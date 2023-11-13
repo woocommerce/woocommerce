@@ -1,8 +1,7 @@
 export type Options = {
 	owner?: string;
 	name?: string;
-	version: string;
-	devRepoPath?: string;
+	base?: string;
+	dryRun?: boolean;
 	commitDirectToBase?: boolean;
-	override?: string;
 };
