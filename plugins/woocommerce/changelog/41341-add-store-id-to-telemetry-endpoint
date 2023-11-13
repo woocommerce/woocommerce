@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Adds identifiers to the system_status REST endpoint.
+Adds the store_id added by #40705 to the system_status REST API.
