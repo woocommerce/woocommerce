@@ -26,9 +26,11 @@ defined( 'ABSPATH' ) || exit;
 	<h4>
 		<?php
 		esc_html_e( 'Total orders', 'woocommerce' );
-		echo wc_help_tip(
-			__( 'Total number of orders for this customer, including the current one.', 'woocommerce' )
-		); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+		echo wp_kses_post(
+			wc_help_tip(
+				__( 'Total number of orders for this customer, including the current one.', 'woocommerce' )
+			)
+		);
 		?>
 	</h4>
 
@@ -39,9 +41,11 @@ defined( 'ABSPATH' ) || exit;
 	<h4>
 		<?php
 		esc_html_e( 'Total revenue', 'woocommerce' );
-		echo wc_help_tip(
-			__( "This is the Customer Lifetime Value, or the total amount you have earned from this customer's orders.", 'woocommerce' )
-		); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+		echo wp_kses_post(
+			wc_help_tip(
+				__( "This is the Customer Lifetime Value, or the total amount you have earned from this customer's orders.", 'woocommerce' )
+			)
+		);
 		?>
 	</h4>
 	<span class="order-source-attribution-total-spend">
