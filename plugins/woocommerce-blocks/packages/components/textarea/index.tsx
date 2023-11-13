@@ -8,7 +8,7 @@ import classnames from 'classnames';
  */
 import './style.scss';
 
-interface TextareaProps {
+export interface TextareaProps {
 	className?: string;
 	disabled: boolean;
 	onTextChange: ( newText: string ) => void;
