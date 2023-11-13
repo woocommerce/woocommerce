@@ -46,11 +46,6 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 					'permission_callback' => array( $this, 'telemetry_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_tracking_ids' ),
-					'args'                => array(),
-				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
@@ -143,21 +138,6 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 				return null !== $value;
 			}
 		);
-	}
-
-	/**
-	 * Get WC Store ID from backend for Mobile Tracks Events
-	 *
-	 * @since  8.4.0
-	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
-	 */
-	public function get_tracking_ids( $request ) {
-		$data = array(
-			"store_id" =>  get_option( \WC_Install::STORE_ID_OPTION, null ),
-			"blog_id" => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
-		);
-		return rest_ensure_response( $data );
 	}
 
 	/**

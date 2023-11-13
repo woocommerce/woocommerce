@@ -149,6 +149,25 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
+						'store_id'                  => array(
+							'description' => __( 'Unique Store Identifier.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'blog_id'                  => array(
+							'description' => __( 'The Jetpack Blog ID if this store is connected to Jetpack.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'site_url'                  => array(
+							'description' => __( 'Site URL.', 'woocommerce' ),
+							'type'        => 'string',
+							'format'      => 'uri',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
 						'version'                   => array(
 							'description' => __( 'WooCommerce version.', 'woocommerce' ),
 							'type'        => 'string',
@@ -826,6 +845,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		return array(
 			'home_url'                  => get_option( 'home' ),
 			'site_url'                  => get_option( 'siteurl' ),
+			'store_id' 					=> get_option( \WC_Install::STORE_ID_OPTION, null ),
+			'blog_id' 					=> class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
 			'version'                   => WC()->version,
 			'log_directory'             => WC_LOG_DIR,
 			'log_directory_writable'    => (bool) @fopen( WC_LOG_DIR . 'test-log.log', 'a' ), // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
