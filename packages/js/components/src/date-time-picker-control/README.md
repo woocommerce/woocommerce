@@ -21,3 +21,4 @@ Name | Type | Default | Description
 `disabled` | Boolean | `null` | Whether the input is disabled
 `is12Hour` | Boolean | `true` | Whether the date time picker should show a 12 or 24 hour format
 `onChange` | Function | `undefined` | (required) A function called upon selection of a date or input change
+`popoverProps` | Object | `{}` | Props that will be sent to the Dropdown component

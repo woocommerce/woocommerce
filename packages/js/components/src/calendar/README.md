@@ -24,6 +24,7 @@ Name | Type | Default | Description
 `onUpdate` | Function | `null` | (required) A function called upon selection of a date or input change
 `dateFormat` | String | `null` | (required) The date format in moment.js-style tokens
 `isInvalidDate` | Function | `null` | A function to determine if a day on the calendar is not valid
+`popoverProps`   | Object   | `{}` | Props that will be sent to the Dropdown component
 
 
 DateRange
