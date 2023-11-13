@@ -16,6 +16,9 @@ export function RefreshButton() {
 	const [ isLoading, setIsLoading ] = useState( false );
 
 	const onClick = () => {
+		if ( isLoading ) {
+			return;
+		}
 		setIsLoading( true );
 		refreshSubscriptions().finally( () => {
 			setIsLoading( false );
