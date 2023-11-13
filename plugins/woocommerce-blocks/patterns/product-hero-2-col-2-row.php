@@ -7,9 +7,6 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-hero-2-col-2-row' );
-$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/product-hero-2-col-2-row' );
-
 $image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/man-person-winter-photography-statue-coat.png' );
 $image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/pattern-fashion-clothing-outerwear-wool-scarf.png' );
 

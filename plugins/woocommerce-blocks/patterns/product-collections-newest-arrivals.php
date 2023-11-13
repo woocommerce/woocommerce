@@ -7,7 +7,6 @@
  */
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-collections-newest-arrivals' );
 
 $first_title  = $content['titles'][0]['default'] ?? '';
 $first_button = $content['buttons'][0]['default'] ?? '';
