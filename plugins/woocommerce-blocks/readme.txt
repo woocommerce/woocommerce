@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 6.3
 Tested up to: 6.3
 Requires PHP: 7.4
-Stable tag: 11.5.0
+Stable tag: 11.5.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -80,6 +80,30 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 Release and roadmap notes available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
 
 == Changelog ==
+
+= 11.5.4 - 2023-11-13 =
+
+#### Bug Fixes
+
+- Prevent PHP warnings when using Jetpack WooCommerce Analytics module. [#11707](https://github.com/woocommerce/woocommerce-blocks/pull/11707)
+- Fixed address components in Firefox, and editing of address form in the editor. [#11714](https://github.com/woocommerce/woocommerce-blocks/pull/11714)
+- Fix Classic Cart/Checkout styling on non-cart and checkout pages. [#11694](https://github.com/woocommerce/woocommerce-blocks/pull/11694)
+- Fix double border in cart and notes field width on mobile. [11742](https://github.com/woocommerce/woocommerce-blocks/pull/11742)
+- Ensure that incompatible notices are displayed in Safari. [#11736](https://github.com/woocommerce/woocommerce-blocks/pull/11736)
+- Enabled the new blockified Order Confirmation by default for block-based themes. [#11615](https://github.com/woocommerce/woocommerce-blocks/pull/11615)
+
+= 11.5.3 - 2023-11-08 =
+
+#### Bug Fixes
+
+- Use wp_json_file_decode instead of json_decode [11681](https://github.com/woocommerce/woocommerce-blocks/pull/11681)
+
+= 11.5.2 - 2023-11-08 =
+
+#### Bug Fixes
+
+- Rename the Centered Header Menu with Search to Centered Header Menu. [11637](https://github.com/woocommerce/woocommerce-blocks/pull/11637)
+- Fix decoding issue and pattern. [11681](https://github.com/woocommerce/woocommerce-blocks/pull/11681)
 
 = 11.5.1 - 2023-11-08 =
 
