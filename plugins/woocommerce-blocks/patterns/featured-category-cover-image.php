@@ -6,8 +6,6 @@
  */
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/featured-category-cover-image' );
-$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/featured-category-cover-image' );
 
 $image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/shop-jeans.png' );
 

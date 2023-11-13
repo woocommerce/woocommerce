@@ -7,9 +7,6 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/just-arrived-full-hero' );
-$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/just-arrived-full-hero' );
-
 $pattern_title       = $content['titles'][0]['default'] ?? '';
 $pattern_description = $content['descriptions'][0]['default'] ?? '';
 $pattern_button      = $content['buttons'][0]['default'] ?? '';

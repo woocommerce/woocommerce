@@ -6,9 +6,8 @@
  */
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/product-collection-banner' );
-$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/product-collection-banner' );
-$image   = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/beach-landscape-sea-coast-nature-person.jpg' );
+
+$image = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/beach-landscape-sea-coast-nature-person.jpg' );
 
 $first_title       = $content['titles'][0]['default'] ?? '';
 $first_description = $content['descriptions'][0]['default'] ?? '';

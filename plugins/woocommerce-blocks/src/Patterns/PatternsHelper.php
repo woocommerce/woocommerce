@@ -124,7 +124,7 @@ class PatternsHelper {
 	 *
 	 * @return mixed|WP_Error|null
 	 */
-	private static function get_patterns_dictionary( $pattern_slug = null ) {
+	public static function get_patterns_dictionary( $pattern_slug = null ) {
 
 		$patterns_ai_data_post = self::get_patterns_ai_data_post();
 

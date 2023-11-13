@@ -6,8 +6,6 @@
  */
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/featured-products-fresh-and-tasty' );
-$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/featured-products-fresh-and-tasty' );
 
 $image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/sweet-organic-lemons.png' );
 $image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/fresh-organic-tomatoes.png' );

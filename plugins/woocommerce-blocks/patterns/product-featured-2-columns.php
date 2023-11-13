@@ -5,8 +5,6 @@
  * Categories: WooCommerce
  */
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/featured-products-2-cols' );
-$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/featured-products-2-cols' );
 
 $first_title       = $content['titles'][0]['default'] ?? '';
 $first_description = $content['descriptions'][0]['default'] ?? '';

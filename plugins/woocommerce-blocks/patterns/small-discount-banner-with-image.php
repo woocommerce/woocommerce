@@ -6,8 +6,6 @@
  */
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/small-discount-banner-with-image' );
-$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/small-discount-banner-with-image' );
 
 $banner_title = $content['titles'][0]['default'] ?? '';
 ?>

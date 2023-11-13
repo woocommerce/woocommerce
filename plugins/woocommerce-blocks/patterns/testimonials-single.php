@@ -6,8 +6,6 @@
  */
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/testimonials-single' );
-$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/testimonials-single' );
 
 $testimonials_title = $content['titles'][0]['default'] ?? '';
 $description        = $content['descriptions'][0]['default'] ?? '';

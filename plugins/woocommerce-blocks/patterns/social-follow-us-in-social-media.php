@@ -6,8 +6,6 @@
  */
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-$content = PatternsHelper::get_pattern_content( 'woocommerce-blocks/social-follow-us-in-social-media' );
-$images  = PatternsHelper::get_pattern_images( 'woocommerce-blocks/social-follow-us-in-social-media' );
 
 $image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/office.png' );
 $image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/living-room.png' );
