@@ -33,6 +33,12 @@
 	line-height: 28px;
 }
 
+.woocommerce-marketplace__notice--error {
+	&:last-child {
+		margin-bottom: $grid-unit-50;
+	}
+}
+
 .woocommerce-marketplace__my-subscriptions__table-description {
 	font-size: 13px;
 	margin-top: $grid-unit-05;

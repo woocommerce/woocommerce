@@ -22,6 +22,7 @@ import {
 } from './table/table-rows';
 import { Subscription } from './types';
 import { RefreshButton } from './table/actions/refresh-button';
+import Notices from './notices';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
@@ -76,6 +77,9 @@ export default function MySubscriptions(): JSX.Element {
 
 	return (
 		<div className="woocommerce-marketplace__my-subscriptions">
+			<section className="woocommerce-marketplace__my-subscriptions__notices">
+				<Notices />
+			</section>
 			<section className="woocommerce-marketplace__my-subscriptions__installed">
 				<header className="woocommerce-marketplace__my-subscriptions__header">
 					<div>
