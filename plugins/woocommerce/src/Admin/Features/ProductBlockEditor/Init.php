@@ -75,18 +75,7 @@ class Init {
 			return;
 		}
 
-		$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
-
-		$editor_settings = array();
-
-		$editor_settings['template']  = $template_registry->get_registered( 'simple-product' )->get_formatted_template();
-		$editor_settings['templates'] = array(
-			'product'           => $template_registry->get_registered( 'simple-product' )->get_formatted_template(),
-			'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template(),
-		);
-
-		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
-		$editor_settings      = get_block_editor_settings( $editor_settings, $block_editor_context );
+		$editor_settings = $this->get_product_editor_settings();
 
 		$script_handle = 'wc-admin-edit-product';
 		wp_register_script( $script_handle, '', array(), '0.1.0', true );
@@ -203,6 +192,25 @@ class Init {
 				'wp.blocks && wp.blocks.unstable__bootstrapServerSideBlockDefinitions && wp.blocks.unstable__bootstrapServerSideBlockDefinitions(' . wp_json_encode( get_block_editor_server_block_settings() ) . ');'
 			);
 		}
+	}
+
+	/**
+	 * Get the product editor settings.
+	 */
+	private function get_product_editor_settings() {
+		$editor_settings = array();
+
+		$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+
+		$editor_settings['template']  = $template_registry->get_registered( 'simple-product' )->get_formatted_template();
+		$editor_settings['templates'] = array(
+			'product'           => $template_registry->get_registered( 'simple-product' )->get_formatted_template(),
+			'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template(),
+		);
+
+		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
+
+		return get_block_editor_settings( $editor_settings, $block_editor_context );
 	}
 
 	/**
