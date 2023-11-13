@@ -1,6 +1,8 @@
-# DatePicker
+# DatePicker and DateRange
 
-## Usage
+## DatePicker
+
+### Usage
 
 ```jsx
 <DatePicker
@@ -12,7 +14,7 @@
 />
 ```
 
-### Props
+#### Props
 
 | Name            | Type     | Default | Description                                                                  |
 | --------------- | -------- | ------- | ---------------------------------------------------------------------------- |
@@ -25,11 +27,11 @@
 | `isInvalidDate` | Function | `null`  | A function to determine if a day on the calendar is not valid                |
 | `popoverProps`  | Object   | `{}`    | Props that will be sent to the Dropdown component                            |
 
-# DateRange
+## DateRange
 
 This is wrapper for a [react-dates](https://github.com/airbnb/react-dates) powered calendar.
 
-## Usage
+### Usage
 
 ```jsx
 <DateRange
@@ -47,7 +49,7 @@ This is wrapper for a [react-dates](https://github.com/airbnb/react-dates) power
 />
 ```
 
-### Props
+#### Props
 
 | Name              | Type     | Default | Description                                                                   |
 | ----------------- | -------- | ------- | ----------------------------------------------------------------------------- |
