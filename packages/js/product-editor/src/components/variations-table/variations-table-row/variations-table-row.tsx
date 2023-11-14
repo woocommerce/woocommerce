@@ -14,6 +14,7 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { Icon, info } from '@wordpress/icons';
 import classNames from 'classnames';
 
 /**
@@ -28,7 +29,6 @@ import {
 } from '../../../utils';
 import { VariationActionsMenu } from '../variation-actions-menu';
 import { VariationsTableRowProps } from './types';
-import { Icon, info } from '@wordpress/icons';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 
@@ -56,9 +56,9 @@ export function VariationsTableRow( {
 
 	const { matchesAny, tags } = useMemo(
 		function getAnyWhenVariationOptionIsNotPresentInProductAttributes() {
-			let matchesAny = false;
+			let matches = false;
 
-			const tags = variableAttributes.map( ( attribute ) => {
+			const tagItems = variableAttributes.map( ( attribute ) => {
 				const variationOption = variation.attributes.find(
 					( option ) => option.id === attribute.id
 				);
@@ -70,7 +70,7 @@ export function VariationsTableRow( {
 					};
 				}
 
-				matchesAny = true;
+				matches = true;
 
 				return {
 					id: attribute.id,
@@ -83,8 +83,8 @@ export function VariationsTableRow( {
 			} );
 
 			return {
-				matchesAny,
-				tags,
+				matchesAny: matches,
+				tags: tagItems,
 			};
 		},
 		[ variableAttributes, variation ]
