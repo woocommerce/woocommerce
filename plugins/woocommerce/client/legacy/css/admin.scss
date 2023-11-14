@@ -8543,19 +8543,32 @@ table.bar_chart {
 		margin-bottom: .1em;
 	}
 
+	.woocommerce-order-source-attribution-origin-container {
+		display: flex;
+		justify-content: space-between;
+		align-items: start;
+	}
+
+	.order-source-attribution-origin {
+		flex-grow: 1;
+	}
+
+	.woocommerce-order-source-attribution-details-toggle {
+		white-space: nowrap;
+	}
+
 	.woocommerce-order-source-attribution-details-container {
 		display: none;
 	}
 
 	.woocommerce-order-source-attribution-details-toggle {
 		display: block;
-		float: right;
 
 		.toggle-indicator {
 			font-family: dashicons;
 			font-size: 1.2em;
 			line-height: 1;
-			vertical-align: middle;
+			vertical-align: top;
 		}
 
 		&[aria-expanded="true"] {
