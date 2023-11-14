@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
+import { isPostcode } from '@woocommerce/blocks-checkout';
 import {
 	ValidatedTextInput,
-	isPostcode,
 	type ValidatedTextInputHandle,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-components';
 import {
 	BillingCountryInput,
 	ShippingCountryInput,

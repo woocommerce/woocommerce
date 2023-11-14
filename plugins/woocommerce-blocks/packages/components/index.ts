@@ -14,4 +14,10 @@ export { default as RadioControlAccordion } from './radio-control-accordion';
 export { default as SortSelect } from './sort-select';
 export { default as Spinner } from './spinner';
 export { default as Textarea } from './textarea';
+export {
+	default as ValidatedTextInput,
+	type ValidatedTextInputHandle,
+} from './text-input/validated-text-input';
+export { default as TextInput } from './text-input/text-input';
 export { default as Title } from './title';
+export { default as ValidationInputError } from './validation-input-error';

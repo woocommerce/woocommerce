@@ -9,10 +9,6 @@ export { default as Button } from './button';
 export { default as Label } from './label';
 export { default as StoreNoticesContainer } from './store-notices-container';
 export { default as CheckboxControl } from './checkbox-control';
-export {
-	default as ValidatedTextInput,
-	ValidatedTextInputHandle,
-} from './text-input/validated-text-input';
-export { default as TextInput } from './text-input/text-input';
-export { default as ValidationInputError } from './validation-input-error';
+export { ValidationInputError } from './validation-input-error';
+export { ValidatedTextInput, TextInput } from './text-input';
 export { default as StoreNotice } from './store-notice';

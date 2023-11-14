@@ -22,7 +22,7 @@ import { useInstanceId } from '@wordpress/compose';
 import TextInput from './text-input';
 import './style.scss';
 import { ValidationInputError } from '../validation-input-error';
-import { getValidityMessageForInput } from '../../utils';
+import { getValidityMessageForInput } from '../../checkout/utils';
 import { ValidatedTextInputProps } from './types';
 
 export type ValidatedTextInputHandle = {
