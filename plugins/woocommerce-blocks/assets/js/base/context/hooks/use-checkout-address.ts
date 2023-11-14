@@ -24,8 +24,6 @@ interface CheckoutAddress {
 	setShippingAddress: ( data: Partial< ShippingAddress > ) => void;
 	setBillingAddress: ( data: Partial< BillingAddress > ) => void;
 	setEmail: ( value: string ) => void;
-	setBillingPhone: ( value: string ) => void;
-	setShippingPhone: ( value: string ) => void;
 	useShippingAsBilling: boolean;
 	setUseShippingAsBilling: ( useShippingAsBilling: boolean ) => void;
 	defaultAddressFields: AddressFields;
@@ -59,28 +57,13 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 	} = useCustomerData();
 
 	const setEmail = useCallback(
-		( value ) =>
+		( value: string ) =>
 			void setBillingAddress( {
 				email: value,
 			} ),
 		[ setBillingAddress ]
 	);
 
-	const setBillingPhone = useCallback(
-		( value ) =>
-			void setBillingAddress( {
-				phone: value,
-			} ),
-		[ setBillingAddress ]
-	);
-
-	const setShippingPhone = useCallback(
-		( value ) =>
-			void setShippingAddress( {
-				phone: value,
-			} ),
-		[ setShippingAddress ]
-	);
 	const forcedBillingAddress: boolean = getSetting(
 		'forcedBillingAddress',
 		false
@@ -91,8 +74,6 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		setShippingAddress,
 		setBillingAddress,
 		setEmail,
-		setBillingPhone,
-		setShippingPhone,
 		defaultAddressFields,
 		useShippingAsBilling,
 		setUseShippingAsBilling: __internalSetUseShippingAsBilling,
@@ -101,8 +82,8 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 			! forcedBillingAddress && needsShipping && ! prefersCollection,
 		showShippingMethods: needsShipping && ! prefersCollection,
 		showBillingFields:
-			! needsShipping || ! useShippingAsBilling || prefersCollection,
+			! needsShipping || ! useShippingAsBilling || !! prefersCollection,
 		forcedBillingAddress,
-		useBillingAsShipping: forcedBillingAddress || prefersCollection,
+		useBillingAsShipping: forcedBillingAddress || !! prefersCollection,
 	};
 };

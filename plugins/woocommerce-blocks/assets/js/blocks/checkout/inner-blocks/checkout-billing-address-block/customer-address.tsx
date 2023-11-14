@@ -16,18 +16,13 @@ import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import AddressWrapper from '../../address-wrapper';
-import PhoneNumber from '../../phone-number';
 import AddressCard from '../../address-card';
 
 const CustomerAddress = ( {
 	addressFieldsConfig,
-	showPhoneField,
-	requirePhoneField,
 	forceEditing = false,
 }: {
 	addressFieldsConfig: Record< keyof AddressFields, Partial< AddressField > >;
-	showPhoneField: boolean;
-	requirePhoneField: boolean;
 	forceEditing?: boolean;
 } ) => {
 	const {
@@ -35,8 +30,6 @@ const CustomerAddress = ( {
 		billingAddress,
 		setShippingAddress,
 		setBillingAddress,
-		setBillingPhone,
-		setShippingPhone,
 		useBillingAsShipping,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
@@ -97,10 +90,10 @@ const CustomerAddress = ( {
 				onEdit={ () => {
 					setEditing( true );
 				} }
-				showPhoneField={ showPhoneField }
+				fieldConfig={ addressFieldsConfig }
 			/>
 		),
-		[ billingAddress, showPhoneField ]
+		[ billingAddress, addressFieldsConfig ]
 	);
 
 	const renderAddressFormComponent = useCallback(
@@ -114,39 +107,13 @@ const CustomerAddress = ( {
 					fields={ addressFieldKeys }
 					fieldConfig={ addressFieldsConfig }
 				/>
-				{ showPhoneField && (
-					<PhoneNumber
-						id="billing-phone"
-						errorId={ 'billing_phone' }
-						isRequired={ requirePhoneField }
-						value={ billingAddress.phone }
-						onChange={ ( value ) => {
-							setBillingPhone( value );
-							dispatchCheckoutEvent( 'set-phone-number', {
-								step: 'billing',
-							} );
-							if ( useBillingAsShipping ) {
-								setShippingPhone( value );
-								dispatchCheckoutEvent( 'set-phone-number', {
-									step: 'billing',
-								} );
-							}
-						} }
-					/>
-				) }
 			</>
 		),
 		[
 			addressFieldKeys,
 			addressFieldsConfig,
 			billingAddress,
-			dispatchCheckoutEvent,
 			onChangeAddress,
-			requirePhoneField,
-			setBillingPhone,
-			setShippingPhone,
-			showPhoneField,
-			useBillingAsShipping,
 		]
 	);
 
