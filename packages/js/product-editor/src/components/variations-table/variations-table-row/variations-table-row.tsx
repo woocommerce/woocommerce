@@ -7,8 +7,13 @@ import { CurrencyContext } from '@woocommerce/currency';
 import { ProductVariation } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { Button, CheckboxControl, Spinner } from '@wordpress/components';
-import { createElement, Fragment, useContext } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import {
+	createElement,
+	Fragment,
+	useContext,
+	useMemo,
+} from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
 
 /**
@@ -37,6 +42,7 @@ function getEditVariationLink( variation: ProductVariation ) {
 
 export function VariationsTableRow( {
 	variation,
+	variableAttributes,
 	isUpdating,
 	isSelected,
 	isSelectionDisabled,
@@ -47,6 +53,32 @@ export function VariationsTableRow( {
 	onSelect,
 }: VariationsTableRowProps ) {
 	const { formatAmount } = useContext( CurrencyContext );
+
+	const tags = useMemo(
+		function getAnyWhenVariationOptionIsNotPresentInProductAttributes() {
+			return variableAttributes.map( ( attribute ) => {
+				const variationOption = variation.attributes.find(
+					( option ) => option.id === attribute.id
+				);
+				if ( variationOption ) {
+					return {
+						id: variationOption.id,
+						label: variationOption.option,
+					};
+				}
+
+				return {
+					id: attribute.id,
+					label: sprintf(
+						// translators: %s is the attribute's name
+						__( 'Any %s', 'woocommerce' ),
+						attribute.name
+					),
+				};
+			} );
+		},
+		[ variableAttributes, variation ]
+	);
 
 	function handleChange( value: Partial< ProductVariation > ) {
 		onChange( {
@@ -81,27 +113,26 @@ export function VariationsTableRow( {
 				) }
 			</div>
 			<div className="woocommerce-product-variations__attributes">
-				{ variation.attributes.map( ( attribute ) => {
+				{ tags.map( ( tagInfo ) => {
 					const tag = (
 						<Tag
-							id={ attribute.id }
+							id={ tagInfo.id }
 							className="woocommerce-product-variations__attribute"
-							key={ attribute.id }
+							key={ tagInfo.id }
 							label={ truncate(
-								attribute.option,
+								tagInfo.label,
 								PRODUCT_VARIATION_TITLE_LIMIT
 							) }
-							screenReaderLabel={ attribute.option }
+							screenReaderLabel={ tagInfo.label }
 						/>
 					);
 
-					return attribute.option.length <=
-						PRODUCT_VARIATION_TITLE_LIMIT ? (
+					return tags.length <= PRODUCT_VARIATION_TITLE_LIMIT ? (
 						tag
 					) : (
 						<Tooltip
-							key={ attribute.id }
-							text={ attribute.option }
+							key={ tagInfo.id }
+							text={ tagInfo.label }
 							position="top center"
 						>
 							<span>{ tag }</span>

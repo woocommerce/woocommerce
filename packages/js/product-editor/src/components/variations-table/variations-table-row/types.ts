@@ -2,10 +2,11 @@
  * External dependencies
  */
 import { MouseEvent } from 'react';
-import { ProductVariation } from '@woocommerce/data';
+import { ProductAttribute, ProductVariation } from '@woocommerce/data';
 
 export type VariationsTableRowProps = {
 	variation: ProductVariation;
+	variableAttributes: ProductAttribute[];
 	isUpdating?: boolean;
 	isSelected?: boolean;
 	isSelectionDisabled?: boolean;

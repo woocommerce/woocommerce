@@ -6,7 +6,12 @@ import { Button, CheckboxControl, Notice } from '@wordpress/components';
 import { Product, ProductVariation } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { ListItem, Sortable } from '@woocommerce/components';
-import { createElement, Fragment, forwardRef } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	forwardRef,
+	useMemo,
+} from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -104,6 +109,11 @@ export const VariationsTable = forwardRef<
 		'postType',
 		'product',
 		'attributes'
+	);
+
+	const variableAttributes = useMemo(
+		() => productAttributes.filter( ( attribute ) => attribute.variation ),
+		[ productAttributes ]
 	);
 
 	const [ variationIds ] = useEntityProp< Product[ 'variations' ] >(
@@ -333,18 +343,14 @@ export const VariationsTable = forwardRef<
 								</Button>
 							</>
 						) : (
-							productAttributes
-								.filter( ( attribute ) => attribute.variation )
-								.map( ( attribute ) => (
-									<VariationsFilter
-										key={ attribute.id }
-										initialValues={ getFilters(
-											attribute
-										) }
-										attribute={ attribute }
-										onFilter={ onFilter( attribute ) }
-									/>
-								) )
+							variableAttributes.map( ( attribute ) => (
+								<VariationsFilter
+									key={ attribute.id }
+									initialValues={ getFilters( attribute ) }
+									attribute={ attribute }
+									onFilter={ onFilter( attribute ) }
+								/>
+							) )
 						) }
 					</div>
 					<div>
@@ -382,6 +388,7 @@ export const VariationsTable = forwardRef<
 						>
 							<VariationsTableRow
 								variation={ variation }
+								variableAttributes={ variableAttributes }
 								isUpdating={ isUpdating[ variation.id ] }
 								isSelected={ isSelected( variation ) }
 								isSelectionDisabled={ isSelectingAll }
