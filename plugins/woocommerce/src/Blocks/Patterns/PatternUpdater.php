@@ -28,13 +28,13 @@ class PatternUpdater {
 		$patterns_with_images = $this->get_patterns_with_images( $images );
 
 		if ( is_wp_error( $patterns_with_images ) ) {
-			return new WP_Error( 'failed_to_set_pattern_images', __( 'Failed to set the pattern images.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'failed_to_set_pattern_images', __( 'Failed to set the pattern images.', 'woocommerce' ) );
 		}
 
 		$patterns_with_images_and_content = $this->get_patterns_with_content( $ai_connection, $token, $patterns_with_images, $business_description );
 
 		if ( is_wp_error( $patterns_with_images_and_content ) ) {
-			return new WP_Error( 'failed_to_set_pattern_content', __( 'Failed to set the pattern content.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'failed_to_set_pattern_content', __( 'Failed to set the pattern content.', 'woocommerce' ) );
 		}
 
 		$patterns_ai_data_post = PatternsHelper::get_patterns_ai_data_post();
@@ -46,7 +46,7 @@ class PatternUpdater {
 		$updated_content = PatternsHelper::upsert_patterns_ai_data_post( $patterns_with_images_and_content );
 
 		if ( is_wp_error( $updated_content ) ) {
-			return new WP_Error( 'failed_to_update_patterns_content', __( 'Failed to update patterns content.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'failed_to_update_patterns_content', __( 'Failed to update patterns content.', 'woocommerce' ) );
 		}
 
 		return $updated_content;
@@ -152,7 +152,7 @@ class PatternUpdater {
 		$patterns_dictionary = plugin_dir_path( __FILE__ ) . 'dictionary.json';
 
 		if ( ! file_exists( $patterns_dictionary ) ) {
-			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woocommerce' ) );
 		}
 
 		return wp_json_file_decode( $patterns_dictionary, array( 'associative' => true ) );

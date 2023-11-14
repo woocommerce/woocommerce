@@ -146,8 +146,8 @@ class BlockTemplatesController {
 	public function register_mini_cart_template_part_area( $default_area_definitions ) {
 		$mini_cart_template_part_area = [
 			'area'        => 'mini-cart',
-			'label'       => __( 'Mini-Cart', 'woo-gutenberg-products-block' ),
-			'description' => __( 'The Mini-Cart template allows shoppers to see their cart items and provides access to the Cart and Checkout pages.', 'woo-gutenberg-products-block' ),
+			'label'       => __( 'Mini-Cart', 'woocommerce' ),
+			'description' => __( 'The Mini-Cart template allows shoppers to see their cart items and provides access to the Cart and Checkout pages.', 'woocommerce' ),
 			'icon'        => 'mini-cart',
 			'area_tag'    => 'mini-cart',
 		];
@@ -754,7 +754,7 @@ class BlockTemplatesController {
 			is_shop() &&
 			'product' === $post_type
 		) {
-			return __( 'Shop', 'woo-gutenberg-products-block' );
+			return __( 'Shop', 'woocommerce' );
 		}
 
 		return $post_type_name;

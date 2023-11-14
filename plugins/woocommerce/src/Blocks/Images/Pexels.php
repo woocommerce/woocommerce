@@ -52,7 +52,7 @@ class Pexels {
 		$response = $ai_connection->fetch_ai_response( $token, $prompt );
 
 		if ( is_wp_error( $response ) || ! isset( $response['completion'] ) ) {
-			return new \WP_Error( 'search_term_definition_failed', __( 'The search term definition failed.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'search_term_definition_failed', __( 'The search term definition failed.', 'woocommerce' ) );
 		}
 
 		return $response['completion'];
@@ -81,7 +81,7 @@ class Pexels {
 				'data' => $response_data,
 			];
 
-			return new \WP_Error( 'pexels_api_error', __( 'Request to the Pexels API failed.', 'woo-gutenberg-products-block' ), $error_msg );
+			return new \WP_Error( 'pexels_api_error', __( 'Request to the Pexels API failed.', 'woocommerce' ), $error_msg );
 		}
 
 		$response = $response_data['media'] ?? $response_data;

@@ -21,7 +21,7 @@ class ProductUpdater {
 	 */
 	public function generate_content( $ai_connection, $token, $images, $business_description ) {
 		if ( empty( $business_description ) ) {
-			return new \WP_Error( 'missing_business_description', __( 'No business description provided for generating AI content.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'missing_business_description', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
 		}
 
 		$last_business_description = get_option( 'last_business_description_with_ai_content_generated' );
@@ -32,7 +32,7 @@ class ProductUpdater {
 					'product_content' => array(),
 				);
 			} else {
-				return new \WP_Error( 'business_description_not_found', __( 'No business description provided for generating AI content.', 'woo-gutenberg-products-block' ) );
+				return new \WP_Error( 'business_description_not_found', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
 			}
 		}
 
@@ -44,7 +44,7 @@ class ProductUpdater {
 		if ( is_wp_error( $response ) ) {
 			$error_msg = $response;
 		} elseif ( empty( $response ) || ! isset( $response['completion'] ) ) {
-			$error_msg = new \WP_Error( 'missing_completion_key', __( 'The response from the AI service is empty or missing the completion key.', 'woo-gutenberg-products-block' ) );
+			$error_msg = new \WP_Error( 'missing_completion_key', __( 'The response from the AI service is empty or missing the completion key.', 'woocommerce' ) );
 		}
 
 		if ( isset( $error_msg ) ) {
@@ -75,7 +75,7 @@ class ProductUpdater {
 		$dummy_products = $this->fetch_product_ids( 'dummy' );
 
 		if ( ! is_array( $dummy_products ) ) {
-			return new \WP_Error( 'failed_to_fetch_dummy_products', __( 'Failed to fetch dummy products.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'failed_to_fetch_dummy_products', __( 'Failed to fetch dummy products.', 'woocommerce' ) );
 		}
 
 		$dummy_products_count          = count( $dummy_products );
@@ -91,7 +91,7 @@ class ProductUpdater {
 		$dummy_products_ids = $this->fetch_product_ids( 'dummy' );
 
 		if ( ! is_array( $dummy_products_ids ) ) {
-			return new \WP_Error( 'failed_to_fetch_dummy_products', __( 'Failed to fetch dummy products.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'failed_to_fetch_dummy_products', __( 'Failed to fetch dummy products.', 'woocommerce' ) );
 		}
 
 		$dummy_products = array_map(
@@ -372,7 +372,7 @@ class ProductUpdater {
 		$store_description = get_option( 'woo_ai_describe_store_description' );
 
 		if ( ! $store_description ) {
-			return new \WP_Error( 'missing_store_description', __( 'The store description is required to generate the content for your site.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'missing_store_description', __( 'The store description is required to generate the content for your site.', 'woocommerce' ) );
 		}
 
 		$prompt = sprintf( 'Given the following business description: "%1s" and the assigned value for the alt property in the JSON below, generate new titles and descriptions for each one of the products listed below and assign them as the new values for the JSON: %2s. Each one of the titles should be unique and must be limited to 29 characters. The response should be only a JSON string, with no intro or explanations.', $store_description, wp_json_encode( $products_default_content ) );

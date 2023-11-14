@@ -108,7 +108,7 @@ class ProductImage extends AbstractBlock {
 			esc_attr( $attributes['saleBadgeAlign'] ),
 			isset( $font_size['class'] ) ? esc_attr( $font_size['class'] ) : '',
 			isset( $font_size['style'] ) ? esc_attr( $font_size['style'] ) : '',
-			esc_html__( 'Sale', 'woo-gutenberg-products-block' )
+			esc_html__( 'Sale', 'woocommerce' )
 		);
 		return $on_sale_badge;
 	}

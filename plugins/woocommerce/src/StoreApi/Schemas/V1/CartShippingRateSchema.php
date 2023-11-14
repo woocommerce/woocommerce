@@ -29,55 +29,55 @@ class CartShippingRateSchema extends AbstractSchema {
 	public function get_properties() {
 		return [
 			'package_id'     => [
-				'description' => __( 'The ID of the package the shipping rates belong to.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'The ID of the package the shipping rates belong to.', 'woocommerce' ),
 				'type'        => [ 'integer', 'string' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'name'           => [
-				'description' => __( 'Name of the package.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Name of the package.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'destination'    => [
-				'description' => __( 'Shipping destination address.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Shipping destination address.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 				'properties'  => [
 					'address_1' => [
-						'description' => __( 'First line of the address being shipped to.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'First line of the address being shipped to.', 'woocommerce' ),
 						'type'        => 'string',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'address_2' => [
-						'description' => __( 'Second line of the address being shipped to.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Second line of the address being shipped to.', 'woocommerce' ),
 						'type'        => 'string',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'city'      => [
-						'description' => __( 'City of the address being shipped to.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'City of the address being shipped to.', 'woocommerce' ),
 						'type'        => 'string',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'state'     => [
-						'description' => __( 'ISO code, or name, for the state, province, or district of the address being shipped to.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'ISO code, or name, for the state, province, or district of the address being shipped to.', 'woocommerce' ),
 						'type'        => 'string',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'postcode'  => [
-						'description' => __( 'Zip or Postcode of the address being shipped to.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Zip or Postcode of the address being shipped to.', 'woocommerce' ),
 						'type'        => 'string',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'country'   => [
-						'description' => __( 'ISO code for the country of the address being shipped to.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'ISO code for the country of the address being shipped to.', 'woocommerce' ),
 						'type'        => 'string',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
@@ -85,7 +85,7 @@ class CartShippingRateSchema extends AbstractSchema {
 				],
 			],
 			'items'          => [
-				'description' => __( 'List of cart items the returned shipping rates apply to.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'List of cart items the returned shipping rates apply to.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -93,19 +93,19 @@ class CartShippingRateSchema extends AbstractSchema {
 					'type'       => 'object',
 					'properties' => [
 						'key'      => [
-							'description' => __( 'Unique identifier for the item within the cart.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Unique identifier for the item within the cart.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'name'     => [
-							'description' => __( 'Name of the item.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Name of the item.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'quantity' => [
-							'description' => __( 'Quantity of the item in the current package.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Quantity of the item in the current package.', 'woocommerce' ),
 							'type'        => 'number',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
@@ -114,7 +114,7 @@ class CartShippingRateSchema extends AbstractSchema {
 				],
 			],
 			'shipping_rates' => [
-				'description' => __( 'List of shipping rates.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'List of shipping rates.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -135,68 +135,68 @@ class CartShippingRateSchema extends AbstractSchema {
 		return array_merge(
 			[
 				'rate_id'       => [
-					'description' => __( 'ID of the shipping rate.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'ID of the shipping rate.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'name'          => [
-					'description' => __( 'Name of the shipping rate, e.g. Express shipping.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'Name of the shipping rate, e.g. Express shipping.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'description'   => [
-					'description' => __( 'Description of the shipping rate, e.g. Dispatched via USPS.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'Description of the shipping rate, e.g. Dispatched via USPS.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'delivery_time' => [
-					'description' => __( 'Delivery time estimate text, e.g. 3-5 business days.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'Delivery time estimate text, e.g. 3-5 business days.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'price'         => [
-					'description' => __( 'Price of this shipping rate using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'Price of this shipping rate using the smallest unit of the currency.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'taxes'         => [
-					'description' => __( 'Taxes applied to this shipping rate using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'Taxes applied to this shipping rate using the smallest unit of the currency.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'method_id'     => [
-					'description' => __( 'ID of the shipping method that provided the rate.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'ID of the shipping method that provided the rate.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'instance_id'   => [
-					'description' => __( 'Instance ID of the shipping method that provided the rate.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'Instance ID of the shipping method that provided the rate.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'meta_data'     => [
-					'description' => __( 'Meta data attached to the shipping rate.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'Meta data attached to the shipping rate.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => [ 'view', 'edit' ],
 					'items'       => [
 						'type'       => 'object',
 						'properties' => [
 							'key'   => [
-								'description' => __( 'Meta key.', 'woo-gutenberg-products-block' ),
+								'description' => __( 'Meta key.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'value' => [
-								'description' => __( 'Meta value.', 'woo-gutenberg-products-block' ),
+								'description' => __( 'Meta value.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
@@ -205,7 +205,7 @@ class CartShippingRateSchema extends AbstractSchema {
 					],
 				],
 				'selected'      => [
-					'description' => __( 'True if this is the rate currently selected by the customer for the cart.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'True if this is the rate currently selected by the customer for the cart.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,

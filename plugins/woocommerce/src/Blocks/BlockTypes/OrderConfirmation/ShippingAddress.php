@@ -39,7 +39,7 @@ class ShippingAddress extends AbstractOrderConfirmationBlock {
 		$address = esc_html(
 			sprintf(
 			/* translators: %s location. */
-				__( 'Shipping to %s', 'woo-gutenberg-products-block' ),
+				__( 'Shipping to %s', 'woocommerce' ),
 				implode(
 					', ',
 					array_filter(
