@@ -28,7 +28,7 @@ defined( 'ABSPATH' ) || exit;
 		esc_html_e( 'Total orders', 'woocommerce' );
 		echo wp_kses_post(
 			wc_help_tip(
-				__( 'Total number of orders for this customer, including the current one.', 'woocommerce' )
+				__( 'Total number of non-cancelled, non-failed orders for this customer, including the current one.', 'woocommerce' )
 			)
 		);
 		?>
