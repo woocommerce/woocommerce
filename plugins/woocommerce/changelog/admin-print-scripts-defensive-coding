@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reduce the possibility of errors if the global `$post` object has been set to an unexpected value.

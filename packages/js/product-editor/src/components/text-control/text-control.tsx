@@ -25,6 +25,7 @@ export type TextProps = {
 	required?: boolean;
 	onBlur?: () => void;
 	tooltip?: string;
+	disabled?: boolean;
 };
 
 export const TextControl: React.FC< TextProps > = ( {
@@ -37,6 +38,7 @@ export const TextControl: React.FC< TextProps > = ( {
 	placeholder,
 	required,
 	tooltip,
+	disabled,
 }: TextProps ) => {
 	const textControlId = useInstanceId(
 		BaseControl,
@@ -59,6 +61,7 @@ export const TextControl: React.FC< TextProps > = ( {
 		>
 			<InputControl
 				id={ textControlId }
+				disabled={ disabled }
 				placeholder={ placeholder }
 				value={ value }
 				onChange={ onChange }

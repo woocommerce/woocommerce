@@ -724,7 +724,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				}
 
 				if ( is_array( $existing_meta_data[ $meta_data->key ] ) ) {
-					$value_index = array_search( $meta_data->value, $existing_meta_data[ $meta_data->key ], true );
+					$value_index = array_search( maybe_serialize( $meta_data->value ), $existing_meta_data[ $meta_data->key ], true );
 					if ( false !== $value_index ) {
 						unset( $existing_meta_data[ $meta_data->key ][ $value_index ] );
 						if ( 0 === count( $existing_meta_data[ $meta_data->key ] ) ) {

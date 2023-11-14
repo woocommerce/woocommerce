@@ -6,6 +6,7 @@ import { Sender } from 'xstate';
 import { __ } from '@wordpress/i18n';
 import { Link } from '@woocommerce/components';
 import { createInterpolateElement } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -180,7 +181,12 @@ export const StartOverWarningModal = ( {
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button
-					onClick={ () => sendEvent( { type: 'DESIGN_WITH_AI' } ) }
+					onClick={ () => {
+						sendEvent( { type: 'DESIGN_WITH_AI' } );
+						recordEvent(
+							'customize_your_store_intro_start_again_click'
+						);
+					} }
 					variant="primary"
 				>
 					{ __( 'Start again', 'woocommerce' ) }

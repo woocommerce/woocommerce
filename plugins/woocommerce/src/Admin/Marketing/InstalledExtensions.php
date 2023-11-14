@@ -275,7 +275,7 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/pinterest.svg';
 
-		$data['docsUrl'] = 'https://woocommerce.com/document/pinterest-for-woocommerce/?utm_medium=product';
+		$data['docsUrl'] = 'https://woo.com/document/pinterest-for-woocommerce/?utm_medium=product';
 
 		if ( 'activated' === $data['status'] && class_exists( 'Pinterest_For_Woocommerce' ) ) {
 			$pinterest_onboarding_completed = Pinterest_For_Woocommerce()::is_setup_complete();
@@ -316,7 +316,7 @@ class InstalledExtensions {
 				$data['settingsUrl'] = admin_url( 'admin.php?page=wc-admin&path=/google/start' );
 			}
 
-			$data['docsUrl'] = 'https://woocommerce.com/document/google-listings-and-ads/?utm_medium=product';
+			$data['docsUrl'] = 'https://woo.com/document/google-listings-and-ads/?utm_medium=product';
 		}
 
 		return $data;
@@ -347,7 +347,7 @@ class InstalledExtensions {
 			}
 
 			$data['settingsUrl'] = admin_url( 'admin.php?page=codisto-settings' );
-			$data['docsUrl']     = 'https://woocommerce.com/document/multichannel-for-woocommerce-google-amazon-ebay-walmart-integration/?utm_medium=product';
+			$data['docsUrl']     = 'https://woo.com/document/multichannel-for-woocommerce-google-amazon-ebay-walmart-integration/?utm_medium=product';
 		}
 
 		return $data;
@@ -463,7 +463,7 @@ class InstalledExtensions {
 			}
 
 			$data['settingsUrl'] = admin_url( 'admin.php?page=tiktok' );
-			$data['docsUrl']     = 'https://woocommerce.com/document/tiktok-for-woocommerce/';
+			$data['docsUrl']     = 'https://woo.com/document/tiktok-for-woocommerce/';
 			$data['supportUrl']  = 'https://ads.tiktok.com/athena/user-feedback/?identify_key=6a1e079024806640c5e1e695d13db80949525168a052299b4970f9c99cb5ac78';
 		}
 
@@ -540,7 +540,7 @@ class InstalledExtensions {
 			}
 
 			$data['settingsUrl'] = admin_url( 'admin.php?page=integration-with-salesforce' );
-			$data['docsUrl']     = 'https://woocommerce.com/document/salesforce-integration/';
+			$data['docsUrl']     = 'https://woo.com/document/salesforce-integration/';
 			$data['supportUrl']  = 'https://wpswings.com/submit-query/';
 		}
 
@@ -573,7 +573,7 @@ class InstalledExtensions {
 			}
 
 			$data['settingsUrl'] = admin_url( 'options-general.php?page=vimeo_settings' );
-			$data['docsUrl']     = 'https://woocommerce.com/document/vimeo/';
+			$data['docsUrl']     = 'https://woo.com/document/vimeo/';
 			$data['supportUrl']  = 'https://vimeo.com/help/contact';
 		}
 
@@ -598,7 +598,7 @@ class InstalledExtensions {
 		if ( 'activated' === $data['status'] ) {
 			$data['status']      = 'configured';
 			$data['settingsUrl'] = admin_url( 'admin.php?page=woocommerce-trustpilot-settings-page' );
-			$data['docsUrl']     = 'https://woocommerce.com/document/trustpilot-reviews/';
+			$data['docsUrl']     = 'https://woo.com/document/trustpilot-reviews/';
 			$data['supportUrl']  = 'https://support.trustpilot.com/hc/en-us/requests/new';
 		}
 
@@ -626,7 +626,7 @@ class InstalledExtensions {
 			'status'      => $status,
 			'name'        => $plugin_data['Name'],
 			'description' => html_entity_decode( wp_trim_words( $plugin_data['Description'], 20 ) ),
-			'supportUrl'  => 'https://woocommerce.com/my-account/create-a-ticket/?utm_medium=product',
+			'supportUrl'  => 'https://woo.com/my-account/create-a-ticket/?utm_medium=product',
 		];
 	}
 

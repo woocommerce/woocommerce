@@ -297,10 +297,19 @@ class WC_Shortcode_Checkout {
 			return;
 		}
 
-		$order_customer_id = $order->get_customer_id();
+		/**
+		 * Indicates if known (non-guest) shoppers need to be logged in before we let
+		 * them access the order received page.
+		 *
+		 * @param bool $verify_known_shoppers If verification is required.
+		 *
+		 * @since 8.4.0
+		 */
+		$verify_known_shoppers = apply_filters( 'woocommerce_order_received_verify_known_shoppers', true );
+		$order_customer_id     = $order->get_customer_id();
 
 		// For non-guest orders, require the user to be logged in before showing this page.
-		if ( $order_customer_id && get_current_user_id() !== $order_customer_id ) {
+		if ( $verify_known_shoppers && $order_customer_id && get_current_user_id() !== $order_customer_id ) {
 			wc_get_template( 'checkout/order-received.php', array( 'order' => false ) );
 			wc_print_notice( esc_html__( 'Please log in to your account to view this order.', 'woocommerce' ), 'notice' );
 			woocommerce_login_form( array( 'redirect' => $order->get_checkout_order_received_url() ) );

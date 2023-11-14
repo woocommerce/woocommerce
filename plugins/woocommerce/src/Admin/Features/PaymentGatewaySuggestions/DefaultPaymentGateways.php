@@ -57,7 +57,7 @@ class DefaultPaymentGateways {
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/affirm.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/affirm.png',
 				'plugins'             => array(),
-				'external_link'       => 'https://woocommerce.com/products/woocommerce-gateway-affirm',
+				'external_link'       => 'https://woo.com/products/woocommerce-gateway-affirm',
 				'is_visible'          => array(
 					self::get_rules_for_countries(
 						array(

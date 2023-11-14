@@ -1305,61 +1305,185 @@ table.wc_status_table--tools {
 }
 
 /**
-  * DB log viewer
-  */
-.wp-list-table.logs {
-	.log-level {
-		display: inline;
-		padding: 0.2em 0.6em 0.3em;
-		font-size: 80%;
-		font-weight: bold;
-		line-height: 1;
-		color: #fff;
-		text-align: center;
-		white-space: nowrap;
-		vertical-align: baseline;
-		border-radius: 0.2em;
+ * FileV2 logs
+ */
+.wc-logs-header {
+	margin: 1.5em 0 2em;
+	display: flex;
+	flex-flow: row wrap;
+	align-items: center;
+	gap: 1em;
 
-		&:empty {
-			display: none;
+	h2 {
+		margin: 0;
+	}
+
+	.file-id {
+		padding: 3px 5px;
+		background: rgba( 0, 0, 0, 0.07 );
+		font-family: Consolas, Monaco, monospace;
+	}
+}
+
+.wc-logs-single-file-rotations {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+
+	h3 {
+		font-size: inherit;
+		margin: 0;
+	}
+
+	.wc-logs-rotation-links {
+		list-style: none;
+		margin: 0;
+		display: flex;
+		gap: 0.5em;
+
+		li {
+			display: block;
+			margin: 0;
+		}
+	}
+}
+
+.wc-logs-single-file-actions {
+	margin-left: auto;
+	display: flex;
+	gap: 0.5em;
+}
+
+.wc-logs-entries {
+	background: #f6f7f7;
+	border: 1px solid #c3c4c7;
+	font-family: Consolas, Monaco, monospace;
+	word-wrap: break-word;
+	line-height: 2.3;
+	counter-reset: line;
+
+	.line {
+		display: block;
+		width: 100%;
+		scroll-margin-top: 6em;
+		position: relative;
+
+		&:before {
+			counter-increment: line;
+			content: counter(line);
+			display: block;
+			float: left;
+			padding: 0 1em 0 0.5em;
+			width: 3em;
+			text-align: right;
+		}
+
+		&:target {
+			box-shadow: 0 0.16em 0.16em -0.16em #c3c4c7, 0 -0.16em 0.16em -0.16em #c3c4c7;
+			z-index: 1;
+
+			.line-content {
+				background: #fff8c5;
+			}
+
+			.log-level:before {
+				color: #fff8c5;
+			}
 		}
 	}
 
-	/**
-	  * Add color to levels
-	  *
-	  * Descending severity:
-	  *   emergency, alert -> red
-	  *   critical, error  -> orange
-	  *   warning, notice  -> yellow
-	  *   info             -> blue
-	  *   debug            -> gree
-	  */
-
-	.log-level--emergency,
-	.log-level--alert {
-		background-color: #ff4136;
+	.line-anchor {
+		position: absolute;
+		color: inherit;
+		text-decoration: none;
+		display: block;
+		height: 100%;
+		width: 4.5em;
 	}
 
-	.log-level--critical,
-	.log-level--error {
-		background-color: #ff851b;
+	.line-content {
+		display: block;
+		overflow: hidden;
+		padding: 0 1em;
+		border-left: 1px solid #c3c4c7;
+		background: #ffffff;
 	}
 
-	.log-level--warning,
-	.log-level--notice {
-		color: #222;
-		background-color: #ffdc00;
+	.log-timestamp {
+		font-weight: 700;
 	}
 
-	.log-level--info {
-		background-color: #0074d9;
+	.log-level {
+		font-size: 100%;
+	}
+}
+
+/**
+ * Log severity level colors.
+ *
+ * Descending severity:
+ *   emergency, alert -> red
+ *   critical, error  -> orange
+ *   warning, notice  -> yellow
+ *   info             -> blue
+ *   debug            -> green
+ */
+.log-level {
+	display: inline;
+	padding: 0 0.5em;
+	font-size: 80%;
+	font-weight: 700;
+	line-height: 1;
+	color: #000000;
+	background: #ffffff;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: baseline;
+	border-style: solid;
+	border-width: 0.16em 0.16em 0.16em 1em;
+	border-top-left-radius: 0.5em;
+	border-bottom-left-radius: 0.5em;
+
+	&:before {
+		content: "•";
+		color: #ffffff;
+		margin-left: -1.3em;
+		margin-right: 0.7em;
 	}
 
-	.log-level--debug {
-		background-color: #3d9970;
+	&:empty {
+		display: none;
 	}
+}
 
+.log-level--emergency,
+.log-level--alert {
+	border-color: #ff4136;
+}
+
+.log-level--critical,
+.log-level--error {
+	border-color: #ff851b;
+}
+
+.log-level--warning,
+.log-level--notice {
+	color: #222;
+	border-color: #ffdc00;
+}
+
+.log-level--info {
+	border-color: #0074d9;
+}
+
+.log-level--debug {
+	border-color: #3d9970;
+}
+
+/**
+  * Legacy file/DB log viewers
+  */
+.wp-list-table.logs {
 	// Adjust log table columns only when table is not collapsed
 	@media screen and (min-width: 783px) {
 		.column-timestamp {
@@ -1398,6 +1522,9 @@ table.wc_status_table--tools {
 	}
 }
 
+/**
+ * Inline edit
+ */
 .inline-edit-product.quick-edit-row {
 	.inline-edit-col-center,
 	.inline-edit-col-right {
