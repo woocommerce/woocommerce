@@ -40,13 +40,33 @@ $table-row-height: calc($grid-unit * 9);
 		}
 	}
 
+	&__table-row {
+		position: relative;
+	}
+
 	&__selection {
+		margin-left: $gap-smallest;
+		display: flex;
+		align-items: center;
+
+		.woocommerce-tooltip {
+			position: absolute;
+			left: -$grid-unit-40;
+			rotate: 180deg;
+
+			.components-button {
+				padding: 0;
+				width: 24px;
+				height: 24px;
+				color: $alert-red;
+			}
+		}
+
 		.components-checkbox-control__input[type="checkbox"] {
 			&:not(:checked):not(:focus) {
 				border-color: $gray-600;
 			}
 		}
-		margin-left: $gap-smallest;
 	}
 
 	&__filters {

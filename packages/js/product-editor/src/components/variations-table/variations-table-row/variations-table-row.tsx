@@ -2,16 +2,11 @@
  * External dependencies
  */
 
-import { Tag } from '@woocommerce/components';
+import { Tag, __experimentalTooltip as Tooltip } from '@woocommerce/components';
 import { CurrencyContext } from '@woocommerce/currency';
 import { ProductVariation } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
-import {
-	Button,
-	CheckboxControl,
-	Spinner,
-	Tooltip,
-} from '@wordpress/components';
+import { Button, CheckboxControl, Spinner } from '@wordpress/components';
 import { createElement, Fragment, useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
@@ -28,6 +23,7 @@ import {
 } from '../../../utils';
 import { VariationActionsMenu } from '../variation-actions-menu';
 import { VariationsTableRowProps } from './types';
+import { Icon, info } from '@wordpress/icons';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 
@@ -62,6 +58,17 @@ export function VariationsTableRow( {
 	return (
 		<>
 			<div className="woocommerce-product-variations__selection">
+				<Tooltip
+					text={ __(
+						"'Any' variations are no longer fully supported. Use regular variations instead",
+						'woocommerce'
+					) }
+					helperText={ __( 'View helper text', 'woocommerce' ) }
+					position="middle right"
+				>
+					<Icon icon={ info } size={ 24 } />
+				</Tooltip>
+
 				{ isUpdating ? (
 					<Spinner />
 				) : (
