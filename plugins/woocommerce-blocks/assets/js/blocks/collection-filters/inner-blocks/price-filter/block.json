@@ -8,7 +8,7 @@
 	"keywords": [
 		"WooCommerce"
 	],
-	"textdomain": "woo-gutenberg-products-block",
+	"textdomain": "woocommerce",
 	"apiVersion": 2,
 	"ancestor": [
 		"woocommerce/collection-filters"

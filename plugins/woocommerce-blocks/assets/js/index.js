@@ -22,14 +22,14 @@ setCategories( [
 	),
 	{
 		slug: 'woocommerce',
-		title: __( 'WooCommerce', 'woo-gutenberg-products-block' ),
+		title: __( 'WooCommerce', 'woocommerce' ),
 		icon: <Icon icon={ woo } />,
 	},
 	{
 		slug: 'woocommerce-product-elements',
 		title: __(
 			'WooCommerce Product Elements',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		icon: (
 			<Icon

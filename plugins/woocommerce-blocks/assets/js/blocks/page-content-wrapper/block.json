@@ -5,7 +5,7 @@
 	"description": "Displays WooCommerce page content.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
-	"textdomain": "woo-gutenberg-products-block",
+	"textdomain": "woocommerce",
 	"supports": {
 		"html": false,
 		"multiple": false,
