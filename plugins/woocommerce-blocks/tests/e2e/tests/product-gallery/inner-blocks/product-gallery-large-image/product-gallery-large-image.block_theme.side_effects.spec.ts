@@ -15,7 +15,7 @@ const blockData = {
 		editor: {},
 	},
 	slug: 'single-product',
-	productPage: '/product/v-neck-t-shirt/',
+	productPage: '/product/hoodie/',
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
@@ -148,5 +148,66 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( styleOnHover.transform ).toBe( '' );
 		} );
+	} );
+
+	test( 'Renders correct image when selecting a product variation in the Add to Cart With Options block', async ( {
+		page,
+		editorUtils,
+		pageObject,
+	} ) => {
+		await pageObject.addProductGalleryBlock( { cleanContent: false } );
+		await pageObject.addAddToCartWithOptionsBlock();
+
+		const block = await pageObject.getMainImageBlock( {
+			page: 'editor',
+		} );
+
+		await expect( block ).toBeVisible();
+
+		await editorUtils.saveTemplate();
+
+		await page.goto( blockData.productPage, {
+			waitUntil: 'commit',
+		} );
+
+		const largeImageBlockOnFrontend = await pageObject.getMainImageBlock( {
+			page: 'frontend',
+		} );
+
+		const largeImageElement = largeImageBlockOnFrontend.locator(
+			'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
+		);
+
+		const imageSourceForLargeImageElement =
+			await largeImageElement.getAttribute( 'src' );
+
+		const addToCartWithOptionsBlock =
+			await pageObject.getAddToCartWithOptionsBlock( {
+				page: 'frontend',
+			} );
+		const addToCartWithOptionsColorSelector =
+			addToCartWithOptionsBlock.getByLabel( 'Color' );
+		const addToCartWithOptionsSizeSelector =
+			addToCartWithOptionsBlock.getByLabel( 'Logo' );
+
+		await addToCartWithOptionsColorSelector.selectOption( 'Green' );
+		await addToCartWithOptionsSizeSelector.selectOption( 'No' );
+
+		const largeImageElementAfterSelectingVariation =
+			largeImageBlockOnFrontend.locator(
+				'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
+			);
+
+		const imageSourceForLargeImageElementAfterSelectingVariation =
+			await largeImageElementAfterSelectingVariation.getAttribute(
+				'src'
+			);
+
+		expect( imageSourceForLargeImageElement ).not.toEqual(
+			imageSourceForLargeImageElementAfterSelectingVariation
+		);
+		expect(
+			imageSourceForLargeImageElementAfterSelectingVariation
+		).toContain( 'hoodie-green-1' );
 	} );
 } );
