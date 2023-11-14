@@ -21,7 +21,7 @@ jobs:
           contents: read
         steps:
             - name: Test
-              run: echo ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} ${{ ( github.event.inputs.dry_run === 'true' && '--dry-run' ) || '' }} --skip-install
+              run: echo ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} ${{ ( github.event.inputs.dry_run == 'true' && '--dry-run' ) || '' }} --skip-install
             
             # - uses: actions/checkout@v3
             
