@@ -7,7 +7,7 @@ on:
                 required: false
                 default: '-a'
             dry_run:
-                description: 'Perform all checks but dont actually make the release.'
+                description: 'Perform a dry run. Complete all steps but dont actually make the release.'
                 type: boolean
                 required: false
 
@@ -21,7 +21,7 @@ jobs:
           contents: read
         steps:
             - name: Test
-              run: echo ${{ github.event.inputs.dry_run }}
+              run: ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} ${{ github.event.inputs.packages && '--dry-run' || '' }} --skip-install ${{ github.event.inputs.packages && '--dry-run' || '' }}
             
             # - uses: actions/checkout@v3
             
