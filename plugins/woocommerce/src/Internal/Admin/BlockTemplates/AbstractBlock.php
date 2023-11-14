@@ -252,14 +252,14 @@ class AbstractBlock implements BlockInterface {
 			'expression' => $expression,
 		);
 
-		BlockTemplateLogger::get_instance()->log(
-			$this->is_detached()
-				? BlockTemplateLogger::HIDE_CONDITION_ADDED_TO_DETACHED_BLOCK
-				: BlockTemplateLogger::HIDE_CONDITION_ADDED,
-			$this->get_root_template(),
-			$this->get_parent(),
-			$this,
-		);
+		/**
+		 * Action called after a hide condition is added to a block.
+		 *
+		 * @param BlockInterface $block The block.
+		 *
+		 * @since 8.4.0
+		 */
+		do_action( 'woocommerce_block_template_after_add_hide_condition', $this );
 
 		return $key;
 	}
@@ -272,12 +272,14 @@ class AbstractBlock implements BlockInterface {
 	public function remove_hide_condition( string $key ) {
 		unset( $this->hide_conditions[ $key ] );
 
-		BlockTemplateLogger::get_instance()->log(
-			BlockTemplateLogger::HIDE_CONDITION_REMOVED,
-			$this->get_root_template(),
-			$this->get_parent(),
-			$this,
-		);
+		/**
+		 * Action called after a hide condition is removed from a block.
+		 *
+		 * @param BlockInterface $block The block.
+		 *
+		 * @since 8.4.0
+		 */
+		do_action( 'woocommerce_block_template_after_remove_hide_condition', $this );
 	}
 
 	/**

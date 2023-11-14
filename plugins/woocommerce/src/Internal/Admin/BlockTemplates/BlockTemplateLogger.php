@@ -116,6 +116,88 @@ class BlockTemplateLogger {
 		}
 
 		$this->threshold_severity = \WC_Log_Levels::get_level_severity( $threshold );
+
+		add_action(
+			'woocommerce_block_template_after_add_block',
+			function ( BlockInterface $block ) {
+				$is_detached = method_exists( $block->get_parent(), 'is_detached' ) && $block->get_parent()->is_detached();
+
+				$this->log(
+					$is_detached
+						? $this::BLOCK_ADDED_TO_DETACHED_CONTAINER
+						: $this::BLOCK_ADDED,
+					$block,
+				);
+			},
+			0,
+		);
+
+		add_action(
+			'woocommerce_block_template_after_remove_block',
+			function ( BlockInterface $block ) {
+				$this->log(
+					$this::BLOCK_REMOVED,
+					$block,
+				);
+			},
+			0,
+		);
+
+		add_action(
+			'woocommerce_block_template_after_add_hide_condition',
+			function ( BlockInterface $block ) {
+				$this->log(
+					$block->is_detached()
+						? $this::HIDE_CONDITION_ADDED_TO_DETACHED_BLOCK
+						: $this::HIDE_CONDITION_ADDED,
+					$block,
+				);
+			},
+			0
+		);
+
+		add_action(
+			'woocommerce_block_template_after_remove_hide_condition',
+			function ( BlockInterface $block ) {
+				$this->log(
+					$this::HIDE_CONDITION_REMOVED,
+					$block,
+				);
+			},
+			0
+		);
+
+		add_action(
+			'woocommerce_block_template_after_add_block_error',
+			function ( BlockInterface $block, string $action, \Exception $exception ) {
+				$this->log(
+					$this::ERROR_AFTER_BLOCK_ADDED,
+					$block,
+					array(
+						'action'    => $action,
+						'exception' => $exception,
+					),
+				);
+			},
+			0,
+			3
+		);
+
+		add_action(
+			'woocommerce_block_template_after_remove_block_error',
+			function ( BlockInterface $block, string $action, \Exception $exception ) {
+				$this->log(
+					$this::ERROR_AFTER_BLOCK_REMOVED,
+					$block,
+					array(
+						'action'    => $action,
+						'exception' => $exception,
+					),
+				);
+			},
+			0,
+			3
+		);
 	}
 
 	/**
@@ -129,16 +211,16 @@ class BlockTemplateLogger {
 			: array();
 	}
 
+
+
 	/**
 	 * Log an event.
 	 *
-	 * @param string                 $event_type      Event type.
-	 * @param BlockTemplateInterface $template        Template.
-	 * @param ContainerInterface     $container       Container.
-	 * @param BlockInterface         $block           Block.
-	 * @param array                  $additional_info Additional info.
+	 * @param string         $event_type      Event type.
+	 * @param BlockInterface $block           Block.
+	 * @param array          $additional_info Additional info.
 	 */
-	public function log( string $event_type, BlockTemplateInterface $template, ContainerInterface $container, $block, $additional_info = array() ) {
+	private function log( string $event_type, BlockInterface $block, $additional_info = array() ) {
 		if ( ! isset( self::$event_types[ $event_type ] ) ) {
 			/* translators: 1: WC_Logger::log 2: level */
 			wc_doing_it_wrong( __METHOD__, sprintf( __( '%1$s was called with an invalid event type "%2$s".', 'woocommerce' ), '<code>BlockTemplateLogger::log</code>', $event_type ), '8.4' );
@@ -160,6 +242,9 @@ class BlockTemplateLogger {
 		if ( ! $this->should_handle( $event_type_info['level'] ) ) {
 			return;
 		}
+
+		$template  = $block->get_root_template();
+		$container = $block->get_parent();
 
 		$this->log_to_logger( $event_type_info, $template, $container, $block, $additional_info );
 		$this->add_template_event( $event_type_info, $template, $container, $block, $additional_info );

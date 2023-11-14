@@ -48,6 +48,13 @@ class Init {
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			BlockTemplateLogger::get_instance();
+
+			// Register the product block template.
+			$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+			$template_registry->register( new SimpleProductTemplate() );
+			$template_registry->register( new ProductVariationTemplate() );
+
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
