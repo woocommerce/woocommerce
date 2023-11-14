@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Exclude async-upload.php from admin access protection to fix error when using the WordPress Media Library Upload popup in the front-end.
