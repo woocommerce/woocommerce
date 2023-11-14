@@ -35,10 +35,12 @@ defined( 'ABSPATH' ) || exit;
 			</span>
 		<?php endif; ?>
 
-		<?php if ( $has_more_details ): ?>
+		<?php if ( $has_more_details ) : ?>
+
 			<a href="" class="woocommerce-order-source-attribution-details-toggle" aria-expanded="false">
-				<?php esc_html_e( 'Details', 'woocommerce' );
-				?><span class="toggle-indicator" aria-hidden="true"></span></a>
+				<span class="toggle-text"><?php esc_html_e( 'Details', 'woocommerce' ); ?></span>
+				<span class="toggle-indicator" aria-hidden="true"></span>
+			</a>
 		<?php endif; ?>
 
 	</div>
