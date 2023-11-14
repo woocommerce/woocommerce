@@ -1380,16 +1380,6 @@ table.wc_status_table--tools {
 	}
 }
 
-//.wc-logs-search {
-//	.wc-logs-search-notice {
-//		display: none;
-//	}
-//
-//	&:focus-within .wc-logs-search-notice {
-//		display: block;
-//	}
-//}
-
 .wc-logs-entries {
 	background: #f6f7f7;
 	border: 1px solid #c3c4c7;
@@ -1456,7 +1446,6 @@ table.wc_status_table--tools {
 
 .wc-logs-search-results {
 	tbody {
-		font-family: Consolas, Monaco, monospace;
 		word-wrap: break-word;
 
 		.column-file_id {
@@ -1479,6 +1468,10 @@ table.wc_status_table--tools {
 
 	.column-line_number {
 		width: 8%;
+	}
+
+	.column-line {
+		font-family: Consolas, Monaco, monospace;
 	}
 
 	.search-match {
