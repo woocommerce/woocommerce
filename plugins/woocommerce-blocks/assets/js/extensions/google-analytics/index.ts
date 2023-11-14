@@ -3,11 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { addAction } from '@wordpress/hooks';
-import type {
-	ProductResponseItem,
-	CartResponseItem,
-	StoreCart,
-} from '@woocommerce/types';
+import type { ProductResponseItem, CartResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -51,13 +47,6 @@ addAction(
 	`${ actionPrefix }-checkout-set-billing-address`,
 	namespace,
 	trackCheckoutStep( 3 )
-);
-addAction(
-	`${ actionPrefix }-checkout-set-phone-number`,
-	namespace,
-	( { step, ...rest }: { step: string; storeCart: StoreCart } ): void => {
-		trackCheckoutStep( step === 'shipping' ? 2 : 3 )( rest );
-	}
 );
 
 /**

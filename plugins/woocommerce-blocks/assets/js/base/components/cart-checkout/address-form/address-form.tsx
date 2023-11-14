@@ -180,6 +180,7 @@ const AddressForm = ( {
 							( fieldsRef.current[ field.key ] = el )
 						}
 						{ ...fieldProps }
+						type={ field.type }
 						value={ values[ field.key ] }
 						onChange={ ( newValue: string ) =>
 							onChange( {

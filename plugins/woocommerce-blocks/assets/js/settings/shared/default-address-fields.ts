@@ -18,6 +18,8 @@ export interface AddressField {
 	hidden: boolean;
 	// Fields will be sorted and render in this order, lowest to highest.
 	index: number;
+	// The type of input to render. Defaults to text.
+	type?: string;
 }
 
 export interface LocaleSpecificAddressField extends Partial< AddressField > {
@@ -34,6 +36,7 @@ export interface AddressFields {
 	city: AddressField;
 	state: AddressField;
 	postcode: AddressField;
+	phone: AddressField;
 }
 
 export type AddressType = 'billing' | 'shipping';
@@ -166,6 +169,15 @@ export const defaultAddressFields: AddressFields = {
 		required: true,
 		hidden: false,
 		index: 90,
+	},
+	phone: {
+		label: __( 'Phone', 'woo-gutenberg-products-block' ),
+		optionalLabel: __( 'Phone (optional)', 'woo-gutenberg-products-block' ),
+		autocomplete: 'tel',
+		type: 'tel',
+		required: true,
+		hidden: false,
+		index: 100,
 	},
 };
 
