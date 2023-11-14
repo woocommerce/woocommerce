@@ -1,0 +1,112 @@
+import { Canvas, Meta, ArgTypes, Primary, Source } from '@storybook/blocks';
+
+import * as NoticeBannerStories from '../stories/index.stories.tsx';
+
+<Meta name="Docs" of={ NoticeBannerStories } />
+
+# NoticeBanner
+
+An informational UI displayed near the top of the store pages.
+
+<Primary />
+
+## Design Guidelines
+
+`NoticeBanner` is an informational UI element displayed near the top of store pages used to indicate the result of an action, or to draw the user's attention to necessary information.
+
+Notices are color-coded to indicate the type of message being communicated, and also show an icon to reinforce the meaning of the message. The color and icon used for a notice are determined by the `status` prop.
+
+### Default Notices
+
+By default, noices are grey and used for less important messaging.
+
+<Canvas of={ NoticeBannerStories.Default } />
+
+### Informational Notices
+
+Blue notices with an info icon are used for general information for buyers, but do not require them to take an action.
+
+<Canvas of={ NoticeBannerStories.Info } />
+
+### Error Notices
+
+Red notices with an alert icon are used to show that an error has occurred and that the user needs to take action.
+
+<Canvas of={ NoticeBannerStories.Error } />
+
+### Success Notices
+
+Green notices with a success icon are used to show an action was successful.
+
+<Canvas of={ NoticeBannerStories.Success } />
+
+### Warning Notices
+
+Yellow notices with an alert icon are used to show that the user may need to take action, or needs to be aware of something important.
+
+<Canvas of={ NoticeBannerStories.Warning } />
+
+### Error Summary
+
+If you provide a `summary` it will be displayed above the notice content. This can be useful for displaying a summary of errors in a list format.
+
+<Canvas of={ NoticeBannerStories.ErrorSummary } />
+
+## Development Guidelines
+
+### Props
+
+<ArgTypes />
+
+### Usage examples
+
+#### Example: string based notices
+
+To display a basic notice, pass the notice message as a string:
+
+```jsx
+import { NoticeBanner } from '@woocommerce/base-components';
+
+<NoticeBanner status="info">Your message here</NoticeBanner>;
+```
+
+#### Example: components within notices
+
+For more complex markup, you can wrap any JSX element:
+
+```jsx
+import { NoticeBanner } from '@woocommerce/base-components';
+
+<NoticeBanner status="error">
+	<p>
+		An error occurred: <code>{ errorDetails }</code>.
+	</p>
+</NoticeBanner>;
+```
+
+#### Example: list of notices
+
+In this example, the summary prop is used to indicate to the user that there are errors in the form submission.
+
+```typescript
+import { NoticeBanner } from '@woocommerce/base-components';
+
+const errorMessages = [
+	'First error message',
+	'Second error message',
+	'Third error message',
+];
+
+<NoticeBanner
+	status="error"
+	summary="There are errors in your form submission:"
+>
+	<ul>
+		{ errorMessages.map( ( message ) => (
+			<li key={ message }>{ message }</li>
+		) ) }
+	</ul>
+</NoticeBanner>;
+```
+
+The list of error messages is rendered within the NoticeBanner component using an unordered list (`<ul>`) and list items (`<li>`). The `status` prop is set to `error` to indicate that the notice represents an error message.

@@ -1,0 +1,128 @@
+.wc-block-components-form .wc-block-components-text-input,
+.wc-block-components-text-input {
+	position: relative;
+	margin-top: $gap;
+	white-space: nowrap;
+
+	label {
+		@include reset-color();
+		@include reset-typography();
+		@include font-size(regular);
+		position: absolute;
+		transform: translateY(em($gap));
+		line-height: 1.25; // =20px when font-size is 16px.
+		left: em($gap-smaller + 1px);
+		top: 0;
+		transform-origin: top left;
+		color: $universal-body-low-emphasis;
+		transition: all 200ms ease;
+		margin: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: calc(100% - #{2 * $gap});
+		cursor: text;
+
+		.has-dark-controls & {
+			color: $input-placeholder-dark;
+		}
+		@media screen and (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+
+	input[type="number"] {
+		-moz-appearance: textfield;
+		&::-webkit-outer-spin-button,
+		&::-webkit-inner-spin-button {
+			appearance: none;
+			margin: 0;
+		}
+	}
+
+	input[type="tel"],
+	input[type="url"],
+	input[type="text"],
+	input[type="number"],
+	input[type="email"] {
+		@include font-size(regular);
+		padding: em($gap);
+		line-height: em($gap);
+		width: 100%;
+		border-radius: $universal-border-radius;
+		border: 1px solid $input-border-gray;
+		font-family: inherit;
+		margin: 0;
+		box-sizing: border-box;
+		min-height: 0;
+		background-color: #fff;
+		color: $input-text-active;
+
+		&:focus {
+			background-color: #fff;
+			color: $input-text-active;
+			outline: 0;
+			box-shadow: 0 0 0 1px $input-border-gray;
+		}
+
+		.has-dark-controls & {
+			background-color: $input-background-dark;
+			border-color: $input-border-dark;
+			color: $input-text-dark;
+
+			&:focus {
+				background-color: $input-background-dark;
+				color: $input-text-dark;
+				box-shadow: 0 0 0 1px $input-border-dark;
+			}
+		}
+	}
+
+	input:-webkit-autofill,
+	&.is-active input[type="tel"],
+	&.is-active input[type="url"],
+	&.is-active input[type="text"],
+	&.is-active input[type="number"],
+	&.is-active input[type="email"] {
+		padding: em($gap + $gap-smaller) em($gap-smaller) em($gap-smaller);
+	}
+
+	&.is-active label,
+	input:-webkit-autofill + label {
+		transform: translateY(em($gap-smaller)) scale(0.875);
+	}
+
+	&.has-error input {
+		&,
+		&:hover,
+		&:focus,
+		&:active {
+			border-color: $alert-red;
+		}
+		&:focus {
+			box-shadow: 0 0 0 1px $alert-red;
+		}
+
+		.has-dark-controls &,
+		.has-dark-controls &:hover,
+		.has-dark-controls &:focus,
+		.has-dark-controls &:active {
+			border-color: color.adjust($alert-red, $lightness: 30%);
+		}
+
+		.has-dark-controls &:focus {
+			box-shadow: 0 0 0 1px color.adjust($alert-red, $lightness: 30%);
+		}
+	}
+
+	&.has-error label {
+		color: $alert-red;
+
+		.has-dark-controls & {
+			color: color.adjust($alert-red, $lightness: 30%);
+		}
+	}
+
+	&:only-child {
+		margin-top: 1.5em;
+	}
+}

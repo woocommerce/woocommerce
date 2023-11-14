@@ -1,0 +1,41 @@
+.wc-block-components-address-card {
+	border: 1px solid $universal-border;
+	@include font-size(regular);
+	padding: em($gap);
+	margin: 0;
+	border-radius: $universal-border-radius;
+	display: flex;
+	justify-content: flex-start;
+	align-items: flex-start;
+
+	address {
+		margin: 0;
+		font-style: normal;
+
+		.wc-block-components-address-card__address-section {
+			display: block;
+			margin: 0 0 2px 0;
+			span {
+				display: inline-block;
+				padding: 0 4px 0 0;
+				&::after {
+					content: ", ";
+				}
+				&:last-child::after {
+					content: "";
+				}
+			}
+			&:last-child {
+				margin-bottom: 0;
+			}
+			&:first-child {
+				font-weight: bold;
+			}
+		}
+	}
+}
+.wc-block-components-address-card__edit {
+	margin: 0 0 0 auto;
+	text-decoration: none;
+	@include font-size(small);
+}

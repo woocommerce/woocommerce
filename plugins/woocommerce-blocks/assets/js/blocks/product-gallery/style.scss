@@ -1,0 +1,281 @@
+$gallery: ".wc-block-product-gallery";
+$large-image: "#{$gallery}-large-image";
+$thumbnails: "#{$gallery}-thumbnails";
+$next-previous: "#{$large-image}-next-previous";
+$next-previous-left-off: "#{$next-previous}-left--off";
+$next-previous-right-off: "#{$next-previous}-right--off";
+$gallery-next-previous-outside-image: "#{$gallery}[data-next-previous-buttons-position='outsideTheImage']:not(.is-single-product-gallery-image)";
+$gallery-next-previous-inside-image: "#{$gallery}:not([data-next-previous-buttons-position='outsideTheImage']:not(.is-single-product-gallery-image))";
+
+
+$outside-image-offset: 30px;
+$outside-image-max-width: calc(100% - (2 * $outside-image-offset));
+
+// Product Gallery
+#{$gallery} {
+	.wc-block-product-gallery-dialog__overlay {
+		height: 100vh;
+		width: 100vw;
+		position: fixed;
+		top: 0;
+		left: 0;
+		background-color: #808080;
+		z-index: 9999;
+	}
+
+	dialog {
+		position: fixed;
+		width: calc(100vw - 100px);
+		border: none;
+		border-radius: 10px;
+		height: 90vh;
+		top: 0;
+		margin-top: $gap-largest;
+		margin-bottom: $gap-largest;
+		z-index: 9999;
+
+		.wc-block-product-galler-dialog__header-right {
+			display: flex;
+			justify-content: flex-end;
+
+			.wc-block-product-gallery-dialog__close {
+				border: none;
+				background-color: transparent;
+				outline: none;
+				cursor: pointer;
+			}
+		}
+
+	}
+}
+
+// Large Image
+#{$large-image} {
+	width: 100%;
+	height: fit-content;
+	position: relative;
+	overflow: hidden;
+
+	// Restrict the width of the Large Image when the Next/Previous buttons are outside the image.
+	#{$gallery-next-previous-outside-image} & .wc-block-product-gallery-large-image__image-element {
+		overflow: hidden;
+		margin: 0 auto;
+		max-width: $outside-image-max-width;
+	}
+
+	.wc-block-product-gallery-large-image__wrapper {
+		flex-shrink: 0;
+		max-width: 100%;
+		overflow: hidden;
+		width: 100%;
+	}
+
+	.wc-block-product-gallery-large-image__container {
+		display: flex;
+		overflow-x: hidden;
+		scroll-snap-type: x mandatory;
+		width: fit-content;
+		height: fit-content;
+		scroll-behavior: auto;
+		align-items: center;
+	}
+
+	#{$gallery-next-previous-inside-image} & .wc-block-product-gallery-large-image__image-element {
+		width: fit-content;
+		overflow: hidden;
+		margin: 0 auto;
+	}
+
+
+	img {
+		display: block;
+		position: relative;
+		margin: 0 auto;
+		z-index: 1;
+		transition: all 0.1s linear;
+		width: auto;
+
+		// Keep the order in this way. The hoverZoom class should override the full-screen-on-click class when both are applied.
+		&.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click {
+			cursor: pointer;
+		}
+
+		&.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom {
+			cursor: zoom-in;
+		}
+	}
+
+	.wc-block-product-gallery-large-image__inner-blocks {
+		display: flex;
+		flex-direction: column;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		top: 0;
+
+		// Reset the margin of the inner blocks when the Next/Previous buttons are outside the image.
+		#{$gallery-next-previous-outside-image} & > * {
+			margin-left: $outside-image-offset;
+			margin-right: $outside-image-offset;
+		}
+
+		// Unset the margin of the inner blocks when the Next/Previous buttons are inside the image.
+		#{$gallery-next-previous-inside-image}  & > * {
+			margin-left: unset;
+			margin-right: unset;
+		}
+	}
+}
+
+// Next/Previous Buttons
+#{$next-previous} {
+	display: flex;
+	position: absolute;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
+	height: 100%;
+
+	button {
+		cursor: pointer;
+		z-index: 3;
+		pointer-events: all;
+		padding: 0;
+		border: none;
+		background: none;
+	}
+
+	.is-vertically-aligned-top {
+		align-items: flex-start;
+	}
+
+	.is-vertically-aligned-center {
+		align-items: center;
+	}
+
+	.is-vertically-aligned-bottom {
+		align-items: flex-end;
+	}
+}
+
+// Next/Previous Buttons Settings
+.wc-block-product-gallery-large-image-next-previous-settings {
+	width: 100%;
+}
+
+// Next/Previous Buttons Off Setting
+#{$next-previous-left-off},
+#{$next-previous-right-off} {
+	display: none;
+}
+
+//  Next/Previous Buttons Inside the Image Settings
+.wc-block-product-gallery-large-image-next-previous-left--inside-image {
+	margin-left: 15px;
+}
+
+.wc-block-product-gallery-large-image-next-previous-right--inside-image {
+	margin-right: 15px;
+}
+
+// Next/Previous Buttons Outside the Image Settings
+#{$gallery-next-previous-outside-image} .wc-block-product-gallery-large-image-next-previous-left--outside-image {
+	bottom: 0;
+	left: 0;
+	position: absolute;
+}
+
+#{$gallery-next-previous-outside-image} .wc-block-product-gallery-large-image-next-previous-right--outside-image {
+	bottom: 0;
+	right: 0;
+	position: absolute;
+}
+
+#{$gallery-next-previous-outside-image} #{$large-image} #{$next-previous} {
+	margin-right: 0;
+	margin-left: 0;
+}
+
+.wc-block-product-gallery-large-image-next-previous-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	position: absolute;
+	height: 50px;
+	width: 100%;
+
+	&.wc-block-product-gallery-large-image-next-previous--inside-image {
+		margin-top: 15px;
+		margin-bottom: 15px;
+	}
+}
+
+// Pager
+.wc-block-product-gallery-pager__pager {
+	display: flex;
+	justify-content: center;
+	list-style: none;
+	gap: $gap-small;
+	margin-top: 0;
+	margin-bottom: 0;
+	padding: 0;
+}
+
+.wc-block-product-gallery-pager__pager-item {
+	@include font-size(regular);
+	color: $gray-600;
+	cursor: pointer;
+}
+
+.wc-block-product-gallery-pager__pager-item--is-active {
+	font-weight: bold;
+	color: $black;
+}
+
+// Thumbnails
+#{$thumbnails} {
+	img {
+		cursor: pointer;
+	}
+
+	.is-vertical & {
+		display: flex;
+		flex-direction: row;
+	}
+
+	.wc-block-product-gallery-thumbnails__thumbnail {
+		width: 100px;
+		height: 100px;
+		margin: 5px;
+		position: relative;
+
+	}
+
+	.wc-block-product-gallery-thumbnails__thumbnail__overlay {
+		cursor: pointer;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		position: absolute;
+		background-color: rgba(0, 0, 0, 0.4);
+		top: 0;
+		width: 100%;
+		height: 100%;
+
+		.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
+			@include font-size(large);
+			font-weight: 700;
+		}
+
+		.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+			@include font-size(smaller);
+			text-decoration: underline;
+		}
+
+		.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count,
+		.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+			color: #fff;
+		}
+	}
+}

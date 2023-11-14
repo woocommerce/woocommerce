@@ -1,0 +1,17 @@
+.wc-block-product-gallery-thumbnails {
+	width: fit-content;
+	.wc-block-editor-product-gallery-thumbnails {
+		display: flex;
+		flex-flow: column nowrap;
+
+		&.wc-block-editor-product-gallery-thumbnails--bottom {
+			flex-flow: row nowrap;
+		}
+
+		img {
+			width: 100px;
+			height: 100px;
+			margin: 5px;
+		}
+	}
+}
