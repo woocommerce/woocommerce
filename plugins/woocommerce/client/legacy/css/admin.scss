@@ -8563,12 +8563,21 @@ table.bar_chart {
 
 	.woocommerce-order-source-attribution-details-toggle {
 		display: block;
+		text-decoration: none;
+		vertical-align: middle;
+		margin-top: -3px;
+		position: relative;
+		top: 3px;
+
+		.toggle-text {
+			text-decoration: underline;
+		}
 
 		.toggle-indicator {
 			font-family: dashicons;
 			font-size: 1.2em;
 			line-height: 1;
-			vertical-align: top;
+			vertical-align: middle;
 		}
 
 		&[aria-expanded="true"] {
