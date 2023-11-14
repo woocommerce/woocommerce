@@ -10,7 +10,8 @@ jQuery( document ).ready( ( $ ) => {
 	$( '.woocommerce-order-source-attribution-details-toggle' )
 		.on( 'click', ( e ) => {
 			var $this = $( e.target );
-			var $container = $this.siblings( '.woocommerce-order-source-attribution-details-container' );
+			var $container = $this.closest( '.order-source-attribution-metabox' )
+											.find( '.woocommerce-order-source-attribution-details-container' );
 			var toggle = '';
 
 			e.preventDefault();

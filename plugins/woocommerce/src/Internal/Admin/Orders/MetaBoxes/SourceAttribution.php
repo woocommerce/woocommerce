@@ -40,6 +40,11 @@ class SourceAttribution {
 			return;
 		}
 
-		wc_get_template( 'order/source-data-fields.php', array( 'meta' => $meta ) );
+		$template_data = array(
+			'meta' => $meta,
+			// Only show more details toggle if there is more than just the origin.
+			'has_more_details' => ['origin'] !== array_keys( $meta ),
+		);
+		wc_get_template( 'order/source-data-fields.php', $template_data );
 	}
 }
