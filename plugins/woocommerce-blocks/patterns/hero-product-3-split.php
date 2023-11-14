@@ -98,7 +98,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 			<!-- wp:buttons -->
 			<div class="wp-block-buttons"><!-- wp:button -->
 				<div class="wp-block-button">
-					<a class="wp-block-button__link wp-element-button" href="https://store.local/shop/classic-shop/">Shop now</a>
+					<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Shop now', 'woo-gutenberg-products-block' ); ?></a>
 				</div>
 				<!-- /wp:button -->
 			</div>
