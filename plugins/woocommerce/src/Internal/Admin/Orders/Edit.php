@@ -259,7 +259,7 @@ class Edit {
 
 		add_meta_box(
 			'woocommerce-customer-history',
-			__( 'Customer History', 'woocommerce' ),
+			__( 'Customer history', 'woocommerce' ),
 			function( $post_or_order ) use ( $customer_history_meta_box ) {
 				$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
 				if ( $order instanceof WC_Order ) {
