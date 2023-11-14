@@ -63,10 +63,7 @@ export function getLeaderboard( options: Options ) {
 	// Disable eslint rule requiring `getItems` to be defined below because the next two statements
 	// depend on `getItems` to have been called.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const leaderboards = getItems< 'leaderboards' >(
-		endpoint,
-		leaderboardQuery
-	);
+	const leaderboards = getItems( endpoint, leaderboardQuery );
 
 	if ( isResolving( 'getItems', [ endpoint, leaderboardQuery ] ) ) {
 		return { ...response, isRequesting: true };

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerStore } from '@wordpress/data';
+import { createReduxStore, register } from '@wordpress/data';
 import { controls } from '@wordpress/data-controls';
 import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
 import { Reducer, AnyAction } from 'redux';
@@ -18,7 +18,7 @@ import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
 
-registerStore< State >( STORE_NAME, {
+const store = createReduxStore( STORE_NAME, {
 	reducer: reducer as Reducer< State, AnyAction >,
 	actions,
 	controls,
@@ -26,16 +26,6 @@ registerStore< State >( STORE_NAME, {
 	resolvers,
 } );
 
-export const EXPERIMENTAL_PRODUCT_FORM_STORE_NAME = STORE_NAME;
+register( store );
 
-declare module '@wordpress/data' {
-	function dispatch(
-		key: typeof STORE_NAME
-	): DispatchFromMap< typeof actions >;
-	function select(
-		key: typeof STORE_NAME
-	): SelectFromMap< typeof selectors > & WPDataSelectors;
-	function resolveSelect(
-		key: typeof STORE_NAME
-	): PromiseifySelectors< SelectFromMap< typeof selectors > >;
-}
+export const EXPERIMENTAL_PRODUCT_FORM_STORE_NAME = STORE_NAME;

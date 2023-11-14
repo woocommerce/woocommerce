@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerStore } from '@wordpress/data';
+import { createReduxStore, register } from '@wordpress/data';
 import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
 import { Reducer, AnyAction } from 'redux';
 /**
@@ -17,24 +17,13 @@ import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
 
-registerStore< State >( STORE_NAME, {
+const store = createReduxStore( STORE_NAME, {
 	reducer: reducer as Reducer< State, AnyAction >,
 	actions,
 	controls,
 	selectors,
 } );
 
-export const EXPORT_STORE_NAME = STORE_NAME;
+register( store );
 
-declare module '@wordpress/data' {
-	// TODO: convert action.js to TS
-	function dispatch(
-		key: typeof STORE_NAME
-	): DispatchFromMap< typeof actions >;
-	function select(
-		key: typeof STORE_NAME
-	): SelectFromMap< typeof selectors > & WPDataSelectors;
-	function resolveSelect(
-		key: typeof STORE_NAME
-	): PromiseifySelectors< SelectFromMap< typeof selectors > >;
-}
+export const EXPORT_STORE_NAME = STORE_NAME;

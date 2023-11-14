@@ -21,8 +21,8 @@
 		"@wordpress/components": "wp-6.0",
 		"directory-tree": "^3.5.1",
 		"glob": "^10.2.7",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"react": "18.2.0",
+		"react-dom": "18.2.0"
 	},
 	"devDependencies": {
 		"@types/node": "^16.18.18",
@@ -38,6 +38,6 @@
 		"prettier": "npm:wp-prettier@^2.6.2",
 		"ts-loader": "^9.4.1",
 		"ts-node": "^10.9.1",
-		"typescript": "^5.1.6"
+		"typescript": "^5.2.0"
 	}
 }

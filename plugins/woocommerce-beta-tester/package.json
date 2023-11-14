@@ -22,7 +22,7 @@
 		"eslint": "^8.32.0",
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"ts-loader": "^9.4.1",
-		"typescript": "^5.1.6",
+		"typescript": "^5.2.0",
 		"uglify-js": "^3.5.3"
 	},
 	"dependencies": {
@@ -48,8 +48,8 @@
 	"peerDependencies": {
 		"@types/react": "^17.0.2",
 		"@types/react-dom": "^17.0.2",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"react": "18.2.0",
+		"react-dom": "18.2.0"
 	},
 	"assets": {
 		"js": {

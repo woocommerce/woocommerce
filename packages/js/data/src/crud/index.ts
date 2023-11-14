@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerStore, StoreConfig } from '@wordpress/data';
+import { createReduxStore, register } from '@wordpress/data';
 import { Reducer } from 'redux';
 
 /**
@@ -18,7 +18,7 @@ type CrudDataStore = {
 	resourceName: string;
 	pluralResourceName: string;
 	namespace: string;
-	storeConfig?: Partial< StoreConfig< ResourceState > >;
+	storeConfig?: unknown;
 };
 
 export const createCrudDataStore = ( {
@@ -54,11 +54,13 @@ export const createCrudDataStore = ( {
 
 	const crudReducer = createReducer( reducer );
 
-	registerStore( storeName, {
+	const store = createReduxStore( storeName, {
 		reducer: crudReducer as Reducer< ResourceState >,
 		actions: { ...crudActions, ...actions },
 		selectors: { ...crudSelectors, ...selectors },
 		resolvers: { ...crudResolvers, ...resolvers },
 		controls: { ...defaultControls, ...controls },
 	} );
+
+	register( store );
 };

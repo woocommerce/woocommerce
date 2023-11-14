@@ -2,7 +2,7 @@
  * External dependencies
  */
 
-import { registerStore } from '@wordpress/data';
+import { createReduxStore, register } from '@wordpress/data';
 import { Reducer } from 'redux';
 
 /**
@@ -15,12 +15,14 @@ import * as resolvers from './resolvers';
 import reducer, { OrdersState, State } from './reducer';
 import controls from '../controls';
 
-registerStore< State >( STORE_NAME, {
+const store = createReduxStore( STORE_NAME, {
 	reducer: reducer as Reducer< OrdersState >,
 	actions,
 	controls,
 	selectors,
 	resolvers,
 } );
+
+register( store );
 
 export const ORDERS_STORE_NAME = STORE_NAME;

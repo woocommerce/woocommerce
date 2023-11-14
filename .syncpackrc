@@ -67,7 +67,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^17.0.2"
+			"pinVersion": "18.2.0"
 		},
 		{
 			"dependencies": [
@@ -76,7 +76,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^5.1.6"
+			"pinVersion": "^5.2.0"
 		},
 		{
 			"dependencies": [
@@ -160,6 +160,15 @@
 				"**"
 			],
 			"pinVersion": "^8.2.0"
+		},
+		{
+			"dependencies": [
+				"@wordpress/**"
+			],
+			"packages": [
+				"@woocommerce/data"
+			],
+			"isIgnored": true
 		},
 		{
 			"dependencies": [

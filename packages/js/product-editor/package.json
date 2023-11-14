@@ -107,13 +107,13 @@
 		"jest-cli": "^27.5.1",
 		"postcss": "^8.4.7",
 		"postcss-loader": "^4.3.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
+		"react": "18.2.0",
+		"react-dom": "18.2.0",
 		"react-hooks^8.0.1": "link:@testing-library/react-hooks^8.0.1",
 		"rimraf": "^3.0.2",
 		"sass-loader": "^10.2.1",
 		"ts-jest": "^27.1.3",
-		"typescript": "^5.1.6",
+		"typescript": "^5.2.0",
 		"webpack": "^5.70.0",
 		"webpack-cli": "^3.3.12"
 	},
@@ -136,7 +136,7 @@
 	"peerDependencies": {
 		"@types/react": "^17.0.2",
 		"@wordpress/data": "wp-6.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"react": "18.2.0",
+		"react-dom": "18.2.0"
 	}
 }
