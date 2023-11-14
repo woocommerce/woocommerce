@@ -31,7 +31,7 @@ describe( 'useWooBlockProps', () => {
 		expect( useBlockProps ).toHaveBeenCalledWith( {
 			'data-template-block-id': 'test/block',
 			'data-template-block-order': 30,
-			tabindex: '-1',
+			tabIndex: '-1',
 			className: 'test',
 		} );
 	} );
