@@ -12,4 +12,4 @@ An example of things that _should_ be tested with E2E tests:
 
 1.  Blocks cannot be added to the block editor more than once. Reason: **We cannot really mock the Gutenberg functionality to test that this happens without some serious effort.**
 2.  Fresh cart data is fetched when using the browser's back buttons. Reason: **We need to emulate the behaviour of a browser when the back button is pressed and this can't be done in unit tests.**
-3.  The compatability notice is shown when first adding the checkout block. Reason: **same as 1**
+3.  The compatibility notice is shown when first adding the checkout block. Reason: **same as 1**
