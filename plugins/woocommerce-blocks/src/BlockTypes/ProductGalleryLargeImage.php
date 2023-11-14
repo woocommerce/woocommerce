@@ -120,7 +120,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			'data-wc-bind--style' => 'selectors.woocommerce.productGalleryLargeImage.styles',
 			'data-wc-effect'      => 'effects.woocommerce.scrollInto',
 			'class'               => 'wc-block-woocommerce-product-gallery-large-image__image',
-
+			'data-wc-class--wc-block-woocommerce-product-gallery-large-image__image--active-image-slide' => 'selectors.woocommerce.isSelected',
 		);
 
 		if ( $context['fullScreenOnClick'] ) {
