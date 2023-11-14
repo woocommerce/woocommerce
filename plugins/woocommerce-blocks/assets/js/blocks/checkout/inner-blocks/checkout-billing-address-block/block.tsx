@@ -14,7 +14,7 @@ import type {
 	AddressField,
 	AddressFields,
 } from '@woocommerce/settings';
-import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { CART_STORE_KEY } from '@woocommerce/block-data';
 

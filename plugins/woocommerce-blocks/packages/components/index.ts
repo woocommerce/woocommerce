@@ -1,3 +1,4 @@
+export { default as Button } from './button';
 export { default as CheckboxList } from './checkbox-list';
 export { Chip, RemovableChip } from './chip';
 export { default as FormStep } from './form-step';
@@ -13,6 +14,8 @@ export type { RadioControlOption as RadioControlOptionType } from './radio-contr
 export { default as RadioControlAccordion } from './radio-control-accordion';
 export { default as SortSelect } from './sort-select';
 export { default as Spinner } from './spinner';
+export { default as StoreNotice } from './store-notice';
+export { default as StoreNoticesContainer } from './store-notices-container';
 export { default as Textarea } from './textarea';
 export {
 	default as ValidatedTextInput,

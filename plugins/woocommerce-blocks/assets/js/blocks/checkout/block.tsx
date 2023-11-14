@@ -12,10 +12,8 @@ import { CheckoutProvider, noticeContexts } from '@woocommerce/base-context';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
 import { CURRENT_USER_IS_ADMIN, getSetting } from '@woocommerce/settings';
-import {
-	SlotFillProvider,
-	StoreNoticesContainer,
-} from '@woocommerce/blocks-checkout';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
+import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {

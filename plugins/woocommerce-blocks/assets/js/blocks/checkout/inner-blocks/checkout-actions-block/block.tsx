@@ -9,10 +9,8 @@ import {
 } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { noticeContexts } from '@woocommerce/base-context';
-import {
-	StoreNoticesContainer,
-	applyCheckoutFilter,
-} from '@woocommerce/blocks-checkout';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
+import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 
 type FilledMiniCartContentsBlockProps = {

@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
-import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { noticeContexts } from '@woocommerce/base-context';
 import { NoticeType } from '@woocommerce/types';
 interface PaymentMethodErrorBoundaryProps {

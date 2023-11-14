@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { Sidebar } from '@woocommerce/base-components/sidebar-layout';
-import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 
 const FrontendBlock = ( {
 	children,

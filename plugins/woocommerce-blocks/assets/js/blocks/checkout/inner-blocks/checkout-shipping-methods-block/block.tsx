@@ -13,9 +13,11 @@ import {
 	isAddressComplete,
 } from '@woocommerce/base-utils';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
+import {
+	FormattedMonetaryAmount,
+	StoreNoticesContainer,
+} from '@woocommerce/blocks-components';
 import { useEditorContext, noticeContexts } from '@woocommerce/base-context';
-import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
 import type {
