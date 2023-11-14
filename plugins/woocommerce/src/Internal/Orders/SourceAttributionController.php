@@ -16,7 +16,6 @@ use WC_Log_Levels;
 use WC_Logger_Interface;
 use WC_Order;
 use WC_Tracks;
-use WP_User;
 
 /**
  * Class SourceAttributionController
