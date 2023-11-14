@@ -21,6 +21,8 @@ class BlockTemplateLogger {
 	const ERROR_AFTER_BLOCK_ADDED                = 'error_after_block_added';
 	const ERROR_AFTER_BLOCK_REMOVED              = 'error_after_block_removed';
 
+	const LOG_HASH_TRANSIENT_BASE_NAME = 'wc_block_template_events_log_hash_';
+
 	/**
 	 * Event types.
 	 *
@@ -247,6 +249,11 @@ class BlockTemplateLogger {
 		return $formatted_template_events;
 	}
 
+	/**
+	 * Log all template events for a given template to the log file.
+	 *
+	 * @param string $template_id Template ID.
+	 */
 	public function log_template_events_to_file( string $template_id ) {
 		if ( ! isset( $this->all_template_events[ $template_id ] ) ) {
 			return;
@@ -256,7 +263,7 @@ class BlockTemplateLogger {
 
 		$hash = $this->generate_template_events_hash( $template_events );
 
-		if ( ! $this->has_template_events_log_changed( $template_id, $hash ) ) {
+		if ( ! $this->has_template_events_changed( $template_id, $hash ) ) {
 			// Nothing has changed since the last time this was logged,
 			// so don't log it again.
 			return;
@@ -286,18 +293,35 @@ class BlockTemplateLogger {
 		}
 	}
 
-	private function has_template_events_log_changed( string $template_id, string $events_hash ) {
-		$previous_hash = get_transient( 'wc_block_template_events_log_hash_' . $template_id );
+	/**
+	 * Has the template events changed since the last time they were logged?
+	 *
+	 * @param string $template_id Template ID.
+	 * @param string $events_hash Events hash.
+	 */
+	private function has_template_events_changed( string $template_id, string $events_hash ) {
+		$previous_hash = get_transient( self::LOG_HASH_TRANSIENT_BASE_NAME . $template_id );
 
 		return $previous_hash !== $events_hash;
 	}
 
-	private function generate_template_events_hash( array $template_events ) {
+	/**
+	 * Generate a hash for a given set of template events.
+	 *
+	 * @param array $template_events Template events.
+	 */
+	private function generate_template_events_hash( array $template_events ): string {
 		return md5( wp_json_encode( $template_events ) );
 	}
 
+	/**
+	 * Set the template events hash for a given template.
+	 *
+	 * @param string $template_id Template ID.
+	 * @param string $hash        Hash of template events.
+	 */
 	private function set_template_events_log_hash( string $template_id, string $hash ) {
-		set_transient( 'wc_block_template_events_log_hash_' . $template_id, $hash );
+		set_transient( self::LOG_HASH_TRANSIENT_BASE_NAME . $template_id, $hash );
 	}
 
 	/**
