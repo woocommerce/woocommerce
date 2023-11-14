@@ -10,6 +10,7 @@ import { createElement, useEffect } from '@wordpress/element';
  */
 import { STORE_NAME } from './constants';
 import { MenuItem } from './types';
+import { WPDataSelectors } from '../types';
 
 /**
  * Higher-order component used to hydrate navigation data.
@@ -18,14 +19,15 @@ import { MenuItem } from './types';
  * @param {MenuItem[]} data.menuItems Menu items to hydrate.
  */
 export const withNavigationHydration = ( data: { menuItems: MenuItem[] } ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+	createHigherOrderComponent(
 		( OriginalComponent ) => ( props ) => {
+			// @ts-expect-error - even though it is incorrect to omit deps, it could cause widespread runtime changes, so ignore for now.
 			const shouldHydrate = useSelect( ( select ) => {
 				if ( ! data ) {
 					return;
 				}
 
-				const { isResolving, hasFinishedResolution } =
+				const { isResolving, hasFinishedResolution }: WPDataSelectors =
 					select( STORE_NAME );
 				return (
 					! isResolving( 'getMenuItems' ) &&
