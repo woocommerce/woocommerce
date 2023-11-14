@@ -14,5 +14,5 @@ fi
 pnpm install
 
 if [ "$recommend_nvm" = true ]; then
-	echo "Could not find nvm; installation is recommended. Please run: brew install nvm && nvm install && nvm use"
+	echo "Could not find nvm; installation is recommended."
 fi
