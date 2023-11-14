@@ -148,23 +148,6 @@ class SourceAttributionController implements RegisterHooksInterface {
 			}
 		);
 
-		// Add output to the User display page.
-		$customer_meta_boxes = function( WP_User $user ) {
-			if ( ! current_user_can( 'manage_woocommerce' ) ) {
-				return;
-			}
-
-			try {
-				$customer = new WC_Customer( $user->ID );
-				$this->display_customer_source_data( $customer );
-			} catch ( Exception $e ) {
-				$this->log( $e->getMessage(), __METHOD__, WC_Log_Levels::ERROR );
-			}
-		};
-
-		add_action( 'show_user_profile', $customer_meta_boxes );
-		add_action( 'edit_user_profile', $customer_meta_boxes );
-
 		// Add origin data to the order table.
 		add_action(
 			'admin_init',
@@ -270,24 +253,6 @@ class SourceAttributionController implements RegisterHooksInterface {
 			array( 'jquery' ),
 			Constants::get_constant( 'WC_VERSION' )
 		);
-	}
-
-	/**
-	 * Display the source data template for the customer.
-	 *
-	 * @param WC_Customer $customer The customer object.
-	 *
-	 * @return void
-	 */
-	private function display_customer_source_data( WC_Customer $customer ) {
-		$meta = $this->filter_meta_data( $customer->get_meta_data() );
-
-		// If we don't have any meta to show, return.
-		if ( empty( $meta ) ) {
-			return;
-		}
-
-		include dirname( WC_PLUGIN_FILE ) . '/templates/order/source-data-fields.php';
 	}
 
 	/**
