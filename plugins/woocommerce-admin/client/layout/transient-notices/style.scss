@@ -28,10 +28,14 @@
 		white-space: pre-line;
 	}
 
+	.components-snackbar__content-with-icon {
+		margin-left: 0;
+	}
+
 	.components-snackbar__icon {
-		position: absolute;
-		top: 12px;
-		left: 12px;
+		position: static;
+		display: inline-block;
+		margin-right: $grid-unit-20;
 	}
 
 	.components-snackbar__dismiss-button {
