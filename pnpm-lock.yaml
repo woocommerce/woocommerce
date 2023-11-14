@@ -3697,6 +3697,10 @@ importers:
         version: 5.1.6
 
   plugins/woocommerce/client/legacy:
+    dependencies:
+      sourcebuster:
+        specifier: ^1.1.0
+        version: 1.1.0
     devDependencies:
       '@types/node':
         specifier: ^16.18.18
@@ -44502,6 +44506,10 @@ packages:
   /source-map@0.7.3:
     resolution: {integrity: sha512-CkCj6giN3S+n9qrYiBTX5gystlENnRW5jZeNLHpe6aue+SrHcG5VYwujhW9s4dY31mEGsxBDrHR6oI69fTXsaQ==}
     engines: {node: '>= 8'}
+
+  /sourcebuster@1.1.0:
+    resolution: {integrity: sha512-+A8MHjtnARAYsqd0OI+aXbgUa/p6mhmXHwGUu3TxdujqfVqS1mjSq+2fkctGDozoxrRSBb55WScJJtJ5YILxSQ==}
+    dev: false
 
   /space-separated-tokens@1.1.5:
     resolution: {integrity: sha512-q/JSVd1Lptzhf5bkYm4ob4iWPjx0KiRe3sRFBNrVqbJkFaBm5vbbowy1mymoPNLRa52+oadOhJ+K49wsSeSjTA==}

@@ -58,7 +58,8 @@
 			"inputs": [
 				"css/**/*.scss",
 				"css/**/*.css",
-				"js/**/*.js"
+				"js/**/*.js",
+				"node_modules/**/*.js"
 			],
 			"outputMode": "new-only"
 		},
