@@ -5,7 +5,7 @@
 import type PaymentMethodLabel from '@woocommerce/base-components/cart-checkout/payment-method-label';
 import type PaymentMethodIcons from '@woocommerce/base-components/cart-checkout/payment-method-icons';
 import type LoadingMask from '@woocommerce/base-components/loading-mask';
-import type { ValidationInputError } from '@woocommerce/blocks-checkout';
+import type { ValidationInputError } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies

@@ -10,16 +10,12 @@ import {
 import { getSetting } from '@woocommerce/settings';
 import {
 	CheckboxControl,
-	ValidatedTextInput,
 	StoreNoticesContainer,
 } from '@woocommerce/blocks-checkout';
+import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { isEmail } from '@wordpress/url';
-
-/**
- * Internal dependencies
- */
 
 const Block = (): JSX.Element => {
 	const { customerId, shouldCreateAccount } = useSelect( ( select ) => {

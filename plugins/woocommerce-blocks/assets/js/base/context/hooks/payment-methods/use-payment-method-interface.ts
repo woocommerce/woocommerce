@@ -16,7 +16,7 @@ import {
 	PAYMENT_STORE_KEY,
 	CART_STORE_KEY,
 } from '@woocommerce/block-data';
-import { ValidationInputError } from '@woocommerce/blocks-checkout';
+import { ValidationInputError } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies

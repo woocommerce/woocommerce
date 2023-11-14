@@ -9,11 +9,11 @@ import { withInstanceId } from '@wordpress/compose';
 import {
 	ValidatedTextInput,
 	ValidationInputError,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import classnames from 'classnames';
-import type { MouseEvent } from 'react';
+import type { MouseEvent, MouseEventHandler } from 'react';
 
 /**
  * Internal dependencies
@@ -62,18 +62,18 @@ export const TotalsCoupon = ( {
 			validationErrorId: store.getValidationErrorId( textInputId ),
 		};
 	} );
-	const handleCouponAnchorClick = (
-		e: MouseEvent< HTMLAnchorElement, MouseEvent >
+	const handleCouponAnchorClick: MouseEventHandler< HTMLAnchorElement > = (
+		e: MouseEvent< HTMLAnchorElement >
 	) => {
 		e.preventDefault();
 		setIsCouponFormHidden( false );
 	};
-	const handleCouponSubmit = (
-		e: MouseEvent< HTMLButtonElement, MouseEvent >
+	const handleCouponSubmit: MouseEventHandler< HTMLButtonElement > = (
+		e: MouseEvent< HTMLButtonElement >
 	) => {
 		e.preventDefault();
-		if ( onSubmit !== undefined ) {
-			onSubmit( couponValue ).then( ( result ) => {
+		if ( typeof onSubmit !== 'undefined' ) {
+			onSubmit( couponValue )?.then( ( result ) => {
 				if ( result ) {
 					setCouponValue( '' );
 					setIsCouponFormHidden( true );

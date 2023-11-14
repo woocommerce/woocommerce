@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { useEffect, useRef } from '@wordpress/element';
 import { withInstanceId } from '@wordpress/compose';
 import { ComboboxControl } from 'wordpress-components';
-import { ValidationInputError } from '@woocommerce/blocks-checkout';
+import { ValidationInputError } from '@woocommerce/blocks-components';
 import { isObject } from '@woocommerce/types';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
