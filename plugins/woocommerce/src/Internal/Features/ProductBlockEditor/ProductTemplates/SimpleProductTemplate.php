@@ -226,11 +226,74 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'     => 10,
 			)
 		);
+
+		// External/Affiliate section.
+		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
+			$buy_button_section = $general_group->add_section(
+				array(
+					'id'         => 'product-buy-button-section',
+					'order'      => 30,
+					'attributes' => array(
+						'title'       => __( 'Buy button', 'woocommerce' ),
+						'description' => __( 'Add a link and choose a label for the button linked to a product sold elsewhere.', 'woocommerce' ),
+					),
+				)
+			);
+
+			$buy_button_section->add_block(
+				array(
+					'id'         => 'product-external-url',
+					'blockName'  => 'woocommerce/product-text-field',
+					'order'      => 10,
+					'attributes' => array(
+						'property' => 'external_url',
+						'label'    => __( 'Link to the external product', 'woocommerce' ),
+						'required' => true,
+					),
+				)
+			);
+
+      $button_text_columns = $buy_button_section->add_block(
+				array(
+					'id'         => 'product-button-text-columns',
+					'blockName'  => 'core/columns',
+					'order'      => 20,
+				)
+      );
+      
+      $button_text_columns->add_block(
+				array(
+					'id'         => 'product-button-text-column1',
+					'blockName'  => 'core/column',
+					'order'      => 10,
+				)
+			)->add_block(
+				array(
+					'id'         => 'product-button-text',
+					'blockName'  => 'woocommerce/product-text-field',
+					'order'      => 10,
+					'attributes' => array(
+						'property' => 'button_text',
+						'label'    => __( 'Buy button text', 'woocommerce' ),
+						'required' => true,
+					),
+				)
+			);
+
+      $button_text_columns->add_block(
+				array(
+					'id'         => 'product-button-text-column2',
+					'blockName'  => 'core/column',
+					'order'      => 20,
+				)
+      );
+		}
+
 		// Images section.
 		$images_section = $general_group->add_section(
 			array(
 				'id'         => 'product-images-section',
-				'order'      => 30,
+				'order'      => 40,
 				'attributes' => array(
 					'title'       => __( 'Images', 'woocommerce' ),
 					'description' => sprintf(
@@ -258,7 +321,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			$general_group->add_section(
 				array(
 					'id'             => 'product-downloads-section',
-					'order'          => 40,
+					'order'          => 50,
 					'attributes'     => array(
 						'title'       => __( 'Downloads', 'woocommerce' ),
 						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
