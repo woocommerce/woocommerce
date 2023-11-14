@@ -7,7 +7,9 @@ use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider
 use Automattic\WooCommerce\Vendor\League\Container\Definition\DefinitionInterface;
 
 /**
- * Class AbstractInterfaceServiceProvider
+ * Extends AbstractServiceProvider to register services and automatically tag them based on their implemented interfaces.
+ * By using the `add_with_implements_tags` and `share_with_implements_tags` methods, it becomes possible to retrieve
+ * all the services that implement a given interface with a single `get` call.
  *
  * @since x.x.x
  */
