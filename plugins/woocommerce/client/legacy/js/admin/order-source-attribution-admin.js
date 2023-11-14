@@ -9,7 +9,7 @@ jQuery( document ).ready( ( $ ) => {
 	// Handle the "Details" container toggle.
 	$( '.woocommerce-order-source-attribution-details-toggle' )
 		.on( 'click', ( e ) => {
-			var $this = $( this );
+			var $this = $( e.target );
 			var $container = $this.siblings( '.woocommerce-order-source-attribution-details-container' );
 			var toggle = '';
 
