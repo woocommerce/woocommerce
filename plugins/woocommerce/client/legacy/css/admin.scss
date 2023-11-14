@@ -1456,6 +1456,10 @@ table.wc_status_table--tools {
 		.column-line {
 			line-height: 2.3;
 		}
+
+		.column-line {
+			font-family: Consolas, Monaco, monospace;
+		}
 	}
 
 	td {
@@ -1468,10 +1472,6 @@ table.wc_status_table--tools {
 
 	.column-line_number {
 		width: 8%;
-	}
-
-	.column-line {
-		font-family: Consolas, Monaco, monospace;
 	}
 
 	.search-match {
