@@ -25,12 +25,28 @@ defined( 'ABSPATH' ) || exit;
  * A facade to allow deprecating an entire class.
  */
 class DeprecatedClassFacade {
+
 	/**
 	 * The instance that this facade covers over.
 	 *
 	 * @var object
 	 */
 	protected $instance;
+
+	/**
+	 * The name of the non-deprecated class that this facade covers.
+	 *
+	 * @var string
+	 */
+	protected static $facade_over_classname;
+
+	/**
+	 * The version that this class was deprecated in.
+	 *
+	 * @var string
+	 */
+	protected static $deprecated_in_version = '';
+
 
 	/**
 	 * Constructor.

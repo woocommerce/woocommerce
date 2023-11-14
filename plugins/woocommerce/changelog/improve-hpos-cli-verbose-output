@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Use wp_json_encode instead of print_r in output for HPOS-related WP CLI commands.

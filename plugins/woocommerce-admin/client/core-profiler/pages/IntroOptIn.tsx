@@ -10,7 +10,7 @@ import { Link } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { IntroOptInEvent, CoreProfilerStateMachineContext } from '../index';
+import { IntroOptInEvent } from '../index';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
 
@@ -20,7 +20,6 @@ export const IntroOptIn = ( {
 }: {
 	sendEvent: ( event: IntroOptInEvent ) => void;
 	navigationProgress: number;
-	context: CoreProfilerStateMachineContext;
 } ) => {
 	const [ iOptInDataSharing, setIsOptInDataSharing ] =
 		useState< boolean >( true );
@@ -72,7 +71,7 @@ export const IntroOptIn = ( {
 						className="core-profiler__checkbox"
 						label={ interpolateComponents( {
 							mixedString: __(
-								'I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
+								'I agree to share my data to tailor my store setup experience and get more relevant content (WooCommerce will never rent or sell your data, and you can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking.{{/link}})',
 								'woocommerce'
 							),
 							components: {

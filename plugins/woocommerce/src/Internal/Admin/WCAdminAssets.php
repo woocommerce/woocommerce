@@ -272,6 +272,7 @@ class WCAdminAssets {
 			'wc-store-data',
 			'wc-currency',
 			'wc-navigation',
+			'wc-block-templates',
 			'wc-product-editor',
 		);
 
@@ -296,6 +297,23 @@ class WCAdminAssets {
 			try {
 				$script_assets_filename = self::get_script_asset_filename( $script_path_name, 'index' );
 				$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/' . $script_assets_filename;
+
+				global $wp_version;
+				if ( 'app' === $script_path_name && version_compare( $wp_version, '6.3', '<' ) ) {
+					// Remove wp-router dependency for WordPress versions < 6.3 because wp-router is not included in those versions. We only use wp-router in customize store pages and the feature is only available in WordPress 6.3+.
+					// We can remove this once our minimum support is WP 6.3.
+					$script_assets['dependencies'] = array_diff( $script_assets['dependencies'], array( 'wp-router' ) );
+				}
+
+				// Remove wp-editor dependency if we're not on a customize store page since we don't use wp-editor in other pages.
+				$is_customize_store_page = (
+					PageController::is_admin_page() &&
+					isset( $_GET['path'] ) &&
+					str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store' )
+				);
+				if ( ! $is_customize_store_page && WC_ADMIN_APP === $script ) {
+					$script_assets['dependencies'] = array_diff( $script_assets['dependencies'], array( 'wp-editor' ) );
+				}
 
 				wp_register_script(
 					$script,
@@ -329,6 +347,14 @@ class WCAdminAssets {
 			$css_file_version
 		);
 		wp_style_add_data( 'wc-components', 'rtl', 'replace' );
+
+		wp_register_style(
+			'wc-block-templates',
+			self::get_url( 'block-templates/style', 'css' ),
+			array(),
+			$css_file_version
+		);
+		wp_style_add_data( 'wc-block-templates', 'rtl', 'replace' );
 
 		wp_register_style(
 			'wc-product-editor',
@@ -398,6 +424,7 @@ class WCAdminAssets {
 				'wc-date',
 				'wc-components',
 				'wc-tracks',
+				'wc-block-templates',
 				'wc-product-editor',
 			];
 			foreach ( $handles_for_injection as $handle ) {

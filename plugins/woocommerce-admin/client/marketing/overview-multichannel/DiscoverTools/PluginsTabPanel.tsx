@@ -71,7 +71,7 @@ export const PluginsTabPanel = ( {
 	 *
 	 * When the process is not successful, an error notice will be displayed.
 	 *
-	 * @param  plugin Plugin to be installed and activated.
+	 * @param plugin Plugin to be installed and activated.
 	 */
 	const installAndActivate = async ( plugin: RecommendedPlugin ) => {
 		setCurrentPlugin( plugin.product );

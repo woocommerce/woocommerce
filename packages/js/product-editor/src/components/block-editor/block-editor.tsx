@@ -3,9 +3,9 @@
  */
 import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
 import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
-import { Product } from '@woocommerce/data';
-import { useSelect, select as WPSelect } from '@wordpress/data';
+import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
+import { PluginArea } from '@wordpress/plugins';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -32,15 +32,17 @@ import {
  * Internal dependencies
  */
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
+import { ProductEditorContext } from '../../types';
+import { PostTypeContext } from '../../contexts/post-type-context';
 
 type BlockEditorProps = {
-	context: {
-		[ key: string ]: unknown;
-	};
-	product: Partial< Product >;
+	context: Partial< ProductEditorContext >;
+	productType: string;
+	productId: number;
 	settings:
 		| ( Partial< EditorSettings & EditorBlockListSettings > & {
 				template?: Template[];
+				templates: Record< string, Template[] >;
 		  } )
 		| undefined;
 };
@@ -48,9 +50,10 @@ type BlockEditorProps = {
 export function BlockEditor( {
 	context,
 	settings: _settings,
-	product,
+	productType,
+	productId,
 }: BlockEditorProps ) {
-	useConfirmUnsavedProductChanges();
+	useConfirmUnsavedProductChanges( productType );
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
@@ -83,16 +86,20 @@ export function BlockEditor( {
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
-		'product',
-		{ id: product.id }
+		productType,
+		{ id: productId }
 	);
 
+	const { updateEditorSettings } = useDispatch( 'core/editor' );
+
 	useLayoutEffect( () => {
-		onChange(
-			synchronizeBlocksWithTemplate( [], _settings?.template ),
-			{}
-		);
-	}, [ product.id ] );
+		const template = _settings?.templates[ productType ];
+		const blockInstances = synchronizeBlocksWithTemplate( [], template );
+
+		onChange( blockInstances, {} );
+
+		updateEditorSettings( _settings ?? {} );
+	}, [ productType, productId ] );
 
 	if ( ! blocks ) {
 		return null;
@@ -115,6 +122,11 @@ export function BlockEditor( {
 							<BlockList className="woocommerce-product-block-editor__block-list" />
 						</ObserveTyping>
 					</BlockTools>
+					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
+					<PostTypeContext.Provider value={ context.postType! }>
+						{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+						<PluginArea scope="woocommerce-product-block-editor" />
+					</PostTypeContext.Provider>
 				</BlockEditorProvider>
 			</BlockContextProvider>
 		</div>

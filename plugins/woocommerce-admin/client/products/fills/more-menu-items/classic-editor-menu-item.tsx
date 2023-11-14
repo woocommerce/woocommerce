@@ -42,7 +42,7 @@ export const ClassicEditorMenuItem = ( {
 		};
 	} );
 
-	const { _feature_nonce } = getAdminSetting( '_feature_nonce' );
+	const _feature_nonce = getAdminSetting( '_feature_nonce' );
 
 	const classicEditorUrl = productId
 		? getAdminLink(

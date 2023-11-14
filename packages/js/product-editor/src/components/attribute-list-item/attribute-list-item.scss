@@ -16,25 +16,35 @@
 		margin-bottom: -1px;
 	}
 
-	&__options {
-		display: flex;
-		flex-direction: row;
-		gap: $gap-smallest;
-	}
-
-	&__option-chip {
-		padding: $gap-smallest $gap-smaller;
-		gap: 2px;
-
-		background: $gray-100;
-		border-radius: 2px;
-	}
-
 	&__actions {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
 		justify-content: end;
 		gap: $gap-smaller;
+	}
+
+	&__actions-tooltip.components-tooltip.components-popover
+		.components-popover__content {
+		width: 100%;
+		max-width: 150px;
+		white-space: normal;
+	}
+
+	&__actions-icon-wrapper {
+		display: flex;
+		align-items: center;
+		position: relative;
+
+		&-icon {
+			color: $gray-600;
+			cursor: help;
+		}
+
+		&-help-icon {
+			position: absolute;
+			right: -2px;
+			bottom: 0px;
+		}
 	}
 }

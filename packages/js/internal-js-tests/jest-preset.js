@@ -3,6 +3,16 @@
  */
 const path = require( 'path' );
 
+// These modules need to be transformed because they are not transpiled to CommonJS.
+const transformModules = [ 'is-plain-obj', 'memize' ];
+// Ignore all node_modules except for the ones we need to transform.
+const transformIgnorePatterns = [
+	`node_modules/(?!.pnpm/${ transformModules.join(
+		'|.pnpm/'
+	) }|${ transformModules.join( '|' ) })`,
+	'/build/',
+];
+
 module.exports = {
 	moduleNameMapper: {
 		tinymce: path.resolve( __dirname, 'build/mocks/tinymce' ),
@@ -44,12 +54,10 @@ module.exports = {
 		'<rootDir>/.*/build-module/',
 		'<rootDir>/tests/e2e/',
 	],
-	transformIgnorePatterns: [
-		`node_modules/(?!.pnpm/is-plain-obj|is-plain-obj)`,
-		'/build/',
-	],
+	transformIgnorePatterns,
 	transform: {
 		'^.+\\is-plain-obj/index\\.js$': 'babel-jest',
+		'^.+\\memize/dist/index\\.js$': 'babel-jest',
 		'^.+\\.[jt]sx?$': 'ts-jest',
 	},
 	testEnvironment: 'jest-environment-jsdom',

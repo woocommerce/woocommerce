@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-When dormant customer accounts are removed, their content should be preserved.

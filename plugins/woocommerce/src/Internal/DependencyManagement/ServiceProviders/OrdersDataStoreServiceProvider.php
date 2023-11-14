@@ -21,6 +21,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStoreMeta;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Utilities\PluginUtil;
 
 /**
  * Service provider for the classes in the Internal\DataStores\Orders namespace.
@@ -57,6 +58,7 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 				PostsToOrdersMigrationController::class,
 				LegacyProxy::class,
 				OrderCacheController::class,
+				BatchProcessingController::class,
 			)
 		);
 		$this->share( OrdersTableRefundDataStore::class )->addArguments( array( OrdersTableDataStoreMeta::class, DatabaseUtil::class, LegacyProxy::class ) );
@@ -69,6 +71,7 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 				FeaturesController::class,
 				OrderCache::class,
 				OrderCacheController::class,
+				PluginUtil::class,
 			)
 		);
 		$this->share( OrderCache::class );

@@ -1,5 +1,6 @@
 .woocommerce-products-stack {
 	width: 550px;
+	position: relative;
 
 	@media (max-width: 550px ) {
 		& {
@@ -38,6 +39,9 @@
 			&.woocommerce-list__item-exit-active {
 				display: none;
 			}
+		}
+		&:first-child {
+			margin-top: 0;
 		}
 	}
 
@@ -79,4 +83,22 @@
 		color: $gray-700;
 		line-height: 16px;
 	}
+
+	.woocommerce-stack__overlay-spinner {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: rgba(255, 255, 255, 0.8);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 999;
+
+		.list-overlay {
+			position: relative;
+		}
+	}
+
 }

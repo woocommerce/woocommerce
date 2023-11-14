@@ -988,6 +988,9 @@ jQuery( function ( $ ) {
 					);
 
 					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
+
+					$( '#variable_product_options' ).trigger( 'woocommerce_variations_added', 1 );
+
 					wc_meta_boxes_product_variations_ajax.unblock();
 				}
 			);

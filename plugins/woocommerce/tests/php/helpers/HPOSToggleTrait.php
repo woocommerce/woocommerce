@@ -54,7 +54,7 @@ trait HPOSToggleTrait {
 	 * @param bool $cot_authoritative True to set the orders table as authoritative, false to set the posts table as authoritative.
 	 */
 	protected function toggle_cot_authoritative( bool $cot_authoritative ) {
-		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, wc_bool_to_string( $cot_authoritative ) );
+		OrderHelper::toggle_cot_feature_and_usage( $cot_authoritative );
 	}
 
 	/**

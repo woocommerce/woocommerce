@@ -1,0 +1,6 @@
+// Hack to hide when the media modal is open
+// Otherwise in Firefox the popover remains visible on top of the modal
+// Changing the z-index of Popovers have wider implications.
+.modal-open .woocommerce-image-gallery__toolbar-dropdown-popover {
+	display: none;
+}

@@ -437,12 +437,14 @@ export const generateDiff = async (
 
 /**
  *
- * @param {string} tmpRepoPath path to temporary repo
- * @param {string} branch      remote branch to checkout
+ * @param {string}  tmpRepoPath path to temporary repo
+ * @param {string}  branch      remote branch to checkout
+ * @param {boolean} isShallow   whether to do a shallow clone and get only the latest commit
  */
 export const checkoutRemoteBranch = async (
 	tmpRepoPath: string,
-	branch: string
+	branch: string,
+	isShallow = true
 ): Promise< void > => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
@@ -451,6 +453,10 @@ export const checkoutRemoteBranch = async (
 
 	// When the clone is shallow, we need to call this before fetching.
 	await git.raw( [ 'remote', 'set-branches', '--add', 'origin', branch ] );
-	await git.raw( [ 'fetch', 'origin', branch ] );
+	const fetchArgs = [ 'fetch', 'origin', branch ];
+	if ( isShallow ) {
+		fetchArgs.push( '--depth=1' );
+	}
+	await git.raw( fetchArgs );
 	await git.raw( [ 'checkout', '-b', branch, `origin/${ branch }` ] );
 };

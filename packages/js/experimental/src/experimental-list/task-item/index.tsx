@@ -45,6 +45,7 @@ type TaskItemProps = {
 	onDismiss?: () => void;
 	onSnooze?: () => void;
 	onExpand?: () => void;
+	badge?: string;
 	additionalInfo?: string;
 	time?: string;
 	content: string;
@@ -107,6 +108,7 @@ const OptionalExpansionWrapper: React.FC< {
 export const TaskItem: React.FC< TaskItemProps > = ( {
 	completed,
 	title,
+	badge,
 	onDelete,
 	onCollapse,
 	onDismiss,
@@ -185,6 +187,11 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 				>
 					<span className="woocommerce-task-list__item-title">
 						{ title }
+						{ badge && (
+							<span className="woocommerce-task-list__item-badge">
+								{ badge }
+							</span>
+						) }
 					</span>
 					<OptionalExpansionWrapper
 						expandable={ expandable }

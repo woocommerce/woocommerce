@@ -99,8 +99,10 @@ class EditLock {
 			return $response;
 		}
 
+		unset( $response['wp-refresh-post-lock'] );
+
 		$order = wc_get_order( $order_id );
-		if ( ! current_user_can( get_post_type_object( $order->get_type() )->cap->edit_post, $order->get_id() ) && ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! $order || ( ! current_user_can( get_post_type_object( $order->get_type() )->cap->edit_post, $order->get_id() ) && ! current_user_can( 'manage_woocommerce' ) ) ) {
 			return $response;
 		}
 
@@ -164,9 +166,9 @@ class EditLock {
 	 * @return void
 	 */
 	public function render_dialog( $order ) {
-		$locked = $this->is_locked_by_another_user( $order );
 		$lock   = $this->get_lock( $order );
-		$user   = get_user_by( 'id', $lock['user_id'] );
+		$user   = $lock ? get_user_by( 'id', $lock['user_id'] ) : false;
+		$locked = $user && ( get_current_user_id() !== $user->ID );
 
 		$edit_url = wc_get_container()->get( \Automattic\WooCommerce\Internal\Admin\Orders\PageController::class )->get_edit_url( $order->get_id() );
 

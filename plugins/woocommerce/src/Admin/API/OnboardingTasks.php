@@ -39,7 +39,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Duration to milisecond mapping.
 	 *
-	 * @var string
+	 * @var array
 	 */
 	protected $duration_to_ms = array(
 		'day'  => DAY_IN_SECONDS * 1000,
@@ -762,6 +762,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
+				null,
 				array(
 					'id'             => $id,
 					'is_dismissable' => true,
@@ -795,6 +796,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
+				null,
 				array(
 					'id'             => $id,
 					'is_dismissable' => true,
@@ -837,6 +839,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( ! $task && $task_id ) {
 			$task = new DeprecatedExtendedTask(
+				null,
 				array(
 					'id'            => $task_id,
 					'is_snoozeable' => true,
@@ -874,6 +877,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
+				null,
 				array(
 					'id'            => $id,
 					'is_snoozeable' => true,
@@ -961,6 +965,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
+				null,
 				array(
 					'id' => $id,
 				)

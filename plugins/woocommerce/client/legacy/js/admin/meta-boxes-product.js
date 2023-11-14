@@ -126,34 +126,6 @@ jQuery( function ( $ ) {
 			return false;
 		} );
 
-	function disable_or_enable_fields() {
-		var product_type = $( 'select#product-type' ).val();
-		$( `.enable_if_simple` ).each( function () {
-			$( this ).addClass( 'disabled' );
-			if ( $( this ).is( 'input' ) ) {
-				$( this ).prop( 'disabled', true );
-			}
-		} );
-		$( `.enable_if_external` ).each( function () {
-			$( this ).addClass( 'disabled' );
-			if ( $( this ).is( 'input' ) ) {
-				$( this ).prop( 'disabled', true );
-			}
-		} );
-		$( `.enable_if_variable` ).each( function () {
-			$( this ).addClass( 'disabled' );
-			if ( $( this ).is( 'input' ) ) {
-				$( this ).prop( 'disabled', true );
-			}
-		} );
-		$( `.enable_if_${ product_type }` ).each( function () {
-			$( this ).removeClass( 'disabled' );
-			if ( $( this ).is( 'input' ) ) {
-				$( this ).prop( 'disabled', false );
-			}
-		} );
-	}
-
 	// Product type specific options.
 	$( 'select#product-type' )
 		.on( 'change', function () {
@@ -173,7 +145,6 @@ jQuery( function ( $ ) {
 			}
 
 			show_and_hide_panels();
-			disable_or_enable_fields();
 			change_product_type_tip( get_product_tip_content( select_val ) );
 
 			$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).trigger( 'click' );
@@ -436,12 +407,19 @@ jQuery( function ( $ ) {
 	// Set up attributes, if current page has the attributes list.
 	const $product_attributes = $( '.product_attributes' );
 	if ( $product_attributes.length === 1 ) {
-		var woocommerce_attribute_items = $product_attributes.find( '.woocommerce_attribute' ).get();
+		// When the attributes tab is shown, add an empty attribute to be filled out by the user.
+		$( '#product_attributes' ).on( 'woocommerce_tab_shown', function() {
+			remove_blank_custom_attribute_if_no_other_attributes();
 
-		// If the product has no attributes, add an empty attribute to be filled out by the user.
-		if ( woocommerce_attribute_items.length === 0  ) {
-			add_custom_attribute_to_list();
-		}
+			const woocommerce_attribute_items = $product_attributes.find( '.woocommerce_attribute' ).get();
+
+			// If the product has no attributes, add an empty attribute to be filled out by the user.
+			if ( woocommerce_attribute_items.length === 0  ) {
+				add_custom_attribute_to_list();
+			}
+		} );
+
+		const woocommerce_attribute_items = $product_attributes.find( '.woocommerce_attribute' ).get();
 
 		// Sort the attributes by their position.
 		woocommerce_attribute_items.sort( function ( a, b ) {
@@ -485,6 +463,14 @@ jQuery( function ( $ ) {
 				.find( 'option[value="' + $( el ).data( 'taxonomy' ) + '"]' )
 				.attr( 'disabled', 'disabled' );
 		}
+
+		if ( 'undefined' === $(el).attr( 'data-taxonomy' ) || false === $(el).attr( 'data-taxonomy' ) || '' === $(el).attr( 'data-taxonomy' ) ) {
+			add_placeholder_to_attribute_values_field( $(el) );
+
+			$( '.woocommerce_attribute input.woocommerce_attribute_used_for_variations' ).on( 'change', function() {
+				add_placeholder_to_attribute_values_field( $(el) );
+			} );
+		}
 	} );
 	$( 'select.wc-attribute-search' ).data(
 		'disabled-items',
@@ -500,6 +486,7 @@ jQuery( function ( $ ) {
 				url: woocommerce_admin_meta_boxes.ajax_url,
 				data: {
 					action: 'woocommerce_add_attribute',
+					product_type: $( '#product-type' ).val(),
 					taxonomy: globalAttributeId ? globalAttributeId : '',
 					i: indexInList,
 					security: woocommerce_admin_meta_boxes.add_attribute_nonce,
@@ -535,6 +522,17 @@ jQuery( function ( $ ) {
 		$attributeListItem.find( 'h3' ).trigger( 'click' );
 	}
 
+	function add_placeholder_to_attribute_values_field( $attributeListItem ) {
+
+		var $used_for_variations_checkbox = $attributeListItem.find( 'input.woocommerce_attribute_used_for_variations' );
+
+		if ( $used_for_variations_checkbox.length && $used_for_variations_checkbox.is( ':checked' ) ) {
+			$attributeListItem.find( 'textarea' ).attr( 'placeholder', woocommerce_admin_meta_boxes.i18n_attributes_used_for_variations_placeholder );
+		} else {
+			$attributeListItem.find( 'textarea' ).attr( 'placeholder', woocommerce_admin_meta_boxes.i18n_attributes_default_placeholder );
+		}
+	}
+
 	function init_select_controls() {
 		$( document.body ).trigger( 'wc-enhanced-select-init' );
 	}
@@ -568,7 +566,16 @@ jQuery( function ( $ ) {
 
 			toggle_expansion_of_attribute_list_item( $attributeListItem );
 
-			disable_or_enable_fields();
+			// Conditionally change the placeholder of product-level Attributes depending on the value of the "Use for variations" checkbox.
+			if ( 'undefined' === typeof globalAttributeId ) {
+				add_placeholder_to_attribute_values_field( $attributeListItem );
+
+				$( '.woocommerce_attribute input.woocommerce_attribute_used_for_variations' ).on( 'change', function() {
+					add_placeholder_to_attribute_values_field( $(this).closest( '.woocommerce_attribute' ) );
+				} );
+			}
+
+			$( document.body ).trigger( 'woocommerce_added_attribute' );
 
 			jQuery.maybe_disable_save_button();
 		} catch ( error ) {
@@ -622,6 +629,17 @@ jQuery( function ( $ ) {
 			}
 		}
 	}
+
+	// Handle the Attributes onboarding dismissible notice.
+	// If users dismiss the notice, never show it again.
+	if ( localStorage.getItem('attributes-notice-dismissed' ) ) {
+		$( '#product_attributes .notice' ).hide();
+	}
+
+	$( '#product_attributes .notice.woocommerce-message button' ).on( 'click', function( e ) {
+		$( '#product_attributes .notice' ).hide();
+		localStorage.setItem( 'attributes-notice-dismissed', 'true');
+	} );
 
 	$( 'select.wc-attribute-search' ).on( 'select2:select', function ( e ) {
 		const attributeId = e && e.params && e.params.data && e.params.data.id;
@@ -913,8 +931,6 @@ jQuery( function ( $ ) {
 
 					// Hide the 'Used for variations' checkbox if not viewing a variable product
 					show_and_hide_panels();
-
-					disable_or_enable_fields();
 
 					// Make sure the dropdown is not disabled for empty value attributes.
 					$( 'select.attribute_taxonomy' )

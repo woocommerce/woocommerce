@@ -11,7 +11,7 @@ import './choice.scss';
 type Props = {
 	className?: string;
 	selected: boolean;
-	title: string;
+	title: string | React.ReactNode;
 	name: string;
 	value: string;
 	onChange: ( value: string ) => void;

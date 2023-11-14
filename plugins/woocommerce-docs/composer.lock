@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c3e8ed8878c0f36e0b6be7c78d35663f",
+    "content-hash": "061f99e607a2e8a793f0231a294cc761",
     "packages": [
         {
             "name": "dflydev/dot-access-data",
@@ -1029,6 +1029,46 @@
                 "source": "https://github.com/phar-io/version/tree/3.2.1"
             },
             "time": "2022-02-21T01:04:05+00:00"
+        },
+        {
+            "name": "php-stubs/wordpress-tests-stubs",
+            "version": "v6.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-stubs/wordpress-tests-stubs.git",
+                "reference": "175f395c814d9f52ebd2c1c64069a3b01ef764e8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-stubs/wordpress-tests-stubs/zipball/175f395c814d9f52ebd2c1c64069a3b01ef764e8",
+                "reference": "175f395c814d9f52ebd2c1c64069a3b01ef764e8",
+                "shasum": ""
+            },
+            "require-dev": {
+                "php": "~7.3 || ~8.0",
+                "php-stubs/generator": "^0.8.0"
+            },
+            "suggest": {
+                "symfony/polyfill-php73": "Symfony polyfill backporting some PHP 7.3+ features to lower PHP versions",
+                "szepeviktor/phpstan-wordpress": "WordPress extensions for PHPStan"
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "WordPress Tests function and class declaration stubs for static analysis.",
+            "homepage": "https://github.com/php-stubs/wordpress-tests-stubs",
+            "keywords": [
+                "PHPStan",
+                "static analysis",
+                "wordpress"
+            ],
+            "support": {
+                "issues": "https://github.com/php-stubs/wordpress-tests-stubs/issues",
+                "source": "https://github.com/php-stubs/wordpress-tests-stubs/tree/v6.2.0"
+            },
+            "time": "2023-05-15T07:50:52+00:00"
         },
         {
             "name": "phpcompatibility/php-compatibility",

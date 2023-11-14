@@ -21,6 +21,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -2593,53 +2594,48 @@ function wc_update_770_remove_multichannel_marketing_feature_options() {
 }
 
 /**
- * Delete posts of type "shop_order_placeholder" with no matching order in the orders table.
+ * Migrate transaction data which was being incorrectly stored in the postmeta table to HPOS tables.
+ *
+ * @return bool Whether there are pending migration recrods.
  */
-function wc_update_800_delete_stray_order_records() {
+function wc_update_810_migrate_transactional_metadata_for_hpos() {
 	global $wpdb;
 
-	$orders_table_name = OrdersTableDataStore::get_orders_table_name();
-
-	// phpcs:disable WordPress.DB.PreparedSQL
-
-	$old_max_id = get_option( 'woocommerce_update_800_delete_stray_order_records_last_processed_id', 0 );
-
-	if ( 0 === $old_max_id ) {
-		$suppress            = $wpdb->suppress_errors();
-		$orders_table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $orders_table_name ) ) );
-		$wpdb->suppress_errors( $suppress );
-
-		if ( ! $orders_table_exists ) {
-			return false;
-		};
-	}
-
-	$new_max_id = $wpdb->get_var(
-		$wpdb->prepare(
-			"SELECT MAX(id) FROM (SELECT id FROM $orders_table_name WHERE id > %d ORDER BY id LIMIT 10000) x",
-			$old_max_id
-		)
-	);
-
-	if ( null === $new_max_id ) {
-		delete_option( 'woocommerce_update_800_delete_stray_order_records_last_processed_id' );
+	$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+	if ( ! $data_synchronizer->get_table_exists() ) {
 		return false;
 	}
 
-	$wpdb->query(
-		$wpdb->prepare(
-			"DELETE FROM {$wpdb->posts} WHERE post_type = %s AND ID > %d AND ID <= %d AND ID NOT IN (SELECT id FROM $orders_table_name WHERE id > %d AND id <= %d)",
-			'shop_order_placehold',
-			$old_max_id,
-			$new_max_id,
-			$old_max_id,
-			$new_max_id,
-		)
-	);
+	$orders_table      = OrdersTableDataStore::get_orders_table_name();
+	$orders_meta_table = OrdersTableDataStore::get_meta_table_name();
 
-	// phpcs:enable WordPress.DB.PreparedSQL
+	/**
+	 * We are migrating payment_tokens meta that is stored in wp_postmeta table to the HPOS table. To do this with minimum db ops:
+	 * 1. We join postmeta table with wc_orders table directly, this filters out orders that are yet to be migrated and any post with non-order post type.
+	 * 2. A combination of filter on wc_orders_meta.meta_key = _payment_tokens in the join condition itself, along with a null check in a WHERE condition, allows us to only get the orders where the meta is not yet migrated.
+	 */
+	$select_query = "
+SELECT post_id, '_payment_tokens', {$wpdb->postmeta}.meta_value
+FROM {$wpdb->postmeta}
+JOIN $orders_table ON {$wpdb->postmeta}.post_id = $orders_table.id
+LEFT JOIN $orders_meta_table ON $orders_meta_table.order_id = $orders_table.id AND $orders_meta_table.meta_key = '_payment_tokens'
+WHERE
+	{$wpdb->postmeta}.meta_key = '_payment_tokens'
+	AND $orders_meta_table.order_id IS NULL
+	";
 
-	update_option( 'woocommerce_update_800_delete_stray_order_records_last_processed_id', $new_max_id );
+	// No need to get the data in application, we can insert directly. Sync setting does not matter as this data already exist in the post table. Limit the batch size to 250.
+	$query =
+		"
+INSERT INTO $orders_meta_table (order_id, meta_key, meta_value)
+$select_query
+LIMIT 250
+";
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input in the query, everything hardcoded.
+	$wpdb->query( $query );
 
-	return true;
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- No user input in the query, everything hardcoded.
+	$has_pending = $wpdb->query( "$select_query LIMIT 1;" );
+
+	return ! empty( $has_pending );
 }

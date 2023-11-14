@@ -1,0 +1,45 @@
+.woocommerce-manage-download-limits-modal {
+	@include breakpoint(">600px") {
+		width: calc(100% - 32px);
+	}
+
+	@include breakpoint(">782px") {
+		width: 640px;
+
+		.components-input-control__container {
+			width: 50%;
+		}
+	}
+
+	&__input-suffix {
+		margin-right: $grid-unit-15;
+	}
+
+	&__content {
+		.components-base-control {
+			.components-input-control__container {
+				.components-input-control__input {
+					min-height: 36px;
+				}
+			}
+		}
+
+		.components-base-control.has-error {
+			.components-input-control__backdrop {
+				border-color: $studio-red-50;
+			}
+
+			.components-base-control__help {
+				color: $studio-red-50;
+			}
+		}
+	}
+
+	&__actions {
+		margin-top: $grid-unit-30;
+		display: flex;
+		flex-direction: row;
+		gap: 8px;
+		justify-content: flex-end;
+	}
+}

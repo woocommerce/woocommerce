@@ -8,13 +8,14 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import CRUD_ACTIONS from './crud-actions';
 import { IdQuery, IdType, ItemQuery } from './types';
+import { getResourceName } from '../utils';
 
 /**
  * Get a REST path given a template path and URL params.
  *
- * @param  templatePath Path with variable names.
- * @param  query        Item query.
- * @param  parameters   Array of items to replace in the templatePath.
+ * @param templatePath Path with variable names.
+ * @param query        Item query.
+ * @param parameters   Array of items to replace in the templatePath.
  * @return string REST path.
  */
 export const getRestPath = (
@@ -39,8 +40,8 @@ export const getRestPath = (
 /**
  * Get a key from an item ID and optional parent.
  *
- * @param  query         Item Query.
- * @param  urlParameters Parameters used for URL.
+ * @param query         Item Query.
+ * @param urlParameters Parameters used for URL.
  * @return string
  */
 export const getKey = ( query: IdQuery, urlParameters: IdType[] = [] ) => {
@@ -64,7 +65,7 @@ export const getKey = ( query: IdQuery, urlParameters: IdType[] = [] ) => {
 /**
  * Parse an ID query into a ID string.
  *
- * @param  query Id Query
+ * @param query Id Query
  * @return string ID.
  */
 export const parseId = ( query: IdQuery, urlParameters: IdType[] = [] ) => {
@@ -84,8 +85,8 @@ export const parseId = ( query: IdQuery, urlParameters: IdType[] = [] ) => {
 /**
  * Create a new function that adds in the namespace.
  *
- * @param  fn        Function to wrap.
- * @param  namespace Namespace to pass to last argument of function.
+ * @param fn        Function to wrap.
+ * @param namespace Namespace to pass to last argument of function.
  * @return Wrapped function
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -109,7 +110,7 @@ export const applyNamespace = < T extends ( ...args: any[] ) => unknown >(
 /**
  * Get the key names from a namespace string.
  *
- * @param  namespace Namespace to get keys from.
+ * @param namespace Namespace to get keys from.
  * @return Array of keys.
  */
 export const getNamespaceKeys = ( namespace: string ) => {
@@ -126,8 +127,8 @@ export const getNamespaceKeys = ( namespace: string ) => {
 /**
  * Get URL parameters from namespace and provided query.
  *
- * @param  namespace Namespace string to replace params in.
- * @param  query     Query object with key values.
+ * @param namespace Namespace string to replace params in.
+ * @param query     Query object with key values.
  * @return Array of URL parameter values.
  */
 export const getUrlParameters = (
@@ -152,8 +153,8 @@ export const getUrlParameters = (
 /**
  * Check to see if an argument is a valid type of ID query.
  *
- * @param  arg       Unknow argument to check.
- * @param  namespace The namespace string
+ * @param arg       Unknow argument to check.
+ * @param namespace The namespace string
  * @return boolean
  */
 export const isValidIdQuery = ( arg: unknown, namespace: string ) => {
@@ -179,8 +180,8 @@ export const isValidIdQuery = ( arg: unknown, namespace: string ) => {
 /**
  * Replace the initial argument with a key if it's a valid ID query.
  *
- * @param  args      Args to check.
- * @param  namespace Namespace.
+ * @param args      Args to check.
+ * @param namespace Namespace.
  * @return Sanitized arguments.
  */
 export const maybeReplaceIdQuery = ( args: unknown[], namespace: string ) => {
@@ -198,8 +199,8 @@ export const maybeReplaceIdQuery = ( args: unknown[], namespace: string ) => {
 /**
  * Clean a query of all namespaced params.
  *
- * @param  query     Query to clean.
- * @param  namespace
+ * @param query     Query to clean.
+ * @param namespace
  * @return Cleaned query object.
  */
 export const cleanQuery = (
@@ -219,28 +220,17 @@ export const cleanQuery = (
 /**
  * Get the identifier for a request provided its arguments.
  *
- * @param  name Name of action or selector.
- * @param  args Arguments for the request.
+ * @param name Name of action or selector.
+ * @param args Arguments for the request.
  * @return Key to identify the request.
  */
-export const getRequestIdentifier = ( name: string, ...args: unknown[] ) => {
-	const suffix = JSON.stringify(
-		args.map( ( arg ) => {
-			if ( typeof arg === 'object' && arg !== null ) {
-				return JSON.stringify( arg, Object.keys( arg ).sort() );
-			}
-			return arg;
-		} )
-	).replace( /\\"/g, '"' );
-
-	return name + '/' + suffix;
-};
+export const getRequestIdentifier = getResourceName;
 
 /**
  * Get a generic action name from a resource action name if one exists.
  *
- * @param  action       Action name to check.
- * @param  resourceName Resurce name.
+ * @param action       Action name to check.
+ * @param resourceName Resurce name.
  * @return Generic action name if one exists, otherwise the passed action name.
  */
 export const getGenericActionName = (

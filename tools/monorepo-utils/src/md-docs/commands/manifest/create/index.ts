@@ -10,6 +10,7 @@ import path from 'path';
  */
 import { generateManifestFromDirectory } from '../../../lib/generate-manifest';
 import { Logger } from '../../../../core/logger';
+import { processMarkdownLinks } from '../../../lib/markdown-links';
 
 export const generateManifestCommand = new Command( 'create' )
 	.description(
@@ -38,8 +39,13 @@ export const generateManifestCommand = new Command( 'create' )
 		'Root directory of the markdown files, used to generate URLs.',
 		process.cwd()
 	)
+	.option(
+		'-be --baseEditUrl <baseEditUrl>',
+		'Base url to provide edit links to. This option will be ignored if your baseUrl is not a GitHub URL.',
+		'https://github.com/woocommerce/woocommerce/edit/trunk'
+	)
 	.action( async ( dir, projectName, options ) => {
-		const { outputFilePath, baseUrl, rootDir } = options;
+		const { outputFilePath, baseUrl, rootDir, baseEditUrl } = options;
 
 		// determine if the rootDir is absolute or relative
 		const absoluteRootDir = path.isAbsolute( rootDir )
@@ -60,7 +66,15 @@ export const generateManifestCommand = new Command( 'create' )
 			absoluteRootDir,
 			absoluteSubDir,
 			projectName,
-			baseUrl
+			baseUrl,
+			baseEditUrl
+		);
+
+		const manifestWithLinks = await processMarkdownLinks(
+			manifest,
+			absoluteRootDir,
+			absoluteSubDir,
+			projectName
 		);
 
 		Logger.endTask();
@@ -69,7 +83,7 @@ export const generateManifestCommand = new Command( 'create' )
 
 		await writeFile(
 			absoluteOutputFilePath,
-			JSON.stringify( manifest, null, 2 ),
+			JSON.stringify( manifestWithLinks, null, 2 ),
 			( err ) => {
 				if ( err ) {
 					Logger.error( err );

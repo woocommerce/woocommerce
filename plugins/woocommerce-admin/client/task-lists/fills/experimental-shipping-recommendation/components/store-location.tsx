@@ -58,7 +58,6 @@ export const StoreLocation: React.FC< {
 				updateAndPersistSettingsForGroup
 			}
 			createNotice={ createNotice }
-			isSettingsError={ false }
 		/>
 	);
 };

@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
 import { plus } from '@wordpress/icons';
 import {
 	createElement,
-	Fragment,
 	useRef,
 	useCallback,
 	useContext,
@@ -35,10 +34,17 @@ import { DocumentOverview } from './document-overview';
 import { ShowBlockInspectorPanel } from './show-block-inspector-panel';
 import { MoreMenu } from './more-menu';
 
-export function HeaderToolbar() {
+type HeaderToolbarProps = {
+	onSave?: () => void;
+	onCancel?: () => void;
+};
+
+export function HeaderToolbar( {
+	onSave = () => {},
+	onCancel = () => {},
+}: HeaderToolbarProps ) {
 	const { isInserterOpened, setIsInserterOpened } =
 		useContext( EditorContext );
-	const isWideViewport = useViewportMatch( 'wide' );
 	const isLargeViewport = useViewportMatch( 'medium' );
 	const inserterButton = useRef< HTMLButtonElement | null >( null );
 	const { isInserterEnabled, isTextModeEnabled } = useSelect( ( select ) => {
@@ -107,22 +113,35 @@ export function HeaderToolbar() {
 					}
 					showTooltip
 				/>
-				{ isWideViewport && (
-					<>
-						{ isLargeViewport && (
-							<ToolbarItem
-								as={ ToolSelector }
-								disabled={ isTextModeEnabled }
-							/>
-						) }
-						<ToolbarItem as={ EditorHistoryUndo } />
-						<ToolbarItem as={ EditorHistoryRedo } />
-						<ToolbarItem as={ DocumentOverview } />
-					</>
+				{ isLargeViewport && (
+					<ToolbarItem
+						as={ ToolSelector }
+						disabled={ isTextModeEnabled }
+					/>
 				) }
+				<ToolbarItem as={ EditorHistoryUndo } />
+				<ToolbarItem as={ EditorHistoryRedo } />
+				<ToolbarItem as={ DocumentOverview } />
 			</div>
 			<div className="woocommerce-iframe-editor__header-toolbar-right">
-				<ToolbarItem as={ ShowBlockInspectorPanel } />
+				<ToolbarItem
+					as={ Button }
+					variant="tertiary"
+					className="woocommerce-modal-actions__cancel-button"
+					onClick={ onCancel }
+					text={ __( 'Cancel', 'woocommerce' ) }
+				/>
+				<ToolbarItem
+					as={ Button }
+					variant="primary"
+					className="woocommerce-modal-actions__done-button"
+					onClick={ onSave }
+					text={ __( 'Done', 'woocommerce' ) }
+				/>
+				<ToolbarItem
+					as={ ShowBlockInspectorPanel }
+					className="woocommerce-show-block-inspector-panel"
+				/>
 				<ToolbarItem as={ MoreMenu } />
 			</div>
 		</NavigableToolbar>

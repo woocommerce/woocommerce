@@ -1,14 +1,12 @@
 <?php
 
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
-
-require_once __DIR__ . '/../../../../helpers/HPOSToggleTrait.php';
 
 /**
  * Tests for DataSynchronizer class.
@@ -33,9 +31,7 @@ class DataSynchronizerTests extends HposTestCase {
 		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
 		OrderHelper::create_order_custom_table_if_not_exist();
 		OrderHelper::toggle_cot_feature_and_usage( false );
-		$this->sut           = wc_get_container()->get( DataSynchronizer::class );
-		$features_controller = wc_get_container()->get( Featurescontroller::class );
-		$features_controller->change_feature_enable( 'custom_order_tables', true );
+		$this->sut = wc_get_container()->get( DataSynchronizer::class );
 	}
 
 	/**
@@ -534,4 +530,209 @@ class DataSynchronizerTests extends HposTestCase {
 		$this->assertNotContains( $order1->get_id(), $orders );
 	}
 
+	/**
+	 * @testDox When HPOS is enabled, the custom orders table is created.
+	 */
+	public function test_tables_are_created_when_hpos_enabled() {
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		$this->sut->delete_database_tables();
+		$this->assertFalse( $this->sut->check_orders_table_exists() );
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$this->assertTrue( $this->sut->check_orders_table_exists() );
+		$this->assertEquals( get_option( DataSynchronizer::ORDERS_TABLE_CREATED ), 'yes' );
+	}
+
+	/**
+	 * @testDox When sync is enabled, the custom orders table is created.
+	 */
+	public function test_tables_are_created_when_sync_is_enabled() {
+		$this->markTestSkipped( 'This is interfering with OrdersTableDataStoreTests and requires further review.' );
+
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		$this->sut->delete_database_tables();
+		$this->assertFalse( $this->sut->check_orders_table_exists() );
+
+		$cot_sync_value = get_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		$this->assertTrue( $this->sut->check_orders_table_exists() );
+		$this->assertEquals( get_option( DataSynchronizer::ORDERS_TABLE_CREATED ), 'yes' );
+		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, $cot_sync_value );
+	}
+
+	/**
+	 * @testDox HPOS cannot be turned on when there are pending orders.
+	 *
+	 * @testWith [true, []]
+	 *           [false, ["yes", "no"]]
+	 *
+	 * @param bool  $auth_table_change_allowed_with_sync_pending True if changing the authoritative data source for orders while synchronization is pending is allowed, false otherwise.
+	 * @param array $expected_setting_disabled_status Expected value for the 'disabled' key in the setting configuration array.
+	 */
+	public function test_hpos_option_is_disabled_but_sync_enabled_with_pending_orders( $auth_table_change_allowed_with_sync_pending, $expected_setting_disabled_status ) {
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', fn() => $auth_table_change_allowed_with_sync_pending );
+
+		$this->sut->delete_database_tables();
+		$this->toggle_cot_authoritative( false );
+		$this->disable_cot_sync();
+		OrderHelper::create_order();
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
+		$features = apply_filters( 'woocommerce_get_settings_advanced', array(), 'features' );
+
+		$cot_setting = array_filter(
+			$features,
+			function( $feature ) {
+				return CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION === $feature['id'];
+			}
+		);
+		$cot_setting = array_values( $cot_setting )[0];
+		$this->assertEquals( $cot_setting['value'], 'no' );
+		$this->assertEquals( $cot_setting['disabled'], $expected_setting_disabled_status );
+
+		$sync_setting = array_filter(
+			$features,
+			function( $feature ) {
+				return DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $feature['id'];
+			}
+		);
+		$sync_setting = array_values( $sync_setting )[0];
+		$this->assertEquals( $sync_setting['value'], 'no' );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], "There's 1 order pending sync" ) );
+		$this->assertTrue(
+			str_contains(
+				$sync_setting['desc_tip'],
+				$auth_table_change_allowed_with_sync_pending ?
+				'Switching data storage while sync is incomplete is dangerous' :
+				'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>'
+			)
+		);
+		$this->assertEquals( $auth_table_change_allowed_with_sync_pending, $sync_setting['description_is_error'] );
+	}
+
+	/**
+	 * Delete an order directly from the wc_orders table so that the usual hooks and filters don't run.
+	 *
+	 * @param int $order_id The ID of the order to delete.
+	 *
+	 * @return void
+	 */
+	private function direct_delete_cot_order( $order_id ) {
+		global $wpdb;
+
+		$wpdb->delete(
+			OrdersTableDataStore::get_orders_table_name(),
+			array( 'id' => $order_id ),
+			array( '%d' )
+		);
+	}
+
+	/**
+	 * @testDox When data sync is enabled, there should be a background sync process scheduled, and running it should
+	 *          enqueue the DataSynchronizer batch processor when there are pending orders.
+	 */
+	public function test_bg_sync_while_sync_enabled() {
+		$reflection     = new ReflectionClass( get_class( $this->sut ) );
+		$process_method = $reflection->getMethod( 'process_updated_option' );
+		$process_method->setAccessible( true );
+
+		$this->toggle_cot_authoritative( false );
+
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+
+		$this->enable_cot_sync();
+		$process_method->invoke( $this->sut, $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, false, 'yes' );
+		$this->assertTrue( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+
+		wc_get_container()->get( BatchProcessingController::class )->remove_processor( DataSynchronizer::class );
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
+		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+
+		$cot_order = OrderHelper::create_complex_data_store_order();
+		$this->direct_delete_cot_order( $cot_order->get_id() );
+		$this->assertEquals( 1, $this->sut->get_total_pending_count() );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
+		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
+		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+
+		$this->disable_cot_sync();
+		$process_method->invoke( $this->sut, $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes', 'no' );
+		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+	}
+
+	/**
+	 * @testDox When data sync is disabled, but background sync is enabled, there should be a background sync process
+	 *          scheduled, and running it should enqueue the DataSynchronizer batch processor when there are pending orders.
+	 */
+	public function test_bg_sync_while_sync_disabled_interval_mode() {
+		$reflection     = new ReflectionClass( get_class( $this->sut ) );
+		$process_method = $reflection->getMethod( 'process_updated_option' );
+		$process_method->setAccessible( true );
+
+		$this->toggle_cot_authoritative( false );
+		$this->disable_cot_sync();
+		$process_method->invoke( $this->sut, $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, false, 'no' );
+
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+
+		update_option( $this->sut::BACKGROUND_SYNC_MODE_OPTION, $this->sut::BACKGROUND_SYNC_MODE_INTERVAL );
+		$this->assertTrue( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
+		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+
+		$this->enable_cot_sync();
+		$cot_order = OrderHelper::create_complex_data_store_order();
+		$this->disable_cot_sync();
+		$this->direct_delete_cot_order( $cot_order->get_id() );
+		$this->assertEquals( 1, $this->sut->get_total_pending_count() );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
+		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
+		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+
+		update_option( $this->sut::BACKGROUND_SYNC_MODE_OPTION, $this->sut::BACKGROUND_SYNC_MODE_OFF );
+		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+	}
+
+	/**
+	 * @testDox When data sync is disabled, but background sync is enabled and set to continuous mode, there should not
+	 *          be a background sync process scheduled, but the DataSynchronizer batch processor should be enqueued anyway.
+	 */
+	public function test_bg_sync_while_sync_disabled_continuous_mode() {
+		$reflection     = new ReflectionClass( get_class( $this->sut ) );
+		$process_method = $reflection->getMethod( 'process_updated_option' );
+		$process_method->setAccessible( true );
+		$handler_method = $reflection->getMethod( 'handle_continuous_background_sync' );
+		$handler_method->setAccessible( true );
+
+		$this->toggle_cot_authoritative( false );
+		$this->disable_cot_sync();
+		$process_method->invoke( $this->sut, $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, false, 'no' );
+
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+
+		update_option( $this->sut::BACKGROUND_SYNC_MODE_OPTION, $this->sut::BACKGROUND_SYNC_MODE_CONTINUOUS );
+		$handler_method->invoke( $this->sut );
+		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
+		do_action( wc_get_container()->get( BatchProcessingController::class )::PROCESS_SINGLE_BATCH_ACTION_NAME, get_class( $this->sut ) );
+		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+		$handler_method->invoke( $this->sut );
+		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
+	}
 }

@@ -3,6 +3,10 @@
  */
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
+/**
+ * Internal dependencies
+ */
+import { Metadata } from '../types';
 
 type EntityEdits = {
 	[ key: string ]: unknown;
@@ -17,10 +21,10 @@ function filterProductEdits( edits: EntityEdits ) {
 	return edits;
 }
 
-export function useProductEdits() {
+export function useProductEdits( productType = <string>'product' ) {
 	const [ productId ] = useEntityProp< number >(
 		'postType',
-		'product',
+		productType,
 		'id'
 	);
 
@@ -30,7 +34,7 @@ export function useProductEdits() {
 
 			const _edits = getEntityRecordNonTransientEdits(
 				'postType',
-				'product',
+				productType,
 				productId
 			) as EntityEdits;
 
@@ -38,10 +42,19 @@ export function useProductEdits() {
 				edits: filterProductEdits( _edits ),
 			};
 		},
-		[ productId ]
+		[ productId, productType ]
 	);
 
 	function hasEdit( fieldName: string ) {
+		if ( fieldName.startsWith( 'meta_data.' ) ) {
+			const metaKey = fieldName.replace( 'meta_data.', '' );
+			return (
+				edits.hasOwnProperty( 'meta_data' ) &&
+				( edits.meta_data as Metadata< unknown >[] ).findIndex(
+					( value ) => value.key === metaKey
+				) !== -1
+			);
+		}
 		return edits.hasOwnProperty( fieldName );
 	}
 

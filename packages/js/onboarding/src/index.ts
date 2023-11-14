@@ -16,3 +16,4 @@ export { WooOnboardingTaskListItem } from './components/WooOnboardingTaskListIte
 export { WooOnboardingTaskListHeader } from './components/WooOnboardingTaskListHeader';
 export { WooOnboardingTask } from './components/WooOnboardingTask';
 export * from './utils/countries';
+export { Loader } from './components/Loader';

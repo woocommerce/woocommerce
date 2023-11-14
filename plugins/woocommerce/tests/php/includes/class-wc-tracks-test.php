@@ -129,4 +129,20 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 		$this->assertTrue( is_wp_error( $event ) );
 		$this->assertEquals( $event->get_error_code(), 'invalid_prop_name' );
 	}
+
+	/**
+	 * Test that the store_id is added to the properties.
+	 */
+	public function test_store_id_is_added_to_properties() {
+		update_option( \WC_Install::STORE_ID_OPTION, '12345' );
+		$properties = \WC_Tracks::get_properties(
+			'test_event',
+			array(
+				'test_property' => 5,
+			)
+		);
+		$this->assertContains( 'store_id', array_keys( $properties ) );
+		$this->assertEquals( '12345', $properties['store_id'] );
+		delete_option( \WC_Install::STORE_ID_OPTION );
+	}
 }

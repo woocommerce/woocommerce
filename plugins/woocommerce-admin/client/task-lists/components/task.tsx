@@ -32,21 +32,25 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 		useDispatch( ONBOARDING_STORE_NAME );
 
 	const updateBadge = useCallback( () => {
-		const badgeElement: HTMLElement | null = document.querySelector(
-			'.toplevel_page_woocommerce .remaining-tasks-badge'
+		const badgeElements: Array< HTMLElement > | null = Array.from(
+			document.querySelectorAll(
+				'#adminmenu .woocommerce-task-list-remaining-tasks-badge'
+			)
 		);
 
-		if ( ! badgeElement ) {
+		if ( ! badgeElements?.length ) {
 			return;
 		}
 
-		const currentBadgeCount = Number( badgeElement.innerText );
+		badgeElements.forEach( ( badgeElement ) => {
+			const currentBadgeCount = Number( badgeElement.innerText );
 
-		if ( currentBadgeCount === 1 ) {
-			badgeElement.remove();
-		}
-
-		badgeElement.innerHTML = String( currentBadgeCount - 1 );
+			if ( currentBadgeCount === 1 ) {
+				badgeElement.remove();
+			} else {
+				badgeElement.innerHTML = String( currentBadgeCount - 1 );
+			}
+		} );
 	}, [] );
 
 	const onComplete = useCallback(

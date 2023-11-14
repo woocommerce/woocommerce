@@ -58,6 +58,7 @@ class WC_Helper {
 		include_once dirname( __FILE__ ) . '/class-wc-helper-updater.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-plugin-info.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-compat.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-admin.php';
 	}
 
 	/**
@@ -1195,6 +1196,11 @@ class WC_Helper {
 
 			list( $product_id, $file_id ) = explode( ':', $data['Woo'] );
 			if ( empty( $product_id ) || empty( $file_id ) ) {
+				continue;
+			}
+
+			// Omit the WooCommerce plugin used on Woo Express sites.
+			if ( 'WooCommerce' === $data['Name'] ) {
 				continue;
 			}
 

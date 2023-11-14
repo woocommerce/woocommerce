@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix add/update button interfering with 'status' for variations
+
+

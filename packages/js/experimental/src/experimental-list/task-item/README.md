@@ -9,6 +9,7 @@ Use `TaskItem` to display a task item.
 	action={ () => alert( '"My action" button has been clicked' ) }
 	actionLabel="My action"
 	additionalInfo="Additional task information"
+	badge="Task badge"
 	completed={ true }
 	content="Task content"
 	expandable={ false }
@@ -33,6 +34,7 @@ Use `TaskItem` to display a task item.
 | `action`           | Function | `null`  | A function to be called when the primary action is triggered |
 | `actionLabel`      | String   | `null`  | Primary action label                                         |
 | `additionalInfo`   | String   | `null`  | Additional task information                                  |
+| `badge`            | String   | `null`  | Task badge to show next to title                             |
 | `completed`        | Boolean  | `null`  | Whether the task is completed or not                         |
 | `content`          | String   | `null`  | Task content                                                 |
 | `expandable`       | Boolean  | `false` | Whether it's an expandable task                              |

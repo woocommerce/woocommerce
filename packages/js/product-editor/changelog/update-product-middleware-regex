@@ -1,0 +1,5 @@
+Significance: patch
+Type: update
+Comment: Update regex to not match 'product_brand'
+
+

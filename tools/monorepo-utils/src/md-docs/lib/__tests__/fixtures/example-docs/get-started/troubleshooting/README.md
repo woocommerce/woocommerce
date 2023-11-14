@@ -1,3 +1,3 @@
 ---
-title: Troubleshooting Problems
+category_title: Troubleshooting Problems
 ---

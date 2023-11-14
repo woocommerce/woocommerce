@@ -11,3 +11,6 @@ $tests_dir = getenv( 'WP_TESTS_DIR' );
 
 require_once $tests_dir . '/includes/functions.php';
 require_once $tests_dir . '/includes/bootstrap.php';
+
+// Require action-scheduler manually.
+require_once __DIR__ . '/../vendor/woocommerce/action-scheduler/action-scheduler.php';

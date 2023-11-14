@@ -109,6 +109,24 @@ test.describe( 'Add variations', () => {
 			}
 		);
 
+		// hook up the woocommerce_variations_added jQuery trigger so we can check if it's fired
+		await test.step(
+			'Hook up the woocommerce_variations_added jQuery trigger',
+			async () => {
+				await page.evaluate( () => {
+					window.woocommerceVariationsAddedFunctionCalls = [];
+
+					window.jQuery( '#variable_product_options' ).on(
+						'woocommerce_variations_added',
+						( event, data ) => {
+							window.woocommerceVariationsAddedFunctionCalls.push(
+								[event, data ]
+							);
+						} );
+				} );
+			}
+		);
+
 		await test.step( 'Click on the "Variations" tab.', async () => {
 			await page.locator( '.variations_tab' ).click();
 		} );
@@ -120,6 +138,7 @@ test.describe( 'Add variations', () => {
 					'.woocommerce_variation h3'
 				);
 				let variationRowsCount = await variationRows.count();
+				const originalVariationRowsCount = variationRowsCount;
 
 				for ( const variationToCreate of variationsToManuallyCreate ) {
 					await test.step( 'Click "Add manually"', async () => {
@@ -132,6 +151,10 @@ test.describe( 'Add variations', () => {
 						await expect( variationRows ).toHaveCount(
 							++variationRowsCount
 						);
+
+						// verify that the woocommerce_variations_added jQuery trigger was fired
+						const woocommerceVariationsAddedFunctionCalls = await page.evaluate( () => window.woocommerceVariationsAddedFunctionCalls );
+    					expect( woocommerceVariationsAddedFunctionCalls.length ).toEqual( variationRowsCount - originalVariationRowsCount );
 					} );
 
 					for ( const attributeValue of variationToCreate ) {
