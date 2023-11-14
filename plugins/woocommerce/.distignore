@@ -5,6 +5,7 @@
 *.zip
 /bin/
 /build/
+/blocks.ini
 /changelog/
 /node_modules/
 /tests/

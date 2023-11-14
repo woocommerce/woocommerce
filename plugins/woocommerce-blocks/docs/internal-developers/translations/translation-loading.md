@@ -74,13 +74,13 @@ msgstr ""
 "Project-Id-Version: Plugins - WooCommerce Blocks - Stable (latest release)\n"
 
 #: assets/js/blocks/featured-product/block.json
-#: build/featured-product/block.json
+#: assets/client/blocks/featured-product/block.json
 msgctxt "block description"
 msgid "Highlight a product or variation."
 msgstr "Ein Produkt oder eine Variante visuell hervorheben und zum sofortigen Handeln auffordern."
 
 #: assets/js/blocks/featured-product/block.json
-#: build/featured-product/block.json
+#: assets/client/blocks/featured-product/block.json
 msgctxt "block title"
 msgid "Featured Product"
 msgstr "Hervorgehobenes Produkt"
@@ -121,7 +121,7 @@ The JSON files are human-readable and named `woo-gutenberg-products-block-{LANGU
 			"Previous price:": [ "Vorheriger Preis:" ]
 		}
 	},
-	"comment": { "reference": "build/product-price-frontend.js" }
+	"comment": { "reference": "assets/client/blocks/product-price-frontend.js" }
 }
 ```
 
@@ -274,7 +274,7 @@ function load_woocommerce_core_js_translation( $file, $handle, $domain ) {
 		return $file;
 	}
 
-	$handle_src      = explode( '/build/', $wp_scripts->registered[ $handle ]->src );
+	$handle_src      = explode( '/assets/client/blocks/', $wp_scripts->registered[ $handle ]->src );
 	$handle_filename = $handle_src[1];
 	$locale          = determine_locale();
 	$lang_dir        = WP_LANG_DIR . '/plugins';
@@ -284,7 +284,7 @@ function load_woocommerce_core_js_translation( $file, $handle, $domain ) {
 		$handle_filename = substr( $handle_filename, 0, -7 ) . '.js';
 	}
 
-	$core_path_md5 = md5( 'packages/woocommerce-blocks/build/' . $handle_filename );
+	$core_path_md5 = md5( 'packages/woocommerce/assets/client/blocks/' . $handle_filename );
 
 	/**
 	 * Return file path of the corresponding translation file in the WC Core is

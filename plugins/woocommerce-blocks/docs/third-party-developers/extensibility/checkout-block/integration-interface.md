@@ -59,7 +59,7 @@ Let's suppose we're the author of an extension: `WooCommerce Example Plugin`. We
 
 We also want some data from a server-side function to be available to our front-end scripts.
 
-You will notice that in the example below, we reference the `/build/index.asset.php` file. This is created by the [`DependencyExtractionWebpackPlugin`](https://www.npmjs.com/package/@wordpress/dependency-extraction-webpack-plugin) which creates a PHP file mapping the dependencies of your client-side scripts, so that they can be added in the `dependencies` array of `wp_register_script`.
+You will notice that in the example below, we reference the `/assets/client/blocks/index.asset.php` file. This is created by the [`DependencyExtractionWebpackPlugin`](https://www.npmjs.com/package/@wordpress/dependency-extraction-webpack-plugin) which creates a PHP file mapping the dependencies of your client-side scripts, so that they can be added in the `dependencies` array of `wp_register_script`.
 
 Let's create our `IntegrationInterface`.
 
@@ -84,8 +84,8 @@ class WooCommerce_Example_Plugin_Integration implements IntegrationInterface {
 	 * When called invokes any initialization/setup for the integration.
 	 */
 	public function initialize() {
-		$script_path = '/build/index.js';
-		$style_path = '/build/style-index.css';
+		$script_path = '/assets/client/blocks/index.js';
+		$style_path = '/assets/client/blocks/style-index.css';
 
     /**
      * The assets linked below should be a path to a file, for the sake of brevity

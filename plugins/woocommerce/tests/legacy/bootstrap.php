@@ -7,7 +7,6 @@
  */
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
@@ -212,7 +211,8 @@ class WC_Unit_Tests_Bootstrap {
 		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
 
 		require_once $this->plugin_dir . '/woocommerce.php';
-		FeaturePlugin::instance()->init();
+		\Automattic\WooCommerce\Blocks\Package::init();
+		\Automattic\WooCommerce\Internal\Admin\FeaturePlugin::instance()->init();
 	}
 
 	/**

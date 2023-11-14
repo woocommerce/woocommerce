@@ -284,7 +284,7 @@ class ProductUpdater {
 	 */
 	public function assign_ai_selected_images_to_dummy_products_information_list( $ai_selected_products_images ) {
 		$default_image = [
-			'src' => esc_url( plugins_url( 'woocommerce-blocks/images/block-placeholders/product-image-gallery.svg' ) ),
+			'src' => esc_url( plugins_url( 'woocommerce/assets/images/block-placeholders/product-image-gallery.svg' ) ),
 			'alt' => 'The placeholder for a product image.',
 		];
 
@@ -332,7 +332,7 @@ class ProductUpdater {
 	public function get_images_information( $images ) {
 		if ( is_wp_error( $images ) ) {
 			return [
-				'src' => 'images/block-placeholders/product-image-gallery.svg',
+				'src' => 'assets/images/block-placeholders/product-image-gallery.svg',
 				'alt' => 'The placeholder for a product image.',
 			];
 		}

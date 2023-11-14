@@ -174,9 +174,9 @@ class JetpackWooCommerceAnalytics {
 		if ( ! $this->is_compatible ) {
 			return;
 		}
-		$asset_file = include Package::get_path() . 'build/wc-blocks-jetpack-woocommerce-analytics.asset.php';
+		$asset_file = include Package::get_path() . 'assets/client/blocks/wc-blocks-jetpack-woocommerce-analytics.asset.php';
 		if ( is_array( $asset_file['dependencies'] ) ) {
-			$this->asset_api->register_script( 'wc-blocks-jetpack-woocommerce-analytics', 'build/wc-blocks-jetpack-woocommerce-analytics.js', array_merge( array( 'wc-blocks' ), $asset_file['dependencies'] ) );
+			$this->asset_api->register_script( 'wc-blocks-jetpack-woocommerce-analytics', 'assets/client/blocks/wc-blocks-jetpack-woocommerce-analytics.js', array_merge( array( 'wc-blocks' ), $asset_file['dependencies'] ) );
 		}
 	}
 

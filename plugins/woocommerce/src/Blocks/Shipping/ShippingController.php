@@ -346,7 +346,7 @@ class ShippingController {
 	 * Load admin scripts.
 	 */
 	public function admin_scripts() {
-		$this->asset_api->register_script( 'wc-shipping-method-pickup-location', 'build/wc-shipping-method-pickup-location.js', [], true );
+		$this->asset_api->register_script( 'wc-shipping-method-pickup-location', 'assets/client/blocks/wc-shipping-method-pickup-location.js', [], true );
 	}
 
 	/**

@@ -169,6 +169,8 @@ class Bootstrap {
 	 * @return boolean
 	 */
 	protected function has_core_dependencies() {
+		return true;
+		
 		$has_needed_dependencies = class_exists( 'WooCommerce', false );
 		if ( $has_needed_dependencies ) {
 			$plugin_data = \get_file_data(
@@ -203,7 +205,7 @@ class Bootstrap {
 	 */
 	protected function is_built() {
 		return file_exists(
-			$this->package->get_path( 'build/featured-product.js' )
+			$this->package->get_path( 'assets/client/blocks/featured-product.js' )
 		);
 	}
 

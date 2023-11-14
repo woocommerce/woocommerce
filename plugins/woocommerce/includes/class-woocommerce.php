@@ -999,8 +999,15 @@ final class WooCommerce {
 			return false;
 		}
 
-		// Check if we have minified JS.
+		// Check for the admin client.
 		if ( ! file_exists( WC()->plugin_path() . '/assets/js/admin/woocommerce_admin.min.js' ) ) {
+			return false;
+		}
+		if ( ! file_exists( WC()->plugin_path() . '/assets/client/admin/app/index.js' ) ) {
+			return false;
+		}
+
+		if ( ! file_exists( WC()->plugin_path() . '/assets/client/blocks/cart.js' ) ) {
 			return false;
 		}
 

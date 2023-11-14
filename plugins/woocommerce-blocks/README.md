@@ -59,7 +59,7 @@ We release a new version of WooCommerce Blocks onto WordPress.org every few week
     3. `npm start` (development build + watching for changes).
 7. Activate the plugin.
 
-The source code is in the `assets/` folder, and the compiled code is stored into `build/`.
+The source code is in the `assets/` folder, and the compiled code is stored into `plugins/woocommerce/assets/client/blocks/`.
 
 ## Getting started with block development
 

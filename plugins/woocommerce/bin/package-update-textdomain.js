@@ -1,6 +1,11 @@
 const wpTextdomain = require( 'wp-textdomain' );
 
-wpTextdomain( 'packages/**/*.php', {
+var glob = 'packages/**/*.php';
+if ( process.argv.length > 2 ) {
+	glob = process.argv[2];
+}
+
+wpTextdomain( glob, {
 	domain: 'woocommerce',
 	fix: true,
 	missingDomain: true,

@@ -39,8 +39,8 @@ class Package extends WP_UnitTestCase {
 
 		//test with relative
 		$this->assertEquals(
-			$test_url . 'build/test',
-			$package->get_url( 'build/test' )
+			$test_url . 'assets/client/blocks/test',
+			$package->get_url( 'assets/client/blocks/test' )
 		);
 	}
 }

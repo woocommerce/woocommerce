@@ -37,7 +37,8 @@
 				"build:feature-config",
 				"^turbo:build",
 				"woocommerce/client/admin#turbo:build",
-				"woocommerce/client/legacy#turbo:build"
+				"woocommerce/client/legacy#turbo:build",
+				"@woocommerce/block-library#turbo:build"
 			],
 			"outputs": [],
 			"inputs": [
@@ -82,6 +83,24 @@
 				"client/**/*.scss",
 				"webpack.config.js",
 				"tsconfig.json"
+			],
+			"outputMode": "new-only"
+		},
+
+		"@woocommerce/block-library#turbo:build": {
+			"dependsOn": [ 
+				"^turbo:build"
+			],
+			"outputs": [
+				"../woocommerce/assets/client/blocks/**"
+			],
+			"inputs": [
+				"assets/**/*",
+				"bin/**/*",
+				"tsconfig.json",
+				"tsconfig.base.json",
+				"webpack.config.js",
+				"babel.config.js"
 			],
 			"outputMode": "new-only"
 		},
