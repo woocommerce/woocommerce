@@ -25,6 +25,7 @@ import { useEditorBlocks } from './hooks/use-editor-blocks';
 import { useScrollOpacity } from './hooks/use-scroll-opacity';
 import { CustomizeStoreContext } from './';
 import { HighlightedBlockContext } from './context/highlighted-block-context';
+import Iframe from './iframe';
 
 const { useHistory } = unlock( routerPrivateApis );
 
@@ -169,6 +170,7 @@ export const BlockEditor = ( {} ) => {
 					useSubRegistry={ false }
 					autoScale={ false }
 					setLogoBlockContext={ true }
+					CustomIframeComponent={ Iframe }
 				/>
 			</div>
 		</div>

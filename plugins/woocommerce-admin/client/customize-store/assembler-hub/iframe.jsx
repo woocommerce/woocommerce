@@ -37,6 +37,15 @@ function Iframe( {
 } ) {
 	const [ iframeDocument, setIframeDocument ] = useState();
 
+	const { resolvedAssets } = useSelect( ( select ) => {
+		const settings = select( blockEditorStore ).getSettings();
+
+		return {
+			resolvedAssets: settings.__unstableResolvedAssets,
+		};
+	}, [] );
+	const { styles = '' } = resolvedAssets;
+
 	const [ contentResizeListener, { height: contentHeight } ] =
 		useResizeObserver();
 	const setRef = useRefEffect( ( node ) => {
@@ -56,6 +65,7 @@ function Iframe( {
 	<head>
 		<script>window.frameElement._load()</script>
 		<style>html{height:auto!important;min-height:100%;}body{margin:0}</style>
+		${ styles }
 
 	</head>
 	<body>

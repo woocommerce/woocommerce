@@ -18,7 +18,7 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
  * Internal dependencies
  */
 import './style.scss';
-import Iframe from '../iframe';
+import Iframe from '../../../iframe';
 
 const { useGlobalStylesOutput } = unlock( blockEditorPrivateApis );
 
