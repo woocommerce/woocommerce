@@ -54,18 +54,23 @@ export function VariationsTableRow( {
 }: VariationsTableRowProps ) {
 	const { formatAmount } = useContext( CurrencyContext );
 
-	const tags = useMemo(
+	const { matchesAny, tags } = useMemo(
 		function getAnyWhenVariationOptionIsNotPresentInProductAttributes() {
-			return variableAttributes.map( ( attribute ) => {
+			let matchesAny = false;
+
+			const tags = variableAttributes.map( ( attribute ) => {
 				const variationOption = variation.attributes.find(
 					( option ) => option.id === attribute.id
 				);
+
 				if ( variationOption ) {
 					return {
 						id: variationOption.id,
 						label: variationOption.option,
 					};
 				}
+
+				matchesAny = true;
 
 				return {
 					id: attribute.id,
@@ -76,6 +81,11 @@ export function VariationsTableRow( {
 					),
 				};
 			} );
+
+			return {
+				matchesAny,
+				tags,
+			};
 		},
 		[ variableAttributes, variation ]
 	);
@@ -90,16 +100,18 @@ export function VariationsTableRow( {
 	return (
 		<>
 			<div className="woocommerce-product-variations__selection">
-				<Tooltip
-					text={ __(
-						"'Any' variations are no longer fully supported. Use regular variations instead",
-						'woocommerce'
-					) }
-					helperText={ __( 'View helper text', 'woocommerce' ) }
-					position="middle right"
-				>
-					<Icon icon={ info } size={ 24 } />
-				</Tooltip>
+				{ matchesAny && (
+					<Tooltip
+						text={ __(
+							"'Any' variations are no longer fully supported. Use regular variations instead",
+							'woocommerce'
+						) }
+						helperText={ __( 'View helper text', 'woocommerce' ) }
+						position="middle right"
+					>
+						<Icon icon={ info } size={ 24 } />
+					</Tooltip>
+				) }
 
 				{ isUpdating ? (
 					<Spinner />
