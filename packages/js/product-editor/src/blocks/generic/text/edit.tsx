@@ -1,20 +1,22 @@
 /**
  * External dependencies
  */
+import { useWooBlockProps } from '@woocommerce/block-templates';
+import { Link } from '@woocommerce/components';
+import { Product } from '@woocommerce/data';
 import { createElement } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { Product } from '@woocommerce/data';
-import { useWooBlockProps } from '@woocommerce/block-templates';
+import { Icon, external } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
-import { useValidation } from '../../../contexts/validation-context';
-import useProductEntityProp from '../../../hooks/use-product-entity-prop';
-import { TextBlockAttributes } from './types';
-import { ProductEditorBlockEditProps } from '../../../types';
 import { TextControl } from '../../../components/text-control';
+import { useValidation } from '../../../contexts/validation-context';
 import { useProductEdits } from '../../../hooks/use-product-edits';
+import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import { ProductEditorBlockEditProps } from '../../../types';
+import { TextBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
@@ -33,6 +35,8 @@ export function Edit( {
 		help,
 		tooltip,
 		disabled,
+		type,
+		suffix,
 	} = attributes;
 	const [ value, setValue ] = useProductEntityProp< string >( property, {
 		postType,
@@ -84,9 +88,27 @@ export function Edit( {
 		[ value ]
 	);
 
+	function getSuffix() {
+		if ( suffix && type === 'url' && value && ! error ) {
+			return (
+				<Link
+					href={ value }
+					target="_blank"
+					rel="noreferrer"
+					className="wp-block-woocommerce-product-text-field__suffix-link"
+				>
+					<Icon icon={ external } size={ 20 } />
+				</Link>
+			);
+		}
+
+		return typeof suffix === 'string' ? suffix : undefined;
+	}
+
 	return (
 		<div { ...blockProps }>
 			<TextControl
+				type={ type }
 				value={ value }
 				disabled={ disabled }
 				label={ label }
@@ -101,6 +123,7 @@ export function Edit( {
 				placeholder={ placeholder }
 				required={ required }
 				tooltip={ tooltip }
+				suffix={ getSuffix() }
 			/>
 		</div>
 	);
