@@ -104,6 +104,17 @@ class SearchListTable extends WP_List_Table {
 			return;
 		}
 
+		if ( $total_items > get_class( $this->file_controller )::SEARCH_MAX_RESULTS ) {
+			printf(
+				'<div class="notice notice-info"><p>%s</p></div>',
+				sprintf(
+					// translators: %s is a number.
+					esc_html__( 'The number of search results has exceeded the limit of %s. Try narrowing your search.', 'woocommerce' ),
+					number_format_i18n( get_class( $this->file_controller )::SEARCH_MAX_RESULTS )
+				)
+			);
+		}
+
 		$total_pages = ceil( $total_items / $per_page );
 		$results     = $this->file_controller->search_within_files( $search, $args, $file_args );
 		$this->items = $results;

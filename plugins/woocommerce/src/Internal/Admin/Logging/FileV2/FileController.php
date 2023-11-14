@@ -380,7 +380,7 @@ class FileController {
 					);
 				}
 
-				if ( count( $matched_lines ) >= self::SEARCH_MAX_RESULTS ) {
+				if ( count( $matched_lines ) > self::SEARCH_MAX_RESULTS ) {
 					break 2;
 				}
 
