@@ -415,7 +415,7 @@ class WC_Helper {
 		foreach ( $filters as $key => $count ) {
 			$_subs = $subscriptions;
 			self::_filter( $_subs, $key );
-			$filters[ $key ] = count( $_subs );
+			$filters[ $key ] = is_countable( $_subs ) ? count( $_subs ) : 0;
 		}
 
 		return $filters;
@@ -1461,7 +1461,7 @@ class WC_Helper {
 				if ( is_readable( $txt ) ) {
 					$txt = file_get_contents( $txt );
 					$txt = preg_split( '#\s#', $txt );
-					if ( count( $txt ) >= 2 ) {
+					if ( is_countable( $txt ) && count( $txt ) >= 2 ) {
 						$header = sprintf( '%d:%s', $txt[0], $txt[1] );
 					}
 				}

@@ -80,7 +80,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</thead>
 			<tbody>
 				<?php
-				if ( count( $errors ) ) {
+				if ( is_countable( $errors ) && count( $errors ) ) {
 					foreach ( $errors as $error ) {
 						if ( ! is_wp_error( $error ) ) {
 							continue;

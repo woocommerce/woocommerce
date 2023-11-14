@@ -69,13 +69,16 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
-			<?php require __DIR__ . '/html-admin-page-addons-category-nav.php'; ?>
-			<?php if ( ! empty( $search ) && ! is_wp_error( $addons ) && 0 === count( $addons ) ) : ?>
+			<?php
+			require __DIR__ . '/html-admin-page-addons-category-nav.php';
+			$addons_count = is_countable( $addons ) ? count( $addons ) : 0;
+			?>
+			<?php if ( ! empty( $search ) && ! is_wp_error( $addons ) && 0 === $addons_count ) : ?>
 				<h1 class="search-form-title">
 					<?php esc_html_e( 'Sorry, could not find anything. Try searching again using a different term.', 'woocommerce' ); ?></p>
 				</h1>
 			<?php endif; ?>
-			<?php if ( ! empty( $search ) && ! is_wp_error( $addons ) && count( $addons ) > 0 ) : ?>
+			<?php if ( ! empty( $search ) && ! is_wp_error( $addons ) && $addons_count > 0 ) : ?>
 				<h1 class="search-form-title">
 					<?php // translators: search keyword. ?>
 					<?php printf( esc_html__( 'Search results for "%s"', 'woocommerce' ), esc_html( sanitize_text_field( wp_unslash( $search ) ) ) ); ?>

@@ -117,6 +117,9 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 	 * @return mixed
 	 */
 	protected function trigger_hook( $old_hook, $new_callback_args ) {
+		$order_id = null;
+		$item_id = null;
+		$item = null;
 		switch ( $old_hook ) {
 			case 'woocommerce_order_add_shipping':
 			case 'woocommerce_order_add_fee':

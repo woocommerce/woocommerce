@@ -619,6 +619,7 @@ abstract class WC_Data {
 	 * @param bool $force_read True to force a new DB read (and update cache).
 	 */
 	public function read_meta_data( $force_read = false ) {
+		$cached_meta = null;
 		$this->meta_data = array();
 		$cache_loaded    = false;
 
@@ -808,7 +809,7 @@ abstract class WC_Data {
 			}
 		}
 
-		return $errors && count( $errors->get_error_codes() ) ? $errors : true;
+		return $errors && is_countable( $errors->get_error_codes() ) && count( $errors->get_error_codes() ) ? $errors : true;
 	}
 
 	/**

@@ -16,7 +16,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 <div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 	<div id="variable_product_options_inner">
 
-		<?php if ( ! count( $variation_attributes ) ) : ?>
+		<?php if ( ! ( is_countable( $variation_attributes ) && count( $variation_attributes ) ) ) : ?>
 
 		<div class="add-attributes-container">
 			<div class="add-attributes-message">
