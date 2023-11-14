@@ -150,6 +150,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 - Remove bullet points and unnecessary padding from `SearchListControl`. ([11444](https://github.com/woocommerce/woocommerce-blocks/pull/11444))
 
+= 11.4.8 - 2023-11-10 =
+
+#### Bug Fixes
+
+- Ensure that incompatible notices are displayed in Safari. [11736](https://github.com/woocommerce/woocommerce-blocks/pull/11736)
+
 = 11.4.7 - 2023-11-09 =
 
 #### Bug Fixes
