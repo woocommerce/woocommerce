@@ -91,8 +91,16 @@ export class CheckoutPage {
 			...this.testData,
 			...overrideAddressDetails,
 		};
-		const selector = `.wc-block-order-confirmation-${ shippingOrBilling }-address`;
-		const addressContainer = this.page.locator( selector );
+
+		const legacySelector = `.woocommerce-column--${ shippingOrBilling }-address`;
+		const blockSelector = `.wc-block-order-confirmation-${ shippingOrBilling }-address`;
+
+		let addressContainer = this.page.locator( blockSelector );
+
+		if ( ! ( await addressContainer.isVisible() ) ) {
+			addressContainer = this.page.locator( legacySelector );
+		}
+
 		await expect(
 			addressContainer.getByText( customerAddressDetails.firstname )
 		).toBeVisible();
