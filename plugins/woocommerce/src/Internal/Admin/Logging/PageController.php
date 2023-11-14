@@ -148,9 +148,7 @@ class PageController {
 			<h2>
 				<?php esc_html_e( 'Browse log files', 'woocommerce' ); ?>
 			</h2>
-			<?php if ( $list_table->has_items() ) : ?>
-				<?php $this->render_search_field(); ?>
-			<?php endif; ?>
+			<?php $this->render_search_field(); ?>
 		</header>
 		<form id="logs-list-table-form" method="get">
 			<input type="hidden" name="page" value="wc-status" />
@@ -640,37 +638,54 @@ class PageController {
 		$params        = $this->get_query_params( array( 'search', 'source' ) );
 		$defaults      = $this->get_query_param_defaults();
 		$search_action = add_query_arg( 'view', 'search_results', $this->get_logs_tab_url() );
-		?>
+		$file_count    = $this->file_controller->get_files( $params, true );
+
+		if ( $file_count > 0 ) :?>
 		<form
 			id="logs-search"
 			class="wc-logs-search"
 			method="get"
 			action="<?php echo esc_url( $search_action ); ?>"
 		>
-			<input type="hidden" name="page" value="wc-status" />
-			<input type="hidden" name="tab" value="logs" />
-			<input type="hidden" name="view" value="search_results" />
-			<?php foreach ( $params as $key => $value ) : ?>
-				<?php if ( $value !== $defaults[ $key ] ) : ?>
+			<fieldset class="wc-logs-search-fieldset">
+				<input type="hidden" name="page" value="wc-status" />
+				<input type="hidden" name="tab" value="logs" />
+				<input type="hidden" name="view" value="search_results" />
+				<?php foreach ( $params as $key => $value ) : ?>
+					<?php if ( $value !== $defaults[ $key ] ) : ?>
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( $key ); ?>"
+							value="<?php echo esc_attr( $value ); ?>"
+						/>
+					<?php endif; ?>
+				<?php endforeach; ?>
+				<label for="logs-search-field">
+					<?php esc_html_e( 'Search within these files', 'woocommerce' ); ?>
 					<input
-						type="hidden"
-						name="<?php echo esc_attr( $key ); ?>"
-						value="<?php echo esc_attr( $value ); ?>"
+						id="logs-search-field"
+						class="wc-logs-search-field"
+						type="text"
+						name="search"
+						value="<?php echo esc_attr( $params['search'] ); ?>"
 					/>
-				<?php endif; ?>
-			<?php endforeach; ?>
-			<label for="logs-search-field">
-				<?php esc_html_e( 'Search within these files', 'woocommerce' ); ?>
-				<input
-					id="logs-search-field"
-					class="wc-logs-search-field"
-					type="text"
-					name="search"
-					value="<?php echo esc_attr( $params['search'] ); ?>"
-				/>
-			</label>
-			<?php submit_button( __( 'Search', 'woocommerce' ), 'secondary', 'submit', false ); ?>
+				</label>
+				<?php submit_button( __( 'Search', 'woocommerce' ), 'secondary', null, false ); ?>
+			</fieldset>
+			<?php if ( $file_count >= get_class( $this->file_controller )::SEARCH_MAX_FILES ) : ?>
+				<div class="wc-logs-search-notice">
+					<?php
+					printf(
+						esc_html__(
+							'⚠️ Only %s files can be searched at one time. Try filtering the file list before searching.',
+							'woocommerce'
+						),
+						number_format_i18n( get_class( $this->file_controller )::SEARCH_MAX_FILES )
+					);
+					?>
+				</div>
+			<?php endif; ?>
 		</form>
-		<?php
+		<?php endif;
 	}
 }
