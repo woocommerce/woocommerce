@@ -251,21 +251,14 @@ export const ShippingTour: React.FC< {
 							<>
 								<span>
 									{ __(
-										"Specify the areas you'd like to ship to! We added a few shipping zones for you based on your location, but you can manage them at any time. Give each zone a name, select the region(s) you'd like to include, and add available shipping methods. Your shipping regions can be as specific as a zip code, or as broad as a country.",
+										"Specify the areas you'd like to ship to! Give each zone a name, then list the regions you'd like to include. Your regions can be as specific as a zip code or as broad as a country. Shoppers will only see the methods available in their region.",
 										'woocommerce'
 									) }
 								</span>
 								<br />
 								<span>
 									{ __(
-										'Your customers will only see the methods available to their region, and can only match one zone.',
-										'woocommerce'
-									) }
-								</span>
-								<br />
-								<span>
-									{ __(
-										'We\'ve added some shipping zones to get you started — you can add or edit them by clicking on "Edit | Delete".',
+										"We've added some shipping zones to get you started — you can manage them by selecting Edit or Delete.",
 										'woocommerce'
 									) }
 								</span>
@@ -286,14 +279,14 @@ export const ShippingTour: React.FC< {
 							<>
 								<span>
 									{ __(
-										"Add one or more shipping methods that you'd like to make available to customers in your zones.",
+										"Add one or more shipping methods you'd like to offer to shoppers in your zones.",
 										'woocommerce'
 									) }
 								</span>
 								<br />
 								<span>
 									{ __(
-										'For example, in the default settings we\'ve provided, free shipping is offered to customers in your country. You can edit these or add more shipping methods by clicking on "Edit | Delete".',
+										"For example, we've added the “Free shipping” method for shoppers in your country. You can edit, add to, or remove shipping methods by selecting Edit or Delete.",
 										'woocommerce'
 									) }
 								</span>

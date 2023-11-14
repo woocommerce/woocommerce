@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<span><?php esc_html_e( 'Shipping zones', 'woocommerce' ); ?></span>
 	<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ) ); ?>" class="button-primary"><?php esc_html_e( 'Add zone', 'woocommerce' ); ?></a>
 </h2>
-<p class="wc-shipping-zone-heading-help-text"><?php echo esc_html_e( 'A shipping zone consists of one or more regions you\'d like to ship to and the shipping method(s) offered. We\'ll use your customer\'s shipping address to show them available shipping methods in their area.', 'woocommerce' ) . ' ' . esc_html_e( 'WooCommerce will match a customer to a single zone using their shipping address and present the shipping methods within that zone to them.', 'woocommerce' ); ?></p>
+<p class="wc-shipping-zone-heading-help-text"><?php echo esc_html_e( 'A shipping zone consists of the region(s) you\'d like to ship to and the shipping method(s) offered. A shopper can only be matched to one zone, and we\'ll use their shipping address to show them the methods available in their area.', 'woocommerce' ); ?></p>
 <table class="wc-shipping-zones widefat">
 	<thead>
 		<tr>

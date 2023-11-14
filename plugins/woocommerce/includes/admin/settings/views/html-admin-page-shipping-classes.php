@@ -66,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<div class="edit">
 									<input type="text" name="name" data-attribute="name" value="{{ data.name }}" placeholder="<?php esc_attr_e( 'e.g. Heavy', 'woocommerce' ); ?>" />
 								</div>
-								<div class="wc-shipping-class-modal-help-text"><?php esc_html_e( 'Assign a distinctive shipping class name for easy identification', 'woocommerce' ); ?></div>
+								<div class="wc-shipping-class-modal-help-text"><?php esc_html_e( 'Give your shipping class a name for easy identification', 'woocommerce' ); ?></div>
 								<?php
 								break;
 							case 'wc-shipping-class-slug':
