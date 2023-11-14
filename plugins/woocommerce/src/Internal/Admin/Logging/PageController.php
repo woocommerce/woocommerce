@@ -572,19 +572,13 @@ class PageController {
 	 * @return void
 	 */
 	private function render_search_field(): void {
-		$params        = $this->get_query_params( array( 'search', 'source' ) );
-		$defaults      = $this->get_query_param_defaults();
-		$search_action = add_query_arg( 'view', 'search_results', $this->get_logs_tab_url() );
-		$file_count    = $this->file_controller->get_files( $params, true );
+		$params     = $this->get_query_params( array( 'search', 'source' ) );
+		$defaults   = $this->get_query_param_defaults();
+		$file_count = $this->file_controller->get_files( $params, true );
 
 		if ( $file_count > 0 ) {
 			?>
-			<form
-				id="logs-search"
-				class="wc-logs-search"
-				method="get"
-				action="<?php echo esc_url( $search_action ); ?>"
-			>
+			<form id="logs-search" class="wc-logs-search" method="get">
 				<fieldset class="wc-logs-search-fieldset">
 					<input type="hidden" name="page" value="wc-status" />
 					<input type="hidden" name="tab" value="logs" />
