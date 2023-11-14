@@ -211,6 +211,9 @@ class Init {
 		$template_registry     = wc_get_container()->get( BlockTemplateRegistry::class );
 		$block_template_logger = BlockTemplateLogger::get_instance();
 
+		$block_template_logger->log_template_events_to_file( 'simple-product' );
+		$block_template_logger->log_template_events_to_file( 'product-variation' );
+
 		$editor_settings['templates'] = array(
 			'product'           => $template_registry->get_registered( 'simple-product' )->get_formatted_template(),
 			'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template(),

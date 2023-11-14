@@ -87,6 +87,13 @@ class BlockTemplateLogger {
 	private $all_template_events = array();
 
 	/**
+	 * Templates.
+	 *
+	 * @var array
+	 */
+	private $templates = array();
+
+	/**
 	 * Threshold severity.
 	 *
 	 * @var int
@@ -205,13 +212,93 @@ class BlockTemplateLogger {
 	 *
 	 * @param string $template_id Template ID.
 	 */
-	public function get_template_events( string $template_id ): array {
-		return isset( $this->all_template_events[ $template_id ] )
-			? $this->all_template_events[ $template_id ]
-			: array();
+	public function get_formatted_template_events( string $template_id ): array {
+		if ( ! isset( $this->all_template_events[ $template_id ] ) ) {
+			return array();
+		}
+
+		$template_events = $this->all_template_events[ $template_id ];
+		$template        = $this->templates[ $template_id ];
+
+		$formatted_template_events = array();
+
+		foreach ( $template_events as $template_event ) {
+			$container = $template_event['container'];
+			$block     = $template_event['block'];
+
+			$formatted_template_events[] = array(
+				'level'           => $template_event['level'],
+				'event_type'      => $template_event['event_type'],
+				'message'         => $template_event['message'],
+				'container'       => $container instanceof BlockInterface
+					? array(
+						'id'   => $container->get_id(),
+						'name' => $container->get_name(),
+					)
+					: null,
+				'block'           => array(
+					'id'   => $block->get_id(),
+					'name' => $block->get_name(),
+				),
+				'additional_info' => $this->format_info( $template_event['additional_info'] ),
+			);
+		}
+
+		return $formatted_template_events;
 	}
 
+	public function log_template_events_to_file( string $template_id ) {
+		if ( ! isset( $this->all_template_events[ $template_id ] ) ) {
+			return;
+		}
 
+		$template_events = $this->all_template_events[ $template_id ];
+
+		$hash = $this->generate_template_events_hash( $template_events );
+
+		if ( ! $this->has_template_events_log_changed( $template_id, $hash ) ) {
+			// Nothing has changed since the last time this was logged,
+			// so don't log it again.
+			return;
+		}
+
+		$this->set_template_events_log_hash( $template_id, $hash );
+
+		$template = $this->templates[ $template_id ];
+
+		foreach ( $template_events as $template_event ) {
+			$info = array_merge(
+				array(
+					'template'  => $template,
+					'container' => $template_event['container'],
+					'block'     => $template_event['block'],
+				),
+				$template_event['additional_info']
+			);
+
+			$message = $this->format_message( $template_event['message'], $info );
+
+			$this->logger->log(
+				$template_event['level'],
+				$message,
+				array( 'source' => 'block_template' )
+			);
+		}
+	}
+
+	private function has_template_events_log_changed( string $template_id, string $events_hash ) {
+		$previous_hash = get_transient( 'wc_block_template_events_log_hash_' . $template_id );
+
+		return $previous_hash !== $events_hash;
+	}
+
+	private function generate_template_events_hash( array $template_events ) {
+		return md5( wp_json_encode( $template_events ) );
+	}
+
+	private function set_template_events_log_hash( string $template_id, string $hash ) {
+		set_transient( 'wc_block_template_events_log_hash_' . $template_id, $hash );
+	}
 
 	/**
 	 * Log an event.
@@ -246,7 +333,6 @@ class BlockTemplateLogger {
 		$template  = $block->get_root_template();
 		$container = $block->get_parent();
 
-		$this->log_to_logger( $event_type_info, $template, $container, $block, $additional_info );
 		$this->add_template_event( $event_type_info, $template, $container, $block, $additional_info );
 	}
 
@@ -257,34 +343,6 @@ class BlockTemplateLogger {
 	 */
 	private function should_handle( $level ) {
 		return $this->threshold_severity <= \WC_Log_Levels::get_level_severity( $level );
-	}
-
-	/**
-	 * Log to the logger.
-	 *
-	 * @param array                  $event_type_info Event type info.
-	 * @param BlockTemplateInterface $template        Template.
-	 * @param ContainerInterface     $container       Container.
-	 * @param BlockInterface         $block           Block.
-	 * @param array                  $additional_info Additional info.
-	 */
-	private function log_to_logger( array $event_type_info, BlockTemplateInterface $template, ContainerInterface $container, BlockInterface $block, array $additional_info = array() ) {
-		$info = array_merge(
-			array(
-				'template'  => $template,
-				'container' => $container,
-				'block'     => $block,
-			),
-			$additional_info
-		);
-
-		$message = $this->format_message( $event_type_info['message'], $info );
-
-		$this->logger->log(
-			$event_type_info['level'],
-			$message,
-			array( 'source' => 'block_template' )
-		);
 	}
 
 	/**
@@ -301,6 +359,7 @@ class BlockTemplateLogger {
 
 		if ( ! isset( $this->all_template_events[ $template_id ] ) ) {
 			$this->all_template_events[ $template_id ] = array();
+			$this->templates[ $template_id ]           = $template;
 		}
 
 		$template_events = &$this->all_template_events[ $template_id ];
@@ -309,17 +368,9 @@ class BlockTemplateLogger {
 			'level'           => $event_type_info['level'],
 			'event_type'      => $event_type_info['event_type'],
 			'message'         => $event_type_info['message'],
-			'container'       => $container instanceof BlockInterface
-				? array(
-					'id'   => $container->get_id(),
-					'name' => $container->get_name(),
-				)
-				: null,
-			'block'           => array(
-				'id'   => $block->get_id(),
-				'name' => $block->get_name(),
-			),
-			'additional_info' => $this->format_info( $additional_info ),
+			'container'       => $container,
+			'block'           => $block,
+			'additional_info' => $additional_info,
 		);
 	}
 
