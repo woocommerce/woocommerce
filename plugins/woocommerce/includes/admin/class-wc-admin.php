@@ -151,7 +151,7 @@ class WC_Admin {
 		$prevent_access = false;
 
 		// Do not interfere with admin-post or admin-ajax requests.
-		$exempted_paths = array( 'admin-post.php', 'admin-ajax.php' );
+		$exempted_paths = array( 'admin-post.php', 'admin-ajax.php', 'async-upload.php' );
 
 		if (
 			/**
