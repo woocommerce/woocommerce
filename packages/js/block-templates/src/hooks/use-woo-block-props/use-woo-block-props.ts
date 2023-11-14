@@ -17,8 +17,10 @@ export const useWooBlockProps = (
 	const additionalProps = {
 		'data-template-block-id': attributes._templateBlockId,
 		'data-template-block-order': attributes._templateBlockOrder,
+		tabIndex: -1,
 		...props,
 	};
-
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	return useBlockProps( additionalProps );
 };
