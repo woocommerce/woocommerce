@@ -231,11 +231,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
 			$buy_button_section = $general_group->add_section(
 				array(
-					'id'         => 'product-buy-button-section',
-					'order'      => 30,
-					'attributes' => array(
+					'id'             => 'product-buy-button-section',
+					'order'          => 30,
+					'attributes'     => array(
 						'title'       => __( 'Buy button', 'woocommerce' ),
 						'description' => __( 'Add a link and choose a label for the button linked to a product sold elsewhere.', 'woocommerce' ),
+					),
+          'hideConditions' => array(
+						array(
+							'expression' => 'editedProduct.type !== "external"',
+						),
 					),
 				)
 			);
@@ -255,17 +260,17 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 
       $button_text_columns = $buy_button_section->add_block(
 				array(
-					'id'         => 'product-button-text-columns',
-					'blockName'  => 'core/columns',
-					'order'      => 20,
+					'id'        => 'product-button-text-columns',
+					'blockName' => 'core/columns',
+					'order'     => 20,
 				)
       );
       
       $button_text_columns->add_block(
 				array(
-					'id'         => 'product-button-text-column1',
-					'blockName'  => 'core/column',
-					'order'      => 10,
+					'id'        => 'product-button-text-column1',
+					'blockName' => 'core/column',
+					'order'     => 10,
 				)
 			)->add_block(
 				array(
@@ -282,9 +287,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 
       $button_text_columns->add_block(
 				array(
-					'id'         => 'product-button-text-column2',
-					'blockName'  => 'core/column',
-					'order'      => 20,
+					'id'        => 'product-button-text-column2',
+					'blockName' => 'core/column',
+					'order'     => 20,
 				)
       );
 		}
