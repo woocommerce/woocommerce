@@ -175,6 +175,7 @@ class File {
 	 * @return bool
 	 */
 	public function close_stream(): bool {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose -- No suitable alternative.
 		return fclose( $this->stream );
 	}
 

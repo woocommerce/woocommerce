@@ -110,7 +110,7 @@ class SearchListTable extends WP_List_Table {
 				sprintf(
 					// translators: %s is a number.
 					esc_html__( 'The number of search results has exceeded the limit of %s. Try narrowing your search.', 'woocommerce' ),
-					number_format_i18n( get_class( $this->file_controller )::SEARCH_MAX_RESULTS )
+					esc_html( number_format_i18n( get_class( $this->file_controller )::SEARCH_MAX_RESULTS ) )
 				)
 			);
 		}
