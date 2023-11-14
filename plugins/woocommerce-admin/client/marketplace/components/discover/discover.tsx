@@ -27,6 +27,7 @@ export default function Discover(): JSX.Element | null {
 			.map( ( product ) => {
 				return product.id;
 			} );
+
 		recordEvent( 'marketplace_discover_viewed', {
 			view: 'discover',
 			product_ids,

@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Card } from '@wordpress/components';
 import classnames from 'classnames';
-import { recordEvent } from '@woocommerce/tracks';
+import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -16,17 +16,6 @@ export interface ProductCardProps {
 	type?: string;
 	product?: Product;
 	isLoading?: boolean;
-}
-
-function recordBeaconEvent( eventName: string, data: object ) {
-	navigator.sendBeacon(
-		'http://localhost:8888/wp-json/wc/v3/marketplace/beacon',
-		JSON.stringify( {
-			eventName,
-			data,
-		} )
-	);
-	//recordEvent( eventName, { ...data } );
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
@@ -59,12 +48,15 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 				href={ product.vendorUrl }
 				rel="noopener noreferrer"
 				onClick={ () => {
-					recordEvent( 'marketplace_product_card_vendor_clicked', {
-						product: product.title,
-						vendor: product.vendorName,
-						product_type: type,
-						...( product.label && { label: product.label } ),
-					} );
+					queueRecordEvent(
+						'marketplace_product_card_vendor_clicked',
+						{
+							product: product.title,
+							vendor: product.vendorName,
+							product_type: type,
+							...( product.label && { label: product.label } ),
+						}
+					);
 				} }
 			>
 				{ product.vendorName }
@@ -118,29 +110,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 									href="#"
 									rel="noopener noreferrer"
 									onClick={ () => {
-										// recordEvent(
-										// 	'marketplace_product_card_clicked',
-										// 	{
-										// 		product: product.title,
-										// 		vendor: product.vendorName,
-										// 		product_type: type,
-										// 		position: product.position,
-										// 		...( product.label && {
-										// 			label: product.label,
-										// 		} ),
-										// 		...( product.group && {
-										// 			group: product.group,
-										// 		} ),
-										// 		...( product.searchTerm && {
-										// 			search_term:
-										// 				product.searchTerm,
-										// 		} ),
-										// 		...( product.category && {
-										// 			category: product.category,
-										// 		} ),
-										// 	}
-										// );
-										recordBeaconEvent(
+										queueRecordEvent(
 											'marketplace_product_card_clicked',
 											{
 												product: product.title,
