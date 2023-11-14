@@ -41,6 +41,9 @@ describe( 'Intro Banners', () => {
 						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
+					transitionalScreen: {
+						hasCompleteSurvey: false,
+					},
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -48,9 +51,7 @@ describe( 'Intro Banners', () => {
 		);
 
 		expect(
-			screen.getByText(
-				/Please check your internet connection and try again./i
-			)
+			screen.getByText( /Please check your internet connection./i )
 		).toBeInTheDocument();
 	} );
 
@@ -77,6 +78,9 @@ describe( 'Intro Banners', () => {
 						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
+					transitionalScreen: {
+						hasCompleteSurvey: false,
+					},
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -117,6 +121,9 @@ describe( 'Intro Banners', () => {
 						currentThemeIsAiGenerated: true,
 					},
 					themeConfiguration: {},
+					transitionalScreen: {
+						hasCompleteSurvey: false,
+					},
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }

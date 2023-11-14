@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add fullscreen class to body when CYS component is shown

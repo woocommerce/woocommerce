@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes daily execution workflow for API and e2e tests

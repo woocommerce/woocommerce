@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Invalidate resolution for paginated variations after removing any from the single variation page

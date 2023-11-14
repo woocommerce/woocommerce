@@ -424,14 +424,14 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			),
 			'wccom_connected'         => array(
 				'type'              => 'boolean',
-				'description'       => __( 'Whether or not the store was connected to WooCommerce.com during the extension flow.', 'woocommerce' ),
+				'description'       => __( 'Whether or not the store was connected to Woo.com during the extension flow.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'is_agree_marketing'      => array(
 				'type'              => 'boolean',
-				'description'       => __( 'Whether or not this store agreed to receiving marketing contents from WooCommerce.com.', 'woocommerce' ),
+				'description'       => __( 'Whether or not this store agreed to receiving marketing contents from Woo.com.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',

@@ -3,14 +3,16 @@ const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const pageTitle = 'Mini Cart';
+const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
 const miniCartButton = '.wc-block-mini-cart__button';
 
 const simpleProductName = 'Single Hundred Product';
 const simpleProductDesc = 'Lorem ipsum dolor sit amet.';
 const singleProductPrice = '100.00';
 const singleProductSalePrice = '50.00';
+const totalInclusiveTax = +singleProductSalePrice + 5 + 2.5;
 
-let product1Id;
+let productId, countryTaxId, stateTaxId, shippingZoneId;
 
 test.describe( 'Mini Cart block page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -32,8 +34,59 @@ test.describe( 'Mini Cart block page', () => {
 				sale_price: singleProductSalePrice,
 			} )
 			.then( ( response ) => {
-				product1Id = response.data.id;
+				productId = response.data.id;
 			} );
+		// add tax
+		await api.put( 'settings/general/woocommerce_calc_taxes', {
+			value: 'yes',
+		} );
+		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
+			value: 'excl',
+		} );
+		await api
+			.post( 'taxes', {
+				country: 'US',
+				state: '*',
+				cities: '*',
+				postcodes: '*',
+				rate: '10',
+				name: 'Country Tax',
+				shipping: false,
+				priority: 1,
+			} )
+			.then( ( response ) => {
+				countryTaxId = response.data.id;
+			} );
+		await api
+			.post( 'taxes', {
+				country: '*',
+				state: 'CA',
+				cities: '*',
+				postcodes: '*',
+				rate: '5',
+				name: 'State Tax',
+				shipping: false,
+				priority: 2,
+			} )
+			.then( ( response ) => {
+				stateTaxId = response.data.id;
+			} );
+		// add shipping zone, location and method
+		await api
+			.post( 'shipping/zones', {
+				name: 'US Free Shipping',
+			} )
+			.then( ( response ) => {
+				shippingZoneId = response.data.id;
+			} );
+		await api.put( `shipping/zones/${ shippingZoneId }/locations`, [
+			{
+				code: 'US',
+			},
+		] );
+		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
+			method_id: 'free_shipping',
+		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -44,7 +97,16 @@ test.describe( 'Mini Cart block page', () => {
 			version: 'wc/v3',
 		} );
 		await api.post( 'products/batch', {
-			delete: [ product1Id ],
+			delete: [ productId ],
+		} );
+		await api.put( 'settings/general/woocommerce_calc_taxes', {
+			value: 'no',
+		} );
+		await api.post( 'taxes/batch', {
+			delete: [ countryTaxId, stateTaxId ],
+		} );
+		await api.delete( `shipping/zones/${ shippingZoneId }`, {
+			force: true,
 		} );
 		const base64auth = Buffer.from(
 			`${ admin.username }:${ admin.password }`
@@ -68,48 +130,51 @@ test.describe( 'Mini Cart block page', () => {
 		} );
 	} );
 
+	test.beforeEach( async ( { context } ) => {
+		// shopping cart is very sensitive to cookies, so be explicit
+		await context.clearCookies();
+	} );
+
 	test( 'can see empty mini cart', async ( { page } ) => {
 		// create a new page with mini cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
+		await page.waitForLoadState( 'networkidle' );
+		await page.locator( 'input[name="log"]' ).fill( admin.username );
+		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
+		await page.locator( 'text=Log In' ).click();
 
-		const welcomeModalVisible = await page
-			.getByRole( 'heading', {
-				name: 'Welcome to the block editor',
-			} )
-			.isVisible();
-
-		if ( welcomeModalVisible ) {
-			await page.getByRole( 'button', { name: 'Close' } ).click();
+		// Close welcome popup if prompted
+		try {
+			await page
+				.getByLabel( 'Close', { exact: true } )
+				.click( { timeout: 5000 } );
+		} catch ( error ) {
+			console.log( "Welcome modal wasn't present, skipping action." );
 		}
 
 		await page
-			.getByRole( 'textbox', { name: 'Add Title' } )
+			.getByRole( 'textbox', { name: 'Add title' } )
 			.fill( pageTitle );
-
 		await page.getByRole( 'button', { name: 'Add default block' } ).click();
-
 		await page
 			.getByRole( 'document', {
 				name: 'Empty block; start writing or type forward slash to choose a block',
 			} )
 			.fill( '/mini' );
 		await page.keyboard.press( 'Enter' );
-
 		await page
 			.getByRole( 'button', { name: 'Publish', exact: true } )
 			.click();
-
 		await page
 			.getByRole( 'region', { name: 'Editor publish' } )
 			.getByRole( 'button', { name: 'Publish', exact: true } )
 			.click();
-
 		await expect(
 			page.getByText( `${ pageTitle } is now live.` )
 		).toBeVisible();
 
 		// go to the page to test mini cart
-		await page.goto( '/mini-cart' );
+		await page.goto( pageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: pageTitle } )
 		).toBeVisible();
@@ -126,13 +191,13 @@ test.describe( 'Mini Cart block page', () => {
 	test( 'can proceed to mini cart, observe it and proceed to the checkout', async ( {
 		page,
 	} ) => {
-		const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 		// add product to cart
-		await page.goto( `product/${ slug }` );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.goto( `/shop/?add-to-cart=${ productId }`, {
+			waitUntil: 'networkidle',
+		} );
 
 		// go to page with mini cart block and test with the product added
-		await page.goto( '/mini-cart' );
+		await page.goto( pageSlug );
 		await expect(
 			page.locator( '.wc-block-mini-cart__button' )
 		).toContainText( `$${ singleProductSalePrice }` );
@@ -166,9 +231,10 @@ test.describe( 'Mini Cart block page', () => {
 		).toBeVisible();
 
 		// add product to cart and redirect from mini to regular cart
-		await page.goto( `product/${ slug }` );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
-		await page.goto( '/mini-cart' );
+		await page.goto( `/shop/?add-to-cart=${ productId }`, {
+			waitUntil: 'networkidle',
+		} );
+		await page.goto( pageSlug );
 		await page.locator( miniCartButton ).click();
 		await page.getByRole( 'link', { name: 'View my cart' } ).click();
 		await expect(
@@ -177,12 +243,64 @@ test.describe( 'Mini Cart block page', () => {
 		await expect( page.locator( miniCartButton ) ).toBeHidden();
 
 		// go to mini cart and test redirection from mini cart to checkout
-		await page.goto( '/mini-cart' );
+		await page.goto( pageSlug );
 		await page.locator( miniCartButton ).click();
 		await page.getByRole( 'link', { name: 'Go to checkout' } ).click();
 		await expect(
 			page.getByRole( 'heading', { name: 'Checkout', exact: true } )
 		).toBeVisible();
 		await expect( page.locator( miniCartButton ) ).toBeHidden();
+	} );
+
+	test( 'can see mini cart total price inclusive with tax', async ( {
+		page,
+		baseURL,
+	} ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		// set inlcuding tax prices
+		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
+			value: 'incl',
+		} );
+
+		// add product to cart
+		await page.goto( `/shop/?add-to-cart=${ productId }`, {
+			waitUntil: 'networkidle',
+		} );
+
+		// go to cart and add shipping details to calculate tax
+		await page.goto( '/cart/' ); // we will use the old cart for this purpose
+		await page.locator( '.shipping-calculator-button' ).click();
+		await page.getByLabel( 'Town / City' ).fill( 'Sacramento' );
+		await page.getByLabel( 'ZIP Code' ).fill( '96000' );
+		await page
+			.getByRole( 'button', { name: 'Update', exact: true } )
+			.click();
+		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
+			'Shipping costs updated.'
+		);
+
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+		await expect(
+			page.locator( '.wc-block-mini-cart__button' )
+		).toContainText( `$${ totalInclusiveTax }` );
+		await page.locator( miniCartButton ).click();
+		await expect(
+			page.locator( '.wc-block-components-totals-item__value' )
+		).toContainText( `$${ totalInclusiveTax }` );
+		await page
+			.getByRole( 'button' )
+			.filter( { hasText: 'Remove item' } )
+			.click();
+		await expect(
+			page.getByText( 'Your cart is currently empty!' )
+		).toBeVisible();
 	} );
 } );

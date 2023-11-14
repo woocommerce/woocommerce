@@ -1,0 +1,46 @@
+.woocommerce-image-placeholder {
+	&__wrapper {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding-top: $gap-largest;
+	}
+	&__item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 150px;
+		height: 150px;
+		padding: $gap;
+		border-radius: 2px;
+		border: 1px dashed #CCCCCC;
+		margin-right: $gap-small;
+		flex: 1;
+		text-align: center;
+
+		svg {
+			margin-bottom: $gap;
+		}
+
+		p {
+			text-align: center;
+			color: #949494;
+		}
+    }
+	@media ( max-width: 535px ) {
+		&__item {
+			display: none;
+		}
+    }
+	@media ( min-width: 536px) and ( max-width: 700px ) {
+		&__item {
+			display: none;
+			&:nth-child( -n+3 ) {
+				display: flex;
+			}
+		}
+    }
+}
+
+

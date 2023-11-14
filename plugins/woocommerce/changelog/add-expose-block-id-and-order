@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Include template block ID and block order in formatted block template so they are available to the client.

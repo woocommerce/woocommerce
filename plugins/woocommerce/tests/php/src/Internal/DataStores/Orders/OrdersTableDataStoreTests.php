@@ -54,11 +54,14 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
 		$this->reset_legacy_proxy_mocks();
 		$this->original_time_zone = wp_timezone_string();
 		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		update_option( 'timezone_string', 'Asia/Kolkata' );
-		parent::setUp();
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		$this->setup_cot();
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
@@ -79,6 +82,9 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		update_option( 'timezone_string', $this->original_time_zone );
 		$this->toggle_cot_feature_and_usage( $this->cot_state );
 		$this->clean_up_cot_setup();
+
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+
 		parent::tearDown();
 	}
 
@@ -194,6 +200,34 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		$this->sut->backfill_post_record( $order );
 		$this->assertEquals( $hardcoded_modified_date, get_post_modified_time( 'U', true, $order->get_id() ) );
+	}
+
+	/**
+	 * @testDox Tests that array metadata is handled properly when backfilling posts.
+	 */
+	public function test_backfill_array_meta() {
+		$tricky_meta = array(
+			'an_array'                        => array( 'because', 'why', 'not' ),
+			'something_that_looks_serialized' => 'a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}',
+		);
+
+		$this->disable_cot_sync();
+
+		$order = new \WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		foreach ( $tricky_meta as $meta_key => $meta_value ) {
+			$order->add_meta_data( $meta_key, $meta_value );
+		}
+		$order->save();
+
+		$this->sut->backfill_post_record( $order );
+
+		$post_meta = get_post_meta( $order->get_id() );
+
+		foreach ( $tricky_meta as $meta_key => $meta_value ) {
+			$this->assertArrayHasKey( $meta_key, $post_meta );
+			$this->assertEquals( $meta_value, maybe_unserialize( $post_meta[ $meta_key ][0] ) );
+		}
 	}
 
 	/**

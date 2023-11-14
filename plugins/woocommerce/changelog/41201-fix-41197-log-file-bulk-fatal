@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error that could occur if you submitted the bulk edit form on the Logs list table without selecting any log files first.

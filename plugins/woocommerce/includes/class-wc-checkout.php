@@ -421,7 +421,10 @@ class WC_Checkout {
 				}
 			}
 
-			$order->hold_applied_coupons( $data['billing_email'] );
+			if ( isset( $data['billing_email'] ) ) {
+				$order->hold_applied_coupons( $data['billing_email'] );
+			}
+
 			$order->set_created_via( 'checkout' );
 			$order->set_cart_hash( $cart_hash );
 			/**
@@ -1045,6 +1048,11 @@ class WC_Checkout {
 
 		// Store Order ID in session so it can be re-used after payment failure.
 		WC()->session->set( 'order_awaiting_payment', $order_id );
+
+		// We save the session early because if the payment gateway hangs
+		// the request will never finish, thus the session data will neved be saved,
+		// and this can lead to duplicate orders if the user submits the order again.
+		WC()->session->save_data();
 
 		// Process Payment.
 		$result = $available_gateways[ $payment_method ]->process_payment( $order_id );

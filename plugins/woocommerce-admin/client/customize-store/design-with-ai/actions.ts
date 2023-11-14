@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { assign, spawn, EventObject } from 'xstate';
+import { assign, spawn } from 'xstate';
 import {
 	getQuery,
 	updateQueryString,
@@ -18,7 +18,6 @@ import {
 	ColorPaletteResponse,
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
-	FontPairing,
 	LookAndToneCompletionResponse,
 	Header,
 	Footer,
@@ -30,6 +29,14 @@ import {
 	lookAndFeelCompleteEvent,
 	toneOfVoiceCompleteEvent,
 } from './pages';
+import { attachIframeListeners, onIframeLoad } from '../utils';
+
+const assignStartLoadingTime = assign<
+	designWithAiStateMachineContext,
+	designWithAiStateMachineEvents
+>( {
+	startLoadingTime: () => performance.now(),
+} );
 
 const assignBusinessInfoDescription = assign<
 	designWithAiStateMachineContext,
@@ -47,8 +54,9 @@ const assignLookAndFeel = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	lookAndFeel: ( _context, event: unknown ) => {
+	lookAndFeel: ( context, event: unknown ) => {
 		return {
+			...context.lookAndFeel,
 			choice: ( event as lookAndFeelCompleteEvent ).payload,
 		};
 	},
@@ -58,8 +66,9 @@ const assignToneOfVoice = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	toneOfVoice: ( _context, event: unknown ) => {
+	toneOfVoice: ( context, event: unknown ) => {
 		return {
+			...context.toneOfVoice,
 			choice: ( event as toneOfVoiceCompleteEvent ).payload,
 		};
 	},
@@ -73,12 +82,16 @@ const assignLookAndTone = assign<
 		return {
 			choice: ( event as { data: LookAndToneCompletionResponse } ).data
 				.look,
+			aiRecommended: ( event as { data: LookAndToneCompletionResponse } )
+				.data.look,
 		};
 	},
 	toneOfVoice: ( _context, event: unknown ) => {
 		return {
 			choice: ( event as { data: LookAndToneCompletionResponse } ).data
 				.tone,
+			aiRecommended: ( event as { data: LookAndToneCompletionResponse } )
+				.data.tone,
 		};
 	},
 } );
@@ -105,38 +118,25 @@ const assignFontPairing = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	aiSuggestions: ( context, event: unknown ) => {
-		if ( ( event as EventObject ).type === 'xstate.error' ) {
-			let fontPairing = context.aiSuggestions.fontPairing;
-			const choice = context.lookAndFeel.choice;
+	aiSuggestions: ( context ) => {
+		let fontPairing = context.aiSuggestions.fontPairing;
+		const choice = context.lookAndFeel.choice;
 
-			switch ( true ) {
-				case choice === 'Contemporary':
-					fontPairing = 'Inter + Inter';
-					break;
-				case choice === 'Classic':
-					fontPairing = 'Bodoni Moda + Overpass';
-					break;
-				case choice === 'Bold':
-					fontPairing = 'Rubik + Inter';
-					break;
-			}
-
-			return {
-				...context.aiSuggestions,
-				fontPairing,
-			};
+		switch ( true ) {
+			case choice === 'Contemporary':
+				fontPairing = 'Inter + Inter';
+				break;
+			case choice === 'Classic':
+				fontPairing = 'Bodoni Moda + Overpass';
+				break;
+			case choice === 'Bold':
+				fontPairing = 'Plus Jakarta Sans + Plus Jakarta Sans';
+				break;
 		}
 
 		return {
 			...context.aiSuggestions,
-			fontPairing: (
-				event as {
-					data: {
-						response: FontPairing;
-					};
-				}
-			 ).data.response.pair_name,
+			fontPairing,
 		};
 	},
 } );
@@ -223,6 +223,8 @@ const assignAPICallLoaderError = assign<
 	designWithAiStateMachineEvents
 >( {
 	apiCallLoader: () => {
+		recordEvent( 'customize_your_store_ai_wizard_error' );
+
 		return {
 			hasErrors: true,
 		};
@@ -290,15 +292,53 @@ const recordTracksStepCompleted = (
 	} );
 };
 
-const redirectToAssemblerHub = () => {
-	window.location.href = getNewPath(
-		{},
-		'/customize-store/assembler-hub',
-		{}
-	);
+const redirectToAssemblerHub = async (
+	context: designWithAiStateMachineContext
+) => {
+	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
+	const iframe = document.createElement( 'iframe' );
+	iframe.classList.add( 'cys-fullscreen-iframe' );
+	iframe.src = assemblerUrl;
+
+	const showIframe = () => {
+		if ( iframe.style.opacity === '1' ) {
+			// iframe is already visible
+			return;
+		}
+
+		const loader = document.getElementsByClassName(
+			'woocommerce-onboarding-loader'
+		);
+		if ( loader[ 0 ] ) {
+			( loader[ 0 ] as HTMLElement ).style.display = 'none';
+		}
+
+		iframe.style.opacity = '1';
+
+		if ( context.startLoadingTime ) {
+			const endLoadingTime = performance.now();
+			const timeToLoad = endLoadingTime - context.startLoadingTime;
+			recordEvent( 'customize_your_store_ai_wizard_loading_time', {
+				time_in_s: ( timeToLoad / 1000 ).toFixed( 2 ),
+			} );
+		}
+	};
+
+	iframe.onload = () => {
+		// Hide loading UI
+		attachIframeListeners( iframe );
+		onIframeLoad( showIframe );
+
+		// Ceiling wait time set to 60 seconds
+		setTimeout( showIframe, 60 * 1000 );
+		window.history?.pushState( {}, '', assemblerUrl );
+	};
+
+	document.body.appendChild( iframe );
 };
 
 export const actions = {
+	assignStartLoadingTime,
 	assignBusinessInfoDescription,
 	assignLookAndFeel,
 	assignToneOfVoice,

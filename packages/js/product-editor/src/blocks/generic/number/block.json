@@ -23,6 +23,19 @@
 		},
 		"placeholder": {
 			"type": "string"
+		},
+		"min": {
+			"type": "number"
+		},
+		"max": {
+			"type": "number"
+		},
+		"tooltip": {
+			"type": "string"
+		},
+		"required": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {

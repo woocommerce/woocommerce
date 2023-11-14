@@ -11,6 +11,7 @@ describe( 'colorPaletteValidator', () => {
 			secondary: '#8C8369',
 			foreground: '#11163d',
 			background: '#ffffff',
+			lookAndFeel: [ 'Contemporary', 'Classic' ],
 		};
 
 		const parsedResult = colorPaletteValidator.parse( validPalette );
@@ -24,6 +25,7 @@ describe( 'colorPaletteValidator', () => {
 			secondary: '#8C8369',
 			foreground: '#11163d',
 			background: '#ffffff',
+			lookAndFeel: [ 'Contemporary', 'Classic' ],
 		};
 		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -46,6 +48,7 @@ describe( 'colorPaletteValidator', () => {
 			secondary: '#8C8369',
 			foreground: '#11163d',
 			background: '#ffffff',
+			lookAndFeel: [ 'Contemporary', 'Classic' ],
 		};
 		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -69,6 +72,7 @@ describe( 'colorPaletteValidator', () => {
 			secondary: 'invalidColor',
 			foreground: '#11163d',
 			background: '#ffffff',
+			lookAndFeel: [ 'Contemporary', 'Classic' ],
 		};
 		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -92,6 +96,7 @@ describe( 'colorPaletteValidator', () => {
 			secondary: '11163d',
 			foreground: '#invalid_color',
 			background: '#ffffff',
+			lookAndFeel: [ 'Contemporary', 'Classic' ],
 		};
 		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -123,6 +128,7 @@ describe( 'colorPaletteValidator', () => {
 			secondary: '#11163d',
 			foreground: '#11163d',
 			background: '#fffff',
+			lookAndFeel: [ 'Contemporary', 'Classic' ],
 		};
 		expect( () => colorPaletteValidator.parse( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -138,15 +144,53 @@ describe( 'colorPaletteValidator', () => {
 		]"
 	` );
 	} );
+
+	it( 'should fail for an invalid Look and Feel', () => {
+		const invalidPalette = {
+			name: 'Ancient Bronze',
+			primary: '#11163d',
+			secondary: '#11163d',
+			foreground: '#11163d',
+			background: '#ffffff',
+			lookAndFeel: [ 'Contemporary', 'Classic', 'Invalid Look' ],
+		};
+		expect( () => colorPaletteValidator.parse( invalidPalette ) )
+			.toThrowErrorMatchingInlineSnapshot( `
+		"[
+		  {
+		    \\"received\\": \\"Invalid Look\\",
+		    \\"code\\": \\"invalid_enum_value\\",
+		    \\"options\\": [
+		      \\"Contemporary\\",
+		      \\"Classic\\",
+		      \\"Bold\\"
+		    ],
+		    \\"path\\": [
+		      \\"lookAndFeel\\",
+		      2
+		    ],
+		    \\"message\\": \\"Invalid enum value. Expected 'Contemporary' | 'Classic' | 'Bold', received 'Invalid Look'\\"
+		  }
+		]"
+	` );
+	} );
 } );
 
 describe( 'colorPaletteResponseValidator', () => {
+	const validPalette = {
+		default: 'Ancient Bronze',
+		bestColors: [
+			'Canary',
+			'Cinder',
+			'Rustic Rosewood',
+			'Lightning',
+			'Midnight Citrus',
+			'Purple Twilight',
+			'Fuchsia',
+			'Charcoal',
+		],
+	};
 	it( 'should validate a correct color palette response', () => {
-		const validPalette = {
-			default: 'Ancient Bronze',
-			bestColors: Array( 8 ).fill( 'Ancient Bronze' ),
-		};
-
 		const parsedResult =
 			defaultColorPalette.responseValidation( validPalette );
 		expect( parsedResult ).toEqual( validPalette );
@@ -154,10 +198,10 @@ describe( 'colorPaletteResponseValidator', () => {
 
 	it( 'should fail if array contains invalid color', () => {
 		const invalidPalette = {
-			default: 'Ancient Bronze',
-			bestColors: Array( 7 )
-				.fill( 'Ancient Bronze' )
-				.concat( [ 'Invalid Color' ] ),
+			default: validPalette.default,
+			bestColors: validPalette.bestColors
+				.slice( 0, 7 )
+				.concat( 'Invalid Color' ),
 		};
 		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -195,7 +239,7 @@ describe( 'colorPaletteResponseValidator', () => {
 	} );
 	it( 'should fail if default property is missing', () => {
 		const invalidPalette = {
-			bestColors: Array( 8 ).fill( 'Ancient Bronze' ),
+			bestColors: validPalette.bestColors,
 		};
 		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -216,7 +260,7 @@ describe( 'colorPaletteResponseValidator', () => {
 	it( 'should fail if bestColors array is not of length 8', () => {
 		const invalidPalette = {
 			default: 'Ancient Bronze',
-			bestColors: Array( 7 ).fill( 'Ancient Bronze' ),
+			bestColors: validPalette.bestColors.slice( 0, 7 ),
 		};
 		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
 			.toThrowErrorMatchingInlineSnapshot( `
@@ -231,6 +275,23 @@ describe( 'colorPaletteResponseValidator', () => {
 		    \\"path\\": [
 		      \\"bestColors\\"
 		    ]
+		  }
+		]"
+	` );
+	} );
+
+	it( 'should fail if there are duplicate colors', () => {
+		const invalidPalette = {
+			default: 'Ancient Bronze',
+			bestColors: Array( 8 ).fill( 'Ancient Bronze' ),
+		};
+		expect( () => defaultColorPalette.responseValidation( invalidPalette ) )
+			.toThrowErrorMatchingInlineSnapshot( `
+		"[
+		  {
+		    \\"code\\": \\"custom\\",
+		    \\"message\\": \\"Color palette names must be unique\\",
+		    \\"path\\": []
 		  }
 		]"
 	` );

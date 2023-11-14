@@ -1,9 +1,11 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
+import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
 import {
 	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
@@ -39,15 +41,24 @@ export function Edit( {
 				<HeadingTagName className="wp-block-woocommerce-product-section__heading">
 					<h2 className="wp-block-woocommerce-product-section__heading-title">
 						{ title }
+						{ description && (
+							<Tooltip
+								text={
+									<p
+										className="wp-block-woocommerce-product-section__heading-description"
+										dangerouslySetInnerHTML={ sanitizeHTML(
+											description
+										) }
+									/>
+								}
+								position={ 'bottom center' }
+								helperText={ __(
+									'View helper text',
+									'woocommerce'
+								) }
+							/>
+						) }
 					</h2>
-					{ description && (
-						<p
-							className="wp-block-woocommerce-product-section__heading-description"
-							dangerouslySetInnerHTML={ sanitizeHTML(
-								description
-							) }
-						/>
-					) }
 				</HeadingTagName>
 			) }
 

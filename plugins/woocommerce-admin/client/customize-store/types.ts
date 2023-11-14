@@ -39,4 +39,7 @@ export type customizeStoreStateMachineContext = {
 		customizeStoreTaskCompleted: boolean;
 		currentThemeIsAiGenerated: boolean;
 	};
+	transitionalScreen: {
+		hasCompleteSurvey: boolean;
+	};
 };

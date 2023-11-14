@@ -546,11 +546,6 @@ $tt2-gray: #f7f7f7;
 			padding: 0.7rem 2rem;
 		}
 	}
-
-	mark {
-		background: var(--wp--preset--color--secondary);
-		color: initial;
-	}
 }
 
 // Description/Additional info/Reviews tabs.
@@ -1013,19 +1008,6 @@ ul.wc-tabs {
 
 	.woocommerce-order > * {
 		margin-bottom: var(--wp--style--block-gap);
-	}
-
-	ul.woocommerce-order-overview {
-
-		li {
-			display: inline;
-			text-transform: uppercase;
-
-			strong {
-				text-transform: none;
-				display: block;
-			}
-		}
 	}
 
 	.woocommerce-customer-details {

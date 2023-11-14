@@ -29,8 +29,28 @@ export const ExampleSimpleLoader = () => (
 	</Loader>
 );
 
+export const ExampleNonLoopingLoader = () => (
+	<Loader>
+		<Loader.Layout>
+			<Loader.Illustration>
+				<img
+					src="https://placekitten.com/200/200"
+					alt="a cute kitteh"
+				/>
+			</Loader.Illustration>
+			<Loader.Title>Very Impressive Title</Loader.Title>
+			<Loader.ProgressBar progress={ 30 } />
+			<Loader.Sequence interval={ 1000 } shouldLoop={ false }>
+				<Loader.Subtext>Message 1</Loader.Subtext>
+				<Loader.Subtext>Message 2</Loader.Subtext>
+				<Loader.Subtext>Message 3</Loader.Subtext>
+			</Loader.Sequence>
+		</Loader.Layout>
+	</Loader>
+);
+
 /** <Loader> component story with controls */
-const Template = ( { progress, title, messages } ) => (
+const Template = ( { progress, title, messages, shouldLoop } ) => (
 	<Loader>
 		<Loader.Layout>
 			<Loader.Illustration>
@@ -41,7 +61,7 @@ const Template = ( { progress, title, messages } ) => (
 			</Loader.Illustration>
 			<Loader.Title>{ title }</Loader.Title>
 			<Loader.ProgressBar progress={ progress } />
-			<Loader.Sequence interval={ 1000 }>
+			<Loader.Sequence interval={ 1000 } shouldLoop={ shouldLoop }>
 				{ messages.map( ( message, index ) => (
 					<Loader.Subtext key={ index }>{ message }</Loader.Subtext>
 				) ) }
@@ -54,6 +74,7 @@ export const ExampleLoaderWithControls = Template.bind( {} );
 ExampleLoaderWithControls.args = {
 	title: 'Very Impressive Title',
 	progress: 30,
+	shouldLoop: true,
 	messages: [ 'Message 1', 'Message 2', 'Message 3' ],
 };
 
@@ -70,6 +91,9 @@ export default {
 				min: 0,
 				max: 100,
 			},
+		},
+		shouldLoop: {
+			control: 'boolean',
 		},
 		messages: {
 			control: 'object',

@@ -10,6 +10,8 @@ export const CUSTOMIZE_STORE_ONBOARDING_TOUR_HIDDEN =
 
 export const useOnboardingTour = () => {
 	const [ showWelcomeTour, setShowWelcomeTour ] = useState( true );
+	const [ isResizeHandleVisible, setIsResizeHandleVisible ] =
+		useState( true );
 
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { shouldTourBeShown } = useSelect( ( select ) => {
@@ -38,5 +40,7 @@ export const useOnboardingTour = () => {
 		shouldTourBeShown,
 		showWelcomeTour,
 		setShowWelcomeTour,
+		setIsResizeHandleVisible,
+		isResizeHandleVisible,
 	};
 };

@@ -19,10 +19,11 @@ import {
 	LookAndFeel,
 	ToneOfVoice,
 	ApiCallLoader,
+	AssembleHubLoader,
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
-import { defaultColorPalette, fontPairings } from './prompts';
+import { defaultColorPalette } from './prompts';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -61,6 +62,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 			},
 		},
 		context: {
+			startLoadingTime: null,
 			businessInfoDescription: {
 				descriptionText: '',
 			},
@@ -281,6 +283,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 								type: 'updateQueryStep',
 								step: 'api-call-loader',
 							},
+							'assignStartLoadingTime',
 						],
 						type: 'parallel',
 						states: {
@@ -323,35 +326,9 @@ export const designWithAiStateMachineDefinition = createMachine(
 								initial: 'pending',
 								states: {
 									pending: {
-										invoke: {
-											src: 'queryAiEndpoint',
-											data: ( context ) => {
-												return {
-													...fontPairings,
-													prompt: fontPairings.prompt(
-														context
-															.businessInfoDescription
-															.descriptionText,
-														context.lookAndFeel
-															.choice,
-														context.toneOfVoice
-															.choice
-													),
-												};
-											},
-											onDone: {
-												actions: [
-													'assignFontPairing',
-												],
-												target: 'success',
-											},
-											// If there's an error we don't want to block the user from proceeding.
-											onError: {
-												actions: [
-													'assignFontPairing',
-												],
-												target: 'success',
-											},
+										entry: [ 'assignFontPairing' ],
+										always: {
+											target: 'success',
 										},
 									},
 									success: { type: 'final' },
@@ -449,13 +426,17 @@ export const designWithAiStateMachineDefinition = createMachine(
 							},
 						},
 						onDone: {
-							actions: [
-								// Full redirect to the Assembler Hub to ensure the user see the new generated content.
-								'redirectToAssemblerHub',
-							],
+							target: '#designWithAi.showAssembleHub',
 						},
 					},
 				},
+			},
+			showAssembleHub: {
+				meta: {
+					component: AssembleHubLoader,
+				},
+				entry: [ 'redirectToAssemblerHub' ],
+				type: 'final',
 			},
 		},
 	},

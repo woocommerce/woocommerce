@@ -20,12 +20,14 @@ type Position =
 
 type TooltipProps = {
 	children?: JSX.Element | string;
+	helperText?: string;
 	position?: Position;
 	text: JSX.Element | string;
 };
 
 export const Tooltip: React.FC< TooltipProps > = ( {
 	children = <Icon icon={ help } />,
+	helperText = __( 'Help', 'woocommerce' ),
 	position = 'top center',
 	text,
 } ) => {
@@ -45,7 +47,7 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 						setIsPopoverVisible( true );
 					} }
 					onClick={ () => setIsPopoverVisible( ! isPopoverVisible ) }
-					label={ __( 'Help', 'woocommerce' ) }
+					label={ helperText }
 				>
 					{ children }
 				</Button>

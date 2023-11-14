@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render customer filter on HPOS orders on hook execution for backwards compat.

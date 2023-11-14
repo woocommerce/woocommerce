@@ -16,7 +16,7 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
-
+import { PluginArea } from '@wordpress/plugins';
 /**
  * Internal dependencies
  */
@@ -29,7 +29,11 @@ import {
 } from './intro';
 import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
-import { events as transitionalEvents } from './transitional';
+import {
+	events as transitionalEvents,
+	services as transitionalServices,
+	actions as transitionalActions,
+} from './transitional';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
@@ -38,6 +42,8 @@ import {
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
+import { navigateOrParent, attachParentListeners } from './utils';
+import useBodyClass from './hooks/use-body-class';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -65,7 +71,8 @@ const updateQueryStep = (
 };
 
 const redirectToWooHome = () => {
-	window.location.href = getNewPath( {}, '/', {} );
+	const url = getNewPath( {}, '/', {} );
+	navigateOrParent( window, url );
 };
 
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
@@ -98,6 +105,12 @@ const browserPopstateHandler =
 		};
 	};
 
+const CYSSpinner = () => (
+	<div className="woocommerce-customize-store__loading">
+		<Spinner />
+	</div>
+);
+
 export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
@@ -106,11 +119,13 @@ export const machineActions = {
 
 export const customizeStoreStateMachineActions = {
 	...introActions,
+	...transitionalActions,
 	...machineActions,
 };
 
 export const customizeStoreStateMachineServices = {
 	...introServices,
+	...transitionalServices,
 	browserPopstateHandler,
 	markTaskComplete,
 };
@@ -141,6 +156,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			activeThemeHasMods: false,
 			customizeStoreTaskCompleted: false,
 			currentThemeIsAiGenerated: false,
+		},
+		transitionalScreen: {
+			hasCompleteSurvey: false,
 		},
 	} as customizeStoreStateMachineContext,
 	invoke: {
@@ -278,12 +296,19 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					},
 				},
 				postAssemblerHub: {
-					invoke: {
-						src: 'markTaskComplete',
-						onDone: {
-							target: '#customizeStore.transitionalScreen',
+					invoke: [
+						{
+							src: 'markTaskComplete',
+							// eslint-disable-next-line xstate/no-ondone-outside-compound-state
+							onDone: {
+								target: '#customizeStore.transitionalScreen',
+							},
 						},
-					},
+						{
+							// Pre-fetch survey completed option so we can show the screen immediately.
+							src: 'fetchSurveyCompletedOption',
+						},
+					],
 				},
 			},
 			on: {
@@ -296,13 +321,38 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		transitionalScreen: {
-			entry: [ { type: 'updateQueryStep', step: 'transitional' } ],
-			meta: {
-				component: AssemblerHub,
-			},
-			on: {
-				GO_BACK_TO_HOME: {
-					actions: 'redirectToWooHome',
+			initial: 'preTransitional',
+			states: {
+				preTransitional: {
+					meta: {
+						component: CYSSpinner,
+					},
+					invoke: {
+						src: 'fetchSurveyCompletedOption',
+						onError: {
+							target: 'transitional', // leave it as initialised default on error
+						},
+						onDone: {
+							target: 'transitional',
+							actions: [ 'assignHasCompleteSurvey' ],
+						},
+					},
+				},
+				transitional: {
+					entry: [
+						{ type: 'updateQueryStep', step: 'transitional' },
+					],
+					meta: {
+						component: AssemblerHub,
+					},
+					on: {
+						GO_BACK_TO_HOME: {
+							actions: 'redirectToWooHome',
+						},
+						COMPLETE_SURVEY: {
+							actions: 'completeSurvey',
+						},
+					},
 				},
 			},
 		},
@@ -360,6 +410,14 @@ export const CustomizeStoreController = ( {
 		}
 	}, [ CurrentComponent, currentNodeMeta?.component ] );
 
+	// Run listeners for parent window.
+	useEffect( () => {
+		const removeListener = attachParentListeners();
+		return removeListener;
+	}, [] );
+
+	useBodyClass( 'is-fullscreen-mode' );
+
 	const currentNodeCssLabel =
 		state.value instanceof Object
 			? Object.keys( state.value )[ 0 ]
@@ -378,11 +436,11 @@ export const CustomizeStoreController = ( {
 						currentState={ state.value }
 					/>
 				) : (
-					<div className="woocommerce-customize-store__loading">
-						<Spinner />
-					</div>
+					<CYSSpinner />
 				) }
 			</div>
+			{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+			<PluginArea scope="woocommerce-customize-store" />
 		</>
 	);
 };
