@@ -1,14 +1,12 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-recommend_nvm=false
-
-if command -v nvm > /dev/null; then
-	nvm=$(command -v nvm)
+recommend_nvm=true
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+if command -v nvm >/dev/null 2>&1 && [ -f .nvmrc ]; then
+	recommend_nvm=false
 	nvm install
-    nvm use
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-	recommend_nvm=true
 fi
 
 pnpm install
