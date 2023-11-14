@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Disable focus on root block when using useWooBlockProps
