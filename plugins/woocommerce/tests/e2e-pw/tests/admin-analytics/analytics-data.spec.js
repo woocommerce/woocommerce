@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-test.describe.serial( 'Analytics-related tests', () => {
+test.describe( 'Analytics-related tests', () => {
 	let categoryIds, productIds, nowOrderIds, setupPage;
 
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -176,7 +176,12 @@ test.describe.serial( 'Analytics-related tests', () => {
 
 	test( 'downloads revenue report as CSV', async( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue' );
-
+		// FTUX tour on first run through
+		try {
+			await page.getByLabel('Close Tour').click( { timeout: 5000 } );
+		} catch (e) {
+			console.log( 'Tour was not visible, skipping.' );
+		}
 		const downloadPromise = page.waitForEvent( 'download' );
 		await page.getByRole( 'button', { name: 'Download' } ).click();
 		const download = await downloadPromise;
@@ -187,7 +192,7 @@ test.describe.serial( 'Analytics-related tests', () => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview' );
 
 		// assert that current month is shown and that values are for that
-		await expect( page.getByText( 'Month to date' ) ).toBeVisible();
+		await expect( page.getByText( 'Month to date' ).first() ).toBeVisible();
 		await expect( page.getByRole( 'menuitem', { name: 'Total sales $1,229.30 No change from Previous year:' } ) ).toBeVisible();
 		await expect( page.getByRole( 'menuitem', { name: 'Net sales $1,229.30 No change from Previous year:' } ) ).toBeVisible();
 		await expect( page.getByRole( 'menuitem', { name: 'Orders 10 No change from Previous year:' } ) ).toBeVisible();
