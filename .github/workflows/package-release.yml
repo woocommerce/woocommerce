@@ -7,10 +7,9 @@ on:
                 required: false
                 default: '-a'
             dry_run:
-                description: 'Perform all checks but don\'t actually make the release.'
+                description: 'Perform all checks but dont actually make the release.'
                 type: boolean
                 required: false
-                default: false
 
 permissions: {}
 
