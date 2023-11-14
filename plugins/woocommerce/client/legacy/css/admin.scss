@@ -8565,28 +8565,32 @@ table.bar_chart {
 		display: block;
 		text-decoration: none;
 		vertical-align: middle;
-		margin-top: -3px;
+		margin-top: -7px;
 		position: relative;
-		top: 3px;
+		top: 5px;
 
 		.toggle-text {
 			text-decoration: underline;
+
+			&.hide {
+				display: none;
+			}
 		}
 
 		.toggle-indicator {
 			font-family: dashicons;
 			font-size: 1.2em;
-			line-height: 1;
+			line-height: 1.6;
 			vertical-align: middle;
 		}
 
-		&[aria-expanded="true"] {
+		&[aria-expanded="false"] {
 			.toggle-indicator::before {
 				content: "\f140";
 			}
 		}
 
-		&[aria-expanded="false"] {
+		&[aria-expanded="true"] {
 			.toggle-indicator::before {
 				content: "\f142";
 			}

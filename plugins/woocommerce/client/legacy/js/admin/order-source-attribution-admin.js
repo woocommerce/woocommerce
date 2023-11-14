@@ -16,17 +16,16 @@ jQuery( document ).ready( ( $ ) => {
 
 			e.preventDefault();
 
+			$container.fadeToggle( 250 );
+			$this.find( '.toggle-text' ).toggle();
 			if ( $container.hasClass( 'closed' ) ) {
-				$container.removeClass( 'closed' );
-				$container.fadeIn( 250 );
 				$this.attr( 'aria-expanded', 'true' );
 				toggle = 'opened';
 			} else {
-				$container.addClass( 'closed' );
-				$container.fadeOut( 250 );
 				$this.attr( 'aria-expanded', 'false' );
 				toggle = 'closed';
 			}
+			$container.toggleClass( 'closed' );
 
 			window.wcTracks.recordEvent( 'order_source_attribution_details_toggle', {
 				order_id: window.woocommerce_admin_meta_boxes.order_id,

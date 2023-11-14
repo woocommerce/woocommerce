@@ -38,7 +38,8 @@ defined( 'ABSPATH' ) || exit;
 		<?php if ( $has_more_details ) : ?>
 
 			<a href="" class="woocommerce-order-source-attribution-details-toggle" aria-expanded="false">
-				<span class="toggle-text"><?php esc_html_e( 'Details', 'woocommerce' ); ?></span>
+				<span class="toggle-text show"><?php esc_html_e( 'Show details', 'woocommerce' ); ?></span>
+				<span class="toggle-text hide" aria-hidden="true"><?php esc_html_e( 'Hide details', 'woocommerce' ); ?></span>
 				<span class="toggle-indicator" aria-hidden="true"></span>
 			</a>
 		<?php endif; ?>
