@@ -45,6 +45,10 @@ class Init {
 			array_push( $this->supported_post_types, 'variable' );
 		}
 
+		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
+			array_push( $this->supported_post_types, 'external' );
+		}
+
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
