@@ -4,7 +4,7 @@
     "name": "woocommerce/product-gallery-large-image-next-previous",
     "version": "1.0.0",
     "title": "Next/Previous Buttons",
-    "description": "Dispaly next and previous buttons.",
+    "description": "Display next and previous buttons.",
     "category": "woocommerce",
     "keywords": [ "WooCommerce" ],
 	"usesContext": [ "nextPreviousButtonsPosition", "productGalleryClientId", "postId"],
