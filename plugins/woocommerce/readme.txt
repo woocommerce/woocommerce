@@ -1,8 +1,8 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski, wpmuguru, royho, barryhughes-1
 Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, checkout, payments, woo, woo commerce, e-commerce, store
-Requires at least: 6.2
-Tested up to: 6.3
+Requires at least: 6.3
+Tested up to: 6.4
 Requires PHP: 7.4
 Stable tag: 8.2.2
 License: GPLv3
@@ -251,6 +251,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Switch theme to TT3 during cys loading screen [#40486](https://github.com/woocommerce/woocommerce/pull/40486)
 * Add - This PR includes tiktok-for-business for core profiler free extension list [#40911](https://github.com/woocommerce/woocommerce/pull/40911)
 * Add - Use CYS AI suggestions to populate the color schemes in assembler hub color palette selection [#40377](https://github.com/woocommerce/woocommerce/pull/40377)
+* Update - Update required and tested up to WP versions for the WordPress 6.4 release. [#41409](https://github.com/woocommerce/woocommerce/pull/41409)
 * Update - Update WooCommerce Blocks to 11.4.2 [#41050](https://github.com/woocommerce/woocommerce/pull/41050)
 * Update - Add active theme label for CYS intro screen [#40824](https://github.com/woocommerce/woocommerce/pull/40824)
 * Update - Add Block Template API conditional visibility example to documentation. [#40883](https://github.com/woocommerce/woocommerce/pull/40883)
