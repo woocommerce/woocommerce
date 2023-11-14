@@ -229,21 +229,10 @@ module.exports = function ( grunt ) {
 				],
 			},
 			js: {
-				files: [
-					{
-						cwd: '<%= dirs.js %>/',
-						expand: true,
-						src: '**',
-						dest: '<%= dirs.jsDest %>/',
-					},
-					{
-						flatten: true,
-						expand: true,
-						src: 'node_modules/sourcebuster/dist/sourcebuster.js',
-						dest: '<%= dirs.jsDest %>/frontend/',
-						filter: 'isFile'
-					}
-				],
+				cwd: '<%= dirs.js %>/',
+				expand: true,
+				src: '**',
+				dest: '<%= dirs.jsDest %>/',
 			},
 		},
 	} );
