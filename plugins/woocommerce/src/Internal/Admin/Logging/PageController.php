@@ -567,69 +567,6 @@ class PageController {
 	}
 
 	/**
-	 * Format a search results line.
-	 *
-	 * @param string $file_id     The file ID that contains the matched line.
-	 * @param int    $line_number The line number of the matched line.
-	 * @param string $line        The matched line, with matched substrings highlighted.
-	 *
-	 * @return string
-	 */
-	private function format_match( string $file_id, int $line_number, string $line ): string {
-		$params = $this->get_query_params( array( 'search' ) );
-
-		// Add a word break after the rotation number, if it exists.
-		$file_id = preg_replace( '/\.([0-9])+\-/', '.\1<wbr>-', $file_id );
-
-		$match_url = add_query_arg(
-			array(
-				'view'    => 'single_file',
-				'file_id' => $file_id,
-			),
-			$this->get_logs_tab_url() . '#L' . absint( $line_number )
-		);
-
-		// Highlight matches within the line.
-		$pattern = preg_quote( $params['search'], '/' );
-		preg_match_all( "/$pattern/i", $line, $matches, PREG_OFFSET_CAPTURE );
-		if ( is_array( $matches[0] ) && count( $matches[0] ) >= 1 ) {
-			$length_change = 0;
-
-			foreach ( $matches[0] as $match ) {
-				$replace        = '<span class="search-match">' . $match[0] . '</span>';
-				$offset         = $match[1] + $length_change;
-				$orig_length    = strlen( $match[0] );
-				$replace_length = strlen( $replace );
-
-				$line = substr_replace( $line, $replace, $offset, $orig_length );
-
-				$length_change += $replace_length - $orig_length;
-			}
-		}
-
-		return sprintf(
-			'<span class="match">%1$s%2$s%3$s</span>',
-			sprintf(
-				'<span class="match-file">%s</span>',
-				wp_kses( $file_id, array( 'wbr' => array() ) )
-			),
-			sprintf(
-				'<a href="%1$s" class="match-anchor">%2$s</a>',
-				esc_url( $match_url ),
-				sprintf(
-					// translators: %s is a line number in a file.
-					esc_html__( 'Line %s', 'woocommerce' ),
-					number_format_i18n( absint( $line_number ) )
-				)
-			),
-			sprintf(
-				'<span class="match-content">%s</span>',
-				wp_kses_post( $line )
-			)
-		);
-	}
-
-	/**
 	 * Render a form for searching within log files.
 	 *
 	 * @return void
