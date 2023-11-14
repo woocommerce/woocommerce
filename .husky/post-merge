@@ -3,8 +3,9 @@
 
 recommend_nvm=true
 export NVM_DIR="$HOME/.nvm"
+export WOO_MONOREPO_ROOT=$(git rev-parse --show-toplevel)
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-if command -v nvm >/dev/null 2>&1 && [ -f .nvmrc ]; then
+if command -v nvm >/dev/null 2>&1 && [ -f "$WOO_MONOREPO_ROOT/.nvmrc" ]; then
 	recommend_nvm=false
 	nvm install
 fi
