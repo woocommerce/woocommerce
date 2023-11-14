@@ -14,10 +14,8 @@ import {
 	CartProvider,
 	noticeContexts,
 } from '@woocommerce/base-context';
-import {
-	SlotFillProvider,
-	StoreNoticesContainer,
-} from '@woocommerce/blocks-checkout';
+import { SlotFillProvider } from '@woocommerce/blocks-checkout';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies

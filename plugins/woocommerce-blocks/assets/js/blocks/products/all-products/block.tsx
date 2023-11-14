@@ -5,7 +5,7 @@ import { Component } from '@wordpress/element';
 import { ProductListContainer } from '@woocommerce/base-components/product-list';
 import { InnerBlockLayoutContextProvider } from '@woocommerce/shared-context';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
-import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { Attributes as ProductListAttributes } from 'assets/js/base/components/product-list/types';
 
 interface BlockProps {

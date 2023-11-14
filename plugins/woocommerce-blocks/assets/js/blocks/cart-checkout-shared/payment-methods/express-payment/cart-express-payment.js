@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useExpressPaymentMethods } from '@woocommerce/base-context/hooks';
 import { noticeContexts } from '@woocommerce/base-context';
-import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY, PAYMENT_STORE_KEY } from '@woocommerce/block-data';
