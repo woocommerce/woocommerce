@@ -41,9 +41,9 @@ class SourceAttribution {
 		}
 
 		$template_data = array(
-			'meta' => $meta,
+			'meta'             => $meta,
 			// Only show more details toggle if there is more than just the origin.
-			'has_more_details' => ['origin'] !== array_keys( $meta ),
+			'has_more_details' => array( 'origin' ) !== array_keys( $meta ),
 		);
 		wc_get_template( 'order/source-data-fields.php', $template_data );
 	}
