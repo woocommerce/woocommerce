@@ -33,6 +33,8 @@ function Iframe( {
 	expand = false,
 	readonly,
 	forwardedRef: ref,
+	loadStyles = true,
+	loadScripts = false,
 	...props
 } ) {
 	const [ iframeDocument, setIframeDocument ] = useState();
@@ -44,7 +46,7 @@ function Iframe( {
 			resolvedAssets: settings.__unstableResolvedAssets,
 		};
 	}, [] );
-	const { styles = '' } = resolvedAssets;
+	const { styles = '', scripts = '' } = resolvedAssets;
 
 	const [ contentResizeListener, { height: contentHeight } ] =
 		useResizeObserver();
@@ -65,8 +67,8 @@ function Iframe( {
 	<head>
 		<script>window.frameElement._load()</script>
 		<style>html{height:auto!important;min-height:100%;}body{margin:0}</style>
-		${ styles }
-
+		${ loadStyles ? styles : '' }
+		${ loadScripts ? scripts : '' }
 	</head>
 	<body>
 		<script>document.currentScript.parentElement.remove()</script>
