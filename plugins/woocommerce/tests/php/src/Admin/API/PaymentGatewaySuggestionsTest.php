@@ -44,13 +44,14 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 		// Clear any exisiting cache first
 		Init::delete_specs_transient();
 
-		$response_mock_ref = function( $preempt, $parsed_args, $url ) {
+		$current_base_country = wc_get_base_location()['country'];
+		$response_mock_ref = function( $preempt, $parsed_args, $url ) use ( $current_base_country ) {
 			if ( str_contains( $url, 'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/suggestions.json' ) ) {
 				return array(
 					'success' => true,
 					'body' => json_encode(array(
 						array(
-							'id' => wc_get_base_location()['country']
+							'id' => $current_base_country
 						)
 					))
 				);
@@ -64,7 +65,7 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 		$response = rest_get_server()->dispatch( $request )->get_data();
 
 		// Confirm the current data returns id = US
-		$this->assertEquals('US', $response[0]->id);
+		$this->assertEquals( $current_base_country , $response[0]->id);
 
 		// Remove filter just in case and a new request still returns the cached data
 		remove_filter( 'pre_http_request', $response_mock_ref );
@@ -82,5 +83,6 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 
 		// Clean up
 		remove_filter( 'pre_http_request', $response_mock_ref );
+
 	}
 }
