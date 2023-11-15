@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Use single quote instead of backspace for escaping in CSV exports.
+Use single quote instead of tab for escaping in CSV exports.
