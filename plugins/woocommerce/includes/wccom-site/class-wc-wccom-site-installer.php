@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce.com Product Installation.
+ * Woo.com Product Installation.
  *
  * @package WooCommerce\WCCom
  * @since   3.7.0
@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC_WCCOM_Site_Installer Class
  *
- * Contains functionalities to install products via WooCommerce.com helper connection.
+ * Contains functionalities to install products via Woo.com helper connection.
  */
 class WC_WCCOM_Site_Installer {
 
@@ -138,7 +138,7 @@ class WC_WCCOM_Site_Installer {
 		);
 
 		// Clear the cache of customer's subscription before asking for them.
-		// Thus, they will be re-fetched from WooCommerce.com after a purchase.
+		// Thus, they will be re-fetched from Woo.com after a purchase.
 		WC_Helper::_flush_subscriptions_cache();
 
 		WC()->queue()->cancel_all( 'woocommerce_wccom_install_products', $args );
@@ -282,7 +282,7 @@ class WC_WCCOM_Site_Installer {
 			'product_type' => '',
 		);
 
-		// Get product info from woocommerce.com.
+		// Get product info from Woo.com.
 		$request = WC_Helper_API::get(
 			add_query_arg(
 				array( 'product_id' => absint( $product_id ) ),
@@ -294,7 +294,7 @@ class WC_WCCOM_Site_Installer {
 		);
 
 		if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
-			return new WP_Error( 'product_info_failed', __( 'Failed to retrieve product info from woocommerce.com', 'woocommerce' ) );
+			return new WP_Error( 'product_info_failed', __( 'Failed to retrieve product info from Woo.com', 'woocommerce' ) );
 		}
 
 		$result = json_decode( wp_remote_retrieve_body( $request ), true );

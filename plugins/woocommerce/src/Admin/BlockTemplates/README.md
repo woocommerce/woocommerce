@@ -217,6 +217,18 @@ Removes a hide condition from the block, referenced by the key returned from `ad
 
 Get the hide conditions for the block.
 
+##### `add_disable_condition( string $expression ): string`
+
+Adds a disable condition to the block. Similar to `add_hide_condition()`, but the block is shown as disabled instead of hidden.
+
+##### `remove_disable_condition( string $key )`
+
+Removes a disable condition from the block, referenced by the key returned from `add_disable_condition()`.
+
+##### `get_disable_conditions(): array`
+
+Get the disable conditions for the block.
+
 ##### `get_formatted_template(): array`
 
 Get the block configuration as a formatted template.

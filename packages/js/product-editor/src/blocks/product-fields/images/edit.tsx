@@ -25,6 +25,7 @@ import { useEntityProp } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { ProductEditorBlockEditProps } from '../../../types';
+import { PlaceHolder } from './place-holder';
 
 type UploadImage = {
 	id?: number;
@@ -193,6 +194,11 @@ export function Edit( {
 		}
 	}
 
+	const isImageGalleryVisible =
+		propertyValue !== null &&
+		Array.isArray( propertyValue ) &&
+		propertyValue.length > 0;
+
 	return (
 		<div { ...blockProps }>
 			<div className="woocommerce-product-form__image-drop-zone">
@@ -236,7 +242,7 @@ export function Edit( {
 					/>
 				) }
 			</div>
-			{ propertyValue !== null && propertyValue !== undefined && (
+			{ isImageGalleryVisible ? (
 				<ImageGallery
 					allowDragging={ false }
 					onDragStart={ handleDragStart }
@@ -263,6 +269,8 @@ export function Edit( {
 						/>
 					) ) }
 				</ImageGallery>
+			) : (
+				<PlaceHolder />
 			) }
 		</div>
 	);

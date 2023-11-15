@@ -60,8 +60,10 @@ const StarRating = ( {
 };
 
 export const SurveyForm = ( {
+	onSend,
 	closeFunction,
 }: {
+	onSend: () => void;
 	closeFunction: CloseSurveyFunction;
 } ): JSX.Element => {
 	const [ isStreamlineChecked, setStreamlineChecked ] = useState( false );
@@ -83,7 +85,8 @@ export const SurveyForm = ( {
 			feedback: feedbackText,
 			spill_beans: spillBeansText,
 		} );
-		closeFunction();
+
+		onSend();
 		createSuccessNotice(
 			__(
 				"Thanks for the feedback. We'll put it to good use!",

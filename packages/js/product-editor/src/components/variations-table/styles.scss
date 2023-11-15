@@ -57,6 +57,7 @@ $table-row-height: calc($grid-unit * 9);
 		display: inline-flex;
 		flex-wrap: wrap;
 		gap: $grid-unit;
+		align-items: center;
 	}
 
 	&__loading {

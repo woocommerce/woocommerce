@@ -32,6 +32,7 @@ export function Edit( {
 		maxLength,
 		help,
 		tooltip,
+		disabled,
 	} = attributes;
 	const [ value, setValue ] = useProductEntityProp< string >( property, {
 		postType,
@@ -87,6 +88,7 @@ export function Edit( {
 		<div { ...blockProps }>
 			<TextControl
 				value={ value }
+				disabled={ disabled }
 				label={ label }
 				onChange={ setValue }
 				onBlur={ () => {
