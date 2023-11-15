@@ -288,7 +288,14 @@ const TreeSelectControl = ( {
 				option.children = children.reduce( reduceOptions, [] );
 
 				if ( ! option.children.length ) {
-					return acc;
+					if ( ! individuallySelectParent ) {
+						return acc;
+					}
+					const match = option.label.toLowerCase().indexOf( filter );
+					if ( match === -1 ) {
+						return acc;
+					}
+					option.label = highlightOptionLabel( option.label, match );
 				}
 			} else if ( isSearching ) {
 				const match = option.label.toLowerCase().indexOf( filter );
