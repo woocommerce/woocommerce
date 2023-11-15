@@ -1654,16 +1654,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function has_downloadable_item() {
+		$has_downloadable_item = false;
 		foreach ( $this->get_items() as $item ) {
 			if ( $item->is_type( 'line_item' ) ) {
 				$product = $item->get_product();
 
 				if ( $product && $product->has_file() ) {
-					return true;
+					$has_downloadable_item = true;
+					break;
 				}
 			}
 		}
-		return false;
+		return apply_filters( 'woocommerce_order_has_downloadable_item', $has_downloadable_item, $this );
 	}
 
 	/**
