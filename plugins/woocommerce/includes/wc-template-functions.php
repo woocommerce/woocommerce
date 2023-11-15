@@ -340,9 +340,9 @@ function wc_body_class( $classes ) {
 	}
 
 	if ( wc_current_theme_is_fse_theme() ) {
-		
+
 		$classes[] = 'woocommerce-uses-block-theme';
-		
+
 	}
 
 	if ( wc_block_theme_has_styles_for_element( 'button' ) ) {
