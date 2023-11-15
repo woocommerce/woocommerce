@@ -164,7 +164,13 @@ export const BlockEditor = ( {} ) => {
 					settings={ settings }
 					additionalStyles={ additionalStyles }
 					isNavigable={ false }
-					isScrollable={ currentState !== 'transitionalScreen' }
+					isScrollable={
+						// Disable scrollable for transitional screen
+						! (
+							typeof currentState === 'object' &&
+							currentState.transitionalScreen === 'transitional'
+						)
+					}
 					onClickNavigationItem={ onClickNavigationItem }
 					// Don't use sub registry so that we can get the logo block from the main registry on the logo sidebar navigation screen component.
 					useSubRegistry={ false }
