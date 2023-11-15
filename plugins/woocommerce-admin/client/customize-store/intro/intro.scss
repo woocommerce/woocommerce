@@ -109,14 +109,6 @@
 	width: 100%;
 	align-items: center;
 
-	.ai-disclaimer {
-		color: #757575 !important;
-		font-size: 12px;
-		a {
-			text-decoration: none;
-		}
-	}
-
 	&.offline-banner {
 		background: rgba(242, 237, 255, 0.6) url(../assets/images/intro-banner-offline.svg) no-repeat center right;
 		background-size: auto 218px;
@@ -191,6 +183,14 @@
 		p {
 			margin: 16px 0 28px 0;
 			color: #2f2f2f;
+
+			&.ai-disclaimer {
+				color: #757575;
+				font-size: 12px;
+				a {
+					text-decoration: none;
+				}
+			}
 		}
 	}
 }
