@@ -3,11 +3,7 @@
  */
 import { useState, useCallback, useEffect } from '@wordpress/element';
 import { AddressForm } from '@woocommerce/base-components/cart-checkout';
-import {
-	useCheckoutAddress,
-	useStoreEvents,
-	useEditorContext,
-} from '@woocommerce/base-context';
+import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import type {
 	ShippingAddress,
 	AddressField,
@@ -24,8 +20,10 @@ import AddressCard from '../../address-card';
 
 const CustomerAddress = ( {
 	addressFieldsConfig,
+	defaultEditing = false,
 }: {
 	addressFieldsConfig: Record< keyof AddressFields, Partial< AddressField > >;
+	defaultEditing?: boolean;
 } ) => {
 	const {
 		defaultAddressFields,
@@ -35,12 +33,7 @@ const CustomerAddress = ( {
 		useShippingAsBilling,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
-	const { isEditor } = useEditorContext();
-	const hasAddress = !! (
-		shippingAddress.address_1 &&
-		( shippingAddress.first_name || shippingAddress.last_name )
-	);
-	const [ editing, setEditing ] = useState( ! hasAddress || isEditor );
+	const [ editing, setEditing ] = useState( defaultEditing );
 
 	// Forces editing state if store has errors.
 	const { hasValidationErrors, invalidProps } = useSelect( ( select ) => {
