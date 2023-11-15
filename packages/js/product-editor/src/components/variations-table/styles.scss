@@ -40,7 +40,7 @@ $table-row-height: calc($grid-unit * 9);
 	}
 
 	&__table {
-		height: $table-row-height * 5;
+		min-height: $table-row-height * 5;
 		overflow: auto;
 	}
 
