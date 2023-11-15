@@ -3,6 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { queueRecordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -23,8 +24,18 @@ export default function RenewButton( props: RenewProps ) {
 		[ 'order_id', props.subscription.order_id.toString() ],
 	] );
 
+	function recordTracksEvent() {
+		queueRecordEvent( 'marketplace_renew_button_clicked', {
+			product_slug: props.subscription.product_slug,
+		} );
+	}
+
 	return (
-		<Button href={ renewUrl } variant={ props.variant ?? 'secondary' }>
+		<Button
+			href={ renewUrl }
+			variant={ props.variant ?? 'secondary' }
+			onClick={ recordTracksEvent }
+		>
 			{ __( 'Renew', 'woocommerce' ) }
 		</Button>
 	);

@@ -3,6 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { queueRecordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -20,8 +21,19 @@ export default function SubscribeButton( props: SubscribeProps ) {
 	const subscribeUrl = appendURLParams( MARKETPLACE_CART_PATH, [
 		[ 'add-to-cart', props.subscription.product_id.toString() ],
 	] );
+
+	function recordTracksEvent() {
+		queueRecordEvent( 'marketplace_subscribe_button_clicked', {
+			product_slug: props.subscription.product_slug,
+		} );
+	}
+
 	return (
-		<Button href={ subscribeUrl } variant={ props.variant ?? 'secondary' }>
+		<Button
+			href={ subscribeUrl }
+			variant={ props.variant ?? 'secondary' }
+			onClick={ recordTracksEvent }
+		>
 			{ __( 'Subscribe', 'woocommerce' ) }
 		</Button>
 	);
