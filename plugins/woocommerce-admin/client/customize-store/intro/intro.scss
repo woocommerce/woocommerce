@@ -183,6 +183,14 @@
 		p {
 			margin: 16px 0 28px 0;
 			color: #2f2f2f;
+
+			&.ai-disclaimer {
+				color: #757575;
+				font-size: 12px;
+				a {
+					text-decoration: none;
+				}
+			}
 		}
 	}
 }

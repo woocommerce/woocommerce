@@ -46,7 +46,7 @@ Cases when we use lower case:
 
 - “ecommerce” (not “eCommerce”)
 - email address — `info@woo.com`
-- website URL — `developer.woocommerce.com`
+- website URL — `developer.woo.com`
 
 ### Contractions
 

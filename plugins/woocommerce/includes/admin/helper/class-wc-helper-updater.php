@@ -1,6 +1,6 @@
 <?php
 /**
- * The update helper for WooCommerce.com plugins.
+ * The update helper for Woo.com plugins.
  *
  * @class WC_Helper_Updater
  * @package WooCommerce\Admin\Helper
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_Helper_Updater Class
  *
  * Contains the logic to fetch available updates and hook into Core's update
- * routines to serve WooCommerce.com-provided packages.
+ * routines to serve Woo.com-provided packages.
  */
 class WC_Helper_Updater {
 
@@ -89,7 +89,7 @@ class WC_Helper_Updater {
 
 	/**
 	 * Runs on pre_set_site_transient_update_themes, provides custom
-	 * packages for WooCommerce.com-hosted extensions.
+	 * packages for Woo.com-hosted extensions.
 	 *
 	 * @param object $transient The update_themes transient object.
 	 *
@@ -516,7 +516,7 @@ class WC_Helper_Updater {
 		return new WP_Error(
 			'woocommerce_subscription_expired',
 			sprintf(
-				// translators: %s: URL of WooCommerce.com subscriptions tab.
+				// translators: %s: URL of Woo.com subscriptions tab.
 				__( 'Please visit the <a href="%s" target="_blank">subscriptions page</a> and renew to continue receiving updates.', 'woocommerce' ),
 				esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) )
 			)
