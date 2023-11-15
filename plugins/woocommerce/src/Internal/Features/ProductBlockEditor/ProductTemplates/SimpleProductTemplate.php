@@ -237,7 +237,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'title'       => __( 'Buy button', 'woocommerce' ),
 						'description' => __( 'Add a link and choose a label for the button linked to a product sold elsewhere.', 'woocommerce' ),
 					),
-          'hideConditions' => array(
+					'hideConditions' => array(
 						array(
 							'expression' => 'editedProduct.type !== "external"',
 						),
@@ -256,23 +256,23 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'placeholder' => __( 'Enter the external URL to the product', 'woocommerce' ),
 						'suffix'      => true,
 						'type'        => array(
-              'value'   => 'url',
-              'message' => __( 'Link to the external product is an invalid URL.', 'woocommerce' ),
-            ),
+							'value'   => 'url',
+							'message' => __( 'Link to the external product is an invalid URL.', 'woocommerce' ),
+						),
 						'required'    => __( 'Link to the external product is required.', 'woocommerce' ),
 					),
 				)
 			);
 
-      $button_text_columns = $buy_button_section->add_block(
+			$button_text_columns = $buy_button_section->add_block(
 				array(
 					'id'        => 'product-button-text-columns',
 					'blockName' => 'core/columns',
 					'order'     => 20,
 				)
-      );
-      
-      $button_text_columns->add_block(
+			);
+
+			$button_text_columns->add_block(
 				array(
 					'id'        => 'product-button-text-column1',
 					'blockName' => 'core/column',
@@ -290,13 +290,13 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				)
 			);
 
-      $button_text_columns->add_block(
+			$button_text_columns->add_block(
 				array(
 					'id'        => 'product-button-text-column2',
 					'blockName' => 'core/column',
 					'order'     => 20,
 				)
-      );
+			);
 		}
 
 		// Images section.
