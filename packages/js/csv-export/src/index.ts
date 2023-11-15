@@ -22,7 +22,16 @@ function escapeCSVValue( value: string | number ) {
 	// Prevent CSV injection.
 	// See: https://owasp.org/www-community/attacks/CSV_Injection
 	// See: WC_CSV_Exporter::escape_data()
-	if ( [ '=', '+', '-', '@' ].includes( stringValue.charAt( 0 ) ) ) {
+	if (
+		[
+			'=',
+			'+',
+			'-',
+			'@',
+			String.fromCharCode( 0x09 ), // tab
+			String.fromCharCode( 0x0d ), // carriage return
+		].includes( stringValue.charAt( 0 ) )
+	) {
 		stringValue = '"\'' + stringValue + '"';
 	} else if ( stringValue.match( /[,"\s]/ ) ) {
 		stringValue = '"' + stringValue.replace( /"/g, '""' ) + '"';
