@@ -5,16 +5,11 @@
 -   [Overview](#overview)
 -   [Usage](#usage)
 -   [Selectors](#selectors)
-    -   [(@deprecated) isPaymentPristine](#deprecated-ispaymentpristine)
     -   [isPaymentIdle](#ispaymentidle)
-    -   [(@deprecated) isPaymentStarted](#deprecated-ispaymentstarted)
     -   [isExpressPaymentStarted](#isexpresspaymentstarted)
     -   [isPaymentProcessing](#ispaymentprocessing)
-    -   [(@deprecated) isPaymentSuccess](#deprecated-ispaymentsuccess)
     -   [isPaymentReady](#ispaymentready)
-    -   [(@deprecated) isPaymentFailed](#deprecated-ispaymentfailed)
     -   [hasPaymentError](#haspaymenterror)
-    -   [(@deprecated) getCurrentStatus](#deprecated-getcurrentstatus)
     -   [isExpressPaymentMethodActive](#isexpresspaymentmethodactive)
     -   [getActiveSavedToken](#getactivesavedtoken)
     -   [getActivePaymentMethod](#getactivepaymentmethod)
@@ -27,12 +22,76 @@
     -   [paymentMethodsInitialized](#paymentmethodsinitialized)
     -   [expressPaymentMethodsInitialized](#expresspaymentmethodsinitialized)
     -   [getPaymentResult](#getpaymentresult)
+    -   [(@deprecated) isPaymentPristine](#deprecated-ispaymentpristine)
+    -   [(@deprecated) isPaymentStarted](#deprecated-ispaymentstarted)
+    -   [(@deprecated) isPaymentSuccess](#deprecated-ispaymentsuccess)
+    -   [(@deprecated) isPaymentFailed](#deprecated-ispaymentfailed)
+    -   [(@deprecated) getCurrentStatus](#deprecated-getcurrentstatus)
 
 ## Overview
 
 The payment data store is used to store payment method data and payment processing information. When the payment status changes, the data store will reflect this.
 
-Currently, all the actions are internal-only while we determine which ones will be useful for extensions to interact with. We do not encourage extensions to dispatch actions onto this data store yet.
+**⚠️ Currently, all the actions are internal-only while we determine which ones will be useful for extensions to interact with. We do not encourage extensions to dispatch actions onto this data store yet.**
+
+An example of data held within the Payment Data Store is shown below. This example shows the state with several Payment Gateways active, and a saved token.
+
+```js
+{
+    status: 'idle',
+    activePaymentMethod: 'stripe',
+    activeSavedToken: '1',
+    availablePaymentMethods: {
+      bacs: {
+        name: 'bacs'
+      },
+      cheque: {
+        name: 'cheque'
+      },
+      cod: {
+        name: 'cod'
+      },
+      stripe: {
+        name: 'stripe'
+      }
+    },
+     availableExpressPaymentMethods: {
+      payment_request: {
+        name: 'payment_request'
+      }
+    },
+    savedPaymentMethods: {
+      cc: [
+        {
+          method: {
+            gateway: 'stripe',
+            last4: '4242',
+            brand: 'Visa'
+          },
+          expires: '12/32',
+          is_default: true,
+          actions: {
+            'delete': {
+              url: 'https://store.local/checkout/delete-payment-method/1/?_wpnonce=123456',
+              name: 'Delete'
+            }
+          },
+          tokenId: 1
+        }
+      ]
+    },
+    paymentMethodData: {
+      token: '1',
+      payment_method: 'stripe',
+      'wc-stripe-payment-token': '1',
+      isSavedToken: true
+    },
+    paymentResult: null,
+    paymentMethodsInitialized: true,
+    expressPaymentMethodsInitialized: true,
+    shouldSavePaymentMethod: false
+}
+```
 
 ## Usage
 
@@ -44,26 +103,9 @@ const { PAYMENT_STORE_KEY } = window.wc.wcBlocksData;
 
 ## Selectors
 
-### (@deprecated) isPaymentPristine
-
-Queries if the status is `pristine`
-
-> ⚠️ This selector is deprecated and will be removed in a future release. Please use `isPaymentIdle` instead.
-
-#### _Returns_ <!-- omit in toc -->
-
--   `boolean`: True if the payment status is `pristine`, false otherwise.
-
-#### _Example_ <!-- omit in toc -->
-
-```js
-const store = select( 'wc/store/payment' );
-const isPaymentPristine = store.isPaymentPristine();
-```
-
 ### isPaymentIdle
 
-Queries if the status is `idle`
+Queries if the status is `idle`.
 
 #### _Returns_ <!-- omit in toc -->
 
@@ -74,23 +116,6 @@ Queries if the status is `idle`
 ```js
 const store = select( 'wc/store/payment' );
 const isPaymentIdle = store.isPaymentIdle();
-```
-
-### (@deprecated) isPaymentStarted
-
-Queries if the status is `started`.
-
-> ⚠️ This selector is deprecated and will be removed in a future release. Please use `isExpressPaymentStarted` instead.
-
-#### _Returns_ <!-- omit in toc -->
-
--   `boolean`: True if the payment status is `started`, false otherwise.
-
-#### _Example_ <!-- omit in toc -->
-
-```js
-const store = select( 'wc/store/payment' );
-const isPaymentStarted = store.isPaymentStarted();
 ```
 
 ### isExpressPaymentStarted
@@ -123,23 +148,6 @@ const store = select( 'wc/store/payment' );
 const isPaymentProcessing = store.isPaymentProcessing();
 ```
 
-### (@deprecated) isPaymentSuccess
-
-Queries if the status is `success`.
-
-> ⚠️ This selector is deprecated and will be removed in a future release. Please use isPaymentReady instead.
-
-#### _Returns_ <!-- omit in toc -->
-
--   `boolean`: True if the payment status is `success`, false otherwise.
-
-#### _Example_ <!-- omit in toc -->
-
-```js
-const store = select( 'wc/store/payment' );
-const isPaymentSuccess = store.isPaymentSuccess();
-```
-
 ### isPaymentReady
 
 Queries if the status is `ready`.
@@ -155,23 +163,6 @@ const store = select( 'wc/store/payment' );
 const isPaymentReady = store.isPaymentReady();
 ```
 
-### (@deprecated) isPaymentFailed
-
-Queries if the status is `failed`.
-
-> ⚠️ This selector is deprecated and will be removed in a future release. Please use `hasPaymentError` instead.
-
-#### _Returns_ <!-- omit in toc -->
-
--   `boolean`: True if the payment status is `failed`, false otherwise.
-
-#### _Example_ <!-- omit in toc -->
-
-```js
-const store = select( 'wc/store/payment' );
-const isPaymentFailed = store.isPaymentFailed();
-```
-
 ### hasPaymentError
 
 Queries if the status is `error`.
@@ -185,30 +176,6 @@ Queries if the status is `error`.
 ```js
 const store = select( 'wc/store/payment' );
 const hasPaymentError = store.hasPaymentError();
-```
-
-### (@deprecated) getCurrentStatus
-
-Returns an object with booleans representing the payment status.
-
-> ⚠️ This selector is deprecated and will be removed in a future release. Please use the selectors above.
-
-#### _Returns_ <!-- omit in toc -->
-
--   `object`: The current payment status with the following keys:
-    -   _isPristine_ `boolean`: True if the payment process has not started, does not have an error and has not finished. This is true initially.
-    -   _isStarted_ `boolean`: True if the payment process has started.
-    -   _isProcessing_ `boolean`: True if the payment is processing.
-    -   _hasError_ `boolean`: True if the payment process has resulted in an error.
-    -   _hasFailed_ `boolean`: True if the payment process has failed.
-    -   _isSuccessful_ `boolean`: True if the payment process is successful.
-    -   _isDoingExpressPayment_ `boolean`: True if an express payment method is active, false otherwise
-
-#### _Example_ <!-- omit in toc -->
-
-```js
-const store = select( 'wc/store/payment' );
-const currentStatus = store.getCurrentStatus();
 ```
 
 ### isExpressPaymentMethodActive
@@ -455,7 +422,7 @@ const expressPaymentMethodsInitialized =
 
 ### getPaymentResult
 
-Returns the result of the last payment attempt
+Returns the result of the last payment attempt.
 
 #### _Returns_ <!-- omit in toc -->
 
@@ -475,6 +442,98 @@ Returns the result of the last payment attempt
 ```js
 const store = select( 'wc/store/payment' );
 const paymentResult = store.getPaymentResult();
+```
+
+### (@deprecated) isPaymentPristine
+
+Queries if the status is `pristine`.
+
+> ⚠️ This selector is deprecated and will be removed in a future release. Please use `isPaymentIdle` instead.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `boolean`: True if the payment status is `pristine`, false otherwise.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( 'wc/store/payment' );
+const isPaymentPristine = store.isPaymentPristine();
+```
+
+### (@deprecated) isPaymentStarted
+
+Queries if the status is `started`.
+
+> ⚠️ This selector is deprecated and will be removed in a future release. Please use `isExpressPaymentStarted` instead.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `boolean`: True if the payment status is `started`, false otherwise.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( 'wc/store/payment' );
+const isPaymentStarted = store.isPaymentStarted();
+```
+
+### (@deprecated) isPaymentSuccess
+
+Queries if the status is `success`.
+
+> ⚠️ This selector is deprecated and will be removed in a future release. Please use `isPaymentReady` instead.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `boolean`: True if the payment status is `success`, false otherwise.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( 'wc/store/payment' );
+const isPaymentSuccess = store.isPaymentSuccess();
+```
+
+### (@deprecated) isPaymentFailed
+
+Queries if the status is `failed`.
+
+> ⚠️ This selector is deprecated and will be removed in a future release. Please use `hasPaymentError` instead.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `boolean`: True if the payment status is `failed`, false otherwise.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( 'wc/store/payment' );
+const isPaymentFailed = store.isPaymentFailed();
+```
+
+### (@deprecated) getCurrentStatus
+
+Returns an object with booleans representing the payment status.
+
+> ⚠️ This selector is deprecated and will be removed in a future release. Please use the selectors above.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `object`: The current payment status with the following keys:
+    -   _isPristine_ `boolean`: True if the payment process has not started, does not have an error and has not finished. This is true initially.
+    -   _isStarted_ `boolean`: True if the payment process has started.
+    -   _isProcessing_ `boolean`: True if the payment is processing.
+    -   _hasError_ `boolean`: True if the payment process has resulted in an error.
+    -   _hasFailed_ `boolean`: True if the payment process has failed.
+    -   _isSuccessful_ `boolean`: True if the payment process is successful.
+    -   _isDoingExpressPayment_ `boolean`: True if an express payment method is active, false otherwise
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( 'wc/store/payment' );
+const currentStatus = store.getCurrentStatus();
 ```
 
 <!-- FEEDBACK -->
