@@ -251,11 +251,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'blockName'  => 'woocommerce/product-text-field',
 					'order'      => 10,
 					'attributes' => array(
-						'property' => 'external_url',
-						'label'    => __( 'Link to the external product', 'woocommerce' ),
-						'type'     => 'url',
-						'suffix'   => true,
-						'required' => true,
+						'property'    => 'external_url',
+						'label'       => __( 'Link to the external product', 'woocommerce' ),
+						'placeholder' => __( 'Enter the external URL to the product', 'woocommerce' ),
+						'type'        => 'url',
+						'suffix'      => true,
+						'required'    => true,
 					),
 				)
 			);
@@ -282,7 +283,6 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'attributes' => array(
 						'property' => 'button_text',
 						'label'    => __( 'Buy button text', 'woocommerce' ),
-						'required' => true,
 					),
 				)
 			);
