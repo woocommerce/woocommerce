@@ -51,7 +51,7 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 					'success' => true,
 					'body' => json_encode(array(
 						array(
-							'id' => $current_base_country
+							'id' => wc_get_base_location()['country']
 						)
 					))
 				);
