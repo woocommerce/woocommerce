@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
 use Automattic\Jetpack\Constants;
+use WC_Cache_Helper;
 use WP_Error;
 
 /**
@@ -46,6 +47,13 @@ class FileController {
 	 * @const int
 	 */
 	public const SEARCH_MAX_RESULTS = 500;
+
+	/**
+	 * A cache key for storing and retrieving the results of the last logs search.
+	 *
+	 * @const string
+	 */
+	private const SEARCH_CACHE_KEY = 'logs_previous_search';
 
 	/**
 	 * The absolute path to the log directory.
@@ -354,40 +362,57 @@ class FileController {
 			)
 		);
 
-		$files = $this->get_files( $file_args );
-		if ( is_wp_error( $files ) ) {
-			return $files;
-		}
+		$cache_key = WC_Cache_Helper::get_prefixed_key( self::SEARCH_CACHE_KEY, 'logs' );
+		$query     = wp_json_encode( array( $search, $args, $file_args ) );
+		$cache     = wp_cache_get( $cache_key );
+		$is_cached = isset( $cache['query'], $cache['results'] ) && $query === $cache['query'];
 
-		$matched_lines = array();
-
-		foreach ( $files as $file ) {
-			$stream      = $file->get_stream();
-			$line_number = 1;
-
-			while ( ! feof( $stream ) ) {
-				$line = fgets( $stream );
-				if ( ! is_string( $line ) ) {
-					continue;
-				}
-
-				$line = esc_html( trim( $line ) );
-				if ( false !== stripos( $line, $search ) ) {
-					$matched_lines[] = array(
-						'file_id'     => $file->get_file_id(),
-						'line_number' => $line_number,
-						'line'        => $line,
-					);
-				}
-
-				if ( count( $matched_lines ) > self::SEARCH_MAX_RESULTS ) {
-					break 2;
-				}
-
-				$line_number ++;
+		if ( true === $is_cached ) {
+			$matched_lines = $cache['results'];
+		} else {
+			$files = $this->get_files( $file_args );
+			if ( is_wp_error( $files ) ) {
+				return $files;
 			}
 
-			$file->close_stream();
+			$matched_lines = array();
+
+			foreach ( $files as $file ) {
+				$stream      = $file->get_stream();
+				$line_number = 1;
+
+				while ( ! feof( $stream ) ) {
+					$line = fgets( $stream, 5 * KB_IN_BYTES );
+					if ( ! is_string( $line ) ) {
+						continue;
+					}
+
+					$sanitized_line = esc_html( trim( $line ) );
+					if ( false !== stripos( $sanitized_line, $search ) ) {
+						$matched_lines[] = array(
+							'file_id'     => $file->get_file_id(),
+							'line_number' => $line_number,
+							'line'        => $sanitized_line,
+						);
+					}
+
+					if ( count( $matched_lines ) > self::SEARCH_MAX_RESULTS ) {
+						break 2;
+					}
+
+					if ( false !== strstr( $line, PHP_EOL ) ) {
+						$line_number ++;
+					}
+				}
+
+				$file->close_stream();
+			}
+
+			$to_cache = array(
+				'query'   => $query,
+				'results' => $matched_lines,
+			);
+			wp_cache_set( $cache_key, $to_cache, 'logs', DAY_IN_SECONDS );
 		}
 
 		if ( true === $count_only ) {
