@@ -9,13 +9,20 @@
 .woocommerce-marketplace__refresh-subscriptions {
 	text-decoration: none;
 	color: #007cba;
+	.woocommerce-marketplace__refresh-subscriptions-icon {
+		margin-right: $grid-unit-05;
+	}
 
 	&.is-busy {
 		@keyframes spin {
-			0% { transform: rotate(0deg); }
-			100% { transform: rotate(360deg); }
-		  }
-		.woocommerce-marketplace__refresh-subscriptions__icon {
+			0% {
+				transform: rotate(0deg);
+			}
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+		.woocommerce-marketplace__refresh-subscriptions-icon {
 			animation: spin 2s linear infinite;
 		}
 	}

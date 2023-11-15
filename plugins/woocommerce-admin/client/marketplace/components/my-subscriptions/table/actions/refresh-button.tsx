@@ -71,7 +71,7 @@ export function RefreshButton() {
 			<img
 				src={ RefreshIcon }
 				alt={ __( 'Refresh subscriptions', 'woocommerce' ) }
-				className="woocommerce-marketplace__refresh-subscriptions__icon"
+				className="woocommerce-marketplace__refresh-subscriptions-icon"
 			/>
 			{ __( 'Refresh', 'woocommerce' ) }
 		</Button>
