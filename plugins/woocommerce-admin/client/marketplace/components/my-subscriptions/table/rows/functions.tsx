@@ -143,6 +143,16 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 export function expiry( subscription: Subscription ): TableRow {
 	const expiryDate = subscription.expires;
 
+	if (
+		subscription.local.installed === true &&
+		subscription.product_key === ''
+	) {
+		return {
+			display: '',
+			value: '',
+		};
+	}
+
 	let expiryDateElement = __( 'Never expires', 'woocommerce' );
 
 	if ( expiryDate ) {
