@@ -1024,7 +1024,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// Parse the data.
 		foreach ( $this->raw_data as $row_index => $row ) {
 			// Skip empty rows.
-			if ( ! count( array_filter( $row ) ) ) {
+			if ( ! count( (array) array_filter( $row ) ) ) {
 				continue;
 			}
 

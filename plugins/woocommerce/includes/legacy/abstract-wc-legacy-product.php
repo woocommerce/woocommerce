@@ -515,7 +515,8 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_total_stock() {
 		wc_deprecated_function( 'WC_Product::get_total_stock', '3.0', 'get_stock_quantity on each child. Beware of performance issues in doing so.' );
-		if ( sizeof( $this->get_children() ) > 0 ) {
+		$children_count = is_countable( $this->get_children() ) ? count( $this->get_children() ) : 0;
+		if ( $children_count > 0 ) {
 			$total_stock = max( 0, $this->get_stock_quantity() );
 
 			foreach ( $this->get_children() as $child_id ) {

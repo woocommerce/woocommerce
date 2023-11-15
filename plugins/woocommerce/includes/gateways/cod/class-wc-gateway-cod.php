@@ -154,12 +154,15 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			$order    = wc_get_order( $order_id );
 
 			// Test if order needs shipping.
-			if ( $order && 0 < count( $order->get_items() ) ) {
-				foreach ( $order->get_items() as $item ) {
-					$_product = $item->get_product();
-					if ( $_product && $_product->needs_shipping() ) {
-						$needs_shipping = true;
-						break;
+			if ( $order ) {
+				$items_count = is_countable( $order->get_items() ) ? count( $order->get_items() ) : 0;
+				if ( 0 < $items_count ) {
+					foreach ( $order->get_items() as $item ) {
+						$_product = $item->get_product();
+						if ( $_product && $_product->needs_shipping() ) {
+							$needs_shipping = true;
+							break;
+						}
 					}
 				}
 			}
@@ -183,7 +186,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				$canonical_rate_ids = $this->get_canonical_package_rate_ids( $chosen_shipping_methods_session );
 			}
 
-			if ( ! count( $this->get_matching_rates( $canonical_rate_ids ) ) ) {
+			$canonical_rate_ids_count = is_countable( $this->get_matching_rates( $canonical_rate_ids ) ) ? count( $this->get_matching_rates( $canonical_rate_ids ) ) : 0;
+			if ( ! $canonical_rate_ids_count ) {
 				return false;
 			}
 		}
@@ -236,6 +240,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
 		$raw_zones  = $data_store->get_zones();
+		$zones = [];
 
 		foreach ( $raw_zones as $raw_zone ) {
 			$zones[] = new WC_Shipping_Zone( $raw_zone );

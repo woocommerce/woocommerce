@@ -68,8 +68,9 @@ class WC_Privacy_Exporters {
 		}
 
 		$orders = wc_get_orders( $order_query );
+		$orders_count = is_countable( $orders ) ? count( $orders ) : 0;
 
-		if ( 0 < count( $orders ) ) {
+		if ( 0 < $orders_count ) {
 			foreach ( $orders as $order ) {
 				$data_to_export[] = array(
 					'group_id'          => 'woocommerce_orders',
@@ -79,7 +80,7 @@ class WC_Privacy_Exporters {
 					'data'              => self::get_order_personal_data( $order ),
 				);
 			}
-			$done = 10 > count( $orders );
+			$done = 10 > $orders_count;
 		}
 
 		return array(
@@ -116,8 +117,9 @@ class WC_Privacy_Exporters {
 		$customer_download_data_store     = WC_Data_Store::load( 'customer-download' );
 		$customer_download_log_data_store = WC_Data_Store::load( 'customer-download-log' );
 		$downloads                        = $customer_download_data_store->get_downloads( $downloads_query );
+		$downloads_count                  = is_countable( $downloads ) ? count( $downloads ) : 0;
 
-		if ( 0 < count( $downloads ) ) {
+		if ( 0 < $downloads_count ) {
 			foreach ( $downloads as $download ) {
 				$data_to_export[] = array(
 					'group_id'          => 'woocommerce_downloads',
@@ -154,7 +156,7 @@ class WC_Privacy_Exporters {
 					);
 				}
 			}
-			$done = 10 > count( $downloads );
+			$done = 10 > $downloads_count;
 		}
 
 		return array(
@@ -415,8 +417,9 @@ class WC_Privacy_Exporters {
 				'page'    => $page,
 			)
 		);
+		$tokens_count = is_countable( $tokens ) ? count( $tokens ) : 0;
 
-		if ( 0 < count( $tokens ) ) {
+		if ( 0 < $tokens_count ) {
 			foreach ( $tokens as $token ) {
 				$data_to_export[] = array(
 					'group_id'          => 'woocommerce_tokens',
@@ -431,7 +434,7 @@ class WC_Privacy_Exporters {
 					),
 				);
 			}
-			$done = 10 > count( $tokens );
+			$done = 10 > $tokens_count;
 		} else {
 			$done = true;
 		}

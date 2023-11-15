@@ -90,7 +90,8 @@ class WC_Structured_Data {
 
 		// Wrap the multiple values of each type inside a graph... Then add context to each type.
 		foreach ( $data as $type => $value ) {
-			$data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
+			$count = is_countable( $value ) ? count( $value ) : 0;
+			$data[ $type ] = $count > 1 ? array( '@graph' => $value ) : $value[0];
 			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + $data[ $type ];
 		}
 
@@ -238,7 +239,7 @@ class WC_Structured_Data {
 						'@type'      => 'AggregateOffer',
 						'lowPrice'   => wc_format_decimal( $lowest, wc_get_price_decimals() ),
 						'highPrice'  => wc_format_decimal( $highest, wc_get_price_decimals() ),
-						'offerCount' => count( $product->get_children() ),
+						'offerCount' => is_countable( $product->get_children() ) ? count( $product->get_children() ) : 0,
 					);
 				}
 			} else {

@@ -418,11 +418,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$result = WC_Gateway_Paypal_API_Handler::refund_transaction( $order, $amount, $reason );
 
 		if ( is_wp_error( $result ) ) {
-			$this->log( 'Refund Failed: ' . $result->get_error_message(), 'error' );
+			static::log( 'Refund Failed: ' . $result->get_error_message(), 'error' );
 			return new WP_Error( 'error', $result->get_error_message() );
 		}
 
-		$this->log( 'Refund Result: ' . wc_print_r( $result, true ) );
+		static::log( 'Refund Result: ' . wc_print_r( $result, true ) );
 
 		switch ( strtolower( $result->ACK ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			case 'success':
@@ -450,13 +450,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 
 			if ( is_wp_error( $result ) ) {
-				$this->log( 'Capture Failed: ' . $result->get_error_message(), 'error' );
+				static::log( 'Capture Failed: ' . $result->get_error_message(), 'error' );
 				/* translators: %s: Paypal gateway error message */
 				$order->add_order_note( sprintf( __( 'Payment could not be captured: %s', 'woocommerce' ), $result->get_error_message() ) );
 				return;
 			}
 
-			$this->log( 'Capture Result: ' . wc_print_r( $result, true ) );
+			static::log( 'Capture Result: ' . wc_print_r( $result, true ) );
 
 			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			if ( ! empty( $result->PAYMENTSTATUS ) ) {

@@ -188,7 +188,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 				// Get possible values for this attribute, for only visible variations.
 				if ( ! empty( $child_ids ) ) {
-					$format     = array_fill( 0, count( $child_ids ), '%d' );
+					$child_ids_count = is_countable( $child_ids ) ? count( $child_ids ) : 0;
+					$format     = array_fill( 0, $child_ids_count, '%d' );
 					$query_in   = '(' . implode( ',', $format ) . ')';
 					$query_args = array( 'attribute_name' => wc_variation_attribute_name( $attribute['name'] ) ) + $child_ids;
 					$values     = array_unique(
@@ -440,7 +441,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			return false;
 		}
 
-		$format   = array_fill( 0, count( $children ), '%d' );
+		$children_count = is_countable( $children ) ? count( $children ) : 0;
+		$format   = array_fill( 0, $children_count, '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
 
 		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN {$query_in}", $children ) ); // @codingStandardsIgnoreLine.
@@ -461,7 +463,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			return false;
 		}
 
-		$format   = array_fill( 0, count( $children ), '%d' );
+		$children_count = is_countable( $children ) ? count( $children ) : 0;
+		$format   = array_fill( 0, $children_count, '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
 
 		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN {$query_in}", $children ) ); // @codingStandardsIgnoreLine.
@@ -494,7 +497,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$children = $product->get_children();
 
 		if ( $children ) {
-			$format     = array_fill( 0, count( $children ), '%d' );
+			$children_count = is_countable( $children ) ? count( $children ) : 0;
+			$format     = array_fill( 0, $children_count, '%d' );
 			$query_in   = '(' . implode( ',', $format ) . ')';
 			$query_args = array( 'stock_status' => $status ) + $children;
 			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
@@ -560,8 +564,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$changed  = false;
 
 			if ( $children ) {
+				$children_count   = is_countable( $children ) ? count( $children ) : 0;
 				$status           = $product->get_stock_status();
-				$format           = array_fill( 0, count( $children ), '%d' );
+				$format           = array_fill( 0, $children_count, '%d' );
 				$query_in         = '(' . implode( ',', $format ) . ')';
 				$managed_children = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN {$query_in}", $children ) ) ); // @codingStandardsIgnoreLine.
 				foreach ( $managed_children as $managed_child ) {
@@ -592,7 +597,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 		$children = $product->get_visible_children();
 		if ( $children ) {
-			$format   = array_fill( 0, count( $children ), '%d' );
+			$children_count = is_countable( $children ) ? count( $children ) : 0;
+			$format   = array_fill( 0, $children_count, '%d' );
 			$query_in = '(' . implode( ',', $format ) . ')';
 			$prices   = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN {$query_in}", $children ) ) ); // @codingStandardsIgnoreLine.
 		} else {
