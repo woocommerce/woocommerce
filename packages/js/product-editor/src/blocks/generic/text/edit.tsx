@@ -92,6 +92,7 @@ export function Edit( {
 		if ( suffix && type === 'url' && value && ! error ) {
 			return (
 				<Link
+					type="external"
 					href={ value }
 					target="_blank"
 					rel="noreferrer"
