@@ -125,13 +125,7 @@ final class CollectionFilters extends AbstractBlock {
 		);
 
 		if ( ! empty( $response['body'] ) ) {
-			$normalized_response = array();
-
-			foreach ( $response['body'] as $key => $data ) {
-				$normalized_response[ $key ] = (array) $data;
-			}
-
-			return $normalized_response;
+			return json_decode( wp_json_encode( $response['body'] ), true );
 		}
 
 		return array();

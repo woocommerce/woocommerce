@@ -1,4 +1,10 @@
-import { useContext, useMemo, useEffect, useLayoutEffect } from 'preact/hooks';
+import {
+	useContext,
+	useMemo,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+} from 'preact/hooks';
 import { deepSignal, peek } from 'deepsignal';
 import { useSignalEffect } from './utils';
 import { directive } from './hooks';
@@ -7,18 +13,16 @@ import { prefetch, navigate } from './router';
 const isObject = ( item ) =>
 	item && typeof item === 'object' && ! Array.isArray( item );
 
-const mergeDeepSignals = ( target, source ) => {
+const mergeDeepSignals = ( target, source, overwrite ) => {
 	for ( const k in source ) {
-		if ( typeof peek( target, k ) === 'undefined' ) {
-			target[ `$${ k }` ] = source[ `$${ k }` ];
-		} else if (
-			isObject( peek( target, k ) ) &&
-			isObject( peek( source, k ) )
-		) {
+		if ( isObject( peek( target, k ) ) && isObject( peek( source, k ) ) ) {
 			mergeDeepSignals(
 				target[ `$${ k }` ].peek(),
-				source[ `$${ k }` ].peek()
+				source[ `$${ k }` ].peek(),
+				overwrite
 			);
+		} else if ( overwrite || typeof peek( target, k ) === 'undefined' ) {
+			target[ `$${ k }` ] = source[ `$${ k }` ];
 		}
 	}
 };
@@ -29,20 +33,24 @@ export default () => {
 		'context',
 		( {
 			directives: {
-				context: { default: context },
+				context: { default: newContext },
 			},
 			props: { children },
-			context: inherited,
+			context: inheritedContext,
 		} ) => {
-			const { Provider } = inherited;
-			const inheritedValue = useContext( inherited );
-			const value = useMemo( () => {
-				const localValue = deepSignal( context );
-				mergeDeepSignals( localValue, inheritedValue );
-				return localValue;
-			}, [ context, inheritedValue ] );
+			const { Provider } = inheritedContext;
+			const inheritedValue = useContext( inheritedContext );
+			const currentValue = useRef( deepSignal( {} ) );
+			currentValue.current = useMemo( () => {
+				const newValue = deepSignal( newContext );
+				mergeDeepSignals( newValue, inheritedValue );
+				mergeDeepSignals( currentValue.current, newValue, true );
+				return currentValue.current;
+			}, [ newContext, inheritedValue ] );
 
-			return <Provider value={ value }>{ children }</Provider>;
+			return (
+				<Provider value={ currentValue.current }>{ children }</Provider>
+			);
 		},
 		{ priority: 5 }
 	);
@@ -87,9 +95,17 @@ export default () => {
 	// data-wc-on--[event]
 	directive( 'on', ( { directives: { on }, element, evaluate, context } ) => {
 		const contextValue = useContext( context );
+		const events = new Map();
 		Object.entries( on ).forEach( ( [ name, path ] ) => {
-			element.props[ `on${ name }` ] = ( event ) => {
-				evaluate( path, { event, context: contextValue } );
+			const event = name.split( '--' )[ 0 ];
+			if ( ! events.has( event ) ) events.set( event, new Set() );
+			events.get( event ).add( path );
+		} );
+		events.forEach( ( paths, event ) => {
+			element.props[ `on${ event }` ] = ( event ) => {
+				paths.forEach( ( path ) => {
+					evaluate( path, { event, context: contextValue } );
+				} );
 			};
 		} );
 	} );

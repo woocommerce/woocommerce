@@ -52,6 +52,9 @@
 			"@woocommerce/blocks-registry": [ "assets/js/blocks-registry" ],
 			"@woocommerce/blocks-checkout": [ "packages/checkout" ],
 			"@woocommerce/blocks-components": [ "packages/components" ],
+			"@woocommerce/interactivity-components/*": [
+				"packages/interactivity-components/*"
+			],
 			"@woocommerce/price-format": [ "packages/prices" ],
 			"@woocommerce/block-settings": [ "assets/js/settings/blocks" ],
 			"@woocommerce/icons": [ "assets/js/icons" ],
