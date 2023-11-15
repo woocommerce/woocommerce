@@ -106,8 +106,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 							<h2 className="woocommerce-marketplace__product-card__title">
 								<a
 									className="woocommerce-marketplace__product-card__link"
-									// href={ product.url }
-									href="#"
+									href={ product.url }
 									rel="noopener noreferrer"
 									onClick={ () => {
 										queueRecordEvent(
