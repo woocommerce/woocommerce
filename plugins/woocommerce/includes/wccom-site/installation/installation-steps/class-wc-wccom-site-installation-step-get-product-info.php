@@ -40,7 +40,7 @@ class WC_WCCOM_Site_Installation_Step_Get_Product_Info implements WC_WCCOM_Site_
 	public function run() {
 		$product_id = $this->state->get_product_id();
 
-		// Get product info from woocommerce.com.
+		// Get product info from Woo.com.
 		$request = WC_Helper_API::get(
 			add_query_arg(
 				array( 'product_id' => $product_id ),

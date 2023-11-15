@@ -38,7 +38,7 @@ global.fetch = jest.fn().mockImplementation( () =>
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
 const confirmModalText =
-	"We'll import images from woocommerce.com to set up your sample products.";
+	"We'll import images from Woo.com to set up your sample products.";
 
 describe( 'Products', () => {
 	beforeEach( () => {

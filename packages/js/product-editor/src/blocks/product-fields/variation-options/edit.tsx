@@ -87,7 +87,7 @@ export function Edit( {
 				),
 				globalAttributeLink: (
 					<Link
-						href="https://woocommerce.com/document/variable-product/#add-attributes-to-use-for-variations"
+						href="https://woo.com/document/variable-product/#add-attributes-to-use-for-variations"
 						type="external"
 						target="_blank"
 					/>

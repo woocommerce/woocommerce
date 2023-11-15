@@ -142,6 +142,14 @@
 	padding: 0 12px;
 }
 
+.woocommerce-marketplace__my-subscriptions .woocommerce-table.is-empty {
+	background: none;
+	border: 1px solid var(--gutenberg-gray-100, #f0f0f0);
+	flex-direction: column;
+	gap: $grid-unit-15;
+	margin-top: $grid-unit-30;
+}
+
 .woocommerce-marketplace__my-subscriptions .components-button.is-link {
 	text-decoration: none;
 	padding: 6px 12px;

@@ -6,6 +6,8 @@ import classNames from 'classnames';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+import interpolateComponents from '@automattic/interpolate-components';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -56,6 +58,23 @@ export const BaseIntroBanner = ( {
 						</Button>
 					) }
 					{ secondaryButton }
+					<p className="ai-disclaimer">
+						{ interpolateComponents( {
+							mixedString: __(
+								'Powered by experimental AI. {{link}}Learn more{{/link}}',
+								'woocommerce'
+							),
+							components: {
+								link: (
+									<Link
+										href="https://automattic.com/ai-guidelines"
+										target="_blank"
+										type="external"
+									/>
+								),
+							},
+						} ) }
+					</p>
 				</div>
 				{ children }
 			</div>
