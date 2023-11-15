@@ -20,10 +20,10 @@ import AddressCard from '../../address-card';
 
 const CustomerAddress = ( {
 	addressFieldsConfig,
-	forceEditing = false,
+	defaultEditing = false,
 }: {
 	addressFieldsConfig: Record< keyof AddressFields, Partial< AddressField > >;
-	forceEditing?: boolean;
+	defaultEditing?: boolean;
 } ) => {
 	const {
 		defaultAddressFields,
@@ -33,11 +33,7 @@ const CustomerAddress = ( {
 		useBillingAsShipping,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
-	const hasAddress = !! (
-		billingAddress.address_1 &&
-		( billingAddress.first_name || billingAddress.last_name )
-	);
-	const [ editing, setEditing ] = useState( ! hasAddress || forceEditing );
+	const [ editing, setEditing ] = useState( defaultEditing );
 
 	// Forces editing state if store has errors.
 	const { hasValidationErrors, invalidProps } = useSelect( ( select ) => {
@@ -47,8 +43,9 @@ const CustomerAddress = ( {
 			invalidProps: Object.keys( billingAddress )
 				.filter( ( key ) => {
 					return (
+						key !== 'email' &&
 						store.getValidationError( 'billing_' + key ) !==
-						undefined
+							undefined
 					);
 				} )
 				.filter( Boolean ),
