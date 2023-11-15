@@ -86,15 +86,22 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		// set shipping zone methods
 		await api.post( `shipping/zones/${ shippingZoneNLId }/methods`, {
 			method_id: 'free_shipping',
+			settings: {
+				title: 'Free shipping',
+			}
 		} );
 		await api.post( `shipping/zones/${ shippingZonePTId }/methods`, {
 			method_id: 'flat_rate',
 			settings: {
 				cost: '5.00',
+				title: 'Flat rate',
 			},
 		} );
 		await api.post( `shipping/zones/${ shippingZonePTId }/methods`, {
 			method_id: 'local_pickup',
+			settings: {
+				title: 'Local pickup',
+			}
 		} );
 
 		// confirm that we allow shipping to any country
