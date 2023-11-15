@@ -237,6 +237,10 @@ class Edit {
 		// Order updated message.
 		$this->message = 1;
 
+		// Claim lock.
+		$edit_lock = wc_get_container()->get( EditLock::class );
+		$edit_lock->lock( $this->order );
+
 		$this->redirect_order( $this->order );
 	}
 
@@ -385,6 +389,9 @@ class Edit {
 		 * @since 8.0.0
 		 */
 		do_action( 'order_edit_form_top', $this->order );
+
+		wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false );
+		wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
 		?>
 		<input type="hidden" id="hiddenaction" name="action" value="<?php echo esc_attr( $form_action ); ?>"/>
 		<input type="hidden" id="original_order_status" name="original_order_status" value="<?php echo esc_attr( $this->order->get_status() ); ?>"/>

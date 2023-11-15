@@ -2,7 +2,7 @@
 	"name": "woocommerce-monorepo",
 	"title": "WooCommerce Monorepo",
 	"description": "Monorepo for the WooCommerce ecosystem",
-	"homepage": "https://woocommerce.com/",
+	"homepage": "https://woo.com/",
 	"engines": {
 		"node": "^16.14.1",
 		"pnpm": "^8.6.7"

@@ -86,7 +86,7 @@ export function Edit( {
 
 	const [ categories ] = useEntityProp< PartialProduct[ 'categories' ] >(
 		'postType',
-		'product',
+		context.postType,
 		'categories'
 	);
 	const [ shippingClass, setShippingClass ] = useEntityProp< string >(

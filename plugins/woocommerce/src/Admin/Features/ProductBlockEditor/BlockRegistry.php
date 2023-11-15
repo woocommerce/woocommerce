@@ -23,7 +23,7 @@ class BlockRegistry {
 	/**
 	 * Array of all available generic blocks.
 	 */
-	const GENERIC_BLOCKS = [
+	const GENERIC_BLOCKS = array(
 		'woocommerce/conditional',
 		'woocommerce/product-checkbox-field',
 		'woocommerce/product-collapsible',
@@ -35,12 +35,12 @@ class BlockRegistry {
 		'woocommerce/product-taxonomy-field',
 		'woocommerce/product-text-field',
 		'woocommerce/product-number-field',
-	];
+	);
 
 	/**
 	 * Array of all available product fields blocks.
 	 */
-	const PRODUCT_FIELDS_BLOCKS = [
+	const PRODUCT_FIELDS_BLOCKS = array(
 		'woocommerce/product-catalog-visibility-field',
 		'woocommerce/product-description-field',
 		'woocommerce/product-downloads-field',
@@ -61,7 +61,7 @@ class BlockRegistry {
 		'woocommerce/product-password-field',
 		'woocommerce/product-has-variations-notice',
 		'woocommerce/product-single-variation-notice',
-	];
+	);
 
 	/**
 	 * Get a file path for a given block file.
@@ -127,6 +127,57 @@ class BlockRegistry {
 	}
 
 	/**
+	 * Augment the attributes of a block by adding attributes that are used by the product editor.
+	 *
+	 * @param array $attributes Block attributes.
+	 */
+	private function augment_attributes( $attributes ) {
+		// Note: If you modify this function, also update the client-side
+		// registerWooBlockType function in @woocommerce/block-templates.
+		return array_merge(
+			$attributes,
+			array(
+				'_templateBlockId'                => array(
+					'type'               => 'string',
+					'__experimentalRole' => 'content',
+				),
+				'_templateBlockOrder'             => array(
+					'type'               => 'integer',
+					'__experimentalRole' => 'content',
+				),
+				'_templateBlockHideConditions'    => array(
+					'type'               => 'array',
+					'__experimentalRole' => 'content',
+				),
+				'_templateBlockDisableConditions' => array(
+					'type'               => 'array',
+					'__experimentalRole' => 'content',
+				),
+				'disabled'                        => isset( $attributes['disabled'] ) ? $attributes['disabled'] : array(
+					'type'               => 'boolean',
+					'__experimentalRole' => 'content',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Augment the uses_context of a block by adding attributes that are used by the product editor.
+	 *
+	 * @param array $uses_context Block uses_context.
+	 */
+	private function augment_uses_context( $uses_context ) {
+		// Note: If you modify this function, also update the client-side
+		// registerProductEditorBlockType function in @woocommerce/product-editor.
+		return array_merge(
+			isset( $uses_context ) ? $uses_context : array(),
+			array(
+				'postType',
+			)
+		);
+	}
+
+	/**
 	 * Register a single block.
 	 *
 	 * @param string $block_name Block name.
@@ -154,7 +205,13 @@ class BlockRegistry {
 			$registry->unregister( $metadata['name'] );
 		}
 
-		return register_block_type_from_metadata( $block_json_file );
+		return register_block_type_from_metadata(
+			$block_json_file,
+			array(
+				'attributes'   => $this->augment_attributes( isset( $metadata['attributes'] ) ? $metadata['attributes'] : array() ),
+				'uses_context' => $this->augment_uses_context( isset( $metadata['usesContext'] ) ? $metadata['usesContext'] : array() ),
+			)
+		);
 	}
 
 }

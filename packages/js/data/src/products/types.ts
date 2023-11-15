@@ -31,6 +31,7 @@ export type ProductDownload = {
 export type ProductAttribute = {
 	id: number;
 	name: string;
+	slug: string;
 	position: number;
 	visible: boolean;
 	variation: boolean;

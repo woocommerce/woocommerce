@@ -44,7 +44,7 @@ export const recordTracksThemeSelected = (
 		{ type: 'SELECTED_ACTIVE_THEME' | 'SELECTED_NEW_THEME' }
 	>
 ) => {
-	recordEvent( 'wcadmin_customize_your_store_intro_theme_select', {
+	recordEvent( 'customize_your_store_intro_theme_select', {
 		theme: event.payload.theme,
 		is_active: event.type === 'SELECTED_ACTIVE_THEME' ? 'yes' : 'no',
 	} );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Check if $data['billing_email'] is set in the create_order function.

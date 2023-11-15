@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Make sure 'woocommerce_update_order' is always triggered even when no changes are made to the order.

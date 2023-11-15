@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow null value in cost field for multichannel campaign.

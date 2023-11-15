@@ -51,6 +51,7 @@ export function Edit( {
 		createTitle,
 		dialogNameHelpText,
 		parentTaxonomyText,
+		disabled,
 	} = attributes;
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
@@ -105,6 +106,7 @@ export function Edit( {
 					}
 					label={ label }
 					isLoading={ isResolving }
+					disabled={ disabled }
 					multiple
 					createValue={ searchValue }
 					onInputChange={ searchDelayed }

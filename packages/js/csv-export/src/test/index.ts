@@ -33,9 +33,16 @@ describe( 'generateCSVDataFromTable', () => {
 		);
 	} );
 
-	it( 'should prefix tab character when the cell value starts with one of =, +, -, and @', () => {
-		[ '=', '+', '-', '@' ].forEach( ( val ) => {
-			const expected = 'value\n"\t' + val + 'test"';
+	it( 'should prefix single quote character when the cell value starts with one of =, +, -, @, tab, and carriage return', () => {
+		[
+			'=',
+			'+',
+			'-',
+			'@',
+			String.fromCharCode( 0x09 ), // tab
+			String.fromCharCode( 0x0d ), // carriage return
+		].forEach( ( val ) => {
+			const expected = 'value\n"\'' + val + 'test"';
 			const result = generateCSVDataFromTable(
 				[
 					{

@@ -2,10 +2,8 @@
  * External dependencies
  */
 import { BlockEditProps } from '@wordpress/blocks';
-import { Product } from '@woocommerce/data';
 
 export interface ProductEditorContext {
-	editedProduct: Product;
 	postId: number;
 	postType: string;
 	selectedTab: string | null;
@@ -15,4 +13,10 @@ export interface ProductEditorContext {
 export interface ProductEditorBlockEditProps< T extends Record< string, any > >
 	extends BlockEditProps< T > {
 	readonly context: ProductEditorContext;
+}
+
+export interface Metadata< T > {
+	id?: number;
+	key: string;
+	value?: T;
 }

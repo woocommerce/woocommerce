@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "153b28fe288733c8aed87718fd6a3792",
+    "content-hash": "27393699927a70878b830621857eea8c",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -1004,16 +1004,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "11.3.1",
+            "version": "11.5.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "52d88c715572d98596c0160a1cfb896a253d6b85"
+                "reference": "a701cbe4466b36a572a0daf7f7363ec23bfdff45"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/52d88c715572d98596c0160a1cfb896a253d6b85",
-                "reference": "52d88c715572d98596c0160a1cfb896a253d6b85",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/a701cbe4466b36a572a0daf7f7363ec23bfdff45",
+                "reference": "a701cbe4466b36a572a0daf7f7363ec23bfdff45",
                 "shasum": ""
             },
             "require": {
@@ -1029,7 +1029,7 @@
                 "nikic/php-parser": "4.16.0 as 1.0.0",
                 "phpdocumentor/reflection": "3.0.1",
                 "phpunit/php-code-coverage": "9.2.29",
-                "phpunit/phpunit": "9.6.10",
+                "phpunit/phpunit": "9.6.13",
                 "woocommerce/woocommerce-sniffs": "0.1.3",
                 "wp-hooks/generator": "0.9.0",
                 "yoast/phpunit-polyfills": "2.0.0"
@@ -1064,9 +1064,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v11.3.1"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v11.5.4"
             },
-            "time": "2023-10-17T13:36:56+00:00"
+            "time": "2023-11-13T14:34:45+00:00"
         }
     ],
     "packages-dev": [

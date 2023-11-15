@@ -3,6 +3,10 @@
  */
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
+/**
+ * Internal dependencies
+ */
+import { Metadata } from '../types';
 
 type EntityEdits = {
 	[ key: string ]: unknown;
@@ -42,6 +46,15 @@ export function useProductEdits( productType = <string>'product' ) {
 	);
 
 	function hasEdit( fieldName: string ) {
+		if ( fieldName.startsWith( 'meta_data.' ) ) {
+			const metaKey = fieldName.replace( 'meta_data.', '' );
+			return (
+				edits.hasOwnProperty( 'meta_data' ) &&
+				( edits.meta_data as Metadata< unknown >[] ).findIndex(
+					( value ) => value.key === metaKey
+				) !== -1
+			);
+		}
 		return edits.hasOwnProperty( fieldName );
 	}
 

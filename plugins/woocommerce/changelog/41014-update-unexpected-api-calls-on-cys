@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add flags to control visibility of  Header, StoreAlerts, Notices, and PluginArea components at the page configuration level.

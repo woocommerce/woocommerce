@@ -19,12 +19,15 @@ export const ThemeCard = ( {
 	total_palettes = 0,
 	link_url = '',
 	is_active = false,
-}: TypeThemeCard ) => {
+	onClick,
+}: TypeThemeCard & {
+	onClick: () => void;
+} ) => {
 	return (
 		<div className="theme-card" key={ slug }>
 			<div>
 				{ link_url ? (
-					<Link href={ link_url }>
+					<Link href={ link_url } onClick={ onClick }>
 						<img src={ thumbnail_url } alt={ description } />
 					</Link>
 				) : (
