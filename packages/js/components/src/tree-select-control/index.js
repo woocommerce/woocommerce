@@ -330,7 +330,16 @@ const TreeSelectControl = ( {
 		}
 
 		if ( ENTER === event.key ) {
-			setTreeVisible( true );
+			if ( treeVisible === false ) {
+				setTreeVisible( true );
+			} else {
+				const elements = focus.focusable
+					.find( dropdownRef.current )
+					.filter( ( el ) => el.type === 'checkbox' );
+				const currentIndex = elements.indexOf( event.target );
+				const index = Math.max( currentIndex, -1 ) % elements.length;
+				elements.at( index ).click();
+			}
 			event.preventDefault();
 		}
 
