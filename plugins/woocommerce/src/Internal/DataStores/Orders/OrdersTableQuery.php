@@ -106,7 +106,7 @@ class OrdersTableQuery {
 	 *
 	 * @var array
 	 */
-	private $results = array();
+	private $orders = array();
 
 	/**
 	 * Final SQL query to run after processing of args.
@@ -172,6 +172,13 @@ class OrdersTableQuery {
 	private $order_datastore = null;
 
 	/**
+	 * Whether to run filters to modify the query or not.
+	 *
+	 * @var boolean
+	 */
+	private $suppress_filters = false;
+
+	/**
 	 * Sets up and runs the query after processing arguments.
 	 *
 	 * @param array $args Array of query vars.
@@ -183,13 +190,66 @@ class OrdersTableQuery {
 		$this->tables   = $this->order_datastore::get_all_table_names_with_id();
 		$this->mappings = $this->order_datastore->get_all_order_column_mappings();
 
+		$this->suppress_filters = array_key_exists( 'suppress_filters', $args ) ? (bool) $args['suppress_filters'] : false;
+		unset( $args['suppress_filters'] );
+
 		$this->args = $args;
 
 		// TODO: args to be implemented.
 		unset( $this->args['customer_note'], $this->args['name'] );
 
 		$this->build_query();
-		$this->run_query();
+		if ( ! $this->maybe_override_query() ) {
+			$this->run_query();
+		}
+	}
+
+	/**
+	 * Lets the `woocommerce_hpos_pre_query` filter override the query.
+	 *
+	 * @return boolean Whether the query was overridden or not.
+	 */
+	private function maybe_override_query(): bool {
+		/**
+		 * Filters the orders array before the query takes place.
+		 *
+		 * Return a non-null value to bypass the HPOS default order queries.
+		 *
+		 * If the query includes limits via the `limit`, `page`, or `offset` arguments, we
+		 * encourage the `found_orders` and `max_num_pages` properties to also be set.
+		 *
+		 * @since 8.2.0
+		 *
+		 * @param array|null $order_data {
+		 *     An array of order data.
+		 *     @type int[] $orders        Return an array of order IDs data to short-circuit the HPOS query,
+		 *                                or null to allow HPOS to run its normal query.
+		 *     @type int   $found_orders  The number of orders found.
+		 *     @type int   $max_num_pages The number of pages.
+		 * }
+		 * @param OrdersTableQuery   $query The OrdersTableQuery instance.
+		 * @param string             $sql The OrdersTableQuery instance.
+		 */
+		$pre_query = apply_filters( 'woocommerce_hpos_pre_query', null, $this, $this->sql );
+		if ( ! $pre_query || ! isset( $pre_query[0] ) || ! is_array( $pre_query[0] ) ) {
+			return false;
+		}
+
+		// If the filter set the orders, make sure the others values are set as well and skip running the query.
+		list( $this->orders, $this->found_orders, $this->max_num_pages ) = $pre_query;
+
+		if ( ! is_int( $this->found_orders ) || $this->found_orders < 1 ) {
+			$this->found_orders = count( $this->orders );
+		}
+
+		if ( ! is_int( $this->max_num_pages ) || $this->max_num_pages < 1 ) {
+			if ( ! $this->arg_isset( 'limit' ) || ! is_int( $this->args['limit'] ) || $this->args['limit'] < 1 ) {
+				$this->args['limit'] = 10;
+			}
+			$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
+		}
+
+		return true;
 	}
 
 	/**
@@ -277,22 +337,22 @@ class OrdersTableQuery {
 	 * YYYY-MM-DD queries have 'day' precision for backwards compatibility.
 	 *
 	 * @param mixed  $date The date. Can be a {@see \WC_DateTime}, a timestamp or a string.
-	 * @param string $timezone The timezone to use for the date.
 	 * @return array An array with keys 'year', 'month', 'day' and possibly 'hour', 'minute' and 'second'.
 	 */
-	private function date_to_date_query_arg( $date, $timezone ): array {
+	private function date_to_date_query_arg( $date ): array {
 		$result    = array(
 			'year'  => '',
 			'month' => '',
 			'day'   => '',
 		);
-		$precision = 'second';
 
 		if ( is_numeric( $date ) ) {
-			$date = new \WC_DateTime( "@{$date}", new \DateTimeZone( $timezone ) );
+			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
+			$precision = 'second';
 		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
-			// YYYY-MM-DD queries have 'day' precision for backwards compat.
-			$date      = wc_string_to_datetime( $date );
+			// For backwards compat (see https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date)
+			// only YYYY-MM-DD is considered for date values. Timestamps do support second precision.
+			$date      = wc_string_to_datetime( date( 'Y-m-d', strtotime( $date ) ) );
 			$precision = 'day';
 		}
 
@@ -304,6 +364,80 @@ class OrdersTableQuery {
 			$result['hour']   = $date->date( 'H' );
 			$result['minute'] = $date->date( 'i' );
 			$result['second'] = $date->date( 's' );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Returns UTC-based date query arguments for a combination of local time dates and a date shorthand operator.
+	 *
+	 * @param  array $dates_raw Array of dates (in local time) to use in combination with the operator.
+	 * @param  string $operator One of the operators supported by date queries (<, <=, =, ..., >, >=).
+	 * @return array Partial date query arg with relevant dates now UTC-based.
+	 *
+	 * @since 8.2.0
+	 */
+	private function local_time_to_gmt_date_query( $dates_raw, $operator ) {
+		$result = array();
+
+		// Convert YYYY-MM-DD to UTC timestamp. Per https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date only date is relevant (time is ignored).
+		foreach ( $dates_raw as &$raw_date ) {
+			$raw_date = is_numeric( $raw_date ) ? $raw_date : strtotime( get_gmt_from_date( date( 'Y-m-d', strtotime( $raw_date ) ) ) );
+		}
+
+		$date1  = end( $dates_raw );
+
+		switch ( $operator ) {
+			case '>':
+				$result = array(
+					'after'     => $this->date_to_date_query_arg( $date1 + DAY_IN_SECONDS ),
+					'inclusive' => true,
+				);
+				break;
+			case '>=':
+				$result = array(
+					'after'     => $this->date_to_date_query_arg( $date1 ),
+					'inclusive' => true,
+				);
+				break;
+			case '=':
+				$result = array(
+					'relation' => 'AND',
+					array(
+						'after'     => $this->date_to_date_query_arg( $date1 ),
+						'inclusive' => true,
+					),
+					array(
+						'before'     => $this->date_to_date_query_arg( $date1 + DAY_IN_SECONDS ),
+						'inclusive'  => false,
+					)
+				);
+				break;
+			case '<=':
+				$result = array(
+					'before'    => $this->date_to_date_query_arg( $date1 + DAY_IN_SECONDS ),
+					'inclusive' => false,
+				);
+				break;
+			case '<':
+				$result = array(
+					'before'    => $this->date_to_date_query_arg( $date1 ),
+					'inclusive' => false,
+				);
+				break;
+			case '...':
+				$result = array(
+					'relation' => 'AND',
+					$this->local_time_to_gmt_date_query( array( $dates_raw[1] ), '<=' ),
+					$this->local_time_to_gmt_date_query( array( $dates_raw[0] ), '>=' ),
+				);
+
+				break;
+		}
+
+		if ( ! $result ) {
+			throw new \Exception( 'Please specify a valid date shorthand operator.' );
 		}
 
 		return $result;
@@ -337,25 +471,43 @@ class OrdersTableQuery {
 		$date_keys       = array_filter( $valid_date_keys, array( $this, 'arg_isset' ) );
 
 		foreach ( $date_keys as $date_key ) {
+			$is_local   = in_array( $date_key, $local_date_keys, true );
 			$date_value = $this->args[ $date_key ];
+
 			$operator   = '=';
+			$dates_raw  = array();
 			$dates      = array();
-			$timezone   = in_array( $date_key, $gmt_date_keys, true ) ? '+0000' : wc_timezone_string();
 
 			if ( is_string( $date_value ) && preg_match( self::REGEX_SHORTHAND_DATES, $date_value, $matches ) ) {
 				$operator = in_array( $matches[2], $valid_operators, true ) ? $matches[2] : '';
 
 				if ( ! empty( $matches[1] ) ) {
-					$dates[] = $this->date_to_date_query_arg( $matches[1], $timezone );
+					$dates_raw[] = $matches[1];
 				}
 
-				$dates[] = $this->date_to_date_query_arg( $matches[3], $timezone );
+				$dates_raw[] = $matches[3];
 			} else {
-				$dates[] = $this->date_to_date_query_arg( $date_value, $timezone );
+				$dates_raw[] = $date_value;
 			}
 
-			if ( empty( $dates ) || ! $operator || ( '...' === $operator && count( $dates ) < 2 ) ) {
+			if ( empty( $dates_raw ) || ! $operator || ( '...' === $operator && count( $dates_raw ) < 2 ) ) {
 				throw new \Exception( 'Invalid date_query' );
+			}
+
+			if ( $is_local ) {
+				$date_key = $local_to_gmt_date_keys[ $date_key ];
+
+				if ( ! is_numeric( $dates_raw[0] ) && ( ! isset( $dates_raw[1] ) || ! is_numeric( $dates_raw[1] ) ) ) {
+					// Only non-numeric args can be considered local time. Timestamps are assumed to be UTC per https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date.
+					$date_queries[] = array_merge(
+						array(
+							'column' => $date_key,
+						),
+						$this->local_time_to_gmt_date_query( $dates_raw, $operator )
+					);
+
+					continue;
+				}
 			}
 
 			$operator_to_keys = array();
@@ -368,7 +520,7 @@ class OrdersTableQuery {
 				$operator_to_keys[] = 'before';
 			}
 
-			$date_key       = in_array( $date_key, $local_date_keys, true ) ? $local_to_gmt_date_keys[ $date_key ] : $date_key;
+			$dates          = array_map( array( $this, 'date_to_date_query_arg' ), $dates_raw );
 			$date_queries[] = array_merge(
 				array(
 					'column'    => $date_key,
@@ -460,7 +612,7 @@ class OrdersTableQuery {
 			$op               = isset( $query['after'] ) ? 'after' : 'before';
 			$date_value_local = $query[ $op ];
 			$date_value_gmt   = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
-			$query[ $op ]     = $this->date_to_date_query_arg( $date_value_gmt, 'UTC' );
+			$query[ $op ]     = $this->date_to_date_query_arg( $date_value_gmt );
 		}
 
 		return $query;
@@ -686,7 +838,7 @@ class OrdersTableQuery {
 		}
 
 		// ORDER BY.
-		$orderby = $this->orderby ? ( 'ORDER BY ' . implode( ', ', $this->orderby ) ) : '';
+		$orderby = $this->orderby ? implode( ', ', $this->orderby ) : '';
 
 		// LIMITS.
 		$limits = '';
@@ -698,9 +850,58 @@ class OrdersTableQuery {
 		}
 
 		// GROUP BY.
-		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
+		$groupby = $this->groupby ? implode( ', ', (array) $this->groupby ) : '';
+
+		$pieces = compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' );
+
+		if ( ! $this->suppress_filters ) {
+			/**
+			 * Filters all query clauses at once.
+			 * Covers the fields (SELECT), JOIN, WHERE, GROUP BY, ORDER BY, and LIMIT clauses.
+			 *
+			 * @since 7.9.0
+			 *
+			 * @param string[]         $clauses {
+			 *     Associative array of the clauses for the query.
+			 *
+			 *     @type string $fields  The SELECT clause of the query.
+			 *     @type string $join    The JOIN clause of the query.
+			 *     @type string $where   The WHERE clause of the query.
+			 *     @type string $groupby The GROUP BY clause of the query.
+			 *     @type string $orderby The ORDER BY clause of the query.
+			 *     @type string $limits  The LIMIT clause of the query.
+			 * }
+			 * @param OrdersTableQuery $query   The OrdersTableQuery instance (passed by reference).
+			 * @param array            $args    Query args.
+			 */
+			$clauses = (array) apply_filters_ref_array( 'woocommerce_orders_table_query_clauses', array( $pieces, &$this, $this->args ) );
+
+			$fields  = $clauses['fields'] ?? '';
+			$join    = $clauses['join'] ?? '';
+			$where   = $clauses['where'] ?? '';
+			$groupby = $clauses['groupby'] ?? '';
+			$orderby = $clauses['orderby'] ?? '';
+			$limits  = $clauses['limits'] ?? '';
+		}
+
+		$groupby = $groupby ? ( 'GROUP BY ' . $groupby ) : '';
+		$orderby = $orderby ? ( 'ORDER BY ' . $orderby ) : '';
 
 		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
+
+		if ( ! $this->suppress_filters ) {
+			/**
+			 * Filters the completed SQL query.
+			 *
+			 * @since 7.9.0
+			 *
+			 * @param string           $sql   The complete SQL query.
+			 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
+			 * @param array            $args  Query args.
+			 */
+			$this->sql = apply_filters_ref_array( 'woocommerce_orders_table_query_sql', array( $this->sql, &$this, $this->args ) );
+		}
+
 		$this->build_count_query( $fields, $join, $where, $groupby );
 	}
 
@@ -1156,7 +1357,7 @@ class OrdersTableQuery {
 				return $this->max_num_pages;
 			case 'posts':
 			case 'orders':
-				return $this->results;
+				return $this->orders;
 			case 'request':
 				return $this->sql;
 			default:

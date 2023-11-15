@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Removing auto-draft as wc post type to resolve publish time bug.

@@ -199,7 +199,7 @@
 	}
 
 	.update-plugins .update-count {
-		background-color: #d54e21;
+		background-color: var(--wp-admin-theme-color);
 		border-radius: 10px;
 		color: #fff;
 		display: inline-block;
@@ -477,7 +477,7 @@
 
 		.addon-product-group-see-more,
 		.addon-product-group-see-more:visited {
-			color: #007cba;
+			color: var(--wp-admin-theme-color);
 			/* Primary / Blue */
 			display: block;
 			font-size: 13px;
@@ -582,7 +582,7 @@
 
 				h2,
 				h3 {
-					color: #007cba;
+					color: var(--wp-admin-theme-color);
 					font-size: 20px;
 					font-weight: 400;
 					letter-spacing: -0.32px;
@@ -620,7 +620,7 @@
 					}
 
 					h2 {
-						color: #2c3338;
+						color: var(--wp-admin-theme-color);
 					}
 				}
 
@@ -718,8 +718,8 @@
 
 				.button {
 					background-color: #fff;
-					border-color: #007cba;
-					color: #007cba;
+					border-color: var(--wp-admin-theme-color);
+					color: var(--wp-admin-theme-color);
 					float: right;
 					font-size: 13px;
 					height: 36px;
@@ -857,7 +857,7 @@
 	max-width: 1200px;
 
 	.update-plugins .update-count {
-		background-color: #d54e21;
+		background-color: var(--wp-admin-theme-color);
 		border-radius: 10px;
 		color: #fff;
 		display: inline-block;
@@ -876,7 +876,8 @@
 		margin-right: 20px;
 	}
 
-	&.woocommerce-page {
+	// NOTE: .woocommerce-page is removed within admin.
+	&.woocommerce-page, &.woocommerce-admin-page {
 		.wrap {
 			margin-top: 32px;
 		}
@@ -902,21 +903,7 @@
 .woocommerce-BlankState {
 	a.button-primary,
 	button.button-primary {
-		background: #bb77ae;
-		border-color: #a36597;
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-		color: #fff;
-		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597,
-			-1px 0 1px #a36597;
 		display: inline-block;
-
-		&:hover,
-		&:focus,
-		&:active {
-			background: #a36597;
-			border-color: #a36597;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-		}
 	}
 }
 
@@ -925,7 +912,7 @@
 	overflow: hidden;
 
 	&.updated {
-		border-left-color: #cc99c2 !important;
+		border-left-color: var(--wp-admin-theme-color) !important;
 	}
 
 	a.skip,
@@ -961,8 +948,13 @@
 #inventory_product_data .notice,
 #variable_product_options .notice {
 	display: flex;
-	margin: 10px;
 	background-color: #ffffff;
+	border-color: #eee;
+	border-width: 1px 0px 0px 0px;
+	border-style: solid;
+	align-items: center;
+	box-shadow: 0 0 0;
+	margin: 5px 0 0;
 	> p {
 		a {
 			text-decoration: none;
@@ -971,6 +963,10 @@
 	}
 	> p:not(:last-child) {
 		width: 85%;
+	}
+	> img.info-icon {
+		width: 1em;
+		filter: brightness(50%);
 	}
 	.woocommerce-add-variation-price-container {
 		width: 15%;
@@ -1141,7 +1137,6 @@ $default-line-height: 18px;
 	}
 	.toolbar-top {
 		.button,
-		.attribute_taxonomy,
 		.select2-container {
 			margin: 1px;
 		}
@@ -1310,61 +1305,185 @@ table.wc_status_table--tools {
 }
 
 /**
-  * DB log viewer
-  */
-.wp-list-table.logs {
-	.log-level {
-		display: inline;
-		padding: 0.2em 0.6em 0.3em;
-		font-size: 80%;
-		font-weight: bold;
-		line-height: 1;
-		color: #fff;
-		text-align: center;
-		white-space: nowrap;
-		vertical-align: baseline;
-		border-radius: 0.2em;
+ * FileV2 logs
+ */
+.wc-logs-header {
+	margin: 1.5em 0 2em;
+	display: flex;
+	flex-flow: row wrap;
+	align-items: center;
+	gap: 1em;
 
-		&:empty {
-			display: none;
+	h2 {
+		margin: 0;
+	}
+
+	.file-id {
+		padding: 3px 5px;
+		background: rgba( 0, 0, 0, 0.07 );
+		font-family: Consolas, Monaco, monospace;
+	}
+}
+
+.wc-logs-single-file-rotations {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+
+	h3 {
+		font-size: inherit;
+		margin: 0;
+	}
+
+	.wc-logs-rotation-links {
+		list-style: none;
+		margin: 0;
+		display: flex;
+		gap: 0.5em;
+
+		li {
+			display: block;
+			margin: 0;
+		}
+	}
+}
+
+.wc-logs-single-file-actions {
+	margin-left: auto;
+	display: flex;
+	gap: 0.5em;
+}
+
+.wc-logs-entries {
+	background: #f6f7f7;
+	border: 1px solid #c3c4c7;
+	font-family: Consolas, Monaco, monospace;
+	word-wrap: break-word;
+	line-height: 2.3;
+	counter-reset: line;
+
+	.line {
+		display: block;
+		width: 100%;
+		scroll-margin-top: 6em;
+		position: relative;
+
+		&:before {
+			counter-increment: line;
+			content: counter(line);
+			display: block;
+			float: left;
+			padding: 0 1em 0 0.5em;
+			width: 3em;
+			text-align: right;
+		}
+
+		&:target {
+			box-shadow: 0 0.16em 0.16em -0.16em #c3c4c7, 0 -0.16em 0.16em -0.16em #c3c4c7;
+			z-index: 1;
+
+			.line-content {
+				background: #fff8c5;
+			}
+
+			.log-level:before {
+				color: #fff8c5;
+			}
 		}
 	}
 
-	/**
-	  * Add color to levels
-	  *
-	  * Descending severity:
-	  *   emergency, alert -> red
-	  *   critical, error  -> orange
-	  *   warning, notice  -> yellow
-	  *   info             -> blue
-	  *   debug            -> gree
-	  */
-
-	.log-level--emergency,
-	.log-level--alert {
-		background-color: #ff4136;
+	.line-anchor {
+		position: absolute;
+		color: inherit;
+		text-decoration: none;
+		display: block;
+		height: 100%;
+		width: 4.5em;
 	}
 
-	.log-level--critical,
-	.log-level--error {
-		background-color: #ff851b;
+	.line-content {
+		display: block;
+		overflow: hidden;
+		padding: 0 1em;
+		border-left: 1px solid #c3c4c7;
+		background: #ffffff;
 	}
 
-	.log-level--warning,
-	.log-level--notice {
-		color: #222;
-		background-color: #ffdc00;
+	.log-timestamp {
+		font-weight: 700;
 	}
 
-	.log-level--info {
-		background-color: #0074d9;
+	.log-level {
+		font-size: 100%;
+	}
+}
+
+/**
+ * Log severity level colors.
+ *
+ * Descending severity:
+ *   emergency, alert -> red
+ *   critical, error  -> orange
+ *   warning, notice  -> yellow
+ *   info             -> blue
+ *   debug            -> green
+ */
+.log-level {
+	display: inline;
+	padding: 0 0.5em;
+	font-size: 80%;
+	font-weight: 700;
+	line-height: 1;
+	color: #000000;
+	background: #ffffff;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: baseline;
+	border-style: solid;
+	border-width: 0.16em 0.16em 0.16em 1em;
+	border-top-left-radius: 0.5em;
+	border-bottom-left-radius: 0.5em;
+
+	&:before {
+		content: "•";
+		color: #ffffff;
+		margin-left: -1.3em;
+		margin-right: 0.7em;
 	}
 
-	.log-level--debug {
-		background-color: #3d9970;
+	&:empty {
+		display: none;
 	}
+}
 
+.log-level--emergency,
+.log-level--alert {
+	border-color: #ff4136;
+}
+
+.log-level--critical,
+.log-level--error {
+	border-color: #ff851b;
+}
+
+.log-level--warning,
+.log-level--notice {
+	color: #222;
+	border-color: #ffdc00;
+}
+
+.log-level--info {
+	border-color: #0074d9;
+}
+
+.log-level--debug {
+	border-color: #3d9970;
+}
+
+/**
+  * Legacy file/DB log viewers
+  */
+.wp-list-table.logs {
 	// Adjust log table columns only when table is not collapsed
 	@media screen and (min-width: 783px) {
 		.column-timestamp {
@@ -1403,6 +1522,9 @@ table.wc_status_table--tools {
 	}
 }
 
+/**
+ * Inline edit
+ */
 .inline-edit-product.quick-edit-row {
 	.inline-edit-col-center,
 	.inline-edit-col-right {
@@ -2800,6 +2922,10 @@ ul.wc_coupon_list_block {
 			padding: 1em 1em 1em 1em !important;
 			vertical-align: middle;
 
+			.locked-indicator {
+				margin-left: 0;
+			}
+
 			input {
 				vertical-align: text-top;
 				margin: 1px 0;
@@ -2867,8 +2993,12 @@ ul.wc_coupon_list_block {
 			}
 
 			&:hover {
-				border: 2px solid #00a0d2;
+				border: 2px solid var(--wp-admin-theme-color);
 			}
+		}
+
+		.wp-locked .order-preview {
+			visibility: hidden;
 		}
 
 		.order-preview.disabled {
@@ -2878,6 +3008,14 @@ ul.wc_coupon_list_block {
 				background-size: 71%;
 			}
 		}
+	}
+}
+
+.woocommerce_page_wc-orders .wp-list-table .locked-indicator-icon {
+	margin-left: -2px;
+
+	&:before {
+		vertical-align: top;
 	}
 }
 
@@ -3918,11 +4056,9 @@ table.wc-shipping-classes {
 
 	td.wc-shipping-zones-blank-state,
 	td.wc-shipping-zone-method-blank-state {
-		background: #f7f1f6 !important;
 		overflow: hidden;
 		position: relative;
 		padding: 7.5em 7.5% !important;
-		border-bottom: 2px solid #eee2ec;
 
 		&.wc-shipping-zone-method-blank-state {
 			padding: 2em !important;
@@ -3934,16 +4070,16 @@ table.wc-shipping-classes {
 
 		p,
 		li {
-			color: #a46497;
-			font-size: 1.5em;
-			line-height: 1.5em;
-			margin: 0 0 1em;
+			color: var(--wc-secondary-text);
+			font-size: 1.2em;
+			line-height: 1.2em;
+			margin: 0 0 1.5em;
 			position: relative;
 			z-index: 1;
 			text-shadow: 1px 1px 1px white;
 
 			&.main {
-				font-size: 2em;
+				font-size: 1.6em;
 			}
 		}
 
@@ -3957,7 +4093,7 @@ table.wc-shipping-classes {
 			font-family: "WooCommerce";
 			text-align: center;
 			line-height: 1;
-			color: #eee2ec;
+			color: #e9e9e9;
 			display: block;
 			width: 1em;
 			font-size: 40em;
@@ -3968,16 +4104,9 @@ table.wc-shipping-classes {
 		}
 
 		.button-primary {
-			background-color: #804877;
-			border-color: #804877;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2),
-				0 1px 0 rgba(0, 0, 0, 0.15);
-			margin: 0;
-			opacity: 1;
-			text-shadow: 0 -1px 1px #8a4f7f, 1px 0 1px #8a4f7f,
-				0 1px 1px #8a4f7f, -1px 0 1px #8a4f7f;
-			font-size: 1.5em;
-			padding: 0.75em 1em;
+			font-size: 1.2em;
+			padding: 0.75em 1.5em;
+			margin: 0 0.25em;
 			height: auto;
 			position: relative;
 			z-index: 1;
@@ -4194,8 +4323,8 @@ table.wc-shipping-classes {
 .woocommerce-input-toggle {
 	height: 16px;
 	width: 32px;
-	border: 2px solid #935687;
-	background-color: #935687;
+	border: 2px solid var(--wp-admin-theme-color);
+	background-color: var(--wp-admin-theme-color);
 	display: inline-block;
 	text-indent: -9999px;
 	border-radius: 10em;
@@ -4330,7 +4459,7 @@ img.help_tip {
 
 .status-enabled::before {
 	@include icon("\e015");
-	color: $woocommerce;
+	color: var(--wp-admin-theme-color);
 }
 
 .status-disabled::before {
@@ -4355,7 +4484,7 @@ img.help_tip {
 		margin-left: 0.5em;
 
 		a {
-			color: #a46497;
+			color: var(--wp-admin-theme-color);
 		}
 	}
 
@@ -4950,6 +5079,11 @@ img.help_tip {
 		float: left;
 		width: 80%;
 
+		._backorders_field .wc-radios li {
+			display: block;
+			padding: 0 0 2px;
+		}
+
 		.wc-radios {
 			display: block;
 			float: left;
@@ -5077,6 +5211,19 @@ img.help_tip {
 				background-color: #eee;
 			}
 		}
+	}
+}
+
+/**
+ * Settings / Advanced / Features
+ */
+.woocommerce_page_wc-settings {
+	.wc-settings-row-woocommerce_custom_orders_table_enabled td.forminp {
+		padding-bottom: 0;
+	}
+
+	.wc-settings-row-woocommerce_custom_orders_table_data_sync_enabled td.forminp {
+		padding-top: 0;
 	}
 }
 
@@ -5302,6 +5449,14 @@ img.help_tip {
 			visibility: visible;
 		}
 	}
+
+	&.wc-metabox {
+		&.postbox {
+			border-top: 0px;
+			border-left: 0px;
+			border-right: 0px;
+		}
+	}
 }
 
 .woocommerce_options_panel {
@@ -5516,7 +5671,8 @@ img.help_tip {
   * WooCommerce meta boxes
   */
 .wc-metaboxes-wrapper {
-	:not(#variable_product_options_inner) {
+	:not(#variable_product_options_inner),
+	&#product_attributes {
 		.toolbar:not(.expand-close-hidden) {
 		  border-bottom: 1px solid #eee;
 		}
@@ -7247,7 +7403,7 @@ table.bar_chart {
 	}
 
 	.select2-dropdown {
-		border-color: #007cba;
+		border-color: var(--wp-admin-theme-color, #007cba);
 
 		&::after {
 			position: absolute;
@@ -7260,7 +7416,7 @@ table.bar_chart {
 	}
 
 	.select2-dropdown--below {
-		box-shadow: 0 0 0 1px #007cba, 0 2px 1px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba), 0 2px 1px rgba(0, 0, 0, 0.1);
 
 		&::after {
 			top: -1px;
@@ -7268,7 +7424,7 @@ table.bar_chart {
 	}
 
 	.select2-dropdown--above {
-		box-shadow: 0 0 0 1px #007cba, 0 -2px 1px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba), 0 -2px 1px rgba(0, 0, 0, 0.1);
 
 		&::after {
 			bottom: -1px;
@@ -7304,7 +7460,7 @@ table.bar_chart {
 				}
 
 				&:hover {
-					color: #007cba;
+					color: var(--wp-admin-theme-color, #007cba);
 				}
 			}
 
@@ -7329,8 +7485,8 @@ table.bar_chart {
 		&.select2-container--focus .select2-selection--single,
 		&.select2-container--open .select2-selection--single,
 		&.select2-container--open .select2-selection--multiple {
-			border-color: #007cba;
-			box-shadow: 0 0 0 1px #007cba;
+			border-color: var(--wp-admin-theme-color, #007cba);
+			box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba);
 		}
 
 		.select2-selection--multiple {
@@ -7370,51 +7526,39 @@ table.bar_chart {
 /**
   * Select2 colors for built-in admin color themes.
   */
-.admin-color {
-	$wp_admin_colors: (
-		blue: #096484,
-		coffee: #c7a589,
-		ectoplasm: #a3b745,
-		midnight: #e14d43,
-		ocean: #9ebaa0,
-		sunrise: #dd823b,
-		light: #04a4cc,
-	);
+.wp-admin {
+	&.wc-wp-version-gte-53 {
+		.select2-dropdown {
+			border-color: var(--wp-admin-theme-color, #007cba);
+		}
 
-	@each $name, $color in $wp_admin_colors {
-		&-#{$name}.wc-wp-version-gte-53 {
-			.select2-dropdown {
-				border-color: $color;
-			}
+		.select2-dropdown--below {
+			box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba), 0 2px 1px rgba(0, 0, 0, 0.1);
+		}
 
-			.select2-dropdown--below {
-				box-shadow: 0 0 0 1px $color, 0 2px 1px rgba(0, 0, 0, 0.1);
-			}
+		.select2-dropdown--above {
+			box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba), 0 -2px 1px rgba(0, 0, 0, 0.1);
+		}
 
-			.select2-dropdown--above {
-				box-shadow: 0 0 0 1px $color, 0 -2px 1px rgba(0, 0, 0, 0.1);
-			}
+		.select2-selection--single .select2-selection__rendered:hover {
+			color: var(--wp-admin-theme-color, #007cba);
+		}
 
-			.select2-selection--single .select2-selection__rendered:hover {
-				color: $color;
-			}
+		.select2-container.select2-container--focus
+		.select2-selection--single,
+		.select2-container.select2-container--open
+		.select2-selection--single,
+		.select2-container.select2-container--open
+		.select2-selection--multiple {
+			border-color: var(--wp-admin-theme-color, #007cba);
+			box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba);
+		}
 
-			.select2-container.select2-container--focus
-				.select2-selection--single,
-			.select2-container.select2-container--open
-				.select2-selection--single,
-			.select2-container.select2-container--open
-				.select2-selection--multiple {
-				border-color: $color;
-				box-shadow: 0 0 0 1px $color;
-			}
-
-			.select2-container--default
-				.select2-results__option--highlighted[aria-selected],
-			.select2-container--default
-				.select2-results__option--highlighted[data-selected] {
-				background-color: $color;
-			}
+		.select2-container--default
+		.select2-results__option--highlighted[aria-selected],
+		.select2-container--default
+		.select2-results__option--highlighted[data-selected] {
+			background-color: var(--wp-admin-theme-color, #007cba);
 		}
 	}
 }
@@ -7488,21 +7632,21 @@ table.bar_chart {
 		}
 
 		li.active {
-			border-color: #a16696;
-			color: #a16696;
+			border-color: var(--wp-admin-theme-color);
+			color: var(--wp-admin-theme-color);
 
 			&::before {
-				border-color: #a16696;
+				border-color: var(--wp-admin-theme-color);
 			}
 		}
 
 		li.done {
-			border-color: #a16696;
-			color: #a16696;
+			border-color: var(--wp-admin-theme-color);
+			color: var(--wp-admin-theme-color);
 
 			&::before {
-				border-color: #a16696;
-				background: #a16696;
+				border-color: var(--wp-admin-theme-color);
+				background: var(--wp-admin-theme-color);
 			}
 		}
 	}
@@ -7511,29 +7655,7 @@ table.bar_chart {
 		font-size: 1.25em;
 		padding: 0.5em 1em !important;
 		line-height: 1.5em !important;
-		margin-right: 0.5em;
-		margin-bottom: 2px;
-		height: auto !important;
 		border-radius: 4px;
-		background-color: #bb77ae;
-		border-color: #a36597;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
-			0 1px 0 #a36597;
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597,
-			-1px 0 1px #a36597;
-		margin: 0;
-		opacity: 1;
-
-		&:hover,
-		&:focus,
-		&:active {
-			background: #a36597;
-			border-color: #a36597;
-			-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
-				0 1px 0 #a36597;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-		}
 	}
 
 	.error .button {
@@ -7690,24 +7812,21 @@ table.bar_chart {
 		progress::-webkit-progress-value {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
-			background: #a46497;
-			background: linear-gradient(to bottom, #a46497, #66405f), #a46497;
+			background: var(--wp-admin-theme-color);
 			transition: width 1s ease;
 		}
 
 		progress::-moz-progress-bar {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
-			background: #a46497;
-			background: linear-gradient(to bottom, #a46497, #66405f), #a46497;
+			background: var(--wp-admin-theme-color);
 			transition: width 1s ease;
 		}
 
 		progress::-ms-fill {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
-			background: #a46497;
-			background: linear-gradient(to bottom, #a46497, #66405f), #a46497;
+			background: var(--wp-admin-theme-color);
 			transition: width 1s ease;
 		}
 
@@ -7800,7 +7919,7 @@ table.bar_chart {
 
 			&::before {
 				@include icon("\e015");
-				color: #a16696;
+				color: var(--wp-admin-theme-color);
 				position: static;
 				font-size: 100px;
 				display: block;
@@ -7911,8 +8030,8 @@ table.bar_chart {
 					margin: 12px 12px 0 0;
 
 					&.current {
-						background: #007cba;
-						border: 1px solid #007cba;
+						background: var(--wp-admin-theme-color);
+						border: 1px solid var(--wp-admin-theme-color);
 
 						a {
 							color: #fff;

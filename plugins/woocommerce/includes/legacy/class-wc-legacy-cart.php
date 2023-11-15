@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Legacy cart class.
  */
+#[AllowDynamicProperties]
 abstract class WC_Legacy_Cart {
 
 	/**

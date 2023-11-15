@@ -2,7 +2,12 @@ const { chromium, expect } = require( '@playwright/test' );
 const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
 const { site } = require( './utils' );
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { ENABLE_HPOS } = process.env;
 
+/**
+ * @param {import('@playwright/test').FullConfig} config
+ */
 module.exports = async ( config ) => {
 	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
 
@@ -39,6 +44,7 @@ module.exports = async ( config ) => {
 	let adminLoggedIn = false;
 	let customerLoggedIn = false;
 	let customerKeyConfigured = false;
+	let hposConfigured = false;
 
 	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
 	const contextOptions = { baseURL, userAgent };
@@ -55,10 +61,14 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
-			await adminPage.goto( `/wp-admin` );
-			await adminPage.fill( 'input[name="log"]', admin.username );
-			await adminPage.fill( 'input[name="pwd"]', admin.password );
-			await adminPage.click( 'text=Log In' );
+			await adminPage.goto( `/wp-admin`, { waitUntil: 'networkidle' } );
+			await adminPage
+				.locator( 'input[name="log"]' )
+				.fill( admin.username );
+			await adminPage
+				.locator( 'input[name="pwd"]' )
+				.fill( admin.password );
+			await adminPage.locator( 'text=Log In' ).click();
 			await adminPage.waitForLoadState( 'networkidle' );
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.waitForLoadState( 'domcontentloaded' );
@@ -96,15 +106,19 @@ module.exports = async ( config ) => {
 			await adminPage.goto(
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
 			);
-			await adminPage.fill( '#key_description', 'Key for API access' );
-			await adminPage.selectOption( '#key_permissions', 'read_write' );
-			await adminPage.click( 'text=Generate API key' );
-			process.env.CONSUMER_KEY = await adminPage.inputValue(
-				'#key_consumer_key'
-			);
-			process.env.CONSUMER_SECRET = await adminPage.inputValue(
-				'#key_consumer_secret'
-			);
+			await adminPage
+				.locator( '#key_description' )
+				.fill( 'Key for API access' );
+			await adminPage
+				.locator( '#key_permissions' )
+				.selectOption( 'read_write' );
+			await adminPage.locator( 'text=Generate API key' ).click();
+			process.env.CONSUMER_KEY = await adminPage
+				.locator( '#key_consumer_key' )
+				.inputValue();
+			process.env.CONSUMER_SECRET = await adminPage
+				.locator( '#key_consumer_secret' )
+				.inputValue();
 			console.log( 'Added consumer token successfully.' );
 			customerKeyConfigured = true;
 			break;
@@ -128,10 +142,16 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as customer...' );
-			await customerPage.goto( `/wp-admin` );
-			await customerPage.fill( 'input[name="log"]', customer.username );
-			await customerPage.fill( 'input[name="pwd"]', customer.password );
-			await customerPage.click( 'text=Log In' );
+			await customerPage.goto( `/wp-admin`, {
+				waitUntil: 'networkidle',
+			} );
+			await customerPage
+				.locator( 'input[name="log"]' )
+				.fill( customer.username );
+			await customerPage
+				.locator( 'input[name="pwd"]' )
+				.fill( customer.password );
+			await customerPage.locator( 'text=Log In' ).click();
 
 			await customerPage.goto( `/my-account` );
 			await expect(
@@ -165,6 +185,46 @@ module.exports = async ( config ) => {
 		);
 		process.exit( 1 );
 	}
+
+	// While we're here, let's set HPOS according to the passed in ENABLE_HPOS env variable
+	// (if a value for ENABLE_HPOS was set)
+	// This was always being set to 'yes' after login in wp-env so this step ensures the
+	// correct value is set before we begin our tests
+	if (ENABLE_HPOS) {
+		const hposSettingRetries = 5;
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+
+		const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
+
+		for (let i = 0; i < hposSettingRetries; i++) {
+			try {
+				console.log( `Trying to switch ${ value === 'yes' ? 'on' : 'off' } HPOS...` );
+				const response = await api.post( 'settings/advanced/woocommerce_custom_orders_table_enabled', { value } );
+				if ( response.data.value === value ) {
+					console.log( `HPOS Switched ${ value === 'yes' ? 'on' : 'off' } successfully` );
+					hposConfigured = true;
+					break;
+				}
+			} catch (e) {
+				console.log( `HPOS setup failed. Retrying... ${ i }/${ hposSettingRetries }` );
+				console.log(e);
+			}
+		}
+
+		if ( ! hposConfigured ) {
+			console.error(
+				'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct ENABLE_HPOS value was used and the test site has been setup correctly.'
+			);
+			process.exit( 1 );
+		}
+	}
+
+	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 
 	await adminContext.close();
 	await customerContext.close();

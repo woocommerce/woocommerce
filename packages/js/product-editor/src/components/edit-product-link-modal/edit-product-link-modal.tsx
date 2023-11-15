@@ -13,6 +13,11 @@ import { cleanForSlug } from '@wordpress/url';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
+/**
+ * Internal dependencies
+ */
+import { TRACKS_SOURCE } from '../../constants';
+
 type EditProductLinkModalProps = {
 	product: Product;
 	permalinkPrefix: string;
@@ -40,7 +45,7 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 
 	const onSave = async () => {
 		recordEvent( 'product_update_slug', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 			product_id: product.id,
 			product_type: product.type,
 		} );

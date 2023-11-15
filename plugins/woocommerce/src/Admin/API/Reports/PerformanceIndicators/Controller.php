@@ -7,7 +7,10 @@
 
 namespace Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators;
 
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use WP_REST_Request;
+use WP_REST_Response;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -15,16 +18,9 @@ defined( 'ABSPATH' ) || exit;
  * REST API Reports Performance indicators controller class.
  *
  * @internal
- * @extends WC_REST_Reports_Controller
+ * @extends GenericController
  */
-class Controller extends \WC_REST_Reports_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
+class Controller extends GenericController {
 
 	/**
 	 * Route base.
@@ -294,13 +290,13 @@ class Controller extends \WC_REST_Reports_Controller {
 			$objects[] = $this->prepare_response_for_collection( $prepared );
 		}
 
-		$response = rest_ensure_response( $objects );
-		$response->header( 'X-WP-Total', count( $data ) );
-		$response->header( 'X-WP-TotalPages', 1 );
-
-		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-
-		return $response;
+		return $this->add_pagination_headers(
+			$request,
+			$objects,
+			(int) count( $data ),
+			1,
+			1
+		);
 	}
 
 	/**
@@ -458,19 +454,14 @@ class Controller extends \WC_REST_Reports_Controller {
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $stat_data    Report data.
+	 * @param array           $stat_data    Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $stat_data, $request ) {
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $stat_data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
+		$response = parent::prepare_item_for_response( $stat_data, $request );
 
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $data ) );
+		$response->add_links( $this->prepare_links( $stat_data ) );
 
 		/**
 		 * Filter a report returned from the API.

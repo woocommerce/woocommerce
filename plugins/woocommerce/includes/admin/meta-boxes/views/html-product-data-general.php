@@ -93,7 +93,7 @@ defined( 'ABSPATH' ) || exit;
 
 					if ( $downloadable_files ) {
 						foreach ( $downloadable_files as $key => $file ) {
-							$disabled_download = isset( $file['enabled'] ) && false === $file['enabled'];
+							$disabled_download         = isset( $file['enabled'] ) && false === $file['enabled'];
 							$disabled_downloads_count += (int) $disabled_download;
 							include __DIR__ . '/html-product-download.php';
 						}
@@ -105,8 +105,8 @@ defined( 'ABSPATH' ) || exit;
 						<th colspan="2">
 							<a href="#" class="button insert" data-row="
 							<?php
-								$key  = '';
-								$file = array(
+								$key               = '';
+								$file              = array(
 									'file' => '',
 									'name' => '',
 								);
@@ -124,7 +124,7 @@ defined( 'ABSPATH' ) || exit;
 									printf(
 										/* translators: 1: opening link tag, 2: closing link tag. */
 										esc_html__( 'The indicated downloads have been disabled (invalid location or filetype&mdash;%1$slearn more%2$s).', 'woocommerce' ),
-										'<a href="https://woocommerce.com/document/approved-download-directories" target="_blank">',
+										'<a href="https://woo.com/document/approved-download-directories" target="_blank">',
 										'</a>'
 									);
 								?>

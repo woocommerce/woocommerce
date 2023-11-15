@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
-import { useSelect } from '@wordpress/data';
+import { render, waitFor } from '@testing-library/react';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useState, createElement } from '@wordpress/element';
 import { ProductAttribute, QueryProductAttribute } from '@woocommerce/data';
 
@@ -14,6 +14,11 @@ import { AttributeInputField } from '../attribute-input-field';
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
+	useDispatch: jest.fn().mockReturnValue( {
+		createErrorNotice: jest.fn(),
+		createProductAttribute: jest.fn(),
+		invalidateResolution: jest.fn(),
+	} ),
 } ) );
 
 jest.mock( '@wordpress/components', () => ( {
@@ -103,6 +108,7 @@ const attributeList: ProductAttribute[] = [
 	{
 		id: 15,
 		name: 'Automotive',
+		slug: 'Automotive',
 		position: 0,
 		visible: true,
 		variation: false,
@@ -111,6 +117,7 @@ const attributeList: ProductAttribute[] = [
 	{
 		id: 1,
 		name: 'Color',
+		slug: 'Color',
 		position: 2,
 		visible: true,
 		variation: true,
@@ -223,6 +230,7 @@ describe( 'AttributeInputField', () => {
 		expect( onChangeMock ).toHaveBeenCalledWith( {
 			id: attributeList[ 0 ].id,
 			name: attributeList[ 0 ].name,
+			slug: attributeList[ 0 ].slug,
 			options: [],
 		} );
 	} );
@@ -264,5 +272,100 @@ describe( 'AttributeInputField', () => {
 		queryByText( 'Update Input' )?.click();
 		queryByText( 'Create "Co"' )?.click();
 		expect( onChangeMock ).toHaveBeenCalledWith( 'Co' );
+	} );
+
+	describe( 'createNewAttributesAsGlobal is true', () => {
+		it( 'should create a new global attribute and invalidate product attributes', async () => {
+			const onChangeMock = jest.fn();
+			( useSelect as jest.Mock ).mockReturnValue( {
+				isLoading: false,
+				attributes: [ attributeList[ 0 ] ],
+			} );
+			const createProductAttributeMock = jest
+				.fn()
+				.mockImplementation(
+					(
+						newAttribute: Partial< Omit< ProductAttribute, 'id' > >
+					) => {
+						return Promise.resolve( {
+							name: newAttribute.name,
+							id: 123,
+							slug: newAttribute.name?.toLowerCase(),
+						} );
+					}
+				);
+			const invalidateResolutionMock = jest.fn();
+			( useDispatch as jest.Mock ).mockReturnValue( {
+				createErrorNotice: jest.fn(),
+				createProductAttribute: createProductAttributeMock,
+				invalidateResolution: invalidateResolutionMock,
+			} );
+			const { queryByText } = render(
+				<AttributeInputField
+					onChange={ onChangeMock }
+					createNewAttributesAsGlobal={ true }
+				/>
+			);
+			queryByText( 'Update Input' )?.click();
+			queryByText( 'Create "Co"' )?.click();
+			expect( createProductAttributeMock ).toHaveBeenCalledWith( {
+				name: 'Co',
+				generate_slug: true,
+			} );
+			await waitFor( () => {
+				expect( invalidateResolutionMock ).toHaveBeenCalledWith(
+					'getProductAttributes'
+				);
+			} );
+			expect( onChangeMock ).toHaveBeenCalledWith( {
+				name: 'Co',
+				slug: 'co',
+				id: 123,
+				options: [],
+			} );
+		} );
+
+		it( 'should show an error notice and not call onChange when creation failed', async () => {
+			const onChangeMock = jest.fn();
+			( useSelect as jest.Mock ).mockReturnValue( {
+				isLoading: false,
+				attributes: [ attributeList[ 0 ] ],
+			} );
+			const createProductAttributeMock = jest
+				.fn()
+				.mockImplementation( () => {
+					return Promise.reject( {
+						code: 'woocommerce_rest_cannot_create',
+						message: 'Duplicate slug',
+					} );
+				} );
+			const invalidateResolutionMock = jest.fn();
+			const createErrorNoticeMock = jest.fn();
+			( useDispatch as jest.Mock ).mockReturnValue( {
+				createErrorNotice: createErrorNoticeMock,
+				createProductAttribute: createProductAttributeMock,
+				invalidateResolution: invalidateResolutionMock,
+			} );
+			const { queryByText } = render(
+				<AttributeInputField
+					onChange={ onChangeMock }
+					createNewAttributesAsGlobal={ true }
+				/>
+			);
+			queryByText( 'Update Input' )?.click();
+			queryByText( 'Create "Co"' )?.click();
+			expect( createProductAttributeMock ).toHaveBeenCalledWith( {
+				name: 'Co',
+				generate_slug: true,
+			} );
+			await waitFor( () => {
+				expect( createErrorNoticeMock ).toHaveBeenCalledWith(
+					'Duplicate slug',
+					{ explicitDismiss: true }
+				);
+			} );
+			expect( invalidateResolutionMock ).not.toHaveBeenCalled();
+			expect( onChangeMock ).not.toHaveBeenCalled();
+		} );
 	} );
 } );

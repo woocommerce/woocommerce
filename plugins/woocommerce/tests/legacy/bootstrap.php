@@ -47,9 +47,6 @@ class WC_Unit_Tests_Bootstrap {
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
 		error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
 
-		// Ensure theme install tests use direct filesystem method.
-		define( 'FS_METHOD', 'direct' );
-
 		// Ensure server variable is set for WP email functions.
 		// phpcs:disable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 		if ( ! isset( $_SERVER['SERVER_NAME'] ) ) {
@@ -83,6 +80,11 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
+		// Ensure theme install tests use direct filesystem method.
+		if ( ! defined( 'FS_METHOD' ) ) {
+			define( 'FS_METHOD', 'direct' );
+		}
+
 		// load WC testing framework.
 		$this->includes();
 
@@ -100,10 +102,24 @@ class WC_Unit_Tests_Bootstrap {
 	 * Register autoloader for the files in the 'tests/tools' directory, for the root namespace 'Automattic\WooCommerce\Testing\Tools'.
 	 */
 	protected static function register_autoloader_for_testing_tools() {
-		return spl_autoload_register(
+		spl_autoload_register(
 			function ( $class ) {
+				$tests_directory   = dirname( __FILE__, 2 );
+				$helpers_directory = $tests_directory . '/php/helpers';
+
+				// Support loading top-level classes from the `php/helpers` directory.
+				if ( ! str_contains( $class, '\\' ) ) {
+					$helper_path = realpath( "$helpers_directory/$class.php" );
+
+					if ( dirname( $helper_path ) === $helpers_directory && file_exists( $helper_path ) ) {
+						require $helper_path;
+						return;
+					}
+				}
+
+				// Otherwise, check if this might relate to an Automattic\WooCommerce\Testing\Tools class.
 				$prefix   = 'Automattic\\WooCommerce\\Testing\\Tools\\';
-				$base_dir = dirname( dirname( __FILE__ ) ) . '/Tools/';
+				$base_dir = $tests_directory . '/Tools/';
 				$len      = strlen( $prefix );
 				if ( strncmp( $prefix, $class, $len ) !== 0 ) {
 					// no, move to the next registered autoloader.
@@ -152,7 +168,7 @@ class WC_Unit_Tests_Bootstrap {
 	private function initialize_hpos() {
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::delete_order_custom_tables();
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order_custom_table_if_not_exist();
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot( true );
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( true );
 	}
 
 	/**
@@ -210,6 +226,10 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_REMOVE_ALL_DATA', true );
 		include $this->plugin_dir . '/uninstall.php';
 
+		if ( ! getenv( 'HPOS' ) ) {
+			add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_false' );
+		}
+
 		WC_Install::install();
 
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
@@ -262,6 +282,7 @@ class WC_Unit_Tests_Bootstrap {
 
 		// Traits.
 		require_once $this->tests_dir . '/framework/traits/trait-wc-rest-api-complex-meta.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/HPOSToggleTrait.php';
 	}
 
 	/**

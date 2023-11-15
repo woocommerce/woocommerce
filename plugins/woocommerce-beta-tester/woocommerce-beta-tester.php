@@ -3,14 +3,15 @@
  * Plugin Name: WooCommerce Beta Tester
  * Plugin URI: https://github.com/woocommerce/woocommerce-beta-tester
  * Description: Run bleeding edge versions of WooCommerce. This will replace your installed version of WooCommerce with the latest tagged release - use with caution, and not on production sites.
- * Version: 2.2.0
+ * Version: 2.2.5
  * Author: WooCommerce
- * Author URI: http://woocommerce.com/
+ * Author URI: http://woo.com/
  * Requires at least: 5.8
  * Tested up to: 6.0
  * WC requires at least: 6.7
  * WC tested up to: 7.0
  * Text Domain: woocommerce-beta-tester
+ * Woo: 18734002351694:04192c15b62a4ce6f5fa69df608aa3aa
  *
  * @package WC_Beta_Tester
  */
@@ -29,7 +30,7 @@ if ( ! defined( 'WC_BETA_TESTER_FILE' ) ) {
 }
 
 if ( ! defined( 'WC_BETA_TESTER_VERSION' ) ) {
-	define( 'WC_BETA_TESTER_VERSION', '2.1.0' ); // WRCS: DEFINED_VERSION.
+	define( 'WC_BETA_TESTER_VERSION', '2.2.4' ); // WRCS: DEFINED_VERSION.
 }
 
 /**
@@ -78,6 +79,9 @@ add_action( 'plugins_loaded', '_wc_beta_tester_bootstrap' );
  * Register the JS.
  */
 function add_extension_register_script() {
+	if ( ! defined( 'WC_ADMIN_APP' ) ) {
+		return;
+	}
 	$script_path       = '/build/index.js';
 	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
 	$script_asset      = file_exists( $script_asset_path )
@@ -122,3 +126,16 @@ function add_extension_register_script() {
 }
 
 add_action( 'admin_enqueue_scripts', 'add_extension_register_script' );
+
+add_action(
+	'before_woocommerce_init',
+	function() {
+		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'product_block_editor', __FILE__, true );
+		}
+	}
+);
+
+// Initialize the live branches feature.
+require_once dirname( __FILE__ ) . '/includes/class-wc-beta-tester-live-branches.php';

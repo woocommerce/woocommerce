@@ -1,5 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const { order } = require( '../../data' );
+const { API_BASE_URL } = process.env;
+const shouldSkip = API_BASE_URL != undefined;
 
 /**
  * Billing properties to update.
@@ -41,7 +43,8 @@ const updatedCustomerShipping = {
  * @group orders
  *
  */
-test.describe( 'Orders API tests', () => {
+
+test.describe.serial( 'Orders API tests', () => {
 	let orderId, sampleData;
 
 	test.beforeAll( async ( { request } ) => {

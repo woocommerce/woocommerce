@@ -1,52 +1,48 @@
 /**
  * External dependencies
  */
-import { Product, ProductStatus } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { MouseEvent } from 'react';
 
+/**
+ * Internal dependencies
+ */
+import { useValidations } from '../../../../contexts/validation-context';
+import { WPError } from '../../../../utils/get-product-error-message';
+import { PublishButtonProps } from '../../publish-button';
+
 export function usePublish( {
+	productType = 'product',
+	productStatus,
 	disabled,
 	onClick,
 	onPublishSuccess,
 	onPublishError,
 	...props
-}: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' > & {
+}: PublishButtonProps & {
 	onPublishSuccess?( product: Product ): void;
-	onPublishError?( error: Error ): void;
+	onPublishError?( error: WPError ): void;
 } ): Button.ButtonProps {
+	const { isValidating, validate } = useValidations< Product >();
+
 	const [ productId ] = useEntityProp< number >(
 		'postType',
-		'product',
+		productType,
 		'id'
 	);
-	const [ productStatus ] = useEntityProp< ProductStatus >(
-		'postType',
-		'product',
-		'status'
-	);
 
-	const { hasEdits, isDisabled, isBusy } = useSelect(
+	const { isSaving } = useSelect(
 		( select ) => {
-			const { hasEditsForEntityRecord, isSavingEntityRecord } =
-				select( 'core' );
-			const { isPostSavingLocked } = select( 'core/editor' );
-			const isSavingLocked = isPostSavingLocked();
-			const isSaving = isSavingEntityRecord< boolean >(
-				'postType',
-				'product',
-				productId
-			);
+			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
-				isDisabled: isSavingLocked || isSaving,
-				isBusy: isSaving,
-				hasEdits: hasEditsForEntityRecord< boolean >(
+				isSaving: isSavingEntityRecord< boolean >(
 					'postType',
-					'product',
+					productType,
 					productId
 				),
 			};
@@ -54,53 +50,88 @@ export function usePublish( {
 		[ productId ]
 	);
 
-	const isCreating = productStatus === 'auto-draft';
-	const ariaDisabled =
-		disabled || isDisabled || ( productStatus === 'publish' && ! hasEdits );
+	const isBusy = isSaving || isValidating;
+
+	const isPublished =
+		productType === 'product' ? productStatus === 'publish' : true;
 
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
-		if ( ariaDisabled ) {
-			return event.preventDefault();
-		}
-
 		if ( onClick ) {
 			onClick( event );
 		}
 
 		try {
-			// The publish button click not only change the status of the product
-			// but also save all the pending changes. So even if the status is
-			// publish it's possible to save the product too.
-			if ( productStatus !== 'publish' ) {
-				await editEntityRecord( 'postType', 'product', productId, {
+			if ( productType === 'product' ) {
+				await validate( {
 					status: 'publish',
 				} );
+				// The publish button click not only change the status of the product
+				// but also save all the pending changes. So even if the status is
+				// publish it's possible to save the product too.
+				if ( ! isPublished ) {
+					await editEntityRecord(
+						'postType',
+						productType,
+						productId,
+						{
+							status: 'publish',
+						}
+					);
+				}
+			} else {
+				await validate();
 			}
 
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
-				'product',
-				productId
+				productType,
+				productId,
+				{
+					throwOnError: true,
+				}
 			);
 
-			if ( onPublishSuccess ) {
+			if ( publishedProduct && onPublishSuccess ) {
 				onPublishSuccess( publishedProduct );
 			}
 		} catch ( error ) {
 			if ( onPublishError ) {
-				onPublishError( error as Error );
+				let wpError = error as WPError;
+				if ( ! wpError.code ) {
+					wpError = {
+						code: isPublished
+							? 'product_publish_error'
+							: 'product_create_error',
+					} as WPError;
+					if ( ( error as Record< string, string > ).variations ) {
+						wpError.code = 'variable_product_no_variation_prices';
+						wpError.message = (
+							error as Record< string, string >
+						 ).variations;
+					} else {
+						const errorMessage = Object.values(
+							error as Record< string, string >
+						).find( ( value ) => value !== undefined ) as
+							| string
+							| undefined;
+						if ( errorMessage !== undefined ) {
+							wpError.code = 'product_form_field_error';
+							wpError.message = errorMessage;
+						}
+					}
+				}
+				onPublishError( wpError );
 			}
 		}
 	}
 
 	return {
-		children: isCreating
-			? __( 'Add', 'woocommerce' )
-			: __( 'Save', 'woocommerce' ),
+		children: isPublished
+			? __( 'Update', 'woocommerce' )
+			: __( 'Add', 'woocommerce' ),
 		...props,
-		'aria-disabled': ariaDisabled,
 		isBusy,
 		variant: 'primary',
 		onClick: handleClick,

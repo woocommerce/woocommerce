@@ -158,22 +158,28 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 		// Merge.
 		$tax_rows = array();
+		// Initialize an associative array to store unique post_ids.
+		$unique_post_ids = array();
 
 		foreach ( $tax_rows_orders + $tax_rows_partial_refunds as $tax_row ) {
-			$key                                    = $tax_row->rate_id;
+			$key                                    = $tax_row->tax_rate;
 			$tax_rows[ $key ]                       = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
 				'tax_amount'          => 0,
 				'shipping_tax_amount' => 0,
 				'total_orders'        => 0,
 			);
-			$tax_rows[ $key ]->total_orders        += 1;
 			$tax_rows[ $key ]->tax_rate             = $tax_row->tax_rate;
 			$tax_rows[ $key ]->tax_amount          += wc_round_tax_total( $tax_row->tax_amount );
 			$tax_rows[ $key ]->shipping_tax_amount += wc_round_tax_total( $tax_row->shipping_tax_amount );
+			if ( ! isset( $unique_post_ids[ $key ] ) || ! in_array( $tax_row->post_id, $unique_post_ids[ $key ], true ) ) {
+				$unique_post_ids[ $key ]         = isset( $unique_post_ids[ $key ] ) ? $unique_post_ids[ $key ] : array();
+				$unique_post_ids[ $key ][]       = $tax_row->post_id;
+				$tax_rows[ $key ]->total_orders += 1;
+			}
 		}
 
 		foreach ( $tax_rows_full_refunds as $tax_row ) {
-			$key                                    = $tax_row->rate_id;
+			$key                                    = $tax_row->tax_rate;
 			$tax_rows[ $key ]                       = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
 				'tax_amount'          => 0,
 				'shipping_tax_amount' => 0,

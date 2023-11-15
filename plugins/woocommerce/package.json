@@ -1,8 +1,8 @@
 {
 	"name": "woocommerce",
 	"title": "WooCommerce",
-	"version": "7.8.0",
-	"homepage": "https://woocommerce.com/",
+	"version": "8.3.0",
+	"homepage": "https://woo.com/",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
@@ -10,7 +10,48 @@
 	"license": "GPL-3.0+",
 	"config": {
 		"wp_org_slug": "woocommerce",
-		"build_step": "pnpm run build:zip"
+		"build_step": "pnpm run build:zip",
+		"ci": {
+			"name": "WP: latest",
+			"customCommands": {
+				"lint": "lint:php:changes:branch ${baseRef}",
+				"test:php": "test:php:env"
+			},
+			"testEnvCommand": "env:test",
+			"testEnvConfig": {
+				"wpVersion": "latest"
+			},
+			"additionalTasks": [
+				{
+					"name": "PHP 8.0",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"phpVersion": "8.0"
+					}
+				},
+				{
+					"name": "WP: nightly",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"wpVersion": "nightly"
+					}
+				},
+				{
+					"name": "WP: latest-1",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"wpVersion": "latest-1"
+					}
+				},
+				{
+					"name": "WP: latest-2",
+					"commandFilter": [ "test:php" ],
+					"testEnvConfig": {
+						"wpVersion": "latest-2"
+					}
+				}
+			]
+		}
 	},
 	"scripts": {
 		"e2e": "pnpm exec wc-e2e test:e2e",
@@ -26,26 +67,33 @@
 		"lint:fix": "pnpm lint:js:fix && pnpm lint:php:fix",
 		"lint:php": "composer run-script phpcs",
 		"lint:php:fix": "composer run-script phpcbf",
+		"lint:php:changes": "composer run-script lint",
+		"lint:php:changes:staged": "composer run-script lint-staged",
+		"lint:php:changes:branch": "composer run-script lint-branch",
 		"docker:down": "pnpm exec wc-e2e docker:down",
 		"docker:ssh": "pnpm exec wc-e2e docker:ssh",
 		"docker:up": "pnpm exec wc-e2e docker:up",
-		"env:dev": "pnpm wp-env start",
+		"env:dev": "pnpm wp-env start --update",
 		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
-		"env:test": "pnpm run update-wp-env && pnpm run env:dev && ./tests/e2e-pw/bin/test-env-setup.sh",
+		"env:test": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='./tests/e2e-pw/bin/test-env-setup.sh' && pnpm run env:dev",
 		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
 		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
-		"env:start": "pnpm wp-env start && ./tests/e2e-pw/bin/test-env-setup.sh",
-		"env:restart": "pnpm wp-env destroy && pnpm wp-env start && ./tests/e2e-pw/bin/test-env-setup.sh",
+		"env:start": "pnpm wp-env start",
+		"env:restart": "pnpm wp-env destroy && pnpm wp-env start --update",
 		"env:stop": "pnpm wp-env stop",
-		"env:test:cot": "pnpm run update-wp-env && pnpm run env:dev && ENABLE_HPOS=1 ./tests/e2e-pw/bin/test-env-setup.sh",
+		"env:test:cot": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='ENABLE_HPOS=1 ./tests/e2e-pw/bin/test-env-setup.sh' && ENABLE_HPOS=1 pnpm run env:dev",
 		"env:performance-init": "./tests/performance/bin/init-sample-products.sh",
 		"env:down": "pnpm wp-env stop",
-		"env:destroy": "pnpm run update-wp-env && pnpm wp-env destroy",
+		"env:destroy": "pnpm wp-env destroy",
 		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
 		"make:collection": "pnpm exec wc-api-tests make:collection",
 		"e2e:debug": "pnpm exec wc-e2e test:e2e-debug",
 		"e2e:dev": "pnpm exec wc-e2e test:e2e-dev",
-		"test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
+		"test:env:start": "pnpm env:test",
+		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
+		"test:php:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
+		"test:unit": "pnpm test:php",
+		"test:unit:env": "pnpm test:php:env",
 		"makepot": "composer run-script makepot",
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js"
 	},
@@ -54,9 +102,9 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
-		"@playwright/test": "^1.33.0",
+		"@playwright/test": "^1.38.1",
 		"@typescript-eslint/eslint-plugin": "^5.54.0",
-		"@typescript-eslint/experimental-utils": "^5.43.0",
+		"@typescript-eslint/experimental-utils": "^5.54.0",
 		"@typescript-eslint/parser": "^5.54.0",
 		"@woocommerce/admin-e2e-tests": "workspace:*",
 		"@woocommerce/api": "workspace:*",
@@ -68,7 +116,7 @@
 		"@woocommerce/woocommerce-rest-api": "^1.0.1",
 		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
 		"@wordpress/babel-preset-default": "3.0.2",
-		"@wordpress/env": "^4.8.0",
+		"@wordpress/env": "^8.2.0",
 		"@wordpress/stylelint-config": "19.1.0",
 		"allure-commandline": "^2.17.2",
 		"allure-playwright": "^2.0.0-beta.16",
@@ -86,9 +134,9 @@
 		"istanbul": "1.0.0-alpha.2",
 		"jest": "^27.5.1",
 		"mocha": "7.2.0",
-		"prettier": "npm:wp-prettier@2.0.5",
+		"prettier": "npm:wp-prettier@^2.8.5",
 		"stylelint": "^13.8.0",
-		"typescript": "^4.9.5",
+		"typescript": "^5.1.6",
 		"uuid": "^8.3.2",
 		"webpack": "5.70.0",
 		"webpack-cli": "3.3.12",
@@ -105,7 +153,7 @@
 	},
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.3.1"
+		"pnpm": "^8.6.7"
 	},
 	"browserslist": [
 		"> 0.1%",

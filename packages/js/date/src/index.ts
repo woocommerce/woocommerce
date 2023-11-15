@@ -189,7 +189,7 @@ export function getStoreTimeZoneMoment() {
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
  * @param {string}                   compare - `previous_period` or `previous_year`
- * @return {DateValue} -  DateValue data about the selected period
+ * @return {DateValue} - DateValue data about the selected period
  */
 export function getLastPeriod(
 	period: moment.DurationInputArg2,
@@ -241,7 +241,7 @@ export function getLastPeriod(
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
  * @param {string}                   compare - `previous_period` or `previous_year`
- * @return {DateValue} -  DateValue data about the selected period
+ * @return {DateValue} - DateValue data about the selected period
  */
 export function getCurrentPeriod(
 	period: moment.DurationInputArg2,

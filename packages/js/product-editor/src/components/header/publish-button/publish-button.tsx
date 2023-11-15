@@ -6,38 +6,43 @@ import { Button } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { MouseEvent } from 'react';
-import { Product, ProductStatus } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
-import { useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
+import { getProductErrorMessage } from '../../../utils/get-product-error-message';
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { usePublish } from '../hooks/use-publish';
+import { PublishButtonProps } from './types';
+import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 
-export function PublishButton(
-	props: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' >
-) {
-	const [ productStatus ] = useEntityProp< ProductStatus >(
-		'postType',
-		'product',
-		'status'
-	);
-
-	const isCreating = productStatus === 'auto-draft';
-
+export function PublishButton( {
+	productStatus,
+	productType = 'product',
+	...props
+}: PublishButtonProps ) {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
 
+	const { maybeShowFeedbackBar } = useFeedbackBar();
+
 	const publishButtonProps = usePublish( {
+		productType,
+		productStatus,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
-			recordProductEvent( 'product_update', savedProduct );
+			const isPublished =
+				productType === 'product' ? productStatus === 'publish' : true;
 
-			const noticeContent = isCreating
-				? __( 'Product successfully created.', 'woocommerce' )
-				: __( 'Product published.', 'woocommerce' );
+			if ( isPublished ) {
+				recordProductEvent( 'product_update', savedProduct );
+			}
+
+			const noticeContent = isPublished
+				? __( 'Product updated.', 'woocommerce' )
+				: __( 'Product added.', 'woocommerce' );
 			const noticeOptions = {
 				icon: '🎉',
 				actions: [
@@ -57,17 +62,16 @@ export function PublishButton(
 
 			createSuccessNotice( noticeContent, noticeOptions );
 
+			maybeShowFeedbackBar();
+
 			if ( productStatus === 'auto-draft' ) {
 				const url = getNewPath( {}, `/product/${ savedProduct.id }` );
 				navigateTo( { url } );
 			}
 		},
-		onPublishError() {
-			const noticeContent = isCreating
-				? __( 'Failed to create product.', 'woocommerce' )
-				: __( 'Failed to publish product.', 'woocommerce' );
-
-			createErrorNotice( noticeContent );
+		onPublishError( error ) {
+			const message = getProductErrorMessage( error );
+			createErrorNotice( message );
 		},
 	} );
 

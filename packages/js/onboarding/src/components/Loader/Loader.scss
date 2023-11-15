@@ -1,0 +1,62 @@
+.woocommerce-onboarding-progress-bar__container {
+	height: 8px;
+	width: 100%;
+}
+
+// Min width equal to height. This means small values look like each other, but all bars have a consistent radius.
+.woocommerce-onboarding-progress-bar__filler {
+	height: 100%;
+	min-width: 8px;
+}
+
+// Loader page
+.woocommerce-onboarding-loader {
+	min-height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	background-color: white;
+	@include breakpoint( '<782px' ) {
+		padding: 0 20px;
+	}
+
+	.woocommerce-onboarding-loader__title {
+		padding: 0;
+		margin: 58px 0 0 0;
+		font-size: 28px;
+		font-weight: 500;
+		@include breakpoint( '<782px' ) {
+			font-size: 20px;
+		}
+	}
+	.woocommerce-onboarding-loader-wrapper {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		max-width: 520px;
+	}
+	.woocommerce-onboarding-progress-bar {
+		width: 520px;
+		margin: 16px 0 16px 0;
+		@include breakpoint( '<782px' ) {
+			width: 100%;
+		}
+	}
+	.woocommerce-onboarding-progress-bar__container {
+		height: 4px;
+	}
+
+	.woocommerce-onboarding-loader__paragraph {
+		font-size: 16px;
+		line-height: 24px;
+		color: #2f2f2f;
+		opacity: 0.8;
+		text-align: center;
+		@include breakpoint( '<782px' ) {
+			font-size: 14px;
+			line-height: 20px;
+		}
+	}
+}

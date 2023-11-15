@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Product, ProductStatus } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { Button, Icon } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -10,44 +10,46 @@ import { check } from '@wordpress/icons';
 import { createElement, Fragment } from '@wordpress/element';
 import { MouseEvent, ReactNode } from 'react';
 
+/**
+ * Internal dependencies
+ */
+import { useValidations } from '../../../../contexts/validation-context';
+import { WPError } from '../../../../utils/get-product-error-message';
+import { SaveDraftButtonProps } from '../../save-draft-button';
+
 export function useSaveDraft( {
+	productStatus,
+	productType = 'product',
 	disabled,
 	onClick,
 	onSaveSuccess,
 	onSaveError,
 	...props
-}: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' > & {
+}: SaveDraftButtonProps & {
 	onSaveSuccess?( product: Product ): void;
-	onSaveError?( error: Error ): void;
+	onSaveError?( error: WPError ): void;
 } ): Button.ButtonProps {
 	const [ productId ] = useEntityProp< number >(
 		'postType',
-		'product',
+		productType,
 		'id'
-	);
-	const [ productStatus ] = useEntityProp< ProductStatus >(
-		'postType',
-		'product',
-		'status'
 	);
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
-			const { isPostSavingLocked } = select( 'core/editor' );
-			const isSavingLocked = isPostSavingLocked();
 			const isSaving = isSavingEntityRecord< boolean >(
 				'postType',
-				'product',
+				productType,
 				productId
 			);
 
 			return {
-				isDisabled: isSavingLocked || isSaving,
+				isDisabled: isSaving,
 				hasEdits: hasEditsForEntityRecord< boolean >(
 					'postType',
-					'product',
+					productType,
 					productId
 				),
 			};
@@ -55,8 +57,13 @@ export function useSaveDraft( {
 		[ productId ]
 	);
 
+	const { isValidating, validate } = useValidations< Product >();
+
 	const ariaDisabled =
-		disabled || isDisabled || ( productStatus !== 'publish' && ! hasEdits );
+		disabled ||
+		isDisabled ||
+		( productStatus !== 'publish' && ! hasEdits ) ||
+		isValidating;
 
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
@@ -70,13 +77,18 @@ export function useSaveDraft( {
 		}
 
 		try {
-			await editEntityRecord( 'postType', 'product', productId, {
+			await validate( { status: 'draft' } );
+
+			await editEntityRecord( 'postType', productType, productId, {
 				status: 'draft',
 			} );
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
-				'product',
-				productId
+				productType,
+				productId,
+				{
+					throwOnError: true,
+				}
 			);
 
 			if ( onSaveSuccess ) {
@@ -84,7 +96,7 @@ export function useSaveDraft( {
 			}
 		} catch ( error ) {
 			if ( onSaveError ) {
-				onSaveError( error as Error );
+				onSaveError( error as WPError );
 			}
 		}
 	}
@@ -92,7 +104,7 @@ export function useSaveDraft( {
 	let children: ReactNode;
 	if ( productStatus === 'publish' ) {
 		children = __( 'Switch to draft', 'woocommerce' );
-	} else if ( hasEdits ) {
+	} else if ( hasEdits || productStatus === 'auto-draft' ) {
 		children = __( 'Save draft', 'woocommerce' );
 	} else {
 		children = (

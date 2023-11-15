@@ -13,8 +13,8 @@ import { Logger } from '../../../../core/logger';
 /**
  * Update plugin readme changelog.
  *
- * @param  tmpRepoPath cloned repo path
- * @param  nextVersion version to bump to
+ * @param tmpRepoPath cloned repo path
+ * @param nextVersion version to bump to
  */
 export const updateReadmeChangelog = async (
 	tmpRepoPath: string,
@@ -38,8 +38,8 @@ export const updateReadmeChangelog = async (
 /**
  * Update plugin class file.
  *
- * @param  tmpRepoPath cloned repo path
- * @param  nextVersion version to bump to
+ * @param tmpRepoPath cloned repo path
+ * @param nextVersion version to bump to
  */
 export const updateClassPluginFile = async (
 	tmpRepoPath: string,
@@ -96,8 +96,8 @@ export const updateJSON = async (
 /**
  * Update plugin main file.
  *
- * @param  tmpRepoPath cloned repo path
- * @param  nextVersion version to bump to
+ * @param tmpRepoPath cloned repo path
+ * @param nextVersion version to bump to
  */
 export const updatePluginFile = async (
 	tmpRepoPath: string,

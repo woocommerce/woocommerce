@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use waitUntil instead of waitForLoadState in page.goto() and page.click().

@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
 use Automattic\WooCommerce\Database\Migrations\MetaToMetaTableMigrator;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 
 /**
  * Helper class to migrate records from the WordPress post meta table
@@ -39,13 +40,6 @@ class PostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 	 */
 	protected function get_meta_config(): array {
 		global $wpdb;
-		// TODO: Remove hardcoding.
-		$this->table_names = array(
-			'orders'    => $wpdb->prefix . 'wc_orders',
-			'addresses' => $wpdb->prefix . 'wc_order_addresses',
-			'op_data'   => $wpdb->prefix . 'wc_order_operational_data',
-			'meta'      => $wpdb->prefix . 'wc_orders_meta',
-		);
 
 		return array(
 			'source'      => array(
@@ -57,15 +51,15 @@ class PostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 					'meta_value_column' => 'meta_value',
 				),
 				'entity'        => array(
-					'table_name'       => $this->table_names['orders'],
-					'source_id_column' => 'id',
-					'id_column'        => 'id',
+					'table_name'       => $wpdb->posts,
+					'source_id_column' => 'ID',
+					'id_column'        => 'ID',
 				),
 				'excluded_keys' => $this->excluded_columns,
 			),
 			'destination' => array(
 				'meta' => array(
-					'table_name'        => $this->table_names['meta'],
+					'table_name'        => OrdersTableDataStore::get_meta_table_name(),
 					'entity_id_column'  => 'order_id',
 					'meta_key_column'   => 'meta_key',
 					'meta_value_column' => 'meta_value',

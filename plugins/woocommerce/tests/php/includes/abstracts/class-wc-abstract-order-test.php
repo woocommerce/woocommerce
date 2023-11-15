@@ -190,7 +190,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_apply_coupon_across_status() {
 		$coupon_code = 'coupon_test_count_across_status';
-		$coupon = WC_Helper_Coupon::create_coupon( $coupon_code );
+		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code );
 		$this->assertEquals( 0, $coupon->get_usage_count() );
 
 		$order = WC_Helper_Order::create_order();
@@ -253,8 +253,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_apply_coupon_stores_meta_data() {
 		$coupon_code = 'coupon_test_meta_data';
-		$coupon = WC_Helper_Coupon::create_coupon( $coupon_code );
-		$order  = WC_Helper_Order::create_order();
+		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code );
+		$order       = WC_Helper_Order::create_order();
 		$order->set_status( 'processing' );
 		$order->save();
 		$order->apply_coupon( $coupon_code );
@@ -323,5 +323,30 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		$order = wc_get_order( $order->get_id() );
 		$this->assertInstanceOf( Automattic\WooCommerce\Admin\Overrides\Order::class, $order );
+	}
+
+	/**
+	 * @testDox When a taxonomy with a default term is set on the order, it's inserted when a new order is created.
+	 */
+	public function test_default_term_for_custom_taxonomy() {
+		$custom_taxonomy = register_taxonomy(
+			'custom_taxonomy',
+			'shop_order',
+			array(
+				'default_term' => 'new_term',
+			),
+		);
+
+		// Set user who has access to create term.
+		$current_user_id = get_current_user_id();
+		$user            = new WP_User( wp_create_user( 'test', '' ) );
+		$user->set_role( 'administrator' );
+		wp_set_current_user( $user->ID );
+
+		$order = wc_create_order();
+
+		wp_set_current_user( $current_user_id );
+		$order_terms = wp_list_pluck( wp_get_object_terms( $order->get_id(), $custom_taxonomy->name ), 'name' );
+		$this->assertContains( 'new_term', $order_terms );
 	}
 }

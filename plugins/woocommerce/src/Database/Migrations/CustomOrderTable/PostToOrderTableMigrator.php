@@ -22,7 +22,7 @@ class PostToOrderTableMigrator extends MetaToCustomTableMigrator {
 	protected function get_schema_config(): array {
 		global $wpdb;
 
-		$this->table_names = array(
+		$table_names = array(
 			'orders'    => $wpdb->prefix . 'wc_orders',
 			'addresses' => $wpdb->prefix . 'wc_order_addresses',
 			'op_data'   => $wpdb->prefix . 'wc_order_operational_data',
@@ -46,7 +46,7 @@ class PostToOrderTableMigrator extends MetaToCustomTableMigrator {
 				),
 			),
 			'destination' => array(
-				'table_name'        => $this->table_names['orders'],
+				'table_name'        => $table_names['orders'],
 				'source_rel_column' => 'id',
 				'primary_key'       => 'id',
 				'primary_key_type'  => 'int',

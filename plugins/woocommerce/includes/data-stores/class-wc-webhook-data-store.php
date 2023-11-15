@@ -282,6 +282,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$exclude         = '';
 		$date_created    = '';
 		$date_modified   = '';
+		$user_id         = '';
+		$api_version     = '';
 
 		if ( ! empty( $args['include'] ) ) {
 			$args['include'] = implode( ',', wp_parse_id_list( $args['include'] ) );
@@ -291,6 +293,10 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		if ( ! empty( $args['exclude'] ) ) {
 			$args['exclude'] = implode( ',', wp_parse_id_list( $args['exclude'] ) );
 			$exclude         = 'AND webhook_id NOT IN (' . $args['exclude'] . ')';
+		}
+
+		if ( ! empty( $args['user_id'] ) ) {
+			$user_id = $wpdb->prepare( 'AND `user_id` = %d', absint( $args['user_id'] ) );
 		}
 
 		if ( ! empty( $args['after'] ) || ! empty( $args['before'] ) ) {
@@ -305,6 +311,11 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			$args['modified_before'] = empty( $args['modified_before'] ) ? current_time( 'mysql', 1 ) : $args['modified_before'];
 
 			$date_modified = "AND `date_modified_gmt` BETWEEN STR_TO_DATE('" . esc_sql( $args['modified_after'] ) . "', '%Y-%m-%d %H:%i:%s') and STR_TO_DATE('" . esc_sql( $args['modified_before'] ) . "', '%Y-%m-%d %H:%i:%s')";
+		}
+
+		$api_version_value = $args['api_version'] ?? null;
+		if ( is_numeric( $api_version_value ) ) {
+			$api_version = 'AND `api_version`=' . esc_sql( $api_version_value );
 		}
 
 		// Check for cache.
@@ -326,6 +337,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 				{$exclude}
 				{$date_created}
 				{$date_modified}
+				{$api_version}
+				{$user_id}
 				{$order}
 				{$limit}
 				{$offset}"
@@ -349,6 +362,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 				{$exclude}
 				{$date_created}
 				{$date_modified}
+				{$user_id}
 				{$order}
 				{$limit}
 				{$offset}"

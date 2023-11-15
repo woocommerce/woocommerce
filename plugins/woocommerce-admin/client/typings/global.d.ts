@@ -9,7 +9,6 @@ declare global {
 		wcAdminFeatures: {
 			'activity-panels': boolean;
 			analytics: boolean;
-			'product-block-editor': boolean;
 			coupons: boolean;
 			'customer-effort-score-tracks': boolean;
 			homescreen: boolean;
@@ -22,6 +21,8 @@ declare global {
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
 			'product-variation-management': boolean;
+			'product-virtual-downloadable': boolean;
+			'product-external-affiliate': boolean;
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;

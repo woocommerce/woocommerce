@@ -37,7 +37,7 @@ export const Plugins = ( {
 	onAbort,
 	onComplete,
 	onError = () => null,
-	pluginSlugs = [ 'jetpack', 'woocommerce-services' ],
+	pluginSlugs = [ 'woocommerce-services' ],
 	onSkip,
 	installText = __( 'Install & enable', 'woocommerce' ),
 	skipText = __( 'No thanks', 'woocommerce' ),

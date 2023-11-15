@@ -17,7 +17,7 @@ const testProps = {
 		paidProduct: {
 			description: 'Paid product type',
 			label: 'Paid product',
-			more_url: 'https://woocommerce.com/paid-product',
+			more_url: 'https://woo.com/paid-product',
 			product: 100,
 			slug: 'paid-product',
 			yearly_price: 120,
@@ -105,7 +105,7 @@ describe( 'ProductTypes', () => {
 
 		expect(
 			screen.queryByText(
-				'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.'
+				'The following extensions will be added to your site for free: WooPayments. An account is required to use this feature.'
 			)
 		).toBeInTheDocument();
 	} );
@@ -133,7 +133,7 @@ describe( 'ProductTypes', () => {
 
 		expect(
 			screen.queryByText(
-				'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.'
+				'The following extensions will be added to your site for free: WooPayments. An account is required to use this feature.'
 			)
 		).not.toBeInTheDocument();
 	} );

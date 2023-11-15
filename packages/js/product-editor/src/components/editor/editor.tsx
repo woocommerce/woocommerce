@@ -7,7 +7,6 @@ import {
 	Fragment,
 	useState,
 } from '@wordpress/element';
-import { PluginArea } from '@wordpress/plugins';
 import {
 	LayoutContextProvider,
 	useExtendLayout,
@@ -16,7 +15,8 @@ import {
 	EditorSettings,
 	EditorBlockListSettings,
 } from '@wordpress/block-editor';
-import { Popover, SlotFillProvider } from '@wordpress/components';
+import { Template } from '@wordpress/blocks';
+import { Popover } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -29,27 +29,32 @@ import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { FullscreenMode, InterfaceSkeleton } from '@wordpress/interface';
+import { InterfaceSkeleton } from '@wordpress/interface';
 
 /**
  * Internal dependencies
  */
 import { Header } from '../header';
 import { BlockEditor } from '../block-editor';
-import { initBlocks } from './init-blocks';
-
-initBlocks();
+import { ValidationProvider } from '../../contexts/validation-context';
 
 export type ProductEditorSettings = Partial<
 	EditorSettings & EditorBlockListSettings
->;
+> & {
+	templates: Record< string, Template[] >;
+};
 
 type EditorProps = {
-	product: Product;
+	product: Pick< Product, 'id' | 'type' >;
+	productType?: string;
 	settings: ProductEditorSettings | undefined;
 };
 
-export function Editor( { product, settings }: EditorProps ) {
+export function Editor( {
+	product,
+	productType = 'product',
+	settings,
+}: EditorProps ) {
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
 
 	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
@@ -59,38 +64,35 @@ export function Editor( { product, settings }: EditorProps ) {
 			<StrictMode>
 				<EntityProvider
 					kind="postType"
-					type="product"
+					type={ productType }
 					id={ product.id }
 				>
 					<ShortcutProvider>
-						<FullscreenMode isActive={ false } />
-						<SlotFillProvider>
+						<ValidationProvider initialValue={ product }>
 							<InterfaceSkeleton
 								header={
 									<Header
-										productName={ product.name }
 										onTabSelect={ setSelectedTab }
+										productType={ productType }
 									/>
 								}
 								content={
 									<>
 										<BlockEditor
 											settings={ settings }
-											product={ product }
+											productType={ productType }
+											productId={ product.id }
 											context={ {
 												selectedTab,
-												postType: 'product',
+												postType: productType,
 												postId: product.id,
 											} }
 										/>
-										{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-										<PluginArea scope="woocommerce-product-block-editor" />
 									</>
 								}
 							/>
-
 							<Popover.Slot />
-						</SlotFillProvider>
+						</ValidationProvider>
 					</ShortcutProvider>
 				</EntityProvider>
 			</StrictMode>

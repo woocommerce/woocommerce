@@ -3,9 +3,12 @@
  * States
  *
  * Returns an array of country states. This deprecates and replaces the /states/ directory found in older versions.
+ *
  * States should be defined in English and translated native through localisation files.
+ *
  * Country codes and states (or province) names should follow the Unicode CLDR recommendation (https://cldr.unicode.org/translation/displaynames/countryregion-territory-names).
- * Countries defined with empty arrays have no states.
+ *
+ * Countries defined with empty arrays have no states. These should also be defined in class-wc-countries.php to mark the state field as not required and hidden.
  *
  * @package WooCommerce\i18n
  * @version 3.8.0
@@ -603,6 +606,7 @@ return array(
 		'ZA' => __( 'Zamora', 'woocommerce' ),
 		'Z'  => __( 'Zaragoza', 'woocommerce' ),
 	),
+	'ET' => array(),
 	'FI' => array(),
 	'FR' => array(),
 	'GF' => array(),
@@ -1080,6 +1084,24 @@ return array(
 		'KE45' => __( 'Vihiga', 'woocommerce' ),
 		'KE46' => __( 'Wajir', 'woocommerce' ),
 		'KE47' => __( 'West Pokot', 'woocommerce' ),
+	),
+	'KN' => array( // Saint Kitts and Nevis parishes.
+		'KNK'  => __( 'Saint Kitts', 'woocommerce' ),
+		'KNN'  => __( 'Nevis', 'woocommerce' ),
+		'KN01' => __( 'Christ Church Nichola Town', 'woocommerce' ),
+		'KN02' => __( 'Saint Anne Sandy Point', 'woocommerce' ),
+		'KN03' => __( 'Saint George Basseterre', 'woocommerce' ),
+		'KN04' => __( 'Saint George Gingerland', 'woocommerce' ),
+		'KN05' => __( 'Saint James Windward', 'woocommerce' ),
+		'KN06' => __( 'Saint John Capisterre', 'woocommerce' ),
+		'KN07' => __( 'Saint John Figtree', 'woocommerce' ),
+		'KN08' => __( 'Saint Mary Cayon', 'woocommerce' ),
+		'KN09' => __( 'Saint Paul Capisterre', 'woocommerce' ),
+		'KN10' => __( 'Saint Paul Charlestown', 'woocommerce' ),
+		'KN11' => __( 'Saint Peter Basseterre', 'woocommerce' ),
+		'KN12' => __( 'Saint Thomas Lowland', 'woocommerce' ),
+		'KN13' => __( 'Saint Thomas Middle Island', 'woocommerce' ),
+		'KN15' => __( 'Trinity Palmetto Point', 'woocommerce' ),
 	),
 	'KR' => array(),
 	'KW' => array(),
@@ -1807,6 +1829,7 @@ return array(
 		'RSKM' => _x( 'Kosovo-Metohija', 'district', 'woocommerce' ),
 		'RSVO' => _x( 'Vojvodina', 'district', 'woocommerce' ),
 	),
+	'RW' => array(),
 	'SE' => array(),
 	'UA' => array( // Ukrainian oblasts. https://github.com/unicode-org/cldr/blob/release-42/common/subdivisions/en.xml#L5243.
 		'UA05' => __( 'Vinnychchyna', 'woocommerce' ),

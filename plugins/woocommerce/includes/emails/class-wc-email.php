@@ -229,6 +229,13 @@ class WC_Email extends WC_Settings_API {
 	public $replace = array();
 
 	/**
+	 * E-mail type: plain, html or multipart.
+	 *
+	 * @var string
+	 */
+	public $email_type;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {

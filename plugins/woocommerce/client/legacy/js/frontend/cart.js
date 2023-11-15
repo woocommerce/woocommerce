@@ -60,23 +60,22 @@ jQuery( function( $ ) {
 	/**
 	 * Removes duplicate notices.
 	 *
-	 * @param {JQuery Object} notices
+	 * @param {JQuery Object} $notices
 	 */
-	var remove_duplicate_notices = function( notices ) {
-		var seen = [];
-		var new_notices = notices;
+	var remove_duplicate_notices = function( $notices ) {
+		var seen                 = new Set();
+		var deduplicated_notices = [];
 
-		notices.each( function( index ) {
-			var text = $( this ).text();
+		$notices.each( function() {
+			const text = $( this ).text();
 
-			if ( 'undefined' === typeof seen[ text ] ) {
-				seen[ text ] = true;
-			} else {
-				new_notices.splice( index, 1 );
+			if ( ! seen.has( text ) ) {
+				seen.add( text );
+				deduplicated_notices.push( this );
 			}
 		} );
 
-		return new_notices;
+		return $( deduplicated_notices );
 	};
 
 	/**
@@ -110,7 +109,7 @@ jQuery( function( $ ) {
 			}
 
 			// No items to display now! Replace all cart content.
-			var $cart_html = $( '.cart-empty', $html ).closest( '.woocommerce' );
+			var $cart_html = $( '.wc-empty-cart-message', $html ).closest( '.woocommerce' );
 			$( '.woocommerce-cart-form__contents' ).closest( '.woocommerce' ).replaceWith( $cart_html );
 
 			// Display errors
@@ -157,7 +156,7 @@ jQuery( function( $ ) {
 	var show_notice = function( html_element, $target ) {
 		if ( ! $target ) {
 			$target = $( '.woocommerce-notices-wrapper:first' ) ||
-				$( '.cart-empty' ).closest( '.woocommerce' ) ||
+				$( '.wc-empty-cart-message' ).closest( '.woocommerce' ) ||
 				$( '.woocommerce-cart-form' );
 		}
 		$target.prepend( html_element );

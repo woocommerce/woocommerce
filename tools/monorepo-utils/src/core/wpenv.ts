@@ -35,7 +35,7 @@ export const isWPEnvPortTaken = () => {
  * Start wp-env.
  *
  * @param {string}   tmpRepoPath - path to the temporary repo to start wp-env from.
- * @param {Function} error       -  error print method.
+ * @param {Function} error       - error print method.
  * @return {boolean} if starting the container succeeded.
  */
 export const startWPEnv = async (

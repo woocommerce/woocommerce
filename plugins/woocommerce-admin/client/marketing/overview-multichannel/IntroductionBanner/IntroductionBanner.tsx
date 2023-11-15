@@ -13,6 +13,7 @@ import { CreateNewCampaignModal } from '~/marketing/components';
 import {
 	useRegisteredChannels,
 	useRecommendedChannels,
+	useCampaignTypes,
 } from '~/marketing/hooks';
 import './IntroductionBanner.scss';
 import wooIconUrl from './woo.svg';
@@ -30,8 +31,11 @@ export const IntroductionBanner = ( {
 	const [ isModalOpen, setModalOpen ] = useState( false );
 	const { data: dataRegistered } = useRegisteredChannels();
 	const { data: dataRecommended } = useRecommendedChannels();
+	const { data: dataCampaignTypes } = useCampaignTypes();
 
-	const showCreateCampaignButton = !! dataRegistered?.length;
+	const showButtons = !! (
+		dataRegistered?.length && dataCampaignTypes?.length
+	);
 
 	/**
 	 * Boolean to display the "Add channels" button in the introduction banner.
@@ -102,21 +106,19 @@ export const IntroductionBanner = ( {
 						</Flex>
 					</FlexItem>
 				</Flex>
-				{ ( showCreateCampaignButton || showAddChannelsButton ) && (
+				{ showButtons && (
 					<Flex
 						className="woocommerce-marketing-introduction-banner-buttons"
 						justify="flex-start"
 					>
-						{ showCreateCampaignButton && (
-							<Button
-								variant="primary"
-								onClick={ () => {
-									setModalOpen( true );
-								} }
-							>
-								{ __( 'Create a campaign', 'woocommerce' ) }
-							</Button>
-						) }
+						<Button
+							variant="primary"
+							onClick={ () => {
+								setModalOpen( true );
+							} }
+						>
+							{ __( 'Create a campaign', 'woocommerce' ) }
+						</Button>
 						{ showAddChannelsButton && (
 							<Button
 								variant="secondary"

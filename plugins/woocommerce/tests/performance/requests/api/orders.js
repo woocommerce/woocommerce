@@ -186,6 +186,10 @@ export function ordersAPI() {
 	group( 'API Batch Update Orders', function () {
 		let updateBatchItem;
 
+		if ( ! post_ids ) {
+			return;
+		}
+
 		for ( let index = 0; index < batchSize; index++ ) {
 			updateBatchItem = {
 				id: `${ post_ids[ index ] }`,

@@ -34,7 +34,7 @@ export const pluginNames = {
 	),
 	'woocommerce-gateway-stripe': __( 'WooCommerce Stripe', 'woocommerce' ),
 	'woocommerce-payfast-gateway': __( 'WooCommerce Payfast', 'woocommerce' ),
-	'woocommerce-payments': __( 'WooCommerce Payments', 'woocommerce' ),
+	'woocommerce-payments': __( 'WooPayments', 'woocommerce' ),
 	'woocommerce-services': __( 'WooCommerce Shipping & Tax', 'woocommerce' ),
 	'woocommerce-services:shipping': __(
 		'WooCommerce Shipping & Tax',

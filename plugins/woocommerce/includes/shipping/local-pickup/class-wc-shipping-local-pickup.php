@@ -21,6 +21,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 
 	/**
+	 * Shipping method cost.
+	 *
+	 * @var string
+	 */
+	public $cost;
+
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int $instance_id Instance ID.

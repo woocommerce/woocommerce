@@ -312,7 +312,7 @@ jQuery( function( $ ) {
 					var select2_args = $.extend( {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
-						minimumInputLength: $( this ).data( 'minimum_input_length' ) ?? '3',
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) !== null && $( this ).data( 'minimum_input_length' ) !== undefined ? $( this ).data( 'minimum_input_length' ) : '3',
 						escapeMarkup      : function( m ) {
 							return m;
 						},
@@ -356,7 +356,7 @@ jQuery( function( $ ) {
 					var select2_args = $.extend( {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
-						minimumInputLength: $( this ).data( 'minimum_input_length' ) ?? '3',
+						minimumInputLength: $( this ).data( 'minimum_input_length' ) !== null && $( this ).data( 'minimum_input_length' ) !== undefined ? $( this ).data( 'minimum_input_length' ) : '3',
 						escapeMarkup      : function( m ) {
 							return m;
 						},

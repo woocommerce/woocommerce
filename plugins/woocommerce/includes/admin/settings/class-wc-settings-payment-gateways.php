@@ -193,7 +193,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Manage the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>';
 										} else {
 											if (
-												'WooCommerce Payments' === $method_title &&
+												// Keep old brand name for backwards compatibility.
+												( 'WooCommerce Payments' === $method_title || 'WooPayments' === $method_title ) &&
 												class_exists( 'WC_Payments_Account' )
 											) {
 												$setup_url = WC_Payments_Account::get_connect_url();
@@ -257,7 +258,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 							echo '<tr>';
 							// phpcs:ignore -- ignoring the error since the value is harded.
 							echo "<td style='border-top: 1px solid #c3c4c7; background-color: #fff' colspan='{$columns_count}'>";
-							echo "<a id='settings-other-payment-methods' href='https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations' target='_blank' class='components-button is-tertiary'>";
+							echo "<a id='settings-other-payment-methods' href='https://woo.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations' target='_blank' class='components-button is-tertiary'>";
 							// phpcs:ignore
 							echo $link_text;
 							// phpcs:ignore

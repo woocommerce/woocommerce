@@ -53,6 +53,13 @@ Other ways of running tests (make sure you are in the `plugins/woocommerce` fold
 -   `pnpm test:e2e-pw --headed` (headed -- displaying browser window and test interactions)
 -   `pnpm test:e2e-pw --debug` (runs tests in debug mode)
 -   `pnpm test:e2e-pw ./tests/e2e-pw/tests/activate-and-setup/basic-setup.spec.js` (runs a single test)
+-   `pnpm test:e2e-pw --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode)). You may need to increase the [test timeout](https://playwright.dev/docs/api/class-testconfig#test-config-timeout) by setting the `DEFAULT_TIMEOUT_OVERRIDE` environment variable like so:
+
+    ```bash
+    # Increase test timeout to 3 minutes
+    export DEFAULT_TIMEOUT_OVERRIDE=180000
+    pnpm test:e2e-pw --ui
+    ```
 
 To see all options, make sure you are in the `plugins/woocommerce` folder and run `pnpm playwright test --help`
 
@@ -60,32 +67,28 @@ To see all options, make sure you are in the `plugins/woocommerce` folder and ru
 
 The default values are:
 
--   Latest stable WordPress version 
+-   Latest stable WordPress version
 -   PHP 7.4
+-   Latest stable WordPress version
 -   MariaDB
 -   URL: `http://localhost:8086/`
 -   Admin credentials: `admin/password`
 
-If you want to customize the port or admin credentials, check the [Test Variables](#test-variables) section.
-
-If you would like to customize the `PHP`, `WordPress` or `WooCommerce` versions installed in the environment, you can define `UPDATE_WP_JSON_FILE=1` along with any or all of the following env vars when building the environment.
-- `WP_VERSION`
-  - Acceptable versions are `nightly`, `trunk`, and any version listed on [WordPress Releases] page.
-- `WC_VERSION`
-  - Acceptable versions can be found on the [WooCommerce Releases](https://github.com/woocommerce/woocommerce/releases) page
-- `PHP`
-  - Any PHP version you see it. Please note that WooCommerce requires a minimum of PHP 7.2.
-
-**Example**
-
-The command below will create and environment with WordPress version 6.2, WooCommerce version 7.5.1 and PHP version 8.2 installed.
-
-`UPDATE_WP_JSON_FILE=1 WP_VERSION=6.2 WC_TEST_VERSION=7.5.1 PHP_VERSION=8.2 pnpm run env:test`
-
-If you'd like to run with the default configuration, simply remove the `UPDATE_WP_JSON_FILE`.
-
-
 For more information how to configure the test environment for `wp-env`, please checkout the [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) documentation.
+
+#### Alternate environments
+
+If you'd like to run the test suite against an alternate environment (external host for example), you can create a `.env` file in `tests/e2e-pw/` containing the following values:
+
+```bash
+BASE_URL='https://www.example.com'
+ADMIN_USER='admin.username'
+ADMIN_PASSWORD='admin.password'
+CUSTOMER_USER='customer.username'
+CUSTOMER_PASSWORD='customer.password'
+DEFAULT_TIMEOUT_OVERRIDE=100000
+
+```
 
 ### Test Variables
 
@@ -109,11 +112,11 @@ The test environment uses the following test variables:
 
 If you need to modify the port for your local test environment (eg. port is already in use) or use, edit [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/playwright.config.js). Depending on what environment tool you are using, you will need to also edit the respective `.json` file.
 
-**Modiify the port wp-env**
+#### Modify the port wp-env
 
 Edit [.wp-env.json](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/.wp-env.json) and [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/playwright.config.js).
 
-**Modify port for e2e-environment**
+#### Modify port for e2e-environment
 
 Edit [tests/e2e/config/default.json](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/config/default.json).\*\*\*\*
 
@@ -127,6 +130,8 @@ After you run a test, it's best to restart the environment to start from a fresh
 -   `pnpm env:restart` to stop/destroy and then start the environment (useful for re-testing)
 
 ## Guide for writing e2e tests
+
+### Tools for writing tests
 
 ### Creating test structure
 
@@ -210,14 +215,14 @@ A browser window should open the Allure report.
 
 If you're on [WSL](https://learn.microsoft.com/en-us/windows/wsl/about) however, you might get this message right after running the `allure open` command:
 
-```
+```bash
 Starting web server...
 2022-12-09 18:52:01.323:INFO::main: Logging initialized @286ms to org.eclipse.jetty.util.log.StdErrLog
 Can not open browser because this capability is not supported on your platform. You can use the link below to open the report manually.
 Server started at <http://127.0.1.1:38917/>. Press <Ctrl+C> to exit
 ```
 
-In this case, take note of the port number (38917 in the example above) and then use it to navigate to `http://localhost`. Taking the example above, you should be able to view the Allure report on http://localhost:38917.
+In this case, take note of the port number (38917 in the example above) and then use it to navigate to localhost. Taking the example above, you should be able to view the Allure report on localhost:38917 in your browser.
 
 To know more about the allure-playwright integration, see their [GitHub documentation](https://github.com/allure-framework/allure-js/tree/master/packages/allure-playwright).
 

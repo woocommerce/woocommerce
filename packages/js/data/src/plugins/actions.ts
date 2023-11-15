@@ -215,20 +215,26 @@ function* handlePluginAPIError(
 }
 
 // Action Creator Generators
-export function* installPlugins( plugins: Partial< PluginNames >[] ) {
+export function* installPlugins(
+	plugins: Partial< PluginNames >[],
+	async = false
+) {
 	yield setIsRequesting( 'installPlugins', true );
 
 	try {
 		const results: InstallPluginsResponse = yield apiFetch( {
 			path: `${ WC_ADMIN_NAMESPACE }/plugins/install`,
 			method: 'POST',
-			data: { plugins: plugins.join( ',' ) },
+			data: { plugins: plugins.join( ',' ), async },
 		} );
 
-		if ( results.data.installed.length ) {
+		if ( results.data.installed?.length ) {
 			yield updateInstalledPlugins( results.data.installed );
 		}
-		if ( Object.keys( results.errors.errors ).length ) {
+		if (
+			results.errors?.errors &&
+			Object.keys( results.errors.errors ).length
+		) {
 			throw results.errors.errors;
 		}
 

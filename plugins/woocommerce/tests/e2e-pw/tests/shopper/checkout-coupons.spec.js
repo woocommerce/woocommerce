@@ -86,19 +86,17 @@ test.describe( 'Checkout coupons', () => {
 			page,
 		} ) => {
 			await page.goto( '/checkout/', { waitUntil: 'networkidle' } );
-			await page.click( 'text=Click here to enter your code' );
-			await page.fill( '#coupon_code', coupons[ i ].code );
-			await page.click( 'text=Apply coupon' );
+			await page.locator( 'text=Click here to enter your code' ).click();
+			await page.locator( '#coupon_code' ).fill( coupons[ i ].code );
+			await page.locator( 'text=Apply coupon' ).click();
 
-			await expect(
-				page.locator( '.woocommerce-message' )
-			).toContainText( 'Coupon code applied successfully.' );
+			await expect( page.getByText( 'Coupon code applied successfully.' ) ).toBeVisible();
 			await expect(
 				page.locator( '.cart-discount .amount' )
-			).toContainText( discounts[ i ] );
+				).toContainText( discounts[ i ] );
 			await expect(
 				page.locator( '.order-total .amount' )
-			).toContainText( totals[ i ] );
+				).toContainText( totals[ i ] );
 		} );
 	}
 
@@ -106,21 +104,17 @@ test.describe( 'Checkout coupons', () => {
 		page,
 	} ) => {
 		await page.goto( '/checkout/' );
-		await page.click( 'text=Click here to enter your code' );
-		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( 'text=Apply coupon' );
+		await page.locator( 'text=Click here to enter your code' ).click();
+		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
+		await page.locator( 'text=Apply coupon' ).click();
 		// successful first time
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			'Coupon code applied successfully.'
-		);
+		await expect( page.getByText( 'Coupon code applied successfully.' ) ).toBeVisible();
 		// try to apply the same coupon
-		await page.click( 'text=Click here to enter your code' );
-		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( 'text=Apply coupon' );
+		await page.locator( 'text=Click here to enter your code' ).click();
+		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
+		await page.locator( 'text=Apply coupon' ).click();
 		// error received
-		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
-			'Coupon code already applied!'
-		);
+		await expect( page.getByText( 'Coupon code already applied!' ) ).toBeVisible();
 		// check cart total
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(
 			discounts[ 0 ]
@@ -132,20 +126,16 @@ test.describe( 'Checkout coupons', () => {
 
 	test( 'allows checkout to apply multiple coupons', async ( { page } ) => {
 		await page.goto( '/checkout/' );
-		await page.click( 'text=Click here to enter your code' );
-		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( 'text=Apply coupon' );
+		await page.locator( 'text=Click here to enter your code' ).click();
+		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
+		await page.locator( 'text=Apply coupon' ).click();
 		// successful
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			'Coupon code applied successfully.'
-		);
-		await page.click( 'text=Click here to enter your code' );
-		await page.fill( '#coupon_code', coupons[ 2 ].code );
-		await page.click( 'text=Apply coupon' );
+		await expect( page.getByText( 'Coupon code applied successfully.' ) ).toBeVisible();
+		await page.locator( 'text=Click here to enter your code' ).click();
+		await page.locator( '#coupon_code' ).fill( coupons[ 2 ].code );
+		await page.locator( 'text=Apply coupon' ).click();
 		// successful
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			'Coupon code applied successfully.'
-		);
+		await expect( page.getByText( 'Coupon code applied successfully.' ) ).toBeVisible();
 		// check cart total
 		await expect(
 			page.locator( '.cart-discount .amount >> nth=0' )
@@ -162,9 +152,9 @@ test.describe( 'Checkout coupons', () => {
 		page,
 	} ) => {
 		await page.goto( '/checkout/' );
-		await page.click( 'text=Click here to enter your code' );
-		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( 'text=Apply coupon' );
+		await page.locator( 'text=Click here to enter your code' ).click();
+		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
+		await page.locator( 'text=Apply coupon' ).click();
 
 		// confirm numbers
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(
@@ -174,7 +164,7 @@ test.describe( 'Checkout coupons', () => {
 			totals[ 0 ]
 		);
 
-		await page.click( 'a.woocommerce-remove-coupon' );
+		await page.locator( 'a.woocommerce-remove-coupon' ).click();
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			'$20.00'

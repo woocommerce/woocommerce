@@ -27,6 +27,7 @@ const WCPaySettingBanner = () => {
 		'admin.php?wcpay-connect=1&_wpnonce=' +
 			getAdminSetting( 'wcpay_welcome_page_connect_nonce' )
 	);
+	const isWooPayEligible = getAdminSetting( 'isWooPayEligible' );
 
 	return (
 		<WCPayBanner>
@@ -41,8 +42,9 @@ const WCPaySettingBanner = () => {
 						{ __( 'Get started', 'woocommerce' ) }
 					</Button>
 				}
+				isWooPayEligible={ isWooPayEligible }
 			/>
-			<WCPayBannerFooter />
+			<WCPayBannerFooter isWooPayEligible={ isWooPayEligible } />
 		</WCPayBanner>
 	);
 };

@@ -44,7 +44,7 @@ export class StoreAlerts extends Component {
 	}
 
 	previousAlert( event ) {
-		event.stopPropagation();
+		event?.stopPropagation();
 		const { currentIndex } = this.state;
 
 		if ( currentIndex > 0 ) {
@@ -67,7 +67,7 @@ export class StoreAlerts extends Component {
 	}
 
 	renderActions( alert ) {
-		const { triggerNoteAction, updateNote } = this.props;
+		const { triggerNoteAction, updateNote, createNotice } = this.props;
 		const actions = alert.actions.map( ( action ) => {
 			return (
 				<Button
@@ -78,13 +78,28 @@ export class StoreAlerts extends Component {
 					onClick={ async ( event ) => {
 						const url = event.currentTarget.getAttribute( 'href' );
 						event.preventDefault();
-						await triggerNoteAction( alert.id, action.id );
-						if (
-							url &&
-							url !== '#' &&
-							parseAdminUrl( url ).href !== window.location.href
-						) {
-							navigateTo( { url } );
+
+						// navigate to previous alert to avoid an out of bounds error in case it's the last alert from the array
+						this.previousAlert();
+						try {
+							await triggerNoteAction( alert.id, action.id );
+							if (
+								url &&
+								url !== '#' &&
+								parseAdminUrl( url ).href !==
+									window.location.href
+							) {
+								navigateTo( { url } );
+							}
+						} catch ( e ) {
+							createNotice(
+								'error',
+								__(
+									`Something went wrong while triggering this note's action.`,
+									'woocommerce'
+								)
+							);
+							throw e;
 						}
 					} }
 				>
@@ -316,10 +331,12 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { triggerNoteAction, updateNote } = dispatch( NOTES_STORE_NAME );
+		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
 			triggerNoteAction,
 			updateNote,
+			createNotice,
 		};
 	} )
 )( StoreAlerts );

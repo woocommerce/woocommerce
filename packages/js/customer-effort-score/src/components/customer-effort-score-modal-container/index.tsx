@@ -15,9 +15,6 @@ import { getStoreAgeInWeeks } from '../../utils';
 import { STORE_KEY } from '../../store';
 import { ADMIN_INSTALL_TIMESTAMP_OPTION_NAME } from '../../constants';
 
-export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =
-	'woocommerce_ces_product_mvp_ces_action';
-
 export const CustomerEffortScoreModalContainer: React.FC = () => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 	const { hideCesModal } = useDispatch( STORE_KEY );
@@ -49,7 +46,8 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 	const recordScore = (
 		score: number,
 		secondScore: number,
-		comments: string
+		comments: string,
+		extraFieldsValues: { [ key: string ]: string } = {}
 	) => {
 		recordEvent( 'ces_feedback', {
 			action: visibleCESModalData.action,
@@ -57,6 +55,7 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 			score_second_question: secondScore ?? null,
 			score_combined: score + ( secondScore ?? 0 ),
 			comments: comments || '',
+			...extraFieldsValues,
 			store_age: storeAgeInWeeks,
 			...visibleCESModalData.tracksProps,
 		} );
@@ -78,6 +77,7 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 	return (
 		<CustomerFeedbackModal
 			title={ visibleCESModalData.title }
+			showDescription={ visibleCESModalData.showDescription }
 			firstQuestion={ visibleCESModalData.firstQuestion }
 			secondQuestion={ visibleCESModalData.secondQuestion }
 			recordScoreCallback={ ( ...args ) => {
@@ -90,6 +90,10 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 				hideCesModal();
 			} }
 			shouldShowComments={ visibleCESModalData.props?.shouldShowComments }
+			getExtraFieldsToBeShown={
+				visibleCESModalData.getExtraFieldsToBeShown
+			}
+			validateExtraFields={ visibleCESModalData.validateExtraFields }
 		/>
 	);
 };

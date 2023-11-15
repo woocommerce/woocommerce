@@ -2,7 +2,7 @@
 /**
  * Marketing Specs Handler
  *
- * Fetches the specifications for the marketing feature from WC.com API.
+ * Fetches the specifications for the marketing feature from Woo.com API.
  */
 
 namespace Automattic\WooCommerce\Internal\Admin\Marketing;
@@ -29,21 +29,21 @@ class MarketingSpecs {
 	const KNOWLEDGE_BASE_TRANSIENT = 'wc_marketing_knowledge_base';
 
 	/**
-	 * Slug of the category specifying marketing extensions on the WooCommerce.com store.
+	 * Slug of the category specifying marketing extensions on the Woo.com store.
 	 *
 	 * @var string
 	 */
 	const MARKETING_EXTENSION_CATEGORY_SLUG = 'marketing';
 
 	/**
-	 * Slug of the subcategory specifying marketing channels on the WooCommerce.com store.
+	 * Slug of the subcategory specifying marketing channels on the Woo.com store.
 	 *
 	 * @var string
 	 */
 	const MARKETING_CHANNEL_SUBCATEGORY_SLUG = 'sales-channels';
 
 	/**
-	 * Load recommended plugins from WooCommerce.com
+	 * Load recommended plugins from Woo.com
 	 *
 	 * @return array
 	 */
@@ -52,7 +52,7 @@ class MarketingSpecs {
 
 		if ( false === $plugins ) {
 			$request = wp_remote_get(
-				'https://woocommerce.com/wp-json/wccom/marketing-tab/1.2/recommendations.json',
+				'https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json',
 				array(
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 				)
@@ -76,7 +76,7 @@ class MarketingSpecs {
 	}
 
 	/**
-	 * Return only the recommended marketing channels from WooCommerce.com.
+	 * Return only the recommended marketing channels from Woo.com.
 	 *
 	 * @return array
 	 */
@@ -85,7 +85,7 @@ class MarketingSpecs {
 	}
 
 	/**
-	 * Return all recommended marketing extensions EXCEPT the marketing channels from WooCommerce.com.
+	 * Return all recommended marketing extensions EXCEPT the marketing channels from Woo.com.
 	 *
 	 * @return array
 	 */
@@ -134,38 +134,29 @@ class MarketingSpecs {
 	}
 
 	/**
-	 * Load knowledge base posts from WooCommerce.com
+	 * Load knowledge base posts from Woo.com
 	 *
-	 * @param string|null $category Category of posts to retrieve.
+	 * @param string|null $topic The topic of marketing knowledgebase to retrieve.
 	 * @return array
 	 */
-	public function get_knowledge_base_posts( ?string $category ): array {
-		$kb_transient = self::KNOWLEDGE_BASE_TRANSIENT;
-
-		$categories = array(
-			'marketing' => 1744,
-			'coupons'   => 25202,
-		);
-
-		// Default to marketing category (if no category set on the kb component).
-		if ( ! empty( $category ) && array_key_exists( $category, $categories ) ) {
-			$category_id  = $categories[ $category ];
-			$kb_transient = $kb_transient . '_' . strtolower( $category );
-		} else {
-			$category_id = $categories['marketing'];
+	public function get_knowledge_base_posts( ?string $topic ): array {
+		// Default to the marketing topic (if no topic is set on the kb component).
+		if ( empty( $topic ) ) {
+			$topic = 'marketing';
 		}
+
+		$kb_transient = self::KNOWLEDGE_BASE_TRANSIENT . '_' . strtolower( $topic );
 
 		$posts = get_transient( $kb_transient );
 
 		if ( false === $posts ) {
 			$request_url = add_query_arg(
 				array(
-					'categories' => $category_id,
-					'page'       => 1,
-					'per_page'   => 8,
-					'_embed'     => 1,
+					'page'     => 1,
+					'per_page' => 8,
+					'_embed'   => 1,
 				),
-				'https://woocommerce.com/wp-json/wp/v2/posts?utm_medium=product'
+				'https://woocommerce.com/wp-json/wccom/marketing-knowledgebase/v1/posts/' . $topic
 			);
 
 			$request = wp_remote_get(

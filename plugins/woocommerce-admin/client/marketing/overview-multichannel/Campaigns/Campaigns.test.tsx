@@ -35,7 +35,7 @@ const createTestCampaign = ( programId: string ) => {
 		description: '',
 		cost: `USD 30`,
 		manageUrl: `https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/edit&programId=${ programId }`,
-		icon: 'https://woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
+		icon: 'https://woo.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
 		channelName: 'Google Listings and Ads',
 		channelSlug: 'google-listings-and-ads',
 	};
@@ -158,7 +158,7 @@ describe( 'Campaigns component', () => {
 		expect( screen.getByText( 'Campaign 6' ) ).toBeInTheDocument();
 	} );
 
-	it( 'renders a "Create new campaign" button in the card header, and upon clicking, displays the "Create a new campaign" modal', async () => {
+	it( 'does not render a "Create new campaign" button in the card header when there are no campaign types', async () => {
 		( useCampaigns as jest.Mock ).mockReturnValue( {
 			loading: false,
 			error: undefined,
@@ -169,6 +169,43 @@ describe( 'Campaigns component', () => {
 		} );
 		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: false,
+			data: [],
+		} );
+
+		render( <Campaigns /> );
+
+		expect(
+			screen.queryByRole( 'button', { name: 'Create new campaign' } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'renders a "Create new campaign" button in the card header when there are campaign types, and upon clicking, displays the "Create a new campaign" modal', async () => {
+		( useCampaigns as jest.Mock ).mockReturnValue( {
+			loading: false,
+			error: undefined,
+			data: [ createTestCampaign( '1' ) ],
+			meta: {
+				total: 1,
+			},
+		} );
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
+			loading: false,
+			data: [
+				{
+					id: 'google-ads',
+					name: 'Google Ads',
+					description:
+						'Boost your product listings with a campaign that is automatically optimized to meet your goals.',
+					channel: {
+						slug: 'google-listings-and-ads',
+						name: 'Google Listings & Ads',
+					},
+					create_url:
+						'https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/create',
+					icon_url:
+						'https://woo.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
+				},
+			],
 		} );
 
 		render( <Campaigns /> );

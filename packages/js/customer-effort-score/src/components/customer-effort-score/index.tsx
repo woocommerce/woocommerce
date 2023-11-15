@@ -21,6 +21,7 @@ type CustomerEffortScoreProps = {
 	) => void;
 	title?: string;
 	description?: string;
+	showDescription?: boolean;
 	noticeLabel?: string;
 	firstQuestion: string;
 	secondQuestion?: string;
@@ -33,6 +34,14 @@ type CustomerEffortScoreProps = {
 		firstQuestionScore: number,
 		secondQuestionScore: number
 	) => boolean;
+	getExtraFieldsToBeShown?: (
+		extraFieldsValues: { [ key: string ]: string },
+		setExtraFieldsValues: ( values: { [ key: string ]: string } ) => void,
+		errors: Record< string, string > | undefined
+	) => JSX.Element;
+	validateExtraFields?: ( values: { [ key: string ]: string } ) => {
+		[ key: string ]: string;
+	};
 };
 
 /**
@@ -45,6 +54,7 @@ type CustomerEffortScoreProps = {
  * @param {Function} props.recordScoreCallback       Function to call when the score should be recorded.
  * @param {string}   [props.title]                   The title displayed in the modal.
  * @param {string}   props.description               The description displayed in the modal.
+ * @param {boolean}  props.showDescription           Show description in the modal.
  * @param {string}   props.noticeLabel               The notice label displayed in the notice.
  * @param {string}   props.firstQuestion             The first survey question.
  * @param {string}   [props.secondQuestion]          The second survey question.
@@ -54,11 +64,14 @@ type CustomerEffortScoreProps = {
  * @param {Function} props.onModalDismissedCallback  Function to call when modal is dismissed.
  * @param {Function} props.shouldShowComments        Callback to determine if comments section should be shown.
  * @param {Object}   props.icon                      Icon (React component) to be shown on the notice.
+ * @param {Function} props.getExtraFieldsToBeShown   Function that returns the extra fields to be shown.
+ * @param {Function} props.validateExtraFields       Function that validates the extra fields.
  */
 const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 	recordScoreCallback,
 	title,
 	description,
+	showDescription = true,
 	noticeLabel,
 	firstQuestion,
 	secondQuestion,
@@ -71,6 +84,8 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 		[ firstQuestionScore, secondQuestionScore ].some(
 			( score ) => score === 1 || score === 2
 		),
+	getExtraFieldsToBeShown,
+	validateExtraFields,
 } ) => {
 	const [ shouldCreateNotice, setShouldCreateNotice ] = useState( true );
 	const [ visible, setVisible ] = useState( false );
@@ -113,11 +128,14 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 		<CustomerFeedbackModal
 			title={ title }
 			description={ description }
+			showDescription={ showDescription }
 			firstQuestion={ firstQuestion }
 			secondQuestion={ secondQuestion }
 			recordScoreCallback={ recordScoreCallback }
 			onCloseModal={ onModalDismissedCallback }
 			shouldShowComments={ shouldShowComments }
+			getExtraFieldsToBeShown={ getExtraFieldsToBeShown }
+			validateExtraFields={ validateExtraFields }
 		/>
 	);
 };

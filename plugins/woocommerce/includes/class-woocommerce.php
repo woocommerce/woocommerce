@@ -18,6 +18,8 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
+use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
+use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -32,7 +34,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '7.8.0';
+	public $version = '8.3.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -204,6 +206,22 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Initiali Jetpack Connection Config.
+	 *
+	 * @return void
+	 */
+	public function init_jetpack_connection_config() {
+		$config = new Automattic\Jetpack\Config();
+		$config->ensure(
+			'connection',
+			array(
+				'slug' => 'woocommerce',
+				'name' => __( 'WooCommerce', 'woocommerce' ),
+			)
+		);
+	}
+
+	/**
 	 * Hook into actions and filters.
 	 *
 	 * @since 2.3
@@ -213,9 +231,11 @@ final class WooCommerce {
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
+		add_action( 'plugins_loaded', array( $this, 'init_jetpack_connection_config' ), 1 );
 		add_action( 'admin_notices', array( $this, 'build_dependencies_notice' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
+		add_action( 'load-post.php', array( $this, 'includes' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
@@ -240,6 +260,8 @@ final class WooCommerce {
 		$container->get( OptionSanitizer::class );
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
+		$container->get( WebhookUtil::class );
+		$container->get( Marketplace::class );
 	}
 
 	/**
@@ -296,9 +318,12 @@ final class WooCommerce {
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
+
+		// These three are kept defined for compatibility, but are no longer used.
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );
 		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '5.2' );
 		$this->define( 'WC_PHP_MIN_REQUIREMENTS_NOTICE', 'wp_php_min_requirements_' . WC_NOTICE_MIN_PHP_VERSION . '_' . WC_NOTICE_MIN_WP_VERSION );
+
 		/** Define if we're checking against major, minor or no versions in the following places:
 		 *   - plugin screen in WP Admin (displaying extra warning when updating to new major versions)
 		 *   - System Status Report ('Installed version not tested with active version of WooCommerce' warning)
@@ -560,7 +585,10 @@ final class WooCommerce {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
 		}
 
-		if ( $this->is_request( 'frontend' ) ) {
+		// We load frontend includes in the post editor, because they may be invoked via pre-loading of blocks.
+		$in_post_editor = doing_action( 'load-post.php' ) || doing_action( 'load-post-new.php' );
+
+		if ( $this->is_request( 'frontend' ) || $this->is_rest_api_request() || $in_post_editor ) {
 			$this->frontend_includes();
 		}
 

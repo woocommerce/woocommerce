@@ -1181,4 +1181,20 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 		WC_Order::prime_raw_meta_data_cache( $raw_meta_data_collection, 'orders' );
 	}
+
+	/**
+	 * Attempts to restore the specified order back to its original status (after having been trashed).
+	 *
+	 * @param WC_Order $order The order to be untrashed.
+	 *
+	 * @return bool If the operation was successful.
+	 */
+	public function untrash_order( WC_Order $order ): bool {
+		if ( ! wp_untrash_post( $order->get_id() ) ) {
+			return false;
+		}
+
+		$order->set_status( get_post_field( 'post_status', $order->get_id() ) );
+		return (bool) $order->save();
+	}
 }

@@ -781,7 +781,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param  string $visibility Options: 'hidden', 'visible', 'search' and 'catalog'.
 	 */
 	public function set_catalog_visibility( $visibility ) {
-		$options = array_keys( wc_get_product_visibility_options() );
+		$options    = array_keys( wc_get_product_visibility_options() );
+		$visibility = in_array( $visibility, $options, true ) ? $visibility : strtolower( $visibility );
+
 		if ( ! in_array( $visibility, $options, true ) ) {
 			$this->error( 'product_invalid_catalog_visibility', __( 'Invalid catalog visibility option.', 'woocommerce' ) );
 		}
@@ -910,6 +912,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( empty( $status ) ) {
 			$status = 'taxable';
 		}
+
+		$status = strtolower( $status );
 
 		if ( ! in_array( $status, $options, true ) ) {
 			$this->error( 'product_invalid_tax_status', __( 'Invalid product tax status.', 'woocommerce' ) );
@@ -1930,6 +1934,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function single_add_to_cart_text() {
 		return apply_filters( 'woocommerce_product_single_add_to_cart_text', __( 'Add to cart', 'woocommerce' ), $this );
+	}
+
+	/**
+	 * Get the aria-describedby description for the add to cart button.
+	 *
+	 * @return string
+	 */
+	public function add_to_cart_aria_describedby() {
+		/**
+		 * Filter the aria-describedby description for the add to cart button.
+		 *
+		 * @since 7.8.0
+		 *
+		 * @param string $var Text for the 'aria-describedby' attribute.
+		 * @param WC_Product $this Product object.
+		 */
+		return apply_filters( 'woocommerce_product_add_to_cart_aria_describedby', '', $this );
 	}
 
 	/**

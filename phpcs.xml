@@ -27,7 +27,7 @@
 
 	<!-- Configs -->
 	<config name="minimum_supported_wp_version" value="5.2" />
-	<config name="testVersion" value="7.3-" />
+	<config name="testVersion" value="7.4-" />
 
 	<!-- Rules -->
 	<rule ref="WooCommerce-Core" />
@@ -48,6 +48,10 @@
 
 	<rule ref="PHPCompatibility">
 		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
+		<exclude-pattern>tests/src</exclude-pattern>
 	</rule>
 
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">

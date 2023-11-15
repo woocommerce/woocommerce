@@ -92,7 +92,7 @@ class MagentoMigration {
 		$note->add_action(
 			'learn-more',
 			__( 'Learn more', 'woocommerce' ),
-			'https://woocommerce.com/posts/how-migrate-from-magento-to-woocommerce/?utm_source=inbox'
+			'https://woo.com/posts/how-migrate-from-magento-to-woocommerce/?utm_source=inbox'
 		);
 
 		return $note;

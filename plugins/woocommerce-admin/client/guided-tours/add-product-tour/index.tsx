@@ -293,10 +293,8 @@ export const ProductTour = () => {
 			recordEvent( 'walkthrough_product_enable_button_click' );
 		} );
 
-		const query = Object.fromEntries(
-			new URLSearchParams( window.location.search )
-		);
-		if ( query && query.tutorial === 'true' ) {
+		const query = new URLSearchParams( window.location.search );
+		if ( query.get( 'tutorial' ) === 'true' ) {
 			const intervalId = waitUntilElementTopNotChange(
 				tourConfig.steps[ 0 ].referenceElements?.desktop || '',
 				() => {
