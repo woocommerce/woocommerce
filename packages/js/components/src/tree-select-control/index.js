@@ -260,10 +260,44 @@ const TreeSelectControl = ( {
 					}
 					return (
 						! this.checked &&
-						this.leaves.some(
+						this.children.some(
 							( opt ) => opt.checked || opt.partialChecked
 						)
 					);
+				},
+			},
+			hasChildSearchValue: {
+				get() {
+					// Since we are doing recursion, exit true if a child is search result.
+					if ( this.isSearchResult ) {
+						return true;
+					}
+
+					if ( this.hasChildren ) {
+						return this.children.some(
+							( opt ) => opt.hasChildSearchValue
+						);
+					}
+
+					return this.leaves.some( ( opt ) => opt.isSearchResult );
+				},
+			},
+			isVisible: {
+				get() {
+					// everything is visible when not searching.
+					if ( ! isSearching ) {
+						return true;
+					}
+					// Otherwise visible if searched or has child search
+					return this.isSearchResult || this.hasChildSearchValue;
+				},
+			},
+			isSearchResult: {
+				get() {
+					if ( ! isSearching ) {
+						return false;
+					}
+					return !! this.filterMatch;
 				},
 			},
 			expanded: {
@@ -275,7 +309,7 @@ const TreeSelectControl = ( {
 				 */
 				get() {
 					return (
-						isSearching ||
+						( isSearching && this.hasChildSearchValue ) ||
 						this.value === ROOT_VALUE ||
 						cache.expandedValues.includes( this.value )
 					);
@@ -294,20 +328,18 @@ const TreeSelectControl = ( {
 		const reduceOptions = ( acc, { children = [], ...option } ) => {
 			if ( children.length ) {
 				option.children = children.reduce( reduceOptions, [] );
+			}
 
-				if ( ! option.children.length ) {
-					return acc;
-				}
-			} else if ( isSearching ) {
+			if ( isSearching ) {
 				const labelWithAccentsRemoved = removeAccents( option.label );
 				const filterWithAccentsRemoved = removeAccents( filter );
 				const match = labelWithAccentsRemoved
 					.toLowerCase()
 					.indexOf( filterWithAccentsRemoved );
-				if ( match === -1 ) {
-					return acc;
+				if ( match > -1 ) {
+					option.label = highlightOptionLabel( option.label, match );
+					option.filterMatch = true;
 				}
-				option.label = highlightOptionLabel( option.label, match );
 			}
 
 			Object.defineProperties( option, descriptors );
