@@ -10,6 +10,7 @@ interface State {
 export interface ProductGalleryInteractivityApiContext {
 	woocommerce: {
 		selectedImage: string;
+		firstMainImageId: string;
 		imageId: string;
 		visibleImagesIds: string[];
 		dialogVisibleImagesIds: string[];
@@ -39,6 +40,11 @@ interface Actions {
 		};
 		handleNextImageButtonClick: {
 			( store: Store ): void;
+		};
+		dialog: {
+			handleCloseButtonClick: {
+				( store: Store ): void;
+			};
 		};
 	};
 }
@@ -123,7 +129,9 @@ interactivityApiStore( {
 
 					// Check if the esc key is pressed.
 					if ( event.keyCode === Keys.ESC ) {
-						context.woocommerce.isDialogOpen = false;
+						actions.woocommerce.dialog.handleCloseButtonClick(
+							store
+						);
 					}
 
 					// Check if left arrow key is pressed.
@@ -175,6 +183,10 @@ interactivityApiStore( {
 			dialog: {
 				handleCloseButtonClick: ( { context }: Store ) => {
 					context.woocommerce.isDialogOpen = false;
+
+					// Reset the main image.
+					context.woocommerce.selectedImage =
+						context.woocommerce.firstMainImageId;
 				},
 			},
 			handleSelectImage: ( { context }: Store ) => {
