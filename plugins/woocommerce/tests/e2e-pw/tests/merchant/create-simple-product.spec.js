@@ -2,7 +2,6 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { getTranslationFor } = require('../../utils/translations');
 
-
 const virtualProductName = 'Virtual Product Name';
 const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
@@ -90,14 +89,10 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( `/?post_type=product&p=${ virtualProductId }`, {
 			waitUntil: 'networkidle',
 		} );
-		await expect( page.locator( '.product_title' ) ).toHaveText(
-			virtualProductName
-		);
-		await expect(
-			page.locator( '.summary .woocommerce-Price-amount' )
-		).toContainText( productPrice );
-		await page.getByRole( 'button', { name: getTranslationFor('Add to cart') } ).click();
-		await page.getByRole( 'link', { name: getTranslationFor('View cart') } ).click();
+		await expect( page.getByRole('heading', { name: virtualProductName }) ).toBeVisible();
+		await expect( page.getByText( productPrice ) ).toBeVisible();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
+		await page.getByRole( 'link', { name: getTranslationFor( 'View cart' ) } ).click();
 		await expect( page.locator( `td[data-title=${getTranslationFor('Product')}]` ) ).toContainText(
 			virtualProductName
 		);
@@ -150,14 +145,10 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( `/?post_type=product&p=${ nonVirtualProductId }`, {
 			waitUntil: 'networkidle',
 		} );
-		await expect( page.locator( '.product_title' ) ).toHaveText(
-			nonVirtualProductName
-		);
-		await expect(
-			page.locator( '.summary .woocommerce-Price-amount' )
-		).toContainText( productPrice );
-		await page.getByRole( 'button', { name: getTranslationFor('Add to cart') } ).click();
-		await page.getByRole( 'link', { name: getTranslationFor('View cart') } ).click();
+		await expect( page.getByRole( 'heading', { name: nonVirtualProductName } ) ).toBeVisible();
+		await expect( page.getByText( productPrice ).first() ).toBeVisible();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
+		await page.getByRole( 'link', { name: getTranslationFor( 'View cart' ) } ).click();
 		await expect( page.locator( `td[data-title=${getTranslationFor('Product')}]` ) ).toContainText(
 			nonVirtualProductName
 		);

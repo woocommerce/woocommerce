@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Allow plugins to access PostTypeContext and blocks (through core/block-editor data store).

@@ -58,7 +58,7 @@ export type Campaign = {
 	cost: {
 		value: string;
 		currency: string;
-	};
+	} | null;
 };
 
 export type CampaignsPage = {

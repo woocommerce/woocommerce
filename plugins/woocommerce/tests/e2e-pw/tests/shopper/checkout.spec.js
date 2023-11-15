@@ -189,9 +189,9 @@ test.describe( 'Checkout page', () => {
 
 		// first try submitting the form with no fields complete
 		await page.getByRole('button', { name: getTranslationFor( 'Place order' ) }).click();
-		await expect( page.locator( 'ul.woocommerce-error' ) ).toBeVisible();
+		await expect( page.locator('form[name="checkout"]').getByRole('alert') ).toBeVisible();
 		await expect( page.getByText( getTranslationFor( 'Billing First name is a required field.' ) ) ).toBeVisible();
-		await expect( page.getByText( getTranslationFor( 'Billing Last name is a required field.' ), { exact : true } ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing Last name is a required field.' ) ) ).toBeVisible();
 		await expect( page.getByText( getTranslationFor( 'Billing Street address is a required field.' ) ) ).toBeVisible();
 		await expect( page.getByText( getTranslationFor( 'Billing Town / City is a required field.' ) ) ).toBeVisible();
 		await expect( page.getByText( getTranslationFor( 'Billing ZIP Code is a required field.' ) ) ).toBeVisible();

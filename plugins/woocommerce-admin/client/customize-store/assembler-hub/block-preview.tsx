@@ -22,7 +22,6 @@ export const BlockPreview = ( {
 	blocks,
 	settings,
 	useSubRegistry = true,
-	additionalStyles,
 	onChange,
 	...props
 }: {
@@ -30,7 +29,6 @@ export const BlockPreview = ( {
 	settings: Record< string, unknown >;
 	onChange?: ChangeHandler | undefined;
 	useSubRegistry?: boolean;
-	previewOpacity?: number;
 } & Omit< ScaledBlockPreviewProps, 'containerWidth' > ) => {
 	const renderedBlocks = useMemo( () => {
 		const _blocks = Array.isArray( blocks ) ? blocks : [ blocks ];
@@ -45,11 +43,7 @@ export const BlockPreview = ( {
 			onChange={ onChange }
 			useSubRegistry={ useSubRegistry }
 		>
-			<AutoHeightBlockPreview
-				settings={ settings }
-				additionalStyles={ additionalStyles }
-				{ ...props }
-			/>
+			<AutoHeightBlockPreview settings={ settings } { ...props } />
 		</BlockEditorProvider>
 	);
 };

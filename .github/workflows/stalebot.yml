@@ -1,7 +1,10 @@
-name: 'Close stale needs-feedback issues'
+name: 'Process stale needs-feedback issues'
 on:
   schedule:
-    - cron: '21 0 * * *'
+    - cron: '11 0 * * *'
+    - cron: '21 1 * * *'
+    - cron: '31 2 * * *'
+    - cron: '41 3 * * *'
 
 permissions: {}
 
@@ -13,9 +16,20 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/stale@v3
+      - name: Install Actions Core
+        run: npm --prefix .github/workflows/scripts install @actions/core
+
+      - name: Get start date
+        id: startdate
+        run: node .github/workflows/scripts/stalebot.js
+        env:
+          CRON_SCHEDULE: ${{ github.event.schedule }}
+      - name: Scan issues
+        uses: actions/stale@v8
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+          operations-per-run: 8
+          start-date: steps.startdate.outputs.stale-start-date
           stale-issue-message: "As a part of this repository's maintenance, this issue is being marked as stale due to inactivity. Please feel free to comment on it in case we missed something.\n\n###### After 7 days with no activity this issue will be automatically be closed."
           close-issue-message: 'This issue was closed because it has been 14 days with no activity.'
           days-before-issue-stale: 7

@@ -5,6 +5,7 @@ import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
 import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
+import { PluginArea } from '@wordpress/plugins';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -32,6 +33,7 @@ import {
  */
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
 import { ProductEditorContext } from '../../types';
+import { PostTypeContext } from '../../contexts/post-type-context';
 
 type BlockEditorProps = {
 	context: Partial< ProductEditorContext >;
@@ -120,6 +122,11 @@ export function BlockEditor( {
 							<BlockList className="woocommerce-product-block-editor__block-list" />
 						</ObserveTyping>
 					</BlockTools>
+					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
+					<PostTypeContext.Provider value={ context.postType! }>
+						{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+						<PluginArea scope="woocommerce-product-block-editor" />
+					</PostTypeContext.Provider>
 				</BlockEditorProvider>
 			</BlockContextProvider>
 		</div>

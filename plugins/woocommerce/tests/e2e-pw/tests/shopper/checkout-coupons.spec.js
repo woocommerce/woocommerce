@@ -91,15 +91,13 @@ test.describe( 'Checkout coupons', () => {
 			await page.locator( '#coupon_code' ).fill( coupons[ i ].code );
 			await page.locator( `text=${getTranslationFor('Apply coupon')}` ).click();
 
-			await expect(
-				page.locator( '.woocommerce-message' )
-			).toContainText( getTranslationFor('Coupon code applied successfully.') );
+			await expect( page.getByText( getTranslationFor( 'Coupon code applied successfully.' ) ) ).toBeVisible();
 			await expect(
 				page.locator( '.cart-discount .amount' )
-			).toContainText( discounts[ i ] );
+				).toContainText( discounts[ i ] );
 			await expect(
 				page.locator( '.order-total .amount' )
-			).toContainText( totals[ i ] );
+				).toContainText( totals[ i ] );
 		} );
 	}
 
@@ -111,17 +109,13 @@ test.describe( 'Checkout coupons', () => {
 		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
 		await page.locator( `text=${getTranslationFor('Apply coupon')}` ).click();
 		// successful first time
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			getTranslationFor('Coupon code applied successfully.')
-		);
+		await expect( page.getByText( getTranslationFor( 'Coupon code applied successfully.' ) ) ).toBeVisible();
 		// try to apply the same coupon
 		await page.locator( `text=${getTranslationFor('Click here to enter your code')}`).click();
 		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
 		await page.locator( `text=${getTranslationFor('Apply coupon')}` ).click();
 		// error received
-		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
-			getTranslationFor('Coupon code already applied!')
-		);
+		await expect( page.getByText( getTranslationFor( 'Coupon code already applied!' ) ) ).toBeVisible();
 		// check cart total
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(
 			discounts[ 0 ]
@@ -137,16 +131,12 @@ test.describe( 'Checkout coupons', () => {
 		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
 		await page.locator( `text=${getTranslationFor('Apply coupon')}` ).click();
 		// successful
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			getTranslationFor('Coupon code applied successfully.')
-		);
-		await page.locator( `text=${getTranslationFor('Click here to enter your code')}` ).click();
+		await expect( page.getByText( getTranslationFor( 'Coupon code applied successfully.' ) ) ).toBeVisible();
+		await page.locator( `text=${ getTranslationFor( 'Click here to enter your code' )}` ).click();
 		await page.locator( '#coupon_code' ).fill( coupons[ 2 ].code );
 		await page.locator( `text=${getTranslationFor('Apply coupon')}` ).click();
 		// successful
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			getTranslationFor('Coupon code applied successfully.')
-		);
+		await expect( page.getByText( getTranslationFor( 'Coupon code applied successfully.' ) ) ).toBeVisible();
 		// check cart total
 		await expect(
 			page.locator( '.cart-discount .amount >> nth=0' )
@@ -163,9 +153,9 @@ test.describe( 'Checkout coupons', () => {
 		page,
 	} ) => {
 		await page.goto( '/checkout/' );
-		await page.locator( `text=${getTranslationFor('Click here to enter your code')}` ).click();
+		await page.locator( `text=${ getTranslationFor('Click here to enter your code') }` ).click();
 		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
-		await page.locator( `text=${getTranslationFor('Apply coupon')}` ).click();
+		await page.locator( `text=${ getTranslationFor('Apply coupon') }` ).click();
 
 		// confirm numbers
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(

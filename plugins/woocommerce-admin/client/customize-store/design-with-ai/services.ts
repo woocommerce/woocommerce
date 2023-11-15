@@ -25,6 +25,7 @@ import {
 	getTemplatePatterns,
 } from '../assembler-hub/hooks/use-home-templates';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
+import { setLogoWidth } from '../utils';
 
 const { escalate } = actions;
 
@@ -217,17 +218,74 @@ export const updateStorePatterns = async (
 			woocommerce_blocks_allow_ai_connection: true,
 		} );
 
-		const response: {
+		const { images } = await apiFetch< {
 			ai_content_generated: boolean;
-			additional_errors?: unknown[];
-		} = await apiFetch( {
-			path: '/wc/store/patterns',
+			images: Array< unknown >;
+		} >( {
+			path: '/wc/private/ai/images',
 			method: 'POST',
 			data: {
 				business_description:
 					context.businessInfoDescription.descriptionText,
 			},
 		} );
+
+		const [ response ] = await Promise.all< {
+			ai_content_generated: boolean;
+			product_content: Array< {
+				title: string;
+				description: string;
+				image: {
+					src: string;
+					alt: string;
+				};
+			} >;
+			additional_errors?: unknown[];
+		} >( [
+			apiFetch( {
+				path: '/wc/private/ai/products',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+					images,
+				},
+			} ),
+			apiFetch( {
+				path: '/wc/private/ai/patterns',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+					images,
+				},
+			} ),
+		] );
+
+		const productContents = response.product_content.map(
+			( product, index ) => {
+				return apiFetch( {
+					path: '/wc/private/ai/product',
+					method: 'POST',
+					data: {
+						products_information: product,
+						index,
+					},
+				} );
+			}
+		);
+
+		await Promise.all( [
+			...productContents,
+			apiFetch( {
+				path: '/wc/private/ai/business-description',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+				},
+			} ),
+		] );
 
 		if ( ! response.ai_content_generated ) {
 			throw new Error(
@@ -257,6 +315,12 @@ const updateGlobalStyles = async ( {
 	);
 	const fontPairing = FONT_PAIRINGS.find(
 		( pairing ) => pairing.title === fontPairingName
+	);
+
+	// @ts-ignore No types for this exist yet.
+	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
+	invalidateResolutionForStoreSelector(
+		'__experimentalGetCurrentGlobalStylesId'
 	);
 
 	const globalStylesId = await resolveSelect(
@@ -298,6 +362,7 @@ const updateTemplate = async ( {
 
 	// Ensure that the patterns are up to date because we populate images and content in previous step.
 	invalidateResolutionForStoreSelector( 'getBlockPatterns' );
+	invalidateResolutionForStoreSelector( '__experimentalGetTemplateForLink' );
 
 	const patterns = ( await resolveSelect(
 		coreStore
@@ -309,10 +374,13 @@ const updateTemplate = async ( {
 		patternsByName
 	);
 
-	const content = [ ...homepageTemplate ]
+	let content = [ ...homepageTemplate ]
 		.filter( Boolean )
 		.map( ( pattern ) => pattern.content )
 		.join( '\n\n' );
+
+	// Replace the logo width with the default width.
+	content = setLogoWidth( content );
 
 	const currentTemplate = await resolveSelect(
 		coreStore
@@ -345,7 +413,6 @@ export const assembleSite = async (
 		} );
 		recordEvent( 'customize_your_store_ai_update_global_styles_success' );
 	} catch ( error ) {
-		// TODO handle error
 		// eslint-disable-next-line no-console
 		console.error( error );
 		recordEvent(
@@ -354,6 +421,7 @@ export const assembleSite = async (
 				error: error instanceof Error ? error.message : 'unknown',
 			}
 		);
+		throw error;
 	}
 
 	try {
@@ -364,12 +432,12 @@ export const assembleSite = async (
 		} );
 		recordEvent( 'customize_your_store_ai_update_template_success' );
 	} catch ( error ) {
-		// TODO handle error
 		// eslint-disable-next-line no-console
 		console.error( error );
 		recordEvent( 'customize_your_store_ai_update_template_response_error', {
 			error: error instanceof Error ? error.message : 'unknown',
 		} );
+		throw error;
 	}
 };
 

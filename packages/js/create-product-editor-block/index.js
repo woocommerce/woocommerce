@@ -16,6 +16,7 @@ module.exports = {
 		attributes: {
 			message: {
 				type: 'string',
+				__experimentalRole: 'content',
 				source: 'text',
 				selector: 'div',
 			},

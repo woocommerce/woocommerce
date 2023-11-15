@@ -18,7 +18,7 @@ On mobile devices, all of the panels get collapsed under the Woo logo.
 
 ![Inbox Activity Panel](images/activity-panels-inbox.png)
 
-This Inbox Panel is dedicated to informational content coming from multiple sources such as WooCommerce core, WooCommerce.com Subscription management, extensions activity and store achievements. It also displays insightful content that could help with the day to day tasks of managing and optimizing a store.
+This Inbox Panel is dedicated to informational content coming from multiple sources such as WooCommerce core, Woo.com Subscription management, extensions activity and store achievements. It also displays insightful content that could help with the day to day tasks of managing and optimizing a store.
 
 ## Orders Panel
 
@@ -42,7 +42,7 @@ For stores with Stock Management enabled, the Stock panel will be displayed.
 
 The Stock Panel will show Products that are either Low in Stock or Out of stock.
 
-"Low in Stock" status is determined by a combination of the store setting and individual product settings. Consult the [Managing Products](https://woocommerce.com/document/managing-products/#inventory-tab) documentation to learn more about managing product stock settings.
+"Low in Stock" status is determined by a combination of the store setting and individual product settings. Consult the [Managing Products](https://woo.com/document/managing-products/#inventory-tab) documentation to learn more about managing product stock settings.
  
 ![Updating Stock from Activity Panel](images/activity-panels-stock-update.png)
 

@@ -288,7 +288,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					case 'info':
 						?><tr valign="top"<?php echo $value['row_class'] ? ' class="' . esc_attr( $value['row_class'] ) . '"' : '' ?>">
-							<th scope="row" class="titledesc"/><td style="<?php echo esc_attr( $value['css'] ); ?>">;
+							<th scope="row" class="titledesc"/><td style="<?php echo esc_attr( $value['css'] ); ?>">
 						<?php
 						echo wp_kses_post( wpautop( wptexturize( $value['text'] ) ) );
 						echo '</td></tr>';
@@ -462,7 +462,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 												name="<?php echo esc_attr( $value['field_name'] ); ?>"
 												value="<?php echo esc_attr( $key ); ?>"
 												type="radio"
-												<?php if( in_array( $key, $disabled_values ) ) { echo 'disabled'; } ?>
+												<?php
+												if ( in_array( $key, $disabled_values, true ) ) {
+													echo 'disabled'; }
+												?>
 												style="<?php echo esc_attr( $value['css'] ); ?>"
 												class="<?php echo esc_attr( $value['class'] ); ?>"
 												<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
@@ -787,16 +790,19 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$description = $value['desc'];
 			}
 
+			$description_is_error    = $value['description_is_error'] ?? false;
+			$extra_description_style = $description_is_error ? " style='color:red'" : '';
+
 			if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ), true ) ) {
 				$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
 			} elseif ( $description && in_array( $value['type'], array( 'checkbox' ), true ) ) {
 				$description = wp_kses_post( $description );
 			} elseif ( $description ) {
-				$description = '<p class="description">' . wp_kses_post( $description ) . '</p>';
+				$description = '<p class="description"' . $extra_description_style . '>' . wp_kses_post( $description ) . '</p>';
 			}
 
 			if ( $tooltip_html && in_array( $value['type'], array( 'checkbox' ), true ) ) {
-				$tooltip_html = '<p class="description">' . $tooltip_html . '</p>';
+				$tooltip_html = '<p class="description"' . $extra_description_style . '>' . $tooltip_html . '</p>';
 			} elseif ( $tooltip_html ) {
 				$tooltip_html = wc_help_tip( $tooltip_html );
 			}
