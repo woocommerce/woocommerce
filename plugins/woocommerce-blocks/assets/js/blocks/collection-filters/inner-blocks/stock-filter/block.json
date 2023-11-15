@@ -1,0 +1,46 @@
+{
+	"name": "woocommerce/collection-stock-filter",
+	"version": "1.0.0",
+	"title": "Stock Filter",
+	"description": "Enable customers to filter the product collection by stock status.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce", "filter", "stock" ],
+	"supports": {
+		"interactivity": true,
+		"html": false,
+		"multiple": false
+	},
+	"attributes": {
+		"className": {
+			"type": "string",
+			"default": ""
+		},
+		"showCounts": {
+			"type": "boolean",
+			"default": false
+		},
+		"displayStyle": {
+			"type": "string",
+			"default": "list"
+		},
+		"selectType": {
+			"type": "string",
+			"default": "multiple"
+		},
+		"isPreview": {
+			"type": "boolean",
+			"default": false
+		},
+		"queryParam": {
+			"type": "object",
+			"default": {
+				"calculate_stock_status_counts": "true"
+			}
+		}
+	},
+	"usesContext": [ "collectionData" ],
+	"ancestor": [ "woocommerce/collection-filters" ],
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}
