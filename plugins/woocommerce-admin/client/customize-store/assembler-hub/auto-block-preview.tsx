@@ -249,7 +249,7 @@ function ScaledBlockPreview( {
 					aria-hidden
 					scrolling={ isScrollable ? 'yes' : 'no' }
 					tabIndex={ -1 }
-					readOnly={ ! isNavigable }
+					readonly={ ! isNavigable }
 					style={
 						autoScale
 							? {
