@@ -12,7 +12,7 @@ export interface TextBlockAttributes extends BlockAttributes {
 	placeholder?: string;
 	type?: HTMLInputTypeAttribute;
 	suffix?: boolean | string;
-	required?: boolean;
+	required?: boolean | string;
 	validationRegex?: string;
 	validationErrorMessage?: string;
 	minLength?: number;

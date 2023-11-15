@@ -31,7 +31,7 @@
 			"type": "object"
 		},
 		"required": {
-			"type": "boolean",
+			"type": "object",
 			"default": false
 		},
 		"validationRegex": {

@@ -53,6 +53,9 @@ export function Edit( {
 				);
 			}
 			if ( required && ! value ) {
+				if ( typeof required === 'string' ) {
+					return required;
+				}
 				return __( 'This field is required.', 'woocommerce' );
 			}
 			if ( validationRegex ) {
@@ -85,7 +88,7 @@ export function Edit( {
 				);
 			}
 		},
-		[ value ]
+		[ value, required ]
 	);
 
 	function getSuffix() {
@@ -122,9 +125,9 @@ export function Edit( {
 				error={ error }
 				help={ help }
 				placeholder={ placeholder }
-				required={ required }
 				tooltip={ tooltip }
 				suffix={ getSuffix() }
+				required={ Boolean( required ) }
 			/>
 		</div>
 	);

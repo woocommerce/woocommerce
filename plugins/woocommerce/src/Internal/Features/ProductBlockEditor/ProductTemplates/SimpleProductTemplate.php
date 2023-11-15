@@ -256,7 +256,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'placeholder' => __( 'Enter the external URL to the product', 'woocommerce' ),
 						'type'        => 'url',
 						'suffix'      => true,
-						'required'    => true,
+						'required'    => __( 'Link to the external product is required.', 'woocommerce' ),
 					),
 				)
 			);
