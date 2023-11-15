@@ -38,7 +38,7 @@ class UtilsClassesServiceProvider extends AbstractServiceProvider {
 		WebhookUtil::class,
 		TimeUtil::class,
 		TemplatingEngine::class,
-		TemplatingRestController::class
+		TemplatingRestController::class,
 	);
 
 	/**
@@ -54,7 +54,7 @@ class UtilsClassesServiceProvider extends AbstractServiceProvider {
 			->addArguments( array( CustomOrdersTableController::class, DataSynchronizer::class ) );
 		$this->share( WebhookUtil::class );
 		$this->share( TimeUtil::class );
-		$this->share( TemplatingEngine::class )->addArgument(TimeUtil::class);
-		$this->share( TemplatingRestController::class )->addArgument(TemplatingEngine::class);
+		$this->share( TemplatingEngine::class )->addArguments( array( TimeUtil::class, LegacyProxy::class ) );
+		$this->share( TemplatingRestController::class )->addArgument( TemplatingEngine::class );
 	}
 }

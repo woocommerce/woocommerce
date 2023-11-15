@@ -1,0 +1,2 @@
+Subtemplate! foo = <?php echo $this->foo; ?>, bar = <?php echo $this->bar; ?>
+

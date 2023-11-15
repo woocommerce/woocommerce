@@ -1,0 +1,8 @@
+Main template.
+Initial foo = <?php echo $this->foo; ?>, bar = <?php echo $this->bar; ?>
+
+<?php $this->render('sub', ['foo' => 'foo 2']); ?>
+<?php $this->render('sub', ['foo' => 'foo 3']); ?>
+<?php $this->render('simple', ['foo' => 'foo 4', 'bar' => 'TheBar 2'], false); ?>
+
+Final foo = <?php echo $this->foo; ?>, bar = <?php echo $this->bar; ?>
