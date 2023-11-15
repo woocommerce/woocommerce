@@ -70,7 +70,7 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 		// Remove filter just in case and a new request still returns the cached data
 		remove_filter( 'pre_http_request', $response_mock_ref );
 		$response = rest_get_server()->dispatch( $request )->get_data();
-		$this->assertEquals('US', $response[0]->id);
+		$this->assertEquals( $current_base_country , $response[0]->id);
 
 		add_filter( 'pre_http_request', $response_mock_ref , 10, 3 );
 
