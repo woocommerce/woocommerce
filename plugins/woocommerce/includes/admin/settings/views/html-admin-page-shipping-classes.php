@@ -61,18 +61,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 							case 'wc-shipping-class-name':
 								?>
 								<div class="view">
-									<?php echo esc_html( wc_strtoupper( $heading ) ); ?> *
+									<?php echo esc_html( $heading ); ?> *
 								</div>
 								<div class="edit">
 									<input type="text" name="name" data-attribute="name" value="{{ data.name }}" placeholder="<?php esc_attr_e( 'e.g. Heavy', 'woocommerce' ); ?>" />
 								</div>
-								<div class="wc-shipping-class-modal-help-text"><?php esc_html_e( 'Assign a distinctive shipping class name for easy identification', 'woocommerce' ); ?></div>
+								<div class="wc-shipping-class-modal-help-text"><?php esc_html_e( 'Give your shipping class a name for easy identification', 'woocommerce' ); ?></div>
 								<?php
 								break;
 							case 'wc-shipping-class-slug':
 								?>
 								<div class="view">
-									<?php echo esc_html( wc_strtoupper( $heading ) ); ?>
+									<?php echo esc_html( $heading ); ?>
 								</div>
 								<div class="edit">
 									<input type="text" name="slug" data-attribute="slug" value="{{ data.slug }}" placeholder="<?php esc_attr_e( 'e.g. heavy-packages', 'woocommerce' ); ?>" />
@@ -83,7 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							case 'wc-shipping-class-description':
 								?>
 								<div class="view">
-									<?php echo esc_html( wc_strtoupper( $heading ) ); ?> *
+									<?php echo esc_html( $heading ); ?> *
 								</div>
 								<div class="edit">
 									<input type="text" name="description" data-attribute="description" value="{{ data.description }}" placeholder="<?php esc_attr_e( 'e.g. For heavy items requiring higher postage', 'woocommerce' ); ?>" />
@@ -95,7 +95,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							default:
 								?>
 								<div class="view wc-shipping-class-hide-sibling-view">
-									<?php echo esc_html( wc_strtoupper( $heading ) ); ?>
+									<?php echo esc_html( $heading ); ?>
 								</div>
 								<?php
 								// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
