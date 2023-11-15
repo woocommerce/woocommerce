@@ -35,16 +35,17 @@ import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved
 import { ProductEditorContext } from '../../types';
 import { PostTypeContext } from '../../contexts/post-type-context';
 
+type BlockEditorSettings = Partial<
+	EditorSettings & EditorBlockListSettings
+> & {
+	templates?: Record< string, Template[] >;
+};
+
 type BlockEditorProps = {
 	context: Partial< ProductEditorContext >;
 	productType: string;
 	productId: number;
-	settings:
-		| ( Partial< EditorSettings & EditorBlockListSettings > & {
-				template?: Template[];
-				templates: Record< string, Template[] >;
-		  } )
-		| undefined;
+	settings: BlockEditorSettings | undefined;
 };
 
 export function BlockEditor( {
@@ -60,27 +61,31 @@ export function BlockEditor( {
 		return canUser( 'create', 'media', '' ) !== false;
 	}, [] );
 
-	const settings = useMemo( () => {
-		if ( ! canUserCreateMedia ) {
-			return _settings;
-		}
+	const settings: BlockEditorSettings = useMemo( () => {
+		const mediaSettings = canUserCreateMedia
+			? {
+					mediaUpload( {
+						onError,
+						...rest
+					}: {
+						onError: ( message: string ) => void;
+					} ) {
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore No types for this exist yet.
+						uploadMedia( {
+							wpAllowedMimeTypes:
+								_settings?.allowedMimeTypes || undefined,
+							onError: ( { message } ) => onError( message ),
+							...rest,
+						} );
+					},
+			  }
+			: {};
+
 		return {
 			..._settings,
-			mediaUpload( {
-				onError,
-				...rest
-			}: {
-				onError: ( message: string ) => void;
-			} ) {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore No types for this exist yet.
-				uploadMedia( {
-					wpAllowedMimeTypes:
-						_settings?.allowedMimeTypes || undefined,
-					onError: ( { message } ) => onError( message ),
-					...rest,
-				} );
-			},
+			...mediaSettings,
+			templateLock: 'all',
 		};
 	}, [ canUserCreateMedia, _settings ] );
 
@@ -93,12 +98,17 @@ export function BlockEditor( {
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	useLayoutEffect( () => {
-		const template = _settings?.templates[ productType ];
+		const template = settings?.templates?.[ productType ];
+
+		if ( ! template ) {
+			return;
+		}
+
 		const blockInstances = synchronizeBlocksWithTemplate( [], template );
 
 		onChange( blockInstances, {} );
 
-		updateEditorSettings( _settings ?? {} );
+		updateEditorSettings( settings ?? {} );
 	}, [ productType, productId ] );
 
 	if ( ! blocks ) {

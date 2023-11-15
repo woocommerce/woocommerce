@@ -395,7 +395,7 @@ class WC_Admin_Status {
 				$has_newer_version = false;
 				$version_string    = $plugin['version'];
 				$network_string    = '';
-				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
+				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) || strstr( $plugin['url'], 'woo.com' ) ) {
 					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
 						/* translators: 1: current version. 2: latest version */
 						$version_string = sprintf( __( '%1$s (update to version %2$s is available)', 'woocommerce' ), $plugin['version'], $plugin['version_latest'] );

@@ -87,7 +87,7 @@ const BlockEditorGuide = ( { onCloseGuide }: BlockEditorGuideProps ) => {
 			className="woocommerce-block-editor-guide"
 			contentLabel=""
 			finishButtonText={ __( 'Tell me more', 'woocommerce' ) }
-			finishButtonLink="https://woocommerce.com/product-form-beta"
+			finishButtonLink="https://woo.com/product-form-beta"
 			onFinish={ onCloseGuide }
 			pages={ pages }
 		/>

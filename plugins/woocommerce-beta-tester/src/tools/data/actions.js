@@ -229,3 +229,31 @@ export function* resetCustomizeYourStore() {
 		} );
 	} );
 }
+
+export function setLoggingLevels( loggingLevels ) {
+	return {
+		type: TYPES.SET_LOGGING_LEVELS,
+		loggingLevels,
+	};
+}
+
+export function setBlockTemplateLoggingThreshold(
+	blockTemplateLoggingThreshold
+) {
+	return {
+		type: TYPES.SET_BLOCK_TEMPLATE_LOGGING_THRESHOLD,
+		blockTemplateLoggingThreshold,
+	};
+}
+
+export function* updateBlockTemplateLoggingThreshold( params ) {
+	yield runCommand( 'Update block template logging threshold', function* () {
+		yield apiFetch( {
+			path:
+				API_NAMESPACE +
+				'/tools/update-block-template-logging-threshold/v1',
+			method: 'POST',
+			data: params,
+		} );
+	} );
+}
