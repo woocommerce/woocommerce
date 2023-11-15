@@ -24,27 +24,29 @@
 		"tooltip": {
 			"type": "string"
 		},
-		"type": {
-			"type": "string"
-		},
 		"suffix": {
 			"type": "object"
 		},
+		"type": {
+			"type": "object"
+		},
 		"required": {
-			"type": "object",
-			"default": false
+			"type": "object"
 		},
-		"validationRegex": {
-			"type": "string"
-		},
-		"validationErrorMessage": {
-			"type": "string"
+		"pattern": {
+			"type": "object"
 		},
 		"minLength": {
-			"type": "number"
+			"type": "object"
 		},
 		"maxLength": {
-			"type": "number"
+			"type": "object"
+		},
+		"min": {
+			"type": "object"
+		},
+		"max": {
+			"type": "object"
 		}
 	},
 	"supports": {

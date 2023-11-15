@@ -4,7 +4,7 @@
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Link } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
-import { createElement } from '@wordpress/element';
+import { createElement, useRef } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Icon, external } from '@wordpress/icons';
 
@@ -23,76 +23,120 @@ export function Edit( {
 	context: { postType },
 }: ProductEditorBlockEditProps< TextBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
+
 	const {
 		property,
 		label,
 		placeholder,
 		required,
-		validationRegex,
-		validationErrorMessage,
+		pattern,
 		minLength,
 		maxLength,
+		min,
+		max,
 		help,
 		tooltip,
 		disabled,
 		type,
 		suffix,
 	} = attributes;
+
 	const [ value, setValue ] = useProductEntityProp< string >( property, {
 		postType,
 		fallbackValue: '',
 	} );
+
 	const { hasEdit } = useProductEdits();
+
+	const inputRef = useRef< HTMLInputElement >( null );
+
 	const { error, validate } = useValidation< Product >(
 		property,
 		async function validator() {
-			if ( typeof value !== 'string' ) {
-				return __(
-					'Unexpected property type assigned to field.',
-					'woocommerce'
+			if ( ! inputRef.current ) return;
+
+			const input = inputRef.current;
+
+			let customErrorMessage = '';
+
+			if ( input.validity.typeMismatch ) {
+				customErrorMessage =
+					type?.message ??
+					__( 'Invalid value for the field.', 'woocommerce' );
+			}
+			if ( input.validity.valueMissing ) {
+				customErrorMessage =
+					typeof required === 'string'
+						? required
+						: __( 'This field is required.', 'woocommerce' );
+			}
+			if ( input.validity.patternMismatch ) {
+				customErrorMessage =
+					pattern?.message ??
+					__( 'Invalid value for the field.', 'woocommerce' );
+			}
+			if ( input.validity.tooShort ) {
+				customErrorMessage = sprintf(
+					minLength?.message ??
+						/* translators: %d: minimum length */
+						__(
+							'The minimum length of the field is %d',
+							'woocommerce'
+						),
+					minLength?.value
 				);
 			}
-			if ( required && ! value ) {
-				if ( typeof required === 'string' ) {
-					return required;
-				}
-				return __( 'This field is required.', 'woocommerce' );
-			}
-			if ( validationRegex ) {
-				const regExp = new RegExp( validationRegex );
-				if ( ! regExp.test( value ) ) {
-					return (
-						validationErrorMessage ||
-						__( 'Invalid value for the field.', 'woocommerce' )
-					);
-				}
-			}
-			if ( typeof minLength === 'number' && value.length < minLength ) {
-				return sprintf(
-					/* translators: %d: minimum length */
-					__(
-						'The minimum length of the field is %d',
-						'woocommerce'
-					),
-					minLength
+			if ( input.validity.tooLong ) {
+				customErrorMessage = sprintf(
+					maxLength?.message ??
+						/* translators: %d: maximum length */
+						__(
+							'The maximum length of the field is %d',
+							'woocommerce'
+						),
+					maxLength?.value
 				);
 			}
-			if ( typeof maxLength === 'number' && value.length > maxLength ) {
-				return sprintf(
-					/* translators: %d: maximum length */
-					__(
-						'The maximum length of the field is %d',
-						'woocommerce'
-					),
-					maxLength
+			if ( input.validity.rangeUnderflow ) {
+				customErrorMessage = sprintf(
+					min?.message ??
+						/* translators: %d: minimum length */
+						__(
+							'The minimum value of the field is %d',
+							'woocommerce'
+						),
+					min?.value
 				);
+			}
+			if ( input.validity.rangeOverflow ) {
+				customErrorMessage = sprintf(
+					max?.message ??
+						/* translators: %d: maximum length */
+						__(
+							'The maximum value of the field is %d',
+							'woocommerce'
+						),
+					max?.value
+				);
+			}
+
+			input.setCustomValidity( customErrorMessage );
+
+			if ( ! input.validity.valid ) {
+				return input.validationMessage;
 			}
 		},
-		[ value, required ]
+		[ type, required, pattern, minLength, maxLength, min, max ]
 	);
 
 	function getSuffix() {
-		if ( suffix && type === 'url' && value && ! error ) {
+		if ( ! suffix || ! value || ! inputRef.current ) return;
+
+		const isValidUrl =
+			inputRef.current.type === 'url' &&
+			! inputRef.current.validity.typeMismatch;
+
+		if ( suffix === true && isValidUrl ) {
 			return (
 				<Link
 					type="external"
@@ -112,7 +156,8 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			<TextControl
-				type={ type }
+				ref={ inputRef }
+				type={ type?.value ?? 'text' }
 				value={ value }
 				disabled={ disabled }
 				label={ label }
@@ -128,6 +173,11 @@ export function Edit( {
 				tooltip={ tooltip }
 				suffix={ getSuffix() }
 				required={ Boolean( required ) }
+				pattern={ pattern?.value }
+				minLength={ minLength?.value }
+				maxLength={ maxLength?.value }
+				min={ min?.value }
+				max={ max?.value }
 			/>
 		</div>
 	);
