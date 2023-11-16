@@ -46,12 +46,14 @@ export const getCompletion = async < ValidResponseObject >( {
 	version,
 	responseValidation,
 	retryCount,
+	abortSignal = AbortSignal.timeout( 10000 ),
 }: {
 	queryId: string;
 	prompt: string;
 	version: string;
 	responseValidation: ( arg0: string ) => ValidResponseObject;
 	retryCount: number;
+	abortSignal?: AbortSignal;
 } ) => {
 	const { token } = await requestJetpackToken();
 	let data: {
@@ -73,6 +75,7 @@ export const getCompletion = async < ValidResponseObject >( {
 				prompt,
 				_fields: 'completion',
 			},
+			signal: abortSignal,
 		} );
 	} catch ( error ) {
 		recordEvent( 'customize_your_store_ai_completion_api_error', {
@@ -128,6 +131,8 @@ export const getLookAndTone = async (
 			context.businessInfoDescription.descriptionText
 		),
 		retryCount: 0,
+		// If the request takes longer than 5 seconds, abort it. We don't want to wait too long for the AI to respond. We will use default values instead.
+		abortSignal: AbortSignal.timeout( 5000 ),
 	} );
 };
 

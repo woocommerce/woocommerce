@@ -123,10 +123,6 @@
 			display: flex;
 		}
 
-		.banner-actions {
-			width: 375px;
-		}
-
 		.woocommerce-block-preview-container {
 			flex: 1;
 			position: relative;
@@ -156,8 +152,12 @@
 	}
 
 	.woocommerce-customize-store-banner-content {
-		width: 375px;
+		width: 450px;
 		margin-left: 50px;
+
+		@media only screen and (min-width: 1400px) {
+			width: 700px;
+		}
 
 		button.is-link {
 			color: var(--wp-admin-theme-color, #3858e9);
@@ -167,6 +167,7 @@
 
 		button.components-button {
 			padding: 8px 16px;
+			height: 40px;
 		}
 
 		button.components-button + button.components-button { // add left margin for all buttons with another button to its left
@@ -178,11 +179,25 @@
 			line-height: 23.87px;
 			font-weight: 500;
 			color: #000;
+			margin-top: 28px;
+			padding: 0;
 		}
 
 		p {
-			margin: 16px 0 28px 0;
+			margin: 12px 0 28px 0;
 			color: #2f2f2f;
+			line-height: 16px;
+
+			&.ai-disclaimer {
+				color: #757575;
+				font-size: 12px;
+				margin-top: 10px;
+				line-height: 18px;
+
+				a {
+					text-decoration: none;
+				}
+			}
 		}
 	}
 }
