@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+Comment: Subscriptions refresh button uses the API instead of redirect.
+
