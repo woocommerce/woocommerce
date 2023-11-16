@@ -21,6 +21,6 @@ export const useWooBlockProps = (
 		...props,
 	};
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
+	// @ts-ignore the type definitions are slighly wrong. It should be possile to pass the tabIndex attribute.
 	return useBlockProps( additionalProps );
 };
