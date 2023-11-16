@@ -136,7 +136,7 @@ const initializeAssembleHub = () => {
 	window.addEventListener( 'dragover', ( e ) => e.preventDefault(), false );
 	window.addEventListener( 'drop', ( e ) => e.preventDefault(), false );
 
-	unlock( dispatch( editorStore ) ).setCanvasMode( 'view' );
+	unlock( dispatch( editSiteStore ) ).setCanvasMode( 'view' );
 };
 
 export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
