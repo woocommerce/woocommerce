@@ -73,8 +73,8 @@ export function ManageDownloadLimitsModal( {
 			setErrors( ( current ) => ( {
 				...current,
 				downloadLimit: sprintf(
+					// translators: %d is the minimum value of the number input.
 					__(
-						// translators: %d is the minimum value of the number input.
 						'Download limit must be greater than or equal to %d',
 						'woocommerce'
 					),
@@ -107,8 +107,8 @@ export function ManageDownloadLimitsModal( {
 			setErrors( ( current ) => ( {
 				...current,
 				downloadExpiry: sprintf(
+					// translators: %d is the minimum value of the number input.
 					__(
-						// translators: %d is the minimum value of the number input.
 						'Expiry period must be greater than or equal to %d',
 						'woocommerce'
 					),
