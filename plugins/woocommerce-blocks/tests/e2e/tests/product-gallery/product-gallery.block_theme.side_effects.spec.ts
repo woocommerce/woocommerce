@@ -11,6 +11,7 @@ import { ProductGalleryPage } from './product-gallery.page';
 
 const blockData = {
 	name: 'woocommerce/product-gallery',
+	title: 'Product Gallery',
 	selectors: {
 		frontend: {},
 		editor: {
@@ -237,6 +238,54 @@ test.describe( `${ blockData.name }`, () => {
 			await mainImageBlock.click();
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
+		} );
+	} );
+
+	test.describe( 'block availability', () => {
+		test( 'should be available on the Single Product Template', async ( {
+			page,
+			editorUtils,
+		} ) => {
+			await editorUtils.openGlobalBlockInserter();
+			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
+			const productGalleryBlockOption = page
+				.getByRole( 'listbox', { name: 'WooCommerce' } )
+				.getByRole( 'option', { name: blockData.title } );
+
+			await expect( productGalleryBlockOption ).toBeVisible();
+		} );
+
+		test( 'should be available on the Product Gallery template part', async ( {
+			admin,
+			editorUtils,
+			page,
+		} ) => {
+			await admin.visitSiteEditor( {
+				postId: `woocommerce/woocommerce//product-gallery`,
+				postType: 'wp_template_part',
+			} );
+			await editorUtils.enterEditMode();
+			await editorUtils.openGlobalBlockInserter();
+			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
+			const productGalleryBlockOption = page
+				.getByRole( 'listbox', { name: 'WooCommerce' } )
+				.getByRole( 'option', { name: blockData.title } );
+
+			await expect( productGalleryBlockOption ).toBeVisible();
+		} );
+
+		test( 'should be hidden on the post editor', async ( {
+			admin,
+			page,
+			editorUtils,
+		} ) => {
+			await admin.createNewPost( { legacyCanvas: true } );
+			await editorUtils.openGlobalBlockInserter();
+			const productGalleryBlockOption = page
+				.getByRole( 'listbox', { name: 'WooCommerce' } )
+				.getByRole( 'option', { name: blockData.title } );
+
+			await expect( productGalleryBlockOption ).toBeHidden();
 		} );
 	} );
 

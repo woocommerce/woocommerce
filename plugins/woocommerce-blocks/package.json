@@ -33,6 +33,7 @@
 		"./assets/js/blocks/product-gallery/inner-blocks/**/index.tsx",
 		"./assets/js/templates/revert-button/index.tsx",
 		"./assets/js/settings/blocks/index.ts",
+		"./assets/js/atomic/utils/blocks-registration-manager/index.ts",
 		"./packages/**/*.{tsx,ts,js}"
 	],
 	"repository": {
