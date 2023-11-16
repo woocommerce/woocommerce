@@ -89,7 +89,7 @@ export default function MySubscriptions(): JSX.Element {
 
 	return (
 		<div className="woocommerce-marketplace__my-subscriptions">
-			<section className="woocommerce-marketplace__my-subscriptions__installed">
+			<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__installed">
 				<header className="woocommerce-marketplace__my-subscriptions__header">
 					<div>
 						<h2 className="woocommerce-marketplace__my-subscriptions__heading">
@@ -123,7 +123,7 @@ export default function MySubscriptions(): JSX.Element {
 				/>
 			</section>
 
-			<section className="woocommerce-marketplace__my-subscriptions__available">
+			<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__available">
 				<h2 className="woocommerce-marketplace__my-subscriptions__heading">
 					{ __( 'Available to use', 'woocommerce' ) }
 				</h2>
