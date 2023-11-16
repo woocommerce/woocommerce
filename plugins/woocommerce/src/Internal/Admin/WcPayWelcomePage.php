@@ -279,7 +279,8 @@ class WcPayWelcomePage {
 	/**
 	 * Check if the store has any paid orders.
 	 *
-	 * Currently, we look at the past 90 days and only consider orders with status `wc-completed` or `wc-processing`.
+	 * Currently, we look at the past 90 days and only consider orders
+	 * with status `wc-completed`, `wc-processing`, or `wc-refunded`.
 	 *
 	 * @return boolean Whether the store has any paid orders.
 	 */
