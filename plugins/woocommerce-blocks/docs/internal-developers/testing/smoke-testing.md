@@ -113,7 +113,7 @@ Note: some blocks might fail to render because they are based on products having
 
 </details>
 
-### 2. Create a page with the Products block, and filter blocks, setup to test that functionality in isolation. Using the columns block here too is a good idea to keep things organized
+### 2. Create a page with the Product Collection block, and filter blocks, setup to test that functionality in isolation. Using the columns block here too is a good idea to keep things organized
 
 <details>
 <summary>You can copy and paste (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) the following code into a new page to add all the blocks (click):</summary>
@@ -127,7 +127,7 @@ Note: some blocks might fail to render because they are based on products having
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/price-filter {"heading":"","lock":{"remove":true}} -->
-<div class="wp-block-woocommerce-price-filter is-loading" data-showinputfields="true" data-showfilterbutton="false" data-heading="" data-heading-level="3"><span aria-hidden="true" class="wc-block-product-categories__placeholder"></span></div>
+<div class="wp-block-woocommerce-price-filter is-loading"><span aria-hidden="true" class="wc-block-product-categories__placeholder"></span></div>
 <!-- /wp:woocommerce/price-filter --></div>
 <!-- /wp:woocommerce/filter-wrapper -->
 
@@ -136,8 +136,8 @@ Note: some blocks might fail to render because they are based on products having
 <h3 class="wp-block-heading">Filter by attribute</h3>
 <!-- /wp:heading -->
 
-<!-- wp:woocommerce/attribute-filter {"attributeId":1,"queryType":"and","displayStyle":"dropdown","heading":"","lock":{"remove":true}} -->
-<div class="wp-block-woocommerce-attribute-filter is-loading" data-attribute-id="1" data-show-counts="true" data-query-type="and" data-heading="" data-heading-level="3" data-display-style="dropdown"><span aria-hidden="true" class="wc-block-product-attribute-filter__placeholder"></span></div>
+<!-- wp:woocommerce/attribute-filter {"attributeId":1,"showCounts":true,"queryType":"and","displayStyle":"dropdown","heading":"","lock":{"remove":true}} -->
+<div class="wp-block-woocommerce-attribute-filter is-loading"></div>
 <!-- /wp:woocommerce/attribute-filter --></div>
 <!-- /wp:woocommerce/filter-wrapper -->
 
@@ -146,8 +146,8 @@ Note: some blocks might fail to render because they are based on products having
 <h3 class="wp-block-heading">Filter by stock status</h3>
 <!-- /wp:heading -->
 
-<!-- wp:woocommerce/stock-filter {"heading":"","lock":{"remove":true}} -->
-<div class="wp-block-woocommerce-stock-filter is-loading" data-show-counts="true" data-heading="" data-heading-level="3"><span aria-hidden="true" class="wc-block-product-stock-filter__placeholder"></span></div>
+<!-- wp:woocommerce/stock-filter {"showCounts":true,"heading":"","lock":{"remove":true}} -->
+<div class="wp-block-woocommerce-stock-filter is-loading"></div>
 <!-- /wp:woocommerce/stock-filter --></div>
 <!-- /wp:woocommerce/filter-wrapper -->
 
@@ -156,8 +156,8 @@ Note: some blocks might fail to render because they are based on products having
 <h3 class="wp-block-heading">Filter by rating</h3>
 <!-- /wp:heading -->
 
-<!-- wp:woocommerce/rating-filter {"displayStyle":"dropdown","lock":{"remove":true}} -->
-<div class="wp-block-woocommerce-rating-filter is-loading" data-show-counts="true"><span aria-hidden="true" class="wc-block-product-rating-filter__placeholder"></span></div>
+<!-- wp:woocommerce/rating-filter {"showCounts":true,"displayStyle":"dropdown","lock":{"remove":true}} -->
+<div class="wp-block-woocommerce-rating-filter is-loading"></div>
 <!-- /wp:woocommerce/rating-filter --></div>
 <!-- /wp:woocommerce/filter-wrapper -->
 
@@ -167,22 +167,22 @@ Note: some blocks might fail to render because they are based on products having
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/active-filters {"heading":"","lock":{"remove":true}} -->
-<div class="wp-block-woocommerce-active-filters is-loading" data-display-style="list" data-heading="" data-heading-level="3"><span aria-hidden="true" class="wc-block-active-filters__placeholder"></span></div>
+<div class="wp-block-woocommerce-active-filters is-loading"><span aria-hidden="true" class="wc-block-active-filters__placeholder"></span></div>
 <!-- /wp:woocommerce/active-filters --></div>
 <!-- /wp:woocommerce/filter-wrapper --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"66.66%"} -->
-<div class="wp-block-column" style="flex-basis:66.66%"><!-- wp:query {"queryId":0,"query":{"perPage":9,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceAttributes":[],"__woocommerceStockStatus":["instock","outofstock","onbackorder"]},"displayLayout":{"type":"flex","columns":3},"namespace":"woocommerce/product-query"} -->
-<div class="wp-block-query"><!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template"} -->
-<!-- wp:woocommerce/product-image {"isDescendentOfQueryLoop":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}}} /-->
+<div class="wp-block-column" style="flex-basis:66.66%"><!-- wp:woocommerce/product-collection {"query":{"perPage":9,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title"","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","displayLayout":{"type":"flex","columns":3}} -->
+<div class="wp-block-woocommerce-product-collection"><!-- wp:woocommerce/product-template -->
+<!-- wp:woocommerce/product-image {"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} /-->
 
-<!-- wp:post-title {"textAlign":"center","level":3,"isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
+<!-- wp:post-title {"textAlign":"center","level":3,"isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
-<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}}} /-->
+<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
 
-<!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}}} /-->
-<!-- /wp:post-template -->
+<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+<!-- /wp:woocommerce/product-template -->
 
 <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
 <!-- wp:query-pagination-previous /-->
@@ -197,14 +197,14 @@ Note: some blocks might fail to render because they are based on products having
 <p></p>
 <!-- /wp:paragraph -->
 <!-- /wp:query-no-results --></div>
-<!-- /wp:query --></div>
+<!-- /wp:woocommerce/product-collection --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 ```
 
 </details>
 
-### 3. Add the Cart and Checkout block to the relevant WooCommerce pages
+### 3. Add the Cart and Checkout block to the relevant templates
 
 ## Editor Tests
 
