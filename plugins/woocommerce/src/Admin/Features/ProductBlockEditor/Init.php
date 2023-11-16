@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTem
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
+use Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block;
+use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplateLogger;
 use WP_Block_Editor_Context;
 
 /**
@@ -62,6 +64,9 @@ class Init {
 
 			$tracks = new Tracks();
 			$tracks->init();
+
+			// Make sure the block template logger is initialized before any templates are created.
+			BlockTemplateLogger::get_instance();
 		}
 	}
 
@@ -199,11 +204,20 @@ class Init {
 	private function get_product_editor_settings() {
 		$editor_settings = array();
 
-		$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+		$template_registry     = wc_get_container()->get( BlockTemplateRegistry::class );
+		$block_template_logger = BlockTemplateLogger::get_instance();
+
+		$block_template_logger->log_template_events_to_file( 'simple-product' );
+		$block_template_logger->log_template_events_to_file( 'product-variation' );
 
 		$editor_settings['templates'] = array(
 			'product'           => $template_registry->get_registered( 'simple-product' )->get_formatted_template(),
 			'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template(),
+		);
+
+		$editor_settings['templateEvents'] = array(
+			'product'           => $block_template_logger->get_formatted_template_events( 'simple-product' ),
+			'product_variation' => $block_template_logger->get_formatted_template_events( 'product-variation' ),
 		);
 
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );

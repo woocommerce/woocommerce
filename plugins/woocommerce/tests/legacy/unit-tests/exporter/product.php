@@ -34,6 +34,12 @@ class WC_Tests_Product_CSV_Exporter extends WC_Unit_Test_Case {
 
 		$data = "@cmd|' /C calc'!A0";
 		$this->assertEquals( "'@cmd|' /C calc'!A0", $exporter->escape_data( $data ) );
+
+		$data = "\tcmd|' /C calc'!A0";
+		$this->assertEquals( "'\tcmd|' /C calc'!A0", $exporter->escape_data( $data ) );
+
+		$data = "\rcmd|' /C calc'!A0";
+		$this->assertEquals( "'\rcmd|' /C calc'!A0", $exporter->escape_data( $data ) );
 	}
 
 	/**

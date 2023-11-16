@@ -30,6 +30,7 @@ import Tag from '../tag';
 const defaultMessages = {
 	clear: __( 'Clear all selected items', 'woocommerce' ),
 	noItems: __( 'No items found.', 'woocommerce' ),
+	/* translators: %s: search term */
 	noResults: __( 'No results for %s', 'woocommerce' ),
 	search: __( 'Search for items', 'woocommerce' ),
 	selected: ( n ) =>

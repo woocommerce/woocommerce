@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+update list of CSV characters to prepend with a tick when occurring at the beginning of a cell
