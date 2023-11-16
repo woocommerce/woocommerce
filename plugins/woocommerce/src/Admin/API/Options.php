@@ -218,6 +218,7 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_customize_store_ai_suggestions',
 			'woocommerce_admin_customize_store_completed',
 			'woocommerce_admin_customize_store_completed_theme_id',
+			'woocommerce_admin_customize_store_survey_completed',
 			// WC Test helper options.
 			'wc-admin-test-helper-rest-api-filters',
 			'wc_admin_helper_feature_values',

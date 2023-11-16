@@ -62,6 +62,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 			},
 		},
 		context: {
+			startLoadingTime: null,
 			businessInfoDescription: {
 				descriptionText: '',
 			},
@@ -282,6 +283,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 								type: 'updateQueryStep',
 								step: 'api-call-loader',
 							},
+							'assignStartLoadingTime',
 						],
 						type: 'parallel',
 						states: {

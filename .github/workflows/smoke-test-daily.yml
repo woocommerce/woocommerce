@@ -178,7 +178,7 @@ jobs:
                     - plugin: 'WooCommerce Shipping & Tax'
                       repo: 'automattic/woocommerce-services'
                       slug: woocommerce-services
-                    - plugin: 'WooCommerce Subscriptions'
+                    - plugin: 'Woo Subscriptions'
                       repo: WC_SUBSCRIPTIONS_REPO
                       private: true
                       slug: woocommerce-subscriptions
@@ -210,6 +210,7 @@ jobs:
               env:
                   PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
                   PLUGIN_NAME: ${{ matrix.plugin }}
+                  PLUGIN_SLUG: ${{ matrix.slug }}
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
 
             - name: Run the rest of E2E tests
@@ -322,7 +323,7 @@ jobs:
                       slug: woocommerce-paypal-payments
                     - plugin: 'WooCommerce Shipping & Tax'
                       slug: woocommerce-services
-                    - plugin: 'WooCommerce Subscriptions'
+                    - plugin: 'Woo Subscriptions'
                       slug: woocommerce-subscriptions
                     - plugin: 'Gutenberg'
                       slug: gutenberg
@@ -350,6 +351,7 @@ jobs:
         permissions:
             contents: read
         if: |
+            github.ref_name == 'trunk' &&
             success() || (
               failure() && contains( needs.*.result, 'failure' )
             )

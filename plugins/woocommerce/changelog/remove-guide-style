@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Remove style from Guide component since it's only being used in one place and doesn't influence the behavior in that case
+
+

@@ -31,8 +31,10 @@ class CategoriesReport extends Component {
 				? 'item-comparison'
 				: 'time-comparison';
 		const itemsLabel = isSingleCategoryView
-			? __( '%d products', 'woocommerce' )
-			: __( '%d categories', 'woocommerce' );
+			? /* translators: %d: number of products */
+			  __( '%d products', 'woocommerce' )
+			: /* translators: %d: number of categories */
+			  __( '%d categories', 'woocommerce' );
 
 		return {
 			isSingleCategoryView,
