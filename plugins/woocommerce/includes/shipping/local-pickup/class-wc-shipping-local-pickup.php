@@ -92,7 +92,7 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
 		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ), wc_get_price_thousand_separator() ), '', $value );
 
-		if ( ! is_numeric( $value ) ) {
+		if ( $value && ! is_numeric( $value ) ) {
 			throw new Exception( __( 'Please enter a valid number', 'woocommerce' ) );
 		}
 
