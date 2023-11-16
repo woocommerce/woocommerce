@@ -159,15 +159,16 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	.woocommerce-marketplace__my-subscriptions__header {
 		margin-top: $grid-unit-20;
 		margin-bottom: $grid-unit-10;
-		font-size: 20px;
+		font-size: $default-font-size;
 	}
 
 	.woocommerce-marketplace__my-subscriptions__description {
 		text-align: center;
-		font-size: 13px;
+		font-size: $default-font-size;
 		line-height: 20px;
 		font-weight: 400;
 		color: var(--gutenberg-gray-700);
+		margin-top: 0;
 		margin-bottom: $grid-unit-30;
 	}
 }
