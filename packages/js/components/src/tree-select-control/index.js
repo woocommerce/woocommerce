@@ -16,6 +16,7 @@ import {
 	__experimentalUseFocusOutside as useFocusOutside,
 	useInstanceId,
 } from '@wordpress/compose';
+import removeAccents from 'remove-accents';
 
 /**
  * Internal dependencies
@@ -291,7 +292,11 @@ const TreeSelectControl = ( {
 					return acc;
 				}
 			} else if ( isSearching ) {
-				const match = option.label.toLowerCase().indexOf( filter );
+				const labelWithAccentsRemoved = removeAccents( option.label );
+				const filterWithAccentsRemoved = removeAccents( filter );
+				const match = labelWithAccentsRemoved
+					.toLowerCase()
+					.indexOf( filterWithAccentsRemoved );
 				if ( match === -1 ) {
 					return acc;
 				}

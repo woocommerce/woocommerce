@@ -15,6 +15,7 @@ const treeSelectControlOptions = [
 		children: [
 			{ value: 'ES', label: 'Spain' },
 			{ value: 'FR', label: 'France' },
+			{ value: 'TR', label: 'Türkiye' },
 			{ key: 'FR-Colonies', value: 'FR-C', label: 'France (Colonies)' },
 		],
 	},
