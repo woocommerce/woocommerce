@@ -109,7 +109,7 @@
 			],
 			"output": [
 				"build-module",
-				"./build-types"
+				"build-types"
 			],
 			"dependencies": [
 				"dependencyOutputs"
