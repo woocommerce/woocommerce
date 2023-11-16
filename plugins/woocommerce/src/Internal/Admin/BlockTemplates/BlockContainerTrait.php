@@ -18,7 +18,7 @@ trait BlockContainerTrait {
 	 *
 	 * @var BlockInterface[]
 	 */
-	private $inner_blocks = [];
+	private $inner_blocks = array();
 
 	// phpcs doesn't take into account exceptions thrown by called methods.
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
@@ -43,16 +43,7 @@ trait BlockContainerTrait {
 		}
 
 		$is_detached = method_exists( $this, 'is_detached' ) && $this->is_detached();
-		if ( $is_detached ) {
-			BlockTemplateLogger::get_instance()->warning(
-				'Block added to detached container. Block will not be included in the template, since the container will not be included in the template.',
-				[
-					'block'     => $block,
-					'container' => $this,
-					'template'  => $this->get_root_template(),
-				]
-			);
-		} else {
+		if ( ! $is_detached ) {
 			$this->get_root_template()->cache_block( $block );
 		}
 
@@ -169,14 +160,6 @@ trait BlockContainerTrait {
 			}
 		);
 
-		BlockTemplateLogger::get_instance()->info(
-			'Block removed from template.',
-			[
-				'block'    => $block,
-				'template' => $root_template,
-			]
-		);
-
 		$this->do_after_remove_block_action( $block );
 		$this->do_after_remove_specific_block_action( $block );
 	}
@@ -237,12 +220,7 @@ trait BlockContainerTrait {
 			 */
 			do_action( 'woocommerce_block_template_after_add_block', $block );
 		} catch ( \Exception $e ) {
-			$this->handle_exception_doing_action(
-				'Error after adding block to template.',
-				'woocommerce_block_template_after_add_block',
-				$block,
-				$e
-			);
+			$this->do_after_add_block_error_action( $block, 'woocommerce_block_template_after_add_block', $e );
 		}
 	}
 
@@ -266,13 +244,33 @@ trait BlockContainerTrait {
 			 */
 			do_action( "woocommerce_block_template_area_{$this->get_root_template()->get_area()}_after_add_block_{$block->get_id()}", $block );
 		} catch ( \Exception $e ) {
-			$this->handle_exception_doing_action(
-				'Error after adding block to template.',
-				"woocommerce_block_template_area_{$this->get_root_template()->get_area()}_after_add_block_{$block->get_id()}",
-				$block,
-				$e
-			);
+			$this->do_after_add_block_error_action( $block, "woocommerce_block_template_area_{$this->get_root_template()->get_area()}_after_add_block_{$block->get_id()}", $e );
 		}
+	}
+
+	/**
+	 * Do the `woocommerce_block_after_add_block_error` action.
+	 *
+	 * @param BlockInterface $block The block.
+	 * @param string         $action The action that threw the exception.
+	 * @param \Exception     $e The exception.
+	 */
+	private function do_after_add_block_error_action( BlockInterface $block, string $action, \Exception $e ) {
+		/**
+		 * Action called after an exception is thrown by a `woocommerce_block_template_after_add_block` action hook.
+		 *
+		 * @param BlockInterface $block The block.
+		 * @param string         $action The action that threw the exception.
+		 * @param \Exception     $exception The exception.
+		 *
+		 * @since 8.4.0
+		 */
+		do_action(
+			'woocommerce_block_template_after_add_block_error',
+			$block,
+			$action,
+			$e,
+		);
 	}
 
 	/**
@@ -295,12 +293,7 @@ trait BlockContainerTrait {
 			 */
 			do_action( 'woocommerce_block_template_after_remove_block', $block );
 		} catch ( \Exception $e ) {
-			$this->handle_exception_doing_action(
-				'Error after removing block from template.',
-				'woocommerce_block_template_after_remove_block',
-				$block,
-				$e
-			);
+			$this->do_after_remove_block_error_action( $block, 'woocommerce_block_template_after_remove_block', $e );
 		}
 	}
 
@@ -324,33 +317,32 @@ trait BlockContainerTrait {
 			 */
 			do_action( "woocommerce_block_template_area_{$this->get_root_template()->get_area()}_after_remove_block_{$block->get_id()}", $block );
 		} catch ( \Exception $e ) {
-			$this->handle_exception_doing_action(
-				'Error after removing block from template.',
-				"woocommerce_block_template_area_{$this->get_root_template()->get_area()}_after_remove_block_{$block->get_id()}",
-				$block,
-				$e
-			);
+			$this->do_after_remove_block_error_action( $block, "woocommerce_block_template_area_{$this->get_root_template()->get_area()}_after_remove_block_{$block->get_id()}", $e );
 		}
 	}
 
 	/**
-	 * Handle an exception thrown by an action.
+	 * Do the `woocommerce_block_after_remove_block_error` action.
 	 *
-	 * @param string         $message    The message.
-	 * @param string         $action_tag The action tag.
-	 * @param BlockInterface $block      The block.
-	 * @param \Exception     $e          The exception.
+	 * @param BlockInterface $block The block.
+	 * @param string         $action The action that threw the exception.
+	 * @param \Exception     $e The exception.
 	 */
-	private function handle_exception_doing_action( string $message, string $action_tag, BlockInterface $block, \Exception $e ) {
-		BlockTemplateLogger::get_instance()->error(
-			$message,
-			[
-				'exception' => $e,
-				'action'    => $action_tag,
-				'container' => $this,
-				'block'     => $block,
-				'template'  => $this->get_root_template(),
-			],
+	private function do_after_remove_block_error_action( BlockInterface $block, string $action, \Exception $e ) {
+		/**
+		 * Action called after an exception is thrown by a `woocommerce_block_template_after_remove_block` action hook.
+		 *
+		 * @param BlockInterface $block The block.
+		 * @param string         $action The action that threw the exception.
+		 * @param \Exception     $exception The exception.
+		 *
+		 * @since 8.4.0
+		 */
+		do_action(
+			'woocommerce_block_template_after_remove_block_error',
+			$block,
+			$action,
+			$e,
 		);
 	}
 }

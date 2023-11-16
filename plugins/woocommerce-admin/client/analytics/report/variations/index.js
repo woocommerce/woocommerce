@@ -24,6 +24,7 @@ const getChartMeta = ( { query } ) => {
 
 	return {
 		compareObject: 'variations',
+		/* translators: %d: number of variations */
 		itemsLabel: __( '%d variations', 'woocommerce' ),
 		mode: isCompareView ? 'item-comparison' : 'time-comparison',
 	};

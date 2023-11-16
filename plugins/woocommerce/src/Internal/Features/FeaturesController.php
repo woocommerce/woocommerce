@@ -7,8 +7,6 @@ namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
-use Automattic\WooCommerce\Admin\Features\NewProductManagementExperience;
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -688,19 +686,21 @@ class FeaturesController {
 			'id'   => empty( $experimental_feature_ids ) ? 'features_options' : 'experimental_features_options',
 		);
 
-		// Allow feature setting properties to be determined dynamically just before being rendered.
-		$feature_settings = array_map(
-			function( $feature_setting ) {
-				foreach ( $feature_setting as $prop => $value ) {
-					if ( is_callable( $value ) ) {
-						$feature_setting[ $prop ] = call_user_func( $value );
+		if ( $this->verify_did_woocommerce_init() ) {
+			// Allow feature setting properties to be determined dynamically just before being rendered.
+			$feature_settings = array_map(
+				function( $feature_setting ) {
+					foreach ( $feature_setting as $prop => $value ) {
+						if ( is_callable( $value ) ) {
+							$feature_setting[ $prop ] = call_user_func( $value );
+						}
 					}
-				}
 
-				return $feature_setting;
-			},
-			$feature_settings
-		);
+					return $feature_setting;
+				},
+				$feature_settings
+			);
+		}
 
 		return $feature_settings;
 	}

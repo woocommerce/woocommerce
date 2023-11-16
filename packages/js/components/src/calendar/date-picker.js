@@ -101,6 +101,7 @@ class DatePicker extends Component {
 						label={ __( 'Choose a date', 'woocommerce' ) }
 						error={ error }
 						describedBy={ sprintf(
+							/* translators: %s: date format specification */
 							__(
 								'Date input describing a selected date in format %s',
 								'woocommerce'
