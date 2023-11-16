@@ -76,6 +76,7 @@ export function Edit( {
 					__( 'Invalid value for the field.', 'woocommerce' );
 			}
 			if ( input.validity.tooShort ) {
+				// eslint-disable-next-line @wordpress/valid-sprintf
 				customErrorMessage = sprintf(
 					minLength?.message ??
 						/* translators: %d: minimum length */
@@ -87,6 +88,7 @@ export function Edit( {
 				);
 			}
 			if ( input.validity.tooLong ) {
+				// eslint-disable-next-line @wordpress/valid-sprintf
 				customErrorMessage = sprintf(
 					maxLength?.message ??
 						/* translators: %d: maximum length */
@@ -98,6 +100,7 @@ export function Edit( {
 				);
 			}
 			if ( input.validity.rangeUnderflow ) {
+				// eslint-disable-next-line @wordpress/valid-sprintf
 				customErrorMessage = sprintf(
 					min?.message ??
 						/* translators: %d: minimum length */
@@ -109,6 +112,7 @@ export function Edit( {
 				);
 			}
 			if ( input.validity.rangeOverflow ) {
+				// eslint-disable-next-line @wordpress/valid-sprintf
 				customErrorMessage = sprintf(
 					max?.message ??
 						/* translators: %d: maximum length */
