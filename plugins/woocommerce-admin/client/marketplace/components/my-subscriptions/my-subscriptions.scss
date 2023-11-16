@@ -166,15 +166,13 @@
 	padding: 0 12px;
 }
 
-
-
 .woocommerce-marketplace__my-subscriptions {
 	.woocommerce-table__empty-item,
 	.woocommerce-table__header,
 	.woocommerce-table__item {
 		padding: $grid-unit-10 $grid-unit-30;
 		align-items: center;
-  		display: flex;
+		display: flex;
 	}
 
 	.woocommerce-table__table tr:hover {
