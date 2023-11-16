@@ -9,6 +9,9 @@
 	},
 	"license": "GPL-3.0-or-later",
 	"author": "Automattic",
+	"files": [
+		"build"
+	],
 	"scripts": {
 		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
 		"build:project": "pnpm --if-present run /^build:project:.*$/",
@@ -244,7 +247,9 @@
 				"client/**/*.{js,jsx,ts,tsx}",
 				"client/**/*.scss"
 			],
-			"output": [],
+			"output": [
+				"build"
+			],
 			"dependencies": [
 				"dependencyOutputs"
 			]

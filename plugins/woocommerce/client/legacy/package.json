@@ -5,6 +5,9 @@
 	"license": "GPL-2.0-or-later",
 	"author": "Automattic",
 	"main": "Gruntfile.js",
+	"files": [
+		"build"
+	],
 	"scripts": {
 		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
 		"build:project": "pnpm --if-present run /^build:project:.*$/",
@@ -47,7 +50,9 @@
 				"js/**/*.js",
 				"css/**/*.scss"
 			],
-			"output": [],
+			"output": [
+				"build"
+			],
 			"dependencies": [
 				"dependencyOutputs"
 			]
