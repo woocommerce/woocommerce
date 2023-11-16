@@ -135,13 +135,14 @@ class TemplatingRestController {
 
 		register_rest_route(
 			$this->route_namespace,
-			'/templates/contents/(?P<id>[\d]+)',
+			'/templates/contents/(?P<id_or_name>.+)',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => fn( $request ) => $this->run( 'get_rendered_template_contents', $request ),
-					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_rendered_template' ),
-					'args'                => $this->get_args_for_get_contents_or_delete_rendered_template(),
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => fn( $request ) => $this->run( 'get_rendered_template_contents', $request ),
+					'args'     => $this->get_args_for_get_contents_or_delete_rendered_template(),
+					// No permission callback, the get_rendered_template_contents method handles authentication by itself
+					// because it's different for the REST API endpoint and for the unauthenticated endpoint.
 				),
 			)
 		);
@@ -162,14 +163,23 @@ class TemplatingRestController {
 			return rest_ensure_response( $this->$method_name( $request ) );
 		} catch ( Exception $ex ) {
 			wc_get_logger()->error( "TemplatingRestController: when executing method $method_name: {$ex->getMessage()}" );
-
-			$data = array( 'status' => 500 );
-			if ( current_user_can( 'manage_woocommerce' ) ) {
-				$data['exception_message'] = $ex->getMessage();
-			}
-
-			return new WP_Error( 'woocommerce_rest_internal_error', __( 'Internal server error', 'woocommerce' ), $data );
+			return $this->internal_wp_error( $ex );
 		}
+	}
+
+	/**
+	 * Return an WP_Error object for an internal server error, with exception information if the current user is an admin.
+	 *
+	 * @param Exception $exception The exception to maybe include information from.
+	 * @return WP_Error
+	 */
+	private function internal_wp_error( Exception $exception ) {
+		$data = array( 'status' => 500 );
+		if ( current_user_can( 'manage_woocommerce' ) ) {
+			$data['exception_message'] = $exception->getMessage();
+		}
+
+		return new WP_Error( 'woocommerce_rest_internal_error', __( 'Internal server error', 'woocommerce' ), $data );
 	}
 
 	/**
@@ -180,11 +190,22 @@ class TemplatingRestController {
 	 * @return bool|WP_Error True if the current user has the capability, an "Unauthorized" error otherwise.
 	 */
 	private function check_permission( WP_REST_Request $request, string $required_capability_name ) {
+		return $this->check_permission_by_method( $request->get_method(), $required_capability_name );
+	}
+
+	/**
+	 * Permission check for JSON REST API endpoints, given the request method.
+	 *
+	 * @param string $method The HTTP method of the request.
+	 * @param string $required_capability_name The name of the required capability.
+	 * @return bool|WP_Error True if the current user has the capability, an "Unauthorized" error otherwise.
+	 */
+	private function check_permission_by_method( string $method, string $required_capability_name ) {
 		if ( current_user_can( $required_capability_name ) ) {
 			return true;
 		}
 
-		$error_information = $this->authentication_errors_by_method[ $request->get_method() ] ?? null;
+		$error_information = $this->authentication_errors_by_method[ $method ] ?? null;
 		if ( is_null( $error_information ) ) {
 			return false;
 		}
@@ -209,18 +230,6 @@ class TemplatingRestController {
 		}
 
 		return $this->adjust_rendered_template_info_for_response( $rendered_template_info );
-	}
-
-	/**
-	 * Serve the contents of a rendered file, exactly in the same way as 'handle_parse_request',
-	 * with the difference that this endpoint (that undergoes authentication and capability checks)
-	 * works even for files that don't have 'is_public' set to true.
-	 *
-	 * @param WP_REST_Request $request The incoming HTTP REST request.
-	 */
-	private function get_rendered_template_contents( WP_REST_Request $request ) {
-		$file_id = $request->get_param( 'id' );
-		$this->serve_file_contents_core( $file_id, null, true );
 	}
 
 	/**
@@ -300,7 +309,7 @@ class TemplatingRestController {
 	/**
 	 * Handle the "parse_request" action for the "wc/file" endpoint.
 	 *
-	 * If the request is not for "/wc-template/filename" or "index.php?wc-rendered-template=filename", it returns without doing anything.
+	 * If the request is not for "/wc/file/<filename>" or "index.php?wc-rendered-template=filename", it returns without doing anything.
 	 * Otherwise, it will serve the contents of the file with the provided name if it exists, is public and has not expired,
 	 * or will return a "Not found" status otherwise.
 	 *
@@ -316,32 +325,72 @@ class TemplatingRestController {
 			$wp->query_vars['wc-rendered-template'] = $query_arg;
 		}
 
-		$template_file_name = $wp->query_vars['wc-rendered-template'] ?? null;
-		if ( is_null( $template_file_name ) ) {
+		if ( is_null( $wp->query_vars['wc-rendered-template'] ?? null ) ) {
 			return;
 		}
 
-		$this->serve_file_contents_core( null, $template_file_name, false );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( 'GET' !== ( $_SERVER['REQUEST_METHOD'] ?? null ) ) {
+			status_header( 405 );
+			exit();
+		}
+
+		$this->serve_file_contents_core( $wp->query_vars['wc-rendered-template'], true, false );
+	}
+
+	/**
+	 * Serve the contents of a rendered file, exactly in the same way as 'handle_parse_request',
+	 * with the difference that this endpoint requires an authenticated user with the proper capability,
+	 * and works even for files that don't have 'is_public' set to true.
+	 *
+	 * @param WP_REST_Request $request The incoming HTTP REST request.
+	 */
+	private function get_rendered_template_contents( WP_REST_Request $request ) {
+		return $this->serve_file_contents_core( $request->get_param( 'id_or_name' ), 'true' === $request->get_param( 'get_by_name' ), true );
 	}
 
 	/**
 	 * Core method to serve the contents of a rendered file.
-	 * It expects that exactly one of $file_id or $file_name will be non-null.
 	 *
-	 * @param int|null    $file_id Rendered file id.
-	 * @param string|null $file_name Rendered file name.
-	 * @param bool        $is_json_rest_api_request True if the request comes from the REST API endpoint, false if it comes from the unauthenticated rendering endpoint.
+	 * @param string $file_id_or_name Rendered file id or filename.
+	 * @param bool   $id_is_name True if $file_id_or_name is a filename, false if it's a database id.
+	 * @param bool   $is_json_rest_api_request True if the request comes from the REST API endpoint, false if it comes from the unauthenticated rendering endpoint.
 	 */
-	private function serve_file_contents_core( ?int $file_id, ?string $file_name, bool $is_json_rest_api_request ) {
+	private function serve_file_contents_core( string $file_id_or_name, bool $id_is_name, bool $is_json_rest_api_request ) {
 		try {
-			$rendered_template_info =
-				is_null( $file_id ) ?
-				$this->templating_engine->get_rendered_file_by_name( $file_name, true ) :
-				$this->templating_engine->get_rendered_file_by_id( $file_id, true );
+			if ( ! $id_is_name && ! is_numeric( $file_id_or_name ) ) {
+				if ( $is_json_rest_api_request ) {
+					return new WP_Error( 'woocommerce_rest_invalid_arguments', __( 'Invalid file id', 'woocommerce' ), array( 'status' => 400 ) );
+				} else {
+					status_header( 400 );
+					exit();
+				}
+			}
 
-			if ( is_null( $rendered_template_info ) || $rendered_template_info['has_expired'] || ( ! $is_json_rest_api_request && ! $rendered_template_info['is_public'] ) ) {
+			$rendered_template_info =
+				$id_is_name ?
+					$this->templating_engine->get_rendered_file_by_name( $file_id_or_name, true ) :
+					$this->templating_engine->get_rendered_file_by_id( (int) $file_id_or_name, true );
+
+			if ( $is_json_rest_api_request ) {
+				$permission_error = $this->check_permission_by_method( 'GET', 'read_rendered_template' );
+				if ( is_wp_error( $permission_error ) ) {
+					return $permission_error;
+				}
+			}
+
+			if ( is_null( $rendered_template_info ) || $rendered_template_info['has_expired'] ) {
+				if ( $is_json_rest_api_request ) {
+					return new WP_Error( 'woocommerce_rest_not_found', __( 'File not found', 'woocommerce' ), array( 'status' => 404 ) );
+				} else {
+					status_header( 404 );
+					exit();
+				}
+			}
+
+			if ( ! $is_json_rest_api_request && ! $rendered_template_info['is_public'] ) {
 				status_header( 404 );
-				exit;
+				exit();
 			}
 
 			$rendered_file_path = $rendered_template_info['file_path'];
@@ -355,10 +404,15 @@ class TemplatingRestController {
 			}
 
 			$file_handle = fopen( $rendered_file_path, 'r' );
-		} catch ( Exception $e ) {
-			wc_get_logger()->error( "Error serving rendered template {($file_id ?? $file_name)}: {$e->getMessage()}" );
-			status_header( 500 );
-			exit;
+		} catch ( Exception $ex ) {
+			$error_message = "Error serving rendered template $file_id_or_name: {$ex->getMessage()}";
+			wc_get_logger()->error( $error_message );
+			if ( $is_json_rest_api_request ) {
+				return $this->internal_wp_error( $ex );
+			} else {
+				status_header( 500 );
+				exit();
+			}
 		}
 
 		$content_type = $rendered_template_info['metadata']['content-type'] ?? 'text/html';
@@ -417,9 +471,14 @@ class TemplatingRestController {
 	 */
 	private function get_args_for_get_contents_or_delete_rendered_template(): array {
 		return array(
-			'id' => array(
-				'description' => __( 'Unique identifier of the template.', 'woocommerce' ),
-				'type'        => 'integer',
+			'id_or_name'  => array(
+				'description' => __( 'Unique identifier or name of the file.', 'woocommerce' ),
+				'type'        => 'string',
+			),
+			'get_by_name' => array(
+				'description' => __( 'True if the value of id_or_name is a file name, false if i\'s a database id.', 'woocommerce' ),
+				'type'        => 'bool',
+				'default'     => false,
 			),
 		);
 	}
