@@ -91,7 +91,7 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	align-items: center;
 	border-radius: 2px;
 	border: none;
-	padding: 2px 8px;
+	padding: $grid-unit-05 $grid-unit-10;
 	margin-left: $grid-unit-15;
 	text-align: left;
 	white-space: nowrap;
@@ -117,12 +117,18 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	}
 }
 
-.woocommerce-marketplace__my-subscriptions__popover .components-popover__content {
-	border: 1px solid $gray-400;
-	width: 300px;
-	border-radius: 2px;
-	padding: $grid-unit-15;
-	color: $gray-900;
+.woocommerce-marketplace__my-subscriptions__popover {
+	top: -8px !important;
+	.components-popover__content {
+		border: none;
+		width: 300px;
+		border-radius: 2px;
+		padding: $grid-unit-15;
+		color: $gray-900;
+		a {
+			text-decoration: none;
+		}
+	}
 }
 
 .components-base-control.woocommerce-marketplace__my-subscriptions__activation {
