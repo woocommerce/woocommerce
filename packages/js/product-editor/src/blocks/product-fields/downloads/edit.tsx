@@ -63,10 +63,10 @@ export function Edit( {
 	);
 	const [ downloadLimit, setDownloadLimit ] = useEntityProp<
 		Product[ 'download_limit' ]
-	>( 'postType', 'product', 'download_limit' );
+	>( 'postType', postType, 'download_limit' );
 	const [ downloadExpiry, setDownloadExpiry ] = useEntityProp<
 		Product[ 'download_expiry' ]
-	>( 'postType', 'product', 'download_expiry' );
+	>( 'postType', postType, 'download_expiry' );
 
 	const [ selectedDownload, setSelectedDownload ] =
 		useState< ProductDownload | null >();
