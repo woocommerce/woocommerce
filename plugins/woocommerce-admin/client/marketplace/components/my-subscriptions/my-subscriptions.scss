@@ -25,7 +25,7 @@ a.woocommerce-marketplace__refresh-subscriptions {
 
 .woocommerce-marketplace__my-subscriptions__table-description {
 	font-size: 13px;
-	margin-top: $grid-unit-05;
+	margin: 1em 0;
 	line-height: 20px;
 	color: $gray-700;
 
@@ -37,6 +37,9 @@ a.woocommerce-marketplace__refresh-subscriptions {
 
 	svg {
 		fill: #007cba;
+		margin-left: 2px;
+		width: 16px;
+		height: 16px;
 	}
 }
 
@@ -48,6 +51,8 @@ a.woocommerce-marketplace__refresh-subscriptions {
 }
 
 .woocommerce-marketplace__my-subscriptions__product {
+	$product-icon-size: 40px;
+
 	display: flex;
 	align-items: center;
 	color: $gray-900;
@@ -60,14 +65,20 @@ a.woocommerce-marketplace__refresh-subscriptions {
 
 	&-icon img {
 		border-radius: 4px;
-		width: 40px;
+		width: $product-icon-size;
 	}
 
-	&-icon svg {
-		border-radius: 4px;
-		padding: $grid-unit-10;
-		fill: $gray-600;
-		background-color: $gray-200;
+	&-icon {
+		width: $product-icon-size;
+		height: $product-icon-size;
+		svg {
+			border-radius: 4px;
+			padding: $grid-unit-10;
+			fill: $gray-600;
+			background-color: $gray-200;
+			width: $product-icon-size;
+			height: $product-icon-size;
+		}
 	}
 }
 
@@ -126,12 +137,26 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	padding: 0 12px;
 }
 
-.woocommerce-marketplace__my-subscriptions .woocommerce-table.is-empty {
-	background: none;
-	border: 1px solid var(--gutenberg-gray-100, #f0f0f0);
-	flex-direction: column;
-	gap: $grid-unit-15;
-	margin-top: $grid-unit-30;
+
+
+.woocommerce-marketplace__my-subscriptions {
+	.woocommerce-table__empty-item,
+	.woocommerce-table__header,
+	.woocommerce-table__item {
+		padding: $grid-unit-10 $grid-unit-30;
+	}
+
+	.woocommerce-table__table tr:hover {
+		background: #f8f9fa;
+	}
+
+	.woocommerce-table.is-empty {
+		background: none;
+		border: 1px solid var(--gutenberg-gray-100, #f0f0f0);
+		flex-direction: column;
+		gap: $grid-unit-15;
+		margin-top: $grid-unit-30;
+	}
 }
 
 .woocommerce-marketplace__my-subscriptions .components-button.is-link {

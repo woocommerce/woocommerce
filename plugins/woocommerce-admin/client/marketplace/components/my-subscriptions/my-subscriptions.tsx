@@ -95,9 +95,9 @@ export default function MySubscriptions(): JSX.Element {
 						<h2 className="woocommerce-marketplace__my-subscriptions__heading">
 							{ __( 'Installed on this store', 'woocommerce' ) }
 						</h2>
-						<span className="woocommerce-marketplace__my-subscriptions__table-description">
+						<p className="woocommerce-marketplace__my-subscriptions__table-description">
 							{ installedTableDescription }
-						</span>
+						</p>
 					</div>
 					<div>
 						<Button
