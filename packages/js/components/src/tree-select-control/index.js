@@ -16,7 +16,6 @@ import {
 	__experimentalUseFocusOutside as useFocusOutside,
 	useInstanceId,
 } from '@wordpress/compose';
-import removeAccents from 'remove-accents';
 
 /**
  * Internal dependencies
@@ -282,6 +281,14 @@ const TreeSelectControl = ( {
 					);
 				},
 			},
+		};
+
+		/**
+		 * Decompose accented characters into their composable parts, then remove accents.
+		 * See https://www.unicode.org/reports/tr15/ and https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize.
+		 */
+		const removeAccents = ( str ) => {
+			return str.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' );
 		};
 
 		const reduceOptions = ( acc, { children = [], ...option } ) => {
