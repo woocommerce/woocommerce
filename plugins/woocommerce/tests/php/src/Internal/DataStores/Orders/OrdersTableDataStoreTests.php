@@ -203,6 +203,34 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	}
 
 	/**
+	 * @testDox Tests that array metadata is handled properly when backfilling posts.
+	 */
+	public function test_backfill_array_meta() {
+		$tricky_meta = array(
+			'an_array'                        => array( 'because', 'why', 'not' ),
+			'something_that_looks_serialized' => 'a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}',
+		);
+
+		$this->disable_cot_sync();
+
+		$order = new \WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		foreach ( $tricky_meta as $meta_key => $meta_value ) {
+			$order->add_meta_data( $meta_key, $meta_value );
+		}
+		$order->save();
+
+		$this->sut->backfill_post_record( $order );
+
+		$post_meta = get_post_meta( $order->get_id() );
+
+		foreach ( $tricky_meta as $meta_key => $meta_value ) {
+			$this->assertArrayHasKey( $meta_key, $post_meta );
+			$this->assertEquals( $meta_value, maybe_unserialize( $post_meta[ $meta_key ][0] ) );
+		}
+	}
+
+	/**
 	 * @testDox Tests update() on the COT datastore.
 	 */
 	public function test_cot_datastore_update() {

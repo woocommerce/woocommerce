@@ -120,6 +120,83 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The get_files_by_id method should return an array of File instances given an array of valid file IDs.
+	 */
+	public function test_get_files_by_id() {
+		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
+		$this->handler->handle( time(), 'debug', '2', array( 'source' => 'unit-testing2' ) );
+		$this->handler->handle( time(), 'debug', '3', array( 'source' => 'unit-testing3' ) );
+		$file_id_1 = 'unit-testing1-' . gmdate( 'Y-m-d', time() );
+		$file_id_2 = 'unit-testing2-' . gmdate( 'Y-m-d', time() );
+
+		$files = $this->sut->get_files_by_id( array( $file_id_1, $file_id_2 ) );
+		$this->assertCount( 2, $files );
+
+		$sources = array_map(
+			function( $file ) {
+				return $file->get_source();
+			},
+			$files
+		);
+		$this->assertContains( 'unit-testing1', $sources );
+		$this->assertContains( 'unit-testing2', $sources );
+
+		$files = $this->sut->get_files_by_id( array( 'pop tart' ) );
+		$this->assertCount( 0, $files );
+	}
+
+	/**
+	 * @testdox The get_file_by_id method should return a File instance given a valid file ID, or a WP_Error.
+	 */
+	public function test_get_file_by_id() {
+		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
+		$this->handler->handle( time(), 'debug', '2', array( 'source' => 'unit-testing2' ) );
+		$this->handler->handle( time(), 'debug', '3', array( 'source' => 'unit-testing3' ) );
+		$file_id = 'unit-testing2-' . gmdate( 'Y-m-d', time() );
+
+		$file = $this->sut->get_file_by_id( $file_id );
+		$this->assertInstanceOf( 'Automattic\\WooCommerce\\Internal\\Admin\\Logging\\FileV2\\File', $file );
+		$this->assertEquals( 'unit-testing2', $file->get_source() );
+
+		$file = $this->sut->get_file_by_id( 'zucchini' );
+		$this->assertWPError( $file );
+	}
+
+	/**
+	 * @testdox The get_file_rotations method should return an associative array of File instances.
+	 */
+	public function test_get_file_rotations() {
+		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
+		$this->handler->handle( time(), 'debug', '2', array( 'source' => 'unit-testing2' ) );
+		$file_id = 'unit-testing1-' . gmdate( 'Y-m-d', time() );
+
+		$reflection = new \ReflectionClass( get_class( $this->handler ) );
+		$method     = $reflection->getMethod( 'log_rotate' );
+		$method->setAccessible( true );
+
+		// Handler has to be reset after rotating a log file because it caches handles.
+		$method->invoke( $this->handler, 'unit-testing1' );
+		$this->handler = new WC_Log_Handler_File();
+		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
+		$method->invoke( $this->handler, 'unit-testing1' );
+		$this->handler = new WC_Log_Handler_File();
+		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
+
+		$rotations = $this->sut->get_file_rotations( $file_id );
+
+		$this->assertCount( 3, $rotations );
+		$this->assertArrayHasKey( 'current', $rotations );
+		$this->assertNull( $rotations['current']->get_rotation() );
+		$this->assertEquals( 'unit-testing1', $rotations['current']->get_source() );
+		$this->assertArrayHasKey( 0, $rotations );
+		$this->assertEquals( 0, $rotations[0]->get_rotation() );
+		$this->assertEquals( 'unit-testing1', $rotations[0]->get_source() );
+		$this->assertArrayHasKey( 1, $rotations );
+		$this->assertEquals( 1, $rotations[1]->get_rotation() );
+		$this->assertEquals( 'unit-testing1', $rotations[1]->get_source() );
+	}
+
+	/**
 	 * @testdox The get_file_sources method should return a unique array of sources.
 	 */
 	public function test_get_file_sources(): void {
@@ -143,16 +220,16 @@ class FileControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 3, $this->sut->get_files( array(), true ) );
 
-		$files    = $this->sut->get_files( array( 'source' => 'log' ) );
-		$filename = $files[0]->get_basename();
-		$deleted  = $this->sut->delete_files( array( $filename ) );
+		$files   = $this->sut->get_files( array( 'source' => 'log' ) );
+		$file_id = $files[0]->get_file_id();
+		$deleted = $this->sut->delete_files( array( $file_id ) );
 		$this->assertEquals( 1, $deleted );
 		$this->assertEquals( 2, $this->sut->get_files( array(), true ) );
 		$this->assertEquals( 0, $this->sut->get_files( array( 'source' => 'log' ), true ) );
 
-		$files     = $this->sut->get_files();
-		$filenames = array_map( fn( $file ) => $file->get_basename(), $files );
-		$deleted   = $this->sut->delete_files( $filenames );
+		$files    = $this->sut->get_files();
+		$file_ids = array_map( fn( $file ) => $file->get_file_id(), $files );
+		$deleted  = $this->sut->delete_files( $file_ids );
 		$this->assertEquals( 2, $deleted );
 		$this->assertEquals( 0, $this->sut->get_files( array(), true ) );
 	}

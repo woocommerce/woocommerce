@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { resolveSelect, useDispatch } from '@wordpress/data';
+import { dispatch, resolveSelect, useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
-import { useCallback, useState } from '@wordpress/element';
+import { useCallback, useMemo, useState } from '@wordpress/element';
 import { getNewPath, getPath, navigateTo } from '@woocommerce/navigation';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
@@ -58,38 +58,61 @@ export function useProductVariationsHelper() {
 		'product',
 		'id'
 	);
-	const {
-		generateProductVariations: _generateProductVariations,
-		invalidateResolutionForStore,
-	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
-	const { invalidateResolution: coreInvalidateResolution } =
-		useDispatch( 'core' );
+	const [ _isGenerating, setIsGenerating ] = useState( false );
 
-	const [ isGenerating, setIsGenerating ] = useState( false );
+	const { isGeneratingVariations } = useSelect(
+		( select ) => {
+			const { isGeneratingVariations: getIsGeneratingVariations } =
+				select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			return {
+				isGeneratingVariations: getIsGeneratingVariations<
+					boolean | undefined
+				>( {
+					product_id: productId,
+				} ),
+			};
+		},
+		[ productId ]
+	);
 
-	const generateProductVariations = useCallback(
-		async (
-			attributes: EnhancedProductAttribute[],
-			defaultAttributes?: ProductDefaultAttribute[]
-		) => {
-			setIsGenerating( true );
+	const isGenerating = useMemo(
+		() => _isGenerating || Boolean( isGeneratingVariations ),
+		[ _isGenerating, isGeneratingVariations ]
+	);
 
-			const { status: lastStatus, variations } = await resolveSelect(
-				'core'
-			).getEditedEntityRecord< Product >(
-				'postType',
-				'product',
-				productId
-			);
-			const hasVariableAttribute = attributes.some(
-				( attr ) => attr.variation
-			);
+	const generateProductVariations = useCallback( async function onGenerate(
+		attributes: EnhancedProductAttribute[],
+		defaultAttributes?: ProductDefaultAttribute[]
+	) {
+		setIsGenerating( true );
 
-			const defaultVariationValues = await getDefaultVariationValues(
-				productId
-			);
+		const { status: lastStatus, variations } = await resolveSelect(
+			'core'
+		).getEditedEntityRecord< Product >( 'postType', 'product', productId );
+		const hasVariableAttribute = attributes.some(
+			( attr ) => attr.variation
+		);
 
-			return _generateProductVariations< {
+		const defaultVariationValues = await getDefaultVariationValues(
+			productId
+		);
+
+		await Promise.all(
+			variations.map( ( variationId ) =>
+				dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
+					'postType',
+					'product_variation',
+					variationId,
+				] )
+			)
+		);
+
+		await dispatch(
+			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+		).invalidateResolutionForStore();
+
+		return dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME )
+			.generateProductVariations< {
 				count: number;
 				deleted_count: number;
 			} >(
@@ -106,36 +129,36 @@ export function useProductVariationsHelper() {
 					default_values: defaultVariationValues,
 				}
 			)
-				.then( () => {
-					if ( variations && variations.length > 0 ) {
-						for ( const variationId of variations ) {
-							coreInvalidateResolution( 'getEntityRecord', [
-								'postType',
-								'product_variation',
-								variationId,
-							] );
-						}
-					}
-					coreInvalidateResolution( 'getEntityRecord', [
-						'postType',
-						'product',
-						productId,
-					] );
-					return invalidateResolutionForStore();
-				} )
-				.finally( () => {
-					setIsGenerating( false );
-					if (
-						lastStatus === 'auto-draft' &&
-						getPath().endsWith( 'add-product' )
-					) {
-						const url = getNewPath( {}, `/product/${ productId }` );
-						navigateTo( { url } );
-					}
-				} );
-		},
-		[]
-	);
+			.then( async ( response ) => {
+				await dispatch( 'core' ).invalidateResolution(
+					'getEntityRecord',
+					[ 'postType', 'product', productId ]
+				);
+
+				await resolveSelect( 'core' ).getEntityRecord(
+					'postType',
+					'product',
+					productId
+				);
+
+				await dispatch(
+					EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+				).invalidateResolutionForStore();
+
+				return response;
+			} )
+			.finally( () => {
+				setIsGenerating( false );
+				if (
+					lastStatus === 'auto-draft' &&
+					getPath().endsWith( 'add-product' )
+				) {
+					const url = getNewPath( {}, `/product/${ productId }` );
+					navigateTo( { url } );
+				}
+			} );
+	},
+	[] );
 
 	return {
 		generateProductVariations,

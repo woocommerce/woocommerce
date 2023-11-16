@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import classnames from 'classnames';
 import { Button, Popover } from '@wordpress/components';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { FocusEvent, KeyboardEvent } from 'react';
@@ -23,10 +24,12 @@ type TooltipProps = {
 	helperText?: string;
 	position?: Position;
 	text: JSX.Element | string;
+	className?: string;
 };
 
 export const Tooltip: React.FC< TooltipProps > = ( {
 	children = <Icon icon={ help } />,
+	className = '',
 	helperText = __( 'Help', 'woocommerce' ),
 	position = 'top center',
 	text,
@@ -37,7 +40,10 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 		<>
 			<div className="woocommerce-tooltip">
 				<Button
-					className="woocommerce-tooltip__button"
+					className={ classnames(
+						'woocommerce-tooltip__button',
+						className
+					) }
 					onKeyDown={ (
 						event: KeyboardEvent< HTMLButtonElement >
 					) => {
@@ -60,7 +66,7 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 						onFocusOutside={ ( event: FocusEvent ) => {
 							if (
 								event.relatedTarget?.classList.contains(
-									'woocommerce-tooltip__button'
+									className
 								)
 							) {
 								return;

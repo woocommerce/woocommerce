@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fixed some i18n related lint rule violations.

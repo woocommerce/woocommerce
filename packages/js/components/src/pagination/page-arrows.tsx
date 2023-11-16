@@ -60,7 +60,8 @@ export function PageArrows( {
 					aria-live="polite"
 				>
 					{ sprintf(
-						__( 'Page %d of %d', 'woocommerce' ),
+						/* translators: 1: current page number, 2: total number of pages */
+						__( 'Page %1$d of %2$d', 'woocommerce' ),
 						currentPage,
 						pageCount
 					) }

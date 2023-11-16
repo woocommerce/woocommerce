@@ -5,6 +5,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -59,6 +60,7 @@ export const LookAndFeel = ( {
 			? choices[ 0 ].key
 			: context.lookAndFeel.choice
 	);
+
 	return (
 		<div>
 			<ProgressBar
@@ -103,6 +105,21 @@ export const LookAndFeel = ( {
 					<Button
 						variant="primary"
 						onClick={ () => {
+							if (
+								context.lookAndFeel.aiRecommended &&
+								context.lookAndFeel.aiRecommended !== look
+							) {
+								recordEvent(
+									'customize_your_store_ai_wizard_changed_ai_option',
+									{
+										step: 'look-and-feel',
+										ai_recommended:
+											context.lookAndFeel.aiRecommended,
+										user_choice: look,
+									}
+								);
+							}
+
 							sendEvent( {
 								type: 'LOOK_AND_FEEL_COMPLETE',
 								payload: look,

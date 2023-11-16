@@ -5,6 +5,9 @@ import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
+import interpolateComponents from '@automattic/interpolate-components';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -55,6 +58,23 @@ export const BaseIntroBanner = ( {
 						</Button>
 					) }
 					{ secondaryButton }
+					<p className="ai-disclaimer">
+						{ interpolateComponents( {
+							mixedString: __(
+								'Powered by experimental AI. {{link}}Learn more{{/link}}',
+								'woocommerce'
+							),
+							components: {
+								link: (
+									<Link
+										href="https://automattic.com/ai-guidelines"
+										target="_blank"
+										type="external"
+									/>
+								),
+							},
+						} ) }
+					</p>
 				</div>
 				{ children }
 			</div>
@@ -192,6 +212,9 @@ export const ExistingAiThemeBanner = ( {
 		<Button
 			className=""
 			onClick={ () => {
+				recordEvent(
+					'customize_your_store_intro_create_a_new_one_click'
+				);
 				setOpenDesignChangeWarningModal( true );
 			} }
 			variant={ 'secondary' }
@@ -211,6 +234,7 @@ export const ExistingAiThemeBanner = ( {
 			bannerClass="existing-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
+				recordEvent( 'customize_your_store_intro_customize_click' );
 				navigateOrParent(
 					window,
 					getNewPath( {}, '/customize-store/assembler-hub', {} )

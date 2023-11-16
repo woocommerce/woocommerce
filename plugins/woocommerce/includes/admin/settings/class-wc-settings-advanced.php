@@ -41,7 +41,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			'keys'            => __( 'REST API', 'woocommerce' ),
 			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
 			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
-			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
+			'woocommerce_com' => __( 'Woo.com', 'woocommerce' ),
 		);
 	}
 
@@ -153,7 +153,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'checkboxgroup'   => 'start',
 					'show_if_checked' => 'option',
 					/* Translators: %s Docs URL. */
-					'desc_tip'        => sprintf( __( 'Force SSL (HTTPS) on the checkout pages (<a href="%s" target="_blank">an SSL Certificate is required</a>).', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/#section-3' ),
+					'desc_tip'        => sprintf( __( 'Force SSL (HTTPS) on the checkout pages (<a href="%s" target="_blank">an SSL Certificate is required</a>).', 'woocommerce' ), 'https://woo.com/document/ssl-and-https/#section-3' ),
 				),
 
 				'unforce_ssl_checkout' => array(
@@ -322,12 +322,12 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings for the WooCommerce.com section.
+	 * Get settings for the Woo.com section.
 	 *
 	 * @return array
 	 */
 	protected function get_settings_for_woocommerce_com_section() {
-		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woocommerce.com/usage-tracking', esc_html__( 'WooCommerce.com Usage Tracking Documentation', 'woocommerce' ) );
+		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woo.com/usage-tracking', esc_html__( 'Woo.com Usage Tracking Documentation', 'woocommerce' ) );
 
 		$settings =
 			array(
@@ -395,10 +395,10 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			$enable_legacy_api_setting['desc_tip'] = sprintf(
 			// translators: Placeholder is a URL.
 				__(
-					'⚠️ <b>️The Legacy REST API will be removed in WooCommerce 9.0.</b> A separate WooCommerce extension will soon be available to keep it enabled. <b><a target=”_blank” href="%s">Learn more about this change.</a></b>',
+					'⚠️ <b>️The Legacy REST API will be removed in WooCommerce 9.0.</b> A separate WooCommerce extension will soon be available to keep it enabled. <b><a target="_blank" href="%s">Learn more about this change.</a></b>',
 					'woocommerce'
 				),
-				'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+				'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
 			);
 		}
 

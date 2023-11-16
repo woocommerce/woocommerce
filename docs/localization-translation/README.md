@@ -30,19 +30,19 @@ If you’re new to translating, check out the [translators handbook](https://mak
 1. Go to [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/woocommerce) and look for your language in the list.
 2. Click the title to be taken to the section for that language.
 
-    ![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/2016-02-17-at-09.57.png)
+    ![screenshot](https://woo.com/wp-content/uploads/2012/01/2016-02-17-at-09.57.png)
 
 3. Click the heading under `Set/Sub Project` to view and download a Stable version.
 
-    ![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/2016-02-17-at-09.59.png)
+    ![screenshot](https://woo.com/wp-content/uploads/2012/01/2016-02-17-at-09.59.png)
 
 4. Scroll to the bottom for export options. Export a `.mo` file for use on your site.
 
-    ![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/2016-02-17-at-10.00.png)
+    ![screenshot](https://woo.com/wp-content/uploads/2012/01/2016-02-17-at-10.00.png)
 
 5. Rename this file to `woocommerce-YOURLANG.mo` (e.g., Great Britain English should be `en_GB`). The corresponding language code can be found by going to [https://translate.wordpress.org/projects/wp-plugins/woocommerce/](https://translate.wordpress.org/projects/wp-plugins/woocommerce/) and opening the desired language. The language code is visible in the upper-right corner.
 
-    ![screenshot](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-17-at-09.44.53.png)
+    ![screenshot](https://woo.com/wp-content/uploads/2023/10/Screenshot-2023-10-17-at-09.44.53.png)
 
 6. Upload to your site under `wp-content/languages/woocommerce/`. Once uploaded, this translation file may be used.
 
@@ -59,12 +59,12 @@ To get started:
 1. Open PoEdit and select `Create new translation from POT template`.
 2. Choose `woocommerce.pot` and PoEdit will show the catalog properties window.
 
-    ![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/Screen-Shot-2013-05-09-at-10.16.46.png)
+    ![screenshot](https://woo.com/wp-content/uploads/2012/01/Screen-Shot-2013-05-09-at-10.16.46.png)
 
 3. Enter your name and details, so other translators know who you are, and click `OK`.
 4. Save your `.po` file. Name it based on what you are translating to, i.e., a GB translation is saved as `woocommerce-en_GB.po`. Now the strings are listed.
 
-    ![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/Screen-Shot-2013-05-09-at-10.20.58.png)
+    ![screenshot](https://woo.com/wp-content/uploads/2012/01/Screen-Shot-2013-05-09-at-10.20.58.png)
 
 5. Save after translating strings. The `.mo` file is generated automatically.
 6. Update your `.po` file by opening it and then go to `Catalog » Update from POT file`.
@@ -72,7 +72,7 @@ To get started:
 
 ## Making your translation upgrade safe
 
-> **Note:** We are unable to provide support for customizations under our [Support Policy](http://www.woocommerce.com/support-policy/). If you need to further customize a snippet, or extend its functionality, we highly recommend [Codeable](https://codeable.io/?ref=z4Hnp), or a [Certified WooExpert](https://woocommerce.com/experts/).
+> **Note:** We are unable to provide support for customizations under our [Support Policy](https://woo.com/support-policy/). If you need to further customize a snippet, or extend its functionality, we highly recommend [Codeable](https://codeable.io/?ref=z4Hnp), or a [Certified WooExpert](https://woo.com/experts/).
 
 WooCommerce keeps translations in `wp-content/languages/plugins`, like all other plugins. But if you wish to include a custom translation, you can use the directory `wp-content/languages/woocommerce`, or you can use a snippet to load a custom translation stored elsewhere:
 
@@ -116,7 +116,7 @@ There are some other third-party tools that can help with translations. The foll
 
 You may see that some of the strings are not being translated on the Checkout page. For example, in the screenshot below, `Local pickup` shipping method, `Cash on delivery` payment method and a message related to Privacy Policy are not being translated to Russian while the rest of the form is indeed translated:
 
-![screenshot](https://woocommerce.com/wp-content/uploads/2012/01/not_translated.jpg)
+![screenshot](https://woo.com/wp-content/uploads/2012/01/not_translated.jpg)
 
 This usually happens when you first install WooCommerce and select default site language (English) and later change the site language to another one. In WooCommerce, the strings that have not been translated in the screenshot, are stored in the database after the initial WooCommerce installation. Therefore, if the site language is changed to another one, there is no way for WooCommerce to detect a translatable string since these are database entries.
 
@@ -153,8 +153,8 @@ If some of your translated strings don’t show up as expected on your WooCommer
 
 This screenshot shows that the Singular translation is available:
 
-![screenshot](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-17-at-10.10.06.png)
+![screenshot](https://woo.com/wp-content/uploads/2023/10/Screenshot-2023-10-17-at-10.10.06.png)
 
 While this screenshot shows that the Plural translation is not available:
 
-![screenshot](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-17-at-10.10.21.png)
+![screenshot](https://woo.com/wp-content/uploads/2023/10/Screenshot-2023-10-17-at-10.10.21.png)

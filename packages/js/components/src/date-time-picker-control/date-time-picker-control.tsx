@@ -50,6 +50,7 @@ export type DateTimePickerControlProps = {
 	placeholder?: string;
 	help?: string | null;
 	onChangeDebounceWait?: number;
+	popoverProps?: Record< string, boolean | string >;
 } & Omit< React.HTMLAttributes< HTMLInputElement >, 'onChange' >;
 
 export const DateTimePickerControl = forwardRef(
@@ -68,6 +69,7 @@ export const DateTimePickerControl = forwardRef(
 			help,
 			className = '',
 			onChangeDebounceWait = 500,
+			popoverProps = {},
 			...props
 		}: DateTimePickerControlProps,
 		ref: Ref< HTMLInputElement >
@@ -353,6 +355,7 @@ export const DateTimePickerControl = forwardRef(
 					anchor: inputControl.current,
 					className: 'woocommerce-date-time-picker-control__popover',
 					placement: 'bottom-start',
+					...popoverProps,
 				} }
 				renderContent={ () => {
 					const Picker = isDateOnlyPicker

@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Avoid expensive DB orders queries in WP admin pages when evaluating incentives eligibility.
