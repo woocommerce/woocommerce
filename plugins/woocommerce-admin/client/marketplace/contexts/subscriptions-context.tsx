@@ -8,12 +8,16 @@ import { useState, createContext, useEffect } from '@wordpress/element';
  */
 import { SubscriptionsContextType } from './types';
 import { Subscription } from '../components/my-subscriptions/types';
-import { fetchSubscriptions } from '../utils/functions';
+import {
+	fetchSubscriptions,
+	refreshSubscriptions as fetchSubscriptionsFromWooCom,
+} from '../utils/functions';
 
 export const SubscriptionsContext = createContext< SubscriptionsContextType >( {
 	subscriptions: [],
 	setSubscriptions: () => {},
 	loadSubscriptions: () => new Promise( () => {} ),
+	refreshSubscriptions: () => new Promise( () => {} ),
 	isLoading: true,
 	setIsLoading: () => {},
 } );
@@ -41,6 +45,15 @@ export function SubscriptionsContextProvider( props: {
 				}
 			} );
 	};
+
+	const refreshSubscriptions = () => {
+		return fetchSubscriptionsFromWooCom().then(
+			( subscriptionResponse ) => {
+				setSubscriptions( subscriptionResponse );
+			}
+		);
+	};
+
 	useEffect( () => {
 		loadSubscriptions( true );
 	}, [] );
@@ -49,6 +62,7 @@ export function SubscriptionsContextProvider( props: {
 		subscriptions,
 		setSubscriptions,
 		loadSubscriptions,
+		refreshSubscriptions,
 		isLoading,
 		setIsLoading,
 	};
