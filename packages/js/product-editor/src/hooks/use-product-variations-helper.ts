@@ -59,6 +59,7 @@ export function useProductVariationsHelper() {
 		'id'
 	);
 	const [ _isGenerating, setIsGenerating ] = useState( false );
+	const [ generateError, setgenerateError ] = useState( undefined );
 
 	const { isGeneratingVariations } = useSelect(
 		( select ) => {
@@ -156,6 +157,9 @@ export function useProductVariationsHelper() {
 					const url = getNewPath( {}, `/product/${ productId }` );
 					navigateTo( { url } );
 				}
+			} )
+			.catch( ( error ) => {
+				setgenerateError( error );
 			} );
 	},
 	[] );
@@ -163,5 +167,6 @@ export function useProductVariationsHelper() {
 	return {
 		generateProductVariations,
 		isGenerating,
+		generateError,
 	};
 }
