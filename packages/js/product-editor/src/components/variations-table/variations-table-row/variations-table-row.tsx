@@ -205,7 +205,6 @@ export function VariationsTableRow( {
 				{ ( variation.status === 'private' ||
 					! variation.regular_price ) && (
 					<Tooltip
-						// @ts-expect-error className is missing in TS, should remove this when it is included.
 						className="woocommerce-attribute-list-item__actions-tooltip"
 						position="top center"
 						text={ NOT_VISIBLE_TEXT }
