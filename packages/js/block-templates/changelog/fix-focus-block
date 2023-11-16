@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+New product editor: Disable focus on root blocks, fixing unnecessary tab between fields in new product editor
