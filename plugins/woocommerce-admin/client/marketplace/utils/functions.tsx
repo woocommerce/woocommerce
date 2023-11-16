@@ -24,6 +24,7 @@ import {
 } from '../components/product-list/types';
 import { NoticeStatus } from '../contexts/types';
 import { noticeStore } from '../contexts/notice-store';
+import { Icon } from '@wordpress/components';
 
 interface ProductGroup {
 	id: string;
@@ -338,6 +339,13 @@ function addNotice(
 			options
 		);
 	} else {
+		if ( ! options?.icon ) {
+			options = {
+				...options,
+				icon: <Icon icon="saved" />,
+			};
+		}
+
 		dispatch( 'core/notices' ).createSuccessNotice( message, options );
 	}
 }
