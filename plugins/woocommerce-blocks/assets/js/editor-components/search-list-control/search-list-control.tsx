@@ -163,7 +163,7 @@ const ListItemsContainer = < T extends object = object >( {
 		return (
 			<div className="woocommerce-search-list__list is-not-found">
 				<span className="woocommerce-search-list__not-found-icon">
-					<Icon icon={ info } />
+					<Icon icon={ info } role="img" />
 				</span>
 				<span className="woocommerce-search-list__not-found-text">
 					{ search

@@ -93,6 +93,7 @@ const Tag = ( {
 						icon={ cancelCircleFilled }
 						size={ 20 }
 						className="clear-icon"
+						role="img"
 					/>
 				</Button>
 			) }
