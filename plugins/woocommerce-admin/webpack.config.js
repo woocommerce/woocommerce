@@ -102,7 +102,7 @@ const webpackConfig = {
 				: `[name]/index${ outputSuffix }.js`;
 		},
 		chunkFilename: `chunks/[name]${ outputSuffix }.js`,
-		path: path.join( __dirname, '/../woocommerce/assets/client/admin' ),
+		path: path.join( __dirname, '/build' ),
 		library: {
 			// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
 			name: [ 'wc', '[modulename]' ],

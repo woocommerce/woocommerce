@@ -11,6 +11,7 @@
 	"license": "GPL-3.0+",
 	"scripts": {
 		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
+		"build:project": "wireit",
 		"build:zip": "./bin/build-zip.sh",
 		"changelog": "composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
@@ -51,7 +52,8 @@
 		"test:php:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
 		"test:unit": "pnpm test:php",
 		"test:unit:env": "pnpm test:php:env",
-		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php"
+		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
+		"watch:build": "pnpm run build:project --watch"
 	},
 	"lint-staged": {
 		"*.php": [
@@ -175,5 +177,60 @@
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/shortcode-assets": "workspace:*",
 		"@woocommerce/block-library": "workspace:*"
+	},
+	"wireit": {
+		"build:project": {
+			"command": "rm -rf assets/client/admin assets/js assets/css && cp -r ../woocommerce-admin/build assets/client/admin && cp -r client/legacy/build/js assets/js && cp -r client/legacy/build/css assets/css",
+			"files": [],
+			"output": [
+				"assets/client/admin",
+				"assets/js",
+				"assets/css"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/e2e-utils/",
+				"node_modules/@woocommerce/e2e-environment/",
+				"node_modules/@woocommerce/e2e-core-tests/build",
+				"node_modules/@woocommerce/e2e-core-tests/build-module",
+				"node_modules/@woocommerce/e2e-core-tests/test-data",
+				"node_modules/@woocommerce/e2e-core-tests/core-tests-root.js",
+				"node_modules/@woocommerce/e2e-core-tests/installFiles",
+				"node_modules/@woocommerce/e2e-core-tests/CHANGELOG.md",
+				"node_modules/@woocommerce/api-core-tests/",
+				"node_modules/@woocommerce/api/dist/",
+				"node_modules/@woocommerce/admin-e2e-tests/build/",
+				"node_modules/@woocommerce/admin-library/build",
+				"package.json",
+				"!node_modules/@woocommerce/admin-e2e-tests/*.ts.map",
+				"!node_modules/@woocommerce/admin-e2e-tests/*.tsbuildinfo",
+				"!node_modules/@woocommerce/api/*.ts.map",
+				"!node_modules/@woocommerce/api/*.tsbuildinfo",
+				"!node_modules/@woocommerce/api/dist/**/__tests__/",
+				"!node_modules/@woocommerce/api/dist/**/__mocks__/",
+				"!node_modules/@woocommerce/api/dist/**/__snapshops__/",
+				"!node_modules/@woocommerce/api/dist/**/__test_data__/",
+				"!node_modules/@woocommerce/api-core-tests/node_modules",
+				"!node_modules/@woocommerce/api-core-tests/.git",
+				"!node_modules/@woocommerce/api-core-tests/.svn",
+				"!node_modules/@woocommerce/api-core-tests/src",
+				"!node_modules/@woocommerce/e2e-environment/node_modules",
+				"!node_modules/@woocommerce/e2e-environment/.git",
+				"!node_modules/@woocommerce/e2e-environment/.svn",
+				"!node_modules/@woocommerce/e2e-environment/src",
+				"!node_modules/@woocommerce/e2e-utils/node_modules",
+				"!node_modules/@woocommerce/e2e-utils/.git",
+				"!node_modules/@woocommerce/e2e-utils/.svn",
+				"!node_modules/@woocommerce/e2e-utils/src"
+			]
+		}
 	}
 }
