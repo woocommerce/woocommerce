@@ -146,7 +146,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 			deletions
 		);
 		if ( additions && deletions ) {
-			return sprintf( '%s, %s.', additionsMessage, deletionsMessage );
+			return sprintf( '%1$s, %2$s.', additionsMessage, deletionsMessage );
 		} else if ( additions ) {
 			return sprintf( '%s.', additionsMessage );
 		}
