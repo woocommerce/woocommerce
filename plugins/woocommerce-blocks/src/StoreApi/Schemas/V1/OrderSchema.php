@@ -380,7 +380,7 @@ class OrderSchema extends AbstractSchema {
 				function( $item ) {
 					return [
 						'name'  => $item->get_name(),
-						'price' => $item->get_tax_total(),
+						'price' => $this->prepare_money_response( $item->get_tax_total() ),
 						'rate'  => strval( $item->get_rate_percent() ),
 					];
 				},
