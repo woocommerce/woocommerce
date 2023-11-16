@@ -123,22 +123,20 @@ const Block = ( {
 					/>
 				) : null }
 			</WrapperComponent>
-			{ hasAddress && (
-				<CheckboxControl
-					className="wc-block-checkout__use-address-for-billing"
-					label={ __(
-						'Use same address for billing',
-						'woo-gutenberg-products-block'
-					) }
-					checked={ useShippingAsBilling }
-					onChange={ ( checked: boolean ) => {
-						setUseShippingAsBilling( checked );
-						if ( checked ) {
-							syncBillingWithShipping();
-						}
-					} }
-				/>
-			) }
+			<CheckboxControl
+				className="wc-block-checkout__use-address-for-billing"
+				label={ __(
+					'Use same address for billing',
+					'woo-gutenberg-products-block'
+				) }
+				checked={ useShippingAsBilling }
+				onChange={ ( checked: boolean ) => {
+					setUseShippingAsBilling( checked );
+					if ( checked ) {
+						syncBillingWithShipping();
+					}
+				} }
+			/>
 		</>
 	);
 };
