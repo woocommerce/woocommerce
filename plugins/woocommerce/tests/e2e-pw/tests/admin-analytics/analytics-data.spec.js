@@ -214,7 +214,7 @@ test.describe( 'Analytics-related tests', () => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue' );
 
 		// assert that current month is shown and that values are for that
-		await expect( page.getByText( 'Month to date' ) ).toBeVisible();
+		await expect( page.getByText( 'Month to date' ).first() ).toBeVisible();
 		await expect( page.getByRole( 'menuitem', { name: 'Gross sales $1,229.30 No change from Previous year:' } ) ).toBeVisible();
 		await expect( page.getByRole( 'menuitem', { name: 'Returns $0.00 No change from Previous year:' } ) ).toBeVisible();
 		await expect( page.getByRole( 'menuitem', { name: 'Coupons $0.00 No change from Previous year:' } ) ).toBeVisible();
@@ -240,7 +240,7 @@ test.describe( 'Analytics-related tests', () => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue' );
 
 		// assert that current month is shown and that values are for that
-		await expect( page.getByText( 'Month to date' ) ).toBeVisible();
+		await expect( page.getByText( 'Month to date' ).first() ).toBeVisible();
 		await expect( page.getByRole( 'menuitem', { name: 'Gross sales $1,229.30 No change from Previous year:' } ) ).toBeVisible();
 		await expect( page.getByRole( 'menuitem', { name: 'Returns $0.00 No change from Previous year:' } ) ).toBeVisible();
 		await expect( page.getByRole( 'menuitem', { name: 'Coupons $0.00 No change from Previous year:' } ) ).toBeVisible();
