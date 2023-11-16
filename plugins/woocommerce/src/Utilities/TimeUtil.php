@@ -35,19 +35,6 @@ class TimeUtil {
 	}
 
 	/**
-	 * Gets the first day of the month at 0:00:00 for a given date.
-	 *
-	 * @param string $base_date Date to be converted, Y-m-d H:i:s or 'now'.
-	 * @param bool   $gmt True to interpret $base_date as UTC.
-	 * @return string The date supplied, but at 00:00:00 of the first day of the month.
-	 * @throws Exception Invalid date passed.
-	 */
-	public function first_day_of_month( string $base_date = 'now', bool $gmt = false ): string {
-		$date = new DateTime( $base_date, $gmt ? wp_timezone() : self::$utc_date_time_zone );
-		return $date->format( 'Y-m' ) . '-01 00:00:00';
-	}
-
-	/**
 	 * Check if a string represents a valid date in a given format.
 	 *
 	 * @param string $date The date string to check.

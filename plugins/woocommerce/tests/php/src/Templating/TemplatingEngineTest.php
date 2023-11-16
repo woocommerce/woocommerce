@@ -52,6 +52,7 @@ class TemplatingEngineTest extends \WC_Unit_Test_Case {
 
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_rendered_templates" );
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_rendered_templates_meta" );
+		self::rmdir_recursive( self::$rendered_templates_dir, false );
 	}
 
 	/**
@@ -72,7 +73,7 @@ class TemplatingEngineTest extends \WC_Unit_Test_Case {
 	 */
 	public static function tearDownAfterClass(): void {
 		parent::tearDownAfterClass();
-		self::rmdir_recursive( sys_get_temp_dir() . '/wp-uploads' );
+		self::rmdir_recursive( self::$rendered_templates_dir, true );
 	}
 
 	/**
@@ -283,7 +284,7 @@ Final foo = foo 1, bar = TheBar';
 		);
 
 		$expected_file_name = '00112233445566778899aabbccddeeff';
-		$expected_file_path = self::$rendered_templates_dir . '/2034-07/' . $expected_file_name;
+		$expected_file_path = self::$rendered_templates_dir . '/2034-07-01/' . $expected_file_name;
 
 		$metadata = array(
 			'expiration_date' => '2034-07-01 12:34:56',
@@ -473,7 +474,7 @@ Final foo = foo 1, bar = TheBar';
 		}
 
 		$this->assertEquals( 'FOOBAR_FILE', $file_name );
-		$this->assertTrue( is_file( self::$rendered_templates_dir . '/2034-01/FOOBAR_FILE' ) );
+		$this->assertTrue( is_file( self::$rendered_templates_dir . '/2034-01-10/FOOBAR_FILE' ) );
 
 		$this->assertEquals( 'simple', $actual_template_name );
 		$this->assertEquals(
@@ -545,7 +546,7 @@ Final foo = foo 1, bar = TheBar';
 		$this->assertEquals( 'misplaced', $actual_template_name );
 		$this->assertNull( $actual_parent_template_path );
 
-		$file_path = self::$rendered_templates_dir . '/2034-01/' . $file_name;
+		$file_path = self::$rendered_templates_dir . '/2034-01-10/' . $file_name;
 		$this->assertTrue( is_file( $file_path ) );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$this->assertEquals( 'This template shouldn\'t be reachable since it\'s outside of the base "Templates" directory.', trim( file_get_contents( $file_path ) ) );
@@ -641,7 +642,7 @@ Final foo = foo 1, bar = TheBar';
 			'date_created_gmt'    => '2023-11-22 01:23:34',
 			'expiration_date_gmt' => '2034-07-01 12:34:56',
 			'is_public'           => true === $is_public,
-			'file_path'           => self::$rendered_templates_dir . '/2034-07/00112233445566778899aabbccddeeff',
+			'file_path'           => self::$rendered_templates_dir . '/2034-07-01/00112233445566778899aabbccddeeff',
 			'has_expired'         => false,
 			'metadata'            => array( 'content-type' => 'foo/bar' ),
 		);
@@ -677,7 +678,7 @@ Final foo = foo 1, bar = TheBar';
 			'date_created_gmt'    => '2023-11-22 01:23:34',
 			'expiration_date_gmt' => '2034-07-01 12:34:56',
 			'is_public'           => true === $is_public,
-			'file_path'           => self::$rendered_templates_dir . '/2034-07/00112233445566778899aabbccddeeff',
+			'file_path'           => self::$rendered_templates_dir . '/2034-07-01/00112233445566778899aabbccddeeff',
 			'has_expired'         => false,
 		);
 
@@ -787,7 +788,7 @@ Final foo = foo 1, bar = TheBar';
 	}
 
 	/**
-	 * @testdox delete_expired_files deletes files, and maybe also databse entries, corresponding to files expired in the previous month or earlier.
+	 * @testdox delete_expired_files deletes files, and maybe also databse entries, corresponding to files expired in the previous day or earlier.
 	 */
 	public function test_delete_expired_files() {
 		global $wpdb;
@@ -800,8 +801,8 @@ Final foo = foo 1, bar = TheBar';
 			)
 		);
 
-		for ( $i = 1; $i <= 12; $i++ ) {
-			$metadata = array( 'expiration_date' => sprintf( '2022-%02d-01 00:00:00', $i ) );
+		for ( $i = 1; $i <= 30; $i++ ) {
+			$metadata = array( 'expiration_date' => sprintf( '2022-10-%02d 00:00:00', $i ) );
 			$this->sut->render_template(
 				'simple',
 				array(
@@ -821,57 +822,57 @@ Final foo = foo 1, bar = TheBar';
 
 		// Not all the expired files are deleted, then no rows are deleted at all.
 
-		$result = $this->sut->delete_expired_rendered_files( 7 );
+		$result = $this->sut->delete_expired_rendered_files( 20 );
 
 		$this->assertEquals(
 			array(
-				'files_deleted' => 7,
+				'files_deleted' => 20,
 				'rows_deleted'  => 0,
 			),
 			$result
 		);
 
-		for ( $i = 1; $i <= 7; $i++ ) {
-			$this->assertFalse( is_dir( self::$rendered_templates_dir . sprintf( '/2022-%02d', $i ) ) );
+		for ( $i = 1; $i <= 20; $i++ ) {
+			$this->assertFalse( is_dir( self::$rendered_templates_dir . sprintf( '/2022-10-%02d', $i ) ) );
 		}
-		for ( $i = 8; $i <= 12; $i++ ) {
-			$this->assertTrue( is_dir( self::$rendered_templates_dir . sprintf( '/2022-%02d', $i ) ) );
+		for ( $i = 21; $i <= 30; $i++ ) {
+			$this->assertTrue( is_dir( self::$rendered_templates_dir . sprintf( '/2022-10-%02d', $i ) ) );
 		}
 
 		$dates_in_db          = $wpdb->get_results( "SELECT expiration_date_gmt FROM {$wpdb->prefix}wc_rendered_templates ORDER BY expiration_date_gmt", ARRAY_N );
 		$dates_in_db          = array_map( fn( $item) => current( $item ), $dates_in_db );
-		$expected_dates_in_db = array_map( fn( $num) => sprintf( '2022-%02d-01 00:00:00', $num ), range( 1, 12 ) );
+		$expected_dates_in_db = array_map( fn( $num) => sprintf( '2022-10-%02d 00:00:00', $num ), range( 1, 30 ) );
 		$this->assertEquals( $expected_dates_in_db, $dates_in_db );
 
 		// All the expired files are deleted, then rows are deleted.
 
-		$result = $this->sut->delete_expired_rendered_files( 7 );
+		$result = $this->sut->delete_expired_rendered_files( 15 );
 
 		$this->assertEquals(
 			array(
-				'files_deleted' => 5,
-				'rows_deleted'  => 7,
+				'files_deleted' => 10,
+				'rows_deleted'  => 15,
 			),
 			$result
 		);
 
-		for ( $i = 1; $i <= 12; $i++ ) {
-			$this->assertFalse( is_dir( self::$rendered_templates_dir . sprintf( '/2022-%02d', $i ) ) );
+		for ( $i = 1; $i <= 30; $i++ ) {
+			$this->assertFalse( is_dir( self::$rendered_templates_dir . sprintf( '/2022-10-%02d', $i ) ) );
 		}
 
 		$dates_in_db          = $wpdb->get_results( "SELECT expiration_date_gmt FROM {$wpdb->prefix}wc_rendered_templates ORDER BY expiration_date_gmt", ARRAY_N );
 		$dates_in_db          = array_map( fn( $item) => current( $item ), $dates_in_db );
-		$expected_dates_in_db = array_map( fn( $num) => sprintf( '2022-%02d-01 00:00:00', $num ), range( 8, 12 ) );
+		$expected_dates_in_db = array_map( fn( $num) => sprintf( '2022-10-%02d 00:00:00', $num ), range( 16, 30 ) );
 		$this->assertEquals( $expected_dates_in_db, $dates_in_db );
 
 		// No files left, all remaining rows are deleted now.
 
-		$result = $this->sut->delete_expired_rendered_files( 7 );
+		$result = $this->sut->delete_expired_rendered_files( 20 );
 
 		$this->assertEquals(
 			array(
 				'files_deleted' => 0,
-				'rows_deleted'  => 5,
+				'rows_deleted'  => 15,
 			),
 			$result
 		);
@@ -881,7 +882,7 @@ Final foo = foo 1, bar = TheBar';
 
 		// Nothing left to delete.
 
-		$result = $this->sut->delete_expired_rendered_files( 7 );
+		$result = $this->sut->delete_expired_rendered_files( 20 );
 
 		$this->assertEquals(
 			array(
@@ -893,9 +894,9 @@ Final foo = foo 1, bar = TheBar';
 	}
 
 	/**
-	 * @testdox delete_expired_files does not delete files that aren't past their expiration dates, or that have expired in the current month.
+	 * @testdox delete_expired_files does not delete files that aren't past their expiration dates, or that have expired in the current day.
 	 */
-	public function test_delete_expired_files_does_not_delete_files_expired_this_month_or_not_expired() {
+	public function test_delete_expired_files_does_not_delete_files_expired_today_or_not_expired() {
 		global $wpdb;
 
 		$this->register_legacy_proxy_function_mocks(
@@ -926,7 +927,7 @@ Final foo = foo 1, bar = TheBar';
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'current_time' => fn( $type, $gmt) =>
-							$gmt && 'mysql' === $type ? '2023-11-05 00:00:00' : current_time( $type, $gmt ),
+							$gmt && 'mysql' === $type ? '2023-11-01 10:00:00' : current_time( $type, $gmt ),
 			)
 		);
 
@@ -942,8 +943,8 @@ Final foo = foo 1, bar = TheBar';
 		$result = $wpdb->get_var( "SELECT COUNT(id) FROM {$wpdb->prefix}wc_rendered_templates" );
 		$this->assertEquals( 2, $result );
 
-		$this->assertTrue( is_dir( self::$rendered_templates_dir . '/2024-01' ) );
-		$this->assertTrue( is_dir( self::$rendered_templates_dir . '/2023-11' ) );
+		$this->assertTrue( is_dir( self::$rendered_templates_dir . '/2024-01-01' ) );
+		$this->assertTrue( is_dir( self::$rendered_templates_dir . '/2023-11-01' ) );
 	}
 
 	/**
@@ -1070,8 +1071,9 @@ Final foo = foo 1, bar = TheBar';
 	 * Deletes a directory and all its contents.
 	 *
 	 * @param string $dirname The directory to delete.
+	 * @param bool   $delete_root_dir True to delete $dirname too, false to delete only the contents of $dirname.
 	 */
-	private static function rmdir_recursive( $dirname ) {
+	private static function rmdir_recursive( $dirname, bool $delete_root_dir ) {
 		if ( ! is_dir( $dirname ) ) {
 			return;
 		}
@@ -1082,13 +1084,15 @@ Final foo = foo 1, bar = TheBar';
 			if ( ( '.' !== $file ) && ( '..' !== $file ) ) {
 				$full = $dirname . '/' . $file;
 				if ( is_dir( $full ) ) {
-					self::rmdir_recursive( $full );
+					self::rmdir_recursive( $full, $delete_root_dir );
 				} else {
 					unlink( $full );
 				}
 			}
 		}
 		closedir( $dir );
-		rmdir( $dirname );
+		if ( $delete_root_dir ) {
+			rmdir( $dirname );
+		}
 	}
 }

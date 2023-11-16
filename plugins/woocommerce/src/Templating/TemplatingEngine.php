@@ -18,8 +18,9 @@ use Automattic\WooCommerce\Utilities\TimeUtil;
  * the engine to render their own templates.
  *
  * Rendered templates have a random file name and an expiration date. They are stored in a directory
- * whose default route is wp-content/uploads/woocommerce_rendered_templates/yyyy-mm, where "yyyy-mm" is
- * the expiration year and month. The base route (minus the expiration date part) can be changed via dedicated hook.
+ * whose default route is wp-content/uploads/woocommerce_rendered_templates/yyyy-mm-dd, where "yyyy-mm-dd" is
+ * the expiration date (year, month and day). The base route (minus the expiration date part) can be changed
+ * via a dedicated hook.
  *
  * While the rendered templates are stored as files in the filesystem, metadata data about them
  * (creation and expiration dates, reachable via REST API or not) is stored in the wp_wc_rendered_templates
@@ -87,7 +88,7 @@ class TemplatingEngine {
 	 * Otherwise, the result of the rendering will be stored as a file with a random name (customizable via
 	 * woocommerce_rendered_template_filename filter) in the directory whose name is the base location
 	 * (WordPress' uploads directory plus "woocommerce_rendered_templates", changeable via the
-	 * woocommerce_rendered_templates_directory filter) plus the expiration year and month formatted as 'yyyy-mm'.
+	 * woocommerce_rendered_templates_directory filter) plus the expiration date formatted as 'yyyy-mm-dd'.
 	 * The name of the file will be the return value of the function.
 	 *
 	 * $metadata must contain at least one of "expiration_date" (GMT, in the usual Y-m-d H:i:s format) or
@@ -182,7 +183,7 @@ class TemplatingEngine {
 			$filename = apply_filters( 'woocommerce_rendered_template_filename', $filename, $template_name, $variables, $metadata );
 
 			$rendered_files_directory  = $this->get_rendered_files_directory();
-			$rendered_files_directory .= '/' . substr( $expiration_date, 0, 7 );
+			$rendered_files_directory .= '/' . substr( $expiration_date, 0, 10 );
 			if ( ! $this->legacy_proxy->call_function( 'is_dir', $rendered_files_directory ) ) {
 				if ( ! $this->legacy_proxy->call_function( 'wp_mkdir_p', $rendered_files_directory ) ) {
 					throw new Exception( "Can't create directory: $rendered_files_directory" );
@@ -485,7 +486,7 @@ class TemplatingEngine {
 			return null;
 		}
 
-		$data['file_path']   = $this->get_rendered_files_directory() . '/' . substr( $data['expiration_date_gmt'], 0, 7 ) . '/' . $data['file_name'];
+		$data['file_path']   = $this->get_rendered_files_directory() . '/' . substr( $data['expiration_date_gmt'], 0, 10 ) . '/' . $data['file_name'];
 		$data['is_public']   = (bool) $data['is_public'];
 		$data['has_expired'] = strtotime( $data['expiration_date_gmt'] ) < time();
 
@@ -587,26 +588,27 @@ class TemplatingEngine {
 	}
 
 	/**
-	 * Delete rendered files that expired in the previous month or earlier.
+	 * Delete rendered files that expired in the previous day or earlier.
 	 *
 	 * For performance reasons (deleting pairs of database entry and physical file one by one would be slow)
 	 * the following strategy is followed:
 	 *
-	 * 1. First physical files are deleted, starting with the ones having the earlier expiration month,
+	 * 1. First physical files are deleted, starting with the ones having the earlier expiration day,
 	 *    and deleting at most $limit files.
 	 * 2. Only if no physical files are left to be deleted, database entries are deleted (again, starting
 	 *    entries having the earlier expiration date), up to $limit entries.
 	 *
 	 * This strategy implies that expired database entries can exist for which the corresponding physical file
 	 * doesn't exist anymore, but not the opposite (physical files without corresponding database entry).
-	 * Also, it's not possible to delete files that have expired in the current month.
+	 * Also, it's not possible to delete files that have expired in the current day.
 	 *
 	 * @param int $limit Maximum number of files to delete.
 	 * @return array "files_deleted" with the count of physical files deleted, "rows_deleted" with the count of rows deleted from wp_rendered_templates.
 	 * @throws Exception The base directory for rendered templates (possibly changed via filter) doesn't exist, database error.
 	 */
 	public function delete_expired_rendered_files( int $limit = 1000 ): array {
-		$expiration_date_gmt = $this->time_util->first_day_of_month( 'now', true );
+		$expiration_date_gmt = $this->legacy_proxy->call_function( 'current_time', 'mysql', true );
+		$expiration_date_gmt = substr( $expiration_date_gmt, 0, 10 ) . ' 00:00:00';
 
 		$delete_files_result = $this->delete_expired_rendered_files_from_filesystem( $expiration_date_gmt, $limit );
 		$rows_deleted_count  =
@@ -623,21 +625,21 @@ class TemplatingEngine {
 	/**
 	 * Delete expired rendered files from the filesystem.
 	 *
-	 * @param string $expiration_date_gmt Cutoff date to consider a file as expired (only year and month will be used).
+	 * @param string $expiration_date_gmt Cutoff date to consider a file as expired (time of day will not be used).
 	 * @param int    $limit Maximum number of files to delete.
 	 * @return array "deleted_count" with the number of files actually deleted, "files_remain" that will be true if there are still files left to delete.
 	 * @throws Exception The base directory for rendered templates (possibly changed via filter) doesn't exist.
 	 */
 	private function delete_expired_rendered_files_from_filesystem( string $expiration_date_gmt, int $limit ): array {
 		$base_dir = $this->get_rendered_files_directory();
-		$subdirs  = glob( $base_dir . '/2[0-9][0-9][0-9]-[0-3][0-9]', GLOB_ONLYDIR );
+		$subdirs  = glob( $base_dir . '/[2-9][0-9][0-9][0-9]-[01][0-9]-[0-3][0-9]', GLOB_ONLYDIR );
 		if ( false === $subdirs ) {
 			throw new Exception( "Error when getting the list of subdirectories of $base_dir" );
 		}
 
-		$subdirs                   = array_map( fn( $name) => substr( $name, strlen( $name ) - 7, 7 ), $subdirs );
-		$expiration_year_and_month = substr( $expiration_date_gmt, 0, 7 );
-		$expired_subdirs           = array_filter( $subdirs, fn( $name) => $name < $expiration_year_and_month );
+		$subdirs                   = array_map( fn( $name ) => substr( $name, strlen( $name ) - 10, 10 ), $subdirs );
+		$expiration_year_month_day = substr( $expiration_date_gmt, 0, 10 );
+		$expired_subdirs           = array_filter( $subdirs, fn( $name ) => $name < $expiration_year_month_day );
 		asort( $subdirs ); // We want to delete files starting with the oldest expiration month.
 
 		$remaining_limit = $limit;
