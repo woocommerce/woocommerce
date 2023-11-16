@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { HTMLInputTypeAttribute } from 'react';
 import type { BlockAttributes } from '@wordpress/blocks';
 
 export interface TextBlockAttributes extends BlockAttributes {
@@ -9,9 +10,12 @@ export interface TextBlockAttributes extends BlockAttributes {
 	help?: string;
 	tooltip?: string;
 	placeholder?: string;
-	required?: boolean;
-	validationRegex?: string;
-	validationErrorMessage?: string;
-	minLength?: number;
-	maxLength?: number;
+	suffix?: boolean | string;
+	required?: boolean | string;
+	type?: { value?: HTMLInputTypeAttribute; message?: string };
+	pattern?: { value: string; message?: string };
+	minLength?: { value: number; message?: string };
+	maxLength?: { value: number; message?: string };
+	min?: { value: number; message?: string };
+	max?: { value: number; message?: string };
 }
