@@ -25,48 +25,39 @@ type StatusBadge = {
 	explanation?: string;
 };
 
-function getStatusBadges( subscription: Subscription ): StatusBadge[] {
-	const badges: StatusBadge[] = [];
-
-	if ( subscription.local.installed && ! subscription.active ) {
-		badges.push( {
-			text: __( 'Not connected', 'woocommerce' ),
-			level: StatusLevel.Warning,
-			explanation: __(
-				'To receive updates and support, please connect your subscription to this store.',
-				'woocommerce'
-			),
-		} );
-	}
-
+function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 	if ( subscription.product_key === '' ) {
-		badges.push( {
+		/**
+		 * If there is no subscription, we don't need to check for the expiry.
+		 */
+		return {
 			text: __( 'No subscription', 'woocommerce' ),
 			level: StatusLevel.Error,
 			explanation: __(
 				'To get updates and support for this extension, you need to purchase a new subscription, or else share or transfer a subscription for this extension from another account.',
 				'woocommerce'
 			),
-		} );
-
-		/**
-		 * If there is no subscription, we don't need to check for the expiry.
-		 */
-		return badges;
-	}
-
-	if ( subscription.expired ) {
-		badges.push( {
+		};
+	} else if ( subscription.local.installed && ! subscription.active ) {
+		return {
+			text: __( 'Not connected', 'woocommerce' ),
+			level: StatusLevel.Warning,
+			explanation: __(
+				'To receive updates and support, please connect your subscription to this store.',
+				'woocommerce'
+			),
+		};
+	} else if ( subscription.expired ) {
+		return {
 			text: __( 'Expired', 'woocommerce' ),
 			level: StatusLevel.Error,
 			explanation: __(
 				'To receive updates and support, please renew your subscription.',
 				'woocommerce'
 			),
-		} );
+		};
 	}
-
-	return badges;
+	return false;
 }
 
 function getVersion( subscription: Subscription ): string | JSX.Element {
@@ -107,18 +98,7 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 		);
 	}
 
-	const statusBadges = getStatusBadges( subscription );
-
-	const statusElement = statusBadges.map( ( badge, index ) => {
-		return (
-			<StatusPopover
-				key={ index }
-				text={ badge.text }
-				level={ badge.level }
-				explanation={ badge.explanation ?? '' }
-			/>
-		);
-	} );
+	const statusBadge = getStatusBadge( subscription );
 
 	const displayElement = (
 		<div className="woocommerce-marketplace__my-subscriptions__product">
@@ -129,7 +109,13 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 				{ subscription.product_name }
 			</span>
 			<span className="woocommerce-marketplace__my-subscriptions__product-statuses">
-				{ statusElement }
+				{ statusBadge && (
+					<StatusPopover
+						text={ statusBadge.text }
+						level={ statusBadge.level }
+						explanation={ statusBadge.explanation ?? '' }
+					/>
+				) }
 			</span>
 		</div>
 	);
