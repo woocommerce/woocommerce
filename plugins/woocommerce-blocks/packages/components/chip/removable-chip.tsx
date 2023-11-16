@@ -98,6 +98,7 @@ export const RemovableChip = ( {
 					className="wc-block-components-chip__remove-icon"
 					icon={ closeSmall }
 					size={ 16 }
+					role="img"
 				/>
 			</RemoveElement>
 		</Chip>
