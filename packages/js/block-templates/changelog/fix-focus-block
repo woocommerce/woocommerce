@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Disable focus on root block when using useWooBlockProps
+New product editor: Disable focus on root blocks, fixing unnecessary tab between fields in new product editor
