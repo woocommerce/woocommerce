@@ -180,7 +180,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 	private function enqueue_scripts_and_styles() {
 		wp_enqueue_script(
 			'sourcebuster-js',
-			plugins_url( "assets/js/frontend/sourcebuster{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
+			plugins_url( "assets/js/sourcebuster/sourcebuster{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
 			array( 'jquery' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
