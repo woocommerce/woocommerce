@@ -53,12 +53,12 @@ class TrackingController implements RegisterHooksInterface {
 
 		add_filter(
 			'wc_order_source_attribution_allow_tracking',
-			[ $this, 'is_wccom_tracking_allowed' ]
+			array( $this, 'is_wccom_tracking_allowed' )
 		);
 
 		add_action(
 			'wp_enqueue_scripts',
-			[ $this, 'enqueue_scripts' ]
+			array( $this, 'enqueue_scripts' )
 		);
 	}
 
