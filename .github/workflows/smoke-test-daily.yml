@@ -94,6 +94,10 @@ jobs:
               with:
                   test-type: e2e
 
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+
             - name: Run E2E tests
               timeout-minutes: 60
               id: run_playwright_e2e_tests
