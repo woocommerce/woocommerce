@@ -63,13 +63,6 @@ class FileController {
 	private const SEARCH_CACHE_KEY = 'logs_previous_search';
 
 	/**
-	 * A cache key for storing and retrieving the results of the last logs search.
-	 *
-	 * @const string
-	 */
-	private const SEARCH_CACHE_KEY = 'logs_previous_search';
-
-	/**
 	 * The absolute path to the log directory.
 	 *
 	 * @var string
