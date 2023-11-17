@@ -25,10 +25,6 @@ See [Block Template API usage examples](../../../../../../plugins/woocommerce/sr
 
 ### [woocommerce/product-radio-field](radio/README.md)
 
-### [woocommerce/product-section](section/README.md)
-
-### [woocommerce/product-tab](tab/README.md)
-
 ### [woocommerce/product-taxonomy-field](taxonomy/README.md)
 
 ### [woocommerce/product-text-field](text/README.md)
