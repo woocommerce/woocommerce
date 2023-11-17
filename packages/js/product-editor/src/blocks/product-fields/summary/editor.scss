@@ -3,6 +3,10 @@
 		margin-top: 0;
 		margin-bottom: 0;
 	}
+
+	@include breakpoint(">782px") {
+		max-width: 650px;
+	}
 }
 
 .components-summary-control {
@@ -29,10 +33,10 @@
 	}
 }
 
-
 // This alignment class does not exists in
 // https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/common.scss
 .has-text-align-justify {
 	/*rtl:ignore*/
 	text-align: justify;
 }
+
