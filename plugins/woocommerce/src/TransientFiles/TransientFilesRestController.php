@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Templating;
+namespace Automattic\WooCommerce\TransientFiles;
 
 use WP_HTTP_Response;
 use \WP_REST_Server;
@@ -12,17 +12,21 @@ use \InvalidArgumentException;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 /**
- * REST API controller for the templating engine. This class handles:
+ * REST API controller for the transient files engine. This class handles:
  *
- * 1. The JSON REST API endpoints for creating, deleting and retrieving information about rendered template files.
- * 2. The endpoint used to retrieve the contents of a rendered file given its file name.
+ * 1. The JSON REST API endpoints for creating, deleting and retrieving information about transient files.
+ * 2. The unauthenticated endpoint used to retrieve the contents of a transient file given its file name.
  *
- * Rendered templates that are public and haven't expired can be obtained remotely via the "/wc/file/filename" endpoint
- * (unauthenticated access is allowed). The default content type will be "text/html", this can be changed if a
- * "content-type" metadata key is passed to render_template. Once a rendered file is successfully served,
- * the woocommerce_rendered_template_served action is fired.
+ * Transient files that are public and haven't expired can be obtained remotely via the unauthenticated endpoint,
+ * which is "/wc/file/transient/<filename>". The default content type will be "text/html", this can be changed if a
+ * "content-type" metadata key is passed to the corresponding file creation method in TransientFilesEngine.
+ * Once a transient file is successfully served, the woocommerce_transient_file_contents_served action is fired.
+ *
+ * The "/wp-json/wc/v3/files/transient/<filename>" endpoint is equivalent to the unauthenticated one, being the differences that
+ * it requires authentication (and more precisely, the 'read_transient_file' capability) and will always
+ * return the file contents, even for files that haven't been created as public.
  */
-class TemplatingRestController {
+class TransientFilesRestController {
 
 	use AccessiblePrivateMethods;
 
@@ -34,11 +38,11 @@ class TemplatingRestController {
 	private string $route_namespace = 'wc/v3';
 
 	/**
-	 * The instance of TemplatingEngine to use.
+	 * The instance of TransientFilesEngine to use.
 	 *
-	 * @var TemplatingEngine
+	 * @var TransientFilesEngine
 	 */
-	private TemplatingEngine $templating_engine;
+	private TransientFilesEngine $transient_files_engine;
 
 	/**
 	 * Holds authentication error messages for each HTTP verb.
@@ -76,11 +80,11 @@ class TemplatingRestController {
 	/**
 	 * Class initialization, to be executed when the class is resolved by the container.
 	 *
-	 * @param TemplatingEngine $templating_engine The instance of TemplatingEngine to use.
+	 * @param TransientFilesEngine $transient_files_engine The instance of TransientFilesEngine to use.
 	 * @internal
 	 */
-	final public function init( TemplatingEngine $templating_engine ) {
-		$this->templating_engine = $templating_engine;
+	final public function init( TransientFilesEngine $transient_files_engine ) {
+		$this->transient_files_engine = $transient_files_engine;
 	}
 
 	/**
@@ -91,7 +95,7 @@ class TemplatingRestController {
 	 * @return array The updated list of WooCommerce REST API namespaces/controllers.
 	 */
 	private function handle_woocommerce_rest_api_get_rest_namespaces( array $namespaces ): array {
-		$namespaces['wc/v3']['templates'] = self::class;
+		$namespaces['wc/v3']['files/transient'] = self::class;
 		return $namespaces;
 	}
 
@@ -103,46 +107,53 @@ class TemplatingRestController {
 
 		register_rest_route(
 			$this->route_namespace,
-			'/templates/(?P<id>[\d]+)',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => fn( $request ) => $this->run( 'get_rendered_template_info', $request ),
-					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_rendered_template' ),
-					'args'                => $this->get_args_for_get_rendered_template_info(),
-				),
-				array(
-					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => fn( $request ) => $this->run( 'delete_rendered_template', $request ),
-					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'delete_rendered_template' ),
-					'args'                => $this->get_args_for_get_contents_or_delete_rendered_template(),
-				),
-			)
-		);
-
-		register_rest_route(
-			$this->route_namespace,
-			'/templates/render',
-			array(
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => fn( $request ) => $this->run( 'render_template', $request ),
-					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'create_rendered_template' ),
-					'args'                => $this->get_args_for_render_template(),
-				),
-			)
-		);
-
-		register_rest_route(
-			$this->route_namespace,
-			'/templates/contents/(?P<id_or_name>.+)',
+			'/files/transient/(?P<id_or_name>[^/]+)',
 			array(
 				array(
 					'methods'  => WP_REST_Server::READABLE,
-					'callback' => fn( $request ) => $this->run( 'get_rendered_template_contents', $request ),
-					'args'     => $this->get_args_for_get_contents_or_delete_rendered_template(),
-					// No permission callback, the get_rendered_template_contents method handles authentication by itself
+					'callback' => fn( $request ) => $this->run( 'get_file_contents', $request ),
+					'args'     => $this->get_args_for_get_file_contents(),
+					// No permission callback, the get_file_contents method handles authentication by itself
 					// because it's different for the REST API endpoint and for the unauthenticated endpoint.
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->route_namespace,
+			'/files/transient/(?P<id>[\d]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => fn( $request ) => $this->run( 'delete_file', $request ),
+					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'delete_transient_file' ),
+					'args'                => $this->get_args_for_delete_file(),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->route_namespace,
+			'/files/transient/render',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( 'create_file_by_rendering_template', $request ),
+					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'create_transient_file' ),
+					'args'                => $this->get_args_for_create_file_by_rendering_template(),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->route_namespace,
+			'/files/transient/(?P<id>[\d]+)/info',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( 'get_file_info', $request ),
+					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_transient_file' ),
+					'args'                => $this->get_args_for_get_file_info(),
 				),
 			)
 		);
@@ -162,7 +173,7 @@ class TemplatingRestController {
 		try {
 			return rest_ensure_response( $this->$method_name( $request ) );
 		} catch ( Exception $ex ) {
-			wc_get_logger()->error( "TemplatingRestController: when executing method $method_name: {$ex->getMessage()}" );
+			wc_get_logger()->error( "TransientFilesRestController: when executing method $method_name: {$ex->getMessage()}" );
 			return $this->internal_wp_error( $ex );
 		}
 	}
@@ -218,114 +229,114 @@ class TemplatingRestController {
 	}
 
 	/**
-	 * Get the details of a rendered template by id.
+	 * Get the details of a transient file by id.
 	 *
 	 * @param WP_REST_Request $request The incoming HTTP REST request.
 	 * @return WP_Error|array The response to send back to the client.
 	 */
-	private function get_rendered_template_info( WP_REST_Request $request ) {
-		$rendered_template_info = $this->templating_engine->get_rendered_file_by_id( $request->get_param( 'id' ), $request->get_param( 'include_metadata' ) );
-		if ( is_null( $rendered_template_info ) ) {
-			return new WP_Error( 'woocommerce_rest_not_found', __( 'Template not found', 'woocommerce' ), array( 'status' => 404 ) );
+	private function get_file_info( WP_REST_Request $request ) {
+		$transient_file_info = $this->transient_files_engine->get_file_by_id( $request->get_param( 'id' ), $request->get_param( 'include_metadata' ) );
+		if ( is_null( $transient_file_info ) ) {
+			return new WP_Error( 'woocommerce_rest_not_found', __( 'File not found', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		return $this->adjust_rendered_template_info_for_response( $rendered_template_info );
+		return $this->adjust_transient_file_info_for_response( $transient_file_info );
 	}
 
 	/**
-	 * Generate a rendered template file.
+	 * Create a transient file by rendering a template.
 	 *
 	 * @param WP_REST_Request $request The incoming HTTP REST request.
 	 * @return WP_Error|WP_REST_Response The response to send back to the client.
 	 * @throws Exception The template can't be found right after having been rendered.
 	 */
-	private function render_template( WP_REST_Request $request ) {
+	private function create_file_by_rendering_template( WP_REST_Request $request ) {
 		$metadata                       = $request->get_param( 'metadata' );
 		$metadata['expiration_date']    = $request->get_param( 'expiration_date' );
 		$metadata['expiration_seconds'] = $request->get_param( 'expiration_seconds' );
 		$metadata['is_public']          = $request->get_param( 'is_public' );
 
 		try {
-			$rendered_file_name = $this->templating_engine->render_template( $request->get_param( 'template_name' ), $request->get_param( 'variables' ), $metadata );
+			$file_name = $this->transient_files_engine->create_file_by_rendering_template( $request->get_param( 'template_name' ), $request->get_param( 'variables' ), $metadata );
 		} catch ( InvalidArgumentException $ex ) {
 			return new WP_Error( 'woocommerce_rest_invalid_arguments', $ex->getMessage(), array( 'status' => 400 ) );
 		}
 
-		$rendered_template_info = $this->templating_engine->get_rendered_file_by_name( $rendered_file_name );
-		if ( is_null( $rendered_template_info ) ) {
-			throw new Exception( "Template {$request->get_param('template_name')} has just been rendered as $rendered_file_name, but now somehow it can't be found" );
+		$transient_file_info = $this->transient_files_engine->get_file_by_name( $file_name );
+		if ( is_null( $transient_file_info ) ) {
+			throw new Exception( "Template {$request->get_param('template_name')} has just been rendered as $file_name, but now somehow it can't be found" );
 		}
 
-		return new WP_REST_Response( $this->adjust_rendered_template_info_for_response( $rendered_template_info ), 201 );
+		return new WP_REST_Response( $this->adjust_transient_file_info_for_response( $transient_file_info ), 201 );
 	}
 
 	/**
-	 * Deletes an existing rendered template file.
+	 * Deletes an existing transient file.
 	 *
 	 * @param WP_REST_Request $request The incoming HTTP REST request.
 	 * @return array The response to send back to the client.
 	 */
-	private function delete_rendered_template( WP_REST_Request $request ): array {
-		$deleted = $this->templating_engine->delete_rendered_file_by_id( $request->get_param( 'id' ) );
+	private function delete_file( WP_REST_Request $request ): array {
+		$deleted = $this->transient_files_engine->delete_file_by_id( $request->get_param( 'id' ) );
 		return array( 'deleted' => $deleted );
 	}
 
 	/**
-	 * Adjust an array of data representing a rendered template file so that it's suitable to bre returned to the client.
+	 * Adjust an array of data representing a transient file so that it's suitable to be returned to the client.
 	 *
-	 * @param array $rendered_template_info The array to adjust.
+	 * @param array $transient_file_info The array to adjust.
 	 * @return array The adjusted array.
 	 */
-	private function adjust_rendered_template_info_for_response( array $rendered_template_info ): array {
-		unset( $rendered_template_info['file_path'] );
-		if ( $rendered_template_info['is_public'] ) {
-			$rendered_template_info['render_url'] = get_site_url( null, "/wc/file/{$rendered_template_info['file_name']}" );
+	private function adjust_transient_file_info_for_response( array $transient_file_info ): array {
+		unset( $transient_file_info['file_path'] );
+		if ( $transient_file_info['is_public'] ) {
+			$transient_file_info['public_url'] = get_site_url( null, "/wc/file/transient/{$transient_file_info['file_name']}" );
 		}
-		return $rendered_template_info;
+		return $transient_file_info;
 	}
 
 	/**
 	 * Handle the "init" action, add rewrite rules for the "wc/file" endpoint.
 	 */
 	private function handle_init() {
-		add_rewrite_rule( '^wc/file/?$', 'index.php?wc-rendered-template=', 'top' );
-		add_rewrite_rule( '^wc/file/(.+)$', 'index.php?wc-rendered-template=$matches[1]', 'top' );
-		add_rewrite_endpoint( 'wc/file', EP_ALL );
+		add_rewrite_rule( '^wc/file/transient/?$', 'index.php?wc-transient-file-name=', 'top' );
+		add_rewrite_rule( '^wc/file/transient/(.+)$', 'index.php?wc-transient-file-name=$matches[1]', 'top' );
+		add_rewrite_endpoint( 'wc/file/transient', EP_ALL );
 	}
 
 	/**
-	 * Handle the "query_vars" action, add the "wc-rendered-template" variable for the "wc/file" endpoint.
+	 * Handle the "query_vars" action, add the "wc-transient-file-name" variable for the "wc/file/transient" endpoint.
 	 *
 	 * @param array $vars The original query variables.
 	 * @return array The updated query variables.
 	 */
 	private function handle_query_vars( $vars ) {
-		$vars[] = 'wc-rendered-template';
+		$vars[] = 'wc-transient-file-name';
 		return $vars;
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.Missing, WordPress.WP.AlternativeFunctions
 
 	/**
-	 * Handle the "parse_request" action for the "wc/file" endpoint.
+	 * Handle the "parse_request" action for the "wc/file/transient" endpoint.
 	 *
-	 * If the request is not for "/wc/file/<filename>" or "index.php?wc-rendered-template=filename", it returns without doing anything.
-	 * Otherwise, it will serve the contents of the file with the provided name if it exists, is public and has not expired,
-	 * or will return a "Not found" status otherwise.
+	 * If the request is not for "/wc/file/transient/<filename>" or "index.php?wc-transient-file-name=filename",
+	 * it returns without doing anything. Otherwise, it will serve the contents of the file with the provided name
+	 * if it exists, is public and has not expired; or will return a "Not found" status otherwise.
 	 *
-	 * The file will be served with a content type header taken from the "content-type" metadata key of the rendered file,
+	 * The file will be served with a content type header taken from the "content-type" metadata key of the file,
 	 * or "text/html" if that key isn't present.
 	 */
 	private function handle_parse_request() {
 		global $wp;
 
 		// phpcs:ignore WordPress.Security
-		$query_arg = wp_unslash( $_GET['wc-rendered-template'] ?? null );
+		$query_arg = wp_unslash( $_GET['wc-transient-file-name'] ?? null );
 		if ( ! is_null( $query_arg ) ) {
-			$wp->query_vars['wc-rendered-template'] = $query_arg;
+			$wp->query_vars['wc-transient-file-name'] = $query_arg;
 		}
 
-		if ( is_null( $wp->query_vars['wc-rendered-template'] ?? null ) ) {
+		if ( is_null( $wp->query_vars['wc-transient-file-name'] ?? null ) ) {
 			return;
 		}
 
@@ -335,26 +346,26 @@ class TemplatingRestController {
 			exit();
 		}
 
-		$this->serve_file_contents_core( $wp->query_vars['wc-rendered-template'], true, false );
+		$this->serve_file_contents_core( $wp->query_vars['wc-transient-file-name'], true, false );
 	}
 
 	/**
-	 * Serve the contents of a rendered file, exactly in the same way as 'handle_parse_request',
+	 * Serve the contents of a transient file, exactly in the same way as 'handle_parse_request',
 	 * with the difference that this endpoint requires an authenticated user with the proper capability,
 	 * and works even for files that don't have 'is_public' set to true.
 	 *
 	 * @param WP_REST_Request $request The incoming HTTP REST request.
 	 */
-	private function get_rendered_template_contents( WP_REST_Request $request ) {
+	private function get_file_contents( WP_REST_Request $request ) {
 		return $this->serve_file_contents_core( $request->get_param( 'id_or_name' ), 'true' === $request->get_param( 'get_by_name' ), true );
 	}
 
 	/**
-	 * Core method to serve the contents of a rendered file.
+	 * Core method to serve the contents of a transient file.
 	 *
-	 * @param string $file_id_or_name Rendered file id or filename.
+	 * @param string $file_id_or_name Transient file id or filename.
 	 * @param bool   $id_is_name True if $file_id_or_name is a filename, false if it's a database id.
-	 * @param bool   $is_json_rest_api_request True if the request comes from the REST API endpoint, false if it comes from the unauthenticated rendering endpoint.
+	 * @param bool   $is_json_rest_api_request True if the request comes from the REST API endpoint, false if it comes from the unauthenticated endpoint.
 	 */
 	private function serve_file_contents_core( string $file_id_or_name, bool $id_is_name, bool $is_json_rest_api_request ) {
 		try {
@@ -367,19 +378,19 @@ class TemplatingRestController {
 				}
 			}
 
-			$rendered_template_info =
+			$transient_file_info =
 				$id_is_name ?
-					$this->templating_engine->get_rendered_file_by_name( $file_id_or_name, true ) :
-					$this->templating_engine->get_rendered_file_by_id( (int) $file_id_or_name, true );
+					$this->transient_files_engine->get_file_by_name( $file_id_or_name, true ) :
+					$this->transient_files_engine->get_file_by_id( (int) $file_id_or_name, true );
 
 			if ( $is_json_rest_api_request ) {
-				$permission_error = $this->check_permission_by_method( 'GET', 'read_rendered_template' );
+				$permission_error = $this->check_permission_by_method( 'GET', 'read_transient_file' );
 				if ( is_wp_error( $permission_error ) ) {
 					return $permission_error;
 				}
 			}
 
-			if ( is_null( $rendered_template_info ) || $rendered_template_info['has_expired'] ) {
+			if ( is_null( $transient_file_info ) || $transient_file_info['has_expired'] ) {
 				if ( $is_json_rest_api_request ) {
 					return new WP_Error( 'woocommerce_rest_not_found', __( 'File not found', 'woocommerce' ), array( 'status' => 404 ) );
 				} else {
@@ -388,24 +399,24 @@ class TemplatingRestController {
 				}
 			}
 
-			if ( ! $is_json_rest_api_request && ! $rendered_template_info['is_public'] ) {
+			if ( ! $is_json_rest_api_request && ! $transient_file_info['is_public'] ) {
 				status_header( 404 );
 				exit();
 			}
 
-			$rendered_file_path = $rendered_template_info['file_path'];
-			if ( ! is_file( $rendered_file_path ) ) {
-				throw new Exception( "File not found: $rendered_file_path" );
+			$file_path = $transient_file_info['file_path'];
+			if ( ! is_file( $file_path ) ) {
+				throw new Exception( "File not found: $file_path" );
 			}
 
-			$file_length = filesize( $rendered_file_path );
+			$file_length = filesize( $file_path );
 			if ( false === $file_length ) {
-				throw new Exception( "Can't retrieve file size: $rendered_file_path" );
+				throw new Exception( "Can't retrieve file size: $file_path" );
 			}
 
-			$file_handle = fopen( $rendered_file_path, 'r' );
+			$file_handle = fopen( $file_path, 'r' );
 		} catch ( Exception $ex ) {
-			$error_message = "Error serving rendered template $file_id_or_name: {$ex->getMessage()}";
+			$error_message = "Error serving transient file $file_id_or_name: {$ex->getMessage()}";
 			wc_get_logger()->error( $error_message );
 			if ( $is_json_rest_api_request ) {
 				return $this->internal_wp_error( $ex );
@@ -415,7 +426,7 @@ class TemplatingRestController {
 			}
 		}
 
-		$content_type = $rendered_template_info['metadata']['content-type'] ?? 'text/html';
+		$content_type = $transient_file_info['metadata']['content-type'] ?? 'text/html';
 		header( "Content-Type: $content_type" );
 		header( "Content-Length: $file_length" );
 
@@ -426,15 +437,16 @@ class TemplatingRestController {
 			}
 
 			/**
-			 * Action that fires after a rendered file has been successfully served, right before terminating the request.
+			 * Action that fires after a transient file has been successfully served, right before terminating the request.
 			 *
-			 * @param array $rendered_template_info Information about the served file, as returned by get_rendered_file_by_name.
+			 * @param array $transient_file_info Information about the served file, as returned by get_file_by_name.
+			 * @param bool $is_json_rest_api_request True if the request came from the JSON API endpoint, false if it came from the authenticated endpoint.
 			 *
 			 * @since 8.4.0
 			 */
-			do_action( 'woocommerce_rendered_template_served', $rendered_template_info );
+			do_action( 'woocommerce_transient_file_contents_served', $transient_file_info, $is_json_rest_api_request );
 		} catch ( Exception $e ) {
-			wc_get_logger()->error( "Error serving rendered template {$rendered_template_info['file_name']}: {$e->getMessage()}" );
+			wc_get_logger()->error( "Error serving transient file {$transient_file_info['file_name']}: {$e->getMessage()}" );
 			// We can't change the response status code at this point.
 		} finally {
 			fclose( $file_handle );
@@ -445,31 +457,31 @@ class TemplatingRestController {
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.Missing, WordPress.WP.AlternativeFunctions
 
 	/**
-	 * Get a description of the arguments accepted by the GET /templates endpoint.
+	 * Get a description of the arguments accepted by the GET /files/transient/<id>/info endpoint.
 	 *
-	 * @return array A description of the arguments accepted by the GET /templates endpoint.
+	 * @return array A description of the arguments accepted by the GET /files/transient/<id> endpoint.
 	 */
-	private function get_args_for_get_rendered_template_info(): array {
+	private function get_args_for_get_file_info(): array {
 		return array(
 			'id'               => array(
-				'description' => __( 'Unique identifier of the template.', 'woocommerce' ),
+				'description' => __( 'Unique identifier of the transient file.', 'woocommerce' ),
 				'type'        => 'integer',
 			),
 			'include_metadata' => array(
 				'required'    => false,
 				'default'     => false,
 				'type'        => 'boolean',
-				'description' => __( 'True to include template metadata in the response.', 'woocommerce' ),
+				'description' => __( 'True to include the file metadata in the response.', 'woocommerce' ),
 			),
 		);
 	}
 
 	/**
-	 * Get a description of the arguments accepted by the GET /templates/contents and DELETE /templates endpoints.
+	 * Get a description of the arguments accepted by the GET /files/transient/<id> endpoint.
 	 *
-	 * @return array A description of the arguments accepted by the GET /templates/contents and DELETE /templates endpoints.
+	 * @return array A description of the arguments accepted by the GET /files/transient/<id> endpoint.
 	 */
-	private function get_args_for_get_contents_or_delete_rendered_template(): array {
+	private function get_args_for_get_file_contents(): array {
 		return array(
 			'id_or_name'  => array(
 				'description' => __( 'Unique identifier or name of the file.', 'woocommerce' ),
@@ -484,11 +496,25 @@ class TemplatingRestController {
 	}
 
 	/**
-	 * Get a description of the arguments accepted by the POST /templates/render endpoint.
+	 * Get a description of the arguments accepted by the DELETE /files/transient<id> endpoint.
 	 *
-	 * @return array A description of the arguments accepted by the POST /templates/render endpoint.
+	 * @return array A description of the arguments accepted by the DELETE /files/transient/<id> endpoints.
 	 */
-	private function get_args_for_render_template(): array {
+	private function get_args_for_delete_file(): array {
+		return array(
+			'id' => array(
+				'description' => __( 'Unique identifier of the file.', 'woocommerce' ),
+				'type'        => 'integer',
+			),
+		);
+	}
+
+	/**
+	 * Get a description of the arguments accepted by the POST /files/transient endpoint.
+	 *
+	 * @return array A description of the arguments accepted by the POST /files/transient endpoint.
+	 */
+	private function get_args_for_create_file_by_rendering_template(): array {
 		return array(
 			'template_name'      => array(
 				'required'    => true,
@@ -511,7 +537,7 @@ class TemplatingRestController {
 				'required'    => false,
 				'default'     => false,
 				'type'        => 'boolean',
-				'description' => __( 'Whether the rendered template will get a public URL.', 'woocommerce' ),
+				'description' => __( 'Whether the created transient file will get a public URL.', 'woocommerce' ),
 			),
 			'variables'          => array(
 				'required'    => false,

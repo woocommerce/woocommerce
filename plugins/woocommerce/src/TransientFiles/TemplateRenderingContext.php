@@ -1,13 +1,13 @@
 <?php
 
-namespace Automattic\WooCommerce\Templating;
+namespace Automattic\WooCommerce\TransientFiles;
 
 use \Closure;
 
 /**
  * Context class for the template rendering process.
  *
- * When a template is rendered with TemplatingEngine::render_template, the template code will see
+ * When a template is rendered with TransientFilesEngine::create_file_by_rendering_template, the template code will see
  * an instance of this class as "$this". If the template executes "$this->render", the secondary template
  * will see a different instance of the class.
  */
@@ -155,7 +155,7 @@ class TemplateRenderingContext {
 	 *
 	 * Setting $relative to true is an indication to consider the location of the secondary template file
 	 * as relative to the template being currently rendered. The current template path, as well as the "relative" flag,
-	 * will be supplied to the core rendering method in TemplatingEngine and to the woocommerce_template_file_path filter.
+	 * will be supplied to the core rendering method in TransientFilesEngine and to the woocommerce_transient_file_creation_template_file_path filter.
 	 *
 	 * The variables available in the current template will be merged with the array passed in $variables
 	 * (the latter will overwrite duplicate keys from the former) and the result will be passed to the secondary template.

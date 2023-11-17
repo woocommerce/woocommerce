@@ -8,7 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Notes;
-use Automattic\WooCommerce\Templating\TemplatingEngine;
+use Automattic\WooCommerce\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
@@ -1223,13 +1223,12 @@ class WC_Install {
 
 		$product_attributes_lookup_table_creation_sql = wc_get_container()->get( DataRegenerator::class )->get_table_creation_sql();
 
-		$feature_controller = wc_get_container()->get( FeaturesController::class );
-		$hpos_enabled =
+		$feature_controller            = wc_get_container()->get( FeaturesController::class );
+		$hpos_enabled                  =
 			$feature_controller->feature_is_enabled( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ) || $feature_controller->feature_is_enabled( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) ||
-			self::should_enable_hpos_for_new_shop()
-		;
-		$hpos_table_schema = $hpos_enabled ? wc_get_container()->get( OrdersTableDataStore::class )->get_database_schema() : '';
-		$templating_engine_schema = wc_get_container()->get( TemplatingEngine::class )->get_database_schema();
+			self::should_enable_hpos_for_new_shop();
+		$hpos_table_schema             = $hpos_enabled ? wc_get_container()->get( OrdersTableDataStore::class )->get_database_schema() : '';
+		$transient_files_engine_schema = wc_get_container()->get( TransientFilesEngine::class )->get_database_schema();
 
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
@@ -1575,7 +1574,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 	PRIMARY KEY (category_tree_id,category_id)
 ) $collate;
 $hpos_table_schema;
-$templating_engine_schema;
+$transient_files_engine_schema;
 		";
 
 		return $tables;
@@ -1765,10 +1764,10 @@ $templating_engine_schema;
 			'view_woocommerce_reports',
 		);
 
-		$capabilities['templates'] = array(
-			'read_rendered_template',
-			'create_rendered_template',
-			'delete_rendered_template'
+		$capabilities['transient_files'] = array(
+			'read_transient_file',
+			'create_transient_file',
+			'delete_transient_file',
 		);
 
 		$capability_types = array( 'product', 'shop_order', 'shop_coupon' );

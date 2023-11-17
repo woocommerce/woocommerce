@@ -7,9 +7,8 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Templating\TemplatingEngine;
-use Automattic\WooCommerce\Templating\TemplatingRestController;
-use Automattic\WooCommerce\Utilities\TimeUtil;
+use Automattic\WooCommerce\TransientFiles\TransientFilesEngine;
+use Automattic\WooCommerce\TransientFiles\TransientFilesRestController;
 
 /**
  * Service provider for the engine classes in the Automattic\WooCommerce\src namespace.
@@ -22,15 +21,15 @@ class EnginesServiceProvider extends AbstractServiceProvider {
 	 * @var array
 	 */
 	protected $provides = array(
-		TemplatingEngine::class,
-		TemplatingRestController::class,
+		TransientFilesEngine::class,
+		TransientFilesRestController::class,
 	);
 
 	/**
 	 * Register the classes.
 	 */
 	public function register() {
-		$this->share( TemplatingEngine::class )->addArguments( array( TimeUtil::class, LegacyProxy::class ) );
-		$this->share( TemplatingRestController::class )->addArgument( TemplatingEngine::class );
+		$this->share( TransientFilesEngine::class )->addArgument( LegacyProxy::class );
+		$this->share( TransientFilesRestController::class )->addArgument( TransientFilesEngine::class );
 	}
 }
