@@ -377,10 +377,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			if ( $meta_id ) {
 				delete_metadata_by_mid( 'post', $meta_id );
 				$coupon->set_used_by( (array) get_post_meta( $coupon->get_id(), '_used_by' ) );
+				$this->refresh_coupon_data( $coupon );
 			}
 		}
-
-		$this->refresh_coupon_data( $coupon );
 
 		do_action( 'woocommerce_decrease_coupon_usage_count', $coupon, $new_count, $used_by );
 

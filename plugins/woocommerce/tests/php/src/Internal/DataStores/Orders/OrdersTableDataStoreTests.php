@@ -3222,7 +3222,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order_id = WC()->checkout->create_order(
 			array(
 				'billing_email'  => 'user@woo.test',
-				'payment_method' => 'dummy'
+				'payment_method' => 'dummy',
 			)
 		);
 
