@@ -23,5 +23,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		.is-link {
+			text-decoration: none;
+		}
 	}
 }
