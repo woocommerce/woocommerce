@@ -10,7 +10,7 @@ inputs:
   build:
     description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
     default: false
-defaults:
+default:
   run:
     shell: 'bash'
 runs:
@@ -37,7 +37,7 @@ runs:
       uses: 'actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84'
       with:
         path: '~/.cache/composer/files'
-        key: '${{ runner.os }}-composer-${{ hashFiles( "**/composer.lock" ) }}'
+        key: "${{ runner.os }}-composer-${{ hashFiles( '**/composer.lock' ) }}"
         restore-keys: '${{ runner.os }}-composer-'
     - name: 'Parse Project Filters'
       id: 'project-filters'
