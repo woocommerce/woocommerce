@@ -234,12 +234,16 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		$action   = $this->current_action();
 		$webhooks = isset( $_REQUEST['webhook'] ) ? array_map( 'absint', (array) $_REQUEST['webhook'] ) : array(); // WPCS: input var okay, CSRF ok.
 
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You do not have permission to edit Webhooks', 'woocommerce' ) );
-		}
+		if ( false !== $action ) {
+			check_admin_referer( 'woocommerce-settings' );
 
-		if ( 'delete' === $action ) {
-			WC_Admin_Webhooks::bulk_delete( $webhooks );
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				wp_die( esc_html__( 'You do not have permission to edit Webhooks', 'woocommerce' ) );
+			}
+
+			if ( 'delete' === $action ) {
+				WC_Admin_Webhooks::bulk_delete( $webhooks );
+			}
 		}
 	}
 
