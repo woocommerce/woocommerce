@@ -163,7 +163,7 @@ class AbstractInterfaceServiceProviderTest extends \WC_Unit_Test_Case {
 	 * Tests adding a class under alias returns the proper object.
 	 *
 	 * @return void
-	 * @throws ContainerException
+	 * @throws ContainerException Dependency injection error.
 	 */
 	public function test_add_with_implements_tags_with_concrete() {
 		$this->sut->add_with_implements_tags( ClassWithNoInterface::class, ClassWithMultipleInterfaces::class );
@@ -201,7 +201,7 @@ class AbstractInterfaceServiceProviderTest extends \WC_Unit_Test_Case {
 	 * Tests sharing a class with multiple interfaces returns the same instance.
 	 *
 	 * @return void
-	 * @throws ContainerException
+	 * @throws ContainerException Dependency injection error.
 	 */
 	public function test_share_with_implements_tags_returns_the_same_instance() {
 		$definition = $this->sut->share_with_implements_tags( ClassWithMultipleInterfaces::class, null );
