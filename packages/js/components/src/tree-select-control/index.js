@@ -260,9 +260,13 @@ const TreeSelectControl = ( {
 					}
 					return (
 						! this.checked &&
-						this.leaves.some(
+						( this.leaves.some(
 							( opt ) => opt.checked || opt.partialChecked
-						)
+						) ||
+							// Also account for direct children in the case of individuallySelected parents, which don't get included in leaves.
+							this.children.some(
+								( opt ) => opt.checked || opt.partialChecked
+							) )
 					);
 				},
 			},
