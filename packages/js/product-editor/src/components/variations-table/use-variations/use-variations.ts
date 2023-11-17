@@ -51,6 +51,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 				resolveSelect( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
 			setIsLoading( true );
+			setGetVariationsError( undefined );
 
 			const data = await getProductVariations< ProductVariation[] >(
 				requestParams
