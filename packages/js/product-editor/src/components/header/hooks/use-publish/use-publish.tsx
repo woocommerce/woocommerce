@@ -148,7 +148,7 @@ export function usePublish( {
 			: __( 'Add', 'woocommerce' ),
 		...props,
 		isBusy,
-		disabled: isDisabled,
+		'aria-disabled': isDisabled,
 		variant: 'primary',
 		onClick: handleClick,
 	};
