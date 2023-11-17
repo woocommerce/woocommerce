@@ -32,8 +32,8 @@ class OrdersTableSearchQuery {
 	 * @param OrdersTableQuery $query The order query object.
 	 */
 	public function __construct( OrdersTableQuery $query ) {
-		$this->query         = $query;
-		$this->search_term   = urldecode( $query->get( 's' ) );
+		$this->query       = $query;
+		$this->search_term = urldecode( $query->get( 's' ) );
 	}
 
 	/**
