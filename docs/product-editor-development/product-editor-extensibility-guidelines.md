@@ -12,7 +12,7 @@ Changelog:
 
 For this reason, the new product form features groups (tabs) that correspond with these tasks. Simply speaking, they are separate views where different form features live. As a developer, you can extend any of these views and offer merchants the information and tools they need to create better, more successful products.
 
-There are several ways to extend the new product form: from a single field to a whole group or section containing multiple fields and tables. These extension points are tightly linked to the form structure, giving you plenty of freedom to create a great user experience.
+There are several ways to extend the new product form: from a single field to a whole group or section containing multiple fields and tables. These extension points are linked to the form structure, giving you plenty of freedom to create a great user experience.
 
 - Product form
     - Group
