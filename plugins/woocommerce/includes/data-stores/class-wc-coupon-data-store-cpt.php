@@ -347,6 +347,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		} else {
 			add_post_meta( $coupon->get_id(), '_used_by', strtolower( $used_by ) );
 		}
+
+		$this->refresh_coupon_data( $coupon );
 	}
 
 	/**
@@ -378,6 +380,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			}
 		}
 
+		$this->refresh_coupon_data( $coupon );
+
 		do_action( 'woocommerce_decrease_coupon_usage_count', $coupon, $new_count, $used_by );
 
 		return $new_count;
@@ -404,6 +408,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$id
 			)
 		);
+
+		$this->refresh_coupon_data( $coupon );
 
 		// Get the latest value direct from the DB, instead of possibly the WP meta cache.
 		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
@@ -556,7 +562,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
 			if ( false !== $result ) {
 				// Clear meta cache.
-				wp_cache_delete( WC_Coupon::generate_meta_cache_key( $coupon->get_id(), 'coupons' ), 'coupons' );
+				$this->refresh_coupon_data( $coupon );
 				break;
 			}
 		}
@@ -651,7 +657,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
 			if ( false !== $result ) {
 				// Clear meta cache.
-				wp_cache_delete( WC_Coupon::generate_meta_cache_key( $coupon->get_id(), 'coupons' ), 'coupons' );
+				$this->refresh_coupon_data( $coupon );
 				break;
 			}
 		}
@@ -691,6 +697,18 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$user_aliases
 			)
 		); // WPCS: unprepared SQL ok.
+	}
+
+	/**
+	 * This function clears coupon data from the WP cache after certain operations which, for performance reasons,
+	 * are done via SQL queries.
+	 *
+	 * @param \WC_Coupon $coupon The coupon object.
+	 * @return void
+	 */
+	private function refresh_coupon_data( &$coupon ) {
+		wp_cache_delete( $coupon->get_meta_cache_key(), 'coupons' );
+		wp_cache_delete( $coupon->get_id(), 'post_meta' );
 	}
 
 	/**
