@@ -54,6 +54,7 @@ const es_ES = {
     '/Canada.*/': /Canadá.*/,
     'Cancelled': 'Cancelado',
     'Cart': 'Cart',
+    'Cart Block is now live': 'Cart Block está ahora visible.',
     'Cash on delivery': 'Contra reembolso',
     'Change status to completed': 'Cambiar estado a completado',
     'Change your header': 'Cambia tu encabezado',
@@ -64,6 +65,7 @@ const es_ES = {
         'Elige qué análisis mostrar y el nombre de la sección',
     '"Choose which analytics to display and the section name"':
         '"Elige qué análisis mostrar y el nombre de la sección"',
+    'City': 'Ciudad',
     'Click here to enter your code': 'Haz clic aquí para introducir tu código',
     'Click here to login': 'Haz clic aquí para acceder',
     'Close': 'Cerrar',
@@ -232,6 +234,7 @@ const es_ES = {
     'Please select some product options before adding this product to your cart.':
         'Elige las opciones del producto antes de añadir este producto a tu carrito.',
     'Post name': 'Nombre de la entrada',
+    'Postal code': 'Código postal',
     'Processing':'Procesando',
     'Product': 'Producto',
     'Product added.': 'Producto añadido.',

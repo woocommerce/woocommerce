@@ -54,6 +54,7 @@ const en_GB = {
     '/Canada.*/': /Canada.*/,
     'Cancelled': 'Cancelled',
     'Cart': 'Cart',
+    'Cart Block is now live': 'Cart Block is now live',
     'Cash on delivery': 'Cash on delivery',
     'Change status to completed': 'Change status to completed',
     'Change your header': 'Change your header',
@@ -64,6 +65,7 @@ const en_GB = {
         'Choose which analytics to display and the section name',
     '"Choose which analytics to display and the section name"':
         '"Choose which analytics to display and the section name"',
+    'City': 'City',
     'Click here to enter your code': 'Click here to enter your code',
     'Click here to login': 'Click here to login',
     'Close': 'Close',
@@ -230,6 +232,7 @@ const en_GB = {
     'Please select some product options before adding this product to your cart.':
         'Please select some product options before adding this product to your basket.',
     'Post name': 'Post name',
+    'Postal code': 'Postal code',
     'Processing':'Processing',
     'Product': 'Product',
     'Product added.': 'Product added.',

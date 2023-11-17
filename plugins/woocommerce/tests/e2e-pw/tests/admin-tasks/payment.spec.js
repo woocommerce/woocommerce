@@ -54,28 +54,18 @@ test.describe( 'Payment setup task', () => {
 			.catch( () => {} );
 
 		// fill in bank transfer form
-		await page
-			.locator( `//input[@placeholder=${getTranslationFor('"Account name"')}]` )
-			.fill( 'Savings' );
-		await page
-			.locator( `//input[@placeholder=${getTranslationFor('"Account number"')}]` )
-			.fill( '1234' );
-		await page
-			.locator( `//input[@placeholder=${getTranslationFor('"Bank name"')}]` )
-			.fill( 'Test Bank' );
-		await page.locator( `//input[@placeholder=${getTranslationFor('"Sort code"')}]` ).fill( '12' );
-		await page
-			.locator( `//input[@placeholder=${getTranslationFor('"IBAN"')}]` )
-			.fill( '12 3456 7890' );
-		await page
-			.locator( `//input[@placeholder=${getTranslationFor('"BIC / Swift"')}]` )
-			.fill( 'ABBA' );
+		await page.getByPlaceholder( getTranslationFor( 'Account name' ) ).fill( 'Savings' );
+		await page.getByPlaceholder( getTranslationFor( 'Account number' ) ).fill( '1234' );
+		await page.getByPlaceholder( getTranslationFor( 'Bank name' ) ).fill( 'Test Bank' );
+		await page.getByPlaceholder( getTranslationFor( 'Sort code' ) ).fill( '12' );
+		await page.getByPlaceholder( getTranslationFor( 'IBAN' ) ).fill( '12 3456 7890' );
+		await page.getByPlaceholder( getTranslationFor( 'BIC / Swift' ) ).fill( 'ABBA' );;
 		await page.locator( `text=${getTranslationFor('Save')}` ).click();
 
 		// check that bank transfers were set up
 		await expect(
 			page.locator( 'div.components-snackbar__content' )
-		).toContainText( `${getTranslationFor('Direct bank transfer details added successfully')}` );
+		).toContainText( getTranslationFor('Direct bank transfer details added successfully') );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
 

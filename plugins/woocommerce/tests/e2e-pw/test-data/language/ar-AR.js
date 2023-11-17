@@ -59,6 +59,7 @@ const ar_AR = {
 	'/Canada.*/': /كندا.*/,
 	'Cancelled': 'ملغي',
 	'Cart': 'Cart',
+	'Cart Block is now live': 'Cart Block está ahora visible.',
 	'Cash on delivery': 'الدفع نقدًا عند الاستلام',
 	'Change status to completed': 'تغيير الحالة إلى مكتمل',
 	'Change your header': 'تغيير ترويستي',
@@ -69,6 +70,7 @@ const ar_AR = {
 		'اختيار التحليلات المراد عرضها واسم القسم',
 	'"Choose which analytics to display and the section name"':
 		'"اختيار التحليلات المراد عرضها واسم القسم"',
+	'City': 'المدينة',
 	'Click here to enter your code': 'أنقر هنا لإدخال رمز القسيمة',
 	'Click here to login': 'أنقر هنا لتسجيل الدخول',
 	'Close': 'إغلاق',
@@ -249,6 +251,7 @@ const ar_AR = {
 	'Please select some product options before adding this product to your cart.':
 		'الرجاء تحديد بعض خيارات المنتج قبل إضافة هذا المنتج إلى سلة مشترياتك.',
 	'Post name': 'عنوان المقالة', 
+	'Postal code': 'الرمز البريدي',
 	'Processing':'قيد التنفيذ',
 	'Product': 'المنتج',
 	'Product added.': 'تمت إضافة المنتج.',
