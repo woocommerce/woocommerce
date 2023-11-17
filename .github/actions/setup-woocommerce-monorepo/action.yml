@@ -1,72 +1,60 @@
-name: Setup WooCommerce Monorepo
-description: Handles the installation, building, and caching of the projects within the monorepo.
-permissions: {}
-
+name: 'Setup WooCommerce Monorepo'
+description: 'A composite action bundling together the setup of dependencies and optional installation and building of projects.'
 inputs:
-    install:
-        description: Indicates whether or not the action should install any projects.
-        default: 'true'
-    install-filters:
-        description: The PNPM filter used to decide what projects to install. Supports multiline strings for multiple filters.
-        default: ''
-    build:
-        description: Indicates whether or not the action should build any projects.
-        default: 'true'
-    build-filters:
-        description: The PNPM filter used to decide what projects to build. Supports multiline strings for multiple filters.
-        default: ''
-    php-version:
-        description: The version of PHP that the action should set up.
-        default: '7.4'
-
+  php-version:
+    description: 'The PHP version that should be installed. Use "false" to skip PHP installation.'
+    default: '7.4'
+  install:
+    description: 'Given a boolean or PNPM filter, runs the install command for monorepo project(s).'
+    default: false
+  build:
+    description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
+    default: false
+defaults:
+  run:
+    shell: 'bash'
 runs:
-    using: composite
-    steps:
-        - name: Parse Action Input
-          id: parse-input
-          shell: bash
-          run: |
-              echo "INSTALL_FILTERS=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.install-filters }}')" >> $GITHUB_OUTPUT
-              echo "BUILD_FILTERS=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.build-filters }}')" >> $GITHUB_OUTPUT
-
-        - name: Setup PNPM
-          uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
-          with:
-              version: '8.6.7'
-
-        - name: Setup Node
-          uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
-          with:
-              node-version-file: .nvmrc
-              cache: pnpm
-              registry-url: 'https://registry.npmjs.org'
-
-        - name: Setup PHP
-          uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
-          with:
-              php-version: ${{ inputs.php-version }}
-              coverage: none
-              tools: phpcs, sirbrillig/phpcs-changed:2.11.1
-
-        - name: Cache Composer Dependencies
-          uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
-          with:
-              path: ~/.cache/composer/files
-              key: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
-              restore-keys: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-
-
-        - name: Install Node and PHP Dependencies
-          shell: bash
-          if: ${{ inputs.install == 'true' }}
-          env:
-            PUPPETEER_SKIP_DOWNLOAD: 'true'
-          run: pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
-
-        - name: Cache Build Output
-          if: ${{ inputs.install == 'true' && inputs.build == 'true' }}
-          uses: google/wireit@setup-github-actions-caching/v1
-
-        - name: Build
-          if: ${{ inputs.install == 'true' && inputs.build == 'true' }}
-          shell: bash
-          run: pnpm ${{ steps.parse-input.outputs.BUILD_FILTERS }} build
+  using: 'composite'
+  steps:
+    - name: 'Setup PNPM'
+      uses: 'pnpm/action-setup@d882d12c64e032187b2edb46d3a0d003b7a43598'
+      with:
+        version: '8'
+    - name: 'Setup Node'
+      uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'pnpm'
+    - name: 'Setup PHP'
+      if: ${{ inputs.php-version !== 'false' }}
+      uses: 'shivammathur/setup-php@a36e1e52ff4a1c9e9c9be31551ee4712a6cb6bd0'
+      with:
+        php-version: '${{ inputs.php-version }}'
+        coverage: 'none'
+        tools: 'phpcs, sirbrillig/phpcs-changed:2.11.1'
+    - name: 'Cache Composer Dependencies'
+      if: ${{ inputs.php-version !== 'false' }}
+      uses: 'actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84'
+      with:
+        path: '~/.cache/composer/files'
+        key: '${{ runner.os }}-composer-${{ hashFiles( "**/composer.lock" ) }}'
+        restore-keys: '${{ runner.os }}-composer-'
+    - name: 'Parse Project Filters'
+      id: 'project-filters'
+      run: |
+        echo "install=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.install }}')" >> $GITHUB_OUTPUT
+        echo "build=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.build }}')" >> $GITHUB_OUTPUT
+    - name: 'Install Project Dependencies'
+      # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
+      if: ${{ inputs.install == 'true' || steps.project-filters.outputs.install != '' }}
+      run: 'pnpm install ${{ steps.project-filters.outputs.install }}'
+    # We want to include an option to build projects using this action so that we can make
+    # sure that the build cache is always used when building projects.
+    - name: 'Cache Build Output'
+      # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
+      if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
+      uses: 'google/wireit@f3a3c79c553122e2fe5829eeac7d815326502903'
+    - name: 'Build'
+      # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
+      if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
+      run: 'pnpm ${{ steps.project-filters.outputs.build }} build'
