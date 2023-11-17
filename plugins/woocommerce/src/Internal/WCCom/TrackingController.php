@@ -53,16 +53,12 @@ class TrackingController implements RegisterHooksInterface {
 
 		add_filter(
 			'wc_order_source_attribution_allow_tracking',
-			function() {
-				return $this->is_wccom_tracking_allowed();
-			}
+			[ $this, 'is_wccom_tracking_allowed' ]
 		);
 
 		add_action(
 			'wp_enqueue_scripts',
-			function() {
-				$this->enqueue_scripts();
-			}
+			[ $this, 'enqueue_scripts' ]
 		);
 	}
 
@@ -80,7 +76,7 @@ class TrackingController implements RegisterHooksInterface {
 	 *
 	 * @return bool
 	 */
-	protected function is_wccom_tracking_allowed() {
+	public function is_wccom_tracking_allowed() {
 		return WCCom_Cookie_Terms::instance()->can_track_user( 'analytics' );
 	}
 
@@ -89,7 +85,7 @@ class TrackingController implements RegisterHooksInterface {
 	 *
 	 * @return void
 	 */
-	private function enqueue_scripts() {
+	public function enqueue_scripts() {
 		wp_enqueue_script(
 			'wccom-integration-js',
 			plugins_url( "assets/js/frontend/wccom-integration{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
