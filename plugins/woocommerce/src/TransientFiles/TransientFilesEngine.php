@@ -121,17 +121,22 @@ class TransientFilesEngine {
 		// phpcs:disable WordPress.WP.AlternativeFunctions
 		if ( $render_to_file ) {
 
+			$transient_file_creation_data = array(
+				'created_via'   => 'template',
+				'template_name' => $template_name,
+				'variables'     => $variables,
+			);
+
 			/**
 			 * Filter to alter the metadata that will be stored for a transient file created with the TransientFilesEngine class.
 			 *
 			 * @param array $metadata The metadata that was supplied when creating the transient file.
-			 * @param string $template_name The name of the template being rendered, null if the file is not being created from a template.
-			 * @param array $variables The variables that have been supplied as part of the rendering process, null if the file is not being created from a template.
+			 * @param array $transient_file_creation_data An array with the following keys: 'created_via' = 'template', 'template_name', 'variables.
 			 * @return array The metadata array that will actually be stored for the transient file.
 			 *
 			 * @since 8.4.0
 			 */
-			$metadata = apply_filters( 'woocommerce_transient_file_creation_metadata', $metadata, $template_name, $variables );
+			$metadata = apply_filters( 'woocommerce_transient_file_creation_metadata', $metadata, $transient_file_creation_data );
 
 			if ( ! is_null( $metadata['expiration_date'] ?? null ) ) {
 				$expiration_date = $metadata['expiration_date'];
@@ -174,14 +179,13 @@ class TransientFilesEngine {
 			 * Filer to alter the name of the physical file (NOT including the directory) of a newly created transient file.
 			 *
 			 * @param string $filename Default randomly generated file name.
-			 * @param string $template_name The name of the template being rendered, null if the file is not being created from a template.
-			 * @param array $variables The variables that have been supplied as part of the rendering process, null if the file is not being created from a template.
+			 * @param array $transient_file_creation_data An array with the following keys: 'created_via' = 'template', 'template_name', 'variables.
 			 * @param array $metadata The metadata that will be stored for the transient file (not including expiration date and 'is_public').
 			 * @return string The actual name that will be given to the file.
 			 *
 			 * @since 8.4.0
 			 */
-			$filename = apply_filters( 'woocommerce_transient_file_creation_filename', $filename, $template_name, $variables, $metadata );
+			$filename = apply_filters( 'woocommerce_transient_file_creation_filename', $filename, $transient_file_creation_data, $metadata );
 
 			$transient_files_directory  = $this->get_transient_files_directory();
 			$transient_files_directory .= '/' . substr( $expiration_date, 0, 10 );

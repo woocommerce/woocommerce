@@ -378,8 +378,7 @@ Final foo = foo 1, bar = TheBar';
 	public function test_rendered_template_metadata_can_be_changed_via_hook() {
 		global $wpdb;
 
-		$actual_template_name      = null;
-		$actual_template_variables = null;
+		$actual_creation_data = null;
 
 		$this->register_legacy_proxy_function_mocks(
 			array( 'wp_upload_dir' => fn() => array( 'basedir' => self::$base_transient_files_dir ) )
@@ -387,15 +386,14 @@ Final foo = foo 1, bar = TheBar';
 
 		add_filter(
 			'woocommerce_transient_file_creation_metadata',
-			function( $metadata, $template_name, $variables ) use ( &$actual_template_name, &$actual_template_variables ) {
-				$actual_template_name      = $template_name;
-				$actual_template_variables = $variables;
+			function( $metadata, $creation_data ) use ( &$actual_creation_data ) {
+				$actual_creation_data = $creation_data;
 
 				$metadata['foo'] = 'bar';
 				return $metadata;
 			},
 			10,
-			3
+			2
 		);
 
 		try {
@@ -419,14 +417,16 @@ Final foo = foo 1, bar = TheBar';
 			ARRAY_A
 		);
 
-		$this->assertEquals( 'simple', $actual_template_name );
-		$this->assertEquals(
+		$expected_creation_data =
 			array(
-				'foo' => 'TheFoo',
-				'bar' => 'TheBar',
-			),
-			$actual_template_variables
-		);
+				'created_via'   => 'template',
+				'template_name' => 'simple',
+				'variables'     => array(
+					'foo' => 'TheFoo',
+					'bar' => 'TheBar',
+				),
+			);
+		$this->assertEquals( $expected_creation_data, $actual_creation_data );
 
 		$this->assertEquals( 'foo', $db_row['meta_key'] );
 		$this->assertEquals( 'bar', $db_row['meta_value'] );
@@ -436,9 +436,8 @@ Final foo = foo 1, bar = TheBar';
 	 * @testdox The name of the file created by create_file_by_rendering_template can be modified via the woocommerce_transient_file_creation_filename hook.
 	 */
 	public function test_rendered_template_filename_can_be_changed_via_hook() {
-		$actual_template_name      = null;
-		$actual_template_variables = null;
-		$actual_template_metadata  = null;
+		$actual_creation_data     = null;
+		$actual_template_metadata = null;
 
 		$this->register_legacy_proxy_function_mocks(
 			array( 'wp_upload_dir' => fn() => array( 'basedir' => self::$base_transient_files_dir ) )
@@ -446,15 +445,15 @@ Final foo = foo 1, bar = TheBar';
 
 		add_filter(
 			'woocommerce_transient_file_creation_filename',
-			function( $filename, $template_name, $variables, $metadata ) use ( &$actual_template_name, &$actual_template_variables, &$actual_template_metadata ) {
-				$actual_template_name      = $template_name;
-				$actual_template_variables = $variables;
-				$actual_template_metadata  = $metadata;
+			function( $filename, $creation_data, $metadata ) use ( &$actual_template_name, &$actual_creation_data, &$actual_template_metadata ) {
+				$actual_creation_data     = $filename;
+				$actual_creation_data     = $creation_data;
+				$actual_template_metadata = $metadata;
 
 				return 'FOOBAR_FILE';
 			},
 			10,
-			4
+			3
 		);
 
 		try {
@@ -476,14 +475,17 @@ Final foo = foo 1, bar = TheBar';
 		$this->assertEquals( 'FOOBAR_FILE', $file_name );
 		$this->assertTrue( is_file( self::$transient_files_dir . '/2034-01-10/FOOBAR_FILE' ) );
 
-		$this->assertEquals( 'simple', $actual_template_name );
-		$this->assertEquals(
+		$expected_creation_data =
 			array(
-				'foo' => 'TheFoo',
-				'bar' => 'TheBar',
-			),
-			$actual_template_variables
-		);
+				'created_via'   => 'template',
+				'template_name' => 'simple',
+				'variables'     => array(
+					'foo' => 'TheFoo',
+					'bar' => 'TheBar',
+				),
+			);
+		$this->assertEquals( $expected_creation_data, $actual_creation_data );
+
 		$this->assertEquals( array( 'fizz' => 'buzz' ), $actual_template_metadata );
 	}
 
