@@ -115,6 +115,7 @@ class TransientFilesRestController {
 					'args'     => $this->get_args_for_get_file_contents(),
 					// No permission callback, the get_file_contents method handles authentication by itself
 					// because it's different for the REST API endpoint and for the unauthenticated endpoint.
+					// Also no schema, since this endpoint doesn't (necessarily) return JSON.
 				),
 			)
 		);
@@ -128,6 +129,7 @@ class TransientFilesRestController {
 					'callback'            => fn( $request ) => $this->run( 'delete_file', $request ),
 					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'delete_transient_file' ),
 					'args'                => $this->get_args_for_delete_file(),
+					'schema'              => $this->get_schema_for_delete_file(),
 				),
 			)
 		);
@@ -141,6 +143,7 @@ class TransientFilesRestController {
 					'callback'            => fn( $request ) => $this->run( 'create_file_by_rendering_template', $request ),
 					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'create_transient_file' ),
 					'args'                => $this->get_args_for_create_file_by_rendering_template(),
+					'schema'              => $this->get_schema_for_create_file(),
 				),
 			)
 		);
@@ -154,6 +157,7 @@ class TransientFilesRestController {
 					'callback'            => fn( $request ) => $this->run( 'get_file_info', $request ),
 					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_transient_file' ),
 					'args'                => $this->get_args_for_get_file_info(),
+					'schema'              => $this->get_schema_for_get_file_info(),
 				),
 			)
 		);
@@ -551,6 +555,109 @@ class TransientFilesRestController {
 				'type'        => 'object',
 				'description' => __( 'Optional metadata object.', 'woocommerce' ),
 			),
+		);
+	}
+
+	/**
+	 * Get the schema for the render file endpoint.
+	 *
+	 * @return array
+	 */
+	private function get_schema_for_create_file(): array {
+		$schema               = $this->get_base_schema();
+		$schema['properties'] = array(
+			'id'                  => array(
+				'description' => __( 'Unique identifier of the file.', 'woocommerce' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'file_name'           => array(
+				'description' => __( 'Unique name of the file.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'date_created_gmt'    => array(
+				'description' => __( 'The creation date of the file, in UTC.', 'woocommerce' ),
+				'type'        => 'date-time',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'expiration_date_gmt' => array(
+				'description' => __( 'The expiration date of the file, in UTC.', 'woocommerce' ),
+				'type'        => 'date-time',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'is_public'           => array(
+				'description' => __( 'Whether the file can be reached publicly via the authenticated URL or not.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'has_expired'         => array(
+				'description' => __( 'Whether the file is past its expiration date or not.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'public_url'          => array(
+				'description' => __( "The URL of the unauthenticated endpoint to get the file contents. This field is present only when 'is_public' is returned as 'true'.", 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+		);
+		return $schema;
+	}
+
+	/**
+	 * Get the schema for the get file information endpoint.
+	 *
+	 * @return array
+	 */
+	private function get_schema_for_get_file_info(): array {
+		$schema                           = $this->get_schema_for_create_file();
+		$schema['properties']['metadata'] = array(
+			array(
+				'description' => __( "File metadata. This field is present only when the 'include_metadata' parameter is sent as 'true'. The fields of the object are the meta keys.", 'woocommerce' ),
+				'type'        => 'object',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+		);
+		return $schema;
+	}
+
+	/**
+	 * Get the schema for the delete file endpoint.
+	 *
+	 * @return array
+	 */
+	private function get_schema_for_delete_file(): array {
+		$schema               = $this->get_base_schema();
+		$schema['properties'] = array(
+			'deleted' => array(
+				'description' => __( "Whether the file has been deleted or not (because it didn't exist).", 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => array( 'edit' ),
+				'readonly'    => true,
+			),
+		);
+		return $schema;
+	}
+
+	/**
+	 * Get the base schema for the REST API endpoints.
+	 *
+	 * @return array
+	 */
+	private function get_base_schema(): array {
+		return array(
+			'$schema' => 'http://json-schema.org/draft-04/schema#',
+			'title'   => 'transient files',
+			'type'    => 'object',
 		);
 	}
 }
