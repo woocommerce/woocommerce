@@ -23,6 +23,7 @@
 	"scripts": {
 		"build": "pnpm -r build",
 		"test": "pnpm -r test",
+		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
 		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
 		"preinstall": "npx only-allow pnpm",
