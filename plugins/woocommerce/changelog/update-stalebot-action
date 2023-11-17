@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+use latest commit of stalebot action, tweak configuration accordingly

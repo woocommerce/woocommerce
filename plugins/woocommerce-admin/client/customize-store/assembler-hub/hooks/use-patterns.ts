@@ -6,7 +6,7 @@
 import { useSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
-import { useMemo } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 import { BlockInstance, parse } from '@wordpress/blocks';
 /**
  * Internal dependencies
@@ -51,34 +51,44 @@ export const usePatterns = () => {
 
 export const usePatternsByCategory = ( category: string ) => {
 	const { blockPatterns, isLoading } = usePatterns();
-	const { attributes } = useLogoAttributes();
+	const { attributes, isAttributesLoading } = useLogoAttributes();
+	const [ currentLogoWidth, setCurrentLogoWidth ] = useState(
+		attributes.width
+	);
 
-	const patternsByCategory: PatternWithBlocks[] = useMemo( () => {
-		return ( blockPatterns || [] )
-			.filter( ( pattern: Pattern ) =>
-				pattern.categories?.includes( category )
-			)
-			.map( ( pattern: Pattern ) => {
-				const content = setLogoWidth(
-					pattern.content,
-					attributes.width
-				);
+	useEffect( () => {
+		if ( isAttributesLoading ) {
+			return;
+		}
 
-				return {
-					...pattern,
+		setCurrentLogoWidth( attributes.width );
+	}, [ isAttributesLoading, attributes.width, currentLogoWidth ] );
+
+	const patternsByCategory = useMemo( () => {
+		return ( blockPatterns || [] ).filter( ( pattern: Pattern ) =>
+			pattern.categories?.includes( category )
+		);
+	}, [ blockPatterns, category ] );
+
+	const patternsWithBlocks = useMemo( () => {
+		return patternsByCategory.map( ( pattern: Pattern ) => {
+			const content = setLogoWidth( pattern.content, currentLogoWidth );
+
+			return {
+				...pattern,
+				content,
+				// Set the logo width to the current logo width so that user changes are not lost.
+
+				blocks: parse(
 					content,
-					// Set the logo width to the current logo width so that user changes are not lost.
+					// @ts-ignore - Passing options is valid, but not in the type.
+					{
+						__unstableSkipMigrationLogs: true,
+					}
+				),
+			};
+		} );
+	}, [ patternsByCategory, currentLogoWidth ] );
 
-					blocks: parse(
-						content,
-						// @ts-ignore - Passing options is valid, but not in the type.
-						{
-							__unstableSkipMigrationLogs: true,
-						}
-					),
-				};
-			} );
-	}, [ blockPatterns, category, attributes ] );
-
-	return { isLoading, patterns: patternsByCategory };
+	return { isLoading, patterns: patternsWithBlocks };
 };

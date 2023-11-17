@@ -108,7 +108,11 @@ export function PageArrowsWithPicker( {
 				min={ 1 }
 				max={ pageCount }
 			/>
-			{ sprintf( __( 'of %d', 'woocommerce' ), pageCount ) }
+			{ sprintf(
+				/* translators: %d: total number of pages */
+				__( 'of %d', 'woocommerce' ),
+				pageCount
+			) }
 			<Button
 				className={ nextLinkClass }
 				icon={ chevronRight }
