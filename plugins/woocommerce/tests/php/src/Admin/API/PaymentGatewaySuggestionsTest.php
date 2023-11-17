@@ -52,14 +52,14 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 		// update the base country to the U.S for testing purposes.
 		update_option( 'woocommerce_default_country', 'US:CA' );
 
-		$response_mock_ref    = function( $preempt, $parsed_args, $url ) {
+		$response_mock_ref = function( $preempt, $parsed_args, $url ) {
 			if ( str_contains( $url, 'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/suggestions.json' ) ) {
 				return array(
 					'success' => true,
 					'body'    => wp_json_encode(
 						array(
 							array(
-								'id' => wc_get_base_location()['country']
+								'id' => wc_get_base_location()['country'],
 							),
 						)
 					),
@@ -94,7 +94,7 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 		// Clean up.
 		remove_filter( 'pre_http_request', $response_mock_ref );
 
-		// restore the base country
+		// restore the base country.
 		update_option( 'woocommerce_default_country', $existing_base_country['country'] . ':' . $existing_base_country['state'] );
 	}
 }
