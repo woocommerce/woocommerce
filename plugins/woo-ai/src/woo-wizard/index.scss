@@ -1,0 +1,35 @@
+$woocommerce-purple: #9B5C8F;
+$toned-down-purple: mix(white, $woocommerce-purple, 50%); // 50% white
+
+.woo-wizard-chat-modal {
+    .woo-chat-history {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: white;
+  
+      .message {
+        max-width: 80%; // Limit the width of each message
+        padding: 8px 12px;
+        border-radius: 15px;
+        margin-bottom: 8px;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1); // Subtle shadow for depth
+  
+        &.user {
+          background-color: $toned-down-purple;
+          color: white;
+          align-self: flex-end; // Align to the right
+          border-bottom-right-radius: 2px; // Adjust for speech bubble effect
+        }
+  
+        &.assistant {
+          background-color: #f4f4f4; // Light grey or another light color
+          color: black;
+          align-self: flex-start; // Align to the left
+          border-bottom-left-radius: 2px; // Adjust for speech bubble effect
+        }
+      }
+    }
+  }

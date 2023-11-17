@@ -6,3 +6,4 @@ declare const wp: any;
 declare module '@wordpress/data';
 declare module '@wordpress/preferences';
 declare module '@wordpress/notices';
+declare module '@wordpress/commands';

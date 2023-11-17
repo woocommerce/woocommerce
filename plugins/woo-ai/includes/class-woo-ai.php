@@ -78,6 +78,7 @@ class Woo_AI {
 		if ( 'post' === $current_screen->base && 'product' === $current_screen->post_type ) {
 			include_once dirname( __FILE__ ) . '/class-woo-ai-product-text-generation.php';
 		}
+		include_once dirname( __FILE__ ) . '/class-woo-ai-woo-wizard.php';
 	}
 
 	/**
