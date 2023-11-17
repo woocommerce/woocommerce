@@ -146,7 +146,7 @@ jobs:
             - name: Setup local test environment
               uses: ./.github/actions/tests/setup-local-test-environment
               with:
-                  test-type: k6
+                  test-type: e2e
 
             - name: Install k6
               run: |
