@@ -21,7 +21,8 @@ runs:
       uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
       with:
         node-version-file: '.nvmrc'
-        cache: 'pnpm'
+        # We only want to use the cache if something is being installed.
+        cache: ${{ ( inputs.install == 'true' || steps.project-filters.outputs.install != '' ) && 'pnpm' || '' }}
     - name: 'Setup PHP'
       if: ${{ inputs.php-version != 'false' }}
       uses: 'shivammathur/setup-php@a36e1e52ff4a1c9e9c9be31551ee4712a6cb6bd0'
