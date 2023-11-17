@@ -13,12 +13,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: 'Parse Project Filters'
-      id: 'project-filters'
-      shell: 'bash'
-      run: |
-        echo "install=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.install }}')" >> $GITHUB_OUTPUT
-        echo "build=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.build }}')" >> $GITHUB_OUTPUT
     - name: 'Setup PNPM'
       uses: 'pnpm/action-setup@d882d12c64e032187b2edb46d3a0d003b7a43598'
       with:
@@ -28,10 +22,7 @@ runs:
       with:
         node-version-file: '.nvmrc'
         # We only want to use the cache if something is being installed.
-        cache: ${{ ( inputs.install == 'true' || steps.project-filters.outputs.install != '' ) && 'pnpm' || '' }}
-    - name: 'Debug'
-      shell: 'bash'
-      run: "echo '${{ ( inputs.install == 'true' || steps.project-filters.outputs.install != '' ) && 'pnpm' || '' }}'"
+        cache: ${{ inputs.install != 'false' && 'pnpm' || '' }}
     - name: 'Setup PHP'
       if: ${{ inputs.php-version != 'false' }}
       uses: 'shivammathur/setup-php@a36e1e52ff4a1c9e9c9be31551ee4712a6cb6bd0'
@@ -46,6 +37,12 @@ runs:
         path: '~/.cache/composer/files'
         key: "${{ runner.os }}-composer-${{ hashFiles( '**/composer.lock' ) }}"
         restore-keys: '${{ runner.os }}-composer-'
+    - name: 'Parse Project Filters'
+      id: 'project-filters'
+      shell: 'bash'
+      run: |
+        echo "install=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.install }}')" >> $GITHUB_OUTPUT
+        echo "build=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.build }}')" >> $GITHUB_OUTPUT
     - name: 'Install Project Dependencies'
       # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
       if: ${{ inputs.install == 'true' || steps.project-filters.outputs.install != '' }}
