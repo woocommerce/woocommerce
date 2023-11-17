@@ -12,7 +12,7 @@ import {
 	createContext,
 	cloneElement,
 } from '@wordpress/element';
-import { DragEvent, DragEventHandler, KeyboardEvent } from 'react';
+import { DragEvent, KeyboardEvent } from 'react';
 import { speak } from '@wordpress/a11y';
 import { throttle } from 'lodash';
 import { v4 } from 'uuid';
@@ -30,7 +30,6 @@ import {
 	isLastDroppable,
 	moveIndex,
 } from './utils';
-import { SortableItem } from './sortable-item';
 import { SortableChild } from './types';
 
 export type SortableProps = React.DetailedHTMLProps<
@@ -240,6 +239,15 @@ export const Sortable = ( {
 			>
 				{ items.map( ( child, index ) => {
 					const isDragging = index === dragIndex;
+
+					if (
+						child.props.className &&
+						child.props.className.indexOf( 'non-sortable-item' ) !==
+							-1
+					) {
+						return child;
+					}
+
 					const itemClasses = classnames( child.props.className, {
 						'is-dragging-over-after': isDraggingOverAfter(
 							index,
@@ -258,14 +266,6 @@ export const Sortable = ( {
 						),
 					} );
 
-					if (
-						child.props.className &&
-						child.props.className.indexOf( 'non-sortable-item' ) !==
-							-1
-					) {
-						return child;
-					}
-
 					return cloneElement( child, {
 						key: child.key || index,
 						className: itemClasses,
@@ -283,29 +283,6 @@ export const Sortable = ( {
 						onKeyDown: ( event: KeyboardEvent< HTMLDivElement > ) =>
 							handleKeyDown( event ),
 					} );
-
-					return (
-						<SortableItem
-							{ ...child.props }
-							key={ child.key || index }
-							className={ itemClasses }
-							id={ `${ index }-${ v4() }` }
-							index={ index }
-							isDragging={ isDragging }
-							isSelected={ selectedIndex === index }
-							onDragEnd={ ( event ) => handleDragEnd( event ) }
-							onDragStart={ ( event ) =>
-								handleDragStart( event, index )
-							}
-							onDragOver={ ( event ) => {
-								event.preventDefault();
-								throttledHandleDragOver( event, index );
-							} }
-							onKeyDown={ ( event ) => handleKeyDown( event ) }
-						>
-							{ child.props.children }
-						</SortableItem>
-					);
 				} ) }
 			</div>
 		</SortableContext.Provider>

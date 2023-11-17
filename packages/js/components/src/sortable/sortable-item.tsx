@@ -2,27 +2,14 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import React, {
-	DragEvent,
-	DragEventHandler,
-	KeyboardEvent,
-	ReactNode,
-	isValidElement,
-	useEffect,
-} from 'react';
+import React, { DragEvent, useEffect } from 'react';
 import classnames from 'classnames';
-import {
-	cloneElement,
-	createElement,
-	useRef,
-	useContext,
-} from '@wordpress/element';
+import { createElement, useRef, useContext } from '@wordpress/element';
 import { Draggable } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { SortableChild } from './types';
 import { SortableContext } from './sortable';
 
 export type SortableItemProps = React.DetailedHTMLProps<
