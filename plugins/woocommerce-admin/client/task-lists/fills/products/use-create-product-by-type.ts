@@ -16,7 +16,7 @@ import { createNoticesFromResponse } from '../../../lib/notices';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 const EXPERIMENT_NAME =
-	'woocommerce_product_creation_experience_add_variations_202310_v2';
+	'woocommerce_product_creation_experience_add_digital_202311_v1';
 
 export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
@@ -34,7 +34,11 @@ export const useCreateProductByType = () => {
 
 		setIsRequesting( true );
 
-		if ( type === 'physical' || type === 'variable' ) {
+		if (
+			type === 'physical' ||
+			type === 'variable' ||
+			type === 'digital'
+		) {
 			if ( isNewExperienceEnabled ) {
 				navigateTo( { url: getNewPath( {}, '/add-product', {} ) } );
 				return;
