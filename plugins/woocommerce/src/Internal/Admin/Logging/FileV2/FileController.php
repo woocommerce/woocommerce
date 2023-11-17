@@ -46,7 +46,14 @@ class FileController {
 	 *
 	 * @const int
 	 */
-	public const SEARCH_MAX_RESULTS = 500;
+	public const SEARCH_MAX_RESULTS = 200;
+
+	/**
+	 * The cache group name to use for caching operations.
+	 *
+	 * @const string
+	 */
+	private const CACHE_GROUP = 'log-files';
 
 	/**
 	 * A cache key for storing and retrieving the results of the last logs search.
@@ -331,6 +338,10 @@ class FileController {
 			}
 		}
 
+		if ( $deleted > 0 ) {
+			$this->invalidate_cache();
+		}
+
 		return $deleted;
 	}
 
@@ -362,7 +373,7 @@ class FileController {
 			)
 		);
 
-		$cache_key = WC_Cache_Helper::get_prefixed_key( self::SEARCH_CACHE_KEY, 'logs' );
+		$cache_key = WC_Cache_Helper::get_prefixed_key( self::SEARCH_CACHE_KEY, self::CACHE_GROUP );
 		$query     = wp_json_encode( array( $search, $args, $file_args ) );
 		$cache     = wp_cache_get( $cache_key );
 		$is_cached = isset( $cache['query'], $cache['results'] ) && $query === $cache['query'];
@@ -375,6 +386,9 @@ class FileController {
 				return $files;
 			}
 
+			// Max string size * SEARCH_MAX_RESULTS = ~1MB largest possible cache entry.
+			$max_string_size = 5 * KB_IN_BYTES;
+
 			$matched_lines = array();
 
 			foreach ( $files as $file ) {
@@ -382,7 +396,7 @@ class FileController {
 				$line_number = 1;
 
 				while ( ! feof( $stream ) ) {
-					$line = fgets( $stream, 5 * KB_IN_BYTES );
+					$line = fgets( $stream, $max_string_size );
 					if ( ! is_string( $line ) ) {
 						continue;
 					}
@@ -412,7 +426,7 @@ class FileController {
 				'query'   => $query,
 				'results' => $matched_lines,
 			);
-			wp_cache_set( $cache_key, $to_cache, 'logs', DAY_IN_SECONDS );
+			wp_cache_set( $cache_key, $to_cache, self::CACHE_GROUP, DAY_IN_SECONDS );
 		}
 
 		if ( true === $count_only ) {
@@ -420,6 +434,15 @@ class FileController {
 		}
 
 		return array_slice( $matched_lines, $args['offset'], $args['per_page'] );
+	}
+
+	/**
+	 * Invalidate the cache group related to log file data.
+	 *
+	 * @return bool True on successfully invalidating the cache.
+	 */
+	public function invalidate_cache(): bool {
+		return WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
 	}
 
 	/**
