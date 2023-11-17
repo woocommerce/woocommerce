@@ -283,6 +283,14 @@ const TreeSelectControl = ( {
 			},
 		};
 
+		/**
+		 * Decompose accented characters into their composable parts, then remove accents.
+		 * See https://www.unicode.org/reports/tr15/ and https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize.
+		 */
+		const removeAccents = ( str ) => {
+			return str.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' );
+		};
+
 		const reduceOptions = ( acc, { children = [], ...option } ) => {
 			if ( children.length ) {
 				option.children = children.reduce( reduceOptions, [] );
@@ -291,7 +299,11 @@ const TreeSelectControl = ( {
 					return acc;
 				}
 			} else if ( isSearching ) {
-				const match = option.label.toLowerCase().indexOf( filter );
+				const labelWithAccentsRemoved = removeAccents( option.label );
+				const filterWithAccentsRemoved = removeAccents( filter );
+				const match = labelWithAccentsRemoved
+					.toLowerCase()
+					.indexOf( filterWithAccentsRemoved );
 				if ( match === -1 ) {
 					return acc;
 				}
