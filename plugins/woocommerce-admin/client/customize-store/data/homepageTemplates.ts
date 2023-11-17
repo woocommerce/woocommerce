@@ -36,9 +36,9 @@ export const HOMEPAGE_TEMPLATES = {
 			'woocommerce-blocks/header-essential',
 
 			// Body
-			'woocommerce-blocks/hero-product-split',
-			'woocommerce-blocks/product-collection-4-columns',
 			'woocommerce-blocks/hero-product-chessboard',
+			'woocommerce-blocks/product-collection-4-columns',
+			'woocommerce-blocks/hero-product-split',
 			'woocommerce-blocks/product-collection-5-columns',
 			'woocommerce-blocks/testimonials-3-columns',
 
@@ -60,9 +60,9 @@ export const HOMEPAGE_TEMPLATES = {
 			'woocommerce-blocks/header-centered-menu',
 
 			// Body
-			'woocommerce-blocks/hero-product-split',
 			'woocommerce-blocks/product-collection-featured-products-5-columns',
 			'woocommerce-blocks/featured-category-triple',
+			'woocommerce-blocks/hero-product-split',
 			'woocommerce-blocks/product-query-product-gallery',
 
 			// Footer
