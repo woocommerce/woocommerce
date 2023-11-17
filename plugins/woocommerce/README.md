@@ -16,7 +16,7 @@ Please make sure you follow the [repository's getting started guide](../../READM
 
 ```bash
 # Make sure that WooCommerce Core and all of its dependencies are built
-pnpm run --filter=@woocommerce/plugin-woocommerce build 
+pnpm --filter=@woocommerce/plugin-woocommerce build 
 # Make sure you're in the WooCommerce Core directory
 cd plugins/woocommerce
 # Start the development environment
@@ -36,9 +36,9 @@ This directory contains the CSS and jQuery code for WooCommerce shortcodes.
 
 ```bash
 # Build the assets.
-pnpm run --filter=@woocommerce/shortcode-assets build 
+pnpm --filter=@woocommerce/shortcode-assets build 
 # Lint the assets.
-pnpm run --filter=@woocommerce/shortcode-assets lint 
+pnpm --filter=@woocommerce/shortcode-assets lint 
 ```
 
 ### `plugins/woocommerce-admin`
@@ -47,11 +47,11 @@ This directory contains the React-based admin interface.
 
 ```bash
 # Build the React-based admin client.
-pnpm run --filter=@woocommerce/admin-library build 
+pnpm --filter=@woocommerce/admin-library build 
 # Lint the React-based admin client.
-pnpm run --filter=@woocommerce/admin-library lint 
+pnpm --filter=@woocommerce/admin-library lint 
 # Test the React-based admin client.
-pnpm run --filter=@woocommerce/admin-library test 
+pnpm --filter=@woocommerce/admin-library test 
 ```
 
 #### Helper Scripts

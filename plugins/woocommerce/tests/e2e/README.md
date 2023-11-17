@@ -120,11 +120,11 @@ Run the following in a terminal/command line window
 
 - `pnpm install`
 
-- `pnpm run build --filter=@woocommerce/plugin-woocommerce`
+- `pnpm --filter='@woocommerce/plugin-woocommerce' build`
 
 - `npm install jest --global` (this only needs to be done once)
 
-- `pnpm docker:up --filter=@woocommerce/plugin-woocommerce` (this will build the test site using Docker)
+- `pnpm --filter='@woocommerce/plugin-woocommerce' docker:up` (this will build the test site using Docker)
 
 - Use `docker ps` to confirm that the Docker containers are running. You should see a log similar to one below indicating that everything had been built as expected:
 
