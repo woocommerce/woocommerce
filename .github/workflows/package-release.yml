@@ -24,6 +24,9 @@ jobs:
             
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                install: true
+                build: './tools/package-release'
 
             - name: Clean working directory
               run: git checkout pnpm-lock.yaml # in case for whatever reason the lockfile is out of sync, there won't be interference with npm publish.

@@ -54,8 +54,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install-filters: woocommerce
-                  build: false
+                install: '@woocommerce/plugin-woocommerce...'
 
             - name: Run E2E tests
               id: run-e2e-composite-action
@@ -130,8 +129,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install-filters: woocommerce
-                  build: false
+                install: '@woocommerce/plugin-woocommerce...'
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -204,8 +202,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install-filters: woocommerce
-                  build: false
+                install: '@woocommerce/plugin-woocommerce...'
 
             - name: Run E2E tests
               id: run-e2e-composite-action
@@ -320,7 +317,8 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  build-filters: woocommerce
+                install: '@woocommerce/plugin-woocommerce...'
+                build: '@woocommerce/plugin-woocommerce'
 
             - name: Launch WP Env
               working-directory: plugins/woocommerce
@@ -462,7 +460,8 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  build-filters: woocommerce
+                install: '@woocommerce/plugin-woocommerce...'
+                build: '@woocommerce/plugin-woocommerce'
 
             - name: Launch WP Env
               working-directory: plugins/woocommerce
@@ -626,7 +625,8 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  build-filters: woocommerce
+                install: '@woocommerce/plugin-woocommerce...'
+                build: '@woocommerce/plugin-woocommerce'
 
             - name: Launch WP Env
               working-directory: plugins/woocommerce
