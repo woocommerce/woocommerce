@@ -23,6 +23,9 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                install: true
+                build: './tools/package-release'
 
             - name: Execute script
               run: ./tools/package-release/bin/dev prepare ${{ github.event.inputs.packages }}
