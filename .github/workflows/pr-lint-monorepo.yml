@@ -24,8 +24,6 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  build: false
 
             - name: Check change files are touched for touched projects
               env:
