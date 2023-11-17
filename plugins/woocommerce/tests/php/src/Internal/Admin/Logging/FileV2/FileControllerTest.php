@@ -253,7 +253,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 			'orderby' => 'source',
 		);
 
-		$results   = $this->sut->search_within_files( 'foo', array(), $file_args );
+		$results = $this->sut->search_within_files( 'foo', array(), $file_args );
 		$this->assertCount( 3, $results );
 
 		$match = array_shift( $results );
