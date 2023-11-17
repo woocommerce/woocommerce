@@ -62,18 +62,18 @@ jobs:
           install: '${{ matrix.projectName }}...'
           build: '${{ matrix.projectName }}'
       - name: 'Lint'
-        if: ${{ !cancelled() && matrix.lintCommand && steps.setup-monorepo.conclusion == 'success' }}
+        if: ${{ ! cancelled() && matrix.lintCommand && steps.setup-monorepo.conclusion == 'success' }}
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.lintCommand }}'
       - name: 'Prepare Test Environment'
         id: 'prepare-test-environment'
-        if: ${{ !cancelled() && matrix.testEnvCommand && steps.setup-monorepo.conclusion == 'success' }}
+        if: ${{ ! cancelled() && matrix.testEnvCommand && steps.setup-monorepo.conclusion == 'success' }}
         env: ${{ matrix.testEnvVars }}
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnvCommand }}'
       - name: 'Test - JS'
-        if: ${{ !cancelled() && matrix.jsTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' ) }}
+        if: ${{ ! cancelled() && matrix.jsTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' ) }}
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.jsTestCommand }}'
       - name: 'Test - PHP'
-        if: ${{ !cancelled() && matrix.phpTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' ) }}
+        if: ${{ ! cancelled() && matrix.phpTestCommand && steps.setup-monorepo.conclusion == 'success' && ( ! matrix.testEnvCommand || steps.prepare-test-environment.conclusion == 'success' ) }}
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.phpTestCommand }}'
   project-task-matrix-evaluation:
     # In order to add a required status check we need a consistent job that we can grab onto.

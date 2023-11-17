@@ -26,14 +26,14 @@ runs:
         node-version-file: '.nvmrc'
         cache: 'pnpm'
     - name: 'Setup PHP'
-      if: ${{ inputs.php-version !== 'false' }}
+      if: ${{ inputs.php-version != 'false' }}
       uses: 'shivammathur/setup-php@a36e1e52ff4a1c9e9c9be31551ee4712a6cb6bd0'
       with:
         php-version: '${{ inputs.php-version }}'
         coverage: 'none'
         tools: 'phpcs, sirbrillig/phpcs-changed:2.11.1'
     - name: 'Cache Composer Dependencies'
-      if: ${{ inputs.php-version !== 'false' }}
+      if: ${{ inputs.php-version != 'false' }}
       uses: 'actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84'
       with:
         path: '~/.cache/composer/files'
