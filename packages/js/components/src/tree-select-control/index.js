@@ -331,6 +331,11 @@ const TreeSelectControl = ( {
 
 		if ( ENTER === event.key ) {
 			setTreeVisible( true );
+
+			if ( event.target.type === 'checkbox' ) {
+				event.target.click();
+			}
+
 			event.preventDefault();
 		}
 
