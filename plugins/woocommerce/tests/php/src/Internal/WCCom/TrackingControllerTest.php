@@ -1,4 +1,7 @@
 <?php
+/**
+ * Class TrackingControllerTest
+ */
 
 namespace Automattic\WooCommerce\Tests\Internal\WCCom;
 
@@ -6,6 +9,11 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\WCCom\TrackingController;
 use WP_UnitTestCase;
 
+/**
+ * Class TrackingControllerTest
+ *
+ * Contains tests for the TrackingController class.
+ */
 class TrackingControllerTest extends WP_UnitTestCase {
 
 	/**
@@ -15,6 +23,11 @@ class TrackingControllerTest extends WP_UnitTestCase {
 	 */
 	private $sut;
 
+	/**
+	 * Set up the test fixture.
+	 *
+	 * @return void
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new TrackingController();
@@ -42,13 +55,13 @@ class TrackingControllerTest extends WP_UnitTestCase {
 
 		$filter = has_filter(
 			'wc_order_source_attribution_allow_tracking',
-			[ $this->sut, 'is_wccom_tracking_allowed' ]
+			array( $this->sut, 'is_wccom_tracking_allowed' )
 		);
 		$this->assertEquals( 10, $filter );
 
 		$action = has_action(
 			'wp_enqueue_scripts',
-			[ $this->sut, 'enqueue_scripts' ]
+			array( $this->sut, 'enqueue_scripts' )
 		);
 		$this->assertEquals( 10, $action );
 	}
@@ -73,13 +86,13 @@ class TrackingControllerTest extends WP_UnitTestCase {
 
 		$filter = has_filter(
 			'wc_order_source_attribution_allow_tracking',
-			[ $this->sut, 'is_wccom_tracking_allowed' ]
+			array( $this->sut, 'is_wccom_tracking_allowed' )
 		);
 		$this->assertFalse( $filter );
 
 		$action = has_action(
 			'wp_enqueue_scripts',
-			[ $this->sut, 'enqueue_scripts' ]
+			array( $this->sut, 'enqueue_scripts' )
 		);
 		$this->assertFalse( $action );
 	}
