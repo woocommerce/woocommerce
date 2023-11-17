@@ -2639,3 +2639,13 @@ LIMIT 250
 
 	return ! empty( $has_pending );
 }
+
+/**
+ * Create the directory to store transient files created with the TransientFilesEngine class.
+ */
+function wc_update_840_create_transient_files_directory() {
+	$transient_files_directory = wp_upload_dir()['basedir'] . '/woocommerce_transient_files';
+	if ( ! is_dir( $transient_files_directory ) ) {
+		wp_mkdir_p( $transient_files_directory );
+	}
+}
