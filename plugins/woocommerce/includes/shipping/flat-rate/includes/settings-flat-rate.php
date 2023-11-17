@@ -48,8 +48,8 @@ if ( ! empty( $shipping_classes ) ) {
 		'title'       => __( 'Shipping class costs', 'woocommerce' ),
 		'type'        => 'title',
 		'default'     => '',
-		/* translators: %s: URL for link, %s: URL for link. */
-		'description' => sprintf( __( 'These costs can optionally be added based on the <a target="_blank" href="%s">product shipping class</a>. Learn more about <a target="_blank" href="%s">setting shipping class costs</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ), 'https://woo.com/document/flat-rate-shipping/#shipping-classes' ),
+		/* translators: %s: URL for link */
+		'description' => sprintf( __( 'These costs can optionally be added based on the <a target="_blank" href="%s">product shipping class</a>. Learn more about <a target="_blank" href="https://woo.com/document/flat-rate-shipping/#shipping-classes">setting shipping class costs</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ),
 	);
 	foreach ( $shipping_classes as $shipping_class ) {
 		if ( ! isset( $shipping_class->term_id ) ) {
