@@ -108,23 +108,6 @@ const WithReactRouterProps = ( { children } ) => {
 	} );
 };
 
-/**
- * Wraps _Layout with WithReactRouterProps for non-embedded page renders
- * We need this because the hooks fail for embedded page renders as there is no Router context above it.
- *
- * @param {Object} props React component props
- */
-const LayoutSwitchWrapper = ( props ) => {
-	if ( props.isEmbedded ) {
-		return <_Layout { ...props } />;
-	}
-	return (
-		<WithReactRouterProps>
-			<_Layout { ...props } />
-		</WithReactRouterProps>
-	);
-};
-
 function _Layout( {
 	activePlugins,
 	installedPlugins,
@@ -285,6 +268,23 @@ _Layout.propTypes = {
 		] ).isRequired,
 		wpOpenMenu: PropTypes.string,
 	} ).isRequired,
+};
+
+/**
+ * Wraps _Layout with WithReactRouterProps for non-embedded page renders
+ * We need this because the hooks fail for embedded page renders as there is no Router context above it.
+ *
+ * @param {Object} props React component props
+ */
+const LayoutSwitchWrapper = ( props ) => {
+	if ( props.isEmbedded ) {
+		return <_Layout { ...props } />;
+	}
+	return (
+		<WithReactRouterProps>
+			<_Layout { ...props } />
+		</WithReactRouterProps>
+	);
 };
 
 const dataEndpoints = getAdminSetting( 'dataEndpoints' );

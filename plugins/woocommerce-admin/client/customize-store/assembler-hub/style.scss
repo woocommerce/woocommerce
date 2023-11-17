@@ -731,3 +731,39 @@
 		}
 	}
 }
+
+.woocommerce-customize-store__logo-header-container {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.components-dropdown-menu__menu .woocommerce-customize-store__logo-menu-group.components-menu-group {
+	border-top: 0;
+	padding: 0 8px;
+
+	.components-menu-item__button {
+		width: 112px;
+	}
+
+	.components-menu-item__item {
+		min-width: auto;
+	}
+}
+
+// Hack to hide when the media modal is open
+// Otherwise in Firefox the popover remains visible on top of the modal
+// Changing the z-index of Popovers have wider implications.
+.modal-open .woocommerce-customize-store__logo-dropdown-popover {
+	display: none;
+}
+
+.woocommerce-customize-store__logo-dropdown-popover {
+	.components-popover__content {
+		padding: 16px 8px;
+	}
+}
+
+.woocommerce-customize-store__logo-menu-item-delete {
+	color: #cc1818;
+}

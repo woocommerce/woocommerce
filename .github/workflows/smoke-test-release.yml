@@ -609,7 +609,7 @@ jobs:
                     - plugin: 'WooCommerce Shipping & Tax'
                       repo: 'automattic/woocommerce-services'
                       env_description: 'woocommerce-shipping-&-tax'
-                    - plugin: 'WooCommerce Subscriptions'
+                    - plugin: 'Woo Subscriptions'
                       repo: WC_SUBSCRIPTIONS_REPO
                       private: true
                       env_description: 'woocommerce-subscriptions'
@@ -715,6 +715,7 @@ jobs:
         permissions:
             contents: read
         if: |
+            github.ref_name == 'trunk' &&
             success() || (
               failure() && contains( needs.*.result, 'failure' )
             )
