@@ -14,6 +14,11 @@ use WP_UnitTestCase;
  */
 class SourceAttributionTest extends WP_UnitTestCase {
 
+	/**
+	 * System under test.
+	 *
+	 * @var SourceAttribution
+	 */
 	private $sut;
 
 	/**
