@@ -37,11 +37,7 @@ export type SortableProps = React.DetailedHTMLProps<
 	React.HTMLAttributes< HTMLDivElement >,
 	HTMLDivElement
 > & {
-	children: SortableChild | SortableChild[] | null | undefined;
 	isHorizontal?: boolean;
-	onDragEnd?: DragEventHandler< HTMLDivElement >;
-	onDragOver?: DragEventHandler< HTMLLIElement >;
-	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onOrderChange?: ( items: SortableChild[] ) => void;
 };
 
