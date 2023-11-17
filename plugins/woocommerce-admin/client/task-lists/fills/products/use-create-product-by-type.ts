@@ -34,7 +34,11 @@ export const useCreateProductByType = () => {
 
 		setIsRequesting( true );
 
-		if ( type === 'physical' || type === 'variable' || type === 'digital' ) {
+		if (
+			type === 'physical' ||
+			type === 'variable' ||
+			type === 'digital'
+		) {
 			if ( isNewExperienceEnabled ) {
 				navigateTo( { url: getNewPath( {}, '/add-product', {} ) } );
 				return;
