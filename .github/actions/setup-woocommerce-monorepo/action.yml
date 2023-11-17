@@ -10,9 +10,6 @@ inputs:
   build:
     description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
     default: false
-default:
-  run:
-    shell: 'bash'
 runs:
   using: 'composite'
   steps:
@@ -41,12 +38,14 @@ runs:
         restore-keys: '${{ runner.os }}-composer-'
     - name: 'Parse Project Filters'
       id: 'project-filters'
+      shell: 'bash'
       run: |
         echo "install=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.install }}')" >> $GITHUB_OUTPUT
         echo "build=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.build }}')" >> $GITHUB_OUTPUT
     - name: 'Install Project Dependencies'
       # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
       if: ${{ inputs.install == 'true' || steps.project-filters.outputs.install != '' }}
+      shell: 'bash'
       run: 'pnpm install ${{ steps.project-filters.outputs.install }}'
     # We want to include an option to build projects using this action so that we can make
     # sure that the build cache is always used when building projects.
@@ -57,4 +56,5 @@ runs:
     - name: 'Build'
       # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
       if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
+      shell: 'bash'
       run: 'pnpm ${{ steps.project-filters.outputs.build }} build'
