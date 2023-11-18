@@ -39,7 +39,13 @@ export function TemplateTabPanel( {
 			}
 
 			if ( innerBlocks ) {
-				return findBlockTemplateById( innerBlocks, blockTemplateId );
+				const matchingInnerBlock = findBlockTemplateById(
+					innerBlocks,
+					blockTemplateId
+				);
+				if ( matchingInnerBlock ) {
+					return matchingInnerBlock;
+				}
 			}
 		}
 
