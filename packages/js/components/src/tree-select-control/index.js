@@ -266,31 +266,9 @@ const TreeSelectControl = ( {
 					);
 				},
 			},
-			hasSearchedDescendent: {
-				/**
-				 * Returns whether this option is being searched for or any of its
-				 * descendents is also a being searched for.
-				 *
-				 * @return {boolean} True if has a searched descendent, false otherwise.
-				 */
-				get() {
-					// Since we are doing recursion, exit true if a child is searched result.
-					if ( this.isSearchResult ) {
-						return true;
-					}
-
-					if ( this.hasChildren ) {
-						return this.children.some(
-							( opt ) => opt.hasSearchedDescendent
-						);
-					}
-
-					return this.leaves.some( ( opt ) => opt.isSearchResult );
-				},
-			},
 			isVisible: {
 				/**
-				 * Returns whether this option should be visible.
+				 * Returns whether this option should be visible based on search.
 				 * All options are visible when not searching. Otherwise, true if this option is
 				 * a search result or it has a descendent that is being searched for.
 				 *
@@ -301,8 +279,18 @@ const TreeSelectControl = ( {
 					if ( ! isSearching ) {
 						return true;
 					}
-					// Otherwise visible if searched or has child being searched.
-					return this.isSearchResult || this.hasSearchedDescendent;
+
+					// Exit true if this is searched result.
+					if ( this.isSearchResult ) {
+						return true;
+					}
+
+					// If any children are search results, remain visible.
+					if ( this.hasChildren ) {
+						return this.children.some( ( opt ) => opt.isVisible );
+					}
+
+					return this.leaves.some( ( opt ) => opt.isSearchResult );
 				},
 			},
 			isSearchResult: {
@@ -327,7 +315,7 @@ const TreeSelectControl = ( {
 				 */
 				get() {
 					return (
-						( isSearching && this.hasSearchedDescendent ) ||
+						( isSearching && this.isVisible ) ||
 						this.value === ROOT_VALUE ||
 						cache.expandedValues.includes( this.value )
 					);
