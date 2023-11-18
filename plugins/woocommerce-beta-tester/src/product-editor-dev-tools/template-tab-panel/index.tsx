@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { BlockTemplateArray, BlockTemplate } from './types';
 import { TabPanel } from '../tab-panel';
+import { BlockTemplateDetailsPanel } from './block-template-details-panel';
 import { BlockTemplateTree } from './block-template-tree';
 
 export function TemplateTabPanel( {
@@ -61,9 +62,9 @@ export function TemplateTabPanel( {
 					template={ template }
 					onSelect={ onBlockTemplateSelect }
 				/>
-				<div className="woocommerce-product-editor-dev-tools-block-template-details">
-					{ JSON.stringify( selectedBlockTemplate, null, 4 ) }
-				</div>
+				<BlockTemplateDetailsPanel
+					blockTemplate={ selectedBlockTemplate }
+				/>
 			</div>
 		</TabPanel>
 	);
