@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { BlockTemplateArray } from './types';
+import { BlockTemplateArray } from '../types';
 import { BlockTemplateTreeItem } from './block-template-tree-item';
 
 export function BlockTemplateTree( {

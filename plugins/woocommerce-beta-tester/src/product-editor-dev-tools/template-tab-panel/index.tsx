@@ -7,21 +7,23 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { BlockTemplateArray, BlockTemplate } from './types';
+import { BlockTemplateArray, BlockTemplate, EvaluationContext } from '../types';
 import { TabPanel } from '../tab-panel';
 import { BlockTemplateDetailsPanel } from './block-template-details-panel';
 import { BlockTemplateTree } from './block-template-tree';
 
 export function TemplateTabPanel( {
 	isSelected,
-	postType,
+	evaluationContext,
 }: {
 	isSelected: boolean;
-	postType: string;
+	evaluationContext: EvaluationContext;
 } ) {
 	const template: BlockTemplateArray =
 		// @ts-ignore
-		globalThis.productBlockEditorSettings.templates[ postType ];
+		globalThis.productBlockEditorSettings.templates[
+			evaluationContext.postType
+		];
 
 	const [ selectedBlockTemplate, setSelectedBlockTemplate ] =
 		useState< BlockTemplate | null >( null );

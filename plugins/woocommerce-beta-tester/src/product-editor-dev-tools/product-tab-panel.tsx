@@ -1,11 +1,7 @@
 /**
- * External dependencies
- */
-import { Product } from '@woocommerce/data';
-
-/**
  * Internal dependencies
  */
+import { EvaluationContext } from './types';
 import { ExpressionsPanel } from './expressions-panel';
 import { TabPanel } from './tab-panel';
 
@@ -14,10 +10,7 @@ export function ProductTabPanel( {
 	evaluationContext,
 }: {
 	isSelected: boolean;
-	evaluationContext: {
-		postType: string;
-		editedProduct: Product;
-	};
+	evaluationContext: EvaluationContext;
 } ) {
 	return (
 		<TabPanel isSelected={ isSelected }>

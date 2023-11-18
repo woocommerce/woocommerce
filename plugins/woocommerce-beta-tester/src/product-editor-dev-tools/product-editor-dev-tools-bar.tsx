@@ -154,7 +154,7 @@ export function ProductEditorDevToolsBar( {
 						isSelected={ selectedTab === 'product' }
 					/>
 					<TemplateTabPanel
-						postType={ postType }
+						evaluationContext={ evaluationContext }
 						isSelected={ selectedTab === 'template' }
 					/>
 					<TemplateEventsTabPanel

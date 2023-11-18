@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { BlockTemplate } from './types';
+import { BlockTemplate } from '../types';
 
 export function BlockTemplateDetailsPanel( {
 	blockTemplate,
