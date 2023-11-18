@@ -266,16 +266,22 @@ const TreeSelectControl = ( {
 					);
 				},
 			},
-			hasChildSearchValue: {
+			hasSearchedDescendent: {
+				/**
+				 * Returns whether this option is being searched for or any of its
+				 * descendents is also a being searched for.
+				 *
+				 * @return {boolean} True if has a searched descendent, false otherwise.
+				 */
 				get() {
-					// Since we are doing recursion, exit true if a child is search result.
+					// Since we are doing recursion, exit true if a child is searched result.
 					if ( this.isSearchResult ) {
 						return true;
 					}
 
 					if ( this.hasChildren ) {
 						return this.children.some(
-							( opt ) => opt.hasChildSearchValue
+							( opt ) => opt.hasSearchedDescendent
 						);
 					}
 
@@ -283,16 +289,28 @@ const TreeSelectControl = ( {
 				},
 			},
 			isVisible: {
+				/**
+				 * Returns whether this option should be visible.
+				 * All options are visible when not searching. Otherwise, true if this option is
+				 * a search result or it has a descendent that is being searched for.
+				 *
+				 * @return {boolean} True if option should be visible, false otherwise.
+				 */
 				get() {
 					// everything is visible when not searching.
 					if ( ! isSearching ) {
 						return true;
 					}
-					// Otherwise visible if searched or has child search
-					return this.isSearchResult || this.hasChildSearchValue;
+					// Otherwise visible if searched or has child being searched.
+					return this.isSearchResult || this.hasSearchedDescendent;
 				},
 			},
 			isSearchResult: {
+				/**
+				 * Returns whether this option is a searched result.
+				 *
+				 * @return {boolean} True if option is being searched, false otherwise.
+				 */
 				get() {
 					if ( ! isSearching ) {
 						return false;
@@ -309,7 +327,7 @@ const TreeSelectControl = ( {
 				 */
 				get() {
 					return (
-						( isSearching && this.hasChildSearchValue ) ||
+						( isSearching && this.hasSearchedDescendent ) ||
 						this.value === ROOT_VALUE ||
 						cache.expandedValues.includes( this.value )
 					);
