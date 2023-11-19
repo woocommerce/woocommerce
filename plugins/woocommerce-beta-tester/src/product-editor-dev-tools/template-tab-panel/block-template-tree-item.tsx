@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { evaluate } from '@woocommerce/expression-evaluation';
+import { Icon, blockDefault, warning } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -11,10 +12,12 @@ import { BlockTemplate, EvaluationContext } from '../types';
 export function BlockTemplateTreeItem( {
 	blockTemplate,
 	evaluationContext,
+	selectedBlockTemplateId,
 	onSelect,
 }: {
 	blockTemplate: BlockTemplate;
 	evaluationContext: EvaluationContext;
+	selectedBlockTemplateId: string | null;
 	onSelect: ( blockTemplateId: string ) => void;
 } ) {
 	const name = blockTemplate[ 0 ];
@@ -28,6 +31,8 @@ export function BlockTemplateTreeItem( {
 		attributes?._templateBlockHideConditions;
 	const templateBlockDisableConditions =
 		attributes?._templateBlockDisableConditions;
+
+	const isSelected = selectedBlockTemplateId === templateBlockId;
 
 	const isConditionallyHidden =
 		templateBlockHideConditions &&
@@ -48,15 +53,30 @@ export function BlockTemplateTreeItem( {
 
 	return (
 		<div
-			className="woocommerce-product-editor-dev-tools-template-block"
+			className={ 'woocommerce-product-editor-dev-tools-template-block' }
 			onClick={ onClick }
 		>
-			<div className="woocommerce-product-editor-dev-tools-template-block__row">
+			<div
+				className={
+					'woocommerce-product-editor-dev-tools-template-block__row ' +
+					`${ isSelected ? 'selected' : '' }` +
+					`${
+						isConditionallyHidden ? 'conditionally-hidden' : ''
+					} ` +
+					`${
+						isConditionallyDisabled ? 'conditionally-disabled' : ''
+					}`
+				}
+			>
+				<Icon
+					icon={ blockDefault }
+					className="woocommerce-product-editor-dev-tools-template-block__row__icon"
+				/>
 				<div>
-					<div className="woocommerce-product-editor-dev-tools-template-block__header">
+					<div className="woocommerce-product-editor-dev-tools-template-block__row__header">
 						{ templateBlockId }
 					</div>
-					<div className="woocommerce-product-editor-dev-tools-template-block__sub-header">
+					<div className="woocommerce-product-editor-dev-tools-template-block__row__sub-header">
 						<span className="woocommerce-product-editor-dev-tools-template-block__name">
 							{ name }
 						</span>
@@ -65,13 +85,19 @@ export function BlockTemplateTreeItem( {
 						</span>
 					</div>
 				</div>
-				<div>
-					<span>
-						hidden: { JSON.stringify( isConditionallyHidden ) }
-					</span>
-					<span>
-						disabled: { JSON.stringify( isConditionallyDisabled ) }
-					</span>
+				<div className="woocommerce-product-editor-dev-tools-template-block__indicators">
+					{ templateBlockHideConditions && (
+						<Icon
+							icon={ warning }
+							className="woocommerce-product-editor-dev-tools-template-block__conditionally-hidden-indicator"
+						/>
+					) }
+					{ templateBlockDisableConditions && (
+						<Icon
+							icon={ warning }
+							className="woocommerce-product-editor-dev-tools-template-block__conditionally-disabled-indicator"
+						/>
+					) }
 				</div>
 			</div>
 
@@ -82,6 +108,7 @@ export function BlockTemplateTreeItem( {
 							blockTemplate={ innerBlockTemplate }
 							evaluationContext={ evaluationContext }
 							key={ index }
+							selectedBlockTemplateId={ selectedBlockTemplateId }
 							onSelect={ onSelect }
 						/>
 					) ) }

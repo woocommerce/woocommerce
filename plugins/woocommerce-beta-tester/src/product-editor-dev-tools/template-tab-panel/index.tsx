@@ -69,6 +69,9 @@ export function TemplateTabPanel( {
 				<BlockTemplateTree
 					template={ template }
 					evaluationContext={ evaluationContext }
+					selectedBlockTemplateId={
+						selectedBlockTemplate?.[ 1 ]._templateBlockId ?? null
+					}
 					onSelect={ onBlockTemplateSelect }
 				/>
 				<BlockTemplateDetailsPanel

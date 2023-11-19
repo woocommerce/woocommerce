@@ -7,10 +7,12 @@ import { BlockTemplateTreeItem } from './block-template-tree-item';
 export function BlockTemplateTree( {
 	template,
 	evaluationContext,
+	selectedBlockTemplateId,
 	onSelect,
 }: {
 	template: BlockTemplateArray;
 	evaluationContext: EvaluationContext;
+	selectedBlockTemplateId: string | null;
 	onSelect: ( blockTemplateId: string ) => void;
 } ) {
 	return (
@@ -20,6 +22,7 @@ export function BlockTemplateTree( {
 					key={ index }
 					blockTemplate={ blockTemplate }
 					evaluationContext={ evaluationContext }
+					selectedBlockTemplateId={ selectedBlockTemplateId }
 					onSelect={ onSelect }
 				/>
 			) ) }
