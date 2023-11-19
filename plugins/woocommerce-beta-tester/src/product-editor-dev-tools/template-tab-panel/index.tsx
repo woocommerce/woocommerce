@@ -68,6 +68,7 @@ export function TemplateTabPanel( {
 			<div className="woocommerce-product-editor-dev-tools-template">
 				<BlockTemplateTree
 					template={ template }
+					evaluationContext={ evaluationContext }
 					onSelect={ onBlockTemplateSelect }
 				/>
 				<BlockTemplateDetailsPanel

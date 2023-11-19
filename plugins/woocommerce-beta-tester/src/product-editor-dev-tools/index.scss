@@ -219,8 +219,13 @@
 
 .woocommerce-product-editor-dev-tools-template-block {
 	margin-top: var(--woocommerce-product-editor-dev-tools-gap-small);
+}
 
-	&__header {
+.woocommerce-product-editor-dev-tools-template-block__row {
+	display: flex;
+	flex-direction: row;
+
+	__header {
 		font-weight: bold;
 	}
 

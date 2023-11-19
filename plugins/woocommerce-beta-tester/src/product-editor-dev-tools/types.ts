@@ -8,10 +8,16 @@ export interface EvaluationContext {
 	editedProduct: Product;
 }
 
+export interface Condition {
+	expression: string;
+}
+
 export interface BlockTemplateAttributes {
 	[ key: string ]: unknown;
 	_templateBlockId: string;
 	_templateBlockOrder: number;
+	_templateBlockHideConditions: Condition[];
+	_templateBlockDisableConditions: Condition[];
 }
 
 export interface BlockTemplate {
