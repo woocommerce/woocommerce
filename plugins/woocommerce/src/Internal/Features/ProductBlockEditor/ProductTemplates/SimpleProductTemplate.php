@@ -334,7 +334,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'order'          => 50,
 					'attributes'     => array(
 						'title'       => __( 'Downloads', 'woocommerce' ),
-						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
+						'description' => sprintf(
+							__( 'Add any files you\'d like to make available for the customer to download after purchasing, such as instructions or warranty info. Store-wide updates can be managed in your %1$sproduct settings%2$s.', 'woocommerce' ),
+							'<a href="' . home_url( 'wp-admin/admin.php?page=wc-settings&tab=products&section=downloadable' ) . '" target="_blank" rel="noreferrer">',
+							'</a>'
+						),
 					),
 					'hideConditions' => array(
 						array(
