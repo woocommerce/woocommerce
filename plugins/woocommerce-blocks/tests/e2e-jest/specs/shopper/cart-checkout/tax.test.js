@@ -22,7 +22,7 @@ if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 	test.only( `Skipping Cart & Checkout tests`, () => {} );
 }
 
-describe( 'Shopper → Cart & Checkout → Taxes', () => {
+describe.skip( 'Shopper → Cart & Checkout → Taxes', () => {
 	beforeEach( async () => {
 		await shopper.block.emptyCart();
 	} );

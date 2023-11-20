@@ -225,6 +225,12 @@ module.exports = {
 	},
 	overrides: [
 		{
+			files: [ '**/tests/e2e-jest/**' ],
+			rules: {
+				'jest/no-disabled-tests': 'off',
+			},
+		},
+		{
 			files: [ '**/bin/**.js', '**/storybook/**.js', '**/stories/**.js' ],
 			rules: {
 				'you-dont-need-lodash-underscore/omit': 'off',

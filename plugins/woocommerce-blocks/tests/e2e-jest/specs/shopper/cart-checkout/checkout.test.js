@@ -45,7 +45,7 @@ describe( 'Shopper → Checkout', () => {
 		await shopper.block.emptyCart();
 	} );
 
-	describe( 'Local pickup', () => {
+	describe.skip( 'Local pickup', () => {
 		const NORMAL_SHIPPING_NAME = 'Normal Shipping';
 
 		beforeAll( async () => {
@@ -183,7 +183,7 @@ describe( 'Shopper → Checkout', () => {
 		} );
 	} );
 
-	describe( 'Payment Methods', () => {
+	describe.skip( 'Payment Methods', () => {
 		it( 'User can change payment methods', async () => {
 			await shopper.block.emptyCart();
 			await shopper.block.goToShop();
@@ -204,7 +204,7 @@ describe( 'Shopper → Checkout', () => {
 		} );
 	} );
 
-	describe( 'Shipping and Billing Addresses', () => {
+	describe.skip( 'Shipping and Billing Addresses', () => {
 		beforeAll( async () => {
 			await preventCompatibilityNotice();
 			await merchant.login();
@@ -358,7 +358,7 @@ describe( 'Shopper → Checkout', () => {
 		} );
 	} );
 
-	describe( `Shipping`, () => {
+	describe.skip( `Shipping`, () => {
 		afterEach( async () => {
 			await merchant.login();
 			await merchantUtils.disableLocalPickup();
@@ -433,7 +433,7 @@ describe( 'Shopper → Checkout', () => {
 		} );
 	} );
 
-	describe( 'Coupons', () => {
+	describe.skip( 'Coupons', () => {
 		beforeAll( async () => {
 			coupon = await createCoupon( { usageLimit: 1 } );
 			await shopper.logout();

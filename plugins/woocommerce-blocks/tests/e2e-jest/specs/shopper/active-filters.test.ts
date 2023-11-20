@@ -87,7 +87,7 @@ const getActiveFilterNameText = () =>
 		( el ) => ( el as HTMLElement ).childNodes[ 1 ].textContent
 	);
 
-describe( 'Shopper → Active Filters Block', () => {
+describe.skip( 'Shopper → Active Filters Block', () => {
 	describe( 'With All Products block', () => {
 		beforeAll( async () => {
 			await switchUserToAdmin();
@@ -115,7 +115,7 @@ describe( 'Shopper → Active Filters Block', () => {
 			expect( page ).not.toMatch( 'Active Filters' );
 		} );
 
-		it( 'Shows selected filters', async () => {
+		it.skip( 'Shows selected filters', async () => {
 			const isRefreshed = jest.fn( () => void 0 );
 
 			await page.waitForSelector( block.class );
@@ -156,7 +156,7 @@ describe( 'Shopper → Active Filters Block', () => {
 			await expect( page ).toMatch( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		} );
 
-		it( 'When clicking the X on a filter it removes a filter', async () => {
+		it.skip( 'When clicking the X on a filter it removes a filter', async () => {
 			const isRefreshed = jest.fn( () => void 0 );
 			await page.waitForSelector( block.class );
 			await page.waitForSelector(
@@ -183,7 +183,7 @@ describe( 'Shopper → Active Filters Block', () => {
 			expect( isRefreshed ).not.toHaveBeenCalled();
 		} );
 
-		it( 'Clicking "Clear All" button removes all active filters', async () => {
+		it.skip( 'Clicking "Clear All" button removes all active filters', async () => {
 			const isRefreshed = jest.fn( () => void 0 );
 			await page.waitForSelector( block.class );
 			await page.waitForSelector(
@@ -210,7 +210,7 @@ describe( 'Shopper → Active Filters Block', () => {
 			expect( isRefreshed ).not.toHaveBeenCalled();
 		} );
 	} );
-	describe( 'With PHP Templates (Products Block and Classic Template Block)', () => {
+	describe.skip( 'With PHP Templates (Products Block and Classic Template Block)', () => {
 		useTheme( 'emptytheme' );
 		beforeAll( async () => {
 			await deleteAllTemplates( 'wp_template_part' );

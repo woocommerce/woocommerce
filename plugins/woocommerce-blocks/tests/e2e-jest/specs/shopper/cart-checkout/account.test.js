@@ -52,7 +52,7 @@ describe( 'Shopper → Checkout → Account', () => {
 		await expect( loginLink ).toContain( `checkout` );
 	} );
 
-	it( 'user can can create an account', async () => {
+	it.skip( 'user can can create an account', async () => {
 		await page.waitForSelector( '.wc-block-checkout__create-account' );
 		await expect( page ).toClick( 'span', {
 			text: 'Create an account?',

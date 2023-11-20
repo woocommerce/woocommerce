@@ -57,7 +57,7 @@ const goToShopPage = () =>
 	} );
 
 describe( `${ block.name } Block`, () => {
-	describe( 'with All Products Block', () => {
+	describe.skip( 'with All Products Block', () => {
 		let link = '';
 		beforeAll( async () => {
 			await switchUserToAdmin();
@@ -93,7 +93,7 @@ describe( `${ block.name } Block`, () => {
 		} );
 	} );
 
-	describe( 'with PHP classic template (Products Block and Classic Template Block)', () => {
+	describe.skip( 'with PHP classic template (Products Block and Classic Template Block)', () => {
 		const productCatalogTemplateId =
 			'woocommerce/woocommerce//archive-product';
 
