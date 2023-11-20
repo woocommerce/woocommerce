@@ -3198,4 +3198,45 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		remove_all_actions( 'woocommerce_webhook_process_delivery' );
 		remove_all_actions( 'woocommerce_webhook_should_deliver' );
 	}
+
+	/**
+	 * @testDox Check that functions in the datastore correctly hold and release coupons from the order.
+	 */
+	public function test_datastore_coupon_methods() {
+		$this->toggle_cot_authoritative( true );
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( '10off' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10.0 );
+		$coupon->set_usage_limit_per_user( 2 );
+		$coupon->save();
+
+		$product = WC_Helper_Product::create_simple_product( true );
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon->get_code() );
+
+		$this->assertEquals( 0, $coupon->get_data_store()->get_usage_by_email( $coupon, 'user@woo.test' ) );
+
+		$order_id = WC()->checkout->create_order(
+			array(
+				'billing_email'  => 'user@woo.test',
+				'payment_method' => 'dummy',
+			)
+		);
+
+		$this->assertEquals( 1, $coupon->get_data_store()->get_tentative_usages_for_user( $coupon->get_id(), array( 'user@woo.test' ) ) );
+		$this->assertEquals( 1, $coupon->get_data_store()->get_usage_by_email( $coupon, 'user@woo.test' ) );
+
+		wc_get_order( $order_id )->payment_complete();
+
+		$this->assertEquals( 0, $coupon->get_data_store()->get_tentative_usages_for_user( $coupon->get_id(), array( 'user@woo.test' ) ) );
+		$this->assertEquals( 1, $coupon->get_data_store()->get_usage_by_email( $coupon, 'user@woo.test' ) );
+
+		// Load a fresh copy of the coupon and make sure things look ok.
+		$coupon = new \WC_Coupon( $coupon->get_id() );
+		$this->assertContains( 'user@woo.test', $coupon->get_used_by( 'edit' ) );
+	}
+
 }

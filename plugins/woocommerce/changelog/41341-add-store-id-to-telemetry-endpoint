@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Includes the store_id added by #40705 to the system_status REST API.

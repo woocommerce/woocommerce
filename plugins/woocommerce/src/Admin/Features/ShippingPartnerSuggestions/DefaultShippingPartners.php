@@ -105,7 +105,7 @@ class DefaultShippingPartners {
 			),
 			array(
 				'name'              => 'Envia',
-				'slug'              => '',
+				'slug'              => 'enviaya-shipping-for-woocommerce',
 				'description'       => '',
 				'layout_column'     => array(
 					'image'    => $asset_base_url . 'envia-column.svg',
