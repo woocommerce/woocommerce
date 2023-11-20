@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix subscription grouping to ensure one installed subscription is available in the installed section.
-
