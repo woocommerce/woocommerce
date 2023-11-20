@@ -9,7 +9,7 @@ import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
  */
 import './style.scss';
 
-interface ValidationInputErrorProps {
+export interface ValidationInputErrorProps {
 	errorMessage?: string;
 	propertyName?: string;
 	elementId?: string;

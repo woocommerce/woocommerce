@@ -6,10 +6,10 @@ import classNames from 'classnames';
 import type { ReactElement, HTMLProps } from 'react';
 
 export interface LabelProps extends HTMLProps< HTMLElement > {
-	label?: string;
-	screenReaderLabel?: string;
-	wrapperElement?: string;
-	wrapperProps?: HTMLProps< HTMLElement >;
+	label?: string | undefined;
+	screenReaderLabel?: string | undefined;
+	wrapperElement?: string | undefined;
+	wrapperProps?: HTMLProps< HTMLElement > | undefined;
 }
 
 /**

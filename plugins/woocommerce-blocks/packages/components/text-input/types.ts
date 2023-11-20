@@ -28,8 +28,6 @@ export interface ValidatedTextInputProps
 	label?: string | undefined;
 	// Field value.
 	value: string;
-	// Other sibling fields that should be validated together.
-	values: string[];
 	// If true, validation errors will be shown.
 	showError?: boolean;
 	// Error message to display alongside the field regardless of validation.

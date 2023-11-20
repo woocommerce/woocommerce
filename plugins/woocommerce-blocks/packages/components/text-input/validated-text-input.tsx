@@ -232,12 +232,12 @@ const ValidatedTextInput = forwardRef<
 				id={ textInputId }
 				type={ type }
 				feedback={
-					showError && (
+					showError ? (
 						<ValidationInputError
 							errorMessage={ passedErrorMessage }
 							propertyName={ errorIdString }
 						/>
-					)
+					) : null
 				}
 				ref={ inputRef }
 				onChange={ ( newValue ) => {
