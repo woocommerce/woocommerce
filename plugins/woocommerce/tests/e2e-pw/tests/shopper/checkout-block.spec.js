@@ -4,6 +4,7 @@ const { admin, customer } = require( '../../test-data/data' );
 const { setFilterValue, clearFilters } = require( '../../utils/filters' );
 
 const guestEmail = 'checkout-guest@example.com';
+const newAccountEmail = 'marge-test-account@example.com';
 
 const simpleProductName = 'Very Simple Product';
 const simpleProductDesc = 'Lorem ipsum dolor.';
@@ -15,7 +16,12 @@ const threeProductPrice = ( singleProductSalePrice * 3 ).toString();
 const pageTitle = 'Checkout Block';
 const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
 
-let guestOrderId1, guestOrderId2, customerOrderId, productId, shippingZoneId;
+let guestOrderId1,
+	guestOrderId2,
+	customerOrderId,
+	newAccountOrderId,
+	productId,
+	shippingZoneId;
 
 test.describe( 'Checkout Block page', () => {
 	test.beforeAll( async ( { baseURL } ) => {
@@ -58,9 +64,16 @@ test.describe( 'Checkout Block page', () => {
 			.then( ( response ) => {
 				productId = response.data.id;
 			} );
-		// enable loggin through checkout
+		// enable logging through checkout
 		await api.put(
 			'settings/account/woocommerce_enable_checkout_login_reminder',
+			{
+				value: 'yes',
+			}
+		);
+		// enable creating account through checkout
+		await api.put(
+			'settings/account/woocommerce_enable_signup_and_login_from_checkout',
 			{
 				value: 'yes',
 			}
@@ -68,7 +81,7 @@ test.describe( 'Checkout Block page', () => {
 		// add a shipping zone and method
 		await api
 			.post( 'shipping/zones', {
-				name: 'Free Shipping Oregon',
+				name: 'California Shipping Zone',
 			} )
 			.then( ( response ) => {
 				shippingZoneId = response.data.id;
@@ -82,6 +95,15 @@ test.describe( 'Checkout Block page', () => {
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'free_shipping',
 		} );
+		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
+			method_id: 'local_pickup',
+		} );
+		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
+			method_id: 'flat_rate',
+			settings: {
+				cost: singleProductSalePrice,
+			},
+		} );
 		// enable bank transfers and COD for payment
 		await api.put( 'payment_gateways/bacs', {
 			enabled: true,
@@ -89,6 +111,20 @@ test.describe( 'Checkout Block page', () => {
 		await api.put( 'payment_gateways/cod', {
 			enabled: true,
 		} );
+		// make sure there's no pre-existing customer that has the same email we're going to use for account creation
+		const { data: customersList } = await api.get( 'customers', {
+			email: newAccountEmail,
+		} );
+
+		if ( customersList && customersList.length ) {
+			const customerId = customersList[ 0 ].id;
+
+			console.log(
+				`Customer with email ${ newAccountEmail } exists! Deleting it before starting test...`
+			);
+
+			await api.delete( `customers/${ customerId }`, { force: true } );
+		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -116,6 +152,12 @@ test.describe( 'Checkout Block page', () => {
 				value: 'no',
 			}
 		);
+		await api.put(
+			'settings/account/woocommerce_enable_signup_and_login_from_checkout',
+			{
+				value: 'no',
+			}
+		);
 		// delete the orders we created
 		if ( guestOrderId1 ) {
 			await api.delete( `orders/${ guestOrderId1 }`, { force: true } );
@@ -126,6 +168,21 @@ test.describe( 'Checkout Block page', () => {
 		if ( customerOrderId ) {
 			await api.delete( `orders/${ customerOrderId }`, { force: true } );
 		}
+		if ( newAccountOrderId ) {
+			await api.delete( `orders/${ newAccountOrderId }`, {
+				force: true,
+			} );
+		}
+		// clear out the customer we create during the test
+		await api.get( 'customers' ).then( async ( response ) => {
+			for ( let i = 0; i < response.data.length; i++ ) {
+				if ( response.data[ i ].billing.email === newAccountEmail ) {
+					await api.delete( `customers/${ response.data[ i ].id }`, {
+						force: true,
+					} );
+				}
+			}
+		} );
 	} );
 
 	test.beforeEach( async ( { context } ) => {
@@ -638,5 +695,153 @@ test.describe( 'Checkout Block page', () => {
 		await expect( page.locator( 'td.line_cost >> nth=0' ) ).toContainText(
 			twoProductPrice
 		);
+	} );
+
+	test( 'can create an account during checkout', async ( { page } ) => {
+		await page.goto( `/shop/?add-to-cart=${ productId }`, {
+			waitUntil: 'networkidle',
+		} );
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+
+		// check create account during checkout
+		await expect( page.getByLabel( 'Create an account?' ) ).toBeVisible();
+		await page.getByLabel( 'Create an account?' ).check();
+		await expect( page.getByLabel( 'Create an account?' ) ).toBeChecked();
+
+		// fill shipping address and check cash on delivery method
+		await page.getByLabel( 'Email address' ).fill( newAccountEmail );
+		await page.getByLabel( 'First name' ).fill( 'Marge' );
+		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
+		await page
+			.getByLabel( 'Address', { exact: true } )
+			.fill( '123 Evergreen Terrace' );
+		await page.getByLabel( 'City' ).fill( 'Springfield' );
+		await page.getByLabel( 'ZIP Code' ).fill( '97403' );
+		await page.getByLabel( 'Cash on delivery' ).check();
+		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
+
+		// add note to the order
+		await page.getByLabel( 'Add a note to your order' ).check();
+		await page
+			.getByPlaceholder(
+				'Notes about your order, e.g. special notes for delivery.'
+			)
+			.fill( 'This is a note' );
+
+		// place an order
+		await page.getByRole( 'button', { name: 'Place order' } ).click();
+		await expect(
+			page.getByRole( 'heading', { name: 'Order received' } )
+		).toBeVisible();
+
+		// get order ID from the page
+		const orderReceivedText = await page
+			.locator( '.woocommerce-order-overview__order.order' )
+			.textContent();
+		newAccountOrderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+
+		// confirms that an account was created
+		await page.goto( '/my-account/' );
+		await expect(
+			page.getByRole( 'heading', { name: 'My account' } )
+		).toBeVisible();
+		await page
+			.getByRole( 'navigation' )
+			.getByRole( 'link', { name: 'Log out' } )
+			.click();
+
+		// sign in as admin to confirm account creation
+		await page.goto( 'wp-admin/users.php' );
+		await page.waitForLoadState( 'networkidle' );
+		await page.locator( 'input[name="log"]' ).fill( admin.username );
+		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
+		await page.locator( 'text=Log in' ).click();
+		await expect( page.locator( 'tbody#the-list' ) ).toContainText(
+			newAccountEmail
+		);
+	} );
+
+	test( 'can choose different shipping types in the checkout', async ( {
+		page,
+	} ) => {
+		await page.goto( `/shop/?add-to-cart=${ productId }`, {
+			waitUntil: 'networkidle',
+		} );
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+
+		// fill shipping address
+		await page.getByLabel( 'Email address' ).fill( customer.email );
+		await page.getByLabel( 'First name' ).fill( 'Lisa' );
+		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
+		await page
+			.getByLabel( 'Address', { exact: true } )
+			.fill( '123 Evergreen Terrace' );
+		await page.getByLabel( 'City' ).fill( 'Springfield' );
+		await page.getByLabel( 'ZIP Code' ).fill( '97403' );
+		await page
+			.locator( '.wc-block-components-loading-mask' )
+			.waitFor( { state: 'visible' } );
+		await page
+			.locator( '.wc-block-components-loading-mask' )
+			.waitFor( { state: 'hidden' } );
+
+		// check if you see all three shipping options
+		await expect( page.getByLabel( 'Free shipping' ) ).toBeVisible();
+		await expect( page.getByLabel( 'Local pickup' ) ).toBeVisible();
+		await expect( page.getByLabel( 'Flat rate' ) ).toBeVisible();
+
+		// check free shipping option
+		await page.getByLabel( 'Free shipping' ).check();
+		await page
+			.locator( '.wc-block-components-loading-mask' )
+			.waitFor( { state: 'visible' } );
+		await page
+			.locator( '.wc-block-components-loading-mask' )
+			.waitFor( { state: 'hidden' } );
+		await expect( page.getByLabel( 'Free shipping' ) ).toBeChecked();
+		await expect(
+			page.locator( '.wc-block-components-totals-shipping__via' )
+		).toHaveText( 'Free shipping' );
+		await expect(
+			page.locator(
+				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+			)
+		).toContainText( singleProductSalePrice );
+
+		// check local pickup option
+		await page.getByLabel( 'Local pickup' ).check();
+		await page
+			.locator( '.wc-block-components-loading-mask' )
+			.waitFor( { state: 'hidden' } );
+		await expect( page.getByLabel( 'Local pickup' ) ).toBeChecked();
+		await expect(
+			page.locator( '.wc-block-components-totals-shipping__via' )
+		).toHaveText( 'Local pickup' );
+		await expect(
+			page.locator(
+				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+			)
+		).toContainText( singleProductSalePrice );
+
+		// check flat rate option
+		await page.getByLabel( 'Flat rate' ).check();
+		await page
+			.locator( '.wc-block-components-loading-mask' )
+			.waitFor( { state: 'hidden' } );
+		await expect( page.getByLabel( 'Flat rate' ) ).toBeChecked();
+		await expect(
+			page.locator( '.wc-block-components-totals-shipping__via' )
+		).toHaveText( 'Flat rate' );
+		await expect(
+			page.locator(
+				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+			)
+		).toContainText( twoProductPrice );
 	} );
 } );
