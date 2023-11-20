@@ -8,23 +8,23 @@
 			"titles": [
 				{
 					"default": "Save up to 60%",
-					"ai_prompt": "A title advertising the sale"
+					"ai_prompt": "A four words title advertising the sale"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "Holiday Sale",
-					"ai_prompt": "A label with the sale name"
+					"ai_prompt": "A two words label with the sale name"
 				},
 				{
 					"default": "Make the day special with our collection of discounted products.",
-					"ai_prompt": "The main description of the sale"
+					"ai_prompt": "The main description of the sale with at least 65 characters"
 				}
 			],
 			"buttons": [
 				{
 					"default": "Shop Holiday Sale",
-					"ai_prompt": "The button text to go to the sale page"
+					"ai_prompt": "A 3 words button text to go to the sale page"
 				}
 			]
 		}
@@ -36,7 +36,7 @@
 			"descriptions": [
 				{
 					"default": "Select products",
-					"ai_prompt": "A description of the products on sale"
+					"ai_prompt": "A two words description of the products on sale"
 				}
 			]
 		}
@@ -50,7 +50,7 @@
 			"descriptions": [
 				{
 					"default": "Select products",
-					"ai_prompt": "A description of the products on sale"
+					"ai_prompt": "A two words description of the products on sale"
 				}
 			]
 		}
@@ -64,7 +64,7 @@
 			"titles": [
 				{
 					"default": "Announcing our newest collection",
-					"ai_prompt": "The title of the featured category: {image.0}"
+					"ai_prompt": "The four words title of the featured category related to the following image description: {image.0}"
 				}
 			]
 		}
@@ -78,15 +78,15 @@
 			"titles": [
 				{
 					"default": "Cupcakes",
-					"ai_prompt": "The title of the first featured category: {image.0}"
+					"ai_prompt": "A one word title for the featured category related to the following image description: {image.0}"
 				},
 				{
 					"default": "Sweet Danish",
-					"ai_prompt": "The title of the second featured category: {image.1}"
+					"ai_prompt": "A two words title for the featured category related to the following image description: {image.1}"
 				},
 				{
 					"default": "Warm Bread",
-					"ai_prompt": "The title of the third featured category: {image.2}"
+					"ai_prompt": "A two words title for the featured category related to the following image description: {image.2}"
 				}
 			]
 		}
@@ -100,25 +100,25 @@
 			"titles": [
 				{
 					"default": "Fresh & tasty goods",
-					"ai_prompt": "The title of the featured products"
+					"ai_prompt": "The title of the featured products with at least 20 characters"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "Sweet Organic Lemons",
-					"ai_prompt": "The description of the first featured products: {image.0}"
+					"ai_prompt": "The three words description of the featured product related to the following image description: {image.0}"
 				},
 				{
 					"default": "Fresh Organic Tomatoes",
-					"ai_prompt": "The description of the second featured products: {image.1}"
+					"ai_prompt": "The three words description of the featured product related to the following image description: {image.1}"
 				},
 				{
 					"default": "Fresh Lettuce (Washed)",
-					"ai_prompt": "The description of the third featured products: {image.2}"
+					"ai_prompt": "The three words description of the featured product related to the following image description: {image.2}"
 				},
 				{
 					"default": "Russet Organic Potatoes",
-					"ai_prompt": "The description of the fourth featured products: {image.3}"
+					"ai_prompt": "The three words description of the featured product related to the following image description: {image.3}"
 				}
 			]
 		}
@@ -132,33 +132,33 @@
 			"titles": [
 				{
 					"default": "New in: 3-in-1 parka",
-					"ai_prompt": "An impact phrase that advertises the displayed product: {image.0}. The title must have less than 30 characters"
+					"ai_prompt": "Generate a 3 words title that highlights one of the qualities of the product being sold"
 				},
 				{
 					"default": "Waterproof Membrane",
-					"ai_prompt": "A title describing the first displayed product feature. The title must have only 2 or 3 words."
+					"ai_prompt": "Generate a two words title that highlights one of the qualities of the product being sold"
 				},
 				{
 					"default": "Expert Craftsmanship",
-					"ai_prompt": "A title describing the second displayed product feature. The title must have only 2 or 3 words."
+					"ai_prompt": "Generate a two words title that highlights one of the qualities of the product being sold"
 				},
 				{
 					"default": "Durable Fabric",
-					"ai_prompt": "A title describing the third displayed product feature. The title must have only 2 or 3 words."
+					"ai_prompt": "Generate a two words title that highlights one of the qualities of the product being sold"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "Never worry about the weather again. Keep yourself dry, warm, and looking stylish.",
-					"ai_prompt": "A description of the first displayed product feature. The description must have less than 120 characters."
+					"ai_prompt": "Craft a catchy product description emphasizing one of its qualities with at least 80 characters"
 				},
 				{
 					"default": "Our products are made with expert craftsmanship and attention to detail.",
-					"ai_prompt": "A description of the second displayed product feature. The description must have less than 120 characters."
+					"ai_prompt": "Craft a catchy product description emphasizing one of its qualities with at least 80 characters"
 				},
 				{
 					"default": "We use only the highest-quality materials in our products, ensuring that they look great.",
-					"ai_prompt": "A description of the third displayed product feature. The description must have less than 120 characters."
+					"ai_prompt": "Craft a catchy product description emphasizing one of its qualities with at least 80 characters"
 				}
 			]
 		}
@@ -172,29 +172,29 @@
 			"titles": [
 				{
 					"default": "Quality Materials",
-					"ai_prompt": "A title describing the first displayed product feature. The title must have less than 20 characters."
+					"ai_prompt": "A two words title describing the first displayed product feature"
 				},
 				{
 					"default": "Expert Craftsmanship",
-					"ai_prompt": "A title describing the second displayed product feature. The title must have less than 20 characters."
+					"ai_prompt": "A two words title describing the second displayed product feature"
 				},
 				{
 					"default": "Customer Satisfaction",
-					"ai_prompt": "A title describing the fourth displayed product feature. The title must have less than 20 characters."
+					"ai_prompt": "A two words title describing the fourth displayed product feature"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "We use only the highest-quality materials in our products, ensuring that they look great and last for years to come.",
-					"ai_prompt": "A description of the first displayed product feature. The text must have less than 120 characters."
+					"ai_prompt": "A description of the product feature with at least 115 characters"
 				},
 				{
 					"default": "Our products are made with expert craftsmanship and attention to detail, ensuring that every stitch and seam is perfect.",
-					"ai_prompt": "A description of the second displayed product feature. The text must have less than 120 characters."
+					"ai_prompt": "A description of the product feature with at least 115 characters"
 				},
 				{
 					"default": "Our top priority is customer satisfaction, and we stand behind our products 100%. ",
-					"ai_prompt": "A description of the fourth displayed product feature. The text must have less than 120 characters."
+					"ai_prompt": "A description of the product feature with at least 115 characters"
 				}
 			]
 		}
@@ -208,7 +208,7 @@
 			"titles": [
 				{
 					"default": "Get cozy this fall with knit sweaters",
-					"ai_prompt": "An impact phrase that advertises the displayed product: {image.0}"
+					"ai_prompt": "An impact phrase that advertises the product the store is selling with at least 35 characters"
 				}
 			]
 		}
@@ -222,19 +222,19 @@
 			"titles": [
 				{
 					"default": "Just arrived",
-					"ai_prompt": "An impact phrase that advertises the displayed product collection"
+					"ai_prompt": "An impact phrase that advertises the displayed product collection with at least 10 characters"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "Our early autumn collection is here.",
-					"ai_prompt": "A description of the product collection"
+					"ai_prompt": "A description of the product collection with at least 35 characters"
 				}
 			],
 			"buttons": [
 				{
 					"default": "Shop now",
-					"ai_prompt": "The button text to go to the product collection page"
+					"ai_prompt": "A two words button text to go to the product collection page"
 				}
 			]
 		}
@@ -248,13 +248,13 @@
 			"titles": [
 				{
 					"default": "Brand New for the Holidays",
-					"ai_prompt": "An impact phrase that advertises the displayed product collection: {image.0}"
+					"ai_prompt": "An impact phrase that advertises the displayed product collection with at least 25 characters related to the following image description: {image.0}"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "Check out our brand new collection of holiday products and find the right gift for anyone.",
-					"ai_prompt": "A description of the product collection"
+					"ai_prompt": "A description of the product collection with at least 90 characters"
 				}
 			]
 		}
@@ -266,7 +266,7 @@
 			"titles": [
 				{
 					"default": "This week's popular products",
-					"ai_prompt": "An impact phrase that advertises the displayed product collection"
+					"ai_prompt": "An impact phrase that advertises the displayed product collection with at least 30 characters"
 				}
 			]
 		}
@@ -280,21 +280,21 @@
 			"titles": [
 				{
 					"default": "Tech gifts under $100",
-					"ai_prompt": "An impact phrase that advertises the first product collection: {image.0}, {image.1}"
+					"ai_prompt": "An impact phrase that advertises the product collection with at least 20 characters related to the following image descriptions: {image.0}, {image.1}"
 				},
 				{
 					"default": "For the gamers",
-					"ai_prompt": "An impact phrase that advertises the second product collection: {image.2}, {image.3}"
+					"ai_prompt": "An impact phrase that advertises the product collection with at least 15 characters related to the following image descriptions: {image.2}, {image.3}"
 				}
 			],
 			"buttons": [
 				{
 					"default": "Shop tech",
-					"ai_prompt": "The button text to go to the first product collection page"
+					"ai_prompt": "A two words button text to go to the product collection page"
 				},
 				{
 					"default": "Shop games",
-					"ai_prompt": "The button text to go to the second product collection page"
+					"ai_prompt": "A two words button text to go to the product collection page"
 				}
 			]
 		}
@@ -306,13 +306,13 @@
 			"titles": [
 				{
 					"default": "Our newest arrivals",
-					"ai_prompt": "An impact phrase that advertises the displayed product collection"
+					"ai_prompt": "An impact phrase that advertises the displayed product collection with at least 20 characters"
 				}
 			],
 			"buttons": [
 				{
 					"default": "More new products",
-					"ai_prompt": "The button text to go to the product collection page"
+					"ai_prompt": "The button text to go to the product collection page with at least 15 characters"
 				}
 			]
 		}
@@ -324,7 +324,7 @@
 			"titles": [
 				{
 					"default": "Our newest arrivals",
-					"ai_prompt": "An impact phrase that advertises the displayed product collection"
+					"ai_prompt": "An impact phrase that advertises the displayed product collection with at least 20 characters"
 				}
 			]
 		}
@@ -336,7 +336,7 @@
 			"titles": [
 				{
 					"default": "Our newest arrivals",
-					"ai_prompt": "An impact phrase that advertises the displayed product collection"
+					"ai_prompt": "An impact phrase that advertises the displayed product collection with at least 20 characters"
 				}
 			]
 		}
@@ -348,7 +348,7 @@
 			"titles": [
 				{
 					"default": "Our newest arrivals",
-					"ai_prompt": "An impact phrase that advertises the displayed product collection"
+					"ai_prompt": "An impact phrase that advertises the displayed product collection with at least 20 characters"
 				}
 			]
 		}
@@ -360,7 +360,7 @@
 			"titles": [
 				{
 					"default": "Our newest arrivals",
-					"ai_prompt": "An impact phrase that advertises the displayed product collection"
+					"ai_prompt": "An impact phrase with that advertises the product collection with at least 20 characters"
 				}
 			]
 		}
@@ -372,19 +372,19 @@
 			"titles": [
 				{
 					"default": "Fan favorites",
-					"ai_prompt": "An impact phrase that advertises the features products"
+					"ai_prompt": "An impact phrase that advertises the featured products with at least 10 characters"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "Get ready to start the season right. All the fan favorites in one place at the best price.",
-					"ai_prompt": "A description of the featured products"
+					"ai_prompt": "A description of the featured products with at least 90 characters"
 				}
 			],
 			"buttons": [
 				{
 					"default": "Shop All",
-					"ai_prompt": "The button text to go to the featured products page"
+					"ai_prompt": "A two words button text to go to the featured products page"
 				}
 			]
 		}
@@ -398,51 +398,51 @@
 			"titles": [
 				{
 					"default": "The Eden Jacket",
-					"ai_prompt": "An title that advertises the displayed product: {image.0}"
+					"ai_prompt": "A three words title that advertises a product related to the following image description: {image.0}"
 				},
 				{
 					"default": "100% Woolen",
-					"ai_prompt": "A title that advertises the first product feature"
+					"ai_prompt": "A two words title that advertises a product feature"
 				},
 				{
 					"default": "Fits your wardrobe",
-					"ai_prompt": "A title that advertises the second product feature"
+					"ai_prompt": "A three words title that advertises a product feature"
 				},
 				{
 					"default": "Versatile",
-					"ai_prompt": "A title that advertises the third product feature"
+					"ai_prompt": "An one word title that advertises a product feature"
 				},
 				{
 					"default": "Normal Fit",
-					"ai_prompt": "A title that advertises the fourth product feature"
+					"ai_prompt": "A two words title that advertises a product feature"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "Perfect for any look featuring a mid-rise, relax fitting silhouette.",
-					"ai_prompt": "A description of the displayed product: {image.0}"
+					"ai_prompt": "The description of a product with at least 65 characters related to the following image: {image.0}"
 				},
 				{
 					"default": "Reflect your fashionable style.",
-					"ai_prompt": "A description of the first product feature"
+					"ai_prompt": "The description of a product feature with at least 30 characters"
 				},
 				{
 					"default": "Half tuck into your pants or layer over.",
-					"ai_prompt": "A description of the second product feature"
+					"ai_prompt": "The description of a product feature with at least 30 characters"
 				},
 				{
 					"default": "Button-down front for any type of mood or look.",
-					"ai_prompt": "A description of the third product feature"
+					"ai_prompt": "The description of a product feature with at least 30 characters"
 				},
 				{
 					"default": "42% Cupro 34% Linen 24% Viscose",
-					"ai_prompt": "A description of the fourth product feature"
+					"ai_prompt": "The description of a product feature with at least 30 characters"
 				}
 			],
 			"buttons": [
 				{
 					"default": "View product",
-					"ai_prompt": "The button text to go to the product page"
+					"ai_prompt": "A two words button text to go to the product page"
 				}
 			]
 		}
@@ -454,19 +454,19 @@
 			"titles": [
 				{
 					"default": "Outdoor Furniture & Accessories",
-					"ai_prompt": "An impact phrase that advertises the first product collection"
+					"ai_prompt": "An impact phrase that advertises the first product collection with at least 30 characters"
 				},
 				{
 					"default": "Summer Dinning",
-					"ai_prompt": "An impact phrase that advertises the second product collection"
+					"ai_prompt": "An impact phrase that advertises the second product collection with at least 20 characters"
 				},
 				{
 					"default": "Women's Styles",
-					"ai_prompt": "An impact phrase that advertises the third product collection"
+					"ai_prompt": "An impact phrase that advertises the third product collection with at least 20 characters"
 				},
 				{
 					"default": "Kids' Styles",
-					"ai_prompt": "An impact phrase that advertises the fourth product collection"
+					"ai_prompt": "An impact phrase that advertises the fourth product collection with at least 20 characters"
 				}
 			]
 		}
@@ -480,7 +480,7 @@
 			"titles": [
 				{
 					"default": "Chairs",
-					"ai_prompt": "An impact phrase that advertises a products: {image.0}"
+					"ai_prompt": "A single word that advertises the product and is related to the following image description: {image.0}"
 				}
 			]
 		}
@@ -494,7 +494,7 @@
 			"titles": [
 				{
 					"default": "Follow us on social media",
-					"ai_prompt": "An phrase that advertises the social media accounts"
+					"ai_prompt": "A phrase that advertises the social media accounts of the store with at least 25 characters"
 				}
 			]
 		}
@@ -508,35 +508,35 @@
 			"titles": [
 				{
 					"default": "The goods",
-					"ai_prompt": "An impact phrase that advertises the products"
+					"ai_prompt": "A two words impact phrase that advertises the products"
 				},
 				{
 					"default": "Created with love and care in Australia",
-					"ai_prompt": "An impact phrase that advertises the products: {image.0}"
+					"ai_prompt": "An impact phrase that advertises the products with at least 40 characters and related to the following image description: {image.0}"
 				},
 				{
 					"default": "About us",
-					"ai_prompt": "An impact phrase that advertises the brand"
+					"ai_prompt": "A two words impact phrase that advertises the brand"
 				},
 				{
 					"default": "Marl is an independent studio and artisanal gallery",
-					"ai_prompt": "An impact phrase that advertises the brand: {image.1}"
+					"ai_prompt": "An impact phrase that advertises the brand with at least 50 characters related to the following image description: {image.1}"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "All items are 100% hand-made, using the potter’s wheel or traditional techniques.\n\nTimeless style.\n\nEarthy, organic feel.\n\nEnduring quality.\n\nUnique, one-of-a-kind pieces.",
-					"ai_prompt": "A description of the products"
+					"ai_prompt": "A description of the products with at least 180 characters"
 				},
 				{
 					"default": "We specialize in limited collections of handmade tableware. We collaborate with restaurants and cafes to create unique items that complement the menu perfectly. Please get in touch if you want to know more about our process and pricing.",
-					"ai_prompt": "A description of the products"
+					"ai_prompt": "A description of the products with at least 180 characters"
 				}
 			],
 			"buttons": [
 				{
 					"default": "Learn more",
-					"ai_prompt": "The button text to go to the product page"
+					"ai_prompt": "A two words button text to go to the product page"
 				}
 			]
 		}
@@ -548,33 +548,33 @@
 			"titles": [
 				{
 					"default": "What our customers say",
-					"ai_prompt": "A title that advertises the set of testimonials"
+					"ai_prompt": "A title that advertises the set of testimonials with a maximum of 25 characters"
 				},
 				{
-					"default": "Great experience",
-					"ai_prompt": "A title that advertises the first testimonial"
+					"default": "I had a great experience",
+					"ai_prompt": "A title that advertises a customer product review with a maximum 25 characters"
 				},
 				{
 					"default": "LOVE IT",
-					"ai_prompt": "A title that advertises the second testimonial"
+					"ai_prompt": "A title that advertises a customer product review with a maximum 10 characters"
 				},
 				{
 					"default": "Awesome couch",
-					"ai_prompt": "A title that advertises the third testimonial"
+					"ai_prompt": "A title that advertises a customer product review with a maximum 15 characters"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "In the end the couch wasn't exactly what I was looking for but my experience with the Burrow team was excellent. First in providing a discount when the couch was delayed.",
-					"ai_prompt": "A description of the first testimonial. The testimonial must have less than 200 characters."
+					"ai_prompt": "A customer product review with at least 170 characters"
 				},
 				{
 					"default": "Great couch. color as advertise. seat is nice and firm. Easy to put together. Versatile. Bought one for my mother in law as well. And she loves hers!",
-					"ai_prompt": "A description of the second testimonial. The testimonial must have less than 200 characters."
+					"ai_prompt": "A customer product review with at least 170 characters"
 				},
 				{
 					"default": "I got the kind sofa. The look and feel is high quality, and I enjoy that it is a medium level of firmness. Assembly took a little longer than I expected, and it came in 4 boxes.",
-					"ai_prompt": "A description of the third testimonial. The testimonial must have less than 200 characters."
+					"ai_prompt": "A customer product review with at least 170 characters"
 				}
 			]
 		}
@@ -588,13 +588,13 @@
 			"titles": [
 				{
 					"default": "Great experience",
-					"ai_prompt": "A title that advertises the testimonial"
+					"ai_prompt": "A two words title that advertises the testimonial"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "In the end the couch wasn't exactly what I was looking for but my experience with the Burrow team was excellent. First in providing a discount when the couch was delayed, then timely feedback and updates as the...",
-					"ai_prompt": "A description of the testimonial. The testimonial must have less than 200 characters."
+					"ai_prompt": "A description of the testimonial with at least 225 characters"
 				}
 			]
 		}
@@ -608,19 +608,19 @@
 			"titles": [
 				{
 					"default": "100% natural denim",
-					"ai_prompt": "A description for a product"
+					"ai_prompt": "A description for a product with at least 20 characters"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "Only the finest goes into our products. You deserve it.",
-					"ai_prompt": "An impact phrase that advertises the products"
+					"ai_prompt": "An impact phrase that advertises the products with at least 55 characters"
 				}
 			],
 			"buttons": [
 				{
 					"default": "Shop jeans",
-					"ai_prompt": "The button text to go to the shop page"
+					"ai_prompt": "A two words button text to go to the shop page"
 				}
 			]
 		}
@@ -632,7 +632,7 @@
 			"titles": [
 				{
 					"default": "Shop new arrivals",
-					"ai_prompt": "An impact phrase that advertises the newest additions to the store"
+					"ai_prompt": "An impact phrase that advertises the newest additions to the store with at least 20 characters"
 				}
 			]
 		}

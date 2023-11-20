@@ -83,10 +83,10 @@ class Connection {
 		$responses = Requests::request_multiple( $requests, array( 'timeout' => $timeout ) );
 
 		$processed_responses = array();
+
 		foreach ( $responses as $key => $response ) {
 			if ( is_wp_error( $response ) || is_a( $response, Exception::class ) ) {
-				$processed_responses[ $key ] = null;
-				continue;
+				return new WP_Error( 'failed-to-connect-with-the-ai-endpoint', esc_html__( 'Failed to connect with the AI endpoint: try again later.', 'woo-gutenberg-products-block' ) );
 			}
 
 			$processed_responses[ $key ] = json_decode( $response->body, true );

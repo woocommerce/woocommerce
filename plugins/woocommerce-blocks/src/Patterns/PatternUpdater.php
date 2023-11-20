@@ -11,7 +11,29 @@ use WP_Error;
 class PatternUpdater {
 
 	/**
-	 * Creates the patterns content for the given vertical.
+	 * The patterns content option name.
+	 */
+	const WC_BLOCKS_PATTERNS_CONTENT = 'wc_blocks_patterns_content';
+
+	/**
+	 * All patterns that are actively in use in the Assembler.
+	 */
+	const WC_PATTERNS_IN_THE_ASSEMBLER = [
+		'woocommerce-blocks/featured-category-triple',
+		'woocommerce-blocks/hero-product-3-split',
+		'woocommerce-blocks/hero-product-chessboard',
+		'woocommerce-blocks/hero-product-split',
+		'woocommerce-blocks/product-query-product-gallery',
+		'woocommerce-blocks/product-collection-3-columns',
+		'woocommerce-blocks/product-collection-4-columns',
+		'woocommerce-blocks/product-collection-5-columns',
+		'woocommerce-blocks/social-follow-us-in-social-media',
+		'woocommerce-blocks/testimonials-3-columns',
+		'woocommerce-blocks/product-collection-featured-products-5-columns',
+	];
+
+	/**
+	 * Generate AI content and assign AI-managed images to Patterns.
 	 *
 	 * @param Connection      $ai_connection The AI connection.
 	 * @param string|WP_Error $token The JWT token.
@@ -25,47 +47,343 @@ class PatternUpdater {
 			return $images;
 		}
 
-		$patterns_with_images = $this->get_patterns_with_images( $images );
-
-		if ( is_wp_error( $patterns_with_images ) ) {
-			return new WP_Error( 'failed_to_set_pattern_images', __( 'Failed to set the pattern images.', 'woo-gutenberg-products-block' ) );
+		if ( is_wp_error( $token ) ) {
+			return $token;
 		}
 
-		$patterns_with_images_and_content = $this->get_patterns_with_content( $ai_connection, $token, $patterns_with_images, $business_description );
+		$last_business_description = get_option( 'last_business_description_with_ai_content_generated' );
 
-		if ( is_wp_error( $patterns_with_images_and_content ) ) {
-			return new WP_Error( 'failed_to_set_pattern_content', __( 'Failed to set the pattern content.', 'woo-gutenberg-products-block' ) );
+		if ( $last_business_description === $business_description ) {
+			if ( is_string( $business_description ) && is_string( $last_business_description ) ) {
+				return true;
+			} else {
+				return new \WP_Error( 'business_description_not_found', __( 'No business description provided for generating AI content.', 'woo-gutenberg-products-block' ) );
+			}
 		}
 
-		$patterns_ai_data_post = PatternsHelper::get_patterns_ai_data_post();
-
-		if ( isset( $patterns_ai_data_post->post_content ) && json_decode( $patterns_ai_data_post->post_content ) === $patterns_with_images_and_content ) {
-			return true;
+		if ( 0 === count( $images ) ) {
+			$images = get_transient( 'woocommerce_ai_managed_images' );
 		}
 
-		$updated_content = PatternsHelper::upsert_patterns_ai_data_post( $patterns_with_images_and_content );
-
-		if ( is_wp_error( $updated_content ) ) {
-			return new WP_Error( 'failed_to_update_patterns_content', __( 'Failed to update patterns content.', 'woo-gutenberg-products-block' ) );
+		if ( empty( $images ) ) {
+			return new WP_Error( 'no_images_found', __( 'No images found.', 'woo-gutenberg-products-block' ) );
 		}
 
-		return $updated_content;
-	}
+		// This is required in case something interrupts the execution of the script and the endpoint is called again on retry.
+		set_transient( 'woocommerce_ai_managed_images', $images, 60 );
 
-	/**
-	 * Returns the patterns with images.
-	 *
-	 * @param array $selected_images The array of images.
-	 *
-	 * @return array|WP_Error The patterns with images.
-	 */
-	private function get_patterns_with_images( $selected_images ) {
-		$patterns_dictionary = $this->get_patterns_dictionary();
+		$patterns_dictionary = self::get_patterns_dictionary();
 
 		if ( is_wp_error( $patterns_dictionary ) ) {
 			return $patterns_dictionary;
 		}
 
+		$patterns = $this->assign_selected_images_to_patterns( $patterns_dictionary, $images );
+
+		if ( is_wp_error( $patterns ) ) {
+			return new WP_Error( 'failed_to_set_pattern_images', __( 'Failed to set the pattern images.', 'woo-gutenberg-products-block' ) );
+		}
+
+		$ai_generated_patterns_content = $this->generate_ai_content_for_patterns( $ai_connection, $token, $patterns, $business_description );
+
+		if ( is_wp_error( $ai_generated_patterns_content ) ) {
+			return new WP_Error( 'failed_to_set_pattern_content', __( 'Failed to set the pattern content.', 'woo-gutenberg-products-block' ) );
+		}
+
+		$patterns_ai_data_post = PatternsHelper::get_patterns_ai_data_post();
+
+		if ( isset( $patterns_ai_data_post->post_content ) && json_decode( $patterns_ai_data_post->post_content ) === $ai_generated_patterns_content ) {
+			return true;
+		}
+
+		$updated_content = PatternsHelper::upsert_patterns_ai_data_post( $ai_generated_patterns_content );
+
+		if ( is_wp_error( $updated_content ) ) {
+			return new WP_Error( 'failed_to_update_patterns_content', __( 'Failed to update patterns content.', 'woo-gutenberg-products-block' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Returns the patterns with AI generated content.
+	 *
+	 * @param Connection      $ai_connection The AI connection.
+	 * @param string|WP_Error $token The JWT token.
+	 * @param array           $patterns The array of patterns.
+	 * @param string          $business_description The business description.
+	 *
+	 * @return array|WP_Error The patterns with AI generated content.
+	 */
+	public function generate_ai_content_for_patterns( $ai_connection, $token, $patterns, $business_description ) {
+		$prompts                 = $this->prepare_prompts( $patterns );
+		$expected_results_format = $this->prepare_expected_results_format( $prompts );
+		$formatted_prompts       = $this->format_prompts_for_ai( $prompts, $business_description, $expected_results_format );
+		$ai_responses            = $this->fetch_and_validate_ai_responses( $ai_connection, $token, $formatted_prompts, $expected_results_format );
+
+		if ( is_wp_error( $ai_responses ) ) {
+			return $ai_responses;
+		}
+
+		return $this->apply_ai_responses_to_patterns( $patterns, $ai_responses );
+	}
+
+	/**
+	 * Prepares the prompts for the AI.
+	 *
+	 * @param array $patterns The array of patterns.
+	 *
+	 * @return array
+	 */
+	private function prepare_prompts( array $patterns ) {
+		$prompts    = [];
+		$result     = [];
+		$group_size = count( self::WC_PATTERNS_IN_THE_ASSEMBLER );
+		$i          = 1;
+		foreach ( $patterns as $pattern ) {
+			$slug = $pattern['slug'] ?? '';
+
+			if ( ! in_array( $slug, self::WC_PATTERNS_IN_THE_ASSEMBLER, true ) ) {
+				continue;
+			}
+
+			$content         = $pattern['content'] ?? '';
+			$counter         = 1;
+			$result[ $slug ] = [];
+
+			if ( isset( $content['titles'] ) ) {
+				foreach ( $content['titles'] as $title ) {
+					$result[ $slug ][ $counter ++ ] = $title['ai_prompt'];
+				}
+			}
+
+			if ( isset( $content['descriptions'] ) ) {
+				foreach ( $content['descriptions'] as $description ) {
+					$result[ $slug ][ $counter ++ ] = $description['ai_prompt'];
+				}
+			}
+
+			if ( isset( $content['buttons'] ) ) {
+				foreach ( $content['buttons'] as $button ) {
+					$result[ $slug ][ $counter ++ ] = $button['ai_prompt'];
+				}
+			}
+
+			$i ++;
+
+			if ( $i === $group_size ) {
+				$prompts[] = $result;
+				$result    = [];
+				$i         = 1;
+			}
+		}
+
+		return $prompts;
+	}
+
+	/**
+	 * Prepares the expected results format for the AI.
+	 *
+	 * @param array $prompts The array of prompts.
+	 *
+	 * @return array
+	 */
+	private function prepare_expected_results_format( array $prompts ) {
+		$expected_results_format = [];
+		foreach ( $prompts as $prompt ) {
+			$expected_result_format = [];
+
+			foreach ( $prompt as $key => $values ) {
+				$expected_result_format[ $key ] = [];
+
+				foreach ( $values as $sub_key => $sub_value ) {
+					$expected_result_format[ $key ][ $sub_key ] = '';
+				}
+			}
+
+			$expected_results_format[] = $expected_result_format;
+		}
+
+		return $expected_results_format;
+	}
+
+	/**
+	 * Formats the prompts for the AI.
+	 *
+	 * @param array  $prompts The array of prompts.
+	 * @param string $business_description The business description.
+	 * @param array  $expected_results_format The expected results format.
+	 *
+	 * @return array
+	 */
+	private function format_prompts_for_ai( array $prompts, string $business_description, array $expected_results_format ) {
+		$i                 = 0;
+		$formatted_prompts = [];
+		foreach ( $prompts as $prompt ) {
+			$formatted_prompts[] = sprintf(
+				"Given the following description '%s' generate long texts for the sections using the following prompts for each one of them: `'%s'`. Ensure each entry is unique and does not repeat the given examples. The response should be an array of data in JSON format. Each element should be an object with the pattern name as the key, and the generated content as values. Do not include backticks or the word json in the response. Here's an example format: `'%s'`",
+				$business_description,
+				wp_json_encode( $prompt ),
+				wp_json_encode( $expected_results_format[ $i ] )
+			);
+			$i ++;
+		}
+
+		return $formatted_prompts;
+	}
+
+	/**
+	 * Fetches and validates the AI responses.
+	 *
+	 * @param Connection      $ai_connection The AI connection.
+	 * @param string|WP_Error $token The JWT token.
+	 * @param array           $formatted_prompts The array of formatted prompts.
+	 * @param array           $expected_results_format The array of expected results format.
+	 *
+	 * @return array|mixed
+	 */
+	private function fetch_and_validate_ai_responses( $ai_connection, $token, $formatted_prompts, $expected_results_format ) {
+		$ai_request_retries = 0;
+		$ai_responses       = [];
+		$success            = false;
+		while ( $ai_request_retries < 5 && ! $success ) {
+			$ai_request_retries ++;
+			$ai_responses = $ai_connection->fetch_ai_responses( $token, $formatted_prompts, 60 );
+
+			if ( is_wp_error( $ai_responses ) ) {
+				continue;
+			}
+
+			if ( empty( $ai_responses ) ) {
+				continue;
+			}
+
+			$loops_success = [];
+			$i             = 0;
+			foreach ( $ai_responses as $ai_response ) {
+				if ( ! isset( $ai_response['completion'] ) ) {
+					$loops_success[] = false;
+					continue;
+				}
+
+				$completion = json_decode( $ai_response['completion'], true );
+
+				if ( ! is_array( $completion ) ) {
+					$loops_success[] = false;
+					continue;
+				}
+
+				$diff = array_diff_key( $expected_results_format[ $i ], $completion );
+				$i ++;
+
+				if ( ! empty( $diff ) ) {
+					$loops_success[] = false;
+					continue;
+				}
+
+				$empty_results = false;
+				foreach ( $completion as $completion_item ) {
+					foreach ( $completion_item as $value ) {
+						if ( empty( $value ) ) {
+							$empty_results = true;
+						}
+					}
+				}
+
+				if ( $empty_results ) {
+					$loops_success[] = false;
+					continue;
+				}
+
+				$loops_success[] = true;
+			}
+
+			if ( ! in_array( false, $loops_success, true ) ) {
+				$success = true;
+			}
+		}
+
+		if ( ! $success ) {
+			return new WP_Error( 'failed_to_fetch_ai_responses', __( 'Failed to fetch AI responses.', 'woo-gutenberg-products-block' ) );
+		}
+
+		return $ai_responses;
+	}
+
+	/**
+	 * Applies the AI responses to the patterns.
+	 *
+	 * @param array $patterns The array of patterns.
+	 * @param array $ai_responses The array of AI responses.
+	 *
+	 * @return mixed
+	 */
+	private function apply_ai_responses_to_patterns( array $patterns, array $ai_responses ) {
+		foreach ( $patterns as $i => $pattern ) {
+			$pattern_slug = $pattern['slug'];
+
+			if ( ! in_array( $pattern_slug, self::WC_PATTERNS_IN_THE_ASSEMBLER, true ) ) {
+				continue;
+			}
+
+			foreach ( $ai_responses as $ai_response ) {
+				$ai_response = json_decode( $ai_response['completion'], true );
+
+				if ( isset( $ai_response[ $pattern_slug ] ) ) {
+					$ai_response_content = $ai_response[ $pattern_slug ];
+
+					$counter = 1;
+					if ( isset( $patterns[ $i ]['content']['titles'] ) ) {
+						foreach ( $patterns[ $i ]['content']['titles'] as $j => $title ) {
+							if ( ! isset( $ai_response_content[ $counter ] ) ) {
+								$ai_response_content[ $counter ] = $ai_response_content[ $counter - 1 ] ?? '';
+							}
+
+							$patterns[ $i ]['content']['titles'][ $j ]['default'] = $ai_response_content[ $counter ];
+
+							$counter ++;
+						}
+					}
+
+					if ( isset( $patterns[ $i ]['content']['descriptions'] ) ) {
+						foreach ( $patterns[ $i ]['content']['descriptions'] as $k => $description ) {
+							if ( ! isset( $ai_response_content[ $counter ] ) ) {
+								$ai_response_content[ $counter ] = $ai_response_content[ $counter - 1 ] ?? '';
+							}
+
+							$patterns[ $i ]['content']['descriptions'][ $k ]['default'] = $ai_response_content[ $counter ];
+
+							$counter ++;
+						}
+					}
+
+					if ( isset( $patterns[ $i ]['content']['buttons'] ) ) {
+						foreach ( $patterns[ $i ]['content']['buttons'] as $l => $button ) {
+							if ( ! isset( $ai_response_content[ $counter ] ) ) {
+								$ai_response_content[ $counter ] = $ai_response_content[ $counter - 1 ] ?? '';
+							}
+
+							$patterns[ $i ]['content']['buttons'][ $l ]['default'] = $ai_response_content[ $counter ];
+
+							$counter ++;
+						}
+					}
+				}
+			}
+		}
+
+		return $patterns;
+	}
+
+	/**
+	 * Assign selected images to patterns.
+	 *
+	 * @param array $patterns_dictionary The array of patterns.
+	 * @param array $selected_images The array of images.
+	 *
+	 * @return array|WP_Error The patterns with images.
+	 */
+	private function assign_selected_images_to_patterns( $patterns_dictionary, $selected_images ) {
 		$patterns_with_images = array();
 
 		foreach ( $patterns_dictionary as $pattern ) {
@@ -98,57 +416,11 @@ class PatternUpdater {
 	}
 
 	/**
-	 * Returns the patterns with AI generated content.
-	 *
-	 * @param Connection      $ai_connection The AI connection.
-	 * @param string|WP_Error $token The JWT token.
-	 * @param array           $patterns The array of patterns.
-	 * @param string          $business_description The business description.
-	 *
-	 * @return array|WP_Error The patterns with AI generated content.
-	 */
-	private function get_patterns_with_content( $ai_connection, $token, $patterns, $business_description ) {
-		if ( is_wp_error( $token ) ) {
-			return $token;
-		}
-
-		$patterns_with_content = $patterns;
-
-		$prompts = array();
-		foreach ( $patterns_with_content as $pattern ) {
-			$prompt  = sprintf( 'Given the following store description: "%s", and the following JSON file representing the content of the "%s" pattern: %s.\n', $business_description, $pattern['name'], wp_json_encode( $pattern['content'] ) );
-			$prompt .= "Replace the titles, descriptions and button texts in each 'default' key using the prompt in the corresponding 'ai_prompt' key by a text that is related to the previous store description (but not the exact text) and matches the 'ai_prompt', the length of each replacement should be similar to the 'default' text length. The text should not be written in first-person. The response should be only a JSON string, with absolutely no intro or explanations.";
-
-			$prompts[] = $prompt;
-		}
-
-		$responses = $ai_connection->fetch_ai_responses( $token, $prompts );
-
-		foreach ( $responses as $key => $response ) {
-			// If the AI response is invalid, we skip the pattern and keep the default content.
-			if ( is_wp_error( $response ) || empty( $response ) ) {
-				continue;
-			}
-
-			if ( ! isset( $response['completion'] ) ) {
-				continue;
-			}
-
-			$pattern_content = json_decode( $response['completion'], true );
-			if ( ! is_null( $pattern_content ) ) {
-				$patterns_with_content[ $key ]['content'] = $pattern_content;
-			}
-		}
-
-		return $patterns_with_content;
-	}
-
-	/**
 	 * Get the Patterns Dictionary.
 	 *
 	 * @return mixed|WP_Error|null
 	 */
-	private function get_patterns_dictionary() {
+	public static function get_patterns_dictionary() {
 		$patterns_dictionary = plugin_dir_path( __FILE__ ) . 'dictionary.json';
 
 		if ( ! file_exists( $patterns_dictionary ) ) {

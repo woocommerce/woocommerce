@@ -74,10 +74,11 @@ class PatternsHelper {
 
 		return $image;
 	}
+
 	/**
 	 * Returns the post that has the generated data by the AI for the patterns.
 	 *
-	 * @return WP_Post|null
+	 * @return \WP_Post|null
 	 */
 	public static function get_patterns_ai_data_post() {
 		$arg = array(
@@ -90,7 +91,7 @@ class PatternsHelper {
 		$query = new \WP_Query( $arg );
 
 		$posts = $query->get_posts();
-		return isset( $posts[0] ) ? $posts[0] : null;
+		return $posts[0] ?? null;
 	}
 
 	/**
@@ -122,41 +123,61 @@ class PatternsHelper {
 	 *
 	 * @param string|null $pattern_slug The pattern slug.
 	 *
-	 * @return mixed|WP_Error|null
+	 * @return array|WP_Error Returns pattern dictionary or WP_Error on failure.
 	 */
 	public static function get_patterns_dictionary( $pattern_slug = null ) {
-
-		$patterns_ai_data_post = self::get_patterns_ai_data_post();
-
-		if ( isset( $patterns_ai_data_post ) ) {
-			$patterns_dictionary = json_decode( $patterns_ai_data_post->post_content, true );
-			if ( empty( $pattern_slug ) ) {
-				return $patterns_dictionary;
-			}
-
-			foreach ( $patterns_dictionary as $pattern_dictionary ) {
-				if ( $pattern_dictionary['slug'] === $pattern_slug ) {
-					return $pattern_dictionary;
-				}
-			}
-		}
-
 		$patterns_dictionary_file = plugin_dir_path( __FILE__ ) . 'dictionary.json';
 
 		if ( ! file_exists( $patterns_dictionary_file ) ) {
 			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woo-gutenberg-products-block' ) );
 		}
 
-		$patterns_dictionary = wp_json_file_decode( $patterns_dictionary_file, array( 'associative' => true ) );
+		$default_patterns_dictionary = wp_json_file_decode( $patterns_dictionary_file, array( 'associative' => true ) );
 
-		if ( ! empty( $pattern_slug ) ) {
-			foreach ( $patterns_dictionary as $pattern_dictionary ) {
-				if ( $pattern_dictionary['slug'] === $pattern_slug ) {
-					return $pattern_dictionary;
-				}
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return new WP_Error( 'json_decode_error', __( 'Error decoding JSON.', 'woo-gutenberg-products-block' ) );
+		}
+
+		$patterns_ai_data_post = self::get_patterns_ai_data_post();
+		$patterns_dictionary   = '';
+		if ( ! empty( $patterns_ai_data_post->post_content ) ) {
+			$patterns_dictionary = json_decode( $patterns_ai_data_post->post_content, true );
+
+			if ( json_last_error() !== JSON_ERROR_NONE ) {
+				return new WP_Error( 'json_decode_error', __( 'Error decoding JSON.', 'woo-gutenberg-products-block' ) );
 			}
 		}
 
-		return $patterns_dictionary;
+		if ( ( $patterns_dictionary === $default_patterns_dictionary || empty( $patterns_dictionary ) ) && $pattern_slug ) {
+			return self::find_pattern_by_slug( $default_patterns_dictionary, $pattern_slug );
+		} elseif ( $pattern_slug && is_array( $patterns_dictionary ) ) {
+			return self::find_pattern_by_slug( $patterns_dictionary, $pattern_slug );
+		} elseif ( is_array( $patterns_dictionary ) ) {
+			return $patterns_dictionary;
+		}
+
+		return $default_patterns_dictionary;
+	}
+
+	/**
+	 * Searches for a pattern by slug in a given dictionary.
+	 *
+	 * @param array  $patterns_dictionary The patterns' dictionary.
+	 * @param string $slug The slug to search for.
+	 *
+	 * @return array|null Returns the pattern if found, otherwise null.
+	 */
+	private static function find_pattern_by_slug( $patterns_dictionary, $slug ) {
+		foreach ( $patterns_dictionary as $pattern ) {
+			if ( ! is_array( $pattern ) ) {
+				continue;
+			}
+
+			if ( $pattern['slug'] === $slug ) {
+				return $pattern;
+			}
+		}
+
+		return null;
 	}
 }

@@ -69,10 +69,10 @@ class Product extends AbstractRoute {
 	 * @return bool|string|\WP_Error|\WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$product_updater = new ProductUpdater();
-		$dummy_products  = $product_updater->fetch_dummy_products_to_update();
+		$product_updater     = new ProductUpdater();
+		$product_information = $request['products_information'] ?? array();
 
-		if ( empty( $dummy_products ) ) {
+		if ( empty( $product_information ) ) {
 			return rest_ensure_response(
 				array(
 					'ai_content_generated' => true,
@@ -80,26 +80,7 @@ class Product extends AbstractRoute {
 			);
 		}
 
-		$index = $request['index'];
-		if ( ! is_numeric( $index ) ) {
-			return rest_ensure_response(
-				array(
-					'ai_content_generated' => false,
-				)
-			);
-		}
-
-		$products_information = $request['products_information'] ?? array();
-
-		if ( ! isset( $dummy_products[ $index ] ) ) {
-			return rest_ensure_response(
-				array(
-					'ai_content_generated' => false,
-				)
-			);
-		}
-
-		$product_updater->update_product_content( $dummy_products[ $index ], $products_information );
+		$product_updater->update_product_content( $product_information );
 
 		return rest_ensure_response(
 			array(
