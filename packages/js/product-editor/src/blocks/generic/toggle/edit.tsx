@@ -64,6 +64,18 @@ export function Edit( {
 		}
 	}
 
+	/**
+	 * Create a Help component in case
+	 * the help attribute is set.
+	 */
+	const help = attributes?.help
+		? sanitizeHTML( attributes.help )?.__html
+		: null;
+
+	const helpComponent = createElement( 'div', {
+		dangerouslySetInnerHTML: { __html: help },
+	} );
+
 	return (
 		<div { ...blockProps }>
 			<ToggleControl
@@ -71,6 +83,7 @@ export function Edit( {
 				checked={ isChecked() }
 				disabled={ disabled }
 				onChange={ handleChange }
+				help={ helpComponent }
 			/>
 			{ disabled && (
 				<p
