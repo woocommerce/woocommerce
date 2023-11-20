@@ -83,7 +83,7 @@ export function Edit( {
 				checked={ isChecked() }
 				disabled={ disabled }
 				onChange={ handleChange }
-				help={ helpComponent }
+				help={ isChecked() ? null : helpComponent }
 			/>
 			{ disabled && (
 				<p
