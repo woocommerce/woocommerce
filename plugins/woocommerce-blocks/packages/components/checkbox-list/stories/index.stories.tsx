@@ -10,7 +10,7 @@ import { useArgs } from '@storybook/client-api';
 import CheckboxList, { type CheckboxListProps } from '..';
 
 export default {
-	title: 'WooCommerce Blocks/@woocommerce-blocks-components/Checkbox List',
+	title: 'External Components/Checkbox List',
 	component: CheckboxList,
 	argTypes: {
 		className: {
