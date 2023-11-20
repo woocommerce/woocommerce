@@ -877,6 +877,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'checkedValue'   => false,
 						'uncheckedValue' => true,
 						'label'          => __( 'This product requires shipping or pickup', 'woocommerce' ),
+						'help'           => __( 'This product will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woo.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
 					),
 				)
 			);
