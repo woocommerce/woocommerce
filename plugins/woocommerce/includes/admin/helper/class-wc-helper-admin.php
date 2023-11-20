@@ -110,7 +110,7 @@ class WC_Helper_Admin {
 	}
 
 	/**
-	 * Fetch featured products from WooCommerce.com and serve them
+	 * Fetch featured products from Woo.com and serve them
 	 * as JSON.
 	 */
 	public static function get_featured() {

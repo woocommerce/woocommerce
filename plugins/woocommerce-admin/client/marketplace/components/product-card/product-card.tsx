@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Card } from '@wordpress/components';
 import classnames from 'classnames';
-import { queueRecordEvent } from '@woocommerce/tracks';
+import { ExtraProperties, queueRecordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -20,7 +20,7 @@ export interface ProductCardProps {
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
-	const { isLoading, type, tracksData } = props;
+	const { isLoading, type } = props;
 	// Get the product if provided; if not provided, render a skeleton loader
 	const product = props.product ?? {
 		title: '',
@@ -36,6 +36,32 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	// We hardcode this for now while we only display prices in USD.
 	const currencySymbol = '$';
 
+	function recordTracksEvent( event: string, data: ExtraProperties ) {
+		const tracksData = props.tracksData;
+
+		if ( tracksData.position ) {
+			data.position = tracksData.position;
+		}
+
+		if ( tracksData.label ) {
+			data.label = tracksData.label;
+		}
+
+		if ( tracksData.group ) {
+			data.group = tracksData.group;
+		}
+
+		if ( tracksData.searchTerm ) {
+			data.search_term = tracksData.searchTerm;
+		}
+
+		if ( tracksData.category ) {
+			data.category = tracksData.category;
+		}
+
+		queueRecordEvent( event, data );
+	}
+
 	const isTheme = type === ProductType.theme;
 	let productVendor: string | JSX.Element | null = product?.vendorName;
 	if ( product?.vendorName && product?.vendorUrl ) {
@@ -44,25 +70,12 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 				href={ product.vendorUrl }
 				rel="noopener noreferrer"
 				onClick={ () => {
-					queueRecordEvent(
+					recordTracksEvent(
 						'marketplace_product_card_vendor_clicked',
 						{
 							product: product.title,
 							vendor: product.vendorName,
 							product_type: type,
-							position: tracksData.position,
-							...( tracksData.label && {
-								label: tracksData.label,
-							} ),
-							...( tracksData.group && {
-								group: tracksData.group,
-							} ),
-							...( tracksData.searchTerm && {
-								search_term: tracksData.searchTerm,
-							} ),
-							...( tracksData.category && {
-								category: tracksData.category,
-							} ),
 						}
 					);
 				} }
@@ -117,27 +130,12 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 									href={ product.url }
 									rel="noopener noreferrer"
 									onClick={ () => {
-										queueRecordEvent(
+										recordTracksEvent(
 											'marketplace_product_card_clicked',
 											{
 												product: product.title,
 												vendor: product.vendorName,
 												product_type: type,
-												position: tracksData.position,
-												...( tracksData.label && {
-													label: tracksData.label,
-												} ),
-												...( tracksData.group && {
-													group: tracksData.group,
-												} ),
-												...( tracksData.searchTerm && {
-													search_term:
-														tracksData.searchTerm,
-												} ),
-												...( tracksData.category && {
-													category:
-														tracksData.category,
-												} ),
 											}
 										);
 									} }
