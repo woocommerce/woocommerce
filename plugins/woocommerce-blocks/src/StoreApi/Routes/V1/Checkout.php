@@ -501,12 +501,21 @@ class Checkout extends AbstractCartRoute {
 					$request['billing_address']['first_name'],
 					$request['billing_address']['last_name']
 				);
-				// Log the customer in.
-				wc_set_customer_auth_cookie( $customer_id );
 
-				// Associate customer with the order.
+				// Associate customer with the order. This is done before login to ensure the order is associated with
+				// the correct customer if login fails.
 				$this->order->set_customer_id( $customer_id );
 				$this->order->save();
+
+				// Log the customer in to WordPress. Doing this inline instead of using `wc_set_customer_auth_cookie`
+				// because wc_set_customer_auth_cookie forces the use of session cookie.
+				wp_set_current_user( $customer_id );
+				wp_set_auth_cookie( $customer_id, true );
+
+				// Init session cookie if the session cookie handler exists.
+				if ( is_callable( [ WC()->session, 'init_session_cookie' ] ) ) {
+					WC()->session->init_session_cookie();
+				}
 			}
 		} catch ( \Exception $error ) {
 			switch ( $error->getMessage() ) {
