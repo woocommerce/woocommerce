@@ -12,7 +12,7 @@ import type { InputHTMLAttributes } from 'react';
 import Label from '../label';
 import './style.scss';
 
-interface TextInputProps
+export interface TextInputProps
 	extends Omit<
 		InputHTMLAttributes< HTMLInputElement >,
 		'onChange' | 'onBlur'
@@ -21,9 +21,9 @@ interface TextInputProps
 	ariaLabel?: string;
 	label?: string | undefined;
 	ariaDescribedBy?: string | undefined;
-	screenReaderLabel?: string;
+	screenReaderLabel?: string | undefined;
 	help?: string;
-	feedback?: boolean | JSX.Element;
+	feedback?: JSX.Element | null;
 	autoComplete?: string | undefined;
 	onChange: ( newValue: string ) => void;
 	onBlur?: ( newValue: string ) => void;
