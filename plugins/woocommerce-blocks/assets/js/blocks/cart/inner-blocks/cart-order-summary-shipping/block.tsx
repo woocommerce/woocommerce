@@ -4,7 +4,7 @@
 import { TotalsShipping } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
-import { TotalsWrapper } from '@woocommerce/blocks-checkout';
+import { TotalsWrapper } from '@woocommerce/blocks-components';
 import { getSetting } from '@woocommerce/settings';
 
 const Block = ( { className }: { className: string } ): JSX.Element | null => {

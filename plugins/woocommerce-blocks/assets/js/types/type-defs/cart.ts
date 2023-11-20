@@ -162,6 +162,7 @@ export interface CartFeeItemTotals extends CurrencyInfo {
 }
 
 export interface CartFeeItem {
+	key: string;
 	id: string;
 	name: string;
 	totals: CartFeeItemTotals;

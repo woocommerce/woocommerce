@@ -229,8 +229,11 @@ describe( 'TotalsShipping', () => {
 					currency={ {
 						code: 'USD',
 						symbol: '$',
-						position: 'left',
-						precision: 2,
+						minorUnit: 2,
+						decimalSeparator: '.',
+						prefix: '',
+						suffix: '',
+						thousandSeparator: ', ',
 					} }
 					values={ {
 						total_shipping: '0',
@@ -274,8 +277,11 @@ describe( 'TotalsShipping', () => {
 					currency={ {
 						code: 'USD',
 						symbol: '$',
-						position: 'left',
-						precision: 2,
+						minorUnit: 2,
+						decimalSeparator: '.',
+						prefix: '',
+						suffix: '',
+						thousandSeparator: ', ',
 					} }
 					values={ {
 						total_shipping: '0',
@@ -320,8 +326,11 @@ describe( 'TotalsShipping', () => {
 					currency={ {
 						code: 'USD',
 						symbol: '$',
-						position: 'left',
-						precision: 2,
+						minorUnit: 2,
+						decimalSeparator: '.',
+						prefix: '',
+						suffix: '',
+						thousandSeparator: ', ',
 					} }
 					values={ {
 						total_shipping: '0',

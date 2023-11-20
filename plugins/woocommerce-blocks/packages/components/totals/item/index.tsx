@@ -4,16 +4,16 @@
 import classnames from 'classnames';
 import { isValidElement } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
-import type { Currency } from '@woocommerce/price-format';
+import type { Currency } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import FormattedMonetaryAmount from '../../../../components/formatted-monetary-amount';
+import FormattedMonetaryAmount from '../../formatted-monetary-amount';
 
 export interface TotalsItemProps {
-	className?: string;
+	className?: string | undefined;
 	currency: Currency;
 	label: string;
 	// Value may be a number, or react node. Numbers are passed to FormattedMonetaryAmount.

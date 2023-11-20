@@ -3,8 +3,8 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
-import { RemovableChip } from '@woocommerce/blocks-components';
-import { applyCheckoutFilter, TotalsItem } from '@woocommerce/blocks-checkout';
+import { RemovableChip, TotalsItem } from '@woocommerce/blocks-components';
+import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { getSetting } from '@woocommerce/settings';
 import {
 	CartResponseCouponItemWithLabel,
