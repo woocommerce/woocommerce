@@ -59,16 +59,20 @@ export function useProductVariationsHelper() {
 		'id'
 	);
 	const [ _isGenerating, setIsGenerating ] = useState( false );
-	const [ generateError, setgenerateError ] = useState( undefined );
 
-	const { isGeneratingVariations } = useSelect(
+	const { isGeneratingVariations, generateError } = useSelect(
 		( select ) => {
-			const { isGeneratingVariations: getIsGeneratingVariations } =
-				select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			const {
+				isGeneratingVariations: getIsGeneratingVariations,
+				generateProductVariationsError,
+			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 			return {
 				isGeneratingVariations: getIsGeneratingVariations<
 					boolean | undefined
 				>( {
+					product_id: productId,
+				} ),
+				generateError: generateProductVariationsError( {
 					product_id: productId,
 				} ),
 			};
@@ -157,9 +161,6 @@ export function useProductVariationsHelper() {
 					const url = getNewPath( {}, `/product/${ productId }` );
 					navigateTo( { url } );
 				}
-			} )
-			.catch( ( error ) => {
-				setgenerateError( error );
 			} );
 	},
 	[] );
