@@ -117,7 +117,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_system_status_info_environment() {
-		$store_id = get_option( \WC_Install::STORE_ID_OPTION, $store_id );
+		$store_id = get_option( \WC_Install::STORE_ID_OPTION, null );
 		if ( empty( $store_id ) ) {
 			$store_id = 'a1b2c3d4-e5f6-a1b2-c3d4-a1b2c3d4e5f6';
 			update_option( \WC_Install::STORE_ID_OPTION, $store_id );
