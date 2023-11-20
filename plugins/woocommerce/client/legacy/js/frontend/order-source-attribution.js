@@ -1,16 +1,16 @@
-( function ( $, params ) {
+( function ( $, wc_order_source_attribution ) {
 	'use strict';
 
+	const params = wc_order_source_attribution.params;
 	const prefix = params.prefix;
 	const cookieLifetime = Number( params.lifetime );
 	const sessionLength = Number( params.session );
 
-	window.woocommerce_order_source_attribution = {};
 
-	woocommerce_order_source_attribution.initOrderTracking = () => {
+	wc_order_source_attribution.initOrderTracking = () => {
 
 		if ( params.allowTracking === 'no' ) {
-			woocommerce_order_source_attribution.removeTrackingCookies();
+			wc_order_source_attribution.removeTrackingCookies();
 			return;
 		}
 
@@ -66,19 +66,19 @@
 	/**
 	 * Enable or disable order tracking analytics and marketing consent init and change.
 	 */
-	woocommerce_order_source_attribution.setAllowTrackingConsent = ( allow ) => {
+	wc_order_source_attribution.setAllowTrackingConsent = ( allow ) => {
 		if ( ! allow ) {
 			return;
 		}
 
 		params.allowTracking = 'yes';
-		woocommerce_order_source_attribution.initOrderTracking();
+		wc_order_source_attribution.initOrderTracking();
 	}
 
 	/**
 	 * Remove sourcebuster.js cookies whenever tracking is disabled or consent is revoked.
 	 */
-	woocommerce_order_source_attribution.removeTrackingCookies = () => {
+	wc_order_source_attribution.removeTrackingCookies = () => {
 		const domain = window.location.hostname;
 		const sbCookies = [
 			'sbjs_current',
@@ -99,6 +99,6 @@
 	}
 
 	// Run init.
-	woocommerce_order_source_attribution.initOrderTracking();
+	wc_order_source_attribution.initOrderTracking();
 
-}( jQuery, window.wc_order_attribute_source_params ) );
+}( jQuery, window.wc_order_source_attribution ) );
