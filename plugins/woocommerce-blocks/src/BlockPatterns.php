@@ -277,6 +277,12 @@ class BlockPatterns {
 	 * @param string $value The option value.
 	 */
 	public function schedule_on_option_update( $option, $value ) {
+		$last_business_description = get_option( 'last_business_description_with_ai_content_generated' );
+
+		if ( $last_business_description === $value ) {
+			return;
+		}
+
 		$this->schedule_patterns_content_update( $value );
 	}
 

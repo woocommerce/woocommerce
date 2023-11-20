@@ -89,20 +89,6 @@ class Products extends AbstractRoute {
 			$business_description = get_option( 'woo_ai_describe_store_description' );
 		}
 
-		$last_business_description = get_option( 'last_business_description_with_ai_content_generated' );
-
-		if ( $last_business_description === $business_description ) {
-			return rest_ensure_response(
-				$this->prepare_item_for_response(
-					[
-						'ai_content_generated' => true,
-						'product_content'      => null,
-					],
-					$request
-				)
-			);
-		}
-
 		$ai_connection = new Connection();
 
 		$site_id = $ai_connection->get_site_id();
