@@ -12,6 +12,9 @@
 			"type": "string",
 			"__experimentalRole": "content"
 		},
+		"help": {
+			"type": "string"
+		},
 		"property": {
 			"type": "string"
 		},
