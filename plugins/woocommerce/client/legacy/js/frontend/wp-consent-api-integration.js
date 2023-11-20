@@ -8,7 +8,7 @@
 		for ( const key in changedConsentCategory ) {
 			if ( changedConsentCategory.hasOwnProperty( key ) ) {
 				if ( key === CONSENT_CATEGORY_MARKING && changedConsentCategory[ key ] === 'allow' ) {
-					window.woocommerce_order_source_attribution.setAllowTrackingConsent( true );
+					window.wc_order_source_attribution.setAllowTrackingConsent( true );
 				}
 			}
 		}
@@ -17,7 +17,7 @@
 	// Init order source attribution as soon as consent type is defined.
 	$( document ).on( 'wp_consent_type_defined', () => {
 		if ( wp_has_consent( CONSENT_CATEGORY_MARKING ) ) {
-			window.woocommerce_order_source_attribution.setAllowTrackingConsent( true );
+			window.wc_order_source_attribution.setAllowTrackingConsent( true );
 		}
 	} );
 }( jQuery ) );
