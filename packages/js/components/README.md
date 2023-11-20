@@ -14,7 +14,7 @@ pnpm install @woocommerce/components --save
 
 ```jsx
 /**
- * Woocommerce dependencies
+ * WooCommerce dependencies
  */
 import { Card } from '@woocommerce/components';
 

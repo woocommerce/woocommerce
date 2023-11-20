@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Only generate product editor templates on WCA routes.

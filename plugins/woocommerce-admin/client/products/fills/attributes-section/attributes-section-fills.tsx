@@ -38,7 +38,7 @@ export const AttributesSectionFills = () => (
 						</span>
 						<Link
 							className="woocommerce-form-section__header-link"
-							href="https://woocommerce.com/document/managing-product-taxonomies/#product-attributes"
+							href="https://woo.com/document/managing-product-taxonomies/#product-attributes"
 							target="_blank"
 							type="external"
 							onClick={ () => {

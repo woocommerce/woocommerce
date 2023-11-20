@@ -17,6 +17,7 @@ export type CheckboxProps = {
 	onChange: ( selected: boolean | string | null ) => void;
 	checkedValue?: string | null;
 	uncheckedValue?: string | null;
+	disabled?: boolean;
 };
 
 export const Checkbox: React.FC< CheckboxProps > = ( {
@@ -27,6 +28,7 @@ export const Checkbox: React.FC< CheckboxProps > = ( {
 	title,
 	checkedValue,
 	uncheckedValue,
+	disabled,
 }: CheckboxProps ) => {
 	function isChecked() {
 		if ( checkedValue !== undefined ) {
@@ -50,6 +52,7 @@ export const Checkbox: React.FC< CheckboxProps > = ( {
 					label={ label }
 					checked={ isChecked() }
 					onChange={ handleChange }
+					disabled={ disabled }
 				/>
 				{ tooltip && (
 					<Tooltip

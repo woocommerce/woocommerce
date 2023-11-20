@@ -22,7 +22,8 @@ import {
  * Internal dependencies
  */
 import { EditDownloadsModalProps } from './types';
-import { UnionIcon } from './union-icon';
+import { UnionIcon } from './images/union-icon';
+import { DownloadsCustomImage } from './images/downloads-custom-image';
 
 export interface Image {
 	id: number;
@@ -131,8 +132,8 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 			className="woocommerce-edit-downloads-modal"
 		>
 			<div className="woocommerce-edit-downloads-modal__preview">
-				{ isImage( file ) && (
-					<ImageGallery allowDragging={ false } columns={ 1 }>
+				<ImageGallery allowDragging={ false } columns={ 1 }>
+					{ isImage( file ) ? (
 						<ImageGalleryItem
 							key={ id }
 							alt={ name }
@@ -140,8 +141,10 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 							id={ `${ id }` }
 							isCover={ false }
 						/>
-					</ImageGallery>
-				) }
+					) : (
+						<DownloadsCustomImage />
+					) }
+				</ImageGallery>
 				<FormFileUpload
 					onChange={ handleFormFileUploadChange }
 					render={ ( { openFileDialog } ) => (

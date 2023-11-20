@@ -63,7 +63,7 @@ class SimpleInboxNote {
 		// collation doesn't support Unicode.
 		$note->set_content(
 			sprintf(
-				'This is your note example contents. You may enter up to 320 displayable characters here. For more information on character limit, visit our <a href="https://developer.woocommerce.com/2021/11/10/introducing-a-320-character-limit-to-inbox-notes/">blogpost</a>.'
+				'This is your note example contents. You may enter up to 320 displayable characters here. For more information on character limit, visit our <a href="https://developer.woo.com/2021/11/10/introducing-a-320-character-limit-to-inbox-notes/">blogpost</a>.'
 			)
 		);
 

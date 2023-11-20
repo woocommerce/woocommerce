@@ -30,6 +30,7 @@ export function Edit( {
 		max,
 		required,
 		tooltip,
+		disabled,
 	} = attributes;
 	const [ value, setValue ] = useProductEntityProp( property, {
 		postType,
@@ -91,6 +92,7 @@ export function Edit( {
 				} }
 				required={ required }
 				tooltip={ tooltip }
+				disabled={ disabled }
 			/>
 		</div>
 	);
