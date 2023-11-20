@@ -24,3 +24,6 @@ build
 build-module
 build-style
 woo-ai/
+
+#Secrets
+.env

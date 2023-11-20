@@ -35,4 +35,37 @@ $toned-down-purple: mix(white, $woocommerce-purple, 50%); // 50% white
 			}
 		}
 	}
+	form.chat-form {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		margin-top: 10px;
+
+		> .components-base-control {
+			flex-grow: 1;
+			margin-right: 10px;
+		}
+
+		.woo-wizard-mic-button {
+			margin-right: 10px;
+		}
+
+		textarea {
+			resize: vertical;
+		}
+
+		.woo-wizard-submit-button {
+			padding: 15px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			background-color: $woocommerce-purple;
+			color: white;
+			font-size:20px;
+			cursor: pointer;
+
+			&:hover {
+				background-color: $toned-down-purple;
+			}
+		}
+	}
 }
