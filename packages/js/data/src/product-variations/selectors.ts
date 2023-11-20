@@ -22,3 +22,18 @@ export const isGeneratingVariations = (
 	);
 	return state.requesting[ itemQuery ];
 };
+export const generateProductVariationsError = (
+	state: ResourceState,
+	idQuery: IdQuery
+) => {
+	const urlParameters = getUrlParameters(
+		WC_PRODUCT_VARIATIONS_NAMESPACE,
+		idQuery
+	);
+	const { key } = parseId( idQuery, urlParameters );
+	const itemQuery = getRequestIdentifier(
+		CRUD_ACTIONS.GENERATE_VARIATIONS,
+		key
+	);
+	return state.errors[ itemQuery ];
+};
