@@ -34,7 +34,6 @@ export default function ProductListContent( props: {
 					key={ product.id }
 					type={ props.type }
 					product={ {
-						position: index + 1,
 						title: product.title,
 						image: product.image,
 						type: product.type,
@@ -49,12 +48,6 @@ export default function ProductListContent( props: {
 							  ] )
 							: '',
 						price: product.price,
-						...( product.label && { label: product.label } ),
-						...( props.group && { group: props.group } ),
-						...( props.searchTerm && {
-							searchTerm: props.searchTerm,
-						} ),
-						...( props.category && { category: props.category } ),
 						url: appendURLParams(
 							product.url,
 							Object.entries(
@@ -62,6 +55,15 @@ export default function ProductListContent( props: {
 							)
 						),
 						description: product.description,
+					} }
+					tracksData={ {
+						position: index + 1,
+						...( product.label && { label: product.label } ),
+						...( props.group && { group: props.group } ),
+						...( props.searchTerm && {
+							searchTerm: props.searchTerm,
+						} ),
+						...( props.category && { category: props.category } ),
 					} }
 				/>
 			) ) }

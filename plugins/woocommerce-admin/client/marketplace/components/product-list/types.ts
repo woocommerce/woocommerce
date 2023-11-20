@@ -42,6 +42,14 @@ export interface Product {
 	category?: string;
 }
 
+export interface ProductTracksData {
+	position?: number;
+	label?: string;
+	group?: string;
+	searchTerm?: string;
+	category?: string;
+}
+
 export enum ProductType {
 	theme = 'theme',
 	extension = 'extension',

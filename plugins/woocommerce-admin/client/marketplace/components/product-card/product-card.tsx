@@ -4,26 +4,26 @@
 import { __ } from '@wordpress/i18n';
 import { Card } from '@wordpress/components';
 import classnames from 'classnames';
-import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
+import { queueRecordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import './product-card.scss';
-import { Product, ProductType } from '../product-list/types';
+import { Product, ProductTracksData, ProductType } from '../product-list/types';
 
 export interface ProductCardProps {
 	type?: string;
 	product?: Product;
 	isLoading?: boolean;
+	tracksData: ProductTracksData;
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
-	const { isLoading, type } = props;
+	const { isLoading, type, tracksData } = props;
 	// Get the product if provided; if not provided, render a skeleton loader
 	const product = props.product ?? {
 		title: '',
-		position: '',
 		description: '',
 		vendorName: '',
 		vendorUrl: '',
@@ -31,10 +31,6 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		url: '',
 		price: 0,
 		image: '',
-		label: '',
-		group: '',
-		searchTerm: '',
-		category: '',
 	};
 
 	// We hardcode this for now while we only display prices in USD.
@@ -54,11 +50,19 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 							product: product.title,
 							vendor: product.vendorName,
 							product_type: type,
-							position: product.position,
-							...( product.label && { label: product.label } ),
-							...( product.group && { group: product.group } ),
-							...( product.searchTerm && { search_term: product.searchTerm } ),
-							...( product.category && { category: product.category } ),
+							position: tracksData.position,
+							...( tracksData.label && {
+								label: tracksData.label,
+							} ),
+							...( tracksData.group && {
+								group: tracksData.group,
+							} ),
+							...( tracksData.searchTerm && {
+								search_term: tracksData.searchTerm,
+							} ),
+							...( tracksData.category && {
+								category: tracksData.category,
+							} ),
 						}
 					);
 				} }
@@ -119,19 +123,20 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 												product: product.title,
 												vendor: product.vendorName,
 												product_type: type,
-												position: product.position,
-												...( product.label && {
-													label: product.label,
+												position: tracksData.position,
+												...( tracksData.label && {
+													label: tracksData.label,
 												} ),
-												...( product.group && {
-													group: product.group,
+												...( tracksData.group && {
+													group: tracksData.group,
 												} ),
-												...( product.searchTerm && {
+												...( tracksData.searchTerm && {
 													search_term:
-														product.searchTerm,
+														tracksData.searchTerm,
 												} ),
-												...( product.category && {
-													category: product.category,
+												...( tracksData.category && {
+													category:
+														tracksData.category,
 												} ),
 											}
 										);
