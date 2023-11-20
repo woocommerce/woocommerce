@@ -221,16 +221,18 @@ class SourceAttributionController implements RegisterHooksInterface {
 		 */
 		$allow_tracking = wc_bool_to_string( apply_filters( 'wc_order_source_attribution_allow_tracking', true ) );
 
-		// Pass parameters to Order Source Attribution JS.
-		$params = array(
-			'lifetime'      => $lifetime,
-			'session'       => $session_length,
-			'ajaxurl'       => admin_url( 'admin-ajax.php' ),
-			'prefix'        => $this->field_prefix,
-			'allowTracking' => $allow_tracking,
+		// Create Order Source Attribution JS namespace with parameters.
+		$namespace = array(
+			'params' => array (
+				'lifetime'      => $lifetime,
+				'session'       => $session_length,
+				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
+				'prefix'        => $this->field_prefix,
+				'allowTracking' => $allow_tracking,
+			),
 		);
 
-		wp_localize_script( 'woocommerce-order-source-attribution-js', 'wc_order_attribute_source_params', $params );
+		wp_localize_script( 'woocommerce-order-source-attribution-js', 'wc_order_source_attribution', $namespace );
 	}
 
 	/**
