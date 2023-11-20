@@ -150,7 +150,7 @@ test.describe( 'Checkout page', () => {
 			'2'
 		);
 		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
-		totalPrice = Number( totalPrice.slice( 1 ).replace( /[^\d.-]/g, '' ) );
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
