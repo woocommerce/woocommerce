@@ -38,7 +38,8 @@ export default function Update( props: UpdateProps ) {
 
 	function update() {
 		recordEvent( 'marketplace_product_update_button_clicked', {
-			product_slug: props.subscription.product_slug,
+			product_zip_slug: props.subscription.zip_slug,
+			product_id: props.subscription.product_id,
 		} );
 
 		if ( ! canUpdate ) {
@@ -93,7 +94,8 @@ export default function Update( props: UpdateProps ) {
 				} );
 
 				recordEvent( 'marketplace_product_updated', {
-					product_slug: props.subscription.product_slug,
+					product_zip_slug: props.subscription.zip_slug,
+					product_id: props.subscription.product_id,
 				} );
 			} )
 			.catch( () => {
@@ -117,7 +119,8 @@ export default function Update( props: UpdateProps ) {
 				setIsUpdating( false );
 
 				recordEvent( 'marketplace_product_update_failed', {
-					product_slug: props.subscription.product_slug,
+					product_zip_slug: props.subscription.zip_slug,
+					product_id: props.subscription.product_id,
 				} );
 			} );
 	}

@@ -24,7 +24,8 @@ export default function SubscribeButton( props: SubscribeProps ) {
 
 	function recordTracksEvent() {
 		queueRecordEvent( 'marketplace_subscribe_button_clicked', {
-			product_slug: props.subscription.product_slug,
+			product_zip_slug: props.subscription.zip_slug,
+			product_id: props.subscription.product_id,
 		} );
 	}
 

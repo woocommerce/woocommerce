@@ -49,7 +49,8 @@ export default function Install( props: InstallProps ) {
 
 	const install = () => {
 		recordEvent( 'marketplace_product_install_button_clicked', {
-			product_slug: props.subscription.product_slug,
+			product_zip_slug: props.subscription.zip_slug,
+			product_id: props.subscription.product_id,
 		} );
 
 		startInstall();
@@ -73,7 +74,8 @@ export default function Install( props: InstallProps ) {
 				} );
 
 				recordEvent( 'marketplace_product_installed', {
-					product_slug: props.subscription.product_slug,
+					product_zip_slug: props.subscription.zip_slug,
+					product_id: props.subscription.product_id,
 				} );
 			} )
 			.catch( ( error ) => {
@@ -103,7 +105,8 @@ export default function Install( props: InstallProps ) {
 				} );
 
 				recordEvent( 'marketplace_product_install_failed', {
-					product_slug: props.subscription.product_slug,
+					product_zip_slug: props.subscription.zip_slug,
+					product_id: props.subscription.product_id,
 				} );
 			} );
 	};
