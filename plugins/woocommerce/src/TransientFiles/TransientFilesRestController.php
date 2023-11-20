@@ -446,7 +446,7 @@ class TransientFilesRestController {
 			 * @param array $transient_file_info Information about the served file, as returned by get_file_by_name.
 			 * @param bool $is_json_rest_api_request True if the request came from the JSON API endpoint, false if it came from the authenticated endpoint.
 			 *
-			 * @since 8.4.0
+			 * @since 8.5.0
 			 */
 			do_action( 'woocommerce_transient_file_contents_served', $transient_file_info, $is_json_rest_api_request );
 		} catch ( Exception $e ) {

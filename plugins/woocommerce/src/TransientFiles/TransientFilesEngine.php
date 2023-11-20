@@ -134,7 +134,7 @@ class TransientFilesEngine {
 			 * @param array $transient_file_creation_data An array with the following keys: 'created_via' = 'template', 'template_name', 'variables.
 			 * @return array The metadata array that will actually be stored for the transient file.
 			 *
-			 * @since 8.4.0
+			 * @since 8.5.0
 			 */
 			$metadata = apply_filters( 'woocommerce_transient_file_creation_metadata', $metadata, $transient_file_creation_data );
 
@@ -183,7 +183,7 @@ class TransientFilesEngine {
 			 * @param array $metadata The metadata that will be stored for the transient file (not including expiration date and 'is_public').
 			 * @return string The actual name that will be given to the file.
 			 *
-			 * @since 8.4.0
+			 * @since 8.5.0
 			 */
 			$filename = apply_filters( 'woocommerce_transient_file_creation_filename', $filename, $transient_file_creation_data, $metadata );
 
@@ -294,7 +294,7 @@ class TransientFilesEngine {
 		 * @param int $lifetime_seconds The default lifetime value.
 		 * @return int The actual lifetime to use, an expiration date of less than (now + lifetime) will throw an error.
 		 *
-		 * @since 8.4.0
+		 * @since 8.5.0
 		 */
 		return apply_filters( 'woocommerce_transient_files_minimum_expiration_seconds', 60 );
 	}
@@ -321,7 +321,7 @@ class TransientFilesEngine {
 		 * @param string $transient_files_directory The default directory for transient files.
 		 * @return string The actual directory to use for storing transient files.
 		 *
-		 * @since 8.4.0
+		 * @since 8.5.0
 		 */
 		$transient_files_directory = apply_filters( 'woocommerce_transient_files_directory', $transient_files_directory );
 
@@ -369,7 +369,7 @@ class TransientFilesEngine {
 		 * @param string|null $parent_template_path Path of the parent template file when rendering a relative secondary template via "$this->render" from within the template itself, null otherwise.
 		 * @return string|null The actual template file path to use, or null if no template is found with the specified name.
 		 *
-		 * @since 8.4.0
+		 * @since 8.5.0
 		 */
 		$template_path = apply_filters( 'woocommerce_transient_file_creation_template_file_path', $template_path, $template_name, $relative ? $parent_template_path : null );
 
@@ -797,7 +797,7 @@ $collate;";
 				 * @param int $interval The default time before the next action run, in seconds.
 				 * @return int The time to actually wait before the next action run, in seconds.
 				 *
-				 * @since 8.4.0
+				 * @since 8.5.0
 				 */
 				$new_interval = apply_filters( 'woocommerce_delete_expired_transient_files_interval', DAY_IN_SECONDS );
 			}

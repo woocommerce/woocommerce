@@ -2643,7 +2643,7 @@ LIMIT 250
 /**
  * Create the directory to store transient files created with the TransientFilesEngine class.
  */
-function wc_update_840_create_transient_files_directory() {
+function wc_update_850_create_transient_files_directory() {
 	$transient_files_directory = wp_upload_dir()['basedir'] . '/woocommerce_transient_files';
 	if ( ! is_dir( $transient_files_directory ) ) {
 		wp_mkdir_p( $transient_files_directory );
