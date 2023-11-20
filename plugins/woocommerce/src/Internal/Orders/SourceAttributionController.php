@@ -181,7 +181,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 		wp_enqueue_script(
 			'sourcebuster-js',
 			plugins_url( "assets/js/sourcebuster/sourcebuster{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
-			array( 'jquery' ),
+			array(),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
