@@ -302,8 +302,11 @@ class TransientFilesEngine {
 	/**
 	 * Get the base directory where transient files are stored.
 	 *
-	 * The default directory is the WordPress uploads directory plus "woocommerce_transient_files". This can
+	 * The default base directory is the WordPress uploads directory plus "woocommerce_transient_files". This can
 	 * be changed by using the woocommerce_transient_files_directory filter.
+	 *
+	 * The actual directory for each existing file will be the base directory plus the expiration date
+	 * of the file formatted as 'yyyy-mm-dd'.
 	 *
 	 * @return string Effective base directory where transient files are stored.
 	 * @throws Exception The base directory (possibly changed via filter) doesn't exist.
