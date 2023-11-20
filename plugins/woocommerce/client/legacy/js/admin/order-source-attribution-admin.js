@@ -9,10 +9,10 @@ jQuery( document ).ready( ( $ ) => {
 	// Handle the "Details" container toggle.
 	$( '.woocommerce-order-source-attribution-details-toggle' )
 		.on( 'click', ( e ) => {
-			const $this = $( e.target ).hasClass( 'woocommerce-order-source-attribution-details-toggle' ) ? $( e.target ) : $( e.target ).closest( '.woocommerce-order-source-attribution-details-toggle');
+			const $this = $( e.target ).closest( '.woocommerce-order-source-attribution-details-toggle');
 			const $container = $this.closest( '.order-source-attribution-metabox' )
 											.find( '.woocommerce-order-source-attribution-details-container' );
-			var toggle = '';
+			let toggle = '';
 
 			e.preventDefault();
 
