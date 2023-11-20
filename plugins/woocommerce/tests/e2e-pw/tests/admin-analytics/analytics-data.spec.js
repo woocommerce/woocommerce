@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Analytics-related tests', () => {
-	let categoryIds, productIds, nowOrderIds, setupPage;
+	let categoryIds, productIds, orderIds, setupPage;
 
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -25,7 +25,7 @@ test.describe( 'Analytics-related tests', () => {
 
 		// create a number of products to be used in orders
 		const productsArray = [];
-		const nowOrdersArray = [];
+		const ordersArray = [];
 		let variationIds = [];
 
 		// 3 simple products
@@ -104,9 +104,9 @@ test.describe( 'Analytics-related tests', () => {
 			} );
 		}
 
-		// set up 15 orders
+		// set up 10 orders
 		for ( let i = 0; i < 10; i++ ) {
-			nowOrdersArray.push( {
+			ordersArray.push( {
 				status: 'completed',
 				line_items: [
 					{
@@ -132,22 +132,17 @@ test.describe( 'Analytics-related tests', () => {
 		}
 		// create the orders
 		await api.post( 'orders/batch', {
-			create: nowOrdersArray
+			create: ordersArray
 		} ).then( ( response ) => {
-			nowOrderIds = response.data.create.map( order => order.id );
+			orderIds = response.data.create.map( order => order.id );
 		} );
 
 		// process the Action Scheduler tasks
 		setupPage = await browser.newPage();
 		await setupPage.waitForTimeout( 5000 ); // bad
 		await setupPage.goto( '?process-waiting-actions' );
-
 	} );
 
-	// test.beforeEach( async( { page } ) => {
-	// 	await page.waitForTimeout( 5000 ); // bad
-	// 	await page.goto( '?process-waiting-actions' );
-	// } );
 
 	test.afterAll( async( { baseURL } ) => {
 		const api = new wcApi( {
@@ -161,7 +156,7 @@ test.describe( 'Analytics-related tests', () => {
 		// delete the products
 		await api.post( 'products/batch', { delete: productIds } );
 		// delete the orders
-		await api.post( 'orders/batch', { delete: nowOrderIds } );
+		await api.post( 'orders/batch', { delete: orderIds } );
 	} );
 
 	test( 'confirms correct summary numbers on overview page', async( { page } ) => {
