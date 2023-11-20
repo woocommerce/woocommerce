@@ -10,7 +10,7 @@ import type { ReactNode } from 'react';
  */
 import './style.scss';
 
-interface TotalsWrapperProps {
+export interface TotalsWrapperProps {
 	children: ReactNode;
 	/* If this TotalsWrapper is being used to wrap a Slot */
 	slotWrapper?: boolean;

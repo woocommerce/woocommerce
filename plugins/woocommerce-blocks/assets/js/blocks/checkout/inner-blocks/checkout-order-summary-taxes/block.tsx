@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { TotalsTaxes, TotalsWrapper } from '@woocommerce/blocks-checkout';
+import { TotalsTaxes, TotalsWrapper } from '@woocommerce/blocks-components';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { getSetting } from '@woocommerce/settings';

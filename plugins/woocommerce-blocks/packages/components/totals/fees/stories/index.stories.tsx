@@ -24,6 +24,7 @@ export default {
 		cartFees: [
 			{
 				id: 'my-id',
+				key: 'my-id',
 				name: 'Storybook fee',
 				totals: {
 					...currenciesAPIShape.USD,

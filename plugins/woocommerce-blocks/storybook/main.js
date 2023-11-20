@@ -9,6 +9,7 @@ module.exports = {
 		'../assets/js/**/stories/*.stories.@(js|jsx|ts|tsx)',
 		'../packages/**/stories/*.stories.@(js|jsx|ts|tsx)',
 		'../assets/js/**/*.mdx',
+		'../packages/**/*.mdx',
 	],
 	addons: [
 		'@storybook/addon-essentials',

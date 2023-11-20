@@ -4,8 +4,11 @@
 import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { createInterpolateElement } from '@wordpress/element';
-import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
-import { applyCheckoutFilter, TotalsItem } from '@woocommerce/blocks-checkout';
+import {
+	FormattedMonetaryAmount,
+	TotalsItem,
+} from '@woocommerce/blocks-components';
+import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { getSetting } from '@woocommerce/settings';
 import {

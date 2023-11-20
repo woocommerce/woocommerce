@@ -4,8 +4,7 @@
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
-import type { Currency } from '@woocommerce/price-format';
-import type { CartTotalsTaxLineItem } from '@woocommerce/types';
+import type { CartTotalsTaxLineItem, Currency } from '@woocommerce/types';
 import type { ReactElement } from 'react';
 
 /**

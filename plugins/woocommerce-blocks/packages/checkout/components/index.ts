@@ -1,5 +1,5 @@
-export * from './totals';
-export { default as TotalsWrapper } from './totals-wrapper';
+export * from '../../components/totals';
+export { default as TotalsWrapper } from '../../components/totals-wrapper';
 export { default as ExperimentalOrderMeta } from './order-meta';
 export { default as ExperimentalDiscountsMeta } from './discounts-meta';
 export { default as ExperimentalOrderShippingPackages } from './order-shipping-packages';

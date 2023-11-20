@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { TotalsItem } from '@woocommerce/blocks-checkout';
+import { TotalsItem } from '@woocommerce/blocks-components';
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
