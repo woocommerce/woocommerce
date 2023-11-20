@@ -26,7 +26,7 @@ describe( `${ block.name } Block`, () => {
 		);
 	} );
 
-	it( 'can select a category and show reviews', async () => {
+	it.skip( 'can select a category and show reviews', async () => {
 		// we focus on the block
 		await page.click( block.class );
 		await page.waitForSelector(

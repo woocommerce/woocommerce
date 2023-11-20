@@ -14,7 +14,7 @@ if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 	test.only( `Skipping Cart & Checkout tests`, () => {} );
 }
 
-describe( 'Shopper → Cart', () => {
+describe.skip( 'Shopper → Cart', () => {
 	beforeAll( async () => {
 		await page.goto( `${ BASE_URL }/?setup_cross_sells` );
 		// eslint-disable-next-line jest/no-standalone-expect

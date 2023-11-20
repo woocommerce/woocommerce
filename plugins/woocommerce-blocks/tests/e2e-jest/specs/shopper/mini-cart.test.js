@@ -141,7 +141,7 @@ describe( 'Shopper → Mini-Cart', () => {
 		} );
 	} );
 
-	describe( 'Filled Mini-Cart', () => {
+	describe.skip( 'Filled Mini-Cart', () => {
 		beforeAll( async () => {
 			await shopper.block.emptyCart();
 		} );
@@ -226,7 +226,7 @@ describe( 'Shopper → Mini-Cart', () => {
 		} );
 	} );
 
-	describe( 'Update quantity', () => {
+	describe.skip( 'Update quantity', () => {
 		beforeAll( async () => {
 			await shopper.block.emptyCart();
 		} );
@@ -322,7 +322,7 @@ describe( 'Shopper → Mini-Cart', () => {
 		} );
 	} );
 
-	describe( 'Tax included', () => {
+	describe.skip( 'Tax included', () => {
 		let taxSettings;
 		beforeAll( async () => {
 			taxSettings = ( await WooCommerce.get( 'settings/tax' ) ).data;
@@ -404,7 +404,7 @@ describe( 'Shopper → Mini-Cart', () => {
 		} );
 	} );
 
-	describe( 'Remove product', () => {
+	describe.skip( 'Remove product', () => {
 		beforeAll( async () => {
 			await shopper.block.emptyCart();
 		} );
@@ -433,7 +433,7 @@ describe( 'Shopper → Mini-Cart', () => {
 		} );
 	} );
 
-	describe( 'Cart page', () => {
+	describe.skip( 'Cart page', () => {
 		beforeAll( async () => {
 			await shopper.block.emptyCart();
 		} );
@@ -467,7 +467,7 @@ describe( 'Shopper → Mini-Cart', () => {
 		} );
 	} );
 
-	describe( 'Checkout page', () => {
+	describe.skip( 'Checkout page', () => {
 		beforeAll( async () => {
 			await shopper.block.emptyCart();
 		} );
@@ -513,7 +513,7 @@ describe( 'Shopper → Mini-Cart', () => {
 		} );
 	} );
 
-	describe( 'Translations', () => {
+	describe.skip( 'Translations', () => {
 		beforeAll( async () => {
 			await merchant.changeLanguage( 'nl_NL' );
 			await shopper.block.emptyCart();

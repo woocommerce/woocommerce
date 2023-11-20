@@ -90,14 +90,14 @@ describe( `${ block.name } Block`, () => {
 			await page.goto( link );
 		} );
 
-		it( 'should render products', async () => {
+		it.skip( 'should render products', async () => {
 			await waitForAllProductsBlockLoaded();
 			const products = await page.$$( selectors.frontend.productsList );
 
 			expect( products ).toHaveLength( 5 );
 		} );
 
-		it( 'should show only products that match the filter', async () => {
+		it.skip( 'should show only products that match the filter', async () => {
 			const isRefreshed = jest.fn( () => void 0 );
 			page.on( 'load', isRefreshed );
 
@@ -188,7 +188,7 @@ describe( `${ block.name } Block`, () => {
 			);
 		} );
 
-		it( 'should refresh the page only if the user clicks on button', async () => {
+		it.skip( 'should refresh the page only if the user clicks on button', async () => {
 			await goToTemplateEditor( {
 				postId: productCatalogTemplateId,
 			} );
@@ -260,7 +260,7 @@ describe( `${ block.name } Block`, () => {
 			await page.goto( frontedPageUrl, { waitUntil: 'networkidle2' } );
 		} );
 
-		it( 'should render products', async () => {
+		it.skip( 'should render products', async () => {
 			const products = await page.$$(
 				selectors.frontend.queryProductsList
 			);

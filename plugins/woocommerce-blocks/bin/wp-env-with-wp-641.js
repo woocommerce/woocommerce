@@ -10,7 +10,7 @@ const wpEnv = JSON.parse( wpEnvRaw );
 // passing when new WordPress versions are released. We do this because we're
 // moving to Playwright and will abandon the Jest E2E tests once the migration
 // is complete.
-wpEnv.core = 'WordPress/WordPress#6.2.2';
+wpEnv.core = 'WordPress/WordPress#6.4.1';
 
 // We write the new file to .wp-env.override.json (https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/#wp-env-override-json)
 fs.writeFileSync(

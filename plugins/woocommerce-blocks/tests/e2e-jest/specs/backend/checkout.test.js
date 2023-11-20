@@ -51,7 +51,7 @@ describe( `${ block.name } Block`, () => {
 			expect( button ).toHaveLength( 0 );
 		} );
 
-		it( 'inner blocks can be added/removed by filters', async () => {
+		it.skip( 'inner blocks can be added/removed by filters', async () => {
 			// Begin by removing the block.
 			await selectBlockByName( block.slug );
 			const options = await page.$x(

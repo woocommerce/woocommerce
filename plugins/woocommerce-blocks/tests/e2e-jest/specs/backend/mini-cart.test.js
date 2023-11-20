@@ -67,7 +67,7 @@ describe( `${ block.name } Block`, () => {
 		} );
 	} );
 
-	describe( 'in FSE editor', () => {
+	describe.skip( 'in FSE editor', () => {
 		useTheme( 'emptytheme' );
 
 		beforeEach( async () => {

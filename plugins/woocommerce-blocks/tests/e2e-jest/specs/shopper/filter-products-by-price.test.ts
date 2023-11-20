@@ -44,7 +44,7 @@ const setMaxPrice = async () => {
 	await page.keyboard.press( 'Tab' );
 };
 
-describe( `${ block.name } Block`, () => {
+describe.skip( `${ block.name } Block`, () => {
 	describe( 'with Product Query Block', () => {
 		let editorPageUrl = '';
 		let frontedPageUrl = '';

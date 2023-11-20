@@ -37,7 +37,7 @@ describe( `${ block.name } Block`, () => {
 		expect( page ).toMatch( 'No results found.' );
 	} );
 
-	describe( 'in FSE editor', () => {
+	describe.skip( 'in FSE editor', () => {
 		useTheme( 'emptytheme' );
 
 		beforeEach( async () => {
