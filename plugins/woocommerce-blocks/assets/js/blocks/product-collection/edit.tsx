@@ -75,7 +75,7 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 			},
 		},
 	],
-	[ 'core/query-no-results' ],
+	[ 'woocommerce/product-collection-no-results' ],
 ];
 
 const Edit = ( props: BlockEditProps< ProductCollectionAttributes > ) => {

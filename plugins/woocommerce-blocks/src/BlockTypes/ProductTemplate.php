@@ -2,8 +2,8 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 use WP_Block;
-use WP_Query;
 
 /**
  * ProductTemplate class.
@@ -36,19 +36,7 @@ class ProductTemplate extends AbstractBlock {
 	 * @return string | void Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$page_key = isset( $block->context['queryId'] ) ? 'query-' . $block->context['queryId'] . '-page' : 'query-page';
-		// phpcs:ignore WordPress.Security.NonceVerification
-		$page = empty( $_GET[ $page_key ] ) ? 1 : (int) $_GET[ $page_key ];
-
-		// Use global query if needed.
-		$use_global_query = ( isset( $block->context['query']['inherit'] ) && $block->context['query']['inherit'] );
-		if ( $use_global_query ) {
-			global $wp_query;
-			$query = clone $wp_query;
-		} else {
-			$query_args = build_query_vars_from_query_block( $block, $page );
-			$query      = new WP_Query( $query_args );
-		}
+		$query = ProductCollectionUtils::prepare_and_execute_query( $block );
 
 		if ( ! $query->have_posts() ) {
 			return '';
