@@ -63,10 +63,10 @@ export function Edit( {
 	);
 	const [ downloadLimit, setDownloadLimit ] = useEntityProp<
 		Product[ 'download_limit' ]
-	>( 'postType', 'product', 'download_limit' );
+	>( 'postType', postType, 'download_limit' );
 	const [ downloadExpiry, setDownloadExpiry ] = useEntityProp<
 		Product[ 'download_expiry' ]
-	>( 'postType', 'product', 'download_expiry' );
+	>( 'postType', postType, 'download_expiry' );
 
 	const [ selectedDownload, setSelectedDownload ] =
 		useState< ProductDownload | null >();
@@ -205,7 +205,7 @@ export function Edit( {
 
 	function editHandler( download: ProductDownload ) {
 		return function handleEditClick() {
-			setSelectedDownload( download );
+			setSelectedDownload( stringifyEntityId( download ) );
 		};
 	}
 
@@ -215,6 +215,19 @@ export function Edit( {
 				? error
 				: __( 'There was an error uploading files', 'woocommerce' )
 		);
+	}
+
+	function editDownloadsModalSaveHandler( value: ProductDownload ) {
+		return function handleEditDownloadsModalSave() {
+			const newDownloads = downloads
+				.map( stringifyEntityId )
+				.map( ( obj: ProductDownload ) =>
+					obj.id === value.id ? value : obj
+				);
+
+			setDownloads( newDownloads );
+			setSelectedDownload( null );
+		};
 	}
 
 	return (
@@ -359,16 +372,7 @@ export function Edit( {
 							name: text,
 						} );
 					} }
-					onSave={ () => {
-						const newDownloads = downloads.map(
-							( obj: ProductDownload ) =>
-								obj.id === selectedDownload.id
-									? selectedDownload
-									: obj
-						) as ProductDownload[];
-						setDownloads( newDownloads );
-						setSelectedDownload( null );
-					} }
+					onSave={ editDownloadsModalSaveHandler( selectedDownload ) }
 					onUploadSuccess={ handleFileReplace }
 					onUploadError={ handleUploadError }
 				/>
