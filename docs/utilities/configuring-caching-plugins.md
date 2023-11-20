@@ -53,13 +53,13 @@ if ( req.url ~ "\\?add-to-cart=" ) {
 }
 ```
 
-## Troubleshooting
+# Troubleshooting
 
-### Why is my Varnish configuration not working in WooCommerce?
+## Why is my Varnish configuration not working in WooCommerce?
 
 Check out the following WordPress.org Support forum post on[ how cookies may be affecting your varnish coding](https://wordpress.org/support/topic/varnish-configuration-not-working-in-woocommerce).
 
-```text
+```
 Add this to vcl_recv above "if (req.http.cookie) {":
 
 # Unset Cookies except for WordPress admin and WooCommerce pages 
@@ -93,7 +93,7 @@ unset beresp.http.set-cookie;
 #
 ```
 
-### Why is my Password Reset stuck in a loop?
+## Why is my Password Reset stuck in a loop?
 
 This is due to the My Account page being cached, Some hosts with server-side caching don’t prevent my-account.php from being cached.
 
