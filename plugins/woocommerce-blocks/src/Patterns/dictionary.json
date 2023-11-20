@@ -519,8 +519,8 @@
 					"ai_prompt": "An impact phrase that advertises the brand"
 				},
 				{
-					"default": "Marl is an independent studio and artisanal gallery: {image.1}",
-					"ai_prompt": "An impact phrase that advertises the brand"
+					"default": "Marl is an independent studio and artisanal gallery",
+					"ai_prompt": "An impact phrase that advertises the brand: {image.1}"
 				}
 			],
 			"descriptions": [
@@ -593,7 +593,7 @@
 			],
 			"descriptions": [
 				{
-					"default": "In the end the couch wasn't exactly what I was looking for but my experience with the Burrow team was excellent. First in providing a discount when the couch was delayed, then timely feedback and updates as the...\n\n~ Anna W.",
+					"default": "In the end the couch wasn't exactly what I was looking for but my experience with the Burrow team was excellent. First in providing a discount when the couch was delayed, then timely feedback and updates as the...",
 					"ai_prompt": "A description of the testimonial. The testimonial must have less than 200 characters."
 				}
 			]

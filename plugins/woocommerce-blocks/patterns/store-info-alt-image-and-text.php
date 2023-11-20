@@ -7,8 +7,8 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
-$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/crafting-pots.png' );
-$image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/hand-made-pots.png' );
+$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/tea-leaf-meal-food-herb-produce.jpg' );
+$image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg' );
 
 $first_title  = $content['titles'][0]['default'] ?? '';
 $second_title = $content['titles'][1]['default'] ?? '';
@@ -84,9 +84,9 @@ $button = $content['buttons'][0]['default'] ?? '';
 
 		<!-- wp:column {"verticalAlignment":"center","width":"52%"} -->
 		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:52%">
-			<!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
-			<figure class="wp-block-image size-full">
-				<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used in the right column.', 'woo-gutenberg-products-block' ); ?>" />
+			<!-- wp:image {"sizeSlug":"full","linkDestination":"none", "height":"auto","aspectRatio":"1","scale":"cover", "className":"is-resized"} -->
+			<figure class="wp-block-image size-full is-resized">
+				<img style="aspect-ratio:1;object-fit:cover" src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used in the right column.', 'woo-gutenberg-products-block' ); ?>" />
 			</figure>
 			<!-- /wp:image -->
 		</div>

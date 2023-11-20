@@ -7,7 +7,7 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
-$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/man-person-winter-photography-statue-coat.png' );
+$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/man-person-winter-photography-guy-statue.jpg' );
 $image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/pattern-fashion-clothing-outerwear-wool-scarf.png' );
 
 $first_title  = $content['titles'][0]['default'] ?? '';
