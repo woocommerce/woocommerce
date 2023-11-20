@@ -117,6 +117,9 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_system_status_info_environment() {
+		$store_id = 'abcedef1234567';
+		update_option( \WC_Install::STORE_ID_OPTION, $store_id );
+
 		$environment = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['environment'];
 
 		// Make sure all expected data is present.
@@ -125,6 +128,8 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		// Test some responses to make sure they match up.
 		$this->assertEquals( get_option( 'home' ), $environment['home_url'] );
 		$this->assertEquals( get_option( 'siteurl' ), $environment['site_url'] );
+		$this->assertEquals( get_option( \WC_Install::STORE_ID_OPTION, null ), $environment['store_id'] );
+		$this->assertEquals( $store_id, $environment['store_id'] );
 		$this->assertEquals( WC()->version, $environment['version'] );
 	}
 
