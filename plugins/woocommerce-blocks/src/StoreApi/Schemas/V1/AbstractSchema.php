@@ -173,12 +173,18 @@ abstract class AbstractSchema {
 				}
 
 				if ( ! $result || is_wp_error( $result ) ) {
+					// If schema validation fails, we return here as we don't need to validate any deeper.
 					return $result;
 				}
 
 				if ( isset( $property_value['properties'] ) ) {
 					$validate_callback = $this->get_recursive_validate_callback( $property_value['properties'] );
-					return $validate_callback( $current_value, $request, $param . ' > ' . $property_key );
+					$result            = $validate_callback( $current_value, $request, $param . ' > ' . $property_key );
+
+					if ( ! $result || is_wp_error( $result ) ) {
+						// If schema validation fails, we return here as we don't need to validate any deeper.
+						return $result;
+					}
 				}
 			}
 
