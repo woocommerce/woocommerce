@@ -54,7 +54,11 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 							product: product.title,
 							vendor: product.vendorName,
 							product_type: type,
+							position: product.position,
 							...( product.label && { label: product.label } ),
+							...( product.group && { group: product.group } ),
+							...( product.searchTerm && { search_term: product.searchTerm } ),
+							...( product.category && { category: product.category } ),
 						}
 					);
 				} }
