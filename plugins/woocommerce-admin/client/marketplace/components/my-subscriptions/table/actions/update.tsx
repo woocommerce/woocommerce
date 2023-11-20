@@ -40,6 +40,8 @@ export default function Update( props: UpdateProps ) {
 		recordEvent( 'marketplace_product_update_button_clicked', {
 			product_zip_slug: props.subscription.zip_slug,
 			product_id: props.subscription.product_id,
+			product_installed_version: props.subscription.local.installed,
+			product_current_version: props.subscription.version,
 		} );
 
 		if ( ! canUpdate ) {
@@ -96,6 +98,9 @@ export default function Update( props: UpdateProps ) {
 				recordEvent( 'marketplace_product_updated', {
 					product_zip_slug: props.subscription.zip_slug,
 					product_id: props.subscription.product_id,
+					product_installed_version:
+						props.subscription.local.installed,
+					product_current_version: props.subscription.version,
 				} );
 			} )
 			.catch( () => {
@@ -121,6 +126,9 @@ export default function Update( props: UpdateProps ) {
 				recordEvent( 'marketplace_product_update_failed', {
 					product_zip_slug: props.subscription.zip_slug,
 					product_id: props.subscription.product_id,
+					product_installed_version:
+						props.subscription.local.installed,
+					product_current_version: props.subscription.version,
 				} );
 			} );
 	}
