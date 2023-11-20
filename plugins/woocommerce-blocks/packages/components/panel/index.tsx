@@ -11,12 +11,12 @@ import type { ReactNode, ReactElement } from 'react';
  */
 import './style.scss';
 
-interface PanelProps {
-	children?: ReactNode;
-	className?: string;
+export interface PanelProps {
+	children: ReactNode;
+	className?: string | undefined;
 	initialOpen?: boolean;
 	hasBorder?: boolean;
-	title?: ReactNode;
+	title: ReactNode;
 	titleTag?: keyof JSX.IntrinsicElements;
 }
 
