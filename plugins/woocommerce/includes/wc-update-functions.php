@@ -2648,4 +2648,6 @@ function wc_update_850_create_transient_files_directory() {
 	if ( ! is_dir( $transient_files_directory ) ) {
 		wp_mkdir_p( $transient_files_directory );
 	}
+
+	wc_get_container()->get( \Automattic\WooCommerce\TransientFiles\TransientFilesEngine::class )->schedule_expired_files_cleanup();
 }
