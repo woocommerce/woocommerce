@@ -77,11 +77,25 @@ class ProductButton extends AbstractBlock {
 		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$product = wc_get_product( $post_id );
 
+		wc_store(
+			array(
+				'state' => array(
+					'woocommerce' => array(
+						'inTheCartText' => sprintf(
+							/* translators: %s: product number. */
+							__( '%s in cart', 'woo-gutenberg-products-block' ),
+							'###'
+						),
+					),
+				),
+			)
+		);
+
 		if ( $product ) {
 			$number_of_items_in_cart = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
 			$more_than_one_item      = $number_of_items_in_cart > 0;
 			$initial_product_text    = $more_than_one_item ? sprintf(
-				/* translators: %s: product number. */
+			/* translators: %s: product number. */
 				__( '%s in cart', 'woo-gutenberg-products-block' ),
 				$number_of_items_in_cart
 			) : $product->add_to_cart_text();
@@ -105,20 +119,6 @@ class ProductButton extends AbstractBlock {
 						'product_type_' . $product->get_type(),
 						esc_attr( $styles_and_classes['classes'] ),
 					)
-				)
-			);
-
-			wc_store(
-				array(
-					'state' => array(
-						'woocommerce' => array(
-							'inTheCartText' => sprintf(
-								/* translators: %s: product number. */
-								__( '%s in cart', 'woo-gutenberg-products-block' ),
-								'###'
-							),
-						),
-					),
 				)
 			);
 
