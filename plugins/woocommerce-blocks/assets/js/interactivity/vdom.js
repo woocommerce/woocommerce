@@ -1,9 +1,18 @@
+// @ts-nocheck
+
+/**
+ * External dependencies
+ */
 import { h } from 'preact';
+/**
+ * Internal dependencies
+ */
 import { directivePrefix as p } from './constants';
 
 const ignoreAttr = `data-${ p }-ignore`;
 const islandAttr = `data-${ p }-interactive`;
 const fullPrefix = `data-${ p }-`;
+let namespace = null;
 
 // Regular expression for directive parsing.
 const directiveParser = new RegExp(
@@ -18,6 +27,12 @@ const directiveParser = new RegExp(
 		'(?:--([a-z0-9_-]+))?$',
 	'i' // Case insensitive.
 );
+
+// Regular expression for reference parsing. It can contain a namespace before
+// the reference, separated by `::`, like `some-namespace::state.somePath`.
+// Namespaces can contain any alphanumeric characters, hyphens, underscores or
+// forward slashes. References don't have any restrictions.
+const nsPathRegExp = /^([\w-_\/]+)::(.+)$/;
 
 export const hydratedIslands = new WeakSet();
 
@@ -34,7 +49,7 @@ export function toVdom( root ) {
 		if ( nodeType === 3 ) return [ node.data ];
 		if ( nodeType === 4 ) {
 			const next = treeWalker.nextSibling();
-			node.replaceWith( new Text( node.nodeValue ) );
+			node.replaceWith( new window.Text( node.nodeValue ) );
 			return [ node.nodeValue, next ];
 		}
 		if ( nodeType === 8 || nodeType === 7 ) {
@@ -45,8 +60,7 @@ export function toVdom( root ) {
 
 		const props = {};
 		const children = [];
-		const directives = {};
-		let hasDirectives = false;
+		const directives = [];
 		let ignore = false;
 		let island = false;
 
@@ -58,17 +72,19 @@ export function toVdom( root ) {
 			) {
 				if ( n === ignoreAttr ) {
 					ignore = true;
-				} else if ( n === islandAttr ) {
-					island = true;
 				} else {
-					hasDirectives = true;
-					let val = attributes[ i ].value;
+					let [ ns, value ] = nsPathRegExp
+						.exec( attributes[ i ].value )
+						?.slice( 1 ) ?? [ null, attributes[ i ].value ];
 					try {
-						val = JSON.parse( val );
+						value = JSON.parse( value );
 					} catch ( e ) {}
-					const [ , prefix, suffix ] = directiveParser.exec( n );
-					directives[ prefix ] = directives[ prefix ] || {};
-					directives[ prefix ][ suffix || 'default' ] = val;
+					if ( n === islandAttr ) {
+						island = true;
+						namespace = value?.namespace ?? null;
+					} else {
+						directives.push( [ n, ns, value ] );
+					}
 				}
 			} else if ( n === 'ref' ) {
 				continue;
@@ -86,7 +102,22 @@ export function toVdom( root ) {
 			];
 		if ( island ) hydratedIslands.add( node );
 
-		if ( hasDirectives ) props.__directives = directives;
+		if ( directives.length ) {
+			props.__directives = directives.reduce(
+				( obj, [ name, ns, value ] ) => {
+					const [ , prefix, suffix = 'default' ] =
+						directiveParser.exec( name );
+					if ( ! obj[ prefix ] ) obj[ prefix ] = [];
+					obj[ prefix ].push( {
+						namespace: ns ?? namespace,
+						value,
+						suffix,
+					} );
+					return obj;
+				},
+				{}
+			);
+		}
 
 		let child = treeWalker.firstChild();
 		if ( child ) {

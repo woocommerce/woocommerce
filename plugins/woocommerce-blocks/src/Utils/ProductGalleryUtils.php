@@ -54,9 +54,7 @@ class ProductGalleryUtils {
 						'data-wc-context',
 						wp_json_encode(
 							array(
-								'woocommerce' => array(
-									'imageId' => $product_gallery_image_id,
-								),
+								'imageId' => $product_gallery_image_id,
 							)
 						)
 					);
@@ -98,6 +96,9 @@ class ProductGalleryUtils {
 		if ( count( $unique_image_ids ) > $max_number_of_visible_images && $only_visible ) {
 			$unique_image_ids = array_slice( $unique_image_ids, 0, $max_number_of_visible_images );
 		}
+
+		// Reindex array.
+		$unique_image_ids = array_values( $unique_image_ids );
 
 		return $unique_image_ids;
 	}

@@ -117,10 +117,10 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 */
 	private function get_main_images_html( $context, $product_id ) {
 		$attributes = array(
-			'data-wc-bind--style' => 'selectors.woocommerce.productGalleryLargeImage.styles',
-			'data-wc-effect'      => 'effects.woocommerce.scrollInto',
-			'class'               => 'wc-block-woocommerce-product-gallery-large-image__image',
-			'data-wc-class--wc-block-woocommerce-product-gallery-large-image__image--active-image-slide' => 'selectors.woocommerce.isSelected',
+			'class'                => 'wc-block-woocommerce-product-gallery-large-image__image',
+			'data-wc-bind--hidden' => '!state.isSelected',
+			'data-wc-watch'        => 'callbacks.scrollInto',
+			'data-wc-class--wc-block-woocommerce-product-gallery-large-image__image--active-image-slide' => 'state.isSelected',
 		);
 
 		if ( $context['fullScreenOnClick'] ) {
@@ -129,7 +129,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		if ( $context['hoverZoom'] ) {
 			$attributes['class']              .= ' wc-block-woocommerce-product-gallery-large-image__image--hoverZoom';
-			$attributes['data-wc-bind--style'] = 'selectors.woocommerce.productGalleryLargeImage.styles';
+			$attributes['data-wc-bind--style'] = 'state.styles';
 		}
 
 		$main_images = ProductGalleryUtils::get_product_gallery_images(
@@ -178,18 +178,17 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			return array();
 		}
 		$context = array(
-			'woocommerce' => array(
-				'styles' => array(
-					'transform'        => 'scale(1.0)',
-					'transform-origin' => '',
-				),
+			'styles' => array(
+				'transform'        => 'scale(1.0)',
+				'transform-origin' => '',
 			),
 		);
 
 		return array(
-			'data-wc-on--mousemove'  => 'actions.woocommerce.handleMouseMove',
-			'data-wc-on--mouseleave' => 'actions.woocommerce.handleMouseLeave',
+			'data-wc-interactive'    => wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ) ),
 			'data-wc-context'        => wp_json_encode( $context, JSON_NUMERIC_CHECK ),
+			'data-wc-on--mousemove'  => 'actions.startZoom',
+			'data-wc-on--mouseleave' => 'actions.resetZoom',
 		);
 	}
 
@@ -206,7 +205,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		}
 
 		return array(
-			'data-wc-on--click' => 'actions.woocommerce.handleClick',
+			'data-wc-on--click' => 'actions.openDialog',
 		);
 	}
 }

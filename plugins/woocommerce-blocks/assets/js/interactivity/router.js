@@ -1,4 +1,12 @@
+// @ts-nocheck
+
+/**
+ * External dependencies
+ */
 import { hydrate, render } from 'preact';
+/**
+ * Internal dependencies
+ */
 import { toVdom, hydratedIslands } from './vdom';
 import { createRootFragment } from './utils';
 import { directivePrefix } from './constants';
@@ -26,18 +34,18 @@ const cleanUrl = ( url ) => {
 };
 
 // Fetch a new page and convert it to a static virtual DOM.
-const fetchPage = async ( url ) => {
-	let dom;
+const fetchPage = async ( url, { html } ) => {
 	try {
-		const res = await window.fetch( url );
-		if ( res.status !== 200 ) return false;
-		const html = await res.text();
-		dom = new window.DOMParser().parseFromString( html, 'text/html' );
+		if ( ! html ) {
+			const res = await window.fetch( url );
+			if ( res.status !== 200 ) return false;
+			html = await res.text();
+		}
+		const dom = new window.DOMParser().parseFromString( html, 'text/html' );
+		return regionsToVdom( dom );
 	} catch ( e ) {
 		return false;
 	}
-
-	return regionsToVdom( dom );
 };
 
 // Return an object with VDOM trees of those HTML regions marked with a
@@ -55,10 +63,10 @@ const regionsToVdom = ( dom ) => {
 
 // Prefetch a page. We store the promise to avoid triggering a second fetch for
 // a page if a fetching has already started.
-export const prefetch = ( url ) => {
+export const prefetch = ( url, options = {} ) => {
 	url = cleanUrl( url );
-	if ( ! pages.has( url ) ) {
-		pages.set( url, fetchPage( url ) );
+	if ( options.force || ! pages.has( url ) ) {
+		pages.set( url, fetchPage( url, options ) );
 	}
 };
 
@@ -72,20 +80,38 @@ const renderRegions = ( page ) => {
 	} );
 };
 
+// Variable to store the current navigation.
+let navigatingTo = '';
+
 // Navigate to a new page.
-export const navigate = async ( href, { replace = false } = {} ) => {
+export const navigate = async ( href, options = {} ) => {
 	const url = cleanUrl( href );
-	prefetch( url );
-	const page = await pages.get( url );
+	navigatingTo = href;
+	prefetch( url, options );
+
+	// Create a promise that resolves when the specified timeout ends. The
+	// timeout value is 10 seconds by default.
+	const timeoutPromise = new Promise( ( resolve ) =>
+		setTimeout( resolve, options.timeout ?? 10000 )
+	);
+
+	const page = await Promise.race( [ pages.get( url ), timeoutPromise ] );
+
+	// Once the page is fetched, the destination URL could have changed (e.g.,
+	// by clicking another link in the meantime). If so, bail out, and let the
+	// newer execution to update the HTML.
+	if ( navigatingTo !== href ) return;
+
 	if ( page ) {
 		renderRegions( page );
-		window.history[ replace ? 'replaceState' : 'pushState' ](
+		window.history[ options.replace ? 'replaceState' : 'pushState' ](
 			{},
 			'',
 			href
 		);
 	} else {
 		window.location.assign( href );
+		await new Promise( () => {} );
 	}
 };
 

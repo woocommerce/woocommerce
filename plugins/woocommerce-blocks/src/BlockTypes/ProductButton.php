@@ -77,16 +77,13 @@ class ProductButton extends AbstractBlock {
 		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$product = wc_get_product( $post_id );
 
-		wc_store(
+		wc_initial_state(
+			'woocommerce/product-button',
 			array(
-				'state' => array(
-					'woocommerce' => array(
-						'inTheCartText' => sprintf(
-							/* translators: %s: product number. */
-							__( '%s in cart', 'woo-gutenberg-products-block' ),
-							'###'
-						),
-					),
+				'inTheCartText' => sprintf(
+					/* translators: %s: product number. */
+					__( '%s in cart', 'woo-gutenberg-products-block' ),
+					'###'
 				),
 			)
 		);
@@ -123,22 +120,21 @@ class ProductButton extends AbstractBlock {
 			);
 
 			$default_quantity = 1;
+			/**
+			* Filters the change the quantity to add to cart.
+			*
+			* @since 10.9.0
+			* @param number $default_quantity The default quantity.
+			* @param number $product_id The product id.
+			*/
+			$quantity_to_add = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id() );
 
 			$context = array(
-				'woocommerce' => array(
-					/**
-					* Filters the change the quantity to add to cart.
-					*
-					* @since 10.9.0
-					* @param number $default_quantity The default quantity.
-					* @param number $product_id The product id.
-					*/
-					'quantityToAdd'          => apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id() ),
-					'productId'              => $product->get_id(),
-					'addToCartText'          => null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woo-gutenberg-products-block' ),
-					'temporaryNumberOfItems' => $number_of_items_in_cart,
-					'animationStatus'        => 'IDLE',
-				),
+				'quantityToAdd'          => $quantity_to_add,
+				'productId'              => $product->get_id(),
+				'addToCartText'          => null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woo-gutenberg-products-block' ),
+				'temporaryNumberOfItems' => $number_of_items_in_cart,
+				'animationStatus'        => 'IDLE',
 			);
 
 			/**
@@ -168,20 +164,27 @@ class ProductButton extends AbstractBlock {
 				$this->prevent_cache();
 			}
 
-			$div_directives = 'data-wc-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK ) . '\'';
+			$interactive = array(
+				'namespace' => 'woocommerce/product-button',
+			);
+
+			$div_directives = '
+				data-wc-interactive=\'' . wp_json_encode( $interactive, JSON_NUMERIC_CHECK ) . '\'
+				data-wc-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK ) . '\'
+			';
 
 			$button_directives = '
-				data-wc-on--click="actions.woocommerce.addToCart"
-				data-wc-class--loading="context.woocommerce.isLoading"
+				data-wc-on--click="actions.addToCart"
+				data-wc-class--loading="context.isLoading"
 			';
 
 			$span_button_directives = '
-				data-wc-text="selectors.woocommerce.addToCartText"
-				data-wc-class--wc-block-slide-in="selectors.woocommerce.slideInAnimation"
-				data-wc-class--wc-block-slide-out="selectors.woocommerce.slideOutAnimation"
-				data-wc-layout-init="init.woocommerce.syncTemporaryNumberOfItemsOnLoad"
-				data-wc-effect="effects.woocommerce.startAnimation"
-				data-wc-on--animationend="actions.woocommerce.handleAnimationEnd"
+				data-wc-text="state.addToCartText"
+				data-wc-class--wc-block-slide-in="state.slideInAnimation"
+				data-wc-class--wc-block-slide-out="state.slideOutAnimation"
+				data-wc-on--animationend="actions.handleAnimationEnd"
+				data-wc-watch="callbacks.startAnimation"
+				data-wc-layout-init="callbacks.syncTemporaryNumberOfItemsOnLoad"
 			';
 
 			/**
@@ -194,20 +197,20 @@ class ProductButton extends AbstractBlock {
 			return apply_filters(
 				'woocommerce_loop_add_to_cart_link',
 				strtr(
-					'<div data-wc-interactive class="wp-block-button wc-block-components-product-button {classes} {custom_classes}"
+					'<div class="wp-block-button wc-block-components-product-button {classes} {custom_classes}"
 						{div_directives}
 					>
-					<{html_element}
-						href="{add_to_cart_url}"
-						class="{button_classes}"
-						style="{button_styles}"
-						{attributes}
-						{button_directives}
-					>
-					<span {span_button_directives}> {add_to_cart_text} </span>
-					</{html_element}>
-					{view_cart_html}
-				</div>',
+						<{html_element}
+							href="{add_to_cart_url}"
+							class="{button_classes}"
+							style="{button_styles}"
+							{attributes}
+							{button_directives}
+						>
+						<span {span_button_directives}> {add_to_cart_text} </span>
+						</{html_element}>
+						{view_cart_html}
+					</div>',
 					array(
 						'{classes}'                => esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
 						'{custom_classes}'         => esc_attr( $classname . ' ' . $custom_width_classes . ' ' . $custom_align_classes ),
@@ -259,7 +262,10 @@ class ProductButton extends AbstractBlock {
 	 */
 	private function get_view_cart_html() {
 		return sprintf(
-			'<span hidden data-wc-bind--hidden="!selectors.woocommerce.displayViewCart">
+			'<span
+				hidden
+				data-wc-bind--hidden="!state.displayViewCart"
+			>
 				<a
 					href="%1$s"
 					class="added_to_cart wc_forward"
