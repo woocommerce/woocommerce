@@ -35,7 +35,7 @@
 		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
-		"lint:lang:js": "eslint --output-file eslint_report.json --format json src",
+		"lint:lang:js": "eslint src",
 		"prepack": "pnpm run build",
 		"test:js": "wireit",
 		"watch:build": "pnpm run build:project --watch"

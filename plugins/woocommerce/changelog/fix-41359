@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Address a problem with searches involving underscore characters in the HPOS.

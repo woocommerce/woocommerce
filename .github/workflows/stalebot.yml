@@ -1,7 +1,7 @@
 name: 'Process stale needs-feedback issues'
 on:
   schedule:
-    - cron: '21 * * * *'
+    - cron: '21 0 * * *'
 
 permissions: {}
 
@@ -14,11 +14,12 @@ jobs:
       pull-requests: write
     steps:
       - name: Scan issues
-        uses: actions/stale@b69b346013879cedbf50c69f572cd85439a41936
+        uses: actions/stale@v8
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           stale-issue-message: "As a part of this repository's maintenance, this issue is being marked as stale due to inactivity. Please feel free to comment on it in case we missed something.\n\n###### After 7 days with no activity this issue will be automatically be closed."
           close-issue-message: 'This issue was closed because it has been 14 days with no activity.'
+          operations-per-run: 140
           days-before-stale: -1
           days-before-close: -1
           days-before-issue-stale: 7
