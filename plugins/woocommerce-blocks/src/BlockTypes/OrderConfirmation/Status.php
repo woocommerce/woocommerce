@@ -64,7 +64,7 @@ class Status extends AbstractOrderConfirmationBlock {
 			return '<p>' . wp_kses_post( apply_filters( 'woocommerce_thankyou_order_received_text', esc_html__( 'Thank you. Your order has been received.', 'woo-gutenberg-products-block' ), null ) ) . '</p>';
 		}
 
-		$content = $this->get_hook_content( 'woocommerce_before_thankyou', [ $order ] );
+		$content = $this->get_hook_content( 'woocommerce_before_thankyou', [ $order->get_id() ] );
 		$status  = $order->get_status();
 
 		// Unlike the core handling, this includes some extra messaging for completed orders so the text is appropriate for other order statuses.
