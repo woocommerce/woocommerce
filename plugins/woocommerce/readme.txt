@@ -163,11 +163,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 8.3.1 2023-11-20 =
+= 8.3.1 2023-11-21 =
 
 **WooCommerce**
 
 * Fix - Invalidate coupon cache after hold/usage data is modified in datastore via SQL [#41538](https://github.com/woocommerce/woocommerce/pull/41538)
+* Update - Update WooCommerce Blocks to 11.4.9. [#41610](https://github.com/woocommerce/woocommerce/pull/41610)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
