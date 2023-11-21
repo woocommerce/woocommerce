@@ -22,6 +22,12 @@ interface ChatModalProps {
 	onClose: () => void;
 }
 
+interface makeWCRestApiCall {
+	path: string;
+	httpVerb: string;
+	body?: object;
+}
+
 const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ input, setInput ] = useState( '' );
 	const [ messages, setMessages ] = useState< Message[] >( [] );
@@ -56,12 +62,29 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		// Now `audioBlob` contains the recorded audio
 	};
 
+	// @todo: figure out how to handle the response since we need a success/fail message and a link to newly-created/updated resources.
+	const makeWCRestApiCall = async ( {
+		path,
+		httpVerb,
+		body,
+	}: makeWCRestApiCall ) => {
+		try {
+			const response = await apiFetch( {
+				path: path,
+				method: httpVerb,
+				// If body is not null or undefined, include it in the apiFetch call
+				...( body && { body: JSON.stringify( body ) } ),
+			} );
+			return response;
+		} catch ( error ) {
+			console.error( 'Error making WC REST API call:', error );
+			throw error; // Re-throw the error to be handled by the caller
+		}
+	};
+
 	const handleSubmit = async ( event: React.FormEvent ) => {
-		console.log( 'handleSubmit' );
 		event.preventDefault();
-		console.log( audioBlob );
 		if ( ! input.trim() && ! audioBlob ) {
-			console.log( 'No input or audio blob' );
 			return;
 		}
 		setLoading( true );
@@ -85,25 +108,81 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				method: 'POST',
 				body: formData,
 			} ) ) as any;
+			const threadID: string = response.thread_id;
+			const runID: string = response.run_id;
+
+			if ( response.status === 'requires_action' ) {
+				const answer = response.answer;
+				const functionID: string = answer.function_id;
+				if ( answer.function_name === 'makeWCRestApiCall' ) {
+					const functionArguments = answer.function_args;
+					let message = '';
+					try {
+						const responseBody = ( await makeWCRestApiCall(
+							functionArguments
+						) ) as string;
+						message = responseBody;
+						// Make an API call to update the thread with the result of the function call
+						/*
+						const formData = new FormData();
+						formData.append( 'thread_id', threadID );
+						formData.append( 'run_id', runID );
+						formData.append( 'tool_call_id', functionID );
+						formData.append( 'output', message );
+						formData.append( 'token', token );
+
+						const outputToolResponse = ( await apiFetch( {
+							url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard/submit-tool-output',
+							method: 'POST',
+							body: formData,
+						} ) ) as any;
+
+
+						console.log( outputToolResponse );
+                        */
+						const summaryPrompt = `Provide a helpful answer for the original query using the resulting data from the API request. The original query was "${ input }". Parse through the data and find the most relevant information to answer the query and provide it in a human-readable format. The data from the result of the API request is: ${ JSON.stringify(
+							message
+						) }`;
+
+						const summaryFormData = new FormData();
+						summaryFormData.append( 'thread_id', threadID );
+						summaryFormData.append( 'message', summaryPrompt );
+						summaryFormData.append( 'token', token );
+
+						const summaryResponse = ( await apiFetch( {
+							url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard',
+							method: 'POST',
+							body: summaryFormData,
+						} ) ) as any;
+						message = summaryResponse.answer;
+					} catch ( error ) {
+						message = 'I had trouble making the api call for you.';
+					}
+
+					setMessages( ( messages ) => [
+						...messages,
+						{
+							sender: 'assistant',
+							text: message,
+						},
+					] );
+					setLoading( false );
+					return;
+					// Handle the result of the WC REST API call as needed
+				}
+			}
 
 			// Assuming the response contains the assistant's message
-			const messages = response.messages;
-			if ( ! messages || ! messages.length ) {
-				throw new Error( 'No messages returned from assistant' );
+			const message = response.answer;
+			if ( ! message || ! message.length ) {
+				throw new Error( 'No message returned from assistant' );
 			}
-			// create a new assistantMessage array
-			const assistantMessages: Message[] = [];
-			for ( const message of messages ) {
-				const assistantMessage: Message = {
-					sender: 'assistant',
-					text: message.content,
-				};
-				assistantMessages.push( assistantMessage );
-			}
-			setMessages( ( messages ) => [
-				...messages,
-				...assistantMessages,
-			] );
+			const assistantMessage: Message = {
+				sender: 'assistant',
+				text: message.content,
+			};
+
+			setMessages( ( messages ) => [ ...messages, assistantMessage ] );
 		} catch ( error ) {
 			console.error( 'Error fetching response:', error );
 			// Handle the error appropriately
