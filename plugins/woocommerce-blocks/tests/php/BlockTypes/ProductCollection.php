@@ -251,35 +251,6 @@ class ProductCollection extends \WP_UnitTestCase {
 			),
 			$merged_query['tax_query']
 		);
-
-		$fn = function() {
-			return 'yes';
-		};
-
-		// Test with hide out of stock items option enabled.
-		add_filter(
-			'pre_option_woocommerce_hide_out_of_stock_items',
-			$fn
-		);
-		$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
-
-		$parsed_block = $this->get_base_parsed_block();
-
-		$merged_query = $this->initialize_merged_query( $parsed_block );
-
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'product_visibility',
-				'field'    => 'term_taxonomy_id',
-				'terms'    => $product_visibility_not_in,
-				'operator' => 'NOT IN',
-			),
-			$merged_query['tax_query']
-		);
-		remove_filter(
-			'pre_option_woocommerce_hide_out_of_stock_items',
-			$fn
-		);
 	}
 
 	/**

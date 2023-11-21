@@ -341,7 +341,7 @@ class ProductCollection extends AbstractBlock {
 		$orderby_query       = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : [];
 		$on_sale_query       = $this->get_on_sale_products_query( $query['on_sale'] );
 		$stock_query         = $this->get_stock_status_query( $query['stock_status'] );
-		$visibility_query    = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query ) : [];
+		$visibility_query    = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query, $query['stock_status'] ) : [];
 		$featured_query      = $this->get_featured_query( $query['featured'] ?? false );
 		$attributes_query    = $this->get_product_attributes_query( $query['product_attributes'] );
 		$taxonomies_query    = $query['taxonomies_query'] ?? [];
@@ -612,16 +612,17 @@ class ProductCollection extends AbstractBlock {
 	/**
 	 * Return a query for product visibility depending on their stock status.
 	 *
-	 * @param array $stock_query Stock status query.
+	 * @param array $stock_query  Stock status query.
+	 * @param array $stock_status Selected stock status.
 	 *
 	 * @return array Tax query for product visibility.
 	 */
-	private function get_product_visibility_query( $stock_query ) {
+	private function get_product_visibility_query( $stock_query, $stock_status ) {
 		$product_visibility_terms  = wc_get_product_visibility_term_ids();
 		$product_visibility_not_in = array( is_search() ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
 
 		// Hide out of stock products.
-		if ( empty( $stock_query ) && 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+		if ( empty( $stock_query ) && ! in_array( 'outofstock', $stock_status, true ) ) {
 			$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
 		}
 
