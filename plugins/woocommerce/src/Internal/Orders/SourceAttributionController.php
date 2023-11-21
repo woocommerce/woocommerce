@@ -400,25 +400,23 @@ class SourceAttributionController implements RegisterHooksInterface {
 	private function register_order_origin_column() {
 		$screen_id = $this->get_order_screen_id();
 
-		add_filter(
-			"manage_{$screen_id}_columns",
-			function( $columns ) {
-				$columns['origin'] = esc_html__( 'Origin', 'woocommerce' );
+		$add_column = function( $columns ) {
+			$columns['origin'] = esc_html__( 'Origin', 'woocommerce' );
 
-				return $columns;
+			return $columns;
+		};
+		// HPOS and non-HPOS use different hooks.
+		add_filter( "manage_{$screen_id}_columns", $add_column );
+		add_filter( "manage_edit-{$screen_id}_columns", $add_column );
+
+		$display_column = function( $column_name, $order_id ) {
+			if ( 'origin' !== $column_name ) {
+				return;
 			}
-		);
-
-		add_action(
-			"manage_{$screen_id}_custom_column",
-			function( $column_name, $order_id ) {
-				if ( 'origin' !== $column_name ) {
-					return;
-				}
-				$this->display_origin_column( $order_id );
-			},
-			10,
-			2
-		);
+			$this->display_origin_column( $order_id );
+		};
+		// HPOS and non-HPOS use different hooks.
+		add_action( "manage_{$screen_id}_custom_column", $display_column, 10, 2 );
+		add_action( "manage_{$screen_id}_posts_custom_column", $display_column, 10, 2 );
 	}
 }
