@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides a detailed guide on how to use the WooCommerce Plugin API to initiate callbacks for plugin actions, especially for gateways and classes not initialized by default.
+This document provides a guide on how to use the WooCommerce Plugin API to initiate callbacks for plugin actions, especially for gateways and classes not initialized by default.
 
 ## Callback URL Structure
 
