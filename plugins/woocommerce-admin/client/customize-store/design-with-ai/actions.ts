@@ -340,15 +340,25 @@ const redirectToAssemblerHub = async (
 	window.addEventListener(
 		'popstate',
 		() => {
-			iframe.contentWindow?.postMessage(
-				{
-					type: 'assemberBackButtonClicked',
-				},
-				'*'
+			const apiLoaderUrl = getNewPath(
+				{},
+				'/customize-store/design-with-ai/api-call-loader',
+				{}
 			);
-			// When the user clicks the back button, push state changes to the previous step
-			// Set it back to the assember hub
-			window.history?.pushState( {}, '', assemblerUrl );
+
+			// Only catch the back button click when the user is on the main assember hub page
+			// and trying to go back to the api loader page
+			if ( 'admin.php' + window.location.search === apiLoaderUrl ) {
+				iframe.contentWindow?.postMessage(
+					{
+						type: 'assemberBackButtonClicked',
+					},
+					'*'
+				);
+				// When the user clicks the back button, push state changes to the previous step
+				// Set it back to the assember hub
+				window.history?.pushState( {}, '', assemblerUrl );
+			}
 		},
 		false
 	);

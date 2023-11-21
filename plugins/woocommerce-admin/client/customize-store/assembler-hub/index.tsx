@@ -159,7 +159,7 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 		<>
 			{ showExitModal && (
 				<ExitWarningModal
-					setOpenDesignChangeWarningModal={ setShowExitModal }
+					setShowExitModal={ setShowExitModal }
 					sendEvent={ props.sendEvent }
 				/>
 			) }
