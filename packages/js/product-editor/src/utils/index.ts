@@ -28,6 +28,7 @@ export * from './register-product-editor-block-type';
 export * from './init-block';
 export * from './product-apifetch-middleware';
 export * from './sift';
+export * from './truncate';
 
 export {
 	AUTO_DRAFT_NAME,

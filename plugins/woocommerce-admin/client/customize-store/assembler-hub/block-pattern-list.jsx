@@ -21,6 +21,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import BlockPreview from './block-preview';
+import Iframe from './iframe';
 
 const WithToolTip = ( { showTooltip, title, children } ) => {
 	if ( showTooltip ) {
@@ -74,6 +75,7 @@ function BlockPattern( { pattern, onClick, onHover, composite, showTooltip } ) {
 							settings={ settings }
 							isScrollable={ false }
 							autoScale={ true }
+							CustomIframeComponent={ Iframe }
 						/>
 						{ ! showTooltip && (
 							<div className="block-editor-block-patterns-list__item-title">

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix currency breaking lines when 2 or more characters

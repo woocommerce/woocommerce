@@ -4,6 +4,10 @@
 import { TriggerCronJob, TRIGGER_CRON_ACTION_NAME } from './trigger-cron';
 import { DisableEmail } from './disable-email';
 import {
+	UpdateBlockTemplateLoggingThreshold,
+	UPDATE_BLOCK_TEMPLATE_LOGGING_THRESHOLD_ACTION_NAME,
+} from './update-block-template-logging-threshold';
+import {
 	TriggerUpdateCallbacks,
 	TRIGGER_UPDATE_CALLBACKS_ACTION_NAME,
 } from './trigger-update-callbacks';
@@ -68,5 +72,10 @@ export default [
 		command: 'Reset Customize Your Store',
 		description: 'Resets Customize Your Store changes.',
 		action: 'resetCustomizeYourStore',
+	},
+	{
+		command: 'Update block template logging threshold',
+		description: <UpdateBlockTemplateLoggingThreshold />,
+		action: UPDATE_BLOCK_TEMPLATE_LOGGING_THRESHOLD_ACTION_NAME,
 	},
 ];
