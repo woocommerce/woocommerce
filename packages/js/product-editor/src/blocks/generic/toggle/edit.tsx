@@ -5,6 +5,7 @@ import { createElement } from '@wordpress/element';
 import { ToggleControl } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
+import { ReactNode } from 'react';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -64,17 +65,42 @@ export function Edit( {
 		}
 	}
 
-	/**
-	 * Create a Help component in case
-	 * the help attribute is set.
-	 */
-	const help = attributes?.help
-		? sanitizeHTML( attributes.help )?.__html
-		: null;
+	let help: ReactNode = null;
 
-	const helpComponent = createElement( 'div', {
-		dangerouslySetInnerHTML: { __html: help },
-	} );
+	// Default help text.
+	if ( attributes?.help ) {
+		help = createElement( 'div', {
+			dangerouslySetInnerHTML: {
+				__html: sanitizeHTML( attributes.help )?.__html,
+			},
+		} );
+	}
+
+	/*
+	 * Redefine the help text when:
+	 * - The checked help text is defined
+	 * - The toggle is checked
+	 */
+	if ( attributes?.checkedHelp && isChecked() ) {
+		help = createElement( 'div', {
+			dangerouslySetInnerHTML: {
+				__html: sanitizeHTML( attributes.checkedHelp )?.__html,
+			},
+		} );
+	}
+
+	/*
+	 * Redefine the help text when:
+	 * - The unchecked help text is defined
+	 * - The toggle is unchecked
+	 */
+	if ( attributes?.uncheckedHelp && ! isChecked() ) {
+		help = createElement( 'div', {
+			dangerouslySetInnerHTML: {
+				__html: sanitizeHTML( attributes.uncheckedHelp )?.__html,
+			},
+		} );
+	}
 
 	return (
 		<div { ...blockProps }>
@@ -83,7 +109,7 @@ export function Edit( {
 				checked={ isChecked() }
 				disabled={ disabled }
 				onChange={ handleChange }
-				help={ isChecked() ? null : helpComponent }
+				help={ help }
 			/>
 			{ disabled && (
 				<p

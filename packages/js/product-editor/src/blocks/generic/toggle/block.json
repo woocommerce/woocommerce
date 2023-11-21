@@ -15,6 +15,12 @@
 		"help": {
 			"type": "string"
 		},
+		"checkedHelp": {
+			"type": "string"
+		},
+		"uncheckedHelp": {
+			"type": "string"
+		},
 		"property": {
 			"type": "string"
 		},
