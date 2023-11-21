@@ -673,10 +673,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_inventory_inner_section->add_block(
 			array(
-				'id'         => 'product-track-stock',
-				'blockName'  => 'woocommerce/product-toggle-field',
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => 'product-track-stock',
+				'blockName'      => 'woocommerce/product-toggle-field',
+				'order'          => 20,
+				'attributes'     => array(
 					'label'        => __( 'Track stock quantity for this product', 'woocommerce' ),
 					'property'     => 'manage_stock',
 					'disabled'     => 'yes' !== get_option( 'woocommerce_manage_stock' ),
@@ -687,6 +687,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'</a>'
 					),
 				),
+				'hideConditions' => Features::is_enabled( 'product-external-affiliate' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "external"',
+					),
+				) : null,
 			)
 		);
 		$product_inventory_quantity_conditional = $product_inventory_inner_section->add_block(
