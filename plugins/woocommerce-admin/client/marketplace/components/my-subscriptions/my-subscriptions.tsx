@@ -59,12 +59,11 @@ export default function MySubscriptions(): JSX.Element {
 		}
 	);
 
-	let subscriptionsInstalled: Array< Subscription > = subscriptions.filter(
+	const subscriptionsInstalled: Array< Subscription > = subscriptions.filter(
 		( subscription: Subscription ) => subscription.subscription_installed
 	);
 
-	const subscriptionsAvailable: Array< Subscription > = [];
-	subscriptions.filter(
+	const subscriptionsAvailable: Array< Subscription > = subscriptions.filter(
 		( subscription: Subscription ) => ! subscription.subscription_installed
 	);
 
@@ -88,7 +87,6 @@ export default function MySubscriptions(): JSX.Element {
 		);
 	}
 
-	subscriptionsInstalled = [];
 	return (
 		<div className="woocommerce-marketplace__my-subscriptions">
 			<section className="woocommerce-marketplace__my-subscriptions__installed">
