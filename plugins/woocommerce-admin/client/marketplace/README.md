@@ -31,6 +31,7 @@ A full list of endpoints can be found in the [subscriptions API source code](/pl
 ## Project Structure
 
 The project is structured as follows:
+
 - **components**: Contains the React components used in the Marketplace page.
 - **contexts**: Contains the React contexts used in the Marketplace page.
 - **utils**: Contains the functionalities used in the Marketplace page to interact with APIs.
