@@ -27,7 +27,6 @@ const goToPostEditor = async ( { page } ) => {
 	}
 };
 
-// Locate input field with label "Command palette".
 const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
 	// Press `Ctrl` + `K` to open the command palette.
 	await page.keyboard.press( 'Control+K' );
@@ -81,7 +80,6 @@ test.describe( 'Use Command Palette commands', () => {
 	test( 'can use the "Add new product" command', async ( { page } ) => {
 		await goToPostEditor( { page } );
 
-		// Click on command palette option.
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'Add new product',
@@ -97,7 +95,6 @@ test.describe( 'Use Command Palette commands', () => {
 	test( 'can use the "Add new order" command', async ( { page } ) => {
 		await goToPostEditor( { page } );
 
-		// Click on command palette option.
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'Add new order',
@@ -113,7 +110,6 @@ test.describe( 'Use Command Palette commands', () => {
 	test( 'can use the "Products" command', async ( { page } ) => {
 		await goToPostEditor( { page } );
 
-		// Click on command palette option.
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'Products',
@@ -129,7 +125,6 @@ test.describe( 'Use Command Palette commands', () => {
 	test( 'can use the "Orders" command', async ( { page } ) => {
 		await goToPostEditor( { page } );
 
-		// Click on command palette option.
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'Orders',
@@ -145,7 +140,6 @@ test.describe( 'Use Command Palette commands', () => {
 	test( 'can use the product search command', async ( { page } ) => {
 		await goToPostEditor( { page } );
 
-		// Click on command palette option.
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'Product to search',
@@ -161,7 +155,6 @@ test.describe( 'Use Command Palette commands', () => {
 	test( 'can use a settings command', async ( { page } ) => {
 		await goToPostEditor( { page } );
 
-		// Click on command palette option.
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'Products Settings',
@@ -175,7 +168,6 @@ test.describe( 'Use Command Palette commands', () => {
 	test( 'can use an analytics command', async ( { page } ) => {
 		await goToPostEditor( { page } );
 
-		// Click on command palette option.
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'Products Analytics',

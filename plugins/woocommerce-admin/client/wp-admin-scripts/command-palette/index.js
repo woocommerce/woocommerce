@@ -135,29 +135,24 @@ const WooCommerceCommands = () => {
 		name: 'woocommerce/product',
 		hook: useProductCommandLoader,
 	} );
-
 	useWooCommerceSettingsCommand( {
 		label: __( 'Products Settings', 'woocommerce' ),
 		tab: 'products',
 	} );
-
 	useWooCommerceSettingsCommand( {
 		label: __( 'Shipping Settings', 'woocommerce' ),
 		tab: 'shipping',
 	} );
-
 	useWooCommerceSettingsCommand( {
 		label: __( 'Payments Settings', 'woocommerce' ),
 		tab: 'checkout',
 	} );
-
 	useWooCommerceSettingsCommand( {
 		label: __( 'Accounts & Privacy Settings', 'woocommerce' ),
 		tab: 'account',
 	} );
-
 	useWooCommerceSettingsCommand( {
-		label: __( 'WooCommerce Email Settings', 'woocommerce' ),
+		label: __( 'WooCommerce Emails Settings', 'woocommerce' ),
 		tab: 'email',
 	} );
 
