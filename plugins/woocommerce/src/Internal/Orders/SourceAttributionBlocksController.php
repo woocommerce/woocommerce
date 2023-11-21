@@ -154,26 +154,34 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function extend_api() {
-		try {
-			$this->extend_schema->register_endpoint_data(
-				[
-					'endpoint'        => CheckoutSchema::IDENTIFIER,
-					'namespace'       => 'woocommerce/order-source-attribution',
-					'schema_callback' => $this->get_schema_callback(),
-				]
-			);
-			$this->extend_schema->register_update_callback(
-				[
-					'namespace' => 'woocommerce/order-source-attribution',
-					'callback'  => function( $data ) {
-						return array();
-						// todo: Save the data to the order here.
-					},
-				]
-			);
-		} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement
-			// Do nothing.
-		}
+		$this->extend_schema->register_endpoint_data(
+			[
+				'endpoint'        => CheckoutSchema::IDENTIFIER,
+				'namespace'       => 'woocommerce/order-source-attribution',
+				'schema_callback' => $this->get_schema_callback(),
+			]
+		);
+		// The following does not work.
+		// https://github.com/woocommerce/woocommerce-blocks/blob/d646b42e98dc69fe06356f54b53fd6cff132fe98/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md#basic-usage
+		//
+		// $this->extend_schema->register_update_callback(
+		// 	[
+		// 		'namespace' => 'woocommerce/order-source-attribution',
+		// 		'callback'  => function( $data ) {
+		// 			// Save the data to the order here.
+		// 		},
+		// 	]
+		// );
+		// So, we fall back to the same mechanism we use for the checkout shortcode.
+		add_action( 'woocommerce_store_api_checkout_update_order_from_request', function ( $order, $request ) {
+			$params = $request->get_param( 'extensions' );
+			if(empty($params['woocommerce/order-source-attribution'])) {
+				return;
+			}
+			$params = $params['woocommerce/order-source-attribution'];
+
+			do_action( 'woocommerce_order_save_attribution_source_data', $order, $params );
+		}, 10, 2 );
 	}
 
 	/**
@@ -206,7 +214,7 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 			};
 
 			foreach ( $fields as $field ) {
-				$schema[ $this->source_attribution_controller->get_prefixed_field( $field ) ] = [
+				$schema[ $field ] = [
 					'description' => sprintf(
 						/* translators: %s is the field name */
 						__( 'Source attribution field: %s', 'woo-gutenberg-products-block' ),
