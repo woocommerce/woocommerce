@@ -8,8 +8,6 @@ use Automattic\WooCommerce\Internal\Integrations\WPConsentAPI;
 use Automattic\WooCommerce\Internal\Orders\SourceAttributionController;
 use Automattic\WooCommerce\Internal\Orders\SourceAttributionBlocksController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-
-// use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 
@@ -45,7 +43,11 @@ class OrderSourceAttributionServiceProvider extends AbstractInterfaceServiceProv
 		$this->share_with_implements_tags( SourceAttributionBlocksController::class )
 			->addArguments(
 				array(
-					// AssetApi::class,
+					// Once Blocks are moved to the monorepo, hopefully, we can use the following code.
+
+					/*
+					AssetApi::class,
+					*/
 					StoreApi::container()->get( ExtendSchema::class ),
 					FeaturesController::class,
 					SourceAttributionController::class,
