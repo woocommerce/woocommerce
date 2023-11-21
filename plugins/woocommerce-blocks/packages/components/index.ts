@@ -1,4 +1,5 @@
 export { default as Button } from './button';
+export { default as CheckboxControl } from './checkbox-control';
 export { default as CheckboxList } from './checkbox-list';
 export { Chip, RemovableChip } from './chip';
 export { default as FormStep } from './form-step';

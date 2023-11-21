@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useEditorContext } from '@woocommerce/base-context';
-import { CheckboxControl } from '@woocommerce/blocks-checkout';
+import { CheckboxControl } from '@woocommerce/blocks-components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY, PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 
