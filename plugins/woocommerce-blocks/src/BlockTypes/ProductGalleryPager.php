@@ -69,11 +69,12 @@ class ProductGalleryPager extends AbstractBlock {
 				$html = $this->render_pager( $product_gallery_images_ids, $pager_display_mode, $number_of_thumbnails );
 
 				return sprintf(
-					'<div %1$s>
+					'<div %1$s data-wc-interactive=\'%3$s\'>
 						%2$s
 					</div>',
 					$wrapper_attributes,
-					$html
+					$html,
+					wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ) )
 				);
 			}
 			return '';
@@ -124,18 +125,16 @@ class ProductGalleryPager extends AbstractBlock {
 				$p->set_attribute(
 					'data-wc-context',
 					wp_json_encode(
-						array(
-							'woocommerce' => array( 'imageId' => $product_gallery_image_id ),
-						)
+						array( 'imageId' => strval( $product_gallery_image_id ) ),
 					)
 				);
 				$p->set_attribute(
 					'data-wc-on--click',
-					'actions.woocommerce.handleSelectImage'
+					'actions.selectImage'
 				);
 				$p->set_attribute(
 					'data-wc-class--wc-block-product-gallery-pager__pager-item--is-active',
-					'selectors.woocommerce.isSelected'
+					'state.isSelected'
 				);
 				$html .= $p->get_updated_html();
 			}
@@ -159,7 +158,7 @@ class ProductGalleryPager extends AbstractBlock {
 		$initial_opacity = $is_active ? '1' : '0.2';
 		return sprintf(
 			'<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-				<circle cx="6" cy="6" r="6" fill="black" fill-opacity="%1$s" data-wc-bind--fill-opacity="selectors.woocommerce.pagerDotFillOpacity"  />
+				<circle cx="6" cy="6" r="6" fill="black" fill-opacity="%1$s" data-wc-bind--fill-opacity="state.pagerDotFillOpacity"  />
 			</svg>',
 			$initial_opacity
 		);

@@ -35,9 +35,12 @@ const isProduction = NODE_ENV === 'production';
  * Shared config for all script builds.
  */
 let initialBundleAnalyzerPort = 8888;
-const getSharedPlugins = ( { bundleAnalyzerReportTitle } ) =>
+const getSharedPlugins = ( {
+	bundleAnalyzerReportTitle,
+	checkCircularDeps = true,
+} ) =>
 	[
-		CHECK_CIRCULAR_DEPS === 'true'
+		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
 			? new CircularDependencyPlugin( {
 					exclude: /node_modules/,
 					cwd: process.cwd(),
@@ -924,6 +927,7 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 		plugins: [
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'WP directives',
+				checkCircularDeps: false,
 			} ),
 			new ProgressBarPlugin(
 				getProgressBarPluginConfig( 'WP directives' )
@@ -943,6 +947,7 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 								babelrc: false,
 								configFile: false,
 								presets: [
+									'@babel/preset-typescript',
 									[
 										'@babel/preset-react',
 										{

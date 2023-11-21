@@ -87,15 +87,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 		if ( $p->next_tag() ) {
 			$p->set_attribute(
 				'data-wc-on--click',
-				'actions.woocommerce.handlePreviousImageButtonClick'
-			);
-			$p->set_attribute(
-				'data-wc-on--mouseleave',
-				'actions.woocommerce.handleMouseLeavePreviousOrNextButton'
-			);
-			$p->set_attribute(
-				'data-wc-on--mouseenter',
-				'actions.woocommerce.handleMouseEnterPreviousOrNextButton'
+				'actions.selectPreviousImage'
 			);
 			$prev_button = $p->get_updated_html();
 		}
@@ -106,7 +98,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 		if ( $p->next_tag() ) {
 			$p->set_attribute(
 				'data-wc-on--click',
-				'actions.woocommerce.handleNextImageButtonClick'
+				'actions.selectNextImage'
 			);
 			$next_button = $p->get_updated_html();
 		}
@@ -115,17 +107,21 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 		$position_class  = 'wc-block-product-gallery-large-image-next-previous--' . $this->get_class_suffix( $context );
 
 		return strtr(
-			'<div class="wc-block-product-gallery-large-image-next-previous wp-block-woocommerce-product-gallery-large-image-next-previous {alignment_class}">
+			'<div
+				class="wc-block-product-gallery-large-image-next-previous wp-block-woocommerce-product-gallery-large-image-next-previous {alignment_class}"
+				data-wc-interactive=\'{data_wc_interactive}\'
+			>
 				<div class="wc-block-product-gallery-large-image-next-previous-container {position_class}">
 					{prev_button}
 					{next_button}
 				</div>
 		</div>',
 			array(
-				'{prev_button}'     => $prev_button,
-				'{next_button}'     => $next_button,
-				'{alignment_class}' => $alignment_class,
-				'{position_class}'  => $position_class,
+				'{prev_button}'         => $prev_button,
+				'{next_button}'         => $next_button,
+				'{alignment_class}'     => $alignment_class,
+				'{position_class}'      => $position_class,
+				'{data_wc_interactive}' => wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_NUMERIC_CHECK ),
 			)
 		);
 	}
