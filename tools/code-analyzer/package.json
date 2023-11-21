@@ -9,7 +9,6 @@
 	"dependencies": {
 		"@actions/core": "^1.10.0",
 		"@commander-js/extra-typings": "^10.0.3",
-		"@oclif/core": "^2.4.0",
 		"@tsconfig/node16": "^1.0.3",
 		"@types/uuid": "^8.3.4",
 		"@woocommerce/monorepo-utils": "workspace:*",

@@ -17,7 +17,7 @@
 		"/oclif.manifest.json"
 	],
 	"dependencies": {
-		"@oclif/core": "^1",
+		"@oclif/core": "^1.16.4",
 		"@oclif/plugin-help": "^5",
 		"@oclif/plugin-plugins": "^2.0.1",
 		"@octokit/graphql": "4.8.0"
