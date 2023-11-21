@@ -103,7 +103,7 @@ class CartAddItem extends AbstractCartRoute {
 		 *
 		 * @since 8.8.0
 		 *
-		 * @param array $customer_data An array of customer (user) data.
+		 * @param array $add_to_cart_data An array of cart item data.
 		 * @return array
 		 */
 		$add_to_cart_data = apply_filters(

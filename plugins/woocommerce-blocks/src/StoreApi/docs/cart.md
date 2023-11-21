@@ -2,7 +2,6 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-
 -   [Get Cart](#get-cart)
 -   [Responses](#responses)
     -   [Cart Response](#cart-response)
@@ -18,7 +17,6 @@
 The cart API returns the current state of the cart for the current session or logged in user.
 
 All POST endpoints require [Nonce Tokens](nonce-tokens.md) and return the updated state of the full cart once complete.
-
 
 ## Get Cart
 
@@ -249,9 +247,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 	},
 	"needs_payment": true,
 	"needs_shipping": true,
-	"payment_requirements": [
-		"products"
-	],
+	"payment_requirements": [ "products" ],
 	"has_calculated_shipping": true,
 	"shipping_rates": [
 		{
@@ -357,10 +353,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 	"items_weight": 0,
 	"cross_sells": [],
 	"errors": [],
-	"payment_methods": [
-		"bacs",
-		"cod"
-	],
+	"payment_methods": [ "bacs", "cod" ],
 	"extensions": {}
 }
 ```
@@ -416,7 +409,16 @@ curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc
 
 Returns the full [Cart Response](#cart-response) on success, or an [Error Response](#error-response) on failure.
 
-If you want to add supplemental cart item data before it is passed into `CartController::add_to_cart` use the [`woocommerce_store_api_add_to_cart_data`](https://github.com/woocommerce/woocommerce-blocks/blob/4d1c295a2bace9a4f6397cfd5469db31083d477a/docs/third-party-developers/extensibility/hooks/filters.md#woocommerce_store_api_add_to_cart_data) filter.
+If you want to add supplemental cart item data before it is passed into `CartController::add_to_cart` use the [`woocommerce_store_api_add_to_cart_data`](https://github.com/woocommerce/woocommerce-blocks/blob/4d1c295a2bace9a4f6397cfd5469db31083d477a/docs/third-party-developers/extensibility/hooks/filters.md#woocommerce_store_api_add_to_cart_data) filter. For example:
+
+```php
+add_filter( 'woocommerce_store_api_add_to_cart_data', function( $add_to_cart_data, \WP_REST_Request $request ) {
+	if ( ! empty( $request['custom-request-param'] ) ) {
+		$add_to_cart_data['cart_item_data']['custom-request-data'] = sanitize_text_field( $request['custom-request-param'] );
+	}
+	return $add_to_cart_data;
+} );
+```
 
 **Variation attribute naming:**
 
@@ -634,4 +636,3 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/cart.md)
 
 <!-- /FEEDBACK -->
-
