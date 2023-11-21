@@ -27,6 +27,7 @@ interface ProductsProps {
 	products?: Product[];
 	perPage?: number;
 	type: ProductType;
+	searchTerm?: string;
 }
 
 const LABELS = {
@@ -46,6 +47,7 @@ export default function Products( props: ProductsProps ): JSX.Element {
 	const label = LABELS[ props.type ].label;
 	const singularLabel = LABELS[ props.type ].singularLabel;
 	const query = useQuery();
+	const category = query?.category;
 
 	const perPage =
 		// Limit results when on search tab, and not showing only one section.
@@ -127,6 +129,8 @@ export default function Products( props: ProductsProps ): JSX.Element {
 					products={ products }
 					type={ props.type }
 					className={ productListClass }
+					searchTerm={ props.searchTerm }
+					category={ category }
 				/>
 				{ showAllButton && (
 					<Button
