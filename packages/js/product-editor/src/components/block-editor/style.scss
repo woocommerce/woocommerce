@@ -57,6 +57,7 @@
 			min-height: $grid-unit-40 + $grid-unit-05;
 		}
 	}
+	// block-editor-block-list__block wp-block wp-block-woocommerce-product-section
 
 	// This is wrong for @wordpress/components/InputControl since it is
 	// wrapped within the BaseControl by default. So it does not need
@@ -162,6 +163,10 @@
 
 		.block-editor-block-list__block:not([contenteditable]):focus:after {
 			display: none; // use important or increase specificity.
+		}
+
+		.block-editor-block-list__block fieldset {
+			min-width: 0;
 		}
 	}
 }
