@@ -24,7 +24,7 @@ import { useEntityId, useEntityProp } from '@wordpress/core-data';
 import { TRACKS_SOURCE } from '../../constants';
 import { VariationsActionsMenu } from './variations-actions-menu';
 import { Pagination } from './pagination';
-import { EmptyTableState } from './table-empty-state';
+import { EmptyOrErrorTableState } from './table-empty-or-error-state';
 import { VariationsFilter } from './variations-filter';
 import { useVariations } from './use-variations';
 import { TableRowSkeleton } from './table-row-skeleton';
@@ -153,6 +153,7 @@ export const VariationsTable = forwardRef<
 		onBatchDelete,
 
 		isGenerating,
+		variationsError,
 		onGenerate,
 	} = useVariations( { productId } );
 
@@ -160,10 +161,16 @@ export const VariationsTable = forwardRef<
 		onGenerate( productAttributes );
 	}
 
-	if ( ! ( isLoading || isGenerating ) && variationIds.length === 0 ) {
+	const isError = variationsError !== undefined;
+
+	if (
+		! ( isLoading || isGenerating ) &&
+		( variationIds.length === 0 || isError )
+	) {
 		return (
-			<EmptyTableState
+			<EmptyOrErrorTableState
 				onActionClick={ handleEmptyTableStateActionClick }
+				isError={ isError }
 			/>
 		);
 	}
