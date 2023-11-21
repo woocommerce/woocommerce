@@ -7,8 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { MARKETPLACE_CART_PATH } from '../../../constants';
-import { appendURLParams } from '../../../../utils/functions';
+import { renewUrl } from '../../../../utils/functions';
 import { Subscription } from '../../types';
 
 interface RenewProps {
@@ -17,14 +16,11 @@ interface RenewProps {
 }
 
 export default function RenewButton( props: RenewProps ) {
-	const renewUrl = appendURLParams( MARKETPLACE_CART_PATH, [
-		[ 'renew_product', props.subscription.product_id.toString() ],
-		[ 'product_key', props.subscription.product_key ],
-		[ 'order_id', props.subscription.order_id.toString() ],
-	] );
-
 	return (
-		<Button href={ renewUrl } variant={ props.variant ?? 'secondary' }>
+		<Button
+			href={ renewUrl( props.subscription ) }
+			variant={ props.variant ?? 'secondary' }
+		>
 			{ __( 'Renew', 'woocommerce' ) }
 		</Button>
 	);

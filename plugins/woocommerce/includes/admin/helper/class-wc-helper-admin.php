@@ -110,7 +110,7 @@ class WC_Helper_Admin {
 	}
 
 	/**
-	 * Fetch featured procucts from Woo.com and serve them
+	 * Fetch featured products from Woo.com and serve them
 	 * as JSON.
 	 */
 	public static function get_featured() {
@@ -122,7 +122,6 @@ class WC_Helper_Admin {
 
 		wp_send_json( $featured );
 	}
-
 }
 
 WC_Helper_Admin::load();
