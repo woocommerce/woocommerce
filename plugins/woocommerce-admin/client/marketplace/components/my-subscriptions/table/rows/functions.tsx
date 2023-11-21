@@ -38,7 +38,8 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 				'woocommerce'
 			),
 		};
-	} else if ( subscription.local.installed && ! subscription.active ) {
+	}
+	if ( subscription.local.installed && ! subscription.active ) {
 		return {
 			text: __( 'Not connected', 'woocommerce' ),
 			level: StatusLevel.Warning,
@@ -47,7 +48,8 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 				'woocommerce'
 			),
 		};
-	} else if ( subscription.expired ) {
+	}
+	if ( subscription.expired ) {
 		return {
 			text: __( 'Expired', 'woocommerce' ),
 			level: StatusLevel.Error,

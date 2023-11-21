@@ -59,11 +59,12 @@ export default function MySubscriptions(): JSX.Element {
 		}
 	);
 
-	const subscriptionsInstalled: Array< Subscription > = subscriptions.filter(
+	let subscriptionsInstalled: Array< Subscription > = subscriptions.filter(
 		( subscription: Subscription ) => subscription.subscription_installed
 	);
 
-	const subscriptionsAvailable: Array< Subscription > = subscriptions.filter(
+	const subscriptionsAvailable: Array< Subscription > = [];
+	subscriptions.filter(
 		( subscription: Subscription ) => ! subscription.subscription_installed
 	);
 
@@ -87,46 +88,44 @@ export default function MySubscriptions(): JSX.Element {
 		);
 	}
 
+	subscriptionsInstalled = [];
 	return (
 		<div className="woocommerce-marketplace__my-subscriptions">
-			{ subscriptionsInstalled.length > 0 && (
-				<section className="woocommerce-marketplace__my-subscriptions__installed">
-					<header className="woocommerce-marketplace__my-subscriptions__header">
-						<div>
-							<h2 className="woocommerce-marketplace__my-subscriptions__heading">
-								{ __(
-									'Installed on this store',
+			<section className="woocommerce-marketplace__my-subscriptions__installed">
+				<header className="woocommerce-marketplace__my-subscriptions__header">
+					<div>
+						<h2 className="woocommerce-marketplace__my-subscriptions__heading">
+							{ __( 'Installed on this store', 'woocommerce' ) }
+						</h2>
+						<span className="woocommerce-marketplace__my-subscriptions__table-description">
+							{ installedTableDescription }
+						</span>
+					</div>
+					<div>
+						<Button
+							href={ updateConnectionUrl }
+							className="woocommerce-marketplace__refresh-subscriptions"
+						>
+							<img
+								src={ RefreshIcon }
+								alt={ __(
+									'Refresh subscriptions',
 									'woocommerce'
 								) }
-							</h2>
-							<span className="woocommerce-marketplace__my-subscriptions__table-description">
-								{ installedTableDescription }
-							</span>
-						</div>
-						<div>
-							<Button
-								href={ updateConnectionUrl }
-								className="woocommerce-marketplace__refresh-subscriptions"
-							>
-								<img
-									src={ RefreshIcon }
-									alt={ __(
-										'Refresh subscriptions',
-										'woocommerce'
-									) }
-								/>
-								{ __( 'Refresh', 'woocommerce' ) }
-							</Button>
-						</div>
-					</header>
+							/>
+							{ __( 'Refresh', 'woocommerce' ) }
+						</Button>
+					</div>
+				</header>
+				{ subscriptionsInstalled.length > 0 && (
 					<InstalledSubscriptionsTable
 						isLoading={ isLoading }
 						rows={ subscriptionsInstalled.map( ( item ) => {
 							return installedSubscriptionRow( item );
 						} ) }
 					/>
-				</section>
-			) }
+				) }
+			</section>
 
 			{ subscriptionsAvailable.length > 0 && (
 				<section className="woocommerce-marketplace__my-subscriptions__available">
