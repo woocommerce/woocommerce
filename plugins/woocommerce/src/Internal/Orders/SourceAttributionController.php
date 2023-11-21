@@ -127,7 +127,8 @@ class SourceAttributionController implements RegisterHooksInterface {
 			function( $order, $data = array() ) {
 				// Nonce check is handled by WooCommerce before woocommerce_checkout_order_created hook.
 				// phpcs:ignore WordPress.Security.NonceVerification
-				$source_data = $this->get_source_values( empty( $data ) ? $_POST : $data );
+				$unprefixed_data = empty( $data ) ? $this->get_unprefixed_fields( $_POST ) : $data;
+				$source_data = $this->get_source_values( $unprefixed_data );
 				$this->send_order_tracks( $source_data, $order );
 				$this->set_order_source_data( $source_data, $order );
 			},
@@ -310,7 +311,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 	private function set_customer_source_data( WC_Customer $customer ) {
 		// Nonce check is handled before user_register hook.
 		// phpcs:ignore WordPress.Security.NonceVerification
-		foreach ( $this->get_source_values( $_POST ) as $key => $value ) {
+		foreach ( $this->get_source_values( $this->get_unprefixed_fields( $_POST ) ) as $key => $value ) {
 			$customer->add_meta_data( $this->get_meta_prefixed_field( $key ), $value );
 		}
 
