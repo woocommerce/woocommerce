@@ -98,12 +98,7 @@ export type BusinessInfoContextProps = Pick<
 		| 'is_agree_marketing'
 		| 'store_email'
 	>;
-} & Partial<
-		Pick<
-			CoreProfilerStateMachineContext,
-			'emailMarketingExperimentAssignment' | 'currentUserEmail'
-		>
-	>;
+} & Partial< Pick< CoreProfilerStateMachineContext, 'currentUserEmail' > >;
 
 export const BusinessInfo = ( {
 	context,
@@ -126,7 +121,6 @@ export const BusinessInfo = ( {
 			is_agree_marketing: isOptInMarketingFromOnboardingProfile,
 			store_email: storeEmailAddressFromOnboardingProfile,
 		},
-		emailMarketingExperimentAssignment,
 		currentUserEmail,
 	} = context;
 
@@ -390,7 +384,7 @@ export const BusinessInfo = ( {
 							</ul>
 						</Notice>
 					) }
-					{ emailMarketingExperimentAssignment === 'treatment' && (
+					{
 						<>
 							<TextControl
 								className={ classNames(
@@ -447,18 +441,13 @@ export const BusinessInfo = ( {
 								} }
 							/>
 						</>
-					) }
+					}
 				</form>
 				<div className="woocommerce-profiler-button-container">
 					<Button
 						className="woocommerce-profiler-button"
 						variant="primary"
-						disabled={
-							! storeCountry.key ||
-							( emailMarketingExperimentAssignment ===
-								'treatment' &&
-								isEmailInvalid )
-						}
+						disabled={ ! storeCountry.key || isEmailInvalid }
 						onClick={ () => {
 							sendEvent( {
 								type: 'BUSINESS_INFO_COMPLETED',
