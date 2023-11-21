@@ -15,7 +15,7 @@ https://example.com/?wc-api=CALLBACK
 In WooCommerce 2.0 or later, use the endpoint:
 
 ```php 
-http://yoursite.com/wc-api/CALLBACK/
+https://example.com/wc-api/CALLBACK/
 ```
 
 ## Behavior
