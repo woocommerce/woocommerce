@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import { createContext, useRef } from '@wordpress/element';
+import { createContext, useEffect, useRef, useState } from '@wordpress/element';
 import { dispatch } from '@wordpress/data';
 import {
 	__experimentalFetchLinkSuggestions as fetchLinkSuggestions,
@@ -46,6 +46,9 @@ import { CustomizeStoreComponent } from '../types';
 import { Layout } from './layout';
 import './style.scss';
 import { PreloadFonts } from './preload-fonts';
+import { ExitWarningModal } from './exit-warning-modal';
+import { set } from 'zod';
+import { onBackButtonClicked } from '../utils';
 
 const { RouterProvider } = unlock( routerPrivateApis );
 
@@ -147,16 +150,29 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 		isInitializedRef.current = true;
 	}
 
+	const [ showExitModal, setShowExitModal ] = useState( false );
+	useEffect( () => {
+		onBackButtonClicked( () => setShowExitModal( true ) );
+	}, [] );
+
 	return (
-		<CustomizeStoreContext.Provider value={ props }>
-			<ShortcutProvider style={ { height: '100%' } }>
-				<GlobalStylesProvider>
-					<RouterProvider>
-						<Layout />
-					</RouterProvider>
-					<PreloadFonts />
-				</GlobalStylesProvider>
-			</ShortcutProvider>
-		</CustomizeStoreContext.Provider>
+		<>
+			{ showExitModal && (
+				<ExitWarningModal
+					setOpenDesignChangeWarningModal={ setShowExitModal }
+					sendEvent={ props.sendEvent }
+				/>
+			) }
+			<CustomizeStoreContext.Provider value={ props }>
+				<ShortcutProvider style={ { height: '100%' } }>
+					<GlobalStylesProvider>
+						<RouterProvider>
+							<Layout />
+						</RouterProvider>
+						<PreloadFonts />
+					</GlobalStylesProvider>
+				</ShortcutProvider>
+			</CustomizeStoreContext.Provider>
+		</>
 	);
 };

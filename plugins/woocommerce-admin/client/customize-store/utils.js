@@ -23,6 +23,14 @@ export function onIframeLoad( callback ) {
 	} );
 }
 
+export function onBackButtonClicked( callback ) {
+	window.addEventListener( 'message', ( event ) => {
+		if ( event.data.type === 'assemberBackButtonClicked' ) {
+			callback();
+		}
+	} );
+}
+
 /**
  * Attach a listener to the window object to listen for messages from the parent window.
  *

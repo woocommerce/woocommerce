@@ -335,6 +335,23 @@ const redirectToAssemblerHub = async (
 	};
 
 	document.body.appendChild( iframe );
+
+	// Listen for back button click
+	window.addEventListener(
+		'popstate',
+		() => {
+			iframe.contentWindow?.postMessage(
+				{
+					type: 'assemberBackButtonClicked',
+				},
+				'*'
+			);
+			// When the user clicks the back button, push state changes to the previous step
+			// Set it back to the assember hub
+			window.history?.pushState( {}, '', assemblerUrl );
+		},
+		false
+	);
 };
 
 export const actions = {
