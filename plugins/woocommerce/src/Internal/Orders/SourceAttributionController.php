@@ -223,7 +223,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 
 		// Create Order Source Attribution JS namespace with parameters.
 		$namespace = array(
-			'params' => array (
+			'params' => array(
 				'lifetime'      => $lifetime,
 				'session'       => $session_length,
 				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
