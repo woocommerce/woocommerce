@@ -562,6 +562,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 */
 		public function enqueue_block_editor_assets() {
 			WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette' );
+			$admin_features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
+			if ( ! $admin_features_disabled ) {
+				WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette-analytics' );
+			}
 		}
 
 		/**
