@@ -2723,10 +2723,17 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 			return;
 		}
 
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order ) {
+			return;
+		}
+
 		wc_get_template(
 			'order/order-details.php',
 			array(
-				'order_id' => $order_id,
+				'order_id'       => $order_id,
+				'show_downloads' => apply_filters( 'woocommerce_order_downloads_table_show_downloads', ( $order->has_downloadable_item() && $order->is_download_permitted() ), $order ),
 			)
 		);
 	}
