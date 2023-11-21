@@ -26,3 +26,17 @@ If a subscription is expired, the user will be prompted to renew it.
 ### My Subscriptions API
 
 My Subscriptions data uses `/wc/v3/marketplace/subscriptions` API endpoints to list, install, connect, and update products.
+A full list of endpoints can be found in the [subscriptions API source code](/plugins/woocommerce/includes/admin/helper/class-wc-helper-subscriptions-api.php).
+
+## Project Structure
+
+The project is structured as follows:
+- **components**: Contains the React components used in the Marketplace page.
+- **contexts**: Contains the React contexts used in the Marketplace page.
+- **utils**: Contains the functionalities used in the Marketplace page to interact with APIs.
+- **stylesheets**: Contains the shared stylesheets used in the Marketplace page.
+- **assets**: Contains the images used in the Marketplace page.
+
+## Development
+
+This feature is part of WooCommerce Admin and uses the [same development environment.](/plugins/woocommerce-admin/README.md)
