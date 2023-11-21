@@ -125,6 +125,18 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 */
 	private function add_general_group_blocks() {
 		$general_group = $this->get_group_by_id( $this::GROUP_IDS['GENERAL'] );
+		$general_group->add_block(
+			array(
+				'id'         => 'product_variation_notice_general_tab',
+				'blockName'  => 'woocommerce/product-has-variations-notice',
+				'order'      => 10,
+				'attributes' => array(
+					'content'    => __( 'This product has options, such as size or color. You can manage each variation\'s images, downloads, and other details individually.', 'woocommerce' ),
+					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
+					'type'       => 'info',
+				),
+			)
+		);
 		// Basic Details Section.
 		$basic_details = $general_group->add_section(
 			array(
@@ -623,7 +635,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-has-variations-notice',
 				'order'      => 10,
 				'attributes' => array(
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s inventory and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
 				),
@@ -661,10 +673,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_inventory_inner_section->add_block(
 			array(
-				'id'         => 'product-track-stock',
-				'blockName'  => 'woocommerce/product-toggle-field',
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => 'product-track-stock',
+				'blockName'      => 'woocommerce/product-toggle-field',
+				'order'          => 20,
+				'attributes'     => array(
 					'label'        => __( 'Track stock quantity for this product', 'woocommerce' ),
 					'property'     => 'manage_stock',
 					'disabled'     => 'yes' !== get_option( 'woocommerce_manage_stock' ),
@@ -675,6 +687,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'</a>'
 					),
 				),
+				'hideConditions' => Features::is_enabled( 'product-external-affiliate' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "external"',
+					),
+				) : null,
 			)
 		);
 		$product_inventory_quantity_conditional = $product_inventory_inner_section->add_block(
@@ -837,7 +854,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-has-variations-notice',
 				'order'      => 10,
 				'attributes' => array(
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s shipping settings and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
 				),
