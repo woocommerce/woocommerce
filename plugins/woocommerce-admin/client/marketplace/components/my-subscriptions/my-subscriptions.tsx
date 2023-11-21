@@ -101,24 +101,25 @@ export default function MySubscriptions(): JSX.Element {
 					} ) }
 				/>
 			</section>
-
-			<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__available">
-				<h2 className="woocommerce-marketplace__my-subscriptions__heading">
-					{ __( 'Available to use', 'woocommerce' ) }
-				</h2>
-				<p className="woocommerce-marketplace__my-subscriptions__table-description">
-					{ __(
-						"Woo.com subscriptions you haven't used yet.",
-						'woocommerce'
-					) }
-				</p>
-				<AvailableSubscriptionsTable
-					isLoading={ isLoading }
-					rows={ subscriptionsAvailable.map( ( item ) => {
-						return availableSubscriptionRow( item );
-					} ) }
-				/>
-			</section>
+			{ subscriptionsAvailable.length > 0 && (
+				<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__available">
+					<h2 className="woocommerce-marketplace__my-subscriptions__heading">
+						{ __( 'Available to use', 'woocommerce' ) }
+					</h2>
+					<p className="woocommerce-marketplace__my-subscriptions__table-description">
+						{ __(
+							"Woo.com subscriptions you haven't used yet.",
+							'woocommerce'
+						) }
+					</p>
+					<AvailableSubscriptionsTable
+						isLoading={ isLoading }
+						rows={ subscriptionsAvailable.map( ( item ) => {
+							return availableSubscriptionRow( item );
+						} ) }
+					/>
+				</section>
+			) }
 		</div>
 	);
 }
