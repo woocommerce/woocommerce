@@ -12,7 +12,9 @@
  *
  * @see     https://woo.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 7.8.0
+ * @version 8.4.0
+ *
+ * @var bool $show_downloads Controls whether the downloads table should be rendered.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -28,7 +30,7 @@ $show_purchase_note    = $order->has_status( apply_filters( 'woocommerce_purchas
 $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_current_user_id();
 $downloads             = $order->get_downloadable_items();
 
-if ( $show_downloads ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+if ( $show_downloads ) {
 	wc_get_template(
 		'order/order-downloads.php',
 		array(
