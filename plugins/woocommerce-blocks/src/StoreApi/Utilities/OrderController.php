@@ -204,18 +204,34 @@ class OrderController {
 			$this->update_order_from_cart( $order );
 
 			// Return exception so customer can review before payment.
-			throw new RouteException(
-				'woocommerce_rest_cart_coupon_errors',
-				sprintf(
-					/* translators: %s Coupon codes. */
-					__( 'Invalid coupons were removed from the cart: "%s"', 'woo-gutenberg-products-block' ),
-					implode( '", "', array_keys( $coupon_errors ) )
-				),
-				409,
-				[
-					'removed_coupons' => $coupon_errors,
-				]
-			);
+			if ( 1 === count( $coupon_errors ) ) {
+				throw new RouteException(
+					'woocommerce_rest_cart_coupon_errors',
+					sprintf(
+						/* translators: %1$s Coupon codes, %2$s Reason */
+						__( '"%1$s" was removed from the cart. %2$s', 'woo-gutenberg-products-block' ),
+						array_keys( $coupon_errors )[0],
+						array_values( $coupon_errors )[0],
+					),
+					409,
+					[
+						'removed_coupons' => $coupon_errors,
+					]
+				);
+			} else {
+				throw new RouteException(
+					'woocommerce_rest_cart_coupon_errors',
+					sprintf(
+						/* translators: %s Coupon codes. */
+						__( 'Invalid coupons were removed from the cart: "%s"', 'woo-gutenberg-products-block' ),
+						implode( '", "', array_keys( $coupon_errors ) )
+					),
+					409,
+					[
+						'removed_coupons' => $coupon_errors,
+					]
+				);
+			}
 		}
 	}
 
@@ -430,14 +446,90 @@ class OrderController {
 	protected function validate_coupon_usage_limit( \WC_Coupon $coupon, \WC_Order $order ) {
 		$coupon_usage_limit = $coupon->get_usage_limit_per_user();
 
-		if ( $coupon_usage_limit > 0 ) {
-			$data_store  = $coupon->get_data_store();
-			$usage_count = $order->get_customer_id() ? $data_store->get_usage_by_user_id( $coupon, $order->get_customer_id() ) : $data_store->get_usage_by_email( $coupon, $order->get_billing_email() );
-
-			if ( $usage_count >= $coupon_usage_limit ) {
-				throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) );
-			}
+		if ( 0 === $coupon_usage_limit ) {
+			return;
 		}
+
+		// First, we check a logged in customer usage count, which happens against their user id, billing email, and account email.
+		if ( $order->get_customer_id() ) {
+			// We get usage per user id and associated emails.
+			$usage_count = $this->get_usage_per_aliases(
+				$coupon,
+				[
+					$order->get_billing_email(),
+					$order->get_customer_id(),
+					$this->get_email_from_user_id( $order->get_customer_id() ),
+				]
+			);
+		} else {
+			// Otherwise we check if the email doesn't belong to an existing user.
+			$customer_data_store = \WC_Data_Store::load( 'customer' );
+
+			// This will get us any user ids for the given billing email.
+			$user_ids = $customer_data_store->get_user_ids_for_billing_email( array( $order->get_billing_email() ) );
+
+			// Convert all found user ids to a list of email addresses.
+			$user_emails = array_map( [ $this, 'get_email_from_user_id' ], $user_ids );
+
+			// This matches a user against the given billing email and gets their ID/email/billing email.
+			$found_user = get_user_by( 'email', $order->get_billing_email() );
+			if ( $found_user ) {
+				$user_ids[]    = $found_user->ID;
+				$user_emails[] = $found_user->user_email;
+				$user_emails[] = get_user_meta( $found_user->ID, 'billing_email', true );
+			}
+
+			// Finally, grab usage count for all found IDs and emails.
+			$usage_count = $this->get_usage_per_aliases(
+				$coupon,
+				array_merge(
+					$user_emails,
+					$user_ids,
+					array( $order->get_billing_email() )
+				)
+			);
+		}
+
+		if ( $usage_count >= $coupon_usage_limit ) {
+			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) );
+		}
+	}
+
+	/**
+	 * Get user email from user id.
+	 *
+	 * @param integer $user_id User ID.
+	 * @return string Email or empty string.
+	 */
+	private function get_email_from_user_id( $user_id ) {
+		$user_data = get_userdata( $user_id );
+		return $user_data ? $user_data->user_email : '';
+	}
+
+	/**
+	 * Get the usage count for a coupon based on a list of aliases (ids, emails).
+	 *
+	 * @param \WC_Coupon $coupon Coupon object applied to the cart.
+	 * @param array      $aliases List of aliases to check.
+	 *
+	 * @return integer
+	 */
+	private function get_usage_per_aliases( $coupon, $aliases ) {
+		global $wpdb;
+		$aliases        = array_unique( array_filter( $aliases ) );
+		$aliases_string = "('" . implode( "','", array_map( 'esc_sql', $aliases ) ) . "')";
+		$usage_count    = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT COUNT( meta_id ) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_used_by' AND meta_value IN {$aliases_string};",
+				$coupon->get_id(),
+			)
+		);
+
+		$data_store = $coupon->get_data_store();
+		// Coupons can be held for an x amount of time before being applied to an order, so we need to check if it's already being held in (maybe via another flow).
+		$tentative_usage_count = $data_store->get_tentative_usages_for_user( $coupon->get_id(), $aliases );
+		return $tentative_usage_count + $usage_count;
 	}
 
 	/**
