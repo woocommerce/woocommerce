@@ -5,10 +5,15 @@ import { __ } from '@wordpress/i18n';
 import { store as editorStore } from '@wordpress/editor';
 import triggerFetch from '@wordpress/api-fetch';
 import { store as coreStore } from '@wordpress/core-data';
-import { Notice, Button } from '@wordpress/components';
+import { Notice } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { CHECKOUT_PAGE_ID, CART_PAGE_ID } from '@woocommerce/block-settings';
-import { useCallback, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useState,
+	createInterpolateElement,
+} from '@wordpress/element';
+
 /**
  * Internal dependencies
  */
@@ -23,40 +28,21 @@ export function DefaultNotice( { block }: { block: string } ) {
 			? 'woocommerce_checkout_page_id'
 			: 'woocommerce_cart_page_id';
 
-	const noticeContent =
-		block === 'checkout'
-			? __(
-					'If you would like to use this block as your default checkout, update your page settings',
-					'woo-gutenberg-products-block'
-			  )
-			: __(
-					'If you would like to use this block as your default cart, update your page settings',
-					'woo-gutenberg-products-block'
-			  );
-
 	// Everything below works the same for Cart/Checkout
 	const { saveEntityRecord } = useDispatch( coreStore );
 	const { editPost, savePost } = useDispatch( editorStore );
-	const { slug, isLoadingPage, postPublished, currentPostId } = useSelect(
-		( select ) => {
-			const { getEntityRecord, isResolving } = select( coreStore );
-			const { isCurrentPostPublished, getCurrentPostId } =
-				select( editorStore );
-			return {
-				slug:
-					getEntityRecord( 'postType', 'page', ORIGINAL_PAGE_ID )
-						?.slug || block,
-				isLoadingPage: isResolving( 'getEntityRecord', [
-					'postType',
-					'page',
-					ORIGINAL_PAGE_ID,
-				] ),
-				postPublished: isCurrentPostPublished(),
-				currentPostId: getCurrentPostId(),
-			};
-		},
-		[]
-	);
+	const { slug, postPublished, currentPostId } = useSelect( ( select ) => {
+		const { getEntityRecord } = select( coreStore );
+		const { isCurrentPostPublished, getCurrentPostId } =
+			select( editorStore );
+		return {
+			slug:
+				getEntityRecord( 'postType', 'page', ORIGINAL_PAGE_ID )?.slug ||
+				block,
+			postPublished: isCurrentPostPublished(),
+			currentPostId: getCurrentPostId(),
+		};
+	}, [] );
 	const [ settingStatus, setStatus ] = useState( 'pristine' );
 	const updatePage = useCallback( () => {
 		setStatus( 'updating' );
@@ -112,6 +98,46 @@ export function DefaultNotice( { block }: { block: string } ) {
 		saveEntityRecord,
 		slug,
 	] );
+
+	let noticeContent;
+	if ( block === 'checkout' ) {
+		noticeContent = createInterpolateElement(
+			__(
+				'If you would like to use this block as your default checkout, <a>update your page settings</a>.',
+				'woo-gutenberg-products-block'
+			),
+			{
+				a: (
+					// eslint-disable-next-line jsx-a11y/anchor-is-valid
+					<a href="#" onClick={ updatePage }>
+						{ __(
+							'update your page settings',
+							'woo-gutenberg-products-block'
+						) }
+					</a>
+				),
+			}
+		);
+	} else {
+		noticeContent = createInterpolateElement(
+			__(
+				'If you would like to use this block as your default cart, <a>update your page settings</a>.',
+				'woo-gutenberg-products-block'
+			),
+			{
+				a: (
+					// eslint-disable-next-line jsx-a11y/anchor-is-valid
+					<a href="#" onClick={ updatePage }>
+						{ __(
+							'update your page settings',
+							'woo-gutenberg-products-block'
+						) }
+					</a>
+				),
+			}
+		);
+	}
+
 	// Avoid showing the notice on the site editor, if already set, or if dismissed earlier.
 	if (
 		( typeof pagenow === 'string' && pagenow === 'site-editor' ) ||
@@ -123,7 +149,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 	return (
 		<Notice
 			className="wc-default-page-notice"
-			status={ settingStatus === 'updated' ? 'success' : 'warning' }
+			status={ settingStatus === 'updated' ? 'success' : 'info' }
 			onRemove={ () => setStatus( 'dismissed' ) }
 			spokenMessage={
 				settingStatus === 'updated'
@@ -139,18 +165,6 @@ export function DefaultNotice( { block }: { block: string } ) {
 			) : (
 				<>
 					<p>{ noticeContent }</p>
-					<Button
-						onClick={ updatePage }
-						variant="secondary"
-						isBusy={ settingStatus === 'updating' }
-						disabled={ isLoadingPage }
-						isSmall={ true }
-					>
-						{ __(
-							'Update your page settings',
-							'woo-gutenberg-products-block'
-						) }
-					</Button>
 				</>
 			) }
 		</Notice>
