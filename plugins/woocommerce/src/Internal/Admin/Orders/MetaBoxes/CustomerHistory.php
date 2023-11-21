@@ -72,6 +72,7 @@ class CustomerHistory {
 			$args['customer_id'] = $customer_identifier;
 		} else {
 			$args['billing_email'] = $customer_identifier;
+			$args['customer_id']   = 0;
 		}
 
 		$orders = wc_get_orders( $args );
