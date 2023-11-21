@@ -187,7 +187,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 		);
 
 		wp_enqueue_script(
-			'woocommerce-order-source-attribution-js',
+			'wc-order-source-attribution',
 			plugins_url( "assets/js/frontend/order-source-attribution{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
 			array( 'jquery', 'sourcebuster-js' ),
 			Constants::get_constant( 'WC_VERSION' ),
@@ -232,7 +232,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 			),
 		);
 
-		wp_localize_script( 'woocommerce-order-source-attribution-js', 'wc_order_source_attribution', $namespace );
+		wp_localize_script( 'wc-order-source-attribution', 'wc_order_source_attribution', $namespace );
 	}
 
 	/**
