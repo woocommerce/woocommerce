@@ -132,7 +132,7 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 				"assets/js/frontend/order-source-attribution-blocks{$this->get_script_suffix()}.js",
 				WC_PLUGIN_FILE
 			),
-			array( 'woocommerce-order-source-attribution-js', 'wp-data-js', 'wc-blocks-checkout-js' ),
+			array( 'woocommerce-order-source-attribution-js', 'wp-data', 'wc-blocks-checkout' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
