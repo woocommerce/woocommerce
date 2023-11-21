@@ -8,15 +8,11 @@ This document provides a guide on how to use the WooCommerce Plugin API to initi
 
 Before WooCommerce 2.0, use:
 
-```php
-https://example.com/?wc-api=CALLBACK
-```
+`https://example.com/?wc-api=CALLBACK`
 
 In WooCommerce 2.0 or later, use the endpoint:
 
-```php 
-https://example.com/wc-api/CALLBACK/
-```
+`https://example.com/wc-api/CALLBACK/`
 
 ## Behavior
 
