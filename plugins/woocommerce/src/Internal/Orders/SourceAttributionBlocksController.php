@@ -123,16 +123,16 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 		// $this->asset_api->register_script(
 		// 	'wc-blocks-order-source-attribution',
 		// 	'build/wc-blocks-order-source-attribution.js',
-		// 	[ 'woocommerce-order-source-attribution-js' ]
+		// 	[ 'wc-order-source-attribution' ]
 		// );
 
 		wp_register_script(
-			'wc-blocks-order-source-attribution',
+			'wc-order-source-attribution-blocks',
 			plugins_url(
 				"assets/js/frontend/order-source-attribution-blocks{$this->get_script_suffix()}.js",
 				WC_PLUGIN_FILE
 			),
-			array( 'woocommerce-order-source-attribution-js', 'wp-data', 'wc-blocks-checkout' ),
+			array( 'wc-order-source-attribution', 'wp-data', 'wc-blocks-checkout' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
@@ -145,7 +145,7 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function enqueue_scripts() {
-		wp_enqueue_script( 'wc-blocks-order-source-attribution' );
+		wp_enqueue_script( 'wc-order-source-attribution-blocks' );
 	}
 
 	/**
