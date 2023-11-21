@@ -59,6 +59,15 @@ class ProductCollectionNoResults extends AbstractBlock {
 	}
 
 	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return null;
+	}
+
+	/**
 	 * Set the URL attributes for "clearing any filters" and "Store's home" links.
 	 *
 	 * @param string $content Block content.
