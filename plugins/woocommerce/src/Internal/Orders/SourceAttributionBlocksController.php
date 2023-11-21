@@ -5,14 +5,11 @@ namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
-
-// use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Internal\Orders\SourceAttributionController;
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
-use Exception;
+use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
 use WP_Error;
 
 /**
@@ -23,13 +20,6 @@ use WP_Error;
 class SourceAttributionBlocksController implements RegisterHooksInterface {
 
 	use ScriptDebug;
-
-	// /**
-	//  * Instance of the asset API.
-	//  *
-	//  * @var AssetApi
-	//  */
-	// private $asset_api;
 
 	/**
 	 * Instance of the features controller.
@@ -57,13 +47,15 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * // @param AssetApi                    $asset_api                     Instance of the asset API.
 	 * @param ExtendSchema                $extend_schema                 ExtendSchema instance.
 	 * @param FeaturesController          $features_controller           Features controller.
 	 * @param SourceAttributionController $source_attribution_controller Instance of the source attribution controller.
 	 */
 	final public function init(
-		// AssetApi $asset_api,
+
+		/*
+		AssetApi $asset_api,
+		*/
 		ExtendSchema $extend_schema,
 		FeaturesController $features_controller,
 		SourceAttributionController $source_attribution_controller
@@ -120,12 +112,16 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	 * Register scripts.
 	 */
 	private function register_assets() {
-		// $this->asset_api->register_script(
-		// 	'wc-blocks-order-source-attribution',
-		// 	'build/wc-blocks-order-source-attribution.js',
-		// 	[ 'wc-order-source-attribution' ]
-		// );
+		// Once Blocks are moved to the monorepo, hopefully, we can use the following code.
 
+		/*
+		$this->asset_api->register_script(
+			'wc-blocks-order-source-attribution',
+			'build/wc-blocks-order-source-attribution.js',
+			[ 'wc-order-source-attribution' ]
+		);
+		*/
+		// Instead of the elaborate version below.
 		wp_register_script(
 			'wc-order-source-attribution-blocks',
 			plugins_url(
@@ -155,33 +151,47 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	 */
 	private function extend_api() {
 		$this->extend_schema->register_endpoint_data(
-			[
+			array(
 				'endpoint'        => CheckoutSchema::IDENTIFIER,
 				'namespace'       => 'woocommerce/order-source-attribution',
 				'schema_callback' => $this->get_schema_callback(),
-			]
+			)
 		);
 		// The following does not work.
-		// https://github.com/woocommerce/woocommerce-blocks/blob/d646b42e98dc69fe06356f54b53fd6cff132fe98/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md#basic-usage
-		//
-		// $this->extend_schema->register_update_callback(
-		// 	[
-		// 		'namespace' => 'woocommerce/order-source-attribution',
-		// 		'callback'  => function( $data ) {
-		// 			// Save the data to the order here.
-		// 		},
-		// 	]
-		// );
-		// So, we fall back to the same mechanism we use for the checkout shortcode.
-		add_action( 'woocommerce_store_api_checkout_update_order_from_request', function ( $order, $request ) {
-			$params = $request->get_param( 'extensions' );
-			if(empty($params['woocommerce/order-source-attribution'])) {
-				return;
-			}
-			$params = $params['woocommerce/order-source-attribution'];
+		// See https://github.com/woocommerce/woocommerce-blocks/blob/d646b42e98dc69fe06356f54b53fd6cff132fe98/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md#basic-usage .
 
-			do_action( 'woocommerce_order_save_attribution_source_data', $order, $params );
-		}, 10, 2 );
+		/*
+		$this->extend_schema->register_update_callback(
+			[
+				'namespace' => 'woocommerce/order-source-attribution',
+				'callback'  => function( $data ) {
+					// Save the data to the order here.
+				},
+			]
+		);
+		*/
+		// So, we fall back to the same mechanism we use for the checkout shortcode.
+		add_action(
+			'woocommerce_store_api_checkout_update_order_from_request',
+			function ( $order, $request ) {
+				$params = $request->get_param( 'extensions' )['woocommerce/order-source-attribution'];
+				if ( empty( $params ) ) {
+					return;
+				}
+
+				/**
+				 * Run an action to save order source attribution data.
+				 *
+				 * @since x.x.x
+				 *
+				 * @param WC_Order $order  The order object.
+				 * @param array    $params Source attribution data.
+				 */
+				do_action( 'woocommerce_order_save_attribution_source_data', $order, $params );
+			},
+			10,
+			2
+		);
 	}
 
 	/**
@@ -191,7 +201,7 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	 */
 	private function get_schema_callback() {
 		return function() {
-			$schema = [];
+			$schema = array();
 			$fields = $this->source_attribution_controller->get_fields();
 
 			$validate_callback = function( $value ) {
@@ -200,7 +210,7 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 						'api-error',
 						sprintf(
 							/* translators: %s is the property type */
-							esc_html__( 'Value of type %s was posted to the source attribution callback', 'woo-gutenberg-products-block' ),
+							esc_html__( 'Value of type %s was posted to the source attribution callback', 'woocommerce' ),
 							gettype( $value )
 						)
 					);
@@ -214,19 +224,19 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 			};
 
 			foreach ( $fields as $field ) {
-				$schema[ $field ] = [
+				$schema[ $field ] = array(
 					'description' => sprintf(
 						/* translators: %s is the field name */
-						__( 'Source attribution field: %s', 'woo-gutenberg-products-block' ),
+						__( 'Source attribution field: %s', 'woocommerce' ),
 						esc_html( $field )
 					),
-					'type'        => [ 'string', 'null' ],
-					'context'     => [],
-					'arg_options' => [
+					'type'        => array( 'string', 'null' ),
+					'context'     => array(),
+					'arg_options' => array(
 						'validate_callback' => $validate_callback,
 						'sanitize_callback' => $sanitize_callback,
-					],
-				];
+					),
+				);
 			}
 
 			return $schema;
