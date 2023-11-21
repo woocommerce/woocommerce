@@ -7,7 +7,7 @@ import {
 	RichText,
 	InspectorControls,
 } from '@wordpress/block-editor';
-import { CheckboxControl } from '@woocommerce/blocks-checkout';
+import { CheckboxControl } from '@woocommerce/blocks-components';
 import {
 	PanelBody,
 	ToggleControl,

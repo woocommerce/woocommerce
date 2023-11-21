@@ -4,13 +4,12 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Fragment, useMemo, useState } from '@wordpress/element';
 import classNames from 'classnames';
-import { CheckboxControl } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-
+import { CheckboxControl } from '../checkbox-control';
 interface CheckboxListOptions {
 	label: React.ReactNode;
 	value: string;
