@@ -32,6 +32,17 @@ final class CollectionFilters extends AbstractBlock {
 	}
 
 	/**
+	 * Get the frontend script handle for this block type.
+	 *
+	 * @see $this->register_block_type()
+	 * @param string $key Data to get, or default to everything.
+	 * @return array|string|null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
+	}
+
+	/**
 	 * Initialize this block type.
 	 *
 	 * - Hook into WP lifecycle.
@@ -143,7 +154,16 @@ final class CollectionFilters extends AbstractBlock {
 		if ( is_a( $inner_blocks, 'WP_Block_List' ) ) {
 			foreach ( $inner_blocks as $inner_block ) {
 				if ( ! empty( $inner_block->attributes['queryParam'] ) ) {
-					$results = array_merge( $results, $inner_block->attributes['queryParam'] );
+					$query_param = $inner_block->attributes['queryParam'];
+					/**
+					 * There can be multiple attribute filters so we transform
+					 * the query param of each filter into an array to merge
+					 * them together.
+					 */
+					if ( ! empty( $query_param['calculate_attribute_counts'] ) ) {
+						$query_param['calculate_attribute_counts'] = array( $query_param['calculate_attribute_counts'] );
+					}
+					$results = array_merge_recursive( $results, $query_param );
 				}
 				$this->get_inner_collection_data_params(
 					$inner_block->inner_blocks,

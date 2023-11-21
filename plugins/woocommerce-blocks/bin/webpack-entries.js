@@ -107,6 +107,10 @@ const blocks = {
 		customDir: 'collection-filters/inner-blocks/price-filter',
 		isExperimental: true,
 	},
+	'collection-attribute-filter': {
+		customDir: 'collection-filters/inner-blocks/attribute-filter',
+		isExperimental: true,
+	},
 	'order-confirmation-summary': {
 		customDir: 'order-confirmation/summary',
 	},
