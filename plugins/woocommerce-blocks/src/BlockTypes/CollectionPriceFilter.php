@@ -89,7 +89,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 					value="%d"
 					data-wc-bind--value="state.filters.minPrice"
 					data-wc-on--input="actions.filters.setMinPrice"
-					data-wc-on--change="actions.filters.updateProducts"
+					data-wc-on--change="actions.filters.updateProductsWithPriceFilter"
 				/>',
 				esc_attr( $min_price )
 			) : sprintf(
@@ -105,7 +105,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 					value="%d"
 					data-wc-bind--value="state.filters.maxPrice"
 					data-wc-on--input="actions.filters.setMaxPrice"
-					data-wc-on--change="actions.filters.updateProducts"
+					data-wc-on--change="actions.filters.updateProductsWithPriceFilter"
 				/>',
 				esc_attr( $max_price )
 			) : sprintf(
@@ -132,7 +132,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 						data-wc-bind--value="state.filters.minPrice"
 						data-wc-class--active="state.filters.isMinActive"
 						data-wc-on--input="actions.filters.setMinPrice"
-						data-wc-on--change="actions.filters.updateProducts"
+						data-wc-on--change="actions.filters.updateProductsWithPriceFilter"
 					>
 					<input
 						type="range"
@@ -144,7 +144,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 						data-wc-bind--value="state.filters.maxPrice"
 						data-wc-class--active="state.filters.isMaxActive"
 						data-wc-on--input="actions.filters.setMaxPrice"
-						data-wc-on--change="actions.filters.updateProducts"
+						data-wc-on--change="actions.filters.updateProductsWithPriceFilter"
 					>
 				</div>
 				<div class="text">

@@ -84,7 +84,7 @@ store( {
 					state.filters.maxPrice - 1
 				);
 			},
-			updateProducts: ( { state }: ActionProps ) => {
+			updateProductsWithPriceFilter: ( { state }: ActionProps ) => {
 				navigate( getHrefWithFilters( { state } ) );
 			},
 			reset: ( { state }: ActionProps ) => {
