@@ -260,10 +260,50 @@ const TreeSelectControl = ( {
 					}
 					return (
 						! this.checked &&
-						this.leaves.some(
+						this.children.some(
 							( opt ) => opt.checked || opt.partialChecked
 						)
 					);
+				},
+			},
+			isVisible: {
+				/**
+				 * Returns whether this option should be visible based on search.
+				 * All options are visible when not searching. Otherwise, true if this option is
+				 * a search result or it has a descendent that is being searched for.
+				 *
+				 * @return {boolean} True if option should be visible, false otherwise.
+				 */
+				get() {
+					// everything is visible when not searching.
+					if ( ! isSearching ) {
+						return true;
+					}
+
+					// Exit true if this is searched result.
+					if ( this.isSearchResult ) {
+						return true;
+					}
+
+					// If any children are search results, remain visible.
+					if ( this.hasChildren ) {
+						return this.children.some( ( opt ) => opt.isVisible );
+					}
+
+					return this.leaves.some( ( opt ) => opt.isSearchResult );
+				},
+			},
+			isSearchResult: {
+				/**
+				 * Returns whether this option is a searched result.
+				 *
+				 * @return {boolean} True if option is being searched, false otherwise.
+				 */
+				get() {
+					if ( ! isSearching ) {
+						return false;
+					}
+					return !! this.filterMatch;
 				},
 			},
 			expanded: {
@@ -275,7 +315,7 @@ const TreeSelectControl = ( {
 				 */
 				get() {
 					return (
-						isSearching ||
+						( isSearching && this.isVisible ) ||
 						this.value === ROOT_VALUE ||
 						cache.expandedValues.includes( this.value )
 					);
@@ -294,20 +334,18 @@ const TreeSelectControl = ( {
 		const reduceOptions = ( acc, { children = [], ...option } ) => {
 			if ( children.length ) {
 				option.children = children.reduce( reduceOptions, [] );
+			}
 
-				if ( ! option.children.length ) {
-					return acc;
-				}
-			} else if ( isSearching ) {
+			if ( isSearching ) {
 				const labelWithAccentsRemoved = removeAccents( option.label );
 				const filterWithAccentsRemoved = removeAccents( filter );
 				const match = labelWithAccentsRemoved
 					.toLowerCase()
 					.indexOf( filterWithAccentsRemoved );
-				if ( match === -1 ) {
-					return acc;
+				if ( match > -1 ) {
+					option.label = highlightOptionLabel( option.label, match );
+					option.filterMatch = true;
 				}
-				option.label = highlightOptionLabel( option.label, match );
 			}
 
 			Object.defineProperties( option, descriptors );

@@ -58,6 +58,7 @@ const Options = ( {
 		const { hasChildren, checked, partialChecked, expanded } = option;
 
 		if ( ! option?.value ) return null;
+		if ( ! isRoot && ! option?.isVisible ) return null;
 
 		return (
 			<div

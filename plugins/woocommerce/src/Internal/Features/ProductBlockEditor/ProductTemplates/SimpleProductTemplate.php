@@ -673,10 +673,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_inventory_inner_section->add_block(
 			array(
-				'id'         => 'product-track-stock',
-				'blockName'  => 'woocommerce/product-toggle-field',
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => 'product-track-stock',
+				'blockName'      => 'woocommerce/product-toggle-field',
+				'order'          => 20,
+				'attributes'     => array(
 					'label'        => __( 'Track stock quantity for this product', 'woocommerce' ),
 					'property'     => 'manage_stock',
 					'disabled'     => 'yes' !== get_option( 'woocommerce_manage_stock' ),
@@ -687,6 +687,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'</a>'
 					),
 				),
+				'hideConditions' => Features::is_enabled( 'product-external-affiliate' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "external"',
+					),
+				) : null,
 			)
 		);
 		$product_inventory_quantity_conditional = $product_inventory_inner_section->add_block(
@@ -877,6 +882,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'checkedValue'   => false,
 						'uncheckedValue' => true,
 						'label'          => __( 'This product requires shipping or pickup', 'woocommerce' ),
+						'uncheckedHelp'  => __( 'This product will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woo.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
 					),
 				)
 			);
