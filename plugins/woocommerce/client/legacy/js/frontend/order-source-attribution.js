@@ -6,6 +6,30 @@
 	const cookieLifetime = Number( params.lifetime );
 	const sessionLength = Number( params.session );
 
+	/**
+	 * Flattens the sbjs.get object into a schema compatible object.
+	 *
+	 * @param {Object} obj Sourcebuster data object, `sbjs.get`.
+	 * @returns
+	 */
+	wc_order_source_attribution.sbjsDataToSchema = ( obj ) => ( {
+		type: obj.current.typ,
+		url: obj.current_add.rf,
+
+		utm_campaign: obj.current.cmp,
+		utm_source: obj.current.src,
+		utm_medium: obj.current.mdm,
+		utm_content: obj.current.cnt,
+		utm_id: obj.current.id,
+		utm_term: obj.current.trm,
+
+		session_entry: obj.current_add.ep,
+		session_start_time: obj.current_add.fd,
+		session_pages: obj.session.pgs,
+		session_count: obj.udata.vst,
+
+		user_agent: obj.udata.uag,
+	} );
 
 	wc_order_source_attribution.initOrderTracking = () => {
 
@@ -31,22 +55,9 @@
 		const setFields = () => {
 
 			if ( sbjs.get ) {
-				$( `input[name="${prefix}type"]` ).val( sbjs.get.current.typ );
-				$( `input[name="${prefix}url"]` ).val( sbjs.get.current_add.rf );
-
-				$( `input[name="${prefix}utm_campaign"]` ).val( sbjs.get.current.cmp );
-				$( `input[name="${prefix}utm_source"]` ).val( sbjs.get.current.src );
-				$( `input[name="${prefix}utm_medium"]` ).val( sbjs.get.current.mdm );
-				$( `input[name="${prefix}utm_content"]` ).val( sbjs.get.current.cnt );
-				$( `input[name="${prefix}utm_id"]` ).val( sbjs.get.current.id );
-				$( `input[name="${prefix}utm_term"]` ).val( sbjs.get.current.trm );
-
-				$( `input[name="${prefix}session_entry"]` ).val( sbjs.get.current_add.ep );
-				$( `input[name="${prefix}session_start_time"]` ).val( sbjs.get.current_add.fd );
-				$( `input[name="${prefix}session_pages"]` ).val( sbjs.get.session.pgs );
-				$( `input[name="${prefix}session_count"]` ).val( sbjs.get.udata.vst );
-
-				$( `input[name="${prefix}user_agent"]` ).val( sbjs.get.udata.uag );
+				for( const [ key, value ] of Object.entries( wc_order_source_attribution.sbjsDataToSchema( sbjs.get ) ) ) {
+					$( `input[name="${prefix}${key}"]` ).val( value );
+				}
 			}
 		};
 
