@@ -99,7 +99,7 @@ const recordTracksIsEmailChanged = (
 		opt_in: event.payload.isOptInMarketing,
 		email_field_prefilled_source: emailSource,
 		email_field_modified: isEmailChanged,
-	});
+	} );
 };
 
 const recordTracksBusinessInfoCompleted = (

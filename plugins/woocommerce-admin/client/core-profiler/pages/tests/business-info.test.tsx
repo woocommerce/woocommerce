@@ -317,7 +317,6 @@ describe( 'BusinessInfo', () => {
 	} );
 
 	describe( 'business info page, email marketing opt-in', () => {
-
 		it( 'should not disable the continue field when opt in checkbox is not checked and email field is empty', () => {
 			props.context.businessInfo.location = 'AW';
 			props.context.onboardingProfile.is_store_country_set = true;
