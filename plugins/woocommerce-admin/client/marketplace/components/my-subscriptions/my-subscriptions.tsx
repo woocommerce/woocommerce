@@ -115,14 +115,12 @@ export default function MySubscriptions(): JSX.Element {
 						</Button>
 					</div>
 				</header>
-				{ subscriptionsInstalled.length > 0 && (
-					<InstalledSubscriptionsTable
-						isLoading={ isLoading }
-						rows={ subscriptionsInstalled.map( ( item ) => {
-							return installedSubscriptionRow( item );
-						} ) }
-					/>
-				) }
+				<InstalledSubscriptionsTable
+					isLoading={ isLoading }
+					rows={ subscriptionsInstalled.map( ( item ) => {
+						return installedSubscriptionRow( item );
+					} ) }
+				/>
 			</section>
 
 			{ subscriptionsAvailable.length > 0 && (
