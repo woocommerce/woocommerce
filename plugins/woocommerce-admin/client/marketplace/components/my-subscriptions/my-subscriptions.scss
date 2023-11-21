@@ -15,9 +15,42 @@
 
 .woocommerce-marketplace__my-subscriptions__header {
 	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: stretch;
 	@include content-width;
+
+	.woocommerce-marketplace__my-subscriptions__header-content,
+	.woocommerce-marketplace__my-subscriptions__header-refresh {
+		width: 100%;
+	}
+
+	.woocommerce-marketplace__my-subscriptions__header-content {
+		order: 2;
+	}
+	.woocommerce-marketplace__my-subscriptions__header-refresh {
+		display: flex;
+		justify-content: end;
+		order: 1;
+	}
+
+	@media screen and (min-width: $breakpoint-medium) {
+		align-items: center;
+		justify-content: space-between;
+		flex-direction: row;
+
+		.woocommerce-marketplace__my-subscriptions__header-content,
+		.woocommerce-marketplace__my-subscriptions__header-refresh {
+			width: auto;
+		}
+
+		.woocommerce-marketplace__my-subscriptions__header-content {
+			order: 1;
+		}
+		.woocommerce-marketplace__my-subscriptions__header-refresh {
+			order: 2;
+		}
+	}
 }
 
 .woocommerce-marketplace__refresh-subscriptions {
