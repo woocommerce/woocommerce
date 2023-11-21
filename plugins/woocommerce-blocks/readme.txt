@@ -150,6 +150,13 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 - Remove bullet points and unnecessary padding from `SearchListControl`. ([11444](https://github.com/woocommerce/woocommerce-blocks/pull/11444))
 
+= 11.4.9 - 2023-11-21 =
+
+#### Bug fixes
+
+- Fixed params passed to woocommerce_before_thankyou for block checkout. This should be an order ID, not an order object. ([#11862](https://github.com/woocommerce/woocommerce-blocks/pull/11862))
+- Enhance validation for limited use coupons and guest users. ([#11860](https://github.com/woocommerce/woocommerce-blocks/pull/11860))
+
 = 11.4.8 - 2023-11-10 =
 
 #### Bug Fixes
