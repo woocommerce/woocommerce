@@ -22,7 +22,7 @@
 	"themes": [
 		"https://downloads.wordpress.org/theme/storefront.latest-stable.zip",
 		"https://downloads.wordpress.org/theme/twentytwentyone.latest-stable.zip",
-		"https://downloads.wordpress.org/theme/twentytwentythree.latest-stable.zip",
+		"https://downloads.wordpress.org/theme/twentytwentyfour.latest-stable.zip",
 		"./tests/mocks/emptytheme",
 		"./tests/mocks/theme-with-woo-templates"
 	],
