@@ -163,6 +163,10 @@
 		.block-editor-block-list__block:not([contenteditable]):focus:after {
 			display: none; // use important or increase specificity.
 		}
+
+		.block-editor-block-list__block fieldset {
+			min-width: 0;
+		}
 	}
 }
 
