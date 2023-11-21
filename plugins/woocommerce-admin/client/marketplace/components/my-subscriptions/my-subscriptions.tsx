@@ -82,7 +82,7 @@ export default function MySubscriptions(): JSX.Element {
 			</section>
 			<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__installed">
 				<header className="woocommerce-marketplace__my-subscriptions__header">
-					<div>
+					<div className="woocommerce-marketplace__my-subscriptions__header-content">
 						<h2 className="woocommerce-marketplace__my-subscriptions__heading">
 							{ __( 'Installed on this store', 'woocommerce' ) }
 						</h2>
@@ -94,12 +94,14 @@ export default function MySubscriptions(): JSX.Element {
 						<RefreshButton />
 					</div>
 				</header>
-				<InstalledSubscriptionsTable
-					isLoading={ isLoading }
-					rows={ subscriptionsInstalled.map( ( item ) => {
-						return installedSubscriptionRow( item );
-					} ) }
-				/>
+				<div className="woocommerce-marketplace__my-subscriptions__table-wrapper">
+					<InstalledSubscriptionsTable
+						isLoading={ isLoading }
+						rows={ subscriptionsInstalled.map( ( item ) => {
+							return installedSubscriptionRow( item );
+						} ) }
+					/>
+				</div>
 			</section>
 			{ subscriptionsAvailable.length > 0 && (
 				<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__available">
@@ -112,12 +114,14 @@ export default function MySubscriptions(): JSX.Element {
 							'woocommerce'
 						) }
 					</p>
-					<AvailableSubscriptionsTable
-						isLoading={ isLoading }
-						rows={ subscriptionsAvailable.map( ( item ) => {
-							return availableSubscriptionRow( item );
-						} ) }
-					/>
+					<div className="woocommerce-marketplace__my-subscriptions__table-wrapper">
+						<AvailableSubscriptionsTable
+							isLoading={ isLoading }
+							rows={ subscriptionsAvailable.map( ( item ) => {
+								return availableSubscriptionRow( item );
+							} ) }
+						/>
+					</div>
 				</section>
 			) }
 		</div>

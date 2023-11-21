@@ -1,10 +1,56 @@
 @import '@wordpress/base-styles/_colors.native.scss';
 @import '../../stylesheets/_variables.scss';
 
+@mixin content-width {
+	max-width: calc(100vw - (2 * #{$grid-unit-20}));
+	@media screen and (min-width: 783px) {
+		max-width: calc(
+			100vw - (2 * #{$grid-unit-40}) - $admin-menu-width-collapsed
+		);
+	}
+	@media screen and (min-width: 960px) {
+		max-width: calc(100vw - (2 * #{$grid-unit-40}) - $admin-menu-width);
+	}
+}
+
 .woocommerce-marketplace__my-subscriptions__header {
 	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: stretch;
+	@include content-width;
+
+	.woocommerce-marketplace__my-subscriptions__header-content,
+	.woocommerce-marketplace__my-subscriptions__header-refresh {
+		width: 100%;
+	}
+
+	.woocommerce-marketplace__my-subscriptions__header-content {
+		order: 2;
+	}
+	.woocommerce-marketplace__my-subscriptions__header-refresh {
+		display: flex;
+		justify-content: end;
+		order: 1;
+	}
+
+	@media screen and (min-width: $breakpoint-medium) {
+		align-items: center;
+		justify-content: space-between;
+		flex-direction: row;
+
+		.woocommerce-marketplace__my-subscriptions__header-content,
+		.woocommerce-marketplace__my-subscriptions__header-refresh {
+			width: auto;
+		}
+
+		.woocommerce-marketplace__my-subscriptions__header-content {
+			order: 1;
+		}
+		.woocommerce-marketplace__my-subscriptions__header-refresh {
+			order: 2;
+		}
+	}
 }
 
 .woocommerce-marketplace__refresh-subscriptions {
@@ -67,11 +113,17 @@
 	}
 }
 
+.woocommerce-marketplace__my-subscriptions__table-wrapper {
+	position: relative;
+	overflow: hidden;
+}
+
 .woocommerce-marketplace__my-subscriptions__table {
 	font-size: 13px;
 	line-height: 20px;
 	margin-top: $grid-unit-30;
 	color: $gray-900;
+	@include content-width;
 }
 
 .woocommerce-marketplace__my-subscriptions__product {
@@ -189,8 +241,12 @@
 	text-decoration: none;
 	padding: 6px 12px;
 }
-.woocommerce-marketplace__my-subscriptions .components-button.is-secondary:hover:not(:disabled) {
-	color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+.woocommerce-marketplace__my-subscriptions
+	.components-button.is-secondary:hover:not(:disabled) {
+	color: var(
+		--wp-components-color-accent,
+		var(--wp-admin-theme-color, #3858e9)
+	);
 }
 
 .woocommerce-marketplace__my-subscriptions--connect {
@@ -289,7 +345,6 @@
 	}
 }
 
-
 .woocommerce-marketplace__my-subscriptions {
 	display: grid;
 	grid-template-columns: repeat(5, auto);
@@ -300,7 +355,8 @@
 		}
 	}
 	.woocommerce-table__table,
-	.woocommerce-marketplace__my-subscriptions-section {
+	.woocommerce-marketplace__my-subscriptions-section,
+	.woocommerce-marketplace__my-subscriptions__table-wrapper {
 		&,
 		& table,
 		& tbody,
@@ -309,13 +365,6 @@
 			grid-column: span 5;
 			display: grid;
 			grid-template-columns: subgrid;
-			max-width: calc(100vw - (2 * #{$grid-unit-20}));
-			@media screen and (min-width: 783px) {
-				max-width: calc(100vw - (2 * #{$grid-unit-40}) - $admin-menu-width-collapsed);
-			}
-			@media screen and (min-width: 960px) {
-				max-width: calc(100vw - (2 * #{$grid-unit-40}) - $admin-menu-width);
-			}
 		}
 	}
 }
