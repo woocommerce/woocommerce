@@ -80,17 +80,17 @@ export default function MySubscriptions(): JSX.Element {
 			<section className="woocommerce-marketplace__my-subscriptions__notices">
 				<Notices />
 			</section>
-			<section className="woocommerce-marketplace__my-subscriptions__installed">
+			<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__installed">
 				<header className="woocommerce-marketplace__my-subscriptions__header">
 					<div>
 						<h2 className="woocommerce-marketplace__my-subscriptions__heading">
 							{ __( 'Installed on this store', 'woocommerce' ) }
 						</h2>
-						<span className="woocommerce-marketplace__my-subscriptions__table-description">
+						<p className="woocommerce-marketplace__my-subscriptions__table-description">
 							{ installedTableDescription }
-						</span>
+						</p>
 					</div>
-					<div>
+					<div className="woocommerce-marketplace__my-subscriptions__header-refresh">
 						<RefreshButton />
 					</div>
 				</header>
@@ -102,7 +102,7 @@ export default function MySubscriptions(): JSX.Element {
 				/>
 			</section>
 
-			<section className="woocommerce-marketplace__my-subscriptions__available">
+			<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__available">
 				<h2 className="woocommerce-marketplace__my-subscriptions__heading">
 					{ __( 'Available to use', 'woocommerce' ) }
 				</h2>

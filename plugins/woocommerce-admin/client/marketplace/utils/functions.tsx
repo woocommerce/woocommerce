@@ -5,12 +5,15 @@ import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
 import { Options } from '@wordpress/notices';
+import { Icon } from '@wordpress/components';
+
 /**
  * Internal dependencies
  */
 import { LOCALE } from '../../utils/admin-settings';
 import { CategoryAPIItem } from '../components/category-selector/types';
 import {
+	MARKETPLACE_CART_PATH,
 	MARKETPLACE_CATEGORY_API_PATH,
 	MARKETPLACE_HOST,
 	MARKETPLACE_SEARCH_API_PATH,
@@ -346,6 +349,13 @@ function addNotice(
 			options
 		);
 	} else {
+		if ( ! options?.icon ) {
+			options = {
+				...options,
+				icon: <Icon icon="saved" />,
+			};
+		}
+
 		dispatch( 'core/notices' ).createSuccessNotice( message, options );
 	}
 }
@@ -373,6 +383,20 @@ const appendURLParams = (
 	return urlObject.toString();
 };
 
+const renewUrl = ( subscription: Subscription ): string => {
+	return appendURLParams( MARKETPLACE_CART_PATH, [
+		[ 'renew_product', subscription.product_id.toString() ],
+		[ 'product_key', subscription.product_key ],
+		[ 'order_id', subscription.order_id.toString() ],
+	] );
+};
+
+const subscribeUrl = ( subscription: Subscription ): string => {
+	return appendURLParams( MARKETPLACE_CART_PATH, [
+		[ 'add-to-cart', subscription.product_id.toString() ],
+	] );
+};
+
 export {
 	ProductGroup,
 	appendURLParams,
@@ -386,4 +410,6 @@ export {
 	updateProduct,
 	addNotice,
 	removeNotice,
+	renewUrl,
+	subscribeUrl,
 };
