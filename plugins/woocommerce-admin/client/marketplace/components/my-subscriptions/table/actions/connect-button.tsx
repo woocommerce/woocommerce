@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button, Icon } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { useContext, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
@@ -46,10 +46,7 @@ export default function ConnectButton( props: ConnectProps ) {
 							__( '%s successfully connected.', 'woocommerce' ),
 							props.subscription.product_name
 						),
-						NoticeStatus.Success,
-						{
-							icon: <Icon icon="yes" />,
-						}
+						NoticeStatus.Success
 					);
 					setIsConnecting( false );
 					if ( props.onClose ) {

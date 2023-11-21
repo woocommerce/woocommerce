@@ -1,14 +1,78 @@
 @import '@wordpress/base-styles/_colors.native.scss';
+@import '../../stylesheets/_variables.scss';
+
+@mixin content-width {
+	max-width: calc(100vw - (2 * #{$grid-unit-20}));
+	@media screen and (min-width: 783px) {
+		max-width: calc(
+			100vw - (2 * #{$grid-unit-40}) - $admin-menu-width-collapsed
+		);
+	}
+	@media screen and (min-width: 960px) {
+		max-width: calc(100vw - (2 * #{$grid-unit-40}) - $admin-menu-width);
+	}
+}
 
 .woocommerce-marketplace__my-subscriptions__header {
 	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: stretch;
+	@include content-width;
+
+	.woocommerce-marketplace__my-subscriptions__header-content,
+	.woocommerce-marketplace__my-subscriptions__header-refresh {
+		width: 100%;
+	}
+
+	.woocommerce-marketplace__my-subscriptions__header-content {
+		order: 2;
+	}
+	.woocommerce-marketplace__my-subscriptions__header-refresh {
+		display: flex;
+		justify-content: end;
+		order: 1;
+	}
+
+	@media screen and (min-width: $breakpoint-medium) {
+		align-items: center;
+		justify-content: space-between;
+		flex-direction: row;
+
+		.woocommerce-marketplace__my-subscriptions__header-content,
+		.woocommerce-marketplace__my-subscriptions__header-refresh {
+			width: auto;
+		}
+
+		.woocommerce-marketplace__my-subscriptions__header-content {
+			order: 1;
+		}
+		.woocommerce-marketplace__my-subscriptions__header-refresh {
+			order: 2;
+		}
+	}
 }
 
-a.woocommerce-marketplace__refresh-subscriptions {
+.woocommerce-marketplace__refresh-subscriptions {
 	text-decoration: none;
 	color: #007cba;
+	.woocommerce-marketplace__refresh-subscriptions-icon {
+		margin-right: $grid-unit-05;
+	}
+
+	&.is-busy {
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+		.woocommerce-marketplace__refresh-subscriptions-icon {
+			animation: spin 2s linear infinite;
+		}
+	}
 }
 
 .woocommerce-marketplace__my-subscriptions__available {
@@ -23,9 +87,15 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	line-height: 28px;
 }
 
+.woocommerce-marketplace__notice--error {
+	&:last-child {
+		margin-bottom: $grid-unit-50;
+	}
+}
+
 .woocommerce-marketplace__my-subscriptions__table-description {
 	font-size: 13px;
-	margin-top: $grid-unit-05;
+	margin: 1em 0;
 	line-height: 20px;
 	color: $gray-700;
 
@@ -37,7 +107,15 @@ a.woocommerce-marketplace__refresh-subscriptions {
 
 	svg {
 		fill: #007cba;
+		margin-left: 2px;
+		width: 16px;
+		height: 16px;
 	}
+}
+
+.woocommerce-marketplace__my-subscriptions__table-wrapper {
+	position: relative;
+	overflow: hidden;
 }
 
 .woocommerce-marketplace__my-subscriptions__table {
@@ -45,9 +123,12 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	line-height: 20px;
 	margin-top: $grid-unit-30;
 	color: $gray-900;
+	@include content-width;
 }
 
 .woocommerce-marketplace__my-subscriptions__product {
+	$product-icon-size: 40px;
+
 	display: flex;
 	align-items: center;
 	color: $gray-900;
@@ -60,19 +141,21 @@ a.woocommerce-marketplace__refresh-subscriptions {
 
 	&-icon img {
 		border-radius: 4px;
-		width: 40px;
+		width: $product-icon-size;
 	}
 
-	&-icon svg {
-		border-radius: 4px;
-		padding: $grid-unit-10;
-		fill: $gray-600;
-		background-color: $gray-200;
+	&-icon {
+		width: $product-icon-size;
+		height: $product-icon-size;
+		svg {
+			border-radius: 4px;
+			padding: $grid-unit-10;
+			fill: $gray-600;
+			background-color: $gray-200;
+			width: $product-icon-size;
+			height: $product-icon-size;
+		}
 	}
-}
-
-.woocommerce-marketplace__my-subscriptions__product-statuses {
-	display: flex;
 }
 
 .woocommerce-marketplace__my-subscriptions__product-status {
@@ -80,7 +163,7 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	align-items: center;
 	border-radius: 2px;
 	border: none;
-	padding: 2px 8px;
+	padding: 2px $grid-unit-10;
 	margin-left: $grid-unit-15;
 	text-align: left;
 	white-space: nowrap;
@@ -106,12 +189,18 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	}
 }
 
-.woocommerce-marketplace__my-subscriptions__popover .components-popover__content {
-	border: 1px solid $gray-400;
-	width: 300px;
-	border-radius: 2px;
-	padding: $grid-unit-15;
-	color: $gray-900;
+.woocommerce-marketplace__my-subscriptions__popover {
+	top: -8px !important;
+	.components-popover__content {
+		border: none;
+		width: 300px;
+		border-radius: 2px;
+		padding: $grid-unit-15;
+		color: $gray-900;
+		a {
+			text-decoration: none;
+		}
+	}
 }
 
 .components-base-control.woocommerce-marketplace__my-subscriptions__activation {
@@ -126,20 +215,38 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	padding: 0 12px;
 }
 
-.woocommerce-marketplace__my-subscriptions .woocommerce-table.is-empty {
-	background: none;
-	border: 1px solid var(--gutenberg-gray-100, #f0f0f0);
-	flex-direction: column;
-	gap: $grid-unit-15;
-	margin-top: $grid-unit-30;
+.woocommerce-marketplace__my-subscriptions {
+	.woocommerce-table__empty-item,
+	.woocommerce-table__header,
+	.woocommerce-table__item {
+		padding: $grid-unit-10 $grid-unit-30;
+		align-items: center;
+		display: flex;
+	}
+
+	.woocommerce-table__table tr:hover {
+		background: #f8f9fa;
+	}
+
+	.woocommerce-table.is-empty {
+		background: none;
+		border: 1px solid var(--gutenberg-gray-100, #f0f0f0);
+		flex-direction: column;
+		gap: $grid-unit-15;
+		margin-top: $grid-unit-30;
+	}
 }
 
 .woocommerce-marketplace__my-subscriptions .components-button.is-link {
 	text-decoration: none;
 	padding: 6px 12px;
 }
-.woocommerce-marketplace__my-subscriptions .components-button.is-secondary:hover:not(:disabled) {
-	color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+.woocommerce-marketplace__my-subscriptions
+	.components-button.is-secondary:hover:not(:disabled) {
+	color: var(
+		--wp-components-color-accent,
+		var(--wp-admin-theme-color, #3858e9)
+	);
 }
 
 .woocommerce-marketplace__my-subscriptions--connect {
@@ -159,21 +266,23 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	.woocommerce-marketplace__my-subscriptions__header {
 		margin-top: $grid-unit-20;
 		margin-bottom: $grid-unit-10;
-		font-size: 20px;
+		font-size: $default-font-size;
 	}
 
 	.woocommerce-marketplace__my-subscriptions__description {
 		text-align: center;
-		font-size: 13px;
+		font-size: $default-font-size;
 		line-height: 20px;
 		font-weight: 400;
 		color: var(--gutenberg-gray-700);
+		margin-top: 0;
 		margin-bottom: $grid-unit-30;
 	}
 }
 
 .woocommerce-marketplace__my-subscriptions__table__header--actions {
 	text-align: right;
+	justify-content: flex-end;
 }
 
 .woocommerce-marketplace__my-subscriptions__actions {
@@ -233,5 +342,29 @@ a.woocommerce-marketplace__refresh-subscriptions {
 	.components-notice__action.components-button.is-link {
 		margin: 0;
 		padding: 0;
+	}
+}
+
+.woocommerce-marketplace__my-subscriptions {
+	display: grid;
+	grid-template-columns: repeat(5, auto);
+	.woocommerce-marketplace__my-subscriptions-section {
+		margin: 1em 0;
+		> * {
+			grid-column: span 5;
+		}
+	}
+	.woocommerce-table__table,
+	.woocommerce-marketplace__my-subscriptions-section,
+	.woocommerce-marketplace__my-subscriptions__table-wrapper {
+		&,
+		& table,
+		& tbody,
+		& thead,
+		& tr {
+			grid-column: span 5;
+			display: grid;
+			grid-template-columns: subgrid;
+		}
 	}
 }

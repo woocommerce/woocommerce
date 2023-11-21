@@ -47,10 +47,7 @@ export default function ActionsDropdownMenu( props: {
 	return (
 		<DropdownMenu
 			icon={ moreVertical }
-			label={ __(
-				'See more things you can do with this subscription',
-				'woocommerce'
-			) }
+			label={ __( 'Actions', 'woocommerce' ) }
 			controls={ controls }
 		/>
 	);

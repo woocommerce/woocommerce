@@ -5,6 +5,7 @@ import { TableRow } from '@woocommerce/components/build-types/table/types';
 import { gmdateI18n } from '@wordpress/date';
 import { __, sprintf } from '@wordpress/i18n';
 import { Icon, plugins } from '@wordpress/icons';
+import { createInterpolateElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -18,55 +19,106 @@ import Update from '../actions/update';
 import StatusPopover from './status-popover';
 import ActionsDropdownMenu from './actions-dropdown-menu';
 import Version from './version';
+import { renewUrl, subscribeUrl } from '../../../../utils/functions';
+import { MARKETPLACE_COLLABORATION_PATH } from '../../../constants';
 
 type StatusBadge = {
 	text: string;
 	level: StatusLevel;
-	explanation?: string;
+	explanation?: string | JSX.Element;
 };
 
-function getStatusBadges( subscription: Subscription ): StatusBadge[] {
-	const badges: StatusBadge[] = [];
-
+function getStatusBadge( subscription: Subscription ): StatusBadge | false {
+	if ( subscription.product_key === '' ) {
+		/**
+		 * If there is no subscription, we don't need to check for the expiry.
+		 */
+		return {
+			text: __( 'No subscription', 'woocommerce' ),
+			level: StatusLevel.Error,
+			explanation: createInterpolateElement(
+				__(
+					'To receive updates and support, please <purchase>purchase</purchase> a subscription or use a subscription from another account by <sharing>sharing</sharing> or <transferring>transferring</transferring>.',
+					'woocommerce'
+				),
+				{
+					purchase: (
+						<a
+							href={ subscribeUrl( subscription ) }
+							rel="nofollow noopener noreferrer"
+						>
+							renew
+						</a>
+					),
+					sharing: (
+						<a
+							href={ MARKETPLACE_COLLABORATION_PATH }
+							rel="nofollow noopener noreferrer"
+						>
+							sharing
+						</a>
+					),
+					transferring: (
+						<a
+							href={ MARKETPLACE_COLLABORATION_PATH }
+							rel="nofollow noopener noreferrer"
+						>
+							sharing
+						</a>
+					),
+				}
+			),
+		};
+	}
 	if ( subscription.local.installed && ! subscription.active ) {
-		badges.push( {
+		return {
 			text: __( 'Not connected', 'woocommerce' ),
 			level: StatusLevel.Warning,
 			explanation: __(
 				'To receive updates and support, please connect your subscription to this store.',
 				'woocommerce'
 			),
-		} );
+		};
 	}
-
-	if ( subscription.product_key === '' ) {
-		badges.push( {
-			text: __( 'No subscription', 'woocommerce' ),
-			level: StatusLevel.Error,
-			explanation: __(
-				'To get updates and support for this extension, you need to purchase a new subscription, or else share or transfer a subscription for this extension from another account.',
-				'woocommerce'
-			),
-		} );
-
-		/**
-		 * If there is no subscription, we don't need to check for the expiry.
-		 */
-		return badges;
-	}
-
 	if ( subscription.expired ) {
-		badges.push( {
+		return {
 			text: __( 'Expired', 'woocommerce' ),
 			level: StatusLevel.Error,
-			explanation: __(
-				'To receive updates and support, please renew your subscription.',
-				'woocommerce'
+			explanation: createInterpolateElement(
+				__(
+					'To receive updates and support, please <renew>renew</renew> this subscription or use a subscription from another account by <sharing>sharing</sharing> or <transferring>transferring</transferring>.',
+					'woocommerce'
+				),
+				{
+					renew: (
+						<a
+							href={ renewUrl( subscription ) }
+							rel="nofollow noopener noreferrer"
+						>
+							renew
+						</a>
+					),
+					sharing: (
+						<a
+							href={ MARKETPLACE_COLLABORATION_PATH }
+							rel="nofollow noopener noreferrer"
+						>
+							sharing
+						</a>
+					),
+					transferring: (
+						<a
+							href={ MARKETPLACE_COLLABORATION_PATH }
+							rel="nofollow noopener noreferrer"
+						>
+							sharing
+						</a>
+					),
+				}
 			),
-		} );
+		};
 	}
-
-	return badges;
+	return false;
 }
 
 function getVersion( subscription: Subscription ): string | JSX.Element {
@@ -107,18 +159,7 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 		);
 	}
 
-	const statusBadges = getStatusBadges( subscription );
-
-	const statusElement = statusBadges.map( ( badge, index ) => {
-		return (
-			<StatusPopover
-				key={ index }
-				text={ badge.text }
-				level={ badge.level }
-				explanation={ badge.explanation ?? '' }
-			/>
-		);
-	} );
+	const statusBadge = getStatusBadge( subscription );
 
 	const displayElement = (
 		<div className="woocommerce-marketplace__my-subscriptions__product">
@@ -129,7 +170,13 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 				{ subscription.product_name }
 			</span>
 			<span className="woocommerce-marketplace__my-subscriptions__product-statuses">
-				{ statusElement }
+				{ statusBadge && (
+					<StatusPopover
+						text={ statusBadge.text }
+						level={ statusBadge.level }
+						explanation={ statusBadge.explanation ?? '' }
+					/>
+				) }
 			</span>
 		</div>
 	);
@@ -142,6 +189,16 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 
 export function expiry( subscription: Subscription ): TableRow {
 	const expiryDate = subscription.expires;
+
+	if (
+		subscription.local.installed === true &&
+		subscription.product_key === ''
+	) {
+		return {
+			display: '',
+			value: '',
+		};
+	}
 
 	let expiryDateElement = __( 'Never expires', 'woocommerce' );
 

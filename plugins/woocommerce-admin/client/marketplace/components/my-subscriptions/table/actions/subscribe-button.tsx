@@ -8,8 +8,7 @@ import { queueRecordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { MARKETPLACE_CART_PATH } from '../../../constants';
-import { appendURLParams } from '../../../../utils/functions';
+import { subscribeUrl } from '../../../../utils/functions';
 import { Subscription } from '../../types';
 
 interface SubscribeProps {
@@ -18,10 +17,6 @@ interface SubscribeProps {
 }
 
 export default function SubscribeButton( props: SubscribeProps ) {
-	const subscribeUrl = appendURLParams( MARKETPLACE_CART_PATH, [
-		[ 'add-to-cart', props.subscription.product_id.toString() ],
-	] );
-
 	function recordTracksEvent() {
 		queueRecordEvent( 'marketplace_subscribe_button_clicked', {
 			product_zip_slug: props.subscription.zip_slug,
@@ -31,7 +26,7 @@ export default function SubscribeButton( props: SubscribeProps ) {
 
 	return (
 		<Button
-			href={ subscribeUrl }
+			href={ subscribeUrl( props.subscription ) }
 			variant={ props.variant ?? 'secondary' }
 			onClick={ recordTracksEvent }
 		>

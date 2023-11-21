@@ -8,8 +8,7 @@ import { queueRecordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { MARKETPLACE_CART_PATH } from '../../../constants';
-import { appendURLParams } from '../../../../utils/functions';
+import { renewUrl } from '../../../../utils/functions';
 import { Subscription } from '../../types';
 
 interface RenewProps {
@@ -18,12 +17,6 @@ interface RenewProps {
 }
 
 export default function RenewButton( props: RenewProps ) {
-	const renewUrl = appendURLParams( MARKETPLACE_CART_PATH, [
-		[ 'renew_product', props.subscription.product_id.toString() ],
-		[ 'product_key', props.subscription.product_key ],
-		[ 'order_id', props.subscription.order_id.toString() ],
-	] );
-
 	function recordTracksEvent() {
 		queueRecordEvent( 'marketplace_renew_button_clicked', {
 			product_zip_slug: props.subscription.zip_slug,
@@ -33,7 +26,7 @@ export default function RenewButton( props: RenewProps ) {
 
 	return (
 		<Button
-			href={ renewUrl }
+			href={ renewUrl( props.subscription ) }
 			variant={ props.variant ?? 'secondary' }
 			onClick={ recordTracksEvent }
 		>

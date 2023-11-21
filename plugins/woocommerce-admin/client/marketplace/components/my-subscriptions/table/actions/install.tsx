@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button, Icon } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { dispatch, useSelect } from '@wordpress/data';
 import { useContext } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
@@ -66,10 +66,7 @@ export default function Install( props: InstallProps ) {
 							__( '%s successfully installed.', 'woocommerce' ),
 							props.subscription.product_name
 						),
-						NoticeStatus.Success,
-						{
-							icon: <Icon icon="yes" />,
-						}
+						NoticeStatus.Success
 					);
 					stopInstall();
 				} );

@@ -13,7 +13,7 @@ import { StatusLevel } from '../../types';
 export default function StatusPopover( props: {
 	text: string;
 	level: StatusLevel;
-	explanation: string;
+	explanation: string | JSX.Element;
 } ) {
 	const [ isVisible, setIsVisible ] = useState( false );
 
@@ -39,7 +39,10 @@ export default function StatusPopover( props: {
 			<Icon icon={ info } size={ 16 } />
 			{ props.text }
 			{ shouldShowExplanation() && (
-				<Popover className="woocommerce-marketplace__my-subscriptions__popover">
+				<Popover
+					className="woocommerce-marketplace__my-subscriptions__popover"
+					position="top center"
+				>
 					{ props.explanation }
 				</Popover>
 			) }
