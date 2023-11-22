@@ -1,4 +1,14 @@
 .wp-block-woocommerce-product-list-field {
+	display: flex;
+	flex-direction: column;
+	gap: $grid-unit-30;
+
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: end;
+	}
+
 	&__empty-state {
 		min-height: 28 * $grid-unit;
 		border-radius: 2px;
