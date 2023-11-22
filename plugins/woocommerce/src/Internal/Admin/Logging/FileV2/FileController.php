@@ -371,7 +371,7 @@ class FileController {
 	 *
 	 * @param array $file_ids An array of file IDs (file basename without the hash).
 	 *
-	 * @return WP_Error|null
+	 * @return WP_Error|void Only returns something if there is an error.
 	 */
 	public function export_multiple_files( array $file_ids ) {
 		$files = $this->get_files_by_id( $file_ids );
@@ -383,16 +383,18 @@ class FileController {
 			);
 		}
 
-		if ( ! get_temp_dir() ) {
+		$temp_dir = get_temp_dir();
+
+		if ( ! is_dir( $temp_dir ) || ! wp_is_writable( $temp_dir ) ) {
 			return new WP_Error(
 				'wc_logs_invalid_directory',
-				__( 'Could not write to the temp directory.', 'woocommerce' )
+				__( 'Could not write to the temp directory. Try downloading files one at a time instead.', 'woocommerce' )
 			);
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/class-pclzip.php';
 
-		$path       = trailingslashit( get_temp_dir() ) . 'woocommerce_logs_' . gmdate( 'Y-m-d_H-i-s' ) . '.zip';
+		$path       = trailingslashit( $temp_dir ) . 'woocommerce_logs_' . gmdate( 'Y-m-d_H-i-s' ) . '.zip';
 		$file_paths = array_map(
 			fn( $file ) => $file->get_path(),
 			$files
