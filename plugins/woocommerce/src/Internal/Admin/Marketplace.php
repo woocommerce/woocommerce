@@ -76,16 +76,19 @@ class Marketplace {
 		}
 
 		// Enqueue WordPress updates script to enable plugin and theme installs and updates.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		wp_enqueue_script( 'updates' );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
 	 * Add a Woo Marketplace link to the plugin install action links.
+	 *
 	 * @param array $tabs Plugins list tabs.
 	 * @return array
 	 */
 	public function add_woo_plugin_install_action_link( $tabs ) {
-		$tabs[self::MARKETPLACE_TAB_SLUG] = 'Woo';
+		$tabs[ self::MARKETPLACE_TAB_SLUG ] = 'Woo';
 		return $tabs;
 	}
 
@@ -93,9 +96,11 @@ class Marketplace {
 	 * Open the Woo tab when the user clicks on the Woo link in the plugin installer.
 	 */
 	public function maybe_open_woo_tab() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_GET['tab'] ) || self::MARKETPLACE_TAB_SLUG !== $_GET['tab'] ) {
 			return;
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		$woo_url = add_query_arg(
 			array(

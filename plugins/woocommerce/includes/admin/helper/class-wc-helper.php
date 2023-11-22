@@ -797,7 +797,7 @@ class WC_Helper {
 					),
 					isset( $_GET['redirect-to-wc-admin'] )
 				)
-			 );
+			);
 			die();
 		}
 
