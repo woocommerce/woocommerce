@@ -42,4 +42,5 @@ export type customizeStoreStateMachineContext = {
 	transitionalScreen: {
 		hasCompleteSurvey: boolean;
 	};
+	isAiAvailable: boolean;
 };
