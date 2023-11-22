@@ -19,7 +19,11 @@ import Update from '../actions/update';
 import StatusPopover from './status-popover';
 import ActionsDropdownMenu from './actions-dropdown-menu';
 import Version from './version';
-import { renewUrl, subscribeUrl } from '../../../../utils/functions';
+import {
+	appendURLParams,
+	renewUrl,
+	subscribeUrl,
+} from '../../../../utils/functions';
 import { MARKETPLACE_COLLABORATION_PATH } from '../../../constants';
 
 type StatusBadge = {
@@ -141,6 +145,15 @@ function getVersion( subscription: Subscription ): string | JSX.Element {
 	return '';
 }
 
+function appendUTMParams( url: string ) {
+	return appendURLParams( url, [
+		[ 'utm_source', 'subscriptionsscreen' ],
+		[ 'utm_medium', 'product' ],
+		[ 'utm_campaign', 'wcaddons' ],
+		[ 'utm_content', 'product-name' ],
+	] );
+}
+
 export function nameAndStatus( subscription: Subscription ): TableRow {
 	// This is the fallback icon element with products without
 	let iconElement = <Icon icon={ plugins } size={ 40 } />;
@@ -163,12 +176,23 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 
 	const displayElement = (
 		<div className="woocommerce-marketplace__my-subscriptions__product">
-			<span className="woocommerce-marketplace__my-subscriptions__product-icon">
-				{ iconElement }
-			</span>
-			<span className="woocommerce-marketplace__my-subscriptions__product-name">
+			<a
+				href={ appendUTMParams( subscription.product_url ) }
+				target="_blank"
+				rel="noreferrer"
+			>
+				<span className="woocommerce-marketplace__my-subscriptions__product-icon">
+					{ iconElement }
+				</span>
+			</a>
+			<a
+				href={ appendUTMParams( subscription.product_url ) }
+				className="woocommerce-marketplace__my-subscriptions__product-name"
+				target="_blank"
+				rel="noreferrer"
+			>
 				{ subscription.product_name }
-			</span>
+			</a>
 			<span className="woocommerce-marketplace__my-subscriptions__product-statuses">
 				{ statusBadge && (
 					<StatusPopover
