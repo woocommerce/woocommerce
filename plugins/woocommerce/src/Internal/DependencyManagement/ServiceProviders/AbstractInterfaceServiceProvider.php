@@ -32,7 +32,7 @@ abstract class AbstractInterfaceServiceProvider extends AbstractServiceProvider 
 		if ( empty( $implements ) ) {
 			foreach ( $this->provides as $class ) {
 				$implements_more = class_implements( $class );
-				if( $implements_more ) {
+				if ( $implements_more ) {
 					$implements = array_merge( $implements, $implements_more );
 				}
 			}
