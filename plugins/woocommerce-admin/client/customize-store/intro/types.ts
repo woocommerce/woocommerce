@@ -16,3 +16,9 @@ export type ThemeCard = {
 	color_palettes: ColorPalette[];
 	total_palettes: number;
 };
+
+export type OpenAiStatus = {
+	status: {
+		indicator: 'major' | 'critical' | 'ok';
+	};
+};

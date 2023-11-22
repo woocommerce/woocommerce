@@ -7,6 +7,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import { resolveSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
+import { OpenAiStatus } from './types';
 
 export const fetchThemeCards = async () => {
 	const themes = await apiFetch( {
@@ -91,4 +92,12 @@ export const fetchIntroData = async () => {
 		themeData,
 		currentThemeIsAiGenerated,
 	};
+};
+
+export const fetchAiStatus = () => async (): Promise< OpenAiStatus > => {
+	const response = await fetch(
+		'https://status.openai.com/api/v2/status.json'
+	);
+	const data = await response.json();
+	return data;
 };

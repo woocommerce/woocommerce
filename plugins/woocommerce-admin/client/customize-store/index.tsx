@@ -4,7 +4,13 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
-import { Sender, createMachine } from 'xstate';
+import {
+	DoneInvokeEvent,
+	Sender,
+	actions,
+	assign,
+	createMachine,
+} from 'xstate';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { useMachine, useSelector } from '@xstate/react';
 import {
@@ -129,6 +135,7 @@ export const customizeStoreStateMachineServices = {
 	browserPopstateHandler,
 	markTaskComplete,
 };
+
 export const customizeStoreStateMachineDefinition = createMachine( {
 	id: 'customizeStore',
 	initial: 'navigate',
@@ -160,6 +167,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		transitionalScreen: {
 			hasCompleteSurvey: false,
 		},
+		isAiAvailable: true,
 	} as customizeStoreStateMachineContext,
 	invoke: {
 		src: 'browserPopstateHandler',
@@ -211,8 +219,34 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		intro: {
 			id: 'intro',
-			initial: 'preIntro',
+			initial: 'checkAiStatus',
 			states: {
+				checkAiStatus: {
+					invoke: {
+						src: 'fetchAiStatus',
+						onDone: {
+							actions: 'assignAIAvailability',
+							target: 'postCheckAiStatus',
+						},
+						onError: {
+							actions: 'assignAiUnavailable',
+							target: '#customizeStore.designWithAi',
+						},
+					},
+				},
+				postCheckAiStatus: {
+					always: [
+						{
+							target: 'preIntro',
+							cond: 'aiIsAvailable',
+						},
+						{
+							target: '#customizeStore.designWithAi',
+							cond: 'aiIsUnavailable',
+						},
+					],
+				},
+
 				preIntro: {
 					invoke: {
 						src: 'fetchIntroData',
@@ -273,9 +307,22 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					meta: {
 						component: DesignWithAi,
 					},
-					entry: [
-						{ type: 'updateQueryStep', step: 'design-with-ai' },
-					],
+					entry: actions.choose( [
+						{
+							actions: {
+								type: 'updateQueryStep',
+								step: 'design-with-ai',
+							},
+							cond: 'aiIsAvailable',
+						},
+						{
+							actions: {
+								type: 'updateQueryStep',
+								step: 'design-with-ai/tone-of-voice',
+							},
+							cond: 'aiIsUnavailable',
+						},
+					] ),
 				},
 			},
 			on: {
@@ -387,6 +434,12 @@ export const CustomizeStoreController = ( {
 						pathFragments[ 2 ] === // [0] '', [1] 'customize-store', [2] step slug
 						( cond as { step: string | undefined } ).step
 					);
+				},
+				aiIsAvailable: ( _ctx ) => {
+					return _ctx.isAiAvailable;
+				},
+				aiIsUnavailable: ( _ctx ) => {
+					return ! _ctx.isAiAvailable;
 				},
 			},
 		} );

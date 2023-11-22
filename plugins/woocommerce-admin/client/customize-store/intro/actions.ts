@@ -13,6 +13,7 @@ import {
 	RecommendThemesAPIResponse,
 } from '../types';
 import { events } from './';
+import { OpenAiStatus } from './types';
 
 export const assignThemeData = assign<
 	customizeStoreStateMachineContext,
@@ -102,4 +103,22 @@ export const assignCurrentThemeIsAiGenerated = assign<
 		 ).data.currentThemeIsAiGenerated;
 		return { ...context.intro, currentThemeIsAiGenerated };
 	},
+} );
+
+export const assignAIAvailability = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
+>( {
+	isAiAvailable: ( _context, _event ) => {
+		const status = ( _event as DoneInvokeEvent< OpenAiStatus > ).data.status
+			.indicator;
+		return status !== 'critical' && status !== 'major';
+	},
+} );
+
+export const assignAiUnavailable = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
+>( {
+	isAiAvailable: false,
 } );
