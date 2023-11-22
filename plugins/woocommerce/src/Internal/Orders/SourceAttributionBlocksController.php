@@ -149,20 +149,7 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 				'schema_callback' => $this->get_schema_callback(),
 			)
 		);
-		// The following does not work.
-		// See https://github.com/woocommerce/woocommerce-blocks/blob/d646b42e98dc69fe06356f54b53fd6cff132fe98/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md#basic-usage .
-
-		/*
-		$this->extend_schema->register_update_callback(
-			[
-				'namespace' => 'woocommerce/order-source-attribution',
-				'callback'  => function( $data ) {
-					// Save the data to the order here.
-				},
-			]
-		);
-		*/
-		// So, we fall back to the same mechanism we use for the checkout shortcode.
+		// Update order based on extended data.
 		add_action(
 			'woocommerce_store_api_checkout_update_order_from_request',
 			function ( $order, $request ) {
