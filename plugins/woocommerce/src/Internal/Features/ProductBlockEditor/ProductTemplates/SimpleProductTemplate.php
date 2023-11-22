@@ -454,6 +454,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'      => 20,
 				'attributes' => array(
 					'title' => __( 'Attributes', 'woocommerce' ),
+					'description' => __( 'Add descriptive pieces of information that customers can use to filter and search for this product. <a href="https://woo.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">Learn more</a>.', 'woocommerce' ),
 				),
 			)
 		);
