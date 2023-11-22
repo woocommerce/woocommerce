@@ -275,6 +275,29 @@
 	margin-left: calc( var(--woocommerce-product-editor-dev-tools-gap) * 2 );
 }
 
+.woocommerce-product-editor-dev-tools-block-template-details__attributes {
+	display: grid;
+	grid-template-columns: min-content auto;
+
+	gap: var(--woocommerce-product-editor-dev-tools-gap-small) var(--woocommerce-product-editor-dev-tools-gap);
+}
+
+.woocommerce-product-editor-dev-tools-block-template-details__attribute-name,
+.woocommerce-product-editor-dev-tools-block-template-details__attribute-value {
+	margin: 0;
+}
+
+.woocommerce-product-editor-dev-tools-block-template-details__attribute-name {
+	&::after {
+		content: ':';
+	}
+}
+
+.woocommerce-product-editor-dev-tools-block-template-details__attribute-value {
+	white-space: normal;
+	word-break: break-all;
+}
+
 .woocommerce-product-editor-dev-tools-events {
 	height: 100%;
 
