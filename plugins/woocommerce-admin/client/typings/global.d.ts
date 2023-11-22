@@ -23,6 +23,7 @@ declare global {
 			'product-variation-management': boolean;
 			'product-virtual-downloadable': boolean;
 			'product-external-affiliate': boolean;
+			'product-grouped': boolean;
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
