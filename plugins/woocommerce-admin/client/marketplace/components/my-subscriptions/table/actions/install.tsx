@@ -5,6 +5,7 @@ import { Button } from '@wordpress/components';
 import { dispatch, useSelect } from '@wordpress/data';
 import { useContext } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -47,6 +48,12 @@ export default function Install( props: InstallProps ) {
 	};
 
 	const install = () => {
+		recordEvent( 'marketplace_product_install_button_clicked', {
+			product_zip_slug: props.subscription.zip_slug,
+			product_id: props.subscription.product_id,
+			product_current_version: props.subscription.version,
+		} );
+
 		startInstall();
 		removeNotice( props.subscription.product_key );
 		installProduct( props.subscription )
@@ -62,6 +69,12 @@ export default function Install( props: InstallProps ) {
 						NoticeStatus.Success
 					);
 					stopInstall();
+				} );
+
+				recordEvent( 'marketplace_product_installed', {
+					product_zip_slug: props.subscription.zip_slug,
+					product_id: props.subscription.product_id,
+					product_current_version: props.subscription.version,
 				} );
 			} )
 			.catch( ( error ) => {
@@ -88,6 +101,12 @@ export default function Install( props: InstallProps ) {
 						}
 					);
 					stopInstall();
+				} );
+
+				recordEvent( 'marketplace_product_install_failed', {
+					product_zip_slug: props.subscription.zip_slug,
+					product_id: props.subscription.product_id,
+					product_current_version: props.subscription.version,
 				} );
 			} );
 	};

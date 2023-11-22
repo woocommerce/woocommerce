@@ -4,6 +4,7 @@
 import { Button } from '@wordpress/components';
 import { useContext, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -36,6 +37,13 @@ export default function Update( props: UpdateProps ) {
 		props.subscription.local.path;
 
 	function update() {
+		recordEvent( 'marketplace_product_update_button_clicked', {
+			product_zip_slug: props.subscription.zip_slug,
+			product_id: props.subscription.product_id,
+			product_installed_version: props.subscription.local.installed,
+			product_current_version: props.subscription.version,
+		} );
+
 		if ( ! canUpdate ) {
 			setShowModal( true );
 			return;
@@ -83,6 +91,14 @@ export default function Update( props: UpdateProps ) {
 					);
 					setIsUpdating( false );
 				} );
+
+				recordEvent( 'marketplace_product_updated', {
+					product_zip_slug: props.subscription.zip_slug,
+					product_id: props.subscription.product_id,
+					product_installed_version:
+						props.subscription.local.installed,
+					product_current_version: props.subscription.version,
+				} );
 			} )
 			.catch( () => {
 				addNotice(
@@ -103,6 +119,14 @@ export default function Update( props: UpdateProps ) {
 					}
 				);
 				setIsUpdating( false );
+
+				recordEvent( 'marketplace_product_update_failed', {
+					product_zip_slug: props.subscription.zip_slug,
+					product_id: props.subscription.product_id,
+					product_installed_version:
+						props.subscription.local.installed,
+					product_current_version: props.subscription.version,
+				} );
 			} );
 	}
 

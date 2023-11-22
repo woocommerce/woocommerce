@@ -4,6 +4,7 @@
 import { Button } from '@wordpress/components';
 import { useContext, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -28,6 +29,11 @@ export default function ConnectButton( props: ConnectProps ) {
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
 
 	const connect = () => {
+		recordEvent( 'marketplace_product_connect_button_clicked', {
+			product_zip_slug: props.subscription.zip_slug,
+			product_id: props.subscription.product_id,
+		} );
+
 		setIsConnecting( true );
 		removeNotice( props.subscription.product_key );
 		connectProduct( props.subscription )
