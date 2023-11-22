@@ -38,7 +38,7 @@ export function Edit( {
 	const { generateProductVariations } = useProductVariationsHelper();
 	const {
 		updateUserPreferences,
-		product_block_variable_options_dismissed_notices_ids:
+		variable_options_dismissed_notices_ids:
 			dismissedNoticesIds = [],
 	} = useUserPreferences();
 
@@ -129,7 +129,7 @@ export function Edit( {
 				useRemoveConfirmationModal={ true }
 				onNoticeDismiss={ () =>
 					updateUserPreferences( {
-						product_block_variable_options_dismissed_notices_ids: [
+						variable_options_dismissed_notices_ids: [
 							...dismissedNoticesIds,
 							productId,
 						],

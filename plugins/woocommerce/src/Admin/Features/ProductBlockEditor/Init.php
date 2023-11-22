@@ -175,7 +175,7 @@ class Init {
 			$user_data_fields,
 			array(
 				'variable_product_block_tour_shown',
-				'product_block_variable_options_dismissed_notices_ids',
+				'variable_options_dismissed_notices_ids',
 				'variable_items_without_price_notice_dismissed',
 			)
 		);
