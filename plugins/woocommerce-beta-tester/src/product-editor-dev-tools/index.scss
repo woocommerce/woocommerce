@@ -71,18 +71,6 @@
 	height: 100%;
 }
 
-.woocommerce-product-editor-dev-tools-block-inspector {
-	height: 100%;
-
-	padding: var(--woocommerce-product-editor-dev-tools-gap);
-
-	overflow: auto;
-
-	white-space: pre;
-
-	font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
-}
-
 .woocommerce-product-editor-dev-tools-product {
 	display: flex;
 	flex-direction: row;

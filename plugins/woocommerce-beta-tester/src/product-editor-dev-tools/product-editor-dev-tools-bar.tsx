@@ -21,7 +21,6 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { BlockInspectorTabPanel } from './block-inspector-tab-panel';
 import { TemplateTabPanel } from './template-tab-panel';
 import { TemplateEventsTabPanel } from './template-events-tab-panel';
 import { HelpTabPanel } from './help-tab-panel';
@@ -137,7 +136,7 @@ export function ProductEditorDevToolsBar( {
 		editedProduct: product,
 	};
 
-	const [ selectedTab, setSelectedTab ] = useState< string >( 'inspector' );
+	const [ selectedTab, setSelectedTab ] = useState< string >( 'template' );
 
 	function handleNavigate( _childIndex: number, child: HTMLButtonElement ) {
 		child.click();
@@ -158,20 +157,6 @@ export function ProductEditorDevToolsBar( {
 							onNavigate={ handleNavigate }
 						>
 							<TabButton
-								name="inspector"
-								selectedTab={ selectedTab }
-								onClick={ handleTabClick }
-							>
-								{ __( 'Block Inspector', 'woocommerce' ) }
-							</TabButton>
-							<TabButton
-								name="product"
-								selectedTab={ selectedTab }
-								onClick={ handleTabClick }
-							>
-								{ __( 'Product', 'woocommerce' ) }
-							</TabButton>
-							<TabButton
 								name="template"
 								selectedTab={ selectedTab }
 								onClick={ handleTabClick }
@@ -184,6 +169,13 @@ export function ProductEditorDevToolsBar( {
 								onClick={ handleTabClick }
 							>
 								{ __( 'Template Events', 'woocommerce' ) }
+							</TabButton>
+							<TabButton
+								name="product"
+								selectedTab={ selectedTab }
+								onClick={ handleTabClick }
+							>
+								{ __( 'Product', 'woocommerce' ) }
 							</TabButton>
 							<TabButton
 								name="help"
@@ -203,14 +195,6 @@ export function ProductEditorDevToolsBar( {
 					</div>
 				</div>
 				<div className="woocommerce-product-editor-dev-tools-bar__panel">
-					<BlockInspectorTabPanel
-						selectedBlock={ selectedBlock }
-						isSelected={ selectedTab === 'inspector' }
-					/>
-					<ProductTabPanel
-						evaluationContext={ evaluationContext }
-						isSelected={ selectedTab === 'product' }
-					/>
 					<TemplateTabPanel
 						evaluationContext={ evaluationContext }
 						setSelectedBlockTemplateId={
@@ -223,6 +207,10 @@ export function ProductEditorDevToolsBar( {
 					<TemplateEventsTabPanel
 						postType={ postType }
 						isSelected={ selectedTab === 'events' }
+					/>
+					<ProductTabPanel
+						evaluationContext={ evaluationContext }
+						isSelected={ selectedTab === 'product' }
 					/>
 					<HelpTabPanel isSelected={ selectedTab === 'help' } />
 				</div>
