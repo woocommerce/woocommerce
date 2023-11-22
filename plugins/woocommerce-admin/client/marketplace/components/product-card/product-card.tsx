@@ -5,12 +5,14 @@ import { __ } from '@wordpress/i18n';
 import { Card } from '@wordpress/components';
 import classnames from 'classnames';
 import { ExtraProperties, queueRecordEvent } from '@woocommerce/tracks';
+import { useQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import './product-card.scss';
 import { Product, ProductTracksData, ProductType } from '../product-list/types';
+import { appendURLParams } from '../../utils/functions';
 
 export interface ProductCardProps {
 	type?: string;
@@ -21,6 +23,7 @@ export interface ProductCardProps {
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
 	const { isLoading, type } = props;
+	const query = useQuery();
 	// Get the product if provided; if not provided, render a skeleton loader
 	const product = props.product ?? {
 		title: '',
@@ -85,6 +88,15 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		);
 	}
 
+	const productUrl = () => {
+		if ( query.ref ) {
+			return appendURLParams( product.url, [
+				[ 'utm_content', query.ref ],
+			] );
+		}
+		return product.url;
+	};
+
 	const classNames = classnames(
 		'woocommerce-marketplace__product-card',
 		`woocommerce-marketplace__product-card--${ type }`,
@@ -127,7 +139,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 							<h2 className="woocommerce-marketplace__product-card__title">
 								<a
 									className="woocommerce-marketplace__product-card__link"
-									href={ product.url }
+									href={ productUrl() }
 									rel="noopener noreferrer"
 									onClick={ () => {
 										recordTracksEvent(
