@@ -27,7 +27,6 @@ test.describe( 'Merchant → Checkout', () => {
 				postId: 'woocommerce/woocommerce//page-checkout',
 				postType: 'wp_template',
 			} );
-			await editorUtils.waitForSiteEditorFinishLoading();
 			await editorUtils.enterEditMode();
 			await editor.openDocumentSettingsSidebar();
 		} );

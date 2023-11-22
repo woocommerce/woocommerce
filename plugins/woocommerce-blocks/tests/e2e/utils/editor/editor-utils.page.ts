@@ -213,22 +213,6 @@ export class EditorUtils {
 		return firstBlockIndex < secondBlockIndex;
 	}
 
-	async waitForSiteEditorFinishLoading() {
-		await this.page
-			.frameLocator( 'iframe[title="Editor canvas"i]' )
-			.locator( 'body > *' )
-			.first()
-			.waitFor();
-		await this.page
-			// Spinner was used instead of the progress bar in an earlier version of
-			// the site editor.
-			.locator( '.edit-site-canvas-loader, .edit-site-canvas-spinner' )
-			// Bigger timeout is needed for larger entities, for example the large
-			// post html fixture that we load for performance tests, which often
-			// doesn't make it under the default 10 seconds.
-			.waitFor( { state: 'hidden', timeout: 60_000 } );
-	}
-
 	async setLayoutOption(
 		option:
 			| 'Align Top'

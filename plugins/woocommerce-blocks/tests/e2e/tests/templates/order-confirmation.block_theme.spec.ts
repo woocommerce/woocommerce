@@ -38,7 +38,6 @@ test.describe( 'Test the order confirmation template', async () => {
 		await editorUtils.enterEditMode();
 		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.transformIntoBlocks();
-		await editorUtils.waitForSiteEditorFinishLoading();
 		await expect(
 			page
 				.frameLocator( 'iframe[title="Editor canvas"i]' )
