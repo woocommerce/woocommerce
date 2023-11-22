@@ -51,11 +51,9 @@ class FileExporter {
 	/**
 	 * Configure PHP and stream the file to the browser.
 	 *
-	 * Modeled on WC_CSV_Exporter::send_headers().
-	 *
 	 * @return WP_Error|void Only returns something if there is an error.
 	 */
-	public function emit_file(  ) {
+	public function emit_file() {
 		global $wp_filesystem;
 		if ( ! $wp_filesystem->is_file( $this->path ) || ! $wp_filesystem->is_readable( $this->path ) ) {
 			return new WP_Error(
@@ -64,20 +62,21 @@ class FileExporter {
 			);
 		}
 
+		// These configuration tweaks are copied from WC_CSV_Exporter::send_headers().
+		// phpcs:disable WordPress.PHP.NoSilencedErrors.Discouraged
 		if ( function_exists( 'gc_enable' ) ) {
 			gc_enable(); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.gc_enableFound
 		}
-
 		if ( function_exists( 'apache_setenv' ) ) {
-			@apache_setenv( 'no-gzip', '1' );
+			@apache_setenv( 'no-gzip', '1' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_apache_setenv
 		}
-
-		@ini_set( 'zlib.output_compression', 'Off' );
-		@ini_set( 'output_buffering', 'Off' );
-		@ini_set( 'output_handler', '' );
+		@ini_set( 'zlib.output_compression', 'Off' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		@ini_set( 'output_buffering', 'Off' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		@ini_set( 'output_handler', '' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 		ignore_user_abort( true );
 		wc_set_time_limit();
 		wc_nocache_headers();
+		// phpcs:enable WordPress.PHP.NoSilencedErrors.Discouraged
 
 		$this->send_headers();
 		$this->send_contents();
@@ -109,9 +108,11 @@ class FileExporter {
 		$stream = fopen( $this->path, 'rb' );
 
 		while ( is_resource( $stream ) && ! feof( $stream ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fread -- No suitable alternative.
 			$chunk = fread( $stream, self::CHUNK_SIZE );
 
 			if ( is_string( $chunk ) ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Outputting to file.
 				echo $chunk;
 			}
 		}
