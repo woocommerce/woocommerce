@@ -370,9 +370,12 @@ class SourceAttributionController implements RegisterHooksInterface {
 	private function send_order_tracks( array $source_data, WC_Order $order ) {
 		$tracks_data = array(
 			'order_id'      => $order->get_id(),
-			'origin'        => $source_data['origin'] ?? '',
+			'type'          => $source_data['type'] ?? '',
+			'medium'        => $source_data['utm_medium'] ?? '',
+			'source'        => $source_data['utm_source'] ?? '',
 			'device_type'   => $source_data['device_type'] ?? '(unknown)',
 			'session_pages' => $source_data['session_pages'] ?? 0,
+			'session_count' => $source_data['session_count'] ?? 0,
 			'order_total'   => $order->get_total(),
 		);
 
