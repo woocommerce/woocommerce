@@ -60,14 +60,19 @@ export function useProductVariationsHelper() {
 	);
 	const [ _isGenerating, setIsGenerating ] = useState( false );
 
-	const { isGeneratingVariations } = useSelect(
+	const { isGeneratingVariations, generateError } = useSelect(
 		( select ) => {
-			const { isGeneratingVariations: getIsGeneratingVariations } =
-				select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			const {
+				isGeneratingVariations: getIsGeneratingVariations,
+				generateProductVariationsError,
+			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 			return {
 				isGeneratingVariations: getIsGeneratingVariations<
 					boolean | undefined
 				>( {
+					product_id: productId,
+				} ),
+				generateError: generateProductVariationsError( {
 					product_id: productId,
 				} ),
 			};
@@ -163,5 +168,6 @@ export function useProductVariationsHelper() {
 	return {
 		generateProductVariations,
 		isGenerating,
+		generateError,
 	};
 }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixes an issue where coupon usage is not correctly recorded when HPOS is active.

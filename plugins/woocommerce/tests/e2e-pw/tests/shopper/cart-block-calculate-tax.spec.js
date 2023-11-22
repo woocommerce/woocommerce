@@ -679,6 +679,9 @@ test.describe( 'Shipping Cart Block Tax', () => {
 		await api
 			.post( `shipping/zones/${ shippingZoneId }/methods`, {
 				method_id: 'flat_rate',
+				settings: {
+					title: 'Flat rate',
+				},
 			} )
 			.then( ( response ) => {
 				shippingMethodId = response.data.id;

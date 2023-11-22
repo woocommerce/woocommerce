@@ -190,7 +190,7 @@ public function init_form_fields() {
 			'title'             => __( 'Customize!', 'woocommerce-integration-demo' ),
 			'type'              => 'button',
 			'custom_attributes' => array(
-				'onclick' => "location.href='http://www.woo.com'",
+				'onclick' => "location.href='https://woo.com'",
 			),
 			'description'       => __( 'Customize your settings by going to the integration site directly.', 'woocommerce-integration-demo' ),
 			'desc_tip'          => true,

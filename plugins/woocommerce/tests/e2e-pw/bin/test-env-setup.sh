@@ -11,6 +11,11 @@ wp-env run tests-cli wp rewrite structure '/%postname%/' --hard
 echo -e 'Activate Filter Setter utility plugin \n'
 wp-env run tests-cli wp plugin activate filter-setter
 
+# This plugin allows you to process queued scheduled actions immediately.
+# It's used in the analytics e2e tests so that order numbers are shown in Analytics.
+echo -e 'Activate Process Waiting Actions utility plugin \n'
+wp-env run tests-cli wp plugin activate process-waiting-actions
+
 echo -e 'Activate Test Helper APIs utility plugin \n'
 wp-env run tests-cli wp plugin activate test-helper-apis
 

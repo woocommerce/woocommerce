@@ -34,10 +34,7 @@ import {
 	USER_STORE_NAME,
 	WCUser,
 } from '@woocommerce/data';
-import {
-	initializeExPlat,
-	loadExperimentAssignment,
-} from '@woocommerce/explat';
+import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
 import CurrencyFactory from '@woocommerce/currency';
@@ -204,7 +201,6 @@ export type CoreProfilerStateMachineContext = {
 	persistBusinessInfoRef?: ReturnType< typeof spawn >;
 	spawnUpdateOnboardingProfileOptionRef?: ReturnType< typeof spawn >;
 	spawnGeolocationRef?: ReturnType< typeof spawn >;
-	emailMarketingExperimentAssignment: 'treatment' | 'control';
 	currentUserEmail: string | undefined;
 };
 
@@ -320,12 +316,6 @@ const handleOnboardingProfileOption = assign( {
 	},
 } );
 
-const getMarketingOptInExperimentAssignment = async () => {
-	return loadExperimentAssignment(
-		`woocommerce_core_profiler_email_marketing_opt_in_2023_Q4_V1`
-	);
-};
-
 const getCurrentUserEmail = async () => {
 	const currentUser: WCUser< 'email' > = await resolveSelect(
 		USER_STORE_NAME
@@ -354,17 +344,6 @@ const assignOnboardingProfile = assign( {
 		_context,
 		event: DoneInvokeEvent< OnboardingProfile | undefined >
 	) => event.data,
-} );
-
-const assignMarketingOptInExperimentAssignment = assign( {
-	emailMarketingExperimentAssignment: (
-		_context,
-		event: DoneInvokeEvent<
-			Awaited<
-				ReturnType< typeof getMarketingOptInExperimentAssignment >
-			>
-		>
-	) => event.data.variationName ?? 'control',
 } );
 
 const getGeolocation = async ( context: CoreProfilerStateMachineContext ) => {
@@ -700,7 +679,6 @@ const coreProfilerMachineActions = {
 	handleCountries,
 	handleOnboardingProfileOption,
 	assignOnboardingProfile,
-	assignMarketingOptInExperimentAssignment,
 	assignCurrentUserEmail,
 	persistBusinessInfo,
 	spawnUpdateOnboardingProfileOption,
@@ -715,7 +693,6 @@ const coreProfilerMachineServices = {
 	getCountries,
 	getGeolocation,
 	getOnboardingProfileOption,
-	getMarketingOptInExperimentAssignment,
 	getCurrentUserEmail,
 	getPlugins,
 	browserPopstateHandler,
@@ -753,7 +730,6 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		loader: {},
 		onboardingProfile: {} as OnboardingProfile,
 		jetpackAuthUrl: undefined,
-		emailMarketingExperimentAssignment: 'control',
 		currentUserEmail: undefined,
 	} as CoreProfilerStateMachineContext,
 	states: {
@@ -1088,23 +1064,6 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								},
 							},
 						},
-						marketingOptInExperiment: {
-							initial: 'fetching',
-							states: {
-								fetching: {
-									invoke: {
-										src: 'getMarketingOptInExperimentAssignment',
-										onDone: {
-											target: 'done',
-											actions: [
-												'assignMarketingOptInExperimentAssignment',
-											],
-										},
-									},
-								},
-								done: { type: 'final' },
-							},
-						},
 						currentUserEmail: {
 							initial: 'fetching',
 							states: {
@@ -1140,7 +1099,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					},
 					entry: [
 						{
-							type: 'recordTracksStepViewedBusinessInfo',
+							type: 'recordTracksStepViewed',
 							step: 'business_info',
 						},
 					],
