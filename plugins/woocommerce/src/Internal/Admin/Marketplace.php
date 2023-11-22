@@ -68,15 +68,16 @@ class Marketplace {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_scripts( $hook_suffix ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( 'woocommerce_page_wc-admin' !== $hook_suffix ) {
 			return;
 		};
+
 		if ( ! isset( $_GET['path'] ) || '/extensions' !== $_GET['path'] ) {
 			return;
 		}
 
 		// Enqueue WordPress updates script to enable plugin and theme installs and updates.
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		wp_enqueue_script( 'updates' );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
