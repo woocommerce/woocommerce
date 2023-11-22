@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import { BlockTemplate } from '../types';
@@ -15,13 +20,27 @@ export function BlockTemplateDetailsPanel( {
 	}
 
 	const name = blockTemplate[ 0 ];
-	const attributes = blockTemplate[ 1 ];
+	const attributesFromTemplate = blockTemplate[ 1 ];
 
 	const {
 		_templateBlockId: templateBlockId,
 		_templateBlockOrder: templateBlockOrder,
-		...regularAttributes
-	} = attributes;
+		...regularAttributesFromTemplate
+	} = attributesFromTemplate;
+
+	const clientId = block?.clientId;
+	const attributesFromBlock = block?.attributes;
+
+	const {
+		_templateBlockId: blockTemplateId = undefined,
+		_templateBlockOrder: blockTemplateOrder = undefined,
+		...regularAttributesFromBlock
+	} = attributesFromBlock ?? {};
+
+	const regularAttributes = {
+		...regularAttributesFromTemplate,
+		...regularAttributesFromBlock,
+	};
 
 	return (
 		<div className="woocommerce-product-editor-dev-tools-block-template-details">
@@ -29,6 +48,7 @@ export function BlockTemplateDetailsPanel( {
 			<div>
 				<span>{ name }</span>
 				<span>{ templateBlockOrder }</span>
+				<span>{ clientId ?? __( 'unknown', 'woocommerce' ) }</span>
 			</div>
 
 			<dl className="woocommerce-product-editor-dev-tools-block-template-details__attributes">
@@ -45,8 +65,6 @@ export function BlockTemplateDetailsPanel( {
 					)
 				) }
 			</dl>
-
-			<div>{ JSON.stringify( block ) }</div>
 		</div>
 	);
 }
