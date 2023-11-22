@@ -333,6 +333,17 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					),
 				)
 			);
+
+			$product_list_section->add_block(
+				array(
+					'id'         => 'product-list',
+					'blockName'  => 'woocommerce/product-list-field',
+					'order'      => 10,
+					'attributes' => array(
+						'property' => 'grouped_products',
+					),
+				)
+			);
 		}
 
 		// Images section.
