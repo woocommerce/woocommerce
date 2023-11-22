@@ -85,7 +85,7 @@ class Marketplace {
 	 * @return array
 	 */
 	public function add_woo_plugin_install_action_link( $tabs ) {
-		$tabs[self::MARKETPLACE_TAB_SLUG] = _x( 'Woo', 'Plugin Installer', 'wccom' );
+		$tabs[self::MARKETPLACE_TAB_SLUG] = 'Woo';
 		return $tabs;
 	}
 
