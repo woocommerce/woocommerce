@@ -12,6 +12,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { closeSmall } from '@wordpress/icons';
 import {
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
@@ -88,6 +89,14 @@ export function AddProductsModal( {
 	}
 
 	const { formatAmount } = useContext( CurrencyContext );
+
+	function removeProductHandler( product: Product ) {
+		return function handleRemoveClick() {
+			setSelectedProducts( ( current ) =>
+				current.filter( ( item ) => item.id !== product.id )
+			);
+		};
+	}
 
 	return (
 		<Modal
@@ -204,6 +213,20 @@ export function AddProductsModal( {
 										<div className="woocommerce-add-products-modal__list-item-description">
 											{ item.sku }
 										</div>
+									</div>
+
+									<div className="woocommerce-add-products-modal__list-item-actions">
+										<Button
+											variant="tertiary"
+											icon={ closeSmall }
+											aria-label={ __(
+												'Remove product',
+												'woocommerce'
+											) }
+											onClick={ removeProductHandler(
+												item
+											) }
+										/>
 									</div>
 								</li>
 							) ) }
