@@ -583,6 +583,9 @@ function wc_notify_payment_gateway_enabled( $option, $old_value, $value ) {
 	if ( empty( $old_value ) || empty( $value ) || ! is_array( $old_value ) || ! is_array( $value ) ) {
 		return;
 	}
+	if ( ! isset( $old_value['enabled'] ) || ! isset( $value['enabled'] ) ) {
+		return;
+	}
 	// This is a change to a payment gateway's settings.
 	if ( 'no' === $old_value['enabled'] && 'yes' === $value['enabled'] ) {
 		// The gateway was just enabled, let's send an email to the admin.
