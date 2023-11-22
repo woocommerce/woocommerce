@@ -190,7 +190,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 		wp_enqueue_script(
 			'wc-order-source-attribution',
 			plugins_url( "assets/js/frontend/order-source-attribution{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
-			array( 'jquery', 'sourcebuster-js' ),
+			array( 'sourcebuster-js' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
