@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { getBlockType } from '@wordpress/blocks';
+
+/**
  * Internal dependencies
  */
 import {
@@ -108,6 +113,11 @@ export class BlockRegistrationManager
 			) {
 				continue;
 			}
+
+			if ( ! getBlockType( blockWithRestrictionName ) ) {
+				continue;
+			}
+
 			this.blockRegistrationStrategy = BLOCKS_WITH_RESTRICTION[
 				blockWithRestrictionName
 			].isVariationBlock
@@ -130,6 +140,10 @@ export class BlockRegistrationManager
 	 */
 	registerBlocksAfterLeavingRestrictedArea() {
 		for ( const unregisteredBlockName of this.unregisteredBlocks ) {
+			if ( ! getBlockType( unregisteredBlockName ) ) {
+				continue;
+			}
+
 			const restrictedBlockData =
 				BLOCKS_WITH_RESTRICTION[ unregisteredBlockName ];
 			this.blockRegistrationStrategy = BLOCKS_WITH_RESTRICTION[
