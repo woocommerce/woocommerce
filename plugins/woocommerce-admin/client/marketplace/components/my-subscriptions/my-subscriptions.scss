@@ -126,6 +126,7 @@
 
 .woocommerce-marketplace__my-subscriptions__product {
 	$product-icon-size: 40px;
+	min-width: 400px;
 
 	display: flex;
 	align-items: center;
@@ -231,7 +232,6 @@
 	.woocommerce-table__item {
 		padding: $grid-unit-10 $grid-unit-30;
 		align-items: center;
-		display: flex;
 	}
 
 	.woocommerce-table__table tr:hover {
@@ -350,29 +350,5 @@
 	.components-notice__action.components-button.is-link {
 		margin: 0;
 		padding: 0;
-	}
-}
-
-.woocommerce-marketplace__my-subscriptions {
-	display: grid;
-	grid-template-columns: repeat(5, auto);
-	.woocommerce-marketplace__my-subscriptions-section {
-		margin: 1em 0;
-		> * {
-			grid-column: span 5;
-		}
-	}
-	.woocommerce-table__table,
-	.woocommerce-marketplace__my-subscriptions-section,
-	.woocommerce-marketplace__my-subscriptions__table-wrapper {
-		&,
-		& table,
-		& tbody,
-		& thead,
-		& tr {
-			grid-column: span 5;
-			display: grid;
-			grid-template-columns: subgrid;
-		}
 	}
 }
