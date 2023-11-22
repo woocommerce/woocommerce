@@ -40,13 +40,14 @@ jobs:
 
             - name: Run API tests
               id: run-api-composite-action
-              working-directory: plugins/woocommerce
+              uses: ./.github/actions/tests/run-api-tests
+              with:
+                  report-name: ${{ env.API_ARTIFACT }}
               env:
                   BASE_URL: http://localhost:8086
                   USER_KEY: admin
                   USER_SECRET: password
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
 
             - name: Generate Playwright API Test report.
               id: generate_api_report
