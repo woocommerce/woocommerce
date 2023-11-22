@@ -1,10 +1,12 @@
-( function ( $, wc_order_source_attribution ) {
+( function ( wc_order_source_attribution ) {
 	'use strict';
 
 	const params = wc_order_source_attribution.params;
 	const prefix = params.prefix;
 	const cookieLifetime = Number( params.lifetime );
 	const sessionLength = Number( params.session );
+
+	const $ = document.querySelector.bind( document );
 
 	/**
 	 * Flattens the sbjs.get object into a schema compatible object.
@@ -56,7 +58,7 @@
 
 			if ( sbjs.get ) {
 				for( const [ key, value ] of Object.entries( wc_order_source_attribution.sbjsDataToSchema( sbjs.get ) ) ) {
-					$( `input[name="${prefix}${key}"]` ).val( value );
+					$( `input[name="${prefix}${key}"]` ).value = value;
 				}
 			}
 		};
@@ -64,12 +66,16 @@
 		/**
 		 * Add source values to checkout.
 		 */
-		$( document.body ).on( 'init_checkout', () => { setFields(); } );
+		const previousInitCheckout = document.body.oninit_checkout;
+		document.body.oninit_checkout = () => {
+			setFields();
+			previousInitCheckout();
+		};
 
 		/**
 		 * Add source values to register.
 		 */
-		if ( $( '.woocommerce form.register' ).length ) {
+		if ( $( '.woocommerce form.register' ) !== null ) {
 			setFields();
 		}
 	}
@@ -112,4 +118,4 @@
 	// Run init.
 	wc_order_source_attribution.initOrderTracking();
 
-}( jQuery, window.wc_order_source_attribution ) );
+}( window.wc_order_source_attribution ) );
