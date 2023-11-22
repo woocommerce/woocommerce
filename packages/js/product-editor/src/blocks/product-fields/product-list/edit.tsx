@@ -11,7 +11,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { closeSmall } from '@wordpress/icons';
+import { external, closeSmall } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { CurrencyContext } from '@woocommerce/currency';
 import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
@@ -239,6 +239,17 @@ export function Edit( {
 										className="wp-block-woocommerce-product-list-field__table-cell"
 										role="cell"
 									>
+										<Button
+											variant="tertiary"
+											icon={ external }
+											aria-label={ __(
+												'Preview the product',
+												'woocommerce'
+											) }
+											href={ product.permalink }
+											target="_blank"
+										/>
+
 										<Button
 											type="button"
 											variant="tertiary"
