@@ -129,12 +129,13 @@
 
 	display: flex;
 	align-items: center;
-	color: $gray-900;
 
 	&-name {
 		margin-left: $grid-unit-15;
 		line-height: 18px;
 		font-weight: 600;
+		color: $gray-900;
+		text-decoration: none;
 	}
 
 	&-icon img {
@@ -145,6 +146,7 @@
 	&-icon {
 		width: $product-icon-size;
 		height: $product-icon-size;
+
 		svg {
 			border-radius: 4px;
 			padding: $grid-unit-10;
@@ -152,6 +154,16 @@
 			background-color: $gray-200;
 			width: $product-icon-size;
 			height: $product-icon-size;
+		}
+	}
+}
+
+.woocommerce-table__item {
+	.woocommerce-marketplace__my-subscriptions__product-name {
+		&:active,
+		&:hover,
+		&:visited {
+			color: $gray-900;
 		}
 	}
 }
