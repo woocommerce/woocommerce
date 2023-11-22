@@ -82,11 +82,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$this->add_group(
 			array(
-				'id'         => $this::GROUP_IDS['PRICING'],
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => $this::GROUP_IDS['PRICING'],
+				'order'          => 20,
+				'attributes'     => array(
 					'title' => __( 'Pricing', 'woocommerce' ),
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		$this->add_group(
@@ -100,11 +105,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$this->add_group(
 			array(
-				'id'         => $this::GROUP_IDS['SHIPPING'],
-				'order'      => 40,
-				'attributes' => array(
+				'id'             => $this::GROUP_IDS['SHIPPING'],
+				'order'          => 40,
+				'attributes'     => array(
 					'title' => __( 'Shipping', 'woocommerce' ),
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		if ( Features::is_enabled( 'product-variation-management' ) ) {
