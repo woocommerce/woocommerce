@@ -48,8 +48,9 @@ export function BlockTemplateDetailsPanel( {
 			<div>
 				<span>{ name }</span>
 				<span>{ templateBlockOrder }</span>
-				<span>{ clientId ?? __( 'unknown', 'woocommerce' ) }</span>
 			</div>
+
+			<div>{ clientId ?? __( 'unknown', 'woocommerce' ) }</div>
 
 			<dl className="woocommerce-product-editor-dev-tools-block-template-details__attributes">
 				{ Object.entries( regularAttributes ).map(
@@ -59,7 +60,7 @@ export function BlockTemplateDetailsPanel( {
 								{ attributeName }
 							</dt>
 							<dd className="woocommerce-product-editor-dev-tools-block-template-details__attribute-value">
-								{ JSON.stringify( attributeValue ) }
+								{ JSON.stringify( attributeValue, null, 4 ) }
 							</dd>
 						</>
 					)
