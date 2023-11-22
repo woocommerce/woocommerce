@@ -24,9 +24,7 @@ export default function NoResults( props: {
 	const [ isLoading, setIsLoading ] = useState( false );
 	const query = useQuery();
 	const showCategorySelector = query.tab === 'search' && query.section;
-	const productGroupsForSearchType: {
-		[ key in SearchResultType ]: string[];
-	} = {
+	const productGroupsForSearchType = {
 		[ SearchResultType.all ]: [ 'most-popular', 'popular-themes' ],
 		[ SearchResultType.theme ]: [ 'popular-themes' ],
 		[ SearchResultType.extension ]: [ 'most-popular' ],

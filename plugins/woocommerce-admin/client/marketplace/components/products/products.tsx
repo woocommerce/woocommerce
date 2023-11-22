@@ -17,10 +17,7 @@ import ProductListContent from '../product-list-content/product-list-content';
 import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
 import { Product, ProductType, SearchResultType } from '../product-list/types';
-import {
-	MARKETPLACE_ITEMS_PER_PAGE,
-	MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-} from '../constants';
+import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 
 interface ProductsProps {
 	categorySelector?: boolean;

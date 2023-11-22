@@ -16,7 +16,7 @@ import { MarketplaceContext } from '../../contexts/marketplace-context';
 import {
 	MARKETPLACE_ITEMS_PER_PAGE,
 	MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-} from '~/marketplace/components/constants';
+} from '../../../marketplace/components/constants';
 
 export interface SearchResultProps {
 	products: Product[];
@@ -46,11 +46,7 @@ export default function SearchResults( props: SearchResultProps ): JSX.Element {
 	function productsComponent(
 		products: Product[],
 		type: ProductType,
-		overrides: {
-			categorySelector?: boolean;
-			showAllButton?: boolean;
-			perPage?: number;
-		} = {}
+		overrides: Overrides = {}
 	) {
 		return (
 			<Products
