@@ -88,15 +88,26 @@
 		flex-direction: column;
 		gap: 2px;
 		flex: 1 1 auto;
+		overflow: hidden;
 	}
 
 	&__product-name {
 		color: $gray-900;
+
+		.is-link {
+			display: block;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
 	}
 
 	&__product-sku {
 		color: $gray-700;
 		font-size: 11px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	&__price--on-sale {
