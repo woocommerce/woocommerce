@@ -1,10 +1,10 @@
 === WooCommerce Blocks ===
 Contributors: automattic, woocommerce, claudiulodro, tiagonoronha, jameskoster, ryelle, levinmedia, aljullu, mikejolley, nerrad, joshuawold, assassinateur, haszari, mppfeiffer, nielslange, opr18, ralucastn, tjcafferkey, danielwrobert, patriciahillebrandt, albarin, dinhtungdu, royho, imanish003, karolmanijak, sunyatasattva, alexandrelara, gigitux, danieldudzic, samueljseay, alexflorisca, opr18, tarunvijwani, pauloarromba, saadtarhi
 Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
-Requires at least: 6.3
-Tested up to: 6.3
+Requires at least: 6.4
+Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 11.5.4
+Stable tag: 11.6.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -80,6 +80,40 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 Release and roadmap notes available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
 
 == Changelog ==
+
+= 11.6.0 - 2023-11-20 =
+
+#### Enhancements
+
+- Product Collection - New 'No Results' block with default UI. [#11783](https://github.com/woocommerce/woocommerce-blocks/pull/11783)
+- WWe have moved the TotalsItem, TotalsFees, Subtotal, Banner, StoreNotice, StoreNotices, Panel, TextInput, ValidatedTextInput and ValidationInputError components to the @woocommerce/blocks-components package. Previously these were available in @woocommerce/blocks-checkout . Your code will continue to work as we have added aliases to the new location. Despite this, it is recommended that you change your code to import this component from @woocommerce/blocks-components as the import from the checkout package will be deprecated in the future. [#11766](https://github.com/woocommerce/woocommerce-blocks/pull/11766) [#11698](https://github.com/woocommerce/woocommerce-blocks/pull/11698) [#11654](https://github.com/woocommerce/woocommerce-blocks/pull/11654) [#11773](https://github.com/woocommerce/woocommerce-blocks/pull/11773)
+- Improve performance in patterns registration. [#11733](https://github.com/woocommerce/woocommerce-blocks/pull/11733)
+- Patterns: remove unused author, sticky, and parents attributes from the Product Collection block in patterns. [#11673](https://github.com/woocommerce/woocommerce-blocks/pull/11673)
+- Semantic enhancement to the position of a phone field in Checkout. [#11651](https://github.com/woocommerce/woocommerce-blocks/pull/11651)
+- Migrate the Product Button to the new store() API of the Interactivity API.. [#11558](https://github.com/woocommerce/woocommerce-blocks/pull/11558)
+- Product Collection: Add support for filtering products by featured status. [#11522](https://github.com/woocommerce/woocommerce-blocks/pull/11522)
+
+#### Bug Fixes
+
+- Make "Use same address for billing" visible by default. [#11804](https://github.com/woocommerce/woocommerce-blocks/pull/11804)
+- Fix the order endpoint tax line items format. [#11796](https://github.com/woocommerce/woocommerce-blocks/pull/11796)
+- Store API/Blocks Extensibility: Fix recursive extension schema validation. [#11792](https://github.com/woocommerce/woocommerce-blocks/pull/11792)
+- Fix: Left align local pickup address. [#11772](https://github.com/woocommerce/woocommerce-blocks/pull/11772)
+- Fix typo in classic checkout modal. [#11771](https://github.com/woocommerce/woocommerce-blocks/pull/11771)
+- Fix hardcoded shop link in "Hero Product 3 Split" pattern. [#11767](https://github.com/woocommerce/woocommerce-blocks/pull/11767)
+- Fix billing address condensed address state in the editor and in Firefox. [#11765](https://github.com/woocommerce/woocommerce-blocks/pull/11765)
+- Related Products: Make the heading translated when in blockified Single Product template. [#11693](https://github.com/woocommerce/woocommerce-blocks/pull/11693)
+- Add to Cart with Options block: fix inconsistency between editor and frontend styles. [#11614](https://github.com/woocommerce/woocommerce-blocks/pull/11614)
+- Product Button: Improve the width and padding. [#11537](https://github.com/woocommerce/woocommerce-blocks/pull/11537)
+- Fix the Layout for Shipping and Billing Address Forms in the Checkout Block [#11486](https://github.com/woocommerce/woocommerce-blocks/pull/11486)
+- Minor fixes for PHP 8. [#11473](https://github.com/woocommerce/woocommerce-blocks/pull/11473)
+- Product Button: always enqueue the store. [#11858](https://github.com/woocommerce/woocommerce-blocks/pull/11858)
+- Fixed params passed to woocommerce_before_thankyou for block checkout. This should be an order ID, not an order object. [#11862](https://github.com/woocommerce/woocommerce-blocks/pull/11862)
+- Enhanced validation for limited use coupons and guest users. [#11860](https://github.com/woocommerce/woocommerce-blocks/pull/11860)
+
+#### Documentation
+
+- Updated documentation for the onProcessingSetup observer. [#11751](https://github.com/woocommerce/woocommerce-blocks/pull/11751)
 
 = 11.5.4 - 2023-11-13 =
 
