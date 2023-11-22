@@ -586,13 +586,15 @@ function wc_notify_payment_gateway_enabled( $option, $old_value, $value ) {
 	if ( ! isset( $old_value['enabled'] ) || ! isset( $value['enabled'] ) ) {
 		return;
 	}
+	if ( 'no' !== $old_value['enabled'] || 'yes' !== $value['enabled'] ) {
+		return;
+	}
 	// This is a change to a payment gateway's settings.
-	if ( 'no' === $old_value['enabled'] && 'yes' === $value['enabled'] ) {
-		// The gateway was just enabled, let's send an email to the admin.
-		$admin_email = get_option( 'admin_email' );
-		/* translators: Do not translate USERNAME, GATEWAY_TITLE, GATEWAY_SETTINGS_URL, EMAIL, SITENAME, SITEURL: those are placeholders. */
-		$email_text = __(
-			'Howdy ###USERNAME###,
+	// The gateway was just enabled, let's send an email to the admin.
+	$admin_email = get_option( 'admin_email' );
+	/* translators: Do not translate USERNAME, GATEWAY_TITLE, GATEWAY_SETTINGS_URL, EMAIL, SITENAME, SITEURL: those are placeholders. */
+	$email_text = __(
+		'Howdy ###USERNAME###,
 
 The payment gateway "###GATEWAY_TITLE###" was just enabled on this site:
 ###SITEURL###
@@ -607,33 +609,32 @@ This email has been sent to ###EMAIL###
 Regards,
 All at ###SITENAME###
 ###SITEURL###',
-			'woocommerce'
-		);
-		$user       = get_user_by( 'email', $admin_email );
-		$username   = $user ? $user->user_login : $admin_email;
-		$email_text = str_replace( '###USERNAME###', $username, $email_text );
-		$email_text = str_replace( '###GATEWAY_TITLE###', $value['title'], $email_text );
-		$email_text = str_replace( '###GATEWAY_SETTINGS_URL###', self_admin_url( 'admin.php?page=wc-settings&tab=checkout' ), $email_text );
-		$email_text = str_replace( '###EMAIL###', $admin_email, $email_text );
-		$email_text = str_replace( '###SITENAME###', wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ), $email_text );
-		$email_text = str_replace( '###SITEURL###', home_url(), $email_text );
+		'woocommerce'
+	);
+	$user       = get_user_by( 'email', $admin_email );
+	$username   = $user ? $user->user_login : $admin_email;
+	$email_text = str_replace( '###USERNAME###', $username, $email_text );
+	$email_text = str_replace( '###GATEWAY_TITLE###', $value['title'], $email_text );
+	$email_text = str_replace( '###GATEWAY_SETTINGS_URL###', self_admin_url( 'admin.php?page=wc-settings&tab=checkout' ), $email_text );
+	$email_text = str_replace( '###EMAIL###', $admin_email, $email_text );
+	$email_text = str_replace( '###SITENAME###', wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ), $email_text );
+	$email_text = str_replace( '###SITEURL###', home_url(), $email_text );
 
-		if ( '' !== get_option( 'blogname' ) ) {
-			$site_title = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
-		} else {
-			$site_title = wp_parse_url( home_url(), PHP_URL_HOST );
-		}
-
-		wp_mail(
-			$admin_email,
-			sprintf(
-				/* translators: Payment gateway enabled notification email subject. %s1: Site title, $s2: Gateway title. */
-				__( '[%1$s] Payment gateway %2$s enabled', 'woocommerce' ),
-				$site_title,
-				$value['title']
-			),
-			$email_text
-		);
+	if ( '' !== get_option( 'blogname' ) ) {
+		$site_title = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+	} else {
+		$site_title = wp_parse_url( home_url(), PHP_URL_HOST );
 	}
+
+	wp_mail(
+		$admin_email,
+		sprintf(
+			/* translators: Payment gateway enabled notification email subject. %s1: Site title, $s2: Gateway title. */
+			__( '[%1$s] Payment gateway %2$s enabled', 'woocommerce' ),
+			$site_title,
+			$value['title']
+		),
+		$email_text
+	);
 }
 add_action( 'update_option', 'wc_notify_payment_gateway_enabled', 10, 3 );
