@@ -81,6 +81,8 @@ class Marketplace {
 
 	/**
 	 * Add a Woo Marketplace link to the plugin install action links.
+	 * @param array $tabs Plugins list tabs.
+	 * @return array
 	 */
 	public function add_woo_plugin_install_action_link( $tabs ) {
 		$tabs[self::MARKETPLACE_TAB_SLUG] = _x( 'Woo', 'Plugin Installer', 'wccom' );
@@ -95,7 +97,6 @@ class Marketplace {
 			return;
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$woo_url = add_query_arg(
 			array(
 				'page' => 'wc-admin',
@@ -105,12 +106,14 @@ class Marketplace {
 			),
 			admin_url( 'admin.php' )
 		);
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		wp_safe_redirect( $woo_url );
 		exit;
 	}
 
+	/**
+	 * Add styles to the plugin install page.
+	 */
 	public function add_plugins_page_styles() {
 		?>
 		<style>
