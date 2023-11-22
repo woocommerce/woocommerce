@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
 use Automattic\Jetpack\Constants;
+use PclZip;
 use WC_Cache_Helper;
 use WP_Error;
 
@@ -343,6 +344,66 @@ class FileController {
 		}
 
 		return $deleted;
+	}
+
+	/**
+	 * Stream a single file to the browser without zipping it first.
+	 *
+	 * @param string $file_id A file ID (file basename without the hash).
+	 *
+	 * @return WP_Error|void Only returns something if there is an error.
+	 */
+	public function export_single_file( $file_id ) {
+		$file = $this->get_file_by_id( $file_id );
+
+		if ( is_wp_error( $file ) ) {
+			return $file;
+		}
+
+		$file_name = $file->get_file_id() . '.log';
+		$exporter  = new FileExporter( $file->get_path(), $file_name );
+
+		return $exporter->emit_file();
+	}
+
+	/**
+	 * Create a zip archive of log files and stream it to the browser.
+	 *
+	 * @param array $file_ids An array of file IDs (file basename without the hash).
+	 *
+	 * @return WP_Error|null
+	 */
+	public function export_multiple_files( array $file_ids ) {
+		$files = $this->get_files_by_id( $file_ids );
+
+		if ( count( $files ) < 1 ) {
+			return new WP_Error(
+				'wc_logs_invalid_file',
+				__( 'Could not access the specified files.', 'woocommerce' )
+			);
+		}
+
+		if ( ! get_temp_dir() ) {
+			return new WP_Error(
+				'wc_logs_invalid_directory',
+				__( 'Could not write to the temp directory.', 'woocommerce' )
+			);
+		}
+
+		require_once ABSPATH . 'wp-admin/includes/class-pclzip.php';
+
+		$path       = trailingslashit( get_temp_dir() ) . 'woocommerce_logs_' . gmdate( 'Y-m-d_H-i-s' ) . '.zip';
+		$file_paths = array_map(
+			fn( $file ) => $file->get_path(),
+			$files
+		);
+		$archive    = new PclZip( $path );
+
+		$archive->create( $file_paths, PCLZIP_OPT_REMOVE_ALL_PATH );
+
+		$exporter = new FileExporter( $path );
+
+		return $exporter->emit_file();
 	}
 
 	/**
