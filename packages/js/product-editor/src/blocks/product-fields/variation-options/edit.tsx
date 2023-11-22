@@ -38,8 +38,7 @@ export function Edit( {
 	const { generateProductVariations } = useProductVariationsHelper();
 	const {
 		updateUserPreferences,
-		variable_options_dismissed_notices_ids:
-			dismissedNoticesIds = [],
+		local_attributes_notice_dismissed_ids: dismissedNoticesIds = [],
 	} = useUserPreferences();
 
 	const [ entityAttributes, setEntityAttributes ] = useEntityProp<
@@ -129,7 +128,7 @@ export function Edit( {
 				useRemoveConfirmationModal={ true }
 				onNoticeDismiss={ () =>
 					updateUserPreferences( {
-						variable_options_dismissed_notices_ids: [
+						local_attributes_notice_dismissed_ids: [
 							...dismissedNoticesIds,
 							productId,
 						],
