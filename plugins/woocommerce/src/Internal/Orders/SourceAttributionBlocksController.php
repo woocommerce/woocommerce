@@ -101,14 +101,6 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Check if WCCom_Cookie_Terms is available.
-	 *
-	 * @return bool
-	 */
-	protected function is_wccom_cookie_terms_available() {
-		return class_exists( WCCom_Cookie_Terms::class );
-	}
-	/**
 	 * Register scripts.
 	 */
 	private function register_assets() {
