@@ -8,6 +8,7 @@ import { createElement, CSSProperties, ReactElement } from 'react';
  * Internal dependencies
  */
 import { getItemPropsType } from './types';
+import classNames from 'classnames';
 
 export type MenuItemProps< ItemType > = {
 	index: number;
@@ -17,6 +18,7 @@ export type MenuItemProps< ItemType > = {
 	getItemProps: getItemPropsType< ItemType >;
 	activeStyle?: CSSProperties;
 	tooltipText?: string;
+	className?: string;
 };
 
 export const MenuItem = < ItemType, >( {
@@ -27,13 +29,19 @@ export const MenuItem = < ItemType, >( {
 	activeStyle = { backgroundColor: '#bde4ff' },
 	item,
 	tooltipText,
+	className,
 }: MenuItemProps< ItemType > ) => {
 	function renderListItem() {
+		const itemProps = getItemProps( { item, index } );
 		return (
 			<li
-				style={ isActive ? activeStyle : {} }
-				{ ...getItemProps( { item, index } ) }
-				className="woocommerce-experimental-select-control__menu-item"
+				{ ...itemProps }
+				style={ isActive ? activeStyle : itemProps.style }
+				className={ classNames(
+					'woocommerce-experimental-select-control__menu-item',
+					itemProps.className,
+					className
+				) }
 			>
 				{ children }
 			</li>
