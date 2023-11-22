@@ -27,7 +27,7 @@ import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
  */
 import { AddProductsModalProps } from './types';
 
-function getProductImageStyle( product: Product ) {
+export function getProductImageStyle( product: Product ) {
 	return product.images.length > 0
 		? {
 				backgroundImage: `url(${ product.images[ 0 ].src })`,
@@ -217,6 +217,7 @@ export function AddProductsModal( {
 
 									<div className="woocommerce-add-products-modal__list-item-actions">
 										<Button
+											type="button"
 											variant="tertiary"
 											icon={ closeSmall }
 											aria-label={ __(
