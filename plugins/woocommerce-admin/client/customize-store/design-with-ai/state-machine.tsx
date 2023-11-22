@@ -38,6 +38,10 @@ export const hasStepInUrl = (
 	);
 };
 
+export const isAiAvailable = ( _ctx: { aiAvailable: boolean } ) => {
+	return _ctx.aiAvailable;
+};
+
 export const designWithAiStateMachineDefinition = createMachine(
 	{
 		id: 'designWithAi',
@@ -72,6 +76,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 			toneOfVoice: {
 				choice: '',
 			},
+			// @ts-expect-error -- Temp solution -- we need to get this value from parent machine.
+			aiAvailable: window.aiAvailable,
 			aiSuggestions: {
 				// Default color palette, font pairing are used as fallbacks when the AI endpoint fails.
 				defaultColorPalette: {
@@ -272,8 +278,19 @@ export const designWithAiStateMachineDefinition = createMachine(
 						type: 'parallel',
 						states: {
 							chooseColorPairing: {
-								initial: 'pending',
+								initial: 'executeOrSkip',
 								states: {
+									executeOrSkip: {
+										always: [
+											{
+												target: 'pending',
+												cond: 'isAiAvailable',
+											},
+											{
+												target: 'success',
+											},
+										],
+									},
 									pending: {
 										invoke: {
 											src: 'queryAiEndpoint',
@@ -307,8 +324,19 @@ export const designWithAiStateMachineDefinition = createMachine(
 								},
 							},
 							chooseFontPairing: {
-								initial: 'pending',
+								initial: 'executeOrSkip',
 								states: {
+									executeOrSkip: {
+										always: [
+											{
+												target: 'pending',
+												cond: 'isAiAvailable',
+											},
+											{
+												target: 'success',
+											},
+										],
+									},
 									pending: {
 										entry: [ 'assignFontPairing' ],
 										always: {
@@ -319,8 +347,19 @@ export const designWithAiStateMachineDefinition = createMachine(
 								},
 							},
 							updateStorePatterns: {
-								initial: 'pending',
+								initial: 'executeOrSkip',
 								states: {
+									executeOrSkip: {
+										always: [
+											{
+												target: 'pending',
+												cond: 'isAiAvailable',
+											},
+											{
+												target: 'success',
+											},
+										],
+									},
 									pending: {
 										invoke: {
 											src: 'updateStorePatterns',
@@ -365,8 +404,19 @@ export const designWithAiStateMachineDefinition = createMachine(
 						type: 'parallel',
 						states: {
 							assembleSite: {
-								initial: 'pending',
+								initial: 'executeOrSkip',
 								states: {
+									executeOrSkip: {
+										always: [
+											{
+												target: 'pending',
+												cond: 'isAiAvailable',
+											},
+											{
+												target: '#designWithAi.showAssembleHub',
+											},
+										],
+									},
 									pending: {
 										invoke: {
 											src: 'assembleSite',
@@ -429,6 +479,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 		services,
 		guards: {
 			hasStepInUrl,
+			isAiAvailable,
 		},
 	}
 );

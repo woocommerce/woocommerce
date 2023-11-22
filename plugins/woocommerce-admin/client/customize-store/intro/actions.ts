@@ -112,7 +112,10 @@ export const assignAIAvailability = assign<
 	isAiAvailable: ( _context, _event ) => {
 		const status = ( _event as DoneInvokeEvent< OpenAiStatus > ).data.status
 			.indicator;
-		return status !== 'critical' && status !== 'major';
+		const isAiAvailable = status !== 'critical' && status !== 'major';
+		// @ts-expect-error temp workaround;
+		window.isAiAvailable = isAiAvailable;
+		return isAiAvailable;
 	},
 } );
 
