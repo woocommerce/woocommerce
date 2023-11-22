@@ -22,10 +22,7 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	 * Test wc_format_postcode() function.
 	 */
 	public function test_wc_format_postcode() {
-		// IE postcode.
-		$this->assertEquals( 'D02 AF30', wc_format_postcode( 'D02AF30', 'IE' ) );
-
-		// PT postcode.
-		$this->assertEquals( '1000-205', wc_format_postcode( '1000205', 'PT' ) );
+		$this->assertEquals( 'D02 AF30', wc_format_postcode( 'D02AF30', 'IE' ), 'Test formatting of IE postcodes.' );
+		$this->assertEquals( '1000-205', wc_format_postcode( '1000205', 'PT' ), 'Test formatting of PT postcodes.' );
 	}
 }
