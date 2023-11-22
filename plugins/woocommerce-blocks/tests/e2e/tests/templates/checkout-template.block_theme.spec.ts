@@ -13,8 +13,7 @@ test.describe( 'Test the checkout template', async () => {
 		page,
 		editorUtils,
 	} ) => {
-		await admin.visitAdminPage( 'site-editor.php' );
-		await editorUtils.waitForSiteEditorFinishLoading();
+		await admin.visitSiteEditor();
 		await page.getByRole( 'button', { name: /Templates/i } ).click();
 		await page.getByRole( 'button', { name: /Page: Checkout/i } ).click();
 		await editorUtils.enterEditMode();
@@ -34,8 +33,7 @@ test.describe( 'Test the checkout template', async () => {
 		page,
 		editorUtils,
 	} ) => {
-		await admin.visitAdminPage( 'site-editor.php' );
-		await editorUtils.waitForSiteEditorFinishLoading();
+		await admin.visitSiteEditor();
 		await editor.page.getByRole( 'button', { name: /Pages/i } ).click();
 		await editor.page.getByRole( 'button', { name: /Checkout/i } ).click();
 		await editorUtils.enterEditMode();
@@ -73,8 +71,7 @@ test.describe( 'Test editing the checkout template', async () => {
 		editor,
 		page,
 	} ) => {
-		await admin.visitAdminPage( 'site-editor.php' );
-		await editorUtils.waitForSiteEditorFinishLoading();
+		await admin.visitSiteEditor();
 		await page.getByRole( 'button', { name: /Templates/i } ).click();
 		await page.getByRole( 'button', { name: /Page: Checkout/i } ).click();
 		await editorUtils.enterEditMode();
