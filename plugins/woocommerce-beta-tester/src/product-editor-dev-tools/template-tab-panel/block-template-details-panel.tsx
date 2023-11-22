@@ -5,8 +5,10 @@ import { BlockTemplate } from '../types';
 
 export function BlockTemplateDetailsPanel( {
 	blockTemplate,
+	block,
 }: {
 	blockTemplate?: BlockTemplate | null;
+	block: any;
 } ) {
 	if ( ! blockTemplate ) {
 		return null;
@@ -43,6 +45,8 @@ export function BlockTemplateDetailsPanel( {
 					)
 				) }
 			</dl>
+
+			<div>{ JSON.stringify( block ) }</div>
 		</div>
 	);
 }

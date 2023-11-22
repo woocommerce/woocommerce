@@ -15,18 +15,21 @@ import { BlockTemplateTree } from './block-template-tree';
 export function TemplateTabPanel( {
 	isSelected,
 	evaluationContext,
+	setSelectedBlockTemplateId,
+	selectedBlockTemplateId,
+	selectedBlock,
 }: {
 	isSelected: boolean;
 	evaluationContext: EvaluationContext;
+	setSelectedBlockTemplateId: ( templateBlockId: string ) => void;
+	selectedBlockTemplateId?: string | null;
+	selectedBlock: any | null;
 } ) {
 	const template: BlockTemplateArray =
 		// @ts-ignore
 		globalThis.productBlockEditorSettings.templates[
 			evaluationContext.postType
 		];
-
-	const [ selectedBlockTemplate, setSelectedBlockTemplate ] =
-		useState< BlockTemplate | null >( null );
 
 	function findBlockTemplateById(
 		blockTemplates: BlockTemplateArray,
@@ -55,13 +58,13 @@ export function TemplateTabPanel( {
 	}
 
 	function onBlockTemplateSelect( blockTemplateId: string ) {
-		const blockTemplate = findBlockTemplateById(
-			template,
-			blockTemplateId
-		);
-
-		setSelectedBlockTemplate( blockTemplate );
+		setSelectedBlockTemplateId( blockTemplateId );
 	}
+
+	const selectedBlockTemplate = findBlockTemplateById(
+		template,
+		selectedBlockTemplateId ?? ''
+	);
 
 	return (
 		<TabPanel isSelected={ isSelected }>
@@ -76,6 +79,7 @@ export function TemplateTabPanel( {
 				/>
 				<BlockTemplateDetailsPanel
 					blockTemplate={ selectedBlockTemplate }
+					block={ selectedBlock }
 				/>
 			</div>
 		</TabPanel>
