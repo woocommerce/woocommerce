@@ -272,6 +272,7 @@ export function Edit( {
 
 			{ openAddProductsModal && (
 				<AddProductsModal
+					initialValue={ groupedProducts }
 					onSubmit={ handleAddProductsModalSubmit }
 					onClose={ handleAddProductsModalClose }
 				/>

@@ -36,6 +36,7 @@ export function getProductImageStyle( product: Product ) {
 }
 
 export function AddProductsModal( {
+	initialValue,
 	onSubmit,
 	onClose,
 }: AddProductsModalProps ) {
@@ -63,7 +64,9 @@ export function AddProductsModal( {
 					search,
 					orderby: 'title',
 					order: 'asc',
-					exclude: selectedProducts.map( ( product ) => product.id ),
+					exclude: [ ...initialValue, ...selectedProducts ].map(
+						( product ) => product.id
+					),
 				} )
 				.then( ( response ) => {
 					setProducts( response );
@@ -81,7 +84,7 @@ export function AddProductsModal( {
 		function preloadProducts() {
 			filter();
 		},
-		[ selectedProducts ]
+		[ initialValue, selectedProducts ]
 	);
 
 	function handleSelect( value: Product ) {
