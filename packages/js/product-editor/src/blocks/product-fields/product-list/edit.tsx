@@ -15,6 +15,8 @@ import { closeSmall } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { CurrencyContext } from '@woocommerce/currency';
 import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
+import { getNewPath } from '@woocommerce/navigation';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -26,7 +28,6 @@ import {
 import { ProductEditorBlockEditProps } from '../../../types';
 import { Shirt, Pants, Glasses } from './images';
 import { UploadsBlockAttributes } from './types';
-import classNames from 'classnames';
 import {
 	getProductStockStatus,
 	getProductStockStatusClass,
@@ -177,7 +178,16 @@ export function Edit( {
 
 										<div className="wp-block-woocommerce-product-list-field__product-info">
 											<div className="wp-block-woocommerce-product-list-field__product-name">
-												{ product.name }
+												<Button
+													variant="link"
+													href={ getNewPath(
+														{},
+														`/product/${ product.id }`
+													) }
+													target="_blank"
+												>
+													{ product.name }
+												</Button>
 											</div>
 
 											<div className="wp-block-woocommerce-product-list-field__product-sku">
