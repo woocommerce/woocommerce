@@ -311,6 +311,20 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			);
 		}
 
+		// Product list section.
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$product_list_section = $general_group->add_section(
+				array(
+					'id'         => 'product-list-section',
+					'order'      => 35,
+					'attributes' => array(
+						'title'       => __( 'Products in this group', 'woocommerce' ),
+						'description' => __( 'Make a collection of related products, enabling customers to purchase multiple items together.', 'woocommerce' ),
+					),
+				)
+			);
+		}
+
 		// Images section.
 		$images_section = $general_group->add_section(
 			array(
