@@ -52,15 +52,10 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	 * @param SourceAttributionController $source_attribution_controller Instance of the source attribution controller.
 	 */
 	final public function init(
-
-		/*
-		AssetApi $asset_api,
-		*/
 		ExtendSchema $extend_schema,
 		FeaturesController $features_controller,
 		SourceAttributionController $source_attribution_controller
 	) {
-		// $this->asset_api                     = $asset_api;
 		$this->extend_schema                 = $extend_schema;
 		$this->features_controller           = $features_controller;
 		$this->source_attribution_controller = $source_attribution_controller;
@@ -104,16 +99,6 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	 * Register scripts.
 	 */
 	private function register_assets() {
-		// Once Blocks are moved to the monorepo, hopefully, we can use the following code.
-
-		/*
-		$this->asset_api->register_script(
-			'wc-blocks-order-source-attribution',
-			'build/wc-blocks-order-source-attribution.js',
-			[ 'wc-order-source-attribution' ]
-		);
-		*/
-		// Instead of the elaborate version below.
 		wp_register_script(
 			'wc-order-source-attribution-blocks',
 			plugins_url(
