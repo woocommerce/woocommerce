@@ -375,7 +375,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 			'type'          => $source_data['type'] ?? '',
 			'medium'        => $source_data['utm_medium'] ?? '',
 			'source'        => $source_data['utm_source'] ?? '',
-			'device_type'   => $source_data['device_type'] ?? '(unknown)',
+			'device_type'   => strtolower( $source_data['device_type'] ?? '(unknown)' ),
 			'session_pages' => $source_data['session_pages'] ?? 0,
 			'session_count' => $source_data['session_count'] ?? 0,
 			'order_total'   => $order->get_total(),
