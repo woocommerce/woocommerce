@@ -252,6 +252,15 @@ class AbstractBlock implements BlockInterface {
 			'expression' => $expression,
 		);
 
+		/**
+		 * Action called after a hide condition is added to a block.
+		 *
+		 * @param BlockInterface $block The block.
+		 *
+		 * @since 8.4.0
+		 */
+		do_action( 'woocommerce_block_template_after_add_hide_condition', $this );
+
 		return $key;
 	}
 
@@ -262,6 +271,15 @@ class AbstractBlock implements BlockInterface {
 	 */
 	public function remove_hide_condition( string $key ) {
 		unset( $this->hide_conditions[ $key ] );
+
+		/**
+		 * Action called after a hide condition is removed from a block.
+		 *
+		 * @param BlockInterface $block The block.
+		 *
+		 * @since 8.4.0
+		 */
+		do_action( 'woocommerce_block_template_after_remove_hide_condition', $this );
 	}
 
 	/**

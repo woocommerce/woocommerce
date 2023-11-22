@@ -1,17 +1,17 @@
 /**
  * External dependencies
  */
-
 import { MenuItem } from '@wordpress/components';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { media } from '@wordpress/icons';
-import { MediaItem, MediaUpload } from '@wordpress/media-utils';
+import { MediaItem } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
 import { MediaLibraryMenuItemProps } from './types';
+import { MediaLibrary } from '../media-library';
 
 const MODAL_CLASS_NAME =
 	'woocommerce-media-library-menu-item__upload_files_modal';
@@ -39,8 +39,8 @@ export function MediaLibraryMenuItem( {
 		[ uploadFilesModalOpen ]
 	);
 
-	function handleMediaUploadSelect( value: unknown ) {
-		onUploadSuccess( value as MediaItem[] );
+	function handleMediaUploadSelect( value: MediaItem[] ) {
+		onUploadSuccess( value );
 	}
 
 	function uploadFilesClickHandler( openMediaUploadModal: () => void ) {
@@ -51,13 +51,16 @@ export function MediaLibraryMenuItem( {
 	}
 
 	return (
-		<MediaUpload
-			modalClass={ MODAL_CLASS_NAME }
-			onSelect={ handleMediaUploadSelect }
+		<MediaLibrary
+			className={ MODAL_CLASS_NAME }
 			allowedTypes={ allowedTypes }
-			// @ts-expect-error - TODO multiple also accepts string.
-			multiple={ 'add' }
-			render={ ( { open } ) => (
+			multiple="add"
+			uploaderParams={ {
+				type: 'downloadable_product',
+			} }
+			onSelect={ handleMediaUploadSelect }
+		>
+			{ ( { open } ) => (
 				<MenuItem
 					icon={ media }
 					iconPosition="left"
@@ -67,6 +70,6 @@ export function MediaLibraryMenuItem( {
 					{ __( 'Media Library', 'woocommerce' ) }
 				</MenuItem>
 			) }
-		/>
+		</MediaLibrary>
 	);
 }

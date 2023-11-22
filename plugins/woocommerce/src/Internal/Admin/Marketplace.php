@@ -33,6 +33,10 @@ class Marketplace {
 	 * Registers report pages.
 	 */
 	public function register_pages() {
+		if ( ! function_exists( 'wc_admin_register_page' ) ) {
+			return;
+		}
+
 		$marketplace_pages = self::get_marketplace_pages();
 		foreach ( $marketplace_pages as $marketplace_page ) {
 			if ( ! is_null( $marketplace_page ) ) {

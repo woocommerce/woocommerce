@@ -1,8 +1,9 @@
 @import "./variations-actions-menu/styles.scss";
 @import "./downloads-menu-item/styles.scss";
 @import "./pagination/styles.scss";
-@import "./table-empty-state/styles.scss";
+@import "./table-empty-or-error-state/styles.scss";
 @import "./variations-filter/styles.scss";
+@import "./table-row-skeleton/styles.scss";
 
 $table-row-height: calc($grid-unit * 9);
 
@@ -39,18 +40,33 @@ $table-row-height: calc($grid-unit * 9);
 		}
 	}
 
-	&__table {
-		height: $table-row-height * 5;
-		overflow: auto;
+	&__table-row {
+		position: relative;
 	}
 
 	&__selection {
+		margin-left: $gap-smallest;
+		display: flex;
+		align-items: center;
+
+		.woocommerce-tooltip {
+			position: absolute;
+			left: -$grid-unit-40;
+			rotate: 180deg;
+
+			.components-button {
+				padding: 0;
+				width: 24px;
+				height: 24px;
+				color: $alert-red;
+			}
+		}
+
 		.components-checkbox-control__input[type="checkbox"] {
 			&:not(:checked):not(:focus) {
 				border-color: $gray-600;
 			}
 		}
-		margin-left: $gap-smallest;
 	}
 
 	&__filters {

@@ -28,6 +28,26 @@ function HistoricalDataActions( {
 	setImportStarted,
 	updateImportation,
 } ) {
+	const makeQuery = ( path, errorMessage, importStarted = false ) => {
+		updateImportation( path, importStarted )
+			.then( ( response ) => {
+				if ( response.status === 'success' ) {
+					createNotice( 'success', response.message );
+				} else {
+					createNotice( 'error', errorMessage );
+					setImportStarted( false );
+					stopImport();
+				}
+			} )
+			.catch( ( error ) => {
+				if ( error && error.message ) {
+					createNotice( 'error', error.message );
+					setImportStarted( false );
+					stopImport();
+				}
+			} );
+	};
+
 	const onStartImport = () => {
 		const path = addQueryArgs(
 			'/wc-analytics/reports/import',
@@ -51,26 +71,6 @@ function HistoricalDataActions( {
 			'woocommerce'
 		);
 		makeQuery( path, errorMessage );
-	};
-
-	const makeQuery = ( path, errorMessage, importStarted = false ) => {
-		updateImportation( path, importStarted )
-			.then( ( response ) => {
-				if ( response.status === 'success' ) {
-					createNotice( 'success', response.message );
-				} else {
-					createNotice( 'error', errorMessage );
-					setImportStarted( false );
-					stopImport();
-				}
-			} )
-			.catch( ( error ) => {
-				if ( error && error.message ) {
-					createNotice( 'error', error.message );
-					setImportStarted( false );
-					stopImport();
-				}
-			} );
 	};
 
 	const deletePreviousData = () => {

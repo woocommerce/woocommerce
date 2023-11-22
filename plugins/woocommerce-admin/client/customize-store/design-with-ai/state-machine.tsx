@@ -147,34 +147,18 @@ export const designWithAiStateMachineDefinition = createMachine(
 								actions: [
 									'assignBusinessInfoDescription',
 									'spawnSaveDescriptionToOption',
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'business_info_description',
+									},
 								],
 								target: 'postBusinessInfoDescription',
 							},
 						},
 					},
 					postBusinessInfoDescription: {
-						invoke: {
-							src: 'getLookAndTone',
-							onError: {
-								actions: [
-									{
-										type: 'recordTracksStepCompleted',
-										step: 'business_info_description',
-									},
-									'logAIAPIRequestError',
-								],
-								target: '#lookAndFeel',
-							},
-							onDone: {
-								actions: [
-									{
-										type: 'recordTracksStepCompleted',
-										step: 'business_info_description',
-									},
-									'assignLookAndTone',
-								],
-								target: '#lookAndFeel',
-							},
+						always: {
+							target: '#lookAndFeel',
 						},
 					},
 				},
