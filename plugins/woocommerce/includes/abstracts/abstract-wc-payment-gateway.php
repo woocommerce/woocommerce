@@ -572,14 +572,6 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
  * @since 8.4.0
  */
 function wc_notify_payment_gateway_enabled( $option, $old_value, $value ) {
-	$gateway_option_keys = array();
-	$wc_payment_gateways = WC_Payment_Gateways::instance()->payment_gateways();
-	foreach ( $wc_payment_gateways as $gateway ) {
-		$gateway_option_keys[] = $gateway->get_option_key();
-	}
-	if ( ! in_array( $option, $gateway_option_keys, true ) ) {
-		return;
-	}
 	if ( empty( $old_value ) || empty( $value ) || ! is_array( $old_value ) || ! is_array( $value ) ) {
 		return;
 	}
@@ -589,8 +581,19 @@ function wc_notify_payment_gateway_enabled( $option, $old_value, $value ) {
 	if ( 'no' !== $old_value['enabled'] || 'yes' !== $value['enabled'] ) {
 		return;
 	}
-	// This is a change to a payment gateway's settings.
-	// The gateway was just enabled, let's send an email to the admin.
+
+	$gateway_found = false;
+	foreach ( WC_Payment_Gateways::instance()->payment_gateways() as $gateway ) {
+		if ( $option === $gateway->get_option_key() ) {
+			$gateway_found = true;
+			break;
+		}
+	}
+	if ( ! $gateway_found ) {
+		return;
+	}
+
+	// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
 	$admin_email = get_option( 'admin_email' );
 	/* translators: Do not translate USERNAME, GATEWAY_TITLE, GATEWAY_SETTINGS_URL, EMAIL, SITENAME, SITEURL: those are placeholders. */
 	$email_text = __(
