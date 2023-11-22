@@ -4,9 +4,7 @@
 @mixin content-width {
 	max-width: calc(100vw - (2 * #{$grid-unit-20}));
 	@media screen and (min-width: 783px) {
-		max-width: calc(
-			100vw - (2 * #{$grid-unit-40}) - $admin-menu-width-collapsed
-		);
+		max-width: calc(100vw - (2 * #{$grid-unit-40}) - $admin-menu-width-collapsed);
 	}
 	@media screen and (min-width: 960px) {
 		max-width: calc(100vw - (2 * #{$grid-unit-40}) - $admin-menu-width);
@@ -243,10 +241,7 @@
 }
 .woocommerce-marketplace__my-subscriptions
 	.components-button.is-secondary:hover:not(:disabled) {
-	color: var(
-		--wp-components-color-accent,
-		var(--wp-admin-theme-color, #3858e9)
-	);
+	color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
 }
 
 .woocommerce-marketplace__my-subscriptions--connect {
