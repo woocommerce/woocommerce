@@ -107,28 +107,29 @@ class SourceAttributionController implements RegisterHooksInterface {
 		add_action( 'woocommerce_after_order_notes', $source_form_fields );
 		add_action( 'woocommerce_register_form', $source_form_fields );
 
-		// Update data based on submitted fields.
+		// Update order based on submitted fields.
 		add_action(
 			'woocommerce_checkout_order_created',
 			function( $order ) {
+				// Nonce check is handled by WooCommerce before woocommerce_checkout_order_created hook.
+				// phpcs:ignore WordPress.Security.NonceVerification
+				$params = $this->get_unprefixed_fields( $_POST );
 				/**
 				 * Run an action to save order source attribution data.
 				 *
 				 * @since x.x.x
 				 *
 				 * @param WC_Order $order The order object.
+				 * @param array    $params Unprefixed source attribution data.
 				 */
-				do_action( 'woocommerce_order_save_attribution_source_data', $order );
+				do_action( 'woocommerce_order_save_attribution_source_data', $order, $params );
 			}
 		);
 
 		add_action(
 			'woocommerce_order_save_attribution_source_data',
-			function( $order, $data = array() ) {
-				// Nonce check is handled by WooCommerce before woocommerce_checkout_order_created hook.
-				// phpcs:ignore WordPress.Security.NonceVerification
-				$unprefixed_data = empty( $data ) ? $this->get_unprefixed_fields( $_POST ) : $data;
-				$source_data = $this->get_source_values( $unprefixed_data );
+			function( $order, $data ) {
+				$source_data = $this->get_source_values( $data );
 				$this->send_order_tracks( $source_data, $order );
 				$this->set_order_source_data( $source_data, $order );
 			},
