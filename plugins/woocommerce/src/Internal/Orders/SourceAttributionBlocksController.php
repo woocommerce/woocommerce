@@ -164,7 +164,7 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 				 * @since x.x.x
 				 *
 				 * @param WC_Order $order  The order object.
-				 * @param array    $params Source attribution data.
+				 * @param array    $params Unprefixed source attribution data.
 				 */
 				do_action( 'woocommerce_order_save_attribution_source_data', $order, $params );
 			},
