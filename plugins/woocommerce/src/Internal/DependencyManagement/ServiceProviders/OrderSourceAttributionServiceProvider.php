@@ -43,11 +43,6 @@ class OrderSourceAttributionServiceProvider extends AbstractInterfaceServiceProv
 		$this->share_with_implements_tags( SourceAttributionBlocksController::class )
 			->addArguments(
 				array(
-					// Once Blocks are moved to the monorepo, hopefully, we can use the following code.
-
-					/*
-					AssetApi::class,
-					*/
 					StoreApi::container()->get( ExtendSchema::class ),
 					FeaturesController::class,
 					SourceAttributionController::class,
