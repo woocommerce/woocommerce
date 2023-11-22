@@ -12,7 +12,7 @@
 		It shoudld match the minimum WP version supported by WooCommerce Core
 		(see https://github.com/woocommerce/woocommerce-blocks/blob/trunk/.github/release-initial-checklist.md#initial-preparation)
 	-->
-	<config name="minimum_supported_wp_version" value="6.2" />
+	<config name="minimum_supported_wp_version" value="6.3" />
 	<config name="testVersion" value="7.3-" />
 
 	<!-- Rules -->
