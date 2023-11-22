@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Support arrays with key/value pair objects in expressions (like post meta data).

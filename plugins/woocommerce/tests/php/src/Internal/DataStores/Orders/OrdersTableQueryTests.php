@@ -402,4 +402,48 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 
 		remove_all_filters( 'woocommerce_hpos_pre_query' );
 	}
+
+	/**
+	 * @testdox Orders will be correctly returned by inexact queries using the 's' search argument.
+	 */
+	public function test_query_s_argument() {
+		$order1 = new \WC_Order();
+		$order1->set_billing_first_name( '%ir Woo' );
+		$order1->set_billing_email( 'test_user@woo.test' );
+		$order1->save();
+
+		$order2 = new \WC_Order();
+		$order2->set_billing_email( 'other_user@woo.test' );
+		$order2->save();
+
+		$query_args = array(
+			's'      => '',
+			'return' => 'ids',
+		);
+
+		$query_args['s'] = '%';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		$query_args['s'] = '%ir';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		$query_args['s'] = 'test_user';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		$query_args['s'] = 'woo.test';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id(), $order2->get_id() ), $query->orders );
+
+		$query_args['s'] = '_user';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id(), $order2->get_id() ), $query->orders );
+
+		$query_args['s'] = 'nowhere_to_be_found';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertCount( 0, $query->orders );
+	}
+
 }

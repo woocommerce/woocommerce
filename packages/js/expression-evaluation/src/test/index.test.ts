@@ -172,6 +172,25 @@ describe( 'evaluate', () => {
 		expect( result ).toEqual( 'baz' );
 	} );
 
+	it( 'should evaluate a nested context property with a key/value pair array (like meta_data)', () => {
+		const result = evaluate( 'foo.bar.baz', {
+			foo: {
+				bar: [
+					{
+						key: 'bee',
+						value: 'boo',
+					},
+					{
+						key: 'baz',
+						value: 'qux',
+					},
+				],
+			},
+		} );
+
+		expect( result ).toEqual( 'qux' );
+	} );
+
 	it( 'should evaluate a NOT expression', () => {
 		const result = evaluate( '!foo', {
 			foo: true,

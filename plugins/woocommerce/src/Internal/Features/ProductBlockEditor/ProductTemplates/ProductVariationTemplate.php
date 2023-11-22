@@ -493,6 +493,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 						'checkedValue'   => false,
 						'uncheckedValue' => true,
 						'label'          => __( 'This variation requires shipping or pickup', 'woocommerce' ),
+						'uncheckedHelp'  => __( 'This variation will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woo.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
 					),
 				)
 			);
