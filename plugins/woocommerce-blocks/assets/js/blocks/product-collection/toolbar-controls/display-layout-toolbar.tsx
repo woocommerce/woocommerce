@@ -11,10 +11,11 @@ import { list, grid } from '@wordpress/icons';
 import {
 	DisplayLayoutToolbarProps,
 	ProductCollectionDisplayLayout,
+	LayoutOptions,
 } from '../types';
 
 const DisplayLayoutToolbar = ( props: DisplayLayoutToolbarProps ) => {
-	const { type, columns } = props.displayLayout;
+	const { type, columns, shrinkColumns } = props.displayLayout;
 	const setDisplayLayout = (
 		displayLayout: ProductCollectionDisplayLayout
 	) => {
@@ -25,14 +26,24 @@ const DisplayLayoutToolbar = ( props: DisplayLayoutToolbarProps ) => {
 		{
 			icon: list,
 			title: __( 'List view', 'woo-gutenberg-products-block' ),
-			onClick: () => setDisplayLayout( { type: 'list', columns } ),
-			isActive: type === 'list',
+			onClick: () =>
+				setDisplayLayout( {
+					type: LayoutOptions.STACK,
+					columns,
+					shrinkColumns,
+				} ),
+			isActive: type === LayoutOptions.STACK,
 		},
 		{
 			icon: grid,
 			title: __( 'Grid view', 'woo-gutenberg-products-block' ),
-			onClick: () => setDisplayLayout( { type: 'flex', columns } ),
-			isActive: type === 'flex',
+			onClick: () =>
+				setDisplayLayout( {
+					type: LayoutOptions.GRID,
+					columns,
+					shrinkColumns,
+				} ),
+			isActive: type === LayoutOptions.GRID,
 		},
 	];
 

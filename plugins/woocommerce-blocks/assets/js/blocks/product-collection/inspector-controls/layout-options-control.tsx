@@ -19,7 +19,7 @@ import {
 /**
  * Internal dependencies
  */
-import { DisplayLayoutControlProps, LayoutOptions } from '../types';
+import { DisplayLayoutToolbarProps, LayoutOptions } from '../types';
 
 const getHelpText = ( layoutOptions: LayoutOptions ) => {
 	switch ( layoutOptions ) {
@@ -40,13 +40,14 @@ const getHelpText = ( layoutOptions: LayoutOptions ) => {
 
 const DEFAULT_VALUE = LayoutOptions.GRID;
 
-const LayoutOptionsControl = ( props: DisplayLayoutControlProps ) => {
-	const { type, columns } = props.displayLayout;
+const LayoutOptionsControl = ( props: DisplayLayoutToolbarProps ) => {
+	const { type, columns, shrinkColumns } = props.displayLayout;
 	const setDisplayLayout = ( displayLayout: LayoutOptions ) => {
 		props.setAttributes( {
 			displayLayout: {
 				type: displayLayout,
 				columns,
+				shrinkColumns,
 			},
 		} );
 	};
