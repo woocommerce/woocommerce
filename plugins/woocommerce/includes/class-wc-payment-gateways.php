@@ -183,10 +183,15 @@ class WC_Payment_Gateways {
 		 * @param array $email_addresses Email addresses.
 		 * @since 8.5.0
 		 */
-		$email_addresses = apply_filters( 'wc_payment_gateway_enabled_notification_email_addresses', array() );
-		$email_addresses = array_unique( array_filter( $email_addresses, function( $email_address ) {
-			return filter_var( $email_address, FILTER_VALIDATE_EMAIL );
-		} ) );
+		$email_addresses   = apply_filters( 'wc_payment_gateway_enabled_notification_email_addresses', array() );
+		$email_addresses   = array_unique(
+			array_filter(
+				$email_addresses,
+				function( $email_address ) {
+					return filter_var( $email_address, FILTER_VALIDATE_EMAIL );
+				}
+			)
+		);
 		$email_addresses[] = $admin_email;
 
 		$logger = wc_get_logger();
