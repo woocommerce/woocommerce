@@ -170,7 +170,7 @@ class ProductReviewSchema extends AbstractSchema {
 			'product_permalink'      => get_permalink( (int) $review->comment_post_ID ),
 			'product_image'          => $this->image_attachment_schema->get_item_response( get_post_thumbnail_id( (int) $review->comment_post_ID ) ),
 			'reviewer'               => $review->comment_author,
-			'review'                 => wp_autop( $review->comment_content ),
+			'review'                 => wpautop( $review->comment_content ),
 			'rating'                 => $rating,
 			'verified'               => wc_review_is_from_verified_owner( $review->comment_ID ),
 			'reviewer_avatar_urls'   => rest_get_avatar_urls( $review->comment_author_email ),
