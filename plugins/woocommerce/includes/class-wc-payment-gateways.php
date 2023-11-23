@@ -113,8 +113,123 @@ class WC_Payment_Gateways {
 		}
 
 		ksort( $this->payment_gateways );
+
+		// Listen for gateways being enabled so as to notify the admin.
+		add_action( 'add_option', [ $this, 'payment_gateway_settings_add_option' ], 10, 2 );
+		add_action( 'update_option', [ $this, 'payment_gateway_settings_update_option' ], 10, 3 );
 	}
 
+	/**
+	 * Email the site admin when a payment gateway is enabled.
+	 *
+	 * @param string $option Option name.
+	 * @param array  $old_value Old value.
+	 * @param array  $value New value.
+	 * @since 8.4.0
+	 */
+	public function payment_gateway_settings_update_option( $option, $old_value, $value ) {
+		if ( ! $this->gateway_settings_enabled( $value, $old_value ) ) {
+			return;
+		}
+		if ( ! $this->option_is_gateway_settings( $option ) ) {
+			return;
+		}
+
+		// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
+		$this->notify_admin_payment_gateway_enabled( $value['title'] );
+	}
+
+	public function payment_gateway_settings_add_option( $option, $value ) {
+		if ( ! $this->gateway_settings_enabled( $value ) ) {
+			return;
+		}
+		if ( ! $this->option_is_gateway_settings( $option ) ) {
+			return;
+		}
+
+		// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
+		$this->notify_admin_payment_gateway_enabled( $value['title'] );
+	}
+
+	private function notify_admin_payment_gateway_enabled( $gateway_title ) {
+		$admin_email          = get_option( 'admin_email' );
+		$user                 = get_user_by( 'email', $admin_email );
+		$username             = $user ? $user->user_login : $admin_email;
+		$gateway_settings_url = self_admin_url( 'admin.php?page=wc-settings&tab=checkout' );
+		$site_name            = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+		$site_url             = home_url();
+	
+		/* translators: Payment gateway enabled notification email. 1: Username, 2: Gateway Title, 3: Site URL, 4: Gateway Settings URL, 5: Admin Email, 6: Site Name, 7: Site URL. */
+		$email_text = sprintf(
+			__(
+				'Howdy %1$s,
+
+The payment gateway "%2$s" was just enabled on this site:
+%3$s
+
+If this was intentional you can safely ignore and delete this email. 
+
+If you did not enable this payment gateway, please log in to your site and consider disabling it here:
+%4$s
+
+This email has been sent to %5$s
+
+Regards,
+All at %6$s
+%7$s',
+				'woocommerce'
+			),
+			$username,
+			$gateway_title,
+			$site_url,
+			$gateway_settings_url,
+			$admin_email,
+			$site_name,
+			$site_url
+		);
+	
+		if ( '' !== get_option( 'blogname' ) ) {
+			$site_title = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+		} else {
+			$site_title = wp_parse_url( home_url(), PHP_URL_HOST );
+		}
+	
+		return wp_mail(
+			$admin_email,
+			sprintf(
+				/* translators: Payment gateway enabled notification email subject. %s1: Site title, $s2: Gateway title. */
+				__( '[%1$s] Payment gateway %2$s enabled', 'woocommerce' ),
+				$site_title,
+				$value['title']
+			),
+			$email_text
+		);
+	}
+	
+	private function option_is_gateway_settings( $option ) {
+		foreach ( WC_Payment_Gateways::instance()->payment_gateways() as $gateway ) {
+			if ( $option === $gateway->get_option_key() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private function gateway_settings_enabled( $value, $old_value = null ) {
+		if ( $old_value === null ) {
+			// There was no old value, so this is a new option.
+			if ( ! empty( $value) && is_array( $value ) && isset( $value['enabled'] ) && $value['enabled'] === 'yes' && isset( $value['title'] ) ) {
+				return true;
+			}
+			return false;
+		}
+		// There was an old value, so this is an update.
+		if ( ! empty( $value) && ! empty( $old_value) && is_array( $value ) && is_array( $old_value ) && isset( $value['enabled'] ) && isset( $old_value['enabled'] ) && $value['enabled'] === 'yes' && $old_value['enabled'] !== 'yes' && isset( $value['title'] ) ) {
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Get gateways.
 	 *
