@@ -57,7 +57,7 @@ class WPConsentAPI {
 		 * So this code needs to be run after that.
 		 */
 		add_filter(
-			'wc_order_source_attribution_allow_tracking',
+			'wc_order_attribution_allow_tracking',
 			function() {
 				return function_exists( 'wp_has_consent' ) && wp_has_consent( 'marketing' );
 			}
