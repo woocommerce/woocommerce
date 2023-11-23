@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useContext, useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { CustomizeStoreContext } from '..';
 export * from './use-onboarding-tour';
 
 type OnboardingTourProps = {
@@ -12,6 +13,7 @@ type OnboardingTourProps = {
 	showWelcomeTour: boolean;
 	setShowWelcomeTour: ( show: boolean ) => void;
 	setIsResizeHandleVisible: ( isVisible: boolean ) => void;
+	aiGeneratedStore?: boolean;
 };
 
 export const OnboardingTour = ( {
@@ -23,7 +25,33 @@ export const OnboardingTour = ( {
 	const [ placement, setPlacement ] =
 		useState< TourKitTypes.WooConfig[ 'placement' ] >( 'left' );
 
+	const { context } = useContext( CustomizeStoreContext );
+	const aiAvailable = ( context as { aiAvailable: boolean } ).aiAvailable;
+
 	if ( showWelcomeTour ) {
+		const heading = aiAvailable
+			? __( 'Welcome to your AI-generated store!', 'woocommerce' )
+			: __( 'Welcome to your store!', 'woocommerce' );
+
+		const desktopDescription = aiAvailable
+			? __(
+					"This is where you can start customizing the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
+					'woocommerce'
+			  )
+			: __(
+					"We encountered some issues while generating content with AI. But don't worry —— you can still customize the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
+					'woocommerce'
+			  );
+
+		const classNames = [
+			'woocommerce-customize-store-tour-kit',
+			'woocommerce-customize-store-welcome-tourkit',
+		];
+
+		if ( ! aiAvailable ) {
+			classNames.push( 'ai-offline' );
+		}
+
 		return (
 			<TourKit
 				config={ {
@@ -45,18 +73,22 @@ export const OnboardingTour = ( {
 								phase: 'beforeWrite',
 								requires: [ 'computeStyles' ],
 								fn: ( { state } ) => {
-									state.styles.popper.top = 'auto';
-									state.styles.popper.left = 'auto';
-									state.styles.popper.bottom = '16px';
-									state.styles.popper.transform =
-										'translate3d(16px, 0px, 0px)';
+									if ( aiAvailable ) {
+										state.styles.popper.top = 'auto';
+										state.styles.popper.left = 'auto';
+										state.styles.popper.bottom = '16px';
+										state.styles.popper.transform =
+											'translate3d(16px, 0px, 0px)';
+									} else {
+										state.styles.popper.top = '50%';
+										state.styles.popper.left = '50%';
+										state.styles.popper.transform =
+											'translate(-50%, -50%)';
+									}
 								},
 							},
 						],
-						classNames: [
-							'woocommerce-customize-store-tour-kit',
-							'woocommerce-customize-store-welcome-tourkit',
-						],
+						classNames,
 					},
 					steps: [
 						{
@@ -66,15 +98,9 @@ export const OnboardingTour = ( {
 									text: __( 'Take a tour', 'woocommerce' ),
 								},
 								descriptions: {
-									desktop: __(
-										"This is where you can start customizing the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
-										'woocommerce'
-									),
+									desktop: desktopDescription,
 								},
-								heading: __(
-									'Welcome to your AI-generated store!',
-									'woocommerce'
-								),
+								heading,
 								skipButton: {
 									isVisible: true,
 								},
