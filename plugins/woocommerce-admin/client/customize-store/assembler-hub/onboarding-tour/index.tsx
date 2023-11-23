@@ -2,14 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { CustomizeStoreContext } from '..';
 import WelcomeTourData from './welcome-tour-data';
 export * from './use-onboarding-tour';
 
@@ -18,7 +17,6 @@ type OnboardingTourProps = {
 	showWelcomeTour: boolean;
 	setShowWelcomeTour: ( show: boolean ) => void;
 	setIsResizeHandleVisible: ( isVisible: boolean ) => void;
-	aiGeneratedStore?: boolean;
 };
 
 export const OnboardingTour = ( {
