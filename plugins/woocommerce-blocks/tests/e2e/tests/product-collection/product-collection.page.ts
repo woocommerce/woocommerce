@@ -29,6 +29,7 @@ export const SELECTORS = {
 	onSaleControlLabel: 'Show only products on sale',
 	inheritQueryFromTemplateControl:
 		'.wc-block-product-collection__inherit-query-control',
+	shrinkColumnsToFit: 'Shrink columns to fit',
 	productSearchLabel: 'Search',
 	productSearchButton: '.wp-block-search__button wp-element-button',
 };
@@ -285,6 +286,18 @@ class ProductCollectionPage {
 
 		await this.page.click( 'body' );
 		await this.refreshLocators( 'editor' );
+	}
+
+	async setShrinkColumnsToFit( value = true ) {
+		const sidebarSettings = await this.locateSidebarSettings();
+		const input = sidebarSettings.getByLabel(
+			SELECTORS.shrinkColumnsToFit
+		);
+		if ( value ) {
+			await input.check();
+		} else {
+			await input.uncheck();
+		}
 	}
 
 	async setProductAttribute( attribute: 'Color' | 'Size', value: string ) {

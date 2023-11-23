@@ -317,30 +317,69 @@ test.describe( 'Product Collection', () => {
 		} );
 	} );
 
-	test( 'Responsive -> Block correctly adjusts number of columns on smaller screens', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.publishAndGoToFrontend();
+	test.describe( 'Responsive', () => {
+		test( 'Block with shrink columns ENABLED correctly displays as grid', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.publishAndGoToFrontend();
+			const productTemplate = pageObject.productTemplate;
 
-		const firstProduct = pageObject.products.first();
+			await expect( productTemplate ).toHaveCSS( 'display', 'grid' );
+			// By default there should be 3 columns, so grid-template-columns
+			// should be compiled to three values
+			await expect( productTemplate ).toHaveCSS(
+				'grid-template-columns',
+				/^\d+(\.\d+)?px \d+(\.\d+)?px \d+(\.\d+)?px$/
+			);
 
-		// In the original viewport size, we expect the product width to be less than the parent width
-		// because we will have more than 1 column
-		let productSize = await firstProduct.boundingBox();
-		let parentSize = await firstProduct.locator( 'xpath=..' ).boundingBox();
-		expect( productSize?.width ).toBeLessThan(
-			parentSize?.width as number
-		);
+			await pageObject.setViewportSize( {
+				height: 667,
+				width: 390, // iPhone 12 Pro
+			} );
 
-		await pageObject.setViewportSize( {
-			height: 667,
-			width: 375,
+			// Verifies grid-template-columns compiles to two numbers,
+			// which means there are two columns on mobile.
+			await expect( productTemplate ).toHaveCSS(
+				'grid-template-columns',
+				/^\d+(\.\d+)?px \d+(\.\d+)?px$/
+			);
 		} );
 
-		// In the smaller viewport size, we expect the product width to be (approximately) the same as the parent width
-		// because we will have only 1 column
-		productSize = await firstProduct.boundingBox();
-		parentSize = await firstProduct.locator( 'xpath=..' ).boundingBox();
-		expect( productSize?.width ).toBeCloseTo( parentSize?.width as number );
+		test( 'Block with shrink columns DISABLED collapses to single column on small screens', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+			await pageObject.setShrinkColumnsToFit( false );
+			await pageObject.publishAndGoToFrontend();
+
+			const productTemplate = pageObject.productTemplate;
+
+			await expect( productTemplate ).not.toHaveCSS( 'display', 'grid' );
+
+			const firstProduct = pageObject.products.first();
+
+			// In the original viewport size, we expect the product width to be less than the parent width
+			// because we will have more than 1 column
+			let productSize = await firstProduct.boundingBox();
+			let parentSize = await firstProduct
+				.locator( 'xpath=..' )
+				.boundingBox();
+			expect( productSize?.width ).toBeLessThan(
+				parentSize?.width as number
+			);
+
+			await pageObject.setViewportSize( {
+				height: 667,
+				width: 390, // iPhone 12 Pro
+			} );
+
+			// In the smaller viewport size, we expect the product width to be (approximately) the same as the parent width
+			// because we will have only 1 column
+			productSize = await firstProduct.boundingBox();
+			parentSize = await firstProduct.locator( 'xpath=..' ).boundingBox();
+			expect( productSize?.width ).toBeCloseTo(
+				parentSize?.width as number
+			);
+		} );
 	} );
 } );
