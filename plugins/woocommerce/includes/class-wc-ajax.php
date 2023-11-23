@@ -2720,7 +2720,7 @@ class WC_AJAX {
 
 			if ( 'false' !== $data['date_to'] ) {
 				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( wc_clean( $data['date_to'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-				$variation->set_date_on_sale_to( $date_on_sale_to );	
+				$variation->set_date_on_sale_to( $date_on_sale_to );
 			}
 
 			$variation->save();
