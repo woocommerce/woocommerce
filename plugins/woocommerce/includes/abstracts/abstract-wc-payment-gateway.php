@@ -563,41 +563,10 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 }
 
-/**
- * Email the site admin when a payment gateway is enabled.
- *
- * @param string $option Option name.
- * @param array  $old_value Old value.
- * @param array  $value New value.
- * @since 8.4.0
- */
-function wc_notify_payment_gateway_enabled( $option, $old_value, $value ) {
-	if ( empty( $old_value ) || empty( $value ) || ! is_array( $old_value ) || ! is_array( $value ) ) {
-		return;
-	}
-	if ( ! isset( $old_value['enabled'] ) || ! isset( $value['enabled'] ) ) {
-		return;
-	}
-	if ( 'no' !== $old_value['enabled'] || 'yes' !== $value['enabled'] ) {
-		return;
-	}
-
-	$gateway_found = false;
-	foreach ( WC_Payment_Gateways::instance()->payment_gateways() as $gateway ) {
-		if ( $option === $gateway->get_option_key() ) {
-			$gateway_found = true;
-			break;
-		}
-	}
-	if ( ! $gateway_found ) {
-		return;
-	}
-
-	// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
+function notify_admin_payment_gateway_enabled( $gateway_title ) {
 	$admin_email          = get_option( 'admin_email' );
 	$user                 = get_user_by( 'email', $admin_email );
 	$username             = $user ? $user->user_login : $admin_email;
-	$gateway_title        = $value['title'];
 	$gateway_settings_url = self_admin_url( 'admin.php?page=wc-settings&tab=checkout' );
 	$site_name            = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 	$site_url             = home_url();
@@ -637,7 +606,7 @@ All at %6$s
 		$site_title = wp_parse_url( home_url(), PHP_URL_HOST );
 	}
 
-	wp_mail(
+	return wp_mail(
 		$admin_email,
 		sprintf(
 			/* translators: Payment gateway enabled notification email subject. %s1: Site title, $s2: Gateway title. */
@@ -648,4 +617,60 @@ All at %6$s
 		$email_text
 	);
 }
-add_action( 'update_option', 'wc_notify_payment_gateway_enabled', 10, 3 );
+
+function option_is_gateway_settings( $option ) {
+	foreach ( WC_Payment_Gateways::instance()->payment_gateways() as $gateway ) {
+		if ( $option === $gateway->get_option_key() ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function gateway_settings_enabled( $value, $old_value = null ) {
+	if ( $old_value === null ) {
+		// There was no old value, so this is a new option.
+		if ( ! empty( $value) && is_array( $value ) && isset( $value['enabled'] ) && $value['enabled'] === 'yes' ) {
+			return true;
+		}
+		return false;
+	}
+	// There was an old value, so this is an update.
+	if ( ! empty( $value) && ! empty( $old_value) && is_array( $value ) && is_array( $old_value ) && isset( $value['enabled'] ) && isset( $old_value['enabled'] ) && $value['enabled'] === 'yes' && $old_value['enabled'] !== 'yes' ) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Email the site admin when a payment gateway is enabled.
+ *
+ * @param string $option Option name.
+ * @param array  $old_value Old value.
+ * @param array  $value New value.
+ * @since 8.4.0
+ */
+function wc_notify_payment_gateway_enabled_update_option( $option, $old_value, $value ) {
+	if ( ! gateway_settings_enabled( $value, $old_value ) ) {
+		return;
+	}
+	if ( ! option_is_gateway_settings( $option ) ) {
+		return;
+	}
+
+	// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
+	notify_admin_payment_gateway_enabled( $value['title'] );
+}
+function wc_notify_payment_gateway_enabled_add_option( $option, $value ) {
+	if ( ! gateway_settings_enabled( $value ) ) {
+		return;
+	}
+	if ( ! option_is_gateway_settings( $option ) ) {
+		return;
+	}
+
+	// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
+	notify_admin_payment_gateway_enabled( $value['title'] );
+}
+add_action( 'add_option', 'wc_notify_payment_gateway_enabled_add_option', 10, 2 );
+add_action( 'update_option', 'wc_notify_payment_gateway_enabled_update_option', 10, 3 );
