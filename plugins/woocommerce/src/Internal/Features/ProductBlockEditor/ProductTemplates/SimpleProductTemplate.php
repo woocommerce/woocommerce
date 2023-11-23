@@ -375,7 +375,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'id'         => 'product-catalog-section',
 				'order'      => 10,
 				'attributes' => array(
-					'title' => __( 'Product catalog', 'woocommerce' ),
+					'title'       => __( 'Product catalog', 'woocommerce' ),
+					'description' => __( 'Help customers find this product by assigning it to categories, adding extra details, and managing its visibility in your store and other channels.', 'woocommerce' ),
 				),
 			)
 		);
@@ -452,7 +453,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'id'         => 'product-attributes-section',
 				'order'      => 20,
 				'attributes' => array(
-					'title' => __( 'Attributes', 'woocommerce' ),
+					'title'       => __( 'Attributes', 'woocommerce' ),
+					'description' => __( 'Add descriptive pieces of information that customers can use to filter and search for this product. <a href="https://woo.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">Learn more</a>.', 'woocommerce' ),
 				),
 			)
 		);
