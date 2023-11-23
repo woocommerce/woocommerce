@@ -67,7 +67,7 @@ class ClassicShortcode extends AbstractDynamicBlock {
 	 * @return string space-separated list of classes.
 	 */
 	protected function get_container_classes( $attributes = array() ) {
-		$classes = array( 'wp-block-group' );
+		$classes = array( 'woocommerce', 'wp-block-group' );
 
 		if ( isset( $attributes['align'] ) ) {
 			$classes[] = "align{$attributes['align']}";
