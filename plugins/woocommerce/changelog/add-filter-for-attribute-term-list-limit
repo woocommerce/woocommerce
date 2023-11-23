@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Adds filter to change the number of terms returned when searching for terms of a product attribute in the metabox

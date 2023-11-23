@@ -40,7 +40,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					?>
 					<select multiple="multiple"
 							data-minimum_input_length="0"
-							data-limit="50" data-return_id="id"
+							data-limit="<?php echo absint( apply_filters( 'woocommerce_admin_meta_boxes_attribute_term_limit', 50 ) ); ?>"
+							data-return_id="id"
 							data-placeholder="<?php esc_attr_e( 'Select values', 'woocommerce' ); ?>"
 							data-orderby="<?php echo esc_attr( $attribute_orderby ); ?>"
 							class="multiselect attribute_values wc-taxonomy-term-search"
