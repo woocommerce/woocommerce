@@ -30,6 +30,6 @@ class EnginesServiceProvider extends AbstractServiceProvider {
 	 */
 	public function register() {
 		$this->share( TransientFilesEngine::class )->addArgument( LegacyProxy::class );
-		$this->share( TransientFilesRestController::class )->addArgument( TransientFilesEngine::class );
+		$this->share( TransientFilesRestController::class );
 	}
 }

@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Utilities\StringUtil;
 /**
  * Tests for the TransientFilesEngine class.
  */
-class TransientFilesEngineTest extends \WC_Unit_Test_Case {
+class TransientFilesEngineTest extends TransientFilesTestBase {
 	/**
 	 * The system under test.
 	 *
@@ -17,63 +17,11 @@ class TransientFilesEngineTest extends \WC_Unit_Test_Case {
 	private TransientFilesEngine $sut;
 
 	/**
-	 * The parent of the base directory for the transient files generated in the tests.
-	 *
-	 * @var string
-	 */
-	private static string $base_transient_files_dir;
-
-	/**
-	 * The base directory for the transient files generated in the tests.
-	 *
-	 * @var string
-	 */
-	private static string $transient_files_dir;
-
-	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
-		global $wpdb;
-
-		parent::set_up();
-		$this->reset_container_resolutions();
+		parent::setUp();
 		$this->sut = $this->get_instance_of( TransientFilesEngine::class );
-
-		// Change the default templates directory to be the one in the tests directory.
-		$this->register_legacy_proxy_function_mocks(
-			array(
-				'dirname' => function( $path ) {
-					return false === StringUtil::ends_with( $path, '/TransientFiles/TransientFilesEngine.php' ) ?
-						dirname( $path ) : __DIR__;
-				},
-			)
-		);
-
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_transient_files" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_transient_files_meta" );
-		self::rmdir_recursive( self::$transient_files_dir, false );
-	}
-
-	/**
-	 * Runs before all the tests in the class.
-	 */
-	public static function setUpBeforeClass(): void {
-		parent::setUpBeforeClass();
-
-		self::$base_transient_files_dir = sys_get_temp_dir() . '/wp-uploads';
-		self::$transient_files_dir      = self::$base_transient_files_dir . '/woocommerce_transient_files';
-		if ( ! is_dir( self::$transient_files_dir ) ) {
-			wp_mkdir_p( self::$transient_files_dir );
-		}
-	}
-
-	/**
-	 * Runs after all the tests in the class.
-	 */
-	public static function tearDownAfterClass(): void {
-		parent::tearDownAfterClass();
-		self::rmdir_recursive( self::$transient_files_dir, true );
 	}
 
 	/**
@@ -173,7 +121,7 @@ class TransientFilesEngineTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'current_time' => fn( $type, $gmt) =>
+				'current_time' => fn( $type, $gmt ) =>
 						$gmt && 'timestamp' === $type ? strtotime( '2023-11-01 12:34:00' ) : current_time( $type, $gmt ),
 			)
 		);
@@ -188,7 +136,7 @@ class TransientFilesEngineTest extends \WC_Unit_Test_Case {
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
-				'realpath'      => fn( $path) => '/real' . $path,
+				'realpath'      => fn( $path ) => '/real' . $path,
 				'is_dir'        => fn() => false,
 				'wp_mkdir_p'    => fn() => false,
 			)
@@ -207,7 +155,7 @@ class TransientFilesEngineTest extends \WC_Unit_Test_Case {
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
-				'realpath'      => fn( $path) => '/real' . $path,
+				'realpath'      => fn( $path ) => '/real' . $path,
 				'is_dir'        => fn() => true,
 				'fopen'         => fn() => false,
 			)
@@ -276,15 +224,15 @@ Final foo = foo 1, bar = TheBar';
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir' => fn() => array( 'basedir' => self::$base_transient_files_dir ),
-				'random_bytes'  => fn( $count) =>  implode( array_map( 'chr', array( 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF ) ) ),
-				'current_time'  => fn( $type, $gmt) =>
+				'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ),
+				'random_bytes'  => fn( $count ) =>  implode( array_map( 'chr', array( 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF ) ) ),
+				'current_time'  => fn( $type, $gmt ) =>
 					$gmt && 'mysql' === $type ? '2023-11-22 01:23:34' : current_time( $type, $gmt ),
 			)
 		);
 
 		$expected_file_name = '00112233445566778899aabbccddeeff';
-		$expected_file_path = self::$transient_files_dir . '/2034-07-01/' . $expected_file_name;
+		$expected_file_path = static::$transient_files_dir . '/2034-07-01/' . $expected_file_name;
 
 		$metadata = array(
 			'expiration_date' => '2034-07-01 12:34:56',
@@ -346,8 +294,8 @@ Final foo = foo 1, bar = TheBar';
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir' => fn() => array( 'basedir' => self::$base_transient_files_dir ),
-				'current_time'  => fn( $type, $gmt) =>
+				'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ),
+				'current_time'  => fn( $type, $gmt ) =>
 				$gmt && 'mysql' === $type ? '2023-11-22 01:23:34' : current_time( $type, $gmt ),
 			)
 		);
@@ -381,7 +329,7 @@ Final foo = foo 1, bar = TheBar';
 		$actual_creation_data = null;
 
 		$this->register_legacy_proxy_function_mocks(
-			array( 'wp_upload_dir' => fn() => array( 'basedir' => self::$base_transient_files_dir ) )
+			array( 'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ) )
 		);
 
 		add_filter(
@@ -440,7 +388,7 @@ Final foo = foo 1, bar = TheBar';
 		$actual_template_metadata = null;
 
 		$this->register_legacy_proxy_function_mocks(
-			array( 'wp_upload_dir' => fn() => array( 'basedir' => self::$base_transient_files_dir ) )
+			array( 'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ) )
 		);
 
 		add_filter(
@@ -473,7 +421,7 @@ Final foo = foo 1, bar = TheBar';
 		}
 
 		$this->assertEquals( 'FOOBAR_FILE', $file_name );
-		$this->assertTrue( is_file( self::$transient_files_dir . '/2034-01-10/FOOBAR_FILE' ) );
+		$this->assertTrue( is_file( static::$transient_files_dir . '/2034-01-10/FOOBAR_FILE' ) );
 
 		$expected_creation_data =
 			array(
@@ -494,10 +442,10 @@ Final foo = foo 1, bar = TheBar';
 	 */
 	public function test_minimum_expiration_seconds_can_be_changed_via_hook() {
 		$this->register_legacy_proxy_function_mocks(
-			array( 'wp_upload_dir' => fn() => array( 'basedir' => self::$base_transient_files_dir ) )
+			array( 'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ) )
 		);
 
-		add_filter( 'woocommerce_transient_files_minimum_expiration_seconds', fn( $seconds) => 120 );
+		add_filter( 'woocommerce_transient_files_minimum_expiration_seconds', fn( $seconds ) => 120 );
 
 		$this->expectException( \InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'expiration_seconds must be a number and have a minimum value of 120, got 100' );
@@ -518,7 +466,7 @@ Final foo = foo 1, bar = TheBar';
 		$actual_parent_template_path = null;
 
 		$this->register_legacy_proxy_function_mocks(
-			array( 'wp_upload_dir' => fn() => array( 'basedir' => self::$base_transient_files_dir ) )
+			array( 'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ) )
 		);
 
 		add_filter(
@@ -548,7 +496,7 @@ Final foo = foo 1, bar = TheBar';
 		$this->assertEquals( 'misplaced', $actual_template_name );
 		$this->assertNull( $actual_parent_template_path );
 
-		$file_path = self::$transient_files_dir . '/2034-01-10/' . $file_name;
+		$file_path = static::$transient_files_dir . '/2034-01-10/' . $file_name;
 		$this->assertTrue( is_file( $file_path ) );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$this->assertEquals( 'This template shouldn\'t be reachable since it\'s outside of the base "Templates" directory.', trim( file_get_contents( $file_path ) ) );
@@ -561,7 +509,7 @@ Final foo = foo 1, bar = TheBar';
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
-				'realpath'      => fn( $path) => '/real' . $path,
+				'realpath'      => fn( $path ) => '/real' . $path,
 			)
 		);
 
@@ -587,7 +535,7 @@ Final foo = foo 1, bar = TheBar';
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
-				'realpath'      => fn( $path) => '/real' . $path,
+				'realpath'      => fn( $path ) => '/real' . $path,
 			)
 		);
 
@@ -606,7 +554,7 @@ Final foo = foo 1, bar = TheBar';
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
-				'realpath'      => fn( $path) => false,
+				'realpath'      => fn( $path ) => false,
 			)
 		);
 
@@ -644,7 +592,7 @@ Final foo = foo 1, bar = TheBar';
 			'date_created_gmt'    => '2023-11-22 01:23:34',
 			'expiration_date_gmt' => '2034-07-01 12:34:56',
 			'is_public'           => true === $is_public,
-			'file_path'           => self::$transient_files_dir . '/2034-07-01/00112233445566778899aabbccddeeff',
+			'file_path'           => static::$transient_files_dir . '/2034-07-01/00112233445566778899aabbccddeeff',
 			'has_expired'         => false,
 			'metadata'            => array( 'content-type' => 'foo/bar' ),
 		);
@@ -680,7 +628,7 @@ Final foo = foo 1, bar = TheBar';
 			'date_created_gmt'    => '2023-11-22 01:23:34',
 			'expiration_date_gmt' => '2034-07-01 12:34:56',
 			'is_public'           => true === $is_public,
-			'file_path'           => self::$transient_files_dir . '/2034-07-01/00112233445566778899aabbccddeeff',
+			'file_path'           => static::$transient_files_dir . '/2034-07-01/00112233445566778899aabbccddeeff',
 			'has_expired'         => false,
 		);
 
@@ -797,8 +745,8 @@ Final foo = foo 1, bar = TheBar';
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir' => fn() => array( 'basedir' => self::$base_transient_files_dir ),
-				'current_time'  => fn( $type, $gmt) =>
+				'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ),
+				'current_time'  => fn( $type, $gmt ) =>
 				$gmt && 'timestamp' === $type ? strtotime( '2020-01-01 00:00:00' ) : current_time( $type, $gmt ),
 			)
 		);
@@ -817,7 +765,7 @@ Final foo = foo 1, bar = TheBar';
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'current_time' => fn( $type, $gmt) =>
+				'current_time' => fn( $type, $gmt ) =>
 								$gmt && 'mysql' === $type ? '2023-01-01 00:00:00' : current_time( $type, $gmt ),
 			)
 		);
@@ -835,15 +783,15 @@ Final foo = foo 1, bar = TheBar';
 		);
 
 		for ( $i = 1; $i <= 20; $i++ ) {
-			$this->assertFalse( is_dir( self::$transient_files_dir . sprintf( '/2022-10-%02d', $i ) ) );
+			$this->assertFalse( is_dir( static::$transient_files_dir . sprintf( '/2022-10-%02d', $i ) ) );
 		}
 		for ( $i = 21; $i <= 30; $i++ ) {
-			$this->assertTrue( is_dir( self::$transient_files_dir . sprintf( '/2022-10-%02d', $i ) ) );
+			$this->assertTrue( is_dir( static::$transient_files_dir . sprintf( '/2022-10-%02d', $i ) ) );
 		}
 
 		$dates_in_db          = $wpdb->get_results( "SELECT expiration_date_gmt FROM {$wpdb->prefix}wc_transient_files ORDER BY expiration_date_gmt", ARRAY_N );
 		$dates_in_db          = array_map( fn( $item) => current( $item ), $dates_in_db );
-		$expected_dates_in_db = array_map( fn( $num) => sprintf( '2022-10-%02d 00:00:00', $num ), range( 1, 30 ) );
+		$expected_dates_in_db = array_map( fn( $num ) => sprintf( '2022-10-%02d 00:00:00', $num ), range( 1, 30 ) );
 		$this->assertEquals( $expected_dates_in_db, $dates_in_db );
 
 		// All the expired files are deleted, then rows are deleted.
@@ -859,12 +807,12 @@ Final foo = foo 1, bar = TheBar';
 		);
 
 		for ( $i = 1; $i <= 30; $i++ ) {
-			$this->assertFalse( is_dir( self::$transient_files_dir . sprintf( '/2022-10-%02d', $i ) ) );
+			$this->assertFalse( is_dir( static::$transient_files_dir . sprintf( '/2022-10-%02d', $i ) ) );
 		}
 
 		$dates_in_db          = $wpdb->get_results( "SELECT expiration_date_gmt FROM {$wpdb->prefix}wc_transient_files ORDER BY expiration_date_gmt", ARRAY_N );
-		$dates_in_db          = array_map( fn( $item) => current( $item ), $dates_in_db );
-		$expected_dates_in_db = array_map( fn( $num) => sprintf( '2022-10-%02d 00:00:00', $num ), range( 16, 30 ) );
+		$dates_in_db          = array_map( fn( $item ) => current( $item ), $dates_in_db );
+		$expected_dates_in_db = array_map( fn( $num ) => sprintf( '2022-10-%02d 00:00:00', $num ), range( 16, 30 ) );
 		$this->assertEquals( $expected_dates_in_db, $dates_in_db );
 
 		// No files left, all remaining rows are deleted now.
@@ -903,8 +851,8 @@ Final foo = foo 1, bar = TheBar';
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir' => fn() => array( 'basedir' => self::$base_transient_files_dir ),
-				'current_time'  => fn( $type, $gmt) =>
+				'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ),
+				'current_time'  => fn( $type, $gmt ) =>
 				$gmt && 'timestamp' === $type ? strtotime( '2020-01-01 00:00:00' ) : current_time( $type, $gmt ),
 			)
 		);
@@ -928,7 +876,7 @@ Final foo = foo 1, bar = TheBar';
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'current_time' => fn( $type, $gmt) =>
+				'current_time' => fn( $type, $gmt ) =>
 							$gmt && 'mysql' === $type ? '2023-11-01 10:00:00' : current_time( $type, $gmt ),
 			)
 		);
@@ -945,8 +893,8 @@ Final foo = foo 1, bar = TheBar';
 		$result = $wpdb->get_var( "SELECT COUNT(id) FROM {$wpdb->prefix}wc_transient_files" );
 		$this->assertEquals( 2, $result );
 
-		$this->assertTrue( is_dir( self::$transient_files_dir . '/2024-01-01' ) );
-		$this->assertTrue( is_dir( self::$transient_files_dir . '/2023-11-01' ) );
+		$this->assertTrue( is_dir( static::$transient_files_dir . '/2024-01-01' ) );
+		$this->assertTrue( is_dir( static::$transient_files_dir . '/2023-11-01' ) );
 	}
 
 	/**
@@ -959,7 +907,7 @@ Final foo = foo 1, bar = TheBar';
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir'             => fn() => array( 'basedir' => self::$base_transient_files_dir ),
+				'wp_upload_dir'             => fn() => array( 'basedir' => static::$base_transient_files_dir ),
 				'time'                      => fn() => 10000000,
 				'as_schedule_single_action' => function( $timestamp, $hook, $args, $group ) use ( &$actual_next_time ) {
 					$actual_next_time = $timestamp;
@@ -987,7 +935,7 @@ Final foo = foo 1, bar = TheBar';
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir'             => fn() => array( 'basedir' => self::$base_transient_files_dir ),
+				'wp_upload_dir'             => fn() => array( 'basedir' => static::$base_transient_files_dir ),
 				'time'                      => fn() => 10000000,
 				'as_schedule_single_action' => function( $timestamp, $hook, $args, $group ) use ( &$actual_next_time ) {
 					$actual_next_time = $timestamp;
@@ -995,7 +943,7 @@ Final foo = foo 1, bar = TheBar';
 			)
 		);
 
-		add_filter( 'woocommerce_delete_expired_transient_files_interval', fn( $interval) => HOUR_IN_SECONDS );
+		add_filter( 'woocommerce_delete_expired_transient_files_interval', fn( $interval ) => HOUR_IN_SECONDS );
 
 		try {
 			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
@@ -1023,10 +971,10 @@ Final foo = foo 1, bar = TheBar';
 						return false === StringUtil::ends_with( $path, '/TransientFiles/TransientFilesEngine.php' ) ?
 						dirname( $path ) : __DIR__;
 					},
-				'wp_upload_dir'             => fn() => array( 'basedir' => self::$base_transient_files_dir ),
+				'wp_upload_dir'             => fn() => array( 'basedir' => static::$base_transient_files_dir ),
 				'time'                      => fn() => 10000000,
 				'current_time'              =>
-					fn( $type, $gmt) =>
+					fn( $type, $gmt ) =>
 						$gmt && 'timestamp' === $type ? strtotime( '2020-01-01 00:00:00' ) : current_time( $type, $gmt ),
 				'as_schedule_single_action' =>
 					function( $timestamp, $hook, $args, $group ) use ( &$actual_next_time ) {
@@ -1046,7 +994,7 @@ Final foo = foo 1, bar = TheBar';
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'current_time' => fn( $type, $gmt) =>
+				'current_time' => fn( $type, $gmt ) =>
 							$gmt && 'mysql' === $type ? '2023-01-01 00:00:00' : current_time( $type, $gmt ),
 			)
 		);
@@ -1071,34 +1019,5 @@ Final foo = foo 1, bar = TheBar';
 		remove_all_filters( 'woocommerce_expired_transient_files_cleanup' );
 		$this->reset_container_resolutions();
 		$this->sut = $this->get_instance_of( TransientFilesEngine::class );
-	}
-
-	/**
-	 * Deletes a directory and all its contents.
-	 *
-	 * @param string $dirname The directory to delete.
-	 * @param bool   $delete_root_dir True to delete $dirname too, false to delete only the contents of $dirname.
-	 */
-	private static function rmdir_recursive( $dirname, bool $delete_root_dir ) {
-		if ( ! is_dir( $dirname ) ) {
-			return;
-		}
-
-		$dir = opendir( $dirname );
-		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-		while ( false !== ( $file = readdir( $dir ) ) ) {
-			if ( ( '.' !== $file ) && ( '..' !== $file ) ) {
-				$full = $dirname . '/' . $file;
-				if ( is_dir( $full ) ) {
-					self::rmdir_recursive( $full, $delete_root_dir );
-				} else {
-					unlink( $full );
-				}
-			}
-		}
-		closedir( $dir );
-		if ( $delete_root_dir ) {
-			rmdir( $dirname );
-		}
 	}
 }

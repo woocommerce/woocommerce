@@ -495,7 +495,7 @@ class TransientFilesEngine {
 
 		$data['file_path']   = $this->get_transient_files_directory() . '/' . substr( $data['expiration_date_gmt'], 0, 10 ) . '/' . $data['file_name'];
 		$data['is_public']   = (bool) $data['is_public'];
-		$data['has_expired'] = strtotime( $data['expiration_date_gmt'] ) < time();
+		$data['has_expired'] = strtotime( $data['expiration_date_gmt'] ) < $this->legacy_proxy->call_function( 'current_time', 'timestamp', true );
 
 		if ( $delete_if_expired && $data['has_expired'] ) {
 			$this->delete_file_core( $data );

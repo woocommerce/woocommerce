@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\TransientFiles;
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WP_HTTP_Response;
 use \WP_REST_Server;
 use \WP_REST_Request;
@@ -38,13 +39,6 @@ class TransientFilesRestController {
 	private string $route_namespace = 'wc/v3';
 
 	/**
-	 * The instance of TransientFilesEngine to use.
-	 *
-	 * @var TransientFilesEngine
-	 */
-	private TransientFilesEngine $transient_files_engine;
-
-	/**
 	 * Holds authentication error messages for each HTTP verb.
 	 *
 	 * @var array
@@ -78,16 +72,6 @@ class TransientFilesRestController {
 	}
 
 	/**
-	 * Class initialization, to be executed when the class is resolved by the container.
-	 *
-	 * @param TransientFilesEngine $transient_files_engine The instance of TransientFilesEngine to use.
-	 * @internal
-	 */
-	final public function init( TransientFilesEngine $transient_files_engine ) {
-		$this->transient_files_engine = $transient_files_engine;
-	}
-
-	/**
 	 * Handle the woocommerce_rest_api_get_rest_namespaces filter
 	 * to add ourselves to the list of REST API controllers registered by WooCommerce.
 	 *
@@ -110,10 +94,11 @@ class TransientFilesRestController {
 			'/files/transient/(?P<id_or_name>[^/]+)',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => fn( $request ) => $this->run( 'get_file_contents', $request ),
-					'args'     => $this->get_args_for_get_file_contents(),
-					// No permission callback, the get_file_contents method handles authentication by itself
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( 'get_file_contents', $request ),
+					'args'                => $this->get_args_for_get_file_contents(),
+					'permission_callback' => '__return_true',
+					// No effective permission callback, the get_file_contents method handles authentication by itself
 					// because it's different for the REST API endpoint and for the unauthenticated endpoint.
 					// Also no schema, since this endpoint doesn't (necessarily) return JSON.
 				),
@@ -190,9 +175,10 @@ class TransientFilesRestController {
 	 */
 	private function internal_wp_error( Exception $exception ) {
 		$data = array( 'status' => 500 );
-		if ( current_user_can( 'manage_woocommerce' ) ) {
+		if ( $this->current_user_can( 'manage_woocommerce' ) ) {
 			$data['exception_message'] = $exception->getMessage();
 		}
+		$data['exception_message'] = $exception->getMessage();
 
 		return new WP_Error( 'woocommerce_rest_internal_error', __( 'Internal server error', 'woocommerce' ), $data );
 	}
@@ -216,7 +202,7 @@ class TransientFilesRestController {
 	 * @return bool|WP_Error True if the current user has the capability, an "Unauthorized" error otherwise.
 	 */
 	private function check_permission_by_method( string $method, string $required_capability_name ) {
-		if ( current_user_can( $required_capability_name ) ) {
+		if ( $this->current_user_can( $required_capability_name ) ) {
 			return true;
 		}
 
@@ -233,13 +219,23 @@ class TransientFilesRestController {
 	}
 
 	/**
+	 * Check if the current user has a given capability.
+	 *
+	 * @param string $capability The capability to check.
+	 * @return bool True if the user has the specified capability.
+	 */
+	private function current_user_can( string $capability ): bool {
+		return wc_get_container()->get( LegacyProxy::class )->call_function( 'current_user_can', $capability );
+	}
+
+	/**
 	 * Get the details of a transient file by id.
 	 *
 	 * @param WP_REST_Request $request The incoming HTTP REST request.
 	 * @return WP_Error|array The response to send back to the client.
 	 */
 	private function get_file_info( WP_REST_Request $request ) {
-		$transient_file_info = $this->transient_files_engine->get_file_by_id( $request->get_param( 'id' ), $request->get_param( 'include_metadata' ) );
+		$transient_file_info = $this->get_transient_files_engine()->get_file_by_id( $request->get_param( 'id' ), $request->get_param( 'include_metadata' ) );
 		if ( is_null( $transient_file_info ) ) {
 			return new WP_Error( 'woocommerce_rest_not_found', __( 'File not found', 'woocommerce' ), array( 'status' => 404 ) );
 		}
@@ -260,13 +256,14 @@ class TransientFilesRestController {
 		$metadata['expiration_seconds'] = $request->get_param( 'expiration_seconds' );
 		$metadata['is_public']          = $request->get_param( 'is_public' );
 
+		$engine = $this->get_transient_files_engine();
 		try {
-			$file_name = $this->transient_files_engine->create_file_by_rendering_template( $request->get_param( 'template_name' ), $request->get_param( 'variables' ), $metadata );
+			$file_name = $engine->create_file_by_rendering_template( $request->get_param( 'template_name' ), $request->get_param( 'variables' ), $metadata );
 		} catch ( InvalidArgumentException $ex ) {
 			return new WP_Error( 'woocommerce_rest_invalid_arguments', $ex->getMessage(), array( 'status' => 400 ) );
 		}
 
-		$transient_file_info = $this->transient_files_engine->get_file_by_name( $file_name );
+		$transient_file_info = $engine->get_file_by_name( $file_name );
 		if ( is_null( $transient_file_info ) ) {
 			throw new Exception( "Template {$request->get_param('template_name')} has just been rendered as $file_name, but now somehow it can't be found" );
 		}
@@ -281,7 +278,7 @@ class TransientFilesRestController {
 	 * @return array The response to send back to the client.
 	 */
 	private function delete_file( WP_REST_Request $request ): array {
-		$deleted = $this->transient_files_engine->delete_file_by_id( $request->get_param( 'id' ) );
+		$deleted = $this->get_transient_files_engine()->delete_file_by_id( $request->get_param( 'id' ) );
 		return array( 'deleted' => $deleted );
 	}
 
@@ -372,20 +369,22 @@ class TransientFilesRestController {
 	 * @param bool   $is_json_rest_api_request True if the request comes from the REST API endpoint, false if it comes from the unauthenticated endpoint.
 	 */
 	private function serve_file_contents_core( string $file_id_or_name, bool $id_is_name, bool $is_json_rest_api_request ) {
+		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+
 		try {
 			if ( ! $id_is_name && ! is_numeric( $file_id_or_name ) ) {
 				if ( $is_json_rest_api_request ) {
 					return new WP_Error( 'woocommerce_rest_invalid_arguments', __( 'Invalid file id', 'woocommerce' ), array( 'status' => 400 ) );
 				} else {
-					status_header( 400 );
-					exit();
+					$legacy_proxy->call_function( 'status_header', 400 );
+					$legacy_proxy->exit();
 				}
 			}
 
 			$transient_file_info =
 				$id_is_name ?
-					$this->transient_files_engine->get_file_by_name( $file_id_or_name, true ) :
-					$this->transient_files_engine->get_file_by_id( (int) $file_id_or_name, true );
+					$this->get_transient_files_engine()->get_file_by_name( $file_id_or_name, true ) :
+					$this->get_transient_files_engine()->get_file_by_id( (int) $file_id_or_name, true );
 
 			if ( $is_json_rest_api_request ) {
 				$permission_error = $this->check_permission_by_method( 'GET', 'read_transient_file' );
@@ -398,14 +397,14 @@ class TransientFilesRestController {
 				if ( $is_json_rest_api_request ) {
 					return new WP_Error( 'woocommerce_rest_not_found', __( 'File not found', 'woocommerce' ), array( 'status' => 404 ) );
 				} else {
-					status_header( 404 );
-					exit();
+					$legacy_proxy->call_function( 'status_header', 404 );
+					$legacy_proxy->exit();
 				}
 			}
 
 			if ( ! $is_json_rest_api_request && ! $transient_file_info['is_public'] ) {
-				status_header( 404 );
-				exit();
+				$legacy_proxy->call_function( 'status_header', 404 );
+				$legacy_proxy->exit();
 			}
 
 			$file_path = $transient_file_info['file_path'];
@@ -422,17 +421,20 @@ class TransientFilesRestController {
 		} catch ( Exception $ex ) {
 			$error_message = "Error serving transient file $file_id_or_name: {$ex->getMessage()}";
 			wc_get_logger()->error( $error_message );
+
 			if ( $is_json_rest_api_request ) {
 				return $this->internal_wp_error( $ex );
-			} else {
-				status_header( 500 );
-				exit();
 			}
+
+			$legacy_proxy->call_function( 'status_header', 500 );
+			$legacy_proxy->exit();
 		}
 
 		$content_type = $transient_file_info['metadata']['content-type'] ?? 'text/html';
-		header( "Content-Type: $content_type" );
-		header( "Content-Length: $file_length" );
+
+		$legacy_proxy->call_function( 'status_header', 200 );
+		$legacy_proxy->call_function( 'header', "Content-Type: $content_type" );
+		$legacy_proxy->call_function( 'header', "Content-Length: $file_length" );
 
 		try {
 			while ( ! feof( $file_handle ) ) {
@@ -454,11 +456,20 @@ class TransientFilesRestController {
 			// We can't change the response status code at this point.
 		} finally {
 			fclose( $file_handle );
-			exit;
+			$legacy_proxy->exit();
 		}
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.Missing, WordPress.WP.AlternativeFunctions
+
+	/**
+	 * Get an instance of TransientFilesEngine.
+	 *
+	 * @return TransientFilesEngine An instance of TransientFilesEngine ready to use.
+	 */
+	private function get_transient_files_engine() {
+		return wc_get_container()->get( TransientFilesEngine::class );
+	}
 
 	/**
 	 * Get a description of the arguments accepted by the GET /files/transient/<id>/info endpoint.
@@ -493,7 +504,7 @@ class TransientFilesRestController {
 			),
 			'get_by_name' => array(
 				'description' => __( 'True if the value of id_or_name is a file name, false if i\'s a database id.', 'woocommerce' ),
-				'type'        => 'bool',
+				'type'        => 'boolean',
 				'default'     => false,
 			),
 		);
@@ -534,7 +545,7 @@ class TransientFilesRestController {
 			'expiration_seconds' => array(
 				'required'    => false,
 				'default'     => null,
-				'type'        => 'int',
+				'type'        => 'integer',
 				'description' => __( 'Expiration seconds, the expiration date will be the current date (UTC) plus this value.', 'woocommerce' ),
 			),
 			'is_public'          => array(
@@ -580,13 +591,13 @@ class TransientFilesRestController {
 			),
 			'date_created_gmt'    => array(
 				'description' => __( 'The creation date of the file, in UTC.', 'woocommerce' ),
-				'type'        => 'date-time',
+				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'expiration_date_gmt' => array(
 				'description' => __( 'The expiration date of the file, in UTC.', 'woocommerce' ),
-				'type'        => 'date-time',
+				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
