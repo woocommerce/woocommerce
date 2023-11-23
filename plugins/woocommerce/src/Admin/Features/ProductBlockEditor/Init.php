@@ -49,6 +49,10 @@ class Init {
 			array_push( $this->supported_post_types, 'external' );
 		}
 
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			array_push( $this->supported_post_types, 'grouped' );
+		}
+
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
