@@ -26,13 +26,13 @@ Whether you’re launching a business, taking brick-and-mortar retail online, or
 - **Rise to the top of search results** by leveraging [WordPress’ SEO advantage](https://www.searchenginejournal.com/wordpress-best-cms-seo/).
 - **Build on a platform that scales.** Get flexible eCommerce for [high-volume stores](https://woo.com/high-volume-stores/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing). 
 
-THE EASIEST WAY TO TRY WOOCOMMERCE
+= THE EASIEST WAY TO TRY WOOCOMMERCE =
 
 Thinking of trying WooCommerce? Woo Express is a simple, all-in-one package that includes fully managed hosting from WordPress.com, popular extensions, and world-class support from Woo — all for one monthly price.
 
 [Try Woo Express free for 14 days](https://woo.com/express/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=wp_org_repo_listing), then get your first 3 months for just $1. 
 
-ALL THE TOOLS YOU NEED TO SELL
+= ALL THE TOOLS YOU NEED TO SELL =
 
 Built-in tools and popular integrations help you efficiently manage your business operations. Many services are free to add with a single click via the optional [Setup Wizard](https://woo.com/document/woocommerce-setup-wizard/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).
 
