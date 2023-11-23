@@ -689,9 +689,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'</a>'
 					),
 				),
-				'hideConditions' => Features::is_enabled( 'product-external-affiliate' ) ? array(
+				'hideConditions' => Features::is_enabled( 'product-external-affiliate' ) || Features::is_enabled( 'product-grouped' ) ? array(
 					array(
-						'expression' => 'editedProduct.type === "external"',
+						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
 					),
 				) : null,
 			)
