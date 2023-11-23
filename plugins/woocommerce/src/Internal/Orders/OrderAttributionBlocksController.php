@@ -56,8 +56,8 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 		FeaturesController $features_controller,
 		OrderAttributionController $order_attribution_controller
 	) {
-		$this->extend_schema                 = $extend_schema;
-		$this->features_controller           = $features_controller;
+		$this->extend_schema                = $extend_schema;
+		$this->features_controller          = $features_controller;
 		$this->order_attribution_controller = $order_attribution_controller;
 	}
 
