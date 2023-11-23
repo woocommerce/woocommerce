@@ -1,14 +1,14 @@
 /**
  * External dependencies
  */
-import { Tooltip } from '@wordpress/components';
 import { createElement, CSSProperties, ReactElement } from 'react';
+import classNames from 'classnames';
+import { Tooltip } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { getItemPropsType } from './types';
-import classNames from 'classnames';
 
 export type MenuItemProps< ItemType > = {
 	index: number;
