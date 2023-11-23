@@ -95,6 +95,20 @@ class PatternsHelper {
 	}
 
 	/**
+	 * Delete the post that has the generated data by the AI for the patterns.
+	 *
+	 * @return \WP_Post|null
+	 */
+	public static function delete_patterns_ai_data_post() {
+		$patterns_ai_data_post = self::get_patterns_ai_data_post();
+
+		if ( isset( $patterns_ai_data_post ) ) {
+			return wp_delete_post( $patterns_ai_data_post->ID, true );
+		}
+	}
+
+
+	/**
 	 * Upsert the patterns AI data.
 	 *
 	 * @param array $patterns_dictionary The patterns dictionary.
