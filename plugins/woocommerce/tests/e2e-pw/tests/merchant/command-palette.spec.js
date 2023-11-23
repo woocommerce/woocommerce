@@ -84,7 +84,6 @@ test.describe( 'Use Command Palette commands', () => {
 			page,
 			optionName: 'Add new product',
 		} );
-		await page.waitForLoadState( 'networkidle' );
 
 		// Verify that the page has loaded.
 		await expect(
@@ -99,7 +98,6 @@ test.describe( 'Use Command Palette commands', () => {
 			page,
 			optionName: 'Add new order',
 		} );
-		await page.waitForLoadState( 'networkidle' );
 
 		// Verify that the page has loaded.
 		await expect(
@@ -114,7 +112,6 @@ test.describe( 'Use Command Palette commands', () => {
 			page,
 			optionName: 'Products',
 		} );
-		await page.waitForLoadState( 'networkidle' );
 
 		// Verify that the page has loaded.
 		await expect(
@@ -129,7 +126,6 @@ test.describe( 'Use Command Palette commands', () => {
 			page,
 			optionName: 'Orders',
 		} );
-		await page.waitForLoadState( 'networkidle' );
 
 		// Verify that the page has loaded.
 		await expect(
@@ -144,7 +140,6 @@ test.describe( 'Use Command Palette commands', () => {
 			page,
 			optionName: 'Product to search',
 		} );
-		await page.waitForLoadState( 'networkidle' );
 
 		// Verify that the page has loaded.
 		await expect( page.getByLabel( 'Product name' ) ).toHaveValue(
@@ -159,7 +154,6 @@ test.describe( 'Use Command Palette commands', () => {
 			page,
 			optionName: 'Products Settings',
 		} );
-		await page.waitForLoadState( 'networkidle' );
 
 		// Verify that the page has loaded.
 		await expect( page.getByText( 'Shop pages' ) ).toBeVisible();
@@ -172,9 +166,11 @@ test.describe( 'Use Command Palette commands', () => {
 			page,
 			optionName: 'Products Analytics',
 		} );
-		await page.waitForLoadState( 'networkidle' );
 
 		// Verify that the page has loaded.
+		await expect(
+			page.locator( 'h1' ).filter( { hasText: 'Products' } )
+		).toBeVisible();
 		const pageTitle = await page.title();
 		expect( pageTitle.includes( 'Products ‹ Analytics' ) ).toBeTruthy();
 	} );
