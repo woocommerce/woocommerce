@@ -119,15 +119,15 @@ class WC_Payment_Gateways {
 		ksort( $this->payment_gateways );
 
 		// Hook in actions.
-		add_action( 'wc_payment_gateways_initialized', [ $this, 'on_payment_gateways_initialized' ], 10, 1 );
+		add_action( 'wc_payment_gateways_initialized', array( $this, 'on_payment_gateways_initialized' ), 10, 1 );
 		do_action( 'wc_payment_gateways_initialized' );
 	}
 
 	public function on_payment_gateways_initialized() {
 		foreach ( $this->payment_gateways as $gateway ) {
 			$option_key = $gateway->get_option_key();
-			self::add_action( 'add_option_' . $option_key, [ $this, 'payment_gateway_settings_option_changed' ], 10, 2 );
-			self::add_action( 'update_option_' . $option_key, [ $this, 'payment_gateway_settings_option_changed' ], 10, 3 );	
+			self::add_action( 'add_option_' . $option_key, array( $this, 'payment_gateway_settings_option_changed' ), 10, 2 );
+			self::add_action( 'update_option_' . $option_key, array( $this, 'payment_gateway_settings_option_changed' ), 10, 3 );
 		}
 	}
 
@@ -142,7 +142,7 @@ class WC_Payment_Gateways {
 	private function payment_gateway_settings_option_changed( $old_value, $value, $option = null ) {
 		if ( null === $option ) {
 			// We're in the add_option_ hook so there's no old value and parameter order is different.
-			$option = $old_value;
+			$option    = $old_value;
 			$old_value = null;
 		}
 		if ( ! $this->was_gateway_enabled( $value, $old_value ) ) {
@@ -160,9 +160,9 @@ class WC_Payment_Gateways {
 		$gateway_settings_url = self_admin_url( 'admin.php?page=wc-settings&tab=checkout' );
 		$site_name            = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 		$site_url             = home_url();
-	
-		/* translators: Payment gateway enabled notification email. 1: Username, 2: Gateway Title, 3: Site URL, 4: Gateway Settings URL, 5: Admin Email, 6: Site Name, 7: Site URL. */
+
 		$email_text = sprintf(
+			/* translators: Payment gateway enabled notification email. 1: Username, 2: Gateway Title, 3: Site URL, 4: Gateway Settings URL, 5: Admin Email, 6: Site Name, 7: Site URL. */
 			__(
 				'Howdy %1$s,
 
@@ -189,13 +189,13 @@ All at %6$s
 			$site_name,
 			$site_url
 		);
-	
+
 		if ( '' !== get_option( 'blogname' ) ) {
 			$site_title = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 		} else {
 			$site_title = wp_parse_url( home_url(), PHP_URL_HOST );
 		}
-	
+
 		return wp_mail(
 			$admin_email,
 			sprintf(
@@ -207,22 +207,22 @@ All at %6$s
 			$email_text
 		);
 	}
-	
+
 	private function was_gateway_enabled( $value, $old_value = null ) {
-		if ( $old_value === null ) {
+		if ( null === $old_value ) {
 			// There was no old value, so this is a new option.
-			if ( ! empty( $value) && is_array( $value ) && isset( $value['enabled'] ) && $value['enabled'] === 'yes' && isset( $value['title'] ) ) {
+			if ( ! empty( $value ) && is_array( $value ) && isset( $value['enabled'] ) && 'yes' === $value['enabled'] && isset( $value['title'] ) ) {
 				return true;
 			}
 			return false;
 		}
 		// There was an old value, so this is an update.
-		if ( ! empty( $value) && ! empty( $old_value) && is_array( $value ) && is_array( $old_value ) && isset( $value['enabled'] ) && isset( $old_value['enabled'] ) && $value['enabled'] === 'yes' && $old_value['enabled'] !== 'yes' && isset( $value['title'] ) ) {
+		if ( ! empty( $value ) && ! empty( $old_value ) && is_array( $value ) && is_array( $old_value ) && isset( $value['enabled'] ) && isset( $old_value['enabled'] ) && 'yes' === $value['enabled'] && 'yes' !== $old_value['enabled'] && isset( $value['title'] ) ) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Get gateways.
 	 *
