@@ -177,6 +177,9 @@ class WC_Payment_Gateways {
 		$site_name            = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 		$site_url             = home_url();
 
+		$logger = wc_get_logger();
+		$logger->info( sprintf( 'Payment gateway enabled: "%s"', $gateway_title ) );
+
 		$email_text = sprintf(
 			/* translators: Payment gateway enabled notification email. 1: Username, 2: Gateway Title, 3: Site URL, 4: Gateway Settings URL, 5: Admin Email, 6: Site Name, 7: Site URL. */
 			__(
