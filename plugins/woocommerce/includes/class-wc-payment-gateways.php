@@ -159,7 +159,8 @@ class WC_Payment_Gateways {
 		}
 
 		// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
-		$this->notify_admin_payment_gateway_enabled( $value['title'] );
+		// "untitled" shouldn't happen, but just in case.
+		$this->notify_admin_payment_gateway_enabled( $value['title'] ?? 'untitled' );
 	}
 
 	/**
