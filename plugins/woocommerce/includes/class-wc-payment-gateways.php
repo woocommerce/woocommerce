@@ -177,6 +177,17 @@ class WC_Payment_Gateways {
 		$gateway_settings_url = self_admin_url( 'admin.php?page=wc-settings&tab=checkout' );
 		$site_name            = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 		$site_url             = home_url();
+		/**
+		 * Allows adding to the addresses that receive payment gateway enabled notifications.
+		 *
+		 * @param array $email_addresses Email addresses.
+		 * @since 8.5.0
+		 */
+		$email_addresses = apply_filters( 'wc_payment_gateway_enabled_notification_email_addresses', array() );
+		$email_addresses = array_unique( array_filter( $email_addresses, function( $email_address ) {
+			return filter_var( $email_address, FILTER_VALIDATE_EMAIL );
+		} ) );
+		$email_addresses[] = $admin_email;
 
 		$logger = wc_get_logger();
 		$logger->info( sprintf( 'Payment gateway enabled: "%s"', $gateway_title ) );
@@ -217,7 +228,7 @@ All at %6$s
 		}
 
 		return wp_mail(
-			$admin_email,
+			$email_addresses,
 			sprintf(
 				/* translators: Payment gateway enabled notification email subject. %s1: Site title, $s2: Gateway title. */
 				__( '[%1$s] Payment gateway %2$s enabled', 'woocommerce' ),
