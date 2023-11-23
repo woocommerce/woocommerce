@@ -118,11 +118,20 @@ class WC_Payment_Gateways {
 
 		ksort( $this->payment_gateways );
 
-		// Hook in actions.
 		add_action( 'wc_payment_gateways_initialized', array( $this, 'on_payment_gateways_initialized' ), 10, 1 );
+		/**
+		 * Hook that is called when the payment gateways have been initialized.
+		 *
+		 * @since 8.5.0
+		 */
 		do_action( 'wc_payment_gateways_initialized' );
 	}
 
+	/**
+	 * Hook into payment gateway settings changes.
+	 *
+	 * @since 8.5.0
+	 */
 	public function on_payment_gateways_initialized() {
 		foreach ( $this->payment_gateways as $gateway ) {
 			$option_key = $gateway->get_option_key();
@@ -132,12 +141,12 @@ class WC_Payment_Gateways {
 	}
 
 	/**
-	 * Email the site admin when a payment gateway is enabled.
+	 * Callback for when a gateway settings option was added or updated.
 	 *
+	 * @param mixed  $old_value Old value. Option name when called via add_option_ hook.
+	 * @param mixed  $value New value.
 	 * @param string $option Option name.
-	 * @param array  $old_value Old value.
-	 * @param array  $value New value.
-	 * @since 8.4.0
+	 * @since 8.5.0
 	 */
 	private function payment_gateway_settings_option_changed( $old_value, $value, $option = null ) {
 		if ( null === $option ) {
@@ -153,6 +162,13 @@ class WC_Payment_Gateways {
 		$this->notify_admin_payment_gateway_enabled( $value['title'] );
 	}
 
+	/**
+	 * Email the site admin when a payment gateway has been enabled.
+	 *
+	 * @param string $gateway_title Gateway title.
+	 * @return bool Whether the email was sent or not.
+	 * @since 8.5.0
+	 */
 	private function notify_admin_payment_gateway_enabled( $gateway_title ) {
 		$admin_email          = get_option( 'admin_email' );
 		$user                 = get_user_by( 'email', $admin_email );
@@ -208,6 +224,13 @@ All at %6$s
 		);
 	}
 
+	/**
+	 * Determines from changes in settings if a gateway was enabled.
+	 *
+	 * @param array $value New value.
+	 * @param array $old_value Old value.
+	 * @return bool Whether the gateway was enabled or not.
+	 */
 	private function was_gateway_enabled( $value, $old_value = null ) {
 		if ( null === $old_value ) {
 			// There was no old value, so this is a new option.
