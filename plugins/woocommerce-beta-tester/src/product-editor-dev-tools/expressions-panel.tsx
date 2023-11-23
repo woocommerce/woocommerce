@@ -6,6 +6,11 @@ import { evaluate } from '@woocommerce/expression-evaluation';
 import { Button } from '@wordpress/components';
 import { useState } from 'react';
 
+/**
+ * Internal dependencies
+ */
+import { ExpressionField } from './expression-field';
+
 export function ExpressionsPanel( {
 	evaluationContext,
 }: {
@@ -17,27 +22,9 @@ export function ExpressionsPanel( {
 	const [ expressions, setExpressions ] = useState< Array< string > >( [] );
 	const [ expressionToAdd, setExpressionToAdd ] = useState< string >( '' );
 
-	const handleExpressionToAddChange = (
-		event: React.ChangeEvent< HTMLTextAreaElement >
-	) => {
-		setExpressionToAdd( event.target.value );
-	};
-
-	const addExpression = () => {
-		setExpressions( [ ...expressions, expressionToAdd ] );
+	const addExpression = ( expression: string ) => {
+		setExpressions( [ ...expressions, expression ] );
 		setExpressionToAdd( '' );
-	};
-
-	const evaluateExpression = ( expression: string ) => {
-		let result;
-
-		try {
-			result = evaluate( expression, evaluationContext );
-		} catch ( error ) {
-			result = error;
-		}
-
-		return String( result );
 	};
 
 	return (
@@ -51,28 +38,21 @@ export function ExpressionsPanel( {
 				<ul className="woocommerce-product-editor-dev-tools-expressions-list">
 					{ expressions.map( ( expression, index ) => (
 						<li key={ index }>
-							<div>
-								<span className="woocommerce-product-editor-dev-tools-expressions-list-prompt">
-									&gt;
-								</span>{ ' ' }
-								{ expression }
-							</div>
-							<div>
-								<span className="woocommerce-product-editor-dev-tools-expressions-list-prompt">
-									&lt;
-								</span>{ ' ' }
-								{ evaluateExpression( expression ) }
-							</div>
+							<ExpressionField
+								expression={ expression }
+								evaluationContext={ evaluationContext }
+							/>
 						</li>
 					) ) }
 				</ul>
 			) }
 			<div className="woocommerce-product-editor-dev-tools-expression-editor">
-				<textarea
-					value={ expressionToAdd }
-					onChange={ handleExpressionToAddChange }
+				<ExpressionField
+					expression={ expressionToAdd }
+					evaluationContext={ evaluationContext }
+					mode="edit"
+					onUpdate={ addExpression }
 				/>
-				<Button onClick={ addExpression }>Add</Button>
 			</div>
 		</div>
 	);
