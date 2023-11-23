@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
+use Automattic\Jetpack\Constants;
 use WP_Filesystem_Direct;
 
 /**
@@ -79,6 +80,19 @@ class File {
 	}
 
 	/**
+	 * Generate a hash to use as the suffix on a log filename.
+	 *
+	 * @param string $file_id A file ID (file basename without the hash).
+	 *
+	 * @return false|string
+	 */
+	public static function generate_hash( $file_id ) {
+		$key = Constants::get_constant( 'AUTH_SALT' ) ?? 'wc-logs';
+
+		return hash_hmac( 'md5', $file_id, $key );
+	}
+
+	/**
 	 * Parse the log filename to derive certain properties of the file.
 	 *
 	 * This makes assumptions about the structure of the log file's name. Using `-` to separate the name into segments,
@@ -109,7 +123,6 @@ class File {
 		} else {
 			$this->source  = implode( '-', $segments );
 			$this->created = filectime( $this->path );
-			$this->hash    = $this->source;
 		}
 
 		$rotation_marker = strrpos( $this->source, '.', -1 );
@@ -120,9 +133,6 @@ class File {
 			}
 
 			$this->source = substr( $this->source, 0, $rotation_marker );
-			if ( count( $segments ) < 5 ) {
-				$this->hash = $this->source;
-			}
 		}
 	}
 
@@ -239,7 +249,7 @@ class File {
 			$file_id .= '.' . $this->get_rotation();
 		}
 
-		if ( $this->get_source() !== $this->get_hash() ) {
+		if ( $this->get_hash() ) {
 			$file_id .= '-' . gmdate( 'Y-m-d', $this->get_created_timestamp() );
 		}
 
@@ -283,6 +293,85 @@ class File {
 		}
 
 		return $wp_filesystem->size( $this->path );
+	}
+
+	/**
+	 * Create and set permissions on the file.
+	 *
+	 * @return bool
+	 */
+	protected function create(): bool {
+		global $wp_filesystem;
+
+		$created = $wp_filesystem->touch( $this->path );
+		$modded  = $wp_filesystem->chmod( $this->path );
+
+		return $created && $modded;
+	}
+
+	/**
+	 * Write content to the file, appending it to the end.
+	 *
+	 * @param string $text The content to add to the file.
+	 *
+	 * @return bool
+	 */
+	public function write( string $text ): bool {
+		if ( ! $this->is_writable() ) {
+			$created = $this->create();
+
+			if ( ! $created ) {
+				return false;
+			}
+		}
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen -- No suitable alternative.
+		$resource = fopen( $this->path, 'ab' );
+
+		mbstring_binary_safe_encoding();
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite -- No suitable alternative.
+		$bytes_written = fwrite( $resource, $text );
+		reset_mbstring_encoding();
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose -- No suitable alternative.
+		fclose( $resource );
+
+		if ( strlen( $text ) !== $bytes_written ) {
+			return false;
+		}
+
+		return true;
+	}
+
+
+	public function rotate(): bool {
+		global $wp_filesystem;
+
+		if ( is_null( $this->get_rotation() ) ) {
+			$new_rotation = 0;
+		} else {
+			$new_rotation = $this->get_rotation() + 1;
+		}
+
+		$search  = array( $this->get_source() . ( $this->get_rotation() ) ? '.' . $this->get_rotation() : '' );
+		$replace = array( $this->get_source() . '.' . $new_rotation );
+		if ( $this->get_hash() ) {
+			$new_file_id = $this->get_source() . '.' . $new_rotation . '-' . gmdate( 'Y-m-d', $this->get_created_timestamp() );
+			$search[]    = $this->get_hash();
+			$replace[]   = self::generate_hash( $new_file_id );
+		}
+
+		$new_path = str_replace( $search, $replace, $this->path );
+		$moved    = $wp_filesystem->move( $this->path, $new_path, true );
+
+		if ( ! $moved ) {
+			return false;
+		}
+
+		$this->path = $new_path;
+		$this->parse_filename();
+
+		return $this->is_readable();
 	}
 
 	/**

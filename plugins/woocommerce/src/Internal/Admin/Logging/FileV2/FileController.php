@@ -13,6 +13,22 @@ use WP_Error;
  */
 class FileController {
 	/**
+	 * The maximum size of a file before it will get rotated.
+	 *
+	 * @const int
+	 */
+	public const MAX_FILE_SIZE = 5 * MB_IN_BYTES;
+
+	/**
+	 * The maximum number of rotations for a file before they start getting overwritten.
+	 *
+	 * This number should not go above 10, or it will cause issues with the glob patterns.
+	 *
+	 * const int
+	 */
+	private const MAX_FILE_ROTATIONS = 10;
+
+	/**
 	 * Default values for arguments for the get_files method.
 	 *
 	 * @const array
@@ -75,6 +91,76 @@ class FileController {
 	 */
 	public function __construct() {
 		$this->log_directory = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) );
+	}
+
+	/**
+	 * Write a log entry to the appropriate file, after rotating the file if necessary.
+	 *
+	 * @param string $source The source property of the log entry, which determines which file to write to.
+	 * @param string $text   The contents of the log entry to add to a file.
+	 *
+	 * @return bool True if the contents were successfully written to the file.
+	 */
+	public function write_to_file( string $source, string $text ) {
+		$file_id = $source . '-' . gmdate( 'Y-m-d' );
+		$file    = $this->get_file_by_id( $file_id );
+
+		if ( $file instanceof File && $file->get_file_size() >= self::MAX_FILE_SIZE ) {
+			$rotated = $this->rotate_file( $file->get_file_id() );
+
+			if ( $rotated ) {
+				$file = null;
+			} else {
+				return false;
+			}
+		}
+
+		if ( ! $file instanceof File ) {
+			$new_path = $this->log_directory . $this->generate_filename( $source );
+			$file     = new File( $new_path );
+		}
+
+		return $file->write( $text );
+	}
+
+	/**
+	 * Generate the full name of a file based on the source and current date.
+	 *
+	 * @param string $source The source property of a log entry, which determines the filename.
+	 *
+	 * @return string
+	 */
+	private function generate_filename( string $source ): string {
+		$date    = gmdate( 'Y-m-d' );
+		$file_id = "$source-$date";
+		$hash    = File::generate_hash( $file_id );
+
+		return "$file_id-$hash.log";
+	}
+
+	/**
+	 * Get all the rotations of a file and increment them, so that they overwrite the previous file with that rotation.
+	 *
+	 * @param string $file_id
+	 *
+	 * @return bool
+	 */
+	private function rotate_file( $file_id ) {
+		$rotations = $this->get_file_rotations( $file_id );
+
+		if ( ! isset( $rotations['current'] ) ) {
+			return false;
+		}
+
+		// Don't rotate a file with the maximum rotation.
+		unset( $rotations[ self::MAX_FILE_ROTATIONS - 1 ] );
+
+		$results = array();
+		foreach ( $rotations as $file ) {
+			$results[] = $file->rotate();
+		}
+
+		return ! in_array( false, $results, true );
 	}
 
 	/**
@@ -259,7 +345,15 @@ class FileController {
 			}
 		}
 
-		$rotation_pattern = $this->log_directory . $source . '.[0123456789]-' . $created . '*.log';
+		$rotations_pattern = sprintf(
+			'.[%s]',
+			implode(
+				'',
+				range( 0, self::MAX_FILE_ROTATIONS - 1 )
+			)
+		);
+
+		$rotation_pattern = $this->log_directory . $source . $rotations_pattern . '-' . $created . '*.log';
 		$rotation_paths   = glob( $rotation_pattern );
 		$rotation_files   = $this->convert_paths_to_objects( $rotation_paths );
 		foreach ( $rotation_files as $rotation_file ) {
