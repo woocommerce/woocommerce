@@ -630,13 +630,13 @@ function option_is_gateway_settings( $option ) {
 function gateway_settings_enabled( $value, $old_value = null ) {
 	if ( $old_value === null ) {
 		// There was no old value, so this is a new option.
-		if ( ! empty( $value) && is_array( $value ) && isset( $value['enabled'] ) && $value['enabled'] === 'yes' ) {
+		if ( ! empty( $value) && is_array( $value ) && isset( $value['enabled'] ) && $value['enabled'] === 'yes' && isset( $value['title'] ) ) {
 			return true;
 		}
 		return false;
 	}
 	// There was an old value, so this is an update.
-	if ( ! empty( $value) && ! empty( $old_value) && is_array( $value ) && is_array( $old_value ) && isset( $value['enabled'] ) && isset( $old_value['enabled'] ) && $value['enabled'] === 'yes' && $old_value['enabled'] !== 'yes' ) {
+	if ( ! empty( $value) && ! empty( $old_value) && is_array( $value ) && is_array( $old_value ) && isset( $value['enabled'] ) && isset( $old_value['enabled'] ) && $value['enabled'] === 'yes' && $old_value['enabled'] !== 'yes' && isset( $value['title'] ) ) {
 		return true;
 	}
 	return false;
