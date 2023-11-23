@@ -8,12 +8,16 @@
  * @package WooCommerce\Classes\Payment
  */
 
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Payment gateways class.
  */
 class WC_Payment_Gateways {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * Payment gateway classes.
@@ -114,9 +118,17 @@ class WC_Payment_Gateways {
 
 		ksort( $this->payment_gateways );
 
-		// Listen for gateways being enabled so as to notify the admin.
-		add_action( 'add_option', [ $this, 'payment_gateway_settings_add_option' ], 10, 2 );
-		add_action( 'update_option', [ $this, 'payment_gateway_settings_update_option' ], 10, 3 );
+		// Hook in actions.
+		add_action( 'wc_payment_gateways_initialized', [ $this, 'on_payment_gateways_initialized' ], 10, 1 );
+		do_action( 'wc_payment_gateways_initialized' );
+	}
+
+	public function on_payment_gateways_initialized() {
+		foreach ( $this->payment_gateways as $gateway ) {
+			$option_key = $gateway->get_option_key();
+			self::add_action( 'add_option_' . $option_key, [ $this, 'payment_gateway_settings_option_changed' ], 10, 2 );
+			self::add_action( 'update_option_' . $option_key, [ $this, 'payment_gateway_settings_option_changed' ], 10, 3 );	
+		}
 	}
 
 	/**
@@ -127,23 +139,13 @@ class WC_Payment_Gateways {
 	 * @param array  $value New value.
 	 * @since 8.4.0
 	 */
-	public function payment_gateway_settings_update_option( $option, $old_value, $value ) {
-		if ( ! $this->gateway_settings_enabled( $value, $old_value ) ) {
-			return;
+	private function payment_gateway_settings_option_changed( $old_value, $value, $option = null ) {
+		if ( null === $option ) {
+			// We're in the add_option_ hook so there's no old value and parameter order is different.
+			$option = $old_value;
+			$old_value = null;
 		}
-		if ( ! $this->option_is_gateway_settings( $option ) ) {
-			return;
-		}
-
-		// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
-		$this->notify_admin_payment_gateway_enabled( $value['title'] );
-	}
-
-	public function payment_gateway_settings_add_option( $option, $value ) {
-		if ( ! $this->gateway_settings_enabled( $value ) ) {
-			return;
-		}
-		if ( ! $this->option_is_gateway_settings( $option ) ) {
+		if ( ! $this->was_gateway_enabled( $value, $old_value ) ) {
 			return;
 		}
 
@@ -200,22 +202,13 @@ All at %6$s
 				/* translators: Payment gateway enabled notification email subject. %s1: Site title, $s2: Gateway title. */
 				__( '[%1$s] Payment gateway %2$s enabled', 'woocommerce' ),
 				$site_title,
-				$value['title']
+				$gateway_title
 			),
 			$email_text
 		);
 	}
 	
-	private function option_is_gateway_settings( $option ) {
-		foreach ( WC_Payment_Gateways::instance()->payment_gateways() as $gateway ) {
-			if ( $option === $gateway->get_option_key() ) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private function gateway_settings_enabled( $value, $old_value = null ) {
+	private function was_gateway_enabled( $value, $old_value = null ) {
 		if ( $old_value === null ) {
 			// There was no old value, so this is a new option.
 			if ( ! empty( $value) && is_array( $value ) && isset( $value['enabled'] ) && $value['enabled'] === 'yes' && isset( $value['title'] ) ) {
