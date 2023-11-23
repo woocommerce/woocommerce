@@ -32,6 +32,10 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ input, setInput ] = useState( '' );
 	const [ messages, setMessages ] = useState< Message[] >( [] );
 	const [ isLoading, setLoading ] = useState( false );
+	// @todo: store threadID as localStorage to be retrieved on page load.
+	// @todo: store the last 3 messages as localStorage to be retrieved on page load.
+	const threadIDRef = useRef< string >( '' );
+	let threadID = threadIDRef.current;
 
 	const [ recording, setRecording ] = useState( false );
 	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
@@ -48,7 +52,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				setAudioBlob( e.data );
 			};
 			mediaRecorder.start();
-			console.log( 'Started recording' );
 			setRecording( true );
 		} catch ( err ) {
 			console.error( 'Error accessing microphone:', err );
@@ -57,7 +60,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 
 	const stopRecording = () => {
 		mediaRecorderRef.current?.stop();
-		console.log( 'stopped recording' );
 		setRecording( false );
 		// Now `audioBlob` contains the recorded audio
 	};
@@ -98,6 +100,9 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			const formData = new FormData();
 			formData.append( 'message', input );
 			formData.append( 'token', token );
+			if ( threadID ) {
+				formData.append( 'thread_id', threadID );
+			}
 
 			// Append audio file if it exists
 			if ( audioBlob ) {
@@ -108,12 +113,14 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				method: 'POST',
 				body: formData,
 			} ) ) as any;
-			const threadID: string = response.thread_id;
-			const runID: string = response.run_id;
+			if ( ! threadID && response.thread_id ) {
+				threadID = response.thread_id;
+			}
 
 			if ( response.status === 'requires_action' ) {
 				const answer = response.answer;
 				const functionID: string = answer.function_id;
+				const runID: string = response.run_id;
 				if ( answer.function_name === 'makeWCRestApiCall' ) {
 					const functionArguments = answer.function_args;
 					let message = '';
@@ -123,7 +130,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 						) ) as string;
 						message = responseBody;
 						// Make an API call to update the thread with the result of the function call
-						/*
+
 						const formData = new FormData();
 						formData.append( 'thread_id', threadID );
 						formData.append( 'run_id', runID );
@@ -137,17 +144,16 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 							body: formData,
 						} ) ) as any;
 
+						// @todo: handle outputToolResponse?
 
-						console.log( outputToolResponse );
-                        */
 						const summaryPrompt = `Provide a helpful answer for the original query using the resulting data from the API request. The original query was "${ input }". Parse through the data and find the most relevant information to answer the query and provide it in a human-readable format. The data from the result of the API request is: ${ JSON.stringify(
 							message
 						) }`;
 
 						const summaryFormData = new FormData();
-						summaryFormData.append( 'thread_id', threadID );
 						summaryFormData.append( 'message', summaryPrompt );
 						summaryFormData.append( 'token', token );
+						summaryFormData.append( 'thread_id', threadID );
 
 						const summaryResponse = ( await apiFetch( {
 							url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard',
@@ -168,7 +174,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 					] );
 					setLoading( false );
 					return;
-					// Handle the result of the WC REST API call as needed
 				}
 			}
 
@@ -179,7 +184,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			}
 			const assistantMessage: Message = {
 				sender: 'assistant',
-				text: message.content,
+				text: message,
 			};
 
 			setMessages( ( messages ) => [ ...messages, assistantMessage ] );
