@@ -21,6 +21,12 @@ export const fetchAiStatus = () => async (): Promise< aiStatusResponse > => {
 	return data;
 };
 
+// Reset all pattern contents.
+// To be implemented in a future PR.
+export const resetPatterns = () => {
+	return Promise.resolve();
+};
+
 export const fetchThemeCards = async () => {
 	const themes = await apiFetch( {
 		path: '/wc-admin/onboarding/themes/recommended',
