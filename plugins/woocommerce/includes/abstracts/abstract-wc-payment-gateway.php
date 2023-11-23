@@ -594,13 +594,13 @@ function wc_notify_payment_gateway_enabled( $option, $old_value, $value ) {
 	}
 
 	// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
-	$admin_email = get_option( 'admin_email' );
-	$user       = get_user_by( 'email', $admin_email );
-	$username   = $user ? $user->user_login : $admin_email;
-	$gateway_title = $value['title'];
+	$admin_email          = get_option( 'admin_email' );
+	$user                 = get_user_by( 'email', $admin_email );
+	$username             = $user ? $user->user_login : $admin_email;
+	$gateway_title        = $value['title'];
 	$gateway_settings_url = self_admin_url( 'admin.php?page=wc-settings&tab=checkout' );
-	$site_name = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
-	$site_url = home_url();
+	$site_name            = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+	$site_url             = home_url();
 
 	/* translators: Payment gateway enabled notification email. 1: Username, 2: Gateway Title, 3: Site URL, 4: Gateway Settings URL, 5: Admin Email, 6: Site Name, 7: Site URL. */
 	$email_text = sprintf(
