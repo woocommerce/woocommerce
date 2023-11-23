@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\Orders\SourceAttributionController;
+use Automattic\WooCommerce\Internal\Orders\OrderAttributionController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
@@ -13,11 +13,11 @@ use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
 use WP_Error;
 
 /**
- * Class SourceAttributionBlocksController
+ * Class OrderAttributionBlocksController
  *
  * @since x.x.x
  */
-class SourceAttributionBlocksController implements RegisterHooksInterface {
+class OrderAttributionBlocksController implements RegisterHooksInterface {
 
 	use ScriptDebug;
 
@@ -36,11 +36,11 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	private $extend_schema;
 
 	/**
-	 * Instance of the source attribution controller.
+	 * Instance of the order attribution controller.
 	 *
-	 * @var SourceAttributionController
+	 * @var OrderAttributionController
 	 */
-	private $source_attribution_controller;
+	private $order_attribution_controller;
 
 	/**
 	 * Bind dependencies on init.
@@ -49,16 +49,16 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	 *
 	 * @param ExtendSchema                $extend_schema                 ExtendSchema instance.
 	 * @param FeaturesController          $features_controller           Features controller.
-	 * @param SourceAttributionController $source_attribution_controller Instance of the source attribution controller.
+	 * @param OrderAttributionController  $order_attribution_controller Instance of the order attribution controller.
 	 */
 	final public function init(
 		ExtendSchema $extend_schema,
 		FeaturesController $features_controller,
-		SourceAttributionController $source_attribution_controller
+		OrderAttributionController $order_attribution_controller
 	) {
 		$this->extend_schema                 = $extend_schema;
 		$this->features_controller           = $features_controller;
-		$this->source_attribution_controller = $source_attribution_controller;
+		$this->order_attribution_controller = $order_attribution_controller;
 	}
 
 	/**
@@ -69,7 +69,7 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	 */
 	public function register() {
 		// Bail if the feature is not enabled.
-		if ( ! $this->features_controller->feature_is_enabled( 'order_source_attribution' ) ) {
+		if ( ! $this->features_controller->feature_is_enabled( 'order_attribution' ) ) {
 			return;
 		}
 
@@ -100,12 +100,12 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	 */
 	private function register_assets() {
 		wp_register_script(
-			'wc-order-source-attribution-blocks',
+			'wc-order-attribution-blocks',
 			plugins_url(
-				"assets/js/frontend/order-source-attribution-blocks{$this->get_script_suffix()}.js",
+				"assets/js/frontend/order-attribution-blocks{$this->get_script_suffix()}.js",
 				WC_PLUGIN_FILE
 			),
-			array( 'wc-order-source-attribution', 'wp-data', 'wc-blocks-checkout' ),
+			array( 'wc-order-attribution', 'wp-data', 'wc-blocks-checkout' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
@@ -118,7 +118,7 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function enqueue_scripts() {
-		wp_enqueue_script( 'wc-order-source-attribution-blocks' );
+		wp_enqueue_script( 'wc-order-attribution-blocks' );
 	}
 
 	/**
@@ -130,7 +130,7 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 		$this->extend_schema->register_endpoint_data(
 			array(
 				'endpoint'        => CheckoutSchema::IDENTIFIER,
-				'namespace'       => 'woocommerce/order-source-attribution',
+				'namespace'       => 'woocommerce/order-attribution',
 				'schema_callback' => $this->get_schema_callback(),
 			)
 		);
@@ -138,13 +138,13 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 		add_action(
 			'woocommerce_store_api_checkout_update_order_from_request',
 			function ( $order, $request ) {
-				$params = $request->get_param( 'extensions' )['woocommerce/order-source-attribution'];
+				$params = $request->get_param( 'extensions' )['woocommerce/order-attribution'];
 				if ( empty( $params ) ) {
 					return;
 				}
 
 				/**
-				 * Run an action to save order source attribution data.
+				 * Run an action to save order attribution data.
 				 *
 				 * @since x.x.x
 				 *
@@ -166,7 +166,7 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 	private function get_schema_callback() {
 		return function() {
 			$schema = array();
-			$fields = $this->source_attribution_controller->get_fields();
+			$fields = $this->order_attribution_controller->get_fields();
 
 			$validate_callback = function( $value ) {
 				if ( ! is_string( $value ) && null !== $value ) {
@@ -174,7 +174,7 @@ class SourceAttributionBlocksController implements RegisterHooksInterface {
 						'api-error',
 						sprintf(
 							/* translators: %s is the property type */
-							esc_html__( 'Value of type %s was posted to the source attribution callback', 'woocommerce' ),
+							esc_html__( 'Value of type %s was posted to the order attribution callback', 'woocommerce' ),
 							gettype( $value )
 						)
 					);
