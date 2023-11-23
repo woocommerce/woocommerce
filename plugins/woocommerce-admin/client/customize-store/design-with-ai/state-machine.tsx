@@ -40,7 +40,7 @@ export const hasStepInUrl = (
 
 export const isAiOnline = () => {
 	// @ts-expect-error temp workaround; the value should be read from the parent context
-	return window.aiOnline;
+	return window.cys_aiOnline;
 };
 
 export const designWithAiStateMachineDefinition = createMachine(
