@@ -4,7 +4,7 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
-import { Sender, createMachine } from 'xstate';
+import { Sender, actions, createMachine } from 'xstate';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { useMachine, useSelector } from '@xstate/react';
 import {
@@ -160,6 +160,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		transitionalScreen: {
 			hasCompleteSurvey: false,
 		},
+		aiOnline: true,
 	} as customizeStoreStateMachineContext,
 	invoke: {
 		src: 'browserPopstateHandler',
@@ -211,8 +212,33 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		intro: {
 			id: 'intro',
-			initial: 'preIntro',
+			initial: 'checkAiStatus',
 			states: {
+				checkAiStatus: {
+					invoke: {
+						src: 'fetchAiStatus',
+						onDone: {
+							actions: 'assignAiStatus',
+							target: 'postCheckAiStatus',
+						},
+						onError: {
+							actions: 'assignAiOffline',
+							target: '#customizeStore.designWithAi',
+						},
+					},
+				},
+				postCheckAiStatus: {
+					always: [
+						{
+							target: 'preIntro',
+							cond: 'isAiOnline',
+						},
+						{
+							target: '#customizeStore.designWithAi',
+							cond: 'isAiOffline',
+						},
+					],
+				},
 				preIntro: {
 					invoke: {
 						src: 'fetchIntroData',
@@ -273,9 +299,22 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					meta: {
 						component: DesignWithAi,
 					},
-					entry: [
-						{ type: 'updateQueryStep', step: 'design-with-ai' },
-					],
+					entry: actions.choose( [
+						{
+							actions: {
+								type: 'updateQueryStep',
+								step: 'design-with-ai',
+							},
+							cond: 'isAiOnline',
+						},
+						{
+							actions: {
+								type: 'updateQueryStep',
+								step: 'design-with-ai/tone-of-voice',
+							},
+							cond: 'isAiOffline',
+						},
+					] ),
 				},
 			},
 			on: {
@@ -387,6 +426,12 @@ export const CustomizeStoreController = ( {
 						pathFragments[ 2 ] === // [0] '', [1] 'customize-store', [2] step slug
 						( cond as { step: string | undefined } ).step
 					);
+				},
+				isAiOnline: ( _ctx ) => {
+					return _ctx.aiOnline;
+				},
+				isAiOffline: ( _ctx ) => {
+					return ! _ctx.aiOnline;
 				},
 			},
 		} );
