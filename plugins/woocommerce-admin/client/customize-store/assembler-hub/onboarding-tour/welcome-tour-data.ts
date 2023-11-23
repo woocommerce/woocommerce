@@ -17,7 +17,7 @@ export default {
 		heading: __( 'Welcome to your store!', 'woocommerce' ),
 		description: {
 			desktop: __(
-				"We encountered some issues while generating content with AI. But don't worry —— you can still customize the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
+				"We encountered some issues while generating content with AI. But don't worry — you can still customize the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
 				'woocommerce'
 			),
 		},
