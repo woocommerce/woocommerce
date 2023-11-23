@@ -234,10 +234,23 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 							cond: 'isAiOnline',
 						},
 						{
-							target: '#customizeStore.designWithAi',
+							target: 'resetPatterns',
 							cond: 'isAiOffline',
 						},
 					],
+				},
+				resetPatterns: {
+					invoke: {
+						src: 'resetPatterns',
+						onDone: {
+							actions: 'assignAiOffline',
+							target: '#customizeStore.designWithAi',
+						},
+						onError: {
+							actions: 'assignAiOffline',
+							target: '#customizeStore.designWithAi',
+						},
+					},
 				},
 				preIntro: {
 					invoke: {
