@@ -5,15 +5,15 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Integrations\WPConsentAPI;
-use Automattic\WooCommerce\Internal\Orders\SourceAttributionController;
+use Automattic\WooCommerce\Internal\Orders\OrderAttributionController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
- * Class OrderSourceAttributionServiceProvider
+ * Class OrderAttributionServiceProvider
  *
  * @since x.x.x
  */
-class OrderSourceAttributionServiceProvider extends AbstractInterfaceServiceProvider {
+class OrderAttributionServiceProvider extends AbstractInterfaceServiceProvider {
 
 	/**
 	 * The classes/interfaces that are serviced by this service provider.
@@ -21,7 +21,7 @@ class OrderSourceAttributionServiceProvider extends AbstractInterfaceServiceProv
 	 * @var array
 	 */
 	protected $provides = array(
-		SourceAttributionController::class,
+		OrderAttributionController::class,
 		WPConsentAPI::class,
 	);
 
@@ -29,7 +29,7 @@ class OrderSourceAttributionServiceProvider extends AbstractInterfaceServiceProv
 	 * Register the classes.
 	 */
 	public function register() {
-		$this->share_with_implements_tags( SourceAttributionController::class )
+		$this->share_with_implements_tags( OrderAttributionController::class )
 			->addArguments(
 				array(
 					LegacyProxy::class,

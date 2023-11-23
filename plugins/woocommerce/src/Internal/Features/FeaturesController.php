@@ -154,7 +154,7 @@ class FeaturesController {
 	private function get_feature_definitions() {
 		if ( empty( $this->features ) ) {
 			$legacy_features = array(
-				'analytics'                => array(
+				'analytics'            => array(
 					'name'               => __( 'Analytics', 'woocommerce' ),
 					'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
 					'option_key'         => Analytics::TOGGLE_OPTION_NAME,
@@ -163,7 +163,7 @@ class FeaturesController {
 					'disable_ui'         => false,
 					'is_legacy'          => true,
 				),
-				'new_navigation'           => array(
+				'new_navigation'       => array(
 					'name'            => __( 'Navigation', 'woocommerce' ),
 					'description'     => __(
 						'Add the new WooCommerce navigation experience to the dashboard',
@@ -174,7 +174,7 @@ class FeaturesController {
 					'disable_ui'      => false,
 					'is_legacy'       => true,
 				),
-				'product_block_editor'     => array(
+				'product_block_editor' => array(
 					'name'            => __( 'New product editor', 'woocommerce' ),
 					'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 					'is_experimental' => true,
@@ -195,13 +195,13 @@ class FeaturesController {
 						return $string;
 					},
 				),
-				'cart_checkout_blocks'     => array(
+				'cart_checkout_blocks' => array(
 					'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 					'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
 					'is_experimental' => false,
 					'disable_ui'      => true,
 				),
-				'marketplace'              => array(
+				'marketplace'          => array(
 					'name'               => __( 'Marketplace', 'woocommerce' ),
 					'description'        => __(
 						'New, faster way to find extensions and themes for your WooCommerce store',
@@ -214,8 +214,8 @@ class FeaturesController {
 				),
 				// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 				// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
-				'order_source_attribution' => array(
-					'name'               => __( 'Order Source Attribution', 'woocommerce' ),
+				'order_attribution'    => array(
+					'name'               => __( 'Order Attribution', 'woocommerce' ),
 					'description'        => __(
 						'Enable this feature to track and credit channels and campaigns that contribute to orders on your site',
 						'woocommerce'
