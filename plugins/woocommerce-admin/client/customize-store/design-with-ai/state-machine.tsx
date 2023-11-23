@@ -38,8 +38,9 @@ export const hasStepInUrl = (
 	);
 };
 
-export const isAiOnline = ( _ctx: { aiAvailable: boolean } ) => {
-	return _ctx.aiAvailable;
+export const isAiOnline = () => {
+	// @ts-expect-error temp workaround; the value should be read from the parent context
+	return window.aiOnline;
 };
 
 export const designWithAiStateMachineDefinition = createMachine(
@@ -76,8 +77,6 @@ export const designWithAiStateMachineDefinition = createMachine(
 			toneOfVoice: {
 				choice: '',
 			},
-			// @ts-expect-error -- Temp solution -- we need to get this value from parent machine.
-			aiAvailable: window.aiAvailable,
 			aiSuggestions: {
 				// Default color palette, font pairing are used as fallbacks when the AI endpoint fails.
 				defaultColorPalette: {
