@@ -1,7 +1,7 @@
-( function ( wc_order_source_attribution ) {
+( function ( wc_order_attribution ) {
 	'use strict';
 
-	const params = wc_order_source_attribution.params;
+	const params = wc_order_attribution.params;
 	const prefix = params.prefix;
 	const cookieLifetime = Number( params.lifetime );
 	const sessionLength = Number( params.session );
@@ -33,10 +33,10 @@
 		user_agent: obj.udata.uag,
 	} );
 
-	wc_order_source_attribution.initOrderTracking = () => {
+	wc_order_attribution.initOrderTracking = () => {
 
 		if ( params.allowTracking === 'no' ) {
-			wc_order_source_attribution.removeTrackingCookies();
+			wc_order_attribution.removeTrackingCookies();
 			return;
 		}
 
@@ -83,19 +83,19 @@
 	/**
 	 * Enable or disable order tracking analytics and marketing consent init and change.
 	 */
-	wc_order_source_attribution.setAllowTrackingConsent = ( allow ) => {
+	wc_order_attribution.setAllowTrackingConsent = ( allow ) => {
 		if ( ! allow ) {
 			return;
 		}
 
 		params.allowTracking = 'yes';
-		wc_order_source_attribution.initOrderTracking();
+		wc_order_attribution.initOrderTracking();
 	}
 
 	/**
 	 * Remove sourcebuster.js cookies whenever tracking is disabled or consent is revoked.
 	 */
-	wc_order_source_attribution.removeTrackingCookies = () => {
+	wc_order_attribution.removeTrackingCookies = () => {
 		const domain = window.location.hostname;
 		const sbCookies = [
 			'sbjs_current',
@@ -116,6 +116,6 @@
 	}
 
 	// Run init.
-	wc_order_source_attribution.initOrderTracking();
+	wc_order_attribution.initOrderTracking();
 
-}( window.wc_order_source_attribution ) );
+}( window.wc_order_attribution ) );

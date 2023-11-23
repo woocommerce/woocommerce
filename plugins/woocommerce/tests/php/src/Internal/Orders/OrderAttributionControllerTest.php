@@ -3,7 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\Orders\SourceAttributionController;
+use Automattic\WooCommerce\Internal\Orders\OrderAttributionController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 use Closure;
@@ -12,18 +12,18 @@ use WC_Order;
 use WP_UnitTestCase;
 
 /**
- * Tests for SourceAttributionControllerTest.
+ * Tests for OrderAttributionControllerTest.
  *
  * @since x.x.x
  */
-class SourceAttributionControllerTest extends WP_UnitTestCase {
+class OrderAttributionControllerTest extends WP_UnitTestCase {
 
 	/**
 	 * The class instance being tested.
 	 *
-	 * @var SourceAttributionController
+	 * @var OrderAttributionController
 	 */
-	protected SourceAttributionController $attribution_fields_class;
+	protected OrderAttributionController $attribution_fields_class;
 
 	/**
 	 * Sets up the fixture, for example, open a network connection.
@@ -34,7 +34,7 @@ class SourceAttributionControllerTest extends WP_UnitTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
-		$this->attribution_fields_class = new SourceAttributionController();
+		$this->attribution_fields_class = new OrderAttributionController();
 
 		/** @var MockableLegacyProxy $legacy_proxy */
 		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
@@ -43,7 +43,7 @@ class SourceAttributionControllerTest extends WP_UnitTestCase {
 			->onlyMethods( array( 'feature_is_enabled' ) )
 			->getMock();
 		$feature_mock->method( 'feature_is_enabled' )
-			->with( 'order_source_attribution' )
+			->with( 'order_attribution' )
 			->willReturn( true );
 
 		$logger_mock = $this->getMockBuilder( WC_Logger::class )

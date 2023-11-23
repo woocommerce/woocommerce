@@ -8538,30 +8538,30 @@ table.bar_chart {
 	}
 }
 
-.order-source-attribution-metabox {
+.order-attribution-metabox {
 	h4 {
 		margin-bottom: .1em;
 	}
 
-	.woocommerce-order-source-attribution-origin-container {
+	.woocommerce-order-attribution-origin-container {
 		display: flex;
 		justify-content: space-between;
 		align-items: start;
 	}
 
-	.order-source-attribution-origin {
+	.order-attribution-origin {
 		flex-grow: 1;
 	}
 
-	.woocommerce-order-source-attribution-details-toggle {
+	.woocommerce-order-attribution-details-toggle {
 		white-space: nowrap;
 	}
 
-	.woocommerce-order-source-attribution-details-container {
+	.woocommerce-order-attribution-details-container {
 		display: none;
 	}
 
-	.woocommerce-order-source-attribution-details-toggle {
+	.woocommerce-order-attribution-details-toggle {
 		display: block;
 		text-decoration: none;
 		vertical-align: middle;

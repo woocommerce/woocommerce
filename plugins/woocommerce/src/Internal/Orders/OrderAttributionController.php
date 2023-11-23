@@ -7,7 +7,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
-use Automattic\WooCommerce\Internal\Traits\SourceAttributionMeta;
+use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Exception;
@@ -18,14 +18,14 @@ use WC_Order;
 use WC_Tracks;
 
 /**
- * Class SourceAttributionController
+ * Class OrderAttributionController
  *
  * @since x.x.x
  */
-class SourceAttributionController implements RegisterHooksInterface {
+class OrderAttributionController implements RegisterHooksInterface {
 
 	use ScriptDebug;
-	use SourceAttributionMeta {
+	use OrderAttributionMeta {
 		get_prefixed_field as public;
 	}
 
@@ -81,7 +81,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 		}
 
 		// Bail if the feature is not enabled.
-		if ( ! $this->feature_controller->feature_is_enabled( 'order_source_attribution' ) ) {
+		if ( ! $this->feature_controller->feature_is_enabled( 'order_attribution' ) ) {
 			return;
 		}
 
@@ -115,7 +115,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 				// phpcs:ignore WordPress.Security.NonceVerification
 				$params = $this->get_unprefixed_fields( $_POST );
 				/**
-				 * Run an action to save order source attribution data.
+				 * Run an action to save order attribution data.
 				 *
 				 * @since x.x.x
 				 *
@@ -189,8 +189,8 @@ class SourceAttributionController implements RegisterHooksInterface {
 		);
 
 		wp_enqueue_script(
-			'wc-order-source-attribution',
-			plugins_url( "assets/js/frontend/order-source-attribution{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
+			'wc-order-attribution',
+			plugins_url( "assets/js/frontend/order-attribution{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
 			array( 'sourcebuster-js' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
@@ -203,7 +203,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 		 *
 		 * @param int $lifetime The lifetime of the cookie in months.
 		 */
-		$lifetime = (int) apply_filters( 'wc_order_source_attribution_cookie_lifetime_months', 6 );
+		$lifetime = (int) apply_filters( 'wc_order_attribution_cookie_lifetime_months', 6 );
 
 		/**
 		 * Filter the session length for source tracking.
@@ -212,7 +212,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 		 *
 		 * @param int $session_length The session length in minutes.
 		 */
-		$session_length = (int) apply_filters( 'wc_order_source_attribution_session_length_minutes', 30 );
+		$session_length = (int) apply_filters( 'wc_order_attribution_session_length_minutes', 30 );
 
 		/**
 		 * Filter to allow tracking.
@@ -221,9 +221,9 @@ class SourceAttributionController implements RegisterHooksInterface {
 		 *
 		 * @param bool $allow_tracking True to allow tracking, false to disable.
 		 */
-		$allow_tracking = wc_bool_to_string( apply_filters( 'wc_order_source_attribution_allow_tracking', true ) );
+		$allow_tracking = wc_bool_to_string( apply_filters( 'wc_order_attribution_allow_tracking', true ) );
 
-		// Create Order Source Attribution JS namespace with parameters.
+		// Create Order Attribution JS namespace with parameters.
 		$namespace = array(
 			'params' => array(
 				'lifetime'      => $lifetime,
@@ -234,7 +234,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 			),
 		);
 
-		wp_localize_script( 'wc-order-source-attribution', 'wc_order_source_attribution', $namespace );
+		wp_localize_script( 'wc-order-attribution', 'wc_order_source_attribution', $namespace );
 	}
 
 	/**
@@ -251,8 +251,8 @@ class SourceAttributionController implements RegisterHooksInterface {
 
 		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 		wp_enqueue_script(
-			'woocommerce-order-source-attribution-admin-js',
-			plugins_url( "assets/js/admin/order-source-attribution-admin{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
+			'woocommerce-order-attribution-admin-js',
+			plugins_url( "assets/js/admin/order-attribution-admin{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
 			array( 'jquery' ),
 			Constants::get_constant( 'WC_VERSION' )
 		);
@@ -350,14 +350,14 @@ class SourceAttributionController implements RegisterHooksInterface {
 		 *
 		 * @param string $enabled 'yes' to enable debug mode, 'no' to disable.
 		 */
-		if ( 'yes' !== apply_filters( 'wc_order_source_attribution_debug_mode_enabled', 'no' ) ) {
+		if ( 'yes' !== apply_filters( 'wc_order_attribution_debug_mode_enabled', 'no' ) ) {
 			return;
 		}
 
 		$this->logger->log(
 			$level,
 			sprintf( '%s %s', $method, $message ),
-			array( 'source' => 'woocommerce-order-source-attribution' )
+			array( 'source' => 'woocommerce-order-attribution' )
 		);
 	}
 
@@ -382,7 +382,7 @@ class SourceAttributionController implements RegisterHooksInterface {
 			'customer_order_count' => wc_get_customer_order_count( $order->get_customer_id() ),
 		);
 
-		$this->proxy->call_static( WC_Tracks::class, 'record_event', 'order_source_attribution', $tracks_data );
+		$this->proxy->call_static( WC_Tracks::class, 'record_event', 'order_attribution', $tracks_data );
 	}
 
 	/**

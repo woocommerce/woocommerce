@@ -3,27 +3,27 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
-use Automattic\WooCommerce\Internal\Traits\SourceAttributionMeta;
+use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
 use WC_Order;
 
 /**
- * Class SourceAttribution
+ * Class OrderAttribution
  *
  * @since x.x.x
  */
-class SourceAttribution {
+class OrderAttribution {
 
-	use SourceAttributionMeta;
+	use OrderAttributionMeta;
 
 	/**
-	 * SourceAttribution constructor.
+	 * OrderAttribution constructor.
 	 */
 	public function __construct() {
 		$this->set_fields_and_prefix();
 	}
 
 	/**
-	 * Output the source data metabox for the order.
+	 * Output the attribution data metabox for the order.
 	 *
 	 * @since x.x.x
 	 *
@@ -45,6 +45,6 @@ class SourceAttribution {
 			// Only show more details toggle if there is more than just the origin.
 			'has_more_details' => array( 'origin' ) !== array_keys( $meta ),
 		);
-		wc_get_template( 'order/source-data-fields.php', $template_data );
+		wc_get_template( 'order/attribution-data-fields.php', $template_data );
 	}
 }

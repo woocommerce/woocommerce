@@ -1,23 +1,23 @@
 <?php
 /**
- * SourceAttribution test class.
+ * \Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution test class.
  */
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders\MetaBoxes;
 
-use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\SourceAttribution;
+use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
 use WC_Helper_Order;
 use WP_UnitTestCase;
 
 /**
- * Tests for the SourceAttribution class.
+ * Tests for the OrderAttribution class.
  */
-class SourceAttributionTest extends WP_UnitTestCase {
+class OrderAttributionTest extends WP_UnitTestCase {
 
 	/**
 	 * System under test.
 	 *
-	 * @var SourceAttribution
+	 * @var OrderAttribution
 	 */
 	private $sut;
 
@@ -28,7 +28,7 @@ class SourceAttributionTest extends WP_UnitTestCase {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new SourceAttribution();
+		$this->sut = new OrderAttribution();
 	}
 
 	/**
@@ -62,7 +62,7 @@ class SourceAttributionTest extends WP_UnitTestCase {
 	 */
 	public function test_more_than_one_related_meta_affects_show_more() {
 		$order = WC_Helper_Order::create_order();
-		$order->add_meta_data( '_wc_order_source_attribution_device_type', 'Desktop' );
+		$order->add_meta_data( '_wc_order_attribution_device_type', 'Desktop' );
 
 		// Hook into the template to check the args.
 		add_action(
@@ -91,18 +91,18 @@ class SourceAttributionTest extends WP_UnitTestCase {
 		$order = WC_Helper_Order::create_order();
 
 		$meta = array(
-			'_wc_order_source_attribution_origin'        => 'Referral: WooCommerce.com',
-			'_wc_order_source_attribution_device_type'   => 'Desktop',
-			'_wc_order_source_attribution_user_agent'    => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-			'_wc_order_source_attribution_session_count' => 1,
-			'_wc_order_source_attribution_session_pages' => 4,
-			'_wc_order_source_attribution_session_start_time' => '2023-11-16 13:47:50',
-			'_wc_order_source_attribution_session_entry' => 'https://wordpress.ddev.site/product/belt/',
-			'_wc_order_source_attribution_utm_content'   => '/',
-			'_wc_order_source_attribution_utm_medium'    => 'referral',
-			'_wc_order_source_attribution_utm_source'    => 'woocommerce.com',
-			'_wc_order_source_attribution_referrer'      => 'https://woocommerce.com/',
-			'_wc_order_source_attribution_source_type'   => 'referral',
+			'_wc_order_attribution_origin'             => 'Referral: WooCommerce.com',
+			'_wc_order_attribution_device_type'        => 'Desktop',
+			'_wc_order_attribution_user_agent'         => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+			'_wc_order_attribution_session_count'      => 1,
+			'_wc_order_attribution_session_pages'      => 4,
+			'_wc_order_attribution_session_start_time' => '2023-11-16 13:47:50',
+			'_wc_order_attribution_session_entry'      => 'https://wordpress.ddev.site/product/belt/',
+			'_wc_order_attribution_utm_content'        => '/',
+			'_wc_order_attribution_utm_medium'         => 'referral',
+			'_wc_order_attribution_utm_source'         => 'woocommerce.com',
+			'_wc_order_attribution_referrer'           => 'https://woocommerce.com/',
+			'_wc_order_attribution_source_type'        => 'referral',
 		);
 		foreach ( $meta as $key => $value ) {
 			$order->add_meta_data( $key, $value );
