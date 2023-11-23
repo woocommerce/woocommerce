@@ -251,6 +251,7 @@ class ProductUpdater {
 
 		$product->set_name( $ai_generated_product_content['title'] );
 		$product->set_description( $ai_generated_product_content['description'] );
+		$product->set_regular_price( $ai_generated_product_content['price'] );
 
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -292,6 +293,7 @@ class ProductUpdater {
 			$products_information_list[] = [
 				'title'       => 'A product title',
 				'description' => 'A product description',
+				'price'       => 'The product price',
 				'image'       => [
 					'src' => esc_url( $image_src ),
 					'alt' => esc_attr( $image_alt ),
@@ -329,12 +331,16 @@ class ProductUpdater {
 
 		$expected_results_format = [];
 		foreach ( $products_information_list as $index => $product ) {
-			$expected_results_format[ $index ] = '';
+			$expected_results_format[ $index ] = [
+				'title' => '',
+				'price' => '',
+			];
 		}
 
 		$formatted_prompt = sprintf(
-			"Generate two-words titles for products using the following prompts for each one of them: '%s'. Ensure each entry is unique and does not repeat the given examples. Do not include backticks or the word json in the response. Here's an example format: '%s'.",
+			"Generate two-words titles and price for products using the following prompts for each one of them: '%s'. Ensure each entry is unique and does not repeat the given examples. It should be a number and it's not too low or too high for the corresponding product title being advertised. Convert the price to this currency: '%s'. Do not include backticks or the word json in the response. Here's an example format: '%s'.",
 			wp_json_encode( $prompts ),
+			get_woocommerce_currency(),
 			wp_json_encode( $expected_results_format )
 		);
 
@@ -381,7 +387,8 @@ class ProductUpdater {
 			}
 
 			foreach ( $products_information_list as $index => $product_information ) {
-				$products_information_list[ $index ]['title'] = str_replace( '"', '', $completion[ $index ] );
+				$products_information_list[ $index ]['title'] = str_replace( '"', '', $completion[ $index ]['title'] );
+				$products_information_list[ $index ]['price'] = $completion[ $index ]['price'];
 			}
 
 			$success = true;
