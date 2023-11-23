@@ -64,13 +64,15 @@
 		};
 
 		/**
-		 * Add source values to checkout.
+		 * Add source values to the classic checkout.
 		 */
-		const previousInitCheckout = document.body.oninit_checkout;
-		document.body.oninit_checkout = () => {
-			setFields();
-			previousInitCheckout();
-		};
+		if ( $( '.woocommerce form.checkout' ) !== null ) {
+			const previousInitCheckout = document.body.oninit_checkout;
+			document.body.oninit_checkout = () => {
+				setFields();
+				previousInitCheckout && previousInitCheckout();
+			};
+		}
 
 		/**
 		 * Add source values to register.
