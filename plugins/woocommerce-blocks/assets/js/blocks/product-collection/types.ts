@@ -25,7 +25,7 @@ export enum LayoutOptions {
 export interface ProductCollectionDisplayLayout {
 	type: LayoutOptions;
 	columns: number;
-	shrinkColumns?: boolean;
+	shrinkColumns: boolean;
 }
 
 export enum ETimeFrameOperator {
