@@ -9,6 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { customizeStoreStateMachineEvents } from '..';
 import {
+	aiStatusResponse,
 	customizeStoreStateMachineContext,
 	RecommendThemesAPIResponse,
 } from '../types';
@@ -102,4 +103,25 @@ export const assignCurrentThemeIsAiGenerated = assign<
 		 ).data.currentThemeIsAiGenerated;
 		return { ...context.intro, currentThemeIsAiGenerated };
 	},
+} );
+
+export const assignAiStatus = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
+>( {
+	aiOnline: ( _context, _event ) => {
+		const status = ( _event as DoneInvokeEvent< aiStatusResponse > ).data
+			.status.indicator;
+		const aiOnline = status !== 'critical' && status !== 'major';
+		// @ts-expect-error temp workaround;
+		window.aiOnline = aiOnline;
+		return aiOnline;
+	},
+} );
+
+export const assignAiOffline = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
+>( {
+	aiOnline: false,
 } );
