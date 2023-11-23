@@ -595,33 +595,41 @@ function wc_notify_payment_gateway_enabled( $option, $old_value, $value ) {
 
 	// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
 	$admin_email = get_option( 'admin_email' );
-	/* translators: Do not translate USERNAME, GATEWAY_TITLE, GATEWAY_SETTINGS_URL, EMAIL, SITENAME, SITEURL: those are placeholders. */
-	$email_text = __(
-		'Howdy ###USERNAME###,
+	$user       = get_user_by( 'email', $admin_email );
+	$username   = $user ? $user->user_login : $admin_email;
+	$gateway_title = $value['title'];
+	$gateway_settings_url = self_admin_url( 'admin.php?page=wc-settings&tab=checkout' );
+	$site_name = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+	$site_url = home_url();
 
-The payment gateway "###GATEWAY_TITLE###" was just enabled on this site:
-###SITEURL###
+	/* translators: Payment gateway enabled notification email. 1: Username, 2: Gateway Title, 3: Site URL, 4: Gateway Settings URL, 5: Admin Email, 6: Site Name, 7: Site URL. */
+	$email_text = sprintf(
+		__(
+			'Howdy %1$s,
+
+The payment gateway "%2$s" was just enabled on this site:
+%3$s
 
 If this was intentional you can safely ignore and delete this email. 
 
 If you did not enable this payment gateway, please log in to your site and consider disabling it here:
-###GATEWAY_SETTINGS_URL###
+%4$s
 
-This email has been sent to ###EMAIL###
+This email has been sent to %5$s
 
 Regards,
-All at ###SITENAME###
-###SITEURL###',
-		'woocommerce'
+All at %6$s
+%7$s',
+			'woocommerce'
+		),
+		$username,
+		$gateway_title,
+		$site_url,
+		$gateway_settings_url,
+		$admin_email,
+		$site_name,
+		$site_url
 	);
-	$user       = get_user_by( 'email', $admin_email );
-	$username   = $user ? $user->user_login : $admin_email;
-	$email_text = str_replace( '###USERNAME###', $username, $email_text );
-	$email_text = str_replace( '###GATEWAY_TITLE###', $value['title'], $email_text );
-	$email_text = str_replace( '###GATEWAY_SETTINGS_URL###', self_admin_url( 'admin.php?page=wc-settings&tab=checkout' ), $email_text );
-	$email_text = str_replace( '###EMAIL###', $admin_email, $email_text );
-	$email_text = str_replace( '###SITENAME###', wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ), $email_text );
-	$email_text = str_replace( '###SITEURL###', home_url(), $email_text );
 
 	if ( '' !== get_option( 'blogname' ) ) {
 		$site_title = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
