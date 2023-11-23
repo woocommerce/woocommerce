@@ -5,7 +5,12 @@ import { __ } from '@wordpress/i18n';
 import { useContext, useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+
+/**
+ * Internal dependencies
+ */
 import { CustomizeStoreContext } from '..';
+import WelcomeTourContent from './welcome-tour-content';
 export * from './use-onboarding-tour';
 
 type OnboardingTourProps = {
@@ -29,20 +34,6 @@ export const OnboardingTour = ( {
 	const aiAvailable = ( context as { aiAvailable: boolean } ).aiAvailable;
 
 	if ( showWelcomeTour ) {
-		const heading = aiAvailable
-			? __( 'Welcome to your AI-generated store!', 'woocommerce' )
-			: __( 'Welcome to your store!', 'woocommerce' );
-
-		const desktopDescription = aiAvailable
-			? __(
-					"This is where you can start customizing the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
-					'woocommerce'
-			  )
-			: __(
-					"We encountered some issues while generating content with AI. But don't worry —— you can still customize the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
-					'woocommerce'
-			  );
-
 		const classNames = [
 			'woocommerce-customize-store-tour-kit',
 			'woocommerce-customize-store-welcome-tourkit',
@@ -98,9 +89,19 @@ export const OnboardingTour = ( {
 									text: __( 'Take a tour', 'woocommerce' ),
 								},
 								descriptions: {
-									desktop: desktopDescription,
+									desktop:
+										WelcomeTourContent[
+											aiAvailable
+												? 'aiAvailable'
+												: 'aiOffline'
+										].description.desktop,
 								},
-								heading,
+								heading:
+									WelcomeTourContent[
+										aiAvailable
+											? 'aiAvailable'
+											: 'aiOffline'
+									].heading,
 								skipButton: {
 									isVisible: true,
 								},
