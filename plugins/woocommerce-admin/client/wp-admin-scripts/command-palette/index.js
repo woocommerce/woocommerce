@@ -1,25 +1,29 @@
 /**
  * External dependencies
  */
-import { useCommandLoader } from '@wordpress/commands';
 import { registerPlugin } from '@wordpress/plugins';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { box, plus, settings } from '@wordpress/icons';
 import { useMemo } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { dispatch, useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { addQueryArgs } from '@wordpress/url';
 import { queueRecordEvent } from '@woocommerce/tracks';
+import { store as commandsStore } from '@wordpress/commands';
 
 /**
  * Internal dependencies
  */
-import { useCommandWithTracking } from './use-command-with-tracking';
+import { registerCommandWithTracking } from './register-command-with-tracking';
 
-const useWooCommerceSettingsCommand = ( { label, tab } ) => {
-	useCommandWithTracking( {
+const registerWooCommerceSettingsCommand = ( { label, tab } ) => {
+	registerCommandWithTracking( {
 		name: `woocommerce/settings-${ tab }`,
-		label,
+		label: sprintf(
+			// translators: %s is the title of the Settings Tab. This is used as a command in the Command Palette.
+			__( 'WooCommerce Settings: %s', 'woocommerce' ),
+			label
+		),
 		icon: settings,
 		callback: () => {
 			document.location = addQueryArgs( 'admin.php', {
@@ -90,7 +94,7 @@ function useProductCommandLoader( { search } ) {
 }
 
 const WooCommerceCommands = () => {
-	useCommandWithTracking( {
+	registerCommandWithTracking( {
 		name: 'woocommerce/add-new-product',
 		label: __( 'Add new product', 'woocommerce' ),
 		icon: plus,
@@ -100,7 +104,7 @@ const WooCommerceCommands = () => {
 			} );
 		},
 	} );
-	useCommandWithTracking( {
+	registerCommandWithTracking( {
 		name: 'woocommerce/add-new-order',
 		label: __( 'Add new order', 'woocommerce' ),
 		icon: plus,
@@ -111,7 +115,7 @@ const WooCommerceCommands = () => {
 			} );
 		},
 	} );
-	useCommandWithTracking( {
+	registerCommandWithTracking( {
 		name: 'woocommerce/view-products',
 		label: __( 'Products', 'woocommerce' ),
 		icon: box,
@@ -121,7 +125,7 @@ const WooCommerceCommands = () => {
 			} );
 		},
 	} );
-	useCommandWithTracking( {
+	registerCommandWithTracking( {
 		name: 'woocommerce/view-orders',
 		label: __( 'Orders', 'woocommerce' ),
 		icon: box,
@@ -131,30 +135,25 @@ const WooCommerceCommands = () => {
 			} );
 		},
 	} );
-	useCommandLoader( {
+	dispatch( commandsStore ).registerCommandLoader( {
 		name: 'woocommerce/product',
 		hook: useProductCommandLoader,
 	} );
-	useWooCommerceSettingsCommand( {
-		label: __( 'Products Settings', 'woocommerce' ),
-		tab: 'products',
-	} );
-	useWooCommerceSettingsCommand( {
-		label: __( 'Shipping Settings', 'woocommerce' ),
-		tab: 'shipping',
-	} );
-	useWooCommerceSettingsCommand( {
-		label: __( 'Payments Settings', 'woocommerce' ),
-		tab: 'checkout',
-	} );
-	useWooCommerceSettingsCommand( {
-		label: __( 'Accounts & Privacy Settings', 'woocommerce' ),
-		tab: 'account',
-	} );
-	useWooCommerceSettingsCommand( {
-		label: __( 'WooCommerce Emails Settings', 'woocommerce' ),
-		tab: 'email',
-	} );
+
+	if (
+		window.hasOwnProperty( 'wcCommandPaletteSettings' ) &&
+		window.wcCommandPaletteSettings.hasOwnProperty( 'settingsTabs' ) &&
+		Array.isArray( window.wcCommandPaletteSettings.settingsTabs )
+	) {
+		const settingsCommands = window.wcCommandPaletteSettings.settingsTabs;
+
+		settingsCommands.forEach( ( settingsCommand ) => {
+			registerWooCommerceSettingsCommand( {
+				label: settingsCommand.label,
+				tab: settingsCommand.key,
+			} );
+		} );
+	}
 
 	return null;
 };

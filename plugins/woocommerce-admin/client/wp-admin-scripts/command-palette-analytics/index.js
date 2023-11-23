@@ -1,20 +1,24 @@
 /**
  * External dependencies
  */
-import { registerPlugin } from '@wordpress/plugins';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { chartBar } from '@wordpress/icons';
+import { registerPlugin } from '@wordpress/plugins';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
-import { useCommandWithTracking } from '../command-palette/use-command-with-tracking';
+import { registerCommandWithTracking } from '../command-palette/register-command-with-tracking';
 
-const useWooCommerceAnalyticsCommand = ( { label, path } ) => {
-	useCommandWithTracking( {
+const registerWooCommerceAnalyticsCommand = ( { label, path } ) => {
+	registerCommandWithTracking( {
 		name: `woocommerce${ path }`,
-		label,
+		label: sprintf(
+			// translators: %s is the title of the Analytics Page. This is used as a command in the Command Palette.
+			__( 'WooCommerce Analytics: %s', 'woocommerce' ),
+			label
+		),
 		icon: chartBar,
 		callback: () => {
 			document.location = addQueryArgs( 'admin.php', {
@@ -26,42 +30,20 @@ const useWooCommerceAnalyticsCommand = ( { label, path } ) => {
 };
 
 const WooCommerceAnalyticsCommands = () => {
-	useWooCommerceAnalyticsCommand( {
-		label: __( 'Products Analytics', 'woocommerce' ),
-		path: '/analytics/products',
-	} );
-	useWooCommerceAnalyticsCommand( {
-		label: __( 'Revenue Analytics', 'woocommerce' ),
-		path: '/analytics/revenue',
-	} );
-	useWooCommerceAnalyticsCommand( {
-		label: __( 'Orders Analytics', 'woocommerce' ),
-		path: '/analytics/orders',
-	} );
-	useWooCommerceAnalyticsCommand( {
-		label: __( 'Variations Analytics', 'woocommerce' ),
-		path: '/analytics/variations',
-	} );
-	useWooCommerceAnalyticsCommand( {
-		label: __( 'Categories Analytics', 'woocommerce' ),
-		path: '/analytics/categories',
-	} );
-	useWooCommerceAnalyticsCommand( {
-		label: __( 'Coupons Analytics', 'woocommerce' ),
-		path: '/analytics/coupons',
-	} );
-	useWooCommerceAnalyticsCommand( {
-		label: __( 'Taxes Analytics', 'woocommerce' ),
-		path: '/analytics/taxes',
-	} );
-	useWooCommerceAnalyticsCommand( {
-		label: __( 'Downloads Analytics', 'woocommerce' ),
-		path: '/analytics/downloads',
-	} );
-	useWooCommerceAnalyticsCommand( {
-		label: __( 'Stock Analytics', 'woocommerce' ),
-		path: '/analytics/stock',
-	} );
+	if (
+		window.hasOwnProperty( 'wcCommandPaletteAnalytics' ) &&
+		window.wcCommandPaletteAnalytics.hasOwnProperty( 'reports' ) &&
+		Array.isArray( window.wcCommandPaletteAnalytics.reports )
+	) {
+		const analyticsReports = window.wcCommandPaletteAnalytics.reports;
+
+		analyticsReports.forEach( ( analyticsReport ) => {
+			registerWooCommerceAnalyticsCommand( {
+				label: analyticsReport.title,
+				path: analyticsReport.path,
+			} );
+		} );
+	}
 
 	return null;
 };

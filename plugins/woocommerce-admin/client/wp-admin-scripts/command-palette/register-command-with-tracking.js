@@ -1,11 +1,17 @@
 /**
  * External dependencies
  */
-import { useCommand } from '@wordpress/commands';
+import { store as commandsStore } from '@wordpress/commands';
+import { dispatch } from '@wordpress/data';
 import { queueRecordEvent } from '@woocommerce/tracks';
 
-export const useCommandWithTracking = ( { name, label, icon, callback } ) => {
-	useCommand( {
+export const registerCommandWithTracking = ( {
+	name,
+	label,
+	icon,
+	callback,
+} ) => {
+	dispatch( commandsStore ).registerCommand( {
 		name,
 		label,
 		icon,

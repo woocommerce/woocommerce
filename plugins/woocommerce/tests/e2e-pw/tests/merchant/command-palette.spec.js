@@ -152,7 +152,7 @@ test.describe( 'Use Command Palette commands', () => {
 
 		await clickOnCommandPaletteOption( {
 			page,
-			optionName: 'Products Settings',
+			optionName: 'WooCommerce Settings: Products',
 		} );
 
 		// Verify that the page has loaded.
@@ -164,7 +164,7 @@ test.describe( 'Use Command Palette commands', () => {
 
 		await clickOnCommandPaletteOption( {
 			page,
-			optionName: 'Products Analytics',
+			optionName: 'WooCommerce Analytics: Products',
 		} );
 
 		// Verify that the page has loaded.
