@@ -30,11 +30,11 @@ export const OnboardingTour = ( {
 	const [ placement, setPlacement ] =
 		useState< TourKitTypes.WooConfig[ 'placement' ] >( 'left' );
 
-	// Context doesn't get the latest value of aiOnline
-	//const { context } = useContext( CustomizeStoreContext );
-	// @todo fix the context and get the value from there
 	// @ts-expect-error temp fix
-	const aiOnline = window.aiOnline;
+	// Since we load the assember hub in an iframe, we don't have access to
+	// xstate's context values.
+	// This is the best workaround I can think of for now.
+	const aiOnline = window.parent?.window.cys_aiOnline;
 
 	if ( showWelcomeTour ) {
 		const classNames = [

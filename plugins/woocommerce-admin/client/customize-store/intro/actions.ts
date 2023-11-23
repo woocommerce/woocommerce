@@ -110,12 +110,12 @@ export const assignAiStatus = assign<
 	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
 >( {
 	aiOnline: ( _context, _event ) => {
-		const status = ( _event as DoneInvokeEvent< aiStatusResponse > ).data
+		const indicator = ( _event as DoneInvokeEvent< aiStatusResponse > ).data
 			.status.indicator;
-		const aiOnline = status !== 'critical' && status !== 'major';
+		const status = indicator !== 'critical' && indicator !== 'major';
 		// @ts-expect-error temp workaround;
-		window.aiOnline = aiOnline;
-		return aiOnline;
+		window.cys_aiOnline = status;
+		return status;
 	},
 } );
 
