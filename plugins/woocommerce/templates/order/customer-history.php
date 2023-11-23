@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  */
 ?>
 
-<div class="customer-history order-source-attribution-metabox">
+<div class="customer-history order-attribution-metabox">
 	<h4>
 		<?php
 		esc_html_e( 'Total orders', 'woocommerce' );
@@ -34,7 +34,7 @@ defined( 'ABSPATH' ) || exit;
 		?>
 	</h4>
 
-	<span class="order-source-attribution-total-orders">
+	<span class="order-attribution-total-orders">
 		<?php echo esc_html( $order_count ); ?>
 	</span>
 
@@ -48,12 +48,12 @@ defined( 'ABSPATH' ) || exit;
 		);
 		?>
 	</h4>
-	<span class="order-source-attribution-total-spend">
+	<span class="order-attribution-total-spend">
 		<?php echo wp_kses_post( wc_price( $total_spent ) ); ?>
 	</span>
 
 	<h4><?php esc_html_e( 'Average order value', 'woocommerce' ); ?></h4>
-	<span class="order-source-attribution-average-order-value">
+	<span class="order-attribution-average-order-value">
 		<?php echo wp_kses_post( wc_price( $average_spent ) ); ?>
 	</span>
 </div>

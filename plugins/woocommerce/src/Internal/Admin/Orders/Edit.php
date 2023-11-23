@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
-use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\SourceAttribution;
+use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WC_Order;
@@ -81,7 +81,7 @@ class Edit {
 		add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable product permissions', 'woocommerce' ) . wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $screen_id, 'normal', 'default' );
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s actions', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Actions::output', $screen_id, 'side', 'high' );
-		self::maybe_register_source_attribution( $screen_id, $title );
+		self::maybe_register_order_attribution( $screen_id, $title );
 	}
 
 	/**
@@ -208,7 +208,7 @@ class Edit {
 	}
 
 	/**
-	 * Register source attribution meta boxes if the feature is enabled.
+	 * Register order attribution meta boxes if the feature is enabled.
 	 *
 	 * @since x.x.x
 	 *
@@ -217,32 +217,32 @@ class Edit {
 	 *
 	 * @return void
 	 */
-	private static function maybe_register_source_attribution( string $screen_id, string $title ) {
+	private static function maybe_register_order_attribution( string $screen_id, string $title ) {
 		/**
 		 * Features controller.
 		 *
 		 * @var FeaturesController $feature_controller
 		 */
 		$feature_controller = wc_get_container()->get( FeaturesController::class );
-		if ( ! $feature_controller->feature_is_enabled( 'order_source_attribution' ) ) {
+		if ( ! $feature_controller->feature_is_enabled( 'order_attribution' ) ) {
 			return;
 		}
 
 		/**
-		 * Source attribution meta box.
+		 * Order attribution meta box.
 		 *
-		 * @var SourceAttribution $source_attribution_meta_box
+		 * @var OrderAttribution $order_attribution_meta_box
 		 */
-		$source_attribution_meta_box = wc_get_container()->get( SourceAttribution::class );
+		$order_attribution_meta_box = wc_get_container()->get( OrderAttribution::class );
 
 		add_meta_box(
 			'woocommerce-order-source-data',
 			/* Translators: %s order type name. */
 			sprintf( __( '%s information', 'woocommerce' ), $title ),
-			function( $post_or_order ) use ( $source_attribution_meta_box ) {
+			function( $post_or_order ) use ( $order_attribution_meta_box ) {
 				$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
 				if ( $order instanceof WC_Order ) {
-					$source_attribution_meta_box->output( $order );
+					$order_attribution_meta_box->output( $order );
 				}
 			},
 			$screen_id,

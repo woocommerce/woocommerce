@@ -10,13 +10,13 @@ use WC_Order;
 use WP_Post;
 
 /**
- * Trait SourceAttributionMeta
+ * Trait OrderAttributionMeta
  *
  * @since x.x.x
  *
  * phpcs:disable Generic.Commenting.DocComment.MissingShort
  */
-trait SourceAttributionMeta {
+trait OrderAttributionMeta {
 
 	/** @var string[] */
 	private $default_fields = array(
@@ -78,7 +78,7 @@ trait SourceAttributionMeta {
 		 *
 		 * @param string[] $fields The fields to show.
 		 */
-		$this->fields = (array) apply_filters( 'wc_order_source_attribution_tracking_fields', $this->default_fields );
+		$this->fields = (array) apply_filters( 'wc_order_attribution_tracking_fields', $this->default_fields );
 		$this->set_field_prefix();
 	}
 
@@ -96,8 +96,8 @@ trait SourceAttributionMeta {
 		 * @param string $prefix The prefix for the meta fields.
 		 */
 		$prefix = (string) apply_filters(
-			'wc_order_source_attribution_tracking_field_prefix',
-			'wc_order_source_attribution_'
+			'wc_order_attribution_tracking_field_prefix',
+			'wc_order_attribution_'
 		);
 
 		// Remove leading and trailing underscores.
@@ -321,7 +321,7 @@ trait SourceAttributionMeta {
 		 * @param string $source           The source.
 		 */
 		$formatted_source = apply_filters(
-			'wc_order_source_attribution_origin_formatted_source',
+			'wc_order_attribution_origin_formatted_source',
 			ucfirst( trim( $source, '()' ) ),
 			$source
 		);
@@ -340,7 +340,7 @@ trait SourceAttributionMeta {
 		 * @param string $formatted_source The formatted source.
 		 */
 		$label = (string) apply_filters(
-			'wc_order_source_attribution_origin_label',
+			'wc_order_attribution_origin_label',
 			$label,
 			$source_type,
 			$source,
@@ -355,7 +355,7 @@ trait SourceAttributionMeta {
 	}
 
 	/**
-	 * Get the description for the order source attribution field.
+	 * Get the description for the order attribution field.
 	 *
 	 * @param string $field The field name.
 	 *
@@ -363,16 +363,16 @@ trait SourceAttributionMeta {
 	 */
 	private function get_field_description( string $field ): string {
 		/* translators: %s is the field name */
-		$description = sprintf( __( 'Order source attribution field: %s', 'woocommerce' ), $field );
+		$description = sprintf( __( 'Order attribution field: %s', 'woocommerce' ), $field );
 
 		/**
-		 * Filter the description for the order source attribution field.
+		 * Filter the description for the order attribution field.
 		 *
 		 * @since x.x.x
 		 *
-		 * @param string $description The description for the order source attribution field.
+		 * @param string $description The description for the order attribution field.
 		 * @param string $field       The field name.
 		 */
-		return (string) apply_filters( 'wc_order_source_attribution_field_description', $description, $field );
+		return (string) apply_filters( 'wc_order_attribution_field_description', $description, $field );
 	}
 }
