@@ -240,7 +240,7 @@ All at %6$s
 			$email_addresses,
 			sprintf(
 				/* translators: Payment gateway enabled notification email subject. %s1: Site title, $s2: Gateway title. */
-				__( '[%1$s] Payment gateway %2$s enabled', 'woocommerce' ),
+				__( '[%1$s] Payment gateway "%2$s" enabled', 'woocommerce' ),
 				$site_title,
 				$gateway_title
 			),
