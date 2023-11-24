@@ -23,8 +23,13 @@ export function ExpressionsPanel( {
 	const [ expressionToAdd, setExpressionToAdd ] = useState< string >( '' );
 
 	const addExpression = ( expression: string ) => {
+		setExpressionToAdd( expression );
 		setExpressions( [ ...expressions, expression ] );
-		setExpressionToAdd( '' );
+		// There has to be a better way to do this, but I'm not sure what it is.
+		// Need to wait for the old expression to be set on the ExpressionField before clearing it.
+		setTimeout( () => {
+			setExpressionToAdd( '' );
+		}, 100 );
 	};
 
 	return (
