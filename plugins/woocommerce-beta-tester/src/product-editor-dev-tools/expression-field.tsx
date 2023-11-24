@@ -36,12 +36,14 @@ export function ExpressionField( {
 		let result;
 
 		try {
-			result = evaluate( editedExpression, evaluationContext );
+			result = JSON.stringify(
+				evaluate( editedExpression, evaluationContext )
+			);
 		} catch ( error ) {
 			result = __( 'Error evaluating expression', 'woocommerce' );
 		}
 
-		return JSON.stringify( result );
+		return result;
 	};
 
 	const result = evaluateExpression();
@@ -65,6 +67,10 @@ export function ExpressionField( {
 			{ mode === 'edit' && (
 				<div>
 					<textarea
+						placeholder={ __(
+							'Enter an expression to evaluate',
+							'woocommerce'
+						) }
 						value={ editedExpression }
 						onChange={ handleOnChange }
 					/>
@@ -86,7 +92,7 @@ export function ExpressionField( {
 					) }
 				</div>
 			) }
-			<div>{ result }</div>
+			<div>{ editedExpression !== '' && result }</div>
 		</div>
 	);
 }
