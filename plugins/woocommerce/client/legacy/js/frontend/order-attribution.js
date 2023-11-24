@@ -66,7 +66,7 @@
 		/**
 		 * Add source values to the classic checkout.
 		 */
-		if ( $( '.woocommerce form.checkout' ) !== null ) {
+		if ( $( 'form.woocommerce-checkout' ) !== null ) {
 			const previousInitCheckout = document.body.oninit_checkout;
 			document.body.oninit_checkout = () => {
 				setFields();
