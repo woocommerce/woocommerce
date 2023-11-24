@@ -11,6 +11,11 @@ import { useState } from 'react';
  */
 import { ExpressionField } from './expression-field';
 
+interface ExpressionListItem {
+	expression: string;
+	mode: 'view' | 'edit';
+}
+
 export function ExpressionsPanel( {
 	evaluationContext,
 }: {
@@ -19,17 +24,38 @@ export function ExpressionsPanel( {
 		editedProduct: Product;
 	};
 } ) {
-	const [ expressions, setExpressions ] = useState< Array< string > >( [] );
+	const [ expressions, setExpressions ] = useState< ExpressionListItem[] >(
+		[]
+	);
 	const [ expressionToAdd, setExpressionToAdd ] = useState< string >( '' );
 
 	const addExpression = ( expression: string ) => {
 		setExpressionToAdd( expression );
-		setExpressions( [ ...expressions, expression ] );
+		setExpressions( [ ...expressions, { expression, mode: 'view' } ] );
 		// There has to be a better way to do this, but I'm not sure what it is.
 		// Need to wait for the old expression to be set on the ExpressionField before clearing it.
 		setTimeout( () => {
 			setExpressionToAdd( '' );
 		}, 100 );
+	};
+
+	const enterEditMode = ( index: number ) => {
+		const newExpressions = [ ...expressions ];
+		newExpressions[ index ].mode = 'edit';
+		setExpressions( newExpressions );
+	};
+
+	const cancelEditMode = ( index: number ) => {
+		const newExpressions = [ ...expressions ];
+		newExpressions[ index ].mode = 'view';
+		setExpressions( newExpressions );
+	};
+
+	const updateExpression = ( index: number, expression: string ) => {
+		const newExpressions = [ ...expressions ];
+		newExpressions[ index ].expression = expression;
+		newExpressions[ index ].mode = 'view';
+		setExpressions( newExpressions );
 	};
 
 	return (
@@ -41,11 +67,17 @@ export function ExpressionsPanel( {
 			) }
 			{ expressions.length > 0 && (
 				<ul className="woocommerce-product-editor-dev-tools-expressions-list">
-					{ expressions.map( ( expression, index ) => (
+					{ expressions.map( ( expressionListItem, index ) => (
 						<li key={ index }>
 							<ExpressionField
-								expression={ expression }
+								expression={ expressionListItem.expression }
 								evaluationContext={ evaluationContext }
+								mode={ expressionListItem.mode }
+								onEnterEdit={ () => enterEditMode( index ) }
+								onCancel={ () => cancelEditMode( index ) }
+								onUpdate={ ( expression ) =>
+									updateExpression( index, expression )
+								}
 							/>
 						</li>
 					) ) }
