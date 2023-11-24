@@ -244,7 +244,7 @@ trait OrderAttributionMeta {
 
 		// Look through each field in POST data.
 		foreach ( $this->fields as $field ) {
-			$values[ $field ] = $raw_values[ $this->get_prefixed_field( $field ) ];
+			$values[ $field ] = $raw_values[ $this->get_prefixed_field( $field ) ] ?? '(none)';
 		}
 
 		return $values;
@@ -262,7 +262,7 @@ trait OrderAttributionMeta {
 
 		// Look through each field in given data.
 		foreach ( $this->fields as $field ) {
-			$value = sanitize_text_field( wp_unslash( $raw_values[ $field ] ?? '(none)' ) );
+			$value = sanitize_text_field( wp_unslash( $raw_values[ $field ] ) );
 			if ( '(none)' === $value ) {
 				continue;
 			}
