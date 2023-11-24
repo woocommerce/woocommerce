@@ -21,8 +21,8 @@ trait OrderAttributionMeta {
 	/** @var string[] */
 	private $default_fields = array(
 		// main fields.
-		'type',
-		'url',
+		'source_type',
+		'referrer',
 
 		// utm fields.
 		'utm_campaign',
@@ -130,7 +130,7 @@ trait OrderAttributionMeta {
 		}
 
 		// Determine the origin based on source type and referrer.
-		$source_type = $return['type'] ?? '';
+		$source_type = $return['source_type'] ?? '';
 		switch ( $source_type ) {
 			case 'organic':
 				$origin = __( 'Organic search', 'woocommerce' );
@@ -173,13 +173,6 @@ trait OrderAttributionMeta {
 	 * @return string The prefixed field name.
 	 */
 	private function get_meta_prefixed_field( string $field ): string {
-		// Map some of the fields to the correct meta name.
-		if ( 'type' === $field ) {
-			$field = 'source_type';
-		} elseif ( 'url' === $field ) {
-			$field = 'referrer';
-		}
-
 		return "_{$this->get_prefixed_field( $field )}";
 	}
 
@@ -191,16 +184,7 @@ trait OrderAttributionMeta {
 	 * @return string
 	 */
 	private function unprefix_meta_field( string $field ): string {
-		$return = str_replace( "_{$this->field_prefix}", '', $field );
-
-		// Map some of the fields to the correct meta name.
-		if ( 'source_type' === $return ) {
-			$return = 'type';
-		} elseif ( 'referrer' === $return ) {
-			$return = 'url';
-		}
-
-		return $return;
+		return str_replace( "_{$this->field_prefix}", '', $field );
 	}
 
 	/**
@@ -276,8 +260,8 @@ trait OrderAttributionMeta {
 		}
 
 		// Set the origin label.
-		if ( array_key_exists( 'type', $values ) && array_key_exists( 'utm_source', $values ) ) {
-			$values['origin'] = $this->get_origin_label( $values['type'], $values['utm_source'] );
+		if ( array_key_exists( 'source_type', $values ) && array_key_exists( 'utm_source', $values ) ) {
+			$values['origin'] = $this->get_origin_label( $values['source_type'], $values['utm_source'] );
 		}
 
 		return $values;

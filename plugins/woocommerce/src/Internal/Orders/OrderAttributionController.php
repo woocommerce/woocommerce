@@ -281,7 +281,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function output_origin_column( WC_Order $order ) {
-		$source_type = $order->get_meta( $this->get_meta_prefixed_field( 'type' ) );
+		$source_type = $order->get_meta( $this->get_meta_prefixed_field( 'source_type' ) );
 		$source      = $order->get_meta( $this->get_meta_prefixed_field( 'utm_source' ) );
 		if ( ! $source ) {
 			$source = __( '(none)', 'woocommerce' );
@@ -368,7 +368,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private function send_order_tracks( array $source_data, WC_Order $order ) {
 		$tracks_data = array(
 			'order_id'             => $order->get_id(),
-			'type'                 => $source_data['type'] ?? '',
+			'source_type'          => $source_data['source_type'] ?? '',
 			'medium'               => $source_data['utm_medium'] ?? '',
 			'source'               => $source_data['utm_source'] ?? '',
 			'device_type'          => strtolower( $source_data['device_type'] ?? '(unknown)' ),
