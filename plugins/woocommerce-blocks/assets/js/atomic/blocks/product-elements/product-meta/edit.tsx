@@ -3,6 +3,7 @@
  */
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { InnerBlockTemplate } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -28,14 +29,17 @@ const Edit = () => {
 				[
 					'core/post-terms',
 					{
-						prefix: 'Category: ',
+						prefix: __(
+							'Category: ',
+							'woo-gutenberg-products-block'
+						),
 						term: 'product_cat',
 					},
 				],
 				[
 					'core/post-terms',
 					{
-						prefix: 'Tags: ',
+						prefix: __( 'Tags: ', 'woo-gutenberg-products-block' ),
 						term: 'product_tag',
 					},
 				],
