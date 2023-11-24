@@ -107,27 +107,29 @@ class OrderAttributionController implements RegisterHooksInterface {
 		add_action( 'woocommerce_after_order_notes', $source_form_fields );
 		add_action( 'woocommerce_register_form', $source_form_fields );
 
-		// Update data based on submitted fields.
+		// Update order based on submitted fields.
 		add_action(
 			'woocommerce_checkout_order_created',
 			function( $order ) {
+				// Nonce check is handled by WooCommerce before woocommerce_checkout_order_created hook.
+				// phpcs:ignore WordPress.Security.NonceVerification
+				$params = $this->get_unprefixed_fields( $_POST );
 				/**
 				 * Run an action to save order attribution data.
 				 *
 				 * @since x.x.x
 				 *
 				 * @param WC_Order $order The order object.
+				 * @param array    $params Unprefixed source attribution data.
 				 */
-				do_action( 'woocommerce_order_save_attribution_source_data', $order );
+				do_action( 'woocommerce_order_save_attribution_source_data', $order, $params );
 			}
 		);
 
 		add_action(
 			'woocommerce_order_save_attribution_source_data',
-			function( $order, $data = array() ) {
-				// Nonce check is handled by WooCommerce before woocommerce_checkout_order_created hook.
-				// phpcs:ignore WordPress.Security.NonceVerification
-				$source_data = $this->get_source_values( empty( $data ) ? $_POST : $data );
+			function( $order, $data ) {
+				$source_data = $this->get_source_values( $data );
 				$this->send_order_tracks( $source_data, $order );
 				$this->set_order_source_data( $source_data, $order );
 			},
@@ -187,9 +189,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 		);
 
 		wp_enqueue_script(
-			'woocommerce-order-attribution-js',
+			'wc-order-attribution',
 			plugins_url( "assets/js/frontend/order-attribution{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
-			array( 'jquery', 'sourcebuster-js' ),
+			array( 'sourcebuster-js' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
@@ -232,7 +234,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			),
 		);
 
-		wp_localize_script( 'woocommerce-order-attribution-js', 'wc_order_attribution', $namespace );
+		wp_localize_script( 'wc-order-attribution', 'wc_order_attribution', $namespace );
 	}
 
 	/**
@@ -310,7 +312,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private function set_customer_source_data( WC_Customer $customer ) {
 		// Nonce check is handled before user_register hook.
 		// phpcs:ignore WordPress.Security.NonceVerification
-		foreach ( $this->get_source_values( $_POST ) as $key => $value ) {
+		foreach ( $this->get_source_values( $this->get_unprefixed_fields( $_POST ) ) as $key => $value ) {
 			$customer->add_meta_data( $this->get_meta_prefixed_field( $key ), $value );
 		}
 

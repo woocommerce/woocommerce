@@ -230,19 +230,39 @@ trait OrderAttributionMeta {
 		return $post_or_order;
 	}
 
+
 	/**
-	 * Map posted values to meta values.
+	 * Map posted, prefixed values to fields.
+	 * Used for the classic forms.
 	 *
-	 * @param array $raw_values The raw values from the submitted data.
+	 * @param array $raw_values The raw values from the POST form.
+	 *
+	 * @return array
+	 */
+	private function get_unprefixed_fields( array $raw_values = array() ): array {
+		$values = array();
+
+		// Look through each field in POST data.
+		foreach ( $this->fields as $field ) {
+			$values[ $field ] = $raw_values[ $this->get_prefixed_field( $field ) ] ?? '(none)';
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Map submitted values to meta values.
+	 *
+	 * @param array $raw_values The raw (unprefixed) values from the submitted data.
 	 *
 	 * @return array
 	 */
 	private function get_source_values( array $raw_values = array() ): array {
 		$values = array();
 
-		// Look through each field in POST data.
+		// Look through each field in given data.
 		foreach ( $this->fields as $field ) {
-			$value = sanitize_text_field( wp_unslash( $raw_values[ $this->get_prefixed_field( $field ) ] ?? '(none)' ) );
+			$value = sanitize_text_field( wp_unslash( $raw_values[ $field ] ) );
 			if ( '(none)' === $value ) {
 				continue;
 			}

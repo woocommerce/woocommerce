@@ -31,7 +31,10 @@ abstract class AbstractInterfaceServiceProvider extends AbstractServiceProvider 
 		static $implements = array();
 		if ( empty( $implements ) ) {
 			foreach ( $this->provides as $class ) {
-				$implements = array_merge( $implements, class_implements( $class ) );
+				$implements_more = class_implements( $class );
+				if ( $implements_more ) {
+					$implements = array_merge( $implements, $implements_more );
+				}
 			}
 
 			$implements = array_unique( $implements );

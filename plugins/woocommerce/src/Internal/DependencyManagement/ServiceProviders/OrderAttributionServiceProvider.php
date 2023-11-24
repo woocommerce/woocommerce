@@ -5,8 +5,11 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Integrations\WPConsentAPI;
+use Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController;
 use Automattic\WooCommerce\Internal\Orders\OrderAttributionController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+use Automattic\WooCommerce\StoreApi\StoreApi;
 
 /**
  * Class OrderAttributionServiceProvider
@@ -21,6 +24,7 @@ class OrderAttributionServiceProvider extends AbstractInterfaceServiceProvider {
 	 * @var array
 	 */
 	protected $provides = array(
+		OrderAttributionBlocksController::class,
 		OrderAttributionController::class,
 		WPConsentAPI::class,
 	);
@@ -34,6 +38,14 @@ class OrderAttributionServiceProvider extends AbstractInterfaceServiceProvider {
 				array(
 					LegacyProxy::class,
 					FeaturesController::class,
+				)
+			);
+		$this->share_with_implements_tags( OrderAttributionBlocksController::class )
+			->addArguments(
+				array(
+					StoreApi::container()->get( ExtendSchema::class ),
+					FeaturesController::class,
+					OrderAttributionController::class,
 				)
 			);
 		$this->share_with_implements_tags( WPConsentAPI::class );
