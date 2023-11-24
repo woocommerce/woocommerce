@@ -1,17 +1,30 @@
-.wc-block-product-gallery-thumbnails {
-	width: fit-content;
-	.wc-block-editor-product-gallery-thumbnails {
-		display: flex;
-		flex-flow: column nowrap;
+$thumbnails: ".wc-block-editor-product-gallery-thumbnails";
+$thumbnails-gap: 15px;
 
-		&.wc-block-editor-product-gallery-thumbnails--bottom {
-			flex-flow: row nowrap;
-		}
+#{$thumbnails} {
+	display: flex;
 
-		img {
-			width: 100px;
-			height: 100px;
-			margin: 5px;
-		}
+	.wc-block-product-gallery-thumbnails--position-bottom & {
+		flex-direction: row;
+		gap: 0 15px;
+	}
+
+	.wc-block-product-gallery-thumbnails:not(.wc-block-product-gallery-thumbnails--position-bottom) & {
+		flex-direction: column;
+		gap: 15px 0;
+	}
+}
+
+@for $i from 3 through 8 {
+	// Calculate the total width occupied by the gaps between thumbnails.
+	$gap-width: $thumbnails-gap * ($i - 1);
+
+	// Calculate the border width, which is multiplied by 2 to account for both sides of each thumbnail.
+	$border-width: ($i * 1px * 2);
+
+	$additional-space: $i * 1px;
+
+	.wc-block-product-gallery-thumbnails--number-of-thumbnails-#{$i}:not(.wc-block-product-gallery-thumbnails--position-bottom) {
+		flex-basis: calc((100% - #{$gap-width} - #{$border-width} - #{$additional-space}) / #{$i});
 	}
 }

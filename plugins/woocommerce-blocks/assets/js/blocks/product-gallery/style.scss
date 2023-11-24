@@ -10,6 +10,8 @@ $gallery-next-previous-inside-image: "#{$gallery}:not([data-next-previous-button
 
 $outside-image-offset: 30px;
 $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
+$thumbnails-gap: 15px;
+$default-number-of-thumbnails: 3;
 
 // Product Gallery
 #{$gallery} {
@@ -55,6 +57,7 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 	height: fit-content;
 	position: relative;
 	overflow: hidden;
+	flex-grow: 1;
 
 	// Restrict the width of the Large Image when the Next/Previous buttons are outside the image.
 	#{$gallery-next-previous-outside-image} & .wc-block-product-gallery-large-image__image-element {
@@ -64,10 +67,13 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 	}
 
 	.wc-block-product-gallery-large-image__wrapper {
+		aspect-ratio: 1 / 1;
 		flex-shrink: 0;
 		max-width: 100%;
 		overflow: hidden;
 		width: 100%;
+		display: flex;
+		align-items: center;
 	}
 
 	.wc-block-product-gallery-large-image__container {
@@ -93,7 +99,8 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 		margin: 0 auto;
 		z-index: 1;
 		transition: all 0.1s linear;
-		width: auto;
+		aspect-ratio: 1 / 1;
+		object-fit: contain;
 
 		// Keep the order in this way. The hoverZoom class should override the full-screen-on-click class when both are applied.
 		&.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click {
@@ -234,20 +241,82 @@ $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 
 // Thumbnails
 #{$thumbnails} {
+	display: flex;
+
 	img {
 		cursor: pointer;
+		height: auto;
+		width: auto;
+		max-width: 100%;
 	}
 
-	.is-vertical & {
-		display: flex;
+	#{$gallery}[data-thumbnails-position='bottom'] & {
 		flex-direction: row;
+		gap: 0 15px;
+	}
+
+	#{$gallery}:not([data-thumbnails-position='bottom']) & {
+		flex-direction: column;
+		gap: 15px 0;
+
+		// Calculate the total width occupied by the gaps between thumbnails.
+		$gap-width: $thumbnails-gap * ($default-number-of-thumbnails - 1);
+
+		// Calculate the border width, which is multiplied by 2 to account for both sides of each thumbnail.
+		$border-width: #{$default-number-of-thumbnails * 1px * 2};
+
+		// Calculate the width of each thumbnail by accounting for the gap, border, and additional space.
+		flex-basis: calc((100% - #{$gap-width} - #{$border-width} - 4px) / #{$default-number-of-thumbnails});
+	}
+
+	@for $i from 3 through 8 {
+		#{$gallery}[data-thumbnails-number-of-thumbnails='#{$i}']:not([data-thumbnails-position='bottom']) & {
+			// Calculate the total width occupied by the gaps between thumbnails.
+			$gap-width: $thumbnails-gap * ($i - 1);
+
+			// Calculate the border width, which is multiplied by 2 to account for both sides of each thumbnail.
+			$border-width: $i * 1px * 2;
+
+			flex-basis: calc((100% - #{$gap-width} - #{$border-width}) / $i);
+		}
 	}
 
 	.wc-block-product-gallery-thumbnails__thumbnail {
-		width: 100px;
-		height: 100px;
-		margin: 5px;
+		border: 1px solid rgba($color: #000, $alpha: 0.1);
+		height: auto;
+		width: auto;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		aspect-ratio: 1 / 1;
 		position: relative;
+		flex-basis: 0;
+		flex-grow: 1;
+
+		img {
+			aspect-ratio: 1 / 1;
+			object-fit: contain;
+		}
+
+		&::before {
+			content: "";
+			display: block;
+			padding-top: 100%;
+		}
+
+		@for $i from 3 through 8 {
+			#{$gallery}[data-thumbnails-number-of-thumbnails='#{$i}'][data-thumbnails-position="bottom"] & {
+				// Calculate the total width occupied by the gaps between thumbnails.
+				$gap-width: $thumbnails-gap * ($i - 1);
+
+				// Calculate the border width, which is multiplied by 2 to account for both sides of each thumbnail.
+				$border-width: $i * 1px * 2;
+
+				$thumbnail-width: calc((100% - #{$gap-width} - #{$border-width}) / $i);
+
+				flex: 0 0 $thumbnail-width;
+			}
+		}
 
 	}
 

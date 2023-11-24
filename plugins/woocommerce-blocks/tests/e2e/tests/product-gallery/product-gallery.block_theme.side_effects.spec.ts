@@ -327,6 +327,8 @@ test.describe( `${ blockData.name }`, () => {
 		const width = image?.width;
 
 		// Allow 1 pixel of difference.
-		expect( width === height + 1 || width === height - 1 ).toBeTruthy();
+		expect(
+			width === height + 1 || width === height - 1 || width === height
+		).toBeTruthy();
 	} );
 } );

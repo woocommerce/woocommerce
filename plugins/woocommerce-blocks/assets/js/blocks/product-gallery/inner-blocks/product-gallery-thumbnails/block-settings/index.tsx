@@ -51,7 +51,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 	context,
 }: ProductGalleryThumbnailsSettingsProps ) => {
 	const maxNumberOfThumbnails = 8;
-	const minNumberOfThumbnails = 2;
+	const minNumberOfThumbnails = 3;
 	const { productGalleryClientId } = context;
 	// @ts-expect-error @wordpress/block-editor/store types not provided
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
@@ -110,7 +110,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 						} )
 					}
 					help={ __(
-						'Choose how many thumbnails (2-8) will display. If more images exist, a “View all” button will display.',
+						'Choose how many thumbnails (3-8) will display. If more images exist, a “View all” button will display.',
 						'woo-gutenberg-products-block'
 					) }
 					max={ maxNumberOfThumbnails }

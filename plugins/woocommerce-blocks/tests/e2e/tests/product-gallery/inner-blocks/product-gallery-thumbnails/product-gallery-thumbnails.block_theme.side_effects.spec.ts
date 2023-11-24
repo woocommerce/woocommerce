@@ -52,6 +52,8 @@ test.describe( `${ blockData.name }`, () => {
 		page,
 		editor,
 		pageObject,
+		editorUtils,
+		frontendUtils,
 	} ) => {
 		await editor.insertBlock( {
 			name: 'woocommerce/product-gallery',
@@ -60,21 +62,37 @@ test.describe( `${ blockData.name }`, () => {
 		const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
 			page: 'editor',
 		} );
-		const largeImageBlock = await pageObject.getMainImageBlock( {
-			page: 'editor',
-		} );
-
-		const thumbnailsBlockBoundingRect = await thumbnailsBlock.boundingBox();
-		const largeImageBlockBoundingRect = await largeImageBlock.boundingBox();
 
 		await expect( thumbnailsBlock ).toBeVisible();
-		// Check the default position: on the left of the large image
-		await expect( thumbnailsBlockBoundingRect?.y ).toBeGreaterThan(
-			largeImageBlockBoundingRect?.y as number
+
+		// We should refactor this.
+		// eslint-disable-next-line playwright/no-wait-for-timeout
+		await page.waitForTimeout( 500 );
+
+		// Test the default (left) position of thumbnails by cross-checking:
+		// - The Gallery block has the classes "is-layout-flex" and "is-nowrap".
+		// - The Thumbnails block has a lower index than the Large Image block.
+
+		const groupBlock = (
+			await editorUtils.getBlockByTypeWithParent(
+				'core/group',
+				'woocommerce/product-gallery'
+			)
+		 ).first();
+
+		const groupBlockClassAttribute = await groupBlock.getAttribute(
+			'class'
 		);
-		await expect( thumbnailsBlockBoundingRect?.x ).toBeLessThan(
-			largeImageBlockBoundingRect?.x as number
+		expect( groupBlockClassAttribute ).toContain( 'is-layout-flex' );
+		expect( groupBlockClassAttribute ).toContain( 'is-nowrap' );
+
+		const isThumbnailsBlockEarlier = await editorUtils.isBlockEarlierThan(
+			groupBlock,
+			'woocommerce/product-gallery-thumbnails',
+			'core/group'
 		);
+
+		expect( isThumbnailsBlockEarlier ).toBe( true );
 
 		await Promise.all( [
 			editor.saveSiteEditorEntities(),
@@ -87,27 +105,27 @@ test.describe( `${ blockData.name }`, () => {
 			waitUntil: 'commit',
 		} );
 
-		const thumbnailsBlockFrontend = await pageObject.getThumbnailsBlock( {
-			page: 'frontend',
-		} );
+		const groupBlockFrontend = (
+			await frontendUtils.getBlockByClassWithParent(
+				'wp-block-group',
+				'woocommerce/product-gallery'
+			)
+		 ).first();
 
-		const largeImageBlockFrontend = await pageObject.getMainImageBlock( {
-			page: 'frontend',
-		} );
-
-		const thumbnailsBlockFrontendBoundingRect =
-			await thumbnailsBlockFrontend.boundingBox();
-		const largeImageBlockFrontendBoundingRect =
-			await largeImageBlockFrontend.boundingBox();
-
-		await expect( thumbnailsBlockFrontend ).toBeVisible();
-		// Check the default position: on the left of the large image
-		await expect( thumbnailsBlockFrontendBoundingRect?.y ).toBeGreaterThan(
-			largeImageBlockFrontendBoundingRect?.y as number
+		const groupBlockFrontendClassAttribute =
+			await groupBlockFrontend.getAttribute( 'class' );
+		expect( groupBlockFrontendClassAttribute ).toContain(
+			'is-layout-flex'
 		);
-		await expect( thumbnailsBlockFrontendBoundingRect?.x ).toBeLessThan(
-			largeImageBlockFrontendBoundingRect?.x as number
-		);
+		expect( groupBlockFrontendClassAttribute ).toContain( 'is-nowrap' );
+
+		const isThumbnailsFrontendBlockEarlier =
+			await frontendUtils.isBlockEarlierThanGroupBlock(
+				groupBlockFrontend,
+				'woocommerce/product-gallery-thumbnails'
+			);
+
+		expect( isThumbnailsFrontendBlockEarlier ).toBe( true );
 	} );
 
 	test.describe( `${ blockData.name } Settings`, () => {
