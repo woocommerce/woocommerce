@@ -81,7 +81,7 @@ test.describe( 'Checkout Block page', () => {
 		// add a shipping zone and method
 		await api
 			.post( 'shipping/zones', {
-				name: 'California Shipping Zone',
+				name: 'California and Oregon Shipping Zone',
 			} )
 			.then( ( response ) => {
 				shippingZoneId = response.data.id;
@@ -91,16 +91,27 @@ test.describe( 'Checkout Block page', () => {
 				code: 'US:CA',
 				type: 'state',
 			},
+			{
+				code: 'US:OR',
+				type: 'state',
+			},
 		] );
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'free_shipping',
+			settings: {
+				title: 'Free shipping',
+			},
 		} );
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'local_pickup',
+			settings: {
+				title: 'Local pickup',
+			},
 		} );
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'flat_rate',
 			settings: {
+				title: 'Flat rate',
 				cost: singleProductSalePrice,
 			},
 		} );
