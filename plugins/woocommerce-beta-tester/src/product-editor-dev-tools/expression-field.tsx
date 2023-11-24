@@ -13,7 +13,7 @@ export function ExpressionField( {
 	mode = 'view',
 	onEnterEdit,
 	onUpdate = () => {},
-	onCancel = () => {},
+	onCancel,
 }: {
 	expression: string;
 	evaluationContext: {
@@ -59,7 +59,7 @@ export function ExpressionField( {
 	};
 
 	const handleOnCancel = () => {
-		onCancel();
+		if ( onCancel ) onCancel();
 	};
 
 	return (
@@ -77,9 +77,11 @@ export function ExpressionField( {
 					<Button onClick={ handleOnUpdate }>
 						{ __( 'Add', 'woocommerce' ) }
 					</Button>
-					<Button onClick={ handleOnCancel }>
-						{ __( 'Cancel', 'woocommerce' ) }
-					</Button>
+					{ onCancel && (
+						<Button onClick={ handleOnCancel }>
+							{ __( 'Cancel', 'woocommerce' ) }
+						</Button>
+					) }
 				</div>
 			) }
 			{ mode !== 'edit' && (
