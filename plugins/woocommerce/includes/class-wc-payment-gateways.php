@@ -137,8 +137,12 @@ class WC_Payment_Gateways {
 	private function on_payment_gateways_initialized( WC_Payment_Gateways $wc_payment_gateways ) {
 		foreach ( $this->payment_gateways as $gateway ) {
 			$option_key = $gateway->get_option_key();
-			self::add_action( 'add_option_' . $option_key, array( $this, 'payment_gateway_settings_option_changed' ), 10, 2 );
-			self::add_action( 'update_option_' . $option_key, array( $this, 'payment_gateway_settings_option_changed' ), 10, 3 );
+			self::add_action( 'add_option_' . $option_key, function( $option, $value ) use ( $gateway) {
+				$this->payment_gateway_settings_option_changed( $gateway, $value, $option );
+			}, 10, 2 );
+			self::add_action( 'update_option_' . $option_key, function( $old_value, $value, $option ) use ( $gateway) {
+				$this->payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value );
+			}, 10, 3 );
 		}
 	}
 
@@ -150,19 +154,14 @@ class WC_Payment_Gateways {
 	 * @param string $option Option name.
 	 * @since 8.5.0
 	 */
-	private function payment_gateway_settings_option_changed( $old_value, $value, $option = null ) {
-		if ( null === $option ) {
-			// We're in the add_option_ hook so there's no old value and parameter order is different.
-			$option    = $old_value;
-			$old_value = null;
-		}
+	private function payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value = null ) {
 		if ( ! $this->was_gateway_enabled( $value, $old_value ) ) {
 			return;
 		}
 
 		// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
 		// "untitled" shouldn't happen, but just in case.
-		$this->notify_admin_payment_gateway_enabled( $value['title'] ?? 'untitled' );
+		$this->notify_admin_payment_gateway_enabled( $gateway );
 	}
 
 	/**
@@ -172,11 +171,12 @@ class WC_Payment_Gateways {
 	 * @return bool Whether the email was sent or not.
 	 * @since 8.5.0
 	 */
-	private function notify_admin_payment_gateway_enabled( $gateway_title ) {
+	private function notify_admin_payment_gateway_enabled( $gateway ) {
 		$admin_email          = get_option( 'admin_email' );
 		$user                 = get_user_by( 'email', $admin_email );
 		$username             = $user ? $user->user_login : $admin_email;
 		$gateway_settings_url = self_admin_url( 'admin.php?page=wc-settings&tab=checkout' );
+		$gateway_title        = $gateway->get_title();
 		$site_name            = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 		$site_url             = home_url();
 		/**
