@@ -283,6 +283,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update WooCommerce Blocks to 11.5.4 [#41403](https://github.com/woocommerce/woocommerce/pull/41403)
 * Update - Update WooCommerce Blocks to 11.6.0 [#41641](https://github.com/woocommerce/woocommerce/pull/41641)
 * Update - use latest commit of stalebot action, tweak configuration accordingly [#41305](https://github.com/woocommerce/woocommerce/pull/41305)
+* Dev - Update WooCommerce Core WP.org product page readme. [#41660](https://github.com/woocommerce/woocommerce/pull/41660)
 * Dev - Add one more scenario to cover taxing [#41064](https://github.com/woocommerce/woocommerce/pull/41064)
 * Dev - Adds e2e tests for a number of Analytics screens [#40504](https://github.com/woocommerce/woocommerce/pull/40504)
 * Dev - Adds e2e tests for tax display in store, cart and checkout [#40178](https://github.com/woocommerce/woocommerce/pull/40178)
