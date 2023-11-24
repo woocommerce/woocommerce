@@ -23,7 +23,7 @@
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
 		"woocommerce/action-scheduler": "3.7.0",
-		"woocommerce/woocommerce-blocks": "11.6.0"
+		"woocommerce/woocommerce-blocks": "11.6.1"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
