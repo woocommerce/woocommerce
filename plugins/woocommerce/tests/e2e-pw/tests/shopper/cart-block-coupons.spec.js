@@ -263,7 +263,7 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		).toBeVisible();
 	} );
 
-	test.only( 'prevents cart block applying coupon with usage limit', async ( {
+	test( 'prevents cart block applying coupon with usage limit', async ( {
 		page,
 		context,
 	} ) => {
