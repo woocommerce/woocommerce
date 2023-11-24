@@ -47,10 +47,10 @@ defined( 'ABSPATH' ) || exit;
 	</div>
 
 	<div class="woocommerce-order-attribution-details-container closed">
-		<?php if ( array_key_exists( 'type', $meta ) ) : ?>
+		<?php if ( array_key_exists( 'source_type', $meta ) ) : ?>
 			<h4><?php esc_html_e( 'Source type', 'woocommerce' ); ?></h4>
 			<span class="order-attribution-source_type">
-				<?php echo esc_html( $meta['type'] ); ?>
+				<?php echo esc_html( $meta['source_type'] ); ?>
 			</span>
 		<?php endif; ?>
 

@@ -15,8 +15,8 @@
 	 * @returns
 	 */
 	wc_order_attribution.sbjsDataToSchema = ( obj ) => ( {
-		type: obj.current.typ,
-		url: obj.current_add.rf,
+		source_type: obj.current.typ,
+		referrer: obj.current_add.rf,
 
 		utm_campaign: obj.current.cmp,
 		utm_source: obj.current.src,
