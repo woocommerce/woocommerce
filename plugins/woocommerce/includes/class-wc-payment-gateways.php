@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -209,7 +210,7 @@ class WC_Payment_Gateways {
 		);
 		$email_addresses[] = $admin_email;
 
-		$logger = wc_get_logger();
+		$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 		$logger->info( sprintf( 'Payment gateway enabled: "%s"', $gateway_title ) );
 
 		$email_text = sprintf(
