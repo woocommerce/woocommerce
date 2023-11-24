@@ -45,7 +45,7 @@ class OrderAttributionServiceProvider extends AbstractInterfaceServiceProvider {
 				array(
 					StoreApi::container()->get( ExtendSchema::class ),
 					FeaturesController::class,
-					SourceAttributionController::class,
+					OrderAttributionController::class,
 				)
 			);
 		$this->share_with_implements_tags( WPConsentAPI::class );

@@ -14,7 +14,7 @@
 	 * @param {Object} obj Sourcebuster data object, `sbjs.get`.
 	 * @returns
 	 */
-	wc_order_source_attribution.sbjsDataToSchema = ( obj ) => ( {
+	wc_order_attribution.sbjsDataToSchema = ( obj ) => ( {
 		type: obj.current.typ,
 		url: obj.current_add.rf,
 
@@ -57,7 +57,7 @@
 		const setFields = () => {
 
 			if ( sbjs.get ) {
-				for( const [ key, value ] of Object.entries( wc_order_source_attribution.sbjsDataToSchema( sbjs.get ) ) ) {
+				for( const [ key, value ] of Object.entries( wc_order_attribution.sbjsDataToSchema( sbjs.get ) ) ) {
 					$( `input[name="${prefix}${key}"]` ).value = value;
 				}
 			}
