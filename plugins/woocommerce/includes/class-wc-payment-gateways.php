@@ -182,10 +182,12 @@ class WC_Payment_Gateways {
 		/**
 		 * Allows adding to the addresses that receive payment gateway enabled notifications.
 		 *
-		 * @param array $email_addresses Email addresses.
+		 * @param array              $email_addresses The array of email addresses to notify.
+		 * @param WC_Payment_Gateway $gateway The gateway that was enabled.
+		 * @return array             The augmented array of email addresses to notify.
 		 * @since 8.5.0
 		 */
-		$email_addresses   = apply_filters( 'wc_payment_gateway_enabled_notification_email_addresses', array() );
+		$email_addresses   = apply_filters( 'wc_payment_gateway_enabled_notification_email_addresses', array(), $gateway );
 		$email_addresses   = array_unique(
 			array_filter(
 				$email_addresses,
