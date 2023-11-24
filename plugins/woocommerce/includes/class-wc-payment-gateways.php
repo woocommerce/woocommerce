@@ -118,7 +118,7 @@ class WC_Payment_Gateways {
 
 		ksort( $this->payment_gateways );
 
-		add_action( 'wc_payment_gateways_initialized', array( $this, 'on_payment_gateways_initialized' ), 10, 1 );
+		self::add_action( 'wc_payment_gateways_initialized', array( $this, 'on_payment_gateways_initialized' ) );
 		/**
 		 * Hook that is called when the payment gateways have been initialized.
 		 *
@@ -134,7 +134,7 @@ class WC_Payment_Gateways {
 	 *
 	 * @since 8.5.0
 	 */
-	public function on_payment_gateways_initialized( WC_Payment_Gateways $wc_payment_gateways ) {
+	private function on_payment_gateways_initialized( WC_Payment_Gateways $wc_payment_gateways ) {
 		foreach ( $this->payment_gateways as $gateway ) {
 			$option_key = $gateway->get_option_key();
 			self::add_action( 'add_option_' . $option_key, array( $this, 'payment_gateway_settings_option_changed' ), 10, 2 );
