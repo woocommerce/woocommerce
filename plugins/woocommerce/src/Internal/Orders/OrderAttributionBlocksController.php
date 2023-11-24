@@ -111,7 +111,7 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Enqueue the Order Source Attribution script.
+	 * Enqueue the Order Attribution script.
 	 *
 	 * @since x.x.x
 	 * @return void
@@ -148,9 +148,9 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 				 * @since x.x.x
 				 *
 				 * @param WC_Order $order  The order object.
-				 * @param array    $params Unprefixed source attribution data.
+				 * @param array    $params Unprefixed order attribution data.
 				 */
-				do_action( 'woocommerce_order_save_attribution_source_data', $order, $params );
+				do_action( 'woocommerce_order_save_attribution_data', $order, $params );
 			},
 			10,
 			2
@@ -190,7 +190,7 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 				$schema[ $field ] = array(
 					'description' => sprintf(
 						/* translators: %s is the field name */
-						__( 'Source attribution field: %s', 'woocommerce' ),
+						__( 'Order attribution field: %s', 'woocommerce' ),
 						esc_html( $field )
 					),
 					'type'        => array( 'string', 'null' ),

@@ -120,14 +120,14 @@ class OrderAttributionController implements RegisterHooksInterface {
 				 * @since x.x.x
 				 *
 				 * @param WC_Order $order The order object.
-				 * @param array    $params Unprefixed source attribution data.
+				 * @param array    $params Unprefixed order attribution data.
 				 */
-				do_action( 'woocommerce_order_save_attribution_source_data', $order, $params );
+				do_action( 'woocommerce_order_save_attribution_data', $order, $params );
 			}
 		);
 
 		add_action(
-			'woocommerce_order_save_attribution_source_data',
+			'woocommerce_order_save_attribution_data',
 			function( $order, $data ) {
 				$source_data = $this->get_source_values( $data );
 				$this->send_order_tracks( $source_data, $order );
@@ -234,7 +234,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			),
 		);
 
-		wp_localize_script( 'wc-order-attribution', 'wc_order_source_attribution', $namespace );
+		wp_localize_script( 'wc-order-attribution', 'wc_order_attribution', $namespace );
 	}
 
 	/**
