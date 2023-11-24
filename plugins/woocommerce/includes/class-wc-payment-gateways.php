@@ -122,9 +122,8 @@ class WC_Payment_Gateways {
 		/**
 		 * Hook that is called when the payment gateways have been initialized.
 		 *
-		 * @since 8.5.0
-		 * 
 		 * @param WC_Payment_Gateways $wc_payment_gateways The payment gateways instance.
+		 * @since 8.5.0
 		 */
 		do_action( 'wc_payment_gateways_initialized', $this );
 	}
@@ -132,26 +131,38 @@ class WC_Payment_Gateways {
 	/**
 	 * Hook into payment gateway settings changes.
 	 *
+	 * @param WC_Payment_Gateways $wc_payment_gateways The WC_Payment_Gateways instance.
 	 * @since 8.5.0
 	 */
 	private function on_payment_gateways_initialized( WC_Payment_Gateways $wc_payment_gateways ) {
 		foreach ( $this->payment_gateways as $gateway ) {
 			$option_key = $gateway->get_option_key();
-			self::add_action( 'add_option_' . $option_key, function( $option, $value ) use ( $gateway) {
-				$this->payment_gateway_settings_option_changed( $gateway, $value, $option );
-			}, 10, 2 );
-			self::add_action( 'update_option_' . $option_key, function( $old_value, $value, $option ) use ( $gateway) {
-				$this->payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value );
-			}, 10, 3 );
+			self::add_action(
+				'add_option_' . $option_key,
+				function( $option, $value ) use ( $gateway ) {
+					$this->payment_gateway_settings_option_changed( $gateway, $value, $option );
+				},
+				10,
+				2
+			);
+			self::add_action(
+				'update_option_' . $option_key,
+				function( $old_value, $value, $option ) use ( $gateway ) {
+					$this->payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value );
+				},
+				10,
+				3
+			);
 		}
 	}
 
 	/**
 	 * Callback for when a gateway settings option was added or updated.
 	 *
-	 * @param mixed  $old_value Old value. Option name when called via add_option_ hook.
-	 * @param mixed  $value New value.
-	 * @param string $option Option name.
+	 * @param WC_Payment_Gateway $gateway   The gateway for which the option was added or updated.
+	 * @param mixed              $value     New value.
+	 * @param string             $option    Option name.
+	 * @param mixed              $old_value Old value. `null` when called via add_option_ hook.
 	 * @since 8.5.0
 	 */
 	private function payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value = null ) {
@@ -167,7 +178,7 @@ class WC_Payment_Gateways {
 	/**
 	 * Email the site admin when a payment gateway has been enabled.
 	 *
-	 * @param string $gateway_title Gateway title.
+	 * @param WC_Payment_Gateway $gateway The gateway that was enabled.
 	 * @return bool Whether the email was sent or not.
 	 * @since 8.5.0
 	 */
@@ -176,7 +187,7 @@ class WC_Payment_Gateways {
 		$user                 = get_user_by( 'email', $admin_email );
 		$username             = $user ? $user->user_login : $admin_email;
 		$gateway_title        = $gateway->get_title();
-		$gateway_settings_url = sanitize_url( self_admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $gateway->id ) );
+		$gateway_settings_url = esc_url_raw( self_admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $gateway->id ) );
 		$site_name            = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 		$site_url             = home_url();
 		/**
