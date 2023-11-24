@@ -47,9 +47,9 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param ExtendSchema                $extend_schema                 ExtendSchema instance.
-	 * @param FeaturesController          $features_controller           Features controller.
-	 * @param OrderAttributionController  $order_attribution_controller Instance of the order attribution controller.
+	 * @param ExtendSchema               $extend_schema                 ExtendSchema instance.
+	 * @param FeaturesController         $features_controller           Features controller.
+	 * @param OrderAttributionController $order_attribution_controller Instance of the order attribution controller.
 	 */
 	final public function init(
 		ExtendSchema $extend_schema,
