@@ -195,7 +195,7 @@ class TransientFilesRestControllerTest extends TransientFilesTestBase {
 		$this->assertEquals( $is_public, $response_body['is_public'] );
 		$this->assertFalse( $response_body['has_expired'] );
 		if ( $is_public ) {
-			$this->assertEquals( 'http://example.org/wc/file/transient/' . $response_body['file_name'], $response_body['public_url'] );
+			$this->assertEquals( get_site_url() . '/wc/file/transient/' . $response_body['file_name'], $response_body['public_url'] );
 		} else {
 			$this->assertArrayNotHasKey( 'public_url', $response_body );
 		}
@@ -299,7 +299,7 @@ class TransientFilesRestControllerTest extends TransientFilesTestBase {
 			);
 		}
 		if ( $is_public ) {
-			$expected_file_data['public_url'] = 'http://example.org/wc/file/transient/' . $response_body['file_name'];
+			$expected_file_data['public_url'] = get_site_url() . '/wc/file/transient/' . $response_body['file_name'];
 		}
 
 		$this->assertEquals( $expected_file_data, $response_body );
