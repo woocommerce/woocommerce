@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ignore '_completed_date' in HPOS verification tool.

@@ -24,7 +24,7 @@ import { useEntityId, useEntityProp } from '@wordpress/core-data';
 import { TRACKS_SOURCE } from '../../constants';
 import { VariationsActionsMenu } from './variations-actions-menu';
 import { Pagination } from './pagination';
-import { EmptyTableState } from './table-empty-state';
+import { EmptyOrErrorTableState } from './table-empty-or-error-state';
 import { VariationsFilter } from './variations-filter';
 import { useVariations } from './use-variations';
 import { TableRowSkeleton } from './table-row-skeleton';
@@ -133,7 +133,6 @@ export const VariationsTable = forwardRef<
 		onPerPageChange,
 		onFilter,
 		getFilters,
-		hasFilters,
 
 		selected,
 		isSelectingAll,
@@ -153,6 +152,7 @@ export const VariationsTable = forwardRef<
 		onBatchDelete,
 
 		isGenerating,
+		variationsError,
 		onGenerate,
 	} = useVariations( { productId } );
 
@@ -160,10 +160,16 @@ export const VariationsTable = forwardRef<
 		onGenerate( productAttributes );
 	}
 
-	if ( ! ( isLoading || isGenerating ) && variationIds.length === 0 ) {
+	const isError = variationsError !== undefined;
+
+	if (
+		! ( isLoading || isGenerating ) &&
+		( variationIds.length === 0 || isError )
+	) {
 		return (
-			<EmptyTableState
+			<EmptyOrErrorTableState
 				onActionClick={ handleEmptyTableStateActionClick }
+				isError={ isError }
 			/>
 		);
 	}
@@ -291,128 +297,198 @@ export const VariationsTable = forwardRef<
 				</Notice>
 			) }
 
-			{ ( hasFilters() || totalCount > 0 ) && (
-				<div className="woocommerce-product-variations__header">
-					<div className="woocommerce-product-variations__selection">
-						<CheckboxControl
-							value="all"
-							checked={ areAllSelected }
-							// @ts-expect-error Property 'indeterminate' does not exist
-							indeterminate={
-								! areAllSelected && areSomeSelected
-							}
-							onChange={ onSelectPage }
-						/>
-					</div>
-					<div className="woocommerce-product-variations__filters">
-						{ areSomeSelected ? (
-							<>
-								<span>
-									{ sprintf(
-										// translators: %d is the amount of selected variations
-										__( '%d selected', 'woocommerce' ),
-										selectedCount
-									) }
-								</span>
-								<Button
-									variant="tertiary"
-									onClick={ () => onSelectPage( true ) }
-								>
-									{ sprintf(
-										// translators: %d the variations amount in the current page
-										__( 'Select page (%d)', 'woocommerce' ),
-										variations.length
-									) }
-								</Button>
-								<Button
-									variant="tertiary"
-									isBusy={ isSelectingAll }
-									onClick={ handleSelectAllVariations }
-								>
-									{ sprintf(
-										// translators: %d the total existing variations amount
-										__( 'Select all (%d)', 'woocommerce' ),
-										totalCount
-									) }
-								</Button>
-								<Button
-									variant="tertiary"
-									onClick={ onClearSelection }
-								>
-									{ __( 'Clear selection', 'woocommerce' ) }
-								</Button>
-							</>
-						) : (
-							variableAttributes.map( ( attribute ) => (
-								<VariationsFilter
-									key={ attribute.id }
-									initialValues={ getFilters( attribute ) }
-									attribute={ attribute }
-									onFilter={ onFilter( attribute ) }
+			<div className="woocommerce-product-variations__table" role="table">
+				{ totalCount > 0 && (
+					<div
+						className="woocommerce-product-variations__table-header"
+						role="rowgroup"
+					>
+						<div
+							className="woocommerce-product-variations__table-row"
+							role="rowheader"
+						>
+							<div className="woocommerce-product-variations__filters">
+								{ areSomeSelected ? (
+									<>
+										<span>
+											{ sprintf(
+												// translators: %d is the amount of selected variations
+												__(
+													'%d selected',
+													'woocommerce'
+												),
+												selectedCount
+											) }
+										</span>
+										<Button
+											variant="tertiary"
+											onClick={ () =>
+												onSelectPage( true )
+											}
+										>
+											{ sprintf(
+												// translators: %d the variations amount in the current page
+												__(
+													'Select page (%d)',
+													'woocommerce'
+												),
+												variations.length
+											) }
+										</Button>
+										<Button
+											variant="tertiary"
+											isBusy={ isSelectingAll }
+											onClick={
+												handleSelectAllVariations
+											}
+										>
+											{ sprintf(
+												// translators: %d the total existing variations amount
+												__(
+													'Select all (%d)',
+													'woocommerce'
+												),
+												totalCount
+											) }
+										</Button>
+										<Button
+											variant="tertiary"
+											onClick={ onClearSelection }
+										>
+											{ __(
+												'Clear selection',
+												'woocommerce'
+											) }
+										</Button>
+									</>
+								) : (
+									variableAttributes.map( ( attribute ) => (
+										<VariationsFilter
+											key={ attribute.id }
+											initialValues={ getFilters(
+												attribute
+											) }
+											attribute={ attribute }
+											onFilter={ onFilter( attribute ) }
+										/>
+									) )
+								) }
+							</div>
+							<div className="woocommerce-product-variations__actions">
+								<VariationsActionsMenu
+									selection={ selected }
+									disabled={
+										! areSomeSelected && ! isSelectingAll
+									}
+									onChange={ handleUpdateAll }
+									onDelete={ handleDeleteAll }
 								/>
-							) )
+							</div>
+						</div>
+
+						<div
+							className="woocommerce-product-variations__table-row"
+							role="rowheader"
+						>
+							<div
+								className="woocommerce-product-variations__table-column woocommerce-product-variations__selection"
+								role="columnheader"
+							>
+								<CheckboxControl
+									value="all"
+									checked={ areAllSelected }
+									// @ts-expect-error Property 'indeterminate' does not exist
+									indeterminate={
+										! areAllSelected && areSomeSelected
+									}
+									onChange={ onSelectPage }
+									aria-label={ __(
+										'Select all',
+										'woocommerce'
+									) }
+								/>
+							</div>
+							<div
+								className="woocommerce-product-variations__table-column"
+								role="columnheader"
+							>
+								{ __( 'Variation', 'woocommerce' ) }
+							</div>
+							<div
+								className="woocommerce-product-variations__table-column woocommerce-product-variations__price"
+								role="columnheader"
+							>
+								{ __( 'Price', 'woocommerce' ) }
+							</div>
+							<div
+								className="woocommerce-product-variations__table-column"
+								role="columnheader"
+							>
+								{ __( 'Stock', 'woocommerce' ) }
+							</div>
+						</div>
+					</div>
+				) }
+
+				{ isLoading || isGenerating ? (
+					<div
+						className="woocommerce-product-variations__table-body"
+						role="presentation"
+						aria-label={
+							isGenerating
+								? __( 'Generating variations…', 'woocommerce' )
+								: __( 'Loading variations…', 'woocommerce' )
+						}
+					>
+						{ Array.from( { length: variations.length || 5 } ).map(
+							( _, index ) => (
+								<TableRowSkeleton key={ index } />
+							)
 						) }
 					</div>
-					<div>
-						<VariationsActionsMenu
-							selection={ selected }
-							disabled={ ! areSomeSelected && ! isSelectingAll }
-							onChange={ handleUpdateAll }
-							onDelete={ handleDeleteAll }
+				) : (
+					<Sortable
+						className="woocommerce-product-variations__table-body"
+						role="rowgroup"
+					>
+						{ variations.map( ( variation ) => (
+							<ListItem
+								key={ `${ variation.id }` }
+								className="woocommerce-product-variations__table-row"
+								role="row"
+							>
+								<VariationsTableRow
+									variation={ variation }
+									variableAttributes={ variableAttributes }
+									isUpdating={ isUpdating[ variation.id ] }
+									isSelected={ isSelected( variation ) }
+									isSelectionDisabled={ isSelectingAll }
+									hideActionButtons={ ! areSomeSelected }
+									onChange={ handleVariationChange }
+									onDelete={ handleDeleteVariationClick }
+									onEdit={ editVariationClickHandler(
+										variation
+									) }
+									onSelect={ onSelect( variation ) }
+								/>
+							</ListItem>
+						) ) }
+					</Sortable>
+				) }
+
+				{ totalCount > 5 && (
+					<div
+						className="woocommerce-product-variations__table-footer"
+						role="row"
+					>
+						<Pagination
+							totalCount={ totalCount }
+							onPageChange={ onPageChange }
+							onPerPageChange={ onPerPageChange }
 						/>
 					</div>
-				</div>
-			) }
-
-			{ isLoading || isGenerating ? (
-				<div
-					className="woocommerce-product-variations__table"
-					aria-label={
-						isGenerating
-							? __( 'Generating variations…', 'woocommerce' )
-							: __( 'Loading variations…', 'woocommerce' )
-					}
-				>
-					{ Array.from( { length: variations.length || 5 } ).map(
-						( _, index ) => (
-							<TableRowSkeleton key={ index } />
-						)
-					) }
-				</div>
-			) : (
-				<Sortable className="woocommerce-product-variations__table">
-					{ variations.map( ( variation ) => (
-						<ListItem
-							key={ `${ variation.id }` }
-							className="woocommerce-product-variations__table-row"
-						>
-							<VariationsTableRow
-								variation={ variation }
-								variableAttributes={ variableAttributes }
-								isUpdating={ isUpdating[ variation.id ] }
-								isSelected={ isSelected( variation ) }
-								isSelectionDisabled={ isSelectingAll }
-								hideActionButtons={ ! areSomeSelected }
-								onChange={ handleVariationChange }
-								onDelete={ handleDeleteVariationClick }
-								onEdit={ editVariationClickHandler(
-									variation
-								) }
-								onSelect={ onSelect( variation ) }
-							/>
-						</ListItem>
-					) ) }
-				</Sortable>
-			) }
-
-			{ totalCount > 5 && (
-				<Pagination
-					className="woocommerce-product-variations__footer"
-					totalCount={ totalCount }
-					onPageChange={ onPageChange }
-					onPerPageChange={ onPerPageChange }
-				/>
-			) }
+				) }
+			</div>
 		</div>
 	);
 } );

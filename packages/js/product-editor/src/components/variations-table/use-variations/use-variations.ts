@@ -32,6 +32,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	const [ variations, setVariations ] = useState< ProductVariation[] >( [] );
 	const [ totalCount, setTotalCount ] = useState< number >( 0 );
 	const [ isLoading, setIsLoading ] = useState( false );
+	const [ getVariationsError, setGetVariationsError ] = useState< unknown >();
 	const [ filters, setFilters ] = useState< AttributeFilters[] >( [] );
 	const perPageRef = useRef( DEFAULT_VARIATION_PER_PAGE_OPTION );
 
@@ -45,22 +46,28 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			...params,
 		};
 
-		const { getProductVariations, getProductVariationsTotalCount } =
-			resolveSelect( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+		try {
+			const { getProductVariations, getProductVariationsTotalCount } =
+				resolveSelect( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
-		setIsLoading( true );
+			setIsLoading( true );
+			setGetVariationsError( undefined );
 
-		const data = await getProductVariations< ProductVariation[] >(
-			requestParams
-		);
+			const data = await getProductVariations< ProductVariation[] >(
+				requestParams
+			);
 
-		const total = await getProductVariationsTotalCount< number >(
-			requestParams
-		);
+			const total = await getProductVariationsTotalCount< number >(
+				requestParams
+			);
 
-		setVariations( data );
-		setTotalCount( total );
-		setIsLoading( false );
+			setVariations( data );
+			setTotalCount( total );
+			setIsLoading( false );
+		} catch ( error ) {
+			setGetVariationsError( error );
+			setIsLoading( false );
+		}
 	}
 
 	useEffect( () => {
@@ -232,7 +239,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}
 
 	function hasFilters() {
-		return filters.length;
+		return Boolean( filters.length );
 	}
 
 	function clearFilters() {
@@ -438,8 +445,11 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 	// Generation
 
-	const { isGenerating, generateProductVariations: onGenerate } =
-		useProductVariationsHelper();
+	const {
+		isGenerating,
+		generateProductVariations: onGenerate,
+		generateError,
+	} = useProductVariationsHelper();
 
 	const wasGenerating = useRef( false );
 
@@ -491,5 +501,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 		isGenerating,
 		onGenerate,
+		variationsError: generateError ?? getVariationsError,
 	};
 }
