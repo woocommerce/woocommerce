@@ -2,7 +2,6 @@
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\AI;
 
-use Automattic\WooCommerce\Blocks\Patterns\ProductUpdater;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 
 /**
