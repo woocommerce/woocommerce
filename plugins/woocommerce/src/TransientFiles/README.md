@@ -15,12 +15,12 @@
 
 The WooCommerce transient files engine allows to create, delete, and get information for transient files. We define a _transient file_ as a physical file (in the server filesystem) that:
 
-- Has a random name.
-- Can have any arbitrary content.
-- Lives in a dedicated subdirectory inside the WordPress `uploads` folder (customizable via [hook](#hooks)).
-- Has an expiration date.
-- Its contents can be retrieved via [authenticated REST API endpoint](#get-wp-jsonwcv3filestransientid).
-- Optionally, its contents can be retrieved via [public (unauthenticated) HTTP endpoint](#get-wcfiletransientname).
+* Has a random name.
+* Can have any arbitrary content.
+* Lives in a dedicated subdirectory inside the WordPress `uploads` folder (customizable via [hook](#hooks)).
+* Has an expiration date.
+* Its contents can be retrieved via [authenticated REST API endpoint](#get-wp-jsonwcv3filestransientid).
+* Optionally, its contents can be retrieved via [public (unauthenticated) HTTP endpoint](#get-wcfiletransientname).
 
 As of now, the only way to create a transient file is by rendering a text-based template, containing a mix of literal text and PHP code, that receives a set of variables. Additional mechanisms (e.g. directly supplying binary content) might be added in the future (pull requests welcome, as usual!)
 
