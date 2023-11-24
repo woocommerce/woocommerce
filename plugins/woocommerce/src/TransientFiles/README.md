@@ -170,7 +170,7 @@ Gets the display name of the template being rendered. By default this is the fil
 Changes the display name of the template being rendered, which can be returned with [`get_template_display_name`](#this-get_template_display_name).
 
 
-### $this->render('template_path', $variables, $relative)
+### $this->render('template_path', variables, relative)
 
 Renders a secondary template. The variables that were passed to the current template (**not** including local variables) are merged with the variables passed in `$variables`, and the result of the merge is what the secondary template gets.
 
