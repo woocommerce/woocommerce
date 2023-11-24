@@ -28,7 +28,7 @@
 		"access": "public"
 	},
 	"dependencies": {
-		"@wordpress/create-block": "wp-6.0",
+		"@wordpress/create-block": "wp-6.3",
 		"chalk": "^4.1.2",
 		"change-case": "^4.1.2",
 		"commander": "^9.2.0",
@@ -49,7 +49,7 @@
 		"@types/testing-library__jest-dom": "^5.14.3",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"@wordpress/browserslist-config": "wp-6.0",
+		"@wordpress/browserslist-config": "wp-6.3",
 		"copy-webpack-plugin": "^9.1.0",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.32.0",

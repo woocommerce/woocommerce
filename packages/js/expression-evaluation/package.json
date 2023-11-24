@@ -27,7 +27,7 @@
 	"types": "build-types",
 	"react-native": "src/index",
 	"dependencies": {
-		"@wordpress/i18n": "wp-6.0",
+		"@wordpress/i18n": "wp-6.3",
 		"peggy": "^3.0.2"
 	},
 	"publishConfig": {
