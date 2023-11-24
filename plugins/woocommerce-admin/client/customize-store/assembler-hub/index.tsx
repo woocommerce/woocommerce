@@ -4,8 +4,8 @@
 /**
  * External dependencies
  */
-import { useEffect, createContext } from '@wordpress/element';
-import { dispatch, useDispatch } from '@wordpress/data';
+import { createContext, useRef } from '@wordpress/element';
+import { dispatch } from '@wordpress/data';
 import {
 	__experimentalFetchLinkSuggestions as fetchLinkSuggestions,
 	__experimentalFetchUrlData as fetchUrlData,
@@ -70,80 +70,82 @@ export type events =
 	| { type: 'FINISH_CUSTOMIZATION' }
 	| { type: 'GO_BACK_TO_DESIGN_WITH_AI' };
 
-export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
-	const { setCanvasMode } = unlock( useDispatch( editSiteStore ) );
-	useEffect( () => {
-		if ( ! window.wcBlockSettings ) {
-			// eslint-disable-next-line no-console
-			console.warn(
-				'window.blockSettings not found. Skipping initialization.'
-			);
-			return;
+const initializeAssembleHub = () => {
+	if ( ! window.wcBlockSettings ) {
+		// eslint-disable-next-line no-console
+		console.warn(
+			'window.blockSettings not found. Skipping initialization.'
+		);
+		return;
+	}
+
+	// Set up the block editor settings.
+	const settings = window.wcBlockSettings;
+	settings.__experimentalFetchLinkSuggestions = (
+		search: string,
+		searchOptions: {
+			isInitialSuggestions: boolean;
+			type: 'attachment' | 'post' | 'term' | 'post-format';
+			subtype: string;
+			page: number;
+			perPage: number;
 		}
+	) => fetchLinkSuggestions( search, searchOptions, settings );
+	settings.__experimentalFetchRichUrlData = fetchUrlData;
 
-		// Set up the block editor settings.
-		const settings = window.wcBlockSettings;
-		settings.__experimentalFetchLinkSuggestions = (
-			search: string,
-			searchOptions: {
-				isInitialSuggestions: boolean;
-				type: 'attachment' | 'post' | 'term' | 'post-format';
-				subtype: string;
-				page: number;
-				perPage: number;
-			}
-		) => fetchLinkSuggestions( search, searchOptions, settings );
-		settings.__experimentalFetchRichUrlData = fetchUrlData;
-
-		const reapplyBlockTypeFilters =
-			// @ts-ignore No types for this exist yet.
-			dispatch( blocksStore ).__experimentalReapplyBlockTypeFilters || // GB < 16.6
-			// @ts-ignore No types for this exist yet.
-			dispatch( blocksStore ).reapplyBlockTypeFilters; // GB >= 16.6
-		reapplyBlockTypeFilters();
-
-		const coreBlocks = __experimentalGetCoreBlocks().filter(
-			( { name }: { name: string } ) =>
-				name !== 'core/freeform' && ! getBlockType( name )
-		);
-		registerCoreBlocks( coreBlocks );
-
+	const reapplyBlockTypeFilters =
 		// @ts-ignore No types for this exist yet.
-		dispatch( blocksStore ).setFreeformFallbackBlockName( 'core/html' );
-
+		dispatch( blocksStore ).__experimentalReapplyBlockTypeFilters || // GB < 16.6
 		// @ts-ignore No types for this exist yet.
-		dispatch( preferencesStore ).setDefaults( 'core/edit-site', {
-			editorMode: 'visual',
-			fixedToolbar: false,
-			focusMode: false,
-			distractionFree: false,
-			keepCaretInsideBlock: false,
-			welcomeGuide: false,
-			welcomeGuideStyles: false,
-			welcomeGuidePage: false,
-			welcomeGuideTemplate: false,
-			showListViewByDefault: false,
-			showBlockBreadcrumbs: true,
-		} );
-		// @ts-ignore No types for this exist yet.
-		dispatch( editSiteStore ).updateSettings( settings );
+		dispatch( blocksStore ).reapplyBlockTypeFilters; // GB >= 16.6
+	reapplyBlockTypeFilters();
 
-		// @ts-ignore No types for this exist yet.
-		dispatch( editorStore ).updateEditorSettings( {
-			defaultTemplateTypes: settings.defaultTemplateTypes,
-			defaultTemplatePartAreas: settings.defaultTemplatePartAreas,
-		} );
+	const coreBlocks = __experimentalGetCoreBlocks().filter(
+		( { name }: { name: string } ) =>
+			name !== 'core/freeform' && ! getBlockType( name )
+	);
+	registerCoreBlocks( coreBlocks );
 
-		// Prevent the default browser action for files dropped outside of dropzones.
-		window.addEventListener(
-			'dragover',
-			( e ) => e.preventDefault(),
-			false
-		);
-		window.addEventListener( 'drop', ( e ) => e.preventDefault(), false );
+	// @ts-ignore No types for this exist yet.
+	dispatch( blocksStore ).setFreeformFallbackBlockName( 'core/html' );
 
-		setCanvasMode( 'view' );
-	}, [ setCanvasMode ] );
+	// @ts-ignore No types for this exist yet.
+	dispatch( preferencesStore ).setDefaults( 'core/edit-site', {
+		editorMode: 'visual',
+		fixedToolbar: false,
+		focusMode: false,
+		distractionFree: false,
+		keepCaretInsideBlock: false,
+		welcomeGuide: false,
+		welcomeGuideStyles: false,
+		welcomeGuidePage: false,
+		welcomeGuideTemplate: false,
+		showListViewByDefault: false,
+		showBlockBreadcrumbs: true,
+	} );
+	// @ts-ignore No types for this exist yet.
+	dispatch( editSiteStore ).updateSettings( settings );
+
+	// @ts-ignore No types for this exist yet.
+	dispatch( editorStore ).updateEditorSettings( {
+		defaultTemplateTypes: settings.defaultTemplateTypes,
+		defaultTemplatePartAreas: settings.defaultTemplatePartAreas,
+	} );
+
+	// Prevent the default browser action for files dropped outside of dropzones.
+	window.addEventListener( 'dragover', ( e ) => e.preventDefault(), false );
+	window.addEventListener( 'drop', ( e ) => e.preventDefault(), false );
+
+	unlock( dispatch( editSiteStore ) ).setCanvasMode( 'view' );
+};
+
+export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
+	const isInitializedRef = useRef( false );
+
+	if ( ! isInitializedRef.current ) {
+		initializeAssembleHub();
+		isInitializedRef.current = true;
+	}
 
 	return (
 		<CustomizeStoreContext.Provider value={ props }>

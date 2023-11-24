@@ -254,6 +254,13 @@ class WC_Install {
 	const NEWLY_INSTALLED_OPTION = 'woocommerce_newly_installed';
 
 	/**
+	 * Option name used to uniquely identify installations of WooCommerce.
+	 *
+	 * @var string
+	 */
+	const STORE_ID_OPTION = 'woocommerce_store_id';
+
+	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
@@ -442,6 +449,7 @@ class WC_Install {
 		self::set_paypal_standard_load_eligibility();
 		self::update_wc_version();
 		self::maybe_update_db_version();
+		self::maybe_set_store_id();
 
 		delete_transient( 'wc_installing' );
 
@@ -611,6 +619,17 @@ class WC_Install {
 			}
 		} else {
 			self::update_db_version();
+		}
+	}
+
+	/**
+	 * Set the Store ID if not already present.
+	 *
+	 * @since 8.4.0
+	 */
+	public static function maybe_set_store_id() {
+		if ( ! get_option( self::STORE_ID_OPTION, false ) ) {
+			add_option( self::STORE_ID_OPTION, wp_generate_uuid4() );
 		}
 	}
 
@@ -1973,14 +1992,14 @@ $transient_files_engine_schema;
 		 *
 		 * @since 2.7.0
 		 */
-		$docs_url = apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' );
+		$docs_url = apply_filters( 'woocommerce_docs_url', 'https://woo.com/documentation/plugins/woocommerce/' );
 
 		/**
 		 * The WooCommerce API documentation URL.
 		 *
 		 * @since 2.2.0
 		 */
-		$api_docs_url = apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' );
+		$api_docs_url = apply_filters( 'woocommerce_apidocs_url', 'https://woo.com/wc-apidocs/' );
 
 		/**
 		 * The community WooCommerce support URL.
@@ -1994,7 +2013,7 @@ $transient_files_engine_schema;
 		 *
 		 * @since
 		 */
-		$support_url = apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/create-a-ticket/' );
+		$support_url = apply_filters( 'woocommerce_support_url', 'https://woo.com/my-account/create-a-ticket/' );
 
 		$row_meta = array(
 			'docs'    => '<a href="' . esc_url( $docs_url ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',

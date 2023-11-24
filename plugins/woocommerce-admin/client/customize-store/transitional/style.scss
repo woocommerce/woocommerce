@@ -61,10 +61,16 @@
 		width: 560px;
 	}
 
-	.woocommerce-customize-store__transitional-preview-button {
-		padding: 8px 16px;
-		height: 40px;
+	.woocommerce-customize-store__transitional-main-actions {
 		margin: 20px 0 0;
+		display: flex;
+		gap: 20px;
+		flex-direction: row;
+
+		.components-button {
+			padding: 8px 16px;
+			height: 40px;
+		}
 	}
 
 	.woocommerce-customize-store__transitional-site-preview-container {
@@ -97,7 +103,8 @@
 			overflow: hidden;
 		}
 
-		.auto-block-preview__container {
+		.auto-block-preview__container,
+		.block-editor-block-preview__content {
 			width: 588px;
 			height: 363px;
 			position: relative;
@@ -165,5 +172,99 @@
 				}
 			}
 		}
+	}
+}
+
+.woocommerce-ai-survey-modal {
+	max-height: 100%;
+	max-width: 620px;
+
+	.components-modal__header {
+		padding: 32px 32px 24px 32px;
+
+		.components-modal__header-heading {
+			font-size: 20px;
+			font-style: normal;
+			font-weight: 400;
+			line-height: 28px; /* 140% */
+		}
+	}
+
+	.components-modal__content {
+		padding-top: 0;
+		padding-bottom: 16px;
+	}
+}
+
+.woocommerce-ai-survey-form {
+	.woocommerce-ai-survey-form__description {
+		margin: 0 0 12px;
+		font-size: 13px;
+		font-style: normal;
+		font-weight: 400;
+		line-height: 20px; /* 153.846% */
+	}
+
+	h4 {
+		font-size: 13px;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 16px; /* 123.077% */
+		margin-top: 0;
+		margin-bottom: 12px;
+	}
+
+	.woocommerce-survey-star-rating {
+		button {
+			background-color: transparent;
+			border: none;
+			outline: none;
+			cursor: pointer;
+			padding: 0 6px 0 0;
+			font-size: 20px;
+		}
+
+		.woocommerce-survey-star-rating__button-on {
+			color: #000;
+		}
+
+		.woocommerce-survey-star-rating__button-off {
+			color: var(--gray-gray-5, #dcdcde);
+		}
+	}
+
+	hr {
+		color: var(--gutenberg-gray-100, #f0f0f0);
+		margin: 20px 0;
+	}
+
+	.components-checkbox-control__input {
+		border: 1px solid $gray-600;
+		border-radius: 2px;
+	}
+
+	.components-checkbox-control:last-child {
+		margin-bottom: 4px;
+	}
+
+	.buttons {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+
+		.components-button {
+			padding: 8px 16px;
+		}
+	}
+
+	.components-textarea-control__input {
+		resize: none;
+		height: 72px;
+		margin-bottom: 20px;
+		font-size: 13px;
+		font-style: normal;
+		font-weight: 400;
+		line-height: 16px; /* 123.077% */
+		color: $gray-900;
 	}
 }

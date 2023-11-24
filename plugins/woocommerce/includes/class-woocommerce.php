@@ -238,6 +238,7 @@ final class WooCommerce {
 		add_action( 'admin_notices', array( $this, 'build_dependencies_notice' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
+		add_action( 'load-post.php', array( $this, 'includes' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
@@ -590,7 +591,10 @@ final class WooCommerce {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
 		}
 
-		if ( $this->is_request( 'frontend' ) ) {
+		// We load frontend includes in the post editor, because they may be invoked via pre-loading of blocks.
+		$in_post_editor = doing_action( 'load-post.php' ) || doing_action( 'load-post-new.php' );
+
+		if ( $this->is_request( 'frontend' ) || $this->is_rest_api_request() || $in_post_editor ) {
 			$this->frontend_includes();
 		}
 

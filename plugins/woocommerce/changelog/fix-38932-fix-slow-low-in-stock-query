@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Remove use SQL_CALC_FOUND_ROWS from the query. SQL_CALC_FOUND_ROWS can cause inconsistent performance depending on the # of rows or DB version.

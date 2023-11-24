@@ -2,7 +2,7 @@
 
 Payment gateways in WooCommerce are class based and can be added through traditional plugins. This guide provides an intro to gateway development.
 
-**Note:** We are unable to provide support for customizations under our **[Support Policy](http://www.woocommerce.com/support-policy/)**. If you need to further customize a snippet, or extend its functionality, we highly recommend [**Codeable**](https://codeable.io/?ref=z4Hnp), or a [**Certified WooExpert**](https://woocommerce.com/experts/).
+**Note:** We are unable to provide support for customizations under our **[Support Policy](https://woo.com/support-policy/)**. If you need to further customize a snippet, or extend its functionality, we highly recommend [**Codeable**](https://codeable.io/?ref=z4Hnp), or a [**Certified WooExpert**](https://woo.com/experts/).
 
 ## Types of payment gateway
 
@@ -13,13 +13,13 @@ Payment gateways come in several varieties:
 3.  **Direct** – This is when the payment fields are shown directly on the checkout page and the payment is made when ‘place order’ is pressed. _Example_: PayPal Pro, Authorize.net AIM
 4.  **Offline** – No online payment is made. _Example_: Cheque, Bank Transfer
 
-Form and iFrame based gateways post data offsite, meaning there are less security issues for you to think about. Direct gateways, however, require server security to be implemented ([SSL certificates](https://woocommerce.com/document/ssl-and-https/), etc.) and may also require a level of [PCI compliance](https://woocommerce.com/document/pci-dss-compliance-and-woocommerce/).
+Form and iFrame based gateways post data offsite, meaning there are less security issues for you to think about. Direct gateways, however, require server security to be implemented ([SSL certificates](https://woo.com/document/ssl-and-https/), etc.) and may also require a level of [PCI compliance](https://woo.com/document/pci-dss-compliance-and-woocommerce/).
 
 ## Creating a basic payment gateway
 
 
 
-**Note:** We are unable to provide support for customizations under our [Support Policy](http://www.woocommerce.com/support-policy/). If you are unfamiliar with code/templates and resolving potential conflicts, select a [WooExpert or Developer](https://woocommerce.com/customizations/)  for assistance.
+**Note:** We are unable to provide support for customizations under our [Support Policy](https://woo.com/support-policy/). If you are unfamiliar with code/templates and resolving potential conflicts, select a [WooExpert or Developer](https://woo.com/customizations/)  for assistance.
 
 **Note:** The instructions below are for the default Checkout page. If you’re looking to add a custom payment method for the new Checkout block, check out [this documentation.](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)
 
@@ -29,7 +29,7 @@ Payment gateways should be created as additional plugins that hook into WooComme
 add_action( 'plugins_loaded', 'init_your_gateway_class' );
 ```
 
-It is also important that your gateway class extends the WooCommerce base gateway class, so you have access to important methods and the [settings API](https://woocommerce.com/document/settings-api/ "https://woocommerce.com/document/settings-api/"):
+It is also important that your gateway class extends the WooCommerce base gateway class, so you have access to important methods and the [settings API](https://woo.com/document/settings-api/ "https://woo.com/document/settings-api/"):
 
 ``` php
 function init_your_gateway_class() {
@@ -89,7 +89,7 @@ add_action( 'woocommerce_update_options_payment_gateways\_' . $this->id, array( 
 
 #### init_form_fields()
 
-Use this method to set `$this->form_fields` – these are options you’ll show in admin on your gateway settings page and make use of the [WC Settings API](https://woocommerce.com/document/settings-api/ "https://woocommerce.com/document/settings-api/").
+Use this method to set `$this->form_fields` – these are options you’ll show in admin on your gateway settings page and make use of the [WC Settings API](https://woo.com/document/settings-api/ "https://woo.com/document/settings-api/").
 
 A basic set of settings for your gateway would consist of _enabled_, _title_ and _description_:
 
@@ -243,7 +243,7 @@ add_action( 'woocommerce_api_wc_gateway_paypal', array( $this, 'check_ipn_respon
 
 WooCommerce will call your gateway and run the action when the URL is called.
 
-For more information, see [WC_API — The WooCommerce API Callback](https://woocommerce.com/document/wc_api-the-woocommerce-api-callback/).
+For more information, see [WC_API — The WooCommerce API Callback](https://woo.com/document/wc_api-the-woocommerce-api-callback/).
 
 ## Hooks in Gateways
 

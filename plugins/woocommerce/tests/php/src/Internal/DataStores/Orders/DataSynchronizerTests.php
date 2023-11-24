@@ -565,8 +565,16 @@ class DataSynchronizerTests extends HposTestCase {
 
 	/**
 	 * @testDox HPOS cannot be turned on when there are pending orders.
+	 *
+	 * @testWith [true, []]
+	 *           [false, ["yes", "no"]]
+	 *
+	 * @param bool  $auth_table_change_allowed_with_sync_pending True if changing the authoritative data source for orders while synchronization is pending is allowed, false otherwise.
+	 * @param array $expected_setting_disabled_status Expected value for the 'disabled' key in the setting configuration array.
 	 */
-	public function test_hpos_option_is_disabled_but_sync_enabled_with_pending_orders() {
+	public function test_hpos_option_is_disabled_but_sync_enabled_with_pending_orders( $auth_table_change_allowed_with_sync_pending, $expected_setting_disabled_status ) {
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', fn() => $auth_table_change_allowed_with_sync_pending );
+
 		$this->sut->delete_database_tables();
 		$this->toggle_cot_authoritative( false );
 		$this->disable_cot_sync();
@@ -583,7 +591,7 @@ class DataSynchronizerTests extends HposTestCase {
 		);
 		$cot_setting = array_values( $cot_setting )[0];
 		$this->assertEquals( $cot_setting['value'], 'no' );
-		$this->assertEquals( $cot_setting['disabled'], array( 'yes', 'no' ) );
+		$this->assertEquals( $cot_setting['disabled'], $expected_setting_disabled_status );
 
 		$sync_setting = array_filter(
 			$features,
@@ -593,7 +601,16 @@ class DataSynchronizerTests extends HposTestCase {
 		);
 		$sync_setting = array_values( $sync_setting )[0];
 		$this->assertEquals( $sync_setting['value'], 'no' );
-		$this->assertTrue( str_contains( $sync_setting['desc_tip'], 'Sync 1 pending order' ) );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], "There's 1 order pending sync" ) );
+		$this->assertTrue(
+			str_contains(
+				$sync_setting['desc_tip'],
+				$auth_table_change_allowed_with_sync_pending ?
+				'Switching data storage while sync is incomplete is dangerous' :
+				'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>'
+			)
+		);
+		$this->assertEquals( $auth_table_change_allowed_with_sync_pending, $sync_setting['description_is_error'] );
 	}
 
 	/**

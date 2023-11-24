@@ -4,11 +4,13 @@
 
 This handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.
 
-The product editor's UI consists of Groups (currently rendered as tabs), Sections, and Fields, which are all blocks.
+The product editor's UI consists of Groups (currently rendered as tabs), Sections, and Fields, which are all blocks. For guidelines on how to extend the product editor (e.g. where to add blocks), please refer to the [Product Editor Extensibility Guidelines](./product-editor-extensibility-guidelines.md).
 
 ![Product editor structure](https://woocommerce.files.wordpress.com/2023/09/groups-sections-fields.jpg)
 
 The form's structure is defined in PHP using a Template, which is a tree structure of blocks. The template can be modified by using the Template API to add new Groups, Sections, and Fields as well as remove existing ones.
+
+For more information about when to perform template modifications, see the [block template lifecycle](./block-template-lifecycle.md).
 
 Many extensibility implementations can be done using only the PHP-based Block Template API alongside our library of [generic blocks](../../packages/js/product-editor/src/blocks/generic/README.md). More complex interactivity can be implemented using JavaScript and React (the same library used to implement the core blocks used in the product editor). [@woocommerce/create-product-editor-block](../../packages/js/create-product-editor-block/README.md) can help scaffold a development environment with JavaScript and React.
 

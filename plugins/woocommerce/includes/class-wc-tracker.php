@@ -133,7 +133,10 @@ class WC_Tracker {
 		$data = array();
 
 		// General site info.
-		$data['url'] = home_url();
+		$data['url']      = home_url();
+		$data['store_id'] = get_option( \WC_Install::STORE_ID_OPTION, null );
+		$data['blog_id']  = class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null;
+
 		/**
 		 * Filter the admin email that's sent with data.
 		 *
@@ -361,7 +364,7 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Check to see if the helper is connected to woocommerce.com
+	 * Check to see if the helper is connected to Woo.com
 	 *
 	 * @return string
 	 */

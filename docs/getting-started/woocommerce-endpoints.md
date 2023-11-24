@@ -1,6 +1,6 @@
 # WooCommerce Endpoints
 
-**Note:** We are unable to provide support for customizations under our **[Support Policy](http://www.woocommerce.com/support-policy/)**. If you need to further customize a snippet, or extend its functionality, we highly recommend [**Codeable**](https://codeable.io/?ref=z4Hnp), or a [**Certified WooExpert**](https://woocommerce.com/experts/).
+**Note:** We are unable to provide support for customizations under our **[Support Policy](https://woo.com/support-policy/)**. If you need to further customize a snippet, or extend its functionality, we highly recommend [**Codeable**](https://codeable.io/?ref=z4Hnp), or a [**Certified WooExpert**](https://woo.com/experts/).
 
 Endpoints are an extra part in the website URL that is detected to show different content when present.
 
@@ -37,7 +37,7 @@ The following endpoints are used for account-related functionality and are appe
 
 The URL for each endpoint can be customized in **WooCommerce > Settings > Advanced** in the Page setup section.
 
-![Endpoints](https://woocommerce.com/wp-content/uploads/2014/02/endpoints.png)
+![Endpoints](https://woo.com/wp-content/uploads/2014/02/endpoints.png)
 
 Ensure that they are unique to avoid conflicts. If you encounter issues with 404s, go to **Settings > Permalinks** and save to flush the rewrite rules.
 
@@ -45,7 +45,7 @@ Ensure that they are unique to avoid conflicts. If you encounter issues with 404
 
 If you want to include an endpoint in your menus, you need to use the Links section:
 
-![2014-02-26 at 14.26](https://woocommerce.com/wp-content/uploads/2014/02/2014-02-26-at-14.26.png)
+![2014-02-26 at 14.26](https://woo.com/wp-content/uploads/2014/02/2014-02-26-at-14.26.png)
 
 Enter the full URL to the endpoint and then insert that into your menu.
 
@@ -103,4 +103,4 @@ Landing on the wrong page when clicking an endpoint URL is typically caused by i
 
 Sometimes the “Downloads” endpoint on the “My account” page does not need to be displayed. This can be removed by going to **WooCommerce → Settings → Advanced → Account endpoints** and clearing the Downloads endpoint field.
 
-![Account endpoints](https://woocommerce.com/wp-content/uploads/2023/04/Screenshot-2023-04-09-at-11.45.58-PM.png?w=650)
+![Account endpoints](https://woo.com/wp-content/uploads/2023/04/Screenshot-2023-04-09-at-11.45.58-PM.png?w=650)

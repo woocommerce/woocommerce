@@ -6,6 +6,7 @@ import { Sender } from 'xstate';
 import { __ } from '@wordpress/i18n';
 import { Link } from '@woocommerce/components';
 import { createInterpolateElement } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -35,7 +36,7 @@ export const DesignChangeWarningModal = ( {
 			<p>
 				{ createInterpolateElement(
 					__(
-						"The [AI designer*] will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
+						"The Store Designer will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
 						'woocommerce'
 					),
 					{
@@ -94,7 +95,7 @@ export const StartNewDesignWarningModal = ( {
 			<p>
 				{ createInterpolateElement(
 					__(
-						"The [AI designer*] will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
+						"The Store Designer will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
 						'woocommerce'
 					),
 					{
@@ -180,7 +181,12 @@ export const StartOverWarningModal = ( {
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button
-					onClick={ () => sendEvent( { type: 'DESIGN_WITH_AI' } ) }
+					onClick={ () => {
+						sendEvent( { type: 'DESIGN_WITH_AI' } );
+						recordEvent(
+							'customize_your_store_intro_start_again_click'
+						);
+					} }
 					variant="primary"
 				>
 					{ __( 'Start again', 'woocommerce' ) }

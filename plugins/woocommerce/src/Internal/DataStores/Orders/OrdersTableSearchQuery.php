@@ -32,9 +32,8 @@ class OrdersTableSearchQuery {
 	 * @param OrdersTableQuery $query The order query object.
 	 */
 	public function __construct( OrdersTableQuery $query ) {
-		global $wpdb;
-		$this->query         = $query;
-		$this->search_term   = esc_sql( '%' . $wpdb->esc_like( urldecode( $query->get( 's' ) ) ) . '%' );
+		$this->query       = $query;
+		$this->search_term = urldecode( $query->get( 's' ) );
 	}
 
 	/**
@@ -81,7 +80,7 @@ class OrdersTableSearchQuery {
 	private function generate_where(): string {
 		global $wpdb;
 		$where             = '';
-		$possible_order_id = (string) absint( $this->query->get( 's' ) );
+		$possible_order_id = (string) absint( $this->search_term );
 		$order_table       = $this->query->get_table_name( 'orders' );
 
 		// Support the passing of an order ID as the search term.
@@ -96,7 +95,7 @@ class OrdersTableSearchQuery {
 			search_query_items.order_item_name LIKE %s
 			OR `$order_table`.id IN ( $meta_sub_query )
 			",
-			$this->search_term
+			'%' . $wpdb->esc_like( $this->search_term ) . '%'
 		);
 
 		return " ( $where ) ";
@@ -123,7 +122,7 @@ WHERE search_query_meta.meta_key IN ( $meta_fields )
 AND search_query_meta.meta_value LIKE %s
 GROUP BY search_query_meta.order_id
 ",
-			$this->search_term
+			'%' . $wpdb->esc_like( $this->search_term ) . '%'
 		);
 	}
 

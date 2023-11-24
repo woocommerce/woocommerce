@@ -13,17 +13,30 @@ import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { NumberBlockAttributes } from './types';
 import { useValidation } from '../../../contexts/validation-context';
 import { NumberControl } from '../../../components/number-control';
+import { useProductEdits } from '../../../hooks/use-product-edits';
 
 export function Edit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< NumberBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, property, suffix, placeholder, help, min, max } = attributes;
+	const {
+		label,
+		property,
+		suffix,
+		placeholder,
+		help,
+		min,
+		max,
+		required,
+		tooltip,
+		disabled,
+	} = attributes;
 	const [ value, setValue ] = useProductEntityProp( property, {
 		postType,
 		fallbackValue: '',
 	} );
+	const { hasEdit } = useProductEdits();
 
 	const { error, validate } = useValidation< Product >(
 		property,
@@ -34,8 +47,8 @@ export function Edit( {
 				parseFloat( value ) < min
 			) {
 				return sprintf(
+					// translators: %d is the minimum value of the number input.
 					__(
-						// translators: %d is the minimum value of the number input.
 						'Value must be greater than or equal to %d',
 						'woocommerce'
 					),
@@ -48,13 +61,16 @@ export function Edit( {
 				parseFloat( value ) > max
 			) {
 				return sprintf(
+					// translators: %d is the maximum value of the number input.
 					__(
-						// translators: %d is the maximum value of the number input.
 						'Value must be less than or equal to %d',
 						'woocommerce'
 					),
 					max
 				);
+			}
+			if ( required && ! value ) {
+				return __( 'This field is required.', 'woocommerce' );
 			}
 		},
 		[ value ]
@@ -69,7 +85,14 @@ export function Edit( {
 				suffix={ suffix }
 				placeholder={ placeholder }
 				error={ error }
-				onBlur={ validate }
+				onBlur={ () => {
+					if ( hasEdit( property ) ) {
+						validate();
+					}
+				} }
+				required={ required }
+				tooltip={ tooltip }
+				disabled={ disabled }
 			/>
 		</div>
 	);

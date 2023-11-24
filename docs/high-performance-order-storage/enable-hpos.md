@@ -7,7 +7,7 @@ To activate High-Performance Order Storage, existing stores will first need to g
 1/ Navigate to  **WooCommerce > Settings > Advanced > Features**
 2/ Turn on the  **“Enable compatibility mode (synchronizes orders to the posts table)”**  setting.
 
-![Enable HPOS Screen](https://woocommerce.com/wp-content/uploads/2023/10/New-Project-4.jpg?w=650)
+![Enable HPOS Screen](https://woo.com/wp-content/uploads/2023/10/New-Project-4.jpg?w=650)
 
 3/ Once this setting is activated, background actions will be scheduled.
 
@@ -16,8 +16,8 @@ To activate High-Performance Order Storage, existing stores will first need to g
 - You can either wait for these actions to run on their own, which should be quite soon, or you can go to  **WooCommerce > Status > Scheduled Actions**, find the actions and click on the run button.
 - The action will backfill 25 orders at a time, if there are more orders to be synced, then more actions will be scheduled as soon as the previous actions are completed.
 
-![wc_schedule_pending_batch_process Screen](https://woocommerce.com/wp-content/uploads/2023/10/2.jpg?w=650)
-![wc_run_batch_process Screen](https://woocommerce.com/wp-content/uploads/2023/10/New-Project-5.jpg?w=650)
+![wc_schedule_pending_batch_process Screen](https://woo.com/wp-content/uploads/2023/10/2.jpg?w=650)
+![wc_run_batch_process Screen](https://woo.com/wp-content/uploads/2023/10/New-Project-5.jpg?w=650)
 
 4/ After both tables are successfully synchronized, you’ll be able to select the option to switch to High-Performance Order Storage (HPOS).
   

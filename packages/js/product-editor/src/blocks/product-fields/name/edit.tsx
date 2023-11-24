@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	createElement,
 	Fragment,
-	createInterpolateElement,
+	useEffect,
 	useState,
 } from '@wordpress/element';
 
@@ -39,9 +39,11 @@ import { useValidation } from '../../../contexts/validation-context';
 import { NameBlockAttributes } from './types';
 import { useProductEdits } from '../../../hooks/use-product-edits';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { Label } from '../../../components/label/label';
 
 export function Edit( {
 	attributes,
+	clientId,
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
@@ -143,21 +145,23 @@ export function Edit( {
 		'product_name'
 	) as string;
 
+	// Select the block initially if it is set to autofocus.
+	// (this does not get done automatically by focusing the input)
+	const { selectBlock } = useDispatch( 'core/block-editor' );
+	useEffect( () => {
+		if ( attributes.autoFocus ) {
+			selectBlock( clientId );
+		}
+	}, [] );
+
 	return (
 		<>
 			<div { ...blockProps }>
 				<BaseControl
 					id={ nameControlId }
-					label={ createInterpolateElement(
-						__( 'Name <required />', 'woocommerce' ),
-						{
-							required: (
-								<span className="woocommerce-product-form__required-input">
-									{ __( '*', 'woocommerce' ) }
-								</span>
-							),
-						}
-					) }
+					label={
+						<Label label={ __( 'Name', 'woocommerce' ) } required />
+					}
 					className={ classNames( {
 						'has-error': nameValidationError,
 					} ) }

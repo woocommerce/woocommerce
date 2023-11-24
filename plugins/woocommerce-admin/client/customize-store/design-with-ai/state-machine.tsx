@@ -19,6 +19,7 @@ import {
 	LookAndFeel,
 	ToneOfVoice,
 	ApiCallLoader,
+	AssembleHubLoader,
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
@@ -61,6 +62,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 			},
 		},
 		context: {
+			startLoadingTime: null,
 			businessInfoDescription: {
 				descriptionText: '',
 			},
@@ -145,34 +147,18 @@ export const designWithAiStateMachineDefinition = createMachine(
 								actions: [
 									'assignBusinessInfoDescription',
 									'spawnSaveDescriptionToOption',
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'business_info_description',
+									},
 								],
 								target: 'postBusinessInfoDescription',
 							},
 						},
 					},
 					postBusinessInfoDescription: {
-						invoke: {
-							src: 'getLookAndTone',
-							onError: {
-								actions: [
-									{
-										type: 'recordTracksStepCompleted',
-										step: 'business_info_description',
-									},
-									'logAIAPIRequestError',
-								],
-								target: '#lookAndFeel',
-							},
-							onDone: {
-								actions: [
-									{
-										type: 'recordTracksStepCompleted',
-										step: 'business_info_description',
-									},
-									'assignLookAndTone',
-								],
-								target: '#lookAndFeel',
-							},
+						always: {
+							target: '#lookAndFeel',
 						},
 					},
 				},
@@ -281,6 +267,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 								type: 'updateQueryStep',
 								step: 'api-call-loader',
 							},
+							'assignStartLoadingTime',
 						],
 						type: 'parallel',
 						states: {
@@ -423,13 +410,17 @@ export const designWithAiStateMachineDefinition = createMachine(
 							},
 						},
 						onDone: {
-							actions: [
-								// Full redirect to the Assembler Hub to ensure the user see the new generated content.
-								'redirectToAssemblerHub',
-							],
+							target: '#designWithAi.showAssembleHub',
 						},
 					},
 				},
+			},
+			showAssembleHub: {
+				meta: {
+					component: AssembleHubLoader,
+				},
+				entry: [ 'redirectToAssemblerHub' ],
+				type: 'final',
 			},
 		},
 	},

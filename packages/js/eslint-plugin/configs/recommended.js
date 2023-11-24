@@ -18,7 +18,6 @@ module.exports = {
 		// temporary conversion to warnings until the below are all handled.
 		'jsdoc/check-line-alignment': 'warn',
 		'jsdoc/require-returns-check': 'warn',
-		'@wordpress/i18n-translator-comments': 'warn',
 		'@wordpress/i18n-text-domain': [
 			'error',
 			{
@@ -34,7 +33,6 @@ module.exports = {
 		'jsdoc/require-param': 'off',
 		// Making use of typescript no-shadow instead, fixes issues with enum.
 		'no-shadow': 'off',
-		'@wordpress/valid-sprintf': 'warn',
 		'@wordpress/no-unsafe-wp-apis': 'warn',
 		'@wordpress/no-global-active-element': 'warn',
 		'import/no-extraneous-dependencies': 'warn',

@@ -56,7 +56,8 @@ export const Layout = () => {
 	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
-	const { shouldTourBeShown, ...onboardingTourProps } = useOnboardingTour();
+	const { shouldTourBeShown, isResizeHandleVisible, ...onboardingTourProps } =
+		useOnboardingTour();
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
@@ -70,11 +71,16 @@ export const Layout = () => {
 	const { record: template } = useEditedEntityRecord();
 	const { id: templateId, type: templateType } = template;
 
-	const { sendEvent, currentState } = useContext( CustomizeStoreContext );
-
+	const { sendEvent, currentState, context } = useContext(
+		CustomizeStoreContext
+	);
+	const [ isSurveyOpen, setSurveyOpen ] = useState( false );
 	const editor = <Editor isLoading={ isEditorLoading } />;
 
-	if ( currentState === 'transitionalScreen' ) {
+	if (
+		typeof currentState === 'object' &&
+		currentState.transitionalScreen === 'transitional'
+	) {
 		return (
 			<EntityProvider kind="root" type="site">
 				<EntityProvider
@@ -82,7 +88,15 @@ export const Layout = () => {
 					type={ templateType }
 					id={ templateId }
 				>
-					<Transitional sendEvent={ sendEvent } editor={ editor } />
+					<Transitional
+						sendEvent={ sendEvent }
+						editor={ editor }
+						isSurveyOpen={ isSurveyOpen }
+						setSurveyOpen={ setSurveyOpen }
+						hasCompleteSurvey={
+							!! context?.transitionalScreen?.hasCompleteSurvey
+						}
+					/>
 				</EntityProvider>
 			</EntityProvider>
 		);
@@ -144,44 +158,24 @@ export const Layout = () => {
 								</NavigableRegion>
 
 								{ ! isMobileViewport && (
-									<div
-										className={ classnames(
-											'edit-site-layout__canvas-container'
-										) }
-									>
+									<div className="edit-site-layout__canvas-container">
 										{ canvasResizer }
 										{ !! canvasSize.width && (
 											<motion.div
-												whileHover={ {
-													scale: 1.005,
-													transition: {
-														duration: disableMotion
-															? 0
-															: 0.5,
-														ease: 'easeOut',
-													},
-												} }
 												initial={ false }
 												layout="position"
 												className={ classnames(
 													'edit-site-layout__canvas'
 												) }
-												transition={ {
-													type: 'tween',
-													duration: disableMotion
-														? 0
-														: ANIMATION_DURATION,
-													ease: 'easeOut',
-												} }
 											>
 												<ErrorBoundary>
 													<ResizableFrame
 														isReady={
 															! isEditorLoading
 														}
-														duringGuideTour={
-															shouldTourBeShown &&
-															! onboardingTourProps.showWelcomeTour
+														isHandleVisibleByDefault={
+															! onboardingTourProps.showWelcomeTour &&
+															isResizeHandleVisible
 														}
 														isFullWidth={ false }
 														defaultSize={ {
@@ -211,7 +205,7 @@ export const Layout = () => {
 								) }
 							</div>
 						</div>
-						{ shouldTourBeShown && (
+						{ ! isEditorLoading && shouldTourBeShown && (
 							<OnboardingTour { ...onboardingTourProps } />
 						) }
 					</EntityProvider>

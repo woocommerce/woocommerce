@@ -18,7 +18,11 @@ export default function ProductList( props: ProductListProps ): JSX.Element {
 	return (
 		<div className="woocommerce-marketplace__product-list">
 			<ProductListHeader title={ title } groupURL={ groupURL } />
-			<ProductListContent products={ products } type={ type } />
+			<ProductListContent
+				group={ title }
+				products={ products }
+				type={ type }
+			/>
 		</div>
 	);
 }

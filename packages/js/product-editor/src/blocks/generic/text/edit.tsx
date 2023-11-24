@@ -1,121 +1,188 @@
 /**
  * External dependencies
  */
-import { createElement, createInterpolateElement } from '@wordpress/element';
-import { useInstanceId } from '@wordpress/compose';
-import { __, sprintf } from '@wordpress/i18n';
-import { Product } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import classNames from 'classnames';
-import {
-	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
-	__experimentalInputControl as InputControl,
-} from '@wordpress/components';
+import { Link } from '@woocommerce/components';
+import { Product } from '@woocommerce/data';
+import { createElement, useRef } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
+import { Icon, external } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
+import { TextControl } from '../../../components/text-control';
 import { useValidation } from '../../../contexts/validation-context';
+import { useProductEdits } from '../../../hooks/use-product-edits';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
-import { TextBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { TextBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< TextBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
+
 	const {
 		property,
 		label,
 		placeholder,
 		required,
-		validationRegex,
-		validationErrorMessage,
+		pattern,
 		minLength,
 		maxLength,
+		min,
+		max,
+		help,
+		tooltip,
+		disabled,
+		type,
+		suffix,
 	} = attributes;
+
 	const [ value, setValue ] = useProductEntityProp< string >( property, {
 		postType,
 		fallbackValue: '',
 	} );
-	const nameControlId = useInstanceId( BaseControl, property ) as string;
+
+	const { hasEdit } = useProductEdits();
+
+	const inputRef = useRef< HTMLInputElement >( null );
 
 	const { error, validate } = useValidation< Product >(
 		property,
 		async function validator() {
-			if ( typeof value !== 'string' ) {
-				return __(
-					'Unexpected property type assigned to field.',
-					'woocommerce'
+			if ( ! inputRef.current ) return;
+
+			const input = inputRef.current;
+
+			let customErrorMessage = '';
+
+			if ( input.validity.typeMismatch ) {
+				customErrorMessage =
+					type?.message ??
+					__( 'Invalid value for the field.', 'woocommerce' );
+			}
+			if ( input.validity.valueMissing ) {
+				customErrorMessage =
+					typeof required === 'string'
+						? required
+						: __( 'This field is required.', 'woocommerce' );
+			}
+			if ( input.validity.patternMismatch ) {
+				customErrorMessage =
+					pattern?.message ??
+					__( 'Invalid value for the field.', 'woocommerce' );
+			}
+			if ( input.validity.tooShort ) {
+				// eslint-disable-next-line @wordpress/valid-sprintf
+				customErrorMessage = sprintf(
+					minLength?.message ??
+						/* translators: %d: minimum length */
+						__(
+							'The minimum length of the field is %d',
+							'woocommerce'
+						),
+					minLength?.value
 				);
 			}
-			if ( required && ! value ) {
-				return __( 'This field is required.', 'woocommerce' );
-			}
-			if ( validationRegex ) {
-				const regExp = new RegExp( validationRegex );
-				if ( ! regExp.test( value ) ) {
-					return (
-						validationErrorMessage ||
-						__( 'Invalid value for the field.', 'woocommerce' )
-					);
-				}
-			}
-			if ( typeof minLength === 'number' && value.length < minLength ) {
-				return sprintf(
-					/* translators: %d: minimum length */
-					__(
-						'The minimum length of the field is %d',
-						'woocommerce'
-					),
-					minLength
+			if ( input.validity.tooLong ) {
+				// eslint-disable-next-line @wordpress/valid-sprintf
+				customErrorMessage = sprintf(
+					maxLength?.message ??
+						/* translators: %d: maximum length */
+						__(
+							'The maximum length of the field is %d',
+							'woocommerce'
+						),
+					maxLength?.value
 				);
 			}
-			if ( typeof maxLength === 'number' && value.length > maxLength ) {
-				return sprintf(
-					/* translators: %d: maximum length */
-					__(
-						'The maximum length of the field is %d',
-						'woocommerce'
-					),
-					maxLength
+			if ( input.validity.rangeUnderflow ) {
+				// eslint-disable-next-line @wordpress/valid-sprintf
+				customErrorMessage = sprintf(
+					min?.message ??
+						/* translators: %d: minimum length */
+						__(
+							'The minimum value of the field is %d',
+							'woocommerce'
+						),
+					min?.value
 				);
+			}
+			if ( input.validity.rangeOverflow ) {
+				// eslint-disable-next-line @wordpress/valid-sprintf
+				customErrorMessage = sprintf(
+					max?.message ??
+						/* translators: %d: maximum length */
+						__(
+							'The maximum value of the field is %d',
+							'woocommerce'
+						),
+					max?.value
+				);
+			}
+
+			input.setCustomValidity( customErrorMessage );
+
+			if ( ! input.validity.valid ) {
+				return input.validationMessage;
 			}
 		},
-		[ value ]
+		[ type, required, pattern, minLength, maxLength, min, max ]
 	);
+
+	function getSuffix() {
+		if ( ! suffix || ! value || ! inputRef.current ) return;
+
+		const isValidUrl =
+			inputRef.current.type === 'url' &&
+			! inputRef.current.validity.typeMismatch;
+
+		if ( suffix === true && isValidUrl ) {
+			return (
+				<Link
+					type="external"
+					href={ value }
+					target="_blank"
+					rel="noreferrer"
+					className="wp-block-woocommerce-product-text-field__suffix-link"
+				>
+					<Icon icon={ external } size={ 20 } />
+				</Link>
+			);
+		}
+
+		return typeof suffix === 'string' ? suffix : undefined;
+	}
 
 	return (
 		<div { ...blockProps }>
-			<BaseControl
-				id={ nameControlId }
-				label={
-					required
-						? createInterpolateElement( `${ label } <required/>`, {
-								required: (
-									<span className="woocommerce-product-form__required-input">
-										{ /* translators: field 'required' indicator */ }
-										{ __( '*', 'woocommerce' ) }
-									</span>
-								),
-						  } )
-						: label
-				}
-				className={ classNames( {
-					'has-error': error,
-				} ) }
-				help={ error }
-			>
-				<InputControl
-					id={ nameControlId }
-					placeholder={ placeholder }
-					value={ value }
-					onChange={ setValue }
-					onBlur={ validate }
-				></InputControl>
-			</BaseControl>
+			<TextControl
+				ref={ inputRef }
+				type={ type?.value ?? 'text' }
+				value={ value }
+				disabled={ disabled }
+				label={ label }
+				onChange={ setValue }
+				onBlur={ () => {
+					if ( hasEdit( property ) ) {
+						validate();
+					}
+				} }
+				error={ error }
+				help={ help }
+				placeholder={ placeholder }
+				tooltip={ tooltip }
+				suffix={ getSuffix() }
+				required={ Boolean( required ) }
+				pattern={ pattern?.value }
+				minLength={ minLength?.value }
+				maxLength={ maxLength?.value }
+				min={ min?.value }
+				max={ max?.value }
+			/>
 		</div>
 	);
 }

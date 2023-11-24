@@ -138,9 +138,7 @@ class Settings {
 
 		//phpcs:ignore
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
-		if ( class_exists( 'Jetpack' ) ) {
-			$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
-		}
+		$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$preload_data = array_reduce(
 				array_values( $preload_data_endpoints ),
@@ -234,10 +232,15 @@ class Settings {
 		$settings['allowMarketplaceSuggestions']      = WC_Marketplace_Suggestions::allow_suggestions();
 		$settings['connectNonce']                     = wp_create_nonce( 'connect' );
 		$settings['wcpay_welcome_page_connect_nonce'] = wp_create_nonce( 'wcpay-connect' );
+		$settings['wc_helper_nonces']                 = array(
+			'refresh' => wp_create_nonce( 'refresh' ),
+		);
 
 		$settings['features'] = $this->get_features();
 
 		$settings['isWooPayEligible'] = WCPayPromotionInit::is_woopay_eligible();
+
+		$settings['gutenberg_version'] = defined( 'GUTENBERG_VERSION' ) ? constant( 'GUTENBERG_VERSION' ) : 0;
 
 		return $settings;
 	}
