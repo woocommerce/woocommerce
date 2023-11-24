@@ -10,6 +10,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import { addQueryArgs } from '@wordpress/url';
 import { queueRecordEvent } from '@woocommerce/tracks';
 import { store as commandsStore } from '@wordpress/commands';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -149,7 +150,7 @@ const WooCommerceCommands = () => {
 
 		settingsCommands.forEach( ( settingsCommand ) => {
 			registerWooCommerceSettingsCommand( {
-				label: settingsCommand.label,
+				label: decodeEntities( settingsCommand.label ),
 				tab: settingsCommand.key,
 			} );
 		} );
