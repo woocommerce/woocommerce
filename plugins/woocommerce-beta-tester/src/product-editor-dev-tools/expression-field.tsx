@@ -37,7 +37,9 @@ export function ExpressionField( {
 
 		try {
 			result = JSON.stringify(
-				evaluate( editedExpression, evaluationContext )
+				evaluate( editedExpression, evaluationContext ),
+				null,
+				4
 			);
 		} catch ( error ) {
 			result = __( 'Error evaluating expression', 'woocommerce' );
