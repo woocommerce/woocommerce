@@ -81,6 +81,33 @@
 
 	&__expression {
 		width: 100%;
+
+		padding: var(--woocommerce-product-editor-dev-tools-gap-small);
+
+		border: none;
+		border-radius: 0;
+
+		font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
+
+		background-color: var(--woocommerce-product-editor-dev-tools-border-color);
+		color: white;
+
+		&[readonly] {
+			background-color: transparent;
+			color: var(--woocommerce-product-editor-dev-tools-text-color);
+
+			border: none;
+
+			resize: none;
+		}
+	}
+
+	&__result {
+		&::before {
+			content: '< ';
+
+			color: var(--woocommerce-product-editor-dev-tools-border-color);
+		}
 	}
 
 	&__actions {
@@ -145,41 +172,6 @@
 
 .woocommerce-product-editor-dev-tools-expressions-list-prompt {
 	color: var(--woocommerce-product-editor-dev-tools-border-color);
-}
-
-.woocommerce-product-editor-dev-tools-expression-editor {
-	display: flex;
-	flex-direction: row;
-
-	gap: var(--woocommerce-product-editor-dev-tools-gap);
-	padding: var(--woocommerce-product-editor-dev-tools-gap);
-
-	align-items: center;
-
-	textarea {
-		flex: 1;
-
-		padding: var(--woocommerce-product-editor-dev-tools-gap);
-
-		border: none;
-		border-radius: 0;
-
-		font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
-
-		background-color: var(--woocommerce-product-editor-dev-tools-border-color);
-		color: var(--woocommerce-product-editor-dev-tools-text-color);
-	}
-
-	.components-button {
-		border-radius: 0;
-
-		color: var(--woocommerce-product-editor-dev-tools-text-color);
-
-		&:active,
-		&:hover {
-			color: var(--woocommerce-product-editor-dev-tools-text-hover-color);
-		}
-	}
 }
 
 .woocommerce-product-editor-dev-tools-template {

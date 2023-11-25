@@ -74,12 +74,14 @@ export function ExpressionField( {
 						'woocommerce'
 					) }
 					readOnly={ mode !== 'edit' }
-					value={ editedExpression }
 					onChange={ handleOnChange }
+					value={ editedExpression }
 				/>
-				<div className="woocommerce-product-editor-dev-tools-expression-field__result">
-					{ editedExpression !== '' && result }
-				</div>
+				{ editedExpression !== '' && (
+					<div className="woocommerce-product-editor-dev-tools-expression-field__result">
+						{ result }
+					</div>
+				) }
 			</div>
 			<div className="woocommerce-product-editor-dev-tools-expression-field__actions">
 				{ mode === 'edit' ? (
