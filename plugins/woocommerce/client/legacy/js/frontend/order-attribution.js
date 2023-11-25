@@ -1,11 +1,9 @@
 ( function ( wc_order_attribution ) {
 	'use strict';
-
+	// Cache params reference for shorter reusability.
 	const params = wc_order_attribution.params;
-	const prefix = params.prefix;
-	const cookieLifetime = Number( params.lifetime );
-	const sessionLength = Number( params.session );
 
+	// Helper functions.
 	const $ = document.querySelector.bind( document );
 
 	/**
@@ -33,10 +31,12 @@
 		user_agent: obj.udata.uag,
 	} );
 
-	wc_order_attribution.initOrderTracking = () => {
-
+	/**
+	 * Initialize the module.
+	 */
+	function initOrderTracking() {
 		if ( params.allowTracking === 'no' ) {
-			wc_order_attribution.removeTrackingCookies();
+			removeTrackingCookies();
 			return;
 		}
 
@@ -44,8 +44,8 @@
 		 * Initialize sourcebuster.js.
 		 */
 		sbjs.init( {
-			lifetime: cookieLifetime,
-			session_length: sessionLength,
+			lifetime: Number( params.lifetime ),
+			session_length: Number( params.session ),
 			timezone_offset: '0', // utc
 		} );
 
@@ -64,7 +64,7 @@
 		};
 
 		/**
-		 * Add source values to the classic checkout.
+		 * Add source values to the classic checkout form.
 		 */
 		if ( $( 'form.woocommerce-checkout' ) !== null ) {
 			const previousInitCheckout = document.body.oninit_checkout;
@@ -75,7 +75,7 @@
 		}
 
 		/**
-		 * Add source values to register.
+		 * Add source values to register form.
 		 */
 		if ( $( '.woocommerce form.register' ) !== null ) {
 			setFields();
@@ -91,13 +91,14 @@
 		}
 
 		params.allowTracking = 'yes';
-		wc_order_attribution.initOrderTracking();
+		initOrderTracking();
 	}
 
 	/**
-	 * Remove sourcebuster.js cookies whenever tracking is disabled or consent is revoked.
+	 * Remove sourcebuster.js cookies.
+	 * To be called whenever tracking is disabled or consent is revoked.
 	 */
-	wc_order_attribution.removeTrackingCookies = () => {
+	function removeTrackingCookies() {
 		const domain = window.location.hostname;
 		const sbCookies = [
 			'sbjs_current',
@@ -114,10 +115,9 @@
 		sbCookies.forEach( ( name ) => {
 			document.cookie = `${name}=; path=/; max-age=-999; domain=.${domain};`;
 		} );
-
 	}
 
 	// Run init.
-	wc_order_attribution.initOrderTracking();
+	initOrderTracking();
 
 }( window.wc_order_attribution ) );
