@@ -163,7 +163,7 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 	private function get_schema_callback() {
 		return function() {
 			$schema = array();
-			$fields = $this->order_attribution_controller->get_fields();
+			$field_names = $this->order_attribution_controller->get_field_names();
 
 			$validate_callback = function( $value ) {
 				if ( ! is_string( $value ) && null !== $value ) {
@@ -184,12 +184,12 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 				return sanitize_text_field( $value );
 			};
 
-			foreach ( $fields as $field ) {
-				$schema[ $field ] = array(
+			foreach ( $field_names as $field_name ) {
+				$schema[ $field_name ] = array(
 					'description' => sprintf(
 						/* translators: %s is the field name */
 						__( 'Order attribution field: %s', 'woocommerce' ),
-						esc_html( $field )
+						esc_html( $field_name )
 					),
 					'type'        => array( 'string', 'null' ),
 					'context'     => array(),

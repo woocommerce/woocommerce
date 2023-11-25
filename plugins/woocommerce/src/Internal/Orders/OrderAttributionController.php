@@ -26,7 +26,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 
 	use ScriptDebug;
 	use OrderAttributionMeta {
-		get_prefixed_field as public;
+		get_prefixed_field_name as public;
 	}
 
 	/**
@@ -98,13 +98,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 			}
 		);
 
-		// Include our hidden fields on order notes and registration form.
-		$source_form_fields = function() {
-			$this->source_form_fields();
+		// Include our hidden `<input>` elements on order notes and registration form.
+		$source_form_elements = function() {
+			$this->source_form_elements();
 		};
 
-		add_action( 'woocommerce_after_order_notes', $source_form_fields );
-		add_action( 'woocommerce_register_form', $source_form_fields );
+		add_action( 'woocommerce_after_order_notes', $source_form_elements );
+		add_action( 'woocommerce_register_form', $source_form_elements );
 
 		// Update order based on submitted fields.
 		add_action(
@@ -112,7 +112,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			function( $order ) {
 				// Nonce check is handled by WooCommerce before woocommerce_checkout_order_created hook.
 				// phpcs:ignore WordPress.Security.NonceVerification
-				$params = $this->get_unprefixed_fields( $_POST );
+				$params = $this->get_unprefixed_field_values( $_POST );
 				/**
 				 * Run an action to save order attribution data.
 				 *
@@ -158,12 +158,12 @@ class OrderAttributionController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Get all of the fields.
+	 * Get all of the field names.
 	 *
 	 * @return array
 	 */
-	public function get_fields(): array {
-		return $this->fields;
+	public function get_field_names(): array {
+		return $this->field_names;
 	}
 
 	/**
@@ -231,6 +231,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 				'prefix'        => $this->field_prefix,
 				'allowTracking' => $allow_tracking,
 			),
+			'fields' => $this->fields,
 		);
 
 		wp_localize_script( 'wc-order-attribution', 'wc_order_attribution', $namespace );
@@ -281,8 +282,8 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function output_origin_column( WC_Order $order ) {
-		$source_type = $order->get_meta( $this->get_meta_prefixed_field( 'source_type' ) );
-		$source      = $order->get_meta( $this->get_meta_prefixed_field( 'utm_source' ) );
+		$source_type = $order->get_meta( $this->get_meta_prefixed_field_name( 'source_type' ) );
+		$source      = $order->get_meta( $this->get_meta_prefixed_field_name( 'utm_source' ) );
 		if ( ! $source ) {
 			$source = __( '(none)', 'woocommerce' );
 		}
@@ -290,11 +291,12 @@ class OrderAttributionController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Add attribution hidden input fields for checkout & customer register froms.
+	 * Add `<input type="hidden">` elements for source fields.
+	 * Used for checkout & customer register froms.
 	 */
-	private function source_form_fields() {
-		foreach ( $this->fields as $field ) {
-			printf( '<input type="hidden" name="%s" value="" />', esc_attr( $this->get_prefixed_field( $field ) ) );
+	private function source_form_elements() {
+		foreach ( $this->field_names as $field_name ) {
+			printf( '<input type="hidden" name="%s" value="" />', esc_attr( $this->get_prefixed_field_name( $field_name ) ) );
 		}
 	}
 
@@ -308,8 +310,8 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private function set_customer_source_data( WC_Customer $customer ) {
 		// Nonce check is handled before user_register hook.
 		// phpcs:ignore WordPress.Security.NonceVerification
-		foreach ( $this->get_source_values( $this->get_unprefixed_fields( $_POST ) ) as $key => $value ) {
-			$customer->add_meta_data( $this->get_meta_prefixed_field( $key ), $value );
+		foreach ( $this->get_source_values( $this->get_unprefixed_field_values( $_POST ) ) as $key => $value ) {
+			$customer->add_meta_data( $this->get_meta_prefixed_field_name( $key ), $value );
 		}
 
 		$customer->save_meta_data();
@@ -325,7 +327,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 */
 	private function set_order_source_data( array $source_data, WC_Order $order ) {
 		foreach ( $source_data as $key => $value ) {
-			$order->add_meta_data( $this->get_meta_prefixed_field( $key ), $value );
+			$order->add_meta_data( $this->get_meta_prefixed_field_name( $key ), $value );
 		}
 
 		$order->save_meta_data();

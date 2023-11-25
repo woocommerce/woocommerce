@@ -5,31 +5,18 @@
 
 	// Helper functions.
 	const $ = document.querySelector.bind( document );
+	const propertyAccessor = ( obj, path ) => path.split( '.' ).reduce( ( acc, part ) => acc && acc[ part ], obj );
 
 	/**
-	 * Flattens the sbjs.get object into a schema compatible object.
+	 * Flattens the sbjs.get object into our schema compatible object
+	 * according to the fields configuration.
+	 * More info at https://sbjs.rocks/#/usage.
 	 *
-	 * @param {Object} obj Sourcebuster data object, `sbjs.get`.
-	 * @returns
+	 * @returns {array} key value paris in `Object.entries` format.
 	 */
-	wc_order_attribution.sbjsDataToSchema = ( obj ) => ( {
-		source_type: obj.current.typ,
-		referrer: obj.current_add.rf,
-
-		utm_campaign: obj.current.cmp,
-		utm_source: obj.current.src,
-		utm_medium: obj.current.mdm,
-		utm_content: obj.current.cnt,
-		utm_id: obj.current.id,
-		utm_term: obj.current.trm,
-
-		session_entry: obj.current_add.ep,
-		session_start_time: obj.current_add.fd,
-		session_pages: obj.session.pgs,
-		session_count: obj.udata.vst,
-
-		user_agent: obj.udata.uag,
-	} );
+	wc_order_attribution.getData =
+		() => Object.entries( wc_order_attribution.fields )
+				.map( ( [ key, accessor ] ) => [ key, propertyAccessor( sbjs.get, accessor ) ] );
 
 	/**
 	 * Initialize the module.
@@ -54,10 +41,10 @@
 		 * and register forms using sourcebuster object values.
 		 * More info at https://sbjs.rocks/#/usage.
 		 */
-		const setFields = () => {
+		const setFormValues = () => {
 
 			if ( sbjs.get ) {
-				for( const [ key, value ] of Object.entries( wc_order_attribution.sbjsDataToSchema( sbjs.get ) ) ) {
+				for( const [ key, value ] of wc_order_attribution.getData() ) {
 					$( `input[name="${params.prefix}${key}"]` ).value = value;
 				}
 			}
@@ -69,7 +56,7 @@
 		if ( $( 'form.woocommerce-checkout' ) !== null ) {
 			const previousInitCheckout = document.body.oninit_checkout;
 			document.body.oninit_checkout = () => {
-				setFields();
+				setFormValues();
 				previousInitCheckout && previousInitCheckout();
 			};
 		}
@@ -78,7 +65,7 @@
 		 * Add source values to register form.
 		 */
 		if ( $( '.woocommerce form.register' ) !== null ) {
-			setFields();
+			setFormValues();
 		}
 	}
 
