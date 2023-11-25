@@ -64,37 +64,45 @@ export function ExpressionField( {
 
 	return (
 		<div className="woocommerce-product-editor-dev-tools-expression-field">
-			{ mode === 'edit' && (
-				<div>
-					<textarea
-						placeholder={ __(
-							'Enter an expression to evaluate',
-							'woocommerce'
+			<div className="woocommerce-product-editor-dev-tools-expression-field__expression_and_result">
+				<textarea
+					className="woocommerce-product-editor-dev-tools-expression-field__expression"
+					placeholder={ __(
+						'Enter an expression to evaluate',
+						'woocommerce'
+					) }
+					readOnly={ mode !== 'edit' }
+					value={ editedExpression }
+					onChange={ handleOnChange }
+				/>
+				<div className="woocommerce-product-editor-dev-tools-expression-field__result">
+					{ editedExpression !== '' && result }
+				</div>
+			</div>
+			<div className="woocommerce-product-editor-dev-tools-expression-field__actions">
+				{ mode === 'edit' ? (
+					<>
+						<Button onClick={ handleOnUpdate }>
+							{ __( 'Add', 'woocommerce' ) }
+						</Button>
+						<>
+							{ onCancel && (
+								<Button onClick={ handleOnCancel }>
+									{ __( 'Cancel', 'woocommerce' ) }
+								</Button>
+							) }
+						</>
+					</>
+				) : (
+					<>
+						{ onEnterEdit && (
+							<Button onClick={ onEnterEdit }>
+								{ __( 'Edit', 'woocommerce' ) }
+							</Button>
 						) }
-						value={ editedExpression }
-						onChange={ handleOnChange }
-					/>
-					<Button onClick={ handleOnUpdate }>
-						{ __( 'Add', 'woocommerce' ) }
-					</Button>
-					{ onCancel && (
-						<Button onClick={ handleOnCancel }>
-							{ __( 'Cancel', 'woocommerce' ) }
-						</Button>
-					) }
-				</div>
-			) }
-			{ mode !== 'edit' && (
-				<div>
-					<div>{ expression }</div>
-					{ onEnterEdit && (
-						<Button onClick={ onEnterEdit }>
-							{ __( 'Edit', 'woocommerce' ) }
-						</Button>
-					) }
-				</div>
-			) }
-			<div>{ editedExpression !== '' && result }</div>
+					</>
+				) }
+			</div>
 		</div>
 	);
 }

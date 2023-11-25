@@ -71,6 +71,23 @@
 	height: 100%;
 }
 
+.woocommerce-product-editor-dev-tools-expression-field {
+	display: flex;
+	width: 100%;
+
+	&__expression_and_result {
+		flex: 1;
+	}
+
+	&__expression {
+		width: 100%;
+	}
+
+	&__actions {
+
+	}
+}
+
 .woocommerce-product-editor-dev-tools-product {
 	display: flex;
 	flex-direction: row;
