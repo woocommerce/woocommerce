@@ -5,6 +5,7 @@ import { Product } from '@woocommerce/data';
 import { evaluate } from '@woocommerce/expression-evaluation';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { check, close, edit } from '@wordpress/icons';
 import { useEffect, useState } from 'react';
 
 export function ExpressionField( {
@@ -86,23 +87,29 @@ export function ExpressionField( {
 			<div className="woocommerce-product-editor-dev-tools-expression-field__actions">
 				{ mode === 'edit' ? (
 					<>
-						<Button onClick={ handleOnUpdate }>
-							{ __( 'Add', 'woocommerce' ) }
-						</Button>
+						<Button
+							icon={ check }
+							label={ __( 'Add', 'woocommerce' ) }
+							onClick={ handleOnUpdate }
+						/>
 						<>
 							{ onCancel && (
-								<Button onClick={ handleOnCancel }>
-									{ __( 'Cancel', 'woocommerce' ) }
-								</Button>
+								<Button
+									icon={ close }
+									label={ __( 'Cancel', 'woocommerce' ) }
+									onClick={ handleOnCancel }
+								/>
 							) }
 						</>
 					</>
 				) : (
 					<>
 						{ onEnterEdit && (
-							<Button onClick={ onEnterEdit }>
-								{ __( 'Edit', 'woocommerce' ) }
-							</Button>
+							<Button
+								icon={ edit }
+								label={ __( 'Edit', 'woocommerce' ) }
+								onClick={ onEnterEdit }
+							/>
 						) }
 					</>
 				) }
