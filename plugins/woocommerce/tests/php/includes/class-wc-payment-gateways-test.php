@@ -14,6 +14,9 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->reset_legacy_proxy_mocks();
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		WC_Payment_Gateways::instance()->init();
 	}
 
 	/**
