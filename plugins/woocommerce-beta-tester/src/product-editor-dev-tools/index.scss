@@ -86,6 +86,9 @@
 
 		padding: var(--woocommerce-product-editor-dev-tools-gap-small);
 
+		overflow-y: hidden;
+		resize: none;
+
 		border: none;
 		border-radius: 0;
 
@@ -99,8 +102,6 @@
 			color: var(--woocommerce-product-editor-dev-tools-text-color);
 
 			border: none;
-
-			resize: none;
 		}
 	}
 

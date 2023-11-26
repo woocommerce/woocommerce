@@ -6,7 +6,7 @@ import { evaluate } from '@woocommerce/expression-evaluation';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { check, close, edit } from '@wordpress/icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function ExpressionField( {
 	expression,
@@ -53,10 +53,17 @@ export function ExpressionField( {
 
 	const result = evaluateExpression();
 
-	const handleOnChange = (
-		event: React.ChangeEvent< HTMLTextAreaElement >
-	) => {
-		setEditedExpression( event.target.value );
+	const expressionTextAreaRef = useRef< HTMLTextAreaElement >( null );
+
+	const handleOnChange = () => {
+		const textArea = expressionTextAreaRef.current;
+
+		if ( ! textArea ) return;
+
+		textArea.style.height = 'auto';
+		textArea.style.height = textArea.scrollHeight + 'px';
+
+		setEditedExpression( textArea.value );
 	};
 
 	const handleOnUpdate = () => {
@@ -76,7 +83,9 @@ export function ExpressionField( {
 		>
 			<div className="woocommerce-product-editor-dev-tools-expression-field__expression_and_result">
 				<textarea
+					ref={ expressionTextAreaRef }
 					className="woocommerce-product-editor-dev-tools-expression-field__expression"
+					rows={ 1 }
 					placeholder={ __(
 						'Enter an expression to evaluate',
 						'woocommerce'
