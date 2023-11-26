@@ -75,6 +75,8 @@
 	display: flex;
 	width: 100%;
 
+	gap: var(--woocommerce-product-editor-dev-tools-gap-small);
+
 	&__expression_and_result {
 		flex: 1;
 	}
@@ -111,7 +113,13 @@
 	}
 
 	&__actions {
+		button {
+			color: var(--woocommerce-product-editor-dev-tools-text-color);
+		}
+	}
 
+	&.readonly &__actions button {
+		color: var(--woocommerce-product-editor-dev-tools-border-color);
 	}
 }
 

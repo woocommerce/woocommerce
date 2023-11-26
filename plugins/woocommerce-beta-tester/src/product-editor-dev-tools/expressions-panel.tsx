@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Product } from '@woocommerce/data';
+import { __ } from '@wordpress/i18n';
 import { useState } from 'react';
 
 /**
@@ -79,6 +80,7 @@ export function ExpressionsPanel( {
 						evaluationContext={ evaluationContext }
 						mode="edit"
 						onUpdate={ addExpression }
+						updateLabel={ __( 'Add', 'woocommerce' ) }
 					/>
 				</li>
 			</ul>

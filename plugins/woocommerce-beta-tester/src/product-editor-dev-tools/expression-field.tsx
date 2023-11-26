@@ -15,6 +15,7 @@ export function ExpressionField( {
 	onEnterEdit,
 	onUpdate = () => {},
 	onCancel,
+	updateLabel = __( 'Update', 'woocommerce' ),
 }: {
 	expression: string;
 	evaluationContext: {
@@ -25,6 +26,7 @@ export function ExpressionField( {
 	onEnterEdit?: () => void;
 	onUpdate?: ( expression: string ) => void;
 	onCancel?: () => void;
+	updateLabel?: string;
 } ) {
 	const [ editedExpression, setEditedExpression ] =
 		useState< string >( expression );
@@ -66,7 +68,12 @@ export function ExpressionField( {
 	};
 
 	return (
-		<div className="woocommerce-product-editor-dev-tools-expression-field">
+		<div
+			className={
+				'woocommerce-product-editor-dev-tools-expression-field ' +
+				`${ mode !== 'edit' ? 'readonly' : '' }`
+			}
+		>
 			<div className="woocommerce-product-editor-dev-tools-expression-field__expression_and_result">
 				<textarea
 					className="woocommerce-product-editor-dev-tools-expression-field__expression"
@@ -89,7 +96,7 @@ export function ExpressionField( {
 					<>
 						<Button
 							icon={ check }
-							label={ __( 'Add', 'woocommerce' ) }
+							label={ updateLabel }
 							onClick={ handleOnUpdate }
 						/>
 						<>
