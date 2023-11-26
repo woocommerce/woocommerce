@@ -21,8 +21,8 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		$this->reset_legacy_proxy_mocks();
 		$container = wc_get_container();
 		$container->reset_all_resolved();
-		$this->$sut = new WC_Payment_Gateways();
-		$this->$sut->init();
+		$this->sut = new WC_Payment_Gateways();
+		$this->sut->init();
 	}
 
 	/**
@@ -58,7 +58,7 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		add_filter( 'wp_mail', $watcher );
 
 		// Enable each gateway and check that the email and log entry are created.
-		foreach ( $this->$sut->payment_gateways() as $gateway ) {
+		foreach ( $this->sut->payment_gateways() as $gateway ) {
 			// Disable the gateway and save the settings.
 			$gateway->settings['enabled'] = 'no';
 			update_option( $gateway->get_option_key(), $gateway->settings );
