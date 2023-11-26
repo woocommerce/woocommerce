@@ -1,19 +1,26 @@
 /**
  * External dependencies
  */
+import { Product } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { BlockTemplate } from '../types';
+import { ExpressionField } from '../expression-field';
 
 export function BlockTemplateDetailsPanel( {
 	blockTemplate,
 	block,
+	evaluationContext,
 }: {
 	blockTemplate?: BlockTemplate | null;
 	block: any;
+	evaluationContext: {
+		postType: string;
+		editedProduct: Product;
+	};
 } ) {
 	if ( ! blockTemplate ) {
 		return null;
@@ -70,26 +77,40 @@ export function BlockTemplateDetailsPanel( {
 			{ templateBlockDisableConditions && (
 				<div>
 					<div>Disable conditions:</div>
-					<div>
-						{ JSON.stringify(
-							templateBlockDisableConditions,
-							null,
-							4
+					<ul>
+						{ templateBlockDisableConditions.map(
+							// @ts-ignore
+							( condition, index ) => (
+								<li key={ index }>
+									<ExpressionField
+										expression={ condition.expression }
+										evaluationContext={ evaluationContext }
+										mode="view"
+									/>
+								</li>
+							)
 						) }
-					</div>
+					</ul>
 				</div>
 			) }
 
 			{ templateBlockHideConditions && (
 				<div>
 					<div>Hide conditions:</div>
-					<div>
-						{ JSON.stringify(
-							templateBlockHideConditions,
-							null,
-							4
+					<ul>
+						{ templateBlockHideConditions.map(
+							// @ts-ignore
+							( condition, index ) => (
+								<li key={ index }>
+									<ExpressionField
+										expression={ condition.expression }
+										evaluationContext={ evaluationContext }
+										mode="view"
+									/>
+								</li>
+							)
 						) }
-					</div>
+					</ul>
 				</div>
 			) }
 

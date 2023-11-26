@@ -80,6 +80,7 @@ export function TemplateTabPanel( {
 				<BlockTemplateDetailsPanel
 					blockTemplate={ selectedBlockTemplate }
 					block={ selectedBlock }
+					evaluationContext={ evaluationContext }
 				/>
 			</div>
 		</TabPanel>
