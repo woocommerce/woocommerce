@@ -9,6 +9,11 @@
 class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * @var WC_Payment_Gateways The system under test.
+	 */
+	private $sut;
+
+	/**
 	 * Setup, enable payment gateways Cash on delivery and direct bank deposit.
 	 */
 	public function setUp(): void {
@@ -16,7 +21,8 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		$this->reset_legacy_proxy_mocks();
 		$container = wc_get_container();
 		$container->reset_all_resolved();
-		WC_Payment_Gateways::instance()->init();
+		$this->$sut = new WC_Payment_Gateways();
+		$this->$sut->init();
 	}
 
 	/**
@@ -52,7 +58,7 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		add_filter( 'wp_mail', $watcher );
 
 		// Enable each gateway and check that the email and log entry are created.
-		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+		foreach ( $this->$sut->payment_gateways() as $gateway ) {
 			// Disable the gateway and save the settings.
 			$gateway->settings['enabled'] = 'no';
 			update_option( $gateway->get_option_key(), $gateway->settings );
