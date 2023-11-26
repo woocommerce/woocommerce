@@ -2,8 +2,6 @@
  * External dependencies
  */
 import { Product } from '@woocommerce/data';
-import { evaluate } from '@woocommerce/expression-evaluation';
-import { Button } from '@wordpress/components';
 import { useState } from 'react';
 
 /**
