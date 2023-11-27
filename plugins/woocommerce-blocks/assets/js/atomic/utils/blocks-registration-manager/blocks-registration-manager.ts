@@ -140,10 +140,6 @@ export class BlockRegistrationManager
 	 */
 	registerBlocksAfterLeavingRestrictedArea() {
 		for ( const unregisteredBlockName of this.unregisteredBlocks ) {
-			if ( ! getBlockType( unregisteredBlockName ) ) {
-				continue;
-			}
-
 			const restrictedBlockData =
 				BLOCKS_WITH_RESTRICTION[ unregisteredBlockName ];
 			this.blockRegistrationStrategy = BLOCKS_WITH_RESTRICTION[
