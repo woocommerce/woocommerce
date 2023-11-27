@@ -100,9 +100,18 @@ export default () => {
 
 	// data-wc-on--[event]
 	directive( 'on', ( { directives: { on }, element, evaluate } ) => {
+		const events = new Map();
 		on.forEach( ( entry ) => {
-			element.props[ `on${ entry.suffix }` ] = ( event ) => {
-				evaluate( entry, event );
+			const event = entry.suffix.split( '--' )[ 0 ];
+			if ( ! events.has( event ) ) events.set( event, new Set() );
+			events.get( event ).add( entry );
+		} );
+
+		events.forEach( ( entries, event ) => {
+			element.props[ `on${ event }` ] = ( event ) => {
+				entries.forEach( ( entry ) => {
+					evaluate( entry, event );
+				} );
 			};
 		} );
 	} );

@@ -1,95 +1,93 @@
 /**
  * External dependencies
  */
-import { store as interactivityStore } from '@woocommerce/interactivity';
+import { getContext, store } from '@woocommerce/interactivity';
 
 export type DropdownContext = {
-	woocommerceDropdown: {
-		currentItem: {
-			label: string;
-			value: string;
-		};
-		selectedItem: {
-			label: string | null;
-			value: string | null;
-		};
-		hoveredItem: {
-			label: string | null;
-			value: string | null;
-		};
-		isOpen: boolean;
+	currentItem: {
+		label: string;
+		value: string;
 	};
+	selectedItem: {
+		label: string | null;
+		value: string | null;
+	};
+	hoveredItem: {
+		label: string | null;
+		value: string | null;
+	};
+	isOpen: boolean;
 };
 
-type Store = {
-	context: DropdownContext;
-	selectors: unknown;
-	ref: HTMLElement;
-};
-
-interactivityStore( {
+store( 'woocommerce/interactivity-dropdown', {
 	state: {},
 	selectors: {
-		woocommerceDropdown: {
-			placeholderText: ( { context }: { context: DropdownContext } ) => {
-				const {
-					woocommerceDropdown: { selectedItem },
-				} = context;
+		placeholderText: () => {
+			const context = getContext< DropdownContext >();
+			const { selectedItem } = context;
 
-				return selectedItem.label || 'Select an option';
-			},
-			isSelected: ( { context }: { context: DropdownContext } ) => {
-				const {
-					woocommerceDropdown: {
-						currentItem: { value },
-					},
-				} = context;
+			return selectedItem.label || 'Select an option';
+		},
+		isSelected: () => {
+			const context = getContext< DropdownContext >();
 
-				return (
-					context.woocommerceDropdown.selectedItem.value === value ||
-					context.woocommerceDropdown.hoveredItem.value === value
-				);
-			},
+			const {
+				currentItem: { value },
+			} = context;
+
+			return (
+				context.selectedItem.value === value ||
+				context.hoveredItem.value === value
+			);
 		},
 	},
 	actions: {
-		woocommerceDropdown: {
-			toggleIsOpen: ( store: Store ) => {
-				const {
-					context: { woocommerceDropdown },
-				} = store;
+		toggleIsOpen: () => {
+			const context = getContext< DropdownContext >();
 
-				woocommerceDropdown.isOpen = ! woocommerceDropdown.isOpen;
-			},
-			selectDropdownItem: ( {
-				context,
-			}: {
-				context: DropdownContext;
-			} ) => {
-				const {
-					woocommerceDropdown: {
-						currentItem: { label, value },
-					},
-				} = context;
+			context.isOpen = ! context.isOpen;
+		},
+		selectDropdownItem: ( event: MouseEvent ) => {
+			const context = getContext< DropdownContext >();
 
-				context.woocommerceDropdown.selectedItem = { label, value };
-				context.woocommerceDropdown.isOpen = false;
-			},
-			addHoverClass: ( { context }: { context: DropdownContext } ) => {
-				const {
-					woocommerceDropdown: {
-						currentItem: { label, value },
-					},
-				} = context;
+			const {
+				currentItem: { label, value },
+			} = context;
 
-				context.woocommerceDropdown.hoveredItem = { label, value };
-			},
-			removeHoverClass: ( { context }: { context: DropdownContext } ) => {
-				context.woocommerceDropdown.hoveredItem = {
+			const { selectedItem } = context;
+
+			if (
+				selectedItem.value === value &&
+				selectedItem.label === label
+			) {
+				context.selectedItem = {
 					label: null,
 					value: null,
 				};
-			},
+			} else {
+				context.selectedItem = { label, value };
+			}
+
+			context.isOpen = false;
+
+			event.stopPropagation();
+		},
+		addHoverClass: () => {
+			const context = getContext< DropdownContext >();
+
+			const {
+				currentItem: { label, value },
+			} = context;
+
+			context.hoveredItem = { label, value };
+		},
+		removeHoverClass: () => {
+			const context = getContext< DropdownContext >();
+
+			context.hoveredItem = {
+				label: null,
+				value: null,
+			};
 		},
 	},
 } );
