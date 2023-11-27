@@ -65,7 +65,7 @@ function useProductCommandLoader( { search } ) {
 				name: postType + '-' + record.id,
 				searchLabel: record.title?.rendered + ' ' + record.id,
 				label: record.title?.rendered
-					? record.title?.rendered
+					? decodeEntities( record.title?.rendered )
 					: __( '(no title)', 'woocommerce' ),
 				icon: box,
 			};
@@ -150,7 +150,7 @@ const WooCommerceCommands = () => {
 
 		settingsCommands.forEach( ( settingsCommand ) => {
 			registerWooCommerceSettingsCommand( {
-				label: decodeEntities( settingsCommand.label ),
+				label: settingsCommand.label,
 				tab: settingsCommand.key,
 			} );
 		} );

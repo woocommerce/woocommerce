@@ -5,7 +5,6 @@ import { __, sprintf } from '@wordpress/i18n';
 import { chartBar } from '@wordpress/icons';
 import { registerPlugin } from '@wordpress/plugins';
 import { addQueryArgs } from '@wordpress/url';
-import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -40,7 +39,7 @@ const WooCommerceAnalyticsCommands = () => {
 
 		analyticsReports.forEach( ( analyticsReport ) => {
 			registerWooCommerceAnalyticsCommand( {
-				label: decodeEntities( analyticsReport.title ),
+				label: analyticsReport.title,
 				path: analyticsReport.path,
 			} );
 		} );
