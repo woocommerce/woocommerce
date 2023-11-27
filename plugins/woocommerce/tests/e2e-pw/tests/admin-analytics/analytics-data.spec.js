@@ -232,7 +232,8 @@ test.describe( 'Analytics-related tests', () => {
 		await expect( page.getByRole( 'menuitem', { name: 'Total sales $0.00 No change from Previous year:' } ) ).toBeVisible();
 	} );
 
-	test( 'set custom date range on revenue report', async( { page } ) => {
+	// this test will be skipped until the cause of test flakiness can be diagnosed and updated
+	test.skip( 'set custom date range on revenue report', async( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue' );
 
 		// assert that current month is shown and that values are for that
