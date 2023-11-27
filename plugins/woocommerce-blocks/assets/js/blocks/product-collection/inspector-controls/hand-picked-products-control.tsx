@@ -3,6 +3,7 @@
  */
 import { getProducts } from '@woocommerce/editor-components/utils';
 import { ProductResponseItem } from '@woocommerce/types';
+import { decodeEntities } from '@wordpress/html-entities';
 import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -91,16 +92,21 @@ const HandPickedProductsControl = ( {
 		);
 	}, [ productsList, selectedProductIds ] );
 
+	/**
+	 * Transforms a token into a product name.
+	 * - If the token is a number, it will be used to lookup the product name.
+	 * - Otherwise, the token will be used as is.
+	 */
 	const transformTokenIntoProductName = ( token: string ) => {
 		const parsedToken = Number( token );
 
 		if ( Number.isNaN( parsedToken ) ) {
-			return token;
+			return decodeEntities( token ) || '';
 		}
 
 		const product = productsMap.get( parsedToken );
 
-		return product?.name || '';
+		return decodeEntities( product?.name ) || '';
 	};
 
 	return (
@@ -120,7 +126,7 @@ const HandPickedProductsControl = ( {
 				disabled={ ! productsMap.size }
 				displayTransform={ transformTokenIntoProductName }
 				label={ __(
-					'Pick some products',
+					'Hand-picked Products',
 					'woo-gutenberg-products-block'
 				) }
 				onChange={ onTokenChange }
@@ -135,6 +141,7 @@ const HandPickedProductsControl = ( {
 						: selectedProductIds || []
 				}
 				__experimentalExpandOnFocus={ true }
+				__experimentalShowHowTo={ false }
 			/>
 		</ToolsPanelItem>
 	);
