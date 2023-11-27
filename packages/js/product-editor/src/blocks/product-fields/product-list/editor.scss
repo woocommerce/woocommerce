@@ -47,7 +47,7 @@
 			display: grid;
 			grid-template-columns: repeat(5, 1fr);
 			gap: $grid-unit-30;
-			padding: $grid-unit-20 0;
+			padding: $grid-unit-20 2px;
 
 			&:not(:last-child) {
 				border-bottom: 1px solid $gray-200;
