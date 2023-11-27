@@ -32,7 +32,7 @@ jobs:
 
             - name: Get current date
               id: date
-              run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+              run: echo "date=$(date +'%Y-%m-%d_%H:%M')" >> $GITHUB_OUTPUT
 
             - name: Get branch name package parameter
               id: branch_package_name
