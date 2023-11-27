@@ -42,15 +42,12 @@ async function processDirectory(
 	// Process README.md (if exists) for the category definition.
 	const readmePath = path.join( subDirectory, 'README.md' );
 
-	if ( checkReadme && fs.existsSync( readmePath ) ) {
-		const readmeContent = fs.readFileSync( readmePath, 'utf-8' );
-		const frontMatter = generatePostFrontMatter( readmeContent );
-		Object.assign( category, frontMatter );
-	} else if ( checkReadme ) {
-		// derive the category title from the directory name, capitalize first letter
-		const categoryTitle = path.basename( subDirectory );
-		category.category_title =
-			categoryTitle.charAt( 0 ).toUpperCase() + categoryTitle.slice( 1 );
+	if ( checkReadme ) {
+		// derive the category title from the directory name, capitalize first letter of each word.
+		const categoryFolder = path.basename( subDirectory ).split( '-' );
+		const categoryTitle = categoryFolder
+			.map( ( slugPart ) => slugPart.charAt( 0 ).toUpperCase() + slugPart.slice( 1 ) );
+		category.category_title = categoryTitle.join( ' ' );
 	}
 
 	const markdownFiles = glob.sync( path.join( subDirectory, '*.md' ) );
