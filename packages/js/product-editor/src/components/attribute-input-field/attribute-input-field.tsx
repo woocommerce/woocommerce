@@ -80,7 +80,6 @@ export interface UseComboboxGetItemPropsOptions< Item >
 export type getMenuPropsType = (
 	options?: UseComboboxGetMenuPropsOptions,
 	otherOptions?: GetPropsCommonOptions
-	// These are the types provided by Downshift.
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => any;
 
