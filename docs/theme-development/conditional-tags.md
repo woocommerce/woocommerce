@@ -1,20 +1,20 @@
 # Conditional tags
 
-**Note:** This is a **Developer level** doc. If you are unfamiliar with code/tags and resolving potential conflicts, select a [WooExpert or Developer](https://woo.com/customizations/) for assistance. We are unable to provide support for customizations under our [Support Policy](https://woo.com/support-policy/).
+**Note:** This is a **Developer level** doc. If you are unfamiliar with code/tags and resolving potential conflicts, select a [WooExpert or Developer](https://woo.com/customizations/) for assistance. We are unable to provide support for customizations under our [Support Policy](http://woo.com/support-policy/).
 
 ## What are “conditional tags”?
 
 The conditional tags of WooCommerce and WordPress can be used in your template files to change what content is displayed based on what *conditions* the page matches. For example, you may want to display a snippet of text above the shop page. With the `is_shop()` conditional tag, you can.
 
-Because WooCommerce uses custom post types, you can also use many of WordPress’ conditional tags. See [codex.wordpress.org/Conditional_Tags](https://codex.wordpress.org/Conditional_Tags) for a list of the tags included with WordPress.
+Because WooCommerce uses custom post types, you can also use many of WordPress’ conditional tags. See: [http://codex.wordpress.org/Conditional_Tags](http://codex.wordpress.org/Conditional_Tags) for a list of the tags included with WordPress.
 
-**Note**: You can only use conditional query tags after the `posts_selection` [action hook](https://codex.wordpress.org/Plugin_API/Action_Reference#Actions_Run_During_a_Typical_Request) in WordPress (the `wp` action hook is the first one through which you can use these conditionals). For themes, this means the conditional tag will never work properly if you are using it in the body of functions.php.
+**Note**: You can only use conditional query tags after the `posts_selection` [action hook](http://codex.wordpress.org/Plugin_API/Action_Reference#Actions_Run_During_a_Typical_Request) in WordPress (the `wp` action hook is the first one through which you can use these conditionals). For themes, this means the conditional tag will never work properly if you are using it in the body of functions.php.
 
 ## Available conditional tags
 
 All conditional tags test whether a condition is met, and then return either `TRUE` or `FALSE`. **Conditions under which tags output `TRUE` are listed below the conditional tags**.
 
-The list below holds the main conditional tags. To see all conditional tags, visit the [WooCommerce API Docs](https://woo.com/wc-apidocs/).
+The list below holds the main conditional tags. To see all conditional tags, visit the [WooCommerce API Docs](https://woo.com/wc-apidocs/index.html).
 
 ### WooCommerce page
 
