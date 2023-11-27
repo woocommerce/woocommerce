@@ -32,6 +32,7 @@ See <https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-pl
 | ----------------------------- | ------------------------------------------------------- |
 | [Actions](./hooks/actions.md) | Documentation covering action hooks on the server side. |
 | [Filters](./hooks/filters.md) | Documentation covering filter hooks on the server side. |
+| [Migrated Hooks](./hooks/migrated-hooks.md) | Documentation covering the migrated WooCommerce core hooks. |
 
 ## REST API
 
