@@ -123,5 +123,9 @@ export const assignAiOffline = assign<
 	customizeStoreStateMachineContext,
 	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
 >( {
-	aiOnline: false,
+	aiOnline: () => {
+		// @ts-expect-error temp workaround;
+		window.cys_aiOnline = false;
+		return false;
+	},
 } );
