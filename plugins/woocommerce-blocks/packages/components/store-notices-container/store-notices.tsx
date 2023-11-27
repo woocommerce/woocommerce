@@ -127,7 +127,7 @@ const StoreNotices = ( {
 						key: string;
 					} = {
 						key: `store-notice-${ status }`,
-						status: 'error',
+						status,
 						onRemove: () => {
 							noticeGroup.forEach( ( notice ) => {
 								removeNotice( notice.id, notice.context );
