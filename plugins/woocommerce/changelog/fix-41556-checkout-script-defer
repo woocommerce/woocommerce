@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Ensure the legacy frontend checkout script loads in the document footer
