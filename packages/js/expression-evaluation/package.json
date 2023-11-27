@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/expression-evaluation",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"description": "Library for evaluating expressions.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
