@@ -35,8 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 	</nav>
 	<?php
-	$curr_tab_reports_count = is_countable( $reports[ $current_tab ]['reports'] ) ? count( $reports[ $current_tab ]['reports'] ) : 0;
-	if ( $curr_tab_reports_count > 1 ) {
+	if ( count( $reports[ $current_tab ]['reports'] ) > 1 ) {
 		?>
 		<ul class="subsubsub">
 			<li>

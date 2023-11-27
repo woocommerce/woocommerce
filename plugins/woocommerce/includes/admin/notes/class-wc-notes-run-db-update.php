@@ -54,7 +54,7 @@ class WC_Notes_Run_Db_Update {
 			return;
 		}
 
-		if ( is_countable( $note_ids ) && count( $note_ids ) > 1 ) {
+		if ( count( $note_ids ) > 1 ) {
 			// Remove weird duplicates. Leave the first one.
 			$current_notice = array_shift( $note_ids );
 			foreach ( $note_ids as $note_id ) {

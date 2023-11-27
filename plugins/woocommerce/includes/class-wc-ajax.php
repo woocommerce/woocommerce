@@ -1885,7 +1885,7 @@ class WC_AJAX {
 							$terms_map[ $ancestor ]->children = array();
 						}
 						$item_exists = count(
-							(array) array_filter(
+							array_filter(
 								$terms_map[ $ancestor ]->children,
 								function( $term ) use ( $current_child ) {
 									return $term->term_id === $current_child->term_id;

@@ -408,14 +408,14 @@ class WC_Helper {
 		}
 
 		$filters = array_fill_keys( array_keys( self::get_filters() ), 0 );
-		if ( empty( $subscriptions ) ) {
+		if ( ! is_array( $subscriptions ) || empty( $subscriptions ) ) {
 			return array();
 		}
 
 		foreach ( $filters as $key => $count ) {
 			$_subs = $subscriptions;
 			self::_filter( $_subs, $key );
-			$filters[ $key ] = is_countable( $_subs ) ? count( $_subs ) : 0;
+			$filters[ $key ] = count( $_subs );
 		}
 
 		return $filters;
@@ -1461,7 +1461,7 @@ class WC_Helper {
 				if ( is_readable( $txt ) ) {
 					$txt = file_get_contents( $txt );
 					$txt = preg_split( '#\s#', $txt );
-					if ( is_countable( $txt ) && count( $txt ) >= 2 ) {
+					if ( is_array( $txt ) && count( $txt ) >= 2 ) {
 						$header = sprintf( '%d:%s', $txt[0], $txt[1] );
 					}
 				}

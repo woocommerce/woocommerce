@@ -117,9 +117,6 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 	 * @return mixed
 	 */
 	protected function trigger_hook( $old_hook, $new_callback_args ) {
-		$order_id = null;
-		$item_id = null;
-		$item = null;
 		switch ( $old_hook ) {
 			case 'woocommerce_order_add_shipping':
 			case 'woocommerce_order_add_fee':
@@ -176,14 +173,6 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 				$order_id = $new_callback_args[2];
 				if ( is_a( $item, 'WC_Order_Item_Product' ) ) {
 					do_action( $old_hook, $order_id, $item_id, $item, $item->get_product() );
-				}
-				break;
-			case 'woocommerce_order_update_coupon':
-			case 'woocommerce_order_update_shipping':
-			case 'woocommerce_order_update_fee':
-			case 'woocommerce_order_update_tax':
-				if ( ! is_a( $item, 'WC_Order_Item_Product' ) ) {
-					do_action( $old_hook, $order_id, $item_id, $item );
 				}
 				break;
 			default:

@@ -1093,9 +1093,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $item_id ) {
 			$this->items[ $items_key ][ $item_id ] = $item;
 		} else {
-			$items = $this->items[ $items_key ];
-			$count = is_countable( $items ) ? count( $items ) : 0;
-			$this->items[ $items_key ][ 'new:' . $items_key . $count ] = $item;
+			$this->items[ $items_key ][ 'new:' . $items_key . count( $this->items[ $items_key ] ) ] = $item;
 		}
 	}
 

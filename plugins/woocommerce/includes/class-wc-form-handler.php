@@ -1107,8 +1107,7 @@ class WC_Form_Handler {
 				$validation_error  = apply_filters( 'woocommerce_process_registration_errors', $validation_error, $username, $password, $email );
 				$validation_errors = $validation_error->get_error_messages();
 
-				$validation_errors_count = is_countable( $validation_errors ) ? count( $validation_errors ) : 0;
-				if ( 1 === $validation_errors_count ) {
+				if ( 1 === count( $validation_errors ) ) {
 					throw new Exception( $validation_error->get_error_message() );
 				} elseif ( $validation_errors ) {
 					foreach ( $validation_errors as $message ) {

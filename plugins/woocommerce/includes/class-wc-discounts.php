@@ -626,9 +626,7 @@ class WC_Discounts {
 					'return'      => 'ids',
 				)
 			);
-
-			$recent_pending_orders_count = is_countable( $recent_pending_orders ) ? count( $recent_pending_orders ) : 0;
-			if ( $recent_pending_orders_count > 0 ) {
+			if ( count( $recent_pending_orders ) > 0 ) {
 				// User logged in and have a pending order, maybe they are trying to use the coupon.
 				$error_code = WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK;
 			} else {
@@ -743,8 +741,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_product_ids( $coupon ) {
-		$product_ids_count = is_countable( $coupon->get_product_ids() ) ? count( $coupon->get_product_ids() ) : 0;
-		if ( $product_ids_count > 0 ) {
+		if ( count( $coupon->get_product_ids() ) > 0 ) {
 			$valid = false;
 
 			foreach ( $this->get_items_to_validate() as $item ) {
@@ -771,8 +768,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_product_categories( $coupon ) {
-		$product_categories_count = is_countable( $coupon->get_product_categories() ) ? count( $coupon->get_product_categories() ) : 0;
-		if ( $product_categories_count > 0 ) {
+		if ( count( $coupon->get_product_categories() ) > 0 ) {
 			$valid = false;
 
 			foreach ( $this->get_items_to_validate() as $item ) {
@@ -884,8 +880,7 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_excluded_product_ids( $coupon ) {
 		// Exclude Products.
-		$excluded_product_ids_count = is_countable( $coupon->get_excluded_product_ids() ) ? count( $coupon->get_excluded_product_ids() ) : 0;
-		if ( $excluded_product_ids_count > 0 ) {
+		if ( count( $coupon->get_excluded_product_ids() ) > 0 ) {
 			$products = array();
 
 			foreach ( $this->get_items_to_validate() as $item ) {
@@ -912,8 +907,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_excluded_product_categories( $coupon ) {
-		$excluded_product_categories_count = is_countable( $coupon->get_excluded_product_categories() ) ? count( $coupon->get_excluded_product_categories() ) : 0;
-		if ( $excluded_product_categories_count > 0 ) {
+		if ( count( $coupon->get_excluded_product_categories() ) > 0 ) {
 			$categories = array();
 
 			foreach ( $this->get_items_to_validate() as $item ) {
