@@ -41,6 +41,7 @@ export function Edit( {
 	const blockProps = useWooBlockProps( attributes );
 	const [ openAddProductsModal, setOpenAddProductsModal ] = useState( false );
 	const [ isLoading, setIsLoading ] = useState( false );
+	const [ preventFetch, setPreventFetch ] = useState( false );
 	const [ groupedProductIds, setGroupedProductIds ] = useEntityProp<
 		number[]
 	>( 'postType', postType, property );
@@ -49,6 +50,8 @@ export function Edit( {
 
 	useEffect(
 		function loadGroupedProducts() {
+			if ( preventFetch ) return;
+
 			if ( groupedProductIds.length ) {
 				setIsLoading( false );
 				resolveSelect( PRODUCTS_STORE_NAME )
@@ -62,7 +65,7 @@ export function Edit( {
 				setGroupedProducts( [] );
 			}
 		},
-		[ groupedProductIds ]
+		[ groupedProductIds, preventFetch ]
 	);
 
 	function handleAddProductsButtonClick() {
@@ -70,10 +73,12 @@ export function Edit( {
 	}
 
 	function handleAddProductsModalSubmit( value: Product[] ) {
-		setGroupedProductIds( [
-			...groupedProductIds,
-			...value.map( ( product ) => product.id ),
-		] );
+		const newGroupedProducts = [ ...groupedProducts, ...value ];
+		setPreventFetch( true );
+		setGroupedProducts( newGroupedProducts );
+		setGroupedProductIds(
+			newGroupedProducts.map( ( product ) => product.id )
+		);
 		setOpenAddProductsModal( false );
 	}
 
@@ -83,10 +88,16 @@ export function Edit( {
 
 	function removeProductHandler( product: Product ) {
 		return function handleRemoveClick() {
-			const newGroupedProductIds = groupedProductIds.filter(
-				( productId ) => productId !== product.id
+			const newGroupedProducts = groupedProducts.filter(
+				( groupedProduct ) => groupedProduct.id !== product.id
 			);
-			setGroupedProductIds( newGroupedProductIds );
+			setPreventFetch( true );
+			setGroupedProducts( newGroupedProducts );
+			setGroupedProductIds(
+				newGroupedProducts.map(
+					( groupedProduct ) => groupedProduct.id
+				)
+			);
 		};
 	}
 
@@ -199,23 +210,30 @@ export function Edit( {
 										className="wp-block-woocommerce-product-list-field__table-cell"
 										role="cell"
 									>
-										{ product.sale_price && (
+										{ product.on_sale && (
 											<span>
+												{ product.sale_price
+													? formatAmount(
+															product.sale_price
+													  )
+													: formatAmount(
+															product.price
+													  ) }
+											</span>
+										) }
+
+										{ product.regular_price && (
+											<span
+												className={ classNames( {
+													'wp-block-woocommerce-product-list-field__price--on-sale':
+														product.on_sale,
+												} ) }
+											>
 												{ formatAmount(
-													product.sale_price
+													product.regular_price
 												) }
 											</span>
 										) }
-										<span
-											className={ classNames( {
-												'wp-block-woocommerce-product-list-field__price--on-sale':
-													product.sale_price,
-											} ) }
-										>
-											{ formatAmount(
-												product.regular_price
-											) }
-										</span>
 									</div>
 									<div
 										className="wp-block-woocommerce-product-list-field__table-cell"
@@ -269,7 +287,6 @@ export function Edit( {
 					</div>
 				) }
 			</div>
-
 			{ openAddProductsModal && (
 				<AddProductsModal
 					initialValue={ groupedProducts }
