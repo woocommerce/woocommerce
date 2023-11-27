@@ -52,7 +52,9 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 	 * @param {InternalAxiosRequestConfig} request The request that was intercepted.
 	 * @return {InternalAxiosRequestConfig} The request with the additional authorization headers.
 	 */
-	protected handleRequest( request: InternalAxiosRequestConfig ): InternalAxiosRequestConfig {
+	protected handleRequest(
+		request: InternalAxiosRequestConfig
+	): InternalAxiosRequestConfig {
 		const url = buildURLWithParams( request );
 		if ( url.startsWith( 'https' ) ) {
 			request.auth = {

@@ -38,7 +38,9 @@ export class AxiosURLToQueryInterceptor extends AxiosInterceptor {
 	 * @param {InternalAxiosRequestConfig} config The axios config.
 	 * @return {InternalAxiosRequestConfig} The axios config.
 	 */
-	protected handleRequest( config: InternalAxiosRequestConfig ): InternalAxiosRequestConfig {
+	protected handleRequest(
+		config: InternalAxiosRequestConfig
+	): InternalAxiosRequestConfig {
 		const url = new URL( buildURL( config ) );
 
 		// Store the path in the query string.
