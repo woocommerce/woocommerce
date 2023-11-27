@@ -19,7 +19,7 @@ export interface TabBlockAttributes extends BlockAttributes {
 	isSelected?: boolean;
 }
 
-export function Edit( {
+export function BlockTabEdit( {
 	setAttributes,
 	attributes,
 	context,
