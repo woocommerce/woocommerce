@@ -12,7 +12,7 @@ import FormStep, { type FormStepProps } from '..';
 import '../style.scss';
 
 export default {
-	title: 'Checkout Components/FormStep',
+	title: 'External Components/FormStep',
 	component: FormStep,
 	argTypes: {
 		className: {

@@ -10,7 +10,7 @@ import Button, { ButtonProps } from '..';
 const availableTypes = [ 'button', 'input', 'submit' ];
 
 export default {
-	title: 'Base Components/Button',
+	title: 'External Components/Button',
 	argTypes: {
 		children: {
 			control: 'text',
