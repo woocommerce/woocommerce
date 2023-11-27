@@ -7,11 +7,6 @@ import { Spinner, Icon } from '@wordpress/components';
 import { plus } from '@wordpress/icons';
 import { createElement, useMemo } from '@wordpress/element';
 import {
-	UseComboboxGetMenuPropsOptions,
-	GetPropsCommonOptions,
-	UseComboboxGetItemPropsOptions,
-} from 'downshift';
-import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	QueryProductAttribute,
 	ProductAttribute,
@@ -52,6 +47,35 @@ type AttributeInputFieldProps = {
 	ignoredAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
 };
+
+export interface GetPropsWithRefKey {
+	refKey?: string;
+}
+export interface GetMenuPropsOptions
+	extends React.HTMLProps< HTMLElement >,
+		GetPropsWithRefKey {
+	[ 'aria-label' ]?: string;
+}
+
+export interface UseComboboxGetMenuPropsOptions
+	extends GetPropsWithRefKey,
+		GetMenuPropsOptions {}
+
+export interface GetPropsCommonOptions {
+	suppressRefError?: boolean;
+}
+
+export interface GetItemPropsOptions< Item >
+	extends React.HTMLProps< HTMLElement > {
+	index?: number;
+	item: Item;
+	isSelected?: boolean;
+	disabled?: boolean;
+}
+
+export interface UseComboboxGetItemPropsOptions< Item >
+	extends GetItemPropsOptions< Item >,
+		GetPropsWithRefKey {}
 
 export type getMenuPropsType = (
 	options?: UseComboboxGetMenuPropsOptions,
@@ -271,8 +295,9 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 				items: NarrowedQueryAttribute[];
 				highlightedIndex: number;
 				getItemProps: (
-					options: UseComboboxGetMenuPropsOptions
-				) => getItemPropsType< NarrowedQueryAttribute >;
+					options: UseComboboxGetItemPropsOptions< NarrowedQueryAttribute >
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				) => any;
 				getMenuProps: getMenuPropsType;
 				isOpen: boolean;
 			} ) => {
