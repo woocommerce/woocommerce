@@ -16,7 +16,7 @@ import { commentContent, Icon } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import EditorContainerBlock from '../editor-container-block.js';
+import EditorContainerBlock from '../editor-container-block';
 import NoReviewsPlaceholder from './no-reviews-placeholder.js';
 import {
 	getBlockControls,

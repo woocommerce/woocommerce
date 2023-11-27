@@ -2,10 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import { debounce } from '@woocommerce/base-utils';
 import { Placeholder } from '@wordpress/components';
 import { useBlockProps } from '@wordpress/block-editor';
+import { EditorContainerBlockProps } from '@woocommerce/blocks/reviews/types';
 
 /**
  * Internal dependencies
@@ -18,7 +18,7 @@ const EditorContainerBlock = ( {
 	icon,
 	name,
 	noReviewsPlaceholder,
-} ) => {
+}: EditorContainerBlockProps ) => {
 	const {
 		categoryIds,
 		productId,
@@ -59,7 +59,9 @@ const EditorContainerBlock = ( {
 			<EditorBlock
 				attributes={ attributes }
 				categoryIds={ categoryIds }
-				delayFunction={ ( callback ) => debounce( callback, 400 ) }
+				delayFunction={ ( callback: () => void ) =>
+					debounce( callback, 400 )
+				}
 				noReviewsPlaceholder={ noReviewsPlaceholder }
 				orderby={ orderby }
 				order={ order }
@@ -68,14 +70,6 @@ const EditorContainerBlock = ( {
 			/>
 		</div>
 	);
-};
-
-EditorContainerBlock.propTypes = {
-	attributes: PropTypes.object.isRequired,
-	icon: PropTypes.node.isRequired,
-	name: PropTypes.string.isRequired,
-	noReviewsPlaceholder: PropTypes.elementType.isRequired,
-	className: PropTypes.string,
 };
 
 export default EditorContainerBlock;
