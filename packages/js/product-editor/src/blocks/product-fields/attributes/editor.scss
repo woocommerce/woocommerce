@@ -3,17 +3,9 @@
 		padding: 0;
 	}
 
-	.woocommerce-list-item {
-		background: none;
-		border: none;
-		border-bottom: 1px solid $gray-200;
-		padding: 0;
-        grid-template-columns: 26% auto 90px;
+	.woocommerce-sortable__handle {
+		display: none;
 	}
-
-    .woocommerce-sortable__handle {
-        display: none;
-    }
 
 	.components-button.has-icon {
 		svg {
