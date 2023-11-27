@@ -153,6 +153,10 @@ class BlockRegistry {
 					'type'               => 'array',
 					'__experimentalRole' => 'content',
 				),
+				'_templateLock' => array(
+					'type'               => 'string',
+					'__experimentalRole' => 'content',
+				),
 				'disabled'                        => isset( $attributes['disabled'] ) ? $attributes['disabled'] : array(
 					'type'               => 'boolean',
 					'__experimentalRole' => 'content',
