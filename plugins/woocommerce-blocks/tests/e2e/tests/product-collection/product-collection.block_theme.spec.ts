@@ -124,7 +124,7 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await pageObject.addFilter( 'Show Hand-picked Products' );
 
-			const filterName = 'Pick some products';
+			const filterName = 'Hand-picked Products';
 			await pageObject.setFilterComboboxValue( filterName, [ 'Album' ] );
 			await expect( pageObject.products ).toHaveCount( 1 );
 
