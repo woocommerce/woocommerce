@@ -36,7 +36,7 @@ jobs:
 
             - name: Get branch name package parameter
               id: branch_package_name
-              run: echo "name=$(${{ github.event.inputs.packages }}" | sed "s/,/-/")" >> $GITHUB_OUTPUT
+              run: echo 'name=$("${{ github.event.inputs.packages }}" | sed "s/,/-/")' >> $GITHUB_OUTPUT
 
             - name: Set all package string
               id: all_description
