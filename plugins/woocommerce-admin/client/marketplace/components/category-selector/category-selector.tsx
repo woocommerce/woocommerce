@@ -145,6 +145,7 @@ export default function CategorySelector(
 				<li className="woocommerce-marketplace__category-item">
 					{ dropdownItems.length > 0 && (
 						<CategoryDropdown
+							type={ props.type }
 							label={ __( 'More', 'woocommerce' ) }
 							categories={ dropdownItems }
 							buttonClassName={ classNames(
@@ -164,6 +165,7 @@ export default function CategorySelector(
 
 			<div className="woocommerce-marketplace__category-selector--full-width">
 				<CategoryDropdown
+					type={ props.type }
 					label={ mobileCategoryDropdownLabel() }
 					categories={ visibleItems.concat( dropdownItems ) }
 					buttonClassName="woocommerce-marketplace__category-dropdown-button"

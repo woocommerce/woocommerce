@@ -239,7 +239,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}
 
 	function hasFilters() {
-		return filters.length;
+		return Boolean( filters.length );
 	}
 
 	function clearFilters() {

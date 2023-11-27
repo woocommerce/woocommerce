@@ -99,7 +99,10 @@ export function VariationsTableRow( {
 
 	return (
 		<>
-			<div className="woocommerce-product-variations__selection">
+			<div
+				className="woocommerce-product-variations__selection"
+				role="cell"
+			>
 				{ matchesAny && (
 					<Tooltip
 						text={ __(
@@ -121,10 +124,18 @@ export function VariationsTableRow( {
 						checked={ isSelected }
 						onChange={ onSelect }
 						disabled={ isSelectionDisabled }
+						aria-label={
+							isSelected
+								? __( 'Unselect variation', 'woocommerce' )
+								: __( 'Select variation', 'woocommerce' )
+						}
 					/>
 				) }
 			</div>
-			<div className="woocommerce-product-variations__attributes">
+			<div
+				className="woocommerce-product-variations__attributes"
+				role="cell"
+			>
 				{ tags.map( ( tagInfo ) => {
 					const tag = (
 						<Tag
@@ -160,6 +171,7 @@ export function VariationsTableRow( {
 							variation.status === 'private',
 					}
 				) }
+				role="cell"
 			>
 				{ variation.on_sale && (
 					<span className="woocommerce-product-variations__sale-price">
@@ -186,6 +198,7 @@ export function VariationsTableRow( {
 							variation.status === 'private',
 					}
 				) }
+				role="cell"
 			>
 				{ variation.regular_price && (
 					<>
@@ -201,7 +214,10 @@ export function VariationsTableRow( {
 					</>
 				) }
 			</div>
-			<div className="woocommerce-product-variations__actions">
+			<div
+				className="woocommerce-product-variations__actions"
+				role="cell"
+			>
 				{ ( variation.status === 'private' ||
 					! variation.regular_price ) && (
 					<Tooltip
