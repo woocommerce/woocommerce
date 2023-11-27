@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { AxiosRequestConfig } from 'axios';
+import { InternalAxiosRequestConfig } from 'axios';
 
 /**
  * Internal dependencies
@@ -35,10 +35,10 @@ export class AxiosURLToQueryInterceptor extends AxiosInterceptor {
 	/**
 	 * Converts the outgoing path into a query parameter.
 	 *
-	 * @param {AxiosRequestConfig} config The axios config.
-	 * @return {AxiosRequestConfig} The axios config.
+	 * @param {InternalAxiosRequestConfig} config The axios config.
+	 * @return {InternalAxiosRequestConfig} The axios config.
 	 */
-	protected handleRequest( config: AxiosRequestConfig ): AxiosRequestConfig {
+	protected handleRequest( config: InternalAxiosRequestConfig ): InternalAxiosRequestConfig {
 		const url = new URL( buildURL( config ) );
 
 		// Store the path in the query string.

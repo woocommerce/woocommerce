@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 /**
  * An object containing the IDs for an interceptor currently applied to a client.
@@ -36,7 +36,7 @@ export abstract class AxiosInterceptor {
 	 */
 	public start( client: AxiosInstance ): void {
 		const requestInterceptorID = client.interceptors.request.use(
-			( response ) => this.handleRequest( response )
+			( response: InternalAxiosRequestConfig ) => this.handleRequest( response )
 		);
 		const responseInterceptorID = client.interceptors.response.use(
 			( response ) => this.onResponseSuccess( response ),
@@ -72,9 +72,9 @@ export abstract class AxiosInterceptor {
 	/**
 	 * An interceptor method for handling requests before they are made to the server.
 	 *
-	 * @param {AxiosRequestConfig} config The Axios request options.
+	 * @param {InternalAxiosRequestConfig} config The Axios request options.
 	 */
-	protected handleRequest( config: AxiosRequestConfig ): AxiosRequestConfig {
+	protected handleRequest( config: InternalAxiosRequestConfig ): InternalAxiosRequestConfig {
 		return config;
 	}
 

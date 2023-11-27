@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { AxiosRequestConfig } from 'axios';
+import type { InternalAxiosRequestConfig } from 'axios';
 import * as createHmac from 'create-hmac';
 import * as OAuth from 'oauth-1.0a';
 
@@ -49,10 +49,10 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 	/**
 	 * Adds WooCommerce API authentication details to the outgoing request.
 	 *
-	 * @param {AxiosRequestConfig} request The request that was intercepted.
-	 * @return {AxiosRequestConfig} The request with the additional authorization headers.
+	 * @param {InternalAxiosRequestConfig} request The request that was intercepted.
+	 * @return {InternalAxiosRequestConfig} The request with the additional authorization headers.
 	 */
-	protected handleRequest( request: AxiosRequestConfig ): AxiosRequestConfig {
+	protected handleRequest( request: InternalAxiosRequestConfig ): InternalAxiosRequestConfig {
 		const url = buildURLWithParams( request );
 		if ( url.startsWith( 'https' ) ) {
 			request.auth = {
