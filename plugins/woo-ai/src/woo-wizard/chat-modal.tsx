@@ -12,21 +12,16 @@ import { __experimentalRequestJetpackToken as requestJetpackToken } from '@wooco
 import './index.scss';
 import micIcon from './mic-icon';
 import playerStop from './player-stop';
+import makeWCRestApiCall from '../utils/wcRestApi';
 
-interface Message {
+type Message = {
 	sender: 'user' | 'assistant';
 	text: string;
-}
+};
 
-interface ChatModalProps {
+type ChatModalProps = {
 	onClose: () => void;
-}
-
-interface makeWCRestApiCall {
-	path: string;
-	httpVerb: string;
-	body?: object;
-}
+};
 
 const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ input, setInput ] = useState( '' );
@@ -62,26 +57,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		mediaRecorderRef.current?.stop();
 		setRecording( false );
 		// Now `audioBlob` contains the recorded audio
-	};
-
-	// @todo: figure out how to handle the response since we need a success/fail message and a link to newly-created/updated resources.
-	const makeWCRestApiCall = async ( {
-		path,
-		httpVerb,
-		body,
-	}: makeWCRestApiCall ) => {
-		try {
-			const response = await apiFetch( {
-				path: path,
-				method: httpVerb,
-				// If body is not null or undefined, include it in the apiFetch call
-				...( body && { body: JSON.stringify( body ) } ),
-			} );
-			return response;
-		} catch ( error ) {
-			console.error( 'Error making WC REST API call:', error );
-			throw error; // Re-throw the error to be handled by the caller
-		}
 	};
 
 	const handleSubmit = async ( event: React.FormEvent ) => {
