@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	store as interactivityStore,
-	navigate,
-} from '@woocommerce/interactivity';
+import { store, navigate, getContext } from '@woocommerce/interactivity';
 import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
 import { HTMLElementEvent } from '@woocommerce/types';
 
@@ -21,59 +18,40 @@ const getUrl = ( activeFilters: string ) => {
 	return url.href;
 };
 
-type StockFilterState = {
-	filters: {
-		stockStatus: string;
-		activeFilters: string;
-		showDropdown: boolean;
-	};
-};
-
-type ActionProps = {
-	state: StockFilterState;
-	event: HTMLElementEvent< HTMLInputElement >;
-};
-
-interactivityStore( {
-	state: {
-		filters: {
-			stockStatus: '',
-		},
-	},
+store( 'woocommerce/collection-stock-filter', {
 	actions: {
-		filters: {
-			navigate: ( { context }: { context: DropdownContext } ) => {
-				if ( context.woocommerceDropdown.selectedItem.value ) {
-					navigate(
-						getUrl( context.woocommerceDropdown.selectedItem.value )
-					);
+		// "on select" handler passed to the dropdown component.
+		navigate: () => {
+			const context = getContext< DropdownContext >(
+				'woocommerce/interactivity-dropdown'
+			);
+
+			navigate( getUrl( context.selectedItem.value || '' ) );
+		},
+		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
+			// get the active filters from the url:
+			const url = new URL( window.location.href );
+			const currentFilters =
+				url.searchParams.get( 'filter_stock_status' ) || '';
+
+			// split out the active filters into an array.
+			const filtersArr =
+				currentFilters === '' ? [] : currentFilters.split( ',' );
+
+			// if checked and not already in activeFilters, add to activeFilters
+			// if not checked and in activeFilters, remove from activeFilters.
+			if ( event.target.checked ) {
+				if ( ! currentFilters.includes( event.target.value ) ) {
+					filtersArr.push( event.target.value );
 				}
-			},
-			updateProducts: ( { event }: ActionProps ) => {
-				// get the active filters from the url:
-				const url = new URL( window.location.href );
-				const currentFilters =
-					url.searchParams.get( 'filter_stock_status' ) || '';
-
-				// split out the active filters into an array.
-				const filtersArr =
-					currentFilters === '' ? [] : currentFilters.split( ',' );
-
-				// if checked and not already in activeFilters, add to activeFilters
-				// if not checked and in activeFilters, remove from activeFilters.
-				if ( event.target.checked ) {
-					if ( ! currentFilters.includes( event.target.value ) ) {
-						filtersArr.push( event.target.value );
-					}
-				} else {
-					const index = filtersArr.indexOf( event.target.value );
-					if ( index > -1 ) {
-						filtersArr.splice( index, 1 );
-					}
+			} else {
+				const index = filtersArr.indexOf( event.target.value );
+				if ( index > -1 ) {
+					filtersArr.splice( index, 1 );
 				}
+			}
 
-				navigate( getUrl( filtersArr.join( ',' ) ) );
-			},
+			navigate( getUrl( filtersArr.join( ',' ) ) );
 		},
 	},
 } );
