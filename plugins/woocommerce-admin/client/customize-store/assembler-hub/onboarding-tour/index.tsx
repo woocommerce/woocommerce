@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useContext, useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -10,6 +10,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import WelcomeTourData from './welcome-tour-data';
+import { CustomizeStoreContext } from '..';
 export * from './use-onboarding-tour';
 
 type OnboardingTourProps = {
@@ -28,11 +29,8 @@ export const OnboardingTour = ( {
 	const [ placement, setPlacement ] =
 		useState< TourKitTypes.WooConfig[ 'placement' ] >( 'left' );
 
-	// @ts-expect-error temp fix
-	// Since we load the assember hub in an iframe, we don't have access to
-	// xstate's context values.
-	// This is the best workaround I can think of for now.
-	const aiOnline = window.parent?.window.cys_aiOnline;
+	const { context } = useContext( CustomizeStoreContext );
+	const aiOnline = context.aiOnline;
 
 	if ( showWelcomeTour ) {
 		const classNames = [
