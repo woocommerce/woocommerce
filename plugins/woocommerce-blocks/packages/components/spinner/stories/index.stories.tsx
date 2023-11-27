@@ -9,7 +9,7 @@ import type { Meta, StoryFn } from '@storybook/react';
 import Spinner from '..';
 
 export default {
-	title: 'Block Components/Spinner',
+	title: 'External Components/Spinner',
 	component: Spinner,
 } as Meta;
 

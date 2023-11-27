@@ -10,7 +10,7 @@ import Title, { type TitleProps } from '..';
 import '../style.scss';
 
 export default {
-	title: 'Block Components/Title',
+	title: 'External Components/Title',
 	component: Title,
 	argTypes: {
 		className: {

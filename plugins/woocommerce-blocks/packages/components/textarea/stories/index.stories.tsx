@@ -11,7 +11,7 @@ import Textarea, { type TextareaProps } from '..';
 import '../style.scss';
 
 export default {
-	title: 'Checkout Components/Textarea',
+	title: 'External Components/Textarea',
 	component: Textarea,
 	argTypes: {
 		className: {
