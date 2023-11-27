@@ -114,6 +114,10 @@ function augmentAttributes<
 				type: 'array',
 				__experimentalRole: 'content',
 			},
+			_templateLock: {
+				type: 'string',
+				__experimentalRole: 'content',
+			},
 			disabled: attributes.disabled || {
 				type: 'boolean',
 				__experimentalRole: 'content',
