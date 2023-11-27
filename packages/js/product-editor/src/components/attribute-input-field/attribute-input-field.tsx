@@ -60,7 +60,6 @@ export type getMenuPropsType = (
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => any;
 
-// type getItemPropsType< T > = MenuItemProps< T >[ 'getItemProps' ];
 export type getItemPropsType< ItemType > = (
 	options: UseComboboxGetItemPropsOptions< ItemType >
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
