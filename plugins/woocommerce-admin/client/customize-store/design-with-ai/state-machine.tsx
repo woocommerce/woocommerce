@@ -38,9 +38,8 @@ export const hasStepInUrl = (
 	);
 };
 
-export const isAiOnline = () => {
-	// @ts-expect-error temp workaround; the value should be read from the parent context
-	return window.cys_aiOnline;
+export const isAiOnline = ( _ctx: designWithAiStateMachineContext ) => {
+	return _ctx.aiOnline;
 };
 
 export const designWithAiStateMachineDefinition = createMachine(
@@ -89,6 +88,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 			apiCallLoader: {
 				hasErrors: false,
 			},
+			aiOnline: true,
 		},
 		initial: 'navigate',
 		states: {
