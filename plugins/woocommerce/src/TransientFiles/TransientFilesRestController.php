@@ -291,7 +291,8 @@ class TransientFilesRestController {
 	private function adjust_transient_file_info_for_response( array $transient_file_info ): array {
 		unset( $transient_file_info['file_path'] );
 		if ( $transient_file_info['is_public'] ) {
-			$transient_file_info['public_url'] = get_site_url( null, "/wc/file/transient/{$transient_file_info['file_name']}" );
+			$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+			$transient_file_info['public_url'] = $legacy_proxy->call_function( 'get_site_url', null, "/wc/file/transient/{$transient_file_info['file_name']}" );
 		}
 		return $transient_file_info;
 	}
