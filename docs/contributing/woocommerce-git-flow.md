@@ -1,4 +1,4 @@
-# WooCommerce Git Flow
+# WooCommerce Git flow
 
 For core development, we use the following structure and flow.
 

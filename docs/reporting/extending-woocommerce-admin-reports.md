@@ -1,4 +1,4 @@
-# Extending WC-Admin reports
+# Extending WooCommerce Analytics reports
 
 ## Introduction
 

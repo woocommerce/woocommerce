@@ -1,4 +1,4 @@
-# User Experience Guidelines: Accessibility 
+# User experience guidelines: accessibility
 
 ## Accessibility
 
