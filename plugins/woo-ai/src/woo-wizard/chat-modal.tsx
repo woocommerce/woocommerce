@@ -33,9 +33,25 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 
 	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
 
+	const prepareFormData = (
+		input: string,
+		token: string,
+		audioBlob: Blob | null
+	) => {
+		const formData = new FormData();
+		formData.append( 'message', input );
+		formData.append( 'token', token );
+		if ( threadID ) {
+			formData.append( 'thread_id', threadID );
+		}
+		if ( audioBlob ) {
+			// @todo: maybe grab the extension from the blob mime type?
+			formData.append( 'audio_file', audioBlob, 'audio.wav' );
+		}
+		return formData;
+	};
+
 	const handleSubmit = async ( event: React.FormEvent ) => {
-		console.log( 'audioBlob' );
-		console.log( audioBlob );
 		event.preventDefault();
 		if ( ! input.trim() && ! audioBlob ) {
 			return;
@@ -48,17 +64,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 
 		try {
 			const { token } = await requestJetpackToken();
-			const formData = new FormData();
-			formData.append( 'message', input );
-			formData.append( 'token', token );
-			if ( threadID ) {
-				formData.append( 'thread_id', threadID );
-			}
-
-			// Append audio file if it exists
-			if ( audioBlob ) {
-				formData.append( 'audio_file', audioBlob, 'audio.wav' ); // Assuming 'audioBlob' is your recorded audio Blob
-			}
+			const formData = prepareFormData( input, token, audioBlob );
 			const response = ( await apiFetch( {
 				url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard',
 				method: 'POST',
@@ -82,29 +88,34 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 						message = responseBody;
 						// Make an API call to update the thread with the result of the function call
 
-						const formData = new FormData();
-						formData.append( 'thread_id', threadID );
+						const formData = prepareFormData(
+							input,
+							token,
+							audioBlob
+						);
 						formData.append( 'run_id', runID );
 						formData.append( 'tool_call_id', functionID );
 						formData.append( 'output', message );
-						formData.append( 'token', token );
 
-						const outputToolResponse = ( await apiFetch( {
+						/* 
+                        Update the thread with the result of the function call. Otherwise, the run is stuck at 'pending'.
+                        That would prevent us from appending new messages to the thread.
+                        */
+						await apiFetch( {
 							url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard/submit-tool-output',
 							method: 'POST',
 							body: formData,
-						} ) ) as any;
-
-						// @todo: handle outputToolResponse?
+						} );
 
 						const summaryPrompt = `Provide a helpful answer for the original query using the resulting data from the API request. The original query was "${ input }". Parse through the data and find the most relevant information to answer the query and provide it in a human-readable format. The data from the result of the API request is: ${ JSON.stringify(
 							message
 						) }`;
 
-						const summaryFormData = new FormData();
-						summaryFormData.append( 'message', summaryPrompt );
-						summaryFormData.append( 'token', token );
-						summaryFormData.append( 'thread_id', threadID );
+						const summaryFormData = prepareFormData(
+							input,
+							token,
+							null
+						);
 
 						const summaryResponse = ( await apiFetch( {
 							url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard',
@@ -113,7 +124,8 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 						} ) ) as any;
 						message = summaryResponse.answer;
 					} catch ( error ) {
-						message = 'I had trouble making the api call for you.';
+						message =
+							"I'm sorry, I had trouble performing this task for you.";
 					}
 
 					setMessages( ( messages ) => [
@@ -128,20 +140,24 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				}
 			}
 
-			// Assuming the response contains the assistant's message
-			const message = response.answer;
-			if ( ! message || ! message.length ) {
+			const { answer } = response;
+			if ( ! answer || ! answer.length ) {
 				throw new Error( 'No message returned from assistant' );
 			}
 			const assistantMessage: Message = {
 				sender: 'assistant',
-				text: message,
+				text: answer,
 			};
 
 			setMessages( ( messages ) => [ ...messages, assistantMessage ] );
 		} catch ( error ) {
-			console.error( 'Error fetching response:', error );
-			// Handle the error appropriately
+			setMessages( ( messages ) => [
+				...messages,
+				{
+					sender: 'assistant',
+					text: "I'm sorry, I had trouble generating a response for you.",
+				},
+			] );
 		}
 		setLoading( false );
 	};
