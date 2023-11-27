@@ -320,7 +320,17 @@ class WC_Frontend_Scripts {
 			),
 		);
 		foreach ( $register_scripts as $name => $props ) {
-			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
+			// Ensure props are in the right order.
+			$defaults = array(
+				'name'    => $name,
+				'src'     => '',
+				'deps'    => array( 'jquery' ),
+				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'args'    => array( 'strategy' => 'defer' ),
+			);
+			$props = wp_parse_args( $props, $defaults );
+
+			call_user_func_array( array( __CLASS__, 'register_script' ), $props );
 		}
 	}
 
