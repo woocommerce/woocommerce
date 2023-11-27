@@ -728,19 +728,17 @@ CREATE TABLE {$wpdb->prefix}wc_transient_files (
 	file_name varchar(255) NOT NULL,
 	date_created_gmt datetime NOT NULL,
 	expiration_date_gmt datetime NOT NULL,
-	is_public tinyint NOT NULL default 0,
+	is_public tinyint(1) NOT NULL default 0,
 	KEY file_name_key (file_name)
-)
-$collate;
-
+) $collate;
 CREATE TABLE {$wpdb->prefix}wc_transient_files_meta (
     id bigint(20) unsigned NOT NULL auto_increment primary key,
 	transient_file_id bigint(20) unsigned NOT NULL,
 	meta_key varchar(255) NOT NULL,
 	meta_value text null,
 	KEY transient_file_id_meta_key (transient_file_id, meta_key)
-)
-$collate;";
+) $collate;
+";
 	}
 
 	/**
