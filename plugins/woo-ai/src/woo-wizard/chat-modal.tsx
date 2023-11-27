@@ -1,8 +1,10 @@
 /**
  * External dependencies
  */
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Button, TextareaControl } from '@wordpress/components';
+import { useDispatch, select } from '@wordpress/data';
+import { store as preferencesStore } from '@wordpress/preferences';
 import apiFetch from '@wordpress/api-fetch';
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 
@@ -22,16 +24,43 @@ type ChatModalProps = {
 	onClose: () => void;
 };
 
+const ONE_HOUR_IN_MS = 3600000;
+
 const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ input, setInput ] = useState( '' );
 	const [ messages, setMessages ] = useState< Message[] >( [] );
 	const [ isLoading, setLoading ] = useState( false );
-	// @todo: store threadID as localStorage to be retrieved on page load.
 	// @todo: store the last 3 messages as localStorage to be retrieved on page load.
 	const threadIDRef = useRef< string >( '' );
 	let threadID = threadIDRef.current;
 
 	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
+
+	const threadPreferenceId = 'assistant-chat-thread-id';
+	const threadExpirationPreferenceId = 'assistant-chat-thread-id-expiration';
+	const { set: setStorageData } = useDispatch( preferencesStore );
+	useEffect( () => {
+		if ( ! threadID ) {
+			const storedThreadId = select( preferencesStore ).get(
+				'woo-ai-plugin',
+				threadPreferenceId
+			);
+			// check that the thread hasn't expired
+			const expiration = select( preferencesStore ).get(
+				'woo-ai-plugin',
+				threadExpirationPreferenceId
+			);
+			if ( expiration && Date.now() > expiration ) {
+				setStorageData( 'woo-ai-plugin', threadPreferenceId, '' );
+				setStorageData(
+					'woo-ai-plugin',
+					threadExpirationPreferenceId,
+					''
+				);
+			}
+			threadID = storedThreadId;
+		}
+	}, [ threadID ] );
 
 	const prepareFormData = (
 		input: string,
@@ -72,6 +101,13 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			} ) ) as any;
 			if ( ! threadID && response.thread_id ) {
 				threadID = response.thread_id;
+				setStorageData( 'woo-ai-plugin', threadPreferenceId, threadID );
+				// set the expiry to 1 hour from now.
+				setStorageData(
+					'woo-ai-plugin',
+					threadExpirationPreferenceId,
+					Date.now() + ONE_HOUR_IN_MS
+				);
 			}
 
 			if ( response.status === 'requires_action' ) {
@@ -148,9 +184,12 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				sender: 'assistant',
 				text: answer,
 			};
-
+			console.log( 'answer' );
+			console.log( answer );
 			setMessages( ( messages ) => [ ...messages, assistantMessage ] );
 		} catch ( error ) {
+			console.log( 'error' );
+			console.log( error );
 			setMessages( ( messages ) => [
 				...messages,
 				{
