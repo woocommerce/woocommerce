@@ -18,11 +18,12 @@ import { sanitizeHTML } from '../../../utils/sanitize-html';
 import { SectionBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
 
-export function Edit( {
+export function SectionBlockEdit( {
 	attributes,
 	clientId,
 }: ProductEditorBlockEditProps< SectionBlockAttributes > ) {
 	const { description, title, blockGap } = attributes;
+
 	const blockProps = useWooBlockProps( attributes );
 	const innerBlockProps = useInnerBlocksProps(
 		{
