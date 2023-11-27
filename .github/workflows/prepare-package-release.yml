@@ -36,7 +36,6 @@ jobs:
 
             - name: Get id string
               id: id
-              run: echo ${${{ github.event.inputs.packages }}//,/}
               run: echo "${{ github.event.inputs.packages }}" | sed "s/,/-/"
 
             # - name: Set all package string
