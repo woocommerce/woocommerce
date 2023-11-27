@@ -26,15 +26,15 @@ This solution allows you to create a new template page within your theme that is
 
 To set up this template page:
 
-**1. Duplicate page.php**
+1. Duplicate page.php
 
 Duplicate your theme’s page.php file, and name it woocommerce.php. This file should be found like this: `wp-content/themes/YOURTHEME/woocommerce.php`.
 
-**2. Edit your page (woocommerce.php)**
+2. Edit your page (woocommerce.php)
 
 Open up your newly created **woocommerce.php** in a text editor, or the editor of your choice.
 
-**3. Replace the loop**
+3. Replace the loop
 
 Next you need to find the loop (see [The_Loop](http://codex.wordpress.org/The_Loop)). The loop usually starts with a:
 
@@ -70,6 +70,7 @@ First unhook the WooCommerce wrappers:
 remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10);
 remove_action( 'woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10);
 ```
+
 Then hook in your own functions to display the wrappers your theme requires:
 
 ```php
@@ -132,6 +133,7 @@ function mytheme_add_woocommerce_support() {
 
 add_action( 'after_setup_theme', 'mytheme_add_woocommerce_support' );
 ```
+
 These are optional theme settings that you can set when declaring WooCommerce support.
 
 `thumbnail_image_width` and `single_image_width` will set the image sizes for the shop. If these are not declared when adding theme support, the user can set image sizes in the Customizer under the **WooCommerce > Product Images** section.
