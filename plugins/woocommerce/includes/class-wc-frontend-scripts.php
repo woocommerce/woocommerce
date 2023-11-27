@@ -329,7 +329,7 @@ class WC_Frontend_Scripts {
 				'version' => Constants::get_constant( 'WC_VERSION' ),
 				'args'    => array( 'strategy' => 'defer' ),
 			);
-			$props = wp_parse_args( $props, $defaults );
+			$props    = wp_parse_args( $props, $defaults );
 
 			call_user_func_array( array( __CLASS__, 'register_script' ), $props );
 		}
