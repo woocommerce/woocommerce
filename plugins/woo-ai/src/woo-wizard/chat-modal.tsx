@@ -10,9 +10,8 @@ import { __experimentalRequestJetpackToken as requestJetpackToken } from '@wooco
  * Internal dependencies
  */
 import './index.scss';
-import micIcon from './mic-icon';
-import playerStop from './player-stop';
 import makeWCRestApiCall from '../utils/wcRestApi';
+import { AudioRecorder } from '../components/audio-recorder';
 
 type Message = {
 	sender: 'user' | 'assistant';
@@ -32,34 +31,11 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const threadIDRef = useRef< string >( '' );
 	let threadID = threadIDRef.current;
 
-	const [ recording, setRecording ] = useState( false );
 	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
-	const mediaRecorderRef = useRef< MediaRecorder | null >( null );
-
-	const startRecording = async () => {
-		try {
-			const stream = await navigator.mediaDevices.getUserMedia( {
-				audio: true,
-			} );
-			const mediaRecorder = new MediaRecorder( stream );
-			mediaRecorderRef.current = mediaRecorder;
-			mediaRecorder.ondataavailable = ( e ) => {
-				setAudioBlob( e.data );
-			};
-			mediaRecorder.start();
-			setRecording( true );
-		} catch ( err ) {
-			console.error( 'Error accessing microphone:', err );
-		}
-	};
-
-	const stopRecording = () => {
-		mediaRecorderRef.current?.stop();
-		setRecording( false );
-		// Now `audioBlob` contains the recorded audio
-	};
 
 	const handleSubmit = async ( event: React.FormEvent ) => {
+		console.log( 'audioBlob' );
+		console.log( audioBlob );
 		event.preventDefault();
 		if ( ! input.trim() && ! audioBlob ) {
 			return;
@@ -194,13 +170,11 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 					rows={ 2 }
 					style={ { flexGrow: 1 } }
 				/>
-				<Button
-					className="woo-wizard-mic-button"
-					icon={ recording ? playerStop : micIcon }
-					iconSize={ 32 }
-					onClick={ recording ? stopRecording : startRecording }
-					label={ recording ? 'Stop recording' : 'Start recording' }
-				></Button>
+				<AudioRecorder
+					onRecordingComplete={ ( audioBlob: Blob ) =>
+						setAudioBlob( audioBlob )
+					}
+				/>
 				<Button
 					className="woo-wizard-submit-button"
 					disabled={ isLoading }
