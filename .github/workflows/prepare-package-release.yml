@@ -49,7 +49,7 @@ jobs:
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}
                   commit-message: 'Automated change: Prep ${{ steps.all_description.outputs.str || steps.specific_description.outputs.str }} for release.'
-                  branch: release-packages/${{ steps.date.outputs.date }}
+                  branch: release/packages-${{ steps.date.outputs.date }}-${{ github.event.inputs.packages.replace(/,/g, '-').replace(/@/g, '') }}
                   delete-branch: true
                   title: Prepare Packages for Release
                   reviewers: ${{ github.actor }}
