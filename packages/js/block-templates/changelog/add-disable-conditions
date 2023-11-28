@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Use _templateBlockDisableConditions attribute to evaluate disabled attribute

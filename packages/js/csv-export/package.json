@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/csv-export",
-	"version": "1.7.0",
+	"version": "1.8.0",
 	"description": "WooCommerce utility library to convert data to CSV files.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",

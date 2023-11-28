@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-append a unique string to the filename if the settings are configured to do so
