@@ -26,17 +26,9 @@ This solution allows you to create a new template page within your theme that is
 
 To set up this template page:
 
-1. Duplicate page.php
-
-Duplicate your theme’s page.php file, and name it woocommerce.php. This file should be found like this: `wp-content/themes/YOURTHEME/woocommerce.php`.
-
-2. Edit your page (woocommerce.php)
-
-Open up your newly created **woocommerce.php** in a text editor, or the editor of your choice.
-
-3. Replace the loop
-
-Next you need to find the loop (see [The_Loop](http://codex.wordpress.org/The_Loop)). The loop usually starts with a:
+1. **Duplicate page.php:** Duplicate your theme’s page.php file, and name it woocommerce.php. This file should be found like this: `wp-content/themes/YOURTHEME/woocommerce.php`.
+2. **Edit your page (woocommerce.php)**: Open up your newly created **woocommerce.php** in a text editor, or the editor of your choice.
+3. **Replace the loop:** Next you need to find the loop (see [The_Loop](http://codex.wordpress.org/The_Loop)). The loop usually starts with a:
 
 ```php
 <?php if ( have_posts() ) :
