@@ -35,7 +35,7 @@ Please take a moment to review the [project readme](https://github.com/woocommer
 
 - Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/).
 - Run our build process described in the document on [how to set up WooCommerce development environment](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment), it will install our pre-commit hook, code sniffs, dependencies, and more.
-- Before pushing commits to GitHub, check your code against our code standards. For PHP code in the WooCommerce Core project you can do this by running `pnpm --filter=@woocommerce/plugin-woocommerce run lint:php:changes:branch`.
+- Before pushing commits to GitHub, check your code against our code standards. For PHP code in the WooCommerce Core project you can do this by running `pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes:branch`.
 - Whenever possible, please fix pre-existing code standards errors in code that you change.
 - Please consider adding appropriate tests related to your change if applicable such as unit, API and E2E tests. You can check the following guides for this purpose:
     - [Writing unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md#guide-for-writing-unit-tests).
