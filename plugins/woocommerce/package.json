@@ -24,28 +24,36 @@
 			"additionalTasks": [
 				{
 					"name": "PHP 8.0",
-					"commandFilter": [ "test:php" ],
+					"commandFilter": [
+						"test:php"
+					],
 					"testEnvConfig": {
 						"phpVersion": "8.0"
 					}
 				},
 				{
 					"name": "WP: nightly",
-					"commandFilter": [ "test:php" ],
+					"commandFilter": [
+						"test:php"
+					],
 					"testEnvConfig": {
 						"wpVersion": "nightly"
 					}
 				},
 				{
 					"name": "WP: latest-1",
-					"commandFilter": [ "test:php" ],
+					"commandFilter": [
+						"test:php"
+					],
 					"testEnvConfig": {
 						"wpVersion": "latest-1"
 					}
 				},
 				{
 					"name": "WP: latest-2",
-					"commandFilter": [ "test:php" ],
+					"commandFilter": [
+						"test:php"
+					],
 					"testEnvConfig": {
 						"wpVersion": "latest-2"
 					}
@@ -128,7 +136,7 @@
 		"config": "3.3.7",
 		"cross-env": "6.0.3",
 		"dotenv": "^10.0.0",
-		"eslint": "^8.32.0",
+		"eslint": "^8.54.0",
 		"eslint-config-wpcalypso": "5.0.0",
 		"eslint-plugin-jest": "23.20.0",
 		"istanbul": "1.0.0-alpha.2",

@@ -33,7 +33,7 @@
 		"@wordpress/env": "^8.2.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^26.4.0",
-		"eslint": "^8.32.0",
+		"eslint": "^8.54.0",
 		"gray-matter": "^4.0.3",
 		"prettier": "npm:wp-prettier@^2.6.2",
 		"ts-loader": "^9.4.1",

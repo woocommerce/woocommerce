@@ -42,7 +42,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"d3-time-format": "^2.3.0",
-		"eslint": "^8.32.0",
+		"eslint": "^8.54.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"concurrently": "^7.0.0",
