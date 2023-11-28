@@ -422,7 +422,7 @@ class PageController {
 				'per_page',
 				array(
 					'default' => $list_table->get_per_page_default(),
-					'option'  => get_class( $list_table )::PER_PAGE_USER_OPTION_KEY,
+					'option'  => $list_table::PER_PAGE_USER_OPTION_KEY,
 				)
 			);
 		}
@@ -604,7 +604,7 @@ class PageController {
 					</label>
 					<?php submit_button( __( 'Search', 'woocommerce' ), 'secondary', null, false ); ?>
 				</fieldset>
-				<?php if ( $file_count >= get_class( $this->file_controller )::SEARCH_MAX_FILES ) : ?>
+				<?php if ( $file_count >= $this->file_controller::SEARCH_MAX_FILES ) : ?>
 					<div class="wc-logs-search-notice">
 						<?php
 						printf(
@@ -613,7 +613,7 @@ class PageController {
 								'⚠️ Only %s files can be searched at one time. Try filtering the file list before searching.',
 								'woocommerce'
 							),
-							esc_html( number_format_i18n( get_class( $this->file_controller )::SEARCH_MAX_FILES ) )
+							esc_html( number_format_i18n( $this->file_controller::SEARCH_MAX_FILES ) )
 						);
 						?>
 					</div>
