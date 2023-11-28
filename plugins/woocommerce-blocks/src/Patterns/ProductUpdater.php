@@ -249,9 +249,18 @@ class ProductUpdater {
 			return;
 		}
 
-		$product->set_name( $ai_generated_product_content['title'] );
-		$product->set_description( $ai_generated_product_content['description'] );
-		$product->set_regular_price( $ai_generated_product_content['price'] );
+		wp_update_post(
+			array(
+				'ID'           => $product->get_id(),
+				'post_title'   => $ai_generated_product_content['title'],
+				'post_content' => $ai_generated_product_content['description'],
+				'post_name'    => sanitize_title( $ai_generated_product_content['title'] ),
+				'meta_input'   => array(
+					'_regular_price' => $ai_generated_product_content['price'],
+				),
+			)
+		);
+		flush_rewrite_rules();
 
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/file.php';
