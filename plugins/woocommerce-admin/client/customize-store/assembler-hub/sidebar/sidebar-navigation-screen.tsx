@@ -24,7 +24,7 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import SidebarButton from '@wordpress/edit-site/build-module/components/sidebar-button';
-import { GoBackWarningModal } from './go-back-warning-modal';
+import { GoBackWarningModal } from '../go-back-warning-modal';
 
 /**
  * Internal dependencies

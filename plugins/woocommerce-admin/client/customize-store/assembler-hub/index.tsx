@@ -46,9 +46,9 @@ import { CustomizeStoreComponent } from '../types';
 import { Layout } from './layout';
 import './style.scss';
 import { PreloadFonts } from './preload-fonts';
-import { ExitWarningModal } from './exit-warning-modal';
-import { set } from 'zod';
+import { GoBackWarningModal } from './go-back-warning-modal';
 import { onBackButtonClicked } from '../utils';
+import { getNewPath } from '@woocommerce/navigation';
 
 const { RouterProvider } = unlock( routerPrivateApis );
 
@@ -158,9 +158,11 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 	return (
 		<>
 			{ showExitModal && (
-				<ExitWarningModal
-					setShowExitModal={ setShowExitModal }
-					sendEvent={ props.sendEvent }
+				<GoBackWarningModal
+					setOpenWarningModal={ setShowExitModal }
+					onExitClicked={ () => {
+						window.location.href = getNewPath( {}, '/', {} );
+					} }
 				/>
 			) }
 			<CustomizeStoreContext.Provider value={ props }>
