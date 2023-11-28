@@ -7,6 +7,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import { resolveSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
+import { apiFetch as wpApiFetch } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
@@ -21,10 +22,11 @@ export const fetchAiStatus = () => async (): Promise< aiStatusResponse > => {
 	return data;
 };
 
-// Reset all pattern contents.
-// To be implemented in a future PR.
-export const resetPatterns = () => {
-	return Promise.resolve();
+export const resetPatterns = () => async () => {
+	return await apiFetch( {
+		path: '/wc/private/ai/patterns',
+		method: 'DELETE',
+	} );
 };
 
 export const fetchThemeCards = async () => {
