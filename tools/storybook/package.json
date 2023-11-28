@@ -10,19 +10,19 @@
 	},
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
+	"scripts": {
+		"build-storybook": "build-storybook  -c ./.storybook",
+		"build-woocommerce": "pnpm --filter=@woocommerce/plugin-woocommerce build",
+		"preinstall": "npx only-allow pnpm",
+		"storybook": "pnpm run build-woocommerce && ./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./.storybook -p 6007 --ci",
+		"storybook-rtl": "USE_RTL_STYLE=true pnpm run storybook"
+	},
 	"engines": {
 		"node": "^16.14.1",
 		"pnpm": "^8.6.7"
 	},
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
-	},
-	"scripts": {
-		"build-storybook": "build-storybook  -c ./.storybook",
-		"preinstall": "npx only-allow pnpm",
-		"build-woocommerce": "pnpm --filter=@woocommerce/plugin-woocommerce run build",
-		"storybook": "pnpm run build-woocommerce && ./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./.storybook -p 6007 --ci",
-		"storybook-rtl": "USE_RTL_STYLE=true pnpm run storybook"
 	},
 	"devDependencies": {
 		"@babel/plugin-proposal-class-properties": "^7.18.6",
