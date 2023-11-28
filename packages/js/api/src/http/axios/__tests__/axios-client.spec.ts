@@ -31,9 +31,8 @@ describe( 'AxiosClient', () => {
 
 		expect( response ).toBeInstanceOf( HTTPResponse );
 		expect( response ).toHaveProperty( 'statusCode', 200 );
-		expect( response ).toHaveProperty( 'headers', {
-			'content-type': 'application/json',
-		} );
+		expect( response ).toHaveProperty( 'headers', );
+		expect( response.headers ).toHaveProperty( 'content-type', 'application/json' );
 		expect( response ).toHaveProperty( 'data', { test: 'value' } );
 	} );
 
