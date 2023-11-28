@@ -54,7 +54,7 @@ export const ColorPalette = () => {
 				);
 			} else {
 				// seems that aiSuggestions weren't correctly populated, we'll just use the first 9
-				setColorPalettes( COLOR_PALETTES.slice( 0, 9 ) );
+				setColorPalettes( COLOR_PALETTES.slice( 0, 18 ) );
 			}
 		}
 	}, [ isLoading, aiSuggestions?.defaultColorPalette ] );
