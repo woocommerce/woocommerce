@@ -35,6 +35,7 @@ test.describe( 'Test the checkout header template part', async () => {
 			postType: templateType,
 		} );
 		await editorUtils.enterEditMode();
+		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: 'Hello World in the header' },

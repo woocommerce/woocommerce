@@ -26,7 +26,7 @@ const Edit = ( {
 	setAttributes: ( attrs: BlockAttributes ) => void;
 } ) => {
 	const TEMPLATE: InnerBlockTemplate[] = [
-		[ 'core/post-title', { align: 'wide' } ],
+		[ 'core/post-title', { align: 'wide', level: 1 } ],
 		[ 'core/post-content', { align: 'wide' } ],
 	];
 
