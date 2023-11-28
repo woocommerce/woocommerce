@@ -22,8 +22,12 @@ export function SectionBlockEdit( {
 	attributes,
 	clientId,
 }: ProductEditorBlockEditProps< SectionBlockAttributes > ) {
-	const { description, title, blockGap } = attributes;
-
+	const {
+		description,
+		title,
+		blockGap,
+		_templateLock = 'contentOnly',
+	} = attributes;
 	const blockProps = useWooBlockProps( attributes );
 	const innerBlockProps = useInnerBlocksProps(
 		{
@@ -32,7 +36,7 @@ export function SectionBlockEdit( {
 				`wp-block-woocommerce-product-section__content--block-gap-${ blockGap }`
 			),
 		},
-		{ templateLock: 'all' }
+		{ templateLock: _templateLock }
 	);
 	const SectionTagName = title ? 'fieldset' : 'div';
 	const HeadingTagName = SectionTagName === 'fieldset' ? 'legend' : 'div';
