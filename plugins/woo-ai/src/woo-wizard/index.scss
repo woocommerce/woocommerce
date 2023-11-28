@@ -2,6 +2,11 @@ $woocommerce-purple: #9b5c8f;
 $toned-down-purple: mix(white, $woocommerce-purple, 50%); // 50% white
 
 .woo-wizard-chat-modal {
+	max-height: 100%;
+	
+	.components-modal__content {
+		overflow: hidden;
+	}
 	.woo-chat-history {
 		display: flex;
 		flex-direction: column;

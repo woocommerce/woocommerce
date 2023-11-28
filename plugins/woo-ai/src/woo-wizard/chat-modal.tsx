@@ -25,42 +25,65 @@ type ChatModalProps = {
 };
 
 const ONE_HOUR_IN_MS = 3600000;
+const WOO_AI_PLUGIN_NAME = 'woo-ai-plugin';
+const threadPreferenceId = 'assistant-chat-thread-id';
+const threadExpirationPreferenceId = 'assistant-chat-thread-id-expiration';
+const chatHistoryPreferenceId = 'woo-ai-chat-history';
 
 const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ input, setInput ] = useState( '' );
 	const [ messages, setMessages ] = useState< Message[] >( [] );
 	const [ isLoading, setLoading ] = useState( false );
-	// @todo: store the last 3 messages as localStorage to be retrieved on page load.
-	const threadIDRef = useRef< string >( '' );
-	let threadID = threadIDRef.current;
+	const [ threadID, setThreadID ] = useState< string >( '' );
 
 	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
-
-	const threadPreferenceId = 'assistant-chat-thread-id';
-	const threadExpirationPreferenceId = 'assistant-chat-thread-id-expiration';
 	const { set: setStorageData } = useDispatch( preferencesStore );
+
 	useEffect( () => {
+		console.log( 'threadID is', threadID );
 		if ( ! threadID ) {
+			console.log( 'threadID is falsey' );
 			const storedThreadId = select( preferencesStore ).get(
-				'woo-ai-plugin',
+				WOO_AI_PLUGIN_NAME,
 				threadPreferenceId
 			);
+			console.log( 'storedThreadId is', storedThreadId );
 			// check that the thread hasn't expired
 			const expiration = select( preferencesStore ).get(
-				'woo-ai-plugin',
+				WOO_AI_PLUGIN_NAME,
 				threadExpirationPreferenceId
 			);
 			if ( expiration && Date.now() > expiration ) {
-				setStorageData( 'woo-ai-plugin', threadPreferenceId, '' );
+				console.log( 'data is expired, clearing it.' );
+				setStorageData( WOO_AI_PLUGIN_NAME, threadPreferenceId, '' );
 				setStorageData(
-					'woo-ai-plugin',
+					WOO_AI_PLUGIN_NAME,
 					threadExpirationPreferenceId,
 					''
 				);
 			}
-			threadID = storedThreadId;
+			setThreadID( storedThreadId );
 		}
 	}, [ threadID ] );
+
+	useEffect( () => {
+		// @todo: also add an expiry to the chat history, say, 24 hours?
+		if ( ! messages || ! messages.length ) {
+			const storedMessages = select( preferencesStore ).get(
+				WOO_AI_PLUGIN_NAME,
+				chatHistoryPreferenceId
+			);
+			if ( storedMessages ) {
+				setMessages( JSON.parse( storedMessages ) );
+			} else {
+				const assistantMessage: Message = {
+					sender: 'assistant',
+					text: 'Hi there! How can I help you today?',
+				};
+				setMessages( [ assistantMessage ] );
+			}
+		}
+	}, [ messages ] );
 
 	const prepareFormData = (
 		input: string,
@@ -68,6 +91,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		audioBlob: Blob | null
 	) => {
 		const formData = new FormData();
+		console.log( 'threadID in prepareFormData is', threadID );
 		formData.append( 'message', input );
 		formData.append( 'token', token );
 		if ( threadID ) {
@@ -86,9 +110,15 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			return;
 		}
 		setLoading( true );
+		console.log( 'threadID is', threadID );
 
 		const userMessage: Message = { sender: 'user', text: input };
 		setMessages( [ ...messages, userMessage ] );
+		setStorageData(
+			WOO_AI_PLUGIN_NAME,
+			chatHistoryPreferenceId,
+			JSON.stringify( [ ...messages, userMessage ] )
+		);
 		setInput( '' );
 
 		try {
@@ -99,12 +129,18 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				method: 'POST',
 				body: formData,
 			} ) ) as any;
-			if ( ! threadID && response.thread_id ) {
-				threadID = response.thread_id;
-				setStorageData( 'woo-ai-plugin', threadPreferenceId, threadID );
-				// set the expiry to 1 hour from now.
+			const newThreadID = response.thread_id;
+			if ( ! threadID && newThreadID ) {
+				console.log( 'no threadID, but newThreadID is', newThreadID );
+				setThreadID( newThreadID );
 				setStorageData(
-					'woo-ai-plugin',
+					WOO_AI_PLUGIN_NAME,
+					threadPreferenceId,
+					newThreadID
+				);
+				// Set the expiry to 1 hour from now since threads expire after 1 hour.
+				setStorageData(
+					WOO_AI_PLUGIN_NAME,
 					threadExpirationPreferenceId,
 					Date.now() + ONE_HOUR_IN_MS
 				);
@@ -148,7 +184,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 						) }`;
 
 						const summaryFormData = prepareFormData(
-							input,
+							summaryPrompt,
 							token,
 							null
 						);
@@ -184,12 +220,13 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				sender: 'assistant',
 				text: answer,
 			};
-			console.log( 'answer' );
-			console.log( answer );
 			setMessages( ( messages ) => [ ...messages, assistantMessage ] );
+			setStorageData(
+				WOO_AI_PLUGIN_NAME,
+				chatHistoryPreferenceId,
+				JSON.stringify( [ ...messages, assistantMessage ] )
+			);
 		} catch ( error ) {
-			console.log( 'error' );
-			console.log( error );
 			setMessages( ( messages ) => [
 				...messages,
 				{
