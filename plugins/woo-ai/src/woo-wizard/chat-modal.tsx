@@ -35,6 +35,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ messages, setMessages ] = useState< Message[] >( [] );
 	const [ isLoading, setLoading ] = useState( false );
 	const [ threadID, setThreadID ] = useState< string >( '' );
+	const [ isResponseError, setIsResponseError ] = useState( false );
 
 	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
 	const { set: setStorageData } = useDispatch( preferencesStore );
@@ -104,6 +105,129 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		return formData;
 	};
 
+	const handleError = ( message: string ) => {
+		setIsResponseError( true );
+		setMessages( ( messages ) => [
+			...messages,
+			{
+				sender: 'assistant',
+				text: message,
+			},
+		] );
+	};
+
+	/**
+	 *
+	 * @param {any} response The response from the assistant API.
+	 * @param {string} token The Jetpack token.
+	 * @returns {string} The message to display to the user.
+	 */
+	const handleRequiresAction = async ( response: any, token: string ) => {
+		const answer = response.answer;
+		const functionID: string = answer.function_id;
+		const runID: string = response.run_id;
+		let message = '';
+		if ( answer.function_name === 'makeWCRestApiCall' ) {
+			const functionArguments = answer.function_args;
+			try {
+				const responseBody = ( await makeWCRestApiCall(
+					functionArguments
+				) ) as string;
+				message = responseBody;
+				// Make an API call to update the thread with the result of the function call
+			} catch ( error ) {
+				handleError(
+					"I'm sorry, I had trouble performing this task for you."
+				);
+			}
+
+			/* 
+                    Update the thread with the result of the function call. Otherwise, the run is stuck at 'pending'.
+                    That would prevent us from appending new messages to the thread.
+                    We're doing this even if the function call failed, because we want to be able to continue the conversation.
+                */
+			try {
+				const formData = prepareFormData( input, token, audioBlob );
+				formData.append( 'run_id', runID );
+				formData.append( 'tool_call_id', functionID );
+				formData.append( 'output', message );
+
+				await apiFetch( {
+					url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard/submit-tool-output',
+					method: 'POST',
+					body: formData,
+				} );
+			} catch ( error ) {
+				handleError(
+					"I believe that I was able to accomplish the task you requested, but I'm having trouble updating our conversation."
+				);
+			}
+
+			// At this point, if there's an error, we don't continue with a summary.
+			if ( isResponseError ) {
+				setMessages( ( messages ) => [
+					...messages,
+					{
+						sender: 'assistant',
+						text: message,
+					},
+				] );
+				setLoading( false );
+				return;
+			}
+			try {
+				const summaryPrompt = `Provide a helpful answer for the original query using the resulting data from the API request. The original query was "${ input }". Parse through the data and find the most relevant information to answer the query and provide it in a human-readable format. The data from the result of the API request is: ${ JSON.stringify(
+					message
+				) }`;
+
+				const summaryFormData = prepareFormData(
+					summaryPrompt,
+					token,
+					null
+				);
+
+				const summaryResponse = ( await apiFetch( {
+					url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard',
+					method: 'POST',
+					body: summaryFormData,
+				} ) ) as any;
+				message = summaryResponse.answer as string;
+			} catch ( error ) {
+				handleError(
+					"I believe that I was able to accomplish the task you requested, but I'm having trouble summarizing the results."
+				);
+			}
+		}
+		return message;
+	};
+
+	const setAndStoreThreadID = ( newThreadID: string ) => {
+		setThreadID( newThreadID );
+		setStorageData( WOO_AI_PLUGIN_NAME, threadPreferenceId, newThreadID );
+		// Set the expiry to 1 hour from now since threads expire after 1 hour.
+		setStorageData(
+			WOO_AI_PLUGIN_NAME,
+			threadExpirationPreferenceId,
+			Date.now() + ONE_HOUR_IN_MS
+		);
+	};
+
+	const setAndStoreMessages = (
+		answer: string,
+		sender: 'assistant' | 'user'
+	) => {
+		const assistantMessage: Message = {
+			sender,
+			text: answer,
+		};
+		setMessages( ( messages ) => [ ...messages, assistantMessage ] );
+		setStorageData(
+			WOO_AI_PLUGIN_NAME,
+			chatHistoryPreferenceId,
+			JSON.stringify( [ ...messages, assistantMessage ] )
+		);
+	};
+
 	const handleSubmit = async ( event: React.FormEvent ) => {
 		event.preventDefault();
 		if ( ! input.trim() && ! audioBlob ) {
@@ -112,13 +236,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		setLoading( true );
 		console.log( 'threadID is', threadID );
 
-		const userMessage: Message = { sender: 'user', text: input };
-		setMessages( [ ...messages, userMessage ] );
-		setStorageData(
-			WOO_AI_PLUGIN_NAME,
-			chatHistoryPreferenceId,
-			JSON.stringify( [ ...messages, userMessage ] )
-		);
+		setAndStoreMessages( input, 'user' );
 		setInput( '' );
 
 		try {
@@ -132,108 +250,27 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			const newThreadID = response.thread_id;
 			if ( ! threadID && newThreadID ) {
 				console.log( 'no threadID, but newThreadID is', newThreadID );
-				setThreadID( newThreadID );
-				setStorageData(
-					WOO_AI_PLUGIN_NAME,
-					threadPreferenceId,
-					newThreadID
-				);
-				// Set the expiry to 1 hour from now since threads expire after 1 hour.
-				setStorageData(
-					WOO_AI_PLUGIN_NAME,
-					threadExpirationPreferenceId,
-					Date.now() + ONE_HOUR_IN_MS
-				);
+				setAndStoreThreadID( newThreadID );
 			}
 
+			let answer: string;
 			if ( response.status === 'requires_action' ) {
-				const answer = response.answer;
-				const functionID: string = answer.function_id;
-				const runID: string = response.run_id;
-				if ( answer.function_name === 'makeWCRestApiCall' ) {
-					const functionArguments = answer.function_args;
-					let message = '';
-					try {
-						const responseBody = ( await makeWCRestApiCall(
-							functionArguments
-						) ) as string;
-						message = responseBody;
-						// Make an API call to update the thread with the result of the function call
-
-						const formData = prepareFormData(
-							input,
-							token,
-							audioBlob
-						);
-						formData.append( 'run_id', runID );
-						formData.append( 'tool_call_id', functionID );
-						formData.append( 'output', message );
-
-						/* 
-                        Update the thread with the result of the function call. Otherwise, the run is stuck at 'pending'.
-                        That would prevent us from appending new messages to the thread.
-                        */
-						await apiFetch( {
-							url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard/submit-tool-output',
-							method: 'POST',
-							body: formData,
-						} );
-
-						const summaryPrompt = `Provide a helpful answer for the original query using the resulting data from the API request. The original query was "${ input }". Parse through the data and find the most relevant information to answer the query and provide it in a human-readable format. The data from the result of the API request is: ${ JSON.stringify(
-							message
-						) }`;
-
-						const summaryFormData = prepareFormData(
-							summaryPrompt,
-							token,
-							null
-						);
-
-						const summaryResponse = ( await apiFetch( {
-							url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard',
-							method: 'POST',
-							body: summaryFormData,
-						} ) ) as any;
-						message = summaryResponse.answer;
-					} catch ( error ) {
-						message =
-							"I'm sorry, I had trouble performing this task for you.";
-					}
-
-					setMessages( ( messages ) => [
-						...messages,
-						{
-							sender: 'assistant',
-							text: message,
-						},
-					] );
-					setLoading( false );
-					return;
-				}
+				const actionsAnswer = await handleRequiresAction(
+					response,
+					token
+				);
+				answer = actionsAnswer || '';
+			} else {
+				answer = response.answer;
 			}
-
-			const { answer } = response;
 			if ( ! answer || ! answer.length ) {
 				throw new Error( 'No message returned from assistant' );
 			}
-			const assistantMessage: Message = {
-				sender: 'assistant',
-				text: answer,
-			};
-			setMessages( ( messages ) => [ ...messages, assistantMessage ] );
-			setStorageData(
-				WOO_AI_PLUGIN_NAME,
-				chatHistoryPreferenceId,
-				JSON.stringify( [ ...messages, assistantMessage ] )
-			);
+			setAndStoreMessages( answer, 'assistant' );
 		} catch ( error ) {
-			setMessages( ( messages ) => [
-				...messages,
-				{
-					sender: 'assistant',
-					text: "I'm sorry, I had trouble generating a response for you.",
-				},
-			] );
+			handleError(
+				"I'm sorry, I had trouble generating a response for you."
+			);
 		}
 		setLoading( false );
 	};
