@@ -19,7 +19,6 @@ import { useInnerBlocksProps } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import { ContentPreview } from '../../../components/content-preview';
 import { ModalEditor } from '../../../components/modal-editor';
 import { ProductEditorBlockEditProps } from '../../../types';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
@@ -54,11 +53,8 @@ export function DescriptionBlockEdit( {
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
-	const [ description, setDescription ] = useEntityProp< string >(
-		'postType',
-		'product',
-		'description'
-	);
+	const [ serializeDescriptionBlocks, setSerializeDescriptionBlocks ] =
+		useEntityProp< string >( 'postType', 'product', 'description' );
 
 	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
 
@@ -111,25 +107,24 @@ export function DescriptionBlockEdit( {
 					recordEvent( 'product_add_description_click' );
 				} }
 			>
-				{ description.length
+				{ serializeDescriptionBlocks.length
 					? __( 'Edit description', 'woocommerce' )
 					: __( 'Add description', 'woocommerce' ) }
 			</Button>
 			{ isModalOpen && (
 				<ModalEditor
-					initialBlocks={ parse( description ) }
+					initialBlocks={ parse( serializeDescriptionBlocks ) }
 					onChange={ ( blocks ) => {
+						replaceInnerBlocks( clientId, blocks, false );
+
 						const html = serialize(
 							clearDescriptionIfEmpty( blocks )
 						);
-						setDescription( html );
+						setSerializeDescriptionBlocks( html );
 					} }
 					onClose={ () => setIsModalOpen( false ) }
 					title={ __( 'Edit description', 'woocommerce' ) }
 				/>
-			) }
-			{ !! description.length && (
-				<ContentPreview content={ description } />
 			) }
 			{ isModalOpen && <ModalEditorWelcomeGuide /> }
 		</div>
