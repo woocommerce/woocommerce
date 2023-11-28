@@ -221,7 +221,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 
 		// Description section.
-		$description_section = $general_group->add_section(
+		$section_block = $general_group->add_section(
 			array(
 				'id'         => 'product-description-section',
 				'order'      => 20,
@@ -232,15 +232,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$description_section->add_block(
+
+		$description_block = $section_block->add_block(
 			array(
 				'id'        => 'product-description',
 				'blockName' => 'woocommerce/product-description-field',
 				'order'     => 10,
 				'attributes' => array(
 					'lock' => array (
-						'move'   => false,
-						'remove' => false,
+						'move'   => true,
+						'remove' => true,
 					),
 				),
 			)
