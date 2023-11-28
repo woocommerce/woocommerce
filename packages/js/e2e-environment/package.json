@@ -28,7 +28,7 @@
 		"wc-e2e": "bin/wc-e2e.sh"
 	},
 	"scripts": {
-		"build": "pnpm run clean && pnpm run compile",
+		"build": "pnpm clean && pnpm compile",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
 		"docker:clear-all": "docker rmi --force $(docker images -q)",
@@ -36,9 +36,9 @@
 		"docker:ssh": "docker exec -it $(node utils/get-app-name.js)_wordpress-www /bin/bash",
 		"docker:up": "./bin/docker-compose.sh up",
 		"docker:wait": "bash ./bin/wait-for-build.sh",
-		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
-		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix",
-		"prepack": "pnpm run build",
+		"lint": "eslint --ext=js,ts,tsx src",
+		"lint:fix": "eslint --ext=js,ts,tsx src --fix",
+		"prepack": "pnpm build",
 		"test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
 		"test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
 		"test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"

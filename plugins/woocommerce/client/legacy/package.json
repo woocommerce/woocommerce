@@ -9,12 +9,12 @@
 		"build"
 	],
 	"scripts": {
-		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
-		"build:project": "pnpm --if-present run /^build:project:.*$/",
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
+		"build:project": "pnpm --if-present /^build:project:.*$/",
 		"build:project:assets": "wireit",
-		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
-		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
-		"watch:build": "pnpm run build:project --watch"
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"watch:build": "pnpm build:project --watch"
 	},
 	"devDependencies": {
 		"@types/node": "^16.18.68",

@@ -31,9 +31,9 @@
 		"wireit": "^0.14.1"
 	},
 	"scripts": {
-		"build": "pnpm run build:admin && pnpm run uglify",
+		"build": "pnpm build:admin && pnpm uglify",
 		"build:admin": "wp-scripts build",
-		"build:dev": "pnpm run lint:js && pnpm run build",
+		"build:dev": "pnpm lint:js && pnpm build",
 		"build:zip": "./bin/build-zip.sh",
 		"changelog": "composer exec -- changelogger",
 		"check-engines": "wp-scripts check-engines",
