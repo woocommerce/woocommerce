@@ -30,6 +30,7 @@ export function Edit( {
 		max,
 		required,
 		tooltip,
+		disabled,
 	} = attributes;
 	const [ value, setValue ] = useProductEntityProp( property, {
 		postType,
@@ -46,8 +47,8 @@ export function Edit( {
 				parseFloat( value ) < min
 			) {
 				return sprintf(
+					// translators: %d is the minimum value of the number input.
 					__(
-						// translators: %d is the minimum value of the number input.
 						'Value must be greater than or equal to %d',
 						'woocommerce'
 					),
@@ -60,8 +61,8 @@ export function Edit( {
 				parseFloat( value ) > max
 			) {
 				return sprintf(
+					// translators: %d is the maximum value of the number input.
 					__(
-						// translators: %d is the maximum value of the number input.
 						'Value must be less than or equal to %d',
 						'woocommerce'
 					),
@@ -91,6 +92,7 @@ export function Edit( {
 				} }
 				required={ required }
 				tooltip={ tooltip }
+				disabled={ disabled }
 			/>
 		</div>
 	);

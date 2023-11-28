@@ -1,4 +1,4 @@
-# Useful Core Functions
+# Useful core functions
 
 WooCommerce core functions are available on both front-end and admin. They can be found in `includes/wc-core-functions.php` and can be used by themes in plugins.
 

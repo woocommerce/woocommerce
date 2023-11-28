@@ -5,6 +5,7 @@
 	margin: auto;
 	max-width: $content-max-width;
 	padding: $grid-unit-30 $grid-unit-20;
+	min-height: 500px;
 }
 
 @media screen and (min-width: $breakpoint-medium) {

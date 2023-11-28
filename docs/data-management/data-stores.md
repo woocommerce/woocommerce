@@ -1,4 +1,4 @@
-# Data Stores
+# Data stores
 
 ## Introduction
 

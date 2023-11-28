@@ -1,4 +1,4 @@
-# CSS SASS coding guidelines and naming convetions
+# CSS SASS coding guidelines and naming conventions
 
 Our guidelines are based on those used in [Calypso](https://github.com/Automattic/wp-calypso) which itself follows the BEM methodology. Refer to [this doc](https://wpcalypso.wordpress.com/devdocs/docs/coding-guidelines/css.md?term=css) for full details. There are a few differences in WooCommerce however which are outlined below;
 

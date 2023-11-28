@@ -1,4 +1,4 @@
-# Payment Gateway API
+# Payment gateway API
 
 Payment gateways in WooCommerce are class based and can be added through traditional plugins. This guide provides an intro to gateway development.
 

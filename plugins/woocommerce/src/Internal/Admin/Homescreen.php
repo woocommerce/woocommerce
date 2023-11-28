@@ -133,7 +133,19 @@ class Homescreen {
 			$zone = new \WC_Shipping_Zone();
 			$zone->set_zone_name( $country_name );
 			$zone->add_location( $country_code, 'country' );
-			$zone->add_shipping_method( 'free_shipping' );
+
+			// Method creation has no default title, use the REST API to add a title.
+			$instance_id = $zone->add_shipping_method( 'free_shipping' );
+			$request     = new \WP_REST_Request( 'POST', '/wc/v2/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id );
+			$request->set_body_params(
+				array(
+					'settings' => array(
+						'title' => 'Free shipping',
+					),
+				)
+			);
+			rest_do_request( $request );
+
 			update_option( 'woocommerce_admin_created_default_shipping_zones', 'yes' );
 			Shipping::delete_zone_count_transient();
 		}

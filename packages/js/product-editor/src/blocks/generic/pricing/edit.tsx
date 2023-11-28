@@ -27,7 +27,7 @@ export function Edit( {
 	context: { postType },
 }: ProductEditorBlockEditProps< PricingBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { property, label, help } = attributes;
+	const { property, label, help, disabled } = attributes;
 	const [ price, setPrice ] = useProductEntityProp< string >( property, {
 		postType,
 		fallbackValue: '',
@@ -60,6 +60,7 @@ export function Edit( {
 			<BaseControl id={ priceId } help={ interpolatedHelp }>
 				<InputControl
 					{ ...inputProps }
+					disabled={ disabled }
 					id={ priceId }
 					name={ property }
 					label={ label || __( 'Price', 'woocommerce' ) }
