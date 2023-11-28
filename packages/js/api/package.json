@@ -49,6 +49,7 @@
 		"oauth-1.0a": "2.2.6"
 	},
 	"devDependencies": {
+		"@babel/preset-env": "^7.23.3",
 		"@types/create-hmac": "1.1.0",
 		"@types/jest": "^29.5.10",
 		"@types/node": "^16.18.65",
