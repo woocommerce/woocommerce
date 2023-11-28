@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,6 +28,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		public function __construct() {
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
+			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		}
 
 		/**
@@ -551,6 +553,56 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					)
 				);
 				wp_enqueue_script( 'marketplace-suggestions' );
+			}
+		}
+
+		/**
+		 * Enqueue block editor assets.
+		 *
+		 * @return void
+		 */
+		public function enqueue_block_editor_assets() {
+			$settings_tabs = apply_filters('woocommerce_settings_tabs_array', []);
+
+			if ( is_array( $settings_tabs ) && count( $settings_tabs ) > 0  ) {
+				$formatted_settings_tabs = array();
+				foreach ($settings_tabs as $key => $label) {
+					$formatted_settings_tabs[] = array(
+						'key'   => is_string( $key ) ? $key : '',
+						'label' => is_string( $label ) ? $label : '',
+					);
+				}
+
+				WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette' );
+				wp_localize_script(
+					'wc-admin-command-palette',
+					'wcCommandPaletteSettings',
+					array(
+						'settingsTabs'    => $formatted_settings_tabs,
+					)
+				);
+			}
+
+			$admin_features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
+			if ( ! $admin_features_disabled ) {
+				$analytics_reports = Analytics::get_report_pages();
+				if ( is_array( $analytics_reports ) && count( $analytics_reports ) > 0 ) {
+					$formatted_analytics_reports = array_map( function( $report ) {
+						return array(
+							'title' => is_string( $report['title'] ) ? $report['title']: '' ,
+							'path' => is_string( $report['path'] ) ? $report['path']: '',
+						);
+					}, $analytics_reports );
+
+					WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette-analytics' );
+					wp_localize_script(
+						'wc-admin-command-palette-analytics',
+						'wcCommandPaletteAnalytics',
+						array(
+							'reports'    => $formatted_analytics_reports,
+						)
+					);
+				}
 			}
 		}
 

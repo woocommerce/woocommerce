@@ -1,4 +1,4 @@
-# User Experience Guidelines: Colors
+# User experience guidelines: colors
 
 ## Colors
 

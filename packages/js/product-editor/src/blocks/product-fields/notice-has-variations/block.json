@@ -30,6 +30,5 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"editorStyle": "file:./editor.css",
-	"templateLock": "contentOnly"
+	"editorStyle": "file:./editor.css"
 }

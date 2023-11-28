@@ -1,4 +1,4 @@
-# Product Editor Extensibility Guidelines
+# Product editor extensibility guidelines
 
 > ⚠️ **Notice:** These guidelines are currently a **work in progress**. Please be aware that some details might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
 

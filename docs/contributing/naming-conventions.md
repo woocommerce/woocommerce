@@ -1,4 +1,4 @@
-# Naming Conventions
+# Naming conventions
 
 ## PHP
 
