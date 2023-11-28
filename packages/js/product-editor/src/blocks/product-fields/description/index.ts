@@ -1,4 +1,8 @@
 /**
+ * External dependencies
+ */
+import { postContent } from '@wordpress/icons';
+/**
  * Internal dependencies
  */
 import blockConfiguration from './block.json';
@@ -12,6 +16,7 @@ export { metadata, name };
 export const settings = {
 	example: {},
 	edit: DescriptionBlockEdit,
+	icon: postContent,
 };
 
 export const init = () =>
