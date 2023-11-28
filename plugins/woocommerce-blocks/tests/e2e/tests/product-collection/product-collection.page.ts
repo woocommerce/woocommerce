@@ -29,7 +29,7 @@ export const SELECTORS = {
 	onSaleControlLabel: 'Show only products on sale',
 	inheritQueryFromTemplateControl:
 		'.wc-block-product-collection__inherit-query-control',
-	shrinkColumnsToFit: 'Shrink columns to fit',
+	shrinkColumnsToFit: 'Responsive',
 	productSearchLabel: 'Search',
 	productSearchButton: '.wp-block-search__button wp-element-button',
 };

@@ -16,20 +16,12 @@ import {
 import { DisplayLayoutToolbarProps } from '../types';
 import { getDefaultDisplayLayout } from '../constants';
 
-const toggleLabel = __(
-	'Shrink columns to fit',
-	'woo-gutenberg-products-block'
-);
-
+const columnsLabel = __( 'Columns', 'woo-gutenberg-products-block' );
+const toggleLabel = __( 'Responsive', 'woo-gutenberg-products-block' );
 const toggleHelp = __(
-	'Reduce the number of columns to better fit smaller screens and spaces.',
+	'Automatically adjust the number of columns to better fit smaller screens.',
 	'woo-gutenberg-products-block'
 );
-
-const getColumnsLabel = ( shrinkColumns: boolean ) =>
-	shrinkColumns
-		? __( 'Max Columns', 'woo-gutenberg-products-block' )
-		: __( 'Columns', 'woo-gutenberg-products-block' );
 
 const ColumnsControl = ( props: DisplayLayoutToolbarProps ) => {
 	const { type, columns, shrinkColumns } = props.displayLayout;
@@ -63,6 +55,21 @@ const ColumnsControl = ( props: DisplayLayoutToolbarProps ) => {
 	return showColumnsControl ? (
 		<>
 			<ToolsPanelItem
+				label={ columnsLabel }
+				hasValue={ () => defaultLayout?.columns !== columns }
+				isShownByDefault
+				onDeselect={ onPanelDeselect }
+			>
+				<RangeControl
+					label={ columnsLabel }
+					onChange={ onColumnsChange }
+					value={ columns }
+					min={ 2 }
+					max={ Math.max( 6, columns ) }
+				/>
+			</ToolsPanelItem>
+			<ToolsPanelItem
+				label={ toggleLabel }
 				hasValue={ () =>
 					defaultLayout?.shrinkColumns !== shrinkColumns
 				}
@@ -74,22 +81,6 @@ const ColumnsControl = ( props: DisplayLayoutToolbarProps ) => {
 					label={ toggleLabel }
 					help={ toggleHelp }
 					onChange={ onShrinkColumnsToggleChange }
-				/>
-			</ToolsPanelItem>
-			<ToolsPanelItem
-				hasValue={ () =>
-					defaultLayout?.columns !== columns ||
-					defaultLayout?.type !== type
-				}
-				isShownByDefault
-				onDeselect={ onPanelDeselect }
-			>
-				<RangeControl
-					label={ getColumnsLabel( !! shrinkColumns ) }
-					onChange={ onColumnsChange }
-					value={ columns }
-					min={ 2 }
-					max={ Math.max( 6, columns ) }
 				/>
 			</ToolsPanelItem>
 		</>
