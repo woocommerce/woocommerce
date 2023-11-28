@@ -1,4 +1,4 @@
-# Fixing Outdated WooCommerce Templates
+# Fixing outdated WooCommerce templates
 
 ## Template Updates and Changes
 

@@ -275,6 +275,14 @@ export const updateStorePatterns = async (
 						context.businessInfoDescription.descriptionText,
 				},
 			} ),
+			apiFetch( {
+				path: '/wc/private/ai/store-title',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+				},
+			} ),
 		] );
 
 		if ( ! response.ai_content_generated ) {

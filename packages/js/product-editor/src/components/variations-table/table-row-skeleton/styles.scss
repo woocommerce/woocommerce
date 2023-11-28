@@ -7,15 +7,9 @@
 		min-height: $grid-unit-30;
 	}
 
-	display: grid;
-	grid-template-columns: 44px auto 25% 25% 88px;
-	padding: 0;
-	min-height: 9 * $grid-unit;
-	border: none;
-	align-items: center;
-
 	&__checkbox {
 		@include skeleton();
+		flex-shrink: 0;
 	}
 
 	&__attribute-option {
@@ -38,14 +32,12 @@
 	&__edit-link {
 		@include skeleton();
 		width: $grid-unit-70;
-		height: $grid-unit-40 + $grid-unit-05;
 		flex-shrink: 0;
 	}
 
 	&__menu-toggle {
 		@include skeleton();
 		width: $grid-unit-40 + $grid-unit-05;
-		height: $grid-unit-40 + $grid-unit-05;
 		flex-shrink: 0;
 	}
 }
