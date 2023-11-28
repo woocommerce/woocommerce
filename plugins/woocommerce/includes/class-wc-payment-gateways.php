@@ -10,6 +10,7 @@
 
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -276,7 +277,10 @@ All at %6$s
 			return false;
 		}
 		// There was an old value, so this is an update.
-		if ( ! empty( $value ) && ! empty( $old_value ) && is_array( $value ) && is_array( $old_value ) && isset( $value['enabled'] ) && isset( $old_value['enabled'] ) && 'yes' === $value['enabled'] && 'yes' !== $old_value['enabled'] && isset( $value['title'] ) ) {
+		if (
+			ArrayUtil::get_value_or_default( $value, 'enabled' ) === 'yes' &&
+			ArrayUtil::get_value_or_default( $old_value, 'enabled' ) !== 'yes' &&
+			isset( $value['title'] ) ) {
 			return true;
 		}
 		return false;
