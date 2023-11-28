@@ -13,7 +13,7 @@ import { Button } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEntityProp } from '@wordpress/core-data';
-
+import { useInnerBlocksProps } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
@@ -57,8 +57,12 @@ export function DescriptionBlockEdit( {
 		'description'
 	);
 
+	const innerBlockProps = useInnerBlocksProps();
+
 	return (
 		<div { ...blockProps }>
+			<div { ...innerBlockProps } />
+
 			<Button
 				variant="secondary"
 				onClick={ () => {
