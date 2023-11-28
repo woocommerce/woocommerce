@@ -1,11 +1,12 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import { registerProductEditorBlockType } from '../../../utils';
+import { box } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
+import { registerProductEditorBlockType } from '../../../utils';
 import blockConfiguration from './block.json';
 import { SectionBlockEdit } from './edit';
 
@@ -16,6 +17,7 @@ export { metadata, name };
 export const settings = {
 	example: {},
 	edit: SectionBlockEdit,
+	icon: box,
 };
 
 export function init() {
