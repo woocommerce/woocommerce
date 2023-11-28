@@ -288,7 +288,10 @@ export function Edit( {
 								download.file.startsWith( 'blob' );
 
 							return (
-								<ListItem key={ download.file }>
+								<ListItem
+									key={ download.file }
+									className="wp-block-woocommerce-product-downloads-field__table-row"
+								>
 									<div className="wp-block-woocommerce-product-downloads-field__table-filename">
 										<span>{ download.name }</span>
 										{ download.name !== nameFromUrl && (

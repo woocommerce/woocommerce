@@ -30,6 +30,4 @@ On this page, we will share some guidelines to help you assess the impact degree
 
 ## My PR is High-Impact. What's next?
 
-If your PR is High-Impact, be sure to label it with `needs: analysis` so that it can get reviewed. If you don't have permission to add labels, please make sure that the **PR reviewers do it**.
-
-Once the PR labelled as `needs: analysis` is reviewed, it will get added the `impact: high` label if it qualifies for High-Impact and the WooCommerce Core team will keep special considerations for testing it.
+If your PR is High-Impact, be sure to label it with `impact: high` and the WooCommerce Core team will keep special considerations for testing it.
