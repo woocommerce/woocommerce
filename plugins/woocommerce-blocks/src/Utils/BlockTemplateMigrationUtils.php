@@ -69,7 +69,7 @@ class BlockTemplateMigrationUtils {
 		$default_template_content = '
 			<!-- wp:group {"layout":{"inherit":true,"type":"constrained"}} -->
 				<div class="wp-block-group"><!-- wp:woocommerce/page-content-wrapper {"page":"' . $template_slug . '"} -->
-				<!-- wp:post-title {"align":"wide"} /-->
+				<!-- wp:post-title {"align":"wide", "level":1} /-->
 				<!-- wp:post-content {"align":"wide"} /-->
 				<!-- /wp:woocommerce/page-content-wrapper --></div>
 			<!-- /wp:group -->
