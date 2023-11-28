@@ -205,6 +205,16 @@ class FeaturesController {
 					'disable_ui'         => false,
 					'is_legacy'          => true,
 				),
+				'my_subscriptions' => array(
+					'name'               => __( 'My Subscriptions', 'woocommerce' ),
+					'description'        => __( 'The new way to manage your subscriptions for Woo.com extensions',
+						'woocommerce'
+					),
+					'is_experimental'    => false,
+					'enabled_by_default' => false,
+					'disable_ui'         => false,
+					'is_legacy'          => true,
+				),
 			);
 
 			foreach ( $legacy_features as $slug => $definition ) {

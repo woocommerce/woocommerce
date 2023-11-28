@@ -9,6 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 /**
  * WC_Helper Class
  *
@@ -39,7 +41,7 @@ class WC_Helper_Admin {
 		$auth_user_data  = WC_Helper_Options::get( 'auth_user_data', array() );
 		$auth_user_email = isset( $auth_user_data['email'] ) ? $auth_user_data['email'] : '';
 
-		$settings['wccomHelper'] = array(
+		$wccom_helper_settings = array(
 			'isConnected' => WC_Helper::is_site_connected(),
 			'connectURL'  => self::get_connection_url(),
 			'userEmail'   => $auth_user_email,
@@ -47,6 +49,12 @@ class WC_Helper_Admin {
 			'storeCountry' => wc_get_base_location()['country'],
 			'inAppPurchaseURLParams' => WC_Admin_Addons::get_in_app_purchase_url_params(),
 		);
+
+		if ( ! FeaturesUtil::feature_is_enabled( 'my_subscriptions' ) ) {
+			$wccom_helper_settings['mySubscriptionsURL'] = admin_url( 'admin.php?page=wc-addons&section=helper' );
+		}
+
+		$settings['wccomHelper'] = $wccom_helper_settings;
 
 		return $settings;
 	}

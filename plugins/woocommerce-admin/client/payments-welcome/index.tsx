@@ -36,6 +36,9 @@ declare global {
 				currency?: {
 					symbol: string;
 				};
+				wccomHelper?: {
+					mySubscriptionsURL?: string;
+				}
 			};
 		};
 	}

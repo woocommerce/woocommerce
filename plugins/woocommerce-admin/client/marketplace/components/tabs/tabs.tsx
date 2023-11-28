@@ -52,6 +52,17 @@ const tabs: Tabs = {
 	},
 };
 
+// If new My Subscriptions feature isn't enabled, go to old My Subscriptions URL
+if ( window?.wcSettings?.admin?.wccomHelper?.mySubscriptionsURL ) {
+	tabs[ 'my-subscriptions' ].href = getNewPath(
+		{
+			page: 'wc-addons',
+			section: 'helper',
+		},
+		''
+	);
+}
+
 const setUrlTabParam = ( tabKey: string ) => {
 	navigateTo( {
 		url: getNewPath(
