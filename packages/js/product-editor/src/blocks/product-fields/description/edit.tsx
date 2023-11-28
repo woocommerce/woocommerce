@@ -10,7 +10,6 @@ import {
 } from '@wordpress/element';
 import {
 	BlockAttributes,
-	BlockInstance,
 	createBlock,
 	parse,
 	serialize,
@@ -27,30 +26,6 @@ import { useInnerBlocksProps } from '@wordpress/block-editor';
 import { ModalEditor } from '../../../components/modal-editor';
 import { ProductEditorBlockEditProps } from '../../../types';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
-
-/**
- * Internal dependencies
- */
-
-/**
- * By default the blocks variable always contains one paragraph
- * block with empty content, that causes the description to never
- * be empty. This function removes the default block to keep
- * the description empty.
- *
- * @param blocks The block list
- * @return Empty array if there is only one block with empty content
- * in the list. The same block list otherwise.
- */
-function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
-	if ( blocks.length === 1 ) {
-		const { content } = blocks[ 0 ].attributes;
-		if ( ! content || ! content.trim() ) {
-			return [];
-		}
-	}
-	return blocks;
-}
 
 export function DescriptionBlockEdit( {
 	attributes,
@@ -85,16 +60,23 @@ export function DescriptionBlockEdit( {
 	);
 
 	/*
-	 * Always ensure the description block is not empty (kinda hack)
-	 * It will create a paragraph block with a placeholder if the
-	 * description blocks are empty.
+	 * Watch the description blocks,
+	 * to update the description HTML when the blocks change,
+	 * but also ensuring to replace the description blocks
+	 * when the there aren't any blocks.
 	 */
 	useEffect( () => {
 		// When description blocks are not empty -> bail early
 		if ( descriptionBlocks?.length ) {
-			return;
+			const html = serialize( descriptionBlocks );
+			return setSerializeDescriptionBlocks( html );
 		}
 
+		/*
+		 * Is the user remove all the blocks,
+		 * ensure to replace them
+		 * with a default paragraph block.
+		 */
 		replaceInnerBlocks(
 			clientId,
 			[
@@ -107,7 +89,12 @@ export function DescriptionBlockEdit( {
 			],
 			false
 		);
-	}, [ clientId, descriptionBlocks, replaceInnerBlocks ] );
+	}, [
+		clientId,
+		descriptionBlocks,
+		replaceInnerBlocks,
+		setSerializeDescriptionBlocks,
+	] );
 
 	/*
 	 * Populate the description blocks
@@ -142,12 +129,8 @@ export function DescriptionBlockEdit( {
 				<ModalEditor
 					initialBlocks={ parsedBlocks }
 					onChange={ ( blocks ) => {
+						// Replace description blocks
 						replaceInnerBlocks( clientId, blocks, false );
-
-						const html = serialize(
-							clearDescriptionIfEmpty( blocks )
-						);
-						setSerializeDescriptionBlocks( html );
 					} }
 					onClose={ () => setIsModalOpen( false ) }
 					title={ __( 'Edit description', 'woocommerce' ) }
