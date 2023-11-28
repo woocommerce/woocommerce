@@ -200,6 +200,7 @@ class WC_Payment_Gateways {
 		 * @since 8.5.0
 		 */
 		$email_addresses   = apply_filters( 'wc_payment_gateway_enabled_notification_email_addresses', array(), $gateway );
+		$email_addresses[] = $admin_email;
 		$email_addresses   = array_unique(
 			array_filter(
 				$email_addresses,
@@ -208,7 +209,6 @@ class WC_Payment_Gateways {
 				}
 			)
 		);
-		$email_addresses[] = $admin_email;
 
 		$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 		$logger->info( sprintf( 'Payment gateway enabled: "%s"', $gateway_title ) );
