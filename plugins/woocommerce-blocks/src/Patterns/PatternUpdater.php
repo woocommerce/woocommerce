@@ -43,6 +43,10 @@ class PatternUpdater {
 	 * @return bool|WP_Error
 	 */
 	public function generate_content( $ai_connection, $token, $images, $business_description ) {
+		if ( empty( $images ) ) {
+			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woo-gutenberg-products-block' ) );
+		}
+
 		if ( is_wp_error( $images ) ) {
 			return $images;
 		}
