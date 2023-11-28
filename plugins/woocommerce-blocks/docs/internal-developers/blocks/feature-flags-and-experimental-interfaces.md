@@ -39,7 +39,6 @@ The majority of our feature flagging is blocks, this is a list of them:
 -   Product Gallery Next/Previous Buttons ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/src/BlockTypesController.php#L236) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/bin/webpack-entries.js#L60-L63)).
 -   Product Gallery Pager ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/src/BlockTypesController.php#L237) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/bin/webpack-entries.js#L64-L67)).
 -   Product Gallery Thumbnails ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/src/BlockTypesController.php#L238) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/bin/webpack-entries.js#L68-L71)).
--   ⚛️ Add to cart ([JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/dfd2902bd8a247b5d048577db6753c5e901fc60f/assets/js/atomic/blocks/product-elements/add-to-cart/index.ts#L26-L29)).
 
 ## Features behind flags
 

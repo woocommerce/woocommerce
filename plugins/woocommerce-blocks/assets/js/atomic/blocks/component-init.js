@@ -116,12 +116,3 @@ registerBlockComponent( {
 		)
 	),
 } );
-
-registerBlockComponent( {
-	blockName: 'woocommerce/product-add-to-cart',
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "product-add-to-cart" */ './product-elements/add-to-cart/frontend'
-		)
-	),
-} );
