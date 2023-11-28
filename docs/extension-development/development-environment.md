@@ -99,7 +99,7 @@ pnpm install && composer install
 ### Build WooCommerce
 
 ```sh
-pnpm run build
+pnpm build
 ```
 
 Running this script will compile the JavaScript and CSS that WooCommerce needs to operate. If you try to run WooCommerce on your server without generating the compiled assets, you may experience errors and other unwanted side-effects.

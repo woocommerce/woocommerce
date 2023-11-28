@@ -22,8 +22,8 @@
 	},
 	"main": "index.js",
 	"scripts": {
-		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
-		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint index.js --fix",
 		"lint:lang:js": "eslint index.js"
 	},

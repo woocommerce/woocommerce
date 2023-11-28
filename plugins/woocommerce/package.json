@@ -10,7 +10,7 @@
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
-		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
 		"build:project": "wireit",
 		"build:zip": "./bin/build-zip.sh",
 		"changelog": "composer exec -- changelogger",
@@ -27,12 +27,12 @@
 		"env:restart": "pnpm wp-env destroy && pnpm wp-env start --update",
 		"env:start": "pnpm wp-env start",
 		"env:stop": "pnpm wp-env stop",
-		"env:test": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='./tests/e2e-pw/bin/test-env-setup.sh' && pnpm run env:dev",
-		"env:test:cot": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='ENABLE_HPOS=1 ./tests/e2e-pw/bin/test-env-setup.sh' && ENABLE_HPOS=1 pnpm run env:dev",
+		"env:test": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='./tests/e2e-pw/bin/test-env-setup.sh' && pnpm env:dev",
+		"env:test:cot": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='ENABLE_HPOS=1 ./tests/e2e-pw/bin/test-env-setup.sh' && ENABLE_HPOS=1 pnpm env:dev",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "composer install",
-		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
-		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
 		"lint:lang:php": "composer run-script phpcs",
 		"lint:php": "composer run-script phpcs",
@@ -53,7 +53,7 @@
 		"test:unit": "pnpm test:php",
 		"test:unit:env": "pnpm test:php:env",
 		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
-		"watch:build": "pnpm run build:project --watch"
+		"watch:build": "pnpm build:project --watch"
 	},
 	"lint-staged": {
 		"*.php": [
@@ -66,7 +66,7 @@
 	},
 	"config": {
 		"wp_org_slug": "woocommerce",
-		"build_step": "pnpm run build:zip",
+		"build_step": "pnpm build:zip",
 		"ci": {
 			"name": "WP: latest",
 			"customCommands": {

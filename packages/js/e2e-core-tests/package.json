@@ -23,12 +23,12 @@
 		"CHANGELOG.md"
 	],
 	"scripts": {
-		"build": "./bin/build.sh && pnpm run clean && pnpm run compile",
+		"build": "./bin/build.sh && pnpm clean && pnpm compile",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
-		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
-		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix",
-		"prepack": "pnpm run build"
+		"lint": "eslint --ext=js,ts,tsx src",
+		"lint:fix": "eslint --ext=js,ts,tsx src --fix",
+		"prepack": "pnpm build"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

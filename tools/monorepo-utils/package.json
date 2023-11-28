@@ -10,7 +10,7 @@
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "tsc",
-		"postinstall": "pnpm run build",
+		"postinstall": "pnpm build",
 		"lint": "eslint . --ext .ts",
 		"start": "tsc --watch",
 		"test": "pnpm test:js",

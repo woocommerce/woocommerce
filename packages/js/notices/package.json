@@ -27,17 +27,17 @@
 	"types": "build-types",
 	"react-native": "src/index",
 	"scripts": {
-		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
-		"build:project": "pnpm --if-present run /^build:project:.*$/",
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
+		"build:project": "pnpm --if-present /^build:project:.*$/",
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "composer install && composer exec -- changelogger",
-		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
-		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
-		"lint:lang:js": "eslint --output-file eslint_report.json --format json src",
-		"prepack": "pnpm run build",
-		"watch:build": "pnpm run build:project --watch"
+		"lint:lang:js": "eslint src",
+		"prepack": "pnpm build",
+		"watch:build": "pnpm build:project --watch"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

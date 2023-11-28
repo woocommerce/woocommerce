@@ -16,7 +16,7 @@ Here is an example `analyzer` command, run from this directory:
 
 In this command we compare the `release/6.7` and `release/6.8` branches to find differences, and we're looking for changes introduced since `6.8.0` (using the `@since` tag).
 
-To find out more about the other arguments to the command you can run `pnpm run analyzer -- --help`
+To find out more about the other arguments to the command you can run `pnpm analyzer -- --help`
 
 2. `major-minor`. This simple CLI tool gives you the latest `.0` major/minor released version of a plugin's mainfile based on Woo release conventions.
 

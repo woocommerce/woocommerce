@@ -74,35 +74,35 @@ jobs:
               if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze milestone -o ${{ github.repository_owner }} -m ${{ steps.get-versions.outputs.monthlyMilestone }}
+              run: pnpm utils code-freeze milestone -o ${{ github.repository_owner }} -m ${{ steps.get-versions.outputs.monthlyMilestone }}
 
             - name: Create next monthly release branch
               id: branch
               if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze branch -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.monthlyBranch }}
+              run: pnpm utils code-freeze branch -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.monthlyBranch }}
 
             - name: Create next accelerated release branch
               id: branch-accel
               if: steps.get-versions.outputs.isTodayAcceleratedFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze branch -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.acceleratedBranch }}
+              run: pnpm utils code-freeze branch -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.acceleratedBranch }}
 
             - name: Bump versions for Beta.1 monthly release
               id: version-bump
               if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze version-bump -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.monthlyBranch }} -c ${{ steps.get-versions.outputs.monthlyVersion }}-beta.1
+              run: pnpm utils code-freeze version-bump -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.monthlyBranch }} -c ${{ steps.get-versions.outputs.monthlyVersion }}-beta.1
 
             - name: Bump versions for accelerated release
               id: version-bump-accel
               if: steps.get-versions.outputs.isTodayAcceleratedFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze version-bump -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.acceleratedBranch }} -c ${{ steps.get-versions.outputs.acceleratedVersion }} -af
+              run: pnpm utils code-freeze version-bump -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.acceleratedBranch }} -c ${{ steps.get-versions.outputs.acceleratedVersion }} -af
 
             - name: Prep accelerated release
               id: accel-release-prep
@@ -116,14 +116,14 @@ jobs:
               if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze version-bump ${{ steps.get-versions.outputs.monthlyMilestone }}-dev -o ${{ github.repository_owner }}
+              run: pnpm utils code-freeze version-bump ${{ steps.get-versions.outputs.monthlyMilestone }}-dev -o ${{ github.repository_owner }}
 
             - name: Generate changelog changes
               id: changelog
               if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze changelog -c -o ${{ github.repository_owner }} -v ${{ steps.get-versions.outputs.monthlyVersionXY }}
+              run: pnpm utils code-freeze changelog -c -o ${{ github.repository_owner }} -v ${{ steps.get-versions.outputs.monthlyVersionXY }}
               
 
     notify-slack:

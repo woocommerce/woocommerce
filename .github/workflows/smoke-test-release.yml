@@ -322,7 +322,7 @@ jobs:
 
             - name: Launch WP Env
               working-directory: plugins/woocommerce
-              run: pnpm run env:test
+              run: pnpm env:test
               env:
                   WP_ENV_CORE: WordPress/WordPress#${{ steps.get-wp-latest-1.outputs.version }}
 
@@ -467,7 +467,7 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                   WP_ENV_PHP_VERSION: ${{ matrix.php_version }}
-              run: pnpm run env:test
+              run: pnpm env:test
 
             - name: Verify PHP version
               working-directory: .github/workflows/scripts
@@ -630,7 +630,7 @@ jobs:
 
             - name: Launch WP Env
               working-directory: plugins/woocommerce
-              run: pnpm run env:test
+              run: pnpm env:test
 
             - name: Download release zip
               id: download-zip
