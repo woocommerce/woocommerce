@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.1.0) - 2023-11-28 
+
+-   Patch - Update internal dependency.
+-   Minor - Remove downloads list fixed height #41744 [#41744]
+-   Patch - [Product Block Editor]: remove unused block attributes [#41674]
+
 ## [1.0.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.0.0) - 2023-11-27 
 
 -   Patch - Add cursor: not-allowed; to the disabled Quick updates button [#40448]
