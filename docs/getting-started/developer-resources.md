@@ -1,4 +1,4 @@
-# WooCommerce Developer Resources
+# WooCommerce developer resources
 
 This guide is a great starting point for WooCommerce development. From setting up your first online store to diving deep into advanced features, you'll find what you need here. New to WooCommerce? Start with the basics. Experienced and looking for specific documentation or community discussions? We've got that covered too. Navigate through the sections below to find the resources tailored for you.
 

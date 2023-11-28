@@ -1,4 +1,4 @@
-# API Critical Flows
+# API critical flows
 
 In our documentation, we've pinpointed the essential user flows within the WooCommerce Core API. These flows serve as
 the compass for our testing initiatives, aiding us in concentrating our efforts where they matter most. They also

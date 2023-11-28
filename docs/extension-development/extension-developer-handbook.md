@@ -1,4 +1,4 @@
-# WooCommerce Extension Developer Handbook
+# WooCommerce extension developer handbook
 
 Want to create a plugin to extend WooCommerce? WooCommerce extensions are the same as regular WordPress plugins. For more information, visit [Writing a plugin](https://developer.wordpress.org/plugins/).
 
