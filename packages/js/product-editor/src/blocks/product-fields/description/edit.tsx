@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement, useEffect, useState } from '@wordpress/element';
+import {
+	createElement,
+	useEffect,
+	useMemo,
+	useState,
+} from '@wordpress/element';
 import {
 	BlockAttributes,
 	BlockInstance,
@@ -56,6 +61,14 @@ export function DescriptionBlockEdit( {
 	const [ serializeDescriptionBlocks, setSerializeDescriptionBlocks ] =
 		useEntityProp< string >( 'postType', 'product', 'description' );
 
+	const parsedBlocks = useMemo( () => {
+		try {
+			return parse( serializeDescriptionBlocks );
+		} catch ( e ) {
+			return [];
+		}
+	}, [ serializeDescriptionBlocks ] );
+
 	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
 
 	const innerBlockProps = useInnerBlocksProps();
@@ -96,6 +109,19 @@ export function DescriptionBlockEdit( {
 		);
 	}, [ clientId, descriptionBlocks, replaceInnerBlocks ] );
 
+	/*
+	 * Populate the description blocks
+	 * when the parsed blocks are not empty,
+	 * in the first render.
+	 */
+	useEffect( () => {
+		if ( ! parsedBlocks.length ) {
+			return;
+		}
+
+		replaceInnerBlocks( clientId, parsedBlocks, false );
+	}, [ clientId, replaceInnerBlocks ] ); // eslint-disable-line
+
 	return (
 		<div { ...blockProps }>
 			<div { ...innerBlockProps } />
@@ -111,9 +137,10 @@ export function DescriptionBlockEdit( {
 					? __( 'Edit description', 'woocommerce' )
 					: __( 'Add description', 'woocommerce' ) }
 			</Button>
+
 			{ isModalOpen && (
 				<ModalEditor
-					initialBlocks={ parse( serializeDescriptionBlocks ) }
+					initialBlocks={ parsedBlocks }
 					onChange={ ( blocks ) => {
 						replaceInnerBlocks( clientId, blocks, false );
 
