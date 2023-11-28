@@ -145,7 +145,9 @@ export const SidebarNavigationScreen = ( {
 			{ openWarningModal && (
 				<GoBackWarningModal
 					setOpenWarningModal={ setOpenWarningModal }
-					sendEvent={ sendEvent }
+					onExitClicked={ () => {
+						sendEvent( 'GO_BACK_TO_DESIGN_WITH_AI' );
+					} }
 				/>
 			) }
 		</>
