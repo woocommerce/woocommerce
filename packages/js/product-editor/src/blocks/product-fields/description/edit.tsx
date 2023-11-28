@@ -2,10 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement, useState } from '@wordpress/element';
+import { createElement, useEffect, useState } from '@wordpress/element';
 import {
 	BlockAttributes,
 	BlockInstance,
+	createBlock,
 	parse,
 	serialize,
 } from '@wordpress/blocks';
@@ -13,6 +14,7 @@ import { Button } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEntityProp } from '@wordpress/core-data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { useInnerBlocksProps } from '@wordpress/block-editor';
 /**
  * Internal dependencies
@@ -48,6 +50,7 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 
 export function DescriptionBlockEdit( {
 	attributes,
+	clientId,
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
@@ -57,7 +60,45 @@ export function DescriptionBlockEdit( {
 		'description'
 	);
 
+	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
+
 	const innerBlockProps = useInnerBlocksProps();
+
+	/*
+	 * Pick the description blocks,
+	 * based on the current block client ID.
+	 */
+	const descriptionBlocks = useSelect(
+		( select ) =>
+			select( 'core/block-editor' ).getBlock( clientId )?.innerBlocks ||
+			[],
+		[ clientId ]
+	);
+
+	/*
+	 * Always ensure the description block is not empty (kinda hack)
+	 * It will create a paragraph block with a placeholder if the
+	 * description blocks are empty.
+	 */
+	useEffect( () => {
+		// When description blocks are not empty -> bail early
+		if ( descriptionBlocks?.length ) {
+			return;
+		}
+
+		replaceInnerBlocks(
+			clientId,
+			[
+				createBlock( 'core/paragraph', {
+					placeholder: __(
+						'Add a description for this product.',
+						'woocommerce'
+					),
+				} ),
+			],
+			false
+		);
+	}, [ clientId, descriptionBlocks, replaceInnerBlocks ] );
 
 	return (
 		<div { ...blockProps }>
