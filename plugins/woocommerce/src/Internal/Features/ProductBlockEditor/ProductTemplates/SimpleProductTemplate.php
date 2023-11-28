@@ -226,8 +226,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'id'         => 'product-description-section',
 				'order'      => 20,
 				'attributes' => array(
-					'title'       => __( 'Description', 'woocommerce' ),
-					'description' => __( 'What makes this product unique? What are its most important features? Enrich the product page by adding rich content using blocks.', 'woocommerce' ),
+					'title'         => __( 'Description', 'woocommerce' ),
+					'description'   => __( 'What makes this product unique? What are its most important features? Enrich the product page by adding rich content using blocks.', 'woocommerce' ),
+					'_templateLock' => false,
 				),
 			)
 		);
@@ -236,6 +237,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'id'        => 'product-description',
 				'blockName' => 'woocommerce/product-description-field',
 				'order'     => 10,
+				'attributes' => array(
+					'lock' => array (
+						'move'   => false,
+						'remove' => false,
+					),
+				),
 			)
 		);
 
