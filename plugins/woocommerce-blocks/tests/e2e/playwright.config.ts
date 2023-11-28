@@ -7,6 +7,8 @@ import path from 'path';
 
 import { fileURLToPath } from 'url';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require( 'dotenv' ).config();
 interface ExtendedPlaywrightTestConfig extends PlaywrightTestConfig {
 	use: {
 		stateDir?: string;
