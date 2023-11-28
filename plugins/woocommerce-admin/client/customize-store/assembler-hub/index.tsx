@@ -153,7 +153,7 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 	// This is the best workaround I can think of for now.
 	// Set the aiOnline value from the parent window so that any child components
 	// can access it.
-	props.context.aiOnline = window.parent?.window.cys_aiOnline;
+	// props.context.aiOnline = window.parent?.window.cys_aiOnline;
 
 	return (
 		<CustomizeStoreContext.Provider value={ props }>
