@@ -105,7 +105,7 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                   ENABLE_HPOS: 0
-              run: pnpm env:test --filter=@woocommerce/plugin-woocommerce
+              run: pnpm --filter=@woocommerce/plugin-woocommerce env:test
 
             - name: Run Playwright API tests.
               id: run_playwright_api_tests
@@ -159,8 +159,8 @@ jobs:
               env:
                   ENABLE_HPOS: 0
               run: |
-                  pnpm env:dev --filter=@woocommerce/plugin-woocommerce
-                  pnpm env:performance-init --filter=@woocommerce/plugin-woocommerce
+                  pnpm --filter=@woocommerce/plugin-woocommerce env:dev
+                  pnpm --filter=@woocommerce/plugin-woocommerce env:performance-init
 
             - name: Install k6
               run: |

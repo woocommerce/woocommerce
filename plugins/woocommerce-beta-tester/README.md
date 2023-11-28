@@ -12,7 +12,7 @@ To get started, run the following commands:
 
 ```text
 pnpm --filter=@woocommerce/plugin-woocommerce-beta-tester install
-pnpm --filter=@woocommerce/plugin-woocommerce-beta-tester run start
+pnpm --filter=@woocommerce/plugin-woocommerce-beta-tester start
 ```
 
 See [wp-scripts](https://github.com/WordPress/gutenberg/tree/master/packages/scripts) for more usage information.
