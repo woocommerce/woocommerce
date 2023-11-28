@@ -13,19 +13,19 @@
 		"build"
 	],
 	"scripts": {
-		"build": "pnpm --if-present --filter=\"$npm_package_name...\" run build:project",
-		"build:project": "pnpm --if-present run /^build:project:.*$/",
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
+		"build:project": "pnpm --if-present /^build:project:.*$/",
 		"build:project:bundle": "wireit",
 		"build:project:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"changelog": "composer install && composer exec -- changelogger",
-		"lint": "pnpm --if-present run '/^lint:lang:.*$/'",
-		"lint:fix": "pnpm --if-present run '/^lint:fix:lang:.*$/'",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:css": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
-		"lint:fix:lang:js": "pnpm run lint:js --fix --ext=js,ts,tsx",
+		"lint:fix:lang:js": "pnpm lint:js --fix --ext=js,ts,tsx",
 		"lint:lang:css": "stylelint '**/*.scss'",
 		"lint:lang:js": "eslint ./client --ext=js,ts,tsx",
 		"test:js": "wireit",
-		"watch:build": "pnpm run build:project --watch"
+		"watch:build": "pnpm build:project --watch"
 	},
 	"lint-staged": {
 		"*.scss": [

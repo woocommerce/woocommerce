@@ -32,4 +32,4 @@ jobs:
               run: php tools/monorepo/check-changelogger-use.php --debug "$BASE" "$HEAD"
 
             - name: Run changelog validation
-              run: pnpm run -r changelog validate
+              run: pnpm -r changelog validate

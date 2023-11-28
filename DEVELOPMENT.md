@@ -16,7 +16,7 @@ Here are some examples of the ways you can use `pnpm` commands:
 
 ```bash
 # Lint and build all plugins, packages, and tools.
-pnpm lint && pnpm run build
+pnpm lint && pnpm build
 
 # Build WooCommerce Core and all of its dependencies
 pnpm --filter='@woocommerce/plugin-woocommerce' build
