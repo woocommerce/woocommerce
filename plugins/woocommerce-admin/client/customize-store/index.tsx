@@ -335,8 +335,21 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'assemblerHub',
+			initial: 'checkAiStatus',
 			states: {
+				checkAiStatus: {
+					invoke: {
+						src: 'fetchAiStatus',
+						onDone: {
+							actions: 'assignAiStatus',
+							target: 'assemblerHub',
+						},
+						onError: {
+							actions: 'assignAiOffline',
+							target: 'assemblerHub',
+						},
+					},
+				},
 				assemblerHub: {
 					entry: [
 						{ type: 'updateQueryStep', step: 'assembler-hub' },
