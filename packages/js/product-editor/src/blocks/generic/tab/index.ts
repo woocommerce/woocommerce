@@ -7,7 +7,7 @@ import { registerProductEditorBlockType } from '../../../utils';
  * Internal dependencies
  */
 import blockConfiguration from './block.json';
-import { BlockTabEdit } from './edit';
+import { TabBlockEdit } from './edit';
 
 const { name, ...metadata } = blockConfiguration;
 
@@ -15,7 +15,7 @@ export { metadata, name };
 
 export const settings = {
 	example: {},
-	edit: BlockTabEdit,
+	edit: TabBlockEdit,
 };
 
 export function init() {
