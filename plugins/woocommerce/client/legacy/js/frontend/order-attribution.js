@@ -58,7 +58,7 @@
 
 			if ( sbjs.get ) {
 				for( const [ key, value ] of Object.entries( wc_order_attribution.sbjsDataToSchema( sbjs.get ) ) ) {
-					$( `input[name="${prefix}${key}"]` ).value = value;
+					$( `input[name="${params.prefix}${key}"]` ).value = value;
 				}
 			}
 		};
