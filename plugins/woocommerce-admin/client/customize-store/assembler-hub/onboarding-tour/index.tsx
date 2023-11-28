@@ -30,6 +30,8 @@ export const OnboardingTour = ( {
 		useState< TourKitTypes.WooConfig[ 'placement' ] >( 'left' );
 
 	const { context } = useContext( CustomizeStoreContext );
+	console.log( context );
+
 	const aiOnline = context.aiOnline;
 
 	if ( showWelcomeTour ) {

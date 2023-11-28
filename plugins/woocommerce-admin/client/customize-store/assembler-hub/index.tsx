@@ -147,7 +147,6 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 		isInitializedRef.current = true;
 	}
 
-	// @ts-expect-error temp fix
 	// Since we load the assember hub in an iframe, we don't have access to
 	// xstate's context values.
 	// This is the best workaround I can think of for now.
