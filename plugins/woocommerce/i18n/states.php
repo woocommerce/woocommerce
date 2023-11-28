@@ -785,7 +785,7 @@ return array(
 		'AR' => __( 'Arunachal Pradesh', 'woocommerce' ),
 		'AS' => __( 'Assam', 'woocommerce' ),
 		'BR' => __( 'Bihar', 'woocommerce' ),
-		'CT' => __( 'Chhattisgarh', 'woocommerce' ),
+		'CG' => __( 'Chhattisgarh', 'woocommerce' ),
 		'GA' => __( 'Goa', 'woocommerce' ),
 		'GJ' => __( 'Gujarat', 'woocommerce' ),
 		'HR' => __( 'Haryana', 'woocommerce' ),
