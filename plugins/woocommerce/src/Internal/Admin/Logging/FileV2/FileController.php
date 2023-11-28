@@ -411,6 +411,7 @@ class FileController {
 					}
 
 					if ( count( $matched_lines ) > self::SEARCH_MAX_RESULTS ) {
+						$file->close_stream();
 						break 2;
 					}
 
