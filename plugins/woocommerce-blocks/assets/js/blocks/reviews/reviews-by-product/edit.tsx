@@ -38,26 +38,30 @@ const ReviewsByProductEditor = ( {
 		return (
 			<SearchListItem
 				{ ...args }
+				item={ {
+					...item,
+					count: item.details.review_count,
+				} }
 				countLabel={ sprintf(
 					/* translators: %d is the review count. */
 					_n(
 						'%d review',
 						'%d reviews',
-						item.review_count,
+						item.details.review_count,
 						'woo-gutenberg-products-block'
 					),
-					item.review_count
+					item.details.review_count
 				) }
 				aria-label={ sprintf(
 					/* translators: %1$s is the item name, and %2$d is the number of reviews for the item. */
 					_n(
 						'%1$s, has %2$d review',
 						'%1$s, has %2$d reviews',
-						item.review_count,
+						item.details.review_count,
 						'woo-gutenberg-products-block'
 					),
 					item.name,
-					item.review_count
+					item.details.review_count
 				) }
 			/>
 		);
