@@ -29,28 +29,28 @@ To get started, we need to prepare a child theme.
 First, we need to create a new stylesheet for our child theme. Create a new file called `style.css` and put this code in it:
 
 ```css
-/\*
+/*
 Theme Name: Child Theme
 Version: 1.0
 Description: Child theme for Woo.
 Author: Woo
 Author URI: http://woocommerce.com
-Template: themedir \*/
+Template: themedir */
 ```
 
 Next, we need to change the **Template** field to point to our installed WooTheme. In this example, we’ll use the Storefront theme, which is installed under `wp-content/themes/storefront/`. The result will look like this:
 
 ```css
-/\*
+/*
 Theme Name: Storefront Child
 Version: 1.0
 Description: Child theme for Storefront.
 Author: Woo
 Author URI: http://woocommerce.com
 Template: storefront
-\*/
+*/
 
-/\* --------------- Theme customization starts here ----------------- \*/
+/* --------------- Theme customization starts here ----------------- */
 ```
 
 **Note:** With Storefront, you do not need to enqueue any of the parent theme style files with PHP from the theme’s `functions.php` file or `@import` these into the child themes `style.css` file as the main parent Storefront theme does this for you.
