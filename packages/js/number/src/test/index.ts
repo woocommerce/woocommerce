@@ -47,6 +47,36 @@ describe( 'numberFormat', () => {
 		};
 		expect( numberFormat( config, '12345.6789' ) ).toBe( '12.345,679' );
 	} );
+
+});
+
+describe( 'parseNumber', () => {
+	it( 'should remove thousand seperator before parsing number', () => {
+		const config = {
+			decimalSeparator: ',',
+			thousandSeparator: '.',
+			precision: 3,
+		};
+		expect( parseNumber( config, '12.345,679' ) ).toBe( '12345.679' );
+	} );
+
+	it( 'supports empty string as the thousandSeperator', () => {
+		const config = {
+			decimalSeparator: ',',
+			thousandSeparator: '',
+			precision: 3,
+		};
+		expect( parseNumber( config, '12345,679' ) ).toBe( '12345.679' );
+	} );
+
+	it( 'supports empty string as the decimalSeperator', () => {
+		const config = {
+			decimalSeparator: '',
+			thousandSeparator: ',',
+			precision: 2,
+		};
+		expect( parseNumber( config, '1,2345,679' ) ).toBe( '12345679.00' );
+	} );
 } );
 
 describe( 'parseNumber', () => {
