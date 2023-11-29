@@ -9,16 +9,14 @@ Sometimes, you might need to customize your theme or WooCommerce beyond what is 
 
 Before we start it’s important that you understand what a child theme is. In short, a child theme is a layer that you put on top of the parent theme to make alterations without having to develop a new theme from scratch. There are two major reasons to use child themes:
 
-- Theme developers can use child themes as a way to offer variations on a theme, similar to what we do with the [Storefront child themes](https://woocommerce.com/product-category/themes/storefront-child-theme-themes/)
+- Theme developers can use child themes as a way to offer variations on a theme, similar to what we do with the [Storefront child themes](https://woo.com/products/storefront/)
 - Developers can use child themes to host customizations of the parent theme or any plugin on the site since the child theme will get priority over the plugins and parent theme
 
-Read [this guide from the WordPress Codex](https://codex.wordpress.org/Child_Themes).
-
-[Download a sample Storefront child theme to get started](https://github.com/stuartduff/storefront-child-theme) if you want to customize a website using Storefront as the theme.
+Read [this guide from the WordPress Codex](https://developer.wordpress.org/themes/advanced-topics/child-themes/).
 
 ## Make a backup
 
-Before customizing a website, you should always ensure that you have a backup of your site in case anything goes wrong. More info at: [Backing up WordPress content](https://woocommerce.com/document/backup-wordpress-content/).
+Before customizing a website, you should always ensure that you have a backup of your site in case anything goes wrong. More info at: [Backing up WordPress content](https://woo.com/document/backup-wordpress-content/).
 
 ## Getting started
 
@@ -83,14 +81,13 @@ Let’s do an example together where we change the color of the site title. Add 
 
 After saving the file and refreshing our browser, you will now see that the color of the site title has changed!
 
-
 ### Template changes
 
-**Note:** This doesn’t apply to [Storefront child themes](https://woocommerce.com/product-category/themes/storefront-child-theme-themes/). Any customization to a Storefront child themes files will be lost when updating. Instead of customizing the Storefront child themes files directly, we recommended that you add code snippets to a customization plugin. We’ve created one to do just this. Download [Theme Customizations](https://github.com/woocommerce/theme-customisations) for free.
+**Note:** This doesn’t apply to Storefront child themes. Any customizations to a Storefront child theme’s files will be lost when updating. Instead of customizing the Storefront child theme’s files directly, we recommended that you add code snippets to a customization plugin. We’ve created one to do just this. Download [Theme Customizations](https://github.com/woocommerce/theme-customisations) for free.
 
 But wait, there’s more! You can do the same with the template files (`*.php`) in the theme folder. For example if w, wanted to modify some code in the header, we need to copy header.php from our parent theme folder `wp-content/themes/storefront/header.php` to our child theme folder `wp-content/themes/storefront-child/header.php`. Once we have copied it to our child theme, we edit `header.php` and customize any code we want. The `header.php` in the child theme will be used instead of the parent theme’s `header.php`.
 
-The same goes for WooCommerce templates. If you create a new folder in your child theme called “WooCommerce”, you can make changes to the WooCommerce templates there to make it more in line with the overall design of your website. More on WooCommerce’s template structure [can be found here](https://woocommerce.com/document/template-structure/).
+The same goes for WooCommerce templates. If you create a new folder in your child theme called “WooCommerce”, you can make changes to the WooCommerce templates there to make it more in line with the overall design of your website. More on WooCommerce’s template structure [can be found here](https://woo.com/document/template-structure/).
 
 ### Functionality changes
 
@@ -112,11 +109,11 @@ If the parent theme function is **pluggable**, you can copy it to the child them
 
 WordPress has a few things that it handles differently in child themes. If you have a template file in your child theme, you have to modify how WordPress includes files. `get_template_directory()` will reference the parent theme. To make it use the file in the child theme, you need to change use `get_stylesheet_directory();`.
 
-[More info on this from the WP Codex](https://codex.wordpress.org/Child_Themes#Referencing_.2F_Including_Files_in_Your_Child_Theme)
+[More info on this from the WP Codex](https://developer.wordpress.org/themes/advanced-topics/child-themes/#referencing-or-including-other-files)
 
 ## Child theme support
 
-Although we do offer basic child theme support that can easily be answered, it still falls under theme customization, so please refer to our [support policy](https://woocommerce.com/support-policy/) to see the extent of support we give. We highly advise anybody confused with child themes to use the [WordPress forums](https://wordpress.org/support/) for help.
+Although we do offer basic child theme support that can easily be answered, it still falls under theme customization, so please refer to our [support policy](https://woo.com/support-policy/) to see the extent of support we give. We highly advise anybody confused with child themes to use the [WordPress forums](https://wordpress.org/support/forums/) for help.
 
 ## Sample child theme
 
