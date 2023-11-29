@@ -47,7 +47,7 @@ class Dropdown {
 									tabindex="-1" 
 									data-wc-on--click="actions.toggleIsOpen" 
 							>
-							<input id="components-form-token-input-1" type="text" autocomplete="off" data-wc-bind--placeholder="selectors.placeholderText" class="components-form-token-field__input" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-describedby="components-form-token-suggestions-howto-1" value="">
+							<input id="components-form-token-input-1" type="text" autocomplete="off" data-wc-bind--placeholder="state.placeholderText" class="components-form-token-field__input" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-describedby="components-form-token-suggestions-howto-1" value="">
 							<ul hidden data-wc-bind--hidden="!context.isOpen" class="components-form-token-field__suggestions-list" id="components-form-token-suggestions-1" role="listbox">
 								<?php
 								foreach ( $items as $item ) :
@@ -59,12 +59,12 @@ class Dropdown {
 										role="option" 
 										data-wc-on--click--select-item="actions.selectDropdownItem" 
 										data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>" 
-										data-wc-class--is-selected="selectors.isSelected" 
+										data-wc-class--is-selected="state.isSelected" 
 										data-wc-on--mouseover="actions.addHoverClass" 
 										data-wc-on--mouseout="actions.removeHoverClass" 
 										data-wc-context='<?php echo wp_json_encode( $context ); ?>' 
 										class="components-form-token-field__suggestion" 
-										data-wc-bind--aria-selected="selectors.isSelected"
+										data-wc-bind--aria-selected="state.isSelected"
 									>
 									<?php echo esc_html( $item['label'] ); ?>
 									</li>
