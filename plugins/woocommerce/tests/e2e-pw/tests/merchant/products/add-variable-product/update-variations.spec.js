@@ -138,14 +138,12 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole('link', { name: 'Variations' }).click();
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
 			await page
-				.locator(
-					'#variable_product_options .toolbar-top a.expand_all'
-				)
+				.getByRole('link', { name: 'Expand' }).first()
 				.click();
 		} );
 
@@ -231,14 +229,12 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole('link', { name: 'Variations' }).click();
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
 			await page
-				.locator(
-					'#variable_product_options .toolbar-top a.expand_all'
-				)
+				.getByRole('link', { name: 'Expand' }).first()
 				.click();
 		} );
 
@@ -344,7 +340,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole( 'link', { name: 'Variations' } ).click();
 		} );
 
 		await test.step(
@@ -358,9 +354,7 @@ test.describe( 'Update variations', () => {
 
 		await test.step( 'Expand all variations.', async () => {
 			await page
-				.locator(
-					'#variable_product_options .toolbar-top a.expand_all'
-				)
+				.getByRole('link', { name: 'Expand' }).first()
 				.click();
 		} );
 
@@ -387,7 +381,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole( 'link', { name: 'Variations' } ).click();
 		} );
 
 		await test.step(
@@ -418,14 +412,12 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole( 'link', { name: 'Variations' } ).click();
 		} );
 
 		await test.step( 'Expand all variations', async () => {
 			await page
-				.locator(
-					'#variable_product_options .toolbar-top a.expand_all'
-				)
+				.getByRole('link', { name: 'Expand' }).first()
 				.click();
 		} );
 
@@ -485,14 +477,12 @@ test.describe( 'Update variations', () => {
 		);
 
 		await test.step( 'Click "Save changes"', async () => {
-			await page.locator( 'button.save-variation-changes' ).click();
+			await page.getByRole('button', { name: 'Save changes' }).click();
 		} );
 
 		await test.step( 'Expand all variations', async () => {
 			await page
-				.locator(
-					'#variable_product_options .toolbar-top a.expand_all'
-				)
+				.getByRole('link', { name: 'Expand' }).first()
 				.click();
 		} );
 
@@ -538,7 +528,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole( 'link', { name: 'Variations' } ).click();
 		} );
 
 		await test.step( 'Wait for block overlay to disappear.', async () => {
@@ -602,7 +592,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole( 'link', { name: 'Variations' } ).click();
 		} );
 
 		await test.step( 'Click "Remove" on a variation', async () => {

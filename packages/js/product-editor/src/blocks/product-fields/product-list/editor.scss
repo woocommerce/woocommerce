@@ -1,0 +1,117 @@
+.wp-block-woocommerce-product-list-field {
+	display: flex;
+	flex-direction: column;
+	gap: $grid-unit-30;
+
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: end;
+	}
+
+	&__empty-state {
+		min-height: 28 * $grid-unit;
+		border-radius: 2px;
+		border: 1px dashed $gray-400;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: $grid-unit-60;
+		gap: $grid-unit-30;
+
+		&-illustration {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: $grid-unit-40;
+			max-width: 100%;
+		}
+
+		&-tip {
+			text-align: center;
+			margin: 0;
+			color: $gray-700;
+		}
+	}
+
+	&__table {
+		&-header {
+			color: $gray-700;
+			font-size: 11px;
+			text-transform: uppercase;
+			border-bottom: 1px solid $gray-200;
+		}
+
+		&-row {
+			display: grid;
+			grid-template-columns: repeat(5, 1fr);
+			gap: $grid-unit-30;
+			padding: $grid-unit-20 0;
+
+			&:not(:last-child) {
+				border-bottom: 1px solid $gray-200;
+			}
+		}
+
+		&-header-column,
+		&-cell {
+			display: flex;
+			align-items: center;
+
+			&:first-child {
+				grid-column: 1 / span 2;
+				gap: $grid-unit + $grid-unit-05;
+			}
+
+			&:nth-child(2),
+			&:last-child {
+				justify-content: end;
+				gap: $grid-unit;
+			}
+		}
+	}
+
+	&__product-image {
+		width: $grid-unit-40;
+		height: $grid-unit-40;
+		border-radius: $grid-unit-05;
+		background-color: $gray-200;
+		background-position: center center;
+		background-repeat: no-repeat;
+		background-size: cover;
+		flex-shrink: 0;
+	}
+
+	&__product-info {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		flex: 1 1 auto;
+		overflow: hidden;
+	}
+
+	&__product-name {
+		color: $gray-900;
+
+		.is-link {
+			display: block;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	&__product-sku {
+		color: $gray-700;
+		font-size: 11px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__price--on-sale {
+		color: $gray-600;
+		text-decoration: line-through;
+	}
+}

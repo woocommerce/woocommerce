@@ -37,7 +37,6 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => array(
 					self::get_plugin( 'mailpoet' ),
-					self::get_plugin( 'codistoconnect' ),
 					self::get_plugin( 'google-listings-and-ads' ),
 					self::get_plugin( 'pinterest-for-woocommerce' ),
 					self::get_plugin( 'facebook-for-woocommerce' ),
@@ -60,7 +59,6 @@ class DefaultFreeExtensions {
 					self::get_plugin( 'tiktok-for-business' ),
 					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
 					self::get_plugin( 'facebook-for-woocommerce:alt' ),
-					self::get_plugin( 'codistoconnect:alt' ),
 				),
 			),
 			array(
@@ -175,25 +173,6 @@ class DefaultFreeExtensions {
 				'image_url'      => plugins_url( '/assets/images/onboarding/klaviyo.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=klaviyo_settings',
 				'is_built_by_wc' => false,
-			),
-			'codistoconnect'                => array(
-				'name'           => __( 'Codisto for WooCommerce', 'woocommerce' ),
-				'description'    => sprintf(
-					/* translators: 1: opening product link tag. 2: closing link tag */
-					__( 'Sell on Amazon, eBay, Walmart and more directly from WooCommerce with  %1$sCodisto%2$s', 'woocommerce' ),
-					'<a href="https://woo.com/pt-br/products/amazon-ebay-integration/?quid=c247a85321c9e93e7c3c6f1eb072e6e5" target="_blank">',
-					'</a>'
-				),
-				'image_url'      => plugins_url( '/assets/images/onboarding/codistoconnect.png', WC_PLUGIN_FILE ),
-				'manage_url'     => 'admin.php?page=codisto-settings',
-				'is_built_by_wc' => true,
-			),
-			'codistoconnect:alt'            => array(
-				'name'           => __( 'Codisto for WooCommerce', 'woocommerce' ),
-				'description'    => __( 'Sell on Amazon, eBay, Walmart and more directly from WooCommerce.', 'woocommerce' ),
-				'image_url'      => plugins_url( '/assets/images/onboarding/codistoconnect.png', WC_PLUGIN_FILE ),
-				'manage_url'     => 'admin.php?page=codisto-settings',
-				'is_built_by_wc' => true,
 			),
 			'woocommerce-payments'          => array(
 				'name'           => __( 'WooPayments', 'woocommerce' ),

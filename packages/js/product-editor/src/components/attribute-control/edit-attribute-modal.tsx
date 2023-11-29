@@ -232,7 +232,10 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 									checked={ editableAttribute?.isDefault }
 									label={ isDefaultLabel }
 								/>
-								<Tooltip text={ isDefaultTooltip } />
+								<Tooltip
+									className="woocommerce-edit-attribute-modal__tooltip-set-default-value"
+									text={ isDefaultTooltip }
+								/>
 							</div>
 						) }
 
@@ -247,7 +250,10 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 								checked={ editableAttribute?.visible }
 								label={ visibleLabel }
 							/>
-							<Tooltip text={ visibleTooltip } />
+							<Tooltip
+								className="woocommerce-edit-attribute-modal__tooltip-show-in-product-details"
+								text={ visibleTooltip }
+							/>
 						</div>
 						{ attribute.id !== 0 && (
 							/* Only supported for global attributes, and disabled for now as the 'Filter by Attributes' block does not support this yet. */
@@ -260,7 +266,10 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 									checked={ true }
 									label={ useAsFilterLabel }
 								/>
-								<Tooltip text={ useAsFilterTooltip } />
+								<Tooltip
+									className="woocommerce-edit-attribute-modal__tooltip-use-as-filter"
+									text={ useAsFilterTooltip }
+								/>
 							</div>
 						) }
 					</div>

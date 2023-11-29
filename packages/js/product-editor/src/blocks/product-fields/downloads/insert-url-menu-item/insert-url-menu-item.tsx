@@ -78,7 +78,7 @@ export function InsertUrlMenuItem( {
 					iconPosition="left"
 					onClick={ onToggle }
 					info={ __(
-						'Import a file hosted elsewhere',
+						'Link to a file hosted elsewhere',
 						'woocommerce'
 					) }
 				>

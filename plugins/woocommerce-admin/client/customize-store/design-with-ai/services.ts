@@ -17,7 +17,6 @@ import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/compo
  * Internal dependencies
  */
 import { designWithAiStateMachineContext } from './types';
-import { lookAndTone } from './prompts';
 import { FONT_PAIRINGS } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
 import {
@@ -120,20 +119,6 @@ export const getCompletion = async < ValidResponseObject >( {
 		} );
 		throw error;
 	}
-};
-
-export const getLookAndTone = async (
-	context: designWithAiStateMachineContext
-) => {
-	return getCompletion( {
-		...lookAndTone,
-		prompt: lookAndTone.prompt(
-			context.businessInfoDescription.descriptionText
-		),
-		retryCount: 0,
-		// If the request takes longer than 5 seconds, abort it. We don't want to wait too long for the AI to respond. We will use default values instead.
-		abortSignal: AbortSignal.timeout( 5000 ),
-	} );
 };
 
 export const queryAiEndpoint = createMachine(
@@ -284,6 +269,14 @@ export const updateStorePatterns = async (
 			...productContents,
 			apiFetch( {
 				path: '/wc/private/ai/business-description',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+				},
+			} ),
+			apiFetch( {
+				path: '/wc/private/ai/store-title',
 				method: 'POST',
 				data: {
 					business_description:
@@ -481,7 +474,6 @@ const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
 };
 
 export const services = {
-	getLookAndTone,
 	browserPopstateHandler,
 	queryAiEndpoint,
 	assembleSite,
