@@ -35,12 +35,12 @@ class WC_Privacy_Background_Process extends WC_Background_Process {
 	 * @return bool
 	 */
 	protected function task( $item ) {
-		$process_count = 0;
-		$process_limit = 20;
-
 		if ( ! $item || empty( $item['task'] ) ) {
 			return false;
 		}
+		
+		$process_count = 0;
+		$process_limit = 20;
 
 		switch ( $item['task'] ) {
 			case 'trash_pending_orders':
