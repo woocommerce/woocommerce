@@ -1,5 +1,5 @@
 ---
-post_title: WC CLI: commands
+post_title: WC CLI - commands
 ---
 
 ## wc shop_coupon
