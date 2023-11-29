@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
 use Automattic\Jetpack\Constants;
+use WC_Cache_Helper;
 use WP_Error;
 
 /**
@@ -22,6 +23,44 @@ class FileController {
 		'per_page' => 20,
 		'source'   => '',
 	);
+
+	/**
+	 * Default values for arguments for the search_within_files method.
+	 *
+	 * @const array
+	 */
+	public const DEFAULTS_SEARCH_WITHIN_FILES = array(
+		'offset'   => 0,
+		'per_page' => 50,
+	);
+
+	/**
+	 * The maximum number of files that can be searched at one time.
+	 *
+	 * @const int
+	 */
+	public const SEARCH_MAX_FILES = 100;
+
+	/**
+	 * The maximum number of search results that can be returned at one time.
+	 *
+	 * @const int
+	 */
+	public const SEARCH_MAX_RESULTS = 200;
+
+	/**
+	 * The cache group name to use for caching operations.
+	 *
+	 * @const string
+	 */
+	private const CACHE_GROUP = 'log-files';
+
+	/**
+	 * A cache key for storing and retrieving the results of the last logs search.
+	 *
+	 * @const string
+	 */
+	private const SEARCH_CACHE_KEY = 'logs_previous_search';
 
 	/**
 	 * The absolute path to the log directory.
@@ -299,7 +338,112 @@ class FileController {
 			}
 		}
 
+		if ( $deleted > 0 ) {
+			$this->invalidate_cache();
+		}
+
 		return $deleted;
+	}
+
+	/**
+	 * Search within a set of log files for a particular string.
+	 *
+	 * @param string $search     The string to search for.
+	 * @param array  $args       Optional. Arguments for pagination of search results.
+	 * @param array  $file_args  Optional. Arguments to filter and sort the files that are returned. See get_files().
+	 * @param bool   $count_only Optional. True to return a total count of the matches.
+	 *
+	 * @return array|int|WP_Error When matches are found, each array item is an associative array that includes the
+	 *                            file ID, line number, and the matched string with HTML markup around the matched parts.
+	 */
+	public function search_within_files( string $search, array $args = array(), array $file_args = array(), bool $count_only = false ) {
+		if ( '' === $search ) {
+			return array();
+		}
+
+		$search = esc_html( $search );
+
+		$args = wp_parse_args( $args, self::DEFAULTS_SEARCH_WITHIN_FILES );
+
+		$file_args = array_merge(
+			$file_args,
+			array(
+				'offset'   => 0,
+				'per_page' => self::SEARCH_MAX_FILES,
+			)
+		);
+
+		$cache_key = WC_Cache_Helper::get_prefixed_key( self::SEARCH_CACHE_KEY, self::CACHE_GROUP );
+		$query     = wp_json_encode( array( $search, $args, $file_args ) );
+		$cache     = wp_cache_get( $cache_key );
+		$is_cached = isset( $cache['query'], $cache['results'] ) && $query === $cache['query'];
+
+		if ( true === $is_cached ) {
+			$matched_lines = $cache['results'];
+		} else {
+			$files = $this->get_files( $file_args );
+			if ( is_wp_error( $files ) ) {
+				return $files;
+			}
+
+			// Max string size * SEARCH_MAX_RESULTS = ~1MB largest possible cache entry.
+			$max_string_size = 5 * KB_IN_BYTES;
+
+			$matched_lines = array();
+
+			foreach ( $files as $file ) {
+				$stream      = $file->get_stream();
+				$line_number = 1;
+
+				while ( ! feof( $stream ) ) {
+					$line = fgets( $stream, $max_string_size );
+					if ( ! is_string( $line ) ) {
+						continue;
+					}
+
+					$sanitized_line = esc_html( trim( $line ) );
+					if ( false !== stripos( $sanitized_line, $search ) ) {
+						$matched_lines[] = array(
+							'file_id'     => $file->get_file_id(),
+							'line_number' => $line_number,
+							'line'        => $sanitized_line,
+						);
+					}
+
+					if ( count( $matched_lines ) >= self::SEARCH_MAX_RESULTS ) {
+						$file->close_stream();
+						break 2;
+					}
+
+					if ( false !== strstr( $line, PHP_EOL ) ) {
+						$line_number ++;
+					}
+				}
+
+				$file->close_stream();
+			}
+
+			$to_cache = array(
+				'query'   => $query,
+				'results' => $matched_lines,
+			);
+			wp_cache_set( $cache_key, $to_cache, self::CACHE_GROUP, DAY_IN_SECONDS );
+		}
+
+		if ( true === $count_only ) {
+			return count( $matched_lines );
+		}
+
+		return array_slice( $matched_lines, $args['offset'], $args['per_page'] );
+	}
+
+	/**
+	 * Invalidate the cache group related to log file data.
+	 *
+	 * @return bool True on successfully invalidating the cache.
+	 */
+	public function invalidate_cache(): bool {
+		return WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
 	}
 
 	/**
