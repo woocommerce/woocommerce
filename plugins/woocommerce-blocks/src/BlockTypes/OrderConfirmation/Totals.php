@@ -46,9 +46,9 @@ class Totals extends AbstractOrderConfirmationBlock {
 				</tbody>
 				<tfoot>
 					' . $this->render_order_details_table_totals( $order ) . '
-					' . $this->render_order_details_table_customer_note( $order ) . '
-				</tfoot>
-			</table>
+					</tfoot>
+					</table>
+			' . $this->render_order_details_customer_note( $order ) . '
 			' . $this->get_hook_content( 'woocommerce_order_details_after_order_table', [ $order ] ) . '
 			' . $this->get_hook_content( 'woocommerce_after_order_details', [ $order ] ) . '
 		';
@@ -99,10 +99,10 @@ class Totals extends AbstractOrderConfirmationBlock {
 	protected function render_order_details_table_items( $order ) {
 		$return      = '';
 		$order_items = array_filter(
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			$order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) ),
 			function( $item ) {
-				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+                // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 				return apply_filters( 'woocommerce_order_item_visible', true, $item );
 			}
 		);
@@ -216,14 +216,16 @@ class Totals extends AbstractOrderConfirmationBlock {
 	 * @param \WC_Order $order Order object.
 	 * @return string
 	 */
-	protected function render_order_details_table_customer_note( $order ) {
+	protected function render_order_details_customer_note( $order ) {
 		if ( ! $order->get_customer_note() ) {
 			return '';
 		}
 
-		return '<tr>
-			<th class="wc-block-order-confirmation-totals__label" scope="row">' . esc_html__( 'Note:', 'woo-gutenberg-products-block' ) . '</th>
-			<td class="wc-block-order-confirmation-totals__note">' . wp_kses_post( nl2br( wptexturize( $order->get_customer_note() ) ) ) . '</td>
-		</tr>';
+		return '<div class="wc-block-order-confirmation-order-note">' .
+					'<p class="wc-block-order-confirmation-order-note__label">' .
+						esc_html__( 'Note:', 'woo-gutenberg-products-block' ) .
+					'</p>' .
+					'<p>' . wp_kses_post( nl2br( wptexturize( $order->get_customer_note() ) ) ) . '</p>' .
+				'</div>';
 	}
 }
