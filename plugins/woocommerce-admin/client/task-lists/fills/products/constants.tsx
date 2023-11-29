@@ -89,4 +89,4 @@ export const onboardingProductTypesToSurfaced: Readonly<
 export const defaultSurfacedProductTypes =
 	onboardingProductTypesToSurfaced.physical;
 
-export const supportedOnboardingProductTypes = [ 'physical','downloads' ];
+export const supportedOnboardingProductTypes = [ 'physical', 'downloads' ];
