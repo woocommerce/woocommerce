@@ -153,7 +153,7 @@ class File {
 	}
 
 	/**
-	 * Open a read-only stream file this file.
+	 * Open a read-only stream for this file.
 	 *
 	 * @return resource|false
 	 */
@@ -164,6 +164,19 @@ class File {
 		}
 
 		return $this->stream;
+	}
+
+	/**
+	 * Close the stream for this file.
+	 *
+	 * The stream will also close automatically when the class instance destructs, but this can be useful for
+	 * avoiding having a large number of streams open simultaneously.
+	 *
+	 * @return bool
+	 */
+	public function close_stream(): bool {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose -- No suitable alternative.
+		return fclose( $this->stream );
 	}
 
 	/**
