@@ -47,8 +47,7 @@ describe( 'numberFormat', () => {
 		};
 		expect( numberFormat( config, '12345.6789' ) ).toBe( '12.345,679' );
 	} );
-
-});
+} );
 
 describe( 'parseNumber', () => {
 	it( 'should remove thousand seperator before parsing number', () => {
