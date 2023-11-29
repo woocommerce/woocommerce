@@ -43,7 +43,6 @@ const confirmModalText =
 describe( 'Products', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
-		);
 	} );
 
 	it( 'should render default products types when onboardingData.profile.productType is null', () => {
