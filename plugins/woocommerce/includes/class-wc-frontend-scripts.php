@@ -267,7 +267,7 @@ class WC_Frontend_Scripts {
 				'src'     => self::get_asset_url( 'assets/js/frontend/checkout' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
 				'version' => $version,
-				'args'    => true,
+				'args'    => array( 'in_footer' => true ),
 			),
 			'wc-country-select'          => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/country-select' . $suffix . '.js' ),
