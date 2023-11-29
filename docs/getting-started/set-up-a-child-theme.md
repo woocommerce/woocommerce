@@ -35,7 +35,8 @@ Version: 1.0
 Description: Child theme for Woo.
 Author: Woo
 Author URI: http://woocommerce.com
-Template: themedir */
+Template: themedir
+*/
 ```
 
 Next, we need to change the **Template** field to point to our installed WooTheme. In this example, we’ll use the Storefront theme, which is installed under `wp-content/themes/storefront/`. The result will look like this:
