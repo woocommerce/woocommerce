@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
+import { resolveSelect, useDispatch } from '@wordpress/data';
+import { useEffect, useState, useCallback } from '@wordpress/element';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
@@ -11,26 +12,8 @@ import { PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME } from '../../constants';
 
 export const useFeedbackBar = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-
-	const { shouldShowFeedbackBar } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
-
-		const showFeedbackBarOption = getOption(
-			PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME
-		) as string;
-
-		const resolving = ! hasFinishedResolution( 'getOption', [
-			PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME,
-		] );
-
-		return {
-			shouldShowFeedbackBar:
-				! resolving &&
-				window.wcTracks?.isEnabled &&
-				showFeedbackBarOption === 'yes',
-		};
-	}, [] );
+	const [ shouldShowFeedbackBar, setShouldShowFeedbackBar ] =
+		useState( false );
 
 	const showFeedbackBar = () => {
 		updateOptions( {
@@ -63,6 +46,24 @@ export const useFeedbackBar = () => {
 			[ PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME ]: 'no',
 		} );
 	};
+
+	const fetchShowFeedbackBarOption = useCallback( () => {
+		return resolveSelect( OPTIONS_STORE_NAME )
+			.getOption< string >( PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME )
+			.then( ( showFeedbackBarOption ) => {
+				if (
+					window.wcTracks?.isEnabled &&
+					showFeedbackBarOption === 'yes'
+				) {
+					setShouldShowFeedbackBar( true );
+					hideFeedbackBar();
+				}
+			} );
+	}, [] );
+
+	useEffect( () => {
+		fetchShowFeedbackBarOption();
+	}, [] );
 
 	return {
 		shouldShowFeedbackBar,
