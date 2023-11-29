@@ -43,14 +43,6 @@ const confirmModalText =
 describe( 'Products', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getSettings: () => ( {
-					general: {
-						woocommerce_default_country: 'US',
-					},
-				} ),
-			} ) )
 		);
 	} );
 
@@ -80,66 +72,6 @@ describe( 'Products', () => {
 		expect( queryByText( 'Digital product' ) ).toBeInTheDocument();
 		expect( queryByRole( 'menu' )?.childElementCount ).toBe( 1 );
 		expect( queryByText( 'View more product types' ) ).toBeInTheDocument();
-	} );
-
-	it( 'should not render subscriptions products type when store is not in the US', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
-			profile: {
-				product_types: [ 'subscriptions' ],
-			},
-		} ) );
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getSettings: () => ( {
-					general: {
-						woocommerce_default_country: 'GB',
-					},
-				} ),
-			} ) )
-		);
-		const { queryByText } = render( <Products /> );
-
-		expect( queryByText( 'Subscription product' ) ).not.toBeInTheDocument();
-	} );
-
-	it( 'should not render subscriptions products type when store country is unknown', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
-			profile: {
-				product_types: [ 'subscriptions' ],
-			},
-		} ) );
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getSettings: () => ( {
-					general: {
-						woocommerce_default_country: undefined,
-					},
-				} ),
-			} ) )
-		);
-		const { queryByText } = render( <Products /> );
-
-		expect( queryByText( 'Subscription product' ) ).not.toBeInTheDocument();
-	} );
-
-	it( 'should render subscriptions products type when store is in the US', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
-			profile: {
-				product_types: [ 'subscriptions' ],
-			},
-		} ) );
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getSettings: () => ( {
-					general: {
-						woocommerce_default_country: 'US',
-					},
-				} ),
-			} ) )
-		);
-		const { queryByText } = render( <Products /> );
-
-		expect( queryByText( 'Subscription product' ) ).toBeInTheDocument();
 	} );
 
 	it( 'clicking on suggested product should fire event tasklist_add_product with method: product_template, tasklist_product_template_selection with is_suggested:true and task_completion_time', () => {

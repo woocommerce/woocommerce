@@ -47,16 +47,6 @@ export const productTypes = Object.freeze( [
 		after: <Icon icon={ chevronRight } />,
 	},
 	{
-		key: 'subscription' as const,
-		title: __( 'Subscription product', 'woocommerce' ),
-		content: __(
-			'Item that customers receive on a regular basis.',
-			'woocommerce'
-		),
-		before: <CalendarIcon />,
-		after: <Icon icon={ chevronRight } />,
-	},
-	{
 		key: 'grouped' as const,
 		title: __( 'Grouped product', 'woocommerce' ),
 		content: __( 'A collection of related products.', 'woocommerce' ),
@@ -93,23 +83,14 @@ export const onboardingProductTypesToSurfaced: Readonly<
 	Record< string, ProductTypeKey[] >
 > = Object.freeze( {
 	physical: [ 'physical', 'variable', 'grouped' ],
-	subscriptions: [ 'subscription' ],
 	downloads: [ 'digital' ],
 	// key in alphabetical and ascending order for mapping
-	'physical,subscriptions': [ 'physical', 'subscription' ],
 	'downloads,physical': [ 'physical', 'digital' ],
-	'downloads,subscriptions': [ 'digital', 'subscription' ],
-	'downloads,physical,subscriptions': [
-		'physical',
-		'digital',
-		'subscription',
-	],
 } );
 export const defaultSurfacedProductTypes =
 	onboardingProductTypesToSurfaced.physical;
 
 export const supportedOnboardingProductTypes = [
 	'physical',
-	'subscriptions',
 	'downloads',
 ];
