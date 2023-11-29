@@ -1,4 +1,6 @@
-# Change a currency symbol
+---
+post_title: Change a currency symbol
+---
 
 See the [currency list](https://woocommerce.github.io/code-reference/files/woocommerce-includes-wc-core-functions.html#source-view.475) for reference on currency codes.
 

@@ -1,4 +1,6 @@
-# Configuring Caching Plugins for WooCommerce
+---
+post_title: Configuring Caching Plugins for WooCommerce
+---
 
 ## Excluding Pages from the Cache
 
@@ -62,35 +64,51 @@ Check out the following WordPress.org Support forum post on[ how cookies may be 
 ```text
 Add this to vcl_recv above "if (req.http.cookie) {":
 
-# Unset Cookies except for WordPress admin and WooCommerce pages 
+---
+post_title: Unset Cookies except for WordPress admin and WooCommerce pages 
+---
 if (!(req.url ~ "(wp-login|wp-admin|cart|my-account/*|wc-api*|checkout|addons|logout|lost-password|product/*)")) { 
 unset req.http.cookie; 
 } 
-# Pass through the WooCommerce dynamic pages 
+---
+post_title: Pass through the WooCommerce dynamic pages 
+---
 if (req.url ~ "^/(cart|my-account/*|checkout|wc-api/*|addons|logout|lost-password|product/*)") { 
 return (pass); 
 } 
-# Pass through the WooCommerce add to cart 
+---
+post_title: Pass through the WooCommerce add to cart 
+---
 if (req.url ~ "\?add-to-cart=" ) { 
 return (pass); 
 } 
-# Pass through the WooCommerce API
+---
+post_title: Pass through the WooCommerce API
+---
 if (req.url ~ "\?wc-api=" ) { 
 return (pass); 
 } 
-# Block access to php admin pages via website 
+---
+post_title: Block access to php admin pages via website 
+---
 if (req.url ~ "^/phpmyadmin/.*$" || req.url ~ "^/phppgadmin/.*$" || req.url ~ "^/server-status.*$") { 
 error 403 "For security reasons, this URL is only accesible using localhost (127.0.0.1) as the hostname"; 
 } 
+---
 #
+---
 
 Add this to vcl_fetch:
 
-# Unset Cookies except for WordPress admin and WooCommerce pages 
+---
+post_title: Unset Cookies except for WordPress admin and WooCommerce pages 
+---
 if ( (!(req.url ~ "(wp-(login|admin)|login|cart|my-account/*|wc-api*|checkout|addons|logout|lost-password|product/*)")) || (req.request == "GET") ) { 
 unset beresp.http.set-cookie; 
 } 
+---
 #
+---
 ```
 
 ### Why is my Password Reset stuck in a loop?

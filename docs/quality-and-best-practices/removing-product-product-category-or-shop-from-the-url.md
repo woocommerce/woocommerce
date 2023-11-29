@@ -1,5 +1,7 @@
 
-# Removing /product/ , /product-category/ , or /shop/ from the URLs
+---
+post_title: Removing /product/ , /product-category/ , or /shop/ from the URLs
+---
 
 **Note:**  This is a  **Developer level**  doc. If you are unfamiliar with code/templates and resolving potential conflicts, select a  [WooExpert or Developer](https://woo.com/customizations/) for assistance. We are unable to provide support for customizations under our  [Support Policy](https://woo.com/support-policy/).
 
