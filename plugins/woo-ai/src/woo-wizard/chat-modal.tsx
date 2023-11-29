@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Button, TextareaControl } from '@wordpress/components';
 import { useDispatch, select } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
@@ -36,26 +36,21 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ isLoading, setLoading ] = useState( false );
 	const [ threadID, setThreadID ] = useState< string >( '' );
 	const [ isResponseError, setIsResponseError ] = useState( false );
-
 	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
 	const { set: setStorageData } = useDispatch( preferencesStore );
 
 	useEffect( () => {
-		console.log( 'threadID is', threadID );
 		if ( ! threadID ) {
-			console.log( 'threadID is falsey' );
 			const storedThreadId = select( preferencesStore ).get(
 				WOO_AI_PLUGIN_NAME,
 				threadPreferenceId
 			);
-			console.log( 'storedThreadId is', storedThreadId );
 			// check that the thread hasn't expired
 			const expiration = select( preferencesStore ).get(
 				WOO_AI_PLUGIN_NAME,
 				threadExpirationPreferenceId
 			);
 			if ( expiration && Date.now() > expiration ) {
-				console.log( 'data is expired, clearing it.' );
 				setStorageData( WOO_AI_PLUGIN_NAME, threadPreferenceId, '' );
 				setStorageData(
 					WOO_AI_PLUGIN_NAME,
@@ -65,10 +60,9 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			}
 			setThreadID( storedThreadId );
 		}
-	}, [ threadID ] );
+	}, [ threadID, setStorageData ] );
 
 	useEffect( () => {
-		// @todo: also add an expiry to the chat history, say, 24 hours?
 		if ( ! messages || ! messages.length ) {
 			const storedMessages = select( preferencesStore ).get(
 				WOO_AI_PLUGIN_NAME,
@@ -92,7 +86,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		audioBlob: Blob | null
 	) => {
 		const formData = new FormData();
-		console.log( 'threadID in prepareFormData is', threadID );
 		formData.append( 'message', input );
 		formData.append( 'token', token );
 		if ( threadID ) {
@@ -118,9 +111,9 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 
 	/**
 	 *
-	 * @param {any} response The response from the assistant API.
-	 * @param {string} token The Jetpack token.
-	 * @returns {string} The message to display to the user.
+	 * @param {any}    response The response from the assistant API.
+	 * @param {string} token    The Jetpack token.
+	 * @return {string} The message to display to the user.
 	 */
 	const handleRequiresAction = async ( response: any, token: string ) => {
 		const answer = response.answer;
@@ -234,7 +227,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			return;
 		}
 		setLoading( true );
-		console.log( 'threadID is', threadID );
 
 		setAndStoreMessages( input, 'user' );
 		setInput( '' );
@@ -249,7 +241,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			} ) ) as any;
 			const newThreadID = response.thread_id;
 			if ( ! threadID && newThreadID ) {
-				console.log( 'no threadID, but newThreadID is', newThreadID );
 				setAndStoreThreadID( newThreadID );
 			}
 
