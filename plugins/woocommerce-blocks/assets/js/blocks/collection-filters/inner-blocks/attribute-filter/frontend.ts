@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	store as interactivityStore,
-	navigate,
-} from '@woocommerce/interactivity';
+import { store, navigate, getContext } from '@woocommerce/interactivity';
 import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
 import { HTMLElementEvent } from '@woocommerce/types';
 
@@ -12,15 +9,6 @@ type AttributeFilterContext = {
 	attributeSlug: string;
 	queryType: 'or' | 'and';
 	selectType: 'single' | 'multiple';
-};
-
-interface AttributeFilterDropdownContext
-	extends AttributeFilterContext,
-		DropdownContext {}
-
-type ActionProps = {
-	event: HTMLElementEvent< HTMLInputElement >;
-	context: AttributeFilterContext;
 };
 
 function getUrl(
@@ -49,58 +37,55 @@ function getSelectedTermsFromUrl( slug: string ) {
 		.filter( Boolean );
 }
 
-interactivityStore( {
-	state: {
-		filters: {},
-	},
+store( 'woocommerce/collection-attribute-filter', {
 	actions: {
-		filters: {
-			navigateWithAttributeFilter: ( {
-				context,
-			}: {
-				context: AttributeFilterDropdownContext;
-			} ) => {
-				if ( context.woocommerceDropdown.selectedItem.value ) {
-					navigate(
-						getUrl(
-							[ context.woocommerceDropdown.selectedItem.value ],
-							context.attributeSlug,
-							context.queryType
-						)
-					);
-				}
-			},
-			updateProductsWithAttributeFilter: ( {
-				event,
-				context,
-			}: ActionProps ) => {
-				if ( ! event.target.value ) return;
+		navigate: () => {
+			const dropdownContext = getContext< DropdownContext >(
+				'woocommerce/interactivity-dropdown'
+			);
 
-				let selectedTerms = getSelectedTermsFromUrl(
-					context.attributeSlug
-				);
+			const context = getContext< AttributeFilterContext >();
 
-				if (
-					event.target.checked &&
-					! selectedTerms.includes( event.target.value )
-				) {
-					if ( context.selectType === 'multiple' )
-						selectedTerms.push( event.target.value );
-					if ( context.selectType === 'single' )
-						selectedTerms = [ event.target.value ];
-				} else {
-					selectedTerms = selectedTerms.filter(
-						( value ) => value !== event.target.value
-					);
-				}
+			if ( dropdownContext.selectedItem.value ) {
 				navigate(
 					getUrl(
-						selectedTerms,
+						[ dropdownContext.selectedItem.value ],
 						context.attributeSlug,
 						context.queryType
 					)
 				);
-			},
+			}
+		},
+		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
+			if ( ! event.target.value ) return;
+
+			const context = getContext< AttributeFilterContext >();
+
+			let selectedTerms = getSelectedTermsFromUrl(
+				context.attributeSlug
+			);
+
+			if (
+				event.target.checked &&
+				! selectedTerms.includes( event.target.value )
+			) {
+				if ( context.selectType === 'multiple' )
+					selectedTerms.push( event.target.value );
+				if ( context.selectType === 'single' )
+					selectedTerms = [ event.target.value ];
+			} else {
+				selectedTerms = selectedTerms.filter(
+					( value ) => value !== event.target.value
+				);
+			}
+
+			navigate(
+				getUrl(
+					selectedTerms,
+					context.attributeSlug,
+					context.queryType
+				)
+			);
 		},
 	},
 } );
