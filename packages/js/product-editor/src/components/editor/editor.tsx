@@ -80,8 +80,9 @@ export function Editor( {
 									<>
 										<BlockEditor
 											settings={ settings }
-											productType={ productType }
+											postType={ productType }
 											productId={ product.id }
+											productType={ product.type }
 											context={ {
 												selectedTab,
 												postType: productType,

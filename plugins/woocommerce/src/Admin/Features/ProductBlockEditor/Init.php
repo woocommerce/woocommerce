@@ -215,18 +215,25 @@ class Init {
 		$template_registry     = wc_get_container()->get( BlockTemplateRegistry::class );
 		$block_template_logger = BlockTemplateLogger::get_instance();
 
-		$block_template_logger->log_template_events_to_file( 'simple-product' );
+		$simple_product_template = $template_registry->get_registered( 'simple-product' );
+		$existing_product_types  = wc_get_product_types();
+
+		// This stablish the relation between the product block template and the product type.
+		// Also this should be moved to a rest api.
+		foreach ( $existing_product_types as $type => $label ) {
+			// The product template id must match the pattern '{product_type}-product' for this to work.
+			$product_template_id                   = "$type-product";
+			$product_template                      = $template_registry->get_registered( $product_template_id );
+			$editor_settings['templates'][ $type ] = is_null( $product_template ) ? $simple_product_template->get_formatted_template() : $product_template->get_formatted_template();
+
+			$block_template_logger->log_template_events_to_file( $product_template_id );
+			$editor_settings['templateEvents'][ $type ] = $block_template_logger->get_formatted_template_events( $product_template_id );
+		}
+
+		$editor_settings['templates']['product_variation'] = $template_registry->get_registered( 'product-variation' )->get_formatted_template();
+
 		$block_template_logger->log_template_events_to_file( 'product-variation' );
-
-		$editor_settings['templates'] = array(
-			'product'           => $template_registry->get_registered( 'simple-product' )->get_formatted_template(),
-			'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template(),
-		);
-
-		$editor_settings['templateEvents'] = array(
-			'product'           => $block_template_logger->get_formatted_template_events( 'simple-product' ),
-			'product_variation' => $block_template_logger->get_formatted_template_events( 'product-variation' ),
-		);
+		$editor_settings['templateEvents']['product_variation'] = $block_template_logger->get_formatted_template_events( 'product-variation' );
 
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
 
