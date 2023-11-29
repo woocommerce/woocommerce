@@ -188,8 +188,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 				// Get possible values for this attribute, for only visible variations.
 				if ( ! empty( $child_ids ) ) {
-					$child_ids_count = is_countable( $child_ids ) ? count( $child_ids ) : 0;
-					$format     = array_fill( 0, $child_ids_count, '%d' );
+					$format     = array_fill( 0, count( $child_ids ), '%d' );
 					$query_in   = '(' . implode( ',', $format ) . ')';
 					$query_args = array( 'attribute_name' => wc_variation_attribute_name( $attribute['name'] ) ) + $child_ids;
 					$values     = array_unique(
