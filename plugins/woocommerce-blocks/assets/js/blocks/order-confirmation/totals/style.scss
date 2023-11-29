@@ -8,16 +8,20 @@
 		border: 1px solid $universal-border-light;
 		border-spacing: 0;
 		border-radius: $universal-border-radius;
-		border-collapse: collapse;
 		th,
 		td {
-			border: 1px solid $universal-border-light;
+			border-top: 1px solid $universal-border-light;
 			border-right-width: 0;
 			border-left-width: 0;
 			padding: $gap;
 			margin: 0;
 			text-align: left;
 			font-weight: inherit;
+			border-radius: 0;
+
+		}
+		thead th {
+			border-top: 0;
 		}
 		thead,
 		tfoot th {
