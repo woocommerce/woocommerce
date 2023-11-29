@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Fix parseNumber to allow for emptry string thousand & decimal separators.
+Fix parseNumber to allow for emptry string thousand & decimal seperators.
