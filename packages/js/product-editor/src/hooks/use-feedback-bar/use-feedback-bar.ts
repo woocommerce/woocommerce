@@ -68,6 +68,5 @@ export const useFeedbackBar = () => {
 	return {
 		shouldShowFeedbackBar,
 		maybeShowFeedbackBar,
-		hideFeedbackBar,
 	};
 };
