@@ -68,9 +68,8 @@ class WC_Privacy_Exporters {
 		}
 
 		$orders = wc_get_orders( $order_query );
-		$orders_count = is_countable( $orders ) ? count( $orders ) : 0;
 
-		if ( 0 < $orders_count ) {
+		if ( is_array( $orders ) && 0 < count( $orders ) ) {
 			foreach ( $orders as $order ) {
 				$data_to_export[] = array(
 					'group_id'          => 'woocommerce_orders',
@@ -80,7 +79,7 @@ class WC_Privacy_Exporters {
 					'data'              => self::get_order_personal_data( $order ),
 				);
 			}
-			$done = 10 > $orders_count;
+			$done = 10 > count( $orders );
 		}
 
 		return array(

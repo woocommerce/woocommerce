@@ -133,8 +133,8 @@ class WC_Privacy_Erasers {
 		}
 
 		$orders = wc_get_orders( $order_query );
-		$orders_count = is_countable( $orders ) ? count( $orders ) : 0;
-		if ( 0 < $orders_count ) {
+
+		if ( is_array( $orders ) && 0 < count( $orders ) ) {
 			foreach ( $orders as $order ) {
 				if ( apply_filters( 'woocommerce_privacy_erase_order_personal_data', $erasure_enabled, $order ) ) {
 					self::remove_order_personal_data( $order );
@@ -148,7 +148,7 @@ class WC_Privacy_Erasers {
 					$response['items_retained'] = true;
 				}
 			}
-			$response['done'] = 10 > $orders_count;
+			$response['done'] = 10 > count( $orders );
 		} else {
 			$response['done'] = true;
 		}
