@@ -39,7 +39,7 @@ Most CDN plugins listen to WordPress core hooks and upload generated thumbnails 
 
 The `woocommerce_background_image_regeneration` filter can be used to disable background regeneration completely. Example code:
 
-```
+```php
 add_filter( 'woocommerce_background_image_regeneration', '__return_false' );
 ```
 
