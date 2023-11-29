@@ -20,15 +20,14 @@ export type DropdownContext = {
 };
 
 store( 'woocommerce/interactivity-dropdown', {
-	state: {},
-	selectors: {
-		placeholderText: () => {
+	state: {
+		get placeholderText() {
 			const context = getContext< DropdownContext >();
 			const { selectedItem } = context;
 
 			return selectedItem.label || 'Select an option';
 		},
-		isSelected: () => {
+		get isSelected() {
 			const context = getContext< DropdownContext >();
 
 			const {
