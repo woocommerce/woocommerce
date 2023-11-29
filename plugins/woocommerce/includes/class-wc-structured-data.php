@@ -238,7 +238,7 @@ class WC_Structured_Data {
 						'@type'      => 'AggregateOffer',
 						'lowPrice'   => wc_format_decimal( $lowest, wc_get_price_decimals() ),
 						'highPrice'  => wc_format_decimal( $highest, wc_get_price_decimals() ),
-						'offerCount' => is_countable( $product->get_children() ) ? count( $product->get_children() ) : 0,
+						'offerCount' => count( $product->get_children() ),
 					);
 				}
 			} else {
