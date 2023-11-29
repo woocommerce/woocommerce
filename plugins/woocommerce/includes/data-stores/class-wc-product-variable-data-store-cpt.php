@@ -440,8 +440,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			return false;
 		}
 
-		$children_count = is_countable( $children ) ? count( $children ) : 0;
-		$format   = array_fill( 0, $children_count, '%d' );
+		$format   = array_fill( 0, count( $children ), '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
 
 		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN {$query_in}", $children ) ); // @codingStandardsIgnoreLine.
@@ -462,8 +461,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			return false;
 		}
 
-		$children_count = is_countable( $children ) ? count( $children ) : 0;
-		$format   = array_fill( 0, $children_count, '%d' );
+		$format   = array_fill( 0, count( $children ), '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
 
 		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN {$query_in}", $children ) ); // @codingStandardsIgnoreLine.
