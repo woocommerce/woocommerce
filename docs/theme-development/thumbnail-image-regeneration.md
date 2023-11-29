@@ -17,7 +17,7 @@ Whilst in the customizer, size changes can be previewed due to our on-the-fly im
 
 If your site is behind BasicAuth, both async requests and background processes will fail to complete. This is because WP Background Processing relies on the WordPress HTTP API, which requires you to attach your BasicAuth credentials to requests.
 
-You can pass these credentials via a snippet, see: https://github.com/A5hleyRich/wp-background-processing#basicauth
+You can pass these credentials via a snippet, see:[BasicAuth documentation](https://github.com/A5hleyRich/wp-background-processing#basicauth).
 
 ### Viewing background regeneration logs
 
@@ -29,7 +29,7 @@ This log file will list images which have been processed and when the job was co
 
 As of WooCommerce 3.3.2 you will see an admin notice when background image regeneration is running. Within this notice is a link to cancel the job.
 
-Cancelling the job will stop more thumbnails being regenerated. If image sizes do not look correct inside your catalog, you'll need to run thumbnail regeneration manually (either using our tool, or using another plugin such as https://en-gb.wordpress.org/plugins/regenerate-thumbnails/).
+Cancelling the job will stop more thumbnails being regenerated. If image sizes do not look correct inside your catalog, you'll need to run thumbnail regeneration manually (either using our tool, or using another plugin such as [Regenerate Thumbnails](https://en-gb.wordpress.org/plugins/regenerate-thumbnails/).
 
 ### CDN plugins
 
