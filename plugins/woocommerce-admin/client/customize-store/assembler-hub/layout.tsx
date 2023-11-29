@@ -96,6 +96,7 @@ export const Layout = () => {
 						hasCompleteSurvey={
 							!! context?.transitionalScreen?.hasCompleteSurvey
 						}
+						aiOnline={ !! context?.aiOnline }
 					/>
 				</EntityProvider>
 			</EntityProvider>
