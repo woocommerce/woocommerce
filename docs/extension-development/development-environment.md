@@ -1,4 +1,6 @@
-# Setting up your development environment
+---
+post_title: Setting up your development environment
+---
 
 ## Introduction
 
