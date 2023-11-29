@@ -78,9 +78,17 @@ export class CheckoutPage {
 		await this.page.evaluate( 'document.activeElement.blur()' );
 	}
 
-	async placeOrder() {
+	/**
+	 * Place order and wait for redirect to order received page.
+	 *
+	 * @param  waitForRedirect If false, then the method will not wait for the redirect to order received page. Useful
+	 *                         when testing for errors on the checkout page.
+	 */
+	async placeOrder( waitForRedirect = true ) {
 		await this.page.getByText( 'Place Order', { exact: true } ).click();
-		await this.page.waitForURL( /order-received/ );
+		if ( waitForRedirect ) {
+			await this.page.waitForURL( /order-received/ );
+		}
 	}
 
 	async verifyAddressDetails(
