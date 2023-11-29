@@ -7,7 +7,7 @@ use WC_Order;
 /**
  * Class CustomerHistory
  *
- * @since x.x.x
+ * @since 8.5.0
  */
 class CustomerHistory {
 

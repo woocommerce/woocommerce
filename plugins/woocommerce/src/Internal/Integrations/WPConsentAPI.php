@@ -10,7 +10,7 @@ use WP_CONSENT_API;
 /**
  * Class WPConsentAPI
  *
- * @since x.x.x
+ * @since 8.5.0
  */
 class WPConsentAPI {
 

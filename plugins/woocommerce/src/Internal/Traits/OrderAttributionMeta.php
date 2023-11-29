@@ -12,7 +12,7 @@ use WP_Post;
 /**
  * Trait OrderAttributionMeta
  *
- * @since x.x.x
+ * @since 8.5.0
  *
  * phpcs:disable Generic.Commenting.DocComment.MissingShort
  */
@@ -74,7 +74,7 @@ trait OrderAttributionMeta {
 		/**
 		 * Filter the fields to show in the source data metabox.
 		 *
-		 * @since x.x.x
+		 * @since 8.5.0
 		 *
 		 * @param string[] $fields The fields to show.
 		 */
@@ -91,7 +91,7 @@ trait OrderAttributionMeta {
 		/**
 		 * Filter the prefix for the meta fields.
 		 *
-		 * @since x.x.x
+		 * @since 8.5.0
 		 *
 		 * @param string $prefix The prefix for the meta fields.
 		 */
@@ -315,7 +315,7 @@ trait OrderAttributionMeta {
 		/**
 		 * Filter the formatted source for the order origin.
 		 *
-		 * @since x.x.x
+		 * @since 8.5.0
 		 *
 		 * @param string $formatted_source The formatted source.
 		 * @param string $source           The source.
@@ -332,7 +332,7 @@ trait OrderAttributionMeta {
 		 * This label should have a %s placeholder for the formatted source to be inserted
 		 * via sprintf().
 		 *
-		 * @since x.x.x
+		 * @since 8.5.0
 		 *
 		 * @param string $label            The label for the order origin.
 		 * @param string $source_type      The source type.
@@ -368,7 +368,7 @@ trait OrderAttributionMeta {
 		/**
 		 * Filter the description for the order attribution field.
 		 *
-		 * @since x.x.x
+		 * @since 8.5.0
 		 *
 		 * @param string $description The description for the order attribution field.
 		 * @param string $field       The field name.

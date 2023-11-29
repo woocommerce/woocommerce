@@ -9,7 +9,7 @@ use WP_UnitTestCase;
 /**
  * Tests for WPConsentAPI.
  *
- * @since x.x.x
+ * @since 8.5.0
  */
 class WPConsentAPITest extends WP_UnitTestCase {
 

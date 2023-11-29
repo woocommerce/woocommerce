@@ -20,7 +20,7 @@ use WC_Tracks;
 /**
  * Class OrderAttributionController
  *
- * @since x.x.x
+ * @since 8.5.0
  */
 class OrderAttributionController implements RegisterHooksInterface {
 
@@ -71,7 +71,6 @@ class OrderAttributionController implements RegisterHooksInterface {
 	/**
 	 * Register this class instance to the appropriate hooks.
 	 *
-	 * @since x.x.x
 	 * @return void
 	 */
 	public function register() {
@@ -117,7 +116,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 				/**
 				 * Run an action to save order attribution data.
 				 *
-				 * @since x.x.x
+				 * @since 8.5.0
 				 *
 				 * @param WC_Order $order The order object.
 				 * @param array    $params Unprefixed order attribution data.
@@ -199,7 +198,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 		/**
 		 * Filter the lifetime of the cookie used for source tracking.
 		 *
-		 * @since x.x.x
+		 * @since 8.5.0
 		 *
 		 * @param int $lifetime The lifetime of the cookie in months.
 		 */
@@ -208,7 +207,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 		/**
 		 * Filter the session length for source tracking.
 		 *
-		 * @since x.x.x
+		 * @since 8.5.0
 		 *
 		 * @param int $session_length The session length in minutes.
 		 */
@@ -217,7 +216,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 		/**
 		 * Filter to allow tracking.
 		 *
-		 * @since x.x.x
+		 * @since 8.5.0
 		 *
 		 * @param bool $allow_tracking True to allow tracking, false to disable.
 		 */
@@ -240,7 +239,6 @@ class OrderAttributionController implements RegisterHooksInterface {
 	/**
 	 * Enqueue the stylesheet for admin pages.
 	 *
-	 * @since x.x.x
 	 * @return void
 	 */
 	private function enqueue_admin_scripts_and_styles() {
@@ -260,8 +258,6 @@ class OrderAttributionController implements RegisterHooksInterface {
 
 	/**
 	 * Display the origin column in the orders table.
-	 *
-	 * @since x.x.x
 	 *
 	 * @param int $order_id The order ID.
 	 *
@@ -346,7 +342,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 		/**
 		 * Filter to enable debug mode.
 		 *
-		 * @since x.x.x
+		 * @since 8.5.0
 		 *
 		 * @param string $enabled 'yes' to enable debug mode, 'no' to disable.
 		 */
@@ -388,7 +384,6 @@ class OrderAttributionController implements RegisterHooksInterface {
 	/**
 	 * Get the screen ID for the orders page.
 	 *
-	 * @since x.x.x
 	 * @return string
 	 */
 	private function get_order_screen_id(): string {
@@ -400,7 +395,6 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 *
 	 * This accounts for the differences in hooks based on whether HPOS is enabled or not.
 	 *
-	 * @since x.x.x
 	 * @return void
 	 */
 	private function register_order_origin_column() {

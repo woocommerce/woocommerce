@@ -6,14 +6,13 @@ namespace Automattic\WooCommerce\Internal;
 /**
  * Interface RegisterHooksInterface
  *
- * @since x.x.x
+ * @since 8.5.0
  */
 interface RegisterHooksInterface {
 
 	/**
 	 * Register this class instance to the appropriate hooks.
 	 *
-	 * @since x.x.x
 	 * @return void
 	 */
 	public function register();

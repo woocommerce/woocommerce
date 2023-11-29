@@ -14,7 +14,7 @@ use WP_Error;
 /**
  * Class OrderAttributionBlocksController
  *
- * @since x.x.x
+ * @since 8.5.0
  */
 class OrderAttributionBlocksController implements RegisterHooksInterface {
 
@@ -63,7 +63,6 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 	/**
 	 * Hook into WP.
 	 *
-	 * @since x.x.x
 	 * @return void
 	 */
 	public function register() {
@@ -113,7 +112,6 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 	/**
 	 * Enqueue the Order Attribution script.
 	 *
-	 * @since x.x.x
 	 * @return void
 	 */
 	private function enqueue_scripts() {
@@ -145,7 +143,7 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 				/**
 				 * Run an action to save order attribution data.
 				 *
-				 * @since x.x.x
+				 * @since 8.5.0
 				 *
 				 * @param WC_Order $order  The order object.
 				 * @param array    $params Unprefixed order attribution data.

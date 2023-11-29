@@ -8,7 +8,7 @@ use Automattic\Jetpack\Constants;
 /**
  * Trait ScriptDebug
  *
- * @since x.x.x
+ * @since 8.5.0
  */
 trait ScriptDebug {
 
@@ -24,7 +24,6 @@ trait ScriptDebug {
 	/**
 	 * Check if SCRIPT_DEBUG is enabled.
 	 *
-	 * @since x.x.x
 	 * @return bool
 	 */
 	protected function is_script_debug_enabled(): bool {

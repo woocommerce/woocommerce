@@ -14,7 +14,7 @@ use WP_UnitTestCase;
 /**
  * Tests for OrderAttributionControllerTest.
  *
- * @since x.x.x
+ * @since 8.5.0
  */
 class OrderAttributionControllerTest extends WP_UnitTestCase {
 
