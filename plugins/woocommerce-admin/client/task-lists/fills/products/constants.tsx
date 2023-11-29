@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import ProductIcon from 'gridicons/dist/product';
 import CloudOutlineIcon from 'gridicons/dist/cloud-outline';
 import TypesIcon from 'gridicons/dist/types';
-import CalendarIcon from 'gridicons/dist/calendar';
 import { Icon, chevronRight } from '@wordpress/icons';
 
 /**
@@ -90,7 +89,4 @@ export const onboardingProductTypesToSurfaced: Readonly<
 export const defaultSurfacedProductTypes =
 	onboardingProductTypesToSurfaced.physical;
 
-export const supportedOnboardingProductTypes = [
-	'physical',
-	'downloads',
-];
+export const supportedOnboardingProductTypes = [ 'physical','downloads' ];
