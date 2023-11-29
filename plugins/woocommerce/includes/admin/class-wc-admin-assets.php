@@ -593,6 +593,9 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				$analytics_reports = Analytics::get_report_pages();
 				if ( is_array( $analytics_reports ) && count( $analytics_reports ) > 0 ) {
 					$formatted_analytics_reports = array_map( function( $report ) {
+						if ( ! is_array( $report ) ) {
+							return null;
+						}
 						$title = array_key_exists( 'title', $report ) ? $report['title'] : '';
 						$path = array_key_exists( 'path', $report ) ? $report['path'] : '';
 						if (
