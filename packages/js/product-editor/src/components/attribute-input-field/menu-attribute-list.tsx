@@ -4,7 +4,7 @@
 import { sprintf, __ } from '@wordpress/i18n';
 import { plus } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
-import { createElement } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import { __experimentalSelectControlMenuItem as MenuItem } from '@woocommerce/components';
 
 /**
@@ -32,7 +32,7 @@ export const MenuAttributeList: React.FC< MenuAttributeListProps > = ( {
 } ) => {
 	if ( renderItems.length > 0 ) {
 		return (
-			<div>
+			<Fragment>
 				{ renderItems.map( ( item, index: number ) => (
 					<MenuItem
 						key={ item.id }
@@ -71,7 +71,7 @@ export const MenuAttributeList: React.FC< MenuAttributeListProps > = ( {
 						) }
 					</MenuItem>
 				) ) }
-			</div>
+			</Fragment>
 		);
 	}
 	return (
