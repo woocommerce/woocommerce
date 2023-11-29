@@ -12,7 +12,7 @@ Before we start it’s important that you understand what a child theme is. In s
 - Theme developers can use child themes as a way to offer variations on a theme, similar to what we do with the [Storefront child themes](https://woocommerce.com/product-category/themes/storefront-child-theme-themes/)
 - Developers can use child themes to host customizations of the parent theme or any plugin on the site since the child theme will get priority over the plugins and parent theme
 
-Read [this guide from the WordPress Codex](http://codex.wordpress.org/Child_Themes).
+Read [this guide from the WordPress Codex](https://codex.wordpress.org/Child_Themes).
 
 [Download a sample Storefront child theme to get started](https://github.com/stuartduff/storefront-child-theme) if you want to customize a website using Storefront as the theme.
 
@@ -34,7 +34,7 @@ Theme Name: Child Theme
 Version: 1.0
 Description: Child theme for Woo.
 Author: Woo
-Author URI: http://woocommerce.com
+Author URI: https://woo.com
 Template: themedir
 */
 ```
@@ -47,7 +47,7 @@ Theme Name: Storefront Child
 Version: 1.0
 Description: Child theme for Storefront.
 Author: Woo
-Author URI: http://woocommerce.com
+Author URI: https://woo.com
 Template: storefront
 */
 
@@ -116,7 +116,7 @@ WordPress has a few things that it handles differently in child themes. If you h
 
 ## Child theme support
 
-Although we do offer basic child theme support that can easily be answered, it still falls under theme customization, so please refer to our [support policy](http://woocommerce.com/support-policy/) to see the extent of support we give. We highly advise anybody confused with child themes to use the [WordPress forums](http://wordpress.org/support/) for help.
+Although we do offer basic child theme support that can easily be answered, it still falls under theme customization, so please refer to our [support policy](https://woocommerce.com/support-policy/) to see the extent of support we give. We highly advise anybody confused with child themes to use the [WordPress forums](https://wordpress.org/support/) for help.
 
 ## Sample child theme
 
