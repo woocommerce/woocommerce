@@ -14,7 +14,7 @@ use Automattic\WooCommerce\StoreApi\StoreApi;
 /**
  * Class OrderAttributionServiceProvider
  *
- * @since x.x.x
+ * @since 8.5.0
  */
 class OrderAttributionServiceProvider extends AbstractInterfaceServiceProvider {
 

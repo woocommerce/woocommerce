@@ -210,7 +210,7 @@ class Edit {
 	/**
 	 * Register order attribution meta boxes if the feature is enabled.
 	 *
-	 * @since x.x.x
+	 * @since 8.5.0
 	 *
 	 * @param string $screen_id Screen ID.
 	 * @param string $title     Title of the page.

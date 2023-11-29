@@ -9,7 +9,7 @@ use WC_Order;
 /**
  * Class OrderAttribution
  *
- * @since x.x.x
+ * @since 8.5.0
  */
 class OrderAttribution {
 
@@ -25,7 +25,7 @@ class OrderAttribution {
 	/**
 	 * Output the attribution data metabox for the order.
 	 *
-	 * @since x.x.x
+	 * @since 8.5.0
 	 *
 	 * @param WC_Order $order The order object.
 	 *
