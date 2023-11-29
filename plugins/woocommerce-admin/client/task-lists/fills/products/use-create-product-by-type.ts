@@ -25,7 +25,6 @@ export const useCreateProductByType = () => {
 		window.wcAdminFeatures[ 'new-product-management-experience' ];
 
 	const createProductByType = async ( type: ProductTypeKey ) => {
-
 		setIsRequesting( true );
 
 		if (
