@@ -519,9 +519,8 @@ class WC_Install {
 		$missing_tables = wc_get_container()
 			->get( DatabaseUtil::class )
 			->get_missing_tables( $schema );
-		$missing_tables_count = is_countable( $missing_tables ) ? count( $missing_tables ) : 0;
 
-		if ( 0 < $missing_tables_count ) {
+		if ( 0 < count( $missing_tables ) ) {
 			if ( $modify_notice ) {
 				WC_Admin_Notices::add_notice( 'base_tables_missing' );
 			}
