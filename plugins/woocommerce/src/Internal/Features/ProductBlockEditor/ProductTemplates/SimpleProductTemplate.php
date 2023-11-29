@@ -82,11 +82,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$this->add_group(
 			array(
-				'id'         => $this::GROUP_IDS['PRICING'],
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => $this::GROUP_IDS['PRICING'],
+				'order'          => 20,
+				'attributes'     => array(
 					'title' => __( 'Pricing', 'woocommerce' ),
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		$this->add_group(
@@ -100,11 +105,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$this->add_group(
 			array(
-				'id'         => $this::GROUP_IDS['SHIPPING'],
-				'order'      => 40,
-				'attributes' => array(
+				'id'             => $this::GROUP_IDS['SHIPPING'],
+				'order'          => 40,
+				'attributes'     => array(
 					'title' => __( 'Shipping', 'woocommerce' ),
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		if ( Features::is_enabled( 'product-variation-management' ) ) {
@@ -307,6 +317,31 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'id'        => 'product-button-text-column2',
 					'blockName' => 'core/column',
 					'order'     => 20,
+				)
+			);
+		}
+
+		// Product list section.
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$product_list_section = $general_group->add_section(
+				array(
+					'id'         => 'product-list-section',
+					'order'      => 35,
+					'attributes' => array(
+						'title'       => __( 'Products in this group', 'woocommerce' ),
+						'description' => __( 'Make a collection of related products, enabling customers to purchase multiple items together.', 'woocommerce' ),
+					),
+				)
+			);
+
+			$product_list_section->add_block(
+				array(
+					'id'         => 'product-list',
+					'blockName'  => 'woocommerce/product-list-field',
+					'order'      => 10,
+					'attributes' => array(
+						'property' => 'grouped_products',
+					),
 				)
 			);
 		}
