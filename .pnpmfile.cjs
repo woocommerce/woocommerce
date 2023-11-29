@@ -15,6 +15,9 @@ const packageFileCache = {};
  * @return {Object} The package file.
  */
 function loadPackageFile( packagePath ) {
+	// Resolve the absolute path for consistency when loading and updating.
+	packagePath = path.resolve( __dirname, packagePath );
+
 	if ( packageFileCache[ packagePath ] ) {
 		return packageFileCache[ packagePath ];
 	}
@@ -34,6 +37,9 @@ function loadPackageFile( packagePath ) {
  * @param {Object} packageFile The new package file contents.
  */
 function updatePackageFile( packagePath, packageFile ) {
+	// Resolve the absolute path for consistency when loading and updating.
+	packagePath = path.resolve( __dirname, packagePath );
+
 	packageFileCache[ packagePath ] = packageFile;
 
 	fs.writeFileSync(
@@ -154,8 +160,6 @@ function getLinkedPackages( packagePath, lockPackage ) {
 		if ( ! linkedPackagePath ) {
 			continue;
 		}
-
-		
 
 		// Load the linked package file and mark it as a dependency.
 		linkedPackages[ linkedPackagePath ] =
