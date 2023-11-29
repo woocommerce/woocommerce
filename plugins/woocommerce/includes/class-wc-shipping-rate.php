@@ -229,8 +229,7 @@ class WC_Shipping_Rate {
 	 * @return float
 	 */
 	public function get_shipping_tax() {
-		$taxes_count = is_countable( $this->taxes ) ? count( $this->taxes ) : 0;
-		return apply_filters( 'woocommerce_get_shipping_tax', $taxes_count > 0 && ! WC()->customer->get_is_vat_exempt() ? (float) array_sum( $this->taxes ) : 0.0, $this );
+		return apply_filters( 'woocommerce_get_shipping_tax', count( $this->taxes ) > 0 && ! WC()->customer->get_is_vat_exempt() ? (float) array_sum( $this->taxes ) : 0.0, $this );
 	}
 
 	/**
