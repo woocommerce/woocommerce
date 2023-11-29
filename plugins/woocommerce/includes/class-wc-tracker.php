@@ -1049,10 +1049,10 @@ class WC_Tracker {
 	 */
 	public static function get_block_tracker_data( $block_name, $woo_page_name ) {
 		$blocks = WC_Blocks_Utils::get_blocks_from_page( $block_name, $woo_page_name );
-		$blocks_count = is_countable( $blocks ) ? count( $blocks ) : 0;
+
 		$block_present = false;
 		$attributes    = array();
-		if ( $blocks && $blocks_count ) {
+		if ( $blocks && count( $blocks ) ) {
 			// Return any customised attributes from the first block.
 			$block_present = true;
 			$attributes    = $blocks[0]['attrs'];
