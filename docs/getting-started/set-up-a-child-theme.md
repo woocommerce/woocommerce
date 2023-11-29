@@ -76,7 +76,7 @@ Let’s do an example together where we change the color of the site title. Add 
 
 ```css
 .site-branding h1 a {
-color: red;
+    color: red;
 }
 ```
 
@@ -98,9 +98,7 @@ The same goes for WooCommerce templates. If you create a new folder in your chil
 The `functions.php` in your child theme is loaded **before** the parent theme’s `functions.php`. If a function in the parent theme is **pluggable**, it allows you to copy a function from the parent theme into the child theme’s `functions.php` and have it replace the one in your parent theme. The only requirement is that the parent theme’s function is **pluggable**, which basically means it is wrapped in a conditional if statement e.g:
 
 ```php
-if 
-(!function_exists("parent_function_name")) 
-{
+if ( ! function_exists( "parent_function_name" ) ) {
     parent_function_name() {
         ...
     }
