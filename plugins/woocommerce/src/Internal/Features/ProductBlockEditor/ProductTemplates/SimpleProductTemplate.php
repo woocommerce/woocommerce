@@ -228,7 +228,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes' => array(
 					'title'         => __( 'Description', 'woocommerce' ),
 					'description'   => __( 'What makes this product unique? What are its most important features? Enrich the product page by adding rich content using blocks.', 'woocommerce' ),
-					'_templateLock' => false,
+					'_templateLock' => 'all',
 				),
 			)
 		);
