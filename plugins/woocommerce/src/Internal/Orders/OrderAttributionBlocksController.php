@@ -162,7 +162,7 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 	 */
 	private function get_schema_callback() {
 		return function() {
-			$schema = array();
+			$schema      = array();
 			$field_names = $this->order_attribution_controller->get_field_names();
 
 			$validate_callback = function( $value ) {
