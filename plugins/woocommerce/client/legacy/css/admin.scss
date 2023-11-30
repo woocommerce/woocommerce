@@ -912,7 +912,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 	overflow: hidden;
 
 	&.updated {
-		border-left-color: var(--wp-admin-theme-color, #7F54B3) !important;
+		border-left-color: var(--wp-admin-theme-color, $woocommerce) !important;
 	}
 
 	a.skip,
@@ -4505,7 +4505,7 @@ table.wc-shipping-classes {
 
 		p,
 		li {
-			color: var(--wc-secondary-text, #7F54B3);
+			color: var(--wc-secondary-text, $woocommerce);
 			font-size: 1.2em;
 			line-height: 1.2em;
 			margin: 0 0 1.5em;
@@ -4752,8 +4752,8 @@ table.wc-shipping-classes {
 .woocommerce-input-toggle {
 	height: 16px;
 	width: 32px;
-	border: 2px solid var(--wp-admin-theme-color, #7F54B3);
-	background-color: var(--wp-admin-theme-color, #7F54B3);
+	border: 2px solid var(--wp-admin-theme-color, $woocommerce);
+	background-color: var(--wp-admin-theme-color, $woocommerce);
 	display: inline-block;
 	text-indent: -9999px;
 	border-radius: 10em;
