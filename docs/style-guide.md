@@ -1,4 +1,6 @@
-# Technical documentation style guide
+---
+post_title: Technical documentation style guide
+---
 
 This style guide is intended to provide guidelines for creating effective and user-friendly tutorials and how-to guides for WooCommerce technical documentation that will live in repo and be editable and iterative by open source contributors and WooCommerce teams.
 
@@ -62,7 +64,9 @@ Note: While we've outlined specific rules above, all other default linting rules
     - Use the ATX-style (`#`) for headers.
 
     ```markdown
+---
     # This is an H1
+---
     ## This is an H2
     ```
 

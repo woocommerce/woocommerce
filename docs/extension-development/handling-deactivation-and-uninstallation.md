@@ -1,4 +1,6 @@
-# Handling deactivation and uninstallation
+---
+post_title: Handling deactivation and uninstallation
+---
 
 ## Introduction
 
