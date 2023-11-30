@@ -134,7 +134,7 @@ test.describe( 'Checkout page', () => {
 		);
 		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
 		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( singleProductPrice )
@@ -156,7 +156,7 @@ test.describe( 'Checkout page', () => {
 		);
 		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
 		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
@@ -180,7 +180,7 @@ test.describe( 'Checkout page', () => {
 		);
 		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
 		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( threeProductPrice )
@@ -251,7 +251,7 @@ test.describe( 'Checkout page', () => {
 		);
 		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
 		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
@@ -283,7 +283,7 @@ test.describe( 'Checkout page', () => {
 		);
 		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
 		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
