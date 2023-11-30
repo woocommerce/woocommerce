@@ -1,5 +1,5 @@
 ---
-post_title: Configuring Caching Plugins for WooCommerce
+post_title: Configuring caching plugins for WooCommerce
 ---
 
 ## Excluding Pages from the Cache
