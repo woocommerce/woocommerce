@@ -129,7 +129,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			Logger.notice(
 				`Bumping versions in ${ owner }/${ name } on ${ workingBranch } branch`
 			);
-			bumpFiles( tmpRepoPath, version );
+			await bumpFiles( tmpRepoPath, version );
 
 			if ( dryRun ) {
 				const diff = await git.diffSummary();
