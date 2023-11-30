@@ -183,8 +183,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 				$canonical_rate_ids = $this->get_canonical_package_rate_ids( $chosen_shipping_methods_session );
 			}
 
-			$canonical_rate_ids_count = is_countable( $this->get_matching_rates( $canonical_rate_ids ) ) ? count( $this->get_matching_rates( $canonical_rate_ids ) ) : 0;
-			if ( ! $canonical_rate_ids_count ) {
+			if ( ! count( $this->get_matching_rates( $canonical_rate_ids ) ) ) {
 				return false;
 			}
 		}
@@ -329,7 +328,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @since  3.4.0
 	 *
 	 * @param array $rate_ids Rate ids to check.
-	 * @return boolean
+	 * @return array
 	 */
 	private function get_matching_rates( $rate_ids ) {
 		// First, match entries in 'method_id:instance_id' format. Then, match entries in 'method_id' format by stripping off the instance ID from the candidates.
