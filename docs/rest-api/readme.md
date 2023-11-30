@@ -1,5 +1,5 @@
 ---
-category_title: Rest Api 
+category_title: REST API
 category_slug: rest-api
 post_title: REST API
 ---
