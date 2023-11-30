@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow the password meter script to run, even if loaded at a different phase that it generally expects.
