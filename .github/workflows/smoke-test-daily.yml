@@ -177,7 +177,6 @@ jobs:
                   C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
                   C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
                   P_ID: 22733
-                  COT: true
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
