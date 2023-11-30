@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [1.0.0](https://www.npmjs.com/package/@woocommerce/admin-layout/v/1.0.0) - 2023-11-28 
 
+-   Patch - Update dependencies.
 -   Minor - Adding LayoutContext component and hook. [#37720]
 -   Minor - Adding support for modifying fill name to WooHeaderItem. [#37255]
 -   Minor - Create @woocommerce/admin-layout package to house header, footer, and similar components and utilities. [#37094]

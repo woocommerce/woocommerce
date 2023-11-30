@@ -52,9 +52,7 @@ export const Products = () => {
 		} );
 
 	const { productTypes: productTypeListItems } = useProductTypeListItems(
-		getProductTypes( {
-			exclude: [ 'subscription' ],
-		} ),
+		getProductTypes(),
 		[],
 		{
 			onClick: recordCompletionTime,
