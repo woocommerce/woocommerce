@@ -343,7 +343,11 @@ class File {
 		return true;
 	}
 
-
+	/**
+	 * Rename this file with an incremented rotation number.
+	 *
+	 * @return bool True if the file was successfully rotated.
+	 */
 	public function rotate(): bool {
 		global $wp_filesystem;
 
