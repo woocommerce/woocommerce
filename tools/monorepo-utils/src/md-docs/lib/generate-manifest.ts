@@ -54,7 +54,7 @@ async function processDirectory(
 		const categoryFolder = path.basename( subDirectory );
 		const categoryTitle = categoryFolder
 			.split( '-' )
-			.map( ( slugPart) => slugPart.charAt( 0 ).toUpperCase() + slugPart.slice( 1 ) )
+			.map( ( slugPart ) => slugPart.charAt( 0 ).toUpperCase() + slugPart.slice( 1 ) )
 			.join( ' ' );
 		category.category_slug = category.category_slug ?? categoryFolder;
 		category.category_title = category.category_title ?? categoryTitle;
