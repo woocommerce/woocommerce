@@ -38,7 +38,7 @@ class WC_Privacy_Background_Process extends WC_Background_Process {
 		if ( ! $item || empty( $item['task'] ) ) {
 			return false;
 		}
-		
+
 		$process_count = 0;
 		$process_limit = 20;
 

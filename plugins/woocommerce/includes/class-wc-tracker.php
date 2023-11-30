@@ -1072,9 +1072,9 @@ class WC_Tracker {
 	 * - pickup_locations_count
 	 */
 	public static function get_pickup_location_data() {
-		$pickup_location_enabled = false;
+		$pickup_location_enabled          = false;
 		$pickup_location_pickup_locations = get_option( 'pickup_location_pickup_locations', array() );
-		$pickup_locations_count  = is_countable( $pickup_location_pickup_locations ) ? count( $pickup_location_pickup_locations ) : 0;
+		$pickup_locations_count           = is_countable( $pickup_location_pickup_locations ) ? count( $pickup_location_pickup_locations ) : 0;
 
 		// Get the available shipping methods.
 		$shipping_methods = WC()->shipping()->get_shipping_methods();

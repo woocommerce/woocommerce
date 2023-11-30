@@ -236,7 +236,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
 		$raw_zones  = $data_store->get_zones();
-		$zones = [];
+		$zones      = array();
 
 		foreach ( $raw_zones as $raw_zone ) {
 			$zones[] = new WC_Shipping_Zone( $raw_zone );
