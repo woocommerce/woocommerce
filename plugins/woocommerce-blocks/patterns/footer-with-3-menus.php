@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Footer with 3 Menus
+ * Title: Footer with menus
  * Slug: woocommerce-blocks/footer-with-3-menus
  * Categories: WooCommerce
  * Block Types: core/template-part/footer
@@ -19,18 +19,6 @@
 
 				<!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"var:preset|spacing|50"}},"layout":{"selfStretch":"fill","flexSize":null}}} -->
 				<div class="wp-block-columns">
-					<!-- wp:column -->
-					<div class="wp-block-column">
-						<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","orientation":"vertical"},"style":{"spacing":{"blockGap":"10px"}}} /-->
-					</div>
-					<!-- /wp:column -->
-
-					<!-- wp:column -->
-					<div class="wp-block-column">
-						<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","orientation":"vertical"},"style":{"spacing":{"blockGap":"10px"}}} /-->
-					</div>
-					<!-- /wp:column -->
-
 					<!-- wp:column -->
 					<div class="wp-block-column">
 						<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","orientation":"vertical"},"style":{"spacing":{"blockGap":"10px"}}} /-->
