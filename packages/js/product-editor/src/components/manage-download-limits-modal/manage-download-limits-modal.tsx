@@ -122,11 +122,14 @@ export function ManageDownloadLimitsModal( {
 		return true;
 	}
 
+	const downloadLimitInputProps = useNumberInputProps( {
+		value: downloadLimit,
+		onChange: setDownloadLimit,
+	} );
+
 	const downloadLimitProps = {
-		...useNumberInputProps( {
-			value: downloadLimit,
-			onChange: setDownloadLimit,
-		} ),
+		value: downloadLimitInputProps.value,
+		onChange: downloadLimitInputProps.onChange,
 		id: useInstanceId(
 			BaseControl,
 			'product_download_limit_field'
@@ -154,11 +157,14 @@ export function ManageDownloadLimitsModal( {
 		},
 	};
 
+	const downloadExpiryInputProps = useNumberInputProps( {
+		value: downloadExpiry,
+		onChange: setDownloadExpiry,
+	} );
+
 	const downloadExpiryProps = {
-		...useNumberInputProps( {
-			value: downloadExpiry,
-			onChange: setDownloadExpiry,
-		} ),
+		value: downloadExpiryInputProps.value,
+		onChange: downloadExpiryInputProps.onChange,
 		id: useInstanceId(
 			BaseControl,
 			'product_download_expiry_field'

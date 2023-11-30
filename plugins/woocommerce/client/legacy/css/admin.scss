@@ -8540,3 +8540,63 @@ table.bar_chart {
 		width: calc(100% - 24px);
 	}
 }
+
+.order-attribution-metabox {
+	h4 {
+		margin-bottom: .1em;
+	}
+
+	.woocommerce-order-attribution-origin-container {
+		display: flex;
+		justify-content: space-between;
+		align-items: start;
+	}
+
+	.order-attribution-origin {
+		flex-grow: 1;
+	}
+
+	.woocommerce-order-attribution-details-toggle {
+		white-space: nowrap;
+	}
+
+	.woocommerce-order-attribution-details-container {
+		display: none;
+	}
+
+	.woocommerce-order-attribution-details-toggle {
+		display: block;
+		text-decoration: none;
+		vertical-align: middle;
+		margin-top: -7px;
+		position: relative;
+		top: 5px;
+
+		.toggle-text {
+			text-decoration: underline;
+
+			&.hide {
+				display: none;
+			}
+		}
+
+		.toggle-indicator {
+			font-family: dashicons;
+			font-size: 1.2em;
+			line-height: 1.6;
+			vertical-align: middle;
+		}
+
+		&[aria-expanded="false"] {
+			.toggle-indicator::before {
+				content: "\f140";
+			}
+		}
+
+		&[aria-expanded="true"] {
+			.toggle-indicator::before {
+				content: "\f142";
+			}
+		}
+	}
+}

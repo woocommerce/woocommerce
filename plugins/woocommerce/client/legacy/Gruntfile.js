@@ -229,10 +229,20 @@ module.exports = function ( grunt ) {
 				],
 			},
 			js: {
-				cwd: '<%= dirs.js %>/',
-				expand: true,
-				src: '**',
-				dest: '<%= dirs.jsDest %>/',
+				files: [
+					{
+						cwd: '<%= dirs.js %>/',
+						expand: true,
+						src: '**',
+						dest: '<%= dirs.jsDest %>/',
+					},
+					{
+						expand: true,
+						flatten: true,
+						src: ['node_modules/sourcebuster/dist/sourcebuster*','node_modules/sourcebuster/LICENSE'],
+						dest: '<%= dirs.jsDest %>/sourcebuster/',
+					}
+				],
 			},
 		},
 	} );

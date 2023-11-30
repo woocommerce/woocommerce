@@ -16,6 +16,9 @@
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"watch:build": "pnpm build:project --watch"
 	},
+	"dependencies": {
+		"sourcebuster": "github:woocommerce/sourcebuster-js#v1.1.2"
+	},
 	"devDependencies": {
 		"@types/node": "^16.18.18",
 		"@wordpress/stylelint-config": "19.1.0",
