@@ -8,9 +8,9 @@ use Automattic\WooCommerce\Internal\Admin\Logging\PageController;
 use WP_List_Table;
 
 /**
- * ListTable class.
+ * FileListTable class.
  */
-class ListTable extends WP_List_Table {
+class FileListTable extends WP_List_Table {
 	/**
 	 * The user option key for saving the preferred number of files displayed per page.
 	 *
@@ -33,7 +33,7 @@ class ListTable extends WP_List_Table {
 	private $page_controller;
 
 	/**
-	 * ListTable class.
+	 * FileListTable class.
 	 *
 	 * @param FileController $file_controller Instance of FileController.
 	 * @param PageController $page_controller Instance of PageController.
@@ -150,14 +150,17 @@ class ListTable extends WP_List_Table {
 	public function prepare_items(): void {
 		$per_page = $this->get_items_per_page(
 			self::PER_PAGE_USER_OPTION_KEY,
-			$this->file_controller::DEFAULTS_GET_FILES['per_page']
+			$this->get_per_page_default()
 		);
 
 		$defaults  = array(
 			'per_page' => $per_page,
 			'offset'   => ( $this->get_pagenum() - 1 ) * $per_page,
 		);
-		$file_args = wp_parse_args( $this->page_controller->get_query_params(), $defaults );
+		$file_args = wp_parse_args(
+			$this->page_controller->get_query_params( array( 'order', 'orderby', 'source' ) ),
+			$defaults
+		);
 
 		$total_items = $this->file_controller->get_files( $file_args, true );
 		if ( is_wp_error( $total_items ) ) {
@@ -317,5 +320,14 @@ class ListTable extends WP_List_Table {
 		$size = $item->get_file_size();
 
 		return size_format( $size );
+	}
+
+	/**
+	 * Helper to get the default value for the per_page arg.
+	 *
+	 * @return int
+	 */
+	public function get_per_page_default(): int {
+		return $this->file_controller::DEFAULTS_GET_FILES['per_page'];
 	}
 }
