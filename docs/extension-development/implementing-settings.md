@@ -1,4 +1,4 @@
-# Implementing Settings for Extensions
+# Implementing settings for extensions
 
 If you’re customizing WooCommerce or adding your own functionality to it you’ll probably need a settings page of some sort. One of the easiest ways to create a settings page is by taking advantage of the [`WC_Integration` class](https://woocommerce.github.io/code-reference/classes/WC-Integration.html 'WC_Integration Class'). Using the Integration class will automatically create a new settings page under **WooCommerce > Settings > Integrations** and it will automatically save, and sanitize your data for you. We’ve created this tutorial so you can see how to create a new integration.
 

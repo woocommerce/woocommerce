@@ -1,4 +1,4 @@
-# Theme Design and User Experience Guidelines
+# Theme design and user experience guidelines
 
 This guide covers general guidelines and best practices to follow in order to ensure your theme experience aligns with ecommerce industry standards and WooCommerce for providing a great online shopping experience, maximizing sales, ensuring ease of use, seamless integration, and strong UX adoption.
 

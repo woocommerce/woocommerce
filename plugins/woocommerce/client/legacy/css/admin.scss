@@ -1351,7 +1351,33 @@ table.wc_status_table--tools {
 .wc-logs-single-file-actions {
 	margin-left: auto;
 	display: flex;
+	flex-flow: row wrap;
 	gap: 0.5em;
+}
+
+.wc-logs-search {
+	margin-left: auto;
+	display: flex;
+	flex-flow: column;
+}
+
+.wc-logs-search-fieldset {
+	display: flex;
+	gap: 0.5em;
+	justify-content: flex-end;
+}
+
+.wc-logs-search-notice {
+	font-size: 0.9em;
+	line-height: 2;
+	text-align: right;
+	visibility: hidden;
+	height: 0;
+
+	.wc-logs-search:focus-within & {
+		visibility: visible;
+		height: auto;
+	}
 }
 
 .wc-logs-entries {
@@ -1415,6 +1441,44 @@ table.wc_status_table--tools {
 
 	.log-level {
 		font-size: 100%;
+	}
+}
+
+.wc-logs-search-results {
+	tbody {
+		word-wrap: break-word;
+
+		.column-file_id {
+			line-height: 2;
+		}
+
+		.column-line_number,
+		.column-line {
+			line-height: 2.3;
+		}
+
+		.column-line {
+			font-family: Consolas, Monaco, monospace;
+		}
+	}
+
+	td {
+		vertical-align: middle;
+	}
+
+	.column-file_id {
+		width: 16%;
+	}
+
+	.column-line_number {
+		width: 8%;
+	}
+
+	.search-match {
+		background: #fff8c5;
+		padding: 0.46em 0;
+		border: 1px dashed #c3c4c7;
+		line-height: 2.3;
 	}
 }
 

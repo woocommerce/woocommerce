@@ -1,4 +1,4 @@
-# CSS/Sass Naming Conventions
+# CSS/Sass naming conventions
 
 Table of Contents:
 
