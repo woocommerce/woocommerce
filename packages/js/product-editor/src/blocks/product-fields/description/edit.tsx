@@ -32,9 +32,7 @@ export function DescriptionBlockEdit( {
 	attributes,
 	clientId,
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
-	const blockProps = useWooBlockProps( attributes, {
-		className: 'description-block-wrapper',
-	} );
+	const blockProps = useWooBlockProps( attributes );
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	const [ serializeDescriptionBlocks, setSerializeDescriptionBlocks ] =
 		useEntityProp< string >( 'postType', 'product', 'description' );
@@ -49,7 +47,7 @@ export function DescriptionBlockEdit( {
 
 	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
 
-	const innerBlockProps = useInnerBlocksProps( blockProps );
+	const innerBlockProps = useInnerBlocksProps();
 
 	/*
 	 * Pick the description blocks,
@@ -113,7 +111,7 @@ export function DescriptionBlockEdit( {
 	}, [ clientId, replaceInnerBlocks ] ); // eslint-disable-line
 
 	return (
-		<>
+		<div { ...blockProps }>
 			<BlockControls group="other">
 				<ToolbarButton
 					label={ __( 'Edit Product description', 'woocommerce' ) }
@@ -141,6 +139,6 @@ export function DescriptionBlockEdit( {
 			) }
 
 			{ isModalOpen && <ModalEditorWelcomeGuide /> }
-		</>
+		</div>
 	);
 }
