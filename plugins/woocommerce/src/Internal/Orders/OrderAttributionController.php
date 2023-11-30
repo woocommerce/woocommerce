@@ -202,7 +202,6 @@ class OrderAttributionController implements RegisterHooksInterface {
 		 *
 		 * @param float $lifetime The lifetime of the Sourcebuster cookies in months.
 		 *
-		 * Fractional values are supported.
 		 * The default value forces Sourcebuster into making the cookies valid for the current session only.
 		 */
 		$lifetime = (float) apply_filters( 'wc_order_attribution_cookie_lifetime_months', 0.00001 );
