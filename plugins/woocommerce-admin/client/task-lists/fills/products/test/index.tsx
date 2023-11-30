@@ -4,7 +4,6 @@
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { recordEvent } from '@woocommerce/tracks';
-import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
