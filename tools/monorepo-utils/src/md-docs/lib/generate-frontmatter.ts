@@ -10,7 +10,8 @@ import yaml from 'js-yaml';
  * @param fileContents
  */
 export const generatePostFrontMatter = (
-	fileContents: string
+	fileContents: string,
+	includeContent: boolean = false
 ): {
 	[ key: string ]: unknown;
 } => {
@@ -22,6 +23,7 @@ export const generatePostFrontMatter = (
 		'post_name',
 		'category_title',
 		'category_slug',
+		'content',
 	];
 
 	const frontMatter = matter( fileContents, {
@@ -36,6 +38,9 @@ export const generatePostFrontMatter = (
 	const title = headings[0]?.substring( 2 ).trim();
 
 	frontMatter.data.post_title = frontMatter.data.post_title ?? title;
+	if ( includeContent ) {
+		frontMatter.data.content = frontMatter.content;
+	}
 	return Object.keys( frontMatter.data )
 		.filter( ( key ) => allowList.includes( key ) )
 		.reduce( ( obj, key ) => {
