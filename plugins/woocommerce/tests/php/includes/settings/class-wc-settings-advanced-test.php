@@ -143,8 +143,10 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 		$sut = new WC_Settings_Advanced();
 
 		$expected = array(
-			'legacy_api_options'      => array( 'title', 'sectionend' ),
-			'woocommerce_api_enabled' => 'checkbox',
+			'legacy_api_options'                          => array( 'title', 'sectionend' ),
+			'woocommerce_api_enabled'                     => 'checkbox',
+			'woocommerce_legacy_api_log_enabled'          => 'checkbox',
+			'woocommerce_legacy_api_usage_notice_enabled' => 'checkbox',
 		);
 
 		$settings               = $sut->get_settings_for_section( 'legacy_api' );
