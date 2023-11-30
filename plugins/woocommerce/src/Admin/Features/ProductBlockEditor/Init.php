@@ -49,6 +49,10 @@ class Init {
 			array_push( $this->supported_post_types, 'external' );
 		}
 
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			array_push( $this->supported_post_types, 'grouped' );
+		}
+
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
@@ -175,7 +179,7 @@ class Init {
 			$user_data_fields,
 			array(
 				'variable_product_block_tour_shown',
-				'product_block_variable_options_notice_dismissed',
+				'local_attributes_notice_dismissed_ids',
 				'variable_items_without_price_notice_dismissed',
 			)
 		);

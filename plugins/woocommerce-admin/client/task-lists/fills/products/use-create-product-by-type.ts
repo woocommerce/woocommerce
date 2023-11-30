@@ -25,13 +25,6 @@ export const useCreateProductByType = () => {
 		window.wcAdminFeatures[ 'new-product-management-experience' ];
 
 	const createProductByType = async ( type: ProductTypeKey ) => {
-		if ( type === 'subscription' ) {
-			window.location.href = getAdminLink(
-				'post-new.php?post_type=product&subscription_pointers=true'
-			);
-			return;
-		}
-
 		setIsRequesting( true );
 
 		if (

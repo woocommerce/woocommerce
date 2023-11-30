@@ -82,11 +82,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$this->add_group(
 			array(
-				'id'         => $this::GROUP_IDS['PRICING'],
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => $this::GROUP_IDS['PRICING'],
+				'order'          => 20,
+				'attributes'     => array(
 					'title' => __( 'Pricing', 'woocommerce' ),
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		$this->add_group(
@@ -100,11 +105,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$this->add_group(
 			array(
-				'id'         => $this::GROUP_IDS['SHIPPING'],
-				'order'      => 40,
-				'attributes' => array(
+				'id'             => $this::GROUP_IDS['SHIPPING'],
+				'order'          => 40,
+				'attributes'     => array(
 					'title' => __( 'Shipping', 'woocommerce' ),
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		if ( Features::is_enabled( 'product-variation-management' ) ) {
@@ -311,6 +321,31 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			);
 		}
 
+		// Product list section.
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$product_list_section = $general_group->add_section(
+				array(
+					'id'         => 'product-list-section',
+					'order'      => 35,
+					'attributes' => array(
+						'title'       => __( 'Products in this group', 'woocommerce' ),
+						'description' => __( 'Make a collection of related products, enabling customers to purchase multiple items together.', 'woocommerce' ),
+					),
+				)
+			);
+
+			$product_list_section->add_block(
+				array(
+					'id'         => 'product-list',
+					'blockName'  => 'woocommerce/product-list-field',
+					'order'      => 10,
+					'attributes' => array(
+						'property' => 'grouped_products',
+					),
+				)
+			);
+		}
+
 		// Images section.
 		$images_section = $general_group->add_section(
 			array(
@@ -375,7 +410,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'id'         => 'product-catalog-section',
 				'order'      => 10,
 				'attributes' => array(
-					'title' => __( 'Product catalog', 'woocommerce' ),
+					'title'       => __( 'Product catalog', 'woocommerce' ),
+					'description' => __( 'Help customers find this product by assigning it to categories, adding extra details, and managing its visibility in your store and other channels.', 'woocommerce' ),
 				),
 			)
 		);
@@ -452,7 +488,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'id'         => 'product-attributes-section',
 				'order'      => 20,
 				'attributes' => array(
-					'title' => __( 'Attributes', 'woocommerce' ),
+					'title'       => __( 'Attributes', 'woocommerce' ),
+					'description' => __( 'Add descriptive pieces of information that customers can use to filter and search for this product. <a href="https://woo.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">Learn more</a>.', 'woocommerce' ),
 				),
 			)
 		);
@@ -687,9 +724,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'</a>'
 					),
 				),
-				'hideConditions' => Features::is_enabled( 'product-external-affiliate' ) ? array(
+				'hideConditions' => Features::is_enabled( 'product-external-affiliate' ) || Features::is_enabled( 'product-grouped' ) ? array(
 					array(
-						'expression' => 'editedProduct.type === "external"',
+						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
 					),
 				) : null,
 			)

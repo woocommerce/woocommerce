@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove empty values from the shipping class request so slug can be generated server side

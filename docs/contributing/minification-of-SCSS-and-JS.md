@@ -1,5 +1,7 @@
 
-# Minification of SCSS and JS
+---
+post_title: Minification of SCSS and JS
+---
 
 ## SCSS
 

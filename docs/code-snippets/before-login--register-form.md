@@ -1,4 +1,6 @@
-# Add a message above the login / register form
+---
+post_title: Add a message above the login / register form
+---
 
 This code will add a custom message above the login/register form on the user’s my-account page.
 

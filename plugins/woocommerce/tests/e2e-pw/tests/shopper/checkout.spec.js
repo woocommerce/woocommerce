@@ -133,7 +133,9 @@ test.describe( 'Checkout page', () => {
 			'1'
 		);
 		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
+		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( singleProductPrice )
 		);
@@ -153,7 +155,9 @@ test.describe( 'Checkout page', () => {
 			'2'
 		);
 		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
+		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
@@ -175,7 +179,9 @@ test.describe( 'Checkout page', () => {
 			'3'
 		);
 		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
+		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( threeProductPrice )
 		);
@@ -244,7 +250,9 @@ test.describe( 'Checkout page', () => {
 			'2'
 		);
 		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
+		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
@@ -274,7 +282,9 @@ test.describe( 'Checkout page', () => {
 			'2'
 		);
 		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
+		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
@@ -385,7 +395,9 @@ test.describe( 'Checkout page', () => {
 			'2'
 		);
 		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
+		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
