@@ -1,4 +1,6 @@
-# Performance optimization for WooCommerce stores
+---
+post_title: Performance optimization for WooCommerce stores
+---
 
 ## Introduction
 
