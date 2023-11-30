@@ -121,12 +121,14 @@ class ProductGallery extends AbstractBlock {
 			$classname_single_image = 'is-single-product-gallery-image';
 		}
 
-		$number_of_thumbnails = $block->attributes['thumbnailsNumberOfThumbnails'] ?? 0;
-		$classname            = $attributes['className'] ?? '';
-		$dialog               = isset( $attributes['mode'] ) && 'full' !== $attributes['mode'] ? $this->render_dialog() : '';
-		$post_id              = $block->context['postId'] ?? '';
-		$product              = wc_get_product( $post_id );
-		$product_id           = strval( $product->get_id() );
+		$number_of_thumbnails           = $block->attributes['thumbnailsNumberOfThumbnails'] ?? 0;
+		$classname                      = $attributes['className'] ?? '';
+		$dialog                         = isset( $attributes['mode'] ) && 'full' !== $attributes['mode'] ? $this->render_dialog() : '';
+		$post_id                        = $block->context['postId'] ?? '';
+		$product                        = wc_get_product( $post_id );
+		$product_gallery_first_image    = ProductGalleryUtils::get_product_gallery_image_ids( $product, 1 );
+		$product_gallery_first_image_id = reset( $product_gallery_first_image );
+		$product_id                     = strval( $product->get_id() );
 
 		$html = $this->inject_dialog( $content, $dialog );
 		$p    = new \WP_HTML_Tag_Processor( $html );
@@ -137,8 +139,8 @@ class ProductGallery extends AbstractBlock {
 				'data-wc-context',
 				wp_json_encode(
 					array(
-						'selectedImage'                   => $product->get_image_id(),
-						'firstMainImageId'                => $product->get_image_id(),
+						'selectedImage'                   => $product_gallery_first_image_id,
+						'firstMainImageId'                => $product_gallery_first_image_id,
 						'isDialogOpen'                    => false,
 						'visibleImagesIds'                => ProductGalleryUtils::get_product_gallery_image_ids( $product, $number_of_thumbnails, true ),
 						'dialogVisibleImagesIds'          => ProductGalleryUtils::get_product_gallery_image_ids( $product, null, false ),
