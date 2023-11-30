@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
 
 /**
- * Simple Product Template.
+ * Product Variation Template.
  */
 class ProductVariationTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
 	/**
@@ -28,7 +28,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	const SINGLE_VARIATION_NOTICE_DISMISSED_OPTION = 'woocommerce_single_variation_notice_dismissed';
 
 	/**
-	 * SimpleProductTemplate constructor.
+	 * ProductVariationTemplate constructor.
 	 */
 	public function __construct() {
 		$this->add_group_blocks();

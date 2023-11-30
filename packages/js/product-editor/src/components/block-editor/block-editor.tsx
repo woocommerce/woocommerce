@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
+import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
@@ -22,8 +22,6 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	BlockTools,
-	EditorSettings,
-	EditorBlockListSettings,
 	ObserveTyping,
 } from '@wordpress/block-editor';
 // It doesn't seem to notice the External dependency block whn @ts-ignore is added.
@@ -38,24 +36,10 @@ import {
  * Internal dependencies
  */
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
-import { ProductEditorContext } from '../../types';
 import { PostTypeContext } from '../../contexts/post-type-context';
-import { ModalEditor } from '../modal-editor';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
-
-type BlockEditorSettings = Partial<
-	EditorSettings & EditorBlockListSettings
-> & {
-	templates?: Record< string, Template[] >;
-};
-
-type BlockEditorProps = {
-	context: Partial< ProductEditorContext >;
-	postType: string;
-	productId: number;
-	productType: string;
-	settings: BlockEditorSettings | undefined;
-};
+import { ModalEditor } from '../modal-editor';
+import { BlockEditorProps, BlockEditorSettings } from './types';
 
 export function BlockEditor( {
 	context,
@@ -121,7 +105,7 @@ export function BlockEditor( {
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	useLayoutEffect( () => {
-		const template = settings?.templates?.[ productType ];
+		const template = settings?.templates?.[ postType ];
 
 		if ( ! template ) {
 			return;

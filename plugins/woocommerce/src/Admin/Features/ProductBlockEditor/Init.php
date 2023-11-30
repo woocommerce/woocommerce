@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductEditorPattern;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block;
@@ -38,6 +39,11 @@ class Init {
 	private $redirection_controller;
 
 	/**
+	 * The template data list
+	 */
+	private $template_data_list = array();
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -56,6 +62,8 @@ class Init {
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			add_filter( 'woocommerce_product_editor_get_patterns', array( $this, 'get_product_editor_patterns' ), -999, 1 );
+
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
@@ -215,25 +223,24 @@ class Init {
 		$template_registry     = wc_get_container()->get( BlockTemplateRegistry::class );
 		$block_template_logger = BlockTemplateLogger::get_instance();
 
-		$simple_product_template = $template_registry->get_registered( 'simple-product' );
-		$existing_product_types  = wc_get_product_types();
-
-		// This stablish the relation between the product block template and the product type.
-		// Also this should be moved to a rest api.
-		foreach ( $existing_product_types as $type => $label ) {
-			// The product template id must match the pattern '{product_type}-product' for this to work.
-			$product_template_id                   = "$type-product";
-			$product_template                      = $template_registry->get_registered( $product_template_id );
-			$editor_settings['templates'][ $type ] = is_null( $product_template ) ? $simple_product_template->get_formatted_template() : $product_template->get_formatted_template();
-
-			$block_template_logger->log_template_events_to_file( $product_template_id );
-			$editor_settings['templateEvents'][ $type ] = $block_template_logger->get_formatted_template_events( $product_template_id );
-		}
-
+		$editor_settings['templates']['product']           = $template_registry->get_registered( 'simple-product' )->get_formatted_template();
 		$editor_settings['templates']['product_variation'] = $template_registry->get_registered( 'product-variation' )->get_formatted_template();
+
+		$block_template_logger->log_template_events_to_file( 'simple-product' );
+		$editor_settings['templateEvents']['product'] = $block_template_logger->get_formatted_template_events( 'simple-product' );
 
 		$block_template_logger->log_template_events_to_file( 'product-variation' );
 		$editor_settings['templateEvents']['product_variation'] = $block_template_logger->get_formatted_template_events( 'product-variation' );
+
+		$patterns = apply_filters( 'woocommerce_product_editor_get_patterns', array() );
+
+		usort( $patterns, function ( $a, $b ) {
+			return $a->get_order() - $b->get_order();
+		} );
+
+		$editor_settings['patterns'] = array_map( function ( $pattern ) {
+			return $pattern->get_formatted();
+		}, $patterns );
 
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
 
@@ -241,11 +248,69 @@ class Init {
 	}
 
 	/**
+	 * Get default product patterns.
+	 * 
+	 * @param array @patterns The initial pattarns.
+	 * @return array The default patterns
+	 */
+	public function get_product_editor_patterns( array $patterns ) {
+		$standard_product_pattern = new ProductEditorPattern(
+			'standard-product-pattern',
+			__( 'Standard product', 'woocommerce' ),
+			'simple-product',
+			array(
+				'type' => 'simple',
+			),
+		);
+		$standard_product_pattern->set_description( __( 'A single physical or virtual product, e.g. a t-shirt or an eBook.', 'woocommerce' ) );
+		$standard_product_pattern->set_order( 10 );
+
+		$grouped_product_pattern = new ProductEditorPattern(
+			'grouped-product-pattern',
+			__( 'Grouped product', 'woocommerce' ),
+			'simple-product',
+			array(
+				'type' => 'grouped',
+			),
+		);
+		$grouped_product_pattern->set_description( __( 'A set of products that go well together, e.g. camera kit.', 'woocommerce' ) );
+		$grouped_product_pattern->set_order( 20 );
+
+		$affiliate_product_pattern = new ProductEditorPattern(
+			'affiliate-product-pattern',
+			__( 'Affiliate product', 'woocommerce' ),
+			'simple-product',
+			array(
+				'type' => 'grouped',
+			),
+		);
+		$affiliate_product_pattern->set_description( __( 'A link to a product sold on a different website, e.g. brand collab.', 'woocommerce' ) );
+		$affiliate_product_pattern->set_order( 30 );
+
+		$variable_product_pattern = new ProductEditorPattern(
+			'variable-product-pattern',
+			__( 'Variable product', 'woocommerce' ),
+			'simple-product',
+			array(
+				'type' => 'variable',
+			),
+		);
+		$variable_product_pattern->set_description( __( 'A product with variations like color or size.', 'woocommerce' ) );
+		$variable_product_pattern->set_order( 40 );
+
+		$patterns[] = $standard_product_pattern;
+		$patterns[] = $grouped_product_pattern;
+		$patterns[] = $affiliate_product_pattern;
+		$patterns[] = $variable_product_pattern;
+
+		return $patterns;
+	}
+
+	/**
 	 * Register product editor templates.
 	 */
 	private function register_product_editor_templates() {
 		$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
-
 		$template_registry->register( new SimpleProductTemplate() );
 		$template_registry->register( new ProductVariationTemplate() );
 	}
