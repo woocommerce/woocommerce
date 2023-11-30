@@ -730,8 +730,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					$value_index = array_search( maybe_serialize( $meta_data->value ), $existing_meta_data[ $meta_data->key ], true );
 					if ( false !== $value_index ) {
 						unset( $existing_meta_data[ $meta_data->key ][ $value_index ] );
-						$count = is_countable( $existing_meta_data[ $meta_data->key ] ) ? count( $existing_meta_data[ $meta_data->key ] ) : 0;
-						if ( 0 === $count ) {
+						if ( 0 === count( $existing_meta_data[ $meta_data->key ] ) ) {
 							unset( $existing_meta_data[ $meta_data->key ] );
 						}
 						continue;
