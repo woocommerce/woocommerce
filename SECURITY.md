@@ -36,3 +36,5 @@ We're committed to working with security researchers to resolve the vulnerabilit
 *   Be Patient - Give us a reasonable time to correct the issue before you disclose the vulnerability.
 
 We also expect you to comply with all applicable laws. You're responsible to pay any taxes associated with your bounties.
+
+Trigger CI
