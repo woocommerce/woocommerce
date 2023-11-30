@@ -125,7 +125,7 @@ class FileTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Check that get_stream returns a PHP resource representation of the file.
 	 */
-	public function test_get_stream() {
+	public function test_get_and_close_stream() {
 		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-2023-10-23-' . wp_hash( 'cheddar' ) . '.log';
 		$resource = fopen( $filename, 'a' );
 		fclose( $resource );
@@ -134,6 +134,10 @@ class FileTest extends WC_Unit_Test_Case {
 		$stream = $file->get_stream();
 
 		$this->assertTrue( is_resource( $stream ) );
+
+		$file->close_stream();
+
+		$this->assertFalse( is_resource( $stream ) );
 	}
 
 	/**
@@ -141,7 +145,7 @@ class FileTest extends WC_Unit_Test_Case {
 	 */
 	public function test_delete() {
 		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-' . wp_hash( 'cheddar' ) . '.5.log';
-		$resource = fopen( $filename, 'a' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		$resource = fopen( $filename, 'a' );
 		fclose( $resource );
 		$file = new File( $filename );
 

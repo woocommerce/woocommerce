@@ -1,4 +1,4 @@
-# User Experience Guidelines: Notices
+# User experience guidelines: notices
 
 ## Notices
 

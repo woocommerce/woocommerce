@@ -1,4 +1,4 @@
-# User Experience Guidelines: Best Practices
+# User experience guidelines: best practices
 
 ## Best practices
 

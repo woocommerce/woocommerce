@@ -1,4 +1,4 @@
-# User Experience Guidelines: Onboarding 
+# User experience guidelines: onboarding
 
 ## Onboarding
 
