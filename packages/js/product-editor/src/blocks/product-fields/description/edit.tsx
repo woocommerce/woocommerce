@@ -47,7 +47,32 @@ export function DescriptionBlockEdit( {
 
 	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
 
-	const innerBlockProps = useInnerBlocksProps();
+	const innerBlockProps = useInnerBlocksProps(
+		{},
+		{
+			template: [
+				'core/paragraph',
+				{
+					placeholder: __(
+						'Add a description for this product. Type / to add a block that may contain text, images, or video.',
+						'woocommerce'
+					),
+				},
+			],
+			templateLock: false,
+			allowedBlocks: [
+				'core/paragraph',
+				'core/heading',
+				'core/list',
+				'core/image',
+				'core/video',
+				'core/cover',
+				'core/columns',
+				'core/media-text',
+				'jetpack/videopress',
+			],
+		}
+	);
 
 	/*
 	 * Pick the description blocks,
@@ -83,7 +108,7 @@ export function DescriptionBlockEdit( {
 			[
 				createBlock( 'core/paragraph', {
 					placeholder: __(
-						'Add a description for this product.',
+						'Add a description for this product. Type / to chose a block',
 						'woocommerce'
 					),
 				} ),
