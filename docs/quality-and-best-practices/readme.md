@@ -1,5 +1,5 @@
 ---
-category_title: Quality Practices Best And 
+category_title: Quality And Best Practices  
 category_slug: quality-and-best-practices
 post_title: Quality and best practices
 ---
