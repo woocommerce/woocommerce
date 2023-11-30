@@ -11,7 +11,7 @@ import yaml from 'js-yaml';
  */
 export const generatePostFrontMatter = (
 	fileContents: string,
-	includeContent: boolean = false
+	includeContent: false
 ): {
 	[ key: string ]: unknown;
 } => {
@@ -34,8 +34,10 @@ export const generatePostFrontMatter = (
 		},
 	} );
 	const content = frontMatter.content.split( '\n' );
-	const headings = content.filter( ( line ) => line.substring( 0, 2 ) === '# ' );
-	const title = headings[0]?.substring( 2 ).trim();
+	const headings = content.filter(
+		( line ) => line.substring( 0, 2 ) === '# '
+	);
+	const title = headings[ 0 ]?.substring( 2 ).trim();
 
 	frontMatter.data.post_title = frontMatter.data.post_title ?? title;
 	if ( includeContent ) {
