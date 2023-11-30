@@ -8,6 +8,8 @@
  * @since    2.6
  */
 
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -16,6 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Legacy API.
  */
 class WC_Legacy_API {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * This is the major version for the REST API and takes
@@ -47,6 +51,8 @@ class WC_Legacy_API {
 	 */
 	public function init() {
 		add_action( 'parse_request', array( $this, 'handle_rest_api_requests' ), 0 );
+		self:$this->mark_method_as_accessible( 'display_legacy_wc_api_usage_notice' );
+		self::add_action('admin_notices', array( $this, 'display_legacy_wc_api_usage_notice' ), 0);
 	}
 
 	/**
@@ -60,6 +66,58 @@ class WC_Legacy_API {
 		$vars[] = 'wc-api-version'; // Deprecated since 2.6.0.
 		$vars[] = 'wc-api-route'; // Deprecated since 2.6.0.
 		return $vars;
+	}
+
+	/**
+	 * Write a log entry, and/or update the last usage options, for a Legacy REST API request
+	 * if the appropriate settings dictate so.
+	 *
+	 * @param string $route The Legacy REST API route requested.
+	 * @param string|null $user_agent The content of the user agent HTTP header in the request, null if not available.
+	 */
+	private function maybe_log_rest_api_request(string $route, ?string $user_agent) {
+		$user_agent = $user_agent ?? 'unknown';
+
+		$write_log_entry = 'yes' === get_option('woocommerce_legacy_api_log_enabled') && function_exists('wc_get_logger');
+		if(!$write_log_entry && 'yes' !== get_option('woocommerce_legacy_api_usage_notice_enabled')) {
+			return;
+		}
+
+		$stored_api_accesses = get_option('wc_legacy_rest_usages', []);
+		$stored_api_accesses_for_user_agent_and_route = $stored_api_accesses[$user_agent][$route] ?? null;
+		$current_date = wp_date( 'Y-m-d H:i:s' );
+		if(is_null($stored_api_accesses_for_user_agent_and_route)) {
+			$stored_api_accesses[$user_agent][$route] = [
+				'version'    => WC_API_REQUEST_VERSION,
+				'first_date' => $current_date,
+				'last_date'   => $current_date,
+				'count' => 1,
+				'logged' => $write_log_entry
+			];
+		}
+		else {
+			$stored_api_accesses[$user_agent][$route]['version'] = WC_API_REQUEST_VERSION;
+			$stored_api_accesses[$user_agent][$route]['count']++;
+			$previous_last_date = $stored_api_accesses[$user_agent][$route]['last_date'];
+			$stored_api_accesses[$user_agent][$route]['last_date'] = $current_date;
+			$was_logged = $stored_api_accesses[$user_agent][$route]['logged'];
+			$write_log_entry =
+				$write_log_entry &&
+				(!$stored_api_accesses[$user_agent][$route]['logged'] || (substr($current_date, 0, 10) !== substr($previous_last_date, 0, 10)));
+
+			// If not logged in the past and we log it now, update 'logged' to true.
+			// But if it was logged in the past and we don't log it now, keep 'logged' as true.
+			if(!$was_logged && $write_log_entry) {
+				$stored_api_accesses[$user_agent][$route]['logged'] = true;
+			}
+		}
+
+		if($write_log_entry) {
+			wc_get_logger()->info( 'LEGACY REST API USAGE DETECTED (version ' . WC_API_REQUEST_VERSION . "): $route (User agent: $user_agent)", ['source' => 'legacy_rest_api_usages'] );
+		}
+
+		update_option('wc_legacy_rest_usages', $stored_api_accesses);
+		update_option('wc_legacy_rest_last_usage', array_merge($stored_api_accesses[$user_agent][$route], ['user_agent' => $user_agent, 'route' => $route]));
 	}
 
 	/**
@@ -90,31 +148,68 @@ class WC_Legacy_API {
 			$wp->query_vars['wc-api-route'] = $_GET['wc-api-route'];
 		}
 
-		// REST API request.
-		if ( ! empty( $wp->query_vars['wc-api-version'] ) && ! empty( $wp->query_vars['wc-api-route'] ) ) {
-
-			wc_maybe_define_constant( 'WC_API_REQUEST', true );
-			wc_maybe_define_constant( 'WC_API_REQUEST_VERSION', absint( $wp->query_vars['wc-api-version'] ) );
-
-			// Legacy v1 API request.
-			if ( 1 === WC_API_REQUEST_VERSION ) {
-				$this->handle_v1_rest_api_request();
-			} elseif ( 2 === WC_API_REQUEST_VERSION ) {
-				$this->handle_v2_rest_api_request();
-			} else {
-				$this->includes();
-
-				$this->server = new WC_API_Server( $wp->query_vars['wc-api-route'] );
-
-				// load API resource classes.
-				$this->register_resources( $this->server );
-
-				// Fire off the request.
-				$this->server->serve_request();
-			}
-
-			exit;
+		if ( empty( $wp->query_vars['wc-api-version'] ) || empty( $wp->query_vars['wc-api-route'] ) ) {
+			return;
 		}
+
+		// REST API request.
+
+		wc_maybe_define_constant( 'WC_API_REQUEST', true );
+		wc_maybe_define_constant( 'WC_API_REQUEST_VERSION', absint( $wp->query_vars['wc-api-version'] ) );
+
+		$route = $wp->query_vars['wc-api-route'];
+		$this->maybe_log_rest_api_request($route, $_SERVER['HTTP_USER_AGENT'] ?? null);
+
+		// Legacy v1 API request.
+		if ( 1 === WC_API_REQUEST_VERSION ) {
+			$this->handle_v1_rest_api_request();
+		} elseif ( 2 === WC_API_REQUEST_VERSION ) {
+			$this->handle_v2_rest_api_request();
+		} else {
+			$this->includes();
+
+			$this->server = new WC_API_Server( $route );
+
+			// load API resource classes.
+			$this->register_resources( $this->server );
+
+			// Fire off the request.
+			$this->server->serve_request();
+		}
+	}
+
+	/**
+	 * Display an admin notice with information about the last Legacy REST API usage,
+	 * if available and if the appropriate setting dictates so.
+	 */
+	private function display_legacy_wc_api_usage_notice(): void {
+		if('yes' !== get_option('woocommerce_legacy_api_usage_notice_enabled')) {
+			return;
+		}
+
+		$legacy_usage = get_option( 'wc_legacy_rest_last_usage' );
+
+		if ( ! is_array( $legacy_usage ) ) {
+			return;
+		}
+
+		$usage    = array_map( 'esc_html', $legacy_usage );
+
+		printf(
+			__("<div class='notice'>
+					<p><strong>ⓘ LEGACY REST API USAGE DETECTED</strong></p>
+					<p>Last usage recorded:</p>
+					<p>
+						API version: <kbd>%s</kbd> |
+						Route: <kbd>%s</kbd> |
+						Agent: <kbd>%s</kbd> |
+						Date and time: <kbd>%s</kbd>
+					</p>
+					<p>Total usages of <kbd>%s</kbd> by <kbd>%s</kbd> recorded: <strong>%s</strong>
+				</p></div>",
+				'woocommerce'),
+			$usage['version'], $usage['route'], $usage['user_agent'], $usage['last_date'], $usage['route'], $usage['user_agent'], $usage['count']
+		);
 	}
 
 	/**

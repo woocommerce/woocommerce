@@ -412,6 +412,21 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				),
 				$enable_legacy_api_setting,
 				array(
+					'title'    => __( 'Log Legacy API accesses', 'woocommerce' ),
+					'desc'     => __( 'Write a log entry when a Legacy REST API usage is detected, and display an admin notice for the last usage detected', 'woocommerce' ),
+					'desc_tip' => __( 'The log file name will start with <kbd>legacy_rest_api_usages_&lt;date&gt;</kbd>. Only one entry per combination of user agent and route will be logged per day.', 'woocommerce' ),
+					'id'       => 'woocommerce_legacy_api_log_enabled',
+					'type'     => 'checkbox',
+					'default'  => 'no',
+				),
+				array(
+					'title'   => __( 'Show notice for Legacy API usage', 'woocommerce' ),
+					'desc'    => __( 'Show a notice in the admin area with information about the last usage of the Legacy REST API usage detected', 'woocommerce' ),
+					'id'      => 'woocommerce_legacy_api_usage_notice_enabled',
+					'type'    => 'checkbox',
+					'default' => 'no',
+				),
+				array(
 					'type' => 'sectionend',
 					'id'   => 'legacy_api_options',
 				),
