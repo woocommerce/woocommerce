@@ -143,7 +143,8 @@ export const DateTimePickerControl = forwardRef(
 		const formatDateTimeForDisplay = useCallback(
 			( dateTime: Moment ) => {
 				return dateTime.isValid()
-					? formatDate( displayFormat, dateTime.local() )
+					? // @ts-expect-error TODO - fix this type error with moment
+					  formatDate( displayFormat, dateTime.local() )
 					: dateTime.creationData().input?.toString() || '';
 			},
 			[ displayFormat ]
