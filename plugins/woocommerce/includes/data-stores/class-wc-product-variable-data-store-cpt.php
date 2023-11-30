@@ -494,8 +494,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$children = $product->get_children();
 
 		if ( $children ) {
-			$children_count = is_countable( $children ) ? count( $children ) : 0;
-			$format     = array_fill( 0, $children_count, '%d' );
+			$format     = array_fill( 0, count( $children ), '%d' );
 			$query_in   = '(' . implode( ',', $format ) . ')';
 			$query_args = array( 'stock_status' => $status ) + $children;
 			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
@@ -561,9 +560,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$changed  = false;
 
 			if ( $children ) {
-				$children_count   = is_countable( $children ) ? count( $children ) : 0;
 				$status           = $product->get_stock_status();
-				$format           = array_fill( 0, $children_count, '%d' );
+				$format           = array_fill( 0, count( $children ), '%d' );
 				$query_in         = '(' . implode( ',', $format ) . ')';
 				$managed_children = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN {$query_in}", $children ) ) ); // @codingStandardsIgnoreLine.
 				foreach ( $managed_children as $managed_child ) {
