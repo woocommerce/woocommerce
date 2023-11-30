@@ -14,6 +14,44 @@
 	.wc-blocks-incompatible-extensions-notice__content {
 		display: flex;
 
+		details {
+			margin: 0;
+
+			&[open] {
+				margin: 0 0 $gap;
+
+				summary {
+					svg {
+						transform: rotate(180deg);
+					}
+				}
+			}
+
+			summary {
+				display: block; // Remove marker for non Webkit-based browsers.
+				cursor: pointer;
+				text-decoration: underline;
+				margin: 0 0 $gap;
+
+				span {
+					color: $gray-700;
+					text-decoration: underline; // Ensure text-decoration works in Safari.
+				}
+
+				&::-webkit-details-marker {
+					display: none; // Remove marker for Webkit-based browsers.
+				}
+
+				svg {
+					width: 24px;
+					height: 24px;
+					position: relative;
+					top: 6px;
+					fill: $gray-700;
+				}
+			}
+		}
+
 		.wc-blocks-incompatible-extensions-notice__warning-icon {
 			width: 24px;
 			height: 24px;
@@ -22,7 +60,7 @@
 		}
 	}
 	ul {
-		margin: 0 0 1em 1.2em;
+		margin: 0 0 0 1.2em;
 		padding: 0;
 		list-style: disc outside;
 	}

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import {
 	Notice,
 	ExternalLink,
@@ -15,7 +15,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { Alert } from '@woocommerce/icons';
-import { Icon } from '@wordpress/icons';
+import { Icon, chevronDown } from '@wordpress/icons';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { createBlock, BlockInstance } from '@wordpress/blocks';
 import { store as noticesStore } from '@wordpress/notices';
@@ -54,8 +54,8 @@ export function IncompatibleExtensionsNotice( {
 	const [
 		isVisible,
 		dismissNotice,
-		incompatiblePaymentMethods,
-		numberOfIncompatiblePaymentMethods,
+		incompatibleExtensions,
+		incompatibleExtensionsCount,
 	] = useCombinedIncompatibilityNotice( block );
 	const [ isOpen, setOpen ] = useState( false );
 	const openModal = () => setOpen( true );
@@ -95,7 +95,7 @@ export function IncompatibleExtensionsNotice( {
 
 	const noticeContent = (
 		<>
-			{ numberOfIncompatiblePaymentMethods > 1
+			{ incompatibleExtensionsCount > 1
 				? createInterpolateElement(
 						__(
 							'Some active extensions do not yet support this block. This may impact the shopper experience. <a>Learn more</a>',
@@ -114,7 +114,7 @@ export function IncompatibleExtensionsNotice( {
 								'<strong>%s</strong> does not yet support this block. This may impact the shopper experience. <a>Learn more</a>',
 								'woo-gutenberg-products-block'
 							),
-							Object.values( incompatiblePaymentMethods )[ 0 ]
+							Object.values( incompatibleExtensions )[ 0 ]
 						),
 						{
 							strong: <strong />,
@@ -138,6 +138,9 @@ export function IncompatibleExtensionsNotice( {
 		}
 	};
 
+	const entries = Object.entries( incompatibleExtensions );
+	const remainingEntries = entries.length - 2;
+
 	return (
 		<Notice
 			className="wc-blocks-incompatible-extensions-notice"
@@ -152,20 +155,49 @@ export function IncompatibleExtensionsNotice( {
 				/>
 				<div>
 					<p>{ noticeContent }</p>
-					{ numberOfIncompatiblePaymentMethods > 1 && (
+					{ incompatibleExtensionsCount > 1 && (
 						<ul>
-							{ Object.entries( incompatiblePaymentMethods ).map(
-								( [ id, title ] ) => (
+							{ entries.slice( 0, 2 ).map( ( [ id, title ] ) => (
+								<li
+									key={ id }
+									className="wc-blocks-incompatible-extensions-notice__element"
+								>
+									{ title }
+								</li>
+							) ) }
+						</ul>
+					) }
+
+					{ entries.length > 2 && (
+						<details>
+							<summary>
+								<span>
+									{ sprintf(
+										// translators: %s is the number of incompatible extensions.
+										_n(
+											'%s more incompatibility',
+											'%s more incompatibilites',
+											remainingEntries,
+											'woo-gutenberg-products-block'
+										),
+										remainingEntries
+									) }
+								</span>
+								<Icon icon={ chevronDown } />
+							</summary>
+							<ul>
+								{ entries.slice( 2 ).map( ( [ id, title ] ) => (
 									<li
 										key={ id }
 										className="wc-blocks-incompatible-extensions-notice__element"
 									>
 										{ title }
 									</li>
-								)
-							) }
-						</ul>
+								) ) }
+							</ul>
+						</details>
 					) }
+
 					<Button
 						variant={ 'secondary' }
 						onClick={ () => {
