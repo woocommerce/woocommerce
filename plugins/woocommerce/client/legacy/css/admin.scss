@@ -202,7 +202,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 	}
 
 	.update-plugins .update-count {
-		background-color: var(--wp-admin-theme-color);
+		background-color: var(--wp-admin-theme-color, #d54e21);
 		border-radius: 10px;
 		color: #fff;
 		display: inline-block;
@@ -477,7 +477,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 
 		.addon-product-group-see-more,
 		.addon-product-group-see-more:visited {
-			color: var(--wp-admin-theme-color);
+			color: var(--wp-admin-theme-color, #007cba);
 			/* Primary / Blue */
 			display: block;
 			font-size: 13px;
@@ -582,7 +582,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 
 				h2,
 				h3 {
-					color: var(--wp-admin-theme-color);
+					color: var(--wp-admin-theme-color, #007cba);
 					font-size: 20px;
 					font-weight: 400;
 					letter-spacing: -0.32px;
@@ -620,7 +620,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 					}
 
 					h2 {
-						color: var(--wp-admin-theme-color);
+						color: var(--wp-admin-theme-color, #2c3338);
 					}
 				}
 
@@ -718,8 +718,8 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 
 				.button {
 					background-color: #fff;
-					border-color: var(--wp-admin-theme-color);
-					color: var(--wp-admin-theme-color);
+					border-color: var(--wp-admin-theme-color, #007cba);
+					color: var(--wp-admin-theme-color, #007cba);
 					float: right;
 					font-size: 13px;
 					height: 36px;
@@ -857,7 +857,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 	max-width: 1200px;
 
 	.update-plugins .update-count {
-		background-color: var(--wp-admin-theme-color);
+		background-color: var(--wp-admin-theme-color, #d54e21);
 		border-radius: 10px;
 		color: #fff;
 		display: inline-block;
@@ -912,7 +912,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 	overflow: hidden;
 
 	&.updated {
-		border-left-color: var(--wp-admin-theme-color) !important;
+		border-left-color: var(--wp-admin-theme-color, #7F54B3) !important;
 	}
 
 	a.skip,
@@ -3057,7 +3057,7 @@ ul.wc_coupon_list_block {
 			}
 
 			&:hover {
-				border: 2px solid var(--wp-admin-theme-color);
+				border: 2px solid var(--wp-admin-theme-color, #00a0d2);
 			}
 		}
 
@@ -4115,7 +4115,6 @@ table.wc_shipping {
 
 	.wc-backbone-modal-main article {
 		padding: 0 32px 32px 32px;
-		
 	}
 
 	.wc-backbone-modal-main header{
@@ -4124,7 +4123,6 @@ table.wc_shipping {
 
 	.wc-backbone-modal-main footer {
 		padding: 20px 32px 12px 32px;
-		
 	}
 
 	.wc-backbone-modal-main .wc-backbone-modal-header h1 {
@@ -4168,7 +4166,6 @@ table.wc_shipping {
 				display: none;
 			}
 		}
-		
 	}
 
 	.wc-shipping-method-add-class-costs {
@@ -4186,7 +4183,7 @@ table.wc_shipping {
 			height: 1px;
 			overflow: hidden;
 			position: absolute;
-			white-space: nowrap; 
+			white-space: nowrap;
 			width: 1px;
 
 			&:checked + label {
@@ -4237,7 +4234,7 @@ table.wc_shipping {
 			font-size: 24px;
 		}
 	}
-	
+
 	.wc-shipping-zone-method-fields {
 
 		& > label {
@@ -4258,7 +4255,7 @@ table.wc_shipping {
 			margin-bottom: 24px;
 			position: relative;
 
-			input, 
+			input,
 			select {
 				margin: 6px 0;
 				padding: 12px;
@@ -4362,7 +4359,7 @@ table {
 	.edit {
 		margin: 5px 0;
 	}
-	
+
 	.edit > input,
 	.edit > select {
 		width: 100%;
@@ -4390,7 +4387,7 @@ table {
 	}
 }
 
-.wc-shipping-class-hide-sibling-view + .view { 
+.wc-shipping-class-hide-sibling-view + .view {
 	display: none;
 }
 
@@ -4402,7 +4399,7 @@ table {
 		display: inline-block;
 		margin: 0 12px;
 	}
-} 
+}
 
 .wc-shipping-zone-heading-help-text {
 	max-width: 800px;
@@ -4508,7 +4505,7 @@ table.wc-shipping-classes {
 
 		p,
 		li {
-			color: var(--wc-secondary-text);
+			color: var(--wc-secondary-text, #7F54B3);
 			font-size: 1.2em;
 			line-height: 1.2em;
 			margin: 0 0 1.5em;
@@ -4755,8 +4752,8 @@ table.wc-shipping-classes {
 .woocommerce-input-toggle {
 	height: 16px;
 	width: 32px;
-	border: 2px solid var(--wp-admin-theme-color);
-	background-color: var(--wp-admin-theme-color);
+	border: 2px solid var(--wp-admin-theme-color, #7F54B3);
+	background-color: var(--wp-admin-theme-color, #7F54B3);
 	display: inline-block;
 	text-indent: -9999px;
 	border-radius: 10em;
@@ -4872,7 +4869,7 @@ img.help_tip {
 
 .status-enabled::before {
 	@include icon("\e015");
-	color: var(--wp-admin-theme-color);
+	color: var(--wp-admin-theme-color, $woocommerce);
 }
 
 .status-disabled::before {
@@ -4897,7 +4894,7 @@ img.help_tip {
 		margin-left: 0.5em;
 
 		a {
-			color: var(--wp-admin-theme-color);
+			color: var(--wp-admin-theme-color, $woocommerce);
 		}
 	}
 
@@ -8045,21 +8042,21 @@ table.bar_chart {
 		}
 
 		li.active {
-			border-color: var(--wp-admin-theme-color);
-			color: var(--wp-admin-theme-color);
+			border-color: var(--wp-admin-theme-color, $woocommerce);
+			color: var(--wp-admin-theme-color, $woocommerce);
 
 			&::before {
-				border-color: var(--wp-admin-theme-color);
+				border-color: var(--wp-admin-theme-color, $woocommerce);
 			}
 		}
 
 		li.done {
-			border-color: var(--wp-admin-theme-color);
-			color: var(--wp-admin-theme-color);
+			border-color: var(--wp-admin-theme-color, $woocommerce);
+			color: var(--wp-admin-theme-color, $woocommerce);
 
 			&::before {
-				border-color: var(--wp-admin-theme-color);
-				background: var(--wp-admin-theme-color);
+				border-color: var(--wp-admin-theme-color, $woocommerce);
+				background: var(--wp-admin-theme-color, $woocommerce);
 			}
 		}
 	}
@@ -8225,21 +8222,21 @@ table.bar_chart {
 		progress::-webkit-progress-value {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
-			background: var(--wp-admin-theme-color);
+			background: var(--wp-admin-theme-color, $woocommerce);
 			transition: width 1s ease;
 		}
 
 		progress::-moz-progress-bar {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
-			background: var(--wp-admin-theme-color);
+			background: var(--wp-admin-theme-color, $woocommerce);
 			transition: width 1s ease;
 		}
 
 		progress::-ms-fill {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
-			background: var(--wp-admin-theme-color);
+			background: var(--wp-admin-theme-color, $woocommerce);
 			transition: width 1s ease;
 		}
 
@@ -8332,7 +8329,7 @@ table.bar_chart {
 
 			&::before {
 				@include icon("\e015");
-				color: var(--wp-admin-theme-color);
+				color: var(--wp-admin-theme-color, $woocommerce);
 				position: static;
 				font-size: 100px;
 				display: block;
@@ -8443,8 +8440,8 @@ table.bar_chart {
 					margin: 12px 12px 0 0;
 
 					&.current {
-						background: var(--wp-admin-theme-color);
-						border: 1px solid var(--wp-admin-theme-color);
+						background: var(--wp-admin-theme-color, #007cba);
+						border: 1px solid var(--wp-admin-theme-color, #007cba);
 
 						a {
 							color: #fff;
