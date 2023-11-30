@@ -22,6 +22,11 @@ module.exports = {
 		],
 	},
 	resolve: {
+		alias: {
+			// https://github.com/facebook/react/issues/20235
+			'react/jsx-dev-runtime': 'react/jsx-dev-runtime.js',
+			'react/jsx-runtime': 'react/jsx-runtime.js',
+		},
 		extensions: [ '.js', '.jsx', '.tsx', '.ts' ],
 		fallback: {
 			stream: false,

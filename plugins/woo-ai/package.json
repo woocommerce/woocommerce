@@ -51,6 +51,7 @@
 		"@wordpress/preferences": "wp-6.3",
 		"debug": "^4.3.3",
 		"prop-types": "^15.8.1",
+		"react-markdown": "^9.0.1",
 		"react-query": "^3.39.3"
 	},
 	"peerDependencies": {

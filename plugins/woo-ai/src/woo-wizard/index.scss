@@ -38,6 +38,9 @@ $toned-down-purple: mix(white, $woocommerce-purple, 50%); // 50% white
 				align-self: flex-start; // Align to the left
 				border-top-left-radius: 2px; // Adjust for speech bubble effect
 			}
+			p {
+				margin: 0;
+			}
 		}
 	}
 	form.chat-form {

@@ -7,6 +7,7 @@ import { useDispatch, select } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 import apiFetch from '@wordpress/api-fetch';
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
+import ReactMarkdown from 'react-markdown';
 
 /**
  * Internal dependencies
@@ -278,7 +279,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 						key={ index }
 						className={ `message ${ message.sender }` }
 					>
-						{ message.text }
+						<ReactMarkdown>{ message.text }</ReactMarkdown>
 					</div>
 				) ) }
 			</div>
