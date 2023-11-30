@@ -11,7 +11,7 @@ import yaml from 'js-yaml';
  */
 export const generatePostFrontMatter = (
 	fileContents: string,
-	includeContent: false
+	includeContent?: boolean
 ): {
 	[ key: string ]: unknown;
 } => {
@@ -40,7 +40,7 @@ export const generatePostFrontMatter = (
 	const title = headings[ 0 ]?.substring( 2 ).trim();
 
 	frontMatter.data.post_title = frontMatter.data.post_title ?? title;
-	if ( includeContent ) {
+	if ( includeContent ?? false ) {
 		frontMatter.data.content = frontMatter.content;
 	}
 	return Object.keys( frontMatter.data )
