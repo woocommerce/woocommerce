@@ -193,22 +193,31 @@ class WC_Legacy_API {
 			return;
 		}
 
-		$usage    = array_map( 'esc_html', $legacy_usage );
+		$usage = array_map( 'esc_html', $legacy_usage );
 
 		printf(
-			__("<div class='notice'>
-					<p><strong>ⓘ LEGACY REST API USAGE DETECTED</strong></p>
-					<p>Last usage recorded:</p>
-					<p>
-						API version: <kbd>%s</kbd> |
-						Route: <kbd>%s</kbd> |
-						Agent: <kbd>%s</kbd> |
-						Date and time: <kbd>%s</kbd>
-					</p>
-					<p>Total usages of <kbd>%s</kbd> by <kbd>%s</kbd> recorded: <strong>%s</strong>
-				</p></div>",
-				'woocommerce'),
-			$usage['version'], $usage['route'], $usage['user_agent'], $usage['last_date'], $usage['route'], $usage['user_agent'], $usage['count']
+			/* translators: 1: API version number, 2: request route, 3: user agent string, 4: ISO-formatted date and time, 5: request route, 6: user agent string, 7: usages count */
+			__(
+				"<div class='notice'>
+                    <p><strong>ⓘ LEGACY REST API USAGE DETECTED</strong></p>
+                    <p>Last usage recorded:</p>
+                    <p>
+                        API version: <kbd>%1\$s</kbd> |
+                        Route: <kbd>%2\$s</kbd> |
+                        Agent: <kbd>%3\$s</kbd> |
+                        Date and time: <kbd>%4\$s</kbd>
+                    </p>
+                    <p>Total usages of <kbd>%5\$s</kbd> by <kbd>%6\$s</kbd> recorded: <strong>%7\$s</strong>
+                </p></div>",
+				'woocommerce'
+			),
+			$usage['version'],
+			$usage['route'],
+			$usage['user_agent'],
+			$usage['last_date'],
+			$usage['route'],
+			$usage['user_agent'],
+			$usage['count']
 		);
 	}
 
