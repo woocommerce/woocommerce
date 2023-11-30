@@ -7,6 +7,7 @@ import {
 	useEffect,
 	useMemo,
 	useState,
+	Fragment,
 } from '@wordpress/element';
 import {
 	BlockAttributes,
@@ -14,12 +15,12 @@ import {
 	parse,
 	serialize,
 } from '@wordpress/blocks';
-import { Button } from '@wordpress/components';
+import { ToolbarButton } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useInnerBlocksProps } from '@wordpress/block-editor';
+import { BlockControls, useInnerBlocksProps } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
@@ -31,7 +32,9 @@ export function DescriptionBlockEdit( {
 	attributes,
 	clientId,
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
-	const blockProps = useWooBlockProps( attributes );
+	const blockProps = useWooBlockProps( attributes, {
+		className: 'description-block-wrapper',
+	} );
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	const [ serializeDescriptionBlocks, setSerializeDescriptionBlocks ] =
 		useEntityProp< string >( 'postType', 'product', 'description' );
@@ -46,7 +49,7 @@ export function DescriptionBlockEdit( {
 
 	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
 
-	const innerBlockProps = useInnerBlocksProps();
+	const innerBlockProps = useInnerBlocksProps( blockProps );
 
 	/*
 	 * Pick the description blocks,
@@ -110,20 +113,20 @@ export function DescriptionBlockEdit( {
 	}, [ clientId, replaceInnerBlocks ] ); // eslint-disable-line
 
 	return (
-		<div { ...blockProps }>
-			<div { ...innerBlockProps } />
+		<>
+			<BlockControls group="other">
+				<ToolbarButton
+					label={ __( 'Edit Product description', 'woocommerce' ) }
+					onClick={ () => {
+						setIsModalOpen( true );
+						recordEvent( 'product_add_description_click' );
+					} }
+				>
+					{ __( 'Full editor', 'woocommerce' ) }
+				</ToolbarButton>
+			</BlockControls>
 
-			<Button
-				variant="secondary"
-				onClick={ () => {
-					setIsModalOpen( true );
-					recordEvent( 'product_add_description_click' );
-				} }
-			>
-				{ serializeDescriptionBlocks.length
-					? __( 'Edit description', 'woocommerce' )
-					: __( 'Add description', 'woocommerce' ) }
-			</Button>
+			<div { ...innerBlockProps } />
 
 			{ isModalOpen && (
 				<ModalEditor
@@ -136,7 +139,8 @@ export function DescriptionBlockEdit( {
 					title={ __( 'Edit description', 'woocommerce' ) }
 				/>
 			) }
+
 			{ isModalOpen && <ModalEditorWelcomeGuide /> }
-		</div>
+		</>
 	);
 }
