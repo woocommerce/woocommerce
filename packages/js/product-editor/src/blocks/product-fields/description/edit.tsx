@@ -6,9 +6,11 @@ import { BlockInstance, serialize } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { useEntityProp } from '@wordpress/core-data';
+import { __ } from '@wordpress/i18n';
 import {
 	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
+	BlockControls,
 } from '@wordpress/block-editor';
 
 /**
@@ -18,6 +20,7 @@ import { ContentPreview } from '../../../components/content-preview';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
 import { store } from '../../../store/product-editor-ui';
 import type { DescriptionBlockEditComponent } from './types';
+import FullEditorToolbarButton from './components/full-editor-toolbar-button';
 
 /**
  * Internal dependencies
@@ -89,7 +92,15 @@ export function DescriptionBlockEdit( {
 
 	return (
 		<div { ...blockProps }>
-			<div { ...innerBlockProps } />
+			{ description.length && (
+				<BlockControls>
+					<FullEditorToolbarButton
+						text={ __( 'Edit in full editor', 'woocommerce' ) }
+					/>
+				</BlockControls>
+			) }
+
+			{ ! description.length && <div { ...innerBlockProps } /> }
 
 			{ !! description.length && (
 				<ContentPreview content={ description } />
