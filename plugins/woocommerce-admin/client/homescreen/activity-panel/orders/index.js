@@ -103,6 +103,7 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 			<>
 				{ interpolateComponents( {
 					mixedString: sprintf(
+						/* translators: 1: order number, 2: customer name */
 						__(
 							'{{orderLink}}Order #%(orderNumber)s{{/orderLink}} %(customerString)s',
 							'woocommerce'
@@ -175,6 +176,7 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 					<div>
 						<span>
 							{ sprintf(
+								/* translators: %d: number of products */
 								_n(
 									'%d product',
 									'%d products',

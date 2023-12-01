@@ -1,10 +1,12 @@
-# Product Editor Development Handbook
+---
+post_title: Product Editor Development Handbook
+---
 
 > ⚠️ **Notice:** This documentation is currently a **work in progress**. Please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
 
 This handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.
 
-The product editor's UI consists of Groups (currently rendered as tabs), Sections, and Fields, which are all blocks.
+The product editor's UI consists of Groups (currently rendered as tabs), Sections, and Fields, which are all blocks. For guidelines on how to extend the product editor (e.g. where to add blocks), please refer to the [Product Editor Extensibility Guidelines](./product-editor-extensibility-guidelines.md).
 
 ![Product editor structure](https://woocommerce.files.wordpress.com/2023/09/groups-sections-fields.jpg)
 

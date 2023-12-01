@@ -1,4 +1,6 @@
-# Naming Conventions
+---
+post_title: Naming conventions
+---
 
 Table of Contents:
 

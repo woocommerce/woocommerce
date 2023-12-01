@@ -54,8 +54,9 @@ const assignLookAndFeel = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	lookAndFeel: ( _context, event: unknown ) => {
+	lookAndFeel: ( context, event: unknown ) => {
 		return {
+			...context.lookAndFeel,
 			choice: ( event as lookAndFeelCompleteEvent ).payload,
 		};
 	},
@@ -65,8 +66,9 @@ const assignToneOfVoice = assign<
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents
 >( {
-	toneOfVoice: ( _context, event: unknown ) => {
+	toneOfVoice: ( context, event: unknown ) => {
 		return {
+			...context.toneOfVoice,
 			choice: ( event as toneOfVoiceCompleteEvent ).payload,
 		};
 	},
@@ -80,12 +82,16 @@ const assignLookAndTone = assign<
 		return {
 			choice: ( event as { data: LookAndToneCompletionResponse } ).data
 				.look,
+			aiRecommended: ( event as { data: LookAndToneCompletionResponse } )
+				.data.look,
 		};
 	},
 	toneOfVoice: ( _context, event: unknown ) => {
 		return {
 			choice: ( event as { data: LookAndToneCompletionResponse } ).data
 				.tone,
+			aiRecommended: ( event as { data: LookAndToneCompletionResponse } )
+				.data.tone,
 		};
 	},
 } );
@@ -329,6 +335,33 @@ const redirectToAssemblerHub = async (
 	};
 
 	document.body.appendChild( iframe );
+
+	// Listen for back button click
+	window.addEventListener(
+		'popstate',
+		() => {
+			const apiLoaderUrl = getNewPath(
+				{},
+				'/customize-store/design-with-ai/api-call-loader',
+				{}
+			);
+
+			// Only catch the back button click when the user is on the main assember hub page
+			// and trying to go back to the api loader page
+			if ( 'admin.php' + window.location.search === apiLoaderUrl ) {
+				iframe.contentWindow?.postMessage(
+					{
+						type: 'assemberBackButtonClicked',
+					},
+					'*'
+				);
+				// When the user clicks the back button, push state changes to the previous step
+				// Set it back to the assember hub
+				window.history?.pushState( {}, '', assemblerUrl );
+			}
+		},
+		false
+	);
 };
 
 export const actions = {

@@ -1,5 +1,11 @@
 *** WooCommerce Beta Tester Changelog ***
 
+2023-11-16 - version 2.3.0
+* Minor - Add ability to update block templates logging threshold.
+* Minor - Add Product Editor Developer Tools
+* Patch - update references to woocommerce.com to now reference woo.com
+* Minor - WooCommerce Beta Tester - CYS: implement removing patterns_ai_data post type
+
 2023-10-30 - version 2.2.5
 * Tweak - Add support for logging array property in track logger
 * Add - Add rest customize your store tool

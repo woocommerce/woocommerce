@@ -17,7 +17,6 @@ import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/compo
  * Internal dependencies
  */
 import { designWithAiStateMachineContext } from './types';
-import { lookAndTone } from './prompts';
 import { FONT_PAIRINGS } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
 import {
@@ -46,12 +45,14 @@ export const getCompletion = async < ValidResponseObject >( {
 	version,
 	responseValidation,
 	retryCount,
+	abortSignal = AbortSignal.timeout( 10000 ),
 }: {
 	queryId: string;
 	prompt: string;
 	version: string;
 	responseValidation: ( arg0: string ) => ValidResponseObject;
 	retryCount: number;
+	abortSignal?: AbortSignal;
 } ) => {
 	const { token } = await requestJetpackToken();
 	let data: {
@@ -73,6 +74,7 @@ export const getCompletion = async < ValidResponseObject >( {
 				prompt,
 				_fields: 'completion',
 			},
+			signal: abortSignal,
 		} );
 	} catch ( error ) {
 		recordEvent( 'customize_your_store_ai_completion_api_error', {
@@ -117,18 +119,6 @@ export const getCompletion = async < ValidResponseObject >( {
 		} );
 		throw error;
 	}
-};
-
-export const getLookAndTone = async (
-	context: designWithAiStateMachineContext
-) => {
-	return getCompletion( {
-		...lookAndTone,
-		prompt: lookAndTone.prompt(
-			context.businessInfoDescription.descriptionText
-		),
-		retryCount: 0,
-	} );
 };
 
 export const queryAiEndpoint = createMachine(
@@ -279,6 +269,14 @@ export const updateStorePatterns = async (
 			...productContents,
 			apiFetch( {
 				path: '/wc/private/ai/business-description',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+				},
+			} ),
+			apiFetch( {
+				path: '/wc/private/ai/store-title',
 				method: 'POST',
 				data: {
 					business_description:
@@ -476,7 +474,6 @@ const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
 };
 
 export const services = {
-	getLookAndTone,
 	browserPopstateHandler,
 	queryAiEndpoint,
 	assembleSite,

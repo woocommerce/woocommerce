@@ -65,7 +65,6 @@ export function VariationsFilter( {
 
 			const sharedRequestArgs = {
 				attribute_id: attributeId,
-				hide_empty: true,
 				per_page: DEFAULT_TERMS_PER_PAGE,
 				page,
 				search: searchText,

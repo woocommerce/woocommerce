@@ -1,10 +1,10 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski, wpmuguru, royho, barryhughes-1
 Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, checkout, payments, woo, woo commerce, e-commerce, store
-Requires at least: 6.2
-Tested up to: 6.3
+Requires at least: 6.3
+Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 8.2.1
+Stable tag: 8.3.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -25,6 +25,14 @@ Whether you’re launching a business, taking brick-and-mortar retail online, or
 - Sell [subscriptions](https://woo.com/products/woocommerce-subscriptions/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing), [bookings](https://woo.com/products/woocommerce-bookings/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing), or [memberships](https://woo.com/products/woocommerce-memberships/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing), with our developer-vetted extensions.
 - **Rise to the top of search results** by leveraging [WordPress’ SEO advantage](https://www.searchenginejournal.com/wordpress-best-cms-seo/).
 - **Build on a platform that scales.** Get flexible eCommerce for [high-volume stores](https://woo.com/high-volume-stores/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing). 
+
+= THE EASIEST WAY TO TRY WOOCOMMERCE =
+
+Thinking of trying WooCommerce? Woo Express is a simple, all-in-one package that includes fully managed hosting from WordPress.com, popular extensions, and world-class support from Woo — all for one monthly price.
+
+[Try Woo Express free for 14 days](https://woo.com/express/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=wp_org_repo_listing), then get your first 3 months for just $1. 
+
+= ALL THE TOOLS YOU NEED TO SELL =
 
 Built-in tools and popular integrations help you efficiently manage your business operations. Many services are free to add with a single click via the optional [Setup Wizard](https://woo.com/document/woocommerce-setup-wizard/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).
 

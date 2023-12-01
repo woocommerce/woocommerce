@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/block-templates",
-	"version": "1.0.0-beta.0",
+	"version": "1.0.0",
 	"description": "Utilities for working with block templates in WooCommerce admin.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -73,7 +73,7 @@
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"test": "pnpm test:js",
 		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"lint": "eslint --output-file eslint_report.json --format json src",
+		"lint": "eslint src",
 		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"build:css": "webpack",
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",

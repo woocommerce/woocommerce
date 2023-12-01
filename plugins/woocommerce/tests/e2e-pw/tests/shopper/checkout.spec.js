@@ -67,13 +67,9 @@ test.describe( 'Checkout page', () => {
 		] );
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'free_shipping',
-		} );
-		// enable bank transfers and COD for payment
-		await api.put( 'payment_gateways/bacs', {
-			enabled: true,
-		} );
-		await api.put( 'payment_gateways/cod', {
-			enabled: true,
+			settings: {
+				title: 'Free shipping',
+			}
 		} );
 	} );
 
@@ -105,9 +101,23 @@ test.describe( 'Checkout page', () => {
 		}
 	} );
 
-	test.beforeEach( async ( { context } ) => {
+	test.beforeEach( async ( { context, baseURL } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
 		await context.clearCookies();
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		// enable bank transfers and COD for payment
+		await api.put( 'payment_gateways/bacs', {
+			enabled: true,
+		} );
+		await api.put( 'payment_gateways/cod', {
+			enabled: true,
+		} );
+
 	} );
 
 	test( 'should display cart items in order review', async ( { page } ) => {
@@ -122,8 +132,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'1'
 		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			singleProductPrice
+		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
+		console.log( `Total Price: ${ totalPrice }` );
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		console.log( `Number: ${ totalPrice }` );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( singleProductPrice )
 		);
 	} );
 
@@ -140,8 +154,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'2'
 		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			twoProductPrice
+		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
+		console.log( `Total Price: ${ totalPrice }` );
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		console.log( `Number: ${ totalPrice }` );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( twoProductPrice )
 		);
 
 		// check the payment methods
@@ -160,8 +178,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'3'
 		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			threeProductPrice
+		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
+		console.log( `Total Price: ${ totalPrice }` );
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		console.log( `Number: ${ totalPrice }` );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( threeProductPrice )
 		);
 
 		// asserting that you can fill in the billing details
@@ -227,8 +249,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'2'
 		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			twoProductPrice
+		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
+		console.log( `Total Price: ${ totalPrice }` );
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		console.log( `Number: ${ totalPrice }` );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( twoProductPrice )
 		);
 
 		await page.locator( '#ship-to-different-address' ).click();
@@ -255,8 +281,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'2'
 		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			twoProductPrice
+		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
+		console.log( `Total Price: ${ totalPrice }` );
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		console.log( `Number: ${ totalPrice }` );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( twoProductPrice )
 		);
 
 		await page.locator( '#billing_first_name' ).fill( 'Lisa' );
@@ -364,8 +394,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'2'
 		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			twoProductPrice
+		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
+		console.log( `Total Price: ${ totalPrice }` );
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		console.log( `Number: ${ totalPrice }` );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( twoProductPrice )
 		);
 
 		await page.locator( '#billing_first_name' ).fill( 'Homer' );

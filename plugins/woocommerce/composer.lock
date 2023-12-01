@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "80d3e18e8cb8badab9416cc82d074b37",
+    "content-hash": "9aa8e31b166b09f29650e80f47481281",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -964,16 +964,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.6.4",
+            "version": "3.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "e7dafe215be5ef823392204535ee2e241f99a8cb"
+                "reference": "7a2046a5e6a15786068bb0298407522f30c694b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/e7dafe215be5ef823392204535ee2e241f99a8cb",
-                "reference": "e7dafe215be5ef823392204535ee2e241f99a8cb",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/7a2046a5e6a15786068bb0298407522f30c694b4",
+                "reference": "7a2046a5e6a15786068bb0298407522f30c694b4",
                 "shasum": ""
             },
             "require-dev": {
@@ -998,22 +998,22 @@
             "homepage": "https://actionscheduler.org/",
             "support": {
                 "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/3.6.4"
+                "source": "https://github.com/woocommerce/action-scheduler/tree/3.7.0"
             },
-            "time": "2023-10-11T18:24:47+00:00"
+            "time": "2023-11-20T12:24:41+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "11.5.3",
+            "version": "11.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "21e398e5e53d38e7a8bb464192160d3b103b2004"
+                "reference": "3c6be3fbb5a3d7745864fd0ee2ea40c620c16330"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/21e398e5e53d38e7a8bb464192160d3b103b2004",
-                "reference": "21e398e5e53d38e7a8bb464192160d3b103b2004",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/3c6be3fbb5a3d7745864fd0ee2ea40c620c16330",
+                "reference": "3c6be3fbb5a3d7745864fd0ee2ea40c620c16330",
                 "shasum": ""
             },
             "require": {
@@ -1064,9 +1064,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v11.5.3"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v11.6.1"
             },
-            "time": "2023-11-08T21:48:50+00:00"
+            "time": "2023-11-23T15:22:10+00:00"
         }
     ],
     "packages-dev": [

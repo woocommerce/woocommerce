@@ -57,8 +57,8 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 				>
 					<?php
 					$count_html = WC_Helper_Updater::get_updates_count_html();
-					/* translators: %s: WooCommerce.com Subscriptions tab count HTML. */
-					echo ( sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html ) );
+					/* translators: %s: Woo.com Subscriptions tab count HTML. */
+					echo ( wp_kses_post( sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html ) ) );
 					?>
 				</a>
 			</li>
@@ -90,7 +90,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 			<?php if ( '_featured' !== $current_section ) : ?>
 				<?php if ( is_wp_error( $addons ) ) : ?>
 					<?php WC_Admin_Addons::output_empty( $addons->get_error_message() ); ?>
-				<?php else: ?>
+				<?php else : ?>
 					<?php
 					if ( ! empty( $promotions ) && WC()->is_wc_admin_active() ) {
 						foreach ( $promotions as $promotion ) {
@@ -105,17 +105,17 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 								// Do not show USPS or Canada Post extensions for US and CA stores, respectively.
 								$country = WC()->countries->get_base_country();
 								if ( 'US' === $country
-									 && false !== strpos(
+									&& false !== strpos(
 										$addon->link,
-										'woocommerce.com/products/usps-shipping-method'
+										'woo.com/products/usps-shipping-method'
 									)
 								) {
 									continue;
 								}
 								if ( 'CA' === $country
-									 && false !== strpos(
+									&& false !== strpos(
 										$addon->link,
-										'woocommerce.com/products/canada-post-shipping-method'
+										'woo.com/products/canada-post-shipping-method'
 									)
 								) {
 									continue;
@@ -131,12 +131,12 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 		</div>
 		<?php else : ?>
 			<?php /* translators: a url */ ?>
-			<p><?php printf( wp_kses_post( __( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ) ), 'https://woocommerce.com/product-category/woocommerce-extensions/' ); ?></p>
+			<p><?php printf( wp_kses_post( __( 'Our catalog of WooCommerce Extensions can be found on Woo.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ) ), 'https://woo.com/product-category/woocommerce-extensions/' ); ?></p>
 		<?php endif; ?>
 
 		<?php if ( 'Storefront' !== $theme['Name'] && '_featured' !== $current_section ) : ?>
 			<?php
-				$storefront_url = WC_Admin_Addons::add_in_app_purchase_url_params( 'https://woocommerce.com/products/storefront/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=wcaddon' );
+				$storefront_url = WC_Admin_Addons::add_in_app_purchase_url_params( 'https://woo.com/products/storefront/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=wcaddon' );
 			?>
 			<div class="storefront">
 				<h2><?php esc_html_e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h2>

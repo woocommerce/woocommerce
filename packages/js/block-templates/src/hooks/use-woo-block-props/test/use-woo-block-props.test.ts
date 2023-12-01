@@ -14,7 +14,7 @@ jest.mock( '@wordpress/block-editor', () => ( {
 } ) );
 
 describe( 'useWooBlockProps', () => {
-	it( 'should return the block props with the block id and block order attributes', () => {
+	it( 'should return the block props with the block id, block order attributes, and tabindex', () => {
 		renderHook( () =>
 			useWooBlockProps(
 				{
@@ -31,6 +31,7 @@ describe( 'useWooBlockProps', () => {
 		expect( useBlockProps ).toHaveBeenCalledWith( {
 			'data-template-block-id': 'test/block',
 			'data-template-block-order': 30,
+			tabIndex: -1,
 			className: 'test',
 		} );
 	} );

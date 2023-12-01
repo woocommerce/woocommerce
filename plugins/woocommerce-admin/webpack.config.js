@@ -70,6 +70,9 @@ const wpAdminScripts = [
 	'product-import-tracking',
 	'variable-product-tour',
 	'product-category-metabox',
+	'shipping-settings-region-picker',
+	'command-palette',
+	'command-palette-analytics',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {

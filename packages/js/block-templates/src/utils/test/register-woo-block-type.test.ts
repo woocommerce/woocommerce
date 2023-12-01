@@ -54,6 +54,14 @@ describe( 'registerWooBlockType', () => {
 						type: 'array',
 						__experimentalRole: 'content',
 					},
+					_templateBlockDisableConditions: {
+						__experimentalRole: 'content',
+						type: 'array',
+					},
+					disabled: {
+						__experimentalRole: 'content',
+						type: 'boolean',
+					},
 				},
 			},
 			{

@@ -355,6 +355,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			{ removingAttribute && (
 				<RemoveConfirmationModal
 					title={ sprintf(
+						/* translators: %s is the attribute name that is being removed */
 						__( 'Delete %(attributeName)s', 'woocommerce' ),
 						{ attributeName: removingAttribute.name }
 					) }

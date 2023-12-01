@@ -1,4 +1,6 @@
-# WC CLI: Overview
+---
+post_title: WC CLI - overview
+---
 
 WooCommerce CLI (WC-CLI) offers the ability to manage WooCommerce (WC) via the command-line, using WP CLI. The documentation here covers the version of WC CLI that started shipping in WC 3.0.0 and later.
 

@@ -1,4 +1,6 @@
-# WooCommerce core critical flows
+---
+post_title: WooCommerce core critical flows
+---
 
 We have identified what we consider to be our most critical user flows within WooCommerce Core. These flows will help us focus and prioritize our testing efforts. They will also help us consider the impact of changes and priority of issues.
 
@@ -261,7 +263,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 
 | User Type | Flow Area        | Flow Name                               | Test File |
 | --------- | ---------------- | --------------------------------------- | --------- |
-| Merchant  | My Subscriptions | Can initiate WooCommerce.com Connection |           |
+| Merchant  | My Subscriptions | Can initiate Woo.com Connection |           |
 
 ### Merchant - Pages
 

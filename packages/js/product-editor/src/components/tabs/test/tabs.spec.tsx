@@ -11,7 +11,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { Tabs } from '../';
-import { Edit as Tab } from '../../../blocks/generic/tab/edit';
+import { TabBlockEdit as Tab } from '../../../blocks/generic/tab/edit';
 
 jest.mock( '@woocommerce/block-templates', () => ( {
 	...jest.requireActual( '@woocommerce/block-templates' ),

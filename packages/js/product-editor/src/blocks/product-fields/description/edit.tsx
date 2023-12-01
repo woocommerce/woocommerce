@@ -46,7 +46,7 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 	return blocks;
 }
 
-export function Edit( {
+export function DescriptionBlockEdit( {
 	attributes,
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );

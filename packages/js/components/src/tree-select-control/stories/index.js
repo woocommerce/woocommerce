@@ -15,6 +15,7 @@ const treeSelectControlOptions = [
 		children: [
 			{ value: 'ES', label: 'Spain' },
 			{ value: 'FR', label: 'France' },
+			{ value: 'TR', label: 'Türkiye' },
 			{ key: 'FR-Colonies', value: 'FR-C', label: 'France (Colonies)' },
 		],
 	},
@@ -28,7 +29,7 @@ const treeSelectControlOptions = [
 				children: [
 					{
 						value: 'TO',
-						label: 'Tokio',
+						label: 'Tokyo',
 						children: [
 							{ value: 'SI', label: 'Shibuya' },
 							{ value: 'GI', label: 'Ginza' },
@@ -97,6 +98,7 @@ Base.args = {
 	includeParent: false,
 	alwaysShowPlaceholder: false,
 	individuallySelectParent: false,
+	clearOnSelect: true,
 };
 
 Base.argTypes = {
