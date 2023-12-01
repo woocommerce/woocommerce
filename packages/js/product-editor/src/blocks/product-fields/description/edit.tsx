@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, useEffect } from '@wordpress/element';
-import { BlockAttributes, BlockInstance, serialize } from '@wordpress/blocks';
+import { BlockInstance, serialize } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { useEntityProp } from '@wordpress/core-data';
@@ -15,9 +15,9 @@ import {
  * Internal dependencies
  */
 import { ContentPreview } from '../../../components/content-preview';
-import { ProductEditorBlockEditProps } from '../../../types';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
 import { store } from '../../../store/product-editor-ui';
+import type { DescriptionBlockEditComponent } from './types';
 
 /**
  * Internal dependencies
@@ -45,7 +45,7 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 
 export function DescriptionBlockEdit( {
 	attributes,
-}: ProductEditorBlockEditProps< BlockAttributes > ) {
+}: DescriptionBlockEditComponent ) {
 	const blockProps = useWooBlockProps( attributes );
 	const [ description, setDescription ] = useEntityProp< string >(
 		'postType',
