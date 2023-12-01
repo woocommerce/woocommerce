@@ -25,7 +25,7 @@ $social_title = $content['titles'][0]['default'] ?? '';
 
 		<!-- wp:social-links {"iconColor":"primary","openInNewTab":true,"style":{"spacing":{"blockGap":{"top":"0","left":"16px"}}},"className":"has-icon-color is-style-logos-only","layout":{"type":"flex","justifyContent":"space-between","orientation":"horizontal"}} -->
 		<ul class="wp-block-social-links has-icon-color is-style-logos-only">
-			<!-- wp:social-link {"url":"https://twitter.com/","service":"twitter"} /-->
+			<!-- wp:social-link {"url":"https://x.com","service":"x"} /-->
 
 			<!-- wp:social-link {"url":"https://www.instagram.com/","service":"instagram"} /-->
 

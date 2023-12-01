@@ -17,6 +17,8 @@ $third_title  = $content['titles'][2]['default'] ?? '';
 $first_description  = $content['descriptions'][0]['default'] ?? '';
 $second_description = $content['descriptions'][1]['default'] ?? '';
 $third_description  = $content['descriptions'][2]['default'] ?? '';
+
+$button = $content['buttons'][0]['default'] ?? '';
 ?>
 
 <!-- wp:group {"align":"full","style":{"spacing":{"margin":{"top":"0px","bottom":"80px"}}},"layout":{"type":"constrained"}} -->
@@ -54,7 +56,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 				<div class="wp-block-buttons" style="margin-top:64px">
 					<!-- wp:button {"textAlign":"left"} -->
 					<div class="wp-block-button has-custom-font-size">
-						<a class="wp-block-button__link has-text-align-left wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>">Shop now</a>
+						<a class="wp-block-button__link has-text-align-left wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>"><?php echo esc_html( $button ); ?></a>
 					</div>
 					<!-- /wp:button -->
 				</div>

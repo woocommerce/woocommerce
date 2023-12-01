@@ -7,7 +7,7 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Save up to 60%",
+					"default": "Up to 60% off",
 					"ai_prompt": "A four words title advertising the sale"
 				}
 			],
@@ -17,13 +17,13 @@
 					"ai_prompt": "A two words label with the sale name"
 				},
 				{
-					"default": "Make the day special with our collection of discounted products.",
+					"default": "Get your favorite vinyl at record-breaking prices.",
 					"ai_prompt": "The main description of the sale with at least 65 characters"
 				}
 			],
 			"buttons": [
 				{
-					"default": "Shop Holiday Sale",
+					"default": "Shop vinyl records",
 					"ai_prompt": "A 3 words button text to go to the sale page"
 				}
 			]
@@ -63,8 +63,14 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Announcing our newest collection",
+					"default": "Black and white high-quality prints",
 					"ai_prompt": "The four words title of the featured category related to the following image description: {image.0}"
+				}
+			],
+			"buttons": [
+				{
+					"default": "Shop prints",
+					"ai_prompt": "A two words button text to go to the featured category"
 				}
 			]
 		}
@@ -77,15 +83,15 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Cupcakes",
+					"default": "Home decor",
 					"ai_prompt": "A one word title for the featured category related to the following image description: {image.0}"
 				},
 				{
-					"default": "Sweet Danish",
+					"default": "Retro photography",
 					"ai_prompt": "A two words title for the featured category related to the following image description: {image.1}"
 				},
 				{
-					"default": "Warm Bread",
+					"default": "Handmade gifts",
 					"ai_prompt": "A two words title for the featured category related to the following image description: {image.2}"
 				}
 			]
@@ -131,33 +137,33 @@
 		"content": {
 			"titles": [
 				{
-					"default": "New in: 3-in-1 parka",
+					"default": "New: Retro Glass Jug",
 					"ai_prompt": "Generate a 3 words title that highlights one of the qualities of the product being sold"
 				},
 				{
-					"default": "Waterproof Membrane",
+					"default": "Timeless elegance",
 					"ai_prompt": "Generate a two words title that highlights one of the qualities of the product being sold"
 				},
 				{
-					"default": "Expert Craftsmanship",
+					"default": "Durable glass",
 					"ai_prompt": "Generate a two words title that highlights one of the qualities of the product being sold"
 				},
 				{
-					"default": "Durable Fabric",
+					"default": "Versatile charm",
 					"ai_prompt": "Generate a two words title that highlights one of the qualities of the product being sold"
 				}
 			],
 			"descriptions": [
 				{
-					"default": "Never worry about the weather again. Keep yourself dry, warm, and looking stylish.",
+					"default": "Elevate your table with a 330ml Retro Glass Jug, blending classic design and durable hardened glass.",
 					"ai_prompt": "Craft a catchy product description emphasizing one of its qualities with at least 80 characters"
 				},
 				{
-					"default": "Our products are made with expert craftsmanship and attention to detail.",
+					"default": "Crafted from resilient thick glass, this jug ensures lasting quality, making it perfect for everyday use with a touch of vintage charm.",
 					"ai_prompt": "Craft a catchy product description emphasizing one of its qualities with at least 80 characters"
 				},
 				{
-					"default": "We use only the highest-quality materials in our products, ensuring that they look great.",
+					"default": "The Retro Glass Jug's classic silhouette effortlessly complements any setting, making it the ideal choice for serving beverages with style and flair.",
 					"ai_prompt": "Craft a catchy product description emphasizing one of its qualities with at least 80 characters"
 				}
 			]
@@ -171,30 +177,36 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Quality Materials",
+					"default": "Inspired living spaces",
 					"ai_prompt": "A two words title describing the first displayed product feature"
 				},
 				{
-					"default": "Expert Craftsmanship",
+					"default": "Unique design",
 					"ai_prompt": "A two words title describing the second displayed product feature"
 				},
 				{
-					"default": "Customer Satisfaction",
+					"default": "Make your house feel like home",
 					"ai_prompt": "A two words title describing the fourth displayed product feature"
 				}
 			],
 			"descriptions": [
 				{
-					"default": "We use only the highest-quality materials in our products, ensuring that they look great and last for years to come.",
+					"default": "Transform your home with our curated collection of home decor, bringing inspiration and style to every corner.",
 					"ai_prompt": "A description of the product feature with at least 115 characters"
 				},
 				{
-					"default": "Our products are made with expert craftsmanship and attention to detail, ensuring that every stitch and seam is perfect.",
+					"default": "From bold prints to intricate details, our products are a perfect combination of style and function.",
 					"ai_prompt": "A description of the product feature with at least 115 characters"
 				},
 				{
-					"default": "Our top priority is customer satisfaction, and we stand behind our products 100%. ",
+					"default": "Add a touch of charm and coziness this holiday season with a wide selection of hand-picked decorations — from minimalist vases to designer furniture.",
 					"ai_prompt": "A description of the product feature with at least 115 characters"
+				}
+			],
+			"buttons": [
+				{
+					"default": "Shop home decor",
+					"ai_prompt": "A two words button text to go to the product page"
 				}
 			]
 		}
@@ -207,7 +219,7 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Get cozy this fall with knit sweaters",
+					"default": "Keep dry with 50% off rain jackets",
 					"ai_prompt": "An impact phrase that advertises the product the store is selling with at least 35 characters"
 				}
 			]
@@ -221,13 +233,13 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Just arrived",
+					"default": "Sound like no other",
 					"ai_prompt": "An impact phrase that advertises the displayed product collection with at least 10 characters"
 				}
 			],
 			"descriptions": [
 				{
-					"default": "Our early autumn collection is here.",
+					"default": "Experience your music like never before with our latest generation of hi-fidelity headphones.",
 					"ai_prompt": "A description of the product collection with at least 35 characters"
 				}
 			],
@@ -347,7 +359,7 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Our newest arrivals",
+					"default": "Staff picks",
 					"ai_prompt": "An impact phrase that advertises the displayed product collection with at least 20 characters"
 				}
 			]
@@ -359,7 +371,7 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Our newest arrivals",
+					"default": "Our latest and greatest",
 					"ai_prompt": "An impact phrase with that advertises the product collection with at least 20 characters"
 				}
 			]
@@ -493,7 +505,7 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Follow us on social media",
+					"default": "Stay in the loop",
 					"ai_prompt": "A phrase that advertises the social media accounts of the store with at least 25 characters"
 				}
 			]
@@ -507,11 +519,11 @@
 		"content": {
 			"titles": [
 				{
-					"default": "The goods",
+					"default": "Our products",
 					"ai_prompt": "A two words impact phrase that advertises the products"
 				},
 				{
-					"default": "Created with love and care in Australia",
+					"default": "Sustainable blends, stylish accessories",
 					"ai_prompt": "An impact phrase that advertises the products with at least 40 characters and related to the following image description: {image.0}"
 				},
 				{
@@ -519,23 +531,39 @@
 					"ai_prompt": "A two words impact phrase that advertises the brand"
 				},
 				{
-					"default": "Marl is an independent studio and artisanal gallery",
+					"default": "Committed to a greener lifestyle",
 					"ai_prompt": "An impact phrase that advertises the brand with at least 50 characters related to the following image description: {image.1}"
 				}
 			],
 			"descriptions": [
 				{
-					"default": "All items are 100% hand-made, using the potter’s wheel or traditional techniques.\n\nTimeless style.\n\nEarthy, organic feel.\n\nEnduring quality.\n\nUnique, one-of-a-kind pieces.",
+					"default": "Indulge in the finest organic coffee beans, teas, and hand-picked accessories, all locally sourced and sustainable for a mindful lifestyle.",
 					"ai_prompt": "A description of the products with at least 180 characters"
 				},
 				{
-					"default": "We specialize in limited collections of handmade tableware. We collaborate with restaurants and cafes to create unique items that complement the menu perfectly. Please get in touch if you want to know more about our process and pricing.",
+					"default": "Our passion is crafting mindful moments with locally sourced, organic, and sustainable products. We're more than a store; we're your path to a community-driven, eco-friendly lifestyle that embraces premium quality.",
 					"ai_prompt": "A description of the products with at least 180 characters"
+				},
+				{
+					"default": "Locally sourced ingredients",
+					"ai_prompt": "A three word description of the products"
+				},
+				{
+					"default": "Premium organic blends",
+					"ai_prompt": "A three word description of the products"
+				},
+				{
+					"default": "Hand-picked accessories",
+					"ai_prompt": "A three word description of the products"
+				},
+				{
+					"default": "Sustainable business practices",
+					"ai_prompt": "A three word description of the products"
 				}
 			],
 			"buttons": [
 				{
-					"default": "Learn more",
+					"default": "Meet us",
 					"ai_prompt": "A two words button text to go to the product page"
 				}
 			]
@@ -551,29 +579,29 @@
 					"ai_prompt": "A title that advertises the set of testimonials with a maximum of 25 characters"
 				},
 				{
-					"default": "I had a great experience",
+					"default": "Eclectic finds, ethical delights",
 					"ai_prompt": "A title that advertises a customer product review with a maximum 25 characters"
 				},
 				{
-					"default": "LOVE IT",
+					"default": "Sip, Shop, Savor",
 					"ai_prompt": "A title that advertises a customer product review with a maximum 10 characters"
 				},
 				{
-					"default": "Awesome couch",
+					"default": "LOCAL LOVE",
 					"ai_prompt": "A title that advertises a customer product review with a maximum 15 characters"
 				}
 			],
 			"descriptions": [
 				{
-					"default": "In the end the couch wasn't exactly what I was looking for but my experience with the Burrow team was excellent. First in providing a discount when the couch was delayed.",
+					"default": "Transformed my daily routine with unique, eco-friendly treasures. Exceptional quality and service. Proud to support a store that aligns with my values.",
 					"ai_prompt": "A customer product review with at least 170 characters"
 				},
 				{
-					"default": "Great couch. color as advertise. seat is nice and firm. Easy to put together. Versatile. Bought one for my mother in law as well. And she loves hers!",
+					"default": "The organic coffee beans are a revelation. Each sip feels like a journey. Beautifully crafted accessories add a touch of elegance to my home.",
 					"ai_prompt": "A customer product review with at least 170 characters"
 				},
 				{
-					"default": "I got the kind sofa. The look and feel is high quality, and I enjoy that it is a medium level of firmness. Assembly took a little longer than I expected, and it came in 4 boxes.",
+					"default": "From sustainably sourced teas to chic vases, this store is a treasure trove. Love knowing my purchases contribute to a greener planet.",
 					"ai_prompt": "A customer product review with at least 170 characters"
 				}
 			]
@@ -587,13 +615,13 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Great experience",
+					"default": "A ‘brewtiful’ experience :-)",
 					"ai_prompt": "A two words title that advertises the testimonial"
 				}
 			],
 			"descriptions": [
 				{
-					"default": "In the end the couch wasn't exactly what I was looking for but my experience with the Burrow team was excellent. First in providing a discount when the couch was delayed, then timely feedback and updates as the...",
+					"default": "Exceptional flavors, sustainable choices. The carefully curated collection of coffee pots and accessories turned my kitchen into a haven of style and taste.",
 					"ai_prompt": "A description of the testimonial with at least 225 characters"
 				}
 			]
@@ -607,19 +635,19 @@
 		"content": {
 			"titles": [
 				{
-					"default": "100% natural denim",
+					"default": "Sit back and relax",
 					"ai_prompt": "A description for a product with at least 20 characters"
 				}
 			],
 			"descriptions": [
 				{
-					"default": "Only the finest goes into our products. You deserve it.",
+					"default": "With a wide range of designer chairs to elevate your living space.",
 					"ai_prompt": "An impact phrase that advertises the products with at least 55 characters"
 				}
 			],
 			"buttons": [
 				{
-					"default": "Shop jeans",
+					"default": "Shop chairs",
 					"ai_prompt": "A two words button text to go to the shop page"
 				}
 			]

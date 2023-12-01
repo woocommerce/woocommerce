@@ -18,6 +18,10 @@ $fifth_title  = $content['titles'][4]['default'] ?? '';
 
 $first_description  = $content['descriptions'][0]['default'] ?? '';
 $second_description = $content['descriptions'][1]['default'] ?? '';
+$list1              = $content['descriptions'][2]['default'] ?? '';
+$list2              = $content['descriptions'][3]['default'] ?? '';
+$list3              = $content['descriptions'][4]['default'] ?? '';
+$list4              = $content['descriptions'][5]['default'] ?? '';
 
 $button = $content['buttons'][0]['default'] ?? '';
 ?>
@@ -39,7 +43,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 		<!-- wp:column {"verticalAlignment":"center","width":"50%"} -->
 		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%">
 			<!-- wp:paragraph {"placeholder":"Content…","style":{"typography":{"textTransform":"uppercase"}}} -->
-			<p style="text-transform:uppercase"><?php esc_html_e( 'The goods', 'woo-gutenberg-products-block' ); ?></p>
+			<p style="text-transform:uppercase"><?php echo esc_html( $first_title ); ?></p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:heading {"level":3,"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
@@ -49,6 +53,26 @@ $button = $content['buttons'][0]['default'] ?? '';
 			<!-- wp:paragraph -->
 			<p><?php echo esc_html( $first_description ); ?></p>
 			<!-- /wp:paragraph -->
+
+			<!-- wp:list -->
+			<ul>
+				<!-- wp:list-item -->
+				<li><?php echo esc_html( $list1 ); ?></li>
+				<!-- /wp:list-item -->
+
+				<!-- wp:list-item -->
+				<li><?php echo esc_html( $list2 ); ?></li>
+				<!-- /wp:list-item -->
+
+				<!-- wp:list-item -->
+				<li><?php echo esc_html( $list3 ); ?></li>
+				<!-- /wp:list-item -->
+
+				<!-- wp:list-item -->
+				<li><?php echo esc_html( $list4 ); ?></li>
+				<!-- /wp:list-item -->
+			</ul>
+			<!-- /wp:list -->
 		</div>
 		<!-- /wp:column -->
 	</div>
@@ -72,8 +96,8 @@ $button = $content['buttons'][0]['default'] ?? '';
 
 			<!-- wp:buttons {"style":{"spacing":{"blockGap":"0"}},"fontSize":"small"} -->
 			<div class="wp-block-buttons has-custom-font-size has-small-font-size">
-				<!-- wp:button {"className":"is-style-outline"} -->
-				<div class="wp-block-button is-style-outline">
+				<!-- wp:button {"className":"is-style-fill"} -->
+				<div class="wp-block-button is-style-fill">
 					<a class="wp-block-button__link wp-element-button"><?php echo esc_html( $button ); ?></a>
 				</div>
 				<!-- /wp:button -->
