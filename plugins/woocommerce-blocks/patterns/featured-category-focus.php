@@ -8,6 +8,8 @@
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
 $category_title = $content['titles'][0]['default'] ?? '';
+
+$button = $content['buttons'][0]['default'] ?? '';
 ?>
 
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","right":"var:preset|spacing|70","bottom":"var:preset|spacing|70","left":"var:preset|spacing|70"}}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","flexWrap":"wrap"}} -->
@@ -26,7 +28,7 @@ $category_title = $content['titles'][0]['default'] ?? '';
 	<div class="wp-block-buttons">
 		<!-- wp:button {"style":{"color":{"text":"#ffffff","background":"#000000"},"border":{"width":"0px","style":"none"}}} -->
 		<div class="wp-block-button">
-			<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="wp-block-button__link has-text-color has-background wp-element-button" style="border-style:none;border-width:0px;color:#ffffff;background-color:#000000">Shop now</a>
+			<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="wp-block-button__link has-text-color has-background wp-element-button" style="border-style:none;border-width:0px;color:#ffffff;background-color:#000000"><?php echo esc_html( $button ); ?></a>
 		</div>
 		<!-- /wp:button -->
 	</div>

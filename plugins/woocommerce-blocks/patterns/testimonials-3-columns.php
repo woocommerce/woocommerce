@@ -35,7 +35,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph -->
-			<p>~ Tanner P.</p>
+			<p>~ Sophia K.</p>
 			<!-- /wp:paragraph -->
 		</div>
 		<!-- /wp:column -->
@@ -52,7 +52,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph -->
-			<p>~ Abigail N.</p>
+			<p>~ Liam M.</p>
 			<!-- /wp:paragraph -->
 		</div>
 		<!-- /wp:column -->
@@ -68,7 +68,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph -->
-			<p>~ Albert L.</p>
+			<p>~ Ava L.</p>
 			<!-- /wp:paragraph -->
 		</div>
 		<!-- /wp:column -->
