@@ -62,9 +62,6 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		] );
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'free_shipping',
-			settings: {
-				title: 'Free shipping',
-			}
 		} );
 		// create customer and save its id
 		await api
@@ -175,6 +172,8 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		// check my account page
 		await page.goto( '/my-account/' );
 		await expect( page.url() ).toContain( 'my-account/' );
-		await expect( page.getByRole( 'heading', { name: 'My account' } ) ).toBeVisible();
+		await expect(
+			page.getByRole( 'heading', { name: 'My account' } )
+		).toBeVisible();
 	} );
 } );
