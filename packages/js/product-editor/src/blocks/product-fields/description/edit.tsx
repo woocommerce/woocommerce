@@ -1,18 +1,10 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { createElement, useEffect } from '@wordpress/element';
-import {
-	BlockAttributes,
-	BlockInstance,
-	parse,
-	serialize,
-} from '@wordpress/blocks';
-import { useSelect, useDispatch } from '@wordpress/data';
-import { Button } from '@wordpress/components';
+import { BlockAttributes, BlockInstance, serialize } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { recordEvent } from '@woocommerce/tracks';
 import { useEntityProp } from '@wordpress/core-data';
 import {
 	// @ts-expect-error no exported member.
@@ -73,8 +65,6 @@ export function DescriptionBlockEdit( {
 		[]
 	);
 
-	const { openModalEditor, setModalEditorBlocks } = useDispatch( store );
-
 	// Update the description when the blocks change.
 	useEffect( () => {
 		if ( ! hasChanged ) {
@@ -100,22 +90,6 @@ export function DescriptionBlockEdit( {
 	return (
 		<div { ...blockProps }>
 			<div { ...innerBlockProps } />
-
-			<Button
-				variant="secondary"
-				onClick={ () => {
-					if ( description ) {
-						setModalEditorBlocks( parse( description ) );
-					}
-
-					openModalEditor();
-					recordEvent( 'product_add_description_click' );
-				} }
-			>
-				{ description.length
-					? __( 'Edit description', 'woocommerce' )
-					: __( 'Add description', 'woocommerce' ) }
-			</Button>
 
 			{ !! description.length && (
 				<ContentPreview content={ description } />
