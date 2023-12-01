@@ -775,43 +775,25 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				) : null,
 			)
 		);
-		$product_inventory_quantity_conditional = $product_inventory_inner_section->add_block(
+		$product_inventory_quantity_hide_conditions = array(
 			array(
-				'id'         => 'product-inventory-quantity-conditional-wrapper',
-				'blockName'  => 'woocommerce/conditional',
-				'order'      => 30,
-				'attributes' => array(
-					'mustMatch' => array(
-						'manage_stock' => array( true ),
-					),
-				),
+				'expression' => 'editedProduct.manage_stock === false',
 			)
 		);
-		$product_inventory_quantity_conditional->add_block(
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$product_inventory_quantity_hide_conditions[] = array(
+				'expression' => 'editedProduct.type === "grouped"',
+			);
+		}
+		$product_inventory_inner_section->add_block(
 			array(
 				'id'        => 'product-inventory-quantity',
 				'blockName' => 'woocommerce/product-inventory-quantity-field',
-				'order'     => 10,
+				'order'     => 30,
+				'hideConditions' => $product_inventory_quantity_hide_conditions,
 			)
 		);
-		$product_stock_status_conditional = $product_inventory_section->add_block(
-			array(
-				'id'             => 'product-stock-status-conditional-wrapper',
-				'blockName'      => 'woocommerce/conditional',
-				'order'          => 20,
-				'attributes'     => array(
-					'mustMatch' => array(
-						'manage_stock' => array( false ),
-					),
-				),
-				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
-					array(
-						'expression' => 'editedProduct.type === "grouped"',
-					),
-				) : null,
-			)
-		);
-		$product_stock_status_conditional->add_block(
+		$product_inventory_section->add_block(
 			array(
 				'id'         => 'product-stock-status',
 				'blockName'  => 'woocommerce/product-radio-field',
@@ -832,6 +814,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 							'label' => __( 'On backorder', 'woocommerce' ),
 							'value' => 'onbackorder',
 						),
+					),
+				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.manage_stock === true',
 					),
 				),
 			)
@@ -862,19 +849,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$product_out_of_stock_conditional   = $product_inventory_advanced_wrapper->add_block(
-			array(
-				'id'         => 'product-out-of-stock-conditional-wrapper',
-				'blockName'  => 'woocommerce/conditional',
-				'order'      => 10,
-				'attributes' => array(
-					'mustMatch' => array(
-						'manage_stock' => array( true ),
-					),
-				),
-			)
-		);
-		$product_out_of_stock_conditional->add_block(
+		$product_inventory_advanced_wrapper->add_block(
 			array(
 				'id'         => 'product-out-of-stock',
 				'blockName'  => 'woocommerce/product-radio-field',
@@ -900,13 +875,23 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						),
 					),
 				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.manage_stock === false',
+					),
+				),
 			)
 		);
-		$product_out_of_stock_conditional->add_block(
+		$product_inventory_advanced_wrapper->add_block(
 			array(
 				'id'        => 'product-inventory-email',
 				'blockName' => 'woocommerce/product-inventory-email-field',
 				'order'     => 20,
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.manage_stock === false',
+					),
+				),
 			)
 		);
 
