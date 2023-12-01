@@ -34,7 +34,8 @@
 			"enum": [ "ltr", "rtl" ]
 		},
 		"label": {
-			"type": "string"
+			"type": "string",
+			"default": "Summary"
 		},
 		"helpText": {
 			"type": "string",
