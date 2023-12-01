@@ -569,6 +569,9 @@
 										status	    : 'new'
 									}
 								});
+							} else {
+								shippingMethodView.model.trigger( 'change:methods' );
+								shippingMethodView.model.trigger( 'saved:methods' );
 							}
 		
 							$( document.body ).trigger( 'init_tooltips' );
