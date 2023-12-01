@@ -11,9 +11,7 @@ import {
 } from '@wordpress/blocks';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useInnerBlocksProps } from '@wordpress/block-editor';
-import { Button } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { recordEvent } from '@woocommerce/tracks';
 import { useEntityProp } from '@wordpress/core-data';
 
 /**
@@ -64,8 +62,7 @@ export function DescriptionBlockEdit( {
 		return select( productEditorUiStore ).isModalEditorOpen();
 	}, [] );
 
-	const { openModalEditor, closeModalEditor } =
-		useDispatch( productEditorUiStore );
+	const { closeModalEditor } = useDispatch( productEditorUiStore );
 
 	const innerBlockProps = useInnerBlocksProps(
 		{},
@@ -78,18 +75,6 @@ export function DescriptionBlockEdit( {
 	return (
 		<div { ...blockProps }>
 			<div { ...innerBlockProps } />
-
-			<Button
-				variant="secondary"
-				onClick={ () => {
-					openModalEditor();
-					recordEvent( 'product_add_description_click' );
-				} }
-			>
-				{ description.length
-					? __( 'Edit description', 'woocommerce' )
-					: __( 'Add description', 'woocommerce' ) }
-			</Button>
 
 			{ isModalEditorOpen && (
 				<ModalEditor
