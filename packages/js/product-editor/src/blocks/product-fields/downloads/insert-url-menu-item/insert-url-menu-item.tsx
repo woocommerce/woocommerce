@@ -70,7 +70,10 @@ export function InsertUrlMenuItem( {
 
 	return (
 		<Dropdown
-			position="middle left"
+			// @ts-expect-error missing prop in types.
+			popoverProps={ {
+				position: 'middle left',
+			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<MenuItem
 					aria-expanded={ isOpen }

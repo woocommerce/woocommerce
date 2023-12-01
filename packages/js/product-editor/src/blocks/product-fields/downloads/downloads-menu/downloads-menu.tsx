@@ -20,7 +20,10 @@ export function DownloadsMenu( {
 }: DownloadsMenuProps ) {
 	return (
 		<Dropdown
-			position="bottom left"
+			// @ts-expect-error missing prop in types.
+			popoverProps={ {
+				position: 'bottom left',
+			} }
 			contentClassName="woocommerce-downloads-menu__menu-content"
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<Button

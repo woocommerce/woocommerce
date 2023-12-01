@@ -139,7 +139,10 @@ export function DownloadsMenuItem( {
 
 	return (
 		<Dropdown
-			position="middle right"
+			// @ts-expect-error missing prop in types.
+			popoverProps={ {
+				position: 'middle right',
+			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<MenuItem
 					onClick={ () => {

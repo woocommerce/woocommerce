@@ -86,9 +86,12 @@ class DatePicker extends Component {
 			popoverProps = { inline: true },
 		} = this.props;
 
+		if ( ! popoverProps.position ) {
+			popoverProps.position = 'bottom center';
+		}
+
 		return (
 			<Dropdown
-				position="bottom center"
 				focusOnMount={ false }
 				popoverProps={ popoverProps }
 				renderToggle={ ( { isOpen, onToggle } ) => (
