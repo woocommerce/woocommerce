@@ -1,5 +1,3 @@
-// @todo: figure out how to handle the response since we need a success/fail message and a link to newly-created/updated resources.
-
 /**
  * External dependencies
  */

@@ -25,10 +25,8 @@ type ChatModalProps = {
 	onClose: () => void;
 };
 
-const ONE_HOUR_IN_MS = 3600000;
 const WOO_AI_PLUGIN_NAME = 'woo-ai-plugin';
 const threadPreferenceId = 'assistant-chat-thread-id';
-const threadExpirationPreferenceId = 'assistant-chat-thread-id-expiration';
 const chatHistoryPreferenceId = 'woo-ai-chat-history';
 
 const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
@@ -46,19 +44,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				WOO_AI_PLUGIN_NAME,
 				threadPreferenceId
 			);
-			// check that the thread hasn't expired
-			const expiration = select( preferencesStore ).get(
-				WOO_AI_PLUGIN_NAME,
-				threadExpirationPreferenceId
-			);
-			if ( expiration && Date.now() > expiration ) {
-				setStorageData( WOO_AI_PLUGIN_NAME, threadPreferenceId, '' );
-				setStorageData(
-					WOO_AI_PLUGIN_NAME,
-					threadExpirationPreferenceId,
-					''
-				);
-			}
 			setThreadID( storedThreadId );
 		}
 	}, [ threadID, setStorageData ] );
@@ -84,13 +69,14 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const prepareFormData = (
 		input: string,
 		token: string,
-		audioBlob: Blob | null
+		audioBlob: Blob | null,
+		tempThreadID?: string
 	) => {
 		const formData = new FormData();
 		formData.append( 'message', input );
 		formData.append( 'token', token );
-		if ( threadID ) {
-			formData.append( 'thread_id', threadID );
+		if ( tempThreadID ) {
+			formData.append( 'thread_id', tempThreadID );
 		}
 		if ( audioBlob ) {
 			// @todo: maybe grab the extension from the blob mime type?
@@ -116,7 +102,11 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	 * @param {string} token    The Jetpack token.
 	 * @return {string} The message to display to the user.
 	 */
-	const handleRequiresAction = async ( response: any, token: string ) => {
+	const handleRequiresAction = async (
+		response: any,
+		token: string,
+		tempThreadID: string
+	) => {
 		const answer = response.answer;
 		const functionID: string = answer.function_id;
 		const runID: string = response.run_id;
@@ -141,7 +131,12 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
                     We're doing this even if the function call failed, because we want to be able to continue the conversation.
                 */
 			try {
-				const formData = prepareFormData( input, token, audioBlob );
+				const formData = prepareFormData(
+					input,
+					token,
+					audioBlob,
+					tempThreadID
+				);
 				formData.append( 'run_id', runID );
 				formData.append( 'tool_call_id', functionID );
 				formData.append( 'output', message );
@@ -198,27 +193,21 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const setAndStoreThreadID = ( newThreadID: string ) => {
 		setThreadID( newThreadID );
 		setStorageData( WOO_AI_PLUGIN_NAME, threadPreferenceId, newThreadID );
-		// Set the expiry to 1 hour from now since threads expire after 1 hour.
-		setStorageData(
-			WOO_AI_PLUGIN_NAME,
-			threadExpirationPreferenceId,
-			Date.now() + ONE_HOUR_IN_MS
-		);
 	};
 
 	const setAndStoreMessages = (
 		answer: string,
 		sender: 'assistant' | 'user'
 	) => {
-		const assistantMessage: Message = {
+		const chatMessage: Message = {
 			sender,
 			text: answer,
 		};
-		setMessages( ( messages ) => [ ...messages, assistantMessage ] );
+		setMessages( ( messages ) => [ ...messages, chatMessage ] );
 		setStorageData(
 			WOO_AI_PLUGIN_NAME,
 			chatHistoryPreferenceId,
-			JSON.stringify( [ ...messages, assistantMessage ] )
+			JSON.stringify( [ ...messages, chatMessage ] )
 		);
 	};
 
@@ -241,6 +230,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				body: formData,
 			} ) ) as any;
 			const newThreadID = response.thread_id;
+			const tempThreadID = newThreadID || threadID;
 			if ( ! threadID && newThreadID ) {
 				setAndStoreThreadID( newThreadID );
 			}
@@ -249,7 +239,8 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			if ( response.status === 'requires_action' ) {
 				const actionsAnswer = await handleRequiresAction(
 					response,
-					token
+					token,
+					tempThreadID
 				);
 				answer = actionsAnswer || '';
 			} else {
