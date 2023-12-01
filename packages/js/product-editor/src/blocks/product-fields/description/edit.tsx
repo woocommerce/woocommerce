@@ -79,7 +79,7 @@ export function DescriptionBlockEdit( {
 
 	return (
 		<div { ...blockProps }>
-			<div { ...innerBlockProps } />
+			{ ! parsedBlocks?.length && <div { ...innerBlockProps } /> }
 
 			{ isModalEditorOpen && (
 				<ModalEditor
