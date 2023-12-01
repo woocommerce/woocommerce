@@ -663,7 +663,7 @@ class Checkout extends AbstractCartRoute {
 				'first_name' => $first_name,
 				'last_name'  => $last_name,
 				'role'       => 'customer',
-				'source'     => 'store-api,',
+				'source'     => 'store-api',
 			)
 		);
 
