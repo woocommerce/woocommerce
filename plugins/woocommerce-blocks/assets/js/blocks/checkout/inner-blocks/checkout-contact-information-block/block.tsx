@@ -8,10 +8,10 @@ import {
 	noticeContexts,
 } from '@woocommerce/base-context';
 import { getSetting } from '@woocommerce/settings';
-import { CheckboxControl } from '@woocommerce/blocks-checkout';
 import {
 	StoreNoticesContainer,
 	ValidatedTextInput,
+	CheckboxControl,
 } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
