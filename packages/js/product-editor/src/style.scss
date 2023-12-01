@@ -37,7 +37,12 @@
 @import "components/product-page-skeleton/styles.scss";
 @import "components/modal-editor-welcome-guide/style.scss";
 @import "components/attribute-control/attribute-skeleton.scss";
+@import "components/checkbox-control/style.scss";
+@import "components/add-products-modal/style.scss";
 
 /* Field Blocks */
 
 @import "blocks/style.scss";
+
+/* Hooks */
+@import "hooks/use-draggable/styles.scss";

@@ -42,6 +42,25 @@
 		max-width: unset;
 	}
 
+	.components-base-control {
+		&.has-error {
+			.components-input-control__backdrop {
+				border-color: $studio-red-50;
+			}
+
+			.components-base-control__help {
+				color: $studio-red-50;
+			}
+		}
+
+		.components-input-control__container .components-input-control__input {
+			min-height: $grid-unit-40 + $grid-unit-05;
+		}
+	}
+
+	// This is wrong for @wordpress/components/InputControl since it is
+	// wrapped within the BaseControl by default. So it does not need
+	// to be wrapped again.
 	.has-error {
 		.components-base-control {
 			margin-bottom: 0;
@@ -143,6 +162,10 @@
 
 		.block-editor-block-list__block:not([contenteditable]):focus:after {
 			display: none; // use important or increase specificity.
+		}
+
+		.block-editor-block-list__block fieldset {
+			min-width: 0;
 		}
 	}
 }

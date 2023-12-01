@@ -106,7 +106,7 @@ class WC_REST_WCCOM_Site_SSR_Controller extends WC_REST_Controller {
 		$data           = $ssr_controller->get_items( $request );
 		$data           = $data->get_data();
 
-		// Submit SSR data to WooCommerce.com.
+		// Submit SSR data to Woo.com.
 		$request = WC_Helper_API::post(
 			'ssr',
 			array(

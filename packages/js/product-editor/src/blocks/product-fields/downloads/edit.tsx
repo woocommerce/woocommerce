@@ -13,7 +13,7 @@ import {
 import { closeSmall } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { ListItem, MediaUploader, Sortable } from '@woocommerce/components';
+import { ListItem, Sortable } from '@woocommerce/components';
 import { Product, ProductDownload } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -24,7 +24,6 @@ import { useEntityProp } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { UploadsBlockAttributes } from './types';
-import { UploadImage } from './upload-image';
 import { DownloadsMenu } from './downloads-menu';
 import { ProductEditorBlockEditProps } from '../../../types';
 import {
@@ -63,10 +62,10 @@ export function Edit( {
 	);
 	const [ downloadLimit, setDownloadLimit ] = useEntityProp<
 		Product[ 'download_limit' ]
-	>( 'postType', 'product', 'download_limit' );
+	>( 'postType', postType, 'download_limit' );
 	const [ downloadExpiry, setDownloadExpiry ] = useEntityProp<
 		Product[ 'download_expiry' ]
-	>( 'postType', 'product', 'download_expiry' );
+	>( 'postType', postType, 'download_expiry' );
 
 	const [ selectedDownload, setSelectedDownload ] =
 		useState< ProductDownload | null >();
@@ -205,7 +204,7 @@ export function Edit( {
 
 	function editHandler( download: ProductDownload ) {
 		return function handleEditClick() {
-			setSelectedDownload( download );
+			setSelectedDownload( stringifyEntityId( download ) );
 		};
 	}
 
@@ -215,6 +214,19 @@ export function Edit( {
 				? error
 				: __( 'There was an error uploading files', 'woocommerce' )
 		);
+	}
+
+	function editDownloadsModalSaveHandler( value: ProductDownload ) {
+		return function handleEditDownloadsModalSave() {
+			const newDownloads = downloads
+				.map( stringifyEntityId )
+				.map( ( obj: ProductDownload ) =>
+					obj.id === value.id ? value : obj
+				);
+
+			setDownloads( newDownloads );
+			setSelectedDownload( null );
+		};
 	}
 
 	return (
@@ -237,50 +249,36 @@ export function Edit( {
 			</div>
 
 			<div className="wp-block-woocommerce-product-downloads-field__body">
-				<MediaUploader
-					label={
-						! Boolean( downloads.length ) ? (
-							<div className="wp-block-woocommerce-product-downloads-field__drop-zone-content">
-								<UploadImage />
-								<p className="wp-block-woocommerce-product-downloads-field__drop-zone-label">
-									{ createInterpolateElement(
-										__(
-											'Supported file types: <Types /> and more. <link>View all</link>',
-											'woocommerce'
-										),
-										{
-											Types: (
-												<Fragment>
-													PNG, JPG, PDF, PPT, DOC,
-													MP3, MP4
-												</Fragment>
-											),
-											link: (
-												// eslint-disable-next-line jsx-a11y/anchor-has-content
-												<a
-													href="https://codex.wordpress.org/Uploading_Files"
-													target="_blank"
-													rel="noreferrer"
-													onClick={ ( event ) =>
-														event.stopPropagation()
-													}
-												/>
-											),
-										}
-									) }
-								</p>
-							</div>
-						) : (
-							''
-						)
-					}
-					buttonText=""
-					allowedMediaTypes={ allowedTypes }
-					multipleSelect={ 'add' }
-					onUpload={ handleFileUpload }
-					onFileUploadChange={ handleFileUpload }
-					onError={ handleUploadError }
-				/>
+				{ ! Boolean( downloads.length ) && (
+					<div className="wp-block-woocommerce-product-downloads-field__drop-zone-content">
+						<p className="wp-block-woocommerce-product-downloads-field__drop-zone-label">
+							{ createInterpolateElement(
+								__(
+									'Supported file types: <Types /> and more. <link>View all</link>',
+									'woocommerce'
+								),
+								{
+									Types: (
+										<Fragment>
+											PNG, JPG, PDF, PPT, DOC, MP3, MP4
+										</Fragment>
+									),
+									link: (
+										// eslint-disable-next-line jsx-a11y/anchor-has-content
+										<a
+											href="https://codex.wordpress.org/Uploading_Files"
+											target="_blank"
+											rel="noreferrer"
+											onClick={ ( event ) =>
+												event.stopPropagation()
+											}
+										/>
+									),
+								}
+							) }
+						</p>
+					</div>
+				) }
 
 				{ Boolean( downloads.length ) && (
 					<Sortable className="wp-block-woocommerce-product-downloads-field__table">
@@ -290,7 +288,10 @@ export function Edit( {
 								download.file.startsWith( 'blob' );
 
 							return (
-								<ListItem key={ download.file }>
+								<ListItem
+									key={ download.file }
+									className="wp-block-woocommerce-product-downloads-field__table-row"
+								>
 									<div className="wp-block-woocommerce-product-downloads-field__table-filename">
 										<span>{ download.name }</span>
 										{ download.name !== nameFromUrl && (
@@ -359,16 +360,7 @@ export function Edit( {
 							name: text,
 						} );
 					} }
-					onSave={ () => {
-						const newDownloads = downloads.map(
-							( obj: ProductDownload ) =>
-								obj.id === selectedDownload.id
-									? selectedDownload
-									: obj
-						) as ProductDownload[];
-						setDownloads( newDownloads );
-						setSelectedDownload( null );
-					} }
+					onSave={ editDownloadsModalSaveHandler( selectedDownload ) }
 					onUploadSuccess={ handleFileReplace }
 					onUploadError={ handleUploadError }
 				/>

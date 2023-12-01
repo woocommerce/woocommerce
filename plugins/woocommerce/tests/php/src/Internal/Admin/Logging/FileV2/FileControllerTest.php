@@ -233,4 +233,43 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 2, $deleted );
 		$this->assertEquals( 0, $this->sut->get_files( array(), true ) );
 	}
+
+	/**
+	 * @testdox The search_within_files method should return an associative array of case-insensitive search results.
+	 */
+	public function test_search_within_files(): void {
+		$log_time = time();
+
+		$this->handler->handle( $log_time, 'debug', 'Foo', array( 'source' => 'unit-testing1' ) );
+		$this->handler->handle( $log_time, 'debug', 'Bar', array( 'source' => 'unit-testing1' ) );
+		$this->handler->handle( $log_time, 'debug', 'foobar', array( 'source' => 'unit-testing1' ) );
+		$this->handler->handle( $log_time, 'debug', 'A trip to the food bar', array( 'source' => 'unit-testing2' ) );
+		$this->handler->handle( $log_time, 'debug', 'Hello world', array( 'source' => 'unit-testing2' ) );
+
+		$this->assertEquals( 2, $this->sut->get_files( array(), true ) );
+
+		$file_args = array(
+			'order'   => 'asc',
+			'orderby' => 'source',
+		);
+
+		$results = $this->sut->search_within_files( 'foo', array(), $file_args );
+		$this->assertCount( 3, $results );
+
+		$match = array_shift( $results );
+		$this->assertArrayHasKey( 'file_id', $match );
+		$this->assertArrayHasKey( 'line_number', $match );
+		$this->assertArrayHasKey( 'line', $match );
+		$this->assertEquals( 'unit-testing1-' . gmdate( 'Y-m-d', $log_time ), $match['file_id'] );
+		$this->assertEquals( 1, $match['line_number'] );
+		$this->assertStringContainsString( 'Foo', $match['line'] );
+
+		$match = array_shift( $results );
+		$this->assertEquals( 3, $match['line_number'] );
+		$this->assertStringContainsString( 'foobar', $match['line'] );
+
+		$match = array_shift( $results );
+		$this->assertEquals( 1, $match['line_number'] );
+		$this->assertStringContainsString( 'A trip to the food bar', $match['line'] );
+	}
 }

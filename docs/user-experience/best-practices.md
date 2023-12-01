@@ -1,4 +1,6 @@
-# User Experience Guidelines: Best Practices
+---
+post_title: User experience guidelines - best practices
+---
 
 ## Best practices
 
@@ -31,4 +33,4 @@ In extensions:
 - Use standard punctuation and avoid excessive exclamation marks.
 - Use American English.
 
-For more, read our [Grammar, Punctuation, and Capitalization guide](https://woocommerce.com/document/grammar-punctuation-style-guide/).
+For more, read our [Grammar, Punctuation, and Capitalization guide](https://woo.com/document/grammar-punctuation-style-guide/).

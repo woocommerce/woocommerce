@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Correct return type of ProductFormTemplateInterface::add_group() method.

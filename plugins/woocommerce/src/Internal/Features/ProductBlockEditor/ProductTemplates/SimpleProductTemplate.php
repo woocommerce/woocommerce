@@ -82,11 +82,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$this->add_group(
 			array(
-				'id'         => $this::GROUP_IDS['PRICING'],
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => $this::GROUP_IDS['PRICING'],
+				'order'          => 20,
+				'attributes'     => array(
 					'title' => __( 'Pricing', 'woocommerce' ),
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		$this->add_group(
@@ -100,11 +105,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$this->add_group(
 			array(
-				'id'         => $this::GROUP_IDS['SHIPPING'],
-				'order'      => 40,
-				'attributes' => array(
+				'id'             => $this::GROUP_IDS['SHIPPING'],
+				'order'          => 40,
+				'attributes'     => array(
 					'title' => __( 'Shipping', 'woocommerce' ),
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		if ( Features::is_enabled( 'product-variation-management' ) ) {
@@ -125,6 +135,18 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 */
 	private function add_general_group_blocks() {
 		$general_group = $this->get_group_by_id( $this::GROUP_IDS['GENERAL'] );
+		$general_group->add_block(
+			array(
+				'id'         => 'product_variation_notice_general_tab',
+				'blockName'  => 'woocommerce/product-has-variations-notice',
+				'order'      => 10,
+				'attributes' => array(
+					'content'    => __( 'This product has options, such as size or color. You can manage each variation\'s images, downloads, and other details individually.', 'woocommerce' ),
+					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
+					'type'       => 'info',
+				),
+			)
+		);
 		// Basic Details Section.
 		$basic_details = $general_group->add_section(
 			array(
@@ -226,17 +248,115 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'     => 10,
 			)
 		);
+
+		// External/Affiliate section.
+		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
+			$buy_button_section = $general_group->add_section(
+				array(
+					'id'             => 'product-buy-button-section',
+					'order'          => 30,
+					'attributes'     => array(
+						'title'       => __( 'Buy button', 'woocommerce' ),
+						'description' => __( 'Add a link and choose a label for the button linked to a product sold elsewhere.', 'woocommerce' ),
+					),
+					'hideConditions' => array(
+						array(
+							'expression' => 'editedProduct.type !== "external"',
+						),
+					),
+				)
+			);
+
+			$buy_button_section->add_block(
+				array(
+					'id'         => 'product-external-url',
+					'blockName'  => 'woocommerce/product-text-field',
+					'order'      => 10,
+					'attributes' => array(
+						'property'    => 'external_url',
+						'label'       => __( 'Link to the external product', 'woocommerce' ),
+						'placeholder' => __( 'Enter the external URL to the product', 'woocommerce' ),
+						'suffix'      => true,
+						'type'        => array(
+							'value'   => 'url',
+							'message' => __( 'Link to the external product is an invalid URL.', 'woocommerce' ),
+						),
+						'required'    => __( 'Link to the external product is required.', 'woocommerce' ),
+					),
+				)
+			);
+
+			$button_text_columns = $buy_button_section->add_block(
+				array(
+					'id'        => 'product-button-text-columns',
+					'blockName' => 'core/columns',
+					'order'     => 20,
+				)
+			);
+
+			$button_text_columns->add_block(
+				array(
+					'id'        => 'product-button-text-column1',
+					'blockName' => 'core/column',
+					'order'     => 10,
+				)
+			)->add_block(
+				array(
+					'id'         => 'product-button-text',
+					'blockName'  => 'woocommerce/product-text-field',
+					'order'      => 10,
+					'attributes' => array(
+						'property' => 'button_text',
+						'label'    => __( 'Buy button text', 'woocommerce' ),
+					),
+				)
+			);
+
+			$button_text_columns->add_block(
+				array(
+					'id'        => 'product-button-text-column2',
+					'blockName' => 'core/column',
+					'order'     => 20,
+				)
+			);
+		}
+
+		// Product list section.
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$product_list_section = $general_group->add_section(
+				array(
+					'id'         => 'product-list-section',
+					'order'      => 35,
+					'attributes' => array(
+						'title'       => __( 'Products in this group', 'woocommerce' ),
+						'description' => __( 'Make a collection of related products, enabling customers to purchase multiple items together.', 'woocommerce' ),
+					),
+				)
+			);
+
+			$product_list_section->add_block(
+				array(
+					'id'         => 'product-list',
+					'blockName'  => 'woocommerce/product-list-field',
+					'order'      => 10,
+					'attributes' => array(
+						'property' => 'grouped_products',
+					),
+				)
+			);
+		}
+
 		// Images section.
 		$images_section = $general_group->add_section(
 			array(
 				'id'         => 'product-images-section',
-				'order'      => 30,
+				'order'      => 40,
 				'attributes' => array(
 					'title'       => __( 'Images', 'woocommerce' ),
 					'description' => sprintf(
 					/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
 						__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s', 'woocommerce' ),
-						'<a href="https://woocommerce.com/posts/how-to-take-professional-product-photos-top-tips" target="_blank" rel="noreferrer">',
+						'<a href="https://woo.com/posts/how-to-take-professional-product-photos-top-tips" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
 				),
@@ -257,11 +377,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
 			$general_group->add_section(
 				array(
-					'id'         => 'product-downloads-section',
-					'order'      => 40,
-					'attributes' => array(
+					'id'             => 'product-downloads-section',
+					'order'          => 50,
+					'attributes'     => array(
 						'title'       => __( 'Downloads', 'woocommerce' ),
 						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
+					),
+					'hideConditions' => array(
+						array(
+							'expression' => 'editedProduct.type !== "simple"',
+						),
 					),
 				)
 			)->add_block(
@@ -285,7 +410,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'id'         => 'product-catalog-section',
 				'order'      => 10,
 				'attributes' => array(
-					'title' => __( 'Product catalog', 'woocommerce' ),
+					'title'       => __( 'Product catalog', 'woocommerce' ),
+					'description' => __( 'Help customers find this product by assigning it to categories, adding extra details, and managing its visibility in your store and other channels.', 'woocommerce' ),
 				),
 			)
 		);
@@ -362,7 +488,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'id'         => 'product-attributes-section',
 				'order'      => 20,
 				'attributes' => array(
-					'title' => __( 'Attributes', 'woocommerce' ),
+					'title'       => __( 'Attributes', 'woocommerce' ),
+					'description' => __( 'Add descriptive pieces of information that customers can use to filter and search for this product. <a href="https://woo.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">Learn more</a>.', 'woocommerce' ),
 				),
 			)
 		);
@@ -402,7 +529,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'description' => sprintf(
 					/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
 						__( 'Set a competitive price, put the product on sale, and manage tax calculations. %1$sHow to price your product?%2$s', 'woocommerce' ),
-						'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
+						'<a href="https://woo.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
 					'blockGap'    => 'unit-40',
@@ -511,7 +638,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'description' => sprintf(
 					/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
 						__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s.', 'woocommerce' ),
-						'<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
+						'<a href="https://woo.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
 					'property'    => 'tax_class',
@@ -545,7 +672,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-has-variations-notice',
 				'order'      => 10,
 				'attributes' => array(
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s inventory and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
 				),
@@ -583,10 +710,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_inventory_inner_section->add_block(
 			array(
-				'id'         => 'product-track-stock',
-				'blockName'  => 'woocommerce/product-toggle-field',
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => 'product-track-stock',
+				'blockName'      => 'woocommerce/product-toggle-field',
+				'order'          => 20,
+				'attributes'     => array(
 					'label'        => __( 'Track stock quantity for this product', 'woocommerce' ),
 					'property'     => 'manage_stock',
 					'disabled'     => 'yes' !== get_option( 'woocommerce_manage_stock' ),
@@ -597,6 +724,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'</a>'
 					),
 				),
+				'hideConditions' => Features::is_enabled( 'product-external-affiliate' ) || Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		$product_inventory_quantity_conditional = $product_inventory_inner_section->add_block(
@@ -759,31 +891,39 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-has-variations-notice',
 				'order'      => 10,
 				'attributes' => array(
-					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s price and other details individually.', 'woocommerce' ),
+					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s shipping settings and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
 				),
 			)
 		);
 		// Virtual section.
-		$shipping_group->add_section(
-			array(
-				'id'    => 'product-virtual-section',
-				'order' => 10,
-			)
-		)->add_block(
-			array(
-				'id'         => 'product-virtual',
-				'blockName'  => 'woocommerce/product-toggle-field',
-				'order'      => 10,
-				'attributes' => array(
-					'property'       => 'virtual',
-					'checkedValue'   => false,
-					'uncheckedValue' => true,
-					'label'          => __( 'This product requires shipping or pickup', 'woocommerce' ),
-				),
-			)
-		);
+		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
+			$shipping_group->add_section(
+				array(
+					'id'             => 'product-virtual-section',
+					'order'          => 10,
+					'hideConditions' => array(
+						array(
+							'expression' => 'editedProduct.type !== "simple"',
+						),
+					),
+				)
+			)->add_block(
+				array(
+					'id'         => 'product-virtual',
+					'blockName'  => 'woocommerce/product-toggle-field',
+					'order'      => 10,
+					'attributes' => array(
+						'property'       => 'virtual',
+						'checkedValue'   => false,
+						'uncheckedValue' => true,
+						'label'          => __( 'This product requires shipping or pickup', 'woocommerce' ),
+						'uncheckedHelp'  => __( 'This product will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woo.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
+					),
+				)
+			);
+		}
 		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			array(
@@ -794,7 +934,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'description' => sprintf(
 					/* translators: %1$s: How to get started? link opening tag. %2$s: How to get started? link closing tag.*/
 						__( 'Set up shipping costs and enter dimensions used for accurate rate calculations. %1$sHow to get started?%2$s.', 'woocommerce' ),
-						'<a href="https://woocommerce.com/posts/how-to-calculate-shipping-costs-for-your-woocommerce-store/" target="_blank" rel="noreferrer">',
+						'<a href="https://woo.com/posts/how-to-calculate-shipping-costs-for-your-woocommerce-store/" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
 				),

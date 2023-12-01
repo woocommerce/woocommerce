@@ -28,6 +28,7 @@ import {
 	FontFamily,
 } from './sidebar/global-styles/font-pairing-variations/font-families-loader';
 import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
+import { PreloadFonts } from './preload-fonts';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -52,6 +53,9 @@ export type ScaledBlockPreviewProps = {
 	isScrollable?: boolean;
 	autoScale?: boolean;
 	setLogoBlockContext?: boolean;
+	CustomIframeComponent?: React.ComponentType<
+		Parameters< typeof Iframe >[ 0 ]
+	>;
 };
 
 function ScaledBlockPreview( {
@@ -64,6 +68,7 @@ function ScaledBlockPreview( {
 	isScrollable = true,
 	autoScale = true,
 	setLogoBlockContext = false,
+	CustomIframeComponent = Iframe,
 }: ScaledBlockPreviewProps ) {
 	const [ contentHeight, setContentHeight ] = useState< number | null >(
 		null
@@ -240,7 +245,7 @@ function ScaledBlockPreview( {
 						: {}
 				}
 			>
-				<Iframe
+				<CustomIframeComponent
 					aria-hidden
 					scrolling={ isScrollable ? 'yes' : 'no' }
 					tabIndex={ -1 }
@@ -316,11 +321,12 @@ function ScaledBlockPreview( {
 					` }
 					</style>
 					<MemoizedBlockList renderAppender={ false } />
+					<PreloadFonts />
 					<FontFamiliesLoader
 						fontFamilies={ externalFontFamilies }
 						onLoad={ noop }
 					/>
-				</Iframe>
+				</CustomIframeComponent>
 			</div>
 		</DisabledProvider>
 	);

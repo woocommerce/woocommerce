@@ -13,6 +13,8 @@ class WC_Tests_Payment_Gateway extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->reset_legacy_proxy_mocks();
+
 		WC()->session = null;
 		$wc_payment_gateways = WC_Payment_Gateways::instance();
 		$wc_payment_gateways->init();
@@ -55,5 +57,4 @@ class WC_Tests_Payment_Gateway extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->set_current_gateway( $gateways );
 		$this->assertTrue( $current_gateway->chosen );
 	}
-
 }

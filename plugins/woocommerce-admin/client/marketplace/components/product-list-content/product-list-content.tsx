@@ -14,8 +14,11 @@ import { getAdminSetting } from '../../../utils/admin-settings';
 
 export default function ProductListContent( props: {
 	products: Product[];
+	group?: string;
 	type: ProductType;
 	className?: string;
+	searchTerm?: string;
+	category?: string;
 } ): JSX.Element {
 	const wccomHelperSettings = getAdminSetting( 'wccomHelper', {} );
 
@@ -26,7 +29,7 @@ export default function ProductListContent( props: {
 
 	return (
 		<div className={ classes }>
-			{ props.products.map( ( product ) => (
+			{ props.products.map( ( product, index ) => (
 				<ProductCard
 					key={ product.id }
 					type={ props.type }
@@ -52,6 +55,15 @@ export default function ProductListContent( props: {
 							)
 						),
 						description: product.description,
+					} }
+					tracksData={ {
+						position: index + 1,
+						...( product.label && { label: product.label } ),
+						...( props.group && { group: props.group } ),
+						...( props.searchTerm && {
+							searchTerm: props.searchTerm,
+						} ),
+						...( props.category && { category: props.category } ),
 					} }
 				/>
 			) ) }

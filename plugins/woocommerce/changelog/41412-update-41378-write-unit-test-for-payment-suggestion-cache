@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a unit test to ensure that the payment gateway suggestion cache is refreshed when the base country is updated

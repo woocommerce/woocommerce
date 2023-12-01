@@ -73,8 +73,8 @@ export function ManageDownloadLimitsModal( {
 			setErrors( ( current ) => ( {
 				...current,
 				downloadLimit: sprintf(
+					// translators: %d is the minimum value of the number input.
 					__(
-						// translators: %d is the minimum value of the number input.
 						'Download limit must be greater than or equal to %d',
 						'woocommerce'
 					),
@@ -107,8 +107,8 @@ export function ManageDownloadLimitsModal( {
 			setErrors( ( current ) => ( {
 				...current,
 				downloadExpiry: sprintf(
+					// translators: %d is the minimum value of the number input.
 					__(
-						// translators: %d is the minimum value of the number input.
 						'Expiry period must be greater than or equal to %d',
 						'woocommerce'
 					),
@@ -122,11 +122,14 @@ export function ManageDownloadLimitsModal( {
 		return true;
 	}
 
+	const downloadLimitInputProps = useNumberInputProps( {
+		value: downloadLimit,
+		onChange: setDownloadLimit,
+	} );
+
 	const downloadLimitProps = {
-		...useNumberInputProps( {
-			value: downloadLimit,
-			onChange: setDownloadLimit,
-		} ),
+		value: downloadLimitInputProps.value,
+		onChange: downloadLimitInputProps.onChange,
 		id: useInstanceId(
 			BaseControl,
 			'product_download_limit_field'
@@ -154,11 +157,14 @@ export function ManageDownloadLimitsModal( {
 		},
 	};
 
+	const downloadExpiryInputProps = useNumberInputProps( {
+		value: downloadExpiry,
+		onChange: setDownloadExpiry,
+	} );
+
 	const downloadExpiryProps = {
-		...useNumberInputProps( {
-			value: downloadExpiry,
-			onChange: setDownloadExpiry,
-		} ),
+		value: downloadExpiryInputProps.value,
+		onChange: downloadExpiryInputProps.onChange,
 		id: useInstanceId(
 			BaseControl,
 			'product_download_expiry_field'
