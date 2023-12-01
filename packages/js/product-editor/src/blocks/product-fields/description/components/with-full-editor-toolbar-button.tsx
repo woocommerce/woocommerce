@@ -4,26 +4,20 @@
 import { createElement, Fragment } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { BlockControls } from '@wordpress/block-editor';
-import { ToolbarButton } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
-import { recordEvent } from '@woocommerce/tracks';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { store } from '../../../../store/product-editor-ai';
 import type {
 	DescriptionBlockEditComponent,
 	DescriptionBlockEditProps,
 } from '../types';
+import FullEditorToolbarButton from './full-editor-toolbar-button';
 
 const wooBlockwithFullEditorToolbarButton =
 	createHigherOrderComponent< DescriptionBlockEditComponent >(
 		( BlockEdit: DescriptionBlockEditComponent ) => {
 			return ( props: DescriptionBlockEditProps ) => {
-				const { openModalEditor } = useDispatch( store );
-
 				// Only extend summary field block instances
 				if ( props?.name !== 'woocommerce/product-summary-field' ) {
 					return <BlockEdit { ...props } />;
@@ -50,20 +44,7 @@ const wooBlockwithFullEditorToolbarButton =
 				return (
 					<>
 						<BlockControls { ...blockControlProps }>
-							<ToolbarButton
-								label={ __(
-									'Edit Product description',
-									'woocommerce'
-								) }
-								onClick={ () => {
-									recordEvent(
-										'product_add_description_click'
-									);
-									openModalEditor();
-								} }
-							>
-								{ __( 'Full editor', 'woocommerce' ) }
-							</ToolbarButton>
+							<FullEditorToolbarButton />
 						</BlockControls>
 						<BlockEdit { ...props } />
 					</>
