@@ -567,10 +567,15 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( is_array( $settings_tabs ) && count( $settings_tabs ) > 0  ) {
 				$formatted_settings_tabs = array();
 				foreach ($settings_tabs as $key => $label) {
-					$formatted_settings_tabs[] = array(
-						'key'   => is_string( $key ) ? $key : '',
-						'label' => is_string( $label ) ? $label : '',
-					);
+					if (
+						is_string( $key ) && $key !== "" &&
+						is_string( $label ) && $label !== ""
+					) {
+						$formatted_settings_tabs[] = array(
+							'key'   => $key,
+							'label' => $label,
+						);
+					}
 				}
 
 				WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette' );
@@ -588,11 +593,23 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				$analytics_reports = Analytics::get_report_pages();
 				if ( is_array( $analytics_reports ) && count( $analytics_reports ) > 0 ) {
 					$formatted_analytics_reports = array_map( function( $report ) {
-						return array(
-							'title' => is_string( $report['title'] ) ? $report['title']: '' ,
-							'path' => is_string( $report['path'] ) ? $report['path']: '',
-						);
+						if ( ! is_array( $report ) ) {
+							return null;
+						}
+						$title = array_key_exists( 'title', $report ) ? $report['title'] : '';
+						$path = array_key_exists( 'path', $report ) ? $report['path'] : '';
+						if (
+							is_string( $title ) && $title !== "" &&
+							is_string( $path ) && $path !== ""
+						) {
+							return array(
+								'title' => $title,
+								'path' => $path,
+							);
+						}
+						return null;
 					}, $analytics_reports );
+					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
 
 					WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette-analytics' );
 					wp_localize_script(
