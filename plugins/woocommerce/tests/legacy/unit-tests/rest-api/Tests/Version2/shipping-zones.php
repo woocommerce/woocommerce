@@ -691,7 +691,7 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'settings' => array(
-					'cost'  => 5,
+					'cost' => 5,
 				),
 			)
 		);
