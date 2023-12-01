@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use WC_Tracks;
 
 /**
  * ShippingController class.
@@ -81,6 +82,8 @@ class ShippingController {
 		// This is required to short circuit `show_shipping` from class-wc-cart.php - without it, that function
 		// returns based on the option's value in the DB and we can't override it any other way.
 		add_filter( 'option_woocommerce_shipping_cost_requires_address', array( $this, 'override_cost_requires_address_option' ) );
+
+		add_action( 'rest_pre_serve_request', array( $this, 'track_local_pickup' ), 10, 4 );
 	}
 
 	/**
@@ -465,5 +468,48 @@ class ShippingController {
 		}
 
 		return $packages;
+	}
+
+	/**
+	 * Track local pickup settings changes via Store API
+	 *
+	 * @param bool              $served Whether the request has already been served.
+	 * @param \WP_REST_Response $result The response object.
+	 * @param \WP_REST_Request  $request The request object.
+	 * @return bool
+	 */
+	public function track_local_pickup( $served, $result, $request ) {
+		if ( '/wp/v2/settings' !== $request->get_route() ) {
+			return $served;
+		}
+		// Param name here comes from the show_in_rest['name'] value when registering the setting.
+		if ( ! $request->get_param( 'pickup_location_settings' ) && ! $request->get_param( 'pickup_locations' ) ) {
+			return $served;
+		}
+
+		$event_name = 'local_pickup_save_changes';
+
+		$settings  = $request->get_param( 'pickup_location_settings' );
+		$locations = $request->get_param( 'pickup_locations' );
+
+		$data = array(
+			'local_pickup_enabled'     => 'yes' === $settings['enabled'] ? true : false,
+			'title'                    => __( 'Local Pickup', 'woo-gutenberg-products-block' ) === $settings['title'],
+			'price'                    => '' === $settings['cost'] ? true : false,
+			'cost'                     => '' === $settings['cost'] ? 0 : $settings['cost'],
+			'taxes'                    => $settings['tax_status'],
+			'total_pickup_locations'   => count( $locations ),
+			'pickup_locations_enabled' => count(
+				array_filter(
+					$locations,
+					function( $location ) {
+						return $location['enabled']; }
+				)
+			),
+		);
+
+		WC_Tracks::record_event( $event_name, $data );
+
+		return $served;
 	}
 }
