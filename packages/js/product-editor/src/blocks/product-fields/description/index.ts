@@ -10,7 +10,7 @@ import { addFilter } from '@wordpress/hooks';
 import blockConfiguration from './block.json';
 import { DescriptionBlockEdit } from './edit';
 import { registerProductEditorBlockType } from '../../../utils';
-import wooDescriptionBlockWithFullEditorButton from './components/withFullEditorToolbarButton';
+import wooDescriptionBlockWithFullEditorButton from './components/with-full-editor-toolbar-button';
 
 const { name, ...metadata } = blockConfiguration;
 
