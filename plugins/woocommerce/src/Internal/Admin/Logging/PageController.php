@@ -196,21 +196,27 @@ class PageController {
 		$rotations         = $this->file_controller->get_file_rotations( $file->get_file_id() );
 		$rotation_url_base = add_query_arg( 'view', 'single_file', $this->get_logs_tab_url() );
 
-		$delete_url = add_query_arg(
+		$download_url           = add_query_arg(
+			array(
+				'action'  => 'export',
+				'file_id' => array( $file->get_file_id() ),
+			),
+			wp_nonce_url( $this->get_logs_tab_url(), 'bulk-log-files' )
+		);
+		$delete_url             = add_query_arg(
 			array(
 				'action'  => 'delete',
 				'file_id' => array( $file->get_file_id() ),
 			),
 			wp_nonce_url( $this->get_logs_tab_url(), 'bulk-log-files' )
 		);
-
-		$stream      = $file->get_stream();
-		$line_number = 1;
-
 		$delete_confirmation_js = sprintf(
 			"return window.confirm( '%s' )",
 			esc_js( __( 'Delete this log file permanently?', 'woocommerce' ) )
 		);
+
+		$stream      = $file->get_stream();
+		$line_number = 1;
 
 		?>
 		<header id="logs-header" class="wc-logs-header">
@@ -255,6 +261,14 @@ class PageController {
 				</nav>
 			<?php endif; ?>
 			<div class="wc-logs-single-file-actions">
+				<?php
+				// Download button.
+				printf(
+					'<a href="%1$s" class="button button-secondary">%2$s</a>',
+					esc_url( $download_url ),
+					esc_html__( 'Download', 'woocommerce' )
+				);
+				?>
 				<?php
 				// Delete button.
 				printf(
@@ -464,6 +478,17 @@ class PageController {
 			}
 
 			switch ( $action ) {
+				case 'export':
+					if ( 1 === count( $file_ids ) ) {
+						$export_error = $this->file_controller->export_single_file( reset( $file_ids ) );
+					} else {
+						$export_error = $this->file_controller->export_multiple_files( $file_ids );
+					}
+
+					if ( is_wp_error( $export_error ) ) {
+						wp_die( wp_kses_post( $export_error ) );
+					}
+					break;
 				case 'delete':
 					$deleted  = $this->file_controller->delete_files( $file_ids );
 					$sendback = add_query_arg( 'deleted', $deleted, $sendback );
