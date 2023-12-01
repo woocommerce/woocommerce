@@ -87,8 +87,8 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 
 	const handleError = ( message: string ) => {
 		setIsResponseError( true );
-		setMessages( ( messages ) => [
-			...messages,
+		setMessages( ( prevMessages ) => [
+			...prevMessages,
 			{
 				sender: 'assistant',
 				text: message,
@@ -154,8 +154,8 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 
 			// At this point, if there's an error, we don't continue with a summary.
 			if ( isResponseError ) {
-				setMessages( ( messages ) => [
-					...messages,
+				setMessages( ( prevMessages ) => [
+					...prevMessages,
 					{
 						sender: 'assistant',
 						text: message,
@@ -191,8 +191,8 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	};
 
 	const setAndStoreThreadID = ( newThreadID: string ) => {
-		setThreadID( newThreadID );
 		setStorageData( WOO_AI_PLUGIN_NAME, threadPreferenceId, newThreadID );
+		setThreadID( newThreadID );
 	};
 
 	const setAndStoreMessages = (
@@ -203,12 +203,13 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			sender,
 			text: answer,
 		};
-		setMessages( ( messages ) => [ ...messages, chatMessage ] );
+		console.log( 'chatMessage: ', chatMessage );
 		setStorageData(
 			WOO_AI_PLUGIN_NAME,
 			chatHistoryPreferenceId,
 			JSON.stringify( [ ...messages, chatMessage ] )
 		);
+		setMessages( ( prevMessages ) => [ ...prevMessages, chatMessage ] );
 	};
 
 	const handleSubmit = async ( event: React.FormEvent ) => {
@@ -217,7 +218,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			return;
 		}
 		setLoading( true );
-
+		console.log( 'going to setandstoremessages for user: ', input );
 		setAndStoreMessages( input, 'user' );
 		setInput( '' );
 
