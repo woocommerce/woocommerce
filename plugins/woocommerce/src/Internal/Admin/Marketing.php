@@ -44,6 +44,9 @@ class Marketing {
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 5 );
 		add_action( 'admin_menu', array( $this, 'add_parent_menu_item' ), 6 );
 
+		// Overwrite submenu defualt ordering for marketing menu. Hight priority gives plugins chance to register their own menu items.
+		add_action( 'admin_menu', array( $this, 'reorder_marketing_submenu' ), 99 );
+
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'component_settings' ), 30 );
 	}
 
@@ -138,6 +141,43 @@ class Marketing {
 				$item[2] = 'admin.php?page=' . $item[2];
 			}
 		}
+	}
+
+	/**
+	 * Order marketing menu items alphabeticaly.
+	 * Overview should be first.
+	 *
+	 * @return  void
+	 */
+	public function reorder_marketing_submenu( ) {
+		global $submenu;
+
+		if ( ! isset( $submenu['woocommerce-marketing'] ) ) {
+			return;
+		}
+
+		$marketing_submenu = $submenu['woocommerce-marketing'];
+
+		$new_order = array();
+
+		// Overview should be first.
+		$overview_key = array_search( 'Overview', array_column( $marketing_submenu, 0 ) );
+		$new_order[]  = $marketing_submenu[ $overview_key ];
+
+		// Remove Overview from the array.
+		unset( $marketing_submenu[ $overview_key ] );
+
+		// Sort the rest of the items alphabetically.
+		usort(
+			$marketing_submenu,
+			function( $a, $b ) {
+				return strcmp( $a[0], $b[0] );
+			}
+		);
+
+		$new_order = array_merge( $new_order, $marketing_submenu );
+
+		$submenu['woocommerce-marketing'] = $new_order;
 	}
 
 	/**
