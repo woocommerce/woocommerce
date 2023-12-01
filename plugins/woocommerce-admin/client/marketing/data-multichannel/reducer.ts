@@ -22,6 +22,9 @@ const initialState = {
 	},
 	campaigns: {
 		pages: {},
+		meta: {
+			total: undefined,
+		},
 	},
 	campaignTypes: {
 		data: undefined,
@@ -78,8 +81,10 @@ export const reducer: Reducer< State, Action > = (
 							  }
 							: {
 									data: action.payload,
-									total: meta.total,
 							  },
+					},
+					meta: {
+						total: meta.total,
 					},
 				},
 			};

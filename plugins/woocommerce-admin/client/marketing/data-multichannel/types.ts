@@ -63,12 +63,16 @@ export type Campaign = {
 
 export type CampaignsPage = {
 	data?: Array< Campaign >;
-	total?: number;
 	error?: ApiFetchError;
+};
+
+export type CampaignsMeta = {
+	total?: number;
 };
 
 export type CampaignsState = {
 	pages: Record< string, CampaignsPage >;
+	meta: CampaignsMeta;
 };
 
 export type CampaignType = {

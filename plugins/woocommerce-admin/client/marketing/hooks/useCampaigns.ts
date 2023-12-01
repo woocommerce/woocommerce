@@ -10,6 +10,7 @@ import { Campaign } from '~/marketing/types';
 import { STORE_KEY } from '~/marketing/data-multichannel/constants';
 import {
 	CampaignsPage,
+	CampaignsMeta,
 	Campaign as APICampaign,
 	ApiFetchError,
 } from '~/marketing/data-multichannel/types';
@@ -35,7 +36,9 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 
 	return useSelect(
 		( select ) => {
-			const { hasFinishedResolution, getCampaigns } = select( STORE_KEY );
+			const { hasFinishedResolution, getCampaigns, getCampaignsMeta } =
+				select( STORE_KEY );
+			const meta = getCampaignsMeta< CampaignsMeta >();
 			const campaignsPage = getCampaigns< CampaignsPage | null >(
 				page,
 				perPage
@@ -62,6 +65,8 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 				};
 			};
 
+			// The `loading` value only considers 'getCampaigns' as the data of 'getCampaignsMeta'
+			// is resolved along with 'getCampaigns' within the data store.
 			return {
 				loading: ! hasFinishedResolution( 'getCampaigns', [
 					page,
@@ -69,9 +74,7 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 				] ),
 				data: campaignsPage?.data?.map( convert ),
 				error: campaignsPage?.error,
-				meta: {
-					total: campaignsPage?.total,
-				},
+				meta,
 			};
 		},
 		[ page, perPage, channels ]

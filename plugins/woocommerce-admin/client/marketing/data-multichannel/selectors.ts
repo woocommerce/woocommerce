@@ -23,6 +23,15 @@ export const getCampaigns = ( state: State, page: number, perPage: number ) => {
 	return state.campaigns.pages[ key ] || null;
 };
 
+/**
+ * Get the meta of campaigns from state.
+ *
+ * @param state State passed in from the data store.
+ */
+export const getCampaignsMeta = ( state: State ) => {
+	return state.campaigns.meta;
+};
+
 export const getCampaignTypes = ( state: State ) => {
 	return state.campaignTypes;
 };
