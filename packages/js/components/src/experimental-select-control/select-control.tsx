@@ -184,6 +184,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		highlightedIndex,
 		getItemProps,
 		selectItem,
+		// @ts-expect-error We're allowed to use the property.
 		selectedItem: comboboxSingleSelectedItem,
 		openMenu,
 		closeMenu,
@@ -207,6 +208,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 				onInputChange( value, changes );
 			}
 		},
+		// @ts-expect-error We're allowed to use the property.
 		stateReducer: ( state, actionAndChanges ) => {
 			const { changes, type } = actionAndChanges;
 			let newChanges;

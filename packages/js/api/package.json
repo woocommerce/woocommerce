@@ -57,9 +57,9 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"axios-mock-adapter": "^1.20.0",
 		"eslint": "^8.32.0",
-		"jest": "~28.1.3",
-		"ts-jest": "~28.0.8",
-		"typescript": "^4.9.5"
+		"jest": "~27.5.1",
+		"ts-jest": "~27.1.3",
+		"typescript": "^5.1.6"
 	},
 	"publishConfig": {
 		"access": "public"

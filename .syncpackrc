@@ -75,7 +75,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^4.9.5"
+			"pinVersion": "^5.1.6"
 		},
 		{
 			"dependencies": [
@@ -213,7 +213,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "~28.1.3"
+			"pinVersion": "~27.5.1"
 		},
 		{
 			"dependencies": [
@@ -222,7 +222,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "~28.0.8"
+			"pinVersion": "~27.1.3"
 		},
 		{
 			"label": "Only manage versions for these dependencies",

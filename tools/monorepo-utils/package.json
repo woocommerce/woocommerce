@@ -38,9 +38,9 @@
 		"@types/node": "^16.18.18",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.32.0",
-		"jest": "~28.1.3",
-		"ts-jest": "~28.0.8",
-		"typescript": "^4.9.5"
+		"jest": "~27.5.1",
+		"ts-jest": "~27.1.3",
+		"typescript": "^5.1.6"
 	},
 	"scripts": {
 		"build": "tsc",
