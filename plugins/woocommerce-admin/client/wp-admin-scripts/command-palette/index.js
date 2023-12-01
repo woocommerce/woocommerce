@@ -4,11 +4,11 @@
 import { registerPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { box, plus, settings } from '@wordpress/icons';
-import { useMemo } from '@wordpress/element';
+import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { dispatch, useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { addQueryArgs } from '@wordpress/url';
-import { queueRecordEvent } from '@woocommerce/tracks';
+import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 import { store as commandsStore } from '@wordpress/commands';
 import { decodeEntities } from '@wordpress/html-entities';
 
@@ -38,6 +38,22 @@ const registerWooCommerceSettingsCommand = ( { label, tab } ) => {
 // Code adapted from the equivalent in Gutenberg:
 // https://github.com/WordPress/gutenberg/blob/8863b49b7e686f555e8b8adf70cc588c4feebfbf/packages/core-commands/src/site-editor-navigation-commands.js#L36C7-L36C44
 function useProductCommandLoader( { search } ) {
+	// Track searched values. We add a 300 ms delay to avoid tracking while typing.
+	const trackingSearchTimeout = useRef( null );
+	useEffect( () => {
+		if ( search !== '' ) {
+			clearTimeout( trackingSearchTimeout.current );
+			trackingSearchTimeout.current = setTimeout( () => {
+				recordEvent( 'woocommerce_command_palette_search', {
+					value: search,
+				} );
+			}, 300 );
+		}
+		return () => {
+			clearTimeout( trackingSearchTimeout.current );
+		};
+	}, [ search ] );
+
 	const postType = 'product';
 	const { records, isLoading } = useSelect(
 		( select ) => {
@@ -95,6 +111,19 @@ function useProductCommandLoader( { search } ) {
 }
 
 const WooCommerceCommands = () => {
+	const { isCommandPaletteOpen } = useSelect( ( select ) => {
+		const { isOpen } = select( commandsStore );
+		return {
+			isCommandPaletteOpen: isOpen(),
+		};
+	}, [] );
+
+	useEffect( () => {
+		if ( isCommandPaletteOpen ) {
+			recordEvent( 'woocommerce_command_palette_open' );
+		}
+	}, [ isCommandPaletteOpen ] );
+
 	registerCommandWithTracking( {
 		name: 'woocommerce/add-new-product',
 		label: __( 'Add new product', 'woocommerce' ),
