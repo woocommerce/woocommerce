@@ -260,7 +260,6 @@ class ProductUpdater {
 				),
 			)
 		);
-		flush_rewrite_rules();
 
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/file.php';
