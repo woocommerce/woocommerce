@@ -184,7 +184,6 @@ function SelectControl< ItemType = DefaultItemType >( {
 		highlightedIndex,
 		getItemProps,
 		selectItem,
-		// @ts-expect-error - TODO fix this type.
 		selectedItem: comboboxSingleSelectedItem,
 		openMenu,
 		closeMenu,
@@ -208,7 +207,6 @@ function SelectControl< ItemType = DefaultItemType >( {
 				onInputChange( value, changes );
 			}
 		},
-		// @ts-expect-error - TODO fix this type.
 		stateReducer: ( state, actionAndChanges ) => {
 			const { changes, type } = actionAndChanges;
 			let newChanges;
