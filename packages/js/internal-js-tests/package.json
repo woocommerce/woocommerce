@@ -45,9 +45,9 @@
 		"jest-cli": "~28.1.3",
 		"resize-observer-polyfill": "1.5.1",
 		"rimraf": "^3.0.2",
-		"ts-jest": "^27.1.3",
-		"babel-jest": "^27.5.1",
-		"typescript": "^5.1.6"
+		"ts-jest": "~28.0.8",
+		"babel-jest": "~28.1.3",
+		"typescript": "^4.9.5"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
