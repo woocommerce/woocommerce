@@ -6,6 +6,7 @@ import { Taxonomy } from '@wordpress/core-data/src/entity-types';
 import { useState, useMemo, useRef } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import { FormTokenField } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 
 type Term = {
 	id: number;
@@ -250,6 +251,10 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 		onChange( newTermIds );
 	};
 
+	const decodeHTMLEntities = ( value: string ) => {
+		return decodeEntities( value ) || '';
+	};
+
 	return (
 		<div className="wc-block-editor-product-collection-inspector__taxonomy-control">
 			<FormTokenField
@@ -261,6 +266,7 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 				disabled={ isResolvingTermMaps }
 				// @ts-expect-error Using experimental features
 				__experimentalShowHowTo={ false }
+				displayTransform={ decodeHTMLEntities }
 			/>
 		</div>
 	);
