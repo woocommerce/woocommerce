@@ -87,8 +87,4 @@ export const Link = ( {
 	);
 };
 
-Link.contextTypes = {
-	router: PropTypes.object,
-};
-
 export default Link;
