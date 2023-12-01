@@ -4115,7 +4115,7 @@ table.wc_shipping {
 
 	.wc-backbone-modal-main article {
 		padding: 0 32px 32px 32px;
-		
+
 	}
 
 	.wc-backbone-modal-main header{
@@ -4124,7 +4124,7 @@ table.wc_shipping {
 
 	.wc-backbone-modal-main footer {
 		padding: 20px 32px 12px 32px;
-		
+
 	}
 
 	.wc-backbone-modal-main .wc-backbone-modal-header h1 {
@@ -4168,7 +4168,7 @@ table.wc_shipping {
 				display: none;
 			}
 		}
-		
+
 	}
 
 	.wc-shipping-method-add-class-costs {
@@ -4186,7 +4186,7 @@ table.wc_shipping {
 			height: 1px;
 			overflow: hidden;
 			position: absolute;
-			white-space: nowrap; 
+			white-space: nowrap;
 			width: 1px;
 
 			&:checked + label {
@@ -4237,7 +4237,7 @@ table.wc_shipping {
 			font-size: 24px;
 		}
 	}
-	
+
 	.wc-shipping-zone-method-fields {
 
 		& > label {
@@ -4258,7 +4258,7 @@ table.wc_shipping {
 			margin-bottom: 24px;
 			position: relative;
 
-			input, 
+			input,
 			select {
 				margin: 6px 0;
 				padding: 12px;
@@ -4362,7 +4362,7 @@ table {
 	.edit {
 		margin: 5px 0;
 	}
-	
+
 	.edit > input,
 	.edit > select {
 		width: 100%;
@@ -4390,7 +4390,7 @@ table {
 	}
 }
 
-.wc-shipping-class-hide-sibling-view + .view { 
+.wc-shipping-class-hide-sibling-view + .view {
 	display: none;
 }
 
@@ -4402,7 +4402,7 @@ table {
 		display: inline-block;
 		margin: 0 12px;
 	}
-} 
+}
 
 .wc-shipping-zone-heading-help-text {
 	max-width: 800px;
