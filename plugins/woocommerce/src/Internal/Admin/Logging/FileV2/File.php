@@ -60,7 +60,10 @@ class File {
 	 * @param string $path The absolute path of the file.
 	 */
 	public function __construct( $path ) {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+
 		global $wp_filesystem;
+
 		if ( ! $wp_filesystem instanceof WP_Filesystem_Direct ) {
 			WP_Filesystem();
 		}
@@ -325,6 +328,12 @@ class File {
 			}
 		}
 
+		// Ensure content ends with a line ending.
+		$eol_pos = strrpos( $text, PHP_EOL );
+		if ( false === $eol_pos || $eol_pos + 1 !== strlen( $text ) ) {
+			$text .= PHP_EOL;
+		}
+
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen -- No suitable alternative.
 		$resource = fopen( $this->path, 'ab' );
 
@@ -349,23 +358,32 @@ class File {
 	 * @return bool True if the file was successfully rotated.
 	 */
 	public function rotate(): bool {
+		if ( ! $this->is_writable() ) {
+			return false;
+		}
+
 		global $wp_filesystem;
 
 		if ( is_null( $this->get_rotation() ) ) {
-			$new_rotation = 0;
+			$old_rotation = '';
+			$new_rotation = '.0';
 		} else {
-			$new_rotation = $this->get_rotation() + 1;
+			$old_rotation = '.' . $this->get_rotation();
+			$new_rotation = '.' . ( $this->get_rotation() + 1 );
 		}
 
-		$search  = array( $this->get_source() . ( $this->get_rotation() ) ? '.' . $this->get_rotation() : '' );
-		$replace = array( $this->get_source() . '.' . $new_rotation );
+		$search  = array( $this->get_source() . $old_rotation );
+		$replace = array( $this->get_source() . $new_rotation );
 		if ( $this->get_hash() ) {
-			$new_file_id = $this->get_source() . '.' . $new_rotation . '-' . gmdate( 'Y-m-d', $this->get_created_timestamp() );
+			$new_file_id = $this->get_source() . $new_rotation . '-' . gmdate( 'Y-m-d', $this->get_created_timestamp() );
 			$search[]    = $this->get_hash();
 			$replace[]   = self::generate_hash( $new_file_id );
 		}
 
-		$new_path = str_replace( $search, $replace, $this->path );
+		$old_filename = $this->get_basename();
+		$new_filename = str_replace( $search, $replace, $old_filename );
+		$new_path     = str_replace( $old_filename, $new_filename, $this->path );
+
 		$moved    = $wp_filesystem->move( $this->path, $new_path, true );
 
 		if ( ! $moved ) {
