@@ -55,5 +55,8 @@
 	&__heading-description {
 		margin: 0;
 		max-width: 300px;
+		a {
+			text-decoration: none;
+		}
 	}
 }
