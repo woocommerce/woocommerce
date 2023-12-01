@@ -3,23 +3,21 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement, useState } from '@wordpress/element';
-import {
-	BlockAttributes,
-	BlockInstance,
-	parse,
-	serialize,
-} from '@wordpress/blocks';
-import { useInnerBlocksProps } from '@wordpress/block-editor';
+import { BlockInstance, parse, serialize } from '@wordpress/blocks';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { useEntityProp } from '@wordpress/core-data';
+import {
+	// @ts-expect-error no exported member.
+	useInnerBlocksProps,
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
 import { ContentPreview } from '../../../components/content-preview';
 import { ModalEditor } from '../../../components/modal-editor';
-import { ProductEditorBlockEditProps } from '../../../types';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
+import type { DescriptionBlockEditComponent } from './types';
 
 /**
  * Internal dependencies
@@ -47,7 +45,7 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 
 export function DescriptionBlockEdit( {
 	attributes,
-}: ProductEditorBlockEditProps< BlockAttributes > ) {
+}: DescriptionBlockEditComponent ) {
 	const blockProps = useWooBlockProps( attributes );
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	const [ description, setDescription ] = useEntityProp< string >(
