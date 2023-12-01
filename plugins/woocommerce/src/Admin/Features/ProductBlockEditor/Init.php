@@ -39,11 +39,6 @@ class Init {
 	private $redirection_controller;
 
 	/**
-	 * The template data list
-	 */
-	private $template_data_list = array();
-
-	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -218,16 +213,21 @@ class Init {
 	 * Get the product editor settings.
 	 */
 	private function get_product_editor_settings() {
+		$template_id                = isset( $_GET['template'] ) ? wp_unslash( $_GET['template'] ) : null;
+		$template_registry          = wc_get_container()->get( BlockTemplateRegistry::class );
+		$simple_product_template    = $template_registry->get_registered( 'simple-product' );
+		$requested_product_template = is_null( $template_id ) ? null : $template_registry->get_registered( $template_id );
+		$product_template           = is_null( $requested_product_template ) ? $simple_product_template : $requested_product_template;
+
 		$editor_settings = array();
 
-		$template_registry     = wc_get_container()->get( BlockTemplateRegistry::class );
-		$block_template_logger = BlockTemplateLogger::get_instance();
-
-		$editor_settings['templates']['product']           = $template_registry->get_registered( 'simple-product' )->get_formatted_template();
+		$editor_settings['templates']['product']           = $product_template->get_formatted_template();
 		$editor_settings['templates']['product_variation'] = $template_registry->get_registered( 'product-variation' )->get_formatted_template();
 
-		$block_template_logger->log_template_events_to_file( 'simple-product' );
-		$editor_settings['templateEvents']['product'] = $block_template_logger->get_formatted_template_events( 'simple-product' );
+		$block_template_logger = BlockTemplateLogger::get_instance();
+
+		$block_template_logger->log_template_events_to_file( $product_template->get_id() );
+		$editor_settings['templateEvents']['product'] = $block_template_logger->get_formatted_template_events( $product_template->get_id() );
 
 		$block_template_logger->log_template_events_to_file( 'product-variation' );
 		$editor_settings['templateEvents']['product_variation'] = $block_template_logger->get_formatted_template_events( 'product-variation' );
