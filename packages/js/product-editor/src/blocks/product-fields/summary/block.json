@@ -34,12 +34,10 @@
 			"enum": [ "ltr", "rtl" ]
 		},
 		"label": {
-			"type": "string",
-			"default": "Summary"
+			"type": "string"
 		},
 		"helpText": {
-			"type": "string",
-			"default": "Summarize this product in 1-2 short sentences. We'll show it at the top of the page."
+			"type": "string"
 		},
 		"content": {
 			"type": "string",

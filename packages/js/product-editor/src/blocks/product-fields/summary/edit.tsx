@@ -89,17 +89,30 @@ export function SummaryBlockEdit( {
 			<BaseControl
 				id={ contentId.toString() }
 				label={
-					label
-						? createInterpolateElement( label, {
-								optional: (
-									<span className="woocommerce-product-form__optional-input">
-										{ __( '(OPTIONAL)', 'woocommerce' ) }
-									</span>
-								),
-						  } )
-						: null
+					typeof label === 'undefined'
+						? createInterpolateElement(
+								__( 'Summary', 'woocommerce' ),
+								{
+									optional: (
+										<span className="woocommerce-product-form__optional-input">
+											{ __(
+												'(OPTIONAL)',
+												'woocommerce'
+											) }
+										</span>
+									),
+								}
+						  )
+						: label
 				}
-				help={ helpText }
+				help={
+					typeof helpText === 'undefined'
+						? __(
+								"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
+								'woocommerce'
+						  )
+						: helpText
+				}
 			>
 				<div { ...blockProps }>
 					<RichText
