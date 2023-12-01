@@ -26,7 +26,7 @@ import { SummaryAttributes } from './types';
 import { ALIGNMENT_CONTROLS } from './constants';
 import { ProductEditorBlockEditProps } from '../../../types';
 
-export function Edit( {
+export function SummaryBlockEdit( {
 	attributes,
 	setAttributes,
 	context,
@@ -36,7 +36,7 @@ export function Edit( {
 		style: { direction },
 	} );
 	const contentId = useInstanceId(
-		Edit,
+		SummaryBlockEdit,
 		'wp-block-woocommerce-product-summary-field__content'
 	);
 	const [ summary, setSummary ] = useEntityProp< string >(
@@ -88,24 +88,18 @@ export function Edit( {
 
 			<BaseControl
 				id={ contentId.toString() }
-				label={ createInterpolateElement(
-					label || __( 'Summary', 'woocommerce' ),
-					{
-						optional: (
-							<span className="woocommerce-product-form__optional-input">
-								{ __( '(OPTIONAL)', 'woocommerce' ) }
-							</span>
-						),
-					}
-				) }
-				help={
-					typeof helpText === 'string'
-						? helpText
-						: __(
-								"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
-								'woocommerce'
-						  )
+				label={
+					label
+						? createInterpolateElement( label, {
+								optional: (
+									<span className="woocommerce-product-form__optional-input">
+										{ __( '(OPTIONAL)', 'woocommerce' ) }
+									</span>
+								),
+						  } )
+						: null
 				}
+				help={ helpText }
 			>
 				<div { ...blockProps }>
 					<RichText
