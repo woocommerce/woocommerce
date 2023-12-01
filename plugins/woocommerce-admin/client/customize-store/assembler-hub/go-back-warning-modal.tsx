@@ -2,21 +2,15 @@
  * External dependencies
  */
 import { Button, Modal } from '@wordpress/components';
-import { Sender } from 'xstate';
 import { __ } from '@wordpress/i18n';
-
-/**
- * Internal dependencies
- */
-import { customizeStoreStateMachineEvents } from '../..';
 
 export const GoBackWarningModal = ( {
 	setOpenWarningModal,
-	sendEvent,
+	onExitClicked,
 	classname = 'woocommerce-customize-store__design-change-warning-modal',
 }: {
 	setOpenWarningModal: ( arg0: boolean ) => void;
-	sendEvent: Sender< customizeStoreStateMachineEvents >;
+	onExitClicked: () => void;
 	classname?: string;
 } ) => {
 	return (
@@ -33,10 +27,7 @@ export const GoBackWarningModal = ( {
 				) }
 			</p>
 			<div className="woocommerce-customize-store__design-change-warning-modal-footer">
-				<Button
-					onClick={ () => sendEvent( 'GO_BACK_TO_DESIGN_WITH_AI' ) }
-					variant="link"
-				>
+				<Button onClick={ onExitClicked } variant="link">
 					{ __( 'Exit and lose changes', 'woocommerce' ) }
 				</Button>
 				<Button

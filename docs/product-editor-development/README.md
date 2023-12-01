@@ -1,4 +1,6 @@
-# Product Editor Development Handbook
+---
+post_title: Product Editor Development Handbook
+---
 
 > ⚠️ **Notice:** This documentation is currently a **work in progress**. Please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
 
