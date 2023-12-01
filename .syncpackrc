@@ -42,9 +42,6 @@
 			"dependencies": [
 				"@types/react"
 			],
-			"dependencyTypes": [
-				"devDependencies"
-			],
 			"pinVersion": "^17.0.2",
 			"packages": [
 				"**"
@@ -61,7 +58,9 @@
 		},
 		{
 			"dependencies": [
+				"@types/react",
 				"react",
+				"@types/react-dom",
 				"react-dom"
 			],
 			"packages": [
@@ -76,14 +75,11 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^5.1.6"
+			"pinVersion": "^4.9.5"
 		},
 		{
 			"dependencies": [
 				"eslint"
-			],
-			"dependencyTypes": [
-				"devDependencies"
 			],
 			"packages": [
 				"**"
@@ -183,9 +179,6 @@
 			"dependencies": [
 				"postcss-loader"
 			],
-			"dependencyTypes": [
-				"devDependencies"
-			],
 			"packages": [
 				"**"
 			],
@@ -208,6 +201,28 @@
 				"**"
 			],
 			"pinVersion": "^16.18.18"
+		},
+		{
+			"dependencies": [
+				"jest",
+				"jest-cli",
+				"jest-environment-jsdom",
+				"jest-environment-node",
+				"babel-jest"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "~28.1.3"
+		},
+		{
+			"dependencies": [
+				"ts-jest"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "~28.0.8"
 		},
 		{
 			"label": "Only manage versions for these dependencies",
