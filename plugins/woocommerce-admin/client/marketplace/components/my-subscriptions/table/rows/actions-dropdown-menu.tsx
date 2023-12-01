@@ -10,6 +10,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { Subscription } from '../../types';
 import { ADMIN_URL } from '../../../../../utils/admin-settings';
+import { getPlaygroundUrl } from '../../../../utils/functions';
 
 export default function ActionsDropdownMenu( props: {
 	subscription: Subscription;
@@ -23,6 +24,18 @@ export default function ActionsDropdownMenu( props: {
 					'https://woo.com/my-account/my-subscriptions',
 					'_blank'
 				);
+			},
+		},
+		{
+			title: __( 'Preview', 'woocommerce' ),
+			icon: <></>,
+			onClick: () => {
+				getPlaygroundUrl( props.subscription ).then( ( response ) => {
+					if ( ! response.data.url ) {
+						return;
+					}
+					window.open( response.data.url, '_blank' );
+				} );
 			},
 		},
 		{

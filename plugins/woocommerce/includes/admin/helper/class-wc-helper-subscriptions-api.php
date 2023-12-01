@@ -94,6 +94,21 @@ class WC_Helper_Subscriptions_API {
 				),
 			)
 		);
+		register_rest_route(
+			'wc/v3',
+			'/marketplace/playground/url',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'playground_url' ),
+				'permission_callback' => array( __CLASS__, 'get_permission' ),
+				'args'                => array(
+					'product_key' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -254,6 +269,45 @@ class WC_Helper_Subscriptions_API {
 		wp_send_json_success(
 			array(
 				'message' => __( 'This product has been activated.', 'woocommerce' ),
+			),
+		);
+	}
+
+	/**
+	 * Returns the URL to the plugin/theme playground.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 */
+	public static function playground_url( $request ) {
+		// Get product download URL.
+		$product_key  = $request->get_param( 'product_key' );
+		$download_url = WC_Helper::get_download_url( $product_key );
+
+		if ( false === $download_url ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'We couldn\'t find a subscription for this product.', 'woocommerce' ),
+				),
+				400
+			);
+		}
+
+		$url = add_query_arg(
+			array(
+				'page'        => 'collector_render_playground_page',
+				'pluginUrl'   => $download_url,
+				'pluginName'  => $product_key,
+				'returnUrl'   => '/wp-admin/plugin-install.php%3F',
+				'url'         => '/wp-admin/admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions',
+				'login'       => '1',
+				'storage'     => 'browser',
+			),
+			admin_url( 'admin.php' )
+		);
+
+		wp_send_json_success(
+			array(
+				'url' => $url,
 			),
 		);
 	}

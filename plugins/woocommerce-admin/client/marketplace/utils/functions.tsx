@@ -335,6 +335,15 @@ function updateProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
+function getPlaygroundUrl( subscription: Subscription ): Promise< void > {
+	const url =
+		'/wc/v3/marketplace/playground/url?product_key=' +
+		subscription.product_key;
+	return apiFetch( {
+		path: url,
+	} );
+}
+
 function addNotice(
 	productKey: string,
 	message: string,
@@ -406,6 +415,7 @@ export {
 	fetchSearchResults,
 	fetchSubscriptions,
 	refreshSubscriptions,
+	getPlaygroundUrl,
 	installProduct,
 	updateProduct,
 	addNotice,

@@ -1469,6 +1469,30 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get a download URL for a given product key.
+	 *
+	 * @param string $product_key Subscription product key.
+	 * @return string|bool The download URL or false.
+	 */
+	public static function get_download_url( $product_key ) {
+		$subscription = self::get_subscription( $product_key );
+		if ( ! $subscription ) {
+			return false;
+		}
+
+		$updates = WC_Helper_Updater::get_update_data();
+		if ( empty( $updates[ $subscription['product_id'] ] ) ) {
+			return false;
+		}
+
+		if ( ! isset( $updates[ $subscription['product_id'] ]['package'] ) ) {
+			return false;
+		}
+
+		return $updates[ $subscription['product_id'] ]['package'];
+	}
+
+	/**
 	 * Get the connected user's subscription list data.
 	 * This is used by the My Subscriptions page.
 	 *
