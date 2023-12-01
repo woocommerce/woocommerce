@@ -58,7 +58,7 @@ let admin_update_order_assert;
 if ( cot_status === true ) {
 	admin_new_order_base = 'admin.php?page=wc-orders&action=new';
 	admin_update_order_base = 'admin.php?page=wc-orders&action=edit';
-	admin_new_order_assert = 'post_status" type="hidden" value="pending';
+	admin_new_order_assert = 'post_status" type="hidden" value="auto-draft';
 	admin_open_order_assert = 'post_status" type="hidden" value="pending';
 	admin_created_order_assert = 'Order updated.';
 	admin_update_order_assert = 'changed from Pending payment to Completed';
