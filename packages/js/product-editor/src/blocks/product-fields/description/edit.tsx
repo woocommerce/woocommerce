@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement } from '@wordpress/element';
+import { createElement, useMemo } from '@wordpress/element';
 import { BlockInstance, parse, serialize } from '@wordpress/blocks';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -61,6 +61,14 @@ export function DescriptionBlockEdit( {
 
 	const { closeModalEditor } = useDispatch( productEditorUiStore );
 
+	const parsedBlocks = useMemo( () => {
+		try {
+			return parse( description );
+		} catch ( e ) {
+			return [];
+		}
+	}, [ description ] );
+
 	const innerBlockProps = useInnerBlocksProps(
 		{},
 		{
@@ -75,7 +83,7 @@ export function DescriptionBlockEdit( {
 
 			{ isModalEditorOpen && (
 				<ModalEditor
-					initialBlocks={ parse( description ) }
+					initialBlocks={ parsedBlocks }
 					onChange={ ( blocks ) => {
 						const html = serialize(
 							clearDescriptionIfEmpty( blocks )
