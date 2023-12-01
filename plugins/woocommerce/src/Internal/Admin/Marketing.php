@@ -162,7 +162,12 @@ class Marketing {
 
 		// Overview should be first.
 		$overview_key = array_search( 'Overview', array_column( $marketing_submenu, 0 ) );
-		$new_order[]  = $marketing_submenu[ $overview_key ];
+
+		if ( false === $overview_key ) {
+			return;
+		}
+
+		$new_order[] = $marketing_submenu[ $overview_key ];
 
 		// Remove Overview from the array.
 		unset( $marketing_submenu[ $overview_key ] );
