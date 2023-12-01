@@ -254,11 +254,23 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$description_section->add_block(
+		$description_field_block = $description_section->add_block(
 			array(
 				'id'        => 'product-description',
 				'blockName' => 'woocommerce/product-description-field',
 				'order'     => 10,
+			)
+		);
+
+		$description_field_block->add_block(
+			array(
+				'id'        => 'product-description__content',
+				'blockName' => 'woocommerce/product-summary-field',
+				'order'     => 10,
+				'attributes' => array(
+					'helpText' => null,
+					'label'    => null,
+				),
 			)
 		);
 
