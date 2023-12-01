@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockEditProps } from '@wordpress/blocks';
+import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
 
 export interface ProductEditorContext {
 	postId: number;
@@ -13,6 +13,11 @@ export interface ProductEditorContext {
 export interface ProductEditorBlockEditProps< T extends Record< string, any > >
 	extends BlockEditProps< T > {
 	readonly context: ProductEditorContext;
+	readonly name: string;
+}
+
+export interface ProductEditorBlockAttributes extends BlockAttributes {
+	_templateBlockId?: string;
 }
 
 export interface Metadata< T > {
