@@ -192,7 +192,12 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'order'      => 40,
 					'attributes' => array(
 						'title'       => __( 'Downloads', 'woocommerce' ),
-						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
+						'description' => sprintf(
+							/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
+								__( 'Add any files you\'d like to make available for the customer to download after purchasing, such as instructions or warranty info. Store-wide updates can be managed in your %1$sproduct settings%2$s.', 'woocommerce' ),
+								'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=downloadable' ) . '" target="_blank" rel="noreferrer">',
+								'</a>'
+							),
 					),
 				)
 			)->add_block(
