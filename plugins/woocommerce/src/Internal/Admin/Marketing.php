@@ -162,15 +162,17 @@ class Marketing {
 
 		// Overview should be first.
 		$overview_key = array_search( 'Overview', array_column( $marketing_submenu, 0 ) );
-
-		if ( false === $overview_key ) {
-			return;
+		if ( false !== $overview_key ) {
+			$new_order[] = $marketing_submenu[ $overview_key ];
+			array_splice( $marketing_submenu, $overview_key, 1 );
 		}
 
-		$new_order[] = $marketing_submenu[ $overview_key ];
-
-		// Remove Overview from the array.
-		unset( $marketing_submenu[ $overview_key ] );
+		// Coupons should be second.
+		$coupons_key = array_search( 'Coupons', array_column( $marketing_submenu, 0 ) );
+		if ( false !== $coupons_key ) {
+			$new_order[] = $marketing_submenu[ $coupons_key ];
+			array_splice( $marketing_submenu, $coupons_key, 1 );
+		}
 
 		// Sort the rest of the items alphabetically.
 		usort(
