@@ -10,6 +10,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import {
 	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
+	BlockControls,
 } from '@wordpress/block-editor';
 /**
  * Internal dependencies
@@ -19,6 +20,7 @@ import { ModalEditor } from '../../../components/modal-editor';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
 import { store as productEditorUiStore } from '../../../store/product-editor-ai';
 import type { DescriptionBlockEditComponent } from './types';
+import FullEditorToolbarButton from './components/full-editor-toolbar-button';
 
 /**
  * Internal dependencies
@@ -79,6 +81,14 @@ export function DescriptionBlockEdit( {
 
 	return (
 		<div { ...blockProps }>
+			{ parsedBlocks?.length && (
+				<BlockControls>
+					<FullEditorToolbarButton
+						text={ __( 'Edit in full editor', 'woocommerce' ) }
+					/>
+				</BlockControls>
+			) }
+
 			{ ! parsedBlocks?.length && <div { ...innerBlockProps } /> }
 
 			{ isModalEditorOpen && (
