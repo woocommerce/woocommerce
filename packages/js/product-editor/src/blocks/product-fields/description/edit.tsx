@@ -3,25 +3,22 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement } from '@wordpress/element';
-import {
-	BlockAttributes,
-	BlockInstance,
-	parse,
-	serialize,
-} from '@wordpress/blocks';
+import { BlockInstance, parse, serialize } from '@wordpress/blocks';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useInnerBlocksProps } from '@wordpress/block-editor';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { useEntityProp } from '@wordpress/core-data';
-
+import {
+	// @ts-expect-error no exported member.
+	useInnerBlocksProps,
+} from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
 import { ContentPreview } from '../../../components/content-preview';
 import { ModalEditor } from '../../../components/modal-editor';
-import { ProductEditorBlockEditProps } from '../../../types';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
 import { store as productEditorUiStore } from '../../../store/product-editor-ai';
+import type { DescriptionBlockEditComponent } from './types';
 
 /**
  * Internal dependencies
@@ -49,7 +46,7 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 
 export function DescriptionBlockEdit( {
 	attributes,
-}: ProductEditorBlockEditProps< BlockAttributes > ) {
+}: DescriptionBlockEditComponent ) {
 	const blockProps = useWooBlockProps( attributes );
 	const [ description, setDescription ] = useEntityProp< string >(
 		'postType',
