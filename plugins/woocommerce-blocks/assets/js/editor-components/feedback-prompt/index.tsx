@@ -71,17 +71,7 @@ export const CartCheckoutFeedbackPrompt = () => (
 			'We are currently working on improving our cart and checkout blocks to provide merchants with the tools and customization options they need.',
 			'woo-gutenberg-products-block'
 		) }
-		url="https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?template=--cart-checkout-feedback.md"
-	/>
-);
-
-export const LegacyFeedbackPrompt = () => (
-	<FeedbackPrompt
-		text={ __(
-			'We are working on a better editing experience that will replace classic blocks. Keep an eye out for updates!',
-			'woo-gutenberg-products-block'
-		) }
-		url="https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?template=--classic-block-feedback.md"
+		url="https://github.com/woocommerce/woocommerce/discussions/new?category=checkout-flow&labels=type%3A+product%20feedback"
 	/>
 );
 
