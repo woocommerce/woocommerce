@@ -114,4 +114,74 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 
 		return sanitize_title( $source );
 	}
+
+	/**
+	 * Delete all logs older than a specified timestamp.
+	 *
+	 * @param int $timestamp All files created before this timestamp will be deleted.
+	 *
+	 * @return int The number of files that were deleted.
+	 */
+	public function delete_logs_before_timestamp( int $timestamp = 0 ): int {
+		if ( ! $timestamp ) {
+			return 0;
+		}
+
+		$files = $this->file_controller->get_files( array(
+			'date_filter' => 'created',
+			'date_start'  => 1,
+			'date_end'    => $timestamp,
+		) );
+
+		if ( is_wp_error( $files ) ) {
+			return 0;
+		}
+
+		$file_ids = array_map(
+			fn( $file ) => $file->get_file_id(),
+			$files
+		);
+
+		$deleted = $this->file_controller->delete_files( $file_ids );
+
+		/** This filter is documented in includes/class-wc-logger.php. */
+		$retention_days = absint( apply_filters( 'woocommerce_logger_days_to_retain_logs', 30 ) );
+
+		$this->handle(
+			time(),
+			'info',
+			sprintf(
+				'%s %s',
+				sprintf(
+					esc_html(
+						// translators: %s is a number of log files.
+						_n(
+							'%s expired log file was deleted.',
+							'%s expired log files were deleted.',
+							$deleted,
+							'woocommerce'
+						)
+					),
+					number_format_i18n( $deleted )
+				),
+				sprintf(
+					esc_html(
+						// translators: %s is a number of days.
+						_n(
+							'The retention period for log files is %s day.',
+							'The retention period for log files is %s days.',
+							$retention_days,
+							'woocommerce'
+						)
+					),
+					number_format_i18n( $retention_days )
+				)
+			),
+			array(
+				'source' => 'wc_logger'
+			)
+		);
+
+		return $deleted;
+	}
 }
