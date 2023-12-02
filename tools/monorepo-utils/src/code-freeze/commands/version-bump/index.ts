@@ -3,11 +3,13 @@
  */
 import { Command } from '@commander-js/extra-typings';
 import simpleGit from 'simple-git';
+import { setOutput } from '@actions/core';
 
 /**
  * Internal dependencies
  */
 import { Logger } from '../../../core/logger';
+import { isGithubCI } from '../../../core/environment';
 import {
 	sparseCheckoutRepoShallow,
 	checkoutRemoteBranch,
@@ -131,12 +133,23 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			);
 			await bumpFiles( tmpRepoPath, version );
 
+			const diff = await git.diffSummary();
+			Logger.notice(
+				`The version has been bumped to ${ version } in the following files:`
+			);
+			const updatedFiles = diff.files.map( ( f ) => f.file );
+			Logger.warn( updatedFiles.join( '\n' ) );
+
+			if ( isGithubCI() ) {
+				setOutput( 'files', updatedFiles );
+			}
+
+			if ( updatedFiles.length === 0 ) {
+				Logger.error( 'No files were updated. Maybe the version-bump had run previously.' );
+				return;
+			}
+
 			if ( dryRun ) {
-				const diff = await git.diffSummary();
-				Logger.notice(
-					`The version has been bumped to ${ version } in the following files:`
-				);
-				Logger.warn( diff.files.map( ( f ) => f.file ).join( '\n' ) );
 				Logger.notice(
 					'Dry run complete. No pull was request created nor was a commit made.'
 				);
