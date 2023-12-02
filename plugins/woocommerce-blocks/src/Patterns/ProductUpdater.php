@@ -8,6 +8,44 @@ use WP_Error;
  * Pattern Images class.
  */
 class ProductUpdater {
+	const DUMMY_PRODUCTS = [
+		[
+			'title'       => 'Vintage Typewriter',
+			'image'       => 'images/pattern-placeholders/writing-typing-keyboard-technology-white-vintage.jpg',
+			'description' => 'A hit spy novel or a love letter? Anything you type using this vintage typewriter from the 20s is bound to make a mark.',
+			'price'       => 90,
+		],
+		[
+			'title'       => 'Leather-Clad Leisure Chair',
+			'image'       => 'images/pattern-placeholders/table-wood-house-chair-floor-window.jpg',
+			'description' => 'Sit back and relax in this comfy designer chair. High-grain leather and steel frame add luxury to your your leisure.',
+			'price'       => 249,
+		],
+		[
+			'title'       => 'Black and White Summer Portrait',
+			'image'       => 'images/pattern-placeholders/white-black-black-and-white-photograph-monochrome-photography.jpg',
+			'description' => 'This 24" x 30" high-quality print just exudes summer. Hang it on the wall and forget about the world outside.',
+			'price'       => 115,
+		],
+		[
+			'title'       => '3-Speed Bike',
+			'image'       => 'images/pattern-placeholders/road-sport-vintage-wheel-retro-old.jpg',
+			'description' => 'Zoom through the streets on this premium 3-speed bike. Manufactured and assembled in Germany in the 80s.',
+			'price'       => 115,
+		],
+		[
+			'title'       => 'Hi-Fi Headphones',
+			'image'       => 'images/pattern-placeholders/man-person-music-black-and-white-white-photography.jpg',
+			'description' => 'Experience your favorite songs in a new way with these premium hi-fi headphones.',
+			'price'       => 125,
+		],
+		[
+			'title'       => 'Retro Glass Jug (330 ml)',
+			'image'       => 'images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg',
+			'description' => 'Thick glass and a classic silhouette make this jug a must-have for any retro-inspired kitchen.',
+			'price'       => 115,
+		],
+	];
 
 	/**
 	 * Generate AI content and assign AI-managed images to Products.
@@ -75,7 +113,7 @@ class ProductUpdater {
 		$products_to_create   = max( 0, 6 - $real_products_count - $dummy_products_count );
 
 		while ( $products_to_create > 0 ) {
-			$this->create_new_product();
+			$this->create_new_product( self::DUMMY_PRODUCTS[ $products_to_create - 1 ] );
 			$products_to_create--;
 		}
 
@@ -146,19 +184,32 @@ class ProductUpdater {
 	/**
 	 * Creates a new product and assigns the _headstart_post meta to it.
 	 *
-	 * @return bool|int
+	 * @param array $product_data The product data.
+	 *
+	 * @return bool|int|\WP_Error
 	 */
-	public function create_new_product() {
-		$product      = new \WC_Product();
-		$random_price = wp_rand( 5, 50 );
+	public function create_new_product( $product_data ) {
+		$product = new \WC_Product();
 
-		$product->set_name( 'My Awesome Product' );
+		$product->set_name( $product_data['title'] );
 		$product->set_status( 'publish' );
-		$product->set_description( 'Product description' );
-		$product->set_price( $random_price );
-		$product->set_regular_price( $random_price );
+		$product->set_description( $product_data['description'] );
+		$product->set_price( $product_data['price'] );
+		$product->set_regular_price( $product_data['price'] );
 
 		$saved_product = $product->save();
+
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+
+		$product_image_id = media_sideload_image( plugins_url( $product_data['image'], dirname( __DIR__ ) ), $product->get_id(), $product_data['title'], 'id' );
+		if ( is_wp_error( $product_image_id ) ) {
+			return new \WP_Error( 'error_uploading_image', $product_image_id->get_error_message() );
+		}
+
+		$product->set_image_id( $product_image_id );
+		$product->save();
 
 		return update_post_meta( $saved_product, '_headstart_post', true );
 	}
@@ -261,24 +312,26 @@ class ProductUpdater {
 			)
 		);
 
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
+		if ( ! empty( $ai_generated_product_content['image']['src'] ) ) {
+			require_once ABSPATH . 'wp-admin/includes/media.php';
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/image.php';
 
-		// Since the media_sideload_image function is expensive and can take longer to complete
-		// the process of downloading the external image and uploading it to the media library,
-		// here we are increasing the time limit to avoid any issues.
-		set_time_limit( 150 );
-		wp_raise_memory_limit( 'image' );
+			// Since the media_sideload_image function is expensive and can take longer to complete
+			// the process of downloading the external image and uploading it to the media library,
+			// here we are increasing the time limit to avoid any issues.
+			set_time_limit( 150 );
+			wp_raise_memory_limit( 'image' );
 
-		$product_image_id = media_sideload_image( $ai_generated_product_content['image']['src'], $product->get_id(), $ai_generated_product_content['image']['alt'], 'id' );
+			$product_image_id = media_sideload_image( $ai_generated_product_content['image']['src'], $product->get_id(), $ai_generated_product_content['image']['alt'], 'id' );
 
-		if ( is_wp_error( $product_image_id ) ) {
-			return $product_image_id->get_error_message();
+			if ( is_wp_error( $product_image_id ) ) {
+				return $product_image_id->get_error_message();
+			}
+
+			$product->set_image_id( $product_image_id );
+			$product->save();
 		}
-
-		$product->set_image_id( $product_image_id );
-		$product->save();
 
 		$this->create_hash_for_ai_modified_product( $product );
 	}
@@ -295,7 +348,7 @@ class ProductUpdater {
 		$products_information_list = [];
 		$dummy_products_count      = count( $dummy_products_to_update );
 		for ( $i = 0; $i < $dummy_products_count; $i ++ ) {
-			$image_src = $ai_selected_images[ $i ]['URL'] ?? plugins_url( 'woocommerce-blocks/images/block-placeholders/product-image-gallery.svg' );
+			$image_src = $ai_selected_images[ $i ]['URL'] ?? '';
 			$image_alt = $ai_selected_images[ $i ]['title'] ?? '';
 
 			$products_information_list[] = [
@@ -357,7 +410,6 @@ class ProductUpdater {
 		while ( $ai_request_retries < 5 && ! $success ) {
 			$ai_request_retries ++;
 			$ai_response = $ai_connection->fetch_ai_response( $token, $formatted_prompt, 30 );
-
 			if ( is_wp_error( $ai_response ) ) {
 				continue;
 			}
