@@ -45,7 +45,7 @@ As well as defining your class, you need to also tell WooCommerce (WC) that it 
 
 ``` php
 function add_your_gateway_class( $methods ) {
-$methods\[\] = 'WC_Gateway_Your_Gateway';
+$methods[] = 'WC_Gateway_Your_Gateway';
 return $methods;
 }
 ```
