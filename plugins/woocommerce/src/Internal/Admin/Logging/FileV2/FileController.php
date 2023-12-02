@@ -27,11 +27,14 @@ class FileController {
 	 * @const array
 	 */
 	public const DEFAULTS_GET_FILES = array(
-		'offset'   => 0,
-		'order'    => 'desc',
-		'orderby'  => 'modified',
-		'per_page' => 20,
-		'source'   => '',
+		'date_end'    => 0,
+		'date_filter' => '',
+		'date_start'  => 0,
+		'offset'      => 0,
+		'order'       => 'desc',
+		'orderby'     => 'modified',
+		'per_page'    => 20,
+		'source'      => '',
 	);
 
 	/**
@@ -180,11 +183,14 @@ class FileController {
 	 * @param array $args      {
 	 *     Optional. Arguments to filter and sort the files that are returned.
 	 *
-	 *     @type int    $offset   Omit this number of files from the beginning of the list. Works with $per_page to do pagination.
-	 *     @type string $order    The sort direction. 'asc' or 'desc'. Defaults to 'desc'.
-	 *     @type string $orderby  The property to sort the list by. 'created', 'modified', 'source', 'size'. Defaults to 'modified'.
-	 *     @type int    $per_page The number of files to include in the list. Works with $offset to do pagination.
-	 *     @type string $source   Only include files from this source.
+	 *     @type int    $date_end    The end of the date range to filter by, as a Unix timestamp.
+	 *     @type string $date_filter Filter files by one of the date props. 'created' or 'modified'.
+	 *     @type int    $date_start  The beginning of the date range to filter by, as a Unix timestamp.
+	 *     @type int    $offset      Omit this number of files from the beginning of the list. Works with $per_page to do pagination.
+	 *     @type string $order       The sort direction. 'asc' or 'desc'. Defaults to 'desc'.
+	 *     @type string $orderby     The property to sort the list by. 'created', 'modified', 'source', 'size'. Defaults to 'modified'.
+	 *     @type int    $per_page    The number of files to include in the list. Works with $offset to do pagination.
+	 *     @type string $source      Only include files from this source.
 	 * }
 	 * @param bool  $count_only Optional. True to return a total count of the files.
 	 *
@@ -203,11 +209,30 @@ class FileController {
 			);
 		}
 
-		if ( true === $count_only ) {
-			return count( $paths );
+		$files = $this->convert_paths_to_objects( $paths );
+
+		if ( $args['date_filter'] && $args['date_start'] && $args['date_end'] ) {
+			switch ( $args['date_filter'] ) {
+				case 'created':
+					$files = array_filter(
+						$files,
+						fn( $file ) => $file->get_created_timestamp() >= $args['date_start']
+							&& $file->get_created_timestamp() <= $args['date_end']
+					);
+					break;
+				case 'modified':
+					$files = array_filter(
+						$files,
+						fn( $file ) => $file->get_modified_timestamp() >= $args['date_start']
+							&& $file->get_modified_timestamp() <= $args['date_end']
+					);
+					break;
+			}
 		}
 
-		$files = $this->convert_paths_to_objects( $paths );
+		if ( true === $count_only ) {
+			return count( $files );
+		}
 
 		$multi_sorter = function( $sort_sets, $order_sets ) {
 			$comparison = 0;
@@ -427,7 +452,7 @@ class FileController {
 	 *
 	 * @param array $file_ids An array of file IDs (file basename without the hash).
 	 *
-	 * @return int
+	 * @return int The number of files that were deleted.
 	 */
 	public function delete_files( array $file_ids ): int {
 		$deleted = 0;
