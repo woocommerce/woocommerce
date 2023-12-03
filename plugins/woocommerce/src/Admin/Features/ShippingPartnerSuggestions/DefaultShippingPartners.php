@@ -85,7 +85,7 @@ class DefaultShippingPartners {
 				),
 				'learn_more_link'   => 'https://wordpress.org/plugins/woocommerce-shipstation-integration/',
 				'is_visible'        => array(
-					self::get_rules_for_countries( array( 'AU', 'CA', 'GB' ) ),
+					self::get_rules_for_countries( array( 'AU', 'NZ', 'CA', 'GB' ) ),
 				),
 				'available_layouts' => array( 'row', 'column' ),
 			),
@@ -116,6 +116,53 @@ class DefaultShippingPartners {
 					self::get_rules_for_countries( array( 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ) ),
 				),
 				'available_layouts' => array( 'column' ),
+			),
+			array(
+				'name'              => 'Easyship',
+				'slug'              => 'easyship-woocommerce-shipping-rates',
+				'description'       => __( 'Simplified shipping with: ', 'woocommerce' ),
+				'layout_column'     => array(
+					'image'    => $asset_base_url . 'easyship-column.svg',
+					'features' => $column_layout_features,
+				),
+				'layout_row'        => array(
+					'image'    => $asset_base_url . 'easyship-row.svg',
+					'features' => array(
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Highly discounted shipping rates', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __(
+								'Seamless order sync and label printing',
+								'woocommerce'
+							),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Dynamic shipping rates at checkout', 'woocommerce' ),
+						),
+
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Branded tracking experience', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Built-in Tax & Duties paperwork', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Free Plan Available', 'woocommerce' ),
+						),
+					),
+				),
+				'learn_more_link'   => 'https://woo.com/products/easyship-shipping-rates/',
+				'is_visible'        => array(
+					self::get_rules_for_countries( array( 'SG', 'HK', 'AU', 'NZ' ) ),
+				),
+				'available_layouts' => array( 'row', 'column' ),
 			),
 			array(
 				'name'              => 'Sendcloud',
