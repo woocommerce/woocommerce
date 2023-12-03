@@ -703,7 +703,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertArrayHasKey( 'title', $data['settings'] );
-		$this->assertEquals( '', $data['settings']['title']['value'] );
+		$this->assertEquals( 'Flat rate', $data['settings']['title']['value'] );
 		$this->assertArrayHasKey( 'tax_status', $data['settings'] );
 		$this->assertEquals( 'taxable', $data['settings']['tax_status']['value'] );
 		$this->assertArrayHasKey( 'cost', $data['settings'] );
@@ -714,8 +714,7 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'settings' => array(
-					'cost'  => 5,
-					'title' => 'Flat rate',
+					'cost' => 5,
 				),
 			)
 		);

@@ -15,7 +15,7 @@ $settings = array(
 		'title'       => __( 'Name', 'woocommerce' ),
 		'type'        => 'text',
 		'description' => __( 'Your customers will see the name of this shipping method during checkout.', 'woocommerce' ),
-		'default'     => '',
+		'default'     => __( 'Flat rate', 'woocommerce' ),
 		'placeholder' => __( 'e.g. Standard national', 'woocommerce' ),
 		'desc_tip'    => true,
 	),
