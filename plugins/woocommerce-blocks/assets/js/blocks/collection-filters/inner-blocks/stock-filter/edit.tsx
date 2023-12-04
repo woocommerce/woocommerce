@@ -7,16 +7,12 @@ import { useBlockProps } from '@wordpress/block-editor';
 import { Disabled } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown } from '@wordpress/icons';
-import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 import { CheckboxList } from '@woocommerce/blocks-components';
 import Label from '@woocommerce/base-components/filter-element-label';
 import FormTokenField from '@woocommerce/base-components/form-token-field';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { getSetting } from '@woocommerce/settings';
-import {
-	useCollectionData,
-	useQueryStateByContext,
-} from '@woocommerce/base-context/hooks';
+import { useCollectionData } from '@woocommerce/base-context/hooks';
 
 /**
  * Internal dependencies
@@ -36,7 +32,7 @@ type StockStatusCount = {
 	count: number;
 };
 
-const Edit = ( props: BlockEditProps< BlockProps > & { context: Context } ) => {
+const Edit = ( props: BlockEditProps< BlockProps > ) => {
 	const blockProps = useBlockProps( {
 		className: classnames(
 			'wc-block-stock-filter',
@@ -50,11 +46,9 @@ const Edit = ( props: BlockEditProps< BlockProps > & { context: Context } ) => {
 		{}
 	);
 
-	const [ queryState ] = useQueryStateByContext();
-
 	const { results: filteredCounts } = useCollectionData( {
 		queryStock: true,
-		queryState,
+		queryState: {},
 		isEditor: true,
 	} );
 

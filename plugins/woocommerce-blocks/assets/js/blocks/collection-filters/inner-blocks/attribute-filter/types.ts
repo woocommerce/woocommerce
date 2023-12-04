@@ -15,9 +15,6 @@ export type BlockAttributes = {
 
 export interface EditProps extends BlockEditProps< BlockAttributes > {
 	debouncedSpeak: ( label: string ) => void;
-	context: {
-		collectionData: unknown[];
-	};
 }
 
 type AttributeCount = {

@@ -128,7 +128,7 @@ final class CollectionFilters extends AbstractBlock {
 		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data(
 			add_query_arg(
 				array_merge(
-					$this->get_formatted_products_params( $block->context['query'] ),
+					$this->get_formatted_products_params( $block->context['query'] ?? array() ),
 					$collection_data_params,
 				),
 				'/wc/store/v1/products/collection-data'

@@ -8,11 +8,7 @@ export type BlockAttributes = {
 	inlineInput: boolean;
 };
 
-export interface EditProps extends BlockEditProps< BlockAttributes > {
-	context: {
-		collectionData: unknown[];
-	};
-}
+export type EditProps = BlockEditProps< BlockAttributes >;
 
 export type PriceFilterState = {
 	minPrice?: number;
@@ -22,8 +18,4 @@ export type PriceFilterState = {
 	rangeStyle: string;
 	formattedMinPrice: string;
 	formattedMaxPrice: string;
-};
-
-export type FilterComponentProps = BlockEditProps< BlockAttributes > & {
-	collectionData: Partial< PriceFilterState >;
 };

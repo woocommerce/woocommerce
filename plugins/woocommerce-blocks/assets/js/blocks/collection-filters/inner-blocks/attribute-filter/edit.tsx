@@ -5,7 +5,10 @@ import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import { BlockControls, useBlockProps } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
-import { useCollection } from '@woocommerce/base-context/hooks';
+import {
+	useCollection,
+	useCollectionData,
+} from '@woocommerce/base-context/hooks';
 import {
 	AttributeSetting,
 	AttributeTerm,
@@ -41,7 +44,6 @@ const Edit = ( props: EditProps ) => {
 		attributes: blockAttributes,
 		setAttributes,
 		debouncedSpeak,
-		context,
 	} = props;
 
 	const {
@@ -68,6 +70,15 @@ const Edit = ( props: EditProps ) => {
 		resourceValues: [ attributeObject?.id || 0 ],
 		shouldSelect: blockAttributes.attributeId > 0,
 		query: { orderby: 'menu_order' },
+	} );
+
+	const { results: filteredCounts } = useCollectionData( {
+		queryAttribute: {
+			taxonomy: attributeObject?.taxonomy || '',
+			queryType: blockAttributes.queryType,
+		},
+		queryState: {},
+		isEditor: true,
 	} );
 
 	const blockProps = useBlockProps();
@@ -103,11 +114,9 @@ const Edit = ( props: EditProps ) => {
 
 	useEffect( () => {
 		const termIdHasProducts =
-			objectHasProp( context.collectionData, 'attribute_counts' ) &&
-			isAttributeCounts( context.collectionData.attribute_counts )
-				? context.collectionData.attribute_counts.map(
-						( term ) => term.term
-				  )
+			objectHasProp( filteredCounts, 'attribute_counts' ) &&
+			isAttributeCounts( filteredCounts.attribute_counts )
+				? filteredCounts.attribute_counts.map( ( term ) => term.term )
 				: [];
 
 		if ( termIdHasProducts.length === 0 ) return setAttributeOptions( [] );
@@ -117,7 +126,7 @@ const Edit = ( props: EditProps ) => {
 				return termIdHasProducts.includes( term.id );
 			} )
 		);
-	}, [ attributeTerms, context.collectionData ] );
+	}, [ attributeTerms, filteredCounts ] );
 
 	const Toolbar = () => (
 		<BlockControls>

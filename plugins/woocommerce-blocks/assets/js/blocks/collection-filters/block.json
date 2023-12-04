@@ -19,9 +19,6 @@
 	"providesContext": {
 		"collectionData": "collectionData"
 	},
-	"ancestor": [
-		"woocommerce/product-collection"
-	],
 	"attributes": {
 		"collectionData": {
 			"type": "object",
