@@ -75,6 +75,11 @@ export type CampaignsState = {
 	meta: CampaignsMeta;
 };
 
+export type CampaignsPagination = {
+	campaignsPage: CampaignsPage | null;
+	meta: CampaignsMeta;
+};
+
 export type CampaignType = {
 	id: string;
 	name: string;
