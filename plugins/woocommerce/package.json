@@ -24,28 +24,36 @@
 			"additionalTasks": [
 				{
 					"name": "PHP 8.0",
-					"commandFilter": [ "test:php" ],
+					"commandFilter": [
+						"test:php"
+					],
 					"testEnvConfig": {
 						"phpVersion": "8.0"
 					}
 				},
 				{
 					"name": "WP: nightly",
-					"commandFilter": [ "test:php" ],
+					"commandFilter": [
+						"test:php"
+					],
 					"testEnvConfig": {
 						"wpVersion": "nightly"
 					}
 				},
 				{
 					"name": "WP: latest-1",
-					"commandFilter": [ "test:php" ],
+					"commandFilter": [
+						"test:php"
+					],
 					"testEnvConfig": {
 						"wpVersion": "latest-1"
 					}
 				},
 				{
 					"name": "WP: latest-2",
-					"commandFilter": [ "test:php" ],
+					"commandFilter": [
+						"test:php"
+					],
 					"testEnvConfig": {
 						"wpVersion": "latest-2"
 					}
@@ -102,7 +110,7 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
-		"@playwright/test": "^1.38.1",
+		"@playwright/test": "^1.40.1",
 		"@typescript-eslint/eslint-plugin": "^5.54.0",
 		"@typescript-eslint/experimental-utils": "^5.54.0",
 		"@typescript-eslint/parser": "^5.54.0",
