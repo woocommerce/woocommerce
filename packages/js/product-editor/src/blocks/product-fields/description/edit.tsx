@@ -4,6 +4,7 @@
 import { createElement, useEffect } from '@wordpress/element';
 import { BlockInstance, serialize } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
+import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
@@ -49,7 +50,6 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 export function DescriptionBlockEdit( {
 	attributes,
 }: DescriptionBlockEditComponent ) {
-	const blockProps = useWooBlockProps( attributes );
 	const [ description, setDescription ] = useEntityProp< string >(
 		'postType',
 		'product',
@@ -82,6 +82,10 @@ export function DescriptionBlockEdit( {
 		setDescription( html );
 	}, [ modalEditorBlocks, setDescription, hasChanged ] );
 
+	const blockProps = useWooBlockProps( attributes, {
+		className: classNames( { 'has-blocks': !! description.length } ),
+	} );
+
 	const innerBlockProps = useInnerBlocksProps(
 		{},
 		{
@@ -101,6 +105,13 @@ export function DescriptionBlockEdit( {
 			) }
 
 			{ ! description.length && <div { ...innerBlockProps } /> }
+
+			{ !! description.length && (
+				<div
+					tabIndex={ 0 }
+					className="wp-block-woocommerce-product-description-field__cover"
+				/>
+			) }
 
 			{ !! description.length && (
 				<ContentPreview content={ description } />
