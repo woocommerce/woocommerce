@@ -440,7 +440,7 @@ export const assembleSite = async (
 };
 
 const installAndActivateTheme = async () => {
-	const themeSlug = 'twentytwentythree';
+	const themeSlug = 'twentytwentyfour';
 
 	try {
 		await apiFetch( {
