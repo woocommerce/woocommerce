@@ -35,7 +35,7 @@
 		},
 		"hasHiddenPrice": {
 			"type": "boolean",
-			"default": false
+			"default": true
 		},
 		"cartAndCheckoutRenderStyle": {
 			"type": "string",
