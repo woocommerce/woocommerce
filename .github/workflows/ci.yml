@@ -46,6 +46,7 @@ jobs:
       runs-on: 'ubuntu-20.04'
       needs: 'project-matrix'
       if: ${{ needs.project-matrix.outputs.matrix != '[]' }}
+      timeout-minutes: 30
       strategy:
         fail-fast: false
         matrix:
