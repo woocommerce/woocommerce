@@ -29,7 +29,7 @@
 		"@woocommerce/monorepo-utils": "workspace:*",
 		"code-analyzer": "workspace:*",
 		"commander": "9.4.0",
-		"dotenv": "^10.0.0",
+		"dotenv": "^15.0.1",
 		"ejs": "^3.1.8",
 		"enquirer": "^2.3.6",
 		"express": "^4.18.1",
