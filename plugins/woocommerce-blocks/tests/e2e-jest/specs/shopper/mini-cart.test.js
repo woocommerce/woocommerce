@@ -100,14 +100,6 @@ describe( 'Shopper → Mini-Cart', () => {
 			await expect( page ).toMatchElement(
 				'.wc-block-mini-cart__quantity-badge'
 			);
-
-			// Make sure the initial quantity is 0.
-			await expect( page ).toMatchElement(
-				'.wc-block-mini-cart__amount',
-				{
-					text: '$0',
-				}
-			);
 			await expect( page ).toMatchElement( '.wc-block-mini-cart__badge', {
 				text: '',
 			} );

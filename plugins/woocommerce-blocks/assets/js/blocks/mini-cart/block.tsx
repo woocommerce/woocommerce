@@ -58,7 +58,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		contents = '',
 		miniCartIcon,
 		addToCartBehaviour = 'none',
-		hasHiddenPrice = false,
+		hasHiddenPrice = true,
 		priceColor = defaultColorItem,
 		iconColor = defaultColorItem,
 		productCountColor = defaultColorItem,

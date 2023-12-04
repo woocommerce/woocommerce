@@ -202,7 +202,7 @@ describe( 'Testing Mini-Cart', () => {
 
 	it( 'renders cart price if "Hide Cart Price" setting is not enabled', async () => {
 		mockEmptyCart();
-		render( <MiniCartBlock /> );
+		render( <MiniCartBlock hasHiddenPrice={ false } /> );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
 		await waitFor( () =>
@@ -212,9 +212,7 @@ describe( 'Testing Mini-Cart', () => {
 
 	it( 'does not render cart price if "Hide Cart Price" setting is enabled', async () => {
 		mockEmptyCart();
-		const { container } = render(
-			<MiniCartBlock hasHiddenPrice={ true } />
-		);
+		const { container } = render( <MiniCartBlock /> );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
 		await waitFor( () =>

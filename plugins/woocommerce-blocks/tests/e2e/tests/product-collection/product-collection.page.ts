@@ -368,7 +368,7 @@ class ProductCollectionPage {
 	 * Private methods to be used by the class.
 	 */
 	private async refreshLocators( currentUI: 'editor' | 'frontend' ) {
-		await this.waitForProductsToLoad();
+		await this.waitForProductsToLoad( currentUI );
 
 		if ( currentUI === 'editor' ) {
 			await this.initializeLocatorsForEditor();
@@ -417,11 +417,15 @@ class ProductCollectionPage {
 		this.pagination = this.page.locator( SELECTORS.pagination.onFrontend );
 	}
 
-	private async waitForProductsToLoad() {
+	private async waitForProductsToLoad( currentUI: 'editor' | 'frontend' ) {
 		// Wait for the product blocks to be loaded.
 		await this.page.waitForSelector( SELECTORS.product );
-		// Wait for the loading spinner to be detached.
-		await this.page.waitForSelector( '.is-loading', { state: 'detached' } );
+		if ( currentUI === 'editor' ) {
+			// Wait for the loading spinner to be detached.
+			await this.page.waitForSelector( '.is-loading', {
+				state: 'detached',
+			} );
+		}
 	}
 }
 
