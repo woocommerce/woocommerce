@@ -26,7 +26,7 @@ jobs:
         - uses: './.github/actions/setup-woocommerce-monorepo'
           name: 'Setup Monorepo'
           with:
-            install: false
+            install: true
         - uses: actions/github-script@v6
           id: 'project-matrix'
           name: 'Build Matrix'
