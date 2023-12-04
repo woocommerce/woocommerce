@@ -84,15 +84,15 @@
 			"titles": [
 				{
 					"default": "Home decor",
-					"ai_prompt": "A one word title for the featured category related to the following image description: {image.0}"
+					"ai_prompt": "A one-word graphic title that encapsulates the essence of the business, inspired by the following image description: {image.0} and the nature of the business. The title should reflect the key elements and characteristics of the business, as portrayed in the image"
 				},
 				{
 					"default": "Retro photography",
-					"ai_prompt": "A two words title for the featured category related to the following image description: {image.1}"
+					"ai_prompt": "A two-words graphic title that encapsulates the essence of the business, inspired by the following image description: {image.1} and the nature of the business. The title should reflect the key elements and characteristics of the business, as portrayed in the image"
 				},
 				{
 					"default": "Handmade gifts",
-					"ai_prompt": "A two words title for the featured category related to the following image description: {image.2}"
+					"ai_prompt": "A two-words graphic title that encapsulates the essence of the business, inspired by the following image description: {image.2} and the nature of the business. The title should reflect the key elements and characteristics of the business, as portrayed in the image"
 				}
 			]
 		}
