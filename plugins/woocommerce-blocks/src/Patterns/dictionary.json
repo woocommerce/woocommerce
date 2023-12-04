@@ -138,19 +138,19 @@
 			"titles": [
 				{
 					"default": "New: Retro Glass Jug",
-					"ai_prompt": "Generate a 3 words title that highlights one of the qualities of the product being sold"
+					"ai_prompt": "Generate a one-word graphic title that encapsulates the essence of the business. The title should reflect the key elements and characteristics of the business"
 				},
 				{
 					"default": "Timeless elegance",
-					"ai_prompt": "Generate a two words title that highlights one of the qualities of the product being sold"
+					"ai_prompt": "Generate a two-words graphic title that encapsulates the essence of the business. The title should reflect the key elements and characteristics of the business"
 				},
 				{
 					"default": "Durable glass",
-					"ai_prompt": "Generate a two words title that highlights one of the qualities of the product being sold"
+					"ai_prompt": "Generate a two-words graphic title that encapsulates the essence of the business. The title should reflect the key elements and characteristics of the business"
 				},
 				{
 					"default": "Versatile charm",
-					"ai_prompt": "Generate a two words title that highlights one of the qualities of the product being sold"
+					"ai_prompt": "Generate a two-words graphic title that encapsulates the essence of the business. The title should reflect the key elements and characteristics of the business"
 				}
 			],
 			"descriptions": [
