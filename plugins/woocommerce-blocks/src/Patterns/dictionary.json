@@ -177,7 +177,7 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Inspired living spaces",
+					"default": "Quality Materials",
 					"ai_prompt": "A two words title describing the first displayed product feature"
 				},
 				{
@@ -191,7 +191,7 @@
 			],
 			"descriptions": [
 				{
-					"default": "Transform your home with our curated collection of home decor, bringing inspiration and style to every corner.",
+					"default": "We use only the highest-quality materials in our products, ensuring that they look great and last for years to come.",
 					"ai_prompt": "A description of the product feature with at least 115 characters"
 				},
 				{
@@ -325,30 +325,6 @@
 				{
 					"default": "More new products",
 					"ai_prompt": "The button text to go to the product collection page with at least 15 characters"
-				}
-			]
-		}
-	},
-	{
-		"name": "Product Gallery",
-		"slug": "woocommerce-blocks/product-query-product-gallery",
-		"content": {
-			"titles": [
-				{
-					"default": "Our newest arrivals",
-					"ai_prompt": "An impact phrase that advertises the displayed product collection with at least 20 characters"
-				}
-			]
-		}
-	},
-	{
-		"name": "Product Collection 3 Columns",
-		"slug": "woocommerce-blocks/product-collection-3-columns",
-		"content": {
-			"titles": [
-				{
-					"default": "Our newest arrivals",
-					"ai_prompt": "An impact phrase that advertises the displayed product collection with at least 20 characters"
 				}
 			]
 		}
