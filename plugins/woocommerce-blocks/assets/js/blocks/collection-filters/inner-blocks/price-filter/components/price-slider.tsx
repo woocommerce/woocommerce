@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { useCollectionData } from '@woocommerce/base-context/hooks';
+
+/**
  * Internal dependencies
  */
 import { EditProps } from '../types';
@@ -8,10 +13,19 @@ import { getFormattedPrice } from '../utils';
  * We pass the whole props from Edit component to <PriceSlider/> so we're
  * reusing the EditProps type here.
  */
-export const PriceSlider = ( { attributes, context }: EditProps ) => {
+export const PriceSlider = ( { attributes }: EditProps ) => {
 	const { showInputFields } = attributes;
+
+	const { results, isLoading } = useCollectionData( {
+		queryPrices: true,
+		queryState: {},
+		isEditor: true,
+	} );
+
+	if ( isLoading ) return null;
+
 	const { minPrice, maxPrice, formattedMinPrice, formattedMaxPrice } =
-		getFormattedPrice( context.collectionData );
+		getFormattedPrice( results );
 
 	const onChange = () => null;
 

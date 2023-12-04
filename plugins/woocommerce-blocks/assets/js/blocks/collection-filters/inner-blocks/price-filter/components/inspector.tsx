@@ -15,12 +15,9 @@ import {
 /**
  * Internal dependencies
  */
-import type { FilterComponentProps } from '../types';
+import type { EditProps } from '../types';
 
-export const Inspector = ( {
-	attributes,
-	setAttributes,
-}: Omit< FilterComponentProps, 'collectionData' > ) => {
+export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 	const { showInputFields, inlineInput } = attributes;
 
 	return (
