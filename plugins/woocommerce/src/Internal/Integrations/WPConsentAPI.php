@@ -85,7 +85,7 @@ class WPConsentAPI {
 				"assets/js/frontend/wp-consent-api-integration{$this->get_script_suffix()}.js",
 				WC_PLUGIN_FILE
 			),
-			array( 'jquery', 'wp-consent-api' ),
+			array( 'wp-consent-api' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
