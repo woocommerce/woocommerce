@@ -407,9 +407,9 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$product_inventory_inner_section->add_block(
 			array(
-				'id'        => 'product-variation-inventory-quantity',
-				'blockName' => 'woocommerce/product-inventory-quantity-field',
-				'order'     => 10,
+				'id'             => 'product-variation-inventory-quantity',
+				'blockName'      => 'woocommerce/product-inventory-quantity-field',
+				'order'          => 10,
 				'hideConditions' => array(
 					array(
 						'expression' => 'editedProduct.manage_stock === false',
@@ -419,10 +419,10 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$product_inventory_section->add_block(
 			array(
-				'id'         => 'product-variation-stock-status',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
-				'attributes' => array(
+				'id'             => 'product-variation-stock-status',
+				'blockName'      => 'woocommerce/product-radio-field',
+				'order'          => 10,
+				'attributes'     => array(
 					'title'    => __( 'Stock status', 'woocommerce' ),
 					'property' => 'stock_status',
 					'options'  => array(

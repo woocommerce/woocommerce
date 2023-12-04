@@ -787,18 +787,18 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		}
 		$product_inventory_inner_section->add_block(
 			array(
-				'id'        => 'product-inventory-quantity',
-				'blockName' => 'woocommerce/product-inventory-quantity-field',
-				'order'     => 30,
+				'id'             => 'product-inventory-quantity',
+				'blockName'      => 'woocommerce/product-inventory-quantity-field',
+				'order'          => 30,
 				'hideConditions' => $product_inventory_quantity_hide_conditions,
 			)
 		);
 		$product_inventory_section->add_block(
 			array(
-				'id'         => 'product-stock-status',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
-				'attributes' => array(
+				'id'             => 'product-stock-status',
+				'blockName'      => 'woocommerce/product-radio-field',
+				'order'          => 10,
+				'attributes'     => array(
 					'title'    => __( 'Stock status', 'woocommerce' ),
 					'property' => 'stock_status',
 					'options'  => array(
@@ -851,10 +851,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_inventory_advanced_wrapper->add_block(
 			array(
-				'id'         => 'product-out-of-stock',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
-				'attributes' => array(
+				'id'             => 'product-out-of-stock',
+				'blockName'      => 'woocommerce/product-radio-field',
+				'order'          => 10,
+				'attributes'     => array(
 					'title'    => __( 'When out of stock', 'woocommerce' ),
 					'property' => 'backorders',
 					'options'  => array(
@@ -884,9 +884,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_inventory_advanced_wrapper->add_block(
 			array(
-				'id'        => 'product-inventory-email',
-				'blockName' => 'woocommerce/product-inventory-email-field',
-				'order'     => 20,
+				'id'             => 'product-inventory-email',
+				'blockName'      => 'woocommerce/product-inventory-email-field',
+				'order'          => 20,
 				'hideConditions' => array(
 					array(
 						'expression' => 'editedProduct.manage_stock === false',
