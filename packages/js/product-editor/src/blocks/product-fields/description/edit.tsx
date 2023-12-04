@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classNames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { createElement, useMemo } from '@wordpress/element';
 import { BlockInstance, parse, serialize } from '@wordpress/blocks';
@@ -49,7 +50,6 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 export function DescriptionBlockEdit( {
 	attributes,
 }: DescriptionBlockEditComponent ) {
-	const blockProps = useWooBlockProps( attributes );
 	const [ description, setDescription ] = useEntityProp< string >(
 		'postType',
 		'product',
@@ -71,6 +71,10 @@ export function DescriptionBlockEdit( {
 		}
 	}, [ description ] );
 
+	const blockProps = useWooBlockProps( attributes, {
+		className: classNames( { 'has-blocks': !! parsedBlocks?.length } ),
+	} );
+
 	const innerBlockProps = useInnerBlocksProps(
 		{},
 		{
@@ -81,7 +85,7 @@ export function DescriptionBlockEdit( {
 
 	return (
 		<div { ...blockProps }>
-			{ parsedBlocks?.length && (
+			{ !! parsedBlocks?.length && (
 				<BlockControls>
 					<FullEditorToolbarButton
 						text={ __( 'Edit in full editor', 'woocommerce' ) }
@@ -90,6 +94,13 @@ export function DescriptionBlockEdit( {
 			) }
 
 			{ ! parsedBlocks?.length && <div { ...innerBlockProps } /> }
+
+			{ !! parsedBlocks?.length && (
+				<div
+					tabIndex={ 0 }
+					className="wp-block-woocommerce-product-description-field__cover"
+				/>
+			) }
 
 			{ isModalEditorOpen && (
 				<ModalEditor
