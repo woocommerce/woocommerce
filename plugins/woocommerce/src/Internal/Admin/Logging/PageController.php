@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileController, FileListTable, SearchListTable };
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Status;
@@ -448,6 +449,11 @@ class PageController {
 	 * @return void
 	 */
 	private function handle_list_table_bulk_actions(): void {
+		// Bail if we're not using the file handler.
+		if ( LogHandlerFileV2::class !== $this->get_default_handler() ) {
+			return;
+		}
+
 		$params = $this->get_query_params( array( 'file_id', 'view' ) );
 
 		// Bail if this is not the list table view.
