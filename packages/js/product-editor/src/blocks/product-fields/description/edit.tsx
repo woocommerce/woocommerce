@@ -22,7 +22,7 @@ import { ContentPreview } from '../../../components/content-preview';
 import { ModalEditor } from '../../../components/modal-editor';
 import { ProductEditorBlockEditProps } from '../../../types';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
-import { store as productEditorUiStore } from '../../../store/product-editor-ai';
+import { store as productEditorUiStore } from '../../../store/product-editor-ui';
 
 /**
  * Internal dependencies
