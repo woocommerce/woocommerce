@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import registerProductEditorUiStore from './store/product-editor-ai';
+import registerProductEditorUiStore from './store/product-editor-ui';
 
 export * from './components';
 export {
@@ -24,7 +24,7 @@ export * from './utils';
 /*
  * Store
  */
-export * from './store/product-editor-ai';
+export * from './store/product-editor-ui';
 
 /**
  * Hooks
