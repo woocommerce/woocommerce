@@ -10,6 +10,7 @@ import {
 	serialize,
 } from '@wordpress/blocks';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { useInnerBlocksProps } from '@wordpress/block-editor';
 import { Button } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
@@ -85,8 +86,18 @@ export function DescriptionBlockEdit( {
 		setDescription( html );
 	}, [ modalEditorBlocks, setDescription, hasChanged ] );
 
+	const innerBlockProps = useInnerBlocksProps(
+		{},
+		{
+			templateLock: 'contentOnly',
+			allowedBlocks: [ 'woocommerce/product-summary-field' ],
+		}
+	);
+
 	return (
 		<div { ...blockProps }>
+			<div { ...innerBlockProps } />
+
 			<Button
 				variant="secondary"
 				onClick={ () => {
