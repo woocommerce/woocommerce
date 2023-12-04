@@ -5,6 +5,8 @@
 
 	// Helper functions.
 	const $ = document.querySelector.bind( document );
+	const propertyAccessor = ( obj, path ) => path.split( '.' ).reduce( ( acc, part ) => acc && acc[ part ], obj );
+	const returnNull = () => null;
 
 	/**
 	 * Map of order attribution field names to sbjs.get property accessors.
@@ -31,29 +33,50 @@
 	};
 
 	/**
-	 * Get the order attribution data..
+	 * Get the order attribution data.
+	 *
+	 * Returns object full of `null`s if tracking is disabled.
 	 *
 	 * @returns {Object} Schema compatible object.
 	 */
-	wc_order_attribution.getData = () => {
+	function getData() {
+		const accessor = params.allowTracking ? propertyAccessor : returnNull;
 		const entries = Object.entries( wc_order_attribution.fields )
-				.map( ( [ key, accessor ] ) => [ key, propertyAccessor( sbjs.get, accessor ) ] );
+				.map( ( [ key, property ] ) => [ key, accessor( sbjs.get, property ) ] );
 		return Object.fromEntries( entries );
 	}
 
 	/**
-	 * Set wc_order_attribution input elements' values.
+	 * Update `wc_order_attribution` input elements' values.
 	 *
 	 * @param {Object} values Object containing field values.
 	 */
-	function setFormValues( values ) {
+	function updateFormValues( values ) {
 		// Update inputs if any exist.
 		if( $( `input[name^="${params.prefix}"]` ) ) {
 			for( const key of Object.keys( wc_order_attribution.fields ) ) {
 				$( `input[name="${params.prefix}${key}"]` ).value = values && values[ key ] || '';
 			}
 		}
+
 	};
+
+	/**
+	 * Update Checkout extension data.
+	 *
+	 * @param {Object} values Object containing field values.
+	 */
+	function updateCheckoutBlockData( values ) {
+		// Update Checkout block data if available.
+		if ( window.wp && window.wp.data && window.wp.data.dispatch && window.wc && window.wc.wcBlocksData ) {
+			window.wp.data.dispatch( window.wc.wcBlocksData.CHECKOUT_STORE_KEY ).__internalSetExtensionData(
+				'woocommerce/order-attribution',
+				values,
+				true
+			);
+		}
+	}
+
 	/**
 	 * Initialize sourcebuster & set data, or clear cookies & data.
 	 *
@@ -64,7 +87,6 @@
 		if ( ! allow ) {
 			// Reset cookies, and clear form data.
 			removeTrackingCookies();
-			setFormValues();
 		} else {
 			// If not done yet, initialize sourcebuster.js which populates `sbjs.get` object.
 			sbjs.init( {
@@ -72,8 +94,10 @@
 				session_length: Number( params.session ),
 				timezone_offset: '0', // utc
 			} );
-			setFormValues( wc_order_attribution.getData() );
 		}
+		const values = getData();
+		updateFormValues( values );
+		updateCheckoutBlockData( values );
 	}
 
 	/**
@@ -106,7 +130,7 @@
 	if ( $( 'form.woocommerce-checkout' ) !== null ) {
 		const previousInitCheckout = document.body.oninit_checkout;
 		document.body.oninit_checkout = () => {
-			setFormValues( wc_order_attribution.getData() );
+			updateFormValues( getData() );
 			previousInitCheckout && previousInitCheckout();
 		};
 	}

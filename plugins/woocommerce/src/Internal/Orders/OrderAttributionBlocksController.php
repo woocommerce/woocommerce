@@ -72,50 +72,6 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 		}
 
 		$this->extend_api();
-
-		// Bail early on admin requests to avoid asset registration.
-		if ( is_admin() ) {
-			return;
-		}
-
-		add_action(
-			'init',
-			function() {
-				$this->register_assets();
-			}
-		);
-
-		add_action(
-			'wp_enqueue_scripts',
-			function() {
-				$this->enqueue_scripts();
-			}
-		);
-	}
-
-	/**
-	 * Register scripts.
-	 */
-	private function register_assets() {
-		wp_register_script(
-			'wc-order-attribution-blocks',
-			plugins_url(
-				"assets/js/frontend/order-attribution-blocks{$this->get_script_suffix()}.js",
-				WC_PLUGIN_FILE
-			),
-			array( 'wc-order-attribution', 'wp-data', 'wc-blocks-checkout' ),
-			Constants::get_constant( 'WC_VERSION' ),
-			true
-		);
-	}
-
-	/**
-	 * Enqueue the Order Attribution script.
-	 *
-	 * @return void
-	 */
-	private function enqueue_scripts() {
-		wp_enqueue_script( 'wc-order-attribution-blocks' );
 	}
 
 	/**
