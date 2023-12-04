@@ -180,6 +180,15 @@ class File {
 	}
 
 	/**
+	 * Get the full absolute path of the file.
+	 *
+	 * @return string
+	 */
+	public function get_path(): string {
+		return $this->path;
+	}
+
+	/**
 	 * Get the name of the file, with extension, but without full path.
 	 *
 	 * @return string
