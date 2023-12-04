@@ -2,9 +2,9 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Admin\PageController;
+use WC_Abstract_Order;
 
 /**
  * Class WCPayWelcomePage
@@ -12,8 +12,9 @@ use Automattic\WooCommerce\Admin\PageController;
  * @package Automattic\WooCommerce\Admin\Features
  */
 class WcPayWelcomePage {
-	const CACHE_TRANSIENT_NAME  = 'wcpay_welcome_page_incentive';
-	const HAD_WCPAY_OPTION_NAME = 'wcpay_was_in_use';
+	const CACHE_TRANSIENT_NAME      = 'wcpay_welcome_page_incentive';
+	const HAS_ORDERS_TRANSIENT_NAME = 'wcpay_incentive_store_has_orders';
+	const HAD_WCPAY_OPTION_NAME     = 'wcpay_was_in_use';
 
 	/**
 	 * Plugin instance.
@@ -276,6 +277,58 @@ class WcPayWelcomePage {
 	}
 
 	/**
+	 * Check if the store has any paid orders.
+	 *
+	 * Currently, we look at the past 90 days and only consider orders
+	 * with status `wc-completed`, `wc-processing`, or `wc-refunded`.
+	 *
+	 * @return boolean Whether the store has any paid orders.
+	 */
+	private function has_orders(): bool {
+		// First, get the stored value, if it exists.
+		// This way we avoid costly DB queries and API calls.
+		$has_orders = get_transient( self::HAS_ORDERS_TRANSIENT_NAME );
+		if ( false !== $has_orders ) {
+			return 'yes' === $has_orders;
+		}
+
+		// We need to determine the value.
+		// Start with the assumption that the store doesn't have orders in the timeframe we look at.
+		$has_orders = false;
+		// By default, we will check for new orders every 6 hours.
+		$expiration = 6 * HOUR_IN_SECONDS;
+
+		// Get the latest completed, processing, or refunded order.
+		$latest_order = wc_get_orders(
+			array(
+				'status'  => array( 'wc-completed', 'wc-processing', 'wc-refunded' ),
+				'limit'   => 1,
+				'orderby' => 'date',
+				'order'   => 'DESC',
+			)
+		);
+		if ( ! empty( $latest_order ) ) {
+			$latest_order = reset( $latest_order );
+			// If the latest order is within the timeframe we look at, we consider the store to have orders.
+			// Otherwise, it clearly doesn't have orders.
+			if ( $latest_order instanceof WC_Abstract_Order
+				&& strtotime( $latest_order->get_date_created() ) >= strtotime( '-90 days' ) ) {
+
+				$has_orders = true;
+
+				// For ultimate efficiency, we will check again after 90 days from the latest order
+				// because in all that time we will consider the store to have orders regardless of new orders.
+				$expiration = strtotime( $latest_order->get_date_created() ) + 90 * DAY_IN_SECONDS - time();
+			}
+		}
+
+		// Store the value for future use.
+		set_transient( self::HAS_ORDERS_TRANSIENT_NAME, $has_orders ? 'yes' : 'no', $expiration );
+
+		return $has_orders;
+	}
+
+	/**
 	 * Check if the current incentive has been manually dismissed.
 	 *
 	 * @return boolean
@@ -331,19 +384,9 @@ class WcPayWelcomePage {
 			'country'      => WC()->countries->get_base_country(),
 			// Store locale, e.g. `en_US`.
 			'locale'       => get_locale(),
-			// WooCommerce active for duration in seconds.
+			// WooCommerce store active for duration in seconds.
 			'active_for'   => WCAdminHelper::get_wcadmin_active_for_in_seconds(),
-			// Whether the store has paid orders in the last 90 days.
-			'has_orders'   => ! empty(
-				wc_get_orders(
-					[
-						'status'       => [ 'wc-completed', 'wc-processing' ],
-						'date_created' => '>=' . strtotime( '-90 days' ),
-						'return'       => 'ids',
-						'limit'        => 1,
-					]
-				)
-			),
+			'has_orders'   => $this->has_orders(),
 			// Whether the store has at least one payment gateway enabled.
 			'has_payments' => ! empty( WC()->payment_gateways()->get_available_payment_gateways() ),
 			'has_wcpay'    => $this->has_wcpay(),

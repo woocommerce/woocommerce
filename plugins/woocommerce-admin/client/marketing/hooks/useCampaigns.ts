@@ -46,11 +46,15 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 					( el ) => el.slug === campaign.channel
 				);
 
+				const cost = campaign.cost
+					? `${ campaign.cost.currency } ${ campaign.cost.value }`
+					: '';
+
 				return {
 					id: `${ campaign.channel }|${ campaign.id }`,
 					title: campaign.title,
 					description: '',
-					cost: `${ campaign.cost.currency } ${ campaign.cost.value }`,
+					cost,
 					manageUrl: campaign.manage_url,
 					icon: channel?.icon || '',
 					channelName: channel?.title || '',

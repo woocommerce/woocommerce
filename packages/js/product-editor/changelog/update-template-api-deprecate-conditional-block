@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Deprecate woocommerce/conditional block in favor of general conditional visibility support.

@@ -65,6 +65,8 @@ describe( 'BusinessInfo', () => {
 			screen.getByText( /Where is your store located?/i )
 		).toBeInTheDocument();
 
+		expect( screen.getByText( /Your email address/i ) ).toBeInTheDocument();
+
 		expect(
 			screen.getByRole( 'button', {
 				name: /Continue/i,
@@ -314,19 +316,8 @@ describe( 'BusinessInfo', () => {
 		} );
 	} );
 
-	describe( 'business info page, email marketing variant', () => {
-		beforeEach( () => {
-			props.context.emailMarketingExperimentAssignment = 'treatment';
-		} );
-
-		it( 'should correctly render the experiment variant with the email field', () => {
-			render( <BusinessInfo { ...props } /> );
-			expect(
-				screen.getByText( /Your email address/i )
-			).toBeInTheDocument();
-		} );
-
-		it( 'should not disable the continue field when experiment variant is shown, opt in checkbox is not checked and email field is empty', () => {
+	describe( 'business info page, email marketing opt-in', () => {
+		it( 'should not disable the continue field when opt in checkbox is not checked and email field is empty', () => {
 			props.context.businessInfo.location = 'AW';
 			props.context.onboardingProfile.is_store_country_set = true;
 			render( <BusinessInfo { ...props } /> );
@@ -336,7 +327,7 @@ describe( 'BusinessInfo', () => {
 			expect( continueButton ).not.toBeDisabled();
 		} );
 
-		it( 'should disable the continue field when experiment variant is shown, opt in checkbox is checked and email field is empty', () => {
+		it( 'should disable the continue field when opt in checkbox is checked and email field is empty', () => {
 			props.context.businessInfo.location = 'AW';
 			props.context.onboardingProfile.is_store_country_set = true;
 			render( <BusinessInfo { ...props } /> );
@@ -350,7 +341,7 @@ describe( 'BusinessInfo', () => {
 			expect( continueButton ).toBeDisabled();
 		} );
 
-		it( 'should correctly send event with opt-in true when experiment variant is shown, opt in checkbox is checked and email field is filled', () => {
+		it( 'should correctly send event with opt-in true when opt in checkbox is checked and email field is filled', () => {
 			props.context.businessInfo.location = 'AW';
 			props.context.onboardingProfile.is_store_country_set = true;
 			render( <BusinessInfo { ...props } /> );

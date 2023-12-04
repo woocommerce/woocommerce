@@ -582,7 +582,8 @@ class CLIRunner {
 	 */
 	private function verify_meta_data( array $order_ids, array $failed_ids ) : array {
 		$meta_keys_to_ignore = array(
-			'_paid_date', // This is set by the CPT datastore but no longer used anywhere.
+			'_paid_date', // This has been deprecated and replaced by '_date_paid' in the CPT datastore.
+			'_completed_date', // This has been deprecated and replaced by '_date_completed' in the CPT datastore.
 			'_edit_lock',
 		);
 

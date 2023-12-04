@@ -1,4 +1,6 @@
-# WC CLI: Commands
+---
+post_title: WC CLI - commands
+---
 
 ## wc shop_coupon
 
@@ -3800,7 +3802,7 @@ Output just the id when the operation is successful.
 
 ## wc com
 
-The `com` command allows interacting with the WooCommerce.com marketplace via CLI. Connecting to the marketplace via *WooCommerce > Extensions > My Subscriptions* in your WooCommerce store is required.
+The `com` command allows interacting with the Woo.com marketplace via CLI. Connecting to the marketplace via *WooCommerce > Extensions > My Subscriptions* in your WooCommerce store is required.
 
 ### wc com extension list
 

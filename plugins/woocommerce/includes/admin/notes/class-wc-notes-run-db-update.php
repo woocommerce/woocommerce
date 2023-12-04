@@ -130,7 +130,7 @@ class WC_Notes_Run_Db_Update {
 			array(
 				'name'    => 'update-db_learn-more',
 				'label'   => __( 'Learn more about updates', 'woocommerce' ),
-				'url'     => 'https://docs.woocommerce.com/document/how-to-update-woocommerce/',
+				'url'     => 'https://woo.com/document/how-to-update-woocommerce/',
 				'status'  => 'unactioned',
 				'primary' => false,
 			),

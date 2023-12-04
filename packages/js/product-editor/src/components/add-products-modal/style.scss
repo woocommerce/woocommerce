@@ -1,0 +1,143 @@
+.woocommerce-add-products-modal {
+	@include breakpoint(">600px") {
+		width: calc(100% - 32px);
+	}
+
+	@include breakpoint(">782px") {
+		width: 640px;
+
+		.components-input-control__container {
+			width: 50%;
+		}
+	}
+
+	&__input-suffix {
+		margin-right: $grid-unit-15;
+	}
+
+	&__form {
+		&-group {
+			&-title {
+				padding: 0;
+				width: 100%;
+				margin-bottom: $grid-unit-40;
+			}
+
+			&-content {
+				display: flex;
+				flex-direction: column;
+				gap: $grid-unit + $grid-unit-05;
+
+				.components-base-control {
+					.components-input-control__container {
+						.components-input-control__input {
+							min-height: 36px;
+						}
+					}
+				}
+
+				.components-base-control.has-error {
+					.components-input-control__backdrop {
+						border-color: $studio-red-50;
+					}
+
+					.components-base-control__help {
+						color: $studio-red-50;
+					}
+				}
+			}
+		}
+	}
+
+	&__actions {
+		margin-top: $grid-unit-30;
+		display: flex;
+		flex-direction: row;
+		gap: 8px;
+		justify-content: flex-end;
+	}
+
+	&__menu {
+		&-loading {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: $grid-unit;
+			height: $grid-unit-60 + 2px;
+		}
+
+		&-item {
+			display: flex;
+			align-items: center;
+			padding: $grid-unit;
+			gap: $grid-unit + $grid-unit-05;
+
+			&-image {
+				width: $grid-unit-40;
+				height: $grid-unit-40;
+				border-radius: $grid-unit-05;
+				background-color: $gray-200;
+				background-position: center center;
+				background-repeat: no-repeat;
+				background-size: cover;
+				flex-shrink: 0;
+			}
+
+			&-content {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+			}
+
+			&-title {
+				color: $gray-900;
+			}
+
+			&-description {
+				color: $gray-700;
+				font-size: 11px;
+			}
+		}
+	}
+
+	&__list {
+		&-item {
+			display: flex;
+			align-items: center;
+			padding: $grid-unit-20 0;
+			gap: $grid-unit + $grid-unit-05;
+			margin: 0;
+
+			&:not(:last-child) {
+				border-bottom: 1px solid $gray-100;
+			}
+
+			&-image {
+				width: $grid-unit-40;
+				height: $grid-unit-40;
+				border-radius: $grid-unit-05;
+				background-color: $gray-200;
+				background-position: center center;
+				background-repeat: no-repeat;
+				background-size: cover;
+				flex-shrink: 0;
+			}
+
+			&-content {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+				flex: 1 1 auto;
+			}
+
+			&-title {
+				color: $gray-900;
+			}
+
+			&-description {
+				color: $gray-700;
+				font-size: 11px;
+			}
+		}
+	}
+}

@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: WooCommerce Docs
- * Plugin URI: https://woocommerce.com/
+ * Plugin URI: https://woo.com/
  * Description: A plugin for consolidating Markdown documentation from remote sources.
  * Version: 1.0
  * Author: Automattic
- * Author URI: https://woocommerce.com
+ * Author URI: https://woo.com
  * Text Domain: woocommerce-docs
  * Domain Path: /i18n/languages/
  * Requires at least: 6.1

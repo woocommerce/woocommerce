@@ -7,7 +7,6 @@ import {
 	Fragment,
 	useState,
 } from '@wordpress/element';
-import { PluginArea } from '@wordpress/plugins';
 import {
 	LayoutContextProvider,
 	useExtendLayout,
@@ -30,7 +29,7 @@ import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { FullscreenMode, InterfaceSkeleton } from '@wordpress/interface';
+import { InterfaceSkeleton } from '@wordpress/interface';
 
 /**
  * Internal dependencies
@@ -69,7 +68,6 @@ export function Editor( {
 					id={ product.id }
 				>
 					<ShortcutProvider>
-						<FullscreenMode isActive={ false } />
 						<ValidationProvider initialValue={ product }>
 							<InterfaceSkeleton
 								header={
@@ -90,8 +88,6 @@ export function Editor( {
 												postId: product.id,
 											} }
 										/>
-										{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-										<PluginArea scope="woocommerce-product-block-editor" />
 									</>
 								}
 							/>

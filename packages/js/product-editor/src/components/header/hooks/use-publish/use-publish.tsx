@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Product } from '@woocommerce/data';
+import type { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -12,8 +12,8 @@ import { MouseEvent } from 'react';
  * Internal dependencies
  */
 import { useValidations } from '../../../../contexts/validation-context';
-import { WPError } from '../../../../utils/get-product-error-message';
-import { PublishButtonProps } from '../../publish-button';
+import type { WPError } from '../../../../utils/get-product-error-message';
+import type { PublishButtonProps } from '../../publish-button';
 
 export function usePublish( {
 	productType = 'product',
@@ -35,12 +35,26 @@ export function usePublish( {
 		'id'
 	);
 
-	const { isSaving } = useSelect(
+	const { isSaving, isDirty } = useSelect(
 		( select ) => {
-			const { isSavingEntityRecord } = select( 'core' );
+			const {
+				isSavingEntityRecord,
+				hasEditsForEntityRecord,
+				getRawEntityRecord,
+			} = select( 'core' );
 
 			return {
 				isSaving: isSavingEntityRecord< boolean >(
+					'postType',
+					productType,
+					productId
+				),
+				isDirty: hasEditsForEntityRecord(
+					'postType',
+					productType,
+					productId
+				),
+				currentPost: getRawEntityRecord< boolean >(
 					'postType',
 					productType,
 					productId
@@ -51,6 +65,7 @@ export function usePublish( {
 	);
 
 	const isBusy = isSaving || isValidating;
+	const isDisabled = disabled || isBusy || ! isDirty;
 
 	const isPublished =
 		productType === 'product' ? productStatus === 'publish' : true;
@@ -133,6 +148,7 @@ export function usePublish( {
 			: __( 'Add', 'woocommerce' ),
 		...props,
 		isBusy,
+		'aria-disabled': isDisabled,
 		variant: 'primary',
 		onClick: handleClick,
 	};

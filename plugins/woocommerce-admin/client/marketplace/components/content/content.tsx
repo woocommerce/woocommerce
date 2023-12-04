@@ -13,8 +13,10 @@ import { getAdminSetting } from '../../../utils/admin-settings';
 import Discover from '../discover/discover';
 import Products from '../products/products';
 import SearchResults from '../search-results/search-results';
+import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { fetchSearchResults } from '../../utils/functions';
+import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
 import {
 	recordMarketplaceView,
 	recordLegacyTabView,
@@ -118,6 +120,12 @@ export default function Content(): JSX.Element {
 				);
 			case 'discover':
 				return <Discover />;
+			case 'my-subscriptions':
+				return (
+					<SubscriptionsContextProvider>
+						<MySubscriptions />
+					</SubscriptionsContextProvider>
+				);
 			default:
 				return <></>;
 		}

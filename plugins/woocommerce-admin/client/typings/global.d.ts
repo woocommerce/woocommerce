@@ -23,6 +23,7 @@ declare global {
 			'product-variation-management': boolean;
 			'product-virtual-downloadable': boolean;
 			'product-external-affiliate': boolean;
+			'product-grouped': boolean;
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
@@ -37,6 +38,15 @@ declare global {
 			'shipping-setting-tour': boolean;
 		};
 		wp: {
+			updates?: {
+				ajax: ( action, data: {
+					slug?: string;
+					plugin?: string;
+					theme?: string;
+					success?: function;
+					error?: function;
+				} ) => JQuery.Promise;
+			};
 			autosave?: {
 				server: {
 					postChanged: () => boolean;

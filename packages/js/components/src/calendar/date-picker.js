@@ -76,13 +76,21 @@ class DatePicker extends Component {
 	}
 
 	render() {
-		const { date, disabled, text, dateFormat, error, isInvalidDate } =
-			this.props;
+		const {
+			date,
+			disabled,
+			text,
+			dateFormat,
+			error,
+			isInvalidDate,
+			popoverProps = { inline: true },
+		} = this.props;
 
 		return (
 			<Dropdown
 				position="bottom center"
 				focusOnMount={ false }
+				popoverProps={ popoverProps }
 				renderToggle={ ( { isOpen, onToggle } ) => (
 					<DateInput
 						disabled={ disabled }
@@ -93,6 +101,7 @@ class DatePicker extends Component {
 						label={ __( 'Choose a date', 'woocommerce' ) }
 						error={ error }
 						describedBy={ sprintf(
+							/* translators: %s: date format specification */
 							__(
 								'Date input describing a selected date in format %s',
 								'woocommerce'
