@@ -29,7 +29,7 @@
 		// Update inputs if any exist.
 		if( $( `input[name^="${params.prefix}"]` ) ) {
 			for( const key of Object.keys( wc_order_attribution.fields ) ) {
-				$( `input[name="${params.prefix}${key}"]` ).value = values? values[ key ] : values;
+				$( `input[name="${params.prefix}${key}"]` ).value = values && values[ key ] || '';
 			}
 		}
 	};
