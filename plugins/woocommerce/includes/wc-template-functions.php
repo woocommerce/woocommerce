@@ -2741,7 +2741,7 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 				 * (which is partly determined by the order status). For special cases, though, this can be overridden
 				 * and the downloads table can be forced to render (or forced not to render).
 				 *
-				 * @since 8.4.0
+				 * @since 8.5.0
 				 *
 				 * @param bool     $show_downloads If the downloads table should be shown.
 				 * @param WC_Order $order          The related order.
