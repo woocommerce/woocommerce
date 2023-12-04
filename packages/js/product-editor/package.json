@@ -54,7 +54,7 @@
 		"@wordpress/edit-post": "wp-6.0",
 		"@wordpress/editor": "wp-6.0",
 		"@wordpress/element": "wp-6.0",
-		"@wordpress/hooks": "^3.6.1",
+		"@wordpress/hooks": "wp-6.0",
 		"@wordpress/html-entities": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
 		"@wordpress/icons": "wp-6.0",
