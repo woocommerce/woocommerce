@@ -340,7 +340,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.getByRole( 'link', { name: 'Variations' } ).click();
+			await page.getByRole('link', { name: 'Variations' }).last().click();
 		} );
 
 		await test.step(
@@ -381,7 +381,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.getByRole( 'link', { name: 'Variations' } ).click();
+			await page.getByRole('link', { name: 'Variations' }).last().click();
 		} );
 
 		await test.step(
@@ -528,7 +528,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.getByRole( 'link', { name: 'Variations' } ).click();
+			await page.getByRole('link', { name: 'Variations' }).last().click();
 		} );
 
 		await test.step( 'Wait for block overlay to disappear.', async () => {
@@ -592,7 +592,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.getByRole( 'link', { name: 'Variations' } ).click();
+			await page.getByRole('link', { name: 'Variations' }).last().click();
 		} );
 
 		await test.step( 'Click "Remove" on a variation', async () => {
