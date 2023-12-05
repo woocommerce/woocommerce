@@ -8,7 +8,6 @@ export const RegionPicker = ( { options, initialValues } ) => {
 	const [ selected, setSelected ] = useState( initialValues );
 	const onChange = ( value ) => {
 		document.body.dispatchEvent(
-			/* global CustomEvent */
 			new CustomEvent( 'wc_region_picker_update', { detail: value } )
 		);
 		setSelected( value );

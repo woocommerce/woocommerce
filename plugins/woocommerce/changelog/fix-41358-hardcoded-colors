@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Removed hardcoded colors from the base stylesheet when a block theme is used
