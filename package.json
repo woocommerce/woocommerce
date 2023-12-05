@@ -17,13 +17,13 @@
 	},
 	"scripts": {
 		"build": "pnpm -r build",
-		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
 		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
 		"create-extension": "node ./tools/create-extension/index.js",
 		"git:update-hooks": "if test -d .git; then rm -r .git/hooks && mkdir -p .git/hooks && husky install; else husky install; fi",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",
+		"lint": "pnpm -r lint",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
 		"test": "pnpm -r test",
 		"utils": "node ./tools/monorepo-utils/dist/index.js"
@@ -70,12 +70,12 @@
 		"node": "^16.14.1",
 		"pnpm": "^8.6.7"
 	},
-	"title": "WooCommerce Monorepo",
 	"pnpm": {
 		"overrides": {
 			"@types/react": "^17.0.2",
 			"react": "^17.0.2",
 			"react-resize-aware": "3.1.1"
 		}
-	}
+	},
+	"title": "WooCommerce Monorepo"
 }
