@@ -2898,8 +2898,8 @@ importers:
         specifier: 9.8.6
         version: 9.8.6
       axios:
-        specifier: ^0.24.0
-        version: 0.24.0
+        specifier: ^1.6.0
+        version: 1.6.0
       babel-eslint:
         specifier: 10.1.0
         version: 10.1.0(eslint@8.32.0)
@@ -24151,6 +24151,16 @@ packages:
     transitivePeerDependencies:
       - debug
     dev: false
+
+  /axios@1.6.0:
+    resolution: {integrity: sha512-EZ1DYihju9pwVB+jg67ogm+Tmqc6JmhamRN6I4Zt8DfZu5lbcQGw3ozH9lFejSJgs/ibaef3A9PMXPLeefFGJg==}
+    dependencies:
+      follow-redirects: 1.15.2(debug@4.3.3)
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+    dev: true
 
   /axobject-query@2.2.0:
     resolution: {integrity: sha512-Td525n+iPOOyUQIeBfcASuG6uJsDOITl7Mds5gFyerkWiX7qhUTdYUBlSgNMyVqtSJqwpt1kXGLdUt6SykLMRA==}
