@@ -20,4 +20,11 @@ export default {
 	): BlockInstance[] {
 		return state.modalEditor.blocks;
 	},
+
+	getModalEditorBlocksListHasChanged:
+		function getModalEditorBlocksListHasChanged(
+			state: ProductEditorUIStateProps
+		): boolean {
+			return !! state.modalEditor.hasChanged;
+		},
 };
