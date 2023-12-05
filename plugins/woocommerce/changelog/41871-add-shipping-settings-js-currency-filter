@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add a filter `woocommerce_shipping_zone_method_currency_context` for manipulating currency context in Shipping Method modals.
