@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Introduces new hooks to customize the cart totals table (classic storefront).
