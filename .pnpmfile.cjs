@@ -44,7 +44,8 @@ function updatePackageFile( packagePath, packageFile ) {
 
 	fs.writeFileSync(
 		path.join( packagePath, 'package.json' ),
-		JSON.stringify( packageFile, null, '\t' ),
+		// Make sure to keep the newline at the end of the file.
+		JSON.stringify( packageFile, null, '\t' ) + "\n",
 		'utf8'
 	);
 }
