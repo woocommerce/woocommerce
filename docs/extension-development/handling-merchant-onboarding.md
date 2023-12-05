@@ -1,4 +1,6 @@
-# Handling merchant onboarding
+---
+post_title: Handling merchant onboarding
+---
 
 ## Introduction
 

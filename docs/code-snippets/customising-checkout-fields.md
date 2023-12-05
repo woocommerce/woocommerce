@@ -1,4 +1,6 @@
-# Customizing checkout fields using actions and filters
+---
+post_title: Customizing checkout fields using actions and filters
+---
 
 If you are unfamiliar with code and resolving potential conflicts, we have an extension that can help: [WooCommerce Checkout Field Editor](https://woo.com/products/woocommerce-checkout-field-editor/). Installing and activating this extension overrides any code below that you try to implement; and you cannot have custom checkout field code in your functions.php file when the extension is activated.
 

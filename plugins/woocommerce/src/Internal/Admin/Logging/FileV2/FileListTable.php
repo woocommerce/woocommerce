@@ -67,6 +67,7 @@ class FileListTable extends WP_List_Table {
 	 */
 	protected function get_bulk_actions(): array {
 		return array(
+			'export' => esc_html__( 'Download', 'woocommerce' ),
 			'delete' => esc_html__( 'Delete permanently', 'woocommerce' ),
 		);
 	}

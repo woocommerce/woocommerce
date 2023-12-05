@@ -1,4 +1,6 @@
-# High Performance Order Storage (HPOS)
+---
+post_title: High Performance Order Storage (HPOS)
+---
 
 WooCommerce has traditionally stored store orders and related order information (like refunds) as custom WordPress post types or post meta records. This comes with performance issues.
 
