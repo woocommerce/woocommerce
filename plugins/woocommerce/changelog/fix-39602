@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Added a new parameter $status_transition to the woocommerce_order_status_$status_transition["to"] hook.
