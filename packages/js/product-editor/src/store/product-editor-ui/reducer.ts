@@ -49,7 +49,7 @@ export default function reducer(
 				...state,
 				modalEditor: {
 					...state.modalEditor,
-					blocks: action.blocks,
+					blocks: action.blocks || [],
 				},
 			};
 	}
