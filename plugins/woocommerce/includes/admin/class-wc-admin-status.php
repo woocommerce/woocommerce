@@ -319,7 +319,7 @@ class WC_Admin_Status {
 	 *
 	 * @return WC_Admin_Log_Table_List
 	 */
-	private static function get_db_log_list_table() {
+	public static function get_db_log_list_table() {
 		if ( is_null( self::$db_log_list_table ) ) {
 			self::$db_log_list_table = new WC_Admin_Log_Table_List();
 		}
