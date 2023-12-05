@@ -81,6 +81,48 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 11.7.0 - 2023-12-05 =
+
+#### Enhancements
+
+- The Block Hooks API is implemented to auto-inject the Mini-Cart block in header patterns and template parts when the "Twenty Twenty-Four" theme is active. The Mini-Cart block also now defaults to not show the total for the items in the cart when inserted into content. ([11745](https://github.com/woocommerce/woocommerce-blocks/pull/11745))
+- Decrease modal width. ([12003](https://github.com/woocommerce/woocommerce-blocks/pull/12003))
+- [Store Customization] Update the default content in patterns. ([11997](https://github.com/woocommerce/woocommerce-blocks/pull/11997))
+- [Store Customization] Update the "Footer with 3 Menus" pattern to remove the last 2 menus. ([11980](https://github.com/woocommerce/woocommerce-blocks/pull/11980))
+- Limit number of visible incompatible extensions in sidebar notice. ([11972](https://github.com/woocommerce/woocommerce-blocks/pull/11972))
+- Improve readability of order note. ([11944](https://github.com/woocommerce/woocommerce-blocks/pull/11944))
+- Reorganise Columns controls and fix undefined problem in Product Collection settings. ([11937](https://github.com/woocommerce/woocommerce-blocks/pull/11937))
+- Switch to NoticeBanner component inside Store Notices Block placeholder. ([11920](https://github.com/woocommerce/woocommerce-blocks/pull/11920))
+- Preserve shrinkColumns value when switching the layout type of Product Collection. ([11905](https://github.com/woocommerce/woocommerce-blocks/pull/11905))
+- Tweak the product prompt. ([11903](https://github.com/woocommerce/woocommerce-blocks/pull/11903))
+- Add DELETE `private/ai/pattern` endpoint. ([11890](https://github.com/woocommerce/woocommerce-blocks/pull/11890))
+- Update notice for default cart and checkout. ([11861](https://github.com/woocommerce/woocommerce-blocks/pull/11861))
+- Enable shrink columns option in Product Collection by default. ([11821](https://github.com/woocommerce/woocommerce-blocks/pull/11821))
+- Move `Combobox` to components package. ([11353](https://github.com/woocommerce/woocommerce-blocks/pull/11353))
+- Interactivity API: Implement the new `store()` API. ([11071](https://github.com/woocommerce/woocommerce-blocks/pull/11071))
+
+#### Bug Fixes
+
+- [CYS] Fix regression and ensure AI-generated content is assigned to products after the third attempt. ([12016](https://github.com/woocommerce/woocommerce-blocks/pull/12016))
+- [Product Collection] Fix: HTML Entity Decoding in Taxonomy Controls. ([11982](https://github.com/woocommerce/woocommerce-blocks/pull/11982))
+- Product Gallery: Add a Product Image fallback. ([11978](https://github.com/woocommerce/woocommerce-blocks/pull/11978))
+- Reviews by Product: Fix reviews count not appearing in product selector. ([11976](https://github.com/woocommerce/woocommerce-blocks/pull/11976))
+- Hook `woocommerce_single_product_summary` action to `core/post-excerpt` block. ([11953](https://github.com/woocommerce/woocommerce-blocks/pull/11953))
+- fix: Store notices always shows as an error type #11768. ([11932](https://github.com/woocommerce/woocommerce-blocks/pull/11932))
+- [Product Collection] Fix: HTML entity decoding for product names in Hand-Picked Products. ([11927](https://github.com/woocommerce/woocommerce-blocks/pull/11927))
+- Validate coupon usage against customer id AND emails. ([11860](https://github.com/woocommerce/woocommerce-blocks/pull/11860))
+- Pass order ID to woocommerce_before_thankyou hook. ([11852](https://github.com/woocommerce/woocommerce-blocks/pull/11852))
+- Translate the prefixes passed to post-terms in product-meta. ([11811](https://github.com/woocommerce/woocommerce-blocks/pull/11811))
+- Prevent fatal errors when using Cart Tokens and creating new accounts on checkout. ([11785](https://github.com/woocommerce/woocommerce-blocks/pull/11785))
+- Product Gallery Thumbnails: Add support for cropping. ([11718](https://github.com/woocommerce/woocommerce-blocks/pull/11718))
+- Fix: Product Collection show products with correct stock statuses. ([11708](https://github.com/woocommerce/woocommerce-blocks/pull/11708))
+- Product Gallery Thumbnails: Fix overflow issues and improve responsiveness. ([11665](https://github.com/woocommerce/woocommerce-blocks/pull/11665))
+
+#### Various
+
+- Update extensibility doc. ([11924](https://github.com/woocommerce/woocommerce-blocks/pull/11924))
+- Move `CheckboxControl` to components package and leave alias in checkout package. ([11662](https://github.com/woocommerce/woocommerce-blocks/pull/11662))
+
 = 11.6.2 - 2023-12-04 =
 
 #### Enhancements
