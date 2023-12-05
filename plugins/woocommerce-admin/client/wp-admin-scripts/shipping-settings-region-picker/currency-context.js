@@ -11,7 +11,11 @@ export const ShippingCurrencyContext = () => {
 
 	useEffect( () => {
 		window.wc.ShippingCurrencyContext =
-			window.wc.ShippingCurrencyContext || applyFilters( 'woocommerce_shipping_zone_method_currency_context', context );
+			window.wc.ShippingCurrencyContext ||
+			applyFilters(
+				'woocommerce_shipping_zone_method_currency_context',
+				context
+			);
 		window.wc.ShippingCurrencyNumberFormat =
 			window.wc.ShippingCurrencyNumberFormat || numberFormat;
 	}, [ context ] );
