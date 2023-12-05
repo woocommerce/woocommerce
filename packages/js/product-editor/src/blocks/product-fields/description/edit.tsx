@@ -102,6 +102,7 @@ export function DescriptionBlockEdit( {
 		if ( ! hasChanged ) {
 			return;
 		}
+
 		if ( ! modalEditorBlocks?.length ) {
 			setDescription( '' );
 		}
