@@ -2,7 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement, useEffect } from '@wordpress/element';
+import { createElement, useEffect, useMemo } from '@wordpress/element';
+import { useWooBlockProps } from '@woocommerce/block-templates';
+import { useEntityProp } from '@wordpress/core-data';
 import {
 	BlockAttributes,
 	BlockInstance,
@@ -11,9 +13,7 @@ import {
 } from '@wordpress/blocks';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { Button } from '@wordpress/components';
-import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
-import { useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -21,7 +21,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import { ContentPreview } from '../../../components/content-preview';
 import { ProductEditorBlockEditProps } from '../../../types';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
-import { store as productEditorUiStore } from '../../../store/product-editor-ui';
+import { store } from '../../../store/product-editor-ui';
 
 /**
  * Internal dependencies
@@ -58,39 +58,58 @@ export function DescriptionBlockEdit( {
 	);
 
 	// Pick Modal editor data from the store.
-	const { isModalEditorOpen, blocks } = useSelect( ( select ) => {
-		return {
-			isModalEditorOpen:
-				select( productEditorUiStore ).isModalEditorOpen(),
-			blocks: select( productEditorUiStore ).getModalEditorBlocks(),
-		};
-	}, [] );
+	const { isModalEditorOpen, modalEditorBlocks, hasChanged } = useSelect(
+		( select ) => {
+			return {
+				isModalEditorOpen: select( store ).isModalEditorOpen(),
+				modalEditorBlocks: select( store ).getModalEditorBlocks(),
+				hasChanged:
+					select( store ).getModalEditorBlocksListHasChanged(),
+			};
+		},
+		[]
+	);
 
-	const { openModalEditor, setModalEditorBlocks } =
-		useDispatch( productEditorUiStore );
+	const { openModalEditor, setModalEditorBlocks } = useDispatch( store );
+
+	const parsedBlocks = useMemo( () => {
+		try {
+			return parse( description );
+		} catch ( e ) {
+			return [];
+		}
+	}, [ description ] );
 
 	/*
 	 * Populate the modal editor with the description blocks,
-	 * in the first render only if the description is not empty.
+	 * in the first render when:
+	 * - the Modal Editor blocks have not changed (hasChanged)
+	 * - the description entity is not empty
 	 */
 	useEffect( () => {
+		if ( hasChanged ) {
+			return;
+		}
+
 		if ( ! description ) {
 			return;
 		}
 
-		setModalEditorBlocks( parse( description ) );
-	}, [] ); // eslint-disable-line
+		setModalEditorBlocks( parsedBlocks );
+	}, [ hasChanged ] ); // eslint-disable-line
 
 	// Update the description when the blocks change.
 	useEffect( () => {
-		if ( ! blocks?.length ) {
+		if ( ! hasChanged ) {
+			return;
+		}
+		if ( ! modalEditorBlocks?.length ) {
 			setDescription( '' );
 		}
 
-		const html = serialize( clearDescriptionIfEmpty( blocks ) );
-
+		const html = serialize( clearDescriptionIfEmpty( modalEditorBlocks ) );
 		setDescription( html );
-	}, [ blocks, setDescription ] );
+	}, [ modalEditorBlocks, setDescription, hasChanged ] );
 
 	return (
 		<div { ...blockProps }>
