@@ -13,7 +13,11 @@ import { useState, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { COLOR_PALETTES } from './constants';
+import {
+	COLOR_PALETTES,
+	DEFAULT_COLOR_PALETTE_TITLES,
+	DEFAULT_COLOR_PALETTES,
+} from './constants';
 import { VariationContainer } from '../variation-container';
 import { ColorPaletteVariationPreview } from './preview';
 import { ColorPaletteResponse } from '~/customize-store/design-with-ai/types';
@@ -54,7 +58,9 @@ export const ColorPalette = () => {
 				);
 			} else {
 				// seems that aiSuggestions weren't correctly populated, we'll just use the first 9
-				setColorPalettes( COLOR_PALETTES.slice( 0, 9 ) );
+				setColorPalettes(
+					DEFAULT_COLOR_PALETTES as typeof COLOR_PALETTES
+				);
 			}
 		}
 	}, [ isLoading, aiSuggestions?.defaultColorPalette ] );
