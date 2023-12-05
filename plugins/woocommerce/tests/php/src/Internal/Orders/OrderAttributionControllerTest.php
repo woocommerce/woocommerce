@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Integrations\WPConsentAPI;
 use Automattic\WooCommerce\Internal\Orders\OrderAttributionController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
@@ -46,11 +47,15 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 			->with( 'order_attribution' )
 			->willReturn( true );
 
+		$wp_consent_mock = $this->getMockBuilder( WPConsentAPI::class )
+			->onlyMethods( array( 'register' ) )
+			->getMock();
+
 		$logger_mock = $this->getMockBuilder( WC_Logger::class )
 			->onlyMethods( array( 'log' ) )
 			->getMock();
 
-		$this->attribution_fields_class->init( $legacy_proxy, $feature_mock, $logger_mock );
+		$this->attribution_fields_class->init( $legacy_proxy, $feature_mock, $wp_consent_mock, $logger_mock );
 	}
 
 	/**
