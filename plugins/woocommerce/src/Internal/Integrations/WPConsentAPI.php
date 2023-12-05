@@ -80,12 +80,12 @@ class WPConsentAPI {
 	 */
 	private function enqueue_consent_api_scripts() {
 		wp_enqueue_script(
-			'wp-consent-api-integration-js',
+			'wp-consent-api-integration',
 			plugins_url(
 				"assets/js/frontend/wp-consent-api-integration{$this->get_script_suffix()}.js",
 				WC_PLUGIN_FILE
 			),
-			array( 'wp-consent-api' ),
+			array( 'wp-consent-api', 'wc-order-attribution' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
