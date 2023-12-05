@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Integrations\WPConsentAPI;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
 use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
@@ -28,6 +29,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 	use OrderAttributionMeta {
 		get_prefixed_field_name as public;
 	}
+
+	/**
+	 * The WPConsentAPI integration instance.
+	 *
+	 * @var WPConsentAPI
+	 */
+	private $consent;
 
 	/**
 	 * The FeatureController instance.
@@ -59,11 +67,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 *
 	 * @param LegacyProxy         $proxy      The legacy proxy.
 	 * @param FeaturesController  $controller The feature controller.
+	 * @param WPConsentAPI		  $consent    The WPConsentAPI integration.
 	 * @param WC_Logger_Interface $logger     The logger object. If not provided, it will be obtained from the proxy.
 	 */
-	final public function init( LegacyProxy $proxy, FeaturesController $controller, ?WC_Logger_Interface $logger = null ) {
+	final public function init( LegacyProxy $proxy, FeaturesController $controller, WPConsentAPI $consent, ?WC_Logger_Interface $logger = null ) {
 		$this->proxy              = $proxy;
 		$this->feature_controller = $controller;
+		$this->consent			  = $consent;
 		$this->logger             = $logger ?? $proxy->call_function( 'wc_get_logger' );
 		$this->set_fields_and_prefix();
 	}
@@ -83,6 +93,10 @@ class OrderAttributionController implements RegisterHooksInterface {
 		if ( ! $this->feature_controller->feature_is_enabled( 'order_attribution' ) ) {
 			return;
 		}
+
+
+		// Register WPConsentAPI integration.
+		$this->consent->register();
 
 		add_action(
 			'wp_enqueue_scripts',
