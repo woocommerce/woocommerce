@@ -63,8 +63,7 @@ export function DescriptionBlockEdit( {
 			return {
 				isModalEditorOpen: select( store ).isModalEditorOpen(),
 				modalEditorBlocks: select( store ).getModalEditorBlocks(),
-				hasChanged:
-					select( store ).getModalEditorBlocksListHasChanged(),
+				hasChanged: select( store ).getModalEditorContentHasChanged(),
 			};
 		},
 		[]
