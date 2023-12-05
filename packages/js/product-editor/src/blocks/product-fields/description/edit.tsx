@@ -79,24 +79,6 @@ export function DescriptionBlockEdit( {
 		}
 	}, [ description ] );
 
-	/*
-	 * Populate the modal editor with the description blocks,
-	 * in the first render when:
-	 * - the Modal Editor blocks have not changed (hasChanged)
-	 * - the description entity is not empty
-	 */
-	useEffect( () => {
-		if ( hasChanged ) {
-			return;
-		}
-
-		if ( ! description ) {
-			return;
-		}
-
-		setModalEditorBlocks( parsedBlocks );
-	}, [ hasChanged ] ); // eslint-disable-line
-
 	// Update the description when the blocks change.
 	useEffect( () => {
 		if ( ! hasChanged ) {
@@ -116,6 +98,10 @@ export function DescriptionBlockEdit( {
 			<Button
 				variant="secondary"
 				onClick={ () => {
+					if ( description ) {
+						setModalEditorBlocks( parsedBlocks );
+					}
+
 					openModalEditor();
 					recordEvent( 'product_add_description_click' );
 				} }
