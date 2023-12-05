@@ -23,7 +23,7 @@ class ReviewCheckoutTask extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Review your shopper\'s checkout experience', 'woo-gutenberg-products-block' );
+		return __( 'Review your checkout experience', 'woo-gutenberg-products-block' );
 	}
 
 	/**
