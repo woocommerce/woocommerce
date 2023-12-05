@@ -211,7 +211,7 @@
 		"moment-timezone": "^0.5.34",
 		"moment-timezone-data-webpack-plugin": "^1.5.0",
 		"node-watch": "^0.7.3",
-		"postcss": "^8.4.7",
+		"postcss": "^8.4.31",
 		"postcss-color-function": "^4.1.0",
 		"postcss-loader": "^4.3.0",
 		"prettier": "npm:wp-prettier@^2.8.5",
