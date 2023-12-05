@@ -57,8 +57,11 @@ export function IframeEditor( {
 		return select( productEditorUiStore ).getModalEditorBlocks();
 	}, [] );
 
-	const { setModalEditorBlocks: setBlocks, closeModalEditor } =
-		useDispatch( productEditorUiStore );
+	const {
+		setModalEditorBlocks: setBlocks,
+		closeModalEditor,
+		seShouldUpdateState,
+	} = useDispatch( productEditorUiStore );
 
 	const { appendEdit } = useEditorHistory( {
 		setBlocks,
@@ -135,6 +138,7 @@ export function IframeEditor( {
 						onSave={ () => {
 							appendEdit( temporalBlocks );
 							setBlocks( temporalBlocks );
+							seShouldUpdateState( true );
 							onChange( temporalBlocks );
 							closeModalEditor();
 						} }
