@@ -403,19 +403,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 						type: 'parallel',
 						states: {
 							assembleSite: {
-								initial: 'executeOrSkip',
+								initial: 'pending',
 								states: {
-									executeOrSkip: {
-										always: [
-											{
-												target: 'pending',
-												cond: 'isAiOnline',
-											},
-											{
-												target: '#designWithAi.showAssembleHub',
-											},
-										],
-									},
 									pending: {
 										invoke: {
 											src: 'assembleSite',
