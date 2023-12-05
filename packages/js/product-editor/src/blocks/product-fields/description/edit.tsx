@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement } from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
 import {
 	BlockAttributes,
 	BlockInstance,
@@ -19,7 +19,6 @@ import { useEntityProp } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { ContentPreview } from '../../../components/content-preview';
-import { ModalEditor } from '../../../components/modal-editor';
 import { ProductEditorBlockEditProps } from '../../../types';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
 import { store as productEditorUiStore } from '../../../store/product-editor-ui';
@@ -58,13 +57,40 @@ export function DescriptionBlockEdit( {
 		'description'
 	);
 
-	// Check if the Modal editor is open from the store.
-	const isModalEditorOpen = useSelect( ( select ) => {
-		return select( productEditorUiStore ).isModalEditorOpen();
+	// Pick Modal editor data from the store.
+	const { isModalEditorOpen, blocks } = useSelect( ( select ) => {
+		return {
+			isModalEditorOpen:
+				select( productEditorUiStore ).isModalEditorOpen(),
+			blocks: select( productEditorUiStore ).getModalEditorBlocks(),
+		};
 	}, [] );
 
-	const { openModalEditor, closeModalEditor } =
+	const { openModalEditor, setModalEditorBlocks } =
 		useDispatch( productEditorUiStore );
+
+	/*
+	 * Populate the modal editor with the description blocks,
+	 * in the first render only if the description is not empty.
+	 */
+	useEffect( () => {
+		if ( ! description ) {
+			return;
+		}
+
+		setModalEditorBlocks( parse( description ) );
+	}, [] ); // eslint-disable-line
+
+	// Update the description when the blocks change.
+	useEffect( () => {
+		if ( ! blocks?.length ) {
+			setDescription( '' );
+		}
+
+		const html = serialize( clearDescriptionIfEmpty( blocks ) );
+
+		setDescription( html );
+	}, [ blocks, setDescription ] );
 
 	return (
 		<div { ...blockProps }>
@@ -79,20 +105,6 @@ export function DescriptionBlockEdit( {
 					? __( 'Edit description', 'woocommerce' )
 					: __( 'Add description', 'woocommerce' ) }
 			</Button>
-
-			{ isModalEditorOpen && (
-				<ModalEditor
-					initialBlocks={ parse( description ) }
-					onChange={ ( blocks ) => {
-						const html = serialize(
-							clearDescriptionIfEmpty( blocks )
-						);
-						setDescription( html );
-					} }
-					onClose={ closeModalEditor }
-					title={ __( 'Edit description', 'woocommerce' ) }
-				/>
-			) }
 
 			{ !! description.length && (
 				<ContentPreview content={ description } />
