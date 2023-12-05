@@ -195,3 +195,4 @@ Every release includes specific testing instructions for new features and bug fi
 -   [11.6.0](./1160.md)
     -   [11.6.1](./1161.md)
     -   [11.6.2](./1162.md)
+-   [11.7.0](./1170.md)
