@@ -1,7 +1,11 @@
 /**
+ * External dependencies
+ */
+import { BlockInstance } from '@wordpress/blocks';
+
+/**
  * Internal dependencies
  */
-
 import type { ProductEditorUIStateProps } from './types';
 
 export default {
@@ -9,5 +13,11 @@ export default {
 		state: ProductEditorUIStateProps
 	) {
 		return state.modalEditor.isOpen;
+	},
+
+	getModalEditorBlocks: function getModalEditorBlocks(
+		state: ProductEditorUIStateProps
+	): BlockInstance[] {
+		return state.modalEditor.blocks;
 	},
 };
