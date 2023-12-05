@@ -2496,8 +2496,11 @@ importers:
         specifier: wp-6.0
         version: 12.5.10(@types/react@17.0.71)(react-dom@17.0.2)(react-with-direction@1.4.0)(react@17.0.2)
       '@wordpress/element':
-        specifier: wp-6.3
-        version: 5.12.2
+        specifier: wp-6.0
+        version: 4.4.1
+      '@wordpress/hooks':
+        specifier: wp-6.0
+        version: 3.6.1
       '@wordpress/html-entities':
         specifier: wp-6.3
         version: 3.35.2
@@ -26876,7 +26879,6 @@ packages:
   /flow-parser@0.223.3:
     resolution: {integrity: sha512-9KxxDKSB22ovMpSULbOL/QAQGPN6M0YMS3PubQvB0jVc4W7QP6VhasIVic7MzKcJSh0BAVs4J6SZjoH0lDDNlg==}
     engines: {node: '>=0.4.0'}
-    dev: true
 
   /flush-write-stream@1.1.1:
     resolution: {integrity: sha512-3Z4XhFZ3992uIq0XOqb9AreonueSYphE6oYbpt5+3u06JWklbsPkNv3ZKkP9Bz/r+1MWCaMoSQ28P85+1Yc77w==}
@@ -32515,7 +32517,7 @@ packages:
       '@babel/register': 7.22.15(@babel/core@7.23.5)
       babel-core: 7.0.0-bridge.0(@babel/core@7.23.5)
       chalk: 4.1.2
-      flow-parser: 0.206.0
+      flow-parser: 0.223.3
       graceful-fs: 4.2.11
       micromatch: 4.0.5
       neo-async: 2.6.2
@@ -37315,7 +37317,7 @@ packages:
       postcss: 8.4.32
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@5.1.4)
+      webpack: 5.89.0(webpack-cli@3.3.12)
 
   /postcss-loader@6.2.1(postcss@8.4.32)(webpack@5.89.0):
     resolution: {integrity: sha512-WbbYpmAaKcux/P66bZ40bpWsBucjx/TTgVVzRZ9yUO8yQfVBlameJ0ZGVaPfH64hNSBh63a+ICP5nqOpBA0w+Q==}
@@ -40880,7 +40882,7 @@ packages:
       sass: 1.69.5
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@5.1.4)
+      webpack: 5.89.0(webpack-cli@3.3.12)
 
   /sass-loader@12.6.0(sass@1.69.5)(webpack@5.89.0):
     resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}
