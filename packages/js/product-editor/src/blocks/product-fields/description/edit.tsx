@@ -2,9 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement, useEffect, useMemo } from '@wordpress/element';
-import { useWooBlockProps } from '@woocommerce/block-templates';
-import { useEntityProp } from '@wordpress/core-data';
+import { createElement, useEffect } from '@wordpress/element';
 import {
 	BlockAttributes,
 	BlockInstance,
@@ -13,7 +11,9 @@ import {
 } from '@wordpress/blocks';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { Button } from '@wordpress/components';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
+import { useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -71,14 +71,6 @@ export function DescriptionBlockEdit( {
 
 	const { openModalEditor, setModalEditorBlocks } = useDispatch( store );
 
-	const parsedBlocks = useMemo( () => {
-		try {
-			return parse( description );
-		} catch ( e ) {
-			return [];
-		}
-	}, [ description ] );
-
 	// Update the description when the blocks change.
 	useEffect( () => {
 		if ( ! hasChanged ) {
@@ -99,7 +91,7 @@ export function DescriptionBlockEdit( {
 				variant="secondary"
 				onClick={ () => {
 					if ( description ) {
-						setModalEditorBlocks( parsedBlocks );
+						setModalEditorBlocks( parse( description ) );
 					}
 
 					openModalEditor();
