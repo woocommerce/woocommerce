@@ -11,7 +11,7 @@ export const SYSTEM_FONT_SLUG = 'system-font';
 
 // Generated from /wpcom/v2/sites/{site_id}/global-styles-variation/font-pairings
 // TODO: Consider creating an API endpoint for this data
-export const FONT_PAIRINGS = [
+export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 	{
 		title: 'Inter + Inter',
 		version: 2,
@@ -66,45 +66,6 @@ export const FONT_PAIRINGS = [
 				fontStyle: 'normal',
 				fontWeight: '400',
 				lineHeight: '1.6',
-			},
-		},
-	},
-	{
-		title: 'Albert Sans + Lora',
-		version: 2,
-		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
-		settings: {
-			typography: {
-				fontFamilies: {
-					theme: [
-						{
-							fontFamily: 'Albert Sans',
-							slug: 'albert-sans',
-						},
-						{
-							fontFamily: 'Lora',
-							slug: 'lora',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			elements: {
-				heading: {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--albert-sans)',
-						fontStyle: 'normal',
-						fontWeight: '700',
-					},
-				},
-			},
-			typography: {
-				fontFamily: 'var(--wp--preset--font-family--lora)',
-				fontStyle: 'normal',
-				fontWeight: '400',
-				lineHeight: '1.67',
 			},
 		},
 	},
@@ -166,6 +127,296 @@ export const FONT_PAIRINGS = [
 				fontStyle: 'normal',
 				fontWeight: '300',
 				lineHeight: '1.6',
+			},
+		},
+	},
+	{
+		title: 'Libre Baskerville + DM Sans',
+		version: 2,
+		lookAndFeel: [] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Libre Baskerville',
+							slug: 'libre-baskerville',
+						},
+						{
+							fontFamily: 'DM Sans',
+							slug: 'dm-sans',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				button: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--dm-sans)',
+						fontWeight: '400',
+						lineHeight: '1',
+					},
+				},
+				heading: {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--libre-baskerville)',
+						fontStyle: 'normal',
+						fontWeight: '700',
+					},
+				},
+			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--libre-baskerville)',
+					},
+				},
+				'core/post-navigation-link': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--libre-baskerville)',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--dm-sans)',
+				fontSize: 'var(--wp--preset--font-size--small)',
+				fontStyle: 'normal',
+				fontWeight: '400',
+				lineHeight: '1.6',
+			},
+		},
+	},
+	{
+		title: 'Montserrat + Arvo',
+		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Montserrat',
+							slug: 'montserrat',
+						},
+						{
+							fontFamily: 'Arvo',
+							slug: 'arvo',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				button: {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--montserrat)',
+						fontStyle: 'normal',
+						fontWeight: '500',
+					},
+				},
+				heading: {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--montserrat)',
+						fontStyle: 'normal',
+						fontWeight: '700',
+						lineHeight: '1.4',
+					},
+				},
+			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--montserrat)',
+						fontWeight: '700',
+					},
+				},
+				'core/post-navigation-link': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--montserrat)',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--arvo)',
+				fontSize: 'var(--wp--preset--font-size--small)',
+				fontStyle: 'normal',
+				fontWeight: '400',
+				lineHeight: '1.6',
+			},
+		},
+	},
+	{
+		title: 'Rubik + Inter',
+		version: 2,
+		lookAndFeel: [ 'Bold' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Rubik',
+							slug: 'rubik',
+						},
+						{
+							fontFamily: 'Inter',
+							slug: 'inter',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				button: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--inter)',
+						fontWeight: '400',
+						lineHeight: '1',
+					},
+				},
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--rubik)',
+						fontStyle: 'normal',
+						fontWeight: '800',
+					},
+				},
+			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--rubik)',
+						fontWeight: '800',
+					},
+				},
+				'core/post-navigation-link': {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--rubik)',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--inter)',
+				fontSize: 'var(--wp--preset--font-size--medium)',
+				fontStyle: 'normal',
+				fontWeight: '400',
+				lineHeight: '1.6',
+			},
+		},
+	},
+	{
+		title: 'Playfair Display + Fira Sans',
+		version: 2,
+		lookAndFeel: [ 'Classic' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Playfair Display',
+							slug: 'playfair-display',
+						},
+						{
+							fontFamily: 'Fira Sans',
+							slug: 'fira-sans',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				button: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--fira-sans)',
+						fontWeight: '400',
+						lineHeight: '1',
+					},
+				},
+				heading: {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--playfair-display)',
+						fontStyle: 'italic',
+						fontWeight: '400',
+					},
+				},
+			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--playfair-display)',
+						fontStyle: 'italic',
+						fontWeight: '400',
+					},
+				},
+				'core/post-navigation-link': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--playfair-display)',
+						fontStyle: 'italic',
+						fontWeight: '400',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--fira-sans)',
+				fontSize: 'var(--wp--preset--font-size--medium)',
+				fontStyle: 'normal',
+				fontWeight: '400',
+				lineHeight: '1.6',
+			},
+		},
+	},
+];
+export const FONT_PAIRINGS = [
+	{
+		title: 'Albert Sans + Lora',
+		version: 2,
+		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Albert Sans',
+							slug: 'albert-sans',
+						},
+						{
+							fontFamily: 'Lora',
+							slug: 'lora',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--albert-sans)',
+						fontStyle: 'normal',
+						fontWeight: '700',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--lora)',
+				fontStyle: 'normal',
+				fontWeight: '400',
+				lineHeight: '1.67',
 			},
 		},
 	},
@@ -343,67 +594,6 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	{
-		title: 'Libre Baskerville + DM Sans',
-		version: 2,
-		lookAndFeel: [] as Look[],
-		settings: {
-			typography: {
-				fontFamilies: {
-					theme: [
-						{
-							fontFamily: 'Libre Baskerville',
-							slug: 'libre-baskerville',
-						},
-						{
-							fontFamily: 'DM Sans',
-							slug: 'dm-sans',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			elements: {
-				button: {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--dm-sans)',
-						fontWeight: '400',
-						lineHeight: '1',
-					},
-				},
-				heading: {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--libre-baskerville)',
-						fontStyle: 'normal',
-						fontWeight: '700',
-					},
-				},
-			},
-			blocks: {
-				'core/site-title': {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--libre-baskerville)',
-					},
-				},
-				'core/post-navigation-link': {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--libre-baskerville)',
-					},
-				},
-			},
-			typography: {
-				fontFamily: 'var(--wp--preset--font-family--dm-sans)',
-				fontSize: 'var(--wp--preset--font-size--small)',
-				fontStyle: 'normal',
-				fontWeight: '400',
-				lineHeight: '1.6',
-			},
-		},
-	},
-	{
 		title: 'Libre Franklin + EB Garamond',
 		version: 2,
 		lookAndFeel: [ 'Classic' ] as Look[],
@@ -468,70 +658,6 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	{
-		title: 'Montserrat + Arvo',
-		version: 2,
-		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
-		settings: {
-			typography: {
-				fontFamilies: {
-					theme: [
-						{
-							fontFamily: 'Montserrat',
-							slug: 'montserrat',
-						},
-						{
-							fontFamily: 'Arvo',
-							slug: 'arvo',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			elements: {
-				button: {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--montserrat)',
-						fontStyle: 'normal',
-						fontWeight: '500',
-					},
-				},
-				heading: {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--montserrat)',
-						fontStyle: 'normal',
-						fontWeight: '700',
-						lineHeight: '1.4',
-					},
-				},
-			},
-			blocks: {
-				'core/site-title': {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--montserrat)',
-						fontWeight: '700',
-					},
-				},
-				'core/post-navigation-link': {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--montserrat)',
-					},
-				},
-			},
-			typography: {
-				fontFamily: 'var(--wp--preset--font-family--arvo)',
-				fontSize: 'var(--wp--preset--font-size--small)',
-				fontStyle: 'normal',
-				fontWeight: '400',
-				lineHeight: '1.6',
-			},
-		},
-	},
-	{
 		title: 'Newsreader + Newsreader',
 		version: 2,
 		lookAndFeel: [ 'Classic' ] as Look[],
@@ -562,71 +688,6 @@ export const FONT_PAIRINGS = [
 				fontFamily: 'var(--wp--preset--font-family--newsreader)',
 				fontSize: 'var(--wp--preset--font-size--medium)',
 				lineHeight: '1.67',
-			},
-		},
-	},
-	{
-		title: 'Playfair Display + Fira Sans',
-		version: 2,
-		lookAndFeel: [ 'Classic' ] as Look[],
-		settings: {
-			typography: {
-				fontFamilies: {
-					theme: [
-						{
-							fontFamily: 'Playfair Display',
-							slug: 'playfair-display',
-						},
-						{
-							fontFamily: 'Fira Sans',
-							slug: 'fira-sans',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			elements: {
-				button: {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--fira-sans)',
-						fontWeight: '400',
-						lineHeight: '1',
-					},
-				},
-				heading: {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--playfair-display)',
-						fontStyle: 'italic',
-						fontWeight: '400',
-					},
-				},
-			},
-			blocks: {
-				'core/site-title': {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--playfair-display)',
-						fontStyle: 'italic',
-						fontWeight: '400',
-					},
-				},
-				'core/post-navigation-link': {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--playfair-display)',
-						fontStyle: 'italic',
-						fontWeight: '400',
-					},
-				},
-			},
-			typography: {
-				fontFamily: 'var(--wp--preset--font-family--fira-sans)',
-				fontSize: 'var(--wp--preset--font-size--medium)',
-				fontStyle: 'normal',
-				fontWeight: '400',
-				lineHeight: '1.6',
 			},
 		},
 	},
@@ -697,65 +758,6 @@ export const FONT_PAIRINGS = [
 				fontFamily: 'var(--wp--preset--font-family--cormorant)',
 				fontSize: 'var(--wp--preset--font-size--medium)',
 				lineHeight: '1.67',
-			},
-		},
-	},
-	{
-		title: 'Rubik + Inter',
-		version: 2,
-		lookAndFeel: [ 'Bold' ] as Look[],
-		settings: {
-			typography: {
-				fontFamilies: {
-					theme: [
-						{
-							fontFamily: 'Rubik',
-							slug: 'rubik',
-						},
-						{
-							fontFamily: 'Inter',
-							slug: 'inter',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			elements: {
-				button: {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--inter)',
-						fontWeight: '400',
-						lineHeight: '1',
-					},
-				},
-				heading: {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--rubik)',
-						fontStyle: 'normal',
-						fontWeight: '800',
-					},
-				},
-			},
-			blocks: {
-				'core/site-title': {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--rubik)',
-						fontWeight: '800',
-					},
-				},
-				'core/post-navigation-link': {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--rubik)',
-					},
-				},
-			},
-			typography: {
-				fontFamily: 'var(--wp--preset--font-family--inter)',
-				fontSize: 'var(--wp--preset--font-size--medium)',
-				fontStyle: 'normal',
-				fontWeight: '400',
-				lineHeight: '1.6',
 			},
 		},
 	},
@@ -854,4 +856,5 @@ export const FONT_PAIRINGS = [
 			},
 		},
 	},
+	...FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
 ];
