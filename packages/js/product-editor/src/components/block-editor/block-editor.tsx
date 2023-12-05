@@ -142,7 +142,6 @@ export function BlockEditor( {
 					onInput={ onInput }
 					onChange={ onChange }
 					settings={ settings }
-					useSubRegistry={ false }
 				>
 					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 					{ /* @ts-ignore No types for this exist yet. */ }
