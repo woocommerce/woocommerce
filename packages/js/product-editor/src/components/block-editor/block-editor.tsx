@@ -2,10 +2,16 @@
  * External dependencies
  */
 import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
-import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
+import {
+	createElement,
+	useMemo,
+	useLayoutEffect,
+	Fragment,
+} from '@wordpress/element';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { PluginArea } from '@wordpress/plugins';
+import { __ } from '@wordpress/i18n';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -34,6 +40,8 @@ import {
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
 import { ProductEditorContext } from '../../types';
 import { PostTypeContext } from '../../contexts/post-type-context';
+import { ModalEditor } from '../modal-editor';
+import { store as productEditorUiStore } from '../../store/product-editor-ui';
 
 type BlockEditorSettings = Partial<
 	EditorSettings & EditorBlockListSettings
@@ -111,34 +119,50 @@ export function BlockEditor( {
 		updateEditorSettings( settings ?? {} );
 	}, [ productType, productId ] );
 
+	// Check if the Modal editor is open from the store.
+	const isModalEditorOpen = useSelect( ( select ) => {
+		return select( productEditorUiStore ).isModalEditorOpen();
+	}, [] );
+
+	const { closeModalEditor } = useDispatch( productEditorUiStore );
+
 	if ( ! blocks ) {
 		return null;
 	}
 
 	return (
-		<div className="woocommerce-product-block-editor">
-			<BlockContextProvider value={ context }>
-				<BlockEditorProvider
-					value={ blocks }
-					onInput={ onInput }
-					onChange={ onChange }
-					settings={ settings }
-				>
-					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-					{ /* @ts-ignore No types for this exist yet. */ }
-					<BlockEditorKeyboardShortcuts.Register />
-					<BlockTools>
-						<ObserveTyping>
-							<BlockList className="woocommerce-product-block-editor__block-list" />
-						</ObserveTyping>
-					</BlockTools>
-					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
-					<PostTypeContext.Provider value={ context.postType! }>
-						{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-						<PluginArea scope="woocommerce-product-block-editor" />
-					</PostTypeContext.Provider>
-				</BlockEditorProvider>
-			</BlockContextProvider>
-		</div>
+		<>
+			{ ' ' }
+			{ isModalEditorOpen && (
+				<ModalEditor
+					onClose={ closeModalEditor }
+					title={ __( 'Edit description', 'woocommerce' ) }
+				/>
+			) }
+			<div className="woocommerce-product-block-editor">
+				<BlockContextProvider value={ context }>
+					<BlockEditorProvider
+						value={ blocks }
+						onInput={ onInput }
+						onChange={ onChange }
+						settings={ settings }
+					>
+						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+						{ /* @ts-ignore No types for this exist yet. */ }
+						<BlockEditorKeyboardShortcuts.Register />
+						<BlockTools>
+							<ObserveTyping>
+								<BlockList className="woocommerce-product-block-editor__block-list" />
+							</ObserveTyping>
+						</BlockTools>
+						{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
+						<PostTypeContext.Provider value={ context.postType! }>
+							{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+							<PluginArea scope="woocommerce-product-block-editor" />
+						</PostTypeContext.Provider>
+					</BlockEditorProvider>
+				</BlockContextProvider>
+			</div>
+		</>
 	);
 }
