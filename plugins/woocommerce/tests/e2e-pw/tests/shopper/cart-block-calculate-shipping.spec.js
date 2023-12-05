@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
+const { closeWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const firstProductName = 'First Product';
@@ -145,14 +146,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
 		await page.locator( 'text=Log In' ).click();
 
-		// close welcome popup if prompted
-		try {
-			await page
-				.getByLabel( 'Close', { exact: true } )
-				.click( { timeout: 5000 } );
-		} catch ( error ) {
-			console.log( "Welcome modal wasn't present, skipping action." );
-		}
+		await closeWelcomeModal( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )

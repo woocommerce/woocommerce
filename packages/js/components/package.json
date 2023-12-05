@@ -131,7 +131,6 @@
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/babel-preset-default": "^6.5.1",
 		"@wordpress/browserslist-config": "wp-6.0",
-		"@wordpress/scripts": "^12.6.1",
 		"concurrently": "^7.0.0",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.32.0",
