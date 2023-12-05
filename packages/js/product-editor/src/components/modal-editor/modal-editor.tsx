@@ -17,8 +17,8 @@ import { IframeEditor } from '../iframe-editor';
 
 type ModalEditorProps = {
 	initialBlocks?: BlockInstance[];
-	onChange: ( blocks: BlockInstance[] ) => void;
-	onClose: () => void;
+	onChange?: ( blocks: BlockInstance[] ) => void;
+	onClose?: () => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 	title: string;
 };
@@ -30,15 +30,15 @@ export function ModalEditor( {
 	title,
 }: ModalEditorProps ) {
 	const debouncedOnChange = useDebounce( ( blocks: BlockInstance[] ) => {
-		onChange( blocks );
+		onChange?.( blocks );
 	}, 250 );
 
 	function handleClose() {
 		const blocks = debouncedOnChange.flush();
 		if ( blocks ) {
-			onChange( blocks );
+			onChange?.( blocks );
 		}
-		onClose();
+		onClose?.();
 	}
 
 	return (
