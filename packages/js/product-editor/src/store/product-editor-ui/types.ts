@@ -7,7 +7,7 @@ import { BlockInstance } from '@wordpress/blocks';
  * Internal dependencies
  */
 import {
-	ACTION_MODAL_EDITOR_BLOCKS_LIST_HAS_CHANGED,
+	ACTION_MODAL_EDITOR_CONTENT_HAS_CHANGED,
 	ACTION_MODAL_EDITOR_CLOSE,
 	ACTION_MODAL_EDITOR_OPEN,
 	ACTION_MODAL_EDITOR_SET_BLOCKS,
@@ -26,7 +26,7 @@ export type ProductEditorModalEditorAction = {
 		| typeof ACTION_MODAL_EDITOR_OPEN
 		| typeof ACTION_MODAL_EDITOR_CLOSE
 		| typeof ACTION_MODAL_EDITOR_SET_BLOCKS
-		| typeof ACTION_MODAL_EDITOR_BLOCKS_LIST_HAS_CHANGED;
+		| typeof ACTION_MODAL_EDITOR_CONTENT_HAS_CHANGED;
 
 	blocks?: BlockInstance[];
 

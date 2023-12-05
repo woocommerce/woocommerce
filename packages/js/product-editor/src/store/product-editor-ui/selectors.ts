@@ -21,8 +21,8 @@ export default {
 		return state.modalEditor.blocks;
 	},
 
-	getModalEditorBlocksListHasChanged:
-		function getModalEditorBlocksListHasChanged(
+	getModalEditorContentHasChanged:
+		function getModalEditorContentHasChanged(
 			state: ProductEditorUIStateProps
 		): boolean {
 			return !! state.modalEditor.hasChanged;

@@ -10,7 +10,7 @@ import {
 	ACTION_MODAL_EDITOR_CLOSE,
 	ACTION_MODAL_EDITOR_OPEN,
 	ACTION_MODAL_EDITOR_SET_BLOCKS,
-	ACTION_MODAL_EDITOR_BLOCKS_LIST_HAS_CHANGED,
+	ACTION_MODAL_EDITOR_CONTENT_HAS_CHANGED,
 } from './constants';
 
 const modalEditorActions = {
@@ -27,8 +27,8 @@ const modalEditorActions = {
 		blocks,
 	} ),
 
-	seShouldUpdateState: ( hasChanged: boolean ) => ( {
-		type: ACTION_MODAL_EDITOR_BLOCKS_LIST_HAS_CHANGED,
+	setModalEditorContentHasChanged: ( hasChanged: boolean ) => ( {
+		type: ACTION_MODAL_EDITOR_CONTENT_HAS_CHANGED,
 		hasChanged,
 	} ),
 };
