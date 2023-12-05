@@ -7,7 +7,6 @@ $next-previous-right-off: "#{$next-previous}-right--off";
 $gallery-next-previous-outside-image: "#{$gallery}[data-next-previous-buttons-position='outsideTheImage']:not(.is-single-product-gallery-image)";
 $gallery-next-previous-inside-image: "#{$gallery}:not([data-next-previous-buttons-position='outsideTheImage']:not(.is-single-product-gallery-image))";
 
-
 $outside-image-offset: 30px;
 $outside-image-max-width: calc(100% - (2 * $outside-image-offset));
 $thumbnails-gap: 15px;
@@ -317,7 +316,6 @@ $default-number-of-thumbnails: 3;
 				flex: 0 0 $thumbnail-width;
 			}
 		}
-
 	}
 
 	.wc-block-product-gallery-thumbnails__thumbnail__overlay {
@@ -333,18 +331,41 @@ $default-number-of-thumbnails: 3;
 		height: 100%;
 
 		.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
-			@include font-size(large);
 			font-weight: 700;
 		}
 
 		.wc-block-product-gallery-thumbnails__thumbnail__view-all {
-			@include font-size(smaller);
 			text-decoration: underline;
 		}
 
 		.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count,
 		.wc-block-product-gallery-thumbnails__thumbnail__view-all {
 			color: #fff;
+		}
+
+		@mixin thumbnail-overlay-text-font-size($remaining-count-size, $view-all-size, $view-all-display: block) {
+			.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
+				font-size: $remaining-count-size;
+			}
+
+			.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+				font-size: $view-all-size;
+				display: $view-all-display;
+			}
+		}
+
+		@include thumbnail-overlay-text-font-size(clamp(1rem, 1.5vw, 2rem), clamp(0.75rem, 0.5vw, 2rem));
+
+		@for $i from 3 through 8 {
+			#{$gallery}[data-thumbnails-number-of-thumbnails='#{$i}'] & {
+				@if $i == 3 {
+					@include thumbnail-overlay-text-font-size(clamp(1rem, 1.5vw, 2rem), clamp(0.75rem, 0.5vw, 2rem));
+				} @else if $i == 4 or $i == 5 {
+					@include thumbnail-overlay-text-font-size(clamp(1rem, 1.25vw, 2rem), clamp(0.75rem, 0.25vw, 2rem));
+				} @else { // For 6, 7, and 8
+					@include thumbnail-overlay-text-font-size(clamp(1rem, 1.25vw, 2rem), null, none);
+				}
+			}
 		}
 	}
 }
