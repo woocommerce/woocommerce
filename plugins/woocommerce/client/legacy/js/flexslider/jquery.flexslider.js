@@ -720,10 +720,10 @@
             });
           }
         } else { // FADE:
+          // if (!touch) calls slider.wrapup() on fade animation end; if (touch) calls slider.wrapup() immediately
           if (!touch) {
-            // Unbind previous transitionEnd events and re-bind new transitionEnd event
             slider.slides.eq(slider.currentSlide).off("transitionend");
-            slider.slides.eq(target).off("transitionend").on("transitionend", () => slider.wrapup(dimension));
+            slider.slides.eq(target).off("transitionend").on("transitionend", slider.wrapup);
           }
 
           slider.slides.eq(slider.currentSlide).css({ "opacity": 0, "zIndex": 1 });
@@ -900,28 +900,15 @@
         }
         if (type === "init") {
           if (!touch) {
-            //slider.slides.eq(slider.currentSlide).fadeIn(slider.vars.animationSpeed, slider.vars.easing);
-            var fadeFirstSlide = slider.vars.fadeFirstSlide;
-
-            slider.slides.each(function(index) {
-              var style = this.style;
-              style.display = "block";
-
-              if (index === slider.currentSlide) {
-                style.opacity = fadeFirstSlide ? 0 : 1;
-                style.zIndex = 2;
-              } else {
-                style.opacity = 0;
-                style.zIndex = 1;
-              }
-
-              // this.offsetWidth waits a frame - thus, "style.opacity = 0" before this.offsetWidth
-              // does NOT get animated and "style.opacity = 1" after this.offsetWidth gets animated
-              this.offsetWidth;
-              if (index === slider.currentSlide && fadeFirstSlide) style.opacity = 1; // fadeIn
-
-              style.transition = "opacity " + slider.vars.animationSpeed / 1000 + "s " + easing;
-            });
+            // Every "opacity" change before outerWidth() does NOT get animated; every "opacity" change after outerWidth() becomes a fadeIn
+            if (slider.vars.fadeFirstSlide == false) {
+              slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).eq(slider.currentSlide).css({"zIndex": 2}).css({"opacity": 1});
+              slider.slides.outerWidth();
+            } else {
+              slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).outerWidth();
+              slider.slides.eq(slider.currentSlide).css({"zIndex": 2}).css({"opacity": 1});
+            }
+            slider.slides.css({ "transition": "opacity " + slider.vars.animationSpeed / 1000 + "s " + easing });
           } else {
             slider.slides.css({ "opacity": 0, "display": "block", "transition": "opacity " + slider.vars.animationSpeed / 1000 + "s ease", "zIndex": 1 }).eq(slider.currentSlide).css({ "opacity": 1, "zIndex": 2});
           }
