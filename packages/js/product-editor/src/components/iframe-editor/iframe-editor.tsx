@@ -31,6 +31,7 @@ import { HeaderToolbar } from './header-toolbar/header-toolbar';
 import { ResizableEditor } from './resizable-editor';
 import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
+import { store as productEditorUiStore } from '../../store/product-editor-ui';
 
 type IframeEditorProps = {
 	closeModal?: () => void;
@@ -42,7 +43,6 @@ type IframeEditorProps = {
 };
 
 export function IframeEditor( {
-	closeModal = () => {},
 	initialBlocks = [],
 	onChange = () => {},
 	onClose,
@@ -50,12 +50,20 @@ export function IframeEditor( {
 	settings: __settings,
 }: IframeEditorProps ) {
 	const [ resizeObserver ] = useResizeObserver();
-	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
 	const [ temporalBlocks, setTemporalBlocks ] =
 		useState< BlockInstance[] >( initialBlocks );
+
+	const blocks: BlockInstance[] = useSelect( ( select ) => {
+		return select( productEditorUiStore ).getModalEditorBlocks();
+	}, [] );
+
+	const { setModalEditorBlocks: setBlocks, closeModalEditor } =
+		useDispatch( productEditorUiStore );
+
 	const { appendEdit } = useEditorHistory( {
 		setBlocks,
 	} );
+
 	const {
 		appendEdit: tempAppendEdit,
 		hasRedo,
@@ -128,14 +136,14 @@ export function IframeEditor( {
 							appendEdit( temporalBlocks );
 							setBlocks( temporalBlocks );
 							onChange( temporalBlocks );
-							closeModal();
+							closeModalEditor();
 						} }
 						onCancel={ () => {
 							appendEdit( blocks );
 							setBlocks( blocks );
 							onChange( blocks );
 							setTemporalBlocks( blocks );
-							closeModal();
+							closeModalEditor();
 						} }
 					/>
 					<div className="woocommerce-iframe-editor__main">
