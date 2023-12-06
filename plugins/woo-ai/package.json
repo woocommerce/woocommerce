@@ -46,7 +46,7 @@
 		"@wordpress/element": "wp-6.3",
 		"@wordpress/hooks": "wp-6.3",
 		"@wordpress/i18n": "wp-6.3",
-		"@wordpress/keyboard-shortcuts": "^4.12.6",
+		"@wordpress/keyboard-shortcuts": "wp-6.3",
 		"@wordpress/notices": "wp-6.3",
 		"@wordpress/preferences": "wp-6.3",
 		"debug": "^4.3.3",
