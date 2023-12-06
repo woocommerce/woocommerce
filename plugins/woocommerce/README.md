@@ -36,9 +36,9 @@ This directory contains the CSS and jQuery code for WooCommerce shortcodes.
 
 ```bash
 # Build the assets.
-pnpm --filter=@woocommerce/classic-assets build 
+pnpm --filter=@woocommerce/shortcode-assets build 
 # Lint the assets.
-pnpm --filter=@woocommerce/classic-assets lint 
+pnpm --filter=@woocommerce/shortcode-assets lint 
 ```
 
 ### `plugins/woocommerce-admin`
