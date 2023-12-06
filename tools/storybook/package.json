@@ -1,28 +1,26 @@
 {
 	"name": "@woocommerce/storybook",
-	"title": "WooCommerce Storybook",
+	"private": true,
 	"description": "Storybook implementation for WooCommerce",
 	"homepage": "https://woocommerce.github.io/woocommerce-admin/#/components/",
-	"private": true,
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
-	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
-	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
-	},
-	"bugs": {
-		"url": "https://github.com/woocommerce/woocommerce/issues"
-	},
+	"author": "Automattic",
 	"scripts": {
 		"build-storybook": "build-storybook  -c ./.storybook",
+		"build-woocommerce": "pnpm --filter=@woocommerce/plugin-woocommerce build",
 		"preinstall": "npx only-allow pnpm",
-		"build-woocommerce": "pnpm --filter=woocommerce run build",
-		"storybook": "pnpm run build-woocommerce && ./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./.storybook -p 6007 --ci",
-		"storybook-rtl": "USE_RTL_STYLE=true pnpm run storybook"
+		"storybook": "pnpm build-woocommerce && ./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./.storybook -p 6007 --ci",
+		"storybook-rtl": "USE_RTL_STYLE=true pnpm storybook"
+	},
+	"dependencies": {
+		"@babel/preset-typescript": "^7.16.7"
 	},
 	"devDependencies": {
 		"@babel/plugin-proposal-class-properties": "^7.16.7",
@@ -49,9 +47,12 @@
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2",
 		"typescript": "^5.1.6",
-		"webpack": "^5.70.0"
+		"webpack": "^5.70.0",
+		"wireit": "^0.14.1"
 	},
-	"dependencies": {
-		"@babel/preset-typescript": "^7.16.7"
-	}
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
+	"title": "WooCommerce Storybook"
 }

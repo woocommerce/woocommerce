@@ -30,10 +30,10 @@ importers:
         version: 1.0.1
     devDependencies:
       '@babel/preset-env':
-        specifier: ^7.20.2
+        specifier: ^7.23.3
         version: 7.23.5(@babel/core@7.12.9)
       '@babel/runtime':
-        specifier: ^7.21.0
+        specifier: ^7.23.4
         version: 7.23.5
       '@types/node':
         specifier: ^16.18.18
@@ -60,10 +60,10 @@ importers:
         specifier: ^10.2.4
         version: 10.2.4(webpack@5.89.0)
       core-js:
-        specifier: ^3.29.1
-        version: 3.33.3
+        specifier: ^3.33.3
+        version: 3.34.0
       css-loader:
-        specifier: ^6.7.3
+        specifier: ^6.8.1
         version: 6.8.1(webpack@5.89.0)
       glob:
         specifier: ^7.2.3
@@ -99,17 +99,14 @@ importers:
         specifier: ^2.88.2
         version: 2.88.2
       sass:
-        specifier: ^1.59.3
+        specifier: ^1.69.5
         version: 1.69.5
       sass-loader:
         specifier: ^10.4.1
         version: 10.4.1(sass@1.69.5)(webpack@5.89.0)
       syncpack:
-        specifier: ^10.7.3
+        specifier: ^10.9.3
         version: 10.9.3
-      turbo:
-        specifier: ^1.10.7
-        version: 1.10.16
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
@@ -117,7 +114,7 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2(webpack@5.89.0)
       webpack:
-        specifier: ^5.76.2
+        specifier: ^5.89.0
         version: 5.89.0(webpack-cli@5.1.4)
 
   packages/js/admin-e2e-tests:
@@ -183,6 +180,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/admin-layout:
     dependencies:
@@ -253,6 +253,9 @@ importers:
       webpack-cli:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/ai:
     dependencies:
@@ -386,6 +389,9 @@ importers:
       webpack-cli:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/api:
     dependencies:
@@ -432,12 +438,15 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/api-core-tests:
     dependencies:
       allure-commandline:
         specifier: ^2.17.2
-        version: 2.24.1
+        version: 2.25.0
       dotenv:
         specifier: ^10.0.0
         version: 10.0.0
@@ -463,6 +472,9 @@ importers:
       eslint:
         specifier: ^8.32.0
         version: 8.55.0
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/block-templates:
     dependencies:
@@ -566,6 +578,9 @@ importers:
       webpack-cli:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/components:
     dependencies:
@@ -691,7 +706,7 @@ importers:
         version: 2.3.2
       core-js:
         specifier: ^3.21.1
-        version: 3.33.3
+        version: 3.34.0
       d3-axis:
         specifier: ^1.0.12
         version: 1.0.12
@@ -891,10 +906,21 @@ importers:
       webpack-cli:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
-  packages/js/create-product-editor-block: {}
+  packages/js/create-product-editor-block:
+    devDependencies:
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
-  packages/js/create-woo-extension: {}
+  packages/js/create-woo-extension:
+    devDependencies:
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/csv-export:
     dependencies:
@@ -941,6 +967,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/currency:
     dependencies:
@@ -996,6 +1025,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/customer-effort-score:
     dependencies:
@@ -1117,6 +1149,9 @@ importers:
       webpack-cli:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/data:
     dependencies:
@@ -1253,6 +1288,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/date:
     dependencies:
@@ -1323,6 +1361,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/dependency-extraction-webpack-plugin:
     dependencies:
@@ -1360,6 +1401,9 @@ importers:
       webpack-cli:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/e2e-core-tests:
     dependencies:
@@ -1424,6 +1468,9 @@ importers:
       eslint-plugin-jest:
         specifier: 23.20.0
         version: 23.20.0(eslint@8.55.0)(typescript@5.3.2)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/e2e-environment:
     dependencies:
@@ -1527,6 +1574,9 @@ importers:
       semver:
         specifier: ^7.3.2
         version: 7.5.4
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/e2e-utils:
     dependencies:
@@ -1600,6 +1650,9 @@ importers:
       eslint-plugin-jest:
         specifier: 23.20.0
         version: 23.20.0(eslint@8.55.0)(typescript@5.3.2)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/eslint-plugin:
     dependencies:
@@ -1643,6 +1696,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/experimental:
     dependencies:
@@ -1721,7 +1777,7 @@ importers:
         version: 27.5.2
       '@types/react-transition-group':
         specifier: ^4.4.4
-        version: 4.4.9
+        version: 4.4.10
       '@types/testing-library__jest-dom':
         specifier: ^5.14.3
         version: 5.14.9
@@ -1779,6 +1835,9 @@ importers:
       webpack-cli:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/explat:
     dependencies:
@@ -1846,6 +1905,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/expression-evaluation:
     dependencies:
@@ -1889,8 +1951,15 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
-  packages/js/extend-cart-checkout-block: {}
+  packages/js/extend-cart-checkout-block:
+    devDependencies:
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/integrate-plugin:
     dependencies:
@@ -1982,6 +2051,9 @@ importers:
       webpack-cli:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/internal-e2e-builds:
     devDependencies:
@@ -2006,6 +2078,9 @@ importers:
       mkdirp:
         specifier: ^1.0.4
         version: 1.0.4
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/internal-js-tests:
     dependencies:
@@ -2058,6 +2133,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/internal-style-build:
     dependencies:
@@ -2116,6 +2194,9 @@ importers:
       webpack:
         specifier: ^5.70.0
         version: 5.89.0(webpack-cli@5.1.4)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/navigation:
     dependencies:
@@ -2195,6 +2276,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/notices:
     dependencies:
@@ -2259,6 +2343,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/number:
     dependencies:
@@ -2305,6 +2392,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/onboarding:
     dependencies:
@@ -2417,6 +2507,9 @@ importers:
       webpack-cli:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/product-editor:
     dependencies:
@@ -2670,6 +2763,9 @@ importers:
       webpack-cli:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   packages/js/tracks:
     dependencies:
@@ -2707,6 +2803,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   plugins/woo-ai:
     dependencies:
@@ -2828,9 +2927,18 @@ importers:
       uglify-js:
         specifier: ^3.5.3
         version: 3.17.4
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   plugins/woocommerce:
     dependencies:
+      '@woocommerce/admin-library':
+        specifier: workspace:*
+        version: link:../woocommerce-admin
+      '@woocommerce/shortcode-assets':
+        specifier: workspace:*
+        version: link:client/legacy
       '@wordpress/browserslist-config':
         specifier: wp-6.3
         version: 5.18.2
@@ -2897,7 +3005,7 @@ importers:
         version: 19.1.0(stylelint@13.8.0)
       allure-commandline:
         specifier: ^2.17.2
-        version: 2.24.1
+        version: 2.25.0
       allure-playwright:
         specifier: ^2.0.0-beta.16
         version: 2.9.2
@@ -2961,6 +3069,9 @@ importers:
       webpack-cli:
         specifier: 3.3.12
         version: 3.3.12(webpack@5.70.0)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
       wp-textdomain:
         specifier: 1.0.1
         version: 1.0.1
@@ -3083,7 +3194,7 @@ importers:
         version: 2.3.2
       core-js:
         specifier: ^3.21.1
-        version: 3.33.3
+        version: 3.34.0
       debug:
         specifier: ^4.3.3
         version: 4.3.4(supports-color@9.4.0)
@@ -3222,7 +3333,7 @@ importers:
         version: 5.3.3
       '@types/react-transition-group':
         specifier: ^4.4.4
-        version: 4.4.9
+        version: 4.4.10
       '@types/testing-library__jest-dom':
         specifier: ^5.14.3
         version: 5.14.9
@@ -3529,6 +3640,9 @@ importers:
       webpack-rtl-plugin:
         specifier: ^2.0.0
         version: 2.0.0
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   plugins/woocommerce-beta-tester:
     dependencies:
@@ -3635,6 +3749,9 @@ importers:
       uglify-js:
         specifier: ^3.5.3
         version: 3.17.4
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   plugins/woocommerce-docs:
     dependencies:
@@ -3699,6 +3816,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   plugins/woocommerce/client/legacy:
     dependencies:
@@ -3775,6 +3895,9 @@ importers:
       stylelint:
         specifier: 13.8.0
         version: 13.8.0
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   tools/code-analyzer:
     dependencies:
@@ -3836,6 +3959,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   tools/create-extension:
     dependencies:
@@ -3848,6 +3974,10 @@ importers:
       promptly:
         specifier: ^3.2.0
         version: 3.2.0
+    devDependencies:
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   tools/monorepo-merge:
     dependencies:
@@ -3897,6 +4027,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   tools/monorepo-utils:
     dependencies:
@@ -3994,6 +4127,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   tools/package-release:
     dependencies:
@@ -4037,6 +4173,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   tools/release-posts:
     dependencies:
@@ -4110,6 +4249,9 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.3.2
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
   tools/storybook:
     dependencies:
@@ -4192,6 +4334,9 @@ importers:
       webpack:
         specifier: ^5.70.0
         version: 5.89.0(webpack-cli@5.1.4)
+      wireit:
+        specifier: ^0.14.1
+        version: 0.14.1
 
 packages:
 
@@ -6997,7 +7142,7 @@ packages:
       '@babel/plugin-transform-unicode-regex': 7.23.3(@babel/core@7.12.9)
       '@babel/preset-modules': 0.1.6(@babel/core@7.12.9)
       '@babel/types': 7.23.5
-      core-js-compat: 3.33.3
+      core-js-compat: 3.34.0
       semver: 5.7.2
 
   /@babel/preset-env@7.23.5(@babel/core@7.12.9):
@@ -7085,7 +7230,7 @@ packages:
       babel-plugin-polyfill-corejs2: 0.4.6(@babel/core@7.12.9)
       babel-plugin-polyfill-corejs3: 0.8.6(@babel/core@7.12.9)
       babel-plugin-polyfill-regenerator: 0.5.3(@babel/core@7.12.9)
-      core-js-compat: 3.33.3
+      core-js-compat: 3.34.0
       semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
@@ -7176,7 +7321,7 @@ packages:
       babel-plugin-polyfill-corejs2: 0.4.6(@babel/core@7.23.5)
       babel-plugin-polyfill-corejs3: 0.8.6(@babel/core@7.23.5)
       babel-plugin-polyfill-regenerator: 0.5.3(@babel/core@7.23.5)
-      core-js-compat: 3.33.3
+      core-js-compat: 3.34.0
       semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
@@ -9842,7 +9987,7 @@ packages:
     dependencies:
       ansi-html-community: 0.0.8
       common-path-prefix: 3.0.0
-      core-js-pure: 3.33.3
+      core-js-pure: 3.34.0
       error-stack-parser: 2.1.4
       find-up: 5.0.0
       html-entities: 2.4.0
@@ -9881,7 +10026,7 @@ packages:
     dependencies:
       ansi-html-community: 0.0.8
       common-path-prefix: 3.0.0
-      core-js-pure: 3.33.3
+      core-js-pure: 3.34.0
       error-stack-parser: 2.1.4
       find-up: 5.0.0
       html-entities: 2.4.0
@@ -11619,7 +11764,7 @@ packages:
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/theming': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       axe-core: 4.8.2
-      core-js: 3.33.3
+      core-js: 3.34.0
       global: 4.4.0
       lodash: 4.17.21
       react: 17.0.2
@@ -11648,7 +11793,7 @@ packages:
       '@storybook/core-events': 6.5.17-alpha.0
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/theming': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
-      core-js: 3.33.3
+      core-js: 3.34.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -11693,7 +11838,7 @@ packages:
       '@storybook/node-logger': 6.5.17-alpha.0
       '@storybook/store': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       '@storybook/theming': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
-      core-js: 3.33.3
+      core-js: 3.34.0
       lodash: 4.17.21
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
@@ -11740,7 +11885,7 @@ packages:
       '@storybook/store': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       '@storybook/theming': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       babel-loader: 8.3.0(@babel/core@7.23.5)(webpack@5.89.0)
-      core-js: 3.33.3
+      core-js: 3.34.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -11785,7 +11930,7 @@ packages:
       '@storybook/core-events': 6.5.17-alpha.0
       '@storybook/theming': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       copy-to-clipboard: 3.3.3
-      core-js: 3.33.3
+      core-js: 3.34.0
       escape-html: 1.0.3
       fast-deep-equal: 3.1.3
       global: 4.4.0
@@ -11821,7 +11966,7 @@ packages:
       '@storybook/core-events': 7.6.3
       '@storybook/theming': 7.6.3(react-dom@16.14.0)(react@17.0.2)
       copy-to-clipboard: 3.3.3
-      core-js: 3.33.3
+      core-js: 3.34.0
       escape-html: 1.0.3
       fast-deep-equal: 3.1.3
       global: 4.4.0
@@ -11854,7 +11999,7 @@ packages:
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/router': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       '@types/qs': 6.9.10
-      core-js: 3.33.3
+      core-js: 3.34.0
       global: 4.4.0
       prop-types: 15.8.1
       qs: 6.11.2
@@ -11882,7 +12027,7 @@ packages:
       '@storybook/router': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       '@storybook/source-loader': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       '@storybook/theming': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
-      core-js: 3.33.3
+      core-js: 3.34.0
       estraverse: 5.3.0
       loader-utils: 2.0.4
       prop-types: 15.8.1
@@ -11909,7 +12054,7 @@ packages:
       '@storybook/components': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       '@storybook/core-events': 6.5.17-alpha.0
       '@storybook/theming': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
-      core-js: 3.33.3
+      core-js: 3.34.0
       global: 4.4.0
       memoizerific: 1.11.3
       prop-types: 15.8.1
@@ -11932,7 +12077,7 @@ packages:
       '@storybook/router': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       '@storybook/theming': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       '@types/webpack-env': 1.18.4
-      core-js: 3.33.3
+      core-js: 3.34.0
       global: 4.4.0
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
@@ -11963,7 +12108,7 @@ packages:
       '@storybook/router': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       '@storybook/semver': 7.3.2
       '@storybook/theming': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
-      core-js: 3.33.3
+      core-js: 3.34.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -12019,7 +12164,7 @@ packages:
       autoprefixer: 9.8.6
       babel-loader: 8.3.0(@babel/core@7.23.5)(webpack@4.47.0)
       case-sensitive-paths-webpack-plugin: 2.4.0
-      core-js: 3.33.3
+      core-js: 3.34.0
       css-loader: 3.6.0(webpack@4.47.0)
       file-loader: 6.2.0(webpack@4.47.0)
       find-up: 5.0.0
@@ -12087,7 +12232,7 @@ packages:
       babel-plugin-named-exports-order: 0.0.2
       browser-assert: 1.2.1
       case-sensitive-paths-webpack-plugin: 2.4.0
-      core-js: 3.33.3
+      core-js: 3.34.0
       css-loader: 5.2.7(webpack@5.89.0)
       fork-ts-checker-webpack-plugin: 6.5.3(eslint@8.55.0)(typescript@5.3.2)(webpack@5.89.0)
       glob: 7.2.3
@@ -12124,7 +12269,7 @@ packages:
       '@storybook/channels': 6.5.17-alpha.0
       '@storybook/client-logger': 6.5.17-alpha.0
       '@storybook/core-events': 6.5.17-alpha.0
-      core-js: 3.33.3
+      core-js: 3.34.0
       global: 4.4.0
       qs: 6.11.2
       telejson: 6.0.8
@@ -12135,7 +12280,7 @@ packages:
     dependencies:
       '@storybook/channels': 6.5.17-alpha.0
       '@storybook/client-logger': 6.5.17-alpha.0
-      core-js: 3.33.3
+      core-js: 3.34.0
       global: 4.4.0
       telejson: 6.0.8
     dev: true
@@ -12143,7 +12288,7 @@ packages:
   /@storybook/channels@6.5.17-alpha.0:
     resolution: {integrity: sha512-yfMGsvtWVFK27FO7orjCZmzoq0Zk/48A5CyqFz9lgyttuzKfltUOIwUpu7mvk/56lJFgDv9yRigD6iVltIMAeA==}
     dependencies:
-      core-js: 3.33.3
+      core-js: 3.34.0
       ts-dedent: 2.2.0
       util-deprecate: 1.0.2
     dev: true
@@ -12174,7 +12319,7 @@ packages:
       '@storybook/store': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       '@types/qs': 6.9.10
       '@types/webpack-env': 1.18.4
-      core-js: 3.33.3
+      core-js: 3.34.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -12192,7 +12337,7 @@ packages:
   /@storybook/client-logger@6.5.17-alpha.0:
     resolution: {integrity: sha512-1g9cGPlp016xKsOv05U4NfhdOrVN7ra6gkkovYy/sZhzOH3ouXGebMw2dMMCGPXBx0MNXK0jnDEj+r3mXPP6BQ==}
     dependencies:
-      core-js: 3.33.3
+      core-js: 3.34.0
       global: 4.4.0
     dev: true
 
@@ -12211,7 +12356,7 @@ packages:
       '@storybook/client-logger': 6.5.17-alpha.0
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/theming': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
-      core-js: 3.33.3
+      core-js: 3.34.0
       memoizerific: 1.11.3
       qs: 6.11.2
       react: 17.0.2
@@ -12266,7 +12411,7 @@ packages:
       '@storybook/ui': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       airbnb-js-shims: 2.2.1
       ansi-to-html: 0.6.15
-      core-js: 3.33.3
+      core-js: 3.34.0
       global: 4.4.0
       lodash: 4.17.21
       qs: 6.11.2
@@ -12303,7 +12448,7 @@ packages:
       '@storybook/ui': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       airbnb-js-shims: 2.2.1
       ansi-to-html: 0.6.15
-      core-js: 3.33.3
+      core-js: 3.34.0
       global: 4.4.0
       lodash: 4.17.21
       qs: 6.11.2
@@ -12357,7 +12502,7 @@ packages:
       babel-plugin-macros: 3.1.0
       babel-plugin-polyfill-corejs3: 0.1.7(@babel/core@7.23.5)
       chalk: 4.1.2
-      core-js: 3.33.3
+      core-js: 3.34.0
       express: 4.18.2
       file-system-cache: 1.1.0
       find-up: 5.0.0
@@ -12391,7 +12536,7 @@ packages:
   /@storybook/core-events@6.5.17-alpha.0:
     resolution: {integrity: sha512-L2QV/isJymOBZp6Q1Q1GMZnLDIs2blwyzCh8auAnVBbluVzpUs8WULvXLvBhSwXULpGZVujt8ToL+aoVTHleFA==}
     dependencies:
-      core-js: 3.33.3
+      core-js: 3.34.0
     dev: true
 
   /@storybook/core-events@7.6.3:
@@ -12440,7 +12585,7 @@ packages:
       cli-table3: 0.6.3
       commander: 6.2.1
       compression: 1.7.4
-      core-js: 3.33.3
+      core-js: 3.34.0
       cpy: 8.1.2
       detect-port: 1.5.1
       express: 4.18.2
@@ -12517,7 +12662,7 @@ packages:
       cli-table3: 0.6.3
       commander: 6.2.1
       compression: 1.7.4
-      core-js: 3.33.3
+      core-js: 3.34.0
       cpy: 8.1.2
       detect-port: 1.5.1
       express: 4.18.2
@@ -12647,7 +12792,7 @@ packages:
       '@babel/types': 7.23.5
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/mdx1-csf': 0.0.1(@babel/core@7.23.5)
-      core-js: 3.33.3
+      core-js: 3.34.0
       fs-extra: 9.1.0
       global: 4.4.0
       regenerator-runtime: 0.13.11
@@ -12674,7 +12819,7 @@ packages:
       '@babel/core': 7.23.5
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/store': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
-      core-js: 3.33.3
+      core-js: 3.34.0
       doctrine: 3.0.0
       lodash: 4.17.21
       regenerator-runtime: 0.13.11
@@ -12735,7 +12880,7 @@ packages:
       babel-loader: 8.3.0(@babel/core@7.23.5)(webpack@4.47.0)
       case-sensitive-paths-webpack-plugin: 2.4.0
       chalk: 4.1.2
-      core-js: 3.33.3
+      core-js: 3.34.0
       css-loader: 3.6.0(webpack@4.47.0)
       express: 4.18.2
       file-loader: 6.2.0(webpack@4.47.0)
@@ -12792,7 +12937,7 @@ packages:
       babel-loader: 8.3.0(@babel/core@7.23.5)(webpack@5.89.0)
       case-sensitive-paths-webpack-plugin: 2.4.0
       chalk: 4.1.2
-      core-js: 3.33.3
+      core-js: 3.34.0
       css-loader: 5.2.7(webpack@5.89.0)
       express: 4.18.2
       find-up: 5.0.0
@@ -12850,7 +12995,7 @@ packages:
     dependencies:
       '@types/npmlog': 4.1.6
       chalk: 4.1.2
-      core-js: 3.33.3
+      core-js: 3.34.0
       npmlog: 5.0.1
       pretty-hrtime: 1.0.3
     dev: true
@@ -12858,7 +13003,7 @@ packages:
   /@storybook/postinstall@6.5.17-alpha.0:
     resolution: {integrity: sha512-ipK7F0Yz7igGgxg1KfJYN++U7XGA0eNqB93CPK4nux7OLbbI+w4LaH22OmnFt+je/TXaKyIt/DZKYP0qVYk7iQ==}
     dependencies:
-      core-js: 3.33.3
+      core-js: 3.34.0
     dev: true
 
   /@storybook/preview-api@7.6.3:
@@ -12893,7 +13038,7 @@ packages:
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/store': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       ansi-to-html: 0.6.15
-      core-js: 3.33.3
+      core-js: 3.34.0
       global: 4.4.0
       lodash: 4.17.21
       qs: 6.11.2
@@ -12977,7 +13122,7 @@ packages:
       acorn-walk: 7.2.0
       babel-plugin-add-react-displayname: 0.0.5
       babel-plugin-react-docgen: 4.2.1
-      core-js: 3.33.3
+      core-js: 3.34.0
       escodegen: 2.1.0
       fs-extra: 9.1.0
       global: 4.4.0
@@ -13067,7 +13212,7 @@ packages:
       acorn-walk: 7.2.0
       babel-plugin-add-react-displayname: 0.0.5
       babel-plugin-react-docgen: 4.2.1
-      core-js: 3.33.3
+      core-js: 3.34.0
       escodegen: 2.1.0
       fs-extra: 9.1.0
       global: 4.4.0
@@ -13114,7 +13259,7 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       '@storybook/client-logger': 6.5.17-alpha.0
-      core-js: 3.33.3
+      core-js: 3.34.0
       memoizerific: 1.11.3
       qs: 6.11.2
       react: 17.0.2
@@ -13135,7 +13280,7 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
-      core-js: 3.33.3
+      core-js: 3.34.0
       find-up: 4.1.0
     dev: true
 
@@ -13148,7 +13293,7 @@ packages:
       '@storybook/addons': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       '@storybook/client-logger': 6.5.17-alpha.0
       '@storybook/csf': 0.0.2--canary.4566f4d.1
-      core-js: 3.33.3
+      core-js: 3.34.0
       estraverse: 5.3.0
       global: 4.4.0
       loader-utils: 2.0.4
@@ -13169,7 +13314,7 @@ packages:
       '@storybook/client-logger': 6.5.17-alpha.0
       '@storybook/core-events': 6.5.17-alpha.0
       '@storybook/csf': 0.0.2--canary.4566f4d.1
-      core-js: 3.33.3
+      core-js: 3.34.0
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -13190,7 +13335,7 @@ packages:
       '@storybook/client-logger': 6.5.17-alpha.0
       '@storybook/core-common': 6.5.17-alpha.0(eslint@8.55.0)(react-dom@17.0.2)(react@17.0.2)(typescript@5.3.2)(webpack-cli@3.3.12)
       chalk: 4.1.2
-      core-js: 3.33.3
+      core-js: 3.34.0
       detect-package-manager: 2.0.1
       fetch-retry: 5.0.6
       fs-extra: 9.1.0
@@ -13218,7 +13363,7 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       '@storybook/client-logger': 6.5.17-alpha.0
-      core-js: 3.33.3
+      core-js: 3.34.0
       memoizerific: 1.11.3
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
@@ -13263,7 +13408,7 @@ packages:
       '@storybook/router': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
       '@storybook/semver': 7.3.2
       '@storybook/theming': 6.5.17-alpha.0(react-dom@17.0.2)(react@17.0.2)
-      core-js: 3.33.3
+      core-js: 3.34.0
       memoizerific: 1.11.3
       qs: 6.11.2
       react: 17.0.2
@@ -14228,8 +14373,8 @@ packages:
       '@types/react': 17.0.71
     dev: true
 
-  /@types/react-transition-group@4.4.9:
-    resolution: {integrity: sha512-ZVNmWumUIh5NhH8aMD9CR2hdW0fNuYInlocZHaZ+dgk/1K49j1w/HoAuK1ki+pgscQrOFRTlXeoURtuzEkV3dg==}
+  /@types/react-transition-group@4.4.10:
+    resolution: {integrity: sha512-hT/+s0VQs2ojCX823m60m5f0sL5idt9SO6Tj6Dg+rdphGPIeJbJ6CxvBYkgkGKrYeDjvIpKTR38UzmtHJOGW3Q==}
     dependencies:
       '@types/react': 17.0.71
     dev: true
@@ -15654,7 +15799,7 @@ packages:
       '@wordpress/browserslist-config': 2.7.0
       '@wordpress/element': 2.20.3
       '@wordpress/warning': 1.4.2
-      core-js: 3.33.3
+      core-js: 3.34.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -15674,7 +15819,7 @@ packages:
       '@wordpress/element': 4.20.0
       '@wordpress/warning': 2.47.0
       browserslist: 4.19.3
-      core-js: 3.33.3
+      core-js: 3.34.0
     transitivePeerDependencies:
       - supports-color
 
@@ -15692,7 +15837,7 @@ packages:
       '@wordpress/browserslist-config': 5.30.0
       '@wordpress/warning': 2.47.0
       browserslist: 4.22.2
-      core-js: 3.33.3
+      core-js: 3.34.0
       react: 17.0.2
     transitivePeerDependencies:
       - supports-color
@@ -16513,7 +16658,7 @@ packages:
       dom-scroll-into-view: 1.2.1
       downshift: 6.1.12(react@17.0.2)
       fast-deep-equal: 3.1.3
-      framer-motion: 10.16.12(react-dom@17.0.2)(react@17.0.2)
+      framer-motion: 10.16.14(react-dom@17.0.2)(react@17.0.2)
       gradient-parser: 0.1.5
       highlight-words-core: 1.2.2
       is-plain-object: 5.0.0
@@ -19587,8 +19732,8 @@ packages:
       require-from-string: 2.0.2
       uri-js: 4.4.1
 
-  /allure-commandline@2.24.1:
-    resolution: {integrity: sha512-eNto3ipBq+O2B/f8/OwiS3E8R7jYENs3qv8jT7wMZmziYLANsISC9tX/FfEqR3FDiQlEOjkP7iyTEZ3ph53FPg==}
+  /allure-commandline@2.25.0:
+    resolution: {integrity: sha512-HYMQwuX/8ySTrXqgr6ZY830c6xgRbSusxVwZIBbDyNTCDb3mqK2b1ENjsD8yhl/7/8S02NZCDAwJFxt3f8qL9Q==}
     hasBin: true
 
   /allure-js-commons@1.3.2:
@@ -20171,8 +20316,8 @@ packages:
     resolution: {integrity: sha512-BQUiyBLScS0+YPnnCZZGjb78mZ8sQ8aKgxarDPNw05rpbaCS7VIQSLy2tgjZKct9Dn1xLbKMXOpA98OWei90zA==}
     dev: true
 
-  /aws-sdk@2.1511.0:
-    resolution: {integrity: sha512-LikcMeIzA1fu+j8qElVmPDpWBFsMzd8pwQoo33xXhIwtWaMoaBMI5vGGz/cvdn3LnjkRcEntWZeE8haULsy+bA==}
+  /aws-sdk@2.1512.0:
+    resolution: {integrity: sha512-+YYS18VsMUdUaZdsVsE+heJmrAwbxcbyw/9B6Ck90ehlRjjU2SELKH7zhpxbgRH00z8Z4ltaLwRhsp69kLHflQ==}
     engines: {node: '>= 10.0.0'}
     dependencies:
       buffer: 4.9.2
@@ -20663,7 +20808,7 @@ packages:
     dependencies:
       '@babel/core': 7.23.5
       '@babel/helper-define-polyfill-provider': 0.1.5(@babel/core@7.23.5)
-      core-js-compat: 3.33.3
+      core-js-compat: 3.34.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -20675,7 +20820,7 @@ packages:
     dependencies:
       '@babel/core': 7.12.9
       '@babel/helper-define-polyfill-provider': 0.4.3(@babel/core@7.12.9)
-      core-js-compat: 3.33.3
+      core-js-compat: 3.34.0
     transitivePeerDependencies:
       - supports-color
 
@@ -20686,7 +20831,7 @@ packages:
     dependencies:
       '@babel/core': 7.23.5
       '@babel/helper-define-polyfill-provider': 0.4.3(@babel/core@7.23.5)
-      core-js-compat: 3.33.3
+      core-js-compat: 3.34.0
     transitivePeerDependencies:
       - supports-color
 
@@ -21385,7 +21530,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001146
-      electron-to-chromium: 1.4.603
+      electron-to-chromium: 1.4.604
     dev: true
 
   /browserslist@4.19.3:
@@ -21394,7 +21539,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001566
-      electron-to-chromium: 1.4.603
+      electron-to-chromium: 1.4.604
       escalade: 3.1.1
       node-releases: 2.0.14
       picocolors: 1.0.0
@@ -21405,7 +21550,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001566
-      electron-to-chromium: 1.4.603
+      electron-to-chromium: 1.4.604
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.22.2)
 
@@ -22889,13 +23034,13 @@ packages:
       webpack: 5.89.0(webpack-cli@3.3.12)
     dev: true
 
-  /core-js-compat@3.33.3:
-    resolution: {integrity: sha512-cNzGqFsh3Ot+529GIXacjTJ7kegdt5fPXxCBVS1G0iaZpuo/tBz399ymceLJveQhFFZ8qThHiP3fzuoQjKN2ow==}
+  /core-js-compat@3.34.0:
+    resolution: {integrity: sha512-4ZIyeNbW/Cn1wkMMDy+mvrRUxrwFNjKwbhCfQpDd+eLgYipDqp8oGFGtLmhh18EDPKA0g3VUBYOxQGGwvWLVpA==}
     dependencies:
       browserslist: 4.22.2
 
-  /core-js-pure@3.33.3:
-    resolution: {integrity: sha512-taJ00IDOP+XYQEA2dAe4ESkmHt1fL8wzYDo3mRWQey8uO9UojlBFMneA65kMyxfYP7106c6LzWaq7/haDT6BCQ==}
+  /core-js-pure@3.34.0:
+    resolution: {integrity: sha512-pmhivkYXkymswFfbXsANmBAewXx86UBfmagP+w0wkK06kLsLlTK5oQmsURPivzMkIBQiYq2cjamcZExIwlFQIg==}
     requiresBuild: true
     dev: true
 
@@ -22909,8 +23054,8 @@ packages:
     deprecated: core-js@<3.23.3 is no longer maintained and not recommended for usage due to the number of issues. Because of the V8 engine whims, feature detection in old core-js versions could cause a slowdown up to 100x even if nothing is polyfilled. Some versions have web compatibility issues. Please, upgrade your dependencies to the actual version of core-js.
     requiresBuild: true
 
-  /core-js@3.33.3:
-    resolution: {integrity: sha512-lo0kOocUlLKmm6kv/FswQL8zbkH7mVsLJ/FULClOhv8WRVmKLVcs6XPNQAzstfeJTCHMyButEwG+z1kHxHoDZw==}
+  /core-js@3.34.0:
+    resolution: {integrity: sha512-aDdvlDder8QmY91H88GzNi9EtQi2TjvQhpCX6B1v/dAZHU1AuLgHvRh54RiOerpEhEW46Tkf+vgAViB/CWC0ag==}
     requiresBuild: true
 
   /core-util-is@1.0.2:
@@ -24512,8 +24657,8 @@ packages:
     dependencies:
       jake: 10.8.7
 
-  /electron-to-chromium@1.4.603:
-    resolution: {integrity: sha512-Dvo5OGjnl7AZTU632dFJtWj0uJK835eeOVQIuRcmBmsFsTNn3cL05FqOyHAfGQDIoHfLhyJ1Tya3PJ0ceMz54g==}
+  /electron-to-chromium@1.4.604:
+    resolution: {integrity: sha512-JAJ4lyLJYudlgJPYJicimU9R+qZ/3iyeyQS99bfT7PWi7psYWeN84lPswTjpHxQueU34PKxM/IJzQS6poYlovQ==}
 
   /element-resize-detector@1.2.4:
     resolution: {integrity: sha512-Fl5Ftk6WwXE0wqCgNoseKWndjzZlDCwuPTcoVZfCP9R3EHQF8qUtr3YUPNETegRBOKqQKPW3n4kiIWngGi8tKg==}
@@ -27128,8 +27273,8 @@ packages:
     dependencies:
       map-cache: 0.2.2
 
-  /framer-motion@10.16.12(react-dom@17.0.2)(react@17.0.2):
-    resolution: {integrity: sha512-w7Yzx0OzQ5Uh6uNkxaX+4TuAPuOKz3haSbjmHpdrqDpGuCJCpq6YP9Dy7JJWdZ6mJjndrg3Ao3vUwDajKNikCA==}
+  /framer-motion@10.16.14(react-dom@17.0.2)(react@17.0.2):
+    resolution: {integrity: sha512-poovsXtR7doXRfjqVjUai82Zl2z5yMUFKtYWHnQK+xsDVPhHVUJEU+Kr2kqEnUV4gry+LcRdrDzcMI7OdJlDMg==}
     peerDependencies:
       react: ^17.0.2
       react-dom: ^18.0.0
@@ -32948,7 +33093,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.5
       app-root-dir: 1.0.2
-      core-js: 3.33.3
+      core-js: 3.34.0
       dotenv: 8.6.0
       dotenv-expand: 5.1.0
     dev: true
@@ -36101,7 +36246,7 @@ packages:
       '@oclif/plugin-help': 5.2.20(@types/node@16.18.67)(typescript@5.3.2)
       '@oclif/plugin-not-found': 2.4.3(@types/node@16.18.67)(typescript@5.3.2)
       '@oclif/plugin-warn-if-update-available': 2.1.1(@types/node@16.18.67)(typescript@5.3.2)
-      aws-sdk: 2.1511.0
+      aws-sdk: 2.1512.0
       concurrently: 7.6.0
       debug: 4.3.4(supports-color@9.4.0)
       find-yarn-workspace-root: 2.0.0
@@ -38425,6 +38570,14 @@ packages:
       object-assign: 4.1.1
       react-is: 16.13.1
 
+  /proper-lockfile@4.1.2:
+    resolution: {integrity: sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA==}
+    dependencies:
+      graceful-fs: 4.2.11
+      retry: 0.12.0
+      signal-exit: 3.0.7
+    dev: true
+
   /properties@1.2.1:
     resolution: {integrity: sha512-qYNxyMj1JeW54i/EWEFsM1cVwxJbtgPp8+0Wg9XjNaK6VE/c4oRi6PNu5p7w1mNXEIQIjV5Wwn8v8Gz82/QzdQ==}
     engines: {node: '>=0.10'}
@@ -39530,7 +39683,7 @@ packages:
       '@emotion/cache': 11.11.0
       '@emotion/react': 11.11.1(@types/react@17.0.71)(react@17.0.2)
       '@floating-ui/dom': 1.5.3
-      '@types/react-transition-group': 4.4.9
+      '@types/react-transition-group': 4.4.10
       memoize-one: 6.0.0
       prop-types: 15.8.1
       react: 17.0.2
@@ -43441,66 +43594,6 @@ packages:
   /turbo-combine-reducers@1.0.2:
     resolution: {integrity: sha512-gHbdMZlA6Ym6Ur5pSH/UWrNQMIM9IqTH6SoL1DbHpqEdQ8i+cFunSmSlFykPt0eGQwZ4d/XTHOl74H0/kFBVWw==}
 
-  /turbo-darwin-64@1.10.16:
-    resolution: {integrity: sha512-+Jk91FNcp9e9NCLYlvDDlp2HwEDp14F9N42IoW3dmHI5ZkGSXzalbhVcrx3DOox3QfiNUHxzWg4d7CnVNCuuMg==}
-    cpu: [x64]
-    os: [darwin]
-    requiresBuild: true
-    dev: true
-    optional: true
-
-  /turbo-darwin-arm64@1.10.16:
-    resolution: {integrity: sha512-jqGpFZipIivkRp/i+jnL8npX0VssE6IAVNKtu573LXtssZdV/S+fRGYA16tI46xJGxSAivrZ/IcgZrV6Jk80bw==}
-    cpu: [arm64]
-    os: [darwin]
-    requiresBuild: true
-    dev: true
-    optional: true
-
-  /turbo-linux-64@1.10.16:
-    resolution: {integrity: sha512-PpqEZHwLoizQ6sTUvmImcRmACyRk9EWLXGlqceogPZsJ1jTRK3sfcF9fC2W56zkSIzuLEP07k5kl+ZxJd8JMcg==}
-    cpu: [x64]
-    os: [linux]
-    requiresBuild: true
-    dev: true
-    optional: true
-
-  /turbo-linux-arm64@1.10.16:
-    resolution: {integrity: sha512-TMjFYz8to1QE0fKVXCIvG/4giyfnmqcQIwjdNfJvKjBxn22PpbjeuFuQ5kNXshUTRaTJihFbuuCcb5OYFNx4uw==}
-    cpu: [arm64]
-    os: [linux]
-    requiresBuild: true
-    dev: true
-    optional: true
-
-  /turbo-windows-64@1.10.16:
-    resolution: {integrity: sha512-+jsf68krs0N66FfC4/zZvioUap/Tq3sPFumnMV+EBo8jFdqs4yehd6+MxIwYTjSQLIcpH8KoNMB0gQYhJRLZzw==}
-    cpu: [x64]
-    os: [win32]
-    requiresBuild: true
-    dev: true
-    optional: true
-
-  /turbo-windows-arm64@1.10.16:
-    resolution: {integrity: sha512-sKm3hcMM1bl0B3PLG4ifidicOGfoJmOEacM5JtgBkYM48ncMHjkHfFY7HrJHZHUnXM4l05RQTpLFoOl/uIo2HQ==}
-    cpu: [arm64]
-    os: [win32]
-    requiresBuild: true
-    dev: true
-    optional: true
-
-  /turbo@1.10.16:
-    resolution: {integrity: sha512-2CEaK4FIuSZiP83iFa9GqMTQhroW2QryckVqUydmg4tx78baftTOS0O+oDAhvo9r9Nit4xUEtC1RAHoqs6ZEtg==}
-    hasBin: true
-    optionalDependencies:
-      turbo-darwin-64: 1.10.16
-      turbo-darwin-arm64: 1.10.16
-      turbo-linux-64: 1.10.16
-      turbo-linux-arm64: 1.10.16
-      turbo-windows-64: 1.10.16
-      turbo-windows-arm64: 1.10.16
-    dev: true
-
   /tweetnacl@0.14.5:
     resolution: {integrity: sha512-KXXFFdAbFXY4geFIwoyNK+f5Z1b7swfXABfL7HXCmoIWMKU3dmS26672A4EeQtDzLKy7SXmfBu51JolvEKwtGA==}
 
@@ -45695,6 +45788,18 @@ packages:
     resolution: {integrity: sha512-UD7d8HFA2+PZsbKyaOCEy8gMh1oDtHgJh1LfgjQ4zVXmYjAT/kvz3PueITKuqDiIXQe7yzpPnxX3lNc+AhQMyw==}
     engines: {node: '>= 0.10.0'}
     hasBin: true
+    dev: true
+
+  /wireit@0.14.1:
+    resolution: {integrity: sha512-q5sixPM/vKQEpyaub6J9QoHAFAF9g4zBdnjoYelH9/RLAekcUf3x1dmFLACGZ6nYjqehCsTlXC1irmzU7znPhA==}
+    engines: {node: '>=14.14.0'}
+    hasBin: true
+    dependencies:
+      braces: 3.0.2
+      chokidar: 3.5.3
+      fast-glob: 3.3.2
+      jsonc-parser: 3.2.0
+      proper-lockfile: 4.1.2
     dev: true
 
   /word-wrap@1.2.5:
