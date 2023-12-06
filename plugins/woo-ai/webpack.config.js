@@ -5,7 +5,7 @@ module.exports = {
 	...defaultConfig,
 	entry: {
 		index: './src/index.ts',
-		wooAiAssistant: './src/woo-ai-assistant/index.tsx',
+		'woo-ai-assistant': './src/woo-ai-assistant/index.ts',
 	},
 	cache: false,
 	module: {

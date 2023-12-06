@@ -25,8 +25,8 @@ class Woo_AI_Woo_Wizard {
 	 * Enqueue the styles and JS
 	 */
 	public function add_woo_ai_assistant_register_script() {
-		$script_path       = '/../build/wooAiAssistant.js';
-		$script_asset_path = dirname( __FILE__ ) . '/../build/wooAiAssistant.asset.php';
+		$script_path       = '/../build/woo-ai-assistant.js';
+		$script_asset_path = dirname( __FILE__ ) . '/../build/woo-ai-assistant.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
 			? require $script_asset_path
 			: array(
@@ -50,11 +50,11 @@ class Woo_AI_Woo_Wizard {
 		if ( class_exists( '\Automattic\Jetpack\Connection\Initial_State' ) ) {
 			wp_add_inline_script( 'woo-ai', Connection_Initial_State::render(), 'before' );
 		}
-        $css_file_version = filemtime( dirname( __FILE__ ) . '/../build/index.css' );
+        $css_file_version = filemtime( dirname( __FILE__ ) . '/../build/woo-ai-assistant.css' );
 
 		wp_register_style(
 			'woo-ai-assistant',
-			plugins_url( '/../build/index.css', __FILE__ ),
+			plugins_url( '/../build/woo-ai-assistant.css', __FILE__ ),
 			// Add any dependencies styles may have, such as wp-components.
 			array(
 				'wp-components',
@@ -62,7 +62,7 @@ class Woo_AI_Woo_Wizard {
 			$css_file_version
 		);
 
-		wp_enqueue_style( 'wwoo-ai-assistant' );
+		wp_enqueue_style( 'woo-ai-assistant' );
 	}
 
 }
