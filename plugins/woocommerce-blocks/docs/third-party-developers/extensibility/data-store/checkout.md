@@ -27,6 +27,8 @@
     -   [isAfterProcessing](#isafterprocessing)
     -   [isComplete](#iscomplete)
     -   [isCalculating](#iscalculating)
+-   [Actions](#actions)
+    -   [setPrefersCollection](#setpreferscollection)
 
 ## Overview
 
@@ -53,7 +55,7 @@ Returns the WordPress user ID of the customer whose order is currently processed
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const customerId = store.getCustomerId();
 ```
 
@@ -68,7 +70,7 @@ Returns the WooCommerce order ID of the order that is currently being processed 
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const orderId = store.getOrderId();
 ```
 
@@ -83,7 +85,7 @@ Returns the order notes.
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const orderNotes = store.getOrderNotes();
 ```
 
@@ -98,7 +100,7 @@ Returns the URL to redirect to after checkout is complete.
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const redirectUrl = store.getRedirectUrl();
 ```
 
@@ -121,7 +123,7 @@ Returns the extra data registered by extensions.
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const extensionData = store.getExtensionData();
 ```
 
@@ -136,7 +138,7 @@ Returns the current status of the checkout process.
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const checkoutStatus = store.getCheckoutStatus();
 ```
 
@@ -151,7 +153,7 @@ Returns true if the shopper has opted to create an account with their order.
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const shouldCreateAccount = store.getShouldCreateAccount();
 ```
 
@@ -166,7 +168,7 @@ Returns true if the shopper has opted to use their shipping address as their bil
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const useShippingAsBilling = store.getUseShippingAsBilling();
 ```
 
@@ -181,7 +183,7 @@ Returns true if an error occurred, and false otherwise.
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const hasError = store.hasError();
 ```
 
@@ -196,7 +198,7 @@ Returns true if a draft order had been created, and false otherwise.
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const hasOrder = store.hasOrder();
 ```
 
@@ -211,7 +213,7 @@ When the checkout status is `IDLE` this flag is true. Checkout will be this stat
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const isIdle = store.isIdle();
 ```
 
@@ -226,7 +228,7 @@ When the checkout status is `BEFORE_PROCESSING` this flag is true. Checkout will
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const isBeforeProcessing = store.isBeforeProcessing();
 ```
 
@@ -241,7 +243,7 @@ When the checkout status is `PROCESSING` this flag is true. Checkout will be thi
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const isProcessing = store.isProcessing();
 ```
 
@@ -256,7 +258,7 @@ When the checkout status is `AFTER_PROCESSING` this flag is true. Checkout will 
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const isAfterProcessing = store.isAfterProcessing();
 ```
 
@@ -271,7 +273,7 @@ When the checkout status is `COMPLETE` this flag is true. Checkout will have thi
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const isComplete = store.isComplete();
 ```
 
@@ -286,8 +288,25 @@ This is true when the total is being re-calculated for the order. There are nume
 #### _Example_ <!-- omit in toc -->
 
 ```js
-const store = select( 'wc/store/checkout' );
+const store = select( CHECKOUT_STORE_KEY );
 const isCalculating = store.isCalculating();
+```
+
+## Actions
+
+### setPrefersCollection
+
+Sets the `prefersCollection` flag to true or false.
+
+#### _Parameters_ <!-- omit in toc -->
+
+-   _prefersCollection_ `boolean`: True if the shopper prefers to collect their order.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = dispatch( CHECKOUT_STORE_KEY );
+store.setPrefersCollection( true );
 ```
 
 <!-- FEEDBACK -->
