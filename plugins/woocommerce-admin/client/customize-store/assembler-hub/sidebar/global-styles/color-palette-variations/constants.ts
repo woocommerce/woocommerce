@@ -1,6 +1,62 @@
 // TODO: Fetch AI-picked color palettes from the backend API
 export const COLOR_PALETTES = [
 	{
+		title: 'New - Neutral',
+		version: 2,
+		settings: {
+			color: {
+				palette: {
+					theme: [
+						{
+							color: '#000000',
+							name: 'Foreground',
+							slug: 'foreground',
+						},
+						{
+							color: '#ffffff',
+							name: 'Background',
+							slug: 'background',
+						},
+						{
+							color: '#000000',
+							name: 'Primary',
+							slug: 'primary',
+						},
+						{
+							color: '#ffe2c7',
+							name: 'Secondary',
+							slug: 'secondary',
+						},
+						{
+							color: '#F6F6F6',
+							name: 'Tertiary',
+							slug: 'tertiary',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			color: {
+				background: 'var(--wp--preset--color--background)',
+				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--primary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
+				link: {
+					color: {
+						text: 'var(--wp--preset--color--foreground)',
+					},
+				},
+			},
+		},
+	},
+	{
 		title: 'Ancient Bronze',
 		version: 2,
 		settings: {
@@ -1067,62 +1123,6 @@ export const COLOR_PALETTES = [
 			},
 		},
 		wpcom_category: 'Dark',
-	},
-	{
-		title: 'New - Neutral',
-		version: 2,
-		settings: {
-			color: {
-				palette: {
-					theme: [
-						{
-							color: '#164A41',
-							name: 'Primary',
-							slug: 'primary',
-						},
-						{
-							color: '#4B7B4D',
-							name: 'Secondary',
-							slug: 'secondary',
-						},
-						{
-							color: '#164A41',
-							name: 'Foreground',
-							slug: 'foreground',
-						},
-						{
-							color: '#ffffff',
-							name: 'Background',
-							slug: 'background',
-						},
-						{
-							color: '#CEEAC4',
-							name: 'Tertiary',
-							slug: 'tertiary',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			color: {
-				background: 'var(--wp--preset--color--background)',
-				text: 'var(--wp--preset--color--foreground)',
-			},
-			elements: {
-				button: {
-					color: {
-						background: 'var(--wp--preset--color--primary)',
-						text: 'var(--wp--preset--color--background)',
-					},
-				},
-				link: {
-					color: {
-						text: 'var(--wp--preset--color--foreground)',
-					},
-				},
-			},
-		},
 	},
 	{
 		title: 'Blueberry Sorbet',
