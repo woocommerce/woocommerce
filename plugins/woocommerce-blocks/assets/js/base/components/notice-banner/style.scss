@@ -46,7 +46,7 @@
 		.wc-forward {
 			float: right;
 			color: $gray-800 !important;
-			background: transparent;
+			background: transparent !important; // For transparent notice button in Twenty Twenty-One theme.
 			padding: 0 !important;
 			margin: 0;
 			border: 0;
@@ -70,6 +70,7 @@
 		background-color: $gray-800;
 		flex-shrink: 0;
 		flex-grow: 0;
+		height: 100%;
 	}
 
 	> .wc-block-components-button {
