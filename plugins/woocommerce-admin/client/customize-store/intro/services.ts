@@ -21,13 +21,6 @@ export const fetchAiStatus = () => async (): Promise< aiStatusResponse > => {
 	return data;
 };
 
-export const resetPatterns = () => async () => {
-	return await apiFetch( {
-		path: '/wc/private/ai/patterns',
-		method: 'DELETE',
-	} );
-};
-
 export const fetchThemeCards = async () => {
 	const themes = await apiFetch( {
 		path: '/wc-admin/onboarding/themes/recommended',

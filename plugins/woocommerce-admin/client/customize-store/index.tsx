@@ -212,61 +212,57 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		intro: {
 			id: 'intro',
-			initial: 'checkAiStatus',
+			initial: 'preIntro',
 			states: {
-				checkAiStatus: {
-					invoke: {
-						src: 'fetchAiStatus',
-						onDone: {
-							actions: 'assignAiStatus',
-							target: 'postCheckAiStatus',
-						},
-						onError: {
-							actions: 'assignAiOffline',
-							target: '#customizeStore.designWithAi',
-						},
-					},
-				},
-				postCheckAiStatus: {
-					always: [
-						{
-							target: 'preIntro',
-							cond: 'isAiOnline',
-						},
-						{
-							target: 'resetPatterns',
-							cond: 'isAiOffline',
-						},
-					],
-				},
-				resetPatterns: {
-					invoke: {
-						src: 'resetPatterns',
-						onDone: {
-							target: '#customizeStore.designWithAi',
-						},
-						onError: {
-							target: '#customizeStore.designWithAi',
-						},
-					},
-				},
 				preIntro: {
-					invoke: {
-						src: 'fetchIntroData',
-						onError: {
-							actions: 'assignFetchIntroDataError',
-							target: 'intro',
+					type: 'parallel',
+					states: {
+						checkAiStatus: {
+							initial: 'pending',
+							states: {
+								pending: {
+									invoke: {
+										src: 'fetchAiStatus',
+										onDone: {
+											actions: 'assignAiStatus',
+											target: 'success',
+										},
+										onError: {
+											actions: 'assignAiOffline',
+											target: 'success',
+										},
+									},
+								},
+								success: { type: 'final' },
+							},
 						},
-						onDone: {
-							target: 'intro',
-							actions: [
-								'assignThemeData',
-								'assignActiveThemeHasMods',
-								'assignCustomizeStoreCompleted',
-								'assignCurrentThemeIsAiGenerated',
-							],
+						fetchIntroData: {
+							initial: 'pending',
+							states: {
+								pending: {
+									invoke: {
+										src: 'fetchIntroData',
+										onError: {
+											actions:
+												'assignFetchIntroDataError',
+											target: 'success',
+										},
+										onDone: {
+											target: 'success',
+											actions: [
+												'assignThemeData',
+												'assignActiveThemeHasMods',
+												'assignCustomizeStoreCompleted',
+												'assignCurrentThemeIsAiGenerated',
+											],
+										},
+									},
+								},
+								success: { type: 'final' },
+							},
 						},
 					},
+					onDone: 'intro',
 				},
 				intro: {
 					meta: {

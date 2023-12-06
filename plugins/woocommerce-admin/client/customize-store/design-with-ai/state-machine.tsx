@@ -355,13 +355,27 @@ export const designWithAiStateMachineDefinition = createMachine(
 												cond: 'isAiOnline',
 											},
 											{
-												target: 'success',
+												target: 'resetPatterns',
 											},
 										],
 									},
 									pending: {
 										invoke: {
 											src: 'updateStorePatterns',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
+											},
+										},
+									},
+									resetPatterns: {
+										invoke: {
+											src: 'resetPatterns',
 											onDone: {
 												target: 'success',
 											},
