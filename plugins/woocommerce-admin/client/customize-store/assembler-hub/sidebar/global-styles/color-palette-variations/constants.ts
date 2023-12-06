@@ -1582,6 +1582,8 @@ export const DEFAULT_COLOR_PALETTE_TITLES = [
 	'Slate',
 ];
 
-export const DEFAULT_COLOR_PALETTES = DEFAULT_COLOR_PALETTE_TITLES.map(title =>
-	COLOR_PALETTES.find(palette => palette.title === title)
+export const DEFAULT_COLOR_PALETTES = DEFAULT_COLOR_PALETTE_TITLES.map(
+	( title ) => COLOR_PALETTES.find(
+		( palette ) => palette.title === title
+	)
 );
