@@ -14,7 +14,7 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../types';
+import { QueryControlProps } from '../../types';
 
 const KeywordControl = ( props: QueryControlProps ) => {
 	const { query, setQueryAttribute } = props;

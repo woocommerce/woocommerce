@@ -12,7 +12,7 @@ import {
 	DisplayLayoutToolbarProps,
 	ProductCollectionDisplayLayout,
 	LayoutOptions,
-} from '../types';
+} from '../../types';
 
 const DisplayLayoutToolbar = ( props: DisplayLayoutToolbarProps ) => {
 	const { type, columns, shrinkColumns } = props.displayLayout;

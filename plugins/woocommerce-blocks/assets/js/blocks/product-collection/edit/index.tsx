@@ -2,81 +2,22 @@
  * External dependencies
  */
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
-import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
+import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 import type {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
-} from './types';
-import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
+} from '../types';
 import InspectorControls from './inspector-controls';
-import { DEFAULT_ATTRIBUTES } from './constants';
+import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import './editor.scss';
-import { getDefaultValueOfInheritQueryFromTemplate } from './utils';
+import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
 import ToolbarControls from './toolbar-controls';
-
-export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
-	[
-		'woocommerce/product-template',
-		{},
-		[
-			[
-				'woocommerce/product-image',
-				{
-					imageSizing: ImageSizing.THUMBNAIL,
-				},
-			],
-			[
-				'core/post-title',
-				{
-					textAlign: 'center',
-					level: 3,
-					fontSize: 'medium',
-					style: {
-						spacing: {
-							margin: {
-								bottom: '0.75rem',
-								top: '0',
-							},
-						},
-					},
-					isLink: true,
-					__woocommerceNamespace: PRODUCT_TITLE_ID,
-				},
-			],
-			[
-				'woocommerce/product-price',
-				{
-					textAlign: 'center',
-					fontSize: 'small',
-				},
-			],
-			[
-				'woocommerce/product-button',
-				{
-					textAlign: 'center',
-					fontSize: 'small',
-				},
-			],
-		],
-	],
-	[
-		'core/query-pagination',
-		{
-			layout: {
-				type: 'flex',
-				justifyContent: 'center',
-			},
-		},
-	],
-	[ 'woocommerce/product-collection-no-results' ],
-];
 
 const Edit = ( props: BlockEditProps< ProductCollectionAttributes > ) => {
 	const { attributes, setAttributes } = props;

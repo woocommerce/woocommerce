@@ -15,7 +15,7 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../types';
+import { QueryControlProps } from '../../types';
 
 const EDIT_ATTRIBUTES_URL = `${ ADMIN_URL }edit.php?post_type=product&page=product_attributes`;
 

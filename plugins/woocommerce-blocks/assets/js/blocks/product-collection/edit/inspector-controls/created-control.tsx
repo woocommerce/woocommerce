@@ -22,7 +22,7 @@ import {
 /**
  * Internal dependencies
  */
-import { ETimeFrameOperator, QueryControlProps } from '../types';
+import { ETimeFrameOperator, QueryControlProps } from '../../types';
 
 const CreatedControl = ( props: QueryControlProps ) => {
 	const { query, setQueryAttribute } = props;

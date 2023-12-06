@@ -13,8 +13,8 @@ import {
 /**
  * Internal dependencies
  */
-import { DisplayLayoutToolbarProps } from '../types';
-import { getDefaultDisplayLayout } from '../constants';
+import { DisplayLayoutToolbarProps } from '../../types';
+import { getDefaultDisplayLayout } from '../../constants';
 
 const columnsLabel = __( 'Columns', 'woo-gutenberg-products-block' );
 const toggleLabel = __( 'Responsive', 'woo-gutenberg-products-block' );

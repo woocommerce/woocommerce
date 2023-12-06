@@ -16,7 +16,7 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../types';
+import { QueryControlProps } from '../../types';
 
 /**
  * Returns:

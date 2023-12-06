@@ -16,7 +16,7 @@ import {
 /**
  * Internal dependencies
  */
-import { ProductCollectionQuery } from '../types';
+import { ProductCollectionQuery } from '../../types';
 
 interface DisplaySettingsToolbarProps {
 	query: ProductCollectionQuery;

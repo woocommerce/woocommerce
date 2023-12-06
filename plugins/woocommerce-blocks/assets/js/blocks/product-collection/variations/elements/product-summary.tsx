@@ -12,9 +12,10 @@ import {
 	BLOCK_DESCRIPTION,
 	BLOCK_TITLE,
 } from '../../../../atomic/blocks/product-elements/summary/constants';
+import blockJson from '../../block.json';
 
 export const CORE_NAME = 'core/post-excerpt';
-export const VARIATION_NAME = 'woocommerce/product-collection/product-summary';
+export const VARIATION_NAME = `${ blockJson.name }/product-summary`;
 
 const registerProductSummary = () => {
 	registerElementVariation( CORE_NAME, {
