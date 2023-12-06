@@ -664,6 +664,21 @@
 		box-shadow: none;
 	}
 
+	&.ai-offline {
+		.woocommerce-tour-kit-step {
+			width: 430px;
+			.components-card__header {
+				background-image: none;
+				height: auto;
+				margin: 0;
+			}
+		}
+
+		.tour-kit-frame__container {
+			bottom: 0;
+		}
+	}
+
 	.woocommerce-tour-kit-step {
 		width: 335px;
 		border-radius: 8px;

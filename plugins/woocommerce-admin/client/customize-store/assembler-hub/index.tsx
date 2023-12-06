@@ -154,6 +154,13 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 	useEffect( () => {
 		onBackButtonClicked( () => setShowExitModal( true ) );
 	}, [] );
+	// @ts-expect-error temp fix
+	// Since we load the assember hub in an iframe, we don't have access to
+	// xstate's context values.
+	// This is the best workaround I can think of for now.
+	// Set the aiOnline value from the parent window so that any child components
+	// can access it.
+	props.context.aiOnline = window.parent?.window.cys_aiOnline;
 
 	return (
 		<>
