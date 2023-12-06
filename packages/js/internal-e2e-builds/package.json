@@ -1,31 +1,28 @@
 {
 	"name": "@woocommerce/internal-e2e-builds",
 	"version": "0.1.0",
-	"private": true,
 	"description": "Utility build files for e2e packages",
-	"homepage": "https://github.com/woocommerce/woocommerce#readme",
-	"bugs": {
-		"url": "https://github.com/woocommerce/woocommerce/issues"
+	"private": true,
+	"main": "build.js",
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
+	"bin": {
+		"e2e-builds": "./build.js"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/woocommerce/woocommerce.git"
 	},
 	"license": "GPL-3.0+",
-	"main": "build.js",
-	"bin": {
-		"e2e-builds": "./build.js"
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
+	"homepage": "https://github.com/woocommerce/woocommerce#readme",
 	"scripts": {
-		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
-		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint build.js --fix",
-		"lint:lang:js": "eslint build.js"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
+		"lint": "eslint build.js",
+		"lint:fix": "eslint build.js --fix"
 	},
 	"devDependencies": {
 		"@babel/core": "7.12.9",
@@ -34,11 +31,11 @@
 		"eslint": "^8.32.0",
 		"glob": "^7.2.0",
 		"lodash": "^4.17.21",
-		"mkdirp": "^1.0.4",
-		"wireit": "^0.14.1"
+		"mkdirp": "^1.0.4"
 	},
-	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
 	}
 }

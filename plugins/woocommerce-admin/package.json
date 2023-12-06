@@ -1,46 +1,59 @@
 {
-	"name": "@woocommerce/admin-library",
+	"name": "woocommerce/client/admin",
 	"version": "3.3.0",
-	"private": true,
+	"license": "GPL-3.0-or-later",
+	"author": "Automattic",
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-admin/README.md",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com:woocommerce/woocommerce.git"
 	},
-	"license": "GPL-3.0-or-later",
-	"author": "Automattic",
-	"files": [
-		"build"
-	],
 	"scripts": {
-		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
-		"build:project": "pnpm --if-present /^build:project:.*$/",
-		"build:project:bundle": "wireit",
-		"build:project:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
-		"changelog": "composer install && composer exec -- changelogger",
-		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
-		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:css": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
-		"lint:fix:lang:js": "pnpm lint:js --fix --ext=js,ts,tsx",
-		"lint:lang:css": "stylelint '**/*.scss'",
-		"lint:lang:js": "eslint ./client --ext=js,ts,tsx",
-		"test:js": "wireit",
-		"watch:build": "pnpm build:project --watch"
-	},
-	"lint-staged": {
-		"*.scss": [
-			"pnpm lint:css-fix"
-		],
-		"client/**/*.(t|j)s?(x)": [
-			"pnpm lint:js-pre-commit",
-			"pnpm test-staged"
-		]
+		"changelog": "pnpm --filter=woocommerce -r run changelog ",
+		"turbo:build": "pnpm run clean && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
+		"turbo:test": "pnpm run test:client",
+		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"test": "pnpm test:js",
+		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"lint": "pnpm run lint:js && pnpm run lint:css",
+		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
+		"clean": "rimraf ../woocommerce/assets/client/admin/*",
+		"client:watch": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development webpack --watch",
+		"create-hook-reference": "node ./bin/hook-reference/index.js",
+		"create-wc-extension": "pnpm -w run create-extension",
+		"dev": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development pnpm -w run build --filter='./packages/js/*' && cross-env WC_ADMIN_PHASE=development webpack",
+		"example": "webpack --config docs/examples/extensions/examples.config.js --watch",
+		"preinstall": "npx only-allow pnpm",
+		"lint:fix": "pnpm lint:js-fix && pnpm lint:css-fix",
+		"lint:css": "stylelint '**/*.scss'",
+		"lint:css-fix": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
+		"lint:js": "eslint ./client --ext=js,ts,tsx",
+		"lint:js-fix": "pnpm run lint:js --fix --ext=js,ts,tsx",
+		"lint:js-packages": "eslint ../../packages/js --ext=js,ts,tsx",
+		"lint:js-pre-commit": "eslint --ext=js,ts,tsx",
+		"prepack": "pnpm install && pnpm run lint && pnpm run test && cross-env WC_ADMIN_PHASE=core pnpm run build",
+		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
+		"packages:build": "pnpm run:packages -- build",
+		"packages:watch": "pnpm run:packages -- start",
+		"run:packages": "pnpm run --parallel --filter='../../packages/js/**'",
+		"prestart": "pnpm packages:build && cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config",
+		"start": "concurrently \"cross-env WC_ADMIN_PHASE=development webpack --watch\" \"cross-env WC_ADMIN_PHASE=development pnpm packages:watch\"",
+		"start:hot": "pnpm prestart && concurrently \"cross-env HOT=true WC_ADMIN_PHASE=development webpack serve\" \"cross-env WC_ADMIN_PHASE=development pnpm packages:watch\"",
+		"test-staged": "pnpm run test:client --bail --findRelatedTests",
+		"test:client": "jest --config client/jest.config.js",
+		"test:debug": "node --inspect-brk ./node_modules/.bin/jest --config client/jest.config.js --watch --runInBand --no-cache",
+		"test:help": "wp-scripts test-unit-js --help",
+		"test:update-snapshots": "pnpm run test:client --updateSnapshot && pnpm run --filter @woocommerce/components test:update-snapshots",
+		"test:watch": "pnpm run test:client --watch",
+		"ts:check": "tsc --project tsconfig.json --pretty",
+		"ts:check:watch": "npm run ts:check -- --watch"
 	},
 	"dependencies": {
-		"@automattic/components": "^2.0.1",
 		"@automattic/explat-client": "^0.0.3",
 		"@automattic/explat-client-react-helpers": "^0.0.4",
 		"@automattic/interpolate-components": "^1.2.0",
+		"@automattic/components": "^2.0.1",
 		"@react-spring/web": "^9.4.3",
 		"@types/wordpress__blocks": "11.0.7",
 		"@woocommerce/api": "^0.2.0",
@@ -224,148 +237,22 @@
 		"webpack-dev-server": "^4.11.1",
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"webpack-merge": "^5.8.0",
-		"webpack-rtl-plugin": "^2.0.0",
-		"wireit": "^0.14.1"
+		"webpack-rtl-plugin": "^2.0.0"
 	},
 	"peerDependencies": {
 		"@wordpress/data": "wp-6.0"
 	},
+	"lint-staged": {
+		"*.scss": [
+			"pnpm lint:css-fix"
+		],
+		"client/**/*.(t|j)s?(x)": [
+			"pnpm lint:js-pre-commit",
+			"pnpm test-staged"
+		]
+	},
 	"engines": {
 		"node": "^16.14.1",
 		"pnpm": "^8.6.7"
-	},
-	"wireit": {
-		"build:project:bundle": {
-			"command": "webpack",
-			"env": {
-				"NODE_ENV": "production",
-				"WC_ADMIN_PHASE": "core"
-			},
-			"files": [
-				"webpack.config.js",
-				"tsconfig.json",
-				"client/**/*.{js,jsx,ts,tsx}",
-				"client/**/*.scss"
-			],
-			"output": [
-				"build"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
-		"test:js": {
-			"command": "jest --config client/jest.config.js",
-			"dependencies": [
-				"build:project"
-			]
-		},
-		"dependencyOutputs": {
-			"allowUsuallyExcludedPaths": true,
-			"files": [
-				"node_modules/@woocommerce/tracks/",
-				"node_modules/@woocommerce/product-editor/",
-				"node_modules/@woocommerce/onboarding/",
-				"node_modules/@woocommerce/number/",
-				"node_modules/@woocommerce/notices/",
-				"node_modules/@woocommerce/navigation/",
-				"node_modules/@woocommerce/internal-style-build/",
-				"node_modules/@woocommerce/internal-js-tests/",
-				"node_modules/@woocommerce/explat/",
-				"node_modules/@woocommerce/experimental/",
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js",
-				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/",
-				"node_modules/@woocommerce/date/",
-				"node_modules/@woocommerce/data/",
-				"node_modules/@woocommerce/customer-effort-score/",
-				"node_modules/@woocommerce/currency/",
-				"node_modules/@woocommerce/csv-export/",
-				"node_modules/@woocommerce/components/",
-				"node_modules/@woocommerce/ai/",
-				"node_modules/@woocommerce/admin-layout/",
-				"node_modules/@woocommerce/admin-e2e-tests/build/",
-				"package.json",
-				"!node_modules/@woocommerce/admin-e2e-tests/*.ts.map",
-				"!node_modules/@woocommerce/admin-e2e-tests/*.tsbuildinfo",
-				"!node_modules/@woocommerce/admin-layout/node_modules",
-				"!node_modules/@woocommerce/admin-layout/.git",
-				"!node_modules/@woocommerce/admin-layout/.svn",
-				"!node_modules/@woocommerce/admin-layout/src",
-				"!node_modules/@woocommerce/ai/node_modules",
-				"!node_modules/@woocommerce/ai/.git",
-				"!node_modules/@woocommerce/ai/.svn",
-				"!node_modules/@woocommerce/ai/src",
-				"!node_modules/@woocommerce/components/node_modules",
-				"!node_modules/@woocommerce/components/.git",
-				"!node_modules/@woocommerce/components/.svn",
-				"!node_modules/@woocommerce/components/src",
-				"!node_modules/@woocommerce/csv-export/node_modules",
-				"!node_modules/@woocommerce/csv-export/.git",
-				"!node_modules/@woocommerce/csv-export/.svn",
-				"!node_modules/@woocommerce/csv-export/src",
-				"!node_modules/@woocommerce/currency/node_modules",
-				"!node_modules/@woocommerce/currency/.git",
-				"!node_modules/@woocommerce/currency/.svn",
-				"!node_modules/@woocommerce/currency/src",
-				"!node_modules/@woocommerce/customer-effort-score/node_modules",
-				"!node_modules/@woocommerce/customer-effort-score/.git",
-				"!node_modules/@woocommerce/customer-effort-score/.svn",
-				"!node_modules/@woocommerce/customer-effort-score/src",
-				"!node_modules/@woocommerce/data/node_modules",
-				"!node_modules/@woocommerce/data/.git",
-				"!node_modules/@woocommerce/data/.svn",
-				"!node_modules/@woocommerce/data/src",
-				"!node_modules/@woocommerce/date/node_modules",
-				"!node_modules/@woocommerce/date/.git",
-				"!node_modules/@woocommerce/date/.svn",
-				"!node_modules/@woocommerce/date/src",
-				"!node_modules/@woocommerce/dependency-extraction-webpack-plugin/node_modules",
-				"!node_modules/@woocommerce/dependency-extraction-webpack-plugin/.git",
-				"!node_modules/@woocommerce/dependency-extraction-webpack-plugin/.svn",
-				"!node_modules/@woocommerce/dependency-extraction-webpack-plugin/src",
-				"!node_modules/@woocommerce/experimental/node_modules",
-				"!node_modules/@woocommerce/experimental/.git",
-				"!node_modules/@woocommerce/experimental/.svn",
-				"!node_modules/@woocommerce/experimental/src",
-				"!node_modules/@woocommerce/explat/node_modules",
-				"!node_modules/@woocommerce/explat/.git",
-				"!node_modules/@woocommerce/explat/.svn",
-				"!node_modules/@woocommerce/explat/src",
-				"!node_modules/@woocommerce/internal-js-tests/node_modules",
-				"!node_modules/@woocommerce/internal-js-tests/.git",
-				"!node_modules/@woocommerce/internal-js-tests/.svn",
-				"!node_modules/@woocommerce/internal-js-tests/src",
-				"!node_modules/@woocommerce/internal-style-build/node_modules",
-				"!node_modules/@woocommerce/internal-style-build/.git",
-				"!node_modules/@woocommerce/internal-style-build/.svn",
-				"!node_modules/@woocommerce/internal-style-build/src",
-				"!node_modules/@woocommerce/navigation/node_modules",
-				"!node_modules/@woocommerce/navigation/.git",
-				"!node_modules/@woocommerce/navigation/.svn",
-				"!node_modules/@woocommerce/navigation/src",
-				"!node_modules/@woocommerce/notices/node_modules",
-				"!node_modules/@woocommerce/notices/.git",
-				"!node_modules/@woocommerce/notices/.svn",
-				"!node_modules/@woocommerce/notices/src",
-				"!node_modules/@woocommerce/number/node_modules",
-				"!node_modules/@woocommerce/number/.git",
-				"!node_modules/@woocommerce/number/.svn",
-				"!node_modules/@woocommerce/number/src",
-				"!node_modules/@woocommerce/onboarding/node_modules",
-				"!node_modules/@woocommerce/onboarding/.git",
-				"!node_modules/@woocommerce/onboarding/.svn",
-				"!node_modules/@woocommerce/onboarding/src",
-				"!node_modules/@woocommerce/product-editor/node_modules",
-				"!node_modules/@woocommerce/product-editor/.git",
-				"!node_modules/@woocommerce/product-editor/.svn",
-				"!node_modules/@woocommerce/product-editor/src",
-				"!node_modules/@woocommerce/tracks/node_modules",
-				"!node_modules/@woocommerce/tracks/.git",
-				"!node_modules/@woocommerce/tracks/.svn",
-				"!node_modules/@woocommerce/tracks/src"
-			]
-		}
 	}
 }

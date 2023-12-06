@@ -24,6 +24,8 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build: false
 
             - name: Check change files are touched for touched projects
               env:
@@ -32,4 +34,4 @@ jobs:
               run: php tools/monorepo/check-changelogger-use.php --debug "$BASE" "$HEAD"
 
             - name: Run changelog validation
-              run: pnpm -r changelog validate
+              run: pnpm run -r changelog validate

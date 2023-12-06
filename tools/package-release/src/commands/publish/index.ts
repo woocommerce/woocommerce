@@ -129,7 +129,7 @@ export default class PackageRelease extends Command {
 				if ( isValidUpdate( name, initialRelease ) ) {
 					const cwd = getFilepathFromPackageName( name );
 					execSync(
-						`pnpm publish ${
+						`SKIP_TURBO=true pnpm publish ${
 							dryRun ? '--dry-run' : ''
 						} --publish-branch=${ branch }`,
 						{
