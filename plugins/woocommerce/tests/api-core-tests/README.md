@@ -38,7 +38,7 @@ WooCommerce's `api-core-tests` are powered by Playwright. The test site is spun 
 
 - `nvm use`
 - `pnpm install`
-- `pnpm --filter='@woocommerce/plugin-woocommerce' build`
+- `pnpm run build --filter=woocommerce`
 - `cd plugins/woocommerce`
 - `pnpm env:test`
 - `pnpm test:api-pw`

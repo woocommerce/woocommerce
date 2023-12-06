@@ -1,19 +1,22 @@
 {
 	"name": "@woocommerce/api",
 	"version": "0.3.0",
+	"author": "Automattic",
 	"description": "A simple interface for interacting with a WooCommerce installation.",
-	"keywords": [
-		"woocommerce",
-		"e2e"
-	],
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/api/README.md",
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
+	"keywords": [
+		"woocommerce",
+		"e2e"
+	],
 	"license": "GPL-3.0+",
-	"author": "Automattic",
-	"sideEffects": false,
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"files": [
@@ -25,23 +28,20 @@
 		"!/dist/**/__snapshops__/",
 		"!/dist/**/__test_data__/"
 	],
+	"sideEffects": false,
 	"scripts": {
-		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
-		"build:project": "pnpm --if-present /^build:project:.*$/",
-		"build:project:typescript": "wireit",
-		"changelog": "composer install && composer exec -- changelogger",
-		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
-		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint src --fix",
-		"lint:lang:js": "eslint src",
-		"prepack": "pnpm build",
-		"test:js": "wireit",
-		"watch:build": "pnpm build:project --watch"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
+		"turbo:build": "pnpm run clean && npm run compile",
+		"turbo:test": "jest",
+		"test": "pnpm test:js",
+		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"prepare": "composer install",
+		"changelog": "composer exec -- changelogger",
+		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
+		"compile": "tsc --project tsconfig.json",
+		"prepack": "pnpm run build",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix"
 	},
 	"dependencies": {
 		"axios": "^0.24.0",
@@ -59,45 +59,14 @@
 		"eslint": "^8.32.0",
 		"jest": "~27.5.1",
 		"ts-jest": "~29.1.1",
-		"typescript": "^5.1.6",
-		"wireit": "^0.14.1"
-	},
-	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"typescript": "^5.1.6"
 	},
 	"publishConfig": {
 		"access": "public"
 	},
-	"wireit": {
-		"build:project:typescript": {
-			"command": "tsc --project tsconfig.json",
-			"files": [
-				"tsconfig.json",
-				"src/**/*.{js,jsx,ts,tsx}",
-				"typings/**/*.ts"
-			],
-			"output": [
-				"dist"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
-		"test:js": {
-			"command": "jest --config ./jest.config.js --passWithNoTests",
-			"dependencies": [
-				"build:project"
-			]
-		},
-		"dependencyOutputs": {
-			"allowUsuallyExcludedPaths": true,
-			"files": [
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js",
-				"package.json"
-			]
-		}
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
 	}
 }

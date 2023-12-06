@@ -1,50 +1,53 @@
 {
 	"name": "@woocommerce/notices",
 	"version": "4.0.1",
-	"private": true,
 	"description": "State management for notices.",
+	"author": "The WordPress Contributors",
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
 	"keywords": [
 		"wordpress",
 		"gutenberg",
 		"notices"
 	],
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/notices/README.md",
-	"bugs": {
-		"url": "https://github.com/woocommerce/woocommerce/issues"
-	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerge.git",
 		"directory": "packages/js/notices"
 	},
-	"license": "GPL-2.0-or-later",
-	"author": "The WordPress Contributors",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
-	"react-native": "src/index",
 	"types": "build-types",
-	"scripts": {
-		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
-		"build:project": "pnpm --if-present /^build:project:.*$/",
-		"build:project:cjs": "wireit",
-		"build:project:esm": "wireit",
-		"changelog": "composer install && composer exec -- changelogger",
-		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
-		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint src --fix",
-		"lint:lang:js": "eslint src",
-		"prepack": "pnpm build",
-		"watch:build": "pnpm build:project --watch"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
-	},
+	"react-native": "src/index",
 	"dependencies": {
 		"@wordpress/a11y": "wp-6.0",
 		"@wordpress/data": "wp-6.0",
 		"@wordpress/notices": "wp-6.0"
+	},
+	"peerDependencies": {
+		"lodash": "^4.17.0",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"private": true,
+	"scripts": {
+		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
+		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"lint": "eslint src",
+		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
+		"prepack": "pnpm run clean && pnpm run build",
+		"lint:fix": "eslint src --fix"
 	},
 	"devDependencies": {
 		"@automattic/data-stores": "^2.0.1",
@@ -53,66 +56,18 @@
 		"@types/wordpress__data": "6.0.0",
 		"@types/wordpress__notices": "3.5.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"concurrently": "^7.0.0",
 		"eslint": "^8.32.0",
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
+		"concurrently": "^7.0.0",
 		"redux": "^4.2.0",
 		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
-		"typescript": "^5.1.6",
-		"wireit": "^0.14.1"
+		"typescript": "^5.1.6"
 	},
-	"peerDependencies": {
-		"lodash": "^4.17.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
-	},
-	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
-	},
-	"publishConfig": {
-		"access": "public"
-	},
-	"wireit": {
-		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json",
-			"files": [
-				"tsconfig-cjs.json",
-				"src/**/*.{js,jsx,ts,tsx}",
-				"typings/**/*.ts"
-			],
-			"output": [
-				"build"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
-		"build:project:esm": {
-			"command": "tsc --project tsconfig.json",
-			"files": [
-				"tsconfig.json",
-				"src/**/*.{js,jsx,ts,tsx}",
-				"typings/**/*.ts"
-			],
-			"output": [
-				"build-module",
-				"build-types"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
-		"dependencyOutputs": {
-			"allowUsuallyExcludedPaths": true,
-			"files": [
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js",
-				"package.json"
-			]
-		}
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
 	}
 }
