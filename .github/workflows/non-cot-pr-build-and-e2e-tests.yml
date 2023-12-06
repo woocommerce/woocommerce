@@ -23,13 +23,10 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                install: '@woocommerce/plugin-woocommerce...'
-                build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers
               working-directory: plugins/woocommerce
-              run: pnpm --filter='@woocommerce/plugin-woocommerce' env:test
+              run: pnpm env:test --filter=woocommerce
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -81,13 +78,10 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                install: '@woocommerce/plugin-woocommerce...'
-                build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers
               working-directory: plugins/woocommerce
-              run: pnpm --filter='@woocommerce/plugin-woocommerce' env:test
+              run: pnpm env:test --filter=woocommerce
 
             - name: Run Playwright API tests.
               id: run_playwright_api_tests

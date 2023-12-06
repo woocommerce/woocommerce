@@ -116,7 +116,7 @@
 			"packages": [
 				"@woocommerce/block-templates",
 				"@woocommerce/product-editor",
-				"@woocommerce/admin-library",
+				"woocommerce/client/admin",
 				"@woocommerce/components"
 			],
 			"isIgnored": true
@@ -223,15 +223,6 @@
 				"**"
 			],
 			"pinVersion": "~29.1.1"
-		},
-		{
-			"dependencies": [
-				"wireit"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^0.14.1"
 		},
 		{
 			"label": "Only manage versions for these dependencies",

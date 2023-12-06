@@ -1,34 +1,26 @@
 {
 	"name": "@woocommerce/internal-style-build",
 	"version": "1.0.0",
-	"private": true,
 	"description": "WooCommerce Components SASS Build",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
 	"keywords": [
 		"wordpress",
 		"woocommerce"
 	],
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/internal-style-build/README.md",
-	"bugs": {
-		"url": "https://github.com/woocommerce/woocommerce/issues"
-	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
-	"license": "GPL-2.0-or-later",
-	"author": "Automattic",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
 	"main": "index.js",
-	"scripts": {
-		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
-		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint index.js --fix",
-		"lint:lang:js": "eslint index.js"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
-	},
 	"dependencies": {
 		"@automattic/color-studio": "^2.5.0",
 		"@wordpress/base-styles": "wp-6.3",
@@ -40,6 +32,11 @@
 		"webpack-remove-empty-scripts": "^0.7.3",
 		"webpack-rtl-plugin": "^2.0.0"
 	},
+	"scripts": {
+		"lint": "eslint index.js",
+		"lint:fix": "eslint index.js --fix"
+	},
+	"private": true,
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
@@ -49,11 +46,11 @@
 		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.1.6",
-		"webpack": "^5.70.0",
-		"wireit": "^0.14.1"
+		"webpack": "^5.70.0"
 	},
-	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
 	}
 }

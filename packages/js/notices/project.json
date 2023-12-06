@@ -1,0 +1,25 @@
+{
+     "root": "packages/js/notices",
+     "sourceRoot": "packages/js/notices/src",
+     "projectType": "library",
+     "targets": {
+         "build": {
+             "executor": "@nrwl/workspace:run-script",
+             "options": {
+                 "script": "build"
+             }
+         },
+         "build-watch": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+                "script": "start"
+			}
+		},
+         "test": {
+             "executor": "@nrwl/workspace:run-script",
+             "options": {
+                 "script": "test"
+             }
+         }
+     }
+ }
