@@ -8,6 +8,7 @@ import { store as preferencesStore } from '@wordpress/preferences';
 import apiFetch from '@wordpress/api-fetch';
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 import ReactMarkdown from 'react-markdown';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 /**
  * Internal dependencies
@@ -37,6 +38,16 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ isResponseError, setIsResponseError ] = useState( false );
 	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
 	const { set: setStorageData } = useDispatch( preferencesStore );
+
+	const [ parent ] = useAutoAnimate();
+	const chatMessagesEndRef = React.useRef< HTMLLIElement | null >( null );
+
+	useEffect( () => {
+		if ( chatMessagesEndRef && chatMessagesEndRef.current ) {
+			const element = chatMessagesEndRef.current;
+			element.scrollIntoView( { behavior: 'smooth' } );
+		}
+	}, [ chatMessagesEndRef, messages ] );
 
 	useEffect( () => {
 		if ( ! threadID ) {
@@ -263,16 +274,17 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			onRequestClose={ onClose }
 			className="woo-ai-assistant-chat-modal"
 		>
-			<div className="woo-chat-history">
+			<ul className="woo-chat-history" ref={ parent }>
 				{ messages.map( ( message, index ) => (
-					<div
+					<li
 						key={ index }
 						className={ `message ${ message.sender }` }
 					>
 						<ReactMarkdown>{ message.text }</ReactMarkdown>
-					</div>
+					</li>
 				) ) }
-			</div>
+				<li ref={ chatMessagesEndRef }></li>
+			</ul>
 			<form onSubmit={ handleSubmit } className="chat-form">
 				<TextareaControl
 					value={ input }
