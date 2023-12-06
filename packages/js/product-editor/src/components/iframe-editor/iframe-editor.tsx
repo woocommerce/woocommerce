@@ -34,12 +34,12 @@ import { useEditorHistory } from './hooks/use-editor-history';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 
 type IframeEditorProps = {
-	closeModal?: () => void;
 	initialBlocks?: BlockInstance[];
 	onChange?: ( blocks: BlockInstance[] ) => void;
 	onClose?: () => void;
 	onInput?: ( blocks: BlockInstance[] ) => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
+	showBackButton?: boolean;
 };
 
 export function IframeEditor( {
@@ -48,6 +48,7 @@ export function IframeEditor( {
 	onClose,
 	onInput = () => {},
 	settings: __settings,
+	showBackButton = false,
 }: IframeEditorProps ) {
 	const [ resizeObserver ] = useResizeObserver();
 	const [ temporalBlocks, setTemporalBlocks ] =
@@ -167,7 +168,7 @@ export function IframeEditor( {
 							{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 							{ /* @ts-ignore */ }
 							<BlockEditorKeyboardShortcuts.Register />
-							{ onClose && (
+							{ showBackButton && onClose && (
 								<BackButton
 									onClick={ () => {
 										setTimeout( onClose, 550 );
