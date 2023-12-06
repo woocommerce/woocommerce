@@ -18,15 +18,15 @@ class Woo_AI_Woo_Wizard {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'admin_enqueue_scripts', array( $this, 'add_woo_wizard_register_script' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_woo_ai_assistant_register_script' ) );
 	}
 
 	/**
 	 * Enqueue the styles and JS
 	 */
-	public function add_woo_wizard_register_script() {
-		$script_path       = '/../build/index.js';
-		$script_asset_path = dirname( __FILE__ ) . '/../build/index.asset.php';
+	public function add_woo_ai_assistant_register_script() {
+		$script_path       = '/../build/wooAiAssistant.js';
+		$script_asset_path = dirname( __FILE__ ) . '/../build/wooAiAssistant.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
 			? require $script_asset_path
 			: array(
@@ -38,14 +38,14 @@ class Woo_AI_Woo_Wizard {
 		$script_asset['dependencies'][] = WC_ADMIN_APP; // Add WCA as a dependency to ensure it loads first.
 
 		wp_register_script(
-			'woo-wizard',
+			'woo-ai-assistant',
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
 			true
 		);
 
-		wp_enqueue_script( 'woo-wizard' );
+		wp_enqueue_script( 'woo-ai-assistant' );
 
 		if ( class_exists( '\Automattic\Jetpack\Connection\Initial_State' ) ) {
 			wp_add_inline_script( 'woo-ai', Connection_Initial_State::render(), 'before' );
@@ -53,7 +53,7 @@ class Woo_AI_Woo_Wizard {
         $css_file_version = filemtime( dirname( __FILE__ ) . '/../build/index.css' );
 
 		wp_register_style(
-			'woo-wizard',
+			'woo-ai-assistant',
 			plugins_url( '/../build/index.css', __FILE__ ),
 			// Add any dependencies styles may have, such as wp-components.
 			array(
@@ -62,7 +62,7 @@ class Woo_AI_Woo_Wizard {
 			$css_file_version
 		);
 
-		wp_enqueue_style( 'woo-wizard' );
+		wp_enqueue_style( 'wwoo-ai-assistant' );
 	}
 
 }

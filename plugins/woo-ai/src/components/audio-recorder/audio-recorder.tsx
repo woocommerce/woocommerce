@@ -68,7 +68,7 @@ export const AudioRecorder: React.FC< AudioRecorderProps > = ( {
 
 	return (
 		<Button
-			className="woo-wizard-mic-button"
+			className="woo-ai-assistant-mic-button"
 			icon={ isRecording ? playerStop : micIcon }
 			iconSize={ 32 }
 			onClick={ isRecording ? stopRecording : startRecording }

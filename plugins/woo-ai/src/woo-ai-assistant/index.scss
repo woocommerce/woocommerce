@@ -1,7 +1,7 @@
 $woocommerce-purple: #9b5c8f;
 $toned-down-purple: mix(white, $woocommerce-purple, 50%); // 50% white
 
-.woo-wizard-chat-modal {
+.woo-ai-assistant-chat-modal {
 	max-height: 100%;
 	
 	.components-modal__content {
@@ -54,7 +54,7 @@ $toned-down-purple: mix(white, $woocommerce-purple, 50%); // 50% white
 			margin-right: 10px;
 		}
 
-		.woo-wizard-mic-button {
+		.woo-ai-assistant-mic-button {
 			margin-right: 10px;
 		}
 
@@ -62,7 +62,7 @@ $toned-down-purple: mix(white, $woocommerce-purple, 50%); // 50% white
 			resize: vertical;
 		}
 
-		.woo-wizard-submit-button {
+		.woo-ai-assistant-submit-button {
 			padding: 15px;
 			border: 1px solid #ccc;
 			border-radius: 5px;

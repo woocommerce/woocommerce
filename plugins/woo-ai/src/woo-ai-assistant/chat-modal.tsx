@@ -26,33 +26,33 @@ type ChatModalProps = {
 };
 
 const WOO_AI_PLUGIN_NAME = 'woo-ai-plugin';
-const threadPreferenceId = 'assistant-chat-thread-id';
-const chatHistoryPreferenceId = 'woo-ai-chat-history';
+const preferencesChatID = 'assistant-chat-id';
+const preferencesChatHistory = 'woo-ai-chat-history';
 
 const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ input, setInput ] = useState( '' );
 	const [ messages, setMessages ] = useState< Message[] >( [] );
 	const [ isLoading, setLoading ] = useState( false );
-	const [ threadID, setThreadID ] = useState< string >( '' );
+	const [ chatID, setChatID ] = useState< string >( '' );
 	const [ isResponseError, setIsResponseError ] = useState( false );
 	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
 	const { set: setStorageData } = useDispatch( preferencesStore );
 
 	useEffect( () => {
-		if ( ! threadID ) {
-			const storedThreadId = select( preferencesStore ).get(
+		if ( ! chatID ) {
+			const storedChatId = select( preferencesStore ).get(
 				WOO_AI_PLUGIN_NAME,
-				threadPreferenceId
+				preferencesChatID
 			);
-			setThreadID( storedThreadId );
+			setChatID( storedChatId );
 		}
-	}, [ threadID, setStorageData ] );
+	}, [ chatID, setStorageData ] );
 
 	useEffect( () => {
 		if ( ! messages || ! messages.length ) {
 			const storedMessages = select( preferencesStore ).get(
 				WOO_AI_PLUGIN_NAME,
-				chatHistoryPreferenceId
+				preferencesChatHistory
 			);
 			if ( storedMessages ) {
 				setMessages( JSON.parse( storedMessages ) );
@@ -70,13 +70,13 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		input: string,
 		token: string,
 		audioBlob: Blob | null,
-		tempThreadID?: string
+		tempChatID?: string
 	) => {
 		const formData = new FormData();
 		formData.append( 'message', input );
 		formData.append( 'token', token );
-		if ( tempThreadID ) {
-			formData.append( 'thread_id', tempThreadID );
+		if ( tempChatID ) {
+			formData.append( 'chat_id', tempChatID );
 		}
 		if ( audioBlob ) {
 			// @todo: maybe grab the extension from the blob mime type?
@@ -105,7 +105,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const handleRequiresAction = async (
 		response: any,
 		token: string,
-		tempThreadID: string
+		tempChatID: string
 	) => {
 		const answer = response.answer;
 		const functionID: string = answer.function_id;
@@ -118,7 +118,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 					functionArguments
 				) ) as string;
 				message = responseBody;
-				// Make an API call to update the thread with the result of the function call
+				// Make an API call to update the chat with the result of the function call
 			} catch ( error ) {
 				handleError(
 					"I'm sorry, I had trouble performing this task for you."
@@ -135,7 +135,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 					input,
 					token,
 					audioBlob,
-					tempThreadID
+					tempChatID
 				);
 				formData.append( 'run_id', runID );
 				formData.append( 'tool_call_id', functionID );
@@ -190,9 +190,9 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		return message;
 	};
 
-	const setAndStoreThreadID = ( newThreadID: string ) => {
-		setStorageData( WOO_AI_PLUGIN_NAME, threadPreferenceId, newThreadID );
-		setThreadID( newThreadID );
+	const setAndStoreChatID = ( newChatID: string ) => {
+		setStorageData( WOO_AI_PLUGIN_NAME, preferencesChatID, newChatID );
+		setChatID( newChatID );
 	};
 
 	const setAndStoreMessages = (
@@ -206,7 +206,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		console.log( 'chatMessage: ', chatMessage );
 		setStorageData(
 			WOO_AI_PLUGIN_NAME,
-			chatHistoryPreferenceId,
+			preferencesChatHistory,
 			JSON.stringify( [ ...messages, chatMessage ] )
 		);
 		setMessages( ( prevMessages ) => [ ...prevMessages, chatMessage ] );
@@ -230,10 +230,10 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				method: 'POST',
 				body: formData,
 			} ) ) as any;
-			const newThreadID = response.thread_id;
-			const tempThreadID = newThreadID || threadID;
-			if ( ! threadID && newThreadID ) {
-				setAndStoreThreadID( newThreadID );
+			const newChatID = response.chat_id;
+			const tempChatID = newChatID || chatID;
+			if ( ! chatID && newChatID ) {
+				setAndStoreChatID( newChatID );
 			}
 
 			let answer: string;
@@ -241,7 +241,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				const actionsAnswer = await handleRequiresAction(
 					response,
 					token,
-					tempThreadID
+					tempChatID
 				);
 				answer = actionsAnswer || '';
 			} else {
@@ -263,7 +263,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		<Modal
 			title="Woo Wizard Assistant"
 			onRequestClose={ onClose }
-			className="woo-wizard-chat-modal"
+			className="woo-ai-assistant-chat-modal"
 		>
 			<div className="woo-chat-history">
 				{ messages.map( ( message, index ) => (
@@ -289,7 +289,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 					}
 				/>
 				<Button
-					className="woo-wizard-submit-button"
+					className="woo-ai-assistant-submit-button"
 					disabled={ isLoading }
 					isBusy={ isLoading }
 					type="submit"
