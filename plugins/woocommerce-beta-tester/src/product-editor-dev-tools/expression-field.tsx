@@ -6,7 +6,7 @@ import { evaluate } from '@woocommerce/expression-evaluation';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { check, close, edit } from '@wordpress/icons';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 export function ExpressionField( {
 	expression,
@@ -55,16 +55,20 @@ export function ExpressionField( {
 
 	const expressionTextAreaRef = useRef< HTMLTextAreaElement >( null );
 
-	const handleOnChange = () => {
+	const handleOnChange = (
+		event: React.ChangeEvent< HTMLTextAreaElement >
+	) => {
+		setEditedExpression( event.target.value );
+	};
+
+	useLayoutEffect( () => {
 		const textArea = expressionTextAreaRef.current;
 
 		if ( ! textArea ) return;
 
 		textArea.style.height = 'auto';
 		textArea.style.height = textArea.scrollHeight + 'px';
-
-		setEditedExpression( textArea.value );
-	};
+	}, [ editedExpression ] );
 
 	const handleOnUpdate = () => {
 		onUpdate( editedExpression );
