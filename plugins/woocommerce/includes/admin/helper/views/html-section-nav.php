@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit(); ?>
 
 	<?php
 		$count_html = WC_Helper_Updater::get_updates_count_html();
-		/* translators: %s: WooCommerce.com Subscriptions tab count HTML. */
+		/* translators: %s: Woo.com Subscriptions tab count HTML. */
 		$menu_title = sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html );
 	?>
 	<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>" class="nav-tab nav-tab-active"><?php echo wp_kses_post( $menu_title ); ?></a>

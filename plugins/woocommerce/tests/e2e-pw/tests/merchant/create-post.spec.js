@@ -1,5 +1,6 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
+const { goToPostEditor } = require( '../../utils/editor' );
 
 const postTitle = `Post-${ new Date().getTime().toString() }`;
 
@@ -33,31 +34,7 @@ test.describe( 'Can create a new post', () => {
 	} );
 
 	test( 'can create new post', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php' );
-
-		const welcomeModalVisible = await test.step(
-			'Check if the Welcome modal appeared',
-			async () => {
-				return await page
-					.getByRole( 'heading', {
-						name: 'Welcome to the block editor',
-					} )
-					.isVisible();
-			}
-		);
-
-		if ( welcomeModalVisible ) {
-			await test.step( 'Welcome modal appeared. Close it.', async () => {
-				await page
-					.getByRole( 'document' )
-					.getByRole( 'button', { name: 'Close' } )
-					.click();
-			} );
-		} else {
-			await test.step( 'Welcome modal did not appear.', async () => {
-				// do nothing.
-			} );
-		}
+		await goToPostEditor( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: 'Add Title' } )

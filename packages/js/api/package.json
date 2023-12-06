@@ -40,7 +40,7 @@
 		"compile": "tsc --project tsconfig.json",
 		"prepack": "pnpm run build",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint --output-file eslint_report.json --format json src",
+		"lint": "eslint src",
 		"lint:fix": "eslint src --fix"
 	},
 	"dependencies": {
@@ -57,8 +57,8 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"axios-mock-adapter": "^1.20.0",
 		"eslint": "^8.32.0",
-		"jest": "^27",
-		"ts-jest": "^27",
+		"jest": "~27.5.1",
+		"ts-jest": "~29.1.1",
 		"typescript": "^5.1.6"
 	},
 	"publishConfig": {

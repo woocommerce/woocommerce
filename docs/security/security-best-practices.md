@@ -1,4 +1,6 @@
-# WooCommerce security best practices
+---
+post_title: WooCommerce security best practices
+---
 
 ## Introduction
 

@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import { DEFAULT_LOGO_WIDTH } from './assembler-hub/sidebar/constants';
+
 export function sendMessageToParent( message ) {
 	window.parent.postMessage( message, '*' );
 }
@@ -13,6 +18,14 @@ export function editorIsLoaded() {
 export function onIframeLoad( callback ) {
 	window.addEventListener( 'message', ( event ) => {
 		if ( event.data.type === 'iframe-loaded' ) {
+			callback();
+		}
+	} );
+}
+
+export function onBackButtonClicked( callback ) {
+	window.addEventListener( 'message', ( event ) => {
+		if ( event.data.type === 'assemberBackButtonClicked' ) {
 			callback();
 		}
 	} );
@@ -57,35 +70,8 @@ export function navigateOrParent( windowObject, url ) {
  * @param {HTMLIFrameElement} iframe
  */
 export function attachIframeListeners( iframe ) {
-	const iframeWindow = iframe.contentWindow;
 	const iframeDocument =
 		iframe.contentDocument || iframe.contentWindow?.document;
-
-	// Listen for pushstate event
-	if ( iframeWindow?.history ) {
-		const originalPushState = iframeWindow.history.pushState;
-		iframeWindow.history.pushState = function ( state, title, url ) {
-			const urlString = url?.toString();
-			if ( urlString ) {
-				// If the URL is not the Assembler Hub, navigate the main window to the new URL.
-				if ( urlString?.indexOf( 'customize-store' ) === -1 ) {
-					window.location.href = urlString;
-				} else {
-					window.history.pushState( state, title, url ); // Update the main window's history
-					originalPushState( state, title, url );
-				}
-			}
-		};
-	}
-
-	// Listen for popstate event
-	iframeWindow?.addEventListener( 'popstate', function ( event ) {
-		window.history.replaceState(
-			event.state,
-			'',
-			iframeWindow.location.href
-		);
-	} );
 
 	// Intercept external link clicks
 	iframeDocument?.addEventListener( 'click', function ( event ) {
@@ -101,3 +87,17 @@ export function attachIframeListeners( iframe ) {
 		}
 	} );
 }
+
+export const setLogoWidth = ( content, width = DEFAULT_LOGO_WIDTH ) => {
+	const logoPatternReg = /<!-- wp:site-logo\s*(\{.*?\})?\s*\/-->/g;
+
+	// Replace the logo width with the default width.
+	return content.replaceAll( logoPatternReg, ( match, group ) => {
+		if ( group ) {
+			const json = JSON.parse( group );
+			json.width = width;
+			return `<!-- wp:site-logo ${ JSON.stringify( json ) } /-->`;
+		}
+		return `<!-- wp:site-logo {"width":${ width }} /-->`;
+	} );
+};

@@ -16,7 +16,7 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
-
+import { PluginArea } from '@wordpress/plugins';
 /**
  * Internal dependencies
  */
@@ -29,7 +29,11 @@ import {
 } from './intro';
 import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
-import { events as transitionalEvents } from './transitional';
+import {
+	events as transitionalEvents,
+	services as transitionalServices,
+	actions as transitionalActions,
+} from './transitional';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
@@ -101,6 +105,12 @@ const browserPopstateHandler =
 		};
 	};
 
+const CYSSpinner = () => (
+	<div className="woocommerce-customize-store__loading">
+		<Spinner />
+	</div>
+);
+
 export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
@@ -109,11 +119,13 @@ export const machineActions = {
 
 export const customizeStoreStateMachineActions = {
 	...introActions,
+	...transitionalActions,
 	...machineActions,
 };
 
 export const customizeStoreStateMachineServices = {
 	...introServices,
+	...transitionalServices,
 	browserPopstateHandler,
 	markTaskComplete,
 };
@@ -145,6 +157,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			customizeStoreTaskCompleted: false,
 			currentThemeIsAiGenerated: false,
 		},
+		transitionalScreen: {
+			hasCompleteSurvey: false,
+		},
+		aiOnline: true,
 	} as customizeStoreStateMachineContext,
 	invoke: {
 		src: 'browserPopstateHandler',
@@ -199,22 +215,54 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			initial: 'preIntro',
 			states: {
 				preIntro: {
-					invoke: {
-						src: 'fetchIntroData',
-						onError: {
-							actions: 'assignFetchIntroDataError',
-							target: 'intro',
+					type: 'parallel',
+					states: {
+						checkAiStatus: {
+							initial: 'pending',
+							states: {
+								pending: {
+									invoke: {
+										src: 'fetchAiStatus',
+										onDone: {
+											actions: 'assignAiStatus',
+											target: 'success',
+										},
+										onError: {
+											actions: 'assignAiOffline',
+											target: 'success',
+										},
+									},
+								},
+								success: { type: 'final' },
+							},
 						},
-						onDone: {
-							target: 'intro',
-							actions: [
-								'assignThemeData',
-								'assignActiveThemeHasMods',
-								'assignCustomizeStoreCompleted',
-								'assignCurrentThemeIsAiGenerated',
-							],
+						fetchIntroData: {
+							initial: 'pending',
+							states: {
+								pending: {
+									invoke: {
+										src: 'fetchIntroData',
+										onError: {
+											actions:
+												'assignFetchIntroDataError',
+											target: 'success',
+										},
+										onDone: {
+											target: 'success',
+											actions: [
+												'assignThemeData',
+												'assignActiveThemeHasMods',
+												'assignCustomizeStoreCompleted',
+												'assignCurrentThemeIsAiGenerated',
+											],
+										},
+									},
+								},
+								success: { type: 'final' },
+							},
 						},
 					},
+					onDone: 'intro',
 				},
 				intro: {
 					meta: {
@@ -270,8 +318,21 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'assemblerHub',
+			initial: 'checkAiStatus',
 			states: {
+				checkAiStatus: {
+					invoke: {
+						src: 'fetchAiStatus',
+						onDone: {
+							actions: 'assignAiStatus',
+							target: 'assemblerHub',
+						},
+						onError: {
+							actions: 'assignAiOffline',
+							target: 'assemblerHub',
+						},
+					},
+				},
 				assemblerHub: {
 					entry: [
 						{ type: 'updateQueryStep', step: 'assembler-hub' },
@@ -281,12 +342,19 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					},
 				},
 				postAssemblerHub: {
-					invoke: {
-						src: 'markTaskComplete',
-						onDone: {
-							target: '#customizeStore.transitionalScreen',
+					invoke: [
+						{
+							src: 'markTaskComplete',
+							// eslint-disable-next-line xstate/no-ondone-outside-compound-state
+							onDone: {
+								target: '#customizeStore.transitionalScreen',
+							},
 						},
-					},
+						{
+							// Pre-fetch survey completed option so we can show the screen immediately.
+							src: 'fetchSurveyCompletedOption',
+						},
+					],
 				},
 			},
 			on: {
@@ -299,13 +367,38 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		transitionalScreen: {
-			entry: [ { type: 'updateQueryStep', step: 'transitional' } ],
-			meta: {
-				component: AssemblerHub,
-			},
-			on: {
-				GO_BACK_TO_HOME: {
-					actions: 'redirectToWooHome',
+			initial: 'preTransitional',
+			states: {
+				preTransitional: {
+					meta: {
+						component: CYSSpinner,
+					},
+					invoke: {
+						src: 'fetchSurveyCompletedOption',
+						onError: {
+							target: 'transitional', // leave it as initialised default on error
+						},
+						onDone: {
+							target: 'transitional',
+							actions: [ 'assignHasCompleteSurvey' ],
+						},
+					},
+				},
+				transitional: {
+					entry: [
+						{ type: 'updateQueryStep', step: 'transitional' },
+					],
+					meta: {
+						component: AssemblerHub,
+					},
+					on: {
+						GO_BACK_TO_HOME: {
+							actions: 'redirectToWooHome',
+						},
+						COMPLETE_SURVEY: {
+							actions: 'completeSurvey',
+						},
+					},
 				},
 			},
 		},
@@ -340,6 +433,12 @@ export const CustomizeStoreController = ( {
 						pathFragments[ 2 ] === // [0] '', [1] 'customize-store', [2] step slug
 						( cond as { step: string | undefined } ).step
 					);
+				},
+				isAiOnline: ( _ctx ) => {
+					return _ctx.aiOnline;
+				},
+				isAiOffline: ( _ctx ) => {
+					return ! _ctx.aiOnline;
 				},
 			},
 		} );
@@ -389,11 +488,11 @@ export const CustomizeStoreController = ( {
 						currentState={ state.value }
 					/>
 				) : (
-					<div className="woocommerce-customize-store__loading">
-						<Spinner />
-					</div>
+					<CYSSpinner />
 				) }
 			</div>
+			{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+			<PluginArea scope="woocommerce-customize-store" />
 		</>
 	);
 };

@@ -6,6 +6,7 @@ import { createElement, useState } from '@wordpress/element';
 import { trash } from '@wordpress/icons';
 import { useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { ImageGallery, ImageGalleryItem } from '@woocommerce/components';
 import {
 	Button,
 	Modal,
@@ -18,7 +19,15 @@ import {
  * Internal dependencies
  */
 import { EditDownloadsModalProps } from './types';
-import { UnionIcon } from './union-icon';
+import { UnionIcon } from './images/union-icon';
+import { DownloadsCustomImage } from './images/downloads-custom-image';
+
+export interface Image {
+	id: number;
+	src: string;
+	name: string;
+	alt: string;
+}
 
 export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 	downloableItem,
@@ -31,13 +40,22 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 	const [ isCopingToClipboard, setIsCopingToClipboard ] =
 		useState< boolean >( false );
 
-	const { file = '', name = '' } = downloableItem;
+	const { id = 0, file = '', name = '' } = downloableItem;
 
 	const onCopySuccess = () => {
 		createNotice(
 			'success',
 			__( 'URL copied successfully.', 'woocommerce' )
 		);
+	};
+
+	const isImage = ( filename = '' ) => {
+		if ( ! filename ) return;
+		const imageExtensions = [ 'jpg', 'jpeg', 'png', 'gif', 'webp' ];
+		const fileExtension = (
+			filename.split( '.' ).pop() || ''
+		).toLowerCase();
+		return imageExtensions.includes( fileExtension );
 	};
 
 	async function copyTextToClipboard( text: string ) {
@@ -81,6 +99,25 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 			} }
 			className="woocommerce-edit-downloads-modal"
 		>
+			<div className="woocommerce-edit-downloads-modal__preview">
+				<ImageGallery allowDragging={ false } columns={ 1 }>
+					{ isImage( file ) ? (
+						<ImageGalleryItem
+							key={ id }
+							alt={ name }
+							src={ file }
+							id={ `${ id }` }
+							isCover={ false }
+						/>
+					) : (
+						<DownloadsCustomImage />
+					) }
+				</ImageGallery>
+
+				<div className="components-form-file-upload">
+					<p>{ name }</p>
+				</div>
+			</div>
 			<BaseControl
 				id={ 'file-name-help' }
 				className="woocommerce-edit-downloads-modal__file-name"

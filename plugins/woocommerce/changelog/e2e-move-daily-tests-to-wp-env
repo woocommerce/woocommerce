@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update daily smoke test to run locally instead of against an external host

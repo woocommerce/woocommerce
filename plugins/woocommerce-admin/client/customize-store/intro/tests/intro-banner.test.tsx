@@ -41,6 +41,10 @@ describe( 'Intro Banners', () => {
 						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
+					transitionalScreen: {
+						hasCompleteSurvey: false,
+					},
+					aiOnline: true,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -75,6 +79,10 @@ describe( 'Intro Banners', () => {
 						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
+					transitionalScreen: {
+						hasCompleteSurvey: false,
+					},
+					aiOnline: true,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -115,6 +123,10 @@ describe( 'Intro Banners', () => {
 						currentThemeIsAiGenerated: true,
 					},
 					themeConfiguration: {},
+					transitionalScreen: {
+						hasCompleteSurvey: false,
+					},
+					aiOnline: true,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }

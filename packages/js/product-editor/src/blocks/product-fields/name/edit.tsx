@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement, Fragment, useState } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 
 import { useInstanceId } from '@wordpress/compose';
 import { cleanForSlug } from '@wordpress/url';
@@ -38,6 +43,7 @@ import { Label } from '../../../components/label/label';
 
 export function Edit( {
 	attributes,
+	clientId,
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
@@ -138,6 +144,15 @@ export function Edit( {
 		BaseControl,
 		'product_name'
 	) as string;
+
+	// Select the block initially if it is set to autofocus.
+	// (this does not get done automatically by focusing the input)
+	const { selectBlock } = useDispatch( 'core/block-editor' );
+	useEffect( () => {
+		if ( attributes.autoFocus ) {
+			selectBlock( clientId );
+		}
+	}, [] );
 
 	return (
 		<>

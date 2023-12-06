@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
-	"homepage": "https://woocommerce.com/",
+	"homepage": "https://woo.com/",
 	"version": "8.3.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
@@ -22,8 +22,8 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.6.4",
-		"woocommerce/woocommerce-blocks": "11.4.2"
+		"woocommerce/action-scheduler": "3.7.0",
+		"woocommerce/woocommerce-blocks": "11.7.0"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",

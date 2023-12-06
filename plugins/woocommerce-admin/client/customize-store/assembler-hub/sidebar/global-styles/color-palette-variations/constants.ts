@@ -1187,6 +1187,13 @@ export const COLOR_PALETTES = [
 							text: 'var(--wp--preset--color--background)',
 						},
 					},
+					':visited': {
+						color: {
+							text: color.styles.elements?.button
+								? color.styles.elements.button.color
+								: 'var(--wp--preset--color--background)',
+						},
+					},
 					color: {
 						background: 'var(--wp--preset--color--primary)',
 						text: 'var(--wp--preset--color--background)',

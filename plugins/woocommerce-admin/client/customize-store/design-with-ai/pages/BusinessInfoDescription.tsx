@@ -61,15 +61,11 @@ export const BusinessInfoDescription = ( {
 							setBusinessInfoDescription( businessInfo );
 						} }
 						value={ businessInfoDescription }
-						placeholder={ __(
-							'E.g., At Cool Cat Shades, we sell sunglasses specially designed for our stylish feline friends. Designed and developed with a cat’s comfort in mind, our range of sunglasses are fashionable accessories our furry friends can wear all day. We currently offer 50 different styles and variations of shades, with plans to add more in the near future.',
-							'woocommerce'
-						) }
 					/>
 					<div className="woocommerce-cys-design-with-ai-guide">
 						<p>
 							{ __(
-								'The more detail you provide, the better job our AI can do!',
+								'The more detail you provide, the better our AI tool can do at creating your content.',
 								'woocommerce'
 							) }
 						</p>

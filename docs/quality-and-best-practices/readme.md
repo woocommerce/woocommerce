@@ -1,4 +1,8 @@
-# Quality and Best Practices
+---
+category_title: Quality And Best Practices  
+category_slug: quality-and-best-practices
+post_title: Quality and best practices
+---
 
 > ⚠️ **Notice:** This documentation is currently a **work in progress**. While it's open to the public for transparency and collaboration, please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
 

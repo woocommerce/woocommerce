@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createContext } from '@wordpress/element';
 import { render, screen } from '@testing-library/react';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -10,6 +11,13 @@ import { recordEvent } from '@woocommerce/tracks';
 import { OnboardingTour } from '../index';
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
+jest.mock( '../../', () => ( {
+	CustomizeStoreContext: createContext( {
+		context: {
+			aiOnline: true,
+		},
+	} ),
+} ) );
 
 describe( 'OnboardingTour', () => {
 	let props: {

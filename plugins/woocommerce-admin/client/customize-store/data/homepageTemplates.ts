@@ -2,10 +2,10 @@ export const HOMEPAGE_TEMPLATES = {
 	template1: {
 		blocks: [
 			// Header
-			'woocommerce-blocks/header-centered-menu-with-search',
+			'woocommerce-blocks/header-centered-menu',
 
 			// Body
-			'woocommerce-blocks/just-arrived-full-hero',
+			'woocommerce-blocks/hero-product-split',
 			'woocommerce-blocks/product-collection-5-columns',
 			'woocommerce-blocks/hero-product-3-split',
 			'woocommerce-blocks/product-collection-3-columns',
@@ -36,7 +36,7 @@ export const HOMEPAGE_TEMPLATES = {
 			'woocommerce-blocks/header-essential',
 
 			// Body
-			'woocommerce-blocks/featured-category-cover-image',
+			'woocommerce-blocks/hero-product-split',
 			'woocommerce-blocks/product-collection-4-columns',
 			'woocommerce-blocks/hero-product-chessboard',
 			'woocommerce-blocks/product-collection-5-columns',
@@ -57,10 +57,10 @@ export const HOMEPAGE_TEMPLATES = {
 	template3: {
 		blocks: [
 			// Header
-			'woocommerce-blocks/header-centered-menu-with-search',
+			'woocommerce-blocks/header-centered-menu',
 
 			// Body
-			'woocommerce-blocks/featured-category-cover-image',
+			'woocommerce-blocks/hero-product-split',
 			'woocommerce-blocks/product-collection-featured-products-5-columns',
 			'woocommerce-blocks/featured-category-triple',
 			'woocommerce-blocks/product-query-product-gallery',

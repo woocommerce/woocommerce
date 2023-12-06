@@ -1,4 +1,6 @@
-# Adding actions and filters
+---
+post_title: Adding actions and filters
+---
 
 Like many WordPress plugins, WooCommerce provides a range of actions and filters through which developers can extend and modify the platform.
 

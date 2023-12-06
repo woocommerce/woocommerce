@@ -44,3 +44,15 @@ export { Checkbox as __experimentalCheckboxControl } from './checkbox-control';
 export { NumberControl as __experimentalNumberControl } from './number-control';
 
 export * from './product-page-skeleton';
+
+export * from './modal-editor-welcome-guide';
+
+export {
+	TextControl as __experimentalTextControl,
+	TextControlProps,
+} from './text-control';
+
+export {
+	AddProductsModal as __experimentalAddProductsModal,
+	AddProductsModalProps,
+} from './add-products-modal';

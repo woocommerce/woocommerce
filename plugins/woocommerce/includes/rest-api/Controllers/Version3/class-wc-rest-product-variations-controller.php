@@ -857,16 +857,26 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Filter by attributes.
 		if ( ! empty( $request['attributes'] ) && is_array( $request['attributes'] ) ) {
 			foreach ( $request['attributes'] as $attribute ) {
-				if ( ! isset( $attribute['attribute'] ) || ! isset( $attribute['term'] ) ) {
-					continue;
+				if ( isset( $attribute['attribute'] ) ) {
+					if ( isset( $attribute['term'] ) ) {
+						$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+							$args,
+							array(
+								'key'   => 'attribute_' . $attribute['attribute'],
+								'value' => $attribute['term'],
+							)
+						);
+					} elseif ( ! empty( $attribute['terms'] ) && is_array( $attribute['terms'] ) ) {
+						$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+							$args,
+							array(
+								'key'     => 'attribute_' . $attribute['attribute'],
+								'compare' => 'IN',
+								'value'   => $attribute['terms'],
+							),
+						);
+					}
 				}
-				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					$args,
-					array(
-						'key'   => 'attribute_' . $attribute['attribute'],
-						'value' => $attribute['term'],
-					)
-				);
 			}
 		}
 
@@ -1023,6 +1033,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 						'type'        => 'string',
 						'description' => __( 'Attribute term.', 'woocommerce' ),
 					),
+					'terms'     => array(
+						'type'        => 'array',
+						'description' => __( 'Attribute terms.', 'woocommerce' ),
+					),
 				),
 			),
 		);
@@ -1077,7 +1091,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		wc_maybe_define_constant( 'WC_MAX_LINKED_VARIATIONS', 50 );
+		wc_maybe_define_constant( 'WC_MAX_LINKED_VARIATIONS', 99 );
 		wc_set_time_limit( 0 );
 
 		$response          = array();

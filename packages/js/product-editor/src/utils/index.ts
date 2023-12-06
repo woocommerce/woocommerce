@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { AUTO_DRAFT_NAME } from './constants';
+import { deferSelectInFocus } from './defer-select-in-focus';
 import { formatCurrencyDisplayValue } from './format-currency-display-value';
 import { getCheckboxTracks } from './get-checkbox-tracks';
 import { getCurrencySymbolProps } from './get-currency-symbol-props';
@@ -27,9 +28,11 @@ export * from './register-product-editor-block-type';
 export * from './init-block';
 export * from './product-apifetch-middleware';
 export * from './sift';
+export * from './truncate';
 
 export {
 	AUTO_DRAFT_NAME,
+	deferSelectInFocus,
 	formatCurrencyDisplayValue,
 	getCheckboxTracks,
 	getCurrencySymbolProps,
