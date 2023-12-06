@@ -236,7 +236,7 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 				 *
 				 * Fires after a customer address has been saved on the user profile admin screen.
 				 *
-				 * @since 8.4.1
+				 * @since 8.5.0
 				 * @param int    $user_id User ID being saved.
 				 * @param string $address_type Type of address; 'billing' or 'shipping'.
 				 */
