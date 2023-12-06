@@ -142,28 +142,6 @@ trait OrderAttributionMeta {
 			$return['device_type'] = $this->get_device_type( $return );
 		}
 
-		// Determine the origin based on source type and referrer.
-		$source_type = $return['source_type'] ?? '';
-		switch ( $source_type ) {
-			case 'organic':
-				$origin = __( 'Organic search', 'woocommerce' );
-				break;
-
-			case 'referral':
-				$origin = __( 'Referral', 'woocommerce' );
-				break;
-
-			case 'typein':
-				$origin = __( 'Direct', 'woocommerce' );
-				break;
-
-			default:
-				$origin = __( 'Unknown', 'woocommerce' );
-				break;
-		}
-
-		$return['origin'] = $origin;
-
 		return $return;
 	}
 
@@ -303,9 +281,12 @@ trait OrderAttributionMeta {
 				/* translators: %s is the source value */
 				$label = __( 'Referral: %s', 'woocommerce' );
 				break;
+			case 'typein':
+				$label = __( 'Direct', 'woocommerce' );
+				break;
 
 			default:
-				$label = '';
+				$label = __( 'Unknown', 'woocommerce' );
 				break;
 		}
 
@@ -343,10 +324,6 @@ trait OrderAttributionMeta {
 			$source,
 			$formatted_source
 		);
-
-		if ( false === strpos( $label, '%' ) ) {
-			return $formatted_source;
-		}
 
 		return sprintf( $label, $formatted_source );
 	}
