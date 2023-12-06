@@ -16,8 +16,8 @@ import {
 	TProductCollectionOrder,
 	TProductCollectionOrderBy,
 	QueryControlProps,
-} from '../types';
-import { getDefaultQuery } from '../constants';
+} from '../../types';
+import { getDefaultQuery } from '../../constants';
 
 const orderOptions = [
 	{

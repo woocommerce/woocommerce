@@ -8,8 +8,8 @@ import { BlockControls } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import { setQueryAttribute } from '../utils';
-import { ProductCollectionAttributes } from '../types';
+import { setQueryAttribute } from '../../utils';
+import { ProductCollectionAttributes } from '../../types';
 import DisplaySettingsToolbar from './display-settings-toolbar';
 import DisplayLayoutToolbar from './display-layout-toolbar';
 import PatternChooserToolbar from './pattern-chooser-toolbar';

@@ -15,7 +15,7 @@ import {
  * Internal dependencies
  */
 import TaxonomyItem from './taxonomy-item';
-import { ProductCollectionQuery } from '../../types';
+import { ProductCollectionQuery } from '../../../types';
 
 interface TaxonomyControlProps {
 	query: ProductCollectionQuery;

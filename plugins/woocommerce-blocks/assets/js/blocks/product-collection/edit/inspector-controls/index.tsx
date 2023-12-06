@@ -24,10 +24,10 @@ import {
 /**
  * Internal dependencies
  */
-import metadata from '../block.json';
-import { ProductCollectionAttributes } from '../types';
-import { setQueryAttribute } from '../utils';
-import { DEFAULT_FILTERS, getDefaultSettings } from '../constants';
+import metadata from '../../block.json';
+import { ProductCollectionAttributes } from '../../types';
+import { setQueryAttribute } from '../../utils';
+import { DEFAULT_FILTERS, getDefaultSettings } from '../../constants';
 import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
 import InheritQueryControl from './inherit-query-control';

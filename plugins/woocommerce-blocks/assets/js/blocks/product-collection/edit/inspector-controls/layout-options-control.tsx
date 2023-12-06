@@ -19,7 +19,7 @@ import {
 /**
  * Internal dependencies
  */
-import { DisplayLayoutToolbarProps, LayoutOptions } from '../types';
+import { DisplayLayoutToolbarProps, LayoutOptions } from '../../types';
 
 const getHelpText = ( layoutOptions: LayoutOptions ) => {
 	switch ( layoutOptions ) {

@@ -13,8 +13,8 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../types';
-import { STOCK_STATUS_OPTIONS, getDefaultStockStatuses } from '../constants';
+import { QueryControlProps } from '../../types';
+import { STOCK_STATUS_OPTIONS, getDefaultStockStatuses } from '../../constants';
 
 /**
  * Gets the id of a specific stock status from its text label

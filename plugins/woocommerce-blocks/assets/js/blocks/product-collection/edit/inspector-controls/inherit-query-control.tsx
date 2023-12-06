@@ -16,9 +16,9 @@ import {
 /**
  * Internal dependencies
  */
-import { ProductCollectionQuery } from '../types';
-import { DEFAULT_QUERY } from '../constants';
-import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
+import { ProductCollectionQuery } from '../../types';
+import { DEFAULT_QUERY } from '../../constants';
+import { getDefaultValueOfInheritQueryFromTemplate } from '../../utils';
 
 const label = __(
 	'Inherit query from template',

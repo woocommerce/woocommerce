@@ -13,7 +13,7 @@ import { type BlockInstance, cloneBlock } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { ProductCollectionQuery } from '../types';
+import { ProductCollectionQuery } from '../../types';
 
 const blockName = 'woocommerce/product-collection';
 
