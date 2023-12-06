@@ -306,22 +306,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					meta: {
 						component: DesignWithAi,
 					},
-					entry: actions.choose( [
-						{
-							actions: {
-								type: 'updateQueryStep',
-								step: 'design-with-ai',
-							},
-							cond: 'isAiOnline',
-						},
-						{
-							actions: {
-								type: 'updateQueryStep',
-								step: 'design-with-ai/tone-of-voice',
-							},
-							cond: 'isAiOffline',
-						},
-					] ),
+					entry: [
+						{ type: 'updateQueryStep', step: 'design-with-ai' },
+					],
 				},
 			},
 			on: {
