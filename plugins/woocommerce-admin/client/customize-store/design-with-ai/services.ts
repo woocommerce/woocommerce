@@ -205,7 +205,7 @@ export const updateStorePatterns = async (
 	try {
 		// TODO: Probably move this to a more appropriate place with a check. We should set this when the user granted permissions during the onboarding phase.
 		await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-			woocommerce_blocks_allow_ai_connection: true,
+			woocommerce_blocks_allow_ai_connection: 'yes',
 		} );
 
 		const { images } = await apiFetch< {
@@ -474,6 +474,10 @@ const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
 };
 
 const resetPatterns = () => async () => {
+	await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_blocks_allow_ai_connection: 'yes',
+	} );
+
 	return await apiFetch( {
 		path: '/wc/private/ai/patterns',
 		method: 'DELETE',
