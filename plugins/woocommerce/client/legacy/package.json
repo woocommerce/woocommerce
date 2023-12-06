@@ -1,14 +1,23 @@
 {
-	"name": "woocommerce/client/legacy",
+	"name": "@woocommerce/shortcode-assets",
 	"version": "1.0.0",
-	"author": "Automattic",
-	"license": "GPL-2.0-or-later",
 	"private": true,
+	"license": "GPL-2.0-or-later",
+	"author": "Automattic",
 	"main": "Gruntfile.js",
+	"files": [
+		"build"
+	],
 	"scripts": {
-		"turbo:build": "grunt assets",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"start": "nodemon --watch js --watch css -e js,scss --exec pnpm build"
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
+		"build:project": "pnpm --if-present /^build:project:.*$/",
+		"build:project:assets": "wireit",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"watch:build": "pnpm build:project --watch"
+	},
+	"dependencies": {
+		"sourcebuster": "github:woocommerce/sourcebuster-js#v1.1.2"
 	},
 	"devDependencies": {
 		"@types/node": "^16.18.18",
@@ -33,9 +42,29 @@
 		"gruntify-eslint": "5.0.0",
 		"nodemon": "^2.0.21",
 		"sass": "^1.45.0",
-		"stylelint": "13.8.0"
+		"stylelint": "13.8.0",
+		"wireit": "^0.14.1"
 	},
-	"dependencies": {
-		"sourcebuster": "github:woocommerce/sourcebuster-js#v1.1.2"
+	"wireit": {
+		"build:project:assets": {
+			"command": "grunt assets",
+			"files": [
+				"Gruntfile.js",
+				"js/**/*.js",
+				"css/**/*.scss"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"package.json"
+			]
+		}
 	}
 }
