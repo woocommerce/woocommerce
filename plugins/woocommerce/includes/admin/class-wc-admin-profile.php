@@ -224,7 +224,7 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 				}
 
 				// Skip firing the action for any non-internal fieldset types.
-				if ( ! in_array( $fieldset_type, array( 'billing', 'shipping' ) ) ) {
+				if ( ! in_array( $fieldset_type, array( 'billing', 'shipping' ), true ) ) {
 					continue;
 				}
 
