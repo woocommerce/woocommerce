@@ -53,6 +53,7 @@ export function IframeEditor( {
 	const [ temporalBlocks, setTemporalBlocks ] =
 		useState< BlockInstance[] >( initialBlocks );
 
+	// Pick the blocks from the store.
 	const blocks: BlockInstance[] = useSelect( ( select ) => {
 		return select( productEditorUiStore ).getModalEditorBlocks();
 	}, [] );
