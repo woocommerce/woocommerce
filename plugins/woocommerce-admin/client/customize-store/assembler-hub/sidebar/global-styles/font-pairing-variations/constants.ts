@@ -131,20 +131,20 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 		},
 	},
 	{
-		title: 'Libre Baskerville + DM Sans',
+		title: 'Albert Sans + Lora',
 		version: 2,
-		lookAndFeel: [] as Look[],
+		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
 					theme: [
 						{
-							fontFamily: 'Libre Baskerville',
-							slug: 'libre-baskerville',
+							fontFamily: 'Albert Sans',
+							slug: 'albert-sans',
 						},
 						{
-							fontFamily: 'DM Sans',
-							slug: 'dm-sans',
+							fontFamily: 'Lora',
+							slug: 'lora',
 						},
 					],
 				},
@@ -152,42 +152,20 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 		},
 		styles: {
 			elements: {
-				button: {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--dm-sans)',
-						fontWeight: '400',
-						lineHeight: '1',
-					},
-				},
 				heading: {
 					typography: {
 						fontFamily:
-							'var(--wp--preset--font-family--libre-baskerville)',
+							'var(--wp--preset--font-family--albert-sans)',
 						fontStyle: 'normal',
 						fontWeight: '700',
 					},
 				},
 			},
-			blocks: {
-				'core/site-title': {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--libre-baskerville)',
-					},
-				},
-				'core/post-navigation-link': {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--libre-baskerville)',
-					},
-				},
-			},
 			typography: {
-				fontFamily: 'var(--wp--preset--font-family--dm-sans)',
-				fontSize: 'var(--wp--preset--font-size--small)',
+				fontFamily: 'var(--wp--preset--font-family--lora)',
 				fontStyle: 'normal',
 				fontWeight: '400',
-				lineHeight: '1.6',
+				lineHeight: '1.67',
 			},
 		},
 	},
@@ -315,7 +293,7 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 		},
 	},
 	{
-		title: 'Playfair Display + Fira Sans',
+		title: 'Newsreader + Newsreader',
 		version: 2,
 		lookAndFeel: [ 'Classic' ] as Look[],
 		settings: {
@@ -323,12 +301,8 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 				fontFamilies: {
 					theme: [
 						{
-							fontFamily: 'Playfair Display',
-							slug: 'playfair-display',
-						},
-						{
-							fontFamily: 'Fira Sans',
-							slug: 'fira-sans',
+							fontFamily: 'Newsreader',
+							slug: 'newsreader',
 						},
 					],
 				},
@@ -336,66 +310,37 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 		},
 		styles: {
 			elements: {
-				button: {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--fira-sans)',
-						fontWeight: '400',
-						lineHeight: '1',
-					},
-				},
 				heading: {
 					typography: {
 						fontFamily:
-							'var(--wp--preset--font-family--playfair-display)',
-						fontStyle: 'italic',
-						fontWeight: '400',
-					},
-				},
-			},
-			blocks: {
-				'core/site-title': {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--playfair-display)',
-						fontStyle: 'italic',
-						fontWeight: '400',
-					},
-				},
-				'core/post-navigation-link': {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--playfair-display)',
-						fontStyle: 'italic',
+							'var(--wp--preset--font-family--newsreader)',
+						fontStyle: 'normal',
 						fontWeight: '400',
 					},
 				},
 			},
 			typography: {
-				fontFamily: 'var(--wp--preset--font-family--fira-sans)',
+				fontFamily: 'var(--wp--preset--font-family--newsreader)',
 				fontSize: 'var(--wp--preset--font-size--medium)',
-				fontStyle: 'normal',
-				fontWeight: '400',
-				lineHeight: '1.6',
+				lineHeight: '1.67',
 			},
 		},
 	},
-];
-export const FONT_PAIRINGS = [
 	{
-		title: 'Albert Sans + Lora',
+		title: 'Cormorant + Work Sans',
 		version: 2,
-		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
+		lookAndFeel: [] as Look[],
 		settings: {
 			typography: {
 				fontFamilies: {
 					theme: [
 						{
-							fontFamily: 'Albert Sans',
-							slug: 'albert-sans',
+							fontFamily: 'Cormorant',
+							slug: 'cormorant',
 						},
 						{
-							fontFamily: 'Lora',
-							slug: 'lora',
+							fontFamily: 'Work Sans',
+							slug: 'work-sans',
 						},
 					],
 				},
@@ -405,21 +350,57 @@ export const FONT_PAIRINGS = [
 			elements: {
 				heading: {
 					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--albert-sans)',
+						fontFamily: 'var(--wp--preset--font-family--cormorant)',
+						fontStyle: 'normal',
+						fontWeight: '500',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--work-sans)',
+			},
+		},
+	},
+	{
+		title: 'Raleway + Cormorant',
+		version: 2,
+		lookAndFeel: [ 'Classic', 'Bold' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Raleway',
+							slug: 'raleway',
+						},
+						{
+							fontFamily: 'Cormorant',
+							slug: 'cormorant',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--raleway)',
 						fontStyle: 'normal',
 						fontWeight: '700',
 					},
 				},
 			},
 			typography: {
-				fontFamily: 'var(--wp--preset--font-family--lora)',
-				fontStyle: 'normal',
-				fontWeight: '400',
+				fontFamily: 'var(--wp--preset--font-family--cormorant)',
+				fontSize: 'var(--wp--preset--font-size--medium)',
 				lineHeight: '1.67',
 			},
 		},
 	},
+];
+
+export const FONT_PAIRINGS = [
 	{
 		title: 'Commissioner + Crimson Pro',
 		version: 2,
@@ -480,41 +461,6 @@ export const FONT_PAIRINGS = [
 				fontStyle: 'normal',
 				fontWeight: '400',
 				lineHeight: '1.6',
-			},
-		},
-	},
-	{
-		title: 'Cormorant + Work Sans',
-		version: 2,
-		lookAndFeel: [] as Look[],
-		settings: {
-			typography: {
-				fontFamilies: {
-					theme: [
-						{
-							fontFamily: 'Cormorant',
-							slug: 'cormorant',
-						},
-						{
-							fontFamily: 'Work Sans',
-							slug: 'work-sans',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			elements: {
-				heading: {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--cormorant)',
-						fontStyle: 'normal',
-						fontWeight: '500',
-					},
-				},
-			},
-			typography: {
-				fontFamily: 'var(--wp--preset--font-family--work-sans)',
 			},
 		},
 	},
@@ -594,6 +540,132 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	{
+		title: 'Libre Baskerville + DM Sans',
+		version: 2,
+		lookAndFeel: [] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Libre Baskerville',
+							slug: 'libre-baskerville',
+						},
+						{
+							fontFamily: 'DM Sans',
+							slug: 'dm-sans',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				button: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--dm-sans)',
+						fontWeight: '400',
+						lineHeight: '1',
+					},
+				},
+				heading: {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--libre-baskerville)',
+						fontStyle: 'normal',
+						fontWeight: '700',
+					},
+				},
+			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--libre-baskerville)',
+					},
+				},
+				'core/post-navigation-link': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--libre-baskerville)',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--dm-sans)',
+				fontSize: 'var(--wp--preset--font-size--small)',
+				fontStyle: 'normal',
+				fontWeight: '400',
+				lineHeight: '1.6',
+			},
+		},
+	},
+	{
+		title: 'Playfair Display + Fira Sans',
+		version: 2,
+		lookAndFeel: [ 'Classic' ] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Playfair Display',
+							slug: 'playfair-display',
+						},
+						{
+							fontFamily: 'Fira Sans',
+							slug: 'fira-sans',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				button: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--fira-sans)',
+						fontWeight: '400',
+						lineHeight: '1',
+					},
+				},
+				heading: {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--playfair-display)',
+						fontStyle: 'italic',
+						fontWeight: '400',
+					},
+				},
+			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--playfair-display)',
+						fontStyle: 'italic',
+						fontWeight: '400',
+					},
+				},
+				'core/post-navigation-link': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--playfair-display)',
+						fontStyle: 'italic',
+						fontWeight: '400',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--fira-sans)',
+				fontSize: 'var(--wp--preset--font-size--medium)',
+				fontStyle: 'normal',
+				fontWeight: '400',
+				lineHeight: '1.6',
+			},
+		},
+	},
+	{
 		title: 'Libre Franklin + EB Garamond',
 		version: 2,
 		lookAndFeel: [ 'Classic' ] as Look[],
@@ -658,40 +730,6 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	{
-		title: 'Newsreader + Newsreader',
-		version: 2,
-		lookAndFeel: [ 'Classic' ] as Look[],
-		settings: {
-			typography: {
-				fontFamilies: {
-					theme: [
-						{
-							fontFamily: 'Newsreader',
-							slug: 'newsreader',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			elements: {
-				heading: {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--newsreader)',
-						fontStyle: 'normal',
-						fontWeight: '400',
-					},
-				},
-			},
-			typography: {
-				fontFamily: 'var(--wp--preset--font-family--newsreader)',
-				fontSize: 'var(--wp--preset--font-size--medium)',
-				lineHeight: '1.67',
-			},
-		},
-	},
-	{
 		title: 'Plus Jakarta Sans + Plus Jakarta Sans',
 		version: 2,
 		lookAndFeel: [ 'Contemporary', 'Bold' ] as Look[],
@@ -720,43 +758,6 @@ export const FONT_PAIRINGS = [
 			},
 			typography: {
 				fontFamily: 'var(--wp--preset--font-family--plus-jakarta-sans)',
-				lineHeight: '1.67',
-			},
-		},
-	},
-	{
-		title: 'Raleway + Cormorant',
-		version: 2,
-		lookAndFeel: [ 'Classic', 'Bold' ] as Look[],
-		settings: {
-			typography: {
-				fontFamilies: {
-					theme: [
-						{
-							fontFamily: 'Raleway',
-							slug: 'raleway',
-						},
-						{
-							fontFamily: 'Cormorant',
-							slug: 'cormorant',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			elements: {
-				heading: {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--raleway)',
-						fontStyle: 'normal',
-						fontWeight: '700',
-					},
-				},
-			},
-			typography: {
-				fontFamily: 'var(--wp--preset--font-family--cormorant)',
-				fontSize: 'var(--wp--preset--font-size--medium)',
 				lineHeight: '1.67',
 			},
 		},
