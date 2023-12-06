@@ -21,10 +21,9 @@ export default {
 		return state.modalEditor.blocks;
 	},
 
-	getModalEditorContentHasChanged:
-		function getModalEditorContentHasChanged(
-			state: ProductEditorUIStateProps
-		): boolean {
-			return !! state.modalEditor.hasChanged;
-		},
+	getModalEditorContentHasChanged: function getModalEditorContentHasChanged(
+		state: ProductEditorUIStateProps
+	): boolean {
+		return !! state.modalEditor.hasChanged;
+	},
 };
