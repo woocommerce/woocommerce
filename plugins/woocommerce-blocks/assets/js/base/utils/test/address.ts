@@ -85,6 +85,27 @@ describe( 'isAddressComplete', () => {
 		};
 		expect( isAddressComplete( address ) ).toBe( true );
 	} );
+
+	it( 'correctly checks addresses against country locale', () => {
+		const address = {
+			first_name: 'John',
+			last_name: 'Doe',
+			company: 'Company',
+			address_1: '409 Main Street',
+			address_2: 'Apt 1',
+			city: 'California',
+			postcode: '90210',
+			country: 'US',
+			state: '',
+			email: 'john.doe@company',
+			phone: '+1234567890',
+		};
+		// US address requires state.
+		expect( isAddressComplete( address ) ).toBe( false );
+
+		address.state = 'CA';
+		expect( isAddressComplete( address ) ).toBe( true );
+	} );
 } );
 
 describe( 'formatShippingAddress', () => {

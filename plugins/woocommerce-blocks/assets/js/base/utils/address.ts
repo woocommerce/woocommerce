@@ -8,6 +8,7 @@ import type {
 	CartResponseShippingAddress,
 } from '@woocommerce/types';
 import {
+	AddressFields,
 	defaultAddressFields,
 	ShippingAddress,
 	BillingAddress,
@@ -93,7 +94,9 @@ export const emptyHiddenAddressFields = <
 >(
 	address: T
 ): T => {
-	const fields = Object.keys( defaultAddressFields );
+	const fields = Object.keys(
+		defaultAddressFields
+	) as ( keyof AddressFields )[];
 	const addressFields = prepareAddressFields( fields, {}, address.country );
 	const newAddress = Object.assign( {}, address ) as T;
 
@@ -149,10 +152,25 @@ export const formatShippingAddress = (
 };
 
 /**
- * Returns true if the address has a city and country.
+ * Checks that all required fields in an address are completed based on the settings in countryLocale.
  */
 export const isAddressComplete = (
 	address: ShippingAddress | BillingAddress
 ): boolean => {
-	return !! address.city && !! address.country;
+	if ( ! address.country ) {
+		return false;
+	}
+	const fields = Object.keys(
+		defaultAddressFields
+	) as ( keyof AddressFields )[];
+	const addressFields = prepareAddressFields( fields, {}, address.country );
+
+	return addressFields.every(
+		( { key = '', hidden = false, required = false } ) => {
+			if ( hidden || ! required ) {
+				return true;
+			}
+			return isValidAddressKey( key, address ) && address[ key ] !== '';
+		}
+	);
 };
