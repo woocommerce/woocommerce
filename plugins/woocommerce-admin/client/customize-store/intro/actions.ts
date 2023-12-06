@@ -115,6 +115,11 @@ export const assignAiStatus = assign<
 		const status = indicator !== 'critical' && indicator !== 'major';
 		// @ts-expect-error temp workaround;
 		window.cys_aiOnline = status;
+
+		recordEvent( 'customize_your_store_ai_status', {
+			online: status ? 'yes' : 'no',
+		} );
+
 		return status;
 	},
 } );
@@ -126,6 +131,10 @@ export const assignAiOffline = assign<
 	aiOnline: () => {
 		// @ts-expect-error temp workaround;
 		window.cys_aiOnline = false;
+		recordEvent( 'customize_your_store_ai_status', {
+			online: 'no',
+		} );
+
 		return false;
 	},
 } );
