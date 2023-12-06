@@ -2936,7 +2936,7 @@ importers:
       '@woocommerce/admin-library':
         specifier: workspace:*
         version: link:../woocommerce-admin
-      '@woocommerce/shortcode-assets':
+      '@woocommerce/classic-assets':
         specifier: workspace:*
         version: link:client/legacy
       '@wordpress/browserslist-config':
