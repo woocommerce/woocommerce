@@ -33,12 +33,23 @@ export const OnboardingTour = ( {
 	const aiOnline = context.aiOnline;
 
 	if ( showWelcomeTour ) {
+		const takeTour = () => {
+			// Click on "Take a tour" button
+			recordEvent( 'customize_your_store_assembler_hub_tour_start' );
+			setShowWelcomeTour( false );
+		};
+
+		const skipTour = () => {
+			recordEvent( 'customize_your_store_assembler_hub_tour_skip' );
+			onClose();
+		};
+
 		if ( ! aiOnline ) {
 			return (
 				<Modal
 					className="woocommerce-customize-store__onboarding-welcome-modal"
 					title={ __( 'Welcome to your store!', 'woocommerce' ) }
-					onRequestClose={ () => {} }
+					onRequestClose={ skipTour }
 					shouldCloseOnClickOutside={ false }
 				>
 					<p>
@@ -48,16 +59,10 @@ export const OnboardingTour = ( {
 						) }
 					</p>
 					<div className="woocommerce-customize-store__design-change-warning-modal-footer">
-						<Button
-							// onClick={ () => setOpenDesignChangeWarningModal( false ) }
-							variant="link"
-						>
+						<Button onClick={ skipTour } variant="link">
 							{ __( 'Skip', 'woocommerce' ) }
 						</Button>
-						<Button
-							// onClick={ () => sendEvent( { type: 'DESIGN_WITH_AI' } ) }
-							variant="primary"
-						>
+						<Button onClick={ takeTour } variant="primary">
 							{ __( 'Take a tour', 'woocommerce' ) }
 						</Button>
 					</div>
@@ -128,15 +133,9 @@ export const OnboardingTour = ( {
 					closeHandler: ( _steps, _currentStepIndex, source ) => {
 						if ( source === 'done-btn' ) {
 							// Click on "Take a tour" button
-							recordEvent(
-								'customize_your_store_assembler_hub_tour_start'
-							);
-							setShowWelcomeTour( false );
+							takeTour();
 						} else {
-							recordEvent(
-								'customize_your_store_assembler_hub_tour_skip'
-							);
-							onClose();
+							skipTour();
 						}
 					},
 				} }
