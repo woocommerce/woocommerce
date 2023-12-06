@@ -5,11 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { useContext, useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { Button, Modal } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import WelcomeTourData from './welcome-tour-data';
 import { CustomizeStoreContext } from '..';
 export * from './use-onboarding-tour';
 
@@ -33,13 +33,36 @@ export const OnboardingTour = ( {
 	const aiOnline = context.aiOnline;
 
 	if ( showWelcomeTour ) {
-		const classNames = [
-			'woocommerce-customize-store-tour-kit',
-			'woocommerce-customize-store-welcome-tourkit',
-		];
-
 		if ( ! aiOnline ) {
-			classNames.push( 'ai-offline' );
+			return (
+				<Modal
+					className="woocommerce-customize-store__onboarding-welcome-modal"
+					title={ __( 'Welcome to your store!', 'woocommerce' ) }
+					onRequestClose={ () => {} }
+					shouldCloseOnClickOutside={ false }
+				>
+					<p>
+						{ __(
+							"We encountered some issues while generating content with AI. But don't worry — you can still customize the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
+							'woocommerce'
+						) }
+					</p>
+					<div className="woocommerce-customize-store__design-change-warning-modal-footer">
+						<Button
+							// onClick={ () => setOpenDesignChangeWarningModal( false ) }
+							variant="link"
+						>
+							{ __( 'Skip', 'woocommerce' ) }
+						</Button>
+						<Button
+							// onClick={ () => sendEvent( { type: 'DESIGN_WITH_AI' } ) }
+							variant="primary"
+						>
+							{ __( 'Take a tour', 'woocommerce' ) }
+						</Button>
+					</div>
+				</Modal>
+			);
 		}
 
 		return (
@@ -63,22 +86,18 @@ export const OnboardingTour = ( {
 								phase: 'beforeWrite',
 								requires: [ 'computeStyles' ],
 								fn: ( { state } ) => {
-									if ( aiOnline ) {
-										state.styles.popper.top = 'auto';
-										state.styles.popper.left = 'auto';
-										state.styles.popper.bottom = '16px';
-										state.styles.popper.transform =
-											'translate3d(16px, 0px, 0px)';
-									} else {
-										state.styles.popper.top = '50%';
-										state.styles.popper.left = '50%';
-										state.styles.popper.transform =
-											'translate(-50%, -50%)';
-									}
+									state.styles.popper.top = 'auto';
+									state.styles.popper.left = 'auto';
+									state.styles.popper.bottom = '16px';
+									state.styles.popper.transform =
+										'translate3d(16px, 0px, 0px)';
 								},
 							},
 						],
-						classNames,
+						classNames: [
+							'woocommerce-customize-store-tour-kit',
+							'woocommerce-customize-store-welcome-tourkit',
+						],
 					},
 					steps: [
 						{
@@ -88,15 +107,15 @@ export const OnboardingTour = ( {
 									text: __( 'Take a tour', 'woocommerce' ),
 								},
 								descriptions: {
-									desktop:
-										WelcomeTourData[
-											aiOnline ? 'aiOnline' : 'aiOffline'
-										].description.desktop,
+									desktop: __(
+										"This is where you can start customizing the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
+										'woocommerce'
+									),
 								},
-								heading:
-									WelcomeTourData[
-										aiOnline ? 'aiOnline' : 'aiOffline'
-									].heading,
+								heading: __(
+									'Welcome to your AI-generated store!',
+									'woocommerce'
+								),
 								skipButton: {
 									isVisible: true,
 								},
