@@ -41,10 +41,11 @@ export const useFeedbackBar = () => {
 		}
 	};
 
-	const hideFeedbackBar = () => {
+	const showFeedbackBarOnce = () => {
 		updateOptions( {
 			[ PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME ]: 'no',
 		} );
+		setShouldShowFeedbackBar( true );
 	};
 
 	const fetchShowFeedbackBarOption = useCallback( () => {
@@ -55,8 +56,7 @@ export const useFeedbackBar = () => {
 					window.wcTracks?.isEnabled &&
 					showFeedbackBarOption === 'yes'
 				) {
-					setShouldShowFeedbackBar( true );
-					hideFeedbackBar();
+					showFeedbackBarOnce();
 				}
 			} );
 	}, [] );
