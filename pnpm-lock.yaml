@@ -2498,9 +2498,6 @@ importers:
       '@wordpress/element':
         specifier: wp-6.0
         version: 4.4.1
-      '@wordpress/hooks':
-        specifier: wp-6.0
-        version: 3.6.1
       '@wordpress/html-entities':
         specifier: wp-6.0
         version: 3.6.1
@@ -36386,7 +36383,7 @@ packages:
       postcss: 8.4.32
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@3.3.12)
+      webpack: 5.89.0(webpack-cli@5.1.4)
 
   /postcss-loader@6.2.1(postcss@8.4.32)(webpack@5.89.0):
     resolution: {integrity: sha512-WbbYpmAaKcux/P66bZ40bpWsBucjx/TTgVVzRZ9yUO8yQfVBlameJ0ZGVaPfH64hNSBh63a+ICP5nqOpBA0w+Q==}
@@ -39851,7 +39848,7 @@ packages:
       sass: 1.69.5
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@3.3.12)
+      webpack: 5.89.0(webpack-cli@5.1.4)
 
   /sass-loader@12.6.0(sass@1.69.5)(webpack@5.89.0):
     resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}
