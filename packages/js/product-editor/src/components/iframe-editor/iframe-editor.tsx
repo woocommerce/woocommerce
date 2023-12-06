@@ -58,11 +58,8 @@ export function IframeEditor( {
 		return select( productEditorUiStore ).getModalEditorBlocks();
 	}, [] );
 
-	const {
-		setModalEditorBlocks: setBlocks,
-		closeModalEditor,
-		setModalEditorContentHasChanged,
-	} = useDispatch( productEditorUiStore );
+	const { setModalEditorBlocks: setBlocks, setModalEditorContentHasChanged } =
+		useDispatch( productEditorUiStore );
 
 	const { appendEdit } = useEditorHistory( {
 		setBlocks,
@@ -141,14 +138,14 @@ export function IframeEditor( {
 							setBlocks( temporalBlocks );
 							setModalEditorContentHasChanged( true );
 							onChange( temporalBlocks );
-							closeModalEditor();
+							onClose?.();
 						} }
 						onCancel={ () => {
 							appendEdit( blocks );
 							setBlocks( blocks );
 							onChange( blocks );
 							setTemporalBlocks( blocks );
-							closeModalEditor();
+							onClose?.();
 						} }
 					/>
 					<div className="woocommerce-iframe-editor__main">

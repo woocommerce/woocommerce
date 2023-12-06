@@ -3,6 +3,7 @@
  */
 import { BlockInstance } from '@wordpress/blocks';
 import { createElement } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
 import {
 	EditorSettings,
 	EditorBlockListSettings,
@@ -14,6 +15,7 @@ import { useDebounce } from '@wordpress/compose';
  * Internal dependencies
  */
 import { IframeEditor } from '../iframe-editor';
+import { store as productEditorUiStore } from '../../store/product-editor-ui';
 
 type ModalEditorProps = {
 	initialBlocks?: BlockInstance[];
@@ -29,6 +31,8 @@ export function ModalEditor( {
 	onClose,
 	title,
 }: ModalEditorProps ) {
+	const { closeModalEditor } = useDispatch( productEditorUiStore );
+
 	const debouncedOnChange = useDebounce( ( blocks: BlockInstance[] ) => {
 		onChange?.( blocks );
 	}, 250 );
@@ -38,6 +42,7 @@ export function ModalEditor( {
 		if ( blocks ) {
 			onChange?.( blocks );
 		}
+		closeModalEditor();
 		onClose?.();
 	}
 
@@ -52,7 +57,7 @@ export function ModalEditor( {
 				initialBlocks={ initialBlocks }
 				onInput={ debouncedOnChange }
 				onChange={ debouncedOnChange }
-				closeModal={ handleClose }
+				onClose={ handleClose }
 			/>
 		</Modal>
 	);
