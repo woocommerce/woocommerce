@@ -1561,6 +1561,26 @@ table.wc_status_table--tools {
 		.column-source {
 			width: 15%;
 		}
+
+		.column-context {
+			width: 10%;
+		}
+	}
+
+	.column-context {
+		.button {
+			span {
+				line-height: 1.3;
+			}
+		}
+	}
+
+	.log-context {
+		display: none;
+
+		pre {
+			white-space: pre-wrap;
+		}
 	}
 }
 
