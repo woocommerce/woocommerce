@@ -64,9 +64,28 @@ class BlockRegistryTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $block_registry->is_registered( 'woocommerce-test/test-block' ), 'Block type already registered.' );
 
-		$block_registry->register_block_type_from_metadata( trailingslashit( __DIR__ ) . 'test-block' );
+		$block_type = $block_registry->register_block_type_from_metadata( trailingslashit( __DIR__ ) . 'test-block' );
 
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce-test/test-block' ), 'Block type not registered.' );
+
+		$this->assertInstanceOf( \WP_Block_Type::class, $block_type, 'Block type not an instance of WP_Block_Type.' );
+
+		// Make sure basic properties are set.
+		$this->assertEquals( 'woocommerce-test/test-block', $block_type->name, 'Block type name not correct.' );
+		$this->assertEquals( 'Test Block', $block_type->title, 'Block type title not correct.' );
+
+		// Make sure defined attributes are set.
+		$this->assertArrayHasKey( 'label', $block_type->attributes, 'Block type missing label attribute.' );
+
+		// Make sure augmented template attributes are set.
+		$this->assertArrayHasKey( '_templateBlockId', $block_type->attributes, 'Block type missing _templateBlockId attribute.' );
+		$this->assertArrayHasKey( '_templateBlockOrder', $block_type->attributes, 'Block type missing _templateBlockOrder attribute.' );
+		$this->assertArrayHasKey( '_templateBlockHideConditions', $block_type->attributes, 'Block type missing _templateBlockHideConditions attribute.' );
+		$this->assertArrayHasKey( '_templateBlockDisableConditions', $block_type->attributes, 'Block type missing _templateBlockDisableConditions attribute.' );
+		$this->assertArrayHasKey( 'disabled', $block_type->attributes, 'Block type missing disabled attribute.' );
+
+		// Make sure usesContext is set.
+		$this->assertContains( 'postType', $block_type->uses_context, 'Block type uses_context missing postType.' );
 	}
 
 	/**
