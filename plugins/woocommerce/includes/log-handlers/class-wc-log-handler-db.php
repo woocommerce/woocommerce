@@ -80,11 +80,7 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 		unset( $context['source'] );
 		if ( ! empty( $context ) ) {
 			if ( isset( $context['backtrace'] ) && true === filter_var( $context['backtrace'], FILTER_VALIDATE_BOOLEAN ) ) {
-				$backtrace            = wp_debug_backtrace_summary( self::class, 0, false );
-				$context['backtrace'] = array_filter(
-					$backtrace,
-					fn( $frame ) => false === strpos( $frame, get_class( wc_get_logger() ) )
-				);
+				$context['backtrace'] = self::get_backtrace();
 			}
 
 			$insert['context'] = wp_json_encode( $context, JSON_PRETTY_PRINT );
