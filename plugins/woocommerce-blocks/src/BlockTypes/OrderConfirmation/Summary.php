@@ -17,10 +17,10 @@ class Summary extends AbstractOrderConfirmationBlock {
 	/**
 	 * This renders the content of the block within the wrapper.
 	 *
-	 * @param \WC_Order $order Order object.
-	 * @param string    $permission Permission level for viewing order details.
-	 * @param array     $attributes Block attributes.
-	 * @param string    $content Original block content.
+	 * @param \WC_Order    $order Order object.
+	 * @param string|false $permission If the current user can view the order details or not.
+	 * @param array        $attributes Block attributes.
+	 * @param string       $content Original block content.
 	 * @return string
 	 */
 	protected function render_content( $order, $permission = false, $attributes = [], $content = '' ) {
@@ -32,10 +32,8 @@ class Summary extends AbstractOrderConfirmationBlock {
 		$content .= $this->render_summary_row( __( 'Order number:', 'woo-gutenberg-products-block' ), $order->get_order_number() );
 		$content .= $this->render_summary_row( __( 'Date:', 'woo-gutenberg-products-block' ), wc_format_datetime( $order->get_date_created() ) );
 		$content .= $this->render_summary_row( __( 'Total:', 'woo-gutenberg-products-block' ), $order->get_formatted_order_total() );
-		if ( 'full' === $permission ) {
-			$content .= $this->render_summary_row( __( 'Email:', 'woo-gutenberg-products-block' ), $order->get_billing_email() );
-			$content .= $this->render_summary_row( __( 'Payment method:', 'woo-gutenberg-products-block' ), $order->get_payment_method_title() );
-		}
+		$content .= $this->render_summary_row( __( 'Email:', 'woo-gutenberg-products-block' ), $order->get_billing_email() );
+		$content .= $this->render_summary_row( __( 'Payment method:', 'woo-gutenberg-products-block' ), $order->get_payment_method_title() );
 		$content .= '</ul>';
 
 		return $content;

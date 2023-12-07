@@ -62,10 +62,10 @@ class DownloadsWrapper extends AbstractOrderConfirmationBlock {
 	/**
 	 * This renders the content of the downloads wrapper.
 	 *
-	 * @param \WC_Order $order Order object.
-	 * @param string    $permission Permission level for viewing order details.
-	 * @param array     $attributes Block attributes.
-	 * @param string    $content Original block content.
+	 * @param \WC_Order    $order Order object.
+	 * @param string|false $permission If the current user can view the order details or not.
+	 * @param array        $attributes Block attributes.
+	 * @param string       $content Original block content.
 	 */
 	protected function render_content( $order, $permission = false, $attributes = [], $content = '' ) {
 		$show_downloads = $order && $order->has_downloadable_item() && $order->is_download_permitted();

@@ -52,10 +52,10 @@ class Status extends AbstractOrderConfirmationBlock {
 	/**
 	 * This renders the content of the block within the wrapper.
 	 *
-	 * @param \WC_Order $order Order object.
-	 * @param string    $permission Permission level for viewing order details.
-	 * @param array     $attributes Block attributes.
-	 * @param string    $content Original block content.
+	 * @param \WC_Order    $order Order object.
+	 * @param string|false $permission If the current user can view the order details or not.
+	 * @param array        $attributes Block attributes.
+	 * @param string       $content Original block content.
 	 * @return string
 	 */
 	protected function render_content( $order, $permission = false, $attributes = [], $content = '' ) {
@@ -106,11 +106,7 @@ class Status extends AbstractOrderConfirmationBlock {
 			case 'failed':
 				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 				$order_received_text = apply_filters( 'woocommerce_thankyou_order_received_text', esc_html__( 'Your order cannot be processed as the originating bank/merchant has declined your transaction. Please attempt your purchase again.', 'woo-gutenberg-products-block' ), null );
-				$actions             = '';
-
-				if ( 'full' === $permission ) {
-					$actions .= '<a href="' . esc_url( $order->get_checkout_payment_url() ) . '" class="button">' . esc_html__( 'Try again', 'woo-gutenberg-products-block' ) . '</a> ';
-				}
+				$actions             = '<a href="' . esc_url( $order->get_checkout_payment_url() ) . '" class="button">' . esc_html__( 'Try again', 'woo-gutenberg-products-block' ) . '</a> ';
 
 				if ( wc_get_page_permalink( 'myaccount' ) ) {
 					$actions .= '<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" class="button">' . esc_html__( 'My account', 'woo-gutenberg-products-block' ) . '</a> ';
