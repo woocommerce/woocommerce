@@ -259,7 +259,8 @@ export const updateStorePatterns = async (
 					method: 'POST',
 					data: {
 						products_information: product,
-						index,
+						last_product:
+							index === response.product_content.length - 1,
 					},
 				} );
 			}
