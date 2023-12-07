@@ -45,7 +45,7 @@ class ProductGalleryUtils {
 							$attributes
 						);
 					} else {
-						$product_image_html = self::get_product_image_placeholder_html( $attributes );
+						$product_image_html = self::get_product_image_placeholder_html( $size, $attributes, $crop_images );
 					}
 
 					if ( $wrapper_class ) {
@@ -158,23 +158,24 @@ class ProductGalleryUtils {
 	/**
 	 * Get the product image placeholder HTML.
 	 *
-	 * @param array $attributes Attributes.
+	 * @param string $size Image size.
+	 * @param array  $attributes Attributes.
+	 * @param bool   $crop_images Whether to crop images.
 	 * @return string
 	 */
-	public static function get_product_image_placeholder_html( $attributes = array() ) {
-		$attributes['src'] = esc_url( plugins_url( 'woocommerce-blocks/images/block-placeholders/product-image-gallery.svg' ) );
-		$attributes['alt'] = esc_attr__( 'Product Image Placeholder', 'woo-gutenberg-products-block' );
+	public static function get_product_image_placeholder_html( $size, $attributes, $crop_images ) {
+		$placeholder_image_id = get_option( 'woocommerce_placeholder_image', 0 );
 
-		$attributes_string = array_reduce(
-			array_keys( $attributes ),
-			function ( $carry, $key ) use ( $attributes ) {
-				$key   = esc_attr( $key );
-				$value = esc_attr( $attributes[ $key ] );
-				return $carry . $key . '="' . $value . '" ';
-			},
-			''
-		);
+		if ( ! $placeholder_image_id ) {
 
-		return '<img ' . $attributes_string . ' />';
+			// Return default fallback WooCommerce placeholder image.
+			return wc_placeholder_img( array( '', '' ), $attributes );
+		}
+
+		if ( $crop_images ) {
+			self::maybe_generate_intermediate_image( $placeholder_image_id, self::CROP_IMAGE_SIZE_NAME );
+		}
+
+		return wp_get_attachment_image( $placeholder_image_id, $size, false, $attributes );
 	}
 }
