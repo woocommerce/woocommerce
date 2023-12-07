@@ -109,7 +109,10 @@ export function DescriptionBlockEdit( {
 			{ ! description.length && <div { ...innerBlockProps } /> }
 
 			{ !! description.length && (
-				<BlockPreview blocks={ parse( description ) } />
+				<BlockPreview
+					blocks={ parse( description ) }
+					viewportWidth={ 960 }
+				/>
 			) }
 
 			{ isModalEditorOpen && <ModalEditorWelcomeGuide /> }
