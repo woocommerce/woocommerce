@@ -112,7 +112,9 @@ export function DescriptionBlockEdit( {
 				<BlockPreview
 					blocks={ parse( description ) }
 					viewportWidth={ 960 }
-					additionalStyles={ [ { css: 'body { padding: 32px; }' } ] }
+					additionalStyles={ [
+						{ css: 'body { padding: 32px; height: 10000px }' },
+					] }
 				/>
 			) }
 
