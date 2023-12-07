@@ -477,4 +477,32 @@ class ProductUpdater {
 			'product_content' => $products_information_list,
 		);
 	}
+
+	/**
+	 * Reset the products content.
+	 */
+	public function reset_products_content() {
+		$dummy_products_to_update = $this->fetch_dummy_products_to_update();
+		$i                        = 0;
+		foreach ( $dummy_products_to_update as $product ) {
+			$product->set_name( self::DUMMY_PRODUCTS[ $i ]['title'] );
+			$product->set_description( self::DUMMY_PRODUCTS[ $i ]['description'] );
+			$product->set_regular_price( self::DUMMY_PRODUCTS[ $i ]['price'] );
+			$product->set_slug( sanitize_title( self::DUMMY_PRODUCTS[ $i ]['title'] ) );
+			$product->save();
+
+			require_once ABSPATH . 'wp-admin/includes/media.php';
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/image.php';
+
+			$product_image_id = media_sideload_image( plugins_url( self::DUMMY_PRODUCTS[ $i ]['image'], dirname( __DIR__ ) ), $product->get_id(), self::DUMMY_PRODUCTS[ $i ]['title'], 'id' );
+			$product_image_id = $product->set_image_id( $product_image_id );
+
+			$product->save();
+
+			$this->create_hash_for_ai_modified_product( $product );
+
+			$i++;
+		}
+	}
 }
