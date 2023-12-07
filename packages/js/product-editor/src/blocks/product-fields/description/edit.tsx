@@ -96,7 +96,7 @@ export function DescriptionBlockEdit( {
 
 	return (
 		<div { ...blockProps }>
-			{ description.length && (
+			{ !! description.length && (
 				<BlockControls>
 					<FullEditorToolbarButton
 						text={ __( 'Edit in full editor', 'woocommerce' ) }
