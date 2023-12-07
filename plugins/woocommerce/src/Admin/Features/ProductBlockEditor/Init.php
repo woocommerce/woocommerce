@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductEditorPattern;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block;
@@ -254,7 +254,7 @@ class Init {
 	 * @return array The default patterns
 	 */
 	public function get_product_editor_patterns( array $patterns ) {
-		$standard_product_pattern = new ProductEditorPattern(
+		$standard_product_template = new ProductTemplate(
 			'standard-product-pattern',
 			__( 'Standard product', 'woocommerce' ),
 			'simple-product',
@@ -262,10 +262,10 @@ class Init {
 				'type' => 'simple',
 			),
 		);
-		$standard_product_pattern->set_description( __( 'A single physical or virtual product, e.g. a t-shirt or an eBook.', 'woocommerce' ) );
-		$standard_product_pattern->set_order( 10 );
+		$standard_product_template->set_description( __( 'A single physical or virtual product, e.g. a t-shirt or an eBook.', 'woocommerce' ) );
+		$standard_product_template->set_order( 10 );
 
-		$grouped_product_pattern = new ProductEditorPattern(
+		$grouped_product_template = new ProductTemplate(
 			'grouped-product-pattern',
 			__( 'Grouped product', 'woocommerce' ),
 			'simple-product',
@@ -273,10 +273,10 @@ class Init {
 				'type' => 'grouped',
 			),
 		);
-		$grouped_product_pattern->set_description( __( 'A set of products that go well together, e.g. camera kit.', 'woocommerce' ) );
-		$grouped_product_pattern->set_order( 20 );
+		$grouped_product_template->set_description( __( 'A set of products that go well together, e.g. camera kit.', 'woocommerce' ) );
+		$grouped_product_template->set_order( 20 );
 
-		$affiliate_product_pattern = new ProductEditorPattern(
+		$affiliate_product_template = new ProductTemplate(
 			'affiliate-product-pattern',
 			__( 'Affiliate product', 'woocommerce' ),
 			'simple-product',
@@ -284,10 +284,10 @@ class Init {
 				'type' => 'grouped',
 			),
 		);
-		$affiliate_product_pattern->set_description( __( 'A link to a product sold on a different website, e.g. brand collab.', 'woocommerce' ) );
-		$affiliate_product_pattern->set_order( 30 );
+		$affiliate_product_template->set_description( __( 'A link to a product sold on a different website, e.g. brand collab.', 'woocommerce' ) );
+		$affiliate_product_template->set_order( 30 );
 
-		$variable_product_pattern = new ProductEditorPattern(
+		$variable_product_template = new ProductTemplate(
 			'variable-product-pattern',
 			__( 'Variable product', 'woocommerce' ),
 			'simple-product',
@@ -295,13 +295,13 @@ class Init {
 				'type' => 'variable',
 			),
 		);
-		$variable_product_pattern->set_description( __( 'A product with variations like color or size.', 'woocommerce' ) );
-		$variable_product_pattern->set_order( 40 );
+		$variable_product_template->set_description( __( 'A product with variations like color or size.', 'woocommerce' ) );
+		$variable_product_template->set_order( 40 );
 
-		$patterns[] = $standard_product_pattern;
-		$patterns[] = $grouped_product_pattern;
-		$patterns[] = $affiliate_product_pattern;
-		$patterns[] = $variable_product_pattern;
+		$patterns[] = $standard_product_template;
+		$patterns[] = $grouped_product_template;
+		$patterns[] = $affiliate_product_template;
+		$patterns[] = $variable_product_template;
 
 		return $patterns;
 	}

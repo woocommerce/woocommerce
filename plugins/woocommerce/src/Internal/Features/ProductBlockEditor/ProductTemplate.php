@@ -6,29 +6,32 @@
 namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor;
 
 /**
- * The Product Editor Pattern
+ * The Product Template that represents the relation between the Product and
+ * the LayoutTemplate (ProductFormTemplateInterface)
+ * 
+ * @see ProductFormTemplateInterface
  */
-class ProductEditorPattern {
+class ProductTemplate {
 	private $id;
 	private $title;
-	private $template_id;
+	private $layout_template_id;
 	private $product_data;
 	private $description = null;
-	private $icon = null;
 	private $order = 999;
+	private $icon = null;
 	
 	/**
-	 * ProductEditorPattern constructor
+	 * ProductTemplate constructor
 	 * 
 	 * @param string $id The pattern ID.
 	 * @param string $title The pattern title.
-	 * @param string $template_id The template id.
+	 * @param string $layout_template_id The layout template id.
 	 * @param array $product_data The product data.
 	 */
-	public function __construct( string $id, string $title, string $template_id, array $product_data ) {
+	public function __construct( string $id, string $title, string $layout_template_id, array $product_data ) {
 		$this->id = $id;
 		$this->title = $title;
-		$this->template_id = $template_id;
+		$this->layout_template_id = $layout_template_id;
 		$this->product_data = $product_data;
 	}
 
@@ -51,12 +54,12 @@ class ProductEditorPattern {
 	}
 
 	/**
-	 * Get the template ID.
+	 * Get the layout template ID.
 	 * 
-	 * @return string The template ID.
+	 * @return string The layout template ID.
 	 */
-	public function get_template_id() {
-		return $this->template_id;
+	public function get_layout_template_id() {
+		return $this->layout_template_id;
 	}
 
 	/**
@@ -134,7 +137,7 @@ class ProductEditorPattern {
 			'description' => $this->get_description(),
 			'icon' => $this->get_icon(),
 			'order' => $this->get_order(),
-			'template_id' => $this->get_template_id(),
+			'layout_template_id' => $this->get_layout_template_id(),
 			'product_data' => $this->get_product_data(),
 		);
 	}
