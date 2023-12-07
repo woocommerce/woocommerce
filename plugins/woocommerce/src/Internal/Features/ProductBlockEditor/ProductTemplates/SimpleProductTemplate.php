@@ -126,6 +126,18 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			)
 		);
 		if ( Features::is_enabled( 'product-variation-management' ) ) {
+			$variations_hide_conditions = array();
+			if ( Features::is_enabled( 'product-grouped' ) ) {
+				$variations_hide_conditions[] = array(
+					'expression' => 'editedProduct.type === "grouped"',
+				);
+			}
+			if ( Features::is_enabled( 'product-external-affiliate' ) ) {
+				$variations_hide_conditions[] = array(
+					'expression' => 'editedProduct.type === "external"',
+				);
+			}
+
 			$this->add_group(
 				array(
 					'id'             => $this::GROUP_IDS['VARIATIONS'],
@@ -133,11 +145,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'attributes'     => array(
 						'title' => __( 'Variations', 'woocommerce' ),
 					),
-					'hideConditions' => Features::is_enabled( 'product-external-affiliate' ) ? array(
-						array(
-							'expression' => 'editedProduct.type === "external"',
-						),
-					) : null,
+					'hideConditions' => $variations_hide_conditions,
 				)
 			);
 		}
