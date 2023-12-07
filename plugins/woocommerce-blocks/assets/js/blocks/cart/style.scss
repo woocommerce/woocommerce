@@ -125,10 +125,14 @@
 		@include text-heading();
 		@include font-size( smaller );
 		display: block;
-		font-weight: 600;
+		font-weight: 700;
 		padding: 0.25rem 0;
 		text-align: right;
 		text-transform: uppercase;
+
+		textarea {
+			font-weight: 700; // Ensure correct font-weight in site-editor.
+		}
 	}
 
 	.wc-block-components-sidebar {
