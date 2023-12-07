@@ -254,6 +254,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
+
 		$description_field_block = $description_section->add_block(
 			array(
 				'id'        => 'product-description',
