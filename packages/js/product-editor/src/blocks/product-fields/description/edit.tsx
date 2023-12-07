@@ -10,11 +10,14 @@ import {
 	serialize,
 } from '@wordpress/blocks';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useInnerBlocksProps } from '@wordpress/block-editor';
 import { Button } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEntityProp } from '@wordpress/core-data';
+import {
+	// @ts-expect-error no exported member.
+	useInnerBlocksProps,
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
