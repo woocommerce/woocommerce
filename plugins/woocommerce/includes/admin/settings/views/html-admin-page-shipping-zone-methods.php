@@ -201,8 +201,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 								if ( ! $method->supports( 'shipping-zones' ) ) {
 									continue;
 								}
-								$description = wp_kses_post( $method->get_method_description() );
-								echo '<div class="wc-shipping-zone-method-input"><input type="radio" value="' . esc_attr( $method->id ) . '" id="' . esc_attr( $method->id ) . '" name="add_method_id"/><label for="' . esc_attr( $method->id ) . '">' . esc_html( $method->get_method_title() ) . '<span class="dashicons dashicons-yes"></span></label><div class="wc-shipping-zone-method-input-help-text"><span>' . esc_html( $description ) . '</span></div></div>';
+								$allowed_html = array(
+									'a' => array(
+										'href' => true,
+										'title' => true
+									)
+								);
+								$description = wp_kses( $method->get_method_description(), $allowed_html );
+								echo '<div class="wc-shipping-zone-method-input"><input type="radio" value="' . esc_attr( $method->id ) . '" id="' . esc_attr( $method->id ) . '" name="add_method_id"/><label for="' . esc_attr( $method->id ) . '">' . esc_html( $method->get_method_title() ) . '<span class="dashicons dashicons-yes"></span></label><div class="wc-shipping-zone-method-input-help-text"><span>' . $description . '</span></div></div>';
 							}
 							?>
 						</fieldset>
