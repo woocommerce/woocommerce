@@ -555,7 +555,7 @@ class DataSynchronizerTests extends HposTestCase {
 		$order->save();
 
 		// Run scheduled deletion.
-		do_action( 'wp_scheduled_delete' );
+		do_action( 'wp_scheduled_delete' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 
 		// Refresh order and ensure it's *not* gone.
 		$order = wc_get_order( $order->get_id() );
@@ -571,7 +571,7 @@ class DataSynchronizerTests extends HposTestCase {
 		);
 
 		// Run scheduled deletion.
-		do_action( 'wp_scheduled_delete' );
+		do_action( 'wp_scheduled_delete' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 
 		// Ensure the placeholder post is gone.
 		$placeholder = get_post( $order->get_id() );

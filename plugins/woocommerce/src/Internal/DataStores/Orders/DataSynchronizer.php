@@ -986,8 +986,8 @@ ORDER BY orders.id ASC
 		$delete_timestamp = $this->legacy_proxy->call_function( 'time' ) - ( DAY_IN_SECONDS * EMPTY_TRASH_DAYS );
 
 		$args = array(
-			'status' => 'trash',
-			'limit'  => self::ORDERS_SYNC_BATCH_SIZE,
+			'status'        => 'trash',
+			'limit'         => self::ORDERS_SYNC_BATCH_SIZE,
 			'date_modified' => '<' . $delete_timestamp,
 		);
 
@@ -1000,7 +1000,7 @@ ORDER BY orders.id ASC
 			if ( $order->get_status() !== 'trash' ) {
 				continue;
 			}
-			if ($order->get_date_modified()->getTimestamp() >= $delete_timestamp ) {
+			if ( $order->get_date_modified()->getTimestamp() >= $delete_timestamp ) {
 				continue;
 			}
 			$order->delete( true );
