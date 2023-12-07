@@ -209,12 +209,28 @@ class BlockRegistry {
 		$block_name      = $this->remove_block_prefix( $block_name );
 		$block_json_file = $this->get_file_path( $block_name . '/block.json', $block_dir );
 
-		if ( ! file_exists( $block_json_file ) ) {
+		return $this->register_block_type_from_metadata( $block_json_file );
+	}
+
+	/**
+	 * Register a block type from metadata stored in the block.json file.
+	 *
+	 * @param string $file_or_folder Path to the JSON file with metadata definition for the block or
+	 * path to the folder where the `block.json` file is located.
+	 *
+	 * @return WP_Block_Type|false The registered block type on success, or false on failure.
+	 */
+	public function register_block_type_from_metadata( $file_or_folder ) {
+		$metadata_file = ( ! str_ends_with( $file_or_folder, 'block.json' ) )
+			? trailingslashit( $file_or_folder ) . 'block.json'
+			: $file_or_folder;
+
+		if ( ! file_exists( $metadata_file ) ) {
 			return false;
 		}
 
 		// phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$metadata = json_decode( file_get_contents( $block_json_file ), true );
+		$metadata = json_decode( file_get_contents( $metadata_file ), true );
 		if ( ! is_array( $metadata ) || ! $metadata['name'] ) {
 			return false;
 		}
@@ -226,12 +242,11 @@ class BlockRegistry {
 		}
 
 		return register_block_type_from_metadata(
-			$block_json_file,
+			$metadata_file,
 			array(
 				'attributes'   => $this->augment_attributes( isset( $metadata['attributes'] ) ? $metadata['attributes'] : array() ),
 				'uses_context' => $this->augment_uses_context( isset( $metadata['usesContext'] ) ? $metadata['usesContext'] : array() ),
 			)
 		);
 	}
-
 }
