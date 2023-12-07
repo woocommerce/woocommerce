@@ -346,9 +346,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		if ( Features::is_enabled( 'product-grouped' ) ) {
 			$product_list_section = $general_group->add_section(
 				array(
-					'id'         => 'product-list-section',
-					'order'      => 35,
-					'attributes' => array(
+					'id'             => 'product-list-section',
+					'order'          => 35,
+					'attributes'     => array(
 						'title'       => __( 'Products in this group', 'woocommerce' ),
 						'description' => __( 'Make a collection of related products, enabling customers to purchase multiple items together.', 'woocommerce' ),
 					),
@@ -783,10 +783,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_stock_status_conditional = $product_inventory_section->add_block(
 			array(
-				'id'         => 'product-stock-status-conditional-wrapper',
-				'blockName'  => 'woocommerce/conditional',
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => 'product-stock-status-conditional-wrapper',
+				'blockName'      => 'woocommerce/conditional',
+				'order'          => 20,
+				'attributes'     => array(
 					'mustMatch' => array(
 						'manage_stock' => array( false ),
 					),
@@ -825,10 +825,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_inventory_advanced         = $product_inventory_section->add_block(
 			array(
-				'id'         => 'product-inventory-advanced',
-				'blockName'  => 'woocommerce/product-collapsible',
-				'order'      => 30,
-				'attributes' => array(
+				'id'             => 'product-inventory-advanced',
+				'blockName'      => 'woocommerce/product-collapsible',
+				'order'          => 30,
+				'attributes'     => array(
 					'toggleText'       => __( 'Advanced', 'woocommerce' ),
 					'initialCollapsed' => true,
 					'persistRender'    => true,
