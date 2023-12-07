@@ -13,12 +13,12 @@ class BlockRegistryTest extends WC_Unit_Test_Case {
 	 * Test registering a block type.
 	 */
 	public function test_register_block_type_from_metadata() {
-		$core_registry = \WP_Block_Type_Registry::get_instance();
-
 		$block_registry = BlockRegistry::get_instance();
+
+		$this->assertFalse( $block_registry->is_registered( 'woocommerce-test/test-block' ), 'Block type already registered.' );
 
 		$block_registry->register_block_type_from_metadata( trailingslashit( __DIR__ ) . 'test-block' );
 
-		$this->assertTrue( $core_registry->is_registered( 'woocommerce-test/test-block' ), 'Block type not registered.' );
+		$this->assertTrue( $block_registry->is_registered( 'woocommerce-test/test-block' ), 'Block type not registered.' );
 	}
 }
