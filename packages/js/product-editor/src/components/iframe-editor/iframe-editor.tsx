@@ -43,7 +43,6 @@ type IframeEditorProps = {
 };
 
 export function IframeEditor( {
-	initialBlocks = [],
 	onChange = () => {},
 	onClose,
 	onInput = () => {},
@@ -51,13 +50,22 @@ export function IframeEditor( {
 	showBackButton = false,
 }: IframeEditorProps ) {
 	const [ resizeObserver ] = useResizeObserver();
-	const [ temporalBlocks, setTemporalBlocks ] =
-		useState< BlockInstance[] >( initialBlocks );
+	const [ temporalBlocks, setTemporalBlocks ] = useState< BlockInstance[] >(
+		[]
+	);
 
 	// Pick the blocks from the store.
 	const blocks: BlockInstance[] = useSelect( ( select ) => {
 		return select( productEditorUiStore ).getModalEditorBlocks();
 	}, [] );
+
+	/*
+	 * Set the initial blocks from the store.
+	 * @todo: probably we can get rid of the initialBlocks prop.
+	 */
+	useEffect( () => {
+		setTemporalBlocks( blocks );
+	}, [] ); // eslint-disable-line
 
 	const { setModalEditorBlocks: setBlocks, setModalEditorContentHasChanged } =
 		useDispatch( productEditorUiStore );
