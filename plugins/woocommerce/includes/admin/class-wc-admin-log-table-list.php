@@ -100,7 +100,9 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	public function display_rows() {
 		foreach ( $this->items as $log ) {
 			$this->single_row( $log );
-			$this->context_row( $log );
+			if ( ! empty( $log['context'] ) ) {
+				$this->context_row( $log );
+			}
 		}
 	}
 
