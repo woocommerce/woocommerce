@@ -5,9 +5,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [1.2.0](https://www.npmjs.com/package/@woocommerce/create-product-editor-block/v/1.2.0) - 2023-12-07 
 
 -   Patch - Add __experimentalRole: 'content' to block properties [#41045]
--   Minor - Update to use the template API. [#39993]
 -   Patch - Bump required PHP version to 7.4 [#39820]
+-   Minor - Update to use the template API. [#39993]
 -   Minor - Update pnpm to 8.6.7 [#39245]
+-   Minor - Add @woocommerce/product-editor as an npm devDependency and use useWooBlockProps hook [#41886]
 
 ## [1.1.0](https://www.npmjs.com/package/@woocommerce/create-product-editor-block/v/1.1.0) - 2023-06-29 
 
