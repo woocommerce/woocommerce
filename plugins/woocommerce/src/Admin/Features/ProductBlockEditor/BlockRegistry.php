@@ -213,6 +213,30 @@ class BlockRegistry {
 	}
 
 	/**
+	 * Check if a block is registered.
+	 *
+	 * @param string $block_name Block name.
+	 */
+	public function is_registered( $block_name ): bool {
+		$registry = \WP_Block_Type_Registry::get_instance();
+
+		return $registry->is_registered( $block_name );
+	}
+
+	/**
+	 * Unregister a block.
+	 *
+	 * @param string $block_name Block name.
+	 */
+	public function unregister( $block_name ) {
+		$registry = \WP_Block_Type_Registry::get_instance();
+
+		if ( $registry->is_registered( $block_name ) ) {
+			$registry->unregister( $block_name );
+		}
+	}
+
+	/**
 	 * Register a block type from metadata stored in the block.json file.
 	 *
 	 * @param string $file_or_folder Path to the JSON file with metadata definition for the block or
@@ -236,11 +260,7 @@ class BlockRegistry {
 			return false;
 		}
 
-		$registry = \WP_Block_Type_Registry::get_instance();
-
-		if ( $registry->is_registered( $metadata['name'] ) ) {
-			$registry->unregister( $metadata['name'] );
-		}
+		$this->unregister( $metadata['name'] );
 
 		return register_block_type_from_metadata(
 			$metadata_file,
