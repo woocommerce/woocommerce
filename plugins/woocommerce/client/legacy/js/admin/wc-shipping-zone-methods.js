@@ -632,17 +632,6 @@
 						}
 					} else if ( target === 'wc-modal-shipping-method-settings' ) {
 						event.data.view.possiblyHideFreeShippingRequirements( data );
-						const requiredFields = [ 'woocommerce_free_shipping_title', 'woocommerce_flat_rate_title', 'woocommerce_local_pickup_title' ];
-						const requiredFieldPresent = requiredFields.find( ( field ) => {
-							return data.hasOwnProperty( field ) && field;
-						} );
-						
-						if ( requiredFieldPresent ) {
-							const shouldDisable = data[ requiredFieldPresent ].length === 0;
-							const saveButton = document.getElementById( 'btn-ok' );
-							saveButton.disabled = shouldDisable;
-							saveButton.classList.toggle( 'disabled', shouldDisable );
-						} 
 					}
 				},
 				onCloseConfigureShippingMethod: function( event, target, post_data, addButtonCalled ) {
