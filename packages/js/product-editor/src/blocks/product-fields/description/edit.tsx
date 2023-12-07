@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, useEffect, Fragment } from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
 import { BlockInstance, parse, serialize } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import classNames from 'classnames';
@@ -109,13 +109,7 @@ export function DescriptionBlockEdit( {
 			{ ! description.length && <div { ...innerBlockProps } /> }
 
 			{ !! description.length && (
-				<div className="wp-block-woocommerce-product-description-field__cover" />
-			) }
-
-			{ !! description.length && (
-				<>
-					<BlockPreview blocks={ parse( description ) } />
-				</>
+				<BlockPreview blocks={ parse( description ) } />
 			) }
 
 			{ isModalEditorOpen && <ModalEditorWelcomeGuide /> }
