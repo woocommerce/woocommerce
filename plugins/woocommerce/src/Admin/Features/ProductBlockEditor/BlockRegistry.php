@@ -65,6 +65,32 @@ class BlockRegistry {
 	);
 
 	/**
+	 * Singleton instance.
+	 *
+	 * @var BlockRegistry
+	 */
+	private static $instance = null;
+
+	/**
+	 * Get the singleton instance.
+	 */
+	public static function get_instance(): BlockRegistry {
+		if ( ! self::$instance ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
+	/**
+	 * Constructor
+	 */
+	protected function __construct() {
+		add_filter( 'block_categories_all', array( $this, 'register_categories' ), 10, 2 );
+		$this->register_product_blocks();
+	}
+
+	/**
 	 * Get a file path for a given block file.
 	 *
 	 * @param string $path File path.
@@ -72,14 +98,6 @@ class BlockRegistry {
 	 */
 	private function get_file_path( $path, $dir ) {
 		return WC_ABSPATH . WCAdminAssets::get_path( 'js' ) . trailingslashit( $dir ) . $path;
-	}
-
-	/**
-	 * Initialize all blocks.
-	 */
-	public function init() {
-		add_filter( 'block_categories_all', array( $this, 'register_categories' ), 10, 2 );
-		$this->register_product_blocks();
 	}
 
 	/**
