@@ -2,12 +2,11 @@
  * External dependencies
  */
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, TextareaControl } from '@wordpress/components';
+import { Button, Modal, TextareaControl } from '@wordpress/components';
 import { useDispatch, select } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 import apiFetch from '@wordpress/api-fetch';
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
-import ReactMarkdown from 'react-markdown';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 /**
@@ -16,8 +15,9 @@ import { useAutoAnimate } from '@formkit/auto-animate/react';
 import './index.scss';
 import makeWCRestApiCall from '../utils/wcRestApi';
 import { AudioRecorder } from '../components/audio-recorder';
+import MessageItem from './message-item';
 
-type Message = {
+export type Message = {
 	sender: 'user' | 'assistant';
 	text: string;
 };
@@ -276,12 +276,11 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		>
 			<ul className="woo-chat-history" ref={ parent }>
 				{ messages.map( ( message, index ) => (
-					<li
+					<MessageItem
+						message={ message }
 						key={ index }
-						className={ `message ${ message.sender }` }
-					>
-						<ReactMarkdown>{ message.text }</ReactMarkdown>
-					</li>
+						index={ index }
+					/>
 				) ) }
 				<li ref={ chatMessagesEndRef }></li>
 			</ul>

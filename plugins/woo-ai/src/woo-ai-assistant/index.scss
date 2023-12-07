@@ -1,5 +1,9 @@
 $woocommerce-purple: #9b5c8f;
 $toned-down-purple: mix(white, $woocommerce-purple, 20%); // 20% white
+$positive-color: #5cb85c;
+$negative-color: #d9534f;
+$toned-down-positive-color: mix(white, $positive-color, 20%); // A lighter green
+$toned-down-negative-color: mix(white, $negative-color, 20%); // A lighter red
 
 .woo-ai-assistant-chat-modal {
 	max-height: 100%;
@@ -18,18 +22,80 @@ $toned-down-purple: mix(white, $woocommerce-purple, 20%); // 20% white
 		padding: 10px;
 		background-color: white;
 
+		.woo-ai-assistant-actions {
+			display: flex;
+			justify-content: flex-start;
+
+			.woo-ai-assistant-clipboard {
+				color: mix( white, #333, 20% );
+
+				&:hover {
+					color: #333;
+				}
+			}
+
+			.feedback-buttons {
+				// target button elements that are disabled
+				button:disabled{
+					opacity: .6;
+				}
+	
+				.specific-feedback {
+					flex-direction: column;
+					align-items: center;
+					margin-bottom: 30px;
+
+					.feedback-prompt {
+						text-align: center;
+					}
+				}
+	
+				.components-button.is-active + .specific-feedback {
+					display: flex;
+				}
+	
+				.woo-ai-assistant-positive-feedback-button {
+					font-size: 18px;
+					color: $toned-down-positive-color;
+
+					&:hover {
+						color: $positive-color;
+					}
+				}
+				.woo-ai-assistant-negative-feedback-button {
+					color: $toned-down-negative-color;
+					font-size: 18px;
+
+					&:hover {
+						color: $negative-color;
+					}
+				}
+			}
+			.woo-ai-assistant-feedback-submitted {
+				background-color: $toned-down-positive-color;
+				color: white;
+				padding: 10px;
+				border-radius: 5px;
+				margin-bottom: 10px;
+			}
+		}
+
+
+
 		.message {
 			max-width: 80%; // Limit the width of each message
 			padding: 8px 12px;
 			border-radius: 15px;
-			margin-bottom: 8px;
+			margin-bottom: 0px;
 			box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1); // Subtle shadow for depth
+			position: relative;
 
 			&.user {
 				background-color: $toned-down-purple;
 				color: white;
 				align-self: flex-end; // Align to the right
 				border-top-right-radius: 2px; // Adjust for speech bubble effect
+				margin-bottom: 20px;
 			}
 
 			&.assistant {
@@ -38,6 +104,7 @@ $toned-down-purple: mix(white, $woocommerce-purple, 20%); // 20% white
 				align-self: flex-start; // Align to the left
 				border-top-left-radius: 2px; // Adjust for speech bubble effect
 			}
+
 			p {
 				margin: 0;
 			}
