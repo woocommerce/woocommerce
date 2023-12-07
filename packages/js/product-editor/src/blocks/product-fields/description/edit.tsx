@@ -1,23 +1,24 @@
 /**
  * External dependencies
  */
-import { createElement, useEffect } from '@wordpress/element';
-import { BlockInstance, serialize } from '@wordpress/blocks';
+import { createElement, useEffect, Fragment } from '@wordpress/element';
+import { BlockInstance, parse, serialize } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import {
+	BlockControls,
 	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
-	BlockControls,
+	// @ts-expect-error no exported member.
+	BlockPreview,
 } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
-import { ContentPreview } from '../../../components/content-preview';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
 import { store } from '../../../store/product-editor-ui';
 import type { DescriptionBlockEditComponent } from './types';
@@ -112,7 +113,9 @@ export function DescriptionBlockEdit( {
 			) }
 
 			{ !! description.length && (
-				<ContentPreview content={ description } />
+				<>
+					<BlockPreview blocks={ parse( description ) } />
+				</>
 			) }
 
 			{ isModalEditorOpen && <ModalEditorWelcomeGuide /> }
