@@ -8,7 +8,7 @@
 	"keywords": [ "products", "section", "description" ],
 	"textdomain": "default",
 	"attributes": {
-		"name": {
+		"content": {
 			"type": "string",
 			"__experimentalRole": "content"
 		}

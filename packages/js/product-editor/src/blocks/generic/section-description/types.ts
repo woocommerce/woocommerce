@@ -4,5 +4,5 @@
 import { BlockAttributes } from '@wordpress/blocks';
 
 export interface SectionDescriptionBlockAttributes extends BlockAttributes {
-	name: string;
+	content: string;
 }
