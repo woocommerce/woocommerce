@@ -44,7 +44,6 @@ build-style/
 build-style.js
 build-types/
 dist/
-oclif.manifest.json
 
 # Project files
 node_modules/
@@ -95,9 +94,8 @@ allure-results
 changes.json
 .env
 
-# Build Cache
+# Turborepo
 .turbo
-.wireit
 
 # Support .gitkeep Files
 !.gitkeep

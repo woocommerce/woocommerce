@@ -28,21 +28,21 @@ To enable Live(Hot) Reload when code is changed, run the following commands:
 
 ```text
 pnpm install
-pnpm start
+pnpm run start
 ```
 
 To build the /woo-ai/ plugin directory (when loading the plugin via symlink), run:
 
 ```text
 pnpm install
-pnpm build
+pnpm run build
 ```
 
 To build the plugin ZIP file, run:
 
 ```text
 pnpm install
-pnpm build:zip
+pnpm run build:zip
 ```
 
 See [wp-scripts](https://github.com/WordPress/gutenberg/tree/master/packages/scripts) for more usage information.

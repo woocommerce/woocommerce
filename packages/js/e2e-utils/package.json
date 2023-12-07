@@ -8,21 +8,12 @@
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
 	"license": "GPL-3.0+",
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
+	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
-	"scripts": {
-		"build": "pnpm clean && pnpm compile",
-		"clean": "rm -rf ./build ./build-module",
-		"compile": "e2e-builds",
-		"lint": "eslint --ext=js,ts,tsx src",
-		"lint:fix": "eslint --ext=js,ts,tsx src --fix",
-		"prepack": "pnpm build"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
-	},
 	"dependencies": {
 		"@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
 		"@wordpress/deprecated": "wp-6.0",
@@ -47,17 +38,26 @@
 		"@wordpress/babel-preset-default": "3.0.2",
 		"@wordpress/browserslist-config": "wp-6.0",
 		"eslint": "^8.32.0",
-		"eslint-plugin-jest": "23.20.0",
-		"wireit": "^0.14.1"
+		"eslint-plugin-jest": "23.20.0"
 	},
 	"peerDependencies": {
 		"@woocommerce/api": "^0.2.0"
 	},
-	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
-	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"scripts": {
+		"turbo:build": "pnpm run clean && pnpm run compile",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"clean": "rm -rf ./build ./build-module",
+		"compile": "e2e-builds",
+		"prepack": "pnpm run build",
+		"lint": "eslint --ext=js,ts,tsx src",
+		"lint:fix": "eslint --ext=js,ts,tsx src --fix"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
 	}
 }
