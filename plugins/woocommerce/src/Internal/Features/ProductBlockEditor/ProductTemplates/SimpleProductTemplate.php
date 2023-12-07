@@ -344,6 +344,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'title'       => __( 'Products in this group', 'woocommerce' ),
 						'description' => __( 'Make a collection of related products, enabling customers to purchase multiple items together.', 'woocommerce' ),
 					),
+					'hideConditions' => array(
+						array(
+							'expression' => 'editedProduct.type !== "grouped"',
+						),
+					),
 				)
 			);
 
