@@ -421,11 +421,13 @@ class Checkout extends AbstractBlock {
 
 		// Filter out payment methods that are not enabled.
 		foreach ( $payment_methods as $payment_method_group => $saved_payment_methods ) {
-			$payment_methods[ $payment_method_group ] = array_filter(
-				$saved_payment_methods,
-				function( $saved_payment_method ) use ( $payment_gateways ) {
-					return in_array( $saved_payment_method['method']['gateway'], array_keys( $payment_gateways ), true );
-				}
+			$payment_methods[ $payment_method_group ] = array_values(
+				array_filter(
+					$saved_payment_methods,
+					function( $saved_payment_method ) use ( $payment_gateways ) {
+						return in_array( $saved_payment_method['method']['gateway'], array_keys( $payment_gateways ), true );
+					}
+				)
 			);
 		}
 
