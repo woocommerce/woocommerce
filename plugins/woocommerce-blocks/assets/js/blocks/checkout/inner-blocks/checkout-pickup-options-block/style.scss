@@ -2,9 +2,9 @@
 .wp-block-woocommerce-checkout-pickup-options-block {
 	.wc-block-components-local-pickup-rates-control {
 		.wc-block-components-radio-control__option {
-			@include with-translucent-border(0 0 1px);
+			border-bottom: 1px solid $universal-border-light;
 			margin: 0;
-			padding: em($gap-small) 0 em($gap-small) em($gap-largest);
+			padding: em($gap-small) 0 em($gap-small) em($gap-huge);
 		}
 		.wc-block-components-shipping-rates-control__no-results-notice {
 			margin: em($gap-small) 0;
@@ -42,7 +42,7 @@
 		.wc-block-components-radio-control__description-group {
 			width: 100%;
 			box-sizing: border-box;
-			background-color: $gray-100;
+			background-color: $universal-background;
 			border-radius: $universal-border-radius;
 			padding: 1px em($gap-small);
 			margin-top: em($gap-smaller);

@@ -5,6 +5,7 @@
 	margin: em($gap) 0;
 	margin-top: 0;
 	padding: 0 0 0 em($gap-larger);
+
 	position: relative;
 	cursor: pointer;
 
@@ -58,7 +59,7 @@
 	.wc-block-components-radio-control__input {
 		appearance: none;
 		background: #fff;
-		border: 2px solid $input-border-gray;
+		border: 1px solid $universal-border-medium;
 		border-radius: 50%;
 		display: inline-block;
 		height: em(24px); // =1.5rem
@@ -67,14 +68,17 @@
 		width: em(24px);
 		// The code belows centers the input vertically.
 		position: absolute;
-		left: 0;
+		left: $gap;
 		top: 50%;
 		transform: translate(0, -45%);
 		margin: inherit;
 		cursor: pointer;
+		&:checked {
+			border: 1px solid $universal-border-strong;
+		}
 
 		&:focus {
-			outline: 2px solid $input-border-gray;
+			outline: 1px solid $universal-border-strong;
 			outline-offset: 2px;
 		}
 

@@ -1,5 +1,5 @@
 .wc-block-components-totals-wrapper {
-	@include with-translucent-border(1px 0 0);
+	border-top: 1px solid $universal-border-light;
 	padding: $gap 0;
 
 	&.has-bottom-border {
@@ -11,6 +11,7 @@
 	// this prevents displaying the empty areas in Order Summary
 	&:empty {
 		padding: 0;
+		border-width: 0;
 		&::after {
 			content: none;
 		}
@@ -20,7 +21,7 @@
 		padding: 0;
 
 		> * > * {
-			@include with-translucent-border(0 0 1px);
+			border-bottom: 1px solid $universal-border-light;
 			padding: $gap 0;
 
 
@@ -35,7 +36,7 @@
 .wc-block-components-discounts-meta {
 	.wc-block-components-totals-wrapper {
 		&:first-child {
-			@include with-translucent-border(1px 0 0);
+			border-top: 1px solid $universal-border-light;
 		}
 	}
 }
