@@ -355,7 +355,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 												cond: 'isAiOnline',
 											},
 											{
-												target: 'resetPatterns',
+												target: 'resetPatternsAndProducts',
 											},
 										],
 									},
@@ -373,9 +373,9 @@ export const designWithAiStateMachineDefinition = createMachine(
 											},
 										},
 									},
-									resetPatterns: {
+									resetPatternsAndProducts: {
 										invoke: {
-											src: 'resetPatterns',
+											src: 'resetPatternsAndProducts',
 											onDone: {
 												target: 'success',
 											},
