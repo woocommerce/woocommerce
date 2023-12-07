@@ -783,6 +783,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'manage_stock' => array( false ),
 					),
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		$product_stock_status_conditional->add_block(
@@ -820,6 +825,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'initialCollapsed' => true,
 					'persistRender'    => true,
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		$product_inventory_advanced_wrapper = $product_inventory_advanced->add_block(
