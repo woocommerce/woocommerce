@@ -28,6 +28,7 @@ const blockData: BlockData = {
 		frontend: {},
 	},
 };
+
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	checkoutPageObject: async ( { page }, use ) => {
 		const pageObject = new CheckoutPage( {
@@ -36,9 +37,45 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 		await use( pageObject );
 	},
 } );
+
 test.describe( 'Merchant → Checkout', () => {
 	// `as string` is safe here because we know the variable is a string, it is defined above.
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
+
+	test.beforeEach( async ( { editorUtils, admin, editor } ) => {
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//page-checkout',
+			postType: 'wp_template',
+		} );
+		await editorUtils.enterEditMode();
+		await editor.openDocumentSettingsSidebar();
+	} );
+
+	test( 'renders without crashing and can only be inserted once', async ( {
+		page,
+		editorUtils,
+		editor,
+	} ) => {
+		const blockPresence = await editorUtils.getBlockByName(
+			blockData.slug
+		);
+		expect( blockPresence ).toBeTruthy();
+
+		await editorUtils.openGlobalBlockInserter();
+		await page.getByPlaceholder( 'Search' ).fill( blockData.slug );
+		const checkoutBlockButton = page.getByRole( 'option', {
+			name: blockData.name,
+			exact: true,
+		} );
+		expect( await editorUtils.ensureNoErrorsOnBlockPage() ).toBe( true );
+		await expect(
+			editor.canvas.locator( blockSelectorInEditor )
+		).toBeVisible();
+		await expect( checkoutBlockButton ).toHaveAttribute(
+			'aria-disabled',
+			'true'
+		);
+	} );
 
 	test.describe( 'Can adjust T&S and Privacy Policy options', () => {
 		test.beforeAll( async ( { browser } ) => {
@@ -110,165 +147,428 @@ test.describe( 'Merchant → Checkout', () => {
 				)
 			).toBeVisible();
 		} );
-		test( 'Merchant can see T&S and Privacy Policy links with checkbox', async ( {
-			frontendUtils,
-			checkoutPageObject,
-			editorUtils,
-			admin,
-			editor,
-		} ) => {
-			await admin.visitSiteEditor( {
-				postId: 'woocommerce/woocommerce//page-checkout',
-				postType: 'wp_template',
-			} );
-			await editorUtils.enterEditMode();
-			await editor.openDocumentSettingsSidebar();
-			await editor.selectBlocks(
-				blockSelectorInEditor +
-					'  [data-type="woocommerce/checkout-terms-block"]'
-			);
-			let requireTermsCheckbox = editor.page.getByRole( 'checkbox', {
-				name: 'Require checkbox',
-				exact: true,
-			} );
-			await requireTermsCheckbox.check();
-			await editor.saveSiteEditorEntities();
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-			await frontendUtils.goToCheckout();
-			await checkoutPageObject.fillInCheckoutWithTestData();
-			await checkoutPageObject.placeOrder( false );
+	} );
+	test( 'Merchant can see T&S and Privacy Policy links with checkbox', async ( {
+		frontendUtils,
+		checkoutPageObject,
+		editorUtils,
+		admin,
+		editor,
+	} ) => {
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//page-checkout',
+			postType: 'wp_template',
+		} );
+		await editorUtils.enterEditMode();
+		await editor.openDocumentSettingsSidebar();
+		await editor.selectBlocks(
+			blockSelectorInEditor +
+				'  [data-type="woocommerce/checkout-terms-block"]'
+		);
+		let requireTermsCheckbox = editor.page.getByRole( 'checkbox', {
+			name: 'Require checkbox',
+			exact: true,
+		} );
+		await requireTermsCheckbox.check();
+		await editor.saveSiteEditorEntities();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCheckout();
+		await checkoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.placeOrder( false );
 
-			const checkboxWithError = frontendUtils.page.getByLabel(
+		const checkboxWithError = frontendUtils.page.getByLabel(
+			'You must accept our Terms and Conditions and Privacy Policy to continue with your purchase.'
+		);
+		await expect( checkboxWithError ).toHaveAttribute(
+			'aria-invalid',
+			'true'
+		);
+
+		await frontendUtils.page
+			.getByLabel(
 				'You must accept our Terms and Conditions and Privacy Policy to continue with your purchase.'
-			);
-			await expect( checkboxWithError ).toHaveAttribute(
-				'aria-invalid',
-				'true'
-			);
+			)
+			.check();
 
-			await frontendUtils.page
-				.getByLabel(
-					'You must accept our Terms and Conditions and Privacy Policy to continue with your purchase.'
-				)
-				.check();
+		await checkoutPageObject.placeOrder();
+		await expect(
+			frontendUtils.page.getByText(
+				'Thank you. Your order has been received'
+			)
+		).toBeVisible();
 
-			await checkoutPageObject.placeOrder();
-			await expect(
-				frontendUtils.page.getByText(
-					'Thank you. Your order has been received'
-				)
-			).toBeVisible();
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//page-checkout',
+			postType: 'wp_template',
+		} );
+		await editorUtils.enterEditMode();
+		await editor.openDocumentSettingsSidebar();
+		await editor.selectBlocks(
+			blockSelectorInEditor +
+				'  [data-type="woocommerce/checkout-terms-block"]'
+		);
+		requireTermsCheckbox = editor.page.getByRole( 'checkbox', {
+			name: 'Require checkbox',
+			exact: true,
+		} );
+		await requireTermsCheckbox.uncheck();
+		await editor.saveSiteEditorEntities();
+	} );
 
-			await admin.visitSiteEditor( {
-				postId: 'woocommerce/woocommerce//page-checkout',
-				postType: 'wp_template',
-			} );
-			await editorUtils.enterEditMode();
+	test( 'inner blocks can be added/removed by filters', async ( {
+		page,
+		editor,
+		editorUtils,
+	} ) => {
+		// Begin by removing the block.
+		await editor.selectBlocks( blockSelectorInEditor );
+		const options = page
+			.getByRole( 'toolbar', { name: 'Block tools' } )
+			.getByRole( 'button', { name: 'Options' } );
+		await options.click();
+		const removeButton = page.getByRole( 'menuitem', {
+			name: 'Delete',
+		} );
+		await removeButton.click();
+		// Expect block to have been removed.
+		await expect(
+			await editorUtils.getBlockByName( blockData.slug )
+		).toHaveCount( 0 );
+
+		// Register a checkout filter to allow `core/table` block in the Checkout block's inner blocks, add
+		// core/audio into the woocommerce/checkout-fields-block.
+		await page.evaluate(
+			`wc.blocksCheckout.registerCheckoutFilters( 'woo-test-namespace', {
+					additionalCartCheckoutInnerBlockTypes: ( value, extensions, { block } ) => {
+						value.push( 'core/table' );
+						if ( block === 'woocommerce/checkout-totals-block' ) {
+							value.push( 'core/audio' );
+						}
+						return value;
+					},
+				} );`
+		);
+
+		await editor.insertBlock( { name: 'woocommerce/checkout' } );
+		await expect(
+			await editorUtils.getBlockByName( blockData.slug )
+		).not.toHaveCount( 0 );
+
+		// Select the checkout-fields-block block and try to insert a block. Check the Table block is available.
+		await editor.selectBlocks(
+			blockData.selectors.editor.block +
+				' .wp-block-woocommerce-checkout-fields-block'
+		);
+
+		const addBlockButton = editor.canvas
+			.locator( '.wp-block-woocommerce-checkout-totals-block' )
+			.getByRole( 'button', { name: 'Add block' } );
+		await addBlockButton.dispatchEvent( 'click' );
+
+		const tableButton = editor.page.getByRole( 'option', {
+			name: 'Table',
+		} );
+		await expect( tableButton ).toBeVisible();
+
+		const audioButton = editor.page.getByRole( 'option', {
+			name: 'Audio',
+		} );
+		await test.expect( audioButton ).toBeVisible();
+
+		// Now check the filled Checkout order summary block and expect only the Table block to be available there.
+		await editor.selectBlocks(
+			blockSelectorInEditor +
+				' [data-type="woocommerce/checkout-order-summary-block"]'
+		);
+		const orderSummaryAddBlockButton = editor.canvas
+			.getByRole( 'document', { name: 'Block: Order Summary' } )
+			.getByRole( 'button', { name: 'Add block' } )
+			.first();
+		await orderSummaryAddBlockButton.dispatchEvent( 'click' );
+
+		const orderSummaryTableButton = editor.page.getByRole( 'option', {
+			name: 'Table',
+		} );
+		await expect( orderSummaryTableButton ).toBeVisible();
+
+		const orderSummaryAudioButton = editor.page.getByRole( 'option', {
+			name: 'Audio',
+		} );
+		await expect( orderSummaryAudioButton ).toBeHidden();
+	} );
+
+	test.describe( 'Attributes', () => {
+		test.beforeEach( async ( { editor } ) => {
 			await editor.openDocumentSettingsSidebar();
-			await editor.selectBlocks(
-				blockSelectorInEditor +
-					'  [data-type="woocommerce/checkout-terms-block"]'
+			await editor.selectBlocks( blockSelectorInEditor );
+		} );
+
+		test( 'can enable dark mode inputs', async ( {
+			editorUtils,
+			page,
+		} ) => {
+			const toggleLabel = page.getByLabel( 'Dark mode inputs' );
+			await toggleLabel.check();
+
+			const shippingAddressBlock = await editorUtils.getBlockByName(
+				'woocommerce/checkout'
 			);
-			requireTermsCheckbox = editor.page.getByRole( 'checkbox', {
-				name: 'Require checkbox',
-				exact: true,
+
+			const darkControls = shippingAddressBlock.locator(
+				'.wc-block-checkout.has-dark-controls'
+			);
+			await expect( darkControls ).toBeVisible();
+			await toggleLabel.uncheck();
+			await expect( darkControls ).toBeHidden();
+		} );
+
+		test.describe( 'Shipping and billing addresses', () => {
+			test.beforeEach( async ( { editor } ) => {
+				await editor.openDocumentSettingsSidebar();
+				await editor.selectBlocks( blockSelectorInEditor );
 			} );
-			await requireTermsCheckbox.uncheck();
-			await editor.saveSiteEditorEntities();
+
+			test( 'Company input visibility and required can be toggled in shipping and billing', async ( {
+				editor,
+			} ) => {
+				await editor.selectBlocks(
+					blockSelectorInEditor +
+						'  [data-type="woocommerce/checkout-shipping-address-block"]'
+				);
+				const checkbox = editor.page.getByRole( 'checkbox', {
+					name: 'Company',
+					exact: true,
+				} );
+
+				await checkbox.check();
+				await expect( checkbox ).toBeChecked();
+				await expect(
+					editor.canvas.locator(
+						'div.wc-block-components-address-form__company'
+					)
+				).toBeVisible();
+
+				await checkbox.uncheck();
+				await expect( checkbox ).not.toBeChecked();
+				await expect(
+					editor.canvas.locator(
+						'.wc-block-checkout__shipping-fields .wc-block-components-address-form__company'
+					)
+				).toBeHidden();
+
+				await editor.canvas
+					.getByLabel( 'Use same address for billing' )
+					.uncheck();
+
+				await editor.selectBlocks(
+					blockSelectorInEditor +
+						'  [data-type="woocommerce/checkout-billing-address-block"]'
+				);
+				const billingCheckbox = editor.page.getByRole( 'checkbox', {
+					name: 'Company',
+					exact: true,
+				} );
+				await billingCheckbox.check();
+				await expect( billingCheckbox ).toBeChecked();
+				await expect(
+					editor.canvas.locator(
+						'.wc-block-checkout__billing-fields .wc-block-components-address-form__company'
+					)
+				).toBeVisible();
+
+				await billingCheckbox.uncheck();
+				await expect( billingCheckbox ).not.toBeChecked();
+				await expect(
+					editor.canvas.locator(
+						'div.wc-block-components-address-form__company'
+					)
+				).toBeHidden();
+			} );
+
+			test( 'Apartment input visibility can be toggled in shipping and billing', async ( {
+				editor,
+				editorUtils,
+			} ) => {
+				await editor.selectBlocks(
+					blockSelectorInEditor +
+						'  [data-type="woocommerce/checkout-shipping-address-block"]'
+				);
+
+				// Turn on apartment field and check it's visible in the fields.
+				const apartmentToggleSelector = editor.page.getByLabel(
+					'Apartment, suite, etc.',
+					{ exact: true }
+				);
+				await apartmentToggleSelector.check();
+				const shippingAddressBlock = await editorUtils.getBlockByName(
+					'woocommerce/checkout-shipping-address-block'
+				);
+
+				const apartmentInput = shippingAddressBlock.getByLabel(
+					'Apartment, suite, etc. (optional)'
+				);
+				// Turn off apartment field and check it's not visible in the fields.
+				await expect( apartmentInput ).toBeVisible();
+
+				await apartmentToggleSelector.uncheck();
+
+				await expect( apartmentInput ).toBeHidden();
+
+				await editor.canvas
+					.getByLabel( 'Use same address for billing' )
+					.uncheck();
+
+				await editor.selectBlocks(
+					blockSelectorInEditor +
+						'  [data-type="woocommerce/checkout-billing-address-block"]'
+				);
+
+				// Turn on apartment field and check it's visible in the fields.
+				const billingApartmentToggleSelector = editor.page.getByLabel(
+					'Apartment, suite, etc.',
+					{ exact: true }
+				);
+				await billingApartmentToggleSelector.check();
+				const billingAddressBlock = await editorUtils.getBlockByName(
+					'woocommerce/checkout-billing-address-block'
+				);
+
+				const billingApartmentInput = billingAddressBlock.getByLabel(
+					'Apartment, suite, etc. (optional)'
+				);
+				// Turn off apartment field and check it's not visible in the fields.
+				await expect( billingApartmentInput ).toBeVisible();
+
+				await billingApartmentToggleSelector.uncheck();
+
+				await expect( billingApartmentInput ).toBeHidden();
+			} );
+
+			test( 'Phone input visibility and required can be toggled', async ( {
+				editor,
+				editorUtils,
+			} ) => {
+				await editor.selectBlocks(
+					blockSelectorInEditor +
+						'  [data-type="woocommerce/checkout-shipping-address-block"]'
+				);
+
+				// Turn on phone field and check it's visible in the fields.
+				const phoneToggleSelector = editor.page.getByLabel( 'Phone', {
+					exact: true,
+				} );
+				await phoneToggleSelector.check();
+				const shippingAddressBlock = await editorUtils.getBlockByName(
+					'woocommerce/checkout-shipping-address-block'
+				);
+
+				// Turn on Require phone number? option and check it becomes required in the fields.
+				const phoneRequiredSelector = editor.page.getByLabel(
+					'Require phone number?',
+					{ exact: true }
+				);
+				await phoneRequiredSelector.check();
+				const phoneInput = shippingAddressBlock.getByLabel( 'Phone' );
+				await expect( phoneInput ).toHaveAttribute( 'required', '' );
+				await phoneRequiredSelector.uncheck();
+				await expect( phoneInput ).not.toHaveAttribute(
+					'required',
+					''
+				);
+
+				// Turn off phone field and check it's not visible in the fields.
+				await expect( phoneInput ).toBeVisible();
+
+				await phoneToggleSelector.uncheck();
+
+				await expect( phoneInput ).toBeHidden();
+
+				await editor.canvas
+					.getByLabel( 'Use same address for billing' )
+					.uncheck();
+
+				await editor.selectBlocks(
+					blockSelectorInEditor +
+						'  [data-type="woocommerce/checkout-billing-address-block"]'
+				);
+
+				// Turn on phone field and check it's visible in the fields.
+				const billingPhoneToggleSelector = editor.page.getByLabel(
+					'Phone',
+					{
+						exact: true,
+					}
+				);
+				await billingPhoneToggleSelector.check();
+				const billingAddressBlock = await editorUtils.getBlockByName(
+					'woocommerce/checkout-billing-address-block'
+				);
+
+				// Turn on Require phone number? option and check it becomes required in the fields.
+				const billingPhoneRequiredSelector = editor.page.getByLabel(
+					'Require phone number?',
+					{ exact: true }
+				);
+				await billingPhoneRequiredSelector.check();
+				const billingPhoneInput =
+					billingAddressBlock.getByLabel( 'Phone' );
+				await expect( billingPhoneInput ).toHaveAttribute(
+					'required',
+					''
+				);
+				await billingPhoneRequiredSelector.uncheck();
+				await expect( billingPhoneInput ).not.toHaveAttribute(
+					'required',
+					''
+				);
+
+				// Turn off phone field and check it's not visible in the fields.
+				await expect( billingPhoneInput ).toBeVisible();
+
+				await billingPhoneToggleSelector.uncheck();
+
+				await expect( billingPhoneInput ).toBeHidden();
+			} );
 		} );
 	} );
 
-	test.describe( 'in page editor', () => {
-		test.beforeEach( async ( { editorUtils, admin, editor } ) => {
-			await admin.visitSiteEditor( {
-				postId: 'woocommerce/woocommerce//page-checkout',
-				postType: 'wp_template',
-			} );
-			await editorUtils.enterEditMode();
+	test.describe( 'Checkout actions', () => {
+		test.beforeEach( async ( { editor } ) => {
 			await editor.openDocumentSettingsSidebar();
+			await editor.selectBlocks( blockSelectorInEditor );
 		} );
 
-		test( 'renders without crashing and can only be inserted once', async ( {
-			page,
+		test( 'Return to cart link is visible and can be toggled', async ( {
+			editor,
 			editorUtils,
 		} ) => {
-			const blockPresence = await editorUtils.getBlockByName(
-				blockData.slug
-			);
-			expect( blockPresence ).toBeTruthy();
-
-			await editorUtils.openGlobalBlockInserter();
-			await page.getByPlaceholder( 'Search' ).fill( blockData.slug );
-			const checkoutBlockButton = page.getByRole( 'option', {
-				name: blockData.name,
-				exact: true,
-			} );
-			await expect( checkoutBlockButton ).toHaveAttribute(
-				'aria-disabled',
-				'true'
-			);
-		} );
-
-		test( 'toggling shipping company hides and shows address field', async ( {
-			editor,
-		} ) => {
 			await editor.selectBlocks(
-				blockSelectorInEditor +
-					'  [data-type="woocommerce/checkout-shipping-address-block"]'
+				`${ blockSelectorInEditor } .wp-block-woocommerce-checkout-actions-block`
 			);
-			const checkbox = editor.page.getByRole( 'checkbox', {
-				name: 'Company',
-				exact: true,
-			} );
-			await checkbox.check();
-			await expect( checkbox ).toBeChecked();
-			await expect(
-				editor.canvas.locator(
-					'div.wc-block-components-address-form__company'
-				)
-			).toBeVisible();
 
-			await checkbox.uncheck();
-			await expect( checkbox ).not.toBeChecked();
-			await expect(
-				editor.canvas.locator(
-					'.wc-block-checkout__shipping-fields .wc-block-components-address-form__company'
-				)
-			).toBeHidden();
-		} );
-
-		test( 'toggling billing company hides and shows address field', async ( {
-			editor,
-		} ) => {
-			await editor.canvas.click( 'body' );
-			await editor.canvas
-				.getByLabel( 'Use same address for billing' )
-				.uncheck();
-
-			await editor.selectBlocks(
-				blockSelectorInEditor +
-					'  [data-type="woocommerce/checkout-billing-address-block"]'
+			// Turn on return to cart link and check it's visible in the block.
+			const returnToCartLinkToggle = editor.page.getByLabel(
+				'Show a "Return to Cart" link',
+				{ exact: true }
 			);
-			const checkbox = editor.page.getByRole( 'checkbox', {
-				name: 'Company',
-				exact: true,
-			} );
-			await checkbox.check();
-			await expect( checkbox ).toBeChecked();
-			await expect(
-				editor.canvas.locator(
-					'.wc-block-checkout__billing-fields .wc-block-components-address-form__company'
-				)
-			).toBeVisible();
+			await returnToCartLinkToggle.check();
+			const shippingAddressBlock = await editorUtils.getBlockByName(
+				'woocommerce/checkout-actions-block'
+			);
 
-			await checkbox.uncheck();
-			await expect( checkbox ).not.toBeChecked();
-			await expect(
-				editor.canvas.locator(
-					'div.wc-block-components-address-form__company'
-				)
-			).toBeHidden();
+			// Turn on return to cart link and check it shows in the block.
+			const returnToCartLink = shippingAddressBlock.getByText(
+				'Return to Cart',
+				{ exact: true }
+			);
+
+			// Turn off return to cart link and check it's not visible in the block.
+			await expect( returnToCartLink ).toBeVisible();
+
+			await returnToCartLinkToggle.uncheck();
+
+			await expect( returnToCartLink ).toBeHidden();
 		} );
 	} );
 } );
