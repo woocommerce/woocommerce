@@ -93,6 +93,40 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * Generates the table rows.
+	 *
+	 * @return void
+	 */
+	public function display_rows() {
+		foreach ( $this->items as $log ) {
+			$this->single_row( $log );
+			if ( ! empty( $log['context'] ) ) {
+				$this->context_row( $log );
+			}
+		}
+	}
+
+	/**
+	 * Render the additional table row that contains extra log context data.
+	 *
+	 * @param array $log Log entry data.
+	 *
+	 * @return void
+	 */
+	protected function context_row( $log ) {
+		// Maintains alternating row background colors.
+		?>
+		<tr style="display: none"><td></td></tr>
+		<tr id="log-context-<?php echo esc_attr( $log['log_id'] ); ?>" class="log-context">
+			<td colspan="<?php echo esc_attr( $this->get_column_count() ); ?>">
+				<p><strong><?php esc_html_e( 'Additional context', 'woocommerce' ); ?></strong></p>
+				<pre><?php echo esc_html( $log['context'] ); ?></pre>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
 	 * Get list columns.
 	 *
 	 * @return array
@@ -104,6 +138,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			'level'     => __( 'Level', 'woocommerce' ),
 			'message'   => __( 'Message', 'woocommerce' ),
 			'source'    => __( 'Source', 'woocommerce' ),
+			'context'   => __( 'Context', 'woocommerce' ),
 		);
 	}
 
@@ -178,6 +213,36 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 */
 	public function column_source( $log ) {
 		return esc_html( $log['source'] );
+	}
+
+	/**
+	 * Context column.
+	 *
+	 * @param array $log Log entry data.
+	 *
+	 * @return string
+	 */
+	public function column_context( $log ) {
+		$content = '';
+
+		if ( ! empty( $log['context'] ) ) {
+			ob_start();
+			?>
+				<button
+					class="log-toggle button button-secondary button-small"
+					data-log-id="<?php echo esc_attr( $log['log_id'] ); ?>"
+					data-toggle-status="off"
+					data-label-show="<?php esc_attr_e( 'Show context', 'woocommerce' ); ?>"
+					data-label-hide="<?php esc_attr_e( 'Hide context', 'woocommerce' ); ?>"
+				>
+					<span class="dashicons dashicons-arrow-down-alt2"></span>
+					<span class="log-toggle-label screen-reader-text"><?php esc_html_e( 'Show context', 'woocommerce' ); ?></span>
+				</button>
+			<?php
+			$content = ob_get_clean();
+		}
+
+		return $content;
 	}
 
 	/**
@@ -273,7 +338,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		$offset = $this->get_items_query_offset();
 
 		$query_items = "
-			SELECT log_id, timestamp, level, message, source
+			SELECT log_id, timestamp, level, message, source, context
 			FROM {$wpdb->prefix}woocommerce_log
 			{$where} {$order} {$limit} {$offset}
 		";
