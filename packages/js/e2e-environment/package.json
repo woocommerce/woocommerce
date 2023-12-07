@@ -34,7 +34,7 @@
 		"app-root-path": "^3.0.0",
 		"commander": "4.1.1",
 		"config": "3.3.7",
-		"jest": "^27.5.1",
+		"jest": "~27.5.1",
 		"jest-circus": "27.5.1",
 		"jest-each": "27.5.1",
 		"jest-puppeteer": "^5.0.4",
@@ -78,8 +78,8 @@
 		"test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
 		"test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
 		"test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev",
-		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
-		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix"
+		"lint": "eslint --ext=js,ts,tsx src",
+		"lint:fix": "eslint --ext=js,ts,tsx src --fix"
 	},
 	"bin": {
 		"wc-e2e": "bin/wc-e2e.sh"

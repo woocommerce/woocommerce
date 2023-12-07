@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/expression-evaluation",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"description": "Library for evaluating expressions.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -41,7 +41,7 @@
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"lint": "eslint --output-file eslint_report.json --format json src",
+		"lint": "eslint src",
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint:fix": "eslint src --fix",
@@ -54,10 +54,10 @@
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"concurrently": "^7.0.0",
 		"eslint": "^8.32.0",
-		"jest": "^27.5.1",
-		"jest-cli": "^27.5.1",
+		"jest": "~27.5.1",
+		"jest-cli": "~27.5.1",
 		"rimraf": "^3.0.2",
-		"ts-jest": "^27.1.3",
+		"ts-jest": "~29.1.1",
 		"typescript": "^5.1.6"
 	},
 	"lint-staged": {

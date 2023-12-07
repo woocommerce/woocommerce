@@ -16,6 +16,7 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Link } from '@woocommerce/components';
+import { getAdminLink } from '@woocommerce/settings';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -31,13 +32,13 @@ import { ProductEditorBlockEditProps } from '../../../types';
 
 export function Edit( {
 	attributes: blockAttributes,
+	context,
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( blockAttributes );
 	const { generateProductVariations } = useProductVariationsHelper();
 	const {
 		updateUserPreferences,
-		product_block_variable_options_notice_dismissed:
-			hasDismissedVariableOptionsNotice,
+		local_attributes_notice_dismissed_ids: dismissedNoticesIds = [],
 	} = useUserPreferences();
 
 	const [ entityAttributes, setEntityAttributes ] = useEntityProp<
@@ -50,6 +51,9 @@ export function Edit( {
 			'product',
 			'default_attributes'
 		);
+
+	const { postType } = context;
+	const productId = useEntityId( 'postType', postType );
 
 	const { attributes, handleChange } = useProductAttributes( {
 		allAttributes: entityAttributes,
@@ -68,7 +72,7 @@ export function Edit( {
 	let notice: string | React.ReactElement = '';
 	if (
 		localAttributeNames.length > 0 &&
-		hasDismissedVariableOptionsNotice !== 'yes'
+		! dismissedNoticesIds?.includes( productId )
 	) {
 		notice = createInterpolateElement(
 			__(
@@ -87,7 +91,9 @@ export function Edit( {
 				),
 				globalAttributeLink: (
 					<Link
-						href="https://woo.com/document/variable-product/#add-attributes-to-use-for-variations"
+						href={ getAdminLink(
+							'edit.php?post_type=product&page=product_attributes'
+						) }
 						type="external"
 						target="_blank"
 					/>
@@ -122,7 +128,10 @@ export function Edit( {
 				useRemoveConfirmationModal={ true }
 				onNoticeDismiss={ () =>
 					updateUserPreferences( {
-						product_block_variable_options_notice_dismissed: 'yes',
+						local_attributes_notice_dismissed_ids: [
+							...dismissedNoticesIds,
+							productId,
+						],
 					} )
 				}
 				onAddAnother={ () => {

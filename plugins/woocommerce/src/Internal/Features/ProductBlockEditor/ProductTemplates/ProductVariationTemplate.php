@@ -192,7 +192,12 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'order'      => 40,
 					'attributes' => array(
 						'title'       => __( 'Downloads', 'woocommerce' ),
-						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
+						'description' => sprintf(
+						/* translators: %1$s: Downloads settings link opening tag. %2$s: Downloads settings link closing tag. */
+							__( 'Add any files you\'d like to make available for the customer to download after purchasing, such as instructions or warranty info. Store-wide updates can be managed in your %1$sproduct settings%2$s.', 'woocommerce' ),
+							'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=downloadable' ) . '" target="_blank" rel="noreferrer">',
+							'</a>'
+						),
 					),
 				)
 			)->add_block(
@@ -493,6 +498,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 						'checkedValue'   => false,
 						'uncheckedValue' => true,
 						'label'          => __( 'This variation requires shipping or pickup', 'woocommerce' ),
+						'uncheckedHelp'  => __( 'This variation will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woo.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
 					),
 				)
 			);

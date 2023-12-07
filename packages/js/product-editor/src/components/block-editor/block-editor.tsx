@@ -6,6 +6,7 @@ import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { PluginArea } from '@wordpress/plugins';
+import { __ } from '@wordpress/i18n';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -34,6 +35,8 @@ import {
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
 import { ProductEditorContext } from '../../types';
 import { PostTypeContext } from '../../contexts/post-type-context';
+import { ModalEditor } from '../modal-editor';
+import { store as productEditorUiStore } from '../../store/product-editor-ui';
 
 type BlockEditorSettings = Partial<
 	EditorSettings & EditorBlockListSettings
@@ -111,8 +114,24 @@ export function BlockEditor( {
 		updateEditorSettings( settings ?? {} );
 	}, [ productType, productId ] );
 
+	// Check if the Modal editor is open from the store.
+	const isModalEditorOpen = useSelect( ( select ) => {
+		return select( productEditorUiStore ).isModalEditorOpen();
+	}, [] );
+
+	const { closeModalEditor } = useDispatch( productEditorUiStore );
+
 	if ( ! blocks ) {
 		return null;
+	}
+
+	if ( isModalEditorOpen ) {
+		return (
+			<ModalEditor
+				onClose={ closeModalEditor }
+				title={ __( 'Edit description', 'woocommerce' ) }
+			/>
+		);
 	}
 
 	return (
@@ -123,6 +142,7 @@ export function BlockEditor( {
 					onInput={ onInput }
 					onChange={ onChange }
 					settings={ settings }
+					useSubRegistry={ false }
 				>
 					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 					{ /* @ts-ignore No types for this exist yet. */ }

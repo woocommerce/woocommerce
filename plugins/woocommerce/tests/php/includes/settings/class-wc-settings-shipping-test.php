@@ -73,8 +73,8 @@ class WC_Settings_Shipping_Test extends WC_Settings_Unit_Test_Case {
 
 		$expected = array(
 			''            => 'Shipping zones',
-			'options'     => 'Shipping options',
-			'classes'     => 'Shipping classes',
+			'options'     => 'Shipping settings',
+			'classes'     => 'Classes',
 			'method_1_id' => 'Method_1_id',
 			'method_2_id' => 'method_2_title',
 		);

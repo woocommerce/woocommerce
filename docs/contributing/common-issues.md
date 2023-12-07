@@ -1,4 +1,6 @@
-# Common issues
+---
+post_title: Common issues
+---
 
 This page aims to document a comprehensive list of known issues, commonly encountered problems, and their solutions or workarounds. If you have encountered an issue that is not mentioned here and should be, please don't hesitate to add to the list.
 

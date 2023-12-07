@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Avoid the PHP error with an undefined property on the WooCommerce > Extensions page.

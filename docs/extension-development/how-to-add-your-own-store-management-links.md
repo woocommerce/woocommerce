@@ -1,4 +1,6 @@
-# Adding store management links
+---
+post_title: Adding store management links
+---
 
 ## Introduction
 

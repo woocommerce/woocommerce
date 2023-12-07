@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add isInSelectedTab context to tab blocks for use in nested blocks.

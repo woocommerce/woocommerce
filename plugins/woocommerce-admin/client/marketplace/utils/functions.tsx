@@ -2,23 +2,31 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import { __, sprintf } from '@wordpress/i18n';
+import { dispatch } from '@wordpress/data';
+import { Options } from '@wordpress/notices';
+import { Icon } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
+import { LOCALE } from '../../utils/admin-settings';
+import { CategoryAPIItem } from '../components/category-selector/types';
+import {
+	MARKETPLACE_CART_PATH,
+	MARKETPLACE_CATEGORY_API_PATH,
+	MARKETPLACE_HOST,
+	MARKETPLACE_SEARCH_API_PATH,
+} from '../components/constants';
+import { Subscription } from '../components/my-subscriptions/types';
 import {
 	Product,
 	ProductType,
-	SearchAPIProductType,
 	SearchAPIJSONType,
+	SearchAPIProductType,
 } from '../components/product-list/types';
-import {
-	MARKETPLACE_HOST,
-	MARKETPLACE_CATEGORY_API_PATH,
-	MARKETPLACE_SEARCH_API_PATH,
-} from '../components/constants';
-import { CategoryAPIItem } from '../components/category-selector/types';
-import { LOCALE } from '../../utils/admin-settings';
+import { NoticeStatus } from '../contexts/types';
+import { noticeStore } from '../contexts/notice-store';
 
 interface ProductGroup {
 	id: string;
@@ -179,6 +187,183 @@ function fetchCategories( type: ProductType ): Promise< CategoryAPIItem[] > {
 		} );
 }
 
+async function fetchSubscriptions(): Promise< Array< Subscription > > {
+	const url = '/wc/v3/marketplace/subscriptions';
+	return await apiFetch( { path: url.toString() } );
+}
+
+async function refreshSubscriptions(): Promise< Array< Subscription > > {
+	const url = '/wc/v3/marketplace/refresh';
+	return await apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+	} );
+}
+
+function connectProduct( subscription: Subscription ): Promise< void > {
+	if ( subscription.active === true ) {
+		return Promise.resolve();
+	}
+	const url = '/wc/v3/marketplace/subscriptions/connect';
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	return apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
+function disconnectProduct( subscription: Subscription ): Promise< void > {
+	if ( subscription.active === false ) {
+		return Promise.resolve();
+	}
+	const url = '/wc/v3/marketplace/subscriptions/disconnect';
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	return apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
+function wpAjax(
+	action: string,
+	data: {
+		slug?: string;
+		plugin?: string;
+		theme?: string;
+		success?: boolean;
+	}
+): Promise< void > {
+	return new Promise( ( resolve, reject ) => {
+		if ( ! window.wp.updates ) {
+			reject( __( 'Please reload and try again', 'woocommerce' ) );
+			return;
+		}
+
+		window.wp.updates.ajax( action, {
+			...data,
+			success: ( response: {
+				success?: boolean;
+				errorMessage?: string;
+			} ) => {
+				if ( response.success === false ) {
+					reject( {
+						success: false,
+						data: {
+							message: response.errorMessage,
+						},
+					} );
+				}
+				resolve();
+			},
+			error: ( error: { errorMessage: string } ) => {
+				reject( {
+					success: false,
+					data: {
+						message: error.errorMessage,
+					},
+				} );
+			},
+		} );
+	} );
+}
+
+function activateProduct( subscription: Subscription ): Promise< void > {
+	if ( subscription.local.active === true ) {
+		return Promise.resolve();
+	}
+	const url = '/wc/v3/marketplace/subscriptions/activate';
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	return apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} )
+		.then( () => Promise.resolve() )
+		.catch( () =>
+			Promise.reject( {
+				success: false,
+				data: {
+					message: sprintf(
+						// translators: %s is the product name.
+						__(
+							'%s could not be activated. Please activate it manually.',
+							'woocommerce'
+						),
+						subscription.product_name
+					),
+				},
+			} )
+		);
+}
+
+function installProduct( subscription: Subscription ): Promise< void > {
+	return connectProduct( subscription ).then( () => {
+		return wpAjax( 'install-' + subscription.product_type, {
+			// The slug prefix is required for the install to use WCCOM install filters.
+			slug: 'woocommerce-com-' + subscription.product_slug,
+		} )
+			.then( () => {
+				return activateProduct( subscription );
+			} )
+			.catch( ( error ) => {
+				// If install fails disconnect the product
+				return disconnectProduct( subscription ).finally( () =>
+					Promise.reject( error )
+				);
+			} );
+	} );
+}
+
+function updateProduct( subscription: Subscription ): Promise< void > {
+	return wpAjax( 'update-' + subscription.product_type, {
+		slug: subscription.local.slug,
+		[ subscription.product_type ]: subscription.local.path,
+	} );
+}
+
+function addNotice(
+	productKey: string,
+	message: string,
+	status?: NoticeStatus,
+	options?: Partial< Options >
+) {
+	if ( status === NoticeStatus.Error ) {
+		dispatch( noticeStore ).addNotice(
+			productKey,
+			message,
+			status,
+			options
+		);
+	} else {
+		if ( ! options?.icon ) {
+			options = {
+				...options,
+				icon: <Icon icon="saved" />,
+			};
+		}
+
+		dispatch( 'core/notices' ).createSuccessNotice( message, options );
+	}
+}
+
+const removeNotice = ( productKey: string ) => {
+	dispatch( noticeStore ).removeNotice( productKey );
+};
+
 // Append UTM parameters to a URL, being aware of existing query parameters
 const appendURLParams = (
 	url: string,
@@ -198,10 +383,33 @@ const appendURLParams = (
 	return urlObject.toString();
 };
 
+const renewUrl = ( subscription: Subscription ): string => {
+	return appendURLParams( MARKETPLACE_CART_PATH, [
+		[ 'renew_product', subscription.product_id.toString() ],
+		[ 'product_key', subscription.product_key ],
+		[ 'order_id', subscription.order_id.toString() ],
+	] );
+};
+
+const subscribeUrl = ( subscription: Subscription ): string => {
+	return appendURLParams( MARKETPLACE_CART_PATH, [
+		[ 'add-to-cart', subscription.product_id.toString() ],
+	] );
+};
+
 export {
-	fetchSearchResults,
-	fetchDiscoverPageData,
-	fetchCategories,
 	ProductGroup,
 	appendURLParams,
+	connectProduct,
+	fetchCategories,
+	fetchDiscoverPageData,
+	fetchSearchResults,
+	fetchSubscriptions,
+	refreshSubscriptions,
+	installProduct,
+	updateProduct,
+	addNotice,
+	removeNotice,
+	renewUrl,
+	subscribeUrl,
 };

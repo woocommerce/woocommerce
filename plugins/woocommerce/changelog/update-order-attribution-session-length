@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Change the default cookie lifetime from 6 months to the length of the session.
