@@ -1561,7 +1561,7 @@ export const COLOR_PALETTES = [
 	};
 } );
 
-export const DEFAULT_COLOR_PALETTE_TITLES = [
+const DEFAULT_COLOR_PALETTE_TITLES = [
 	'New - Neutral',
 	'Blueberry Sorbet',
 	'Ancient Bronze',
@@ -1583,7 +1583,5 @@ export const DEFAULT_COLOR_PALETTE_TITLES = [
 ];
 
 export const DEFAULT_COLOR_PALETTES = DEFAULT_COLOR_PALETTE_TITLES.map(
-	(title) => COLOR_PALETTES.find(
-		(palette) => palette.title === title
-	)
+	( title ) => COLOR_PALETTES.find( ( palette ) => palette.title === title )
 );
