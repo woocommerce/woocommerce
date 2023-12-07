@@ -57,7 +57,7 @@ class Init {
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			add_filter( 'woocommerce_product_editor_get_patterns', array( $this, 'get_product_editor_patterns' ), -999, 1 );
+			add_filter( 'woocommerce_product_editor_get_product_templates', array( $this, 'get_product_templates' ), -999, 1 );
 
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
@@ -232,15 +232,15 @@ class Init {
 		$block_template_logger->log_template_events_to_file( 'product-variation' );
 		$editor_settings['templateEvents']['product_variation'] = $block_template_logger->get_formatted_template_events( 'product-variation' );
 
-		$patterns = apply_filters( 'woocommerce_product_editor_get_patterns', array() );
+		$product_templates = apply_filters( 'woocommerce_product_editor_get_product_templates', array() );
 
-		usort( $patterns, function ( $a, $b ) {
+		usort( $product_templates, function ( $a, $b ) {
 			return $a->get_order() - $b->get_order();
 		} );
 
-		$editor_settings['patterns'] = array_map( function ( $pattern ) {
-			return $pattern->get_formatted();
-		}, $patterns );
+		$editor_settings['productTemplates'] = array_map( function ( $product_template ) {
+			return $product_template->get_formatted();
+		}, $product_templates );
 
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
 
@@ -248,12 +248,12 @@ class Init {
 	}
 
 	/**
-	 * Get default product patterns.
+	 * Get default product templates.
 	 * 
-	 * @param array @patterns The initial pattarns.
-	 * @return array The default patterns
+	 * @param array @templates The initial templates.
+	 * @return array The default templates
 	 */
-	public function get_product_editor_patterns( array $patterns ) {
+	public function get_product_templates( array $templates ) {
 		$standard_product_template = new ProductTemplate(
 			'standard-product-pattern',
 			__( 'Standard product', 'woocommerce' ),
@@ -298,12 +298,12 @@ class Init {
 		$variable_product_template->set_description( __( 'A product with variations like color or size.', 'woocommerce' ) );
 		$variable_product_template->set_order( 40 );
 
-		$patterns[] = $standard_product_template;
-		$patterns[] = $grouped_product_template;
-		$patterns[] = $affiliate_product_template;
-		$patterns[] = $variable_product_template;
+		$templates[] = $standard_product_template;
+		$templates[] = $grouped_product_template;
+		$templates[] = $affiliate_product_template;
+		$templates[] = $variable_product_template;
 
-		return $patterns;
+		return $templates;
 	}
 
 	/**
