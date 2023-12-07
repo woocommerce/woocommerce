@@ -84,6 +84,7 @@ export function DescriptionBlockEdit( {
 
 	const blockProps = useWooBlockProps( attributes, {
 		className: classNames( { 'has-blocks': !! description.length } ),
+		tabIndex: 0,
 	} );
 
 	const innerBlockProps = useInnerBlocksProps(
@@ -107,10 +108,7 @@ export function DescriptionBlockEdit( {
 			{ ! description.length && <div { ...innerBlockProps } /> }
 
 			{ !! description.length && (
-				<div
-					tabIndex={ 0 }
-					className="wp-block-woocommerce-product-description-field__cover"
-				/>
+				<div className="wp-block-woocommerce-product-description-field__cover" />
 			) }
 
 			{ !! description.length && (
