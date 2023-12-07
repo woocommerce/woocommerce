@@ -39,41 +39,41 @@ $social_title = $content['titles'][0]['default'] ?? '';
 
 	<!-- wp:columns {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}}} -->
 	<div class="wp-block-columns alignwide" style="margin-top:var(--wp--preset--spacing--40);margin-bottom:var(--wp--preset--spacing--40)">
-		<!-- wp:column -->
-		<div class="wp-block-column">
-			<!-- wp:image {"width":"266px","height":"266px","aspectRatio":"1","scale":"cover","sizeSlug":"large","linkDestination":"none"} -->
+		<!-- wp:column {"width":"25%"} -->
+		<div class="wp-block-column" style="flex-basis:25%">
+			<!-- wp:image {"aspectRatio":"1","scale":"cover","sizeSlug":"large","linkDestination":"none"} -->
 			<figure class="wp-block-image is-resized size-large">
-				<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 1 out of 4.', 'woo-gutenberg-products-block' ); ?>" style="aspect-ratio:1;object-fit:cover;width:266px;height:266px"/>
+				<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 1 out of 4.', 'woo-gutenberg-products-block' ); ?>" style="aspect-ratio:1;object-fit:cover;"/>
 			</figure>
 			<!-- /wp:image -->
 		</div>
 		<!-- /wp:column -->
 
-		<!-- wp:column -->
-		<div class="wp-block-column">
-			<!-- wp:image {"width":"266px","height":"266px","aspectRatio":"1","scale":"cover","sizeSlug":"large","linkDestination":"none"} -->
+		<!-- wp:column {"width":"25%"} -->
+		<div class="wp-block-column" style="flex-basis:25%">
+			<!-- wp:image {"aspectRatio":"1","scale":"cover","sizeSlug":"large","linkDestination":"none"} -->
 			<figure class="wp-block-image is-resized size-large">
-				<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 2 out of 4.', 'woo-gutenberg-products-block' ); ?>" style="aspect-ratio:1;object-fit:cover;width:266px;height:266px"/>
+				<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 2 out of 4.', 'woo-gutenberg-products-block' ); ?>" style="aspect-ratio:1;object-fit:cover;"/>
 			</figure>
 			<!-- /wp:image -->
 		</div>
 		<!-- /wp:column -->
 
-		<!-- wp:column -->
-		<div class="wp-block-column">
-			<!-- wp:image {"width":"266px","height":"266px","aspectRatio":"1","scale":"cover","sizeSlug":"large","linkDestination":"none"} -->
+		<!-- wp:column {"width":"25%"} -->
+		<div class="wp-block-column" style="flex-basis:25%">
+			<!-- wp:image {"aspectRatio":"1","scale":"cover","sizeSlug":"large","linkDestination":"none"} -->
 			<figure class="wp-block-image is-resized size-large">
-				<img src="<?php echo esc_url( $image3 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 3 out of 4.', 'woo-gutenberg-products-block' ); ?>" style="aspect-ratio:1;object-fit:cover;width:266px;height:266px"/>
+				<img src="<?php echo esc_url( $image3 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 3 out of 4.', 'woo-gutenberg-products-block' ); ?>" style="aspect-ratio:1;object-fit:cover;"/>
 			</figure>
 			<!-- /wp:image -->
 		</div>
 		<!-- /wp:column -->
 
-		<!-- wp:column -->
-		<div class="wp-block-column">
-			<!-- wp:image {"width":"266px","height":"266px","aspectRatio":"1","scale":"cover","sizeSlug":"large","linkDestination":"none"} -->
+		<!-- wp:column {"width":"25%"} -->
+		<div class="wp-block-column" style="flex-basis:25%">
+			<!-- wp:image {"aspectRatio":"1","scale":"cover","sizeSlug":"large","linkDestination":"none"} -->
 			<figure class="wp-block-image is-resized size-large">
-				<img src="<?php echo esc_url( $image4 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 4 out of 4.', 'woo-gutenberg-products-block' ); ?>" style="aspect-ratio:1;object-fit:cover;width:266px;height:266px"/>
+				<img src="<?php echo esc_url( $image4 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased under the social media icons. 4 out of 4.', 'woo-gutenberg-products-block' ); ?>" style="aspect-ratio:1;object-fit:cover;"/>
 			</figure>
 			<!-- /wp:image -->
 		</div>
