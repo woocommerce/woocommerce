@@ -67,10 +67,10 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	 * This renders the content of the block within the wrapper. The permission determines what data can be shown under
 	 * the given context.
 	 *
-	 * @param \WC_Order $order Order object.
-	 * @param string    $permission Permission level for viewing order details.
-	 * @param array     $attributes Block attributes.
-	 * @param string    $content Original block content.
+	 * @param \WC_Order    $order Order object.
+	 * @param string|false $permission If the current user can view the order details or not.
+	 * @param array        $attributes Block attributes.
+	 * @param string       $content Original block content.
 	 * @return string
 	 */
 	abstract protected function render_content( $order, $permission = false, $attributes = [], $content = '' );
@@ -103,13 +103,8 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	/**
 	 * View mode for order details based on the order, current user, and settings.
 	 *
-	 * Possible values are:
-	 * - "full" user can view all order details.
-	 * - "limited" user can view some order details, but no PII. This may happen for example, if the user checked out as a guest.
-	 * - false user cannot view order details.
-	 *
 	 * @param \WC_Order|null $order Order object.
-	 * @return "full"|"limited"|false
+	 * @return string|false Returns "full" if the user can view all order details. False if they can view no details.
 	 */
 	protected function get_view_order_permissions( $order ) {
 		if ( ! $order || ! $this->has_valid_order_key( $order ) ) {
@@ -121,8 +116,8 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 			return $this->is_current_customer_order( $order ) ? 'full' : false;
 		}
 
-		// Guest orders are displayed with limited information.
-		return $this->email_verification_required( $order ) ? false : 'limited';
+		// Guest orders are displayed only within the grace period or after verification. If email verification is required, return false.
+		return $this->email_verification_required( $order ) ? false : 'full';
 	}
 
 	/**
@@ -146,17 +141,12 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	}
 
 	/**
-	 * See if we need to verify the email address before showing the order details.
+	 * See if the order was created within the grace period for viewing details.
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @return boolean
 	 */
-	protected function email_verification_required( $order ) {
-		// Skip verification if the current user still has the order in their session.
-		if ( $order->get_id() === wc()->session->get( 'store_api_draft_order' ) ) {
-			return false;
-		}
-
+	protected function is_within_grace_period( $order ) {
 		/**
 		 * Controls the grace period within which we do not require any sort of email verification step before rendering
 		 * the 'order received' or 'order pay' pages.
@@ -170,36 +160,47 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 		$verification_grace_period = (int) apply_filters( 'woocommerce_order_email_verification_grace_period', 10 * MINUTE_IN_SECONDS, $order, 'order-received' );
 		$date_created              = $order->get_date_created();
 
-		// We do not need to verify the email address if we are within the grace period immediately following order creation.
-		if ( is_a( $date_created, \WC_DateTime::class ) && time() - $date_created->getTimestamp() <= $verification_grace_period ) {
-			return false;
-		}
+		return is_a( $date_created, \WC_DateTime::class ) && time() - $date_created->getTimestamp() <= $verification_grace_period;
+	}
 
-		$session       = wc()->session;
-		$session_email = '';
-		$session_order = 0;
-
-		if ( is_a( $session, \WC_Session::class ) ) {
-			$customer      = $session->get( 'customer' );
-			$session_email = is_array( $customer ) && isset( $customer['email'] ) ? sanitize_email( $customer['email'] ) : '';
-			$session_order = (int) $session->get( 'store_api_draft_order' );
-		}
-
-		// We do not need to verify the email address if the user still has the order in session.
-		if ( $order->get_id() === $session_order ) {
-			return false;
-		}
-
+	/**
+	 * Returns true if the email has been verified (posted email matches given order email).
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return boolean
+	 */
+	protected function is_email_verified( $order ) {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		if ( ! empty( $_POST ) && ! wp_verify_nonce( $_POST['check_submission'] ?? '', 'wc_verify_email' ) ) {
-			return true;
+		if ( empty( $_POST ) || ! isset( $_POST['email'] ) || ! wp_verify_nonce( $_POST['check_submission'] ?? '', 'wc_verify_email' ) ) {
+			return false;
 		}
 
-		$session_email_match  = $session_email === $order->get_billing_email();
-		$supplied_email_match = isset( $_POST['email'] ) && sanitize_email( wp_unslash( $_POST['email'] ) ?? '' ) === $order->get_billing_email();
+		return $order->get_billing_email() && sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ) === $order->get_billing_email();
+	}
 
-		// If we cannot match the order with the current user, the user should verify their email address.
-		$email_verification_required = ! $session_email_match && ! $supplied_email_match;
+	/**
+	 * See if we need to verify the email address before showing the order details.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return boolean
+	 */
+	protected function email_verification_required( $order ) {
+		$session = wc()->session;
+
+		// Skip verification if the current user still has the order in their session.
+		if ( is_a( $session, \WC_Session::class ) && $order->get_id() === (int) $session->get( 'store_api_draft_order' ) ) {
+			return false;
+		}
+
+		// Skip verification if the order was created within the grace period.
+		if ( $this->is_within_grace_period( $order ) ) {
+			return false;
+		}
+
+		// If the user verified their email address, we can skip further verification.
+		if ( $this->is_email_verified( $order ) ) {
+			return false;
+		}
 
 		/**
 		 * Provides an opportunity to override the (potential) requirement for shoppers to verify their email address
@@ -211,7 +212,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 		 * @param WC_Order $order                       The relevant order.
 		 * @param string   $context                     The context under which we are performing this check.
 		 */
-		return (bool) apply_filters( 'woocommerce_order_email_verification_required', $email_verification_required, $order, 'order-received' );
+		return (bool) apply_filters( 'woocommerce_order_email_verification_required', true, $order, 'order-received' );
 	}
 
 	/**
