@@ -1561,7 +1561,7 @@ export const COLOR_PALETTES = [
 	};
 } );
 
-const DEFAULT_COLOR_PALETTE_TITLES = [
+export const DEFAULT_COLOR_PALETTE_TITLES = [
 	'New - Neutral',
 	'Blueberry Sorbet',
 	'Ancient Bronze',
