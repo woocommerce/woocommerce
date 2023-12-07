@@ -409,6 +409,15 @@
 					});
 
 					$( '.wc-shipping-zone-method-selector select' ).trigger( 'change' );
+
+					$('.wc-shipping-zone-method-input input').change( function() {
+						const selected = $('.wc-shipping-zone-method-input input:checked');
+						const id = selected.attr( 'id' );
+						const description = $( `#${ id }-description` );
+						const descriptions = $( '.wc-shipping-zone-method-input-help-text' );
+						descriptions.css( 'display', 'none' );
+						description.css( 'display', 'block' );
+					});
 				},
 				/**
 				 * The settings HTML is controlled and built by the settings api, so in order to refactor the 

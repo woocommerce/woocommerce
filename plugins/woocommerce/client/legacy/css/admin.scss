@@ -4226,17 +4226,14 @@ table.wc_shipping {
 			margin: 12px 0;
 			border-radius: 4px;
 		}
+	}
 
-		.wc-shipping-zone-method-input-help-text {
-			position: absolute;
-    		bottom: -30px;
-			height: 30px;
-			display: none;
-		}
+	.wc-shipping-zone-method-input-help-text-container {
+		min-height: 40px;
+	}
 
-		input:checked ~ .wc-shipping-zone-method-input-help-text {
-			display: block;
-		}
+	.wc-shipping-zone-method-input-help-text {
+		display: none;
 	}
 
 	.wc-shipping-zone-method-selector {
