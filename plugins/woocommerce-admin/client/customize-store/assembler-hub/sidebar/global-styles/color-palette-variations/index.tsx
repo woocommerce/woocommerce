@@ -13,11 +13,7 @@ import { useState, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import {
-	COLOR_PALETTES,
-	DEFAULT_COLOR_PALETTE_TITLES,
-	DEFAULT_COLOR_PALETTES,
-} from './constants';
+import { COLOR_PALETTES, DEFAULT_COLOR_PALETTES } from './constants';
 import { VariationContainer } from '../variation-container';
 import { ColorPaletteVariationPreview } from './preview';
 import { ColorPaletteResponse } from '~/customize-store/design-with-ai/types';
