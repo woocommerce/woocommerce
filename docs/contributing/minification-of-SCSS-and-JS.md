@@ -1,4 +1,3 @@
-
 ---
 post_title: Minification of SCSS and JS
 ---

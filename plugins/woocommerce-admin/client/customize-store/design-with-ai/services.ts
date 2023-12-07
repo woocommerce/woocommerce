@@ -259,7 +259,8 @@ export const updateStorePatterns = async (
 					method: 'POST',
 					data: {
 						products_information: product,
-						index,
+						last_product:
+							index === response.product_content.length - 1,
 					},
 				} );
 			}
@@ -473,15 +474,21 @@ const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
 	} );
 };
 
-const resetPatterns = () => async () => {
+const resetPatternsAndProducts = () => async () => {
 	await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_blocks_allow_ai_connection: 'yes',
 	} );
 
-	return await apiFetch( {
-		path: '/wc/private/ai/patterns',
-		method: 'DELETE',
-	} );
+	return Promise.all( [
+		apiFetch( {
+			path: '/wc/private/ai/patterns',
+			method: 'DELETE',
+		} ),
+		apiFetch( {
+			path: '/wc/private/ai/products',
+			method: 'DELETE',
+		} ),
+	] );
 };
 
 export const services = {
@@ -491,5 +498,5 @@ export const services = {
 	updateStorePatterns,
 	saveAiResponseToOption,
 	installAndActivateTheme,
-	resetPatterns,
+	resetPatternsAndProducts,
 };

@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
+import { Slot } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
 import {
@@ -63,6 +64,8 @@ export function SectionBlockEdit( {
 							/>
 						) }
 					</h2>
+
+					<Slot name={ clientId } />
 				</HeadingTagName>
 			) }
 

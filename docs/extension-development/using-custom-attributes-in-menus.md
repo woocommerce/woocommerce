@@ -1,4 +1,3 @@
-
 ---
 post_title: Using custom attributes in menus and taxonomy archives
 ---
@@ -7,9 +6,7 @@ Attributes that can be used for the layered nav are a custom taxonomy, which mea
 
 > **Note:**  This is a  **Developer level**  doc. If you are unfamiliar with code/templates and resolving potential conflicts, select a  [WooExpert or Developer](https://woo.com/customizations/) for assistance. We are unable to provide support for customizations under our  [Support Policy](https://woo.com/support-policy/).
 
----
-post_title: Register the taxonomy for menus
----
+## Register the taxonomy for menus
 
 When registering taxonomies for your custom attributes, WooCommerce calls the following hook:
 
@@ -32,9 +29,7 @@ Custom attribute slugs are prefixed with `pa_`, so an attribute called `size` wo
 
 Now use your attribute in  **Appearance > Menus**. You will notice, however, that it has default blog styling when you click on a link to your taxonomy term.
 
----
-post_title: Create a template
----
+## Create a template
 
 You need to theme your attribute to make it display products as you want. To do this:
 
