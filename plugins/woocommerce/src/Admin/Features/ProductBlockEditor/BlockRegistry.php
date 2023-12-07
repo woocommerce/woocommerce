@@ -229,6 +229,7 @@ class BlockRegistry {
 			return false;
 		}
 
+		// We are dealing with a local file, so we can use file_get_contents.
 		// phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$metadata = json_decode( file_get_contents( $metadata_file ), true );
 		if ( ! is_array( $metadata ) || ! $metadata['name'] ) {
