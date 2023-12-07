@@ -1,27 +1,27 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { createElement, useEffect } from '@wordpress/element';
-import {
-	BlockAttributes,
-	BlockInstance,
-	parse,
-	serialize,
-} from '@wordpress/blocks';
-import { useSelect, useDispatch } from '@wordpress/data';
-import { Button } from '@wordpress/components';
+import { BlockInstance, serialize } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
+import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { recordEvent } from '@woocommerce/tracks';
 import { useEntityProp } from '@wordpress/core-data';
+import { __ } from '@wordpress/i18n';
+import {
+	// @ts-expect-error no exported member.
+	useInnerBlocksProps,
+	BlockControls,
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
 import { ContentPreview } from '../../../components/content-preview';
-import { ProductEditorBlockEditProps } from '../../../types';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
 import { store } from '../../../store/product-editor-ui';
+import type { DescriptionBlockEditComponent } from './types';
+import FullEditorToolbarButton from './components/full-editor-toolbar-button';
 
 /**
  * Internal dependencies
@@ -49,8 +49,7 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 
 export function DescriptionBlockEdit( {
 	attributes,
-}: ProductEditorBlockEditProps< BlockAttributes > ) {
-	const blockProps = useWooBlockProps( attributes );
+}: DescriptionBlockEditComponent ) {
 	const [ description, setDescription ] = useEntityProp< string >(
 		'postType',
 		'product',
@@ -69,8 +68,6 @@ export function DescriptionBlockEdit( {
 		[]
 	);
 
-	const { openModalEditor, setModalEditorBlocks } = useDispatch( store );
-
 	// Update the description when the blocks change.
 	useEffect( () => {
 		if ( ! hasChanged ) {
@@ -85,23 +82,34 @@ export function DescriptionBlockEdit( {
 		setDescription( html );
 	}, [ modalEditorBlocks, setDescription, hasChanged ] );
 
+	const blockProps = useWooBlockProps( attributes, {
+		className: classNames( { 'has-blocks': !! description.length } ),
+		tabIndex: 0,
+	} );
+
+	const innerBlockProps = useInnerBlocksProps(
+		{},
+		{
+			templateLock: 'contentOnly',
+			allowedBlocks: [ 'woocommerce/product-summary-field' ],
+		}
+	);
+
 	return (
 		<div { ...blockProps }>
-			<Button
-				variant="secondary"
-				onClick={ () => {
-					if ( description ) {
-						setModalEditorBlocks( parse( description ) );
-					}
+			{ !! description.length && (
+				<BlockControls>
+					<FullEditorToolbarButton
+						text={ __( 'Edit in full editor', 'woocommerce' ) }
+					/>
+				</BlockControls>
+			) }
 
-					openModalEditor();
-					recordEvent( 'product_add_description_click' );
-				} }
-			>
-				{ description.length
-					? __( 'Edit description', 'woocommerce' )
-					: __( 'Add description', 'woocommerce' ) }
-			</Button>
+			{ ! description.length && <div { ...innerBlockProps } /> }
+
+			{ !! description.length && (
+				<div className="wp-block-woocommerce-product-description-field__cover" />
+			) }
 
 			{ !! description.length && (
 				<ContentPreview content={ description } />
