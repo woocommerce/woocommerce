@@ -37,7 +37,7 @@
 
 .is-large {
 	.wc-block-checkout__actions {
-		@include with-translucent-border(1px 0 0);
+		border-top: 1px solid $universal-border-light;
 		padding: em($gap-large) 0;
 	}
 }

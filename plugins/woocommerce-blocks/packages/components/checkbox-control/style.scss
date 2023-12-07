@@ -19,7 +19,7 @@
 	.wc-block-components-checkbox__input[type="checkbox"] {
 		font-size: 1em;
 		appearance: none;
-		border: 2px solid $input-border-gray;
+		border: 1px solid $universal-border-medium;
 		border-radius: $universal-border-radius;
 		box-sizing: border-box;
 		height: em(24px);
@@ -35,11 +35,10 @@
 
 		&:checked {
 			background: #fff;
-			border-color: $input-border-gray;
 		}
 
 		&:focus {
-			outline: 2px solid $input-border-gray;
+			outline: 1px solid $universal-border-strong;
 			outline-offset: 2px;
 		}
 

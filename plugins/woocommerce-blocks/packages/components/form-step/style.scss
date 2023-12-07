@@ -96,7 +96,7 @@
 	.wc-block-components-checkout-step__container::after {
 		content: "";
 		height: 100%;
-		border-left: 1px solid $universal-border;
+		border-left: 1px solid $universal-border-light;
 		position: absolute;
 		left: -$gap-large;
 		top: 0;

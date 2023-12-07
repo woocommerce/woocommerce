@@ -15,7 +15,7 @@
 	}
 
 	.wc-block-components-order-summary-item {
-		@include with-translucent-border(0 0 1px);
+		border-bottom: 1px solid $universal-border-light;
 		@include font-size(small);
 		display: flex;
 		padding-bottom: 1px;
@@ -27,6 +27,8 @@
 		}
 
 		&:last-child {
+			border-bottom: 0;
+
 			> div {
 				padding-bottom: 0;
 			}
@@ -39,6 +41,7 @@
 		.wc-block-components-product-metadata {
 			@include font-size(regular);
 		}
+
 	}
 
 	.wc-block-components-order-summary-item__image,
@@ -64,6 +67,7 @@
 		border: 2px solid;
 		border-radius: 1em;
 		box-shadow: 0 0 0 2px #fff;
+		border-color: $universal-border-light;
 		color: #000;
 		display: flex;
 		line-height: 1;
