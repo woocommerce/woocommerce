@@ -140,7 +140,6 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 										<span>
 											{ formatDate(
 												timeFormat,
-												// @ts-expect-error TODO - fix this type error with moment
 												moment().startOf( 'day' )
 											) }
 										</span>
@@ -149,7 +148,6 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 										<span>
 											{ formatDate(
 												timeFormat,
-												// @ts-expect-error TODO - fix this type error with moment
 												moment().endOf( 'day' )
 											) }
 										</span>
