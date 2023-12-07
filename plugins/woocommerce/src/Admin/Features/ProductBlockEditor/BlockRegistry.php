@@ -241,7 +241,7 @@ class BlockRegistry {
 	 * @param string $file_or_folder Path to the JSON file with metadata definition for the block or
 	 * path to the folder where the `block.json` file is located.
 	 *
-	 * @return WP_Block_Type|false The registered block type on success, or false on failure.
+	 * @return \WP_Block_Type|false The registered block type on success, or false on failure.
 	 */
 	public function register_block_type_from_metadata( $file_or_folder ) {
 		$metadata_file = ( ! str_ends_with( $file_or_folder, 'block.json' ) )
