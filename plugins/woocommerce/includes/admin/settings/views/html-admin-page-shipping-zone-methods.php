@@ -203,8 +203,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 								}
 								$allowed_html = array(
 									'a' => array(
-										'href' => true,
-										'title' => true
+										'href'   => true,
+										'title'  => true,
+										'target' => true,
 									)
 								);
 								$description = wp_kses( $method->get_method_description(), $allowed_html );
