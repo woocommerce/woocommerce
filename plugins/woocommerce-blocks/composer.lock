@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6ea9def2c493bb54dfd4e8ac178608b2",
+    "content-hash": "4d4044d392231f57668344b8887d93e5",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -177,20 +177,23 @@
         },
         {
             "name": "automattic/jetpack-config",
-            "version": "v1.15.4",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-config.git",
-                "reference": "6cf8d61a972530322c9b62f7375fff83342c38f9"
+                "reference": "1e34ef5f598abc1e5ee9100aa5a1a1f51b62681d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-config/zipball/6cf8d61a972530322c9b62f7375fff83342c38f9",
-                "reference": "6cf8d61a972530322c9b62f7375fff83342c38f9",
+                "url": "https://api.github.com/repos/Automattic/jetpack-config/zipball/1e34ef5f598abc1e5ee9100aa5a1a1f51b62681d",
+                "reference": "1e34ef5f598abc1e5ee9100aa5a1a1f51b62681d",
                 "shasum": ""
             },
+            "require": {
+                "php": ">=7.0"
+            },
             "require-dev": {
-                "automattic/jetpack-changelogger": "^3.3.9"
+                "automattic/jetpack-changelogger": "^4.0.0"
             },
             "suggest": {
                 "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
@@ -204,7 +207,7 @@
                     "link-template": "https://github.com/Automattic/jetpack-config/compare/v${old}...v${new}"
                 },
                 "branch-alias": {
-                    "dev-trunk": "1.15.x-dev"
+                    "dev-trunk": "2.0.x-dev"
                 }
             },
             "autoload": {
@@ -218,9 +221,9 @@
             ],
             "description": "Jetpack configuration package that initializes other packages and configures Jetpack's functionality. Can be used as a base for all variants of Jetpack package usage.",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-config/tree/v1.15.4"
+                "source": "https://github.com/Automattic/jetpack-config/tree/v2.0.0"
             },
-            "time": "2023-09-19T18:18:30+00:00"
+            "time": "2023-11-20T20:02:25+00:00"
         },
         {
             "name": "automattic/jetpack-connection",
