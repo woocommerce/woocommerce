@@ -113,7 +113,7 @@
 			this.closeButton( e, true );
 		},
 		backButton: function( e ) {
-			$( document.body ).trigger( 'wc_backbone_modal_response_back', [ this._target, this.getFormData() ] );
+			$( document.body ).trigger( 'wc_backbone_modal_back_response', [ this._target, this.getFormData() ] );
 			this.closeButton( e, false );
 		},
 		nextButton: function( e ) {
