@@ -4,7 +4,7 @@
 const path = require( 'path' );
 
 // These modules need to be transformed because they are not transpiled to CommonJS.
-const transformModules = [ 'is-plain-obj', 'memize' ];
+const transformModules = [ 'is-plain-obj', 'memize', 'd3-*' ];
 // Ignore all node_modules except for the ones we need to transform.
 const transformIgnorePatterns = [
 	`node_modules/(?!.pnpm/${ transformModules.join(
@@ -35,7 +35,7 @@ module.exports = {
 			'build/mocks/style-mock.js'
 		),
 		// Force module uuid to resolve with the CJS entry point, because Jest does not support package.json.exports. See https://github.com/uuidjs/uuid/issues/451
-		"uuid": require.resolve('uuid'),
+		uuid: require.resolve( 'uuid' ),
 	},
 	restoreMocks: true,
 	setupFiles: [
@@ -60,7 +60,7 @@ module.exports = {
 	transform: {
 		'^.+\\is-plain-obj/index\\.js$': 'babel-jest',
 		'^.+\\memize/dist/index\\.js$': 'babel-jest',
-		'^.+\\.[jt]sx?$': 'ts-jest',
+		'^.+\\.[jt]sx?$': 'babel-jest',
 	},
 	testEnvironment: 'jest-environment-jsdom',
 	timers: 'modern',
