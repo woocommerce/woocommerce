@@ -6,7 +6,7 @@
 
 -   [Data Stores](#data-stores)
     -   [Checkout Data Store](#checkout-data-store)
-        -   [Selectors](#selectors)
+        -   [Selectors](../../../third-party-developers/extensibility/data-store/checkout.md#selectors)
         -   [Actions](#actions)
 -   [Contexts](#contexts)
     -   [Shipping Method Data context](#shipping-method-data-context)

@@ -9,6 +9,9 @@
 -   [Selectors](#selectors)
     -   [getRoute( state, namespace, resourceName, ids = \[\] )](#getroute-state-namespace-resourcename-ids---)
     -   [getRoutes( state, namespace )](#getroutes-state-namespace-)
+    -   [getRouteFromResourceEntries](#getroutefromresourceentries)
+    -   [assembleRouteWithPlaceholders](#assembleroutewithplaceholders)
+
 
 ## Overview
 
@@ -80,6 +83,47 @@ This will return all the registered routes for the given namespace as a flat arr
 #### _Returns_ <!-- omit in toc -->
 
 -   `array`: An array of all routes for the given namespace.
+
+### getRouteFromResourceEntries
+
+This will returns the route from the given slice of the route state.
+
+#### _Parameters_ <!-- omit in toc -->
+
+-   _stateSlice_ `object`: Slice of the route state from a given namespace and resource name.
+-   _ids_ `array` (default: `[]`): An array of id references that are to be replaced in route placeholders.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `string`: The route for the given resource entries, or an empty string if no route is found.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( SCHEMA_STORE_KEY );
+const route = store.getRouteFromResourceEntries( stateSlice, ids );
+```
+
+### assembleRouteWithPlaceholders
+
+This will return the assembled route with placeholders.
+
+#### _Parameters_ <!-- omit in toc -->
+
+-   _route_ `string`: The route to assemble.
+-   _routePlaceholders_ `array`: An array of route placeholders.
+-   _ids_ `array`: An array of id references that are to be replaced in route placeholders.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `string`: The assembled route with placeholders replaced by actual values.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( SCHEMA_STORE_KEY );
+const route = store.assembleRouteWithPlaceholders( route, routePlaceholders, ids );
+```
 
 <!-- FEEDBACK -->
 

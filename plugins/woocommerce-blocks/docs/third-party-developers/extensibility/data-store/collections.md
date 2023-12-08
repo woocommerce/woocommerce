@@ -9,8 +9,12 @@
     -   [receiveCollectionError](#receivecollectionerror)
     -   [receiveLastModified](#receivelastmodified)
 -   [Selectors](#selectors)
-    -   [getCollection](#getcollection)
-    -   [getCollectionHeader](#getcollectionheader)
+   	-   [getFromState](#getfromstate)
+   	-   [getCollection](#getcollection)
+   	-   [getCollectionHeader](#getcollectionheader)
+   	-   [getCollectionHeaders](#getcollectionheaders)
+   	-   [getCollectionError](#getcollectionerror)
+   	-   [getCollectionLastModified](#getcollectionlastmodified)
 
 ## Overview
 
@@ -90,16 +94,37 @@ dispatch( receiveLastModified( timestamp ) );
 
 ## Selectors
 
+### getFromState
+
+This selector will return the state from the collections store.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `object`: The state from the collections storew ith the following properties:
+   	- _namespace_ `string`: The route namespace for the collection, eg. `/wc/blocks`.
+    - _resourceName_ `string`: The resource name for the collection, eg. `products/attributes`.
+    - _query_ `object`: The query arguments for the collection, eg. `{ order: 'ASC', sortBy: Price }`.
+    - _ids_ `array`: If the collection route has placeholders for ids you provide the values for those placeholders in this array (in order).
+   	- _type_ `string`: type of the collections ie `items`.
+
+or
+
+- `array` | `null` | `undefined`: Returns a fallback value (specified as a parameter) when the collection lacks matching headers for the provided arguments.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( COLLECTIONS_STORE_KEY );
+const state = store.getFromState( state, namespace, resourceName, queryString, ids, type, fallback );
+```
+
 ### getCollection
 
 This selector will return the collection for the given arguments. It has a sibling resolver, so if the selector has never been resolved, the resolver will make a request to the server for the collection and dispatch results to the store.
 
 #### _Returns_ <!-- omit in toc -->
 
--   _namespace_ `string`: The route namespace for the collection, eg. `/wc/blocks`.
--   _resourceName_ `string`: The resource name for the collection, eg. `products/attributes`.
--   _query_ `object`: The query arguments for the collection, eg. `{ order: 'ASC', sortBy: Price }`.
--   _ids_ `array`: If the collection route has placeholders for ids you provide the values for those placeholders in this array (in order).
+-   `object`:  Returns the `getFromState` object (see [`getFromState`](#getfromstate)).
 
 ### getCollectionHeader
 
@@ -121,6 +146,51 @@ or
     -   _header_ `string`: The header key for the header.
     -   _query_ `Object`: The query arguments for the collection, eg. `{ order: 'ASC', sortBy: Price }`.
     -   _ids_ `Array`: If the collection route has placeholders for ids you provide the values for those placeholders in this array (in order).
+
+### getCollectionHeaders
+
+This selector will return the headers for a collection.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `object`:  Returns the `getFromState` object (see [`getFromState`](#getfromstate)).
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( COLLECTIONS_STORE_KEY );
+const headers = store.getCollectionHeaders( state, namespace, resourceName, queryString );
+```
+
+### getCollectionError
+
+This selector will return any error that occurred while fetching a collection.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `object`:  Returns the `getFromState` object (see [`getFromState`](#getfromstate)).
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( COLLECTIONS_STORE_KEY );
+const error = store.getCollectionError( state, namespace, resourceName, queryString );
+```
+
+### getCollectionLastModified
+
+This selector will return the last modified date for a collection.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `number`: The last modified date for the collection, or `0` if there was no last modified date.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( COLLECTIONS_STORE_KEY );
+const lastModified = store.getCollectionLastModified( state, namespace, resourceName, queryString );
+```
 
 <!-- FEEDBACK -->
 
