@@ -1073,7 +1073,7 @@ class FeaturesController {
 		}
 
 		$features                   = $this->get_feature_definitions();
-		$feature_compatibility_info = $this->get_compatible_features_for_plugin( $plugin_file, true );
+		$feature_compatibility_info = $this->get_compatible_features_for_plugin( $plugin_file );
 		$incompatible_features      = array_merge( $feature_compatibility_info['incompatible'], $feature_compatibility_info['uncertain'] );
 		$incompatible_features      = array_values(
 			array_filter(
