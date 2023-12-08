@@ -22,13 +22,12 @@ class Packages {
 	private function __construct() {}
 
 	/**
-	 * Array of package names and their main package classes.
+	 * Array of package names and their main package classes. Once a package has been merged into WooCommerce
+	 * directly it should be removed from here and added to the merged packages array.
 	 *
 	 * @var array Key is the package name/directory, value is the main package class which handles init.
 	 */
 	protected static $packages = array(
-		'woocommerce-admin' => '\\Automattic\\WooCommerce\\Admin\\Composer\\Package',
-		'woocommerce-blocks' => '\\Automattic\\WooCommerce\\Blocks\\Package',
 	);
 
 	/**
@@ -45,11 +44,8 @@ class Packages {
 	 * @var array Key is the package name/directory, value is the main package class which handles init.
 	 */
 	protected static $merged_packages = array(
-		'woocommerce-admin',
-		// Accommodate all of the different names WooCommerce Blocks may be referred to using.
-		'woo-gutenberg-products-block',
-		'woocommerce-gutenberg-products-block',
-		'woocommerce-blocks',
+		'woocommerce-admin' => '\\Automattic\\WooCommerce\\Admin\\Composer\\Package',
+		'woocommerce-gutenberg-products-block' => '\\Automattic\\WooCommerce\\Blocks\\Package',
 	);
 
 	/**
@@ -76,11 +72,6 @@ class Packages {
 	 * @return boolean
 	 */
 	public static function package_exists( $package ) {
-		// Once a package has been merged it always exists.
-		if ( in_array( $package, self::$merged_packages, true ) ) {
-			return true;
-		}
-
 		return file_exists( dirname( __DIR__ ) . '/packages/' . $package );
 	}
 
@@ -98,57 +89,29 @@ class Packages {
 			return;
 		}
 
-		// Since we are relying on the Jetpack Autloader to resolve class versioning differences we can use it to
-		// detect whether or not an mu-plugin is registered in the autoloader. This is powerful because it means
-		// we don't have to do expensive mu-plugin checks on every request.
-		global $jetpack_autoloader_cached_plugin_paths;
+		// Scroll through all of the active plugins and disable them if they're merged packages.
 		$active_plugins = get_option( 'active_plugins', array() );
-		foreach ( $jetpack_autoloader_cached_plugin_paths as $plugin_dir_path ) {
-			$plugin_dir = basename( $plugin_dir_path );
-
-			if ( ! in_array( $plugin_dir, self::$merged_packages, true ) ) {
+		// Deactivate the plugin if possible so that there are no conflicts.
+		foreach ( $active_plugins as $active_plugin_path ) {
+			$plugin_file = basename( plugin_basename( $active_plugin_path ), '.php' );
+			if ( ! isset( self::$merged_packages[ $plugin_file ] ) ) {
 				continue;
 			}
 
-			// Deactivate the plugin if possible so that there are no conflicts.
-			foreach ( $active_plugins as $active_plugin_path ) {
-				$active_plugin_dir = dirname( plugin_basename( $active_plugin_path ) );
-				if ( $active_plugin_dir !== $plugin_dir ) {
-					continue;
-				}
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-				require_once ABSPATH . 'wp-admin/includes/plugin.php';
-
-				// Make sure to display a message informing the user that the plugin has been deactivated.
-				$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $active_plugin_path );
-				deactivate_plugins( $active_plugin_path );
-				add_action(
-					'admin_notices',
-					function() use ( $plugin_data ) {
-						echo '<div class="error"><p>';
-						printf(
-							/* translators: %s: is referring to the plugin's name. */
-							esc_html__( 'The %1$s plugin has been deactivated as the latest improvements are now included with the %2$s plugin.', 'woocommerce' ),
-							'<code>' . $plugin_data[ 'Name' ] . '</code>',
-							'<code>WooCommerce</code>'
-						);
-						echo '</p></div>';
-					}
-				);
-
-				continue 2;
-			}
-
-			// Since no active plugin was found this is most likely an mu-plugin. We can't deactivate this ourselves so we need
-			// to display a message informing the site administrator that the plugin needs to be disabled.
+			// Make sure to display a message informing the user that the plugin has been deactivated.
+			$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $active_plugin_path );
+			deactivate_plugins( $active_plugin_path );
 			add_action(
 				'admin_notices',
-				function() use ( $plugin_dir ) {
+				function() use ( $plugin_data ) {
 					echo '<div class="error"><p>';
 					printf(
 						/* translators: %s: is referring to the plugin's name. */
-						esc_html__( 'The %1$s Must-Use plugin has been merged into WooCommerce and should be removed from your site.', 'woocommerce' ),
-						'<code>' . $plugin_dir . '</code>'
+						esc_html__( 'The %1$s plugin has been deactivated as the latest improvements are now included with the %2$s plugin.', 'woocommerce' ),
+						'<code>' . $plugin_data[ 'Name' ] . '</code>',
+						'<code>WooCommerce</code>'
 					);
 					echo '</p></div>';
 				}
@@ -162,6 +125,10 @@ class Packages {
 	 * Each package should include an init file which loads the package so it can be used by core.
 	 */
 	protected static function initialize_packages() {
+		foreach ( self::$merged_packages as $package_name => $package_class ) {
+			call_user_func( array( $package_class, 'init' ) );
+		}
+
 		foreach ( self::$packages as $package_name => $package_class ) {
 			if ( ! self::package_exists( $package_name ) ) {
 				self::missing_package( $package_name );
