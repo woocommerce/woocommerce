@@ -18,7 +18,7 @@
 		"composer/installers": "^1.7.0",
 		"automattic/jetpack-autoloader": "^3.0",
 		"automattic/jetpack-connection": "^2.1",
-		"automattic/jetpack-config": "^1.15"
+		"automattic/jetpack-config": "^2.0"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "9.6.15",
