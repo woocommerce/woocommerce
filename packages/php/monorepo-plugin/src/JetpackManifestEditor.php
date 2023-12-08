@@ -63,21 +63,20 @@ class JetpackManifestEditor {
 
 		// Add an offset to the version string so that we can still tell
 		// the difference between subsequent versions of an autoload.
-		$old_version = $root_package->getVersion();
-		$new_version = $old_version;
+		$new_version = $root_package->getVersion();
 		if ( preg_match( '/^([\\d.]+)?(.*)$/', $new_version, $version_parts ) ) {
 			$new_version = '10' . $version_parts[1] . $version_parts[2];
 		}
-		if ( $old_version === $new_version ) {
+		if ( $root_package->getVersion() === $new_version ) {
 			return;
 		}
 
 		$this->io->write( "<info>Updating Merged Feature Plugin Autoloads ($manifest_dir)</info>" );
 
 		// Update all of the manifest files.
-		$this->update_manifest_versions( $manifest_dir, 'jetpack_autoload_classmap.php', $old_version, $new_version );
-		$this->update_manifest_versions( $manifest_dir, 'jetpack_autoload_psr4.php', $old_version, $new_version );
-		$this->update_manifest_versions( $manifest_dir, 'jetpack_autoload_filemap.php', $old_version, $new_version );
+		$this->update_manifest_versions( $manifest_dir, 'jetpack_autoload_classmap.php', $new_version );
+		$this->update_manifest_versions( $manifest_dir, 'jetpack_autoload_psr4.php', $new_version );
+		$this->update_manifest_versions( $manifest_dir, 'jetpack_autoload_filemap.php', $new_version );
 	}
 
 	/**
@@ -85,10 +84,9 @@ class JetpackManifestEditor {
 	 *
 	 * @param string $manifest_dir The directory that holds the manifest files.
 	 * @param string $file The manifest file to update.
-	 * @param string $old_version The old version in the manifest file.
 	 * @param string $new_version The new version to set into the manifest file.
 	 */
-	private function update_manifest_versions( $manifest_dir, $file, $old_version, $new_version ) {
+	private function update_manifest_versions( $manifest_dir, $file, $new_version ) {
 		$manifest_content = @file_get_contents( $manifest_dir . $file );
 		if ( ! $manifest_content ) {
 			return;
@@ -96,12 +94,9 @@ class JetpackManifestEditor {
 
 		$this->io->write( "<info>Updating: $file</info>" );
 
-		// Escape the old version since it's going into the regex.
-		$old_version = preg_quote( $old_version );
-
 		// We should replace anything mapped from the base directory since that's a path we're mapping an autoload for.
 		$manifest_content = preg_replace(
-			"/('version'\s+=>\s+')$old_version(',\s+'path'\s+=>\s+(?:array\( )?\\\$baseDir)/",
+			"/('version'\s+=>\s+')[^']+(',\s+'path'\s+=>\s+(?:array\( )?\\\$baseDir)/",
 			'${1}' . $new_version . '${2}',
 			$manifest_content
 		);
