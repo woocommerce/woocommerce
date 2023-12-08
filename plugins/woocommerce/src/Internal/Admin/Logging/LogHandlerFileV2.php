@@ -127,11 +127,13 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 			return 0;
 		}
 
-		$files = $this->file_controller->get_files( array(
-			'date_filter' => 'created',
-			'date_start'  => 1,
-			'date_end'    => $timestamp,
-		) );
+		$files = $this->file_controller->get_files(
+			array(
+				'date_filter' => 'created',
+				'date_start'  => 1,
+				'date_end'    => $timestamp,
+			)
+		);
 
 		if ( is_wp_error( $files ) ) {
 			return 0;
@@ -178,7 +180,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 				)
 			),
 			array(
-				'source' => 'wc_logger'
+				'source' => 'wc_logger',
 			)
 		);
 

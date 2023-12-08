@@ -98,6 +98,8 @@ class FileController {
 		/**
 		 * Filter the maximum size of a log file before it will get rotated.
 		 *
+		 * @since 8.5.0
+		 *
 		 * @param int $max_file_size The file size in bytes.
 		 */
 		$this->max_file_size = apply_filters( 'woocommerce_log_file_size_limit', 5 * MB_IN_BYTES );
@@ -151,7 +153,7 @@ class FileController {
 	/**
 	 * Get all the rotations of a file and increment them, so that they overwrite the previous file with that rotation.
 	 *
-	 * @param string $file_id
+	 * @param string $file_id A file ID (file basename without the hash).
 	 *
 	 * @return bool True if the file and all its rotations were successfully rotated.
 	 */

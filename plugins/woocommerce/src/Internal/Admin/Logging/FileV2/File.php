@@ -330,7 +330,7 @@ class File {
 
 		// Ensure content ends with a line ending.
 		$eol_pos = strrpos( $text, PHP_EOL );
-		if ( false === $eol_pos || $eol_pos + 1 !== strlen( $text ) ) {
+		if ( false === $eol_pos || strlen( $text ) !== $eol_pos + 1 ) {
 			$text .= PHP_EOL;
 		}
 
@@ -384,8 +384,7 @@ class File {
 		$new_filename = str_replace( $search, $replace, $old_filename );
 		$new_path     = str_replace( $old_filename, $new_filename, $this->path );
 
-		$moved    = $wp_filesystem->move( $this->path, $new_path, true );
-
+		$moved = $wp_filesystem->move( $this->path, $new_path, true );
 		if ( ! $moved ) {
 			return false;
 		}
