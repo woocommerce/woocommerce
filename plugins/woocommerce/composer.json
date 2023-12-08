@@ -11,6 +11,10 @@
 		{
 			"type": "path",
 			"url": "lib"
+		},
+		{
+			"type": "path",
+			"url": "../../packages/php/monorepo-plugin"
 		}
 	],
 	"require": {
@@ -31,7 +35,8 @@
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
 		"phpunit/phpunit": "^9.0",
 		"sebastian/comparator": "^4.0",
-		"yoast/phpunit-polyfills": "^2.0"
+		"yoast/phpunit-polyfills": "^2.0",
+		"woocommerce/monorepo-plugin": "*"
 	},
 	"config": {
 		"optimize-autoloader": true,
@@ -47,7 +52,8 @@
 		"allow-plugins": {
 			"automattic/jetpack-autoloader": true,
 			"composer/installers": true,
-			"bamarni/composer-bin-plugin": true
+			"bamarni/composer-bin-plugin": true,
+			"woocommerce/monorepo-plugin": true
 		}
 	},
 	"autoload": {
