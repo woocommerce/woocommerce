@@ -2,11 +2,19 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { customerFile, guestFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
 import { CheckoutPage } from './checkout.page';
+import {
+	FREE_SHIPPING_NAME,
+	FREE_SHIPPING_PRICE,
+	SIMPLE_PHYSICAL_PRODUCT_NAME,
+	FLAT_RATE_SHIPPING_NAME,
+	FLAT_RATE_SHIPPING_PRICE,
+} from './constants';
 
 const test = base.extend< { pageObject: CheckoutPage } >( {
 	pageObject: async ( { page }, use ) => {
@@ -18,14 +26,7 @@ const test = base.extend< { pageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Checkout block → Shipping', () => {
-	const FREE_SHIPPING_NAME = 'Free shipping';
-	const FREE_SHIPPING_PRICE = '$0.00';
-	const FLAT_RATE_SHIPPING_NAME = 'Flat rate shipping';
-	const FLAT_RATE_SHIPPING_PRICE = '$10.00';
-
-	test.use( {
-		storageState: process.env.CUSTOMERSTATE,
-	} );
+	test.use( { storageState: customerFile } );
 
 	test( 'Shopper can choose free shipping, flat rate shipping, and can have different billing and shipping addresses', async ( {
 		pageObject,
@@ -94,5 +95,33 @@ test.describe( 'Shopper → Checkout block → Shipping', () => {
 			overrideBillingDetails
 		);
 		await pageObject.verifyAddressDetails( 'shipping' );
+	} );
+} );
+
+// We only check if guest user can place an order because we already checked if logged in user can
+// place an order in the previous test
+test.describe( 'Shopper → Checkout block → Place Order', () => {
+	test.use( { storageState: guestFile } );
+
+	test( 'Guest user can place order', async ( {
+		pageObject,
+		frontendUtils,
+		page,
+	} ) => {
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.goToCheckout();
+		await expect(
+			await pageObject.selectAndVerifyShippingOption(
+				FREE_SHIPPING_NAME,
+				FREE_SHIPPING_PRICE
+			)
+		).toBe( true );
+		await pageObject.fillInCheckoutWithTestData();
+		await pageObject.placeOrder();
+		await expect(
+			page.getByText( 'Your order has been received.' )
+		).toBeVisible();
 	} );
 } );

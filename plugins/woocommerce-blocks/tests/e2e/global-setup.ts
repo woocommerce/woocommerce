@@ -4,8 +4,14 @@
  */
 import { FullConfig, chromium, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
+import { expect } from '@woocommerce/e2e-playwright-utils';
 import fs from 'fs';
-import { cli } from '@woocommerce/e2e-utils';
+import {
+	cli,
+	adminFile,
+	customerFile,
+	guestFile,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -79,6 +85,94 @@ const loginAsCustomer = async ( config: FullConfig ) => {
 	await browser.close();
 };
 
+const authenticateAsAdmin = async ( config: FullConfig ) => {
+	const { baseURL, userAgent } = config.projects[ 0 ].use;
+
+	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
+	const contextOptions = { baseURL, userAgent };
+	// Create browser, browserContext, and page for admin users
+	const browser = await chromium.launch();
+	const context = await browser.newContext( contextOptions );
+	const page = await context.newPage();
+	await page.goto( '/my-account' );
+	await page.getByLabel( 'Username or email address' ).fill( admin.username );
+	await page.getByLabel( 'Password' ).fill( admin.password );
+	await page.getByRole( 'button', { name: 'Log in' } ).click();
+	// Sometimes login flow sets cookies in the process of several redirects.
+	// Wait for the final URL to ensure that the cookies are actually set.
+	await page.waitForURL( '/my-account/' );
+
+	await expect(
+		page
+			.getByRole( 'list' )
+			.filter( {
+				hasText:
+					'Dashboard Orders Downloads Addresses Account details Log out',
+			} )
+			.getByRole( 'link', { name: 'Log out' } )
+	).toBeVisible();
+
+	await page.context().storageState( { path: adminFile } );
+
+	await context.close();
+	await browser.close();
+};
+
+const authenticateAsCustomer = async ( config: FullConfig ) => {
+	const { baseURL, userAgent } = config.projects[ 0 ].use;
+
+	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
+	const contextOptions = { baseURL, userAgent };
+	// Create browser, browserContext, and page for customer users
+	const browser = await chromium.launch();
+	const context = await browser.newContext( contextOptions );
+	const page = await context.newPage();
+	await page.goto( '/my-account' );
+	await page
+		.getByLabel( 'Username or email address' )
+		.fill( customer.username );
+	await page.getByLabel( 'Password' ).fill( customer.password );
+	await page.getByRole( 'button', { name: 'Log in' } ).click();
+	// Sometimes login flow sets cookies in the process of several redirects.
+	// Wait for the final URL to ensure that the cookies are actually set.
+	await page.waitForURL( '/my-account/' );
+
+	await expect(
+		page
+			.getByRole( 'list' )
+			.filter( {
+				hasText:
+					'Dashboard Orders Downloads Addresses Account details Log out',
+			} )
+			.getByRole( 'link', { name: 'Log out' } )
+	).toBeVisible();
+
+	await page.context().storageState( { path: customerFile } );
+
+	await context.close();
+	await browser.close();
+};
+
+const visitAsGuest = async ( config: FullConfig ) => {
+	const { baseURL, userAgent } = config.projects[ 0 ].use;
+
+	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
+	const contextOptions = { baseURL, userAgent };
+	// Create browser, browserContext, and page for customer and admin users
+	const browser = await chromium.launch();
+	const context = await browser.newContext( contextOptions );
+	const page = await context.newPage();
+	await page.goto( '/my-account' );
+	await expect(
+		page.getByLabel( 'Username or email address' )
+	).toBeVisible();
+
+	await page.context().storageState( { path: guestFile } );
+
+	await context.close();
+	await browser.close();
+};
+
 const prepareAttributes = async ( config: FullConfig ) => {
 	const { baseURL, userAgent } = config.projects[ 0 ].use;
 
@@ -145,6 +239,9 @@ async function globalSetup( config: FullConfig ) {
 
 	await prepareAttributes( config );
 	await loginAsCustomer( config );
+	await authenticateAsAdmin( config );
+	await authenticateAsCustomer( config );
+	await visitAsGuest( config );
 }
 
 export default globalSetup;
