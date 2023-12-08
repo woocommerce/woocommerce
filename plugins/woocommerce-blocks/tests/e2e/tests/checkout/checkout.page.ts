@@ -391,4 +391,34 @@ export class CheckoutPage {
 
 		return orderId;
 	}
+
+	async verifyBillingDetails( overrideData = {} ) {
+		const testData = { ...this.testData, ...overrideData };
+		const {
+			firstname,
+			lastname,
+			city,
+			postcode,
+			phone,
+			addressfirstline,
+			addresssecondline,
+		} = testData;
+		const billingAddressSection = this.page.locator(
+			'[data-block-name="woocommerce/order-confirmation-billing-address"]'
+		);
+		await expect(
+			billingAddressSection.getByText( `${ firstname } ${ lastname }` )
+		).toBeVisible();
+		await expect( billingAddressSection.getByText( city ) ).toBeVisible();
+		await expect(
+			billingAddressSection.getByText( postcode )
+		).toBeVisible();
+		await expect( billingAddressSection.getByText( phone ) ).toBeVisible();
+		await expect(
+			billingAddressSection.getByText( addressfirstline )
+		).toBeVisible();
+		await expect(
+			billingAddressSection.getByText( addresssecondline )
+		).toBeVisible();
+	}
 }
