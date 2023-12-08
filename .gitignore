@@ -99,3 +99,6 @@ changes.json
 
 # Support .gitkeep Files
 !.gitkeep
+
+# default docs manifest
+/manifest.json
