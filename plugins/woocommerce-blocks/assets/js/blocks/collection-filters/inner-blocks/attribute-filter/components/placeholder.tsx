@@ -34,7 +34,7 @@ export const NoAttributesPlaceholder = () => (
 		</p>
 		<Button
 			className="wc-block-attribute-filter__add-attribute-button"
-			isSecondary
+			variant="secondary"
 			href={ getAdminLink(
 				'edit.php?post_type=product&page=product_attributes'
 			) }
@@ -45,7 +45,7 @@ export const NoAttributesPlaceholder = () => (
 		</Button>
 		<Button
 			className="wc-block-attribute-filter__read_more_button"
-			isTertiary
+			variant="tertiary"
 			href="https://docs.woocommerce.com/document/managing-product-taxonomies/"
 			target="_blank"
 		>

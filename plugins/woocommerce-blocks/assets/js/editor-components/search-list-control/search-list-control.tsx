@@ -122,7 +122,7 @@ const SelectedListItems = < T extends object = object >( {
 				<strong>{ messages.selected( selectedCount ) }</strong>
 				{ selectedCount > 0 ? (
 					<Button
-						isLink
+						variant="link"
 						isDestructive
 						onClick={ () => onChange( [] ) }
 						aria-label={ messages.clear }

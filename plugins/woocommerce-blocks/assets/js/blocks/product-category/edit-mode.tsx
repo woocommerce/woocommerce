@@ -88,12 +88,12 @@ export const ProductsByCategoryEditMode = (
 						setChangedAttributes( { catOperator: value } )
 					}
 				/>
-				<Button isPrimary onClick={ onDone }>
+				<Button variant="primary" onClick={ onDone }>
 					{ __( 'Done', 'woo-gutenberg-products-block' ) }
 				</Button>
 				<Button
 					className="wc-block-products-category__cancel-button"
-					isTertiary
+					variant="tertiary"
 					onClick={ onCancel }
 				>
 					{ __( 'Cancel', 'woo-gutenberg-products-block' ) }

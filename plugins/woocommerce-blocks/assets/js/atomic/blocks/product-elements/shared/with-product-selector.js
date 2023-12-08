@@ -58,7 +58,7 @@ const withProductSelector = ( selectorArgs ) => ( OriginalComponent ) => {
 								} }
 							/>
 							<Button
-								isSecondary
+								variant="secondary"
 								disabled={ ! productId }
 								onClick={ () => {
 									setIsEditing( false );

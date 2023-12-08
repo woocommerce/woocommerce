@@ -103,7 +103,7 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 	return (
 		<div className="wp-block-woocommerce-classic-template__placeholder-migration-button-container">
 			<Button
-				isPrimary
+				variant="primary"
 				onClick={ () => {
 					onClickCallback( {
 						clientId,
