@@ -6,12 +6,6 @@ import { graphql, GraphqlResponseError } from '@octokit/graphql';
 import { RequestError } from '@octokit/request-error';
 
 /**
- * Make sure we aren't hardcoding the monorepo into the command.
- */
-const MONOREPO_OWNER = 'woocommerce';
-const MONOREPO_NAME = 'woocommerce';
-
-/**
  * Described a label object.
  */
 interface GitHubLabel {
@@ -19,17 +13,34 @@ interface GitHubLabel {
 	name: string;
 }
 
+// These properties should match the UpdateProjectV2ItemFieldValueInput mutation input.
+interface GitHubProjectField {
+	projectId: string;
+	fieldId: string;
+	itemId: string;
+	dataType: string;
+	value: {
+		text?: string;
+		number?: number;
+		date?: string;
+		singleSelectOptionId?: string;
+		iterationId?: string;
+	};
+}
+
 /**
  * Describes an issue object.
  */
 interface GitHubIssue {
 	id: string;
+	newID?: string;
 	title: string;
+	projectFields: GitHubProjectField[];
 }
 
 export default class TransferIssues extends Command {
 	static description =
-		'Transfers issues from another repository into the monorepo.';
+		'Transfers issues from another repository into the destination repository.';
 
 	static args = [
 		{
@@ -40,6 +51,11 @@ export default class TransferIssues extends Command {
 	];
 
 	static flags = {
+		destination: Flags.string( {
+			description:
+				'The destination repository to transfer into.',
+			default: 'woocommerce/woocommerce',
+		} ),
 		searchFilter: Flags.string( {
 			description:
 				'The search filter to apply when searching for issues to transfer.',
@@ -56,6 +72,22 @@ export default class TransferIssues extends Command {
 	 */
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( TransferIssues );
+
+		const matches = flags.destination.match( /^([^/]+)\/([^/]+)$/ );
+		if ( ! matches ) {
+			this.error(
+				'The destination repository must be in the format "owner/repo"!'
+			);
+		}
+
+		const destinationOwner = matches[1];
+		const destinationRepo = matches[2];
+
+		if ( ! args.source.startsWith( destinationOwner + '/' ) ) {
+			this.error(
+				'The source and target repository must have the same owner!'
+			);
+		}
 
 		let confirmation = await CliUx.ux.confirm(
 			'Are you sure you want to transfer issues from ' +
@@ -91,10 +123,14 @@ export default class TransferIssues extends Command {
 		}
 
 		const monorepoNodeID = await this.getMonorepoNodeID(
-			authenticatedGraphQL
+			authenticatedGraphQL,
+			destinationOwner,
+			destinationRepo
 		);
 		const labelsToAdd = await this.getLabelsToAdd(
 			authenticatedGraphQL,
+			destinationOwner,
+			destinationRepo,
 			flags.labels
 		);
 		const issuesToTransfer = await this.getIssues(
@@ -103,7 +139,7 @@ export default class TransferIssues extends Command {
 			flags.searchFilter
 		);
 
-		const newIssueIDs: string[] = [];
+		let transferredIssues = 0;
 		for ( const issue of issuesToTransfer ) {
 			const newIssueID = await this.transferIssue(
 				authenticatedGraphQL,
@@ -111,8 +147,10 @@ export default class TransferIssues extends Command {
 				monorepoNodeID
 			);
 
-			if ( newIssueID !== null ) {
-				newIssueIDs.push( newIssueID );
+			// Track the transferred issue.
+			if ( newIssueID ) {
+				issue.newID = newIssueID;
+				transferredIssues++;
 			}
 		}
 
@@ -123,11 +161,20 @@ export default class TransferIssues extends Command {
 		await new Promise( ( resolve ) => setTimeout( resolve, 5000 ) );
 		CliUx.ux.action.stop();
 
-		CliUx.ux.action.start( 'Applying label changes' );
-		for ( const newIssueID of newIssueIDs ) {
+		CliUx.ux.action.start( 'Running post-transfer tasks' );
+		for ( const issue of issuesToTransfer ) {
+			if ( ! issue.newID ) {
+				continue;
+			}
+
+			this.updateProjectFields(
+				authenticatedGraphQL,
+				issue.projectFields
+			);
+
 			this.addLabelsToIssue(
 				authenticatedGraphQL,
-				newIssueID,
+				issue.newID,
 				labelsToAdd
 			);
 		}
@@ -135,7 +182,7 @@ export default class TransferIssues extends Command {
 
 		this.log(
 			'Successfully transferred ' +
-				newIssueIDs.length +
+			transferredIssues +
 				'/' +
 				numberOfIssues +
 				' issues.'
@@ -184,9 +231,13 @@ export default class TransferIssues extends Command {
 	 * Fetches the node ID of the monorepo from GitHub.
 	 *
 	 * @param {graphql} authenticatedGraphQL The graphql object for making requests.
+	 * @param {string}  destinationOwner	 The owner of the repository to transfer issues into.
+	 * @param {string}  destinationRepo	 	 The repository to transfer issues into.
 	 */
 	private async getMonorepoNodeID(
-		authenticatedGraphQL: typeof graphql
+		authenticatedGraphQL: typeof graphql,
+		destinationOwner: string,
+		destinationRepo: string,
 	): Promise< string > {
 		CliUx.ux.action.start( 'Finding Monorepo' );
 
@@ -206,8 +257,8 @@ export default class TransferIssues extends Command {
                 }
                 `,
 				{
-					monorepoOwner: MONOREPO_OWNER,
-					monorepoName: MONOREPO_NAME,
+					monorepoOwner: destinationOwner,
+					monorepoName: destinationRepo,
 				}
 			);
 
@@ -219,11 +270,7 @@ export default class TransferIssues extends Command {
 
 			if ( err instanceof GraphqlResponseError ) {
 				this.error(
-					'Could not find the repository "' +
-						MONOREPO_OWNER +
-						'/' +
-						MONOREPO_NAME +
-						'"'
+					'Could not find the repository "' + destinationOwner + '/' + destinationRepo + '"'
 				);
 			}
 
@@ -237,10 +284,14 @@ export default class TransferIssues extends Command {
 	 * Gets all of the labels we want to add from GitHub.
 	 *
 	 * @param {graphql}             authenticatedGraphQL The graphql object for making requests.
+	 * @param {string}				destinationOwner	 The owner of the repository to transfer issues into.
+	 * @param {string}				destinationRepo	 	 The repository to transfer issues into.
 	 * @param {Array.<GitHubLabel>} labels               The labels we want to add after the transfer.
 	 */
 	private async getLabelsToAdd(
 		authenticatedGraphQL: typeof graphql,
+		destinationOwner: string,
+		destinationRepo: string,
 		labels?: string
 	): Promise< GitHubLabel[] > {
 		if ( ! labels ) {
@@ -281,8 +332,8 @@ export default class TransferIssues extends Command {
                 }
                 `,
 				{
-					monorepoOwner: MONOREPO_OWNER,
-					monorepoName: MONOREPO_NAME,
+					monorepoOwner: destinationOwner,
+					monorepoName: destinationRepo,
 					cursor,
 				}
 			);
@@ -305,7 +356,7 @@ export default class TransferIssues extends Command {
 		for ( const label of addLabels ) {
 			if ( ! allLabels[ label ] ) {
 				this.error(
-					'The monorepo does not have the label ' + label + '.'
+					'The target repository does not have the label ' + label + '.'
 				);
 			}
 
@@ -384,26 +435,83 @@ export default class TransferIssues extends Command {
 				};
 			} >(
 				`
-                query ( $searchQuery: String!, $cursor: String ) {
-                    search ( 
-                        type: ISSUE, 
-                        query: $searchQuery,
-                        first: 100,
-                        after: $cursor
-                    ) {
-                        nodes {
-                            ... on Issue {
-                                id,
-                                title
-                            }
-                        },
-                        pageInfo {
-                            hasNextPage,
-                            endCursor
-                        }
-                    }
-                }
-                `,
+				query ($searchQuery: String!, $cursor: String) {
+					search(type: ISSUE, query: $searchQuery, first: 100, after: $cursor) {
+					  nodes {
+							... on Issue {
+								id
+								title
+								projectItems(first: 50) {
+									nodes {
+										id
+										project {
+											id
+										}
+										fieldValues(first: 50) {
+											nodes {
+												... on ProjectV2ItemFieldTextValue {
+													field {
+														... on ProjectV2FieldCommon {
+															id
+															name
+															dataType
+														}
+													}
+													text
+												}
+												... on ProjectV2ItemFieldNumberValue {
+													field {
+														... on ProjectV2FieldCommon {
+															id
+															name
+															dataType
+														}
+													}
+													number
+												}
+												... on ProjectV2ItemFieldDateValue {
+													field {
+														... on ProjectV2FieldCommon {
+															id
+															name
+															dataType
+														}
+													}
+													date
+												}
+												... on ProjectV2ItemFieldSingleSelectValue {
+													field {
+														... on ProjectV2FieldCommon {
+															id
+															name
+															dataType
+														}
+													}
+													optionId
+												}
+												... on ProjectV2ItemFieldIterationValue {
+													field {
+														... on ProjectV2FieldCommon {
+															id
+															name
+															dataType
+														}
+													}
+													iterationId
+												}
+											}
+										}
+									}
+								}
+						  }
+					  }
+					  pageInfo {
+						  hasNextPage
+						  endCursor
+					  }
+					}
+				  }
+				`,
 				{
 					searchQuery,
 					cursor,
@@ -412,9 +520,58 @@ export default class TransferIssues extends Command {
 
 			// Record all of the issues that we've found
 			for ( const issue of search.nodes ) {
+				const projectFields: GitHubProjectField[] = [];
+
+				// @ts-expect-error The types do not cover the projectItems field.
+				for ( const projectItem of issue.projectItems.nodes ) {
+					for ( const fieldValue of projectItem.fieldValues.nodes ) {
+						// We only care if this is a field we can process.
+						if ( ! fieldValue.field ) {
+							continue;
+						}
+
+						const projectField: GitHubProjectField = {
+							projectId: projectItem.project.id,
+							fieldId: fieldValue.field.id,
+							itemId: projectItem.id,
+							dataType: fieldValue.field.dataType,
+							value: {},
+						};
+
+						// Map the field value to the correct property.
+						switch ( fieldValue.field.dataType ) {
+							case 'TEXT':
+								projectField.value = { text: fieldValue.text };
+								break;
+
+							case 'NUMBER':
+								projectField.value = { number: fieldValue.number };
+								break;
+
+							case 'DATE':
+								projectField.value = { date: fieldValue.date };
+								break;
+
+							case 'SINGLE_SELECT':
+								projectField.value = { singleSelectOptionId: fieldValue.optionId };
+								break;
+
+							case 'ITERATION':
+								projectField.value = { iterationId: fieldValue.iterationId };
+								break;
+
+							default:
+								continue;
+						}
+
+						projectFields.push( projectField );
+					}
+				}
+
 				issues.push( {
 					id: issue.id,
 					title: issue.title,
+					projectFields: projectFields
 				} );
 			}
 
@@ -480,6 +637,42 @@ export default class TransferIssues extends Command {
 			return null;
 		} finally {
 			CliUx.ux.action.stop();
+		}
+	}
+
+	/**
+	 * Update the project fields for the issue.
+	 * 
+	 * @param {graphql}             authenticatedGraphQL The graphql object for making requests.
+	 * @param {Array.<GitHubLabel>} projectFields        The project fields to update for the issue.
+	 */
+	private async updateProjectFields(
+		authenticatedGraphQL: typeof graphql,
+		projectFields: GitHubProjectField[]
+	) {
+		for ( const projectField of projectFields ) {
+			const input = {
+				clientMutationId: 'monorepo-merge',
+				projectId: projectField.projectId,
+				fieldId: projectField.fieldId,
+				itemId: projectField.itemId,
+				value: projectField.value,
+			};
+
+			await authenticatedGraphQL(
+				`
+				mutation ( $input: UpdateProjectV2ItemFieldValueInput! ) {
+					updateProjectV2ItemFieldValue (
+						input: $input
+					) {
+						projectV2Item {
+						id
+					  }
+					}
+				}
+				`,
+				{ input }
+			);
 		}
 	}
 
