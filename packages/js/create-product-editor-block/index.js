@@ -16,6 +16,7 @@ module.exports = {
 		attributes: {
 			message: {
 				type: 'string',
+				__experimentalRole: 'content',
 				source: 'text',
 				selector: 'div',
 			},
@@ -32,6 +33,7 @@ module.exports = {
 			'@wordpress/prettier-config',
 			'@wordpress/stylelint-config',
 			'eslint-import-resolver-typescript',
+			'@woocommerce/product-editor',
 		],
 		customScripts: {
 			postinstall: 'composer install',

@@ -14,7 +14,7 @@ interface ProductFormTemplateInterface extends BlockTemplateInterface {
 	 * Adds a new group block.
 	 *
 	 * @param array $block_config block config.
-	 * @return BlockInterface new block section.
+	 * @return GroupInterface new group block.
 	 */
 	public function add_group( array $block_config ): GroupInterface;
 

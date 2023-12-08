@@ -3,7 +3,6 @@
  */
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Spinner } from '@wordpress/components';
 import { useQuery } from '@woocommerce/navigation';
 import classNames from 'classnames';
 
@@ -114,10 +113,18 @@ export default function CategorySelector(
 
 	if ( isLoading ) {
 		return (
-			<div className="woocommerce-marketplace__category-selector-loading">
-				<p>{ __( 'Loading categories…', 'woocommerce' ) }</p>
-				<Spinner />
-			</div>
+			<>
+				<ul className="woocommerce-marketplace__category-selector">
+					{ [ ...Array( 5 ) ].map( ( el, i ) => (
+						<li
+							key={ i }
+							className="woocommerce-marketplace__category-item"
+						>
+							<CategoryLink slug="" label="" selected={ false } />
+						</li>
+					) ) }
+				</ul>
+			</>
 		);
 	}
 
@@ -138,6 +145,7 @@ export default function CategorySelector(
 				<li className="woocommerce-marketplace__category-item">
 					{ dropdownItems.length > 0 && (
 						<CategoryDropdown
+							type={ props.type }
 							label={ __( 'More', 'woocommerce' ) }
 							categories={ dropdownItems }
 							buttonClassName={ classNames(
@@ -157,6 +165,7 @@ export default function CategorySelector(
 
 			<div className="woocommerce-marketplace__category-selector--full-width">
 				<CategoryDropdown
+					type={ props.type }
 					label={ mobileCategoryDropdownLabel() }
 					categories={ visibleItems.concat( dropdownItems ) }
 					buttonClassName="woocommerce-marketplace__category-dropdown-button"

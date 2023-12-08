@@ -1,25 +1,27 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { createElement, useState } from '@wordpress/element';
-import {
-	BlockAttributes,
-	BlockInstance,
-	parse,
-	serialize,
-} from '@wordpress/blocks';
-import { Button } from '@wordpress/components';
+import { createElement, useEffect } from '@wordpress/element';
+import { BlockInstance, serialize } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
+import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { recordEvent } from '@woocommerce/tracks';
 import { useEntityProp } from '@wordpress/core-data';
+import { __ } from '@wordpress/i18n';
+import {
+	// @ts-expect-error no exported member.
+	useInnerBlocksProps,
+	BlockControls,
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
 import { ContentPreview } from '../../../components/content-preview';
-import { ModalEditor } from '../../../components/modal-editor';
-import { ProductEditorBlockEditProps } from '../../../types';
+import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
+import { store } from '../../../store/product-editor-ui';
+import type { DescriptionBlockEditComponent } from './types';
+import FullEditorToolbarButton from './components/full-editor-toolbar-button';
 
 /**
  * Internal dependencies
@@ -45,46 +47,75 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 	return blocks;
 }
 
-export function Edit( {
+export function DescriptionBlockEdit( {
 	attributes,
-}: ProductEditorBlockEditProps< BlockAttributes > ) {
-	const blockProps = useWooBlockProps( attributes );
-	const [ isModalOpen, setIsModalOpen ] = useState( false );
+}: DescriptionBlockEditComponent ) {
 	const [ description, setDescription ] = useEntityProp< string >(
 		'postType',
 		'product',
 		'description'
 	);
 
+	// Pick Modal editor data from the store.
+	const { isModalEditorOpen, modalEditorBlocks, hasChanged } = useSelect(
+		( select ) => {
+			return {
+				isModalEditorOpen: select( store ).isModalEditorOpen(),
+				modalEditorBlocks: select( store ).getModalEditorBlocks(),
+				hasChanged: select( store ).getModalEditorContentHasChanged(),
+			};
+		},
+		[]
+	);
+
+	// Update the description when the blocks change.
+	useEffect( () => {
+		if ( ! hasChanged ) {
+			return;
+		}
+
+		if ( ! modalEditorBlocks?.length ) {
+			setDescription( '' );
+		}
+
+		const html = serialize( clearDescriptionIfEmpty( modalEditorBlocks ) );
+		setDescription( html );
+	}, [ modalEditorBlocks, setDescription, hasChanged ] );
+
+	const blockProps = useWooBlockProps( attributes, {
+		className: classNames( { 'has-blocks': !! description.length } ),
+		tabIndex: 0,
+	} );
+
+	const innerBlockProps = useInnerBlocksProps(
+		{},
+		{
+			templateLock: 'contentOnly',
+			allowedBlocks: [ 'woocommerce/product-summary-field' ],
+		}
+	);
+
 	return (
 		<div { ...blockProps }>
-			<Button
-				variant="secondary"
-				onClick={ () => {
-					setIsModalOpen( true );
-					recordEvent( 'product_add_description_click' );
-				} }
-			>
-				{ description.length
-					? __( 'Edit description', 'woocommerce' )
-					: __( 'Add description', 'woocommerce' ) }
-			</Button>
-			{ isModalOpen && (
-				<ModalEditor
-					initialBlocks={ parse( description ) }
-					onChange={ ( blocks ) => {
-						const html = serialize(
-							clearDescriptionIfEmpty( blocks )
-						);
-						setDescription( html );
-					} }
-					onClose={ () => setIsModalOpen( false ) }
-					title={ __( 'Edit description', 'woocommerce' ) }
-				/>
+			{ !! description.length && (
+				<BlockControls>
+					<FullEditorToolbarButton
+						text={ __( 'Edit in full editor', 'woocommerce' ) }
+					/>
+				</BlockControls>
 			) }
+
+			{ ! description.length && <div { ...innerBlockProps } /> }
+
+			{ !! description.length && (
+				<div className="wp-block-woocommerce-product-description-field__cover" />
+			) }
+
 			{ !! description.length && (
 				<ContentPreview content={ description } />
 			) }
+
+			{ isModalEditorOpen && <ModalEditorWelcomeGuide /> }
 		</div>
 	);
 }

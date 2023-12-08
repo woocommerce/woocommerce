@@ -1,6 +1,6 @@
-# Adjust the quantity input values
-
-> This is a **Developer level** doc. If you are unfamiliar with code and resolving potential conflicts, select a [WooExpert or Developer](https://woocommerce.com/customizations/) for assistance. We are unable to provide support for customizations under our  [Support Policy](http://www.woocommerce.com/support-policy/).
+---
+post_title: Adjust the quantity input values
+---
 
 Set the starting value, maximum value, minimum value, and increment amount for quantity input fields on product pages.
 
@@ -34,7 +34,7 @@ if ( ! function_exists( 'YOUR_PREFIX_woocommerce_available_variation' ) ) {
 	function YOUR_PREFIX_woocommerce_available_variation( $args ) {
 		$args['max_qty'] = 20; // Maximum value (variations)
 		$args['min_qty'] = 2;  // Minimum value (variations)
-		
+
 		// Note: the starting value and step for variations is controlled
 		// from the 'woocommerce_quantity_input_args' filter shown above for
     // simple products
@@ -46,4 +46,4 @@ if ( ! function_exists( 'YOUR_PREFIX_woocommerce_available_variation' ) ) {
 }
 ```
 
-If you are looking for a little more power, check out our [Min/Max Quantities](http://woocommerce.com/products/minmax-quantities) extension!
+If you are looking for a little more power, check out our [Min/Max Quantities](https://woo.com/products/minmax-quantities) extension!

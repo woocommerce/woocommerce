@@ -63,6 +63,7 @@ export function getProductAttributeObject(
 		? {
 				id: 0,
 				name: attribute,
+				slug: attribute,
 				options: [],
 		  }
 		: attribute;

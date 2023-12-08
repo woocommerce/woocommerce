@@ -2,7 +2,7 @@
 /**
  * Marketing Specs Handler
  *
- * Fetches the specifications for the marketing feature from WC.com API.
+ * Fetches the specifications for the marketing feature from Woo.com API.
  */
 
 namespace Automattic\WooCommerce\Internal\Admin\Marketing;
@@ -29,21 +29,21 @@ class MarketingSpecs {
 	const KNOWLEDGE_BASE_TRANSIENT = 'wc_marketing_knowledge_base';
 
 	/**
-	 * Slug of the category specifying marketing extensions on the WooCommerce.com store.
+	 * Slug of the category specifying marketing extensions on the Woo.com store.
 	 *
 	 * @var string
 	 */
 	const MARKETING_EXTENSION_CATEGORY_SLUG = 'marketing';
 
 	/**
-	 * Slug of the subcategory specifying marketing channels on the WooCommerce.com store.
+	 * Slug of the subcategory specifying marketing channels on the Woo.com store.
 	 *
 	 * @var string
 	 */
 	const MARKETING_CHANNEL_SUBCATEGORY_SLUG = 'sales-channels';
 
 	/**
-	 * Load recommended plugins from WooCommerce.com
+	 * Load recommended plugins from Woo.com
 	 *
 	 * @return array
 	 */
@@ -76,7 +76,7 @@ class MarketingSpecs {
 	}
 
 	/**
-	 * Return only the recommended marketing channels from WooCommerce.com.
+	 * Return only the recommended marketing channels from Woo.com.
 	 *
 	 * @return array
 	 */
@@ -85,7 +85,7 @@ class MarketingSpecs {
 	}
 
 	/**
-	 * Return all recommended marketing extensions EXCEPT the marketing channels from WooCommerce.com.
+	 * Return all recommended marketing extensions EXCEPT the marketing channels from Woo.com.
 	 *
 	 * @return array
 	 */
@@ -134,7 +134,7 @@ class MarketingSpecs {
 	}
 
 	/**
-	 * Load knowledge base posts from WooCommerce.com
+	 * Load knowledge base posts from Woo.com
 	 *
 	 * @param string|null $topic The topic of marketing knowledgebase to retrieve.
 	 * @return array

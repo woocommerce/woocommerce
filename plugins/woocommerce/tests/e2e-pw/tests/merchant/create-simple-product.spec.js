@@ -88,12 +88,8 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( `/?post_type=product&p=${ virtualProductId }`, {
 			waitUntil: 'networkidle',
 		} );
-		await expect( page.locator( '.product_title' ) ).toHaveText(
-			virtualProductName
-		);
-		await expect(
-			page.locator( '.summary .woocommerce-Price-amount' )
-		).toContainText( productPrice );
+		await expect( page.getByRole('heading', { name: virtualProductName }) ).toBeVisible();
+		await expect( page.getByText( productPrice ) ).toBeVisible();
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 		await page.getByRole( 'link', { name: 'View cart' } ).click();
 		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
@@ -148,12 +144,8 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( `/?post_type=product&p=${ nonVirtualProductId }`, {
 			waitUntil: 'networkidle',
 		} );
-		await expect( page.locator( '.product_title' ) ).toHaveText(
-			nonVirtualProductName
-		);
-		await expect(
-			page.locator( '.summary .woocommerce-Price-amount' )
-		).toContainText( productPrice );
+		await expect( page.getByRole( 'heading', { name: nonVirtualProductName } ) ).toBeVisible();
+		await expect( page.getByText( productPrice ).first() ).toBeVisible();
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 		await page.getByRole( 'link', { name: 'View cart' } ).click();
 		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(

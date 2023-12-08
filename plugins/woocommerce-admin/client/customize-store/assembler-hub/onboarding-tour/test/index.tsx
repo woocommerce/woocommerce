@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createContext } from '@wordpress/element';
 import { render, screen } from '@testing-library/react';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -10,12 +11,20 @@ import { recordEvent } from '@woocommerce/tracks';
 import { OnboardingTour } from '../index';
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
+jest.mock( '../../', () => ( {
+	CustomizeStoreContext: createContext( {
+		context: {
+			aiOnline: true,
+		},
+	} ),
+} ) );
 
 describe( 'OnboardingTour', () => {
 	let props: {
 		onClose: jest.Mock;
 		setShowWelcomeTour: jest.Mock;
 		showWelcomeTour: boolean;
+		setIsResizeHandleVisible: ( isVisible: boolean ) => void;
 	};
 
 	beforeEach( () => {
@@ -23,6 +32,7 @@ describe( 'OnboardingTour', () => {
 			onClose: jest.fn(),
 			setShowWelcomeTour: jest.fn(),
 			showWelcomeTour: true,
+			setIsResizeHandleVisible: jest.fn(),
 		};
 	} );
 

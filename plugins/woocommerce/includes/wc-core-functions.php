@@ -2003,9 +2003,7 @@ function wc_remove_number_precision_deep( $value ) {
  *     - an instance which will be used directly as the logger
  * In either case, the class or instance *must* implement WC_Logger_Interface.
  *
- * @see WC_Logger_Interface
- *
- * @return WC_Logger
+ * @return WC_Logger_Interface
  */
 function wc_get_logger() {
 	static $logger = null;
@@ -2532,7 +2530,7 @@ function wc_selected( $value, $options ) {
 function wc_get_server_database_version() {
 	global $wpdb;
 
-	if ( empty( $wpdb->is_mysql ) || ! $wpdb->use_mysqli ) {
+	if ( empty( $wpdb->is_mysql ) || empty( $wpdb->use_mysqli ) ) {
 		return array(
 			'string' => '',
 			'number' => '',

@@ -1,4 +1,6 @@
-# WooCommerce grammar, punctuation and capitalization guide
+---
+post_title: WooCommerce grammar, punctuation and capitalization guide
+---
 
 Following grammar, punctuation and style guidelines helps keep our presentation consistent. Users have a better experience if they know what to expect and where to find the information they need.
 
@@ -45,8 +47,8 @@ Cases when we capitalize:
 Cases when we use lower case:
 
 - “ecommerce” (not “eCommerce”)
-- email address — info@woocommerce.com
-- website URL — developer.woocommerce.com
+- email address — `info@woo.com`
+- website URL — `developer.woo.com`
 
 ### Contractions
 

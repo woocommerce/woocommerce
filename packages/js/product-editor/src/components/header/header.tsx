@@ -65,6 +65,8 @@ export function Header( {
 		return null;
 	}
 
+	const isVariation = lastPersistedProduct?.parent_id > 0;
+
 	return (
 		<div
 			className="woocommerce-product-header"
@@ -73,7 +75,7 @@ export function Header( {
 			tabIndex={ -1 }
 		>
 			<div className="woocommerce-product-header__inner">
-				{ lastPersistedProduct?.parent_id > 0 ? (
+				{ isVariation ? (
 					<div className="woocommerce-product-header__back">
 						<Tooltip
 							// @ts-expect-error className is missing in TS, should remove this when it is included.
@@ -108,7 +110,7 @@ export function Header( {
 				) }
 
 				<h1 className="woocommerce-product-header__title">
-					{ lastPersistedProduct?.parent_id > 0 ? (
+					{ isVariation ? (
 						<div className="woocommerce-product-header__variable-product-title">
 							<Icon icon={ group } />
 							<span className="woocommerce-product-header__variable-product-name">
@@ -127,10 +129,12 @@ export function Header( {
 				</h1>
 
 				<div className="woocommerce-product-header__actions">
-					<SaveDraftButton
-						productType={ productType }
-						productStatus={ lastPersistedProduct.status }
-					/>
+					{ ! isVariation && (
+						<SaveDraftButton
+							productType={ productType }
+							productStatus={ lastPersistedProduct.status }
+						/>
+					) }
 
 					<PreviewButton
 						productType={ productType }

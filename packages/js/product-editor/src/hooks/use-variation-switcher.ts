@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { Product } from '@woocommerce/data';
+import {
+	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	Product,
+} from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 type VariationSwitcherProps = {
@@ -17,6 +20,9 @@ export function useVariationSwitcher( {
 	parentProductType,
 }: VariationSwitcherProps ) {
 	const { invalidateResolution } = useDispatch( 'core' );
+	const { invalidateResolutionForStoreSelector } = useDispatch(
+		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+	);
 	const variationValues = useSelect(
 		( select ) => {
 			if ( parentId === undefined ) {
@@ -36,13 +42,11 @@ export function useVariationSwitcher( {
 				const activeVariationIndex =
 					parentProduct.variations.indexOf( variationId );
 				const previousVariationIndex =
-					activeVariationIndex > 0
-						? activeVariationIndex - 1
-						: parentProduct.variations.length - 1;
+					activeVariationIndex > 0 ? activeVariationIndex - 1 : null;
 				const nextVariationIndex =
 					activeVariationIndex !== parentProduct.variations.length - 1
 						? activeVariationIndex + 1
-						: 0;
+						: null;
 
 				return {
 					activeVariationIndex,
@@ -50,9 +54,13 @@ export function useVariationSwitcher( {
 					previousVariationIndex,
 					numberOfVariations: parentProduct.variations.length,
 					previousVariationId:
-						parentProduct.variations[ previousVariationIndex ],
+						previousVariationIndex !== null
+							? parentProduct.variations[ previousVariationIndex ]
+							: null,
 					nextVariationId:
-						parentProduct.variations[ nextVariationIndex ],
+						nextVariationIndex !== null
+							? parentProduct.variations[ nextVariationIndex ]
+							: null,
 				};
 			}
 			return {};
@@ -66,35 +74,44 @@ export function useVariationSwitcher( {
 			parentProductType || 'product',
 			parentId,
 		] );
+		invalidateResolutionForStoreSelector( 'getProductVariations' );
+		invalidateResolutionForStoreSelector(
+			'getProductVariationsTotalCount'
+		);
+	}
+
+	function goToVariation( id: number ) {
+		navigateTo( {
+			url: getNewPath( {}, `/product/${ parentId }/variation/${ id }` ),
+		} );
 	}
 
 	function goToNextVariation() {
-		if ( variationValues.nextVariationId === undefined ) {
+		if (
+			variationValues.nextVariationId === undefined ||
+			variationValues.nextVariationId === null
+		) {
 			return false;
 		}
-		navigateTo( {
-			url: getNewPath(
-				{},
-				`/product/${ parentId }/variation/${ variationValues.nextVariationId }`
-			),
-		} );
+		goToVariation( variationValues.nextVariationId );
+		return true;
 	}
 
 	function goToPreviousVariation() {
-		if ( variationValues.previousVariationId === undefined ) {
+		if (
+			variationValues.previousVariationId === undefined ||
+			variationValues.previousVariationId === null
+		) {
 			return false;
 		}
-		navigateTo( {
-			url: getNewPath(
-				{},
-				`/product/${ parentId }/variation/${ variationValues.previousVariationId }`
-			),
-		} );
+		goToVariation( variationValues.previousVariationId );
+		return true;
 	}
 
 	return {
 		...variationValues,
 		invalidateVariationList,
+		goToVariation,
 		goToNextVariation,
 		goToPreviousVariation,
 	};

@@ -5,10 +5,7 @@
 	"title": "Product text field",
 	"category": "woocommerce",
 	"description": "A text field for use in the product editor.",
-	"keywords": [
-		"products",
-		"text"
-	],
+	"keywords": [ "products", "text" ],
 	"textdomain": "default",
 	"attributes": {
 		"label": {
@@ -21,21 +18,35 @@
 		"placeholder": {
 			"type": "string"
 		},
+		"help": {
+			"type": "string"
+		},
+		"tooltip": {
+			"type": "string"
+		},
+		"suffix": {
+			"type": "object"
+		},
+		"type": {
+			"type": "object"
+		},
 		"required": {
-			"type": "boolean",
-			"default": false
+			"type": "object"
 		},
-		"validationRegex": {
-			"type": "string"
-		},
-		"validationErrorMessage": {
-			"type": "string"
+		"pattern": {
+			"type": "object"
 		},
 		"minLength": {
-			"type": "number"
+			"type": "object"
 		},
 		"maxLength": {
-			"type": "number"
+			"type": "object"
+		},
+		"min": {
+			"type": "object"
+		},
+		"max": {
+			"type": "object"
 		}
 	},
 	"supports": {

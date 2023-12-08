@@ -32,6 +32,13 @@
 		}
 	}
 
+	&__button-next {
+		margin-left: auto;
+	}
+	&__button-previous {
+		margin-right: auto;
+	}
+
 	&__product-image {
 		max-height: 32px;
 		max-width: 32px;

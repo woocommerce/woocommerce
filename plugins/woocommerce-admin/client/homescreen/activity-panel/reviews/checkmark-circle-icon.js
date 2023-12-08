@@ -8,7 +8,7 @@ export default () => (
 	>
 		<mask
 			id="mask0"
-			mask-type="alpha"
+			style="mask-type:alpha"
 			maskUnits="userSpaceOnUse"
 			x="1"
 			y="1"

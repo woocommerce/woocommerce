@@ -392,7 +392,23 @@ class WC_Order extends WC_Abstract_Order {
 
 		if ( $status_transition ) {
 			try {
-				do_action( 'woocommerce_order_status_' . $status_transition['to'], $this->get_id(), $this );
+				/**
+				 * Fires when order status is changed.
+				 *
+				 * @since 1.0.0
+				 *
+				 * @param int Order ID.
+				 * @param WC_Order $order Order object.
+				 * @param array $status_transition {
+				 *      Status transition data.
+				 *
+				 *      @type string $from Order status from.
+				 *      @type string $to Order status to
+				 *      @type string $note Order note.
+				 *      @type boolean $manual True if the order is manually changed.
+				 * }
+				 */
+				do_action( 'woocommerce_order_status_' . $status_transition['to'], $this->get_id(), $this, $status_transition );
 
 				if ( ! empty( $status_transition['from'] ) ) {
 					/* translators: 1: old order status 2: new order status */
@@ -1802,6 +1818,15 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_cancel_order_url( $redirect = '' ) {
+		/**
+		 * Filter the URL to cancel the order in the frontend.
+		 *
+		 * @since 2.2.0
+		 *
+		 * @param string $url
+		 * @param WC_Order $order Order data.
+		 * @param string $redirect Redirect URL.
+		 */
 		return apply_filters(
 			'woocommerce_get_cancel_order_url',
 			wp_nonce_url(
@@ -1815,7 +1840,9 @@ class WC_Order extends WC_Abstract_Order {
 					$this->get_cancel_endpoint()
 				),
 				'woocommerce-cancel_order'
-			)
+			),
+			$this,
+			$redirect
 		);
 	}
 
@@ -1826,6 +1853,15 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string The unescaped cancel-order URL.
 	 */
 	public function get_cancel_order_url_raw( $redirect = '' ) {
+		/**
+		 * Filter the raw URL to cancel the order in the frontend.
+		 *
+		 * @since 2.2.0
+		 *
+		 * @param string $url
+		 * @param WC_Order $order Order data.
+		 * @param string $redirect Redirect URL.
+		 */
 		return apply_filters(
 			'woocommerce_get_cancel_order_url_raw',
 			add_query_arg(
@@ -1837,7 +1873,9 @@ class WC_Order extends WC_Abstract_Order {
 					'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' ),
 				),
 				$this->get_cancel_endpoint()
-			)
+			),
+			$this,
+			$redirect
 		);
 	}
 

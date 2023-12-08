@@ -7,7 +7,6 @@ export * from './gpay';
 export * from './jcb';
 export * from './maestro';
 export * from './mastercard';
-export * from './sofort';
 export * from './unionpay';
 export * from './visa';
 export * from './woopay';

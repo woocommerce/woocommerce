@@ -13,9 +13,6 @@
 		},
 		"title": {
 			"type": "string"
-		},
-		"order": {
-			"type": "number"
 		}
 	},
 	"supports": {
@@ -31,6 +28,5 @@
 		"isInSelectedTab": "isSelected"
 	},
 	"usesContext": [ "selectedTab" ],
-	"editorStyle": "file:./editor.css",
-	"templateLock": "contentOnly"
+	"editorStyle": "file:./editor.css"
 }

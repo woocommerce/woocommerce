@@ -2,12 +2,10 @@
  * External dependencies
  */
 import { useEntityProp } from '@wordpress/core-data';
-
-interface Metadata< T > {
-	id?: number;
-	key: string;
-	value?: T;
-}
+/**
+ * Internal dependencies
+ */
+import { Metadata } from '../types';
 
 interface UseProductEntityPropConfig< T > {
 	postType?: string;

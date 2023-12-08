@@ -1,14 +1,14 @@
 <?php
 /**
  * Plugin Name: WooCommerce
- * Plugin URI: https://woocommerce.com/
+ * Plugin URI: https://woo.com/
  * Description: An eCommerce toolkit that helps you sell anything. Beautifully.
- * Version: 8.3.0-dev
+ * Version: 8.5.0-dev
  * Author: Automattic
- * Author URI: https://woocommerce.com
+ * Author URI: https://woo.com
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
- * Requires at least: 6.2
+ * Requires at least: 6.3
  * Requires PHP: 7.4
  *
  * @package WooCommerce

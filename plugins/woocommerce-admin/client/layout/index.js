@@ -62,18 +62,24 @@ const WCPayUsageModal = lazy( () =>
 
 export class PrimaryLayout extends Component {
 	render() {
-		const { children } = this.props;
+		const {
+			children,
+			showStoreAlerts = true,
+			showNotices = true,
+		} = this.props;
+
 		return (
 			<div
 				className="woocommerce-layout__primary"
 				id="woocommerce-layout__primary"
 			>
-				{ window.wcAdminFeatures[ 'store-alerts' ] && (
-					<Suspense fallback={ null }>
-						<StoreAlerts />
-					</Suspense>
-				) }
-				<Notices />
+				{ window.wcAdminFeatures[ 'store-alerts' ] &&
+					showStoreAlerts && (
+						<Suspense fallback={ null }>
+							<StoreAlerts />
+						</Suspense>
+					) }
+				{ showNotices && <Notices /> }
 				{ children }
 			</div>
 		);
@@ -100,23 +106,6 @@ const WithReactRouterProps = ( { children } ) => {
 			match: matchProp,
 		} );
 	} );
-};
-
-/**
- * Wraps _Layout with WithReactRouterProps for non-embedded page renders
- * We need this because the hooks fail for embedded page renders as there is no Router context above it.
- *
- * @param {Object} props React component props
- */
-const LayoutSwitchWrapper = ( props ) => {
-	if ( props.isEmbedded ) {
-		return <_Layout { ...props } />;
-	}
-	return (
-		<WithReactRouterProps>
-			<_Layout { ...props } />
-		</WithReactRouterProps>
-	);
 };
 
 function _Layout( {
@@ -186,9 +175,22 @@ function _Layout( {
 	}
 
 	const { breadcrumbs, layout = { header: true, footer: true } } = page;
-	const { header: showHeader = true, footer: showFooter = true } = layout;
+	const {
+		header: showHeader = true,
+		footer: showFooter = true,
+		showPluginArea = true,
+	} = layout;
 
 	const query = getQuery();
+
+	useEffect( () => {
+		const wpbody = document.getElementById( 'wpbody' );
+		if ( showHeader ) {
+			wpbody?.classList.remove( 'no-header' );
+		} else {
+			wpbody?.classList.add( 'no-header' );
+		}
+	}, [ showHeader ] );
 
 	return (
 		<LayoutContextProvider
@@ -211,7 +213,10 @@ function _Layout( {
 					) }
 					<TransientNotices />
 					{ ! isEmbedded && (
-						<PrimaryLayout>
+						<PrimaryLayout
+							showNotices={ page?.layout?.showNotices }
+							showStoreAlerts={ page?.layout?.showStoreAlerts }
+						>
 							<div className="woocommerce-layout__main">
 								<Controller
 									page={ page }
@@ -230,11 +235,15 @@ function _Layout( {
 					{ showFooter && <Footer /> }
 					<CustomerEffortScoreModalContainer />
 				</div>
-				<PluginArea scope="woocommerce-admin" />
-				{ window.wcAdminFeatures.navigation && (
-					<PluginArea scope="woocommerce-navigation" />
+				{ showPluginArea && (
+					<>
+						<PluginArea scope="woocommerce-admin" />
+						{ window.wcAdminFeatures.navigation && (
+							<PluginArea scope="woocommerce-navigation" />
+						) }
+						<PluginArea scope="woocommerce-tasks" />
+					</>
 				) }
-				<PluginArea scope="woocommerce-tasks" />
 			</SlotFillProvider>
 		</LayoutContextProvider>
 	);
@@ -259,6 +268,23 @@ _Layout.propTypes = {
 		] ).isRequired,
 		wpOpenMenu: PropTypes.string,
 	} ).isRequired,
+};
+
+/**
+ * Wraps _Layout with WithReactRouterProps for non-embedded page renders
+ * We need this because the hooks fail for embedded page renders as there is no Router context above it.
+ *
+ * @param {Object} props React component props
+ */
+const LayoutSwitchWrapper = ( props ) => {
+	if ( props.isEmbedded ) {
+		return <_Layout { ...props } />;
+	}
+	return (
+		<WithReactRouterProps>
+			<_Layout { ...props } />
+		</WithReactRouterProps>
+	);
 };
 
 const dataEndpoints = getAdminSetting( 'dataEndpoints' );

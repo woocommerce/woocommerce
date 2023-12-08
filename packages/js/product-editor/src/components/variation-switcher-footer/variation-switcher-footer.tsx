@@ -46,16 +46,20 @@ export function VariationSwitcherFooter( {
 			const { getEntityRecord } = select( 'core' );
 			if ( numberOfVariations && numberOfVariations > 0 ) {
 				return {
-					previousVariation: getEntityRecord< ProductVariation >(
-						'postType',
-						'product_variation',
-						previousVariationId
-					),
-					nextVariation: getEntityRecord< ProductVariation >(
-						'postType',
-						'product_variation',
-						nextVariationId
-					),
+					previousVariation:
+						previousVariationId !== null &&
+						getEntityRecord< ProductVariation >(
+							'postType',
+							'product_variation',
+							previousVariationId
+						),
+					nextVariation:
+						nextVariationId !== null &&
+						getEntityRecord< ProductVariation >(
+							'postType',
+							'product_variation',
+							nextVariationId
+						),
 				};
 			}
 			return {};
@@ -63,23 +67,27 @@ export function VariationSwitcherFooter( {
 		[ nextVariationId, previousVariationId, numberOfVariations ]
 	);
 	function onPrevious() {
-		recordEvent( 'product_variation_switch_previous', {
-			variation_length: numberOfVariations,
-			variation_id: previousVariation?.id,
-			variation_index: activeVariationIndex,
-			previous_variation_index: previousVariationIndex,
-		} );
-		goToPreviousVariation();
+		if ( previousVariation ) {
+			recordEvent( 'product_variation_switch_previous', {
+				variation_length: numberOfVariations,
+				variation_id: previousVariation?.id,
+				variation_index: activeVariationIndex,
+				previous_variation_index: previousVariationIndex,
+			} );
+			goToPreviousVariation();
+		}
 	}
 
 	function onNext() {
-		recordEvent( 'product_variation_switch_next', {
-			variation_length: numberOfVariations,
-			variation_id: nextVariation?.id,
-			variation_index: activeVariationIndex,
-			next_variation_index: nextVariationIndex,
-		} );
-		goToNextVariation();
+		if ( nextVariation ) {
+			recordEvent( 'product_variation_switch_next', {
+				variation_length: numberOfVariations,
+				variation_id: nextVariation?.id,
+				variation_index: activeVariationIndex,
+				next_variation_index: nextVariationIndex,
+			} );
+			goToNextVariation();
+		}
 	}
 
 	if ( ! numberOfVariations || numberOfVariations < 2 ) {
@@ -88,9 +96,9 @@ export function VariationSwitcherFooter( {
 
 	return (
 		<div className="woocommerce-product-variation-switcher-footer">
-			{ previousVariation ? (
+			{ previousVariation && (
 				<Button
-					className="woocommerce-product-variation-switcher-footer__button"
+					className="woocommerce-product-variation-switcher-footer__button woocommerce-product-variation-switcher-footer__button-previous"
 					label={ __( 'Previous', 'woocommerce' ) }
 					onClick={ onPrevious }
 				>
@@ -106,12 +114,13 @@ export function VariationSwitcherFooter( {
 					) }
 					{ previousVariation.name }
 				</Button>
-			) : (
+			) }
+			{ ! previousVariation && previousVariationId !== null && (
 				<SwitcherLoadingPlaceholder position="left" />
 			) }
-			{ nextVariation ? (
+			{ nextVariation && (
 				<Button
-					className="woocommerce-product-variation-switcher-footer__button"
+					className="woocommerce-product-variation-switcher-footer__button woocommerce-product-variation-switcher-footer__button-next"
 					label={ __( 'Next', 'woocommerce' ) }
 					onClick={ onNext }
 				>
@@ -127,7 +136,8 @@ export function VariationSwitcherFooter( {
 					) }
 					<Icon icon={ arrowRight } size={ 16 } />
 				</Button>
-			) : (
+			) }
+			{ ! nextVariation && nextVariationId !== null && (
 				<SwitcherLoadingPlaceholder position="right" />
 			) }
 		</div>

@@ -93,6 +93,15 @@ abstract class WC_Log_Levels {
 	}
 
 	/**
+	 * Get an associative array with `level name => numerical severity` key/value pairs.
+	 *
+	 * @return int[]
+	 */
+	public static function get_all_level_severities() {
+		return self::$level_to_severity;
+	}
+
+	/**
 	 * Translate severity integer to level string.
 	 *
 	 * @param int $severity Severity level.
@@ -105,4 +114,12 @@ abstract class WC_Log_Levels {
 		return self::$severity_to_level[ $severity ];
 	}
 
+	/**
+	 * Get an associative array with `numerical severity => level name` key/value pairs.
+	 *
+	 * @return string[]
+	 */
+	public static function get_all_severity_levels() {
+		return self::$severity_to_level;
+	}
 }

@@ -6,10 +6,12 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
-use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
+use Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block;
+use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplateLogger;
 use WP_Block_Editor_Context;
 
 /**
@@ -43,14 +45,17 @@ class Init {
 			array_push( $this->supported_post_types, 'variable' );
 		}
 
+		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
+			array_push( $this->supported_post_types, 'external' );
+		}
+
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			array_push( $this->supported_post_types, 'grouped' );
+		}
+
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			// Register the product block template.
-			$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
-			$template_registry->register( new SimpleProductTemplate() );
-			$template_registry->register( new ProductVariationTemplate() );
-
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
@@ -58,16 +63,18 @@ class Init {
 			}
 			add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_product_template' ) );
 			add_filter( 'woocommerce_register_post_type_product_variation', array( $this, 'enable_rest_api_for_product_variation' ) );
 
 			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
 
-			$block_registry = new BlockRegistry();
-			$block_registry->init();
+			// Make sure the block registry is initialized so that core blocks are registered.
+			BlockRegistry::get_instance();
 
 			$tracks = new Tracks();
 			$tracks->init();
+
+			// Make sure the block template logger is initialized before any templates are created.
+			BlockTemplateLogger::get_instance();
 		}
 	}
 
@@ -78,21 +85,9 @@ class Init {
 		if ( ! PageController::is_admin_or_embed_page() ) {
 			return;
 		}
-		$post_type_object     = get_post_type_object( 'product' );
-		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
-		$template_registry    = wc_get_container()->get( BlockTemplateRegistry::class );
 
-		$editor_settings = array();
-		if ( ! empty( $post_type_object->template ) ) {
-			$editor_settings['template']     = $post_type_object->template;
-			$editor_settings['templateLock'] = ! empty( $post_type_object->template_lock ) ? $post_type_object->template_lock : false;
-			$editor_settings['templates']    = array(
-				'product'           => $post_type_object->template,
-				'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template(),
-			);
-		}
-
-		$editor_settings = get_block_editor_settings( $editor_settings, $block_editor_context );
+		$this->register_product_editor_templates();
+		$editor_settings = $this->get_product_editor_settings();
 
 		$script_handle = 'wc-admin-edit-product';
 		wp_register_script( $script_handle, '', array(), '0.1.0', true );
@@ -162,26 +157,6 @@ class Init {
 	}
 
 	/**
-	 * Enqueue styles needed for the rich text editor.
-	 *
-	 * @param array $args Array of post type arguments.
-	 * @return array Array of post type arguments.
-	 */
-	public function add_product_template( $args ) {
-		if ( ! isset( $args['template'] ) ) {
-			// Get the template from the registry.
-			$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
-			$template          = $template_registry->get_registered( 'simple-product' );
-
-			if ( isset( $template ) ) {
-				$args['template_lock'] = 'all';
-				$args['template']      = $template->get_formatted_template();
-			}
-		}
-		return $args;
-	}
-
-	/**
 	 * Enables variation post type in REST API.
 	 *
 	 * @param array $args Array of post type arguments.
@@ -204,7 +179,7 @@ class Init {
 			$user_data_fields,
 			array(
 				'variable_product_block_tour_shown',
-				'product_block_variable_options_notice_dismissed',
+				'local_attributes_notice_dismissed_ids',
 				'variable_items_without_price_notice_dismissed',
 			)
 		);
@@ -229,5 +204,42 @@ class Init {
 				'wp.blocks && wp.blocks.unstable__bootstrapServerSideBlockDefinitions && wp.blocks.unstable__bootstrapServerSideBlockDefinitions(' . wp_json_encode( get_block_editor_server_block_settings() ) . ');'
 			);
 		}
+	}
+
+	/**
+	 * Get the product editor settings.
+	 */
+	private function get_product_editor_settings() {
+		$editor_settings = array();
+
+		$template_registry     = wc_get_container()->get( BlockTemplateRegistry::class );
+		$block_template_logger = BlockTemplateLogger::get_instance();
+
+		$block_template_logger->log_template_events_to_file( 'simple-product' );
+		$block_template_logger->log_template_events_to_file( 'product-variation' );
+
+		$editor_settings['templates'] = array(
+			'product'           => $template_registry->get_registered( 'simple-product' )->get_formatted_template(),
+			'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template(),
+		);
+
+		$editor_settings['templateEvents'] = array(
+			'product'           => $block_template_logger->get_formatted_template_events( 'simple-product' ),
+			'product_variation' => $block_template_logger->get_formatted_template_events( 'product-variation' ),
+		);
+
+		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
+
+		return get_block_editor_settings( $editor_settings, $block_editor_context );
+	}
+
+	/**
+	 * Register product editor templates.
+	 */
+	private function register_product_editor_templates() {
+		$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+
+		$template_registry->register( new SimpleProductTemplate() );
+		$template_registry->register( new ProductVariationTemplate() );
 	}
 }

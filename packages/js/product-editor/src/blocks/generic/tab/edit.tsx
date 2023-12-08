@@ -16,17 +16,21 @@ import { ProductEditorBlockEditProps } from '../../../types';
 export interface TabBlockAttributes extends BlockAttributes {
 	id: string;
 	title: string;
-	order: number;
 	isSelected?: boolean;
 }
 
-export function Edit( {
+export function TabBlockEdit( {
 	setAttributes,
 	attributes,
 	context,
 }: ProductEditorBlockEditProps< TabBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { id, title, order, isSelected: contextIsSelected } = attributes;
+	const {
+		id,
+		title,
+		_templateBlockOrder: order,
+		isSelected: contextIsSelected,
+	} = attributes;
 	const isSelected = context.selectedTab === id;
 	if ( isSelected !== contextIsSelected ) {
 		setAttributes( { isSelected } );

@@ -5,11 +5,17 @@ import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
+import interpolateComponents from '@automattic/interpolate-components';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { Intro } from '.';
+import { IntroSiteIframe } from './intro-site-iframe';
+import { getAdminSetting } from '~/utils/admin-settings';
+import { navigateOrParent } from '../utils';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
@@ -18,6 +24,7 @@ export const BaseIntroBanner = ( {
 	buttonIsLink,
 	bannerButtonOnClick,
 	bannerButtonText,
+	secondaryButton,
 	children,
 }: {
 	bannerTitle: string;
@@ -26,6 +33,7 @@ export const BaseIntroBanner = ( {
 	buttonIsLink?: boolean;
 	bannerButtonOnClick?: () => void;
 	bannerButtonText?: string;
+	secondaryButton?: React.ReactNode;
 	children?: React.ReactNode;
 } ) => {
 	return (
@@ -36,18 +44,38 @@ export const BaseIntroBanner = ( {
 			) }
 		>
 			<div className={ `woocommerce-customize-store-banner-content` }>
-				<h1>{ bannerTitle }</h1>
-				<p>{ bannerText }</p>
-				{ bannerButtonText ? (
-					<Button
-						onClick={ () =>
-							bannerButtonOnClick && bannerButtonOnClick()
-						}
-						variant={ buttonIsLink ? 'link' : 'primary' }
-					>
-						{ bannerButtonText }
-					</Button>
-				) : null }
+				<div className="banner-actions">
+					<h1>{ bannerTitle }</h1>
+					<p>{ bannerText }</p>
+					{ bannerButtonText && (
+						<Button
+							onClick={ () =>
+								bannerButtonOnClick && bannerButtonOnClick()
+							}
+							variant={ buttonIsLink ? 'link' : 'primary' }
+						>
+							{ bannerButtonText }
+						</Button>
+					) }
+					{ secondaryButton }
+					<p className="ai-disclaimer">
+						{ interpolateComponents( {
+							mixedString: __(
+								'Powered by experimental AI. {{link}}Learn more{{/link}}',
+								'woocommerce'
+							),
+							components: {
+								link: (
+									<Link
+										href="https://automattic.com/ai-guidelines"
+										target="_blank"
+										type="external"
+									/>
+								),
+							},
+						} ) }
+					</p>
+				</div>
 				{ children }
 			</div>
 		</div>
@@ -180,6 +208,22 @@ export const ExistingAiThemeBanner = ( {
 }: {
 	setOpenDesignChangeWarningModal: ( arg0: boolean ) => void;
 } ) => {
+	const secondaryButton = (
+		<Button
+			className=""
+			onClick={ () => {
+				recordEvent(
+					'customize_your_store_intro_create_a_new_one_click'
+				);
+				setOpenDesignChangeWarningModal( true );
+			} }
+			variant={ 'secondary' }
+		>
+			{ __( 'Create a new one', 'woocommerce' ) }
+		</Button>
+	);
+	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
+
 	return (
 		<BaseIntroBanner
 			bannerTitle={ __( 'Customize your custom theme', 'woocommerce' ) }
@@ -190,23 +234,20 @@ export const ExistingAiThemeBanner = ( {
 			bannerClass="existing-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
-				window.location.href = getNewPath(
-					{},
-					'/customize-store/assembler-hub',
-					{}
+				recordEvent( 'customize_your_store_intro_customize_click' );
+				navigateOrParent(
+					window,
+					getNewPath( {}, '/customize-store/assembler-hub', {} )
 				);
 			} }
 			bannerButtonText={ __( 'Customize', 'woocommerce' ) }
+			secondaryButton={ secondaryButton }
 		>
-			<Button
-				className=""
-				onClick={ () => {
-					setOpenDesignChangeWarningModal( true );
-				} }
-				variant={ 'secondary' }
-			>
-				{ __( 'Create a new one', 'woocommerce' ) }
-			</Button>
+			<div className={ 'woocommerce-block-preview-container' }>
+				<div className="iframe-container">
+					<IntroSiteIframe siteUrl={ siteUrl } />
+				</div>
+			</div>
 		</BaseIntroBanner>
 	);
 };

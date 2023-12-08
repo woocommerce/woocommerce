@@ -3,6 +3,9 @@ description: Handles the installation, building, and caching of the projects wit
 permissions: {}
 
 inputs:
+    install:
+        description: Indicates whether or not the action should install any projects.
+        default: 'true'
     install-filters:
         description: The PNPM filter used to decide what projects to install. Supports multiline strings for multiple filters.
         default: ''
@@ -54,6 +57,9 @@ runs:
 
         - name: Install Node and PHP Dependencies
           shell: bash
+          if: ${{ inputs.install == 'true' }}
+          env:
+            PUPPETEER_SKIP_DOWNLOAD: 'true'
           run: |
               pnpm -w install turbo
               pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
@@ -70,6 +76,7 @@ runs:
               fi
 
         - name: Cache Build Output
+          if: ${{ inputs.build == 'true' }}
           uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
           with:
               path: .turbo
@@ -79,6 +86,6 @@ runs:
                   ${{ runner.os }}-build-output
 
         - name: Build
-          if: ${{ inputs.build == 'true' }}
+          if: ${{ inputs.install == 'true' && inputs.build == 'true' }}
           shell: bash
           run: pnpm -w exec turbo run turbo:build --cache-dir=".turbo" ${{ steps.parse-input.outputs.BUILD_FILTERS }}
