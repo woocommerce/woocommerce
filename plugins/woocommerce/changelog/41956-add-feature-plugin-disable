@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Automatically disable feature plugins that have been merged into WooCommerce Core.
+Automatically disable the feature plugins that have been merged into WooCommerce Core.
