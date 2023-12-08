@@ -342,7 +342,7 @@ class WC_Admin_Status {
 
 		WC_Log_Handler_DB::flush();
 
-		$sendback = remove_query_arg( array( 'action', 'action2', 'flush-logs', '_wpnonce', '_wp_http_referer' ), wp_get_referer() );
+		$sendback = wp_sanitize_redirect( admin_url( 'admin.php?page=wc-status&tab=logs' ) );
 
 		wp_safe_redirect( $sendback );
 		exit;
