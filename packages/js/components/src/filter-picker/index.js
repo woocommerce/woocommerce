@@ -295,7 +295,7 @@ class FilterPicker extends Component {
 				<Dropdown
 					contentClassName="woocommerce-filters-filter__content"
 					popoverProps={ {
-						position: 'bottom',
+						placement: 'bottom',
 					} }
 					expandOnMobile
 					headerTitle={ __(

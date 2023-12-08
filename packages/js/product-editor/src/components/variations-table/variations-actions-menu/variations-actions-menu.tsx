@@ -28,7 +28,7 @@ export function VariationsActionsMenu( {
 		<Dropdown
 			// @ts-expect-error missing prop in types.
 			popoverProps={ {
-				position: 'bottom left',
+				placement: 'bottom-end',
 			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<Button

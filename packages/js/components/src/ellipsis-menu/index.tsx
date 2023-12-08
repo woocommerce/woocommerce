@@ -89,7 +89,7 @@ const EllipsisMenu = ( {
 				contentClassName="woocommerce-ellipsis-menu__popover"
 				// @ts-expect-error missing prop in types.
 				popoverProps={ {
-					position: 'bottom left',
+					placement: 'bottom',
 				} }
 				renderToggle={ renderEllipsis }
 				renderContent={ renderMenu }

@@ -72,7 +72,7 @@ export function InsertUrlMenuItem( {
 		<Dropdown
 			// @ts-expect-error missing prop in types.
 			popoverProps={ {
-				position: 'middle left',
+				placement: 'left',
 			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<MenuItem

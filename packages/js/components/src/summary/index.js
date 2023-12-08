@@ -50,7 +50,7 @@ const SummaryList = ( { children, isDropdownBreakpoint, label } ) => {
 		<Dropdown
 			className="woocommerce-summary"
 			popoverProps={ {
-				position: 'bottom',
+				placement: 'bottom',
 			} }
 			headerTitle={ label }
 			renderToggle={ ( { isOpen, onToggle } ) =>

@@ -321,7 +321,7 @@ class AdvancedFilters extends Component {
 							<Dropdown
 								className="woocommerce-filters-advanced__add-filter-dropdown"
 								popoverProps={ {
-									position: 'bottom center',
+									placement: 'bottom',
 								} }
 								renderToggle={ ( { isOpen, onToggle } ) => (
 									<Button
