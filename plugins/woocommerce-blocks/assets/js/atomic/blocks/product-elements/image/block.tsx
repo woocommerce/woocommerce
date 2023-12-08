@@ -148,6 +148,9 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		},
 	};
 
+	// Remove parent block custom styles from sale badge.
+	delete restProps.style;
+
 	return (
 		<div
 			className={ classnames(
