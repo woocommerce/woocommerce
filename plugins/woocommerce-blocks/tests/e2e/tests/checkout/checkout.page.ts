@@ -270,7 +270,7 @@ export class CheckoutPage {
 		shippingName: string,
 		shippingPrice: string
 	) {
-		const shipping = this.page.getByLabel( shippingName );
+		const shipping = this.page.getByLabel( shippingName ).first();
 		await expect( shipping ).toBeVisible();
 		if (
 			! ( await this.isShippingRateSelected(

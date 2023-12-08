@@ -12,3 +12,8 @@ export const STORAGE_STATE_PATH = path.join(
 	process.cwd(),
 	'artifacts/storage-states/admin.json'
 );
+
+// User roles file paths
+export const adminFile = '.auth/admin.json';
+export const customerFile = '.auth/customer.json';
+export const guestFile = '.auth/guest.json';

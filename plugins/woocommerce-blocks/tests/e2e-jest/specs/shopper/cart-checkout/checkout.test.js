@@ -333,31 +333,6 @@ describe( 'Shopper → Checkout', () => {
 		} );
 	} );
 
-	describe( 'Place Order', () => {
-		it( 'Guest user can place order', async () => {
-			if ( await shopper.isLoggedIn() ) {
-				await shopper.logout();
-			}
-			await shopper.block.goToShop();
-			await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
-			await shopper.block.goToCheckout();
-			await shopper.block.fillBillingDetails( BILLING_DETAILS );
-			await shopper.block.placeOrder();
-			await expect( page ).toMatch( 'Your order has been received.' );
-		} );
-
-		it( 'Logged in user can place an order', async () => {
-			await shopper.login();
-			await shopper.block.goToShop();
-			await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
-			await shopper.block.goToCheckout();
-			await shopper.block.fillBillingDetails( BILLING_DETAILS );
-			await shopper.block.placeOrder();
-			await expect( page ).toMatch( 'Your order has been received.' );
-			await shopper.logout();
-		} );
-	} );
-
 	describe.skip( `Shipping`, () => {
 		afterEach( async () => {
 			await merchant.login();
