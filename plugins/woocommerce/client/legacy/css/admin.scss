@@ -4357,6 +4357,10 @@ table.wc_shipping {
 		line-height: 16px;
 		color: #757575;
 	}
+
+	.wc-backbone-modal-back-inactive {
+		display: none;
+	}
 }
 
 .wc-backbone-modal-add-shipping-method .wc-backbone-modal-main article {
