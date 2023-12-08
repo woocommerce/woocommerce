@@ -589,13 +589,7 @@
           }
         }
       ],
-      "categories": [
-        {
-          "category_slug": "_media",
-          "category_title": "_media",
-          "categories": []
-        }
-      ]
+      "categories": []
     },
     {
       "content": "\n> ⚠️ **Notice:** This documentation is currently a **work in progress**. While it's open to the public for transparency and collaboration, please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!\n\nSecurity is paramount. This section will dive into best practices, guidelines, and insights to ensure your WooCommerce projects remain secure from threats. \n",
@@ -676,13 +670,7 @@
           "id": "c2fde53e1dc3efbded3cfe1fb4df27136a3799a4"
         }
       ],
-      "categories": [
-        {
-          "category_slug": "_media",
-          "category_title": "_media",
-          "categories": []
-        }
-      ]
+      "categories": []
     },
     {
       "content": "\n> ⚠️ **Notice:** This documentation is currently a **work in progress**. While it's open to the public for transparency and collaboration, please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!\n\nThis section will contain step-by-step guides and walkthroughs tailored for both novice and seasoned WooCommerce enthusiasts. Whether it's setting up a new feature or diving into complex customizations, our tutorials will cover a wide range of topics to help you achieve your goals.\n",
@@ -784,13 +772,7 @@
           "id": "e735f919214fed8fa5332d30a5340fd2e6a21169"
         }
       ],
-      "categories": [
-        {
-          "category_slug": "_media",
-          "category_title": "_media",
-          "categories": []
-        }
-      ]
+      "categories": []
     },
     {
       "category_slug": "wc-cli",
@@ -814,5 +796,5 @@
       "categories": []
     }
   ],
-  "hash": "a0e4d6c0ffdfccb2a64936ea9f0542e13ac05304a2cdc5ee297cd741362ba504"
+  "hash": "a055cc49f6aee473c29380b9a36fb50e253ec04431dc41f54687be939927319d"
 }
