@@ -2498,6 +2498,9 @@ importers:
       '@wordpress/element':
         specifier: wp-6.0
         version: 4.4.1
+      '@wordpress/hooks':
+        specifier: wp-6.0
+        version: 3.6.1
       '@wordpress/html-entities':
         specifier: wp-6.0
         version: 3.6.1
