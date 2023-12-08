@@ -60,28 +60,18 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	 * Figures out a source string to use for a log entry based on where the log method was called from.
 	 *
 	 * @return string
-	 * @throws \ReflectionException
 	 */
 	protected function determine_source(): string {
-		// Get the filename of the current logger class.
-		$reflector    = new \ReflectionClass( wc_get_logger() );
-		$logger_file  = $reflector->getFileName();
-		$ignore_files = array( __FILE__, $logger_file );
-
 		$source_roots = array(
 			'mu-plugin' => trailingslashit( Constants::get_constant( 'WPMU_PLUGIN_DIR' ) ),
 			'plugin'    => trailingslashit( Constants::get_constant( 'WP_PLUGIN_DIR' ) ),
 			'theme'     => trailingslashit( get_theme_root() ),
 		);
-		$source       = '';
 
-		$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
+		$source    = '';
+		$backtrace = self::get_backtrace();
 
 		foreach ( $backtrace as $frame ) {
-			if ( ! isset( $frame['file'] ) || in_array( $frame['file'], $ignore_files, true ) ) {
-				continue;
-			}
-
 			foreach ( $source_roots as $type => $path ) {
 				if ( 0 === strpos( $frame['file'], $path ) ) {
 					$relative_path = trim( substr( $frame['file'], strlen( $path ) ), DIRECTORY_SEPARATOR );
