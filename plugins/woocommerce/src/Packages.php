@@ -27,16 +27,15 @@ class Packages {
 	 *
 	 * @var array Key is the package name/directory, value is the main package class which handles init.
 	 */
-	protected static $packages = array(
-	);
+	protected static $packages = array();
 
 	/**
 	 * Array of package names and their main package classes.
-	 * 
+	 *
 	 * One a package has been merged into WooCommerce Core it should be moved fron the package list and placed in
 	 * this list. This will ensure that the feature plugin is disabled as well as provide the class to handle
 	 * initialization for the now-merged feature plugin.
-	 * 
+	 *
 	 * Once a package has been merged into WooCommerce Core it should have its slug added here. This will ensure
 	 * that we deactivate the feature plugin automaticatlly to prevent any problems caused by conflicts between
 	 * the two versions caused by them both being active.
@@ -44,7 +43,7 @@ class Packages {
 	 * @var array Key is the package name/directory, value is the main package class which handles init.
 	 */
 	protected static $merged_packages = array(
-		'woocommerce-admin' => '\\Automattic\\WooCommerce\\Admin\\Composer\\Package',
+		'woocommerce-admin'                    => '\\Automattic\\WooCommerce\\Admin\\Composer\\Package',
 		'woocommerce-gutenberg-products-block' => '\\Automattic\\WooCommerce\\Blocks\\Package',
 	);
 
@@ -64,7 +63,7 @@ class Packages {
 		self::deactivate_merged_packages();
 		self::initialize_packages();
 	}
-	
+
 	/**
 	 * Checks a package exists by looking for it's directory.
 	 *
@@ -110,7 +109,7 @@ class Packages {
 					printf(
 						/* translators: %s: is referring to the plugin's name. */
 						esc_html__( 'The %1$s plugin has been deactivated as the latest improvements are now included with the %2$s plugin.', 'woocommerce' ),
-						'<code>' . $plugin_data[ 'Name' ] . '</code>',
+						'<code>' . esc_html( $plugin_data['Name'] ) . '</code>',
 						'<code>WooCommerce</code>'
 					);
 					echo '</p></div>';
