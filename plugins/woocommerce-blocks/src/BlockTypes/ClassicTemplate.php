@@ -95,6 +95,7 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			return $this->render_single_product();
 		}
 
+		$valid             = false;
 		$archive_templates = array(
 			'archive-product',
 			'taxonomy-product_cat',
@@ -103,7 +104,19 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			ProductSearchResultsTemplate::SLUG,
 		);
 
+		// Set selected template when we directly find template base slug.
 		if ( in_array( $attributes['template'], $archive_templates, true ) ) {
+			$valid = true;
+		}
+
+		// Set selected template when we find template base slug as prefix for a specific term.
+		foreach ( $archive_templates as $template ) {
+			if ( 0 === strpos( $attributes['template'], $template ) ) {
+				$valid = true;
+			}
+		}
+
+		if ( $valid ) {
 			// Set this so that our product filters can detect if it's a PHP template.
 			$this->asset_data_registry->add( 'isRenderingPhpTemplate', true, true );
 
