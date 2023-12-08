@@ -11,14 +11,11 @@ import ChatModal from './chat-modal';
 const WooAIAssistant = () => {
 	const [ isModalOpen, setModalOpen ] = useState( false );
 
-	const handleKeyDown = useCallback(
-		( event ) => {
-			if ( event.altKey && event.shiftKey && event.code === 'KeyW' ) {
-				setModalOpen( ! isModalOpen );
-			}
-		},
-		[ isModalOpen ]
-	);
+	const handleKeyDown = useCallback( ( event ) => {
+		if ( event.altKey && event.shiftKey && event.code === 'KeyW' ) {
+			setModalOpen( ( currentIsModalOpen ) => ! currentIsModalOpen );
+		}
+	}, [] );
 
 	useEffect( () => {
 		window.addEventListener( 'keydown', handleKeyDown );
@@ -30,7 +27,11 @@ const WooAIAssistant = () => {
 	return (
 		<>
 			{ isModalOpen && (
-				<ChatModal onClose={ () => setModalOpen( false ) } />
+				<ChatModal
+					onClose={ () => {
+						setModalOpen( false );
+					} }
+				/>
 			) }
 		</>
 	);

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button, Modal, TextareaControl } from '@wordpress/components';
 import { useDispatch, select } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
@@ -16,6 +16,7 @@ import './index.scss';
 import makeWCRestApiCall from '../utils/wcRestApi';
 import { AudioRecorder } from '../components/audio-recorder';
 import MessageItem from './message-item';
+import recordWooAIAssistantTracks from './utils';
 
 export type Message = {
 	sender: 'user' | 'assistant';
@@ -38,9 +39,41 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ isResponseError, setIsResponseError ] = useState( false );
 	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
 	const { set: setStorageData } = useDispatch( preferencesStore );
+	const startSessionTimeRef = useRef< number >( Date.now() );
 
 	const [ parent ] = useAutoAnimate();
 	const chatMessagesEndRef = React.useRef< HTMLLIElement | null >( null );
+
+	useEffect( () => {
+		console.log( 'ChatModal is mounted' );
+		console.log(
+			'startSessionTimeRef while mounting',
+			startSessionTimeRef.current
+		);
+		// Calculate the session duration based on the component mounting and unmounting (opening and closing modal)
+		return () => {
+			const sessionDurationInSeconds = Math.floor(
+				( Date.now() - startSessionTimeRef.current ) / 1000
+			);
+			if (
+				startSessionTimeRef?.current &&
+				sessionDurationInSeconds > 0
+			) {
+				recordWooAIAssistantTracks( 'session_duration', {
+					session_duration_in_seconds: sessionDurationInSeconds,
+				} );
+				startSessionTimeRef.current = 0;
+			}
+		};
+	}, [] );
+
+	useEffect( () => {
+		// @todo: auto-focus the input field when the component mounts.
+	} );
+
+	useEffect( () => {
+		recordWooAIAssistantTracks( 'open' );
+	}, [] );
 
 	useEffect( () => {
 		if ( chatMessagesEndRef && chatMessagesEndRef.current ) {
@@ -229,6 +262,9 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		}
 		setLoading( true );
 		setAndStoreMessages( input, 'user' );
+		recordWooAIAssistantTracks( 'send_message', {
+			message: input,
+		} );
 		setInput( '' );
 
 		try {

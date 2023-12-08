@@ -10,13 +10,18 @@ import { useAutoAnimate } from '@formkit/auto-animate/react';
  * Internal dependencies
  */
 import { Message } from './chat-modal';
+import recordWooAIAssistantTracks from './utils';
 
 type MessageItemProps = {
 	message: Message;
 	index: number;
 };
 
-type FeedbackType = 'positive' | 'outdated' | 'incorrect' | 'not_answered';
+type FeedbackType =
+	| 'positive'
+	| 'outdated_information'
+	| 'inaccurate_answer'
+	| 'did_not_answer_question';
 
 type FeedbackState = {
 	[ key: number ]: {
@@ -30,28 +35,35 @@ const MessageItem: React.FC< MessageItemProps > = ( { message, index } ) => {
 	const [ feedback, setFeedback ] = useState< FeedbackState >( {} );
 	const [ feedbackButtonsRef ] = useAutoAnimate< HTMLDivElement >();
 
-	const handlePositiveFeedback = ( messageIndex: number ): void => {
+	const handlePositiveFeedback = (): void => {
 		setFeedback( {
 			...feedback,
-			[ messageIndex ]: { type: 'positive', submitted: true },
+			[ index ]: { type: 'positive', submitted: true },
 		} );
-		// Additional logic to send feedback to backend if required
-	};
-
-	const handleNegativeFeedback = ( messageIndex: number ): void => {
-		setFeedback( {
-			...feedback,
-			[ messageIndex ]: { submitted: false, showSpecificFeedback: true },
+		recordWooAIAssistantTracks( 'feedback', {
+			response: 'positive',
+			message: message.text,
 		} );
 	};
 
-	const submitSpecificFeedback = (
+	const handleNegativeFeedback = (): void => {
+		setFeedback( {
+			...feedback,
+			[ index ]: { submitted: false, showSpecificFeedback: true },
+		} );
+	};
+
+	const submitSpecificNegativeFeedback = (
 		messageIndex: number,
 		type: FeedbackType
 	): void => {
 		setFeedback( {
 			...feedback,
 			[ messageIndex ]: { type, submitted: true },
+		} );
+		recordWooAIAssistantTracks( 'feedback', {
+			response: type,
+			message: message.text,
 		} );
 	};
 
@@ -81,7 +93,7 @@ const MessageItem: React.FC< MessageItemProps > = ( { message, index } ) => {
 				icon={ icon }
 				label={ label }
 				className={ `woo-ai-assistant-${ type }-feedback-button` }
-				onClick={ () => handleClick( index ) }
+				onClick={ handleClick }
 				disabled={ isSubmitted }
 			/>
 		);
@@ -116,9 +128,9 @@ const MessageItem: React.FC< MessageItemProps > = ( { message, index } ) => {
 								<Button
 									variant="tertiary"
 									onClick={ () =>
-										submitSpecificFeedback(
+										submitSpecificNegativeFeedback(
 											index,
-											'outdated'
+											'outdated_information'
 										)
 									}
 								>
@@ -127,9 +139,9 @@ const MessageItem: React.FC< MessageItemProps > = ( { message, index } ) => {
 								<Button
 									variant="tertiary"
 									onClick={ () =>
-										submitSpecificFeedback(
+										submitSpecificNegativeFeedback(
 											index,
-											'incorrect'
+											'inaccurate_answer'
 										)
 									}
 								>
@@ -138,9 +150,9 @@ const MessageItem: React.FC< MessageItemProps > = ( { message, index } ) => {
 								<Button
 									variant="tertiary"
 									onClick={ () =>
-										submitSpecificFeedback(
+										submitSpecificNegativeFeedback(
 											index,
-											'not_answered'
+											'did_not_answer_question'
 										)
 									}
 								>
