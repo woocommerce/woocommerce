@@ -231,14 +231,14 @@ class Editor extends Component {
 					<div className="wc-block-all-products__actions">
 						<Button
 							className="wc-block-all-products__done-button"
-							isPrimary
+							variant="primary"
 							onClick={ onDone }
 						>
 							{ __( 'Done', 'woo-gutenberg-products-block' ) }
 						</Button>
 						<Button
 							className="wc-block-all-products__cancel-button"
-							isTertiary
+							variant="tertiary"
 							onClick={ onCancel }
 						>
 							{ __( 'Cancel', 'woo-gutenberg-products-block' ) }

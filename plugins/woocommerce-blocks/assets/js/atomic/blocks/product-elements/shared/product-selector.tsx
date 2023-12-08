@@ -45,7 +45,7 @@ export const ProductSelector = ( {
 							} }
 						/>
 						<Button
-							isSecondary
+							variant="secondary"
 							disabled={ ! productId }
 							onClick={ () => {
 								setIsEditing( false );

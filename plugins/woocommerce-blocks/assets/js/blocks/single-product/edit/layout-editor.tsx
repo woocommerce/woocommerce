@@ -69,7 +69,7 @@ const LayoutEditor = ( {
 								'woo-gutenberg-products-block'
 							) }
 							onClick={ resetInnerBlocks }
-							isTertiary
+							variant="tertiary"
 							className="wc-block-editor-single-product__reset-layout"
 							icon={ backup }
 						>

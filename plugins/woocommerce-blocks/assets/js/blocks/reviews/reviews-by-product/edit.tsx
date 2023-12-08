@@ -146,7 +146,7 @@ const ReviewsByProductEditor = ( {
 						} }
 						renderItem={ renderProductControlItem }
 					/>
-					<Button isPrimary onClick={ onDone }>
+					<Button variant="primary" onClick={ onDone }>
 						{ __( 'Done', 'woo-gutenberg-products-block' ) }
 					</Button>
 				</div>

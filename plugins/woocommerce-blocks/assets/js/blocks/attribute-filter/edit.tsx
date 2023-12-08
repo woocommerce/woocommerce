@@ -348,7 +348,7 @@ const Edit = ( {
 			</p>
 			<Button
 				className="wc-block-attribute-filter__add-attribute-button"
-				isSecondary
+				variant="secondary"
 				href={ getAdminLink(
 					'edit.php?post_type=product&page=product_attributes'
 				) }
@@ -360,7 +360,7 @@ const Edit = ( {
 			</Button>
 			<Button
 				className="wc-block-attribute-filter__read_more_button"
-				isTertiary
+				variant="tertiary"
 				href="https://docs.woocommerce.com/document/managing-product-taxonomies/"
 				target="_blank"
 			>
@@ -397,7 +397,7 @@ const Edit = ( {
 				</div>
 				<div className="wc-block-attribute-filter__selection">
 					{ renderAttributeControl( { isCompact: false } ) }
-					<Button isPrimary onClick={ onDone }>
+					<Button variant="primary" onClick={ onDone }>
 						{ __( 'Done', 'woo-gutenberg-products-block' ) }
 					</Button>
 				</div>

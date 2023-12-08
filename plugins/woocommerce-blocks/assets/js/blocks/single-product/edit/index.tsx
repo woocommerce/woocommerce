@@ -115,7 +115,7 @@ const Editor = ( {
 								setAttributes={ setAttributes }
 							/>
 							<Button
-								isSecondary
+								variant="secondary"
 								onClick={ () => {
 									setIsEditing( false );
 								} }

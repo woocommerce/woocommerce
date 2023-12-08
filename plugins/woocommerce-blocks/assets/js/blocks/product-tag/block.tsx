@@ -219,12 +219,12 @@ const ProductsByTagBlock = ( {
 							} )
 						}
 					/>
-					<Button isPrimary onClick={ onDone }>
+					<Button variant="primary" onClick={ onDone }>
 						{ __( 'Done', 'woo-gutenberg-products-block' ) }
 					</Button>
 					<Button
 						className="wc-block-product-tag__cancel-button"
-						isTertiary
+						variant="tertiary"
 						onClick={ onCancel }
 					>
 						{ __( 'Cancel', 'woo-gutenberg-products-block' ) }
