@@ -2,8 +2,10 @@
  * External dependencies
  */
 
-import { WP_REST_API_Category } from 'wp-types';
-import { ProductResponseItem } from '@woocommerce/types';
+import {
+	ProductResponseItem,
+	ProductCategoryResponseItem,
+} from '@woocommerce/types';
 import { Placeholder, Icon, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
@@ -69,15 +71,14 @@ export const withEditMode =
 					{ description }
 					<div className={ `${ className }__selection` }>
 						{ name === BLOCK_NAMES.featuredCategory && (
-							// Ignoring this TS error for now as it seems that `ProductCategoryControl`
-							// types might be too strict.
-							// @todo Convert `ProductCategoryControl` to TypeScript
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore
 							<ProductCategoryControl
-								selected={ [ attributes.categoryId ] }
+								selected={
+									attributes.categoryId
+										? [ attributes.categoryId ]
+										: []
+								}
 								onChange={ (
-									value: WP_REST_API_Category[] = []
+									value: ProductCategoryResponseItem[] = []
 								) => {
 									const id = value[ 0 ] ? value[ 0 ].id : 0;
 									setAttributes( {
@@ -97,12 +98,6 @@ export const withEditMode =
 										? [ attributes.productId ]
 										: []
 								}
-								// `ProductControl` is not yet a TypeScript file and the types
-								// are incorrectly generated for the wrapped HOC, so `showVariation`
-								// doesn't appear in the allowed props
-								// @todo Convert `ProductControl` to TypeScript
-								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-								// @ts-ignore
 								showVariations
 								onChange={ (
 									value: ProductResponseItem[] = []

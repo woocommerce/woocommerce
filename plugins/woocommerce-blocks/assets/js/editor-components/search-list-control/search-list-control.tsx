@@ -30,13 +30,13 @@ import type {
 	SearchListItem as SearchListItemProps,
 	SearchListControlProps,
 	SearchListMessages,
-	renderItemArgs,
+	RenderItemArgs,
 	ListItemsProps,
 	SearchListItemsContainerProps,
 } from './types';
 import './style.scss';
 
-const defaultRenderListItem = ( args: renderItemArgs ): JSX.Element => {
+const defaultRenderListItem = ( args: RenderItemArgs ): JSX.Element => {
 	return <SearchListItem { ...args } />;
 };
 

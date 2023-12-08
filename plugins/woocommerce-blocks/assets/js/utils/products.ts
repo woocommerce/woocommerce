@@ -2,7 +2,10 @@
  * External dependencies
  */
 import type { SearchListItem } from '@woocommerce/editor-components/search-list-control/types';
-import type { ProductResponseItem } from '@woocommerce/types';
+import type {
+	ProductResponseItem,
+	ProductCategoryResponseItem,
+} from '@woocommerce/types';
 
 /**
  * Converts a Product object into a shape compatible with the `SearchListControl`
@@ -20,6 +23,26 @@ export const convertProductResponseItemToSearchItem = (
 		children: [],
 		details: product,
 		value: product.slug,
+	};
+};
+
+/**
+ * Converts a Product Category object into a shape compatible with the `SearchListControl`
+ */
+export const convertProductCategoryResponseItemToSearchItem = (
+	category: ProductCategoryResponseItem
+): SearchListItem< ProductCategoryResponseItem > => {
+	const { id, name, parent, count } = category;
+
+	return {
+		id,
+		name,
+		parent,
+		count,
+		breadcrumbs: [],
+		children: [],
+		details: category,
+		value: category.slug,
 	};
 };
 

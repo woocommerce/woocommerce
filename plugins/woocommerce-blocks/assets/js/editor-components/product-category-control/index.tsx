@@ -2,47 +2,68 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import {
 	SearchListControl,
 	SearchListItem,
 } from '@woocommerce/editor-components/search-list-control';
 import { SelectControl } from '@wordpress/components';
-import { withCategories } from '@woocommerce/block-hocs';
+import { withSearchedCategories } from '@woocommerce/block-hocs';
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
 import classNames from 'classnames';
+import type { RenderItemArgs } from '@woocommerce/editor-components/search-list-control/types';
+import type {
+	ProductCategoryResponseItem,
+	WithInjectedSearchedCategories,
+} from '@woocommerce/types';
+import { convertProductCategoryResponseItemToSearchItem } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
-/**
- * @param {Object}    props
- * @param {string=}   props.categories
- * @param {boolean=}  props.isLoading
- * @param {string=}   props.error
- * @param {Function}  props.onChange
- * @param {Function=} props.onOperatorChange
- * @param {string=}   props.operator
- * @param {number[]}  props.selected
- * @param {boolean=}  props.isCompact
- * @param {boolean=}  props.isSingle
- * @param {boolean=}  props.showReviewCount
- */
+interface ProductCategoryControlProps {
+	/**
+	 * Callback to update the selected product categories.
+	 */
+	onChange: () => void;
+	/**
+	 * Whether or not the search control should be displayed in a compact way, so it occupies less space.
+	 */
+	isCompact?: boolean;
+	/**
+	 * Allow only a single selection. Defaults to false.
+	 */
+	isSingle?: boolean;
+	/**
+	 * Callback to update the category operator. If not passed in, setting is not used.
+	 */
+	onOperatorChange?: () => void;
+	/**
+	 * Setting for whether products should match all or any selected categories.
+	 */
+	operator?: 'all' | 'any';
+	/**
+	 * Whether or not to display the number of reviews for a category in the list.
+	 */
+	showReviewCount?: boolean;
+}
+
 const ProductCategoryControl = ( {
-	categories,
-	error,
-	isLoading,
+	categories = [],
+	error = null,
+	isLoading = false,
 	onChange,
 	onOperatorChange,
-	operator,
+	operator = 'any',
 	selected,
-	isCompact,
-	isSingle,
+	isCompact = false,
+	isSingle = false,
 	showReviewCount,
-} ) => {
-	const renderItem = ( args ) => {
+}: ProductCategoryControlProps & WithInjectedSearchedCategories ) => {
+	const renderItem = (
+		args: RenderItemArgs< ProductCategoryResponseItem >
+	) => {
 		const { item, search, depth = 0 } = args;
 
 		const accessibleName = ! item.breadcrumbs.length
@@ -55,22 +76,22 @@ const ProductCategoryControl = ( {
 					_n(
 						'%1$s, has %2$d review',
 						'%1$s, has %2$d reviews',
-						item.review_count,
+						item.details?.review_count || 0,
 						'woo-gutenberg-products-block'
 					),
 					accessibleName,
-					item.review_count
+					item.details?.review_count || 0
 			  )
 			: sprintf(
 					/* translators: %1$s is the item name, %2$d is the count of products for the item. */
 					_n(
 						'%1$s, has %2$d product',
 						'%1$s, has %2$d products',
-						item.count,
+						item.details?.count || 0,
 						'woo-gutenberg-products-block'
 					),
 					accessibleName,
-					item.count
+					item.details?.count || 0
 			  );
 
 		const listItemCountLabel = showReviewCount
@@ -79,21 +100,22 @@ const ProductCategoryControl = ( {
 					_n(
 						'%d review',
 						'%d reviews',
-						item.review_count,
+						item.details?.review_count || 0,
 						'woo-gutenberg-products-block'
 					),
-					item.review_count
+					item.details?.review_count || 0
 			  )
 			: sprintf(
 					/* translators: %d is the count of products. */
 					_n(
 						'%d product',
 						'%d products',
-						item.count,
+						item.details?.count || 0,
 						'woo-gutenberg-products-block'
 					),
-					item.count
+					item.details?.count || 0
 			  );
+
 		return (
 			<SearchListItem
 				className={ classNames(
@@ -125,7 +147,7 @@ const ProductCategoryControl = ( {
 			'Search for product categories',
 			'woo-gutenberg-products-block'
 		),
-		selected: ( n ) =>
+		selected: ( n: number ) =>
 			sprintf(
 				/* translators: %d is the count of selected categories. */
 				_n(
@@ -146,17 +168,19 @@ const ProductCategoryControl = ( {
 		return <ErrorMessage error={ error } />;
 	}
 
+	const currentList = categories.map(
+		convertProductCategoryResponseItemToSearchItem
+	);
+
 	return (
 		<>
 			<SearchListControl
 				className="woocommerce-product-categories"
-				list={ categories }
+				list={ currentList }
 				isLoading={ isLoading }
-				selected={ selected
-					.map( ( id ) =>
-						categories.find( ( category ) => category.id === id )
-					)
-					.filter( Boolean ) }
+				selected={ currentList.filter( ( { id } ) =>
+					selected.includes( Number( id ) )
+				) }
 				onChange={ onChange }
 				renderItem={ renderItem }
 				messages={ messages }
@@ -201,34 +225,4 @@ const ProductCategoryControl = ( {
 	);
 };
 
-ProductCategoryControl.propTypes = {
-	/**
-	 * Callback to update the selected product categories.
-	 */
-	onChange: PropTypes.func.isRequired,
-	/**
-	 * Callback to update the category operator. If not passed in, setting is not used.
-	 */
-	onOperatorChange: PropTypes.func,
-	/**
-	 * Setting for whether products should match all or any selected categories.
-	 */
-	operator: PropTypes.oneOf( [ 'all', 'any' ] ),
-	/**
-	 * The list of currently selected category IDs.
-	 */
-	selected: PropTypes.array.isRequired,
-	isCompact: PropTypes.bool,
-	/**
-	 * Allow only a single selection. Defaults to false.
-	 */
-	isSingle: PropTypes.bool,
-};
-
-ProductCategoryControl.defaultProps = {
-	operator: 'any',
-	isCompact: false,
-	isSingle: false,
-};
-
-export default withCategories( ProductCategoryControl );
+export default withSearchedCategories( ProductCategoryControl );

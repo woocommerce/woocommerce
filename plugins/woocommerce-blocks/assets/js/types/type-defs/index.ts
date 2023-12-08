@@ -15,6 +15,7 @@ export * from './objects';
 export * from './payment-method-interface';
 export * from './payments';
 export * from './product-response';
+export * from './product-category-response';
 export * from './shipping';
 export * from './stock-status';
 export * from './taxes';

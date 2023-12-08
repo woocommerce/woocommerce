@@ -8,14 +8,14 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import type { renderItemArgs } from '../search-list-control/types';
+import type { RenderItemArgs } from '../search-list-control/types';
 
 export const ProductTagItem = ( {
 	item,
 	search,
 	depth = 0,
 	...rest
-}: renderItemArgs ): JSX.Element => {
+}: RenderItemArgs ): JSX.Element => {
 	const accessibleName = ! item.breadcrumbs.length
 		? item.name
 		: `${ item.breadcrumbs.join( ', ' ) }, ${ item.name }`;

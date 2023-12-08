@@ -11,7 +11,7 @@ import { decodeEntities } from '@wordpress/html-entities';
  * Internal dependencies
  */
 import type {
-	renderItemArgs,
+	RenderItemArgs,
 	SearchListItem as SearchListItemProps,
 } from './types';
 import { getHighlightedName, getBreadcrumbsForDisplay } from './utils';
@@ -53,7 +53,7 @@ export const SearchListItem = < T extends object = object >( {
 	selected,
 	useExpandedPanelId,
 	...props
-}: renderItemArgs< T > ): JSX.Element => {
+}: RenderItemArgs< T > ): JSX.Element => {
 	const [ expandedPanelId, setExpandedPanelId ] = useExpandedPanelId;
 	const showCount =
 		countLabel !== undefined &&

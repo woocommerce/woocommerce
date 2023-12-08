@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
-import type { ProductResponseItem } from '@woocommerce/types';
+import type {
+	ProductResponseItem,
+	ProductCategoryResponseItem,
+} from '@woocommerce/types';
 
 export interface WithInjectedProductVariations {
 	error: ErrorObject | null;
@@ -19,6 +22,13 @@ export interface WithInjectedSearchedProducts {
 	isLoading: boolean;
 	onSearch: ( ( search: string ) => void ) | null;
 	products: ProductResponseItem[];
+	selected: number[];
+}
+
+export interface WithInjectedSearchedCategories {
+	error: ErrorObject | null;
+	isLoading: boolean;
+	categories: ProductCategoryResponseItem[];
 	selected: number[];
 }
 

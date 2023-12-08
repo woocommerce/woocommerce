@@ -25,7 +25,7 @@ interface SearchListProps< T extends object = object > {
 	// A complete list of item objects, each with id, name properties. This is displayed as a clickable/keyboard-able list, and possibly filtered by the search term (searches name).
 	list: SearchListItem< T >[];
 	// Callback to render each item in the selection list, allows any custom object-type rendering.
-	renderItem?: ( args: renderItemArgs< T > ) => JSX.Element;
+	renderItem?: ( args: RenderItemArgs< T > ) => JSX.Element;
 	// The list of currently selected items.
 	selected: SearchListItem< T >[];
 }
@@ -70,7 +70,7 @@ export interface SearchListMessages {
 	updated: string;
 }
 
-export interface renderItemArgs< T extends object = object >
+export interface RenderItemArgs< T extends object = object >
 	extends ItemProps,
 		Partial<
 			Omit<
@@ -113,7 +113,7 @@ export interface SearchListControlProps< T extends object = object > {
 	isHierarchical?: boolean;
 	// Whether the list of items is still loading.
 	isLoading?: boolean;
-	//Restrict selections to one item.
+	// Restrict selections to one item.
 	isSingle: boolean;
 	// A complete list of item objects, each with id, name properties. This is displayed as a clickable/keyboard-able list, and possibly filtered by the search term (searches name).
 	list: SearchListItem< T >[];
@@ -125,7 +125,7 @@ export interface SearchListControlProps< T extends object = object > {
 	onSearch?: ( ( search: string ) => void ) | undefined;
 	// Callback to render each item in the selection list, allows any custom object-type rendering.
 	renderItem?:
-		| ( ( args: renderItemArgs< T > ) => JSX.Element | null )
+		| ( ( args: RenderItemArgs< T > ) => JSX.Element | null )
 		| undefined;
 	// The list of currently selected items.
 	selected: SearchListItem< T >[];

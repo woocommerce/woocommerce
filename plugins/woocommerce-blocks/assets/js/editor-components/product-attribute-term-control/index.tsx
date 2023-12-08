@@ -13,7 +13,7 @@ import useProductAttributes from '@woocommerce/base-context/hooks/use-product-at
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
 import ExpandableSearchListItem from '@woocommerce/editor-components/expandable-search-list-item/expandable-search-list-item';
 import {
-	renderItemArgs,
+	RenderItemArgs,
 	SearchListControlProps,
 	SearchListItem as SearchListItemProps,
 } from '@woocommerce/editor-components/search-list-control/types';
@@ -54,7 +54,7 @@ const ProductAttributeTermControl = ( {
 	const { errorLoadingAttributes, isLoadingAttributes, productsAttributes } =
 		useProductAttributes( true );
 
-	const renderItem = ( args: renderItemArgs ) => {
+	const renderItem = ( args: RenderItemArgs ) => {
 		const { item, search, depth = 0 } = args;
 		const count = item.count || 0;
 		const classes = [
