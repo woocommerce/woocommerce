@@ -103,6 +103,7 @@
 					$( document.body ).on( 'wc_region_picker_update', this.onUpdateZoneRegionPicker );
 					$( document.body ).on( 'wc_backbone_modal_next_response', this.onAddShippingMethodSubmitted );
 					$( document.body ).on( 'wc_backbone_modal_before_remove', this.onCloseConfigureShippingMethod );
+					$( document.body ).on( 'wc_backbone_modal_response_back', this.onConfigureShippingMethodBack );
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
 					$( document.body ).on( 'wc_backbone_modal_validation', { view: this }, this.validateFormArguments );
@@ -380,6 +381,11 @@
 							},
 							'json'
 						);
+					}
+				},
+				onConfigureShippingMethodBack: function( event, target ) {
+					if ( 'wc-modal-shipping-method-settings' === target ) {
+						shippingMethodView.onAddShippingMethod( event );
 					}
 				},
 				showErrors: function( errors ) {
