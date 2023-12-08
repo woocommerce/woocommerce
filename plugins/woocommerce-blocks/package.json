@@ -279,7 +279,7 @@
 		"@wordpress/server-side-render": "3.10.0",
 		"@wordpress/style-engine": "^1.15.0",
 		"@wordpress/url": "3.13.0",
-		"@wordpress/wordcount": "3.13.0",
+		"@wordpress/wordcount": "3.47.0",
 		"change-case": "^4.1.2",
 		"classnames": "2.3.1",
 		"compare-versions": "4.1.3",
