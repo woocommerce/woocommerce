@@ -60,7 +60,7 @@ module.exports = {
 	transform: {
 		'^.+\\is-plain-obj/index\\.js$': 'babel-jest',
 		'^.+\\memize/dist/index\\.js$': 'babel-jest',
-		'^.+\\.[jt]sx?$': 'babel-jest',
+		'^.+\\.[jt]sx?$': 'ts-jest',
 	},
 	testEnvironment: 'jest-environment-jsdom',
 	timers: 'modern',
