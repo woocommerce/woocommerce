@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b6acb0cb84f1203222c10e9a337f2963",
+    "content-hash": "3dbbf6613e191c5f595184e03bff2d91",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -3875,6 +3875,34 @@
                 "source": "https://github.com/wikimedia/at-ease/tree/v2.1.0"
             },
             "time": "2021-02-27T15:53:37+00:00"
+        },
+        {
+            "name": "woocommerce/monorepo-plugin",
+            "version": "dev-add/feature-plugin-disable",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/php/monorepo-plugin",
+                "reference": "77919ca36196034975a1dac1a670f73731cdf4ac"
+            },
+            "require": {
+                "composer-plugin-api": "^2.0"
+            },
+            "require-dev": {
+                "composer/composer": "^2.0",
+                "wp-coding-standards/wpcs": "^3.0"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Automattic\\WooCommerce\\Monorepo\\Composer\\Plugin"
+            },
+            "autoload": {
+                "psr-4": {
+                    "Automattic\\WooCommerce\\Monorepo\\Composer\\": "src/"
+                }
+            },
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "yoast/phpunit-polyfills",
