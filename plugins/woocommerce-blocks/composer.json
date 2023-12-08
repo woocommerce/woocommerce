@@ -21,7 +21,7 @@
 		"automattic/jetpack-config": "^1.15"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "9.6.13",
+		"phpunit/phpunit": "9.6.15",
 		"phpunit/php-code-coverage": "9.2.29",
 		"woocommerce/woocommerce-sniffs": "0.1.3",
 		"phpdocumentor/reflection": "3.0.1",
