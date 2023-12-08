@@ -17,7 +17,7 @@
 		"ext-json": "*",
 		"composer/installers": "^1.7.0",
 		"automattic/jetpack-autoloader": "^2.11",
-		"automattic/jetpack-connection": "^1.57",
+		"automattic/jetpack-connection": "^2.1",
 		"automattic/jetpack-config": "^1.15"
 	},
 	"require-dev": {
