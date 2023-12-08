@@ -35,6 +35,7 @@ async function processDirectory(
 	baseUrl: string,
 	baseEditUrl: string,
 	fullPathToDocs: string,
+	exclude: string[],
 	checkReadme = true
 ): Promise< Category > {
 	const category: Category = {};
@@ -63,8 +64,11 @@ async function processDirectory(
 		category.category_title = category.category_title ?? categoryTitle;
 	}
 
-	const markdownFiles = glob.sync( path.join( subDirectory, '*.md' ) );
-
+	const markdownFiles = glob
+		.sync( path.join( subDirectory, '*.md' ) )
+		.filter(
+			( markdownFile ) => ! filenameMatches( markdownFile, exclude )
+		);
 	// If there are markdown files in this directory, add a posts array to the category. Otherwise, assume its a top level category that will contain subcategories.
 	if ( markdownFiles.length > 0 ) {
 		category.posts = [];
@@ -115,6 +119,9 @@ async function processDirectory(
 	const subdirectories = fs
 		.readdirSync( subDirectory, { withFileTypes: true } )
 		.filter( ( dirent ) => dirent.isDirectory() )
+		.filter(
+			( dirent ) => ! filenameMatches( dirent.name, exclude )
+		)
 		.map( ( dirent ) => path.join( subDirectory, dirent.name ) );
 	for ( const subdirectory of subdirectories ) {
 		const subcategory = await processDirectory(
@@ -123,7 +130,8 @@ async function processDirectory(
 			projectName,
 			baseUrl,
 			baseEditUrl,
-			fullPathToDocs
+			fullPathToDocs,
+			exclude
 		);
 
 		category.categories.push( subcategory );
@@ -140,6 +148,17 @@ export async function generateManifestFromDirectory(
 	baseEditUrl: string
 ) {
 	const fullPathToDocs = subDirectory;
+	const manifestIgnore = path.join( subDirectory, '.manifestignore' );
+	let ignoreList;
+
+	if ( fs.existsSync( manifestIgnore ) ) {
+		ignoreList = fs
+			.readFileSync( manifestIgnore, 'utf-8' )
+			.split( "\n" )
+			.map( ( item ) => item.trim() )
+			.filter( ( item ) => item.length > 0 )
+			.filter( ( item ) => item.substring( 0, 1 ) != '#' );
+	}
 
 	const manifest = await processDirectory(
 		rootDirectory,
@@ -148,6 +167,7 @@ export async function generateManifestFromDirectory(
 		baseUrl,
 		baseEditUrl,
 		fullPathToDocs,
+		ignoreList ?? [],
 		false
 	);
 
@@ -158,4 +178,12 @@ export async function generateManifestFromDirectory(
 		.digest( 'hex' );
 
 	return { ...manifest, hash };
+}
+
+function filenameMatches(
+	filename: string,
+	hayStack: string[]
+) {
+	const found = hayStack.filter( ( item ) => filename.match( item ) );
+	return found.length > 0;
 }
