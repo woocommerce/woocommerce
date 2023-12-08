@@ -9,7 +9,7 @@ import {
 } from '@woocommerce/editor-components/search-list-control';
 import type {
 	SearchListControlProps,
-	renderItemArgs,
+	RenderItemArgs,
 } from '@woocommerce/editor-components/search-list-control/types';
 import { withInstanceId } from '@wordpress/compose';
 import {
@@ -38,6 +38,9 @@ interface ProductControlProps {
 	 * Callback to update the selected products.
 	 */
 	onChange: () => void;
+	/**
+	 * Whether or not the search control should be displayed in a compact way, so it occupies less space.
+	 */
 	isCompact?: boolean;
 	/**
 	 * The ID of the currently expanded product.
@@ -100,7 +103,7 @@ const ProductControl = (
 	} = props;
 
 	const renderItemWithVariations = (
-		args: renderItemArgs< ProductResponseItem >
+		args: RenderItemArgs< ProductResponseItem >
 	) => {
 		const { item, search, depth = 0, isSelected, onSelect } = args;
 		const variationsCount =

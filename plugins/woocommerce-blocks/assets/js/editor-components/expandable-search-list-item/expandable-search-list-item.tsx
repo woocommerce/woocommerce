@@ -3,10 +3,10 @@
  */
 import { Spinner } from '@wordpress/components';
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control';
-import { renderItemArgs } from '@woocommerce/editor-components/search-list-control/types';
+import { RenderItemArgs } from '@woocommerce/editor-components/search-list-control/types';
 import classNames from 'classnames';
 
-interface ExpandableSearchListItemProps extends renderItemArgs {
+interface ExpandableSearchListItemProps extends RenderItemArgs {
 	isLoading: boolean;
 }
 
