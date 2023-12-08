@@ -444,7 +444,7 @@ test.describe( 'Checkout page', () => {
 			.last()
 			.locator( 'td' )
 			.textContent();
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
