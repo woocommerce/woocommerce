@@ -28,6 +28,11 @@ export function generatePostId( filePath: string, prefix = '' ) {
 	return hash.digest( 'hex' );
 }
 
+function filenameMatches( filename: string, hayStack: string[] ) {
+	const found = hayStack.filter( ( item ) => filename.match( item ) );
+	return found.length > 0;
+}
+
 async function processDirectory(
 	rootDirectory: string,
 	subDirectory: string,
@@ -119,9 +124,7 @@ async function processDirectory(
 	const subdirectories = fs
 		.readdirSync( subDirectory, { withFileTypes: true } )
 		.filter( ( dirent ) => dirent.isDirectory() )
-		.filter(
-			( dirent ) => ! filenameMatches( dirent.name, exclude )
-		)
+		.filter( ( dirent ) => ! filenameMatches( dirent.name, exclude ) )
 		.map( ( dirent ) => path.join( subDirectory, dirent.name ) );
 	for ( const subdirectory of subdirectories ) {
 		const subcategory = await processDirectory(
@@ -154,10 +157,10 @@ export async function generateManifestFromDirectory(
 	if ( fs.existsSync( manifestIgnore ) ) {
 		ignoreList = fs
 			.readFileSync( manifestIgnore, 'utf-8' )
-			.split( "\n" )
+			.split( '\n' )
 			.map( ( item ) => item.trim() )
 			.filter( ( item ) => item.length > 0 )
-			.filter( ( item ) => item.substring( 0, 1 ) != '#' );
+			.filter( ( item ) => item.substring( 0, 1 ) !== '#' );
 	}
 
 	const manifest = await processDirectory(
@@ -178,12 +181,4 @@ export async function generateManifestFromDirectory(
 		.digest( 'hex' );
 
 	return { ...manifest, hash };
-}
-
-function filenameMatches(
-	filename: string,
-	hayStack: string[]
-) {
-	const found = hayStack.filter( ( item ) => filename.match( item ) );
-	return found.length > 0;
 }
