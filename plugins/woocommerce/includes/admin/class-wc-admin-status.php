@@ -360,14 +360,7 @@ class WC_Admin_Status {
 			wp_die( esc_html__( 'You do not have permission to manage log entries.', 'woocommerce' ) );
 		}
 
-		$log_ids = filter_input(
-			INPUT_GET,
-			'log',
-			FILTER_CALLBACK,
-			array(
-				'options' => fn( $log ) => absint( $log ),
-			)
-		);
+		$log_ids = (array) filter_input( INPUT_GET, 'log', FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY );
 
 		$action = self::get_db_log_list_table()->current_action();
 
