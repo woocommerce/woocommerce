@@ -1661,7 +1661,7 @@ add_action( 'wc_update_product_lookup_tables_rating_count_batch', 'wc_update_pro
 /**
  * Attach product featured image. Use image filename to match a product sku when product is not provided.
  *
- * @since 8.3.0
+ * @since 8.5.0
  * @param int        $attachment_id Media attachment ID.
  * @param WC_Product $product Optional product object.
  * @return void
