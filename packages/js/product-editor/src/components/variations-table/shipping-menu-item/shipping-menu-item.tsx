@@ -51,7 +51,7 @@ export function ShippingMenuItem( {
 		<Dropdown
 			// @ts-expect-error missing prop in types.
 			popoverProps={ {
-				position: 'middle right',
+				placement: 'right-start',
 			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<MenuItem
