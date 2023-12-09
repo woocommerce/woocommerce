@@ -71,9 +71,7 @@
 		"package-plugin:dev": "rimraf woocommerce-gutenberg-products-block.zip && ./bin/build-plugin-zip.sh -d",
 		"package-plugin:zip-only": "rimraf woocommerce-gutenberg-products-block.zip && ./bin/build-plugin-zip.sh -z",
 		"package-plugin:deploy": "npm run build:deploy && npm run package-plugin:zip-only",
-		"postinstall": "patch-package",
 		"pre-commit": "lint-staged",
-		"prepare": "husky install",
 		"reformat-files": "prettier --ignore-path .eslintignore --write \"**/*.{js,jsx,json,ts,tsx}\"",
 		"release": "sh ./bin/wordpress-deploy.sh",
 		"rimraf": "./node_modules/rimraf/bin.js",
@@ -258,8 +256,8 @@
 		"zenhub-api": "0.2.0"
 	},
 	"engines": {
-		"node": "^16.13.0",
-		"npm": "^8.0.0"
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.0.5",
