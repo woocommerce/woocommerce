@@ -27,7 +27,7 @@
 	"sideEffects": false,
 	"dependencies": {
 		"@jest/globals": "^27.5.1",
-		"@types/jest": "^27.4.1",
+		"@types/jest": "^27.5.2",
 		"@woocommerce/e2e-utils": "workspace:*",
 		"config": "3.3.7"
 	},
@@ -37,20 +37,20 @@
 		"puppeteer": "^2.0.0"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.17.5",
+		"@babel/core": "^7.23.5",
 		"@types/config": "0.0.41",
 		"@types/expect-puppeteer": "^4.4.7",
-		"@types/puppeteer": "^5.4.5",
-		"@typescript-eslint/eslint-plugin": "^5.54.0",
+		"@types/puppeteer": "^5.4.7",
+		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@woocommerce/api": "^0.2.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.32.0",
+		"eslint": "^8.55.0",
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
 		"jest-mock-extended": "^1.0.18",
 		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
-		"typescript": "^5.1.6"
+		"typescript": "^5.3.3"
 	},
 	"publishConfig": {
 		"access": "public"
