@@ -130,6 +130,7 @@ const useLogoEdit = ( {
 
 	const { createErrorNotice } = useDispatch( noticesStore );
 	const onUploadError = ( message: string ) => {
+		// @ts-expect-error The types for this are wrong.
 		createErrorNotice( message, { type: 'snackbar' } );
 	};
 
