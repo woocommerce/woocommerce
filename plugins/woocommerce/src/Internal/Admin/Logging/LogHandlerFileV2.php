@@ -31,9 +31,11 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	 * @param string $level     emergency|alert|critical|error|warning|notice|info|debug.
 	 * @param string $message   Log message.
 	 * @param array  $context   {
-	 *     Optional. Additional information for log handlers.
+	 *     Optional. Additional information for log handlers. Any data can be added here, but there are some array
+	 *     keys that have special behavior:
 	 *
-	 *     @type string $source Optional. Determines which log file to write to.
+	 *     @type string $source    Determines which log file to write to. Must be at least 3 characters in length.
+	 *     @type bool   $backtrace True to include a backtrace that shows where the logging function got called.
 	 * }
 	 *
 	 * @return bool False if value was not handled and true if value was handled.
@@ -54,6 +56,48 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		}
 
 		return $written;
+	}
+
+	/**
+	 * Builds a log entry text from level, timestamp, and message.
+	 *
+	 * @param int    $timestamp Log timestamp.
+	 * @param string $level     emergency|alert|critical|error|warning|notice|info|debug.
+	 * @param string $message   Log message.
+	 * @param array  $context   Additional information for log handlers.
+	 *
+	 * @return string Formatted log entry.
+	 */
+	protected static function format_entry( $timestamp, $level, $message, $context ) {
+		$time_string  = self::format_time( $timestamp );
+		$level_string = strtoupper( $level );
+
+		// Remove line breaks so the whole entry is on one line in the file.
+		$formatted_message = str_replace( PHP_EOL, ' ', $message );
+
+		unset( $context['source'] );
+		if ( ! empty( $context ) ) {
+			if ( isset( $context['backtrace'] ) && true === filter_var( $context['backtrace'], FILTER_VALIDATE_BOOLEAN ) ) {
+				$context['backtrace'] = self::get_backtrace();
+			}
+
+			$formatted_context = wp_json_encode( $context );
+			$formatted_message .= " CONTEXT: $formatted_context";
+		}
+
+		$entry = "$time_string $level_string $formatted_message";
+
+		/** This filter is documented in includes/abstracts/abstract-wc-log-handler.php */
+		return apply_filters(
+			'woocommerce_format_log_entry',
+			$entry,
+			array(
+				'timestamp' => $timestamp,
+				'level'     => $level,
+				'message'   => $message,
+				'context'   => $context,
+			)
+		);
 	}
 
 	/**

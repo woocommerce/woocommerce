@@ -570,14 +570,17 @@ class PageController {
 			$line = '&nbsp;';
 		}
 
-		$segments = explode( ' ', $line, 3 );
+		$segments      = explode( ' ', $line, 3 );
+		$has_timestamp = false;
+		$has_level     = false;
 
 		if ( isset( $segments[0] ) && false !== strtotime( $segments[0] ) ) {
-			$classes[]   = 'log-entry';
-			$segments[0] = sprintf(
+			$classes[]     = 'log-entry';
+			$segments[0]   = sprintf(
 				'<span class="log-timestamp">%s</span>',
 				$segments[0]
 			);
+			$has_timestamp = true;
 		}
 
 		if ( isset( $segments[1] ) && in_array( strtolower( $segments[1] ), $severity_levels, true ) ) {
@@ -586,6 +589,28 @@ class PageController {
 				esc_attr( 'log-level log-level--' . strtolower( $segments[1] ) ),
 				esc_html( $segments[1] )
 			);
+			$has_level   = true;
+		}
+
+		if ( isset( $segments[2] ) && $has_timestamp && $has_level ) {
+			$message_chunks = explode( 'CONTEXT:', $segments[2], 2 );
+			if ( isset( $message_chunks[1] ) ) {
+				try {
+					$maybe_json = stripslashes( html_entity_decode( trim( $message_chunks[1] ) ) );
+					$context    = json_decode( $maybe_json, false, 512, JSON_THROW_ON_ERROR );
+
+					$message_chunks[1] = sprintf(
+						'<details><summary>%1$s</summary><pre>%2$s</pre></details>',
+						esc_html__( 'Additional context', 'woocommerce' ),
+						wp_json_encode( $context, JSON_PRETTY_PRINT )
+					);
+
+					$segments[2] = implode( ' ', $message_chunks );
+					$classes[]   = 'has-context';
+				} catch ( \JsonException $exception ) {
+					// It's not valid JSON so don't do anything with it.
+				}
+			}
 		}
 
 		if ( count( $segments ) > 1 ) {
