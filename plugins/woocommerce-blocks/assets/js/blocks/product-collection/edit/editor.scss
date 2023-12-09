@@ -1,0 +1,26 @@
+.wc-block-editor-product-collection-inspector-toolspanel__filters {
+	.wc-block-editor-product-collection-inspector__taxonomy-control:not(:last-child) {
+		margin-bottom: $grid-unit-30;
+	}
+}
+
+.wc-block-editor-product-collection__display-settings {
+	.components-popover__content {
+		min-width: 230px;
+	}
+}
+
+.wc-blocks-product-collection__selection-modal {
+	.block-editor-block-patterns-list {
+		column-count: 3;
+		column-gap: $grid-unit-30;
+
+		@include breakpoint("<1280px") {
+			column-count: 2;
+		}
+
+		@include breakpoint("<782px") {
+			column-count: 1;
+		}
+	}
+}
