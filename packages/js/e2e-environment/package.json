@@ -27,30 +27,30 @@
 	"dependencies": {
 		"@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
 		"@jest/test-sequencer": "^27.5.1",
-		"@slack/web-api": "^6.1.0",
+		"@slack/web-api": "^6.10.0",
 		"@woocommerce/api": "^0.2.0",
 		"@wordpress/e2e-test-utils": "^4.16.1",
 		"@wordpress/jest-preset-default": "^7.1.3",
-		"app-root-path": "^3.0.0",
+		"app-root-path": "^3.1.0",
 		"commander": "4.1.1",
 		"config": "3.3.7",
 		"jest": "~27.5.1",
 		"jest-circus": "27.5.1",
 		"jest-each": "27.5.1",
 		"jest-puppeteer": "^5.0.4",
-		"node-stream-zip": "^1.13.6",
+		"node-stream-zip": "^1.15.0",
 		"puppeteer": "2.1.1",
 		"readline-sync": "^1.4.10",
 		"request": "^2.88.2",
-		"sprintf-js": "^1.1.2"
+		"sprintf-js": "^1.1.3"
 	},
 	"devDependencies": {
 		"@babel/cli": "7.12.8",
 		"@babel/core": "7.12.9",
-		"@babel/plugin-proposal-async-generator-functions": "^7.16.4",
-		"@babel/plugin-proposal-object-rest-spread": "^7.16.0",
-		"@babel/plugin-transform-react-jsx": "^7.16.0",
-		"@babel/plugin-transform-runtime": "^7.16.4",
+		"@babel/plugin-proposal-async-generator-functions": "^7.20.7",
+		"@babel/plugin-proposal-object-rest-spread": "^7.20.7",
+		"@babel/plugin-transform-react-jsx": "^7.23.4",
+		"@babel/plugin-transform-runtime": "^7.23.4",
 		"@babel/polyfill": "7.12.1",
 		"@babel/preset-env": "7.12.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
@@ -59,7 +59,7 @@
 		"@wordpress/babel-preset-default": "3.0.2",
 		"@wordpress/browserslist-config": "wp-6.3",
 		"ndb": "^1.1.5",
-		"semver": "^7.3.2"
+		"semver": "^7.5.4"
 	},
 	"publishConfig": {
 		"access": "public"

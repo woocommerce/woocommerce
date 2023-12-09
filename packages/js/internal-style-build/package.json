@@ -26,9 +26,9 @@
 		"@wordpress/base-styles": "wp-6.3",
 		"@wordpress/postcss-plugins-preset": "wp-6.0",
 		"css-loader": "^3.6.0",
-		"mini-css-extract-plugin": "^2.6.0",
+		"mini-css-extract-plugin": "^2.7.6",
 		"postcss-loader": "^4.3.0",
-		"sass-loader": "^10.2.1",
+		"sass-loader": "^10.5.0",
 		"webpack-remove-empty-scripts": "^0.7.3",
 		"webpack-rtl-plugin": "^2.0.0"
 	},
@@ -38,15 +38,15 @@
 	},
 	"private": true,
 	"devDependencies": {
-		"@babel/core": "^7.17.5",
+		"@babel/core": "^7.23.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.32.0",
+		"eslint": "^8.55.0",
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
 		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
-		"typescript": "^5.1.6",
-		"webpack": "^5.70.0"
+		"typescript": "^5.3.3",
+		"webpack": "^5.89.0"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

@@ -11,7 +11,7 @@
 		"start": "nodemon --watch js --watch css -e js,scss --exec pnpm build"
 	},
 	"devDependencies": {
-		"@types/node": "^16.18.18",
+		"@types/node": "^16.18.68",
 		"@wordpress/stylelint-config": "19.1.0",
 		"autoprefixer": "9.8.6",
 		"browserslist": "4.19.3",
@@ -31,8 +31,8 @@
 		"grunt-sass": "3.1.0",
 		"grunt-stylelint": "0.16.0",
 		"gruntify-eslint": "5.0.0",
-		"nodemon": "^2.0.21",
-		"sass": "^1.45.0",
+		"nodemon": "^2.0.22",
+		"sass": "^1.69.5",
 		"stylelint": "13.8.0"
 	},
 	"dependencies": {

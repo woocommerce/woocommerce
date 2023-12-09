@@ -48,17 +48,17 @@
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.17.5",
-		"@types/jest": "^27.4.1",
+		"@babel/core": "^7.23.5",
+		"@types/jest": "^27.5.2",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"concurrently": "^7.0.0",
-		"eslint": "^8.32.0",
+		"concurrently": "^7.6.0",
+		"eslint": "^8.55.0",
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
 		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
-		"typescript": "^5.1.6"
+		"typescript": "^5.3.3"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

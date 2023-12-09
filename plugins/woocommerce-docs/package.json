@@ -20,24 +20,24 @@
 		"@wordpress/api-fetch": "wp-6.3",
 		"@wordpress/components": "wp-6.3",
 		"directory-tree": "^3.5.1",
-		"glob": "^10.2.7",
+		"glob": "^10.3.10",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
 	},
 	"devDependencies": {
-		"@types/node": "^16.18.18",
-		"@types/react": "^17.0.2",
-		"@types/react-dom": "^17.0.2",
+		"@types/node": "^16.18.68",
+		"@types/react": "^17.0.71",
+		"@types/react-dom": "^17.0.25",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/env": "^8.2.0",
+		"@wordpress/env": "^8.13.0",
 		"@wordpress/prettier-config": "2.17.0",
-		"@wordpress/scripts": "^26.4.0",
-		"eslint": "^8.32.0",
+		"@wordpress/scripts": "^26.18.0",
+		"eslint": "^8.55.0",
 		"gray-matter": "^4.0.3",
-		"prettier": "npm:wp-prettier@^2.6.2",
-		"ts-loader": "^9.4.1",
-		"ts-node": "^10.9.1",
-		"typescript": "^5.1.6"
+		"prettier": "npm:wp-prettier@^2.8.5",
+		"ts-loader": "^9.5.1",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.3.3"
 	}
 }

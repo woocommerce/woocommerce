@@ -33,9 +33,9 @@
 		"utils": "node ./tools/monorepo-utils/dist/index.js"
 	},
 	"devDependencies": {
-		"@babel/preset-env": "^7.20.2",
-		"@babel/runtime": "^7.21.0",
-		"@types/node": "^16.18.18",
+		"@babel/preset-env": "^7.23.5",
+		"@babel/runtime": "^7.23.5",
+		"@types/node": "^16.18.68",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/data": "wp-6.3",
 		"@wordpress/eslint-plugin": "14.7.0",
@@ -43,8 +43,8 @@
 		"babel-loader": "^8.3.0",
 		"chalk": "^4.1.2",
 		"copy-webpack-plugin": "^10.2.4",
-		"core-js": "^3.29.1",
-		"css-loader": "^6.7.3",
+		"core-js": "^3.34.0",
+		"css-loader": "^6.8.1",
 		"glob": "^7.2.3",
 		"husky": "^7.0.4",
 		"jest": "~27.5.1",
@@ -56,13 +56,13 @@
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"regenerator-runtime": "^0.13.11",
 		"request": "^2.88.2",
-		"sass": "^1.59.3",
-		"sass-loader": "^10.4.1",
-		"syncpack": "^10.7.3",
-		"turbo": "^1.10.7",
-		"typescript": "^5.1.6",
+		"sass": "^1.69.5",
+		"sass-loader": "^10.5.0",
+		"syncpack": "^10.9.3",
+		"turbo": "^1.11.1",
+		"typescript": "^5.3.3",
 		"url-loader": "^1.1.2",
-		"webpack": "^5.76.2"
+		"webpack": "^5.89.0"
 	},
 	"dependencies": {
 		"@babel/core": "7.12.9",

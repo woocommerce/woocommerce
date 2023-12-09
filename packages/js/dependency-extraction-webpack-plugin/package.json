@@ -22,21 +22,21 @@
 	},
 	"main": "src/index.js",
 	"dependencies": {
-		"@wordpress/dependency-extraction-webpack-plugin": "^3.3.0"
+		"@wordpress/dependency-extraction-webpack-plugin": "^3.7.0"
 	},
 	"publishConfig": {
 		"access": "public"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.17.5",
+		"@babel/core": "^7.23.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.32.0",
+		"eslint": "^8.55.0",
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
 		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
-		"typescript": "^5.1.6",
-		"webpack": "^5.70.0",
+		"typescript": "^5.3.3",
+		"webpack": "^5.89.0",
 		"webpack-cli": "^3.3.12"
 	},
 	"scripts": {
