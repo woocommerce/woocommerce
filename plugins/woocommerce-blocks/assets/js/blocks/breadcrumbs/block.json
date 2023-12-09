@@ -5,7 +5,7 @@
 	"description": "Enable customers to keep track of their location within the store and navigate back to parent pages.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
-	"textdomain": "woo-gutenberg-products-block",
+	"textdomain": "woocommerce",
 	"attributes": {
 		"contentJustification": {
 			"type": "string"

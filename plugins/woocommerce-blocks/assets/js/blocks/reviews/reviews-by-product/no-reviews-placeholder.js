@@ -31,7 +31,7 @@ const NoReviewsPlaceholder = ( { error, getProduct, isLoading, product } ) => {
 				/* translators: %s is the product name. */
 				__(
 					"This block lists reviews for a selected product. %s doesn't have any reviews yet, but they will show up here when it does.",
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				decodeEntities( product.name )
 			)
@@ -46,7 +46,7 @@ const NoReviewsPlaceholder = ( { error, getProduct, isLoading, product } ) => {
 					className="block-editor-block-icon"
 				/>
 			}
-			label={ __( 'Reviews by Product', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Reviews by Product', 'woocommerce' ) }
 		>
 			{ content }
 		</Placeholder>

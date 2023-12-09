@@ -10,17 +10,17 @@ export const previewReviews = [
 		date_created: '2019-07-15T17:05:04',
 		formatted_date_created: __(
 			'July 15, 2019',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		date_created_gmt: '2019-07-15T15:05:04',
 		product_id: 0,
-		product_name: __( 'WordPress Pennant', 'woo-gutenberg-products-block' ),
+		product_name: __( 'WordPress Pennant', 'woocommerce' ),
 		product_permalink: '#',
 		/* translators: An example person name used for the block previews. */
-		reviewer: __( 'Alice', 'woo-gutenberg-products-block' ),
+		reviewer: __( 'Alice', 'woocommerce' ),
 		review: `<p>${ __(
 			"I bought this product last week and I'm very happy with it.",
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }</p>\n`,
 		reviewer_avatar_urls: {
 			48: blocksConfig.defaultAvatar,
@@ -34,17 +34,17 @@ export const previewReviews = [
 		date_created: '2019-07-12T12:39:39',
 		formatted_date_created: __(
 			'July 12, 2019',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		date_created_gmt: '2019-07-12T10:39:39',
 		product_id: 0,
-		product_name: __( 'WordPress Pennant', 'woo-gutenberg-products-block' ),
+		product_name: __( 'WordPress Pennant', 'woocommerce' ),
 		product_permalink: '#',
 		/* translators: An example person name used for the block previews. */
-		reviewer: __( 'Bob', 'woo-gutenberg-products-block' ),
+		reviewer: __( 'Bob', 'woocommerce' ),
 		review: `<p>${ __(
 			'This product is awesome, I love it!',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }</p>\n`,
 		reviewer_avatar_urls: {
 			48: blocksConfig.defaultAvatar,

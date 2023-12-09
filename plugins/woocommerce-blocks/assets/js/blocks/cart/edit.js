@@ -79,16 +79,16 @@ export const Edit = ( { clientId, className, attributes, setAttributes } ) => {
 			<BlockErrorBoundary
 				header={ __(
 					'Cart Block Error',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				text={ __(
 					'There was an error whilst rendering the cart block. If this problem continues, try re-creating the block.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				showErrorMessage={ true }
 				errorMessagePrefix={ __(
 					'Error message:',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			>
 				<EditorProvider

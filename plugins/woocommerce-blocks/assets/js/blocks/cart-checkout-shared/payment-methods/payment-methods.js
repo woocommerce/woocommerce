@@ -47,11 +47,11 @@ const PaymentMethods = () => {
 				<Label
 					label={ __(
 						'Use another payment method.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					screenReaderLabel={ __(
 						'Other available payment methods',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					wrapperElement="p"
 					wrapperProps={ {

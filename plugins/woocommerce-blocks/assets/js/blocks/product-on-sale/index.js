@@ -14,7 +14,7 @@ import sharedAttributes, {
 } from '../../utils/shared-attributes';
 
 registerBlockType( 'woocommerce/product-on-sale', {
-	title: __( 'On Sale Products', 'woo-gutenberg-products-block' ),
+	title: __( 'On Sale Products', 'woocommerce' ),
 	icon: {
 		src: (
 			<Icon
@@ -24,10 +24,10 @@ registerBlockType( 'woocommerce/product-on-sale', {
 		),
 	},
 	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
+	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
 	description: __(
 		'Display a grid of products currently on sale.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	supports: {
 		align: [ 'wide', 'full' ],
