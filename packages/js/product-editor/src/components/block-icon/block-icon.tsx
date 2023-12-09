@@ -17,7 +17,7 @@ export function BlockIcon( { clientId }: BlockIconProps ) {
 			// Try to get the icon from the block's attributes
 			const { getBlockAttributes, getBlockName } =
 				select( 'core/block-editor' );
-			const attributes: BlockAttributes = getBlockAttributes( clientId );
+			const attributes = getBlockAttributes( clientId );
 			if ( attributes?.icon ) {
 				return attributes.icon;
 			}
