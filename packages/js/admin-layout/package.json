@@ -41,6 +41,11 @@
 		"prepack": "pnpm build",
 		"watch:build": "pnpm build:project --watch"
 	},
+	"dependencies": {
+		"@woocommerce/components": "workspace:*",
+		"@wordpress/components": "wp-6.0",
+		"@wordpress/element": "wp-6.0"
+	},
 	"devDependencies": {
 		"@types/react": "^17.0.71",
 		"@types/wordpress__components": "^19.10.5",
@@ -118,7 +123,12 @@
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/components/",
 				"package.json",
+				"!node_modules/@woocommerce/components/node_modules",
+				"!node_modules/@woocommerce/components/.git",
+				"!node_modules/@woocommerce/components/.svn",
+				"!node_modules/@woocommerce/components/src",
 				"!node_modules/@woocommerce/internal-style-build/node_modules",
 				"!node_modules/@woocommerce/internal-style-build/.git",
 				"!node_modules/@woocommerce/internal-style-build/.svn",
