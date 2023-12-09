@@ -19,7 +19,7 @@ export function SectionDescriptionBlockEdit( {
 	const { content } = attributes;
 	const blockProps = useWooBlockProps( attributes );
 
-	const rootClientId: string = useSelect(
+	const rootClientId = useSelect(
 		( select ) => {
 			const { getBlockRootClientId } = select( 'core/block-editor' );
 			return getBlockRootClientId( clientId );
