@@ -1134,7 +1134,8 @@
             $slides = $this.find(selector);
 
       if ( ( $slides.length === 1 && options.allowOneSlide === false ) || $slides.length === 0 ) {
-          $slides.fadeIn(400);
+          var fadeIn = [{ opacity: 0 }, { opacity: 1 }];
+          if ($slides.length) { $slides[0].animate(fadeIn, 400); }
           if (options.start) { options.start($this); }
         } else if ($this.data('flexslider') === undefined) {
           new $.flexslider(this, options);
