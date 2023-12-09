@@ -60,7 +60,7 @@
 		"sass-loader": "10.5.0",
 		"syncpack": "10.9.3",
 		"turbo": "1.11.1",
-		"typescript": "5.3.3",
+		"typescript": "5.1.6",
 		"url-loader": "1.1.2",
 		"webpack": "5.89.0"
 	},
@@ -73,8 +73,8 @@
 	},
 	"pnpm": {
 		"overrides": {
-			"@types/react": "^17.0.2",
-			"react": "^17.0.2",
+			"@types/react": "17.0.71",
+			"react": "17.0.2",
 			"react-resize-aware": "3.1.1"
 		}
 	}

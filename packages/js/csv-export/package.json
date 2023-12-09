@@ -26,7 +26,7 @@
 	"types": "build-types",
 	"react-native": "src/index",
 	"dependencies": {
-		"@types/node": "^16.18.18",
+		"@types/node": "^16.18.68",
 		"browser-filesaver": "1.1.1",
 		"moment": "2.29.4"
 	},

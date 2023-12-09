@@ -41,16 +41,16 @@
 		"@types/config": "0.0.41",
 		"@types/expect-puppeteer": "^4.4.7",
 		"@types/puppeteer": "^5.4.5",
-		"@typescript-eslint/eslint-plugin": "^5.54.0",
+		"@typescript-eslint/eslint-plugin": "5.54.0",
 		"@woocommerce/api": "^0.2.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.32.0",
+		"eslint": "8.32.0",
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
 		"jest-mock-extended": "^1.0.18",
 		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
-		"typescript": "^5.1.6"
+		"typescript": "5.1.6"
 	},
 	"publishConfig": {
 		"access": "public"

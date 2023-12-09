@@ -51,7 +51,7 @@
 	"devDependencies": {
 		"@types/create-hmac": "1.1.0",
 		"@types/jest": "27.4.1",
-		"@types/node": "^16.18.18",
+		"@types/node": "^16.18.68",
 		"@typescript-eslint/eslint-plugin": "5.54.0",
 		"@typescript-eslint/parser": "5.54.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
