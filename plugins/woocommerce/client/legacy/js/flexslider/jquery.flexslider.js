@@ -705,15 +705,13 @@
 
           } else {
             var prop = slider.prop;
+
             slider.container.each(function() {
               var container = this;
-              var keyframes = {};
-              keyframes[prop] = [
-                window.getComputedStyle(container)[prop],
-                slider.args[prop]
-              ];
+              var currentStyle = {};
+              currentStyle[prop] = container.style[prop];
 
-              container.animate(keyframes, { duration: slider.vars.animationSpeed, easing: easing }).onfinish = function() {
+              container.animate([currentStyle, slider.args], { duration: slider.vars.animationSpeed, easing: easing }).onfinish = function() {
                 container.style[prop] = slider.args[prop];
                 slider.wrapup(dimension);
               };
