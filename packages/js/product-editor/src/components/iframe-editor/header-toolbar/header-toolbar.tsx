@@ -49,14 +49,8 @@ export function HeaderToolbar( {
 	const inserterButton = useRef< HTMLButtonElement | null >( null );
 	const { isInserterEnabled, isTextModeEnabled } = useSelect( ( select ) => {
 		const {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
 			hasInserterItems,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
 			getBlockRootClientId,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
 			getBlockSelectionEnd,
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore These selectors are available in the block data store.
@@ -66,7 +60,8 @@ export function HeaderToolbar( {
 		return {
 			isTextModeEnabled: getEditorMode() === 'text',
 			isInserterEnabled: hasInserterItems(
-				getBlockRootClientId( getBlockSelectionEnd() )
+				getBlockRootClientId( getBlockSelectionEnd() ?? '' ) ??
+					undefined
 			),
 		};
 	}, [] );

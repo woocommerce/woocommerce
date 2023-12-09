@@ -16,8 +16,6 @@ import {
 	BlockEditorKeyboardShortcuts,
 	EditorSettings,
 	EditorBlockListSettings,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 

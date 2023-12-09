@@ -10,8 +10,6 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	__unstableEditorStyles as EditorStyles,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 

@@ -51,24 +51,18 @@ function MockTabs( { onChange = jest.fn() } ) {
 			<Tab
 				{ ...blockProps }
 				attributes={ { id: 'test1', title: 'Test button 1', order: 1 } }
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore editedProduct is not used, so we can just ignore the fact that our context doesn't have it
 				context={ mockContext }
 				name="test1"
 			/>
 			<Tab
 				{ ...blockProps }
 				attributes={ { id: 'test2', title: 'Test button 2', order: 2 } }
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore editedProduct is not used, so we can just ignore the fact that our context doesn't have it
 				context={ mockContext }
 				name="test2"
 			/>
 			<Tab
 				{ ...blockProps }
 				attributes={ { id: 'test3', title: 'Test button 3', order: 3 } }
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore editedProduct is not used, so we can just ignore the fact that our context doesn't have it
 				context={ mockContext }
 				name="test3"
 			/>

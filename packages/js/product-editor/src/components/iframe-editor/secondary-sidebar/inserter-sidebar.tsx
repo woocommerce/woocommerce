@@ -33,12 +33,10 @@ export default function InserterSidebar() {
 	const { setIsInserterOpened } = useContext( EditorContext );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const { rootClientId } = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore These selectors are available in the block data store.
 		const { getBlockRootClientId } = select( blockEditorStore );
 
 		return {
-			rootClientId: getBlockRootClientId(),
+			rootClientId: getBlockRootClientId( '' ),
 		};
 	} );
 

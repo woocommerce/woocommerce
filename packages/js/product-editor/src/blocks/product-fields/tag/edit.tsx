@@ -8,9 +8,6 @@ import { BlockAttributes } from '@wordpress/blocks';
 import { BaseControl } from '@wordpress/components';
 import { ProductTag } from '@woocommerce/data';
 import { useInstanceId } from '@wordpress/compose';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp } from '@wordpress/core-data';
 
 /**

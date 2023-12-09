@@ -164,11 +164,7 @@ export function useProductHelper() {
 			},
 			{
 				update: Object.values( variationsOrder )
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
 					.flatMap( Object.entries )
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
 					.map( ( [ id, menu_order ] ) => ( {
 						id,
 						menu_order,

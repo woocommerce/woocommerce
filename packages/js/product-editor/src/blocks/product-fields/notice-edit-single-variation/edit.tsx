@@ -8,9 +8,6 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
 import { Link } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp } from '@wordpress/core-data';
 
 /**

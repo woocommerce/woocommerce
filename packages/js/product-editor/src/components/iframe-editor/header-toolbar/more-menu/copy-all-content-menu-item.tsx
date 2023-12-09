@@ -14,11 +14,7 @@ export const CopyAllContentMenuItem = () => {
 	const { createNotice } = useDispatch( 'core/notices' );
 
 	const { blocks } = useSelect( ( select ) => {
-		const {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			getBlocks,
-		} = select( blockEditorStore );
+		const { getBlocks } = select( blockEditorStore );
 
 		return {
 			blocks: getBlocks(),

@@ -44,8 +44,7 @@ export function SummaryBlockEdit( {
 		context.postType || 'product',
 		attributes.property
 	);
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
+
 	const { clearSelectedBlock } = useDispatch( blockEditorStore );
 
 	function handleAlignmentChange( value: SummaryAttributes[ 'align' ] ) {
