@@ -6,7 +6,7 @@ post_title: Minification of SCSS and JS
 
 When updating SCSS files in the WooCommerce project, please **commit only your changes to unminified SCSS files**. The minification will be handled as part of the release process.
 
-To get the minified CSS files, run `pnpm --filter='@woocommerce/shortcode-assets' build` from the repository root directory. To set up the development environment from scratch, see the section on [how to install dependencies and generate assets](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment#install-dependencies-and-generate-assets) in the guide to set up a WooCommerce development environment.
+To get the minified CSS files, run `pnpm --filter='@woocommerce/classic-assets' build` from the repository root directory. To set up the development environment from scratch, see the section on [how to install dependencies and generate assets](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment#install-dependencies-and-generate-assets) in the guide to set up a WooCommerce development environment.
 
 ## Javascript
 

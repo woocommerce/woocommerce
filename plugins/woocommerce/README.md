@@ -32,13 +32,13 @@ in this way to take advantage of caching to prevent unnecessarily performing exp
 
 ### `plugins/woocommerce/client/legacy`
 
-This directory contains the CSS and jQuery code for WooCommerce shortcodes.
+This directory contains the Classic CSS and jQuery code for WooCommerce.
 
 ```bash
 # Build the assets.
-pnpm --filter=@woocommerce/shortcode-assets build 
+pnpm --filter=@woocommerce/classic-assets build 
 # Lint the assets.
-pnpm --filter=@woocommerce/shortcode-assets lint 
+pnpm --filter=@woocommerce/classic-assets lint 
 ```
 
 ### `plugins/woocommerce-admin`
