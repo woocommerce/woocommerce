@@ -256,8 +256,8 @@
 		"zenhub-api": "0.2.0"
 	},
 	"engines": {
-		"node": "^16.13.0",
-		"npm": "^8.0.0"
+		"node": "^16.14.1",
+		"pnpm": "^8.6.7"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.0.5",
