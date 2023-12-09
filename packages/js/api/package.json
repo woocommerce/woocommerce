@@ -44,22 +44,22 @@
 		"lint:fix": "eslint src --fix"
 	},
 	"dependencies": {
-		"axios": "^0.24.0",
+		"axios": "0.24.0",
 		"create-hmac": "1.1.7",
 		"oauth-1.0a": "2.2.6"
 	},
 	"devDependencies": {
 		"@types/create-hmac": "1.1.0",
-		"@types/jest": "^27.4.1",
+		"@types/jest": "27.4.1",
 		"@types/node": "^16.18.18",
-		"@typescript-eslint/eslint-plugin": "^5.54.0",
-		"@typescript-eslint/parser": "^5.54.0",
+		"@typescript-eslint/eslint-plugin": "5.54.0",
+		"@typescript-eslint/parser": "5.54.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"axios-mock-adapter": "^1.20.0",
-		"eslint": "^8.32.0",
+		"axios-mock-adapter": "1.20.0",
+		"eslint": "8.32.0",
 		"jest": "~27.5.1",
 		"ts-jest": "~29.1.1",
-		"typescript": "^5.1.6"
+		"typescript": "5.1.6"
 	},
 	"publishConfig": {
 		"access": "public"
