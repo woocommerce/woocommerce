@@ -1,0 +1,72 @@
+{
+	"name": "woocommerce/woocommerce-blocks",
+	"description": "WooCommerce blocks for the Gutenberg editor.",
+	"homepage": "https://woocommerce.com/",
+	"type": "wordpress-plugin",
+	"version": "11.8.0-dev",
+	"keywords": [
+		"gutenberg",
+		"woocommerce",
+		"blocks"
+	],
+	"license": "GPL-3.0-or-later",
+	"prefer-stable": true,
+	"minimum-stability": "dev",
+	"require": {
+		"ext-hash": "*",
+		"ext-json": "*",
+		"composer/installers": "^1.7.0",
+		"automattic/jetpack-autoloader": "^3.0",
+		"automattic/jetpack-connection": "^2.1",
+		"automattic/jetpack-config": "^2.0"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "9.6.15",
+		"phpunit/php-code-coverage": "9.2.29",
+		"woocommerce/woocommerce-sniffs": "0.1.3",
+		"phpdocumentor/reflection": "3.0.1",
+		"yoast/phpunit-polyfills": "2.0.0",
+		"nikic/php-parser": "4.16.0 as 1.0.0",
+		"mockery/mockery": "1.6.6",
+		"wp-hooks/generator": "0.9.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"Automattic\\WooCommerce\\StoreApi\\": "src/StoreApi/",
+			"Automattic\\WooCommerce\\Blocks\\": "src/"
+		},
+		"files": [
+			"src/StoreApi/deprecated.php",
+			"src/StoreApi/functions.php"
+		]
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Automattic\\WooCommerce\\Blocks\\Tests\\": "tests/php"
+		}
+	},
+	"scripts": {
+		"phpcs": [
+			"phpcs --extensions=php -s -p"
+		],
+		"phpcbf": [
+			"phpcbf -p"
+		]
+	},
+	"config": {
+		"platform": {
+			"php": "7.4.33"
+		},
+		"allow-plugins": {
+			"automattic/jetpack-autoloader": true,
+			"composer/installers": true,
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"extra": {
+		"scripts-description": {
+			"phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+			"phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+		}
+	}
+}
