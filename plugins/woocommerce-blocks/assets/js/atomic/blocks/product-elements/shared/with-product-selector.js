@@ -64,7 +64,7 @@ const withProductSelector = ( selectorArgs ) => ( OriginalComponent ) => {
 									setIsEditing( false );
 								} }
 							>
-								{ __( 'Done', 'woo-gutenberg-products-block' ) }
+								{ __( 'Done', 'woocommerce' ) }
 							</Button>
 						</div>
 					</Placeholder>
@@ -77,7 +77,7 @@ const withProductSelector = ( selectorArgs ) => ( OriginalComponent ) => {
 								>
 									{ __(
 										'Switch product…',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</TextToolbarButton>
 							</ToolbarGroup>

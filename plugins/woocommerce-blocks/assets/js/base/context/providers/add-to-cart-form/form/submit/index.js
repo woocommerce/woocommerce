@@ -105,7 +105,7 @@ const FormSubmit = () => {
 							createErrorNotice(
 								__(
 									'Something went wrong. Please contact us for assistance.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								{
 									id: 'add-to-cart',

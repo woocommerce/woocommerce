@@ -7,13 +7,13 @@ import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 export const previewCategories = [
 	{
 		id: 1,
-		name: __( 'Clothing', 'woo-gutenberg-products-block' ),
+		name: __( 'Clothing', 'woocommerce' ),
 		slug: 'clothing',
 		parent: 0,
 		count: 10,
 		description: `<p>${ __(
 			'Branded t-shirts, jumpers, pants and more!',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }</p>\n`,
 		image: {
 			id: 1,

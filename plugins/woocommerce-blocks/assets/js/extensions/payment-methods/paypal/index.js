@@ -26,20 +26,20 @@ const paypalPaymentMethod = {
 		<img
 			src={ `${ WC_ASSET_URL }/images/paypal.png` }
 			alt={ decodeEntities(
-				settings.title || __( 'PayPal', 'woo-gutenberg-products-block' )
+				settings.title || __( 'PayPal', 'woocommerce' )
 			) }
 		/>
 	),
 	placeOrderButtonLabel: __(
 		'Proceed to PayPal',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	content: <Content />,
 	edit: <Content />,
 	canMakePayment: () => true,
 	ariaLabel: decodeEntities(
 		settings?.title ||
-			__( 'Payment via PayPal', 'woo-gutenberg-products-block' )
+			__( 'Payment via PayPal', 'woocommerce' )
 	),
 	supports: {
 		features: settings.supports ?? [],

@@ -50,7 +50,7 @@ const CheckoutOrderError = () => {
 			decodeEntities( checkoutData.message ) ||
 			__(
 				'There was a problem checking out. Please try again. If the problem persists, please get in touch with us so we can assist.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 	};
 
@@ -75,12 +75,12 @@ const CheckoutOrderError = () => {
  * @param {Object} props.errorData Object containing code and message.
  */
 const ErrorTitle = ( { errorData } ) => {
-	let heading = __( 'Checkout error', 'woo-gutenberg-products-block' );
+	let heading = __( 'Checkout error', 'woocommerce' );
 
 	if ( cartItemErrorCodes.includes( errorData.code ) ) {
 		heading = __(
 			'There is a problem with your cart',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		);
 	}
 
@@ -104,7 +104,7 @@ const ErrorMessage = ( { errorData } ) => {
 			' ' +
 			__(
 				'Please edit your cart and try again.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			);
 	}
 
@@ -118,11 +118,11 @@ const ErrorMessage = ( { errorData } ) => {
  * @param {Object} props.errorData Object containing code and message.
  */
 const ErrorButton = ( { errorData } ) => {
-	let buttonText = __( 'Retry', 'woo-gutenberg-products-block' );
+	let buttonText = __( 'Retry', 'woocommerce' );
 	let buttonUrl = 'javascript:window.location.reload(true)';
 
 	if ( cartItemErrorCodes.includes( errorData.code ) ) {
-		buttonText = __( 'Edit your cart', 'woo-gutenberg-products-block' );
+		buttonText = __( 'Edit your cart', 'woocommerce' );
 		buttonUrl = CART_URL;
 	}
 

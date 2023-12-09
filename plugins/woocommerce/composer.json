@@ -26,8 +26,7 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.7.0",
-		"woocommerce/woocommerce-blocks": "11.7.0"
+		"woocommerce/action-scheduler": "3.7.0"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
@@ -41,9 +40,7 @@
 	"config": {
 		"optimize-autoloader": true,
 		"preferred-install": {
-			"woocommerce/action-scheduler": "dist",
-			"woocommerce/woocommerce-rest-api": "dist",
-			"woocommerce/woocommerce-blocks": "dist"
+			"woocommerce/action-scheduler": "dist"
 		},
 		"sort-packages": true,
 		"platform": {
@@ -124,9 +121,7 @@
 	"extra": {
 		"installer-paths": {
 			"packages/{$name}": [
-				"woocommerce/action-scheduler",
-				"woocommerce/woocommerce-blocks",
-				"woocommerce/woocommerce-admin"
+				"woocommerce/action-scheduler"
 			]
 		},
 		"scripts-description": {
