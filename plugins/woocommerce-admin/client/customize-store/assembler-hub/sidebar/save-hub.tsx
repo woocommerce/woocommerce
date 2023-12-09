@@ -60,6 +60,8 @@ export const SaveHub = () => {
 	const { __unstableMarkLastChangeAsPersistent } =
 		useDispatch( blockEditorStore );
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore The types for this are incorrect.
 	const { createErrorNotice } = useDispatch( noticesStore );
 
 	const {
