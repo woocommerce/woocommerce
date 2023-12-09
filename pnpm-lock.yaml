@@ -2947,7 +2947,7 @@ importers:
       '@woocommerce/block-library':
         specifier: workspace:*
         version: link:../woocommerce-blocks
-      '@woocommerce/shortcode-assets':
+      '@woocommerce/classic-assets':
         specifier: workspace:*
         version: link:client/legacy
       '@wordpress/browserslist-config':

@@ -175,7 +175,7 @@
 	"dependencies": {
 		"@wordpress/browserslist-config": "wp-6.0",
 		"@woocommerce/admin-library": "workspace:*",
-		"@woocommerce/shortcode-assets": "workspace:*",
+		"@woocommerce/classic-assets": "workspace:*",
 		"@woocommerce/block-library": "workspace:*"
 	},
 	"wireit": {
