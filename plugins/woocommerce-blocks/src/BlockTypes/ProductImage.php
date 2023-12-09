@@ -162,19 +162,6 @@ class ProductImage extends AbstractBlock {
 			$image_style .= sprintf( 'aspect-ratio:%s;', $attributes['aspectRatio'] );
 		}
 
-		if ( ! $product->get_image_id() ) {
-			// The alt text is left empty on purpose, as it's considered a decorative image.
-			// More can be found here: https://www.w3.org/WAI/tutorials/images/decorative/.
-			// Github discussion for a context: https://github.com/woocommerce/woocommerce-blocks/pull/7651#discussion_r1019560494.
-			return wc_placeholder_img(
-				$image_size,
-				array(
-					'alt'   => '',
-					'style' => $image_style,
-				)
-			);
-		}
-
 		return $product->get_image(
 			$image_size,
 			array(
