@@ -187,7 +187,7 @@
 		"@wordpress/prettier-config": "1.4.0",
 		"@wordpress/scripts": "24.6.0",
 		"autoprefixer": "10.4.14",
-		"axios": "0.27.2",
+		"axios": "1.6.0",
 		"babel-jest": "^29.6.2",
 		"babel-plugin-explicit-exports-references": "^1.0.2",
 		"babel-plugin-react-docgen": "4.2.1",
