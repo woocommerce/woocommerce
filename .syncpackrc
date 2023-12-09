@@ -31,6 +31,15 @@
 		},
 		{
 			"dependencies": [
+				"**"
+			],
+			"packages": [
+				"@woocommerce/block-library"
+			],
+			"isIgnored": true
+		},
+		{
+			"dependencies": [
 				"@typescript-eslint/**"
 			],
 			"pinVersion": "^5.54.0",
