@@ -62,7 +62,7 @@ runs:
             PUPPETEER_SKIP_DOWNLOAD: 'true'
           run: |
               pnpm -w install turbo
-              pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
+              pnpm install --no-frozen-lockfile ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
         - name: Get branch name
           id: get_branch

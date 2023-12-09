@@ -35,7 +35,7 @@ jobs:
 
             - name: Install prerequisites
               run: |
-                  pnpm install --filter monorepo-utils --ignore-scripts
+                  pnpm install --no-frozen-lockfile --filter monorepo-utils --ignore-scripts
                   # ignore scripts speeds up setup signficantly, but we still need to build monorepo utils
                   pnpm build
               working-directory: tools/monorepo-utils

@@ -22,7 +22,7 @@ jobs:
               run: |
                   npm install -g pnpm
                   npm -g i @wordpress/env@8.0.0
-                  pnpm install --filter code-analyzer --filter monorepo-utils
+                  pnpm install --no-frozen-lockfile --filter code-analyzer --filter monorepo-utils
             - name: Run analyzer
               id: run
               working-directory: tools/code-analyzer
