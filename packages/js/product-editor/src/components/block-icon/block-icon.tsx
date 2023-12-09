@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { BlockIcon as BaseBlockIcon } from '@wordpress/block-editor';
-import { Block } from '@wordpress/blocks';
+import { Block, BlockAttributes } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import { createElement, RawHTML } from '@wordpress/element';
 
@@ -26,7 +26,7 @@ export function BlockIcon( { clientId }: BlockIconProps ) {
 			// Then try to get icon from block's metadata
 			const { getBlockType } = select( 'core/blocks' );
 			const blockName = getBlockName( clientId );
-			const block = getBlockType< Block >( blockName );
+			const block = getBlockType< Block >( blockName ?? undefined );
 			return block?.icon;
 		},
 		[ clientId ]

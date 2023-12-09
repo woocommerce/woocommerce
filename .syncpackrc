@@ -40,7 +40,7 @@
 			"dependencies": [
 				"@typescript-eslint/**"
 			],
-			"pinVersion": "^5.54.0",
+			"pinVersion": "^5.62.0",
 			"packages": [
 				"**"
 			]
@@ -49,7 +49,16 @@
 			"dependencies": [
 				"@types/react"
 			],
-			"pinVersion": "^17.0.2",
+			"pinVersion": "^17.0.71",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"@types/react-dom"
+			],
+			"pinVersion": "^17.0.25",
 			"packages": [
 				"**"
 			]
@@ -65,9 +74,7 @@
 		},
 		{
 			"dependencies": [
-				"@types/react",
 				"react",
-				"@types/react-dom",
 				"react-dom"
 			],
 			"packages": [
@@ -82,7 +89,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^5.1.6"
+			"pinVersion": "^5.3.3"
 		},
 		{
 			"dependencies": [
@@ -91,7 +98,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^8.32.0"
+			"pinVersion": "^8.55.0"
 		},
 		{
 			"dependencies": [
@@ -162,7 +169,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^8.2.0"
+			"pinVersion": "^8.13.0"
 		},
 		{
 			"dependencies": [
@@ -180,7 +187,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^19.10.3"
+			"pinVersion": "^19.10.5"
 		},
 		{
 			"dependencies": [
@@ -198,7 +205,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^8.4.7"
+			"pinVersion": "^8.4.32"
 		},
 		{
 			"dependencies": [
@@ -207,7 +214,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^16.18.18"
+			"pinVersion": "^16.18.68"
 		},
 		{
 			"dependencies": [

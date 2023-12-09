@@ -48,14 +48,14 @@ export function VariationSwitcherFooter( {
 				return {
 					previousVariation:
 						previousVariationId !== null &&
-						getEntityRecord< ProductVariation >(
+						getEntityRecord(
 							'postType',
 							'product_variation',
 							previousVariationId
 						),
 					nextVariation:
 						nextVariationId !== null &&
-						getEntityRecord< ProductVariation >(
+						getEntityRecord(
 							'postType',
 							'product_variation',
 							nextVariationId
