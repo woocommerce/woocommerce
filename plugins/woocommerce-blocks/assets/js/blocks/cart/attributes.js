@@ -22,12 +22,12 @@ export const blockAttributes = {
 		default: [
 			{
 				view: 'woocommerce/filled-cart-block',
-				label: __( 'Filled Cart', 'woo-gutenberg-products-block' ),
+				label: __( 'Filled Cart', 'woocommerce' ),
 				icon: <Icon icon={ filledCart } />,
 			},
 			{
 				view: 'woocommerce/empty-cart-block',
-				label: __( 'Empty Cart', 'woo-gutenberg-products-block' ),
+				label: __( 'Empty Cart', 'woocommerce' ),
 				icon: <Icon icon={ removeCart } />,
 			},
 		],

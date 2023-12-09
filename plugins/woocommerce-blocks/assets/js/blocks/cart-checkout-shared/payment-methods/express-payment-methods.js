@@ -158,7 +158,7 @@ const ExpressPaymentMethods = () => {
 			<li key="noneRegistered">
 				{ __(
 					'No registered Payment Methods',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</li>
 		);

@@ -38,7 +38,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 	return (
 		<>
 			<ToggleControl
-				label={ __( 'Product rating', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Product rating', 'woocommerce' ) }
 				checked={ attributes.showReviewRating }
 				onChange={ () =>
 					setAttributes( {
@@ -54,7 +54,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 					{ createInterpolateElement(
 						__(
 							'Product rating is disabled in your <a>store settings</a>.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						{
 							a: (
@@ -72,7 +72,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 				</Notice>
 			) }
 			<ToggleControl
-				label={ __( 'Reviewer name', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Reviewer name', 'woocommerce' ) }
 				checked={ attributes.showReviewerName }
 				onChange={ () =>
 					setAttributes( {
@@ -81,7 +81,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 				}
 			/>
 			<ToggleControl
-				label={ __( 'Image', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Image', 'woocommerce' ) }
 				checked={ attributes.showReviewImage }
 				onChange={ () =>
 					setAttributes( {
@@ -90,7 +90,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 				}
 			/>
 			<ToggleControl
-				label={ __( 'Review date', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Review date', 'woocommerce' ) }
 				checked={ attributes.showReviewDate }
 				onChange={ () =>
 					setAttributes( {
@@ -99,7 +99,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 				}
 			/>
 			<ToggleControl
-				label={ __( 'Review content', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Review content', 'woocommerce' ) }
 				checked={ attributes.showReviewContent }
 				onChange={ () =>
 					setAttributes( {
@@ -112,7 +112,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 					<ToggleGroupControl
 						label={ __(
 							'Review image',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ attributes.imageType }
 						onChange={ ( value ) =>
@@ -123,14 +123,14 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 							value="reviewer"
 							label={ __(
 								'Reviewer photo',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 						<ToggleGroupControlOption
 							value="product"
 							label={ __(
 								'Product',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					</ToggleGroupControl>
@@ -142,7 +142,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 							{ createInterpolateElement(
 								__(
 									'Reviewer photo is disabled in your <a>site settings</a>.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								{
 									a: (
@@ -172,7 +172,7 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 	return (
 		<>
 			<ToggleControl
-				label={ __( 'Order by', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Order by', 'woocommerce' ) }
 				checked={ attributes.showOrderby }
 				onChange={ () =>
 					setAttributes( { showOrderby: ! attributes.showOrderby } )
@@ -181,7 +181,7 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 			<SelectControl
 				label={ __(
 					'Order Product Reviews by',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				value={ attributes.orderby }
 				options={ [
@@ -194,7 +194,7 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 			<RangeControl
 				label={ __(
 					'Starting Number of Reviews',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				value={ attributes.reviewsOnPageLoad }
 				onChange={ ( reviewsOnPageLoad ) =>
@@ -204,7 +204,7 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 				min={ minPerPage }
 			/>
 			<ToggleControl
-				label={ __( 'Load more', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Load more', 'woocommerce' ) }
 				checked={ attributes.showLoadMore }
 				onChange={ () =>
 					setAttributes( { showLoadMore: ! attributes.showLoadMore } )
@@ -214,7 +214,7 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 				<RangeControl
 					label={ __(
 						'Load More Reviews',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					value={ attributes.reviewsOnLoadMore }
 					onChange={ ( reviewsOnLoadMore ) =>

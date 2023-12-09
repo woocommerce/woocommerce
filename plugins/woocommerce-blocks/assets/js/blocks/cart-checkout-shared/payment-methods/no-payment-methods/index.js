@@ -21,7 +21,7 @@ const NoPaymentMethods = () => {
 		>
 			{ __(
 				'There are no payment methods available. This may be an error on our side. Please contact us if you need any help placing your order.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		</NoticeBanner>
 	);

@@ -6,7 +6,7 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"usesContext": [ "query", "queryId", "postId" ],
-	"textdomain": "woo-gutenberg-products-block",
+	"textdomain": "woocommerce",
 	"attributes": {
 		"productId": {
 			"type": "number",

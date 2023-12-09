@@ -51,7 +51,7 @@
       "hasImage": false
     }
   },
-  "textdomain": "woo-gutenberg-products-block",
+  "textdomain": "woocommerce",
   "apiVersion": 2,
   "$schema": "https://schemas.wp.org/trunk/block.json"
 }

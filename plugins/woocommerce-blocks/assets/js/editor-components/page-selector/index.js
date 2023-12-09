@@ -23,7 +23,7 @@ const PageSelector = ( { setPageId, pageId, labels } ) => {
 		return (
 			<PanelBody title={ labels.title }>
 				<SelectControl
-					label={ __( 'Link to', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Link to', 'woocommerce' ) }
 					value={ pageId }
 					options={ [
 						{

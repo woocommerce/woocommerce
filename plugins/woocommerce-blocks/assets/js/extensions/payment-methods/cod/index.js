@@ -12,7 +12,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { PAYMENT_METHOD_NAME } from './constants';
 
 const settings = getPaymentMethodData( 'cod', {} );
-const defaultLabel = __( 'Cash on delivery', 'woo-gutenberg-products-block' );
+const defaultLabel = __( 'Cash on delivery', 'woocommerce' );
 const label = decodeEntities( settings?.title || '' ) || defaultLabel;
 
 /**

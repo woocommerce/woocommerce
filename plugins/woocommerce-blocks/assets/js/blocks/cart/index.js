@@ -19,7 +19,7 @@ import './inner-blocks';
  * Register and run the Cart block.
  */
 const settings = {
-	title: __( 'Cart', 'woo-gutenberg-products-block' ),
+	title: __( 'Cart', 'woocommerce' ),
 	icon: {
 		src: (
 			<Icon
@@ -29,8 +29,8 @@ const settings = {
 		),
 	},
 	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
-	description: __( 'Shopping cart.', 'woo-gutenberg-products-block' ),
+	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
+	description: __( 'Shopping cart.', 'woocommerce' ),
 	supports: {
 		align: [ 'wide' ],
 		html: false,

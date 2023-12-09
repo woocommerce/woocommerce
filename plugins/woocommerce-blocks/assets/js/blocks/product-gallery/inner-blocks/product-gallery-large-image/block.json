@@ -11,6 +11,6 @@
 	"supports": {
 		"interactivity": true
 	},
-    "textdomain": "woo-gutenberg-products-block",
+    "textdomain": "woocommerce",
 	"ancestor": [ "woocommerce/product-gallery" ]
 }

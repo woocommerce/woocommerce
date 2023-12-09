@@ -245,7 +245,7 @@ export const AddToCartFormStateContextProvider = ( {
 							data.processingResponse?.message ||
 							__(
 								'Something went wrong. Please contact us for assistance.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							);
 						createErrorNotice( message, {
 							id: 'add-to-cart',

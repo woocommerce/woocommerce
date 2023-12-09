@@ -8,7 +8,7 @@
     "category": "woocommerce",
     "keywords": [ "WooCommerce" ],
 	"usesContext": [ "postId", "thumbnailsPosition", "thumbnailsNumberOfThumbnails", "productGalleryClientId", "mode", "cropImages" ],
-    "textdomain": "woo-gutenberg-products-block",
+    "textdomain": "woocommerce",
 	"ancestor": [ "woocommerce/product-gallery" ],
 	"supports": {
 		"spacing": {

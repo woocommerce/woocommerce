@@ -14,7 +14,7 @@ import { PAYMENT_METHOD_NAME } from './constants';
 const settings = getPaymentMethodData( 'bacs', {} );
 const defaultLabel = __(
 	'Direct bank transfer',
-	'woo-gutenberg-products-block'
+	'woocommerce'
 );
 const label = decodeEntities( settings?.title || '' ) || defaultLabel;
 

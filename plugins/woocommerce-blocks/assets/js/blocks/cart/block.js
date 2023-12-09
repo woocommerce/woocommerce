@@ -71,15 +71,15 @@ const Block = ( { attributes, children, scrollToTop } ) => (
 	<BlockErrorBoundary
 		header={ __(
 			'Something went wrong. Please contact us for assistance.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
 		text={ __(
 			'The cart has encountered an unexpected error. If the error persists, please get in touch with us for help.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
 		button={
 			<button className="wc-block-button" onClick={ reloadPage }>
-				{ __( 'Reload the page', 'woo-gutenberg-products-block' ) }
+				{ __( 'Reload the page', 'woocommerce' ) }
 			</button>
 		}
 		showErrorMessage={ CURRENT_USER_IS_ADMIN }

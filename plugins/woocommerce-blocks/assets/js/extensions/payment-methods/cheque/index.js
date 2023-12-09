@@ -12,7 +12,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { PAYMENT_METHOD_NAME } from './constants';
 
 const settings = getPaymentMethodData( 'cheque', {} );
-const defaultLabel = __( 'Check payment', 'woo-gutenberg-products-block' );
+const defaultLabel = __( 'Check payment', 'woocommerce' );
 const label = decodeEntities( settings?.title || '' ) || defaultLabel;
 
 /**
