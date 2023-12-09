@@ -62,7 +62,7 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"peerDependencies": {
-		"@types/react": "^17.0.2",
+		"@types/react": "^17.0.71",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
 	},
