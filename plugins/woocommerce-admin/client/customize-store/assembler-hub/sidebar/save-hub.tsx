@@ -165,6 +165,7 @@ export const SaveHub = () => {
 			resetHighlightedBlockIndex();
 			navigator.goToParent();
 		} catch ( error ) {
+			// @ts-expect-error The types for this are wrong.
 			createErrorNotice(
 				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
 			);
@@ -179,6 +180,7 @@ export const SaveHub = () => {
 			await save();
 			sendEvent( 'FINISH_CUSTOMIZATION' );
 		} catch ( error ) {
+			// @ts-expect-error The types for this are wrong.
 			createErrorNotice(
 				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
 			);

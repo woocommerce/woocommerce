@@ -46,7 +46,7 @@ export function Header( {
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord< Product | ProductVariation >(
+			return getEntityRecord(
 				'postType',
 				productType,
 				productId
@@ -95,7 +95,7 @@ export function Header( {
 										);
 										const url = getNewPath(
 											{ tab: 'variations' },
-											`/product/${ lastPersistedProduct.parent_id }`
+											`/product/${ lastPersistedProduct?.parent_id }`
 										);
 										navigateTo( { url } );
 									} }
@@ -117,13 +117,13 @@ export function Header( {
 								{ lastPersistedProduct?.name }
 							</span>
 							<span className="woocommerce-product-header__variable-product-id">
-								# { lastPersistedProduct.id }
+								# { lastPersistedProduct?.id }
 							</span>
 						</div>
 					) : (
 						getHeaderTitle(
 							editedProductName,
-							lastPersistedProduct.name
+							lastPersistedProduct?.name
 						)
 					) }
 				</h1>
@@ -132,18 +132,18 @@ export function Header( {
 					{ ! isVariation && (
 						<SaveDraftButton
 							productType={ productType }
-							productStatus={ lastPersistedProduct.status }
+							productStatus={ lastPersistedProduct?.status }
 						/>
 					) }
 
 					<PreviewButton
 						productType={ productType }
-						productStatus={ lastPersistedProduct.status }
+						productStatus={ lastPersistedProduct?.status }
 					/>
 
 					<PublishButton
 						productType={ productType }
-						productStatus={ lastPersistedProduct.status }
+						productStatus={ lastPersistedProduct?.status }
 					/>
 
 					<WooHeaderItem.Slot name="product" />
