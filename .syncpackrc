@@ -207,7 +207,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "8.4.7"
+			"pinVersion": "8.4.32"
 		},
 		{
 			"dependencies": [
