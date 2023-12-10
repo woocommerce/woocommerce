@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { BlockIcon as BaseBlockIcon } from '@wordpress/block-editor';
-import { Block, BlockAttributes } from '@wordpress/blocks';
+import { Block } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import { createElement, RawHTML } from '@wordpress/element';
 

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { WooHeaderItem } from '@woocommerce/admin-layout';
-import { Product, ProductVariation } from '@woocommerce/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
