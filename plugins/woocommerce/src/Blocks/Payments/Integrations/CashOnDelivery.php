@@ -79,7 +79,7 @@ final class CashOnDelivery extends AbstractPaymentMethodType {
 	public function get_payment_method_script_handles() {
 		$this->asset_api->register_script(
 			'wc-payment-method-cod',
-			'build/wc-payment-method-cod.js'
+			'assets/client/blocks/wc-payment-method-cod.js'
 		);
 		return [ 'wc-payment-method-cod' ];
 	}

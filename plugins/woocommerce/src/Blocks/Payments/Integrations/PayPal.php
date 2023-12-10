@@ -57,7 +57,7 @@ final class PayPal extends AbstractPaymentMethodType {
 	public function get_payment_method_script_handles() {
 		$this->asset_api->register_script(
 			'wc-payment-method-paypal',
-			'build/wc-payment-method-paypal.js'
+			'assets/client/blocks/wc-payment-method-paypal.js'
 		);
 		return [ 'wc-payment-method-paypal' ];
 	}

@@ -206,7 +206,7 @@ class MiniCart extends AbstractBlock {
 	 * Prints the variable containing information about the scripts to lazy load.
 	 */
 	public function print_lazy_load_scripts() {
-		$script_data = $this->asset_api->get_script_data( 'build/mini-cart-component-frontend.js' );
+		$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-component-frontend.js' );
 
 		$num_dependencies = is_countable( $script_data['dependencies'] ) ? count( $script_data['dependencies'] ) : 0;
 		$wp_scripts       = wp_scripts();
@@ -261,7 +261,7 @@ class MiniCart extends AbstractBlock {
 			);
 		}
 		foreach ( $inner_blocks_frontend_scripts as $inner_block_frontend_script ) {
-			$script_data = $this->asset_api->get_script_data( 'build/mini-cart-contents-block/' . $inner_block_frontend_script . '.js' );
+			$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-contents-block/' . $inner_block_frontend_script . '.js' );
 			$this->scripts_to_lazy_load[ 'wc-block-' . $inner_block_frontend_script ] = array(
 				'src'     => $script_data['src'],
 				'version' => $script_data['version'],

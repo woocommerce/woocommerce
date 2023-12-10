@@ -46,26 +46,26 @@ final class AssetsController {
 	 * Register block scripts & styles.
 	 */
 	public function register_assets() {
-		$this->register_style( 'wc-blocks-packages-style', plugins_url( $this->api->get_block_asset_build_path( 'packages-style', 'css' ), __DIR__ ), [], 'all', true );
-		$this->register_style( 'wc-blocks-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks', 'css' ), __DIR__ ), [], 'all', true );
-		$this->register_style( 'wc-blocks-editor-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-editor-style', 'css' ), __DIR__ ), [ 'wp-edit-blocks' ], 'all', true );
+		$this->register_style( 'wc-blocks-packages-style', plugins_url( $this->api->get_block_asset_build_path( 'packages-style', 'css' ), dirname( __DIR__ ) ), [], 'all', true );
+		$this->register_style( 'wc-blocks-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks', 'css' ), dirname( __DIR__ ) ), [], 'all', true );
+		$this->register_style( 'wc-blocks-editor-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-editor-style', 'css' ), dirname( __DIR__ ) ), [ 'wp-edit-blocks' ], 'all', true );
 
-		$this->api->register_script( 'wc-blocks-middleware', 'build/wc-blocks-middleware.js', [], false );
-		$this->api->register_script( 'wc-blocks-data-store', 'build/wc-blocks-data.js', [ 'wc-blocks-middleware' ] );
+		$this->api->register_script( 'wc-blocks-middleware', 'assets/client/blocks/wc-blocks-middleware.js', [], false );
+		$this->api->register_script( 'wc-blocks-data-store', 'assets/client/blocks/wc-blocks-data.js', [ 'wc-blocks-middleware' ] );
 		$this->api->register_script( 'wc-blocks-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-vendors' ), [], false );
-		$this->api->register_script( 'wc-blocks-registry', 'build/wc-blocks-registry.js', [], false );
+		$this->api->register_script( 'wc-blocks-registry', 'assets/client/blocks/wc-blocks-registry.js', [], false );
 		$this->api->register_script( 'wc-blocks', $this->api->get_block_asset_build_path( 'wc-blocks' ), [ 'wc-blocks-vendors' ], false );
-		$this->api->register_script( 'wc-blocks-shared-context', 'build/wc-blocks-shared-context.js' );
-		$this->api->register_script( 'wc-blocks-shared-hocs', 'build/wc-blocks-shared-hocs.js', [], false );
+		$this->api->register_script( 'wc-blocks-shared-context', 'assets/client/blocks/wc-blocks-shared-context.js' );
+		$this->api->register_script( 'wc-blocks-shared-hocs', 'assets/client/blocks/wc-blocks-shared-hocs.js', [], false );
 
 		// The price package is shared externally so has no blocks prefix.
-		$this->api->register_script( 'wc-price-format', 'build/price-format.js', [], false );
+		$this->api->register_script( 'wc-price-format', 'assets/client/blocks/price-format.js', [], false );
 
-		$this->api->register_script( 'wc-blocks-checkout', 'build/blocks-checkout.js', [] );
-		$this->api->register_script( 'wc-blocks-components', 'build/blocks-components.js', [] );
+		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocks-checkout.js', [] );
+		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js', [] );
 
 		// Register the interactivity components here for now.
-		$this->api->register_script( 'wc-interactivity-dropdown', 'build/wc-interactivity-dropdown.js', [] );
+		$this->api->register_script( 'wc-interactivity-dropdown', 'assets/client/blocks/wc-interactivity-dropdown.js', [] );
 
 		wp_add_inline_script(
 			'wc-blocks-middleware',
@@ -83,8 +83,8 @@ final class AssetsController {
 	 * Register and enqueue assets for exclusive usage within the Site Editor.
 	 */
 	public function register_and_enqueue_site_editor_assets() {
-		$this->api->register_script( 'wc-blocks-classic-template-revert-button', 'build/wc-blocks-classic-template-revert-button.js' );
-		$this->api->register_style( 'wc-blocks-classic-template-revert-button-style', 'build/wc-blocks-classic-template-revert-button-style.css' );
+		$this->api->register_script( 'wc-blocks-classic-template-revert-button', 'assets/client/blocks/wc-blocks-classic-template-revert-button.js' );
+		$this->api->register_style( 'wc-blocks-classic-template-revert-button-style', 'assets/client/blocks/wc-blocks-classic-template-revert-button-style.css' );
 
 		$current_screen = get_current_screen();
 		if ( $current_screen instanceof \WP_Screen && 'site-editor' === $current_screen->base ) {
@@ -290,7 +290,7 @@ final class AssetsController {
 	 * @param boolean $rtl   Optional. Whether or not to register RTL styles.
 	 */
 	protected function register_style( $handle, $src, $deps = [], $media = 'all', $rtl = false ) {
-		$filename = str_replace( plugins_url( '/', __DIR__ ), '', $src );
+		$filename = str_replace( plugins_url( '/', dirname( __DIR__ ) ), '', $src );
 		$ver      = self::get_file_version( $filename );
 
 		wp_register_style( $handle, $src, $deps, $ver, $media );

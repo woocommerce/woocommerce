@@ -41,7 +41,7 @@ class GoogleAnalytics {
 	 * Register scripts.
 	 */
 	public function register_assets() {
-		$this->asset_api->register_script( 'wc-blocks-google-analytics', 'build/wc-blocks-google-analytics.js', [ 'google-tag-manager' ] );
+		$this->asset_api->register_script( 'wc-blocks-google-analytics', 'assets/client/blocks/wc-blocks-google-analytics.js', [ 'google-tag-manager' ] );
 	}
 
 	/**

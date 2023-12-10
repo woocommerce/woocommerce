@@ -56,7 +56,7 @@ final class BankTransfer extends AbstractPaymentMethodType {
 	public function get_payment_method_script_handles() {
 		$this->asset_api->register_script(
 			'wc-payment-method-bacs',
-			'build/wc-payment-method-bacs.js'
+			'assets/client/blocks/wc-payment-method-bacs.js'
 		);
 		return [ 'wc-payment-method-bacs' ];
 	}
