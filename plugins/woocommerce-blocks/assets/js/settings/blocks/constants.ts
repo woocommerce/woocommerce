@@ -30,7 +30,7 @@ export const blocksConfig = getSetting( 'wcBlocksConfig', {
 	wordCountType: 'words',
 } ) as WcBlocksConfig;
 
-export const WC_BLOCKS_IMAGE_URL = blocksConfig.pluginUrl + 'images/';
+export const WC_BLOCKS_IMAGE_URL = blocksConfig.pluginUrl + 'assets/images/';
 export const WC_BLOCKS_BUILD_URL = blocksConfig.pluginUrl + 'assets/client/blocks/';
 export const WC_BLOCKS_PHASE = blocksConfig.buildPhase;
 export const SHOP_URL = STORE_PAGES.shop?.permalink;

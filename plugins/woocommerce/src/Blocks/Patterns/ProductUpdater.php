@@ -11,37 +11,37 @@ class ProductUpdater {
 	const DUMMY_PRODUCTS = [
 		[
 			'title'       => 'Vintage Typewriter',
-			'image'       => 'images/pattern-placeholders/writing-typing-keyboard-technology-white-vintage.jpg',
+			'image'       => 'assets/images/pattern-placeholders/writing-typing-keyboard-technology-white-vintage.jpg',
 			'description' => 'A hit spy novel or a love letter? Anything you type using this vintage typewriter from the 20s is bound to make a mark.',
 			'price'       => 90,
 		],
 		[
 			'title'       => 'Leather-Clad Leisure Chair',
-			'image'       => 'images/pattern-placeholders/table-wood-house-chair-floor-window.jpg',
+			'image'       => 'assets/images/pattern-placeholders/table-wood-house-chair-floor-window.jpg',
 			'description' => 'Sit back and relax in this comfy designer chair. High-grain leather and steel frame add luxury to your your leisure.',
 			'price'       => 249,
 		],
 		[
 			'title'       => 'Black and White Summer Portrait',
-			'image'       => 'images/pattern-placeholders/white-black-black-and-white-photograph-monochrome-photography.jpg',
+			'image'       => 'assets/images/pattern-placeholders/white-black-black-and-white-photograph-monochrome-photography.jpg',
 			'description' => 'This 24" x 30" high-quality print just exudes summer. Hang it on the wall and forget about the world outside.',
 			'price'       => 115,
 		],
 		[
 			'title'       => '3-Speed Bike',
-			'image'       => 'images/pattern-placeholders/road-sport-vintage-wheel-retro-old.jpg',
+			'image'       => 'assets/images/pattern-placeholders/road-sport-vintage-wheel-retro-old.jpg',
 			'description' => 'Zoom through the streets on this premium 3-speed bike. Manufactured and assembled in Germany in the 80s.',
 			'price'       => 115,
 		],
 		[
 			'title'       => 'Hi-Fi Headphones',
-			'image'       => 'images/pattern-placeholders/man-person-music-black-and-white-white-photography.jpg',
+			'image'       => 'assets/images/pattern-placeholders/man-person-music-black-and-white-white-photography.jpg',
 			'description' => 'Experience your favorite songs in a new way with these premium hi-fi headphones.',
 			'price'       => 125,
 		],
 		[
 			'title'       => 'Retro Glass Jug (330 ml)',
-			'image'       => 'images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg',
+			'image'       => 'assets/images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg',
 			'description' => 'Thick glass and a classic silhouette make this jug a must-have for any retro-inspired kitchen.',
 			'price'       => 115,
 		],
