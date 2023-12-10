@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Blocks\Tests\Utils;
+namespace Automattic\WooCommerce\Tests\Blocks\Utils;
 
 use Automattic\WooCommerce\Blocks\Migration;
 use Automattic\WooCommerce\Blocks\Options;

@@ -3,9 +3,9 @@
  * CartController Tests.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Utilities;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
-use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 

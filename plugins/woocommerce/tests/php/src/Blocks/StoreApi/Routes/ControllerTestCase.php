@@ -3,7 +3,7 @@
  * ControllerTestCase Tests.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Formatters;

@@ -3,7 +3,7 @@
  * Helper used to create fixture data for tests.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\Helpers;
+namespace Automattic\WooCommerce\Tests\Blocks\Helpers;
 
 /**
  * FixtureData class.

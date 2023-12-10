@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Blocks\Tests\Domain\Package;
+namespace Automattic\WooCommerce\Tests\Blocks\Domain\Package;
 
 use \WP_UnitTestCase;
 use Automattic\WooCommerce\Blocks\Domain\Package as TestedPackage;
