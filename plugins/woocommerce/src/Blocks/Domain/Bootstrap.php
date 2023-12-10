@@ -77,22 +77,20 @@ class Bootstrap {
 		$this->package   = $container->get( Package::class );
 		$this->migration = $container->get( Migration::class );
 
-		if ( $this->has_core_dependencies() ) {
-			$this->init();
-			/**
-			 * Fires when the woocommerce blocks are loaded and ready to use.
-			 *
-			 * This hook is intended to be used as a safe event hook for when the plugin
-			 * has been loaded, and all dependency requirements have been met.
-			 *
-			 * To ensure blocks are initialized, you must use the `woocommerce_blocks_loaded`
-			 * hook instead of the `plugins_loaded` hook. This is because the functions
-			 * hooked into plugins_loaded on the same priority load in an inconsistent and unpredictable manner.
-			 *
-			 * @since 2.5.0
-			 */
-			do_action( 'woocommerce_blocks_loaded' );
-		}
+		$this->init();
+		/**
+		 * Fires when the woocommerce blocks are loaded and ready to use.
+		 *
+		 * This hook is intended to be used as a safe event hook for when the plugin
+		 * has been loaded, and all dependency requirements have been met.
+		 *
+		 * To ensure blocks are initialized, you must use the `woocommerce_blocks_loaded`
+		 * hook instead of the `plugins_loaded` hook. This is because the functions
+		 * hooked into plugins_loaded on the same priority load in an inconsistent and unpredictable manner.
+		 *
+		 * @since 2.5.0
+		 */
+		do_action( 'woocommerce_blocks_loaded' );
 	}
 
 	/**
@@ -159,39 +157,6 @@ class Bootstrap {
 			$this->container->get( SingleProductTemplateCompatibility::class )->init();
 			$this->container->get( Notices::class )->init();
 		}
-	}
-
-	/**
-	 * Check core dependencies exist.
-	 *
-	 * @return boolean
-	 */
-	protected function has_core_dependencies() {
-		$has_needed_dependencies = class_exists( 'WooCommerce', false );
-		if ( $has_needed_dependencies ) {
-			$plugin_data = \get_file_data(
-				$this->package->get_path( 'woocommerce-gutenberg-products-block.php' ),
-				[
-					'RequiredWCVersion' => 'WC requires at least',
-				]
-			);
-			if ( isset( $plugin_data['RequiredWCVersion'] ) && version_compare( \WC()->version, $plugin_data['RequiredWCVersion'], '<' ) ) {
-				$has_needed_dependencies = false;
-				add_action(
-					'admin_notices',
-					function() {
-						if ( should_display_compatibility_notices() ) {
-							?>
-							<div class="notice notice-error">
-								<p><?php esc_html_e( 'The WooCommerce Blocks plugin requires a more recent version of WooCommerce and has been deactivated. Please update to the latest version of WooCommerce.', 'woo-gutenberg-products-block' ); ?></p>
-							</div>
-							<?php
-						}
-					}
-				);
-			}
-		}
-		return $has_needed_dependencies;
 	}
 
 	/**
