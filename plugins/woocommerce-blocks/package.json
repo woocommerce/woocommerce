@@ -43,21 +43,29 @@
 	"license": "GPL-3.0+",
 	"scripts": {
 		"analyze-bundles": "cross-env WP_BUNDLE_ANALYZER=1 npm run build",
-		"build": "rimraf build/* && cross-env BABEL_ENV=default NODE_ENV=production webpack",
+		"changelog": "composer install && composer exec -- changelogger",
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
+		"build:project": "pnpm --if-present /^build:project:.*$/",
+		"build:project:bundle": "wireit",
 		"build:check-assets": "rimraf build/* && cross-env ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
 		"build:deploy": "rimraf vendor/* && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 composer install --no-dev && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 npm run build --loglevel error",
 		"prebuild:docs": "rimraf docs/extensibility/actions.md & rimraf docs/extensibility/filters.md",
 		"build:docs": "./vendor/bin/wp-hooks-generator --input=src --output=bin/hook-docs/data && node ./bin/hook-docs",
 		"postbuild:docs": "./bin/add-doc-footer.sh",
-		"changelog": "node ./bin/changelog",
 		"changelog:zenhub": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'",
 		"change-versions": "source ./bin/change-versions.sh",
 		"deploy": "npm run build:deploy && sh ./bin/github-deploy.sh",
 		"dev": "rimraf build/* && cross-env BABEL_ENV=default webpack",
 		"labels:dry": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels --dry-run woocommerce/woocommerce-gutenberg-products-block",
 		"labels:sync": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels woocommerce/woocommerce-gutenberg-products-block",
-		"fix-package-lock": "./bin/fix-package-lock.sh",
-		"lint": "npm run lint:php && npm run lint:css && npm run lint:js",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:css": "pnpm lint:css-fix",
+		"lint:fix:lang:js": "pnpm lint:js-fix",
+		"lint:fix:lang:php": "pnpm lint:php-fix",
+		"lint:lang:css": "pnpm lint:css",
+		"lint:lang:js": "pnpm lint:js",
+		"lint:lang:php": "pnpm lint:php",
 		"lint:ci": "npm run lint:js && npm run lint:css",
 		"lint:css": "stylelint '**/*.scss'",
 		"lint:css-fix": "stylelint '**/*.scss' --fix",
@@ -67,6 +75,7 @@
 		"lint:md:docs": "wp-scripts lint-md-docs",
 		"lint:php": "composer run-script phpcs ./src && composer run-script phpcs ./tests/mocks/woo-test-helper",
 		"lint:php-fix": "composer run-script phpcbf ./src && composer run-script phpcbf ./tests/mocks/woo-test-helper",
+		"fix-package-lock": "./bin/fix-package-lock.sh",
 		"package-plugin": "rimraf woocommerce-gutenberg-products-block.zip && ./bin/build-plugin-zip.sh",
 		"package-plugin:dev": "rimraf woocommerce-gutenberg-products-block.zip && ./bin/build-plugin-zip.sh -d",
 		"package-plugin:zip-only": "rimraf woocommerce-gutenberg-products-block.zip && ./bin/build-plugin-zip.sh -z",
@@ -79,7 +88,7 @@
 		"storybook": "storybook dev  -c ./storybook -p 6006 --ci",
 		"storybook:build": "BABEL_ENV=development storybook build  -c ./storybook -o ./storybook/dist",
 		"storybook:deploy": "rimraf ./storybook/dist/* && npm run storybook:build && gh-pages -d ./storybook/dist",
-		"test": "wp-scripts test-unit-js --config tests/js/jest.config.json",
+		"test:js": "wireit",
 		"test:debug": "ndb .",
 		"test:e2e": "sh ./bin/check-env.sh && npx playwright test --config=tests/e2e/playwright.config.ts",
 		"test:e2e:report": "sh ./bin/check-env.sh && npx playwright test --config=tests/e2e/playwright.config.ts --reporter=html",
@@ -102,7 +111,8 @@
 		"ts:check": "tsc --build",
 		"ts:log-errors": "npm --silent run ts:check | npx -y @bartekbp/typescript-checkstyle > checkstyle.xml",
 		"wp-env": "wp-env",
-		"wp-env:config": "./bin/wp-env-pre-config.sh"
+		"wp-env:config": "./bin/wp-env-pre-config.sh",
+		"watch:build": "pnpm build:project --watch"
 	},
 	"devDependencies": {
 		"@actions/core": "1.10.0",
@@ -341,5 +351,58 @@
 		"languages/**/*.json",
 		"license.txt",
 		"woocommerce-gutenberg-products-block.php"
-	]
+	],
+	"wireit": {
+		"build:project:bundle": {
+			"command": "webpack",
+			"env": {
+				"NODE_ENV": "production",
+				"BABEL_ENV": "default"
+			},
+			"files": [
+				"webpack.config.js",
+				"bin/webpack-*.js",
+				"tsconfig.json",
+				"tsconfig.base.json",
+				"babel.config.js",
+				"assets"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"test:js": {
+			"command": "wp-scripts test-unit-js --config tests/js/jest.config.json",
+			"dependencies": [
+				"build:project"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/e2e-utils/",
+				"node_modules/@woocommerce/data/",
+				"node_modules/@woocommerce/tracks/",
+				"package.json",
+				"!node_modules/@woocommerce/tracks/node_modules",
+				"!node_modules/@woocommerce/tracks/.git",
+				"!node_modules/@woocommerce/tracks/.svn",
+				"!node_modules/@woocommerce/tracks/src",
+				"!node_modules/@woocommerce/data/node_modules",
+				"!node_modules/@woocommerce/data/.git",
+				"!node_modules/@woocommerce/data/.svn",
+				"!node_modules/@woocommerce/data/src",
+				"!node_modules/@woocommerce/e2e-utils/node_modules",
+				"!node_modules/@woocommerce/e2e-utils/.git",
+				"!node_modules/@woocommerce/e2e-utils/.svn",
+				"!node_modules/@woocommerce/e2e-utils/src"
+			]
+		}
+	}
 }
