@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Blocks\Tests\Mocks;
+namespace Automattic\WooCommerce\Tests\Blocks\Mocks;
 
 class MockTestDependency {
 	public $dependency;

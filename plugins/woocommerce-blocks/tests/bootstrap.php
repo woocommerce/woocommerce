@@ -5,7 +5,7 @@
  * @package WooCommerce Blocks
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests;
+namespace Automattic\WooCommerce\Tests\Blocks;
 
 // Require composer dependencies.
 require_once dirname( __DIR__ ) . '/vendor/autoload.php';

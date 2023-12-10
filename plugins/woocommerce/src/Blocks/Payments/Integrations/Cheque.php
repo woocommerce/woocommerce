@@ -57,7 +57,7 @@ final class Cheque extends AbstractPaymentMethodType {
 	public function get_payment_method_script_handles() {
 		$this->asset_api->register_script(
 			'wc-payment-method-cheque',
-			'build/wc-payment-method-cheque.js'
+			'assets/client/blocks/wc-payment-method-cheque.js'
 		);
 		return [ 'wc-payment-method-cheque' ];
 	}

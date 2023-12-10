@@ -4,7 +4,7 @@
  *  bootstrap.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\Bootstrap;
+namespace Automattic\WooCommerce\Tests\Blocks\Bootstrap;
 
 use \WP_UnitTestCase;
 use Automattic\WooCommerce\Blocks\Domain\Bootstrap;

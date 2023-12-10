@@ -353,7 +353,7 @@ class Checkout extends AbstractBlock {
 				$declared_extensions['incompatible'],
 				function( $acc, $item ) use ( $all_plugins ) {
 					$plugin      = $all_plugins[ $item ] ?? null;
-					$plugin_id   = $plugin['TextDomain'] ?? dirname( $item );
+					$plugin_id   = $plugin['TextDomain'] ?? dirname( $item, 2 );
 					$plugin_name = $plugin['Name'] ?? $plugin_id;
 					$acc[]       = [
 						'id'    => $plugin_id,
