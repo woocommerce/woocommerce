@@ -108,7 +108,7 @@ class Api {
 	 * @return string|boolean False if metadata file is not found for the block.
 	 */
 	public function get_block_metadata_path( $block_name, $path = '' ) {
-		$path_to_metadata_from_plugin_root = $this->package->get_path( 'build/' . $path . $block_name . '/block.json' );
+		$path_to_metadata_from_plugin_root = $this->package->get_path( 'assets/client/blocks/' . $path . $block_name . '/block.json' );
 		if ( ! file_exists( $path_to_metadata_from_plugin_root ) ) {
 			return false;
 		}
@@ -284,7 +284,7 @@ class Api {
 	 * @param boolean $rtl   Optional. Whether or not to register RTL styles.
 	 */
 	public function register_style( $handle, $relative_src, $deps = [], $media = 'all', $rtl = false ) {
-		$filename = str_replace( plugins_url( '/', __DIR__ ), '', $relative_src );
+		$filename = str_replace( plugins_url( '/', dirname( __DIR__ ) ), '', $relative_src );
 		$src      = $this->get_asset_url( $relative_src );
 		$ver      = $this->get_file_version( $filename );
 		wp_register_style( $handle, $src, $deps, $ver, $media );
@@ -302,7 +302,7 @@ class Api {
 	 * @return  string             The generated path.
 	 */
 	public function get_block_asset_build_path( $filename, $type = 'js' ) {
-		return "build/$filename.$type";
+		return "assets/client/blocks/$filename.$type";
 	}
 
 	/**

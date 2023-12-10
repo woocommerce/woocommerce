@@ -180,7 +180,7 @@ abstract class AbstractBlock {
 	 * @return string[] $chunks list of chunks to load.
 	 */
 	protected function get_chunks_paths( $chunks_folder ) {
-		$build_path = \Automattic\WooCommerce\Blocks\Package::get_path() . 'build/';
+		$build_path = \Automattic\WooCommerce\Blocks\Package::get_path() . 'assets/client/blocks/';
 		$blocks     = [];
 		if ( ! is_dir( $build_path . $chunks_folder ) ) {
 			return [];

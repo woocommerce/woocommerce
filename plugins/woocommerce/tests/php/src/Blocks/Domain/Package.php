@@ -27,8 +27,8 @@ class Package extends WP_UnitTestCase {
 		$this->assertEquals( __DIR__ . '/', $package->get_path() );
 
 		//test with relative
-		$expect = __DIR__ . '/build/test';
-		$this->assertEquals( $expect, $package->get_path( 'build/test') );
+		$expect = __DIR__ . '/assets/client/blocks/test';
+		$this->assertEquals( $expect, $package->get_path( 'assets/client/blocks/test') );
 	}
 
 	public function test_get_url() {
@@ -39,8 +39,8 @@ class Package extends WP_UnitTestCase {
 
 		//test with relative
 		$this->assertEquals(
-			$test_url . 'build/test',
-			$package->get_url( 'build/test' )
+			$test_url . 'assets/client/blocks',
+			$package->get_url( 'assets/client/blocks' )
 		);
 	}
 }

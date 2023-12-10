@@ -166,7 +166,7 @@ class Bootstrap {
 	 */
 	protected function is_built() {
 		return file_exists(
-			$this->package->get_path( 'build/featured-product.js' )
+			$this->package->get_path( 'assets/client/blocks/featured-product.js' )
 		);
 	}
 
