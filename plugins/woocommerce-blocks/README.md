@@ -1,6 +1,6 @@
 # WooCommerce Blocks <!-- omit in toc -->
 
-This is the client for WooCommerce + the Gutenberg. This plugin serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the block editor.
+This is the client for WooCommerce + the Gutenberg. This package serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the block editor.
 
 ## Table of Contents <!-- omit in toc -->
 
@@ -27,8 +27,6 @@ If you want to see what we're working on for future versions, or want to help ou
 Run through the ["Writing Your First Block Type" tutorial](https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/writing-your-first-block-type/) for a quick course in block-building.
 
 For deeper dive, try looking at the [core blocks code,](https://github.com/WordPress/gutenberg/tree/master/packages/block-library/src) or see what [components are available.](https://github.com/WordPress/gutenberg/tree/master/packages/components/src)
-
-To begin contributing to the WooCommerce Blocks plugin, see our [getting started guide](./docs/contributors/getting-started.md) and [developer handbook](./docs/README.md).
 
 Other useful docs to explore:
 
