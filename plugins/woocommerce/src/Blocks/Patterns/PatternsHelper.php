@@ -66,7 +66,7 @@ class PatternsHelper {
 	public static function get_image_url( array $images, int $index, string $default_image ): string {
 		$image = filter_var( $default_image, FILTER_VALIDATE_URL )
 			? $default_image
-			: plugins_url( $default_image, dirname( __DIR__ ) );
+			: plugins_url( $default_image, dirname( __DIR__, 2 ) );
 
 		if ( isset( $images[ $index ] ) ) {
 			$image = $images[ $index ];

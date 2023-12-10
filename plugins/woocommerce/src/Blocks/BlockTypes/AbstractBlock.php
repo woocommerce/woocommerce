@@ -180,7 +180,7 @@ abstract class AbstractBlock {
 	 * @return string[] $chunks list of chunks to load.
 	 */
 	protected function get_chunks_paths( $chunks_folder ) {
-		$build_path = \Automattic\WooCommerce\Blocks\Package::get_path() . 'build/';
+		$build_path = \Automattic\WooCommerce\Blocks\Package::get_path() . 'assets/client/blocks/';
 		$blocks     = [];
 		if ( ! is_dir( $build_path . $chunks_folder ) ) {
 			return [];
@@ -429,7 +429,7 @@ abstract class AbstractBlock {
 				'wcBlocksConfig',
 				[
 					'buildPhase'    => Package::feature()->get_flag(),
-					'pluginUrl'     => plugins_url( '/', dirname( __DIR__ ) ),
+					'pluginUrl'     => plugins_url( '/', dirname( __DIR__, 2 ) ),
 					'productCount'  => array_sum( (array) wp_count_posts( 'product' ) ),
 					'restApiRoutes' => [
 						'/wc/store/v1' => array_keys( $this->get_routes_from_namespace( 'wc/store/v1' ) ),

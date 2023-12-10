@@ -293,7 +293,7 @@ class BlockTemplateUtils {
 	 * @return string
 	 */
 	public static function get_templates_directory( $template_type = 'wp_template' ) {
-			$root_path                = dirname( __DIR__, 2 ) . '/' . self::TEMPLATES_ROOT_DIR . DIRECTORY_SEPARATOR;
+			$root_path                = dirname( __DIR__, 3 ) . '/' . self::TEMPLATES_ROOT_DIR . DIRECTORY_SEPARATOR;
 			$templates_directory      = $root_path . self::DIRECTORY_NAMES['TEMPLATES'];
 			$template_parts_directory = $root_path . self::DIRECTORY_NAMES['TEMPLATE_PARTS'];
 

@@ -1,7 +1,7 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\Tests\BlockTypes;
+namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Tests\Mocks\ProductCollectionMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 
 /**
  * Tests for the ProductCollection block type

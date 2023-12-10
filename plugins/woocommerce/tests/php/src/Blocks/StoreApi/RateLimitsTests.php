@@ -3,7 +3,7 @@
  * Rate Limits Tests
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi;
 
 use Automattic\WooCommerce\StoreApi\Authentication;
 use Automattic\WooCommerce\StoreApi\Utilities\RateLimits;

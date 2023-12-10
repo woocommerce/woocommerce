@@ -28,7 +28,7 @@ function woocommerce_interactivity_register_runtime() {
 	$plugin_path = \Automattic\WooCommerce\Blocks\Package::get_path();
 	$plugin_url  = plugin_dir_url( $plugin_path . '/index.php' );
 
-	$file = 'build/wc-interactivity.js';
+	$file = 'assets/client/blocks/wc-interactivity.js';
 
 	$file_path = $plugin_path . $file;
 	$file_url  = $plugin_url . $file;

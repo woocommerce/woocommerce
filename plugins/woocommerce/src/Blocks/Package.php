@@ -112,7 +112,7 @@ class Package {
 					$version = '11.8.0-dev';
 					return new NewPackage(
 						$version,
-						dirname( __DIR__ ),
+						dirname( __DIR__, 2 ),
 						new FeatureGating()
 					);
 				}

@@ -373,7 +373,7 @@ class AssetDataRegistry {
 	public function register_data_script() {
 		$this->api->register_script(
 			$this->handle,
-			'build/wc-settings.js',
+			'assets/client/blocks/wc-settings.js',
 			[ 'wp-api-fetch' ],
 			true
 		);

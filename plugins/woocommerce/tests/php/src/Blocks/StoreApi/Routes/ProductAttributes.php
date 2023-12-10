@@ -3,11 +3,11 @@
  * Controller Tests.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes\ControllerTestCase;
-use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
-use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
+use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
 
 /**
  * Product Attributes Controller Tests.

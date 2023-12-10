@@ -3,7 +3,7 @@
  * Controller Tests.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Formatters;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Formatters;
 
 use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 

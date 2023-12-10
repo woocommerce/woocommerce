@@ -3,7 +3,7 @@
  * NoticeHandler Tests.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Utilities;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
