@@ -1042,7 +1042,7 @@ importers:
         version: link:../experimental
       '@wordpress/components':
         specifier: wp-6.0
-        version: 19.8.5(react-dom@17.0.2)(react-with-direction@1.4.0)(react@17.0.2)
+        version: 19.8.5(@types/react@17.0.71)(react-dom@17.0.2)(react-with-direction@1.4.0)(react@17.0.2)
       '@wordpress/compose':
         specifier: wp-6.3
         version: 6.12.3(react@17.0.2)
@@ -20569,7 +20569,7 @@ packages:
       '@wordpress/escape-html': 2.47.0
       '@wordpress/hooks': 3.6.1
       '@wordpress/i18n': 4.6.1
-      '@wordpress/icons': 8.2.3
+      '@wordpress/icons': 8.4.0
       '@wordpress/is-shallow-equal': 4.24.0
       '@wordpress/keycodes': 3.47.0
       '@wordpress/primitives': 3.4.1
@@ -20623,59 +20623,6 @@ packages:
       '@wordpress/hooks': 3.6.1
       '@wordpress/i18n': 4.6.1
       '@wordpress/icons': 8.4.0
-      '@wordpress/is-shallow-equal': 4.24.0
-      '@wordpress/keycodes': 3.47.0
-      '@wordpress/primitives': 3.4.1
-      '@wordpress/rich-text': 5.4.2(react@17.0.2)
-      '@wordpress/warning': 2.6.1
-      classnames: 2.3.2
-      colord: 2.9.3
-      dom-scroll-into-view: 1.2.1
-      downshift: 6.1.12(react@17.0.2)
-      framer-motion: 6.5.1(react-dom@17.0.2)(react@17.0.2)
-      gradient-parser: 0.1.5
-      highlight-words-core: 1.2.2
-      lodash: 4.17.21
-      memize: 1.1.0
-      moment: 2.29.4
-      re-resizable: 6.9.11(react-dom@17.0.2)(react@17.0.2)
-      react: 17.0.2
-      react-colorful: 5.6.1(react-dom@17.0.2)(react@17.0.2)
-      react-dates: 17.2.0(moment@2.29.4)(react-dom@17.0.2)(react-with-direction@1.4.0)(react@17.0.2)
-      react-dom: 17.0.2(react@17.0.2)
-      react-resize-aware: 3.1.1(react@17.0.2)
-      reakit: 1.3.11(react-dom@17.0.2)(react@17.0.2)
-      uuid: 8.3.2
-    transitivePeerDependencies:
-      - '@types/react'
-      - react-with-direction
-    dev: false
-
-  /@wordpress/components@19.8.5(react-dom@17.0.2)(react-with-direction@1.4.0)(react@17.0.2):
-    resolution: {integrity: sha512-36d8fSk/nWfNv2nEZrC2gLx1rN9rGWFt425yXoH6JiakDvdXacN/04xcxZGBRkS+JDz6v22uyPMEol9TzwXOLg==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      react: ^17.0.2
-      react-dom: ^17.0.0
-    dependencies:
-      '@babel/runtime': 7.23.5
-      '@emotion/cache': 11.11.0
-      '@emotion/css': 11.11.2
-      '@emotion/react': 11.11.1(@types/react@17.0.71)(react@17.0.2)
-      '@emotion/serialize': 1.1.2
-      '@emotion/styled': 11.11.0(@emotion/react@11.11.1)(@types/react@17.0.71)(react@17.0.2)
-      '@emotion/utils': 1.0.0
-      '@use-gesture/react': 10.3.0(react@17.0.2)
-      '@wordpress/a11y': 3.6.1
-      '@wordpress/compose': 5.4.1(react@17.0.2)
-      '@wordpress/date': 4.6.1
-      '@wordpress/deprecated': 3.41.0
-      '@wordpress/dom': 3.27.0
-      '@wordpress/element': 4.4.1
-      '@wordpress/escape-html': 2.47.0
-      '@wordpress/hooks': 3.6.1
-      '@wordpress/i18n': 4.6.1
-      '@wordpress/icons': 8.2.3
       '@wordpress/is-shallow-equal': 4.24.0
       '@wordpress/keycodes': 3.47.0
       '@wordpress/primitives': 3.4.1
