@@ -117,7 +117,7 @@ const getCoreConfig = ( options = {} ) => {
 			...getSharedPlugins( { bundleAnalyzerReportTitle: 'Core' } ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Core' ) ),
 			new CreateFileWebpack( {
-				path: './',
+				path: '../woocommerce',
 				// file name
 				fileName: 'blocks.ini',
 				// content of the file
