@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Blocks\Tests\Templates;
+namespace Automattic\WooCommerce\Tests\Blocks\Templates;
 
 use \WP_UnitTestCase;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;

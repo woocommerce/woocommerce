@@ -3,7 +3,7 @@
  * Helper used to validate schema differences.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\Helpers;
+namespace Automattic\WooCommerce\Tests\Blocks\Helpers;
 
 /**
  * Validate schema.

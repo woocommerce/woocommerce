@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi;
 
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;

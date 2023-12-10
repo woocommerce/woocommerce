@@ -1,5 +1,5 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\Tests\BlockTypes;
+namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
 

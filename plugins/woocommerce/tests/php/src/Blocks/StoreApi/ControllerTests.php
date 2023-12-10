@@ -3,7 +3,7 @@
  * Controller Tests.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi;
 
 /**
  * ControllerTests

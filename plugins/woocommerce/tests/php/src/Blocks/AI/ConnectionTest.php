@@ -5,7 +5,7 @@
  * @package WooCommerce\AI\Tests
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\AI;
+namespace Automattic\WooCommerce\Tests\Blocks\AI;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use \WP_UnitTestCase;

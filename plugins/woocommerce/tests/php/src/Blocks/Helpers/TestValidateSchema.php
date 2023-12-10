@@ -3,7 +3,7 @@
  * Ensures the helper works.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\Helpers;
+namespace Automattic\WooCommerce\Tests\Blocks\Helpers;
 
 require_once __DIR__ . '/ValidateSchema.php';
 

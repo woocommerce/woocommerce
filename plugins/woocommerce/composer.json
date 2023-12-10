@@ -69,7 +69,11 @@
 		},
 		"psr-0": {
 			"Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
-		}
+		},
+		"files": [
+			"src/StoreApi/deprecated.php",
+			"src/StoreApi/functions.php"
+		]
 	},
 	"autoload-dev": {
 		"psr-4": {

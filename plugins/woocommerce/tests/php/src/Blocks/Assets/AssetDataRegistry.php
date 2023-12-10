@@ -1,9 +1,9 @@
 <?php
 
-namespace Automattic\WooCommerce\Blocks\Tests\Assets;
+namespace Automattic\WooCommerce\Tests\Blocks\Assets;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;
-use Automattic\WooCommerce\Blocks\Tests\Mocks\AssetDataRegistryMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use Automattic\WooCommerce\Blocks\Package;
 use InvalidArgumentException;
 

@@ -4148,7 +4148,7 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-refactor/task-infrastructure",
+            "version": "dev-fix/block-library-build",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",

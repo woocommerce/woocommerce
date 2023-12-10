@@ -1,7 +1,7 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\Tests\BlockTypes;
+namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Tests\Mocks\ProductQueryMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductQueryMock;
 
 /**
  * Tests for the ProductQuery block type

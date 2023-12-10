@@ -3,10 +3,10 @@
  * Cart extensions route tests.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes\ControllerTestCase;
-use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
+use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
  * Cart Controller Tests.

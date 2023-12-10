@@ -1,5 +1,5 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\Tests\Mocks;
+namespace Automattic\WooCommerce\Tests\Blocks\Mocks;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
