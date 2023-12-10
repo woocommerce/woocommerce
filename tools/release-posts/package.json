@@ -22,7 +22,7 @@
 		"@types/node-fetch": "^2.6.9",
 		"@types/semver": "^7.5.6",
 		"typescript": "^5.3.3",
-		"wireit": "^0.14.1"
+		"wireit": "0.14.1"
 	},
 	"dependencies": {
 		"@commander-js/extra-typings": "^0.1.0",
