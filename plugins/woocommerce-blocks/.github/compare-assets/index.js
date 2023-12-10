@@ -20,7 +20,7 @@ const runner = async () => {
 			return;
 		}
 
-		const newAssets = require( '../../build/assets.json' );
+		const newAssets = require( '../../../woocommerce/assets/client/blocks/assets.json' );
 
 		if ( ! newAssets ) {
 			return;

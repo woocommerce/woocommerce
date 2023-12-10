@@ -84,7 +84,7 @@ const getCoreConfig = ( options = {} ) => {
 			filename: ( chunkData ) => {
 				return `${ paramCase( chunkData.chunk.name ) }.js`;
 			},
-			path: path.resolve( __dirname, '../build/' ),
+			path: path.resolve( __dirname, '../../woocommerce/assets/client/blocks/' ),
 			library: [ 'wc', '[name]' ],
 			libraryTarget: 'this',
 			uniqueName: 'webpackWcBlocksJsonp',
@@ -183,7 +183,7 @@ const getMainConfig = ( options = {} ) => {
 		entry: getEntryConfig( 'main', options.exclude || [] ),
 		output: {
 			devtoolNamespace: 'wc',
-			path: path.resolve( __dirname, '../build/' ),
+			path: path.resolve( __dirname, '../../woocommerce/assets/client/blocks/' ),
 			// This is a cache busting mechanism which ensures that the script is loaded via the browser with a ?ver=hash
 			// string. The hash is based on the built file contents.
 			// @see https://github.com/webpack/webpack/issues/2329
@@ -317,7 +317,7 @@ const getFrontConfig = ( options = {} ) => {
 		entry: getEntryConfig( 'frontend', options.exclude || [] ),
 		output: {
 			devtoolNamespace: 'wc',
-			path: path.resolve( __dirname, '../build/' ),
+			path: path.resolve( __dirname, '../../woocommerce/assets/client/blocks/' ),
 			// This is a cache busting mechanism which ensures that the script is loaded via the browser with a ?ver=hash
 			// string. The hash is based on the built file contents.
 			// @see https://github.com/webpack/webpack/issues/2329
@@ -442,7 +442,7 @@ const getPaymentsConfig = ( options = {} ) => {
 		entry: getEntryConfig( 'payments', options.exclude || [] ),
 		output: {
 			devtoolNamespace: 'wc',
-			path: path.resolve( __dirname, '../build/' ),
+			path: path.resolve( __dirname, '../../woocommerce/assets/client/blocks/' ),
 			filename: `[name].js`,
 			uniqueName: 'webpackWcBlocksPaymentMethodExtensionJsonp',
 		},
@@ -549,7 +549,7 @@ const getExtensionsConfig = ( options = {} ) => {
 		entry: getEntryConfig( 'extensions', options.exclude || [] ),
 		output: {
 			devtoolNamespace: 'wc',
-			path: path.resolve( __dirname, '../build/' ),
+			path: path.resolve( __dirname, '../../woocommerce/assets/client/blocks/' ),
 			filename: `[name].js`,
 			uniqueName: 'webpackWcBlocksExtensionsMethodExtensionJsonp',
 		},
@@ -656,7 +656,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 		entry: getEntryConfig( 'editor', options.exclude || [] ),
 		output: {
 			devtoolNamespace: 'wc',
-			path: path.resolve( __dirname, '../build/' ),
+			path: path.resolve( __dirname, '../../woocommerce/assets/client/blocks/' ),
 			filename: `[name].js`,
 			chunkLoadingGlobal: 'webpackWcBlocksExtensionsMethodExtensionJsonp',
 		},
@@ -763,7 +763,7 @@ const getStylingConfig = ( options = {} ) => {
 		entry: getEntryConfig( 'styling', options.exclude || [] ),
 		output: {
 			devtoolNamespace: 'wc',
-			path: path.resolve( __dirname, '../build/' ),
+			path: path.resolve( __dirname, '../../woocommerce/assets/client/blocks/' ),
 			filename: `[name]-style${ fileSuffix }.js`,
 			library: [ 'wc', 'blocks', '[name]' ],
 			libraryTarget: 'this',
@@ -914,7 +914,7 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 		},
 		output: {
 			filename: '[name].js',
-			path: path.resolve( __dirname, '../build/' ),
+			path: path.resolve( __dirname, '../../woocommerce/assets/client/blocks/' ),
 			library: [ 'wc', '__experimentalInteractivity' ],
 			libraryTarget: 'this',
 			chunkLoadingGlobal: 'webpackWcBlocksJsonp',
