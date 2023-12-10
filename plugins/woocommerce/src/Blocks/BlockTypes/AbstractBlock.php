@@ -429,7 +429,7 @@ abstract class AbstractBlock {
 				'wcBlocksConfig',
 				[
 					'buildPhase'    => Package::feature()->get_flag(),
-					'pluginUrl'     => plugins_url( '/', dirname( __DIR__ ) ),
+					'pluginUrl'     => plugins_url( '/', dirname( __DIR__, 2 ) ),
 					'productCount'  => array_sum( (array) wp_count_posts( 'product' ) ),
 					'restApiRoutes' => [
 						'/wc/store/v1' => array_keys( $this->get_routes_from_namespace( 'wc/store/v1' ) ),
