@@ -1,6 +1,6 @@
 # WooCommerce Blocks <!-- omit in toc -->
 
-This is the client for WooCommerce + the Gutenberg. This package serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the block editor.
+This is the client for WooCommerce + Gutenberg. This package serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the block editor.
 
 ## Table of Contents <!-- omit in toc -->
 
