@@ -54,6 +54,19 @@ pnpm --filter=@woocommerce/admin-library lint
 pnpm --filter=@woocommerce/admin-library test 
 ```
 
+### `plugins/woocommerce-blocks`
+
+This directory contains the client for WooCommerce + Gutenberg.
+
+```bash
+# Build the Blocks client.
+pnpm run --filter=@woocommerce/block-library build 
+# Lint the Blocks client.
+pnpm run --filter=@woocommerce/block-library lint 
+# Test the Blocks client.
+pnpm run --filter=@woocommerce/block-library test 
+```
+
 #### Helper Scripts
 
 Here is a collection of scripts that can help when developing the React-based admin interface.
