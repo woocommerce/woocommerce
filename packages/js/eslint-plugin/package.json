@@ -41,10 +41,11 @@
 		"access": "public"
 	},
 	"scripts": {
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"lint": "eslint ./rules ./configs",
-		"lint:fix": "eslint ./rules ./configs --fix"
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint ./rules ./configs --fix",
+		"lint:lang:js": "eslint ./rules ./configs"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
@@ -53,7 +54,8 @@
 		"jest-cli": "~27.5.1",
 		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
-		"typescript": "^5.3.3"
+		"typescript": "^5.3.3",
+		"wireit": "0.14.1"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

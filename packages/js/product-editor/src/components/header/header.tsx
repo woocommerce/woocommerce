@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { WooHeaderItem } from '@woocommerce/admin-layout';
-import { Product, ProductVariation } from '@woocommerce/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
@@ -46,11 +45,7 @@ export function Header( {
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord(
-				'postType',
-				productType,
-				productId
-			);
+			return getEntityRecord( 'postType', productType, productId );
 		},
 		[ productId ]
 	);
