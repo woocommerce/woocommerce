@@ -103,7 +103,7 @@ class Api {
 	 * Get the path to a block's metadata
 	 *
 	 * @param string $block_name The block to get metadata for.
-	 * @param string $path Optional. The path to the metadata file inside the 'build' folder.
+	 * @param string $path Optional. The path to the metadata file inside the 'assets/client/blocks' folder.
 	 *
 	 * @return string|boolean False if metadata file is not found for the block.
 	 */
