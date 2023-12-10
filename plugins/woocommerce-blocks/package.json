@@ -42,19 +42,19 @@
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
-		"analyze-bundles": "cross-env WP_BUNDLE_ANALYZER=1 npm run build",
+		"analyze-bundles": "cross-env WP_BUNDLE_ANALYZER=1 pnpm run build",
 		"changelog": "composer install && composer exec -- changelogger",
 		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
 		"build:project": "pnpm --if-present /^build:project:.*$/",
 		"build:project:bundle": "wireit",
 		"build:check-assets": "rimraf build/* && cross-env ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
-		"build:deploy": "rimraf vendor/* && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 composer install --no-dev && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 npm run build --loglevel error",
+		"build:deploy": "rimraf vendor/* && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 composer install --no-dev && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 pnpm run build --loglevel error",
 		"prebuild:docs": "rimraf docs/extensibility/actions.md & rimraf docs/extensibility/filters.md",
 		"build:docs": "./vendor/bin/wp-hooks-generator --input=src --output=bin/hook-docs/data && node ./bin/hook-docs",
 		"postbuild:docs": "./bin/add-doc-footer.sh",
 		"changelog:zenhub": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'",
 		"change-versions": "source ./bin/change-versions.sh",
-		"deploy": "npm run build:deploy && sh ./bin/github-deploy.sh",
+		"deploy": "pnpm run build:deploy && sh ./bin/github-deploy.sh",
 		"dev": "rimraf build/* && cross-env BABEL_ENV=default webpack",
 		"labels:dry": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels --dry-run woocommerce/woocommerce-gutenberg-products-block",
 		"labels:sync": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels woocommerce/woocommerce-gutenberg-products-block",
@@ -64,11 +64,11 @@
 		"lint:fix:lang:js": "pnpm lint:js-fix",
 		"lint:lang:css": "pnpm lint:css",
 		"lint:lang:js": "pnpm lint:js",
-		"lint:ci": "npm run lint:js && npm run lint:css",
+		"lint:ci": "pnpm run lint:js && pnpm run lint:css",
 		"lint:css": "stylelint '**/*.scss'",
 		"lint:css-fix": "stylelint '**/*.scss' --fix",
 		"lint:js": "wp-scripts lint-js --ext=js,ts,tsx",
-		"lint:js:report": "npm run lint:js -- --output-file eslint_report.json --ext=js,ts,tsx --format json",
+		"lint:js:report": "pnpm run lint:js -- --output-file eslint_report.json --ext=js,ts,tsx --format json",
 		"lint:js-fix": "eslint assets/js --ext=js,jsx,ts,tsx --fix",
 		"lint:md:docs": "wp-scripts lint-md-docs",
 		"lint:php": "composer run-script phpcs ./src && composer run-script phpcs ./tests/mocks/woo-test-helper",
@@ -77,7 +77,7 @@
 		"package-plugin": "rimraf woocommerce-gutenberg-products-block.zip && ./bin/build-plugin-zip.sh",
 		"package-plugin:dev": "rimraf woocommerce-gutenberg-products-block.zip && ./bin/build-plugin-zip.sh -d",
 		"package-plugin:zip-only": "rimraf woocommerce-gutenberg-products-block.zip && ./bin/build-plugin-zip.sh -z",
-		"package-plugin:deploy": "npm run build:deploy && npm run package-plugin:zip-only",
+		"package-plugin:deploy": "pnpm run build:deploy && pnpm run package-plugin:zip-only",
 		"pre-commit": "lint-staged",
 		"reformat-files": "prettier --ignore-path .eslintignore --write \"**/*.{js,jsx,json,ts,tsx}\"",
 		"release": "sh ./bin/wordpress-deploy.sh",
@@ -85,27 +85,27 @@
 		"start": "rimraf build/* && cross-env BABEL_ENV=default CHECK_CIRCULAR_DEPS=true webpack --watch",
 		"storybook": "storybook dev  -c ./storybook -p 6006 --ci",
 		"storybook:build": "BABEL_ENV=development storybook build  -c ./storybook -o ./storybook/dist",
-		"storybook:deploy": "rimraf ./storybook/dist/* && npm run storybook:build && gh-pages -d ./storybook/dist",
+		"storybook:deploy": "rimraf ./storybook/dist/* && pnpm run storybook:build && gh-pages -d ./storybook/dist",
 		"test:js": "wireit",
 		"test:debug": "ndb .",
 		"test:e2e": "sh ./bin/check-env.sh && npx playwright test --config=tests/e2e/playwright.config.ts",
 		"test:e2e:report": "sh ./bin/check-env.sh && npx playwright test --config=tests/e2e/playwright.config.ts --reporter=html",
-		"test:e2e:side-effects": "npm run test:e2e -- --config=tests/e2e/playwright.side-effects.config.ts",
-		"test:e2e:side-effects:report": "npm run test:e2e:report -- --config=tests/e2e/playwright.side-effects.config.ts",
-		"test:e2e:classic-theme": "npm run test:e2e -- --config=tests/e2e/playwright.classic-theme.config.ts",
-		"test:e2e:classic-theme:report": "npm run test:e2e:report -- --config=tests/e2e/playwright.classic-theme.config.ts",
-		"test:e2e:jest": "npm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js",
-		"test:e2e:jest:dev": "npm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js",
-		"test:e2e:jest:dev-watch": "npm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --watch",
-		"test:e2e:jest:update": "npm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --updateSnapshot",
-		"env:start": "npm run wp-env start && ./tests/e2e/bin/test-env-setup.sh",
-		"env:restart": "npm run wp-env clean all && npm run wp-env start && ./tests/e2e/bin/test-env-setup.sh",
-		"env:stop": "npm run wp-env stop",
+		"test:e2e:side-effects": "pnpm run test:e2e -- --config=tests/e2e/playwright.side-effects.config.ts",
+		"test:e2e:side-effects:report": "pnpm run test:e2e:report -- --config=tests/e2e/playwright.side-effects.config.ts",
+		"test:e2e:classic-theme": "pnpm run test:e2e -- --config=tests/e2e/playwright.classic-theme.config.ts",
+		"test:e2e:classic-theme:report": "pnpm run test:e2e:report -- --config=tests/e2e/playwright.classic-theme.config.ts",
+		"test:e2e:jest": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js",
+		"test:e2e:jest:dev": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js",
+		"test:e2e:jest:dev-watch": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --watch",
+		"test:e2e:jest:update": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --updateSnapshot",
+		"env:start": "pnpm run wp-env start && ./tests/e2e/bin/test-env-setup.sh",
+		"env:restart": "pnpm run wp-env clean all && pnpm run wp-env start && ./tests/e2e/bin/test-env-setup.sh",
+		"env:stop": "pnpm run wp-env stop",
 		"test:help": "wp-scripts test-unit-js --help",
-		"test:performance": "npm run wp-env:config && cross-env NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.performance.config.js -- performance",
+		"test:performance": "pnpm run wp-env:config && cross-env NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.performance.config.js -- performance",
 		"test:php": "wp-env run --env-cwd=\"wp-content/plugins/${PWD##*/}\" tests-wordpress vendor/bin/phpunit -- -c phpunit.xml.dist",
 		"test:update": "wp-scripts test-unit-js --updateSnapshot --config tests/js/jest.config.json",
-		"test:watch": "npm run test -- --watch",
+		"test:watch": "pnpm run test -- --watch",
 		"ts:check": "tsc --build",
 		"ts:log-errors": "npm --silent run ts:check | npx -y @bartekbp/typescript-checkstyle > checkstyle.xml",
 		"wp-env": "wp-env",
@@ -328,18 +328,18 @@
 	},
 	"lint-staged": {
 		"*.scss": [
-			"npm run lint:css"
+			"pnpm run lint:css"
 		],
 		"*.{js,ts,tsx}": [
 			"prettier --write",
-			"npm run lint:js"
+			"pnpm run lint:js"
 		],
 		"*.php": [
 			"php -d display_errors=1 -l",
 			"composer run-script phpcs"
 		],
 		"*.md": [
-			"npm run lint:md:docs"
+			"pnpm run lint:md:docs"
 		]
 	},
 	"changelog": {
@@ -360,8 +360,15 @@
 		"build:project:bundle": {
 			"command": "webpack",
 			"env": {
-				"NODE_ENV": "production",
-				"BABEL_ENV": "default"
+				"NODE_ENV": {
+					"external": true
+				},
+				"BABEL_ENV": {
+					"external": true
+				},
+				"WOOCOMMERCE_BLOCKS_PHASE": {
+					"external": true
+				}
 			},
 			"files": [
 				"webpack.config.js",
