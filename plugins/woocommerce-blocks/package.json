@@ -373,7 +373,8 @@
 				"packages"
 			],
 			"output": [
-				"build"
+				"build",
+				"blocks.ini"
 			],
 			"dependencies": [
 				"dependencyOutputs"
