@@ -208,7 +208,7 @@ class ProductUpdater {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 
-		$product_image_id = media_sideload_image( plugins_url( $product_data['image'], dirname( __DIR__ ) ), $product->get_id(), $product_data['title'], 'id' );
+		$product_image_id = media_sideload_image( plugins_url( $product_data['image'], dirname( __DIR__, 2 ) ), $product->get_id(), $product_data['title'], 'id' );
 		if ( is_wp_error( $product_image_id ) ) {
 			return new \WP_Error( 'error_uploading_image', $product_image_id->get_error_message() );
 		}
@@ -495,7 +495,7 @@ class ProductUpdater {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 			require_once ABSPATH . 'wp-admin/includes/image.php';
 
-			$product_image_id = media_sideload_image( plugins_url( self::DUMMY_PRODUCTS[ $i ]['image'], dirname( __DIR__ ) ), $product->get_id(), self::DUMMY_PRODUCTS[ $i ]['title'], 'id' );
+			$product_image_id = media_sideload_image( plugins_url( self::DUMMY_PRODUCTS[ $i ]['image'], dirname( __DIR__, 2 ) ), $product->get_id(), self::DUMMY_PRODUCTS[ $i ]['title'], 'id' );
 			$product_image_id = $product->set_image_id( $product_image_id );
 
 			$product->save();
