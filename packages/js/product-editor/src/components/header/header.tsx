@@ -46,11 +46,7 @@ export function Header( {
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord(
-				'postType',
-				productType,
-				productId
-			);
+			return getEntityRecord( 'postType', productType, productId );
 		},
 		[ productId ]
 	);

@@ -33,11 +33,8 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				);
 			} );
 
-			const {
-				startResolution,
-				finishResolution,
-				receiveCurrentUser,
-			} = useDispatch( STORE_NAME );
+			const { startResolution, finishResolution, receiveCurrentUser } =
+				useDispatch( STORE_NAME );
 
 			if ( shouldHydrate ) {
 				startResolution( 'getCurrentUser', [] );

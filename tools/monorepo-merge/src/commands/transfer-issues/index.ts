@@ -52,8 +52,7 @@ export default class TransferIssues extends Command {
 
 	static flags = {
 		destination: Flags.string( {
-			description:
-				'The destination repository to transfer into.',
+			description: 'The destination repository to transfer into.',
 			default: 'woocommerce/woocommerce',
 		} ),
 		searchFilter: Flags.string( {
@@ -80,8 +79,8 @@ export default class TransferIssues extends Command {
 			);
 		}
 
-		const destinationOwner = matches[1];
-		const destinationRepo = matches[2];
+		const destinationOwner = matches[ 1 ];
+		const destinationRepo = matches[ 2 ];
 
 		if ( ! args.source.startsWith( destinationOwner + '/' ) ) {
 			this.error(
@@ -182,7 +181,7 @@ export default class TransferIssues extends Command {
 
 		this.log(
 			'Successfully transferred ' +
-			transferredIssues +
+				transferredIssues +
 				'/' +
 				numberOfIssues +
 				' issues.'
@@ -231,13 +230,13 @@ export default class TransferIssues extends Command {
 	 * Fetches the node ID of the monorepo from GitHub.
 	 *
 	 * @param {graphql} authenticatedGraphQL The graphql object for making requests.
-	 * @param {string}  destinationOwner	 The owner of the repository to transfer issues into.
-	 * @param {string}  destinationRepo	 	 The repository to transfer issues into.
+	 * @param {string}  destinationOwner     The owner of the repository to transfer issues into.
+	 * @param {string}  destinationRepo      The repository to transfer issues into.
 	 */
 	private async getMonorepoNodeID(
 		authenticatedGraphQL: typeof graphql,
 		destinationOwner: string,
-		destinationRepo: string,
+		destinationRepo: string
 	): Promise< string > {
 		CliUx.ux.action.start( 'Finding Monorepo' );
 
@@ -270,7 +269,11 @@ export default class TransferIssues extends Command {
 
 			if ( err instanceof GraphqlResponseError ) {
 				this.error(
-					'Could not find the repository "' + destinationOwner + '/' + destinationRepo + '"'
+					'Could not find the repository "' +
+						destinationOwner +
+						'/' +
+						destinationRepo +
+						'"'
 				);
 			}
 
@@ -284,8 +287,8 @@ export default class TransferIssues extends Command {
 	 * Gets all of the labels we want to add from GitHub.
 	 *
 	 * @param {graphql}             authenticatedGraphQL The graphql object for making requests.
-	 * @param {string}				destinationOwner	 The owner of the repository to transfer issues into.
-	 * @param {string}				destinationRepo	 	 The repository to transfer issues into.
+	 * @param {string}              destinationOwner     The owner of the repository to transfer issues into.
+	 * @param {string}              destinationRepo      The repository to transfer issues into.
 	 * @param {Array.<GitHubLabel>} labels               The labels we want to add after the transfer.
 	 */
 	private async getLabelsToAdd(
@@ -356,7 +359,9 @@ export default class TransferIssues extends Command {
 		for ( const label of addLabels ) {
 			if ( ! allLabels[ label ] ) {
 				this.error(
-					'The target repository does not have the label ' + label + '.'
+					'The target repository does not have the label ' +
+						label +
+						'.'
 				);
 			}
 
@@ -545,7 +550,9 @@ export default class TransferIssues extends Command {
 								break;
 
 							case 'NUMBER':
-								projectField.value = { number: fieldValue.number };
+								projectField.value = {
+									number: fieldValue.number,
+								};
 								break;
 
 							case 'DATE':
@@ -553,11 +560,15 @@ export default class TransferIssues extends Command {
 								break;
 
 							case 'SINGLE_SELECT':
-								projectField.value = { singleSelectOptionId: fieldValue.optionId };
+								projectField.value = {
+									singleSelectOptionId: fieldValue.optionId,
+								};
 								break;
 
 							case 'ITERATION':
-								projectField.value = { iterationId: fieldValue.iterationId };
+								projectField.value = {
+									iterationId: fieldValue.iterationId,
+								};
 								break;
 
 							default:
@@ -571,7 +582,7 @@ export default class TransferIssues extends Command {
 				issues.push( {
 					id: issue.id,
 					title: issue.title,
-					projectFields: projectFields
+					projectFields,
 				} );
 			}
 
@@ -642,7 +653,7 @@ export default class TransferIssues extends Command {
 
 	/**
 	 * Update the project fields for the issue.
-	 * 
+	 *
 	 * @param {graphql}             authenticatedGraphQL The graphql object for making requests.
 	 * @param {Array.<GitHubLabel>} projectFields        The project fields to update for the issue.
 	 */

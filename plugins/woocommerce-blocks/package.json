@@ -255,6 +255,7 @@
 		"rtlcss": "^4.1.1",
 		"sass-loader": "10.1.0",
 		"storybook": "^7.6.4",
+		"stylelint": "^14.16.1",
 		"storybook-addon-react-docgen": "1.2.44",
 		"terser-webpack-plugin": "5.3.6",
 		"typescript": "5.3.2",
