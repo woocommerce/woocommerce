@@ -67,6 +67,9 @@
 'plugin: woo-ai':
 - plugins/woo-ai/**/*
 
+'plugin: woocommerce docs':
+- plugins/woocommerce-docs/**/*
+
 'focus: performance tests':
 - plugins/woocommerce/tests/performance/**/*
 
