@@ -2,7 +2,6 @@ name: 'Changelog Auto Add'
 on:
     pull_request_target:
         types: [opened, synchronize, reopened, edited]
-    pull_request:
     workflow_dispatch:
         inputs:
             prNumber:
