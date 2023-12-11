@@ -45,11 +45,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const chatMessagesEndRef = React.useRef< HTMLLIElement | null >( null );
 
 	useEffect( () => {
-		console.log( 'ChatModal is mounted' );
-		console.log(
-			'startSessionTimeRef while mounting',
-			startSessionTimeRef.current
-		);
 		// Calculate the session duration based on the component mounting and unmounting (opening and closing modal)
 		return () => {
 			const sessionDurationInSeconds = Math.floor(
@@ -62,8 +57,8 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				recordWooAIAssistantTracks( 'session_duration', {
 					session_duration_in_seconds: sessionDurationInSeconds,
 				} );
-				startSessionTimeRef.current = 0;
 			}
+			startSessionTimeRef.current = 0;
 		};
 	}, [] );
 
@@ -247,12 +242,12 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			sender,
 			text: answer,
 		};
+		setMessages( ( prevMessages ) => [ ...prevMessages, chatMessage ] );
 		setStorageData(
 			WOO_AI_PLUGIN_NAME,
 			preferencesChatHistory,
 			JSON.stringify( [ ...messages, chatMessage ] )
 		);
-		setMessages( ( prevMessages ) => [ ...prevMessages, chatMessage ] );
 	};
 
 	const handleSubmit = async ( event: React.FormEvent ) => {
@@ -266,6 +261,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			message: input,
 		} );
 		setInput( '' );
+		let answer = '';
 
 		try {
 			const { token } = await requestJetpackToken();
@@ -281,7 +277,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				setAndStorethreadID( newthreadID );
 			}
 
-			let answer: string;
 			if ( response.status === 'requires_action' ) {
 				const actionsAnswer = await handleRequiresAction(
 					response,
@@ -295,11 +290,12 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			if ( ! answer || ! answer.length ) {
 				throw new Error( 'No message returned from assistant' );
 			}
-			setAndStoreMessages( answer, 'assistant' );
 		} catch ( error ) {
 			handleError(
 				"I'm sorry, I had trouble generating a response for you."
 			);
+		} finally {
+			setAndStoreMessages( answer, 'assistant' );
 		}
 		setLoading( false );
 	};
