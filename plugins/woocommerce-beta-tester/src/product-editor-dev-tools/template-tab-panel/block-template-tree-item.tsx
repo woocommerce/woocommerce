@@ -99,18 +99,11 @@ export function BlockTemplateTreeItem( {
 					icon={ blockDefault }
 					className="woocommerce-product-editor-dev-tools-template-block__row__icon"
 				/>
-				<div>
-					<div className="woocommerce-product-editor-dev-tools-template-block__row__header">
-						{ templateBlockId }
-					</div>
-					<div className="woocommerce-product-editor-dev-tools-template-block__row__sub-header">
-						<span className="woocommerce-product-editor-dev-tools-template-block__name">
-							{ name }
-						</span>
-						<span className="woocommerce-product-editor-dev-tools-template-block__order">
-							{ templateBlockOrder }
-						</span>
-					</div>
+				<div
+					className="woocommerce-product-editor-dev-tools-template-block__row__header"
+					title={ `${ name } (order: ${ templateBlockOrder })` }
+				>
+					{ templateBlockId }
 				</div>
 				<div className="woocommerce-product-editor-dev-tools-template-block__indicators">
 					{ templateBlockHideConditions && (
