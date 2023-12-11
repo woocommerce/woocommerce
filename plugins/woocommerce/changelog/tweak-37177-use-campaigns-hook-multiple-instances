@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Make the `useCampaigns` hook support being used with multiple instances.

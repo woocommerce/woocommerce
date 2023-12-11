@@ -24,7 +24,26 @@
 	"main": "build/index.js",
 	"module": "build-module/index.js",
 	"types": "build-types",
-	"react-native": "src/index",
+	"scripts": {
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
+		"build:project": "pnpm --if-present /^build:project:.*$/",
+		"build:project:cjs": "wireit",
+		"build:project:esm": "wireit",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint src",
+		"prepack": "pnpm build",
+		"test:js": "wireit",
+		"watch:build": "pnpm build:project --watch"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test-staged"
+		]
+	},
 	"dependencies": {
 		"@woocommerce/date": "workspace:*",
 		"@woocommerce/navigation": "workspace:*",
@@ -40,38 +59,39 @@
 		"@wordpress/i18n": "wp-6.0",
 		"@wordpress/url": "wp-6.0",
 		"md5": "^2.3.0",
-		"qs": "^6.10.3",
-		"rememo": "^4.0.0"
+		"qs": "^6.11.2",
+		"rememo": "^4.0.2"
 	},
 	"publishConfig": {
 		"access": "public"
 	},
 	"devDependencies": {
 		"@automattic/data-stores": "^2.0.1",
-		"@babel/core": "^7.17.5",
-		"@babel/runtime": "^7.17.2",
-		"@testing-library/react": "^12.1.3",
-		"@testing-library/react-hooks": "^7.0.2",
-		"@types/jest": "^27.4.1",
-		"@types/lodash": "^4.14.182",
-		"@types/md5": "^2.3.2",
-		"@types/qs": "^6.9.7",
-		"@types/react": "^17.0.2",
-		"@types/node": "^16.18.18",
-		"@types/wordpress__compose": "^4.0.1",
-		"@types/wordpress__core-data": "^2.4.5",
-		"@types/wordpress__data": "^6.0.0",
-		"@types/wordpress__data-controls": "^2.2.0",
+		"@babel/core": "^7.23.5",
+		"@babel/runtime": "^7.23.5",
+		"@testing-library/react": "12.1.3",
+		"@testing-library/react-hooks": "7.0.2",
+		"@types/jest": "^27.5.2",
+		"@types/lodash": "^4.14.202",
+		"@types/md5": "^2.3.5",
+		"@types/node": "^16.18.68",
+		"@types/qs": "^6.9.10",
+		"@types/react": "^17.0.71",
+		"@types/wordpress__compose": "4.0.1",
+		"@types/wordpress__core-data": "2.4.5",
+		"@types/wordpress__data": "6.0.0",
+		"@types/wordpress__data-controls": "~2.2.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"eslint": "^8.32.0",
-		"jest": "^27.5.1",
-		"jest-cli": "^27.5.1",
-		"concurrently": "^7.0.0",
-		"redux": "^4.1.0",
+		"concurrently": "^7.6.0",
+		"eslint": "^8.55.0",
+		"jest": "~27.5.1",
+		"jest-cli": "~27.5.1",
+		"redux": "^4.2.1",
 		"rimraf": "^3.0.2",
-		"ts-jest": "^27.1.3",
-		"typescript": "^5.1.6"
+		"ts-jest": "~29.1.1",
+		"typescript": "^5.3.3",
+		"wireit": "0.14.1"
 	},
 	"peerDependencies": {
 		"@wordpress/core-data": "wp-6.0",
@@ -79,25 +99,70 @@
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
 	},
-	"scripts": {
-		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"turbo:test": "jest --config ./jest.config.json",
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"test": "pnpm test:js",
-		"test:js": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"lint": "eslint src",
-		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
-		"prepack": "pnpm run clean && pnpm run build",
-		"lint:fix": "eslint src --fix",
-		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix",
-			"pnpm test-staged"
-		]
+	"wireit": {
+		"build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json",
+			"files": [
+				"tsconfig-cjs.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"build:project:esm": {
+			"command": "tsc --project tsconfig.json",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build-module",
+				"build-types"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"test:js": {
+			"command": "jest --config ./jest.config.json --passWithNoTests",
+			"dependencies": [
+				"build:project"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"node_modules/@woocommerce/internal-js-tests/",
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/tracks/",
+				"node_modules/@woocommerce/navigation/",
+				"node_modules/@woocommerce/date/",
+				"package.json",
+				"!node_modules/@woocommerce/date/node_modules",
+				"!node_modules/@woocommerce/date/.git",
+				"!node_modules/@woocommerce/date/.svn",
+				"!node_modules/@woocommerce/date/src",
+				"!node_modules/@woocommerce/navigation/node_modules",
+				"!node_modules/@woocommerce/navigation/.git",
+				"!node_modules/@woocommerce/navigation/.svn",
+				"!node_modules/@woocommerce/navigation/src",
+				"!node_modules/@woocommerce/tracks/node_modules",
+				"!node_modules/@woocommerce/tracks/.git",
+				"!node_modules/@woocommerce/tracks/.svn",
+				"!node_modules/@woocommerce/tracks/src",
+				"!node_modules/@woocommerce/internal-js-tests/node_modules",
+				"!node_modules/@woocommerce/internal-js-tests/.git",
+				"!node_modules/@woocommerce/internal-js-tests/.svn",
+				"!node_modules/@woocommerce/internal-js-tests/src"
+			]
+		}
 	}
 }

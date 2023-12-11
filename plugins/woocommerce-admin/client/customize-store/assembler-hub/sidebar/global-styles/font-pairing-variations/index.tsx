@@ -7,15 +7,16 @@
 import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
-import { useMemo } from '@wordpress/element';
+import { useContext, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { FONT_PAIRINGS } from './constants';
+import { FONT_PAIRINGS, FONT_PAIRINGS_WHEN_AI_IS_OFFLINE } from './constants';
 import { VariationContainer } from '../variation-container';
 import { FontPairingVariationPreview } from './preview';
 import { Look } from '~/customize-store/design-with-ai/types';
+import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 
 export const FontPairing = () => {
 	const { aiSuggestions, isLoading } = useSelect( ( select ) => {
@@ -31,14 +32,17 @@ export const FontPairing = () => {
 		};
 	} );
 
+	const { context } = useContext( CustomizeStoreContext );
+	const aiOnline = context.aiOnline;
+
 	const fontPairings = useMemo(
 		() =>
-			aiSuggestions?.lookAndFeel
+			aiOnline && aiSuggestions?.lookAndFeel
 				? FONT_PAIRINGS.filter( ( font ) =>
 						font.lookAndFeel.includes( aiSuggestions?.lookAndFeel )
 				  )
-				: FONT_PAIRINGS,
-		[ aiSuggestions ]
+				: FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
+		[ aiOnline, aiSuggestions?.lookAndFeel ]
 	);
 
 	if ( isLoading ) {

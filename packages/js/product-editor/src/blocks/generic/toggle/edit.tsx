@@ -107,6 +107,8 @@ export function Edit( {
 			<ToggleControl
 				label={ label }
 				checked={ isChecked() }
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore disabled prop exists
 				disabled={ disabled }
 				onChange={ handleChange }
 				help={ help }

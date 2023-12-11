@@ -1,5 +1,6 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
+const { goToPageEditor } = require( '../../utils/editor' );
 
 const pageTitle = `Page-${ new Date().getTime().toString() }`;
 
@@ -32,17 +33,7 @@ test.describe( 'Can create a new page', () => {
 	} );
 
 	test( 'can create new page', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-		const welcomeModalVisible = await page
-			.getByRole( 'heading', {
-				name: 'Welcome to the block editor',
-			} )
-			.isVisible();
-
-		if ( welcomeModalVisible ) {
-			await page.getByRole( 'button', { name: 'Close' } ).click();
-		}
+		await goToPageEditor( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: 'Add Title' } )

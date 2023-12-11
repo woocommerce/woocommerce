@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
+import { Slot } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
 import {
@@ -18,11 +19,12 @@ import { sanitizeHTML } from '../../../utils/sanitize-html';
 import { SectionBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
 
-export function Edit( {
+export function SectionBlockEdit( {
 	attributes,
 	clientId,
 }: ProductEditorBlockEditProps< SectionBlockAttributes > ) {
 	const { description, title, blockGap } = attributes;
+
 	const blockProps = useWooBlockProps( attributes );
 	const innerBlockProps = useInnerBlocksProps(
 		{
@@ -62,6 +64,8 @@ export function Edit( {
 							/>
 						) }
 					</h2>
+
+					<Slot name={ clientId } />
 				</HeadingTagName>
 			) }
 

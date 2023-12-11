@@ -1,4 +1,6 @@
-# Data Stores
+---
+post_title: Data stores
+---
 
 ## Introduction
 

@@ -1,4 +1,6 @@
-# WooCommerce code snippets
+---
+post_title: WooCommerce code snippets
+---
 
 Various code snippets you can add to your site to enable custom functionality:
 

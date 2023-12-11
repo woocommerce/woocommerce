@@ -1,4 +1,6 @@
-# Getting started with the REST API
+---
+post_title: Getting started with the REST API
+---
 
 The REST API is a powerful part of WooCommerce which lets you read and write various parts of WooCommerce data such as orders, products, coupons, customers, and shipping zones.
 

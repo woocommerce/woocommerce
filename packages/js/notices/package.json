@@ -26,6 +26,24 @@
 	"module": "build-module/index.js",
 	"types": "build-types",
 	"react-native": "src/index",
+	"scripts": {
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
+		"build:project": "pnpm --if-present /^build:project:.*$/",
+		"build:project:cjs": "wireit",
+		"build:project:esm": "wireit",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint src",
+		"prepack": "pnpm build",
+		"watch:build": "pnpm build:project --watch"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
+	},
 	"dependencies": {
 		"@wordpress/a11y": "wp-6.0",
 		"@wordpress/data": "wp-6.0",
@@ -40,34 +58,61 @@
 		"access": "public"
 	},
 	"private": true,
-	"scripts": {
-		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint src",
-		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
-		"prepack": "pnpm run clean && pnpm run build",
-		"lint:fix": "eslint src --fix"
-	},
 	"devDependencies": {
 		"@automattic/data-stores": "^2.0.1",
-		"@babel/core": "^7.17.5",
-		"@types/lodash": "^4.14.182",
-		"@types/wordpress__data": "^6.0.0",
-		"@types/wordpress__notices": "^3.5.0",
+		"@babel/core": "^7.23.5",
+		"@types/lodash": "^4.14.202",
+		"@types/wordpress__data": "6.0.0",
+		"@types/wordpress__notices": "3.5.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.32.0",
-		"jest": "^27.5.1",
-		"jest-cli": "^27.5.1",
-		"concurrently": "^7.0.0",
-		"redux": "^4.2.0",
+		"concurrently": "^7.6.0",
+		"eslint": "^8.55.0",
+		"jest": "~27.5.1",
+		"jest-cli": "~27.5.1",
+		"redux": "^4.2.1",
 		"rimraf": "^3.0.2",
-		"ts-jest": "^27.1.3",
-		"typescript": "^5.1.6"
+		"ts-jest": "~29.1.1",
+		"typescript": "^5.3.3",
+		"wireit": "0.14.1"
 	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
+	"wireit": {
+		"build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json",
+			"files": [
+				"tsconfig-cjs.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"build:project:esm": {
+			"command": "tsc --project tsconfig.json",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build-module",
+				"build-types"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"package.json"
+			]
+		}
 	}
 }

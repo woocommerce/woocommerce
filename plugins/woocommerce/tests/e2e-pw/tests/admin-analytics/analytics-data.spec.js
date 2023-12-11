@@ -170,6 +170,7 @@ test.describe( 'Analytics-related tests', () => {
 	} );
 
 	// this test will be skipped until the cause of test flakiness can be diagnosed and updated
+	// UPDATE: test appears to be flaky because sometimes CSV is processed async and not immediately downloaded
 	test.skip( 'downloads revenue report as CSV', async( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue' );
 		// FTUX tour on first run through
@@ -178,10 +179,11 @@ test.describe( 'Analytics-related tests', () => {
 		} catch (e) {
 			console.log( 'Tour was not visible, skipping.' );
 		}
+		await page.getByRole( 'button', { name: 'Download' } ).scrollIntoViewIfNeeded();
 		const downloadPromise = page.waitForEvent( 'download' );
 		await page.getByRole( 'button', { name: 'Download' } ).click();
 		const download = await downloadPromise;
-		await expect( download._suggestedFilename ).toContain( 'revenue.csv' );
+		await expect( download.suggestedFilename() ).toContain( 'revenue.csv' );
 	} );
 
 	test( 'use date filter on overview page', async( { page } ) => {

@@ -1,4 +1,6 @@
-# WC CLI: Commands
+---
+post_title: WC CLI - commands
+---
 
 ## wc shop_coupon
 

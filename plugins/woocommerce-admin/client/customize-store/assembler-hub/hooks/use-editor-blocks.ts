@@ -34,10 +34,10 @@ export const useEditorBlocks = (): [
 
 	// @ts-ignore Types are not up to date.
 	const [ blocks, onInput, onChange ]: [
-		BlockInstance[],
+		BlockInstance[] | undefined,
 		ChangeHandler,
 		ChangeHandler
 	] = useEntityBlockEditor( 'postType', templateType );
 
-	return [ blocks, onInput, onChange ];
+	return [ blocks ?? [], onInput, onChange ];
 };

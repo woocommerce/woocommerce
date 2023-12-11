@@ -82,11 +82,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$this->add_group(
 			array(
-				'id'         => $this::GROUP_IDS['PRICING'],
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => $this::GROUP_IDS['PRICING'],
+				'order'          => 20,
+				'attributes'     => array(
 					'title' => __( 'Pricing', 'woocommerce' ),
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		$this->add_group(
@@ -98,23 +103,49 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
+		$shipping_hide_conditions = array();
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$shipping_hide_conditions[] = array(
+				'expression' => 'editedProduct.type === "grouped"',
+			);
+		}
+		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
+			$shipping_hide_conditions[] = array(
+				'expression' => 'editedProduct.type === "external"',
+			);
+		}
+
 		$this->add_group(
 			array(
-				'id'         => $this::GROUP_IDS['SHIPPING'],
-				'order'      => 40,
-				'attributes' => array(
+				'id'             => $this::GROUP_IDS['SHIPPING'],
+				'order'          => 40,
+				'attributes'     => array(
 					'title' => __( 'Shipping', 'woocommerce' ),
 				),
+				'hideConditions' => $shipping_hide_conditions,
 			)
 		);
 		if ( Features::is_enabled( 'product-variation-management' ) ) {
+			$variations_hide_conditions = array();
+			if ( Features::is_enabled( 'product-grouped' ) ) {
+				$variations_hide_conditions[] = array(
+					'expression' => 'editedProduct.type === "grouped"',
+				);
+			}
+			if ( Features::is_enabled( 'product-external-affiliate' ) ) {
+				$variations_hide_conditions[] = array(
+					'expression' => 'editedProduct.type === "external"',
+				);
+			}
+
 			$this->add_group(
 				array(
-					'id'         => $this::GROUP_IDS['VARIATIONS'],
-					'order'      => 50,
-					'attributes' => array(
+					'id'             => $this::GROUP_IDS['VARIATIONS'],
+					'order'          => 50,
+					'attributes'     => array(
 						'title' => __( 'Variations', 'woocommerce' ),
 					),
+					'hideConditions' => $variations_hide_conditions,
 				)
 			);
 		}
@@ -231,11 +262,24 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$description_section->add_block(
+
+		$description_field_block = $description_section->add_block(
 			array(
 				'id'        => 'product-description',
 				'blockName' => 'woocommerce/product-description-field',
 				'order'     => 10,
+			)
+		);
+
+		$description_field_block->add_block(
+			array(
+				'id'         => 'product-description__content',
+				'blockName'  => 'woocommerce/product-summary-field',
+				'order'      => 10,
+				'attributes' => array(
+					'helpText' => null,
+					'label'    => null,
+				),
 			)
 		);
 
@@ -311,6 +355,36 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			);
 		}
 
+		// Product list section.
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$product_list_section = $general_group->add_section(
+				array(
+					'id'             => 'product-list-section',
+					'order'          => 35,
+					'attributes'     => array(
+						'title'       => __( 'Products in this group', 'woocommerce' ),
+						'description' => __( 'Make a collection of related products, enabling customers to purchase multiple items together.', 'woocommerce' ),
+					),
+					'hideConditions' => array(
+						array(
+							'expression' => 'editedProduct.type !== "grouped"',
+						),
+					),
+				)
+			);
+
+			$product_list_section->add_block(
+				array(
+					'id'         => 'product-list',
+					'blockName'  => 'woocommerce/product-list-field',
+					'order'      => 10,
+					'attributes' => array(
+						'property' => 'grouped_products',
+					),
+				)
+			);
+		}
+
 		// Images section.
 		$images_section = $general_group->add_section(
 			array(
@@ -346,7 +420,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'order'          => 50,
 					'attributes'     => array(
 						'title'       => __( 'Downloads', 'woocommerce' ),
-						'description' => __( "Add any files you'd like to make available for the customer to download after purchasing, such as instructions or warranty info.", 'woocommerce' ),
+						'description' => sprintf(
+							/* translators: %1$s: Downloads settings link opening tag. %2$s: Downloads settings link closing tag. */
+							__( 'Add any files you\'d like to make available for the customer to download after purchasing, such as instructions or warranty info. Store-wide updates can be managed in your %1$sproduct settings%2$s.', 'woocommerce' ),
+							'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=downloadable' ) . '" target="_blank" rel="noreferrer">',
+							'</a>'
+						),
 					),
 					'hideConditions' => array(
 						array(
@@ -717,14 +796,19 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_stock_status_conditional = $product_inventory_section->add_block(
 			array(
-				'id'         => 'product-stock-status-conditional-wrapper',
-				'blockName'  => 'woocommerce/conditional',
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => 'product-stock-status-conditional-wrapper',
+				'blockName'      => 'woocommerce/conditional',
+				'order'          => 20,
+				'attributes'     => array(
 					'mustMatch' => array(
 						'manage_stock' => array( false ),
 					),
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		$product_stock_status_conditional->add_block(
@@ -754,14 +838,19 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_inventory_advanced         = $product_inventory_section->add_block(
 			array(
-				'id'         => 'product-inventory-advanced',
-				'blockName'  => 'woocommerce/product-collapsible',
-				'order'      => 30,
-				'attributes' => array(
+				'id'             => 'product-inventory-advanced',
+				'blockName'      => 'woocommerce/product-collapsible',
+				'order'          => 30,
+				'attributes'     => array(
 					'toggleText'       => __( 'Advanced', 'woocommerce' ),
 					'initialCollapsed' => true,
 					'persistRender'    => true,
 				),
+				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				) : null,
 			)
 		);
 		$product_inventory_advanced_wrapper = $product_inventory_advanced->add_block(

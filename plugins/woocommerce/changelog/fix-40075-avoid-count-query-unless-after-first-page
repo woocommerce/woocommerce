@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Prevent second query used to determine real post count from running if paging isn't being used.

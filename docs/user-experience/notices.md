@@ -1,4 +1,6 @@
-# User Experience Guidelines: Notices
+---
+post_title: User experience guidelines - notices
+---
 
 ## Notices
 

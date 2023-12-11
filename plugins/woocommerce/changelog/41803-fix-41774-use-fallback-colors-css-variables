@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use fallback colors when CSS variables are not available in admin.

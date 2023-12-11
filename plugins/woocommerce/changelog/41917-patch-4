@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Format postcode before validation on the shortcode cart shipping calculator

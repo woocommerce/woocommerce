@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Makes it possible to use existing action hook `woocommerce_customer_save_address` to detect customer address changes made via the admin environment.
