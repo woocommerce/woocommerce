@@ -111,9 +111,9 @@ export function DescriptionBlockEdit( {
 			{ !! description.length && (
 				<BlockPreview
 					blocks={ parse( description ) }
-					viewportWidth={ 960 }
+					viewportWidth={ 800 }
 					additionalStyles={ [
-						{ css: 'body { padding: 32px; height: 10000px }' },
+						{ css: 'body { padding: 32px; height: 10000px }' }, // hack: setting height to 10000px to ensure the preview is not cut off.
 					] }
 				/>
 			) }
