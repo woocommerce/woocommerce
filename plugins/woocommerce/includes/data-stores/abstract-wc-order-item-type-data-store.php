@@ -49,6 +49,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 				'order_item_name' => $item->get_name(),
 				'order_item_type' => $item->get_type(),
 				'order_id'        => $item->get_order_id(),
+				'uniqid'          => $item->get_uniqid(),
 			)
 		);
 		$item->set_id( $wpdb->insert_id );
@@ -58,6 +59,47 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$this->clear_cache( $item );
 
 		do_action( 'woocommerce_new_order_item', $item->get_id(), $item, $item->get_order_id() );
+	}
+
+	/**
+	 * Upserts order items.
+	 *
+	 * @param array $items List of uniqid => $item items.
+	 * @return void
+	 */
+	public function upsert_multiple( &$items ) {
+		global $wpdb;
+
+		$sql  = "INSERT INTO {$wpdb->prefix}woocommerce_order_items( order_item_name, order_item_type, order_id, uniqid ) VALUES ";
+
+		foreach ( $items as &$item ) {
+			$sql = $wpdb->prepare( $sql . '(%s, %s, %d, %s)', $item->get_name(), $item->get_type(), $item->get_order_id(), $item->get_uniqid() ) . ',';
+		}
+
+		$sql  = substr( $sql, 0, -1 );
+		$sql .= " ON DUPLICATE KEY UPDATE order_item_name = VALUES(order_item_name), order_item_type = VALUES(order_item_type), order_id = VALUES(order_id)";
+		$wpdb->query( $sql );
+
+		$last_insert_id = $wpdb->insert_id;
+		foreach ( $items as &$item ) {
+			$item_id = $item->get_id();
+			if ( ! $item_id ) {
+				$item->set_id( $last_insert_id );
+			}
+
+			$this->save_item_data( $item );
+			$item->save_meta_data();
+			$item->apply_changes();
+			$this->clear_cache( $item );
+
+			if ( $item_id ) {
+				do_action( 'woocommerce_update_order_item', $item->get_id(), $item, $item->get_order_id() );
+			} else {
+				do_action( 'woocommerce_new_order_item', $item->get_id(), $item, $item->get_order_id() );
+			}
+
+			$last_insert_id++;
+		}
 	}
 
 	/**
@@ -127,7 +169,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$data = wp_cache_get( 'item-' . $item->get_id(), 'order-items' );
 
 		if ( false === $data ) {
-			$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_id, order_item_name, uniqid FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
 			wp_cache_set( 'item-' . $item->get_id(), $data, 'order-items' );
 		}
 
@@ -139,6 +181,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 			array(
 				'order_id' => $data->order_id,
 				'name'     => $data->order_item_name,
+				'uniqid'   => $data->uniqid,
 			)
 		);
 		$item->read_meta_data();

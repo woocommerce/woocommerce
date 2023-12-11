@@ -269,6 +269,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected function save_items() {
 		$items_changed = false;
 
+		// TODO: bulk delete?
 		foreach ( $this->items_to_delete as $item ) {
 			$item->delete();
 			$items_changed = true;
@@ -276,28 +277,39 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->items_to_delete = array();
 
 		// Add/save items.
-		foreach ( $this->items as $item_group => $items ) {
-			if ( is_array( $items ) ) {
-				$items = array_filter( $items );
-				foreach ( $items as $item_key => $item ) {
-					$item->set_order_id( $this->get_id() );
-
-					$item_id = $item->save();
-
-					// If ID changed (new item saved to DB)...
-					if ( $item_id !== $item_key ) {
-						$this->items[ $item_group ][ $item_id ] = $item;
-
-						unset( $this->items[ $item_group ][ $item_key ] );
-
-						$items_changed = true;
-					}
-				}
-			}
-		}
+		$items = array_reduce( $this->items, fn( $carry, $x ) => $carry + $x, [] );
+		$this->bulk_upsert_items( $items );
+		$items_changed = false; // TODO: properly detect changes during upsert and update $this->items accordingly.
 
 		if ( $items_changed ) {
 			delete_transient( 'wc_order_' . $this->get_id() . '_needs_processing' );
+		}
+	}
+
+	/**
+	 * Bulk upsert.
+	 */
+	private function bulk_upsert_items( &$items ) {
+		$by_class = array();
+
+		foreach ( $items as &$item ) {
+			$cls = get_class( $item );
+
+			if ( ! isset( $by_class[ $cls ] ) ) {
+				$by_class[ $cls ] = array();
+			}
+
+			$item->set_order_id( $this->get_id() );
+			$by_class[ $cls ][ $item->get_uniqid() ] = $item;
+		}
+
+		foreach ( $by_class as $classname => $items ) {
+			$datastore = (new $classname())->get_data_store();
+			if ( $datastore->has_callable( 'upsert_multiple' ) ) {
+				$datastore->upsert_multiple( $items );
+			} else {
+				array_walk( $items, fn( $x ) => $x->save() );
+			}
 		}
 	}
 

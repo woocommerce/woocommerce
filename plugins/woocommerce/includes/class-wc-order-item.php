@@ -26,6 +26,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	protected $data = array(
 		'order_id' => 0,
 		'name'     => '',
+		'uniqid'   => '',
 	);
 
 	/**
@@ -65,6 +66,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		} elseif ( is_numeric( $item ) && $item > 0 ) {
 			$this->set_id( $item );
 		} else {
+			$this->set_prop( 'uniqid', uniqid( 'order-item' ) );
 			$this->set_object_read( true );
 		}
 
@@ -73,6 +75,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
+	}
+
+	public function get_uniqid() {
+		return $this->get_prop( 'uniqid', 'edit' );
 	}
 
 	/**
