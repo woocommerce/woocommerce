@@ -3,6 +3,7 @@
 	"description": "The WooCommerce documentation plugin.",
 	"type": "wordpress-plugin",
 	"require": {
+		"php": "<8.3",
 		"woocommerce/action-scheduler": "^3.6",
 		"league/commonmark": "^2.4"
 	},
