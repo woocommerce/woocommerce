@@ -414,7 +414,7 @@ class ProductUpdater {
 		}
 
 		$formatted_prompt = sprintf(
-			"Generate two-words titles and price for products using the following prompts for each one of them: '%s'. Ensure each entry is unique and does not repeat the given examples. It should be a number and it's not too low or too high for the corresponding product title being advertised. Convert the price to this currency: '%s'. Do not include backticks or the word json in the response. Here's an example format: '%s'.",
+			"Generate two-words titles and price for products using the following prompts for each one of them: '%s'. Ensure each entry is unique and does not repeat the given examples. It should be a number and it's not too low or too high for the corresponding product title being advertised. Convert the price to this currency: '%s'. Do not include backticks or the word json in the response. Here's an example of the expected output format in JSON: '%s'.",
 			wp_json_encode( $prompts ),
 			get_woocommerce_currency(),
 			wp_json_encode( $expected_results_format )
@@ -424,7 +424,7 @@ class ProductUpdater {
 		$success            = false;
 		while ( $ai_request_retries < 5 && ! $success ) {
 			$ai_request_retries ++;
-			$ai_response = $ai_connection->fetch_ai_response( $token, $formatted_prompt, 30 );
+			$ai_response = $ai_connection->fetch_ai_response( $token, $formatted_prompt, 30, 'json_object' );
 			if ( is_wp_error( $ai_response ) ) {
 				continue;
 			}

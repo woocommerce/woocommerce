@@ -245,7 +245,7 @@ class PatternUpdater {
 		$success            = false;
 		while ( $ai_request_retries < 5 && ! $success ) {
 			$ai_request_retries ++;
-			$ai_responses = $ai_connection->fetch_ai_responses( $token, $formatted_prompts, 60 );
+			$ai_responses = $ai_connection->fetch_ai_responses( $token, $formatted_prompts, 60, 'json_object' );
 
 			if ( is_wp_error( $ai_responses ) ) {
 				continue;

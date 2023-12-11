@@ -20,23 +20,29 @@ class Connection {
 	 * @param string $token The JWT token.
 	 * @param string $prompt The prompt to send to the API.
 	 * @param int    $timeout The timeout for the request.
+	 * @param string $response_format The response format.
 	 *
 	 * @return mixed
 	 */
-	public function fetch_ai_response( $token, $prompt, $timeout = 15 ) {
+	public function fetch_ai_response( $token, $prompt, $timeout = 15, $response_format = null ) {
 		if ( $token instanceof \WP_Error ) {
 			return $token;
+		}
+
+		$body = array(
+			'feature' => 'woocommerce_blocks_patterns',
+			'prompt'  => $prompt,
+			'token'   => $token,
+		);
+
+		if ( $response_format ) {
+			$body['response_format'] = $response_format;
 		}
 
 		$response = wp_remote_post(
 			self::TEXT_COMPLETION_API_URL,
 			array(
-				'body'    =>
-					array(
-						'feature' => 'woocommerce_blocks_patterns',
-						'prompt'  => $prompt,
-						'token'   => $token,
-					),
+				'body'    => $body,
 				'timeout' => $timeout,
 			)
 		);
@@ -56,27 +62,32 @@ class Connection {
 	 * @param string $token The JWT token.
 	 * @param array  $prompts The prompts to send to the API.
 	 * @param int    $timeout The timeout for the request.
+	 * @param string $response_format The response format.
 	 *
 	 * @return array|WP_Error The responses or a WP_Error object.
 	 */
-	public function fetch_ai_responses( $token, array $prompts, $timeout = 15 ) {
+	public function fetch_ai_responses( $token, array $prompts, $timeout = 15, $response_format = null ) {
 		if ( $token instanceof \WP_Error ) {
 			return $token;
 		}
 
 		$requests = array();
 		foreach ( $prompts as $prompt ) {
+			$data = array(
+				'feature' => 'woocommerce_blocks_patterns',
+				'prompt'  => $prompt,
+				'token'   => $token,
+			);
+
+			if ( $response_format ) {
+				$data['response_format'] = $response_format;
+			}
+
 			$requests[] = array(
 				'url'     => self::TEXT_COMPLETION_API_URL,
 				'type'    => 'POST',
 				'headers' => array( 'Content-Type' => 'application/json; charset=utf-8' ),
-				'data'    => wp_json_encode(
-					array(
-						'feature' => 'woocommerce_blocks_patterns',
-						'prompt'  => $prompt,
-						'token'   => $token,
-					)
-				),
+				'data'    => wp_json_encode( $data ),
 			);
 		}
 
