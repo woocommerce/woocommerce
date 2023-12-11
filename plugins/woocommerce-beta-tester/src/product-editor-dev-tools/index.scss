@@ -231,7 +231,13 @@
 	display: flex;
 	flex-direction: row;
 
+	align-items: center;
+
 	padding: calc( var(--woocommerce-product-editor-dev-tools-gap-small) / 2 );
+
+	&__expand-toggle svg {
+		fill: white;
+	}
 
 	&__icon {
 		fill: white;

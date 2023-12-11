@@ -1,8 +1,17 @@
 /**
  * External dependencies
  */
+import { useState } from 'react';
 import { evaluate } from '@woocommerce/expression-evaluation';
-import { Icon, blockDefault, warning } from '@wordpress/icons';
+import { Button } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import {
+	Icon,
+	blockDefault,
+	chevronDown,
+	chevronRight,
+	warning,
+} from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -20,6 +29,8 @@ export function BlockTemplateTreeItem( {
 	selectedBlockTemplateId: string | null;
 	onSelect: ( blockTemplateId: string ) => void;
 } ) {
+	const [ isExpanded, setIsExpanded ] = useState( true );
+
 	const name = blockTemplate[ 0 ];
 	const attributes = blockTemplate[ 1 ];
 	const innerBlocks = blockTemplate[ 2 ];
@@ -45,6 +56,10 @@ export function BlockTemplateTreeItem( {
 			evaluate( condition.expression, evaluationContext )
 		);
 
+	function onToggleExpand() {
+		setIsExpanded( ! isExpanded );
+	}
+
 	function onClick( event: React.MouseEvent ) {
 		event.stopPropagation();
 
@@ -68,6 +83,18 @@ export function BlockTemplateTreeItem( {
 					}`
 				}
 			>
+				{ innerBlocks && (
+					<Button
+						icon={ isExpanded ? chevronDown : chevronRight }
+						className="woocommerce-product-editor-dev-tools-template-block__row__expand-toggle"
+						label={
+							isExpanded
+								? __( 'Collapse', 'woocommerce' )
+								: __( 'Expand', 'woocommerce' )
+						}
+						onClick={ onToggleExpand }
+					/>
+				) }
 				<Icon
 					icon={ blockDefault }
 					className="woocommerce-product-editor-dev-tools-template-block__row__icon"
@@ -101,7 +128,7 @@ export function BlockTemplateTreeItem( {
 				</div>
 			</div>
 
-			{ innerBlocks && (
+			{ isExpanded && innerBlocks && (
 				<div className="woocommerce-product-editor-dev-tools-template__inner-blocks">
 					{ innerBlocks.map( ( innerBlockTemplate, index ) => (
 						<BlockTemplateTreeItem
