@@ -17,6 +17,7 @@ interface GitHubLabel {
 interface GitHubProjectField {
 	projectId: string;
 	fieldId: string;
+	fieldName: string;
 	itemId: string;
 	dataType: string;
 	value: {
@@ -157,7 +158,7 @@ export default class TransferIssues extends Command {
 		// can fully transfer the issue with the existing labels, since otherwise,
 		// we would replace the labels that would have been transferred.
 		CliUx.ux.action.start( 'Waiting for GitHub to process transfers' );
-		await new Promise( ( resolve ) => setTimeout( resolve, 5000 ) );
+		await new Promise( ( resolve ) => setTimeout( resolve, 25000 ) );
 		CliUx.ux.action.stop();
 
 		CliUx.ux.action.start( 'Running post-transfer tasks' );
@@ -166,9 +167,9 @@ export default class TransferIssues extends Command {
 				continue;
 			}
 
-			this.updateProjectFields(
+			this.resetProjectFields(
 				authenticatedGraphQL,
-				issue.projectFields
+				issue
 			);
 
 			this.addLabelsToIssue(
@@ -538,6 +539,7 @@ export default class TransferIssues extends Command {
 						const projectField: GitHubProjectField = {
 							projectId: projectItem.project.id,
 							fieldId: fieldValue.field.id,
+							fieldName: fieldValue.field.name,
 							itemId: projectItem.id,
 							dataType: fieldValue.field.dataType,
 							value: {},
@@ -652,16 +654,123 @@ export default class TransferIssues extends Command {
 	}
 
 	/**
-	 * Update the project fields for the issue.
+	 * Resets the project fields for the issue if necessary.
 	 *
-	 * @param {graphql}             authenticatedGraphQL The graphql object for making requests.
-	 * @param {Array.<GitHubLabel>} projectFields        The project fields to update for the issue.
+	 * @param {graphql}     authenticatedGraphQL The graphql object for making requests.
+	 * @param {GitHubIssue} issue        		 The GitHub issue to update the project fields for.
 	 */
-	private async updateProjectFields(
+	private async resetProjectFields(
 		authenticatedGraphQL: typeof graphql,
-		projectFields: GitHubProjectField[]
+		issue: GitHubIssue
 	) {
-		for ( const projectField of projectFields ) {
+		// Pull all of the project fields from the issue post-transfer so that we can make sure that they've been transferred correctly.
+		// If they haven't, we need to to try and set them and log the ones that required this step.
+		const { node } = await authenticatedGraphQL< { node: any } >(
+			`
+			query ($nodeID: ID!) {
+				node(id: $nodeID) {
+					... on Issue {
+						id
+						title
+						projectItems(first: 50) {
+							nodes {
+								id
+								project {
+									id
+									title
+								}
+								fieldValues(first: 50) {
+									nodes {
+										... on ProjectV2ItemFieldTextValue {
+											field {
+												... on ProjectV2FieldCommon {
+													id
+													name
+													dataType
+												}
+											}
+											text
+										}
+										... on ProjectV2ItemFieldNumberValue {
+											field {
+												... on ProjectV2FieldCommon {
+													id
+													name
+													dataType
+												}
+											}
+											number
+										}
+										... on ProjectV2ItemFieldDateValue {
+											field {
+												... on ProjectV2FieldCommon {
+													id
+													name
+													dataType
+												}
+											}
+											date
+										}
+										... on ProjectV2ItemFieldSingleSelectValue {
+											field {
+												... on ProjectV2FieldCommon {
+													id
+													name
+													dataType
+												}
+											}
+											optionId
+										}
+										... on ProjectV2ItemFieldIterationValue {
+											field {
+												... on ProjectV2FieldCommon {
+													id
+													name
+													dataType
+												}
+											}
+											iterationId
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+`,
+			{
+				nodeID: issue.newID,
+			}
+		);
+
+		for ( const projectField of issue.projectFields ) {
+			// Check for existing project fields and error if one was not give an error and exit.
+			for ( const project of node.projectItems.nodes ) {
+				if ( project.project.id !== projectField.projectId ) {
+					this.error(
+						'Issue "' + issue.title + '" does not have an entry for project "' + project.project.title + '"!'
+					);
+				}
+
+				let foundField = false;
+				for ( const field of project.fieldValues.nodes ) {
+					if ( ! field.field ) {
+						continue;
+					}
+
+					if ( projectField.fieldId === field.field.id ) {
+						foundField = true;
+					}
+				}
+
+				if ( ! foundField ) {
+					this.error(
+						'Issue "' + issue.title + '" - Project "' + project.project.title + '" is missing "' + projectField.fieldId + '" value "' + JSON.stringify( projectField.value ) + '"!'
+					);
+				}
+			}
+
 			const input = {
 				clientMutationId: 'monorepo-merge',
 				projectId: projectField.projectId,
