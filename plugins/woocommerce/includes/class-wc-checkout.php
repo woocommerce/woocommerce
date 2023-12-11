@@ -1289,7 +1289,7 @@ class WC_Checkout {
 					$this->process_order_without_payment( $order_id );
 				}
 			}
-		} catch ( Exception $e ) {
+		} catch ( Throwable $e ) {
 			wc_add_notice( $e->getMessage(), 'error' );
 		}
 		$this->send_ajax_failure_response();

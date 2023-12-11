@@ -458,7 +458,7 @@ class WC_Form_Handler {
 								exit;
 							}
 						}
-					} catch ( Exception $e ) {
+					} catch ( Throwable $e ) {
 						wc_add_notice( $e->getMessage(), 'error' );
 					}
 				} else {
