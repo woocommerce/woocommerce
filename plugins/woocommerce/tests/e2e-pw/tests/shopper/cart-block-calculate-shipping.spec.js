@@ -282,10 +282,10 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			.textContent();
 		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
-			Number( doubleFirstProductWithFlatRate )
+			Number( firstProductPrice )
 		);
 		await expect( totalPrice ).toBeLessThanOrEqual(
-			Number( doubleFirstProductWithFlatRate * 1.25 )
+			Number( firstProductPrice * 1.25 )
 		);
 	} );
 
