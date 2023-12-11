@@ -18,7 +18,7 @@
 	"extra": {
 		"changelogger": {
 			"formatter": {
-				"filename": "../../../tools/changelogger/class-package-formatter.php"
+				"filename": "../../tools/changelogger/class-package-formatter.php"
 			},
 			"types": {
 				"fix": "Fixes an existing bug",
