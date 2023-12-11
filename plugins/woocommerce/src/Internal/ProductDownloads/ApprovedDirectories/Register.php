@@ -31,6 +31,8 @@ class Register {
 	 */
 	private $mode_option = 'wc_downloads_approved_directories_mode';
 
+	private $cache = array();
+
 	/**
 	 * Sets up the approved directories sub-system.
 	 *
@@ -240,6 +242,10 @@ class Register {
 	public function is_valid_path( string $download_url ): bool {
 		global $wpdb;
 
+		if ( isset( $this->cache[ $download_url ] ) ) {
+			return $this->cache[ $download_url ] > 0;
+		}
+
 		$parent_directories = array();
 
 		foreach ( ( new URL( $this->normalize_url( $download_url ) ) )->get_all_parent_urls() as $parent ) {
@@ -266,6 +272,8 @@ class Register {
 			"
 		);
 		// phpcs:enable
+
+		$this->cache[ $download_url ] = $matches;
 
 		return $matches > 0;
 	}
