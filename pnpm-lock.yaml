@@ -1969,6 +1969,9 @@ importers:
 
   packages/js/integrate-plugin:
     dependencies:
+      '@types/wordpress__blocks':
+        specifier: 11.0.7
+        version: 11.0.7(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/create-block':
         specifier: wp-6.0
         version: 3.1.1
@@ -2033,6 +2036,9 @@ importers:
       '@wordpress/browserslist-config':
         specifier: wp-6.0
         version: 4.1.3
+      concurrently:
+        specifier: ^7.0.0
+        version: 7.6.0
       copy-webpack-plugin:
         specifier: ^9.1.0
         version: 9.1.0(webpack@5.89.0)
@@ -17962,8 +17968,8 @@ packages:
     resolution: {integrity: sha512-8BcT3CUxHt73CepaLtQHAhA7uBhDOK9x5HJOAxzV+Bl37W04u4jSNulXxwX/6tI7t7Knux5lnN9bvKf/1sg+Rw==}
     dependencies:
       '@types/react': 17.0.71
-      '@types/wordpress__components': 19.10.5(react-dom@17.0.2)(react@17.0.2)
-      '@wordpress/element': 4.4.1
+      '@types/wordpress__components': 23.0.10(react-dom@17.0.2)(react@17.0.2)
+      '@wordpress/element': 4.20.0
     transitivePeerDependencies:
       - react
       - react-dom

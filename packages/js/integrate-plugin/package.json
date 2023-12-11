@@ -42,6 +42,7 @@
 		"watch:build": "pnpm build:project --watch"
 	},
 	"dependencies": {
+		"@types/wordpress__blocks": "11.0.7",
 		"@wordpress/create-block": "wp-6.0",
 		"chalk": "^4.1.2",
 		"change-case": "^4.1.2",
@@ -65,6 +66,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/browserslist-config": "wp-6.0",
+		"concurrently": "^7.0.0",
 		"copy-webpack-plugin": "^9.1.0",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.55.0",
