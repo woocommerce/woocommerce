@@ -338,7 +338,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
 			)
 		).toContainText( '$0.00' );
-		let totalPrice = await page
+		totalPrice = await page
 			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
 			.last()
 			.textContent();
