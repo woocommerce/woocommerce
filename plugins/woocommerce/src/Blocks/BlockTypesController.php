@@ -233,7 +233,6 @@ final class BlockTypesController {
 			'MiniCart',
 			'StoreNotices',
 			'PriceFilter',
-			'ProductAddToCart',
 			'ProductBestSellers',
 			'ProductButton',
 			'ProductCategories',
@@ -300,6 +299,7 @@ final class BlockTypesController {
 			$block_types[] = 'CollectionStockFilter';
 			$block_types[] = 'CollectionPriceFilter';
 			$block_types[] = 'CollectionAttributeFilter';
+			$block_types[] = 'CollectionRatingFilter';
 		}
 
 		/**

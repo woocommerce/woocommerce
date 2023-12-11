@@ -1,0 +1,52 @@
+{
+	"name": "woocommerce/collection-rating-filter",
+	"version": "1.0.0",
+	"title": "Collection Rating Filter",
+	"description": "Enable customers to filter the product collection by rating.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"interactivity": true
+	},
+	"ancestor": [
+		"woocommerce/collection-filters"
+	],
+	"usesContext": [
+		"collectionData"
+	],
+	"attributes": {
+		"className": {
+			"type": "string",
+			"default": ""
+		},
+		"showCounts": {
+			"type": "boolean",
+			"default": false
+		},
+		"displayStyle": {
+			"type": "string",
+			"default": "dropdown"
+		},
+		"showFilterButton": {
+			"type": "boolean",
+			"default": false
+		},
+		"selectType": {
+			"type": "string",
+			"default": "multiple"
+		},
+		"isPreview": {
+			"type": "boolean",
+			"default": false
+		},
+		"queryParam": {
+			"type": "object",
+			"default": {
+				"calculate_rating_counts": "true"
+			}
+		}
+	},
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}
