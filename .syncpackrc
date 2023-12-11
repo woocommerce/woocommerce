@@ -173,6 +173,15 @@
 		},
 		{
 			"dependencies": [
+				"@wordpress/e2e-test-utils-playwright"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "wp-6.4"
+		},
+		{
+			"dependencies": [
 				"@wordpress/**"
 			],
 			"packages": [
