@@ -211,15 +211,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 								if ( ! $method->supports( 'shipping-zones' ) ) {
 									continue;
 								}
-								$allowed_html = array(
-									'a' => array(
-										'href'   => true,
-										'title'  => true,
-										'target' => true,
-									),
-								);
 
-								echo '<div id=' . esc_attr( $method->id ) . '-description class="wc-shipping-zone-method-input-help-text"><span>' . wp_kses( $method->get_method_description(), $allowed_html ) . '</span></div>';
+								echo '<div id=' . esc_attr( $method->id ) . '-description class="wc-shipping-zone-method-input-help-text"><span>' . wp_kses_post( wpautop( $method->get_method_description() ) ) . '</span></div>';
 							}
 							echo '</div>'
 							?>
