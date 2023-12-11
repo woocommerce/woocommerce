@@ -41,11 +41,26 @@ export default function InstallModal() {
 		return null;
 	}
 
+	const removeInstallQuery = () => {
+		navigateTo( {
+			url: getNewPath(
+				{
+					...query,
+					install: undefined,
+				},
+				MARKETPLACE_PATH,
+				{}
+			),
+		} );
+	};
+
 	const subscription: Subscription | undefined = subscriptions.find(
 		( s: Subscription ) => s.product_key === installingProductKey
 	);
-	if ( isConnected && ! subscription ) {
+	// If subscriptions loaded, but we don't have a subscription for the product key, show an error.
+	if ( isConnected && ! isLoading && ! subscription ) {
 		addNotice(
+			installingProductKey,
 			sprintf(
 				/* translators: %s is the product key */
 				__(
@@ -56,6 +71,7 @@ export default function InstallModal() {
 			),
 			NoticeStatus.Error
 		);
+		removeInstallQuery();
 		return null;
 	}
 
@@ -98,14 +114,7 @@ export default function InstallModal() {
 	};
 
 	const onClose = () => {
-		const newQuery = {
-			...query,
-			install: undefined,
-		};
-		navigateTo( {
-			url: getNewPath( newQuery, MARKETPLACE_PATH, {} ),
-		} );
-
+		removeInstallQuery();
 		setShowModal( false );
 	};
 
