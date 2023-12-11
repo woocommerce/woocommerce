@@ -27,12 +27,15 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                install: '@woocommerce/plugin-woocommerce...'
+                build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               env:
                   WP_ENV_PHP_VERSION: 7.4
-              run: pnpm run env:test
+              run: pnpm env:test
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -94,12 +97,15 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                install: '@woocommerce/plugin-woocommerce...'
+                build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               env:
                   ENABLE_HPOS: 0
-              run: pnpm env:test --filter=woocommerce
+              run: pnpm --filter=@woocommerce/plugin-woocommerce env:test
 
             - name: Run Playwright API tests.
               id: run_playwright_api_tests
@@ -144,14 +150,17 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                install: '@woocommerce/plugin-woocommerce...'
+                build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               env:
                   ENABLE_HPOS: 0
               run: |
-                  pnpm env:dev --filter=woocommerce
-                  pnpm env:performance-init --filter=woocommerce
+                  pnpm --filter=@woocommerce/plugin-woocommerce env:dev
+                  pnpm --filter=@woocommerce/plugin-woocommerce env:performance-init
 
             - name: Install k6
               run: |

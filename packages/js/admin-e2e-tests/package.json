@@ -25,9 +25,26 @@
 		"!*.tsbuildinfo"
 	],
 	"sideEffects": false,
+	"scripts": {
+		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
+		"build:project": "pnpm --if-present /^build:project:.*$/",
+		"build:project:typescript": "wireit",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint src",
+		"prepack": "pnpm build",
+		"watch:build": "pnpm build:project --watch"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix:lang:js"
+		]
+	},
 	"dependencies": {
 		"@jest/globals": "^27.5.1",
-		"@types/jest": "^27.4.1",
+		"@types/jest": "^27.5.2",
 		"@woocommerce/e2e-utils": "workspace:*",
 		"config": "3.3.7"
 	},
@@ -37,38 +54,58 @@
 		"puppeteer": "^2.0.0"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.17.5",
+		"@babel/core": "^7.23.5",
 		"@types/config": "0.0.41",
 		"@types/expect-puppeteer": "^4.4.7",
-		"@types/puppeteer": "^5.4.5",
-		"@typescript-eslint/eslint-plugin": "^5.54.0",
+		"@types/puppeteer": "^5.4.7",
+		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@woocommerce/api": "^0.2.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.32.0",
+		"eslint": "^8.55.0",
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
 		"jest-mock-extended": "^1.0.18",
 		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
-		"typescript": "^5.1.6"
+		"typescript": "^5.3.3",
+		"wireit": "0.14.1"
 	},
 	"publishConfig": {
 		"access": "public"
 	},
-	"scripts": {
-		"turbo:build": "tsc --project tsconfig.json",
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint src",
-		"start": "tsc --project tsconfig.json --watch",
-		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"lint:fix": "eslint src --fix",
-		"prepack": "pnpm run clean && pnpm run build"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
+	"wireit": {
+		"build:project:typescript": {
+			"command": "tsc --project tsconfig.json",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/e2e-environment/",
+				"node_modules/@woocommerce/e2e-utils/",
+				"package.json",
+				"!node_modules/@woocommerce/e2e-utils/node_modules",
+				"!node_modules/@woocommerce/e2e-utils/.git",
+				"!node_modules/@woocommerce/e2e-utils/.svn",
+				"!node_modules/@woocommerce/e2e-utils/src",
+				"!node_modules/@woocommerce/e2e-environment/node_modules",
+				"!node_modules/@woocommerce/e2e-environment/.git",
+				"!node_modules/@woocommerce/e2e-environment/.svn",
+				"!node_modules/@woocommerce/e2e-environment/src"
+			]
+		}
 	}
 }

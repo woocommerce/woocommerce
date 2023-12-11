@@ -39,6 +39,7 @@ export function Edit( {
 
 	const displayBlocks = useSelect(
 		( select ) => {
+			// @ts-expect-error There are no types for this.
 			const product: Product = select( 'core' ).getEditedEntityRecord(
 				'postType',
 				postType,
