@@ -490,6 +490,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function read_items( $order, $type ) {
 		global $wpdb;
 
+		if ( ! $order->get_id() ) {
+			return array();
+		}
+
 		// Get from cache if available.
 		$items = 0 < $order->get_id() ? wp_cache_get( 'order-items-' . $order->get_id(), 'orders' ) : false;
 
