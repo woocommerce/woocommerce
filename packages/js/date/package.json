@@ -25,6 +25,11 @@
 	"module": "build-module/index.js",
 	"types": "build-types",
 	"react-native": "src/index",
+	"files": [
+		"build",
+		"build-module",
+		"build-types"
+	],
 	"dependencies": {
 		"@types/d3-time-format": "^2.3.4",
 		"@wordpress/date": "wp-6.0",

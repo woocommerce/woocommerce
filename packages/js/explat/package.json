@@ -25,6 +25,11 @@
 	"main": "build/index.js",
 	"module": "build-module/index.js",
 	"types": "build-types",
+	"files": [
+		"build",
+		"build-module",
+		"build-types"
+	],
 	"scripts": {
 		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
 		"build:project": "pnpm --if-present /^build:project:.*$/",

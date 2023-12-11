@@ -20,7 +20,7 @@
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
 	"files": [
-		"/build/",
+		"build",
 		"!*.ts.map",
 		"!*.tsbuildinfo"
 	],

@@ -26,6 +26,11 @@
 	"module": "build-module/index.js",
 	"types": "build-types",
 	"react-native": "src/index",
+	"files": [
+		"build",
+		"build-module",
+		"build-types"
+	],
 	"dependencies": {
 		"@wordpress/i18n": "wp-6.0",
 		"peggy": "^3.0.2"

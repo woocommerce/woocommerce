@@ -20,6 +20,12 @@
 	"module": "build-module/index.js",
 	"types": "build-types",
 	"react-native": "src/index",
+	"files": [
+		"build",
+		"build-module",
+		"build-style",
+		"build-types"
+	],
 	"sideEffects": [
 		"build-style/**",
 		"src/**/*.scss"
