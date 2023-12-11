@@ -113,7 +113,7 @@ function isLinkedPackage( packagePath, lockVersion ) {
 	// We can parse the version that PNPM stores in order to get the relative path to the package.
 	// file: dependencies use a relative path with dependencies listed in parentheses after it.
 	// workspace: dependencies just store the relative path from the package itself.
-	const match = lockVersion.match( /^(?:file:|link:)((?:\.?\/|\.\.\/)[^\^<>:"|?*()]+)/i );
+	const match = lockVersion.match( /^(?:file:|link:)([^\^<>:"|?*()]+)/i );
 	if ( ! match ) {
 		return false;
 	}
@@ -123,6 +123,14 @@ function isLinkedPackage( packagePath, lockVersion ) {
 	// Linked paths are relative to the package instead of the monorepo.
 	if ( lockVersion.startsWith( 'link:' ) ) {
 		relativePath = path.join( packagePath, relativePath );
+	}
+
+	// Local relative paths won't always start with './' so we want to make sure that the path
+	// exists before we return it. We do this instead of checking for the existeince of the
+	// package.json file later because we want to be able to detect cases where the
+	// package file should exist but for some reason can't be loaded.
+	if ( ! match[ 1 ].startsWith( '.' ) && ! fs.existsSync( relativePath ) ) {
+		return false;
 	}
 
 	return relativePath;
