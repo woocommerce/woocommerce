@@ -60,6 +60,8 @@
 
 'plugin: woocommerce':
 - plugins/woocommerce/**/*
+- plugins/woocommerce-admin/**/*
+- plugins/woocommerce-blocks/**/*
 
 'plugin: woocommerce beta tester':
 - plugins/woocommerce-beta-tester/**/*
