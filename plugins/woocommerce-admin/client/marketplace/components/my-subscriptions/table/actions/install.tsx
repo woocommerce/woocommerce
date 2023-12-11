@@ -22,6 +22,7 @@ import { NoticeStatus } from '../../../../contexts/types';
 
 interface InstallProps {
 	subscription: Subscription;
+	variant?: Button.ButtonVariant;
 }
 
 export default function Install( props: InstallProps ) {
@@ -113,7 +114,7 @@ export default function Install( props: InstallProps ) {
 
 	return (
 		<Button
-			variant="link"
+			variant={ props.variant ?? 'link' }
 			isBusy={ loading }
 			disabled={ loading }
 			onClick={ install }
