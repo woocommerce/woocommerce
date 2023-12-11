@@ -648,6 +648,8 @@ class WC_Helper {
 			return;
 		}
 
+		self::maybe_redirect_to_new_marketplace_installer();
+
 		if ( empty( $_GET['section'] ) || 'helper' !== $_GET['section'] ) {
 			return;
 		}
@@ -679,6 +681,31 @@ class WC_Helper {
 		if ( ! empty( $_GET['wc-helper-deactivate-plugin'] ) ) {
 			return self::_helper_plugin_deactivate();
 		}
+	}
+
+	private static function maybe_redirect_to_new_marketplace_installer() {
+		// Redirect requires the "install" URL parameter to be passed.
+		if ( empty( $_GET[ 'install' ] ) ) {
+			return;
+		}
+
+		// Check the format of the product key in the "install" parameter is what we expect it to be
+		if ( ! preg_match( '/^W00-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $_GET[ 'install' ], $matches ) ) {
+			return;
+		}
+
+		$redirect_url = add_query_arg(
+			array(
+				'page'    => 'wc-admin',
+				'tab'     => 'my-subscriptions',
+				'path'    => rawurlencode( '/extensions' ),
+				'install' => rawurlencode( wp_unslash( $_GET[ 'install' ] ) ),
+			),
+			admin_url( 'admin.php' )
+		);
+
+		wp_safe_redirect( esc_url_raw( $redirect_url ) );
+		die();
 	}
 
 	/**
