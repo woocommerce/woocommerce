@@ -353,12 +353,8 @@
 		"repo": "woocommerce/woocommerce-gutenberg-products-block"
 	},
 	"files": [
-		"assets/**/*.{js,scss,php}",
-		"build/**/*.{js,json,css}",
-		"includes/**/*.php",
-		"languages/**/*.json",
-		"license.txt",
-		"woocommerce-gutenberg-products-block.php"
+		"build",
+		"blocks.ini"
 	],
 	"wireit": {
 		"build:project:bundle": {
