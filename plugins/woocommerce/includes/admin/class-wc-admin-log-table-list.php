@@ -17,6 +17,12 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 }
 
 class WC_Admin_Log_Table_List extends WP_List_Table {
+	/**
+	 * The key for the user option of how many list table items to display per page.
+	 *
+	 * @const string
+	 */
+	public const PER_PAGE_USER_OPTION_KEY = 'woocommerce_status_log_items_per_page';
 
 	/**
 	 * Initialize the log table list.
@@ -330,7 +336,10 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 
 		$this->prepare_column_headers();
 
-		$per_page = $this->get_items_per_page( 'woocommerce_status_log_items_per_page', 10 );
+		$per_page = $this->get_items_per_page(
+			self::PER_PAGE_USER_OPTION_KEY,
+			$this->get_per_page_default()
+		);
 
 		$where  = $this->get_items_query_where();
 		$order  = $this->get_items_query_order();
@@ -367,7 +376,11 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	protected function get_items_query_limit() {
 		global $wpdb;
 
-		$per_page = $this->get_items_per_page( 'woocommerce_status_log_items_per_page', 10 );
+		$per_page = $this->get_items_per_page(
+			self::PER_PAGE_USER_OPTION_KEY,
+			$this->get_per_page_default()
+		);
+
 		return $wpdb->prepare( 'LIMIT %d', $per_page );
 	}
 
@@ -381,7 +394,10 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	protected function get_items_query_offset() {
 		global $wpdb;
 
-		$per_page     = $this->get_items_per_page( 'woocommerce_status_log_items_per_page', 10 );
+		$per_page     = $this->get_items_per_page(
+			self::PER_PAGE_USER_OPTION_KEY,
+			$this->get_per_page_default()
+		);
 		$current_page = $this->get_pagenum();
 		if ( 1 < $current_page ) {
 			$offset = $per_page * ( $current_page - 1 );
@@ -456,5 +472,14 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			array(),
 			$this->get_sortable_columns(),
 		);
+	}
+
+	/**
+	 * Helper to get the default value for the per_page arg.
+	 *
+	 * @return int
+	 */
+	public function get_per_page_default(): int {
+		return 20;
 	}
 }

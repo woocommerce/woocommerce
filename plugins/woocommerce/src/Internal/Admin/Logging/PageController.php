@@ -4,11 +4,13 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileController, FileListTable, SearchListTable };
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Status;
-use WP_List_Table;
+use WC_Log_Handler_File, WC_Log_Handler_DB;
 use WC_Log_Levels;
+use WP_List_Table;
 
 /**
  * PageController class.
@@ -82,7 +84,7 @@ class PageController {
 		$handler = Constants::get_constant( 'WC_LOG_HANDLER' );
 
 		if ( is_null( $handler ) || ! class_exists( $handler ) ) {
-			$handler = \WC_Log_Handler_File::class;
+			$handler = WC_Log_Handler_File::class;
 		}
 
 		return $handler;
@@ -424,11 +426,22 @@ class PageController {
 	 * @return void
 	 */
 	private function setup_screen_options(): void {
-		$params = $this->get_query_params( array( 'view' ) );
+		$params     = $this->get_query_params( array( 'view' ) );
+		$handler    = $this->get_default_handler();
+		$list_table = null;
 
-		if ( in_array( $params['view'], array( 'list_files', 'search_results' ), true ) ) {
-			$list_table = $this->get_list_table( $params['view'] );
+		switch ( $handler ) {
+			case LogHandlerFileV2::class:
+				if ( in_array( $params['view'], array( 'list_files', 'search_results' ), true ) ) {
+					$list_table = $this->get_list_table( $params['view'] );
+				}
+				break;
+			case 'WC_Log_Handler_DB':
+					$list_table = WC_Admin_Status::get_db_log_list_table();
+				break;
+		}
 
+		if ( $list_table instanceof WP_List_Table ) {
 			// Ensure list table columns are initialized early enough to enable column hiding, if available.
 			$list_table->prepare_column_headers();
 
@@ -448,6 +461,11 @@ class PageController {
 	 * @return void
 	 */
 	private function handle_list_table_bulk_actions(): void {
+		// Bail if we're not using the file handler.
+		if ( LogHandlerFileV2::class !== $this->get_default_handler() ) {
+			return;
+		}
+
 		$params = $this->get_query_params( array( 'file_id', 'view' ) );
 
 		// Bail if this is not the list table view.
