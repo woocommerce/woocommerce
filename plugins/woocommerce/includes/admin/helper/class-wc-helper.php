@@ -693,9 +693,10 @@ class WC_Helper {
 		if ( true === $redirect_to_wc_admin && 'woocommerce_page_wc-addons' === $current_screen->id ) {
 			return add_query_arg(
 				array(
-					'page' => 'wc-admin',
-					'tab'  => 'my-subscriptions',
-					'path' => rawurlencode( '/extensions' ),
+					'page'    => 'wc-admin',
+					'tab'     => 'my-subscriptions',
+					'path'    => rawurlencode( '/extensions' ),
+					'install' => $_GET['install'] ?? '',
 				),
 				admin_url( 'admin.php' )
 			);
@@ -725,6 +726,10 @@ class WC_Helper {
 
 		if ( isset( $_GET['redirect-to-wc-admin'] ) ) {
 			$redirect_url_args['redirect-to-wc-admin'] = 1;
+		}
+
+		if ( isset( $_GET['install'] ) ) {
+			$redirect_url_args['install'] = $_GET['install'];
 		}
 
 		$redirect_uri = add_query_arg(

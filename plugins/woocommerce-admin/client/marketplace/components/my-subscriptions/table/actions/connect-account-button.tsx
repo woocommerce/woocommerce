@@ -11,16 +11,19 @@ import { getAdminSetting } from '../../../../../utils/admin-settings';
 
 interface RenewProps {
 	variant?: Button.ButtonVariant;
+	install?: string;
 }
 
 export default function ConnectAccountButton( props: RenewProps ) {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+
+	const url = new URL( wccomSettings?.connectURL ?? '' );
+	if ( props.install ) {
+		url.searchParams.set( 'install', props.install );
+	}
 	return (
-		<Button
-			href={ wccomSettings?.connectURL }
-			variant={ props.variant ?? 'secondary' }
-		>
-			{ __( 'Connect account', 'woocommerce' ) }
+		<Button href={ url.href } variant={ props.variant ?? 'secondary' }>
+			{ __( 'Connect Account', 'woocommerce' ) }
 		</Button>
 	);
 }
