@@ -67,7 +67,7 @@ module.exports = {
 			return acc;
 		},
 		{
-			'src/.*\\.[jt]sx?$': 'ts-jest',
+			'(?:src|client|assets/js)/.*\\.[jt]sx?$': 'ts-jest',
 		}
 	),
 	testEnvironment: 'jest-environment-jsdom',
