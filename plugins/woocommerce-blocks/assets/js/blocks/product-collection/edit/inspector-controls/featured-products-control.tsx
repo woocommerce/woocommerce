@@ -33,10 +33,7 @@ const FeaturedProductsControl = ( props: QueryControlProps ) => {
 				label={ __( 'Featured', 'woocommerce' ) }
 			>
 				<ToggleControl
-					label={ __(
-						'Show only featured products',
-						'woocommerce'
-					) }
+					label={ __( 'Show only featured products', 'woocommerce' ) }
 					checked={ query.featured || false }
 					onChange={ ( featured ) => {
 						setQueryAttribute( {

@@ -32,26 +32,14 @@ const BLOCK_CONTROL_CONFIG = {
 
 const CONTENT_CONFIG = {
 	...GENERIC_CONFIG,
-	emptyMessage: __(
-		'No product is selected.',
-		'woocommerce'
-	),
-	noSelectionButtonLabel: __(
-		'Select a product',
-		'woocommerce'
-	),
+	emptyMessage: __( 'No product is selected.', 'woocommerce' ),
+	noSelectionButtonLabel: __( 'Select a product', 'woocommerce' ),
 };
 
 const EDIT_MODE_CONFIG = {
 	...GENERIC_CONFIG,
-	description: __(
-		'Highlight a product or variation.',
-		'woocommerce'
-	),
-	editLabel: __(
-		'Showing Featured Product block preview.',
-		'woocommerce'
-	),
+	description: __( 'Highlight a product or variation.', 'woocommerce' ),
+	editLabel: __( 'Showing Featured Product block preview.', 'woocommerce' ),
 };
 
 export default compose( [

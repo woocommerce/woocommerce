@@ -13,8 +13,7 @@ const isConversionPossible = () => {
 	return true;
 };
 
-const getButtonLabel = () =>
-	__( 'Transform into blocks', 'woocommerce' );
+const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
 
 const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
 	[

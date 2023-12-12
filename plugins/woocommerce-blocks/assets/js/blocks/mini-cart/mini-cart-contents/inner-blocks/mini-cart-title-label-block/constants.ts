@@ -3,7 +3,4 @@
  */
 import { __ } from '@wordpress/i18n';
 
-export const defaultYourCartLabel = __(
-	'Your cart',
-	'woocommerce'
-);
+export const defaultYourCartLabel = __( 'Your cart', 'woocommerce' );

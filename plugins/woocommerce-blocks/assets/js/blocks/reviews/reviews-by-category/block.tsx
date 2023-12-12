@@ -57,14 +57,9 @@ const ReviewsByCategoryEditor = ( {
 						showReviewCount={ true }
 					/>
 				</PanelBody>
-				<PanelBody
-					title={ __( 'Content', 'woocommerce' ) }
-				>
+				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
 					<ToggleControl
-						label={ __(
-							'Product name',
-							'woocommerce'
-						) }
+						label={ __( 'Product name', 'woocommerce' ) }
 						checked={ attributes.showProductName }
 						onChange={ () =>
 							setAttributes( {
@@ -77,12 +72,7 @@ const ReviewsByCategoryEditor = ( {
 						setAttributes
 					) }
 				</PanelBody>
-				<PanelBody
-					title={ __(
-						'List Settings',
-						'woocommerce'
-					) }
-				>
+				<PanelBody title={ __( 'List Settings', 'woocommerce' ) }>
 					{ getSharedReviewListControls( attributes, setAttributes ) }
 				</PanelBody>
 			</InspectorControls>
@@ -108,10 +98,7 @@ const ReviewsByCategoryEditor = ( {
 						className="block-editor-block-icon"
 					/>
 				}
-				label={ __(
-					'Reviews by Category',
-					'woocommerce'
-				) }
+				label={ __( 'Reviews by Category', 'woocommerce' ) }
 				className="wc-block-reviews-by-category"
 			>
 				{ __(
@@ -139,10 +126,7 @@ const ReviewsByCategoryEditor = ( {
 		return renderEditMode();
 	}
 
-	const buttonTitle = __(
-		'Edit selected categories',
-		'woocommerce'
-	);
+	const buttonTitle = __( 'Edit selected categories', 'woocommerce' );
 
 	return (
 		<>
@@ -156,10 +140,7 @@ const ReviewsByCategoryEditor = ( {
 						className="block-editor-block-icon"
 					/>
 				}
-				name={ __(
-					'Reviews by Category',
-					'woocommerce'
-				) }
+				name={ __( 'Reviews by Category', 'woocommerce' ) }
 				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>
 		</>

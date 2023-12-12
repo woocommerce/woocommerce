@@ -127,19 +127,13 @@ const Edit = ( {
 		isCompact: boolean;
 	} ) => {
 		const messages = {
-			clear: __(
-				'Clear selected attribute',
-				'woocommerce'
-			),
+			clear: __( 'Clear selected attribute', 'woocommerce' ),
 			list: __( 'Product Attributes', 'woocommerce' ),
 			noItems: __(
 				"Your store doesn't have any product attributes.",
 				'woocommerce'
 			),
-			search: __(
-				'Search for a product attribute:',
-				'woocommerce'
-			),
+			search: __( 'Search for a product attribute:', 'woocommerce' ),
 			selected: ( n: number ) =>
 				sprintf(
 					/* translators: %d is the number of attributes selected. */
@@ -182,17 +176,9 @@ const Edit = ( {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __(
-						'Display Settings',
-						'woocommerce'
-					) }
-				>
+				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
 					<ToggleControl
-						label={ __(
-							'Display product count',
-							'woocommerce'
-						) }
+						label={ __( 'Display product count', 'woocommerce' ) }
 						checked={ showCounts }
 						onChange={ () =>
 							setAttributes( {
@@ -215,25 +201,16 @@ const Edit = ( {
 					>
 						<ToggleGroupControlOption
 							value="multiple"
-							label={ __(
-								'Multiple',
-								'woocommerce'
-							) }
+							label={ __( 'Multiple', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="single"
-							label={ __(
-								'Single',
-								'woocommerce'
-							) }
+							label={ __( 'Single', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 					{ selectType === 'multiple' && (
 						<ToggleGroupControl
-							label={ __(
-								'Filter Conditions',
-								'woocommerce'
-							) }
+							label={ __( 'Filter Conditions', 'woocommerce' ) }
 							help={
 								queryType === 'and'
 									? __(
@@ -255,25 +232,16 @@ const Edit = ( {
 						>
 							<ToggleGroupControlOption
 								value="and"
-								label={ __(
-									'All',
-									'woocommerce'
-								) }
+								label={ __( 'All', 'woocommerce' ) }
 							/>
 							<ToggleGroupControlOption
 								value="or"
-								label={ __(
-									'Any',
-									'woocommerce'
-								) }
+								label={ __( 'Any', 'woocommerce' ) }
 							/>
 						</ToggleGroupControl>
 					) }
 					<ToggleGroupControl
-						label={ __(
-							'Display Style',
-							'woocommerce'
-						) }
+						label={ __( 'Display Style', 'woocommerce' ) }
 						value={ displayStyle }
 						onChange={ ( value: string ) =>
 							setAttributes( {
@@ -284,17 +252,11 @@ const Edit = ( {
 					>
 						<ToggleGroupControlOption
 							value="list"
-							label={ __(
-								'List',
-								'woocommerce'
-							) }
+							label={ __( 'List', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="dropdown"
-							label={ __(
-								'Dropdown',
-								'woocommerce'
-							) }
+							label={ __( 'Dropdown', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 					<ToggleControl
@@ -315,10 +277,7 @@ const Edit = ( {
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __(
-						'Content Settings',
-						'woocommerce'
-					) }
+					title={ __( 'Content Settings', 'woocommerce' ) }
 					initialOpen={ false }
 				>
 					{ renderAttributeControl( { isCompact: true } ) }
@@ -331,10 +290,7 @@ const Edit = ( {
 		<Placeholder
 			className="wc-block-attribute-filter"
 			icon={ <Icon icon={ category } /> }
-			label={ __(
-				'Filter by Attribute',
-				'woocommerce'
-			) }
+			label={ __( 'Filter by Attribute', 'woocommerce' ) }
 			instructions={ __(
 				'Display a list of filters based on the selected attributes.',
 				'woocommerce'
@@ -354,8 +310,7 @@ const Edit = ( {
 				) }
 				target="_top"
 			>
-				{ __( 'Add new attribute', 'woocommerce' ) +
-					' ' }
+				{ __( 'Add new attribute', 'woocommerce' ) + ' ' }
 				<Icon icon={ external } />
 			</Button>
 			<Button
@@ -384,10 +339,7 @@ const Edit = ( {
 			<Placeholder
 				className="wc-block-attribute-filter"
 				icon={ <Icon icon={ category } /> }
-				label={ __(
-					'Filter by Attribute',
-					'woocommerce'
-				) }
+				label={ __( 'Filter by Attribute', 'woocommerce' ) }
 			>
 				<div className="wc-block-attribute-filter__instructions">
 					{ __(

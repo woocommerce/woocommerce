@@ -110,10 +110,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 			{ attributes.showReviewImage && (
 				<>
 					<ToggleGroupControl
-						label={ __(
-							'Review image',
-							'woocommerce'
-						) }
+						label={ __( 'Review image', 'woocommerce' ) }
 						value={ attributes.imageType }
 						onChange={ ( value ) =>
 							setAttributes( { imageType: value } )
@@ -121,17 +118,11 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 					>
 						<ToggleGroupControlOption
 							value="reviewer"
-							label={ __(
-								'Reviewer photo',
-								'woocommerce'
-							) }
+							label={ __( 'Reviewer photo', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="product"
-							label={ __(
-								'Product',
-								'woocommerce'
-							) }
+							label={ __( 'Product', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 					{ attributes.imageType === 'reviewer' && ! showAvatars && (
@@ -179,10 +170,7 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 				}
 			/>
 			<SelectControl
-				label={ __(
-					'Order Product Reviews by',
-					'woocommerce'
-				) }
+				label={ __( 'Order Product Reviews by', 'woocommerce' ) }
 				value={ attributes.orderby }
 				options={ [
 					{ label: 'Most recent', value: 'most-recent' },
@@ -192,10 +180,7 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 				onChange={ ( orderby ) => setAttributes( { orderby } ) }
 			/>
 			<RangeControl
-				label={ __(
-					'Starting Number of Reviews',
-					'woocommerce'
-				) }
+				label={ __( 'Starting Number of Reviews', 'woocommerce' ) }
 				value={ attributes.reviewsOnPageLoad }
 				onChange={ ( reviewsOnPageLoad ) =>
 					setAttributes( { reviewsOnPageLoad } )
@@ -212,10 +197,7 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 			/>
 			{ attributes.showLoadMore && (
 				<RangeControl
-					label={ __(
-						'Load More Reviews',
-						'woocommerce'
-					) }
+					label={ __( 'Load More Reviews', 'woocommerce' ) }
 					value={ attributes.reviewsOnLoadMore }
 					onChange={ ( reviewsOnLoadMore ) =>
 						setAttributes( { reviewsOnLoadMore } )

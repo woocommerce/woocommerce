@@ -38,24 +38,21 @@ test.describe( 'Single Product Template', () => {
 		);
 	} );
 
-	test.describe(
-		`should render a password input when the product is protected `,
-		() =>
-			test( 'add product specific classes to the body', async ( {
-				page,
-			} ) => {
-				await page.goto( `/product/${ product.slug }` );
-				const placeholder = page.getByText(
-					'This content is password protected. To view it please enter your password below:'
-				);
+	test.describe( `should render a password input when the product is protected `, () =>
+		test( 'add product specific classes to the body', async ( {
+			page,
+		} ) => {
+			await page.goto( `/product/${ product.slug }` );
+			const placeholder = page.getByText(
+				'This content is password protected. To view it please enter your password below:'
+			);
 
-				await expect( placeholder ).toBeVisible();
+			await expect( placeholder ).toBeVisible();
 
-				await page.getByLabel( 'Password' ).fill( 'password' );
+			await page.getByLabel( 'Password' ).fill( 'password' );
 
-				await page.getByRole( 'button', { name: 'Enter' } ).click();
+			await page.getByRole( 'button', { name: 'Enter' } ).click();
 
-				await expect( placeholder ).toBeHidden();
-			} )
-	);
+			await expect( placeholder ).toBeHidden();
+		} ) );
 } );

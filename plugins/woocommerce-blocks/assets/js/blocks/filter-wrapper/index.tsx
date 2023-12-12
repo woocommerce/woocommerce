@@ -158,10 +158,7 @@ registerBlockType( metadata, {
 				attributes.filterType === 'price-filter',
 			attributes: {
 				filterType: 'price-filter',
-				heading: __(
-					'Filter by price',
-					'woocommerce'
-				),
+				heading: __( 'Filter by price', 'woocommerce' ),
 			},
 			icon: {
 				src: (
@@ -183,10 +180,7 @@ registerBlockType( metadata, {
 				attributes.filterType === 'stock-filter',
 			attributes: {
 				filterType: 'stock-filter',
-				heading: __(
-					'Filter by stock status',
-					'woocommerce'
-				),
+				heading: __( 'Filter by stock status', 'woocommerce' ),
 			},
 			icon: {
 				src: (
@@ -208,10 +202,7 @@ registerBlockType( metadata, {
 				attributes.filterType === 'attribute-filter',
 			attributes: {
 				filterType: 'attribute-filter',
-				heading: __(
-					'Filter by attribute',
-					'woocommerce'
-				),
+				heading: __( 'Filter by attribute', 'woocommerce' ),
 			},
 			icon: {
 				src: (
@@ -233,10 +224,7 @@ registerBlockType( metadata, {
 				attributes.filterType === 'rating-filter',
 			attributes: {
 				filterType: 'rating-filter',
-				heading: __(
-					'Filter by rating',
-					'woocommerce'
-				),
+				heading: __( 'Filter by rating', 'woocommerce' ),
 			},
 			icon: {
 				src: (
