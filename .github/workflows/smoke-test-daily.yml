@@ -95,11 +95,13 @@ jobs:
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
                   install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
-            - name: Setup local test environment
-              uses: ./.github/actions/tests/setup-local-test-environment
-              with:
-                  test-type: e2e
+            - name: Load docker images and start containers.
+              working-directory: plugins/woocommerce
+              env:
+                  WP_ENV_PHP_VERSION: 7.4
+              run: pnpm env:test
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
