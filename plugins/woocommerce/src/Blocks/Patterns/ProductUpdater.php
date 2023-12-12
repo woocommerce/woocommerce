@@ -8,6 +8,10 @@ use WP_Error;
  * Pattern Images class.
  */
 class ProductUpdater {
+
+	/**
+	 * The dummy products.
+	 */
 	const DUMMY_PRODUCTS = [
 		[
 			'title'       => 'Vintage Typewriter',
@@ -194,27 +198,20 @@ class ProductUpdater {
 	 * @return bool|int|\WP_Error
 	 */
 	public function create_new_product( $product_data ) {
-		$product = new \WC_Product();
+		$product          = new \WC_Product();
+		$image_src        = plugins_url( $product_data['image'], dirname( __DIR__, 2 ) );
+		$image_alt        = $product_data['title'];
+		$product_image_id = $this->product_image_upload( $product->get_id(), $image_src, $image_alt );
 
-		$product->set_name( $product_data['title'] );
-		$product->set_status( 'publish' );
-		$product->set_description( $product_data['description'] );
-		$product->set_price( $product_data['price'] );
-		$product->set_regular_price( $product_data['price'] );
-
-		$saved_product = $product->save();
-
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-
-		$product_image_id = media_sideload_image( plugins_url( $product_data['image'], dirname( __DIR__, 2 ) ), $product->get_id(), $product_data['title'], 'id' );
 		if ( is_wp_error( $product_image_id ) ) {
 			return new \WP_Error( 'error_uploading_image', $product_image_id->get_error_message() );
 		}
 
-		$product->set_image_id( $product_image_id );
-		$product->save();
+		$saved_product = $this->product_update( $product, $product_image_id, $product_data['title'], $product_data['description'], $product_data['price'] );
+
+		if ( is_wp_error( $saved_product ) ) {
+			return $saved_product;
+		}
 
 		return update_post_meta( $saved_product, '_headstart_post', true );
 	}
@@ -305,30 +302,25 @@ class ProductUpdater {
 			return;
 		}
 
-		$product->set_name( $ai_generated_product_content['title'] );
-		$product->set_description( $ai_generated_product_content['description'] );
-		$product->set_regular_price( $ai_generated_product_content['price'] );
-		$product->set_slug( sanitize_title( $ai_generated_product_content['title'] ) );
-		$product->save();
+		$product_image_id = $this->product_image_upload( $product->get_id(), $ai_generated_product_content['image']['src'], $ai_generated_product_content['image']['alt'] );
 
-		$update_product_image = $this->update_product_image( $product, $ai_generated_product_content );
-
-		if ( is_wp_error( $update_product_image ) ) {
-			return $update_product_image;
+		if ( is_wp_error( $product_image_id ) ) {
+			return $product_image_id->get_error_message();
 		}
 
-		$this->create_hash_for_ai_modified_product( $product );
+		$this->product_update( $product, $product_image_id, $ai_generated_product_content['title'], $ai_generated_product_content['description'], $ai_generated_product_content['price'] );
 	}
 
 	/**
-	 * Update the product images with the AI-generated image.
+	 * Upload the image for the product.
 	 *
-	 * @param \WC_Product $product The product.
-	 * @param array       $ai_generated_product_content The AI-generated product content.
+	 * @param int    $product_id The product ID.
+	 * @param string $image_src The image source.
+	 * @param string $image_alt The image alt.
 	 *
-	 * @return string|true
+	 * @return int|string|WP_Error
 	 */
-	public function update_product_image( $product, $ai_generated_product_content ) {
+	private function product_image_upload( $product_id, $image_src, $image_alt ) {
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
@@ -339,16 +331,13 @@ class ProductUpdater {
 		set_time_limit( 150 );
 		wp_raise_memory_limit( 'image' );
 
-		$product_image_id = media_sideload_image( $ai_generated_product_content['image']['src'], $product->get_id(), $ai_generated_product_content['image']['alt'], 'id' );
+		$product_image_id = media_sideload_image( $image_src, $product_id, $image_alt, 'id' );
 
 		if ( is_wp_error( $product_image_id ) ) {
 			return $product_image_id->get_error_message();
 		}
 
-		$product->set_image_id( $product_image_id );
-		$product->save();
-
-		return true;
+		return $product_image_id;
 	}
 
 	/**
@@ -424,7 +413,7 @@ class ProductUpdater {
 		$success            = false;
 		while ( $ai_request_retries < 5 && ! $success ) {
 			$ai_request_retries ++;
-			$ai_response = $ai_connection->fetch_ai_response( $token, $formatted_prompt, 30, 'json_object' );
+			$ai_response = $ai_connection->fetch_ai_response( $token, $formatted_prompt, 30 );
 			if ( is_wp_error( $ai_response ) ) {
 				continue;
 			}
@@ -485,24 +474,46 @@ class ProductUpdater {
 		$dummy_products_to_update = $this->fetch_dummy_products_to_update();
 		$i                        = 0;
 		foreach ( $dummy_products_to_update as $product ) {
-			$product->set_name( self::DUMMY_PRODUCTS[ $i ]['title'] );
-			$product->set_description( self::DUMMY_PRODUCTS[ $i ]['description'] );
-			$product->set_regular_price( self::DUMMY_PRODUCTS[ $i ]['price'] );
-			$product->set_slug( sanitize_title( self::DUMMY_PRODUCTS[ $i ]['title'] ) );
-			$product->save();
+			$image_src        = plugins_url( self::DUMMY_PRODUCTS[ $i ]['image'], dirname( __DIR__, 2 ) );
+			$image_alt        = self::DUMMY_PRODUCTS[ $i ]['title'];
+			$product_image_id = $this->product_image_upload( $product->get_id(), $image_src, $image_alt );
 
-			require_once ABSPATH . 'wp-admin/includes/media.php';
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-			require_once ABSPATH . 'wp-admin/includes/image.php';
+			if ( is_wp_error( $product_image_id ) ) {
+				continue;
+			}
 
-			$product_image_id = media_sideload_image( plugins_url( self::DUMMY_PRODUCTS[ $i ]['image'], dirname( __DIR__, 2 ) ), $product->get_id(), self::DUMMY_PRODUCTS[ $i ]['title'], 'id' );
-			$product_image_id = $product->set_image_id( $product_image_id );
-
-			$product->save();
-
-			$this->create_hash_for_ai_modified_product( $product );
+			$this->product_update( $product, $product_image_id, self::DUMMY_PRODUCTS[ $i ]['title'], self::DUMMY_PRODUCTS[ $i ]['description'], self::DUMMY_PRODUCTS[ $i ]['price'] );
 
 			$i++;
 		}
+	}
+
+	/**
+	 * Update the product with the new content.
+	 *
+	 * @param \WC_Product $product The product.
+	 * @param int         $product_image_id The product image ID.
+	 * @param string      $product_title The product title.
+	 * @param string      $product_description The product description.
+	 * @param int         $product_price The product price.
+	 *
+	 * @return int|\WP_Error
+	 */
+	private function product_update( $product, $product_image_id, $product_title, $product_description, $product_price ) {
+		if ( ! $product instanceof \WC_Product ) {
+			return new WP_Error( 'invalid_product', __( 'Invalid product.', 'woo-gutenberg-products-block' ) );
+		}
+
+		$product->set_image_id( $product_image_id );
+		$product->set_name( $product_title );
+		$product->set_description( $product_description );
+		$product->set_price( $product_price );
+		$product->set_regular_price( $product_price );
+		$product->set_slug( sanitize_title( $product_title ) );
+		$product->save();
+
+		$this->create_hash_for_ai_modified_product( $product );
+
+		return $product->get_id();
 	}
 }
