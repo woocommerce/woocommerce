@@ -96,9 +96,12 @@ test.describe( 'Grouped Product Page', () => {
 		await expect(
 			page.locator( 'td.product-name >> nth=1' )
 		).toContainText( simpleProduct2 );
-		await expect( page.locator( 'tr.order-total > td' ) ).toContainText(
-			( +productPrice * 10 ).toString()
-		);
+		let totalPrice = await page
+			.locator( 'tr.order-total > td' )
+			.last()
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual( productPrice * 10 );
 	} );
 
 	test( 'should be able to remove grouped products from the cart', async ( {

@@ -133,9 +133,7 @@ test.describe( 'Checkout page', () => {
 			.last()
 			.locator( 'td' )
 			.textContent();
-		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( singleProductPrice )
 		);
@@ -159,9 +157,7 @@ test.describe( 'Checkout page', () => {
 			.last()
 			.locator( 'td' )
 			.textContent();
-		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
@@ -187,9 +183,7 @@ test.describe( 'Checkout page', () => {
 			.last()
 			.locator( 'td' )
 			.textContent();
-		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( threeProductPrice )
 		);
@@ -292,9 +286,7 @@ test.describe( 'Checkout page', () => {
 			.last()
 			.locator( 'td' )
 			.textContent();
-		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
@@ -328,9 +320,7 @@ test.describe( 'Checkout page', () => {
 			.last()
 			.locator( 'td' )
 			.textContent();
-		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
@@ -454,9 +444,7 @@ test.describe( 'Checkout page', () => {
 			.last()
 			.locator( 'td' )
 			.textContent();
-		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);

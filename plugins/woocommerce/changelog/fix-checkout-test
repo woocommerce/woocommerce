@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fixes the checkout test with better regex

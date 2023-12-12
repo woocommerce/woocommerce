@@ -205,9 +205,7 @@ test.describe( 'Variable Product Page', () => {
 		).toContainText( variableProductName );
 
 		totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( productPrice * 10 )
 		);
@@ -302,9 +300,7 @@ test.describe( 'Shopper > Update variable product', () => {
 
 		// handling assertion this way because taxes may or may not be enabled
 		totalPrice = await page.locator( '.woocommerce-variation-price' ).last().locator( 'bdi' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( productPrice )
 		);
@@ -316,9 +312,7 @@ test.describe( 'Shopper > Update variable product', () => {
 
 		// handling assertion this way because taxes may or may not be enabled
 		totalPrice = await page.locator( '.woocommerce-variation-price' ).last().locator( 'bdi' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( productPrice )
 		);
@@ -330,9 +324,7 @@ test.describe( 'Shopper > Update variable product', () => {
 
 		// handling assertion this way because taxes may or may not be enabled
 		totalPrice = await page.locator( '.woocommerce-variation-price' ).last().locator( 'bdi' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( productPrice )
 		);
@@ -351,9 +343,7 @@ test.describe( 'Shopper > Update variable product', () => {
 		await page.locator( '#size' ).selectOption( 'Small' );
 
 		totalPrice = await page.locator( '.woocommerce-variation-price' ).last().locator( 'bdi' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( productPrice )
 		);
@@ -371,9 +361,7 @@ test.describe( 'Shopper > Update variable product', () => {
 		await page.locator( '#size' ).selectOption( 'XLarge' );
 
 		totalPrice = await page.locator( '.woocommerce-variation-price' ).last().locator( 'bdi' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( productPrice * 2 )
 		);
@@ -399,9 +387,7 @@ test.describe( 'Shopper > Update variable product', () => {
 		await page.locator( '#size' ).selectOption( 'Small' );
 
 		totalPrice = await page.locator( '.woocommerce-variation-price' ).last().locator( 'bdi' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( productPrice )
 		);
@@ -412,9 +398,7 @@ test.describe( 'Shopper > Update variable product', () => {
 		await page.locator( '#size' ).selectOption( 'Medium' );
 
 		totalPrice = await page.locator( '.woocommerce-variation-price' ).last().locator( 'bdi' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( productPrice )
 		);
@@ -425,9 +409,7 @@ test.describe( 'Shopper > Update variable product', () => {
 		await page.locator( '#size' ).selectOption( 'Large' );
 
 		totalPrice = await page.locator( '.woocommerce-variation-price' ).last().locator( 'bdi' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( productPrice * 2 )
 		);
@@ -438,9 +420,7 @@ test.describe( 'Shopper > Update variable product', () => {
 		await page.locator( '#size' ).selectOption( 'XLarge' );
 
 		totalPrice = await page.locator( '.woocommerce-variation-price' ).last().locator( 'bdi' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( productPrice * 2 )
 		);
@@ -457,9 +437,7 @@ test.describe( 'Shopper > Update variable product', () => {
 		await page.locator( '#size' ).selectOption( 'Small' );
 
 		totalPrice = await page.locator( '.woocommerce-variation-price' ).last().locator( 'bdi' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
 		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( productPrice )
 		);
