@@ -38,68 +38,68 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		return array_merge(
-			[
-				'first_name' => [
+			array(
+				'first_name' => array(
 					'description' => __( 'First name', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => array( 'view', 'edit' ),
 					'required'    => true,
-				],
-				'last_name'  => [
+				),
+				'last_name'  => array(
 					'description' => __( 'Last name', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => array( 'view', 'edit' ),
 					'required'    => true,
-				],
-				'company'    => [
+				),
+				'company'    => array(
 					'description' => __( 'Company', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => array( 'view', 'edit' ),
 					'required'    => true,
-				],
-				'address_1'  => [
+				),
+				'address_1'  => array(
 					'description' => __( 'Address', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => array( 'view', 'edit' ),
 					'required'    => true,
-				],
-				'address_2'  => [
+				),
+				'address_2'  => array(
 					'description' => __( 'Apartment, suite, etc.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => array( 'view', 'edit' ),
 					'required'    => true,
-				],
-				'city'       => [
+				),
+				'city'       => array(
 					'description' => __( 'City', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => array( 'view', 'edit' ),
 					'required'    => true,
-				],
-				'state'      => [
+				),
+				'state'      => array(
 					'description' => __( 'State/County code, or name of the state, county, province, or district.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => array( 'view', 'edit' ),
 					'required'    => true,
-				],
-				'postcode'   => [
+				),
+				'postcode'   => array(
 					'description' => __( 'Postal code', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => array( 'view', 'edit' ),
 					'required'    => true,
-				],
-				'country'    => [
+				),
+				'country'    => array(
 					'description' => __( 'Country/Region code in ISO 3166-1 alpha-2 format.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => array( 'view', 'edit' ),
 					'required'    => true,
-				],
-				'phone'      => [
+				),
+				'phone'      => array(
 					'description' => __( 'Phone', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => array( 'view', 'edit' ),
 					'required'    => true,
-				],
-			],
+				),
+			),
 			$this->get_additional_address_fields_schema(),
 		);
 	}
@@ -134,7 +134,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 				}
 				return $carry;
 			},
-			[]
+			array()
 		);
 
 		return $address;
@@ -241,7 +241,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			$field_schema = array(
 				'description' => $field['label'],
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => array( 'view', 'edit' ),
 				'required'    => true,
 			);
 
@@ -253,6 +253,8 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 					},
 					$field['options']
 				);
+			} elseif ( 'checkbox' === $field['type'] ) {
+				$field_schema['type'] = 'boolean';
 			}
 
 			$schema[ $key ] = $field_schema;
