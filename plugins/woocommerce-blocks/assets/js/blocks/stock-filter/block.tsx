@@ -319,10 +319,7 @@ const StockStatusFilterBlock = ( {
 					speak(
 						sprintf(
 							/* translators: %s stock statuses (for example: 'instock'...) */
-							__(
-								'%s filter added.',
-								'woocommerce'
-							),
+							__( '%s filter added.', 'woocommerce' ),
 							filterAddedName
 						)
 					);
@@ -330,10 +327,7 @@ const StockStatusFilterBlock = ( {
 					speak(
 						sprintf(
 							/* translators: %s stock statuses (for example:'instock'...) */
-							__(
-								'%s filter removed.',
-								'woocommerce'
-							),
+							__( '%s filter removed.', 'woocommerce' ),
 							filterRemovedName
 						)
 					);

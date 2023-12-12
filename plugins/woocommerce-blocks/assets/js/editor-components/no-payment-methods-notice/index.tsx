@@ -28,10 +28,7 @@ export function NoPaymentMethodsNotice() {
 				<ExternalLink
 					href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout` }
 				>
-					{ __(
-						'Configure Payment Methods',
-						'woocommerce'
-					) }
+					{ __( 'Configure Payment Methods', 'woocommerce' ) }
 				</ExternalLink>
 			</div>
 		</Notice>

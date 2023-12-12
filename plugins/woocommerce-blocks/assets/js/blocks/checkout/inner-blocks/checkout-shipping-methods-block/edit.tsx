@@ -65,10 +65,7 @@ export const Edit = ( {
 		>
 			<InspectorControls>
 				<PanelBody
-					title={ __(
-						'Shipping Calculations',
-						'woocommerce'
-					) }
+					title={ __( 'Shipping Calculations', 'woocommerce' ) }
 				>
 					<p className="wc-block-checkout__controls-text">
 						{ __(
@@ -79,19 +76,11 @@ export const Edit = ( {
 					<ExternalLink
 						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=options` }
 					>
-						{ __(
-							'Manage shipping options',
-							'woocommerce'
-						) }
+						{ __( 'Manage shipping options', 'woocommerce' ) }
 					</ExternalLink>{ ' ' }
 				</PanelBody>
 				{ globalShippingMethods.length > 0 && (
-					<PanelBody
-						title={ __(
-							'Methods',
-							'woocommerce'
-						) }
-					>
+					<PanelBody title={ __( 'Methods', 'woocommerce' ) }>
 						<p className="wc-block-checkout__controls-text">
 							{ __(
 								'The following shipping integrations are active on your store.',
@@ -111,20 +100,12 @@ export const Edit = ( {
 						<ExternalLink
 							href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
 						>
-							{ __(
-								'Manage shipping methods',
-								'woocommerce'
-							) }
+							{ __( 'Manage shipping methods', 'woocommerce' ) }
 						</ExternalLink>
 					</PanelBody>
 				) }
 				{ activeShippingZones.length && (
-					<PanelBody
-						title={ __(
-							'Shipping Zones',
-							'woocommerce'
-						) }
-					>
+					<PanelBody title={ __( 'Shipping Zones', 'woocommerce' ) }>
 						<p className="wc-block-checkout__controls-text">
 							{ __(
 								'Shipping Zones can be made managed in your store settings.',

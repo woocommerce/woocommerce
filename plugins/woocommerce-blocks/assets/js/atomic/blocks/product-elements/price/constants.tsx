@@ -4,10 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { currencyDollar, Icon } from '@wordpress/icons';
 
-export const BLOCK_TITLE: string = __(
-	'Product Price',
-	'woocommerce'
-);
+export const BLOCK_TITLE: string = __( 'Product Price', 'woocommerce' );
 export const BLOCK_ICON: JSX.Element = (
 	<Icon
 		icon={ currencyDollar }

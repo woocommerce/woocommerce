@@ -90,8 +90,7 @@ const getDescription = ( templateTitle: string, canConvert: boolean ) => {
 	return getDescriptionDisallowingConversion( templateTitle );
 };
 
-const getButtonLabel = () =>
-	__( 'Transform into blocks', 'woocommerce' );
+const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
 
 const onClickCallback = ( {
 	clientId,

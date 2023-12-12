@@ -38,10 +38,7 @@ const AccountSettingsLink = () => {
 	) }admin.php?page=wc-settings&tab=account`;
 
 	const linkText = createInterpolateElement(
-		`<a>${ __(
-			'Manage account settings',
-			'woocommerce'
-		) }</a>`,
+		`<a>${ __( 'Manage account settings', 'woocommerce' ) }</a>`,
 		{
 			a: <ExternalLink href={ accountSettingsUrl } />,
 		}
@@ -69,18 +66,10 @@ export const BlockSettings = ( {
 			<PanelBody>
 				<AccountSettingsLink />
 			</PanelBody>
-			<PanelBody
-				title={ __(
-					'Display settings',
-					'woocommerce'
-				) }
-			>
+			<PanelBody title={ __( 'Display settings', 'woocommerce' ) }>
 				<SelectControl
 					className="customer-account-display-style"
-					label={ __(
-						'Icon options',
-						'woocommerce'
-					) }
+					label={ __( 'Icon options', 'woocommerce' ) }
 					value={ displayStyle }
 					onChange={ ( value: DisplayStyle ) => {
 						setAttributes( { displayStyle: value } );
@@ -92,33 +81,21 @@ export const BlockSettings = ( {
 					options={ [
 						{
 							value: DisplayStyle.ICON_AND_TEXT,
-							label: __(
-								'Icon and text',
-								'woocommerce'
-							),
+							label: __( 'Icon and text', 'woocommerce' ),
 						},
 						{
 							value: DisplayStyle.TEXT_ONLY,
-							label: __(
-								'Text-only',
-								'woocommerce'
-							),
+							label: __( 'Text-only', 'woocommerce' ),
 						},
 						{
 							value: DisplayStyle.ICON_ONLY,
-							label: __(
-								'Icon-only',
-								'woocommerce'
-							),
+							label: __( 'Icon-only', 'woocommerce' ),
 						},
 					] }
 				/>
 				{ displayIconStyleSelector ? (
 					<ToggleGroupControl
-						label={ __(
-							'Display Style',
-							'woocommerce'
-						) }
+						label={ __( 'Display Style', 'woocommerce' ) }
 						value={ iconStyle }
 						onChange={ ( value: IconStyle ) =>
 							setAttributes( {

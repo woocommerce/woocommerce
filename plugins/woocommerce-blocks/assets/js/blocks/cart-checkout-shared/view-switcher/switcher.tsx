@@ -87,10 +87,7 @@ export const Switcher = ( {
 		<BlockControls>
 			<ToolbarGroup>
 				<ToolbarDropdownMenu
-					label={ __(
-						'Switch view',
-						'woocommerce'
-					) }
+					label={ __( 'Switch view', 'woocommerce' ) }
 					text={ currentViewLabel }
 					icon={
 						<Icon icon={ eye } style={ { marginRight: '8px' } } />

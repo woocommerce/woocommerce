@@ -341,10 +341,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 									} }
 									disabled={ isPendingDelete }
 								>
-									{ __(
-										'Remove item',
-										'woocommerce'
-									) }
+									{ __( 'Remove item', 'woocommerce' ) }
 								</button>
 							) }
 						</div>

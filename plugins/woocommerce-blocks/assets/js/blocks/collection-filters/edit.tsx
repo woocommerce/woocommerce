@@ -20,10 +20,7 @@ const template = [
 	[
 		'core/heading',
 		{
-			content: __(
-				'Filter by Stock status',
-				'woocommerce'
-			),
+			content: __( 'Filter by Stock status', 'woocommerce' ),
 			level: 3,
 		},
 	],

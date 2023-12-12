@@ -555,10 +555,7 @@ const AttributeFilterBlock = ( {
 							disabled={ isLoading }
 							placeholder={ sprintf(
 								/* translators: %s attribute name. */
-								__(
-									'Select %s',
-									'woocommerce'
-								),
+								__( 'Select %s', 'woocommerce' ),
 								attributeObject.label
 							) }
 							onChange={ ( tokens: string[] ) => {
@@ -609,34 +606,22 @@ const AttributeFilterBlock = ( {
 							messages={ {
 								added: sprintf(
 									/* translators: %s is the attribute label. */
-									__(
-										'%s filter added.',
-										'woocommerce'
-									),
+									__( '%s filter added.', 'woocommerce' ),
 									attributeObject.label
 								),
 								removed: sprintf(
 									/* translators: %s is the attribute label. */
-									__(
-										'%s filter removed.',
-										'woocommerce'
-									),
+									__( '%s filter removed.', 'woocommerce' ),
 									attributeObject.label
 								),
 								remove: sprintf(
 									/* translators: %s is the attribute label. */
-									__(
-										'Remove %s filter.',
-										'woocommerce'
-									),
+									__( 'Remove %s filter.', 'woocommerce' ),
 									attributeObject.label.toLocaleLowerCase()
 								),
 								__experimentalInvalid: sprintf(
 									/* translators: %s is the attribute label. */
-									__(
-										'Invalid %s filter.',
-										'woocommerce'
-									),
+									__( 'Invalid %s filter.', 'woocommerce' ),
 									attributeObject.label.toLocaleLowerCase()
 								),
 							} }

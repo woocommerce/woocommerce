@@ -28,10 +28,7 @@ const customValidationHandler = (
 		} )
 	) {
 		inputObject.setCustomValidity(
-			__(
-				'Please enter a valid postcode',
-				'woocommerce'
-			)
+			__( 'Please enter a valid postcode', 'woocommerce' )
 		);
 		return false;
 	}

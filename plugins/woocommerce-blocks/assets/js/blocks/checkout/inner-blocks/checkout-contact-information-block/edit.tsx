@@ -56,10 +56,7 @@ export const Edit = ( {
 					<ExternalLink
 						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=account` }
 					>
-						{ __(
-							'Manage account settings',
-							'woocommerce'
-						) }
+						{ __( 'Manage account settings', 'woocommerce' ) }
 					</ExternalLink>
 				</PanelBody>
 			</InspectorControls>

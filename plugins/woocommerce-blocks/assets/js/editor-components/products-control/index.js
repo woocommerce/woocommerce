@@ -35,14 +35,8 @@ const ProductsControl = ( {
 	const messages = {
 		clear: __( 'Clear all products', 'woocommerce' ),
 		list: __( 'Products', 'woocommerce' ),
-		noItems: __(
-			"Your store doesn't have any products.",
-			'woocommerce'
-		),
-		search: __(
-			'Search for products to display',
-			'woocommerce'
-		),
+		noItems: __( "Your store doesn't have any products.", 'woocommerce' ),
+		search: __( 'Search for products to display', 'woocommerce' ),
 		selected: ( n ) =>
 			sprintf(
 				/* translators: %d is the number of selected products. */
@@ -54,10 +48,7 @@ const ProductsControl = ( {
 				),
 				n
 			),
-		updated: __(
-			'Product search results updated.',
-			'woocommerce'
-		),
+		updated: __( 'Product search results updated.', 'woocommerce' ),
 	};
 
 	if ( error ) {

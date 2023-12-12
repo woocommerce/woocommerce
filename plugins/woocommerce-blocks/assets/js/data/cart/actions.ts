@@ -34,7 +34,7 @@ export * from './thunks';
 /**
  * An action creator that dispatches the plain action responsible for setting the cart data in the store.
  *
- * @param  cart the parsed cart object. (Parsed into camelCase).
+ * @param cart the parsed cart object. (Parsed into camelCase).
  */
 export const setCartData = ( cart: Cart ): { type: string; response: Cart } => {
 	return {
@@ -46,7 +46,7 @@ export const setCartData = ( cart: Cart ): { type: string; response: Cart } => {
 /**
  * An action creator that dispatches the plain action responsible for setting the cart error data in the store.
  *
- * @param  error the parsed error object (Parsed into camelCase).
+ * @param error the parsed error object (Parsed into camelCase).
  */
 export const setErrorData = (
 	error: ApiErrorResponse | null

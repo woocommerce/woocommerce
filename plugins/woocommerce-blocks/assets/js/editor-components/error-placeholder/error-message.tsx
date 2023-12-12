@@ -27,10 +27,7 @@ const getErrorMessage = ( { message, type }: ErrorObject ) => {
 	if ( type === 'general' ) {
 		return (
 			<span>
-				{ __(
-					'The following error was returned',
-					'woocommerce'
-				) }
+				{ __( 'The following error was returned', 'woocommerce' ) }
 				<br />
 				<code>{ escapeHTML( message ) }</code>
 			</span>

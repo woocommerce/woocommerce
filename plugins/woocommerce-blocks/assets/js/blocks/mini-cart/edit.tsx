@@ -92,16 +92,11 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<PanelBody
-					title={ __( 'Settings', 'woocommerce' ) }
-				>
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ToggleGroupControl
 						className="wc-block-editor-mini-cart__cart-icon-toggle"
 						isBlock={ true }
-						label={ __(
-							'Cart Icon',
-							'woocommerce'
-						) }
+						label={ __( 'Cart Icon', 'woocommerce' ) }
 						value={ miniCartIcon }
 						onChange={ ( value: 'cart' | 'bag' | 'bag-alt' ) => {
 							setAttributes( {
@@ -124,16 +119,10 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 					</ToggleGroupControl>
 					<BaseControl
 						id="wc-block-mini-cart__display-toggle"
-						label={ __(
-							'Display',
-							'woocommerce'
-						) }
+						label={ __( 'Display', 'woocommerce' ) }
 					>
 						<ToggleControl
-							label={ __(
-								'Display total price',
-								'woocommerce'
-							) }
+							label={ __( 'Display total price', 'woocommerce' ) }
 							help={ __(
 								'Toggle to display the total price of products in the shopping cart. If no products have been added, the price will not display.',
 								'woocommerce'
@@ -166,27 +155,16 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						>
 							<ToggleGroupControlOption
 								value={ 'hidden' }
-								label={ __(
-									'Hide',
-									'woocommerce'
-								) }
+								label={ __( 'Hide', 'woocommerce' ) }
 							/>
 							<ToggleGroupControlOption
 								value={ 'removed' }
-								label={ __(
-									'Remove',
-									'woocommerce'
-								) }
+								label={ __( 'Remove', 'woocommerce' ) }
 							/>
 						</ToggleGroupControl>
 					) }
 				</PanelBody>
-				<PanelBody
-					title={ __(
-						'Cart Drawer',
-						'woocommerce'
-					) }
-				>
+				<PanelBody title={ __( 'Cart Drawer', 'woocommerce' ) }>
 					{ templatePartEditUri && (
 						<>
 							<img
@@ -216,10 +194,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 					) }
 					<BaseControl
 						id="wc-block-mini-cart__add-to-cart-behaviour-toggle"
-						label={ __(
-							'Behavior',
-							'woocommerce'
-						) }
+						label={ __( 'Behavior', 'woocommerce' ) }
 					>
 						<ToggleControl
 							label={ __(
