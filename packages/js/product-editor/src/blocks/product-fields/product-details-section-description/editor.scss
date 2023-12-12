@@ -1,6 +1,12 @@
 .wp-block-woocommerce-product-details-section-description {
+	margin-top: $grid-unit;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: $grid-unit-05;
+
 	p {
-		margin-top: $grid-unit;
-		margin-bottom: 0;
+		margin: 0;
 	}
 }

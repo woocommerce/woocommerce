@@ -1,18 +1,38 @@
 /**
  * External dependencies
  */
-import { Fill } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
-import { createElement } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import {
+	Button,
+	Dropdown,
+	Fill,
+	MenuGroup,
+	MenuItem,
+} from '@wordpress/components';
+import { useEntityProp } from '@wordpress/core-data';
+import { useDispatch, useSelect } from '@wordpress/data';
+import {
+	Fragment,
+	createElement,
+	createInterpolateElement,
+} from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { chevronRight } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
+import { Product } from '@woocommerce/data';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useEntityId } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
+import { ProductEditorSettings } from '../../../components';
+import { ProductTemplate } from '../../../components/editor';
+import { AUTO_DRAFT_NAME } from '../../../utils';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
-import { useEntityProp } from '@wordpress/core-data';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
@@ -20,6 +40,38 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 }: ProductEditorBlockEditProps< ProductDetailsSectionDescriptionBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const [ productType ] = useEntityProp( 'postType', 'product', 'type' );
+
+	const { productTemplates } = useSelect( ( select ) => {
+		const { getEditorSettings } = select( 'core/editor' );
+		return getEditorSettings() as ProductEditorSettings;
+	} );
+
+	const [ supportedProductTemplates, unsupportedProductTemplates ] =
+		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
+			( [ supported, unsupported ], productTemplate ) => {
+				if ( productTemplate.layout_template_id ) {
+					supported.push( productTemplate );
+				} else {
+					unsupported.push( productTemplate );
+				}
+				return [ supported, unsupported ];
+			},
+			[ [], [] ]
+		);
+
+	const productId = useEntityId( 'postType', 'product' );
+
+	const hasEdits = useSelect(
+		( select ) => {
+			// @ts-expect-error There are no types for this.
+			const { hasEditsForEntityRecord } = select( 'core' );
+			return hasEditsForEntityRecord( 'postType', 'product', productId );
+		},
+		[ productId ]
+	);
+
+	const { saveEntityRecord } = useDispatch( 'core' );
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const rootClientId = useSelect(
 		( select ) => {
@@ -31,16 +83,146 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	if ( ! rootClientId ) return;
 
+	function menuItemClickHandler(
+		productTemplate: ProductTemplate,
+		onClose: () => void
+	) {
+		return async function handleMenuItemClick() {
+			if ( hasEdits ) {
+				createErrorNotice(
+					__(
+						'The current product must be saved before continue.',
+						'woocommerce'
+					)
+				);
+				return;
+			}
+
+			const newProduct = await ( saveEntityRecord(
+				'postType',
+				'product',
+				{
+					title: AUTO_DRAFT_NAME,
+					status: 'auto-draft',
+					...productTemplate.product_data,
+				}
+			) as never as Promise< Product > );
+
+			const url = getNewPath( {}, `/product/${ newProduct.id }` );
+			navigateTo( { url } );
+
+			onClose();
+		};
+	}
+
 	return (
 		<Fill name={ rootClientId }>
 			<div { ...blockProps }>
 				<p>
-					{ sprintf(
-						/* translators: %s: the product type. */
-						__( 'This is a %s product.', 'woocommerce' ),
-						productType
+					{ createInterpolateElement(
+						/* translators: <ProductType />: the product type. */
+						__(
+							'This is a <ProductType /> product.',
+							'woocommerce'
+						),
+						{
+							ProductType: <Fragment>{ productType }</Fragment>,
+						}
 					) }
 				</p>
+
+				<Dropdown
+					renderToggle={ ( { isOpen, onToggle } ) => (
+						<Button
+							aria-expanded={ isOpen }
+							variant="link"
+							onClick={ onToggle }
+						>
+							<span>
+								{ __( 'Change product type', 'woocommerce' ) }
+							</span>
+						</Button>
+					) }
+					renderContent={ ( { onClose } ) => (
+						<div className="components-dropdown-menu__menu">
+							<MenuGroup>
+								{ supportedProductTemplates.map(
+									( productTemplate ) => (
+										<MenuItem
+											key={ productTemplate.id }
+											info={
+												productTemplate.description ??
+												undefined
+											}
+											onClick={ menuItemClickHandler(
+												productTemplate,
+												onClose
+											) }
+										>
+											{ productTemplate.title }
+										</MenuItem>
+									)
+								) }
+							</MenuGroup>
+
+							{ unsupportedProductTemplates.length > 0 && (
+								<MenuGroup>
+									<Dropdown
+										// @ts-ignore Property does exists
+										popoverProps={ {
+											placement: 'right-start',
+										} }
+										renderToggle={ ( {
+											isOpen,
+											onToggle,
+										} ) => (
+											<MenuItem
+												aria-expanded={ isOpen }
+												icon={ chevronRight }
+												iconPosition="right"
+												onClick={ onToggle }
+											>
+												<span>
+													{ __(
+														'More',
+														'woocommerce'
+													) }
+												</span>
+											</MenuItem>
+										) }
+										renderContent={ () => (
+											<div className="components-dropdown-menu__menu">
+												<MenuGroup>
+													{ unsupportedProductTemplates.map(
+														( productTemplate ) => (
+															<MenuItem
+																key={
+																	productTemplate.id
+																}
+																info={
+																	productTemplate.description ??
+																	undefined
+																}
+																onClick={ menuItemClickHandler(
+																	productTemplate,
+																	onClose
+																) }
+															>
+																{
+																	productTemplate.title
+																}
+															</MenuItem>
+														)
+													) }
+												</MenuGroup>
+											</div>
+										) }
+									/>
+								</MenuGroup>
+							) }
+						</div>
+					) }
+				/>
 			</div>
 		</Fill>
 	);
