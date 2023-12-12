@@ -111,7 +111,7 @@
 		"wp-env": "wp-env",
 		"wp-env:config": "./bin/wp-env-pre-config.sh",
 		"watch:build": "pnpm --if-present --filter=\"$npm_package_name...\" --parallel watch:build:project",
-		"watch:build:project": "pnpm build:project --watch"
+		"watch:build:project": "webpack --watch"
 	},
 	"devDependencies": {
 		"@actions/core": "1.10.0",

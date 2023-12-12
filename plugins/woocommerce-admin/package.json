@@ -26,7 +26,7 @@
 		"lint:lang:js": "eslint ./client --ext=js,ts,tsx",
 		"test:js": "wireit",
 		"watch:build": "pnpm --if-present --filter=\"$npm_package_name...\" --parallel watch:build:project",
-		"watch:build:project": "pnpm build:project --watch"
+		"watch:build:project": "webpack --watch"
 	},
 	"lint-staged": {
 		"*.scss": [
