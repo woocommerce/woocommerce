@@ -33,9 +33,8 @@ if [ -z "$SKIP_UPDATE_TEXTDOMAINS" ]; then
 	pnpm packages:fix:textdomain
 	output 2 "Done!"
 
-	output 3 "Updating package JS textdomains..."
-	find ./packages/woocommerce-blocks \( -iname '*.js' -o -iname '*.json' \) -exec sed -i.bak -e "s/'woo-gutenberg-products-block'/'woocommerce'/g" -e "s/\"woo-gutenberg-products-block\"/\"woocommerce\"/g" {} \;
-	find ./packages/woocommerce-blocks -iname '*.js' -exec sed -i.bak -e "s/'woocommerce-admin'/'woocommerce'/g" -e "s/\"woocommerce-admin\"/\"woocommerce\"/g" {} \;
+#	output 3 "Updating package JS textdomains..."
+#	find ./packages/woocommerce-blocks \( -iname '*.js' -o -iname '*.json' \) -exec sed -i.bak -e "s/'woo-gutenberg-products-block'/'woocommerce'/g" -e "s/\"woo-gutenberg-products-block\"/\"woocommerce\"/g" {} \;
 fi
 
 # Cleanup backup files
