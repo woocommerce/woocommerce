@@ -5,6 +5,8 @@ import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { __ } from '@wordpress/i18n';
 import { getPaymentMethodData, WC_ASSET_URL } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
+import { sanitizeHTML } from '@woocommerce/utils';
+import { RawHTML } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -17,7 +19,7 @@ const settings = getPaymentMethodData( 'paypal', {} );
  * Content component
  */
 const Content = () => {
-	return decodeEntities( settings.description || '' );
+	return <RawHTML>{ sanitizeHTML( settings.description || '' ) }</RawHTML>;
 };
 
 const paypalPaymentMethod = {
