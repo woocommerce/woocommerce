@@ -75,6 +75,7 @@ export function BlockTemplateTreeItem( {
 				className={
 					'woocommerce-product-editor-dev-tools-template-block__row ' +
 					`${ isSelected ? 'selected' : '' }` +
+					`${ innerBlocks ? '' : 'no-inner-blocks' } ` +
 					`${
 						isConditionallyHidden ? 'conditionally-hidden' : ''
 					} ` +
