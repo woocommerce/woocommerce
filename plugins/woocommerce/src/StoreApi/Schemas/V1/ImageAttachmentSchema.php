@@ -27,39 +27,39 @@ class ImageAttachmentSchema extends AbstractSchema {
 	public function get_properties() {
 		return [
 			'id'        => [
-				'description' => __( 'Image ID.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Image ID.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
 			],
 			'src'       => [
-				'description' => __( 'Full size image URL.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Full size image URL.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'uri',
 				'context'     => [ 'view', 'edit' ],
 			],
 			'thumbnail' => [
-				'description' => __( 'Thumbnail URL.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Thumbnail URL.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'uri',
 				'context'     => [ 'view', 'edit' ],
 			],
 			'srcset'    => [
-				'description' => __( 'Thumbnail srcset for responsive images.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Thumbnail srcset for responsive images.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
 			'sizes'     => [
-				'description' => __( 'Thumbnail sizes for responsive images.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Thumbnail sizes for responsive images.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
 			'name'      => [
-				'description' => __( 'Image name.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Image name.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
 			'alt'       => [
-				'description' => __( 'Image alternative text.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Image alternative text.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],

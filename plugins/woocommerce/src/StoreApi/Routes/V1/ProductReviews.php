@@ -165,7 +165,7 @@ class ProductReviews extends AbstractRoute {
 		$params['context']['default'] = 'view';
 
 		$params['page'] = array(
-			'description'       => __( 'Current page of the collection.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -174,7 +174,7 @@ class ProductReviews extends AbstractRoute {
 		);
 
 		$params['per_page'] = array(
-			'description'       => __( 'Maximum number of items to be returned in result set. Defaults to no limit if left blank.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Maximum number of items to be returned in result set. Defaults to no limit if left blank.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 0,
@@ -184,14 +184,14 @@ class ProductReviews extends AbstractRoute {
 		);
 
 		$params['offset'] = array(
-			'description'       => __( 'Offset the result set by a specific number of items.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['order'] = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
@@ -199,7 +199,7 @@ class ProductReviews extends AbstractRoute {
 		);
 
 		$params['orderby'] = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
@@ -213,14 +213,14 @@ class ProductReviews extends AbstractRoute {
 		);
 
 		$params['category_id'] = array(
-			'description'       => __( 'Limit result set to reviews from specific category IDs.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to reviews from specific category IDs.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['product_id'] = array(
-			'description'       => __( 'Limit result set to reviews from specific product IDs.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to reviews from specific product IDs.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',

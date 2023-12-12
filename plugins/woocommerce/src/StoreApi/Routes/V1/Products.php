@@ -116,7 +116,7 @@ class Products extends AbstractRoute {
 		$params['context']['default'] = 'view';
 
 		$params['page'] = array(
-			'description'       => __( 'Current page of the collection.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -125,7 +125,7 @@ class Products extends AbstractRoute {
 		);
 
 		$params['per_page'] = array(
-			'description'       => __( 'Maximum number of items to be returned in result set. Defaults to no limit if left blank.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Maximum number of items to be returned in result set. Defaults to no limit if left blank.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 0,
@@ -135,35 +135,35 @@ class Products extends AbstractRoute {
 		);
 
 		$params['search'] = array(
-			'description'       => __( 'Limit results to those matching a string.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit results to those matching a string.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['slug'] = array(
-			'description'       => __( 'Limit result set to products with specific slug(s). Use commas to separate.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to products with specific slug(s). Use commas to separate.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['after'] = array(
-			'description'       => __( 'Limit response to resources created after a given ISO8601 compliant date.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit response to resources created after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['before'] = array(
-			'description'       => __( 'Limit response to resources created before a given ISO8601 compliant date.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit response to resources created before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['date_column'] = array(
-			'description'       => __( 'When limiting response using after/before, which date column to compare against.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'When limiting response using after/before, which date column to compare against.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
@@ -176,7 +176,7 @@ class Products extends AbstractRoute {
 		);
 
 		$params['exclude'] = array(
-			'description'       => __( 'Ensure result set excludes specific IDs.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -186,7 +186,7 @@ class Products extends AbstractRoute {
 		);
 
 		$params['include'] = array(
-			'description'       => __( 'Limit result set to specific ids.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -196,14 +196,14 @@ class Products extends AbstractRoute {
 		);
 
 		$params['offset'] = array(
-			'description'       => __( 'Offset the result set by a specific number of items.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['order'] = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
@@ -211,7 +211,7 @@ class Products extends AbstractRoute {
 		);
 
 		$params['orderby'] = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
@@ -231,7 +231,7 @@ class Products extends AbstractRoute {
 		);
 
 		$params['parent'] = array(
-			'description'       => __( 'Limit result set to those of particular parent IDs.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -241,7 +241,7 @@ class Products extends AbstractRoute {
 		);
 
 		$params['parent_exclude'] = array(
-			'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -251,7 +251,7 @@ class Products extends AbstractRoute {
 		);
 
 		$params['type'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific type.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to products assigned a specific type.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array_merge( array_keys( wc_get_product_types() ), [ 'variation' ] ),
 			'sanitize_callback' => 'sanitize_key',
@@ -259,28 +259,28 @@ class Products extends AbstractRoute {
 		);
 
 		$params['sku'] = array(
-			'description'       => __( 'Limit result set to products with specific SKU(s). Use commas to separate.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to products with specific SKU(s). Use commas to separate.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['featured'] = array(
-			'description'       => __( 'Limit result set to featured products.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to featured products.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['category'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['category_operator'] = array(
-			'description'       => __( 'Operator to compare product category terms.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Operator to compare product category terms.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => [ 'in', 'not_in', 'and' ],
 			'default'           => 'in',
@@ -292,7 +292,7 @@ class Products extends AbstractRoute {
 		foreach ( $_REQUEST as $param => $value ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( str_starts_with( $param, '_unstable_tax_' ) && ! str_ends_with( $param, '_operator' ) ) {
 				$params[ $param ] = array(
-					'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woo-gutenberg-products-block' ),
+					'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
 					'type'              => 'string',
 					'sanitize_callback' => 'wp_parse_id_list',
 					'validate_callback' => 'rest_validate_request_arg',
@@ -300,7 +300,7 @@ class Products extends AbstractRoute {
 			}
 			if ( str_starts_with( $param, '_unstable_tax_' ) && str_ends_with( $param, '_operator' ) ) {
 				$params[ $param ] = array(
-					'description'       => __( 'Operator to compare product category terms.', 'woo-gutenberg-products-block' ),
+					'description'       => __( 'Operator to compare product category terms.', 'woocommerce' ),
 					'type'              => 'string',
 					'enum'              => [ 'in', 'not_in', 'and' ],
 					'default'           => 'in',
@@ -311,14 +311,14 @@ class Products extends AbstractRoute {
 		}
 
 		$params['tag'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['tag_operator'] = array(
-			'description'       => __( 'Operator to compare product tags.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Operator to compare product tags.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => [ 'in', 'not_in', 'and' ],
 			'default'           => 'in',
@@ -327,28 +327,28 @@ class Products extends AbstractRoute {
 		);
 
 		$params['on_sale'] = array(
-			'description'       => __( 'Limit result set to products on sale.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to products on sale.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['min_price'] = array(
-			'description'       => __( 'Limit result set to products based on a minimum price, provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to products based on a minimum price, provided using the smallest unit of the currency.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['max_price'] = array(
-			'description'       => __( 'Limit result set to products based on a maximum price, provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to products based on a maximum price, provided using the smallest unit of the currency.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['stock_status'] = array(
-			'description' => __( 'Limit result set to products with specified stock status.', 'woo-gutenberg-products-block' ),
+			'description' => __( 'Limit result set to products with specified stock status.', 'woocommerce' ),
 			'type'        => 'array',
 			'items'       => array(
 				'type'              => 'string',
@@ -360,18 +360,18 @@ class Products extends AbstractRoute {
 		);
 
 		$params['attributes'] = array(
-			'description' => __( 'Limit result set to products with selected global attributes.', 'woo-gutenberg-products-block' ),
+			'description' => __( 'Limit result set to products with selected global attributes.', 'woocommerce' ),
 			'type'        => 'array',
 			'items'       => array(
 				'type'       => 'object',
 				'properties' => array(
 					'attribute' => array(
-						'description'       => __( 'Attribute taxonomy name.', 'woo-gutenberg-products-block' ),
+						'description'       => __( 'Attribute taxonomy name.', 'woocommerce' ),
 						'type'              => 'string',
 						'sanitize_callback' => 'wc_sanitize_taxonomy_name',
 					),
 					'term_id'   => array(
-						'description'       => __( 'List of attribute term IDs.', 'woo-gutenberg-products-block' ),
+						'description'       => __( 'List of attribute term IDs.', 'woocommerce' ),
 						'type'              => 'array',
 						'items'             => [
 							'type' => 'integer',
@@ -379,7 +379,7 @@ class Products extends AbstractRoute {
 						'sanitize_callback' => 'wp_parse_id_list',
 					),
 					'slug'      => array(
-						'description'       => __( 'List of attribute slug(s). If a term ID is provided, this will be ignored.', 'woo-gutenberg-products-block' ),
+						'description'       => __( 'List of attribute slug(s). If a term ID is provided, this will be ignored.', 'woocommerce' ),
 						'type'              => 'array',
 						'items'             => [
 							'type' => 'string',
@@ -387,7 +387,7 @@ class Products extends AbstractRoute {
 						'sanitize_callback' => 'wp_parse_slug_list',
 					),
 					'operator'  => array(
-						'description' => __( 'Operator to compare product attribute terms.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Operator to compare product attribute terms.', 'woocommerce' ),
 						'type'        => 'string',
 						'enum'        => [ 'in', 'not_in', 'and' ],
 					),
@@ -397,7 +397,7 @@ class Products extends AbstractRoute {
 		);
 
 		$params['attribute_relation'] = array(
-			'description'       => __( 'The logical relationship between attributes when filtering across multiple at once.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'The logical relationship between attributes when filtering across multiple at once.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => [ 'in', 'and' ],
 			'default'           => 'and',
@@ -406,7 +406,7 @@ class Products extends AbstractRoute {
 		);
 
 		$params['catalog_visibility'] = array(
-			'description'       => __( 'Determines if hidden or visible catalog products are shown.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Determines if hidden or visible catalog products are shown.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array( 'any', 'visible', 'catalog', 'search', 'hidden' ),
 			'sanitize_callback' => 'sanitize_key',
@@ -414,7 +414,7 @@ class Products extends AbstractRoute {
 		);
 
 		$params['rating'] = array(
-			'description'       => __( 'Limit result set to products with a certain average rating.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to products with a certain average rating.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
