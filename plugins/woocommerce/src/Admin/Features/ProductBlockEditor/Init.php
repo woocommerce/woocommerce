@@ -221,8 +221,9 @@ class Init {
 
 		$editor_settings = array();
 
-		$editor_settings['templates']['product']           = $product_template->get_formatted_template();
-		$editor_settings['templates']['product_variation'] = $template_registry->get_registered( 'product-variation' )->get_formatted_template();
+		foreach ( $template_registry->get_all_registered() as $layout_template ) {
+			$editor_settings['templates'][] = $layout_template->to_JSON();
+		}
 
 		$block_template_logger = BlockTemplateLogger::get_instance();
 
