@@ -48,7 +48,7 @@ export const __internalSetComplete = (
 /**
  * Set the url to redirect to after checkout completes`
  *
- * @param  redirectUrl the url to redirect to
+ * @param redirectUrl the url to redirect to
  */
 export const __internalSetRedirectUrl = ( redirectUrl: string ) => ( {
 	type: types.SET_REDIRECT_URL,
@@ -58,7 +58,7 @@ export const __internalSetRedirectUrl = ( redirectUrl: string ) => ( {
 /**
  * Set whether the checkout has an error or not
  *
- * @param  hasError Wether the checkout has an error or not
+ * @param hasError Wether the checkout has an error or not
  */
 export const __internalSetHasError = ( hasError = true ) => ( {
 	type: types.SET_HAS_ERROR,
@@ -84,7 +84,7 @@ export const __internalDecrementCalculating = () => ( {
 /**
  * Set the customer id
  *
- * @param  customerId ID of the customer who is checking out.
+ * @param customerId ID of the customer who is checking out.
  */
 export const __internalSetCustomerId = ( customerId: number ) => ( {
 	type: types.SET_CUSTOMER_ID,
@@ -94,7 +94,7 @@ export const __internalSetCustomerId = ( customerId: number ) => ( {
 /**
  * Whether to use the shipping address as the billing address
  *
- * @param  useShippingAsBilling True if shipping address should be the same as billing, false otherwise
+ * @param useShippingAsBilling True if shipping address should be the same as billing, false otherwise
  */
 export const __internalSetUseShippingAsBilling = (
 	useShippingAsBilling: boolean
@@ -106,7 +106,7 @@ export const __internalSetUseShippingAsBilling = (
 /**
  * Whether an account should be created for the user while checking out
  *
- * @param  shouldCreateAccount True if an account should be created, false otherwise
+ * @param shouldCreateAccount True if an account should be created, false otherwise
  */
 export const __internalSetShouldCreateAccount = (
 	shouldCreateAccount: boolean
@@ -118,7 +118,7 @@ export const __internalSetShouldCreateAccount = (
 /**
  * Set the notes for the order
  *
- * @param  orderNotes String that represents a note for the order
+ * @param orderNotes String that represents a note for the order
  */
 export const __internalSetOrderNotes = ( orderNotes: string ) => ( {
 	type: types.SET_ORDER_NOTES,

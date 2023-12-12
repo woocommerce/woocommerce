@@ -23,10 +23,7 @@ const validateShippingCountry = ( values: ShippingAddress ): void => {
 		} else {
 			dispatch( VALIDATION_STORE_KEY ).setValidationErrors( {
 				[ validationErrorId ]: {
-					message: __(
-						'Please select your country',
-						'woocommerce'
-					),
+					message: __( 'Please select your country', 'woocommerce' ),
 					hidden: false,
 				},
 			} );

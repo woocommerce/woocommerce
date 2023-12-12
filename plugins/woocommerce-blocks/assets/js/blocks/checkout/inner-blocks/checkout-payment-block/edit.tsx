@@ -64,12 +64,7 @@ export const Edit = ( {
 		>
 			<InspectorControls>
 				{ globalPaymentMethods.length > 0 && (
-					<PanelBody
-						title={ __(
-							'Methods',
-							'woocommerce'
-						) }
-					>
+					<PanelBody title={ __( 'Methods', 'woocommerce' ) }>
 						<p className="wc-block-checkout__controls-text">
 							{ __(
 								'You currently have the following payment integrations active.',
@@ -118,10 +113,7 @@ export const Edit = ( {
 						<ExternalLink
 							href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout` }
 						>
-							{ __(
-								'Manage payment methods',
-								'woocommerce'
-							) }
+							{ __( 'Manage payment methods', 'woocommerce' ) }
 						</ExternalLink>
 					</PanelBody>
 				) }

@@ -24,11 +24,11 @@ import type { BlockAttributes } from './types';
  * - Available on backorder
  * - 2 left in stock
  *
- * @param  stockInfo                Object containing stock information.
- * @param  stockInfo.isInStock      Whether product is in stock.
- * @param  stockInfo.isLowStock     Whether product is low in stock.
- * @param  stockInfo.lowStockAmount Number of items left in stock.
- * @param  stockInfo.isOnBackorder  Whether product is on backorder.
+ * @param stockInfo                Object containing stock information.
+ * @param stockInfo.isInStock      Whether product is in stock.
+ * @param stockInfo.isLowStock     Whether product is low in stock.
+ * @param stockInfo.lowStockAmount Number of items left in stock.
+ * @param stockInfo.isOnBackorder  Whether product is on backorder.
  * @return string Stock text.
  */
 const getTextBasedOnStock = ( {

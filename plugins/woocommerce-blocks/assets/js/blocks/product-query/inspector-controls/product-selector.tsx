@@ -72,10 +72,7 @@ export const ProductSelector = ( props: ProductQueryBlock ) => {
 
 	return (
 		<ToolsPanelItem
-			label={ __(
-				'Hand-picked Products',
-				'woocommerce'
-			) }
+			label={ __( 'Hand-picked Products', 'woocommerce' ) }
 			hasValue={ () => query.include?.length }
 		>
 			<FormTokenField
@@ -87,10 +84,7 @@ export const ProductSelector = ( props: ProductQueryBlock ) => {
 								( product ) => product.id === Number( token )
 						  )?.name || ''
 				}
-				label={ __(
-					'Pick some products',
-					'woocommerce'
-				) }
+				label={ __( 'Pick some products', 'woocommerce' ) }
 				onChange={ onTokenChange }
 				suggestions={ productsList.map( ( product ) => product.name ) }
 				validateInput={ ( value: string ) =>

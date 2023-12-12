@@ -77,19 +77,13 @@ export const Edit = ( { clientId, className, attributes, setAttributes } ) => {
 				/>
 			</InspectorControls>
 			<BlockErrorBoundary
-				header={ __(
-					'Cart Block Error',
-					'woocommerce'
-				) }
+				header={ __( 'Cart Block Error', 'woocommerce' ) }
 				text={ __(
 					'There was an error whilst rendering the cart block. If this problem continues, try re-creating the block.',
 					'woocommerce'
 				) }
 				showErrorMessage={ true }
-				errorMessagePrefix={ __(
-					'Error message:',
-					'woocommerce'
-				) }
+				errorMessagePrefix={ __( 'Error message:', 'woocommerce' ) }
 			>
 				<EditorProvider
 					previewData={ { previewCart } }

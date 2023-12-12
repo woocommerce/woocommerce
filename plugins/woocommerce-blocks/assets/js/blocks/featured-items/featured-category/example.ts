@@ -7,7 +7,7 @@ import type { Block } from '@wordpress/blocks';
 type ExampleBlock = Block[ 'example' ] & {
 	attributes: {
 		categoryId: 'preview' | number;
-		previewCategory: typeof previewCategories[ number ];
+		previewCategory: ( typeof previewCategories )[ number ];
 		editMode: false;
 	};
 };

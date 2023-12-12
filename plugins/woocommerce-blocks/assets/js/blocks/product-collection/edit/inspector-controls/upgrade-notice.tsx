@@ -22,17 +22,12 @@ const notice = createInterpolateElement(
 	),
 	{
 		strongText: (
-			<strong>
-				{ __( `Product Collection`, 'woocommerce' ) }
-			</strong>
+			<strong>{ __( `Product Collection`, 'woocommerce' ) }</strong>
 		),
 	}
 );
 
-const buttonLabel = __(
-	'Revert to Products (Beta)',
-	'woocommerce'
-);
+const buttonLabel = __( 'Revert to Products (Beta)', 'woocommerce' );
 
 type UpgradeNoticeProps = {
 	revertMigration: () => void;

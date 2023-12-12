@@ -86,10 +86,7 @@ const TotalsFooterItem = ( {
 						} )
 						.join( ', ' )
 			  )
-			: __(
-					'Including <TaxAmount/> in taxes',
-					'woocommerce'
-			  );
+			: __( 'Including <TaxAmount/> in taxes', 'woocommerce' );
 
 	return (
 		<TotalsItem

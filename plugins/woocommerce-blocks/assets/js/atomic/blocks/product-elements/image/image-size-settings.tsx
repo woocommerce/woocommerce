@@ -99,24 +99,15 @@ export const ImageSizeSettings = ( {
 						<>
 							<ToggleGroupControlOption
 								value="cover"
-								label={ __(
-									'Cover',
-									'woocommerce'
-								) }
+								label={ __( 'Cover', 'woocommerce' ) }
 							/>
 							<ToggleGroupControlOption
 								value="contain"
-								label={ __(
-									'Contain',
-									'woocommerce'
-								) }
+								label={ __( 'Contain', 'woocommerce' ) }
 							/>
 							<ToggleGroupControlOption
 								value="fill"
-								label={ __(
-									'Fill',
-									'woocommerce'
-								) }
+								label={ __( 'Fill', 'woocommerce' ) }
 							/>
 						</>
 					</ToggleGroupControl>

@@ -80,7 +80,7 @@ const CheckboxList = ( {
 								'Show %s more option',
 								'Show %s more options',
 								remainingOptionsCount,
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							remainingOptionsCount
 						) }
@@ -91,7 +91,7 @@ const CheckboxList = ( {
 								'Show %s more',
 								'Show %s more',
 								remainingOptionsCount,
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							remainingOptionsCount
 						) }
@@ -110,12 +110,9 @@ const CheckboxList = ( {
 							setShowExpanded( false );
 						} }
 						aria-expanded={ true }
-						aria-label={ __(
-							'Show less options',
-							'woo-gutenberg-products-block'
-						) }
+						aria-label={ __( 'Show less options', 'woocommerce' ) }
 					>
-						{ __( 'Show less', 'woo-gutenberg-products-block' ) }
+						{ __( 'Show less', 'woocommerce' ) }
 					</button>
 				</li>
 			)

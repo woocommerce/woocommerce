@@ -34,15 +34,9 @@ import { CheckoutBlockContext } from './context';
 const MustLoginPrompt = () => {
 	return (
 		<div className="wc-block-must-login-prompt">
-			{ __(
-				'You must be logged in to checkout.',
-				'woocommerce'
-			) }{ ' ' }
+			{ __( 'You must be logged in to checkout.', 'woocommerce' ) }{ ' ' }
 			<a href={ LOGIN_TO_CHECKOUT_URL }>
-				{ __(
-					'Click here to log in.',
-					'woocommerce'
-				) }
+				{ __( 'Click here to log in.', 'woocommerce' ) }
 			</a>
 		</div>
 	);

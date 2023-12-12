@@ -54,9 +54,7 @@ const TotalsFees = ( {
 							className
 						) }
 						currency={ currency }
-						label={
-							name || __( 'Fee', 'woo-gutenberg-products-block' )
-						}
+						label={ name || __( 'Fee', 'woocommerce' ) }
 						value={
 							getSetting( 'displayCartPricesIncludingTax', false )
 								? feesValue + feesTaxValue

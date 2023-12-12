@@ -49,6 +49,7 @@ jest.mock( '@woocommerce/settings', () => {
 	const originalModule = jest.requireActual( '@woocommerce/settings' );
 
 	return {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore We know @woocommerce/settings is an object.
 		...originalModule,
 		getSetting: ( setting, ...rest ) => {

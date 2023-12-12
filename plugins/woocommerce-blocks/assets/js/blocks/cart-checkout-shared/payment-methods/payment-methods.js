@@ -45,10 +45,7 @@ const PaymentMethods = () => {
 			<SavedPaymentMethodOptions />
 			{ Object.keys( savedPaymentMethods ).length > 0 && (
 				<Label
-					label={ __(
-						'Use another payment method.',
-						'woocommerce'
-					) }
+					label={ __( 'Use another payment method.', 'woocommerce' ) }
 					screenReaderLabel={ __(
 						'Other available payment methods',
 						'woocommerce'

@@ -66,18 +66,9 @@ interface ProductControlProps {
 
 const messages = {
 	list: __( 'Products', 'woocommerce' ),
-	noItems: __(
-		"Your store doesn't have any products.",
-		'woocommerce'
-	),
-	search: __(
-		'Search for a product to display',
-		'woocommerce'
-	),
-	updated: __(
-		'Product search results updated.',
-		'woocommerce'
-	),
+	noItems: __( "Your store doesn't have any products.", 'woocommerce' ),
+	search: __( 'Search for a product to display', 'woocommerce' ),
+	updated: __( 'Product search results updated.', 'woocommerce' ),
 };
 
 const ProductControl = (
@@ -145,10 +136,7 @@ const ProductControl = (
 						hasVariations
 							? sprintf(
 									/* translators: %1$d is the number of variations of a product product. */
-									__(
-										'%1$d variations',
-										'woocommerce'
-									),
+									__( '%1$d variations', 'woocommerce' ),
 									item.details?.variations.length
 							  )
 							: null

@@ -94,10 +94,7 @@ class Editor extends Component {
 
 		if ( ! this.state.isEditing ) {
 			debouncedSpeak(
-				__(
-					'Showing All Products block preview.',
-					'woocommerce'
-				)
+				__( 'Showing All Products block preview.', 'woocommerce' )
 			);
 		}
 	};
@@ -109,10 +106,7 @@ class Editor extends Component {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __(
-						'Layout Settings',
-						'woocommerce'
-					) }
+					title={ __( 'Layout Settings', 'woocommerce' ) }
 					initialOpen
 				>
 					<GridLayoutControl
@@ -126,12 +120,7 @@ class Editor extends Component {
 						maxRows={ getSetting( 'maxRows', 6 ) }
 					/>
 				</PanelBody>
-				<PanelBody
-					title={ __(
-						'Content Settings',
-						'woocommerce'
-					) }
-				>
+				<PanelBody title={ __( 'Content Settings', 'woocommerce' ) }>
 					{ getSharedContentControls( attributes, setAttributes ) }
 					{ getSharedListControls( attributes, setAttributes ) }
 				</PanelBody>
@@ -252,10 +241,7 @@ class Editor extends Component {
 							) }
 							onClick={ onReset }
 						>
-							{ __(
-								'Reset Layout',
-								'woocommerce'
-							) }
+							{ __( 'Reset Layout', 'woocommerce' ) }
 						</Button>
 					</div>
 				</div>

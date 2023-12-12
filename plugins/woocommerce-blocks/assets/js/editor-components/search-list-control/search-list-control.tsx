@@ -320,12 +320,7 @@ export const SearchListControl = < T extends object = object >(
 						__experimentalValidateInput={ () => false }
 						value={
 							isLoading
-								? [
-										__(
-											'Loading…',
-											'woocommerce'
-										),
-								  ]
+								? [ __( 'Loading…', 'woocommerce' ) ]
 								: selected.map( ( token ) => ( {
 										...token,
 										value: token.name,

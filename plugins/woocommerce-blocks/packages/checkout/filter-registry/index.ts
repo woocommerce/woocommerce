@@ -234,7 +234,7 @@ export const applyCheckoutFilter = < T >( {
 						/* translators: %1$s is the type of the variable passed to the filter function, %2$s is the type of the value returned by the filter function. */
 						__(
 							'The type returned by checkout filters must be the same as the type they receive. The function received %1$s but returned %2$s.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						typeof value,
 						typeof newValue

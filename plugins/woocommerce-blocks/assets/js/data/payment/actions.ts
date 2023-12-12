@@ -40,7 +40,7 @@ export const __internalSetPaymentReady = () => ( {
 /**
  * Set whether the payment methods have been initialised or not
  *
- * @param  initialized True if the `checkCanPay` methods have been run on all available payment methods
+ * @param initialized True if the `checkCanPay` methods have been run on all available payment methods
  */
 export const __internalSetPaymentMethodsInitialized = (
 	initialized: boolean
@@ -61,7 +61,7 @@ export const __internalSetPaymentMethodsInitialized = (
 /**
  * Set whether the express payment methods have been initialised or not
  *
- * @param  initialized True if the `checkCanPay` methods have been run on all express available payment methods
+ * @param initialized True if the `checkCanPay` methods have been run on all express available payment methods
  */
 export const __internalSetExpressPaymentMethodsInitialized = (
 	initialized: boolean
@@ -73,7 +73,7 @@ export const __internalSetExpressPaymentMethodsInitialized = (
 /**
  * Set a flag for whether to save the current payment method for next time
  *
- * @param  shouldSavePaymentMethod Whether to save the current payment method for next time
+ * @param shouldSavePaymentMethod Whether to save the current payment method for next time
  */
 export const __internalSetShouldSavePaymentMethod = (
 	shouldSavePaymentMethod: boolean
@@ -85,8 +85,8 @@ export const __internalSetShouldSavePaymentMethod = (
 /**
  * Set the payment method the user has chosen. This should change every time the user selects a new payment method
  *
- * @param  activePaymentMethod The name of the payment method selected by the user
- * @param  paymentMethodData   The extra data associated with a payment
+ * @param activePaymentMethod The name of the payment method selected by the user
+ * @param paymentMethodData   The extra data associated with a payment
  */
 export const __internalSetActivePaymentMethod = (
 	activePaymentMethod: string,
@@ -100,7 +100,7 @@ export const __internalSetActivePaymentMethod = (
 /**
  * Set the extra data for the chosen payment method
  *
- * @param  paymentMethodData The extra data associated with a payment
+ * @param paymentMethodData The extra data associated with a payment
  */
 export const __internalSetPaymentMethodData = (
 	paymentMethodData: Record< string, unknown > = {}
@@ -112,7 +112,7 @@ export const __internalSetPaymentMethodData = (
 /**
  * Store the result of the payment attempt from the /checkout StoreApi call
  *
- * @param  data The result of the payment attempt through the StoreApi /checkout endpoints
+ * @param data The result of the payment attempt through the StoreApi /checkout endpoints
  */
 export const __internalSetPaymentResult = ( data: PaymentResult ) => ( {
 	type: ACTION_TYPES.SET_PAYMENT_RESULT,

@@ -29,10 +29,7 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 			} }
 		>
 			<ToggleControl
-				label={ __(
-					'Show only products on sale',
-					'woocommerce'
-				) }
+				label={ __( 'Show only products on sale', 'woocommerce' ) }
 				checked={ query.woocommerceOnSale || false }
 				onChange={ ( woocommerceOnSale ) => {
 					setQueryAttribute( {

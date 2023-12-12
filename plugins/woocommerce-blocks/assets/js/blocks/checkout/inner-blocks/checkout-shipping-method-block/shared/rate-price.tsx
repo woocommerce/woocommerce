@@ -44,10 +44,7 @@ export const RatePrice = ( {
 				: createInterpolateElement(
 						minRatePrice === 0 && maxRatePrice === 0
 							? '<price />'
-							: __(
-									'from <price />',
-									'woocommerce'
-							  ),
+							: __( 'from <price />', 'woocommerce' ),
 						{
 							price: priceElement,
 						}

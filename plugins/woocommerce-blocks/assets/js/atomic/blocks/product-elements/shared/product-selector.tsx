@@ -62,10 +62,7 @@ export const ProductSelector = ( {
 							<TextToolbarButton
 								onClick={ () => setIsEditing( true ) }
 							>
-								{ __(
-									'Switch product…',
-									'woocommerce'
-								) }
+								{ __( 'Switch product…', 'woocommerce' ) }
 							</TextToolbarButton>
 						</ToolbarGroup>
 					</BlockControls>

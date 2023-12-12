@@ -53,10 +53,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		>
 			<Label
 				label={ __( 'Sale', 'woocommerce' ) }
-				screenReaderLabel={ __(
-					'Product on sale',
-					'woocommerce'
-				) }
+				screenReaderLabel={ __( 'Product on sale', 'woocommerce' ) }
 			/>
 		</div>
 	);

@@ -35,15 +35,9 @@ const getHelpText = ( pagerDisplayMode: PagerDisplayModes ) => {
 				'woocommerce'
 			);
 		case 'off':
-			return __(
-				'No pager will be displayed.',
-				'woocommerce'
-			);
+			return __( 'No pager will be displayed.', 'woocommerce' );
 		default:
-			return __(
-				'No pager will be displayed.',
-				'woocommerce'
-			);
+			return __( 'No pager will be displayed.', 'woocommerce' );
 	}
 };
 

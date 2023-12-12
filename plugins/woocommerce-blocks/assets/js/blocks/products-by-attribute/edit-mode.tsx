@@ -30,20 +30,14 @@ export const ProductsByAttributeEditMode = (
 	const onDone = () => {
 		setIsEditing( ! isEditing );
 		debouncedSpeak(
-			__(
-				'Showing Products by Attribute block preview.',
-				'woocommerce'
-			)
+			__( 'Showing Products by Attribute block preview.', 'woocommerce' )
 		);
 	};
 
 	return (
 		<Placeholder
 			icon={ <Icon icon={ category } /> }
-			label={ __(
-				'Products by Attribute',
-				'woocommerce'
-			) }
+			label={ __( 'Products by Attribute', 'woocommerce' ) }
 			className="wc-block-products-grid wc-block-products-by-attribute"
 		>
 			{ __(

@@ -134,19 +134,13 @@ const ProductCategoryControl = ( {
 	};
 
 	const messages = {
-		clear: __(
-			'Clear all product categories',
-			'woocommerce'
-		),
+		clear: __( 'Clear all product categories', 'woocommerce' ),
 		list: __( 'Product Categories', 'woocommerce' ),
 		noItems: __(
 			"Your store doesn't have any product categories.",
 			'woocommerce'
 		),
-		search: __(
-			'Search for product categories',
-			'woocommerce'
-		),
+		search: __( 'Search for product categories', 'woocommerce' ),
 		selected: ( n: number ) =>
 			sprintf(
 				/* translators: %d is the count of selected categories. */
@@ -158,10 +152,7 @@ const ProductCategoryControl = ( {
 				),
 				n
 			),
-		updated: __(
-			'Category search results updated.',
-			'woocommerce'
-		),
+		updated: __( 'Category search results updated.', 'woocommerce' ),
 	};
 
 	if ( error ) {

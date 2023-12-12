@@ -88,12 +88,7 @@ class FrontendContainerBlock extends Component<
 	}
 
 	onReviewsLoadError() {
-		speak(
-			__(
-				'There was an error loading the reviews.',
-				'woocommerce'
-			)
-		);
+		speak( __( 'There was an error loading the reviews.', 'woocommerce' ) );
 	}
 
 	render() {

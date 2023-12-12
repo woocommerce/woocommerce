@@ -30,10 +30,7 @@ const AttributeSelectControl = ( {
 	options = [],
 	value = '',
 	onChange = () => void 0,
-	errorMessage = __(
-		'Please select a value.',
-		'woocommerce'
-	),
+	errorMessage = __( 'Please select a value.', 'woocommerce' ),
 }: Props ) => {
 	const errorId = attributeName;
 

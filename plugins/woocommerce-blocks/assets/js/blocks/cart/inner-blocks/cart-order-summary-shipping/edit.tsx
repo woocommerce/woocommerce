@@ -32,10 +32,7 @@ export const Edit = ( {
 			<InspectorControls>
 				{ !! shippingEnabled && (
 					<PanelBody
-						title={ __(
-							'Shipping Calculations',
-							'woocommerce'
-						) }
+						title={ __( 'Shipping Calculations', 'woocommerce' ) }
 					>
 						<p className="wc-block-checkout__controls-text">
 							{ __(
@@ -46,10 +43,7 @@ export const Edit = ( {
 						<ExternalLink
 							href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=options` }
 						>
-							{ __(
-								'Manage shipping options',
-								'woocommerce'
-							) }
+							{ __( 'Manage shipping options', 'woocommerce' ) }
 						</ExternalLink>{ ' ' }
 					</PanelBody>
 				) }

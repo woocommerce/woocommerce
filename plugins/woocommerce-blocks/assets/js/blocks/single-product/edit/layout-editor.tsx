@@ -73,10 +73,7 @@ const LayoutEditor = ( {
 							className="wc-block-editor-single-product__reset-layout"
 							icon={ backup }
 						>
-							{ __(
-								'Reset layout',
-								'woocommerce'
-							) }
+							{ __( 'Reset layout', 'woocommerce' ) }
 						</Button>
 					</PanelBody>
 				</InspectorControls>

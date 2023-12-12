@@ -104,45 +104,36 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 		);
 	} );
 
-	test.describe(
-		'Product Archive with Product Collection block',
-		async () => {
-			test.beforeEach( async ( { pageObject } ) => {
-				await pageObject.replaceProductsWithProductCollectionInTemplate(
-					'woocommerce/woocommerce//archive-product'
-				);
-				await pageObject.goToProductCatalogFrontend();
+	test.describe( 'Product Archive with Product Collection block', async () => {
+		test.beforeEach( async ( { pageObject } ) => {
+			await pageObject.replaceProductsWithProductCollectionInTemplate(
+				'woocommerce/woocommerce//archive-product'
+			);
+			await pageObject.goToProductCatalogFrontend();
+		} );
+
+		for ( const scenario of singleOccurranceScenarios ) {
+			test( `${ scenario.title } is attached to the page`, async ( {
+				pageObject,
+			} ) => {
+				const hooks = pageObject.locateByTestId( scenario.dataTestId );
+
+				await expect( hooks ).toHaveCount( scenario.amount );
+				await expect( hooks ).toHaveText( scenario.content );
 			} );
-
-			for ( const scenario of singleOccurranceScenarios ) {
-				test( `${ scenario.title } is attached to the page`, async ( {
-					pageObject,
-				} ) => {
-					const hooks = pageObject.locateByTestId(
-						scenario.dataTestId
-					);
-
-					await expect( hooks ).toHaveCount( scenario.amount );
-					await expect( hooks ).toHaveText( scenario.content );
-				} );
-			}
-
-			for ( const scenario of multipleOccurranceScenarios ) {
-				test( `${ scenario.title } is attached to the page`, async ( {
-					pageObject,
-				} ) => {
-					const hooks = pageObject.locateByTestId(
-						scenario.dataTestId
-					);
-
-					await expect( hooks ).toHaveCount( scenario.amount );
-					await expect( hooks.first() ).toHaveText(
-						scenario.content
-					);
-				} );
-			}
 		}
-	);
+
+		for ( const scenario of multipleOccurranceScenarios ) {
+			test( `${ scenario.title } is attached to the page`, async ( {
+				pageObject,
+			} ) => {
+				const hooks = pageObject.locateByTestId( scenario.dataTestId );
+
+				await expect( hooks ).toHaveCount( scenario.amount );
+				await expect( hooks.first() ).toHaveText( scenario.content );
+			} );
+		}
+	} );
 
 	test.afterAll( async ( { requestUtils } ) => {
 		await uninstallPluginFromPHPFile(

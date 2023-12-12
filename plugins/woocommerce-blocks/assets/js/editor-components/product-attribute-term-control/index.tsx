@@ -77,12 +77,7 @@ const ProductAttributeTermControl = ( {
 					name={ `attributes-${ instanceId }` }
 					countLabel={ sprintf(
 						/* translators: %d is the count of terms. */
-						_n(
-							'%d term',
-							'%d terms',
-							count,
-							'woocommerce'
-						),
+						_n( '%d term', '%d terms', count, 'woocommerce' ),
 						count
 					) }
 					aria-label={ sprintf(
@@ -109,12 +104,7 @@ const ProductAttributeTermControl = ( {
 				className={ classNames( ...classes, 'has-count' ) }
 				countLabel={ sprintf(
 					/* translators: %d is the count of products. */
-					_n(
-						'%d product',
-						'%d products',
-						count,
-						'woocommerce'
-					),
+					_n( '%d product', '%d products', count, 'woocommerce' ),
 					count
 				) }
 				aria-label={ sprintf(
@@ -143,18 +133,12 @@ const ProductAttributeTermControl = ( {
 	}, [] as SearchListItemProps[] );
 
 	messages = {
-		clear: __(
-			'Clear all product attributes',
-			'woocommerce'
-		),
+		clear: __( 'Clear all product attributes', 'woocommerce' ),
 		noItems: __(
 			"Your store doesn't have any product attributes.",
 			'woocommerce'
 		),
-		search: __(
-			'Search for product attributes',
-			'woocommerce'
-		),
+		search: __( 'Search for product attributes', 'woocommerce' ),
 		selected: ( n: number ) =>
 			sprintf(
 				/* translators: %d is the count of attributes selected. */

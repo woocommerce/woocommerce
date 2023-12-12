@@ -21,12 +21,7 @@ const Block = ( props: Props ): JSX.Element => {
 		>
 			{ sprintf(
 				/* translators: %d is the count of items in the cart. */
-				_n(
-					'(%d item)',
-					'(%d items)',
-					cartItemsCount,
-					'woocommerce'
-				),
+				_n( '(%d item)', '(%d items)', cartItemsCount, 'woocommerce' ),
 				cartItemsCount
 			) }
 		</span>

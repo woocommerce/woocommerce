@@ -13,10 +13,7 @@ export const Edit = (): JSX.Element => {
 		[
 			'core/heading',
 			{
-				content: __(
-					'You may be interested in…',
-					'woocommerce'
-				),
+				content: __( 'You may be interested in…', 'woocommerce' ),
 				level: 2,
 				fontSize: 'large',
 			},

@@ -93,10 +93,7 @@ const Editor = ( {
 			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 			{ /* @ts-ignore */ }
 			<BlockErrorBoundary
-				header={ __(
-					'Single Product Block Error',
-					'woocommerce'
-				) }
+				header={ __( 'Single Product Block Error', 'woocommerce' ) }
 			>
 				<EditorBlockControls
 					setIsEditing={ setIsEditing }
@@ -128,10 +125,7 @@ const Editor = ( {
 					<div>
 						<InspectorControls>
 							<PanelBody
-								title={ __(
-									'Product',
-									'woocommerce'
-								) }
+								title={ __( 'Product', 'woocommerce' ) }
 								initialOpen={ false }
 							>
 								<SharedProductControl

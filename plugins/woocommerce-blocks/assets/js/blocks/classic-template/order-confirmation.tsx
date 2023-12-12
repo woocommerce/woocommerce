@@ -13,8 +13,7 @@ const isConversionPossible = () => {
 	return true;
 };
 
-const getButtonLabel = () =>
-	__( 'Transform into blocks', 'woocommerce' );
+const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
 
 const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
 	[
@@ -97,9 +96,7 @@ const getSkeleton = () => {
 	return (
 		<div className="woocommerce-page">
 			<div className="woocommerce-order">
-				<h1>
-					{ __( 'Order received', 'woocommerce' ) }
-				</h1>
+				<h1>{ __( 'Order received', 'woocommerce' ) }</h1>
 				<p className="woocommerce-notice woocommerce-notice--success woocommerce-thankyou-order-confirmation">
 					{ __(
 						'Thank you. Your order has been received.',
@@ -108,8 +105,8 @@ const getSkeleton = () => {
 				</p>
 				<ul className="woocommerce-order-overview woocommerce-thankyou-order-details order_details">
 					<li className="woocommerce-order-overview__order order">
-						{ __( 'Order number', 'woocommerce' ) }
-						: <strong>123</strong>
+						{ __( 'Order number', 'woocommerce' ) }:{ ' ' }
+						<strong>123</strong>
 					</li>
 					<li className="woocommerce-order-overview__date date">
 						{ __( 'Date', 'woocommerce' ) }:{ ' ' }
@@ -127,25 +124,16 @@ const getSkeleton = () => {
 
 				<section className="woocommerce-order-details">
 					<h2 className="woocommerce-order-details__title">
-						{ __(
-							'Order details',
-							'woocommerce'
-						) }
+						{ __( 'Order details', 'woocommerce' ) }
 					</h2>
 					<table className="woocommerce-table woocommerce-table--order-details shop_table order_details">
 						<thead>
 							<tr>
 								<th className="woocommerce-table__product-name product-name">
-									{ __(
-										'Product',
-										'woocommerce'
-									) }
+									{ __( 'Product', 'woocommerce' ) }
 								</th>
 								<th className="woocommerce-table__product-table product-total">
-									{ __(
-										'Total',
-										'woocommerce'
-									) }
+									{ __( 'Total', 'woocommerce' ) }
 								</th>
 							</tr>
 						</thead>
@@ -166,21 +154,13 @@ const getSkeleton = () => {
 						<tfoot>
 							<tr>
 								<th scope="row">
-									{ __(
-										'Subtotal',
-										'woocommerce'
-									) }
-									:
+									{ __( 'Subtotal', 'woocommerce' ) }:
 								</th>
 								<td>$20.00</td>
 							</tr>
 							<tr>
 								<th scope="row">
-									{ __(
-										'Total',
-										'woocommerce'
-									) }
-									:
+									{ __( 'Total', 'woocommerce' ) }:
 								</th>
 								<td>$20.00</td>
 							</tr>
@@ -192,10 +172,7 @@ const getSkeleton = () => {
 					<section className="woocommerce-columns woocommerce-columns--2 woocommerce-columns--addresses col2-set addresses">
 						<div className="woocommerce-column woocommerce-column--1 woocommerce-column--billing-address col-1">
 							<h2 className="woocommerce-column__title">
-								{ __(
-									'Billing address',
-									'woocommerce'
-								) }
+								{ __( 'Billing address', 'woocommerce' ) }
 							</h2>
 							<address>
 								123 Main St
@@ -208,10 +185,7 @@ const getSkeleton = () => {
 
 						<div className="woocommerce-column woocommerce-column--2 woocommerce-column--shipping-address col-2">
 							<h2 className="woocommerce-column__title">
-								{ __(
-									'Shipping address',
-									'woocommerce'
-								) }
+								{ __( 'Shipping address', 'woocommerce' ) }
 							</h2>
 							<address>
 								123 Main St

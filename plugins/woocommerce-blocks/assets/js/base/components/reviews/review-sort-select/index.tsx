@@ -33,24 +33,15 @@ const ReviewSortSelect = ( {
 				},
 				{
 					key: 'highest-rating',
-					label: __(
-						'Highest rating',
-						'woocommerce'
-					),
+					label: __( 'Highest rating', 'woocommerce' ),
 				},
 				{
 					key: 'lowest-rating',
-					label: __(
-						'Lowest rating',
-						'woocommerce'
-					),
+					label: __( 'Lowest rating', 'woocommerce' ),
 				},
 			] }
 			readOnly={ readOnly }
-			screenReaderLabel={ __(
-				'Order reviews by',
-				'woocommerce'
-			) }
+			screenReaderLabel={ __( 'Order reviews by', 'woocommerce' ) }
 			value={ value }
 		/>
 	);

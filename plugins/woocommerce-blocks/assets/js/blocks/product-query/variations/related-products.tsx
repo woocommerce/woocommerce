@@ -121,15 +121,9 @@ registerBlockSingleProductTemplate( {
 	blockName: QUERY_LOOP_ID,
 	blockMetadata: {},
 	blockSettings: {
-		description: __(
-			'Display related products.',
-			'woocommerce'
-		),
+		description: __( 'Display related products.', 'woocommerce' ),
 		name: 'Related Products Controls',
-		title: __(
-			'Related Products Controls',
-			'woocommerce'
-		),
+		title: __( 'Related Products Controls', 'woocommerce' ),
 		// @ts-expect-error: `isActive` exists on Block Variation configuration
 		isActive: ( blockAttributes: BlockAttributes ) =>
 			blockAttributes.namespace === VARIATION_NAME,

@@ -29,10 +29,7 @@ const Edit = () => {
 				[
 					'core/post-terms',
 					{
-						prefix: __(
-							'Category: ',
-							'woocommerce'
-						),
+						prefix: __( 'Category: ', 'woocommerce' ),
 						term: 'product_cat',
 					},
 				],

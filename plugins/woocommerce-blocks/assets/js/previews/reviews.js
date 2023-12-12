@@ -8,10 +8,7 @@ export const previewReviews = [
 	{
 		id: 1,
 		date_created: '2019-07-15T17:05:04',
-		formatted_date_created: __(
-			'July 15, 2019',
-			'woocommerce'
-		),
+		formatted_date_created: __( 'July 15, 2019', 'woocommerce' ),
 		date_created_gmt: '2019-07-15T15:05:04',
 		product_id: 0,
 		product_name: __( 'WordPress Pennant', 'woocommerce' ),
@@ -32,10 +29,7 @@ export const previewReviews = [
 	{
 		id: 2,
 		date_created: '2019-07-12T12:39:39',
-		formatted_date_created: __(
-			'July 12, 2019',
-			'woocommerce'
-		),
+		formatted_date_created: __( 'July 12, 2019', 'woocommerce' ),
 		date_created_gmt: '2019-07-12T10:39:39',
 		product_id: 0,
 		product_name: __( 'WordPress Pennant', 'woocommerce' ),

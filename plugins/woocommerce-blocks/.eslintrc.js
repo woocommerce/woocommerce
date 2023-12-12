@@ -119,6 +119,7 @@ const restrictedImports = [
 module.exports = {
 	env: {
 		browser: true,
+		jest: true,
 	},
 	root: true,
 	extends: [
@@ -192,7 +193,7 @@ module.exports = {
 		'@wordpress/i18n-text-domain': [
 			'error',
 			{
-				allowedTextDomain: [ 'woo-gutenberg-products-block' ],
+				allowedTextDomain: [ 'woocommerce' ],
 			},
 		],
 		'no-restricted-imports': [

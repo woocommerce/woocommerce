@@ -96,25 +96,22 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 		);
 	} );
 
-	test.describe(
-		'Product Archive with Product Collection block',
-		async () => {
-			test.beforeAll( async ( { page } ) => {
-				await page.goto( '/product/hoodie/' );
+	test.describe( 'Product Archive with Product Collection block', async () => {
+		test.beforeAll( async ( { page } ) => {
+			await page.goto( '/product/hoodie/' );
+		} );
+
+		for ( const scenario of singleOccurranceScenarios ) {
+			test( `${ scenario.title } is attached to the page`, async ( {
+				page,
+			} ) => {
+				const hooks = page.getByTestId( scenario.dataTestId );
+
+				await expect( hooks ).toHaveCount( scenario.amount );
+				await expect( hooks ).toHaveText( scenario.content );
 			} );
-
-			for ( const scenario of singleOccurranceScenarios ) {
-				test( `${ scenario.title } is attached to the page`, async ( {
-					page,
-				} ) => {
-					const hooks = page.getByTestId( scenario.dataTestId );
-
-					await expect( hooks ).toHaveCount( scenario.amount );
-					await expect( hooks ).toHaveText( scenario.content );
-				} );
-			}
 		}
-	);
+	} );
 } );
 
 test.afterAll( async ( { requestUtils } ) => {

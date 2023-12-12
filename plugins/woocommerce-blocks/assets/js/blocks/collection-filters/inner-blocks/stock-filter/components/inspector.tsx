@@ -22,17 +22,9 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 
 	return (
 		<InspectorControls key="inspector">
-			<PanelBody
-				title={ __(
-					'Display Settings',
-					'woocommerce'
-				) }
-			>
+			<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
 				<ToggleControl
-					label={ __(
-						'Display product count',
-						'woocommerce'
-					) }
+					label={ __( 'Display product count', 'woocommerce' ) }
 					checked={ showCounts }
 					onChange={ () =>
 						setAttributes( {
@@ -55,10 +47,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				>
 					<ToggleGroupControlOption
 						value="multiple"
-						label={ __(
-							'Multiple',
-							'woocommerce'
-						) }
+						label={ __( 'Multiple', 'woocommerce' ) }
 					/>
 					<ToggleGroupControlOption
 						value="single"
@@ -66,10 +55,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 					/>
 				</ToggleGroupControl>
 				<ToggleGroupControl
-					label={ __(
-						'Display Style',
-						'woocommerce'
-					) }
+					label={ __( 'Display Style', 'woocommerce' ) }
 					value={ displayStyle }
 					onChange={ ( value ) =>
 						setAttributes( {
@@ -84,10 +70,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 					/>
 					<ToggleGroupControlOption
 						value="dropdown"
-						label={ __(
-							'Dropdown',
-							'woocommerce'
-						) }
+						label={ __( 'Dropdown', 'woocommerce' ) }
 					/>
 				</ToggleGroupControl>
 			</PanelBody>

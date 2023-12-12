@@ -90,10 +90,7 @@ const TotalsDiscount = ( {
 										text={ cartCoupon.label }
 										screenReaderText={ sprintf(
 											/* translators: %s Coupon code. */
-											__(
-												'Coupon: %s',
-												'woocommerce'
-											),
+											__( 'Coupon: %s', 'woocommerce' ),
 											cartCoupon.label
 										) }
 										disabled={ isRemovingCoupon }

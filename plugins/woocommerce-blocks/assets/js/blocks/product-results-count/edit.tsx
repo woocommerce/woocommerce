@@ -16,10 +16,7 @@ const Edit = () => {
 	return (
 		<div { ...blockProps }>
 			<p className="woocommerce-result-count">
-				{ __(
-					'Showing 1-X of X results',
-					'woocommerce'
-				) }
+				{ __( 'Showing 1-X of X results', 'woocommerce' ) }
 			</p>
 		</div>
 	);

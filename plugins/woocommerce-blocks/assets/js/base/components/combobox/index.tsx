@@ -46,10 +46,7 @@ const Combobox = ( {
 	options,
 	value,
 	required = false,
-	errorMessage = __(
-		'Please select a value.',
-		'woocommerce'
-	),
+	errorMessage = __( 'Please select a value.', 'woocommerce' ),
 	errorId: incomingErrorId,
 	instanceId = '0',
 	autoComplete = 'off',

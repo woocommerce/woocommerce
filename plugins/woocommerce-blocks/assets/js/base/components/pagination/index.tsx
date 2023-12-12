@@ -90,10 +90,7 @@ const Pagination = ( {
 				<button
 					className="wc-block-pagination-page wc-block-components-pagination__page wc-block-components-pagination-page--arrow"
 					onClick={ () => onPageChange( currentPage - 1 ) }
-					title={ __(
-						'Previous page',
-						'woocommerce'
-					) }
+					title={ __( 'Previous page', 'woocommerce' ) }
 					disabled={ currentPage <= 1 }
 				>
 					<Label
@@ -212,10 +209,7 @@ const Pagination = ( {
 				>
 					<Label
 						label="&rarr;"
-						screenReaderLabel={ __(
-							'Next page',
-							'woocommerce'
-						) }
+						screenReaderLabel={ __( 'Next page', 'woocommerce' ) }
 					/>
 				</button>
 			) }

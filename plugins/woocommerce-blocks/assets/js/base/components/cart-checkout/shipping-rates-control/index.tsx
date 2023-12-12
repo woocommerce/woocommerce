@@ -109,10 +109,7 @@ const ShippingRatesControl = ( {
 	return (
 		<LoadingMask
 			isLoading={ isLoadingRates }
-			screenReaderLabel={ __(
-				'Loading shipping rates…',
-				'woocommerce'
-			) }
+			screenReaderLabel={ __( 'Loading shipping rates…', 'woocommerce' ) }
 			showSpinner={ true }
 		>
 			{ hasSelectedLocalPickup &&

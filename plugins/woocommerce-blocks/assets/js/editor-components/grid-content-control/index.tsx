@@ -56,10 +56,7 @@ const GridContentControl = ( {
 				onChange={ () => onChange( { ...settings, rating: ! rating } ) }
 			/>
 			<ToggleControl
-				label={ __(
-					'Add to Cart button',
-					'woocommerce'
-				) }
+				label={ __( 'Add to Cart button', 'woocommerce' ) }
 				checked={ button }
 				onChange={ () => onChange( { ...settings, button: ! button } ) }
 			/>

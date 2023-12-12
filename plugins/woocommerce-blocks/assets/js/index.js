@@ -28,10 +28,7 @@ setCategories( [
 	},
 	{
 		slug: 'woocommerce-product-elements',
-		title: __(
-			'WooCommerce Product Elements',
-			'woocommerce'
-		),
+		title: __( 'WooCommerce Product Elements', 'woocommerce' ),
 		icon: (
 			<Icon
 				icon={ woo }

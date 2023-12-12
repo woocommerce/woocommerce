@@ -51,10 +51,7 @@ export const ShippingAddress = ( {
 			) }
 			{ showCalculator && (
 				<CalculatorButton
-					label={ __(
-						'Change address',
-						'woocommerce'
-					) }
+					label={ __( 'Change address', 'woocommerce' ) }
 					isShippingCalculatorOpen={ isShippingCalculatorOpen }
 					setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
 				/>

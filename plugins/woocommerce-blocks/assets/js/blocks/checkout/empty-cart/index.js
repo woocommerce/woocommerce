@@ -20,10 +20,7 @@ const EmptyCart = () => {
 				size={ 100 }
 			/>
 			<strong className="wc-block-checkout-empty__title">
-				{ __(
-					'Your cart is currently empty!',
-					'woocommerce'
-				) }
+				{ __( 'Your cart is currently empty!', 'woocommerce' ) }
 			</strong>
 			<p className="wc-block-checkout-empty__description">
 				{ __(

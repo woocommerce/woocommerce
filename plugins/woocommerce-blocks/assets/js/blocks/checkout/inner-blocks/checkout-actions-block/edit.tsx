@@ -51,12 +51,7 @@ export const Edit = ( {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<PanelBody
-					title={ __(
-						'Account options',
-						'woocommerce'
-					) }
-				>
+				<PanelBody title={ __( 'Account options', 'woocommerce' ) }>
 					<ToggleControl
 						label={ __(
 							'Show a "Return to Cart" link',

@@ -63,10 +63,7 @@ const AddressCard = ( {
 					role="button"
 					href={ '#' + target }
 					className="wc-block-components-address-card__edit"
-					aria-label={ __(
-						'Edit address',
-						'woocommerce'
-					) }
+					aria-label={ __( 'Edit address', 'woocommerce' ) }
 					onClick={ ( e ) => {
 						onEdit();
 						e.preventDefault();

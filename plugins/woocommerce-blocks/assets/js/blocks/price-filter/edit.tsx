@@ -46,14 +46,9 @@ export default function ( {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __( 'Settings', 'woocommerce' ) }
-				>
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ToggleGroupControl
-						label={ __(
-							'Price Range Selector',
-							'woocommerce'
-						) }
+						label={ __( 'Price Range Selector', 'woocommerce' ) }
 						value={ showInputFields ? 'editable' : 'text' }
 						onChange={ ( value: string ) =>
 							setAttributes( {
@@ -64,25 +59,16 @@ export default function ( {
 					>
 						<ToggleGroupControlOption
 							value="editable"
-							label={ __(
-								'Editable',
-								'woocommerce'
-							) }
+							label={ __( 'Editable', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="text"
-							label={ __(
-								'Text',
-								'woocommerce'
-							) }
+							label={ __( 'Text', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 					{ showInputFields && (
 						<ToggleControl
-							label={ __(
-								'Inline input fields',
-								'woocommerce'
-							) }
+							label={ __( 'Inline input fields', 'woocommerce' ) }
 							checked={ inlineInput }
 							onChange={ () =>
 								setAttributes( {
@@ -138,8 +124,7 @@ export default function ( {
 				href={ getAdminLink( 'post-new.php?post_type=product' ) }
 				target="_top"
 			>
-				{ __( 'Add new product', 'woocommerce' ) +
-					' ' }
+				{ __( 'Add new product', 'woocommerce' ) + ' ' }
 				<Icon icon={ external } />
 			</Button>
 			<Button

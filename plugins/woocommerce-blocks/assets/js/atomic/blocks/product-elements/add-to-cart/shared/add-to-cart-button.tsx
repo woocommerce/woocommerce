@@ -165,8 +165,7 @@ const AddToCartButton = () => {
 			className="wc-block-components-product-add-to-cart-button"
 			href={ addToCartButtonData.url }
 			text={
-				addToCartButtonData.text ||
-				__( 'View Product', 'woocommerce' )
+				addToCartButtonData.text || __( 'View Product', 'woocommerce' )
 			}
 			onClick={ () => {
 				dispatchStoreEvent( 'product-view-link', {

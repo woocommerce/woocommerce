@@ -120,10 +120,7 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 						{
 							actions: [
 								{
-									label: __(
-										'Undo',
-										'woocommerce'
-									),
+									label: __( 'Undo', 'woocommerce' ),
 									onClick: () => {
 										const clientIds = pickBlockClientIds(
 											getBlocks()
@@ -262,10 +259,7 @@ const Edit = ( {
 					<div className="wp-block-woocommerce-classic-template__placeholder-copy__icon-container">
 						<span className="woo-icon">
 							<Icon icon={ woo } />{ ' ' }
-							{ __(
-								'WooCommerce',
-								'woocommerce'
-							) }
+							{ __( 'WooCommerce', 'woocommerce' ) }
 						</span>
 						<span>
 							{ __(
@@ -317,10 +311,7 @@ const registerClassicTemplateBlock = ( {
 		title:
 			template && TEMPLATES[ template ]
 				? TEMPLATES[ template ].title
-				: __(
-						'WooCommerce Classic Template',
-						'woocommerce'
-				  ),
+				: __( 'WooCommerce Classic Template', 'woocommerce' ),
 		icon: (
 			<Icon
 				icon={ box }

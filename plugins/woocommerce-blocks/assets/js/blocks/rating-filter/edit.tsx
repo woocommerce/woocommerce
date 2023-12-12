@@ -54,17 +54,9 @@ const Edit = ( {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __(
-						'Display Settings',
-						'woocommerce'
-					) }
-				>
+				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
 					<ToggleControl
-						label={ __(
-							'Display product count',
-							'woocommerce'
-						) }
+						label={ __( 'Display product count', 'woocommerce' ) }
 						checked={ showCounts }
 						onChange={ () =>
 							setAttributes( {
@@ -87,24 +79,15 @@ const Edit = ( {
 					>
 						<ToggleGroupControlOption
 							value="multiple"
-							label={ __(
-								'Multiple',
-								'woocommerce'
-							) }
+							label={ __( 'Multiple', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="single"
-							label={ __(
-								'Single',
-								'woocommerce'
-							) }
+							label={ __( 'Single', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 					<ToggleGroupControl
-						label={ __(
-							'Display Style',
-							'woocommerce'
-						) }
+						label={ __( 'Display Style', 'woocommerce' ) }
 						value={ displayStyle }
 						onChange={ ( value: string ) =>
 							setAttributes( {
@@ -115,17 +98,11 @@ const Edit = ( {
 					>
 						<ToggleGroupControlOption
 							value="list"
-							label={ __(
-								'List',
-								'woocommerce'
-							) }
+							label={ __( 'List', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="dropdown"
-							label={ __(
-								'Dropdown',
-								'woocommerce'
-							) }
+							label={ __( 'Dropdown', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 					<ToggleControl

@@ -12,10 +12,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { PAYMENT_METHOD_NAME } from './constants';
 
 const settings = getPaymentMethodData( 'bacs', {} );
-const defaultLabel = __(
-	'Direct bank transfer',
-	'woocommerce'
-);
+const defaultLabel = __( 'Direct bank transfer', 'woocommerce' );
 const label = decodeEntities( settings?.title || '' ) || defaultLabel;
 
 /**

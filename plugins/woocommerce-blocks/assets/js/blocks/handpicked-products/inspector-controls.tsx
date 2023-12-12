@@ -22,10 +22,7 @@ export const HandpickedProductsInspectorControls = (
 
 	return (
 		<InspectorControls key="inspector">
-			<PanelBody
-				title={ __( 'Layout', 'woocommerce' ) }
-				initialOpen
-			>
+			<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
 				<RangeControl
 					label={ __( 'Columns', 'woocommerce' ) }
 					value={ columns }
@@ -36,20 +33,14 @@ export const HandpickedProductsInspectorControls = (
 					max={ getSetting( 'maxColumns', 6 ) }
 				/>
 				<ToggleControl
-					label={ __(
-						'Align Buttons',
-						'woocommerce'
-					) }
+					label={ __( 'Align Buttons', 'woocommerce' ) }
 					help={
 						alignButtons
 							? __(
 									'Buttons are aligned vertically.',
 									'woocommerce'
 							  )
-							: __(
-									'Buttons follow content.',
-									'woocommerce'
-							  )
+							: __( 'Buttons follow content.', 'woocommerce' )
 					}
 					checked={ alignButtons }
 					onChange={ () =>
@@ -57,10 +48,7 @@ export const HandpickedProductsInspectorControls = (
 					}
 				/>
 			</PanelBody>
-			<PanelBody
-				title={ __( 'Content', 'woocommerce' ) }
-				initialOpen
-			>
+			<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
 				<GridContentControl
 					settings={ contentVisibility }
 					onChange={ ( value ) =>

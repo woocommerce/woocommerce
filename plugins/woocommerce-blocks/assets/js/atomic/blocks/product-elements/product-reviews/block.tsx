@@ -26,12 +26,7 @@ export const ProductReviews = () => {
 					) }
 				</p>
 			</Notice>
-			<h2>
-				{ __(
-					'3 reviews for this product',
-					'woocommerce'
-				) }
-			</h2>
+			<h2>{ __( '3 reviews for this product', 'woocommerce' ) }</h2>
 			<img
 				src={ `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-reviews.svg` }
 				alt="Placeholder"
@@ -39,21 +34,11 @@ export const ProductReviews = () => {
 			<h3>{ __( 'Add a review', 'woocommerce' ) }</h3>
 			<div className="wp-block-woocommerce-product-reviews__editor__form-container">
 				<div className="wp-block-woocommerce-product-reviews__editor__row">
-					<span>
-						{ __(
-							'Your rating *',
-							'woocommerce'
-						) }
-					</span>
+					<span>{ __( 'Your rating *', 'woocommerce' ) }</span>
 					<p className="wp-block-woocommerce-product-reviews__editor__stars"></p>
 				</div>
 				<div className="wp-block-woocommerce-product-reviews__editor__row">
-					<span>
-						{ __(
-							'Your review *',
-							'woocommerce'
-						) }
-					</span>
+					<span>{ __( 'Your review *', 'woocommerce' ) }</span>
 					<textarea />
 				</div>
 				<input

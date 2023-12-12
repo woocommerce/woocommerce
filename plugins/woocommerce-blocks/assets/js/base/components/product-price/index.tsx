@@ -52,10 +52,7 @@ const PriceRange = ( {
 			<span className="screen-reader-text">
 				{ sprintf(
 					/* translators: %1$s min price, %2$s max price */
-					__(
-						'Price between %1$s and %2$s',
-						'woocommerce'
-					),
+					__( 'Price between %1$s and %2$s', 'woocommerce' ),
 					formatPrice( minPrice ),
 					formatPrice( maxPrice )
 				) }

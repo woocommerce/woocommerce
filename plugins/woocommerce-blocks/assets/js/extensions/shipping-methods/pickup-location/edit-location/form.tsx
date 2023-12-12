@@ -57,10 +57,7 @@ const Form = ( {
 					event: React.InvalidEvent< HTMLInputElement >
 				) => {
 					event.target.setCustomValidity(
-						__(
-							'A Location title is required',
-							'woocommerce'
-						)
+						__( 'A Location title is required', 'woocommerce' )
 					);
 				} }
 				onInput={ ( event: React.ChangeEvent< HTMLInputElement > ) => {
@@ -88,35 +85,23 @@ const Form = ( {
 				label={ __( 'Postcode / ZIP', 'woocommerce' ) }
 				name={ 'location_postcode' }
 				hideLabelFromVision={ true }
-				placeholder={ __(
-					'Postcode / ZIP',
-					'woocommerce'
-				) }
+				placeholder={ __( 'Postcode / ZIP', 'woocommerce' ) }
 				value={ values.address.postcode }
 				onChange={ setLocationAddressField( 'postcode' ) }
 				autoComplete="off"
 			/>
 			{ ! countryHasStates && (
 				<TextControl
-					placeholder={ __(
-						'State',
-						'woocommerce'
-					) }
+					placeholder={ __( 'State', 'woocommerce' ) }
 					value={ selectedState }
 					onChange={ setLocationAddressField( 'state' ) }
 				/>
 			) }
 			<SelectControl
 				name="location_country_state"
-				label={ __(
-					'Country / State',
-					'woocommerce'
-				) }
+				label={ __( 'Country / State', 'woocommerce' ) }
 				hideLabelFromVision={ true }
-				placeholder={ __(
-					'Country / State',
-					'woocommerce'
-				) }
+				placeholder={ __( 'Country / State', 'woocommerce' ) }
 				value={ ( () => {
 					if ( ! selectedState && countryHasStates ) {
 						return `${ selectedCountry }:${

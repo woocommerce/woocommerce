@@ -41,10 +41,7 @@ const Block = (): JSX.Element => {
 		getSetting( 'checkoutAllowsSignup', false ) && (
 			<CheckboxControl
 				className="wc-block-checkout__create-account"
-				label={ __(
-					'Create an account?',
-					'woocommerce'
-				) }
+				label={ __( 'Create an account?', 'woocommerce' ) }
 				checked={ shouldCreateAccount }
 				onChange={ ( value ) =>
 					__internalSetShouldCreateAccount( value )

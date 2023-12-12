@@ -43,10 +43,7 @@ const Edit = (): JSX.Element => {
 						<tr>
 							<th className="download-product">
 								<span className="nobr">
-									{ __(
-										'Product',
-										'woocommerce'
-									) }
+									{ __( 'Product', 'woocommerce' ) }
 								</span>
 							</th>
 							<th className="download-remaining">
@@ -59,18 +56,12 @@ const Edit = (): JSX.Element => {
 							</th>
 							<th className="download-expires">
 								<span className="nobr">
-									{ __(
-										'Expires',
-										'woocommerce'
-									) }
+									{ __( 'Expires', 'woocommerce' ) }
 								</span>
 							</th>
 							<th className="download-file">
 								<span className="nobr">
-									{ __(
-										'Download',
-										'woocommerce'
-									) }
+									{ __( 'Download', 'woocommerce' ) }
 								</span>
 							</th>
 						</tr>

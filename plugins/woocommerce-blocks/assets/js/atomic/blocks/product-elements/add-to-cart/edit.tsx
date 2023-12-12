@@ -43,9 +43,7 @@ const Edit = ( { attributes, setAttributes }: EditProps ) => {
 		>
 			<EditProductLink productId={ product.id } />
 			<InspectorControls>
-				<PanelBody
-					title={ __( 'Layout', 'woocommerce' ) }
-				>
+				<PanelBody title={ __( 'Layout', 'woocommerce' ) }>
 					{ productSupportsAddToCartForm( product ) ? (
 						<ToggleControl
 							label={ __(

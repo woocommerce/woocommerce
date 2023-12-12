@@ -54,10 +54,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 						<button
 							className={ `single_add_to_cart_button button alt wp-element-button` }
 						>
-							{ __(
-								'Add to cart',
-								'woocommerce'
-							) }
+							{ __( 'Add to cart', 'woocommerce' ) }
 						</button>
 					</Disabled>
 				</div>

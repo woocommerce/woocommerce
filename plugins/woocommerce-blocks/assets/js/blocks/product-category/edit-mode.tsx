@@ -66,10 +66,7 @@ export const ProductsByCategoryEditMode = (
 	return (
 		<Placeholder
 			icon={ <Icon icon={ file } /> }
-			label={ __(
-				'Products by Category',
-				'woocommerce'
-			) }
+			label={ __( 'Products by Category', 'woocommerce' ) }
 			className="wc-block-products-grid wc-block-products-category"
 		>
 			{ __(

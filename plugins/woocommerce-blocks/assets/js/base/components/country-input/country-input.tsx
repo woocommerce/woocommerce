@@ -23,10 +23,7 @@ export const CountryInput = ( {
 	autoComplete = 'off',
 	required = false,
 	errorId,
-	errorMessage = __(
-		'Please select a country',
-		'woocommerce'
-	),
+	errorMessage = __( 'Please select a country', 'woocommerce' ),
 }: CountryInputWithCountriesProps ): JSX.Element => {
 	const options = useMemo(
 		() =>

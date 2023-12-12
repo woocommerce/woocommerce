@@ -28,10 +28,7 @@ const CheckoutOrderNotes = ( {
 		<div className="wc-block-checkout__add-note">
 			<CheckboxControl
 				disabled={ disabled }
-				label={ __(
-					'Add a note to your order',
-					'woocommerce'
-				) }
+				label={ __( 'Add a note to your order', 'woocommerce' ) }
 				checked={ withOrderNotes }
 				onChange={ ( isChecked ) => {
 					setWithOrderNotes( isChecked );

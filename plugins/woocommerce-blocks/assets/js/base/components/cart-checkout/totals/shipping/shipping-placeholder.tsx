@@ -25,24 +25,15 @@ export const ShippingPlaceholder = ( {
 		return (
 			<em>
 				{ isCheckout
-					? __(
-							'No shipping options available',
-							'woocommerce'
-					  )
-					: __(
-							'Calculated during checkout',
-							'woocommerce'
-					  ) }
+					? __( 'No shipping options available', 'woocommerce' )
+					: __( 'Calculated during checkout', 'woocommerce' ) }
 			</em>
 		);
 	}
 
 	return (
 		<CalculatorButton
-			label={ __(
-				'Add an address for shipping options',
-				'woocommerce'
-			) }
+			label={ __( 'Add an address for shipping options', 'woocommerce' ) }
 			isShippingCalculatorOpen={ isShippingCalculatorOpen }
 			setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
 		/>

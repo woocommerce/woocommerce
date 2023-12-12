@@ -17,9 +17,7 @@ const Edit = () => {
 	return (
 		<div { ...blockProps }>
 			<Disabled>
-				<a href="/">
-					{ __( 'Breadcrumbs', 'woocommerce' ) }
-				</a>
+				<a href="/">{ __( 'Breadcrumbs', 'woocommerce' ) }</a>
 				{ __( ' / Navigation / Path', 'woocommerce' ) }
 			</Disabled>
 		</div>

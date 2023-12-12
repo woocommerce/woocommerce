@@ -23,10 +23,7 @@ const browseStoreTemplate = SHOP_URL
 				align: 'center',
 				content: sprintf(
 					/* translators: %s is the link to the store product directory. */
-					__(
-						'<a href="%s">Browse store</a>',
-						'woocommerce'
-					),
+					__( '<a href="%s">Browse store</a>', 'woocommerce' ),
 					SHOP_URL
 				),
 				dropCap: false,
@@ -39,10 +36,7 @@ const defaultTemplate = [
 		'core/heading',
 		{
 			textAlign: 'center',
-			content: __(
-				'Your cart is currently empty!',
-				'woocommerce'
-			),
+			content: __( 'Your cart is currently empty!', 'woocommerce' ),
 			level: 2,
 			className: 'with-empty-cart-icon wc-block-cart__empty-cart__title',
 		},

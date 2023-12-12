@@ -41,15 +41,8 @@ function WidthPanel( {
 	}
 
 	return (
-		<PanelBody
-			title={ __( 'Width settings', 'woocommerce' ) }
-		>
-			<ButtonGroup
-				aria-label={ __(
-					'Button width',
-					'woocommerce'
-				) }
-			>
+		<PanelBody title={ __( 'Width settings', 'woocommerce' ) }>
+			<ButtonGroup aria-label={ __( 'Button width', 'woocommerce' ) }>
 				{ [ 25, 50, 75, 100 ].map( ( widthValue ) => {
 					return (
 						<Button

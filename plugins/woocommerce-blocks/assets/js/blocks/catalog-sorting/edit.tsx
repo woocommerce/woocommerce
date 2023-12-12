@@ -8,9 +8,7 @@ import { __ } from '@wordpress/i18n';
 const CatalogSorting = () => {
 	return (
 		<select className="orderby">
-			<option>
-				{ __( 'Default sorting', 'woocommerce' ) }
-			</option>
+			<option>{ __( 'Default sorting', 'woocommerce' ) }</option>
 		</select>
 	);
 };

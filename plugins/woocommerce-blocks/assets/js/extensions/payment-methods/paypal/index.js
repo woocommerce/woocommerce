@@ -30,16 +30,12 @@ const paypalPaymentMethod = {
 			) }
 		/>
 	),
-	placeOrderButtonLabel: __(
-		'Proceed to PayPal',
-		'woocommerce'
-	),
+	placeOrderButtonLabel: __( 'Proceed to PayPal', 'woocommerce' ),
 	content: <Content />,
 	edit: <Content />,
 	canMakePayment: () => true,
 	ariaLabel: decodeEntities(
-		settings?.title ||
-			__( 'Payment via PayPal', 'woocommerce' )
+		settings?.title || __( 'Payment via PayPal', 'woocommerce' )
 	),
 	supports: {
 		features: settings.supports ?? [],

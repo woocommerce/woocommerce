@@ -100,9 +100,7 @@ export const Edit = ( {
 
 	const addressFieldControls = (): JSX.Element => (
 		<InspectorControls>
-			<PanelBody
-				title={ __( 'Address Fields', 'woocommerce' ) }
-			>
+			<PanelBody title={ __( 'Address Fields', 'woocommerce' ) }>
 				<p className="wc-block-checkout__controls-text">
 					{ __(
 						'Show or hide fields in the checkout address forms.',
@@ -116,10 +114,7 @@ export const Edit = ( {
 				/>
 				{ showCompanyField && (
 					<CheckboxControl
-						label={ __(
-							'Require company name?',
-							'woocommerce'
-						) }
+						label={ __( 'Require company name?', 'woocommerce' ) }
 						checked={ requireCompanyField }
 						onChange={ () =>
 							toggleAttribute( 'requireCompanyField' )
@@ -128,10 +123,7 @@ export const Edit = ( {
 					/>
 				) }
 				<ToggleControl
-					label={ __(
-						'Apartment, suite, etc.',
-						'woocommerce'
-					) }
+					label={ __( 'Apartment, suite, etc.', 'woocommerce' ) }
 					checked={ showApartmentField }
 					onChange={ () => toggleAttribute( 'showApartmentField' ) }
 				/>
@@ -142,10 +134,7 @@ export const Edit = ( {
 				/>
 				{ showPhoneField && (
 					<CheckboxControl
-						label={ __(
-							'Require phone number?',
-							'woocommerce'
-						) }
+						label={ __( 'Require phone number?', 'woocommerce' ) }
 						checked={ requirePhoneField }
 						onChange={ () =>
 							toggleAttribute( 'requirePhoneField' )

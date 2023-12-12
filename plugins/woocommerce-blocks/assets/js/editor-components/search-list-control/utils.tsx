@@ -19,12 +19,7 @@ export const defaultMessages = {
 	selected: ( n: number ): string =>
 		sprintf(
 			/* translators: Number of items selected from list. */
-			_n(
-				'%d item selected',
-				'%d items selected',
-				n,
-				'woocommerce'
-			),
+			_n( '%d item selected', '%d items selected', n, 'woocommerce' ),
 			n
 		),
 	updated: __( 'Search results updated.', 'woocommerce' ),

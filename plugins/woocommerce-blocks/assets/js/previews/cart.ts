@@ -44,10 +44,7 @@ export const previewCart: CartResponse = {
 			catalog_visibility: 'visible',
 			name: __( 'Beanie', 'woocommerce' ),
 			summary: __( 'Beanie', 'woocommerce' ),
-			short_description: __(
-				'Warm hat for winter',
-				'woocommerce'
-			),
+			short_description: __( 'Warm hat for winter', 'woocommerce' ),
 			description:
 				'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
 			sku: 'woo-beanie',
@@ -126,10 +123,7 @@ export const previewCart: CartResponse = {
 			catalog_visibility: 'visible',
 			name: __( 'Cap', 'woocommerce' ),
 			summary: __( 'Cap', 'woocommerce' ),
-			short_description: __(
-				'Lightweight baseball cap',
-				'woocommerce'
-			),
+			short_description: __( 'Lightweight baseball cap', 'woocommerce' ),
 			description:
 				'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
 			sku: 'woo-cap',
@@ -263,14 +257,8 @@ export const previewCart: CartResponse = {
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-long-sleeve-tee',
-			short_description: __(
-				'Long Sleeve Tee',
-				'woocommerce'
-			),
-			description: __(
-				'Long Sleeve Tee',
-				'woocommerce'
-			),
+			short_description: __( 'Long Sleeve Tee', 'woocommerce' ),
+			description: __( 'Long Sleeve Tee', 'woocommerce' ),
 			on_sale: false,
 			prices: {
 				currency_code: 'USD',
@@ -327,14 +315,8 @@ export const previewCart: CartResponse = {
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-hoodie-with-zipper',
-			short_description: __(
-				'Hoodie with Zipper',
-				'woocommerce'
-			),
-			description: __(
-				'Hoodie with Zipper',
-				'woocommerce'
-			),
+			short_description: __( 'Hoodie with Zipper', 'woocommerce' ),
+			description: __( 'Hoodie with Zipper', 'woocommerce' ),
 			on_sale: true,
 			prices: {
 				currency_code: 'USD',
@@ -450,14 +432,8 @@ export const previewCart: CartResponse = {
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-hoodie-with-pocket',
-			short_description: __(
-				'Hoodie with Pocket',
-				'woocommerce'
-			),
-			description: __(
-				'Hoodie with Pocket',
-				'woocommerce'
-			),
+			short_description: __( 'Hoodie with Pocket', 'woocommerce' ),
+			description: __( 'Hoodie with Pocket', 'woocommerce' ),
 			on_sale: true,
 			prices: {
 				currency_code: 'USD',

@@ -51,10 +51,7 @@ const FeedbackPrompt = ( {
 						rel="noreferrer noopener"
 						target="_blank"
 					>
-						{ __(
-							'Give us your feedback.',
-							'woocommerce'
-						) }
+						{ __( 'Give us your feedback.', 'woocommerce' ) }
 						<Icon icon={ external } size={ 16 } />
 					</a>
 				</div>

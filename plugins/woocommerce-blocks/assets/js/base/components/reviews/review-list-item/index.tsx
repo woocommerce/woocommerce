@@ -44,10 +44,7 @@ function getReviewImage(
 			{ review.verified && (
 				<div
 					className="wc-block-review-list-item__verified wc-block-components-review-list-item__verified"
-					title={ __(
-						'Verified buyer',
-						'woocommerce'
-					) }
+					title={ __( 'Verified buyer', 'woocommerce' ) }
 				>
 					{ __( 'Verified buyer', 'woocommerce' ) }
 				</div>
@@ -60,14 +57,8 @@ function getReviewContent( review: Review ): JSX.Element {
 	return (
 		<ReadMore
 			maxLines={ 10 }
-			moreText={ __(
-				'Read full review',
-				'woocommerce'
-			) }
-			lessText={ __(
-				'Hide full review',
-				'woocommerce'
-			) }
+			moreText={ __( 'Read full review', 'woocommerce' ) }
+			lessText={ __( 'Hide full review', 'woocommerce' ) }
 			className="wc-block-review-list-item__text wc-block-components-review-list-item__text"
 		>
 			<div

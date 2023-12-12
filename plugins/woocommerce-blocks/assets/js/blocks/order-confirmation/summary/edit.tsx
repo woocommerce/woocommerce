@@ -24,10 +24,7 @@ const Edit = (): JSX.Element => {
 				<ul className="wc-block-order-confirmation-summary-list">
 					<li className="wc-block-order-confirmation-summary-list-item">
 						<span className="wc-block-order-confirmation-summary-list-item__key">
-							{ __(
-								'Order number:',
-								'woocommerce'
-							) }
+							{ __( 'Order number:', 'woocommerce' ) }
 						</span>{ ' ' }
 						<span className="wc-block-order-confirmation-summary-list-item__value">
 							123
@@ -63,16 +60,10 @@ const Edit = (): JSX.Element => {
 					</li>
 					<li className="wc-block-order-confirmation-summary-list-item">
 						<span className="wc-block-order-confirmation-summary-list-item__key">
-							{ __(
-								'Payment method:',
-								'woocommerce'
-							) }
+							{ __( 'Payment method:', 'woocommerce' ) }
 						</span>{ ' ' }
 						<span className="wc-block-order-confirmation-summary-list-item__value">
-							{ __(
-								'Credit Card',
-								'woocommerce'
-							) }
+							{ __( 'Credit Card', 'woocommerce' ) }
 						</span>
 					</li>
 				</ul>

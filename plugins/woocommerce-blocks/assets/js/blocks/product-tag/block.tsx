@@ -79,10 +79,7 @@ const ProductsByTagBlock = ( {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __(
-						'Product Tag',
-						'woocommerce'
-					) }
+					title={ __( 'Product Tag', 'woocommerce' ) }
 					initialOpen={ ! attributes.tags.length && ! isEditing }
 				>
 					<ProductTagControl
@@ -98,10 +95,7 @@ const ProductsByTagBlock = ( {
 						isCompact={ true }
 					/>
 				</PanelBody>
-				<PanelBody
-					title={ __( 'Layout', 'woocommerce' ) }
-					initialOpen
-				>
+				<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
 					<GridLayoutControl
 						columns={ columns }
 						rows={ rows }
@@ -129,10 +123,7 @@ const ProductsByTagBlock = ( {
 						) }
 					/>
 				</PanelBody>
-				<PanelBody
-					title={ __( 'Content', 'woocommerce' ) }
-					initialOpen
-				>
+				<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
 					<GridContentControl
 						settings={ contentVisibility }
 						onChange={ ( value ) =>
@@ -150,10 +141,7 @@ const ProductsByTagBlock = ( {
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __(
-						'Filter by stock status',
-						'woocommerce'
-					) }
+					title={ __( 'Filter by stock status', 'woocommerce' ) }
 					initialOpen={ false }
 				>
 					<ProductStockControl
@@ -170,19 +158,13 @@ const ProductsByTagBlock = ( {
 		const onDone = () => {
 			save();
 			debouncedSpeak(
-				__(
-					'Showing Products by Tag block preview.',
-					'woocommerce'
-				)
+				__( 'Showing Products by Tag block preview.', 'woocommerce' )
 			);
 		};
 		const onCancel = () => {
 			stopEditing();
 			debouncedSpeak(
-				__(
-					'Showing Products by Tag block preview.',
-					'woocommerce'
-				)
+				__( 'Showing Products by Tag block preview.', 'woocommerce' )
 			);
 		};
 
@@ -191,10 +173,7 @@ const ProductsByTagBlock = ( {
 				icon={
 					<Icon icon={ tag } className="block-editor-block-icon" />
 				}
-				label={ __(
-					'Products by Tag',
-					'woocommerce'
-				) }
+				label={ __( 'Products by Tag', 'woocommerce' ) }
 				className="wc-block-products-grid wc-block-product-tag"
 			>
 				{ __(
@@ -251,10 +230,7 @@ const ProductsByTagBlock = ( {
 								className="block-editor-block-icon"
 							/>
 						}
-						label={ __(
-							'Products by Tag',
-							'woocommerce'
-						) }
+						label={ __( 'Products by Tag', 'woocommerce' ) }
 						className="wc-block-products-grid wc-block-product-tag"
 					>
 						{ __(
@@ -278,10 +254,7 @@ const ProductsByTagBlock = ( {
 					controls={ [
 						{
 							icon: 'edit',
-							title: __(
-								'Edit selected tags',
-								'woocommerce'
-							),
+							title: __( 'Edit selected tags', 'woocommerce' ),
 							onClick: () =>
 								isEditing ? stopEditing() : startEditing(),
 							isActive: isEditing,

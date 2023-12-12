@@ -51,10 +51,7 @@ const ErrorPlaceholder = ( {
 }: ErrorPlaceholderProps ): JSX.Element => (
 	<Placeholder
 		icon={ <Icon icon={ warning } /> }
-		label={ __(
-			'Sorry, an error occurred',
-			'woocommerce'
-		) }
+		label={ __( 'Sorry, an error occurred', 'woocommerce' ) }
 		className={ classNames( 'wc-block-api-error', className ) }
 	>
 		<ErrorMessage error={ error } />

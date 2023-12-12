@@ -73,14 +73,9 @@ const Edit = ( {
 					height={ height }
 					setAttributes={ setAttributes }
 				/>
-				<PanelBody
-					title={ __( 'Content', 'woocommerce' ) }
-				>
+				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
 					<ToggleControl
-						label={ __(
-							'Link to Product Page',
-							'woocommerce'
-						) }
+						label={ __( 'Link to Product Page', 'woocommerce' ) }
 						help={ __(
 							'Links the image to the single product listing.',
 							'woocommerce'
@@ -93,10 +88,7 @@ const Edit = ( {
 						}
 					/>
 					<ToggleControl
-						label={ __(
-							'Show On-Sale Badge',
-							'woocommerce'
-						) }
+						label={ __( 'Show On-Sale Badge', 'woocommerce' ) }
 						help={ __(
 							'Display a “sale” badge if the product is on-sale.',
 							'woocommerce'
@@ -121,33 +113,21 @@ const Edit = ( {
 						>
 							<ToggleGroupControlOption
 								value="left"
-								label={ __(
-									'Left',
-									'woocommerce'
-								) }
+								label={ __( 'Left', 'woocommerce' ) }
 							/>
 							<ToggleGroupControlOption
 								value="center"
-								label={ __(
-									'Center',
-									'woocommerce'
-								) }
+								label={ __( 'Center', 'woocommerce' ) }
 							/>
 							<ToggleGroupControlOption
 								value="right"
-								label={ __(
-									'Right',
-									'woocommerce'
-								) }
+								label={ __( 'Right', 'woocommerce' ) }
 							/>
 						</ToggleGroupControl>
 					) }
 					{ ! isBlockThemeEnabled && (
 						<ToggleGroupControl
-							label={ __(
-								'Image Sizing',
-								'woocommerce'
-							) }
+							label={ __( 'Image Sizing', 'woocommerce' ) }
 							help={ createInterpolateElement(
 								__(
 									'Product image cropping can be modified in the <a>Customizer</a>.',
@@ -173,17 +153,11 @@ const Edit = ( {
 						>
 							<ToggleGroupControlOption
 								value={ ImageSizing.SINGLE }
-								label={ __(
-									'Full Size',
-									'woocommerce'
-								) }
+								label={ __( 'Full Size', 'woocommerce' ) }
 							/>
 							<ToggleGroupControlOption
 								value={ ImageSizing.THUMBNAIL }
-								label={ __(
-									'Cropped',
-									'woocommerce'
-								) }
+								label={ __( 'Cropped', 'woocommerce' ) }
 							/>
 						</ToggleGroupControl>
 					) }

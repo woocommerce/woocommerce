@@ -21,10 +21,7 @@ const ProductSortSelect = ( {
 			options={ [
 				{
 					key: 'menu_order',
-					label: __(
-						'Default sorting',
-						'woocommerce'
-					),
+					label: __( 'Default sorting', 'woocommerce' ),
 				},
 				{
 					key: 'popularity',
@@ -32,10 +29,7 @@ const ProductSortSelect = ( {
 				},
 				{
 					key: 'rating',
-					label: __(
-						'Average rating',
-						'woocommerce'
-					),
+					label: __( 'Average rating', 'woocommerce' ),
 				},
 				{
 					key: 'date',
@@ -43,23 +37,14 @@ const ProductSortSelect = ( {
 				},
 				{
 					key: 'price',
-					label: __(
-						'Price: low to high',
-						'woocommerce'
-					),
+					label: __( 'Price: low to high', 'woocommerce' ),
 				},
 				{
 					key: 'price-desc',
-					label: __(
-						'Price: high to low',
-						'woocommerce'
-					),
+					label: __( 'Price: high to low', 'woocommerce' ),
 				},
 			] }
-			screenReaderLabel={ __(
-				'Order products by',
-				'woocommerce'
-			) }
+			screenReaderLabel={ __( 'Order products by', 'woocommerce' ) }
 			value={ value }
 		/>
 	);

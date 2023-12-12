@@ -96,10 +96,7 @@ const ActiveFiltersBlock = ( {
 			return null;
 		}
 
-		const stockStatusLabel = __(
-			'Stock Status',
-			'woocommerce'
-		);
+		const stockStatusLabel = __( 'Stock Status', 'woocommerce' );
 
 		return (
 			<li>
@@ -258,10 +255,7 @@ const ActiveFiltersBlock = ( {
 							type: ratingLabel,
 							name: sprintf(
 								/* translators: %s is referring to the average rating value */
-								__(
-									'Rated %s out of 5',
-									'woocommerce'
-								),
+								__( 'Rated %s out of 5', 'woocommerce' ),
 								slug
 							),
 							removeCallback: () => {
@@ -349,25 +343,13 @@ const ActiveFiltersBlock = ( {
 					{ isEditor ? (
 						<>
 							{ renderRemovableListItem( {
-								type: __(
-									'Size',
-									'woocommerce'
-								),
-								name: __(
-									'Small',
-									'woocommerce'
-								),
+								type: __( 'Size', 'woocommerce' ),
+								name: __( 'Small', 'woocommerce' ),
 								displayStyle: blockAttributes.displayStyle,
 							} ) }
 							{ renderRemovableListItem( {
-								type: __(
-									'Color',
-									'woocommerce'
-								),
-								name: __(
-									'Blue',
-									'woocommerce'
-								),
+								type: __( 'Color', 'woocommerce' ),
+								name: __( 'Blue', 'woocommerce' ),
 								displayStyle: blockAttributes.displayStyle,
 							} ) }
 						</>
@@ -401,10 +383,7 @@ const ActiveFiltersBlock = ( {
 						} }
 					>
 						<Label
-							label={ __(
-								'Clear All',
-								'woocommerce'
-							) }
+							label={ __( 'Clear All', 'woocommerce' ) }
 							screenReaderLabel={ __(
 								'Clear All Filters',
 								'woocommerce'

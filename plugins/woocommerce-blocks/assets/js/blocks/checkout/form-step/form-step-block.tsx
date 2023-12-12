@@ -41,17 +41,9 @@ export const FormStepBlock = ( {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<PanelBody
-					title={ __(
-						'Form Step Options',
-						'woocommerce'
-					) }
-				>
+				<PanelBody title={ __( 'Form Step Options', 'woocommerce' ) }>
 					<ToggleControl
-						label={ __(
-							'Show step number',
-							'woocommerce'
-						) }
+						label={ __( 'Show step number', 'woocommerce' ) }
 						checked={ showStepNumber }
 						onChange={ () =>
 							setAttributes( {

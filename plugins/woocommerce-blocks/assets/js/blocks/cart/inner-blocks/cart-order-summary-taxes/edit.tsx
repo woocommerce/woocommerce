@@ -38,12 +38,7 @@ export const Edit = ( {
 				{ taxesEnabled &&
 					displayItemizedTaxes &&
 					! displayCartPricesIncludingTax && (
-						<PanelBody
-							title={ __(
-								'Taxes',
-								'woocommerce'
-							) }
-						>
+						<PanelBody title={ __( 'Taxes', 'woocommerce' ) }>
 							<ToggleControl
 								label={ __(
 									'Show rate after tax name',

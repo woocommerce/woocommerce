@@ -113,10 +113,7 @@ export const WooInheritToggleControl = (
 	return (
 		<ToggleControl
 			className="woo-inherit-query-toggle"
-			label={ __(
-				'Inherit query from template',
-				'woocommerce'
-			) }
+			label={ __( 'Inherit query from template', 'woocommerce' ) }
 			help={ __(
 				'Toggle to use the global query context that is set with the current template, such as variations of the product catalog or search. Disable to customize the filtering independently.',
 				'woocommerce'
@@ -174,10 +171,7 @@ export const TOOLS_PANEL_CONTROLS = {
 				hasValue={ () => query.__woocommerceOnSale }
 			>
 				<ToggleControl
-					label={ __(
-						'Show only products on sale',
-						'woocommerce'
-					) }
+					label={ __( 'Show only products on sale', 'woocommerce' ) }
 					checked={ query.__woocommerceOnSale || false }
 					onChange={ ( __woocommerceOnSale ) => {
 						setQueryAttribute( props, {
@@ -198,10 +192,7 @@ export const TOOLS_PANEL_CONTROLS = {
 				hasValue={ () => query.__woocommerceStockStatus }
 			>
 				<FormTokenField
-					label={ __(
-						'Stock status',
-						'woocommerce'
-					) }
+					label={ __( 'Stock status', 'woocommerce' ) }
 					onChange={ ( statusLabels ) => {
 						const __woocommerceStockStatus = statusLabels
 							.map( getStockStatusIdByLabel )
@@ -245,10 +236,7 @@ const ProductQueryControls = ( props: ProductQueryBlock ) => {
 				) }
 				<ToolsPanel
 					className="woocommerce-product-query-toolspanel"
-					label={ __(
-						'Advanced Filters',
-						'woocommerce'
-					) }
+					label={ __( 'Advanced Filters', 'woocommerce' ) }
 					resetAll={ () => {
 						setQueryAttribute( props, defaultWooQueryParams );
 					} }

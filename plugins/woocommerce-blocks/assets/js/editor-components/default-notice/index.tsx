@@ -110,10 +110,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 				a: (
 					// eslint-disable-next-line jsx-a11y/anchor-is-valid
 					<a href="#" onClick={ updatePage }>
-						{ __(
-							'update your page settings',
-							'woocommerce'
-						) }
+						{ __( 'update your page settings', 'woocommerce' ) }
 					</a>
 				),
 			}
@@ -128,10 +125,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 				a: (
 					// eslint-disable-next-line jsx-a11y/anchor-is-valid
 					<a href="#" onClick={ updatePage }>
-						{ __(
-							'update your page settings',
-							'woocommerce'
-						) }
+						{ __( 'update your page settings', 'woocommerce' ) }
 					</a>
 				),
 			}
@@ -153,10 +147,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 			onRemove={ () => setStatus( 'dismissed' ) }
 			spokenMessage={
 				settingStatus === 'updated'
-					? __(
-							'Page settings updated',
-							'woocommerce'
-					  )
+					? __( 'Page settings updated', 'woocommerce' )
 					: noticeContent
 			}
 		>

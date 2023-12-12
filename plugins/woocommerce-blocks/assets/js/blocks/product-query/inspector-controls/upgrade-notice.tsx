@@ -13,20 +13,12 @@ export const UpgradeNotice = ( props: { upgradeBlock: () => void } ) => {
 		),
 		{
 			strongText: (
-				<strong>
-					{ __(
-						`Product Collection`,
-						'woocommerce'
-					) }
-				</strong>
+				<strong>{ __( `Product Collection`, 'woocommerce' ) }</strong>
 			),
 		}
 	);
 
-	const buttonLabel = __(
-		'Upgrade to Product Collection',
-		'woocommerce'
-	);
+	const buttonLabel = __( 'Upgrade to Product Collection', 'woocommerce' );
 
 	const handleClick = () => {
 		props.upgradeBlock();

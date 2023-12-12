@@ -10,6 +10,52 @@ import { createRegistrySelector } from '@wordpress/data';
 import { STORE_KEY } from './constants';
 
 /**
+ * For a given route, route parts and ids,
+ *
+ * @param {string} route
+ * @param {Array}  routePlaceholders
+ * @param {Array}  ids
+ *
+ * @return {string} Assembled route.
+ */
+const assembleRouteWithPlaceholders = ( route, routePlaceholders, ids ) => {
+	routePlaceholders.forEach( ( part, index ) => {
+		route = route.replace( `{${ part }}`, ids[ index ] );
+	} );
+	return route;
+};
+
+/**
+ * Returns the route from the given slice of the route state.
+ *
+ * @param {Object} stateSlice This will be a slice of the route state from a
+ *                            given namespace and resource name.
+ * @param {Array}  [ids=[]]   Any id references that are to be replaced in
+ *                            route placeholders.
+ *
+ * @return {string}  The route or an empty string if nothing found.
+ */
+const getRouteFromResourceEntries = ( stateSlice, ids = [] ) => {
+	// convert to array for easier discovery
+	stateSlice = Object.entries( stateSlice );
+	const match = stateSlice.find( ( [ , idNames ] ) => {
+		return ids.length === idNames.length;
+	} );
+	const [ matchingRoute, routePlaceholders ] = match || [];
+	// if we have a matching route, let's return it.
+	if ( matchingRoute ) {
+		return ids.length === 0
+			? matchingRoute
+			: assembleRouteWithPlaceholders(
+					matchingRoute,
+					routePlaceholders,
+					ids
+			  );
+	}
+	return '';
+};
+
+/**
  * Returns the requested route for the given arguments.
  *
  * @param {Object} state        The original state.
@@ -113,49 +159,3 @@ export const getRoutes = createRegistrySelector(
 		return namespaceRoutes;
 	}
 );
-
-/**
- * Returns the route from the given slice of the route state.
- *
- * @param {Object} stateSlice This will be a slice of the route state from a
- *                            given namespace and resource name.
- * @param {Array}  [ids=[]]   Any id references that are to be replaced in
- *                            route placeholders.
- *
- * @return {string}  The route or an empty string if nothing found.
- */
-const getRouteFromResourceEntries = ( stateSlice, ids = [] ) => {
-	// convert to array for easier discovery
-	stateSlice = Object.entries( stateSlice );
-	const match = stateSlice.find( ( [ , idNames ] ) => {
-		return ids.length === idNames.length;
-	} );
-	const [ matchingRoute, routePlaceholders ] = match || [];
-	// if we have a matching route, let's return it.
-	if ( matchingRoute ) {
-		return ids.length === 0
-			? matchingRoute
-			: assembleRouteWithPlaceholders(
-					matchingRoute,
-					routePlaceholders,
-					ids
-			  );
-	}
-	return '';
-};
-
-/**
- * For a given route, route parts and ids,
- *
- * @param {string} route
- * @param {Array}  routePlaceholders
- * @param {Array}  ids
- *
- * @return {string} Assembled route.
- */
-const assembleRouteWithPlaceholders = ( route, routePlaceholders, ids ) => {
-	routePlaceholders.forEach( ( part, index ) => {
-		route = route.replace( `{${ part }}`, ids[ index ] );
-	} );
-	return route;
-};

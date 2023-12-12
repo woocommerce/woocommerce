@@ -83,7 +83,7 @@ export function getClassPrefixFromName( blockName: string ) {
 /**
  * Convert the selected ratio to the correct background class.
  *
- * @param  ratio Selected opacity from 0 to 100.
+ * @param ratio Selected opacity from 0 to 100.
  * @return The class name, if applicable (not used for ratio 0 or 50).
  */
 export function dimRatioToClass( ratio: number ) {

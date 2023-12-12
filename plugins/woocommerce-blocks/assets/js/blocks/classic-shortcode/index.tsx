@@ -93,10 +93,7 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 						{
 							actions: [
 								{
-									label: __(
-										'Undo',
-										'woocommerce'
-									),
+									label: __( 'Undo', 'woocommerce' ),
 									onClick: () => {
 										const targetBlocks = [
 											'woocommerce/cart',
@@ -224,10 +221,7 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 					<div className="wp-block-woocommerce-classic-shortcode__placeholder-copy__icon-container">
 						<span className="woo-icon">
 							<Icon icon={ woo } />{ ' ' }
-							{ __(
-								'WooCommerce',
-								'woocommerce'
-							) }
+							{ __( 'WooCommerce', 'woocommerce' ) }
 						</span>
 						<span>{ placeholderTitle }</span>
 					</div>

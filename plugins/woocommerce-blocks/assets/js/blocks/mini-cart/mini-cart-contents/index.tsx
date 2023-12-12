@@ -28,10 +28,7 @@ const settings: BlockConfiguration = {
 	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-	description: __(
-		'Display a Mini-Cart widget.',
-		'woocommerce'
-	),
+	description: __( 'Display a Mini-Cart widget.', 'woocommerce' ),
 	supports: {
 		align: false,
 		html: false,

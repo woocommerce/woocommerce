@@ -41,10 +41,7 @@ const EditLocation = ( {
 			title={
 				editingLocation === 'new'
 					? __( 'Pickup location', 'woocommerce' )
-					: __(
-							'Edit pickup location',
-							'woocommerce'
-					  )
+					: __( 'Edit pickup location', 'woocommerce' )
 			}
 			actions={
 				<>
@@ -57,10 +54,7 @@ const EditLocation = ( {
 								onClose();
 							} }
 						>
-							{ __(
-								'Delete location',
-								'woocommerce'
-							) }
+							{ __( 'Delete location', 'woocommerce' ) }
 						</Button>
 					) }
 					<Button variant="secondary" onClick={ onClose }>

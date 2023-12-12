@@ -28,12 +28,7 @@ export const ProductGalleryBlockSettings = ( {
 	} = context;
 	return (
 		<InspectorControls>
-			<PanelBody
-				title={ __(
-					'Gallery Navigation',
-					'woocommerce'
-				) }
-			>
+			<PanelBody title={ __( 'Gallery Navigation', 'woocommerce' ) }>
 				<ProductGalleryPagerBlockSettings
 					context={ { productGalleryClientId, pagerDisplayMode } }
 				/>
@@ -51,14 +46,9 @@ export const ProductGalleryBlockSettings = ( {
 					} }
 				/>
 			</PanelBody>
-			<PanelBody
-				title={ __( 'Media Settings', 'woocommerce' ) }
-			>
+			<PanelBody title={ __( 'Media Settings', 'woocommerce' ) }>
 				<ToggleControl
-					label={ __(
-						'Crop images to fit',
-						'woocommerce'
-					) }
+					label={ __( 'Crop images to fit', 'woocommerce' ) }
 					help={ __(
 						'Images will be cropped to fit within a square space.',
 						'woocommerce'
@@ -72,10 +62,7 @@ export const ProductGalleryBlockSettings = ( {
 					className="wc-block-product-gallery__crop-images"
 				/>
 				<ToggleControl
-					label={ __(
-						'Zoom while hovering',
-						'woocommerce'
-					) }
+					label={ __( 'Zoom while hovering', 'woocommerce' ) }
 					help={ __(
 						'While hovering the large image will zoom in by 30%.',
 						'woocommerce'
@@ -88,10 +75,7 @@ export const ProductGalleryBlockSettings = ( {
 					}
 				/>
 				<ToggleControl
-					label={ __(
-						'Full-screen when clicked',
-						'woocommerce'
-					) }
+					label={ __( 'Full-screen when clicked', 'woocommerce' ) }
 					help={ __(
 						'Clicking on the large image will open a full-screen gallery experience.',
 						'woocommerce'

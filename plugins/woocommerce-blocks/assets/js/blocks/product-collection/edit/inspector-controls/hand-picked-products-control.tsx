@@ -111,10 +111,7 @@ const HandPickedProductsControl = ( {
 
 	return (
 		<ToolsPanelItem
-			label={ __(
-				'Hand-picked Products',
-				'woocommerce'
-			) }
+			label={ __( 'Hand-picked Products', 'woocommerce' ) }
 			hasValue={ () => !! selectedProductIds?.length }
 			onDeselect={ () => {
 				setQueryAttribute( {
@@ -125,10 +122,7 @@ const HandPickedProductsControl = ( {
 			<FormTokenField
 				disabled={ ! productsMap.size }
 				displayTransform={ transformTokenIntoProductName }
-				label={ __(
-					'Hand-picked Products',
-					'woocommerce'
-				) }
+				label={ __( 'Hand-picked Products', 'woocommerce' ) }
 				onChange={ onTokenChange }
 				suggestions={ suggestions }
 				// @ts-expect-error Using experimental features
