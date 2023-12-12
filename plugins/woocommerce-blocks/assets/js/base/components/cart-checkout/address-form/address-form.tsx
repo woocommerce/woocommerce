@@ -35,7 +35,7 @@ const AddressForm = ( {
 	fields,
 	fieldConfig = {} as FieldConfig,
 	onChange,
-	type = 'shipping',
+	addressType = 'shipping',
 	values,
 }: AddressFormProps ): JSX.Element => {
 	const instanceId = useInstanceId( AddressForm );
@@ -54,11 +54,11 @@ const AddressForm = ( {
 		);
 		return {
 			fields: preparedFields,
-			type,
+			addressType,
 			required: preparedFields.filter( ( field ) => field.required ),
 			hidden: preparedFields.filter( ( field ) => field.hidden ),
 		};
-	}, [ currentFields, currentFieldConfig, currentCountry, type ] );
+	}, [ currentFields, currentFieldConfig, currentCountry, addressType ] );
 
 	// Stores refs for rendered fields so we can access them later.
 	const fieldsRef = useRef<
@@ -80,10 +80,10 @@ const AddressForm = ( {
 
 	// Maybe validate country when other fields change so user is notified that it's required.
 	useEffect( () => {
-		if ( type === 'shipping' ) {
+		if ( addressType === 'shipping' ) {
 			validateShippingCountry( values );
 		}
-	}, [ values, type ] );
+	}, [ values, addressType ] );
 
 	// Changing country may change format for postcodes.
 	useEffect( () => {
@@ -101,7 +101,7 @@ const AddressForm = ( {
 
 				const fieldProps = {
 					id: `${ id }-${ field.key }`,
-					errorId: `${ type }_${ field.key }`,
+					errorId: `${ addressType }_${ field.key }`,
 					label: field.required ? field.label : field.optionalLabel,
 					autoCapitalize: field.autocapitalize,
 					autoComplete: field.autocomplete,
@@ -112,7 +112,7 @@ const AddressForm = ( {
 
 				if ( field.key === 'country' ) {
 					const Tag =
-						type === 'shipping'
+						addressType === 'shipping'
 							? ShippingCountryInput
 							: BillingCountryInput;
 					return (
@@ -144,7 +144,7 @@ const AddressForm = ( {
 
 				if ( field.key === 'state' ) {
 					const Tag =
-						type === 'shipping'
+						addressType === 'shipping'
 							? ShippingStateInput
 							: BillingStateInput;
 					return (
