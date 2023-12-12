@@ -21,6 +21,9 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"main": "src/index.js",
+	"files": [
+		"src/"
+	],
 	"dependencies": {
 		"@wordpress/dependency-extraction-webpack-plugin": "^3.7.0"
 	},

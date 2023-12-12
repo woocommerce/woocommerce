@@ -20,13 +20,13 @@
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"files": [
-		"/dist/",
+		"dist/",
 		"!*.ts.map",
 		"!*.tsbuildinfo",
-		"!/dist/**/__tests__/",
-		"!/dist/**/__mocks__/",
-		"!/dist/**/__snapshops__/",
-		"!/dist/**/__test_data__/"
+		"!dist/**/__tests__/",
+		"!dist/**/__mocks__/",
+		"!dist/**/__snapshops__/",
+		"!dist/**/__test_data__/"
 	],
 	"sideEffects": false,
 	"scripts": {

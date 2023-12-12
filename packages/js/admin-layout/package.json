@@ -20,6 +20,12 @@
 	"module": "build-module/index.js",
 	"types": "build-types",
 	"react-native": "src/index",
+	"files": [
+		"build",
+		"build-module",
+		"build-style",
+		"build-types"
+	],
 	"sideEffects": [
 		"build-style/**",
 		"src/**/*.scss"
@@ -119,20 +125,16 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
-				"node_modules/@woocommerce/internal-style-build/",
+				"node_modules/@woocommerce/internal-style-build/index.js",
+				"node_modules/@woocommerce/internal-style-build/abstracts",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
-				"node_modules/@woocommerce/components/",
-				"package.json",
-				"!node_modules/@woocommerce/components/node_modules",
-				"!node_modules/@woocommerce/components/.git",
-				"!node_modules/@woocommerce/components/.svn",
-				"!node_modules/@woocommerce/components/src",
-				"!node_modules/@woocommerce/internal-style-build/node_modules",
-				"!node_modules/@woocommerce/internal-style-build/.git",
-				"!node_modules/@woocommerce/internal-style-build/.svn",
-				"!node_modules/@woocommerce/internal-style-build/src"
+				"node_modules/@woocommerce/components/build",
+				"node_modules/@woocommerce/components/build-module",
+				"node_modules/@woocommerce/components/build-style",
+				"node_modules/@woocommerce/components/build-types",
+				"package.json"
 			]
 		}
 	}

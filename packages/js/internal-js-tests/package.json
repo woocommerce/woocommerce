@@ -20,6 +20,11 @@
 	"private": true,
 	"main": "build/util/index.js",
 	"module": "build-module/util/index.js",
+	"files": [
+		"build",
+		"build-module",
+		"jest-preset.js"
+	],
 	"scripts": {
 		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
 		"build:project": "pnpm --if-present /^build:project:.*$/",
