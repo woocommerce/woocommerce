@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress Coding Standards">
+	<file>src/</file>
+
+	<!-- Show progress, show the error codes for each message (source). -->
+	<arg value="ps" />
+
+	<!-- Check up to 8 files simultaneously. -->
+	<arg name="parallel" value="8" />
+
+	<!-- Rules -->
+	<rule ref="WordPress-Core" />
+
+    <!-- Support PSR-4 -->
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>src/</exclude-pattern>
+	</rule>
+    <rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>src/</exclude-pattern>
+	</rule>
+</ruleset>

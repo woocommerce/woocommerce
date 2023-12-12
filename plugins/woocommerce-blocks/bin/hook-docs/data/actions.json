@@ -1,0 +1,1066 @@
+{
+    "$schema": "https://raw.githubusercontent.com/wp-hooks/generator/0.9.0/schema.json",
+    "hooks": [
+        {
+            "name": "deprecated_function_run",
+            "file": "Domain/Bootstrap.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when a deprecated function is called.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.3.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_add_to_cart",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when an item is added to the cart.",
+                "long_description": "This hook fires when an item is added to the cart. This is triggered from the Store API in this context, but WooCommerce core add to cart events trigger the same hook.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.5.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches action name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "ID of the item in the cart.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$cart_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "ID of the product added to the cart.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$product_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Quantity of the item added to the cart.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$request_quantity"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Variation ID of the product added to the cart.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$variation_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Array of variation data.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$variation"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Array of other cart item data.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$cart_item_data"
+                    }
+                ],
+                "long_description_html": "<p>This hook fires when an item is added to the cart. This is triggered from the Store API in this context, but WooCommerce core add to cart events trigger the same hook.</p>"
+            },
+            "args": 6
+        },
+        {
+            "name": "woocommerce_after_main_content",
+            "file": "BlockTypes/ClassicTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_main_content",
+                "long_description": "Called after rendering the main content for a product.",
+                "tags": [
+                    {
+                        "name": "see",
+                        "content": "Outputs closing DIV for the content (priority 10)",
+                        "refers": "woocommerce_output_content_wrapper_end()"
+                    },
+                    {
+                        "name": "since",
+                        "content": "6.3.0"
+                    }
+                ],
+                "long_description_html": "<p>Called after rendering the main content for a product.</p>"
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_after_main_content",
+            "file": "BlockTypes/ClassicTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_main_content",
+                "long_description": "Called after rendering the main content for a product.",
+                "tags": [
+                    {
+                        "name": "see",
+                        "content": "Outputs closing DIV for the content (priority 10)",
+                        "refers": "woocommerce_output_content_wrapper_end()"
+                    },
+                    {
+                        "name": "since",
+                        "content": "6.3.0"
+                    }
+                ],
+                "long_description_html": "<p>Called after rendering the main content for a product.</p>"
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_after_shop_loop",
+            "file": "BlockTypes/ClassicTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_shop_loop.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "see",
+                        "content": "Renders pagination (priority 10)",
+                        "refers": "woocommerce_pagination()"
+                    },
+                    {
+                        "name": "since",
+                        "content": "6.3.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_applied_coupon",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires after a coupon has been applied to the cart.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.6.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches action name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "The coupon code that was applied.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$coupon_code"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_archive_description",
+            "file": "BlockTypes/ClassicTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_archive_description.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "see",
+                        "content": "Renders the taxonomy archive description (priority 10)",
+                        "refers": "woocommerce_taxonomy_archive_description()"
+                    },
+                    {
+                        "name": "see",
+                        "content": "Renders the product archive description (priority 10)",
+                        "refers": "woocommerce_product_archive_description()"
+                    },
+                    {
+                        "name": "since",
+                        "content": "6.3.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_before_main_content",
+            "file": "BlockTypes/ClassicTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_main_content",
+                "long_description": "Called before rendering the main content for a product.",
+                "tags": [
+                    {
+                        "name": "see",
+                        "content": "Outputs opening DIV for the content (priority 10)",
+                        "refers": "woocommerce_output_content_wrapper()"
+                    },
+                    {
+                        "name": "see",
+                        "content": "Outputs breadcrumb trail to the current product (priority 20)",
+                        "refers": "woocommerce_breadcrumb()"
+                    },
+                    {
+                        "name": "see",
+                        "content": "Outputs schema markup (priority 30)",
+                        "refers": "WC_Structured_Data::generate_website_data()"
+                    },
+                    {
+                        "name": "since",
+                        "content": "6.3.0"
+                    }
+                ],
+                "long_description_html": "<p>Called before rendering the main content for a product.</p>"
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_before_main_content",
+            "file": "BlockTypes/ClassicTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_main_content",
+                "long_description": "Called before rendering the main content for a product.",
+                "tags": [
+                    {
+                        "name": "see",
+                        "content": "Outputs opening DIV for the content (priority 10)",
+                        "refers": "woocommerce_output_content_wrapper()"
+                    },
+                    {
+                        "name": "see",
+                        "content": "Outputs breadcrumb trail to the current product (priority 20)",
+                        "refers": "woocommerce_breadcrumb()"
+                    },
+                    {
+                        "name": "see",
+                        "content": "Outputs schema markup (priority 30)",
+                        "refers": "WC_Structured_Data::generate_website_data()"
+                    },
+                    {
+                        "name": "since",
+                        "content": "6.3.0"
+                    }
+                ],
+                "long_description_html": "<p>Called before rendering the main content for a product.</p>"
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_before_shop_loop",
+            "file": "BlockTypes/ClassicTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_shop_loop.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "see",
+                        "content": "Render error notices (priority 10)",
+                        "refers": "woocommerce_output_all_notices()"
+                    },
+                    {
+                        "name": "see",
+                        "content": "Show number of results found (priority 20)",
+                        "refers": "woocommerce_result_count()"
+                    },
+                    {
+                        "name": "see",
+                        "content": "Show form to control sort order (priority 30)",
+                        "refers": "woocommerce_catalog_ordering()"
+                    },
+                    {
+                        "name": "since",
+                        "content": "6.3.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_blocks_cart_enqueue_data",
+            "file": "BlockTypes/MiniCart.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires after cart block data is registered.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "5.8.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_blocks_cart_enqueue_data",
+            "file": "BlockTypes/Cart.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires after cart block data is registered.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.6.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_blocks_checkout_enqueue_data",
+            "file": "BlockTypes/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires after checkout block data is registered.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.6.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_blocks_enqueue_cart_block_scripts_after",
+            "file": "BlockTypes/Cart.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires after cart block scripts are enqueued.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.6.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_blocks_enqueue_cart_block_scripts_before",
+            "file": "BlockTypes/Cart.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires before cart block scripts are enqueued.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.6.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_blocks_enqueue_checkout_block_scripts_after",
+            "file": "BlockTypes/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires after checkout block scripts are enqueued.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "4.6.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_blocks_enqueue_checkout_block_scripts_before",
+            "file": "BlockTypes/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires before checkout block scripts are enqueued.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "4.6.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_blocks_loaded",
+            "file": "Domain/Bootstrap.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the woocommerce blocks are loaded and ready to use.",
+                "long_description": "This hook is intended to be used as a safe event hook for when the plugin has been loaded, and all dependency requirements have been met.\n To ensure blocks are initialized, you must use the `woocommerce_blocks_loaded` hook instead of the `plugins_loaded` hook. This is because the functions hooked into plugins_loaded on the same priority load in an inconsistent and unpredictable manner.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "2.5.0"
+                    }
+                ],
+                "long_description_html": "<p>This hook is intended to be used as a safe event hook for when the plugin has been loaded, and all dependency requirements have been met.</p> <p>To ensure blocks are initialized, you must use the <code>woocommerce_blocks_loaded</code> hook instead of the <code>plugins_loaded</code> hook. This is because the functions hooked into plugins_loaded on the same priority load in an inconsistent and unpredictable manner.</p>"
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_blocks_{$this->registry_identifier}_registration",
+            "file": "Integrations/IntegrationRegistry.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the IntegrationRegistry is initialized.",
+                "long_description": "Runs before integrations are initialized allowing new integration to be registered for use. This should be used as the primary hook for integrations to include their scripts, styles, and other code extending the blocks.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "4.6.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Instance of the IntegrationRegistry class which exposes the IntegrationRegistry::register() method.",
+                        "types": [
+                            "\\Automattic\\WooCommerce\\Blocks\\Integrations\\IntegrationRegistry"
+                        ],
+                        "variable": "$this"
+                    }
+                ],
+                "long_description_html": "<p>Runs before integrations are initialized allowing new integration to be registered for use. This should be used as the primary hook for integrations to include their scripts, styles, and other code extending the blocks.</p>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_check_cart_items",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when cart items are being validated.",
+                "long_description": "Allow 3rd parties to validate cart items. This is a legacy hook from Woo core. This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture notices and convert to wp errors instead.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "deprecated",
+                        "content": ""
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches action name in WooCommerce core."
+                    }
+                ],
+                "long_description_html": "<p>Allow 3rd parties to validate cart items. This is a legacy hook from Woo core. This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture notices and convert to wp errors instead.</p>"
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_created_customer",
+            "file": "StoreApi/Routes/V1/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires after a customer account has been registered.",
+                "long_description": "This hook fires after customer accounts are created and passes the customer data.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "New customer (user) ID.",
+                        "types": [
+                            "integer"
+                        ],
+                        "variable": "$customer_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Array of customer (user) data.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$new_customer_data"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The generated password for the account.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$password_generated"
+                    }
+                ],
+                "long_description_html": "<p>This hook fires after customer accounts are created and passes the customer data.</p>"
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_no_products_found",
+            "file": "BlockTypes/ClassicTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_no_products_found.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "see",
+                        "content": "Default no products found content (priority 10)",
+                        "refers": "wc_no_products_found()"
+                    },
+                    {
+                        "name": "since",
+                        "content": "6.3.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_register_post",
+            "file": "StoreApi/Routes/V1/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires before a customer account is registered.",
+                "long_description": "This hook fires before customer accounts are created and passes the form data (username, email) and an array of errors.\n This could be used to add extra validation logic and append errors to the array.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
+                        "name": "param",
+                        "content": "Customer username.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$username"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Customer email address.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$user_email"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Error object.",
+                        "types": [
+                            "\\WP_Error"
+                        ],
+                        "variable": "$errors"
+                    }
+                ],
+                "long_description_html": "<p>This hook fires before customer accounts are created and passes the form data (username, email) and an array of errors.</p> <p>This could be used to add extra validation logic and append errors to the array.</p>"
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_shop_loop",
+            "file": "BlockTypes/ClassicTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_shop_loop.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "6.3.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "woocommerce_store_api_cart_errors",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires an action to validate the cart.",
+                "long_description": "Functions hooking into this should add custom errors using the provided WP_Error instance.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "example",
+                        "content": "docs/examples/validate-cart.md"
+                    },
+                    {
+                        "name": "param",
+                        "content": "WP_Error object.",
+                        "types": [
+                            "\\WP_Error"
+                        ],
+                        "variable": "$errors"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Cart object.",
+                        "types": [
+                            "\\WC_Cart"
+                        ],
+                        "variable": "$cart"
+                    }
+                ],
+                "long_description_html": "<p>Functions hooking into this should add custom errors using the provided WP_Error instance.</p>"
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_cart_select_shipping_rate",
+            "file": "StoreApi/Routes/V1/CartSelectShippingRate.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires an action after a shipping method has been chosen for package(s) via the Store API.",
+                "long_description": "This allows extensions to perform addition actions after a shipping method has been chosen, but before the cart totals are recalculated.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "9.0.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The sanitized ID of the package being updated. Null if all packages are being updated.",
+                        "types": [
+                            "string",
+                            "null"
+                        ],
+                        "variable": "$package_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The sanitized chosen rate ID for the package.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$rate_id"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Full details about the request.",
+                        "types": [
+                            "\\WP_REST_Request"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
+                "long_description_html": "<p>This allows extensions to perform addition actions after a shipping method has been chosen, but before the cart totals are recalculated.</p>"
+            },
+            "args": 3
+        },
+        {
+            "name": "woocommerce_store_api_cart_update_customer_from_request",
+            "file": "StoreApi/Routes/V1/CartUpdateCustomer.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the Checkout Block/Store API updates a customer from the API request data.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Customer object.",
+                        "types": [
+                            "\\WC_Customer"
+                        ],
+                        "variable": "$customer"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Full details about the request.",
+                        "types": [
+                            "\\WP_REST_Request"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_cart_update_order_from_request",
+            "file": "StoreApi/Routes/V1/AbstractCartRoute.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the order is synced with cart data from a cart route.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$draft_order"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Customer object.",
+                        "types": [
+                            "\\WC_Customer"
+                        ],
+                        "variable": "$customer"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Full details about the request.",
+                        "types": [
+                            "\\WP_REST_Request"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_checkout_order_processed",
+            "file": "StoreApi/Routes/V1/CheckoutOrder.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires before an order is processed by the Checkout Block/Store API.",
+                "long_description": "This hook informs extensions that $order has completed processing and is ready for payment.\n This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action: - To keep the interface focused (only pass $order, not passing request data). - This also explicitly indicates these orders are from checkout block/StoreAPI.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "see",
+                        "content": "",
+                        "refers": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238"
+                    },
+                    {
+                        "name": "example",
+                        "content": "docs/examples/checkout-order-processed.md"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    }
+                ],
+                "long_description_html": "<p>This hook informs extensions that $order has completed processing and is ready for payment.</p> <p>This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_store_api_checkout_order_processed",
+            "file": "StoreApi/Routes/V1/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires before an order is processed by the Checkout Block/Store API.",
+                "long_description": "This hook informs extensions that $order has completed processing and is ready for payment.\n This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action: - To keep the interface focused (only pass $order, not passing request data). - This also explicitly indicates these orders are from checkout block/StoreAPI.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "see",
+                        "content": "",
+                        "refers": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238"
+                    },
+                    {
+                        "name": "example",
+                        "content": "docs/examples/checkout-order-processed.md"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    }
+                ],
+                "long_description_html": "<p>This hook informs extensions that $order has completed processing and is ready for payment.</p> <p>This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_store_api_checkout_update_customer_from_request",
+            "file": "StoreApi/Routes/V1/CheckoutOrder.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the Checkout Block/Store API updates a customer from the API request data.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "8.2.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Customer object.",
+                        "types": [
+                            "\\WC_Customer"
+                        ],
+                        "variable": "$customer"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Full details about the request.",
+                        "types": [
+                            "\\WP_REST_Request"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_checkout_update_customer_from_request",
+            "file": "StoreApi/Routes/V1/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the Checkout Block/Store API updates a customer from the API request data.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "8.2.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Customer object.",
+                        "types": [
+                            "\\WC_Customer"
+                        ],
+                        "variable": "$customer"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Full details about the request.",
+                        "types": [
+                            "\\WP_REST_Request"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_checkout_update_order_meta",
+            "file": "StoreApi/Routes/V1/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the Checkout Block/Store API updates an order's meta data.",
+                "long_description": "This hook gives extensions the chance to add or update meta data on the $order. Throwing an exception from a callback attached to this action will make the Checkout Block render in a warning state, effectively preventing checkout.\n This is similar to existing core hook woocommerce_checkout_update_order_meta. We're using a new action: - To keep the interface focused (only pass $order, not passing request data). - This also explicitly indicates these orders are from checkout block/StoreAPI.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.2.0"
+                    },
+                    {
+                        "name": "see",
+                        "content": "",
+                        "refers": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    }
+                ],
+                "long_description_html": "<p>This hook gives extensions the chance to add or update meta data on the $order. Throwing an exception from a callback attached to this action will make the Checkout Block render in a warning state, effectively preventing checkout.</p> <p>This is similar to existing core hook woocommerce_checkout_update_order_meta. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_store_api_rate_limit_exceeded",
+            "file": "StoreApi/Authentication.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the rate limit is exceeded.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "8.9.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The IP address of the request.",
+                        "types": [
+                            "string"
+                        ],
+                        "variable": "$ip_address"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_store_api_validate_add_to_cart",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires during validation when adding an item to the cart via the Store API.",
+                "long_description": "Fire action to validate add to cart. Functions hooking into this should throw an \\Exception to prevent add to cart from happening.",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.1.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Product object being added to the cart.",
+                        "types": [
+                            "\\WC_Product"
+                        ],
+                        "variable": "$product"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Add to cart request params including id, quantity, and variation attributes.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
+                "long_description_html": "<p>Fire action to validate add to cart. Functions hooking into this should throw an \\Exception to prevent add to cart from happening.</p>"
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_validate_cart_item",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "action",
+            "doc": {
+                "description": "Fire action to validate add to cart. Functions hooking into this should throw an \\Exception to prevent add to cart from occurring.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "7.1.0"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Product object being added to the cart.",
+                        "types": [
+                            "\\WC_Product"
+                        ],
+                        "variable": "$product"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Cart item array.",
+                        "types": [
+                            "array"
+                        ],
+                        "variable": "$cart_item"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_{$product->get_type()}_add_to_cart",
+            "file": "BlockTypes/AddToCartForm.php",
+            "type": "action",
+            "doc": {
+                "description": "Trigger the single product add to cart action for each product type.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "9.7.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        },
+        {
+            "name": "{$hook}",
+            "file": "Templates/AbstractTemplateCompatibility.php",
+            "type": "action",
+            "doc": {
+                "description": "Action to render the content of a hook.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "since",
+                        "content": "9.5.0"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 0
+        }
+    ]
+}

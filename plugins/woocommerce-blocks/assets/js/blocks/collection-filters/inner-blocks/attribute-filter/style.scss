@@ -1,0 +1,17 @@
+//  Import styles we need to render the checkbox list and checkbox control.
+@import "../../../../../../packages/components/checkbox-list/style";
+@import "../../../../../../packages/components/checkbox-control/style";
+
+.wp-block-woocommerce-collection-attribute-filter {
+	.attribute-dropdown {
+		position: relative;
+
+		> svg {
+			position: absolute;
+			right: 8px;
+			top: 50%;
+			transform: translateY(-50%);
+			pointer-events: none;
+		}
+	}
+}

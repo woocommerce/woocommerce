@@ -32,6 +32,8 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                install: '@woocommerce/plugin-woocommerce...'
 
             - name: Setup local test environment
               uses: ./.github/actions/tests/setup-local-test-environment
@@ -89,6 +91,8 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                install: '@woocommerce/plugin-woocommerce...'
 
             - name: Setup local test environment
               uses: ./.github/actions/tests/setup-local-test-environment
@@ -141,8 +145,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install-filters: woocommerce
-                  build: false
+                install: '@woocommerce/plugin-woocommerce...'
 
             - name: Update performance test site with E2E test
               id: update-perf-site
@@ -218,7 +221,8 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  build-filters: woocommerce
+                install: '@woocommerce/plugin-woocommerce...'
+                build: '@woocommerce/plugin-woocommerce'
 
             - name: Setup local test environment
               uses: ./.github/actions/tests/setup-local-test-environment

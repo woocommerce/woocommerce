@@ -1,0 +1,14 @@
+!.eslintrc.js
+build
+build-module
+coverage
+languages
+node_modules
+vendor
+legacy
+reports
+tests/e2e-jest/specs/backend/__fixtures__
+tests/e2e-jest/specs/backend/__snapshots__
+
+storybook/dist
+assets/js/interactivity
