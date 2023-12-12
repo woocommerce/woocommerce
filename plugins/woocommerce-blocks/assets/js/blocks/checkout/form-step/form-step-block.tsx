@@ -44,13 +44,13 @@ export const FormStepBlock = ( {
 				<PanelBody
 					title={ __(
 						'Form Step Options',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				>
 					<ToggleControl
 						label={ __(
 							'Show step number',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showStepNumber }
 						onChange={ () =>
@@ -80,7 +80,7 @@ export const FormStepBlock = ( {
 						value={ description }
 						placeholder={ __(
 							'Optional text for this form step.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						onChange={ ( value ) =>
 							setAttributes( {

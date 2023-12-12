@@ -62,7 +62,7 @@ const notifyIfQuantityLimitsChanged = ( oldCart: Cart, newCart: Cart ) => {
 					/* translators: %1$s is the name of the item, %2$d is the quantity of the item. %3$d is a number that the quantity must be a multiple of. */
 					__(
 						'The quantity of "%1$s" was changed to %2$d. You must purchase this product in groups of %3$d.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					cartItem.name,
 					// We round down to the nearest step value here. We need to do it this way because at this point we
@@ -89,7 +89,7 @@ const notifyIfQuantityLimitsChanged = ( oldCart: Cart, newCart: Cart ) => {
 					/* translators: %1$s is the name of the item, %2$d is the quantity of the item. */
 					__(
 						'The quantity of "%1$s" was increased to %2$d. This is the minimum required quantity.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					cartItem.name,
 					cartItem.quantity_limits.minimum
@@ -110,7 +110,7 @@ const notifyIfQuantityLimitsChanged = ( oldCart: Cart, newCart: Cart ) => {
 				/* translators: %1$s is the name of the item, %2$d is the quantity of the item. */
 				__(
 					'The quantity of "%1$s" was decreased to %2$d. This is the maximum allowed quantity.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				cartItem.name,
 				cartItem.quantity_limits.maximum
@@ -151,7 +151,7 @@ const notifyIfQuantityChanged = (
 						/* translators: %1$s is the name of the item, %2$d is the quantity of the item. */
 						__(
 							'The quantity of "%1$s" was changed to %2$d.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						cartItem.name,
 						cartItem.quantity
@@ -196,7 +196,7 @@ const notifyIfRemoved = (
 					/* translators: %s is the name of the item. */
 					__(
 						'"%s" was removed from your cart.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					oldCartItem.name
 				),

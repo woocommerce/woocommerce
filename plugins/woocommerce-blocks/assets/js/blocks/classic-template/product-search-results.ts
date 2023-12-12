@@ -25,17 +25,17 @@ const createNoResultsParagraph = () =>
 	createBlock( 'core/paragraph', {
 		content: __(
 			'No products were found matching your selection.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 	} );
 
 const createProductSearch = () =>
 	createBlock( 'core/search', {
 		buttonPosition: 'button-outside',
-		buttonText: __( 'Search', 'woo-gutenberg-products-block' ),
+		buttonText: __( 'Search', 'woocommerce' ),
 		buttonUseIcon: false,
 		showLabel: false,
-		placeholder: __( 'Search products…', 'woo-gutenberg-products-block' ),
+		placeholder: __( 'Search products…', 'woocommerce' ),
 		query: { post_type: 'product' },
 	} );
 
@@ -118,7 +118,7 @@ const getDescriptionAllowingConversion = ( templateTitle: string ) =>
 		/* translators: %s is the template title */
 		__(
 			'Transform this template into multiple blocks so you can add, remove, reorder, and customize your %s template.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		templateTitle
 	);
@@ -128,7 +128,7 @@ const getDescriptionDisallowingConversion = ( templateTitle: string ) =>
 		/* translators: %s is the template title */
 		__(
 			'This block serves as a placeholder for your %s. It will display the actual product image, title, price in your store. You can move this placeholder around and add more blocks around to customize the template.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		templateTitle
 	);
@@ -167,7 +167,7 @@ const onClickCallback = ( {
 };
 
 const getButtonLabel = () =>
-	__( 'Transform into blocks', 'woo-gutenberg-products-block' );
+	__( 'Transform into blocks', 'woocommerce' );
 
 const blockifyConfig = {
 	getButtonLabel,

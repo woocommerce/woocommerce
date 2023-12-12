@@ -11,11 +11,11 @@ import { keyBy } from '@woocommerce/base-utils';
 import type { SearchListItem } from './types';
 
 export const defaultMessages = {
-	clear: __( 'Clear all selected items', 'woo-gutenberg-products-block' ),
-	noItems: __( 'No items found.', 'woo-gutenberg-products-block' ),
+	clear: __( 'Clear all selected items', 'woocommerce' ),
+	noItems: __( 'No items found.', 'woocommerce' ),
 	/* Translators: %s search term */
-	noResults: __( 'No results for %s', 'woo-gutenberg-products-block' ),
-	search: __( 'Search for items', 'woo-gutenberg-products-block' ),
+	noResults: __( 'No results for %s', 'woocommerce' ),
+	search: __( 'Search for items', 'woocommerce' ),
 	selected: ( n: number ): string =>
 		sprintf(
 			/* translators: Number of items selected from list. */
@@ -23,11 +23,11 @@ export const defaultMessages = {
 				'%d item selected',
 				'%d items selected',
 				n,
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			n
 		),
-	updated: __( 'Search results updated.', 'woo-gutenberg-products-block' ),
+	updated: __( 'Search results updated.', 'woocommerce' ),
 };
 
 /**

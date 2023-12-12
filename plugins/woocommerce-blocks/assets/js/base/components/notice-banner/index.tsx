@@ -77,7 +77,7 @@ const NoticeBanner = ( {
 					icon={ close }
 					label={ __(
 						'Dismiss this notice',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					onClick={ dismiss }
 					showTooltip={ false }

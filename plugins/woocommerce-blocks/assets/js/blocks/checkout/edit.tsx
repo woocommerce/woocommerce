@@ -101,16 +101,16 @@ export const Edit = ( {
 	const addressFieldControls = (): JSX.Element => (
 		<InspectorControls>
 			<PanelBody
-				title={ __( 'Address Fields', 'woo-gutenberg-products-block' ) }
+				title={ __( 'Address Fields', 'woocommerce' ) }
 			>
 				<p className="wc-block-checkout__controls-text">
 					{ __(
 						'Show or hide fields in the checkout address forms.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				</p>
 				<ToggleControl
-					label={ __( 'Company', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Company', 'woocommerce' ) }
 					checked={ showCompanyField }
 					onChange={ () => toggleAttribute( 'showCompanyField' ) }
 				/>
@@ -118,7 +118,7 @@ export const Edit = ( {
 					<CheckboxControl
 						label={ __(
 							'Require company name?',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ requireCompanyField }
 						onChange={ () =>
@@ -130,13 +130,13 @@ export const Edit = ( {
 				<ToggleControl
 					label={ __(
 						'Apartment, suite, etc.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					checked={ showApartmentField }
 					onChange={ () => toggleAttribute( 'showApartmentField' ) }
 				/>
 				<ToggleControl
-					label={ __( 'Phone', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Phone', 'woocommerce' ) }
 					checked={ showPhoneField }
 					onChange={ () => toggleAttribute( 'showPhoneField' ) }
 				/>
@@ -144,7 +144,7 @@ export const Edit = ( {
 					<CheckboxControl
 						label={ __(
 							'Require phone number?',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ requirePhoneField }
 						onChange={ () =>

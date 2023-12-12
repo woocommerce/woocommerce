@@ -6,7 +6,7 @@ import { starEmpty, Icon } from '@wordpress/icons';
 
 export const BLOCK_TITLE: string = __(
 	'Product Rating',
-	'woo-gutenberg-products-block'
+	'woocommerce'
 );
 export const BLOCK_ICON: JSX.Element = (
 	<Icon
@@ -16,5 +16,5 @@ export const BLOCK_ICON: JSX.Element = (
 );
 export const BLOCK_DESCRIPTION: string = __(
 	'Display the average rating of a product.',
-	'woo-gutenberg-products-block'
+	'woocommerce'
 );

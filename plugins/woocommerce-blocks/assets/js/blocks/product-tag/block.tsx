@@ -81,7 +81,7 @@ const ProductsByTagBlock = ( {
 				<PanelBody
 					title={ __(
 						'Product Tag',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					initialOpen={ ! attributes.tags.length && ! isEditing }
 				>
@@ -99,7 +99,7 @@ const ProductsByTagBlock = ( {
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __( 'Layout', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Layout', 'woocommerce' ) }
 					initialOpen
 				>
 					<GridLayoutControl
@@ -130,7 +130,7 @@ const ProductsByTagBlock = ( {
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Content', 'woocommerce' ) }
 					initialOpen
 				>
 					<GridContentControl
@@ -141,7 +141,7 @@ const ProductsByTagBlock = ( {
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __( 'Order By', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Order By', 'woocommerce' ) }
 					initialOpen={ false }
 				>
 					<ProductOrderbyControl
@@ -152,7 +152,7 @@ const ProductsByTagBlock = ( {
 				<PanelBody
 					title={ __(
 						'Filter by stock status',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					initialOpen={ false }
 				>
@@ -172,7 +172,7 @@ const ProductsByTagBlock = ( {
 			debouncedSpeak(
 				__(
 					'Showing Products by Tag block preview.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				)
 			);
 		};
@@ -181,7 +181,7 @@ const ProductsByTagBlock = ( {
 			debouncedSpeak(
 				__(
 					'Showing Products by Tag block preview.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				)
 			);
 		};
@@ -193,13 +193,13 @@ const ProductsByTagBlock = ( {
 				}
 				label={ __(
 					'Products by Tag',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				className="wc-block-products-grid wc-block-product-tag"
 			>
 				{ __(
 					'Display a grid of products from your selected tags.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				<div className="wc-block-product-tag__selection">
 					<ProductTagControl
@@ -220,14 +220,14 @@ const ProductsByTagBlock = ( {
 						}
 					/>
 					<Button variant="primary" onClick={ onDone }>
-						{ __( 'Done', 'woo-gutenberg-products-block' ) }
+						{ __( 'Done', 'woocommerce' ) }
 					</Button>
 					<Button
 						className="wc-block-product-tag__cancel-button"
 						variant="tertiary"
 						onClick={ onCancel }
 					>
-						{ __( 'Cancel', 'woo-gutenberg-products-block' ) }
+						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 				</div>
 			</Placeholder>
@@ -253,13 +253,13 @@ const ProductsByTagBlock = ( {
 						}
 						label={ __(
 							'Products by Tag',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						className="wc-block-products-grid wc-block-product-tag"
 					>
 						{ __(
 							'This block displays products from selected tags. Select at least one tag to display its products.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</Placeholder>
 				) }
@@ -280,7 +280,7 @@ const ProductsByTagBlock = ( {
 							icon: 'edit',
 							title: __(
 								'Edit selected tags',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							onClick: () =>
 								isEditing ? stopEditing() : startEditing(),
@@ -295,12 +295,12 @@ const ProductsByTagBlock = ( {
 	) : (
 		<Placeholder
 			icon={ <Icon icon={ tag } className="block-editor-block-icon" /> }
-			label={ __( 'Products by Tag', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Products by Tag', 'woocommerce' ) }
 			className="wc-block-products-grid wc-block-product-tag"
 		>
 			{ __(
 				'This block displays products from selected tags. To use it you first need to create products and assign tags to them.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		</Placeholder>
 	);

@@ -49,25 +49,25 @@ export const prepareTotalItems = (
 
 	newTotals.push(
 		factory(
-			__( 'Subtotal:', 'woo-gutenberg-products-block' ),
+			__( 'Subtotal:', 'woocommerce' ),
 			'total_items'
 		)
 	);
 
 	newTotals.push(
-		factory( __( 'Fees:', 'woo-gutenberg-products-block' ), 'total_fees' )
+		factory( __( 'Fees:', 'woocommerce' ), 'total_fees' )
 	);
 
 	newTotals.push(
 		factory(
-			__( 'Discount:', 'woo-gutenberg-products-block' ),
+			__( 'Discount:', 'woocommerce' ),
 			'total_discount'
 		)
 	);
 
 	newTotals.push( {
 		key: 'total_tax',
-		label: __( 'Taxes:', 'woo-gutenberg-products-block' ),
+		label: __( 'Taxes:', 'woocommerce' ),
 		value: parseInt( totals.total_tax, 10 ),
 		valueWithTax: parseInt( totals.total_tax, 10 ),
 	} );
@@ -75,7 +75,7 @@ export const prepareTotalItems = (
 	if ( needsShipping ) {
 		newTotals.push(
 			factory(
-				__( 'Shipping:', 'woo-gutenberg-products-block' ),
+				__( 'Shipping:', 'woocommerce' ),
 				'total_shipping'
 			)
 		);

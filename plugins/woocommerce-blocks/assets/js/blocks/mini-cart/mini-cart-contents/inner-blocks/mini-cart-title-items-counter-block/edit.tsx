@@ -17,7 +17,7 @@ export const Edit = (): JSX.Element => {
 					'(%d item)',
 					'(%d items)',
 					cartItemsCount,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				cartItemsCount
 			) }

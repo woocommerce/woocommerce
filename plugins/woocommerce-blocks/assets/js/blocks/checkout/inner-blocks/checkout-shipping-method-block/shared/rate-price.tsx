@@ -29,7 +29,7 @@ export const RatePrice = ( {
 		: parseInt( maxRate.price, 10 );
 	const priceElement =
 		minRatePrice === 0 ? (
-			<em>{ __( 'free', 'woo-gutenberg-products-block' ) }</em>
+			<em>{ __( 'free', 'woocommerce' ) }</em>
 		) : (
 			<FormattedMonetaryAmount
 				currency={ getCurrencyFromPriceResponse( minRate ) }
@@ -46,7 +46,7 @@ export const RatePrice = ( {
 							? '<price />'
 							: __(
 									'from <price />',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 							  ),
 						{
 							price: priceElement,
