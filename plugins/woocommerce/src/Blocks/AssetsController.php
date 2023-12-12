@@ -46,29 +46,26 @@ final class AssetsController {
 	 * Register block scripts & styles.
 	 */
 	public function register_assets() {
-		$this->register_style( 'wc-blocks-packages-style', plugins_url( $this->api->get_block_asset_build_path( 'packages-style', 'css' ), __DIR__ ), [], 'all', true );
-		$this->register_style( 'wc-blocks-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks', 'css' ), __DIR__ ), [], 'all', true );
-		$this->register_style( 'wc-blocks-editor-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-editor-style', 'css' ), __DIR__ ), [ 'wp-edit-blocks' ], 'all', true );
+		$this->register_style( 'wc-blocks-packages-style', plugins_url( $this->api->get_block_asset_build_path( 'packages-style', 'css' ), dirname( __DIR__ ) ), array(), 'all', true );
+		$this->register_style( 'wc-blocks-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks', 'css' ), dirname( __DIR__ ) ), array(), 'all', true );
+		$this->register_style( 'wc-blocks-editor-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-editor-style', 'css' ), dirname( __DIR__ ) ), array( 'wp-edit-blocks' ), 'all', true );
 
-		$this->api->register_script( 'wc-blocks-middleware', 'build/wc-blocks-middleware.js', [], false );
-		$this->api->register_script( 'wc-blocks-data-store', 'build/wc-blocks-data.js', [ 'wc-blocks-middleware' ] );
-		$this->api->register_script( 'wc-blocks-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-vendors' ), [], false );
-		$this->api->register_script( 'wc-blocks-registry', 'build/wc-blocks-registry.js', [], false );
-		$this->api->register_script( 'wc-blocks', $this->api->get_block_asset_build_path( 'wc-blocks' ), [ 'wc-blocks-vendors' ], false );
-		$this->api->register_script( 'wc-blocks-shared-context', 'build/wc-blocks-shared-context.js' );
-		$this->api->register_script( 'wc-blocks-shared-hocs', 'build/wc-blocks-shared-hocs.js', [], false );
+		$this->api->register_script( 'wc-blocks-middleware', 'assets/client/blocks/wc-blocks-middleware.js', array(), false );
+		$this->api->register_script( 'wc-blocks-data-store', 'assets/client/blocks/wc-blocks-data.js', array( 'wc-blocks-middleware' ) );
+		$this->api->register_script( 'wc-blocks-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-vendors' ), array(), false );
+		$this->api->register_script( 'wc-blocks-registry', 'assets/client/blocks/wc-blocks-registry.js', array(), false );
+		$this->api->register_script( 'wc-blocks', $this->api->get_block_asset_build_path( 'wc-blocks' ), array( 'wc-blocks-vendors' ), false );
+		$this->api->register_script( 'wc-blocks-shared-context', 'assets/client/blocks/wc-blocks-shared-context.js' );
+		$this->api->register_script( 'wc-blocks-shared-hocs', 'assets/client/blocks/wc-blocks-shared-hocs.js', array(), false );
 
 		// The price package is shared externally so has no blocks prefix.
-		$this->api->register_script( 'wc-price-format', 'build/price-format.js', [], false );
+		$this->api->register_script( 'wc-price-format', 'assets/client/blocks/price-format.js', array(), false );
 
-		$this->api->register_script( 'wc-blocks-checkout', 'build/blocks-checkout.js', [] );
-		$this->api->register_script( 'wc-blocks-components', 'build/blocks-components.js', [] );
+		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocks-checkout.js', array() );
+		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js', array() );
 
 		// Register the interactivity components here for now.
-		$this->api->register_script( 'wc-interactivity-dropdown', 'build/wc-interactivity-dropdown.js', [] );
-		$this->api->register_script( 'wc-interactivity-checkbox-list', 'build/wc-interactivity-checkbox-list.js', [] );
-		$this->register_style( 'wc-interactivity-checkbox-list', plugins_url( $this->api->get_block_asset_build_path( 'wc-interactivity-checkbox-list', 'css' ), __DIR__ ), [], 'all', true );
-		$this->register_style( 'wc-interactivity-dropdown', plugins_url( $this->api->get_block_asset_build_path( 'wc-interactivity-dropdown', 'css' ), __DIR__ ), [], 'all', true );
+		$this->api->register_script( 'wc-interactivity-dropdown', 'assets/client/blocks/wc-interactivity-dropdown.js', array() );
 
 		wp_add_inline_script(
 			'wc-blocks-middleware',
@@ -86,8 +83,8 @@ final class AssetsController {
 	 * Register and enqueue assets for exclusive usage within the Site Editor.
 	 */
 	public function register_and_enqueue_site_editor_assets() {
-		$this->api->register_script( 'wc-blocks-classic-template-revert-button', 'build/wc-blocks-classic-template-revert-button.js' );
-		$this->api->register_style( 'wc-blocks-classic-template-revert-button-style', 'build/wc-blocks-classic-template-revert-button-style.css' );
+		$this->api->register_script( 'wc-blocks-classic-template-revert-button', 'assets/client/blocks/wc-blocks-classic-template-revert-button.js' );
+		$this->api->register_style( 'wc-blocks-classic-template-revert-button-style', 'assets/client/blocks/wc-blocks-classic-template-revert-button-style.css' );
 
 		$current_screen = get_current_screen();
 		if ( $current_screen instanceof \WP_Screen && 'site-editor' === $current_screen->base ) {
@@ -106,7 +103,7 @@ final class AssetsController {
 	 * @return array URLs to print for resource hints.
 	 */
 	public function add_resource_hints( $urls, $relation_type ) {
-		if ( ! in_array( $relation_type, [ 'prefetch', 'prerender' ], true ) || is_admin() ) {
+		if ( ! in_array( $relation_type, array( 'prefetch', 'prerender' ), true ) || is_admin() ) {
 			return $urls;
 		}
 
@@ -140,7 +137,7 @@ final class AssetsController {
 	 * @return array Array of URLs.
 	 */
 	private function get_prefetch_resource_hints() {
-		$urls = [];
+		$urls = array();
 
 		// Core page IDs.
 		$cart_page_id     = wc_get_page_id( 'cart' );
@@ -171,7 +168,7 @@ final class AssetsController {
 	 * @return array Array of URLs.
 	 */
 	private function get_prerender_resource_hints() {
-		$urls          = [];
+		$urls          = array();
 		$is_block_cart = has_block( 'woocommerce/cart' );
 
 		if ( ! $is_block_cart ) {
@@ -196,13 +193,13 @@ final class AssetsController {
 	 */
 	private function get_block_asset_resource_hints( $filename = '' ) {
 		if ( ! $filename ) {
-			return [];
+			return array();
 		}
 		$script_data = $this->api->get_script_data(
 			$this->api->get_block_asset_build_path( $filename )
 		);
 		$resources   = array_merge(
-			[ esc_url( add_query_arg( 'ver', $script_data['version'], $script_data['src'] ) ) ],
+			array( esc_url( add_query_arg( 'ver', $script_data['version'], $script_data['src'] ) ) ),
 			$this->get_script_dependency_src_array( $script_data['dependencies'] )
 		);
 		return array_map(
@@ -233,7 +230,7 @@ final class AssetsController {
 				}
 				return $src;
 			},
-			[]
+			array()
 		);
 	}
 
@@ -292,8 +289,8 @@ final class AssetsController {
 	 *                        'all', 'print' and 'screen', or media queries like '(orientation: portrait)' and '(max-width: 640px)'.
 	 * @param boolean $rtl   Optional. Whether or not to register RTL styles.
 	 */
-	protected function register_style( $handle, $src, $deps = [], $media = 'all', $rtl = false ) {
-		$filename = str_replace( plugins_url( '/', __DIR__ ), '', $src );
+	protected function register_style( $handle, $src, $deps = array(), $media = 'all', $rtl = false ) {
+		$filename = str_replace( plugins_url( '/', dirname( __DIR__ ) ), '', $src );
 		$ver      = self::get_file_version( $filename );
 
 		wp_register_style( $handle, $src, $deps, $ver, $media );
@@ -341,7 +338,7 @@ final class AssetsController {
 	 */
 	public function update_block_settings_dependencies() {
 		$wp_scripts     = wp_scripts();
-		$known_packages = [ 'wc-settings', 'wc-blocks-checkout', 'wc-price-format' ];
+		$known_packages = array( 'wc-settings', 'wc-blocks-checkout', 'wc-price-format' );
 
 		foreach ( $wp_scripts->registered as $handle => $script ) {
 			// scripts that are loaded in the footer has extra->group = 1.
