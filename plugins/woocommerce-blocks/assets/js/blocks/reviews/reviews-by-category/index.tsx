@@ -18,7 +18,7 @@ import { example } from '../example.js';
  */
 registerBlockType( 'woocommerce/reviews-by-category', {
 	apiVersion: 2,
-	title: __( 'Reviews by Category', 'woo-gutenberg-products-block' ),
+	title: __( 'Reviews by Category', 'woocommerce' ),
 	icon: {
 		src: (
 			<Icon
@@ -28,10 +28,10 @@ registerBlockType( 'woocommerce/reviews-by-category', {
 		),
 	},
 	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
+	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
 	description: __(
 		'Show product reviews from specific categories.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	supports: {
 		html: false,

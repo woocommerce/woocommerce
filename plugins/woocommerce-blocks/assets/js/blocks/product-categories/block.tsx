@@ -27,13 +27,13 @@ const EmptyPlaceholder = () => (
 		icon={ <Icon icon={ listView } /> }
 		label={ __(
 			'Product Categories List',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
 		className="wc-block-product-categories"
 	>
 		{ __(
 			'This block displays the product categories for your store. To use it you first need to create a product and assign it to a category.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
 	</Placeholder>
 );
@@ -72,14 +72,14 @@ const ProductCategoriesBlock = ( {
 				<PanelBody
 					title={ __(
 						'List Settings',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					initialOpen
 				>
 					<ToggleGroupControl
 						label={ __(
 							'Display style',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ isDropdown ? 'dropdown' : 'list' }
 						onChange={ ( value: string ) =>
@@ -92,26 +92,26 @@ const ProductCategoriesBlock = ( {
 							value="list"
 							label={ __(
 								'List',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 						<ToggleGroupControlOption
 							value="dropdown"
 							label={ __(
 								'Dropdown',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					</ToggleGroupControl>
 				</PanelBody>
 				<PanelBody
-					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Content', 'woocommerce' ) }
 					initialOpen
 				>
 					<ToggleControl
 						label={ __(
 							'Show product count',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ hasCount }
 						onChange={ () =>
@@ -122,17 +122,17 @@ const ProductCategoriesBlock = ( {
 						<ToggleControl
 							label={ __(
 								'Show category images',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							help={
 								hasImage
 									? __(
 											'Category images are visible.',
-											'woo-gutenberg-products-block'
+											'woocommerce'
 									  )
 									: __(
 											'Category images are hidden.',
-											'woo-gutenberg-products-block'
+											'woocommerce'
 									  )
 							}
 							checked={ hasImage }
@@ -144,7 +144,7 @@ const ProductCategoriesBlock = ( {
 					<ToggleControl
 						label={ __(
 							'Show hierarchy',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ isHierarchical }
 						onChange={ () =>
@@ -156,7 +156,7 @@ const ProductCategoriesBlock = ( {
 					<ToggleControl
 						label={ __(
 							'Show empty categories',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ hasEmpty }
 						onChange={ () =>
@@ -167,11 +167,11 @@ const ProductCategoriesBlock = ( {
 						<ToggleControl
 							label={ __(
 								'Only show children of current category',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							help={ __(
 								'This will affect product category pages',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							checked={ showChildrenOnly }
 							onChange={ () =>

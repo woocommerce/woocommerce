@@ -77,7 +77,7 @@ const ProductCategoryControl = ( {
 						'%1$s, has %2$d review',
 						'%1$s, has %2$d reviews',
 						item.details?.review_count || 0,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					accessibleName,
 					item.details?.review_count || 0
@@ -88,7 +88,7 @@ const ProductCategoryControl = ( {
 						'%1$s, has %2$d product',
 						'%1$s, has %2$d products',
 						item.details?.count || 0,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					accessibleName,
 					item.details?.count || 0
@@ -101,7 +101,7 @@ const ProductCategoryControl = ( {
 						'%d review',
 						'%d reviews',
 						item.details?.review_count || 0,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					item.details?.review_count || 0
 			  )
@@ -111,7 +111,7 @@ const ProductCategoryControl = ( {
 						'%d product',
 						'%d products',
 						item.details?.count || 0,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					item.details?.count || 0
 			  );
@@ -136,16 +136,16 @@ const ProductCategoryControl = ( {
 	const messages = {
 		clear: __(
 			'Clear all product categories',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
-		list: __( 'Product Categories', 'woo-gutenberg-products-block' ),
+		list: __( 'Product Categories', 'woocommerce' ),
 		noItems: __(
 			"Your store doesn't have any product categories.",
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		search: __(
 			'Search for product categories',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		selected: ( n: number ) =>
 			sprintf(
@@ -154,13 +154,13 @@ const ProductCategoryControl = ( {
 					'%d category selected',
 					'%d categories selected',
 					n,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				n
 			),
 		updated: __(
 			'Category search results updated.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 	};
 
@@ -194,11 +194,11 @@ const ProductCategoryControl = ( {
 						className="woocommerce-product-categories__operator"
 						label={ __(
 							'Display products matching',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						help={ __(
 							'Pick at least two categories to use this setting.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ operator }
 						onChange={ onOperatorChange }
@@ -206,14 +206,14 @@ const ProductCategoryControl = ( {
 							{
 								label: __(
 									'Any selected categories',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								value: 'any',
 							},
 							{
 								label: __(
 									'All selected categories',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								value: 'all',
 							},

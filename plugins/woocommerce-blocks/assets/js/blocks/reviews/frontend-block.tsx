@@ -57,7 +57,7 @@ const FrontendBlock = ( {
 					onClick={ onAppendReviews }
 					screenReaderLabel={ __(
 						'Load more reviews',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				/>
 			) }

@@ -134,7 +134,7 @@ const Edit = ( props: EditProps ) => {
 				controls={ [
 					{
 						icon: 'edit',
-						title: __( 'Edit', 'woo-gutenberg-products-block' ),
+						title: __( 'Edit', 'woocommerce' ),
 						onClick: () => setIsEditing( ! isEditing ),
 						isActive: isEditing,
 					},
@@ -162,12 +162,12 @@ const Edit = ( props: EditProps ) => {
 						debouncedSpeak(
 							__(
 								'Now displaying a preview of the Filter Products by Attribute block.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							)
 						);
 					} }
 				>
-					{ __( 'Done', 'woo-gutenberg-products-block' ) }
+					{ __( 'Done', 'woocommerce' ) }
 				</Button>
 			</div>
 		</AttributesPlaceholder>
@@ -202,7 +202,7 @@ const Edit = ( props: EditProps ) => {
 					<p>
 						{ __(
 							'Please select an attribute to use this filter!',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</p>
 				</Notice>
@@ -216,7 +216,7 @@ const Edit = ( props: EditProps ) => {
 					<p>
 						{ __(
 							'There are no products with the selected attributes.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</p>
 				</Notice>
@@ -231,7 +231,7 @@ const Edit = ( props: EditProps ) => {
 					<AttributeDropdown
 						label={
 							attributeObject.label ||
-							__( 'attribute', 'woo-gutenberg-products-block' )
+							__( 'attribute', 'woocommerce' )
 						}
 					/>
 				) : (

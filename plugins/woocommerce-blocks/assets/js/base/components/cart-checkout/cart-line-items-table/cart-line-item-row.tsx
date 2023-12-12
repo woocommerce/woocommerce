@@ -314,7 +314,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 										/* translators: %s refers to the item's name in the cart. */
 										__(
 											'Remove %s from cart',
-											'woo-gutenberg-products-block'
+											'woocommerce'
 										),
 										name
 									) }
@@ -333,7 +333,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 												/* translators: %s refers to the item name in the cart. */
 												__(
 													'%s has been removed from your cart.',
-													'woo-gutenberg-products-block'
+													'woocommerce'
 												),
 												name
 											)
@@ -343,7 +343,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 								>
 									{ __(
 										'Remove item',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</button>
 							) }

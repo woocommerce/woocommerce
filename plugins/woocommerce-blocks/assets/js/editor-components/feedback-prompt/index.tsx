@@ -24,7 +24,7 @@ interface FeedbackPromptProps {
  */
 const FeedbackPrompt = ( {
 	text,
-	title = __( 'Feedback?', 'woo-gutenberg-products-block' ),
+	title = __( 'Feedback?', 'woocommerce' ),
 	url,
 }: FeedbackPromptProps ) => {
 	// By returning false we ensure that this component is not entered into the InspectorControls
@@ -53,7 +53,7 @@ const FeedbackPrompt = ( {
 					>
 						{ __(
 							'Give us your feedback.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						<Icon icon={ external } size={ 16 } />
 					</a>
@@ -69,7 +69,7 @@ export const CartCheckoutFeedbackPrompt = () => (
 	<FeedbackPrompt
 		text={ __(
 			'We are currently working on improving our cart and checkout blocks to provide merchants with the tools and customization options they need.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
 		url="https://github.com/woocommerce/woocommerce/discussions/new?category=checkout-flow&labels=type%3A+product%20feedback"
 	/>
@@ -79,9 +79,9 @@ export const ProductQueryFeedbackPrompt = () => (
 	<FeedbackPrompt
 		text={ __(
 			'Thanks for trying out the Products block! Help us make it better by sharing your feedback.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
-		title={ __( 'Share your feedback!', 'woo-gutenberg-products-block' ) }
+		title={ __( 'Share your feedback!', 'woocommerce' ) }
 		url={ 'https://airtable.com/shrFX5FAqmCY6hVYI' }
 	/>
 );
@@ -90,9 +90,9 @@ export const ProductCollectionFeedbackPrompt = () => (
 	<FeedbackPrompt
 		text={ __(
 			'Thanks for trying out the Product Collection block! Help us make it better by sharing your feedback.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
-		title={ __( 'Share your feedback!', 'woo-gutenberg-products-block' ) }
+		title={ __( 'Share your feedback!', 'woocommerce' ) }
 		url={ 'https://airtable.com/shrqsMSDPvAKoY99u' }
 	/>
 );

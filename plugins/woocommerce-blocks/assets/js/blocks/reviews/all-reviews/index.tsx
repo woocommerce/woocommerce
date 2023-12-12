@@ -21,7 +21,7 @@ import type { AllReviewsEditorProps } from './types';
  */
 registerBlockType( 'woocommerce/all-reviews', {
 	apiVersion: 2,
-	title: __( 'All Reviews', 'woo-gutenberg-products-block' ),
+	title: __( 'All Reviews', 'woocommerce' ),
 	icon: {
 		src: (
 			<Icon
@@ -31,10 +31,10 @@ registerBlockType( 'woocommerce/all-reviews', {
 		),
 	},
 	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
+	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
 	description: __(
 		'Show a list of all product reviews.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	supports: {
 		html: false,

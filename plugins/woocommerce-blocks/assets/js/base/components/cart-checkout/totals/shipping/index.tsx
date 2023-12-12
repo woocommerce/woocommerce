@@ -93,7 +93,7 @@ export const TotalsShipping = ( {
 			) }
 		>
 			<TotalsItem
-				label={ __( 'Shipping', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Shipping', 'woocommerce' ) }
 				value={
 					! shippingMethodsMissing && cartHasCalculatedShipping
 						? // if address is not complete, display the link to add an address.

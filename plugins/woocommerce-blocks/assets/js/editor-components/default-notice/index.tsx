@@ -104,7 +104,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 		noticeContent = createInterpolateElement(
 			__(
 				'If you would like to use this block as your default checkout, <a>update your page settings</a>.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			{
 				a: (
@@ -112,7 +112,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 					<a href="#" onClick={ updatePage }>
 						{ __(
 							'update your page settings',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</a>
 				),
@@ -122,7 +122,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 		noticeContent = createInterpolateElement(
 			__(
 				'If you would like to use this block as your default cart, <a>update your page settings</a>.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			{
 				a: (
@@ -130,7 +130,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 					<a href="#" onClick={ updatePage }>
 						{ __(
 							'update your page settings',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</a>
 				),
@@ -155,13 +155,13 @@ export function DefaultNotice( { block }: { block: string } ) {
 				settingStatus === 'updated'
 					? __(
 							'Page settings updated',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 					  )
 					: noticeContent
 			}
 		>
 			{ settingStatus === 'updated' ? (
-				__( 'Page settings updated', 'woo-gutenberg-products-block' )
+				__( 'Page settings updated', 'woocommerce' )
 			) : (
 				<>
 					<p>{ noticeContent }</p>

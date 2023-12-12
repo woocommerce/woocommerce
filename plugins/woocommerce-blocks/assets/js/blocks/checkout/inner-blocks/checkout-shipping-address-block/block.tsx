@@ -129,7 +129,7 @@ const Block = ( {
 				className="wc-block-checkout__use-address-for-billing"
 				label={ __(
 					'Use same address for billing',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				checked={ useShippingAsBilling }
 				onChange={ ( checked: boolean ) => {

@@ -30,7 +30,7 @@ const CheckoutOrderNotes = ( {
 				disabled={ disabled }
 				label={ __(
 					'Add a note to your order',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				checked={ withOrderNotes }
 				onChange={ ( isChecked ) => {

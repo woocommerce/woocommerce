@@ -22,17 +22,17 @@ import { useSettingsContext } from './settings-context';
 
 const GeneralSettingsDescription = () => (
 	<>
-		<h2>{ __( 'General', 'woo-gutenberg-products-block' ) }</h2>
+		<h2>{ __( 'General', 'woocommerce' ) }</h2>
 		<p>
 			{ __(
 				'Enable or disable local pickup on your store, and define costs. Local pickup is only available from the block checkout.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		</p>
 		<ExternalLink
 			href={ `${ ADMIN_URL }post.php?post=${ CHECKOUT_PAGE_ID }&action=edit` }
 		>
-			{ __( 'View checkout page', 'woo-gutenberg-products-block' ) }
+			{ __( 'View checkout page', 'woocommerce' ) }
 		</ExternalLink>
 	</>
 );
@@ -60,7 +60,7 @@ const GeneralSettings = () => {
 						{ createInterpolateElement(
 							__(
 								'Enabling this will produce duplicate options at checkout. Remove the local pickup shipping method from your <a>shipping zones</a>.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							{
 								a: (
@@ -81,20 +81,20 @@ const GeneralSettings = () => {
 					onChange={ setSettingField( 'enabled' ) }
 					label={ __(
 						'Enable local pickup',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					help={
 						<span>
 							{ __(
 								'When enabled, local pickup will appear as an option on the block based checkout.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							{ shippingCostRequiresAddress ? (
 								<>
 									<br />
 									{ __(
 										'If local pickup is enabled, the "Hide shipping costs until an address is entered" setting will be ignored.',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</>
 							) : null }
@@ -102,15 +102,15 @@ const GeneralSettings = () => {
 					}
 				/>
 				<TextControl
-					label={ __( 'Title', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Title', 'woocommerce' ) }
 					name="local_pickup_title"
 					help={ __(
 						'This is the shipping method title shown to customers.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					placeholder={ __(
 						'Local Pickup',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					value={ settings.title }
 					onChange={ setSettingField( 'title' ) }
@@ -123,7 +123,7 @@ const GeneralSettings = () => {
 						event.target.setCustomValidity(
 							__(
 								'Local pickup title is required',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							)
 						);
 					} }
@@ -141,11 +141,11 @@ const GeneralSettings = () => {
 					} }
 					label={ __(
 						'Add a price for customers who choose local pickup',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					help={ __(
 						'By default, the local pickup shipping method is free.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				/>
 				{ showCosts ? (
@@ -153,16 +153,16 @@ const GeneralSettings = () => {
 						<TextControl
 							label={ __(
 								'Cost',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							name="local_pickup_cost"
 							help={ __(
 								'Optional cost to charge for local pickup.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							placeholder={ __(
 								'Free',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							type="number"
 							pattern="[0-9]+\.?[0-9]*"
@@ -175,25 +175,25 @@ const GeneralSettings = () => {
 						<SelectControl
 							label={ __(
 								'Taxes',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							name="local_pickup_tax_status"
 							help={ __(
 								'If a cost is defined, this controls if taxes are applied to that cost.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							options={ [
 								{
 									label: __(
 										'Taxable',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									),
 									value: 'taxable',
 								},
 								{
 									label: __(
 										'Not taxable',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									),
 									value: 'none',
 								},

@@ -59,7 +59,7 @@ export const __TabsWithoutInstanceId = ( {
 	tabs,
 	activeClass = 'is-active',
 	initialTabName,
-	ariaLabel = __( 'Tabbed Content', 'woo-gutenberg-products-block' ),
+	ariaLabel = __( 'Tabbed Content', 'woocommerce' ),
 	instanceId,
 	id,
 }: TabsProps ): JSX.Element | null => {

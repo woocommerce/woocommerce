@@ -25,10 +25,10 @@ registerBlockType( metadata, {
 		),
 	},
 	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
+	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
 	description: __(
 		'Display a grid of your top rated products.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	attributes: {
 		...sharedAttributes,

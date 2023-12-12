@@ -61,7 +61,7 @@ addAction(
 	( { shippingRateId }: { shippingRateId: string } ): void => {
 		trackCheckoutOption( {
 			step: 4,
-			option: __( 'Shipping Method', 'woo-gutenberg-products-block' ),
+			option: __( 'Shipping Method', 'woocommerce' ),
 			value: shippingRateId,
 		} )();
 	}
@@ -79,7 +79,7 @@ addAction(
 	( { paymentMethodSlug }: { paymentMethodSlug: string } ): void => {
 		trackCheckoutOption( {
 			step: 5,
-			option: __( 'Payment Method', 'woo-gutenberg-products-block' ),
+			option: __( 'Payment Method', 'woocommerce' ),
 			value: paymentMethodSlug,
 		} )();
 	}
@@ -118,7 +118,7 @@ addAction(
 	} ): void => {
 		trackEvent( 'add_to_cart', {
 			event_category: 'ecommerce',
-			event_label: __( 'Add to Cart', 'woo-gutenberg-products-block' ),
+			event_label: __( 'Add to Cart', 'woocommerce' ),
 			items: [ getProductFieldObject( product, quantity ) ],
 		} );
 	}
@@ -144,7 +144,7 @@ addAction(
 			event_category: 'ecommerce',
 			event_label: __(
 				'Remove Cart Item',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			items: [ getProductFieldObject( product, quantity ) ],
 		} );
@@ -170,7 +170,7 @@ addAction(
 			event_category: 'ecommerce',
 			event_label: __(
 				'Change Cart Item Quantity',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			items: [ getProductFieldObject( product, quantity ) ],
 		} );
@@ -188,7 +188,7 @@ addAction(
 	namespace,
 	( {
 		products,
-		listName = __( 'Product List', 'woo-gutenberg-products-block' ),
+		listName = __( 'Product List', 'woocommerce' ),
 	}: {
 		products: Array< ProductResponseItem >;
 		listName: string;
@@ -200,7 +200,7 @@ addAction(
 			event_category: 'engagement',
 			event_label: __(
 				'Viewing products',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			items: products.map( ( product, index ) => ( {
 				...getProductImpressionObject( product, listName ),

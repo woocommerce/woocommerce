@@ -18,12 +18,12 @@ import {
 const notice = createInterpolateElement(
 	__(
 		'Products (Beta) block was upgraded to <strongText />, an updated version with new features and simplified settings.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	{
 		strongText: (
 			<strong>
-				{ __( `Product Collection`, 'woo-gutenberg-products-block' ) }
+				{ __( `Product Collection`, 'woocommerce' ) }
 			</strong>
 		),
 	}
@@ -31,7 +31,7 @@ const notice = createInterpolateElement(
 
 const buttonLabel = __(
 	'Revert to Products (Beta)',
-	'woo-gutenberg-products-block'
+	'woocommerce'
 );
 
 type UpgradeNoticeProps = {

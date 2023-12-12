@@ -14,7 +14,7 @@ const isConversionPossible = () => {
 };
 
 const getButtonLabel = () =>
-	__( 'Transform into blocks', 'woo-gutenberg-products-block' );
+	__( 'Transform into blocks', 'woocommerce' );
 
 const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
 	[
@@ -50,13 +50,13 @@ const onClickCallback = ( {
 };
 
 const getTitle = () => {
-	return __( 'Classic Checkout', 'woo-gutenberg-products-block' );
+	return __( 'Classic Checkout', 'woocommerce' );
 };
 
 const getDescription = () => {
 	return __(
 		'This block will render the classic checkout shortcode. You can optionally transform it into blocks for more control over the checkout experience.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	);
 };
 

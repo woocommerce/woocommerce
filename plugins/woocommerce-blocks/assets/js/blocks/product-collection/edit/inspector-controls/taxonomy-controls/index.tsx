@@ -51,7 +51,7 @@ function TaxonomyControls( {
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Taxonomies', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Taxonomies', 'woocommerce' ) }
 			hasValue={ () =>
 				Object.values( taxQuery || {} ).some(
 					( terms ) => !! terms.length

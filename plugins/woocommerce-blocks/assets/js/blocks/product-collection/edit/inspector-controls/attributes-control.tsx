@@ -32,12 +32,12 @@ const AttributesControl = ( {
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Product Attributes', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Product Attributes', 'woocommerce' ) }
 			hasValue={ () => !! woocommerceAttributes?.length }
 		>
 			<ProductAttributeTermControl
 				messages={ {
-					search: __( 'Attributes', 'woo-gutenberg-products-block' ),
+					search: __( 'Attributes', 'woocommerce' ),
 				} }
 				selected={ selectedAttributes || [] }
 				onChange={ ( searchListItems: SearchListItem[] ) => {
@@ -60,7 +60,7 @@ const AttributesControl = ( {
 				className="wc-block-editor-product-collection-panel__manage-attributes-link"
 				href={ EDIT_ATTRIBUTES_URL }
 			>
-				{ __( 'Manage attributes', 'woo-gutenberg-products-block' ) }
+				{ __( 'Manage attributes', 'woocommerce' ) }
 			</ExternalLink>
 		</ToolsPanelItem>
 	);

@@ -36,7 +36,7 @@ const FilterElementLabel = ( {
 							'%s product',
 							'%s products',
 							count,
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						count
 					) }

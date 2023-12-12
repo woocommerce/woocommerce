@@ -29,8 +29,8 @@ const PhoneNumber = ( {
 			required={ isRequired }
 			label={
 				isRequired
-					? __( 'Phone', 'woo-gutenberg-products-block' )
-					: __( 'Phone (optional)', 'woo-gutenberg-products-block' )
+					? __( 'Phone', 'woocommerce' )
+					: __( 'Phone (optional)', 'woocommerce' )
 			}
 			value={ value }
 			onChange={ onChange }

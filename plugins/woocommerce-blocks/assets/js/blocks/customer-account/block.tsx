@@ -43,8 +43,8 @@ const Label = ( { displayStyle }: { displayStyle: DisplayStyle } ) => {
 	return (
 		<span className="label">
 			{ currentUserId
-				? __( 'My Account', 'woo-gutenberg-products-block' )
-				: __( 'Log in', 'woo-gutenberg-products-block' ) }
+				? __( 'My Account', 'woocommerce' )
+				: __( 'Log in', 'woocommerce' ) }
 		</span>
 	);
 };

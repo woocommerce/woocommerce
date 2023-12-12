@@ -55,13 +55,13 @@ const TitleEdit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 				<PanelBody
 					title={ __(
 						'Link settings',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				>
 					<ToggleControl
 						label={ __(
 							'Make title a link',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showProductLink }
 						onChange={ () =>
@@ -75,7 +75,7 @@ const TitleEdit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 							<ToggleControl
 								label={ __(
 									'Open in new tab',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 								onChange={ ( value ) =>
 									setAttributes( {
@@ -102,7 +102,7 @@ const Title = isFeaturePluginBuild()
 				label: BLOCK_TITLE,
 				description: __(
 					'Choose a product to display its title.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 			} ),
 	  ] )( TitleEdit )

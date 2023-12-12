@@ -21,24 +21,24 @@ import { withUpdateButtonAttributes } from '../with-update-button-attributes';
 
 const GENERIC_CONFIG = {
 	icon: starEmpty,
-	label: __( 'Featured Product', 'woo-gutenberg-products-block' ),
+	label: __( 'Featured Product', 'woocommerce' ),
 };
 
 const BLOCK_CONTROL_CONFIG = {
 	...GENERIC_CONFIG,
-	cropLabel: __( 'Edit product image', 'woo-gutenberg-products-block' ),
-	editLabel: __( 'Edit selected product', 'woo-gutenberg-products-block' ),
+	cropLabel: __( 'Edit product image', 'woocommerce' ),
+	editLabel: __( 'Edit selected product', 'woocommerce' ),
 };
 
 const CONTENT_CONFIG = {
 	...GENERIC_CONFIG,
 	emptyMessage: __(
 		'No product is selected.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	noSelectionButtonLabel: __(
 		'Select a product',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 };
 
@@ -46,11 +46,11 @@ const EDIT_MODE_CONFIG = {
 	...GENERIC_CONFIG,
 	description: __(
 		'Highlight a product or variation.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	editLabel: __(
 		'Showing Featured Product block preview.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 };
 

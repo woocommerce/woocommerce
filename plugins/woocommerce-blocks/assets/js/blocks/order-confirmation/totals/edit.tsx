@@ -45,13 +45,13 @@ const Edit = (): JSX.Element => {
 							<th className="wc-block-order-confirmation-totals__product">
 								{ __(
 									'Product',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							</th>
 							<th className="wc-block-order-confirmation-totals__total">
 								{ __(
 									'Total',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							</th>
 						</tr>
@@ -66,7 +66,7 @@ const Edit = (): JSX.Element => {
 									{ _x(
 										'Test Product',
 										'sample product name',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</a>
 								&nbsp;
@@ -87,7 +87,7 @@ const Edit = (): JSX.Element => {
 									{ _x(
 										'Test Product',
 										'sample product name',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</a>
 								&nbsp;
@@ -108,7 +108,7 @@ const Edit = (): JSX.Element => {
 							>
 								{ __(
 									'Total',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							</th>
 							<td className="wc-block-order-confirmation-totals__total">

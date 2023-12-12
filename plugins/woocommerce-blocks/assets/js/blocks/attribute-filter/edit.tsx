@@ -44,11 +44,11 @@ const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 const noticeContent = {
 	noAttributes: __(
 		'Please select an attribute to use this filter!',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	noProducts: __(
 		'There are no products with the selected attributes.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 };
 
@@ -92,7 +92,7 @@ const Edit = ( {
 					controls={ [
 						{
 							icon: 'edit',
-							title: __( 'Edit', 'woo-gutenberg-products-block' ),
+							title: __( 'Edit', 'woocommerce' ),
 							onClick: () => setIsEditing( ! isEditing ),
 							isActive: isEditing,
 						},
@@ -129,16 +129,16 @@ const Edit = ( {
 		const messages = {
 			clear: __(
 				'Clear selected attribute',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
-			list: __( 'Product Attributes', 'woo-gutenberg-products-block' ),
+			list: __( 'Product Attributes', 'woocommerce' ),
 			noItems: __(
 				"Your store doesn't have any product attributes.",
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			search: __(
 				'Search for a product attribute:',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			selected: ( n: number ) =>
 				sprintf(
@@ -147,13 +147,13 @@ const Edit = ( {
 						'%d attribute selected',
 						'%d attributes selected',
 						n,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					n
 				),
 			updated: __(
 				'Product attribute search results updated.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 		};
 
@@ -185,13 +185,13 @@ const Edit = ( {
 				<PanelBody
 					title={ __(
 						'Display Settings',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				>
 					<ToggleControl
 						label={ __(
 							'Display product count',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showCounts }
 						onChange={ () =>
@@ -203,7 +203,7 @@ const Edit = ( {
 					<ToggleGroupControl
 						label={ __(
 							'Allow selecting multiple options?',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ selectType || 'multiple' }
 						onChange={ ( value: string ) =>
@@ -217,14 +217,14 @@ const Edit = ( {
 							value="multiple"
 							label={ __(
 								'Multiple',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 						<ToggleGroupControlOption
 							value="single"
 							label={ __(
 								'Single',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					</ToggleGroupControl>
@@ -232,17 +232,17 @@ const Edit = ( {
 						<ToggleGroupControl
 							label={ __(
 								'Filter Conditions',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							help={
 								queryType === 'and'
 									? __(
 											'Choose to return filter results for all of the attributes selected.',
-											'woo-gutenberg-products-block'
+											'woocommerce'
 									  )
 									: __(
 											'Choose to return filter results for any of the attributes selected.',
-											'woo-gutenberg-products-block'
+											'woocommerce'
 									  )
 							}
 							value={ queryType }
@@ -257,14 +257,14 @@ const Edit = ( {
 								value="and"
 								label={ __(
 									'All',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							/>
 							<ToggleGroupControlOption
 								value="or"
 								label={ __(
 									'Any',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							/>
 						</ToggleGroupControl>
@@ -272,7 +272,7 @@ const Edit = ( {
 					<ToggleGroupControl
 						label={ __(
 							'Display Style',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ displayStyle }
 						onChange={ ( value: string ) =>
@@ -286,25 +286,25 @@ const Edit = ( {
 							value="list"
 							label={ __(
 								'List',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 						<ToggleGroupControlOption
 							value="dropdown"
 							label={ __(
 								'Dropdown',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					</ToggleGroupControl>
 					<ToggleControl
 						label={ __(
 							"Show 'Apply filters' button",
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						help={ __(
 							'Products will update when the button is clicked.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showFilterButton }
 						onChange={ ( value ) =>
@@ -317,7 +317,7 @@ const Edit = ( {
 				<PanelBody
 					title={ __(
 						'Content Settings',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					initialOpen={ false }
 				>
@@ -333,17 +333,17 @@ const Edit = ( {
 			icon={ <Icon icon={ category } /> }
 			label={ __(
 				'Filter by Attribute',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			instructions={ __(
 				'Display a list of filters based on the selected attributes.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		>
 			<p>
 				{ __(
 					"Attributes are needed for filtering your products. You haven't created any attributes yet.",
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</p>
 			<Button
@@ -354,7 +354,7 @@ const Edit = ( {
 				) }
 				target="_top"
 			>
-				{ __( 'Add new attribute', 'woo-gutenberg-products-block' ) +
+				{ __( 'Add new attribute', 'woocommerce' ) +
 					' ' }
 				<Icon icon={ external } />
 			</Button>
@@ -364,7 +364,7 @@ const Edit = ( {
 				href="https://docs.woocommerce.com/document/managing-product-taxonomies/"
 				target="_blank"
 			>
-				{ __( 'Learn more', 'woo-gutenberg-products-block' ) }
+				{ __( 'Learn more', 'woocommerce' ) }
 			</Button>
 		</Placeholder>
 	);
@@ -374,7 +374,7 @@ const Edit = ( {
 		debouncedSpeak(
 			__(
 				'Now displaying a preview of the Filter Products by Attribute block.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			)
 		);
 	};
@@ -386,19 +386,19 @@ const Edit = ( {
 				icon={ <Icon icon={ category } /> }
 				label={ __(
 					'Filter by Attribute',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			>
 				<div className="wc-block-attribute-filter__instructions">
 					{ __(
 						'Display a list of filters based on the selected attributes.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				</div>
 				<div className="wc-block-attribute-filter__selection">
 					{ renderAttributeControl( { isCompact: false } ) }
 					<Button variant="primary" onClick={ onDone }>
-						{ __( 'Done', 'woo-gutenberg-products-block' ) }
+						{ __( 'Done', 'woocommerce' ) }
 					</Button>
 				</div>
 			</Placeholder>

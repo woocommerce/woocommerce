@@ -60,13 +60,13 @@ const LayoutEditor = ( {
 			>
 				<InspectorControls>
 					<PanelBody
-						title={ __( 'Layout', 'woo-gutenberg-products-block' ) }
+						title={ __( 'Layout', 'woocommerce' ) }
 						initialOpen={ true }
 					>
 						<Button
 							label={ __(
 								'Reset layout to default',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							onClick={ resetInnerBlocks }
 							variant="tertiary"
@@ -75,7 +75,7 @@ const LayoutEditor = ( {
 						>
 							{ __(
 								'Reset layout',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</Button>
 					</PanelBody>

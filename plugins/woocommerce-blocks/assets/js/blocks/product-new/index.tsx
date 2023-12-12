@@ -16,7 +16,7 @@ import { Edit } from './edit';
 import metadata from './block.json';
 
 registerBlockType( metadata, {
-	title: __( 'Newest Products', 'woo-gutenberg-products-block' ),
+	title: __( 'Newest Products', 'woocommerce' ),
 	icon: {
 		src: (
 			<Icon

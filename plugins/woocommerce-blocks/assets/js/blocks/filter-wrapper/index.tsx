@@ -24,22 +24,22 @@ const filterBlocksWidgets = [
 	{
 		widgetId: 'woocommerce_layered_nav_filters',
 		name: 'active-filters',
-		heading: __( 'Active filters', 'woo-gutenberg-products-block' ),
+		heading: __( 'Active filters', 'woocommerce' ),
 	},
 	{
 		widgetId: 'woocommerce_price_filter',
 		name: 'price-filter',
-		heading: __( 'Filter by price', 'woo-gutenberg-products-block' ),
+		heading: __( 'Filter by price', 'woocommerce' ),
 	},
 	{
 		widgetId: 'woocommerce_layered_nav',
 		name: 'attribute-filter',
-		heading: __( 'Filter by attribute', 'woo-gutenberg-products-block' ),
+		heading: __( 'Filter by attribute', 'woocommerce' ),
 	},
 	{
 		widgetId: 'woocommerce_rating_filter',
 		name: 'rating-filter',
-		heading: __( 'Filter by rating', 'woo-gutenberg-products-block' ),
+		heading: __( 'Filter by rating', 'woocommerce' ),
 	},
 ];
 
@@ -120,10 +120,10 @@ registerBlockType( metadata, {
 	variations: [
 		{
 			name: 'active-filters',
-			title: __( 'Active Filters', 'woo-gutenberg-products-block' ),
+			title: __( 'Active Filters', 'woocommerce' ),
 			description: __(
 				'Display the currently active filters.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			/**
 			 * We need to handle the isActive function differently for this
@@ -134,7 +134,7 @@ registerBlockType( metadata, {
 				attributes.filterType === 'active-filters' ||
 				! attributes.filterType,
 			attributes: {
-				heading: __( 'Active filters', 'woo-gutenberg-products-block' ),
+				heading: __( 'Active filters', 'woocommerce' ),
 				filterType: 'active-filters',
 			},
 			icon: {
@@ -149,10 +149,10 @@ registerBlockType( metadata, {
 		},
 		{
 			name: 'price-filter',
-			title: __( 'Filter by Price', 'woo-gutenberg-products-block' ),
+			title: __( 'Filter by Price', 'woocommerce' ),
 			description: __(
 				'Enable customers to filter the product grid by choosing a price range.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			isActive: ( attributes ) =>
 				attributes.filterType === 'price-filter',
@@ -160,7 +160,7 @@ registerBlockType( metadata, {
 				filterType: 'price-filter',
 				heading: __(
 					'Filter by price',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 			},
 			icon: {
@@ -174,10 +174,10 @@ registerBlockType( metadata, {
 		},
 		{
 			name: 'stock-filter',
-			title: __( 'Filter by Stock', 'woo-gutenberg-products-block' ),
+			title: __( 'Filter by Stock', 'woocommerce' ),
 			description: __(
 				'Enable customers to filter the product grid by stock status.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			isActive: ( attributes ) =>
 				attributes.filterType === 'stock-filter',
@@ -185,7 +185,7 @@ registerBlockType( metadata, {
 				filterType: 'stock-filter',
 				heading: __(
 					'Filter by stock status',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 			},
 			icon: {
@@ -199,10 +199,10 @@ registerBlockType( metadata, {
 		},
 		{
 			name: 'attribute-filter',
-			title: __( 'Filter by Attribute', 'woo-gutenberg-products-block' ),
+			title: __( 'Filter by Attribute', 'woocommerce' ),
 			description: __(
 				'Enable customers to filter the product grid by selecting one or more attributes, such as color.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			isActive: ( attributes ) =>
 				attributes.filterType === 'attribute-filter',
@@ -210,7 +210,7 @@ registerBlockType( metadata, {
 				filterType: 'attribute-filter',
 				heading: __(
 					'Filter by attribute',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 			},
 			icon: {
@@ -224,10 +224,10 @@ registerBlockType( metadata, {
 		},
 		{
 			name: 'rating-filter',
-			title: __( 'Filter by Rating', 'woo-gutenberg-products-block' ),
+			title: __( 'Filter by Rating', 'woocommerce' ),
 			description: __(
 				'Enable customers to filter the product grid by rating.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			isActive: ( attributes ) =>
 				attributes.filterType === 'rating-filter',
@@ -235,7 +235,7 @@ registerBlockType( metadata, {
 				filterType: 'rating-filter',
 				heading: __(
 					'Filter by rating',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 			},
 			icon: {

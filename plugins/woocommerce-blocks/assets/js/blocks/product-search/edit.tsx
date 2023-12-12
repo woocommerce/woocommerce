@@ -70,13 +70,13 @@ const Edit = ( {
 		<>
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Content', 'woocommerce' ) }
 					initialOpen
 				>
 					<ToggleControl
 						label={ __(
 							'Show search field label',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ hasLabel }
 						onChange={ () =>
@@ -94,7 +94,7 @@ const Edit = ( {
 						>
 							{ __(
 								'Search Label',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</label>
 						<PlainText
@@ -114,7 +114,7 @@ const Edit = ( {
 						value={ placeholder }
 						placeholder={ __(
 							'Enter search placeholder text',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						onChange={ ( value ) =>
 							setAttributes( { placeholder: value } )
@@ -125,7 +125,7 @@ const Edit = ( {
 						className="wc-block-product-search__button"
 						aria-label={ __(
 							'Search',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						onClick={ ( e ) => e.preventDefault() }
 						tabIndex={ -1 }

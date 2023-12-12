@@ -53,7 +53,7 @@ export const CallToAction = ( {
 							{
 								text: __(
 									'Shop now',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								url: permalink,
 							},

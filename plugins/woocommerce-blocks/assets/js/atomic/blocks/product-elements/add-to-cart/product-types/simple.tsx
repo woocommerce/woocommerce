@@ -33,7 +33,7 @@ const Simple = () => {
 			<ProductUnavailable
 				reason={ __(
 					'This product is currently out of stock and cannot be purchased.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			/>
 		);

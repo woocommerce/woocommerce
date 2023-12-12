@@ -65,14 +65,14 @@ const AddressCard = ( {
 					className="wc-block-components-address-card__edit"
 					aria-label={ __(
 						'Edit address',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					onClick={ ( e ) => {
 						onEdit();
 						e.preventDefault();
 					} }
 				>
-					{ __( 'Edit', 'woo-gutenberg-products-block' ) }
+					{ __( 'Edit', 'woocommerce' ) }
 				</a>
 			) }
 		</div>

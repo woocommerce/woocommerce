@@ -50,7 +50,7 @@ const PaymentMethodCard = ( {
 					className="wc-block-components-payment-methods__save-card-info"
 					label={ __(
 						'Save payment information to my account for future purchases.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					checked={ shouldSavePaymentMethod }
 					onChange={ () =>

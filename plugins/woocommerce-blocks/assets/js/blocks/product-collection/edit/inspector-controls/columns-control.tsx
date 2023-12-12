@@ -16,11 +16,11 @@ import {
 import { DisplayLayoutToolbarProps } from '../../types';
 import { getDefaultDisplayLayout } from '../../constants';
 
-const columnsLabel = __( 'Columns', 'woo-gutenberg-products-block' );
-const toggleLabel = __( 'Responsive', 'woo-gutenberg-products-block' );
+const columnsLabel = __( 'Columns', 'woocommerce' );
+const toggleLabel = __( 'Responsive', 'woocommerce' );
 const toggleHelp = __(
 	'Automatically adjust the number of columns to better fit smaller screens.',
-	'woo-gutenberg-products-block'
+	'woocommerce'
 );
 
 const ColumnsControl = ( props: DisplayLayoutToolbarProps ) => {

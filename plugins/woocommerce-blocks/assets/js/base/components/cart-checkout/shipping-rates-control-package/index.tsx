@@ -72,7 +72,7 @@ export const ShippingRatesControlPackage = ( {
 											'%1$s (%2$d unit)',
 											'%1$s (%2$d units)',
 											quantity,
-											'woo-gutenberg-products-block'
+											'woocommerce'
 										),
 										name,
 										quantity

@@ -10,7 +10,7 @@ import formStepAttributes from '../../form-step/attributes';
 
 export default {
 	...formStepAttributes( {
-		defaultTitle: __( 'Payment options', 'woo-gutenberg-products-block' ),
+		defaultTitle: __( 'Payment options', 'woocommerce' ),
 		defaultDescription: '',
 	} ),
 	className: {

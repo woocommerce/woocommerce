@@ -27,7 +27,7 @@ const SHIPPING_RATE_ERROR = {
 	hidden: true,
 	message: __(
 		'Shipping options are not available',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 };
 
@@ -126,7 +126,7 @@ const ShippingSelector = ( {
 			<span className="wc-block-checkout__shipping-method-option-price">
 				{ __(
 					'calculated with an address',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</span>
 		) : (

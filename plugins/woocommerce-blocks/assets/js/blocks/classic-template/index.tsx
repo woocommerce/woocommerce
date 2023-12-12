@@ -115,14 +115,14 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 					createInfoNotice(
 						__(
 							'Template transformed into blocks!',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						{
 							actions: [
 								{
 									label: __(
 										'Undo',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									),
 									onClick: () => {
 										const clientIds = pickBlockClientIds(
@@ -264,13 +264,13 @@ const Edit = ( {
 							<Icon icon={ woo } />{ ' ' }
 							{ __(
 								'WooCommerce',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</span>
 						<span>
 							{ __(
 								'Classic Template Placeholder',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</span>
 					</div>
@@ -282,7 +282,7 @@ const Edit = ( {
 					<p>
 						{ __(
 							'You cannot edit the content of this block. However, you can move it and place other blocks around it.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</p>
 					{ canConvert && blockifyConfig && (
@@ -319,7 +319,7 @@ const registerClassicTemplateBlock = ( {
 				? TEMPLATES[ template ].title
 				: __(
 						'WooCommerce Classic Template',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 				  ),
 		icon: (
 			<Icon
@@ -329,10 +329,10 @@ const registerClassicTemplateBlock = ( {
 		),
 		category: 'woocommerce',
 		apiVersion: 2,
-		keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
+		keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
 		description: __(
 			'Renders classic WooCommerce PHP templates.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		supports: {
 			align: [ 'wide', 'full' ],

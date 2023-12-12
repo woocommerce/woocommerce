@@ -39,7 +39,7 @@ export const ProductOnSaleInspectorControls = (
 	return (
 		<InspectorControls key="inspector">
 			<PanelBody
-				title={ __( 'Layout', 'woo-gutenberg-products-block' ) }
+				title={ __( 'Layout', 'woocommerce' ) }
 				initialOpen
 			>
 				<GridLayoutControl
@@ -54,7 +54,7 @@ export const ProductOnSaleInspectorControls = (
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+				title={ __( 'Content', 'woocommerce' ) }
 				initialOpen
 			>
 				<GridContentControl
@@ -65,7 +65,7 @@ export const ProductOnSaleInspectorControls = (
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Order By', 'woo-gutenberg-products-block' ) }
+				title={ __( 'Order By', 'woocommerce' ) }
 				initialOpen={ false }
 			>
 				<ProductOrderbyControl
@@ -76,7 +76,7 @@ export const ProductOnSaleInspectorControls = (
 			<PanelBody
 				title={ __(
 					'Filter by Product Category',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				initialOpen={ false }
 			>
@@ -95,7 +95,7 @@ export const ProductOnSaleInspectorControls = (
 			<PanelBody
 				title={ __(
 					'Filter by stock status',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				initialOpen={ false }
 			>

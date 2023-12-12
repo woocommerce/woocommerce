@@ -31,15 +31,15 @@ interface ImageSizeSettingProps {
 const scaleHelp: Record< string, string > = {
 	cover: __(
 		'Image is scaled and cropped to fill the entire space without being distorted.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	contain: __(
 		'Image is scaled to fill the space without clipping nor distorting.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	fill: __(
 		'Image will be stretched and distorted to completely fill the space.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 };
 
@@ -52,10 +52,10 @@ export const ImageSizeSettings = ( {
 	return (
 		<ToolsPanel
 			className="wc-block-product-image__tools-panel"
-			label={ __( 'Image size', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Image size', 'woocommerce' ) }
 		>
 			<UnitControl
-				label={ __( 'Height', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Height', 'woocommerce' ) }
 				onChange={ ( value: string ) => {
 					setAttributes( { height: value } );
 				} }
@@ -68,7 +68,7 @@ export const ImageSizeSettings = ( {
 				] }
 			/>
 			<UnitControl
-				label={ __( 'Width', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Width', 'woocommerce' ) }
 				onChange={ ( value: string ) => {
 					setAttributes( { width: value } );
 				} }
@@ -83,10 +83,10 @@ export const ImageSizeSettings = ( {
 			{ height && (
 				<ToolsPanelItem
 					hasValue={ () => true }
-					label={ __( 'Scale', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Scale', 'woocommerce' ) }
 				>
 					<ToggleGroupControl
-						label={ __( 'Scale', 'woo-gutenberg-products-block' ) }
+						label={ __( 'Scale', 'woocommerce' ) }
 						value={ scale }
 						help={ scaleHelp[ scale ] }
 						onChange={ ( value: string ) =>
@@ -101,21 +101,21 @@ export const ImageSizeSettings = ( {
 								value="cover"
 								label={ __(
 									'Cover',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							/>
 							<ToggleGroupControlOption
 								value="contain"
 								label={ __(
 									'Contain',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							/>
 							<ToggleGroupControlOption
 								value="fill"
 								label={ __(
 									'Fill',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							/>
 						</>

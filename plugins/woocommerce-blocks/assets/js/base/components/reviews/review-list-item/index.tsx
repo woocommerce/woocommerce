@@ -46,10 +46,10 @@ function getReviewImage(
 					className="wc-block-review-list-item__verified wc-block-components-review-list-item__verified"
 					title={ __(
 						'Verified buyer',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				>
-					{ __( 'Verified buyer', 'woo-gutenberg-products-block' ) }
+					{ __( 'Verified buyer', 'woocommerce' ) }
 				</div>
 			) }
 		</div>
@@ -62,11 +62,11 @@ function getReviewContent( review: Review ): JSX.Element {
 			maxLines={ 10 }
 			moreText={ __(
 				'Read full review',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			lessText={ __(
 				'Hide full review',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			className="wc-block-review-list-item__text wc-block-components-review-list-item__text"
 		>
@@ -129,13 +129,13 @@ function getReviewRating( review: Review ): JSX.Element {
 	};
 	const ratingText = sprintf(
 		/* translators: %f is referring to the average rating value */
-		__( 'Rated %f out of 5', 'woo-gutenberg-products-block' ),
+		__( 'Rated %f out of 5', 'woocommerce' ),
 		rating
 	);
 	const ratingHTML = {
 		__html: sprintf(
 			/* translators: %s is referring to the average rating value */
-			__( 'Rated %s out of 5', 'woo-gutenberg-products-block' ),
+			__( 'Rated %s out of 5', 'woocommerce' ),
 			sprintf( '<strong class="rating">%f</strong>', rating )
 		),
 	};

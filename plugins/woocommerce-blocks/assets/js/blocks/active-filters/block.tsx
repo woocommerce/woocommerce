@@ -98,7 +98,7 @@ const ActiveFiltersBlock = ( {
 
 		const stockStatusLabel = __(
 			'Stock Status',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		);
 
 		return (
@@ -149,7 +149,7 @@ const ActiveFiltersBlock = ( {
 			return null;
 		}
 		return renderRemovableListItem( {
-			type: __( 'Price', 'woo-gutenberg-products-block' ),
+			type: __( 'Price', 'woocommerce' ),
 			name: formatPriceRange( minPrice, maxPrice ),
 			removeCallback: () => {
 				removeArgsFromFilterUrl( 'max_price', 'min_price' );
@@ -245,7 +245,7 @@ const ActiveFiltersBlock = ( {
 			return null;
 		}
 
-		const ratingLabel = __( 'Rating', 'woo-gutenberg-products-block' );
+		const ratingLabel = __( 'Rating', 'woocommerce' );
 
 		return (
 			<li>
@@ -260,7 +260,7 @@ const ActiveFiltersBlock = ( {
 								/* translators: %s is referring to the average rating value */
 								__(
 									'Rated %s out of 5',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								slug
 							),
@@ -351,22 +351,22 @@ const ActiveFiltersBlock = ( {
 							{ renderRemovableListItem( {
 								type: __(
 									'Size',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								name: __(
 									'Small',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								displayStyle: blockAttributes.displayStyle,
 							} ) }
 							{ renderRemovableListItem( {
 								type: __(
 									'Color',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								name: __(
 									'Blue',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								displayStyle: blockAttributes.displayStyle,
 							} ) }
@@ -403,11 +403,11 @@ const ActiveFiltersBlock = ( {
 						<Label
 							label={ __(
 								'Clear All',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							screenReaderLabel={ __(
 								'Clear All Filters',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					</button>

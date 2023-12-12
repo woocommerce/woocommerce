@@ -120,7 +120,7 @@ const Edit = ( {
 					<PanelBody
 						title={ __(
 							'Dimensions',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						initialOpen
 					>

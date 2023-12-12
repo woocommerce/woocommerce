@@ -25,7 +25,7 @@ const Block = ( props: Props ): JSX.Element => {
 					'(%d item)',
 					'(%d items)',
 					cartItemsCount,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				cartItemsCount
 			) }

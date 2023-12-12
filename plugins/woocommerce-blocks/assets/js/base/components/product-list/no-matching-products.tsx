@@ -22,16 +22,16 @@ const NoMatchingProducts = ( {
 				size={ 100 }
 			/>
 			<strong className={ `${ parentClassName }__no-products-title` }>
-				{ __( 'No products found', 'woo-gutenberg-products-block' ) }
+				{ __( 'No products found', 'woocommerce' ) }
 			</strong>
 			<p className={ `${ parentClassName }__no-products-description` }>
 				{ __(
 					'We were unable to find any results based on your search.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</p>
 			<button onClick={ resetCallback }>
-				{ __( 'Reset Search', 'woo-gutenberg-products-block' ) }
+				{ __( 'Reset Search', 'woocommerce' ) }
 			</button>
 		</div>
 	);

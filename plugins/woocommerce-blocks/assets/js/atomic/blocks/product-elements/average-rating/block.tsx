@@ -29,7 +29,7 @@ export const Block = ( props: ProductAverageRatingProps ): JSX.Element => {
 		<div className={ className } style={ styleProps.style }>
 			{ Number( product.average_rating ) > 0
 				? product.average_rating
-				: __( 'No ratings', 'woo-gutenberg-products-block' ) }
+				: __( 'No ratings', 'woocommerce' ) }
 		</div>
 	);
 };

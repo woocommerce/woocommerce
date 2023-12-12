@@ -76,7 +76,7 @@ class FrontendContainerBlock extends Component<
 					'%d review loaded.',
 					'%d reviews loaded.',
 					newReviews.length,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				newReviews.length
 			)
@@ -84,14 +84,14 @@ class FrontendContainerBlock extends Component<
 	}
 
 	onReviewsReplaced() {
-		speak( __( 'Reviews list updated.', 'woo-gutenberg-products-block' ) );
+		speak( __( 'Reviews list updated.', 'woocommerce' ) );
 	}
 
 	onReviewsLoadError() {
 		speak(
 			__(
 				'There was an error loading the reviews.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			)
 		);
 	}

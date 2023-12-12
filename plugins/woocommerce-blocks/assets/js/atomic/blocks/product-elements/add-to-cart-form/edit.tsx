@@ -56,7 +56,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 						>
 							{ __(
 								'Add to cart',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</button>
 					</Disabled>

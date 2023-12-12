@@ -55,13 +55,13 @@ const AddToCartButton = ( {
 					'%d in cart',
 					'%d in cart',
 					cartQuantity,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				cartQuantity
 		  )
 		: decodeEntities(
 				productCartDetails?.text ||
-					__( 'Add to cart', 'woo-gutenberg-products-block' )
+					__( 'Add to cart', 'woocommerce' )
 		  );
 
 	const ButtonTag = allowAddToCart ? 'button' : 'a';

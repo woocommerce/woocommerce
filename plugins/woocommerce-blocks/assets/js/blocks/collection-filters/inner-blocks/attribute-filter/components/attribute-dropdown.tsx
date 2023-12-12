@@ -14,7 +14,7 @@ export const AttributeDropdown = ( { label }: Props ) => (
 			suggestions={ [] }
 			placeholder={ sprintf(
 				/* translators: %s attribute name. */
-				__( 'Select %s', 'woo-gutenberg-products-block' ),
+				__( 'Select %s', 'woocommerce' ),
 				label
 			) }
 			onChange={ () => null }

@@ -48,7 +48,7 @@ export const ProductsByCategoryEditMode = (
 		debouncedSpeak(
 			__(
 				'Now displaying a preview of the reviews for the products in the selected categories.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			)
 		);
 	};
@@ -58,7 +58,7 @@ export const ProductsByCategoryEditMode = (
 		debouncedSpeak(
 			__(
 				'Now displaying a preview of the reviews for the products in the selected categories.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			)
 		);
 	};
@@ -68,13 +68,13 @@ export const ProductsByCategoryEditMode = (
 			icon={ <Icon icon={ file } /> }
 			label={ __(
 				'Products by Category',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			className="wc-block-products-grid wc-block-products-category"
 		>
 			{ __(
 				'Display a grid of products from your selected categories.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			<div className="wc-block-products-category__selection">
 				<ProductCategoryControl
@@ -89,14 +89,14 @@ export const ProductsByCategoryEditMode = (
 					}
 				/>
 				<Button variant="primary" onClick={ onDone }>
-					{ __( 'Done', 'woo-gutenberg-products-block' ) }
+					{ __( 'Done', 'woocommerce' ) }
 				</Button>
 				<Button
 					className="wc-block-products-category__cancel-button"
 					variant="tertiary"
 					onClick={ onCancel }
 				>
-					{ __( 'Cancel', 'woo-gutenberg-products-block' ) }
+					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 			</div>
 		</Placeholder>

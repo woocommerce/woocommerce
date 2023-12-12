@@ -34,13 +34,13 @@ export const Edit = ( {
 					<PanelBody
 						title={ __(
 							'Shipping Calculations',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					>
 						<p className="wc-block-checkout__controls-text">
 							{ __(
 								'Options that control shipping can be managed in your store settings.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</p>
 						<ExternalLink
@@ -48,7 +48,7 @@ export const Edit = ( {
 						>
 							{ __(
 								'Manage shipping options',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</ExternalLink>{ ' ' }
 					</PanelBody>

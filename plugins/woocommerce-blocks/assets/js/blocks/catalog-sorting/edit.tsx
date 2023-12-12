@@ -9,7 +9,7 @@ const CatalogSorting = () => {
 	return (
 		<select className="orderby">
 			<option>
-				{ __( 'Default sorting', 'woo-gutenberg-products-block' ) }
+				{ __( 'Default sorting', 'woocommerce' ) }
 			</option>
 		</select>
 	);

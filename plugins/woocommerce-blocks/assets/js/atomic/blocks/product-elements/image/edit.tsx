@@ -74,16 +74,16 @@ const Edit = ( {
 					setAttributes={ setAttributes }
 				/>
 				<PanelBody
-					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Content', 'woocommerce' ) }
 				>
 					<ToggleControl
 						label={ __(
 							'Link to Product Page',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						help={ __(
 							'Links the image to the single product listing.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showProductLink }
 						onChange={ () =>
@@ -95,11 +95,11 @@ const Edit = ( {
 					<ToggleControl
 						label={ __(
 							'Show On-Sale Badge',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						help={ __(
 							'Display a “sale” badge if the product is on-sale.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showSaleBadge }
 						onChange={ () =>
@@ -112,7 +112,7 @@ const Edit = ( {
 						<ToggleGroupControl
 							label={ __(
 								'Sale Badge Alignment',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							value={ saleBadgeAlign }
 							onChange={ ( value: SaleBadgeAlignProps ) =>
@@ -123,21 +123,21 @@ const Edit = ( {
 								value="left"
 								label={ __(
 									'Left',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							/>
 							<ToggleGroupControlOption
 								value="center"
 								label={ __(
 									'Center',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							/>
 							<ToggleGroupControlOption
 								value="right"
 								label={ __(
 									'Right',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							/>
 						</ToggleGroupControl>
@@ -146,12 +146,12 @@ const Edit = ( {
 						<ToggleGroupControl
 							label={ __(
 								'Image Sizing',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							help={ createInterpolateElement(
 								__(
 									'Product image cropping can be modified in the <a>Customizer</a>.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								{
 									a: (
@@ -175,14 +175,14 @@ const Edit = ( {
 								value={ ImageSizing.SINGLE }
 								label={ __(
 									'Full Size',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							/>
 							<ToggleGroupControlOption
 								value={ ImageSizing.THUMBNAIL }
 								label={ __(
 									'Cropped',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							/>
 						</ToggleGroupControl>

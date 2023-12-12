@@ -34,31 +34,31 @@ const GridContentControl = ( {
 	return (
 		<>
 			<ToggleControl
-				label={ __( 'Product image', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Product image', 'woocommerce' ) }
 				checked={ imageIsVisible }
 				onChange={ () =>
 					onChange( { ...settings, image: ! imageIsVisible } )
 				}
 			/>
 			<ToggleControl
-				label={ __( 'Product title', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Product title', 'woocommerce' ) }
 				checked={ title }
 				onChange={ () => onChange( { ...settings, title: ! title } ) }
 			/>
 			<ToggleControl
-				label={ __( 'Product price', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Product price', 'woocommerce' ) }
 				checked={ price }
 				onChange={ () => onChange( { ...settings, price: ! price } ) }
 			/>
 			<ToggleControl
-				label={ __( 'Product rating', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Product rating', 'woocommerce' ) }
 				checked={ rating }
 				onChange={ () => onChange( { ...settings, rating: ! rating } ) }
 			/>
 			<ToggleControl
 				label={ __(
 					'Add to Cart button',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				checked={ button }
 				onChange={ () => onChange( { ...settings, button: ! button } ) }

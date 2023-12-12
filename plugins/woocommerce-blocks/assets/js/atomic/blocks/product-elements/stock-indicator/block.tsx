@@ -45,15 +45,15 @@ const getTextBasedOnStock = ( {
 	if ( isLowStock && lowStockAmount !== null ) {
 		return sprintf(
 			/* translators: %d stock amount (number of items in stock for product) */
-			__( '%d left in stock', 'woo-gutenberg-products-block' ),
+			__( '%d left in stock', 'woocommerce' ),
 			lowStockAmount
 		);
 	} else if ( isOnBackorder ) {
-		return __( 'Available on backorder', 'woo-gutenberg-products-block' );
+		return __( 'Available on backorder', 'woocommerce' );
 	} else if ( isInStock ) {
-		return __( 'In stock', 'woo-gutenberg-products-block' );
+		return __( 'In stock', 'woocommerce' );
 	}
-	return __( 'Out of stock', 'woo-gutenberg-products-block' );
+	return __( 'Out of stock', 'woocommerce' );
 };
 
 type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;

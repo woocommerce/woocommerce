@@ -22,7 +22,7 @@ const EditorBlockControls = ( {
 						icon: 'edit',
 						title: __(
 							'Edit selected product',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						onClick: () => setIsEditing( ! isEditing ),
 						isActive: isEditing,

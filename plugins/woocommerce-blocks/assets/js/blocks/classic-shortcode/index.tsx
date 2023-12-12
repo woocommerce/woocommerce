@@ -88,14 +88,14 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 					createInfoNotice(
 						__(
 							'Classic shortcode transformed to blocks.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						{
 							actions: [
 								{
 									label: __(
 										'Undo',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									),
 									onClick: () => {
 										const targetBlocks = [
@@ -171,7 +171,7 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 				target="_blank"
 				tabIndex={ 0 }
 			>
-				{ __( 'Learn more', 'woo-gutenberg-products-block' ) }
+				{ __( 'Learn more', 'woocommerce' ) }
 			</Button>
 		</TabbableContainer>
 	);
@@ -193,13 +193,13 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 	const canConvert = isConversionPossible();
 	const placeholderTitle = getTitle
 		? getTitle()
-		: __( 'Classic Shortcode Placeholder', 'woo-gutenberg-products-block' );
+		: __( 'Classic Shortcode Placeholder', 'woocommerce' );
 	const placeholderDescription = getDescription( templateTitle, canConvert );
 
 	const learnMoreContent = createInterpolateElement(
 		__(
 			'You can learn more about the benefits of switching to blocks, compatibility with extensions, and how to switch back to shortcodes <a>in our documentation</a>.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		{
 			a: (
@@ -226,7 +226,7 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 							<Icon icon={ woo } />{ ' ' }
 							{ __(
 								'WooCommerce',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</span>
 						<span>{ placeholderTitle }</span>
@@ -274,7 +274,7 @@ const settings = {
 	variations: [
 		{
 			name: 'checkout',
-			title: __( 'Classic Checkout', 'woo-gutenberg-products-block' ),
+			title: __( 'Classic Checkout', 'woocommerce' ),
 			attributes: {
 				shortcode: 'checkout',
 			},
@@ -284,7 +284,7 @@ const settings = {
 		},
 		{
 			name: 'cart',
-			title: __( 'Classic Cart', 'woo-gutenberg-products-block' ),
+			title: __( 'Classic Cart', 'woocommerce' ),
 			attributes: {
 				shortcode: 'cart',
 			},

@@ -23,11 +23,11 @@ export const HandpickedProductsInspectorControls = (
 	return (
 		<InspectorControls key="inspector">
 			<PanelBody
-				title={ __( 'Layout', 'woo-gutenberg-products-block' ) }
+				title={ __( 'Layout', 'woocommerce' ) }
 				initialOpen
 			>
 				<RangeControl
-					label={ __( 'Columns', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Columns', 'woocommerce' ) }
 					value={ columns }
 					onChange={ ( value ) =>
 						setAttributes( { columns: value } )
@@ -38,17 +38,17 @@ export const HandpickedProductsInspectorControls = (
 				<ToggleControl
 					label={ __(
 						'Align Buttons',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					help={
 						alignButtons
 							? __(
 									'Buttons are aligned vertically.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 							  )
 							: __(
 									'Buttons follow content.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 							  )
 					}
 					checked={ alignButtons }
@@ -58,7 +58,7 @@ export const HandpickedProductsInspectorControls = (
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+				title={ __( 'Content', 'woocommerce' ) }
 				initialOpen
 			>
 				<GridContentControl
@@ -69,7 +69,7 @@ export const HandpickedProductsInspectorControls = (
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Order By', 'woo-gutenberg-products-block' ) }
+				title={ __( 'Order By', 'woocommerce' ) }
 				initialOpen={ false }
 			>
 				<ProductOrderbyControl
@@ -78,7 +78,7 @@ export const HandpickedProductsInspectorControls = (
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Products', 'woo-gutenberg-products-block' ) }
+				title={ __( 'Products', 'woocommerce' ) }
 				initialOpen={ false }
 			>
 				<ProductsControl

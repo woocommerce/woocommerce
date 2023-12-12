@@ -18,7 +18,7 @@ const Edit = () => {
 			<p className="woocommerce-result-count">
 				{ __(
 					'Showing 1-X of X results',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</p>
 		</div>

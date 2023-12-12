@@ -22,15 +22,15 @@ export const AttributeSelectControls = ( {
 	attributeId,
 }: AttributeSelectControlsProps ) => {
 	const messages = {
-		clear: __( 'Clear selected attribute', 'woo-gutenberg-products-block' ),
-		list: __( 'Product Attributes', 'woo-gutenberg-products-block' ),
+		clear: __( 'Clear selected attribute', 'woocommerce' ),
+		list: __( 'Product Attributes', 'woocommerce' ),
 		noItems: __(
 			"Your store doesn't have any product attributes.",
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		search: __(
 			'Search for a product attribute:',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		selected: ( n: number ) =>
 			sprintf(
@@ -39,13 +39,13 @@ export const AttributeSelectControls = ( {
 					'%d attribute selected',
 					'%d attributes selected',
 					n,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				n
 			),
 		updated: __(
 			'Product attribute search results updated.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 	};
 

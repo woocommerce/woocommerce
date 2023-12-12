@@ -113,7 +113,7 @@ const HandPickedProductsControl = ( {
 		<ToolsPanelItem
 			label={ __(
 				'Hand-picked Products',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			hasValue={ () => !! selectedProductIds?.length }
 			onDeselect={ () => {
@@ -127,7 +127,7 @@ const HandPickedProductsControl = ( {
 				displayTransform={ transformTokenIntoProductName }
 				label={ __(
 					'Hand-picked Products',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				onChange={ onTokenChange }
 				suggestions={ suggestions }
@@ -137,7 +137,7 @@ const HandPickedProductsControl = ( {
 				}
 				value={
 					! productsMap.size
-						? [ __( 'Loading…', 'woo-gutenberg-products-block' ) ]
+						? [ __( 'Loading…', 'woocommerce' ) ]
 						: selectedProductIds || []
 				}
 				__experimentalExpandOnFocus={ true }

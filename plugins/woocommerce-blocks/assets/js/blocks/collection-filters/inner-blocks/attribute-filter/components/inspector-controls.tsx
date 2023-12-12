@@ -26,13 +26,13 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 			<PanelBody
 				title={ __(
 					'Display Settings',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			>
 				<ToggleControl
 					label={ __(
 						'Display product count',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					checked={ showCounts }
 					onChange={ () =>
@@ -44,7 +44,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				<ToggleGroupControl
 					label={ __(
 						'Allow selecting multiple options?',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					value={ selectType || 'multiple' }
 					onChange={ ( value: string ) =>
@@ -58,29 +58,29 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 						value="multiple"
 						label={ __(
 							'Multiple',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					/>
 					<ToggleGroupControlOption
 						value="single"
-						label={ __( 'Single', 'woo-gutenberg-products-block' ) }
+						label={ __( 'Single', 'woocommerce' ) }
 					/>
 				</ToggleGroupControl>
 				{ selectType === 'multiple' && (
 					<ToggleGroupControl
 						label={ __(
 							'Filter Conditions',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						help={
 							queryType === 'and'
 								? __(
 										'Choose to return filter results for all of the attributes selected.',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 								  )
 								: __(
 										'Choose to return filter results for any of the attributes selected.',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 								  )
 						}
 						value={ queryType }
@@ -95,14 +95,14 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 							value="and"
 							label={ __(
 								'All',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 						<ToggleGroupControlOption
 							value="or"
 							label={ __(
 								'Any',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					</ToggleGroupControl>
@@ -110,7 +110,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				<ToggleGroupControl
 					label={ __(
 						'Display Style',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					value={ displayStyle }
 					onChange={ ( value: string ) =>
@@ -122,13 +122,13 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				>
 					<ToggleGroupControlOption
 						value="list"
-						label={ __( 'List', 'woo-gutenberg-products-block' ) }
+						label={ __( 'List', 'woocommerce' ) }
 					/>
 					<ToggleGroupControlOption
 						value="dropdown"
 						label={ __(
 							'Dropdown',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					/>
 				</ToggleGroupControl>
@@ -136,7 +136,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 			<PanelBody
 				title={ __(
 					'Content Settings',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				initialOpen={ false }
 			>

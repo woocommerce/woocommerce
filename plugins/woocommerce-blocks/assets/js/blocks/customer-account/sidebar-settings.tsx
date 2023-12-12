@@ -40,7 +40,7 @@ const AccountSettingsLink = () => {
 	const linkText = createInterpolateElement(
 		`<a>${ __(
 			'Manage account settings',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }</a>`,
 		{
 			a: <ExternalLink href={ accountSettingsUrl } />,
@@ -72,14 +72,14 @@ export const BlockSettings = ( {
 			<PanelBody
 				title={ __(
 					'Display settings',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			>
 				<SelectControl
 					className="customer-account-display-style"
 					label={ __(
 						'Icon options',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					value={ displayStyle }
 					onChange={ ( value: DisplayStyle ) => {
@@ -87,28 +87,28 @@ export const BlockSettings = ( {
 					} }
 					help={ __(
 						'Choose if you want to include an icon with the customer account link.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					options={ [
 						{
 							value: DisplayStyle.ICON_AND_TEXT,
 							label: __(
 								'Icon and text',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 						},
 						{
 							value: DisplayStyle.TEXT_ONLY,
 							label: __(
 								'Text-only',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 						},
 						{
 							value: DisplayStyle.ICON_ONLY,
 							label: __(
 								'Icon-only',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 						},
 					] }
@@ -117,7 +117,7 @@ export const BlockSettings = ( {
 					<ToggleGroupControl
 						label={ __(
 							'Display Style',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ iconStyle }
 						onChange={ ( value: IconStyle ) =>

@@ -42,12 +42,12 @@ function WidthPanel( {
 
 	return (
 		<PanelBody
-			title={ __( 'Width settings', 'woo-gutenberg-products-block' ) }
+			title={ __( 'Width settings', 'woocommerce' ) }
 		>
 			<ButtonGroup
 				aria-label={ __(
 					'Button width',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			>
 				{ [ 25, 50, 75, 100 ].map( ( widthValue ) => {

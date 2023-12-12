@@ -24,32 +24,32 @@ const ReviewSortSelect = ( {
 	return (
 		<SortSelect
 			className="wc-block-review-sort-select wc-block-components-review-sort-select"
-			label={ __( 'Order by', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Order by', 'woocommerce' ) }
 			onChange={ onChange }
 			options={ [
 				{
 					key: 'most-recent',
-					label: __( 'Most recent', 'woo-gutenberg-products-block' ),
+					label: __( 'Most recent', 'woocommerce' ),
 				},
 				{
 					key: 'highest-rating',
 					label: __(
 						'Highest rating',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 				},
 				{
 					key: 'lowest-rating',
 					label: __(
 						'Lowest rating',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 				},
 			] }
 			readOnly={ readOnly }
 			screenReaderLabel={ __(
 				'Order reviews by',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			value={ value }
 		/>

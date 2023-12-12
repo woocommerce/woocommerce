@@ -94,17 +94,17 @@ export const TotalsCoupon = ( {
 					className="wc-block-components-totals-coupon-link"
 					aria-label={ __(
 						'Add a coupon',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					onClick={ handleCouponAnchorClick }
 				>
-					{ __( 'Add a coupon', 'woo-gutenberg-products-block' ) }
+					{ __( 'Add a coupon', 'woocommerce' ) }
 				</a>
 			) : (
 				<LoadingMask
 					screenReaderLabel={ __(
 						'Applying coupon…',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					isLoading={ isLoading }
 					showSpinner={ false }
@@ -120,7 +120,7 @@ export const TotalsCoupon = ( {
 								className="wc-block-components-totals-coupon__input"
 								label={ __(
 									'Enter code',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 								value={ couponValue }
 								ariaDescribedBy={ validationErrorId }
@@ -140,7 +140,7 @@ export const TotalsCoupon = ( {
 							>
 								{ __(
 									'Apply',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							</Button>
 						</form>

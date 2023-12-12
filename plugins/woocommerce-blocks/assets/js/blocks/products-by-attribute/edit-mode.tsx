@@ -32,7 +32,7 @@ export const ProductsByAttributeEditMode = (
 		debouncedSpeak(
 			__(
 				'Showing Products by Attribute block preview.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			)
 		);
 	};
@@ -42,13 +42,13 @@ export const ProductsByAttributeEditMode = (
 			icon={ <Icon icon={ category } /> }
 			label={ __(
 				'Products by Attribute',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			className="wc-block-products-grid wc-block-products-by-attribute"
 		>
 			{ __(
 				'Display a grid of products from your selected attributes.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			<div className="wc-block-products-by-attribute__selection">
 				<ProductAttributeTermControl
@@ -68,7 +68,7 @@ export const ProductsByAttributeEditMode = (
 					}
 				/>
 				<Button variant="primary" onClick={ onDone }>
-					{ __( 'Done', 'woo-gutenberg-products-block' ) }
+					{ __( 'Done', 'woocommerce' ) }
 				</Button>
 			</div>
 		</Placeholder>

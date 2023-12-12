@@ -58,7 +58,7 @@ const CloseButtonPortal = ( {
 					className="wc-block-components-drawer__close"
 					icon={ close }
 					onClick={ onClick }
-					label={ __( 'Close', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Close', 'woocommerce' ) }
 					showTooltip={ false }
 				/>,
 				closeButtonWrapper

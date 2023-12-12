@@ -76,7 +76,7 @@ const TotalsDiscount = ( {
 					<LoadingMask
 						screenReaderLabel={ __(
 							'Removing coupon…',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						isLoading={ isRemovingCoupon }
 						showSpinner={ false }
@@ -92,7 +92,7 @@ const TotalsDiscount = ( {
 											/* translators: %s Coupon code. */
 											__(
 												'Coupon: %s',
-												'woo-gutenberg-products-block'
+												'woocommerce'
 											),
 											cartCoupon.label
 										) }
@@ -105,7 +105,7 @@ const TotalsDiscount = ( {
 											/* translators: %s is a coupon code. */
 											__(
 												'Remove coupon "%s"',
-												'woo-gutenberg-products-block'
+												'woocommerce'
 											),
 											cartCoupon.label
 										) }
@@ -118,8 +118,8 @@ const TotalsDiscount = ( {
 			}
 			label={
 				!! discountTotalValue
-					? __( 'Discount', 'woo-gutenberg-products-block' )
-					: __( 'Coupons', 'woo-gutenberg-products-block' )
+					? __( 'Discount', 'woocommerce' )
+					: __( 'Coupons', 'woocommerce' )
 			}
 			value={ discountTotalValue ? discountTotalValue * -1 : '-' }
 		/>

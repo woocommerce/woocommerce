@@ -79,18 +79,18 @@ export function IncompatibleExtensionsNotice( {
 
 	const switchButtonLabel =
 		block === 'woocommerce/cart'
-			? __( 'Switch to classic cart', 'woo-gutenberg-products-block' )
+			? __( 'Switch to classic cart', 'woocommerce' )
 			: __(
 					'Switch to classic checkout',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 			  );
 
 	const snackbarLabel =
 		block === 'woocommerce/cart'
-			? __( 'Switched to classic cart.', 'woo-gutenberg-products-block' )
+			? __( 'Switched to classic cart.', 'woocommerce' )
 			: __(
 					'Switched to classic checkout.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 			  );
 
 	const noticeContent = (
@@ -99,7 +99,7 @@ export function IncompatibleExtensionsNotice( {
 				? createInterpolateElement(
 						__(
 							'Some active extensions do not yet support this block. This may impact the shopper experience. <a>Learn more</a>',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						{
 							a: (
@@ -112,7 +112,7 @@ export function IncompatibleExtensionsNotice( {
 							// translators: %s is the name of the extension.
 							__(
 								'<strong>%s</strong> does not yet support this block. This may impact the shopper experience. <a>Learn more</a>',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							Object.values( incompatibleExtensions )[ 0 ]
 						),
@@ -178,7 +178,7 @@ export function IncompatibleExtensionsNotice( {
 											'%s more incompatibility',
 											'%s more incompatibilites',
 											remainingEntries,
-											'woo-gutenberg-products-block'
+											'woocommerce'
 										),
 										remainingEntries
 									) }
@@ -254,7 +254,7 @@ export function IncompatibleExtensionsNotice( {
 												{
 													label: __(
 														'Undo',
-														'woo-gutenberg-products-block'
+														'woocommerce'
 													),
 													onClick: () => {
 														undo();
@@ -278,7 +278,7 @@ export function IncompatibleExtensionsNotice( {
 								>
 									{ __(
 										'Switch',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</Button>{ ' ' }
 								<Button
@@ -299,7 +299,7 @@ export function IncompatibleExtensionsNotice( {
 								>
 									{ __(
 										'Cancel',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</Button>
 							</TabbableContainer>

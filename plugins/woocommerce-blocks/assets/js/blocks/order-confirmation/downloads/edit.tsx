@@ -45,7 +45,7 @@ const Edit = (): JSX.Element => {
 								<span className="nobr">
 									{ __(
 										'Product',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</span>
 							</th>
@@ -53,7 +53,7 @@ const Edit = (): JSX.Element => {
 								<span className="nobr">
 									{ __(
 										'Downloads remaining',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</span>
 							</th>
@@ -61,7 +61,7 @@ const Edit = (): JSX.Element => {
 								<span className="nobr">
 									{ __(
 										'Expires',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</span>
 							</th>
@@ -69,7 +69,7 @@ const Edit = (): JSX.Element => {
 								<span className="nobr">
 									{ __(
 										'Download',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</span>
 							</th>
@@ -85,7 +85,7 @@ const Edit = (): JSX.Element => {
 									{ _x(
 										'Test Product',
 										'sample product name',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</a>
 							</td>
@@ -96,7 +96,7 @@ const Edit = (): JSX.Element => {
 								{ _x(
 									'∞',
 									'infinite downloads remaining',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							</td>
 							<td
@@ -106,7 +106,7 @@ const Edit = (): JSX.Element => {
 								{ _x(
 									'Never',
 									'download expires',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							</td>
 							<td className="download-file" data-title="Download">
@@ -117,7 +117,7 @@ const Edit = (): JSX.Element => {
 									{ _x(
 										'Test Download',
 										'sample download name',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</a>
 							</td>

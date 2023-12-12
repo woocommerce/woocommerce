@@ -84,11 +84,11 @@ const ProductStockControl = ( {
 				const helpText = checkedOptions.includes( option.value )
 					? /* translators: %s stock status. */ __(
 							'Stock status "%s" visible.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 					  )
 					: /* translators: %s stock status. */ __(
 							'Stock status "%s" hidden.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 					  );
 				return (
 					<ToggleControl

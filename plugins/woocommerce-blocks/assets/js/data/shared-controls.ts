@@ -19,7 +19,7 @@ const invalidJsonError = {
 	code: 'invalid_json',
 	message: __(
 		'The response is not a valid JSON response.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 };
 

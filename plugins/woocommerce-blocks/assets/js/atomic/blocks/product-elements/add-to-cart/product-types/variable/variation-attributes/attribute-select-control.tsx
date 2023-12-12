@@ -19,7 +19,7 @@ interface Props extends SelectControlType.Props< string > {
 // Default option for select boxes.
 const selectAnOption = {
 	value: '',
-	label: __( 'Select an option', 'woo-gutenberg-products-block' ),
+	label: __( 'Select an option', 'woocommerce' ),
 };
 
 /**
@@ -32,7 +32,7 @@ const AttributeSelectControl = ( {
 	onChange = () => void 0,
 	errorMessage = __(
 		'Please select a value.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 }: Props ) => {
 	const errorId = attributeName;

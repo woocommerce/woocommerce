@@ -81,7 +81,7 @@ const ProductAttributeTermControl = ( {
 							'%d term',
 							'%d terms',
 							count,
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						count
 					) }
@@ -91,7 +91,7 @@ const ProductAttributeTermControl = ( {
 							'%1$s, has %2$d term',
 							'%1$s, has %2$d terms',
 							count,
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						item.name,
 						count
@@ -113,7 +113,7 @@ const ProductAttributeTermControl = ( {
 						'%d product',
 						'%d products',
 						count,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					count
 				) }
@@ -123,7 +123,7 @@ const ProductAttributeTermControl = ( {
 						'%1$s, has %2$d product',
 						'%1$s, has %2$d products',
 						count,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					itemName,
 					count
@@ -145,15 +145,15 @@ const ProductAttributeTermControl = ( {
 	messages = {
 		clear: __(
 			'Clear all product attributes',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		noItems: __(
 			"Your store doesn't have any product attributes.",
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		search: __(
 			'Search for product attributes',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		selected: ( n: number ) =>
 			sprintf(
@@ -162,13 +162,13 @@ const ProductAttributeTermControl = ( {
 					'%d attribute selected',
 					'%d attributes selected',
 					n,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				n
 			),
 		updated: __(
 			'Product attribute search results updated.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		...messages,
 	};
@@ -204,11 +204,11 @@ const ProductAttributeTermControl = ( {
 						className="woocommerce-product-attributes__operator"
 						label={ __(
 							'Display products matching',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						help={ __(
 							'Pick at least two attributes to use this setting.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ operator }
 						onChange={ onOperatorChange }
@@ -216,14 +216,14 @@ const ProductAttributeTermControl = ( {
 							{
 								label: __(
 									'Any selected attributes',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								value: 'any',
 							},
 							{
 								label: __(
 									'All selected attributes',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								value: 'all',
 							},

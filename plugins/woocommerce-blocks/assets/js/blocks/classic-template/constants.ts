@@ -29,7 +29,7 @@ export const TEMPLATES: TemplateDetails = {
 		type: TYPES.singleProduct,
 		title: __(
 			'WooCommerce Single Product Block',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		placeholder: PLACEHOLDERS.singleProduct,
 	},
@@ -37,7 +37,7 @@ export const TEMPLATES: TemplateDetails = {
 		type: TYPES.productCatalog,
 		title: __(
 			'WooCommerce Product Grid Block',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		placeholder: PLACEHOLDERS.archiveProduct,
 	},
@@ -45,7 +45,7 @@ export const TEMPLATES: TemplateDetails = {
 		type: TYPES.productTaxonomy,
 		title: __(
 			'WooCommerce Product Taxonomy Block',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		placeholder: PLACEHOLDERS.archiveProduct,
 	},
@@ -53,7 +53,7 @@ export const TEMPLATES: TemplateDetails = {
 		type: TYPES.productTaxonomy,
 		title: __(
 			'WooCommerce Product Tag Block',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		placeholder: PLACEHOLDERS.archiveProduct,
 	},
@@ -61,7 +61,7 @@ export const TEMPLATES: TemplateDetails = {
 		type: TYPES.productTaxonomy,
 		title: __(
 			'WooCommerce Product Attribute Block',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		placeholder: PLACEHOLDERS.archiveProduct,
 	},
@@ -70,7 +70,7 @@ export const TEMPLATES: TemplateDetails = {
 		type: TYPES.productTaxonomy,
 		title: __(
 			"WooCommerce Product's Custom Taxonomy Block",
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		placeholder: PLACEHOLDERS.archiveProduct,
 	},
@@ -78,18 +78,18 @@ export const TEMPLATES: TemplateDetails = {
 		type: TYPES.productSearchResults,
 		title: __(
 			'WooCommerce Product Search Results Block',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		placeholder: PLACEHOLDERS.archiveProduct,
 	},
 	'checkout-header': {
 		type: TYPES.checkoutHeader,
-		title: __( 'Checkout Header', 'woo-gutenberg-products-block' ),
+		title: __( 'Checkout Header', 'woocommerce' ),
 		placeholder: 'checkout-header',
 	},
 	'order-confirmation': {
 		type: TYPES.orderConfirmation,
-		title: __( 'Order Confirmation Block', 'woo-gutenberg-products-block' ),
+		title: __( 'Order Confirmation Block', 'woocommerce' ),
 		placeholder: PLACEHOLDERS.orderConfirmation,
 	},
 };

@@ -89,7 +89,7 @@ export const Switcher = ( {
 				<ToolbarDropdownMenu
 					label={ __(
 						'Switch view',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					text={ currentViewLabel }
 					icon={

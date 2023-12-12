@@ -111,7 +111,7 @@ const ShippingRatesControl = ( {
 			isLoading={ isLoadingRates }
 			screenReaderLabel={ __(
 				'Loading shipping rates…',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			showSpinner={ true }
 		>
@@ -127,7 +127,7 @@ const ShippingRatesControl = ( {
 					>
 						{ __(
 							'Multiple shipments must have the same pickup location',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</NoticeBanner>
 				) }

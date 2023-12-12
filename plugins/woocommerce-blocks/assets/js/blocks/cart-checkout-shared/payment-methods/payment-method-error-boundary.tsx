@@ -33,7 +33,7 @@ class PaymentMethodErrorBoundary extends Component< PaymentMethodErrorBoundaryPr
 		if ( hasError ) {
 			let errorText = __(
 				'We are experiencing difficulties with this payment method. Please contact us for assistance.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			);
 			if ( isEditor || CURRENT_USER_IS_ADMIN ) {
 				if ( errorMessage ) {
@@ -41,7 +41,7 @@ class PaymentMethodErrorBoundary extends Component< PaymentMethodErrorBoundaryPr
 				} else {
 					errorText = __(
 						"There was an error with this payment method. Please verify it's configured correctly.",
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					);
 				}
 			}

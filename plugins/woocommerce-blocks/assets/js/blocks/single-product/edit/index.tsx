@@ -95,7 +95,7 @@ const Editor = ( {
 			<BlockErrorBoundary
 				header={ __(
 					'Single Product Block Error',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			>
 				<EditorBlockControls
@@ -120,7 +120,7 @@ const Editor = ( {
 									setIsEditing( false );
 								} }
 							>
-								{ __( 'Done', 'woo-gutenberg-products-block' ) }
+								{ __( 'Done', 'woocommerce' ) }
 							</Button>
 						</div>
 					</Placeholder>
@@ -130,7 +130,7 @@ const Editor = ( {
 							<PanelBody
 								title={ __(
 									'Product',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 								initialOpen={ false }
 							>

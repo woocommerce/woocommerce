@@ -10,7 +10,7 @@ const DisplayLayoutControl = ( props: {
 	return (
 		<ToolbarGroup>
 			<ToolbarButton onClick={ props.openPatternSelectionModal }>
-				{ __( 'Choose pattern', 'woo-gutenberg-products-block' ) }
+				{ __( 'Choose pattern', 'woocommerce' ) }
 			</ToolbarButton>
 		</ToolbarGroup>
 	);
