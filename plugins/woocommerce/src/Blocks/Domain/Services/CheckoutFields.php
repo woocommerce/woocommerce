@@ -33,6 +33,11 @@ class CheckoutFields {
 	private $fields_locations;
 
 	/**
+	 * Supported field types
+	 */
+	private $supported_field_types = [ 'text', 'select' ];
+
+	/**
 	 * Instance of the asset data registry.
 	 *
 	 * @var AssetDataRegistry
