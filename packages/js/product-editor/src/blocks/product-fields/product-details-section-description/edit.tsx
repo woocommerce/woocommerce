@@ -4,7 +4,7 @@
 import { Fill } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 
 /**
@@ -12,12 +12,14 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
  */
 import { ProductEditorBlockEditProps } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
+import { useEntityProp } from '@wordpress/core-data';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
 	clientId,
 }: ProductEditorBlockEditProps< ProductDetailsSectionDescriptionBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
+	const [ productType ] = useEntityProp( 'postType', 'product', 'type' );
 
 	const rootClientId = useSelect(
 		( select ) => {
@@ -32,7 +34,13 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	return (
 		<Fill name={ rootClientId }>
 			<div { ...blockProps }>
-				<p>{ __( 'This is a standard product.', 'woocommerce' ) }</p>
+				<p>
+					{ sprintf(
+						/* translators: %s: the product type. */
+						__( 'This is a %s product.', 'woocommerce' ),
+						productType
+					) }
+				</p>
 			</div>
 		</Fill>
 	);
