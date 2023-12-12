@@ -98,7 +98,7 @@ class FileController {
 		/**
 		 * Filter the maximum size of a log file before it will get rotated.
 		 *
-		 * @since 8.5.0
+		 * @since 3.4.0
 		 *
 		 * @param int $max_file_size The file size in bytes.
 		 */
