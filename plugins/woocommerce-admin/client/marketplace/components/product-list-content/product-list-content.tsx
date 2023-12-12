@@ -53,8 +53,7 @@ export default function ProductListContent( props: {
 							product.url,
 							Object.entries( {
 								...wccomHelperSettings.inAppPurchaseURLParams,
-								...( props.productCategory !== '' ||
-								props.productCategory !== undefined
+								...( props.productCategory !== undefined
 									? { utm_category: props.productCategory }
 									: {} ),
 							} )
