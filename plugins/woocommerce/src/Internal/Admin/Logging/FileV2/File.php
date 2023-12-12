@@ -124,8 +124,7 @@ class File {
 			$this->created = strtotime( implode( '-', array_slice( $segments, -4, 3 ) ) );
 			$this->hash    = array_slice( $segments, -1 )[0];
 		} else {
-			$this->source  = implode( '-', $segments );
-			$this->created = filectime( $this->path );
+			$this->source = implode( '-', $segments );
 		}
 
 		$rotation_marker = strrpos( $this->source, '.', -1 );
@@ -171,6 +170,10 @@ class File {
 	 * @return resource|false
 	 */
 	public function get_stream() {
+		if ( ! $this->is_readable() ) {
+			return false;
+		}
+
 		if ( ! is_resource( $this->stream ) ) {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen -- No suitable alternative.
 			$this->stream = fopen( $this->path, 'rb' );
@@ -265,6 +268,10 @@ class File {
 	 * @return int|false
 	 */
 	public function get_created_timestamp() {
+		if ( ! $this->created && $this->is_readable() ) {
+			$this->created = filectime( $this->path );
+		}
+
 		return $this->created;
 	}
 
@@ -323,7 +330,7 @@ class File {
 		if ( ! $this->is_writable() ) {
 			$created = $this->create();
 
-			if ( ! $created ) {
+			if ( ! $created || ! $this->is_writable() ) {
 				return false;
 			}
 		}
