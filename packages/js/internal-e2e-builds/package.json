@@ -4,6 +4,10 @@
 	"description": "Utility build files for e2e packages",
 	"private": true,
 	"main": "build.js",
+	"files": [
+		"build.js",
+		"get-babel-config.js"
+	],
 	"engines": {
 		"node": "^16.14.1",
 		"pnpm": "^8.6.7"

@@ -5,8 +5,11 @@ import {
 	Card,
 	CardBody,
 	CardHeader,
+	// @ts-ignore No types for this exist yet.
 	__experimentalItem as Item,
+	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
+	// @ts-ignore No types for this exist yet.
 	__experimentalScrollable as Scrollable,
 	Spinner,
 } from '@wordpress/components';

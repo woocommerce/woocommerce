@@ -25,6 +25,11 @@
 	"module": "build-module/index.js",
 	"types": "build-types",
 	"react-native": "src/index",
+	"files": [
+		"build",
+		"build-module",
+		"build-types"
+	],
 	"scripts": {
 		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
 		"build:project": "pnpm --if-present /^build:project:.*$/",
@@ -106,15 +111,12 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
-				"node_modules/@woocommerce/internal-js-tests/",
+				"node_modules/@woocommerce/internal-js-tests/build",
+				"node_modules/@woocommerce/internal-js-tests/build-module",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
-				"package.json",
-				"!node_modules/@woocommerce/internal-js-tests/node_modules",
-				"!node_modules/@woocommerce/internal-js-tests/.git",
-				"!node_modules/@woocommerce/internal-js-tests/.svn",
-				"!node_modules/@woocommerce/internal-js-tests/src"
+				"package.json"
 			]
 		}
 	}
