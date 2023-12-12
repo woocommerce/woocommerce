@@ -4,6 +4,7 @@
 import { gallery as icon } from '@wordpress/icons';
 import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
 import { createBlock } from '@wordpress/blocks';
+import { isExperimentalBuild } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -11,6 +12,8 @@ import { createBlock } from '@wordpress/blocks';
 import edit from './edit';
 import metadata from './block.json';
 import './style.scss';
+
+const galleryBlock = isExperimentalBuild() ? 'woocommerce/product-gallery' : '';
 
 registerBlockSingleProductTemplate( {
 	blockName: metadata.name,
@@ -24,9 +27,9 @@ registerBlockSingleProductTemplate( {
 			to: [
 				{
 					type: 'block',
-					blocks: [ 'woocommerce/product-gallery' ],
+					blocks: [ galleryBlock ],
 					transform: () => {
-						return createBlock( 'woocommerce/product-gallery' );
+						return createBlock( galleryBlock );
 					},
 				},
 			],
