@@ -4,7 +4,12 @@
 import { Button, ButtonGroup, Modal, Notice } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
-import { useContext, useEffect, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useContext,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -30,18 +35,11 @@ export default function InstallModal() {
 
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
 
-	useEffect( () => {
-		if ( isLoading ) {
-			return;
-		}
-		setShowModal( !! query?.install );
-	}, [ query?.install, isLoading ] );
+	const subscription: Subscription | undefined = subscriptions.find(
+		( s: Subscription ) => s.product_key === installingProductKey
+	);
 
-	if ( ! showModal ) {
-		return null;
-	}
-
-	const removeInstallQuery = () => {
+	const removeInstallQuery = useCallback( () => {
 		navigateTo( {
 			url: getNewPath(
 				{
@@ -52,28 +50,43 @@ export default function InstallModal() {
 				{}
 			),
 		} );
-	};
+	}, [ query ] );
 
-	const subscription: Subscription | undefined = subscriptions.find(
-		( s: Subscription ) => s.product_key === installingProductKey
-	);
-	// If subscriptions loaded, but we don't have a subscription for the product key, show an error.
-	if ( isConnected && ! isLoading && ! subscription ) {
-		addNotice(
-			installingProductKey,
-			sprintf(
-				/* translators: %s is the product key */
-				__(
-					'Could not find subscription with product key %s.',
-					'woocommerce'
+	useEffect( () => {
+		if ( isLoading ) {
+			return;
+		}
+
+		// If subscriptions loaded, but we don't have a subscription for the product key, show an error.
+		if (
+			installingProductKey &&
+			isConnected &&
+			! isLoading &&
+			! subscription
+		) {
+			addNotice(
+				installingProductKey,
+				sprintf(
+					/* translators: %s is the product key */
+					__(
+						'Could not find subscription with product key %s.',
+						'woocommerce'
+					),
+					installingProductKey
 				),
-				installingProductKey
-			),
-			NoticeStatus.Error
-		);
-		removeInstallQuery();
-		return null;
-	}
+				NoticeStatus.Error
+			);
+			removeInstallQuery();
+		} else {
+			setShowModal( !! installingProductKey );
+		}
+	}, [
+		isConnected,
+		isLoading,
+		installingProductKey,
+		removeInstallQuery,
+		subscription,
+	] );
 
 	const actionButton = () => {
 		if ( ! isConnected ) {
@@ -117,6 +130,10 @@ export default function InstallModal() {
 		removeInstallQuery();
 		setShowModal( false );
 	};
+
+	if ( ! showModal ) {
+		return null;
+	}
 
 	return (
 		<Modal
