@@ -69,40 +69,33 @@ function getPackageOutputs( packageFile ) {
 		exclude: [],
 	};
 
-	// Packages that explicitly declare their outputs have made this easy for us.
-	if ( packageFile.files ) {
-		// We're going to make the glob relative to the package directory instead of the dependency directory.
-		// To do this though, we need to transform the path a little bit.
-		for ( const fileGlob of packageFile.files ) {
-			let relativeGlob = fileGlob;
+	// Packages that don't explicitly define files should be excluded from the fingerprint entirely.
+	if ( ! packageFile.files ) {
+		return packageOutputs;
+	}
 
-			// Negation globs need to move the exclamation point to the beginning of the output glob.
-			let negation = relativeGlob.startsWith( '!' ) ? true : false;
-			if ( negation ) {
-				relativeGlob = relativeGlob.substring( 1 );
-			}
+	// We're going to make the glob relative to the package directory instead of the dependency directory.
+	// To do this though, we need to transform the path a little bit.
+	for ( const fileGlob of packageFile.files ) {
+		let relativeGlob = fileGlob;
 
-			// Remove leading slashes.
-			if ( relativeGlob.startsWith( '/' ) ) {
-				relativeGlob = relativeGlob.substring( 1 );
-			}
-
-			// Now we can construct a glob relative to the package directory.
-			if ( negation ) {
-				packageOutputs.exclude.push( `!${ basePath }/${ relativeGlob }` );
-			} else {
-				packageOutputs.include.push( `${ basePath }/${ relativeGlob }` );
-			}
+		// Negation globs need to move the exclamation point to the beginning of the output glob.
+		let negation = relativeGlob.startsWith( '!' ) ? true : false;
+		if ( negation ) {
+			relativeGlob = relativeGlob.substring( 1 );
 		}
-	} else {
-		// This is a VERY heavy-handed approach and will simply include every file in the package directory.
-		packageOutputs.include.push( `${ basePath }/` );
 
-		// We can make this a little bit smarter by ignoring some common directories.
-		packageOutputs.exclude.push( `!${ basePath }/node_modules` );
-		packageOutputs.exclude.push( `!${ basePath }/.git` );
-		packageOutputs.exclude.push( `!${ basePath }/.svn` );
-		packageOutputs.exclude.push( `!${ basePath }/src` ); // We generally name our source directories "src" and don't need source files.
+		// Remove leading slashes.
+		if ( relativeGlob.startsWith( '/' ) ) {
+			relativeGlob = relativeGlob.substring( 1 );
+		}
+
+		// Now we can construct a glob relative to the package directory.
+		if ( negation ) {
+			packageOutputs.exclude.push( `!${ basePath }/${ relativeGlob }` );
+		} else {
+			packageOutputs.include.push( `${ basePath }/${ relativeGlob }` );
+		}
 	}
 
 	return packageOutputs;
@@ -120,7 +113,7 @@ function isLinkedPackage( packagePath, lockVersion ) {
 	// We can parse the version that PNPM stores in order to get the relative path to the package.
 	// file: dependencies use a relative path with dependencies listed in parentheses after it.
 	// workspace: dependencies just store the relative path from the package itself.
-	const match = lockVersion.match( /^(?:file:|link:)((?:\.?\/|\.\.\/)[^\^<>:"|?*()]+)/i );
+	const match = lockVersion.match( /^(?:file:|link:)([^\^<>:"|?*()]+)/i );
 	if ( ! match ) {
 		return false;
 	}
@@ -130,6 +123,14 @@ function isLinkedPackage( packagePath, lockVersion ) {
 	// Linked paths are relative to the package instead of the monorepo.
 	if ( lockVersion.startsWith( 'link:' ) ) {
 		relativePath = path.join( packagePath, relativePath );
+	}
+
+	// Local relative paths won't always start with './' so we want to make sure that the path
+	// exists before we return it. We do this instead of checking for the existeince of the
+	// package.json file later because we want to be able to detect cases where the
+	// package file should exist but for some reason can't be loaded.
+	if ( ! match[ 1 ].startsWith( '.' ) && ! fs.existsSync( relativePath ) ) {
+		return false;
 	}
 
 	return relativePath;
@@ -174,8 +175,8 @@ function getLinkedPackages( packagePath, lockPackage ) {
  * Hooks up all of the dependency outputs as file dependencies for wireit to fingerprint them.
  *
  * @param {Object.<string, Object>} lockPackages The paths to all of the packages we're processing.
- * @param {Object}                  context      The hook context object.
- * @param {Function.<string>}       context.log  Logs a message to the console.
+ * @param {Object}					context		 The hook context object.
+ * @param {Function.<string>}		context.log	 Logs a message to the console.
  */
 function updateWireitDependencies( lockPackages, context ) {
 	context.log( '[wireit] Updating Dependency Lists' );
@@ -216,7 +217,15 @@ function updateWireitDependencies( lockPackages, context ) {
 		// their outputs to the list. We can then use these are file dependencies for
 		// wireit and it will fingerprint them for us.
 		for ( const linkedPackage of linkedPackages ) {
-			const packageOutputs = getPackageOutputs( linkedPackage );
+			const packageOutputs = getPackageOutputs( linkedPackage, context );
+
+			if ( ! packageOutputs.include.length && ! packageOutputs.include.length ) {
+				context.log(
+					`[wireit][${ packageFile.name }] Missing '${ linkedPackage.name }' Output Definition`
+				);
+				continue;
+			}
+
 			// Put includes at the front and excludes at the end. This is important because otherwise
 			// wireit will blow the call stack due to the way it handles negation globs.
 			packageFile.wireit.dependencyOutputs.files.unshift( ...packageOutputs.include );
@@ -235,11 +244,11 @@ function updateWireitDependencies( lockPackages, context ) {
 /**
  * This hook allows for the mutation of the lockfile before it is serialized.
  *
- * @param {Object}                  lockfile                 The lock file that was produced by PNPM.
- * @param {string}                  lockfile.lockfileVersion The version of the lock file spec.
- * @param {Object.<string, Object>} lockfile.importers       The packages in the workspace that are included in the lock file, keyed by the relative path to the package.
- * @param {Object}                  context                  The hook context object.
- * @param {Function.<string>}       context.log              Logs a message to the console.
+ * @param {Object}					lockfile				 The lock file that was produced by PNPM.
+ * @param {string}					lockfile.lockfileVersion The version of the lock file spec.
+ * @param {Object.<string, Object>} lockfile.importers		 The packages in the workspace that are included in the lock file, keyed by the relative path to the package.
+ * @param {Object}					context					 The hook context object.
+ * @param {Function.<string>}		context.log				 Logs a message to the console.
  *
  * @return {Object} lockfile The updated lockfile.
  */

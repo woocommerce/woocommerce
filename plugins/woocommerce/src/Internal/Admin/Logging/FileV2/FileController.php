@@ -421,7 +421,7 @@ class FileController {
 	 */
 	public function search_within_files( string $search, array $args = array(), array $file_args = array(), bool $count_only = false ) {
 		if ( '' === $search ) {
-			return array();
+			return $count_only ? 0 : array();
 		}
 
 		$search = esc_html( $search );
