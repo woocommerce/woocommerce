@@ -5,7 +5,10 @@
 	"require": {
 		"php": "<8.3",
 		"woocommerce/action-scheduler": "^3.6",
-		"league/commonmark": "^2.4"
+		"league/commonmark": "^2.4",
+		"nette/utils": "3.2.9",
+		"symfony/deprecation-contracts": "2.5.2",
+		"doctrine/instantiator": "1.5.0"
 	},
 	"autoload": {
 		"psr-4": {
