@@ -237,7 +237,7 @@ test.describe( 'Product Collection', () => {
 			test( 'Inherit query from template should work as expected in Product Catalog template', async ( {
 				pageObject,
 			} ) => {
-				await pageObject.goToProductCatalogAndInsertBlock();
+				await pageObject.goToProductCatalogAndInsertCollection();
 
 				const sidebarSettings =
 					await pageObject.locateSidebarSettings();
@@ -292,6 +292,7 @@ test.describe( 'Product Collection', () => {
 		test( 'Toolbar -> Items per page, offset & max page to show', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.clickDisplaySettings();
 			await pageObject.setDisplaySettings( {
 				itemsPerPage: 3,
 				offset: 0,
@@ -380,6 +381,138 @@ test.describe( 'Product Collection', () => {
 			expect( productSize?.width ).toBeCloseTo(
 				parentSize?.width as number
 			);
+		} );
+	} );
+
+	test.describe( 'Collections', () => {
+		test( 'New Arrivals Collection can be added and displays proper products', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock( 'newArrivals' );
+
+			const newArrivalsProducts = [
+				'WordPress Pennant',
+				'Logo Collection',
+				'Beanie with Logo',
+				'T-Shirt with Logo',
+				'Single',
+			];
+
+			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( pageObject.productTitles ).toHaveText(
+				newArrivalsProducts
+			);
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 5 );
+		} );
+
+		test( 'Top Rated Collection can be added and displays proper products', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock( 'topRated' );
+
+			const topRatedProducts = [
+				'Beanie',
+				'Logo Collection',
+				'Belt',
+				'WordPress Pennant',
+				'Cap',
+			];
+
+			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( pageObject.productTitles ).toHaveText(
+				topRatedProducts
+			);
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 5 );
+		} );
+
+		test( 'Best Sellers Collection can be added and displays proper products', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock( 'bestSellers' );
+
+			const bestSellersProducts = [
+				'Album',
+				'Hoodie',
+				'Single',
+				'Hoodie with Logo',
+				'T-Shirt with Logo',
+			];
+
+			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( pageObject.productTitles ).toHaveText(
+				bestSellersProducts
+			);
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 5 );
+		} );
+
+		test( 'On Sale Collection can be added and displays proper products', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock( 'onSale' );
+
+			const onSaleProducts = [
+				'Beanie',
+				'Beanie with Logo',
+				'Belt',
+				'Cap',
+				'Hoodie',
+			];
+
+			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( pageObject.productTitles ).toHaveText(
+				onSaleProducts
+			);
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 5 );
+		} );
+
+		test( 'Featured Collection can be added and displays proper products', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock( 'featured' );
+
+			const featuredProducts = [
+				'Cap',
+				'Hoodie with Zipper',
+				'Sunglasses',
+				'V-Neck T-Shirt',
+			];
+
+			await expect( pageObject.products ).toHaveCount( 4 );
+			await expect( pageObject.productTitles ).toHaveText(
+				featuredProducts
+			);
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 4 );
+		} );
+
+		test( 'Default Query Collection can be added and displays proper products', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock( 'productCatalog' );
+
+			const orderBy = await pageObject.getOrderBy();
+
+			expect( orderBy ).toBe( 'title/asc' );
+
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 9 );
 		} );
 	} );
 } );
