@@ -17,7 +17,7 @@ $description        = $content['descriptions'][0]['default'] ?? '';
 	<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:160px">
 		<!-- wp:image {"width": "164px", "className":"is-style-rounded"} -->
 		<figure class="wp-block-image is-resized is-style-rounded">
-			<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/portrait.png' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image with the avatar of the user who is writing the testimonial.', 'woo-gutenberg-products-block' ); ?>" style="width:164px"/>
+			<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/portrait.png' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image with the avatar of the user who is writing the testimonial.', 'woocommerce' ); ?>" style="width:164px"/>
 		</figure>
 		<!-- /wp:image -->
 	</div>

@@ -9,7 +9,7 @@
 
 <!-- wp:woocommerce/filter-wrapper {"filterType":"active-filters"} -->
 <div class="wp-block-woocommerce-filter-wrapper"><!-- wp:heading {"level":3} -->
-<h3><?php esc_html_e( 'Active filters', 'woo-gutenberg-products-block' ); ?></h3>
+<h3><?php esc_html_e( 'Active filters', 'woocommerce' ); ?></h3>
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/active-filters {"heading":"","lock":{"remove":true}} -->
@@ -19,7 +19,7 @@
 
 <!-- wp:woocommerce/filter-wrapper {"filterType":"price-filter"} -->
 <div class="wp-block-woocommerce-filter-wrapper"><!-- wp:heading {"level":3} -->
-<h3><?php esc_html_e( 'Filter by price', 'woo-gutenberg-products-block' ); ?></h3>
+<h3><?php esc_html_e( 'Filter by price', 'woocommerce' ); ?></h3>
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/price-filter {"heading":"","lock":{"remove":true}} -->
@@ -29,7 +29,7 @@
 
 <!-- wp:woocommerce/filter-wrapper {"filterType":"stock-filter"} -->
 <div class="wp-block-woocommerce-filter-wrapper"><!-- wp:heading {"level":3} -->
-<h3><?php esc_html_e( 'Filter by stock status', 'woo-gutenberg-products-block' ); ?></h3>
+<h3><?php esc_html_e( 'Filter by stock status', 'woocommerce' ); ?></h3>
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/stock-filter {"heading":"","lock":{"remove":true}} -->
@@ -39,7 +39,7 @@
 
 <!-- wp:woocommerce/filter-wrapper {"filterType":"attribute-filter"} -->
 <div class="wp-block-woocommerce-filter-wrapper"><!-- wp:heading {"level":3} -->
-<h3><?php esc_html_e( 'Filter by attribute', 'woo-gutenberg-products-block' ); ?></h3>
+<h3><?php esc_html_e( 'Filter by attribute', 'woocommerce' ); ?></h3>
 <!-- /wp:heading -->
 
 <?php
@@ -58,7 +58,7 @@ if ( ! empty( $attributes ) ) {
 
 <!-- wp:woocommerce/filter-wrapper {"filterType":"rating-filter"} -->
 <div class="wp-block-woocommerce-filter-wrapper"><!-- wp:heading {"level":3} -->
-<h3><?php esc_html_e( 'Filter by rating', 'woo-gutenberg-products-block' ); ?></h3>
+<h3><?php esc_html_e( 'Filter by rating', 'woocommerce' ); ?></h3>
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/rating-filter {"lock":{"remove":true}} -->

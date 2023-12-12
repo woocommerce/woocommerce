@@ -29,7 +29,7 @@ $fourth_description = $content['descriptions'][3]['default'] ?? '';
 	<div class="wp-block-column">
 		<!-- wp:image {"align":"full","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image alignfull size-full">
-			<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in the featured products pattern. 1 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
+			<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in the featured products pattern. 1 out of 4.', 'woocommerce' ); ?>" />
 		</figure>
 		<!-- /wp:image -->
 
@@ -46,7 +46,7 @@ $fourth_description = $content['descriptions'][3]['default'] ?? '';
 			<!-- wp:column {"width":"33%","layout":{"type":"constrained","justifyContent":"right"}} -->
 			<div class="wp-block-column" style="flex-basis:33%">
 				<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
-				<p class="has-text-align-left has-small-font-size"><?php esc_html_e( 'from $1.99', 'woo-gutenberg-products-block' ); ?></p>
+				<p class="has-text-align-left has-small-font-size"><?php esc_html_e( 'from $1.99', 'woocommerce' ); ?></p>
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:column -->
@@ -59,7 +59,7 @@ $fourth_description = $content['descriptions'][3]['default'] ?? '';
 	<div class="wp-block-column">
 		<!-- wp:image {"align":"full","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image alignfull size-full">
-			<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in the featured products pattern. 2 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
+			<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in the featured products pattern. 2 out of 4.', 'woocommerce' ); ?>" />
 		</figure>
 		<!-- /wp:image -->
 
@@ -76,7 +76,7 @@ $fourth_description = $content['descriptions'][3]['default'] ?? '';
 			<!-- wp:column {"width":"33%","layout":{"type":"constrained","justifyContent":"right"}} -->
 			<div class="wp-block-column" style="flex-basis:33%">
 				<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
-				<p class="has-text-align-left has-small-font-size"><?php esc_html_e( 'from $2.99', 'woo-gutenberg-products-block' ); ?></p>
+				<p class="has-text-align-left has-small-font-size"><?php esc_html_e( 'from $2.99', 'woocommerce' ); ?></p>
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:column -->
@@ -89,7 +89,7 @@ $fourth_description = $content['descriptions'][3]['default'] ?? '';
 	<div class="wp-block-column">
 		<!-- wp:image {"align":"full","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image alignfull size-full">
-			<img src="<?php echo esc_url( $image3 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in the featured products pattern. 3 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
+			<img src="<?php echo esc_url( $image3 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in the featured products pattern. 3 out of 4.', 'woocommerce' ); ?>" />
 		</figure>
 		<!-- /wp:image -->
 
@@ -106,7 +106,7 @@ $fourth_description = $content['descriptions'][3]['default'] ?? '';
 			<!-- wp:column {"width":"33%","layout":{"type":"constrained","justifyContent":"right"}} -->
 			<div class="wp-block-column" style="flex-basis:33%">
 				<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
-				<p class="has-text-align-left has-small-font-size"><?php esc_html_e( 'from $0.99', 'woo-gutenberg-products-block' ); ?></p>
+				<p class="has-text-align-left has-small-font-size"><?php esc_html_e( 'from $0.99', 'woocommerce' ); ?></p>
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:column -->
@@ -119,7 +119,7 @@ $fourth_description = $content['descriptions'][3]['default'] ?? '';
 	<div class="wp-block-column">
 		<!-- wp:image {"align":"full","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image alignfull size-full">
-			<img src="<?php echo esc_url( $image4 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in the featured products pattern. 4 out of 4.', 'woo-gutenberg-products-block' ); ?>" />
+			<img src="<?php echo esc_url( $image4 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in the featured products pattern. 4 out of 4.', 'woocommerce' ); ?>" />
 		</figure>
 		<!-- /wp:image -->
 
@@ -136,7 +136,7 @@ $fourth_description = $content['descriptions'][3]['default'] ?? '';
 			<!-- wp:column {"width":"33%","layout":{"type":"constrained","justifyContent":"right"}} -->
 			<div class="wp-block-column" style="flex-basis:33%">
 				<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
-				<p class="has-text-align-left has-small-font-size"><?php esc_html_e( 'from $1.49', 'woo-gutenberg-products-block' ); ?></p>
+				<p class="has-text-align-left has-small-font-size"><?php esc_html_e( 'from $1.49', 'woocommerce' ); ?></p>
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:column -->

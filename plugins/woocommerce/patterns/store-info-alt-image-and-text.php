@@ -34,7 +34,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%">
 			<!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full">
-				<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used in the left column.', 'woo-gutenberg-products-block' ); ?>" />
+				<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used in the left column.', 'woocommerce' ); ?>" />
 			</figure>
 			<!-- /wp:image -->
 		</div>
@@ -110,7 +110,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:52%">
 			<!-- wp:image {"sizeSlug":"full","linkDestination":"none", "height":"auto","aspectRatio":"1","scale":"cover", "className":"is-resized"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img style="aspect-ratio:1;object-fit:cover" src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used in the right column.', 'woo-gutenberg-products-block' ); ?>" />
+				<img style="aspect-ratio:1;object-fit:cover" src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used in the right column.', 'woocommerce' ); ?>" />
 			</figure>
 			<!-- /wp:image -->
 		</div>

@@ -16,12 +16,12 @@ echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 /* translators: %s: Customer username */
-echo sprintf( esc_html__( 'Hi %s,', 'woo-gutenberg-products-block' ), esc_html( $user_login ) ) . "\n\n";
+echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_login ) ) . "\n\n";
 /* translators: %1$s: Site title, %2$s: Username, %3$s: My account link */
-echo sprintf( esc_html__( 'Thanks for creating an account on %1$s. Your username is %2$s. You can access your account area to view orders, change your password, and more at: %3$s', 'woo-gutenberg-products-block' ), esc_html( $blogname ), esc_html( $user_login ), esc_html( wc_get_page_permalink( 'myaccount' ) ) ) . "\n\n";
+echo sprintf( esc_html__( 'Thanks for creating an account on %1$s. Your username is %2$s. You can access your account area to view orders, change your password, and more at: %3$s', 'woocommerce' ), esc_html( $blogname ), esc_html( $user_login ), esc_html( wc_get_page_permalink( 'myaccount' ) ) ) . "\n\n";
 
 if ( $set_password_url ) {
-	echo esc_html__( 'To set your password, visit the following address: ', 'woo-gutenberg-products-block' ) . "\n\n";
+	echo esc_html__( 'To set your password, visit the following address: ', 'woocommerce' ) . "\n\n";
 	echo esc_html( $set_password_url ) . "\n\n";
 }
 

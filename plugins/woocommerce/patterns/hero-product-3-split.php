@@ -26,7 +26,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 			<span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span>
 			<img
 				class="wp-block-cover__image-background"
-				alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased.', 'woo-gutenberg-products-block' ); ?>"
+				alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased.', 'woocommerce' ); ?>"
 				src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg' ) ); ?>"
 				data-object-fit="cover" />
 			<div class="wp-block-cover__inner-container">
@@ -98,7 +98,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 			<!-- wp:buttons -->
 			<div class="wp-block-buttons"><!-- wp:button -->
 				<div class="wp-block-button">
-					<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Shop now', 'woo-gutenberg-products-block' ); ?></a>
+					<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Shop now', 'woocommerce' ); ?></a>
 				</div>
 				<!-- /wp:button -->
 			</div>
