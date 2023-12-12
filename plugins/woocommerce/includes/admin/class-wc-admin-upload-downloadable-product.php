@@ -1,6 +1,6 @@
 <?php
 /**
- * Add some content to the help tab
+ * Add hooks related to uploading downloadable products.
  *
  * @package     WooCommerce\Admin
  * @version     8.5.0
@@ -18,6 +18,9 @@ if ( class_exists( 'WC_Admin_Upload_Downloadable_Product', false ) ) {
  * WC_Admin_Upload_Downloadable_Product Class.
  */
 class WC_Admin_Upload_Downloadable_Product {
+	/**
+	 * Add hooks.
+	 */
 	public function __construct() {
 		add_filter( 'upload_dir', array( $this, 'upload_dir' ) );
 		add_filter( 'wp_unique_filename', array( $this, 'update_filename' ), 10, 3 );
@@ -114,6 +117,7 @@ class WC_Admin_Upload_Downloadable_Product {
 	 * Run a filter when uploading a downloadable product.
 	 */
 	public function woocommerce_media_upload_downloadable_product() {
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'media_upload_file' );
 	}
 }
