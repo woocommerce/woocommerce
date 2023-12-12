@@ -15,14 +15,14 @@ export const previewShippingRates: CartResponseShippingRate[] = [
 			country: '',
 		},
 		package_id: 0,
-		name: __( 'Shipping', 'woo-gutenberg-products-block' ),
+		name: __( 'Shipping', 'woocommerce' ),
 		items: [
 			{
 				key: '33e75ff09dd601bbe69f351039152189',
 				name: _x(
 					'Beanie with Logo',
 					'example product in Cart Block',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				quantity: 2,
 			},
@@ -31,7 +31,7 @@ export const previewShippingRates: CartResponseShippingRate[] = [
 				name: _x(
 					'Beanie',
 					'example product in Cart Block',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				quantity: 1,
 			},
@@ -47,7 +47,7 @@ export const previewShippingRates: CartResponseShippingRate[] = [
 				currency_suffix: '',
 				name: __(
 					'Flat rate shipping',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				description: '',
 				delivery_time: '',
@@ -67,7 +67,7 @@ export const previewShippingRates: CartResponseShippingRate[] = [
 				currency_thousand_separator: ',',
 				currency_prefix: '$',
 				currency_suffix: '',
-				name: __( 'Free shipping', 'woo-gutenberg-products-block' ),
+				name: __( 'Free shipping', 'woocommerce' ),
 				description: '',
 				delivery_time: '',
 				price: '0',
@@ -86,7 +86,7 @@ export const previewShippingRates: CartResponseShippingRate[] = [
 				currency_thousand_separator: ',',
 				currency_prefix: '$',
 				currency_suffix: '',
-				name: __( 'Local pickup', 'woo-gutenberg-products-block' ),
+				name: __( 'Local pickup', 'woocommerce' ),
 				description: '',
 				delivery_time: '',
 				price: '0',
@@ -114,7 +114,7 @@ export const previewShippingRates: CartResponseShippingRate[] = [
 				currency_thousand_separator: ',',
 				currency_prefix: '$',
 				currency_suffix: '',
-				name: __( 'Local pickup', 'woo-gutenberg-products-block' ),
+				name: __( 'Local pickup', 'woocommerce' ),
 				description: '',
 				delivery_time: '',
 				price: '0',

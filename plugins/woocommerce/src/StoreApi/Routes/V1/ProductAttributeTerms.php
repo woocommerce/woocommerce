@@ -32,7 +32,7 @@ class ProductAttributeTerms extends AbstractTermsRoute {
 		return [
 			'args'   => array(
 				'attribute_id' => array(
-					'description' => __( 'Unique identifier for the attribute.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'Unique identifier for the attribute.', 'woocommerce' ),
 					'type'        => 'integer',
 				),
 			),
@@ -68,7 +68,7 @@ class ProductAttributeTerms extends AbstractTermsRoute {
 		$attribute = wc_get_attribute( $request['attribute_id'] );
 
 		if ( ! $attribute || ! taxonomy_exists( $attribute->slug ) ) {
-			throw new RouteException( 'woocommerce_rest_taxonomy_invalid', __( 'Attribute does not exist.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_taxonomy_invalid', __( 'Attribute does not exist.', 'woocommerce' ), 404 );
 		}
 
 		return $this->get_terms_response( $attribute->slug, $request );

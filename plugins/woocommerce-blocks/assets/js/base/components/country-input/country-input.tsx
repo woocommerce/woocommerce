@@ -25,7 +25,7 @@ export const CountryInput = ( {
 	errorId,
 	errorMessage = __(
 		'Please select a country',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 }: CountryInputWithCountriesProps ): JSX.Element => {
 	const options = useMemo(

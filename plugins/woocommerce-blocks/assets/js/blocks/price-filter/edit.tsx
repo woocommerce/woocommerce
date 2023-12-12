@@ -47,12 +47,12 @@ export default function ( {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __( 'Settings', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Settings', 'woocommerce' ) }
 				>
 					<ToggleGroupControl
 						label={ __(
 							'Price Range Selector',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ showInputFields ? 'editable' : 'text' }
 						onChange={ ( value: string ) =>
@@ -66,14 +66,14 @@ export default function ( {
 							value="editable"
 							label={ __(
 								'Editable',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 						<ToggleGroupControlOption
 							value="text"
 							label={ __(
 								'Text',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					</ToggleGroupControl>
@@ -81,7 +81,7 @@ export default function ( {
 						<ToggleControl
 							label={ __(
 								'Inline input fields',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							checked={ inlineInput }
 							onChange={ () =>
@@ -91,18 +91,18 @@ export default function ( {
 							}
 							help={ __(
 								'Show input fields inline with the slider.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					) }
 					<ToggleControl
 						label={ __(
 							"Show 'Apply filters' button",
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						help={ __(
 							'Products will update when the button is clicked.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showFilterButton }
 						onChange={ () =>
@@ -120,16 +120,16 @@ export default function ( {
 		<Placeholder
 			className="wc-block-price-slider"
 			icon={ <Icon icon={ currencyDollar } /> }
-			label={ __( 'Filter by Price', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Filter by Price', 'woocommerce' ) }
 			instructions={ __(
 				'Display a slider to filter products in your store by price.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		>
 			<p>
 				{ __(
 					'To filter your products by price you first need to assign prices to your products.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</p>
 			<Button
@@ -138,7 +138,7 @@ export default function ( {
 				href={ getAdminLink( 'post-new.php?post_type=product' ) }
 				target="_top"
 			>
-				{ __( 'Add new product', 'woo-gutenberg-products-block' ) +
+				{ __( 'Add new product', 'woocommerce' ) +
 					' ' }
 				<Icon icon={ external } />
 			</Button>
@@ -148,7 +148,7 @@ export default function ( {
 				href="https://docs.woocommerce.com/document/managing-products/"
 				target="_blank"
 			>
-				{ __( 'Learn more', 'woo-gutenberg-products-block' ) }
+				{ __( 'Learn more', 'woocommerce' ) }
 			</Button>
 		</Placeholder>
 	);

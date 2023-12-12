@@ -39,7 +39,7 @@ class CartRemoveItem extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => [
 					'key' => [
-						'description' => __( 'Unique identifier (key) for the cart item.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Unique identifier (key) for the cart item.', 'woocommerce' ),
 						'type'        => 'string',
 					],
 				],
@@ -61,7 +61,7 @@ class CartRemoveItem extends AbstractCartRoute {
 		$cart_item = $this->cart_controller->get_cart_item( $request['key'] );
 
 		if ( empty( $cart_item ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item no longer exists or is invalid.', 'woo-gutenberg-products-block' ), 409 );
+			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item no longer exists or is invalid.', 'woocommerce' ), 409 );
 		}
 
 		$cart->remove_cart_item( $request['key'] );

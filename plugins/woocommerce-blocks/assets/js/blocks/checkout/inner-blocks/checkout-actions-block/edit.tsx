@@ -54,13 +54,13 @@ export const Edit = ( {
 				<PanelBody
 					title={ __(
 						'Account options',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				>
 					<ToggleControl
 						label={ __(
 							'Show a "Return to Cart" link',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showReturnToCart }
 						onChange={ () =>
@@ -83,11 +83,11 @@ export const Edit = ( {
 							labels={ {
 								title: __(
 									'Return to Cart button',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								default: __(
 									'WooCommerce Cart Page',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 							} }
 						/>

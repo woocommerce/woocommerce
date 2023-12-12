@@ -65,18 +65,18 @@ interface ProductControlProps {
 }
 
 const messages = {
-	list: __( 'Products', 'woo-gutenberg-products-block' ),
+	list: __( 'Products', 'woocommerce' ),
 	noItems: __(
 		"Your store doesn't have any products.",
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	search: __(
 		'Search for a product to display',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	updated: __(
 		'Product search results updated.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 };
 
@@ -147,7 +147,7 @@ const ProductControl = (
 									/* translators: %1$d is the number of variations of a product product. */
 									__(
 										'%1$d variations',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									),
 									item.details?.variations.length
 							  )
@@ -163,7 +163,7 @@ const ProductControl = (
 										'%1$s, has %2$d variations',
 										item.details?.variations
 											?.length as number,
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									),
 									item.name,
 									item.details?.variations.length

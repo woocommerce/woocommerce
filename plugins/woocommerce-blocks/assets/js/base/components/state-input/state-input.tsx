@@ -103,7 +103,7 @@ const StateInput = ( {
 				value={ value }
 				errorMessage={ __(
 					'Please select a state.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				errorId={ errorId }
 				required={ required }

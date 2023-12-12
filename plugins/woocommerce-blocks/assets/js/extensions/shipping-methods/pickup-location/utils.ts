@@ -27,7 +27,7 @@ export const indexLocationsById = (
 
 export const defaultSettings = {
 	enabled: false,
-	title: __( 'Local Pickup', 'woo-gutenberg-products-block' ),
+	title: __( 'Local Pickup', 'woocommerce' ),
 	tax_status: 'taxable',
 	cost: '',
 };

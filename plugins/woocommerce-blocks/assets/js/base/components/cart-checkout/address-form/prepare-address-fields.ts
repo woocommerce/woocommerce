@@ -43,7 +43,7 @@ const getSupportedCoreLocaleProps = (
 	if ( localeField.label !== undefined && ! localeField.optionalLabel ) {
 		fields.optionalLabel = sprintf(
 			/* translators: %s Field label. */
-			__( '%s (optional)', 'woo-gutenberg-products-block' ),
+			__( '%s (optional)', 'woocommerce' ),
 			localeField.label
 		);
 	}

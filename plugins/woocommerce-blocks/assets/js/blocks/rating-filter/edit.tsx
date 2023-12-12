@@ -29,7 +29,7 @@ const noRatingsNotice = (
 		<p>
 			{ __(
 				"Your store doesn't have any products with ratings yet. This filter option will display when a product receives a review.",
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		</p>
 	</Notice>
@@ -57,13 +57,13 @@ const Edit = ( {
 				<PanelBody
 					title={ __(
 						'Display Settings',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				>
 					<ToggleControl
 						label={ __(
 							'Display product count',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showCounts }
 						onChange={ () =>
@@ -75,7 +75,7 @@ const Edit = ( {
 					<ToggleGroupControl
 						label={ __(
 							'Allow selecting multiple options?',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ selectType || 'multiple' }
 						onChange={ ( value: string ) =>
@@ -89,21 +89,21 @@ const Edit = ( {
 							value="multiple"
 							label={ __(
 								'Multiple',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 						<ToggleGroupControlOption
 							value="single"
 							label={ __(
 								'Single',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					</ToggleGroupControl>
 					<ToggleGroupControl
 						label={ __(
 							'Display Style',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ displayStyle }
 						onChange={ ( value: string ) =>
@@ -117,25 +117,25 @@ const Edit = ( {
 							value="list"
 							label={ __(
 								'List',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 						<ToggleGroupControlOption
 							value="dropdown"
 							label={ __(
 								'Dropdown',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					</ToggleGroupControl>
 					<ToggleControl
 						label={ __(
 							"Show 'Apply filters' button",
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						help={ __(
 							'Products will update when the button is clicked.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showFilterButton }
 						onChange={ ( value ) =>

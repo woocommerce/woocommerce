@@ -97,7 +97,7 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 										suggestions={ [] }
 										placeholder={ __(
 											'Select stock status',
-											'woo-gutenberg-products-block'
+											'woocommerce'
 										) }
 										onChange={ () => null }
 										value={ [] }

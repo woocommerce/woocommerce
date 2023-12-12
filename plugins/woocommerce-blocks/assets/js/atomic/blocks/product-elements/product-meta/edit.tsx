@@ -31,7 +31,7 @@ const Edit = () => {
 					{
 						prefix: __(
 							'Category: ',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						term: 'product_cat',
 					},
@@ -39,7 +39,7 @@ const Edit = () => {
 				[
 					'core/post-terms',
 					{
-						prefix: __( 'Tags: ', 'woo-gutenberg-products-block' ),
+						prefix: __( 'Tags: ', 'woocommerce' ),
 						term: 'product_tag',
 					},
 				],

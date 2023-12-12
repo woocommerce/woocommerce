@@ -108,7 +108,7 @@ const ShippingSelector = ( {
 			<span className="wc-block-checkout__shipping-method-option-price">
 				{ __(
 					'calculated with an address',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</span>
 		) : (
@@ -211,18 +211,18 @@ export const Edit = ( {
 		>
 			<InspectorControls>
 				<PanelBody
-					title={ __( 'Appearance', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Appearance', 'woocommerce' ) }
 				>
 					<p className="wc-block-checkout__controls-text">
 						{ __(
 							'Choose how this block is displayed to your customers.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</p>
 					<ToggleControl
 						label={ __(
 							'Show icon',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showIcon }
 						onChange={ () =>
@@ -234,7 +234,7 @@ export const Edit = ( {
 					<ToggleControl
 						label={ __(
 							'Show costs',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showPrice }
 						onChange={ () =>
@@ -247,13 +247,13 @@ export const Edit = ( {
 				<PanelBody
 					title={ __(
 						'Shipping Methods',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				>
 					<p className="wc-block-checkout__controls-text">
 						{ __(
 							'Methods can be made managed in your store settings.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</p>
 					<ExternalLinkCard
@@ -261,11 +261,11 @@ export const Edit = ( {
 						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
 						title={ __(
 							'Shipping',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						description={ __(
 							'Manage your shipping zones, methods, and rates.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					/>
 					<ExternalLinkCard
@@ -273,11 +273,11 @@ export const Edit = ( {
 						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=pickup_location` }
 						title={ __(
 							'Local Pickup',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						description={ __(
 							'Allow customers to choose a local pickup location during checkout.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					/>
 				</PanelBody>
