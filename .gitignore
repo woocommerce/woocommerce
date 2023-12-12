@@ -108,3 +108,4 @@ changes.json
 # Metrics tests
 /artifacts
 /plugins/*/artifacts
+/tools/*/artifacts
