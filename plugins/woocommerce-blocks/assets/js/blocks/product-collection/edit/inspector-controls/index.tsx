@@ -35,7 +35,6 @@ import { DEFAULT_FILTERS, getDefaultSettings } from '../../constants';
 import { getUnchangeableFilters } from '../../collections';
 import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
-import InheritQueryControl from './inherit-query-control';
 import OrderByControl from './order-by-control';
 import OnSaleControl from './on-sale-control';
 import StockStatusControl from './stock-status-control';
@@ -60,11 +59,7 @@ const ProductCollectionInspectorControls = (
 	const unchangeableFilters = getUnchangeableFilters( collection );
 	const shouldShowFilter = prepareShouldShowFilter( unchangeableFilters );
 
-	// To be changed - inherit control will be hidden completely once Custom
-	// collection is introduced
 	const showQueryControls = inherit === false;
-	const showInheritQueryControls =
-		isEmpty( collection ) || shouldShowFilter( CoreFilterNames.INHERIT );
 	const showOrderControl =
 		showQueryControls && shouldShowFilter( CoreFilterNames.ORDER );
 	const showFeaturedControl = shouldShowFilter( CoreFilterNames.FEATURED );
@@ -98,9 +93,6 @@ const ProductCollectionInspectorControls = (
 			>
 				<LayoutOptionsControl { ...displayControlProps } />
 				<ColumnsControl { ...displayControlProps } />
-				{ showInheritQueryControls ? (
-					<InheritQueryControl { ...queryControlProps } />
-				) : null }
 				{ showOrderControl ? (
 					<OrderByControl { ...queryControlProps } />
 				) : null }
