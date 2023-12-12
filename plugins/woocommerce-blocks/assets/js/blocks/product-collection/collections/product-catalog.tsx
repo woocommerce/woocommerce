@@ -19,7 +19,7 @@ const collection = {
 	title: __( 'Product Catalog', 'woo-gutenberg-products-block' ),
 	icon: ( <Icon icon={ loop } /> ) as BlockIcon,
 	description:
-		'Display all products. Results may be limited by the current template context.',
+		'Display all products in your catalog. Results will (change to) match the current template, page, or search term.',
 	keywords: [ 'all products' ],
 	scope: [],
 	unchangeableFilters: [],
