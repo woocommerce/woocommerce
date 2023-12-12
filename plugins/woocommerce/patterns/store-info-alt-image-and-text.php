@@ -7,8 +7,8 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
-$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/tea-leaf-meal-food-herb-produce.jpg' );
-$image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg' );
+$image1 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/tea-leaf-meal-food-herb-produce.jpg' );
+$image2 = PatternsHelper::get_image_url( $images, 1, 'assets/images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg' );
 
 $first_title  = $content['titles'][0]['default'] ?? '';
 $second_title = $content['titles'][1]['default'] ?? '';
