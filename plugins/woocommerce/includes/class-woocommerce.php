@@ -1143,7 +1143,9 @@ final class WooCommerce {
 	 * Process an incoming request for the Legacy REST API.
 	 *
 	 * If the dedicated Legacy REST API extension is installed and active, this method does nothing.
-	 * Otherwise it returns a "The WooCommerce API is disabled on this site" error.
+	 * Otherwise it returns a "The WooCommerce API is disabled on this site" error,
+	 * unless the request contains a "wc-api" variable and the appropriate
+	 * "woocommerce_api_*" hook is set.
 	 */
 	private function parse_legacy_rest_api_request() {
 		global $wp;
@@ -1152,6 +1154,8 @@ final class WooCommerce {
 		if ( class_exists( 'WC_API' ) ) {
 			return;
 		}
+
+		$this->maybe_process_wc_api_query_var();
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 
@@ -1184,6 +1188,50 @@ final class WooCommerce {
 		}
 
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
+	 * Process a "wc-api" variable if present in the query, by triggering the appropriate hooks.
+	 */
+	private function maybe_process_wc_api_query_var() {
+		global $wp;
+
+		if ( ! empty( $_GET['wc-api'] ) ) { // WPCS: input var okay, CSRF ok.
+			$wp->query_vars['wc-api'] = sanitize_key( wp_unslash( $_GET['wc-api'] ) ); // WPCS: input var okay, CSRF ok.
+		}
+
+		// wc-api endpoint requests.
+		if ( ! empty( $wp->query_vars['wc-api'] ) ) {
+
+			// Buffer, we won't want any output here.
+			ob_start();
+
+			// No cache headers.
+			wc_nocache_headers();
+
+			// Clean the API request.
+			$api_request = strtolower( wc_clean( $wp->query_vars['wc-api'] ) );
+
+			// Make sure gateways are available for request.
+			WC()->payment_gateways();
+
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+
+			// Trigger generic action before request hook.
+			do_action( 'woocommerce_api_request', $api_request );
+
+			// Is there actually something hooked into this API request? If not trigger 400 - Bad request.
+			status_header( has_action( 'woocommerce_api_' . $api_request ) ? 200 : 400 );
+
+			// Trigger an action which plugins can hook into to fulfill the request.
+			do_action( 'woocommerce_api_' . $api_request );
+
+			// phpcs:enable WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+
+			// Done, clear buffer and exit.
+			ob_end_clean();
+			die( '-1' );
+		}
 	}
 
 	/**
