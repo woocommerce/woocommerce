@@ -166,8 +166,7 @@ const onClickCallback = ( {
 	}
 };
 
-const getButtonLabel = () =>
-	__( 'Transform into blocks', 'woocommerce' );
+const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
 
 const blockifyConfig = {
 	getButtonLabel,

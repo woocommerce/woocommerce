@@ -68,10 +68,7 @@ export type CountryAddressFields = Record< string, AddressFields >;
 export const defaultAddressFields: AddressFields = {
 	first_name: {
 		label: __( 'First name', 'woocommerce' ),
-		optionalLabel: __(
-			'First name (optional)',
-			'woocommerce'
-		),
+		optionalLabel: __( 'First name (optional)', 'woocommerce' ),
 		autocomplete: 'given-name',
 		autocapitalize: 'sentences',
 		required: true,
@@ -80,10 +77,7 @@ export const defaultAddressFields: AddressFields = {
 	},
 	last_name: {
 		label: __( 'Last name', 'woocommerce' ),
-		optionalLabel: __(
-			'Last name (optional)',
-			'woocommerce'
-		),
+		optionalLabel: __( 'Last name (optional)', 'woocommerce' ),
 		autocomplete: 'family-name',
 		autocapitalize: 'sentences',
 		required: true,
@@ -92,10 +86,7 @@ export const defaultAddressFields: AddressFields = {
 	},
 	company: {
 		label: __( 'Company', 'woocommerce' ),
-		optionalLabel: __(
-			'Company (optional)',
-			'woocommerce'
-		),
+		optionalLabel: __( 'Company (optional)', 'woocommerce' ),
 		autocomplete: 'organization',
 		autocapitalize: 'sentences',
 		required: false,
@@ -104,10 +95,7 @@ export const defaultAddressFields: AddressFields = {
 	},
 	address_1: {
 		label: __( 'Address', 'woocommerce' ),
-		optionalLabel: __(
-			'Address (optional)',
-			'woocommerce'
-		),
+		optionalLabel: __( 'Address (optional)', 'woocommerce' ),
 		autocomplete: 'address-line1',
 		autocapitalize: 'sentences',
 		required: true,
@@ -116,10 +104,7 @@ export const defaultAddressFields: AddressFields = {
 	},
 	address_2: {
 		label: __( 'Apartment, suite, etc.', 'woocommerce' ),
-		optionalLabel: __(
-			'Apartment, suite, etc. (optional)',
-			'woocommerce'
-		),
+		optionalLabel: __( 'Apartment, suite, etc. (optional)', 'woocommerce' ),
 		autocomplete: 'address-line2',
 		autocapitalize: 'sentences',
 		required: false,
@@ -128,10 +113,7 @@ export const defaultAddressFields: AddressFields = {
 	},
 	country: {
 		label: __( 'Country/Region', 'woocommerce' ),
-		optionalLabel: __(
-			'Country/Region (optional)',
-			'woocommerce'
-		),
+		optionalLabel: __( 'Country/Region (optional)', 'woocommerce' ),
 		autocomplete: 'country',
 		required: true,
 		hidden: false,
@@ -148,10 +130,7 @@ export const defaultAddressFields: AddressFields = {
 	},
 	state: {
 		label: __( 'State/County', 'woocommerce' ),
-		optionalLabel: __(
-			'State/County (optional)',
-			'woocommerce'
-		),
+		optionalLabel: __( 'State/County (optional)', 'woocommerce' ),
 		autocomplete: 'address-level1',
 		autocapitalize: 'sentences',
 		required: true,
@@ -160,10 +139,7 @@ export const defaultAddressFields: AddressFields = {
 	},
 	postcode: {
 		label: __( 'Postal code', 'woocommerce' ),
-		optionalLabel: __(
-			'Postal code (optional)',
-			'woocommerce'
-		),
+		optionalLabel: __( 'Postal code (optional)', 'woocommerce' ),
 		autocomplete: 'postal-code',
 		autocapitalize: 'characters',
 		required: true,

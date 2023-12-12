@@ -78,10 +78,7 @@ const ErrorTitle = ( { errorData } ) => {
 	let heading = __( 'Checkout error', 'woocommerce' );
 
 	if ( cartItemErrorCodes.includes( errorData.code ) ) {
-		heading = __(
-			'There is a problem with your cart',
-			'woocommerce'
-		);
+		heading = __( 'There is a problem with your cart', 'woocommerce' );
 	}
 
 	return (
@@ -102,10 +99,7 @@ const ErrorMessage = ( { errorData } ) => {
 		message =
 			message +
 			' ' +
-			__(
-				'Please edit your cart and try again.',
-				'woocommerce'
-			);
+			__( 'Please edit your cart and try again.', 'woocommerce' );
 	}
 
 	return <p className="wc-block-checkout-error__description">{ message }</p>;

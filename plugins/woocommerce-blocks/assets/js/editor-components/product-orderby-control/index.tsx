@@ -26,45 +26,27 @@ const ProductOrderbyControl = ( {
 			value={ value }
 			options={ [
 				{
-					label: __(
-						'Newness - newest first',
-						'woocommerce'
-					),
+					label: __( 'Newness - newest first', 'woocommerce' ),
 					value: 'date',
 				},
 				{
-					label: __(
-						'Price - low to high',
-						'woocommerce'
-					),
+					label: __( 'Price - low to high', 'woocommerce' ),
 					value: 'price_asc',
 				},
 				{
-					label: __(
-						'Price - high to low',
-						'woocommerce'
-					),
+					label: __( 'Price - high to low', 'woocommerce' ),
 					value: 'price_desc',
 				},
 				{
-					label: __(
-						'Rating - highest first',
-						'woocommerce'
-					),
+					label: __( 'Rating - highest first', 'woocommerce' ),
 					value: 'rating',
 				},
 				{
-					label: __(
-						'Sales - most first',
-						'woocommerce'
-					),
+					label: __( 'Sales - most first', 'woocommerce' ),
 					value: 'popularity',
 				},
 				{
-					label: __(
-						'Title - alphabetical',
-						'woocommerce'
-					),
+					label: __( 'Title - alphabetical', 'woocommerce' ),
 					value: 'title',
 				},
 				{

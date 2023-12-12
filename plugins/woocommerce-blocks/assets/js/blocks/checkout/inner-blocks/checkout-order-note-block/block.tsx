@@ -45,10 +45,7 @@ const Block = ( { className }: { className?: string } ): JSX.Element => {
 								'Notes about your order, e.g. special notes for delivery.',
 								'woocommerce'
 						  )
-						: __(
-								'Notes about your order.',
-								'woocommerce'
-						  )
+						: __( 'Notes about your order.', 'woocommerce' )
 				}
 				value={ orderNotes }
 			/>

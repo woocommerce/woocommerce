@@ -22,14 +22,9 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 
 	return (
 		<InspectorControls>
-			<PanelBody
-				title={ __( 'Settings', 'woocommerce' ) }
-			>
+			<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 				<ToggleGroupControl
-					label={ __(
-						'Price Slider',
-						'woocommerce'
-					) }
+					label={ __( 'Price Slider', 'woocommerce' ) }
 					value={ showInputFields ? 'editable' : 'text' }
 					onChange={ ( value: string ) =>
 						setAttributes( {
@@ -40,10 +35,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				>
 					<ToggleGroupControlOption
 						value="editable"
-						label={ __(
-							'Editable',
-							'woocommerce'
-						) }
+						label={ __( 'Editable', 'woocommerce' ) }
 					/>
 					<ToggleGroupControlOption
 						value="text"
@@ -52,10 +44,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				</ToggleGroupControl>
 				{ showInputFields && (
 					<ToggleControl
-						label={ __(
-							'Inline input fields',
-							'woocommerce'
-						) }
+						label={ __( 'Inline input fields', 'woocommerce' ) }
 						checked={ inlineInput }
 						onChange={ () =>
 							setAttributes( {

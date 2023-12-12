@@ -28,10 +28,7 @@ export const AttributeSelectControls = ( {
 			"Your store doesn't have any product attributes.",
 			'woocommerce'
 		),
-		search: __(
-			'Search for a product attribute:',
-			'woocommerce'
-		),
+		search: __( 'Search for a product attribute:', 'woocommerce' ),
 		selected: ( n: number ) =>
 			sprintf(
 				/* translators: %d is the number of attributes selected. */

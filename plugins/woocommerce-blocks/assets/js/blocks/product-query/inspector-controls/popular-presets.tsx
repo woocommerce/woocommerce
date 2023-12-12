@@ -36,17 +36,11 @@ export function PopularPresets( props: ProductQueryBlock ) {
 			initialOpen={ true }
 		>
 			<p>
-				{ __(
-					'Arrange products by popular pre-sets.',
-					'woocommerce'
-				) }
+				{ __( 'Arrange products by popular pre-sets.', 'woocommerce' ) }
 			</p>
 			<CustomSelectControl
 				hideLabelFromVision={ true }
-				label={ __(
-					'Choose among these pre-sets',
-					'woocommerce'
-				) }
+				label={ __( 'Choose among these pre-sets', 'woocommerce' ) }
 				onChange={ ( option ) => {
 					if ( ! option.selectedItem?.key ) return;
 
