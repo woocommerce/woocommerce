@@ -108,7 +108,7 @@ class Pexels {
 	 * @return mixed|\WP_Error
 	 */
 	private function define_search_term( $ai_connection, $token, $business_description ) {
-		$prompt = sprintf( 'Based on the description "%s", generate one word that precisely describe what this business is selling. The returned word should be as accurate as possible to describe the products sold, do not include any adjectives or descriptions of the qualities of the product. The generated word must exist in the english dictionary and not be a proper name, the returned word should be simple, do not add any explanations.', $business_description );
+		$prompt = sprintf( 'You are a teacher. Based on the following business description, \'%s\', describe to a child exactly what this store is selling in one or two words. Do not add any explanations in the response', $business_description );
 
 		$response = $ai_connection->fetch_ai_response( $token, $prompt, 30 );
 
