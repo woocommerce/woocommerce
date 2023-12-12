@@ -23,6 +23,8 @@ import { NoticeStatus } from '../../../../contexts/types';
 interface InstallProps {
 	subscription: Subscription;
 	variant?: Button.ButtonVariant;
+	onSuccess?: () => void;
+	onError?: () => void;
 }
 
 export default function Install( props: InstallProps ) {
@@ -77,6 +79,10 @@ export default function Install( props: InstallProps ) {
 					product_id: props.subscription.product_id,
 					product_current_version: props.subscription.version,
 				} );
+
+				if ( props.onSuccess ) {
+					props.onSuccess();
+				}
 			} )
 			.catch( ( error ) => {
 				loadSubscriptions( false ).then( () => {
@@ -102,6 +108,10 @@ export default function Install( props: InstallProps ) {
 						}
 					);
 					stopInstall();
+
+					if ( props.onError ) {
+						props.onError();
+					}
 				} );
 
 				recordEvent( 'marketplace_product_install_failed', {

@@ -18,7 +18,7 @@ import { Subscription } from '../../types';
 import { getAdminSetting } from '../../../../../utils/admin-settings';
 import Install from './install';
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
-import { MARKETPLACE_PATH } from '../../../constants';
+import { MARKETPLACE_PATH, WP_ADMIN_PLUGIN_LIST_URL } from '../../../constants';
 import ConnectAccountButton from './connect-account-button';
 import ProductCard from '../../../product-card/product-card';
 import { addNotice, subscriptionToProduct } from '../../../../utils/functions';
@@ -32,6 +32,7 @@ export default function InstallModal() {
 	const isConnected = !! wccomSettings?.isConnected;
 
 	const [ showModal, setShowModal ] = useState< boolean >( false );
+	const [ isInstalled, setIsInstalled ] = useState< boolean >( false );
 
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
 
@@ -88,17 +89,23 @@ export default function InstallModal() {
 		subscription,
 	] );
 
-	const actionButton = () => {
-		if ( ! isConnected ) {
-			return (
-				<ConnectAccountButton
-					variant="primary"
-					install={ installingProductKey }
-				/>
-			);
-		} else if ( subscription ) {
-			return <Install subscription={ subscription } variant="primary" />;
+	useEffect( () => {
+		if ( subscription && subscription.local.installed ) {
+			setIsInstalled( true );
 		}
+	}, [ subscription ] );
+
+	const onClose = () => {
+		removeInstallQuery();
+		setShowModal( false );
+	};
+
+	const modalTitle = () => {
+		if ( isInstalled ) {
+			return __( 'You are ready to go!', 'woocommerce' );
+		}
+
+		return __( 'Add to store', 'woocommerce' );
 	};
 
 	const modalContent = () => {
@@ -113,22 +120,88 @@ export default function InstallModal() {
 			);
 		} else if ( subscription ) {
 			return (
-				<ProductCard
-					product={ subscriptionToProduct( subscription ) }
-					small={ true }
-					tracksData={ {
-						position: 1,
-						group: 'subscriptions',
-						label: 'install',
-					} }
-				/>
+				<>
+					{ isInstalled && (
+						<p className="woocommerce-marketplace__header-account-modal-text">
+							{ __(
+								'Keep the momentum going and start setting up your extension.',
+								'woocommerce'
+							) }
+						</p>
+					) }
+					<ProductCard
+						product={ subscriptionToProduct( subscription ) }
+						small={ true }
+						tracksData={ {
+							position: 1,
+							group: 'subscriptions',
+							label: 'install',
+						} }
+					/>
+				</>
 			);
 		}
 	};
+	const modalButtons = () => {
+		const buttons = [];
+		if ( isInstalled ) {
+			buttons.push(
+				<Button
+					variant="secondary"
+					href={ subscription?.documentation_url }
+					target="_blank"
+					className="woocommerce-marketplace__header-account-modal-button"
+					key={ 'docs' }
+				>
+					{ __( 'View docs', 'woocommerce' ) }
+				</Button>
+			);
+			buttons.push(
+				<Button
+					variant="primary"
+					href={ WP_ADMIN_PLUGIN_LIST_URL }
+					className="woocommerce-marketplace__header-account-modal-button"
+					key={ 'plugin-list' }
+				>
+					{ __( 'View in Plugins', 'woocommerce' ) }
+				</Button>
+			);
+		} else {
+			buttons.push(
+				<Button
+					variant="tertiary"
+					onClick={ onClose }
+					className="woocommerce-marketplace__header-account-modal-button"
+					key={ 'cancel' }
+				>
+					{ __( 'Cancel', 'woocommerce' ) }
+				</Button>
+			);
 
-	const onClose = () => {
-		removeInstallQuery();
-		setShowModal( false );
+			if ( ! isConnected ) {
+				buttons.push(
+					<ConnectAccountButton
+						variant="primary"
+						install={ installingProductKey }
+						key={ 'connect' }
+					/>
+				);
+			} else if ( subscription ) {
+				buttons.push(
+					<Install
+						subscription={ subscription }
+						variant="primary"
+						onError={ onClose }
+						key={ 'install' }
+					/>
+				);
+			}
+		}
+		return (
+			<ButtonGroup className="woocommerce-marketplace__header-account-modal-button-group">
+				{ buttons }
+			</ButtonGroup>
+		);
 	};
 
 	if ( ! showModal ) {
@@ -137,7 +210,7 @@ export default function InstallModal() {
 
 	return (
 		<Modal
-			title={ __( 'Add to store', 'woocommerce' ) }
+			title={ modalTitle() }
 			onRequestClose={ onClose }
 			focusOnMount={ true }
 			className="woocommerce-marketplace__header-account-modal has-size-medium"
@@ -145,16 +218,7 @@ export default function InstallModal() {
 			overlayClassName="woocommerce-marketplace__header-account-modal-overlay"
 		>
 			{ modalContent() }
-			<ButtonGroup className="woocommerce-marketplace__header-account-modal-button-group">
-				<Button
-					variant="tertiary"
-					onClick={ onClose }
-					className="woocommerce-marketplace__header-account-modal-button"
-				>
-					{ __( 'Cancel', 'woocommerce' ) }
-				</Button>
-				{ actionButton() }
-			</ButtonGroup>
+			{ modalButtons() }
 		</Modal>
 	);
 }

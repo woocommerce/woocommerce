@@ -11,3 +11,4 @@ export const MARKETPLACE_CART_PATH = MARKETPLACE_HOST + '/cart/';
 export const MARKETPLACE_COLLABORATION_PATH =
 	MARKETPLACE_HOST +
 	'/document/managing-woocommerce-com-subscriptions/#transfer-a-woocommerce-com-subscription';
+export const WP_ADMIN_PLUGIN_LIST_URL = '/wp-admin/plugins.php';
