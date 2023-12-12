@@ -778,7 +778,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$product_inventory_quantity_hide_conditions = array(
 			array(
 				'expression' => 'editedProduct.manage_stock === false',
-			)
+			),
 		);
 		if ( Features::is_enabled( 'product-grouped' ) ) {
 			$product_inventory_quantity_hide_conditions[] = array(
