@@ -200,7 +200,7 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - plugin: 'WooCommerce Payments'
+                    - plugin: 'WooPayments'
                       repo: 'automattic/woocommerce-payments'
                       slug: woocommerce-payments
                     - plugin: 'WooCommerce PayPal Payments'
