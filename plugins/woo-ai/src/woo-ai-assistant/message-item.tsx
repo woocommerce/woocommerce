@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Button } from '@wordpress/components';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -15,10 +16,16 @@ import recordWooAIAssistantTracks from './utils';
 type MessageItemProps = {
 	message: Message;
 	index: number;
+	onRetry: ( index: number ) => void;
+};
+
+type FeedbackButtonProps = {
+	type: FeedbackType;
 };
 
 type FeedbackType =
 	| 'positive'
+	| 'negative'
 	| 'outdated_information'
 	| 'inaccurate_answer'
 	| 'did_not_answer_question';
@@ -31,7 +38,11 @@ type FeedbackState = {
 	};
 };
 
-const MessageItem: React.FC< MessageItemProps > = ( { message, index } ) => {
+const MessageItem: React.FC< MessageItemProps > = ( {
+	message,
+	index,
+	onRetry,
+} ) => {
 	const [ feedback, setFeedback ] = useState< FeedbackState >( {} );
 	const [ feedbackButtonsRef ] = useAutoAnimate< HTMLDivElement >();
 
@@ -67,7 +78,7 @@ const MessageItem: React.FC< MessageItemProps > = ( { message, index } ) => {
 		} );
 	};
 
-	const renderFeedbackButton = ( type: 'positive' | 'negative' ) => {
+	const RenderFeedbackButton = ( { type }: FeedbackButtonProps ) => {
 		const isSubmitted = feedback[ index ]?.submitted;
 		const feedbackType = feedback[ index ]?.type;
 
@@ -92,10 +103,88 @@ const MessageItem: React.FC< MessageItemProps > = ( { message, index } ) => {
 				showTooltip={ true }
 				icon={ icon }
 				label={ label }
-				className={ `woo-ai-assistant-${ type }-feedback-button` }
+				className={ `woo-ai-assistant-${ type }-feedback-button woo-ai-assistant-actions-button` }
 				onClick={ handleClick }
 				disabled={ isSubmitted }
 			/>
+		);
+	};
+
+	const RenderClipboardButton = () => {
+		return (
+			<Button
+				className="woo-ai-assistant-clipboard woo-ai-assistant-actions-button"
+				showTooltip={ true }
+				label={ __( 'Copy to clipboard', 'woocommerce' ) }
+				icon="clipboard"
+				onClick={ () => {
+					navigator.clipboard.writeText( message.text );
+				} }
+			/>
+		);
+	};
+
+	const RenderSpecificFeedbackButtons = () => {
+		return (
+			<div className="specific-feedback">
+				<p className="feedback-prompt">
+					{ __(
+						'Please let me know why this was not helpful:',
+						'woocommerce'
+					) }
+				</p>
+				<div className="specific-feedback-buttons">
+					<Button
+						variant="tertiary"
+						onClick={ () =>
+							submitSpecificNegativeFeedback(
+								index,
+								'outdated_information'
+							)
+						}
+					>
+						{ __( 'Outdated Information', 'woocommerce' ) }
+					</Button>
+					<Button
+						variant="tertiary"
+						onClick={ () =>
+							submitSpecificNegativeFeedback(
+								index,
+								'inaccurate_answer'
+							)
+						}
+					>
+						{ __( 'Incorrect Information', 'woocommerce' ) }
+					</Button>
+					<Button
+						variant="tertiary"
+						onClick={ () =>
+							submitSpecificNegativeFeedback(
+								index,
+								'did_not_answer_question'
+							)
+						}
+					>
+						{ __( 'Did Not Answer My Question', 'woocommerce' ) }
+					</Button>
+				</div>
+			</div>
+		);
+	};
+
+	const RenderRetryButton = () => {
+		return (
+			<div className="woo-ai-assistant-retry">
+				<Button
+					showTooltip={ true }
+					className="woo-ai-assistant-actions-button"
+					icon="redo"
+					label={ __( 'Retry', 'woocommerce' ) }
+					onClick={ () => {
+						onRetry( index );
+					} }
+				/>
+			</div>
 		);
 	};
 
@@ -104,65 +193,21 @@ const MessageItem: React.FC< MessageItemProps > = ( { message, index } ) => {
 			<li key={ index } className={ `message ${ message.sender }` }>
 				<ReactMarkdown>{ message.text }</ReactMarkdown>
 			</li>
-			{ message.sender === 'assistant' && (
-				<div className="woo-ai-assistant-actions">
-					<Button
-						className="woo-ai-assistant-clipboard"
-						icon="clipboard"
-						onClick={ () => {
-							navigator.clipboard.writeText( message.text );
-						} }
-					/>
-					<div
-						className="feedback-buttons"
-						ref={ feedbackButtonsRef }
-					>
-						{ renderFeedbackButton( 'positive' ) }
-						{ renderFeedbackButton( 'negative' ) }
-
-						{ feedback[ index ]?.showSpecificFeedback && (
-							<div className="specific-feedback">
-								<p className="feedback-prompt">
-									Sorry to hear that. Could you tell me more?
-								</p>
-								<Button
-									variant="tertiary"
-									onClick={ () =>
-										submitSpecificNegativeFeedback(
-											index,
-											'outdated_information'
-										)
-									}
-								>
-									Outdated Information
-								</Button>
-								<Button
-									variant="tertiary"
-									onClick={ () =>
-										submitSpecificNegativeFeedback(
-											index,
-											'inaccurate_answer'
-										)
-									}
-								>
-									Incorrect Information
-								</Button>
-								<Button
-									variant="tertiary"
-									onClick={ () =>
-										submitSpecificNegativeFeedback(
-											index,
-											'did_not_answer_question'
-										)
-									}
-								>
-									Did Not Answer My Question
-								</Button>
-							</div>
-						) }
-					</div>
+			{ message.sender === 'user' && <RenderRetryButton /> }
+			<div className="woo-ai-assistant-actions">
+				<div className="feedback-buttons" ref={ feedbackButtonsRef }>
+					{ message.sender === 'assistant' && (
+						<>
+							<RenderClipboardButton />
+							<RenderFeedbackButton type={ 'positive' } />
+							<RenderFeedbackButton type={ 'negative' } />
+						</>
+					) }
+					{ feedback[ index ]?.showSpecificFeedback && (
+						<RenderSpecificFeedbackButtons />
+					) }
 				</div>
-			) }
+			</div>
 		</>
 	);
 };

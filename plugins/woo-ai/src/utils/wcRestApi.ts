@@ -15,15 +15,6 @@ const makeWCRestApiCall = async ( {
 	body,
 }: makeWCRestApiCallProps ) => {
 	try {
-		console.log( 'path' );
-		console.log( path );
-		console.log( 'httpVerb' );
-		console.log( httpVerb );
-		console.log( 'body' );
-		console.log( body );
-		console.log( typeof body );
-		console.log( 'apiFetch' );
-		console.log( { path, method: httpVerb, body: JSON.stringify( body ) } );
 		const response = await apiFetch( {
 			path,
 			method: httpVerb,

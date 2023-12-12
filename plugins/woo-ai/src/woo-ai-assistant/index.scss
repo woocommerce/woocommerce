@@ -1,9 +1,6 @@
 $woocommerce-purple: #9b5c8f;
 $toned-down-purple: mix(white, $woocommerce-purple, 20%); // 20% white
-$positive-color: #5cb85c;
-$negative-color: #d9534f;
-$toned-down-positive-color: mix(white, $positive-color, 20%); // A lighter green
-$toned-down-negative-color: mix(white, $negative-color, 20%); // A lighter red
+$toned-down-grey: mix(white, #333, 20%); // A lighter grey
 
 .woo-ai-assistant-chat-modal {
 	max-height: 100%;
@@ -22,57 +19,57 @@ $toned-down-negative-color: mix(white, $negative-color, 20%); // A lighter red
 		padding: 10px;
 		background-color: white;
 
+		.woo-ai-assistant-retry {
+			display: flex;
+			justify-content: end;
+		}
+
+		.woo-ai-assistant-actions-button {
+			font-size: 18px;
+			color: $toned-down-grey;
+
+			&:hover {
+				color: #333;
+			}
+		}
+
 		.woo-ai-assistant-actions {
 			display: flex;
 			justify-content: flex-start;
-
-			.woo-ai-assistant-clipboard {
-				color: mix( white, #333, 20% );
-
-				&:hover {
-					color: #333;
-				}
-			}
 
 			.feedback-buttons {
 				// target button elements that are disabled
 				button:disabled{
 					opacity: .6;
 				}
+
+				button:disabled span {
+					&:hover {
+						color: $toned-down-grey;
+					}
+				}
 	
 				.specific-feedback {
-					flex-direction: column;
-					align-items: center;
 					margin-bottom: 30px;
+					background-color: #f0eeee;
+					padding: 5px;
+					border-radius: 5px;
+					border: 1px solid #e3e3e3;
 
-					.feedback-prompt {
-						text-align: center;
+					.specific-feedback-buttons {
+						display:flex;
+						flex-direction: column;
+						align-items: center;
 					}
 				}
 	
 				.components-button.is-active + .specific-feedback {
 					display: flex;
 				}
-	
-				.woo-ai-assistant-positive-feedback-button {
-					font-size: 18px;
-					color: $toned-down-positive-color;
 
-					&:hover {
-						color: $positive-color;
-					}
-				}
-				.woo-ai-assistant-negative-feedback-button {
-					color: $toned-down-negative-color;
-					font-size: 18px;
-
-					&:hover {
-						color: $negative-color;
-					}
-				}
 			}
 			.woo-ai-assistant-feedback-submitted {
-				background-color: $toned-down-positive-color;
+				background-color: $toned-down-grey;
 				color: white;
 				padding: 10px;
 				border-radius: 5px;
@@ -89,13 +86,13 @@ $toned-down-negative-color: mix(white, $negative-color, 20%); // A lighter red
 			margin-bottom: 0px;
 			box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1); // Subtle shadow for depth
 			position: relative;
+			margin-top: 20px;
 
 			&.user {
 				background-color: $toned-down-purple;
 				color: white;
 				align-self: flex-end; // Align to the right
 				border-top-right-radius: 2px; // Adjust for speech bubble effect
-				margin-bottom: 20px;
 			}
 
 			&.assistant {

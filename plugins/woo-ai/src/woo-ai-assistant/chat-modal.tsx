@@ -44,8 +44,8 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ parent ] = useAutoAnimate();
 	const chatMessagesEndRef = React.useRef< HTMLLIElement | null >( null );
 
+	// Calculate the session duration based on the component mounting and unmounting (opening and closing modal)
 	useEffect( () => {
-		// Calculate the session duration based on the component mounting and unmounting (opening and closing modal)
 		return () => {
 			const sessionDurationInSeconds = Math.floor(
 				( Date.now() - startSessionTimeRef.current ) / 1000
@@ -93,26 +93,25 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				WOO_AI_PLUGIN_NAME,
 				preferencesChatHistory
 			);
+			// check that each message text property is a string, otherwise we'll get an error when rendering
+			// unset the message in question if it's not a string
 			if ( storedMessages ) {
-				setMessages( JSON.parse( storedMessages ) );
-			} else {
-				const assistantMessage: Message = {
-					sender: 'assistant',
-					text: 'Hi there! How can I help you today?',
-				};
-				setMessages( [ assistantMessage ] );
+				const parsedMessages = JSON.parse( storedMessages );
+				const filteredMessages = parsedMessages.filter(
+					( message: Message ) => typeof message.text === 'string'
+				);
+				setMessages( filteredMessages );
 			}
 		}
 	}, [ messages ] );
 
 	const prepareFormData = (
-		input: string,
+		message: string,
 		token: string,
-		audioBlob: Blob | null,
 		tempthreadID?: string
 	) => {
 		const formData = new FormData();
-		formData.append( 'message', input );
+		formData.append( 'message', message );
 		formData.append( 'token', token );
 		if ( tempthreadID ) {
 			formData.append( 'thread_id', tempthreadID );
@@ -170,12 +169,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
                     We're doing this even if the function call failed, because we want to be able to continue the conversation.
                 */
 			try {
-				const formData = prepareFormData(
-					input,
-					token,
-					audioBlob,
-					tempthreadID
-				);
+				const formData = prepareFormData( input, token, tempthreadID );
 				formData.append( 'run_id', runID );
 				formData.append( 'tool_call_id', functionID );
 				formData.append( 'output', message );
@@ -208,11 +202,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 					message
 				) }`;
 
-				const summaryFormData = prepareFormData(
-					summaryPrompt,
-					token,
-					null
-				);
+				const summaryFormData = prepareFormData( summaryPrompt, token );
 
 				const summaryResponse = ( await apiFetch( {
 					url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard',
@@ -242,6 +232,9 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			sender,
 			text: answer,
 		};
+		if ( typeof answer !== 'string' ) {
+			return;
+		}
 		setMessages( ( prevMessages ) => [ ...prevMessages, chatMessage ] );
 		setStorageData(
 			WOO_AI_PLUGIN_NAME,
@@ -250,22 +243,16 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		);
 	};
 
-	const handleSubmit = async ( event: React.FormEvent ) => {
-		event.preventDefault();
-		if ( ! input.trim() && ! audioBlob ) {
-			return;
-		}
-		setLoading( true );
-		setAndStoreMessages( input, 'user' );
+	const makeWooAssistantApiCall = async ( userQuery: string ) => {
 		recordWooAIAssistantTracks( 'send_message', {
-			message: input,
+			message: userQuery,
 		} );
-		setInput( '' );
 		let answer = '';
+		setLoading( true );
 
 		try {
 			const { token } = await requestJetpackToken();
-			const formData = prepareFormData( input, token, audioBlob );
+			const formData = prepareFormData( userQuery, token );
 			const response = ( await apiFetch( {
 				url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard',
 				method: 'POST',
@@ -290,14 +277,49 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			if ( ! answer || ! answer.length ) {
 				throw new Error( 'No message returned from assistant' );
 			}
+			setAndStoreMessages( answer, 'assistant' );
 		} catch ( error ) {
 			handleError(
 				"I'm sorry, I had trouble generating a response for you."
 			);
 		} finally {
-			setAndStoreMessages( answer, 'assistant' );
+			setLoading( false );
 		}
-		setLoading( false );
+	};
+
+	const retryUserQuery = async ( index: number ) => {
+		const userQuery = messages[ index ];
+		setAndStoreMessages( userQuery.text, 'user' );
+		const retryUserQueryPrompt = `Your previous answer to the following request was unsatisfactory, please try again: ${ userQuery.text }`;
+		if ( userQuery.sender !== 'user' ) {
+			return;
+		}
+
+		try {
+			makeWooAssistantApiCall( retryUserQueryPrompt );
+		} catch ( error ) {
+			handleError( 'I had trouble generating a response for you.' );
+		} finally {
+			recordWooAIAssistantTracks( 'send_message_retry', {
+				message: userQuery.text,
+			} );
+		}
+	};
+
+	const handleSubmit = async ( event: React.FormEvent ) => {
+		event.preventDefault();
+		if ( ! input.trim() && ! audioBlob ) {
+			return;
+		}
+		try {
+			setAndStoreMessages( input, 'user' );
+			setInput( '' );
+			makeWooAssistantApiCall( input );
+		} catch ( error ) {
+			handleError(
+				"I'm sorry, I had trouble generating a response for you."
+			);
+		}
 	};
 
 	return (
@@ -307,11 +329,19 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			className="woo-ai-assistant-chat-modal"
 		>
 			<ul className="woo-chat-history" ref={ parent }>
+				{ ! messages.length && (
+					<li>
+						<p className="message assistant">
+							Hi there! How can I help you today?
+						</p>
+					</li>
+				) }
 				{ messages.map( ( message, index ) => (
 					<MessageItem
 						message={ message }
 						key={ index }
 						index={ index }
+						onRetry={ retryUserQuery }
 					/>
 				) ) }
 				<li ref={ chatMessagesEndRef }></li>
