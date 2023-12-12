@@ -83,26 +83,34 @@ class FileController {
 	private $log_directory;
 
 	/**
-	 * The maximum size of a file before it will get rotated.
-	 *
-	 * @var int
-	 */
-	private $max_file_size;
-
-	/**
 	 * Class FileController
 	 */
 	public function __construct() {
 		$this->log_directory = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) );
+	}
+
+	/**
+	 * Get the file size limit that determines when to rotate a file.
+	 *
+	 * @return int
+	 */
+	private function get_file_size_limit(): int {
+		$default = 5 * MB_IN_BYTES;
 
 		/**
-		 * Filter the maximum size of a log file before it will get rotated.
+		 * Filter the threshold size of a log file at which point it will get rotated.
 		 *
 		 * @since 3.4.0
 		 *
-		 * @param int $max_file_size The file size in bytes.
+		 * @param int $file_size_limit The file size limit in bytes.
 		 */
-		$this->max_file_size = apply_filters( 'woocommerce_log_file_size_limit', 5 * MB_IN_BYTES );
+		$file_size_limit = apply_filters( 'woocommerce_log_file_size_limit', $default );
+
+		if ( ! is_int( $file_size_limit ) || $file_size_limit < 1 ) {
+			return $default;
+		}
+
+		return $file_size_limit;
 	}
 
 	/**
