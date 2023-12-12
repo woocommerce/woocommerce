@@ -1,5 +1,5 @@
 .woocommerce-layout .woocommerce-layout__main {
-	@include breakpoint("<782px") {
+	@include breakpoint('<782px') {
 		padding-top: 0 !important;
 	}
 
@@ -36,10 +36,7 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 	margin-top: 0 !important;
 	height: 100%;
 
-	&
-		> div.tour-kit.woocommerce-tour-kit
-		> div
-		> div.tour-kit-spotlight.is-visible {
+	& > div.tour-kit.woocommerce-tour-kit > div > div.tour-kit-spotlight.is-visible {
 		outline: 99999px solid rgba(0, 0, 0, 0.15);
 	}
 
@@ -118,10 +115,7 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		padding: 12px;
 		width: 404px;
 		border-radius: 2px;
-		background: var(
-			--wp-admin-theme-color-background-04,
-			rgba(168, 168, 170, 0.301)
-		);
+		background: var(--wp-admin-theme-color-background-04, rgba(168, 168, 170, 0.301));
 		color: var(--gutenberg-gray-800, #2f2f2f);
 
 		p {
