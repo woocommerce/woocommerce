@@ -140,7 +140,7 @@ export default function InstallModal() {
 			title={ __( 'Add to store', 'woocommerce' ) }
 			onRequestClose={ onClose }
 			focusOnMount={ true }
-			className="woocommerce-marketplace__header-account-modal"
+			className="woocommerce-marketplace__header-account-modal has-size-medium"
 			style={ { borderRadius: 4 } }
 			overlayClassName="woocommerce-marketplace__header-account-modal-overlay"
 		>

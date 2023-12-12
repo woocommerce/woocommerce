@@ -70,6 +70,15 @@
 			.woocommerce-marketplace__product-card__content {
 				display: block;
 			}
+
+			.woocommerce-marketplace__product-card__details {
+				align-items: center;
+			}
+
+			.woocommerce-marketplace__product-card__title {
+				font-size: 14px;
+				line-height: 20px;
+			}
 		}
 
 		&:hover {
