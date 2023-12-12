@@ -39,7 +39,8 @@ import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved
 import { PostTypeContext } from '../../contexts/post-type-context';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { ModalEditor } from '../modal-editor';
-import { BlockEditorProps, BlockEditorSettings } from './types';
+import { ProductEditorSettings } from '../editor';
+import { BlockEditorProps } from './types';
 
 export function BlockEditor( {
 	context,
@@ -68,7 +69,7 @@ export function BlockEditor( {
 		return () => window.removeEventListener( 'scroll', wpPinMenuEvent );
 	}, [] );
 
-	const settings: BlockEditorSettings = useMemo( () => {
+	const settings = useMemo< Partial< ProductEditorSettings > >( () => {
 		const mediaSettings = canUserCreateMedia
 			? {
 					mediaUpload( {
@@ -105,18 +106,37 @@ export function BlockEditor( {
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	useLayoutEffect( () => {
-		const template = settings?.templates?.[ postType ];
+		const productTemplates = settings?.productTemplates ?? [];
+		const productTemplate = productTemplates.find(
+			( template ) => template.product_data.type === productType
+		);
 
-		if ( ! template ) {
+		const layoutTemplates = settings?.layoutTemplates ?? [];
+
+		let layoutTemplateId = productTemplate?.layout_template_id;
+		// Product variations do not have a related product template but
+		// they do have a layout template
+		if ( postType === 'product_variation' ) {
+			layoutTemplateId = 'product-variation';
+		}
+
+		const layoutTemplate = layoutTemplates.find(
+			( template ) => template.id === layoutTemplateId
+		);
+
+		if ( ! layoutTemplate ) {
 			return;
 		}
 
-		const blockInstances = synchronizeBlocksWithTemplate( [], template );
+		const blockInstances = synchronizeBlocksWithTemplate(
+			[],
+			layoutTemplate.blocks
+		);
 
 		onChange( blockInstances, {} );
 
 		updateEditorSettings( settings ?? {} );
-	}, [ productType ] );
+	}, [ settings, postType, productType ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( select ) => {
