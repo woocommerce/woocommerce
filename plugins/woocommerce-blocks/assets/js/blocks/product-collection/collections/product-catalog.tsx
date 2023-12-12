@@ -31,6 +31,7 @@ const attributes = {
 		...DEFAULT_ATTRIBUTES.query,
 		inherit: true,
 	},
+	collection: collection.name,
 };
 
 const innerBlocks: InnerBlockTemplate[] = [ INNER_BLOCKS_PRODUCT_TEMPLATE ];
