@@ -250,52 +250,53 @@ export function Edit( {
 			</div>
 
 			<div className="wp-block-woocommerce-product-downloads-field__body">
-				{ ! Boolean( downloads.length ) && (
-					<MediaUploader
-						label={
-							! Boolean( downloads.length ) ? (
-								<div className="wp-block-woocommerce-product-downloads-field__drop-zone-content">
-									<UploadImage />
-									<p className="wp-block-woocommerce-product-downloads-field__drop-zone-label">
-										{ createInterpolateElement(
-											__(
-												'Supported file types: <Types /> and more. <link>View all</link>',
-												'woocommerce'
+				<MediaUploader
+					label={
+						! Boolean( downloads.length ) ? (
+							<div className="wp-block-woocommerce-product-downloads-field__drop-zone-content">
+								<UploadImage />
+								<p className="wp-block-woocommerce-product-downloads-field__drop-zone-label">
+									{ createInterpolateElement(
+										__(
+											'Supported file types: <Types /> and more. <link>View all</link>',
+											'woocommerce'
+										),
+										{
+											Types: (
+												<Fragment>
+													PNG, JPG, PDF, PPT, DOC,
+													MP3, MP4
+												</Fragment>
 											),
-											{
-												Types: (
-													<Fragment>
-														PNG, JPG, PDF, PPT, DOC,
-														MP3, MP4
-													</Fragment>
-												),
-												link: (
-													// eslint-disable-next-line jsx-a11y/anchor-has-content
-													<a
-														href="https://codex.wordpress.org/Uploading_Files"
-														target="_blank"
-														rel="noreferrer"
-														onClick={ ( event ) =>
-															event.stopPropagation()
-														}
-													/>
-												),
-											}
-										) }
-									</p>
-								</div>
-							) : (
-								''
-							)
-						}
-						buttonText=""
-						allowedMediaTypes={ allowedTypes }
-						multipleSelect={ 'add' }
-						onUpload={ handleFileUpload }
-						onFileUploadChange={ handleFileUpload }
-						onError={ handleUploadError }
-					/>
-				) }
+											link: (
+												// eslint-disable-next-line jsx-a11y/anchor-has-content
+												<a
+													href="https://codex.wordpress.org/Uploading_Files"
+													target="_blank"
+													rel="noreferrer"
+													onClick={ ( event ) =>
+														event.stopPropagation()
+													}
+												/>
+											),
+										}
+									) }
+								</p>
+							</div>
+						) : (
+							''
+						)
+					}
+					buttonText=""
+					allowedMediaTypes={ allowedTypes }
+					multipleSelect={ 'add' }
+					onUpload={ handleFileUpload }
+					onFileUploadChange={ handleFileUpload }
+					onError={ handleUploadError }
+					additionalData={ {
+						type: 'downloadable_product',
+					} }
+				/>
 
 				{ Boolean( downloads.length ) && (
 					<Sortable className="wp-block-woocommerce-product-downloads-field__table">
