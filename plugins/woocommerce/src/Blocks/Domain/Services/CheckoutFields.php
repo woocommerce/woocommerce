@@ -22,7 +22,7 @@ class CheckoutFields {
 	 *
 	 * @var array
 	 */
-	private $additional_fields = array();
+	private $additional_fields = [];
 
 	/**
 	 * Fields locations.
@@ -36,7 +36,7 @@ class CheckoutFields {
 	 *
 	 * @var array
 	 */
-	private $supported_field_types = array( 'text', 'select' );
+	private $supported_field_types = [ 'text', 'select', 'checkbox' ];
 
 	/**
 	 * Instance of the asset data registry.
@@ -690,16 +690,16 @@ class CheckoutFields {
 	 */
 	public function get_all_fields_from_customer( $customer, $all = false ) {
 		$customer_id = $customer->get_id();
-		$meta_data   = array(
-			'billing'    => array(),
-			'shipping'   => array(),
-			'additional' => array(),
-		);
+		$meta_data   = [
+			'billing'    => [],
+			'shipping'   => [],
+			'additional' => [],
+		];
 		if ( ! $customer_id ) {
 			if ( isset( wc()->session ) ) {
-				$meta_data['billing']    = wc()->session->get( self::BILLING_FIELDS_KEY, array() );
-				$meta_data['shipping']   = wc()->session->get( self::SHIPPING_FIELDS_KEY, array() );
-				$meta_data['additional'] = wc()->session->get( self::ADDITIONAL_FIELDS_KEY, array() );
+				$meta_data['billing']    = wc()->session->get( self::BILLING_FIELDS_KEY, [] );
+				$meta_data['shipping']   = wc()->session->get( self::SHIPPING_FIELDS_KEY, [] );
+				$meta_data['additional'] = wc()->session->get( self::ADDITIONAL_FIELDS_KEY, [] );
 			}
 		} else {
 			$meta_data['billing']    = get_user_meta( $customer_id, self::BILLING_FIELDS_KEY, true );
@@ -719,11 +719,11 @@ class CheckoutFields {
 	 * @return array An array of fields.
 	 */
 	public function get_all_fields_from_order( $order, $all = false ) {
-		$meta_data = array(
-			'billing'    => array(),
-			'shipping'   => array(),
-			'additional' => array(),
-		);
+		$meta_data = [
+			'billing'    => [],
+			'shipping'   => [],
+			'additional' => [],
+		];
 		if ( $order instanceof \WC_Order ) {
 			$meta_data['billing']    = $order->get_meta( self::BILLING_FIELDS_KEY, true );
 			$meta_data['shipping']   = $order->get_meta( self::SHIPPING_FIELDS_KEY, true );
@@ -741,9 +741,9 @@ class CheckoutFields {
 	 * @return array An array of fields.
 	 */
 	private function format_meta_data( $meta, $all = false ) {
-		$billing_fields    = $meta['billing'] ?? array();
-		$shipping_fields   = $meta['shipping'] ?? array();
-		$additional_fields = $meta['additional'] ?? array();
+		$billing_fields    = $meta['billing'] ?? [];
+		$shipping_fields   = $meta['shipping'] ?? [];
+		$additional_fields = $meta['additional'] ?? [];
 
 		$fields = array();
 
