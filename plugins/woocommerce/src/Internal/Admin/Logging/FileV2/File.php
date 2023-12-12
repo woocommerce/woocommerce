@@ -139,6 +139,17 @@ class File {
 	}
 
 	/**
+	 * Check if the filename structure is in the expected format.
+	 *
+	 * @see parse_filename().
+	 *
+	 * @return bool
+	 */
+	public function has_standard_filename(): bool {
+		return !! $this->get_hash();
+	}
+
+	/**
 	 * Check if the file represented by the class instance is a file and is readable.
 	 *
 	 * @global WP_Filesystem_Direct $wp_filesystem
@@ -255,7 +266,7 @@ class File {
 			$file_id .= '.' . $this->get_rotation();
 		}
 
-		if ( $this->get_hash() ) {
+		if ( $this->has_standard_filename() ) {
 			$file_id .= '-' . gmdate( 'Y-m-d', $this->get_created_timestamp() );
 		}
 

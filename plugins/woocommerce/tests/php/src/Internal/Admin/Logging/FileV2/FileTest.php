@@ -169,6 +169,20 @@ class FileTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Check that the has_standard_filename method correctly identifies standard and nonstandard filenames.
+	 */
+	public function test_has_standard_filename() {
+		$standard    = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1.3-2023-10-23-' . wp_hash( 'cheddar' ) . '.log';
+		$nonstandard = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-' . wp_hash( 'cheddar' ) . '.5.log';
+
+		$file = new File( $standard );
+		$this->assertTrue( $file->has_standard_filename() );
+
+		$file = new File( $nonstandard );
+		$this->assertFalse( $file->has_standard_filename() );
+	}
+
+	/**
 	 * @testdox Check that get_stream returns a PHP resource representation of the file.
 	 */
 	public function test_get_and_close_stream() {
