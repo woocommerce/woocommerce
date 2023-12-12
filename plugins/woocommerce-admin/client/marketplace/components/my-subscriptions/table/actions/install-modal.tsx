@@ -119,16 +119,20 @@ export default function InstallModal() {
 				</Notice>
 			);
 		} else if ( subscription ) {
+			const installContent = isInstalled
+				? __(
+						'Keep the momentum going and start setting up your extension.',
+						'woocommerce'
+				  )
+				: __(
+						'Would you like to install this extension?',
+						'woocommerce'
+				  );
 			return (
 				<>
-					{ isInstalled && (
-						<p className="woocommerce-marketplace__header-account-modal-text">
-							{ __(
-								'Keep the momentum going and start setting up your extension.',
-								'woocommerce'
-							) }
-						</p>
-					) }
+					<p className="woocommerce-marketplace__header-account-modal-text">
+						{ installContent }
+					</p>
 					<ProductCard
 						product={ subscriptionToProduct( subscription ) }
 						small={ true }
