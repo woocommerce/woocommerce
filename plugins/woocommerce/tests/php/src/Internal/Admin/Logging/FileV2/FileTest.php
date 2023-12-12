@@ -80,7 +80,8 @@ class FileTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ), $file->get_source() );
 		$this->assertNull( $file->get_rotation() );
 		$this->assertEquals( filemtime( $filename ), $file->get_created_timestamp() );
-		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ), $file->get_hash() );
+		// On non-standard filenames, we can't determine what part of the name might be a hash.
+		$this->assertEquals( '', $file->get_hash() );
 	}
 
 	/**
@@ -97,7 +98,8 @@ class FileTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ), $file->get_source() );
 		$this->assertEquals( 5, $file->get_rotation() );
 		$this->assertEquals( filemtime( $filename ), $file->get_created_timestamp() );
-		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ), $file->get_hash() );
+		// On non-standard filenames, we can't determine what part of the name might be a hash.
+		$this->assertEquals( '', $file->get_hash() );
 	}
 
 	/**
