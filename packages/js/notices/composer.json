@@ -1,11 +1,8 @@
 {
-	"name": "woocommerce/woocommerce-blocks",
-	"description": "WooCommerce blocks for the Gutenberg editor.",
-	"homepage": "https://woocommerce.com/",
-	"type": "wordpress-plugin",
-	"version": "11.8.0-dev",
+	"name": "woocommerce/notices",
+	"description": "State management for notices.",
+	"type": "library",
 	"license": "GPL-3.0-or-later",
-	"prefer-stable": true,
 	"minimum-stability": "dev",
 	"require-dev": {
 		"automattic/jetpack-changelogger": "3.3.0"
@@ -18,7 +15,7 @@
 	"extra": {
 		"changelogger": {
 			"formatter": {
-				"filename": "../../tools/changelogger/class-package-formatter.php"
+				"filename": "../../../tools/changelogger/class-package-formatter.php"
 			},
 			"types": {
 				"fix": "Fixes an existing bug",

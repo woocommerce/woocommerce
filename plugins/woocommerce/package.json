@@ -13,7 +13,7 @@
 		"build": "pnpm --if-present --filter=\"$npm_package_name...\" build:project",
 		"build:project": "wireit",
 		"build:zip": "./bin/build-zip.sh",
-		"changelog": "composer exec -- changelogger",
+		"changelog": "composer install && composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
 		"docker:ssh": "pnpm exec wc-e2e docker:ssh",
 		"docker:up": "pnpm exec wc-e2e docker:up",

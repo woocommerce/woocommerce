@@ -1,6 +1,6 @@
 {
-	"name": "woocommerce/woocommerce-blocks",
-	"description": "WooCommerce blocks for the Gutenberg editor.",
+	"name": "woocommerce/woocommerce-admin",
+	"description": "WooCommerce admin.",
 	"homepage": "https://woocommerce.com/",
 	"type": "wordpress-plugin",
 	"version": "11.8.0-dev",
