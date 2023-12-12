@@ -29,7 +29,7 @@ import blockJson from '../block.json';
 import { collections } from '../collections';
 
 type CollectionButtonProps = {
-	active: boolean;
+	active?: boolean;
 	title: string;
 	icon: string;
 	description: string;
@@ -37,7 +37,7 @@ type CollectionButtonProps = {
 };
 
 const CollectionButton = ( {
-	active,
+	active = false,
 	title,
 	icon,
 	description,
@@ -64,24 +64,6 @@ const CollectionButton = ( {
 			</div>
 		</Button>
 	);
-};
-
-const getDefaultChosenCollection = (
-	attributes: ProductCollectionAttributes,
-	// @ts-expect-error Type definitions are missing
-	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
-	blockCollections
-) => {
-	// If `attributes.query` is truthy, that means Product Collection was already
-	// configured. So it's either a collection or we need to return defaultQuery
-	// collection name;
-	if ( attributes.query ) {
-		return attributes.collection || productCatalog.name;
-	}
-
-	// Otherwise it should be the first available choice. We control collections
-	// so there's always at least one available.
-	return blockCollections.length ? blockCollections[ 0 ].name : '';
 };
 
 const ProductCollectionPlaceholder = (
@@ -140,21 +122,14 @@ const ProductCollectionPlaceholder = (
 					'woo-gutenberg-products-block'
 				) }
 				instructions={ __(
-					'Choose a product collection to display, or create your own.',
+					"Choose a collection to get started. Don't worry, you can change and tweak this any time.",
 					'woo-gutenberg-products-block'
 				) }
 			>
-				<p className="wc-blocks-product-collection__subtitle">
-					{ __(
-						"Pick what products are shown. Don't worry, you can switch and tweak this collection any time.",
-						'woo-gutenberg-products-block'
-					) }
-				</p>
 				<div className="wc-blocks-product-collection__collections-section">
 					{ blockCollections.map(
 						( { name, title, icon, description } ) => (
 							<CollectionButton
-								active={ defaultChosenCollection === name }
 								key={ name }
 								title={ title }
 								description={ description }
