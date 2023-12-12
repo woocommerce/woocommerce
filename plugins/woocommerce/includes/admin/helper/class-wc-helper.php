@@ -689,20 +689,8 @@ class WC_Helper {
 			return;
 		}
 
-		// Check the format of the product key in the "install" parameter is what we expect it to be
-		if ( ! preg_match( '/^W00-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $_GET[ 'install' ], $matches ) ) {
-			return;
-		}
-
-		$redirect_url = add_query_arg(
-			array(
-				'page'    => 'wc-admin',
-				'tab'     => 'my-subscriptions',
-				'path'    => rawurlencode( '/extensions' ),
-				'install' => rawurlencode( wp_unslash( $_GET[ 'install' ] ) ),
-			),
-			admin_url( 'admin.php' )
-		);
+		$my_subscriptions_url_base = self::get_helper_redirect_url( [], true );
+		$redirect_url              = add_query_arg( 'install', wp_unslash( $_GET[ 'install' ] ), $my_subscriptions_url_base );
 
 		wp_safe_redirect( esc_url_raw( $redirect_url ) );
 		die();
