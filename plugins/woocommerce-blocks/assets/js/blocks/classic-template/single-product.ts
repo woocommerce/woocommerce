@@ -29,7 +29,7 @@ const getBlockifiedTemplate = () =>
 						justifyContent: 'right',
 						width: '512px',
 					},
-					[ createBlock( 'woocommerce/product-image-gallery' ) ]
+					[ createBlock( 'woocommerce/product-gallery' ) ]
 				),
 				createBlock( 'core/column', {}, [
 					createBlock( 'core/post-title', {
