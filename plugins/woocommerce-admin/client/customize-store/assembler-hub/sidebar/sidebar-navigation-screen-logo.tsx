@@ -452,7 +452,7 @@ export const SidebarNavigationScreenLogo = () => {
 									className:
 										'woocommerce-customize-store__logo-dropdown-popover',
 									// @ts-expect-error outdated TS.
-									placement: 'left',
+									placement: 'bottom-end',
 								} }
 							>
 								{ ( { onClose } ) => (
