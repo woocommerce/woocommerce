@@ -526,7 +526,7 @@
 					if ( 'wc-modal-add-shipping-method' === target ) {
 						shippingMethodView.block();
 
-						$('#btn-next').html('<img alt="processing" src="images/wpspin_light.gif" class="waiting" />');
+						$('#btn-next').addClass( 'is-busy' );
 
 						// Add method to zone via ajax call
 						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_add_method', {

@@ -4361,6 +4361,21 @@ table.wc_shipping {
 	.wc-backbone-modal-back-inactive {
 		display: none;
 	}
+	
+	#btn-next.is-busy {
+		background-image: linear-gradient(-45deg, #fafafa 33%, #e0e0e0 33%, #e0e0e0 70%, #fafafa 70%);
+		animation-duration: 2.5s;
+		animation-timing-function: linear;
+		animation-delay: 0s;
+		animation-iteration-count: infinite;
+		animation-direction: normal;
+		animation-fill-mode: none;
+		animation-play-state: running;
+		animation-name: components-button__busy-animation;
+		animation-timeline: auto;
+		animation-range-start: normal;
+		color: #757575;
+	}
 }
 
 .wc-backbone-modal-add-shipping-method .wc-backbone-modal-main article {
