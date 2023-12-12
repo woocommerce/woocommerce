@@ -99,7 +99,7 @@ class DefaultShippingPartners {
 				'description'       => '',
 				'learn_more_link'   => 'https://wordpress.org/plugins/skydropx-cotizador-y-envios/',
 				'is_visible'        => array(
-					self::get_rules_for_countries( array( 'MX', 'CO' ) ),
+					self::get_rules_for_countries( array( ) ), // No countries eligible for SkydropX promotion at this time.
 				),
 				'available_layouts' => array( 'column' ),
 			),
