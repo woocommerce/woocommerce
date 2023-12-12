@@ -10,7 +10,6 @@ use WC_Customer;
  */
 class CheckoutFields {
 
-
 	/**
 	 * Core checkout fields.
 	 *
@@ -287,8 +286,7 @@ class CheckoutFields {
 			trigger_error( sprintf( 'Registering a field with hidden set to true is not supported. The field "%s" will be registered as visible.', esc_html( $id ) ), E_USER_WARNING );
 		}
 
-		// Insert new field into the correct location array.
-		$this->additional_fields[ $id ] = array(
+		$field_data = array(
 			'label'          => $options['label'],
 			'hidden'         => false,
 			'type'           => $type,
@@ -297,6 +295,9 @@ class CheckoutFields {
 			'autocomplete'   => empty( $options['autocomplete'] ) ? '' : $options['autocomplete'],
 			'autocapitalize' => empty( $options['autocapitalize'] ) ? '' : $options['autocapitalize'],
 		);
+
+		// Insert new field into the correct location array.
+		$this->additional_fields[ $id ] = $field_data;
 
 		$this->fields_locations[ $location ][] = $id;
 	}
