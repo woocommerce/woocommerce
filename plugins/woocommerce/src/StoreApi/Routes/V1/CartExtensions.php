@@ -43,11 +43,11 @@ class CartExtensions extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => [
 					'namespace' => [
-						'description' => __( 'Extension\'s name - this will be used to ensure the data in the request is routed appropriately.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Extension\'s name - this will be used to ensure the data in the request is routed appropriately.', 'woocommerce' ),
 						'type'        => 'string',
 					],
 					'data'      => [
-						'description' => __( 'Additional data to pass to the extension', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Additional data to pass to the extension', 'woocommerce' ),
 						'type'        => 'object',
 					],
 				],

@@ -36,12 +36,12 @@ class CartSelectShippingRate extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => [
 					'package_id' => array(
-						'description' => __( 'The ID of the package being shipped. Leave blank to apply to all packages.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'The ID of the package being shipped. Leave blank to apply to all packages.', 'woocommerce' ),
 						'type'        => [ 'integer', 'string', 'null' ],
 						'required'    => false,
 					),
 					'rate_id'    => [
-						'description' => __( 'The chosen rate ID for the package.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'The chosen rate ID for the package.', 'woocommerce' ),
 						'type'        => 'string',
 						'required'    => true,
 					],
@@ -61,11 +61,11 @@ class CartSelectShippingRate extends AbstractCartRoute {
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		if ( ! wc_shipping_enabled() ) {
-			throw new RouteException( 'woocommerce_rest_shipping_disabled', __( 'Shipping is disabled.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_shipping_disabled', __( 'Shipping is disabled.', 'woocommerce' ), 404 );
 		}
 
 		if ( ! isset( $request['rate_id'] ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_missing_rate_id', __( 'Invalid Rate ID.', 'woo-gutenberg-products-block' ), 400 );
+			throw new RouteException( 'woocommerce_rest_cart_missing_rate_id', __( 'Invalid Rate ID.', 'woocommerce' ), 400 );
 		}
 
 		$cart       = $this->cart_controller->get_cart_instance();

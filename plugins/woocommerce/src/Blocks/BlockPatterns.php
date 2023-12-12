@@ -98,8 +98,8 @@ class BlockPatterns {
 			self::PATTERNS_AI_DATA_POST_TYPE,
 			array(
 				'labels'           => array(
-					'name'          => __( 'Patterns AI Data', 'woo-gutenberg-products-block' ),
-					'singular_name' => __( 'Patterns AI Data', 'woo-gutenberg-products-block' ),
+					'name'          => __( 'Patterns AI Data', 'woocommerce' ),
+					'singular_name' => __( 'Patterns AI Data', 'woocommerce' ),
 				),
 				'public'           => false,
 				'hierarchical'     => false,
@@ -141,7 +141,7 @@ class BlockPatterns {
 					esc_html(
 						sprintf(
 						/* translators: %s: file name. */
-							__( 'Could not register file "%s" as a block pattern ("Slug" field missing)', 'woo-gutenberg-products-block' ),
+							__( 'Could not register file "%s" as a block pattern ("Slug" field missing)', 'woocommerce' ),
 							$file
 						)
 					),
@@ -156,7 +156,7 @@ class BlockPatterns {
 					esc_html(
 						sprintf(
 						/* translators: %1s: file name; %2s: slug value found. */
-							__( 'Could not register file "%1$s" as a block pattern (invalid slug "%2$s")', 'woo-gutenberg-products-block' ),
+							__( 'Could not register file "%1$s" as a block pattern (invalid slug "%2$s")', 'woocommerce' ),
 							$file,
 							$pattern_data['slug']
 						)
@@ -177,7 +177,7 @@ class BlockPatterns {
 					esc_html(
 						sprintf(
 						/* translators: %1s: file name; %2s: slug value found. */
-							__( 'Could not register file "%s" as a block pattern ("Title" field missing)', 'woo-gutenberg-products-block' ),
+							__( 'Could not register file "%s" as a block pattern ("Title" field missing)', 'woocommerce' ),
 							$file
 						)
 					),
@@ -223,10 +223,10 @@ class BlockPatterns {
 			}
 
 			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
-			$pattern_data['title'] = translate_with_gettext_context( $pattern_data['title'], 'Pattern title', 'woo-gutenberg-products-block' );
+			$pattern_data['title'] = translate_with_gettext_context( $pattern_data['title'], 'Pattern title', 'woocommerce' );
 			if ( ! empty( $pattern_data['description'] ) ) {
 				// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
-				$pattern_data['description'] = translate_with_gettext_context( $pattern_data['description'], 'Pattern description', 'woo-gutenberg-products-block' );
+				$pattern_data['description'] = translate_with_gettext_context( $pattern_data['description'], 'Pattern description', 'woocommerce' );
 			}
 
 			$pattern_data_from_dictionary = $this->get_pattern_from_dictionary( $dictionary, $pattern_data['slug'] );
@@ -262,7 +262,7 @@ class BlockPatterns {
 				register_block_pattern_category(
 					$category_slug,
 					// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-					array( 'label' => __( $category, 'woo-gutenberg-products-block' ) )
+					array( 'label' => __( $category, 'woocommerce' ) )
 				);
 			}
 
@@ -340,7 +340,7 @@ class BlockPatterns {
 		if ( ! $allow_ai_connection ) {
 			return new \WP_Error(
 				'ai_connection_not_allowed',
-				__( 'AI content generation is not allowed on this store. Update your store settings if you wish to enable this feature.', 'woo-gutenberg-products-block' )
+				__( 'AI content generation is not allowed on this store. Update your store settings if you wish to enable this feature.', 'woocommerce' )
 			);
 		}
 

@@ -102,7 +102,7 @@ class Batch extends AbstractRoute implements RouteInterface {
 		try {
 			foreach ( $request['requests'] as $args ) {
 				if ( ! stristr( $args['path'], 'wc/store' ) ) {
-					throw new RouteException( 'woocommerce_rest_invalid_path', __( 'Invalid path provided.', 'woo-gutenberg-products-block' ), 400 );
+					throw new RouteException( 'woocommerce_rest_invalid_path', __( 'Invalid path provided.', 'woocommerce' ), 400 );
 				}
 			}
 			$response = rest_get_server()->serve_batch_request_v1( $request );

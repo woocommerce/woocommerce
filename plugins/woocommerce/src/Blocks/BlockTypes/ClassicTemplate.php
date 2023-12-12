@@ -155,7 +155,7 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			'<%1$s %2$s>%3$s</%1$s>',
 			'h1',
 			get_block_wrapper_attributes(), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			esc_html__( 'Order confirmation', 'woo-gutenberg-products-block' )
+			esc_html__( 'Order confirmation', 'woocommerce' )
 		);
 
 		WC_Shortcode_Checkout::output( array() );

@@ -166,7 +166,7 @@ abstract class AbstractRoute implements RouteInterface {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		return $this->get_route_error_response( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
+		return $this->get_route_error_response( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woocommerce' ), 404 );
 	}
 
 	/**
@@ -179,7 +179,7 @@ abstract class AbstractRoute implements RouteInterface {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		return $this->get_route_error_response( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
+		return $this->get_route_error_response( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woocommerce' ), 404 );
 	}
 
 	/**
@@ -192,7 +192,7 @@ abstract class AbstractRoute implements RouteInterface {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_update_response( \WP_REST_Request $request ) {
-		return $this->get_route_error_response( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
+		return $this->get_route_error_response( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woocommerce' ), 404 );
 	}
 
 	/**
@@ -205,7 +205,7 @@ abstract class AbstractRoute implements RouteInterface {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_delete_response( \WP_REST_Request $request ) {
-		return $this->get_route_error_response( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
+		return $this->get_route_error_response( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woocommerce' ), 404 );
 	}
 
 	/**
@@ -260,7 +260,7 @@ abstract class AbstractRoute implements RouteInterface {
 	 */
 	protected function get_context_param( $args = array() ) {
 		$param_details = array(
-			'description'       => __( 'Scope under which the request is made; determines fields present in response.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Scope under which the request is made; determines fields present in response.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',

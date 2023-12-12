@@ -18,61 +18,61 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	public function get_properties() {
 		return [
 			'first_name' => [
-				'description' => __( 'First name', 'woo-gutenberg-products-block' ),
+				'description' => __( 'First name', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			],
 			'last_name'  => [
-				'description' => __( 'Last name', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Last name', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			],
 			'company'    => [
-				'description' => __( 'Company', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Company', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			],
 			'address_1'  => [
-				'description' => __( 'Address', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Address', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			],
 			'address_2'  => [
-				'description' => __( 'Apartment, suite, etc.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Apartment, suite, etc.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			],
 			'city'       => [
-				'description' => __( 'City', 'woo-gutenberg-products-block' ),
+				'description' => __( 'City', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			],
 			'state'      => [
-				'description' => __( 'State/County code, or name of the state, county, province, or district.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'State/County code, or name of the state, county, province, or district.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			],
 			'postcode'   => [
-				'description' => __( 'Postal code', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Postal code', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			],
 			'country'    => [
-				'description' => __( 'Country/Region code in ISO 3166-1 alpha-2 format.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Country/Region code in ISO 3166-1 alpha-2 format.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			],
 			'phone'      => [
-				'description' => __( 'Phone', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Phone', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
@@ -125,7 +125,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 				'invalid_country',
 				sprintf(
 					/* translators: %s valid country codes */
-					__( 'Invalid country code provided. Must be one of: %s', 'woo-gutenberg-products-block' ),
+					__( 'Invalid country code provided. Must be one of: %s', 'woocommerce' ),
 					implode( ', ', array_keys( wc()->countries->get_countries() ) )
 				)
 			);
@@ -137,7 +137,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 				'invalid_state',
 				sprintf(
 					/* translators: %1$s given state, %2$s valid states */
-					__( 'The provided state (%1$s) is not valid. Must be one of: %2$s', 'woo-gutenberg-products-block' ),
+					__( 'The provided state (%1$s) is not valid. Must be one of: %2$s', 'woocommerce' ),
 					esc_html( $address['state'] ),
 					implode( ', ', array_keys( $validation_util->get_states_for_country( $address['country'] ) ) )
 				)
@@ -147,14 +147,14 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		if ( ! empty( $address['postcode'] ) && ! \WC_Validation::is_postcode( $address['postcode'], $address['country'] ) ) {
 			$errors->add(
 				'invalid_postcode',
-				__( 'The provided postcode / ZIP is not valid', 'woo-gutenberg-products-block' )
+				__( 'The provided postcode / ZIP is not valid', 'woocommerce' )
 			);
 		}
 
 		if ( ! empty( $address['phone'] ) && ! \WC_Validation::is_phone( $address['phone'] ) ) {
 			$errors->add(
 				'invalid_phone',
-				__( 'The provided phone number is not valid', 'woo-gutenberg-products-block' )
+				__( 'The provided phone number is not valid', 'woocommerce' )
 			);
 		}
 

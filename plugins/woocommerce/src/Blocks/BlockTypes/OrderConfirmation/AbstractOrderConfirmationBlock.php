@@ -267,7 +267,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Order details', 'woo-gutenberg-products-block' ) . '</h3><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Order details', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
 			)
 		);
 
@@ -276,7 +276,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Downloads', 'woo-gutenberg-products-block' ) . '</h3><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Downloads', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
 			)
 		);
 
@@ -285,7 +285,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Shipping address', 'woo-gutenberg-products-block' ) . '</h3><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Shipping address', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
 			)
 		);
 
@@ -294,7 +294,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Billing address', 'woo-gutenberg-products-block' ) . '</h3><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Billing address', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
 			)
 		);
 

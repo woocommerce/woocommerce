@@ -46,7 +46,7 @@ class Images extends AbstractRoute {
 				'permission_callback' => [ Middleware::class, 'is_authorized' ],
 				'args'                => [
 					'business_description' => [
-						'description' => __( 'The business description for a given store.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'The business description for a given store.', 'woocommerce' ),
 						'type'        => 'string',
 					],
 				],

@@ -168,7 +168,7 @@ class ShippingController {
 
 		return sprintf(
 			// Translators: %s location name.
-			__( 'Collection from <strong>%s</strong>:', 'woo-gutenberg-products-block' ),
+			__( 'Collection from <strong>%s</strong>:', 'woocommerce' ),
 			$location
 		) . '<br/><address>' . str_replace( ',', ',<br/>', $address ) . '</address><br/>' . $details;
 	}
@@ -183,7 +183,7 @@ class ShippingController {
 		if ( CartCheckoutUtils::is_checkout_block_default() && $this->local_pickup_enabled ) {
 			foreach ( $settings as $index => $setting ) {
 				if ( 'woocommerce_shipping_cost_requires_address' === $setting['id'] ) {
-					$settings[ $index ]['desc']    .= ' (' . __( 'Not available when using WooCommerce Blocks Local Pickup', 'woo-gutenberg-products-block' ) . ')';
+					$settings[ $index ]['desc']    .= ' (' . __( 'Not available when using WooCommerce Blocks Local Pickup', 'woocommerce' ) . ')';
 					$settings[ $index ]['disabled'] = true;
 					$settings[ $index ]['value']    = 'no';
 					break;
@@ -211,21 +211,21 @@ class ShippingController {
 						'type'       => 'object',
 						'properties' => array(
 							'enabled'    => [
-								'description' => __( 'If enabled, this method will appear on the block based checkout.', 'woo-gutenberg-products-block' ),
+								'description' => __( 'If enabled, this method will appear on the block based checkout.', 'woocommerce' ),
 								'type'        => 'string',
 								'enum'        => [ 'yes', 'no' ],
 							],
 							'title'      => [
-								'description' => __( 'This controls the title which the user sees during checkout.', 'woo-gutenberg-products-block' ),
+								'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 								'type'        => 'string',
 							],
 							'tax_status' => [
-								'description' => __( 'If a cost is defined, this controls if taxes are applied to that cost.', 'woo-gutenberg-products-block' ),
+								'description' => __( 'If a cost is defined, this controls if taxes are applied to that cost.', 'woocommerce' ),
 								'type'        => 'string',
 								'enum'        => [ 'taxable', 'none' ],
 							],
 							'cost'       => [
-								'description' => __( 'Optional cost to charge for local pickup.', 'woo-gutenberg-products-block' ),
+								'description' => __( 'Optional cost to charge for local pickup.', 'woocommerce' ),
 								'type'        => 'string',
 							],
 						),
@@ -494,7 +494,7 @@ class ShippingController {
 
 		$data = array(
 			'local_pickup_enabled'     => 'yes' === $settings['enabled'] ? true : false,
-			'title'                    => __( 'Local Pickup', 'woo-gutenberg-products-block' ) === $settings['title'],
+			'title'                    => __( 'Local Pickup', 'woocommerce' ) === $settings['title'],
 			'price'                    => '' === $settings['cost'] ? true : false,
 			'cost'                     => '' === $settings['cost'] ? 0 : $settings['cost'],
 			'taxes'                    => $settings['tax_status'],

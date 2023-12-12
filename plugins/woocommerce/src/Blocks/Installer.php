@@ -120,7 +120,7 @@ class Installer {
 				echo '<div class="error"><p>';
 				printf(
 					/* translators: %1$s table name, %2$s database user, %3$s database name. */
-					esc_html__( 'WooCommerce %1$s table creation failed. Does the %2$s user have CREATE privileges on the %3$s database?', 'woo-gutenberg-products-block' ),
+					esc_html__( 'WooCommerce %1$s table creation failed. Does the %2$s user have CREATE privileges on the %3$s database?', 'woocommerce' ),
 					'<code>' . esc_html( $table_name ) . '</code>',
 					'<code>' . esc_html( DB_USER ) . '</code>',
 					'<code>' . esc_html( DB_NAME ) . '</code>'

@@ -36,13 +36,13 @@ class CartAddItem extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => [
 					'id'        => [
-						'description'       => __( 'The cart item product or variation ID.', 'woo-gutenberg-products-block' ),
+						'description'       => __( 'The cart item product or variation ID.', 'woocommerce' ),
 						'type'              => 'integer',
 						'context'           => [ 'view', 'edit' ],
 						'sanitize_callback' => 'absint',
 					],
 					'quantity'  => [
-						'description' => __( 'Quantity of this item to add to the cart.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Quantity of this item to add to the cart.', 'woocommerce' ),
 						'type'        => 'integer',
 						'context'     => [ 'view', 'edit' ],
 						'arg_options' => [
@@ -50,19 +50,19 @@ class CartAddItem extends AbstractCartRoute {
 						],
 					],
 					'variation' => [
-						'description' => __( 'Chosen attributes (for variations).', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Chosen attributes (for variations).', 'woocommerce' ),
 						'type'        => 'array',
 						'context'     => [ 'view', 'edit' ],
 						'items'       => [
 							'type'       => 'object',
 							'properties' => [
 								'attribute' => [
-									'description' => __( 'Variation attribute name.', 'woo-gutenberg-products-block' ),
+									'description' => __( 'Variation attribute name.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => [ 'view', 'edit' ],
 								],
 								'value'     => [
-									'description' => __( 'Variation attribute value.', 'woo-gutenberg-products-block' ),
+									'description' => __( 'Variation attribute value.', 'woocommerce' ),
 									'type'        => 'string',
 									'context'     => [ 'view', 'edit' ],
 								],
@@ -86,7 +86,7 @@ class CartAddItem extends AbstractCartRoute {
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		// Do not allow key to be specified during creation.
 		if ( ! empty( $request['key'] ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_item_exists', __( 'Cannot create an existing cart item.', 'woo-gutenberg-products-block' ), 400 );
+			throw new RouteException( 'woocommerce_rest_cart_item_exists', __( 'Cannot create an existing cart item.', 'woocommerce' ), 400 );
 		}
 
 		$cart = $this->cart_controller->get_cart_instance();

@@ -233,8 +233,8 @@ class ProductCategories extends AbstractDynamicBlock {
 	 */
 	protected function renderDropdown( $categories, $attributes, $uid ) {
 		$aria_label = empty( $attributes['hasCount'] ) ?
-			__( 'List of categories', 'woo-gutenberg-products-block' ) :
-			__( 'List of categories with their product counts', 'woo-gutenberg-products-block' );
+			__( 'List of categories', 'woocommerce' ) :
+			__( 'List of categories with their product counts', 'woocommerce' );
 
 		$output = '
 			<div class="wc-block-product-categories__dropdown">
@@ -242,11 +242,11 @@ class ProductCategories extends AbstractDynamicBlock {
 				class="screen-reader-text"
 					for="' . esc_attr( $uid ) . '-select"
 				>
-					' . esc_html__( 'Select a category', 'woo-gutenberg-products-block' ) . '
+					' . esc_html__( 'Select a category', 'woocommerce' ) . '
 				</label>
 				<select aria-label="' . esc_attr( $aria_label ) . '" id="' . esc_attr( $uid ) . '-select">
 					<option value="false" hidden>
-						' . esc_html__( 'Select a category', 'woo-gutenberg-products-block' ) . '
+						' . esc_html__( 'Select a category', 'woocommerce' ) . '
 					</option>
 					' . $this->renderDropdownOptions( $categories, $attributes, $uid ) . '
 				</select>
@@ -254,7 +254,7 @@ class ProductCategories extends AbstractDynamicBlock {
 			<button
 				type="button"
 				class="wc-block-product-categories__button"
-				aria-label="' . esc_html__( 'Go to category', 'woo-gutenberg-products-block' ) . '"
+				aria-label="' . esc_html__( 'Go to category', 'woocommerce' ) . '"
 				onclick="const url = document.getElementById( \'' . esc_attr( $uid ) . '-select\' ).value; if ( \'false\' !== url ) document.location.href = url;"
 			>
 				<svg
@@ -394,7 +394,7 @@ class ProductCategories extends AbstractDynamicBlock {
 
 		$screen_reader_text = sprintf(
 			/* translators: %s number of products in cart. */
-			_n( '%d product', '%d products', absint( $category->count ), 'woo-gutenberg-products-block' ),
+			_n( '%d product', '%d products', absint( $category->count ), 'woocommerce' ),
 			absint( $category->count )
 		);
 

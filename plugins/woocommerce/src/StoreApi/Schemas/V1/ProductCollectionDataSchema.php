@@ -27,7 +27,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 	public function get_properties() {
 		return [
 			'price_range'         => [
-				'description' => __( 'Min and max prices found in collection of products, provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Min and max prices found in collection of products, provided using the smallest unit of the currency.', 'woocommerce' ),
 				'type'        => [ 'object', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -35,13 +35,13 @@ class ProductCollectionDataSchema extends AbstractSchema {
 					$this->get_store_currency_properties(),
 					[
 						'min_price' => [
-							'description' => __( 'Min price found in collection of products.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Min price found in collection of products.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'max_price' => [
-							'description' => __( 'Max price found in collection of products.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Max price found in collection of products.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
@@ -50,7 +50,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 				),
 			],
 			'attribute_counts'    => [
-				'description' => __( 'Returns number of products within attribute terms.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Returns number of products within attribute terms.', 'woocommerce' ),
 				'type'        => [ 'array', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -58,13 +58,13 @@ class ProductCollectionDataSchema extends AbstractSchema {
 					'type'       => 'object',
 					'properties' => [
 						'term'  => [
-							'description' => __( 'Term ID', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Term ID', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'count' => [
-							'description' => __( 'Number of products.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Number of products.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
@@ -73,7 +73,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 				],
 			],
 			'rating_counts'       => [
-				'description' => __( 'Returns number of products with each average rating.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Returns number of products with each average rating.', 'woocommerce' ),
 				'type'        => [ 'array', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -81,13 +81,13 @@ class ProductCollectionDataSchema extends AbstractSchema {
 					'type'       => 'object',
 					'properties' => [
 						'rating' => [
-							'description' => __( 'Average rating', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Average rating', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'count'  => [
-							'description' => __( 'Number of products.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Number of products.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
@@ -96,7 +96,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 				],
 			],
 			'stock_status_counts' => [
-				'description' => __( 'Returns number of products with each stock status.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Returns number of products with each stock status.', 'woocommerce' ),
 				'type'        => [ 'array', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -104,13 +104,13 @@ class ProductCollectionDataSchema extends AbstractSchema {
 					'type'       => 'object',
 					'properties' => [
 						'status' => [
-							'description' => __( 'Status', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Status', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'count'  => [
-							'description' => __( 'Number of products.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Number of products.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,

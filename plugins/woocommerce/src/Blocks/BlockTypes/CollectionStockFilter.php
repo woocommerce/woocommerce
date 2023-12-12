@@ -130,7 +130,7 @@ final class CollectionStockFilter extends AbstractBlock {
 												<?php if ( $show_counts ) : ?>
 													<?php
 													// translators: %s: number of products.
-													$screen_reader_text = sprintf( _n( '%s product', '%s products', $stock_count['count'], 'woo-gutenberg-products-block' ), number_format_i18n( $stock_count['count'] ) );
+													$screen_reader_text = sprintf( _n( '%s product', '%s products', $stock_count['count'], 'woocommerce' ), number_format_i18n( $stock_count['count'] ) );
 													?>
 													<span>
 														<span aria-hidden="true">

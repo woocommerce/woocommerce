@@ -141,13 +141,13 @@ class Downloads extends AbstractOrderConfirmationBlock {
 						$return .= '<a href="' . esc_url( $download['download_url'] ) . '" class="woocommerce-MyAccount-downloads-file button alt">' . esc_html( $download['download_name'] ) . '</a>';
 						break;
 					case 'download-remaining':
-						$return .= is_numeric( $download['downloads_remaining'] ) ? esc_html( $download['downloads_remaining'] ) : esc_html__( '&infin;', 'woo-gutenberg-products-block' );
+						$return .= is_numeric( $download['downloads_remaining'] ) ? esc_html( $download['downloads_remaining'] ) : esc_html__( '&infin;', 'woocommerce' );
 						break;
 					case 'download-expires':
 						if ( ! empty( $download['access_expires'] ) ) {
 							$return .= '<time datetime="' . esc_attr( gmdate( 'Y-m-d', strtotime( $download['access_expires'] ) ) ) . '" title="' . esc_attr( strtotime( $download['access_expires'] ) ) . '">' . esc_html( date_i18n( get_option( 'date_format' ), strtotime( $download['access_expires'] ) ) ) . '</time>';
 						} else {
-							$return .= esc_html__( 'Never', 'woo-gutenberg-products-block' );
+							$return .= esc_html__( 'Never', 'woocommerce' );
 						}
 						break;
 				}

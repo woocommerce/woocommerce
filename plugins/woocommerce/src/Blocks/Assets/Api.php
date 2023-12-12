@@ -243,7 +243,7 @@ class Api {
 						function() use ( $handle ) {
 								echo '<div class="error"><p>';
 								/* translators: %s file handle name. */
-								printf( esc_html__( 'Script with handle %s had a dependency on itself which has been removed. This is an indicator that your JS code has a circular dependency that can cause bugs.', 'woo-gutenberg-products-block' ), esc_html( $handle ) );
+								printf( esc_html__( 'Script with handle %s had a dependency on itself which has been removed. This is an indicator that your JS code has a circular dependency that can cause bugs.', 'woocommerce' ), esc_html( $handle ) );
 								echo '</p></div>';
 						}
 					);
@@ -266,7 +266,7 @@ class Api {
 		wp_register_script( $handle, $script_data['src'], $script_dependencies, $script_data['version'], true );
 
 		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( $handle, 'woo-gutenberg-products-block', $this->package->get_path( 'languages' ) );
+			wp_set_script_translations( $handle, 'woocommerce', $this->package->get_path( 'languages' ) );
 		}
 	}
 

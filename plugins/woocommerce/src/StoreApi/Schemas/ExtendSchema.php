@@ -332,7 +332,7 @@ final class ExtendSchema {
 		if ( ARRAY_N === $schema_type ) {
 			return [
 				/* translators: %s: extension namespace */
-				'description' => sprintf( __( 'Extension data registered by %s', 'woo-gutenberg-products-block' ), $namespace ),
+				'description' => sprintf( __( 'Extension data registered by %s', 'woocommerce' ), $namespace ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
 				'items'       => $schema,
@@ -340,7 +340,7 @@ final class ExtendSchema {
 		}
 		return [
 			/* translators: %s: extension namespace */
-			'description' => sprintf( __( 'Extension data registered by %s', 'woo-gutenberg-products-block' ), $namespace ),
+			'description' => sprintf( __( 'Extension data registered by %s', 'woocommerce' ), $namespace ),
 			'type'        => 'object',
 			'context'     => [ 'view', 'edit' ],
 			'properties'  => $schema,

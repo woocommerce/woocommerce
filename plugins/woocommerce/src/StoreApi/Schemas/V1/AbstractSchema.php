@@ -319,43 +319,43 @@ abstract class AbstractSchema {
 	protected function get_store_currency_properties() {
 		return [
 			'currency_code'               => [
-				'description' => __( 'Currency code (in ISO format) for returned prices.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Currency code (in ISO format) for returned prices.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'currency_symbol'             => [
-				'description' => __( 'Currency symbol for the currency which can be used to format returned prices.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Currency symbol for the currency which can be used to format returned prices.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'currency_minor_unit'         => [
-				'description' => __( 'Currency minor unit (number of digits after the decimal separator) for returned prices.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Currency minor unit (number of digits after the decimal separator) for returned prices.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'currency_decimal_separator'  => array(
-				'description' => __( 'Decimal separator for the currency which can be used to format returned prices.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Decimal separator for the currency which can be used to format returned prices.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'currency_thousand_separator' => array(
-				'description' => __( 'Thousand separator for the currency which can be used to format returned prices.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Thousand separator for the currency which can be used to format returned prices.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'currency_prefix'             => array(
-				'description' => __( 'Price prefix for the currency which can be used to format returned prices.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Price prefix for the currency which can be used to format returned prices.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'currency_suffix'             => array(
-				'description' => __( 'Price prefix for the currency which can be used to format returned prices.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Price prefix for the currency which can be used to format returned prices.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,

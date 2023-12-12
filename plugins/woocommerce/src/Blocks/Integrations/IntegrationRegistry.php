@@ -32,7 +32,7 @@ class IntegrationRegistry {
 		}
 
 		if ( empty( $this->registry_identifier ) ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Integration registry requires an identifier.', 'woo-gutenberg-products-block' ), '4.6.0' );
+			_doing_it_wrong( __METHOD__, esc_html__( 'Integration registry requires an identifier.', 'woocommerce' ), '4.6.0' );
 			return false;
 		}
 
@@ -66,7 +66,7 @@ class IntegrationRegistry {
 
 		if ( $this->is_registered( $name ) ) {
 			/* translators: %s: Integration name. */
-			_doing_it_wrong( __METHOD__, esc_html( sprintf( __( '"%s" is already registered.', 'woo-gutenberg-products-block' ), $name ) ), '4.6.0' );
+			_doing_it_wrong( __METHOD__, esc_html( sprintf( __( '"%s" is already registered.', 'woocommerce' ), $name ) ), '4.6.0' );
 			return false;
 		}
 
@@ -97,7 +97,7 @@ class IntegrationRegistry {
 
 		if ( ! $this->is_registered( $name ) ) {
 			/* translators: %s: Integration name. */
-			_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Integration "%s" is not registered.', 'woo-gutenberg-products-block' ), $name ) ), '4.6.0' );
+			_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Integration "%s" is not registered.', 'woocommerce' ), $name ) ), '4.6.0' );
 			return false;
 		}
 

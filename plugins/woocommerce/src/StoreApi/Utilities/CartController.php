@@ -188,13 +188,13 @@ class CartController {
 		$cart_item = $this->get_cart_item( $item_id );
 
 		if ( empty( $cart_item ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item does not exist.', 'woo-gutenberg-products-block' ), 409 );
+			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item does not exist.', 'woocommerce' ), 409 );
 		}
 
 		$product = $cart_item['data'];
 
 		if ( ! $product instanceof \WC_Product ) {
-			throw new RouteException( 'woocommerce_rest_cart_invalid_product', __( 'Cart item is invalid.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_invalid_product', __( 'Cart item is invalid.', 'woocommerce' ), 404 );
 		}
 
 		$quantity_validation = ( new QuantityLimits() )->validate_cart_item_quantity( $quantity, $cart_item );
@@ -225,7 +225,7 @@ class CartController {
 				'woocommerce_rest_product_out_of_stock',
 				sprintf(
 					/* translators: %s: product name */
-					__( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woo-gutenberg-products-block' ),
+					__( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ),
 					$product->get_name()
 				),
 				400
@@ -241,7 +241,7 @@ class CartController {
 					'woocommerce_rest_product_partially_out_of_stock',
 					sprintf(
 						/* translators: 1: product name 2: quantity in stock */
-						__( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woo-gutenberg-products-block' ),
+						__( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woocommerce' ),
 						$product->get_name(),
 						wc_format_stock_quantity_for_display( $qty_remaining, $product )
 					),
@@ -348,48 +348,48 @@ class CartController {
 				/* translators: %s: product name. */
 				'singular' => __(
 					'%s is out of stock and cannot be purchased. Please remove it from your cart.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				/* translators: %s: product names. */
 				'plural'   => __(
 					'%s are out of stock and cannot be purchased. Please remove them from your cart.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 			],
 			'not_purchasable'      => [
 				/* translators: %s: product name. */
 				'singular' => __(
 					'%s cannot be purchased. Please remove it from your cart.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				/* translators: %s: product names. */
 				'plural'   => __(
 					'%s cannot be purchased. Please remove them from your cart.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 			],
 			'too_many_in_cart'     => [
 				/* translators: %s: product names. */
 				'singular' => __(
 					'There are too many %s in the cart. Only 1 can be purchased. Please reduce the quantity in your cart.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				/* translators: %s: product names. */
 				'plural'   => __(
 					'There are too many %s in the cart. Only 1 of each can be purchased. Please reduce the quantities in your cart.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 			],
 			'partial_out_of_stock' => [
 				/* translators: %s: product names. */
 				'singular' => __(
 					'There is not enough %s in stock. Please reduce the quantity in your cart.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				/* translators: %s: product names. */
 				'plural'   => __(
 					'There are not enough %s in stock. Please reduce the quantities in your cart.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 			],
 		];
@@ -401,7 +401,7 @@ class CartController {
 			return $stock_error_messages[ $exception_type ][ $singular_or_plural ];
 		}
 
-		return __( 'There was an error with an item in your cart.', 'woo-gutenberg-products-block' );
+		return __( 'There was an error with an item in your cart.', 'woocommerce' );
 	}
 
 	/**
@@ -725,7 +725,7 @@ class CartController {
 		$cart = wc()->cart;
 
 		if ( ! $cart || ! $cart instanceof \WC_Cart ) {
-			throw new RouteException( 'woocommerce_rest_cart_error', __( 'Unable to retrieve cart.', 'woo-gutenberg-products-block' ), 500 );
+			throw new RouteException( 'woocommerce_rest_cart_error', __( 'Unable to retrieve cart.', 'woocommerce' ), 500 );
 		}
 
 		return $cart;
@@ -861,10 +861,10 @@ class CartController {
 			$index > 1 ?
 				sprintf(
 					/* translators: %d: shipping package number */
-					_x( 'Shipment %d', 'shipping packages', 'woo-gutenberg-products-block' ),
+					_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
 					$index
 				) :
-				_x( 'Shipment 1', 'shipping packages', 'woo-gutenberg-products-block' ),
+				_x( 'Shipment 1', 'shipping packages', 'woocommerce' ),
 			$package['package_id'],
 			$package
 		);
@@ -905,7 +905,7 @@ class CartController {
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(
 					/* translators: %s coupon code */
-					__( '"%s" is an invalid coupon code.', 'woo-gutenberg-products-block' ),
+					__( '"%s" is an invalid coupon code.', 'woocommerce' ),
 					esc_html( $coupon_code )
 				),
 				400
@@ -917,7 +917,7 @@ class CartController {
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(
 					/* translators: %s coupon code */
-					__( 'Coupon code "%s" has already been applied.', 'woo-gutenberg-products-block' ),
+					__( 'Coupon code "%s" has already been applied.', 'woocommerce' ),
 					esc_html( $coupon_code )
 				),
 				400
@@ -961,7 +961,7 @@ class CartController {
 					'woocommerce_rest_cart_coupon_error',
 					sprintf(
 						/* translators: %s: coupon code */
-						__( '"%s" has already been applied and cannot be used in conjunction with other coupons.', 'woo-gutenberg-products-block' ),
+						__( '"%s" has already been applied and cannot be used in conjunction with other coupons.', 'woocommerce' ),
 						$code
 					),
 					400
@@ -1022,7 +1022,7 @@ class CartController {
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(
 					/* translators: %1$s coupon code, %2$s reason. */
-					__( 'The "%1$s" coupon has been removed from your cart: %2$s', 'woo-gutenberg-products-block' ),
+					__( 'The "%1$s" coupon has been removed from your cart: %2$s', 'woocommerce' ),
 					$coupon->get_code(),
 					wp_strip_all_tags( $coupon->get_error_message() )
 				),
@@ -1072,7 +1072,7 @@ class CartController {
 		if ( ! $product || 'trash' === $product->get_status() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_invalid_product',
-				__( 'This product cannot be added to the cart.', 'woo-gutenberg-products-block' ),
+				__( 'This product cannot be added to the cart.', 'woocommerce' ),
 				400
 			);
 		}
@@ -1112,7 +1112,7 @@ class CartController {
 			'woocommerce_rest_product_not_purchasable',
 			sprintf(
 				/* translators: %s: product name */
-				__( '&quot;%s&quot; is not available for purchase.', 'woo-gutenberg-products-block' ),
+				__( '&quot;%s&quot; is not available for purchase.', 'woocommerce' ),
 				$product->get_name()
 			),
 			400
@@ -1231,7 +1231,7 @@ class CartController {
 				throw new RouteException(
 					'woocommerce_rest_invalid_variation_data',
 					/* translators: %1$s: Attribute name, %2$s: Allowed values. */
-					sprintf( __( 'Invalid value posted for %1$s. Allowed values: %2$s', 'woo-gutenberg-products-block' ), $attribute_label, implode( ', ', $attribute->get_slugs() ) ),
+					sprintf( __( 'Invalid value posted for %1$s. Allowed values: %2$s', 'woocommerce' ), $attribute_label, implode( ', ', $attribute->get_slugs() ) ),
 					400
 				);
 			}
@@ -1251,7 +1251,7 @@ class CartController {
 			throw new RouteException(
 				'woocommerce_rest_missing_variation_data',
 				/* translators: %s: Attribute name. */
-				__( 'Missing variation data for variable product.', 'woo-gutenberg-products-block' ) . ' ' . sprintf( _n( '%s is a required field', '%s are required fields', count( $missing_attributes ), 'woo-gutenberg-products-block' ), wc_format_list_of_items( $missing_attributes ) ),
+				__( 'Missing variation data for variable product.', 'woocommerce' ) . ' ' . sprintf( _n( '%s is a required field', '%s are required fields', count( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ),
 				400
 			);
 		}
@@ -1278,7 +1278,7 @@ class CartController {
 		if ( empty( $variation_id ) ) {
 			throw new RouteException(
 				'woocommerce_rest_variation_id_from_variation_data',
-				__( 'No matching variation found.', 'woo-gutenberg-products-block' ),
+				__( 'No matching variation found.', 'woocommerce' ),
 				400
 			);
 		}
@@ -1355,7 +1355,7 @@ class CartController {
 		if ( ! $product || 'trash' === $product->get_status() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_invalid_parent_product',
-				__( 'This product cannot be added to the cart.', 'woo-gutenberg-products-block' ),
+				__( 'This product cannot be added to the cart.', 'woocommerce' ),
 				400
 			);
 		}

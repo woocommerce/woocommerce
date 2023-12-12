@@ -26,7 +26,7 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 		$params['context']['default'] = 'view';
 
 		$params['page'] = array(
-			'description'       => __( 'Current page of the collection.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -35,7 +35,7 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 		);
 
 		$params['per_page'] = array(
-			'description'       => __( 'Maximum number of items to be returned in result set. Defaults to no limit if left blank.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Maximum number of items to be returned in result set. Defaults to no limit if left blank.', 'woocommerce' ),
 			'type'              => 'integer',
 			'minimum'           => 0,
 			'maximum'           => 100,
@@ -44,14 +44,14 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 		);
 
 		$params['search'] = array(
-			'description'       => __( 'Limit results to those matching a string.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit results to those matching a string.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['exclude'] = array(
-			'description'       => __( 'Ensure result set excludes specific IDs.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -61,7 +61,7 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 		);
 
 		$params['include'] = array(
-			'description'       => __( 'Limit result set to specific ids.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -71,7 +71,7 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 		);
 
 		$params['order'] = array(
-			'description'       => __( 'Sort ascending or descending.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Sort ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'asc',
 			'enum'              => array( 'asc', 'desc' ),
@@ -79,7 +79,7 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 		);
 
 		$params['orderby'] = array(
-			'description'       => __( 'Sort by term property.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Sort by term property.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'name',
 			'enum'              => array(
@@ -91,7 +91,7 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 		);
 
 		$params['hide_empty'] = array(
-			'description' => __( 'If true, empty terms will not be returned.', 'woo-gutenberg-products-block' ),
+			'description' => __( 'If true, empty terms will not be returned.', 'woocommerce' ),
 			'type'        => 'boolean',
 			'default'     => true,
 		);

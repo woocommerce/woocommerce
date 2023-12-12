@@ -27,8 +27,8 @@ class PickupLocation extends WC_Shipping_Method {
 	 */
 	public function __construct() {
 		$this->id                 = 'pickup_location';
-		$this->method_title       = __( 'Local pickup', 'woo-gutenberg-products-block' );
-		$this->method_description = __( 'Allow customers to choose a local pickup location during checkout.', 'woo-gutenberg-products-block' );
+		$this->method_title       = __( 'Local pickup', 'woocommerce' );
+		$this->method_description = __( 'Allow customers to choose a local pickup location during checkout.', 'woocommerce' );
 		$this->init();
 	}
 
@@ -141,9 +141,9 @@ class PickupLocation extends WC_Shipping_Method {
 		}
 		switch ( $name ) {
 			case 'pickup_location':
-				return __( 'Pickup location', 'woo-gutenberg-products-block' );
+				return __( 'Pickup location', 'woocommerce' );
 			case 'pickup_address':
-				return __( 'Pickup address', 'woo-gutenberg-products-block' );
+				return __( 'Pickup address', 'woocommerce' );
 		}
 		return $label;
 	}
@@ -159,7 +159,7 @@ class PickupLocation extends WC_Shipping_Method {
 
 		wp_enqueue_script( 'wc-shipping-method-pickup-location' );
 
-		echo '<h2>' . esc_html__( 'Local pickup', 'woo-gutenberg-products-block' ) . '</h2>';
+		echo '<h2>' . esc_html__( 'Local pickup', 'woocommerce' ) . '</h2>';
 		echo '<div class="wrap"><div id="wc-shipping-method-pickup-location-settings-container"></div></div>';
 	}
 }

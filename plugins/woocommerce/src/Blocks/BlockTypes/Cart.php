@@ -57,7 +57,7 @@ class Cart extends AbstractBlock {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"align":"wide", "level":1} --><h1 class="wp-block-heading alignwide">' . esc_html__( 'Cart', 'woo-gutenberg-products-block' ) . '</h1><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"align":"wide", "level":1} --><h1 class="wp-block-heading alignwide">' . esc_html__( 'Cart', 'woocommerce' ) . '</h1><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -65,7 +65,7 @@ class Cart extends AbstractBlock {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"fontSize":"large"} --><h2 class="wp-block-heading has-large-font-size">' . esc_html__( 'You may be interested in…', 'woo-gutenberg-products-block' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"fontSize":"large"} --><h2 class="wp-block-heading has-large-font-size">' . esc_html__( 'You may be interested in…', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -74,8 +74,8 @@ class Cart extends AbstractBlock {
 				'title'    => '',
 				'inserter' => false,
 				'content'  => '
-					<!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} --><h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . esc_html__( 'Your cart is currently empty!', 'woo-gutenberg-products-block' ) . '</h2><!-- /wp:heading -->
-					<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><a href="' . esc_attr( esc_url( $shop_permalink ) ) . '">' . esc_html__( 'Browse store', 'woo-gutenberg-products-block' ) . '</a></p><!-- /wp:paragraph -->
+					<!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} --><h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . esc_html__( 'Your cart is currently empty!', 'woocommerce' ) . '</h2><!-- /wp:heading -->
+					<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><a href="' . esc_attr( esc_url( $shop_permalink ) ) . '">' . esc_html__( 'Browse store', 'woocommerce' ) . '</a></p><!-- /wp:paragraph -->
 				',
 			)
 		);
@@ -84,7 +84,7 @@ class Cart extends AbstractBlock {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . esc_html__( 'New in store', 'woo-gutenberg-products-block' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . esc_html__( 'New in store', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 	}

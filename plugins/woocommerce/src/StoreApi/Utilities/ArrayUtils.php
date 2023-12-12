@@ -26,7 +26,7 @@ class ArrayUtils {
 		if ( $array ) {
 			return sprintf(
 				/* translators: 1: The first n-1 items of a list 2: the last item in the list. */
-				__( '%1$s and %2$s', 'woo-gutenberg-products-block' ),
+				__( '%1$s and %2$s', 'woocommerce' ),
 				implode( ', ', $array ),
 				$last
 			);

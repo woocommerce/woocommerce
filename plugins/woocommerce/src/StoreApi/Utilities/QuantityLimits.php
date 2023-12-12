@@ -90,7 +90,7 @@ final class QuantityLimits {
 		if ( ! $limits['editable'] ) {
 			return new \WP_Error(
 				'readonly_quantity',
-				__( 'This item is already in the cart and its quantity cannot be edited', 'woo-gutenberg-products-block' )
+				__( 'This item is already in the cart and its quantity cannot be edited', 'woocommerce' )
 			);
 		}
 
@@ -99,7 +99,7 @@ final class QuantityLimits {
 				'invalid_quantity',
 				sprintf(
 					// Translators: %s amount.
-					__( 'The minimum quantity that can be added to the cart is %s', 'woo-gutenberg-products-block' ),
+					__( 'The minimum quantity that can be added to the cart is %s', 'woocommerce' ),
 					$limits['minimum']
 				)
 			);
@@ -110,7 +110,7 @@ final class QuantityLimits {
 				'invalid_quantity',
 				sprintf(
 					// Translators: %s amount.
-					__( 'The maximum quantity that can be added to the cart is %s', 'woo-gutenberg-products-block' ),
+					__( 'The maximum quantity that can be added to the cart is %s', 'woocommerce' ),
 					$limits['maximum']
 				)
 			);
@@ -121,7 +121,7 @@ final class QuantityLimits {
 				'invalid_quantity',
 				sprintf(
 					// Translators: %s amount.
-					__( 'The quantity added to the cart must be a multiple of %s', 'woo-gutenberg-products-block' ),
+					__( 'The quantity added to the cart must be a multiple of %s', 'woocommerce' ),
 					$limits['multiple_of']
 				)
 			);

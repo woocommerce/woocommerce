@@ -64,7 +64,7 @@ class Checkout extends AbstractBlock {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"align":"wide", "level":1} --><h1 class="wp-block-heading alignwide">' . esc_html__( 'Checkout', 'woo-gutenberg-products-block' ) . '</h1><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"align":"wide", "level":1} --><h1 class="wp-block-heading alignwide">' . esc_html__( 'Checkout', 'woocommerce' ) . '</h1><!-- /wp:heading -->',
 			)
 		);
 	}
@@ -317,8 +317,8 @@ class Checkout extends AbstractBlock {
 			);
 			$formatted_shipping_zones[] = [
 				'id'          => 0,
-				'title'       => __( 'International', 'woo-gutenberg-products-block' ),
-				'description' => __( 'Locations outside all other zones', 'woo-gutenberg-products-block' ),
+				'title'       => __( 'International', 'woocommerce' ),
+				'description' => __( 'Locations outside all other zones', 'woocommerce' ),
 			];
 			$this->asset_data_registry->add( 'activeShippingZones', $formatted_shipping_zones );
 		}

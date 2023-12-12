@@ -27,13 +27,13 @@ class ErrorSchema extends AbstractSchema {
 	public function get_properties() {
 		return [
 			'code'    => [
-				'description' => __( 'Error code', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Error code', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'message' => [
-				'description' => __( 'Error message', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Error message', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,

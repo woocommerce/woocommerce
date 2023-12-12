@@ -54,8 +54,8 @@ class CustomerNewAccount extends \WC_Email {
 		// apply to this email (consistent with the core email).
 		$this->id                    = 'customer_new_account';
 		$this->customer_email        = true;
-		$this->title                 = __( 'New account', 'woo-gutenberg-products-block' );
-		$this->description           = __( '“New Account” emails are sent when a customer signs up via the checkout flow.', 'woo-gutenberg-products-block' );
+		$this->title                 = __( 'New account', 'woocommerce' );
+		$this->description           = __( '“New Account” emails are sent when a customer signs up via the checkout flow.', 'woocommerce' );
 		$this->template_html         = 'emails/customer-new-account-blocks.php';
 		$this->template_plain        = 'emails/plain/customer-new-account-blocks.php';
 		$this->default_template_path = $package->get_path( '/templates/' );
@@ -71,7 +71,7 @@ class CustomerNewAccount extends \WC_Email {
 	 * @return string
 	 */
 	public function get_default_subject() {
-		return __( 'Your {site_title} account has been created!', 'woo-gutenberg-products-block' );
+		return __( 'Your {site_title} account has been created!', 'woocommerce' );
 	}
 
 	/**
@@ -81,7 +81,7 @@ class CustomerNewAccount extends \WC_Email {
 	 * @return string
 	 */
 	public function get_default_heading() {
-		return __( 'Welcome to {site_title}', 'woo-gutenberg-products-block' );
+		return __( 'Welcome to {site_title}', 'woocommerce' );
 	}
 
 	/**
@@ -169,6 +169,6 @@ class CustomerNewAccount extends \WC_Email {
 	 * @return string
 	 */
 	public function get_default_additional_content() {
-		return __( 'We look forward to seeing you soon.', 'woo-gutenberg-products-block' );
+		return __( 'We look forward to seeing you soon.', 'woocommerce' );
 	}
 }

@@ -103,8 +103,8 @@ class CustomerAccount extends AbstractBlock {
 		}
 
 		return get_current_user_id()
-			? __( 'My Account', 'woo-gutenberg-products-block' )
-			: __( 'Login', 'woo-gutenberg-products-block' );
+			? __( 'My Account', 'woocommerce' )
+			: __( 'Login', 'woocommerce' );
 	}
 
 	/**

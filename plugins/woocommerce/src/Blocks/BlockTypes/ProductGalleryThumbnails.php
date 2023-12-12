@@ -56,7 +56,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 		return sprintf(
 			$view_all_html,
 			esc_html( $remaining_thumbnails_count ),
-			esc_html__( 'View all', 'woo-gutenberg-products-block' )
+			esc_html__( 'View all', 'woocommerce' )
 		);
 	}
 

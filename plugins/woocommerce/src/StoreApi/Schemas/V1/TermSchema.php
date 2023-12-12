@@ -27,37 +27,37 @@ class TermSchema extends AbstractSchema {
 	public function get_properties() {
 		return [
 			'id'          => array(
-				'description' => __( 'Unique identifier for the resource.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'name'        => array(
-				'description' => __( 'Term name.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Term name.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'slug'        => array(
-				'description' => __( 'String based identifier for the term.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'String based identifier for the term.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'description' => array(
-				'description' => __( 'Term description.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Term description.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'parent'      => array(
-				'description' => __( 'Parent term ID, if applicable.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Parent term ID, if applicable.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'count'       => array(
-				'description' => __( 'Number of objects (posts of any type) assigned to the term.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Number of objects (posts of any type) assigned to the term.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,

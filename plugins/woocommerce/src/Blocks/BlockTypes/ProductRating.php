@@ -147,14 +147,14 @@ class ProductRating extends AbstractBlock {
 
 				if ( 0 < $average_rating || false === $product_permalink ) {
 					/* translators: %s: rating */
-					$label                  = sprintf( __( 'Rated %s out of 5', 'woo-gutenberg-products-block' ), $average_rating );
+					$label                  = sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $average_rating );
 					$customer_reviews_count = sprintf(
 						/* translators: %s is referring to the total of reviews for a product */
 						_n(
 							'(%s customer review)',
 							'(%s customer reviews)',
 							$reviews_count,
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						esc_html( $reviews_count )
 					);

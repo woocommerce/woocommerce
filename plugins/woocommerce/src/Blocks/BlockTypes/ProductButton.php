@@ -82,7 +82,7 @@ class ProductButton extends AbstractBlock {
 			array(
 				'inTheCartText' => sprintf(
 					/* translators: %s: product number. */
-					__( '%s in cart', 'woo-gutenberg-products-block' ),
+					__( '%s in cart', 'woocommerce' ),
 					'###'
 				),
 			)
@@ -93,7 +93,7 @@ class ProductButton extends AbstractBlock {
 			$more_than_one_item      = $number_of_items_in_cart > 0;
 			$initial_product_text    = $more_than_one_item ? sprintf(
 			/* translators: %s: product number. */
-				__( '%s in cart', 'woo-gutenberg-products-block' ),
+				__( '%s in cart', 'woocommerce' ),
 				$number_of_items_in_cart
 			) : $product->add_to_cart_text();
 			$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
@@ -132,7 +132,7 @@ class ProductButton extends AbstractBlock {
 			$context = array(
 				'quantityToAdd'          => $quantity_to_add,
 				'productId'              => $product->get_id(),
-				'addToCartText'          => null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woo-gutenberg-products-block' ),
+				'addToCartText'          => null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' ),
 				'temporaryNumberOfItems' => $number_of_items_in_cart,
 				'animationStatus'        => 'IDLE',
 			);
@@ -275,7 +275,7 @@ class ProductButton extends AbstractBlock {
 				</a>
 			</span>',
 			wc_get_cart_url(),
-			__( 'View cart', 'woo-gutenberg-products-block' )
+			__( 'View cart', 'woocommerce' )
 		);
 	}
 }

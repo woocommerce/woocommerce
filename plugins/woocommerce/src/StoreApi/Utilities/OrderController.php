@@ -21,7 +21,7 @@ class OrderController {
 		if ( wc()->cart->is_empty() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_empty',
-				__( 'Cannot create order from empty cart.', 'woo-gutenberg-products-block' ),
+				__( 'Cannot create order from empty cart.', 'woocommerce' ),
 				400
 			);
 		}
@@ -209,7 +209,7 @@ class OrderController {
 					'woocommerce_rest_cart_coupon_errors',
 					sprintf(
 						/* translators: %1$s Coupon codes, %2$s Reason */
-						__( '"%1$s" was removed from the cart. %2$s', 'woo-gutenberg-products-block' ),
+						__( '"%1$s" was removed from the cart. %2$s', 'woocommerce' ),
 						array_keys( $coupon_errors )[0],
 						array_values( $coupon_errors )[0],
 					),
@@ -223,7 +223,7 @@ class OrderController {
 					'woocommerce_rest_cart_coupon_errors',
 					sprintf(
 						/* translators: %s Coupon codes. */
-						__( 'Invalid coupons were removed from the cart: "%s"', 'woo-gutenberg-products-block' ),
+						__( 'Invalid coupons were removed from the cart: "%s"', 'woocommerce' ),
 						implode( '", "', array_keys( $coupon_errors ) )
 					),
 					409,
@@ -247,7 +247,7 @@ class OrderController {
 		if ( empty( $email ) ) {
 			throw new RouteException(
 				'woocommerce_rest_missing_email_address',
-				__( 'A valid email address is required', 'woo-gutenberg-products-block' ),
+				__( 'A valid email address is required', 'woocommerce' ),
 				400
 			);
 		}
@@ -257,7 +257,7 @@ class OrderController {
 				'woocommerce_rest_invalid_email_address',
 				sprintf(
 					/* translators: %s provided email. */
-					__( 'The provided email address (%s) is not valid—please provide a valid email address', 'woo-gutenberg-products-block' ),
+					__( 'The provided email address (%s) is not valid—please provide a valid email address', 'woocommerce' ),
 					esc_html( $email )
 				),
 				400
@@ -282,7 +282,7 @@ class OrderController {
 				'woocommerce_rest_invalid_address_country',
 				sprintf(
 					/* translators: %s country code. */
-					__( 'Sorry, we do not ship orders to the provided country (%s)', 'woo-gutenberg-products-block' ),
+					__( 'Sorry, we do not ship orders to the provided country (%s)', 'woocommerce' ),
 					$shipping_address['country']
 				),
 				400,
@@ -297,7 +297,7 @@ class OrderController {
 				'woocommerce_rest_invalid_address_country',
 				sprintf(
 					/* translators: %s country code. */
-					__( 'Sorry, we do not allow orders from the provided country (%s)', 'woo-gutenberg-products-block' ),
+					__( 'Sorry, we do not allow orders from the provided country (%s)', 'woocommerce' ),
 					$billing_address['country']
 				),
 				400,
@@ -328,8 +328,8 @@ class OrderController {
 				'woocommerce_rest_invalid_address',
 				sprintf(
 					/* translators: %s Address type. */
-					__( 'There was a problem with the provided %s:', 'woo-gutenberg-products-block' ) . ' ' . implode( ', ', $error_messages ),
-					'shipping' === $code ? __( 'shipping address', 'woo-gutenberg-products-block' ) : __( 'billing address', 'woo-gutenberg-products-block' )
+					__( 'There was a problem with the provided %s:', 'woocommerce' ) . ' ' . implode( ', ', $error_messages ),
+					'shipping' === $code ? __( 'shipping address', 'woocommerce' ) : __( 'billing address', 'woocommerce' )
 				),
 				400,
 				[
@@ -367,39 +367,39 @@ class OrderController {
 		 */
 		$address_fields = [
 			'first_name' => [
-				'label'    => __( 'First name', 'woo-gutenberg-products-block' ),
+				'label'    => __( 'First name', 'woocommerce' ),
 				'required' => true,
 			],
 			'last_name'  => [
-				'label'    => __( 'Last name', 'woo-gutenberg-products-block' ),
+				'label'    => __( 'Last name', 'woocommerce' ),
 				'required' => true,
 			],
 			'company'    => [
-				'label'    => __( 'Company', 'woo-gutenberg-products-block' ),
+				'label'    => __( 'Company', 'woocommerce' ),
 				'required' => false,
 			],
 			'address_1'  => [
-				'label'    => __( 'Address', 'woo-gutenberg-products-block' ),
+				'label'    => __( 'Address', 'woocommerce' ),
 				'required' => true,
 			],
 			'address_2'  => [
-				'label'    => __( 'Apartment, suite, etc.', 'woo-gutenberg-products-block' ),
+				'label'    => __( 'Apartment, suite, etc.', 'woocommerce' ),
 				'required' => false,
 			],
 			'country'    => [
-				'label'    => __( 'Country/Region', 'woo-gutenberg-products-block' ),
+				'label'    => __( 'Country/Region', 'woocommerce' ),
 				'required' => true,
 			],
 			'city'       => [
-				'label'    => __( 'City', 'woo-gutenberg-products-block' ),
+				'label'    => __( 'City', 'woocommerce' ),
 				'required' => true,
 			],
 			'state'      => [
-				'label'    => __( 'State/County', 'woo-gutenberg-products-block' ),
+				'label'    => __( 'State/County', 'woocommerce' ),
 				'required' => true,
 			],
 			'postcode'   => [
-				'label'    => __( 'Postal code', 'woo-gutenberg-products-block' ),
+				'label'    => __( 'Postal code', 'woocommerce' ),
 				'required' => true,
 			],
 		];
@@ -416,7 +416,7 @@ class OrderController {
 		foreach ( $address_fields as $address_field_key => $address_field ) {
 			if ( empty( $address[ $address_field_key ] ) && $address_field['required'] ) {
 				/* translators: %s Field label. */
-				$errors->add( $address_type, sprintf( __( '%s is required', 'woo-gutenberg-products-block' ), $address_field['label'] ), $address_field_key );
+				$errors->add( $address_type, sprintf( __( '%s is required', 'woocommerce' ), $address_field['label'] ), $address_field_key );
 			}
 		}
 	}
@@ -548,7 +548,7 @@ class OrderController {
 			if ( false === $chosen_shipping_method ) {
 				throw new RouteException(
 					'woocommerce_rest_invalid_shipping_option',
-					__( 'Sorry, this order requires a shipping option.', 'woo-gutenberg-products-block' ),
+					__( 'Sorry, this order requires a shipping option.', 'woocommerce' ),
 					400,
 					[]
 				);
@@ -567,7 +567,7 @@ class OrderController {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order || ! $order_key || $order->get_id() !== $order_id || ! hash_equals( $order->get_order_key(), $order_key ) ) {
-			throw new RouteException( 'woocommerce_rest_invalid_order', __( 'Invalid order ID or key provided.', 'woo-gutenberg-products-block' ), 401 );
+			throw new RouteException( 'woocommerce_rest_invalid_order', __( 'Invalid order ID or key provided.', 'woocommerce' ), 401 );
 		}
 	}
 
@@ -619,7 +619,7 @@ class OrderController {
 							return array(
 								'code'    => 'woocommerce_rest_out_of_stock',
 								/* translators: %s: product name */
-								'message' => sprintf( __( 'Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woo-gutenberg-products-block' ), $product->get_name() ),
+								'message' => sprintf( __( 'Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ),
 							);
 						}
 
@@ -646,7 +646,7 @@ class OrderController {
 							return array(
 								'code'    => 'woocommerce_rest_out_of_stock',
 								/* translators: %s: product name */
-								'message' => sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woo-gutenberg-products-block' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ),
+								'message' => sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ),
 							);
 						}
 					}

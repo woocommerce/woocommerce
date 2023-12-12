@@ -58,6 +58,6 @@ class OrderConfirmationTemplate extends AbstractPageTemplate {
 	 * @return string
 	 */
 	public static function get_template_title() {
-		return __( 'Order Confirmation', 'woo-gutenberg-products-block' );
+		return __( 'Order Confirmation', 'woocommerce' );
 	}
 }

@@ -39,7 +39,7 @@ class CartCouponsByCode extends AbstractCartRoute {
 		return [
 			'args'        => [
 				'code' => [
-					'description' => __( 'Unique identifier for the coupon within the cart.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'Unique identifier for the coupon within the cart.', 'woocommerce' ),
 					'type'        => 'string',
 				],
 			],
@@ -70,7 +70,7 @@ class CartCouponsByCode extends AbstractCartRoute {
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
 		if ( ! $this->cart_controller->has_coupon( $request['code'] ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon does not exist in the cart.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon does not exist in the cart.', 'woocommerce' ), 404 );
 		}
 
 		return $this->prepare_item_for_response( $request['code'], $request );
@@ -85,7 +85,7 @@ class CartCouponsByCode extends AbstractCartRoute {
 	 */
 	protected function get_route_delete_response( \WP_REST_Request $request ) {
 		if ( ! $this->cart_controller->has_coupon( $request['code'] ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon does not exist in the cart.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon does not exist in the cart.', 'woocommerce' ), 404 );
 		}
 
 		$cart = $this->cart_controller->get_cart_instance();
