@@ -33,12 +33,14 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
-            - name: Setup local test environment
-              uses: ./.github/actions/tests/setup-local-test-environment
-              with:
-                  test-type: api
+            - name: Load docker images and start containers.
+              working-directory: plugins/woocommerce
+              env:
+                  ENABLE_HPOS: 0
+              run: pnpm --filter=@woocommerce/plugin-woocommerce env:test
 
             - name: Run API tests
               id: run-api-composite-action
@@ -92,12 +94,14 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
-            - name: Setup local test environment
-              uses: ./.github/actions/tests/setup-local-test-environment
-              with:
-                  test-type: e2e
+            - name: Load docker images and start containers.
+              working-directory: plugins/woocommerce
+              env:
+                  WP_ENV_PHP_VERSION: 7.4
+              run: pnpm env:test
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -145,7 +149,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
+                  install: '@woocommerce/plugin-woocommerce...'
 
             - name: Update performance test site with E2E test
               id: update-perf-site
@@ -196,7 +200,7 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - plugin: 'WooCommerce Payments'
+                    - plugin: 'WooPayments'
                       repo: 'automattic/woocommerce-payments'
                       slug: woocommerce-payments
                     - plugin: 'WooCommerce PayPal Payments'
@@ -221,8 +225,8 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
-                build: '@woocommerce/plugin-woocommerce'
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Setup local test environment
               uses: ./.github/actions/tests/setup-local-test-environment
