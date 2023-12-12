@@ -99,6 +99,7 @@ export type QueryControlProps = {
 
 export enum CoreCollectionNames {
 	PRODUCT_CATALOG = 'woocommerce-blocks/product-collection/product-catalog',
+	CUSTOM = 'woocommerce-blocks/product-collection/custom',
 	BEST_SELLERS = 'woocommerce-blocks/product-collection/best-sellers',
 	FEATURED = 'woocommerce-blocks/product-collection/featured',
 	NEW_ARRIVALS = 'woocommerce-blocks/product-collection/new-arrivals',

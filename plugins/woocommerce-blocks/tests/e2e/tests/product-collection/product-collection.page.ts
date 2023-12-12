@@ -49,7 +49,7 @@ const collectionToButtonNameMap = {
 	onSale: 'On Sale Highlight products that are currently on sale.',
 	featured: 'Featured Showcase your featured products.',
 	productCatalog:
-		'Product Catalog Display all products in your catalog. Results may change to match the current template, page, or search term.',
+	custom: 'Custom Build your own collection of products and customize their layout. Optionally, adjust results to match the current template, page, or search term.',
 };
 
 class ProductCollectionPage {

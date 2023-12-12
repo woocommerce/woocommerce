@@ -26,7 +26,7 @@ import type {
 import { getDefaultProductCollection } from '../constants';
 import Icon from '../icon';
 import blockJson from '../block.json';
-import productCatalog from '../collections/product-catalog';
+import { collections } from '../collections';
 
 type CollectionButtonProps = {
 	active: boolean;
@@ -95,20 +95,15 @@ const ProductCollectionPlaceholder = (
 
 	// Get Collections
 	const blockCollections = [
-		productCatalog,
+		collections.productCatalog,
 		...useSelect( ( select ) => {
 			// @ts-expect-error Type definitions are missing
 			// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
 			const { getBlockVariations } = select( blocksStore );
 			return getBlockVariations( blockJson.name );
 		}, [] ),
+		collections.custom,
 	];
-
-	// Prepare Collections
-	const defaultChosenCollection = getDefaultChosenCollection(
-		attributes,
-		blockCollections
-	);
 
 	const applyCollection = ( chosenCollectionName: string ) => {
 		// Case 1: Merchant has chosen Default Query. In that case we create defaultProductCollection

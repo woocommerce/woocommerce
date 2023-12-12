@@ -13,6 +13,7 @@ import {
 import { CollectionName, FilterName } from '../types';
 import blockJson from '../block.json';
 import productCatalog from './product-catalog';
+import custom from './custom';
 import newArrivals from './new-arrivals';
 import topRated from './top-rated';
 import bestSellers from './best-sellers';
@@ -26,6 +27,7 @@ export const collections = {
 	bestSellers,
 	onSale,
 	featured,
+	custom,
 };
 
 const collectionsToRegister: BlockVariation[] = [
