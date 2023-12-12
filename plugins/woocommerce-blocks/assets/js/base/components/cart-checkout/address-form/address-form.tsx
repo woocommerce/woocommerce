@@ -26,6 +26,7 @@ import { AddressFormProps, FieldConfig, AddressFormFields } from './types';
 import prepareAddressFields from './prepare-address-fields';
 import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
+import Combobox from '../../combobox';
 
 /**
  * Checkout address form.
@@ -159,6 +160,24 @@ const AddressForm = ( {
 									state: newValue,
 								} )
 							}
+						/>
+					);
+				}
+
+				if ( field.type === 'select' ) {
+					return (
+						<Combobox
+							key={ field.key }
+							{ ...fieldProps }
+							className="wc-block-components-select-input"
+							value={ values[ field.key ] }
+							onChange={ ( newValue: string ) => {
+								onChange( {
+									...values,
+									[ field.key ]: newValue,
+								} );
+							} }
+							options={ field.options }
 						/>
 					);
 				}
