@@ -53,7 +53,8 @@
 		"test:unit": "pnpm test:php",
 		"test:unit:env": "pnpm test:php:env",
 		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
-		"watch:build": "pnpm build:project --watch"
+		"watch:build": "pnpm --if-present --filter=\"$npm_package_name...\" --parallel watch:build:project",
+		"watch:build:project": "pnpm build:project --watch"
 	},
 	"lint-staged": {
 		"*.php": [
@@ -181,6 +182,7 @@
 	"wireit": {
 		"build:project": {
 			"command": "rm -rf assets/client/admin assets/js assets/css && cp -r ../woocommerce-admin/build assets/client/admin && cp -r client/legacy/build/js assets/js && cp -r client/legacy/build/css assets/css && cp -r ../woocommerce-blocks/build assets/client/blocks && cp -r ../woocommerce-blocks/blocks.ini blocks.ini",
+			"clean": "if-file-deleted",
 			"files": [],
 			"output": [
 				"assets/client/admin",

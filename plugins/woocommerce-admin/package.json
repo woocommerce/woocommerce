@@ -25,7 +25,8 @@
 		"lint:lang:css": "stylelint '**/*.scss'",
 		"lint:lang:js": "eslint ./client --ext=js,ts,tsx",
 		"test:js": "wireit",
-		"watch:build": "pnpm build:project --watch"
+		"watch:build": "pnpm --if-present --filter=\"$npm_package_name...\" --parallel watch:build:project",
+		"watch:build:project": "pnpm build:project --watch"
 	},
 	"lint-staged": {
 		"*.scss": [
@@ -237,6 +238,7 @@
 	"wireit": {
 		"build:project:bundle": {
 			"command": "webpack",
+			"clean": "if-file-deleted",
 			"env": {
 				"NODE_ENV": "production",
 				"WC_ADMIN_PHASE": "core"

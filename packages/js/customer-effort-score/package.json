@@ -43,7 +43,8 @@
 		"lint:lang:js": "eslint src",
 		"prepack": "pnpm build",
 		"test:js": "wireit",
-		"watch:build": "pnpm build:project --watch"
+		"watch:build": "pnpm --if-present --filter=\"$npm_package_name...\" --parallel watch:build:project",
+		"watch:build:project": "pnpm build:project --watch"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
@@ -103,6 +104,7 @@
 	"wireit": {
 		"build:project:bundle": {
 			"command": "webpack",
+			"clean": "if-file-deleted",
 			"files": [
 				"webpack.config.js",
 				"src/**/*.scss"
@@ -116,6 +118,7 @@
 		},
 		"build:project:cjs": {
 			"command": "tsc --project tsconfig-cjs.json",
+			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
 				"src/**/*.{js,jsx,ts,tsx}",
@@ -130,6 +133,7 @@
 		},
 		"build:project:esm": {
 			"command": "tsc --project tsconfig.json",
+			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig.json",
 				"src/**/*.{js,jsx,ts,tsx}",
