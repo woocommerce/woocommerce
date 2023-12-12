@@ -48,7 +48,7 @@ const Combobox = ( {
 	required = false,
 	errorMessage = __(
 		'Please select a value.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	errorId: incomingErrorId,
 	instanceId = '0',

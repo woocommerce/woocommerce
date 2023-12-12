@@ -5,10 +5,10 @@ import { __ } from '@wordpress/i18n';
 
 export const defaultLocalPickupText = __(
 	'Local Pickup',
-	'woo-gutenberg-products-block'
+	'woocommerce'
 );
 
 export const defaultShippingText = __(
 	'Shipping',
-	'woo-gutenberg-products-block'
+	'woocommerce'
 );

@@ -24,7 +24,7 @@ const TEMPLATE: Template[] = [
 					fontSize: 'medium',
 					content: `<strong>${ __(
 						'No results found',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }</strong>`,
 				},
 			],
@@ -33,16 +33,16 @@ const TEMPLATE: Template[] = [
 				{
 					content: `${ __(
 						'You can try',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) } <a href="#" class="wc-link-clear-any-filters">${ __(
 						'clearing any filters',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }</a> ${ __(
 						'or head to our',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) } <a href="#" class="wc-link-stores-home">${ __(
 						"store's home",
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }</a>`,
 				},
 			],

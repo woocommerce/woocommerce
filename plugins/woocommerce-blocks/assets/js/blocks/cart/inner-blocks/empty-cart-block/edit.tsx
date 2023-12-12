@@ -25,7 +25,7 @@ const browseStoreTemplate = SHOP_URL
 					/* translators: %s is the link to the store product directory. */
 					__(
 						'<a href="%s">Browse store</a>',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					SHOP_URL
 				),
@@ -41,7 +41,7 @@ const defaultTemplate = [
 			textAlign: 'center',
 			content: __(
 				'Your cart is currently empty!',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			level: 2,
 			className: 'with-empty-cart-icon wc-block-cart__empty-cart__title',
@@ -58,7 +58,7 @@ const defaultTemplate = [
 		'core/heading',
 		{
 			textAlign: 'center',
-			content: __( 'New in store', 'woo-gutenberg-products-block' ),
+			content: __( 'New in store', 'woocommerce' ),
 			level: 2,
 		},
 	],

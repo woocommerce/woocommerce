@@ -67,7 +67,7 @@ const ProductCollectionInspectorControls = (
 	return (
 		<InspectorControls>
 			<ToolsPanel
-				label={ __( 'Settings', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Settings', 'woocommerce' ) }
 				resetAll={ () => {
 					const defaultSettings = getDefaultSettings(
 						props.attributes
@@ -85,7 +85,7 @@ const ProductCollectionInspectorControls = (
 
 			{ displayQueryControls ? (
 				<ToolsPanel
-					label={ __( 'Filters', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Filters', 'woocommerce' ) }
 					resetAll={ ( resetAllFilters: ( () => void )[] ) => {
 						setQueryAttribute( props, DEFAULT_FILTERS );
 						resetAllFilters.forEach( ( resetFilter ) =>

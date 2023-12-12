@@ -37,7 +37,7 @@ const getCcOrEcheckLabel = ( {
 		/* translators: %1$s is referring to the payment method brand, %2$s is referring to the last 4 digits of the payment card, %3$s is referring to the expiry date.  */
 		__(
 			'%1$s ending in %2$s (expires %3$s)',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		method.brand,
 		method.last4,
@@ -57,7 +57,7 @@ const getDefaultLabel = ( {
 	if ( method.brand && method.last4 ) {
 		return sprintf(
 			/* translators: %1$s is referring to the payment method brand, %2$s is referring to the last 4 digits of the payment card. */
-			__( '%1$s ending in %2$s', 'woo-gutenberg-products-block' ),
+			__( '%1$s ending in %2$s', 'woocommerce' ),
 			method.brand,
 			method.last4
 		);
@@ -66,7 +66,7 @@ const getDefaultLabel = ( {
 	/* For saved payment methods without brand & last 4 */
 	return sprintf(
 		/* translators: %s is the name of the payment method gateway. */
-		__( 'Saved token for %s', 'woo-gutenberg-products-block' ),
+		__( 'Saved token for %s', 'woocommerce' ),
 		method.gateway
 	);
 };

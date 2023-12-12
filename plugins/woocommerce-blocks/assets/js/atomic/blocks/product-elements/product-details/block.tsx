@@ -56,7 +56,7 @@ export const SingleProductDetails = () => {
 			active: true,
 			content: __(
 				'This block lists description, attributes and reviews for a single product.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 		},
 		{

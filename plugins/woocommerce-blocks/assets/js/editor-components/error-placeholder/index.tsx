@@ -53,7 +53,7 @@ const ErrorPlaceholder = ( {
 		icon={ <Icon icon={ warning } /> }
 		label={ __(
 			'Sorry, an error occurred',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
 		className={ classNames( 'wc-block-api-error', className ) }
 	>
@@ -64,7 +64,7 @@ const ErrorPlaceholder = ( {
 					<Spinner />
 				) : (
 					<Button variant="secondary" onClick={ onRetry }>
-						{ __( 'Retry', 'woo-gutenberg-products-block' ) }
+						{ __( 'Retry', 'woocommerce' ) }
 					</Button>
 				) }
 			</>

@@ -25,7 +25,7 @@ const validateShippingCountry = ( values: ShippingAddress ): void => {
 				[ validationErrorId ]: {
 					message: __(
 						'Please select your country',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					hidden: false,
 				},

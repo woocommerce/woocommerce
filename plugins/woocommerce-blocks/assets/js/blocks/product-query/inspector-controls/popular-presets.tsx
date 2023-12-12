@@ -13,16 +13,16 @@ import { setQueryAttribute } from '../utils';
 const PRESETS = [
 	{
 		key: 'title/asc',
-		name: __( 'Sorted by title', 'woo-gutenberg-products-block' ),
+		name: __( 'Sorted by title', 'woocommerce' ),
 	},
-	{ key: 'date/desc', name: __( 'Newest', 'woo-gutenberg-products-block' ) },
+	{ key: 'date/desc', name: __( 'Newest', 'woocommerce' ) },
 	{
 		key: 'popularity/desc',
-		name: __( 'Best Selling', 'woo-gutenberg-products-block' ),
+		name: __( 'Best Selling', 'woocommerce' ),
 	},
 	{
 		key: 'rating/desc',
-		name: __( 'Top Rated', 'woo-gutenberg-products-block' ),
+		name: __( 'Top Rated', 'woocommerce' ),
 	},
 ];
 
@@ -32,20 +32,20 @@ export function PopularPresets( props: ProductQueryBlock ) {
 	return (
 		<PanelBody
 			className="woocommerce-product-query-panel__sort"
-			title={ __( 'Popular Filters', 'woo-gutenberg-products-block' ) }
+			title={ __( 'Popular Filters', 'woocommerce' ) }
 			initialOpen={ true }
 		>
 			<p>
 				{ __(
 					'Arrange products by popular pre-sets.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</p>
 			<CustomSelectControl
 				hideLabelFromVision={ true }
 				label={ __(
 					'Choose among these pre-sets',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				onChange={ ( option ) => {
 					if ( ! option.selectedItem?.key ) return;

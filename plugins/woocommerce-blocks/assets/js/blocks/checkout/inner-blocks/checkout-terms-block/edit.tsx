@@ -49,7 +49,7 @@ export const Edit = ( {
 					>
 						{ __(
 							"Link to your store's Terms and Conditions and Privacy Policy pages by creating pages for them.",
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						<br />
 						{ ! TERMS_URL && (
@@ -60,7 +60,7 @@ export const Edit = ( {
 								>
 									{ __(
 										'Setup a Terms and Conditions page',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</ExternalLink>
 							</>
@@ -73,7 +73,7 @@ export const Edit = ( {
 								>
 									{ __(
 										'Setup a Privacy Policy page',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</ExternalLink>
 							</>
@@ -97,7 +97,7 @@ export const Edit = ( {
 											{
 												label: __(
 													'Restore default text',
-													'woo-gutenberg-products-block'
+													'woocommerce'
 												),
 												onClick: () =>
 													setAttributes( {
@@ -111,7 +111,7 @@ export const Edit = ( {
 							<p>
 								{ __(
 									'Ensure you add links to your policy pages in this section.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							</p>
 						</Notice>
@@ -119,13 +119,13 @@ export const Edit = ( {
 				<PanelBody
 					title={ __(
 						'Display options',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				>
 					<ToggleControl
 						label={ __(
 							'Require checkbox',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ checkbox }
 						onChange={ () =>

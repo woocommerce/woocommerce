@@ -557,7 +557,7 @@ const AttributeFilterBlock = ( {
 								/* translators: %s attribute name. */
 								__(
 									'Select %s',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								attributeObject.label
 							) }
@@ -611,7 +611,7 @@ const AttributeFilterBlock = ( {
 									/* translators: %s is the attribute label. */
 									__(
 										'%s filter added.',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									),
 									attributeObject.label
 								),
@@ -619,7 +619,7 @@ const AttributeFilterBlock = ( {
 									/* translators: %s is the attribute label. */
 									__(
 										'%s filter removed.',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									),
 									attributeObject.label
 								),
@@ -627,7 +627,7 @@ const AttributeFilterBlock = ( {
 									/* translators: %s is the attribute label. */
 									__(
 										'Remove %s filter.',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									),
 									attributeObject.label.toLocaleLowerCase()
 								),
@@ -635,7 +635,7 @@ const AttributeFilterBlock = ( {
 									/* translators: %s is the attribute label. */
 									__(
 										'Invalid %s filter.',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									),
 									attributeObject.label.toLocaleLowerCase()
 								),
@@ -668,7 +668,7 @@ const AttributeFilterBlock = ( {
 						} }
 						screenReaderLabel={ __(
 							'Reset attribute filter',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					/>
 				) }
