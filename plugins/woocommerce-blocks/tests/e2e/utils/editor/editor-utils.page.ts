@@ -13,6 +13,25 @@ export class EditorUtils {
 		this.page = page;
 	}
 
+	/**
+	 * Check to see if there are any errors in the editor.
+	 */
+	async ensureNoErrorsOnBlockPage() {
+		const errorMessages = [
+			/This block contains unexpected or invalid content/gi,
+			/Your site doesn’t include support for/gi,
+			/There was an error whilst rendering/gi,
+			/This block has encountered an error and cannot be previewed/gi,
+		];
+
+		for ( const error of errorMessages ) {
+			if ( ( await this.editor.canvas.getByText( error ).count() ) > 0 ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	async getBlockByName( name: string ) {
 		return this.editor.canvas.locator( `[data-type="${ name }"]` );
 	}
