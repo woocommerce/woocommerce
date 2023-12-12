@@ -23,7 +23,7 @@ class ReviewCheckoutTask extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Review your checkout experience', 'woo-gutenberg-products-block' );
+		return __( 'Review your checkout experience', 'woocommerce' );
 	}
 
 	/**
@@ -50,7 +50,7 @@ class ReviewCheckoutTask extends Task {
 	 * @return string
 	 */
 	public function get_additional_info() {
-		return __( 'Make sure cart and checkout flows are configured correctly for your shoppers.', 'woo-gutenberg-products-block' );
+		return __( 'Make sure cart and checkout flows are configured correctly for your shoppers.', 'woocommerce' );
 	}
 
 	/**
