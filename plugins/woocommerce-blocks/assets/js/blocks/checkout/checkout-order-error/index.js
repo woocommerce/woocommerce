@@ -31,44 +31,6 @@ const cartItemErrorCodes = [
 const preloadedCheckoutData = getSetting( 'checkoutData', {} );
 
 /**
- * When an order was not created for the checkout, for example, when an item
- * was out of stock, this component will be shown instead of the checkout form.
- *
- * The error message is derived by the hydrated API request passed to the
- * checkout block.
- */
-const CheckoutOrderError = () => {
-	const checkoutData = {
-		code: '',
-		message: '',
-		...( preloadedCheckoutData || {} ),
-	};
-
-	const errorData = {
-		code: checkoutData.code || 'unknown',
-		message:
-			decodeEntities( checkoutData.message ) ||
-			__(
-				'There was a problem checking out. Please try again. If the problem persists, please get in touch with us so we can assist.',
-				'woocommerce'
-			),
-	};
-
-	return (
-		<div className="wc-block-checkout-error">
-			<Icon
-				className="wc-block-checkout-error__image"
-				icon={ removeCart }
-				size={ 100 }
-			/>
-			<ErrorTitle errorData={ errorData } />
-			<ErrorMessage errorData={ errorData } />
-			<ErrorButton errorData={ errorData } />
-		</div>
-	);
-};
-
-/**
  * Get the error message to display.
  *
  * @param {Object} props           Incoming props for the component.
@@ -126,6 +88,44 @@ const ErrorButton = ( { errorData } ) => {
 				{ buttonText }
 			</a>
 		</span>
+	);
+};
+
+/**
+ * When an order was not created for the checkout, for example, when an item
+ * was out of stock, this component will be shown instead of the checkout form.
+ *
+ * The error message is derived by the hydrated API request passed to the
+ * checkout block.
+ */
+const CheckoutOrderError = () => {
+	const checkoutData = {
+		code: '',
+		message: '',
+		...( preloadedCheckoutData || {} ),
+	};
+
+	const errorData = {
+		code: checkoutData.code || 'unknown',
+		message:
+			decodeEntities( checkoutData.message ) ||
+			__(
+				'There was a problem checking out. Please try again. If the problem persists, please get in touch with us so we can assist.',
+				'woocommerce'
+			),
+	};
+
+	return (
+		<div className="wc-block-checkout-error">
+			<Icon
+				className="wc-block-checkout-error__image"
+				icon={ removeCart }
+				size={ 100 }
+			/>
+			<ErrorTitle errorData={ errorData } />
+			<ErrorMessage errorData={ errorData } />
+			<ErrorButton errorData={ errorData } />
+		</div>
 	);
 };
 
