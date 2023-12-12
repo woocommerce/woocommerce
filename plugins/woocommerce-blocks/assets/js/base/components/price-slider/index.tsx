@@ -351,7 +351,7 @@ const PriceSlider = ( {
 						className="wc-block-price-filter__range-input wc-block-price-filter__range-input--min wc-block-components-price-slider__range-input wc-block-components-price-slider__range-input--min"
 						aria-label={ __(
 							'Filter products by minimum price',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						aria-valuetext={ ariaReadableMinPrice }
 						value={
@@ -372,7 +372,7 @@ const PriceSlider = ( {
 						className="wc-block-price-filter__range-input wc-block-price-filter__range-input--max wc-block-components-price-slider__range-input wc-block-components-price-slider__range-input--max"
 						aria-label={ __(
 							'Filter products by maximum price',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						aria-valuetext={ ariaReadableMaxPrice }
 						value={
@@ -420,7 +420,7 @@ const PriceSlider = ( {
 							className={ getInputClassName( 'min' ) }
 							aria-label={ __(
 								'Filter products by minimum price',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							isAllowed={ isValidMinValue( {
 								minConstraint,
@@ -445,7 +445,7 @@ const PriceSlider = ( {
 							className={ getInputClassName( 'max' ) }
 							aria-label={ __(
 								'Filter products by maximum price',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							isAllowed={ isValidMaxValue( {
 								maxConstraint,
@@ -493,7 +493,7 @@ const PriceSlider = ( {
 							} }
 							screenReaderLabel={ __(
 								'Reset price filter',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					) }
@@ -505,7 +505,7 @@ const PriceSlider = ( {
 							onClick={ onSubmit }
 							screenReaderLabel={ __(
 								'Apply price filter',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					) }

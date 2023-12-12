@@ -43,7 +43,7 @@ const translations = {
 			/* translators: %s is referring to the average rating value */
 			__(
 				'Rated %s out of 5 filter added.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			rating
 		),
@@ -52,7 +52,7 @@ const translations = {
 			/* translators: %s is referring to the average rating value */
 			__(
 				'Rated %s out of 5 filter added.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			rating
 		),
@@ -356,7 +356,7 @@ const RatingFilterBlock = ( {
 							disabled={ isLoading }
 							placeholder={ __(
 								'Select Rating',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							onChange={ ( tokens: string[] ) => {
 								if ( ! multiple && tokens.length > 1 ) {
@@ -441,19 +441,19 @@ const RatingFilterBlock = ( {
 							messages={ {
 								added: __(
 									'Rating filter added.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								removed: __(
 									'Rating filter removed.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								remove: __(
 									'Remove rating filter.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								__experimentalInvalid: __(
 									'Invalid rating filter.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 							} }
 						/>
@@ -485,7 +485,7 @@ const RatingFilterBlock = ( {
 							} }
 							screenReaderLabel={ __(
 								'Reset rating filter',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					) }

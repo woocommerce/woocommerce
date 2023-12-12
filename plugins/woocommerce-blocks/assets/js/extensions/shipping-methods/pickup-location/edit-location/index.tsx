@@ -40,10 +40,10 @@ const EditLocation = ( {
 			onRequestClose={ onClose }
 			title={
 				editingLocation === 'new'
-					? __( 'Pickup location', 'woo-gutenberg-products-block' )
+					? __( 'Pickup location', 'woocommerce' )
 					: __(
 							'Edit pickup location',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 					  )
 			}
 			actions={
@@ -59,12 +59,12 @@ const EditLocation = ( {
 						>
 							{ __(
 								'Delete location',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</Button>
 					) }
 					<Button variant="secondary" onClick={ onClose }>
-						{ __( 'Cancel', 'woo-gutenberg-products-block' ) }
+						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 					<Button
 						variant="primary"
@@ -77,7 +77,7 @@ const EditLocation = ( {
 							}
 						} }
 					>
-						{ __( 'Done', 'woo-gutenberg-products-block' ) }
+						{ __( 'Done', 'woocommerce' ) }
 					</Button>
 				</>
 			}

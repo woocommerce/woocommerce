@@ -43,11 +43,11 @@ const Block = ( { className }: { className?: string } ): JSX.Element => {
 					needsShipping
 						? __(
 								'Notes about your order, e.g. special notes for delivery.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 						  )
 						: __(
 								'Notes about your order.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 						  )
 				}
 				value={ orderNotes }

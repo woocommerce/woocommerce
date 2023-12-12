@@ -19,7 +19,7 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'On Sale', 'woo-gutenberg-products-block' ) }
+			label={ __( 'On Sale', 'woocommerce' ) }
 			hasValue={ () => query.woocommerceOnSale === true }
 			isShownByDefault
 			onDeselect={ () => {
@@ -31,7 +31,7 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 			<ToggleControl
 				label={ __(
 					'Show only products on sale',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				checked={ query.woocommerceOnSale || false }
 				onChange={ ( woocommerceOnSale ) => {

@@ -68,7 +68,7 @@ registerBlockType( metadata, {
 	variations: [
 		{
 			name: 'checkout-page',
-			title: __( 'Checkout Page', 'woo-gutenberg-products-block' ),
+			title: __( 'Checkout Page', 'woocommerce' ),
 			attributes: {
 				page: 'checkout',
 			},
@@ -77,7 +77,7 @@ registerBlockType( metadata, {
 		},
 		{
 			name: 'cart-page',
-			title: __( 'Cart Page', 'woo-gutenberg-products-block' ),
+			title: __( 'Cart Page', 'woocommerce' ),
 			attributes: {
 				page: 'cart',
 			},

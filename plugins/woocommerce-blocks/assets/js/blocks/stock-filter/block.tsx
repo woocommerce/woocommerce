@@ -321,7 +321,7 @@ const StockStatusFilterBlock = ( {
 							/* translators: %s stock statuses (for example: 'instock'...) */
 							__(
 								'%s filter added.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							filterAddedName
 						)
@@ -332,7 +332,7 @@ const StockStatusFilterBlock = ( {
 							/* translators: %s stock statuses (for example:'instock'...) */
 							__(
 								'%s filter removed.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							filterRemovedName
 						)
@@ -469,7 +469,7 @@ const StockStatusFilterBlock = ( {
 							disabled={ isLoading }
 							placeholder={ __(
 								'Select stock status',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							onChange={ onDropdownChange }
 							value={ checked }
@@ -483,19 +483,19 @@ const StockStatusFilterBlock = ( {
 							messages={ {
 								added: __(
 									'Stock filter added.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								removed: __(
 									'Stock filter removed.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								remove: __(
 									'Remove stock filter.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								__experimentalInvalid: __(
 									'Invalid stock filter.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 							} }
 						/>
@@ -524,7 +524,7 @@ const StockStatusFilterBlock = ( {
 							} }
 							screenReaderLabel={ __(
 								'Reset stock filter',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					) }

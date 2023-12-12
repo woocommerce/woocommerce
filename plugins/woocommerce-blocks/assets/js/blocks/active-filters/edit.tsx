@@ -40,13 +40,13 @@ const Edit = ( {
 				<PanelBody
 					title={ __(
 						'Display Settings',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				>
 					<ToggleGroupControl
 						label={ __(
 							'Display Style',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ displayStyle }
 						onChange={ ( value: Attributes[ 'displayStyle' ] ) =>
@@ -60,14 +60,14 @@ const Edit = ( {
 							value="list"
 							label={ __(
 								'List',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 						<ToggleGroupControlOption
 							value="chips"
 							label={ __(
 								'Chips',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					</ToggleGroupControl>
