@@ -236,7 +236,7 @@ class FileListTable extends WP_List_Table {
 			name="file_id[]"
 			value="<?php echo esc_attr( $item->get_file_id() ); ?>"
 		/>
-		<label for="cb-select-<?php echo esc_attr( $item->get_hash() ); ?>">
+		<label for="cb-select-<?php echo esc_attr( $item->get_file_id() ); ?>">
 			<span class="screen-reader-text">
 				<?php
 				printf(
