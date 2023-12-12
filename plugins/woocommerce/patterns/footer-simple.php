@@ -54,7 +54,7 @@
 			<?php
 			echo sprintf(
 				/* translators: %s WooCommerce link */
-				esc_html__( 'Built with %s', 'woo-gutenberg-products-block' ),
+				esc_html__( 'Built with %s', 'woocommerce' ),
 				'<a href="https://woocommerce.com/" target="_blank" rel="noreferrer nofollow">WooCommerce</a>'
 			);
 			?>

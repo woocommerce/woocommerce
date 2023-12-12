@@ -16,11 +16,11 @@
 			<!-- wp:group {"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","orientation":"vertical"}} -->
 			<div class="wp-block-group"><!-- wp:site-logo /-->
 				<!-- wp:heading {"level":5,"style":{"typography":{"textTransform":"none"},"spacing":{"margin":{"top":"40px"}}}} -->
-				<h5 class="wp-block-heading" style="margin-top:40px;text-transform:none"><?php esc_html_e( 'Join the community', 'woo-gutenberg-products-block' ); ?></h5>
+				<h5 class="wp-block-heading" style="margin-top:40px;text-transform:none"><?php esc_html_e( 'Join the community', 'woocommerce' ); ?></h5>
 				<!-- /wp:heading -->
 
 				<!-- wp:paragraph {"style":{"spacing":{"margin":{"bottom":"40px"}}}} -->
-				<p style="margin-bottom:40px"><?php esc_html_e( 'Learn about new products and discounts', 'woo-gutenberg-products-block' ); ?></p>
+				<p style="margin-bottom:40px"><?php esc_html_e( 'Learn about new products and discounts', 'woocommerce' ); ?></p>
 				<!-- /wp:paragraph -->
 
 				<!-- wp:social-links {"size":"has-small-icon-size","style":{"spacing":{"blockGap":{"left":"16px"}}},"className":"is-style-logos-only"} -->
@@ -67,7 +67,7 @@
 			/* translators: Footer powered by text. %1$s being WordPress, %2$s being WooCommerce */
 				esc_html__(
 					'Powered by %1$s with %2$s',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				'<a href="https://wordpress.org" target="_blank" rel="noreferrer nofollow">WordPress</a>',
 				'<a href="https://woocommerce.com" target="_blank" rel="noreferrer nofollow">WooCommerce</a>'
