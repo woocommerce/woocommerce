@@ -213,25 +213,17 @@ class Init {
 	 * Get the product editor settings.
 	 */
 	private function get_product_editor_settings() {
-		$template_id                = isset( $_GET['template'] ) ? wp_unslash( $_GET['template'] ) : null;
-		$template_registry          = wc_get_container()->get( BlockTemplateRegistry::class );
-		$simple_product_template    = $template_registry->get_registered( 'simple-product' );
-		$requested_product_template = is_null( $template_id ) ? null : $template_registry->get_registered( $template_id );
-		$product_template           = is_null( $requested_product_template ) ? $simple_product_template : $requested_product_template;
+		$layout_template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+		$layout_template_logger   = BlockTemplateLogger::get_instance();
 
 		$editor_settings = array();
 
-		foreach ( $template_registry->get_all_registered() as $layout_template ) {
-			$editor_settings['templates'][] = $layout_template->to_JSON();
+		foreach ( $layout_template_registry->get_all_registered() as $layout_template ) {
+			$editor_settings['layoutTemplates'][] = $layout_template->to_JSON();
+
+			$layout_template_logger->log_template_events_to_file( $layout_template->get_id() );
+			$editor_settings['layoutTemplateEvents'][] = $layout_template_logger->get_formatted_template_events( $layout_template->get_id() );
 		}
-
-		$block_template_logger = BlockTemplateLogger::get_instance();
-
-		$block_template_logger->log_template_events_to_file( $product_template->get_id() );
-		$editor_settings['templateEvents']['product'] = $block_template_logger->get_formatted_template_events( $product_template->get_id() );
-
-		$block_template_logger->log_template_events_to_file( 'product-variation' );
-		$editor_settings['templateEvents']['product_variation'] = $block_template_logger->get_formatted_template_events( 'product-variation' );
 
 		$product_templates = apply_filters( 'woocommerce_product_editor_get_product_templates', array() );
 
