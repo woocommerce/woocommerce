@@ -9,12 +9,12 @@ import { list, grid } from '@wordpress/icons';
  * Internal dependencies
  */
 import {
-	DisplayLayoutToolbarProps,
+	DisplayLayoutControlProps,
 	ProductCollectionDisplayLayout,
 	LayoutOptions,
 } from '../../types';
 
-const DisplayLayoutToolbar = ( props: DisplayLayoutToolbarProps ) => {
+const DisplayLayoutToolbar = ( props: DisplayLayoutControlProps ) => {
 	const { type, columns, shrinkColumns } = props.displayLayout;
 	const setDisplayLayout = (
 		displayLayout: ProductCollectionDisplayLayout

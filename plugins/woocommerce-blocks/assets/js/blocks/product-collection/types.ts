@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { AttributeMetadata } from '@woocommerce/types';
+import type { BlockEditProps } from '@wordpress/blocks';
+import { type AttributeMetadata } from '@woocommerce/types';
 
 export interface ProductCollectionAttributes {
 	query: ProductCollectionQuery;
@@ -15,6 +16,7 @@ export interface ProductCollectionAttributes {
 	displayLayout: ProductCollectionDisplayLayout;
 	tagName: string;
 	convertedFromProducts: boolean;
+	collection?: string;
 }
 
 export enum LayoutOptions {
@@ -74,6 +76,11 @@ export interface ProductCollectionQuery {
 	woocommerceHandPickedProducts?: string[];
 }
 
+export type ProductCollectionEditComponentProps =
+	BlockEditProps< ProductCollectionAttributes > & {
+		openPatternSelectionModal: () => void;
+	};
+
 export type TProductCollectionOrder = 'asc' | 'desc';
 export type TProductCollectionOrderBy =
 	| 'date'
@@ -81,7 +88,7 @@ export type TProductCollectionOrderBy =
 	| 'popularity'
 	| 'rating';
 
-export type DisplayLayoutToolbarProps = {
+export type DisplayLayoutControlProps = {
 	displayLayout: ProductCollectionDisplayLayout;
 	setAttributes: ( attrs: Partial< ProductCollectionAttributes > ) => void;
 };
@@ -89,3 +96,28 @@ export type QueryControlProps = {
 	query: ProductCollectionQuery;
 	setQueryAttribute: ( attrs: Partial< ProductCollectionQuery > ) => void;
 };
+
+export enum CoreCollectionNames {
+	PRODUCT_CATALOG = 'woocommerce-blocks/product-collection/product-catalog',
+	BEST_SELLERS = 'woocommerce-blocks/product-collection/best-sellers',
+	FEATURED = 'woocommerce-blocks/product-collection/featured',
+	NEW_ARRIVALS = 'woocommerce-blocks/product-collection/new-arrivals',
+	ON_SALE = 'woocommerce-blocks/product-collection/on-sale',
+	TOP_RATED = 'woocommerce-blocks/product-collection/top-rated',
+}
+
+export enum CoreFilterNames {
+	ATTRIBUTES = 'attributes',
+	CREATED = 'created',
+	FEATURED = 'featured',
+	HAND_PICKED = 'hand-picked',
+	INHERIT = 'inherit',
+	KEYWORD = 'keyword',
+	ON_SALE = 'on-sale',
+	ORDER = 'order',
+	STOCK_STATUS = 'stock-status',
+	TAXONOMY = 'taxonomy',
+}
+
+export type CollectionName = CoreCollectionNames | string;
+export type FilterName = CoreFilterNames | string;

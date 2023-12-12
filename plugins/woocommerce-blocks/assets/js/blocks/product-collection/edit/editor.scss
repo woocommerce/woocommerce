@@ -10,17 +10,79 @@
 	}
 }
 
-.wc-blocks-product-collection__selection-modal {
-	.block-editor-block-patterns-list {
-		column-count: 3;
-		column-gap: $grid-unit-30;
+.wc-blocks-product-collection__placeholder,
+.wc-blocks-product-collection__modal {
+	.wc-blocks-product-collection__selection-subtitle {
+		margin-bottom: $gap-large;
+	}
 
-		@include breakpoint("<1280px") {
-			column-count: 2;
-		}
+	.wc-blocks-product-collection__collections-section {
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr;
+		grid-auto-rows: 1fr;
+		gap: $gap-small;
+		margin: $gap-large auto;
+		max-width: 1000px;
 
 		@include breakpoint("<782px") {
-			column-count: 1;
+			grid-template-columns: 1fr 1fr;
+
+			.wc-blocks-product-collection__collection-button {
+				padding: $gap-smallest;
+
+				.wc-blocks-product-collection__collection-button-text {
+					padding: 0 0 0 $gap-smallest;
+				}
+			}
 		}
+	}
+
+	.wc-blocks-product-collection__collection-button {
+		color: inherit;
+		display: flex;
+		align-items: flex-start;
+		height: auto;
+		border: 1px solid $input-border-gray;
+		border-radius: $universal-border-radius;
+		box-sizing: border-box;
+		box-shadow: none;
+		padding: $gap-smallest $gap-small;
+		margin: 0;
+
+		&.is-primary {
+			border: 2px solid var(--wp-admin-theme-color-darker-10, #3858e9);
+			color: var(--wp-admin-theme-color-darker-10);
+			background-color: #fff;
+			margin: -1px;
+
+			&:hover {
+				background-color: #fff;
+				color: var(--wp-admin-theme-color-darker-10);
+			}
+		}
+
+		.wc-blocks-product-collection__collection-button-icon {
+			margin: 1em 0;
+		}
+
+		.wc-blocks-product-collection__collection-button-text {
+			padding: 0 $gap-small;
+			text-align: left;
+			white-space: break-spaces;
+		}
+
+		.wc-blocks-product-collection__collection-button-title {
+			@include font-size(large);
+			line-height: 1;
+		}
+
+		.wc-blocks-product-collection__collection-button-description {
+			white-space: wrap;
+		}
+	}
+
+	.wc-blocks-product-collection__footer {
+		text-align: end;
+		margin: $gap-small 0;
 	}
 }

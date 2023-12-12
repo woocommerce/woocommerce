@@ -5,7 +5,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { type ElementType, useMemo } from '@wordpress/element';
-import { EditorBlock } from '@woocommerce/types';
+import { EditorBlock, isEmpty } from '@woocommerce/types';
 import { addFilter } from '@wordpress/hooks';
 import { ProductCollectionFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import {
@@ -25,9 +25,14 @@ import {
  * Internal dependencies
  */
 import metadata from '../../block.json';
-import { ProductCollectionAttributes } from '../../types';
+import {
+	ProductCollectionAttributes,
+	CoreFilterNames,
+	FilterName,
+} from '../../types';
 import { setQueryAttribute } from '../../utils';
 import { DEFAULT_FILTERS, getDefaultSettings } from '../../constants';
+import { getUnchangeableFilters } from '../../collections';
 import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
 import InheritQueryControl from './inherit-query-control';
@@ -42,12 +47,28 @@ import LayoutOptionsControl from './layout-options-control';
 import FeaturedProductsControl from './featured-products-control';
 import CreatedControl from './created-control';
 
+const prepareShouldShowFilter =
+	( unchangeableFilters: FilterName[] ) => ( filter: FilterName ) => {
+		return ! unchangeableFilters.includes( filter );
+	};
+
 const ProductCollectionInspectorControls = (
 	props: BlockEditProps< ProductCollectionAttributes >
 ) => {
-	const query = props.attributes.query;
+	const { query, collection } = props.attributes;
 	const inherit = query?.inherit;
-	const displayQueryControls = inherit === false;
+	const unchangeableFilters = getUnchangeableFilters( collection );
+	const shouldShowFilter = prepareShouldShowFilter( unchangeableFilters );
+
+	// To be changed - inherit control will be hidden completely once Custom
+	// collection is introduced
+	const showQueryControls = inherit === false;
+	const showInheritQueryControls =
+		isEmpty( collection ) || shouldShowFilter( CoreFilterNames.INHERIT );
+	const showOrderControl =
+		showQueryControls && shouldShowFilter( CoreFilterNames.ORDER );
+	const showFeaturedControl = shouldShowFilter( CoreFilterNames.FEATURED );
+	const showOnSaleControl = shouldShowFilter( CoreFilterNames.ON_SALE );
 
 	const setQueryAttributeBind = useMemo(
 		() => setQueryAttribute.bind( null, props ),
@@ -77,13 +98,15 @@ const ProductCollectionInspectorControls = (
 			>
 				<LayoutOptionsControl { ...displayControlProps } />
 				<ColumnsControl { ...displayControlProps } />
-				<InheritQueryControl { ...queryControlProps } />
-				{ displayQueryControls ? (
+				{ showInheritQueryControls ? (
+					<InheritQueryControl { ...queryControlProps } />
+				) : null }
+				{ showOrderControl ? (
 					<OrderByControl { ...queryControlProps } />
 				) : null }
 			</ToolsPanel>
 
-			{ displayQueryControls ? (
+			{ showQueryControls ? (
 				<ToolsPanel
 					label={ __( 'Filters', 'woo-gutenberg-products-block' ) }
 					resetAll={ ( resetAllFilters: ( () => void )[] ) => {
@@ -94,13 +117,17 @@ const ProductCollectionInspectorControls = (
 					} }
 					className="wc-block-editor-product-collection-inspector-toolspanel__filters"
 				>
-					<OnSaleControl { ...queryControlProps } />
+					{ showOnSaleControl ? (
+						<OnSaleControl { ...queryControlProps } />
+					) : null }
 					<StockStatusControl { ...queryControlProps } />
 					<HandPickedProductsControl { ...queryControlProps } />
 					<KeywordControl { ...queryControlProps } />
 					<AttributesControl { ...queryControlProps } />
 					<TaxonomyControls { ...queryControlProps } />
-					<FeaturedProductsControl { ...queryControlProps } />
+					{ showFeaturedControl ? (
+						<FeaturedProductsControl { ...queryControlProps } />
+					) : null }
 					<CreatedControl { ...queryControlProps } />
 				</ToolsPanel>
 			) : null }
@@ -200,8 +227,4 @@ export const withUpgradeNoticeControls =
 		);
 	};
 
-addFilter(
-	'editor.BlockEdit',
-	'woocommerce/product-collection',
-	withUpgradeNoticeControls
-);
+addFilter( 'editor.BlockEdit', metadata.name, withUpgradeNoticeControls );

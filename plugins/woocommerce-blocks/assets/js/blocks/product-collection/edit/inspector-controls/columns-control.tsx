@@ -13,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { DisplayLayoutToolbarProps } from '../../types';
+import { DisplayLayoutControlProps } from '../../types';
 import { getDefaultDisplayLayout } from '../../constants';
 
 const columnsLabel = __( 'Columns', 'woo-gutenberg-products-block' );
@@ -23,7 +23,7 @@ const toggleHelp = __(
 	'woo-gutenberg-products-block'
 );
 
-const ColumnsControl = ( props: DisplayLayoutToolbarProps ) => {
+const ColumnsControl = ( props: DisplayLayoutControlProps ) => {
 	const { type, columns, shrinkColumns } = props.displayLayout;
 	const showColumnsControl = type === 'flex';
 
