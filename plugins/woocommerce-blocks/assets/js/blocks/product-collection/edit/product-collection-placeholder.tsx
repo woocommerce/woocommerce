@@ -19,14 +19,12 @@ import {
 /**
  * Internal dependencies
  */
-import type {
-	ProductCollectionEditComponentProps,
-	ProductCollectionAttributes,
-} from '../types';
+import CollectionChooser from './collection-chooser';
+import type { ProductCollectionEditComponentProps } from '../types';
 import { getDefaultProductCollection } from '../constants';
 import Icon from '../icon';
 import blockJson from '../block.json';
-import { collections } from '../collections';
+import { getCollectionByName } from '../collections';
 
 type CollectionButtonProps = {
 	active?: boolean;
@@ -70,43 +68,22 @@ const ProductCollectionPlaceholder = (
 	props: ProductCollectionEditComponentProps
 ) => {
 	const blockProps = useBlockProps();
-	const { clientId, attributes } = props;
+	const { clientId } = props;
 	// @ts-expect-error Type definitions for this function are missing
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
 	const { replaceBlock } = useDispatch( blockEditorStore );
 
-	// Get Collections
-	const blockCollections = [
-		collections.productCatalog,
-		...useSelect( ( select ) => {
-			// @ts-expect-error Type definitions are missing
-			// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
-			const { getBlockVariations } = select( blocksStore );
-			return getBlockVariations( blockJson.name );
-		}, [] ),
-		collections.custom,
-	];
-
 	const applyCollection = ( chosenCollectionName: string ) => {
-		// Case 1: Merchant has chosen Default Query. In that case we create defaultProductCollection
-		if (
-			chosenCollectionName ===
-			'woocommerce-blocks/product-collection/default-query'
-		) {
-			const defaultProductCollection = getDefaultProductCollection();
-			replaceBlock( clientId, defaultProductCollection );
+		const collection = getCollectionByName( chosenCollectionName );
+
+		if ( ! collection ) {
 			return;
 		}
 
-		// Case 2: Merchant has chosen another Collection
-		const chosenCollection = blockCollections.find(
-			( { name }: { name: string } ) => name === chosenCollectionName
-		);
-
 		const newBlock = createBlock(
 			blockJson.name,
-			chosenCollection.attributes,
-			createBlocksFromInnerBlocksTemplate( chosenCollection.innerBlocks )
+			collection.attributes,
+			createBlocksFromInnerBlocksTemplate( collection.innerBlocks )
 		);
 
 		replaceBlock( clientId, newBlock );
@@ -126,19 +103,7 @@ const ProductCollectionPlaceholder = (
 					'woo-gutenberg-products-block'
 				) }
 			>
-				<div className="wc-blocks-product-collection__collections-section">
-					{ blockCollections.map(
-						( { name, title, icon, description } ) => (
-							<CollectionButton
-								key={ name }
-								title={ title }
-								description={ description }
-								icon={ icon }
-								onClick={ () => applyCollection( name ) }
-							/>
-						)
-					) }
-				</div>
+				<CollectionChooser onCollectionClick={ applyCollection } />
 			</Placeholder>
 		</div>
 	);

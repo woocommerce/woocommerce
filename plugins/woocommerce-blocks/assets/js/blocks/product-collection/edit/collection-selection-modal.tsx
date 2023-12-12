@@ -20,66 +20,10 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import type { ProductCollectionAttributes } from '../types';
-import { getDefaultProductCollection } from '../constants';
+import CollectionChooser from './collection-chooser';
+import type { CollectionName, ProductCollectionAttributes } from '../types';
 import blockJson from '../block.json';
-import { collections } from '../collections';
-
-type CollectionButtonProps = {
-	active: boolean;
-	title: string;
-	icon: string;
-	description: string;
-	onClick: () => void;
-};
-
-const CollectionButton = ( {
-	active,
-	title,
-	icon,
-	description,
-	onClick,
-}: CollectionButtonProps ) => {
-	const variant = active ? 'primary' : 'secondary';
-
-	return (
-		<Button
-			className="wc-blocks-product-collection__collection-button"
-			variant={ variant }
-			onClick={ onClick }
-		>
-			<div className="wc-blocks-product-collection__collection-button-icon">
-				{ icon }
-			</div>
-			<div className="wc-blocks-product-collection__collection-button-text">
-				<p className="wc-blocks-product-collection__collection-button-title">
-					{ title }
-				</p>
-				<p className="wc-blocks-product-collection__collection-button-description">
-					{ description }
-				</p>
-			</div>
-		</Button>
-	);
-};
-
-const getDefaultChosenCollection = (
-	attributes: ProductCollectionAttributes,
-	// @ts-expect-error Type definitions are missing
-	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
-	blockCollections
-) => {
-	// If `attributes.query` is truthy, that means Product Collection was already
-	// configured. So it's either a collection or we need to return defaultQuery
-	// collection name;
-	if ( attributes.query ) {
-		return attributes.collection || collections.productCatalog.name;
-	}
-
-	// Otherwise it should be the first available choice. We control collections
-	// so there's always at least one available.
-	return blockCollections.length ? blockCollections[ 0 ].name : '';
-};
+import { getCollectionByName } from '../collections';
 
 const PatternSelectionModal = ( props: {
 	clientId: string;
@@ -91,47 +35,21 @@ const PatternSelectionModal = ( props: {
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
 	const { replaceBlock } = useDispatch( blockEditorStore );
 
-	// Get Collections
-	const blockCollections = [
-		collections.productCatalog,
-		...useSelect( ( select ) => {
-			// @ts-expect-error Type definitions are missing
-			// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
-			const { getBlockVariations } = select( blocksStore );
-			return getBlockVariations( blockJson.name );
-		}, [] ),
-	];
-
-	// Prepare Collections
-	const defaultChosenCollection = getDefaultChosenCollection(
-		attributes,
-		blockCollections
-	);
-
-	const [ chosenCollectionName, selectCollectionName ] = useState(
-		defaultChosenCollection
+	const [ chosenCollection, selectCollectionName ] = useState(
+		attributes.collection
 	);
 
 	const applyCollection = () => {
-		// Case 1: Merchant has chosen Default Query. In that case we create defaultProductCollection
-		if (
-			chosenCollectionName ===
-			'woocommerce-blocks/product-collection/default-query'
-		) {
-			const defaultProductCollection = getDefaultProductCollection();
-			replaceBlock( clientId, defaultProductCollection );
+		const collection = getCollectionByName( chosenCollection );
+
+		if ( ! collection ) {
 			return;
 		}
 
-		// Case 2: Merchant has chosen another Collection
-		const chosenCollection = blockCollections.find(
-			( { name }: { name: string } ) => name === chosenCollectionName
-		);
-
 		const newBlock = createBlock(
 			blockJson.name,
-			chosenCollection.attributes,
-			createBlocksFromInnerBlocksTemplate( chosenCollection.innerBlocks )
+			collection.attributes,
+			createBlocksFromInnerBlocksTemplate( collection.innerBlocks )
 		);
 
 		replaceBlock( clientId, newBlock );
@@ -155,20 +73,10 @@ const PatternSelectionModal = ( props: {
 						'woo-gutenberg-products-block'
 					) }
 				</p>
-				<div className="wc-blocks-product-collection__collections-section">
-					{ blockCollections.map(
-						( { name, title, icon, description } ) => (
-							<CollectionButton
-								active={ chosenCollectionName === name }
-								key={ name }
-								title={ title }
-								description={ description }
-								icon={ icon }
-								onClick={ () => selectCollectionName( name ) }
-							/>
-						)
-					) }
-				</div>
+				<CollectionChooser
+					chosenCollection={ chosenCollection }
+					onCollectionClick={ selectCollectionName }
+				/>
 				<div className="wc-blocks-product-collection__footer">
 					<Button
 						variant="tertiary"

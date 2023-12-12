@@ -54,7 +54,11 @@ export const registerCollections = () => {
 	} );
 };
 
-export const getCollectionByName = ( collectionName: CollectionName ) => {
+export const getCollectionByName = ( collectionName?: CollectionName ) => {
+	if ( ! collectionName ) {
+		return null;
+	}
+
 	return Object.values( collections ).find(
 		( { name } ) => name === collectionName
 	);
