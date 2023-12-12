@@ -70,7 +70,7 @@ const ProductSearchBlock = ( {
 						className="wc-block-product-search__button"
 						aria-label={ __(
 							'Search',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					>
 						<svg

@@ -41,17 +41,17 @@ export const Edit = ( {
 						<PanelBody
 							title={ __(
 								'Taxes',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						>
 							<ToggleControl
 								label={ __(
 									'Show rate after tax name',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 								help={ __(
 									'Show the percentage rate alongside each tax line in the summary.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 								checked={ showRateAfterTaxName }
 								onChange={ () =>

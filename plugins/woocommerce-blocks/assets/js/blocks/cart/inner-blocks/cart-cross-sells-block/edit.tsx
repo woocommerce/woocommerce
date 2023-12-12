@@ -15,7 +15,7 @@ export const Edit = (): JSX.Element => {
 			{
 				content: __(
 					'You may be interested in…',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				level: 2,
 				fontSize: 'large',

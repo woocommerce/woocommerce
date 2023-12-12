@@ -76,7 +76,7 @@ class DraftOrders {
 	 * @return array
 	 */
 	public function register_draft_order_status( array $statuses ) {
-		$statuses[ self::DB_STATUS ] = _x( 'Draft', 'Order status', 'woo-gutenberg-products-block' );
+		$statuses[ self::DB_STATUS ] = _x( 'Draft', 'Order status', 'woocommerce' );
 		return $statuses;
 	}
 
@@ -100,13 +100,13 @@ class DraftOrders {
 	 */
 	private function get_post_status_properties() {
 		return [
-			'label'                     => _x( 'Draft', 'Order status', 'woo-gutenberg-products-block' ),
+			'label'                     => _x( 'Draft', 'Order status', 'woocommerce' ),
 			'public'                    => false,
 			'exclude_from_search'       => false,
 			'show_in_admin_all_list'    => false,
 			'show_in_admin_status_list' => true,
 			/* translators: %s: number of orders */
-			'label_count'               => _n_noop( 'Drafts <span class="count">(%s)</span>', 'Drafts <span class="count">(%s)</span>', 'woo-gutenberg-products-block' ),
+			'label_count'               => _n_noop( 'Drafts <span class="count">(%s)</span>', 'Drafts <span class="count">(%s)</span>', 'woocommerce' ),
 		];
 	}
 

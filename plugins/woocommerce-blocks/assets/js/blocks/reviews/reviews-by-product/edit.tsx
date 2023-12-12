@@ -48,7 +48,7 @@ const ReviewsByProductEditor = ( {
 						'%d review',
 						'%d reviews',
 						item.details.review_count,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					item.details.review_count
 				) }
@@ -58,7 +58,7 @@ const ReviewsByProductEditor = ( {
 						'%1$s, has %2$d review',
 						'%1$s, has %2$d reviews',
 						item.details.review_count,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					item.name,
 					item.details.review_count
@@ -71,7 +71,7 @@ const ReviewsByProductEditor = ( {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __( 'Product', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Product', 'woocommerce' ) }
 					initialOpen={ false }
 				>
 					<ProductControl
@@ -85,7 +85,7 @@ const ReviewsByProductEditor = ( {
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Content', 'woocommerce' ) }
 				>
 					{ getSharedReviewContentControls(
 						attributes,
@@ -95,7 +95,7 @@ const ReviewsByProductEditor = ( {
 				<PanelBody
 					title={ __(
 						'List Settings',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				>
 					{ getSharedReviewListControls( attributes, setAttributes ) }
@@ -110,7 +110,7 @@ const ReviewsByProductEditor = ( {
 			debouncedSpeak(
 				__(
 					'Showing Reviews by Product block preview.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				)
 			);
 		};
@@ -125,13 +125,13 @@ const ReviewsByProductEditor = ( {
 				}
 				label={ __(
 					'Reviews by Product',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				className="wc-block-reviews-by-product"
 			>
 				{ __(
 					'Show reviews of your product to build trust',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				<div className="wc-block-reviews__selection">
 					<ProductControl
@@ -147,7 +147,7 @@ const ReviewsByProductEditor = ( {
 						renderItem={ renderProductControlItem }
 					/>
 					<Button variant="primary" onClick={ onDone }>
-						{ __( 'Done', 'woo-gutenberg-products-block' ) }
+						{ __( 'Done', 'woocommerce' ) }
 					</Button>
 				</div>
 			</Placeholder>
@@ -160,7 +160,7 @@ const ReviewsByProductEditor = ( {
 
 	const buttonTitle = __(
 		'Edit selected product',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	);
 
 	return (
@@ -177,7 +177,7 @@ const ReviewsByProductEditor = ( {
 				}
 				name={ __(
 					'Reviews by Product',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>

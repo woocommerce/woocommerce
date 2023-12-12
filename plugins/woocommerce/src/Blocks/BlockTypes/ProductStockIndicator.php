@@ -55,15 +55,15 @@ class ProductStockIndicator extends AbstractBlock {
 		if ( $is_low_stock ) {
 			return sprintf(
 				/* translators: %d is number of items in stock for product */
-				__( '%d left in stock', 'woo-gutenberg-products-block' ),
+				__( '%d left in stock', 'woocommerce' ),
 				$low_stock_amount
 			);
 		} elseif ( $is_on_backorder ) {
-			return __( 'Available on backorder', 'woo-gutenberg-products-block' );
+			return __( 'Available on backorder', 'woocommerce' );
 		} elseif ( $is_in_stock ) {
-			return __( 'In stock', 'woo-gutenberg-products-block' );
+			return __( 'In stock', 'woocommerce' );
 		} else {
-			return __( 'Out of stock', 'woo-gutenberg-products-block' );
+			return __( 'Out of stock', 'woocommerce' );
 		}
 	}
 

@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 const ProductUnavailable = ( {
 	reason = __(
 		'Sorry, this product cannot be purchased.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 } ) => {
 	return (

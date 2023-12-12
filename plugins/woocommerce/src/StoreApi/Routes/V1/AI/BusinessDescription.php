@@ -46,7 +46,7 @@ class BusinessDescription extends AbstractRoute {
 				'permission_callback' => [ Middleware::class, 'is_authorized' ],
 				'args'                => [
 					'business_description' => [
-						'description' => __( 'The business description for a given store.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'The business description for a given store.', 'woocommerce' ),
 						'type'        => 'string',
 					],
 				],
@@ -71,7 +71,7 @@ class BusinessDescription extends AbstractRoute {
 			return $this->error_to_response(
 				new \WP_Error(
 					'invalid_business_description',
-					__( 'Invalid business description.', 'woo-gutenberg-products-block' )
+					__( 'Invalid business description.', 'woocommerce' )
 				)
 			);
 		}

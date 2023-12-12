@@ -185,7 +185,7 @@ const QuantitySelector = ( {
 					/* translators: %s refers to the item name in the cart. */
 					__(
 						'Quantity of %s in your cart.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					itemName
 				) }
@@ -196,7 +196,7 @@ const QuantitySelector = ( {
 					/* translators: %s refers to the item name in the cart. */
 					__(
 						'Reduce quantity of %s',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					itemName
 				) }
@@ -210,7 +210,7 @@ const QuantitySelector = ( {
 							/* translators: %s refers to the item's new quantity in the cart. */
 							__(
 								'Quantity reduced to %s.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							newQuantity
 						)
@@ -226,7 +226,7 @@ const QuantitySelector = ( {
 					/* translators: %s refers to the item's name in the cart. */
 					__(
 						'Increase quantity of %s',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					itemName
 				) }
@@ -240,7 +240,7 @@ const QuantitySelector = ( {
 							/* translators: %s refers to the item's new quantity in the cart. */
 							__(
 								'Quantity increased to %s.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							newQuantity
 						)

@@ -24,8 +24,8 @@ export const ShippingRateSelector = ( {
 	isAddressComplete,
 }: ShippingRateSelectorProps ): JSX.Element => {
 	const legend = hasRates
-		? __( 'Shipping options', 'woo-gutenberg-products-block' )
-		: __( 'Choose a shipping option', 'woo-gutenberg-products-block' );
+		? __( 'Shipping options', 'woocommerce' )
+		: __( 'Choose a shipping option', 'woocommerce' );
 	return (
 		<fieldset className="wc-block-components-totals-shipping__fieldset">
 			<legend className="screen-reader-text">{ legend }</legend>
@@ -41,7 +41,7 @@ export const ShippingRateSelector = ( {
 							>
 								{ __(
 									'There are no shipping options available. Please check your shipping address.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							</NoticeBanner>
 						) }

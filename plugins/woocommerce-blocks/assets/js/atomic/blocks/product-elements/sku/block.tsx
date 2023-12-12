@@ -36,7 +36,7 @@ const Preview = ( {
 		} ) }
 		style={ style }
 	>
-		{ __( 'SKU:', 'woo-gutenberg-products-block' ) }{ ' ' }
+		{ __( 'SKU:', 'woocommerce' ) }{ ' ' }
 		<strong>{ sku }</strong>
 	</div>
 );

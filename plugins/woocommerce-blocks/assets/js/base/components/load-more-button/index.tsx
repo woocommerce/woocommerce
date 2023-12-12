@@ -18,8 +18,8 @@ interface LoadMoreButtonProps {
 
 export const LoadMoreButton = ( {
 	onClick,
-	label = __( 'Load more', 'woo-gutenberg-products-block' ),
-	screenReaderLabel = __( 'Load more', 'woo-gutenberg-products-block' ),
+	label = __( 'Load more', 'woocommerce' ),
+	screenReaderLabel = __( 'Load more', 'woocommerce' ),
 }: LoadMoreButtonProps ): JSX.Element => {
 	return (
 		<div className="wp-block-button wc-block-load-more wc-block-components-load-more">

@@ -54,7 +54,7 @@ const PriceRange = ( {
 					/* translators: %1$s min price, %2$s max price */
 					__(
 						'Price between %1$s and %2$s',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					formatPrice( minPrice ),
 					formatPrice( maxPrice )
@@ -136,7 +136,7 @@ const SalePrice = ( {
 	return (
 		<>
 			<span className="screen-reader-text">
-				{ __( 'Previous price:', 'woo-gutenberg-products-block' ) }
+				{ __( 'Previous price:', 'woocommerce' ) }
 			</span>
 			<FormattedMonetaryAmount
 				currency={ currency }
@@ -154,7 +154,7 @@ const SalePrice = ( {
 				value={ regularPrice }
 			/>
 			<span className="screen-reader-text">
-				{ __( 'Discounted price:', 'woo-gutenberg-products-block' ) }
+				{ __( 'Discounted price:', 'woocommerce' ) }
 			</span>
 			<FormattedMonetaryAmount
 				currency={ currency }

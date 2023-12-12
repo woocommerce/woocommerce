@@ -2,22 +2,23 @@
  * External dependencies
  */
 import { createElement, useEffect } from '@wordpress/element';
-import { BlockInstance, serialize } from '@wordpress/blocks';
+import { BlockInstance, parse, serialize } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import {
+	BlockControls,
 	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
-	BlockControls,
+	// @ts-expect-error no exported member.
+	BlockPreview,
 } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
-import { ContentPreview } from '../../../components/content-preview';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
 import { store } from '../../../store/product-editor-ui';
 import type { DescriptionBlockEditComponent } from './types';
@@ -108,11 +109,13 @@ export function DescriptionBlockEdit( {
 			{ ! description.length && <div { ...innerBlockProps } /> }
 
 			{ !! description.length && (
-				<div className="wp-block-woocommerce-product-description-field__cover" />
-			) }
-
-			{ !! description.length && (
-				<ContentPreview content={ description } />
+				<BlockPreview
+					blocks={ parse( description ) }
+					viewportWidth={ 800 }
+					additionalStyles={ [
+						{ css: 'body { padding: 32px; height: 10000px }' }, // hack: setting height to 10000px to ensure the preview is not cut off.
+					] }
+				/>
 			) }
 
 			{ isModalEditorOpen && <ModalEditorWelcomeGuide /> }
