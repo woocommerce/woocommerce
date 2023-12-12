@@ -14,10 +14,10 @@ namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor;
 class ProductTemplate {
 	private $id;
 	private $title;
-	private $layout_template_id;
 	private $product_data;
-	private $description = null;
 	private $order = 999;
+	private $layout_template_id = null;
+	private $description = null;
 	private $icon = null;
 	
 	/**
@@ -25,13 +25,11 @@ class ProductTemplate {
 	 * 
 	 * @param string $id The pattern ID.
 	 * @param string $title The pattern title.
-	 * @param string $layout_template_id The layout template id.
 	 * @param array $product_data The product data.
 	 */
-	public function __construct( string $id, string $title, string $layout_template_id, array $product_data ) {
+	public function __construct( string $id, string $title, array $product_data ) {
 		$this->id = $id;
 		$this->title = $title;
-		$this->layout_template_id = $layout_template_id;
 		$this->product_data = $product_data;
 	}
 
@@ -60,6 +58,15 @@ class ProductTemplate {
 	 */
 	public function get_layout_template_id() {
 		return $this->layout_template_id;
+	}
+
+	/**
+	 * Set the layout template ID.
+	 * 
+	 * @param string The layout template ID.
+	 */
+	public function set_layout_template_id( string $layout_template_id ) {
+		$this->layout_template_id = $layout_template_id;
 	}
 
 	/**

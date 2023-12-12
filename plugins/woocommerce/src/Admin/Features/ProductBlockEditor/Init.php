@@ -57,6 +57,11 @@ class Init {
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			add_filter( 'product_type_selector', function ( $types ) {
+				$types['simple-subscription'] = __( 'Simple subscription', 'woocommerce' );
+				$types['variable-subscription'] = __( 'Variable subscription', 'woocommerce' );
+				return $types;
+			}, 999, 1 );
 			add_filter( 'woocommerce_product_editor_get_product_templates', array( $this, 'get_product_templates' ), -999, 1 );
 
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
@@ -244,57 +249,97 @@ class Init {
 	 * Get default product templates.
 	 * 
 	 * @param array @templates The initial templates.
-	 * @return array The default templates
+	 * @return array The default templates.
 	 */
 	public function get_product_templates( array $templates ) {
-		$standard_product_template = new ProductTemplate(
-			'standard-product-pattern',
-			__( 'Standard product', 'woocommerce' ),
-			'simple-product',
-			array(
-				'type' => 'simple',
+		$supported_product_types = array(
+			'simple' => array(
+				'product_template_id'           => 'standard-product-template',
+				'product_template_title'        => __( 'Standard product', 'woocommerce' ),
+				'product_template_description'  => __( 'A single physical or virtual product, e.g. a t-shirt or an eBook.', 'woocommerce' ),
+				'product_template_order'        => 10,
+				'product_template_icon'         => null,
+				'product_template_layout_id'    => 'simple-product',
+				'product_template_product_data' => array(
+					'type' => 'simple',
+				),
+			),
+			'grouped' => array(
+				'product_template_id'           => 'grouped-product-template',
+				'product_template_title'        => __( 'Grouped product', 'woocommerce' ),
+				'product_template_description'  => __( 'A set of products that go well together, e.g. camera kit.', 'woocommerce' ),
+				'product_template_order'        => 20,
+				'product_template_icon'         => null,
+				'product_template_layout_id'    => 'simple-product',
+				'product_template_product_data' => array(
+					'type' => 'grouped',
+				),
+			),
+			'external' => array(
+				'product_template_id'           => 'affiliate-product-template',
+				'product_template_title'        => __( 'Affiliate product', 'woocommerce' ),
+				'product_template_description'  => __( 'A link to a product sold on a different website, e.g. brand collab.', 'woocommerce' ),
+				'product_template_order'        => 30,
+				'product_template_icon'         => null,
+				'product_template_layout_id'    => 'simple-product',
+				'product_template_product_data' => array(
+					'type' => 'external',
+				),
+			),
+			'variable' => array(
+				'product_template_id'           => 'variable-product-template',
+				'product_template_title'        => __( 'Variable product', 'woocommerce' ),
+				'product_template_description'  => __( 'A product with variations like color or size.', 'woocommerce' ),
+				'product_template_order'        => 40,
+				'product_template_icon'         => null,
+				'product_template_layout_id'    => 'simple-product',
+				'product_template_product_data' => array(
+					'type' => 'variable',
+				),
 			),
 		);
-		$standard_product_template->set_description( __( 'A single physical or virtual product, e.g. a t-shirt or an eBook.', 'woocommerce' ) );
-		$standard_product_template->set_order( 10 );
 
-		$grouped_product_template = new ProductTemplate(
-			'grouped-product-pattern',
-			__( 'Grouped product', 'woocommerce' ),
-			'simple-product',
-			array(
-				'type' => 'grouped',
-			),
-		);
-		$grouped_product_template->set_description( __( 'A set of products that go well together, e.g. camera kit.', 'woocommerce' ) );
-		$grouped_product_template->set_order( 20 );
+		// Getting the product types registered via the classic editor.
+		// This is not required when registering new product templates.
+		$registered_product_types = wc_get_product_types();
 
-		$affiliate_product_template = new ProductTemplate(
-			'affiliate-product-pattern',
-			__( 'Affiliate product', 'woocommerce' ),
-			'simple-product',
-			array(
-				'type' => 'grouped',
-			),
-		);
-		$affiliate_product_template->set_description( __( 'A link to a product sold on a different website, e.g. brand collab.', 'woocommerce' ) );
-		$affiliate_product_template->set_order( 30 );
+		foreach ( $registered_product_types as $product_type => $title ) {
+			if ( array_key_exists( $product_type, $supported_product_types ) ) continue;
 
-		$variable_product_template = new ProductTemplate(
-			'variable-product-pattern',
-			__( 'Variable product', 'woocommerce' ),
-			'simple-product',
-			array(
-				'type' => 'variable',
-			),
-		);
-		$variable_product_template->set_description( __( 'A product with variations like color or size.', 'woocommerce' ) );
-		$variable_product_template->set_order( 40 );
+			$supported_product_types[ $product_type ] = array(
+				'product_template_id'           => $product_type . '-product-template',
+				'product_template_title'        => $title,
+				'product_template_description'  => null,
+				'product_template_order'        => ( count( $supported_product_types ) + 1 ) * 10,
+				'product_template_icon'         => null,
+				'product_template_layout_id'    => null,
+				'product_template_product_data' => array(
+					'type' => $product_type,
+				),
+			);
+		}
 
-		$templates[] = $standard_product_template;
-		$templates[] = $grouped_product_template;
-		$templates[] = $affiliate_product_template;
-		$templates[] = $variable_product_template;
+		foreach ( $supported_product_types as $template_data ) {
+			$product_template = new ProductTemplate(
+				$template_data['product_template_id'],
+				$template_data['product_template_title'],
+				$template_data['product_template_product_data'],
+			);
+			if ( isset( $template_data['product_template_layout_id'] ) ) {
+				$product_template->set_layout_template_id( $template_data['product_template_layout_id'] );
+			}
+			if ( isset( $template_data['product_template_description'] ) ) {
+				$product_template->set_description( $template_data['product_template_description'] );
+			}
+			if ( isset( $template_data['product_template_order'] ) ) {
+				$product_template->set_order( $template_data['product_template_order'] );
+			}
+			if ( isset( $template_data['product_template_icon'] ) ) {
+				$product_template->set_icon( $template_data['product_template_icon'] );
+			}
+
+			$templates[] = $product_template;
+		}
 
 		return $templates;
 	}
