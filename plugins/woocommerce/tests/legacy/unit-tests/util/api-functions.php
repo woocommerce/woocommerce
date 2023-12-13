@@ -44,7 +44,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 		$this->upload_dir_path = $upload_dir_info['path'];
 		$this->upload_dir_url  = $upload_dir_info['url'];
 		$this->file_name       = 'Dr1Bczxq4q.png';
-		$this->file_regex	   = '/Dr1Bczxq4q(?:-[0-9]+)?\.png$/';
+		$this->file_regex      = '/Dr1Bczxq4q(?:-[0-9]+)?\.png$/';
 	}
 
 	/**
