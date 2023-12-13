@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classNames from 'classnames';
 import {
 	Button,
 	Dropdown,
@@ -17,7 +18,7 @@ import {
 	lazy,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { chevronRight } from '@wordpress/icons';
+import { chevronRight, check } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
@@ -42,10 +43,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const blockProps = useWooBlockProps( attributes );
 	const [ productType ] = useEntityProp( 'postType', 'product', 'type' );
 
-	const { productTemplates } = useSelect( ( select ) => {
-		const { getEditorSettings } = select( 'core/editor' );
-		return getEditorSettings() as ProductEditorSettings;
-	} );
+	const { productTemplates, productTemplate: selectedProductTemplate } =
+		useSelect( ( select ) => {
+			const { getEditorSettings } = select( 'core/editor' );
+			return getEditorSettings() as ProductEditorSettings;
+		} );
 
 	const [ supportedProductTemplates, unsupportedProductTemplates ] =
 		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
@@ -133,16 +135,20 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	function getMenuItem( onClose: () => void ) {
 		return function renderMenuItem( productTemplate: ProductTemplate ) {
+			const isSelected =
+				selectedProductTemplate?.id === productTemplate.id;
 			return (
 				<MenuItem
 					key={ productTemplate.id }
 					info={ productTemplate.description ?? undefined }
-					isSelected={
-						productType === productTemplate.product_data.type
-					}
-					icon={ resolveIcon( productTemplate ) }
+					isSelected={ isSelected }
+					icon={ isSelected ? check : resolveIcon( productTemplate ) }
 					iconPosition="left"
+					role="menuitemradio"
 					onClick={ menuItemClickHandler( productTemplate, onClose ) }
+					className={ classNames( {
+						'components-menu-item__button--selected': isSelected,
+					} ) }
 				>
 					{ productTemplate.title }
 				</MenuItem>
@@ -168,6 +174,10 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 				<Dropdown
 					focusOnMount={ false }
+					// @ts-ignore Property does exists
+					popoverProps={ {
+						placement: 'bottom-start',
+					} }
 					renderToggle={ ( { isOpen, onToggle } ) => (
 						<Button
 							aria-expanded={ isOpen }

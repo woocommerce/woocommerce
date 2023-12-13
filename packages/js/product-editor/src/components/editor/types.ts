@@ -31,6 +31,7 @@ export type ProductEditorSettings = Partial<
 > & {
 	layoutTemplates: LayoutTemplate[];
 	productTemplates: ProductTemplate[];
+	productTemplate?: ProductTemplate;
 };
 
 export type EditorProps = {

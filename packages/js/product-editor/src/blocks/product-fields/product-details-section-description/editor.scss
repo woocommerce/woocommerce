@@ -29,5 +29,12 @@
 				align-self: flex-start;
 			}
 		}
+
+		&--selected {
+			svg,
+			.components-menu-item__item {
+				color: var(--wp-admin-theme-color);
+			}
+		}
 	}
 }

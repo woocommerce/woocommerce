@@ -135,7 +135,10 @@ export function BlockEditor( {
 
 		onChange( blockInstances, {} );
 
-		updateEditorSettings( settings ?? {} );
+		updateEditorSettings( {
+			...settings,
+			productTemplate,
+		} as Partial< ProductEditorSettings > );
 	}, [ settings, postType, productType ] );
 
 	// Check if the Modal editor is open from the store.
