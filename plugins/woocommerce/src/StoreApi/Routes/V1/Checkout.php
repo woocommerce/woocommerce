@@ -79,7 +79,7 @@ class Checkout extends AbstractCartRoute {
 				'args'                => array_merge(
 					[
 						'payment_data' => [
-							'description' => __( 'Data to pass through to the payment method when processing payment.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Data to pass through to the payment method when processing payment.', 'woocommerce' ),
 							'type'        => 'array',
 							'items'       => [
 								'type'       => 'object',
@@ -376,7 +376,7 @@ class Checkout extends AbstractCartRoute {
 		if ( ! $this->order instanceof \WC_Order ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_missing_order',
-				__( 'Unable to create order', 'woo-gutenberg-products-block' ),
+				__( 'Unable to create order', 'woocommerce' ),
 				500
 			);
 		}
@@ -460,7 +460,7 @@ class Checkout extends AbstractCartRoute {
 			if ( $requires_payment_method ) {
 				throw new RouteException(
 					'woocommerce_rest_checkout_missing_payment_method',
-					__( 'No payment method provided.', 'woo-gutenberg-products-block' ),
+					__( 'No payment method provided.', 'woocommerce' ),
 					400
 				);
 			}
@@ -474,7 +474,7 @@ class Checkout extends AbstractCartRoute {
 				'woocommerce_rest_checkout_payment_method_disabled',
 				sprintf(
 					// Translators: %s Payment method ID.
-					__( '%s is not available for this order—please choose a different payment method', 'woo-gutenberg-products-block' ),
+					__( '%s is not available for this order—please choose a different payment method', 'woocommerce' ),
 					esc_html( $gateway_title )
 				),
 				400
@@ -522,13 +522,13 @@ class Checkout extends AbstractCartRoute {
 				case 'registration-error-invalid-email':
 					throw new RouteException(
 						'registration-error-invalid-email',
-						__( 'Please provide a valid email address.', 'woo-gutenberg-products-block' ),
+						__( 'Please provide a valid email address.', 'woocommerce' ),
 						400
 					);
 				case 'registration-error-email-exists':
 					throw new RouteException(
 						'registration-error-email-exists',
-						__( 'An account is already registered with your email address. Please log in before proceeding.', 'woo-gutenberg-products-block' ),
+						__( 'An account is already registered with your email address. Please log in before proceeding.', 'woocommerce' ),
 						400
 					);
 			}

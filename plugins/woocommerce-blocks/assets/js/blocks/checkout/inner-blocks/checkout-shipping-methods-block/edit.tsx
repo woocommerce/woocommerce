@@ -65,37 +65,26 @@ export const Edit = ( {
 		>
 			<InspectorControls>
 				<PanelBody
-					title={ __(
-						'Shipping Calculations',
-						'woo-gutenberg-products-block'
-					) }
+					title={ __( 'Shipping Calculations', 'woocommerce' ) }
 				>
 					<p className="wc-block-checkout__controls-text">
 						{ __(
 							'Options that control shipping can be managed in your store settings.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</p>
 					<ExternalLink
 						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=options` }
 					>
-						{ __(
-							'Manage shipping options',
-							'woo-gutenberg-products-block'
-						) }
+						{ __( 'Manage shipping options', 'woocommerce' ) }
 					</ExternalLink>{ ' ' }
 				</PanelBody>
 				{ globalShippingMethods.length > 0 && (
-					<PanelBody
-						title={ __(
-							'Methods',
-							'woo-gutenberg-products-block'
-						) }
-					>
+					<PanelBody title={ __( 'Methods', 'woocommerce' ) }>
 						<p className="wc-block-checkout__controls-text">
 							{ __(
 								'The following shipping integrations are active on your store.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</p>
 						{ globalShippingMethods.map( ( method ) => {
@@ -111,24 +100,16 @@ export const Edit = ( {
 						<ExternalLink
 							href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
 						>
-							{ __(
-								'Manage shipping methods',
-								'woo-gutenberg-products-block'
-							) }
+							{ __( 'Manage shipping methods', 'woocommerce' ) }
 						</ExternalLink>
 					</PanelBody>
 				) }
 				{ activeShippingZones.length && (
-					<PanelBody
-						title={ __(
-							'Shipping Zones',
-							'woo-gutenberg-products-block'
-						) }
-					>
+					<PanelBody title={ __( 'Shipping Zones', 'woocommerce' ) }>
 						<p className="wc-block-checkout__controls-text">
 							{ __(
 								'Shipping Zones can be made managed in your store settings.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</p>
 						{ activeShippingZones.map( ( zone ) => {

@@ -43,34 +43,25 @@ const Edit = (): JSX.Element => {
 						<tr>
 							<th className="download-product">
 								<span className="nobr">
-									{ __(
-										'Product',
-										'woo-gutenberg-products-block'
-									) }
+									{ __( 'Product', 'woocommerce' ) }
 								</span>
 							</th>
 							<th className="download-remaining">
 								<span className="nobr">
 									{ __(
 										'Downloads remaining',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</span>
 							</th>
 							<th className="download-expires">
 								<span className="nobr">
-									{ __(
-										'Expires',
-										'woo-gutenberg-products-block'
-									) }
+									{ __( 'Expires', 'woocommerce' ) }
 								</span>
 							</th>
 							<th className="download-file">
 								<span className="nobr">
-									{ __(
-										'Download',
-										'woo-gutenberg-products-block'
-									) }
+									{ __( 'Download', 'woocommerce' ) }
 								</span>
 							</th>
 						</tr>
@@ -85,7 +76,7 @@ const Edit = (): JSX.Element => {
 									{ _x(
 										'Test Product',
 										'sample product name',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</a>
 							</td>
@@ -96,7 +87,7 @@ const Edit = (): JSX.Element => {
 								{ _x(
 									'∞',
 									'infinite downloads remaining',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							</td>
 							<td
@@ -106,7 +97,7 @@ const Edit = (): JSX.Element => {
 								{ _x(
 									'Never',
 									'download expires',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							</td>
 							<td className="download-file" data-title="Download">
@@ -117,7 +108,7 @@ const Edit = (): JSX.Element => {
 									{ _x(
 										'Test Download',
 										'sample download name',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</a>
 							</td>

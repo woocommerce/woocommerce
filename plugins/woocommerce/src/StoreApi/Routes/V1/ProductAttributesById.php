@@ -39,7 +39,7 @@ class ProductAttributesById extends AbstractRoute {
 		return [
 			'args'   => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 				),
 			),
@@ -70,7 +70,7 @@ class ProductAttributesById extends AbstractRoute {
 		$object = wc_get_attribute( (int) $request['id'] );
 
 		if ( ! $object || 0 === $object->id ) {
-			throw new RouteException( 'woocommerce_rest_attribute_invalid_id', __( 'Invalid attribute ID.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_attribute_invalid_id', __( 'Invalid attribute ID.', 'woocommerce' ), 404 );
 		}
 
 		$data     = $this->prepare_item_for_response( $object, $request );

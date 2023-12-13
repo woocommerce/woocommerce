@@ -171,7 +171,7 @@ const CheckoutProcessor = () => {
 				return {
 					errorMessage: __(
 						'Sorry, this order requires a shipping option.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 				};
 			}
@@ -181,7 +181,7 @@ const CheckoutProcessor = () => {
 			return {
 				errorMessage: __(
 					'There was a problem with your payment option.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				context: 'wc/checkout/payments',
 			};
@@ -190,7 +190,7 @@ const CheckoutProcessor = () => {
 			return {
 				errorMessage: __(
 					'There was a problem with your shipping option.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				context: 'wc/checkout/shipping-methods',
 			};
@@ -297,13 +297,13 @@ const CheckoutProcessor = () => {
 				} catch {
 					let errorMessage = __(
 						'Something went wrong when placing the order. Check your email for order updates before retrying.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					);
 
 					if ( customerId !== 0 ) {
 						errorMessage = __(
 							"Something went wrong when placing the order. Check your account's order history or your email for order updates before retrying.",
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						);
 					}
 					processErrorResponse( {

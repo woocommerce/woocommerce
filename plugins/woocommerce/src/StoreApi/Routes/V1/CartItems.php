@@ -92,7 +92,7 @@ class CartItems extends AbstractCartRoute {
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		// Do not allow key to be specified during creation.
 		if ( ! empty( $request['key'] ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_item_exists', __( 'Cannot create an existing cart item.', 'woo-gutenberg-products-block' ), 400 );
+			throw new RouteException( 'woocommerce_rest_cart_item_exists', __( 'Cannot create an existing cart item.', 'woocommerce' ), 400 );
 		}
 
 		$result = $this->cart_controller->add_to_cart(

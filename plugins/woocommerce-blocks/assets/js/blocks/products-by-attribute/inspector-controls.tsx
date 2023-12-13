@@ -33,10 +33,7 @@ export const ProductsByAttributeInspectorControls = (
 
 	return (
 		<InspectorControls key="inspector">
-			<PanelBody
-				title={ __( 'Layout', 'woo-gutenberg-products-block' ) }
-				initialOpen
-			>
+			<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
 				<GridLayoutControl
 					columns={ columns }
 					rows={ rows }
@@ -48,10 +45,7 @@ export const ProductsByAttributeInspectorControls = (
 					maxRows={ getSetting( 'maxRows', 6 ) }
 				/>
 			</PanelBody>
-			<PanelBody
-				title={ __( 'Content', 'woo-gutenberg-products-block' ) }
-				initialOpen
-			>
+			<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
 				<GridContentControl
 					settings={ contentVisibility }
 					onChange={ ( value ) =>
@@ -60,10 +54,7 @@ export const ProductsByAttributeInspectorControls = (
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __(
-					'Filter by Product Attribute',
-					'woo-gutenberg-products-block'
-				) }
+				title={ __( 'Filter by Product Attribute', 'woocommerce' ) }
 				initialOpen={ false }
 			>
 				<ProductAttributeTermControl
@@ -85,7 +76,7 @@ export const ProductsByAttributeInspectorControls = (
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Order By', 'woo-gutenberg-products-block' ) }
+				title={ __( 'Order By', 'woocommerce' ) }
 				initialOpen={ false }
 			>
 				<ProductOrderbyControl
@@ -94,10 +85,7 @@ export const ProductsByAttributeInspectorControls = (
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __(
-					'Filter by stock status',
-					'woo-gutenberg-products-block'
-				) }
+				title={ __( 'Filter by stock status', 'woocommerce' ) }
 				initialOpen={ false }
 			>
 				<ProductStockControl
