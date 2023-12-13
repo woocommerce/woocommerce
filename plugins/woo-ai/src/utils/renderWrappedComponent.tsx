@@ -25,10 +25,8 @@ export const renderWrappedComponent = (
 	);
 
 	if ( createRoot ) {
-		console.log( 'rendering with createRoot' );
 		createRoot( rootElement ).render( <WrappedComponent /> );
 	} else {
-		console.log( 'rendering with render' );
 		render( <WrappedComponent />, rootElement );
 	}
 };

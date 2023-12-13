@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Button } from '@wordpress/components';
 import { useAutoAnimate } from '@formkit/auto-animate/react';

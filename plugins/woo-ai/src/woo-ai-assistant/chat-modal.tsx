@@ -17,6 +17,7 @@ import makeWCRestApiCall from '../utils/wcRestApi';
 import MessageItem from './message-item';
 import recordWooAIAssistantTracks from './utils';
 import ChatInputForm from './chat-input-form';
+import TypingIndicator from '../components/typing-indicator';
 
 export type Message = {
 	sender: 'user' | 'assistant';
@@ -396,6 +397,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 						onRetry={ retryUserQuery }
 					/>
 				) ) }
+				{ isLoading && <TypingIndicator /> }
 				<li ref={ chatMessagesEndRef }></li>
 			</ul>
 			<ChatInputForm
