@@ -204,7 +204,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	protected function get_additional_address_fields_schema() {
 		$additional_fields_keys = $this->additional_fields_controller->get_address_fields_keys();
 
-		$fields = array_merge( $this->additional_fields_controller->get_core_fields(), $this->additional_fields_controller->get_additional_fields() );
+		$fields = $this->additional_fields_controller->get_additional_fields();
 
 		$address_fields = array_filter(
 			$fields,
