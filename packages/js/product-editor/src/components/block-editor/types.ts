@@ -12,6 +12,5 @@ export type BlockEditorProps = {
 	context: Partial< ProductEditorContext >;
 	postType: string;
 	productId: number;
-	productType: string;
 	settings?: ProductEditorSettings;
 };

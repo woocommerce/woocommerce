@@ -88,7 +88,7 @@ export default function ProductPage() {
 		<>
 			<Editor
 				product={ variation }
-				productType="product_variation"
+				postType="product_variation"
 				settings={ productBlockEditorSettings || {} }
 			/>
 			<WooFooterItem order={ 0 }>

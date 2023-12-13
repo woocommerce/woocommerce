@@ -32,7 +32,11 @@ import { useEntityId } from '@wordpress/core-data';
  */
 import { ProductEditorSettings } from '../../../components';
 import { ProductTemplate } from '../../../components/editor';
-import { AUTO_DRAFT_NAME } from '../../../utils';
+import { useValidations } from '../../../contexts/validation-context';
+import {
+	WPError,
+	getProductErrorMessage,
+} from '../../../utils/get-product-error-message';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
 
@@ -44,10 +48,13 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const [ productType ] = useEntityProp( 'postType', 'product', 'type' );
 
 	const { productTemplates, productTemplate: selectedProductTemplate } =
-		useSelect( ( select ) => {
-			const { getEditorSettings } = select( 'core/editor' );
-			return getEditorSettings() as ProductEditorSettings;
-		} );
+		useSelect(
+			( select ) => {
+				const { getEditorSettings } = select( 'core/editor' );
+				return getEditorSettings() as ProductEditorSettings;
+			},
+			[ productType ]
+		);
 
 	const [ supportedProductTemplates, unsupportedProductTemplates ] =
 		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
@@ -64,17 +71,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	const productId = useEntityId( 'postType', 'product' );
 
-	const hasEdits = useSelect(
-		( select ) => {
-			// @ts-expect-error There are no types for this.
-			const { hasEditsForEntityRecord } = select( 'core' );
-			return hasEditsForEntityRecord( 'postType', 'product', productId );
-		},
-		[ productId ]
-	);
-
-	const { saveEntityRecord } = useDispatch( 'core' );
-	const { createErrorNotice } = useDispatch( 'core/notices' );
+	const { validate } = useValidations< Product >();
+	// @ts-expect-error There are no types for this.
+	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
+	const { createSuccessNotice, createErrorNotice } =
+		useDispatch( 'core/notices' );
 
 	const rootClientId = useSelect(
 		( select ) => {
@@ -91,28 +92,32 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		onClose: () => void
 	) {
 		return async function handleMenuItemClick() {
-			if ( hasEdits ) {
-				createErrorNotice(
-					__(
-						'The current product must be saved before continue.',
-						'woocommerce'
-					)
+			try {
+				await validate( productTemplate.product_data );
+
+				await editEntityRecord(
+					'postType',
+					'product',
+					productId,
+					productTemplate.product_data
 				);
-				return;
+
+				await saveEditedEntityRecord< Product >(
+					'postType',
+					'product',
+					productId,
+					{
+						throwOnError: true,
+					}
+				);
+
+				createSuccessNotice(
+					__( 'Product type changed.', 'woocommerce' )
+				);
+			} catch ( error ) {
+				const message = getProductErrorMessage( error as WPError );
+				createErrorNotice( message );
 			}
-
-			const newProduct = await ( saveEntityRecord(
-				'postType',
-				'product',
-				{
-					title: AUTO_DRAFT_NAME,
-					status: 'auto-draft',
-					...productTemplate.product_data,
-				}
-			) as never as Promise< Product > );
-
-			const url = getNewPath( {}, `/product/${ newProduct.id }` );
-			navigateTo( { url } );
 
 			onClose();
 		};
@@ -161,13 +166,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			<div { ...blockProps }>
 				<p>
 					{ createInterpolateElement(
-						/* translators: <ProductType />: the product type. */
-						__(
-							'This is a <ProductType /> product.',
-							'woocommerce'
-						),
+						/* translators: <ProductTemplate />: the product template. */
+						__( 'This is a <ProductTemplate />.', 'woocommerce' ),
 						{
-							ProductType: <Fragment>{ productType }</Fragment>,
+							ProductTemplate: (
+								<span>{ selectedProductTemplate?.title }</span>
+							),
 						}
 					) }
 				</p>

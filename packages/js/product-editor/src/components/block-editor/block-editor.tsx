@@ -30,6 +30,7 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore store should be included.
 	useEntityBlockEditor,
+	useEntityProp,
 } from '@wordpress/core-data';
 
 /**
@@ -47,7 +48,6 @@ export function BlockEditor( {
 	settings: _settings,
 	postType,
 	productId,
-	productType,
 }: BlockEditorProps ) {
 	useConfirmUnsavedProductChanges( postType );
 
@@ -96,6 +96,8 @@ export function BlockEditor( {
 			templateLock: 'all',
 		};
 	}, [ canUserCreateMedia, _settings ] );
+
+	const [ productType ] = useEntityProp( 'postType', postType, 'type' );
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
