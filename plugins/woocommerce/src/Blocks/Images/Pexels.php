@@ -108,7 +108,7 @@ class Pexels {
 	 * @return mixed|\WP_Error
 	 */
 	private function define_search_term( $ai_connection, $token, $business_description ) {
-		$prompt = sprintf( 'You are a teacher. Based on the following business description, \'%s\', describe to a child exactly what this store is selling in one or two words. Do not add any explanations in the response', $business_description );
+		$prompt = sprintf( 'You are a teacher. Based on the following business description, \'%s\', describe to a child exactly what this store is selling in one or two words. Make sure you do not add double quotes in your response. Do not add any explanations in the response', $business_description );
 
 		$response = $ai_connection->fetch_ai_response( $token, $prompt, 30 );
 
