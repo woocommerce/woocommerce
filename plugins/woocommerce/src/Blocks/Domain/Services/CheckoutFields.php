@@ -301,17 +301,31 @@ class CheckoutFields {
 				return new \WP_Error( 'woocommerce_blocks_checkout_select_field_no_options_specified', __( 'Fields of type "select" must have an array of "options".', 'woo-gutenberg-products-block' ) );
 			}
 
+			$cleaned_options = array();
+			$added_values = array();
+
 			// Check all entries in $options['options'] has a key and value member.
 			foreach ( $options['options'] as $key => $option ) {
 				if ( ! isset( $option['value'] ) || ! isset( $option['label'] ) ) {
 					return new \WP_Error( 'woocommerce_blocks_checkout_select_field_options_invalid', __( 'Fields of type "select" must have an array of "options" with a "value" and "label" member.', 'woo-gutenberg-products-block' ) );
 				}
 
-				$options[ $key ]['value'] = sanitize_text_field( $option['value'] );
-				$options[ $key ]['label'] = sanitize_text_field( $option['label'] );
+				$sanitized_value = sanitize_text_field( $option['value'] );
+				$sanitized_label = sanitize_text_field( $option['label'] );
+
+				if ( in_array( $sanitized_value, $added_values ) ) {
+					return new \WP_Error( 'woocommerce_blocks_checkout_select_field_options_not_unique', sprintf( __( 'The value in each option of "select" fields must be unique. Duplicate value "%s" found.', 'woo-gutenberg-products-block' ), esc_html( $sanitized_value ) ) );
+				}
+
+				$added_values[] = $sanitized_value;
+
+				$cleaned_options[] = array(
+					'value' => $sanitized_value,
+					'label' => $sanitized_label,
+				);
 			}
 
-			$field_data['options'] = $options['options'];
+			$field_data['options'] = $cleaned_options;
 		}
 
 		// Insert new field into the correct location array.
