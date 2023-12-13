@@ -183,7 +183,6 @@
 		"@wordpress/browserslist-config": "wp-6.0"
 	},
 	"nodemonConfig": {
-		"command": "pnpm run build:project",
 		"delay": 2500,
 		"watch": [
 			"node_modules/@woocommerce/block-library/build",
