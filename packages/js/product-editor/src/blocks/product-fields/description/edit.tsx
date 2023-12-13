@@ -30,6 +30,26 @@ import type { DescriptionBlockEditComponent } from './types';
 import FullEditorToolbarButton from './components/full-editor-toolbar-button';
 
 /**
+ * Check whether the parsed blocks become from the summary block.
+ *
+ * @param {BlockInstance[]} blocks - The block list
+ * @return {string|false} The content of the freeform block if it's a freeform block, false otherwise.
+ */
+export function getContentFromFreeform(
+	blocks: BlockInstance[]
+): false | string {
+	// Check whether the parsed blocks become from the summary block:
+	const isCoreFreeformBlock =
+		blocks.length === 1 && blocks[ 0 ].name === 'core/freeform';
+
+	if ( isCoreFreeformBlock ) {
+		return blocks[ 0 ].attributes.content;
+	}
+
+	return false;
+}
+
+/**
  * By default the blocks variable always contains one paragraph
  * block with empty content, that causes the description to never
  * be empty. This function removes the default block to keep
@@ -92,11 +112,7 @@ export function DescriptionBlockEdit( {
 
 		const parsedBlocks = parse( description );
 		// Check whether the parsed blocks become from the summary block:
-		const isSummaryBlock =
-			parsedBlocks.length === 1 &&
-			parsedBlocks[ 0 ].name === 'core/freeform';
-
-		if ( isSummaryBlock ) {
+		if ( getContentFromFreeform( parsedBlocks ) ) {
 			return;
 		}
 
