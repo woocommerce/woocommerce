@@ -196,10 +196,7 @@ const RatingFilterEditBlock = ( {
 								)
 								.map( ( option ) => option.value ) }
 							disabled={ isLoading }
-							placeholder={ __(
-								'Select Rating',
-								'woo-gutenberg-products-block'
-							) }
+							placeholder={ __( 'Select Rating', 'woocommerce' ) }
 							onChange={ () => {
 								// noop
 							} }
@@ -254,19 +251,19 @@ const RatingFilterEditBlock = ( {
 							messages={ {
 								added: __(
 									'Rating filter added.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								removed: __(
 									'Rating filter removed.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								remove: __(
 									'Remove rating filter.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								__experimentalInvalid: __(
 									'Invalid rating filter.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 							} }
 						/>
@@ -287,33 +284,6 @@ const RatingFilterEditBlock = ( {
 					/>
 				) }
 			</div>
-			{
-				<div className="wc-block-rating-filter__actions">
-					{ ( checked.length > 0 || isEditor ) && ! isLoading && (
-						<FilterResetButton
-							onClick={ () => {
-								setChecked( [] );
-								setProductRatingsQuery( [] );
-								// onSubmit( [] );
-							} }
-							screenReaderLabel={ __(
-								'Reset rating filter',
-								'woo-gutenberg-products-block'
-							) }
-						/>
-					) }
-					{ blockAttributes.showFilterButton && (
-						<FilterSubmitButton
-							className="wc-block-rating-filter__button"
-							isLoading={ isLoading }
-							disabled={ isLoading || isDisabled }
-							onClick={ () => {
-								// noop
-							} }
-						/>
-					) }
-				</div>
-			}
 		</>
 	);
 };
