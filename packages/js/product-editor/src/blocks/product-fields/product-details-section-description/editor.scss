@@ -9,4 +9,25 @@
 	p {
 		margin: 0;
 	}
+
+	&__dropdown .components-button.components-menu-item__button {
+		border-radius: 2px;
+		padding: $grid-unit $grid-unit + 2;
+		padding-inline-start: $grid-unit-30 + $grid-unit-05;
+
+		&:hover {
+			background-color: $gray-100;
+			color: inherit;
+		}
+
+		&.has-icon {
+			gap: $grid-unit-05;
+			padding-inline-start: 0;
+
+			svg {
+				flex-shrink: 0;
+				align-self: flex-start;
+			}
+		}
+	}
 }

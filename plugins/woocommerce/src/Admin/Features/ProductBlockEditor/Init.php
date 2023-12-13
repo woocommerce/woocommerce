@@ -258,7 +258,7 @@ class Init {
 				'product_template_title'        => __( 'Standard product', 'woocommerce' ),
 				'product_template_description'  => __( 'A single physical or virtual product, e.g. a t-shirt or an eBook.', 'woocommerce' ),
 				'product_template_order'        => 10,
-				'product_template_icon'         => null,
+				'product_template_icon'         => 'shipping',
 				'product_template_layout_id'    => 'simple-product',
 				'product_template_product_data' => array(
 					'type' => 'simple',
@@ -269,7 +269,7 @@ class Init {
 				'product_template_title'        => __( 'Grouped product', 'woocommerce' ),
 				'product_template_description'  => __( 'A set of products that go well together, e.g. camera kit.', 'woocommerce' ),
 				'product_template_order'        => 20,
-				'product_template_icon'         => null,
+				'product_template_icon'         => 'group',
 				'product_template_layout_id'    => 'simple-product',
 				'product_template_product_data' => array(
 					'type' => 'grouped',
@@ -280,7 +280,7 @@ class Init {
 				'product_template_title'        => __( 'Affiliate product', 'woocommerce' ),
 				'product_template_description'  => __( 'A link to a product sold on a different website, e.g. brand collab.', 'woocommerce' ),
 				'product_template_order'        => 30,
-				'product_template_icon'         => null,
+				'product_template_icon'         => 'link',
 				'product_template_layout_id'    => 'simple-product',
 				'product_template_product_data' => array(
 					'type' => 'external',

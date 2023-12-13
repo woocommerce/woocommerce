@@ -14,6 +14,7 @@ import {
 	Fragment,
 	createElement,
 	createInterpolateElement,
+	lazy,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronRight } from '@wordpress/icons';
@@ -115,6 +116,40 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		};
 	}
 
+	function resolveIcon( productTemplate: ProductTemplate ) {
+		const iconName = productTemplate.icon;
+		if ( ! iconName ) return undefined;
+
+		const Icon = lazy( () =>
+			import( '@wordpress/icons' ).then(
+				( { Icon, [ iconName as never ]: icon } ) => ( {
+					default: () => <Icon icon={ icon } size={ 24 } />,
+				} )
+			)
+		);
+
+		return <Icon />;
+	}
+
+	function getMenuItem( onClose: () => void ) {
+		return function renderMenuItem( productTemplate: ProductTemplate ) {
+			return (
+				<MenuItem
+					key={ productTemplate.id }
+					info={ productTemplate.description ?? undefined }
+					isSelected={
+						productType === productTemplate.product_data.type
+					}
+					icon={ resolveIcon( productTemplate ) }
+					iconPosition="left"
+					onClick={ menuItemClickHandler( productTemplate, onClose ) }
+				>
+					{ productTemplate.title }
+				</MenuItem>
+			);
+		};
+	}
+
 	return (
 		<Fill name={ rootClientId }>
 			<div { ...blockProps }>
@@ -132,6 +167,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 				</p>
 
 				<Dropdown
+					focusOnMount={ false }
 					renderToggle={ ( { isOpen, onToggle } ) => (
 						<Button
 							aria-expanded={ isOpen }
@@ -144,30 +180,17 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						</Button>
 					) }
 					renderContent={ ( { onClose } ) => (
-						<div className="components-dropdown-menu__menu">
+						<div className="wp-block-woocommerce-product-details-section-description__dropdown components-dropdown-menu__menu">
 							<MenuGroup>
 								{ supportedProductTemplates.map(
-									( productTemplate ) => (
-										<MenuItem
-											key={ productTemplate.id }
-											info={
-												productTemplate.description ??
-												undefined
-											}
-											onClick={ menuItemClickHandler(
-												productTemplate,
-												onClose
-											) }
-										>
-											{ productTemplate.title }
-										</MenuItem>
-									)
+									getMenuItem( onClose )
 								) }
 							</MenuGroup>
 
 							{ unsupportedProductTemplates.length > 0 && (
 								<MenuGroup>
 									<Dropdown
+										focusOnMount={ false }
 										// @ts-ignore Property does exists
 										popoverProps={ {
 											placement: 'right-start',
@@ -191,28 +214,10 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 											</MenuItem>
 										) }
 										renderContent={ () => (
-											<div className="components-dropdown-menu__menu">
+											<div className="wp-block-woocommerce-product-details-section-description__dropdown components-dropdown-menu__menu">
 												<MenuGroup>
 													{ unsupportedProductTemplates.map(
-														( productTemplate ) => (
-															<MenuItem
-																key={
-																	productTemplate.id
-																}
-																info={
-																	productTemplate.description ??
-																	undefined
-																}
-																onClick={ menuItemClickHandler(
-																	productTemplate,
-																	onClose
-																) }
-															>
-																{
-																	productTemplate.title
-																}
-															</MenuItem>
-														)
+														getMenuItem( onClose )
 													) }
 												</MenuGroup>
 											</div>
