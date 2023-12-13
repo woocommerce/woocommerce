@@ -137,34 +137,34 @@
 		"content": {
 			"titles": [
 				{
-					"default": "New: Retro Glass Jug",
-					"ai_prompt": "You are a marketer. Create three words title describing what the store is selling."
-				},
-				{
 					"default": "Timeless elegance",
-					"ai_prompt": "You are a marketer. Create a two words title that advertises the products the store is selling."
+					"ai_prompt": "Write a two words title for advertising the store"
 				},
 				{
 					"default": "Durable glass",
-					"ai_prompt": "You are a marketer. Create a two words title that advertises the products the store is selling."
+					"ai_prompt": "Write a two words title for advertising the store"
 				},
 				{
 					"default": "Versatile charm",
-					"ai_prompt": "You are a marketer. Create a two words title that advertises the products the store is selling."
+					"ai_prompt": "Write a two words title for advertising the store"
+				},
+				{
+					"default": "New: Retro Glass Jug",
+					"ai_prompt": "Write a three words title for advertising the store"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "Elevate your table with a 330ml Retro Glass Jug, blending classic design and durable hardened glass.",
-					"ai_prompt": "You are a marketer. Create a phrase to describe what the store is selling with at least 80 characters."
+					"ai_prompt": "Write a text with at least 150 characters, to describe a product the business is selling"
 				},
 				{
 					"default": "Crafted from resilient thick glass, this jug ensures lasting quality, making it perfect for everyday use with a touch of vintage charm.",
-					"ai_prompt": "You are a marketer. Create a phrase to describe what the store is selling with at least 80 characters."
+					"ai_prompt": "Write a text with a minimum of 150 characters, to describe a product the business is selling"
 				},
 				{
 					"default": "The Retro Glass Jug's classic silhouette effortlessly complements any setting, making it the ideal choice for serving beverages with style and flair.",
-					"ai_prompt": "You are a marketer. Create a short phrase to describe what the store is selling."
+					"ai_prompt": "Write a long text, with at least 150 characters, to describe a product the business is selling"
 				}
 			]
 		}
@@ -570,15 +570,15 @@
 			"descriptions": [
 				{
 					"default": "Transformed my daily routine with unique, eco-friendly treasures. Exceptional quality and service. Proud to support a store that aligns with my values.",
-					"ai_prompt": "The testimonial from a real customer with a maximum of 150 characters"
+					"ai_prompt": "Write the testimonial from a customer with approximately 150 characters"
 				},
 				{
 					"default": "The organic coffee beans are a revelation. Each sip feels like a journey. Beautifully crafted accessories add a touch of elegance to my home.",
-					"ai_prompt": "The testimonial from a real customer with a maximum of 150 characters"
+					"ai_prompt": "Write the testimonial from a customer with approximately 150 characters"
 				},
 				{
 					"default": "From sustainably sourced teas to chic vases, this store is a treasure trove. Love knowing my purchases contribute to a greener planet.",
-					"ai_prompt": "The testimonial from a real customer. The returned phrase should be long, with a maximum of 150 characters."
+					"ai_prompt": "Write the testimonial from a customer with approximately 150 characters"
 				}
 			]
 		}
