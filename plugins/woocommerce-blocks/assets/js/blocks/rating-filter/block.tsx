@@ -41,19 +41,13 @@ const translations = {
 	ratingAdded: ( rating: string ): string =>
 		sprintf(
 			/* translators: %s is referring to the average rating value */
-			__(
-				'Rated %s out of 5 filter added.',
-				'woocommerce'
-			),
+			__( 'Rated %s out of 5 filter added.', 'woocommerce' ),
 			rating
 		),
 	ratingRemoved: ( rating: string ): string =>
 		sprintf(
 			/* translators: %s is referring to the average rating value */
-			__(
-				'Rated %s out of 5 filter added.',
-				'woocommerce'
-			),
+			__( 'Rated %s out of 5 filter added.', 'woocommerce' ),
 			rating
 		),
 };
@@ -354,10 +348,7 @@ const RatingFilterBlock = ( {
 								)
 								.map( ( option ) => option.value ) }
 							disabled={ isLoading }
-							placeholder={ __(
-								'Select Rating',
-								'woocommerce'
-							) }
+							placeholder={ __( 'Select Rating', 'woocommerce' ) }
 							onChange={ ( tokens: string[] ) => {
 								if ( ! multiple && tokens.length > 1 ) {
 									tokens = [ tokens[ tokens.length - 1 ] ];

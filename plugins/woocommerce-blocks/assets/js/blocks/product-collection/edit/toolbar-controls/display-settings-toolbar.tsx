@@ -86,10 +86,7 @@ const DisplaySettingsToolbar = ( {
 					<>
 						<NumberControl
 							{ ...numberControlProps }
-							label={ __(
-								'Items per Page',
-								'woocommerce'
-							) }
+							label={ __( 'Items per Page', 'woocommerce' ) }
 							min={ 1 }
 							max={ 100 }
 							onChange={ handlePerPageChange }
@@ -98,10 +95,7 @@ const DisplaySettingsToolbar = ( {
 
 						<NumberControl
 							{ ...numberControlProps }
-							label={ __(
-								'Offset',
-								'woocommerce'
-							) }
+							label={ __( 'Offset', 'woocommerce' ) }
 							min={ 0 }
 							max={ 100 }
 							onChange={ handleOffsetChange }

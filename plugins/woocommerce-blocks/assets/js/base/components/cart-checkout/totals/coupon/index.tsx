@@ -92,10 +92,7 @@ export const TotalsCoupon = ( {
 					role="button"
 					href="#wc-block-components-totals-coupon__form"
 					className="wc-block-components-totals-coupon-link"
-					aria-label={ __(
-						'Add a coupon',
-						'woocommerce'
-					) }
+					aria-label={ __( 'Add a coupon', 'woocommerce' ) }
 					onClick={ handleCouponAnchorClick }
 				>
 					{ __( 'Add a coupon', 'woocommerce' ) }
@@ -118,10 +115,7 @@ export const TotalsCoupon = ( {
 								id={ textInputId }
 								errorId="coupon"
 								className="wc-block-components-totals-coupon__input"
-								label={ __(
-									'Enter code',
-									'woocommerce'
-								) }
+								label={ __( 'Enter code', 'woocommerce' ) }
 								value={ couponValue }
 								ariaDescribedBy={ validationErrorId }
 								onChange={ ( newCouponValue ) => {
@@ -138,10 +132,7 @@ export const TotalsCoupon = ( {
 								onClick={ handleCouponSubmit }
 								type="submit"
 							>
-								{ __(
-									'Apply',
-									'woocommerce'
-								) }
+								{ __( 'Apply', 'woocommerce' ) }
 							</Button>
 						</form>
 						<ValidationInputError

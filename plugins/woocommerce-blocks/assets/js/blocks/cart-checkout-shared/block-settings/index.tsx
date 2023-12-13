@@ -18,10 +18,7 @@ export const BlockSettings = ( {
 		<InspectorControls>
 			<PanelBody title={ __( 'Style', 'woocommerce' ) }>
 				<ToggleControl
-					label={ __(
-						'Dark mode inputs',
-						'woocommerce'
-					) }
+					label={ __( 'Dark mode inputs', 'woocommerce' ) }
 					help={ __(
 						'Inputs styled specifically for use on dark background colors.',
 						'woocommerce'

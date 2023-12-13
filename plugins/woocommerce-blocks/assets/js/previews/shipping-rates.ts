@@ -45,10 +45,7 @@ export const previewShippingRates: CartResponseShippingRate[] = [
 				currency_thousand_separator: ',',
 				currency_prefix: '$',
 				currency_suffix: '',
-				name: __(
-					'Flat rate shipping',
-					'woocommerce'
-				),
+				name: __( 'Flat rate shipping', 'woocommerce' ),
 				description: '',
 				delivery_time: '',
 				price: '500',

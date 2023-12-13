@@ -20,10 +20,7 @@ import { ProductCollectionQuery } from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../../utils';
 
-const label = __(
-	'Inherit query from template',
-	'woocommerce'
-);
+const label = __( 'Inherit query from template', 'woocommerce' );
 
 interface InheritQueryControlProps {
 	setQueryAttribute: ( value: Partial< ProductCollectionQuery > ) => void;

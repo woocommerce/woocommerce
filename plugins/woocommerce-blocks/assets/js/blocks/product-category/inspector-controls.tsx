@@ -39,10 +39,7 @@ export const ProductsByCategoryInspectorControls = (
 	return (
 		<InspectorControls key="inspector">
 			<PanelBody
-				title={ __(
-					'Product Category',
-					'woocommerce'
-				) }
+				title={ __( 'Product Category', 'woocommerce' ) }
 				initialOpen={ ! attributes.categories.length && ! isEditing }
 			>
 				<ProductCategoryControl
@@ -64,10 +61,7 @@ export const ProductsByCategoryInspectorControls = (
 					isCompact={ true }
 				/>
 			</PanelBody>
-			<PanelBody
-				title={ __( 'Layout', 'woocommerce' ) }
-				initialOpen
-			>
+			<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
 				<GridLayoutControl
 					columns={ columns }
 					rows={ rows }
@@ -79,10 +73,7 @@ export const ProductsByCategoryInspectorControls = (
 					maxRows={ getSetting( 'maxRows', 6 ) }
 				/>
 			</PanelBody>
-			<PanelBody
-				title={ __( 'Content', 'woocommerce' ) }
-				initialOpen
-			>
+			<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
 				<GridContentControl
 					settings={ contentVisibility }
 					onChange={ ( value ) =>
@@ -100,10 +91,7 @@ export const ProductsByCategoryInspectorControls = (
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __(
-					'Filter by stock status',
-					'woocommerce'
-				) }
+				title={ __( 'Filter by stock status', 'woocommerce' ) }
 				initialOpen={ false }
 			>
 				<ProductStockControl

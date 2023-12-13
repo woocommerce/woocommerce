@@ -105,14 +105,9 @@ export const InspectorControls = ( {
 
 	return (
 		<GutenbergInspectorControls key="inspector">
-			<PanelBody
-				title={ __( 'Content', 'woocommerce' ) }
-			>
+			<PanelBody title={ __( 'Content', 'woocommerce' ) }>
 				<ToggleControl
-					label={ __(
-						'Show description',
-						'woocommerce'
-					) }
+					label={ __( 'Show description', 'woocommerce' ) }
 					checked={ showDesc }
 					onChange={ () => setAttributes( { showDesc: ! showDesc } ) }
 				/>
@@ -122,10 +117,7 @@ export const InspectorControls = ( {
 				<>
 					{ focalPointPickerExists && (
 						<PanelBody
-							title={ __(
-								'Media settings',
-								'woocommerce'
-							) }
+							title={ __( 'Media settings', 'woocommerce' ) }
 						>
 							<ToggleControl
 								label={ __(
@@ -174,10 +166,7 @@ export const InspectorControls = ( {
 											</span>
 										</>
 									}
-									label={ __(
-										'Image fit',
-										'woocommerce'
-									) }
+									label={ __( 'Image fit', 'woocommerce' ) }
 									value={ imageFit }
 									onChange={ ( value: ImageFit ) =>
 										setAttributes( {
@@ -186,18 +175,12 @@ export const InspectorControls = ( {
 									}
 								>
 									<ToggleGroupControlOption
-										label={ __(
-											'None',
-											'woocommerce'
-										) }
+										label={ __( 'None', 'woocommerce' ) }
 										value="none"
 									/>
 									<ToggleGroupControlOption
 										/* translators: "Cover" is a verb that indicates an image covering the entire container. */
-										label={ __(
-											'Cover',
-											'woocommerce'
-										) }
+										label={ __( 'Cover', 'woocommerce' ) }
 										value="cover"
 									/>
 								</ToggleGroupControl>
@@ -242,10 +225,7 @@ export const InspectorControls = ( {
 					<PanelColorGradientSettings
 						__experimentalHasMultipleOrigins
 						__experimentalIsRenderedInSidebar
-						title={ __(
-							'Overlay',
-							'woocommerce'
-						) }
+						title={ __( 'Overlay', 'woocommerce' ) }
 						initialOpen={ true }
 						settings={ [
 							{
@@ -259,18 +239,12 @@ export const InspectorControls = ( {
 										overlayGradient: value,
 									} );
 								},
-								label: __(
-									'Color',
-									'woocommerce'
-								),
+								label: __( 'Color', 'woocommerce' ),
 							},
 						] }
 					>
 						<RangeControl
-							label={ __(
-								'Opacity',
-								'woocommerce'
-							) }
+							label={ __( 'Opacity', 'woocommerce' ) }
 							value={ dimRatio }
 							onChange={ ( value ) =>
 								setAttributes( { dimRatio: value as number } )

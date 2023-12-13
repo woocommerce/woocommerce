@@ -12,10 +12,7 @@ import type { BlockErrorProps } from './types';
 const BlockError = ( {
 	imageUrl = `${ WC_BLOCKS_IMAGE_URL }/block-error.svg`,
 	header = __( 'Oops!', 'woocommerce' ),
-	text = __(
-		'There was an error loading the content.',
-		'woocommerce'
-	),
+	text = __( 'There was an error loading the content.', 'woocommerce' ),
 	errorMessage,
 	errorMessagePrefix = __( 'Error:', 'woocommerce' ),
 	button,

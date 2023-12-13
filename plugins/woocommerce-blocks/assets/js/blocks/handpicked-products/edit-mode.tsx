@@ -39,10 +39,7 @@ export const HandpickedProductsEditMode = (
 	return (
 		<Placeholder
 			icon={ <Icon icon={ stack } /> }
-			label={ __(
-				'Hand-picked Products',
-				'woocommerce'
-			) }
+			label={ __( 'Hand-picked Products', 'woocommerce' ) }
 			className="wc-block-products-grid wc-block-handpicked-products"
 		>
 			{ __(

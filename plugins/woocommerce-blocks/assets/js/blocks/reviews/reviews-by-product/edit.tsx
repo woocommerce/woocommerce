@@ -84,20 +84,13 @@ const ReviewsByProductEditor = ( {
 						isCompact={ true }
 					/>
 				</PanelBody>
-				<PanelBody
-					title={ __( 'Content', 'woocommerce' ) }
-				>
+				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
 					{ getSharedReviewContentControls(
 						attributes,
 						setAttributes
 					) }
 				</PanelBody>
-				<PanelBody
-					title={ __(
-						'List Settings',
-						'woocommerce'
-					) }
-				>
+				<PanelBody title={ __( 'List Settings', 'woocommerce' ) }>
 					{ getSharedReviewListControls( attributes, setAttributes ) }
 				</PanelBody>
 			</InspectorControls>
@@ -108,10 +101,7 @@ const ReviewsByProductEditor = ( {
 		const onDone = () => {
 			setAttributes( { editMode: false } );
 			debouncedSpeak(
-				__(
-					'Showing Reviews by Product block preview.',
-					'woocommerce'
-				)
+				__( 'Showing Reviews by Product block preview.', 'woocommerce' )
 			);
 		};
 
@@ -123,10 +113,7 @@ const ReviewsByProductEditor = ( {
 						className="block-editor-block-icon"
 					/>
 				}
-				label={ __(
-					'Reviews by Product',
-					'woocommerce'
-				) }
+				label={ __( 'Reviews by Product', 'woocommerce' ) }
 				className="wc-block-reviews-by-product"
 			>
 				{ __(
@@ -158,10 +145,7 @@ const ReviewsByProductEditor = ( {
 		return renderEditMode();
 	}
 
-	const buttonTitle = __(
-		'Edit selected product',
-		'woocommerce'
-	);
+	const buttonTitle = __( 'Edit selected product', 'woocommerce' );
 
 	return (
 		<>
@@ -175,10 +159,7 @@ const ReviewsByProductEditor = ( {
 						className="block-editor-block-icon"
 					/>
 				}
-				name={ __(
-					'Reviews by Product',
-					'woocommerce'
-				) }
+				name={ __( 'Reviews by Product', 'woocommerce' ) }
 				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>
 		</>
