@@ -15,12 +15,12 @@ const NoProducts = (): JSX.Element => {
 				size={ 100 }
 			/>
 			<strong className={ `${ parentClassName }__no-products-title` }>
-				{ __( 'No products', 'woo-gutenberg-products-block' ) }
+				{ __( 'No products', 'woocommerce' ) }
 			</strong>
 			<p className={ `${ parentClassName }__no-products-description` }>
 				{ __(
 					'There are currently no products available to display.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</p>
 		</div>

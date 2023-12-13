@@ -27,23 +27,17 @@ const getHelpText = ( pagerDisplayMode: PagerDisplayModes ) => {
 		case PagerDisplayModes.DIGITS:
 			return __(
 				'A list of numbers will show to indicate the number of items.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			);
 		case PagerDisplayModes.DOTS:
 			return __(
 				'A series of dots will show to indicate the number of items.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			);
 		case 'off':
-			return __(
-				'No pager will be displayed.',
-				'woo-gutenberg-products-block'
-			);
+			return __( 'No pager will be displayed.', 'woocommerce' );
 		default:
-			return __(
-				'No pager will be displayed.',
-				'woo-gutenberg-products-block'
-			);
+			return __( 'No pager will be displayed.', 'woocommerce' );
 	}
 };
 
@@ -58,7 +52,7 @@ export const ProductGalleryPagerBlockSettings = ( {
 
 	return (
 		<ToggleGroupControl
-			label={ __( 'Pager', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Pager', 'woocommerce' ) }
 			style={ {
 				width: '100%',
 			} }
@@ -72,7 +66,7 @@ export const ProductGalleryPagerBlockSettings = ( {
 		>
 			<ToggleGroupControlOption
 				value={ PagerDisplayModes.OFF }
-				label={ __( 'Off', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Off', 'woocommerce' ) }
 			/>
 			<ToggleGroupControlOption
 				value={ PagerDisplayModes.DOTS }

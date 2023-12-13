@@ -301,11 +301,11 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		}
 
 		if ( null === $nonce ) {
-			return $this->get_route_error_response( 'woocommerce_rest_missing_nonce', __( 'Missing the Nonce header. This endpoint requires a valid nonce.', 'woo-gutenberg-products-block' ), 401 );
+			return $this->get_route_error_response( 'woocommerce_rest_missing_nonce', __( 'Missing the Nonce header. This endpoint requires a valid nonce.', 'woocommerce' ), 401 );
 		}
 
 		if ( ! wp_verify_nonce( $nonce, 'wc_store_api' ) ) {
-			return $this->get_route_error_response( 'woocommerce_rest_invalid_nonce', __( 'Nonce is invalid.', 'woo-gutenberg-products-block' ), 403 );
+			return $this->get_route_error_response( 'woocommerce_rest_invalid_nonce', __( 'Nonce is invalid.', 'woocommerce' ), 403 );
 		}
 
 		return true;

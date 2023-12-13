@@ -30,10 +30,7 @@ const NoShippingPlaceholder = () => {
 				target="_blank"
 				rel="noopener noreferrer"
 			>
-				{ __(
-					'Configure Shipping Options',
-					'woocommerce'
-				) }
+				{ __( 'Configure Shipping Options', 'woocommerce' ) }
 			</Button>
 		</Placeholder>
 	);

@@ -20,7 +20,7 @@ const Edit = (): JSX.Element => {
 			<NoticeBanner status="info" isDismissible={ false }>
 				{ __(
 					'Notices added by WooCommerce or extensions will show up here.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</NoticeBanner>
 		</div>

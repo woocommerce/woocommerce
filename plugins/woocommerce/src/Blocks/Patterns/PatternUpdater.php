@@ -37,7 +37,7 @@ class PatternUpdater {
 	 */
 	public function generate_content( $ai_connection, $token, $images, $business_description ) {
 		if ( empty( $images ) ) {
-			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woocommerce' ) );
 		}
 
 		if ( is_wp_error( $images ) ) {
@@ -54,7 +54,7 @@ class PatternUpdater {
 			if ( is_string( $business_description ) && is_string( $last_business_description ) ) {
 				return true;
 			} else {
-				return new \WP_Error( 'business_description_not_found', __( 'No business description provided for generating AI content.', 'woo-gutenberg-products-block' ) );
+				return new \WP_Error( 'business_description_not_found', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
 			}
 		}
 
@@ -63,7 +63,7 @@ class PatternUpdater {
 		}
 
 		if ( empty( $images ) ) {
-			return new WP_Error( 'no_images_found', __( 'No images found.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'no_images_found', __( 'No images found.', 'woocommerce' ) );
 		}
 
 		// This is required in case something interrupts the execution of the script and the endpoint is called again on retry.
@@ -78,13 +78,13 @@ class PatternUpdater {
 		$patterns = $this->assign_selected_images_to_patterns( $patterns_dictionary, $images );
 
 		if ( is_wp_error( $patterns ) ) {
-			return new WP_Error( 'failed_to_set_pattern_images', __( 'Failed to set the pattern images.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'failed_to_set_pattern_images', __( 'Failed to set the pattern images.', 'woocommerce' ) );
 		}
 
 		$ai_generated_patterns_content = $this->generate_ai_content_for_patterns( $ai_connection, $token, $patterns, $business_description );
 
 		if ( is_wp_error( $ai_generated_patterns_content ) ) {
-			return new WP_Error( 'failed_to_set_pattern_content', __( 'Failed to set the pattern content.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'failed_to_set_pattern_content', __( 'Failed to set the pattern content.', 'woocommerce' ) );
 		}
 
 		$patterns_ai_data_post = PatternsHelper::get_patterns_ai_data_post();
@@ -96,7 +96,7 @@ class PatternUpdater {
 		$updated_content = PatternsHelper::upsert_patterns_ai_data_post( $ai_generated_patterns_content );
 
 		if ( is_wp_error( $updated_content ) ) {
-			return new WP_Error( 'failed_to_update_patterns_content', __( 'Failed to update patterns content.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'failed_to_update_patterns_content', __( 'Failed to update patterns content.', 'woocommerce' ) );
 		}
 
 		return true;
@@ -301,7 +301,7 @@ class PatternUpdater {
 		}
 
 		if ( ! $success ) {
-			return new WP_Error( 'failed_to_fetch_ai_responses', __( 'Failed to fetch AI responses.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'failed_to_fetch_ai_responses', __( 'Failed to fetch AI responses.', 'woocommerce' ) );
 		}
 
 		return $ai_responses;
@@ -421,7 +421,7 @@ class PatternUpdater {
 		$patterns_dictionary = plugin_dir_path( __FILE__ ) . 'dictionary.json';
 
 		if ( ! file_exists( $patterns_dictionary ) ) {
-			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woocommerce' ) );
 		}
 
 		return wp_json_file_decode( $patterns_dictionary, array( 'associative' => true ) );
