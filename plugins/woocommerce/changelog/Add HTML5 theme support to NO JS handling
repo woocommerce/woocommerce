@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+W3C validator shows a warning for using text/javascript on script tags. This adds a theme support check which is inline with Wordpress function _print_scripts in /wp-includes/script-loader.php
