@@ -22,8 +22,8 @@ export type ProductTemplate = {
 	description: string | null;
 	icon: string | null;
 	order: number;
-	layout_template_id: string;
-	product_data: Partial< Product >;
+	layoutTemplateId: string;
+	productData: Partial< Product >;
 };
 
 export type ProductEditorSettings = Partial<

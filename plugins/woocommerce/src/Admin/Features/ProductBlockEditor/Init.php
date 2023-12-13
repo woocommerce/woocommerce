@@ -237,7 +237,7 @@ class Init {
 		} );
 
 		$editor_settings['productTemplates'] = array_map( function ( $product_template ) {
-			return $product_template->get_formatted();
+			return $product_template->to_JSON();
 		}, $product_templates );
 
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );

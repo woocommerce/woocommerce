@@ -12,7 +12,6 @@ import {
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
-	Fragment,
 	createElement,
 	createInterpolateElement,
 	lazy,
@@ -21,7 +20,6 @@ import { __ } from '@wordpress/i18n';
 import { chevronRight, check } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -59,7 +57,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const [ supportedProductTemplates, unsupportedProductTemplates ] =
 		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
 			( [ supported, unsupported ], productTemplate ) => {
-				if ( productTemplate.layout_template_id ) {
+				if ( productTemplate.layoutTemplateId ) {
 					supported.push( productTemplate );
 				} else {
 					unsupported.push( productTemplate );
@@ -93,13 +91,13 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	) {
 		return async function handleMenuItemClick() {
 			try {
-				await validate( productTemplate.product_data );
+				await validate( productTemplate.productData );
 
 				await editEntityRecord(
 					'postType',
 					'product',
 					productId,
-					productTemplate.product_data
+					productTemplate.productData
 				);
 
 				await saveEditedEntityRecord< Product >(

@@ -133,19 +133,19 @@ class ProductTemplate {
 	}
 
 	/**
-	 * Get the formatted pattern.
+	 * Get the product template as JSON like.
 	 * 
-	 * @return array The formatted pattern.
+	 * @return array The JSON.
 	 */
-	function get_formatted() {
+	function to_JSON() {
 		return array(
 			'id' => $this->get_id(),
 			'title' => $this->get_title(),
 			'description' => $this->get_description(),
 			'icon' => $this->get_icon(),
 			'order' => $this->get_order(),
-			'layout_template_id' => $this->get_layout_template_id(),
-			'product_data' => $this->get_product_data(),
+			'layoutTemplateId' => $this->get_layout_template_id(),
+			'productData' => $this->get_product_data(),
 		);
 	}
 }

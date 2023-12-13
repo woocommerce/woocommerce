@@ -110,12 +110,12 @@ export function BlockEditor( {
 	useLayoutEffect( () => {
 		const productTemplates = settings?.productTemplates ?? [];
 		const productTemplate = productTemplates.find(
-			( template ) => template.product_data.type === productType
+			( template ) => template.productData.type === productType
 		);
 
 		const layoutTemplates = settings?.layoutTemplates ?? [];
 
-		let layoutTemplateId = productTemplate?.layout_template_id;
+		let layoutTemplateId = productTemplate?.layoutTemplateId;
 		// Product variations do not have a related product template but
 		// they do have a layout template
 		if ( postType === 'product_variation' ) {
