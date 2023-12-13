@@ -23,14 +23,16 @@ class ProductTemplate {
 	/**
 	 * ProductTemplate constructor
 	 * 
-	 * @param string $id The pattern ID.
-	 * @param string $title The pattern title.
-	 * @param array $product_data The product data.
+	 * @param array $data The data.
 	 */
-	public function __construct( string $id, string $title, array $product_data ) {
-		$this->id = $id;
-		$this->title = $title;
-		$this->product_data = $product_data;
+	public function __construct( array $data ) {
+		$this->id                 = $data['id'];
+		$this->title              = $data['title'];
+		$this->product_data       = $data['product_data'];
+		$this->order              = $data['order'];
+		$this->layout_template_id = $data['layout_template_id'];
+		$this->description        = $data['description'];
+		$this->icon               = $data['icon'];
 	}
 
 	/**
