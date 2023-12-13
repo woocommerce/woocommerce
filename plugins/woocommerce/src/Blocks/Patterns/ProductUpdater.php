@@ -352,6 +352,22 @@ class ProductUpdater {
 	}
 
 	/**
+	 * @param $image_url
+	 *
+	 * @return string
+	 */
+	private function adjust_image_size_for_products( $image_url ) {
+		$parsed_url = parse_url( $image_url );
+
+		parse_str( $parsed_url['query'], $query_params );
+		unset( $query_params['h'], $query_params['w'] );
+		$query_params['h'] = 400;
+		$new_query_string  = http_build_query( $query_params );
+
+		return $parsed_url['scheme'] . '://' . $parsed_url['host'] . $parsed_url['path'] . '?' . $new_query_string;
+	}
+
+	/**
 	 * Assigns the default content for the products.
 	 *
 	 * @param array $dummy_products_to_update The dummy products to update.
@@ -363,7 +379,7 @@ class ProductUpdater {
 		$products_information_list = [];
 		$dummy_products_count      = count( $dummy_products_to_update );
 		for ( $i = 0; $i < $dummy_products_count; $i ++ ) {
-			$image_src = $ai_selected_images[ $i ]['URL'] ?? '';
+			$image_src = $this->adjust_image_size_for_products( $ai_selected_images[ $i ]['URL'] );
 			$image_alt = $ai_selected_images[ $i ]['title'] ?? '';
 
 			$products_information_list[] = [
