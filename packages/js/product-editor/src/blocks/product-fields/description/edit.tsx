@@ -82,6 +82,14 @@ export function DescriptionBlockEdit( {
 			return;
 		}
 
+		/*
+		 * First quick check to avoid parsing process,
+		 * since it's an expensive operation.
+		 */
+		if ( description.indexOf( '<!-- wp:' ) === -1 ) {
+			return;
+		}
+
 		const parsedBlocks = parse( description );
 		// Check whether the parsed blocks become from the summary block:
 		const isSummaryBlock =
