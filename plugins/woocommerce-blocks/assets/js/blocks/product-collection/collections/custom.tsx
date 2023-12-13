@@ -16,7 +16,7 @@ import { CoreCollectionNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.CUSTOM,
-	title: __( 'Custom', 'woo-gutenberg-products-block' ),
+	title: __( 'Custom', 'woocommerce' ),
 	icon: ( <Icon icon={ tool } /> ) as BlockIcon,
 	description:
 		'Build your own collection of products and customize their layout. Optionally, adjust results to match the current template, page, or search term.',

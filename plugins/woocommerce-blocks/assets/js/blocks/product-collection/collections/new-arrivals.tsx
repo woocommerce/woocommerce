@@ -20,12 +20,9 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.NEW_ARRIVALS,
-	title: __( 'New Arrivals', 'woo-gutenberg-products-block' ),
+	title: __( 'New Arrivals', 'woocommerce' ),
 	icon: ( <Icon icon={ calendar } /> ) as BlockIcon,
-	description: __(
-		'Recommend your newest products.',
-		'woo-gutenberg-products-block'
-	),
+	description: __( 'Recommend your newest products.', 'woocommerce' ),
 	keywords: [ 'newest products' ],
 	scope: [],
 	unchangeableFilters: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
@@ -54,7 +51,7 @@ const heading: [ string, BlockAttributes?, InnerBlockTemplate[]? ] = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'New arrivals', 'woo-gutenberg-products-block' ),
+		content: __( 'New arrivals', 'woocommerce' ),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

@@ -16,7 +16,7 @@ import { CoreCollectionNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.PRODUCT_CATALOG,
-	title: __( 'Product Catalog', 'woo-gutenberg-products-block' ),
+	title: __( 'Product Catalog', 'woocommerce' ),
 	icon: ( <Icon icon={ loop } /> ) as BlockIcon,
 	description:
 		'Display all products in your catalog. Results will (change to) match the current template, page, or search term.',

@@ -20,12 +20,9 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.FEATURED,
-	title: __( 'Featured', 'woo-gutenberg-products-block' ),
+	title: __( 'Featured', 'woocommerce' ),
 	icon: ( <Icon icon={ starFilled } /> ) as BlockIcon,
-	description: __(
-		'Showcase your featured products.',
-		'woo-gutenberg-products-block'
-	),
+	description: __( 'Showcase your featured products.', 'woocommerce' ),
 	keywords: [],
 	scope: [],
 	unchangeableFilters: [ CoreFilterNames.INHERIT, CoreFilterNames.FEATURED ],
@@ -53,7 +50,7 @@ const heading: [ string, BlockAttributes?, InnerBlockTemplate[]? ] = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'Featured products', 'woo-gutenberg-products-block' ),
+		content: __( 'Featured products', 'woocommerce' ),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

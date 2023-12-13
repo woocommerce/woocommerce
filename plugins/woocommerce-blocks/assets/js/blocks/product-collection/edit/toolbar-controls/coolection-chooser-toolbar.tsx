@@ -10,7 +10,7 @@ const CollectionChooserToolbar = ( props: {
 	return (
 		<ToolbarGroup>
 			<ToolbarButton onClick={ props.openPatternSelectionModal }>
-				{ __( 'Choose collection', 'woo-gutenberg-products-block' ) }
+				{ __( 'Choose collection', 'woocommerce' ) }
 			</ToolbarButton>
 		</ToolbarGroup>
 	);

@@ -20,11 +20,11 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.TOP_RATED,
-	title: __( 'Top Rated', 'woo-gutenberg-products-block' ),
+	title: __( 'Top Rated', 'woocommerce' ),
 	icon: ( <Icon icon={ starEmpty } /> ) as BlockIcon,
 	description: __(
 		'Recommend products with the highest review ratings.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	keywords: [],
 	scope: [],
@@ -54,7 +54,7 @@ const heading: [ string, BlockAttributes?, InnerBlockTemplate[]? ] = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'Top rated products', 'woo-gutenberg-products-block' ),
+		content: __( 'Top rated products', 'woocommerce' ),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

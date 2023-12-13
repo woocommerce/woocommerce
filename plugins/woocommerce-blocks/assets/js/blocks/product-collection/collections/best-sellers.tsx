@@ -16,12 +16,9 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.BEST_SELLERS,
-	title: __( 'Best Sellers', 'woo-gutenberg-products-block' ),
+	title: __( 'Best Sellers', 'woocommerce' ),
 	icon: ( <Icon icon={ chartBar } /> ) as BlockIcon,
-	description: __(
-		'Recommend your best-selling products.',
-		'woo-gutenberg-products-block'
-	),
+	description: __( 'Recommend your best-selling products.', 'woocommerce' ),
 	keywords: [ 'best selling' ],
 	scope: [],
 	unchangeableFilters: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
@@ -50,7 +47,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'Best selling products', 'woo-gutenberg-products-block' ),
+		content: __( 'Best selling products', 'woocommerce' ),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

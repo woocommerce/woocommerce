@@ -58,10 +58,7 @@ const PatternSelectionModal = ( props: {
 	return (
 		<Modal
 			overlayClassName="wc-blocks-product-collection__modal"
-			title={ __(
-				'Choose a collection',
-				'woo-gutenberg-products-block'
-			) }
+			title={ __( 'Choose a collection', 'woocommerce' ) }
 			onRequestClose={ props.closePatternSelectionModal }
 			// @ts-expect-error Type definitions are missing in the version we are using i.e. 19.1.5,
 			size={ 'large' }
@@ -70,7 +67,7 @@ const PatternSelectionModal = ( props: {
 				<p className="wc-blocks-product-collection__subtitle">
 					{ __(
 						"Pick what products are shown. Don't worry, you can switch and tweak this collection any time.",
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				</p>
 				<CollectionChooser
@@ -82,10 +79,10 @@ const PatternSelectionModal = ( props: {
 						variant="tertiary"
 						onClick={ props.closePatternSelectionModal }
 					>
-						{ __( 'Cancel', 'woo-gutenberg-products-block' ) }
+						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 					<Button variant="primary" onClick={ applyCollection }>
-						{ __( 'Continue', 'woo-gutenberg-products-block' ) }
+						{ __( 'Continue', 'woocommerce' ) }
 					</Button>
 				</div>
 			</div>

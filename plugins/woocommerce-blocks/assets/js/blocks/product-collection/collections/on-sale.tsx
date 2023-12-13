@@ -20,11 +20,11 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.ON_SALE,
-	title: __( 'On Sale', 'woo-gutenberg-products-block' ),
+	title: __( 'On Sale', 'woocommerce' ),
 	icon: ( <Icon icon={ percent } /> ) as BlockIcon,
 	description: __(
 		'Highlight products that are currently on sale.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	keywords: [],
 	scope: [],
@@ -53,7 +53,7 @@ const heading: [ string, BlockAttributes?, InnerBlockTemplate[]? ] = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'On sale products', 'woo-gutenberg-products-block' ),
+		content: __( 'On sale products', 'woocommerce' ),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];
