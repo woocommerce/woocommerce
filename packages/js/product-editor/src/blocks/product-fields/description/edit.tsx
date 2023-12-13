@@ -30,10 +30,6 @@ import type { DescriptionBlockEditComponent } from './types';
 import FullEditorToolbarButton from './components/full-editor-toolbar-button';
 
 /**
- * Internal dependencies
- */
-
-/**
  * By default the blocks variable always contains one paragraph
  * block with empty content, that causes the description to never
  * be empty. This function removes the default block to keep
