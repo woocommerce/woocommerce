@@ -117,7 +117,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$address         = array_merge( array_fill_keys( array_keys( $this->get_properties() ), '' ), (array) $address );
 		$address         = array_reduce(
 			array_keys( $address ),
-			function( $carry, $key ) use ( $address, $validation_util ) {
+			function( $carry, $key ) use ( $address, $validation_util, $request ) {
 				switch ( $key ) {
 					case 'country':
 						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
@@ -129,7 +129,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
 						break;
 					default:
-						$carry[ $key ] = sanitize_text_field( wp_unslash( $address[ $key ] ) );
+						$carry[ $key ] = rest_sanitize_request_arg( wp_unslash( $address[ $key ] ), $request, $key );
 						break;
 				}
 				return $carry;
