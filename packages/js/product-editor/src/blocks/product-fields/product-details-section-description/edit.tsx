@@ -9,15 +9,10 @@ import {
 	MenuGroup,
 	MenuItem,
 } from '@wordpress/components';
-import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
-import {
-	createElement,
-	createInterpolateElement,
-	lazy,
-} from '@wordpress/element';
+import { createElement, createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { chevronRight, check } from '@wordpress/icons';
+import * as icons from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -43,16 +38,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	clientId,
 }: ProductEditorBlockEditProps< ProductDetailsSectionDescriptionBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const [ productType ] = useEntityProp( 'postType', 'product', 'type' );
 
 	const { productTemplates, productTemplate: selectedProductTemplate } =
-		useSelect(
-			( select ) => {
-				const { getEditorSettings } = select( 'core/editor' );
-				return getEditorSettings() as ProductEditorSettings;
-			},
-			[ productType ]
-		);
+		useSelect( ( select ) => {
+			const { getEditorSettings } = select( 'core/editor' );
+			return getEditorSettings() as ProductEditorSettings;
+		} );
 
 	const [ supportedProductTemplates, unsupportedProductTemplates ] =
 		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
@@ -121,19 +112,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		};
 	}
 
-	function resolveIcon( productTemplate: ProductTemplate ) {
-		const iconName = productTemplate.icon;
-		if ( ! iconName ) return undefined;
+	function resolveIcon( iconName?: string | null ) {
+		if ( ! iconName || ! ( iconName in icons ) ) return undefined;
 
-		const Icon = lazy( () =>
-			import( '@wordpress/icons' ).then(
-				( { Icon, [ iconName as never ]: icon } ) => ( {
-					default: () => <Icon icon={ icon } size={ 24 } />,
-				} )
-			)
-		);
+		const { Icon, [ iconName as never ]: icon } = icons;
 
-		return <Icon />;
+		return <Icon icon={ icon } size={ 24 } />;
 	}
 
 	function getMenuItem( onClose: () => void ) {
@@ -145,7 +129,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					key={ productTemplate.id }
 					info={ productTemplate.description ?? undefined }
 					isSelected={ isSelected }
-					icon={ isSelected ? check : resolveIcon( productTemplate ) }
+					icon={
+						isSelected
+							? resolveIcon( 'check' )
+							: resolveIcon( productTemplate.icon )
+					}
 					iconPosition="left"
 					role="menuitemradio"
 					onClick={ menuItemClickHandler( productTemplate, onClose ) }
@@ -178,6 +166,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 				<Dropdown
 					focusOnMount={ false }
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore Property does exists
 					popoverProps={ {
 						placement: 'bottom-start',
@@ -205,6 +194,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 								<MenuGroup>
 									<Dropdown
 										focusOnMount={ false }
+										// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 										// @ts-ignore Property does exists
 										popoverProps={ {
 											placement: 'right-start',
@@ -215,7 +205,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 										} ) => (
 											<MenuItem
 												aria-expanded={ isOpen }
-												icon={ chevronRight }
+												icon={ resolveIcon(
+													'chevronRight'
+												) }
 												iconPosition="right"
 												onClick={ onToggle }
 											>
