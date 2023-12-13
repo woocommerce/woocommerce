@@ -93,7 +93,7 @@ class Pexels {
 			return new \WP_Error( 'woocommerce_no_images_found', __( 'No images found.', 'woo-gutenberg-products-block' ) );
 		}
 
-		return $refined_images;
+		return array( 'images' => $refined_images, 'search_term' => $search_term );
 	}
 
 	/**
@@ -141,7 +141,7 @@ class Pexels {
 			}
 		}
 
-		$prompt = sprintf( 'Compare the following business description: "%s" with the image titles listed in the JSON below: if the image is not aligned with what the business is selling, delete the description from the list. Do not include any explanations or introductions to the response. The JSON is: %s', $business_description, wp_json_encode( $image_titles ) );
+		$prompt = sprintf( 'Given that you own a store described as "%s", remove from the following JSON all titles that do not represent products that could be sold on your store: %s', $business_description, wp_json_encode( $image_titles ) );
 
 		$response = $ai_connection->fetch_ai_response( $token, $prompt, 30 );
 

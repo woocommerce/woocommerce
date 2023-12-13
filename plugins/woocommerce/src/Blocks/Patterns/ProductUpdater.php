@@ -70,6 +70,10 @@ class ProductUpdater {
 			return $token;
 		}
 
+		if ( ! isset( $images['images'] ) || ! isset( $images['search_term'] ) ) {
+			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woo-gutenberg-products-block' ) );
+		}
+
 		if ( empty( $business_description ) ) {
 			return new \WP_Error( 'missing_business_description', __( 'No business description provided for generating AI content.', 'woo-gutenberg-products-block' ) );
 		}
@@ -98,9 +102,9 @@ class ProductUpdater {
 			);
 		}
 
-		$products_information_list = $this->assign_ai_selected_images_to_dummy_products( $dummy_products_to_update, $images );
+		$products_information_list = $this->assign_ai_selected_images_to_dummy_products( $dummy_products_to_update, $images['images'] );
 
-		return $this->assign_ai_generated_content_to_dummy_products( $ai_connection, $token, $products_information_list, $business_description );
+		return $this->assign_ai_generated_content_to_dummy_products( $ai_connection, $token, $products_information_list, $business_description, $images['search_term'] );
 	}
 
 	/**
@@ -380,7 +384,7 @@ class ProductUpdater {
 	 *
 	 * @return array|int|string|\WP_Error
 	 */
-	public function assign_ai_generated_content_to_dummy_products( $ai_connection, $token, $products_information_list, $business_description ) {
+	public function assign_ai_generated_content_to_dummy_products( $ai_connection, $token, $products_information_list, $business_description, $search_term ) {
 		if ( empty( $business_description ) ) {
 			return new \WP_Error( 'missing_store_description', __( 'The store description is required to generate content for your site.', 'woo-gutenberg-products-block' ) );
 		}
@@ -388,9 +392,9 @@ class ProductUpdater {
 		$prompts = [];
 		foreach ( $products_information_list as $product_information ) {
 			if ( ! empty( $product_information['image']['alt'] ) ) {
-				$prompts[] = sprintf( 'Generate a product name for a product that could be sold in a store and could be associated with the following image description: "%s" and also is related to the following business description: "%s". Do not include any adjectives or descriptions of the qualities of the product and always refer to objects or services, not humans. The returned result should not refer to people, only objects.', $product_information['image']['alt'], $business_description );
+				$prompts[] = sprintf( 'Considering that you are the owner of a store with the following description "%s", create the title for a product that is related to "%s" and to an image described as "%s". Do not include any adjectives or descriptions of the qualities of the product and always refer to objects or services, not humans.', $business_description, $search_term, $product_information['image']['alt'] );
 			} else {
-				$prompts[] = sprintf( 'Generate a product name for a product that could be sold in a store and matches the following business description: "%s". Do not include any adjectives or descriptions of the qualities of the product and always refer to objects or services, not humans.', $business_description );
+				$prompts[] = sprintf( 'You are the owner of a business described as: "%s". Create the title for a product that could be sold on your store. Do not include any adjectives or descriptions of the qualities of the product and always refer to objects or services, not humans.', $business_description );
 			}
 		}
 
