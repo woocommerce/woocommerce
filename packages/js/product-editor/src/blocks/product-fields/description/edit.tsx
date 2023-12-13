@@ -39,6 +39,9 @@ import FullEditorToolbarButton from './components/full-editor-toolbar-button';
  * be empty. This function removes the default block to keep
  * the description empty.
  *
+ * todo: this is not optimal. We cannot rely on the content attribute to
+ * determine whether the description is empty or not
+ *
  * @param blocks The block list
  * @return Empty array if there is only one block with empty content
  * in the list. The same block list otherwise.
