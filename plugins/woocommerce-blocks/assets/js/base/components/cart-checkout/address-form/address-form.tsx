@@ -165,6 +165,9 @@ const AddressForm = ( {
 				}
 
 				if ( field.type === 'select' ) {
+					if ( typeof field.options === 'undefined' ) {
+						return null;
+					}
 					return (
 						<Combobox
 							key={ field.key }
