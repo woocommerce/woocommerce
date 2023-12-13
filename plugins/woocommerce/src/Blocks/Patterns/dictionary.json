@@ -150,21 +150,21 @@
 				},
 				{
 					"default": "New: Retro Glass Jug",
-					"ai_prompt": "Write a very short title for advertising the store"
+					"ai_prompt": "Write a title with less than 20 characters for advertising the store"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "Elevate your table with a 330ml Retro Glass Jug, blending classic design and durable hardened glass.",
-					"ai_prompt": "Write a text with at least 150 characters, to describe a product the business is selling"
+					"ai_prompt": "Write a text with approximately 130 characters, to describe a product the business is selling"
 				},
 				{
 					"default": "Crafted from resilient thick glass, this jug ensures lasting quality, making it perfect for everyday use with a touch of vintage charm.",
-					"ai_prompt": "Write a text with a minimum of 150 characters, to describe a product the business is selling"
+					"ai_prompt": "Write a text with approximately 130 characters, to describe a product the business is selling"
 				},
 				{
 					"default": "The Retro Glass Jug's classic silhouette effortlessly complements any setting, making it the ideal choice for serving beverages with style and flair.",
-					"ai_prompt": "Write a long text, with at least 150 characters, to describe a product the business is selling"
+					"ai_prompt": "Write a long text, with at least 130 characters, to describe a product the business is selling"
 				}
 			]
 		}
