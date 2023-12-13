@@ -3,11 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { Modal, Button } from '@wordpress/components';
 import {
 	// @ts-expect-error Type definitions for this function are missing in Guteberg
-	store as blocksStore,
 	createBlock,
 	// @ts-expect-error Type definitions for this function are missing in Guteberg
 	createBlocksFromInnerBlocksTemplate,
@@ -21,7 +20,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import CollectionChooser from './collection-chooser';
-import type { CollectionName, ProductCollectionAttributes } from '../types';
+import type { ProductCollectionAttributes } from '../types';
 import blockJson from '../block.json';
 import { getCollectionByName } from '../collections';
 

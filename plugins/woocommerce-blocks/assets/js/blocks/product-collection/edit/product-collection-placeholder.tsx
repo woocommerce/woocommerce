@@ -7,10 +7,8 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 import { Placeholder, Button } from '@wordpress/components';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import {
-	// @ts-expect-error Type definitions for this function are missing in Guteberg
-	store as blocksStore,
 	createBlock,
 	// @ts-expect-error Type definitions for this function are missing in Guteberg
 	createBlocksFromInnerBlocksTemplate,
@@ -21,48 +19,9 @@ import {
  */
 import CollectionChooser from './collection-chooser';
 import type { ProductCollectionEditComponentProps } from '../types';
-import { getDefaultProductCollection } from '../constants';
 import Icon from '../icon';
 import blockJson from '../block.json';
 import { getCollectionByName } from '../collections';
-
-type CollectionButtonProps = {
-	active?: boolean;
-	title: string;
-	icon: string;
-	description: string;
-	onClick: () => void;
-};
-
-const CollectionButton = ( {
-	active = false,
-	title,
-	icon,
-	description,
-	onClick,
-}: CollectionButtonProps ) => {
-	const variant = active ? 'primary' : 'secondary';
-
-	return (
-		<Button
-			className="wc-blocks-product-collection__collection-button"
-			variant={ variant }
-			onClick={ onClick }
-		>
-			<div className="wc-blocks-product-collection__collection-button-icon">
-				{ icon }
-			</div>
-			<div className="wc-blocks-product-collection__collection-button-text">
-				<p className="wc-blocks-product-collection__collection-button-title">
-					{ title }
-				</p>
-				<p className="wc-blocks-product-collection__collection-button-description">
-					{ description }
-				</p>
-			</div>
-		</Button>
-	);
-};
 
 const ProductCollectionPlaceholder = (
 	props: ProductCollectionEditComponentProps
