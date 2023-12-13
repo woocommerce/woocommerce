@@ -2,13 +2,11 @@ name: Run Blocks E2E Tests
 
 on:
     pull_request:
-        paths-ignore:
-            - '**/changelog/**'
-            - '**/woo-ai/**'
-            - '**/woocommerce-admin/**'
-            - '**/woocommerce-beta-tester/**'
-            - '**/woocommerce-docs/**'
-            - '**/woocommerce/**'
+        paths:
+            - 'plugins/woocommerce-blocks/**'
+            - 'plugins/woocommerce/src/Blocks/**'
+            - 'plugins/woocommerce/templates/**'
+            - 'plugins/woocommerce/patterns/**'
 
 jobs:
     JSE2EWithGutenberg:
@@ -19,55 +17,21 @@ jobs:
                 part: [1, 2, 3, 4, 5]
         name: JavaScript E2E Tests (WP latest with Gutenberg plugin)
         runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: plugins/woocommerce-blocks
         steps:
             - uses: actions/checkout@v3
 
-            - name: Cache node_modules
-              id: cache-node-modules
-              uses: actions/cache@v3
-              env:
-                  cache-name: cache-node-modules
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  path: node_modules
-                  key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
-            - name: Setup node version and npm cache
-              uses: actions/setup-node@v4
-              with:
-                  node-version-file: '.nvmrc'
-                  cache: 'npm'
+            - name: Install Jest
+              run: pnpm install -g jest
 
-            - name: Install Node Dependencies
-              if: steps.cache-node-modules.outputs.cache-hit != 'true'
-              run: npm ci --no-optional
-
-            - name: Build Assets
-              run: FORCE_REDUCED_MOTION=true npm run build
-
-            - name: blocks.ini setup
-              run: |
-                  echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
-            - name: Get Composer Cache Directory
-              id: composer-cache
-              run: |
-                  echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-            - uses: actions/cache@v3
-              with:
-                  path: ${{ steps.composer-cache.outputs.dir }}
-                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-composer-
-            - name: Set up PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '8.0'
-                  coverage: none
-                  tools: composer
-
-            - name: Composer install
-              run: |
-                  composer install
             - name: E2E Tests (WP latest with Gutenberg plugin)
               env:
                   WOOCOMMERCE_BLOCKS_PHASE: 3
@@ -99,59 +63,20 @@ jobs:
             matrix:
                 part: [1, 2, 3, 4, 5]
         runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: plugins/woocommerce-blocks
         steps:
             - uses: actions/checkout@v3
 
-            - name: Cache node_modules
-              id: cache-node-modules
-              uses: actions/cache@v3
-              env:
-                  cache-name: cache-node-modules
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  path: node_modules
-                  key: ${{ runner.os }}-modified-build-${{ hashFiles('**/package-lock.json') }}
-                  restore-keys: |
-                      ${{ runner.os }}-modified-build-${{ env.cache-name }}-
-                      ${{ runner.os }}-modified-build-
-                      ${{ runner.os }}-modified-
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
-            - name: Setup node version and npm cache
-              uses: actions/setup-node@v4
-              with:
-                  node-version-file: '.nvmrc'
-                  cache: 'npm'
-
-            - name: Install Node dependencies
-              if: steps.cache-node-modules.outputs.cache-hit != 'true'
-              run: npm install --no-optional --no-audit
-
-            - name: Build Assets
-              run: FORCE_REDUCED_MOTION=true npm run build
-
-            - name: blocks.ini setup
-              run: |
-                  echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
-            - name: Get Composer Cache Directory
-              id: composer-cache
-              run: |
-                  echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-            - uses: actions/cache@v3
-              with:
-                  path: ${{ steps.composer-cache.outputs.dir }}
-                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-composer-
-
-            - name: Set up PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '8.0'
-                  coverage: none
-                  tools: composer
-
-            - name: Composer install
-              run: |
-                  composer install
+            - name: Install Jest
+              run: pnpm install -g jest
 
             - name: E2E Tests (WP latest)
               env:
