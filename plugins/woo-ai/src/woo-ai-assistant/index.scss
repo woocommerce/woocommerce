@@ -19,11 +19,6 @@ $toned-down-grey: mix(white, #333, 20%); // A lighter grey
 		padding: 10px;
 		background-color: white;
 
-		.woo-ai-assistant-retry {
-			display: flex;
-			justify-content: end;
-		}
-
 		.woo-ai-assistant-actions-button {
 			font-size: 18px;
 			color: $toned-down-grey;
