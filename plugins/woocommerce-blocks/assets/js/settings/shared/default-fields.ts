@@ -20,7 +20,7 @@ export interface AddressField {
 	// Fields will be sorted and render in this order, lowest to highest.
 	index: number;
 	// The type of input to render. Defaults to text.
-	type?: 'text' | 'select';
+	type?: string;
 	// The options if this is a select field
 	options?: ComboboxControlOption[];
 }
