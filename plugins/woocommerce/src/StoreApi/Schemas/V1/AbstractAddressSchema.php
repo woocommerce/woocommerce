@@ -223,12 +223,27 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 
 		$schema = [];
 		foreach ( $address_fields as $key => $field ) {
-			$schema[ $key ] = [
+			$field_schema = [
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			];
+
+			if ( ! empty( $field['type'] ) && 'select' === $field['type'] ) {
+				$field_schema['type'] = 'string';
+				$field_schema['enum'] = array_map(
+					function( $option ) {
+						return $option['value'];
+					},
+					$field['options']
+				);
+				$field_schema['items'] = array(
+					'type' => 'string',
+				);
+			}
+
+			$schema[ $key ] = $field_schema;
 		}
 		return $schema;
 	}
