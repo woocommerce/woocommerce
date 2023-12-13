@@ -38,7 +38,6 @@ import FullEditorToolbarButton from './components/full-editor-toolbar-button';
 export function getContentFromFreeform(
 	blocks: BlockInstance[]
 ): false | string {
-	// Check whether the parsed blocks become from the summary block:
 	const isCoreFreeformBlock =
 		blocks.length === 1 && blocks[ 0 ].name === 'core/freeform';
 
