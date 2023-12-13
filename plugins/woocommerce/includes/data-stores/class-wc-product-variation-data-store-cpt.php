@@ -292,7 +292,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$attributes = (array) $product->get_attributes();
 
 		// Do not include attributes if the product has 3+ attributes.
-		$should_include_attributes = count( $attributes ) < 3;
+		$should_include_attributes = apply_filters(
+			'woocommerce_product_variation_title_should_include_attributes', 
+			count( $attributes ) < 3,
+			$attributes
+		);
 
 		// Do not include attributes if an attribute name has 2+ words and the
 		// product has multiple attributes.
