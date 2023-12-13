@@ -510,11 +510,13 @@
 					// `<table class="form-table" />` elements added by the Settings API need to be removed. 
 					// Modern browsers won't interpret other table elements like `td` not in a `table`, so 
 					// Removing the `table` is sufficient.
-					const htmlContent = $( html );
-					const tables = htmlContent.find( 'table.form-table' );
+					const originalTable = $( html );
+					const htmlContent = $( '<div class="wc-shipping-zone-method-fields" />' );
+					htmlContent.html( originalTable.html() );
 
-					tables.each( ( i ) => {
-						const table = $( tables[ i ] );
+					const innerTables = htmlContent.find( 'table.form-table' );
+					innerTables.each( ( i ) => {
+						const table = $( innerTables[ i ] );
 						const div = $( '<div class="wc-shipping-zone-method-fields" />' );
 						div.html( table.html() );
 						table.replaceWith( div );
