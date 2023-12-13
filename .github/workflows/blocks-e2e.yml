@@ -2,11 +2,11 @@ name: Run Blocks E2E Tests
 
 on:
     pull_request:
-#        paths:
-#            - 'plugins/woocommerce-blocks/**'
-#            - 'plugins/woocommerce/src/Blocks/**'
-#            - 'plugins/woocommerce/templates/**'
-#            - 'plugins/woocommerce/patterns/**'
+        paths:
+            - 'plugins/woocommerce-blocks/**'
+            - 'plugins/woocommerce/src/Blocks/**'
+            - 'plugins/woocommerce/templates/**'
+            - 'plugins/woocommerce/patterns/**'
 
 jobs:
     JSE2EWithGutenberg:
