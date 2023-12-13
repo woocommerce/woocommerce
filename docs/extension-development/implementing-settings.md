@@ -2,19 +2,19 @@
 post_title: Implementing settings for extensions
 ---
 
-If you’re customizing WooCommerce or adding your own functionality to it you’ll probably need a settings page of some sort. One of the easiest ways to create a settings page is by taking advantage of the [`WC_Integration` class](https://woocommerce.github.io/code-reference/classes/WC-Integration.html 'WC_Integration Class'). Using the Integration class will automatically create a new settings page under **WooCommerce > Settings > Integrations** and it will automatically save, and sanitize your data for you. We’ve created this tutorial so you can see how to create a new integration.
+If you're customizing WooCommerce or adding your own functionality to it you'll probably need a settings page of some sort. One of the easiest ways to create a settings page is by taking advantage of the [`WC_Integration` class](https://woocommerce.github.io/code-reference/classes/WC-Integration.html 'WC_Integration Class'). Using the Integration class will automatically create a new settings page under **WooCommerce > Settings > Integrations** and it will automatically save, and sanitize your data for you. We've created this tutorial so you can see how to create a new integration.
 
 ## Setting up the Integration
 
-You’ll need at least two files to create an integration so you’ll need to create a directory.
+You'll need at least two files to create an integration so you'll need to create a directory.
 
 ### Creating the Main Plugin File
 
-Create your main plugin file to [hook](https://developer.wordpress.org/reference/functions/add_action/ 'WordPress add_action()') into the `plugins_loaded` hook and check if the `WC_Integration` [class exists](https://www.php.net/manual/en/language.oop5.basic.php#language.oop5.basic.extends 'PHP Class Exists'). If it doesn’t then the user most likely doesn’t have WooCommerce activated. After you do that you need to register the integration. Load the integration file (we’ll get to this file in a minute). Use the `woocommerce_integrations` filter to add a new integration to the [array](http://php.net/manual/en/language.types.array.php 'PHP Array').
+Create your main plugin file to [hook](https://developer.wordpress.org/reference/functions/add_action/ 'WordPress add_action()') into the `plugins_loaded` hook and check if the `WC_Integration` [class exists](https://www.php.net/manual/en/language.oop5.basic.php#language.oop5.basic.extends 'PHP Class Exists'). If it doesn't then the user most likely doesn't have WooCommerce activated. After you do that you need to register the integration. Load the integration file (we'll get to this file in a minute). Use the `woocommerce_integrations` filter to add a new integration to the [array](http://php.net/manual/en/language.types.array.php 'PHP Array').
 
 ### Creating the Integration Class
 
-Now that we have the framework setup let’s actually implement this Integration class. There already is a `WC_Integration` class so we want to make a [child class](http://php.net/manual/en/keyword.extends.php 'PHP Child Class'). This way it inherits all of the existing methods and data. You’ll need to set an id, a description, and a title for your integration. These will show up on the integration page. You’ll also need to load the settings by calling: `$this->init_form_fields();` & `$this->init_settings();` You’ll also need to save your options by calling the `woocommerce_update_options_integration_{your method id}` hook. Lastly you have to input some settings to save! We’ve included two dummy fields below but we’ll go more into fields in the next section.
+Now that we have the framework setup let's actually implement this Integration class. There already is a `WC_Integration` class so we want to make a [child class](http://php.net/manual/en/keyword.extends.php 'PHP Child Class'). This way it inherits all of the existing methods and data. You'll need to set an id, a description, and a title for your integration. These will show up on the integration page. You'll also need to load the settings by calling: `$this->init_form_fields();` & `$this->init_settings();` You'll also need to save your options by calling the `woocommerce_update_options_integration_{your method id}` hook. Lastly you have to input some settings to save! We've included two dummy fields below but we'll go more into fields in the next section.
 
 > Added to a file named `class-wc-integration-demo-integration.php`
 
@@ -150,7 +150,7 @@ $WC_Integration_Demo = new WC_Integration_Demo( __FILE__ );
 
 ## Creating Settings
 
-If you took a look through the last section you’ll see that we added two dummy settings using the `init_form_fields()` method.
+If you took a look through the last section you'll see that we added two dummy settings using the `init_form_fields()` method.
 
 ### Types of Settings
 
@@ -165,7 +165,7 @@ WooCommerce includes support for 8 types of settings.
 -   select
 -   multiselect
 
-And these settings have attributes which you can use. These affect the way the setting looks and behaves on the settings page. It doesn’t affect the setting itself. The attributes will manifest slightly differently depending on the setting type. A placeholder for example doesn’t work with checkboxes. To see exactly how they work you should look through the [source code](https://github.com/woocommerce/woocommerce/blob/master/includes/abstracts/abstract-wc-settings-api.php#L180 'WC Settings API on GitHub'). Ex.
+And these settings have attributes which you can use. These affect the way the setting looks and behaves on the settings page. It doesn't affect the setting itself. The attributes will manifest slightly differently depending on the setting type. A placeholder for example doesn't work with checkboxes. To see exactly how they work you should look through the [source code](https://github.com/woocommerce/woocommerce/blob/master/includes/abstracts/abstract-wc-settings-api.php#L180 'WC Settings API on GitHub'). Ex.
 
 -   title
 -   class
@@ -177,7 +177,7 @@ And these settings have attributes which you can use. These affect the way the s
 
 ### Creating Your Own Settings
 
-The built-in settings are great but you may need extra controls to create your settings page. That’s why we included some methods to do this for you. First, define a setting by adding it to the `$this->form_fields` array, entering the kind of form control you want under `type`. You can override the default HTML for your form inputs by creating a method with a name of the format `generate_{ type }_html` which outputs HTML markup. To specify how buttons are rendered, you’d add a method called `generate_button_html`. For textareas, you’d add a `generate_textarea_html` method, and so on. (Check out the `generate_settings_html` method of the `WC_Settings_API` class in the WooCommerce source code to see how WooCommerce uses this.) The below example creates a button that goes to Woo.com.
+The built-in settings are great but you may need extra controls to create your settings page. That's why we included some methods to do this for you. First, define a setting by adding it to the `$this->form_fields` array, entering the kind of form control you want under `type`. You can override the default HTML for your form inputs by creating a method with a name of the format `generate_{ type }_html` which outputs HTML markup. To specify how buttons are rendered, you'd add a method called `generate_button_html`. For textareas, you'd add a `generate_textarea_html` method, and so on. (Check out the `generate_settings_html` method of the `WC_Settings_API` class in the WooCommerce source code to see how WooCommerce uses this.) The below example creates a button that goes to Woo.com.
 
 ```php
 /**
@@ -245,11 +245,11 @@ public function generate_button_html( $key, $data ) {
 
 ## Validating & Sanitizing Data
 
-To create the best user experience you’ll most likely want to validate and sanitize your data. The integration class already performs basic sanitization so that there’s no malicious code present but you could further sanitize by removing unused data. An example of sanitizing data would be integrating with a 3rd party service where all API keys are upper case. You could convert the API key to upper case which will make it a bit more clear for the user.
+To create the best user experience you'll most likely want to validate and sanitize your data. The integration class already performs basic sanitization so that there's no malicious code present but you could further sanitize by removing unused data. An example of sanitizing data would be integrating with a 3rd party service where all API keys are upper case. You could convert the API key to upper case which will make it a bit more clear for the user.
 
 ### Sanitize
 
-We'll demonstrate how to sanitize data first because it’s a bit easier to understand. But the one thing you should keep in mind is that sanitizing happens _after_ validation. So if something isn’t validated it won’t get to the sanitization step.
+We'll demonstrate how to sanitize data first because it's a bit easier to understand. But the one thing you should keep in mind is that sanitizing happens _after_ validation. So if something isn't validated it won't get to the sanitization step.
 
 ```php
 /**
@@ -279,7 +279,7 @@ public function sanitize_settings( $settings ) {
 
 ### Validation
 
-Validation isn’t always necessary but it’s nice to do. If your API keys are always 10 characters long and someone enters one that’s not 10 then you can print out an error message and prevent the user a lot of headache when they assumed they put it in correctly. First set up a `validate_{setting key}_field` method for each field you want to validate. For example, with the `api_key` field you need a `validate_api_key_field()` method.
+Validation isn't always necessary but it's nice to do. If your API keys are always 10 characters long and someone enters one that's not 10 then you can print out an error message and prevent the user a lot of headache when they assumed they put it in correctly. First set up a `validate_{setting key}_field` method for each field you want to validate. For example, with the `api_key` field you need a `validate_api_key_field()` method.
 
 ```php
 public function validate_api_key_field( $key, $value ) {
@@ -293,4 +293,4 @@ public function validate_api_key_field( $key, $value ) {
 
 ## A complete example
 
-If you’ve been following along you should have a complete integration example. If you have any problems see our [full integration demo](https://github.com/woogists/woocommerce-integration-demo 'Integration Demo').
+If you've been following along you should have a complete integration example. If you have any problems see our [full integration demo](https://github.com/woogists/woocommerce-integration-demo 'Integration Demo').

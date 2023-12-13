@@ -34,6 +34,6 @@ Now use your attribute in  **Appearance > Menus**. You will notice, however, tha
 You need to theme your attribute to make it display products as you want. To do this:
 
 1.  Copy `woocommerce/templates/taxonomy-product_cat.php` into your theme folder
-2.  Rename the template to reflect your attribute – in our example we’d use `taxonomy-pa_size.php`
+2.  Rename the template to reflect your attribute – in our example we'd use `taxonomy-pa_size.php`
 
 You should now see this template when viewing taxonomy terms for your custom attribute.

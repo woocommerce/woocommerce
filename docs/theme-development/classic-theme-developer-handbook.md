@@ -20,7 +20,7 @@ If you want more control over the layout of WooCommerce elements or full reviews
 
 ## Theme Integration
 
-There are three possible ways to integrate WooCommerce with a theme. If you are using WooCommerce 3.2 or below (**strongly discouraged**) you will need to use one of these methods to ensure WooCommerce shop and product pages are rendered correctly in your theme. If you are using a version of WooCommerce 3.3 or above you only need to do a theme integration if the automatic one doesn’t meet your needs.
+There are three possible ways to integrate WooCommerce with a theme. If you are using WooCommerce 3.2 or below (**strongly discouraged**) you will need to use one of these methods to ensure WooCommerce shop and product pages are rendered correctly in your theme. If you are using a version of WooCommerce 3.3 or above you only need to do a theme integration if the automatic one doesn't meet your needs.
 
 ### Using `woocommerce_content()`
 
@@ -28,7 +28,7 @@ This solution allows you to create a new template page within your theme that is
 
 To set up this template page:
 
-1. **Duplicate page.php:** Duplicate your theme’s `page.php` file, and name it `woocommerce.php`. This path to the file should follow this pattern: `wp-content/themes/YOURTHEME/woocommerce.php`.
+1. **Duplicate page.php:** Duplicate your theme's `page.php` file, and name it `woocommerce.php`. This path to the file should follow this pattern: `wp-content/themes/YOURTHEME/woocommerce.php`.
 2. **Edit your page (woocommerce.php)**: Open up your newly created `woocommerce.php` in a text editor.
 3. **Replace the loop:** Next you need to find the loop (see [The_Loop](https://codex.wordpress.org/The_Loop)). The loop usually starts with code like this:
 
@@ -48,15 +48,15 @@ This varies between themes. Once you have found it, **delete it**. In its place,
 <?php woocommerce_content(); ?>
 ```
 
-This will make it use **WooCommerce’s loop instead**. Save the file. You’re done.
+This will make it use **WooCommerce's loop instead**. Save the file. You're done.
 
-**Note:** When creating `woocommerce.php` in your theme’s folder, you will not be able to override the `woocommerce/archive-product.php` custom template as `woocommerce.php` has priority over `archive-product.php`. This is intended to prevent display issues.
+**Note:** When creating `woocommerce.php` in your theme's folder, you will not be able to override the `woocommerce/archive-product.php` custom template as `woocommerce.php` has priority over `archive-product.php`. This is intended to prevent display issues.
 
 ### Using hooks
 
-The hook method is more involved, but it is also more flexible. This is similar to the method we use when creating themes. It’s also the method we use to integrate nicely with WordPress default themes.
+The hook method is more involved, but it is also more flexible. This is similar to the method we use when creating themes. It's also the method we use to integrate nicely with WordPress default themes.
 
-Insert a few lines in your theme’s `functions.php` file.
+Insert a few lines in your theme's `functions.php` file.
 
 First unhook the WooCommerce wrappers:
 
@@ -80,7 +80,7 @@ function my_theme_wrapper_end() {
 }
 ```
 
-Make sure that the markup matches that of your theme. If you’re unsure of which classes or IDs to use, take a look at your theme’s `page.php` for guidance.
+Make sure that the markup matches that of your theme. If you're unsure of which classes or IDs to use, take a look at your theme's `page.php` for guidance.
 
 **Whenever possible use the hooks to add or remove content. This method is more robust than overriding the templates.** If you have overridden a template, you have to update the template any time the file changes. If you are using the hooks, you will only have to update if the hooks change, which happens much less frequently.
 
@@ -92,7 +92,7 @@ For information about overriding the WooCommerce templates with your own custom 
 
 If you are using custom WooCommerce template overrides in your theme you need to declare WooCommerce support using the `add_theme_support` function. WooCommerce template overrides are only enabled on themes that declare WooCommerce support. If you do not declare WooCommerce support in your theme, WooCommerce will assume the theme is not designed for WooCommerce compatibility and will use shortcode-based unsupported theme rendering to display the shop.
 
-Declaring WooCommerce support is straightforward and involves adding one function in your theme’s `functions.php` file.
+Declaring WooCommerce support is straightforward and involves adding one function in your theme's `functions.php` file.
 
 ### Basic Usage
 
@@ -138,7 +138,7 @@ The `product_grid` settings let theme developers set default, minimum, and maxim
 
 The product gallery introduced in 3.0.0 ([read here for more information](https://developer.woo.com/2016/10/19/new-product-gallery-merged-in-to-core-for-2-7/)) uses Flexslider, Photoswipe, and the jQuery Zoom plugin to offer swiping, lightboxes, and other neat features.
 
-In versions `3.0`, `3.1`, and `3.2`, the new gallery is off by default and needs to be enabled using a snippet (below) or by using a compatible theme. This is because it’s common for themes to disable the WooCommerce gallery and replace it with their own scripts.
+In versions `3.0`, `3.1`, and `3.2`, the new gallery is off by default and needs to be enabled using a snippet (below) or by using a compatible theme. This is because it's common for themes to disable the WooCommerce gallery and replace it with their own scripts.
 
 In versions `3.3+`, the gallery is off by default for WooCommerce compatible themes unless they declare support for it (below). 3rd party themes with no WooCommerce support will have the gallery enabled by default.
 
@@ -188,10 +188,10 @@ Inside the `assets/css/` directory, you will find the stylesheets responsible fo
 
 Files to look for are `woocommerce.scss` and `woocommerce.css`.
 
-- `woocommerce.css` is the minified stylesheet – it’s the CSS without any of the spaces, indents, etc. This makes the file very fast to load. This file is referenced by the plugin and declares all WooCommerce styles.
+- `woocommerce.css` is the minified stylesheet – it's the CSS without any of the spaces, indents, etc. This makes the file very fast to load. This file is referenced by the plugin and declares all WooCommerce styles.
 - `woocommerce.scss` is not directly used by the plugin, but by the team developing WooCommerce. We use [SASS](http://sass-lang.com/) in this file to generate the CSS in the first file.
 
-The CSS is written to make the default layout compatible with as many themes as possible by using percentage-based widths for all layout styles. It is, however, likely that you’ll want to make your own adjustments.
+The CSS is written to make the default layout compatible with as many themes as possible by using percentage-based widths for all layout styles. It is, however, likely that you'll want to make your own adjustments.
 
 ### Modifications
 
@@ -212,7 +212,7 @@ WooCommerce also outputs the theme name (plus other useful information, such as 
 
 ### Disabling WooCommerce styles
 
-If you plan to make major changes, or create a theme from scratch, then you may prefer your theme not reference the WooCommerce stylesheet at all. You can tell WooCommerce to not use the default `woocommerce.css` by adding the following code to your theme’s `functions.php` file:
+If you plan to make major changes, or create a theme from scratch, then you may prefer your theme not reference the WooCommerce stylesheet at all. You can tell WooCommerce to not use the default `woocommerce.css` by adding the following code to your theme's `functions.php` file:
 
 ```php
 add_filter( 'woocommerce_enqueue_styles', '__return_false' );
@@ -220,4 +220,4 @@ add_filter( 'woocommerce_enqueue_styles', '__return_false' );
 
 With this definition in place, your theme will no longer use the WooCommerce stylesheet and give you a blank canvas upon which you can build your own desired layout and styles.
 
-Styling a WooCommerce theme from scratch for the first time is no easy task. There are many different pages and elements that need to be styled, and if you’re new to WooCommerce, you are probably not familiar with many of them. A non-exhaustive list of WooCommerce elements to style can be found [here](https://developer.files.wordpress.com/2017/12/woocommerce-theme-testing-checklist.pdf).
+Styling a WooCommerce theme from scratch for the first time is no easy task. There are many different pages and elements that need to be styled, and if you're new to WooCommerce, you are probably not familiar with many of them. A non-exhaustive list of WooCommerce elements to style can be found [here](https://developer.files.wordpress.com/2017/12/woocommerce-theme-testing-checklist.pdf).

@@ -42,6 +42,6 @@ If you are looking for the default templates to use for updating, you want to us
 - Download the latest version from [the WordPress.org plugin page](https://wordpress.org/plugins/woocommerce/).
 - Download the latest release from [the GitHub repository](https://github.com/woocommerce/woocommerce/releases).
 
-### Why don’t you make a button to click and update everything?
+### Why don't you make a button to click and update everything?
 
 It is impossible to make a video or a one-click update. Why? Because there are thousands of themes, and every theme is coded differently. One size does not fit all.

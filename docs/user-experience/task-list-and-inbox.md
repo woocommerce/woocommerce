@@ -19,7 +19,7 @@ Anything that **requires** action should go in the task list.
     - Tasks that will enable, connect, or configure an extension.
     - Tasks that are critical to the business, such as capturing payment or responding to disputes.
 
-- *What doesn’t appear in the Things to do Task List:*
+- *What doesn't appear in the Things to do Task List:*
 
     - Any critical update that would impact or prevent the functioning of the store should appear as a top level notice using the standard WordPress component.
     - Informational notices such as feature announcements or tips for using the plugin should appear in the Inbox as they are not critical and do not require action.
@@ -41,7 +41,7 @@ The Inbox provides informational, useful, and supplemental content to the user, 
     - Tips for using the plugin and introducing features.
     - Insights such as inspirational messages or milestones.
 
-- *What doesn’t appear in the Inbox*:
+- *What doesn't appear in the Inbox*:
 
     - Notices that require action, extension setup tasks, or regular feedback notices.
 

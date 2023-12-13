@@ -20,7 +20,7 @@ This is the command-line interface for [WordPress](https://wordpress.org/). You 
 
 #### [wp-env](https://www.npmjs.com/package/@wordpress/env)
 
-This command-line tool lets you easily set up a local WordPress environment for building and testing plugins and themes. It’s simple to install and requires no configuration.
+This command-line tool lets you easily set up a local WordPress environment for building and testing plugins and themes. It's simple to install and requires no configuration.
 
 #### [eslint-plugin](https://www.npmjs.com/package/@woocommerce/eslint-plugin)
 
