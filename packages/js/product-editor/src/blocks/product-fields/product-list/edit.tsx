@@ -121,12 +121,14 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			<div className="wp-block-woocommerce-product-list-field__header">
-				<Button
-					onClick={ handleReorderProductsButtonClick }
-					variant="tertiary"
-				>
-					{ __( 'Reorder', 'woocommerce' ) }
-				</Button>
+				{ ! isLoading && groupedProducts.length > 0 && (
+					<Button
+						onClick={ handleReorderProductsButtonClick }
+						variant="tertiary"
+					>
+						{ __( 'Reorder', 'woocommerce' ) }
+					</Button>
+				) }
 				<Button
 					onClick={ handleAddProductsButtonClick }
 					variant="secondary"

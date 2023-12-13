@@ -5,7 +5,7 @@ import { FormEvent } from 'react';
 import { Button, Modal } from '@wordpress/components';
 import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { closeSmall, dragHandle } from '@wordpress/icons';
+import { dragHandle } from '@wordpress/icons';
 import { Product } from '@woocommerce/data';
 import classNames from 'classnames';
 
@@ -33,14 +33,6 @@ export function ReorderProductsModal( {
 
 	function handleCancelClick() {
 		onClose();
-	}
-
-	function removeProductHandler( product: Product ) {
-		return function handleRemoveClick() {
-			setSelectedProducts( ( current ) =>
-				current.filter( ( item ) => item.id !== product.id )
-			);
-		};
 	}
 
 	const { container, draggable, handler } = useDraggable( {
@@ -102,21 +94,6 @@ export function ReorderProductsModal( {
 										<div className="woocommerce-add-products-modal__list-item-description">
 											{ item.sku }
 										</div>
-									</div>
-
-									<div className="woocommerce-add-products-modal__list-item-actions">
-										<Button
-											type="button"
-											variant="tertiary"
-											icon={ closeSmall }
-											aria-label={ __(
-												'Remove product',
-												'woocommerce'
-											) }
-											onClick={ removeProductHandler(
-												item
-											) }
-										/>
 									</div>
 								</li>
 							) ) }
