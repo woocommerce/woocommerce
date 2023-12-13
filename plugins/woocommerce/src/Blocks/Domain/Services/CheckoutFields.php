@@ -298,13 +298,13 @@ class CheckoutFields {
 
 		if ( 'select' === $type ) {
 			if ( empty( $options['options'] ) || ! is_array( $options['options'] ) ) {
-				return new \WP_Error( 'woocommerce_blocks_checkout_field_no_options_specified', __( 'Fields of type "select" must have an array of "options".', 'woo-gutenberg-products-block' ) );
+				return new \WP_Error( 'woocommerce_blocks_checkout_select_field_no_options_specified', __( 'Fields of type "select" must have an array of "options".', 'woo-gutenberg-products-block' ) );
 			}
 
 			// Check all entries in $options['options'] has a key and value member.
 			foreach ( $options['options'] as $key => $option ) {
 				if ( ! isset( $option['value'] ) || ! isset( $option['label'] ) ) {
-					return new \WP_Error( 'woocommerce_blocks_checkout_field_options_invalid', __( 'Fields of type "select" must have an array of "options" with a "value" and "label" member.', 'woo-gutenberg-products-block' ) );
+					return new \WP_Error( 'woocommerce_blocks_checkout_select_field_options_invalid', __( 'Fields of type "select" must have an array of "options" with a "value" and "label" member.', 'woo-gutenberg-products-block' ) );
 				}
 
 				$options[ $key ]['value'] = sanitize_text_field( $option['value'] );
