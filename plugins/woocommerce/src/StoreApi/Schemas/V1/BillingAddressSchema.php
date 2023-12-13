@@ -33,14 +33,14 @@ class BillingAddressSchema extends AbstractAddressSchema {
 		$properties = parent::get_properties();
 		return array_merge(
 			$properties,
-			[
-				'email' => [
+			array(
+				'email' => array(
 					'description' => __( 'Email', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => array( 'view', 'edit' ),
 					'required'    => true,
-				],
-			]
+				),
+			)
 		);
 	}
 
@@ -111,17 +111,17 @@ class BillingAddressSchema extends AbstractAddressSchema {
 				array_keys( $additional_address_fields ),
 				function( $carry, $key ) use ( $additional_address_fields ) {
 					if ( 0 === strpos( $key, '/billing/' ) ) {
-						$value         = $additional_address_fields[ $key ];
+						$value = $additional_address_fields[ $key ];
+						error_log( gettype( $value ) );
 						$key           = str_replace( '/billing/', '', $key );
 						$carry[ $key ] = $value;
 					}
 					return $carry;
 				},
-				[]
+				array()
 			);
-
-			$address_object = \array_merge(
-				[
+			$address_object            = \array_merge(
+				array(
 					'first_name' => $address->get_billing_first_name(),
 					'last_name'  => $address->get_billing_last_name(),
 					'company'    => $address->get_billing_company(),
@@ -133,7 +133,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 					'country'    => $billing_country,
 					'email'      => $address->get_billing_email(),
 					'phone'      => $address->get_billing_phone(),
-				],
+				),
 				$additional_address_fields
 			);
 
@@ -145,7 +145,15 @@ class BillingAddressSchema extends AbstractAddressSchema {
 				$address_object[ $field ] = '';
 			}
 
-			return $this->prepare_html_response( $address_object );
+			foreach ( $address_object as $key => $value ) {
+				if ( 'boolean' === $this->get_properties()[ $key ]['type'] ) {
+					$address_object[ $key ] = (bool) $value;
+				} else {
+					$address_object[ $key ] = $this->prepare_html_response( $value );
+				}
+			}
+			return $address_object;
+
 		}
 		throw new RouteException(
 			'invalid_object_type',

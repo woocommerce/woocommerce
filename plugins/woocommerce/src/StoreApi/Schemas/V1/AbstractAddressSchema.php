@@ -240,7 +240,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		foreach ( $address_fields as $key => $field ) {
 			$field_schema = array(
 				'description' => $field['label'],
-				'type'        => 'string',
+				'type'        => 'checkbox' === $field['type'] ? 'boolean' : 'string',
 				'context'     => array( 'view', 'edit' ),
 				'required'    => true,
 			);

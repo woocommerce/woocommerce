@@ -2,9 +2,11 @@
  * External dependencies
  */
 import { isPostcode } from '@woocommerce/blocks-checkout';
+import { __ } from '@wordpress/i18n';
 import {
 	ValidatedTextInput,
 	type ValidatedTextInputHandle,
+	CheckboxControl,
 } from '@woocommerce/blocks-components';
 import {
 	BillingCountryInput,
@@ -100,7 +102,22 @@ const AddressForm = ( {
 				if ( field.hidden ) {
 					return null;
 				}
-
+				if ( field.type === 'checkbox' ) {
+					return (
+						<CheckboxControl
+							className={ `wc-block-components-address-form__${ field.key }` }
+							label={ field.label }
+							key={ field.key }
+							checked={ Boolean( values[ field.key ] ) }
+							onChange={ ( checked: boolean ) => {
+								onChange( {
+									...values,
+									[ field.key ]: checked,
+								} );
+							} }
+						/>
+					);
+				}
 				const fieldProps = {
 					id: `${ id }-${ field.key }`,
 					errorId: `${ addressType }_${ field.key }`,
