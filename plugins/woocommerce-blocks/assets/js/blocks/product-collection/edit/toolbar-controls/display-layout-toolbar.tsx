@@ -25,7 +25,7 @@ const DisplayLayoutToolbar = ( props: DisplayLayoutToolbarProps ) => {
 	const displayLayoutControls = [
 		{
 			icon: list,
-			title: __( 'List view', 'woo-gutenberg-products-block' ),
+			title: __( 'List view', 'woocommerce' ),
 			onClick: () =>
 				setDisplayLayout( {
 					type: LayoutOptions.STACK,
@@ -36,7 +36,7 @@ const DisplayLayoutToolbar = ( props: DisplayLayoutToolbarProps ) => {
 		},
 		{
 			icon: grid,
-			title: __( 'Grid view', 'woo-gutenberg-products-block' ),
+			title: __( 'Grid view', 'woocommerce' ),
 			onClick: () =>
 				setDisplayLayout( {
 					type: LayoutOptions.GRID,

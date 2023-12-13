@@ -26,13 +26,10 @@ const getHelpText = ( layoutOptions: LayoutOptions ) => {
 		case LayoutOptions.GRID:
 			return __(
 				'Display products using rows and columns.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			);
 		case LayoutOptions.STACK:
-			return __(
-				'Display products in a single column.',
-				'woo-gutenberg-products-block'
-			);
+			return __( 'Display products in a single column.', 'woocommerce' );
 		default:
 			return '';
 	}
@@ -54,7 +51,7 @@ const LayoutOptionsControl = ( props: DisplayLayoutToolbarProps ) => {
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Layout', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Layout', 'woocommerce' ) }
 			hasValue={ () => type !== DEFAULT_VALUE }
 			isShownByDefault
 			onDeselect={ () => {
@@ -62,7 +59,7 @@ const LayoutOptionsControl = ( props: DisplayLayoutToolbarProps ) => {
 			} }
 		>
 			<ToggleGroupControl
-				label={ __( 'Layout', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Layout', 'woocommerce' ) }
 				isBlock
 				onChange={ ( value: LayoutOptions ) => {
 					setDisplayLayout( value );
@@ -72,11 +69,11 @@ const LayoutOptionsControl = ( props: DisplayLayoutToolbarProps ) => {
 			>
 				<ToggleGroupControlOption
 					value={ LayoutOptions.STACK }
-					label={ __( 'Stack', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Stack', 'woocommerce' ) }
 				/>
 				<ToggleGroupControlOption
 					value={ LayoutOptions.GRID }
-					label={ __( 'Grid', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Grid', 'woocommerce' ) }
 				/>
 			</ToggleGroupControl>
 		</ToolsPanelItem>

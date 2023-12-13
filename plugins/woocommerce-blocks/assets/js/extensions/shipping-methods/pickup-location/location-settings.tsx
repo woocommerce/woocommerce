@@ -23,15 +23,15 @@ import { getUserFriendlyAddress } from './utils';
 
 const LocationSettingsDescription = () => (
 	<>
-		<h2>{ __( 'Pickup locations', 'woo-gutenberg-products-block' ) }</h2>
+		<h2>{ __( 'Pickup locations', 'woocommerce' ) }</h2>
 		<p>
 			{ __(
 				'Define pickup locations for your customers to choose from during checkout.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		</p>
 		<ExternalLink href="https://woocommerce.com/document/woocommerce-blocks-local-pickup/">
-			{ __( 'Learn more', 'woo-gutenberg-products-block' ) }
+			{ __( 'Learn more', 'woocommerce' ) }
 		</ExternalLink>
 	</>
 );
@@ -57,7 +57,7 @@ const LocationSettings = () => {
 	const tableColumns = [
 		{
 			name: 'name',
-			label: __( 'Pickup location', 'woo-gutenberg-products-block' ),
+			label: __( 'Pickup location', 'woocommerce' ),
 			width: '50%',
 			renderCallback: ( row: SortableData ): JSX.Element => (
 				<>
@@ -70,7 +70,7 @@ const LocationSettings = () => {
 		},
 		{
 			name: 'enabled',
-			label: __( 'Enabled', 'woo-gutenberg-products-block' ),
+			label: __( 'Enabled', 'woocommerce' ),
 			align: 'right',
 			renderCallback: ( row: SortableData ): JSX.Element => (
 				<ToggleControl
@@ -92,7 +92,7 @@ const LocationSettings = () => {
 						setEditingLocation( row.id );
 					} }
 				>
-					{ __( 'Edit', 'woo-gutenberg-products-block' ) }
+					{ __( 'Edit', 'woocommerce' ) }
 				</button>
 			),
 		},
@@ -105,7 +105,7 @@ const LocationSettings = () => {
 				setEditingLocation( 'new' );
 			} }
 		>
-			{ __( 'Add pickup location', 'woo-gutenberg-products-block' ) }
+			{ __( 'Add pickup location', 'woocommerce' ) }
 		</Button>
 	);
 
@@ -120,7 +120,7 @@ const LocationSettings = () => {
 				} }
 				placeholder={ __(
 					'When you add a pickup location, it will appear here.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				footerContent={ FooterContent }
 			/>

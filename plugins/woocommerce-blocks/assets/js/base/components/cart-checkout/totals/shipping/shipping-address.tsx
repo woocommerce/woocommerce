@@ -51,10 +51,7 @@ export const ShippingAddress = ( {
 			) }
 			{ showCalculator && (
 				<CalculatorButton
-					label={ __(
-						'Change address',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Change address', 'woocommerce' ) }
 					isShippingCalculatorOpen={ isShippingCalculatorOpen }
 					setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
 				/>

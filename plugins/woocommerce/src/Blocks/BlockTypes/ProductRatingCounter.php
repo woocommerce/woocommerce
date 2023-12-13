@@ -153,7 +153,7 @@ class ProductRatingCounter extends AbstractBlock {
 							'(%s customer review)',
 							'(%s customer reviews)',
 							$reviews_count,
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						esc_html( $reviews_count )
 					);

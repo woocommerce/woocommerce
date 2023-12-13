@@ -174,6 +174,17 @@ export async function goToSiteEditor( params = {} ) {
 }
 
 /**
+ * Waits for the Gutenberg canvas to be available
+ *
+ * @param {number} [timeout=DEFAULT_TIMEOUT] The amount of ms to wait for the element
+ *
+ * @return {Promise<?ElementHandle>} The canvas element handle
+ */
+export function waitForCanvas( timeout = DEFAULT_TIMEOUT ) {
+	return page.waitForSelector( SELECTORS.canvas, { timeout } );
+}
+
+/**
  * Visits the Site Editor template edit view.
  *
  * @param {Object}                             params
@@ -218,17 +229,6 @@ export async function goToTemplatesList( {
 	} else {
 		await page.waitForSelector( SELECTORS.templatesListTable.root );
 	}
-}
-
-/**
- * Waits for the Gutenberg canvas to be available
- *
- * @param {number} [timeout=DEFAULT_TIMEOUT] The amount of ms to wait for the element
- *
- * @return {Promise<?ElementHandle>} The canvas element handle
- */
-export function waitForCanvas( timeout = DEFAULT_TIMEOUT ) {
-	return page.waitForSelector( SELECTORS.canvas, { timeout } );
 }
 
 /**

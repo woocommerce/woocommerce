@@ -24,10 +24,7 @@ const Edit = (): JSX.Element => {
 				<ul className="wc-block-order-confirmation-summary-list">
 					<li className="wc-block-order-confirmation-summary-list-item">
 						<span className="wc-block-order-confirmation-summary-list-item__key">
-							{ __(
-								'Order number:',
-								'woo-gutenberg-products-block'
-							) }
+							{ __( 'Order number:', 'woocommerce' ) }
 						</span>{ ' ' }
 						<span className="wc-block-order-confirmation-summary-list-item__value">
 							123
@@ -35,7 +32,7 @@ const Edit = (): JSX.Element => {
 					</li>
 					<li className="wc-block-order-confirmation-summary-list-item">
 						<span className="wc-block-order-confirmation-summary-list-item__key">
-							{ __( 'Date:', 'woo-gutenberg-products-block' ) }
+							{ __( 'Date:', 'woocommerce' ) }
 						</span>{ ' ' }
 						<span className="wc-block-order-confirmation-summary-list-item__value">
 							{ date(
@@ -47,7 +44,7 @@ const Edit = (): JSX.Element => {
 					</li>
 					<li className="wc-block-order-confirmation-summary-list-item">
 						<span className="wc-block-order-confirmation-summary-list-item__key">
-							{ __( 'Total:', 'woo-gutenberg-products-block' ) }
+							{ __( 'Total:', 'woocommerce' ) }
 						</span>{ ' ' }
 						<span className="wc-block-order-confirmation-summary-list-item__value">
 							{ formatPrice( 4000 ) }
@@ -55,7 +52,7 @@ const Edit = (): JSX.Element => {
 					</li>
 					<li className="wc-block-order-confirmation-summary-list-item">
 						<span className="wc-block-order-confirmation-summary-list-item__key">
-							{ __( 'Email:', 'woo-gutenberg-products-block' ) }
+							{ __( 'Email:', 'woocommerce' ) }
 						</span>{ ' ' }
 						<span className="wc-block-order-confirmation-summary-list-item__value">
 							test@test.com
@@ -63,16 +60,10 @@ const Edit = (): JSX.Element => {
 					</li>
 					<li className="wc-block-order-confirmation-summary-list-item">
 						<span className="wc-block-order-confirmation-summary-list-item__key">
-							{ __(
-								'Payment method:',
-								'woo-gutenberg-products-block'
-							) }
+							{ __( 'Payment method:', 'woocommerce' ) }
 						</span>{ ' ' }
 						<span className="wc-block-order-confirmation-summary-list-item__value">
-							{ __(
-								'Credit Card',
-								'woo-gutenberg-products-block'
-							) }
+							{ __( 'Credit Card', 'woocommerce' ) }
 						</span>
 					</li>
 				</ul>
