@@ -254,46 +254,46 @@ class Init {
 	public function get_product_templates( array $templates ) {
 		$supported_product_types = array(
 			'simple' => array(
-				'product_template_id'           => 'standard-product-template',
-				'product_template_title'        => __( 'Standard product', 'woocommerce' ),
-				'product_template_description'  => __( 'A single physical or virtual product, e.g. a t-shirt or an eBook.', 'woocommerce' ),
-				'product_template_order'        => 10,
-				'product_template_icon'         => 'shipping',
-				'product_template_layout_id'    => 'simple-product',
-				'product_template_product_data' => array(
+				'id'           => 'standard-product-template',
+				'title'        => __( 'Standard product', 'woocommerce' ),
+				'description'  => __( 'A single physical or virtual product, e.g. a t-shirt or an eBook.', 'woocommerce' ),
+				'order'        => 10,
+				'icon'         => 'shipping',
+				'layout_id'    => 'simple-product',
+				'product_data' => array(
 					'type' => 'simple',
 				),
 			),
 			'grouped' => array(
-				'product_template_id'           => 'grouped-product-template',
-				'product_template_title'        => __( 'Grouped product', 'woocommerce' ),
-				'product_template_description'  => __( 'A set of products that go well together, e.g. camera kit.', 'woocommerce' ),
-				'product_template_order'        => 20,
-				'product_template_icon'         => 'group',
-				'product_template_layout_id'    => 'simple-product',
-				'product_template_product_data' => array(
+				'id'           => 'grouped-product-template',
+				'title'        => __( 'Grouped product', 'woocommerce' ),
+				'description'  => __( 'A set of products that go well together, e.g. camera kit.', 'woocommerce' ),
+				'order'        => 20,
+				'icon'         => 'group',
+				'layout_id'    => 'simple-product',
+				'product_data' => array(
 					'type' => 'grouped',
 				),
 			),
 			'external' => array(
-				'product_template_id'           => 'affiliate-product-template',
-				'product_template_title'        => __( 'Affiliate product', 'woocommerce' ),
-				'product_template_description'  => __( 'A link to a product sold on a different website, e.g. brand collab.', 'woocommerce' ),
-				'product_template_order'        => 30,
-				'product_template_icon'         => 'link',
-				'product_template_layout_id'    => 'simple-product',
-				'product_template_product_data' => array(
+				'id'           => 'affiliate-product-template',
+				'title'        => __( 'Affiliate product', 'woocommerce' ),
+				'description'  => __( 'A link to a product sold on a different website, e.g. brand collab.', 'woocommerce' ),
+				'order'        => 30,
+				'icon'         => 'link',
+				'layout_id'    => 'simple-product',
+				'product_data' => array(
 					'type' => 'external',
 				),
 			),
 			'variable' => array(
-				'product_template_id'           => 'variable-product-template',
-				'product_template_title'        => __( 'Variable product', 'woocommerce' ),
-				'product_template_description'  => __( 'A product with variations like color or size.', 'woocommerce' ),
-				'product_template_order'        => 40,
-				'product_template_icon'         => null,
-				'product_template_layout_id'    => 'simple-product',
-				'product_template_product_data' => array(
+				'id'           => 'variable-product-template',
+				'title'        => __( 'Variable product', 'woocommerce' ),
+				'description'  => __( 'A product with variations like color or size.', 'woocommerce' ),
+				'order'        => 40,
+				'icon'         => null,
+				'layout_id'    => 'simple-product',
+				'product_data' => array(
 					'type' => 'variable',
 				),
 			),
@@ -307,13 +307,13 @@ class Init {
 			if ( array_key_exists( $product_type, $supported_product_types ) ) continue;
 
 			$supported_product_types[ $product_type ] = array(
-				'product_template_id'           => $product_type . '-product-template',
-				'product_template_title'        => $title,
-				'product_template_description'  => null,
-				'product_template_order'        => ( count( $supported_product_types ) + 1 ) * 10,
-				'product_template_icon'         => null,
-				'product_template_layout_id'    => null,
-				'product_template_product_data' => array(
+				'id'           => $product_type . '-product-template',
+				'title'        => $title,
+				'description'  => null,
+				'order'        => ( count( $supported_product_types ) + 1 ) * 10,
+				'icon'         => null,
+				'layout_id'    => null,
+				'product_data' => array(
 					'type' => $product_type,
 				),
 			);
@@ -321,21 +321,21 @@ class Init {
 
 		foreach ( $supported_product_types as $template_data ) {
 			$product_template = new ProductTemplate(
-				$template_data['product_template_id'],
-				$template_data['product_template_title'],
-				$template_data['product_template_product_data'],
+				$template_data['id'],
+				$template_data['title'],
+				$template_data['product_data'],
 			);
-			if ( isset( $template_data['product_template_layout_id'] ) ) {
-				$product_template->set_layout_template_id( $template_data['product_template_layout_id'] );
+			if ( isset( $template_data['layout_id'] ) ) {
+				$product_template->set_layout_template_id( $template_data['layout_id'] );
 			}
-			if ( isset( $template_data['product_template_description'] ) ) {
-				$product_template->set_description( $template_data['product_template_description'] );
+			if ( isset( $template_data['description'] ) ) {
+				$product_template->set_description( $template_data['description'] );
 			}
-			if ( isset( $template_data['product_template_order'] ) ) {
-				$product_template->set_order( $template_data['product_template_order'] );
+			if ( isset( $template_data['order'] ) ) {
+				$product_template->set_order( $template_data['order'] );
 			}
-			if ( isset( $template_data['product_template_icon'] ) ) {
-				$product_template->set_icon( $template_data['product_template_icon'] );
+			if ( isset( $template_data['icon'] ) ) {
+				$product_template->set_icon( $template_data['icon'] );
 			}
 
 			$templates[] = $product_template;
