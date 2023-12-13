@@ -24,12 +24,12 @@ jobs:
         with:
           fetch-depth: 0
       - uses: './.github/actions/setup-woocommerce-monorepo'
+        name: 'Setup Monorepo'
         with:
           php-version: false # We don't want to waste time installing PHP since we aren't using it in this job.
-        name: 'Setup Monorepo'
       - uses: actions/github-script@v6
-        id: 'project-matrix'
         name: 'Build Matrix'
+        id: 'project-matrix'
         with:
           script: |
             let baseRef = ${{ toJson( github.base_ref ) }};
@@ -56,8 +56,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: './.github/actions/setup-woocommerce-monorepo'
-        id: 'setup-monorepo'
         name: 'Setup Monorepo'
+        id: 'setup-monorepo'
         with:
           install: '${{ matrix.projectName }}...'
           build: '${{ matrix.projectName }}'
