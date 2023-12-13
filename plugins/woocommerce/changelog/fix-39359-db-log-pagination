@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix problems with pagination and filtering for the database logger list table view

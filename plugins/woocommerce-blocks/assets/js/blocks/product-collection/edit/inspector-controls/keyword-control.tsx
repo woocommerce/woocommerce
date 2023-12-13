@@ -36,12 +36,12 @@ const KeywordControl = ( props: QueryControlProps ) => {
 	return (
 		<ToolsPanelItem
 			hasValue={ () => !! querySearch }
-			label={ __( 'Keyword', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Keyword', 'woocommerce' ) }
 			onDeselect={ () => setQuerySearch( '' ) }
 			resetAllFilter={ () => setQuerySearch( '' ) }
 		>
 			<TextControl
-				label={ __( 'Keyword', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Keyword', 'woocommerce' ) }
 				value={ querySearch }
 				onChange={ setQuerySearch }
 			/>

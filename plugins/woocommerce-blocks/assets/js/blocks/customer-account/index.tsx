@@ -38,7 +38,7 @@ registerBlockType( metadata, {
 // For more context, see https://github.com/woocommerce/woocommerce-blocks/pull/8594
 registerBlockVariation( 'woocommerce/customer-account', {
 	name: 'woocommerce/customer-account',
-	title: __( 'Customer account', 'woo-gutenberg-products-block' ),
+	title: __( 'Customer account', 'woocommerce' ),
 	isDefault: true,
 	attributes: {
 		...metadata.attributes,

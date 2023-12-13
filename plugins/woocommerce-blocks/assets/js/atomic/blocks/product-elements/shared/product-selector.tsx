@@ -51,7 +51,7 @@ export const ProductSelector = ( {
 								setIsEditing( false );
 							} }
 						>
-							{ __( 'Done', 'woo-gutenberg-products-block' ) }
+							{ __( 'Done', 'woocommerce' ) }
 						</Button>
 					</div>
 				</Placeholder>
@@ -62,10 +62,7 @@ export const ProductSelector = ( {
 							<TextToolbarButton
 								onClick={ () => setIsEditing( true ) }
 							>
-								{ __(
-									'Switch product…',
-									'woo-gutenberg-products-block'
-								) }
+								{ __( 'Switch product…', 'woocommerce' ) }
 							</TextToolbarButton>
 						</ToolbarGroup>
 					</BlockControls>

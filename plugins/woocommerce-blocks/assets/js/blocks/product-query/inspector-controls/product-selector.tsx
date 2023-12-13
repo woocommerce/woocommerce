@@ -72,10 +72,7 @@ export const ProductSelector = ( props: ProductQueryBlock ) => {
 
 	return (
 		<ToolsPanelItem
-			label={ __(
-				'Hand-picked Products',
-				'woo-gutenberg-products-block'
-			) }
+			label={ __( 'Hand-picked Products', 'woocommerce' ) }
 			hasValue={ () => query.include?.length }
 		>
 			<FormTokenField
@@ -87,10 +84,7 @@ export const ProductSelector = ( props: ProductQueryBlock ) => {
 								( product ) => product.id === Number( token )
 						  )?.name || ''
 				}
-				label={ __(
-					'Pick some products',
-					'woo-gutenberg-products-block'
-				) }
+				label={ __( 'Pick some products', 'woocommerce' ) }
 				onChange={ onTokenChange }
 				suggestions={ productsList.map( ( product ) => product.name ) }
 				validateInput={ ( value: string ) =>
@@ -98,7 +92,7 @@ export const ProductSelector = ( props: ProductQueryBlock ) => {
 				}
 				value={
 					! productsList.length
-						? [ __( 'Loading…', 'woo-gutenberg-products-block' ) ]
+						? [ __( 'Loading…', 'woocommerce' ) ]
 						: query?.include || []
 				}
 				__experimentalExpandOnFocus={ true }

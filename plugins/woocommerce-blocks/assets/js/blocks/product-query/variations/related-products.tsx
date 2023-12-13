@@ -56,7 +56,7 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 		'core/heading',
 		{
 			level: 2,
-			content: __( 'Related products', 'woo-gutenberg-products-block' ),
+			content: __( 'Related products', 'woocommerce' ),
 			style: { spacing: { margin: { top: '1rem', bottom: '1rem' } } },
 		},
 	],
@@ -121,15 +121,9 @@ registerBlockSingleProductTemplate( {
 	blockName: QUERY_LOOP_ID,
 	blockMetadata: {},
 	blockSettings: {
-		description: __(
-			'Display related products.',
-			'woo-gutenberg-products-block'
-		),
+		description: __( 'Display related products.', 'woocommerce' ),
 		name: 'Related Products Controls',
-		title: __(
-			'Related Products Controls',
-			'woo-gutenberg-products-block'
-		),
+		title: __( 'Related Products Controls', 'woocommerce' ),
 		// @ts-expect-error: `isActive` exists on Block Variation configuration
 		isActive: ( blockAttributes: BlockAttributes ) =>
 			blockAttributes.namespace === VARIATION_NAME,

@@ -30,11 +30,11 @@ const ReviewsCount = ( props: { reviews: number } ): JSX.Element => {
 					'(%s customer review)',
 					'(%s customer reviews)',
 					reviews,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				reviews
 		  )
-		: __( '(X customer reviews)', 'woo-gutenberg-products-block' );
+		: __( '(X customer reviews)', 'woocommerce' );
 
 	return (
 		<span className="wc-block-components-product-rating-counter__reviews_count">

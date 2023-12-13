@@ -20,9 +20,9 @@ interface FilterResetButtonProps {
 const FilterResetButton = ( {
 	className,
 	/* translators: Reset button text for filters. */
-	label = __( 'Reset', 'woo-gutenberg-products-block' ),
+	label = __( 'Reset', 'woocommerce' ),
 	onClick,
-	screenReaderLabel = __( 'Reset filter', 'woo-gutenberg-products-block' ),
+	screenReaderLabel = __( 'Reset filter', 'woocommerce' ),
 }: FilterResetButtonProps ): JSX.Element => {
 	return (
 		<button

@@ -16,15 +16,12 @@ export const BlockSettings = ( {
 	const { hasDarkControls } = attributes;
 	return (
 		<InspectorControls>
-			<PanelBody title={ __( 'Style', 'woo-gutenberg-products-block' ) }>
+			<PanelBody title={ __( 'Style', 'woocommerce' ) }>
 				<ToggleControl
-					label={ __(
-						'Dark mode inputs',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Dark mode inputs', 'woocommerce' ) }
 					help={ __(
 						'Inputs styled specifically for use on dark background colors.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					checked={ hasDarkControls }
 					onChange={ () =>

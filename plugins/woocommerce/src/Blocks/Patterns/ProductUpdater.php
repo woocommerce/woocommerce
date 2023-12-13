@@ -82,7 +82,7 @@ class ProductUpdater {
 		set_transient( 'woocommerce_ai_managed_images', $images, 60 );
 
 		if ( empty( $business_description ) ) {
-			return new \WP_Error( 'missing_business_description', __( 'No business description provided for generating AI content.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'missing_business_description', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
 		}
 
 		$last_business_description = get_option( 'last_business_description_with_ai_content_generated' );
@@ -93,7 +93,7 @@ class ProductUpdater {
 					'product_content' => array(),
 				);
 			} else {
-				return new \WP_Error( 'business_description_not_found', __( 'No business description provided for generating AI content.', 'woo-gutenberg-products-block' ) );
+				return new \WP_Error( 'business_description_not_found', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
 			}
 		}
 
@@ -140,7 +140,7 @@ class ProductUpdater {
 		// Identify dummy products that need to have their content updated.
 		$dummy_products_ids = $this->fetch_product_ids( 'dummy' );
 		if ( ! is_array( $dummy_products_ids ) ) {
-			return new \WP_Error( 'failed_to_fetch_dummy_products', __( 'Failed to fetch dummy products.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'failed_to_fetch_dummy_products', __( 'Failed to fetch dummy products.', 'woocommerce' ) );
 		}
 
 		$dummy_products = array_map(
@@ -422,7 +422,7 @@ class ProductUpdater {
 	 */
 	public function assign_ai_generated_content_to_dummy_products( $ai_connection, $token, $products_information_list, $business_description, $search_term ) {
 		if ( empty( $business_description ) ) {
-			return new \WP_Error( 'missing_store_description', __( 'The store description is required to generate content for your site.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'missing_store_description', __( 'The store description is required to generate content for your site.', 'woocommerce' ) );
 		}
 
 		$prompts = [];
@@ -499,7 +499,7 @@ class ProductUpdater {
 		}
 
 		if ( ! $success ) {
-			return new WP_Error( 'failed_to_fetch_ai_responses', __( 'Failed to fetch AI responses for products.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'failed_to_fetch_ai_responses', __( 'Failed to fetch AI responses for products.', 'woocommerce' ) );
 		}
 
 		return array(

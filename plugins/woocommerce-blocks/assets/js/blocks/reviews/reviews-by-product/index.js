@@ -29,10 +29,7 @@ registerBlockType( 'woocommerce/reviews-by-product', {
 	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-	description: __(
-		'Display reviews for your products.',
-		'woocommerce'
-	),
+	description: __( 'Display reviews for your products.', 'woocommerce' ),
 	supports: {
 		html: false,
 		color: {
