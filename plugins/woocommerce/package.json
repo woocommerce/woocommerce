@@ -155,6 +155,7 @@
 		"istanbul": "1.0.0-alpha.2",
 		"jest": "~27.5.1",
 		"mocha": "7.2.0",
+		"nodemon": "^3.0.2",
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"stylelint": "^13.13.1",
 		"typescript": "^5.3.3",
@@ -174,10 +175,10 @@
 		"ie 9"
 	],
 	"dependencies": {
-		"@wordpress/browserslist-config": "wp-6.0",
 		"@woocommerce/admin-library": "workspace:*",
+		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/classic-assets": "workspace:*",
-		"@woocommerce/block-library": "workspace:*"
+		"@wordpress/browserslist-config": "wp-6.0"
 	},
 	"wireit": {
 		"build:project": {
