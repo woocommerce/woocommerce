@@ -22,7 +22,7 @@ class CheckoutFields {
 	 *
 	 * @var array
 	 */
-	private $additional_fields = [];
+	private $additional_fields = array();
 
 	/**
 	 * Fields locations.
@@ -312,7 +312,7 @@ class CheckoutFields {
 		if ( ! empty( $options['type'] ) ) {
 			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
 				// translators: %1$s is the registered field type, %2$s is a list of supported field types (comma separated).
-				return new \WP_Error( 'woocommerce_blocks_checkout_field_type_unsupported', sprintf( __( 'Registering a field with type "%1$s" is not supported. The supported types are: %2$s.', 'woo-gutenberg-products-block' ), esc_html( $options['type'] ), implode( ', ', $this->supported_field_types ) ) );
+				return new \WP_Error( 'woocommerce_blocks_checkout_field_type_unsupported', sprintf( __( 'Registering a field with type "%1$s" is not supported. The supported types are: %2$s.', 'woocommerce' ), esc_html( $options['type'] ), implode( ', ', $this->supported_field_types ) ) );
 			}
 			$type = $options['type'];
 		}
@@ -699,16 +699,16 @@ class CheckoutFields {
 	 */
 	public function get_all_fields_from_customer( $customer, $all = false ) {
 		$customer_id = $customer->get_id();
-		$meta_data   = [
-			'billing'    => [],
-			'shipping'   => [],
-			'additional' => [],
-		];
+		$meta_data   = array(
+			'billing'    => array(),
+			'shipping'   => array(),
+			'additional' => array(),
+		);
 		if ( ! $customer_id ) {
 			if ( isset( wc()->session ) ) {
-				$meta_data['billing']    = wc()->session->get( self::BILLING_FIELDS_KEY, [] );
-				$meta_data['shipping']   = wc()->session->get( self::SHIPPING_FIELDS_KEY, [] );
-				$meta_data['additional'] = wc()->session->get( self::ADDITIONAL_FIELDS_KEY, [] );
+				$meta_data['billing']    = wc()->session->get( self::BILLING_FIELDS_KEY, array() );
+				$meta_data['shipping']   = wc()->session->get( self::SHIPPING_FIELDS_KEY, array() );
+				$meta_data['additional'] = wc()->session->get( self::ADDITIONAL_FIELDS_KEY, array() );
 			}
 		} else {
 			$meta_data['billing']    = get_user_meta( $customer_id, self::BILLING_FIELDS_KEY, true );
@@ -728,11 +728,11 @@ class CheckoutFields {
 	 * @return array An array of fields.
 	 */
 	public function get_all_fields_from_order( $order, $all = false ) {
-		$meta_data = [
-			'billing'    => [],
-			'shipping'   => [],
-			'additional' => [],
-		];
+		$meta_data = array(
+			'billing'    => array(),
+			'shipping'   => array(),
+			'additional' => array(),
+		);
 		if ( $order instanceof \WC_Order ) {
 			$meta_data['billing']    = $order->get_meta( self::BILLING_FIELDS_KEY, true );
 			$meta_data['shipping']   = $order->get_meta( self::SHIPPING_FIELDS_KEY, true );
@@ -750,9 +750,9 @@ class CheckoutFields {
 	 * @return array An array of fields.
 	 */
 	private function format_meta_data( $meta, $all = false ) {
-		$billing_fields    = $meta['billing'] ?? [];
-		$shipping_fields   = $meta['shipping'] ?? [];
-		$additional_fields = $meta['additional'] ?? [];
+		$billing_fields    = $meta['billing'] ?? array();
+		$shipping_fields   = $meta['shipping'] ?? array();
+		$additional_fields = $meta['additional'] ?? array();
 
 		$fields = array();
 
