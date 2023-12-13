@@ -24,9 +24,9 @@ const FilterSubmitButton = ( {
 	isLoading,
 	disabled,
 	/* translators: Submit button text for filters. */
-	label = __( 'Apply', 'woo-gutenberg-products-block' ),
+	label = __( 'Apply', 'woocommerce' ),
 	onClick,
-	screenReaderLabel = __( 'Apply filter', 'woo-gutenberg-products-block' ),
+	screenReaderLabel = __( 'Apply filter', 'woocommerce' ),
 }: FilterSubmitButtonProps ): JSX.Element => {
 	return (
 		<button

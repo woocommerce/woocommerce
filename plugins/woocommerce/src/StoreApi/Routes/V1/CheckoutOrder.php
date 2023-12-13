@@ -58,7 +58,7 @@ class CheckoutOrder extends AbstractCartRoute {
 				'args'                => array_merge(
 					[
 						'payment_data' => [
-							'description' => __( 'Data to pass through to the payment method when processing payment.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Data to pass through to the payment method when processing payment.', 'woocommerce' ),
 							'type'        => 'array',
 							'items'       => [
 								'type'       => 'object',
@@ -103,7 +103,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		if ( ! $this->order || ! $this->order->needs_payment() ) {
 			return new \WP_Error(
 				'invalid_order_update_status',
-				__( 'This order cannot be paid for.', 'woo-gutenberg-products-block' )
+				__( 'This order cannot be paid for.', 'woocommerce' )
 			);
 		}
 
@@ -232,7 +232,7 @@ class CheckoutOrder extends AbstractCartRoute {
 			if ( $requires_payment_method ) {
 				throw new RouteException(
 					'woocommerce_rest_checkout_missing_payment_method',
-					__( 'No payment method provided.', 'woo-gutenberg-products-block' ),
+					__( 'No payment method provided.', 'woocommerce' ),
 					400
 				);
 			}
@@ -244,7 +244,7 @@ class CheckoutOrder extends AbstractCartRoute {
 				'woocommerce_rest_checkout_payment_method_disabled',
 				sprintf(
 					// Translators: %s Payment method ID.
-					__( 'The %s payment gateway is not available.', 'woo-gutenberg-products-block' ),
+					__( 'The %s payment gateway is not available.', 'woocommerce' ),
 					esc_html( $request_payment_method )
 				),
 				400

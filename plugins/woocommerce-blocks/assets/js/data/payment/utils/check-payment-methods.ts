@@ -141,7 +141,7 @@ const registrationErrorNotice = (
 		/* translators: %s the id of the payment method being registered (bank transfer, cheque...) */
 		__(
 			`There was an error registering the payment method with id '%s': `,
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		paymentMethod.paymentMethodId
 	);

@@ -40,8 +40,8 @@ class ProductSearch extends AbstractBlock {
 				'hasLabel'    => true,
 				'align'       => '',
 				'className'   => '',
-				'label'       => __( 'Search', 'woo-gutenberg-products-block' ),
-				'placeholder' => __( 'Search products…', 'woo-gutenberg-products-block' ),
+				'label'       => __( 'Search', 'woocommerce' ),
+				'placeholder' => __( 'Search products…', 'woocommerce' ),
 			)
 		);
 
@@ -108,7 +108,7 @@ class ProductSearch extends AbstractBlock {
 					<path d="M6 15l5-5-5-5 1-2 7 7-7 7z" />
 				</svg>
 			</button>',
-			esc_attr__( 'Search', 'woo-gutenberg-products-block' )
+			esc_attr__( 'Search', 'woocommerce' )
 		);
 
 		$field_markup = '

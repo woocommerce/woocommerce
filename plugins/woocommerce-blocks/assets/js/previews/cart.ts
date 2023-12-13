@@ -42,12 +42,9 @@ export const previewCart: CartResponse = {
 			type: 'simple',
 			quantity: 2,
 			catalog_visibility: 'visible',
-			name: __( 'Beanie', 'woo-gutenberg-products-block' ),
-			summary: __( 'Beanie', 'woo-gutenberg-products-block' ),
-			short_description: __(
-				'Warm hat for winter',
-				'woo-gutenberg-products-block'
-			),
+			name: __( 'Beanie', 'woocommerce' ),
+			summary: __( 'Beanie', 'woocommerce' ),
+			short_description: __( 'Warm hat for winter', 'woocommerce' ),
 			description:
 				'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
 			sku: 'woo-beanie',
@@ -75,12 +72,12 @@ export const previewCart: CartResponse = {
 			],
 			variation: [
 				{
-					attribute: __( 'Color', 'woo-gutenberg-products-block' ),
-					value: __( 'Yellow', 'woo-gutenberg-products-block' ),
+					attribute: __( 'Color', 'woocommerce' ),
+					value: __( 'Yellow', 'woocommerce' ),
 				},
 				{
-					attribute: __( 'Size', 'woo-gutenberg-products-block' ),
-					value: __( 'Small', 'woo-gutenberg-products-block' ),
+					attribute: __( 'Size', 'woocommerce' ),
+					value: __( 'Small', 'woocommerce' ),
 				},
 			],
 			prices: {
@@ -124,12 +121,9 @@ export const previewCart: CartResponse = {
 			type: 'simple',
 			quantity: 1,
 			catalog_visibility: 'visible',
-			name: __( 'Cap', 'woo-gutenberg-products-block' ),
-			summary: __( 'Cap', 'woo-gutenberg-products-block' ),
-			short_description: __(
-				'Lightweight baseball cap',
-				'woo-gutenberg-products-block'
-			),
+			name: __( 'Cap', 'woocommerce' ),
+			summary: __( 'Cap', 'woocommerce' ),
+			short_description: __( 'Lightweight baseball cap', 'woocommerce' ),
 			description:
 				'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
 			sku: 'woo-cap',
@@ -157,8 +151,8 @@ export const previewCart: CartResponse = {
 			],
 			variation: [
 				{
-					attribute: __( 'Color', 'woo-gutenberg-products-block' ),
-					value: __( 'Orange', 'woo-gutenberg-products-block' ),
+					attribute: __( 'Color', 'woocommerce' ),
+					value: __( 'Orange', 'woocommerce' ),
 				},
 			],
 			prices: {
@@ -200,14 +194,14 @@ export const previewCart: CartResponse = {
 	cross_sells: [
 		{
 			id: 1,
-			name: __( 'Polo', 'woo-gutenberg-products-block' ),
+			name: __( 'Polo', 'woocommerce' ),
 			parent: 0,
 			type: 'simple',
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-polo',
-			short_description: __( 'Polo', 'woo-gutenberg-products-block' ),
-			description: __( 'Polo', 'woo-gutenberg-products-block' ),
+			short_description: __( 'Polo', 'woocommerce' ),
+			description: __( 'Polo', 'woocommerce' ),
 			on_sale: false,
 			prices: {
 				currency_code: 'USD',
@@ -257,20 +251,14 @@ export const previewCart: CartResponse = {
 		},
 		{
 			id: 2,
-			name: __( 'Long Sleeve Tee', 'woo-gutenberg-products-block' ),
+			name: __( 'Long Sleeve Tee', 'woocommerce' ),
 			parent: 0,
 			type: 'simple',
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-long-sleeve-tee',
-			short_description: __(
-				'Long Sleeve Tee',
-				'woo-gutenberg-products-block'
-			),
-			description: __(
-				'Long Sleeve Tee',
-				'woo-gutenberg-products-block'
-			),
+			short_description: __( 'Long Sleeve Tee', 'woocommerce' ),
+			description: __( 'Long Sleeve Tee', 'woocommerce' ),
 			on_sale: false,
 			prices: {
 				currency_code: 'USD',
@@ -321,20 +309,14 @@ export const previewCart: CartResponse = {
 		},
 		{
 			id: 3,
-			name: __( 'Hoodie with Zipper', 'woo-gutenberg-products-block' ),
+			name: __( 'Hoodie with Zipper', 'woocommerce' ),
 			parent: 0,
 			type: 'simple',
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-hoodie-with-zipper',
-			short_description: __(
-				'Hoodie with Zipper',
-				'woo-gutenberg-products-block'
-			),
-			description: __(
-				'Hoodie with Zipper',
-				'woo-gutenberg-products-block'
-			),
+			short_description: __( 'Hoodie with Zipper', 'woocommerce' ),
+			description: __( 'Hoodie with Zipper', 'woocommerce' ),
 			on_sale: true,
 			prices: {
 				currency_code: 'USD',
@@ -386,14 +368,14 @@ export const previewCart: CartResponse = {
 		},
 		{
 			id: 4,
-			name: __( 'Hoodie with Logo', 'woo-gutenberg-products-block' ),
+			name: __( 'Hoodie with Logo', 'woocommerce' ),
 			parent: 0,
 			type: 'simple',
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-hoodie-with-logo',
-			short_description: __( 'Polo', 'woo-gutenberg-products-block' ),
-			description: __( 'Polo', 'woo-gutenberg-products-block' ),
+			short_description: __( 'Polo', 'woocommerce' ),
+			description: __( 'Polo', 'woocommerce' ),
 			on_sale: false,
 			prices: {
 				currency_code: 'USD',
@@ -444,20 +426,14 @@ export const previewCart: CartResponse = {
 		},
 		{
 			id: 5,
-			name: __( 'Hoodie with Pocket', 'woo-gutenberg-products-block' ),
+			name: __( 'Hoodie with Pocket', 'woocommerce' ),
 			parent: 0,
 			type: 'simple',
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-hoodie-with-pocket',
-			short_description: __(
-				'Hoodie with Pocket',
-				'woo-gutenberg-products-block'
-			),
-			description: __(
-				'Hoodie with Pocket',
-				'woo-gutenberg-products-block'
-			),
+			short_description: __( 'Hoodie with Pocket', 'woocommerce' ),
+			description: __( 'Hoodie with Pocket', 'woocommerce' ),
 			on_sale: true,
 			prices: {
 				currency_code: 'USD',
@@ -509,14 +485,14 @@ export const previewCart: CartResponse = {
 		},
 		{
 			id: 6,
-			name: __( 'T-Shirt', 'woo-gutenberg-products-block' ),
+			name: __( 'T-Shirt', 'woocommerce' ),
 			parent: 0,
 			type: 'simple',
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-t-shirt',
-			short_description: __( 'T-Shirt', 'woo-gutenberg-products-block' ),
-			description: __( 'T-Shirt', 'woo-gutenberg-products-block' ),
+			short_description: __( 'T-Shirt', 'woocommerce' ),
+			description: __( 'T-Shirt', 'woocommerce' ),
 			on_sale: false,
 			prices: {
 				currency_code: 'USD',
@@ -568,7 +544,7 @@ export const previewCart: CartResponse = {
 	fees: [
 		{
 			id: 'fee',
-			name: __( 'Fee', 'woo-gutenberg-products-block' ),
+			name: __( 'Fee', 'woocommerce' ),
 			totals: {
 				currency_code: 'USD',
 				currency_symbol: '$',
@@ -632,7 +608,7 @@ export const previewCart: CartResponse = {
 		total_price: '4920',
 		tax_lines: [
 			{
-				name: __( 'Sales tax', 'woo-gutenberg-products-block' ),
+				name: __( 'Sales tax', 'woocommerce' ),
 				rate: '20%',
 				price: '820',
 			},

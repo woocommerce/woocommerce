@@ -31,7 +31,7 @@ export const HandpickedProductsEditMode = (
 		debouncedSpeak(
 			__(
 				'Now displaying a preview of the Hand-picked Products block.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			)
 		);
 	};
@@ -39,15 +39,12 @@ export const HandpickedProductsEditMode = (
 	return (
 		<Placeholder
 			icon={ <Icon icon={ stack } /> }
-			label={ __(
-				'Hand-picked Products',
-				'woo-gutenberg-products-block'
-			) }
+			label={ __( 'Hand-picked Products', 'woocommerce' ) }
 			className="wc-block-products-grid wc-block-handpicked-products"
 		>
 			{ __(
 				'Display a selection of hand-picked products in a grid.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			<div className="wc-block-handpicked-products__selection">
 				<ProductsControl
@@ -58,7 +55,7 @@ export const HandpickedProductsEditMode = (
 					} }
 				/>
 				<Button variant="primary" onClick={ onDone }>
-					{ __( 'Done', 'woo-gutenberg-products-block' ) }
+					{ __( 'Done', 'woocommerce' ) }
 				</Button>
 			</div>
 		</Placeholder>

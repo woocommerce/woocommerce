@@ -29,17 +29,14 @@ const Edit = () => {
 				[
 					'core/post-terms',
 					{
-						prefix: __(
-							'Category: ',
-							'woo-gutenberg-products-block'
-						),
+						prefix: __( 'Category: ', 'woocommerce' ),
 						term: 'product_cat',
 					},
 				],
 				[
 					'core/post-terms',
 					{
-						prefix: __( 'Tags: ', 'woo-gutenberg-products-block' ),
+						prefix: __( 'Tags: ', 'woocommerce' ),
 						term: 'product_tag',
 					},
 				],

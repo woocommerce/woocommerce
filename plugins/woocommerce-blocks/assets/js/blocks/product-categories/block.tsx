@@ -25,15 +25,12 @@ import type { ProductCategoriesBlockProps } from './types';
 const EmptyPlaceholder = () => (
 	<Placeholder
 		icon={ <Icon icon={ listView } /> }
-		label={ __(
-			'Product Categories List',
-			'woo-gutenberg-products-block'
-		) }
+		label={ __( 'Product Categories List', 'woocommerce' ) }
 		className="wc-block-product-categories"
 	>
 		{ __(
 			'This block displays the product categories for your store. To use it you first need to create a product and assign it to a category.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
 	</Placeholder>
 );
@@ -70,17 +67,11 @@ const ProductCategoriesBlock = ( {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __(
-						'List Settings',
-						'woo-gutenberg-products-block'
-					) }
+					title={ __( 'List Settings', 'woocommerce' ) }
 					initialOpen
 				>
 					<ToggleGroupControl
-						label={ __(
-							'Display style',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Display style', 'woocommerce' ) }
 						value={ isDropdown ? 'dropdown' : 'list' }
 						onChange={ ( value: string ) =>
 							setAttributes( {
@@ -90,29 +81,17 @@ const ProductCategoriesBlock = ( {
 					>
 						<ToggleGroupControlOption
 							value="list"
-							label={ __(
-								'List',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'List', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="dropdown"
-							label={ __(
-								'Dropdown',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'Dropdown', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 				</PanelBody>
-				<PanelBody
-					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
-					initialOpen
-				>
+				<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
 					<ToggleControl
-						label={ __(
-							'Show product count',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Show product count', 'woocommerce' ) }
 						checked={ hasCount }
 						onChange={ () =>
 							setAttributes( { hasCount: ! hasCount } )
@@ -122,17 +101,17 @@ const ProductCategoriesBlock = ( {
 						<ToggleControl
 							label={ __(
 								'Show category images',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							help={
 								hasImage
 									? __(
 											'Category images are visible.',
-											'woo-gutenberg-products-block'
+											'woocommerce'
 									  )
 									: __(
 											'Category images are hidden.',
-											'woo-gutenberg-products-block'
+											'woocommerce'
 									  )
 							}
 							checked={ hasImage }
@@ -142,10 +121,7 @@ const ProductCategoriesBlock = ( {
 						/>
 					) }
 					<ToggleControl
-						label={ __(
-							'Show hierarchy',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Show hierarchy', 'woocommerce' ) }
 						checked={ isHierarchical }
 						onChange={ () =>
 							setAttributes( {
@@ -154,10 +130,7 @@ const ProductCategoriesBlock = ( {
 						}
 					/>
 					<ToggleControl
-						label={ __(
-							'Show empty categories',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Show empty categories', 'woocommerce' ) }
 						checked={ hasEmpty }
 						onChange={ () =>
 							setAttributes( { hasEmpty: ! hasEmpty } )
@@ -167,11 +140,11 @@ const ProductCategoriesBlock = ( {
 						<ToggleControl
 							label={ __(
 								'Only show children of current category',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							help={ __(
 								'This will affect product category pages',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							checked={ showChildrenOnly }
 							onChange={ () =>

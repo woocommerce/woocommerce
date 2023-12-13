@@ -135,7 +135,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const ParentComponent = showProductLink ? 'a' : Fragment;
 	const anchorLabel = sprintf(
 		/* translators: %s is referring to the product name */
-		__( 'Link to %s', 'woo-gutenberg-products-block' ),
+		__( 'Link to %s', 'woocommerce' ),
 		product.name
 	);
 	const anchorProps = {

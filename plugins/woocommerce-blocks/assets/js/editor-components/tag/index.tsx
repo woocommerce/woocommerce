@@ -84,7 +84,7 @@ const Tag = ( {
 					onClick={ remove( id ) }
 					label={ sprintf(
 						// Translators: %s label.
-						__( 'Remove %s', 'woo-gutenberg-products-block' ),
+						__( 'Remove %s', 'woocommerce' ),
 						label
 					) }
 					aria-describedby={ labelId }

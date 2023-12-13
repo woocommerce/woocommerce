@@ -41,7 +41,7 @@ const ProductSaleBadge = ( {
 
 	const formattedMessage = sprintf(
 		/* translators: %s will be replaced by the discount amount */
-		__( `Save %s`, 'woo-gutenberg-products-block' ),
+		__( `Save %s`, 'woocommerce' ),
 		format
 	);
 
