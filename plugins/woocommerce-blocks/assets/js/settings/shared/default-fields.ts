@@ -7,6 +7,7 @@ import { ComboboxControlOption } from '@woocommerce/base-components/combobox';
  * Internal dependencies
  */
 import { getSetting } from './utils';
+import { ComboboxControlOption } from '@woocommerce/base-components/combobox';
 
 export interface AddressField {
 	// The label for the field.
