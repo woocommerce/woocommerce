@@ -41,8 +41,9 @@ import { Attributes } from './types';
 import { formatSlug, getActiveFilters, generateUniqueId } from './utils';
 import { useSetWraperVisibility } from '../../../filter-wrapper/context';
 import './editor.scss';
+import { Inspector } from './components/inspector';
 
-const noRatingsNotice = (
+const NoRatings = (
 	<Notice status="warning" isDismissible={ false }>
 		<p>
 			{ __(
@@ -309,106 +310,22 @@ const RatingFilterEditBlock = ( {
 	);
 };
 
-const Edit = ( {
-	attributes,
-	setAttributes,
-}: BlockEditProps< Attributes > ) => {
-	const {
-		className,
-		displayStyle,
-		showCounts,
-		showFilterButton,
-		selectType,
-	} = attributes;
+const Edit = ( props: BlockEditProps< Attributes > ) => {
+	const { className } = props.attributes;
 
 	const blockProps = useBlockProps( {
 		className: classnames( 'wc-block-rating-filter', className ),
 	} );
 
-	const getInspectorControls = () => {
-		return (
-			<InspectorControls key="inspector">
-				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
-					<ToggleControl
-						label={ __( 'Display product count', 'woocommerce' ) }
-						checked={ showCounts }
-						onChange={ () =>
-							setAttributes( {
-								showCounts: ! showCounts,
-							} )
-						}
-					/>
-					<ToggleGroupControl
-						label={ __(
-							'Allow selecting multiple options?',
-							'woocommerce'
-						) }
-						value={ selectType || 'multiple' }
-						onChange={ ( value: string ) =>
-							setAttributes( {
-								selectType: value,
-							} )
-						}
-						className="wc-block-attribute-filter__multiple-toggle"
-					>
-						<ToggleGroupControlOption
-							value="multiple"
-							label={ __( 'Multiple', 'woocommerce' ) }
-						/>
-						<ToggleGroupControlOption
-							value="single"
-							label={ __( 'Single', 'woocommerce' ) }
-						/>
-					</ToggleGroupControl>
-					<ToggleGroupControl
-						label={ __( 'Display Style', 'woocommerce' ) }
-						value={ displayStyle }
-						onChange={ ( value: string ) =>
-							setAttributes( {
-								displayStyle: value,
-							} )
-						}
-						className="wc-block-attribute-filter__display-toggle"
-					>
-						<ToggleGroupControlOption
-							value="list"
-							label={ __( 'List', 'woocommerce' ) }
-						/>
-						<ToggleGroupControlOption
-							value="dropdown"
-							label={ __( 'Dropdown', 'woocommerce' ) }
-						/>
-					</ToggleGroupControl>
-					<ToggleControl
-						label={ __(
-							"Show 'Apply filters' button",
-							'woocommerce'
-						) }
-						help={ __(
-							'Products will update when the button is clicked.',
-							'woocommerce'
-						) }
-						checked={ showFilterButton }
-						onChange={ ( value ) =>
-							setAttributes( {
-								showFilterButton: value,
-							} )
-						}
-					/>
-				</PanelBody>
-			</InspectorControls>
-		);
-	};
-
 	return (
 		<>
-			{ getInspectorControls() }
+			<Inspector { ...props } />
 			{
 				<div { ...blockProps }>
 					<Disabled>
 						<RatingFilterEditBlock
-							attributes={ attributes }
-							noRatingsNotice={ noRatingsNotice }
+							attributes={ props.attributes }
+							noRatingsNotice={ NoRatings }
 						/>
 					</Disabled>
 				</div>
