@@ -11,18 +11,27 @@ import classnames from 'classnames';
  */
 import './editor.scss';
 import { useCompatibilityNotice } from './use-compatibility-notice';
+import { SwitchToClassicShortcodeButton } from '../switch-to-classic-shortcode-button';
+
+interface CartCheckoutSidebarCompatibilityNoticeProps {
+	block: 'cart' | 'checkout';
+	clientId: string;
+}
 
 export const CartCheckoutSidebarCompatibilityNotice = ( {
 	block,
-}: {
-	block: 'cart' | 'checkout';
-} ) => {
+	clientId,
+}: CartCheckoutSidebarCompatibilityNoticeProps ) => {
 	const [ isVisible, dismissNotice ] = useCompatibilityNotice( block );
+
+	if ( ! isVisible ) {
+		return null;
+	}
 
 	const noticeText = createInterpolateElement(
 		__(
-			'The Cart & Checkout Blocks are built to optimize for faster checkout. To make sure this feature is right for your store, <a>review the list of compatible extensions</a>.',
-			'woo-gutenberg-products-block'
+			"Some active extensions don't yet support this block, which may impact the shopper experience. <a>Learn more</a>",
+			'woocommerce'
 		),
 		{
 			a: (
@@ -33,6 +42,9 @@ export const CartCheckoutSidebarCompatibilityNotice = ( {
 		}
 	);
 
+	const blockName =
+		block === 'cart' ? 'woocommerce/cart' : 'woocommerce/checkout';
+
 	return (
 		<Notice
 			onRemove={ dismissNotice }
@@ -42,6 +54,11 @@ export const CartCheckoutSidebarCompatibilityNotice = ( {
 			] ) }
 		>
 			{ noticeText }
+			<div></div>
+			<SwitchToClassicShortcodeButton
+				block={ blockName }
+				clientId={ clientId }
+			/>
 		</Notice>
 	);
 };
