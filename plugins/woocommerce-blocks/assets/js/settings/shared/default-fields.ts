@@ -19,7 +19,7 @@ export interface AddressField {
 	// Fields will be sorted and render in this order, lowest to highest.
 	index: number;
 	// The type of input to render. Defaults to text.
-	type?: string;
+	type?: 'text' | 'select';
 }
 
 export interface LocaleSpecificAddressField extends Partial< AddressField > {
