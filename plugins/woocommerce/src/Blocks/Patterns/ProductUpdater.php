@@ -352,7 +352,10 @@ class ProductUpdater {
 	}
 
 	/**
-	 * @param $image_url
+	 * Reduce the size of the image for the product to improve performance and
+	 * avoid memory exhaustion errors when uploading them to the media library.
+	 *
+	 * @param string $image_url The image URL.
 	 *
 	 * @return string
 	 */
