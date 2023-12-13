@@ -81,7 +81,9 @@ export function DescriptionBlockEdit( {
 		'description'
 	);
 
-	const [ descriptionBlocks, setDescriptionBlocks ] = useState( [] );
+	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
+		BlockInstance[]
+	>( [] );
 
 	// Pick Modal editor data from the store.
 	const { isModalEditorOpen, modalEditorBlocks, hasChanged } = useSelect(
@@ -116,7 +118,6 @@ export function DescriptionBlockEdit( {
 			return;
 		}
 
-		// console.log( 'parsedBlocks: ', parsedBlocks );
 		setDescriptionBlocks( parsedBlocks );
 	}, [ description ] );
 
