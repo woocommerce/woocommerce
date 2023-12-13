@@ -27,19 +27,19 @@ class OrderCouponSchema extends AbstractSchema {
 	public function get_properties() {
 		return [
 			'code'          => [
-				'description' => __( 'The coupons unique code.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'The coupons unique code.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'discount_type' => [
-				'description' => __( 'The discount type for the coupon (e.g. percentage or fixed amount)', 'woo-gutenberg-products-block' ),
+				'description' => __( 'The discount type for the coupon (e.g. percentage or fixed amount)', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'totals'        => [
-				'description' => __( 'Total amounts provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Total amounts provided using the smallest unit of the currency.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -47,13 +47,13 @@ class OrderCouponSchema extends AbstractSchema {
 					$this->get_store_currency_properties(),
 					[
 						'total_discount'     => [
-							'description' => __( 'Total discount applied by this coupon.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Total discount applied by this coupon.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'total_discount_tax' => [
-							'description' => __( 'Total tax removed due to discount applied by this coupon.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Total tax removed due to discount applied by this coupon.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,

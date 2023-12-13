@@ -58,7 +58,7 @@ const ExternalLinkCard = ( {
 			<VisuallyHidden as="span">
 				{
 					/* translators: accessibility text */
-					__( '(opens in a new tab)', 'woo-gutenberg-products-block' )
+					__( '(opens in a new tab)', 'woocommerce' )
 				}
 			</VisuallyHidden>
 			<Icon

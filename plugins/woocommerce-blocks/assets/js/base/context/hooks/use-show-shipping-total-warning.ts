@@ -79,7 +79,7 @@ export const useShowShippingTotalWarning = () => {
 			createInfoNotice(
 				__(
 					'Totals will be recalculated when a valid shipping method is selected.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				{
 					id: 'wc-blocks-totals-shipping-warning',

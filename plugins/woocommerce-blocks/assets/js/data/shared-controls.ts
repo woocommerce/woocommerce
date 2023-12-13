@@ -17,10 +17,7 @@ const EMPTY_OBJECT = {};
  */
 const invalidJsonError = {
 	code: 'invalid_json',
-	message: __(
-		'The response is not a valid JSON response.',
-		'woo-gutenberg-products-block'
-	),
+	message: __( 'The response is not a valid JSON response.', 'woocommerce' ),
 };
 
 const setNonceOnFetch = ( headers: Headers ): void => {

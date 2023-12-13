@@ -18,13 +18,13 @@ Example: two text buttons to select edit modes for cart block.
 			onClick={ toggleFullCartMode }
 			isToggled={ isFullCartMode }
 		>
-			{ __( 'Full Cart', 'woo-gutenberg-products-block' ) }
+			{ __( 'Full Cart', 'woocommerce' ) }
 		</TextToolbarButton>
 		<TextToolbarButton
 			onClick={ toggleFullCartMode }
 			isToggled={ ! isFullCartMode }
 		>
-			{ __( 'Empty Cart', 'woo-gutenberg-products-block' ) }
+			{ __( 'Empty Cart', 'woocommerce' ) }
 		</TextToolbarButton>
 	</Toolbar>
 </BlockControls>

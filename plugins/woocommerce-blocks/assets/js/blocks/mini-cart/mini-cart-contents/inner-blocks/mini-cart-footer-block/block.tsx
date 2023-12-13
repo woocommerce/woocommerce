@@ -61,11 +61,11 @@ const Block = ( {
 			<TotalsItem
 				className="wc-block-mini-cart__footer-subtotal"
 				currency={ getCurrencyFromPriceResponse( cartTotals ) }
-				label={ __( 'Subtotal', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Subtotal', 'woocommerce' ) }
 				value={ subTotal }
 				description={ __(
 					'Shipping, taxes, and discounts calculated at checkout.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			/>
 			<div className="wc-block-mini-cart__footer-actions">

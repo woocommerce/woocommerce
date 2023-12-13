@@ -35,7 +35,7 @@ $collection_title = $content['titles'][0]['default'] ?? '';
 		<!-- wp:button {"textAlign":"center"} -->
 		<div class="wp-block-button">
 			<a class="wp-block-button__link has-text-align-center wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>">
-				<?php esc_html_e( 'Shop All', 'woo-gutenberg-products-block' ); ?>
+				<?php esc_html_e( 'Shop All', 'woocommerce' ); ?>
 			</a>
 		</div>
 		<!-- /wp:button -->

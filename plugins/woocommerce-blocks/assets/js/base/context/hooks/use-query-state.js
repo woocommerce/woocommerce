@@ -74,6 +74,7 @@ export const useQueryStateByKey = ( queryKey, defaultValue, context ) => {
 			const store = select( storeKey );
 			return store.getValueForQueryKey( context, queryKey, defaultValue );
 		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[ context, queryKey ]
 	);
 

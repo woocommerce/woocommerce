@@ -116,7 +116,7 @@ class ProductRatingStars extends AbstractBlock {
 
 				if ( 0 < $average_rating || false === $product_permalink ) {
 					/* translators: %s: rating */
-					$label = sprintf( __( 'Rated %s out of 5', 'woo-gutenberg-products-block' ), $average_rating );
+					$label = sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $average_rating );
 					$html  = sprintf(
 						'<div class="wc-block-components-product-rating-stars__container">
 							<div class="wc-block-components-product-rating__stars wc-block-grid__product-rating__stars" role="img" aria-label="%1$s">

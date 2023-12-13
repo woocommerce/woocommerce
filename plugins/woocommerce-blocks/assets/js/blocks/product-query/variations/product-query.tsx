@@ -40,11 +40,11 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 	registerBlockVariation( QUERY_LOOP_ID, {
 		description: __(
 			'A block that displays a selection of products in your store.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		name: PRODUCT_QUERY_VARIATION_NAME,
 		/* translators: “Products“ is the name of the block. */
-		title: __( 'Products (Beta)', 'woo-gutenberg-products-block' ),
+		title: __( 'Products (Beta)', 'woocommerce' ),
 		isActive: ( blockAttributes ) =>
 			blockAttributes.namespace === PRODUCT_QUERY_VARIATION_NAME,
 		icon: (

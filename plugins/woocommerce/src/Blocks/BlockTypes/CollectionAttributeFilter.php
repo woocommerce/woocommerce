@@ -149,7 +149,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 				</span>',
 				$option['count'],
 				// translators: %d is the number of products.
-				sprintf( _n( '%d product', '%d products', $option['count'], 'woo-gutenberg-products-block' ), $option['count'] )
+				sprintf( _n( '%d product', '%d products', $option['count'], 'woocommerce' ), $option['count'] )
 			) :
 			'';
 

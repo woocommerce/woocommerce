@@ -35,7 +35,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 			$properties,
 			[
 				'email' => [
-					'description' => __( 'Email', 'woo-gutenberg-products-block' ),
+					'description' => __( 'Email', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'required'    => true,
@@ -74,7 +74,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 		if ( ! empty( $address['email'] ) && ! is_email( $address['email'] ) ) {
 			$errors->add(
 				'invalid_email',
-				__( 'The provided email address is not valid', 'woo-gutenberg-products-block' )
+				__( 'The provided email address is not valid', 'woocommerce' )
 			);
 		}
 
@@ -119,7 +119,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 			'invalid_object_type',
 			sprintf(
 				/* translators: Placeholders are class and method names */
-				__( '%1$s requires an instance of %2$s or %3$s for the address', 'woo-gutenberg-products-block' ),
+				__( '%1$s requires an instance of %2$s or %3$s for the address', 'woocommerce' ),
 				'BillingAddressSchema::get_item_response',
 				'WC_Customer',
 				'WC_Order'

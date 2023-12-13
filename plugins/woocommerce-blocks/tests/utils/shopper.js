@@ -416,14 +416,17 @@ export const shopper = {
 					text: shippingName,
 				}
 			);
-			//eslint-disable-next-line no-shadow
+			// eslint-disable-next-line no-shadow,@typescript-eslint/no-shadow
 			const checkIfShippingHasChanged = ( el, shippingName ) => {
 				const checkShippingTotal = () => {
 					if ( el.textContent === `via ${ shippingName }` ) {
+						// eslint-disable-next-line @typescript-eslint/no-use-before-define
 						clearInterval( intervalId );
+						// eslint-disable-next-line @typescript-eslint/no-use-before-define
 						clearTimeout( timeoutId );
 					}
 				};
+
 				const intervalId = setInterval( checkShippingTotal, 500 );
 				const timeoutId = setInterval( () => {
 					clearInterval( intervalId );

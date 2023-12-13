@@ -36,7 +36,7 @@ class CartApplyCoupon extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => [
 					'code' => [
-						'description' => __( 'Unique identifier for the coupon within the cart.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Unique identifier for the coupon within the cart.', 'woocommerce' ),
 						'type'        => 'string',
 					],
 				],
@@ -55,7 +55,7 @@ class CartApplyCoupon extends AbstractCartRoute {
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		if ( ! wc_coupons_enabled() ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', __( 'Coupons are disabled.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', __( 'Coupons are disabled.', 'woocommerce' ), 404 );
 		}
 
 		$cart        = $this->cart_controller->get_cart_instance();

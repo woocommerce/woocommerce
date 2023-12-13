@@ -16,7 +16,7 @@
 				<?php
 					echo esc_html__(
 						'Related products',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					)
 					?>
 			</h2>
