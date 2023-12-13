@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</thead>
 	<tbody class="wc-shipping-zone-rows wc-shipping-tables-tbody"></tbody>
 
-	<tfoot data-id="0" class="wc-shipping-zone-worldwide">
+	<tfoot data-id="0" class="wc-shipping-zone-worldwide wc-shipping-zone-rows-tfoot">
 		<td width="1%" class="wc-shipping-zone-worldwide"></td>
 		<td class="wc-shipping-zone-name">
 			<?php esc_html_e( 'Rest of the world', 'woocommerce' ); ?>

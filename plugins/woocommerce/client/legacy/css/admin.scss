@@ -4525,16 +4525,16 @@ table.wc-shipping-classes {
 		}
 	}
 
-	.wc-shipping-zone-method-rows {
+	.wc-shipping-zone-rows,
+	.wc-shipping-zone-method-rows,
+	.wc-shipping-class-rows {
 		tr:nth-child(odd) td {
 			background: #f9f9f9;
 		}
 	}
-	
-	.wc-shipping-class-rows tr:nth-child(odd) {
-		td {
-			background: #f9f9f9;
-		}
+
+	.wc-shipping-zone-rows-tfoot .odd td {
+		background: #f9f9f9;
 	}
 
 	td.wc-shipping-zones-blank-state,
