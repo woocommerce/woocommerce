@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { createElement, useEffect } from '@wordpress/element';
+import {
+	createElement,
+	useEffect,
+	useState,
+	Fragment,
+} from '@wordpress/element';
 import { BlockInstance, parse, serialize } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import classNames from 'classnames';
@@ -57,6 +62,8 @@ export function DescriptionBlockEdit( {
 		'description'
 	);
 
+	const [ descriptionBlocks, setDescriptionBlocks ] = useState( [] );
+
 	// Pick Modal editor data from the store.
 	const { isModalEditorOpen, modalEditorBlocks, hasChanged } = useSelect(
 		( select ) => {
@@ -69,7 +76,31 @@ export function DescriptionBlockEdit( {
 		[]
 	);
 
-	// Update the description when the blocks change.
+	// Parse the description into blocks.
+	useEffect( () => {
+		if ( ! description ) {
+			setDescriptionBlocks( [] );
+			return;
+		}
+
+		const parsedBlocks = parse( description );
+		// Check whether the parsed blocks become from the summary block:
+		const isSummaryBlock =
+			parsedBlocks.length === 1 &&
+			parsedBlocks[ 0 ].name === 'core/freeform';
+
+		if ( isSummaryBlock ) {
+			return;
+		}
+
+		// console.log( 'parsedBlocks: ', parsedBlocks );
+		setDescriptionBlocks( parsedBlocks );
+	}, [ description ] );
+
+	/*
+	 * From Modal Editor -> Description entity.
+	 * Update the description when the modal editor blocks change.
+	 */
 	useEffect( () => {
 		if ( ! hasChanged ) {
 			return;
@@ -98,24 +129,24 @@ export function DescriptionBlockEdit( {
 
 	return (
 		<div { ...blockProps }>
-			{ !! description.length && (
-				<BlockControls>
-					<FullEditorToolbarButton
-						text={ __( 'Edit in full editor', 'woocommerce' ) }
+			{ !! descriptionBlocks?.length ? (
+				<>
+					<BlockControls>
+						<FullEditorToolbarButton
+							text={ __( 'Edit in full editor', 'woocommerce' ) }
+						/>
+					</BlockControls>
+
+					<BlockPreview
+						blocks={ descriptionBlocks }
+						viewportWidth={ 800 }
+						additionalStyles={ [
+							{ css: 'body { padding: 32px; height: 10000px }' }, // hack: setting height to 10000px to ensure the preview is not cut off.
+						] }
 					/>
-				</BlockControls>
-			) }
-
-			{ ! description.length && <div { ...innerBlockProps } /> }
-
-			{ !! description.length && (
-				<BlockPreview
-					blocks={ parse( description ) }
-					viewportWidth={ 800 }
-					additionalStyles={ [
-						{ css: 'body { padding: 32px; height: 10000px }' }, // hack: setting height to 10000px to ensure the preview is not cut off.
-					] }
-				/>
+				</>
+			) : (
+				<div { ...innerBlockProps } />
 			) }
 
 			{ isModalEditorOpen && <ModalEditorWelcomeGuide /> }
