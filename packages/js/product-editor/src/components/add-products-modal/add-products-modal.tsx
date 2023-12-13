@@ -12,7 +12,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { closeSmall, dragHandle } from '@wordpress/icons';
+import { closeSmall } from '@wordpress/icons';
 import {
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
@@ -21,13 +21,11 @@ import {
 } from '@woocommerce/components';
 import { CurrencyContext } from '@woocommerce/currency';
 import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
-import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
 import { AddProductsModalProps } from './types';
-import { useDraggable } from '../../hooks/use-draggable';
 
 export function getProductImageStyle( product: Product ) {
 	return product.images.length > 0

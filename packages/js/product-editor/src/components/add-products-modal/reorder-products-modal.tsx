@@ -12,15 +12,15 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import { AddProductsModalProps } from './types';
+import { ReorderProductsModalProps } from './types';
 import { useDraggable } from '../../hooks/use-draggable';
-import { getProductImageStyle } from '../add-products-modal';
+import { getProductImageStyle } from './add-products-modal';
 
 export function ReorderProductsModal( {
 	products,
 	onSubmit,
 	onClose,
-}: AddProductsModalProps ) {
+}: ReorderProductsModalProps ) {
 	const [ selectedProducts, setSelectedProducts ] = useState< Product[] >( [
 		...products,
 	] );
@@ -133,7 +133,7 @@ export function ReorderProductsModal( {
 						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 					<Button variant="primary" type="submit">
-						{ __( 'Save', 'woocommerce' ) }
+						{ __( 'Done', 'woocommerce' ) }
 					</Button>
 				</div>
 			</form>

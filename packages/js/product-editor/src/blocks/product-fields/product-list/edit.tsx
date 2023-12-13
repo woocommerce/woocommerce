@@ -24,8 +24,8 @@ import classNames from 'classnames';
 import {
 	AddProductsModal,
 	getProductImageStyle,
+	ReorderProductsModal,
 } from '../../../components/add-products-modal';
-import { ReorderProductsModal } from '../../../components/reorder-products-modal';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { Shirt, Pants, Glasses } from './images';
 import { UploadsBlockAttributes } from './types';
@@ -91,6 +91,7 @@ export function Edit( {
 
 	function handleReorderProductsModalSubmit( value: Product[] ) {
 		setGroupedProducts( value );
+		setGroupedProductIds( value.map( ( product ) => product.id ) );
 		setOpenReorderProductsModal( false );
 	}
 
