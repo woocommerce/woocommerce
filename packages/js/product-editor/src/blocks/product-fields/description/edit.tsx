@@ -7,7 +7,12 @@ import {
 	useState,
 	Fragment,
 } from '@wordpress/element';
-import { BlockInstance, parse, serialize } from '@wordpress/blocks';
+import {
+	BlockInstance,
+	getBlockContent,
+	parse,
+	serialize,
+} from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -49,26 +54,28 @@ export function getContentFromFreeform(
 }
 
 /**
- * By default the blocks variable always contains one paragraph
- * block with empty content, that causes the description to never
- * be empty. This function removes the default block to keep
- * the description empty.
+ * Given a list of blocks, returns the HTML content.
  *
- * todo: this is not optimal. We cannot rely on the content attribute to
- * determine whether the description is empty or not
- *
- * @param blocks The block list
- * @return Empty array if there is only one block with empty content
- * in the list. The same block list otherwise.
+ * @param {BlockInstance[]} blocks - The block list
+ * @return {string} The HTML content.
  */
-function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
-	if ( blocks.length === 1 ) {
-		const { content } = blocks[ 0 ].attributes;
-		if ( ! content || ! content.trim() ) {
-			return [];
-		}
-	}
-	return blocks;
+function getBlocksInnerHTML( blocks: BlockInstance[] ): string {
+	return blocks
+		.filter( ( block ) => block !== null )
+		.map( ( block ) => getBlockContent( block ) )
+		.join( '' );
+}
+
+/**
+ * Given a HTML string, returns the text content.
+ *
+ * @param {string} html - The HTML content.
+ * @return {string} The text content.
+ */
+function getTextContent( html: string ): string {
+	const tempDomContainer = document.createElement( 'div' );
+	tempDomContainer.innerHTML = html;
+	return tempDomContainer.textContent || tempDomContainer.innerText || '';
 }
 
 export function DescriptionBlockEdit( {
@@ -130,11 +137,20 @@ export function DescriptionBlockEdit( {
 		}
 
 		if ( ! modalEditorBlocks?.length ) {
-			setDescription( '' );
+			return setDescription( '' );
 		}
 
-		const html = serialize( clearDescriptionIfEmpty( modalEditorBlocks ) );
-		setDescription( html );
+		const htmlContent = getBlocksInnerHTML( modalEditorBlocks );
+		if ( ! htmlContent?.length ) {
+			return setDescription( '' );
+		}
+
+		const textContent = getTextContent( htmlContent );
+		if ( ! textContent?.length ) {
+			return setDescription( '' );
+		}
+
+		setDescription( serialize( modalEditorBlocks ) );
 	}, [ modalEditorBlocks, setDescription, hasChanged ] );
 
 	const blockProps = useWooBlockProps( attributes, {
