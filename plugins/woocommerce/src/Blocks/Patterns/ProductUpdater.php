@@ -71,8 +71,15 @@ class ProductUpdater {
 		}
 
 		if ( ! isset( $images['images'] ) || ! isset( $images['search_term'] ) ) {
+			$images = get_transient( 'woocommerce_ai_managed_images' );
+		}
+
+		if ( ! isset( $images['images'] ) || ! isset( $images['search_term'] ) ) {
 			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woo-gutenberg-products-block' ) );
 		}
+
+		// This is required in case something interrupts the execution of the script and the endpoint is called again on retry.
+		set_transient( 'woocommerce_ai_managed_images', $images, 60 );
 
 		if ( empty( $business_description ) ) {
 			return new \WP_Error( 'missing_business_description', __( 'No business description provided for generating AI content.', 'woo-gutenberg-products-block' ) );
