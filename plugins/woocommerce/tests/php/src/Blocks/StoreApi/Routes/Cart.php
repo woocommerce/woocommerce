@@ -111,10 +111,10 @@ class Cart extends ControllerTestCase {
 					'total_fees_tax'              => '0',
 					'total_discount'              => '100',
 					'total_discount_tax'          => '0',
-					'total_shipping'              => '0',
+					'total_shipping'              => '1000',
 					'total_shipping_tax'          => '0',
 					'total_tax'                   => '0',
-					'total_price'                 => '2900',
+					'total_price'                 => '3900',
 					'tax_lines'                   => array(),
 				),
 			)
