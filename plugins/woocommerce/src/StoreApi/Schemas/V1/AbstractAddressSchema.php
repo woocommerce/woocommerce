@@ -238,12 +238,12 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 
 		$schema = array();
 		foreach ( $address_fields as $key => $field ) {
-			$field_schema = array(
+			$field_schema = [
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
-			);
+			];
 
 			if ( 'select' === $field['type'] ) {
 				$field_schema['type'] = 'string';
