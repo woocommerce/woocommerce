@@ -4026,6 +4026,7 @@ table.wc_shipping {
 .wc-shipping-zone-settings {
 	#zone_name {
 		width: 600px;
+		padding: 2px 8px;
 	}
 
 	th {
@@ -4456,6 +4457,11 @@ table {
 	font-style: normal;
 	font-weight: 400;
 	line-height: 17px;
+}
+
+#wc-shipping-zone-region-picker-root .woocommerce-tree-select-control .components-base-control {
+	padding: 2px 8px;
+	border-radius: 4px;
 }
 
 table.wc-shipping-zones,
