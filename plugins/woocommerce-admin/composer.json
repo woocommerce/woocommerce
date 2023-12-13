@@ -17,6 +17,7 @@
 	},
 	"extra": {
 		"changelogger": {
+			"changes-dir": "../woocommerce/changelog",
 			"formatter": {
 				"filename": "../../tools/changelogger/class-package-formatter.php"
 			},
