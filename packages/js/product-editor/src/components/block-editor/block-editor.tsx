@@ -132,7 +132,7 @@ export function BlockEditor( {
 
 		const blockInstances = synchronizeBlocksWithTemplate(
 			[],
-			layoutTemplate.blocks
+			layoutTemplate.blockTemplates
 		);
 
 		onChange( blockInstances, {} );

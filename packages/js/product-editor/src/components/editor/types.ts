@@ -13,7 +13,7 @@ export type LayoutTemplate = {
 	title: string;
 	description: string;
 	area: string;
-	blocks: Template[];
+	blockTemplates: Template[];
 };
 
 export type ProductTemplate = {
