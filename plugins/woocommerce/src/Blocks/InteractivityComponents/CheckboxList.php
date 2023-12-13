@@ -24,16 +24,18 @@ class CheckboxList {
 		wp_enqueue_script( 'wc-interactivity-checkbox-list' );
 		wp_enqueue_style( 'wc-interactivity-checkbox-list' );
 
-		$items = $props['items'] ?? [];
+		$items = $props['items'] ?? array();
 
 		$checkbox_list_context = array( 'items' => $items );
 
 		// Items should be an array of objects with a label (which can be plaintext or HTML) and value property.
-		$items = $props['items'] ?? [];
+		$items = $props['items'] ?? array();
+
+		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-checkbox-list' ) );
 
 		ob_start();
 		?>
-		<div data-wc-interactive='<?php echo wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-checkbox-list' ) ); ?>'>
+		<div data-wc-interactive='<?php echo esc_attr( $namespace ); ?>'>
 			<div data-wc-context='<?php echo esc_attr( wp_json_encode( $checkbox_list_context ) ); ?>' >
 			<div class="wc-block-stock-filter style-list">
 					<ul class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list">

@@ -37,11 +37,13 @@ class Dropdown {
 		$action = $props['action'] ?? '';
 
 		// Items should be an array of objects with a label and value property.
-		$items = $props['items'] ?? [];
+		$items = $props['items'] ?? array();
+
+		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) );
 
 		ob_start();
 		?>
-		<div data-wc-interactive='<?php echo wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) ); ?>'>
+		<div data-wc-interactive='<?php echo esc_attr( $namespace ); ?>'>
 			<div class="wc-interactivity-dropdown" data-wc-context='<?php echo esc_attr( wp_json_encode( $dropdown_context ) ); ?>' >
 				<div class="wc-blocks-components-form-token-field-wrapper single-selection" >
 					<div class="components-form-token-field" tabindex="-1">
