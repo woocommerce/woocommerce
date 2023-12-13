@@ -103,10 +103,6 @@ export function AddProductsModal( {
 		};
 	}
 
-	const { container, draggable, handler } = useDraggable( {
-		onSort: setSelectedProducts,
-	} );
-
 	return (
 		<Modal
 			title={ __( 'Add products to this group', 'woocommerce' ) }
@@ -204,29 +200,12 @@ export function AddProductsModal( {
 					</div>
 
 					{ Boolean( selectedProducts.length ) && (
-						<ul
-							{ ...container }
-							className={ classNames(
-								'woocommerce-add-products-modal__list',
-								container.className
-							) }
-						>
+						<ul className="woocommerce-add-products-modal__list">
 							{ selectedProducts.map( ( item ) => (
 								<li
-									{ ...draggable }
 									key={ item.id }
 									className="woocommerce-add-products-modal__list-item"
 								>
-									<Button
-										{ ...handler }
-										icon={ dragHandle }
-										variant="tertiary"
-										type="button"
-										aria-label={ __(
-											'Sortable handler',
-											'woocommerce'
-										) }
-									/>
 									<div
 										className="woocommerce-add-products-modal__list-item-image"
 										style={ getProductImageStyle( item ) }
