@@ -111,8 +111,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 				array_keys( $additional_address_fields ),
 				function( $carry, $key ) use ( $additional_address_fields ) {
 					if ( 0 === strpos( $key, '/billing/' ) ) {
-						$value = $additional_address_fields[ $key ];
-						error_log( gettype( $value ) );
+						$value         = $additional_address_fields[ $key ];
 						$key           = str_replace( '/billing/', '', $key );
 						$carry[ $key ] = $value;
 					}
