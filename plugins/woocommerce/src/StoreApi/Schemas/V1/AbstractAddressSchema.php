@@ -193,6 +193,13 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			);
 		}
 
+		foreach ( array_keys( $address ) as $key ) {
+			$result = rest_validate_value_from_schema( $address[ $key ], $this->get_properties()[ $key ], $key );
+			if ( is_wp_error( $result ) ) {
+				$errors->add( $result->get_error_code(), $result->get_error_message() );
+			}
+		}
+
 		return $errors->has_errors( $errors ) ? $errors : true;
 	}
 
