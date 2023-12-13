@@ -170,7 +170,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						__( 'This is a <ProductTemplate />.', 'woocommerce' ),
 						{
 							ProductTemplate: (
-								<span>{ selectedProductTemplate?.title }</span>
+								<span>
+									{ selectedProductTemplate?.title?.toLowerCase() }
+								</span>
 							),
 						}
 					) }
