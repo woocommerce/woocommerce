@@ -12,7 +12,8 @@
 				"wp-content/mu-plugins": "./node_modules/@wordpress/e2e-tests/mu-plugins",
 				"wp-content/plugins/gutenberg-test-plugins": "./node_modules/@wordpress/e2e-tests/plugins",
 				"wp-cli.yml": "./wp-cli.yml",
-				"custom-plugins" : "./tests/e2e/mocks/custom-plugins"
+				"custom-plugins": "./tests/e2e/mocks/custom-plugins",
+				"wp-content/plugins/woocommerce/blocks-bin": "./bin"
 			}
 		}
 	},
