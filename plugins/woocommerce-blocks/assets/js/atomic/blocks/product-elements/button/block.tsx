@@ -51,17 +51,11 @@ const AddToCartButton = ( {
 	const buttonText = addedToCart
 		? sprintf(
 				/* translators: %s number of products in cart. */
-				_n(
-					'%d in cart',
-					'%d in cart',
-					cartQuantity,
-					'woocommerce'
-				),
+				_n( '%d in cart', '%d in cart', cartQuantity, 'woocommerce' ),
 				cartQuantity
 		  )
 		: decodeEntities(
-				productCartDetails?.text ||
-					__( 'Add to cart', 'woocommerce' )
+				productCartDetails?.text || __( 'Add to cart', 'woocommerce' )
 		  );
 
 	const ButtonTag = allowAddToCart ? 'button' : 'a';

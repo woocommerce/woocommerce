@@ -30,9 +30,7 @@ export const Edit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<PanelBody
-					title={ __( 'Settings', 'woocommerce' ) }
-				>
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<RangeControl
 						label={ __(
 							'Cross-Sells products to show',

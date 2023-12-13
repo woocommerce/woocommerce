@@ -79,10 +79,7 @@ const GeneralSettings = () => {
 					checked={ settings.enabled }
 					name="local_pickup_enabled"
 					onChange={ setSettingField( 'enabled' ) }
-					label={ __(
-						'Enable local pickup',
-						'woocommerce'
-					) }
+					label={ __( 'Enable local pickup', 'woocommerce' ) }
 					help={
 						<span>
 							{ __(
@@ -108,10 +105,7 @@ const GeneralSettings = () => {
 						'This is the shipping method title shown to customers.',
 						'woocommerce'
 					) }
-					placeholder={ __(
-						'Local Pickup',
-						'woocommerce'
-					) }
+					placeholder={ __( 'Local Pickup', 'woocommerce' ) }
 					value={ settings.title }
 					onChange={ setSettingField( 'title' ) }
 					disabled={ false }
@@ -151,19 +145,13 @@ const GeneralSettings = () => {
 				{ showCosts ? (
 					<>
 						<TextControl
-							label={ __(
-								'Cost',
-								'woocommerce'
-							) }
+							label={ __( 'Cost', 'woocommerce' ) }
 							name="local_pickup_cost"
 							help={ __(
 								'Optional cost to charge for local pickup.',
 								'woocommerce'
 							) }
-							placeholder={ __(
-								'Free',
-								'woocommerce'
-							) }
+							placeholder={ __( 'Free', 'woocommerce' ) }
 							type="number"
 							pattern="[0-9]+\.?[0-9]*"
 							min={ 0 }
@@ -173,10 +161,7 @@ const GeneralSettings = () => {
 							autoComplete="off"
 						/>
 						<SelectControl
-							label={ __(
-								'Taxes',
-								'woocommerce'
-							) }
+							label={ __( 'Taxes', 'woocommerce' ) }
 							name="local_pickup_tax_status"
 							help={ __(
 								'If a cost is defined, this controls if taxes are applied to that cost.',
@@ -184,17 +169,11 @@ const GeneralSettings = () => {
 							) }
 							options={ [
 								{
-									label: __(
-										'Taxable',
-										'woocommerce'
-									),
+									label: __( 'Taxable', 'woocommerce' ),
 									value: 'taxable',
 								},
 								{
-									label: __(
-										'Not taxable',
-										'woocommerce'
-									),
+									label: __( 'Not taxable', 'woocommerce' ),
 									value: 'none',
 								},
 							] }

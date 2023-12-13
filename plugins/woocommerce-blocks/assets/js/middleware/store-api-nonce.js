@@ -32,26 +32,6 @@ const isStoreApiRequest = ( options ) => {
 };
 
 /**
- * Set the current nonce from a header object.
- *
- * @param {Object} headers Headers object.
- */
-const setNonce = ( headers ) => {
-	const nonce =
-		typeof headers?.get === 'function'
-			? headers.get( 'Nonce' )
-			: headers.Nonce;
-	const timestamp =
-		typeof headers?.get === 'function'
-			? headers.get( 'Nonce-Timestamp' )
-			: headers[ 'Nonce-Timestamp' ];
-
-	if ( nonce ) {
-		updateNonce( nonce, timestamp );
-	}
-};
-
-/**
  * Updates the stored nonce within localStorage so it is persisted between page loads.
  *
  * @param {string} nonce     Incoming nonce string.
@@ -79,6 +59,26 @@ const updateNonce = ( nonce, timestamp ) => {
 			timestamp: currentTimestamp,
 		} )
 	);
+};
+
+/**
+ * Set the current nonce from a header object.
+ *
+ * @param {Object} headers Headers object.
+ */
+const setNonce = ( headers ) => {
+	const nonce =
+		typeof headers?.get === 'function'
+			? headers.get( 'Nonce' )
+			: headers.Nonce;
+	const timestamp =
+		typeof headers?.get === 'function'
+			? headers.get( 'Nonce-Timestamp' )
+			: headers[ 'Nonce-Timestamp' ];
+
+	if ( nonce ) {
+		updateNonce( nonce, timestamp );
+	}
 };
 
 const appendNonceHeader = ( request ) => {
@@ -114,8 +114,10 @@ apiFetch.use( storeNonceMiddleware );
 apiFetch.setNonce = setNonce;
 
 updateNonce(
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore wcBlocksMiddlewareConfig is window global cache for the initial nonce initialized from hydration.
 	wcBlocksMiddlewareConfig.storeApiNonce,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore wcBlocksMiddlewareConfig is window global cache for the initial nonce initialized from hydration.
 	wcBlocksMiddlewareConfig.storeApiNonceTimestamp
 );

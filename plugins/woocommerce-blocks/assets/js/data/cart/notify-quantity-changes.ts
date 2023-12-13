@@ -172,9 +172,9 @@ const notifyIfQuantityChanged = (
 /**
  * Checks whether the old cart contains an item that the new cart doesn't, and that the item was not slated for removal.
  *
- * @param  oldCart                The old cart.
- * @param  newCart                The new cart.
- * @param  cartItemsPendingDelete The cart items that are pending deletion.
+ * @param oldCart                The old cart.
+ * @param newCart                The new cart.
+ * @param cartItemsPendingDelete The cart items that are pending deletion.
  */
 const notifyIfRemoved = (
 	oldCart: Cart,
@@ -194,10 +194,7 @@ const notifyIfRemoved = (
 			dispatch( 'core/notices' ).createInfoNotice(
 				sprintf(
 					/* translators: %s is the name of the item. */
-					__(
-						'"%s" was removed from your cart.',
-						'woocommerce'
-					),
+					__( '"%s" was removed from your cart.', 'woocommerce' ),
 					oldCartItem.name
 				),
 				{

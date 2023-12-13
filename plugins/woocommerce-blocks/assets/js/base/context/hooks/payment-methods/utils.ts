@@ -48,21 +48,13 @@ export const prepareTotalItems = (
 	};
 
 	newTotals.push(
-		factory(
-			__( 'Subtotal:', 'woocommerce' ),
-			'total_items'
-		)
+		factory( __( 'Subtotal:', 'woocommerce' ), 'total_items' )
 	);
 
-	newTotals.push(
-		factory( __( 'Fees:', 'woocommerce' ), 'total_fees' )
-	);
+	newTotals.push( factory( __( 'Fees:', 'woocommerce' ), 'total_fees' ) );
 
 	newTotals.push(
-		factory(
-			__( 'Discount:', 'woocommerce' ),
-			'total_discount'
-		)
+		factory( __( 'Discount:', 'woocommerce' ), 'total_discount' )
 	);
 
 	newTotals.push( {
@@ -74,10 +66,7 @@ export const prepareTotalItems = (
 
 	if ( needsShipping ) {
 		newTotals.push(
-			factory(
-				__( 'Shipping:', 'woocommerce' ),
-				'total_shipping'
-			)
+			factory( __( 'Shipping:', 'woocommerce' ), 'total_shipping' )
 		);
 	}
 

@@ -73,18 +73,10 @@ const ProductTagControl = ( {
 		selected: ( n: number ) =>
 			sprintf(
 				/* translators: %d is the count of selected tags. */
-				_n(
-					'%d tag selected',
-					'%d tags selected',
-					n,
-					'woocommerce'
-				),
+				_n( '%d tag selected', '%d tags selected', n, 'woocommerce' ),
 				n
 			),
-		updated: __(
-			'Tag search results updated.',
-			'woocommerce'
-		),
+		updated: __( 'Tag search results updated.', 'woocommerce' ),
 	};
 
 	return (
@@ -118,17 +110,11 @@ const ProductTagControl = ( {
 						onChange={ onOperatorChange }
 						options={ [
 							{
-								label: __(
-									'Any selected tags',
-									'woocommerce'
-								),
+								label: __( 'Any selected tags', 'woocommerce' ),
 								value: 'any',
 							},
 							{
-								label: __(
-									'All selected tags',
-									'woocommerce'
-								),
+								label: __( 'All selected tags', 'woocommerce' ),
 								value: 'all',
 							},
 						] }

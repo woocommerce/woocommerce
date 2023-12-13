@@ -142,10 +142,7 @@ addAction(
 	} ): void => {
 		trackEvent( 'remove_from_cart', {
 			event_category: 'ecommerce',
-			event_label: __(
-				'Remove Cart Item',
-				'woocommerce'
-			),
+			event_label: __( 'Remove Cart Item', 'woocommerce' ),
 			items: [ getProductFieldObject( product, quantity ) ],
 		} );
 	}
@@ -168,10 +165,7 @@ addAction(
 	} ): void => {
 		trackEvent( 'change_cart_quantity', {
 			event_category: 'ecommerce',
-			event_label: __(
-				'Change Cart Item Quantity',
-				'woocommerce'
-			),
+			event_label: __( 'Change Cart Item Quantity', 'woocommerce' ),
 			items: [ getProductFieldObject( product, quantity ) ],
 		} );
 	}
@@ -198,10 +192,7 @@ addAction(
 		}
 		trackEvent( 'view_item_list', {
 			event_category: 'engagement',
-			event_label: __(
-				'Viewing products',
-				'woocommerce'
-			),
+			event_label: __( 'Viewing products', 'woocommerce' ),
 			items: products.map( ( product, index ) => ( {
 				...getProductImpressionObject( product, listName ),
 				list_position: index + 1,

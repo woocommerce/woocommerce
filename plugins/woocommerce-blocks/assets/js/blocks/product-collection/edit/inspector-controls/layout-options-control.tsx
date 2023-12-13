@@ -29,10 +29,7 @@ const getHelpText = ( layoutOptions: LayoutOptions ) => {
 				'woocommerce'
 			);
 		case LayoutOptions.STACK:
-			return __(
-				'Display products in a single column.',
-				'woocommerce'
-			);
+			return __( 'Display products in a single column.', 'woocommerce' );
 		default:
 			return '';
 	}
