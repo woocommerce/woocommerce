@@ -118,6 +118,7 @@ export default function Install( props: InstallProps ) {
 					product_zip_slug: props.subscription.zip_slug,
 					product_id: props.subscription.product_id,
 					product_current_version: props.subscription.version,
+					error_message: error?.data?.message,
 				} );
 			} );
 	};
