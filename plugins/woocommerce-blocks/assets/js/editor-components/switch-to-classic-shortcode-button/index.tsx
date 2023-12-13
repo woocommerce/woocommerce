@@ -84,10 +84,10 @@ export function SwitchToClassicShortcodeButton( {
 					size="medium"
 					title={ switchButtonLabel }
 					onRequestClose={ closeModal }
-					className="wc-blocks-switch_to_classic_shortcode-modal-content"
+					className="wc-blocks-switch-to-classic-shortcode-modal-content"
 				>
 					<ModalContent blockType={ block } />
-					<TabbableContainer className="wc-blocks-switch_to_classic_shortcode-modal-actions">
+					<TabbableContainer className="wc-blocks-switch-to-classic-shortcode-modal-actions">
 						<Button
 							variant="primary"
 							isDestructive={ true }

@@ -113,13 +113,10 @@ export const WooInheritToggleControl = (
 	return (
 		<ToggleControl
 			className="woo-inherit-query-toggle"
-			label={ __(
-				'Inherit query from template',
-				'woo-gutenberg-products-block'
-			) }
+			label={ __( 'Inherit query from template', 'woocommerce' ) }
 			help={ __(
 				'Toggle to use the global query context that is set with the current template, such as variations of the product catalog or search. Disable to customize the filtering independently.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			checked={
 				isCustomInheritGlobalQueryImplementationEnabled
@@ -170,14 +167,11 @@ export const TOOLS_PANEL_CONTROLS = {
 
 		return (
 			<ToolsPanelItem
-				label={ __( 'Sale status', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Sale status', 'woocommerce' ) }
 				hasValue={ () => query.__woocommerceOnSale }
 			>
 				<ToggleControl
-					label={ __(
-						'Show only products on sale',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Show only products on sale', 'woocommerce' ) }
 					checked={ query.__woocommerceOnSale || false }
 					onChange={ ( __woocommerceOnSale ) => {
 						setQueryAttribute( props, {
@@ -194,14 +188,11 @@ export const TOOLS_PANEL_CONTROLS = {
 
 		return (
 			<ToolsPanelItem
-				label={ __( 'Stock status', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Stock status', 'woocommerce' ) }
 				hasValue={ () => query.__woocommerceStockStatus }
 			>
 				<FormTokenField
-					label={ __(
-						'Stock status',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Stock status', 'woocommerce' ) }
 					onChange={ ( statusLabels ) => {
 						const __woocommerceStockStatus = statusLabels
 							.map( getStockStatusIdByLabel )
@@ -245,10 +236,7 @@ const ProductQueryControls = ( props: ProductQueryBlock ) => {
 				) }
 				<ToolsPanel
 					className="woocommerce-product-query-toolspanel"
-					label={ __(
-						'Advanced Filters',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Advanced Filters', 'woocommerce' ) }
 					resetAll={ () => {
 						setQueryAttribute( props, defaultWooQueryParams );
 					} }

@@ -13,8 +13,7 @@ const isConversionPossible = () => {
 	return true;
 };
 
-const getButtonLabel = () =>
-	__( 'Transform into blocks', 'woo-gutenberg-products-block' );
+const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
 
 const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
 	[
@@ -53,7 +52,7 @@ const onClickCallback = ( {
  * Title shown within the block itself.
  */
 const getTitle = () => {
-	return __( 'Classic Cart', 'woo-gutenberg-products-block' );
+	return __( 'Classic Cart', 'woocommerce' );
 };
 
 /**
@@ -62,7 +61,7 @@ const getTitle = () => {
 const getDescription = () => {
 	return __(
 		'This block will render the classic cart shortcode. You can optionally transform it into blocks for more control over the cart experience.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	);
 };
 

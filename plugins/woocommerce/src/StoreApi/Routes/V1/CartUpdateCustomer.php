@@ -41,14 +41,14 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => [
 					'billing_address'  => [
-						'description'       => __( 'Billing address.', 'woo-gutenberg-products-block' ),
+						'description'       => __( 'Billing address.', 'woocommerce' ),
 						'type'              => 'object',
 						'context'           => [ 'view', 'edit' ],
 						'properties'        => $this->schema->billing_address_schema->get_properties(),
 						'sanitize_callback' => null,
 					],
 					'shipping_address' => [
-						'description'       => __( 'Shipping address.', 'woo-gutenberg-products-block' ),
+						'description'       => __( 'Shipping address.', 'woocommerce' ),
 						'type'              => 'object',
 						'context'           => [ 'view', 'edit' ],
 						'properties'        => $this->schema->shipping_address_schema->get_properties(),
@@ -79,7 +79,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 			$billing_validation_check = $this->schema->billing_address_schema->validate_callback( $billing, $request, 'billing_address' );
 
 			if ( false === $billing_validation_check ) {
-				$invalid_params['billing_address'] = __( 'Invalid parameter.', 'woo-gutenberg-products-block' );
+				$invalid_params['billing_address'] = __( 'Invalid parameter.', 'woocommerce' );
 			} elseif ( is_wp_error( $billing_validation_check ) ) {
 				$invalid_params['billing_address']  = implode( ' ', $billing_validation_check->get_error_messages() );
 				$invalid_details['billing_address'] = \rest_convert_error_to_response( $billing_validation_check )->get_data();
@@ -90,7 +90,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 			$shipping_validation_check = $this->schema->shipping_address_schema->validate_callback( $shipping, $request, 'shipping_address' );
 
 			if ( false === $shipping_validation_check ) {
-				$invalid_params['shipping_address'] = __( 'Invalid parameter.', 'woo-gutenberg-products-block' );
+				$invalid_params['shipping_address'] = __( 'Invalid parameter.', 'woocommerce' );
 			} elseif ( is_wp_error( $shipping_validation_check ) ) {
 				$invalid_params['shipping_address']  = implode( ' ', $shipping_validation_check->get_error_messages() );
 				$invalid_details['shipping_address'] = \rest_convert_error_to_response( $shipping_validation_check )->get_data();
@@ -101,7 +101,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 			return new \WP_Error(
 				'rest_invalid_param',
 				/* translators: %s: List of invalid parameters. */
-				sprintf( __( 'Invalid parameter(s): %s', 'woo-gutenberg-products-block' ), implode( ', ', array_keys( $invalid_params ) ) ),
+				sprintf( __( 'Invalid parameter(s): %s', 'woocommerce' ), implode( ', ', array_keys( $invalid_params ) ) ),
 				[
 					'status'  => 400,
 					'params'  => $invalid_params,

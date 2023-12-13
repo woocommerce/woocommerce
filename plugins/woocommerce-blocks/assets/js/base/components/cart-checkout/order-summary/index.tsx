@@ -32,7 +32,7 @@ const OrderSummary = ( {
 			hasBorder={ false }
 			title={
 				<span className="wc-block-components-order-summary__button-text">
-					{ __( 'Order summary', 'woo-gutenberg-products-block' ) }
+					{ __( 'Order summary', 'woocommerce' ) }
 				</span>
 			}
 		>

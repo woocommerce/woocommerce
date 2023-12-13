@@ -20,7 +20,7 @@ const FeaturedProductsControl = ( props: QueryControlProps ) => {
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Featured', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Featured', 'woocommerce' ) }
 			hasValue={ () => query.featured === true }
 			onDeselect={ () => {
 				setQueryAttribute( {
@@ -30,13 +30,10 @@ const FeaturedProductsControl = ( props: QueryControlProps ) => {
 		>
 			<BaseControl
 				id="product-collection-featured-products-control"
-				label={ __( 'Featured', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Featured', 'woocommerce' ) }
 			>
 				<ToggleControl
-					label={ __(
-						'Show only featured products',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Show only featured products', 'woocommerce' ) }
 					checked={ query.featured || false }
 					onChange={ ( featured ) => {
 						setQueryAttribute( {
