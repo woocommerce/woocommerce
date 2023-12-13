@@ -21,45 +21,30 @@ const ProductSortSelect = ( {
 			options={ [
 				{
 					key: 'menu_order',
-					label: __(
-						'Default sorting',
-						'woo-gutenberg-products-block'
-					),
+					label: __( 'Default sorting', 'woocommerce' ),
 				},
 				{
 					key: 'popularity',
-					label: __( 'Popularity', 'woo-gutenberg-products-block' ),
+					label: __( 'Popularity', 'woocommerce' ),
 				},
 				{
 					key: 'rating',
-					label: __(
-						'Average rating',
-						'woo-gutenberg-products-block'
-					),
+					label: __( 'Average rating', 'woocommerce' ),
 				},
 				{
 					key: 'date',
-					label: __( 'Latest', 'woo-gutenberg-products-block' ),
+					label: __( 'Latest', 'woocommerce' ),
 				},
 				{
 					key: 'price',
-					label: __(
-						'Price: low to high',
-						'woo-gutenberg-products-block'
-					),
+					label: __( 'Price: low to high', 'woocommerce' ),
 				},
 				{
 					key: 'price-desc',
-					label: __(
-						'Price: high to low',
-						'woo-gutenberg-products-block'
-					),
+					label: __( 'Price: high to low', 'woocommerce' ),
 				},
 			] }
-			screenReaderLabel={ __(
-				'Order products by',
-				'woo-gutenberg-products-block'
-			) }
+			screenReaderLabel={ __( 'Order products by', 'woocommerce' ) }
 			value={ value }
 		/>
 	);

@@ -29,10 +29,7 @@ export const ProductBestSellersInspectorControls = (
 
 	return (
 		<InspectorControls key="inspector">
-			<PanelBody
-				title={ __( 'Layout', 'woo-gutenberg-products-block' ) }
-				initialOpen
-			>
+			<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
 				<GridLayoutControl
 					columns={ columns }
 					rows={ rows }
@@ -44,10 +41,7 @@ export const ProductBestSellersInspectorControls = (
 					maxRows={ getSetting( 'maxRows', 6 ) }
 				/>
 			</PanelBody>
-			<PanelBody
-				title={ __( 'Content', 'woo-gutenberg-products-block' ) }
-				initialOpen
-			>
+			<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
 				<GridContentControl
 					settings={ contentVisibility }
 					onChange={ ( value ) =>
@@ -56,10 +50,7 @@ export const ProductBestSellersInspectorControls = (
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __(
-					'Filter by Product Category',
-					'woo-gutenberg-products-block'
-				) }
+				title={ __( 'Filter by Product Category', 'woocommerce' ) }
 				initialOpen={ false }
 			>
 				<ProductCategoryControl

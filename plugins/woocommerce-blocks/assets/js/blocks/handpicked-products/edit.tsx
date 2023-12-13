@@ -36,7 +36,7 @@ export const EditBlock = ( props: Props ): JSX.Element => {
 							icon: 'edit',
 							title: __(
 								'Edit selected products',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							onClick: () => setIsEditing( ! isEditing ),
 							isActive: isEditing,

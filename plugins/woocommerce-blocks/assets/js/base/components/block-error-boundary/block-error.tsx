@@ -11,13 +11,10 @@ import type { BlockErrorProps } from './types';
 
 const BlockError = ( {
 	imageUrl = `${ WC_BLOCKS_IMAGE_URL }/block-error.svg`,
-	header = __( 'Oops!', 'woo-gutenberg-products-block' ),
-	text = __(
-		'There was an error loading the content.',
-		'woo-gutenberg-products-block'
-	),
+	header = __( 'Oops!', 'woocommerce' ),
+	text = __( 'There was an error loading the content.', 'woocommerce' ),
 	errorMessage,
-	errorMessagePrefix = __( 'Error:', 'woo-gutenberg-products-block' ),
+	errorMessagePrefix = __( 'Error:', 'woocommerce' ),
 	button,
 	showErrorBlock = true,
 }: BlockErrorProps ): JSX.Element | null => {

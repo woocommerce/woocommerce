@@ -127,7 +127,7 @@ const SelectedListItems = < T extends object = object >( {
 						onClick={ () => onChange( [] ) }
 						aria-label={ messages.clear }
 					>
-						{ __( 'Clear all', 'woo-gutenberg-products-block' ) }
+						{ __( 'Clear all', 'woocommerce' ) }
 					</Button>
 				) : null }
 			</div>
@@ -320,12 +320,7 @@ export const SearchListControl = < T extends object = object >(
 						__experimentalValidateInput={ () => false }
 						value={
 							isLoading
-								? [
-										__(
-											'Loading…',
-											'woo-gutenberg-products-block'
-										),
-								  ]
+								? [ __( 'Loading…', 'woocommerce' ) ]
 								: selected.map( ( token ) => ( {
 										...token,
 										value: token.name,

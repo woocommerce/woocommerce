@@ -42,7 +42,7 @@ class Connection {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			return new \WP_Error( $response->get_error_code(), esc_html__( 'Failed to connect with the AI endpoint: try again later.', 'woo-gutenberg-products-block' ), $response->get_error_message() );
+			return new \WP_Error( $response->get_error_code(), esc_html__( 'Failed to connect with the AI endpoint: try again later.', 'woocommerce' ), $response->get_error_message() );
 		}
 
 		$body = wp_remote_retrieve_body( $response );
@@ -86,7 +86,7 @@ class Connection {
 
 		foreach ( $responses as $key => $response ) {
 			if ( is_wp_error( $response ) || is_a( $response, Exception::class ) ) {
-				return new WP_Error( 'failed-to-connect-with-the-ai-endpoint', esc_html__( 'Failed to connect with the AI endpoint: try again later.', 'woo-gutenberg-products-block' ) );
+				return new WP_Error( 'failed-to-connect-with-the-ai-endpoint', esc_html__( 'Failed to connect with the AI endpoint: try again later.', 'woocommerce' ) );
 			}
 
 			$processed_responses[ $key ] = json_decode( $response->body, true );
@@ -102,13 +102,13 @@ class Connection {
 	 */
 	public function get_site_id() {
 		if ( ! class_exists( Jetpack_Options::class ) ) {
-			return new \WP_Error( 'site-id-error', esc_html__( 'Failed to fetch the site ID: try again later.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'site-id-error', esc_html__( 'Failed to fetch the site ID: try again later.', 'woocommerce' ) );
 		}
 
 		$site_id = Jetpack_Options::get_option( 'id' );
 
 		if ( ! $site_id ) {
-			return new \WP_Error( 'site-id-error', esc_html__( 'Failed to fetch the site ID: The site is not registered.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'site-id-error', esc_html__( 'Failed to fetch the site ID: The site is not registered.', 'woocommerce' ) );
 		}
 
 		return $site_id;
@@ -138,11 +138,11 @@ class Connection {
 		$response = json_decode( wp_remote_retrieve_body( $request ) );
 
 		if ( $response instanceof \WP_Error ) {
-			return new \WP_Error( $response->get_error_code(), esc_html__( 'Failed to generate the JWT token', 'woo-gutenberg-products-block' ), $response->get_error_message() );
+			return new \WP_Error( $response->get_error_code(), esc_html__( 'Failed to generate the JWT token', 'woocommerce' ), $response->get_error_message() );
 		}
 
 		if ( ! isset( $response->token ) ) {
-			return new \WP_Error( 'failed-to-retrieve-jwt-token', esc_html__( 'Failed to retrieve the JWT token: Try again later.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'failed-to-retrieve-jwt-token', esc_html__( 'Failed to retrieve the JWT token: Try again later.', 'woocommerce' ) );
 		}
 
 		return $response->token;

@@ -86,11 +86,11 @@ class Pexels {
 		}
 
 		if ( $refined_images_count < $required_images && ! empty( $errors ) ) {
-			return new \WP_Error( 'ai_service_unavailable', __( 'AI Service is unavailable, try again later.', 'woo-gutenberg-products-block' ), $errors );
+			return new \WP_Error( 'ai_service_unavailable', __( 'AI Service is unavailable, try again later.', 'woocommerce' ), $errors );
 		}
 
 		if ( empty( $refined_images ) ) {
-			return new \WP_Error( 'woocommerce_no_images_found', __( 'No images found.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'woocommerce_no_images_found', __( 'No images found.', 'woocommerce' ) );
 		}
 
 		return $refined_images;
@@ -117,7 +117,7 @@ class Pexels {
 		}
 
 		if ( ! isset( $response['completion'] ) ) {
-			return new \WP_Error( 'search_term_definition_failed', __( 'The search term definition failed.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'search_term_definition_failed', __( 'The search term definition failed.', 'woocommerce' ) );
 		}
 
 		return $response['completion'];
@@ -162,7 +162,7 @@ class Pexels {
 		}
 
 		if ( ! is_array( $filtered_image_titles ) ) {
-			return new \WP_Error( 'ai_service_unavailable', __( 'AI Service is unavailable, try again later.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'ai_service_unavailable', __( 'AI Service is unavailable, try again later.', 'woocommerce' ) );
 		}
 
 		// Remove the images that are not aligned with the business description.
@@ -199,7 +199,7 @@ class Pexels {
 				'data' => $response_data,
 			];
 
-			return new \WP_Error( 'pexels_api_error', __( 'Request to the Pexels API failed.', 'woo-gutenberg-products-block' ), $error_msg );
+			return new \WP_Error( 'pexels_api_error', __( 'Request to the Pexels API failed.', 'woocommerce' ), $error_msg );
 		}
 
 		$response = $response_data['media'] ?? $response_data;

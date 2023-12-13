@@ -49,11 +49,11 @@ class Patterns extends AbstractRoute {
 				'permission_callback' => [ Middleware::class, 'is_authorized' ],
 				'args'                => [
 					'business_description' => [
-						'description' => __( 'The business description for a given store.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'The business description for a given store.', 'woocommerce' ),
 						'type'        => 'string',
 					],
 					'images'               => [
-						'description' => __( 'The images for a given store.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'The images for a given store.', 'woocommerce' ),
 						'type'        => 'object',
 					],
 				],

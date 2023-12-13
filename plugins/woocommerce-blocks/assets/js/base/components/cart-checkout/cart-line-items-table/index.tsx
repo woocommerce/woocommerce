@@ -79,19 +79,13 @@ const CartLineItemsTable = ( {
 			<thead>
 				<tr className="wc-block-cart-items__header">
 					<th className="wc-block-cart-items__header-image">
-						<span>
-							{ __( 'Product', 'woo-gutenberg-products-block' ) }
-						</span>
+						<span>{ __( 'Product', 'woocommerce' ) }</span>
 					</th>
 					<th className="wc-block-cart-items__header-product">
-						<span>
-							{ __( 'Details', 'woo-gutenberg-products-block' ) }
-						</span>
+						<span>{ __( 'Details', 'woocommerce' ) }</span>
 					</th>
 					<th className="wc-block-cart-items__header-total">
-						<span>
-							{ __( 'Total', 'woo-gutenberg-products-block' ) }
-						</span>
+						<span>{ __( 'Total', 'woocommerce' ) }</span>
 					</th>
 				</tr>
 			</thead>

@@ -109,10 +109,7 @@ const ShippingRatesControl = ( {
 	return (
 		<LoadingMask
 			isLoading={ isLoadingRates }
-			screenReaderLabel={ __(
-				'Loading shipping rates…',
-				'woo-gutenberg-products-block'
-			) }
+			screenReaderLabel={ __( 'Loading shipping rates…', 'woocommerce' ) }
 			showSpinner={ true }
 		>
 			{ hasSelectedLocalPickup &&
@@ -127,7 +124,7 @@ const ShippingRatesControl = ( {
 					>
 						{ __(
 							'Multiple shipments must have the same pickup location',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</NoticeBanner>
 				) }

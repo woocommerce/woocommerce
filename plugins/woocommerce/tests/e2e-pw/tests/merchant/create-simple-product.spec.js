@@ -89,7 +89,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			waitUntil: 'networkidle',
 		} );
 		await expect( page.getByRole('heading', { name: virtualProductName }) ).toBeVisible();
-		await expect( page.getByText( productPrice ) ).toBeVisible();
+		await expect( page.getByText( productPrice ).first() ).toBeVisible();
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 		await page.getByRole( 'link', { name: 'View cart' } ).click();
 		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(

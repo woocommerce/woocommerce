@@ -22,44 +22,29 @@ export const ProductReviews = () => {
 				<p>
 					{ __(
 						'The products reviews and the form to add a new review will be displayed here according to your theme. The look you see here is not representative of what is going to look like, this is just a placeholder.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				</p>
 			</Notice>
-			<h2>
-				{ __(
-					'3 reviews for this product',
-					'woo-gutenberg-products-block'
-				) }
-			</h2>
+			<h2>{ __( '3 reviews for this product', 'woocommerce' ) }</h2>
 			<img
 				src={ `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-reviews.svg` }
 				alt="Placeholder"
 			/>
-			<h3>{ __( 'Add a review', 'woo-gutenberg-products-block' ) }</h3>
+			<h3>{ __( 'Add a review', 'woocommerce' ) }</h3>
 			<div className="wp-block-woocommerce-product-reviews__editor__form-container">
 				<div className="wp-block-woocommerce-product-reviews__editor__row">
-					<span>
-						{ __(
-							'Your rating *',
-							'woo-gutenberg-products-block'
-						) }
-					</span>
+					<span>{ __( 'Your rating *', 'woocommerce' ) }</span>
 					<p className="wp-block-woocommerce-product-reviews__editor__stars"></p>
 				</div>
 				<div className="wp-block-woocommerce-product-reviews__editor__row">
-					<span>
-						{ __(
-							'Your review *',
-							'woo-gutenberg-products-block'
-						) }
-					</span>
+					<span>{ __( 'Your review *', 'woocommerce' ) }</span>
 					<textarea />
 				</div>
 				<input
 					type="submit"
 					className="submit wp-block-button__link wp-element-button"
-					value={ __( 'Submit', 'woo-gutenberg-products-block' ) }
+					value={ __( 'Submit', 'woocommerce' ) }
 				/>
 			</div>
 		</div>
