@@ -13,7 +13,7 @@
 		"build": "WIREIT_LOGGER='quiet-ci' pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" build:project",
 		"build:project": "wireit",
 		"build:zip": "./bin/build-zip.sh",
-		"changelog": "composer install && composer exec -- changelogger",
+		"changelog": "composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
 		"docker:ssh": "pnpm exec wc-e2e docker:ssh",
 		"docker:up": "pnpm exec wc-e2e docker:up",
