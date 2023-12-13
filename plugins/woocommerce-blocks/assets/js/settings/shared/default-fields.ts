@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { getSetting } from './utils';
+import { ComboboxControlOption } from '@woocommerce/base-components/combobox';
 
 export interface AddressField {
 	// The label for the field.
@@ -20,6 +21,8 @@ export interface AddressField {
 	index: number;
 	// The type of input to render. Defaults to text.
 	type?: 'text' | 'select';
+	// The options if this is a select field
+	options?: ComboboxControlOption[];
 }
 
 export interface LocaleSpecificAddressField extends Partial< AddressField > {
