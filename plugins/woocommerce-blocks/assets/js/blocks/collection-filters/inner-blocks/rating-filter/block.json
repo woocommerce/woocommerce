@@ -8,12 +8,8 @@
 	"supports": {
 		"interactivity": true
 	},
-	"ancestor": [
-		"woocommerce/collection-filters"
-	],
-	"usesContext": [
-		"collectionData"
-	],
+	"ancestor": [ "woocommerce/collection-filters" ],
+	"usesContext": [ "collectionData" ],
 	"attributes": {
 		"className": {
 			"type": "string",
@@ -26,10 +22,6 @@
 		"displayStyle": {
 			"type": "string",
 			"default": "dropdown"
-		},
-		"showFilterButton": {
-			"type": "boolean",
-			"default": false
 		},
 		"selectType": {
 			"type": "string",
