@@ -85,7 +85,7 @@ class DefaultShippingPartners {
 				),
 				'learn_more_link'   => 'https://wordpress.org/plugins/woocommerce-shipstation-integration/',
 				'is_visible'        => array(
-					self::get_rules_for_countries( array( 'AU', 'NZ', 'CA', 'GB' ) ),
+					self::get_rules_for_countries( array( 'AU', 'CA', 'GB' ) ),
 				),
 				'available_layouts' => array( 'row', 'column' ),
 			),
@@ -139,11 +139,6 @@ class DefaultShippingPartners {
 								'woocommerce'
 							),
 						),
-						array(
-							'icon'        => $check_icon,
-							'description' => __( 'Dynamic shipping rates at checkout', 'woocommerce' ),
-						),
-
 						array(
 							'icon'        => $check_icon,
 							'description' => __( 'Branded tracking experience', 'woocommerce' ),
