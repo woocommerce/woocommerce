@@ -1,19 +1,16 @@
 {
 	"core": null,
 	"plugins": [
-		"https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip",
 		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
 		"https://downloads.wordpress.org/plugin/wordpress-importer.0.8.zip",
 		"./tests/mocks/woo-test-helper",
-		"."
+		"../woocommerce"
 	],
 	"env": {
 		"tests": {
 			"mappings": {
 				"wp-content/mu-plugins": "./node_modules/@wordpress/e2e-tests/mu-plugins",
 				"wp-content/plugins/gutenberg-test-plugins": "./node_modules/@wordpress/e2e-tests/plugins",
-				"wp-content/plugins/woocommerce-blocks": ".",
-				"wp-content/plugins/woocommerce-gutenberg-products-block": ".",
 				"wp-cli.yml": "./wp-cli.yml",
 				"custom-plugins" : "./tests/e2e/mocks/custom-plugins"
 			}
