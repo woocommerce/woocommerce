@@ -195,7 +195,7 @@ If you provide a service via an API, it's best to store that information so futu
 
 You may want to log data that can be useful for debugging purposes. This is great with two conditions:
 
-- Allow any logging as an ‘opt in'.
+- Allow any logging as an 'opt in'.
 - Use the [WC_Logger](https://woo.com/wc-apidocs/class-WC_Logger.html) class. A user can then view logs on their system status page.
 
 If adding logging to your extension, here's a snippet for presenting a link to the logs, in a way the extension user can easily make use of.

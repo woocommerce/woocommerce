@@ -12,7 +12,7 @@ Payment gateways come in several varieties:
 
 1.  **Form based** – This is where the user must click a button on a form that then redirects them to the payment processor on the gateway's own website. _Example_: PayPal standard, Authorize.net DPM
 2.  **iFrame based** – This is when the gateway payment system is loaded inside an iframe on your store. _Example_: SagePay Form, PayPal Advanced
-3.  **Direct** – This is when the payment fields are shown directly on the checkout page and the payment is made when ‘place order' is pressed. _Example_: PayPal Pro, Authorize.net AIM
+3.  **Direct** – This is when the payment fields are shown directly on the checkout page and the payment is made when 'place order' is pressed. _Example_: PayPal Pro, Authorize.net AIM
 4.  **Offline** – No online payment is made. _Example_: Cheque, Bank Transfer
 
 Form and iFrame based gateways post data offsite, meaning there are less security issues for you to think about. Direct gateways, however, require server security to be implemented ([SSL certificates](https://woo.com/document/ssl-and-https/), etc.) and may also require a level of [PCI compliance](https://woo.com/document/pci-dss-compliance-and-woocommerce/).
@@ -62,7 +62,7 @@ Most methods are inherited from the WC_Payment_Gateway class, but some are requ
 
 Within your constructor, you should define the following variables:
 
-- `$this->id` – Unique ID for your gateway, e.g., ‘your_gateway'
+- `$this->id` – Unique ID for your gateway, e.g., 'your_gateway'
 - `$this->icon` – If you want to show an image next to the gateway's name on the frontend, enter a URL to an image.
 - `$this->has_fields` – Bool. Can be set to true if you want payment fields to show on the checkout (if doing a direct integration).
 - `$this->method_title` – Title of the payment method shown on the admin page.
@@ -197,7 +197,7 @@ If you are creating an advanced, direct gateway (i.e., one that takes payment o
 $this->has_fields = true;
 ```
 
-This tells the checkout to output a ‘payment_box' containing your direct payment form that you define next.
+This tells the checkout to output a 'payment_box' containing your direct payment form that you define next.
 
 Create a method called `payment_fields()` – this contains your form, most likely to have credit card details.
 

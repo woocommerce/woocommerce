@@ -186,7 +186,7 @@ function custom_override_default_address_fields( $address_fields ) {
 
 ### Defining select options
 
-If you are adding a field with type ‘select', as stated above you would define key/value pairs. For example:
+If you are adding a field with type 'select', as stated above you would define key/value pairs. For example:
 
 ```php
 $fields['billing']['your_field']['options'] = array(

@@ -33,18 +33,18 @@ The list below holds the main conditional tags. To see all conditional tags, vis
 - `is_product_category()`  
   Returns true when viewing a product category archive.
 - `is_product_category( 'shirts' )`  
-  When the product category page for the ‘shirts' category is being displayed.
+  When the product category page for the 'shirts' category is being displayed.
 - `is_product_category( array( 'shirts', 'games' ) )`  
-  When the product category page for the ‘shirts' or ‘games' category is being displayed.
+  When the product category page for the 'shirts' or 'games' category is being displayed.
 
 ### Product tag page
 
 - `is_product_tag()`  
   Returns true when viewing a product tag archive
 - `is_product_tag( 'shirts' )`  
-  When the product tag page for the ‘shirts' tag is being displayed.
+  When the product tag page for the 'shirts' tag is being displayed.
 - `is_product_tag( array( 'shirts', 'games' ) )`  
-  When the product tag page for the ‘shirts' or ‘games' tags is being displayed.
+  When the product tag page for the 'shirts' or 'games' tags is being displayed.
 
 ### Single product page
 

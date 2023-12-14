@@ -6,7 +6,7 @@ post_title: WooCommerce Endpoints
 
 Endpoints are an extra part in the website URL that is detected to show different content when present.
 
-For example: You may have a ‘my account' page shown at URL **yoursite.com/my-account**. When the endpoint ‘edit-account' is appended to this URL, making it ‘**yoursite.com/my-account/edit-account**‘ then the **Edit account page** is shown instead of the **My account page**.
+For example: You may have a 'my account' page shown at URL **yoursite.com/my-account**. When the endpoint 'edit-account' is appended to this URL, making it '**yoursite.com/my-account/edit-account**' then the **Edit account page** is shown instead of the **My account page**.
 
 This allows us to show different content without the need for multiple pages and shortcodes, and reduces the amount of content that needs to be installed.
 
@@ -99,7 +99,7 @@ On Windows servers, the **web.config** file may not be set correctly to allow fo
 
 ### Pages direct to wrong place
 
-Landing on the wrong page when clicking an endpoint URL is typically caused by incorrect settings. For example, clicking ‘Edit address' on your account page takes you to the Shop page instead of the edit address form means you selected the wrong page in settings. Confirm that your pages are correctly configured and that a different page is used for each section.
+Landing on the wrong page when clicking an endpoint URL is typically caused by incorrect settings. For example, clicking 'Edit address' on your account page takes you to the Shop page instead of the edit address form means you selected the wrong page in settings. Confirm that your pages are correctly configured and that a different page is used for each section.
 
 ### How to Remove “Downloads” from My Account
 

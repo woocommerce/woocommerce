@@ -32,7 +32,7 @@ We're unable to cover all options, but we have added some tips for the popular c
 
 ### W3 Total Cache Minify Settings
 
-Ensure you add ‘mfunc' to the ‘Ignored comment stems' option in the Minify settings.
+Ensure you add 'mfunc' to the 'Ignored comment stems' option in the Minify settings.
 
 ### WP-Rocket
 

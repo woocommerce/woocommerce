@@ -45,10 +45,10 @@ Lifecycle hooks can be used to communicate that a lifecycle event is about to st
 
 In general, lifecycle hooks:
 
-* Come in pairs (‘before' and ‘after')
+* Come in pairs ('before' and 'after')
 * Are always actions, never filters
-* The ‘before' hook will generally always provide callbacks with the arguments array, if there is one
-* The ‘after' hook will generally also provide callbacks with the function's return value, if there is one
+* The 'before' hook will generally always provide callbacks with the arguments array, if there is one
+* The 'after' hook will generally also provide callbacks with the function's return value, if there is one
 
 Note that lifecycle hooks primarily exist to let other systems observe, rather than to modify the result. Of course, this does not stop the function author from additionally providing a filter hook that serves this function.
 
