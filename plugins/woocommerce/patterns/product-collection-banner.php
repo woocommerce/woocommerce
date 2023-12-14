@@ -7,7 +7,7 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
-$image = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/beach-landscape-sea-coast-nature-person.jpg' );
+$image = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/beach-landscape-sea-coast-nature-person.jpg' );
 
 $first_title       = $content['titles'][0]['default'] ?? '';
 $first_description = $content['descriptions'][0]['default'] ?? '';
