@@ -983,8 +983,11 @@ ORDER BY orders.id ASC
 	 * @return void
 	 */
 	private function delete_trashed_orders() {
-		$delete_timestamp = $this->legacy_proxy->call_function( 'time' ) - ( DAY_IN_SECONDS * EMPTY_TRASH_DAYS );
+		if ( ! $this->custom_orders_table_is_authoritative() ) {
+			return;
+		}
 
+		$delete_timestamp = $this->legacy_proxy->call_function( 'time' ) - ( DAY_IN_SECONDS * EMPTY_TRASH_DAYS );
 		$args = array(
 			'status'        => 'trash',
 			'limit'         => self::ORDERS_SYNC_BATCH_SIZE,
