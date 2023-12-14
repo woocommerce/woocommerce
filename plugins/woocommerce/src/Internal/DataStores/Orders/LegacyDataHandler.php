@@ -116,4 +116,70 @@ class LegacyDataHandler {
 
 		return $sql;
 	}
+
+	/**
+	 * Performs a cleanup of post data for a given order and also converts the post to the placeholder type in the backup table.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return void
+	 * @throws \Exception When an error occurs.
+	 */
+	public function cleanup_post_data( $order_id ): void {
+		global $wpdb;
+
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			throw new \Exception( sprintf( __( '%d is not a valid order ID.', 'woocommerce' ), $order_id ) );
+		}
+
+		if ( ! $this->is_order_newer_than_post( $order ) ) {
+			throw new \Exception( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables.', 'woocommerce' ) ) );
+		}
+
+		$meta_ids = $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d", $order->get_id() ) );
+		foreach ( $meta_ids as $meta_id ) {
+			delete_metadata_by_mid( 'post', $meta_id );
+		}
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->posts} SET post_type = %s, post_status = %s WHERE ID = %d",
+				$this->data_synchronizer::PLACEHOLDER_ORDER_POST_TYPE,
+				'draft',
+				$order->get_id()
+			)
+		);
+
+		clean_post_cache( $order->get_id() );
+	}
+
+	/**
+	 * Checks whether an HPOS-backed order is newer than the corresponding post.
+	 *
+	 * @param int|\WC_Order $order An HPOS order.
+	 * @return bool TRUE if the order is up to date with the corresponding post.
+	 * @throws \Exception When the order is not an HPOS order.
+	 */
+	private function is_order_newer_than_post( $order ): bool {
+		$order = is_a( $order, 'WC_Order' ) ? $order : wc_get_order( absint( $order ) );
+
+		if ( ! is_a( $order->get_data_store()->get_current_class_name(), OrdersTableDataStore::class, true ) ) {
+			throw new \Exception( __( 'Order is not an HPOS order.' ) );
+		}
+
+		$post = get_post( $order->get_id() );
+		if ( ! $post || $this->data_synchronizer::PLACEHOLDER_ORDER_POST_TYPE === $post->post_type ) {
+			return true;
+		}
+
+		$order_modified_gmt = $order->get_date_modified() ?? $order->get_date_created();
+		$order_modified_gmt = $order_modified_gmt ? $order_modified_gmt->getTimestamp() : 0;
+		$post_modified_gmt  = $post->post_modified_gmt ?? $post->post_date_gmt;
+		$post_modified_gmt  = ( $post_modified_gmt && '0000-00-00 00:00:00' !== $post_modified_gmt ) ? wc_string_to_timestamp( $post_modified_gmt ) : 0;
+
+		return $order_modified_gmt >= $post_modified_gmt;
+	}
+
+
+
 }
