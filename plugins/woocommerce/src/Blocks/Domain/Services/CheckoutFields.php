@@ -310,7 +310,10 @@ class CheckoutFields {
 
 		if ( 'select' === $type ) {
 			if ( empty( $options['options'] ) || ! is_array( $options['options'] ) ) {
-				return new \WP_Error( 'woocommerce_blocks_checkout_select_field_no_options_specified', __( 'Fields of type "select" must have an array of "options".', 'woocommerce' ) );
+				return new \WP_Error(
+					'woocommerce_blocks_checkout_select_field_no_options_specified',
+					__( 'Fields of type "select" must have an array of "options".', 'woocommerce' )
+				);
 			}
 
 			$cleaned_options = array();
