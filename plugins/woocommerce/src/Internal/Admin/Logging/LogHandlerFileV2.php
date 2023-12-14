@@ -183,40 +183,42 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		/** This filter is documented in includes/class-wc-logger.php. */
 		$retention_days = absint( apply_filters( 'woocommerce_logger_days_to_retain_logs', 30 ) );
 
-		$this->handle(
-			time(),
-			'info',
-			sprintf(
-				'%s %s',
+		if ( $deleted > 0 ) {
+			$this->handle(
+				time(),
+				'info',
 				sprintf(
-					esc_html(
+					'%s %s',
+					sprintf(
+						esc_html(
 						// translators: %s is a number of log files.
-						_n(
-							'%s expired log file was deleted.',
-							'%s expired log files were deleted.',
-							$deleted,
-							'woocommerce'
-						)
+							_n(
+								'%s expired log file was deleted.',
+								'%s expired log files were deleted.',
+								$deleted,
+								'woocommerce'
+							)
+						),
+						number_format_i18n( $deleted )
 					),
-					number_format_i18n( $deleted )
-				),
-				sprintf(
-					esc_html(
+					sprintf(
+						esc_html(
 						// translators: %s is a number of days.
-						_n(
-							'The retention period for log files is %s day.',
-							'The retention period for log files is %s days.',
-							$retention_days,
-							'woocommerce'
-						)
-					),
-					number_format_i18n( $retention_days )
+							_n(
+								'The retention period for log files is %s day.',
+								'The retention period for log files is %s days.',
+								$retention_days,
+								'woocommerce'
+							)
+						),
+						number_format_i18n( $retention_days )
+					)
+				),
+				array(
+					'source' => 'wc_logger',
 				)
-			),
-			array(
-				'source' => 'wc_logger',
-			)
-		);
+			);
+		}
 
 		return $deleted;
 	}
