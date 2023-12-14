@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -689,11 +690,47 @@ class WC_Helper {
 			return;
 		}
 
-		$my_subscriptions_url_base = self::get_helper_redirect_url( [], true );
-		$redirect_url              = add_query_arg( 'install', wp_unslash( $_GET[ 'install' ] ), $my_subscriptions_url_base );
+		$my_subscriptions_url = self::get_subscriptions_redirect_url( array( 'install' => wp_unslash( $_GET[ 'install' ] ) ), true );
+		wp_safe_redirect( esc_url_raw( $my_subscriptions_url ) );
+	}
 
-		wp_safe_redirect( esc_url_raw( $redirect_url ) );
-		die();
+	/**
+	 * Get the subscriptions page url.
+	 * This provides compatibility for the old and new subscriptions page and replaces
+	 * the previous `get_helper_redirect_url` method below.
+	 *
+	 * @param array $args Query args added to the base url.
+	 * @return string
+	 */
+	public static function get_subscriptions_redirect_url( array $args = array(), bool $redirect_to_wc_admin = false ): string {
+		global $current_screen;
+
+		if ( true === $redirect_to_wc_admin && $current_screen->id === 'woocommerce_page_wc-addons' && FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
+			return add_query_arg(
+				array_merge(
+					array(
+						'page' => 'wc-admin',
+						'tab'  => 'my-subscriptions',
+						'path' => urlencode( '/extensions' ),
+					),
+					$args
+				),
+				admin_url( 'admin.php' )
+			);
+		}
+
+		return add_query_arg(
+			array_merge(
+				$args,
+				array(
+					'page'    => 'wc-addons',
+					'section' => 'helper',
+					// we remove the install parameter from the url to prevent a redirect loop.
+					'install' => false,
+				),
+			),
+			admin_url( 'admin.php' )
+		);
 	}
 
 	/**
