@@ -49,7 +49,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 
 		$entry = self::format_entry( $timestamp, $level, $message, $context );
 
-		$written = $this->file_controller->write_to_file( $source, $entry );
+		$written = $this->file_controller->write_to_file( $source, $entry, $timestamp );
 
 		if ( $written ) {
 			$this->file_controller->invalidate_cache();
