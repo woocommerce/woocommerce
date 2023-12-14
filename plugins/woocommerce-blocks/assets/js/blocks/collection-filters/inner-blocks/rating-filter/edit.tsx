@@ -313,8 +313,6 @@ const RatingFilterEditBlock = ( {
 const Edit = ( props: BlockEditProps< Attributes > ) => {
 	const { className } = props.attributes;
 
-	console.log( 'YO BOI' );
-
 	const blockProps = useBlockProps( {
 		className: classnames( 'wc-block-rating-filter', className ),
 	} );
