@@ -36,7 +36,7 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_filter( 'render_block', array( $this, 'add_alignment_class_to_wrapper' ), 10, 2 );
-		add_filter( 'woocommerce_product_query_meta_query', array( $this, 'filter_products_by_stock' ) );
+		// add_filter( 'woocommerce_product_query_meta_query', array( $this, 'filter_products_by_stock' ) );
 		add_action( 'enqueue_block_assets', array( $this, 'enqueue_block_assets' ) );
 	}
 

@@ -1,8 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\CollectionFilterer;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 
 /**
  * CollectionFilters class.
@@ -144,21 +144,106 @@ final class CollectionFilters extends AbstractBlock {
 			return array();
 		}
 
-		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data(
-			add_query_arg(
-				array_merge(
-					$this->get_formatted_products_params( $block->context['query'] ?? array() ),
-					$collection_data_params,
-				),
-				'/wc/store/v1/products/collection-data'
-			)
-		);
+		$data    = [
+			'min_price'           => null,
+			'max_price'           => null,
+			'attribute_counts'    => null,
+			'stock_status_counts' => null,
+			'rating_counts'       => null,
+		];
 
-		if ( ! empty( $response['body'] ) ) {
-			return json_decode( wp_json_encode( $response['body'] ), true );
+		$filters = Package::container()->get( CollectionFilterer::class );
+
+		$query_vars = array();
+
+		if ( ! empty($block->context['query'] ) && ! $block->context['query']['inherit'] ) {
+			$query_vars = build_query_vars_from_query_block( $block, 1 );
+		} else {
+			global $wp_query;
+			$query_vars = array_filter( $wp_query->query_vars );
 		}
 
-		return array();
+		$query_vars['fields'] = 'ids';
+
+		if ( ! empty( $collection_data_params['calculate_price_range'] ) ) {
+			$filter_query_vars = $query_vars;
+			unset( $filter_query_vars['min_price'], $filter_query_vars['max_price'] );
+
+			$price_results     = $filters->get_filtered_price( $query_vars );
+			$data['price_range'] = array(
+			'min_price' => intval(floor( $price_results->min_price )),
+			'max_price' => intval(ceil( $price_results->max_price )),
+			);
+		}
+
+		if ( ! empty( $collection_data_params['calculate_stock_status_counts'] ) ) {
+			$filter_query_vars = $query_vars;
+			unset( $filter_query_vars['filter_stock_status'] );
+
+			$counts = $filters->get_stock_status_counts( $filter_query_vars );
+
+			$data['stock_status_counts'] = [];
+
+			foreach ( $counts as $key => $value ) {
+				$data['stock_status_counts'][] = array(
+					'status' => $key,
+					'count'  => $value,
+				);
+			}
+		}
+
+		if ( ! empty( $collection_data_params['calculate_rating_counts'] ) ) {
+			// Regenerate the products query vars without rating filter.
+			$filter_query_vars = $query_vars;
+
+			if ( ! empty( $filter_query_vars['tax_query'] ) ) {
+				foreach ( $filter_query_vars['tax_query'] as $key => $tax_query ) {
+					if ( isset( $tax_query['rating_filter'] ) && $tax_query['rating_filter'] ) {
+						unset( $filter_query_vars['tax_query'][$key] );
+					}
+				}
+			}
+
+			$counts                = $filters->get_rating_counts( $filter_query_vars );
+			$data['rating_counts'] = [];
+
+			foreach ( $counts as $key => $value ) {
+				$data['rating_counts'][] = array(
+					'rating' => $key,
+					'count'  => $value,
+				);
+			}
+		}
+
+		if ( ! empty( $collection_data_params['calculate_attribute_counts'] ) ) {
+			foreach ( $collection_data_params['calculate_attribute_counts'] as $attributes_to_count ) {
+				if ( ! isset( $attributes_to_count['taxonomy'] ) ) {
+					continue;
+				}
+
+				$filter_query_vars = $query_vars;
+				unset( $filter_query_vars[ 'filter_' . str_replace( 'pa_', '', $attributes_to_count['taxonomy']) ] );
+				unset($filter_query_vars['taxonomy']);
+				unset($filter_query_vars['terms']);
+				foreach( $filter_query_vars['tax_query'] as $key => $tax_query ) {
+					if ( is_array( $tax_query ) && $tax_query['taxonomy'] === $attributes_to_count['taxonomy'] ) {
+						unset($filter_query_vars['tax_query'][$key]);
+					}
+				}
+
+				$counts = $filters->get_attribute_counts( $filter_query_vars, $attributes_to_count['taxonomy'] );
+
+				foreach ( $counts as $key => $value ) {
+					$data['attribute_counts'][] = array(
+						'term'  => $key,
+						'count' => $value,
+					);
+				}
+			}
+
+		}
+
+		return $data;
 	}
 
 	/**
