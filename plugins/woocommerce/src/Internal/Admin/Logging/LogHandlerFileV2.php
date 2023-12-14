@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Log_Handler;
 
 /**
@@ -47,7 +48,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 			$source = $this->determine_source();
 		}
 
-		$entry = self::format_entry( $timestamp, $level, $message, $context );
+		$entry = static::format_entry( $timestamp, $level, $message, $context );
 
 		$written = $this->file_controller->write_to_file( $source, $entry, $timestamp );
 
@@ -69,7 +70,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	 * @return string Formatted log entry.
 	 */
 	protected static function format_entry( $timestamp, $level, $message, $context ) {
-		$time_string  = self::format_time( $timestamp );
+		$time_string  = static::format_time( $timestamp );
 		$level_string = strtoupper( $level );
 
 		// Remove line breaks so the whole entry is on one line in the file.
@@ -78,7 +79,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		unset( $context['source'] );
 		if ( ! empty( $context ) ) {
 			if ( isset( $context['backtrace'] ) && true === filter_var( $context['backtrace'], FILTER_VALIDATE_BOOLEAN ) ) {
-				$context['backtrace'] = self::get_backtrace();
+				$context['backtrace'] = static::get_backtrace();
 			}
 
 			$formatted_context  = wp_json_encode( $context );
@@ -115,7 +116,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		);
 
 		$source    = '';
-		$backtrace = self::get_backtrace();
+		$backtrace = static::get_backtrace();
 
 		foreach ( $backtrace as $frame ) {
 			foreach ( $source_roots as $type => $path ) {

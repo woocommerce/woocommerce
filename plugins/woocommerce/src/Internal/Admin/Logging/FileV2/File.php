@@ -150,7 +150,7 @@ class File {
 			$parsed['source'] = substr( $parsed['source'], 0, $rotation_marker );
 		}
 
-		$parsed['file_id'] = self::generate_file_id(
+		$parsed['file_id'] = static::generate_file_id(
 			$parsed['source'],
 			$parsed['rotation'],
 			$parsed['created']
@@ -173,7 +173,7 @@ class File {
 	 * @return string
 	 */
 	public static function generate_file_id( string $source, ?int $rotation = null, int $created = 0 ): string {
-		$file_id = self::sanitize_source( $source );
+		$file_id = static::sanitize_source( $source );
 
 		if ( ! is_null( $rotation ) ) {
 			$file_id .= '.' . $rotation;
@@ -216,7 +216,7 @@ class File {
 	 * @return void
 	 */
 	protected function ingest_path(): void {
-		$parsed_path    = self::parse_path( $this->path );
+		$parsed_path    = static::parse_path( $this->path );
 		$this->source   = $parsed_path['source'];
 		$this->rotation = $parsed_path['rotation'];
 		$this->created  = $parsed_path['created'];
@@ -347,7 +347,7 @@ class File {
 			$created = $this->get_created_timestamp();
 		}
 
-		$file_id = self::generate_file_id(
+		$file_id = static::generate_file_id(
 			$this->get_source(),
 			$this->get_rotation(),
 			$created
@@ -476,13 +476,13 @@ class File {
 			$new_rotation = $this->get_rotation() + 1;
 		}
 
-		$new_file_id = self::generate_file_id( $this->get_source(), $new_rotation, $created );
+		$new_file_id = static::generate_file_id( $this->get_source(), $new_rotation, $created );
 
 		$search  = array( $this->get_file_id() );
 		$replace = array( $new_file_id );
 		if ( $this->has_standard_filename() ) {
 			$search[]  = $this->get_hash();
-			$replace[] = self::generate_hash( $new_file_id );
+			$replace[] = static::generate_hash( $new_file_id );
 		}
 
 		$old_filename = $this->get_basename();
