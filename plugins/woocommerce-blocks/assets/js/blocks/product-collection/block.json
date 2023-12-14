@@ -1,13 +1,13 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-    "apiVersion": 2,
-    "name": "woocommerce/product-collection",
-    "version": "1.0.0",
-    "title": "Product Collection (Beta)",
-    "description": "Display a collection of products from your store.",
-    "category": "woocommerce",
-    "keywords": [ "WooCommerce", "Products (Beta)" ],
-    "textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2,
+	"name": "woocommerce/product-collection",
+	"version": "1.0.0",
+	"title": "Product Collection (Beta)",
+	"description": "Display a collection of products from your store.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce", "Products (Beta)" ],
+	"textdomain": "woocommerce",
 	"attributes": {
 		"queryId": {
 			"type": "number"
