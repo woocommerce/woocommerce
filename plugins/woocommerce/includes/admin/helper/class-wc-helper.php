@@ -686,6 +686,7 @@ class WC_Helper {
 	 *
 	 * @param array $args Query args.
 	 * @param bool  $redirect_to_wc_admin Whether to redirect to WC Admin.
+	 * @param string $install_product_key Optional Product key to install.
 	 * @return string
 	 */
 	private static function get_helper_redirect_url( $args = array(), $redirect_to_wc_admin = false, $install_product_key = '' ) {
@@ -693,9 +694,9 @@ class WC_Helper {
 		if ( true === $redirect_to_wc_admin && 'woocommerce_page_wc-addons' === $current_screen->id ) {
 			$new_url = add_query_arg(
 				array(
-					'page'    => 'wc-admin',
-					'tab'     => 'my-subscriptions',
-					'path'    => rawurlencode( '/extensions' ),
+					'page' => 'wc-admin',
+					'tab'  => 'my-subscriptions',
+					'path' => rawurlencode( '/extensions' ),
 				),
 				admin_url( 'admin.php' )
 			);
