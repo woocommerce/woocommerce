@@ -988,7 +988,7 @@ ORDER BY orders.id ASC
 		}
 
 		$delete_timestamp = $this->legacy_proxy->call_function( 'time' ) - ( DAY_IN_SECONDS * EMPTY_TRASH_DAYS );
-		$args = array(
+		$args             = array(
 			'status'        => 'trash',
 			'limit'         => self::ORDERS_SYNC_BATCH_SIZE,
 			'date_modified' => '<' . $delete_timestamp,
