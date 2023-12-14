@@ -74,18 +74,20 @@ export function BlockTemplateTreeItem( {
 			<div
 				className={
 					'woocommerce-product-editor-dev-tools-template-block__row ' +
-					`${ isSelected ? 'selected' : '' }` +
+					`${ isSelected ? 'selected' : '' } ` +
 					`${ innerBlocks ? '' : 'no-inner-blocks' } ` +
 					`${
 						isConditionallyHidden ? 'conditionally-hidden' : ''
 					} ` +
 					`${
 						isConditionallyDisabled ? 'conditionally-disabled' : ''
-					}`
+					} `
 				}
 			>
 				{ innerBlocks && (
 					<Button
+						// @ts-ignore
+						size="compact"
 						icon={ isExpanded ? chevronDown : chevronRight }
 						className="woocommerce-product-editor-dev-tools-template-block__row__expand-toggle"
 						label={
