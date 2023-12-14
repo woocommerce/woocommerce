@@ -94,8 +94,8 @@ class Pexels {
 		}
 
 		return array(
-			'images' => $refined_images,
-			'search_term' => $search_term
+			'images'      => $refined_images,
+			'search_term' => $search_term,
 		);
 	}
 
