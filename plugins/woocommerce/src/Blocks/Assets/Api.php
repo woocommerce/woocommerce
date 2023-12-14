@@ -16,7 +16,7 @@ class Api {
 	 *
 	 * @var array
 	 */
-	private $inline_scripts = array();
+	private $inline_scripts = [];
 
 	/**
 	 * Determines if caching is enabled for script data.
@@ -133,7 +133,7 @@ class Api {
 	 */
 	private function get_cached_script_data() {
 		if ( $this->disable_cache ) {
-			return array();
+			return [];
 		}
 
 		$transient_value = json_decode( (string) get_transient( $this->script_data_transient_key ), true );
@@ -147,10 +147,10 @@ class Api {
 			empty( $transient_value['hash'] ) ||
 			$transient_value['hash'] !== $this->script_data_hash
 		) {
-			return array();
+			return [];
 		}
 
-		return (array) ( $transient_value['script_data'] ?? array() );
+		return (array) ( $transient_value['script_data'] ?? [] );
 	}
 
 	/**
@@ -181,7 +181,7 @@ class Api {
 	 *
 	 * @return array src, version and dependencies of the script.
 	 */
-	public function get_script_data( $relative_src, $dependencies = array() ) {
+	public function get_script_data( $relative_src, $dependencies = [] ) {
 		if ( ! $relative_src ) {
 			return array(
 				'src'          => '',
@@ -198,21 +198,21 @@ class Api {
 			$asset_path = $this->package->get_path( str_replace( '.js', '.asset.php', $relative_src ) );
 			// The following require is safe because we are checking if the file exists and it is not a user input.
 			// nosemgrep audit.php.lang.security.file.inclusion-arg.
-			$asset = file_exists( $asset_path ) ? require $asset_path : array();
+			$asset = file_exists( $asset_path ) ? require $asset_path : [];
 
 			$this->script_data[ $relative_src ] = array(
 				'src'          => $this->get_asset_url( $relative_src ),
 				'version'      => ! empty( $asset['version'] ) ? $asset['version'] : $this->get_file_version( $relative_src ),
-				'dependencies' => ! empty( $asset['dependencies'] ) ? $asset['dependencies'] : array(),
+				'dependencies' => ! empty( $asset['dependencies'] ) ? $asset['dependencies'] : [],
 			);
 		}
 
 		// Return asset details as well as the requested dependencies array.
-		return array(
+		return [
 			'src'          => $this->script_data[ $relative_src ]['src'],
 			'version'      => $this->script_data[ $relative_src ]['version'],
 			'dependencies' => array_merge( $this->script_data[ $relative_src ]['dependencies'], $dependencies ),
-		);
+		];
 	}
 
 	/**
@@ -232,12 +232,12 @@ class Api {
 	 * @param array  $dependencies  Optional. An array of registered script handles this script depends on. Default empty array.
 	 * @param bool   $has_i18n      Optional. Whether to add a script translation call to this file. Default: true.
 	 */
-	public function register_script( $handle, $relative_src, $dependencies = array(), $has_i18n = true ) {
+	public function register_script( $handle, $relative_src, $dependencies = [], $has_i18n = true ) {
 		$script_data = $this->get_script_data( $relative_src, $dependencies );
 
 		if ( in_array( $handle, $script_data['dependencies'], true ) ) {
 			if ( $this->package->feature()->is_development_environment() ) {
-				$dependencies = array_diff( $script_data['dependencies'], array( $handle ) );
+				$dependencies = array_diff( $script_data['dependencies'], [ $handle ] );
 					add_action(
 						'admin_notices',
 						function() use ( $handle ) {
@@ -283,7 +283,7 @@ class Api {
 	 *                              'all', 'print' and 'screen', or media queries like '(orientation: portrait)' and '(max-width: 640px)'.
 	 * @param boolean $rtl   Optional. Whether or not to register RTL styles.
 	 */
-	public function register_style( $handle, $relative_src, $deps = array(), $media = 'all', $rtl = false ) {
+	public function register_style( $handle, $relative_src, $deps = [], $media = 'all', $rtl = false ) {
 		$filename = str_replace( plugins_url( '/', dirname( __DIR__ ) ), '', $relative_src );
 		$src      = $this->get_asset_url( $relative_src );
 		$ver      = $this->get_file_version( $filename );
