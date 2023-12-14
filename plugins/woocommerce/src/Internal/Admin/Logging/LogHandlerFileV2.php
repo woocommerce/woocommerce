@@ -32,7 +32,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	 * @param string $message   Log message.
 	 * @param array  $context   {
 	 *     Optional. Additional information for log handlers. Any data can be added here, but there are some array
-	 *     keys that have special behavior:
+	 *     keys that have special behavior.
 	 *
 	 *     @type string $source    Determines which log file to write to. Must be at least 3 characters in length.
 	 *     @type bool   $backtrace True to include a backtrace that shows where the logging function got called.
@@ -81,12 +81,13 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 				$context['backtrace'] = self::get_backtrace();
 			}
 
-			$formatted_context = wp_json_encode( $context );
+			$formatted_context  = wp_json_encode( $context );
 			$formatted_message .= " CONTEXT: $formatted_context";
 		}
 
 		$entry = "$time_string $level_string $formatted_message";
 
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/** This filter is documented in includes/abstracts/abstract-wc-log-handler.php */
 		return apply_filters(
 			'woocommerce_format_log_entry',
@@ -98,6 +99,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 				'context'   => $context,
 			)
 		);
+		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 	}
 
 	/**
@@ -180,8 +182,10 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 
 		$deleted = $this->file_controller->delete_files( $file_ids );
 
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/** This filter is documented in includes/class-wc-logger.php. */
 		$retention_days = absint( apply_filters( 'woocommerce_logger_days_to_retain_logs', 30 ) );
+		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		if ( $deleted > 0 ) {
 			$this->handle(
@@ -191,7 +195,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 					'%s %s',
 					sprintf(
 						esc_html(
-						// translators: %s is a number of log files.
+							// translators: %s is a number of log files.
 							_n(
 								'%s expired log file was deleted.',
 								'%s expired log files were deleted.',

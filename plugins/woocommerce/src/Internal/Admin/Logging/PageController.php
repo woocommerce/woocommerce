@@ -607,7 +607,7 @@ class PageController {
 
 					$segments[2] = implode( ' ', $message_chunks );
 					$classes[]   = 'has-context';
-				} catch ( \JsonException $exception ) {
+				} catch ( \JsonException $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 					// It's not valid JSON so don't do anything with it.
 				}
 			}

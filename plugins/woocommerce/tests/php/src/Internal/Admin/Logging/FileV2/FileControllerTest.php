@@ -154,14 +154,15 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		$source      = 'unit-testing';
 		$new_content = 'test';
 
-		$result  = $this->sut->write_to_file( $source, $new_content, $time );
+		$result = $this->sut->write_to_file( $source, $new_content, $time );
 		$this->assertTrue( $result );
 
 		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
 		$this->assertCount( 2, $paths );
 
 		foreach ( $paths as $path ) {
-			$file           = new File( $path );
+			$file = new File( $path );
+
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			$actual_content = file_get_contents( $file->get_path() );
 
@@ -218,7 +219,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		$first_file = array_shift( $files );
 		$this->assertEquals( 'unit-testing', $first_file->get_source() );
 
-		$files      = $this->sut->get_files(
+		$files = $this->sut->get_files(
 			array(
 				'date_filter' => 'created',
 				'date_start'  => strtotime( '-6 days' ),

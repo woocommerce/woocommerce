@@ -231,7 +231,7 @@ class File {
 	 * @return bool
 	 */
 	public function has_standard_filename(): bool {
-		return !! $this->get_hash();
+		return ! ! $this->get_hash();
 	}
 
 	/**
@@ -481,8 +481,8 @@ class File {
 		$search  = array( $this->get_file_id() );
 		$replace = array( $new_file_id );
 		if ( $this->has_standard_filename() ) {
-			$search[]    = $this->get_hash();
-			$replace[]   = self::generate_hash( $new_file_id );
+			$search[]  = $this->get_hash();
+			$replace[] = self::generate_hash( $new_file_id );
 		}
 
 		$old_filename = $this->get_basename();
