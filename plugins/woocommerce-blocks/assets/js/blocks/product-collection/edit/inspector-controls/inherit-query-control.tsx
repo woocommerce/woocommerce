@@ -20,10 +20,7 @@ import { ProductCollectionQuery } from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../../utils';
 
-const label = __(
-	'Inherit query from template',
-	'woo-gutenberg-products-block'
-);
+const label = __( 'Inherit query from template', 'woocommerce' );
 
 interface InheritQueryControlProps {
 	setQueryAttribute: ( value: Partial< ProductCollectionQuery > ) => void;
@@ -71,7 +68,7 @@ const InheritQueryControl = ( {
 				label={ label }
 				help={ __(
 					'Toggle to use the global query context that is set with the current template, such as an archive or search. Disable to customize the settings independently.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				checked={ !! inherit }
 				onChange={ ( newInherit ) => {

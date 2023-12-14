@@ -28,10 +28,7 @@ const customValidationHandler = (
 		} )
 	) {
 		inputObject.setCustomValidity(
-			__(
-				'Please enter a valid postcode',
-				'woo-gutenberg-products-block'
-			)
+			__( 'Please enter a valid postcode', 'woocommerce' )
 		);
 		return false;
 	}

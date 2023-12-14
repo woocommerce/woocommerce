@@ -22,14 +22,9 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 
 	return (
 		<InspectorControls>
-			<PanelBody
-				title={ __( 'Settings', 'woo-gutenberg-products-block' ) }
-			>
+			<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 				<ToggleGroupControl
-					label={ __(
-						'Price Slider',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Price Slider', 'woocommerce' ) }
 					value={ showInputFields ? 'editable' : 'text' }
 					onChange={ ( value: string ) =>
 						setAttributes( {
@@ -40,22 +35,16 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				>
 					<ToggleGroupControlOption
 						value="editable"
-						label={ __(
-							'Editable',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Editable', 'woocommerce' ) }
 					/>
 					<ToggleGroupControlOption
 						value="text"
-						label={ __( 'Text', 'woo-gutenberg-products-block' ) }
+						label={ __( 'Text', 'woocommerce' ) }
 					/>
 				</ToggleGroupControl>
 				{ showInputFields && (
 					<ToggleControl
-						label={ __(
-							'Inline input fields',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Inline input fields', 'woocommerce' ) }
 						checked={ inlineInput }
 						onChange={ () =>
 							setAttributes( {
@@ -64,7 +53,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 						}
 						help={ __(
 							'Show input fields inline with the slider.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					/>
 				) }

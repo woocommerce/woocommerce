@@ -30,7 +30,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 	<!-- wp:media-text {"align":"full","mediaType":"image","mediaId":1,"mediaLink":"<?php echo esc_url( $image1 ); ?>","mediaWidth":40} -->
 	<div class="wp-block-media-text alignfull is-stacked-on-mobile" style="grid-template-columns:40% auto">
 		<figure class="wp-block-media-text__media">
-			<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1 size-full" />
+			<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woocommerce' ); ?>" class="wp-image-1 size-full" />
 		</figure>
 		<div class="wp-block-media-text__content">
 			<!-- wp:group {"layout":{"contentSize":"760px","type":"constrained"}} -->
@@ -132,7 +132,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 			<!-- /wp:columns -->
 		</div>
 		<figure class="wp-block-media-text__media">
-			<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1 size-full" />
+			<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woocommerce' ); ?>" class="wp-image-1 size-full" />
 		</figure>
 	</div>
 	<!-- /wp:media-text -->

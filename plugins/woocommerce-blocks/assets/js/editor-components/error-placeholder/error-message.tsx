@@ -20,17 +20,14 @@ const getErrorMessage = ( { message, type }: ErrorObject ) => {
 	if ( ! message ) {
 		return __(
 			'An error has prevented the block from being updated.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		);
 	}
 
 	if ( type === 'general' ) {
 		return (
 			<span>
-				{ __(
-					'The following error was returned',
-					'woo-gutenberg-products-block'
-				) }
+				{ __( 'The following error was returned', 'woocommerce' ) }
 				<br />
 				<code>{ escapeHTML( message ) }</code>
 			</span>
@@ -42,7 +39,7 @@ const getErrorMessage = ( { message, type }: ErrorObject ) => {
 			<span>
 				{ __(
 					'The following error was returned from the API',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				<br />
 				<code>{ escapeHTML( message ) }</code>

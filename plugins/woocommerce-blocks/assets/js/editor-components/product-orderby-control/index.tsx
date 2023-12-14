@@ -22,53 +22,35 @@ const ProductOrderbyControl = ( {
 }: ProductOrderbyControlProps ) => {
 	return (
 		<SelectControl
-			label={ __( 'Order products by', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Order products by', 'woocommerce' ) }
 			value={ value }
 			options={ [
 				{
-					label: __(
-						'Newness - newest first',
-						'woo-gutenberg-products-block'
-					),
+					label: __( 'Newness - newest first', 'woocommerce' ),
 					value: 'date',
 				},
 				{
-					label: __(
-						'Price - low to high',
-						'woo-gutenberg-products-block'
-					),
+					label: __( 'Price - low to high', 'woocommerce' ),
 					value: 'price_asc',
 				},
 				{
-					label: __(
-						'Price - high to low',
-						'woo-gutenberg-products-block'
-					),
+					label: __( 'Price - high to low', 'woocommerce' ),
 					value: 'price_desc',
 				},
 				{
-					label: __(
-						'Rating - highest first',
-						'woo-gutenberg-products-block'
-					),
+					label: __( 'Rating - highest first', 'woocommerce' ),
 					value: 'rating',
 				},
 				{
-					label: __(
-						'Sales - most first',
-						'woo-gutenberg-products-block'
-					),
+					label: __( 'Sales - most first', 'woocommerce' ),
 					value: 'popularity',
 				},
 				{
-					label: __(
-						'Title - alphabetical',
-						'woo-gutenberg-products-block'
-					),
+					label: __( 'Title - alphabetical', 'woocommerce' ),
 					value: 'title',
 				},
 				{
-					label: __( 'Menu Order', 'woo-gutenberg-products-block' ),
+					label: __( 'Menu Order', 'woocommerce' ),
 					value: 'menu_order',
 				},
 			] }

@@ -62,7 +62,7 @@ const NoRating = ( { parentClassName }: { parentClassName: string } ) => {
 			>
 				<span style={ starStyle } />
 			</div>
-			<span>{ __( 'No Reviews', 'woo-gutenberg-products-block' ) }</span>
+			<span>{ __( 'No Reviews', 'woocommerce' ) }</span>
 		</div>
 	);
 };
@@ -74,7 +74,7 @@ const Rating = ( props: RatingProps ): JSX.Element => {
 
 	const ratingText = sprintf(
 		/* translators: %f is referring to the average rating value */
-		__( 'Rated %f out of 5', 'woo-gutenberg-products-block' ),
+		__( 'Rated %f out of 5', 'woocommerce' ),
 		rating
 	);
 
@@ -85,7 +85,7 @@ const Rating = ( props: RatingProps ): JSX.Element => {
 				'Rated %1$s out of 5 based on %2$s customer rating',
 				'Rated %1$s out of 5 based on %2$s customer ratings',
 				reviews,
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			sprintf( '<strong class="rating">%f</strong>', rating ),
 			sprintf( '<span class="rating">%d</span>', reviews )

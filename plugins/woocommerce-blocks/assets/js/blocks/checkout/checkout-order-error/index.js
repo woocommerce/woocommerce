@@ -31,6 +31,67 @@ const cartItemErrorCodes = [
 const preloadedCheckoutData = getSetting( 'checkoutData', {} );
 
 /**
+ * Get the error message to display.
+ *
+ * @param {Object} props           Incoming props for the component.
+ * @param {Object} props.errorData Object containing code and message.
+ */
+const ErrorTitle = ( { errorData } ) => {
+	let heading = __( 'Checkout error', 'woocommerce' );
+
+	if ( cartItemErrorCodes.includes( errorData.code ) ) {
+		heading = __( 'There is a problem with your cart', 'woocommerce' );
+	}
+
+	return (
+		<strong className="wc-block-checkout-error_title">{ heading }</strong>
+	);
+};
+
+/**
+ * Get the error message to display.
+ *
+ * @param {Object} props           Incoming props for the component.
+ * @param {Object} props.errorData Object containing code and message.
+ */
+const ErrorMessage = ( { errorData } ) => {
+	let message = errorData.message;
+
+	if ( cartItemErrorCodes.includes( errorData.code ) ) {
+		message =
+			message +
+			' ' +
+			__( 'Please edit your cart and try again.', 'woocommerce' );
+	}
+
+	return <p className="wc-block-checkout-error__description">{ message }</p>;
+};
+
+/**
+ * Get the CTA button to display.
+ *
+ * @param {Object} props           Incoming props for the component.
+ * @param {Object} props.errorData Object containing code and message.
+ */
+const ErrorButton = ( { errorData } ) => {
+	let buttonText = __( 'Retry', 'woocommerce' );
+	let buttonUrl = 'javascript:window.location.reload(true)';
+
+	if ( cartItemErrorCodes.includes( errorData.code ) ) {
+		buttonText = __( 'Edit your cart', 'woocommerce' );
+		buttonUrl = CART_URL;
+	}
+
+	return (
+		<span className="wp-block-button">
+			<a href={ buttonUrl } className="wp-block-button__link">
+				{ buttonText }
+			</a>
+		</span>
+	);
+};
+
+/**
  * When an order was not created for the checkout, for example, when an item
  * was out of stock, this component will be shown instead of the checkout form.
  *
@@ -65,73 +126,6 @@ const CheckoutOrderError = () => {
 			<ErrorMessage errorData={ errorData } />
 			<ErrorButton errorData={ errorData } />
 		</div>
-	);
-};
-
-/**
- * Get the error message to display.
- *
- * @param {Object} props           Incoming props for the component.
- * @param {Object} props.errorData Object containing code and message.
- */
-const ErrorTitle = ( { errorData } ) => {
-	let heading = __( 'Checkout error', 'woocommerce' );
-
-	if ( cartItemErrorCodes.includes( errorData.code ) ) {
-		heading = __(
-			'There is a problem with your cart',
-			'woocommerce'
-		);
-	}
-
-	return (
-		<strong className="wc-block-checkout-error_title">{ heading }</strong>
-	);
-};
-
-/**
- * Get the error message to display.
- *
- * @param {Object} props           Incoming props for the component.
- * @param {Object} props.errorData Object containing code and message.
- */
-const ErrorMessage = ( { errorData } ) => {
-	let message = errorData.message;
-
-	if ( cartItemErrorCodes.includes( errorData.code ) ) {
-		message =
-			message +
-			' ' +
-			__(
-				'Please edit your cart and try again.',
-				'woocommerce'
-			);
-	}
-
-	return <p className="wc-block-checkout-error__description">{ message }</p>;
-};
-
-/**
- * Get the CTA button to display.
- *
- * @param {Object} props           Incoming props for the component.
- * @param {Object} props.errorData Object containing code and message.
- */
-const ErrorButton = ( { errorData } ) => {
-	let buttonText = __( 'Retry', 'woocommerce' );
-	let buttonUrl = 'javascript:window.location.reload(true)';
-
-	if ( cartItemErrorCodes.includes( errorData.code ) ) {
-		buttonText = __( 'Edit your cart', 'woocommerce' );
-		buttonUrl = CART_URL;
-	}
-
-	return (
-		<span className="wp-block-button">
-			<a href={ buttonUrl } className="wp-block-button__link">
-				{ buttonText }
-			</a>
-		</span>
 	);
 };
 

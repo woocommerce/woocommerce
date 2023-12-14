@@ -21,6 +21,10 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"main": "index.js",
+	"files": [
+		"index.js",
+		"abstracts"
+	],
 	"scripts": {
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
