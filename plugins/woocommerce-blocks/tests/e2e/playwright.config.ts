@@ -45,18 +45,18 @@ const config: ExtendedPlaywrightTestConfig = {
 		viewport: { width: 1280, height: 720 },
 		storageState: STORAGE_STATE_PATH,
 	},
-	// projects: [
-	// 	{
-	// 		name: 'blockThemeConfiguration',
-	// 		testDir: '.',
-	// 		testMatch: /block-theme.setup.ts/,
-	// 	},
-	// 	{
-	// 		name: 'blockTheme',
-	// 		testMatch: /.*.block_theme.spec.ts/,
-	// 		dependencies: [ 'blockThemeConfiguration' ],
-	// 	},
-	// ],
+	projects: [
+		{
+			name: 'blockThemeConfiguration',
+			testDir: '.',
+			testMatch: /block-theme.setup.ts/,
+		},
+		{
+			name: 'blockTheme',
+			testMatch: /.*.block_theme.spec.ts/,
+			dependencies: [ 'blockThemeConfiguration' ],
+		},
+	],
 };
 
 export default defineConfig( config );
