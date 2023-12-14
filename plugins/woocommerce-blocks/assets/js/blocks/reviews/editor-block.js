@@ -68,7 +68,7 @@ class EditorBlock extends Component {
 					<LoadMoreButton
 						screenReaderLabel={ __(
 							'Load more reviews',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					/>
 				) }

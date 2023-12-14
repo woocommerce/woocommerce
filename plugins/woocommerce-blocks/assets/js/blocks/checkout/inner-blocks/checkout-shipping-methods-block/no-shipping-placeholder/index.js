@@ -15,13 +15,13 @@ const NoShippingPlaceholder = () => {
 	return (
 		<Placeholder
 			icon={ <Icon icon={ shipping } /> }
-			label={ __( 'Shipping options', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Shipping options', 'woocommerce' ) }
 			className="wc-block-checkout__no-shipping-placeholder"
 		>
 			<span className="wc-block-checkout__no-shipping-placeholder-description">
 				{ __(
 					'Your store does not have any Shipping Options configured. Once you have added your Shipping Options they will appear here.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</span>
 			<Button
@@ -30,10 +30,7 @@ const NoShippingPlaceholder = () => {
 				target="_blank"
 				rel="noopener noreferrer"
 			>
-				{ __(
-					'Configure Shipping Options',
-					'woo-gutenberg-products-block'
-				) }
+				{ __( 'Configure Shipping Options', 'woocommerce' ) }
 			</Button>
 		</Placeholder>
 	);

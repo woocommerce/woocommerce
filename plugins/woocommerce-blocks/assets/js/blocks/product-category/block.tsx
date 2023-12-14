@@ -15,12 +15,12 @@ import { Props } from './types';
 const EmptyPlaceholder = () => (
 	<Placeholder
 		icon={ <Icon icon={ file } /> }
-		label={ __( 'Products by Category', 'woo-gutenberg-products-block' ) }
+		label={ __( 'Products by Category', 'woocommerce' ) }
 		className="wc-block-products-grid wc-block-products-category"
 	>
 		{ __(
 			'No products were found that matched your selection.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
 	</Placeholder>
 );
@@ -43,7 +43,7 @@ export const ProductByCategoryBlock = ( props: Props ): JSX.Element => {
 		<>
 			{ __(
 				'Select at least one category to display its products.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		</>
 	);

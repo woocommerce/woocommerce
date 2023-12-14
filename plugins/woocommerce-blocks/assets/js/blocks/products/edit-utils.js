@@ -15,7 +15,7 @@ export const renderNoProductsPlaceholder = ( blockTitle, blockIcon ) => (
 		<p>
 			{ __(
 				"You haven't published any products to list here yet.",
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		</p>
 		<Button
@@ -24,7 +24,7 @@ export const renderNoProductsPlaceholder = ( blockTitle, blockIcon ) => (
 			href={ ADMIN_URL + 'post-new.php?post_type=product' }
 			target="_top"
 		>
-			{ __( 'Add new product', 'woo-gutenberg-products-block' ) + ' ' }
+			{ __( 'Add new product', 'woocommerce' ) + ' ' }
 			<Icon icon={ external } />
 		</Button>
 		<Button
@@ -33,7 +33,7 @@ export const renderNoProductsPlaceholder = ( blockTitle, blockIcon ) => (
 			href="https://docs.woocommerce.com/document/managing-products/"
 			target="_blank"
 		>
-			{ __( 'Learn more', 'woo-gutenberg-products-block' ) }
+			{ __( 'Learn more', 'woocommerce' ) }
 		</Button>
 	</Placeholder>
 );
@@ -46,7 +46,7 @@ export const renderHiddenContentPlaceholder = ( blockTitle, blockIcon ) => (
 	>
 		{ __(
 			'The content for this block is hidden due to block settings.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
 	</Placeholder>
 );

@@ -33,16 +33,10 @@ const ProductsControl = ( {
 	isCompact,
 } ) => {
 	const messages = {
-		clear: __( 'Clear all products', 'woo-gutenberg-products-block' ),
-		list: __( 'Products', 'woo-gutenberg-products-block' ),
-		noItems: __(
-			"Your store doesn't have any products.",
-			'woo-gutenberg-products-block'
-		),
-		search: __(
-			'Search for products to display',
-			'woo-gutenberg-products-block'
-		),
+		clear: __( 'Clear all products', 'woocommerce' ),
+		list: __( 'Products', 'woocommerce' ),
+		noItems: __( "Your store doesn't have any products.", 'woocommerce' ),
+		search: __( 'Search for products to display', 'woocommerce' ),
 		selected: ( n ) =>
 			sprintf(
 				/* translators: %d is the number of selected products. */
@@ -50,14 +44,11 @@ const ProductsControl = ( {
 					'%d product selected',
 					'%d products selected',
 					n,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				n
 			),
-		updated: __(
-			'Product search results updated.',
-			'woo-gutenberg-products-block'
-		),
+		updated: __( 'Product search results updated.', 'woocommerce' ),
 	};
 
 	if ( error ) {

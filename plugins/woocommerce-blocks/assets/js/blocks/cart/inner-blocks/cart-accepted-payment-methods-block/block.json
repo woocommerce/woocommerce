@@ -12,7 +12,7 @@
 		"inserter": true
 	},
 	"parent": [ "woocommerce/cart-totals-block" ],
-	"textdomain": "woo-gutenberg-products-block",
+	"textdomain": "woocommerce",
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2
 }

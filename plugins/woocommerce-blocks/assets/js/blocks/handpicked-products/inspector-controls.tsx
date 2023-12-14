@@ -22,12 +22,9 @@ export const HandpickedProductsInspectorControls = (
 
 	return (
 		<InspectorControls key="inspector">
-			<PanelBody
-				title={ __( 'Layout', 'woo-gutenberg-products-block' ) }
-				initialOpen
-			>
+			<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
 				<RangeControl
-					label={ __( 'Columns', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Columns', 'woocommerce' ) }
 					value={ columns }
 					onChange={ ( value ) =>
 						setAttributes( { columns: value } )
@@ -36,20 +33,14 @@ export const HandpickedProductsInspectorControls = (
 					max={ getSetting( 'maxColumns', 6 ) }
 				/>
 				<ToggleControl
-					label={ __(
-						'Align Buttons',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Align Buttons', 'woocommerce' ) }
 					help={
 						alignButtons
 							? __(
 									'Buttons are aligned vertically.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 							  )
-							: __(
-									'Buttons follow content.',
-									'woo-gutenberg-products-block'
-							  )
+							: __( 'Buttons follow content.', 'woocommerce' )
 					}
 					checked={ alignButtons }
 					onChange={ () =>
@@ -57,10 +48,7 @@ export const HandpickedProductsInspectorControls = (
 					}
 				/>
 			</PanelBody>
-			<PanelBody
-				title={ __( 'Content', 'woo-gutenberg-products-block' ) }
-				initialOpen
-			>
+			<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
 				<GridContentControl
 					settings={ contentVisibility }
 					onChange={ ( value ) =>
@@ -69,7 +57,7 @@ export const HandpickedProductsInspectorControls = (
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Order By', 'woo-gutenberg-products-block' ) }
+				title={ __( 'Order By', 'woocommerce' ) }
 				initialOpen={ false }
 			>
 				<ProductOrderbyControl
@@ -78,7 +66,7 @@ export const HandpickedProductsInspectorControls = (
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Products', 'woo-gutenberg-products-block' ) }
+				title={ __( 'Products', 'woocommerce' ) }
 				initialOpen={ false }
 			>
 				<ProductsControl

@@ -78,9 +78,7 @@ const renderPickupLocation = (
 	const details = getPickupDetails( option );
 
 	// Default to showing "free" as the secondary label. Price checks below will update it if needed.
-	let secondaryLabel = (
-		<em>{ __( 'free', 'woo-gutenberg-products-block' ) }</em>
-	);
+	let secondaryLabel = <em>{ __( 'free', 'woocommerce' ) }</em>;
 
 	// If there is a cost for local pickup, show the cost per package.
 	if ( parseInt( priceWithTaxes, 10 ) > 0 ) {
@@ -99,7 +97,7 @@ const renderPickupLocation = (
 					'<price/> x <packageCount/> package',
 					'<price/> x <packageCount/> packages',
 					packageCount,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				{
 					price: (

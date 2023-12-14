@@ -1,7 +1,7 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 1,
-	"textdomain": "woo-gutenberg-products-block",
+	"textdomain": "woocommerce",
 	"name": "woocommerce/all-products",
 	"title": "All Products",
 	"category": "woocommerce",

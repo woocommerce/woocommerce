@@ -35,7 +35,7 @@ const Subtotal = ( {
 		<TotalsItem
 			className={ className }
 			currency={ currency }
-			label={ __( 'Subtotal', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Subtotal', 'woocommerce' ) }
 			value={
 				getSetting( 'displayCartPricesIncludingTax', false )
 					? itemsValue + itemsTaxValue

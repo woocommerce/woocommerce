@@ -89,10 +89,7 @@ const CheckoutExpressPayment = () => {
 							className="wc-block-components-express-payment__title"
 							headingLevel="2"
 						>
-							{ __(
-								'Express Checkout',
-								'woo-gutenberg-products-block'
-							) }
+							{ __( 'Express Checkout', 'woocommerce' ) }
 						</Title>
 					</div>
 					<div className="wc-block-components-express-payment__content">
@@ -104,7 +101,7 @@ const CheckoutExpressPayment = () => {
 				</div>
 			</LoadingMask>
 			<div className="wc-block-components-express-payment-continue-rule wc-block-components-express-payment-continue-rule--checkout">
-				{ __( 'Or continue below', 'woo-gutenberg-products-block' ) }
+				{ __( 'Or continue below', 'woocommerce' ) }
 			</div>
 		</>
 	);

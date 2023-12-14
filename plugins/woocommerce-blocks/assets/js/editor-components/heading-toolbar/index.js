@@ -22,7 +22,7 @@ class HeadingToolbar extends Component {
 			icon: <HeadingLevelIcon level={ targetLevel } />,
 			title: sprintf(
 				/* translators: %s: heading level e.g: "2", "3", "4" */
-				__( 'Heading %d', 'woo-gutenberg-products-block' ),
+				__( 'Heading %d', 'woocommerce' ),
 				targetLevel
 			),
 			isActive,

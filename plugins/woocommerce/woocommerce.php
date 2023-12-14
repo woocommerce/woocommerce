@@ -20,6 +20,12 @@ if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
 	define( 'WC_PLUGIN_FILE', __FILE__ );
 }
 
+if ( ! defined( 'WC_BLOCKS_IS_FEATURE_PLUGIN' ) ) {
+	define( 'WC_BLOCKS_IS_FEATURE_PLUGIN', true );
+}
+
+// Test Change
+
 // Load core packages and the autoloader.
 require __DIR__ . '/src/Autoloader.php';
 require __DIR__ . '/src/Packages.php';
