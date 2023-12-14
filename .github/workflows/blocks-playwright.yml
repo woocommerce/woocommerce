@@ -12,6 +12,9 @@ jobs:
         name: Playwright E2E tests - ${{ matrix.config.name }}
         timeout-minutes: 60
         runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: plugins/woocommerce-blocks
         strategy:
             matrix:
                 config:
