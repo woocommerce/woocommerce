@@ -81,8 +81,8 @@ final class CollectionActiveFilters extends AbstractBlock {
 				<?php endforeach; ?>
 			</ul>
 			<button class="wc-block-active-filters__clear-all" data-wc-on--click="actions.clearAll">
-				<span aria-hidden="true"><?php echo esc_html__( 'Clear All', 'woo-gutenberg-products-block' ); ?></span>
-				<span class="screen-reader-text"><?php echo esc_html__( 'Clear All Filters', 'woo-gutenberg-products-block' ); ?></span>
+				<span aria-hidden="true"><?php echo esc_html__( 'Clear All', 'woocommerce' ); ?></span>
+				<span class="screen-reader-text"><?php echo esc_html__( 'Clear All Filters', 'woocommerce' ); ?></span>
 			</button>
 		</div>
 

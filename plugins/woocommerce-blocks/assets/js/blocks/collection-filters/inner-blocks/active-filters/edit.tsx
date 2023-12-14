@@ -31,13 +31,13 @@ const Edit = ( props: EditProps ) => {
 					} ) }
 				>
 					<RemovableListItem
-						type={ __( 'Size', 'woo-gutenberg-products-block' ) }
-						name={ __( 'Small', 'woo-gutenberg-products-block' ) }
+						type={ __( 'Size', 'woocommerce' ) }
+						name={ __( 'Small', 'woocommerce' ) }
 						displayStyle={ displayStyle }
 					/>
 					<RemovableListItem
-						type={ __( 'Color', 'woo-gutenberg-products-block' ) }
-						name={ __( 'Blue', 'woo-gutenberg-products-block' ) }
+						type={ __( 'Color', 'woocommerce' ) }
+						name={ __( 'Blue', 'woocommerce' ) }
 						displayStyle={ displayStyle }
 					/>
 				</ul>

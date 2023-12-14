@@ -71,7 +71,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 		if ( $formatted_min_price && $formatted_max_price ) {
 			$title = sprintf(
 				/* translators: %1$s and %2$s are the formatted minimum and maximum prices respectively. */
-				__( 'Between %1$s and %2$s', 'woo-gutenberg-products-block' ),
+				__( 'Between %1$s and %2$s', 'woocommerce' ),
 				$formatted_min_price,
 				$formatted_max_price
 			);
@@ -79,16 +79,16 @@ final class CollectionPriceFilter extends AbstractBlock {
 
 		if ( ! $formatted_min_price ) {
 			/* translators: %s is the formatted maximum price. */
-			$title = sprintf( __( 'Up to %s', 'woo-gutenberg-products-block' ), $formatted_max_price );
+			$title = sprintf( __( 'Up to %s', 'woocommerce' ), $formatted_max_price );
 		}
 
 		if ( ! $formatted_max_price ) {
 			/* translators: %s is the formatted minimum price. */
-			$title = sprintf( __( 'From %s', 'woo-gutenberg-products-block' ), $formatted_min_price );
+			$title = sprintf( __( 'From %s', 'woocommerce' ), $formatted_min_price );
 		}
 
 		$data['price'] = array(
-			'type'  => __( 'Price', 'woo-gutenberg-products-block' ),
+			'type'  => __( 'Price', 'woocommerce' ),
 			'items' => array(
 				array(
 					'title'      => $title,

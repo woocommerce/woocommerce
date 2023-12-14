@@ -34,7 +34,7 @@ export const RemovableListItem = ( {
 	);
 	const removeText = sprintf(
 		/* translators: %s attribute value used in the filter. For example: yellow, green, small, large. */
-		__( 'Remove %s filter', 'woo-gutenberg-products-block' ),
+		__( 'Remove %s filter', 'woocommerce' ),
 		name
 	);
 
