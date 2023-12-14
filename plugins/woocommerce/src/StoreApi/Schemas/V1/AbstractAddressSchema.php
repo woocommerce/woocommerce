@@ -194,7 +194,18 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		}
 
 		foreach ( array_keys( $address ) as $key ) {
-			$result = rest_validate_value_from_schema( $address[ $key ], $this->get_properties()[ $key ], $key );
+
+			// Skip email here it will be validated in BillingAddressSchema.
+			if ( 'email' === $key ) {
+				continue;
+			}
+
+			$properties = $this->get_properties();
+			if ( empty( $properties[ $key ] ) ) {
+				continue;
+			}
+
+			$result = rest_validate_value_from_schema( $address[ $key ], $properties[ $key ], $key );
 			if ( is_wp_error( $result ) ) {
 				$errors->add( $result->get_error_code(), $result->get_error_message() );
 			}
