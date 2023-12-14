@@ -50,6 +50,9 @@ jobs:
             - name: Load wp-env
               run: pnpm --filter='@woocommerce/block-library' wp-env start
 
+            - name: Configure the environment
+              run: pnpm wp-env:config
+
             - name: Run Playwright tests
               run: pnpm --filter='@woocommerce/block-library' test:e2e -- --config=tests/e2e/${{ matrix.config.file }}
 
