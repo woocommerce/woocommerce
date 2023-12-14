@@ -31,8 +31,8 @@
 		"@woocommerce/expression-evaluation": "workspace:*",
 		"@wordpress/block-editor": "^9.8.0",
 		"@wordpress/blocks": "^12.3.0",
-		"@wordpress/data": "wp-6.0",
-		"@wordpress/element": "wp-6.0"
+		"@wordpress/data": "wp-6.3",
+		"@wordpress/element": "wp-6.3"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.21.3",
@@ -47,7 +47,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
-		"@wordpress/browserslist-config": "wp-6.0",
+		"@wordpress/browserslist-config": "wp-6.3",
 		"copy-webpack-plugin": "^9.1.0",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.32.0",

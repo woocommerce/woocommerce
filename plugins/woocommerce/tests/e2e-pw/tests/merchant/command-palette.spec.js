@@ -1,6 +1,10 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
+// need to figure out whether tests are being run on a mac
+const macOS = process.platform === 'darwin';
+const cmdKeyCombo = macOS ? 'Meta+k' : 'Control+k';
+
 const goToPostEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php' );
 
@@ -29,7 +33,7 @@ const goToPostEditor = async ( { page } ) => {
 
 const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
 	// Press `Ctrl` + `K` to open the command palette.
-	await page.keyboard.press( 'Control+K' );
+	await page.keyboard.press( cmdKeyCombo );
 
 	await page.getByLabel( 'Command palette' ).fill( optionName );
 

@@ -2,6 +2,7 @@
 .editorconfig
 .gitignore
 .travis.yml
+.env
 .git/
 .eslintrc
 .eslintignore

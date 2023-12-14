@@ -5,7 +5,9 @@ module.exports = {
 	...defaultConfig,
 	entry: {
 		index: './src/index.ts',
+		'woo-ai-assistant': './src/woo-ai-assistant/index.ts',
 	},
+	cache: false,
 	module: {
 		...defaultConfig.module,
 		rules: [
@@ -22,6 +24,11 @@ module.exports = {
 		],
 	},
 	resolve: {
+		alias: {
+			// https://github.com/facebook/react/issues/20235
+			'react/jsx-dev-runtime': 'react/jsx-dev-runtime.js',
+			'react/jsx-runtime': 'react/jsx-runtime.js',
+		},
 		extensions: [ '.js', '.jsx', '.tsx', '.ts' ],
 		fallback: {
 			stream: false,

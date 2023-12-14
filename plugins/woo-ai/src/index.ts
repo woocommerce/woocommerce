@@ -7,6 +7,7 @@ import './product-description';
 import './product-short-description';
 import './product-name';
 import './product-category';
+import './woo-ai-assistant';
 
 import './index.scss';
 
