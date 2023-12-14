@@ -217,6 +217,7 @@ class CheckoutFields {
 	 */
 	public function init() {
 		add_action( 'woocommerce_blocks_checkout_enqueue_data', array( $this, 'add_fields_data' ) );
+		add_action( 'woocommerce_blocks_cart_enqueue_data', array( $this, 'add_fields_data' ) );
 	}
 
 	/**
