@@ -30,6 +30,7 @@ class Dropdown {
 				'value' => null,
 			),
 			'isOpen'        => false,
+			'selectType'    => $select_type,
 		);
 
 		wc_initial_state( 'woocommerce/interactivity-dropdown', array( 'selectedItems' => $selected_items ) );
@@ -59,7 +60,13 @@ class Dropdown {
 											<?php echo esc_html( $selected['label'] ); ?>
 										</span>
 									</span>
-									<button type="button" class="components-button components-form-token-field__remove-token has-icon">
+									<button 
+										type="button" 
+										data-wc-context="<?php echo esc_attr( wp_json_encode( array( 'currentItem' => $selected ) ) ); ?>"
+										data-wc-on--click="actions.unselectDropdownItem" 
+										data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>" 
+										class="components-button components-form-token-field__remove-token has-icon"
+									>
 										<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
 											<path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"></path>
 										</svg>

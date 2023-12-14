@@ -9,6 +9,7 @@ import { getContext, store } from '@woocommerce/interactivity';
 import './style.scss';
 
 export type DropdownContext = {
+	selectType: 'multiple' | 'single';
 	currentItem: {
 		label: string;
 		value: string;
@@ -37,6 +38,7 @@ type DropdownStore = {
 	actions: {
 		toggleIsOpen: () => void;
 		selectDropdownItem: ( event: MouseEvent ) => void;
+		unselectDropdownItem: ( event: MouseEvent ) => void;
 	};
 };
 
@@ -45,11 +47,17 @@ const { state } = store< DropdownStore >(
 	{
 		state: {
 			get placeholderText(): string {
-				const { selectedItems } = state;
+				const { selectType } = getContext< DropdownContext >();
 
-				return selectedItems?.length && selectedItems[ 0 ].label
-					? selectedItems[ 0 ]?.label
-					: 'Select an option';
+				if ( selectType === 'single' ) {
+					const { selectedItems } = state;
+
+					return selectedItems?.length && selectedItems[ 0 ].label
+						? selectedItems[ 0 ]?.label
+						: 'Select an option';
+				}
+
+				return '';
 			},
 
 			get isSelected(): boolean {
@@ -72,6 +80,29 @@ const { state } = store< DropdownStore >(
 
 				context.isOpen = ! context.isOpen;
 			},
+			unselectDropdownItem: ( event: MouseEvent ) => {
+				const context = getContext< DropdownContext >();
+
+				const { selectedItems } = state;
+
+				const {
+					currentItem: { label, value },
+				} = context;
+
+				const items = selectedItems || [];
+				const selectedItemIndex = items.findIndex(
+					( item ) => item.value === value && item.label === label
+				);
+
+				if ( selectedItemIndex !== -1 ) {
+					items.splice( selectedItemIndex, 1 );
+
+					state.selectedItems = items || [];
+					context.selectedItems = items || [];
+				}
+
+				event.stopPropagation();
+			},
 			selectDropdownItem: ( event: MouseEvent ) => {
 				const context = getContext< DropdownContext >();
 				const { selectedItems } = state;
@@ -81,17 +112,15 @@ const { state } = store< DropdownStore >(
 				} = context;
 
 				// check if item already selected
-				const selectedItem = selectedItems?.find(
-					( item ) => item.value === value && item.label === label
-				);
+				const selectedItemIndex =
+					selectedItems?.findIndex(
+						( item ) => item.value === value && item.label === label
+					) || -1;
 
 				// if item already selected remove it from state:
 				// else add it to state:
-				if ( selectedItem ) {
-					const items = selectedItems?.slice(
-						selectedItems.indexOf( selectedItem ),
-						1
-					);
+				if ( selectedItemIndex !== -1 ) {
+					const items = selectedItems?.splice( selectedItemIndex, 1 );
 					state.selectedItems = items || [];
 					context.selectedItems = items || [];
 				} else {
