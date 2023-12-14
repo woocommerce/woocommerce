@@ -30,7 +30,7 @@ class OrderAttribution {
 	 * @return void
 	 */
 	public function format_meta_data( array &$meta ) {
-		// Format the session pages.
+
 		if ( array_key_exists( 'device_type', $meta ) ) {
 
 			switch ( $meta['device_type'] ) {
