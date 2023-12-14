@@ -109,8 +109,21 @@ const productGallery = {
 				attributes: true,
 			} );
 
+			const clearVariationsLink = document.querySelector(
+				'.wp-block-add-to-cart-form .reset_variations'
+			);
+
+			const handleClick = () => {
+				context.selectedImage = context.firstMainImageId;
+			};
+
+			if ( clearVariationsLink ) {
+				clearVariationsLink.addEventListener( 'click', handleClick );
+			}
+
 			return () => {
 				observer.disconnect();
+				document.removeEventListener( 'click', handleClick );
 			};
 		},
 		keyboardAccess: () => {
