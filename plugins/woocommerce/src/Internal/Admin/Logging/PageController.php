@@ -640,7 +640,7 @@ class PageController {
 	 * @return void
 	 */
 	private function render_search_field(): void {
-		$params     = $this->get_query_params( array( 'search', 'source' ) );
+		$params     = $this->get_query_params( array( 'date_end', 'date_filter', 'date_start', 'search', 'source' ) );
 		$defaults   = $this->get_query_param_defaults();
 		$file_count = $this->file_controller->get_files( $params, true );
 
