@@ -449,7 +449,14 @@ class CheckoutFields {
 
 		if ( ! in_array( $key, $this->fields_locations[ $location ], true ) ) {
 			// translators: %1$s field key, %2$s location.
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_invalid_location', \sprintf( __( 'The field %1$s is invalid for the location %2$s.', 'woocommerce' ), $key, $location ) );
+			return new \WP_Error(
+				'woocommerce_blocks_checkout_field_invalid_location',
+				\sprintf(
+					__( 'The field %1$s is invalid for the location %2$s.', 'woocommerce' ),
+					$key,
+					$location
+				)
+			);
 		}
 
 		$field = $this->additional_fields[ $key ];
