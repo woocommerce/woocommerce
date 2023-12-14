@@ -116,16 +116,21 @@ class FileController {
 	/**
 	 * Write a log entry to the appropriate file, after rotating the file if necessary.
 	 *
-	 * @param string $source The source property of the log entry, which determines which file to write to.
-	 * @param string $text   The contents of the log entry to add to a file.
+	 * @param string   $source The source property of the log entry, which determines which file to write to.
+	 * @param string   $text   The contents of the log entry to add to a file.
+	 * @param int|null $time   Optional. The time of the log entry as a Unix timestamp. Defaults to the current time.
 	 *
 	 * @return bool True if the contents were successfully written to the file.
 	 */
-	public function write_to_file( string $source, string $text ) {
-		$file_id = $source . '-' . gmdate( 'Y-m-d' );
+	public function write_to_file( string $source, string $text, ?int $time = null ): bool {
+		if ( is_null( $time ) ) {
+			$time = time();
+		}
+
+		$file_id = File::generate_file_id( $source, null, $time );
 		$file    = $this->get_file_by_id( $file_id );
 
-		if ( $file instanceof File && $file->get_file_size() >= $this->max_file_size ) {
+		if ( $file instanceof File && $file->get_file_size() >= $this->get_file_size_limit() ) {
 			$rotated = $this->rotate_file( $file->get_file_id() );
 
 			if ( $rotated ) {
@@ -136,7 +141,7 @@ class FileController {
 		}
 
 		if ( ! $file instanceof File ) {
-			$new_path = $this->log_directory . $this->generate_filename( $source );
+			$new_path = $this->log_directory . $this->generate_filename( $source, $time );
 			$file     = new File( $new_path );
 		}
 
@@ -144,15 +149,15 @@ class FileController {
 	}
 
 	/**
-	 * Generate the full name of a file based on the source and current date.
+	 * Generate the full name of a file based on source and date values.
 	 *
 	 * @param string $source The source property of a log entry, which determines the filename.
+	 * @param int    $time   The time of the log entry as a Unix timestamp.
 	 *
 	 * @return string
 	 */
-	private function generate_filename( string $source ): string {
-		$date    = gmdate( 'Y-m-d' );
-		$file_id = "$source-$date";
+	private function generate_filename( string $source, int $time ): string {
+		$file_id = File::generate_file_id( $source, null, $time );
 		$hash    = File::generate_hash( $file_id );
 
 		return "$file_id-$hash.log";
@@ -165,19 +170,21 @@ class FileController {
 	 *
 	 * @return bool True if the file and all its rotations were successfully rotated.
 	 */
-	private function rotate_file( $file_id ) {
+	private function rotate_file( $file_id ): bool {
 		$rotations = $this->get_file_rotations( $file_id );
 
 		if ( is_wp_error( $rotations ) || ! isset( $rotations['current'] ) ) {
 			return false;
 		}
 
+		$max_rotation_marker = self::MAX_FILE_ROTATIONS - 1;
+
 		// Don't rotate a file with the maximum rotation.
-		unset( $rotations[ self::MAX_FILE_ROTATIONS - 1 ] );
+		unset( $rotations[ $max_rotation_marker ] );
 
 		$results = array();
 		// Rotate starting with oldest first and working backwards.
-		for ( $i = 9; $i >= 0; $i -- ) {
+		for ( $i = $max_rotation_marker; $i >= 0; $i -- ) {
 			if ( isset( $rotations[ $i ] ) ) {
 				$results[] = $rotations[ $i ]->rotate();
 			}
@@ -328,14 +335,19 @@ class FileController {
 		$paths = array();
 
 		foreach ( $file_ids as $file_id ) {
-			$glob = glob( $this->log_directory . $file_id . '*.log' );
+			// Look for the standard filename format first, which includes a hash.
+			$glob = glob( $this->log_directory . $file_id . '-*.log' );
+
+			if ( ! $glob ) {
+				$glob = glob( $this->log_directory . $file_id . '.log' );
+			}
 
 			if ( is_array( $glob ) ) {
 				$paths = array_merge( $paths, $glob );
 			}
 		}
 
-		$files = $this->convert_paths_to_objects( $paths );
+		$files = $this->convert_paths_to_objects( array_unique( $paths ) );
 
 		return $files;
 	}
@@ -354,6 +366,13 @@ class FileController {
 			return new WP_Error(
 				'wc_log_file_error',
 				esc_html__( 'This file does not exist.', 'woocommerce' )
+			);
+		}
+
+		if ( count( $result ) > 1 ) {
+			return new WP_Error(
+				'wc_log_file_error',
+				esc_html__( 'Multiple files match this ID.', 'woocommerce' )
 			);
 		}
 
@@ -379,12 +398,15 @@ class FileController {
 		$rotations = array();
 
 		$source  = $file->get_source();
-		$created = gmdate( 'Y-m-d', $file->get_created_timestamp() );
+		$created = 0;
+		if ( $file->has_standard_filename() ) {
+			$created = $file->get_created_timestamp();
+		}
 
 		if ( is_null( $file->get_rotation() ) ) {
 			$current['current'] = $file;
 		} else {
-			$current_file_id = $source . '-' . $created;
+			$current_file_id = File::generate_file_id( $source, null, $created );
 			$result          = $this->get_file_by_id( $current_file_id );
 			if ( ! is_wp_error( $result ) ) {
 				$current['current'] = $result;
@@ -399,7 +421,9 @@ class FileController {
 			)
 		);
 
-		$rotation_pattern = $this->log_directory . $source . $rotations_pattern . '-' . $created . '*.log';
+		$created_pattern = $created ? '-' . gmdate( 'Y-m-d', $created ) . '-' : '';
+
+		$rotation_pattern = $this->log_directory . $source . $rotations_pattern . $created_pattern . '*.log';
 		$rotation_paths   = glob( $rotation_pattern );
 		$rotation_files   = $this->convert_paths_to_objects( $rotation_paths );
 		foreach ( $rotation_files as $rotation_file ) {
@@ -470,7 +494,7 @@ class FileController {
 		$files = $this->get_files_by_id( $file_ids );
 		foreach ( $files as $file ) {
 			$result = false;
-			if ( $file->is_readable() ) {
+			if ( $file->is_writable() ) {
 				$result = $file->delete();
 			}
 
@@ -647,16 +671,5 @@ class FileController {
 	 */
 	public function invalidate_cache(): bool {
 		return WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
-	}
-
-	/**
-	 * Sanitize the source property of a log file.
-	 *
-	 * @param string $source The source property of a log file.
-	 *
-	 * @return string
-	 */
-	public function sanitize_source( string $source ): string {
-		return sanitize_file_name( $source );
 	}
 }
