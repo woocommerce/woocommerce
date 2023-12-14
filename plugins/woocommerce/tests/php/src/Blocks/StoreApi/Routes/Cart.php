@@ -603,7 +603,7 @@ class Cart extends ControllerTestCase {
 					array(
 						'variation' => array( // order matters, alphabetical attribute order.
 							array(
-								'attribute' => 'Color',
+								'attribute' => 'color',
 								'value'     => 'red',
 							),
 							array(
