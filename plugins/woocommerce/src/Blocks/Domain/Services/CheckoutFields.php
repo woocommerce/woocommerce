@@ -269,7 +269,17 @@ class CheckoutFields {
 		if ( ! empty( $options['type'] ) ) {
 			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
 				// translators: %1$s is the registered field type, %2$s is a list of supported field types (comma separated).
-				return new \WP_Error( 'woocommerce_blocks_checkout_field_type_unsupported', sprintf( __( 'Registering a field with type "%1$s" is not supported. The supported types are: %2$s.', 'woocommerce' ), esc_html( $options['type'] ), implode( ', ', $this->supported_field_types ) ) );
+				return new \WP_Error(
+					'woocommerce_blocks_checkout_field_type_unsupported',
+					sprintf(
+						__(
+							'Registering a field with type "%1$s" is not supported. The supported types are: %2$s.',
+							'woocommerce'
+						),
+						esc_html( $options['type'] ),
+						implode( ', ', $this->supported_field_types )
+					)
+				);
 			}
 			$type = $options['type'];
 		}
