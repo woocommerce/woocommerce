@@ -69,10 +69,10 @@ class CheckoutFields {
 		$this->asset_data_registry = $asset_data_registry;
 		$this->core_fields         = array(
 			'email'      => array(
-				'label'          => __( 'Email address', 'woo-gutenberg-products-block' ),
+				'label'          => __( 'Email address', 'woocommerce' ),
 				'optionalLabel'  => __(
 					'Email address (optional)',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				'required'       => true,
 				'hidden'         => false,
@@ -81,10 +81,10 @@ class CheckoutFields {
 				'index'          => 0,
 			),
 			'first_name' => array(
-				'label'          => __( 'First name', 'woo-gutenberg-products-block' ),
+				'label'          => __( 'First name', 'woocommerce' ),
 				'optionalLabel'  => __(
 					'First name (optional)',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				'required'       => true,
 				'hidden'         => false,
@@ -93,10 +93,10 @@ class CheckoutFields {
 				'index'          => 10,
 			),
 			'last_name'  => array(
-				'label'          => __( 'Last name', 'woo-gutenberg-products-block' ),
+				'label'          => __( 'Last name', 'woocommerce' ),
 				'optionalLabel'  => __(
 					'Last name (optional)',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				'required'       => true,
 				'hidden'         => false,
@@ -105,10 +105,10 @@ class CheckoutFields {
 				'index'          => 20,
 			),
 			'company'    => array(
-				'label'          => __( 'Company', 'woo-gutenberg-products-block' ),
+				'label'          => __( 'Company', 'woocommerce' ),
 				'optionalLabel'  => __(
 					'Company (optional)',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				'required'       => false,
 				'hidden'         => false,
@@ -117,10 +117,10 @@ class CheckoutFields {
 				'index'          => 30,
 			),
 			'address_1'  => array(
-				'label'          => __( 'Address', 'woo-gutenberg-products-block' ),
+				'label'          => __( 'Address', 'woocommerce' ),
 				'optionalLabel'  => __(
 					'Address (optional)',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				'required'       => true,
 				'hidden'         => false,
@@ -129,10 +129,10 @@ class CheckoutFields {
 				'index'          => 40,
 			),
 			'address_2'  => array(
-				'label'          => __( 'Apartment, suite, etc.', 'woo-gutenberg-products-block' ),
+				'label'          => __( 'Apartment, suite, etc.', 'woocommerce' ),
 				'optionalLabel'  => __(
 					'Apartment, suite, etc. (optional)',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				'required'       => false,
 				'hidden'         => false,
@@ -141,10 +141,10 @@ class CheckoutFields {
 				'index'          => 50,
 			),
 			'country'    => array(
-				'label'         => __( 'Country/Region', 'woo-gutenberg-products-block' ),
+				'label'         => __( 'Country/Region', 'woocommerce' ),
 				'optionalLabel' => __(
 					'Country/Region (optional)',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				'required'      => true,
 				'hidden'        => false,
@@ -152,10 +152,10 @@ class CheckoutFields {
 				'index'         => 50,
 			),
 			'city'       => array(
-				'label'          => __( 'City', 'woo-gutenberg-products-block' ),
+				'label'          => __( 'City', 'woocommerce' ),
 				'optionalLabel'  => __(
 					'City (optional)',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				'required'       => true,
 				'hidden'         => false,
@@ -164,10 +164,10 @@ class CheckoutFields {
 				'index'          => 70,
 			),
 			'state'      => array(
-				'label'          => __( 'State/County', 'woo-gutenberg-products-block' ),
+				'label'          => __( 'State/County', 'woocommerce' ),
 				'optionalLabel'  => __(
 					'State/County (optional)',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				'required'       => true,
 				'hidden'         => false,
@@ -176,10 +176,10 @@ class CheckoutFields {
 				'index'          => 80,
 			),
 			'postcode'   => array(
-				'label'          => __( 'Postal code', 'woo-gutenberg-products-block' ),
+				'label'          => __( 'Postal code', 'woocommerce' ),
 				'optionalLabel'  => __(
 					'Postal code (optional)',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				'required'       => true,
 				'hidden'         => false,
@@ -188,10 +188,10 @@ class CheckoutFields {
 				'index'          => 90,
 			),
 			'phone'      => array(
-				'label'          => __( 'Phone', 'woo-gutenberg-products-block' ),
+				'label'          => __( 'Phone', 'woocommerce' ),
 				'optionalLabel'  => __(
 					'Phone (optional)',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				'required'       => false,
 				'hidden'         => false,
@@ -236,26 +236,26 @@ class CheckoutFields {
 	 */
 	public function register_checkout_field( $options ) {
 		if ( empty( $options['id'] ) ) {
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_id_required', __( 'The field id is required.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'woocommerce_blocks_checkout_field_id_required', __( 'The field id is required.', 'woocommerce' ) );
 		}
 
 		list( $namespace, $name ) = explode( '/', $options['id'] );
 
 		// Having $name empty means they didn't pass a namespace.
 		if ( empty( $name ) ) {
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_namespace_required', __( 'An id must consist of namespace/name.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'woocommerce_blocks_checkout_field_namespace_required', __( 'An id must consist of namespace/name.', 'woocommerce' ) );
 		}
 
 		if ( empty( $options['label'] ) ) {
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_label_required', __( 'The field label is required.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'woocommerce_blocks_checkout_field_label_required', __( 'The field label is required.', 'woocommerce' ) );
 		}
 
 		if ( empty( $options['location'] ) ) {
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_location_required', __( 'The field location is required.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'woocommerce_blocks_checkout_field_location_required', __( 'The field location is required.', 'woocommerce' ) );
 		}
 
 		if ( ! in_array( $options['location'], array_keys( $this->fields_locations ), true ) ) {
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_location_invalid', __( 'The field location is invalid.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'woocommerce_blocks_checkout_field_location_invalid', __( 'The field location is invalid.', 'woocommerce' ) );
 		}
 
 		// At this point, the essentials fields and its location should be set.
@@ -263,7 +263,7 @@ class CheckoutFields {
 		$id       = $options['id'];
 		// Check to see if field is already in the array.
 		if ( ! empty( $this->additional_fields[ $id ] ) || in_array( $id, $this->fields_locations[ $location ], true ) ) {
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_already_registered', __( 'The field is already registered.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'woocommerce_blocks_checkout_field_already_registered', __( 'The field is already registered.', 'woocommerce' ) );
 		}
 
 		// Hidden fields are not supported right now. They will be registered with hidden => false.
@@ -370,18 +370,18 @@ class CheckoutFields {
 	public function validate_field_for_location( $key, $value, $location ) {
 		if ( ! $this->is_field( $key ) ) {
 			// translators: %s field key.
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_invalid', \sprintf( __( 'The field %s is invalid.', 'woo-gutenberg-products-block' ), $key ) );
+			return new \WP_Error( 'woocommerce_blocks_checkout_field_invalid', \sprintf( __( 'The field %s is invalid.', 'woocommerce' ), $key ) );
 		}
 
 		if ( ! in_array( $key, $this->fields_locations[ $location ], true ) ) {
 			// translators: %1$s field key, %2$s location.
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_invalid_location', \sprintf( __( 'The field %1$s is invalid for the location %2$s.', 'woo-gutenberg-products-block' ), $key, $location ) );
+			return new \WP_Error( 'woocommerce_blocks_checkout_field_invalid_location', \sprintf( __( 'The field %1$s is invalid for the location %2$s.', 'woocommerce' ), $key, $location ) );
 		}
 
 		$field = $this->additional_fields[ $key ];
 		if ( ! empty( $field['required'] ) && empty( $value ) ) {
 			// translators: %s field key.
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_required', \sprintf( __( 'The field %s is required.', 'woo-gutenberg-products-block' ), $key ) );
+			return new \WP_Error( 'woocommerce_blocks_checkout_field_required', \sprintf( __( 'The field %s is required.', 'woocommerce' ), $key ) );
 		}
 
 		return true;
