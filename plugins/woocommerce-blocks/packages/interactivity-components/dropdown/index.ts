@@ -13,10 +13,10 @@ export type DropdownContext = {
 		label: string;
 		value: string;
 	};
-	selectedItem: {
+	selectedItems: {
 		label: string | null;
 		value: string | null;
-	};
+	}[];
 	hoveredItem: {
 		label: string | null;
 		value: string | null;
@@ -26,10 +26,10 @@ export type DropdownContext = {
 
 type DropdownStore = {
 	state: {
-		selectedItem?: {
+		selectedItems?: {
 			label: string | null;
 			value: string | null;
-		};
+		}[];
 		placeholderText: string;
 		isSelected: boolean;
 	};
@@ -45,16 +45,25 @@ const { state } = store< DropdownStore >(
 	{
 		state: {
 			get placeholderText(): string {
-				const { selectedItem } = state;
+				const { selectedItems } = state;
 
-				return selectedItem?.label || 'Select an option';
+				return selectedItems?.length && selectedItems[ 0 ].label
+					? selectedItems[ 0 ]?.label
+					: 'Select an option';
 			},
 
 			get isSelected(): boolean {
 				const { currentItem } = getContext< DropdownContext >();
-				const { selectedItem } = state;
+				const { selectedItems } = state;
 
-				return selectedItem?.value === currentItem.value;
+				return (
+					selectedItems?.some( ( item ) => {
+						return (
+							item.value === currentItem.value &&
+							item.label === currentItem.label
+						);
+					} ) || false
+				);
 			},
 		},
 		actions: {
@@ -65,27 +74,35 @@ const { state } = store< DropdownStore >(
 			},
 			selectDropdownItem: ( event: MouseEvent ) => {
 				const context = getContext< DropdownContext >();
-				const { selectedItem } = state;
+				const { selectedItems } = state;
 
 				const {
 					currentItem: { label, value },
 				} = context;
 
-				if (
-					selectedItem?.value === value &&
-					selectedItem?.label === label
-				) {
-					state.selectedItem = {
-						label: null,
-						value: null,
-					};
-					context.selectedItem = {
-						label: null,
-						value: null,
-					};
+				// check if item already selected
+				const selectedItem = selectedItems?.find(
+					( item ) => item.value === value && item.label === label
+				);
+
+				// if item already selected remove it from state:
+				// else add it to state:
+				if ( selectedItem ) {
+					const items = selectedItems?.slice(
+						selectedItems.indexOf( selectedItem ),
+						1
+					);
+					state.selectedItems = items || [];
+					context.selectedItems = items || [];
 				} else {
-					state.selectedItem = { label, value };
-					context.selectedItem = { label, value };
+					selectedItems?.push( {
+						label,
+						value,
+					} );
+					context.selectedItems.push( {
+						label,
+						value,
+					} );
 				}
 
 				context.isOpen = false;

@@ -18,21 +18,21 @@ class Dropdown {
 		wp_enqueue_script( 'wc-interactivity-dropdown' );
 		wp_enqueue_style( 'wc-interactivity-dropdown' );
 
-		$selected_item = $props['selected_item'] ?? array(
-			'label' => null,
-			'value' => null,
-		);
+		// @todo - default should be single , this is just for testing.
+		$select_type = $props['select_type'] ?? 'multiple';
+
+		$selected_items = $props['selected_items'] ?? array();
 
 		$dropdown_context = array(
-			'selectedItem' => $selected_item,
-			'hoveredItem'  => array(
+			'selectedItems' => $selected_items,
+			'hoveredItem'   => array(
 				'label' => null,
 				'value' => null,
 			),
-			'isOpen'       => false,
+			'isOpen'        => false,
 		);
 
-		wc_initial_state( 'woocommerce/interactivity-dropdown', array( 'selectedItem' => $selected_item ) );
+		wc_initial_state( 'woocommerce/interactivity-dropdown', array( 'selectedItems' => $selected_items ) );
 
 		$action = $props['action'] ?? '';
 
@@ -52,6 +52,20 @@ class Dropdown {
 									tabindex="-1" 
 									data-wc-on--click="actions.toggleIsOpen" 
 							>
+							<?php if ( 'multiple' === $select_type ) { ?>
+								<?php foreach ( $selected_items as $selected ) { ?>
+									<span class="components-form-token-field__token">
+										<span class="components-form-token-field__token-text">
+											<?php echo esc_html( $selected['label'] ); ?>
+										</span>
+									</span>
+									<button type="button" class="components-button components-form-token-field__remove-token has-icon">
+										<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+											<path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"></path>
+										</svg>
+									</button>
+								<?php } ?>
+							<?php } ?>
 							<input id="components-form-token-input-1" type="text" autocomplete="off" data-wc-bind--placeholder="state.placeholderText" class="components-form-token-field__input" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-describedby="components-form-token-suggestions-howto-1" value="">
 							<ul hidden data-wc-bind--hidden="!context.isOpen" class="components-form-token-field__suggestions-list" id="components-form-token-suggestions-1" role="listbox">
 								<?php
@@ -69,9 +83,9 @@ class Dropdown {
 										class="components-form-token-field__suggestion" 
 										data-wc-bind--aria-selected="state.isSelected"
 									>
-										<?php // This attribute supports HTML so should be sanitized by caller. ?>
-										<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-										<?php echo $item['label']; ?>
+									<?php // This attribute supports HTML so should be sanitized by caller. ?>
+									<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									<?php echo $item['label']; ?>
 									</li>
 								<?php endforeach; ?>
 							</ul>
@@ -83,7 +97,7 @@ class Dropdown {
 				</svg>
 			</div>
 		</div>
-		<?php
-		return ob_get_clean();
+									<?php
+									return ob_get_clean();
 	}
 }

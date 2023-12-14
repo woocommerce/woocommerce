@@ -33,7 +33,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 			return '';
 		}
 
-		$rating_counts = $block->context['collectionData']['rating_counts'] ?? [];
+		$rating_counts = $block->context['collectionData']['rating_counts'] ?? array();
 		$display_style = $attributes['displayStyle'] ?? 'list';
 		$show_counts   = $attributes['showCounts'] ?? false;
 
@@ -136,14 +136,14 @@ final class CollectionRatingFilter extends AbstractBlock {
 	private function get_dropdown_props( $rating_counts, $selected_ratings_query, $show_counts ) {
 		$ratings_array = explode( ',', $selected_ratings_query );
 
-		$selected_item = array_reduce(
+		$selected_items = array_reduce(
 			$rating_counts,
 			function( $carry, $rating ) use ( $ratings_array, $show_counts ) {
 				if ( in_array( (string) $rating['rating'], $ratings_array, true ) ) {
 					$count       = $rating['count'];
 					$count_label = $show_counts ? "($count)" : '';
 					$rating_str  = (string) $rating['rating'];
-					return array(
+					$carry[]     = array(
 						/* translators: %d is referring to the average rating value. Example: Rated 4 out of 5. */
 						'label' => sprintf( __( 'Rated %d out of 5', 'woo-gutenberg-products-block' ), $rating_str ) . ' ' . $count_label,
 						'value' => $rating['rating'],
@@ -155,7 +155,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 		);
 
 		return array(
-			'items'         => array_map(
+			'items'          => array_map(
 				function ( $rating ) use ( $show_counts ) {
 					$count = $rating['count'];
 					$count_label = $show_counts ? "($count)" : '';
@@ -168,8 +168,8 @@ final class CollectionRatingFilter extends AbstractBlock {
 				},
 				$rating_counts
 			),
-			'selected_item' => $selected_item,
-			'action'        => 'woocommerce/collection-rating-filter::actions.onDropdownChange',
+			'selected_items' => $selected_items,
+			'action'         => 'woocommerce/collection-rating-filter::actions.onDropdownChange',
 		);
 	}
 }
