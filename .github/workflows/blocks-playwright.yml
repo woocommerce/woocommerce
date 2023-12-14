@@ -55,7 +55,7 @@ jobs:
 
             - name: Run Playwright tests
               working-directory: plugins/woocommerce-blocks
-              run: pnpm test:e2e -- --config=tests/e2e/${{ matrix.config.file }}
+              run: pnpm playwright test --config=tests/e2e/${{ matrix.config.file }}
 
             - uses: actions/upload-artifact@v3
               if: ${{ failure() }}

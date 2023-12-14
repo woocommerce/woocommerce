@@ -82,7 +82,7 @@
 		"storybook:deploy": "rimraf ./storybook/dist/* && pnpm run storybook:build && gh-pages -d ./storybook/dist",
 		"test:js": "wireit",
 		"test:debug": "ndb .",
-		"test:e2e": "sh ./bin/check-env.sh && npx playwright test --config=tests/e2e/playwright.config.ts",
+		"test:e2e": "sh ./bin/check-env.sh && pnpm playwright test --config=tests/e2e/playwright.config.ts",
 		"test:e2e:report": "sh ./bin/check-env.sh && npx playwright test --config=tests/e2e/playwright.config.ts --reporter=html",
 		"test:e2e:side-effects": "pnpm run test:e2e -- --config=tests/e2e/playwright.side-effects.config.ts",
 		"test:e2e:side-effects:report": "pnpm run test:e2e:report -- --config=tests/e2e/playwright.side-effects.config.ts",
