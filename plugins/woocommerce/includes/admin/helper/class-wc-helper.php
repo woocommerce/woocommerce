@@ -696,7 +696,7 @@ class WC_Helper {
 					'page'    => 'wc-admin',
 					'tab'     => 'my-subscriptions',
 					'path'    => rawurlencode( '/extensions' ),
-					'install' => $_GET['install'] ?? '',
+					'install' => isset( $_GET[ 'install' ] ) ? wp_unslash( $_GET[ 'install' ] ) : '',
 				),
 				admin_url( 'admin.php' )
 			);
@@ -729,7 +729,7 @@ class WC_Helper {
 		}
 
 		if ( isset( $_GET['install'] ) ) {
-			$redirect_url_args['install'] = $_GET['install'];
+			$redirect_url_args[ 'install' ] = wp_unslash( $_GET[ 'install' ] );
 		}
 
 		$redirect_uri = add_query_arg(
