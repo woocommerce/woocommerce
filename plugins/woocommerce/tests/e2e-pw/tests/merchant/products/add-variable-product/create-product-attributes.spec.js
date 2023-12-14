@@ -71,9 +71,7 @@ test.describe( 'Add product attributes', () => {
 						.click();
 
 					await expect(
-						page.getByRole( 'heading', {
-							name: 'New attribute',
-						} )
+						page.locator( '.woocommerce_attribute .attribute_name.placeholder' )
 					).toBeVisible();
 				} );
 			}
