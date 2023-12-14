@@ -516,13 +516,12 @@
 					return htmlContent.prop( 'outerHTML' );
 				},
 				replaceHTMLTables: function ( html ) {
+					// Wrap the html content in a div
+					const htmlContent = $( '<div>' + html + '</div>' );
+
 					// `<table class="form-table" />` elements added by the Settings API need to be removed. 
 					// Modern browsers won't interpret other table elements like `td` not in a `table`, so 
 					// Removing the `table` is sufficient.
-					const originalTable = $( html );
-					const htmlContent = $( '<div class="wc-shipping-zone-method-fields" />' );
-					htmlContent.html( originalTable.html() );
-
 					const innerTables = htmlContent.find( 'table.form-table' );
 					innerTables.each( ( i ) => {
 						const table = $( innerTables[ i ] );
