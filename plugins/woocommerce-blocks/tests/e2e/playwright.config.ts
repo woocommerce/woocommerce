@@ -48,7 +48,7 @@ const config: ExtendedPlaywrightTestConfig = {
 	projects: [
 		{
 			name: 'blockThemeConfiguration',
-			testDir: '.',
+			testDir: './tests/',
 			testMatch: /block-theme.setup.ts/,
 		},
 		{

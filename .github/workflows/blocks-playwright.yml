@@ -47,14 +47,14 @@ jobs:
             - name: Install Playwright
               run: pnpm --filter='@woocommerce/block-library' exec playwright install --with-deps
 
-            - name: Load wp-env
+            - name: Start wp-env
               run: pnpm --filter='@woocommerce/block-library' wp-env start
 
             - name: Configure the environment
               run: pnpm wp-env:config
 
             - name: Run Playwright tests
-              run: pnpm test:e2e -- --config=tests/e2e/${{ matrix.config.file }}
+              run: pnpm --filter='@woocommerce/block-library' test:e2e -- --config=tests/e2e/${{ matrix.config.file }}
 
             - uses: actions/upload-artifact@v3
               if: ${{ failure() }}
