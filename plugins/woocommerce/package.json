@@ -187,12 +187,12 @@
 			"node_modules/@woocommerce/block-library/blocks.ini",
 			"node_modules/@woocommerce/classic-assets/build",
 			"node_modules/@woocommerce/admin-library/build"
-		], 
+		],
 		"ignoreRoot": []
 	},
 	"wireit": {
 		"build:project": {
-			"command": "rm -rf assets/client/admin assets/js assets/css && cp -r ../woocommerce-admin/build assets/client/admin && cp -r client/legacy/build/js assets/js && cp -r client/legacy/build/css assets/css && cp -r ../woocommerce-blocks/build assets/client/blocks && cp -r ../woocommerce-blocks/blocks.ini blocks.ini",
+			"command": "rm -rf assets/client/blocks assets/client/admin assets/js assets/css && cp -r ../woocommerce-admin/build assets/client/admin && cp -r client/legacy/build/js assets/js && cp -r client/legacy/build/css assets/css && cp -r ../woocommerce-blocks/build assets/client/blocks && cp -r ../woocommerce-blocks/blocks.ini blocks.ini",
 			"clean": "if-file-deleted",
 			"files": [],
 			"output": [
