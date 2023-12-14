@@ -118,10 +118,7 @@ const Edit = ( {
 			{ isFeaturePluginBuild() && (
 				<InspectorControls key="inspector">
 					<PanelBody
-						title={ __(
-							'Dimensions',
-							'woocommerce'
-						) }
+						title={ __( 'Dimensions', 'woocommerce' ) }
 						initialOpen
 					>
 						<UnitControl

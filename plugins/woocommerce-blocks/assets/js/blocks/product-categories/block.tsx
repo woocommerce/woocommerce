@@ -25,10 +25,7 @@ import type { ProductCategoriesBlockProps } from './types';
 const EmptyPlaceholder = () => (
 	<Placeholder
 		icon={ <Icon icon={ listView } /> }
-		label={ __(
-			'Product Categories List',
-			'woocommerce'
-		) }
+		label={ __( 'Product Categories List', 'woocommerce' ) }
 		className="wc-block-product-categories"
 	>
 		{ __(
@@ -70,17 +67,11 @@ const ProductCategoriesBlock = ( {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __(
-						'List Settings',
-						'woocommerce'
-					) }
+					title={ __( 'List Settings', 'woocommerce' ) }
 					initialOpen
 				>
 					<ToggleGroupControl
-						label={ __(
-							'Display style',
-							'woocommerce'
-						) }
+						label={ __( 'Display style', 'woocommerce' ) }
 						value={ isDropdown ? 'dropdown' : 'list' }
 						onChange={ ( value: string ) =>
 							setAttributes( {
@@ -90,29 +81,17 @@ const ProductCategoriesBlock = ( {
 					>
 						<ToggleGroupControlOption
 							value="list"
-							label={ __(
-								'List',
-								'woocommerce'
-							) }
+							label={ __( 'List', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="dropdown"
-							label={ __(
-								'Dropdown',
-								'woocommerce'
-							) }
+							label={ __( 'Dropdown', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 				</PanelBody>
-				<PanelBody
-					title={ __( 'Content', 'woocommerce' ) }
-					initialOpen
-				>
+				<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
 					<ToggleControl
-						label={ __(
-							'Show product count',
-							'woocommerce'
-						) }
+						label={ __( 'Show product count', 'woocommerce' ) }
 						checked={ hasCount }
 						onChange={ () =>
 							setAttributes( { hasCount: ! hasCount } )
@@ -142,10 +121,7 @@ const ProductCategoriesBlock = ( {
 						/>
 					) }
 					<ToggleControl
-						label={ __(
-							'Show hierarchy',
-							'woocommerce'
-						) }
+						label={ __( 'Show hierarchy', 'woocommerce' ) }
 						checked={ isHierarchical }
 						onChange={ () =>
 							setAttributes( {
@@ -154,10 +130,7 @@ const ProductCategoriesBlock = ( {
 						}
 					/>
 					<ToggleControl
-						label={ __(
-							'Show empty categories',
-							'woocommerce'
-						) }
+						label={ __( 'Show empty categories', 'woocommerce' ) }
 						checked={ hasEmpty }
 						onChange={ () =>
 							setAttributes( { hasEmpty: ! hasEmpty } )

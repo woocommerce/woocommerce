@@ -23,17 +23,9 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 		attributes;
 	return (
 		<InspectorControls key="inspector">
-			<PanelBody
-				title={ __(
-					'Display Settings',
-					'woocommerce'
-				) }
-			>
+			<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
 				<ToggleControl
-					label={ __(
-						'Display product count',
-						'woocommerce'
-					) }
+					label={ __( 'Display product count', 'woocommerce' ) }
 					checked={ showCounts }
 					onChange={ () =>
 						setAttributes( {
@@ -56,10 +48,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				>
 					<ToggleGroupControlOption
 						value="multiple"
-						label={ __(
-							'Multiple',
-							'woocommerce'
-						) }
+						label={ __( 'Multiple', 'woocommerce' ) }
 					/>
 					<ToggleGroupControlOption
 						value="single"
@@ -68,10 +57,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				</ToggleGroupControl>
 				{ selectType === 'multiple' && (
 					<ToggleGroupControl
-						label={ __(
-							'Filter Conditions',
-							'woocommerce'
-						) }
+						label={ __( 'Filter Conditions', 'woocommerce' ) }
 						help={
 							queryType === 'and'
 								? __(
@@ -93,25 +79,16 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 					>
 						<ToggleGroupControlOption
 							value="and"
-							label={ __(
-								'All',
-								'woocommerce'
-							) }
+							label={ __( 'All', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="or"
-							label={ __(
-								'Any',
-								'woocommerce'
-							) }
+							label={ __( 'Any', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 				) }
 				<ToggleGroupControl
-					label={ __(
-						'Display Style',
-						'woocommerce'
-					) }
+					label={ __( 'Display Style', 'woocommerce' ) }
 					value={ displayStyle }
 					onChange={ ( value: string ) =>
 						setAttributes( {
@@ -126,18 +103,12 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 					/>
 					<ToggleGroupControlOption
 						value="dropdown"
-						label={ __(
-							'Dropdown',
-							'woocommerce'
-						) }
+						label={ __( 'Dropdown', 'woocommerce' ) }
 					/>
 				</ToggleGroupControl>
 			</PanelBody>
 			<PanelBody
-				title={ __(
-					'Content Settings',
-					'woocommerce'
-				) }
+				title={ __( 'Content Settings', 'woocommerce' ) }
 				initialOpen={ false }
 			>
 				<AttributeSelectControls

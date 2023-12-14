@@ -116,17 +116,9 @@ export const Edit = ( {
 							</p>
 						</Notice>
 					) }
-				<PanelBody
-					title={ __(
-						'Display options',
-						'woocommerce'
-					) }
-				>
+				<PanelBody title={ __( 'Display options', 'woocommerce' ) }>
 					<ToggleControl
-						label={ __(
-							'Require checkbox',
-							'woocommerce'
-						) }
+						label={ __( 'Require checkbox', 'woocommerce' ) }
 						checked={ checkbox }
 						onChange={ () =>
 							setAttributes( {

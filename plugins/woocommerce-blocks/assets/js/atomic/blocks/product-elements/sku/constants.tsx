@@ -5,10 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { barcode } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 
-export const BLOCK_TITLE: string = __(
-	'Product SKU',
-	'woocommerce'
-);
+export const BLOCK_TITLE: string = __( 'Product SKU', 'woocommerce' );
 export const BLOCK_ICON: JSX.Element = (
 	<Icon icon={ barcode } className="wc-block-editor-components-block-icon" />
 );

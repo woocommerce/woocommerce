@@ -80,18 +80,12 @@ export function IncompatibleExtensionsNotice( {
 	const switchButtonLabel =
 		block === 'woocommerce/cart'
 			? __( 'Switch to classic cart', 'woocommerce' )
-			: __(
-					'Switch to classic checkout',
-					'woocommerce'
-			  );
+			: __( 'Switch to classic checkout', 'woocommerce' );
 
 	const snackbarLabel =
 		block === 'woocommerce/cart'
 			? __( 'Switched to classic cart.', 'woocommerce' )
-			: __(
-					'Switched to classic checkout.',
-					'woocommerce'
-			  );
+			: __( 'Switched to classic checkout.', 'woocommerce' );
 
 	const noticeContent = (
 		<>
@@ -276,10 +270,7 @@ export function IncompatibleExtensionsNotice( {
 										closeModal();
 									} }
 								>
-									{ __(
-										'Switch',
-										'woocommerce'
-									) }
+									{ __( 'Switch', 'woocommerce' ) }
 								</Button>{ ' ' }
 								<Button
 									variant="secondary"
@@ -297,10 +288,7 @@ export function IncompatibleExtensionsNotice( {
 										closeModal();
 									} }
 								>
-									{ __(
-										'Cancel',
-										'woocommerce'
-									) }
+									{ __( 'Cancel', 'woocommerce' ) }
 								</Button>
 							</TabbableContainer>
 						</Modal>

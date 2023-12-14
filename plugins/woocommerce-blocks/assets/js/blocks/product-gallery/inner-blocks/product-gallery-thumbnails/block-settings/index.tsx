@@ -99,10 +99,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 			</ToggleGroupControl>
 			{ context.thumbnailsPosition !== ThumbnailsPosition.OFF && (
 				<RangeControl
-					label={ __(
-						'Number of Thumbnails',
-						'woocommerce'
-					) }
+					label={ __( 'Number of Thumbnails', 'woocommerce' ) }
 					value={ context.thumbnailsNumberOfThumbnails }
 					onChange={ ( value: number ) =>
 						updateBlockAttributes( productGalleryClientId, {
