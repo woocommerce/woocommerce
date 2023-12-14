@@ -57,11 +57,11 @@ trait OrderAttributionMeta {
 		$detector = new MobileDetect( array(), $values['user_agent'] );
 
 		if ( $detector->isMobile() ) {
-			return __( 'Mobile', 'woocommerce' );
+			return 'Mobile';
 		} elseif ( $detector->isTablet() ) {
-			return __( 'Tablet', 'woocommerce' );
+			return 'Tablet';
 		} else {
-			return __( 'Desktop', 'woocommerce' );
+			return 'Desktop';
 		}
 	}
 
@@ -281,7 +281,7 @@ trait OrderAttributionMeta {
 		}
 
 		return $values;
-	}
+		}
 
 	/**
 	 * Get the label for the order origin
