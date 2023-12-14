@@ -462,7 +462,13 @@ class CheckoutFields {
 		$field = $this->additional_fields[ $key ];
 		if ( ! empty( $field['required'] ) && empty( $value ) ) {
 			// translators: %s field key.
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_required', \sprintf( __( 'The field %s is required.', 'woocommerce' ), $key ) );
+			return new \WP_Error(
+				'woocommerce_blocks_checkout_field_required',
+				\sprintf(
+					__( 'The field %s is required.', 'woocommerce' ),
+					$key
+				)
+			);
 		}
 
 		return true;
