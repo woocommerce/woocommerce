@@ -14,7 +14,7 @@
 		"commander": "9.5.0",
 		"chalk": "^4.1.2",
 		"inquirer": "^7.1.0",
-		"simple-git": "3.5.0"
+		"simple-git": "3.16.0"
 	},
 	"engines": {
 		"node": "^16.14.1",
