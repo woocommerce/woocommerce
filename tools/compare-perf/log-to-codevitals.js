@@ -8,7 +8,7 @@ const [ token, branch, hash, baseHash, timestamp ] = process.argv.slice( 2 );
 const resultsFiles = [
 	{
 		file: 'editor.performance-results.json',
-		metricsPrefix: 'editor',
+		metricsPrefix: 'editor-',
 	},
 ];
 

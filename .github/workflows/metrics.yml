@@ -53,9 +53,9 @@ jobs:
                   path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results*.json
 
             - name: Publish performance results
-              if: github.event_name == 'pull_request'
+              if: github.event_name == 'push'
               env:
                   CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }}
               run: |
                   COMMITTED_AT=$(git show -s $GITHUB_SHA --format="%cI")
-                  cd tools/compare-perf && pnpm run log $CODEVITALS_PROJECT_TOKEN trunk $GITHUB_SHA 2f6ca66e00b3666b2567877ae67cbfb5b6ce171a $COMMITTED_AT
+                  cd tools/compare-perf && pnpm run log $CODEVITALS_PROJECT_TOKEN trunk $GITHUB_SHA 19f3d0884617d7ecdcf37664f648a51e2987cada $COMMITTED_AT
