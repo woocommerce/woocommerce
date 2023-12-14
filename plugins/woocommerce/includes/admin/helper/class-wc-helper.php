@@ -684,8 +684,8 @@ class WC_Helper {
 	/**
 	 * Get helper redirect URL.
 	 *
-	 * @param array $args Query args.
-	 * @param bool  $redirect_to_wc_admin Whether to redirect to WC Admin.
+	 * @param array  $args Query args.
+	 * @param bool   $redirect_to_wc_admin Whether to redirect to WC Admin.
 	 * @param string $install_product_key Optional Product key to install.
 	 * @return string
 	 */
