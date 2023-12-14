@@ -18,6 +18,7 @@ import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 import isShallowEqual from '@wordpress/is-shallow-equal';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -168,12 +169,15 @@ const AddressForm = ( {
 					if ( typeof field.options === 'undefined' ) {
 						return null;
 					}
-					
+
 					return (
 						<Combobox
 							key={ field.key }
 							{ ...fieldProps }
-							className="wc-block-components-select-input"
+							className={ classnames(
+								'wc-block-components-select-input',
+								`wc-block-components-select-input-${ field.key }`
+							) }
 							value={ values[ field.key ] }
 							onChange={ ( newValue: string ) => {
 								onChange( {
