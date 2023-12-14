@@ -8,10 +8,7 @@ import { Icon, tool } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import {
-	DEFAULT_ATTRIBUTES,
-	INNER_BLOCKS_PRODUCT_TEMPLATE,
-} from '../constants';
+import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { CoreCollectionNames } from '../types';
 
 const collection = {
@@ -34,7 +31,7 @@ const attributes = {
 	collection: collection.name,
 };
 
-const innerBlocks: InnerBlockTemplate[] = [ INNER_BLOCKS_PRODUCT_TEMPLATE ];
+const innerBlocks: InnerBlockTemplate[] = INNER_BLOCKS_TEMPLATE;
 
 export default {
 	...collection,

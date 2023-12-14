@@ -6,7 +6,7 @@ import {
 	store as blockEditorStore,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { Placeholder, Button } from '@wordpress/components';
+import { Placeholder } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import {
 	createBlock,
