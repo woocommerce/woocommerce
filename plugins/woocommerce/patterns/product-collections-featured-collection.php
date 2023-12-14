@@ -34,7 +34,7 @@ $collection_title = $content['titles'][0]['default'] ?? '';
 				<div class="wp-block-group has-background" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-left-radius:4px;border-bottom-right-radius:4px;background-color:#484848;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
 					<!-- wp:group {"style":{"border":{"radius":{"topLeft":"4px","topRight":"4px"},"color":"#ffffff","style":"solid","width":"3px"},"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"blockGap":"0"}},"layout":{"type":"flex","orientation":"vertical"}} -->
 					<div class="wp-block-group has-border-color" style="border-color:#ffffff;border-style:solid;border-width:3px;border-top-left-radius:4px;border-top-right-radius:4px;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
-						<!-- wp:woocommerce/product-image {"imageSizing":"thumbnail","isDescendentOfQueryLoop":true,"style":{"spacing":{"margin":{"top":"0","right":"0","bottom":"0","left":"0"}}}} /-->
+						<!-- wp:woocommerce/product-image {"imageSizing":"single","isDescendentOfQueryLoop":true,"style":{"spacing":{"margin":{"top":"0","right":"0","bottom":"0","left":"0"}}}} /-->
 					</div>
 					<!-- /wp:group -->
 

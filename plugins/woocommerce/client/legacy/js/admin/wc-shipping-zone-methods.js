@@ -409,6 +409,15 @@
 					});
 
 					$( '.wc-shipping-zone-method-selector select' ).trigger( 'change' );
+
+					$('.wc-shipping-zone-method-input input').change( function() {
+						const selected = $('.wc-shipping-zone-method-input input:checked');
+						const id = selected.attr( 'id' );
+						const description = $( `#${ id }-description` );
+						const descriptions = $( '.wc-shipping-zone-method-input-help-text' );
+						descriptions.css( 'display', 'none' );
+						description.css( 'display', 'block' );
+					});
 				},
 				/**
 				 * The settings HTML is controlled and built by the settings api, so in order to refactor the 
@@ -510,11 +519,13 @@
 					// `<table class="form-table" />` elements added by the Settings API need to be removed. 
 					// Modern browsers won't interpret other table elements like `td` not in a `table`, so 
 					// Removing the `table` is sufficient.
-					const htmlContent = $( html );
-					const tables = htmlContent.find( 'table.form-table' );
+					const originalTable = $( html );
+					const htmlContent = $( '<div class="wc-shipping-zone-method-fields" />' );
+					htmlContent.html( originalTable.html() );
 
-					tables.each( ( i ) => {
-						const table = $( tables[ i ] );
+					const innerTables = htmlContent.find( 'table.form-table' );
+					innerTables.each( ( i ) => {
+						const table = $( innerTables[ i ] );
 						const div = $( '<div class="wc-shipping-zone-method-fields" />' );
 						div.html( table.html() );
 						table.replaceWith( div );
@@ -526,7 +537,7 @@
 					if ( 'wc-modal-add-shipping-method' === target ) {
 						shippingMethodView.block();
 
-						$('#btn-next').html('<img alt="processing" src="images/wpspin_light.gif" class="waiting" />');
+						$('#btn-next').addClass( 'is-busy' );
 
 						// Add method to zone via ajax call
 						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_add_method', {
