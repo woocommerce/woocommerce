@@ -60,7 +60,7 @@ const data = new TextEncoder().encode(
 );
 
 const options = {
-	hostname: 'codevitals.run',
+	hostname: 'www.codevitals.run',
 	port: 443,
 	path: '/api/log?token=' + token,
 	method: 'POST',
