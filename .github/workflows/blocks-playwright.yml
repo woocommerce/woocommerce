@@ -54,7 +54,8 @@ jobs:
               run: pnpm wp-env:config
 
             - name: Run Playwright tests
-              run: pnpm --filter='@woocommerce/block-library' test:e2e -- --config=tests/e2e/${{ matrix.config.file }}
+              working-directory: plugins/woocommerce-blocks
+              run: pnpm test:e2e -- --config=tests/e2e/${{ matrix.config.file }}
 
             - uses: actions/upload-artifact@v3
               if: ${{ failure() }}

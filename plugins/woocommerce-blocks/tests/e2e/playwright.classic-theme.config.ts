@@ -20,7 +20,7 @@ export default defineConfig( {
 	projects: [
 		{
 			name: 'classicThemeConfiguration',
-			testDir: './tests/',
+			testDir: '.',
 			testMatch: /classic-theme.setup.ts/,
 		},
 		{
