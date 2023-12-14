@@ -499,7 +499,7 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
-		test( 'Default Query Collection can be added and displays proper products', async ( {
+		test( 'Product Catalog Collection can be added and displays proper products', async ( {
 			pageObject,
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock( 'productCatalog' );
