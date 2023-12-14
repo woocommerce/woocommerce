@@ -444,7 +444,13 @@ class CheckoutFields {
 	public function validate_field_for_location( $key, $value, $location ) {
 		if ( ! $this->is_field( $key ) ) {
 			// translators: %s field key.
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_invalid', \sprintf( __( 'The field %s is invalid.', 'woocommerce' ), $key ) );
+			return new \WP_Error(
+				'woocommerce_blocks_checkout_field_invalid',
+				\sprintf(
+					__( 'The field %s is invalid.', 'woocommerce' ),
+					$key
+				)
+			);
 		}
 
 		if ( ! in_array( $key, $this->fields_locations[ $location ], true ) ) {
