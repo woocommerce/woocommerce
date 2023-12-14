@@ -600,7 +600,7 @@ class MiniCart extends AbstractBlock {
 		 *
 		 * @since $VID:$
 		 */
-		$pattern_exclude_list = apply_filters( 'woocommerce_blocks_mini_cart_auto_insert_pattern_exclude_list', [] );
+		$pattern_exclude_list = apply_filters( 'woocommerce_blocks_mini_cart_auto_insert_pattern_exclude_list', [ 'twentytwentytwo/header-centered-logo', 'twentytwentytwo/header-stacked' ] );
 
 		/**
 		 * A list of theme slugs to execute this with. This is a temporary
@@ -609,7 +609,7 @@ class MiniCart extends AbstractBlock {
 		 *
 		 * @since $VID:$
 		 */
-		$theme_include_list = apply_filters( 'woocommerce_blocks_mini_cart_auto_insert_theme_include_list', [ 'Twenty Twenty-Four' ] );
+		$theme_include_list = apply_filters( 'woocommerce_blocks_mini_cart_auto_insert_theme_include_list', [ 'Twenty Twenty-Four', 'Twenty Twenty-Two' ] );
 
 		if ( $context && in_array( $active_theme_name, $theme_include_list, true ) ) {
 			if (
@@ -636,6 +636,13 @@ class MiniCart extends AbstractBlock {
 	 */
 	private function pattern_is_excluded( $context, $pattern_exclude_list ) {
 		$pattern_slug = is_array( $context ) && isset( $context['slug'] ) ? $context['slug'] : '';
+		if ( ! $pattern_slug ) {
+			/**
+			 * Woo patterns have a slug property in $context, but core/theme patterns dont.
+			 * In that case, we fallback to the name property, as they're the same.
+			 */
+			$pattern_slug = is_array( $context ) && isset( $context['name'] ) ? $context['name'] : '';
+		}
 		return in_array( $pattern_slug, $pattern_exclude_list, true );
 	}
 
