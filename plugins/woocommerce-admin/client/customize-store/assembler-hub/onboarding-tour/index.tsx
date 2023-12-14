@@ -52,9 +52,15 @@ export const OnboardingTour = ( {
 					onRequestClose={ skipTour }
 					shouldCloseOnClickOutside={ false }
 				>
+					<span className="woocommerce-customize-store__title">
+						{ __(
+							'Our AI tool had a few issues generating your content.',
+							'woocommerce'
+						) }
+					</span>
 					<p>
 						{ __(
-							"We encountered some issues while generating content with AI. But don't worry — you can still customize the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
+							"But don't let that stop you! Start customizing the look and feel of your store by adding your logo and selecting your colors and layout. Take a quick tour to discover what's possible.",
 							'woocommerce'
 						) }
 					</p>
