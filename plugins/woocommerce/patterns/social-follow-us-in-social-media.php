@@ -7,10 +7,10 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
-$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg' );
-$image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/watch-hand-brand-jewellery-strap-platinum.jpg' );
-$image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholders/tree-branch-plant-wood-leaf-flower.jpg' );
-$image4 = PatternsHelper::get_image_url( $images, 3, 'images/pattern-placeholders/road-sport-vintage-wheel-retro-old.jpg' );
+$image1 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg' );
+$image2 = PatternsHelper::get_image_url( $images, 1, 'assets/images/pattern-placeholders/watch-hand-brand-jewellery-strap-platinum.jpg' );
+$image3 = PatternsHelper::get_image_url( $images, 2, 'assets/images/pattern-placeholders/tree-branch-plant-wood-leaf-flower.jpg' );
+$image4 = PatternsHelper::get_image_url( $images, 3, 'assets/images/pattern-placeholders/road-sport-vintage-wheel-retro-old.jpg' );
 
 $social_title = $content['titles'][0]['default'] ?? '';
 ?>

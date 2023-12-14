@@ -21,13 +21,13 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 <div class="wp-block-columns alignwide" style="margin-top:0px;margin-bottom:80px">
 	<!-- wp:column -->
 	<div class="wp-block-column">
-		<!-- wp:cover {"url":"<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg' ) ); ?>","dimRatio":0,"minHeight":800,"minHeightUnit":"px","isDark":false,"layout":{"type":"constrained"}} -->
+		<!-- wp:cover {"url":"<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg' ) ); ?>","dimRatio":0,"minHeight":800,"minHeightUnit":"px","isDark":false,"layout":{"type":"constrained"}} -->
 		<div class="wp-block-cover is-light" style="min-height:800px">
 			<span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span>
 			<img
 				class="wp-block-cover__image-background"
 				alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased.', 'woocommerce' ); ?>"
-				src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg' ) ); ?>"
+				src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg' ) ); ?>"
 				data-object-fit="cover" />
 			<div class="wp-block-cover__inner-container">
 				<!-- wp:paragraph {"align":"center","placeholder":" ","fontSize":"large"} -->

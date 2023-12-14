@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 $pattern_title       = $content['titles'][0]['default'] ?? '';
 $pattern_description = $content['descriptions'][0]['default'] ?? '';
 $pattern_button      = $content['buttons'][0]['default'] ?? '';
-$pattern_image       = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/man-person-music-black-and-white-white-photography.jpg' );
+$pattern_image       = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/man-person-music-black-and-white-white-photography.jpg' );
 ?>
 
 <!-- wp:cover {"url":"<?php echo esc_url( $pattern_image ); ?>","dimRatio":50,"focalPoint":{"x":0.5,"y":0.21},"minHeight":739,"contentPosition":"center right","align":"full"} -->

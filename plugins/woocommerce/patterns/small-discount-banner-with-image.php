@@ -36,7 +36,7 @@ $banner_title = $content['titles'][0]['default'] ?? '';
 	<div class="wp-block-column">
 		<!-- wp:image {"align":"center","id":1,"sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image aligncenter size-full">
-			<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square-lg.png' ) ); ?>" alt="" class="wp-image-1" />
+			<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square-lg.png' ) ); ?>" alt="" class="wp-image-1" />
 		</figure>
 		<!-- /wp:image -->
 	</div>
