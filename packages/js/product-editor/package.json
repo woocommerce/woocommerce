@@ -223,6 +223,7 @@
 				"node_modules/@woocommerce/internal-style-build/abstracts",
 				"node_modules/@woocommerce/internal-js-tests/build",
 				"node_modules/@woocommerce/internal-js-tests/build-module",
+				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

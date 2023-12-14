@@ -38,7 +38,6 @@
 		"grunt-sass": "3.1.0",
 		"grunt-stylelint": "0.16.0",
 		"gruntify-eslint": "5.0.0",
-		"nodemon": "^2.0.22",
 		"sass": "^1.69.5",
 		"stylelint": "13.8.0",
 		"wireit": "0.14.1"
