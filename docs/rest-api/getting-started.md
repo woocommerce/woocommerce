@@ -8,7 +8,7 @@ The REST API is a powerful part of WooCommerce which lets you read and write var
 
 In order to access the REST API using the standard endpoint URI structure (e.g. `wc/v3/products`), you must have your WordPress permalinks configured to something other than "Plain". Go to **Settings > Permalinks** and choose an option.
 
-![Permalinks options](_media/permalinks.webp)
+![Permalinks options](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/permalinks.webp)
 
 ## API reference
 
@@ -32,7 +32,7 @@ To start using REST API, you first need to generate API keys.
 4. Click *Generate api key*.
 5. Your keys will be shown - do not close this tab yet, the secret will be hidden if you try to view the key again.
 
-![Generated API Keys](_media/keys.png)
+![Generated API Keys](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/keys.png)
 
 ## Make a basic request
 
@@ -42,11 +42,11 @@ In Postman, you need to set the fields for request type, request URL, and the se
 
 Once done, hit send and you'll see the JSON response from the API if all worked well. You should see something like this:
 
-![Generated API Keys](_media/postman.png)
+![Generated API Keys](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/postman.png)
 
 Insomnia is almost identical to Postman; fill in the same fields and again use basic auth.
 
-![Insomnia](_media/insomnia.png)
+![Insomnia](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/insomnia.png)
 
 Thats it! The API is working.
 
@@ -58,15 +58,15 @@ If you have problems connecting, you may need to disable SSL verification - see 
 
 If you're having problems connecting to the REST API on your localhost and seeing errors like this:
 
-![SSL Error](_media/sslerror.png)
+![SSL Error](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/sslerror.png)
 
 You need to disable SSL verification. In Postman you can find this in the settings:
 
-![Postman settings](_media/postman-ssl.png)
+![Postman settings](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/postman-ssl.png)
 
 Insomnia also has this setting the preferences area:
 
-![Insomnia settings](_media/insomnia-ssl.png)
+![Insomnia settings](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/insomnia-ssl.png)
 
 ### 401 Unauthorized
 
