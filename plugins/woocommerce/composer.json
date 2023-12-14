@@ -33,11 +33,10 @@
 		"bamarni/composer-bin-plugin": "^1.4",
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
 		"mockery/mockery": "1.6.6",
-		"phpunit/phpunit": "^9.0",
+		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
 		"yoast/phpunit-polyfills": "^2.0",
-		"woocommerce/monorepo-plugin": "*",
-		"wp-hooks/generator": "0.9.0"
+		"woocommerce/monorepo-plugin": "*"
 	},
 	"config": {
 		"optimize-autoloader": true,
