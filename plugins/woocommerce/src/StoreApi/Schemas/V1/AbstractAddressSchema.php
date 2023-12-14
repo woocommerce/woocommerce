@@ -238,9 +238,6 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 					},
 					$field['options']
 				);
-				$field_schema['items'] = array(
-					'type' => 'string',
-				);
 			}
 
 			$schema[ $key ] = $field_schema;
