@@ -230,7 +230,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 				'required'    => true,
 			];
 
-			if ( ! empty( $field['type'] ) && 'select' === $field['type'] ) {
+			if ( 'select' === $field['type'] ) {
 				$field_schema['type'] = 'string';
 				$field_schema['enum'] = array_map(
 					function( $option ) {
