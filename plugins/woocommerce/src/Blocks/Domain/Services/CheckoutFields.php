@@ -333,7 +333,13 @@ class CheckoutFields {
 
 				if ( in_array( $sanitized_value, $added_values, true ) ) {
 					// translators: %s is the duplicate value.
-					return new \WP_Error( 'woocommerce_blocks_checkout_select_field_options_not_unique', sprintf( __( 'The value in each option of "select" fields must be unique. Duplicate value "%s" found.', 'woocommerce' ), esc_html( $sanitized_value ) ) );
+					return new \WP_Error(
+						'woocommerce_blocks_checkout_select_field_options_not_unique',
+						sprintf(
+							__( 'The value in each option of "select" fields must be unique. Duplicate value "%s" found.', 'woocommerce' ),
+							esc_html( $sanitized_value )
+						)
+					);
 				}
 
 				$added_values[] = $sanitized_value;
