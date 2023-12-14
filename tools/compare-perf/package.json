@@ -7,7 +7,7 @@
 	"license": "GPLv2",
 	"repository": "woocommerce/woocommerce",
 	"scripts": {
-		"test": "node index.js"
+		"compare": "node index.js"
 	},
 	"dependencies": {
 		"@wordpress/env": "^8.13.0",
