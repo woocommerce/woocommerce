@@ -211,7 +211,7 @@ async function runPerformanceTests( branches, options ) {
 
 	logAtIndent( 2, 'Installing dependencies and building' );
 	await runShellScript(
-		`bash -c "source $HOME/.nvm/nvm.sh && nvm install && ${ config.setupCommand }"`,
+		`bash -c "source $HOME/.nvm/nvm.sh && nvm install && ${ config.setupTestRunner }"`,
 		testRunnerDir
 	);
 
