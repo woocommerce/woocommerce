@@ -93,7 +93,10 @@ class Pexels {
 			return new \WP_Error( 'woocommerce_no_images_found', __( 'No images found.', 'woocommerce' ) );
 		}
 
-		return array( 'images' => $refined_images, 'search_term' => $search_term );
+		return array(
+			'images' => $refined_images,
+			'search_term' => $search_term
+		);
 	}
 
 	/**

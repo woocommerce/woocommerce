@@ -45,7 +45,7 @@ class PatternUpdater {
 		}
 
 		if ( ! isset( $images['images'] ) ) {
-			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woocommerce' ) );
 		}
 
 		$last_business_description = get_option( 'last_business_description_with_ai_content_generated' );

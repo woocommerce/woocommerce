@@ -75,7 +75,7 @@ class ProductUpdater {
 		}
 
 		if ( ! isset( $images['images'] ) || ! isset( $images['search_term'] ) ) {
-			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woocommerce' ) );
 		}
 
 		// This is required in case something interrupts the execution of the script and the endpoint is called again on retry.
@@ -360,7 +360,7 @@ class ProductUpdater {
 	 * @return string
 	 */
 	private function adjust_image_size_for_products( $image_url ) {
-		$parsed_url = parse_url( $image_url );
+		$parsed_url = wp_parse_url( $image_url );
 
 		if ( ! isset( $parsed_url['query'] ) ) {
 			return $image_url;
@@ -417,6 +417,7 @@ class ProductUpdater {
 	 * @param string     $token The JWT token.
 	 * @param array      $products_information_list The products information list.
 	 * @param string     $business_description The business description.
+	 * @param string     $search_term The search term.
 	 *
 	 * @return array|int|string|\WP_Error
 	 */
@@ -541,7 +542,7 @@ class ProductUpdater {
 	 */
 	private function product_update( $product, $product_image_id, $product_title, $product_description, $product_price ) {
 		if ( ! $product instanceof \WC_Product ) {
-			return new WP_Error( 'invalid_product', __( 'Invalid product.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'invalid_product', __( 'Invalid product.', 'woocommerce' ) );
 		}
 
 		$product->set_image_id( $product_image_id );
