@@ -873,7 +873,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * <all|id|range>...
 	 * : ID or range of orders to clean up.
 	 *
- 	 * [--batch-size=<batch-size>]
+	 * [--batch-size=<batch-size>]
 	 * : Number of orders to process per batch. Applies only to cleaning up of 'all' orders.
 	 * ---
 	 * default: 500
@@ -893,8 +893,8 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *    # Cleanup postmeta for all orders with a batch size of 200 (instead of the default 500).
 	 *    wp wc hpos cleanup all --batch-size=200
 	 *
-	 * @param array $args Positional arguments passed to the command.
-	 * @param array $assoc_args Associate arguments (options) passed to the command.
+	 * @param array $args       Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 * @return void
 	 */
 	public function cleanup_post_data( array $args = array(), array $assoc_args = array() ) {
@@ -913,9 +913,10 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			return;
 		}
 
-		$progress    = WP_CLI\Utils\make_progress_bar( __( 'HPOS cleanup', 'woocommerce' ), $order_count );
-		$count       = 0;
+		$progress = WP_CLI\Utils\make_progress_bar( __( 'HPOS cleanup', 'woocommerce' ), $order_count );
+		$count    = 0;
 
+		// translators: %d is the number of orders to clean up.
 		WP_CLI::log( sprintf( _n( 'Starting cleanup for %d order...', 'Starting cleanup for %d orders...', $order_count, 'woocommerce' ), $order_count ) );
 
 		do {
@@ -925,9 +926,12 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				try {
 					$handler->cleanup_post_data( $order_id );
 					$count++;
+
+					// translators: %d is an order ID.
 					WP_CLI::debug( sprintf( __( 'Cleanup completed for order %d.', 'woocommerce' ), $order_id ) );
 				} catch ( \Exception $e ) {
-					WP_CLI::error( sprintf( __( 'An error occurred while cleaning up order %d: %s', 'woocommerce' ), $order_id, $e->getMessage() ) );
+					// translators: %1$d is an order ID, %2$s is an error message.
+					WP_CLI::error( sprintf( __( 'An error occurred while cleaning up order %1$d: %2$s', 'woocommerce' ), $order_id, $e->getMessage() ) );
 				}
 
 				$progress->tick();
@@ -936,13 +940,13 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			if ( ! $all_orders ) {
 				break;
 			}
-
-		} while( $order_ids );
+		} while ( $order_ids );
 
 		$progress->finish();
 
 		WP_CLI::success(
 			sprintf(
+				// translators: %d is the number of orders that were cleaned up.
 				_n( 'Cleanup completed for %d order.', 'Cleanup completed for %d orders.', $count, 'woocommerce' ),
 				$count
 			)

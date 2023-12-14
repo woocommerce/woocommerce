@@ -47,7 +47,7 @@ class LegacyDataHandler {
 	 */
 	public function count_orders_for_cleanup( $order_ids = array() ) : int {
 		global $wpdb;
-		return (int) $wpdb->get_var( $this->build_sql_query_for_cleanup( $order_ids, 'count' ) );
+		return (int) $wpdb->get_var( $this->build_sql_query_for_cleanup( $order_ids, 'count' ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- prepared in build_sql_query_for_cleanup().
 	}
 
 	/**
@@ -62,7 +62,7 @@ class LegacyDataHandler {
 
 		return array_map(
 			'absint',
-			$wpdb->get_col( $this->build_sql_query_for_cleanup( $order_ids, 'ids', $limit ) )
+			$wpdb->get_col( $this->build_sql_query_for_cleanup( $order_ids, 'ids', $limit ) ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- prepared in build_sql_query_for_cleanup().
 		);
 	}
 
@@ -77,44 +77,44 @@ class LegacyDataHandler {
 	private function build_sql_query_for_cleanup( array $order_ids = array(), string $result = 'ids', int $limit = 0 ): string {
 		global $wpdb;
 
-		$order_types                 = wc_get_order_types( 'cot-migration' );
-		$sql_fields                  = 'count' === $result ? 'COUNT(*)' : 'ID as id';
-		$sql_order_types_placeholder = implode( ', ', array_fill( 0, count( $order_types ), '%s' ) );
-		$sql_limit_placeholder       = ( 'count' !== $result && $limit ) ? 'LIMIT %d' : '';
+		$sql_where = '';
 
 		if ( $order_ids ) {
 			// Expand ranges in $order_ids as needed to build the WHERE clause.
-			$sql_ids    = '';
-			$sql_ranges = array();
+			$where_ids    = array();
+			$where_ranges = array();
 
 			foreach ( $order_ids as &$arg ) {
 				if ( is_numeric( $arg ) ) {
-					$sql_ids .= $wpdb->prepare( '%d,', absint( $arg ) );
+					$where_ids[] = absint( $arg );
 				} elseif ( preg_match( '/^(\d+)-(\d+)$/', $arg, $matches ) ) {
-					$sql_ranges[] = $wpdb->prepare( '(id >= %d AND id <= %d)', array( absint( $matches[1] ), absint( $matches[2] ) ) );
+					$where_ranges[] = $wpdb->prepare( "({$wpdb->posts}.ID >= %d AND {$wpdb->posts}.ID <= %d)", absint( $matches[1] ), absint( $matches[2] ) );
 				}
 			}
 
-			if ( $sql_ids ) {
-				$sql_ids = substr( $sql_ids, 0, -1 );
-				$sql_ids = "(id IN ({$sql_ids}))";
+			if ( $where_ids ) {
+				$where_ranges[] = "{$wpdb->posts}.ID IN (" . implode( ',', $where_ids ) . ')';
 			}
 
-			if ( ! $sql_ids && ! $sql_ranges ) {
-				$sql_where = '1=0';
+			if ( ! $where_ranges ) {
+				$sql_where .= '1=0';
 			} else {
-				$sql_where = implode( ' OR ', array_filter( array_merge( array( $sql_ids ), $sql_ranges ) ) );
+				$sql_where .= '(' . implode( ' OR ', $where_ranges ) . ')';
 			}
-		} else {
-			$sql_where = '1=1';
 		}
 
-		$sql = $wpdb->prepare(
-			"SELECT {$sql_fields} FROM {$wpdb->posts} WHERE post_type IN ({$sql_order_types_placeholder}) AND ({$sql_where}) {$sql_limit_placeholder}",
-			array_merge( $order_types, $limit ? array( $limit ) : array() )
-		);
+		$sql_where .= $sql_where ? ' AND ' : '';
+		$sql_where .= "{$wpdb->posts}.post_type IN ('" . implode( "', '", esc_sql( wc_get_order_types( 'cot-migration' ) ) ) . "')";
 
-		return $sql;
+		if ( 'count' === $result ) {
+			$sql_fields = 'COUNT(*)';
+			$sql_limit  = '';
+		} else {
+			$sql_fields = 'ID';
+			$sql_limit  = $limit > 0 ? $wpdb->prepare( 'LIMIT %d', $limit ) : '';
+		}
+
+		return "SELECT {$sql_fields} FROM {$wpdb->posts} WHERE {$sql_where} {$sql_limit}";
 	}
 
 	/**
@@ -129,6 +129,7 @@ class LegacyDataHandler {
 
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
+			// translators: %d is an order ID.
 			throw new \Exception( sprintf( __( '%d is not a valid order ID.', 'woocommerce' ), $order_id ) );
 		}
 
@@ -164,7 +165,7 @@ class LegacyDataHandler {
 		$order = is_a( $order, 'WC_Order' ) ? $order : wc_get_order( absint( $order ) );
 
 		if ( ! is_a( $order->get_data_store()->get_current_class_name(), OrdersTableDataStore::class, true ) ) {
-			throw new \Exception( __( 'Order is not an HPOS order.' ) );
+			throw new \Exception( __( 'Order is not an HPOS order.', 'woocommerce' ) );
 		}
 
 		$post = get_post( $order->get_id() );
