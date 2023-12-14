@@ -18,7 +18,7 @@ $first_button      = $content['buttons'][0]['default'] ?? '';
 		<!-- wp:query {"query":{"perPage":"4","pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceAttributes":[],"__woocommerceStockStatus":["instock","onbackorder"]},"displayLayout":{"type":"flex","columns":2},"namespace":"woocommerce/product-query"} -->
 		<div class="wp-block-query">
 			<!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template"} -->
-			<!-- wp:woocommerce/product-image {"imageSizing":"thumbnail","isDescendentOfQueryLoop":true,"style":{"spacing":{"margin":{"bottom":"24px","top":"0"}}}} /-->
+			<!-- wp:woocommerce/product-image {"imageSizing":"single","isDescendentOfQueryLoop":true,"style":{"spacing":{"margin":{"bottom":"24px","top":"0"}}}} /-->
 
 			<!-- wp:columns {"verticalAlignment":"bottom"} -->
 			<div class="wp-block-columns are-vertically-aligned-bottom">

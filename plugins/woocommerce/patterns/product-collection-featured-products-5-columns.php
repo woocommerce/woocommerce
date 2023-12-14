@@ -21,7 +21,7 @@ $collection_title = $content['titles'][0]['default'] ?? '';
 	<!-- wp:woocommerce/product-collection {"query":{"perPage":5,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","displayLayout":{"type":"flex","columns":5},"align":"wide"} -->
 		<div class="wp-block-woocommerce-product-collection alignwide">
 			<!-- wp:woocommerce/product-template -->
-			<!-- wp:woocommerce/product-image {"aspectRatio":"1","imageSizing":"thumbnail","isDescendentOfQueryLoop":true} /-->
+			<!-- wp:woocommerce/product-image {"aspectRatio":"1","imageSizing":"single","isDescendentOfQueryLoop":true} /-->
 
 			<!-- wp:post-title {"textAlign":"left","level":3,"isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
