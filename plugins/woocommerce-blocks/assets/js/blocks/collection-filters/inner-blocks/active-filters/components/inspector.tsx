@@ -21,17 +21,9 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 
 	return (
 		<InspectorControls>
-			<PanelBody
-				title={ __(
-					'Display Settings',
-					'woocommerce'
-				) }
-			>
+			<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
 				<ToggleGroupControl
-					label={ __(
-						'Display Style',
-						'woocommerce'
-					) }
+					label={ __( 'Display Style', 'woocommerce' ) }
 					value={ displayStyle }
 					onChange={ ( value: BlockAttributes[ 'displayStyle' ] ) =>
 						setAttributes( {

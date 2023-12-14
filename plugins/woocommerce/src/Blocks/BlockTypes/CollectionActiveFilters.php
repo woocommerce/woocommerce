@@ -192,12 +192,13 @@ final class CollectionActiveFilters extends AbstractBlock {
 
 	/**
 	 * Parse the filter parameters from the URL.
+	 * For now we only get the global query params from the URL. In the future,
+	 * we should get the query params based on $query_id.
 	 *
 	 * @param int $query_id Query ID.
 	 * @return array Parsed filter params.
 	 */
 	private function get_filter_query_params( $query_id ) {
-		// @todo Get the query params based on $query_id
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
 
