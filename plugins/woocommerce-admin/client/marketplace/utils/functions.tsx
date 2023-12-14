@@ -364,6 +364,23 @@ const removeNotice = ( productKey: string ) => {
 	dispatch( noticeStore ).removeNotice( productKey );
 };
 
+const subscriptionToProduct = ( subscription: Subscription ): Product => {
+	return {
+		id: subscription.product_id,
+		title: subscription.product_name,
+		image: '',
+		type: subscription.product_type as ProductType,
+		description: '',
+		vendorName: '',
+		vendorUrl: '',
+		icon: subscription.product_icon,
+		url: subscription.product_url,
+		price: -1,
+		averageRating: 0,
+		reviewsCount: 0,
+	};
+};
+
 // Append UTM parameters to a URL, being aware of existing query parameters
 const appendURLParams = (
 	url: string,
@@ -412,4 +429,5 @@ export {
 	removeNotice,
 	renewUrl,
 	subscribeUrl,
+	subscriptionToProduct,
 };
