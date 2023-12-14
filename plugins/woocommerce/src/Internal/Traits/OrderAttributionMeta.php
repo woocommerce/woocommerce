@@ -281,7 +281,7 @@ trait OrderAttributionMeta {
 		}
 
 		return $values;
-		}
+	}
 
 	/**
 	 * Get the label for the order origin
