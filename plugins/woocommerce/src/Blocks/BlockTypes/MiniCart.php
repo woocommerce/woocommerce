@@ -600,7 +600,7 @@ class MiniCart extends AbstractBlock {
 		 *
 		 * @since $VID:$
 		 */
-		$pattern_exclude_list = apply_filters( 'woocommerce_blocks_mini_cart_auto_insert_pattern_exclude_list', [ 'twentytwentytwo/header-centered-logo', 'twentytwentytwo/header-stacked' ] );
+		$pattern_exclude_list = apply_filters( 'woocommerce_blocks_mini_cart_auto_insert_pattern_exclude_list', array( 'twentytwentytwo/header-centered-logo', 'twentytwentytwo/header-stacked' ) );
 
 		/**
 		 * A list of theme slugs to execute this with. This is a temporary
@@ -609,7 +609,7 @@ class MiniCart extends AbstractBlock {
 		 *
 		 * @since $VID:$
 		 */
-		$theme_include_list = apply_filters( 'woocommerce_blocks_mini_cart_auto_insert_theme_include_list', [ 'Twenty Twenty-Four', 'Twenty Twenty-Two' ] );
+		$theme_include_list = apply_filters( 'woocommerce_blocks_mini_cart_auto_insert_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Two' ) );
 
 		if ( $context && in_array( $active_theme_name, $theme_include_list, true ) ) {
 			if (
