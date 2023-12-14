@@ -15,13 +15,12 @@
 			"php": "7.4"
 		},
 		"allow-plugins": {
-			"composer/installers": true,
-			"dealerdirect/phpcodesniffer-composer-installer": true,
 			"automattic/jetpack-autoloader": true
 		}
 	},
 	"extra": {
 		"changelogger": {
+			"changes-dir": "../woocommerce/changelog",
 			"formatter": {
 				"filename": "../../tools/changelogger/class-package-formatter.php"
 			},
