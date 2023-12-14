@@ -57,6 +57,7 @@
 	},
 	"dependencies": {
 		"@woocommerce/experimental": "workspace:*",
+<<<<<<< HEAD
 		"@wordpress/components": "wp-6.0",
 		"@wordpress/compose": "wp-6.0",
 		"@wordpress/data": "wp-6.0",
@@ -64,6 +65,15 @@
 		"@wordpress/i18n": "wp-6.0",
 		"@wordpress/notices": "wp-6.0",
 		"classnames": "^2.3.2",
+=======
+		"@wordpress/components": "wp-6.3",
+		"@wordpress/compose": "wp-6.3",
+		"@wordpress/data": "wp-6.3",
+		"@wordpress/element": "wp-6.3",
+		"@wordpress/i18n": "wp-6.3",
+		"@wordpress/notices": "wp-6.3",
+		"classnames": "^2.3.1",
+>>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 		"prop-types": "^15.8.1",
 		"react-transition-group": "^4.4.5"
 	},
@@ -84,8 +94,14 @@
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@woocommerce/navigation": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
+<<<<<<< HEAD
 		"@wordpress/browserslist-config": "wp-6.0",
 		"concurrently": "^7.6.0",
+=======
+		"@woocommerce/internal-js-tests": "workspace:*",
+		"@wordpress/browserslist-config": "wp-6.3",
+		"concurrently": "^7.0.0",
+>>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 		"css-loader": "^3.6.0",
 		"eslint": "^8.55.0",
 		"jest": "~27.5.1",

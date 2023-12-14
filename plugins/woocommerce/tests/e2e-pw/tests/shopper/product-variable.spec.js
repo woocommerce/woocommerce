@@ -216,6 +216,10 @@ test.describe( 'Variable Product Page', () => {
 		await expect( totalPrice ).toBeLessThanOrEqual(
 			Number( productPrice * 10 * 1.25 )
 		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( productPrice * 10 * 1.25 )
+		);
+
 	} );
 
 	test( 'should be able to remove variation products from the cart', async ( {

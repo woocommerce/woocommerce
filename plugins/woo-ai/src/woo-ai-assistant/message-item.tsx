@@ -191,7 +191,7 @@ const MessageItem: React.FC< MessageItemProps > = ( {
 				} }
 			/>
 		);
-	}, [ index, onRetry ] );
+	}, [ index ] );
 
 	return (
 		<>
@@ -201,23 +201,22 @@ const MessageItem: React.FC< MessageItemProps > = ( {
 			>
 				<ReactMarkdown>{ message.text }</ReactMarkdown>
 			</li>
-			{ message.sender === 'assistant' &&
-				message.type === 'actionable' && (
-					<div className="woo-ai-assistant-actions">
-						<div
-							className="feedback-buttons"
-							ref={ feedbackButtonsRef }
-						>
-							<RenderClipboardButton />
-							<RenderFeedbackButton type={ 'positive' } />
-							<RenderFeedbackButton type={ 'negative' } />
-							<RenderRetryButton />
-							{ feedback[ index ]?.showSpecificFeedback && (
-								<RenderSpecificFeedbackButtons />
-							) }
-						</div>
+			{ message.sender === 'assistant' && (
+				<div className="woo-ai-assistant-actions">
+					<div
+						className="feedback-buttons"
+						ref={ feedbackButtonsRef }
+					>
+						<RenderClipboardButton />
+						<RenderFeedbackButton type={ 'positive' } />
+						<RenderFeedbackButton type={ 'negative' } />
+						<RenderRetryButton />
+						{ feedback[ index ]?.showSpecificFeedback && (
+							<RenderSpecificFeedbackButtons />
+						) }
 					</div>
-				) }
+				</div>
+			) }
 		</>
 	);
 };

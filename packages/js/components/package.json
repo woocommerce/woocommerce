@@ -78,6 +78,7 @@
 		"@wordpress/api-fetch": "wp-6.3",
 		"@wordpress/base-styles": "wp-6.3",
 		"@wordpress/block-editor": "^9.8.0",
+<<<<<<< HEAD
 		"@wordpress/block-library": "^7.19.0",
 		"@wordpress/blocks": "^11.21.0",
 		"@wordpress/components": "wp-6.0",
@@ -99,6 +100,29 @@
 		"@wordpress/viewport": "^4.20.0",
 		"classnames": "^2.3.2",
 		"core-js": "^3.34.0",
+=======
+		"@wordpress/block-library": "^7.16.0",
+		"@wordpress/blocks": "^11.18.0",
+		"@wordpress/components": "wp-6.3",
+		"@wordpress/compose": "wp-6.3",
+		"@wordpress/core-data": "wp-6.3",
+		"@wordpress/date": "wp-6.3",
+		"@wordpress/deprecated": "wp-6.3",
+		"@wordpress/dom": "wp-6.3",
+		"@wordpress/element": "wp-6.3",
+		"@wordpress/hooks": "wp-6.3",
+		"@wordpress/html-entities": "wp-6.3",
+		"@wordpress/i18n": "wp-6.3",
+		"@wordpress/icons": "wp-6.3",
+		"@wordpress/keyboard-shortcuts": "wp-6.3",
+		"@wordpress/keycodes": "wp-6.3",
+		"@wordpress/media-utils": "wp-6.3",
+		"@wordpress/rich-text": "wp-6.3",
+		"@wordpress/url": "wp-6.3",
+		"@wordpress/viewport": "^4.1.2",
+		"classnames": "^2.3.1",
+		"core-js": "^3.21.1",
+>>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 		"d3-axis": "^1.0.12",
 		"d3-format": "^1.4.5",
 		"d3-scale": "^2.2.2",
@@ -118,9 +142,15 @@
 		"react-transition-group": "^4.4.5"
 	},
 	"peerDependencies": {
+<<<<<<< HEAD
 		"@types/react": "^17.0.71",
 		"@types/react-dom": "^17.0.25",
 		"@wordpress/data": "wp-6.0",
+=======
+		"@types/react": "^17.0.2",
+		"@types/react-dom": "^17.0.2",
+		"@wordpress/data": "wp-6.3",
+>>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 		"lodash": "^4.17.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
@@ -160,9 +190,15 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
+<<<<<<< HEAD
 		"@wordpress/babel-preset-default": "^6.17.0",
 		"@wordpress/browserslist-config": "wp-6.0",
 		"concurrently": "^7.6.0",
+=======
+		"@wordpress/browserslist-config": "wp-6.3",
+		"@wordpress/scripts": "^12.6.1",
+		"concurrently": "^7.0.0",
+>>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 		"css-loader": "^3.6.0",
 		"eslint": "^8.55.0",
 		"jest": "~27.5.1",

@@ -84,6 +84,10 @@ return (pass);
 if (req.url ~ "^/phpmyadmin/.*$" || req.url ~ "^/phppgadmin/.*$" || req.url ~ "^/server-status.*$") { 
 error 403 "For security reasons, this URL is only accesible using localhost (127.0.0.1) as the hostname"; 
 } 
+<<<<<<< HEAD
+=======
+#
+>>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 
 Add this to vcl_fetch:
 
@@ -91,6 +95,10 @@ Add this to vcl_fetch:
 if ( (!(req.url ~ "(wp-(login|admin)|login|cart|my-account/*|wc-api*|checkout|addons|logout|lost-password|product/*)")) || (req.request == "GET") ) { 
 unset beresp.http.set-cookie; 
 } 
+<<<<<<< HEAD
+=======
+#
+>>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 ```
 
 ### Why is my Password Reset stuck in a loop?
