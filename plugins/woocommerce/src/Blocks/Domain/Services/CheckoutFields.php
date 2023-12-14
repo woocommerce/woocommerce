@@ -295,18 +295,15 @@ class CheckoutFields {
 		$type = 'text';
 		if ( ! empty( $options['type'] ) ) {
 			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
-				// translators: %1$s is the registered field type, %2$s is a list of supported field types (comma separated).
-				return new \WP_Error(
-					'woocommerce_blocks_checkout_field_type_unsupported',
+				wc_get_logger()->debug(
 					sprintf(
-						__(
-							'Registering a field with type "%1$s" is not supported. The supported types are: %2$s.',
-							'woocommerce'
-						),
+						'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
+						esc_html( $options['id'] ),
 						esc_html( $options['type'] ),
 						implode( ', ', $this->supported_field_types )
 					)
 				);
+				return;
 			}
 			$type = $options['type'];
 		}
@@ -356,6 +353,7 @@ class CheckoutFields {
 				wc_get_logger()->warning(
 					sprintf( 'Registering select fields as optional is not supported. "%s" will be registered as required.', esc_html( $id ) )
 				);
+				return;
 			}
 
 			$cleaned_options = array();
