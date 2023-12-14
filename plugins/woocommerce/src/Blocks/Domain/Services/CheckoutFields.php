@@ -322,7 +322,10 @@ class CheckoutFields {
 			// Check all entries in $options['options'] has a key and value member.
 			foreach ( $options['options'] as $key => $option ) {
 				if ( ! isset( $option['value'] ) || ! isset( $option['label'] ) ) {
-					return new \WP_Error( 'woocommerce_blocks_checkout_select_field_options_invalid', __( 'Fields of type "select" must have an array of "options" with a "value" and "label" member.', 'woocommerce' ) );
+					return new \WP_Error(
+						'woocommerce_blocks_checkout_select_field_options_invalid',
+						__( 'Fields of type "select" must have an array of "options" with a "value" and "label" member.', 'woocommerce' )
+					);
 				}
 
 				$sanitized_value = sanitize_text_field( $option['value'] );
