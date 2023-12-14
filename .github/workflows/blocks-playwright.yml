@@ -50,8 +50,8 @@ jobs:
             - name: Start wp-env
               run: pnpm --filter='@woocommerce/block-library' wp-env start
 
-            - name: Configure the environment
-              run: pnpm wp-env:config
+            # - name: Configure the environment
+            #   run: pnpm wp-env:config
 
             - name: Run Playwright tests
               working-directory: plugins/woocommerce-blocks
