@@ -36,9 +36,9 @@ class File {
 	/**
 	 * The date the file was created, as a Unix timestamp, derived from the filename.
 	 *
-	 * @var int|false
+	 * @var int
 	 */
-	protected $created = false;
+	protected $created = 0;
 
 	/**
 	 * The hash property of the file, derived from the filename.
@@ -69,7 +69,7 @@ class File {
 		}
 
 		$this->path = $path;
-		$this->parse_filename();
+		$this->ingest_path();
 	}
 
 	/**
@@ -83,65 +83,150 @@ class File {
 	}
 
 	/**
+	 * Parse a path to a log file to determine if it uses the standard filename structure and various properties.
+	 *
+	 * This makes assumptions about the structure of the log file's name. Using `-` to separate the name into segments,
+	 *  if there are at least 5 segments, it assumes that the last segment is the hash, and the three segments before
+	 *  that make up the date when the file was created in YYYY-MM-DD format. Any segments left after that are the
+	 *  "source" that generated the log entries. If the filename doesn't have enough segments, it falls back to the
+	 *  source and the hash both being the entire filename, and using the inode change time as the creation date.
+	 *
+	 *  Example:
+	 *      my-custom-plugin.2-2025-01-01-a1b2c3d4e5f.log
+	 *            |          |       |         |
+	 *    'my-custom-plugin' | '2025-01-01'    |
+	 *         (source)      |   (created)     |
+	 *                      '2'          'a1b2c3d4e5f'
+	 *                  (rotation)           (hash)
+	 *
+	 * @param string $path The full path of the log file.
+	 *
+	 * @return array {
+	 *     @type string   $dirname   The directory structure containing the file. See pathinfo().
+	 *     @type string   $basename  The filename with extension. See pathinfo().
+	 *     @type string   $extension The file extension. See pathinfo().
+	 *     @type string   $filename  The filename without extension. See pathinfo().
+	 *     @type string   $source    The source of the log entries contained in the file.
+	 *     @type int|null $rotation  The 0-based incremental rotation marker, if the file has been rotated.
+	 *                               Should only be a single digit.
+	 *     @type int      $created   The date the file was created, as a Unix timestamp.
+	 *     @type string   $hash      The hash suffix of the filename that protects from direct access.
+	 *     @type string   $file_id   The public ID of the log file (filename without the hash).
+	 * }
+	 */
+	public static function parse_path( string $path ): array {
+		$defaults = array(
+			'dirname'   => '',
+			'basename'  => '',
+			'extension' => '',
+			'filename'  => '',
+			'source'    => '',
+			'rotation'  => null,
+			'created'   => 0,
+			'hash'      => '',
+			'file_id'   => '',
+		);
+
+		$parsed = array_merge( $defaults, pathinfo( $path ) );
+
+		$segments  = explode( '-', $parsed['filename'] );
+		$timestamp = strtotime( implode( '-', array_slice( $segments, -4, 3 ) ) );
+
+		if ( count( $segments ) >= 5 && false !== $timestamp ) {
+			$parsed['source']  = implode( '-', array_slice( $segments, 0, -4 ) );
+			$parsed['created'] = $timestamp;
+			$parsed['hash']    = array_slice( $segments, -1 )[0];
+		} else {
+			$parsed['source'] = implode( '-', $segments );
+		}
+
+		$rotation_marker = strrpos( $parsed['source'], '.', -1 );
+		if ( false !== $rotation_marker ) {
+			$rotation = substr( $parsed['source'], -1 );
+			if ( is_numeric( $rotation ) ) {
+				$parsed['rotation'] = intval( $rotation );
+			}
+
+			$parsed['source'] = substr( $parsed['source'], 0, $rotation_marker );
+		}
+
+		$parsed['file_id'] = self::generate_file_id(
+			$parsed['source'],
+			$parsed['rotation'],
+			$parsed['created']
+		);
+
+		return $parsed;
+	}
+
+	/**
+	 * Generate a public ID for a log file based on its properties.
+	 *
+	 * The file ID is the basename of the file without the hash part. It allows us to identify a file without revealing
+	 * its full name in the filesystem, so that it's difficult to access the file directly with an HTTP request.
+	 *
+	 * @param string   $source   The source of the log entries contained in the file.
+	 * @param int|null $rotation Optional. The 0-based incremental rotation marker, if the file has been rotated.
+	 *                           Should only be a single digit.
+	 * @param int      $created  Optional. The date the file was created, as a Unix timestamp.
+	 *
+	 * @return string
+	 */
+	public static function generate_file_id( string $source, ?int $rotation = null, int $created = 0 ): string {
+		$file_id = self::sanitize_source( $source );
+
+		if ( ! is_null( $rotation ) ) {
+			$file_id .= '.' . $rotation;
+		}
+
+		if ( $created > 0 ) {
+			$file_id .= '-' . gmdate( 'Y-m-d', $created );
+		}
+
+		return $file_id;
+	}
+
+	/**
 	 * Generate a hash to use as the suffix on a log filename.
 	 *
 	 * @param string $file_id A file ID (file basename without the hash).
 	 *
-	 * @return false|string
+	 * @return string
 	 */
-	public static function generate_hash( $file_id ) {
+	public static function generate_hash( string $file_id ): string {
 		$key = Constants::get_constant( 'AUTH_SALT' ) ?? 'wc-logs';
 
 		return hash_hmac( 'md5', $file_id, $key );
 	}
 
 	/**
-	 * Parse the log filename to derive certain properties of the file.
+	 * Sanitize the source property of a log file.
 	 *
-	 * This makes assumptions about the structure of the log file's name. Using `-` to separate the name into segments,
-	 * if there are at least 5 segments, it assumes that the last segment is the hash, and the three segments before
-	 * that make up the date when the file was created in YYYY-MM-DD format. Any segments left after that are the
-	 * "source" that generated the log entries. If the filename doesn't have enough segments, it falls back to the
-	 * source and the hash both being the entire filename, and using the inode change time as the creation date.
+	 * @param string $source The source of the log entries contained in the file.
 	 *
-	 * Example:
-	 *     my-custom-plugin.2-2025-01-01-a1b2c3d4e5f.log
-	 *           |          |       |         |
-	 *   'my-custom-plugin' | '2025-01-01'    |
-	 *        (source)      |   (created)     |
-	 *                     '2'          'a1b2c3d4e5f'
-	 *                 (rotation)           (hash)
+	 * @return string
+	 */
+	public static function sanitize_source( string $source ): string {
+		return sanitize_file_name( $source );
+	}
+
+	/**
+	 * Parse the log file path and assign various properties to this class instance.
 	 *
 	 * @return void
 	 */
-	protected function parse_filename(): void {
-		$info     = pathinfo( $this->path );
-		$filename = $info['filename'];
-		$segments = explode( '-', $filename );
-
-		if ( count( $segments ) >= 5 ) {
-			$this->source  = implode( '-', array_slice( $segments, 0, -4 ) );
-			$this->created = strtotime( implode( '-', array_slice( $segments, -4, 3 ) ) );
-			$this->hash    = array_slice( $segments, -1 )[0];
-		} else {
-			$this->source = implode( '-', $segments );
-		}
-
-		$rotation_marker = strrpos( $this->source, '.', -1 );
-		if ( false !== $rotation_marker ) {
-			$rotation = substr( $this->source, -1 );
-			if ( is_numeric( $rotation ) ) {
-				$this->rotation = intval( $rotation );
-			}
-
-			$this->source = substr( $this->source, 0, $rotation_marker );
-		}
+	protected function ingest_path(): void {
+		$parsed_path    = self::parse_path( $this->path );
+		$this->source   = $parsed_path['source'];
+		$this->rotation = $parsed_path['rotation'];
+		$this->created  = $parsed_path['created'];
+		$this->hash     = $parsed_path['hash'];
 	}
 
 	/**
 	 * Check if the filename structure is in the expected format.
 	 *
-	 * @see parse_filename().
+	 * @see parse_path().
 	 *
 	 * @return bool
 	 */
@@ -254,21 +339,19 @@ class File {
 	/**
 	 * Get the file's public ID.
 	 *
-	 * The file ID is the basename of the file without the hash part. It allows us to identify a file without revealing
-	 * its full name in the filesystem, so that it's difficult to access the file directly with an HTTP request.
-	 *
 	 * @return string
 	 */
 	public function get_file_id(): string {
-		$file_id = $this->get_source();
-
-		if ( ! is_null( $this->get_rotation() ) ) {
-			$file_id .= '.' . $this->get_rotation();
-		}
-
+		$created = 0;
 		if ( $this->has_standard_filename() ) {
-			$file_id .= '-' . gmdate( 'Y-m-d', $this->get_created_timestamp() );
+			$created = $this->get_created_timestamp();
 		}
+
+		$file_id = self::generate_file_id(
+			$this->get_source(),
+			$this->get_rotation(),
+			$created
+		);
 
 		return $file_id;
 	}
@@ -276,9 +359,9 @@ class File {
 	/**
 	 * Get the file's created property.
 	 *
-	 * @return int|false
+	 * @return int
 	 */
-	public function get_created_timestamp() {
+	public function get_created_timestamp(): int {
 		if ( ! $this->created && $this->is_readable() ) {
 			$this->created = filectime( $this->path );
 		}
@@ -382,18 +465,22 @@ class File {
 
 		global $wp_filesystem;
 
-		if ( is_null( $this->get_rotation() ) ) {
-			$old_rotation = '';
-			$new_rotation = '.0';
-		} else {
-			$old_rotation = '.' . $this->get_rotation();
-			$new_rotation = '.' . ( $this->get_rotation() + 1 );
+		$created = 0;
+		if ( $this->has_standard_filename() ) {
+			$created = $this->get_created_timestamp();
 		}
 
-		$search  = array( $this->get_source() . $old_rotation );
-		$replace = array( $this->get_source() . $new_rotation );
-		if ( $this->get_hash() ) {
-			$new_file_id = $this->get_source() . $new_rotation . '-' . gmdate( 'Y-m-d', $this->get_created_timestamp() );
+		if ( is_null( $this->get_rotation() ) ) {
+			$new_rotation = 0;
+		} else {
+			$new_rotation = $this->get_rotation() + 1;
+		}
+
+		$new_file_id = self::generate_file_id( $this->get_source(), $new_rotation, $created );
+
+		$search  = array( $this->get_file_id() );
+		$replace = array( $new_file_id );
+		if ( $this->has_standard_filename() ) {
 			$search[]    = $this->get_hash();
 			$replace[]   = self::generate_hash( $new_file_id );
 		}
@@ -408,7 +495,7 @@ class File {
 		}
 
 		$this->path = $new_path;
-		$this->parse_filename();
+		$this->ingest_path();
 
 		return $this->is_readable();
 	}

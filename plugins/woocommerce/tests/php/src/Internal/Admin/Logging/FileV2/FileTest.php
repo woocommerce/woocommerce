@@ -33,6 +33,114 @@ class FileTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for test_parse_path.
+	 *
+	 * @return iterable
+	 */
+	public function provide_path_data(): iterable {
+		$hash = wp_hash( 'cheddar' );
+
+		yield 'standard filename, no rotation' => array(
+			Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-2023-10-23-' . $hash . '.log',
+			array(
+				'basename' => 'test-Source_1-1-2023-10-23-' . $hash . '.log',
+				'source'   => 'test-Source_1-1',
+				'rotation' => null,
+				'created'  => strtotime( '2023-10-23' ),
+				'hash'     => $hash,
+				'file_id'  => 'test-Source_1-1-2023-10-23',
+			),
+		);
+		yield 'standard filename, with rotation' => array(
+			Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1.3-2023-10-23-' . $hash . '.log',
+			array(
+				'basename' => 'test-Source_1-1.3-2023-10-23-' . $hash . '.log',
+				'source'   => 'test-Source_1-1',
+				'rotation' => 3,
+				'created'  => strtotime( '2023-10-23' ),
+				'hash'     => $hash,
+				'file_id'  => 'test-Source_1-1.3-2023-10-23',
+			),
+		);
+		yield 'non-standard filename, no rotation' => array(
+			Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-' . $hash . '.log',
+			array(
+				'basename' => 'test-Source_1-1-' . $hash . '.log',
+				'source'   => 'test-Source_1-1-' . $hash,
+				'rotation' => null,
+				'created'  => 0,
+				'hash'     => '',
+				'file_id'  => 'test-Source_1-1-' . $hash,
+			),
+		);
+		yield 'non-standard filename, with rotation' => array(
+			Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-' . $hash . '.5.log',
+			array(
+				'basename' => 'test-Source_1-1-' . $hash . '.5.log',
+				'source'   => 'test-Source_1-1-' . $hash,
+				'rotation' => 5,
+				'created'  => 0,
+				'hash'     => '',
+				'file_id'  => 'test-Source_1-1-' . $hash . '.5',
+			),
+		);
+	}
+
+	/**
+	 * @testdox Check that the parse_path method correctly parses log file properties from the path.
+	 *
+	 * @dataProvider provide_path_data
+	 *
+	 * @param string $path     The path to test the method with.
+	 * @param array  $expected The expected data returned from the method.
+	 */
+	public function test_parse_path( string $path, array $expected ): void {
+		$parsed = File::parse_path( $path );
+
+		foreach ( array_keys( $expected ) as $key ) {
+			$this->assertEquals( $expected[ $key ], $parsed[ $key ] );
+		}
+	}
+
+	/**
+	 * @testdox Check that the generate_file_id method concatenates strings in the correct way.
+	 */
+	public function test_generate_file_id(): void {
+		$this->assertEquals(
+			'unit-testing-' . gmdate( 'Y-m-d' ),
+			File::generate_file_id( 'unit-testing', null, time() )
+		);
+		$this->assertEquals(
+			'unit-testing.4-' . gmdate( 'Y-m-d' ),
+			File::generate_file_id( 'unit-testing', 4, time() )
+		);
+		$this->assertEquals(
+			'unit-testing-2022-09-25',
+			File::generate_file_id( 'unit-testing', null, strtotime( '2022-09-25' ) )
+		);
+		$this->assertEquals(
+			'asdf.4-2033-01-01',
+			File::generate_file_id( 'asdf.4-2033-01-01' )
+		);
+	}
+
+	/**
+	 * @testdox Check that the generate_hash method generates the correct hash.
+	 */
+	public function test_generate_hash(): void {
+		$key = Constants::get_constant( 'AUTH_SALT' ) ?? 'wc-logs';
+
+		$this->assertEquals(
+			hash_hmac( 'md5', 'unit-testing.3-2023-04-02', $key ),
+			File::generate_hash( 'unit-testing.3-2023-04-02' )
+		);
+		$this->assertEquals(
+			hash_hmac( 'md5', 'abc', $key ),
+			File::generate_hash( 'abc' )
+		);
+	}
+
+	/**
 	 * @testdox Check that the readable and writable methods correctly detect whether the file exists in the filesystem,
 	 *          and whether the file is readable and writable.
 	 */
@@ -98,74 +206,6 @@ class FileTest extends WC_Unit_Test_Case {
 		$actual_content = file_get_contents( $filename );
 
 		$this->assertEquals( $content1 . "\n" . $content2 . "\n", $actual_content );
-	}
-
-	/**
-	 * @testdox Check that all properties are populated correctly when a File instance receives a filename in the standard format.
-	 */
-	public function test_initialize_existing_file_standard() {
-		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-2023-10-23-' . wp_hash( 'cheddar' ) . '.log';
-		$file     = new File( $filename );
-
-		$this->assertEquals( 'test-Source_1-1-2023-10-23-' . wp_hash( 'cheddar' ) . '.log', $file->get_basename() );
-		$this->assertEquals( 'test-Source_1-1-2023-10-23', $file->get_file_id() );
-		$this->assertEquals( 'test-Source_1-1', $file->get_source() );
-		$this->assertNull( $file->get_rotation() );
-		$this->assertEquals( strtotime( '2023-10-23' ), $file->get_created_timestamp() );
-		$this->assertEquals( wp_hash( 'cheddar' ), $file->get_hash() );
-	}
-
-	/**
-	 * @testdox Check that all properties are populated correctly when a File instance receives a rotated filename in the standard format.
-	 */
-	public function test_initialize_existing_file_standard_rotated() {
-		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1.3-2023-10-23-' . wp_hash( 'cheddar' ) . '.log';
-		$file     = new File( $filename );
-
-		$this->assertEquals( 'test-Source_1-1.3-2023-10-23-' . wp_hash( 'cheddar' ) . '.log', $file->get_basename() );
-		$this->assertEquals( 'test-Source_1-1.3-2023-10-23', $file->get_file_id() );
-		$this->assertEquals( 'test-Source_1-1', $file->get_source() );
-		$this->assertEquals( 3, $file->get_rotation() );
-		$this->assertEquals( strtotime( '2023-10-23' ), $file->get_created_timestamp() );
-		$this->assertEquals( wp_hash( 'cheddar' ), $file->get_hash() );
-	}
-
-	/**
-	 * @testdox Check that all properties are populated correctly when a File instance receives a filename in a non-standard format.
-	 */
-	public function test_initialize_existing_file_non_standard() {
-		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-' . wp_hash( 'cheddar' ) . '.log';
-		$file     = new File( $filename );
-
-		// For non-standard files, file must exist to get the created timestamp.
-		$file->write( 'test' );
-
-		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ) . '.log', $file->get_basename() );
-		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ), $file->get_file_id() );
-		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ), $file->get_source() );
-		$this->assertNull( $file->get_rotation() );
-		$this->assertEquals( filectime( $filename ), $file->get_created_timestamp() );
-		// On non-standard filenames, we can't determine what part of the name might be a hash.
-		$this->assertEquals( '', $file->get_hash() );
-	}
-
-	/**
-	 * @testdox Check that all properties are populated correctly when a File instance receives a rotated filename in a non-standard format.
-	 */
-	public function test_initialize_existing_file_non_standard_rotated() {
-		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-' . wp_hash( 'cheddar' ) . '.5.log';
-		$file     = new File( $filename );
-
-		// For non-standard files, file must exist to get the created timestamp.
-		$file->write( 'test' );
-
-		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ) . '.5.log', $file->get_basename() );
-		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ) . '.5', $file->get_file_id() );
-		$this->assertEquals( 'test-Source_1-1-' . wp_hash( 'cheddar' ), $file->get_source() );
-		$this->assertEquals( 5, $file->get_rotation() );
-		$this->assertEquals( filectime( $filename ), $file->get_created_timestamp() );
-		// On non-standard filenames, we can't determine what part of the name might be a hash.
-		$this->assertEquals( '', $file->get_hash() );
 	}
 
 	/**

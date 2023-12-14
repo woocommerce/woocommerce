@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileController, FileListTable, SearchListTable };
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController, FileListTable, SearchListTable };
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Status;
 use WC_Log_Handler_File, WC_Log_Handler_DB;
@@ -374,7 +374,7 @@ class PageController {
 				'source'  => array(
 					'filter'  => FILTER_CALLBACK,
 					'options' => function( $source ) {
-						return $this->file_controller->sanitize_source( wp_unslash( $source ) );
+						return File::sanitize_source( wp_unslash( $source ) );
 					},
 				),
 				'view'    => array(
