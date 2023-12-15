@@ -37,4 +37,16 @@
 			}
 		}
 	}
+
+	&__modal {
+		max-width: 650px;
+
+		&-actions {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			gap: $grid-unit;
+			padding-top: $grid-unit-40;
+		}
+	}
 }

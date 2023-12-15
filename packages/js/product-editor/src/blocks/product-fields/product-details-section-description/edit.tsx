@@ -8,13 +8,19 @@ import {
 	Fill,
 	MenuGroup,
 	MenuItem,
+	Modal,
 } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { createElement, createInterpolateElement } from '@wordpress/element';
+import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
+import {
+	createElement,
+	createInterpolateElement,
+	useState,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import * as icons from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
+import { getNewPath } from '@woocommerce/navigation';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -62,7 +68,8 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	const { validate } = useValidations< Product >();
 	// @ts-expect-error There are no types for this.
-	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
+	const { editEntityRecord, saveEditedEntityRecord, saveEntityRecord } =
+		useDispatch( 'core' );
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
 
@@ -74,6 +81,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		[ clientId ]
 	);
 
+	const [ unsupportedProductTemplate, setUnsupportedProductTemplate ] =
+		useState< ProductTemplate >();
+
 	if ( ! rootClientId ) return;
 
 	function menuItemClickHandler(
@@ -82,6 +92,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	) {
 		return async function handleMenuItemClick() {
 			try {
+				if ( ! productTemplate.layoutTemplateId ) {
+					setUnsupportedProductTemplate( productTemplate );
+					onClose();
+					return;
+				}
+
 				await validate( productTemplate.productData );
 
 				await editEntityRecord(
@@ -145,6 +161,36 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 				</MenuItem>
 			);
 		};
+	}
+
+	async function handleModelChangeClick() {
+		try {
+			await validate( unsupportedProductTemplate?.productData );
+
+			const product = await saveEditedEntityRecord< Product >(
+				'postType',
+				'product',
+				productId,
+				{
+					throwOnError: true,
+				}
+			);
+			// Avoiding to save some changes that are not supported by the current product template.
+			// So in this case those changes are saved directly to the server.
+			saveEntityRecord( 'postType', 'product', {
+				...product,
+				...unsupportedProductTemplate?.productData,
+			} );
+
+			createSuccessNotice( __( 'Product type changed.', 'woocommerce' ) );
+
+			// Let the server manage the redirection when the product is not supported
+			// by the product editor.
+			window.location.href = getNewPath( {}, `/product/${ productId }` );
+		} catch ( error ) {
+			const message = getProductErrorMessage( error as WPError );
+			createErrorNotice( message );
+		}
 	}
 
 	return (
@@ -234,6 +280,50 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						</div>
 					) }
 				/>
+
+				{ Boolean( unsupportedProductTemplate ) && (
+					<Modal
+						title={ __( 'Change product type?', 'woocommerce' ) }
+						className="wp-block-woocommerce-product-details-section-description__modal"
+						onRequestClose={ () => {
+							setUnsupportedProductTemplate( undefined );
+						} }
+					>
+						<p>
+							<b>
+								{ __(
+									'This product type isn’t supported by the updated product editing experience yet.',
+									'woocommerce'
+								) }
+							</b>
+						</p>
+
+						<p>
+							{ __(
+								'You’ll be taken to the classic editing screen that isn’t optimized for commerce but offers advanced functionality and supports all extensions.',
+								'woocommerce'
+							) }
+						</p>
+
+						<div className="wp-block-woocommerce-product-details-section-description__modal-actions">
+							<Button
+								variant="secondary"
+								onClick={ () => {
+									setUnsupportedProductTemplate( undefined );
+								} }
+							>
+								{ __( 'Cancel', 'woocommerce' ) }
+							</Button>
+
+							<Button
+								variant="primary"
+								onClick={ handleModelChangeClick }
+							>
+								{ __( 'Change', 'woocommerce' ) }
+							</Button>
+						</div>
+					</Modal>
+				) }
 			</div>
 		</Fill>
 	);

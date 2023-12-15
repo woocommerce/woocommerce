@@ -62,7 +62,6 @@ class Init {
 				$types['variable-subscription'] = __( 'Variable subscription', 'woocommerce' );
 				return $types;
 			}, 999, 1 );
-			add_filter( 'woocommerce_product_editor_product_templates', array( $this, 'get_product_templates' ), -999, 1 );
 
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
@@ -230,7 +229,7 @@ class Init {
 			$editor_settings['layoutTemplateEvents'][] = $layout_template_logger->get_formatted_template_events( $layout_template->get_id() );
 		}
 
-		$product_templates = apply_filters( 'woocommerce_product_editor_product_templates', array() );
+		$product_templates = apply_filters( 'woocommerce_product_editor_product_templates', $this->get_default_product_templates() );
 
 		usort( $product_templates, function ( $a, $b ) {
 			return $a->get_order() - $b->get_order();
@@ -248,10 +247,10 @@ class Init {
 	/**
 	 * Get default product templates.
 	 * 
-	 * @param array @templates The initial templates.
 	 * @return array The default templates.
 	 */
-	public function get_product_templates( array $templates ) {
+	public function get_default_product_templates() {
+		$templates = array();
 		$templates[] = new ProductTemplate(
 			array(
 				'id'                 => 'standard-product-template',

@@ -36,6 +36,6 @@ export type ProductEditorSettings = Partial<
 
 export type EditorProps = {
 	product: Pick< Product, 'id' | 'type' >;
-	postType?: string;
+	productType?: string;
 	settings?: ProductEditorSettings;
 };

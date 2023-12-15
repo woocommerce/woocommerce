@@ -35,7 +35,7 @@ import { EditorProps } from './types';
 
 export function Editor( {
 	product,
-	postType = 'product',
+	productType = 'product',
 	settings,
 }: EditorProps ) {
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
@@ -47,7 +47,7 @@ export function Editor( {
 			<StrictMode>
 				<EntityProvider
 					kind="postType"
-					type={ postType }
+					type={ productType }
 					id={ product.id }
 				>
 					<ShortcutProvider>
@@ -56,18 +56,18 @@ export function Editor( {
 								header={
 									<Header
 										onTabSelect={ setSelectedTab }
-										productType={ postType }
+										productType={ productType }
 									/>
 								}
 								content={
 									<>
 										<BlockEditor
 											settings={ settings }
-											postType={ postType }
+											postType={ productType }
 											productId={ product.id }
 											context={ {
 												selectedTab,
-												postType,
+												postType: productType,
 												postId: product.id,
 											} }
 										/>
