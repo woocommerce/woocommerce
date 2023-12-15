@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { isPostcode } from '@woocommerce/blocks-checkout';
-import { __ } from '@wordpress/i18n';
 import {
 	ValidatedTextInput,
 	type ValidatedTextInputHandle,

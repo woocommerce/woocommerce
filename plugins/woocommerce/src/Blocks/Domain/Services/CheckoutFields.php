@@ -493,7 +493,7 @@ class CheckoutFields {
 					// translators: %s is field key.
 					__( 'The field %s is required.', 'woocommerce' ),
 					$key
-					)
+				)
 			);
 		}
 

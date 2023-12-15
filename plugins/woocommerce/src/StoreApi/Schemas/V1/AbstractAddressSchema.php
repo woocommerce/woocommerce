@@ -44,7 +44,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'required'    => true,
-			],
+				],
 				'last_name'  => [
 					'description' => __( 'Last name', 'woocommerce' ),
 					'type'        => 'string',
@@ -241,7 +241,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			$field_schema = [
 				'description' => $field['label'],
 				'type'        => 'string',
-				'context'     => ['view', 'edit' ],
+				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			];
 
