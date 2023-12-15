@@ -10,7 +10,6 @@ use WC_Customer;
  */
 class CheckoutFields {
 
-
 	/**
 	 * Core checkout fields.
 	 *
@@ -23,7 +22,7 @@ class CheckoutFields {
 	 *
 	 * @var array
 	 */
-	private $additional_fields = [];
+	private $additional_fields = array();
 
 	/**
 	 * Fields locations.
@@ -31,6 +30,13 @@ class CheckoutFields {
 	 * @var array
 	 */
 	private $fields_locations;
+
+	/**
+	 * Supported field types
+	 *
+	 * @var array
+	 */
+	private $supported_field_types = array( 'text', 'select' );
 
 	/**
 	 * Instance of the asset data registry.
@@ -237,26 +243,53 @@ class CheckoutFields {
 	 */
 	public function register_checkout_field( $options ) {
 		if ( empty( $options['id'] ) ) {
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_id_required', __( 'The field id is required.', 'woocommerce' ) );
+			wc_get_logger()->warning( 'A checkout field cannot be registered without an id.' );
+			return;
 		}
 
-		list( $namespace, $name ) = explode( '/', $options['id'] );
-
-		// Having $name empty means they didn't pass a namespace.
-		if ( empty( $name ) ) {
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_namespace_required', __( 'An id must consist of namespace/name.', 'woocommerce' ) );
+		// Having fewer than 2 after exploding around a / means there is no namespace.
+		if ( count( explode( '/', $options['id'] ) ) < 2 ) {
+			wc_get_logger()->warning(
+				sprintf( 'Unable to register field with id: "%s". %s', esc_html( $options['id'] ), 'A checkout field id must consist of namespace/name.' )
+			);
+			return;
 		}
 
 		if ( empty( $options['label'] ) ) {
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_label_required', __( 'The field label is required.', 'woocommerce' ) );
+			wc_get_logger()->warning(
+				sprintf( 'Unable to register field with id: "%s". %s', esc_html( $options['id'] ), 'The field label is required.' )
+			);
+			return;
 		}
 
 		if ( empty( $options['location'] ) ) {
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_location_required', __( 'The field location is required.', 'woocommerce' ) );
+			wc_get_logger()->warning(
+				sprintf( 'Unable to register field with id: "%s". %s', esc_html( $options['id'] ), 'The field location is required.' )
+			);
+			return;
 		}
 
 		if ( ! in_array( $options['location'], array_keys( $this->fields_locations ), true ) ) {
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_location_invalid', __( 'The field location is invalid.', 'woocommerce' ) );
+			wc_get_logger()->warning(
+				sprintf( 'Unable to register field with id: "%s". %s', esc_html( $options['id'] ), 'The field location is invalid.' )
+			);
+			return;
+		}
+
+		$type = 'text';
+		if ( ! empty( $options['type'] ) ) {
+			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
+				wc_get_logger()->warning(
+					sprintf(
+						'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
+						esc_html( $options['id'] ),
+						esc_html( $options['type'] ),
+						implode( ', ', $this->supported_field_types )
+					)
+				);
+				return;
+			}
+			$type = $options['type'];
 		}
 
 		// At this point, the essentials fields and its location should be set.
@@ -264,24 +297,83 @@ class CheckoutFields {
 		$id       = $options['id'];
 		// Check to see if field is already in the array.
 		if ( ! empty( $this->additional_fields[ $id ] ) || in_array( $id, $this->fields_locations[ $location ], true ) ) {
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_already_registered', __( 'The field is already registered.', 'woocommerce' ) );
+			wc_get_logger()->warning(
+				sprintf( 'Unable to register field with id: "%s". %s', esc_html( $id ), 'The field is already registered.' )
+			);
+			return;
 		}
 
 		// Hidden fields are not supported right now. They will be registered with hidden => false.
 		if ( ! empty( $options['hidden'] ) && true === $options['hidden'] ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			trigger_error( sprintf( 'Registering a field with hidden set to true is not supported. The field "%s" will be registered as visible.', esc_html( $id ) ), E_USER_WARNING );
+			wc_get_logger()->warning(
+				sprintf( 'Registering a field with hidden set to true is not supported. The field "%s" will be registered as visible.', esc_html( $id ) )
+			);
 		}
 
-		// Insert new field into the correct location array.
-		$this->additional_fields[ $id ] = array(
+		$field_data = array(
 			'label'          => $options['label'],
 			'hidden'         => false,
+			'type'           => $type,
 			'optionalLabel'  => empty( $options['optionalLabel'] ) ? '' : $options['optionalLabel'],
 			'required'       => empty( $options['required'] ) ? false : $options['required'],
 			'autocomplete'   => empty( $options['autocomplete'] ) ? '' : $options['autocomplete'],
 			'autocapitalize' => empty( $options['autocapitalize'] ) ? '' : $options['autocapitalize'],
 		);
+
+		/**
+		 * Handle Select fields.
+		 */
+		if ( 'select' === $type ) {
+			if ( empty( $options['options'] ) || ! is_array( $options['options'] ) ) {
+				wc_get_logger()->warning(
+					sprintf( 'Unable to register field with id: "%s". %s', esc_html( $id ), 'Fields of type "select" must have an array of "options".' )
+				);
+				return;
+			}
+
+			// Select fields are always required. Log a warning if it's set explicitly as false.
+			$field_data['required'] = true;
+			if ( isset( $options['required'] ) && false === $options['required'] ) {
+				wc_get_logger()->warning(
+					sprintf( 'Registering select fields as optional is not supported. "%s" will be registered as required.', esc_html( $id ) )
+				);
+			}
+
+			$cleaned_options = array();
+			$added_values    = array();
+
+			// Check all entries in $options['options'] has a key and value member.
+			foreach ( $options['options'] as $option ) {
+				if ( ! isset( $option['value'] ) || ! isset( $option['label'] ) ) {
+					wc_get_logger()->warning(
+						sprintf( 'Unable to register field with id: "%s". %s', esc_html( $id ), 'Fields of type "select" must have an array of "options" and each option must contain a "value" and "label" member.' )
+					);
+					return;
+				}
+
+				$sanitized_value = sanitize_text_field( $option['value'] );
+				$sanitized_label = sanitize_text_field( $option['label'] );
+
+				if ( in_array( $sanitized_value, $added_values, true ) ) {
+					wc_get_logger()->warning(
+						sprintf( 'Duplicate key found when registering field with id: "%s". The value in each option of "select" fields must be unique. Duplicate value "%s" found. The duplicate key will be removed.', esc_html( $id ), esc_html( $sanitized_value ) )
+					);
+					continue;
+				}
+
+				$added_values[] = $sanitized_value;
+
+				$cleaned_options[] = array(
+					'value' => $sanitized_value,
+					'label' => $sanitized_label,
+				);
+			}
+
+			$field_data['options'] = $cleaned_options;
+		}
+
+		// Insert new field into the correct location array.
+		$this->additional_fields[ $id ] = $field_data;
 
 		$this->fields_locations[ $location ][] = $id;
 	}
@@ -370,19 +462,39 @@ class CheckoutFields {
 	 */
 	public function validate_field_for_location( $key, $value, $location ) {
 		if ( ! $this->is_field( $key ) ) {
-			// translators: %s field key.
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_invalid', \sprintf( __( 'The field %s is invalid.', 'woocommerce' ), $key ) );
+			return new \WP_Error(
+				'woocommerce_blocks_checkout_field_invalid',
+				\sprintf(
+					// translators: % is field key.
+					__( 'The field %s is invalid.', 'woocommerce' ),
+					$key
+				)
+			);
 		}
 
 		if ( ! in_array( $key, $this->fields_locations[ $location ], true ) ) {
-			// translators: %1$s field key, %2$s location.
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_invalid_location', \sprintf( __( 'The field %1$s is invalid for the location %2$s.', 'woocommerce' ), $key, $location ) );
+			return new \WP_Error(
+				'woocommerce_blocks_checkout_field_invalid_location',
+				\sprintf(
+					// translators: %1$s is field key, %2$s location.
+					__( 'The field %1$s is invalid for the location %2$s.', 'woocommerce' ),
+					$key,
+					$location
+				)
+			);
 		}
 
 		$field = $this->additional_fields[ $key ];
 		if ( ! empty( $field['required'] ) && empty( $value ) ) {
 			// translators: %s field key.
-			return new \WP_Error( 'woocommerce_blocks_checkout_field_required', \sprintf( __( 'The field %s is required.', 'woocommerce' ), $key ) );
+			return new \WP_Error(
+				'woocommerce_blocks_checkout_field_required',
+				\sprintf(
+					// translators: %s is field key.
+					__( 'The field %s is required.', 'woocommerce' ),
+					$key
+				)
+			);
 		}
 
 		return true;
@@ -561,16 +673,16 @@ class CheckoutFields {
 	 */
 	public function get_all_fields_from_customer( $customer, $all = false ) {
 		$customer_id = $customer->get_id();
-		$meta_data   = [
-			'billing'    => [],
-			'shipping'   => [],
-			'additional' => [],
-		];
+		$meta_data   = array(
+			'billing'    => array(),
+			'shipping'   => array(),
+			'additional' => array(),
+		);
 		if ( ! $customer_id ) {
 			if ( isset( wc()->session ) ) {
-				$meta_data['billing']    = wc()->session->get( self::BILLING_FIELDS_KEY, [] );
-				$meta_data['shipping']   = wc()->session->get( self::SHIPPING_FIELDS_KEY, [] );
-				$meta_data['additional'] = wc()->session->get( self::ADDITIONAL_FIELDS_KEY, [] );
+				$meta_data['billing']    = wc()->session->get( self::BILLING_FIELDS_KEY, array() );
+				$meta_data['shipping']   = wc()->session->get( self::SHIPPING_FIELDS_KEY, array() );
+				$meta_data['additional'] = wc()->session->get( self::ADDITIONAL_FIELDS_KEY, array() );
 			}
 		} else {
 			$meta_data['billing']    = get_user_meta( $customer_id, self::BILLING_FIELDS_KEY, true );
@@ -590,11 +702,11 @@ class CheckoutFields {
 	 * @return array An array of fields.
 	 */
 	public function get_all_fields_from_order( $order, $all = false ) {
-		$meta_data = [
-			'billing'    => [],
-			'shipping'   => [],
-			'additional' => [],
-		];
+		$meta_data = array(
+			'billing'    => array(),
+			'shipping'   => array(),
+			'additional' => array(),
+		);
 		if ( $order instanceof \WC_Order ) {
 			$meta_data['billing']    = $order->get_meta( self::BILLING_FIELDS_KEY, true );
 			$meta_data['shipping']   = $order->get_meta( self::SHIPPING_FIELDS_KEY, true );
@@ -612,9 +724,9 @@ class CheckoutFields {
 	 * @return array An array of fields.
 	 */
 	private function format_meta_data( $meta, $all = false ) {
-		$billing_fields    = $meta['billing'] ?? [];
-		$shipping_fields   = $meta['shipping'] ?? [];
-		$additional_fields = $meta['additional'] ?? [];
+		$billing_fields    = $meta['billing'] ?? array();
+		$shipping_fields   = $meta['shipping'] ?? array();
+		$additional_fields = $meta['additional'] ?? array();
 
 		$fields = array();
 
