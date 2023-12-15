@@ -188,14 +188,11 @@ class WC_Orders_Tracking {
 	 *
 	 * @param string $hook Page hook.
 	 */
-	public function possibly_add_order_tracking_scripts( $hook ) {
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
-		if (
-			( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) ||
-			( 'post.php' === $hook && isset( $_GET['post'] ) && 'shop_order' === get_post_type( intval( $_GET['post'] ) ) )
-		) {
-			WCAdminAssets::register_script( 'wp-admin-scripts', 'order-tracking', false );
+	public function possibly_add_order_tracking_scripts() {
+		if ( ! OrderUtil::is_new_order_screen() && ! OrderUtil::is_order_edit_screen() && ! OrderUtil::is_order_list_table_screen() ) {
+			return;
 		}
-		// phpcs:enable
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'order-tracking', false );
 	}
 }
