@@ -25,8 +25,11 @@ class WC_Orders_Tracking {
 		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_orders_view' ), 10 ); // HPOS.
 		add_action( 'load-post-new.php', array( $this, 'track_add_order_from_edit' ), 10 );
 
+		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_created_date_change' ), 10 );
+
 		add_filter( 'load-edit.php', array( $this, 'track_order_search' ) );
 		add_filter( 'load-woocommerce_page_wc-orders', array( $this, 'track_order_search' ) ); // HPOS.
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_order_tracking_scripts' ) );
 	}
 
@@ -90,15 +93,15 @@ class WC_Orders_Tracking {
 			return;
 		}
 
-		if ( 'auto-draft' === get_post_status( $id ) ) {
+		$order = wc_get_order( $id );
+		if ( ! $order || 'auto-draft' === $order->get_status() ) {
 			return;
 		}
 
-		$order        = wc_get_order( $id );
 		$date_created = $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d H:i:s' ) : '';
 		// phpcs:disable WordPress.Security.NonceVerification
 		$new_date = sprintf(
-			'%s %2d:%2d:%2d',
+			'%s %2d:%02d:%02d',
 			isset( $_POST['order_date'] ) ? wc_clean( wp_unslash( $_POST['order_date'] ) ) : '',
 			isset( $_POST['order_date_hour'] ) ? wc_clean( wp_unslash( $_POST['order_date_hour'] ) ) : '',
 			isset( $_POST['order_date_minute'] ) ? wc_clean( wp_unslash( $_POST['order_date_minute'] ) ) : '',
