@@ -16,16 +16,18 @@
 }
 
 ul.cross-list {
-	list-style: none outside;
-	margin: 0 0 24px 1em;
-	padding: 0;
-	li {
-		list-style: none outside;
-		margin: 1em 0;
-		padding: 0;
-	}
-	li::before {
-		content: "❌";
-		margin-right: 0.5em;
-	}
+  list-style: none outside;
+  margin: 0 0 24px 1em;
+  padding: 0;
+
+  li {
+    list-style: none outside;
+    margin: 1em 0;
+    padding: 0;
+
+    &::before {
+      content: "❌";
+      margin-right: 0.5em;
+    }
+  }
 }
