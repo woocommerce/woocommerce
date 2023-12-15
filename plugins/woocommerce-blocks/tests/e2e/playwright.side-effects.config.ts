@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { defineConfig } from '@playwright/test';
-import path from 'path';
 
 /**
  * Internal dependencies
