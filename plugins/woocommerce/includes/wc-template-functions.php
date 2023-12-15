@@ -363,8 +363,9 @@ function wc_body_class( $classes ) {
  * @since 3.4.0
  */
 function wc_no_js() {
+	$type_attr = current_theme_supports( 'html5', 'script' ) ? '' : " type='text/javascript'";
 	?>
-	<script type="text/javascript">
+	<script<?php echo $type_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 		(function () {
 			var c = document.body.className;
 			c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
