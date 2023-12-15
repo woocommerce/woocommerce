@@ -33,8 +33,6 @@ class Dropdown {
 			'selectType'    => $select_type,
 		);
 
-		wc_initial_state( 'woocommerce/interactivity-dropdown', array( 'selectedItems' => $selected_items ) );
-
 		$action = $props['action'] ?? '';
 
 		// Items should be an array of objects with a label and value property.
@@ -49,30 +47,30 @@ class Dropdown {
 				<div class="wc-blocks-components-form-token-field-wrapper single-selection" >
 					<div class="components-form-token-field" tabindex="-1">
 						<div class="components-form-token-field__input-container" 
-									data-wc-class--is-active="context.isOpen" 
-									tabindex="-1" 
-									data-wc-on--click="actions.toggleIsOpen" 
+							data-wc-class--is-active="context.isOpen" 
+							tabindex="-1" 
+							data-wc-on--click="actions.toggleIsOpen" 
 							>
-							<?php if ( 'multiple' === $select_type ) { ?>
-								<?php foreach ( $selected_items as $selected ) { ?>
-									<span class="components-form-token-field__token">
-										<span class="components-form-token-field__token-text">
-											<?php echo esc_html( $selected['label'] ); ?>
+								<?php if ( 'multiple' === $select_type ) { ?>
+									<?php foreach ( $selected_items as $selected ) { ?>
+										<span class="components-form-token-field__token">
+											<span class="components-form-token-field__token-text">
+												<?php echo esc_html( $selected['label'] ); ?>
+											</span>
 										</span>
-									</span>
-									<button 
-										type="button" 
-										data-wc-context="<?php echo esc_attr( wp_json_encode( array( 'currentItem' => $selected ) ) ); ?>"
-										data-wc-on--click="actions.unselectDropdownItem" 
-										data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>" 
-										class="components-button components-form-token-field__remove-token has-icon"
-									>
-										<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-											<path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"></path>
-										</svg>
-									</button>
+										<button 
+											type="button" 
+											data-wc-context="<?php echo esc_attr( wp_json_encode( array( 'currentItem' => $selected ) ) ); ?>"
+											data-wc-on--click="actions.unselectDropdownItem" 
+											data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>" 
+											class="components-button components-form-token-field__remove-token has-icon"
+										>
+											<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+												<path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"></path>
+											</svg>
+										</button>
+									<?php } ?>
 								<?php } ?>
-							<?php } ?>
 							<input id="components-form-token-input-1" type="text" autocomplete="off" data-wc-bind--placeholder="state.placeholderText" class="components-form-token-field__input" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-describedby="components-form-token-suggestions-howto-1" value="">
 							<ul hidden data-wc-bind--hidden="!context.isOpen" class="components-form-token-field__suggestions-list" id="components-form-token-suggestions-1" role="listbox">
 								<?php
@@ -104,7 +102,7 @@ class Dropdown {
 				</svg>
 			</div>
 		</div>
-									<?php
-									return ob_get_clean();
+		<?php
+		return ob_get_clean();
 	}
 }

@@ -40,6 +40,7 @@ store( 'woocommerce/collection-rating-filter', {
 			const selectedItems = dropdownContext.selectedItems;
 			const items = selectedItems || [];
 			const filter = items.map( ( i ) => i.value ).join( ',' ) || '';
+
 			const url = new URL( window.location.href );
 
 			if ( filter ) {
@@ -49,6 +50,8 @@ store( 'woocommerce/collection-rating-filter', {
 				// remove filter from url
 				url.searchParams.delete( 'rating_filter' );
 			}
+
+			console.log( url.toString() );
 
 			navigate( url );
 		},

@@ -145,7 +145,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 					$rating_str  = (string) $rating['rating'];
 					$carry[]     = array(
 						/* translators: %d is referring to the average rating value. Example: Rated 4 out of 5. */
-						'label' => sprintf( __( 'Rated %d out of 5', 'woo-gutenberg-products-block' ), $rating_str ) . ' ' . $count_label,
+						'label' => sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating_str ) . ' ' . $count_label,
 						'value' => $rating['rating'],
 					);
 				}
@@ -153,6 +153,8 @@ final class CollectionRatingFilter extends AbstractBlock {
 			},
 			array()
 		);
+
+		// error_log( print_r( $selected_items, true ) );
 
 		return array(
 			'items'          => array_map(
@@ -162,7 +164,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 					$rating_str = (string) $rating['rating'];
 					return array(
 						/* translators: %d is referring to the average rating value. Example: Rated 4 out of 5. */
-						'label' => sprintf( __( 'Rated %d out of 5', 'woo-gutenberg-products-block' ), $rating_str ) . ' ' . $count_label,
+						'label' => sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating_str ) . ' ' . $count_label,
 						'value' => $rating['rating'],
 					);
 				},
