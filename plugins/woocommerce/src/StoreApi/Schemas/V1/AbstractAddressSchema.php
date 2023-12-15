@@ -232,14 +232,14 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			ARRAY_FILTER_USE_KEY
 		);
 
-		$schema = [];
+		$schema = array();
 		foreach ( $address_fields as $key => $field ) {
-			$field_schema = [
+			$field_schema = array(
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
-			];
+			);
 
 			if ( 'select' === $field['type'] ) {
 				$field_schema['type'] = 'string';
