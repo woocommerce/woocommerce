@@ -684,10 +684,12 @@ class WC_Helper {
 		}
 	}
 
+	/**
+	 * Maybe redirect to the new Marketplace installer.
+	 */
 	private static function maybe_redirect_to_new_marketplace_installer() {
-		debug($_GET);
 		// Redirect requires the "install" URL parameter to be passed.
-		if ( empty( $_GET[ 'install' ] ) ) {
+		if ( empty( $_GET['install'] ) ) {
 			return;
 		}
 
