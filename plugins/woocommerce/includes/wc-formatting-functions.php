@@ -379,7 +379,7 @@ function wc_format_coupon_code( $value ) {
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
-	return wp_kses_post( sanitize_post_field( 'post_title', $value ?? '', 0, 'db' ) );
+	return wp_kses( sanitize_post_field( 'post_title', $value ?? '', 0, 'db' ), 'entities' );
 }
 
 /**
