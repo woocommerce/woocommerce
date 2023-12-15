@@ -26,7 +26,22 @@ class ProductCollectionUtils {
 			$query = clone $wp_query;
 		} else {
 			$query_args = build_query_vars_from_query_block( $block, $page );
-			$query      = new WP_Query( $query_args );
+
+			/**
+			 * We are adding these extra query arguments to be used in `posts_clauses`
+			 * because there are 2 special edge cases we wanna handle for Price range filter:
+			 * Case 1: Prices excluding tax are displayed including tax
+			 * Case 2: Prices including tax are displayed excluding tax
+			 *
+			 * Both of these cases require us to modify SQL query to get the correct results.
+			 */
+			$query_args['isProductCollection'] = true;
+			$price_range                       = $block->context['query']['priceRange'] ?? null;
+			if ( $price_range ) {
+				$query_args['priceRange'] = $price_range;
+			}
+
+			$query = new WP_Query( $query_args );
 		}
 
 		return $query;

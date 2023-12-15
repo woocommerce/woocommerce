@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use WP_Query;
+use WC_Tax;
 
 /**
  * ProductCollection class.
@@ -95,6 +96,8 @@ class ProductCollection extends AbstractBlock {
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'add_navigation_id_directive' ), 10, 3 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
+
+		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter' ), 10, 2 );
 	}
 
 	/**
@@ -1032,5 +1035,196 @@ class ProductCollection extends AbstractBlock {
 		);
 	}
 
+	/**
+	 * Adds price range conditions to a query.
+	 *
+	 * @param array       $query The query to add conditions to.
+	 * @param array       $price_range Price range.
+	 * @param string|null $tax_class Optional tax class for tax adjustments.
+	 */
+	private function add_price_range_to_query( $query, $price_range, $tax_class = false ) {
+		if ( ! empty( $price_range['min'] ) ) {
+			$min_price = false === $tax_class ? $price_range['min'] : $this->adjust_price_value_for_tax_class( $price_range['min'], $tax_class );
+			$query[]   = [
+				'key'     => '_price',
+				'value'   => $min_price,
+				'compare' => '>=',
+				'type'    => 'DECIMAL(10,3)',
+			];
+		}
 
+		if ( ! empty( $price_range['max'] ) ) {
+			$max_price = false === $tax_class ? $price_range['max'] : $this->adjust_price_value_for_tax_class( $price_range['max'], $tax_class );
+			$query[]   = [
+				'key'     => '_price',
+				'value'   => $max_price,
+				'compare' => '<=',
+				'type'    => 'DECIMAL(10,3)',
+			];
+		}
+
+		return $query;
+	}
+
+	/**
+	 * Add the `posts_clauses` filter to the main query.
+	 *
+	 * @param array    $clauses The query clauses.
+	 * @param WP_Query $query   The WP_Query instance.
+	 */
+	public function add_price_range_filter( $clauses, $query ) {
+		$query_vars                  = $query->query_vars;
+		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
+		if ( ! $is_product_collection_block ) {
+			return $clauses;
+		}
+
+		// do_action( 'qm/debug', $query_vars );
+		// do_action( 'qm/debug', $clauses );
+
+		$price_range = $query_vars['priceRange'] ?? [];
+		if ( empty( $price_range ) ) {
+			return $clauses;
+		}
+
+		// do_action( 'qm/debug', $price_range );
+
+		global $wpdb;
+		$adjust_for_taxes = $this->should_adjust_price_range_for_taxes();
+		$clauses['join']  = $this->append_product_sorting_table_join( $clauses['join'] );
+
+		$min_price = $price_range['min'] ?? null;
+		if ( $min_price ) {
+			if ( $adjust_for_taxes ) {
+				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price, 'min_price', '>=' );
+			} else {
+				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price >= %f ', $min_price );
+			}
+		}
+
+		$max_price = $price_range['max'] ?? null;
+		if ( $max_price ) {
+			if ( $adjust_for_taxes ) {
+				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price, 'max_price', '<=' );
+			} else {
+				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price <= %f ', $max_price );
+			}
+		}
+
+		// do_action( 'qm/debug', $clauses );
+		return $clauses;
+	}
+
+	/**
+	 * Determines if price filters need adjustment based on the tax display settings.
+	 *
+	 * This function checks if there's a discrepancy between how prices are stored in the database
+	 * and how they are displayed to the user, specifically with respect to tax inclusion or exclusion.
+	 * It returns true if an adjustment is needed, indicating that the price filters should account for this
+	 * discrepancy to display accurate prices.
+	 *
+	 * @return bool True if the price filters need to be adjusted for tax display settings, false otherwise.
+	 */
+	private function should_adjust_price_range_for_taxes() {
+		$display_setting      = get_option( 'woocommerce_tax_display_shop' ); // Tax display setting ('incl' or 'excl').
+		$price_storage_method = wc_prices_include_tax() ? 'incl' : 'excl';
+
+		return $display_setting !== $price_storage_method;
+	}
+
+	/**
+	 * Join wc_product_meta_lookup to posts if not already joined.
+	 *
+	 * @param string $sql SQL join.
+	 * @return string
+	 */
+	protected function append_product_sorting_table_join( $sql ) {
+		global $wpdb;
+
+		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
+			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
+		}
+		return $sql;
+	}
+
+	/**
+	 * Get query for price filters when dealing with displayed taxes.
+	 *
+	 * @param float  $price_filter Price filter to apply.
+	 * @param string $column Price being filtered (min or max).
+	 * @param string $operator Comparison operator for column.
+	 * @return string Constructed query.
+	 */
+	protected function get_price_filter_query_for_displayed_taxes( $price_filter, $column = 'min_price', $operator = '>=' ) {
+		global $wpdb;
+
+		// Select only used tax classes to avoid unwanted calculations.
+		$product_tax_classes = $wpdb->get_col( "SELECT DISTINCT tax_class FROM {$wpdb->wc_product_meta_lookup};" );
+
+		if ( empty( $product_tax_classes ) ) {
+			return '';
+		}
+
+		$or_queries = [];
+
+		// We need to adjust the filter for each possible tax class and combine the queries into one.
+		foreach ( $product_tax_classes as $tax_class ) {
+			$adjusted_price_filter = $this->adjust_price_filter_for_tax_class( $price_filter, $tax_class );
+			$or_queries[]          = $wpdb->prepare(
+				'( wc_product_meta_lookup.tax_class = %s AND wc_product_meta_lookup.`' . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )',
+				$tax_class,
+				$adjusted_price_filter
+			);
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		return $wpdb->prepare(
+			' AND (
+				wc_product_meta_lookup.tax_status = "taxable" AND ( 0=1 OR ' . implode( ' OR ', $or_queries ) . ')
+				OR ( wc_product_meta_lookup.tax_status != "taxable" AND wc_product_meta_lookup.`' . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )
+			) ',
+			$price_filter
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * Adjusts a price filter based on a tax class and whether or not the amount includes or excludes taxes.
+	 *
+	 * This calculation logic is based on `wc_get_price_excluding_tax` and `wc_get_price_including_tax` in core.
+	 *
+	 * @param float  $price_filter Price filter amount as entered.
+	 * @param string $tax_class Tax class for adjustment.
+	 * @return float
+	 */
+	protected function adjust_price_filter_for_tax_class( $price_filter, $tax_class ) {
+		$tax_display    = get_option( 'woocommerce_tax_display_shop' );
+		$tax_rates      = WC_Tax::get_rates( $tax_class );
+		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
+
+		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
+		if ( 'incl' === $tax_display ) {
+			/**
+			 * Filters if taxes should be removed from locations outside the store base location.
+			 *
+			 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing
+			 * with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10
+			 * regardless of location and taxes.
+			 *
+			 * @since 2.6.0
+			 *
+			 * @internal Matches filter name in WooCommerce core.
+			 *
+			 * @param boolean $adjust_non_base_location_prices True by default.
+			 * @return boolean
+			 */
+			$taxes = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $price_filter, $base_tax_rates, true ) : WC_Tax::calc_tax( $price_filter, $tax_rates, true );
+			return $price_filter - array_sum( $taxes );
+		}
+
+		// If prices are shown excl. tax, add taxes to match the prices stored in the DB.
+		$taxes = WC_Tax::calc_tax( $price_filter, $tax_rates, false );
+
+		return $price_filter + array_sum( $taxes );
+	}
 }
