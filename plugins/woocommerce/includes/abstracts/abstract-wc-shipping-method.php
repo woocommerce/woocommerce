@@ -460,7 +460,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			$settings_html = $this->generate_settings_html( $this->get_form_fields(), false );
 		}
 
-		return '<div class="wc-shipping-zone-method-fields">' . $settings_html . '</div>';
+		return '<table class="form-table">' . $settings_html . '</table>';
 	}
 
 	/**
