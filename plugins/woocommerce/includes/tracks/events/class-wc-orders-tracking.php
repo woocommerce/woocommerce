@@ -21,9 +21,12 @@ class WC_Orders_Tracking {
 		add_action( 'woocommerce_order_status_changed', array( $this, 'track_order_status_change' ), 10, 3 );
 		// WC_Meta_Box_Order_Actions::save() hooks in at priority 50.
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_order_action' ), 51 );
+
 		add_action( 'load-edit.php', array( $this, 'track_orders_view' ), 10 );
 		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_orders_view' ), 10 ); // HPOS.
+
 		add_action( 'load-post-new.php', array( $this, 'track_add_order_from_edit' ), 10 );
+		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_add_order_from_edit' ), 10 ); // HPOS.
 
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_created_date_change' ), 10 );
 
@@ -144,30 +147,39 @@ class WC_Orders_Tracking {
 	 * Track "add order" button on the Edit Order screen.
 	 */
 	public function track_add_order_from_edit() {
-		// phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) {
-			$referer = wp_get_referer();
+		if ( ! OrderUtil::is_new_order_screen() ) {
+			return;
+		}
 
-			if ( $referer ) {
-				$referring_page = wp_parse_url( $referer );
-				$referring_args = array();
-				$post_edit_page = wp_parse_url( admin_url( 'post.php' ) );
+		$referer = wp_get_referer();
+		if ( ! $referer ) {
+			return;
+		}
 
-				if ( ! empty( $referring_page['query'] ) ) {
-					parse_str( $referring_page['query'], $referring_args );
-				}
+		$referring_page = wp_parse_url( $referer );
 
-				// Determine if we arrived from an Order Edit screen.
-				if (
-					$post_edit_page['path'] === $referring_page['path'] &&
-					isset( $referring_args['action'] ) &&
-					'edit' === $referring_args['action'] &&
-					isset( $referring_args['post'] ) &&
-					'shop_order' === OrderUtil::get_order_type( $referring_args['post'] )
-				) {
-					WC_Tracks::record_event( 'order_edit_add_order' );
-				}
-			}
+		if ( empty( $referring_page['query'] ) ) {
+			// Edit Order screen has query args.
+			return;
+		}
+		parse_str( $referring_page['query'], $referring_args );
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$post_edit_page = admin_url( 'admin.php?page=wc-orders' );
+			$order_id       = $referring_args['id'] ?? 0;
+		} else {
+			$post_edit_page = admin_url( 'post.php' );
+			$order_id       = $referring_args['post'] ?? 0;
+		}
+		$post_edit_page = wp_parse_url( $post_edit_page );
+
+		if (
+			( $post_edit_page['path'] === $referring_page['path'] ) &&
+			( isset( $post_edit_page['query'] ) || false !== strpos( $referring_page['query'], $post_edit_page['query'] ) ) &&
+			( isset( $referring_args['action'] ) && 'edit' === $referring_args['action'] ) &&
+			'shop_order' === OrderUtil::get_order_type( $order_id )
+		) {
+			WC_Tracks::record_event( 'order_edit_add_order' );
 		}
 	}
 
