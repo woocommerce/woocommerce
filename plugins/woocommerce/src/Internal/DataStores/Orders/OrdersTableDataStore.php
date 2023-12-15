@@ -610,6 +610,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 		self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
 
+		/**
+		 * Fired when the backing post record for an HPOS order is backfilled after an order update.
+		 *
+		 * @since 8.5.0
+		 *
+		 * @param \WC_Order $order The order object.
+		 */
 		do_action( 'woocommerce_hpos_post_record_backfilled', $order );
 	}
 
@@ -1432,6 +1439,14 @@ WHERE
 		}
 		$this->persist_updates( $order, false );
 
+		/**
+		 * Fired when an HPOS order is updated from its corresponding post record on read due to a difference in the data.
+		 *
+		 * @since 8.5.0
+		 *
+		 * @param \WC_Order $order The order object.
+		 * @param array     $diff  Difference between HPOS data and post data.
+		 */
 		do_action( 'woocommerce_hpos_post_record_migrated_on_read', $order, $diff );
 	}
 
