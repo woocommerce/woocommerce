@@ -691,16 +691,6 @@ class WC_Helper {
 			return;
 		}
 
-		debug(
-			self::get_helper_redirect_url(
-				array(
-					'page'    => 'wc-addons',
-					'section' => 'helper',
-				),
-				isset( $_GET['redirect-to-wc-admin'] ),
-				sanitize_text_field( wp_unslash( $_GET['install'] ) )
-			)
-		);
 		wp_safe_redirect(
 			self::get_helper_redirect_url(
 				array(
