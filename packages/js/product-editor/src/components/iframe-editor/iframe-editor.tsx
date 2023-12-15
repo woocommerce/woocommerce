@@ -139,7 +139,7 @@ export function IframeEditor( {
 						setTemporalBlocks( updatedBlocks );
 						onInput( updatedBlocks );
 					} }
-					useSubRegistry={ true }
+					useSubRegistry={ false }
 				>
 					<HeaderToolbar
 						onSave={ () => {
