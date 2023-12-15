@@ -45,6 +45,7 @@ class DefaultShippingPartners {
 
 		return array(
 			array(
+				'id'                => 'woocommerce-shipstation-integration',
 				'name'              => 'ShipStation',
 				'slug'              => 'woocommerce-shipstation-integration',
 				'description'       => __( 'Powerful yet easy-to-use solution:', 'woocommerce' ),
@@ -90,6 +91,7 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'row', 'column' ),
 			),
 			array(
+				'id'                => 'skydropx-cotizador-y-envios',
 				'name'              => 'Skydropx',
 				'slug'              => 'skydropx-cotizador-y-envios',
 				'layout_column'     => array(
@@ -104,6 +106,7 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'column' ),
 			),
 			array(
+				'id'                => 'envia',
 				'name'              => 'Envia',
 				'slug'              => '',
 				'description'       => '',
@@ -118,6 +121,7 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'column' ),
 			),
 			array(
+				'id'                => 'easyship-woocommerce-shipping-rates',
 				'name'              => 'Easyship',
 				'slug'              => 'easyship-woocommerce-shipping-rates',
 				'description'       => __( 'Simplified shipping with: ', 'woocommerce' ),
@@ -160,6 +164,7 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'row', 'column' ),
 			),
 			array(
+				'id'                => 'sendcloud-shipping',
 				'name'              => 'Sendcloud',
 				'slug'              => 'sendcloud-shipping',
 				'description'       => __( 'All-in-one shipping tool:', 'woocommerce' ),
@@ -203,6 +208,7 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'row', 'column' ),
 			),
 			array(
+				'id'                => 'packlink-pro-shipping',
 				'name'              => 'Packlink',
 				'slug'              => 'packlink-pro-shipping',
 				'description'       => __( 'Optimize your full shipping process:', 'woocommerce' ),
@@ -251,6 +257,7 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'row', 'column' ),
 			),
 			array(
+				'id'                => 'woocommerce-services',
 				'name'              => 'WooCommerce Shipping',
 				'slug'              => 'woocommerce-services',
 				'description'       => __( 'Save time and money by printing your shipping labels right from your computer with WooCommerce Shipping. Try WooCommerce Shipping for free.', 'woocommerce' ),
