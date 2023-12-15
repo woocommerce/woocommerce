@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add CLI command `hpos cleanup` to cleanup postmeta data for migrated orders.
