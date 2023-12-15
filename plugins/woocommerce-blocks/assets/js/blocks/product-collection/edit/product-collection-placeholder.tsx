@@ -8,20 +8,16 @@ import {
 } from '@wordpress/block-editor';
 import { Placeholder } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
-import {
-	createBlock,
-	// @ts-expect-error Type definitions for this function are missing in Guteberg
-	createBlocksFromInnerBlocksTemplate,
-} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import CollectionChooser from './collection-chooser';
-import type { ProductCollectionEditComponentProps } from '../types';
+import CollectionChooser, { applyCollection } from './collection-chooser';
+import type {
+	CollectionName,
+	ProductCollectionEditComponentProps,
+} from '../types';
 import Icon from '../icon';
-import blockJson from '../block.json';
-import { getCollectionByName } from '../collections';
 
 const ProductCollectionPlaceholder = (
 	props: ProductCollectionEditComponentProps
@@ -32,21 +28,8 @@ const ProductCollectionPlaceholder = (
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
 	const { replaceBlock } = useDispatch( blockEditorStore );
 
-	const applyCollection = ( chosenCollectionName: string ) => {
-		const collection = getCollectionByName( chosenCollectionName );
-
-		if ( ! collection ) {
-			return;
-		}
-
-		const newBlock = createBlock(
-			blockJson.name,
-			collection.attributes,
-			createBlocksFromInnerBlocksTemplate( collection.innerBlocks )
-		);
-
-		replaceBlock( clientId, newBlock );
-	};
+	const onCollectionClick = ( collectionName: CollectionName ) =>
+		applyCollection( collectionName, clientId, replaceBlock );
 
 	return (
 		<div { ...blockProps }>
@@ -59,7 +42,7 @@ const ProductCollectionPlaceholder = (
 					'woocommerce'
 				) }
 			>
-				<CollectionChooser onCollectionClick={ applyCollection } />
+				<CollectionChooser onCollectionClick={ onCollectionClick } />
 			</Placeholder>
 		</div>
 	);

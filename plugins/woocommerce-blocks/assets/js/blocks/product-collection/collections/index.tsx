@@ -19,16 +19,8 @@ import bestSellers from './best-sellers';
 import onSale from './on-sale';
 import featured from './featured';
 
-export const collections = {
+const collections: BlockVariation[] = [
 	productCollection,
-	newArrivals,
-	topRated,
-	bestSellers,
-	onSale,
-	featured,
-};
-
-const collectionsToRegister: BlockVariation[] = [
 	featured,
 	topRated,
 	onSale,
@@ -37,7 +29,7 @@ const collectionsToRegister: BlockVariation[] = [
 ];
 
 export const registerCollections = () => {
-	collectionsToRegister.forEach( ( collection ) => {
+	collections.forEach( ( collection ) => {
 		const isActive = (
 			blockAttrs: BlockAttributes,
 			variationAttributes: BlockAttributes
@@ -57,9 +49,7 @@ export const getCollectionByName = ( collectionName?: CollectionName ) => {
 		return null;
 	}
 
-	return Object.values( collections ).find(
-		( { name } ) => name === collectionName
-	);
+	return collections.find( ( { name } ) => name === collectionName );
 };
 
 export const getUnchangeableFilters = (

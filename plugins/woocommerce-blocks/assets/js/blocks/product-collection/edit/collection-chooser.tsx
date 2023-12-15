@@ -4,6 +4,10 @@
 import { useSelect } from '@wordpress/data';
 import { Button } from '@wordpress/components';
 import {
+	BlockInstance,
+	createBlock,
+	// @ts-expect-error Type definitions for this function are missing in Guteberg
+	createBlocksFromInnerBlocksTemplate,
 	// @ts-expect-error Type definitions for this function are missing in Guteberg
 	store as blocksStore,
 } from '@wordpress/blocks';
@@ -13,7 +17,7 @@ import {
  */
 import type { CollectionName } from '../types';
 import blockJson from '../block.json';
-import { collections } from '../collections';
+import { getCollectionByName } from '../collections';
 
 type CollectionButtonProps = {
 	active?: boolean;
@@ -21,6 +25,26 @@ type CollectionButtonProps = {
 	icon: string;
 	description: string;
 	onClick: () => void;
+};
+
+export const applyCollection = (
+	collectionName: CollectionName,
+	clientId: string,
+	replaceBlock: ( clientId: string, block: BlockInstance ) => void
+) => {
+	const collection = getCollectionByName( collectionName );
+
+	if ( ! collection ) {
+		return;
+	}
+
+	const newBlock = createBlock(
+		blockJson.name,
+		collection.attributes,
+		createBlocksFromInnerBlocksTemplate( collection.innerBlocks )
+	);
+
+	replaceBlock( clientId, newBlock );
 };
 
 const CollectionButton = ( {
@@ -61,7 +85,6 @@ const CollectionChooser = ( props: {
 
 	// Get Collections
 	const blockCollections = [
-		collections.productCollection,
 		...useSelect( ( select ) => {
 			// @ts-expect-error Type definitions are missing
 			// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
