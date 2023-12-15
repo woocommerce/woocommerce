@@ -1,4 +1,4 @@
-# Transient Files Engine]
+# Transient Files Engine
 
 ## Index
 
