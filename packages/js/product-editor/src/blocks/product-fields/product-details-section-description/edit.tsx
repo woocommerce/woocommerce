@@ -10,7 +10,7 @@ import {
 	MenuItem,
 	Modal,
 } from '@wordpress/components';
-import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	createElement,
 	createInterpolateElement,
@@ -51,6 +51,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			return getEditorSettings() as ProductEditorSettings;
 		} );
 
+	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const [ supportedProductTemplates, unsupportedProductTemplates ] =
 		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
 			( [ supported, unsupported ], productTemplate ) => {
@@ -167,20 +168,29 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		try {
 			await validate( unsupportedProductTemplate?.productData );
 
-			const product = await saveEditedEntityRecord< Product >(
+			const product = ( await saveEditedEntityRecord< Product >(
 				'postType',
 				'product',
 				productId,
 				{
 					throwOnError: true,
 				}
-			);
+			) ) ?? { id: productId };
+
 			// Avoiding to save some changes that are not supported by the current product template.
 			// So in this case those changes are saved directly to the server.
-			saveEntityRecord( 'postType', 'product', {
-				...product,
-				...unsupportedProductTemplate?.productData,
-			} );
+			await saveEntityRecord(
+				'postType',
+				'product',
+				{
+					...product,
+					...unsupportedProductTemplate?.productData,
+				},
+				// @ts-expect-error Expected 3 arguments, but got 4.
+				{
+					throwOnError: true,
+				}
+			);
 
 			createSuccessNotice( __( 'Product type changed.', 'woocommerce' ) );
 
@@ -212,8 +222,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 				<Dropdown
 					focusOnMount={ false }
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore Property does exists
+					// @ts-expect-error Property does exists
 					popoverProps={ {
 						placement: 'bottom-start',
 					} }
@@ -240,8 +249,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 								<MenuGroup>
 									<Dropdown
 										focusOnMount={ false }
-										// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-										// @ts-ignore Property does exists
+										// @ts-expect-error Property does exists
 										popoverProps={ {
 											placement: 'right-start',
 										} }

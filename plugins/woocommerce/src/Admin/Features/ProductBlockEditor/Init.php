@@ -25,11 +25,11 @@ class Init {
 	const EDITOR_CONTEXT_NAME = 'woocommerce/edit-product';
 
 	/**
-	 * Supported post types.
+	 * Supported product types.
 	 *
 	 * @var array
 	 */
-	private $supported_post_types = array( 'simple' );
+	private $supported_product_types = array( 'simple' );
 
 	/**
 	 * Redirection controller.
@@ -43,18 +43,18 @@ class Init {
 	 */
 	public function __construct() {
 		if ( Features::is_enabled( 'product-variation-management' ) ) {
-			array_push( $this->supported_post_types, 'variable' );
+			array_push( $this->supported_product_types, 'variable' );
 		}
 
 		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-			array_push( $this->supported_post_types, 'external' );
+			array_push( $this->supported_product_types, 'external' );
 		}
 
 		if ( Features::is_enabled( 'product-grouped' ) ) {
-			array_push( $this->supported_post_types, 'grouped' );
+			array_push( $this->supported_product_types, 'grouped' );
 		}
 
-		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
+		$this->redirection_controller = new RedirectionController( $this->supported_product_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
@@ -243,7 +243,7 @@ class Init {
 	 * 
 	 * @return array The default templates.
 	 */
-	public function get_default_product_templates() {
+	private function get_default_product_templates() {
 		$templates = array();
 		$templates[] = new ProductTemplate(
 			array(
@@ -298,19 +298,12 @@ class Init {
 			)
 		);
 
-		$supported_product_types = array(
-			'simple',
-			'grouped',
-			'external',
-			'variable',
-		);
-
 		// Getting the product types registered via the classic editor.
 		// This is not required when registering new product templates.
 		$registered_product_types = wc_get_product_types();
 
 		foreach ( $registered_product_types as $product_type => $title ) {
-			if ( in_array( $product_type, $supported_product_types ) ) continue;
+			if ( in_array( $product_type, $this->supported_product_types ) ) continue;
 
 			$templates[] = new ProductTemplate(
 				array(
