@@ -609,6 +609,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			}
 		}
 		self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
+
+		do_action( 'woocommerce_hpos_post_record_backfilled', $order );
 	}
 
 	/**
@@ -1423,12 +1425,14 @@ WHERE
 	 * @return void
 	 */
 	private function migrate_post_record( \WC_Abstract_Order &$order, \WC_Abstract_Order $post_order ): void {
-		$this->migrate_meta_data_from_post_order( $order, $post_order );
+		$diff                 = $this->migrate_meta_data_from_post_order( $order, $post_order );
 		$post_order_base_data = $post_order->get_base_data();
 		foreach ( $post_order_base_data as $key => $value ) {
 			$this->set_order_prop( $order, $key, $value );
 		}
 		$this->persist_updates( $order, false );
+
+		do_action( 'woocommerce_hpos_post_record_migrated_on_read', $order, $diff );
 	}
 
 	/**
