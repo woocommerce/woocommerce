@@ -11,10 +11,7 @@ import config from './playwright.config';
 
 export default defineConfig( {
 	...config,
-	outputDir: path.join(
-		process.cwd(),
-		'artifacts/test-results-side-effects'
-	),
+	outputDir: '/artifacts/test-results-side-effects',
 	fullyParallel: false,
 	workers: 1,
 	projects: [

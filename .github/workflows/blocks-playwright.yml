@@ -7,6 +7,9 @@ on:
             - 'plugins/woocommerce/templates/**'
             - 'plugins/woocommerce/patterns/**'
 
+env:
+    FORCE_COLOR: 1
+
 jobs:
     PlaywrightE2ETests:
         name: Playwright E2E tests - ${{ matrix.config.name }}
@@ -59,5 +62,5 @@ jobs:
 
               with:
                   name: playwright-report-${{ matrix.config.name }}
-                  path: artifacts/${{ matrix.config.resultPath }}
+                  path: /artifacts/${{ matrix.config.resultPath }}
                   if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
