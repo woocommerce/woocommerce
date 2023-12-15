@@ -85,6 +85,22 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const [ unsupportedProductTemplate, setUnsupportedProductTemplate ] =
 		useState< ProductTemplate >();
 
+	const { isSaving } = useSelect(
+		( select ) => {
+			// @ts-expect-error There are no types for this.
+			const { isSavingEntityRecord } = select( 'core' );
+
+			return {
+				isSaving: isSavingEntityRecord< boolean >(
+					'postType',
+					'product',
+					productId
+				),
+			};
+		},
+		[ productId ]
+	);
+
 	if ( ! rootClientId ) return;
 
 	function menuItemClickHandler(
@@ -166,6 +182,8 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	async function handleModelChangeClick() {
 		try {
+			if ( isSaving ) return;
+
 			await validate( unsupportedProductTemplate?.productData );
 
 			const product = ( await saveEditedEntityRecord< Product >(
@@ -196,7 +214,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 			// Let the server manage the redirection when the product is not supported
 			// by the product editor.
-			window.location.href = getNewPath( {}, `/product/${ productId }` );
+			// window.location.href = getNewPath( {}, `/product/${ productId }` );
 		} catch ( error ) {
 			const message = getProductErrorMessage( error as WPError );
 			createErrorNotice( message );
@@ -316,7 +334,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						<div className="wp-block-woocommerce-product-details-section-description__modal-actions">
 							<Button
 								variant="secondary"
+								aria-disabled={ isSaving }
 								onClick={ () => {
+									if ( isSaving ) return;
 									setUnsupportedProductTemplate( undefined );
 								} }
 							>
@@ -325,6 +345,8 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 							<Button
 								variant="primary"
+								isBusy={ isSaving }
+								aria-disabled={ isSaving }
 								onClick={ handleModelChangeClick }
 							>
 								{ __( 'Change', 'woocommerce' ) }
