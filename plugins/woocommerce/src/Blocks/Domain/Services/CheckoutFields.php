@@ -321,6 +321,19 @@ class CheckoutFields {
 		);
 
 		/**
+		 * Handle Checkbox fields.
+		 */
+		if ( 'checkbox' === $type ) {
+			// Checkbox fields are always optional. Log a warning if it's set explicitly as true.
+			$field_data['required'] = false;
+			if ( isset( $options['required'] ) && true === $options['required'] ) {
+				wc_get_logger()->warning(
+					sprintf( 'Registering checkbox fields as required is not supported. "%s" will be registered as optional.', esc_html( $id ) )
+				);
+			}
+		}
+
+		/**
 		 * Handle Select fields.
 		 */
 		if ( 'select' === $type ) {
