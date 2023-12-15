@@ -26,7 +26,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	/**
 	 * Order IDs for which we are checking sync on read in the current request. In WooCommerce, using wc_get_order is a very common pattern, to avoid performance issues, we only sync on read once per request per order. This works because we consider out of sync orders to be an anomaly, so we don't recommend running HPOS with incompatible plugins.
 	 *
-	 * @var array.
+	 * @var array
 	 */
 	private static $reading_order_ids = array();
 
@@ -1412,17 +1412,6 @@ WHERE
 			$diff[ $key ] = $order2_values;
 		}
 		return $diff;
-	}
-
-	/**
-	 * Log difference between post and COT data for an order.
-	 *
-	 * @param array $diff Difference between post and COT data.
-	 *
-	 * @return void
-	 */
-	private function log_diff( array $diff ): void {
-		$this->error_logger->notice( 'Diff found: ' . wp_json_encode( $diff, JSON_PRETTY_PRINT ) );
 	}
 
 	/**
