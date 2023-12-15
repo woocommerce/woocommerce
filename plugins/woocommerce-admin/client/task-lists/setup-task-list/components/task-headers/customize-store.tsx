@@ -33,7 +33,7 @@ const CustomizeStoreHeader = ( {
 				<h1>{ __( 'Start customizing your store', 'woocommerce' ) }</h1>
 				<p>
 					{ __(
-						'Quickly create a beautiful looking store using our built-in store designer, or select a pre-built theme and customize it to fit your brand.',
+						'Use our built-in AI tools to design your store and populate it with content, or select a pre-built theme and customize it to fit your brand.',
 						'woocommerce'
 					) }
 				</p>

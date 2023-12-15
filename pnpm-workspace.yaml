@@ -4,6 +4,7 @@ packages:
     - 'plugins/woocommerce/client/legacy'
     - 'tools/monorepo-merge'
     - 'tools/code-analyzer'
+    - 'tools/compare-perf'
     - 'tools/create-extension'
     - 'tools/package-release'
     - 'tools/cherry-pick'

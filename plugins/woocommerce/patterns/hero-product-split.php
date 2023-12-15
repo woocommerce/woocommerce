@@ -29,7 +29,7 @@ $hero_title = $content['titles'][0]['default'] ?? '';
 	</div>
 
 	<figure class="wp-block-media-text__media">
-		<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/man-person-winter-photography-statue-coat.png' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woocommerce' ); ?>" />
+		<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/man-person-winter-photography-statue-coat.png' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woocommerce' ); ?>" />
 	</figure>
 </div>
 <!-- /wp:media-text -->
