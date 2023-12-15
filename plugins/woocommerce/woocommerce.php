@@ -71,3 +71,70 @@ $GLOBALS['woocommerce'] = WC();
 if ( class_exists( \Automattic\Jetpack\Connection\Rest_Authentication::class ) ) {
 	\Automattic\Jetpack\Connection\Rest_Authentication::init();
 }
+
+
+add_action(
+	'woocommerce_blocks_loaded',
+	function() {
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'             => 'plugin-namespace/vat-number',
+				'label'          => __( 'VAT Number', 'woo-gutenberg-products-block' ),
+				'optionalLabel'  => __( 'VAT Number (optional)', 'woo-gutenberg-products-block' ),
+				'autocomplete'   => 'vat-number',
+				'autocapitalize' => 'characters',
+				'location'       => 'address',
+				'type'           => 'text',
+			)
+		);
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'             => 'plugin-namespace/road-type',
+				'label'          => __( 'Road type', 'woo-gutenberg-products-block' ),
+				'optionalLabel'  => __( 'Road type (optional)', 'woo-gutenberg-products-block' ),
+				'autocomplete'   => 'road-type',
+				'required'       => 'true',
+				'autocapitalize' => 'characters',
+				'location'       => 'address',
+				'type'           => 'select',
+				'options'        => array(
+					array(
+						'value' => 'alleyway',
+						'label' => __( 'Alleyway', 'woo-gutenberg-products-block' ),
+					),
+					array(
+						'value' => 'avenue',
+						'label' => __( 'Avenue', 'woo-gutenberg-products-block' ),
+					),
+					array(
+						'value' => 'boulevard',
+						'label' => __( 'Boulevard', 'woo-gutenberg-products-block' ),
+					),
+					array(
+						'value' => 'cul-de-sac',
+						'label' => __( 'Cul-de-sac', 'woo-gutenberg-products-block' ),
+					),
+					array(
+						'value' => 'street',
+						'label' => __( 'Street', 'woo-gutenberg-products-block' ),
+					),
+				),
+			)
+		);
+
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'             => 'plugin-namespace/leave-at-door',
+				'label'          => __( 'Leave at door?', 'woo-gutenberg-products-block' ),
+				'optionalLabel'  => __( 'Leave at door (optional)', 'woo-gutenberg-products-block' ),
+				'location'       => 'address',
+				'type'           => 'checkbox',
+			)
+		);
+	}
+);
+
+add_filter('woocommerce_get_country_locale', function($locale) {
+	$locale['US']['plugin-namespace/road-type']['priority'] = 29;
+	return $locale;
+});
