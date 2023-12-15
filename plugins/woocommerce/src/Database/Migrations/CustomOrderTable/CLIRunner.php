@@ -931,7 +931,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 					WP_CLI::debug( sprintf( __( 'Cleanup completed for order %d.', 'woocommerce' ), $order_id ) );
 				} catch ( \Exception $e ) {
 					// translators: %1$d is an order ID, %2$s is an error message.
-					WP_CLI::error( sprintf( __( 'An error occurred while cleaning up order %1$d: %2$s', 'woocommerce' ), $order_id, $e->getMessage() ) );
+					WP_CLI::warning( sprintf( __( 'An error occurred while cleaning up order %1$d: %2$s', 'woocommerce' ), $order_id, $e->getMessage() ) );
 				}
 
 				$progress->tick();
