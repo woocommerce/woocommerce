@@ -9,52 +9,6 @@ use WP_Error;
  */
 class PatternsHelper {
 	/**
-	 * Returns the pattern content.
-	 *
-	 * @param string $pattern_slug The pattern slug.
-	 *
-	 * @return array The pattern content.
-	 */
-	public static function get_pattern_content( string $pattern_slug ) {
-		$pattern = self::get_patterns_dictionary( $pattern_slug );
-
-		if ( empty( $pattern ) ) {
-			return array();
-		}
-
-		if ( ! isset( $pattern['content'] ) ) {
-			return array();
-		}
-
-		return $pattern['content'];
-	}
-
-	/**
-	 * Returns the pattern images.
-	 *
-	 * @param string $pattern_slug The pattern slug.
-	 *
-	 * @return array The pattern images.
-	 */
-	public static function get_pattern_images( string $pattern_slug ): array {
-		$pattern = self::get_patterns_dictionary( $pattern_slug );
-
-		if ( empty( $pattern ) ) {
-			return array();
-		}
-
-		if ( ! isset( $pattern['images'] ) ) {
-			return array();
-		}
-
-		if ( ! isset( $pattern['images_total'] ) ) {
-			return array();
-		}
-
-		return $pattern['images'];
-	}
-
-	/**
 	 * Returns the image for the given pattern.
 	 *
 	 * @param array  $images The array of images.
@@ -143,13 +97,13 @@ class PatternsHelper {
 		$patterns_dictionary_file = plugin_dir_path( __FILE__ ) . 'dictionary.json';
 
 		if ( ! file_exists( $patterns_dictionary_file ) ) {
-			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woocommerce' ) );
 		}
 
 		$default_patterns_dictionary = wp_json_file_decode( $patterns_dictionary_file, array( 'associative' => true ) );
 
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			return new WP_Error( 'json_decode_error', __( 'Error decoding JSON.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'json_decode_error', __( 'Error decoding JSON.', 'woocommerce' ) );
 		}
 
 		$patterns_ai_data_post = self::get_patterns_ai_data_post();
@@ -158,7 +112,7 @@ class PatternsHelper {
 			$patterns_dictionary = json_decode( $patterns_ai_data_post->post_content, true );
 
 			if ( json_last_error() !== JSON_ERROR_NONE ) {
-				return new WP_Error( 'json_decode_error', __( 'Error decoding JSON.', 'woo-gutenberg-products-block' ) );
+				return new WP_Error( 'json_decode_error', __( 'Error decoding JSON.', 'woocommerce' ) );
 			}
 		}
 

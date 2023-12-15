@@ -156,10 +156,7 @@ const ExpressPaymentMethods = () => {
 			} )
 		) : (
 			<li key="noneRegistered">
-				{ __(
-					'No registered Payment Methods',
-					'woocommerce'
-				) }
+				{ __( 'No registered Payment Methods', 'woocommerce' ) }
 			</li>
 		);
 

@@ -49,20 +49,20 @@ class ProductCategorySchema extends TermSchema {
 	public function get_properties() {
 		$schema                 = parent::get_properties();
 		$schema['image']        = [
-			'description' => __( 'Category image.', 'woo-gutenberg-products-block' ),
+			'description' => __( 'Category image.', 'woocommerce' ),
 			'type'        => 'object',
 			'context'     => [ 'view', 'edit', 'embed' ],
 			'readonly'    => true,
 			'properties'  => $this->image_attachment_schema->get_properties(),
 		];
 		$schema['review_count'] = [
-			'description' => __( 'Number of reviews for products in this category.', 'woo-gutenberg-products-block' ),
+			'description' => __( 'Number of reviews for products in this category.', 'woocommerce' ),
 			'type'        => 'integer',
 			'context'     => [ 'view', 'edit' ],
 			'readonly'    => true,
 		];
 		$schema['permalink']    = [
-			'description' => __( 'Category URL.', 'woo-gutenberg-products-block' ),
+			'description' => __( 'Category URL.', 'woocommerce' ),
 			'type'        => 'string',
 			'format'      => 'uri',
 			'context'     => [ 'view', 'edit', 'embed' ],

@@ -27,19 +27,19 @@ class CartFeeSchema extends AbstractSchema {
 	public function get_properties() {
 		return [
 			'id'     => [
-				'description' => __( 'Unique identifier for the fee within the cart.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Unique identifier for the fee within the cart.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'name'   => [
-				'description' => __( 'Fee name.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Fee name.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'totals' => [
-				'description' => __( 'Fee total amounts provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Fee total amounts provided using the smallest unit of the currency.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -47,13 +47,13 @@ class CartFeeSchema extends AbstractSchema {
 					$this->get_store_currency_properties(),
 					[
 						'total'     => [
-							'description' => __( 'Total amount for this fee.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Total amount for this fee.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'total_tax' => [
-							'description' => __( 'Total tax amount for this fee.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Total tax amount for this fee.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,

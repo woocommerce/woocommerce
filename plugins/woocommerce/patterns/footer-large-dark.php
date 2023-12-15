@@ -22,11 +22,11 @@
 				<!-- /wp:spacer -->
 
 				<!-- wp:heading {"level":5} -->
-				<h5><?php esc_html_e( 'Join the community', 'woo-gutenberg-products-block' ); ?></h5>
+				<h5><?php esc_html_e( 'Join the community', 'woocommerce' ); ?></h5>
 				<!-- /wp:heading -->
 
 				<!-- wp:paragraph -->
-				<p><?php esc_html_e( 'Learn about new products and discounts!', 'woo-gutenberg-products-block' ); ?></p>
+				<p><?php esc_html_e( 'Learn about new products and discounts!', 'woocommerce' ); ?></p>
 				<!-- /wp:paragraph -->
 
 				<!-- wp:spacer {"height":"20px"} -->
@@ -80,7 +80,7 @@
 			<?php
 			echo sprintf(
 				/* translators: %s WooCommerce link */
-				esc_html__( 'Built with %s', 'woo-gutenberg-products-block' ),
+				esc_html__( 'Built with %s', 'woocommerce' ),
 				'<a href="https://woocommerce.com/" target="_blank" rel="noreferrer nofollow">WooCommerce</a>'
 			);
 			?>

@@ -101,10 +101,7 @@ const StateInput = ( {
 				onChange={ onChangeState }
 				options={ options }
 				value={ value }
-				errorMessage={ __(
-					'Please select a state.',
-					'woo-gutenberg-products-block'
-				) }
+				errorMessage={ __( 'Please select a state.', 'woocommerce' ) }
 				errorId={ errorId }
 				required={ required }
 				autoComplete={ autoComplete }

@@ -113,7 +113,7 @@ export const withEditMode =
 							/>
 						) }
 						<Button variant="primary" onClick={ onDone }>
-							{ __( 'Done', 'woo-gutenberg-products-block' ) }
+							{ __( 'Done', 'woocommerce' ) }
 						</Button>
 					</div>
 				</Placeholder>

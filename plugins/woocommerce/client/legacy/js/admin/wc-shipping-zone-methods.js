@@ -103,6 +103,7 @@
 					$( document.body ).on( 'wc_region_picker_update', this.onUpdateZoneRegionPicker );
 					$( document.body ).on( 'wc_backbone_modal_next_response', this.onAddShippingMethodSubmitted );
 					$( document.body ).on( 'wc_backbone_modal_before_remove', this.onCloseConfigureShippingMethod );
+					$( document.body ).on( 'wc_backbone_modal_back_response', this.onConfigureShippingMethodBack );
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
 					$( document.body ).on( 'wc_backbone_modal_validation', { view: this }, this.validateFormArguments );
@@ -382,6 +383,11 @@
 						);
 					}
 				},
+				onConfigureShippingMethodBack: function( event, target ) {
+					if ( 'wc-modal-shipping-method-settings' === target ) {
+						shippingMethodView.onAddShippingMethod( event );
+					}
+				},
 				showErrors: function( errors ) {
 					var error_html = '<div id="woocommerce_errors" class="error notice is-dismissible">';
 
@@ -403,6 +409,15 @@
 					});
 
 					$( '.wc-shipping-zone-method-selector select' ).trigger( 'change' );
+
+					$('.wc-shipping-zone-method-input input').change( function() {
+						const selected = $('.wc-shipping-zone-method-input input:checked');
+						const id = selected.attr( 'id' );
+						const description = $( `#${ id }-description` );
+						const descriptions = $( '.wc-shipping-zone-method-input-help-text' );
+						descriptions.css( 'display', 'none' );
+						description.css( 'display', 'block' );
+					});
 				},
 				/**
 				 * The settings HTML is controlled and built by the settings api, so in order to refactor the 
@@ -501,14 +516,15 @@
 					return htmlContent.prop( 'outerHTML' );
 				},
 				replaceHTMLTables: function ( html ) {
+					// Wrap the html content in a div
+					const htmlContent = $( '<div>' + html + '</div>' );
+
 					// `<table class="form-table" />` elements added by the Settings API need to be removed. 
 					// Modern browsers won't interpret other table elements like `td` not in a `table`, so 
 					// Removing the `table` is sufficient.
-					const htmlContent = $( html );
-					const tables = htmlContent.find( 'table.form-table' );
-
-					tables.each( ( i ) => {
-						const table = $( tables[ i ] );
+					const innerTables = htmlContent.find( 'table.form-table' );
+					innerTables.each( ( i ) => {
+						const table = $( innerTables[ i ] );
 						const div = $( '<div class="wc-shipping-zone-method-fields" />' );
 						div.html( table.html() );
 						table.replaceWith( div );
@@ -520,7 +536,7 @@
 					if ( 'wc-modal-add-shipping-method' === target ) {
 						shippingMethodView.block();
 
-						$('#btn-next').html('<img alt="processing" src="images/wpspin_light.gif" class="waiting" />');
+						$('#btn-next').addClass( 'is-busy' );
 
 						// Add method to zone via ajax call
 						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_add_method', {

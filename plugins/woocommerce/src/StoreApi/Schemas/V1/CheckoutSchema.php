@@ -4,7 +4,8 @@ namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
-
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Package;
 
 /**
  * CheckoutSchema class.
@@ -46,6 +47,13 @@ class CheckoutSchema extends AbstractSchema {
 	protected $image_attachment_schema;
 
 	/**
+	 * Additional fields controller.
+	 *
+	 * @var CheckoutFields
+	 */
+	protected $additional_fields_controller;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param ExtendSchema     $extend Rest Extending instance.
@@ -53,9 +61,10 @@ class CheckoutSchema extends AbstractSchema {
 	 */
 	public function __construct( ExtendSchema $extend, SchemaController $controller ) {
 		parent::__construct( $extend, $controller );
-		$this->billing_address_schema  = $this->controller->get( BillingAddressSchema::IDENTIFIER );
-		$this->shipping_address_schema = $this->controller->get( ShippingAddressSchema::IDENTIFIER );
-		$this->image_attachment_schema = $this->controller->get( ImageAttachmentSchema::IDENTIFIER );
+		$this->billing_address_schema       = $this->controller->get( BillingAddressSchema::IDENTIFIER );
+		$this->shipping_address_schema      = $this->controller->get( ShippingAddressSchema::IDENTIFIER );
+		$this->image_attachment_schema      = $this->controller->get( ImageAttachmentSchema::IDENTIFIER );
+		$this->additional_fields_controller = Package::container()->get( CheckoutFields::class );
 	}
 
 	/**
@@ -66,42 +75,42 @@ class CheckoutSchema extends AbstractSchema {
 	public function get_properties() {
 		return [
 			'order_id'          => [
-				'description' => __( 'The order ID to process during checkout.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'The order ID to process during checkout.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'status'            => [
-				'description' => __( 'Order status. Payment providers will update this value after payment.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Order status. Payment providers will update this value after payment.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'order_key'         => [
-				'description' => __( 'Order key used to check validity or protect access to certain order data.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Order key used to check validity or protect access to certain order data.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'order_number'      => [
-				'description' => __( 'Order number used for display.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Order number used for display.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'customer_note'     => [
-				'description' => __( 'Note added to the order by the customer during checkout.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Note added to the order by the customer during checkout.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
 			'customer_id'       => [
-				'description' => __( 'Customer ID if registered. Will return 0 for guests.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Customer ID if registered. Will return 0 for guests.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'billing_address'   => [
-				'description' => __( 'Billing address.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Billing address.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'properties'  => $this->billing_address_schema->get_properties(),
@@ -112,7 +121,7 @@ class CheckoutSchema extends AbstractSchema {
 				'required'    => true,
 			],
 			'shipping_address'  => [
-				'description' => __( 'Shipping address.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Shipping address.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'properties'  => $this->shipping_address_schema->get_properties(),
@@ -122,7 +131,7 @@ class CheckoutSchema extends AbstractSchema {
 				],
 			],
 			'payment_method'    => [
-				'description' => __( 'The ID of the payment method being used to process the payment.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'The ID of the payment method being used to process the payment.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				// Validation may be based on cart contents which is not available here; this returns all enabled
@@ -130,23 +139,23 @@ class CheckoutSchema extends AbstractSchema {
 				'enum'        => array_values( WC()->payment_gateways->get_payment_gateway_ids() ),
 			],
 			'create_account'    => [
-				'description' => __( 'Whether to create a new user account as part of order processing.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Whether to create a new user account as part of order processing.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => [ 'view', 'edit' ],
 			],
 			'payment_result'    => [
-				'description' => __( 'Result of payment processing, or false if not yet processed.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Result of payment processing, or false if not yet processed.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 				'properties'  => [
 					'payment_status'  => [
-						'description' => __( 'Status of the payment returned by the gateway. One of success, pending, failure, error.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Status of the payment returned by the gateway. One of success, pending, failure, error.', 'woocommerce' ),
 						'readonly'    => true,
 						'type'        => 'string',
 					],
 					'payment_details' => [
-						'description' => __( 'An array of data being returned from the payment gateway.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'An array of data being returned from the payment gateway.', 'woocommerce' ),
 						'readonly'    => true,
 						'type'        => 'array',
 						'items'       => [
@@ -162,11 +171,17 @@ class CheckoutSchema extends AbstractSchema {
 						],
 					],
 					'redirect_url'    => [
-						'description' => __( 'A URL to redirect the customer after checkout. This could be, for example, a link to the payment processors website.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'A URL to redirect the customer after checkout. This could be, for example, a link to the payment processors website.', 'woocommerce' ),
 						'readonly'    => true,
 						'type'        => 'string',
 					],
 				],
+			],
+			'additional_fields' => [
+				'description' => __( 'Additional fields to be persisted on the order.', 'woocommerce' ),
+				'type'        => 'object',
+				'context'     => [ 'view', 'edit' ],
+				'properties'  => $this->get_additional_fields_schema(),
 			],
 			self::EXTENDING_KEY => $this->get_extended_schema( self::IDENTIFIER ),
 		];
@@ -205,6 +220,7 @@ class CheckoutSchema extends AbstractSchema {
 				'payment_details' => $this->prepare_payment_details_for_response( $payment_result->payment_details ),
 				'redirect_url'    => $payment_result->redirect_url,
 			],
+			'additional_fields' => $this->get_additional_fields_response( $order ),
 			self::EXTENDING_KEY => $this->get_extended_data( self::IDENTIFIER ),
 		];
 	}
@@ -229,5 +245,55 @@ class CheckoutSchema extends AbstractSchema {
 			array_keys( $payment_details ),
 			$payment_details
 		);
+	}
+
+	/**
+	 * Get the additional fields response.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return array
+	 */
+	protected function get_additional_fields_response( \WC_Order $order ) {
+		$fields   = $this->additional_fields_controller->get_all_fields_from_order( $order );
+		$response = [];
+
+		foreach ( $fields as $key => $value ) {
+			if ( 0 === strpos( $key, '/billing/' ) || 0 === strpos( $key, '/shipping/' ) ) {
+				continue;
+			}
+			$response[ $key ] = $value;
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Get the schema for additional fields.
+	 *
+	 * @return array
+	 */
+	protected function get_additional_fields_schema() {
+		$additional_fields_keys = $this->additional_fields_controller->get_additional_fields_keys();
+
+		$fields = $this->additional_fields_controller->get_additional_fields();
+
+		$additional_fields = array_filter(
+			$fields,
+			function( $key ) use ( $additional_fields_keys ) {
+				return in_array( $key, $additional_fields_keys, true );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+
+		$schema = [];
+		foreach ( $additional_fields as $key => $field ) {
+			$schema[ $key ] = [
+				'description' => $field['label'],
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+				'required'    => true,
+			];
+		}
+		return $schema;
 	}
 }

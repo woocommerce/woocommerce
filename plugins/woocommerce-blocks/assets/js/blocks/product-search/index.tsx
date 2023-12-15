@@ -44,7 +44,7 @@ const attributes = {
 	 */
 	label: {
 		type: 'string',
-		default: __( 'Search', 'woo-gutenberg-products-block' ),
+		default: __( 'Search', 'woocommerce' ),
 	},
 
 	/**
@@ -52,7 +52,7 @@ const attributes = {
 	 */
 	placeholder: {
 		type: 'string',
-		default: __( 'Search products…', 'woo-gutenberg-products-block' ),
+		default: __( 'Search products…', 'woocommerce' ),
 	},
 
 	/**
@@ -101,7 +101,7 @@ const DeprecatedBlockEdit = ( { clientId }: { clientId: string } ) => {
 
 	const actions = [
 		<Button key="update" onClick={ updateBlock } variant="primary">
-			{ __( 'Upgrade Block', 'woo-gutenberg-products-block' ) }
+			{ __( 'Upgrade Block', 'woocommerce' ) }
 		</Button>,
 	];
 
@@ -109,14 +109,14 @@ const DeprecatedBlockEdit = ( { clientId }: { clientId: string } ) => {
 		<Warning actions={ actions } className="wc-block-components-actions">
 			{ __(
 				'This version of the Product Search block is outdated. Upgrade to continue using.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		</Warning>
 	);
 };
 
 registerBlockType( 'woocommerce/product-search', {
-	title: __( 'Product Search', 'woo-gutenberg-products-block' ),
+	title: __( 'Product Search', 'woocommerce' ),
 	icon: {
 		src: (
 			<Icon
@@ -126,10 +126,10 @@ registerBlockType( 'woocommerce/product-search', {
 		),
 	},
 	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
+	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
 	description: __(
 		'A search box to allow customers to search for products by keyword.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	supports: {
 		align: [ 'wide', 'full' ],
@@ -174,7 +174,7 @@ registerBlockType( 'woocommerce/product-search', {
 if ( isBlockVariationAvailable ) {
 	registerBlockVariation( 'core/search', {
 		name: 'woocommerce/product-search',
-		title: __( 'Product Search', 'woo-gutenberg-products-block' ),
+		title: __( 'Product Search', 'woocommerce' ),
 		icon: {
 			src: (
 				<Icon
@@ -191,10 +191,10 @@ if ( isBlockVariationAvailable ) {
 			);
 		},
 		category: 'woocommerce',
-		keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
+		keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
 		description: __(
 			'A search box to allow customers to search for products by keyword.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		attributes: PRODUCT_SEARCH_ATTRIBUTES,
 	} );

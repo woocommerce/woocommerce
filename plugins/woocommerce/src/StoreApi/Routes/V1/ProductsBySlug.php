@@ -39,7 +39,7 @@ class ProductsBySlug extends AbstractRoute {
 		return [
 			'args'   => array(
 				'slug' => array(
-					'description' => __( 'Slug of the resource.', 'woo-gutenberg-products-block' ),
+					'description' => __( 'Slug of the resource.', 'woocommerce' ),
 					'type'        => 'string',
 				),
 			),
@@ -75,7 +75,7 @@ class ProductsBySlug extends AbstractRoute {
 		}
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			throw new RouteException( 'woocommerce_rest_product_invalid_slug', __( 'Invalid product slug.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_product_invalid_slug', __( 'Invalid product slug.', 'woocommerce' ), 404 );
 		}
 
 		return rest_ensure_response( $this->schema->get_item_response( $object ) );
