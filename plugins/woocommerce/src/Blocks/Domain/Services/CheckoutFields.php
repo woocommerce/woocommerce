@@ -451,10 +451,10 @@ class CheckoutFields {
 	 */
 	public function validate_field_for_location( $key, $value, $location ) {
 		if ( ! $this->is_field( $key ) ) {
-			// translators: %s field key.
 			return new \WP_Error(
 				'woocommerce_blocks_checkout_field_invalid',
 				\sprintf(
+					// translators: % is field key.
 					__( 'The field %s is invalid.', 'woocommerce' ),
 					$key
 				)
@@ -462,10 +462,10 @@ class CheckoutFields {
 		}
 
 		if ( ! in_array( $key, $this->fields_locations[ $location ], true ) ) {
-			// translators: %1$s field key, %2$s location.
 			return new \WP_Error(
 				'woocommerce_blocks_checkout_field_invalid_location',
 				\sprintf(
+					// translators: %1$s is field key, %2$s location.
 					__( 'The field %1$s is invalid for the location %2$s.', 'woocommerce' ),
 					$key,
 					$location
@@ -479,6 +479,7 @@ class CheckoutFields {
 			return new \WP_Error(
 				'woocommerce_blocks_checkout_field_required',
 				\sprintf(
+					// translators: %s is field key.
 					__( 'The field %s is required.', 'woocommerce' ),
 					$key
 				)
