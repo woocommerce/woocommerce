@@ -82,7 +82,7 @@ final class WC_Cart_Session {
 
 		// Cookie events - cart cookies need to be set before headers are sent.
 		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
-		add_action( 'send_headers', array( $this, 'maybe_set_cart_cookies' ), 99 );
+		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
 	}
 
@@ -256,7 +256,7 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function maybe_set_cart_cookies() {
-		if ( headers_sent() || ! did_action( 'send_headers' ) ) {
+		if ( headers_sent() || ! did_action( 'wp_loaded' ) ) {
 			return;
 		}
 		if ( ! $this->cart->is_empty() ) {
