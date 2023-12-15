@@ -24,32 +24,21 @@ class WC_Orders_Tracking {
 		add_action( 'load-edit.php', array( $this, 'track_orders_view' ), 10 );
 		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_orders_view' ), 10 ); // HPOS.
 		add_action( 'load-post-new.php', array( $this, 'track_add_order_from_edit' ), 10 );
-		add_filter( 'woocommerce_shop_order_search_results', array( $this, 'track_order_search' ), 10, 3 );
+
+		add_filter( 'load-edit.php', array( $this, 'track_order_search' ) );
+		add_filter( 'load-woocommerce_page_wc-orders', array( $this, 'track_order_search' ) ); // HPOS.
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_order_tracking_scripts' ) );
 	}
 
 	/**
 	 * Send a track event when on the Order Listing page, and search results are being displayed.
-	 *
-	 * @param array  $order_ids Array of order_ids that are matches for the search.
-	 * @param string $term The string that was used in the search.
-	 * @param array  $search_fields Fields that were used in the original search.
 	 */
-	public function track_order_search( $order_ids, $term, $search_fields ) {
-		// Since `woocommerce_shop_order_search_results` can run in the front-end context, exit if get_current_screen isn't defined.
-		if ( ! function_exists( 'get_current_screen' ) ) {
-			return $order_ids;
+	public function track_order_search() {
+		if ( ! OrderUtil::is_order_list_table_screen() || empty( $_REQUEST['s'] ) ) {
+			return;
 		}
 
-		$screen = get_current_screen();
-
-		// We only want to record this track when the filter is executed on the order listing page.
-		if ( 'edit-shop_order' === $screen->id ) {
-			// we are on the order listing page, and query results are being shown.
-			WC_Tracks::record_event( 'orders_view_search' );
-		}
-
-		return $order_ids;
+		WC_Tracks::record_event( 'orders_view_search' );
 	}
 
 	/**
