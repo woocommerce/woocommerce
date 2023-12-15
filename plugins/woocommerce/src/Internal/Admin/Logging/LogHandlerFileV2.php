@@ -208,7 +208,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 					),
 					sprintf(
 						esc_html(
-						// translators: %s is a number of days.
+							// translators: %s is a number of days.
 							_n(
 								'The retention period for log files is %s day.',
 								'The retention period for log files is %s days.',
