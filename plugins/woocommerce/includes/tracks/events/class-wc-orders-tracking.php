@@ -19,10 +19,10 @@ class WC_Orders_Tracking {
 	 */
 	public function init() {
 		add_action( 'woocommerce_order_status_changed', array( $this, 'track_order_status_change' ), 10, 3 );
-		add_action( 'load-edit.php', array( $this, 'track_orders_view' ), 10 );
-		add_action( 'pre_post_update', array( $this, 'track_created_date_change' ), 10 );
 		// WC_Meta_Box_Order_Actions::save() hooks in at priority 50.
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_order_action' ), 51 );
+		add_action( 'load-edit.php', array( $this, 'track_orders_view' ), 10 );
+		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_orders_view' ), 10 ); // HPOS.
 		add_action( 'load-post-new.php', array( $this, 'track_add_order_from_edit' ), 10 );
 		add_filter( 'woocommerce_shop_order_search_results', array( $this, 'track_order_search' ), 10, 3 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_order_tracking_scripts' ) );
@@ -56,16 +56,17 @@ class WC_Orders_Tracking {
 	 * Send a Tracks event when the Orders page is viewed.
 	 */
 	public function track_orders_view() {
-		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-			// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
-			$properties = array(
-				'status' => isset( $_GET['post_status'] ) ? sanitize_text_field( $_GET['post_status'] ) : 'all',
-			);
-			// phpcs:enable
-
-			WC_Tracks::record_event( 'orders_view', $properties );
+		if ( ! OrderUtil::is_order_list_table_screen() ) {
+			return;
 		}
+
+		// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
+		$properties = array(
+			'status' => sanitize_text_field( $_GET['post_status'] ?? ( $_GET['status'] ?? 'all' ) ),
+		);
+		// phpcs:enable
+
+		WC_Tracks::record_event( 'orders_view', $properties );
 	}
 
 	/**
