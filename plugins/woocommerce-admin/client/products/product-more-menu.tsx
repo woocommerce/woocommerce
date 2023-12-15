@@ -45,7 +45,6 @@ export const ProductMoreMenu = () => {
 				className="woocommerce-product-form-more-menu"
 				label={ __( 'More product options', 'woocommerce' ) }
 				icon={ moreVertical }
-				popoverProps={ { position: 'bottom left' } }
 			>
 				{ ( { onClose } ) => (
 					<>

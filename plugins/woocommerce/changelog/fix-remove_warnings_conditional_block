@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove use of deprecated conditional block in favour of hideConditions.
