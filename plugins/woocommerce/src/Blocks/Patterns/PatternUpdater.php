@@ -36,16 +36,16 @@ class PatternUpdater {
 	 * @return bool|WP_Error
 	 */
 	public function generate_content( $ai_connection, $token, $images, $business_description ) {
-		if ( empty( $images ) ) {
-			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woocommerce' ) );
-		}
-
 		if ( is_wp_error( $images ) ) {
 			return $images;
 		}
 
 		if ( is_wp_error( $token ) ) {
 			return $token;
+		}
+
+		if ( ! isset( $images['images'] ) ) {
+			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woocommerce' ) );
 		}
 
 		$last_business_description = get_option( 'last_business_description_with_ai_content_generated' );
@@ -58,11 +58,11 @@ class PatternUpdater {
 			}
 		}
 
-		if ( 0 === count( $images ) ) {
+		if ( 0 === count( $images['images'] ) ) {
 			$images = get_transient( 'woocommerce_ai_managed_images' );
 		}
 
-		if ( empty( $images ) ) {
+		if ( empty( $images['images'] ) ) {
 			return new WP_Error( 'no_images_found', __( 'No images found.', 'woocommerce' ) );
 		}
 
@@ -75,7 +75,7 @@ class PatternUpdater {
 			return $patterns_dictionary;
 		}
 
-		$patterns = $this->assign_selected_images_to_patterns( $patterns_dictionary, $images );
+		$patterns = $this->assign_selected_images_to_patterns( $patterns_dictionary, $images['images'] );
 
 		if ( is_wp_error( $patterns ) ) {
 			return new WP_Error( 'failed_to_set_pattern_images', __( 'Failed to set the pattern images.', 'woocommerce' ) );
@@ -218,7 +218,7 @@ class PatternUpdater {
 		$formatted_prompts = [];
 		foreach ( $prompts as $prompt ) {
 			$formatted_prompts[] = sprintf(
-				"Given the following description '%s' generate long texts for the sections using the following prompts for each one of them: `'%s'`. Ensure each entry is unique and does not repeat the given examples. The response should be an array of data in JSON format. Each element should be an object with the pattern name as the key, and the generated content as values. Do not include backticks or the word json in the response. Here's an example format: `'%s'`",
+				"You are an experienced writer. Given a business described as: '%s', generate content for the sections using the following prompts for each one of them: `'%s'`, always making sure that the expected number of characters is respected. The response should be an array of data in JSON format. Each element should be an object with the pattern name as the key, and the generated content as values. Here's an example format: `'%s'`",
 				$business_description,
 				wp_json_encode( $prompt ),
 				wp_json_encode( $expected_results_format[ $i ] )
@@ -245,7 +245,7 @@ class PatternUpdater {
 		$success            = false;
 		while ( $ai_request_retries < 5 && ! $success ) {
 			$ai_request_retries ++;
-			$ai_responses = $ai_connection->fetch_ai_responses( $token, $formatted_prompts, 60 );
+			$ai_responses = $ai_connection->fetch_ai_responses( $token, $formatted_prompts, 60, 'json_object' );
 
 			if ( is_wp_error( $ai_responses ) ) {
 				continue;

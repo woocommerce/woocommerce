@@ -8,6 +8,10 @@ use WP_Error;
  * Pattern Images class.
  */
 class ProductUpdater {
+
+	/**
+	 * The dummy products.
+	 */
 	const DUMMY_PRODUCTS = [
 		[
 			'title'       => 'Vintage Typewriter',
@@ -66,6 +70,17 @@ class ProductUpdater {
 			return $token;
 		}
 
+		if ( ! isset( $images['images'] ) || ! isset( $images['search_term'] ) ) {
+			$images = get_transient( 'woocommerce_ai_managed_images' );
+		}
+
+		if ( ! isset( $images['images'] ) || ! isset( $images['search_term'] ) ) {
+			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woocommerce' ) );
+		}
+
+		// This is required in case something interrupts the execution of the script and the endpoint is called again on retry.
+		set_transient( 'woocommerce_ai_managed_images', $images, 60 );
+
 		if ( empty( $business_description ) ) {
 			return new \WP_Error( 'missing_business_description', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
 		}
@@ -94,9 +109,9 @@ class ProductUpdater {
 			);
 		}
 
-		$products_information_list = $this->assign_ai_selected_images_to_dummy_products( $dummy_products_to_update, $images );
+		$products_information_list = $this->assign_ai_selected_images_to_dummy_products( $dummy_products_to_update, $images['images'] );
 
-		return $this->assign_ai_generated_content_to_dummy_products( $ai_connection, $token, $products_information_list, $business_description );
+		return $this->assign_ai_generated_content_to_dummy_products( $ai_connection, $token, $products_information_list, $business_description, $images['search_term'] );
 	}
 
 	/**
@@ -194,27 +209,20 @@ class ProductUpdater {
 	 * @return bool|int|\WP_Error
 	 */
 	public function create_new_product( $product_data ) {
-		$product = new \WC_Product();
+		$product          = new \WC_Product();
+		$image_src        = plugins_url( $product_data['image'], dirname( __DIR__, 2 ) );
+		$image_alt        = $product_data['title'];
+		$product_image_id = $this->product_image_upload( $product->get_id(), $image_src, $image_alt );
 
-		$product->set_name( $product_data['title'] );
-		$product->set_status( 'publish' );
-		$product->set_description( $product_data['description'] );
-		$product->set_price( $product_data['price'] );
-		$product->set_regular_price( $product_data['price'] );
-
-		$saved_product = $product->save();
-
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-
-		$product_image_id = media_sideload_image( plugins_url( $product_data['image'], dirname( __DIR__, 2 ) ), $product->get_id(), $product_data['title'], 'id' );
 		if ( is_wp_error( $product_image_id ) ) {
 			return new \WP_Error( 'error_uploading_image', $product_image_id->get_error_message() );
 		}
 
-		$product->set_image_id( $product_image_id );
-		$product->save();
+		$saved_product = $this->product_update( $product, $product_image_id, $product_data['title'], $product_data['description'], $product_data['price'] );
+
+		if ( is_wp_error( $saved_product ) ) {
+			return $saved_product;
+		}
 
 		return update_post_meta( $saved_product, '_headstart_post', true );
 	}
@@ -305,30 +313,25 @@ class ProductUpdater {
 			return;
 		}
 
-		$product->set_name( $ai_generated_product_content['title'] );
-		$product->set_description( $ai_generated_product_content['description'] );
-		$product->set_regular_price( $ai_generated_product_content['price'] );
-		$product->set_slug( sanitize_title( $ai_generated_product_content['title'] ) );
-		$product->save();
+		$product_image_id = $this->product_image_upload( $product->get_id(), $ai_generated_product_content['image']['src'], $ai_generated_product_content['image']['alt'] );
 
-		$update_product_image = $this->update_product_image( $product, $ai_generated_product_content );
-
-		if ( is_wp_error( $update_product_image ) ) {
-			return $update_product_image;
+		if ( is_wp_error( $product_image_id ) ) {
+			return $product_image_id->get_error_message();
 		}
 
-		$this->create_hash_for_ai_modified_product( $product );
+		$this->product_update( $product, $product_image_id, $ai_generated_product_content['title'], $ai_generated_product_content['description'], $ai_generated_product_content['price'] );
 	}
 
 	/**
-	 * Update the product images with the AI-generated image.
+	 * Upload the image for the product.
 	 *
-	 * @param \WC_Product $product The product.
-	 * @param array       $ai_generated_product_content The AI-generated product content.
+	 * @param int    $product_id The product ID.
+	 * @param string $image_src The image source.
+	 * @param string $image_alt The image alt.
 	 *
-	 * @return string|true
+	 * @return int|string|WP_Error
 	 */
-	public function update_product_image( $product, $ai_generated_product_content ) {
+	private function product_image_upload( $product_id, $image_src, $image_alt ) {
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
@@ -339,16 +342,37 @@ class ProductUpdater {
 		set_time_limit( 150 );
 		wp_raise_memory_limit( 'image' );
 
-		$product_image_id = media_sideload_image( $ai_generated_product_content['image']['src'], $product->get_id(), $ai_generated_product_content['image']['alt'], 'id' );
+		$product_image_id = media_sideload_image( $image_src, $product_id, $image_alt, 'id' );
 
 		if ( is_wp_error( $product_image_id ) ) {
 			return $product_image_id->get_error_message();
 		}
 
-		$product->set_image_id( $product_image_id );
-		$product->save();
+		return $product_image_id;
+	}
 
-		return true;
+	/**
+	 * Reduce the size of the image for the product to improve performance and
+	 * avoid memory exhaustion errors when uploading them to the media library.
+	 *
+	 * @param string $image_url The image URL.
+	 *
+	 * @return string
+	 */
+	private function adjust_image_size_for_products( $image_url ) {
+		$parsed_url = wp_parse_url( $image_url );
+
+		if ( ! isset( $parsed_url['query'] ) ) {
+			return $image_url;
+		}
+
+		parse_str( $parsed_url['query'], $query_params );
+
+		unset( $query_params['h'], $query_params['w'] );
+		$query_params['w'] = 300;
+		$new_query_string  = http_build_query( $query_params );
+
+		return $parsed_url['scheme'] . '://' . $parsed_url['host'] . $parsed_url['path'] . '?' . $new_query_string;
 	}
 
 	/**
@@ -364,6 +388,11 @@ class ProductUpdater {
 		$dummy_products_count      = count( $dummy_products_to_update );
 		for ( $i = 0; $i < $dummy_products_count; $i ++ ) {
 			$image_src = $ai_selected_images[ $i ]['URL'] ?? '';
+
+			if ( wc_is_valid_url( $image_src ) ) {
+				$image_src = $this->adjust_image_size_for_products( $ai_selected_images[ $i ]['URL'] );
+			}
+
 			$image_alt = $ai_selected_images[ $i ]['title'] ?? '';
 
 			$products_information_list[] = [
@@ -388,10 +417,11 @@ class ProductUpdater {
 	 * @param string     $token The JWT token.
 	 * @param array      $products_information_list The products information list.
 	 * @param string     $business_description The business description.
+	 * @param string     $search_term The search term.
 	 *
 	 * @return array|int|string|\WP_Error
 	 */
-	public function assign_ai_generated_content_to_dummy_products( $ai_connection, $token, $products_information_list, $business_description ) {
+	public function assign_ai_generated_content_to_dummy_products( $ai_connection, $token, $products_information_list, $business_description, $search_term ) {
 		if ( empty( $business_description ) ) {
 			return new \WP_Error( 'missing_store_description', __( 'The store description is required to generate content for your site.', 'woocommerce' ) );
 		}
@@ -399,9 +429,9 @@ class ProductUpdater {
 		$prompts = [];
 		foreach ( $products_information_list as $product_information ) {
 			if ( ! empty( $product_information['image']['alt'] ) ) {
-				$prompts[] = sprintf( 'Generate a product name for a product that could be sold in a store and could be associated with the following image description: "%s" and also is related to the following business description: "%s". Do not include any adjectives or descriptions of the qualities of the product and always refer to objects or services, not humans. The returned result should not refer to people, only objects.', $product_information['image']['alt'], $business_description );
+				$prompts[] = sprintf( 'Considering that you are the owner of a store with the following description "%s", create the title for a product that is related to "%s" and to an image described as "%s". Do not include any adjectives or descriptions of the qualities of the product and always refer to objects or services, not humans.', $business_description, $search_term, $product_information['image']['alt'] );
 			} else {
-				$prompts[] = sprintf( 'Generate a product name for a product that could be sold in a store and matches the following business description: "%s". Do not include any adjectives or descriptions of the qualities of the product and always refer to objects or services, not humans.', $business_description );
+				$prompts[] = sprintf( 'You are the owner of a business described as: "%s". Create the title for a product that could be sold on your store. Do not include any adjectives or descriptions of the qualities of the product and always refer to objects or services, not humans.', $business_description );
 			}
 		}
 
@@ -414,7 +444,7 @@ class ProductUpdater {
 		}
 
 		$formatted_prompt = sprintf(
-			"Generate two-words titles and price for products using the following prompts for each one of them: '%s'. Ensure each entry is unique and does not repeat the given examples. It should be a number and it's not too low or too high for the corresponding product title being advertised. Convert the price to this currency: '%s'. Do not include backticks or the word json in the response. Here's an example format: '%s'.",
+			"Generate two-words titles and price for products using the following prompts for each one of them: '%s'. Ensure each entry is unique and does not repeat the given examples. It should be a number and it's not too low or too high for the corresponding product title being advertised. Convert the price to this currency: '%s'. Do not include backticks or the word json in the response. Here's an example of the expected output format in JSON: '%s'.",
 			wp_json_encode( $prompts ),
 			get_woocommerce_currency(),
 			wp_json_encode( $expected_results_format )
@@ -485,24 +515,46 @@ class ProductUpdater {
 		$dummy_products_to_update = $this->fetch_dummy_products_to_update();
 		$i                        = 0;
 		foreach ( $dummy_products_to_update as $product ) {
-			$product->set_name( self::DUMMY_PRODUCTS[ $i ]['title'] );
-			$product->set_description( self::DUMMY_PRODUCTS[ $i ]['description'] );
-			$product->set_regular_price( self::DUMMY_PRODUCTS[ $i ]['price'] );
-			$product->set_slug( sanitize_title( self::DUMMY_PRODUCTS[ $i ]['title'] ) );
-			$product->save();
+			$image_src        = plugins_url( self::DUMMY_PRODUCTS[ $i ]['image'], dirname( __DIR__, 2 ) );
+			$image_alt        = self::DUMMY_PRODUCTS[ $i ]['title'];
+			$product_image_id = $this->product_image_upload( $product->get_id(), $image_src, $image_alt );
 
-			require_once ABSPATH . 'wp-admin/includes/media.php';
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-			require_once ABSPATH . 'wp-admin/includes/image.php';
+			if ( is_wp_error( $product_image_id ) ) {
+				continue;
+			}
 
-			$product_image_id = media_sideload_image( plugins_url( self::DUMMY_PRODUCTS[ $i ]['image'], dirname( __DIR__, 2 ) ), $product->get_id(), self::DUMMY_PRODUCTS[ $i ]['title'], 'id' );
-			$product_image_id = $product->set_image_id( $product_image_id );
-
-			$product->save();
-
-			$this->create_hash_for_ai_modified_product( $product );
+			$this->product_update( $product, $product_image_id, self::DUMMY_PRODUCTS[ $i ]['title'], self::DUMMY_PRODUCTS[ $i ]['description'], self::DUMMY_PRODUCTS[ $i ]['price'] );
 
 			$i++;
 		}
+	}
+
+	/**
+	 * Update the product with the new content.
+	 *
+	 * @param \WC_Product $product The product.
+	 * @param int         $product_image_id The product image ID.
+	 * @param string      $product_title The product title.
+	 * @param string      $product_description The product description.
+	 * @param int         $product_price The product price.
+	 *
+	 * @return int|\WP_Error
+	 */
+	private function product_update( $product, $product_image_id, $product_title, $product_description, $product_price ) {
+		if ( ! $product instanceof \WC_Product ) {
+			return new WP_Error( 'invalid_product', __( 'Invalid product.', 'woocommerce' ) );
+		}
+
+		$product->set_image_id( $product_image_id );
+		$product->set_name( $product_title );
+		$product->set_description( $product_description );
+		$product->set_price( $product_price );
+		$product->set_regular_price( $product_price );
+		$product->set_slug( sanitize_title( $product_title ) );
+		$product->save();
+
+		$this->create_hash_for_ai_modified_product( $product );
+
+		return $product->get_id();
 	}
 }

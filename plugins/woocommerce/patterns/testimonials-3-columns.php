@@ -7,10 +7,10 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
-$main_header        = $content['titles'][0]['default'] ?? '';
-$first_review       = $content['titles'][1]['default'] ?? '';
-$second_review      = $content['titles'][2]['default'] ?? '';
-$third_review       = $content['titles'][3]['default'] ?? '';
+$main_header        = $content['titles'][3]['default'] ?? '';
+$first_review       = $content['titles'][0]['default'] ?? '';
+$second_review      = $content['titles'][1]['default'] ?? '';
+$third_review       = $content['titles'][2]['default'] ?? '';
 $first_description  = $content['descriptions'][0]['default'] ?? '';
 $second_description = $content['descriptions'][1]['default'] ?? '';
 $third_description  = $content['descriptions'][2]['default'] ?? '';

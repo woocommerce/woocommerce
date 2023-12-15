@@ -9,52 +9,6 @@ use WP_Error;
  */
 class PatternsHelper {
 	/**
-	 * Returns the pattern content.
-	 *
-	 * @param string $pattern_slug The pattern slug.
-	 *
-	 * @return array The pattern content.
-	 */
-	public static function get_pattern_content( string $pattern_slug ) {
-		$pattern = self::get_patterns_dictionary( $pattern_slug );
-
-		if ( empty( $pattern ) ) {
-			return array();
-		}
-
-		if ( ! isset( $pattern['content'] ) ) {
-			return array();
-		}
-
-		return $pattern['content'];
-	}
-
-	/**
-	 * Returns the pattern images.
-	 *
-	 * @param string $pattern_slug The pattern slug.
-	 *
-	 * @return array The pattern images.
-	 */
-	public static function get_pattern_images( string $pattern_slug ): array {
-		$pattern = self::get_patterns_dictionary( $pattern_slug );
-
-		if ( empty( $pattern ) ) {
-			return array();
-		}
-
-		if ( ! isset( $pattern['images'] ) ) {
-			return array();
-		}
-
-		if ( ! isset( $pattern['images_total'] ) ) {
-			return array();
-		}
-
-		return $pattern['images'];
-	}
-
-	/**
 	 * Returns the image for the given pattern.
 	 *
 	 * @param array  $images The array of images.
