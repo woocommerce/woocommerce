@@ -480,6 +480,7 @@ class Checkout extends AbstractBlock {
 		return [
 			'Checkout',
 			'CheckoutActionsBlock',
+			'CheckoutAdditionalInformationBlock',
 			'CheckoutBillingAddressBlock',
 			'CheckoutContactInformationBlock',
 			'CheckoutExpressPaymentBlock',
