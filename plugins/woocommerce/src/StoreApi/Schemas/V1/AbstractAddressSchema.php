@@ -201,7 +201,11 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			}
 
 			$properties = $this->get_properties();
-			if ( empty( $properties[ $key ] ) ) {
+
+			// Only run specific validation on properties that are defined in the schema and present in the address.
+			// This is for partial address pushes when only part of a customer address is sent.
+			// Full schema address validation still happens later, so empty, required values are disallowed.
+			if ( empty( $properties[ $key ] ) || empty( $address[ $key ] ) ) {
 				continue;
 			}
 
