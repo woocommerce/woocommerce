@@ -63,19 +63,56 @@ export function SwitchToClassicShortcodeButton( {
 		}
 	};
 
+	const handleSwitchToClassicShortcodeClick = () => {
+		recordEvent( 'switch_to_classic_shortcode_click', {
+			shortcode: block === 'woocommerce/checkout' ? 'checkout' : 'cart',
+		} );
+		openModal();
+	};
+
+	const handleUndoClick = () => {
+		undo();
+		recordEvent( 'switch_to_classic_shortcode_undo', {
+			shortcode: block === 'woocommerce/checkout' ? 'checkout' : 'cart',
+		} );
+	};
+
+	const handleSwitchClick = () => {
+		replaceBlock(
+			clientId,
+			createBlock( 'woocommerce/classic-shortcode', {
+				shortcode:
+					block === 'woocommerce/checkout' ? 'checkout' : 'cart',
+			} )
+		);
+		recordEvent( 'switch_to_classic_shortcode_confirm', {
+			shortcode: block === 'woocommerce/checkout' ? 'checkout' : 'cart',
+		} );
+		selectClassicShortcodeBlock();
+		createInfoNotice( snackbarLabel, {
+			actions: [
+				{
+					label: __( 'Undo', 'woocommerce' ),
+					onClick: handleUndoClick,
+				},
+			],
+			type: 'snackbar',
+		} );
+		closeModal();
+	};
+
+	const handleCancelClick = () => {
+		recordEvent( 'switch_to_classic_shortcode_cancel', {
+			shortcode: block === 'woocommerce/checkout' ? 'checkout' : 'cart',
+		} );
+		closeModal();
+	};
+
 	return (
 		<>
 			<Button
 				variant={ 'secondary' }
-				onClick={ () => {
-					recordEvent( 'switch_to_classic_shortcode_click', {
-						shortcode:
-							block === 'woocommerce/checkout'
-								? 'checkout'
-								: 'cart',
-					} );
-					openModal();
-				} }
+				onClick={ handleSwitchToClassicShortcodeClick }
 			>
 				{ switchButtonLabel }
 			</Button>
@@ -91,69 +128,13 @@ export function SwitchToClassicShortcodeButton( {
 						<Button
 							variant="primary"
 							isDestructive={ true }
-							onClick={ () => {
-								replaceBlock(
-									clientId,
-									createBlock(
-										'woocommerce/classic-shortcode',
-										{
-											shortcode:
-												block === 'woocommerce/checkout'
-													? 'checkout'
-													: 'cart',
-										}
-									)
-								);
-								recordEvent(
-									'switch_to_classic_shortcode_confirm',
-									{
-										shortcode:
-											block === 'woocommerce/checkout'
-												? 'checkout'
-												: 'cart',
-									}
-								);
-								selectClassicShortcodeBlock();
-								createInfoNotice( snackbarLabel, {
-									actions: [
-										{
-											label: __( 'Undo', 'woocommerce' ),
-											onClick: () => {
-												undo();
-												recordEvent(
-													'switch_to_classic_shortcode_undo',
-													{
-														shortcode:
-															block ===
-															'woocommerce/checkout'
-																? 'checkout'
-																: 'cart',
-													}
-												);
-											},
-										},
-									],
-									type: 'snackbar',
-								} );
-								closeModal();
-							} }
+							onClick={ handleSwitchClick }
 						>
 							{ __( 'Switch', 'woocommerce' ) }
 						</Button>{ ' ' }
 						<Button
 							variant="secondary"
-							onClick={ () => {
-								recordEvent(
-									'switch_to_classic_shortcode_cancel',
-									{
-										shortcode:
-											block === 'woocommerce/checkout'
-												? 'checkout'
-												: 'cart',
-									}
-								);
-								closeModal();
-							} }
+							onClick={ handleCancelClick }
 						>
 							{ __( 'Cancel', 'woocommerce' ) }
 						</Button>
