@@ -103,7 +103,7 @@ const ProductCollectionInspectorControls = (
 					<TaxonomyControls { ...queryControlProps } />
 					<FeaturedProductsControl { ...queryControlProps } />
 					<CreatedControl { ...queryControlProps } />
-          <PriceRangeControl { ...queryControlProps } />
+					<PriceRangeControl { ...queryControlProps } />
 				</ToolsPanel>
 			) : null }
 			<ProductCollectionFeedbackPrompt />

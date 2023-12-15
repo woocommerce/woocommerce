@@ -24,7 +24,7 @@ const PriceRangeControl = ( props: QueryControlProps ) => {
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Price Range', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Price Range', 'woocommerce' ) }
 			hasValue={ () => {
 				return value?.min !== undefined || value?.max !== undefined;
 			} }
@@ -34,12 +34,12 @@ const PriceRangeControl = ( props: QueryControlProps ) => {
 			className="wc-block-product-price-range-control"
 		>
 			<BaseControl.VisualLabel>
-				{ __( 'PRICE RANGE', 'woo-gutenberg-products-block' ) }
+				{ __( 'PRICE RANGE', 'woocommerce' ) }
 			</BaseControl.VisualLabel>
 
 			<HStack spacing="2">
 				<PriceTextField
-					label={ __( 'MIN', 'woo-gutenberg-products-block' ) }
+					label={ __( 'MIN', 'woocommerce' ) }
 					value={ value?.min as number }
 					onChange={ ( min?: number ) => {
 						setQueryAttribute( {
@@ -52,7 +52,7 @@ const PriceRangeControl = ( props: QueryControlProps ) => {
 				/>
 
 				<PriceTextField
-					label={ __( 'MAX', 'woo-gutenberg-products-block' ) }
+					label={ __( 'MAX', 'woocommerce' ) }
 					value={ value?.max as number }
 					onChange={ ( max?: number ) => {
 						setQueryAttribute( {

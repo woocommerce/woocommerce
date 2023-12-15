@@ -42,7 +42,7 @@ const PriceTextField: React.FC< PriceTextFieldProps > = ( {
 					{ currency?.symbol }
 				</InputControlSuffixWrapper>
 			}
-			placeholder={ __( 'Auto', 'woo-gutenberg-products-block' ) }
+			placeholder={ __( 'Auto', 'woocommerce' ) }
 			isPressEnterToChange
 			hideLabelFromVision
 			hideHTMLArrows

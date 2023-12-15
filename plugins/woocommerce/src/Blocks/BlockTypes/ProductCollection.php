@@ -1036,37 +1036,6 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Adds price range conditions to a query.
-	 *
-	 * @param array       $query The query to add conditions to.
-	 * @param array       $price_range Price range.
-	 * @param string|null $tax_class Optional tax class for tax adjustments.
-	 */
-	private function add_price_range_to_query( $query, $price_range, $tax_class = false ) {
-		if ( ! empty( $price_range['min'] ) ) {
-			$min_price = false === $tax_class ? $price_range['min'] : $this->adjust_price_value_for_tax_class( $price_range['min'], $tax_class );
-			$query[]   = [
-				'key'     => '_price',
-				'value'   => $min_price,
-				'compare' => '>=',
-				'type'    => 'DECIMAL(10,3)',
-			];
-		}
-
-		if ( ! empty( $price_range['max'] ) ) {
-			$max_price = false === $tax_class ? $price_range['max'] : $this->adjust_price_value_for_tax_class( $price_range['max'], $tax_class );
-			$query[]   = [
-				'key'     => '_price',
-				'value'   => $max_price,
-				'compare' => '<=',
-				'type'    => 'DECIMAL(10,3)',
-			];
-		}
-
-		return $query;
-	}
-
-	/**
 	 * Add the `posts_clauses` filter to the main query.
 	 *
 	 * @param array    $clauses The query clauses.
@@ -1079,15 +1048,10 @@ class ProductCollection extends AbstractBlock {
 			return $clauses;
 		}
 
-		// do_action( 'qm/debug', $query_vars );
-		// do_action( 'qm/debug', $clauses );
-
 		$price_range = $query_vars['priceRange'] ?? [];
 		if ( empty( $price_range ) ) {
 			return $clauses;
 		}
-
-		// do_action( 'qm/debug', $price_range );
 
 		global $wpdb;
 		$adjust_for_taxes = $this->should_adjust_price_range_for_taxes();
@@ -1111,7 +1075,6 @@ class ProductCollection extends AbstractBlock {
 			}
 		}
 
-		// do_action( 'qm/debug', $clauses );
 		return $clauses;
 	}
 
