@@ -356,9 +356,9 @@ class CheckoutFields {
 
 				if ( in_array( $sanitized_value, $added_values, true ) ) {
 					wc_get_logger()->warning(
-						sprintf( 'Unable to register field with id: "%s". The value in each option of "select" fields must be unique. Duplicate value "%s" found.', esc_html( $id ), esc_html( $sanitized_value ) )
+						sprintf( 'Duplicate key found when registering field with id: "%s". The value in each option of "select" fields must be unique. Duplicate value "%s" found. The duplicate key will be removed.', esc_html( $id ), esc_html( $sanitized_value ) )
 					);
-					return;
+					continue;
 				}
 
 				$added_values[] = $sanitized_value;
