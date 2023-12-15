@@ -2,7 +2,7 @@
  * External dependencies
  */
 import {
-	defaultAddressFields,
+	defaultFields,
 	AddressFields,
 	ShippingAddress,
 	BillingAddress,
@@ -26,7 +26,7 @@ interface CheckoutAddress {
 	setEmail: ( value: string ) => void;
 	useShippingAsBilling: boolean;
 	setUseShippingAsBilling: ( useShippingAsBilling: boolean ) => void;
-	defaultAddressFields: AddressFields;
+	defaultFields: AddressFields;
 	showShippingFields: boolean;
 	showBillingFields: boolean;
 	forcedBillingAddress: boolean;
@@ -74,7 +74,7 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		setShippingAddress,
 		setBillingAddress,
 		setEmail,
-		defaultAddressFields,
+		defaultFields,
 		useShippingAsBilling,
 		setUseShippingAsBilling: __internalSetUseShippingAsBilling,
 		needsShipping,

@@ -17,32 +17,22 @@ import {
 import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
-import { defaultAddressFields } from '@woocommerce/settings';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Internal dependencies
  */
-import {
-	AddressFormProps,
-	FieldType,
-	FieldConfig,
-	AddressFormFields,
-} from './types';
+import { AddressFormProps, FieldConfig, AddressFormFields } from './types';
 import prepareAddressFields from './prepare-address-fields';
 import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
-
-const defaultFields = Object.keys(
-	defaultAddressFields
-) as unknown as FieldType[];
 
 /**
  * Checkout address form.
  */
 const AddressForm = ( {
 	id = '',
-	fields = defaultFields,
+	fields,
 	fieldConfig = {} as FieldConfig,
 	onChange,
 	type = 'shipping',

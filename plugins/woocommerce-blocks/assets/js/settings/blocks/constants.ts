@@ -58,6 +58,12 @@ type CountryData = {
 	locale: Record< string, LocaleSpecificAddressField >;
 };
 
+type FieldsLocations = {
+	address: string[];
+	contact: string[];
+	additional: string[];
+};
+
 // Contains country names.
 const countries = getSetting< Record< string, string > >( 'countries', {} );
 
@@ -112,3 +118,35 @@ export const COUNTRY_LOCALE = Object.fromEntries(
 		return [ countryCode, countryData[ countryCode ].locale || [] ];
 	} )
 );
+
+const defaultFieldsLocations: FieldsLocations = {
+	address: [
+		'first_name',
+		'last_name',
+		'company',
+		'address_1',
+		'address_2',
+		'city',
+		'postcode',
+		'country',
+		'state',
+		'phone',
+	],
+	contact: [ 'email' ],
+	additional: [],
+};
+
+export const ADDRESS_FIELDS_KEYS = getSetting< FieldsLocations >(
+	'addressFieldsLocations',
+	defaultFieldsLocations
+).address;
+
+export const CONTACT_FIELDS_KEYS = getSetting< FieldsLocations >(
+	'addressFieldsLocations',
+	defaultFieldsLocations
+).contact;
+
+export const ADDITIONAL_FIELDS_KEYS = getSetting< FieldsLocations >(
+	'addressFieldsLocations',
+	defaultFieldsLocations
+).additional;
