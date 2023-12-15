@@ -23,6 +23,7 @@
 		"product-virtual-downloadable": true,
 		"product-external-affiliate": false,
 		"product-grouped": false,
+		"product-min-max-new-product-editor": false,
 		"remote-inbox-notifications": true,
 		"remote-free-extensions": true,
 		"payment-gateway-suggestions": true,
