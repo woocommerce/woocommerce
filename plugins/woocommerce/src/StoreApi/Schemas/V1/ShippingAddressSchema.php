@@ -60,10 +60,10 @@ class ShippingAddressSchema extends AbstractAddressSchema {
 					}
 					return $carry;
 				},
-				array()
+				[]
 			);
 			$address_object            = array_merge(
-				array(
+				[
 					'first_name' => $address->get_shipping_first_name(),
 					'last_name'  => $address->get_shipping_last_name(),
 					'company'    => $address->get_shipping_company(),
@@ -74,7 +74,7 @@ class ShippingAddressSchema extends AbstractAddressSchema {
 					'postcode'   => $address->get_shipping_postcode(),
 					'country'    => $shipping_country,
 					'phone'      => $address->get_shipping_phone(),
-				),
+				],
 				$additional_address_fields
 			);
 

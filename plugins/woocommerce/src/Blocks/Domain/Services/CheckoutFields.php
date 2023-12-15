@@ -295,7 +295,7 @@ class CheckoutFields {
 		$type = 'text';
 		if ( ! empty( $options['type'] ) ) {
 			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
-				wc_get_logger()->debug(
+				wc_get_logger()->warning(
 					sprintf(
 						'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
 						esc_html( $options['id'] ),
@@ -304,15 +304,6 @@ class CheckoutFields {
 					)
 				);
 				return;
-			}
-			$type = $options['type'];
-		}
-
-		$type = 'text';
-		if ( ! empty( $options['type'] ) ) {
-			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
-				// translators: %1$s is the registered field type, %2$s is a list of supported field types (comma separated).
-				return new \WP_Error( 'woocommerce_blocks_checkout_field_type_unsupported', sprintf( __( 'Registering a field with type "%1$s" is not supported. The supported types are: %2$s.', 'woocommerce' ), esc_html( $options['type'] ), implode( ', ', $this->supported_field_types ) ) );
 			}
 			$type = $options['type'];
 		}
@@ -518,7 +509,7 @@ class CheckoutFields {
 					// translators: %s is field key.
 					__( 'The field %s is required.', 'woocommerce' ),
 					$key
-				)
+					)
 			);
 		}
 
@@ -781,6 +772,7 @@ class CheckoutFields {
 				$fields[ $key ] = $value;
 			}
 		}
+
 		return $fields;
 	}
 

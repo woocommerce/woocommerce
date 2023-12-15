@@ -33,14 +33,14 @@ class BillingAddressSchema extends AbstractAddressSchema {
 		$properties = parent::get_properties();
 		return array_merge(
 			$properties,
-			array(
-				'email' => array(
+			[
+				'email' => [
 					'description' => __( 'Email', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => [ 'view', 'edit' ],
 					'required'    => true,
-				),
-			)
+				],
+			]
 		);
 	}
 
@@ -117,10 +117,10 @@ class BillingAddressSchema extends AbstractAddressSchema {
 					}
 					return $carry;
 				},
-				array()
+				[]
 			);
 			$address_object            = \array_merge(
-				array(
+				[
 					'first_name' => $address->get_billing_first_name(),
 					'last_name'  => $address->get_billing_last_name(),
 					'company'    => $address->get_billing_company(),
@@ -132,7 +132,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 					'country'    => $billing_country,
 					'email'      => $address->get_billing_email(),
 					'phone'      => $address->get_billing_phone(),
-				),
+				],
 				$additional_address_fields
 			);
 
