@@ -15,9 +15,10 @@ import {
 /**
  * Internal dependencies
  */
-import type { CollectionName } from '../types';
+import { type CollectionName, CoreCollectionNames } from '../types';
 import blockJson from '../block.json';
 import { getCollectionByName } from '../collections';
+import { getDefaultProductCollection } from '../constants';
 
 type CollectionButtonProps = {
 	active?: boolean;
@@ -38,11 +39,16 @@ export const applyCollection = (
 		return;
 	}
 
-	const newBlock = createBlock(
-		blockJson.name,
-		collection.attributes,
-		createBlocksFromInnerBlocksTemplate( collection.innerBlocks )
-	);
+	const newBlock =
+		collection.name === CoreCollectionNames.PRODUCT_CATALOG
+			? getDefaultProductCollection()
+			: createBlock(
+					blockJson.name,
+					collection.attributes,
+					createBlocksFromInnerBlocksTemplate(
+						collection.innerBlocks
+					)
+			  );
 
 	replaceBlock( clientId, newBlock );
 };
@@ -78,7 +84,7 @@ const CollectionButton = ( {
 };
 
 const CollectionChooser = ( props: {
-	chosenCollection?: CollectionName;
+	chosenCollection: CollectionName | undefined;
 	onCollectionClick: ( name: string ) => void;
 } ) => {
 	const { chosenCollection, onCollectionClick } = props;
