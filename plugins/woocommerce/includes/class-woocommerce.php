@@ -263,6 +263,7 @@ final class WooCommerce {
 		$container->get( FeaturesController::class );
 		$container->get( WebhookUtil::class );
 		$container->get( Marketplace::class );
+		$container->get(\Automattic\WooCommerce\Utilities\TimeUtil::class);
 
 		/**
 		 * These classes have a register method for attaching hooks.
