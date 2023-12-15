@@ -3,8 +3,7 @@
  */
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-import { useEffect, useRef } from '@wordpress/element';
-import { withInstanceId } from '@wordpress/compose';
+import { useEffect, useId, useRef } from '@wordpress/element';
 import { ComboboxControl } from 'wordpress-components';
 import { ValidationInputError } from '@woocommerce/blocks-components';
 import { isObject } from '@woocommerce/types';
@@ -48,11 +47,11 @@ const Combobox = ( {
 	required = false,
 	errorMessage = __( 'Please select a value.', 'woocommerce' ),
 	errorId: incomingErrorId,
-	instanceId = '0',
 	autoComplete = 'off',
 }: ComboboxProps ): JSX.Element => {
 	const controlRef = useRef< HTMLDivElement >( null );
-	const controlId = id || 'control-' + instanceId;
+	const fallbackId = useId();
+	const controlId = id || 'control-' + fallbackId;
 	const errorId = incomingErrorId || controlId;
 
 	const { setValidationErrors, clearValidationError } =
@@ -154,4 +153,4 @@ const Combobox = ( {
 	);
 };
 
-export default withInstanceId( Combobox );
+export default Combobox;

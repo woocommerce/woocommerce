@@ -12,6 +12,15 @@ import { ADDRESS_FIELDS_KEYS } from '@woocommerce/block-settings';
  */
 import AddressForm from '../address-form';
 
+jest.mock( '@wordpress/element', () => {
+	return {
+		...jest.requireActual( '@wordpress/element' ),
+		useId: () => {
+			return 'mock-id';
+		},
+	};
+} );
+
 const renderInCheckoutProvider = ( ui, options = {} ) => {
 	const Wrapper = ( { children } ) => {
 		return <CheckoutProvider>{ children }</CheckoutProvider>;

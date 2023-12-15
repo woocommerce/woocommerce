@@ -117,7 +117,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$address         = array_merge( array_fill_keys( array_keys( $this->get_properties() ), '' ), (array) $address );
 		$address         = array_reduce(
 			array_keys( $address ),
-			function( $carry, $key ) use ( $address, $validation_util ) {
+			function( $carry, $key ) use ( $address, $validation_util, $request ) {
 				switch ( $key ) {
 					case 'country':
 						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
@@ -129,7 +129,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
 						break;
 					default:
-						$carry[ $key ] = sanitize_text_field( wp_unslash( $address[ $key ] ) );
+						$carry[ $key ] = rest_sanitize_request_arg( wp_unslash( $address[ $key ] ), $request, $key );
 						break;
 				}
 				return $carry;
@@ -193,6 +193,28 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			);
 		}
 
+		foreach ( array_keys( $address ) as $key ) {
+
+			// Skip email here it will be validated in BillingAddressSchema.
+			if ( 'email' === $key ) {
+				continue;
+			}
+
+			$properties = $this->get_properties();
+
+			// Only run specific validation on properties that are defined in the schema and present in the address.
+			// This is for partial address pushes when only part of a customer address is sent.
+			// Full schema address validation still happens later, so empty, required values are disallowed.
+			if ( empty( $properties[ $key ] ) || empty( $address[ $key ] ) ) {
+				continue;
+			}
+
+			$result = rest_validate_value_from_schema( $address[ $key ], $properties[ $key ], $key );
+			if ( is_wp_error( $result ) ) {
+				$errors->add( $result->get_error_code(), $result->get_error_message() );
+			}
+		}
+
 		return $errors->has_errors( $errors ) ? $errors : true;
 	}
 
@@ -204,7 +226,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	protected function get_additional_address_fields_schema() {
 		$additional_fields_keys = $this->additional_fields_controller->get_address_fields_keys();
 
-		$fields = array_merge( $this->additional_fields_controller->get_core_fields(), $this->additional_fields_controller->get_additional_fields() );
+		$fields = $this->additional_fields_controller->get_additional_fields();
 
 		$address_fields = array_filter(
 			$fields,
@@ -214,14 +236,26 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			ARRAY_FILTER_USE_KEY
 		);
 
-		$schema = [];
+		$schema = array();
 		foreach ( $address_fields as $key => $field ) {
-			$schema[ $key ] = [
+			$field_schema = array(
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
-			];
+			);
+
+			if ( 'select' === $field['type'] ) {
+				$field_schema['type'] = 'string';
+				$field_schema['enum'] = array_map(
+					function( $option ) {
+						return $option['value'];
+					},
+					$field['options']
+				);
+			}
+
+			$schema[ $key ] = $field_schema;
 		}
 		return $schema;
 	}
