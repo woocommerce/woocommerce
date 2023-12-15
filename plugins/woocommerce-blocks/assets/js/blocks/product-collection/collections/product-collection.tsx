@@ -3,7 +3,7 @@
  */
 import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
-import { Icon, tool } from '@wordpress/icons';
+import { Icon, loop } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -12,12 +12,12 @@ import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { CoreCollectionNames } from '../types';
 
 const collection = {
-	name: CoreCollectionNames.CUSTOM,
-	title: __( 'Custom', 'woocommerce' ),
-	icon: ( <Icon icon={ tool } /> ) as BlockIcon,
+	name: CoreCollectionNames.PRODUCT_CATALOG,
+	title: __( 'Product Catalog', 'woocommerce' ),
+	icon: ( <Icon icon={ loop } /> ) as BlockIcon,
 	description:
-		'Build your own collection of products and customize their layout. Optionally, adjust results to match the current template, page, or search term.',
-	keywords: [],
+		'Display all products in your catalog. Results can (change to) match the current template, page, or search term.',
+	keywords: [ 'all products' ],
 	scope: [],
 	unchangeableFilters: [],
 };
@@ -26,7 +26,7 @@ const attributes = {
 	...DEFAULT_ATTRIBUTES,
 	query: {
 		...DEFAULT_ATTRIBUTES.query,
-		inherit: false,
+		inherit: true,
 	},
 	collection: collection.name,
 };
