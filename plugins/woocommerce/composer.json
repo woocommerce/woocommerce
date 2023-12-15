@@ -26,7 +26,7 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.7.0"
+		"woocommerce/action-scheduler": "3.7.1"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
@@ -71,7 +71,8 @@
 		},
 		"files": [
 			"src/StoreApi/deprecated.php",
-			"src/StoreApi/functions.php"
+			"src/StoreApi/functions.php",
+			"src/Blocks/Domain/Services/functions.php"
 		]
 	},
 	"autoload-dev": {

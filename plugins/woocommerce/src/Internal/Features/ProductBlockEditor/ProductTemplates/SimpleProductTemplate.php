@@ -279,6 +279,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes' => array(
 					'helpText' => null,
 					'label'    => null,
+					'property' => 'description',
 				),
 			)
 		);

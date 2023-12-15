@@ -23,6 +23,7 @@ import {
 import { Subscription } from './types';
 import { RefreshButton } from './table/actions/refresh-button';
 import Notices from './notices';
+import InstallModal from './table/actions/install-modal';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
@@ -58,6 +59,7 @@ export default function MySubscriptions(): JSX.Element {
 	if ( ! wccomSettings?.isConnected ) {
 		return (
 			<div className="woocommerce-marketplace__my-subscriptions--connect">
+				<InstallModal />
 				<div className="woocommerce-marketplace__my-subscriptions__icon" />
 				<h2 className="woocommerce-marketplace__my-subscriptions__header">
 					{ __( 'Manage your subscriptions', 'woocommerce' ) }
@@ -77,6 +79,7 @@ export default function MySubscriptions(): JSX.Element {
 
 	return (
 		<div className="woocommerce-marketplace__my-subscriptions">
+			<InstallModal />
 			<section className="woocommerce-marketplace__my-subscriptions__notices">
 				<Notices />
 			</section>

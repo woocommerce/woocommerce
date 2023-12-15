@@ -672,7 +672,7 @@ const ShippingWrapper = compose(
 
 		const shippingPartners = select(
 			SHIPPING_METHODS_STORE_NAME
-		).getShippingMethods( true );
+		).getShippingMethods();
 
 		const country = countryCode ? getCountry( countryCode ) : null;
 		const countryName = country ? country.name : null;
