@@ -1,2 +1,7 @@
 # Uses the same format as .gitignore
 _media
+
+# Placeholder / WIP docs
+theme-development/marketplace-guidelines.md
+quality-and-best-practices/removing-product-product-category-or-shop-from-the-url.md
+extension-development/class-reference.md
