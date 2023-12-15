@@ -87,7 +87,7 @@ class ShippingAddressSchema extends AbstractAddressSchema {
 			}
 
 			foreach ( $address_object as $key => $value ) {
-				if ( 'boolean' === $this->get_properties()[ $key ]['type'] ) {
+				if ( isset( $this->get_properties()[ $key ]['type'] ) && 'boolean' === $this->get_properties()[ $key ]['type'] ) {
 					$address_object[ $key ] = (bool) $value;
 				} else {
 					$address_object[ $key ] = $this->prepare_html_response( $value );

@@ -337,7 +337,6 @@ class CheckoutFields {
 				wc_get_logger()->warning(
 					sprintf( 'Registering select fields as optional is not supported. "%s" will be registered as required.', esc_html( $id ) )
 				);
-				return;
 			}
 
 			$cleaned_options = array();

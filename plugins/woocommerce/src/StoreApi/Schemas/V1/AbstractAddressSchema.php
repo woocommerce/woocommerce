@@ -252,7 +252,9 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 					},
 					$field['options']
 				);
-			} elseif ( 'checkbox' === $field['type'] ) {
+			}
+
+			if ( 'checkbox' === $field['type'] ) {
 				$field_schema['type'] = 'boolean';
 			}
 
