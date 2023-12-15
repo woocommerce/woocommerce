@@ -7,12 +7,13 @@ import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { dispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
-import { parse } from '@wordpress/blocks';
+import { parse, rawHandler } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import { store } from '../../../../store/product-editor-ui';
+import { getContentFromFreeform } from '../edit';
 
 export default function FullEditorToolbarButton( {
 	label = __( 'Edit Product description', 'woocommerce' ),
@@ -29,7 +30,15 @@ export default function FullEditorToolbarButton( {
 		<ToolbarButton
 			label={ label }
 			onClick={ () => {
-				setModalEditorBlocks( parse( description ) );
+				let parsedBlocks = parse( description );
+				const freeformContent = getContentFromFreeform( parsedBlocks );
+
+				// replace the freeform block with a paragraph block
+				if ( freeformContent ) {
+					parsedBlocks = rawHandler( { HTML: freeformContent } );
+				}
+
+				setModalEditorBlocks( parsedBlocks );
 				recordEvent( 'product_add_description_click' );
 				openModalEditor();
 			} }
