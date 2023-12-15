@@ -243,34 +243,34 @@ class CheckoutFields {
 	 */
 	public function register_checkout_field( $options ) {
 		if ( empty( $options['id'] ) ) {
-			wc_get_logger()->debug( 'A checkout field cannot be registered without an id.' );
+			wc_get_logger()->warning( 'A checkout field cannot be registered without an id.' );
 			return;
 		}
 
 		// Having fewer than 2 after exploding around a / means there is no namespace.
 		if ( count( explode( '/', $options['id'] ) ) < 2 ) {
-			wc_get_logger()->debug(
+			wc_get_logger()->warning(
 				sprintf( 'Unable to register field with id: "%s". %s', esc_html( $options['id'] ), 'A checkout field id must consist of namespace/name.' )
 			);
 			return;
 		}
 
 		if ( empty( $options['label'] ) ) {
-			wc_get_logger()->debug(
+			wc_get_logger()->warning(
 				sprintf( 'Unable to register field with id: "%s". %s', esc_html( $options['id'] ), 'The field label is required.' )
 			);
 			return;
 		}
 
 		if ( empty( $options['location'] ) ) {
-			wc_get_logger()->debug(
+			wc_get_logger()->warning(
 				sprintf( 'Unable to register field with id: "%s". %s', esc_html( $options['id'] ), 'The field location is required.' )
 			);
 			return;
 		}
 
 		if ( ! in_array( $options['location'], array_keys( $this->fields_locations ), true ) ) {
-			wc_get_logger()->debug(
+			wc_get_logger()->warning(
 				sprintf( 'Unable to register field with id: "%s". %s', esc_html( $options['id'] ), 'The field location is invalid.' )
 			);
 			return;
@@ -279,7 +279,7 @@ class CheckoutFields {
 		$type = 'text';
 		if ( ! empty( $options['type'] ) ) {
 			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
-				wc_get_logger()->debug(
+				wc_get_logger()->warning(
 					sprintf(
 						'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
 						esc_html( $options['id'] ),
@@ -297,7 +297,7 @@ class CheckoutFields {
 		$id       = $options['id'];
 		// Check to see if field is already in the array.
 		if ( ! empty( $this->additional_fields[ $id ] ) || in_array( $id, $this->fields_locations[ $location ], true ) ) {
-			wc_get_logger()->debug(
+			wc_get_logger()->warning(
 				sprintf( 'Unable to register field with id: "%s". %s', esc_html( $id ), 'The field is already registered.' )
 			);
 			return;
@@ -305,7 +305,7 @@ class CheckoutFields {
 
 		// Hidden fields are not supported right now. They will be registered with hidden => false.
 		if ( ! empty( $options['hidden'] ) && true === $options['hidden'] ) {
-			wc_get_logger()->debug(
+			wc_get_logger()->warning(
 				sprintf( 'Registering a field with hidden set to true is not supported. The field "%s" will be registered as visible.', esc_html( $id ) )
 			);
 		}
@@ -320,9 +320,12 @@ class CheckoutFields {
 			'autocapitalize' => empty( $options['autocapitalize'] ) ? '' : $options['autocapitalize'],
 		);
 
+		/**
+		 * Handle Select fields.
+		 */
 		if ( 'select' === $type ) {
 			if ( empty( $options['options'] ) || ! is_array( $options['options'] ) ) {
-				wc_get_logger()->debug(
+				wc_get_logger()->warning(
 					sprintf( 'Unable to register field with id: "%s". %s', esc_html( $id ), 'Fields of type "select" must have an array of "options".' )
 				);
 				return;
@@ -340,9 +343,9 @@ class CheckoutFields {
 			$added_values    = array();
 
 			// Check all entries in $options['options'] has a key and value member.
-			foreach ( $options['options'] as $key => $option ) {
+			foreach ( $options['options'] as $option ) {
 				if ( ! isset( $option['value'] ) || ! isset( $option['label'] ) ) {
-					wc_get_logger()->debug(
+					wc_get_logger()->warning(
 						sprintf( 'Unable to register field with id: "%s". %s', esc_html( $id ), 'Fields of type "select" must have an array of "options" and each option must contain a "value" and "label" member.' )
 					);
 					return;
@@ -352,7 +355,7 @@ class CheckoutFields {
 				$sanitized_label = sanitize_text_field( $option['label'] );
 
 				if ( in_array( $sanitized_value, $added_values, true ) ) {
-					wc_get_logger()->debug(
+					wc_get_logger()->warning(
 						sprintf( 'Unable to register field with id: "%s". The value in each option of "select" fields must be unique. Duplicate value "%s" found.', esc_html( $id ), esc_html( $sanitized_value ) )
 					);
 					return;
