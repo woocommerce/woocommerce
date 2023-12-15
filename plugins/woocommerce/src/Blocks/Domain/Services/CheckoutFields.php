@@ -328,6 +328,14 @@ class CheckoutFields {
 				return;
 			}
 
+			// Select fields are always required. Log a warning if it's set explicitly as false.
+			$field_data['required'] = true;
+			if ( isset( $options['required'] ) && false === $options['required'] ) {
+				wc_get_logger()->warning(
+					sprintf( 'Registering select fields as optional is not supported. "%s" will be registered as required.', esc_html( $id ) )
+				);
+			}
+
 			$cleaned_options = array();
 			$added_values    = array();
 
