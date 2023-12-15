@@ -685,51 +685,31 @@ class WC_Helper {
 	}
 
 	private static function maybe_redirect_to_new_marketplace_installer() {
+		debug($_GET);
 		// Redirect requires the "install" URL parameter to be passed.
 		if ( empty( $_GET[ 'install' ] ) ) {
 			return;
 		}
 
-		$my_subscriptions_url = self::get_subscriptions_redirect_url( array( 'install' => wp_unslash( $_GET[ 'install' ] ) ), true );
-		wp_safe_redirect( esc_url_raw( $my_subscriptions_url ) );
-	}
-
-	/**
-	 * Get the subscriptions page url.
-	 * This provides compatibility for the old and new subscriptions page and replaces
-	 * the previous `get_helper_redirect_url` method below.
-	 *
-	 * @param array $args Query args added to the base url.
-	 * @return string
-	 */
-	public static function get_subscriptions_redirect_url( array $args = array(), bool $redirect_to_wc_admin = false ): string {
-		global $current_screen;
-
-		if ( true === $redirect_to_wc_admin && $current_screen->id === 'woocommerce_page_wc-addons' && FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
-			return add_query_arg(
-				array_merge(
-					array(
-						'page' => 'wc-admin',
-						'tab'  => 'my-subscriptions',
-						'path' => urlencode( '/extensions' ),
-					),
-					$args
-				),
-				admin_url( 'admin.php' )
-			);
-		}
-
-		return add_query_arg(
-			array_merge(
-				$args,
+		debug(
+			self::get_helper_redirect_url(
 				array(
 					'page'    => 'wc-addons',
 					'section' => 'helper',
-					// we remove the install parameter from the url to prevent a redirect loop.
-					'install' => false,
 				),
-			),
-			admin_url( 'admin.php' )
+				isset( $_GET['redirect-to-wc-admin'] ),
+				sanitize_text_field( wp_unslash( $_GET['install'] ) )
+			)
+		);
+		wp_safe_redirect(
+			self::get_helper_redirect_url(
+				array(
+					'page'    => 'wc-addons',
+					'section' => 'helper',
+				),
+				isset( $_GET['redirect-to-wc-admin'] ),
+				sanitize_text_field( wp_unslash( $_GET['install'] ) )
+			)
 		);
 	}
 
@@ -743,7 +723,14 @@ class WC_Helper {
 	 */
 	private static function get_helper_redirect_url( $args = array(), $redirect_to_wc_admin = false, $install_product_key = '' ) {
 		global $current_screen;
-		if ( true === $redirect_to_wc_admin && 'woocommerce_page_wc-addons' === $current_screen->id ) {
+		if (
+			'woocommerce_page_wc-addons' === $current_screen->id &&
+			FeaturesUtil::feature_is_enabled( 'marketplace' ) &&
+			(
+				true === $redirect_to_wc_admin ||
+				false === empty( $install_product_key )
+			)
+		) {
 			$new_url = add_query_arg(
 				array(
 					'page' => 'wc-admin',
