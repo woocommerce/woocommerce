@@ -39,7 +39,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ isLoading, setLoading ] = useState( false );
 	const [ threadID, setThreadID ] = useState< string >( '' );
 	const [ isResponseError, setIsResponseError ] = useState( false );
-	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
 	const { set: setStorageData } = useDispatch( preferencesStore );
 	const startSessionTimeRef = useRef< number >( Date.now() );
 
@@ -113,13 +112,9 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			if ( tempthreadID ) {
 				formData.append( 'thread_id', tempthreadID );
 			}
-			if ( audioBlob ) {
-				// @todo: maybe grab the extension from the blob mime type?
-				formData.append( 'audio_file', audioBlob, 'audio.wav' );
-			}
 			return formData;
 		},
-		[ audioBlob ]
+		[]
 	);
 
 	const handleError = useCallback( ( message: string ) => {
@@ -362,7 +357,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	);
 
 	const handleSubmit = async ( input: string ) => {
-		if ( ! input.trim() && ! audioBlob ) {
+		if ( ! input.trim() ) {
 			return;
 		}
 		try {
@@ -403,7 +398,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			<ChatInputForm
 				onSubmit={ handleSubmit }
 				isLoading={ isLoading }
-				setAudioBlob={ setAudioBlob }
+				handleError={ handleError }
 			/>
 		</Modal>
 	);

@@ -2,32 +2,44 @@
  * External dependencies
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Button } from '@wordpress/components';
+import { Button, Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import micIcon from './mic-icon';
 import playerStop from './player-stop';
+import './index.scss';
 
 type AudioRecorderProps = {
 	onRecordingComplete: ( audioBlob: Blob ) => void;
+	isTranscribing: boolean;
+	handleError: ( message: string ) => void;
 };
 
 export const AudioRecorder: React.FC< AudioRecorderProps > = ( {
 	onRecordingComplete,
+	isTranscribing,
+	handleError,
 } ) => {
 	const [ isRecording, setIsRecording ] = useState( false );
 	const mediaRecorderRef = useRef< MediaRecorder | null >( null );
+	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
 
 	const handleDataAvailable = useCallback(
 		( e: BlobEvent ) => {
 			if ( e.data.size > 0 ) {
-				onRecordingComplete( e.data );
+				setAudioBlob( e.data );
 			}
 		},
-		[ onRecordingComplete ]
+		[ setAudioBlob ]
 	);
+
+	useEffect( () => {
+		if ( audioBlob && ! isRecording ) {
+			onRecordingComplete( audioBlob );
+		}
+	}, [ audioBlob, isRecording, onRecordingComplete ] );
 
 	const startRecording = async () => {
 		try {
@@ -44,7 +56,7 @@ export const AudioRecorder: React.FC< AudioRecorderProps > = ( {
 				handleDataAvailable
 			);
 		} catch ( err ) {
-			console.error( 'Error accessing microphone:', err );
+			handleError( 'Error accessing microphone:' );
 		}
 	};
 
@@ -65,6 +77,10 @@ export const AudioRecorder: React.FC< AudioRecorderProps > = ( {
 			}
 		};
 	}, [ handleDataAvailable ] );
+
+	if ( isTranscribing && ! isRecording ) {
+		return <Spinner className="woo-ai-assistant-mic-button-spinner" />;
+	}
 
 	return (
 		<Button
