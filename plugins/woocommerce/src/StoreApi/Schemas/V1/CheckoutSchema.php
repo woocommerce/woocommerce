@@ -178,7 +178,7 @@ class CheckoutSchema extends AbstractSchema {
 				],
 			],
 			'additional_fields' => [
-				'description' => __( 'Additional fields to be persisted on the order.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Additional fields to be persisted on the order.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'properties'  => $this->get_additional_fields_schema(),
