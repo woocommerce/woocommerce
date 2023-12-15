@@ -22,7 +22,7 @@ const config: ExtendedPlaywrightTestConfig = {
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
 		: 90 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: '/artifacts/test-results',
+	outputDir: 'artifacts/test-results',
 	globalSetup: fileURLToPath(
 		new URL( 'global-setup.ts', 'file:' + __filename ).href
 	),

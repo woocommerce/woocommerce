@@ -62,5 +62,5 @@ jobs:
 
               with:
                   name: playwright-report-${{ matrix.config.name }}
-                  path: /artifacts/${{ matrix.config.resultPath }}
+                  path: artifacts/${{ matrix.config.resultPath }}
                   if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
