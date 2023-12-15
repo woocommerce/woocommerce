@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
-import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
+import {
+	createElement,
+	useMemo,
+	useLayoutEffect,
+	useEffect,
+} from '@wordpress/element';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { PluginArea } from '@wordpress/plugins';
@@ -62,6 +67,19 @@ export function BlockEditor( {
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
 		return canUser( 'create', 'media', '' ) !== false;
+	}, [] );
+
+	/**
+	 * Fire wp-pin-menu event once to trigger the pinning of the menu.
+	 * That can be necessary since wpwrap's height wasn't being recalculated after the skeleton
+	 * is switched to the real content, which is usually larger
+	 */
+	useEffect( () => {
+		const wpPinMenuEvent = () => {
+			document.dispatchEvent( new Event( 'wp-pin-menu' ) );
+		};
+		window.addEventListener( 'scroll', wpPinMenuEvent, { once: true } );
+		return () => window.removeEventListener( 'scroll', wpPinMenuEvent );
 	}, [] );
 
 	const settings: BlockEditorSettings = useMemo( () => {
