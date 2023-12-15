@@ -19,6 +19,7 @@ import { getFilepathFromPackageName } from './validate';
 export const getNextVersion = ( name: string ) => {
 	try {
 		const cwd = getFilepathFromPackageName( name );
+		execSync( 'composer install', { cwd, encoding: 'utf-8' } );
 		return execSync( './vendor/bin/changelogger version next', {
 			cwd,
 			encoding: 'utf-8',
