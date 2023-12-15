@@ -214,7 +214,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 			// Let the server manage the redirection when the product is not supported
 			// by the product editor.
-			// window.location.href = getNewPath( {}, `/product/${ productId }` );
+			window.location.href = getNewPath( {}, `/product/${ productId }` );
 		} catch ( error ) {
 			const message = getProductErrorMessage( error as WPError );
 			createErrorNotice( message );

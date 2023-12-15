@@ -217,21 +217,32 @@ class Init {
 		$editor_settings = array();
 
 		foreach ( $layout_template_registry->get_all_registered() as $layout_template ) {
-			$editor_settings['layoutTemplates'][] = $layout_template->to_JSON();
+			$editor_settings['layoutTemplates'][] = $layout_template->to_json();
 
 			$layout_template_logger->log_template_events_to_file( $layout_template->get_id() );
 			$editor_settings['layoutTemplateEvents'][] = $layout_template_logger->get_formatted_template_events( $layout_template->get_id() );
 		}
 
+		/**
+		 * Allows for new product template registration.
+		 *
+		 * @since 8.5.0
+		 */
 		$product_templates = apply_filters( 'woocommerce_product_editor_product_templates', $this->get_default_product_templates() );
 
-		usort( $product_templates, function ( $a, $b ) {
-			return $a->get_order() - $b->get_order();
-		} );
+		usort(
+			$product_templates,
+			function ( $a, $b ) {
+				return $a->get_order() - $b->get_order();
+			}
+		);
 
-		$editor_settings['productTemplates'] = array_map( function ( $product_template ) {
-			return $product_template->to_JSON();
-		}, $product_templates );
+		$editor_settings['productTemplates'] = array_map(
+			function ( $product_template ) {
+				return $product_template->to_json();
+			},
+			$product_templates
+		);
 
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
 
@@ -240,11 +251,11 @@ class Init {
 
 	/**
 	 * Get default product templates.
-	 * 
+	 *
 	 * @return array The default templates.
 	 */
 	private function get_default_product_templates() {
-		$templates = array();
+		$templates   = array();
 		$templates[] = new ProductTemplate(
 			array(
 				'id'                 => 'standard-product-template',
@@ -303,7 +314,9 @@ class Init {
 		$registered_product_types = wc_get_product_types();
 
 		foreach ( $registered_product_types as $product_type => $title ) {
-			if ( in_array( $product_type, $this->supported_product_types ) ) continue;
+			if ( in_array( $product_type, $this->supported_product_types, true ) ) {
+				continue;
+			}
 
 			$templates[] = new ProductTemplate(
 				array(

@@ -134,8 +134,10 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 
 	/**
 	 * Get the template as JSON like array.
+	 *
+	 * @return array The JSON.
 	 */
-	public function to_JSON(): array {
+	public function to_json(): array {
 		return array(
 			'id'             => $this->get_id(),
 			'title'          => $this->get_title(),
