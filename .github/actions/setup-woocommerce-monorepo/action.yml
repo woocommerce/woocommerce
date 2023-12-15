@@ -20,7 +20,7 @@ runs:
     - name: 'Setup PNPM'
       uses: 'pnpm/action-setup@d882d12c64e032187b2edb46d3a0d003b7a43598'
       with:
-        version: ${{ steps.read-pnpm-version.outputs.version }}
+        version: '${{ steps.read-pnpm-version.outputs.version }}'
     - name: 'Setup Node'
       uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
       with:
