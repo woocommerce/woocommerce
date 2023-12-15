@@ -2,14 +2,6 @@
 post_title: CSS/Sass naming conventions
 ---
 
-Table of Contents:
-
-- [Introduction](#introduction)
-- [Prefixing](#prefixing)
-- [Class names](#class-names)
-    - [Example](#example)
-- [TL;DR](#tldr)
-  
 ## Introduction
 
 Our guidelines are based on those used in [Calypso](https://github.com/Automattic/wp-calypso), which itself follows the [BEM methodology](https://getbem.com/).

@@ -2,14 +2,6 @@
 post_title: Naming conventions
 ---
 
-Table of Contents:
-
-- [PHP](#php)
-    - [`/src`](#src)
-    - [`/includes`](#includes)
-- [JS](#js)
-- [CSS and SASS](#css-and-sass)
-
 ## PHP
 
 WooCommerce core generally follows [WordPress PHP naming conventions](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/#naming-conventions). 
