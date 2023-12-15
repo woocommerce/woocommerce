@@ -85,8 +85,9 @@ trait CheckoutTrait {
 				throw new RouteException( 'woocommerce_rest_checkout_invalid_payment_result', __( 'Invalid payment result received from payment method.', 'woo-gutenberg-products-block' ), 500 );
 			}
 		} catch ( \Throwable $e ) {
+			$error_code = method_exists( $e, 'getErrorCode' ) ? $e->getErrorCode() : 'woocommerce_rest_checkout_process_payment_error';
 			$additional_data = method_exists( $e, 'getAdditionalData' ) ? $e->getAdditionalData() : [];
-			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', $e->getMessage(), 402, $additional_data );
+			throw new RouteException( $error_code, $e->getMessage(), 402, $additional_data );
 		}
 	}
 
