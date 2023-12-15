@@ -59,6 +59,28 @@
 			}
 		}
 
+		&.is-small {
+			padding: $medium-gap;
+
+			.woocommerce-marketplace__product-card__description,
+			.woocommerce-marketplace__product-card__price {
+				display: none;
+			}
+
+			.woocommerce-marketplace__product-card__content {
+				display: block;
+			}
+
+			.woocommerce-marketplace__product-card__details {
+				align-items: center;
+			}
+
+			.woocommerce-marketplace__product-card__title {
+				font-size: 14px;
+				line-height: 20px;
+			}
+		}
+
 		&:hover {
 			outline: 1.5px solid var(--wp-admin-theme-color);
 		}
