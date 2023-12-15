@@ -113,17 +113,20 @@ const productGallery = {
 				'.wp-block-add-to-cart-form .reset_variations'
 			);
 
-			const handleClick = () => {
+			const selectFirstImage = () => {
 				context.selectedImage = context.firstMainImageId;
 			};
 
 			if ( clearVariationsLink ) {
-				clearVariationsLink.addEventListener( 'click', handleClick );
+				clearVariationsLink.addEventListener(
+					'click',
+					selectFirstImage
+				);
 			}
 
 			return () => {
 				observer.disconnect();
-				document.removeEventListener( 'click', handleClick );
+				document.removeEventListener( 'click', selectFirstImage );
 			};
 		},
 		keyboardAccess: () => {
