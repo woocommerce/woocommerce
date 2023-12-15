@@ -57,12 +57,6 @@ class Init {
 		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			add_filter( 'product_type_selector', function ( $types ) {
-				$types['simple-subscription'] = __( 'Simple subscription', 'woocommerce' );
-				$types['variable-subscription'] = __( 'Variable subscription', 'woocommerce' );
-				return $types;
-			}, 999, 1 );
-
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
