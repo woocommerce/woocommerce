@@ -31,7 +31,7 @@ export class FrontendUtils {
 		if ( itemName !== '' ) {
 			await this.page
 				.getByRole( 'button', {
-					name: `Add “${ itemName }” to your cart`,
+					name: `Add to cart: “${ itemName }”`,
 				} )
 				.click();
 		} else {
