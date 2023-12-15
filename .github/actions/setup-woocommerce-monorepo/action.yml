@@ -16,7 +16,7 @@ runs:
     - name: 'Read PNPM Version'
       id: 'read-pnpm-version'
       shell: 'bash'
-      run: './.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json >> $GITHUB_OUTPUT'
+      run: 'echo "TEST=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)" >> $GITHUB_OUTPUT'
     - name: 'Setup PNPM'
       uses: 'pnpm/action-setup@d882d12c64e032187b2edb46d3a0d003b7a43598'
       with:
