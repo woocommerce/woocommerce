@@ -28,7 +28,7 @@ class OrderAttribution {
 	 * @since 8.5.0
 	 *
 	 * @param array $meta The array of meta data to format.
-	 * 
+	 *
 	 * @return void
 	 */
 	public function format_meta_data( array &$meta ) {
