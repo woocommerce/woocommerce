@@ -292,22 +292,6 @@ class CheckoutFields {
 			$type = $options['type'];
 		}
 
-		$type = 'text';
-		if ( ! empty( $options['type'] ) ) {
-			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
-				wc_get_logger()->warning(
-					sprintf(
-						'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
-						esc_html( $options['id'] ),
-						esc_html( $options['type'] ),
-						implode( ', ', $this->supported_field_types )
-					)
-				);
-				return;
-			}
-			$type = $options['type'];
-		}
-
 		// At this point, the essentials fields and its location should be set.
 		$location = $options['location'];
 		$id       = $options['id'];
