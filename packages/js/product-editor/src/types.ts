@@ -25,3 +25,10 @@ export interface Metadata< T > {
 	key: string;
 	value?: T;
 }
+
+export interface ProductEntityProps {
+	id: number;
+	parent_id: number;
+	name: string;
+	status: 'publish' | 'draft' | 'pending' | 'private';
+}
