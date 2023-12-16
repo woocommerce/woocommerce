@@ -38,11 +38,8 @@ export function usePublish( {
 	const { isSaving, isDirty } = useSelect(
 		( select ) => {
 			const {
-				// @ts-expect-error There are no types for this.
 				isSavingEntityRecord,
-				// @ts-expect-error There are no types for this.
 				hasEditsForEntityRecord,
-				// @ts-expect-error There are no types for this.
 				getRawEntityRecord,
 			} = select( 'core' );
 
@@ -73,7 +70,6 @@ export function usePublish( {
 	const isPublished =
 		productType === 'product' ? productStatus === 'publish' : true;
 
-	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {

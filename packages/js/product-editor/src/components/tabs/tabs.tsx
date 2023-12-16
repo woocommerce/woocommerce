@@ -37,7 +37,6 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 		'id'
 	);
 	const product: Product = useSelect( ( select ) =>
-		// @ts-expect-error There are no types for this.
 		select( 'core' ).getEditedEntityRecord(
 			'postType',
 			'product',
