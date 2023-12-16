@@ -4,6 +4,10 @@
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
+/**
+ * Internal dependencies
+ */
+import type { ProductEntityProps } from '../types';
 
 type VariationSwitcherProps = {
 	parentProductType?: string;
@@ -17,6 +21,8 @@ export function useVariationSwitcher( {
 	parentProductType,
 }: VariationSwitcherProps ) {
 	const { invalidateResolution } = useDispatch( 'core' );
+
+	// @ts-expect-error no exported member.
 	const { invalidateResolutionForStoreSelector } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
@@ -26,7 +32,7 @@ export function useVariationSwitcher( {
 				return {};
 			}
 			const { getEntityRecord } = select( 'core' );
-			const parentProduct = getEntityRecord(
+			const parentProduct: ProductEntityProps = getEntityRecord(
 				'postType',
 				parentProductType || 'product',
 				parentId
