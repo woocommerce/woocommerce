@@ -25,7 +25,7 @@ abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 	 * @return string Formatted time for use in log entry.
 	 */
 	protected static function format_time( $timestamp ) {
-		return date( 'c', $timestamp );
+		return gmdate( 'c', $timestamp );
 	}
 
 	/**

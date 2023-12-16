@@ -76,21 +76,21 @@ class LogHandlerFileV2Test extends WC_Unit_Test_Case {
 				'timestamp' => $current_time,
 				'context'   => array(),
 			),
-			'plugin-woocommerce-' . gmdate( 'Y-m-d', $current_time )
+			'plugin-woocommerce-' . gmdate( 'Y-m-d', $current_time ),
 		);
 		yield 'custom source, past time' => array(
 			array(
 				'timestamp' => $past_time,
 				'context'   => array( 'source' => 'tater_tots' ),
 			),
-			'tater_tots-' . gmdate( 'Y-m-d', $past_time )
+			'tater_tots-' . gmdate( 'Y-m-d', $past_time ),
 		);
 		yield 'custom source with formatting issues, current time' => array(
 			array(
 				'timestamp' => $current_time,
 				'context'   => array( 'source' => 'MACARONI & chEEse_Puffs' ),
 			),
-			'macaroni-cheese_puffs-' . gmdate( 'Y-m-d', $current_time )
+			'macaroni-cheese_puffs-' . gmdate( 'Y-m-d', $current_time ),
 		);
 	}
 
@@ -143,7 +143,7 @@ MESSAGE;
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$actual_content   = file_get_contents( reset( $paths ) );
-		$expected_content = date( 'c', $time ) . ' DEBUG How to win 1. Bake cookies 2. ??? 3. Profit' . "\n";
+		$expected_content = gmdate( 'c', $time ) . ' DEBUG How to win 1. Bake cookies 2. ??? 3. Profit' . "\n";
 
 		$this->assertEquals( $expected_content, $actual_content );
 	}
@@ -158,7 +158,7 @@ MESSAGE;
 			array(
 				'file'     => 'foo.bar',
 				'line'     => 1337,
-				'function' => 'baz'
+				'function' => 'baz',
 			),
 		);
 	}
@@ -180,7 +180,11 @@ MESSAGE;
 			'',
 		);
 		yield 'source and custom keys' => array(
-			array( 'source' => 'frootloops', 'yin' => 'yang', 'apple' => 'orange' ),
+			array(
+				'source' => 'frootloops',
+				'yin'    => 'yang',
+				'apple'  => 'orange',
+			),
 			$context_delineator . '{"yin":"yang","apple":"orange"}',
 		);
 		yield 'backtrace boolean only' => array(
@@ -204,18 +208,21 @@ MESSAGE;
 	public function test_handle_context_output( array $input, string $expected ): void {
 		// Mock the backtrace output.
 		$handler = new class() extends LogHandlerFileV2 {
+			// phpcs:ignore Squiz.Commenting.VariableComment.Missing
 			protected $backtrace_data;
 
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			public function set_backtrace_data( $data ) {
 				$this->backtrace_data = $data;
 			}
 
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			protected static function get_backtrace() {
 				return array(
 					array(
 						'file'     => 'foo.bar',
 						'line'     => 1337,
-						'function' => 'baz'
+						'function' => 'baz',
 					),
 				);
 			}
@@ -229,7 +236,7 @@ MESSAGE;
 			$time,
 			'debug',
 			$message,
-			$input
+			$input,
 		);
 
 		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
@@ -237,7 +244,7 @@ MESSAGE;
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$actual_content  = file_get_contents( reset( $paths ) );
-		$expected_prefix = date( 'c', $time ) . ' DEBUG ' . $message;
+		$expected_prefix = gmdate( 'c', $time ) . ' DEBUG ' . $message;
 
 		$this->assertEquals( $expected_prefix . $expected . "\n", $actual_content );
 	}
@@ -270,7 +277,7 @@ MESSAGE;
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$actual_content  = file_get_contents( reset( $paths ) );
-		$expected_string = "4 expired log files were deleted.";
+		$expected_string = '4 expired log files were deleted.';
 		$this->assertStringContainsString( $expected_string, $actual_content );
 	}
 }
