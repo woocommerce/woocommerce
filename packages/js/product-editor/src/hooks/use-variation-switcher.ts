@@ -22,10 +22,12 @@ export function useVariationSwitcher( {
 }: VariationSwitcherProps ) {
 	const { invalidateResolution } = useDispatch( 'core' );
 
-	// @ts-expect-error no exported member.
 	const { invalidateResolutionForStoreSelector } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
-	);
+	) as unknown as {
+		invalidateResolutionForStoreSelector: ( selectorName: string ) => void;
+	};
+
 	const variationValues = useSelect(
 		( select ) => {
 			if ( parentId === undefined ) {
