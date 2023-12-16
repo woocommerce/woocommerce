@@ -41,11 +41,11 @@ export const RemovableListItem = ( {
 	return (
 		<li
 			className="wc-block-active-filters__list-item"
-			key={ type + ':' + name }
+			key={ `${ type }: ${ name }` }
 		>
 			{ showLabel && (
 				<span className="wc-block-active-filters__list-item-type">
-					{ type + ': ' }
+					{ `${ type }: ` }
 				</span>
 			) }
 			{ displayStyle === 'chips' ? (
