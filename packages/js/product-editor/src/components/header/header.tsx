@@ -21,6 +21,7 @@ import { SaveDraftButton } from './save-draft-button';
 import { PublishButton } from './publish-button';
 import { Tabs } from '../tabs';
 import { TRACKS_SOURCE } from '../../constants';
+import type { ProductEntityProps } from '../../types';
 
 export type HeaderProps = {
 	onTabSelect: ( tabId: string | null ) => void;
@@ -42,7 +43,7 @@ export function Header( {
 		'id'
 	);
 
-	const lastPersistedProduct = useSelect(
+	const lastPersistedProduct: ProductEntityProps = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
 			return getEntityRecord( 'postType', productType, productId );
