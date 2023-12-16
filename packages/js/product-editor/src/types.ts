@@ -31,4 +31,5 @@ export interface ProductEntityProps {
 	parent_id: number;
 	name: string;
 	status: 'publish' | 'draft' | 'pending' | 'private';
+	variations: number[];
 }
