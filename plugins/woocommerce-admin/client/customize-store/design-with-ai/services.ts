@@ -17,7 +17,6 @@ import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/compo
  * Internal dependencies
  */
 import { designWithAiStateMachineContext } from './types';
-import { lookAndTone } from './prompts';
 import { FONT_PAIRINGS } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
 import {
@@ -122,20 +121,6 @@ export const getCompletion = async < ValidResponseObject >( {
 	}
 };
 
-export const getLookAndTone = async (
-	context: designWithAiStateMachineContext
-) => {
-	return getCompletion( {
-		...lookAndTone,
-		prompt: lookAndTone.prompt(
-			context.businessInfoDescription.descriptionText
-		),
-		retryCount: 0,
-		// If the request takes longer than 5 seconds, abort it. We don't want to wait too long for the AI to respond. We will use default values instead.
-		abortSignal: AbortSignal.timeout( 5000 ),
-	} );
-};
-
 export const queryAiEndpoint = createMachine(
 	{
 		id: 'query-ai-endpoint',
@@ -220,7 +205,7 @@ export const updateStorePatterns = async (
 	try {
 		// TODO: Probably move this to a more appropriate place with a check. We should set this when the user granted permissions during the onboarding phase.
 		await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-			woocommerce_blocks_allow_ai_connection: true,
+			woocommerce_blocks_allow_ai_connection: 'yes',
 		} );
 
 		const { images } = await apiFetch< {
@@ -274,7 +259,8 @@ export const updateStorePatterns = async (
 					method: 'POST',
 					data: {
 						products_information: product,
-						index,
+						last_product:
+							index === response.product_content.length - 1,
 					},
 				} );
 			}
@@ -284,6 +270,14 @@ export const updateStorePatterns = async (
 			...productContents,
 			apiFetch( {
 				path: '/wc/private/ai/business-description',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+				},
+			} ),
+			apiFetch( {
+				path: '/wc/private/ai/store-title',
 				method: 'POST',
 				data: {
 					business_description:
@@ -447,7 +441,7 @@ export const assembleSite = async (
 };
 
 const installAndActivateTheme = async () => {
-	const themeSlug = 'twentytwentythree';
+	const themeSlug = 'twentytwentyfour';
 
 	try {
 		await apiFetch( {
@@ -480,12 +474,29 @@ const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
 	} );
 };
 
+const resetPatternsAndProducts = () => async () => {
+	await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_blocks_allow_ai_connection: 'yes',
+	} );
+
+	return Promise.all( [
+		apiFetch( {
+			path: '/wc/private/ai/patterns',
+			method: 'DELETE',
+		} ),
+		apiFetch( {
+			path: '/wc/private/ai/products',
+			method: 'DELETE',
+		} ),
+	] );
+};
+
 export const services = {
-	getLookAndTone,
 	browserPopstateHandler,
 	queryAiEndpoint,
 	assembleSite,
 	updateStorePatterns,
 	saveAiResponseToOption,
 	installAndActivateTheme,
+	resetPatternsAndProducts,
 };

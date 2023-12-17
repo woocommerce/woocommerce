@@ -54,4 +54,37 @@ abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 			)
 		);
 	}
+
+	/**
+	 * Get a backtrace that shows where the logging function was called.
+	 *
+	 * @return array
+	 */
+	protected static function get_backtrace() {
+		// Get the filenames of the logging-related classes so we can ignore them.
+		$ignore_files = array_map(
+			function( $class ) {
+				try {
+					$reflector = new \ReflectionClass( $class );
+					return $reflector->getFileName();
+				} catch ( Exception $exception ) {
+					return null;
+				}
+			},
+			array( wc_get_logger(), self::class, static::class )
+		);
+
+		$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
+
+		$filtered_backtrace = array_filter(
+			$backtrace,
+			function( $frame ) use ( $ignore_files ) {
+				$ignore = isset( $frame['file'] ) && in_array( $frame['file'], $ignore_files, true );
+
+				return ! $ignore;
+			}
+		);
+
+		return array_values( $filtered_backtrace );
+	}
 }

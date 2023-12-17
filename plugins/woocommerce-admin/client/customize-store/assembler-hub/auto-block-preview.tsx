@@ -53,6 +53,9 @@ export type ScaledBlockPreviewProps = {
 	isScrollable?: boolean;
 	autoScale?: boolean;
 	setLogoBlockContext?: boolean;
+	CustomIframeComponent?: React.ComponentType<
+		Parameters< typeof Iframe >[ 0 ]
+	>;
 };
 
 function ScaledBlockPreview( {
@@ -65,6 +68,7 @@ function ScaledBlockPreview( {
 	isScrollable = true,
 	autoScale = true,
 	setLogoBlockContext = false,
+	CustomIframeComponent = Iframe,
 }: ScaledBlockPreviewProps ) {
 	const [ contentHeight, setContentHeight ] = useState< number | null >(
 		null
@@ -241,8 +245,10 @@ function ScaledBlockPreview( {
 						: {}
 				}
 			>
-				<Iframe
+				<CustomIframeComponent
 					aria-hidden
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore disabled prop exists
 					scrolling={ isScrollable ? 'yes' : 'no' }
 					tabIndex={ -1 }
 					readonly={ ! isNavigable }
@@ -322,7 +328,7 @@ function ScaledBlockPreview( {
 						fontFamilies={ externalFontFamilies }
 						onLoad={ noop }
 					/>
-				</Iframe>
+				</CustomIframeComponent>
 			</div>
 		</DisabledProvider>
 	);

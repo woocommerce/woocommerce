@@ -67,7 +67,10 @@ export function ContentPreview( { content }: ContentPreviewProps ) {
 
 	return (
 		<div className="woocommerce-content-preview">
-			<Iframe className="woocommerce-content-preview__iframe">
+			<Iframe
+				className="woocommerce-content-preview__iframe"
+				tabIndex={ -1 }
+			>
 				<>
 					<EditorStyles styles={ parentEditorSettings?.styles } />
 					<style>

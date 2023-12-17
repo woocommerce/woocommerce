@@ -1,4 +1,6 @@
-# User Experience Guidelines: Task list and Inbox 
+---
+post_title: User experience guidelines - task list and inbox
+---
 
 ## Task List & Inbox
 

@@ -1,0 +1,37 @@
+.wp-block-woocommerce-product-sale-badge {
+	display: flex;
+	flex-direction: column;
+}
+
+.wc-block-components-product-sale-badge {
+	@include font-size(small);
+	padding: em($gap-smallest) em($gap-small);
+	display: inline-block;
+	width: fit-content;
+	border: 1px solid #43454b;
+	border-radius: $universal-border-radius;
+	box-sizing: border-box;
+	color: #43454b;
+	background: #fff;
+	text-align: center;
+	text-transform: uppercase;
+	font-weight: 600;
+	z-index: 9;
+	position: static;
+
+	&--align-left {
+		align-self: auto;
+	}
+	&--align-center {
+		align-self: center;
+	}
+	&--align-right {
+		align-self: flex-end;
+	}
+
+	span {
+		color: inherit;
+		background-color: inherit;
+	}
+
+}

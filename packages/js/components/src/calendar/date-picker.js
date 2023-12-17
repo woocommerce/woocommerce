@@ -86,9 +86,12 @@ class DatePicker extends Component {
 			popoverProps = { inline: true },
 		} = this.props;
 
+		if ( ! popoverProps.placement ) {
+			popoverProps.placement = 'bottom';
+		}
+
 		return (
 			<Dropdown
-				position="bottom center"
 				focusOnMount={ false }
 				popoverProps={ popoverProps }
 				renderToggle={ ( { isOpen, onToggle } ) => (
@@ -101,6 +104,7 @@ class DatePicker extends Component {
 						label={ __( 'Choose a date', 'woocommerce' ) }
 						error={ error }
 						describedBy={ sprintf(
+							/* translators: %s: date format specification */
 							__(
 								'Date input describing a selected date in format %s',
 								'woocommerce'

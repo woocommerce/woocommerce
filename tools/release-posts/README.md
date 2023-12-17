@@ -12,8 +12,8 @@ don't have access to a WordPress.com auth token.
 2. Make sure you have added a `.env` file with the env variables set. WCCOM_TOKEN is optional if you're using `--outputOnly`, but
    the `GITHUB_ACCESS_TOKEN` is required. If you need help generating a token see [the docs](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). To silence all CLI output, set `LOGGER_LEVEL` to `"silent"`.
 3. Note that the env file should live at the same path that you're running the command from.
-4. Run the tool via the npm script, e.g. `pnpm run release-post release "6.8.0" --outputOnly`
-5. For more help on individual options, run the help `pnpm run release-post <command> --help`. e.g. `pnpm run release-post rc --help`
+4. Run the tool via the npm script, e.g. `pnpm release-post release "6.8.0" --outputOnly`
+5. For more help on individual options, run the help `pnpm release-post <command> --help`. e.g. `pnpm release-post rc --help`
 
 ## Publishing Draft Posts
 
@@ -37,7 +37,7 @@ This tool will publish draft posts to `https://developer.woo.com` for you if you
 If you don't have a final release yet you can generate an HTML contributors list that you can copy
 paste into a blank post.
 
-To do that simply run `pnpm run release-post contributors "<currentVersion>" "<previousVersion>"`
+To do that simply run `pnpm release-post contributors "<currentVersion>" "<previousVersion>"`
 
 ## Advanced
 

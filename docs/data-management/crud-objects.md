@@ -1,4 +1,6 @@
-# Developing using WooCommerce CRUD objects
+---
+post_title: Developing using WooCommerce CRUD objects
+---
 
 CRUD is an abbreviation of the four basic operations you can do to a database or resource – Create, Read, Update, Delete.
 

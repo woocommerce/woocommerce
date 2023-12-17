@@ -38,6 +38,10 @@ export const hasStepInUrl = (
 	);
 };
 
+export const isAiOnline = ( _ctx: designWithAiStateMachineContext ) => {
+	return _ctx.aiOnline;
+};
+
 export const designWithAiStateMachineDefinition = createMachine(
 	{
 		id: 'designWithAi',
@@ -84,6 +88,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 			apiCallLoader: {
 				hasErrors: false,
 			},
+			aiOnline: true,
 		},
 		initial: 'navigate',
 		states: {
@@ -147,34 +152,18 @@ export const designWithAiStateMachineDefinition = createMachine(
 								actions: [
 									'assignBusinessInfoDescription',
 									'spawnSaveDescriptionToOption',
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'business_info_description',
+									},
 								],
 								target: 'postBusinessInfoDescription',
 							},
 						},
 					},
 					postBusinessInfoDescription: {
-						invoke: {
-							src: 'getLookAndTone',
-							onError: {
-								actions: [
-									{
-										type: 'recordTracksStepCompleted',
-										step: 'business_info_description',
-									},
-									'logAIAPIRequestError',
-								],
-								target: '#lookAndFeel',
-							},
-							onDone: {
-								actions: [
-									{
-										type: 'recordTracksStepCompleted',
-										step: 'business_info_description',
-									},
-									'assignLookAndTone',
-								],
-								target: '#lookAndFeel',
-							},
+						always: {
+							target: '#lookAndFeel',
 						},
 					},
 				},
@@ -288,8 +277,19 @@ export const designWithAiStateMachineDefinition = createMachine(
 						type: 'parallel',
 						states: {
 							chooseColorPairing: {
-								initial: 'pending',
+								initial: 'executeOrSkip',
 								states: {
+									executeOrSkip: {
+										always: [
+											{
+												target: 'pending',
+												cond: 'isAiOnline',
+											},
+											{
+												target: 'success',
+											},
+										],
+									},
 									pending: {
 										invoke: {
 											src: 'queryAiEndpoint',
@@ -323,8 +323,19 @@ export const designWithAiStateMachineDefinition = createMachine(
 								},
 							},
 							chooseFontPairing: {
-								initial: 'pending',
+								initial: 'executeOrSkip',
 								states: {
+									executeOrSkip: {
+										always: [
+											{
+												target: 'pending',
+												cond: 'isAiOnline',
+											},
+											{
+												target: 'success',
+											},
+										],
+									},
 									pending: {
 										entry: [ 'assignFontPairing' ],
 										always: {
@@ -335,11 +346,36 @@ export const designWithAiStateMachineDefinition = createMachine(
 								},
 							},
 							updateStorePatterns: {
-								initial: 'pending',
+								initial: 'executeOrSkip',
 								states: {
+									executeOrSkip: {
+										always: [
+											{
+												target: 'pending',
+												cond: 'isAiOnline',
+											},
+											{
+												target: 'resetPatternsAndProducts',
+											},
+										],
+									},
 									pending: {
 										invoke: {
 											src: 'updateStorePatterns',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
+											},
+										},
+									},
+									resetPatternsAndProducts: {
+										invoke: {
+											src: 'resetPatternsAndProducts',
 											onDone: {
 												target: 'success',
 											},
@@ -445,6 +481,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 		services,
 		guards: {
 			hasStepInUrl,
+			isAiOnline,
 		},
 	}
 );

@@ -1,5 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Updated package.json to include publishConfig, which was needed for initial bootstrap.
-
-

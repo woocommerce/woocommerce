@@ -30,6 +30,7 @@ class BlockRegistry {
 		'woocommerce/product-radio-field',
 		'woocommerce/product-pricing-field',
 		'woocommerce/product-section',
+		'woocommerce/product-section-description',
 		'woocommerce/product-tab',
 		'woocommerce/product-toggle-field',
 		'woocommerce/product-taxonomy-field',
@@ -59,9 +60,36 @@ class BlockRegistry {
 		'woocommerce/product-variation-items-field',
 		'woocommerce/product-variations-fields',
 		'woocommerce/product-password-field',
+		'woocommerce/product-list-field',
 		'woocommerce/product-has-variations-notice',
 		'woocommerce/product-single-variation-notice',
 	);
+
+	/**
+	 * Singleton instance.
+	 *
+	 * @var BlockRegistry
+	 */
+	private static $instance = null;
+
+	/**
+	 * Get the singleton instance.
+	 */
+	public static function get_instance(): BlockRegistry {
+		if ( ! self::$instance ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
+	/**
+	 * Constructor
+	 */
+	protected function __construct() {
+		add_filter( 'block_categories_all', array( $this, 'register_categories' ), 10, 2 );
+		$this->register_product_blocks();
+	}
 
 	/**
 	 * Get a file path for a given block file.
@@ -71,14 +99,6 @@ class BlockRegistry {
 	 */
 	private function get_file_path( $path, $dir ) {
 		return WC_ABSPATH . WCAdminAssets::get_path( 'js' ) . trailingslashit( $dir ) . $path;
-	}
-
-	/**
-	 * Initialize all blocks.
-	 */
-	public function init() {
-		add_filter( 'block_categories_all', array( $this, 'register_categories' ), 10, 2 );
-		$this->register_product_blocks();
 	}
 
 	/**
@@ -189,29 +209,65 @@ class BlockRegistry {
 		$block_name      = $this->remove_block_prefix( $block_name );
 		$block_json_file = $this->get_file_path( $block_name . '/block.json', $block_dir );
 
-		if ( ! file_exists( $block_json_file ) ) {
+		return $this->register_block_type_from_metadata( $block_json_file );
+	}
+
+	/**
+	 * Check if a block is registered.
+	 *
+	 * @param string $block_name Block name.
+	 */
+	public function is_registered( $block_name ): bool {
+		$registry = \WP_Block_Type_Registry::get_instance();
+
+		return $registry->is_registered( $block_name );
+	}
+
+	/**
+	 * Unregister a block.
+	 *
+	 * @param string $block_name Block name.
+	 */
+	public function unregister( $block_name ) {
+		$registry = \WP_Block_Type_Registry::get_instance();
+
+		if ( $registry->is_registered( $block_name ) ) {
+			$registry->unregister( $block_name );
+		}
+	}
+
+	/**
+	 * Register a block type from metadata stored in the block.json file.
+	 *
+	 * @param string $file_or_folder Path to the JSON file with metadata definition for the block or
+	 * path to the folder where the `block.json` file is located.
+	 *
+	 * @return \WP_Block_Type|false The registered block type on success, or false on failure.
+	 */
+	public function register_block_type_from_metadata( $file_or_folder ) {
+		$metadata_file = ( ! str_ends_with( $file_or_folder, 'block.json' ) )
+			? trailingslashit( $file_or_folder ) . 'block.json'
+			: $file_or_folder;
+
+		if ( ! file_exists( $metadata_file ) ) {
 			return false;
 		}
 
+		// We are dealing with a local file, so we can use file_get_contents.
 		// phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$metadata = json_decode( file_get_contents( $block_json_file ), true );
+		$metadata = json_decode( file_get_contents( $metadata_file ), true );
 		if ( ! is_array( $metadata ) || ! $metadata['name'] ) {
 			return false;
 		}
 
-		$registry = \WP_Block_Type_Registry::get_instance();
-
-		if ( $registry->is_registered( $metadata['name'] ) ) {
-			$registry->unregister( $metadata['name'] );
-		}
+		$this->unregister( $metadata['name'] );
 
 		return register_block_type_from_metadata(
-			$block_json_file,
+			$metadata_file,
 			array(
 				'attributes'   => $this->augment_attributes( isset( $metadata['attributes'] ) ? $metadata['attributes'] : array() ),
 				'uses_context' => $this->augment_uses_context( isset( $metadata['usesContext'] ) ? $metadata['usesContext'] : array() ),
 			)
 		);
 	}
-
 }

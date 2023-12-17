@@ -1,0 +1,103 @@
+.wc-blocks-incompatible-extensions-notice.is-dismissible {
+	margin: 0;
+	padding-right: 16px;
+	.components-notice__dismiss {
+		min-width: 24px;
+	}
+	.components-notice__content {
+		margin: 4px 0;
+	}
+	svg {
+		width: 16px;
+		height: 16px;
+	}
+	.wc-blocks-incompatible-extensions-notice__content {
+		display: flex;
+
+		details {
+			margin: 0;
+
+			&[open] {
+				margin: 0 0 $gap;
+
+				summary {
+					svg {
+						transform: rotate(180deg);
+					}
+				}
+			}
+
+			summary {
+				display: block; // Remove marker for non Webkit-based browsers.
+				cursor: pointer;
+				text-decoration: underline;
+				margin: 0 0 $gap;
+
+				span {
+					color: $gray-700;
+					text-decoration: underline; // Ensure text-decoration works in Safari.
+				}
+
+				&::-webkit-details-marker {
+					display: none; // Remove marker for Webkit-based browsers.
+				}
+
+				svg {
+					width: 24px;
+					height: 24px;
+					position: relative;
+					top: 6px;
+					fill: $gray-700;
+				}
+			}
+		}
+
+		.wc-blocks-incompatible-extensions-notice__warning-icon {
+			width: 24px;
+			height: 24px;
+			margin-right: 6px;
+			min-width: 24px; // Ensure that notice is visible in Safari. See https://github.com/woocommerce/woocommerce-blocks/issues/11734
+		}
+	}
+	ul {
+		margin: 0 0 0 1.2em;
+		padding: 0;
+		list-style: disc outside;
+	}
+}
+
+.wc-blocks-legacy-page-notice {
+	margin: 0;
+}
+
+ul.cross-list {
+	list-style: none outside;
+	margin: 0 0 24px 1em;
+	padding: 0;
+	li {
+		list-style: none outside;
+		margin: 1em 0;
+		padding: 0;
+	}
+	li::before {
+		content: "❌";
+		margin-right: 0.5em;
+	}
+}
+
+.wc-blocks-incompatible-extensions-notice-modal-content {
+	max-width: 480px;
+
+	p {
+		margin-top: 0;
+	}
+}
+
+.wc-blocks-incompatible-extensions-notice-modal-actions {
+	text-align: right;
+
+	button {
+		margin-left: 4px;
+		display: inline-block;
+	}
+}

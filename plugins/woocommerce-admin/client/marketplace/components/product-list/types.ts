@@ -23,6 +23,7 @@ export type SearchAPIProductType = {
 
 export interface Product {
 	id?: number;
+	position?: number;
 	title: string;
 	image: string;
 	type: ProductType;
@@ -35,6 +36,18 @@ export interface Product {
 	productType?: string;
 	averageRating?: number | null;
 	reviewsCount?: number | null;
+	label?: string;
+	group?: string;
+	searchTerm?: string;
+	category?: string;
+}
+
+export interface ProductTracksData {
+	position?: number;
+	label?: string;
+	group?: string;
+	searchTerm?: string;
+	category?: string;
 }
 
 export enum ProductType {

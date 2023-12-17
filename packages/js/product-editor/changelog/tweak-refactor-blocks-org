@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Split product editor blocks into 'generic' and 'product-fields' directories

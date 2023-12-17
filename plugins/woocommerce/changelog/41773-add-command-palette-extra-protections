@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Prevent Command Palette logic showing PHP errors if buggy extensions add incorrect settings tabs or analytics reports.
+

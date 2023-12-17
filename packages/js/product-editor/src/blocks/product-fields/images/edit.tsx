@@ -196,8 +196,7 @@ export function Edit( {
 
 	const isImageGalleryVisible =
 		propertyValue !== null &&
-		Array.isArray( propertyValue ) &&
-		propertyValue.length > 0;
+		( ! Array.isArray( propertyValue ) || propertyValue.length > 0 );
 
 	return (
 		<div { ...blockProps }>

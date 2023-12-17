@@ -133,19 +133,17 @@ test.describe( 'Update variations', () => {
 
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ productId_indivEdit }&action=edit`
+				`/wp-admin/post.php?post=${ productId_indivEdit }&action=edit#variable_product_options`
 			);
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole('link', { name: 'Variations' }).last().click();
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
 			await page
-				.locator(
-					'#variable_product_options .toolbar-top a.expand_all'
-				)
+				.getByRole('link', { name: 'Expand' }).first()
 				.click();
 		} );
 
@@ -231,14 +229,12 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole('link', { name: 'Variations' }).last().click();
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
 			await page
-				.locator(
-					'#variable_product_options .toolbar-top a.expand_all'
-				)
+				.getByRole('link', { name: 'Expand' }).first()
 				.click();
 		} );
 
@@ -339,12 +335,12 @@ test.describe( 'Update variations', () => {
 	test( 'can bulk edit variations', async ( { page } ) => {
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ productId_bulkEdit }&action=edit`
+				`/wp-admin/post.php?post=${ productId_bulkEdit }&action=edit#variable_product_options`
 			);
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole('link', { name: 'Variations' }).last().click();
 		} );
 
 		await test.step(
@@ -358,9 +354,7 @@ test.describe( 'Update variations', () => {
 
 		await test.step( 'Expand all variations.', async () => {
 			await page
-				.locator(
-					'#variable_product_options .toolbar-top a.expand_all'
-				)
+				.getByRole('link', { name: 'Expand' }).first()
 				.click();
 		} );
 
@@ -382,12 +376,12 @@ test.describe( 'Update variations', () => {
 	test( 'can delete all variations', async ( { page } ) => {
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ productId_deleteAll }&action=edit`
+				`/wp-admin/post.php?post=${ productId_deleteAll }&action=edit#variable_product_options`
 			);
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole('link', { name: 'Variations' }).last().click();
 		} );
 
 		await test.step(
@@ -413,19 +407,17 @@ test.describe( 'Update variations', () => {
 	test( 'can manage stock levels', async ( { page } ) => {
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ productId_manageStock }&action=edit`
+				`/wp-admin/post.php?post=${ productId_manageStock }&action=edit#variable_product_options`
 			);
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole( 'link', { name: 'Variations' } ).click();
 		} );
 
 		await test.step( 'Expand all variations', async () => {
 			await page
-				.locator(
-					'#variable_product_options .toolbar-top a.expand_all'
-				)
+				.getByRole('link', { name: 'Expand' }).first()
 				.click();
 		} );
 
@@ -485,14 +477,12 @@ test.describe( 'Update variations', () => {
 		);
 
 		await test.step( 'Click "Save changes"', async () => {
-			await page.locator( 'button.save-variation-changes' ).click();
+			await page.getByRole('button', { name: 'Save changes' }).click();
 		} );
 
 		await test.step( 'Expand all variations', async () => {
 			await page
-				.locator(
-					'#variable_product_options .toolbar-top a.expand_all'
-				)
+				.getByRole('link', { name: 'Expand' }).first()
 				.click();
 		} );
 
@@ -533,12 +523,12 @@ test.describe( 'Update variations', () => {
 	test( 'can set variation defaults', async ( { page } ) => {
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ productId_variationDefaults }&action=edit`
+				`/wp-admin/post.php?post=${ productId_variationDefaults }&action=edit#variable_product_options`
 			);
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole('link', { name: 'Variations' }).last().click();
 		} );
 
 		await test.step( 'Wait for block overlay to disappear.', async () => {
@@ -597,12 +587,12 @@ test.describe( 'Update variations', () => {
 	test( 'can remove a variation', async ( { page } ) => {
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ productId_removeVariation }&action=edit`
+				`/wp-admin/post.php?post=${ productId_removeVariation }&action=edit#variable_product_options`
 			);
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.getByRole('link', { name: 'Variations' }).last().click();
 		} );
 
 		await test.step( 'Click "Remove" on a variation', async () => {

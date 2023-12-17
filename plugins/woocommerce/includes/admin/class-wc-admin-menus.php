@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\Orders\COTRedirectionController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
 use Automattic\WooCommerce\Internal\Admin\Logging\PageController as LoggingPageController;
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\ListTable as LoggingListTable;
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileListTable, SearchListTable };
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -324,7 +324,9 @@ class WC_Admin_Menus {
 		$screen_options = array(
 			'woocommerce_keys_per_page',
 			'woocommerce_webhooks_per_page',
-			LoggingListTable::PER_PAGE_USER_OPTION_KEY,
+			FileListTable::PER_PAGE_USER_OPTION_KEY,
+			SearchListTable::PER_PAGE_USER_OPTION_KEY,
+			WC_Admin_Log_Table_List::PER_PAGE_USER_OPTION_KEY,
 		);
 
 		if ( in_array( $option, $screen_options, true ) ) {

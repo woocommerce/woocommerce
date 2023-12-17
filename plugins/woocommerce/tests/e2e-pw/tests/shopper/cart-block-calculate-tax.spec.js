@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin } = require( '../../test-data/data' );
+const { closeWelcomeModal } = require( '../../utils/editor' );
 
 const productName = 'First Product Cart Block Taxing';
 const productPrice = '100.00';
@@ -106,14 +107,7 @@ test.describe( 'Shopper Cart Block Tax Display', () => {
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
 		await page.locator( 'text=Log In' ).click();
 
-		// Close welcome popup if prompted
-		try {
-			await page
-				.getByLabel( 'Close', { exact: true } )
-				.click( { timeout: 5000 } );
-		} catch ( error ) {
-			console.log( "Welcome modal wasn't present, skipping action." );
-		}
+		await closeWelcomeModal( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
@@ -679,6 +673,9 @@ test.describe( 'Shipping Cart Block Tax', () => {
 		await api
 			.post( `shipping/zones/${ shippingZoneId }/methods`, {
 				method_id: 'flat_rate',
+				settings: {
+					title: 'Flat rate',
+				},
 			} )
 			.then( ( response ) => {
 				shippingMethodId = response.data.id;
