@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Simple Product Template: set `description` entity to update from the Description block

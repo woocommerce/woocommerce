@@ -5,6 +5,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CheckoutProvider } from '@woocommerce/base-context';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
+import { ADDRESS_FIELDS_KEYS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -81,15 +82,14 @@ const inputAddress = async ( {
 
 describe( 'AddressForm Component', () => {
 	const WrappedAddressForm = ( { type } ) => {
-		const { defaultAddressFields, setShippingAddress, shippingAddress } =
-			useCheckoutAddress();
+		const { setShippingAddress, shippingAddress } = useCheckoutAddress();
 
 		return (
 			<AddressForm
 				type={ type }
 				onChange={ setShippingAddress }
 				values={ shippingAddress }
-				fields={ Object.keys( defaultAddressFields ) }
+				fields={ ADDRESS_FIELDS_KEYS }
 			/>
 		);
 	};
