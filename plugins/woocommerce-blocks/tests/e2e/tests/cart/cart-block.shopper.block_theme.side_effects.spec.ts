@@ -128,4 +128,19 @@ test.describe( 'Shopper → Cart block', () => {
 			`${ __dirname }/update-price-plugin.php`
 		);
 	} );
+
+	test( 'User can view empty cart message', async ( {
+		frontendUtils,
+		page,
+	} ) => {
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToCart();
+
+		// Verify cart is empty
+		await expect(
+			page.getByRole( 'heading', {
+				name: 'Your cart is currently empty!',
+			} )
+		).toBeVisible();
+	} );
 } );
