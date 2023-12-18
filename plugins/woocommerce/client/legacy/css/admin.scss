@@ -1416,6 +1416,17 @@ table.wc_status_table--tools {
 				color: #fff8c5;
 			}
 		}
+
+		&.has-context {
+			summary {
+				cursor: pointer;
+			}
+
+			pre {
+				margin-top: 0;
+				white-space: pre-wrap;
+			}
+		}
 	}
 
 	.line-anchor {
