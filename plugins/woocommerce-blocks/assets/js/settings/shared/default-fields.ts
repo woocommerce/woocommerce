@@ -63,7 +63,7 @@ export interface CoreAddress {
 	phone: string;
 }
 
-export type ShippingAddress = CoreAddress & Record< string, string >;
+export type ShippingAddress = CoreAddress & Record< string, string | boolean >;
 
 export type KeyedAddressField = AddressField & {
 	key: keyof AddressFields;

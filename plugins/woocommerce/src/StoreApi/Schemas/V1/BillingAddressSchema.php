@@ -119,8 +119,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 				},
 				[]
 			);
-
-			$address_object = \array_merge(
+			$address_object            = \array_merge(
 				[
 					'first_name' => $address->get_billing_first_name(),
 					'last_name'  => $address->get_billing_last_name(),
@@ -145,7 +144,15 @@ class BillingAddressSchema extends AbstractAddressSchema {
 				$address_object[ $field ] = '';
 			}
 
-			return $this->prepare_html_response( $address_object );
+			foreach ( $address_object as $key => $value ) {
+				if ( isset( $this->get_properties()[ $key ]['type'] ) && 'boolean' === $this->get_properties()[ $key ]['type'] ) {
+					$address_object[ $key ] = (bool) $value;
+				} else {
+					$address_object[ $key ] = $this->prepare_html_response( $value );
+				}
+			}
+			return $address_object;
+
 		}
 		throw new RouteException(
 			'invalid_object_type',
