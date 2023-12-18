@@ -50,9 +50,11 @@ describe( 'CurrencyContext', () => {
 		expect(
 			numberFormatWithShippingFormula(
 				config,
-				`0.5 * [qty] + [fee percent="10" max_fee='8.33']`
+				'10*[qty]+(1+(2/[cost]))+([fee percent="10" max_fee="8.33"])'
 			)
-		).toBe( `0.50 * [qty] + [fee percent="10" max_fee='8.33']` );
+		).toBe(
+			'10.00*[qty]+(1.00+(2.00/[cost]))+([fee percent="10" max_fee="8.33"])'
+		);
 	} );
 
 	it( 'should return the original string for non-numeric inputs', () => {
