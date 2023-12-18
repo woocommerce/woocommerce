@@ -212,6 +212,7 @@ class ProductCollection extends AbstractBlock {
 		$handpicked_products = $request->get_param( 'woocommerceHandPickedProducts' );
 		$featured            = $request->get_param( 'featured' );
 		$time_frame          = $request->get_param( 'timeFrame' );
+		$price_range         = $request->get_param( 'priceRange' );
 		// This argument is required for the tests to PHP Unit Tests to run correctly.
 		// Most likely this argument is being accessed in the test environment image.
 		$args['author'] = '';
@@ -226,6 +227,7 @@ class ProductCollection extends AbstractBlock {
 				'handpicked_products' => $handpicked_products,
 				'featured'            => $featured,
 				'timeFrame'           => $time_frame,
+				'priceRange'          => $price_range,
 			)
 		);
 	}
@@ -313,6 +315,7 @@ class ProductCollection extends AbstractBlock {
 		$taxonomies_query    = $this->get_filter_by_taxonomies_query( $query['tax_query'] ?? array() );
 		$handpicked_products = $query['woocommerceHandPickedProducts'] ?? array();
 		$time_frame          = $query['timeFrame'] ?? null;
+		$price_range         = $query['priceRange'] ?? null;
 
 		$final_query = $this->get_final_query_args(
 			$common_query_values,
@@ -325,27 +328,10 @@ class ProductCollection extends AbstractBlock {
 				'handpicked_products' => $handpicked_products,
 				'featured'            => $query['featured'] ?? false,
 				'timeFrame'           => $time_frame,
+				'priceRange'          => $price_range,
 			),
 			$is_exclude_applied_filters
 		);
-
-		if ( isset( $query['priceRange'] ) ) {
-			/**
-			 * We are adding these extra query arguments to be used in `posts_clauses`
-			 * because there are 2 special edge cases we wanna handle for Price range filter:
-			 * Case 1: Prices excluding tax are displayed including tax
-			 * Case 2: Prices including tax are displayed excluding tax
-			 *
-			 * Both of these cases require us to modify SQL query to get the correct results.
-			 */
-			$final_query = array_merge(
-				$final_query,
-				array(
-					'isProductCollection' => true,
-					'priceRange'          => $query['priceRange'],
-				)
-			);
-		}
 
 		return $final_query;
 	}
@@ -374,7 +360,27 @@ class ProductCollection extends AbstractBlock {
 
 		$merged_query = $this->merge_queries( $common_query_values, $orderby_query, $on_sale_query, $stock_query, $tax_query, $applied_filters_query, $date_query );
 
-		return $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
+		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
+
+		if ( isset( $query['priceRange'] ) ) {
+			/**
+			 * We are adding these extra query arguments to be used in `posts_clauses`
+			 * because there are 2 special edge cases we wanna handle for Price range filter:
+			 * Case 1: Prices excluding tax are displayed including tax
+			 * Case 2: Prices including tax are displayed excluding tax
+			 *
+			 * Both of these cases require us to modify SQL query to get the correct results.
+			 */
+			$result = array_merge(
+				$result,
+				array(
+					'isProductCollection' => true,
+					'priceRange'          => $query['priceRange'],
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
