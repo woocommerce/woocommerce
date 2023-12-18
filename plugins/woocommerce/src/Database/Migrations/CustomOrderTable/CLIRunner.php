@@ -879,6 +879,12 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * default: 500
 	 * ---
 	 *
+	 * [--force]
+	 * : Whether to skip checks before cleaning up.
+	 * ---
+	 * default: false
+	 * ---
+	 *
 	 * ## EXAMPLES
 	 *
 	 *    # Cleanup post data for order 314.
@@ -904,6 +910,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		$handler = wc_get_container()->get( LegacyDataHandler::class );
 
 		$all_orders  = 'all' === $args[0];
+		$force       = (bool) ( $assoc_args['force'] ?? false );
 		$q_order_ids = $all_orders ? array() : $args;
 		$q_limit     = $all_orders ? absint( $assoc_args['batch-size'] ?? 500 ) : 0; // Limit per batch.
 
@@ -924,7 +931,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 
 			foreach ( $order_ids as $order_id ) {
 				try {
-					$handler->cleanup_post_data( $order_id );
+					$handler->cleanup_post_data( $order_id, $force );
 					$count++;
 
 					// translators: %d is an order ID.

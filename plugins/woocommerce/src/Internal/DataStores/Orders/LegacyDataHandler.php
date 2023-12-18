@@ -128,11 +128,12 @@ class LegacyDataHandler {
 	/**
 	 * Performs a cleanup of post data for a given order and also converts the post to the placeholder type in the backup table.
 	 *
-	 * @param int $order_id Order ID.
+	 * @param int  $order_id    Order ID.
+	 * @param bool $skip_checks Whether to skip the checks that happen before the order is cleaned up.
 	 * @return void
 	 * @throws \Exception When an error occurs.
 	 */
-	public function cleanup_post_data( $order_id ): void {
+	public function cleanup_post_data( int $order_id, bool $skip_checks = false ): void {
 		global $wpdb;
 
 		$order = wc_get_order( $order_id );
@@ -141,7 +142,7 @@ class LegacyDataHandler {
 			throw new \Exception( sprintf( __( '%d is not a valid order ID.', 'woocommerce' ), $order_id ) );
 		}
 
-		if ( ! $this->is_order_newer_than_post( $order ) ) {
+		if ( ! $skip_checks && ! $this->is_order_newer_than_post( $order ) ) {
 			throw new \Exception( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables.', 'woocommerce' ) ) );
 		}
 
@@ -150,6 +151,8 @@ class LegacyDataHandler {
 			delete_metadata_by_mid( 'post', $meta_id );
 		}
 
+		// wp_update_post() changes the post modified date, so we do this manually.
+		// Also, we suspect using wp_update_post() could lead to integrations mistakenly updating the entity.
 		$wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$wpdb->posts} SET post_type = %s, post_status = %s WHERE ID = %d",
