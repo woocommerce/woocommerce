@@ -25,7 +25,6 @@
         "../plugins/woocommerce/src/README.md": "ce56ab8f22c220f4d76be184907df5faa3d4286e",
         "../plugins/woocommerce/src/Admin/RemoteInboxNotifications/README.md": "668c5f986b9276b1e0ba9257a13119a22207fcf6",
         "../plugins/woocommerce/src/Admin/RemoteInboxNotifications/Transformers/README.md": "fbaa8301410429996ce28a18f6ab4f54108f4b89",
-        "../plugins/woocommerce/src/Blocks/README.md": "3ea85cc62b1ed89bcc40aa88e232d97ad8335220",
         "../plugins/woocommerce/src/Internal/README.md": "2f30c16a53b353c9ff9cd8219b09344d0a443256",
         "../plugins/woocommerce/src/Internal/Admin/ProductForm/README.md": "910ed47b5051f1a94e4a4432e4e0bdef49b4ebec",
         "../plugins/woocommerce/tests/README.md": "5699becdae821c43b067ab73542ebcba3713ca8b",
@@ -171,7 +170,7 @@
         {
           "post_title": "Minification of SCSS and JS",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/minification-of-SCSS-and-JS.md",
-          "hash": "54ebb5dbddab7b87269a898b71de1547265a850d037bebb3891d034094e77700",
+          "hash": "954a98d3d1ba425c2f63f22d0a4df29c05592f5f396026d95f4da42656283d0f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/minification-of-SCSS-and-JS.md",
           "id": "bb50c2ce61a6c5465c95e6a94982c4c1e7944fd7"
         },
@@ -319,15 +318,9 @@
         {
           "post_title": "Setting up your development environment",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/development-environment.md",
-          "hash": "a49c379ceb6b5498ad9cf080adbf3bc710aac29283265a962b6afc9fbe1892d8",
+          "hash": "81286e38b0e2c5c6116d4c7c054a7b6f4546c5bbae0014e9d0b1a0485d3c0a88",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/development-environment.md",
           "id": "bd443aa2ebb30ee1bafd7a95a85d025930e59e7d"
-        },
-        {
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/class-reference.md",
-          "hash": "bf87cfbd1a7035fcb029c581ca1262d8e504174d0f133b867080b65f88ca17f5",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/class-reference.md",
-          "id": "d5f4d8e645707552d013b4be2cd5fd1c943f2122"
         },
         {
           "post_title": "Building your first extension",
@@ -487,12 +480,6 @@
           "id": "56a8ef0ef0afec9c884f655e7fdd23d9666c9d00"
         },
         {
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-url.md",
-          "hash": "0dcd3d549e16ec654cd0e0d0c29b2170ffda8317727bddcc2a9c180b8999a7b7",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-url.md",
-          "id": "827bfa56d40c2155542147ea5afe7cc756e18c5d"
-        },
-        {
           "post_title": "Performance optimization for WooCommerce stores",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/performance-optimization.md",
           "hash": "193d9265d51abd34532933b82e7f47fc4d1a8888e0b5c76f2f2a82027a606e81",
@@ -638,12 +625,6 @@
           "hash": "fbb962f34f983947c9e52c38ad0d7a62e3be06d32ef7ecde31e8ef9ef920d71d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/theme-design-ux-guidelines.md",
           "id": "ec1f05ca7c14ed81a52553fa1c3f1045df5f6a4f"
-        },
-        {
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/marketplace-guidelines.md",
-          "hash": "5ca562b2f4cabefe47b0d08334f39d56e8d3e6dc31ea347000d3bb221e51d0a1",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/marketplace-guidelines.md",
-          "id": "d166aa9f8d039c444df468655b22b322df0cba37"
         },
         {
           "post_title": "Fixing outdated WooCommerce templates",
@@ -796,5 +777,5 @@
       "categories": []
     }
   ],
-  "hash": "a055cc49f6aee473c29380b9a36fb50e253ec04431dc41f54687be939927319d"
+  "hash": "8797e28acfedd6c5317671b63954364a0b97cadc863527bdb46643db2c7d1c63"
 }
