@@ -43,16 +43,4 @@ describe.skip( 'Shopper → Cart', () => {
 			shopper.block.productIsInCart( '32GB USB Stick', 1 )
 		).toBeTruthy();
 	} );
-
-	it( 'User can proceed to checkout', async () => {
-		await shopper.block.goToShop();
-		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
-		await shopper.block.goToCart();
-
-		// Click on "Proceed to Checkout" button
-		await shopper.block.proceedToCheckout();
-
-		// Verify that you see the Checkout Block page
-		await expect( page ).toMatchElement( 'h1', { text: 'Checkout' } );
-	} );
 } );

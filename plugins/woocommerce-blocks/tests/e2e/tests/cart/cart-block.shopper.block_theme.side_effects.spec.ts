@@ -238,4 +238,18 @@ test.describe( 'Shopper → Cart block', () => {
 			)
 		).toHaveValue( '4' );
 	} );
+
+	test( 'User can proceed to checkout', async ( { frontendUtils, page } ) => {
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+
+		// Click on "Proceed to Checkout" button
+		await page.getByRole( 'link', { name: 'Proceed to Checkout' } ).click();
+
+		// Verify that you see the Checkout Block page
+		await expect(
+			page.getByRole( 'heading', { name: 'Checkout' } )
+		).toBeVisible();
+	} );
 } );
