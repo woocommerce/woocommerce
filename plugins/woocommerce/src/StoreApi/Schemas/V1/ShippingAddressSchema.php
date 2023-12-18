@@ -42,7 +42,27 @@ class ShippingAddressSchema extends AbstractAddressSchema {
 				$shipping_state = '';
 			}
 
-			return $this->prepare_html_response(
+			if ( $address instanceof \WC_Order ) {
+				// get additional fields from order.
+				$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_order( $address );
+			} elseif ( $address instanceof \WC_Customer ) {
+				// get additional fields from customer.
+				$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_customer( $address );
+			}
+
+			$additional_address_fields = array_reduce(
+				array_keys( $additional_address_fields ),
+				function( $carry, $key ) use ( $additional_address_fields ) {
+					if ( 0 === strpos( $key, '/shipping/' ) ) {
+						$value         = $additional_address_fields[ $key ];
+						$key           = str_replace( '/shipping/', '', $key );
+						$carry[ $key ] = $value;
+					}
+					return $carry;
+				},
+				[]
+			);
+			$address_object            = array_merge(
 				[
 					'first_name' => $address->get_shipping_first_name(),
 					'last_name'  => $address->get_shipping_last_name(),
@@ -54,9 +74,28 @@ class ShippingAddressSchema extends AbstractAddressSchema {
 					'postcode'   => $address->get_shipping_postcode(),
 					'country'    => $shipping_country,
 					'phone'      => $address->get_shipping_phone(),
-				]
+				],
+				$additional_address_fields
 			);
+
+			// Add any missing keys from additional_fields_controller to the address response.
+			foreach ( $this->additional_fields_controller->get_address_fields_keys() as $field ) {
+				if ( isset( $address_object[ $field ] ) ) {
+					continue;
+				}
+				$address_object[ $field ] = '';
+			}
+
+			foreach ( $address_object as $key => $value ) {
+				if ( isset( $this->get_properties()[ $key ]['type'] ) && 'boolean' === $this->get_properties()[ $key ]['type'] ) {
+					$address_object[ $key ] = (bool) $value;
+				} else {
+					$address_object[ $key ] = $this->prepare_html_response( $value );
+				}
+			}
+			return $address_object;
 		}
+
 		throw new RouteException(
 			'invalid_object_type',
 			sprintf(

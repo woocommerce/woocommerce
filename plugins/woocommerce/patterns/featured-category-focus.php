@@ -16,7 +16,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 <div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--70);padding-right:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70);padding-left:var(--wp--preset--spacing--70)">
 	<!-- wp:image {"id":1,"width":"469px","height":"348px","sizeSlug":"full","linkDestination":"none", "scale":"cover"} -->
 	<figure class="wp-block-image size-full is-resized">
-		<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/white-black-black-and-white-photograph-monochrome-photography.jpg' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a featured category section.', 'woocommerce' ); ?>" class="wp-image-1"  style="object-fit:cover;width:469px;height:348px"/>
+		<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/white-black-black-and-white-photograph-monochrome-photography.jpg' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a featured category section.', 'woocommerce' ); ?>" class="wp-image-1"  style="object-fit:cover;width:469px;height:348px"/>
 	</figure>
 	<!-- /wp:image -->
 
