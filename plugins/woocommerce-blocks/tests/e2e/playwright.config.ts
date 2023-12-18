@@ -3,7 +3,6 @@
  */
 import { defineConfig, PlaywrightTestConfig } from '@playwright/test';
 import { BASE_URL, STORAGE_STATE_PATH } from '@woocommerce/e2e-utils';
-import path from 'path';
 
 import { fileURLToPath } from 'url';
 
@@ -22,7 +21,7 @@ const config: ExtendedPlaywrightTestConfig = {
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
 		: 90 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: path.join( process.cwd(), 'artifacts/test-results' ),
+	outputDir: 'artifacts/test-results',
 	globalSetup: fileURLToPath(
 		new URL( 'global-setup.ts', 'file:' + __filename ).href
 	),
