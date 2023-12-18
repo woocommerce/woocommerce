@@ -15,6 +15,7 @@ import {
 	DISCOUNTED_PRODUCT_NAME,
 	REGULAR_PRICED_PRODUCT_NAME,
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
+	SIMPLE_VIRTUAL_PRODUCT_NAME,
 } from '../checkout/constants';
 
 const test = base.extend< { pageObject: CartPage } >( {
@@ -162,5 +163,35 @@ test.describe( 'Shopper → Cart block', () => {
 				name: 'Your cart is currently empty!',
 			} )
 		).toBeVisible();
+	} );
+
+	test( 'User can update product quantity via the input field', async ( {
+		frontendUtils,
+		page,
+	} ) => {
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+		await page
+			.getByLabel(
+				`Quantity of ${ SIMPLE_VIRTUAL_PRODUCT_NAME } in your cart.`
+			)
+			.fill( '4' );
+
+		// Verify the "Proceed to Checkout" button is disabled during network request
+		await expect(
+			page.getByRole( 'button', { name: 'Proceed to Checkout' } )
+		).toBeDisabled();
+
+		// Verify the "Proceed to Checkout" button is enabled after network request
+		await expect(
+			page.getByRole( 'link', { name: 'Proceed to Checkout' } )
+		).toBeEnabled();
+
+		await expect(
+			page.getByLabel(
+				`Quantity of ${ SIMPLE_VIRTUAL_PRODUCT_NAME } in your cart.`
+			)
+		).toHaveValue( '4' );
 	} );
 } );

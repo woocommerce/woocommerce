@@ -26,23 +26,6 @@ describe.skip( 'Shopper → Cart', () => {
 		await shopper.block.emptyCart();
 	} );
 
-	it( 'User can update product quantity via the input field', async () => {
-		await shopper.block.goToShop();
-		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
-		await shopper.block.goToCart();
-		await shopper.block.setCartQuantity( SIMPLE_VIRTUAL_PRODUCT_NAME, 4 );
-
-		await expect( page ).toMatchElement(
-			'button.wc-block-cart__submit-button[disabled]'
-		);
-
-		// To avoid flakiness: The default "idleTime: 500" fails in headless mode
-		await page.waitForNetworkIdle( { idleTime: 1000 } );
-		await expect( page ).toMatchElement( 'a.wc-block-cart__submit-button' );
-
-		await shopper.block.productIsInCart( SIMPLE_VIRTUAL_PRODUCT_NAME, 4 );
-	} );
-
 	it( 'User can increase product quantity via the plus button', async () => {
 		await shopper.block.increaseCartQuantityByOne(
 			SIMPLE_VIRTUAL_PRODUCT_NAME
