@@ -379,7 +379,7 @@ test.describe( 'Checkout page', () => {
 		await expect(
 			page.locator( 'form.woocommerce-verify-email p:nth-child(4)' )
 		).toContainText( /verify the email address associated with the order/ );
-		await expect( page.locator( '.is-error ul li' ) ).toContainText(
+		await expect( page.locator( '.is-error' ) ).toContainText(
 			/We were unable to verify the email address you provided/
 		);
 
