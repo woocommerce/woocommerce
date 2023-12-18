@@ -10,8 +10,9 @@ import { addQueryArgs } from '@wordpress/url';
  * Internal dependencies
  */
 import { registerCommandWithTracking } from '../command-palette/register-command-with-tracking';
+import { useEditedPostType } from '../command-palette/use-edited-post-type';
 
-const registerWooCommerceAnalyticsCommand = ( { label, path } ) => {
+const registerWooCommerceAnalyticsCommand = ( { label, path, origin } ) => {
 	registerCommandWithTracking( {
 		name: `woocommerce${ path }`,
 		label: sprintf(
@@ -26,10 +27,13 @@ const registerWooCommerceAnalyticsCommand = ( { label, path } ) => {
 				path,
 			} );
 		},
+		origin,
 	} );
 };
 
 const WooCommerceAnalyticsCommands = () => {
+	const { editedPostType } = useEditedPostType();
+	const origin = editedPostType ? editedPostType + '-editor' : null;
 	if (
 		window.hasOwnProperty( 'wcCommandPaletteAnalytics' ) &&
 		window.wcCommandPaletteAnalytics.hasOwnProperty( 'reports' ) &&
@@ -41,6 +45,7 @@ const WooCommerceAnalyticsCommands = () => {
 			registerWooCommerceAnalyticsCommand( {
 				label: analyticsReport.title,
 				path: analyticsReport.path,
+				origin,
 			} );
 		} );
 	}
