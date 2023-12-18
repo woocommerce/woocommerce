@@ -46,7 +46,7 @@ const singleOccurrenceScenarios: Scenario[] = [
 	},
 ];
 
-const multipleOccurranceScenarios: Scenario[] = [
+const multipleOccurrenceScenarios: Scenario[] = [
 	{
 		title: 'Before Shop Loop Item Title',
 		dataTestId: 'woocommerce_before_shop_loop_item_title',
@@ -123,7 +123,7 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 			} );
 		}
 
-		for ( const scenario of multipleOccurranceScenarios ) {
+		for ( const scenario of multipleOccurrenceScenarios ) {
 			test( `${ scenario.title } is attached to the page`, async ( {
 				pageObject,
 			} ) => {
