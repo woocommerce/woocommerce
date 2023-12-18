@@ -23,12 +23,12 @@ final class ExtendSchema {
 	 *
 	 * @var string[]
 	 */
-	private $endpoints = array(
+	private $endpoints = [
 		CartItemSchema::IDENTIFIER,
 		CartSchema::IDENTIFIER,
 		CheckoutSchema::IDENTIFIER,
 		ProductSchema::IDENTIFIER,
-	);
+	];
 
 	/**
 	 * Holds the formatters class instance.
@@ -42,21 +42,21 @@ final class ExtendSchema {
 	 *
 	 * @var array
 	 */
-	private $extend_data = array();
+	private $extend_data = [];
 
 	/**
 	 * Data to be extended
 	 *
 	 * @var array
 	 */
-	private $callback_methods = array();
+	private $callback_methods = [];
 
 	/**
 	 * Array of payment requirements
 	 *
 	 * @var array
 	 */
-	private $payment_requirements = array();
+	private $payment_requirements = [];
 
 	/**
 	 * Constructor
@@ -85,13 +85,13 @@ final class ExtendSchema {
 	public function register_endpoint_data( $args ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'endpoint'        => '',
 				'namespace'       => '',
 				'schema_callback' => null,
 				'data_callback'   => null,
 				'schema_type'     => ARRAY_A,
-			)
+			]
 		);
 
 		if ( ! is_string( $args['namespace'] ) || empty( $args['namespace'] ) ) {
@@ -112,17 +112,17 @@ final class ExtendSchema {
 			$this->throw_exception( '$data_callback must be a callable function.' );
 		}
 
-		if ( ! in_array( $args['schema_type'], array( ARRAY_N, ARRAY_A ), true ) ) {
+		if ( ! in_array( $args['schema_type'], [ ARRAY_N, ARRAY_A ], true ) ) {
 			$this->throw_exception(
 				sprintf( 'Data type must be either ARRAY_N for a numeric array or ARRAY_A for an object like array. You provided %1$s.', $args['schema_type'] )
 			);
 		}
 
-		$this->extend_data[ $args['endpoint'] ][ $args['namespace'] ] = array(
+		$this->extend_data[ $args['endpoint'] ][ $args['namespace'] ] = [
 			'schema_callback' => $args['schema_callback'],
 			'data_callback'   => $args['data_callback'],
 			'schema_type'     => $args['schema_type'],
-		);
+		];
 	}
 
 	/**
@@ -140,10 +140,10 @@ final class ExtendSchema {
 	public function register_update_callback( $args ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'namespace' => '',
 				'callback'  => null,
-			)
+			]
 		);
 
 		if ( ! is_string( $args['namespace'] ) || empty( $args['namespace'] ) ) {
@@ -217,8 +217,8 @@ final class ExtendSchema {
 	 * @return object Returns an casted object with registered endpoint data.
 	 * @throws \Exception If a registered callback throws an error, or silently logs it.
 	 */
-	public function get_endpoint_data( $endpoint, array $passed_args = array() ) {
-		$registered_data = array();
+	public function get_endpoint_data( $endpoint, array $passed_args = [] ) {
+		$registered_data = [];
 
 		if ( isset( $this->extend_data[ $endpoint ] ) ) {
 			foreach ( $this->extend_data[ $endpoint ] as $namespace => $callbacks ) {
@@ -229,7 +229,7 @@ final class ExtendSchema {
 					$data = $callbacks['data_callback']( ...$passed_args );
 
 					if ( ! is_array( $data ) ) {
-						$data = array();
+						$data = [];
 						throw new \Exception( '$data_callback must return an array.' );
 					}
 				} catch ( \Throwable $e ) {
@@ -251,8 +251,8 @@ final class ExtendSchema {
 	 * @return object Returns an array with registered schema data.
 	 * @throws \Exception If a registered callback throws an error, or silently logs it.
 	 */
-	public function get_endpoint_schema( $endpoint, array $passed_args = array() ) {
-		$registered_schema = array();
+	public function get_endpoint_schema( $endpoint, array $passed_args = [] ) {
+		$registered_schema = [];
 
 		if ( isset( $this->extend_data[ $endpoint ] ) ) {
 			foreach ( $this->extend_data[ $endpoint ] as $namespace => $callbacks ) {
@@ -263,7 +263,7 @@ final class ExtendSchema {
 					$schema = $callbacks['schema_callback']( ...$passed_args );
 
 					if ( ! is_array( $schema ) ) {
-						$schema = array();
+						$schema = [];
 						throw new \Exception( '$schema_callback must return an array.' );
 					}
 				} catch ( \Throwable $e ) {
@@ -285,7 +285,7 @@ final class ExtendSchema {
 	 * @return array Returns a list of payment requirements.
 	 * @throws \Exception If a registered callback throws an error, or silently logs it.
 	 */
-	public function get_payment_requirements( array $requirements = array( 'products' ) ) {
+	public function get_payment_requirements( array $requirements = [ 'products' ] ) {
 		if ( ! empty( $this->payment_requirements ) ) {
 			foreach ( $this->payment_requirements as $callback ) {
 				try {
@@ -330,20 +330,20 @@ final class ExtendSchema {
 	 */
 	private function format_extensions_properties( $namespace, $schema, $schema_type ) {
 		if ( ARRAY_N === $schema_type ) {
-			return array(
+			return [
 				/* translators: %s: extension namespace */
 				'description' => sprintf( __( 'Extension data registered by %s', 'woocommerce' ), $namespace ),
-				'type'        => array( 'array', 'null' ),
-				'context'     => array( 'view', 'edit' ),
+				'type'        => [ 'array', 'null' ],
+				'context'     => [ 'view', 'edit' ],
 				'items'       => $schema,
-			);
+			];
 		}
-		return array(
+		return [
 			/* translators: %s: extension namespace */
 			'description' => sprintf( __( 'Extension data registered by %s', 'woocommerce' ), $namespace ),
-			'type'        => array( 'object', 'null' ),
-			'context'     => array( 'view', 'edit' ),
+			'type'        => [ 'object', 'null' ],
+			'context'     => [ 'view', 'edit' ],
 			'properties'  => $schema,
-		);
+		];
 	}
 }
