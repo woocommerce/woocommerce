@@ -30,7 +30,7 @@ final class QueryFilters {
 		}
 
 		if ( $wp_query->get( 'filter_stock_status' ) ) {
-			$args = $this->stock_filter_clauses( $args, $wp_query->get( 'filter_stock_status' ) );
+			$args = $this->stock_filter_clauses( $args, $wp_query );
 		}
 
 		return $args;
