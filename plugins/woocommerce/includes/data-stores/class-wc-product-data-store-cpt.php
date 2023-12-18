@@ -371,13 +371,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ?? '' ) );
 
 		$product->set_props( $set_props );
-		if ( 'variable' !== $product->get_type() && $product->is_on_sale() ) {
-			$product->set_price( $set_props['sale_price'] );
-			$this->clear_caches( $product );
-		} elseif ( (float) $product->get_price() !== (float) $product->get_regular_price() ) {
-			$product->set_price( $set_props['regular_price'] );
-			$this->clear_caches( $product );
-		}
 	}
 
 	/**
