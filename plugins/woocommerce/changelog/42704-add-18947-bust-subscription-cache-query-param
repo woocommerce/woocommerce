@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+Comment: Marketplace: refresh subscriptions in if "install" query parameter exists
+
