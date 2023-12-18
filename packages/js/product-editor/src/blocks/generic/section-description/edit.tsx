@@ -23,6 +23,7 @@ export function SectionDescriptionBlockEdit( {
 			{ ...blockProps }
 			name="section-description"
 			clientId={ clientId }
+			slotContainerBlockName="woocommerce/product-section"
 		>
 			<div>{ content }</div>
 		</BlockFill>

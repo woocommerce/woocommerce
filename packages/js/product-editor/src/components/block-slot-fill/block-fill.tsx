@@ -11,16 +11,32 @@ import { createElement } from '@wordpress/element';
 import { getName } from './utils/get-name';
 import { BlockFillProps } from './types';
 
-export function BlockFill( { name, clientId, ...props }: BlockFillProps ) {
-	const rootClientId = useSelect(
+export function BlockFill( {
+	name,
+	clientId,
+	slotContainerBlockName,
+	...props
+}: BlockFillProps ) {
+	const closestAncestorClientId = useSelect(
 		( select ) => {
-			const { getBlockRootClientId } = select( 'core/block-editor' );
-			return getBlockRootClientId( clientId );
+			// @ts-expect-error Outdated type definition.
+			const { getBlockParentsByBlockName } =
+				select( 'core/block-editor' );
+
+			const [ closestParentClientId ] = getBlockParentsByBlockName(
+				clientId,
+				slotContainerBlockName,
+				true
+			);
+
+			return closestParentClientId;
 		},
-		[ clientId ]
+		[ clientId, slotContainerBlockName ]
 	);
 
-	if ( ! rootClientId ) return null;
+	if ( ! closestAncestorClientId ) return null;
 
-	return <Fill { ...props } name={ getName( name, rootClientId ) } />;
+	return (
+		<Fill { ...props } name={ getName( name, closestAncestorClientId ) } />
+	);
 }

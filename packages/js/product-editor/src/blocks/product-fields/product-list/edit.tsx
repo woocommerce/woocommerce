@@ -122,7 +122,11 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<BlockFill name="section-actions" clientId={ clientId }>
+			<BlockFill
+				name="section-actions"
+				clientId={ clientId }
+				slotContainerBlockName="woocommerce/product-section"
+			>
 				<div className="wp-block-woocommerce-product-list-field__header">
 					{ ! isLoading && groupedProducts.length > 0 && (
 						<Button
