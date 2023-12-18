@@ -411,4 +411,48 @@ export default () => {
 		),
 		{ priority: 4 }
 	);
+
+	directive(
+		'each',
+		( {
+			directives: {
+				each,
+				'each-key': [ eachKey ],
+			},
+			context: inheritedContext,
+			element,
+			evaluate,
+		} ) => {
+			const { Provider } = inheritedContext;
+			const inheritedValue = useContext( inheritedContext );
+
+			const [ entry ] = each;
+			const { namespace, suffix } = entry;
+
+			const list = evaluate( entry );
+			return list.map( ( item ) => {
+				const currentValue = useRef( deepSignal( {} ) );
+
+				currentValue.current = useMemo( () => {
+					const itemProp = suffix === 'default' ? 'item' : suffix;
+					const newValue = deepSignal( {
+						[ namespace ]: { [ itemProp ]: item },
+					} );
+					mergeDeepSignals( newValue, inheritedValue );
+					mergeDeepSignals( currentValue.current, newValue, true );
+					return currentValue.current;
+				}, [ inheritedValue, entry ] );
+
+				const key = eachKey?.value;
+
+				return (
+					<Provider value={ currentValue.current } key={ key }>
+						{ element.props.content }
+					</Provider>
+				);
+			} );
+		}
+	);
+
+	directive( 'each-child', () => null );
 };
