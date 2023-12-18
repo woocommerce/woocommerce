@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the potential for a Reflected XSS attack in relation to a dismissable notice in the edit comments screen.
