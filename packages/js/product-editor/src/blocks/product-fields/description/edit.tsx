@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { createElement, useEffect } from '@wordpress/element';
+import {
+	createElement,
+	useEffect,
+	useState,
+	Fragment,
+} from '@wordpress/element';
 import { BlockInstance, parse, serialize } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import classNames from 'classnames';
@@ -25,14 +30,33 @@ import type { DescriptionBlockEditComponent } from './types';
 import FullEditorToolbarButton from './components/full-editor-toolbar-button';
 
 /**
- * Internal dependencies
+ * Check whether the parsed blocks become from the summary block.
+ *
+ * @param {BlockInstance[]} blocks - The block list
+ * @return {string|false} The content of the freeform block if it's a freeform block, false otherwise.
  */
+export function getContentFromFreeform(
+	blocks: BlockInstance[]
+): false | string {
+	// Check whether the parsed blocks become from the summary block:
+	const isCoreFreeformBlock =
+		blocks.length === 1 && blocks[ 0 ].name === 'core/freeform';
+
+	if ( isCoreFreeformBlock ) {
+		return blocks[ 0 ].attributes.content;
+	}
+
+	return false;
+}
 
 /**
  * By default the blocks variable always contains one paragraph
  * block with empty content, that causes the description to never
  * be empty. This function removes the default block to keep
  * the description empty.
+ *
+ * todo: this is not optimal. We cannot rely on the content attribute to
+ * determine whether the description is empty or not
  *
  * @param blocks The block list
  * @return Empty array if there is only one block with empty content
@@ -57,6 +81,10 @@ export function DescriptionBlockEdit( {
 		'description'
 	);
 
+	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
+		BlockInstance[]
+	>( [] );
+
 	// Pick Modal editor data from the store.
 	const { isModalEditorOpen, modalEditorBlocks, hasChanged } = useSelect(
 		( select ) => {
@@ -69,7 +97,34 @@ export function DescriptionBlockEdit( {
 		[]
 	);
 
-	// Update the description when the blocks change.
+	// Parse the description into blocks.
+	useEffect( () => {
+		if ( ! description ) {
+			setDescriptionBlocks( [] );
+			return;
+		}
+
+		/*
+		 * First quick check to avoid parsing process,
+		 * since it's an expensive operation.
+		 */
+		if ( description.indexOf( '<!-- wp:' ) === -1 ) {
+			return;
+		}
+
+		const parsedBlocks = parse( description );
+		// Check whether the parsed blocks become from the summary block:
+		if ( getContentFromFreeform( parsedBlocks ) ) {
+			return;
+		}
+
+		setDescriptionBlocks( parsedBlocks );
+	}, [ description ] );
+
+	/*
+	 * From Modal Editor -> Description entity.
+	 * Update the description when the modal editor blocks change.
+	 */
 	useEffect( () => {
 		if ( ! hasChanged ) {
 			return;
@@ -98,24 +153,24 @@ export function DescriptionBlockEdit( {
 
 	return (
 		<div { ...blockProps }>
-			{ !! description.length && (
-				<BlockControls>
-					<FullEditorToolbarButton
-						text={ __( 'Edit in full editor', 'woocommerce' ) }
+			{ !! descriptionBlocks?.length ? (
+				<>
+					<BlockControls>
+						<FullEditorToolbarButton
+							text={ __( 'Edit in full editor', 'woocommerce' ) }
+						/>
+					</BlockControls>
+
+					<BlockPreview
+						blocks={ descriptionBlocks }
+						viewportWidth={ 800 }
+						additionalStyles={ [
+							{ css: 'body { padding: 32px; height: 10000px }' }, // hack: setting height to 10000px to ensure the preview is not cut off.
+						] }
 					/>
-				</BlockControls>
-			) }
-
-			{ ! description.length && <div { ...innerBlockProps } /> }
-
-			{ !! description.length && (
-				<BlockPreview
-					blocks={ parse( description ) }
-					viewportWidth={ 800 }
-					additionalStyles={ [
-						{ css: 'body { padding: 32px; height: 10000px }' }, // hack: setting height to 10000px to ensure the preview is not cut off.
-					] }
-				/>
+				</>
+			) : (
+				<div { ...innerBlockProps } />
 			) }
 
 			{ isModalEditorOpen && <ModalEditorWelcomeGuide /> }

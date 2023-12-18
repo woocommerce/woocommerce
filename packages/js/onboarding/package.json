@@ -6,7 +6,7 @@
 	"license": "GPL-3.0-or-later",
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
 	},
 	"keywords": [
 		"wordpress",
@@ -171,6 +171,7 @@
 				"node_modules/@woocommerce/internal-style-build/abstracts",
 				"node_modules/@woocommerce/internal-js-tests/build",
 				"node_modules/@woocommerce/internal-js-tests/build-module",
+				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

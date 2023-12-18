@@ -1416,6 +1416,17 @@ table.wc_status_table--tools {
 				color: #fff8c5;
 			}
 		}
+
+		&.has-context {
+			summary {
+				cursor: pointer;
+			}
+
+			pre {
+				margin-top: 0;
+				white-space: pre-wrap;
+			}
+		}
 	}
 
 	.line-anchor {
@@ -1564,6 +1575,13 @@ table.wc_status_table--tools {
 
 		.column-context {
 			width: 10%;
+		}
+	}
+
+	.column-message {
+		pre {
+			margin: 0;
+			white-space: pre-wrap;
 		}
 	}
 
@@ -4223,17 +4241,14 @@ table.wc_shipping {
 			margin: 12px 0;
 			border-radius: 4px;
 		}
+	}
 
-		.wc-shipping-zone-method-input-help-text {
-			position: absolute;
-    		bottom: -30px;
-			height: 30px;
-			display: none;
-		}
+	.wc-shipping-zone-method-input-help-text-container {
+		min-height: 40px;
+	}
 
-		input:checked ~ .wc-shipping-zone-method-input-help-text {
-			display: block;
-		}
+	.wc-shipping-zone-method-input-help-text {
+		display: none;
 	}
 
 	.wc-shipping-zone-method-selector {
@@ -4357,6 +4372,21 @@ table.wc_shipping {
 
 	.wc-backbone-modal-back-inactive {
 		display: none;
+	}
+	
+	#btn-next.is-busy {
+		background-image: linear-gradient(-45deg, #fafafa 33%, #e0e0e0 33%, #e0e0e0 70%, #fafafa 70%);
+		animation-duration: 2.5s;
+		animation-timing-function: linear;
+		animation-delay: 0s;
+		animation-iteration-count: infinite;
+		animation-direction: normal;
+		animation-fill-mode: none;
+		animation-play-state: running;
+		animation-name: components-button__busy-animation;
+		animation-timeline: auto;
+		animation-range-start: normal;
+		color: #757575;
 	}
 }
 

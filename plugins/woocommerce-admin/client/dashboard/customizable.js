@@ -185,7 +185,9 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 
 		return (
 			<Dropdown
-				position="top center"
+				popoverProps={ {
+					placement: 'top',
+				} }
 				className="woocommerce-dashboard-section__add-more"
 				renderToggle={ ( { onToggle, isOpen } ) => (
 					<Button
