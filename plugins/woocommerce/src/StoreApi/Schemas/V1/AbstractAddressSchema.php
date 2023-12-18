@@ -236,23 +236,26 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			ARRAY_FILTER_USE_KEY
 		);
 
-		$schema = array();
+		$schema = [];
 		foreach ( $address_fields as $key => $field ) {
-			$field_schema = array(
+			$field_schema = [
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
-			);
+			];
 
 			if ( 'select' === $field['type'] ) {
-				$field_schema['type'] = 'string';
 				$field_schema['enum'] = array_map(
 					function( $option ) {
 						return $option['value'];
 					},
 					$field['options']
 				);
+			}
+
+			if ( 'checkbox' === $field['type'] ) {
+				$field_schema['type'] = 'boolean';
 			}
 
 			$schema[ $key ] = $field_schema;
