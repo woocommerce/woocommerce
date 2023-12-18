@@ -12,7 +12,7 @@ The first experience your users have with your extension is crucial. A user act
 
 - Use the standard WordPress notice format and WooCommerce admin notices API.
 - Notices should be dismissible. Users should always have a clear way to close the notice.
-- Keep the post-activation notice with the WordPress plugin area in context of the plugin listing—do not display it on the dashboard, or any other parts of the platform.
+- Keep the post-activation notice with the WordPress plugin area in context of the plugin listing-do not display it on the dashboard, or any other parts of the platform.
 - Don’t display more than one notice.
 - Try to keep the notice copy between 125 to 200 characters.
 
