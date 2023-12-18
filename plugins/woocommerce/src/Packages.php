@@ -53,7 +53,7 @@ class Packages {
 	 * @since 3.7.0
 	 */
 	public static function init() {
-		add_action( 'plugins_loaded', array( __CLASS__, 'on_init' ) );
+		add_action( 'init', array( __CLASS__, 'on_init' ) );
 	}
 
 	/**
