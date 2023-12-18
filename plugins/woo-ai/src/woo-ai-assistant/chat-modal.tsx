@@ -2,12 +2,13 @@
  * External dependencies
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Modal } from '@wordpress/components';
+import { Button, Modal } from '@wordpress/components';
 import { useDispatch, select } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 import apiFetch from '@wordpress/api-fetch';
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -24,6 +25,7 @@ export type Message = {
 	text: string;
 	userQueryIndex?: number;
 	timestamp: number;
+	type: 'informational' | 'actionable';
 };
 
 type ChatModalProps = {
@@ -109,12 +111,13 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			const formData = new FormData();
 			formData.append( 'message', message );
 			formData.append( 'token', token );
-			if ( tempthreadID ) {
-				formData.append( 'thread_id', tempthreadID );
+			const _thread_id = tempthreadID || threadID || '';
+			if ( threadID && threadID.length > 0 ) {
+				formData.append( 'thread_id', _thread_id );
 			}
 			return formData;
 		},
-		[]
+		[ threadID ]
 	);
 
 	const handleError = useCallback( ( message: string ) => {
@@ -125,9 +128,55 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				sender: 'assistant',
 				text: message,
 				timestamp: new Date().getTime(),
+				type: 'actionable',
 			},
 		] );
 	}, [] );
+
+	const setAndStoreMessages = useCallback(
+		(
+			message: string,
+			sender: 'assistant' | 'user',
+			userQueryIndex?: number,
+			type?: 'actionable' | 'informational'
+		) => {
+			const chatMessage: Message = {
+				sender,
+				text: message,
+				timestamp: new Date().getTime(),
+				type: type || 'actionable',
+			};
+			if ( typeof userQueryIndex === 'number' && userQueryIndex >= 0 ) {
+				chatMessage.userQueryIndex = userQueryIndex;
+			}
+			// @todo: we might want to replace the message with a message that says we're having trouble.
+			if ( typeof message !== 'string' ) {
+				return;
+			}
+			setMessages( ( prevMessages ) => {
+				const updatedMessages = [ ...prevMessages, chatMessage ];
+				setStorageData(
+					WOO_AI_PLUGIN_NAME,
+					preferencesChatHistory,
+					JSON.stringify( updatedMessages )
+				);
+				return updatedMessages;
+			} );
+		},
+		[ setStorageData ]
+	);
+
+	const generateInformationalMessage = useCallback(
+		( message ) => {
+			setAndStoreMessages(
+				message,
+				'assistant',
+				undefined,
+				'informational'
+			);
+		},
+		[ setAndStoreMessages ]
+	);
 
 	/**
 	 *
@@ -140,7 +189,12 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			const answer = response.answer;
 			const functionID: string = answer.function_id;
 			const runID: string = response.run_id;
+
+			generateInformationalMessage(
+				"I'm trying to accomplish that for you now..."
+			);
 			let message = '';
+
 			if ( answer.function_name === 'makeWCRestApiCall' ) {
 				const functionArguments = answer.function_args;
 				try {
@@ -190,6 +244,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 							sender: 'assistant',
 							text: message,
 							timestamp: new Date().getTime(),
+							type: 'actionable',
 						},
 					] );
 					setLoading( false );
@@ -219,7 +274,12 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			}
 			return message;
 		},
-		[ handleError, isResponseError, prepareFormData ]
+		[
+			generateInformationalMessage,
+			handleError,
+			isResponseError,
+			prepareFormData,
+		]
 	);
 
 	const setAndStorethreadID = useCallback(
@@ -230,37 +290,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				newthreadID
 			);
 			setThreadID( newthreadID );
-		},
-		[ setStorageData ]
-	);
-
-	const setAndStoreMessages = useCallback(
-		(
-			message: string,
-			sender: 'assistant' | 'user',
-			userQueryIndex?: number
-		) => {
-			const chatMessage: Message = {
-				sender,
-				text: message,
-				timestamp: new Date().getTime(),
-			};
-			if ( typeof userQueryIndex === 'number' && userQueryIndex >= 0 ) {
-				chatMessage.userQueryIndex = userQueryIndex;
-			}
-			// @todo: we might want to replace the message with a message that says we're having trouble.
-			if ( typeof message !== 'string' ) {
-				return;
-			}
-			setMessages( ( prevMessages ) => {
-				const updatedMessages = [ ...prevMessages, chatMessage ];
-				setStorageData(
-					WOO_AI_PLUGIN_NAME,
-					preferencesChatHistory,
-					JSON.stringify( updatedMessages )
-				);
-				return updatedMessages;
-			} );
 		},
 		[ setStorageData ]
 	);
@@ -356,19 +385,72 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		[ messages, handleError, makeWooAssistantApiCall, setAndStoreMessages ]
 	);
 
-	const handleSubmit = async ( input: string ) => {
-		if ( ! input.trim() ) {
-			return;
-		}
-		try {
-			setAndStoreMessages( input, 'user' );
-			makeWooAssistantApiCall( input );
-		} catch ( error ) {
-			handleError(
-				"I'm sorry, I had trouble generating a response for you."
-			);
-		}
-	};
+	const handleSubmit = useCallback(
+		async ( input: string ) => {
+			if ( ! input.trim() ) {
+				return;
+			}
+			try {
+				setAndStoreMessages( input, 'user' );
+				makeWooAssistantApiCall( input );
+			} catch ( error ) {
+				handleError(
+					"I'm sorry, I had trouble generating a response for you."
+				);
+			}
+		},
+		[ makeWooAssistantApiCall, setAndStoreMessages, handleError ]
+	);
+
+	const OnboardingMessage = useCallback( () => {
+		return (
+			<li className="woo-ai-onboarding-message">
+				<p className="message assistant">
+					Hi there! I am your helpful Woo AI Assistant, here to answer
+					questions, find relevant documentation, and perform common
+					store tasks. How can I help you today?
+				</p>
+			</li>
+		);
+	}, [] );
+
+	const ExampleClickableQuestions = useCallback( () => {
+		const examples = {
+			action: 'Run a sales report for today.',
+			information:
+				'Recommend a Woo Extension that enables selling subscription products on my store.',
+			consultation:
+				'What are some tips to improve my store conversion rates?',
+		};
+		return (
+			<div className="woo-ai-message-examples">
+				<Button
+					variant="tertiary"
+					onClick={ () => handleSubmit( examples.action ) }
+				>
+					{ __( 'Run a sales report for today.', 'woocommerce' ) }
+				</Button>
+				<Button
+					variant="tertiary"
+					onClick={ () => handleSubmit( examples.information ) }
+				>
+					{ __(
+						'Recommend a Woo Extension that enables selling subscription products on my store.',
+						'woocommerce'
+					) }
+				</Button>
+				<Button
+					variant="tertiary"
+					onClick={ () => handleSubmit( examples.consultation ) }
+				>
+					{ __(
+						'What are some tips to improve my store conversion rates?',
+						'woocommerce'
+					) }
+				</Button>
+			</div>
+		);
+	}, [ handleSubmit ] );
 
 	return (
 		<Modal
@@ -377,13 +459,8 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			className="woo-ai-assistant-chat-modal"
 		>
 			<ul className="woo-chat-history" ref={ parent }>
-				{ ! messages.length && (
-					<li>
-						<p className="message assistant">
-							Hi there! How can I help you today?
-						</p>
-					</li>
-				) }
+				{ ! messages.length && <OnboardingMessage /> }
+				{ ! messages.length && <ExampleClickableQuestions /> }
 				{ messages.map( ( message, index ) => (
 					<MessageItem
 						message={ message }

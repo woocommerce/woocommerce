@@ -19,6 +19,10 @@ $toned-down-grey: mix(white, #333, 20%); // A lighter grey
 		padding: 10px;
 		background-color: white;
 
+		.woo-ai-onboarding-message {
+			flex-grow: 1;
+		}
+
 		.woo-ai-assistant-actions-button {
 			font-size: 18px;
 			color: $toned-down-grey;
