@@ -1887,9 +1887,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Clear any caches.
-	 *
-	 * @param WC_Product $product Product object.
-	 * @since 8.5.0
 	 */
 	protected function clear_caches() {
 		wc_delete_product_transients( $this->get_id() );
