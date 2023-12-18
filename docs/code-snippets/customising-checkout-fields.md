@@ -197,7 +197,7 @@ $fields['billing']['your_field']['options'] = array(
 
 ## Priority
 
-Priority in regards to PHP code helps establish when a bit of code — called a function — runs in relation to a page load. It is set inside of each function and is useful when overriding existing code for custom display.
+Priority in regards to PHP code helps establish when a bit of code - called a function - runs in relation to a page load. It is set inside of each function and is useful when overriding existing code for custom display.
 
 Code with a higher number set as the priority will run after code with a lower number, meaning code with a priority of 20 will run after code with 10 priority.
 
