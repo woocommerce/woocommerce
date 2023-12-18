@@ -200,7 +200,23 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$pricing_columns  = $basic_details->add_block(
+
+		// This is needed until hide conditions can be applied to core blocks.
+		$pricing_conditional_wrapper = $basic_details->add_block(
+			array(
+				'id'             => 'product-pricing-conditional-wrapper',
+				'blockName'      => 'woocommerce/conditional',
+				'order'          => 30,
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				),
+			)
+		);
+
+		$pricing_wrapper  = Features::is_enabled( 'product-grouped' ) ? $pricing_conditional_wrapper : $basic_details;
+		$pricing_columns  = $pricing_wrapper->add_block(
 			array(
 				'id'        => 'product-pricing-columns',
 				'blockName' => 'core/columns',
