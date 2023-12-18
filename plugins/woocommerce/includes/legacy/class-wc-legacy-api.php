@@ -51,8 +51,8 @@ class WC_Legacy_API {
 	 */
 	public function init() {
 		add_action( 'parse_request', array( $this, 'handle_rest_api_requests' ), 0 );
-		self:$this->mark_method_as_accessible( 'display_legacy_wc_api_usage_notice' );
-		self::add_action('admin_notices', array( $this, 'display_legacy_wc_api_usage_notice' ), 0);
+		self:$this->mark_method_as_accessible( 'maybe_display_legacy_wc_api_usage_notice' );
+		self::add_action( 'admin_notices', array( $this, 'maybe_display_legacy_wc_api_usage_notice' ), 0);
 	}
 
 	/**
@@ -69,55 +69,53 @@ class WC_Legacy_API {
 	}
 
 	/**
-	 * Write a log entry, and/or update the last usage options, for a Legacy REST API request
-	 * if the appropriate settings dictate so.
+	 * Write a log entry and update the last usage options, for a Legacy REST API request.
 	 *
-	 * @param string $route The Legacy REST API route requested.
+	 * @param string      $route The Legacy REST API route requested.
 	 * @param string|null $user_agent The content of the user agent HTTP header in the request, null if not available.
 	 */
-	private function maybe_log_rest_api_request(string $route, ?string $user_agent) {
-		$user_agent = $user_agent ?? 'unknown';
-
-		$write_log_entry = 'yes' === get_option('woocommerce_legacy_api_log_enabled') && function_exists('wc_get_logger');
-		if(!$write_log_entry && 'yes' !== get_option('woocommerce_legacy_api_usage_notice_enabled')) {
+	private function maybe_log_rest_api_request( string $route, ?string $user_agent ) {
+		if ( is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ) {
 			return;
 		}
 
-		$stored_api_accesses = get_option('wc_legacy_rest_usages', []);
-		$stored_api_accesses_for_user_agent_and_route = $stored_api_accesses[$user_agent][$route] ?? null;
-		$current_date = wp_date( 'Y-m-d H:i:s' );
-		if(is_null($stored_api_accesses_for_user_agent_and_route)) {
-			$stored_api_accesses[$user_agent][$route] = [
-				'version'    => WC_API_REQUEST_VERSION,
+		$user_agent = $user_agent ?? 'unknown';
+
+		$current_date        = wp_date( 'Y-m-d H:i:s' );
+		$stored_api_accesses = get_transient( 'wc_legacy_rest_api_usages' );
+		if ( false === $stored_api_accesses ) {
+			$stored_api_accesses = array(
+				'user_agents' => array(),
+				'first_usage' => $current_date,
+				'total_count' => 0,
+			);
+		}
+
+		$stored_api_accesses_for_user_agent = $stored_api_accesses['user_agents'][ $user_agent ] ?? null;
+		if ( is_null( $stored_api_accesses_for_user_agent ) ) {
+			$stored_api_accesses['user_agents'][ $user_agent ] = array(
 				'first_date' => $current_date,
-				'last_date'   => $current_date,
-				'count' => 1,
-				'logged' => $write_log_entry
-			];
+				'last_date'  => $current_date,
+				'count'      => 1,
+			);
+		} else {
+			$stored_api_accesses['user_agents'][ $user_agent ]['count']++;
+			$stored_api_accesses['user_agents'][ $user_agent ]['last_date'] = $current_date;
 		}
-		else {
-			$stored_api_accesses[$user_agent][$route]['version'] = WC_API_REQUEST_VERSION;
-			$stored_api_accesses[$user_agent][$route]['count']++;
-			$previous_last_date = $stored_api_accesses[$user_agent][$route]['last_date'];
-			$stored_api_accesses[$user_agent][$route]['last_date'] = $current_date;
-			$was_logged = $stored_api_accesses[$user_agent][$route]['logged'];
-			$write_log_entry =
-				$write_log_entry &&
-				(!$stored_api_accesses[$user_agent][$route]['logged'] || (substr($current_date, 0, 10) !== substr($previous_last_date, 0, 10)));
+		$stored_api_accesses['total_count']++;
 
-			// If not logged in the past and we log it now, update 'logged' to true.
-			// But if it was logged in the past and we don't log it now, keep 'logged' as true.
-			if(!$was_logged && $write_log_entry) {
-				$stored_api_accesses[$user_agent][$route]['logged'] = true;
-			}
+		set_transient( 'wc_legacy_rest_api_usages', $stored_api_accesses, time() + 2 * WEEK_IN_SECONDS );
+
+		/**
+		 * This filter allows disabling the logging of Legacy REST API usages.
+		 *
+		 * @param bool $do_logging True to enable the logging of all the Legacy REST API usages (default), false to disable.
+		 *
+		 * @since 8.5.0
+		 */
+		if ( apply_filters( 'woocommerce_log_legacy_rest_api_usages', true ) ) {
+			wc_get_logger()->info( 'LEGACY REST API USAGE DETECTED (version ' . WC_API_REQUEST_VERSION . "): $route (User agent: $user_agent)", array( 'source' => 'legacy_rest_api_usages' ) );
 		}
-
-		if($write_log_entry) {
-			wc_get_logger()->info( 'LEGACY REST API USAGE DETECTED (version ' . WC_API_REQUEST_VERSION . "): $route (User agent: $user_agent)", ['source' => 'legacy_rest_api_usages'] );
-		}
-
-		update_option('wc_legacy_rest_usages', $stored_api_accesses);
-		update_option('wc_legacy_rest_last_usage', array_merge($stored_api_accesses[$user_agent][$route], ['user_agent' => $user_agent, 'route' => $route]));
 	}
 
 	/**
@@ -157,7 +155,7 @@ class WC_Legacy_API {
 		wc_maybe_define_constant( 'WC_API_REQUEST', true );
 		wc_maybe_define_constant( 'WC_API_REQUEST_VERSION', absint( $wp->query_vars['wc-api-version'] ) );
 
-		$route = $wp->query_vars['wc-api-route'];
+		$route =  $wp->query_vars['wc-api-route'];
 		$this->maybe_log_rest_api_request($route, $_SERVER['HTTP_USER_AGENT'] ?? null);
 
 		// Legacy v1 API request.
@@ -180,45 +178,41 @@ class WC_Legacy_API {
 
 	/**
 	 * Display an admin notice with information about the last Legacy REST API usage,
-	 * if available and if the appropriate setting dictates so.
+	 * if the corresponding transient is available and unless the Legacy REST API
+	 * extension is installed or the user has dismissed the notice.
 	 */
-	private function display_legacy_wc_api_usage_notice(): void {
-		if('yes' !== get_option('woocommerce_legacy_api_usage_notice_enabled')) {
+	private function maybe_display_legacy_wc_api_usage_notice(): void {
+		if ( is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ) {
+			if ( WC_Admin_Notices::has_notice( 'legacy_api_usages_detected' ) ) {
+				WC_Admin_Notices::remove_notice( 'legacy_api_usages_detected', true );
+			}
 			return;
 		}
 
-		$legacy_usage = get_option( 'wc_legacy_rest_last_usage' );
+		$legacy_api_usages = get_transient( 'wc_legacy_rest_api_usages' );
+		if ( false !== $legacy_api_usages && ! WC_Admin_Notices::user_has_dismissed_notice( 'legacy_api_usages_detected' ) ) {
+			unset( $legacy_api_usages['user_agents']['unknown'] );
+			$user_agents = array_keys( $legacy_api_usages['user_agents'] );
 
-		if ( ! is_array( $legacy_usage ) ) {
-			return;
+			WC_Admin_Notices::add_custom_notice(
+				'legacy_api_usages_detected',
+				sprintf(
+					'%s%s',
+					sprintf(
+						'<h4>%s</h4>',
+						esc_html__( 'WooCommerce Legacy REST API access detected', 'woocommerce' )
+					),
+					sprintf(
+					// translators: Placeholders are URLs.
+						wpautop( wp_kses_data( __( '<p>The WooCommerce Legacy REST API has been accessed <b>%1$d</b> times since <b>%2$s</b>. There are <b>%3$d</b> known user agents registered. There are more details in <b><a target="_blank" href="%4$s">the WooCommerce log files</a></b> (file names start with <code>legacy_rest_api_usages</code>).', 'woocommerce' ) ) ),
+						$legacy_api_usages['total_count'],
+						$legacy_api_usages['first_usage'],
+						count( $user_agents ),
+						admin_url( 'admin.php?page=wc-status&tab=logs' ),
+					)
+				)
+			);
 		}
-
-		$usage = array_map( 'esc_html', $legacy_usage );
-
-		printf(
-			/* translators: 1: API version number, 2: request route, 3: user agent string, 4: ISO-formatted date and time, 5: request route, 6: user agent string, 7: usages count */
-			__(
-				"<div class='notice'>
-                    <p><strong>ⓘ LEGACY REST API USAGE DETECTED</strong></p>
-                    <p>Last usage recorded:</p>
-                    <p>
-                        API version: <kbd>%1\$s</kbd> |
-                        Route: <kbd>%2\$s</kbd> |
-                        Agent: <kbd>%3\$s</kbd> |
-                        Date and time: <kbd>%4\$s</kbd>
-                    </p>
-                    <p>Total usages of <kbd>%5\$s</kbd> by <kbd>%6\$s</kbd> recorded: <strong>%7\$s</strong>
-                </p></div>",
-				'woocommerce'
-			),
-			$usage['version'],
-			$usage['route'],
-			$usage['user_agent'],
-			$usage['last_date'],
-			$usage['route'],
-			$usage['user_agent'],
-			$usage['count']
-		);
 	}
 
 	/**
