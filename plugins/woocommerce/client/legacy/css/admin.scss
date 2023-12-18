@@ -1578,6 +1578,13 @@ table.wc_status_table--tools {
 		}
 	}
 
+	.column-message {
+		pre {
+			margin: 0;
+			white-space: pre-wrap;
+		}
+	}
+
 	.column-context {
 		.button {
 			span {
