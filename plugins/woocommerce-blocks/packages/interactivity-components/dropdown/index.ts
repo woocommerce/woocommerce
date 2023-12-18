@@ -10,7 +10,7 @@ import './style.scss';
 
 export type DropdownContext = {
 	selectType: 'multiple' | 'single';
-	currentItem: {
+	item: {
 		label: string;
 		value: string;
 	};
@@ -54,15 +54,11 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 		},
 
 		get isSelected(): boolean {
-			const { currentItem, selectedItems } =
-				getContext< DropdownContext >();
+			const { item, selectedItems } = getContext< DropdownContext >();
 
 			return (
-				selectedItems?.some( ( item ) => {
-					return (
-						item.value === currentItem.value &&
-						item.label === currentItem.label
-					);
+				selectedItems?.some( ( i ) => {
+					return i.value === item.value && i.label === item.label;
 				} ) || false
 			);
 		},
@@ -77,7 +73,7 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 			const context = getContext< DropdownContext >();
 
 			const {
-				currentItem: { label, value },
+				item: { label, value },
 				selectedItems,
 			} = context;
 
@@ -96,7 +92,7 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 			const context = getContext< DropdownContext >();
 
 			const {
-				currentItem: { label, value },
+				item: { label, value },
 				selectedItems,
 			} = context;
 
