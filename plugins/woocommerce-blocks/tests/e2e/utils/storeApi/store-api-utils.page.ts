@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
-
-/**
- * Internal dependencies
- */
 
 export class StoreApiUtils {
 	private requestUtils: RequestUtils;

@@ -3,6 +3,7 @@
  */
 import { request as req } from '@playwright/test';
 import fs from 'fs/promises';
+
 /**
  * Internal dependencies
  */
