@@ -414,11 +414,11 @@ test.describe( 'Product Collection', () => {
 			await pageObject.createNewPostAndInsertBlock( 'topRated' );
 
 			const topRatedProducts = [
+				'V Neck T Shirt',
+				'Hoodie',
+				'Hoodie with Logo',
+				'T-Shirt',
 				'Beanie',
-				'Logo Collection',
-				'Belt',
-				'WordPress Pennant',
-				'Cap',
 			];
 
 			await expect( pageObject.products ).toHaveCount( 5 );
