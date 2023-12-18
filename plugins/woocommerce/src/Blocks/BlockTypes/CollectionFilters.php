@@ -154,16 +154,12 @@ final class CollectionFilters extends AbstractBlock {
 
 		$filters = Package::container()->get( CollectionFilterer::class );
 
-		$query_vars = array();
-
 		if ( ! empty($block->context['query'] ) && ! $block->context['query']['inherit'] ) {
 			$query_vars = build_query_vars_from_query_block( $block, 1 );
 		} else {
 			global $wp_query;
 			$query_vars = array_filter( $wp_query->query_vars );
 		}
-
-		$query_vars['fields'] = 'ids';
 
 		if ( ! empty( $collection_data_params['calculate_price_range'] ) ) {
 			$filter_query_vars = $query_vars;

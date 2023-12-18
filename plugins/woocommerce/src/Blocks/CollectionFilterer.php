@@ -12,6 +12,13 @@ class CollectionFilterer {
 		add_filter( 'posts_clauses', array( $this, 'main_query_filter' ), 10, 2 );
 	}
 
+	/**
+	 * Filter the posts clauses of the main query to suport global filters.
+	 *
+	 * @param array     $args     Query args.
+	 * @param \WP_Query $wp_query WP_Query object.
+	 * @return array
+	 */
 	public function main_query_filter( $args, $wp_query ) {
 		if ( ! $wp_query->is_main_query() ) {
 			return $args;
@@ -24,36 +31,53 @@ class CollectionFilterer {
 		return $args;
 	}
 
+	/**
+	 * Add conditional query clauses based on the filter params in query vars.
+	 *
+	 * @param array     $args  	  Query args.
+	 * @param \WP_Query $wp_query WP_Query object.
+	 * @return array
+	 */
 	public function add_query_clauses( $args, $wp_query ) {
-		if ( $wp_query->get( 'filter_stock_status' ) ) {
-			$args = $this->stock_filter_clauses( $args, $wp_query->get( 'filter_stock_status' ) );
-		}
+		$args = $this->stock_filter_clauses( $args, $wp_query );
 
-		if ( $wp_query->get( 'min_price' ) || $wp_query->get( 'max_price' ) ) {
-			$args = $this->price_filter_clauses( $args, $wp_query );
-		}
+		$args = $this->price_filter_clauses( $args, $wp_query );
 
-		if ( $wp_query->get( 'min_price' ) || $wp_query->get( 'max_price' ) ) {
-			$args = $this->price_filter_clauses( $args, $wp_query );
-		}
-
-		$chosen_attributes = $this->get_chosen_attributes( $wp_query->query_vars );
-
-		if ( ! empty( $chosen_attributes ) ) {
-			$args = $this->attribute_filter_clauses( $args, $chosen_attributes );
-		}
+		$args = $this->attribute_filter_clauses( $args, $wp_query );
 
 		return $args;
 	}
 
-	private function stock_filter_clauses( $args, $status ) {
+	/**
+	 * Add query clauses for stock filter.
+	 *
+	 * @param array     $args     Query args.
+	 * @param \WP_Query $wp_query WP_Query object.
+	 * @return array
+	 */
+	private function stock_filter_clauses( $args, $wp_query ) {
+		if ( ! $wp_query->get( 'filter_stock_status' ) ) {
+			return $args;
+		}
+
 		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . $status . '")';
+		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . $wp_query->get( 'filter_stock_status' ) . '")';
 
 		return $args;
 	}
 
+	/**
+	 * Add query clauses for price filter.
+	 *
+	 * @param array     $args     Query args.
+	 * @param \WP_Query $wp_query WP_Query object.
+	 * @return array
+	 */
 	private function price_filter_clauses( $args, $wp_query ) {
+		if ( ! $wp_query->get( 'min_price' ) && ! $wp_query->get( 'max_price' ) ) {
+			return $args;
+		}
+
 		global $wpdb;
 
 		$adjust_for_taxes = $this->adjust_price_filters_for_displayed_taxes();
@@ -97,6 +121,12 @@ class CollectionFilterer {
 		return $sql;
 	}
 
+	/**
+	 * Get price data for current products.
+	 *
+	 * @param array $query_vars The WP_Query arguments.
+	 * @return object
+	 */
 	public function get_filtered_price( $query_vars ) {
 		global $wpdb;
 
@@ -105,6 +135,7 @@ class CollectionFilterer {
 
 		$query_vars['no_found_rows']  = true;
 		$query_vars['posts_per_page'] = -1;
+		$query_vars['fields']         = 'ids';
 		$query                        = new \WP_Query();
 		$result                       = $query->query( $query_vars );
 		$product_query_sql            = $query->request;
@@ -136,6 +167,7 @@ class CollectionFilterer {
 
 		$query_vars['no_found_rows']  = true;
 		$query_vars['posts_per_page'] = -1;
+		$query_vars['fields']         = 'ids';
 		$query                        = new \WP_Query();
 		$result                       = $query->query( $query_vars );
 		$product_query_sql            = $query->request;
@@ -300,9 +332,10 @@ class CollectionFilterer {
 
 		$query_vars['no_found_rows']  = true;
 		$query_vars['posts_per_page'] = -1;
-		$query                                       = new \WP_Query();
-		$result                                      = $query->query( $query_vars );
-		$product_query_sql                           = $query->request;
+		$query_vars['fields']         = 'ids';
+		$query                        = new \WP_Query();
+		$result                       = $query->query( $query_vars );
+		$product_query_sql            = $query->request;
 
 		remove_filter( 'posts_clauses', array( $this, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
@@ -321,6 +354,13 @@ class CollectionFilterer {
 		return array_map( 'absint', wp_list_pluck( $results, 'product_count', 'rounded_average_rating' ) );
 	}
 
+	/**
+	 * Get attribute counts for the current products.
+	 *
+	 * @param array  $query_vars         The WP_Query arguments.
+	 * @param string $attribute_to_count Attribute taxonomy name.
+	 * @return array termId=>count pairs.
+	 */
 	public function get_attribute_counts( $query_vars, $attribute_to_count ) {
 		global $wpdb;
 
@@ -329,6 +369,7 @@ class CollectionFilterer {
 
 		$query_vars['no_found_rows']  = true;
 		$query_vars['posts_per_page'] = -1;
+		$query_vars['fields']         = 'ids';
 		$query                        = new \WP_Query();
 		$result                       = $query->query( $query_vars );
 		$product_query_sql            = $query->request;
@@ -357,7 +398,20 @@ class CollectionFilterer {
 		return wc_get_container()->get( LookupDataStore::class )->get_lookup_table_name();
 	}
 
-	private function attribute_filter_clauses( array $args, array $attributes_to_filter_by ) {
+	/**
+	 * Add query clauses for attribute filter.
+	 *
+	 * @param array     $args     Query args.
+	 * @param \WP_Query $wp_query WP_Query object.
+	 * @return array
+	 */
+	private function attribute_filter_clauses( $args, $wp_query ) {
+		$chosen_attributes = $this->get_chosen_attributes( $wp_query->query_vars );
+
+		if( empty( $chosen_attributes ) ) {
+			return $args;
+		}
+
 		global $wpdb;
 
 		// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
@@ -371,7 +425,7 @@ class CollectionFilterer {
 
 		$attribute_ids_for_and_filtering = array();
 
-		foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
+		foreach ( $chosen_attributes as $taxonomy => $data ) {
 			$all_terms                  = get_terms( $taxonomy, array( 'hide_empty' => false ) );
 			$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
 			$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
@@ -427,6 +481,12 @@ class CollectionFilterer {
 		return $args;
 	}
 
+	/**
+	 * Get an array of attributes and terms selected from query arguments.
+	 *
+	 * @param array $query_vars The WP_Query arguments.
+	 * @return array
+	 */
 	private function get_chosen_attributes( $query_vars ) {
 		$chosen_attributes = array();
 
