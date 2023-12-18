@@ -137,34 +137,34 @@
 		"content": {
 			"titles": [
 				{
-					"default": "New: Retro Glass Jug",
-					"ai_prompt": "Generate a one-word graphic title that encapsulates the essence of the business. The title should reflect the key elements and characteristics of the business"
-				},
-				{
 					"default": "Timeless elegance",
-					"ai_prompt": "Generate a two-words graphic title that encapsulates the essence of the business. The title should reflect the key elements and characteristics of the business"
+					"ai_prompt": "Write a two words title for advertising the store"
 				},
 				{
 					"default": "Durable glass",
-					"ai_prompt": "Generate a two-words graphic title that encapsulates the essence of the business. The title should reflect the key elements and characteristics of the business"
+					"ai_prompt": "Write a two words title for advertising the store"
 				},
 				{
 					"default": "Versatile charm",
-					"ai_prompt": "Generate a two-words graphic title that encapsulates the essence of the business. The title should reflect the key elements and characteristics of the business"
+					"ai_prompt": "Write a two words title for advertising the store"
+				},
+				{
+					"default": "New: Retro Glass Jug",
+					"ai_prompt": "Write a title with less than 20 characters for advertising the store"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "Elevate your table with a 330ml Retro Glass Jug, blending classic design and durable hardened glass.",
-					"ai_prompt": "Craft a catchy product description emphasizing one of its qualities with at least 80 characters"
+					"ai_prompt": "Write a text with approximately 130 characters, to describe a product the business is selling"
 				},
 				{
 					"default": "Crafted from resilient thick glass, this jug ensures lasting quality, making it perfect for everyday use with a touch of vintage charm.",
-					"ai_prompt": "Craft a catchy product description emphasizing one of its qualities with at least 80 characters"
+					"ai_prompt": "Write a text with approximately 130 characters, to describe a product the business is selling"
 				},
 				{
 					"default": "The Retro Glass Jug's classic silhouette effortlessly complements any setting, making it the ideal choice for serving beverages with style and flair.",
-					"ai_prompt": "Craft a catchy product description emphasizing one of its qualities with at least 80 characters"
+					"ai_prompt": "Write a long text, with at least 130 characters, to describe a product the business is selling"
 				}
 			]
 		}
@@ -551,34 +551,34 @@
 		"content": {
 			"titles": [
 				{
-					"default": "What our customers say",
-					"ai_prompt": "A title that advertises the set of testimonials with a maximum of 25 characters"
-				},
-				{
 					"default": "Eclectic finds, ethical delights",
-					"ai_prompt": "A title that advertises a customer product review with a maximum 25 characters"
+					"ai_prompt": "Write a short title advertising a testimonial from a customer"
 				},
 				{
 					"default": "Sip, Shop, Savor",
-					"ai_prompt": "A title that advertises a customer product review with a maximum 10 characters"
+					"ai_prompt": "Write a short title advertising a testimonial from a customer"
 				},
 				{
 					"default": "LOCAL LOVE",
-					"ai_prompt": "A title that advertises a customer product review with a maximum 15 characters"
+					"ai_prompt": "Write a short title advertising a testimonial from a customer"
+				},
+				{
+					"default": "What our customers say",
+					"ai_prompt": "Write just 4 words to advertise testimonials from customers"
 				}
 			],
 			"descriptions": [
 				{
 					"default": "Transformed my daily routine with unique, eco-friendly treasures. Exceptional quality and service. Proud to support a store that aligns with my values.",
-					"ai_prompt": "A customer product review with at least 170 characters"
+					"ai_prompt": "Write the testimonial from a customer with approximately 150 characters"
 				},
 				{
 					"default": "The organic coffee beans are a revelation. Each sip feels like a journey. Beautifully crafted accessories add a touch of elegance to my home.",
-					"ai_prompt": "A customer product review with at least 170 characters"
+					"ai_prompt": "Write the testimonial from a customer with approximately 150 characters"
 				},
 				{
 					"default": "From sustainably sourced teas to chic vases, this store is a treasure trove. Love knowing my purchases contribute to a greener planet.",
-					"ai_prompt": "A customer product review with at least 170 characters"
+					"ai_prompt": "Write the testimonial from a customer with approximately 150 characters"
 				}
 			]
 		}

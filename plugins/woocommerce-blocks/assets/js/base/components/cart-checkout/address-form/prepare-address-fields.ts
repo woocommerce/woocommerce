@@ -7,7 +7,7 @@ import {
 	AddressField,
 	AddressFields,
 	CountryAddressFields,
-	defaultAddressFields,
+	defaultFields,
 	KeyedAddressField,
 	LocaleSpecificAddressField,
 } from '@woocommerce/settings';
@@ -114,7 +114,7 @@ const prepareAddressFields = (
 
 	return fields
 		.map( ( field ) => {
-			const defaultConfig = defaultAddressFields[ field ] || {};
+			const defaultConfig = defaultFields[ field ] || {};
 			const localeConfig = localeConfigs[ field ] || {};
 			const fieldConfig = fieldConfigs[ field ] || {};
 

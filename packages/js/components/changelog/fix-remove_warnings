@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove legacy context API usage from Link component.
