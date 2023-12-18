@@ -4,9 +4,14 @@ namespace Automattic\WooCommerce\Blocks;
 use WC_Tax;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 
-class CollectionFilterer {
+/**
+ * Process the collection query data for filtering purposes.
+ */
+final class CollectionFilterer {
 	/**
 	 * Initialization method.
+	 *
+	 * @internal
 	 */
 	public function init() {
 		add_filter( 'posts_clauses', array( $this, 'main_query_filter' ), 10, 2 );
@@ -34,15 +39,13 @@ class CollectionFilterer {
 	/**
 	 * Add conditional query clauses based on the filter params in query vars.
 	 *
-	 * @param array     $args  	  Query args.
+	 * @param array     $args     Query args.
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
 	public function add_query_clauses( $args, $wp_query ) {
 		$args = $this->stock_filter_clauses( $args, $wp_query );
-
 		$args = $this->price_filter_clauses( $args, $wp_query );
-
 		$args = $this->attribute_filter_clauses( $args, $wp_query );
 
 		return $args;
@@ -160,7 +163,7 @@ class CollectionFilterer {
 	 */
 	public function get_stock_status_counts( $query_vars ) {
 		global $wpdb;
-		$stock_status_options  = array_map( 'esc_sql', array_keys( wc_get_product_stock_status_options() ) );
+		$stock_status_options = array_map( 'esc_sql', array_keys( wc_get_product_stock_status_options() ) );
 
 		add_filter( 'posts_clauses', array( $this, 'add_query_clauses' ), 10, 2 );
 		add_filter( 'posts_pre_query', '__return_empty_array' );
@@ -230,7 +233,7 @@ class CollectionFilterer {
 			return '';
 		}
 
-		$or_queries = [];
+		$or_queries = array();
 
 		// We need to adjust the filter for each possible tax class and combine the queries into one.
 		foreach ( $product_tax_classes as $tax_class ) {
@@ -394,6 +397,11 @@ class CollectionFilterer {
 		return array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 	}
 
+	/**
+	 * Get attribute lookup table name.
+	 *
+	 * @return string
+	 */
 	private function get_lookup_table_name() {
 		return wc_get_container()->get( LookupDataStore::class )->get_lookup_table_name();
 	}
@@ -408,7 +416,7 @@ class CollectionFilterer {
 	private function attribute_filter_clauses( $args, $wp_query ) {
 		$chosen_attributes = $this->get_chosen_attributes( $wp_query->query_vars );
 
-		if( empty( $chosen_attributes ) ) {
+		if ( empty( $chosen_attributes ) ) {
 			return $args;
 		}
 
@@ -504,8 +512,8 @@ class CollectionFilterer {
 					continue;
 				}
 
-				$query_type = ! empty( $query_vars[ 'query_type_' . $attribute ] ) && in_array( $query_vars[ 'query_type_' . $attribute ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $query_vars[ 'query_type_' . $attribute ] ) ) : '';
-				$chosen_attributes[ $taxonomy ]['terms'] = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding.
+				$query_type                                   = ! empty( $query_vars[ 'query_type_' . $attribute ] ) && in_array( $query_vars[ 'query_type_' . $attribute ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $query_vars[ 'query_type_' . $attribute ] ) ) : '';
+				$chosen_attributes[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding.
 				$chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : 'and';
 			}
 		}

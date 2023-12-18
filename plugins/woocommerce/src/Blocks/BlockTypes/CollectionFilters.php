@@ -144,17 +144,17 @@ final class CollectionFilters extends AbstractBlock {
 			return array();
 		}
 
-		$data    = [
+		$data = array(
 			'min_price'           => null,
 			'max_price'           => null,
 			'attribute_counts'    => null,
 			'stock_status_counts' => null,
 			'rating_counts'       => null,
-		];
+		);
 
 		$filters = Package::container()->get( CollectionFilterer::class );
 
-		if ( ! empty($block->context['query'] ) && ! $block->context['query']['inherit'] ) {
+		if ( ! empty( $block->context['query'] ) && ! $block->context['query']['inherit'] ) {
 			$query_vars = build_query_vars_from_query_block( $block, 1 );
 		} else {
 			global $wp_query;
@@ -165,10 +165,10 @@ final class CollectionFilters extends AbstractBlock {
 			$filter_query_vars = $query_vars;
 			unset( $filter_query_vars['min_price'], $filter_query_vars['max_price'] );
 
-			$price_results     = $filters->get_filtered_price( $query_vars );
+			$price_results       = $filters->get_filtered_price( $query_vars );
 			$data['price_range'] = array(
-			'min_price' => intval(floor( $price_results->min_price )),
-			'max_price' => intval(ceil( $price_results->max_price )),
+				'min_price' => intval( floor( $price_results->min_price ) ),
+				'max_price' => intval( ceil( $price_results->max_price ) ),
 			);
 		}
 
@@ -178,7 +178,7 @@ final class CollectionFilters extends AbstractBlock {
 
 			$counts = $filters->get_stock_status_counts( $filter_query_vars );
 
-			$data['stock_status_counts'] = [];
+			$data['stock_status_counts'] = array();
 
 			foreach ( $counts as $key => $value ) {
 				$data['stock_status_counts'][] = array(
@@ -195,13 +195,13 @@ final class CollectionFilters extends AbstractBlock {
 			if ( ! empty( $filter_query_vars['tax_query'] ) ) {
 				foreach ( $filter_query_vars['tax_query'] as $key => $tax_query ) {
 					if ( isset( $tax_query['rating_filter'] ) && $tax_query['rating_filter'] ) {
-						unset( $filter_query_vars['tax_query'][$key] );
+						unset( $filter_query_vars['tax_query'][ $key ] );
 					}
 				}
 			}
 
 			$counts                = $filters->get_rating_counts( $filter_query_vars );
-			$data['rating_counts'] = [];
+			$data['rating_counts'] = array();
 
 			foreach ( $counts as $key => $value ) {
 				$data['rating_counts'][] = array(
@@ -218,12 +218,12 @@ final class CollectionFilters extends AbstractBlock {
 				}
 
 				$filter_query_vars = $query_vars;
-				unset( $filter_query_vars[ 'filter_' . str_replace( 'pa_', '', $attributes_to_count['taxonomy']) ] );
-				unset($filter_query_vars['taxonomy']);
-				unset($filter_query_vars['terms']);
-				foreach( $filter_query_vars['tax_query'] as $key => $tax_query ) {
+				unset( $filter_query_vars[ 'filter_' . str_replace( 'pa_', '', $attributes_to_count['taxonomy'] ) ] );
+				unset( $filter_query_vars['taxonomy'] );
+				unset( $filter_query_vars['terms'] );
+				foreach ( $filter_query_vars['tax_query'] as $key => $tax_query ) {
 					if ( is_array( $tax_query ) && $tax_query['taxonomy'] === $attributes_to_count['taxonomy'] ) {
-						unset($filter_query_vars['tax_query'][$key]);
+						unset( $filter_query_vars['tax_query'][ $key ] );
 					}
 				}
 
@@ -236,7 +236,6 @@ final class CollectionFilters extends AbstractBlock {
 					);
 				}
 			}
-
 		}
 
 		return $data;
