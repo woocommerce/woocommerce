@@ -58,6 +58,7 @@ export const CartCheckoutSidebarCompatibilityNotice = ( {
 			<SwitchToClassicShortcodeButton
 				block={ blockName }
 				clientId={ clientId }
+				type={ 'generic' }
 			/>
 		</Notice>
 	);

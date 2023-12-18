@@ -21,11 +21,13 @@ import './editor.scss';
 interface SwitchToClassicShortcodeButtonProps {
 	block: 'woocommerce/cart' | 'woocommerce/checkout';
 	clientId: string;
+	type: string;
 }
 
 export function SwitchToClassicShortcodeButton( {
 	block,
 	clientId,
+	type,
 }: SwitchToClassicShortcodeButtonProps ): JSX.Element {
 	const { createInfoNotice } = useDispatch( noticesStore );
 	const { replaceBlock, selectBlock } = useDispatch( blockEditorStore );
@@ -66,6 +68,10 @@ export function SwitchToClassicShortcodeButton( {
 	const handleSwitchToClassicShortcodeClick = () => {
 		recordEvent( 'switch_to_classic_shortcode_click', {
 			shortcode: block === 'woocommerce/checkout' ? 'checkout' : 'cart',
+			notice:
+				type === 'incompatible'
+					? 'incompatible_notice'
+					: 'generic_notice',
 		} );
 		openModal();
 	};
@@ -74,6 +80,10 @@ export function SwitchToClassicShortcodeButton( {
 		undo();
 		recordEvent( 'switch_to_classic_shortcode_undo', {
 			shortcode: block === 'woocommerce/checkout' ? 'checkout' : 'cart',
+			notice:
+				type === 'incompatible'
+					? 'incompatible_notice'
+					: 'generic_notice',
 		} );
 	};
 
@@ -87,6 +97,10 @@ export function SwitchToClassicShortcodeButton( {
 		);
 		recordEvent( 'switch_to_classic_shortcode_confirm', {
 			shortcode: block === 'woocommerce/checkout' ? 'checkout' : 'cart',
+			notice:
+				type === 'incompatible'
+					? 'incompatible_notice'
+					: 'generic_notice',
 		} );
 		selectClassicShortcodeBlock();
 		createInfoNotice( snackbarLabel, {
@@ -104,6 +118,10 @@ export function SwitchToClassicShortcodeButton( {
 	const handleCancelClick = () => {
 		recordEvent( 'switch_to_classic_shortcode_cancel', {
 			shortcode: block === 'woocommerce/checkout' ? 'checkout' : 'cart',
+			notice:
+				type === 'incompatible'
+					? 'incompatible_notice'
+					: 'generic_notice',
 		} );
 		closeModal();
 	};
