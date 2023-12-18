@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
@@ -9,6 +10,9 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
+use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
+use Automattic\WooCommerce\Blocks\Package;
 
 /**
  * Checkout class.
@@ -79,7 +83,7 @@ class Checkout extends AbstractCartRoute {
 				'args'                => array_merge(
 					[
 						'payment_data' => [
-							'description' => __( 'Data to pass through to the payment method when processing payment.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Data to pass through to the payment method when processing payment.', 'woocommerce' ),
 							'type'        => 'array',
 							'items'       => [
 								'type'       => 'object',
@@ -376,7 +380,7 @@ class Checkout extends AbstractCartRoute {
 		if ( ! $this->order instanceof \WC_Order ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_missing_order',
-				__( 'Unable to create order', 'woo-gutenberg-products-block' ),
+				__( 'Unable to create order', 'woocommerce' ),
 				500
 			);
 		}
@@ -417,6 +421,8 @@ class Checkout extends AbstractCartRoute {
 		foreach ( $request['billing_address'] as $key => $value ) {
 			if ( is_callable( [ $customer, "set_billing_$key" ] ) ) {
 				$customer->{"set_billing_$key"}( $value );
+			} elseif ( $this->additional_fields_controller->is_field( $key, 'address' ) ) {
+				$this->additional_fields_controller->persist_field_for_customer( "/billing/$key", $value, $customer );
 			}
 		}
 
@@ -428,6 +434,8 @@ class Checkout extends AbstractCartRoute {
 				$customer->{"set_shipping_$key"}( $value );
 			} elseif ( 'phone' === $key ) {
 				$customer->update_meta_data( 'shipping_phone', $value );
+			} elseif ( $this->additional_fields_controller->is_field( $key, 'address' ) ) {
+				$this->additional_fields_controller->persist_field_for_customer( "/shipping/$key", $value, $customer );
 			}
 		}
 
@@ -460,7 +468,7 @@ class Checkout extends AbstractCartRoute {
 			if ( $requires_payment_method ) {
 				throw new RouteException(
 					'woocommerce_rest_checkout_missing_payment_method',
-					__( 'No payment method provided.', 'woo-gutenberg-products-block' ),
+					__( 'No payment method provided.', 'woocommerce' ),
 					400
 				);
 			}
@@ -474,7 +482,7 @@ class Checkout extends AbstractCartRoute {
 				'woocommerce_rest_checkout_payment_method_disabled',
 				sprintf(
 					// Translators: %s Payment method ID.
-					__( '%s is not available for this order—please choose a different payment method', 'woo-gutenberg-products-block' ),
+					__( '%s is not available for this order—please choose a different payment method', 'woocommerce' ),
 					esc_html( $gateway_title )
 				),
 				400
@@ -522,13 +530,13 @@ class Checkout extends AbstractCartRoute {
 				case 'registration-error-invalid-email':
 					throw new RouteException(
 						'registration-error-invalid-email',
-						__( 'Please provide a valid email address.', 'woo-gutenberg-products-block' ),
+						__( 'Please provide a valid email address.', 'woocommerce' ),
 						400
 					);
 				case 'registration-error-email-exists':
 					throw new RouteException(
 						'registration-error-email-exists',
-						__( 'An account is already registered with your email address. Please log in before proceeding.', 'woo-gutenberg-products-block' ),
+						__( 'An account is already registered with your email address. Please log in before proceeding.', 'woocommerce' ),
 						400
 					);
 			}

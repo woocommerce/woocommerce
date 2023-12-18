@@ -48,64 +48,64 @@ class ProductReviewSchema extends AbstractSchema {
 	public function get_properties() {
 		$properties = [
 			'id'                     => [
-				'description' => __( 'Unique identifier for the resource.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'date_created'           => [
-				'description' => __( "The date the review was created, in the site's timezone.", 'woo-gutenberg-products-block' ),
+				'description' => __( "The date the review was created, in the site's timezone.", 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'formatted_date_created' => [
-				'description' => __( "The date the review was created, in the site's timezone in human-readable format.", 'woo-gutenberg-products-block' ),
+				'description' => __( "The date the review was created, in the site's timezone in human-readable format.", 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'date_created_gmt'       => [
-				'description' => __( 'The date the review was created, as GMT.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'The date the review was created, as GMT.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'product_id'             => [
-				'description' => __( 'Unique identifier for the product that the review belongs to.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Unique identifier for the product that the review belongs to.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'product_name'           => [
-				'description' => __( 'Name of the product that the review belongs to.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Name of the product that the review belongs to.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'product_permalink'      => [
-				'description' => __( 'Permalink of the product that the review belongs to.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Permalink of the product that the review belongs to.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'product_image'          => [
-				'description' => __( 'Image of the product that the review belongs to.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Image of the product that the review belongs to.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 				'properties'  => $this->image_attachment_schema->get_properties(),
 			],
 			'reviewer'               => [
-				'description' => __( 'Reviewer name.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Reviewer name.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'review'                 => [
-				'description' => __( 'The content of the review.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'The content of the review.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'arg_options' => [
@@ -114,13 +114,13 @@ class ProductReviewSchema extends AbstractSchema {
 				'readonly'    => true,
 			],
 			'rating'                 => [
-				'description' => __( 'Review rating (0 to 5).', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Review rating (0 to 5).', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'verified'               => [
-				'description' => __( 'Shows if the reviewer bought the product or not.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Shows if the reviewer bought the product or not.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -134,14 +134,14 @@ class ProductReviewSchema extends AbstractSchema {
 			foreach ( $avatar_sizes as $size ) {
 				$avatar_properties[ $size ] = array(
 					/* translators: %d: avatar image size in pixels */
-					'description' => sprintf( __( 'Avatar URL with image size of %d pixels.', 'woo-gutenberg-products-block' ), $size ),
+					'description' => sprintf( __( 'Avatar URL with image size of %d pixels.', 'woocommerce' ), $size ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'embed', 'view', 'edit' ),
 				);
 			}
 			$properties['reviewer_avatar_urls'] = array(
-				'description' => __( 'Avatar URLs for the object reviewer.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Avatar URLs for the object reviewer.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,

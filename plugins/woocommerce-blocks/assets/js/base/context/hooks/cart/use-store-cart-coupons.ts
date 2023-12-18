@@ -58,7 +58,7 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 							/* translators: %s coupon code. */
 							__(
 								'Coupon code "%s" has been applied to your cart.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							couponCode
 						),
@@ -98,7 +98,7 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 							/* translators: %s coupon code. */
 							__(
 								'Coupon code "%s" has been removed from your cart.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							couponCode
 						),

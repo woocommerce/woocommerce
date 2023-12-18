@@ -53,7 +53,7 @@ const FrontendBlock = ( {
 				[ validationErrorId ]: {
 					message: __(
 						'Please read and accept the terms and conditions.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					hidden: true,
 				},

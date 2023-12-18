@@ -34,11 +34,11 @@ class CartUpdateItem extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => [
 					'key'      => [
-						'description' => __( 'Unique identifier (key) for the cart item to update.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Unique identifier (key) for the cart item to update.', 'woocommerce' ),
 						'type'        => 'string',
 					],
 					'quantity' => [
-						'description' => __( 'New quantity of the item in the cart.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'New quantity of the item in the cart.', 'woocommerce' ),
 						'type'        => 'integer',
 					],
 				],

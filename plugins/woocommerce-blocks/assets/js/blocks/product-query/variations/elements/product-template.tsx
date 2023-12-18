@@ -16,10 +16,10 @@ export const VARIATION_NAME = 'woocommerce/product-query/product-template';
 registerElementVariation( CORE_NAME, {
 	blockDescription: __(
 		'Contains the block elements used to render a product, like its name, featured image, rating, and more.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	blockIcon: <Icon icon={ layout } />,
-	blockTitle: __( 'Product template', 'woo-gutenberg-products-block' ),
+	blockTitle: __( 'Product template', 'woocommerce' ),
 	variationName: VARIATION_NAME,
 	scope: [ 'block', 'inserter' ],
 } );

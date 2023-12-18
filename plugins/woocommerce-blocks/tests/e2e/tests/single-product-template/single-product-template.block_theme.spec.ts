@@ -52,6 +52,5 @@ for ( const { classes, product, frontendPage } of products ) {
 			classes.forEach( ( className ) => {
 				expect( bodyClasses?.split( ' ' ) ).toContain( className );
 			} );
-		} )
-	);
+		} ) );
 }

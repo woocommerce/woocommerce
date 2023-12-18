@@ -66,7 +66,7 @@ const TotalsFooterItem = ( {
 	const { receiveCart, ...cart } = useStoreCart();
 	const label = applyCheckoutFilter( {
 		filterName: 'totalLabel',
-		defaultValue: __( 'Total', 'woo-gutenberg-products-block' ),
+		defaultValue: __( 'Total', 'woocommerce' ),
 		extensions: cart.extensions,
 		arg: { cart },
 	} );
@@ -76,7 +76,7 @@ const TotalsFooterItem = ( {
 		taxLines && taxLines.length > 0
 			? sprintf(
 					/* translators: %s is a list of tax rates */
-					__( 'Including %s', 'woo-gutenberg-products-block' ),
+					__( 'Including %s', 'woocommerce' ),
 					taxLines
 						.map( ( { name, price } ) => {
 							return `${ formatPrice(
@@ -86,10 +86,7 @@ const TotalsFooterItem = ( {
 						} )
 						.join( ', ' )
 			  )
-			: __(
-					'Including <TaxAmount/> in taxes',
-					'woo-gutenberg-products-block'
-			  );
+			: __( 'Including <TaxAmount/> in taxes', 'woocommerce' );
 
 	return (
 		<TotalsItem

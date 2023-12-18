@@ -37,7 +37,7 @@ const SaveSettings = () => {
 				} }
 				type="submit"
 			>
-				{ __( 'Save changes', 'woo-gutenberg-products-block' ) }
+				{ __( 'Save changes', 'woocommerce' ) }
 			</Button>
 		</SaveSectionWrapper>
 	);

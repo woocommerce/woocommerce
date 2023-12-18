@@ -9,24 +9,16 @@ export const UpgradeNotice = ( props: { upgradeBlock: () => void } ) => {
 	const notice = createInterpolateElement(
 		__(
 			'Upgrade all Products (Beta) blocks on this page to <strongText /> for more features!',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		{
 			strongText: (
-				<strong>
-					{ __(
-						`Product Collection`,
-						'woo-gutenberg-products-block'
-					) }
-				</strong>
+				<strong>{ __( `Product Collection`, 'woocommerce' ) }</strong>
 			),
 		}
 	);
 
-	const buttonLabel = __(
-		'Upgrade to Product Collection',
-		'woo-gutenberg-products-block'
-	);
+	const buttonLabel = __( 'Upgrade to Product Collection', 'woocommerce' );
 
 	const handleClick = () => {
 		props.upgradeBlock();

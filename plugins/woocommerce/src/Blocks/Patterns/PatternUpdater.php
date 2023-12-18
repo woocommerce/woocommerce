@@ -36,10 +36,6 @@ class PatternUpdater {
 	 * @return bool|WP_Error
 	 */
 	public function generate_content( $ai_connection, $token, $images, $business_description ) {
-		if ( empty( $images ) ) {
-			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woo-gutenberg-products-block' ) );
-		}
-
 		if ( is_wp_error( $images ) ) {
 			return $images;
 		}
@@ -48,22 +44,26 @@ class PatternUpdater {
 			return $token;
 		}
 
+		if ( ! isset( $images['images'] ) ) {
+			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woocommerce' ) );
+		}
+
 		$last_business_description = get_option( 'last_business_description_with_ai_content_generated' );
 
 		if ( $last_business_description === $business_description ) {
 			if ( is_string( $business_description ) && is_string( $last_business_description ) ) {
 				return true;
 			} else {
-				return new \WP_Error( 'business_description_not_found', __( 'No business description provided for generating AI content.', 'woo-gutenberg-products-block' ) );
+				return new \WP_Error( 'business_description_not_found', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
 			}
 		}
 
-		if ( 0 === count( $images ) ) {
+		if ( 0 === count( $images['images'] ) ) {
 			$images = get_transient( 'woocommerce_ai_managed_images' );
 		}
 
-		if ( empty( $images ) ) {
-			return new WP_Error( 'no_images_found', __( 'No images found.', 'woo-gutenberg-products-block' ) );
+		if ( empty( $images['images'] ) ) {
+			return new WP_Error( 'no_images_found', __( 'No images found.', 'woocommerce' ) );
 		}
 
 		// This is required in case something interrupts the execution of the script and the endpoint is called again on retry.
@@ -75,16 +75,16 @@ class PatternUpdater {
 			return $patterns_dictionary;
 		}
 
-		$patterns = $this->assign_selected_images_to_patterns( $patterns_dictionary, $images );
+		$patterns = $this->assign_selected_images_to_patterns( $patterns_dictionary, $images['images'] );
 
 		if ( is_wp_error( $patterns ) ) {
-			return new WP_Error( 'failed_to_set_pattern_images', __( 'Failed to set the pattern images.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'failed_to_set_pattern_images', __( 'Failed to set the pattern images.', 'woocommerce' ) );
 		}
 
 		$ai_generated_patterns_content = $this->generate_ai_content_for_patterns( $ai_connection, $token, $patterns, $business_description );
 
 		if ( is_wp_error( $ai_generated_patterns_content ) ) {
-			return new WP_Error( 'failed_to_set_pattern_content', __( 'Failed to set the pattern content.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'failed_to_set_pattern_content', __( 'Failed to set the pattern content.', 'woocommerce' ) );
 		}
 
 		$patterns_ai_data_post = PatternsHelper::get_patterns_ai_data_post();
@@ -96,7 +96,7 @@ class PatternUpdater {
 		$updated_content = PatternsHelper::upsert_patterns_ai_data_post( $ai_generated_patterns_content );
 
 		if ( is_wp_error( $updated_content ) ) {
-			return new WP_Error( 'failed_to_update_patterns_content', __( 'Failed to update patterns content.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'failed_to_update_patterns_content', __( 'Failed to update patterns content.', 'woocommerce' ) );
 		}
 
 		return true;
@@ -218,7 +218,7 @@ class PatternUpdater {
 		$formatted_prompts = [];
 		foreach ( $prompts as $prompt ) {
 			$formatted_prompts[] = sprintf(
-				"Given the following description '%s' generate long texts for the sections using the following prompts for each one of them: `'%s'`. Ensure each entry is unique and does not repeat the given examples. The response should be an array of data in JSON format. Each element should be an object with the pattern name as the key, and the generated content as values. Do not include backticks or the word json in the response. Here's an example format: `'%s'`",
+				"You are an experienced writer. Given a business described as: '%s', generate content for the sections using the following prompts for each one of them: `'%s'`, always making sure that the expected number of characters is respected. The response should be an array of data in JSON format. Each element should be an object with the pattern name as the key, and the generated content as values. Here's an example format: `'%s'`",
 				$business_description,
 				wp_json_encode( $prompt ),
 				wp_json_encode( $expected_results_format[ $i ] )
@@ -245,7 +245,7 @@ class PatternUpdater {
 		$success            = false;
 		while ( $ai_request_retries < 5 && ! $success ) {
 			$ai_request_retries ++;
-			$ai_responses = $ai_connection->fetch_ai_responses( $token, $formatted_prompts, 60 );
+			$ai_responses = $ai_connection->fetch_ai_responses( $token, $formatted_prompts, 60, 'json_object' );
 
 			if ( is_wp_error( $ai_responses ) ) {
 				continue;
@@ -301,7 +301,7 @@ class PatternUpdater {
 		}
 
 		if ( ! $success ) {
-			return new WP_Error( 'failed_to_fetch_ai_responses', __( 'Failed to fetch AI responses.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'failed_to_fetch_ai_responses', __( 'Failed to fetch AI responses.', 'woocommerce' ) );
 		}
 
 		return $ai_responses;
@@ -421,7 +421,7 @@ class PatternUpdater {
 		$patterns_dictionary = plugin_dir_path( __FILE__ ) . 'dictionary.json';
 
 		if ( ! file_exists( $patterns_dictionary ) ) {
-			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woo-gutenberg-products-block' ) );
+			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woocommerce' ) );
 		}
 
 		return wp_json_file_decode( $patterns_dictionary, array( 'associative' => true ) );

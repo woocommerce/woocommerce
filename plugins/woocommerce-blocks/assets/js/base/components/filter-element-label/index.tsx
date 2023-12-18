@@ -32,12 +32,7 @@ const FilterElementLabel = ( {
 					label={ count.toString() }
 					screenReaderLabel={ sprintf(
 						/* translators: %s number of products. */
-						_n(
-							'%s product',
-							'%s products',
-							count,
-							'woo-gutenberg-products-block'
-						),
+						_n( '%s product', '%s products', count, 'woocommerce' ),
 						count
 					) }
 					wrapperElement="span"

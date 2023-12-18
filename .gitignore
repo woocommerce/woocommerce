@@ -101,3 +101,11 @@ changes.json
 
 # Support .gitkeep Files
 !.gitkeep
+
+# default docs manifest
+/manifest.json
+
+# Metrics tests
+/artifacts
+/plugins/*/artifacts
+/tools/*/artifacts

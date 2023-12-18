@@ -16,7 +16,7 @@ import save from '../save';
  */
 const sharedConfig: Omit< BlockConfiguration, 'attributes' | 'title' > = {
 	category: 'woocommerce-product-elements',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
+	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
 	icon: {
 		src: (
 			<Icon

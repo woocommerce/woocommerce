@@ -47,7 +47,7 @@
 
 		<!-- wp:group {"style":{"spacing":{"padding":{"right":"0","left":"0"}}},"layout":{"type":"constrained"}} -->
 		<div class="wp-block-group" style="padding-right:0;padding-left:0">
-			<!-- wp:search {"label":"","showLabel":false,"placeholder":"<?php esc_html_e( 'Search', 'woo-gutenberg-products-block' ); ?>","buttonText":"<?php esc_html_e( 'Search', 'woo-gutenberg-products-block' ); ?>","buttonUseIcon":true,"query":{"post_type":"product"},"style":{"border":{"radius":"0px"}}} /-->
+			<!-- wp:search {"label":"","showLabel":false,"placeholder":"<?php esc_html_e( 'Search', 'woocommerce' ); ?>","buttonText":"<?php esc_html_e( 'Search', 'woocommerce' ); ?>","buttonUseIcon":true,"query":{"post_type":"product"},"style":{"border":{"radius":"0px"}}} /-->
 		</div>
 		<!-- /wp:group -->
 	</div>
