@@ -215,7 +215,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			)
 		);
 
-		$pricing_wrapper  = Features::is_enabled( 'product-grouped' ) ? $pricing_conditional_wrapper : $basic_details; 
+		$pricing_wrapper  = Features::is_enabled( 'product-grouped' ) ? $pricing_conditional_wrapper : $basic_details;
 		$pricing_columns  = $pricing_wrapper->add_block(
 			array(
 				'id'        => 'product-pricing-columns',
