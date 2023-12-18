@@ -139,10 +139,15 @@ jobs:
               with:
                   fetch-depth: 0
 
+            - name: Read PNPM Version
+              id: read-pnpm-version
+              shell: bash
+              run: echo "version=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)" >> $GITHUB_OUTPUT
+
             - name: Setup PNPM
               uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
               with:
-                  version: '8.12.1'
+                  version: ${{ steps.read-pnpm-version.outputs.version }}
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
