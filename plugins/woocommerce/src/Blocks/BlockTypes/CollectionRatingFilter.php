@@ -33,7 +33,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 			return '';
 		}
 
-		$rating_counts = $block->context['collectionData']['rating_counts'] ?? [];
+		$rating_counts = $block->context['collectionData']['rating_counts'] ?? array();
 		$display_style = $attributes['displayStyle'] ?? 'list';
 		$show_counts   = $attributes['showCounts'] ?? false;
 
@@ -78,7 +78,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 
 		$rating_label = sprintf(
 			/* translators: %1$d is referring to rating value. Example: Rated 4 out of 5. */
-			__( 'Rated %1$d out of 5', 'woo-gutenberg-products-block' ),
+			__( 'Rated %1$d out of 5', 'woocommerce' ),
 			$rating,
 		);
 
@@ -145,7 +145,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 					$rating_str  = (string) $rating['rating'];
 					return array(
 						/* translators: %d is referring to the average rating value. Example: Rated 4 out of 5. */
-						'label' => sprintf( __( 'Rated %d out of 5', 'woo-gutenberg-products-block' ), $rating_str ) . ' ' . $count_label,
+						'label' => sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating_str ) . ' ' . $count_label,
 						'value' => $rating['rating'],
 					);
 				}
@@ -162,7 +162,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 					$rating_str = (string) $rating['rating'];
 					return array(
 						/* translators: %d is referring to the average rating value. Example: Rated 4 out of 5. */
-						'label' => sprintf( __( 'Rated %d out of 5', 'woo-gutenberg-products-block' ), $rating_str ) . ' ' . $count_label,
+						'label' => sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating_str ) . ' ' . $count_label,
 						'value' => $rating['rating'],
 					);
 				},
