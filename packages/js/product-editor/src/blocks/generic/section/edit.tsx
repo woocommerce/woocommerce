@@ -2,7 +2,6 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import { Slot } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -73,7 +72,10 @@ export function SectionBlockEdit( {
 						/>
 					</div>
 
-					<Slot name={ clientId } />
+					<BlockSlot
+						name="section-description"
+						clientId={ clientId }
+					/>
 				</HeadingTagName>
 			) }
 
