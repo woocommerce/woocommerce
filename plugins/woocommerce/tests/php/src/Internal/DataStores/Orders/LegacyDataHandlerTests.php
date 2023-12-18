@@ -42,7 +42,7 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 	public function test_post_data_cleanup() {
 		$this->enable_cot_sync();
 		$orders = array(
-			OrderHelper::create_complex_data_store_order(),
+			OrderHelper::create_order(),
 			OrderHelper::create_order(),
 		);
 		$this->disable_cot_sync();
@@ -70,6 +70,43 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 
 		// Confirm that we now have 1 unsynced order (due to the removal of the backup data).
 		$this->assertEquals( 1, wc_get_container()->get( DataSynchronizer::class )->get_current_orders_pending_sync_count() );
+	}
+
+	/**
+	 * Tests that cleanup for a non-existent order throws an exception.
+	 */
+	public function test_post_data_cleanup_non_existent() {
+		$this->expectException( \Exception::class );
+		$this->sut->cleanup_post_data( 0 );
+	}
+
+	/**
+	 * Tests `get_orders_for_cleanup()` with various arguments, including ranges of orders and individual order IDs.
+	 */
+	public function test_get_orders_for_cleanup() {
+		// Create a few orders.
+		$this->enable_cot_sync();
+		$order_ids = array();
+		for ( $i = 0; $i < 10; $i++ ) {
+			$order_id    = OrderHelper::create_order()->get_id();
+			$order_ids[] = $order_id;
+		}
+		$this->disable_cot_sync();
+
+		$this->assertCount( 0, $this->sut->get_orders_for_cleanup( array( max( $order_ids ) + 1 ) ) );
+		$this->assertCount( 10, $this->sut->get_orders_for_cleanup() );
+		$this->assertCount( 10, $this->sut->get_orders_for_cleanup( $order_ids ) );
+
+		$interval = min( $order_ids ) . '-' . max( $order_ids );
+		$this->assertCount( 10, $this->sut->get_orders_for_cleanup( array( $interval ) ) );
+		$this->assertCount( 0, $this->sut->get_orders_for_cleanup( array( '300-2' ) ) );
+
+		$slice    = array_slice( $order_ids, 5 );
+		$interval = min( $slice ) . '-' . max( $slice );
+		$this->assertCount( 5, $this->sut->get_orders_for_cleanup( $slice ) );
+		$this->assertCount( 5, $this->sut->get_orders_for_cleanup( array( $interval ) ) );
+		$this->assertCount( 7, $this->sut->get_orders_for_cleanup( array( $order_ids[0], $order_ids[1], $interval ) ) );
+		$this->assertCount( 10, $this->sut->get_orders_for_cleanup( array( $interval, '0-' . min( $slice ) ) ) );
 	}
 
 }
