@@ -516,5 +516,65 @@ test.describe( 'Product Collection', () => {
 
 			await expect( pageObject.products ).toHaveCount( 9 );
 		} );
+
+		test( 'Product Catalog Collection can be added in product archive and inherits query from template', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.goToProductCatalogAndInsertCollection(
+				'productCatalog'
+			);
+
+			const sidebarSettings = await pageObject.locateSidebarSettings();
+			const input = sidebarSettings.locator(
+				`${ SELECTORS.inheritQueryFromTemplateControl } input`
+			);
+
+			await expect( input ).toBeChecked();
+		} );
+
+		test.describe( 'Have hidden implementation in UI', () => {
+			test( 'New Arrivals', async ( { pageObject } ) => {
+				await pageObject.createNewPostAndInsertBlock( 'newArrivals' );
+				const input = await pageObject.getOrderByElement();
+
+				await expect( input ).toBeHidden();
+			} );
+
+			test( 'Top Rated', async ( { pageObject } ) => {
+				await pageObject.createNewPostAndInsertBlock( 'topRated' );
+				const input = await pageObject.getOrderByElement();
+
+				await expect( input ).toBeHidden();
+			} );
+
+			test( 'Best Sellers', async ( { pageObject } ) => {
+				await pageObject.createNewPostAndInsertBlock( 'bestSellers' );
+				const input = await pageObject.getOrderByElement();
+
+				await expect( input ).toBeHidden();
+			} );
+
+			test( 'On Sale', async ( { pageObject } ) => {
+				await pageObject.createNewPostAndInsertBlock( 'onSale' );
+				const sidebarSettings =
+					await pageObject.locateSidebarSettings();
+				const input = sidebarSettings.getByLabel(
+					SELECTORS.onSaleControlLabel
+				);
+
+				await expect( input ).toBeHidden();
+			} );
+
+			test( 'Featured', async ( { pageObject } ) => {
+				await pageObject.createNewPostAndInsertBlock( 'featured' );
+				const sidebarSettings =
+					await pageObject.locateSidebarSettings();
+				const input = sidebarSettings.getByLabel(
+					SELECTORS.featuredControlLabel
+				);
+
+				await expect( input ).toBeHidden();
+			} );
+		} );
 	} );
 } );
