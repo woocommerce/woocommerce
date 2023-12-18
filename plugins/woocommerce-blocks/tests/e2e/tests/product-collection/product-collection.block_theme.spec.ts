@@ -499,15 +499,17 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
-		test( 'Product Catalog Collection can be added and displays proper products', async ( {
+		test( "Product Catalog Collection can be added in post and doesn't inherit query from template", async ( {
 			pageObject,
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock( 'productCatalog' );
 
-			const orderBy = await pageObject.getOrderBy();
+			const sidebarSettings = await pageObject.locateSidebarSettings();
+			const input = sidebarSettings.locator(
+				`${ SELECTORS.inheritQueryFromTemplateControl } input`
+			);
 
-			expect( orderBy ).toBe( 'title/asc' );
-
+			await expect( input ).toBeHidden();
 			await expect( pageObject.products ).toHaveCount( 9 );
 
 			await pageObject.publishAndGoToFrontend();
