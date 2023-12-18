@@ -15,13 +15,18 @@ export type DisplayStateProps = {
 export const DisplayState: React.FC< DisplayStateProps > = ( {
 	state = 'visible',
 	children,
+	...props
 } ) => {
 	if ( state === 'visible' ) {
-		return <>{ children }</>;
+		return <div { ...props }>{ children }</div>;
 	}
 
 	if ( state === 'visually-hidden' ) {
-		return <div style={ { display: 'none' } }>{ children }</div>;
+		return (
+			<div { ...props } style={ { display: 'none' } }>
+				{ children }
+			</div>
+		);
 	}
 
 	return null;
