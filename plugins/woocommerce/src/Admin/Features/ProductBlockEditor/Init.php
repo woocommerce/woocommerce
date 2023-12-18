@@ -68,6 +68,8 @@ class Init {
 
 			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
 
+			add_action( 'rest_api_init', array( $this, 'register_product_editor_templates' ) );
+
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
 
@@ -370,7 +372,7 @@ class Init {
 	/**
 	 * Register product editor templates.
 	 */
-	private function register_product_editor_templates() {
+	public function register_product_editor_templates() {
 		$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
 		$template_registry->register( new SimpleProductTemplate() );
 		$template_registry->register( new ProductVariationTemplate() );
