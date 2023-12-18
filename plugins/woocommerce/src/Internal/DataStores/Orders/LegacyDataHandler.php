@@ -104,7 +104,15 @@ class LegacyDataHandler {
 		}
 
 		$sql_where .= $sql_where ? ' AND ' : '';
+
+		// Post type handling.
+		$sql_where .= '(';
 		$sql_where .= "{$wpdb->posts}.post_type IN ('" . implode( "', '", esc_sql( wc_get_order_types( 'cot-migration' ) ) ) . "')";
+		$sql_where .= $wpdb->prepare(
+			" OR (post_type = %s AND EXISTS(SELECT 1 FROM {$wpdb->postmeta} WHERE post_id = {$wpdb->posts}.ID))",
+			$this->data_synchronizer::PLACEHOLDER_ORDER_POST_TYPE
+		);
+		$sql_where .= ')';
 
 		if ( 'count' === $result ) {
 			$sql_fields = 'COUNT(*)';
