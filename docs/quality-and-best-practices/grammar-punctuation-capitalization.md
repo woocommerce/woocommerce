@@ -47,8 +47,8 @@ Cases when we capitalize:
 Cases when we use lower case:
 
 - “ecommerce” (not “eCommerce”)
-- email address — `info@woo.com`
-- website URL — `developer.woo.com`
+- email address - `info@woo.com`
+- website URL - `developer.woo.com`
 
 ### Contractions
 
@@ -186,12 +186,12 @@ Use a hyphen – without spaces on either side to link words, or indicate a span
 - first-time user
 - Monday-Friday
 
-Use an em dash — without spaces on either side to indicate an aside.
+Use an em dash - without spaces on either side to indicate an aside.
 
 Use a true em dash, not hyphens – or –.
 
-- Multivariate testing—just one of our new Pro features—can help you grow your business.
-- Austin thought Brad was the donut thief, but he was wrong—it was Lain.
+- Multivariate testing-just one of our new Pro features-can help you grow your business.
+- Austin thought Brad was the donut thief, but he was wrong-it was Lain.
 
 #### Ellipses
 

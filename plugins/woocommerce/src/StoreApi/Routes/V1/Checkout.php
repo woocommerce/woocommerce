@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
@@ -9,6 +10,9 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
+use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
+use Automattic\WooCommerce\Blocks\Package;
 
 /**
  * Checkout class.
@@ -417,6 +421,8 @@ class Checkout extends AbstractCartRoute {
 		foreach ( $request['billing_address'] as $key => $value ) {
 			if ( is_callable( [ $customer, "set_billing_$key" ] ) ) {
 				$customer->{"set_billing_$key"}( $value );
+			} elseif ( $this->additional_fields_controller->is_field( $key, 'address' ) ) {
+				$this->additional_fields_controller->persist_field_for_customer( "/billing/$key", $value, $customer );
 			}
 		}
 
@@ -428,6 +434,8 @@ class Checkout extends AbstractCartRoute {
 				$customer->{"set_shipping_$key"}( $value );
 			} elseif ( 'phone' === $key ) {
 				$customer->update_meta_data( 'shipping_phone', $value );
+			} elseif ( $this->additional_fields_controller->is_field( $key, 'address' ) ) {
+				$this->additional_fields_controller->persist_field_for_customer( "/shipping/$key", $value, $customer );
 			}
 		}
 
