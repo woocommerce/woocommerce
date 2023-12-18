@@ -5,9 +5,9 @@ use WC_Tax;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 
 /**
- * Process the collection query data for filtering purposes.
+ * Process the query data for filtering purposes.
  */
-final class CollectionFilterer {
+final class QueryFilters {
 	/**
 	 * Initialization method.
 	 *

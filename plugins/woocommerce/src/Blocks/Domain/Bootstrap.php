@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Blocks\AssetsController;
 use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
-use Automattic\WooCommerce\Blocks\CollectionFilterer;
+use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
@@ -162,7 +162,7 @@ class Bootstrap {
 			$this->container->get( Notices::class )->init();
 		}
 
-		$this->container->get( CollectionFilterer::class )->init();
+		$this->container->get( QueryFilters::class )->init();
 	}
 
 	/**
@@ -417,9 +417,9 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			CollectionFilterer::class,
+			QueryFilters::class,
 			function() {
-				return new CollectionFilterer();
+				return new QueryFilters();
 			}
 		);
 	}

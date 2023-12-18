@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\CollectionFilterer;
+use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Package;
 
 /**
@@ -152,7 +152,7 @@ final class CollectionFilters extends AbstractBlock {
 			'rating_counts'       => null,
 		);
 
-		$filters = Package::container()->get( CollectionFilterer::class );
+		$filters = Package::container()->get( QueryFilters::class );
 
 		if ( ! empty( $block->context['query'] ) && ! $block->context['query']['inherit'] ) {
 			$query_vars = build_query_vars_from_query_block( $block, 1 );
