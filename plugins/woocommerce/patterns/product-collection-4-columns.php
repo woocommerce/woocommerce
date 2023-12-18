@@ -18,7 +18,7 @@ $products_title = $content['titles'][0]['default'] ?? '';
 	<!-- wp:woocommerce/product-collection {"query":{"perPage":4,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","displayLayout":{"type":"flex","columns":4},"align":"wide"} -->
 	<div class="wp-block-woocommerce-product-collection alignwide">
 		<!-- wp:woocommerce/product-template -->
-		<!-- wp:woocommerce/product-image {"aspectRatio":"3/5","imageSizing":"thumbnail","isDescendentOfQueryLoop":true} /-->
+		<!-- wp:woocommerce/product-image {"aspectRatio":"3/5","imageSizing":"single","isDescendentOfQueryLoop":true} /-->
 
 		<!-- wp:post-title {"textAlign":"center","level":3,"isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
