@@ -26,24 +26,6 @@ describe.skip( 'Shopper → Cart', () => {
 		await shopper.block.emptyCart();
 	} );
 
-	it( 'User can remove a product from cart', async () => {
-		await shopper.block.goToShop();
-		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
-		await shopper.block.goToCart();
-		const removeProductLink = await page.$(
-			'.wc-block-cart-item__remove-link'
-		);
-
-		await removeProductLink.click();
-		// we need to wait to ensure the cart is updated
-		await page.waitForSelector( '.wc-block-cart__empty-cart__title' );
-
-		// Verify product is removed from the cart'
-		await expect( page ).toMatchElement( 'h2', {
-			text: 'Your cart is currently empty!',
-		} );
-	} );
-
 	it( 'User can update product quantity via the input field', async () => {
 		await shopper.block.goToShop();
 		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );

@@ -14,6 +14,7 @@ import { CartPage } from './cart.page';
 import {
 	DISCOUNTED_PRODUCT_NAME,
 	REGULAR_PRICED_PRODUCT_NAME,
+	SIMPLE_PHYSICAL_PRODUCT_NAME,
 } from '../checkout/constants';
 
 const test = base.extend< { pageObject: CartPage } >( {
@@ -137,6 +138,25 @@ test.describe( 'Shopper → Cart block', () => {
 		await frontendUtils.goToCart();
 
 		// Verify cart is empty
+		await expect(
+			page.getByRole( 'heading', {
+				name: 'Your cart is currently empty!',
+			} )
+		).toBeVisible();
+	} );
+
+	test( 'User can remove a product from cart', async ( {
+		frontendUtils,
+		page,
+	} ) => {
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+		await page
+			.getByLabel( `Remove ${ SIMPLE_PHYSICAL_PRODUCT_NAME } from cart` )
+			.click();
+
+		// Verify product is removed from the cart'
 		await expect(
 			page.getByRole( 'heading', {
 				name: 'Your cart is currently empty!',
