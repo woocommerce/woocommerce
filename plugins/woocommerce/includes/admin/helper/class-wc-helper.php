@@ -688,6 +688,7 @@ class WC_Helper {
 	 * Maybe redirect to the new Marketplace installer.
 	 */
 	private static function maybe_redirect_to_new_marketplace_installer() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// Redirect requires the "install" URL parameter to be passed.
 		if ( empty( $_GET['install'] ) ) {
 			return;
@@ -703,6 +704,7 @@ class WC_Helper {
 				sanitize_text_field( wp_unslash( $_GET['install'] ) )
 			)
 		);
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
