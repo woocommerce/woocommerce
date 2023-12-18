@@ -165,19 +165,63 @@ test.describe( 'Shopper → Cart block', () => {
 		).toBeVisible();
 	} );
 
-	test( 'User can update product quantity via the input field', async ( {
+	test( 'User can update product quantity', async ( {
 		frontendUtils,
 		page,
 	} ) => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await frontendUtils.goToCart();
+
+		// Via the input field
 		await page
 			.getByLabel(
 				`Quantity of ${ SIMPLE_VIRTUAL_PRODUCT_NAME } in your cart.`
 			)
 			.fill( '4' );
 
+		// Verify the "Proceed to Checkout" button is disabled during network request
+		await expect(
+			page.getByRole( 'button', { name: 'Proceed to Checkout' } )
+		).toBeDisabled();
+
+		// Verify the "Proceed to Checkout" button is enabled after network request
+		await expect(
+			page.getByRole( 'link', { name: 'Proceed to Checkout' } )
+		).toBeEnabled();
+
+		await expect(
+			page.getByLabel(
+				`Quantity of ${ SIMPLE_VIRTUAL_PRODUCT_NAME } in your cart.`
+			)
+		).toHaveValue( '4' );
+
+		// Via the plus button
+		await page
+			.getByLabel(
+				`Increase quantity of ${ SIMPLE_VIRTUAL_PRODUCT_NAME }`
+			)
+			.click();
+		// Verify the "Proceed to Checkout" button is disabled during network request
+		await expect(
+			page.getByRole( 'button', { name: 'Proceed to Checkout' } )
+		).toBeDisabled();
+
+		// Verify the "Proceed to Checkout" button is enabled after network request
+		await expect(
+			page.getByRole( 'link', { name: 'Proceed to Checkout' } )
+		).toBeEnabled();
+
+		await expect(
+			page.getByLabel(
+				`Quantity of ${ SIMPLE_VIRTUAL_PRODUCT_NAME } in your cart.`
+			)
+		).toHaveValue( '4' );
+
+		// Via the minus button
+		await page
+			.getByLabel( `Reduce quantity of ${ SIMPLE_VIRTUAL_PRODUCT_NAME }` )
+			.click();
 		// Verify the "Proceed to Checkout" button is disabled during network request
 		await expect(
 			page.getByRole( 'button', { name: 'Proceed to Checkout' } )
