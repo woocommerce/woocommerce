@@ -6,6 +6,7 @@ import {
 	installPluginFromPHPFile,
 	uninstallPluginFromPHPFile,
 } from '@woocommerce/e2e-mocks/custom-plugins';
+import { BASE_URL } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -251,5 +252,30 @@ test.describe( 'Shopper → Cart block', () => {
 		await expect(
 			page.getByRole( 'heading', { name: 'Checkout' } )
 		).toBeVisible();
+	} );
+
+	test( 'User can see Cross-Sells products block', async ( {
+		frontendUtils,
+		page,
+	} ) => {
+		await page.goto( `${ BASE_URL }/?setup_cross_sells` );
+		await expect(
+			page.getByText( 'Cross-Sells products set up.' )
+		).toBeVisible();
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+		await page.waitForSelector(
+			'.wp-block-woocommerce-cart-cross-sells-block'
+		);
+		await page
+			.locator(
+				'.wp-block-cart-cross-sells-product__product-add-to-cart .wc-block-components-product-button__button'
+			)
+			.click();
+		await expect(
+			page.getByLabel( `Quantity of 32GB USB Stick in your cart.` )
+		).toHaveValue( '1' );
 	} );
 } );
