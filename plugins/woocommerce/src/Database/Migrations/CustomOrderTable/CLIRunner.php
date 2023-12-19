@@ -64,7 +64,6 @@ class CLIRunner {
 		WP_CLI::add_command( 'wc cot verify_cot_data', array( $this, 'verify_cot_data' ) );
 		WP_CLI::add_command( 'wc cot enable', array( $this, 'enable' ) );
 		WP_CLI::add_command( 'wc cot disable', array( $this, 'disable' ) );
-
 		WP_CLI::add_command( 'wc hpos cleanup', array( $this, 'cleanup_post_data' ) );
 	}
 
