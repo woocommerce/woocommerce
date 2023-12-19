@@ -3,27 +3,42 @@
  */
 import { useContext, useEffect } from '@wordpress/element';
 import { CurrencyContext } from '@woocommerce/currency';
-import { numberFormat } from '@woocommerce/number';
+import { numberFormat, parseNumber } from '@woocommerce/number';
 
 /**
- * Format all numbers with respect to shipping formula.
+ * Escape special characters for user input in regex.
+ *
+ * @param {string} string
+ * @return {string} string
  */
-export const numberFormatWithShippingFormula = ( config, number ) => {
+const escapeRegExp = ( string ) => {
+	return string.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+};
+
+/**
+ * Format number when it's exclusively a number or a string of numbers, otherwise return the input.
+ */
+export const safeNumberFormat = ( config, number ) => {
 	if ( typeof number === 'number' ) {
 		return numberFormat( config, number );
 	}
 
 	if ( typeof number === 'string' ) {
-		/**
-		 * \b: Ensures that we're capturing whole numbers (word boundaries).
-		 * \d+: Matches one or more digits.
-		 * (\.\d+)?: Optionally matches a decimal point followed by one or more digits.
-		 * (?![^[]*\]): A negative lookahead to avoid numbers inside square brackets.
-		 * g: Global flag to match all instances in the string.
-		 */
-		return number.replace( /(\b\d+(\.\d+)?\b)(?![^[]*\])/g, ( n ) =>
-			numberFormat( config, n )
+		const escapedDecimalSeparator = escapeRegExp( config.decimalSeparator );
+		const escapedThousandSeparator = escapeRegExp(
+			config.thousandSeparator
 		);
+
+		// Regex to match strictly numbers with arbitrary thousands and decimal separators.
+		// Example: /^\s*(\d+)*(,\d+)*(\.\d+)?\s*$/ for default config.
+		const regex = new RegExp(
+			`^\\s*(\\d+)*(${ escapedThousandSeparator }\\d+)*(${ escapedDecimalSeparator }\\d+)?\\s*$`
+		);
+
+		return number.replace( regex, ( n ) => {
+			const parsed = parseNumber( config, n );
+			return numberFormat( config, parsed );
+		} );
 	}
 
 	return number;
@@ -36,8 +51,7 @@ export const ShippingCurrencyContext = () => {
 		window.wc.ShippingCurrencyContext =
 			window.wc.ShippingCurrencyContext || context;
 		window.wc.ShippingCurrencyNumberFormat =
-			window.wc.ShippingCurrencyNumberFormat ||
-			numberFormatWithShippingFormula;
+			window.wc.ShippingCurrencyNumberFormat || safeNumberFormat;
 	}, [ context ] );
 
 	return null;

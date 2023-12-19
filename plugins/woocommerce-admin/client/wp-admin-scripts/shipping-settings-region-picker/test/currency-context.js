@@ -6,7 +6,7 @@ import { numberFormat } from '@woocommerce/number';
 /**
  * Internal dependencies
  */
-import { numberFormatWithShippingFormula } from '../currency-context';
+import { safeNumberFormat } from '../currency-context';
 
 const config = {
 	code: 'USD',
@@ -20,53 +20,52 @@ const config = {
 
 describe( 'CurrencyContext', () => {
 	it( 'should format a number input correctly', () => {
-		expect( numberFormatWithShippingFormula( config, 1234 ) ).toBe(
+		expect( safeNumberFormat( config, 1234 ) ).toBe(
 			numberFormat( config, 1234 )
 		);
 	} );
 
-	it( 'should format numbers within a string correctly', () => {
-		expect(
-			numberFormatWithShippingFormula( config, 'Value is 123456789' )
-		).toBe( `Value is 123,456,789.00` );
-	} );
-
-	it( 'should not format numbers within square brackets', () => {
-		expect(
-			numberFormatWithShippingFormula( config, 'Value [1234] is inside' )
-		).toBe( 'Value [1234] is inside' );
-	} );
-
-	it( 'should format all numbers inside parenthesis', () => {
-		expect(
-			numberFormatWithShippingFormula(
-				config,
-				'50 + (([qty]*2+1)(5*10))(1)'
-			)
-		).toBe( '50.00 + (([qty]*2.00+1.00)(5.00*10.00))(1.00)' );
-	} );
-
-	it( 'should format numbers and ignore shortcodes', () => {
-		expect(
-			numberFormatWithShippingFormula(
-				config,
-				'10*[qty]+(1+(2/[cost]))+([fee percent="10" max_fee="8.33"])'
-			)
-		).toBe(
-			'10.00*[qty]+(1.00+(2.00/[cost]))+([fee percent="10" max_fee="8.33"])'
+	it( 'should format string numbers correctly', () => {
+		expect( safeNumberFormat( config, '123456789' ) ).toBe(
+			'123,456,789.00'
 		);
 	} );
 
+	it( 'should format with arbitrary thousands separator placements', () => {
+		expect( safeNumberFormat( config, '12,34,56,789' ) ).toBe(
+			'123,456,789.00'
+		);
+	} );
+
+	it( 'should format with swapped decimal and thousand separator', () => {
+		const customConfig = {
+			...config,
+			decimalSeparator: ',',
+			thousandSeparator: '.',
+		};
+		expect( safeNumberFormat( customConfig, '123.456.789' ) ).toBe(
+			'123.456.789,00'
+		);
+	} );
+
+	it( 'should not format numbers when text is included', () => {
+		expect( safeNumberFormat( config, 'Value 1234' ) ).toBe( 'Value 1234' );
+	} );
+
+	it( 'should not format when formula is included', () => {
+		expect(
+			safeNumberFormat( config, '50 + (([qty]*2+1)(5*10))(1)' )
+		).toBe( '50 + (([qty]*2+1)(5*10))(1)' );
+	} );
+
 	it( 'should return the original string for non-numeric inputs', () => {
-		expect( numberFormatWithShippingFormula( config, 'Hello World' ) ).toBe(
+		expect( safeNumberFormat( config, 'Hello World' ) ).toBe(
 			'Hello World'
 		);
 	} );
 
 	it( 'should return the original input for non-string, non-number inputs', () => {
 		const input = { some: 'object' };
-		expect( numberFormatWithShippingFormula( config, input ) ).toBe(
-			input
-		);
+		expect( safeNumberFormat( config, input ) ).toBe( input );
 	} );
 } );
