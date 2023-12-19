@@ -1,4 +1,4 @@
-.wp-block-woocommerce-product-details {
+.editor-styles-wrapper .wp-block-woocommerce-product-details {
 	ul.wc-tabs {
 		list-style: none;
 		padding: 0 0 0 1em;
@@ -43,57 +43,67 @@
  *
  * See also: src/Blocks/BlockTypes/ProductDetails.php for inline css.
  */
-.wp-block-woocommerce-product-details.is-style-modern {
+.editor-styles-wrapper .wp-block-woocommerce-product-details.is-style-modern,
+body:not(.wp-admin) .wp-block-woocommerce-product-details.is-style-modern .woocommerce-tabs {
 
 	ul.wc-tabs {
-		overflow: visible;
-		border-bottom-color: inherit;
-		// border-bottom-color: var(--wc--preset--product-tabs--color--contrast);
 
-		@media only screen and ( max-width: 768px ) {
-			border-bottom-width: 0;
-			padding: 0;
+		padding: 0;
+		border-bottom-width: 0;
+		border-bottom-color: inherit; /* Backward compatibility for TT3, TT2. */
+
+		&::after,
+		&::before { 
+			display: none;
 		}
 
 		li {
-			background: transparent;
 			color: inherit;
-			border-radius: 0;
-			border-width: 1px;
-			border-bottom-width: 0;
-			border-style: solid;
+			background: transparent;
 			border-color: transparent;
+			border-style: solid;
+			border-width: 1px;
+			border-radius: 0;
+			margin: 0;
+			padding: 0 1em;
+			display: inline-block;
 			float: none; /* Backward compatibility for TT3, TT2. */
-
-			&:first-child {
-				margin-left: 0; /* Backward compatibility for TT3, TT2. */
-			}
+			font-weight: bold;
+			opacity: 0.65;
 
 			a {
+				padding: 0.5em 0;
 				color: inherit;
-				// color: var(--wc--preset--product-tabs--color--contrast);
+				border: none;
 				text-shadow: none;
 				text-decoration: none;
-				border: 0;
+				display: inline-block;
 			}
 
 			&.active {
 				color: inherit;
 				background: inherit;
-				// background: var(--wc--preset--product-tabs--color--base);
 				border-color: inherit;
-				// border-color: var(--wc--preset--product-tabs--color--contrast);
-				top: 1px;
+				opacity: 1;
 
 				a {
 					color: inherit;
-					top: -1px; /* Balance <li> positioning */
+					border: none;
+					text-decoration: none;
 				}
 			}
 
 			@media only screen and ( max-width: 768px ) {
 				display: block;
-				border-bottom-width: 1px;
+			}
+
+			&:first-child {
+				margin-left: 0; /* Backward compatibility for TT3, TT2. */
+			}
+
+			&::after,
+			&::before {
+				display: none;
 			}
 		}
 	}
@@ -104,41 +114,70 @@
  *
  * See also: src/Blocks/BlockTypes/ProductDetails.php for inline css.
  */
-.wp-block-woocommerce-product-details.is-style-minimal {
-
+.editor-styles-wrapper .wp-block-woocommerce-product-details.is-style-minimal,
+body:not(.wp-admin) .wp-block-woocommerce-product-details.is-style-minimal .woocommerce-tabs {
+	
 	ul.wc-tabs {
+
 		padding: 0;
 		border-bottom-width: 0;
+		border-bottom-color: inherit; /* Backward compatibility for TT3, TT2. */
+
+		&::after,
+		&::before { 
+			display: none;
+		}
 
 		li {
+			color: inherit;
 			background: transparent;
-			border: 0;
-			border-style: solid;
 			border-color: transparent;
+			border-style: solid;
+			border-width: 0px;
 			border-bottom-width: 2px;
 			border-radius: 0;
 			margin: 0;
+			padding: 0 1em;
+			display: inline-block;
 			float: none; /* Backward compatibility for TT3, TT2. */
+			font-weight: bold;
+			opacity: 0.65;
+
+			a {
+				padding: 0.5em 0;
+				color: inherit;
+				border: none;
+				text-shadow: none;
+				text-decoration: none;
+				display: inline-block;
+			}
+
+			&.active {
+				color: inherit;
+				background: inherit;
+				border-color: inherit;
+				opacity: 1;
+
+				a {
+					color: inherit;
+					border: none;
+					text-decoration: none;
+				}
+			}
+
+			@media only screen and ( max-width: 768px ) {
+				display: block;
+				border-left-width: 2px;
+				border-bottom-width: 0;
+			}
 
 			&:first-child {
 				margin-left: 0; /* Backward compatibility for TT3, TT2. */
 			}
 
-			a {
-				color: var(--wc--preset--product-tabs--color--contrast);
-				text-shadow: none;
-				text-decoration: none;
-				border: 0;
-			}
-
-			&.active {
-				border-color: var(--wc--preset--product-tabs--color--contrast);
-			}
-
-			@media only screen and ( max-width: 768px ) {
-				display: block;
-				border-bottom-width: 0;
-				border-left-width: 2px;
+			&::after,
+			&::before {
+				display: none;
 			}
 		}
 	}
