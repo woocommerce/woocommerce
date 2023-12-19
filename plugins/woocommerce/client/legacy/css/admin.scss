@@ -4645,6 +4645,8 @@ table.wc-shipping-classes {
 		&::before {
 			content: "";
 			mask: url(../images/icons/move-icon.svg);
+			mask-image: url(../images/icons/move-icon.svg);
+			-webkit-mask-image: url(../images/icons/move-icon.svg);
 			background-color: #1E1E1E;
 			display: block;
 			width: 17px;
