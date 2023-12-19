@@ -354,31 +354,15 @@ class ProductCollection extends AbstractBlock {
 		$taxonomies_query    = $query['taxonomies_query'] ?? array();
 		$tax_query           = $this->merge_tax_queries( $visibility_query, $attributes_query, $taxonomies_query, $featured_query );
 		$date_query          = $this->get_date_query( $query['timeFrame'] ?? array() );
+		$price_query_args    = $this->get_price_range_query_args( $query['priceRange'] ?? array() );
+
 
 		// We exclude applied filters to generate product ids for the filter blocks.
 		$applied_filters_query = $is_exclude_applied_filters ? array() : $this->get_queries_by_applied_filters();
 
-		$merged_query = $this->merge_queries( $common_query_values, $orderby_query, $on_sale_query, $stock_query, $tax_query, $applied_filters_query, $date_query );
+		$merged_query = $this->merge_queries( $common_query_values, $orderby_query, $on_sale_query, $stock_query, $tax_query, $applied_filters_query, $date_query, $price_query_args );
 
 		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
-
-		if ( isset( $query['priceRange'] ) ) {
-			/**
-			 * We are adding these extra query arguments to be used in `posts_clauses`
-			 * because there are 2 special edge cases we wanna handle for Price range filter:
-			 * Case 1: Prices excluding tax are displayed including tax
-			 * Case 2: Prices including tax are displayed excluding tax
-			 *
-			 * Both of these cases require us to modify SQL query to get the correct results.
-			 */
-			$result = array_merge(
-				$result,
-				array(
-					'isProductCollection' => true,
-					'priceRange'          => $query['priceRange'],
-				)
-			);
-		}
 
 		return $result;
 	}
@@ -516,6 +500,8 @@ class ProductCollection extends AbstractBlock {
 				'posts_per_page',
 				'suppress_filters',
 				'tax_query',
+				'isProductCollection',
+				'priceRange',
 			)
 		);
 
@@ -1055,6 +1041,31 @@ class ProductCollection extends AbstractBlock {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Get query arguments for price range filter.
+	 * We are adding these extra query arguments to be used in `posts_clauses`
+	 * because there are 2 special edge cases we wanna handle for Price range filter:
+	 * Case 1: Prices excluding tax are displayed including tax
+	 * Case 2: Prices including tax are displayed excluding tax
+	 *
+	 * Both of these cases require us to modify SQL query to get the correct results.
+	 *
+	 * See add_price_range_filter_posts_clauses function in this file for more details.
+	 *
+	 * @param array $price_range Price range with min and max values.
+	 * @return array Query arguments.
+	 */
+	public function get_price_range_query_args( $price_range ) {
+		if ( empty( $price_range ) ) {
+			return array();
+		}
+
+		return [
+			'isProductCollection' => true,
+			'priceRange'          => $price_range,
+		];
 	}
 
 	/**
