@@ -810,6 +810,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'hideConditions' => $product_inventory_quantity_hide_conditions,
 			)
 		);
+		$product_stock_status_hide_conditions = array(
+			array(
+				'expression' => 'editedProduct.manage_stock === true',
+			),
+		);
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$product_stock_status_hide_conditions[] = array(
+				'expression' => 'editedProduct.type === "grouped"',
+			);
+		}
 		$product_inventory_section->add_block(
 			array(
 				'id'             => 'product-stock-status',
@@ -833,11 +843,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						),
 					),
 				),
-				'hideConditions' => array(
-					array(
-						'expression' => 'editedProduct.manage_stock === true',
-					),
-				),
+				'hideConditions' => $product_stock_status_hide_conditions,
 			)
 		);
 		$product_inventory_advanced         = $product_inventory_section->add_block(
