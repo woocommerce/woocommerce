@@ -103,8 +103,6 @@ export const Layout = () => {
 	const [ isSurveyOpen, setSurveyOpen ] = useState( false );
 	const editor = <Editor isLoading={ isEditorLoading } />;
 
-	console.log( { shouldTourBeShown, showAiOfflineModal, aiOnline } );
-
 	if (
 		typeof currentState === 'object' &&
 		currentState.transitionalScreen === 'transitional'
