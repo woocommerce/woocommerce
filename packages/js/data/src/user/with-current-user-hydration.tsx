@@ -26,11 +26,6 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 					return;
 				}
 
-				/*
-				 * TODO: Update @types/wordpress__core-data
-				 * to include the 'hasStartedResolution', 'hasFinishedResolution' method.
-				 */
-				// @ts-expect-error no exported member.
 				const { isResolving, hasFinishedResolution } =
 					select( STORE_NAME );
 				return (
@@ -39,11 +34,6 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				);
 			} );
 
-			/*
-			 * TODO: Update @types/wordpress__core-data
-			 * to include the 'hasStartedResolution', 'hasFinishedResolution' method.
-			 */
-			// @ts-expect-error no exported member.
 			const { startResolution, finishResolution, receiveCurrentUser } =
 				useDispatch( STORE_NAME );
 
