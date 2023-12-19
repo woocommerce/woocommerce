@@ -121,11 +121,11 @@ class TransientFilesEngine implements RegisterHooksInterface {
 			$expiration_date = gmdate( 'Y-m-d', $expiration_date );
 		} elseif ( ! is_string( $expiration_date ) || ! TimeUtil::is_valid_date( $expiration_date, 'Y-m-d' ) ) {
 			$expiration_date = is_scalar( $expiration_date ) ? $expiration_date : gettype( $expiration_date );
-			throw new InvalidArgumentException( "$expiration_date is not a valid date, expected format: year-month-day" );
+			throw new InvalidArgumentException( "$expiration_date is not a valid date, expected format: YYYY-MM-DD" );
 		}
 
 		$expiration_date_object = DateTime::createFromFormat( 'Y-m-d', $expiration_date, TimeUtil::get_utc_date_time_zone() );
-		$today_date_object      = new DateTime( $this->legacy_proxy->call_function('gmdate', 'Y-m-d'), TimeUtil::get_utc_date_time_zone() );
+		$today_date_object      = new DateTime( $this->legacy_proxy->call_function( 'gmdate', 'Y-m-d' ), TimeUtil::get_utc_date_time_zone() );
 
 		if ( $expiration_date_object < $today_date_object ) {
 			throw new InvalidArgumentException( "The supplied expiration date, $expiration_date, is in the past" );
@@ -142,8 +142,9 @@ class TransientFilesEngine implements RegisterHooksInterface {
 		}
 		$filepath = $transient_files_directory . '/' . $filename;
 
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
-		if( false === $this->legacy_proxy->call_function( 'file_put_contents', $filepath, $file_contents ) ) {
+		WP_Filesystem();
+		$wp_filesystem = $this->legacy_proxy->get_global( 'wp_filesystem' );
+		if ( false === $wp_filesystem->put_contents( $filepath, $file_contents ) ) {
 			throw new Exception( "Can't create file: $filepath" );
 		}
 
@@ -163,7 +164,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 * @return string|null The full physical path of the file, or null if the files doesn't exist.
 	 */
 	public function get_transient_file_path( string $filename ): ?string {
-		if ( strlen( $filename ) < 7 ) {
+		if ( strlen( $filename ) < 7 || ! ctype_xdigit( $filename ) ) {
 			return null;
 		}
 
@@ -199,7 +200,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 		$dirname                = dirname( $file_path );
 		$expiration_date        = substr( $dirname, strlen( $dirname ) - 10, 10 );
 		$expiration_date_object = new DateTime( $expiration_date, TimeUtil::get_utc_date_time_zone() );
-		$today_date_object      = new DateTime( $this->legacy_proxy->call_function('gmdate', 'Y-m-d'), TimeUtil::get_utc_date_time_zone() );
+		$today_date_object      = new DateTime( $this->legacy_proxy->call_function( 'gmdate', 'Y-m-d' ), TimeUtil::get_utc_date_time_zone() );
 		return $expiration_date_object < $today_date_object;
 	}
 

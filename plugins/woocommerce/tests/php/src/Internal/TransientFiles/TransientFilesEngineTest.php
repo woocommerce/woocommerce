@@ -67,7 +67,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_create_transient_file_throws_if_invalid_expiration_date_is_supplied() {
 		$this->expectException( \InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'BAD_DATE is not a valid date, expected format: year-month-day' );
+		$this->expectExceptionMessage( 'BAD_DATE is not a valid date, expected format: YYYY-MM-DD' );
 		$this->sut->create_transient_file( 'foobar', 'BAD_DATE' );
 	}
 
@@ -114,14 +114,27 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 	public function test_create_transient_file_throws_if_file_cant_be_created() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir'     => fn() => array( 'basedir' => '/wordpress/uploads' ),
-				'realpath'          => fn( $path ) => '/real' . $path,
-				'is_dir'            => fn() => true,
-				'file_put_contents' => fn( $path, $contents ) => false,
-				'random_bytes'      => fn( $length ) => implode( array_map( 'chr', array( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ) ) ),
-				'gmdate'            => fn( $format, $date = null ) =>
+				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
+				'realpath'      => fn( $path ) => '/real' . $path,
+				'is_dir'        => fn() => true,
+				'random_bytes'  => fn( $length ) => implode( array_map( 'chr', array( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ) ) ),
+				'gmdate'        => fn( $format, $date = null ) =>
 					is_null( $date ) && 'Y-m-d' === $format ? '2023-12-01' : gmdate( $format, $date ),
 			),
+		);
+
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing
+		$fake_wp_filesystem = new class() {
+			public function put_contents( string $file, string $contents, $mode = false ): bool {
+				return false;
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing
+
+		$this->register_legacy_proxy_global_mocks(
+			array(
+				'wp_filesystem' => $fake_wp_filesystem,
+			)
 		);
 
 		$this->expectException( \Exception::class );
