@@ -118,11 +118,6 @@ export const useUserPreferences = () => {
 	// Get our dispatch methods now - this can't happen inside the callback below.
 	const dispatch = useDispatch( STORE_NAME );
 	const { addEntities, receiveCurrentUser, saveEntityRecord } = dispatch;
-	/*
-	 * TODO: Update @types/wordpress__core-data
-	 * to include the 'hasStartedResolution', 'hasFinishedResolution' method.
-	 */
-	// @ts-expect-error no exported member.
 	let { saveUser } = dispatch;
 
 	const userData = useSelect( ( select ) => {
@@ -130,11 +125,8 @@ export const useUserPreferences = () => {
 			getCurrentUser,
 			getEntity,
 			getEntityRecord,
-			// @ts-expect-error no exported member.
 			getLastEntitySaveError,
-			// @ts-expect-error no exported member.
 			hasStartedResolution,
-			// @ts-expect-error no exported member.
 			hasFinishedResolution,
 		} = select( STORE_NAME );
 
@@ -158,6 +150,11 @@ export const useUserPreferences = () => {
 		// WP 5.3.x doesn't have the User entity defined.
 		if ( typeof saveUser !== 'function' ) {
 			// Polyfill saveUser() - wrapper of saveEntityRecord.
+			/*
+			 * TODO: Update @types/wordpress__core-data
+			 * to include the 'hasStartedResolution', 'hasFinishedResolution' method.
+			 */
+			// @ts-expect-error no exported member.
 			saveUser = async ( userToSave: {
 				id: number;
 				woocommerce_meta: { [ key: string ]: boolean };
