@@ -373,7 +373,7 @@ test.describe( 'Checkout Block page', () => {
 			.getByPlaceholder(
 				'Notes about your order, e.g. special notes for delivery.'
 			)
-			.fill( 'Ship it fast.' );
+			.fill( 'This is to avoid flakiness' );
 
 		// place an order
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
@@ -495,6 +495,87 @@ test.describe( 'Checkout Block page', () => {
 		).toBeVisible();
 	} );
 
+	test( 'can choose different shipping types in the checkout', async ( {
+		page,
+	} ) => {
+		await page.goto( `/shop/?add-to-cart=${ productId }`, {
+			waitUntil: 'networkidle',
+		} );
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+
+		// fill shipping address
+		await page.getByLabel( 'Email address' ).fill( customer.email );
+		await page.getByLabel( 'First name' ).fill( 'Lisa' );
+		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
+		await page
+			.getByLabel( 'Address', { exact: true } )
+			.fill( '123 Evergreen Terrace' );
+		await page.getByLabel( 'City' ).fill( 'Springfield' );
+		await page.getByLabel( 'ZIP Code' ).fill( '97403' );
+		await page
+			.locator( '.wc-block-components-loading-mask' )
+			.waitFor( { state: 'visible' } );
+		await page
+			.locator( '.wc-block-components-loading-mask' )
+			.waitFor( { state: 'hidden' } );
+
+		// check if you see all three shipping options
+		await expect( page.getByLabel( 'Free shipping' ) ).toBeVisible();
+		await expect( page.getByLabel( 'Local pickup' ) ).toBeVisible();
+		await expect( page.getByLabel( 'Flat rate' ) ).toBeVisible();
+
+		// check free shipping option
+		await page.getByLabel( 'Free shipping' ).check();
+		await page
+			.locator( '.wc-block-components-loading-mask' )
+			.waitFor( { state: 'visible' } );
+		await page
+			.locator( '.wc-block-components-loading-mask' )
+			.waitFor( { state: 'hidden' } );
+		await expect( page.getByLabel( 'Free shipping' ) ).toBeChecked();
+		await expect(
+			page.locator( '.wc-block-components-totals-shipping__via' )
+		).toHaveText( 'Free shipping' );
+		await expect(
+			page.locator(
+				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+			)
+		).toContainText( singleProductSalePrice );
+
+		// check local pickup option
+		await page.getByLabel( 'Local pickup' ).check();
+		await page
+			.locator( '.wc-block-components-loading-mask' )
+			.waitFor( { state: 'hidden' } );
+		await expect( page.getByLabel( 'Local pickup' ) ).toBeChecked();
+		await expect(
+			page.locator( '.wc-block-components-totals-shipping__via' )
+		).toHaveText( 'Local pickup' );
+		await expect(
+			page.locator(
+				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+			)
+		).toContainText( singleProductSalePrice );
+
+		// check flat rate option
+		await page.getByLabel( 'Flat rate' ).check();
+		await page
+			.locator( '.wc-block-components-loading-mask' )
+			.waitFor( { state: 'hidden' } );
+		await expect( page.getByLabel( 'Flat rate' ) ).toBeChecked();
+		await expect(
+			page.locator( '.wc-block-components-totals-shipping__via' )
+		).toHaveText( 'Flat rate' );
+		await expect(
+			page.locator(
+				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+			)
+		).toContainText( twoProductPrice );
+	} );
+
 	test( 'allows guest customer to place an order', async ( { page } ) => {
 		for ( let i = 1; i < 3; i++ ) {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
@@ -523,7 +604,7 @@ test.describe( 'Checkout Block page', () => {
 			.getByPlaceholder(
 				'Notes about your order, e.g. special notes for delivery.'
 			)
-			.fill( 'Please ship this order ASAP!' );
+			.fill( 'This is to avoid flakiness' );
 
 		// place an order
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
@@ -650,6 +731,14 @@ test.describe( 'Checkout Block page', () => {
 		await page.getByLabel( 'Cash on delivery' ).check();
 		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 
+		// add note to the order
+		await page.getByLabel( 'Add a note to your order' ).check();
+		await page
+			.getByPlaceholder(
+				'Notes about your order, e.g. special notes for delivery.'
+			)
+			.fill( 'This is to avoid flakiness' );
+
 		// place an order
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 		await expect(
@@ -732,7 +821,7 @@ test.describe( 'Checkout Block page', () => {
 			.getByPlaceholder(
 				'Notes about your order, e.g. special notes for delivery.'
 			)
-			.fill( 'This is a note' );
+			.fill( 'This is to avoid flakiness' );
 
 		// place an order
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
@@ -765,86 +854,5 @@ test.describe( 'Checkout Block page', () => {
 		await expect( page.locator( 'tbody#the-list' ) ).toContainText(
 			newAccountEmail
 		);
-	} );
-
-	test( 'can choose different shipping types in the checkout', async ( {
-		page,
-	} ) => {
-		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
-		} );
-		await page.goto( pageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
-		).toBeVisible();
-
-		// fill shipping address
-		await page.getByLabel( 'Email address' ).fill( customer.email );
-		await page.getByLabel( 'First name' ).fill( 'Lisa' );
-		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
-		await page
-			.getByLabel( 'Address', { exact: true } )
-			.fill( '123 Evergreen Terrace' );
-		await page.getByLabel( 'City' ).fill( 'Springfield' );
-		await page.getByLabel( 'ZIP Code' ).fill( '97403' );
-		await page
-			.locator( '.wc-block-components-loading-mask' )
-			.waitFor( { state: 'visible' } );
-		await page
-			.locator( '.wc-block-components-loading-mask' )
-			.waitFor( { state: 'hidden' } );
-
-		// check if you see all three shipping options
-		await expect( page.getByLabel( 'Free shipping' ) ).toBeVisible();
-		await expect( page.getByLabel( 'Local pickup' ) ).toBeVisible();
-		await expect( page.getByLabel( 'Flat rate' ) ).toBeVisible();
-
-		// check free shipping option
-		await page.getByLabel( 'Free shipping' ).check();
-		await page
-			.locator( '.wc-block-components-loading-mask' )
-			.waitFor( { state: 'visible' } );
-		await page
-			.locator( '.wc-block-components-loading-mask' )
-			.waitFor( { state: 'hidden' } );
-		await expect( page.getByLabel( 'Free shipping' ) ).toBeChecked();
-		await expect(
-			page.locator( '.wc-block-components-totals-shipping__via' )
-		).toHaveText( 'Free shipping' );
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( singleProductSalePrice );
-
-		// check local pickup option
-		await page.getByLabel( 'Local pickup' ).check();
-		await page
-			.locator( '.wc-block-components-loading-mask' )
-			.waitFor( { state: 'hidden' } );
-		await expect( page.getByLabel( 'Local pickup' ) ).toBeChecked();
-		await expect(
-			page.locator( '.wc-block-components-totals-shipping__via' )
-		).toHaveText( 'Local pickup' );
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( singleProductSalePrice );
-
-		// check flat rate option
-		await page.getByLabel( 'Flat rate' ).check();
-		await page
-			.locator( '.wc-block-components-loading-mask' )
-			.waitFor( { state: 'hidden' } );
-		await expect( page.getByLabel( 'Flat rate' ) ).toBeChecked();
-		await expect(
-			page.locator( '.wc-block-components-totals-shipping__via' )
-		).toHaveText( 'Flat rate' );
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( twoProductPrice );
 	} );
 } );
