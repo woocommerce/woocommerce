@@ -31,12 +31,6 @@ describe( 'CurrencyContext', () => {
 		);
 	} );
 
-	it( 'should format with arbitrary thousands separator placements', () => {
-		expect( safeNumberFormat( config, '12,34,56,789' ) ).toBe(
-			'123,456,789.00'
-		);
-	} );
-
 	it( 'should format with swapped decimal and thousand separator', () => {
 		const customConfig = {
 			...config,
@@ -46,6 +40,15 @@ describe( 'CurrencyContext', () => {
 		expect( safeNumberFormat( customConfig, '123.456.789' ) ).toBe(
 			'123.456.789,00'
 		);
+	} );
+
+	it( 'should format ignore wrongly formatted numbers', () => {
+		const customConfig = {
+			...config,
+			decimalSeparator: ',',
+			thousandSeparator: '.',
+		};
+		expect( safeNumberFormat( customConfig, '7.5' ) ).toBe( '7.5' );
 	} );
 
 	it( 'should format number according to precision', () => {

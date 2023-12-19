@@ -24,15 +24,13 @@ export const safeNumberFormat = ( config, number ) => {
 	}
 
 	if ( typeof number === 'string' ) {
-		const escapedDecimalSeparator = escapeRegExp( config.decimalSeparator );
-		const escapedThousandSeparator = escapeRegExp(
-			config.thousandSeparator
-		);
+		const dot = escapeRegExp( config.decimalSeparator );
+		const comma = escapeRegExp( config.thousandSeparator );
 
 		// Regex to match strictly numbers with arbitrary thousands and decimal separators.
-		// Example: /^\s*(\d+)*(,\d+)*(\.\d+)?\s*$/ for default config.
+		// Example: /^\s*(\d+|\d{1,3}(?:,\d{3})*)(?:\.\d+)?\s*$/ for default config.
 		const regex = new RegExp(
-			`^\\s*(\\d+)*(${ escapedThousandSeparator }\\d+)*(${ escapedDecimalSeparator }\\d+)?\\s*$`
+			`^\\s*(\\d+|\\d{1,3}(?:${ comma }\\d{3})*)(?:${ dot }\\d+)?\\s*$`
 		);
 
 		return number.replace( regex, ( n ) => {
