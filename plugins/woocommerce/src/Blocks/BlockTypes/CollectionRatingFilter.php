@@ -78,7 +78,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 			function( $rating ) {
 				return array(
 					/* translators: %d is the rating value. */
-					'title'      => sprintf( __('Rated %d out of 5', 'woocommerce' ), $rating ),
+					'title'      => sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating ),
 					'attributes' => array(
 						'data-wc-on--click' => 'woocommerce/collection-rating-filter::actions.removeFilter',
 						'data-wc-context'   => 'woocommerce/collection-rating-filter::' . wp_json_encode( array( 'value' => $rating ) ),
