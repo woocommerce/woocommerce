@@ -11,6 +11,10 @@ type AttributeFilterContext = {
 	selectType: 'single' | 'multiple';
 };
 
+interface ActiveAttributeFilterContext extends AttributeFilterContext {
+	value: string;
+}
+
 function getUrl(
 	selectedTerms: string[],
 	slug: string,
@@ -86,6 +90,16 @@ store( 'woocommerce/collection-attribute-filter', {
 					context.queryType
 				)
 			);
+		},
+		removeFilter: () => {
+			const { attributeSlug, queryType, value } =
+				getContext< ActiveAttributeFilterContext >();
+
+			let selectedTerms = getSelectedTermsFromUrl( attributeSlug );
+
+			selectedTerms = selectedTerms.filter( ( item ) => item !== value );
+
+			navigate( getUrl( selectedTerms, attributeSlug, queryType ) );
 		},
 	},
 } );

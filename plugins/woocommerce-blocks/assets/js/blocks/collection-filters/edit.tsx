@@ -9,6 +9,7 @@ import type { AttributeSetting } from '@woocommerce/types';
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
 const template = [
+	[ 'woocommerce/collection-active-filters', {} ],
 	[
 		'core/heading',
 		{
@@ -25,6 +26,14 @@ const template = [
 		},
 	],
 	[ 'woocommerce/collection-stock-filter', {} ],
+	[
+		'core/heading',
+		{
+			content: __( 'Filter by Rating', 'woocommerce' ),
+			level: 3,
+		},
+	],
+	[ 'woocommerce/collection-rating-filter', {} ],
 ];
 
 const firstAttribute = ATTRIBUTES.find( Boolean );

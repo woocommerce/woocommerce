@@ -4,11 +4,11 @@
 import { registerPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { box, plus, settings } from '@wordpress/icons';
-import { useMemo } from '@wordpress/element';
+import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { dispatch, useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { addQueryArgs } from '@wordpress/url';
-import { queueRecordEvent } from '@woocommerce/tracks';
+import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 import { store as commandsStore } from '@wordpress/commands';
 import { decodeEntities } from '@wordpress/html-entities';
 
@@ -16,8 +16,9 @@ import { decodeEntities } from '@wordpress/html-entities';
  * Internal dependencies
  */
 import { registerCommandWithTracking } from './register-command-with-tracking';
+import { useEditedPostType } from './use-edited-post-type';
 
-const registerWooCommerceSettingsCommand = ( { label, tab } ) => {
+const registerWooCommerceSettingsCommand = ( { label, tab, origin } ) => {
 	registerCommandWithTracking( {
 		name: `woocommerce/settings-${ tab }`,
 		label: sprintf(
@@ -32,12 +33,32 @@ const registerWooCommerceSettingsCommand = ( { label, tab } ) => {
 				tab,
 			} );
 		},
+		origin,
 	} );
 };
 
 // Code adapted from the equivalent in Gutenberg:
 // https://github.com/WordPress/gutenberg/blob/8863b49b7e686f555e8b8adf70cc588c4feebfbf/packages/core-commands/src/site-editor-navigation-commands.js#L36C7-L36C44
 function useProductCommandLoader( { search } ) {
+	const { editedPostType } = useEditedPostType();
+	const origin = editedPostType ? editedPostType + '-editor' : null;
+	// Track searched values. We add a 300 ms delay to avoid tracking while typing.
+	const trackingSearchTimeout = useRef( null );
+	useEffect( () => {
+		if ( search !== '' ) {
+			clearTimeout( trackingSearchTimeout.current );
+			trackingSearchTimeout.current = setTimeout( () => {
+				recordEvent( 'woocommerce_command_palette_search', {
+					value: search,
+					origin,
+				} );
+			}, 300 );
+		}
+		return () => {
+			clearTimeout( trackingSearchTimeout.current );
+		};
+	}, [ search, origin ] );
+
 	const postType = 'product';
 	const { records, isLoading } = useSelect(
 		( select ) => {
@@ -74,6 +95,7 @@ function useProductCommandLoader( { search } ) {
 				callback: ( { close } ) => {
 					queueRecordEvent( 'woocommerce_command_palette_submit', {
 						name: 'woocommerce/product',
+						origin,
 					} );
 
 					const args = {
@@ -86,7 +108,7 @@ function useProductCommandLoader( { search } ) {
 				},
 			};
 		} );
-	}, [ records ] );
+	}, [ records, origin ] );
 
 	return {
 		commands,
@@ -95,6 +117,25 @@ function useProductCommandLoader( { search } ) {
 }
 
 const WooCommerceCommands = () => {
+	const { editedPostType } = useEditedPostType();
+	const origin = editedPostType ? editedPostType + '-editor' : null;
+	const { isCommandPaletteOpen } = useSelect( ( select ) => {
+		const { isOpen } = select( commandsStore );
+		return {
+			isCommandPaletteOpen: isOpen(),
+		};
+	}, [] );
+	const wasCommandPaletteOpen = useRef( false );
+
+	useEffect( () => {
+		if ( isCommandPaletteOpen && ! wasCommandPaletteOpen.current ) {
+			recordEvent( 'woocommerce_command_palette_open', {
+				origin,
+			} );
+		}
+		wasCommandPaletteOpen.current = isCommandPaletteOpen;
+	}, [ isCommandPaletteOpen, origin ] );
+
 	registerCommandWithTracking( {
 		name: 'woocommerce/add-new-product',
 		label: __( 'Add new product', 'woocommerce' ),
@@ -104,6 +145,7 @@ const WooCommerceCommands = () => {
 				post_type: 'product',
 			} );
 		},
+		origin,
 	} );
 	registerCommandWithTracking( {
 		name: 'woocommerce/add-new-order',
@@ -115,6 +157,7 @@ const WooCommerceCommands = () => {
 				action: 'new',
 			} );
 		},
+		origin,
 	} );
 	registerCommandWithTracking( {
 		name: 'woocommerce/view-products',
@@ -125,6 +168,7 @@ const WooCommerceCommands = () => {
 				post_type: 'product',
 			} );
 		},
+		origin,
 	} );
 	registerCommandWithTracking( {
 		name: 'woocommerce/view-orders',
@@ -135,6 +179,7 @@ const WooCommerceCommands = () => {
 				page: 'wc-orders',
 			} );
 		},
+		origin,
 	} );
 	dispatch( commandsStore ).registerCommandLoader( {
 		name: 'woocommerce/product',
@@ -152,6 +197,7 @@ const WooCommerceCommands = () => {
 			registerWooCommerceSettingsCommand( {
 				label: settingsCommand.label,
 				tab: settingsCommand.key,
+				origin,
 			} );
 		} );
 	}

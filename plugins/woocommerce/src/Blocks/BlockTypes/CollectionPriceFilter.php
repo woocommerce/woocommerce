@@ -17,6 +17,92 @@ final class CollectionPriceFilter extends AbstractBlock {
 	const MAX_PRICE_QUERY_VAR = 'max_price';
 
 	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 */
+	protected function initialize() {
+		parent::initialize();
+
+		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
+		add_filter( 'collection_active_filters_data', array( $this, 'register_active_filters_data' ), 10, 2 );
+	}
+
+	/**
+	 * Register the query param keys.
+	 *
+	 * @param array $filter_param_keys The active filters data.
+	 * @param array $url_param_keys    The query param parsed from the URL.
+	 *
+	 * @return array Active filters param keys.
+	 */
+	public function get_filter_query_param_keys( $filter_param_keys, $url_param_keys ) {
+		$price_param_keys = array_filter(
+			$url_param_keys,
+			function( $param ) {
+				return self::MIN_PRICE_QUERY_VAR === $param || self::MAX_PRICE_QUERY_VAR === $param;
+			}
+		);
+
+		return array_merge(
+			$filter_param_keys,
+			$price_param_keys
+		);
+	}
+
+	/**
+	 * Register the active filters data.
+	 *
+	 * @param array $data   The active filters data.
+	 * @param array $params The query param parsed from the URL.
+	 * @return array Active filters data.
+	 */
+	public function register_active_filters_data( $data, $params ) {
+		$min_price           = intval( $params[ self::MIN_PRICE_QUERY_VAR ] ?? 0 );
+		$max_price           = intval( $params[ self::MAX_PRICE_QUERY_VAR ] ?? 0 );
+		$formatted_min_price = $min_price ? wp_strip_all_tags( wc_price( $min_price, array( 'decimals' => 0 ) ) ) : null;
+		$formatted_max_price = $max_price ? wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) : null;
+
+		if ( ! $formatted_min_price && ! $formatted_max_price ) {
+			return $data;
+		}
+
+		if ( $formatted_min_price && $formatted_max_price ) {
+			$title = sprintf(
+				/* translators: %1$s and %2$s are the formatted minimum and maximum prices respectively. */
+				__( 'Between %1$s and %2$s', 'woocommerce' ),
+				$formatted_min_price,
+				$formatted_max_price
+			);
+		}
+
+		if ( ! $formatted_min_price ) {
+			/* translators: %s is the formatted maximum price. */
+			$title = sprintf( __( 'Up to %s', 'woocommerce' ), $formatted_max_price );
+		}
+
+		if ( ! $formatted_max_price ) {
+			/* translators: %s is the formatted minimum price. */
+			$title = sprintf( __( 'From %s', 'woocommerce' ), $formatted_min_price );
+		}
+
+		$data['price'] = array(
+			'type'  => __( 'Price', 'woocommerce' ),
+			'items' => array(
+				array(
+					'title'      => $title,
+					'attributes' => array(
+						'data-wc-on--click' => 'woocommerce/collection-price-filter::actions.reset',
+					),
+				),
+			),
+		);
+
+		return $data;
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.

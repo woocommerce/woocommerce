@@ -36,7 +36,7 @@ class CheckoutFields {
 	 *
 	 * @var array
 	 */
-	private $supported_field_types = array( 'text', 'select' );
+	private $supported_field_types = [ 'text', 'select', 'checkbox' ];
 
 	/**
 	 * Instance of the asset data registry.
@@ -321,6 +321,19 @@ class CheckoutFields {
 		);
 
 		/**
+		 * Handle Checkbox fields.
+		 */
+		if ( 'checkbox' === $type ) {
+			// Checkbox fields are always optional. Log a warning if it's set explicitly as true.
+			$field_data['required'] = false;
+			if ( isset( $options['required'] ) && true === $options['required'] ) {
+				wc_get_logger()->warning(
+					sprintf( 'Registering checkbox fields as required is not supported. "%s" will be registered as optional.', esc_html( $id ) )
+				);
+			}
+		}
+
+		/**
 		 * Handle Select fields.
 		 */
 		if ( 'select' === $type ) {
@@ -486,7 +499,6 @@ class CheckoutFields {
 
 		$field = $this->additional_fields[ $key ];
 		if ( ! empty( $field['required'] ) && empty( $value ) ) {
-			// translators: %s field key.
 			return new \WP_Error(
 				'woocommerce_blocks_checkout_field_required',
 				\sprintf(
