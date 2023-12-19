@@ -22,12 +22,12 @@ interface Props {
 const EmptyPlaceholder = () => (
 	<Placeholder
 		icon={ <Icon icon={ percent } /> }
-		label={ __( 'On Sale Products', 'woo-gutenberg-products-block' ) }
+		label={ __( 'On Sale Products', 'woocommerce' ) }
 		className="wc-block-product-on-sale"
 	>
 		{ __(
 			'This block shows on-sale products. There are currently no discounted products in your store.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
 	</Placeholder>
 );

@@ -25,10 +25,7 @@ import { shippingAddressHasValidationErrors } from '../../../../data/cart/utils'
 
 const SHIPPING_RATE_ERROR = {
 	hidden: true,
-	message: __(
-		'Shipping options are not available',
-		'woo-gutenberg-products-block'
-	),
+	message: __( 'Shipping options are not available', 'woocommerce' ),
 };
 
 const LocalPickupSelector = ( {
@@ -124,10 +121,7 @@ const ShippingSelector = ( {
 	const Price =
 		rate.min === undefined || rateShouldBeHidden ? (
 			<span className="wc-block-checkout__shipping-method-option-price">
-				{ __(
-					'calculated with an address',
-					'woo-gutenberg-products-block'
-				) }
+				{ __( 'calculated with an address', 'woocommerce' ) }
 			</span>
 		) : (
 			<RatePrice minRate={ rate.min } maxRate={ rate.max } />

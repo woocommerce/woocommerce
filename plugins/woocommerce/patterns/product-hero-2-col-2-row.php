@@ -7,8 +7,8 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
-$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/man-person-winter-photography-guy-statue.jpg' );
-$image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/pattern-fashion-clothing-outerwear-wool-scarf.png' );
+$image1 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/man-person-winter-photography-guy-statue.jpg' );
+$image2 = PatternsHelper::get_image_url( $images, 1, 'assets/images/pattern-placeholders/pattern-fashion-clothing-outerwear-wool-scarf.png' );
 
 $first_title  = $content['titles'][0]['default'] ?? '';
 $second_title = $content['titles'][1]['default'] ?? '';
@@ -30,7 +30,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 	<!-- wp:media-text {"align":"full","mediaType":"image","mediaId":1,"mediaLink":"<?php echo esc_url( $image1 ); ?>","mediaWidth":40} -->
 	<div class="wp-block-media-text alignfull is-stacked-on-mobile" style="grid-template-columns:40% auto">
 		<figure class="wp-block-media-text__media">
-			<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1 size-full" />
+			<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woocommerce' ); ?>" class="wp-image-1 size-full" />
 		</figure>
 		<div class="wp-block-media-text__content">
 			<!-- wp:group {"layout":{"contentSize":"760px","type":"constrained"}} -->
@@ -132,7 +132,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 			<!-- /wp:columns -->
 		</div>
 		<figure class="wp-block-media-text__media">
-			<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1 size-full" />
+			<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woocommerce' ); ?>" class="wp-image-1 size-full" />
 		</figure>
 	</div>
 	<!-- /wp:media-text -->

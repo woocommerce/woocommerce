@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
@@ -62,6 +64,13 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	protected $order_controller;
 
 	/**
+	 * Additional fields controller class instance.
+	 *
+	 * @var CheckoutFields
+	 */
+	protected $additional_fields_controller;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param SchemaController $schema_controller Schema Controller instance.
@@ -70,10 +79,11 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	public function __construct( SchemaController $schema_controller, AbstractSchema $schema ) {
 		parent::__construct( $schema_controller, $schema );
 
-		$this->cart_schema      = $this->schema_controller->get( CartSchema::IDENTIFIER );
-		$this->cart_item_schema = $this->schema_controller->get( CartItemSchema::IDENTIFIER );
-		$this->cart_controller  = new CartController();
-		$this->order_controller = new OrderController();
+		$this->cart_schema                  = $this->schema_controller->get( CartSchema::IDENTIFIER );
+		$this->cart_item_schema             = $this->schema_controller->get( CartItemSchema::IDENTIFIER );
+		$this->cart_controller              = new CartController();
+		$this->additional_fields_controller = Package::container()->get( CheckoutFields::class );
+		$this->order_controller             = new OrderController();
 	}
 
 	/**
@@ -301,11 +311,11 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		}
 
 		if ( null === $nonce ) {
-			return $this->get_route_error_response( 'woocommerce_rest_missing_nonce', __( 'Missing the Nonce header. This endpoint requires a valid nonce.', 'woo-gutenberg-products-block' ), 401 );
+			return $this->get_route_error_response( 'woocommerce_rest_missing_nonce', __( 'Missing the Nonce header. This endpoint requires a valid nonce.', 'woocommerce' ), 401 );
 		}
 
 		if ( ! wp_verify_nonce( $nonce, 'wc_store_api' ) ) {
-			return $this->get_route_error_response( 'woocommerce_rest_invalid_nonce', __( 'Nonce is invalid.', 'woo-gutenberg-products-block' ), 403 );
+			return $this->get_route_error_response( 'woocommerce_rest_invalid_nonce', __( 'Nonce is invalid.', 'woocommerce' ), 403 );
 		}
 
 		return true;

@@ -19,6 +19,7 @@ export interface ProductCardProps {
 	product?: Product;
 	isLoading?: boolean;
 	tracksData: ProductTracksData;
+	small?: boolean;
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
@@ -102,6 +103,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		`woocommerce-marketplace__product-card--${ type }`,
 		{
 			'is-loading': isLoading,
+			'is-small': props.small,
 		}
 	);
 

@@ -36,7 +36,7 @@ class CartRemoveCoupon extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => [
 					'code' => [
-						'description' => __( 'Unique identifier for the coupon within the cart.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Unique identifier for the coupon within the cart.', 'woocommerce' ),
 						'type'        => 'string',
 					],
 				],
@@ -55,7 +55,7 @@ class CartRemoveCoupon extends AbstractCartRoute {
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		if ( ! wc_coupons_enabled() ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', __( 'Coupons are disabled.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', __( 'Coupons are disabled.', 'woocommerce' ), 404 );
 		}
 
 		$cart        = $this->cart_controller->get_cart_instance();
@@ -63,11 +63,11 @@ class CartRemoveCoupon extends AbstractCartRoute {
 		$coupon      = new \WC_Coupon( $coupon_code );
 
 		if ( $coupon->get_code() !== $coupon_code || ! $coupon->is_valid() ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_error', __( 'Invalid coupon code.', 'woo-gutenberg-products-block' ), 400 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_error', __( 'Invalid coupon code.', 'woocommerce' ), 400 );
 		}
 
 		if ( ! $this->cart_controller->has_coupon( $coupon_code ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon cannot be removed because it is not already applied to the cart.', 'woo-gutenberg-products-block' ), 409 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon cannot be removed because it is not already applied to the cart.', 'woocommerce' ), 409 );
 		}
 
 		$cart = $this->cart_controller->get_cart_instance();

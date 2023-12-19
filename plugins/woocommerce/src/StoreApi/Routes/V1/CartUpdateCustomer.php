@@ -41,14 +41,14 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => [
 					'billing_address'  => [
-						'description'       => __( 'Billing address.', 'woo-gutenberg-products-block' ),
+						'description'       => __( 'Billing address.', 'woocommerce' ),
 						'type'              => 'object',
 						'context'           => [ 'view', 'edit' ],
 						'properties'        => $this->schema->billing_address_schema->get_properties(),
 						'sanitize_callback' => null,
 					],
 					'shipping_address' => [
-						'description'       => __( 'Shipping address.', 'woo-gutenberg-products-block' ),
+						'description'       => __( 'Shipping address.', 'woocommerce' ),
 						'type'              => 'object',
 						'context'           => [ 'view', 'edit' ],
 						'properties'        => $this->schema->shipping_address_schema->get_properties(),
@@ -79,7 +79,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 			$billing_validation_check = $this->schema->billing_address_schema->validate_callback( $billing, $request, 'billing_address' );
 
 			if ( false === $billing_validation_check ) {
-				$invalid_params['billing_address'] = __( 'Invalid parameter.', 'woo-gutenberg-products-block' );
+				$invalid_params['billing_address'] = __( 'Invalid parameter.', 'woocommerce' );
 			} elseif ( is_wp_error( $billing_validation_check ) ) {
 				$invalid_params['billing_address']  = implode( ' ', $billing_validation_check->get_error_messages() );
 				$invalid_details['billing_address'] = \rest_convert_error_to_response( $billing_validation_check )->get_data();
@@ -90,7 +90,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 			$shipping_validation_check = $this->schema->shipping_address_schema->validate_callback( $shipping, $request, 'shipping_address' );
 
 			if ( false === $shipping_validation_check ) {
-				$invalid_params['shipping_address'] = __( 'Invalid parameter.', 'woo-gutenberg-products-block' );
+				$invalid_params['shipping_address'] = __( 'Invalid parameter.', 'woocommerce' );
 			} elseif ( is_wp_error( $shipping_validation_check ) ) {
 				$invalid_params['shipping_address']  = implode( ' ', $shipping_validation_check->get_error_messages() );
 				$invalid_details['shipping_address'] = \rest_convert_error_to_response( $shipping_validation_check )->get_data();
@@ -101,7 +101,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 			return new \WP_Error(
 				'rest_invalid_param',
 				/* translators: %s: List of invalid parameters. */
-				sprintf( __( 'Invalid parameter(s): %s', 'woo-gutenberg-products-block' ), implode( ', ', array_keys( $invalid_params ) ) ),
+				sprintf( __( 'Invalid parameter(s): %s', 'woocommerce' ), implode( ', ', array_keys( $invalid_params ) ) ),
 				[
 					'status'  => 400,
 					'params'  => $invalid_params,
@@ -182,6 +182,19 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'shipping_phone'      => $shipping['phone'] ?? null,
 			)
 		);
+		// We want to only get additional fields passed, since core ones are already saved.
+		$core_fields = array_keys( $this->additional_fields_controller->get_core_fields() );
+
+		$additional_shipping_values = array_diff_key( $shipping, array_flip( $core_fields ) );
+		$additional_billing_values  = array_diff_key( $billing, array_flip( $core_fields ) );
+
+		// We save them one by one, and we add the group prefix.
+		foreach ( $additional_shipping_values as $key => $value ) {
+			$this->additional_fields_controller->persist_field_for_customer( "/shipping/{$key}", $value, $customer );
+		}
+		foreach ( $additional_billing_values as $key => $value ) {
+			$this->additional_fields_controller->persist_field_for_customer( "/billing/{$key}", $value, $customer );
+		}
 
 		wc_do_deprecated_action(
 			'woocommerce_blocks_cart_update_customer_from_request',
@@ -222,6 +235,21 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		$billing_country = $customer->get_billing_country();
 		$billing_state   = $customer->get_billing_state();
 
+		$additional_fields = $this->additional_fields_controller->get_all_fields_from_customer( $customer );
+
+		$additional_fields = array_reduce(
+			array_keys( $additional_fields ),
+			function( $carry, $key ) use ( $additional_fields ) {
+				if ( 0 === strpos( $key, '/billing/' ) ) {
+					$value         = $additional_fields[ $key ];
+					$key           = str_replace( '/billing/', '', $key );
+					$carry[ $key ] = $value;
+				}
+				return $carry;
+			},
+			array()
+		);
+
 		/**
 		 * There's a bug in WooCommerce core in which not having a state ("") would result in us validating against the store's state.
 		 * This resets the state to an empty string if it doesn't match the country.
@@ -231,19 +259,22 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		if ( ! $validation_util->validate_state( $billing_state, $billing_country ) ) {
 			$billing_state = '';
 		}
-		return [
-			'first_name' => $customer->get_billing_first_name(),
-			'last_name'  => $customer->get_billing_last_name(),
-			'company'    => $customer->get_billing_company(),
-			'address_1'  => $customer->get_billing_address_1(),
-			'address_2'  => $customer->get_billing_address_2(),
-			'city'       => $customer->get_billing_city(),
-			'state'      => $billing_state,
-			'postcode'   => $customer->get_billing_postcode(),
-			'country'    => $billing_country,
-			'phone'      => $customer->get_billing_phone(),
-			'email'      => $customer->get_billing_email(),
-		];
+		return array_merge(
+			[
+				'first_name' => $customer->get_billing_first_name(),
+				'last_name'  => $customer->get_billing_last_name(),
+				'company'    => $customer->get_billing_company(),
+				'address_1'  => $customer->get_billing_address_1(),
+				'address_2'  => $customer->get_billing_address_2(),
+				'city'       => $customer->get_billing_city(),
+				'state'      => $billing_state,
+				'postcode'   => $customer->get_billing_postcode(),
+				'country'    => $billing_country,
+				'phone'      => $customer->get_billing_phone(),
+				'email'      => $customer->get_billing_email(),
+			],
+			$additional_fields
+		);
 	}
 
 	/**
@@ -253,17 +284,34 @@ class CartUpdateCustomer extends AbstractCartRoute {
 	 * @return array
 	 */
 	protected function get_customer_shipping_address( \WC_Customer $customer ) {
-		return [
-			'first_name' => $customer->get_shipping_first_name(),
-			'last_name'  => $customer->get_shipping_last_name(),
-			'company'    => $customer->get_shipping_company(),
-			'address_1'  => $customer->get_shipping_address_1(),
-			'address_2'  => $customer->get_shipping_address_2(),
-			'city'       => $customer->get_shipping_city(),
-			'state'      => $customer->get_shipping_state(),
-			'postcode'   => $customer->get_shipping_postcode(),
-			'country'    => $customer->get_shipping_country(),
-			'phone'      => $customer->get_shipping_phone(),
-		];
+		$additional_fields = $this->additional_fields_controller->get_all_fields_from_customer( $customer );
+
+		$additional_fields = array_reduce(
+			array_keys( $additional_fields ),
+			function( $carry, $key ) use ( $additional_fields ) {
+				if ( 0 === strpos( $key, '/shipping/' ) ) {
+					$value         = $additional_fields[ $key ];
+					$key           = str_replace( '/shipping/', '', $key );
+					$carry[ $key ] = $value;
+				}
+				return $carry;
+			},
+			array()
+		);
+		return array_merge(
+			[
+				'first_name' => $customer->get_shipping_first_name(),
+				'last_name'  => $customer->get_shipping_last_name(),
+				'company'    => $customer->get_shipping_company(),
+				'address_1'  => $customer->get_shipping_address_1(),
+				'address_2'  => $customer->get_shipping_address_2(),
+				'city'       => $customer->get_shipping_city(),
+				'state'      => $customer->get_shipping_state(),
+				'postcode'   => $customer->get_shipping_postcode(),
+				'country'    => $customer->get_shipping_country(),
+				'phone'      => $customer->get_shipping_phone(),
+			],
+			$additional_fields
+		);
 	}
 }

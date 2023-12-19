@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\Domain\Services\GoogleAnalytics;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Migration;
@@ -129,6 +130,7 @@ class Bootstrap {
 		$this->container->get( CreateAccount::class )->init();
 		$this->container->get( ShippingController::class )->init();
 		$this->container->get( TasksController::class )->init();
+		$this->container->get( CheckoutFields::class );
 
 		// Load assets in admin and on the frontend.
 		if ( ! $is_rest ) {
@@ -137,6 +139,7 @@ class Bootstrap {
 			$this->container->get( AssetsController::class );
 			$this->container->get( Installer::class )->init();
 			$this->container->get( GoogleAnalytics::class )->init();
+			$this->container->get( CheckoutFields::class )->init();
 		}
 
 		// Load assets unless this is a request specifically for the store API.
@@ -183,7 +186,7 @@ class Bootstrap {
 				echo '<div class="error"><p>';
 				printf(
 					/* translators: %1$s is the install command, %2$s is the build command, %3$s is the watch command. */
-					esc_html__( 'WooCommerce Blocks development mode requires files to be built. From the plugin directory, run %1$s to install dependencies, %2$s to build the files or %3$s to build the files and watch for changes.', 'woo-gutenberg-products-block' ),
+					esc_html__( 'WooCommerce Blocks development mode requires files to be built. From the plugin directory, run %1$s to install dependencies, %2$s to build the files or %3$s to build the files and watch for changes.', 'woocommerce' ),
 					'<code>npm install</code>',
 					'<code>npm run build</code>',
 					'<code>npm start</code>'
@@ -339,6 +342,12 @@ class Bootstrap {
 			Hydration::class,
 			function( Container $container ) {
 				return new Hydration( $container->get( AssetDataRegistry::class ) );
+			}
+		);
+		$this->container->register(
+			CheckoutFields::class,
+			function( Container $container ) {
+				return new CheckoutFields( $container->get( AssetDataRegistry::class ) );
 			}
 		);
 		$this->container->register(

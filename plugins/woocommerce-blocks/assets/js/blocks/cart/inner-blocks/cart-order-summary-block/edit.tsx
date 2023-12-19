@@ -29,7 +29,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 		[
 			'woocommerce/cart-order-summary-heading-block',
 			{
-				content: __( 'Cart totals', 'woo-gutenberg-products-block' ),
+				content: __( 'Cart totals', 'woocommerce' ),
 			},
 			[],
 		],

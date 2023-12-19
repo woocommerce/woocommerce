@@ -12,7 +12,7 @@ import { noticeContexts } from '../context/event-emit/utils';
 
 export const DEFAULT_ERROR_MESSAGE = __(
 	'Something went wrong. Please contact us to get assistance.',
-	'woo-gutenberg-products-block'
+	'woocommerce'
 );
 
 /**

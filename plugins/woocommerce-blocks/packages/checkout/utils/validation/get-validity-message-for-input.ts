@@ -23,7 +23,7 @@ const getValidityMessageForInput = (
 
 	const invalidFieldMessage = sprintf(
 		/* translators: %s field label */
-		__( 'Please enter a valid %s', 'woo-gutenberg-products-block' ),
+		__( 'Please enter a valid %s', 'woocommerce' ),
 		label.toLowerCase()
 	);
 

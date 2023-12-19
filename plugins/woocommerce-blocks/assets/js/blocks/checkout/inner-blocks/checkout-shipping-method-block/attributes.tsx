@@ -11,10 +11,10 @@ import { defaultShippingText, defaultLocalPickupText } from './constants';
 
 export default {
 	...formStepAttributes( {
-		defaultTitle: __( 'Shipping method', 'woo-gutenberg-products-block' ),
+		defaultTitle: __( 'Shipping method', 'woocommerce' ),
 		defaultDescription: __(
 			'Select how you would like to receive your order.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 	} ),
 	className: {

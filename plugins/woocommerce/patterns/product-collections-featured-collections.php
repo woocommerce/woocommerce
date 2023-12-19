@@ -7,10 +7,10 @@
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
-$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/technology-white-camera-photography-vintage-photographer.png' );
-$image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/leather-guitar-typewriter-red-gadget-sofa.png' );
-$image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholders/music-technology-play-equipment-studio-gadget.png' );
-$image4 = PatternsHelper::get_image_url( $images, 3, 'images/pattern-placeholders/technology-joystick-gadget-console-games-playstation.png' );
+$image1 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/technology-white-camera-photography-vintage-photographer.png' );
+$image2 = PatternsHelper::get_image_url( $images, 1, 'assets/images/pattern-placeholders/leather-guitar-typewriter-red-gadget-sofa.png' );
+$image3 = PatternsHelper::get_image_url( $images, 2, 'assets/images/pattern-placeholders/music-technology-play-equipment-studio-gadget.png' );
+$image4 = PatternsHelper::get_image_url( $images, 3, 'assets/images/pattern-placeholders/technology-joystick-gadget-console-games-playstation.png' );
 
 $first_title   = $content['titles'][0]['default'] ?? '';
 $second_title  = $content['titles'][1]['default'] ?? '';
@@ -40,13 +40,13 @@ $second_button = $content['buttons'][1]['default'] ?? '';
 		<div class="wp-block-group">
 			<!-- wp:image {"width":140,"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a left side of a banner. 1 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" />
+				<img src="<?php echo esc_url( $image1 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a left side of a banner. 1 out of 2.', 'woocommerce' ); ?>" width="140" />
 			</figure>
 			<!-- /wp:image -->
 
 			<!-- wp:image {"width":140,"height":100,"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a left side of a banner. 2 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" height="100" />
+				<img src="<?php echo esc_url( $image2 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a left side of a banner. 2 out of 2.', 'woocommerce' ); ?>" width="140" height="100" />
 			</figure>
 			<!-- /wp:image -->
 		</div>
@@ -74,13 +74,13 @@ $second_button = $content['buttons'][1]['default'] ?? '';
 		<div class="wp-block-group">
 			<!-- wp:image {"width":140,"height":100,"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img src="<?php echo esc_url( $image3 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a right side of a banner. 1 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" height="100" />
+				<img src="<?php echo esc_url( $image3 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a right side of a banner. 1 out of 2.', 'woocommerce' ); ?>" width="140" height="100" />
 			</figure>
 			<!-- /wp:image -->
 
 			<!-- wp:image {"width":140,"height":100,"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img src="<?php echo esc_url( $image4 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a right side of a banner. 2 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" height="100" />
+				<img src="<?php echo esc_url( $image4 ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a right side of a banner. 2 out of 2.', 'woocommerce' ); ?>" width="140" height="100" />
 			</figure>
 			<!-- /wp:image -->
 		</div>

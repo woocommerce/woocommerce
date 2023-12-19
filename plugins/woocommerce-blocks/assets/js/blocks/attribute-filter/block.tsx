@@ -555,10 +555,7 @@ const AttributeFilterBlock = ( {
 							disabled={ isLoading }
 							placeholder={ sprintf(
 								/* translators: %s attribute name. */
-								__(
-									'Select %s',
-									'woo-gutenberg-products-block'
-								),
+								__( 'Select %s', 'woocommerce' ),
 								attributeObject.label
 							) }
 							onChange={ ( tokens: string[] ) => {
@@ -609,34 +606,22 @@ const AttributeFilterBlock = ( {
 							messages={ {
 								added: sprintf(
 									/* translators: %s is the attribute label. */
-									__(
-										'%s filter added.',
-										'woo-gutenberg-products-block'
-									),
+									__( '%s filter added.', 'woocommerce' ),
 									attributeObject.label
 								),
 								removed: sprintf(
 									/* translators: %s is the attribute label. */
-									__(
-										'%s filter removed.',
-										'woo-gutenberg-products-block'
-									),
+									__( '%s filter removed.', 'woocommerce' ),
 									attributeObject.label
 								),
 								remove: sprintf(
 									/* translators: %s is the attribute label. */
-									__(
-										'Remove %s filter.',
-										'woo-gutenberg-products-block'
-									),
+									__( 'Remove %s filter.', 'woocommerce' ),
 									attributeObject.label.toLocaleLowerCase()
 								),
 								__experimentalInvalid: sprintf(
 									/* translators: %s is the attribute label. */
-									__(
-										'Invalid %s filter.',
-										'woo-gutenberg-products-block'
-									),
+									__( 'Invalid %s filter.', 'woocommerce' ),
 									attributeObject.label.toLocaleLowerCase()
 								),
 							} }
@@ -668,7 +653,7 @@ const AttributeFilterBlock = ( {
 						} }
 						screenReaderLabel={ __(
 							'Reset attribute filter',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					/>
 				) }

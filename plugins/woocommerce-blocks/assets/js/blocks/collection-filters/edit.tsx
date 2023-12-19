@@ -12,7 +12,7 @@ const template = [
 	[
 		'core/heading',
 		{
-			content: __( 'Filter by Price', 'woo-gutenberg-products-block' ),
+			content: __( 'Filter by Price', 'woocommerce' ),
 			level: 3,
 		},
 	],
@@ -20,14 +20,19 @@ const template = [
 	[
 		'core/heading',
 		{
-			content: __(
-				'Filter by Stock status',
-				'woo-gutenberg-products-block'
-			),
+			content: __( 'Filter by Stock status', 'woocommerce' ),
 			level: 3,
 		},
 	],
 	[ 'woocommerce/collection-stock-filter', {} ],
+	[
+		'core/heading',
+		{
+			content: __( 'Filter by Rating', 'woocommerce' ),
+			level: 3,
+		},
+	],
+	[ 'woocommerce/collection-rating-filter', {} ],
 ];
 
 const firstAttribute = ATTRIBUTES.find( Boolean );
@@ -39,7 +44,7 @@ if ( firstAttribute ) {
 			{
 				content: sprintf(
 					// translators: %s is the attribute label.
-					__( 'Filter by %s', 'woo-gutenberg-products-block' ),
+					__( 'Filter by %s', 'woocommerce' ),
 					firstAttribute.attribute_label
 				),
 				level: 3,

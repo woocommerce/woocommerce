@@ -86,14 +86,17 @@ class Pexels {
 		}
 
 		if ( $refined_images_count < $required_images && ! empty( $errors ) ) {
-			return new \WP_Error( 'ai_service_unavailable', __( 'AI Service is unavailable, try again later.', 'woo-gutenberg-products-block' ), $errors );
+			return new \WP_Error( 'ai_service_unavailable', __( 'AI Service is unavailable, try again later.', 'woocommerce' ), $errors );
 		}
 
 		if ( empty( $refined_images ) ) {
-			return new \WP_Error( 'woocommerce_no_images_found', __( 'No images found.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'woocommerce_no_images_found', __( 'No images found.', 'woocommerce' ) );
 		}
 
-		return $refined_images;
+		return array(
+			'images'      => $refined_images,
+			'search_term' => $search_term,
+		);
 	}
 
 	/**
@@ -108,7 +111,7 @@ class Pexels {
 	 * @return mixed|\WP_Error
 	 */
 	private function define_search_term( $ai_connection, $token, $business_description ) {
-		$prompt = sprintf( 'Based on the description "%s", generate one word that precisely describe what this business is selling. The returned word should be as accurate as possible to describe the products sold, do not include any adjectives or descriptions of the qualities of the product. The generated word must exist in the english dictionary and not be a proper name, the returned word should be simple, do not add any explanations.', $business_description );
+		$prompt = sprintf( 'You are a teacher. Based on the following business description, \'%s\', describe to a child exactly what this store is selling in one or two words and be as precise as you can possibly be. Do not reply with generic words that could cause confusion and be associated with other businesses as a response. Make sure you do not add double quotes in your response. Do not add any explanations in the response', $business_description );
 
 		$response = $ai_connection->fetch_ai_response( $token, $prompt, 30 );
 
@@ -117,7 +120,7 @@ class Pexels {
 		}
 
 		if ( ! isset( $response['completion'] ) ) {
-			return new \WP_Error( 'search_term_definition_failed', __( 'The search term definition failed.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'search_term_definition_failed', __( 'The search term definition failed.', 'woocommerce' ) );
 		}
 
 		return $response['completion'];
@@ -141,7 +144,7 @@ class Pexels {
 			}
 		}
 
-		$prompt = sprintf( 'Compare the following business description: "%s" with the image titles listed in the JSON below: if the image is not aligned with what the business is selling, delete the description from the list. Do not include any explanations or introductions to the response. The JSON is: %s', $business_description, wp_json_encode( $image_titles ) );
+		$prompt = sprintf( 'Given that you own a store described as "%s", remove from the following JSON all titles that do not represent products that could be sold on your store: %s', $business_description, wp_json_encode( $image_titles ) );
 
 		$response = $ai_connection->fetch_ai_response( $token, $prompt, 30 );
 
@@ -162,7 +165,7 @@ class Pexels {
 		}
 
 		if ( ! is_array( $filtered_image_titles ) ) {
-			return new \WP_Error( 'ai_service_unavailable', __( 'AI Service is unavailable, try again later.', 'woo-gutenberg-products-block' ) );
+			return new \WP_Error( 'ai_service_unavailable', __( 'AI Service is unavailable, try again later.', 'woocommerce' ) );
 		}
 
 		// Remove the images that are not aligned with the business description.
@@ -199,7 +202,7 @@ class Pexels {
 				'data' => $response_data,
 			];
 
-			return new \WP_Error( 'pexels_api_error', __( 'Request to the Pexels API failed.', 'woo-gutenberg-products-block' ), $error_msg );
+			return new \WP_Error( 'pexels_api_error', __( 'Request to the Pexels API failed.', 'woocommerce' ), $error_msg );
 		}
 
 		$response = $response_data['media'] ?? $response_data;

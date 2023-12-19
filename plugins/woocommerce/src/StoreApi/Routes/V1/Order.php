@@ -42,7 +42,6 @@ class Order extends AbstractRoute {
 	 */
 	public function __construct( SchemaController $schema_controller, AbstractSchema $schema ) {
 		parent::__construct( $schema_controller, $schema );
-
 		$this->order_controller = new OrderController();
 	}
 

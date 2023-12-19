@@ -6,11 +6,16 @@ import { isWpVersion } from '@woocommerce/settings';
 import { BlockInstance, createBlock } from '@wordpress/blocks';
 import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '@woocommerce/blocks/product-query/variations/elements/product-title';
 import { VARIATION_NAME as PRODUCT_SUMMARY_VARIATION_NAME } from '@woocommerce/blocks/product-query/variations/elements/product-summary';
+import { isExperimentalBuild } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
 import { OnClickCallbackParameter } from './types';
+
+const galleryBlock = isExperimentalBuild()
+	? 'woocommerce/product-gallery'
+	: 'woocommerce/product-image-gallery';
 
 const getBlockifiedTemplate = () =>
 	[
@@ -29,7 +34,7 @@ const getBlockifiedTemplate = () =>
 						justifyContent: 'right',
 						width: '512px',
 					},
-					[ createBlock( 'woocommerce/product-image-gallery' ) ]
+					[ createBlock( galleryBlock ) ]
 				),
 				createBlock( 'core/column', {}, [
 					createBlock( 'core/post-title', {
@@ -67,7 +72,7 @@ const getDescriptionAllowingConversion = ( templateTitle: string ) =>
 		/* translators: %s is the template title */
 		__(
 			'Transform this template into multiple blocks so you can add, remove, reorder, and customize your %s template.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		templateTitle
 	);
@@ -77,7 +82,7 @@ const getDescriptionDisallowingConversion = ( templateTitle: string ) =>
 		/* translators: %s is the template title */
 		__(
 			'This block serves as a placeholder for your %s. It will display the actual product image, title, price in your store. You can move this placeholder around and add more blocks around to customize the template.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		templateTitle
 	);
@@ -90,8 +95,7 @@ const getDescription = ( templateTitle: string, canConvert: boolean ) => {
 	return getDescriptionDisallowingConversion( templateTitle );
 };
 
-const getButtonLabel = () =>
-	__( 'Transform into blocks', 'woo-gutenberg-products-block' );
+const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
 
 const onClickCallback = ( {
 	clientId,

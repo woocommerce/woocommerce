@@ -35,8 +35,8 @@ class Totals extends AbstractOrderConfirmationBlock {
 			<table cellspacing="0" class="wc-block-order-confirmation-totals__table ' . esc_attr( $classes_and_styles['classes'] ) . '" style="' . esc_attr( $classes_and_styles['styles'] ) . '">
 				<thead>
 					<tr>
-						<th class="wc-block-order-confirmation-totals__product">' . esc_html__( 'Product', 'woo-gutenberg-products-block' ) . '</th>
-						<th class="wc-block-order-confirmation-totals__total">' . esc_html__( 'Total', 'woo-gutenberg-products-block' ) . '</th>
+						<th class="wc-block-order-confirmation-totals__product">' . esc_html__( 'Product', 'woocommerce' ) . '</th>
+						<th class="wc-block-order-confirmation-totals__total">' . esc_html__( 'Total', 'woocommerce' ) . '</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -223,7 +223,7 @@ class Totals extends AbstractOrderConfirmationBlock {
 
 		return '<div class="wc-block-order-confirmation-order-note">' .
 					'<p class="wc-block-order-confirmation-order-note__label">' .
-						esc_html__( 'Note:', 'woo-gutenberg-products-block' ) .
+						esc_html__( 'Note:', 'woocommerce' ) .
 					'</p>' .
 					'<p>' . wp_kses_post( nl2br( wptexturize( $order->get_customer_note() ) ) ) . '</p>' .
 				'</div>';

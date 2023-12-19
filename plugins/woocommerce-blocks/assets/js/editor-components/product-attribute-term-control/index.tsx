@@ -77,12 +77,7 @@ const ProductAttributeTermControl = ( {
 					name={ `attributes-${ instanceId }` }
 					countLabel={ sprintf(
 						/* translators: %d is the count of terms. */
-						_n(
-							'%d term',
-							'%d terms',
-							count,
-							'woo-gutenberg-products-block'
-						),
+						_n( '%d term', '%d terms', count, 'woocommerce' ),
 						count
 					) }
 					aria-label={ sprintf(
@@ -91,7 +86,7 @@ const ProductAttributeTermControl = ( {
 							'%1$s, has %2$d term',
 							'%1$s, has %2$d terms',
 							count,
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						item.name,
 						count
@@ -109,12 +104,7 @@ const ProductAttributeTermControl = ( {
 				className={ classNames( ...classes, 'has-count' ) }
 				countLabel={ sprintf(
 					/* translators: %d is the count of products. */
-					_n(
-						'%d product',
-						'%d products',
-						count,
-						'woo-gutenberg-products-block'
-					),
+					_n( '%d product', '%d products', count, 'woocommerce' ),
 					count
 				) }
 				aria-label={ sprintf(
@@ -123,7 +113,7 @@ const ProductAttributeTermControl = ( {
 						'%1$s, has %2$d product',
 						'%1$s, has %2$d products',
 						count,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					itemName,
 					count
@@ -143,18 +133,12 @@ const ProductAttributeTermControl = ( {
 	}, [] as SearchListItemProps[] );
 
 	messages = {
-		clear: __(
-			'Clear all product attributes',
-			'woo-gutenberg-products-block'
-		),
+		clear: __( 'Clear all product attributes', 'woocommerce' ),
 		noItems: __(
 			"Your store doesn't have any product attributes.",
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
-		search: __(
-			'Search for product attributes',
-			'woo-gutenberg-products-block'
-		),
+		search: __( 'Search for product attributes', 'woocommerce' ),
 		selected: ( n: number ) =>
 			sprintf(
 				/* translators: %d is the count of attributes selected. */
@@ -162,13 +146,13 @@ const ProductAttributeTermControl = ( {
 					'%d attribute selected',
 					'%d attributes selected',
 					n,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				n
 			),
 		updated: __(
 			'Product attribute search results updated.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 		...messages,
 	};
@@ -204,11 +188,11 @@ const ProductAttributeTermControl = ( {
 						className="woocommerce-product-attributes__operator"
 						label={ __(
 							'Display products matching',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						help={ __(
 							'Pick at least two attributes to use this setting.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ operator }
 						onChange={ onOperatorChange }
@@ -216,14 +200,14 @@ const ProductAttributeTermControl = ( {
 							{
 								label: __(
 									'Any selected attributes',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								value: 'any',
 							},
 							{
 								label: __(
 									'All selected attributes',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								value: 'all',
 							},

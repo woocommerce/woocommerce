@@ -44,7 +44,7 @@ const ReviewsByCategoryEditor = ( {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __( 'Category', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Category', 'woocommerce' ) }
 					initialOpen={ false }
 				>
 					<ProductCategoryControl
@@ -57,14 +57,9 @@ const ReviewsByCategoryEditor = ( {
 						showReviewCount={ true }
 					/>
 				</PanelBody>
-				<PanelBody
-					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
-				>
+				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
 					<ToggleControl
-						label={ __(
-							'Product name',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Product name', 'woocommerce' ) }
 						checked={ attributes.showProductName }
 						onChange={ () =>
 							setAttributes( {
@@ -77,12 +72,7 @@ const ReviewsByCategoryEditor = ( {
 						setAttributes
 					) }
 				</PanelBody>
-				<PanelBody
-					title={ __(
-						'List Settings',
-						'woo-gutenberg-products-block'
-					) }
-				>
+				<PanelBody title={ __( 'List Settings', 'woocommerce' ) }>
 					{ getSharedReviewListControls( attributes, setAttributes ) }
 				</PanelBody>
 			</InspectorControls>
@@ -95,7 +85,7 @@ const ReviewsByCategoryEditor = ( {
 			debouncedSpeak(
 				__(
 					'Now displaying a preview of the reviews for the products in the selected categories.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				)
 			);
 		};
@@ -108,15 +98,12 @@ const ReviewsByCategoryEditor = ( {
 						className="block-editor-block-icon"
 					/>
 				}
-				label={ __(
-					'Reviews by Category',
-					'woo-gutenberg-products-block'
-				) }
+				label={ __( 'Reviews by Category', 'woocommerce' ) }
 				className="wc-block-reviews-by-category"
 			>
 				{ __(
 					'Show product reviews from specific categories.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				<div className="wc-block-reviews__selection">
 					<ProductCategoryControl
@@ -128,7 +115,7 @@ const ReviewsByCategoryEditor = ( {
 						showReviewCount={ true }
 					/>
 					<Button variant="primary" onClick={ onDone }>
-						{ __( 'Done', 'woo-gutenberg-products-block' ) }
+						{ __( 'Done', 'woocommerce' ) }
 					</Button>
 				</div>
 			</Placeholder>
@@ -139,10 +126,7 @@ const ReviewsByCategoryEditor = ( {
 		return renderEditMode();
 	}
 
-	const buttonTitle = __(
-		'Edit selected categories',
-		'woo-gutenberg-products-block'
-	);
+	const buttonTitle = __( 'Edit selected categories', 'woocommerce' );
 
 	return (
 		<>
@@ -156,10 +140,7 @@ const ReviewsByCategoryEditor = ( {
 						className="block-editor-block-icon"
 					/>
 				}
-				name={ __(
-					'Reviews by Category',
-					'woo-gutenberg-products-block'
-				) }
+				name={ __( 'Reviews by Category', 'woocommerce' ) }
 				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>
 		</>

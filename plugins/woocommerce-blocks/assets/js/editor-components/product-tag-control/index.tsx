@@ -63,28 +63,20 @@ const ProductTagControl = ( {
 	const debouncedOnSearch = useDebouncedCallback( onSearch, 400 );
 
 	const messages = {
-		clear: __( 'Clear all product tags', 'woo-gutenberg-products-block' ),
-		list: __( 'Product Tags', 'woo-gutenberg-products-block' ),
+		clear: __( 'Clear all product tags', 'woocommerce' ),
+		list: __( 'Product Tags', 'woocommerce' ),
 		noItems: __(
 			'You have not set up any product tags on your store.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
-		search: __( 'Search for product tags', 'woo-gutenberg-products-block' ),
+		search: __( 'Search for product tags', 'woocommerce' ),
 		selected: ( n: number ) =>
 			sprintf(
 				/* translators: %d is the count of selected tags. */
-				_n(
-					'%d tag selected',
-					'%d tags selected',
-					n,
-					'woo-gutenberg-products-block'
-				),
+				_n( '%d tag selected', '%d tags selected', n, 'woocommerce' ),
 				n
 			),
-		updated: __(
-			'Tag search results updated.',
-			'woo-gutenberg-products-block'
-		),
+		updated: __( 'Tag search results updated.', 'woocommerce' ),
 	};
 
 	return (
@@ -108,27 +100,21 @@ const ProductTagControl = ( {
 						className="woocommerce-product-tags__operator"
 						label={ __(
 							'Display products matching',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						help={ __(
 							'Pick at least two tags to use this setting.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ operator }
 						onChange={ onOperatorChange }
 						options={ [
 							{
-								label: __(
-									'Any selected tags',
-									'woo-gutenberg-products-block'
-								),
+								label: __( 'Any selected tags', 'woocommerce' ),
 								value: 'any',
 							},
 							{
-								label: __(
-									'All selected tags',
-									'woo-gutenberg-products-block'
-								),
+								label: __( 'All selected tags', 'woocommerce' ),
 								value: 'all',
 							},
 						] }

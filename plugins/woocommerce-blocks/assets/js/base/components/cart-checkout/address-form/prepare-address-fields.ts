@@ -7,7 +7,7 @@ import {
 	AddressField,
 	AddressFields,
 	CountryAddressFields,
-	defaultAddressFields,
+	defaultFields,
 	KeyedAddressField,
 	LocaleSpecificAddressField,
 } from '@woocommerce/settings';
@@ -43,7 +43,7 @@ const getSupportedCoreLocaleProps = (
 	if ( localeField.label !== undefined && ! localeField.optionalLabel ) {
 		fields.optionalLabel = sprintf(
 			/* translators: %s Field label. */
-			__( '%s (optional)', 'woo-gutenberg-products-block' ),
+			__( '%s (optional)', 'woocommerce' ),
 			localeField.label
 		);
 	}
@@ -114,7 +114,7 @@ const prepareAddressFields = (
 
 	return fields
 		.map( ( field ) => {
-			const defaultConfig = defaultAddressFields[ field ] || {};
+			const defaultConfig = defaultFields[ field ] || {};
 			const localeConfig = localeConfigs[ field ] || {};
 			const fieldConfig = fieldConfigs[ field ] || {};
 

@@ -102,7 +102,7 @@ export const runCheckoutFailObservers = ( {
 				data.processingResponse?.message ||
 				__(
 					'Something went wrong. Please contact us to get assistance.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				);
 			createErrorNotice( message, {
 				id: 'checkout',
@@ -214,7 +214,7 @@ export const getPaymentResultFromCheckoutResponse = (
 	) {
 		paymentResult.message = __(
 			'Something went wrong. Please contact us to get assistance.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		);
 	}
 

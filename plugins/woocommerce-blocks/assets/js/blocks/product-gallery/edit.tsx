@@ -31,6 +31,9 @@ const TEMPLATE: InnerBlockTemplate[] = [
 				flexWrap: 'nowrap',
 				verticalAlignment: 'top',
 			},
+			metadata: {
+				name: 'Gallery Area',
+			},
 		},
 		[
 			[
@@ -48,6 +51,9 @@ const TEMPLATE: InnerBlockTemplate[] = [
 					},
 					style: {
 						layout: { selfStretch: 'fixed', flexSize: '100%' },
+					},
+					metadata: {
+						name: 'Large Image and Navigation',
 					},
 					...getInnerBlocksLockAttributes( 'lock' ),
 				},
