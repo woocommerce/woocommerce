@@ -87,7 +87,10 @@ final class CollectionFilters extends AbstractBlock {
 		);
 
 		if ( ! isset( $block->context['queryId'] ) ) {
-			$attributes_data['data-wc-navigation-id'] = 'wc-collection-filters';
+			$attributes_data['data-wc-navigation-id'] = sprintf(
+				'wc-collection-filters-%s',
+				md5( wp_json_encode( $block->parsed_block['innerBlocks'] ) )
+			);
 		}
 
 		return sprintf(
