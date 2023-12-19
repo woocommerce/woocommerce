@@ -54,7 +54,7 @@ class Controller extends GenericStatsController implements ExportableInterface {
 		$args['segmentby']           = $request['segmentby'];
 		$args['fields']              = $request['fields'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
-		$args['date_type'] = $request['date_type'];
+		$args['date_type']           = $request['date_type'];
 
 		return $args;
 	}
