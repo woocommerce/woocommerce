@@ -134,7 +134,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 		$filename = bin2hex( $this->legacy_proxy->call_function( 'random_bytes', 16 ) );
 
 		$transient_files_directory  = $this->get_transient_files_directory();
-		$transient_files_directory .= '/' . substr( $expiration_date, 0, 10 );
+		$transient_files_directory .= '/' . $expiration_date_object->format( 'Y-m-d' );
 		if ( ! $this->legacy_proxy->call_function( 'is_dir', $transient_files_directory ) ) {
 			if ( ! $this->legacy_proxy->call_function( 'wp_mkdir_p', $transient_files_directory ) ) {
 				throw new Exception( "Can't create directory: $transient_files_directory" );
@@ -193,12 +193,12 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 * 3. Otherwise, use 'file_has_expired' passing the obtained full file path.
 	 *
 	 * @param string $file_path The full file path to check.
-	 * @return bool Trye if the file has expired, false otherwise.
+	 * @return bool True if the file has expired, false otherwise.
 	 * @throws \Exception Thrown by DateTime if a wrong file path is passed.
 	 */
 	public function file_has_expired( string $file_path ): bool {
 		$dirname                = dirname( $file_path );
-		$expiration_date        = substr( $dirname, strlen( $dirname ) - 10, 10 );
+		$expiration_date        = basename( $dirname );
 		$expiration_date_object = new DateTime( $expiration_date, TimeUtil::get_utc_date_time_zone() );
 		$today_date_object      = new DateTime( $this->legacy_proxy->call_function( 'gmdate', 'Y-m-d' ), TimeUtil::get_utc_date_time_zone() );
 		return $expiration_date_object < $today_date_object;

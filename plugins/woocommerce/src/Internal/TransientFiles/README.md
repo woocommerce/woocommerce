@@ -11,13 +11,13 @@
 
 ## Summary
 
-The WooCommerce transient files engine allows to create transient files. We define a _transient file_ as a physical file (in the server filesystem) that:
+The WooCommerce transient files engine allows for the creation of transient files. We define a _transient file_ as a physical file (in the server filesystem) that:
 
 * Has a random name.
 * Can have any arbitrary content.
 * Lives in a dedicated subdirectory inside the WordPress `uploads` folder (customizable via [hook](#hooks)).
 * Has an expiration date.
-* Its contents can be retrieved via [unauthenticated HTTP endpoint](#the-http-file-serving-endpoint).
+* Its contents can be retrieved via an [unauthenticated HTTP endpoint](#the-http-file-serving-endpoint).
 
 As of now, the only way to create a transient file is by directly passing its contents to the [`create_transient_file`](#create_transient_file) method in a parameter. Additional mechanisms (e.g. passing the path of an already existing file) might be added in the future (pull requests welcome, as usual!)
 
