@@ -6,7 +6,7 @@ post_title: User experience guidelines - notices
 
 Use notices primarily to provide user feedback in response to an action. Avoid using notices to communicate offers or announcements. Don’t apply brand colors, fonts, or illustrations to your notices.
 
-If a post-activation notice is required, keep it within the WordPress plugin area—do not display it on the dashboard, or any other parts of the platform.
+If a post-activation notice is required, keep it within the WordPress plugin area-do not display it on the dashboard, or any other parts of the platform.
 
 Use the standard WordPress notice format and WooCommerce admin notices API.
 

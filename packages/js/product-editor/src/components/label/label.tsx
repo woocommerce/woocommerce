@@ -11,7 +11,7 @@ import { Tooltip } from '@wordpress/components';
  */
 import { sanitizeHTML } from '../../utils/sanitize-html';
 
-interface LabelProps {
+export interface LabelProps {
 	label: string;
 	required?: boolean;
 	tooltip?: string;

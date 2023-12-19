@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Redirect users to new In-app marketplace installer if correct URL parameter is provided
