@@ -389,7 +389,7 @@ trait OrderAttributionMeta {
 		$args = array(
 			'limit'  => - 1,
 			'return' => 'objects',
-			// Don't count cancelled, on-hold, or failed orders.
+			// Don't count cancelled or failed orders.
 			'status' => array( 'pending', 'processing', 'on-hold', 'completed', 'refunded' ),
 			'type'   => 'shop_order',
 		);
