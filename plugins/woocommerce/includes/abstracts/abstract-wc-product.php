@@ -1876,26 +1876,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( '' === $this->get_price() ) {
 			$price = apply_filters( 'woocommerce_empty_price_html', '', $this );
 		} elseif ( $this->is_on_sale() ) {
-			$this->clear_caches();
 			$price = wc_format_sale_price( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this, array( 'price' => $this->get_sale_price() ) ) ) . $this->get_price_suffix();
 		} else {
 			$price = wc_price( wc_get_price_to_display( $this ) ) . $this->get_price_suffix();
 		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
-	}
-
-	/**
-	 * Clear any caches.
-	 */
-	protected function clear_caches() {
-		wc_delete_product_transients( $this->get_id() );
-		if ( $this->get_parent_id( 'edit' ) ) {
-			wc_delete_product_transients( $this->get_parent_id( 'edit' ) );
-			WC_Cache_Helper::invalidate_cache_group( 'product_' . $this->get_parent_id( 'edit' ) );
-		}
-		WC_Cache_Helper::invalidate_attribute_count( array_keys( $this->get_attributes() ) );
-		WC_Cache_Helper::invalidate_cache_group( 'product_' . $this->get_id() );
 	}
 
 	/**
