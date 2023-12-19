@@ -22,6 +22,8 @@ jest.mock( '../../', () => ( {
 describe( 'OnboardingTour', () => {
 	let props: {
 		onClose: jest.Mock;
+		skipTour: jest.Mock;
+		takeTour: jest.Mock;
 		setShowWelcomeTour: jest.Mock;
 		showWelcomeTour: boolean;
 		setIsResizeHandleVisible: ( isVisible: boolean ) => void;
@@ -30,6 +32,8 @@ describe( 'OnboardingTour', () => {
 	beforeEach( () => {
 		props = {
 			onClose: jest.fn(),
+			skipTour: jest.fn(),
+			takeTour: jest.fn(),
 			setShowWelcomeTour: jest.fn(),
 			showWelcomeTour: true,
 			setIsResizeHandleVisible: jest.fn(),
