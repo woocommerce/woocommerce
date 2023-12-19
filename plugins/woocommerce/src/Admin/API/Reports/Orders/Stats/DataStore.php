@@ -304,6 +304,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
+		if (isset($query_args['date_type'])) {
+			$date_type = $query_args['date_type'];
+			$allowed_date_types = array('date_paid', 'date_created', 'date_completed');
+			if (in_array($date_type, $allowed_date_types)) {
+				$this->date_column_name = $date_type;
+			}
+		}
+
 		if ( false === $data ) {
 			$this->initialize_queries();
 
