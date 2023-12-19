@@ -52,7 +52,7 @@ class WC_Legacy_API {
 	public function init() {
 		add_action( 'parse_request', array( $this, 'handle_rest_api_requests' ), 0 );
 		$this->mark_method_as_accessible( 'maybe_display_legacy_wc_api_usage_notice' );
-		self::add_action( 'admin_notices', array( $this, 'maybe_display_legacy_wc_api_usage_notice' ), 0);
+		self::add_action( 'admin_notices', array( $this, 'maybe_display_legacy_wc_api_usage_notice' ), 0 );
 	}
 
 	/**
@@ -156,7 +156,7 @@ class WC_Legacy_API {
 		wc_maybe_define_constant( 'WC_API_REQUEST_VERSION', absint( $wp->query_vars['wc-api-version'] ) );
 
 		$route =  $wp->query_vars['wc-api-route'];
-		$this->maybe_log_rest_api_request($route, $_SERVER['HTTP_USER_AGENT'] ?? null);
+		$this->maybe_log_rest_api_request($route, $_SERVER['HTTP_USER_AGENT'] ?? null );
 
 		// Legacy v1 API request.
 		if ( 1 === WC_API_REQUEST_VERSION ) {
