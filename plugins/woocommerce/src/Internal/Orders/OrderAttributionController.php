@@ -176,7 +176,6 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private function maybe_set_admin_source( WC_Order $order ) {
 		if ( function_exists( 'is_admin' ) && is_admin() ) {
 			$order->add_meta_data( $this->get_meta_prefixed_field( 'type' ), 'admin' );
-			$order->add_meta_data( $this->get_meta_prefixed_field( 'origin' ), 'Web admin' );
 			$order->save();
 		}
 	}
@@ -300,7 +299,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Output the data for the Origin column in the orders table.
+	 * Output the translated origin label for the Origin column in the orders table.
 	 *
 	 * Default to "Unknown" if no origin is set.
 	 *
@@ -309,7 +308,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function output_origin_column( WC_Order $order ) {
-		$origin = $order->get_meta( $this->get_meta_prefixed_field( 'origin' ) );
+		$source_type = $order->get_meta( $this->get_meta_prefixed_field( 'type' ) );
+		$source      = $order->get_meta( $this->get_meta_prefixed_field( 'utm_source' ) );
+		$origin      = $this->get_origin_label( $source_type, $source );
 		if ( empty( $origin ) ) {
 			$origin = __( 'Unknown', 'woocommerce' );
 		}
@@ -398,7 +399,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			$source_data['utm_source'] ?? '',
 			false
 		);
-		$tracks_data   = array(
+		$tracks_data  = array(
 			'order_id'             => $order->get_id(),
 			'type'                 => $source_data['type'] ?? '',
 			'medium'               => $source_data['utm_medium'] ?? '',

@@ -281,11 +281,6 @@ trait OrderAttributionMeta {
 			$values['device_type'] = $this->get_device_type( $values );
 		}
 
-		// Set the origin label.
-		if ( array_key_exists( 'type', $values ) && array_key_exists( 'utm_source', $values ) ) {
-			$values['origin'] = $this->get_origin_label( $values['type'], $values['utm_source'] );
-		}
-
 		return $values;
 	}
 
