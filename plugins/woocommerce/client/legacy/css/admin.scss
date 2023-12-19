@@ -4534,12 +4534,12 @@ table.wc-shipping-classes {
 	.wc-shipping-zone-rows,
 	.wc-shipping-zone-method-rows,
 	.wc-shipping-class-rows {
-		tr:nth-child(odd) td {
+		tr:nth-child(even) td {
 			background: #f9f9f9;
 		}
 	}
 
-	.wc-shipping-zone-rows-tfoot .odd td {
+	.wc-shipping-zone-rows-tfoot .even td {
 		background: #f9f9f9;
 	}
 

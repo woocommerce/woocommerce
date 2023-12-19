@@ -136,14 +136,14 @@
 					$tr.find( '.wc-shipping-zone-delete' ).on( 'click', { view: this }, this.onDeleteRow );
 				},
 				initRows: function() {
-					const isOdd = 0 === ( $( 'tbody.wc-shipping-zone-rows tr' ).length % 2 );
+					const isEven = 0 !== ( $( 'tbody.wc-shipping-zone-rows tr' ).length % 2 );
 					const tfoot = $( 'tfoot.wc-shipping-zone-rows-tfoot' );
 
 					// Stripe
-					if ( isOdd ) {
-						tfoot.find( 'tr' ).addClass( 'odd' );
+					if ( isEven ) {
+						tfoot.find( 'tr' ).addClass( 'even' );
 					} else {
-						tfoot.find( 'tr' ).removeClass( 'odd' );
+						tfoot.find( 'tr' ).removeClass( 'even' );
 					}
 					// Tooltips
 					$( '#tiptip_holder' ).removeAttr( 'style' );
