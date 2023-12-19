@@ -30,7 +30,6 @@ class Dropdown {
 			'selectedItems' => $selected_items,
 			'isOpen'        => false,
 			'selectType'    => $select_type,
-			'items'         => $items,
 		);
 
 		$action = $props['action'] ?? '';
@@ -53,7 +52,7 @@ class Dropdown {
 							<?php if ( 'multiple' === $select_type ) { ?>
 								<template
 									data-wc-each="context.selectedItems"
-									data-wc-each-key="value"
+									data-wc-each-key="context.item.value"
 								>
 									<span class="components-form-token-field__token">
 										<span
@@ -94,29 +93,18 @@ class Dropdown {
 							<?php } ?>
 							<input id="components-form-token-input-1" type="text" autocomplete="off" data-wc-bind--placeholder="state.placeholderText" class="components-form-token-field__input" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-describedby="components-form-token-suggestions-howto-1" value="" data-wc-key="input">
 							<ul hidden data-wc-bind--hidden="!context.isOpen" class="components-form-token-field__suggestions-list" id="components-form-token-suggestions-1" role="listbox"  data-wc-key="ul">
-								<template data-wc-each="context.items" data-wc-each-key="value">
+								<?php
+								foreach ( $items as $item ) :
+									$context = array( 'item' => $item );
+									?>
 									<li
 										role="option"
-										data-wc-text="context.item.label"
 										data-wc-on--click--select-item="actions.selectDropdownItem"
 										data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>"
 										data-wc-class--is-selected="state.isSelected"
 										class="components-form-token-field__suggestion"
 										data-wc-bind--aria-selected="state.isSelected"
-									>
-									</li>
-								</template>
-								<?php
-								foreach ( $items as $item ) :
-									$context = array(
-										'currentItem' => $item,
-									);
-									?>
-									<li
-										role="option"
-										class="components-form-token-field__suggestion"
-										aria-selected="false"
-										data-wc-each-child
+										data-wc-context='<?php echo wp_json_encode( $context ); ?>'
 									>
 									<?php // This attribute supports HTML so should be sanitized by caller. ?>
 									<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
