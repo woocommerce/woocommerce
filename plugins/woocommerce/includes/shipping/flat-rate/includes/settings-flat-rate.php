@@ -31,7 +31,7 @@ $settings = array(
 	),
 	'cost'       => array(
 		'title'             => __( 'Cost', 'woocommerce' ),
-		'type'              => 'price',
+		'type'              => 'text',
 		'class'             => 'wc-shipping-modal-price',
 		'placeholder'       => '',
 		'description'       => $cost_desc,
@@ -58,7 +58,7 @@ if ( ! empty( $shipping_classes ) ) {
 		$settings[ 'class_cost_' . $shipping_class->term_id ] = array(
 			/* translators: %s: shipping class name */
 			'title'             => sprintf( __( '"%s" shipping class cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
-			'type'              => 'price',
+			'type'              => 'text',
 			'class'             => 'wc-shipping-modal-price',
 			'placeholder'       => __( 'N/A', 'woocommerce' ),
 			'description'       => $cost_desc,
@@ -70,7 +70,7 @@ if ( ! empty( $shipping_classes ) ) {
 
 	$settings['no_class_cost'] = array(
 		'title'             => __( 'No shipping class cost', 'woocommerce' ),
-		'type'              => 'price',
+		'type'              => 'text',
 		'class'             => 'wc-shipping-modal-price',
 		'placeholder'       => __( 'N/A', 'woocommerce' ),
 		'description'       => $cost_desc,
