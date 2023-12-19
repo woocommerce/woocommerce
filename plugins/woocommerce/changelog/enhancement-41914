@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add CLI command `hpos cleanup` to cleanup postmeta data for migrated orders.
+Add CLI command `wc hpos cleanup` to cleanup post and post meta data for migrated orders.
