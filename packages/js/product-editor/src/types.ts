@@ -25,3 +25,14 @@ export interface Metadata< T > {
 	key: string;
 	value?: T;
 }
+
+export interface Taxonomy {
+	id: number;
+	name: string;
+	parent: number;
+	meta?: Record< string, string >;
+}
+
+export interface TaxonomyMetadata {
+	hierarchical: boolean;
+}
