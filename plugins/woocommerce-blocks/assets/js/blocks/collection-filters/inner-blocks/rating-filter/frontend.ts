@@ -17,7 +17,7 @@ function getUrl( filters: Array< string | null > ) {
 		url.searchParams.delete( 'rating_filter' );
 	}
 
-	return url;
+	return url.href;
 }
 
 store( 'woocommerce/collection-rating-filter', {
