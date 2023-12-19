@@ -87,6 +87,19 @@
 			margin-bottom: var(--wp--style--block-gap);
 		}
 		
+		.woocommerce-tabs {
+			ul.tabs li.active {
+
+				&::before {
+					box-shadow: 2px 2px 0 var(--wp--preset--color--background, $contentbg);
+				}
+
+				&::after {
+					box-shadow: -2px 2px 0 var(--wp--preset--color--background, $contentbg);
+				}
+			}
+		}
+
 		form.cart {
 			div.quantity {
 				display: inline-block;
