@@ -39,7 +39,13 @@ class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => array(),
+				'args'                => array(
+					'area' => array(
+						'description' => __( 'Area to get templates for.', 'woocommerce' ),
+						'type'        => 'string',
+						'default'     => '',
+					),
+				),
 			)
 		);
 
@@ -78,6 +84,10 @@ class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 		$registered_layout_templates = $template_registry->get_all_registered();
 
 		foreach ( $registered_layout_templates as $layout_template ) {
+			if ( ! empty( $request['area'] ) && $layout_template->get_area() !== $request['area'] ) {
+				continue;
+			}
+
 			$layout_templates[] = $layout_template->get_formatted_template();
 		}
 
