@@ -132,30 +132,9 @@ trait OrderAttributionMeta {
 		}
 
 		// Determine the origin based on source type and referrer.
-		$source_type = $return['type'] ?? '';
-		switch ( $source_type ) {
-			case 'organic':
-				$origin = __( 'Organic search', 'woocommerce' );
-				break;
-
-			case 'referral':
-				$origin = __( 'Referral', 'woocommerce' );
-				break;
-
-			case 'typein':
-				$origin = __( 'Direct', 'woocommerce' );
-				break;
-
-			case 'admin':
-				$origin = __( 'Web admin', 'woocommerce' );
-				break;
-
-			default:
-				$origin = __( 'Unknown', 'woocommerce' );
-				break;
-		}
-
-		$return['origin'] = $origin;
+		$source_type      = $return['type'] ?? '';
+		$source           = $return['utm_source'] ?? '';
+		$return['origin'] = $this->get_origin_label( $source_type, $source, true );
 
 		return $return;
 	}
