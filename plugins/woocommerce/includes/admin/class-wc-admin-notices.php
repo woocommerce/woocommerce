@@ -283,6 +283,8 @@ class WC_Admin_Notices {
 	/**
 	 * Check if a given user has dismissed a given admin notice.
 	 *
+	 * @since 8.5.0
+	 *
 	 * @param string   $name The name of the admin notice to check.
 	 * @param int|null $user_id User id, or null for the current user.
 	 * @return bool True if the user has dismissed the notice.

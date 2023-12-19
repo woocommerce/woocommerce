@@ -51,7 +51,7 @@ class WC_Legacy_API {
 	 */
 	public function init() {
 		add_action( 'parse_request', array( $this, 'handle_rest_api_requests' ), 0 );
-		self:$this->mark_method_as_accessible( 'maybe_display_legacy_wc_api_usage_notice' );
+		$this->mark_method_as_accessible( 'maybe_display_legacy_wc_api_usage_notice' );
 		self::add_action( 'admin_notices', array( $this, 'maybe_display_legacy_wc_api_usage_notice' ), 0);
 	}
 
@@ -114,7 +114,7 @@ class WC_Legacy_API {
 		 * @since 8.5.0
 		 */
 		if ( apply_filters( 'woocommerce_log_legacy_rest_api_usages', true ) ) {
-			wc_get_logger()->info( 'LEGACY REST API USAGE DETECTED (version ' . WC_API_REQUEST_VERSION . "): $route (User agent: $user_agent)", array( 'source' => 'legacy_rest_api_usages' ) );
+			wc_get_logger()->info( 'Version: ' . WC_API_REQUEST_VERSION . ", Route: $route, User agent: $user_agent", array( 'source' => 'legacy_rest_api_usages' ) );
 		}
 	}
 
@@ -174,6 +174,8 @@ class WC_Legacy_API {
 			// Fire off the request.
 			$this->server->serve_request();
 		}
+
+		exit;
 	}
 
 	/**
@@ -203,8 +205,8 @@ class WC_Legacy_API {
 						esc_html__( 'WooCommerce Legacy REST API access detected', 'woocommerce' )
 					),
 					sprintf(
-					// translators: Placeholders are URLs.
-						wpautop( wp_kses_data( __( '<p>The WooCommerce Legacy REST API has been accessed <b>%1$d</b> times since <b>%2$s</b>. There are <b>%3$d</b> known user agents registered. There are more details in <b><a target="_blank" href="%4$s">the WooCommerce log files</a></b> (file names start with <code>legacy_rest_api_usages</code>).', 'woocommerce' ) ) ),
+						// translators: %1$d = count of Legacy REST API usages recorded, %2$s = date and time of first access, %3$d = count of known user agents registered, %4$s = URL.
+						wpautop( wp_kses_data( __( '<p>The WooCommerce Legacy REST API has been accessed <b>%1$d</b> time(s) since <b>%2$s</b>. There are <b>%3$d</b> known user agent(s) registered. There are more details in <b><a target="_blank" href="%4$s">the WooCommerce log files</a></b> (file names start with <code>legacy_rest_api_usages</code>).', 'woocommerce' ) ) ),
 						$legacy_api_usages['total_count'],
 						$legacy_api_usages['first_usage'],
 						count( $user_agents ),
