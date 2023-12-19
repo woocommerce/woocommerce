@@ -44,4 +44,4 @@ type Collection = {
 
 ## Registering Collection
 
-To register collection import it in `./index.ts` file and add to the `collectionsToRegister` array.
+To register collection import it in `./index.ts` file and add to the `collections` array.
