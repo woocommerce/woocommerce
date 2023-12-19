@@ -7,6 +7,7 @@ import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { Cart } from '@woocommerce/type-defs/cart';
 import { createRoot } from '@wordpress/element';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
+import { doAction } from '@wordpress/hooks';
 
 interface Context {
 	isLoading: boolean;
@@ -135,6 +136,7 @@ const { state } = store< Store >( 'woocommerce/product-button', {
 		*addToCart() {
 			const context = getContext();
 			const { productId, quantityToAdd } = context;
+			const product = getProductById( state.cart, productId );
 
 			context.isLoading = true;
 
@@ -142,6 +144,14 @@ const { state } = store< Store >( 'woocommerce/product-button', {
 				yield dispatch( storeKey ).addItemToCart(
 					productId,
 					quantityToAdd
+				);
+
+				// Add a manual trigger of the event for backward compatibility
+				// and symmetry (remove event is triggered properly from Cart and Mini Cart).
+				// We'll try to unify the events in future.
+				yield doAction(
+					`experimental__woocommerce_blocks-cart-add-item`,
+					product
 				);
 
 				// After the cart is updated, sync the temporary number of items again.
