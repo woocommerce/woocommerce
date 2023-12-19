@@ -7,14 +7,14 @@ import { Product, ProductType } from './types';
 
 interface ProductListProps {
 	title: string;
-	productCategory?: string;
+	productGroup?: string;
 	products: Product[];
 	groupURL: string;
 	type: ProductType;
 }
 
 export default function ProductList( props: ProductListProps ): JSX.Element {
-	const { title, products, groupURL, type, productCategory } = props;
+	const { title, products, groupURL, type, productGroup } = props;
 
 	return (
 		<div className="woocommerce-marketplace__product-list">
@@ -23,7 +23,7 @@ export default function ProductList( props: ProductListProps ): JSX.Element {
 				group={ title }
 				products={ products }
 				type={ type }
-				productCategory={ productCategory }
+				productGroup={ productGroup }
 			/>
 		</div>
 	);
