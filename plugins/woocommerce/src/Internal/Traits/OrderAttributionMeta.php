@@ -429,12 +429,11 @@ trait OrderAttributionMeta {
 		$order_count = 0;
 		$total_spent = 0;
 		foreach ( $orders as $order ) {
-			$order_count ++;
-			$total_spent += $order->get_total();
-
-			// Remove any refunded amount from the total_spent.
-			foreach ( $order->get_refunds() as $refund ) {
-				$total_spent += $refund->get_total();
+			$order_total = $order->get_total() - $order->get_total_refunded();
+			
+			if ( $order_total ) {
+				$order_count++;
+				$total_spent += $order_total;
 			}
 		}
 
