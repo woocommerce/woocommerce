@@ -2,20 +2,12 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import {
-	installPluginFromPHPFile,
-	uninstallPluginFromPHPFile,
-} from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
  */
 import { CartPage } from './cart.page';
-import {
-	DISCOUNTED_PRODUCT_NAME,
-	REGULAR_PRICED_PRODUCT_NAME,
-	SIMPLE_PHYSICAL_PRODUCT_NAME,
-} from '../checkout/constants';
+import { SIMPLE_PHYSICAL_PRODUCT_NAME } from '../checkout/constants';
 
 const test = base.extend< { pageObject: CartPage } >( {
 	pageObject: async ( { page }, use ) => {
@@ -87,7 +79,10 @@ test.describe( 'Cart performance', () => {
 			) {
 				return;
 			}
-			logPerformanceResult( `Cart block loading: (${ name })`, value );
+			performanceUtils.logPerformanceResult(
+				`Cart block loading: (${ name })`,
+				value
+			);
 		} );
 
 		// To stop warning about no assertions.
