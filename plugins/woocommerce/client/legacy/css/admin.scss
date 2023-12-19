@@ -4065,7 +4065,6 @@ table.wc_shipping {
 		margin: 0.5em 0 0;
 		text-decoration: underline;
 		display: block;
-		// font-family: $font-sf-pro-text;
 		font-size: 13px;
 		font-weight: 400;
 		line-height: 16px;
@@ -4086,7 +4085,6 @@ table.wc_shipping {
 		}
 
 		.description {
-			// font-family: $font-sf-pro-text;
 			font-size: 13px;
 			font-weight: 400;
 			line-height: 18px;
@@ -4442,7 +4440,6 @@ table {
 }
 
 .wc-shipping-zone-heading-help-text {
-	// font-family: $font-sf-pro-text;
 	color: #3C434A;
 	font-size: 13px;
 	font-style: normal;
@@ -4451,7 +4448,6 @@ table {
 }
 
 .wc-shipping-zone-help-text {
-	// font-family: $font-sf-pro-text;
 	color: #3C434A;
 	font-size: 12px;
 	font-style: normal;
@@ -4471,18 +4467,9 @@ table {
 table.wc-shipping-zones,
 table.wc-shipping-zone-methods,
 table.wc-shipping-classes {
-	// font-family: $font-sf-pro-text;
 	font-size: 14px;
-	// font-weight: 400;
-	// line-height: 20px;
-	// color: #000000;
-
-	&.widefat p {
-		// color: #000000;
-	}
 
 	thead tr th {
-		// color: #646970;
 		vertical-align: middle;
 		padding: 1em;
 		font-weight: 600;
@@ -4498,8 +4485,6 @@ table.wc-shipping-classes {
 
 	tfoot tr td {
 		padding: 24px 12px;
-		// background-color: #F6F7F7;
-		// color: #000000;
 		vertical-align: top;
 
 		&:last-child {
@@ -4509,13 +4494,8 @@ table.wc-shipping-classes {
 
 	td,
 	th {
-		// background: #fff;
 		display: table-cell !important;
-		// font-family: $font-sf-pro-text;
 		font-size: 14px;
-		// font-weight: 400;
-		// line-height: 20px;
-		// color: #000000;
 		vertical-align: middle;
 		padding: 24px 12px;
 
@@ -4607,16 +4587,6 @@ table.wc-shipping-classes {
 	}
 
 	tbody.wc-shipping-tables-tbody {
-		// td {
-		// 	border-top: 1px solid #C3C4C7;
-		// }
-
-		// tr:first-child {
-		// 	td {
-		// 		border-top: 0;
-		// 	}
-		// }
-
 		.wc-shipping-zone-name,
 		.wc-shipping-zone-method-title,
 		.wc-shipping-class-name {
@@ -4686,14 +4656,8 @@ table.wc-shipping-classes {
 
 		a.wc-shipping-zone-actions,
 		a.wc-shipping-zone-actions:hover {
-			// color: #D63638;
 			color: var(--wc-red);
 		}
-
-		// a.wc-shipping-zone-action-edit,
-		// a.wc-shipping-zone-action-edit:hover {
-		// 	color: #0675C4;
-		// }
 	}
 
 	.wc-shipping-class-description,
@@ -4714,8 +4678,6 @@ table.wc-shipping-classes {
 	}
 
 	td.wc-shipping-zone-methods {
-		// color: #555;
-
 		.method_disabled {
 			text-decoration: line-through;
 		}
