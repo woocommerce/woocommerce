@@ -316,12 +316,14 @@ trait OrderAttributionMeta {
 					: 'Referral: %s';
 				break;
 			case 'typein':
-				$label = $translated ?
+				$label  = '';
+				$source = $translated ?
 					__( 'Direct', 'woocommerce' )
 					: 'Direct';
 				break;
 			case 'admin':
-				$label = $translated ?
+				$label  = '';
+				$source = $translated ?
 					__( 'Web admin', 'woocommerce' )
 					: 'Web admin';
 				break;
