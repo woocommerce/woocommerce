@@ -1416,6 +1416,17 @@ table.wc_status_table--tools {
 				color: #fff8c5;
 			}
 		}
+
+		&.has-context {
+			summary {
+				cursor: pointer;
+			}
+
+			pre {
+				margin-top: 0;
+				white-space: pre-wrap;
+			}
+		}
 	}
 
 	.line-anchor {
@@ -1564,6 +1575,13 @@ table.wc_status_table--tools {
 
 		.column-context {
 			width: 10%;
+		}
+	}
+
+	.column-message {
+		pre {
+			margin: 0;
+			white-space: pre-wrap;
 		}
 	}
 
@@ -4624,6 +4642,8 @@ table.wc-shipping-classes {
 		&::before {
 			content: "";
 			mask: url(../images/icons/move-icon.svg);
+			mask-image: url(../images/icons/move-icon.svg);
+			-webkit-mask-image: url(../images/icons/move-icon.svg);
 			background-color: #1E1E1E;
 			display: block;
 			width: 17px;

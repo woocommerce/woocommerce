@@ -130,6 +130,7 @@ trait CheckoutTrait {
 		$this->order->set_customer_note( $request['customer_note'] ?? '' );
 		$this->order->set_payment_method( $this->get_request_payment_method_id( $request ) );
 		$this->order->set_payment_method_title( $this->get_request_payment_method_title( $request ) );
+		$this->persist_additional_fields_for_order( $request );
 
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_update_order_from_request',
@@ -179,5 +180,31 @@ trait CheckoutTrait {
 	private function get_request_payment_method_title( \WP_REST_Request $request ) {
 		$payment_method = $this->get_request_payment_method( $request );
 		return is_null( $payment_method ) ? '' : $payment_method->get_title();
+	}
+
+	/**
+	 * Persist additional fields for the order after validating them.
+	 *
+	 * @param \WP_REST_Request $request Full details about the request.
+	 *
+	 * @throws RouteException On error.
+	 */
+	private function persist_additional_fields_for_order( \WP_REST_Request $request ) {
+		$errors         = new \WP_Error();
+		$request_fields = $request['additional_fields'] ?? [];
+		foreach ( $request_fields as $key => $value ) {
+			try {
+				$this->additional_fields_controller->validate_field_for_location( $key, $value, 'additional' );
+			} catch ( \Exception $e ) {
+				$errors[] = $e->getMessage();
+				continue;
+			}
+			$this->additional_fields_controller->persist_field_for_order( $key, $value, $this->order, false );
+		}
+
+		if ( $errors->has_errors() ) {
+			throw new RouteException( 'woocommerce_rest_checkout_invalid_additional_fields', $errors->get_error_messages(), 400 );
+		}
+
 	}
 }

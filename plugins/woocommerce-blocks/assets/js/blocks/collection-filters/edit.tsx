@@ -25,6 +25,14 @@ const template = [
 		},
 	],
 	[ 'woocommerce/collection-stock-filter', {} ],
+	[
+		'core/heading',
+		{
+			content: __( 'Filter by Rating', 'woocommerce' ),
+			level: 3,
+		},
+	],
+	[ 'woocommerce/collection-rating-filter', {} ],
 ];
 
 const firstAttribute = ATTRIBUTES.find( Boolean );
