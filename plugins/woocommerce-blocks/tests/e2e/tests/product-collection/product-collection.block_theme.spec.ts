@@ -408,7 +408,10 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 5 );
 		} );
 
-		test( 'Top Rated Collection can be added and displays proper products', async ( {
+		// When creating reviews programmatically the ratings are not propagated
+		// properly so products order by rating is undeterministic in test env.
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip( 'Top Rated Collection can be added and displays proper products', async ( {
 			pageObject,
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock( 'topRated' );
@@ -431,6 +434,9 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 5 );
 		} );
 
+		// There's no orders in test env so the order of Best Sellers
+		// is undeterministic in test env. Requires further work.
+		// eslint-disable-next-line playwright/no-skipped-test
 		test( 'Best Sellers Collection can be added and displays proper products', async ( {
 			pageObject,
 		} ) => {
