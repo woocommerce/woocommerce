@@ -108,7 +108,9 @@ trait OrderAttributionMeta {
 	}
 
 	/**
-	 * Filter the meta data to only the keys that we care about.
+	 * Filter an order's meta data to only the keys that we care about.
+	 *
+	 * Sets the origin value based on the source type.
 	 *
 	 * @param WC_Meta_Data[] $meta The meta data.
 	 *
@@ -142,6 +144,10 @@ trait OrderAttributionMeta {
 
 			case 'typein':
 				$origin = __( 'Direct', 'woocommerce' );
+				break;
+
+			case 'admin':
+				$origin = __( 'Web admin', 'woocommerce' );
 				break;
 
 			default:
