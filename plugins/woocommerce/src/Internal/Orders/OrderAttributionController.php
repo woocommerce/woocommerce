@@ -393,13 +393,18 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function send_order_tracks( array $source_data, WC_Order $order ) {
-		$tracks_data = array(
+		$origin_label = $this->get_origin_label(
+			$source_data['type'] ?? '',
+			$source_data['utm_source'] ?? '',
+			false
+		);
+		$tracks_data   = array(
 			'order_id'             => $order->get_id(),
 			'type'                 => $source_data['type'] ?? '',
 			'medium'               => $source_data['utm_medium'] ?? '',
 			'source'               => $source_data['utm_source'] ?? '',
-			'origin'               => strtolower( $source_data['origin'] ?? '' ),
 			'device_type'          => strtolower( $source_data['device_type'] ?? '(unknown)' ),
+			'origin_label'         => $origin_label,
 			'session_pages'        => $source_data['session_pages'] ?? 0,
 			'session_count'        => $source_data['session_count'] ?? 0,
 			'order_total'          => $order->get_total(),
