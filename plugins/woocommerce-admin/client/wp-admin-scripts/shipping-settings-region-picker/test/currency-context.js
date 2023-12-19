@@ -42,7 +42,7 @@ describe( 'CurrencyContext', () => {
 		);
 	} );
 
-	it( 'should format ignore wrongly formatted numbers', () => {
+	it( 'should not format incorrectly formatted numbers according to current config', () => {
 		const customConfig = {
 			...config,
 			decimalSeparator: ',',
