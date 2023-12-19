@@ -394,12 +394,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function send_order_tracks( array $source_data, WC_Order $order ) {
-		$origin_label = $this->get_origin_label(
+		$origin_label  = $this->get_origin_label(
 			$source_data['type'] ?? '',
 			$source_data['utm_source'] ?? '',
 			false
 		);
-		$tracks_data  = array(
+		$customer_info = $this->get_customer_history( $order->get_customer_id() ?: $order->get_billing_email() );
+		$tracks_data   = array(
 			'order_id'             => $order->get_id(),
 			'type'                 => $source_data['type'] ?? '',
 			'medium'               => $source_data['utm_medium'] ?? '',
@@ -409,7 +410,8 @@ class OrderAttributionController implements RegisterHooksInterface {
 			'session_pages'        => $source_data['session_pages'] ?? 0,
 			'session_count'        => $source_data['session_count'] ?? 0,
 			'order_total'          => $order->get_total(),
-			'customer_order_count' => wc_get_customer_order_count( $order->get_customer_id() ),
+			'customer_order_count' => $customer_info['order_count'],
+			'customer_registered'  => $order->get_customer_id() ? 'yes' : 'no',
 		);
 		$this->proxy->call_static( WC_Tracks::class, 'record_event', 'order_attribution', $tracks_data );
 	}
