@@ -48,6 +48,18 @@ describe( 'CurrencyContext', () => {
 		);
 	} );
 
+	it( 'should format number according to precision', () => {
+		const customConfig = {
+			...config,
+			precision: 5,
+		};
+		expect( safeNumberFormat( customConfig, '123.4' ) ).toBe( '123.40000' );
+	} );
+
+	it( 'should format number and trim leading and trailing spaces', () => {
+		expect( safeNumberFormat( config, ' 1234 ' ) ).toBe( '1,234.00' );
+	} );
+
 	it( 'should not format numbers when text is included', () => {
 		expect( safeNumberFormat( config, 'Value 1234' ) ).toBe( 'Value 1234' );
 	} );
@@ -56,12 +68,6 @@ describe( 'CurrencyContext', () => {
 		expect(
 			safeNumberFormat( config, '50 + (([qty]*2+1)(5*10))(1)' )
 		).toBe( '50 + (([qty]*2+1)(5*10))(1)' );
-	} );
-
-	it( 'should return the original string for non-numeric inputs', () => {
-		expect( safeNumberFormat( config, 'Hello World' ) ).toBe(
-			'Hello World'
-		);
 	} );
 
 	it( 'should return the original input for non-string, non-number inputs', () => {
