@@ -405,15 +405,10 @@ trait OrderAttributionMeta {
 		$orders = wc_get_orders( $args );
 
 		// Populate the order_count and total_spent variables with the valid orders.
-		$order_count = 0;
+		$order_count = count( $orders );
 		$total_spent = 0;
 		foreach ( $orders as $order ) {
-			$order_total = $order->get_total() - $order->get_total_refunded();
-			
-			if ( $order_total ) {
-				$order_count++;
-				$total_spent += $order_total;
-			}
+			$total_spent += $order->get_total() - $order->get_total_refunded();
 		}
 
 		return array(
