@@ -290,27 +290,45 @@ trait OrderAttributionMeta {
 	}
 
 	/**
-	 * Get the label for the order origin
+	 * Get the label for the Order origin with placeholder where appropriate. Can be
+	 * translated (for DB / display) or untranslated (for Tracks).
 	 *
 	 * @param string $source_type The source type.
 	 * @param string $source      The source.
+	 * @param bool   $translated  Whether the label should be translated.
 	 *
 	 * @return string
 	 */
-	private function get_origin_label( string $source_type, string $source ): string {
+	private function get_origin_label( string $source_type, string $source, bool $translated = true ): string {
 		// Set up the label based on the source type.
 		switch ( $source_type ) {
 			case 'utm':
-				/* translators: %s is the source value */
-				$label = __( 'Source: %s', 'woocommerce' );
+				$label = $translated ?
+					/* translators: %s is the source value */
+					__( 'Source: %s', 'woocommerce' )
+					: 'Source: %s';
 				break;
 			case 'organic':
-				/* translators: %s is the source value */
-				$label = __( 'Organic: %s', 'woocommerce' );
+				$label = $translated ?
+					/* translators: %s is the source value */
+					__( 'Organic: %s', 'woocommerce' )
+					: 'Organic: %s';
 				break;
 			case 'referral':
-				/* translators: %s is the source value */
-				$label = __( 'Referral: %s', 'woocommerce' );
+				$label = $translated ?
+					/* translators: %s is the source value */
+					__( 'Referral: %s', 'woocommerce' )
+					: 'Referral: %s';
+				break;
+			case 'typein':
+				$label = $translated ?
+					__( 'Direct', 'woocommerce' )
+					: 'Direct';
+				break;
+			case 'admin':
+				$label = $translated ?
+					__( 'Web admin', 'woocommerce' )
+					: 'Web admin';
 				break;
 
 			default:
