@@ -4686,13 +4686,14 @@ table.wc-shipping-classes {
 
 		a.wc-shipping-zone-actions,
 		a.wc-shipping-zone-actions:hover {
-			color: #D63638;
+			// color: #D63638;
+			color: var(--wc-red);
 		}
 
-		a.wc-shipping-zone-action-edit,
-		a.wc-shipping-zone-action-edit:hover {
-			color: #0675C4;
-		}
+		// a.wc-shipping-zone-action-edit,
+		// a.wc-shipping-zone-action-edit:hover {
+		// 	color: #0675C4;
+		// }
 	}
 
 	.wc-shipping-class-description,
