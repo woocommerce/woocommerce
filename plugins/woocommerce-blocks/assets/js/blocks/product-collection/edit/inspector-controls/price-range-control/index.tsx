@@ -14,7 +14,7 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../../types';
+import { QueryControlProps } from '../../../types';
 import PriceTextField from './PriceTextField';
 
 const PriceRangeControl = ( props: QueryControlProps ) => {
@@ -41,10 +41,12 @@ const PriceRangeControl = ( props: QueryControlProps ) => {
 				<PriceTextField
 					label={ __( 'MIN', 'woocommerce' ) }
 					value={ value?.min as number }
-					onChange={ ( min?: number ) => {
+					onChange={ ( val?: number ) => {
+						const min = val === 0 ? undefined : val;
+
 						setQueryAttribute( {
 							priceRange: {
-								min: min === 0 ? undefined : min,
+								min,
 								max: value?.max as number,
 							},
 						} );
@@ -54,11 +56,13 @@ const PriceRangeControl = ( props: QueryControlProps ) => {
 				<PriceTextField
 					label={ __( 'MAX', 'woocommerce' ) }
 					value={ value?.max as number }
-					onChange={ ( max?: number ) => {
+					onChange={ ( val?: number ) => {
+						const max = val === 0 ? undefined : val;
+
 						setQueryAttribute( {
 							priceRange: {
 								min: value?.min as number,
-								max: max === 0 ? undefined : max,
+								max,
 							},
 						} );
 					} }
