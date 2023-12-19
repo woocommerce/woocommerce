@@ -394,13 +394,14 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function send_order_tracks( array $source_data, WC_Order $order ) {
-		$origin_label  = $this->get_origin_label(
+		$origin_label        = $this->get_origin_label(
 			$source_data['type'] ?? '',
 			$source_data['utm_source'] ?? '',
 			false
 		);
-		$customer_info = $this->get_customer_history( $order->get_customer_id() ?: $order->get_billing_email() );
-		$tracks_data   = array(
+		$customer_identifier = $order->get_customer_id() ? $order->get_customer_id() : $order->get_billing_email();
+		$customer_info       = $this->get_customer_history( $customer_identifier );
+		$tracks_data         = array(
 			'order_id'             => $order->get_id(),
 			'type'                 => $source_data['type'] ?? '',
 			'medium'               => $source_data['utm_medium'] ?? '',
