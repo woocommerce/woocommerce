@@ -18,6 +18,52 @@ class ProductDetails extends AbstractBlock {
 	 * It isn't necessary register block assets because it is a server side block.
 	 */
 	protected function register_block_type_assets() {
+
+		static $loaded;
+		if ( $loaded ) {
+			return null;
+		}
+		$loaded = true;
+
+		// Register block styles.
+		$styles     = wp_get_global_styles( array('color') );
+		$background = $styles['background'] ?? '#000000';
+		$color      = $styles['text'] ?? '#ffffff';
+
+		// Assign local variables.
+		$css = sprintf( 
+			'%3$s{ --wc--preset--product-tabs--color--base: %1$s; --wc--preset--product-tabs--color--contrast: %2$s; }',
+			$background,
+			$color,
+			'.wp-block-woocommerce-product-details.is-style-modern, .wp-block-woocommerce-product-details.is-style-minimal',
+		);
+
+		register_block_style(
+			'woocommerce/product-details',
+			array(
+				'name'         => 'classic',
+				'label'        => __( 'Classic' ),
+				'is_default'   => true
+			)
+		);
+
+		register_block_style(
+			'woocommerce/product-details',
+			array(
+				'name'         => 'modern',
+				'label'        => __( 'Modern' )
+			)
+		);
+
+		register_block_style(
+			'woocommerce/product-details',
+			array(
+				'name'         => 'minimal',
+				'label'        => __( 'Minimal' ),
+				'inline_style' => $css,
+			)
+		);
+
 		return null;
 	}
 

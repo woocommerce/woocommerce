@@ -14,10 +14,11 @@
 			z-index: 0;
 			border-radius: $universal-border-radius $universal-border-radius 0 0;
 			margin: 0;
-			padding: 0.5em 1em;
+			padding: 0 1em;
 
 			a {
 				display: inline-block;
+				padding: 0.5em 0;
 				font-weight: 700;
 				text-decoration: none;
 
@@ -32,6 +33,112 @@
 				a {
 					text-shadow: inherit;
 				}
+			}
+		}
+	}
+}
+
+/*
+ * Modern style.
+ *
+ * See also: src/Blocks/BlockTypes/ProductDetails.php for inline css.
+ */
+.wp-block-woocommerce-product-details.is-style-modern {
+
+	ul.wc-tabs {
+		overflow: visible;
+		border-bottom-color: inherit;
+		// border-bottom-color: var(--wc--preset--product-tabs--color--contrast);
+
+		@media only screen and ( max-width: 768px ) {
+			border-bottom-width: 0;
+			padding: 0;
+		}
+
+		li {
+			background: transparent;
+			color: inherit;
+			border-radius: 0;
+			border-width: 1px;
+			border-bottom-width: 0;
+			border-style: solid;
+			border-color: transparent;
+			float: none; /* Backward compatibility for TT3, TT2. */
+
+			&:first-child {
+				margin-left: 0; /* Backward compatibility for TT3, TT2. */
+			}
+
+			a {
+				color: inherit;
+				// color: var(--wc--preset--product-tabs--color--contrast);
+				text-shadow: none;
+				text-decoration: none;
+				border: 0;
+			}
+
+			&.active {
+				color: inherit;
+				background: inherit;
+				// background: var(--wc--preset--product-tabs--color--base);
+				border-color: inherit;
+				// border-color: var(--wc--preset--product-tabs--color--contrast);
+				top: 1px;
+
+				a {
+					color: inherit;
+					top: -1px; /* Balance <li> positioning */
+				}
+			}
+
+			@media only screen and ( max-width: 768px ) {
+				display: block;
+				border-bottom-width: 1px;
+			}
+		}
+	}
+}
+
+/*
+ * Minimal style.
+ *
+ * See also: src/Blocks/BlockTypes/ProductDetails.php for inline css.
+ */
+.wp-block-woocommerce-product-details.is-style-minimal {
+
+	ul.wc-tabs {
+		padding: 0;
+		border-bottom-width: 0;
+
+		li {
+			background: transparent;
+			border: 0;
+			border-style: solid;
+			border-color: transparent;
+			border-bottom-width: 2px;
+			border-radius: 0;
+			margin: 0;
+			float: none; /* Backward compatibility for TT3, TT2. */
+
+			&:first-child {
+				margin-left: 0; /* Backward compatibility for TT3, TT2. */
+			}
+
+			a {
+				color: var(--wc--preset--product-tabs--color--contrast);
+				text-shadow: none;
+				text-decoration: none;
+				border: 0;
+			}
+
+			&.active {
+				border-color: var(--wc--preset--product-tabs--color--contrast);
+			}
+
+			@media only screen and ( max-width: 768px ) {
+				display: block;
+				border-bottom-width: 0;
+				border-left-width: 2px;
 			}
 		}
 	}
