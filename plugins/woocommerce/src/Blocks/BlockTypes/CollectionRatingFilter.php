@@ -88,7 +88,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 			$active_ratings
 		);
 
-		$data['stock'] = array(
+		$data['rating'] = array(
 			'type'  => __( 'Rating', 'woocommerce' ),
 			'items' => $active_ratings,
 		);
