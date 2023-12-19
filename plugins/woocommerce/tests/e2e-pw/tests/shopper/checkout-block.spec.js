@@ -334,7 +334,7 @@ test.describe( 'Checkout Block page', () => {
 		await expect( page.getByLabel( 'Phone (optional)' ) ).toBeEditable();
 	} );
 
-	test.only( 'allows customer to fill different shipping and billing details', async ( {
+	test( 'allows customer to fill different shipping and billing details', async ( {
 		page,
 	} ) => {
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
