@@ -167,6 +167,12 @@ abstract class AbstractSchema {
 			foreach ( $properties as $property_key => $property_value ) {
 				$current_value = isset( $values[ $property_key ] ) ? $values[ $property_key ] : null;
 
+				$property_type = is_array( $property_value['type'] ) ? $property_value['type'] : [ $property_value['type'] ];
+				if ( empty( $current_value ) && in_array( 'null', $property_type, true ) ) {
+					// If the value is null and the schema allows null, we can skip validation for children.
+					continue;
+				}
+
 				if ( isset( $property_value['arg_options']['validate_callback'] ) ) {
 					$callback = $property_value['arg_options']['validate_callback'];
 					$result   = is_callable( $callback ) ? $callback( $current_value, $request, $param ) : false;
