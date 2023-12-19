@@ -10,27 +10,25 @@ import useProductMetadata from '../use-product-metadata';
 
 const mockFnMetadataProp = jest.fn();
 jest.mock( '@wordpress/core-data', () => ( {
-	useEntityProp: jest
-		.fn()
-		.mockImplementation( ( _postType, _product, property ) => {
-			return [
-				[
-					{
-						key: 'field1',
-						value: 'value1',
-					},
-					{
-						key: 'field2',
-						value: 'value1',
-					},
-					{
-						key: 'existing_field',
-						value: 'value1',
-					},
-				],
-				mockFnMetadataProp,
-			];
-		} ),
+	useEntityProp: jest.fn().mockImplementation( () => {
+		return [
+			[
+				{
+					key: 'field1',
+					value: 'value1',
+				},
+				{
+					key: 'field2',
+					value: 'value1',
+				},
+				{
+					key: 'existing_field',
+					value: 'value1',
+				},
+			],
+			mockFnMetadataProp,
+		];
+	} ),
 } ) );
 
 describe( 'useProductMetadata', () => {
