@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Migrate `performance -> cart` tests from Puppeteer to Playwright.
