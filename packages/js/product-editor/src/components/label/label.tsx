@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Icon, help as helpIcon } from '@wordpress/icons';
 import { Tooltip } from '@wordpress/components';
 
-interface LabelProps {
+export interface LabelProps {
 	label: string;
 	required?: boolean;
 	tooltip?: string;
