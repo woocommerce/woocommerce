@@ -817,6 +817,11 @@ class CartController {
 
 		$packages = $cart->get_shipping_packages();
 
+		// Return early if no packages or invalid object supplied by the filter.
+		if ( ! is_array( $packages ) || empty( $packages ) ) {
+			return [];
+		}
+
 		// Add extra package data to array.
 		if ( count( $packages ) ) {
 			$packages = array_map(
@@ -831,9 +836,7 @@ class CartController {
 			);
 		}
 
-		$packages = $calculate_rates ? wc()->shipping()->calculate_shipping( $packages ) : $packages;
-
-		return $packages;
+		return $calculate_rates ? wc()->shipping()->calculate_shipping( $packages ) : $packages;
 	}
 
 	/**
