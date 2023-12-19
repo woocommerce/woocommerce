@@ -879,7 +879,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * ---
 	 *
 	 * [--force]
-	 * : Whether to skip checks before cleaning up.
+	 * : When true, post meta will be cleaned up even if the post appears to have been updated more recently than the order.
 	 * ---
 	 * default: false
 	 * ---
