@@ -114,6 +114,9 @@ class LegacyDataHandler {
 		);
 		$sql_where .= ')';
 
+		// Exclude 'auto-draft' since those go away on their own.
+		$sql_where .= $wpdb->prepare( " AND {$wpdb->posts}.post_status != %s", 'auto-draft' );
+
 		if ( 'count' === $result ) {
 			$sql_fields = 'COUNT(*)';
 			$sql_limit  = '';
