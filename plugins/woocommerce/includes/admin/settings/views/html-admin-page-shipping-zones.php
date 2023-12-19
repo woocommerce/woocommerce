@@ -55,7 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <script type="text/html" id="tmpl-wc-shipping-zone-row-blank">
 	<?php if ( 0 === $method_count ) : ?>
 		<tr>
-			<td class="wc-shipping-zones-blank-state" colspan="4">
+			<td class="wc-shipping-zones-blank-state" colspan="5">
 				<p class="main"><?php _e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
 				<p><?php _e( 'For example:', 'woocommerce' ); ?></p>
 				<ul>
