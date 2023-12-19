@@ -6,73 +6,89 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export class PerformanceUtils {
-	page: Page;
+	private page: Page;
+	private static readonly PERFORMANCE_REPORT_DIRECTORY = path.join(
+		__dirname,
+		'reports'
+	);
+	private static readonly PERFORMANCE_REPORT_FILENAME =
+		'e2e-cart-performance.json';
 
 	constructor( page: Page ) {
 		this.page = page;
 	}
 
-	reportDirectory = 'reports'; // Directory for the report
-	reportFilename = 'e2e-performance.json'; // Filename for the report
-	PERFORMANCE_REPORT_FILENAME = path.join(
-		this.reportDirectory,
-		this.reportFilename
-	);
-
 	async getLoadingDurations(): Promise< ReturnType< Page[ 'evaluate' ] > > {
-		return await this.page.evaluate( () => {
-			const [
-				{
-					requestStart,
-					responseStart,
-					responseEnd,
-					domContentLoadedEventEnd,
-					loadEventEnd,
-				},
-			] = performance.getEntriesByType(
+		return this.page.evaluate( () => {
+			const [ navigationEntry ] = performance.getEntriesByType(
 				'navigation'
 			) as PerformanceNavigationTiming[];
-
 			const paintTimings = performance.getEntriesByType( 'paint' );
+
+			const calculateTiming = ( name: string ) => {
+				const paint = paintTimings.find(
+					( entry ) => entry.name === name
+				);
+				return paint
+					? paint.startTime - navigationEntry.responseEnd
+					: 0;
+			};
+
 			return {
-				// Server side metric.
-				serverResponse: responseStart - requestStart,
-				// For client side metrics, consider the end of the response (the
-				// browser receives the HTML) as the start time (0).
-				firstPaint:
-					paintTimings.find( ( { name } ) => name === 'first-paint' )
-						.startTime - responseEnd,
-				domContentLoaded: domContentLoadedEventEnd - responseEnd,
-				loaded: loadEventEnd - responseEnd,
-				firstContentfulPaint:
-					paintTimings.find(
-						( { name } ) => name === 'first-contentful-paint'
-					).startTime - responseEnd,
-				// This is evaluated right after Puppeteer found the block selector.
-				firstBlock: performance.now() - responseEnd,
+				serverResponse:
+					navigationEntry.responseStart -
+					navigationEntry.requestStart,
+				firstPaint: calculateTiming( 'first-paint' ),
+				domContentLoaded:
+					navigationEntry.domContentLoadedEventEnd -
+					navigationEntry.responseEnd,
+				loaded:
+					navigationEntry.loadEventEnd - navigationEntry.responseEnd,
+				firstContentfulPaint: calculateTiming(
+					'first-contentful-paint'
+				),
+				firstBlock: performance.now() - navigationEntry.responseEnd,
 			};
 		} );
 	}
 
-	average = ( array ) => array.reduce( ( a, b ) => a + b ) / array.length;
-
-	logPerformanceResult = ( description, times ) => {
+	logPerformanceResult( description: string, times: number[] ) {
 		const roundedTimes = times.map(
-			( time ) => Math.round( time + Number.EPSILON * 100 ) / 100
+			( time ) => Math.round( time * 100 ) / 100
 		);
-		if ( ! fs.existsSync( this.reportDirectory ) ) {
-			fs.mkdirSync( this.reportDirectory, { recursive: true } );
-		}
+		const average =
+			roundedTimes.reduce( ( a, b ) => a + b, 0 ) / roundedTimes.length;
 
-		fs.appendFileSync(
-			this.PERFORMANCE_REPORT_FILENAME,
+		this.createReportDirectory();
+
+		const performanceReportPath = path.join(
+			PerformanceUtils.PERFORMANCE_REPORT_DIRECTORY,
+			PerformanceUtils.PERFORMANCE_REPORT_FILENAME
+		);
+		const performanceData =
 			JSON.stringify( {
 				description,
 				longest: Math.max( ...roundedTimes ),
 				shortest: Math.min( ...roundedTimes ),
-				average: this.average( roundedTimes ),
-			} ) + '\n',
-			{ flag: 'a' }
-		);
-	};
+				average,
+			} ) + '\n';
+
+		this.appendToFile( performanceReportPath, performanceData );
+	}
+
+	private createReportDirectory() {
+		if (
+			! fs.existsSync( PerformanceUtils.PERFORMANCE_REPORT_DIRECTORY )
+		) {
+			fs.mkdirSync( PerformanceUtils.PERFORMANCE_REPORT_FILENAME );
+		}
+	}
+
+	private appendToFile( filePath: string, data: string ) {
+		try {
+			fs.appendFileSync( filePath, data );
+		} catch ( error ) {
+			console.error( 'Error writing to file:', error );
+		}
+	}
 }

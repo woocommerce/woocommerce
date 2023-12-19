@@ -25,12 +25,7 @@ test.describe( 'Cart performance', () => {
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 	} );
 
-	test( 'Loading', async ( {
-		pageObject,
-		frontendUtils,
-		page,
-		performanceUtils,
-	} ) => {
+	test( 'Loading', async ( { frontendUtils, page, performanceUtils } ) => {
 		await frontendUtils.goToCart();
 
 		const results = {
@@ -49,8 +44,6 @@ test.describe( 'Cart performance', () => {
 		};
 
 		let i = 3;
-
-		// Measuring loading time.
 		while ( i-- ) {
 			await page.reload();
 			await page.locator( '.wc-block-cart' ).waitFor();
@@ -85,7 +78,83 @@ test.describe( 'Cart performance', () => {
 			);
 		} );
 
-		// To stop warning about no assertions.
 		expect( true ).toBe( true );
+	} );
+
+	test( 'Quantity change', async ( {
+		frontendUtils,
+		page,
+		performanceUtils,
+	} ) => {
+		await frontendUtils.goToCart();
+		await page
+			.locator(
+				'button.wc-block-components-quantity-selector__button--plus'
+			)
+			.waitFor();
+
+		const timesForResponse = [];
+		let i = 3;
+		while ( i-- ) {
+			const start = performance.now();
+
+			await page.click(
+				'button.wc-block-components-quantity-selector__button--plus'
+			);
+			const response = await page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/wc/store/v1/batch' ) &&
+					response.status() === 207
+			);
+			await expect( response.ok() ).toBeTruthy();
+
+			const end = performance.now();
+			timesForResponse.push( end - start );
+		}
+
+		performanceUtils.logPerformanceResult(
+			'Cart block: Change cart item quantity',
+			timesForResponse
+		);
+	} );
+	test( 'Coupon entry', async ( {
+		frontendUtils,
+		page,
+		performanceUtils,
+	} ) => {
+		await frontendUtils.goToCart();
+		await page
+			.locator(
+				'button.wc-block-components-quantity-selector__button--plus'
+			)
+			.waitFor();
+		await page.click( '.wc-block-components-totals-coupon-link' );
+
+		const timesForResponse = [];
+		let i = 3;
+		while ( i-- ) {
+			const start = performance.now();
+
+			await page.fill( '[aria-label="Enter code"]', 'test_coupon' );
+			await page.click(
+				'button.wc-block-components-totals-coupon__button'
+			);
+
+			const response = await page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/wc/store/v1/batch' ) &&
+					response.status() === 207
+			);
+
+			await expect( response.ok() ).toBeTruthy();
+
+			const end = performance.now();
+			timesForResponse.push( end - start );
+		}
+
+		performanceUtils.logPerformanceResult(
+			'Cart block: Coupon entry',
+			timesForResponse
+		);
 	} );
 } );
