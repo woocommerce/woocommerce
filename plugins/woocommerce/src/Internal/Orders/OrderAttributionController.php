@@ -155,6 +155,30 @@ class OrderAttributionController implements RegisterHooksInterface {
 				$this->register_order_origin_column();
 			}
 		);
+
+		add_action(
+			'woocommerce_new_order',
+			function( $order_id, $order ) {
+				$this->maybe_set_admin_source( $order );
+			},
+			2,
+			10
+		);
+	}
+
+	/**
+	 * If the order is created in the admin, set the source type and origin to admin/Web admin.
+	 *
+	 * @param WC_Order $order The recently created order object.
+	 *
+	 * @since 8.5.0
+	 */
+	private function maybe_set_admin_source( WC_Order $order ) {
+		if ( function_exists( 'is_admin' ) && is_admin() ) {
+			$order->add_meta_data( $this->get_meta_prefixed_field( 'type' ), 'admin' );
+			$order->add_meta_data( $this->get_meta_prefixed_field( 'origin' ), 'Web admin' );
+			$order->save();
+		}
 	}
 
 	/**
