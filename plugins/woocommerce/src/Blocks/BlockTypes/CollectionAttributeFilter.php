@@ -29,7 +29,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 	}
 
 	/**
-	 * Register the active filters data.
+	 * Register the query param keys.
 	 *
 	 * @param array $filter_param_keys The active filters data.
 	 * @param array $url_param_keys    The query param parsed from the URL.
