@@ -205,7 +205,9 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( '<div class="notice notice-info is-dismissible">', $output );
 		$this->assertStringContainsString( '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews" class="button-primary">', $output );
-		$this->assertStringContainsString( '<button type="button" class="notice-dismiss" onclick="window.location = \'?wc-hide-notice=product_reviews_moved&#038;_wc_notice_nonce=' . $nonce . '\';">', $output );
+		$this->assertStringContainsString( '<input type="hidden" name="wc-hide-notice" value="product_reviews_moved" />', $output );
+		$this->assertStringContainsString( '<input type="hidden" id="_wc_notice_nonce" name="_wc_notice_nonce" value="' . $nonce . '" />', $output );
+		$this->assertStringNotContainsString( 'onclick', $output );
 	}
 
 	/**
