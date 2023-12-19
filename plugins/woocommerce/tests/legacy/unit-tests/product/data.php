@@ -281,10 +281,10 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$product1 = new WC_Product_Simple();
 		$product2 = new WC_Product_Simple();
 
-		$yesterday = date( 'Y-m-d', strtotime( '-10 day' ) ) . ' 23:59:00';
+		$yesterday           = gmdate( 'Y-m-d', strtotime( '-10 day' ) ) . ' 23:59:00';
 		$yesterday_timestamp = wc_string_to_timestamp( $yesterday );
-		$tomorrow = date( 'Y-m-d', strtotime( '+10 day' ) ) . ' 23:59:00';
-		$tomorrow_timestamp = wc_string_to_timestamp( $tomorrow );
+		$tomorrow            = gmdate( 'Y-m-d', strtotime( '+10 day' ) ) . ' 23:59:00';
+		$tomorrow_timestamp  = wc_string_to_timestamp( $tomorrow );
 
 		$product1->set_regular_price( '100.00' );
 		$product1->set_sale_price( '90.00' );
