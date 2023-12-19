@@ -53,19 +53,9 @@ export class PerformanceUtils {
 			};
 		} );
 	}
-	/**
-	 * Takes an average value of all items in an array.
-	 *
-	 * @param {Array} array An array of numbers to take an average from.
-	 * @return {number} The average value of all members of the array.
-	 */
+
 	average = ( array ) => array.reduce( ( a, b ) => a + b ) / array.length;
-	/**
-	 * Writes a line to the e2e performance result for the current test containing longest, shortest, and average run times.
-	 *
-	 * @param {string} description Message to describe what you're logging the performance of.
-	 * @param {Array}  times       array of times to record.
-	 */
+
 	logPerformanceResult = ( description, times ) => {
 		const roundedTimes = times.map(
 			( time ) => Math.round( time + Number.EPSILON * 100 ) / 100
