@@ -18,7 +18,7 @@ export type FieldType = keyof AddressFields;
 
 export type AddressFormFields = {
 	fields: KeyedAddressField[];
-	type: AddressType;
+	addressType: AddressType;
 	required: KeyedAddressField[];
 	hidden: KeyedAddressField[];
 };
@@ -27,7 +27,7 @@ export interface AddressFormProps {
 	// Id for component.
 	id?: string;
 	// Type of form (billing or shipping).
-	type?: AddressType;
+	addressType?: AddressType;
 	// Array of fields in form.
 	fields: FieldType[];
 	// Field configuration for fields in form.

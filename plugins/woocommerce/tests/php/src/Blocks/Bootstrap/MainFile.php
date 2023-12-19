@@ -28,21 +28,37 @@ class MainFile extends WP_UnitTestCase {
 	 * Ensure that container is reset between tests.
 	 */
 	protected function setUp(): void {
-		// reset container
+		// reset container.
 		$this->container = Package::container( true );
 	}
 
+	/**
+	 * Test that the container is returned from the main file.
+	 */
 	public function test_container_returns_same_instance() {
 		$container = Package::container();
 		$this->assertSame( $container, $this->container );
 	}
 
+	/**
+	 * Test that the container is reset when the reset flag is passed.
+	 */
 	public function test_container_reset() {
 		$container = Package::container( true );
 		$this->assertNotSame( $container, $this->container );
 	}
 
+	/**
+	 *  Asserts that the bootstrap class is returned from the container.
+	 */
 	public function wc_blocks_bootstrap() {
 		$this->assertInstanceOf( Bootstrap::class, wc_blocks_bootstrap() );
+	}
+
+	/**
+	 * Ensure that the init method is called on the bootstrap class. This is a workaround since we're using an anti-pattern for DI.
+	 */
+	protected function tearDown(): void {
+		Package::init();
 	}
 }

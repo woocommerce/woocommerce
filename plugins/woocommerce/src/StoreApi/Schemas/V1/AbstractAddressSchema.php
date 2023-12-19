@@ -2,13 +2,34 @@
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
-
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\Blocks\Package;
 /**
  * AddressSchema class.
  *
  * Provides a generic address schema for composition in other schemas.
  */
 abstract class AbstractAddressSchema extends AbstractSchema {
+
+	/**
+	 * Additional fields controller.
+	 *
+	 * @var CheckoutFields
+	 */
+	protected $additional_fields_controller;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param ExtendSchema     $extend ExtendSchema instance.
+	 * @param SchemaController $controller Schema Controller instance.
+	 */
+	public function __construct( ExtendSchema $extend, SchemaController $controller ) {
+		parent::__construct( $extend, $controller );
+		$this->additional_fields_controller = Package::container()->get( CheckoutFields::class );
+	}
 	/**
 	 * Term properties.
 	 *
@@ -16,68 +37,71 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_properties() {
-		return [
-			'first_name' => [
-				'description' => __( 'First name', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
+		return array_merge(
+			[
+				'first_name' => [
+					'description' => __( 'First name', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'required'    => true,
+				],
+				'last_name'  => [
+					'description' => __( 'Last name', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'required'    => true,
+				],
+				'company'    => [
+					'description' => __( 'Company', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'required'    => true,
+				],
+				'address_1'  => [
+					'description' => __( 'Address', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'required'    => true,
+				],
+				'address_2'  => [
+					'description' => __( 'Apartment, suite, etc.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'required'    => true,
+				],
+				'city'       => [
+					'description' => __( 'City', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'required'    => true,
+				],
+				'state'      => [
+					'description' => __( 'State/County code, or name of the state, county, province, or district.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'required'    => true,
+				],
+				'postcode'   => [
+					'description' => __( 'Postal code', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'required'    => true,
+				],
+				'country'    => [
+					'description' => __( 'Country/Region code in ISO 3166-1 alpha-2 format.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'required'    => true,
+				],
+				'phone'      => [
+					'description' => __( 'Phone', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'required'    => true,
+				],
 			],
-			'last_name'  => [
-				'description' => __( 'Last name', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
-			],
-			'company'    => [
-				'description' => __( 'Company', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
-			],
-			'address_1'  => [
-				'description' => __( 'Address', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
-			],
-			'address_2'  => [
-				'description' => __( 'Apartment, suite, etc.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
-			],
-			'city'       => [
-				'description' => __( 'City', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
-			],
-			'state'      => [
-				'description' => __( 'State/County code, or name of the state, county, province, or district.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
-			],
-			'postcode'   => [
-				'description' => __( 'Postal code', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
-			],
-			'country'    => [
-				'description' => __( 'Country/Region code in ISO 3166-1 alpha-2 format.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
-			],
-			'phone'      => [
-				'description' => __( 'Phone', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
-			],
-		];
+			$this->get_additional_address_fields_schema(),
+		);
 	}
 
 	/**
@@ -90,18 +114,29 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	 */
 	public function sanitize_callback( $address, $request, $param ) {
 		$validation_util = new ValidationUtils();
+		$address         = array_merge( array_fill_keys( array_keys( $this->get_properties() ), '' ), (array) $address );
+		$address         = array_reduce(
+			array_keys( $address ),
+			function( $carry, $key ) use ( $address, $validation_util, $request ) {
+				switch ( $key ) {
+					case 'country':
+						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
+						break;
+					case 'state':
+						$carry[ $key ] = $validation_util->format_state( sanitize_text_field( wp_unslash( $address[ $key ] ) ), $address['country'] );
+						break;
+					case 'postcode':
+						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
+						break;
+					default:
+						$carry[ $key ] = rest_sanitize_request_arg( wp_unslash( $address[ $key ] ), $request, $key );
+						break;
+				}
+				return $carry;
+			},
+			[]
+		);
 
-		$address               = array_merge( array_fill_keys( array_keys( $this->get_properties() ), '' ), (array) $address );
-		$address['country']    = wc_strtoupper( sanitize_text_field( wp_unslash( $address['country'] ) ) );
-		$address['first_name'] = sanitize_text_field( wp_unslash( $address['first_name'] ) );
-		$address['last_name']  = sanitize_text_field( wp_unslash( $address['last_name'] ) );
-		$address['company']    = sanitize_text_field( wp_unslash( $address['company'] ) );
-		$address['address_1']  = sanitize_text_field( wp_unslash( $address['address_1'] ) );
-		$address['address_2']  = sanitize_text_field( wp_unslash( $address['address_2'] ) );
-		$address['city']       = sanitize_text_field( wp_unslash( $address['city'] ) );
-		$address['state']      = $validation_util->format_state( sanitize_text_field( wp_unslash( $address['state'] ) ), $address['country'] );
-		$address['postcode']   = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
-		$address['phone']      = sanitize_text_field( wp_unslash( $address['phone'] ) );
 		return $address;
 	}
 
@@ -158,6 +193,73 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			);
 		}
 
+		foreach ( array_keys( $address ) as $key ) {
+
+			// Skip email here it will be validated in BillingAddressSchema.
+			if ( 'email' === $key ) {
+				continue;
+			}
+
+			$properties = $this->get_properties();
+
+			// Only run specific validation on properties that are defined in the schema and present in the address.
+			// This is for partial address pushes when only part of a customer address is sent.
+			// Full schema address validation still happens later, so empty, required values are disallowed.
+			if ( empty( $properties[ $key ] ) || empty( $address[ $key ] ) ) {
+				continue;
+			}
+
+			$result = rest_validate_value_from_schema( $address[ $key ], $properties[ $key ], $key );
+			if ( is_wp_error( $result ) ) {
+				$errors->add( $result->get_error_code(), $result->get_error_message() );
+			}
+		}
+
 		return $errors->has_errors( $errors ) ? $errors : true;
+	}
+
+	/**
+	 * Get additional address fields schema.
+	 *
+	 * @return array
+	 */
+	protected function get_additional_address_fields_schema() {
+		$additional_fields_keys = $this->additional_fields_controller->get_address_fields_keys();
+
+		$fields = $this->additional_fields_controller->get_additional_fields();
+
+		$address_fields = array_filter(
+			$fields,
+			function( $key ) use ( $additional_fields_keys ) {
+				return in_array( $key, $additional_fields_keys, true );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+
+		$schema = [];
+		foreach ( $address_fields as $key => $field ) {
+			$field_schema = [
+				'description' => $field['label'],
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+				'required'    => true,
+			];
+
+			if ( 'select' === $field['type'] ) {
+				$field_schema['enum'] = array_map(
+					function( $option ) {
+						return $option['value'];
+					},
+					$field['options']
+				);
+			}
+
+			if ( 'checkbox' === $field['type'] ) {
+				$field_schema['type'] = 'boolean';
+			}
+
+			$schema[ $key ] = $field_schema;
+		}
+		return $schema;
 	}
 }
