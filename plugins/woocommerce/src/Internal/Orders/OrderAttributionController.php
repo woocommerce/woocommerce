@@ -302,17 +302,18 @@ class OrderAttributionController implements RegisterHooksInterface {
 	/**
 	 * Output the data for the Origin column in the orders table.
 	 *
+	 * Default to "Unknown" if no origin is set.
+	 *
 	 * @param WC_Order $order The order object.
 	 *
 	 * @return void
 	 */
 	private function output_origin_column( WC_Order $order ) {
-		$source_type = $order->get_meta( $this->get_meta_prefixed_field( 'type' ) );
-		$source      = $order->get_meta( $this->get_meta_prefixed_field( 'utm_source' ) );
-		if ( ! $source ) {
-			$source = __( '(none)', 'woocommerce' );
+		$origin = $order->get_meta( $this->get_meta_prefixed_field( 'origin' ) );
+		if ( empty( $origin ) ) {
+			$origin = __( 'Unknown', 'woocommerce' );
 		}
-		echo esc_html( $this->get_origin_label( $source_type, $source ) );
+		echo esc_html( $origin );
 	}
 
 	/**
