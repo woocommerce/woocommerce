@@ -20,7 +20,7 @@ import { useSelect } from '@wordpress/data';
  */
 import { CreateTaxonomyModal } from './create-taxonomy-modal';
 import useTaxonomySearch from './use-taxonomy-search';
-import {
+import type {
 	ProductEditorBlockEditProps,
 	Taxonomy,
 	TaxonomyMetadata,
