@@ -347,25 +347,50 @@ test.describe( 'Checkout Block page', () => {
 
 		// fill shipping address
 		await page.getByLabel( 'Email address' ).fill( guestEmail );
-		await page.getByLabel( 'First name' ).fill( 'Homer' );
-		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
 		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'First name' )
+			.fill( 'Homer' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'Last name' )
+			.fill( 'Simpson' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
 			.getByLabel( 'Address', { exact: true } )
 			.fill( '123 Evergreen Terrace' );
-		await page.getByLabel( 'City' ).fill( 'Springfield' );
-		await page.getByLabel( 'ZIP Code' ).fill( '97403' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'City' )
+			.fill( 'Springfield' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'ZIP Code' )
+			.fill( '97403' );
 
 		await page.getByLabel( 'Use same address for billing' ).click();
 
 		// fill billing details
-		await page.getByLabel( 'First name' ).last().fill( 'Mister' );
-		await page.getByLabel( 'Last name' ).last().fill( 'Burns' );
 		await page
+			.getByRole( 'group', { name: 'Billing address' } )
+			.getByLabel( 'First name' )
+			.fill( 'Mister' );
+		await page
+			.getByRole( 'group', { name: 'Billing address' } )
+			.getByLabel( 'Last name' )
+			.fill( 'Burns' );
+		await page
+			.getByRole( 'group', { name: 'Billing address' } )
 			.getByLabel( 'Address', { exact: true } )
-			.last()
 			.fill( '156th Street' );
-		await page.getByLabel( 'City' ).last().fill( 'Springfield' );
-		await page.getByLabel( 'ZIP Code' ).last().fill( '98500' );
+		await page
+			.getByRole( 'group', { name: 'Billing address' } )
+			.getByLabel( 'City' )
+			.fill( 'Springfield' );
+		await page
+			.getByRole( 'group', { name: 'Billing address' } )
+			.getByLabel( 'ZIP Code' )
+			.fill( '98500' );
 
 		// add note to the order
 		await page.getByLabel( 'Add a note to your order' ).check();
@@ -403,32 +428,60 @@ test.describe( 'Checkout Block page', () => {
 			.getByLabel( 'Edit address', { exact: true } )
 			.first()
 			.click();
-		await expect( page.getByLabel( 'First name' ) ).toHaveValue( 'Homer' );
-		await expect( page.getByLabel( 'Last name' ) ).toHaveValue( 'Simpson' );
 		await expect(
-			page.getByLabel( 'Address', { exact: true } )
+			page
+				.getByRole( 'group', { name: 'Shipping address' } )
+				.getByLabel( 'First name' )
+		).toHaveValue( 'Homer' );
+		await expect(
+			page
+				.getByRole( 'group', { name: 'Shipping address' } )
+				.getByLabel( 'Last name' )
+		).toHaveValue( 'Simpson' );
+		await expect(
+			page
+				.getByRole( 'group', { name: 'Shipping address' } )
+				.getByLabel( 'Address', { exact: true } )
 		).toHaveValue( '123 Evergreen Terrace' );
-		await expect( page.getByLabel( 'City' ) ).toHaveValue( 'Springfield' );
-		await expect( page.getByLabel( 'ZIP Code' ) ).toHaveValue( '97403' );
+		await expect(
+			page
+				.getByRole( 'group', { name: 'Shipping address' } )
+				.getByLabel( 'City' )
+		).toHaveValue( 'Springfield' );
+		await expect(
+			page
+				.getByRole( 'group', { name: 'Shipping address' } )
+				.getByLabel( 'ZIP Code' )
+		).toHaveValue( '97403' );
 
 		// verify billing details
-		// issue found and reported to blocks team: please uncomment this once fixed
+		// ISSUE REPORTED #42967, please uncomment below once fixed
 		// await page.getByLabel( 'Edit address', { exact: true } ).last().click();
-		// await expect( page.getByLabel( 'First name' ).last() ).toHaveValue(
-		// 	'Mister'
-		// );
-		// await expect( page.getByLabel( 'Last name' ).last() ).toHaveValue(
-		// 	'Burns'
-		// );
 		// await expect(
-		// 	page.getByLabel( 'Address', { exact: true } ).last()
+		// 	page
+		// 		.getByRole( 'group', { name: 'Billing address' } )
+		// 		.getByLabel( 'First name' )
+		// ).toHaveValue( 'Mister' );
+		// await expect(
+		// 	page
+		// 		.getByRole( 'group', { name: 'Billing address' } )
+		// 		.getByLabel( 'Last name' )
+		// ).toHaveValue( 'Burns' );
+		// await expect(
+		// 	page
+		// 		.getByRole( 'group', { name: 'Billing address' } )
+		// 		.getByLabel( 'Address', { exact: true } )
 		// ).toHaveValue( '156th Street' );
-		// await expect( page.getByLabel( 'City' ).last() ).toHaveValue(
-		// 	'Springfield'
-		// );
-		// await expect( page.getByLabel( 'ZIP Code' ).last() ).toHaveValue(
-		// 	'98500'
-		// );
+		// await expect(
+		// 	page
+		// 		.getByRole( 'group', { name: 'Billing address' } )
+		// 		.getByLabel( 'City' )
+		// ).toHaveValue( 'Springfield' );
+		// await expect(
+		// 	page
+		// 		.getByRole( 'group', { name: 'Billing address' } )
+		// 		.getByLabel( 'ZIP Code' )
+		// ).toHaveValue( '98500' );
 	} );
 
 	test( 'warn when customer is missing required details', async ( {
@@ -477,13 +530,26 @@ test.describe( 'Checkout Block page', () => {
 
 		// fill shipping address and check the toggle to use a different address for billing
 		await page.getByLabel( 'Email address' ).fill( customer.email );
-		await page.getByLabel( 'First name' ).fill( 'Homer' );
-		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
 		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'First name' )
+			.fill( 'Homer' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'Last name' )
+			.fill( 'Simpson' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
 			.getByLabel( 'Address', { exact: true } )
 			.fill( '123 Evergreen Terrace' );
-		await page.getByLabel( 'City' ).fill( 'Springfield' );
-		await page.getByLabel( 'ZIP Code' ).fill( '97403' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'City' )
+			.fill( 'Springfield' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'ZIP Code' )
+			.fill( '97403' );
 		await expect(
 			page.getByLabel( 'Use same address for billing' )
 		).toBeVisible();
@@ -508,13 +574,26 @@ test.describe( 'Checkout Block page', () => {
 
 		// fill shipping address
 		await page.getByLabel( 'Email address' ).fill( customer.email );
-		await page.getByLabel( 'First name' ).fill( 'Lisa' );
-		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
 		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'First name' )
+			.fill( 'Lisa' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'Last name' )
+			.fill( 'Simpson' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
 			.getByLabel( 'Address', { exact: true } )
 			.fill( '123 Evergreen Terrace' );
-		await page.getByLabel( 'City' ).fill( 'Springfield' );
-		await page.getByLabel( 'ZIP Code' ).fill( '97403' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'City' )
+			.fill( 'Springfield' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'ZIP Code' )
+			.fill( '97403' );
 		await page
 			.locator( '.wc-block-components-loading-mask' )
 			.waitFor( { state: 'visible' } );
@@ -588,13 +667,26 @@ test.describe( 'Checkout Block page', () => {
 
 		// fill shipping address and check cash on delivery method
 		await page.getByLabel( 'Email address' ).fill( guestEmail );
-		await page.getByLabel( 'First name' ).fill( 'Homer' );
-		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
 		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'First name' )
+			.fill( 'Homer' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'Last name' )
+			.fill( 'Simpson' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
 			.getByLabel( 'Address', { exact: true } )
 			.fill( '123 Evergreen Terrace' );
-		await page.getByLabel( 'City' ).fill( 'Springfield' );
-		await page.getByLabel( 'ZIP Code' ).fill( '97403' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'City' )
+			.fill( 'Springfield' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'ZIP Code' )
+			.fill( '97403' );
 		await page.getByLabel( 'Cash on delivery' ).check();
 		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 
@@ -721,13 +813,26 @@ test.describe( 'Checkout Block page', () => {
 
 		// fill shipping address and check cash on delivery method
 		await page.getByLabel( 'Email address' ).fill( customer.email );
-		await page.getByLabel( 'First name' ).fill( 'Homer' );
-		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
 		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'First name' )
+			.fill( 'Homer' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'Last name' )
+			.fill( 'Simpson' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
 			.getByLabel( 'Address', { exact: true } )
 			.fill( '123 Evergreen Terrace' );
-		await page.getByLabel( 'City' ).fill( 'Springfield' );
-		await page.getByLabel( 'ZIP Code' ).fill( '97403' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'City' )
+			.fill( 'Springfield' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'ZIP Code' )
+			.fill( '97403' );
 		await page.getByLabel( 'Cash on delivery' ).check();
 		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 
@@ -805,13 +910,26 @@ test.describe( 'Checkout Block page', () => {
 
 		// fill shipping address and check cash on delivery method
 		await page.getByLabel( 'Email address' ).fill( newAccountEmail );
-		await page.getByLabel( 'First name' ).fill( 'Marge' );
-		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
 		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'First name' )
+			.fill( 'Marge' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'Last name' )
+			.fill( 'Simpson' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
 			.getByLabel( 'Address', { exact: true } )
 			.fill( '123 Evergreen Terrace' );
-		await page.getByLabel( 'City' ).fill( 'Springfield' );
-		await page.getByLabel( 'ZIP Code' ).fill( '97403' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'City' )
+			.fill( 'Springfield' );
+		await page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'ZIP Code' )
+			.fill( '97403' );
 		await page.getByLabel( 'Cash on delivery' ).check();
 		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 
