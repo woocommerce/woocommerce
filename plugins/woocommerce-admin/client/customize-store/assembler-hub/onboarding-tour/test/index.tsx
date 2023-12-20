@@ -65,9 +65,7 @@ describe( 'OnboardingTour', () => {
 			} )
 			.click();
 
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'customize_your_store_assembler_hub_tour_start'
-		);
+		expect( props.takeTour ).toHaveBeenCalled();
 	} );
 
 	it( 'should record an event when clicking on "Skip" button', () => {
@@ -79,12 +77,10 @@ describe( 'OnboardingTour', () => {
 			} )
 			.click();
 
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'customize_your_store_assembler_hub_tour_skip'
-		);
+		expect( props.skipTour ).toHaveBeenCalled();
 	} );
 
-	it( 'should record an event when clicking on "Skip" button', () => {
+	it( 'should record an event when clicking on the "Close Tour" button', () => {
 		render( <OnboardingTour { ...props } showWelcomeTour={ false } /> );
 
 		screen
