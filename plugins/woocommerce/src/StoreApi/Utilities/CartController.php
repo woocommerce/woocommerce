@@ -823,18 +823,16 @@ class CartController {
 		}
 
 		// Add extra package data to array.
-		if ( count( $packages ) ) {
-			$packages = array_map(
-				function( $key, $package, $index ) {
-					$package['package_id']   = isset( $package['package_id'] ) ? $package['package_id'] : $key;
-					$package['package_name'] = isset( $package['package_name'] ) ? $package['package_name'] : $this->get_package_name( $package, $index );
-					return $package;
-				},
-				array_keys( $packages ),
-				$packages,
-				range( 1, count( $packages ) )
-			);
-		}
+		$packages = array_map(
+			function( $key, $package, $index ) {
+				$package['package_id']   = isset( $package['package_id'] ) ? $package['package_id'] : $key;
+				$package['package_name'] = isset( $package['package_name'] ) ? $package['package_name'] : $this->get_package_name( $package, $index );
+				return $package;
+			},
+			array_keys( $packages ),
+			$packages,
+			range( 1, count( $packages ) )
+		);
 
 		return $calculate_rates ? wc()->shipping()->calculate_shipping( $packages ) : $packages;
 	}
