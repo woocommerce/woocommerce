@@ -374,7 +374,13 @@ class Init {
 	 */
 	public function register_product_editor_templates() {
 		$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
-		$template_registry->register( new SimpleProductTemplate() );
-		$template_registry->register( new ProductVariationTemplate() );
+
+		if ( ! $template_registry->get_registered( 'simple-product' ) ) {
+			$template_registry->register( new SimpleProductTemplate() );
+		}
+
+		if ( ! $template_registry->get_registered( 'product-variation' ) ) {
+			$template_registry->register( new ProductVariationTemplate() );
+		}
 	}
 }
