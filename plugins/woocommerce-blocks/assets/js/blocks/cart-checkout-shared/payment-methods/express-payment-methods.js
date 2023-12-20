@@ -141,8 +141,12 @@ const ExpressPaymentMethods = () => {
 				const expressPaymentMethod = isEditor
 					? paymentMethod.edit
 					: paymentMethod.content;
+				const expressPaymentMethodId = paymentMethod.name;
 				return isValidElement( expressPaymentMethod ) ? (
-					<PaymentMethodErrorBoundary isEditor={ isEditor }>
+					<PaymentMethodErrorBoundary
+						expressPaymentMethodId={ expressPaymentMethodId }
+						isEditor={ isEditor }
+					>
 						<li key={ id } id={ `express-payment-method-${ id }` }>
 							{ cloneElement( expressPaymentMethod, {
 								...paymentMethodInterface,
