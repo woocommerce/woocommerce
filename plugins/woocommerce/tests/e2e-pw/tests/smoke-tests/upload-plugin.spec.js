@@ -95,21 +95,11 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 			await expect( shopHeading ).toBeVisible();
 		} );
 
-<<<<<<< HEAD
-		await test.step(
-			'Expect the WooCommerce Homepage to load successfully.',
-			async () => {
-				const statsOverviewHeading = page.getByText( getTranslationFor('Stats overview') );
-				const skipSetupStoreLink = page.getByRole( 'button', {
-					name: getTranslationFor('Skip setup store details'),
-				} );
-=======
 		await test.step( 'Expect the WooCommerce Homepage to load successfully.', async () => {
-			const statsOverviewHeading = page.getByText( 'Stats overview' );
+			const statsOverviewHeading = page.getByText( getTranslationFor('Stats overview') );
 			const skipSetupStoreLink = page.getByRole( 'button', {
 				name: 'Set up my store',
 			} );
->>>>>>> origin/trunk
 
 			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
 			await expect(
