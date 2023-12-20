@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reviews by Product block: decode the product name in the Product selector input aria-label
