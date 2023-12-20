@@ -817,7 +817,7 @@ class CartController {
 
 		$packages = $cart->get_shipping_packages();
 
-		// Return early if no packages or invalid object supplied by the filter.
+		// Return early if invalid object supplied by the filter or no packages.
 		if ( ! is_array( $packages ) || empty( $packages ) ) {
 			return [];
 		}
