@@ -13,4 +13,5 @@ export interface NumberBlockAttributes extends BlockAttributes {
 	max?: number;
 	required?: boolean;
 	tooltip?: string;
+	step?: number;
 }

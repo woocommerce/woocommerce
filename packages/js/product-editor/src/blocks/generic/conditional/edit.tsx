@@ -57,12 +57,11 @@ export function Edit( {
 	);
 
 	return (
-		<div { ...blockProps }>
-			<DisplayState
-				state={ displayBlocks ? 'visible' : 'visually-hidden' }
-			>
-				<InnerBlocks templateLock="all" />
-			</DisplayState>
-		</div>
+		<DisplayState
+			{ ...blockProps }
+			state={ displayBlocks ? 'visible' : 'visually-hidden' }
+		>
+			<InnerBlocks templateLock="all" />
+		</DisplayState>
 	);
 }
