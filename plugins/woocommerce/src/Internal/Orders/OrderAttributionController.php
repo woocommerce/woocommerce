@@ -175,7 +175,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 */
 	private function maybe_set_admin_source( WC_Order $order ) {
 		if ( function_exists( 'is_admin' ) && is_admin() ) {
-			$order->add_meta_data( $this->get_meta_prefixed_field( 'source_type' ), 'admin' );
+			$order->add_meta_data( $this->get_meta_prefixed_field_name( 'source_type' ), 'admin' );
 			$order->save();
 		}
 	}
