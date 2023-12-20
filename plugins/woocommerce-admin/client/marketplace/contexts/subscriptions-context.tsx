@@ -2,13 +2,15 @@
  * External dependencies
  */
 import { useState, createContext, useEffect } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { SubscriptionsContextType } from './types';
+import { SubscriptionsContextType, NoticeStatus } from './types';
 import { Subscription } from '../components/my-subscriptions/types';
 import {
+	addNotice,
 	fetchSubscriptions,
 	refreshSubscriptions as fetchSubscriptionsFromWooCom,
 } from '../utils/functions';
@@ -46,16 +48,60 @@ export function SubscriptionsContextProvider( props: {
 			} );
 	};
 
-	const refreshSubscriptions = () => {
-		return fetchSubscriptionsFromWooCom().then(
-			( subscriptionResponse ) => {
+	const refreshSubscriptions = ( toggleLoading?: boolean ) => {
+		if ( toggleLoading ) {
+			setIsLoading( true );
+		}
+
+		return fetchSubscriptionsFromWooCom()
+			.then( ( subscriptionResponse ) => {
 				setSubscriptions( subscriptionResponse );
-			}
-		);
+			} )
+			.finally( () => {
+				if ( toggleLoading ) {
+					setIsLoading( false );
+				}
+			} );
 	};
 
 	useEffect( () => {
-		loadSubscriptions( true );
+		/**
+		 * Check if we have &install=PRODUCT_KEY in the URL. This means we have just
+		 * installed a new product and nwe need to refresh the list.
+		 */
+		const urlParams = new URLSearchParams( window.location.search );
+		const installKey = urlParams.get( 'install' );
+
+		if ( installKey ) {
+			refreshSubscriptions( true ).catch( ( error ) => {
+				addNotice(
+					'woocommerce-marketplace-refresh-subscriptions',
+					sprintf(
+						// translators: %s is the error message.
+						__(
+							'Error refreshing subscriptions: %s',
+							'woocommerce'
+						),
+						error.message
+					),
+					NoticeStatus.Error
+				);
+			} );
+
+			return;
+		}
+
+		loadSubscriptions( true ).catch( ( error ) => {
+			addNotice(
+				'woocommerce-marketplace-load-subscriptions',
+				sprintf(
+					// translators: %s is the error message.
+					__( 'Error loading subscriptions: %s', 'woocommerce' ),
+					error.message
+				),
+				NoticeStatus.Error
+			);
+		} );
 	}, [] );
 
 	const contextValue = {

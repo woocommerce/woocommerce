@@ -8,6 +8,11 @@ import { getContext, store } from '@woocommerce/interactivity';
  */
 import './style.scss';
 
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
 export type DropdownContext = {
 	selectType: 'multiple' | 'single';
 	item: {
@@ -113,7 +118,7 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 				} );
 			}
 
-			context.isOpen = false;
+				context.isOpen = false;
 
 			event.stopPropagation();
 		},

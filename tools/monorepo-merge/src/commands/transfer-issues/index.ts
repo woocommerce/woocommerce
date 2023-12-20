@@ -167,10 +167,7 @@ export default class TransferIssues extends Command {
 				continue;
 			}
 
-			this.resetProjectFields(
-				authenticatedGraphQL,
-				issue
-			);
+			this.resetProjectFields( authenticatedGraphQL, issue );
 
 			this.addLabelsToIssue(
 				authenticatedGraphQL,
@@ -657,7 +654,7 @@ export default class TransferIssues extends Command {
 	 * Resets the project fields for the issue if necessary.
 	 *
 	 * @param {graphql}     authenticatedGraphQL The graphql object for making requests.
-	 * @param {GitHubIssue} issue        		 The GitHub issue to update the project fields for.
+	 * @param {GitHubIssue} issue                The GitHub issue to update the project fields for.
 	 */
 	private async resetProjectFields(
 		authenticatedGraphQL: typeof graphql,
@@ -665,6 +662,7 @@ export default class TransferIssues extends Command {
 	) {
 		// Pull all of the project fields from the issue post-transfer so that we can make sure that they've been transferred correctly.
 		// If they haven't, we need to to try and set them and log the ones that required this step.
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const { node } = await authenticatedGraphQL< { node: any } >(
 			`
 			query ($nodeID: ID!) {
@@ -749,7 +747,11 @@ export default class TransferIssues extends Command {
 			for ( const project of node.projectItems.nodes ) {
 				if ( project.project.id !== projectField.projectId ) {
 					this.error(
-						'Issue "' + issue.title + '" does not have an entry for project "' + project.project.title + '"!'
+						'Issue "' +
+							issue.title +
+							'" does not have an entry for project "' +
+							project.project.title +
+							'"!'
 					);
 				}
 
@@ -766,7 +768,15 @@ export default class TransferIssues extends Command {
 
 				if ( ! foundField ) {
 					this.error(
-						'Issue "' + issue.title + '" - Project "' + project.project.title + '" is missing "' + projectField.fieldId + '" value "' + JSON.stringify( projectField.value ) + '"!'
+						'Issue "' +
+							issue.title +
+							'" - Project "' +
+							project.project.title +
+							'" is missing "' +
+							projectField.fieldId +
+							'" value "' +
+							JSON.stringify( projectField.value ) +
+							'"!'
 					);
 				}
 			}

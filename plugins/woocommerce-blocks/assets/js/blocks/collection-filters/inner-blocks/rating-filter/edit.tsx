@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown } from '@wordpress/icons';
 import classnames from 'classnames';
-import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import Rating, {
 	RatingValues,
@@ -19,18 +19,7 @@ import { isBoolean, isObject, objectHasProp } from '@woocommerce/types';
 import { useState, useMemo, useEffect } from '@wordpress/element';
 import { CheckboxList } from '@woocommerce/blocks-components';
 import FormTokenField from '@woocommerce/base-components/form-token-field';
-import type { ReactElement } from 'react';
-import {
-	Disabled,
-	Notice,
-	PanelBody,
-	ToggleControl,
-	withSpokenMessages,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControl as ToggleGroupControl,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
-} from '@wordpress/components';
+import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -41,9 +30,9 @@ import { Attributes } from './types';
 import { formatSlug, getActiveFilters, generateUniqueId } from './utils';
 import { useSetWraperVisibility } from '../../../filter-wrapper/context';
 import './editor.scss';
-import { Inspector } from './components/inspector';
+import { Inspector } from '../attribute-filter/components/inspector-controls';
 
-const NoRatings = (
+const NoRatings = () => (
 	<Notice status="warning" isDismissible={ false }>
 		<p>
 			{ __(
@@ -54,16 +43,14 @@ const NoRatings = (
 	</Notice>
 );
 
-/**
- * Component displaying a rating filter in the block editor.
- */
-const RatingFilterEditBlock = ( {
-	attributes: blockAttributes,
-	noRatingsNotice = null,
-}: {
-	attributes: Attributes;
-	noRatingsNotice?: ReactElement | null;
-} ) => {
+const Edit = ( props: BlockEditProps< Attributes > ) => {
+	const { className } = props.attributes;
+	const blockAttributes = props.attributes;
+
+	const blockProps = useBlockProps( {
+		className: classnames( 'wc-block-rating-filter', className ),
+	} );
+
 	const isEditor = true;
 
 	const setWrapperVisibility = useSetWraperVisibility();
@@ -92,9 +79,9 @@ const RatingFilterEditBlock = ( {
 		[]
 	);
 
-	const [ checked, setChecked ] = useState( initialFilters );
+	const [ checked ] = useState( initialFilters );
 
-	const [ productRatingsQuery, setProductRatingsQuery ] = useQueryStateByKey(
+	const [ productRatingsQuery ] = useQueryStateByKey(
 		'rating',
 		initialFilters
 	);
@@ -190,146 +177,138 @@ const RatingFilterEditBlock = ( {
 
 	return (
 		<>
-			{ displayNoProductRatingsNotice && noRatingsNotice }
-			<div
-				className={ classnames(
-					'wc-block-rating-filter',
-					`style-${ blockAttributes.displayStyle }`,
-					{
-						'is-loading': isLoading,
-					}
-				) }
-			>
-				{ blockAttributes.displayStyle === 'dropdown' ? (
-					<>
-						<FormTokenField
-							key={ remountKey }
-							className={ classnames( {
-								'single-selection': ! multiple,
-								'is-loading': isLoading,
-							} ) }
-							style={ {
-								borderStyle: 'none',
-							} }
-							suggestions={ displayedOptions
-								.filter(
-									( option ) =>
-										! checked.includes( option.value )
-								)
-								.map( ( option ) => option.value ) }
-							disabled={ isLoading }
-							placeholder={ __( 'Select Rating', 'woocommerce' ) }
-							onChange={ () => {
-								// noop
-							} }
-							value={ checked }
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore - FormTokenField doesn't accept custom components, forcing it here to display component
-							displayTransform={ ( value ) => {
-								const resultWithZeroCount = {
-									value,
-									label: (
-										<Rating
-											key={
-												Number( value ) as RatingValues
-											}
-											rating={
-												Number( value ) as RatingValues
-											}
-											ratedProductsCount={ 0 }
-										/>
-									),
-								};
-								const resultWithNonZeroCount =
-									displayedOptions.find(
-										( option ) => option.value === value
-									);
-
-								const displayedResult =
-									resultWithNonZeroCount ||
-									resultWithZeroCount;
-
-								const { label, value: rawValue } =
-									displayedResult;
-
-								// A label - JSX component - is extended with faked string methods to allow using JSX element as an option in FormTokenField
-								const extendedLabel = Object.assign(
-									{},
-									label,
-									{
-										toLocaleLowerCase: () => rawValue,
-										substring: (
-											start: number,
-											end: number
-										) =>
-											start === 0 && end === 1
-												? label
-												: '',
-									}
-								);
-								return extendedLabel;
-							} }
-							saveTransform={ formatSlug }
-							messages={ {
-								added: __(
-									'Rating filter added.',
-									'woocommerce'
-								),
-								removed: __(
-									'Rating filter removed.',
-									'woocommerce'
-								),
-								remove: __(
-									'Remove rating filter.',
-									'woocommerce'
-								),
-								__experimentalInvalid: __(
-									'Invalid rating filter.',
-									'woocommerce'
-								),
-							} }
-						/>
-						{ showChevron && (
-							<Icon icon={ chevronDown } size={ 30 } />
-						) }
-					</>
-				) : (
-					<CheckboxList
-						className={ 'wc-block-rating-filter-list' }
-						options={ displayedOptions }
-						checked={ checked }
-						onChange={ () => {
-							// noop
-						} }
-						isLoading={ isLoading }
-						isDisabled={ isDisabled }
-					/>
-				) }
-			</div>
-		</>
-	);
-};
-
-const Edit = ( props: BlockEditProps< Attributes > ) => {
-	const { className } = props.attributes;
-
-	const blockProps = useBlockProps( {
-		className: classnames( 'wc-block-rating-filter', className ),
-	} );
-
-	return (
-		<>
 			<Inspector { ...props } />
-			{
-				<div { ...blockProps }>
-					<Disabled>
-						<RatingFilterEditBlock
-							attributes={ props.attributes }
-							noRatingsNotice={ NoRatings }
-						/>
-					</Disabled>
-				</div>
-			}
+			<div { ...blockProps }>
+				<Disabled>
+					{ displayNoProductRatingsNotice && <NoRatings /> }
+					<div
+						className={ classnames(
+							'wc-block-rating-filter',
+							`style-${ blockAttributes.displayStyle }`,
+							{
+								'is-loading': isLoading,
+							}
+						) }
+					>
+						{ blockAttributes.displayStyle === 'dropdown' ? (
+							<>
+								<FormTokenField
+									key={ remountKey }
+									className={ classnames( {
+										'single-selection': ! multiple,
+										'is-loading': isLoading,
+									} ) }
+									style={ {
+										borderStyle: 'none',
+									} }
+									suggestions={ displayedOptions
+										.filter(
+											( option ) =>
+												! checked.includes(
+													option.value
+												)
+										)
+										.map( ( option ) => option.value ) }
+									disabled={ isLoading }
+									placeholder={ __(
+										'Select Rating',
+										'woocommerce'
+									) }
+									onChange={ () => {
+										// noop
+									} }
+									value={ checked }
+									// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+									// @ts-ignore - FormTokenField doesn't accept custom components, forcing it here to display component
+									displayTransform={ ( value ) => {
+										const resultWithZeroCount = {
+											value,
+											label: (
+												<Rating
+													key={
+														Number(
+															value
+														) as RatingValues
+													}
+													rating={
+														Number(
+															value
+														) as RatingValues
+													}
+													ratedProductsCount={ 0 }
+												/>
+											),
+										};
+										const resultWithNonZeroCount =
+											displayedOptions.find(
+												( option ) =>
+													option.value === value
+											);
+
+										const displayedResult =
+											resultWithNonZeroCount ||
+											resultWithZeroCount;
+
+										const { label, value: rawValue } =
+											displayedResult;
+
+										// A label - JSX component - is extended with faked string methods to allow using JSX element as an option in FormTokenField
+										const extendedLabel = Object.assign(
+											{},
+											label,
+											{
+												toLocaleLowerCase: () =>
+													rawValue,
+												substring: (
+													start: number,
+													end: number
+												) =>
+													start === 0 && end === 1
+														? label
+														: '',
+											}
+										);
+										return extendedLabel;
+									} }
+									saveTransform={ formatSlug }
+									messages={ {
+										added: __(
+											'Rating filter added.',
+											'woocommerce'
+										),
+										removed: __(
+											'Rating filter removed.',
+											'woocommerce'
+										),
+										remove: __(
+											'Remove rating filter.',
+											'woocommerce'
+										),
+										__experimentalInvalid: __(
+											'Invalid rating filter.',
+											'woocommerce'
+										),
+									} }
+								/>
+								{ showChevron && (
+									<Icon icon={ chevronDown } size={ 30 } />
+								) }
+							</>
+						) : (
+							<CheckboxList
+								className={ 'wc-block-rating-filter-list' }
+								options={ displayedOptions }
+								checked={ checked }
+								onChange={ () => {
+									// noop
+								} }
+								isLoading={ isLoading }
+								isDisabled={ isDisabled }
+							/>
+						) }
+					</div>
+				</Disabled>
+			</div>
 		</>
 	);
 };

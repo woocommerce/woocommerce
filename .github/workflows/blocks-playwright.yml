@@ -1,0 +1,66 @@
+name: Run Blocks Playwright Tests
+on:
+    pull_request:
+        paths:
+            - 'plugins/woocommerce-blocks/**'
+            - 'plugins/woocommerce/src/Blocks/**'
+            - 'plugins/woocommerce/templates/**'
+            - 'plugins/woocommerce/patterns/**'
+
+env:
+    FORCE_COLOR: 1
+
+jobs:
+    PlaywrightE2ETests:
+        name: Playwright E2E tests - ${{ matrix.config.name }}
+        timeout-minutes: 60
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: plugins/woocommerce-blocks
+        strategy:
+            matrix:
+                config:
+                    [
+                        {
+                            name: Normal,
+                            file: playwright.config.ts,
+                            resultPath: test-results,
+                        },
+                        {
+                            name: Classic,
+                            file: playwright.classic-theme.config.ts,
+                            resultPath: test-results-classic-theme,
+                        },
+                        {
+                            name: SideEffects,
+                            file: playwright.side-effects.config.ts,
+                            resultPath: test-results-side-effects,
+                        },
+                    ]
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
+
+            - name: Install Playwright
+              run: pnpm --filter='@woocommerce/block-library' exec playwright install --with-deps
+
+            - name: Start wp-env
+              run: pnpm --filter='@woocommerce/block-library' env:start
+
+            - name: Run Playwright tests
+              working-directory: plugins/woocommerce-blocks
+              run: pnpm playwright test --config=tests/e2e/${{ matrix.config.file }}
+
+            - uses: actions/upload-artifact@v3
+              if: ${{ failure() }}
+
+              with:
+                  name: playwright-report-${{ matrix.config.name }}
+                  path: plugins/woocommerce-blocks/tests/e2e/artifacts/${{ matrix.config.resultPath }}
+                  if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
