@@ -499,9 +499,11 @@ class BlockTemplatesController {
 		$templates      = array();
 
 		foreach ( $template_files as $template_file ) {
-			if ( ! $this->package->is_experimental_build() && str_contains( $template_file, 'templates/parts/product-gallery.html' ) ) {
-				break;
+			// Skip the Product Gallery template part, as it is not supposed to be exposed at this point.
+			if ( str_contains( $template_file, 'templates/parts/product-gallery.html' ) ) {
+				continue;
 			}
+
 			// Skip the template if it's blockified, and we should only use classic ones.
 			if ( ! BlockTemplateUtils::should_use_blockified_product_grid_templates() && strpos( $template_file, 'blockified' ) !== false ) {
 				continue;
