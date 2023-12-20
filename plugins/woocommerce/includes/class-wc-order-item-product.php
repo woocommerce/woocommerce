@@ -270,7 +270,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Gets the item subtotal. This is the price of the item times the quantity
-  	 * excluding taxes before coupon discounts.
+	 * excluding taxes before coupon discounts.
 	 *
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
@@ -291,7 +291,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Gets the item total. This is the price of the item times the quantity
-  	 * excluding taxes after coupon discounts.
+	 * excluding taxes after coupon discounts.
 	 *
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
