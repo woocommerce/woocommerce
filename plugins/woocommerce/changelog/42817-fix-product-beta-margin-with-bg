@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Remove padding for the products query when background is added

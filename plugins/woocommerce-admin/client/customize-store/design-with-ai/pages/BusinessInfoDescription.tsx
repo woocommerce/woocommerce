@@ -65,7 +65,7 @@ export const BusinessInfoDescription = ( {
 					<div className="woocommerce-cys-design-with-ai-guide">
 						<p>
 							{ __(
-								'The more detail you provide, the better job our AI can do! Try to include:',
+								'The more detail you provide, the better job our AI can do!',
 								'woocommerce'
 							) }
 						</p>

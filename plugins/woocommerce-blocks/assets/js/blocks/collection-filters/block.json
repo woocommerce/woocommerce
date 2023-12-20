@@ -14,7 +14,8 @@
 		"reusable": false
 	},
 	"usesContext": [
-		"query"
+		"query",
+		"queryId"
 	],
 	"providesContext": {
 		"collectionData": "collectionData"

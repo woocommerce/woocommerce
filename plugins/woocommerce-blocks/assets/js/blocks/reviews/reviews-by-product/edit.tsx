@@ -12,6 +12,7 @@ import {
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { commentContent, Icon } from '@wordpress/icons';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -60,7 +61,7 @@ const ReviewsByProductEditor = ( {
 						item.details.review_count,
 						'woocommerce'
 					),
-					item.name,
+					decodeEntities( item.name ),
 					item.details.review_count
 				) }
 			/>
