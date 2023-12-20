@@ -33,7 +33,9 @@ class MarketingRecommendationsDataSourcePoller extends DataSourcePoller {
 	 */
 	public static function get_instance() {
 		if ( ! self::$instance ) {
-			self::$instance = new self( self::ID, self::DATA_SOURCES );
+			self::$instance = new self( self::ID, self::DATA_SOURCES, array(
+				'spec_key' => 'product',
+			) );
 		}
 		return self::$instance;
 	}
