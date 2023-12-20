@@ -58,6 +58,7 @@ export const customer = {
 	},
 };
 
+// source: plugins/woocommerce-blocks/tests/e2e/bin/scripts/parallel/reviews.sh
 export const reviews = [
 	{
 		name: `${ customer.first_name } ${ customer.last_name }`,
