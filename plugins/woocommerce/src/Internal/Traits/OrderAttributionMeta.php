@@ -385,13 +385,23 @@ trait OrderAttributionMeta {
 	 * @return array Order count, total spend, and average spend per order.
 	 */
 	private function get_customer_history( $customer_identifier ): array {
+		/*
+		 * Exclude the statuses that aren't valid for the Customers report.
+		 * @see /Automattic/WooCommerce/Admin/API/Report/DataStore::get_excluded_report_order_statuses()
+		 */
+		$all_statuses_no_prefix = array_map(
+			function ( $status ) {
+				return str_replace( 'wc-', '', $status );
+			},
+			array_keys( wc_get_order_statuses() )
+		);
+		$excluded_statuses      = array( 'pending', 'failed', 'cancelled', 'auto-draft', 'trash' );
 
 		// Get the valid customer orders.
 		$args = array(
 			'limit'  => - 1,
 			'return' => 'objects',
-			// Don't count cancelled or failed orders.
-			'status' => array( 'pending', 'processing', 'on-hold', 'completed', 'refunded' ),
+			'status' => array_diff( $all_statuses_no_prefix, $excluded_statuses ),
 			'type'   => 'shop_order',
 		);
 
