@@ -40,6 +40,17 @@ const mergeDeepSignals = ( target, source, overwrite ) => {
 	}
 };
 
+const deepClone = ( o ) => {
+	if ( isObject( o ) )
+		return Object.fromEntries(
+			Object.entries( o ).map( ( [ k, v ] ) => [ k, deepClone( v ) ] )
+		);
+	if ( Array.isArray( o ) ) {
+		return [ ...o.map( ( i ) => deepClone( i ) ) ];
+	}
+	return o;
+};
+
 export default () => {
 	// data-wc-context
 	directive(
@@ -56,7 +67,9 @@ export default () => {
 
 			currentValue.current = useMemo( () => {
 				const newValue = context
-					.map( ( c ) => deepSignal( { [ c.namespace ]: c.value } ) )
+					.map( ( c ) =>
+						deepSignal( { [ c.namespace ]: deepClone( c.value ) } )
+					)
 					.reduceRight( mergeDeepSignals );
 
 				mergeDeepSignals( newValue, inheritedValue );
