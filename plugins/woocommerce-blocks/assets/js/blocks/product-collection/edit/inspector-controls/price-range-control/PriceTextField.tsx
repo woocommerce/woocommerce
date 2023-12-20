@@ -5,6 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { getCurrency } from '@woocommerce/price-format';
 import { Currency } from '@woocommerce/types';
+import { useState } from '@wordpress/element';
 import {
 	// @ts-expect-error Using experimental features
 	__experimentalInputControl as InputControl,
@@ -44,7 +45,10 @@ const formatNumber = ( val: number, currency: Currency ): string => {
 	return `${ whole }${ decimalSeparator }${ decimal }`;
 };
 
-const formatCurrency = ( val: number | undefined, currency: Currency ) => {
+const formatValueAsCurrency = (
+	val: number | undefined,
+	currency: Currency
+) => {
 	if ( val === undefined || isNaN( val ) ) {
 		return undefined;
 	}
@@ -71,6 +75,7 @@ const PriceTextField: React.FC< PriceTextFieldProps > = ( {
 	onChange,
 	label,
 } ) => {
+	const [ newValue, setNewValue ] = useState< number | undefined >( value );
 	const currency = getCurrency();
 
 	const convertCurrencyStringToNumber = (
@@ -108,34 +113,52 @@ const PriceTextField: React.FC< PriceTextFieldProps > = ( {
 			);
 		}
 
-		const numberValue = Number( normalizedValue );
-		if ( isNaN( numberValue ) ) {
+		const parsedNumericValue = Number( normalizedValue );
+		if ( isNaN( parsedNumericValue ) ) {
 			return undefined;
 		}
 
 		/**
 		 * If the value is negative, return 0.
 		 */
-		if ( numberValue < 0 ) {
+		if ( parsedNumericValue < 0 ) {
 			return 0;
 		}
 
-		return numberValue;
+		return parsedNumericValue;
+	};
+
+	const handleOnChange = ( val: string ) => {
+		const numberValue = convertCurrencyStringToNumber( val );
+		setNewValue( numberValue );
+	};
+
+	const handleOnBlur = () => {
+		onChange( newValue );
+	};
+
+	/**
+	 * When the user presses the enter key, the new value should be saved.
+	 */
+	const handleEnterKeyPress = (
+		event: React.KeyboardEvent< HTMLInputElement >
+	) => {
+		if ( event.key === 'Enter' ) {
+			onChange( newValue );
+		}
 	};
 
 	return (
 		<InputControl
-			value={ formatCurrency( value, currency ) }
-			onChange={ ( val: string ) => {
-				const numberValue = convertCurrencyStringToNumber( val );
-				onChange( numberValue );
-			} }
+			value={ formatValueAsCurrency( newValue, currency ) }
+			onChange={ handleOnChange }
+			onBlur={ handleOnBlur }
+			onKeyDown={ handleEnterKeyPress }
 			label={ label }
 			prefix={
 				<InputControlPrefixWrapper>{ label }</InputControlPrefixWrapper>
 			}
 			placeholder={ __( 'Auto', 'woocommerce' ) }
-			isPressEnterToChange
 			hideLabelFromVision
 			type="text"
 			style={ {
