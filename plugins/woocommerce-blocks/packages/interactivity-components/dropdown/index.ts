@@ -66,13 +66,9 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 		get isSelected(): boolean {
 			const { item, selectedItems } = getContext< DropdownContext >();
 
-			console.log( 'selectedItems', selectedItems );
-
-			return (
-				selectedItems.some( ( i ) => {
-					return i.value === item.value && i.label === item.label;
-				} ) || false
-			);
+			return selectedItems.some( ( i ) => {
+				return i.value === item.value && i.label === item.label;
+			} );
 		},
 	},
 	actions: {
