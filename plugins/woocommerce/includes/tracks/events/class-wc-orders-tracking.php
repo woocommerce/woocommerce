@@ -30,8 +30,8 @@ class WC_Orders_Tracking {
 
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_created_date_change' ), 10 );
 
-		add_filter( 'load-edit.php', array( $this, 'track_order_search' ) );
-		add_filter( 'load-woocommerce_page_wc-orders', array( $this, 'track_order_search' ) ); // HPOS.
+		add_action( 'load-edit.php', array( $this, 'track_order_search' ) );
+		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_order_search' ) ); // HPOS.
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_order_tracking_scripts' ) );
 	}
