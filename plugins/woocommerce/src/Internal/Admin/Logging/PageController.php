@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
+use Automattic\WooCommerce\Internal\Admin\Logging\{ LogHandlerFileV2, Settings };
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController, FileListTable, SearchListTable };
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Status;
@@ -27,6 +27,13 @@ class PageController {
 	private $file_controller;
 
 	/**
+	 * Instance of Settings.
+	 *
+	 * @var Settings
+	 */
+	private $settings;
+
+	/**
 	 * Instance of FileListTable or SearchListTable.
 	 *
 	 * @var FileListTable|SearchListTable
@@ -39,13 +46,16 @@ class PageController {
 	 * @internal
 	 *
 	 * @param FileController $file_controller Instance of FileController.
+	 * @param Settings       $settings        Instance of Settings.
 	 *
 	 * @return void
 	 */
 	final public function init(
-		FileController $file_controller
+		FileController $file_controller,
+		Settings $settings
 	): void {
 		$this->file_controller = $file_controller;
+		$this->settings        = $settings;
 
 		$this->init_hooks();
 	}
@@ -121,18 +131,34 @@ class PageController {
 	 */
 	public function render(): void {
 		$handler = $this->get_default_handler();
+		$params  = $this->get_query_params( array( 'view' ) );
+
+		if ( 'settings' === $params['view'] ) {
+			$this->settings->render_page();
+
+			return;
+		}
 
 		switch ( $handler ) {
 			case LogHandlerFileV2::class:
 				$this->render_filev2();
-				break;
-			case 'WC_Log_Handler_DB':
+				return;
+			case WC_Log_Handler_DB::class:
 				WC_Admin_Status::status_logs_db();
-				break;
-			default:
+				return;
+			case WC_Log_Handler_File::class:
 				WC_Admin_Status::status_logs_file();
-				break;
+				return;
 		}
+
+		/**
+		 * Action fires if the default logging handler is not one of the built-in ones.
+		 *
+		 * @param string $handler
+		 *
+		 * @since 8.5.0
+		 */
+		do_action( 'wc_logs_render_page', $handler );
 	}
 
 	/**
@@ -404,7 +430,7 @@ class PageController {
 				'view'    => array(
 					'filter'  => FILTER_VALIDATE_REGEXP,
 					'options' => array(
-						'regexp'  => '/^(list_files|single_file|search_results)$/',
+						'regexp'  => '/^(list_files|single_file|search_results|settings)$/',
 						'default' => $defaults['view'],
 					),
 				),

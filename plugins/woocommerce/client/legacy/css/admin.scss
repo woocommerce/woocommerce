@@ -1493,6 +1493,14 @@ table.wc_status_table--tools {
 	}
 }
 
+.wc-logs-settings {
+	.wc-settings-row-logs-retention-period-days {
+		td {
+			line-height: 2;
+		}
+	}
+}
+
 /**
  * Log severity level colors.
  *
@@ -4372,7 +4380,7 @@ table.wc_shipping {
 	.wc-backbone-modal-back-inactive {
 		display: none;
 	}
-	
+
 	#btn-next.is-busy {
 		background-image: linear-gradient(-45deg, #fafafa 33%, #e0e0e0 33%, #e0e0e0 70%, #fafafa 70%);
 		animation-duration: 2.5s;
