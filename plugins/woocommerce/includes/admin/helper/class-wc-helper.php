@@ -1198,7 +1198,6 @@ class WC_Helper {
 			return '';
 		}
 
-
 		$body = json_decode( wp_remote_retrieve_body( $install_url_response ), true );
 		if ( empty( $body['data']['url'] ) ) {
 			self::log( sprintf( 'Install URL API call returned an invalid body: %s', wp_remote_retrieve_body( $install_url_response ) ) );
