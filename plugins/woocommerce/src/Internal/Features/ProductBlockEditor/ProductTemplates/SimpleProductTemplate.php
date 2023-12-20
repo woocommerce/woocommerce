@@ -151,7 +151,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			);
 		}
 
-		// Linked Products tab.
+		// Linked Products tabgit.
 		if ( Features::is_enabled( 'product-linked' ) ) {
 			$this->add_group(
 				array(
@@ -160,11 +160,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'attributes'     => array(
 						'title' => __( 'Linked products', 'woocommerce' ),
 					),
-					'hideConditions' => array(
+					'hideConditions' => Features::is_enabled( 'product-linked' ) ? array(
 						array(
 							'expression' => 'editedProduct.type === "grouped"',
 						),
-					),
+					) : null,
 				)
 			);
 		}
