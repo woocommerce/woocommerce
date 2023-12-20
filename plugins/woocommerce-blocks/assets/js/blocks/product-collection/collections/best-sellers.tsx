@@ -19,7 +19,7 @@ const collection = {
 	title: __( 'Best Sellers', 'woocommerce' ),
 	icon: ( <Icon icon={ chartBar } /> ) as BlockIcon,
 	description: __( 'Recommend your best-selling products.', 'woocommerce' ),
-	keywords: [ 'best selling' ],
+	keywords: [ 'best selling', 'product collection' ],
 	scope: [],
 	unchangeableFilters: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
 };

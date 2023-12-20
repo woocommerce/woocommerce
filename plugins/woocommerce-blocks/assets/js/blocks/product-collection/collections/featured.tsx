@@ -23,7 +23,7 @@ const collection = {
 	title: __( 'Featured', 'woocommerce' ),
 	icon: ( <Icon icon={ starFilled } /> ) as BlockIcon,
 	description: __( 'Showcase your featured products.', 'woocommerce' ),
-	keywords: [],
+	keywords: [ 'product collection' ],
 	scope: [],
 	unchangeableFilters: [ CoreFilterNames.INHERIT, CoreFilterNames.FEATURED ],
 };

@@ -23,7 +23,7 @@ const collection = {
 	title: __( 'New Arrivals', 'woocommerce' ),
 	icon: ( <Icon icon={ calendar } /> ) as BlockIcon,
 	description: __( 'Recommend your newest products.', 'woocommerce' ),
-	keywords: [ 'newest products' ],
+	keywords: [ 'newest products', 'product collection' ],
 	scope: [],
 	unchangeableFilters: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
 };

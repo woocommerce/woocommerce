@@ -26,7 +26,7 @@ const collection = {
 		'Highlight products that are currently on sale.',
 		'woocommerce'
 	),
-	keywords: [],
+	keywords: [ 'product collection' ],
 	scope: [],
 	unchangeableFilters: [ CoreFilterNames.INHERIT, CoreFilterNames.ON_SALE ],
 };

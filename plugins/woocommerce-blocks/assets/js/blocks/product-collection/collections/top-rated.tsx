@@ -26,7 +26,7 @@ const collection = {
 		'Recommend products with the highest review ratings.',
 		'woocommerce'
 	),
-	keywords: [],
+	keywords: [ 'product collection' ],
 	scope: [],
 	unchangeableFilters: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
 };
