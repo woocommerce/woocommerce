@@ -21,7 +21,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Remove deprecated use of position for Dropdown component, using popoverProps.placement instead. [#41845]
 -   Minor - Update products list field to add re-order option. [#42766]
 -   Patch - [Product Block Editor]: expose Label component [#42959]
--   Patch - [Product Block Editor]: move Modal edittor out of the description block edit component [#41878]
+-   Patch - [Product Block Editor]: move modal editor out of the description block edit component [#41878]
 -   Patch - [Product Block Editor]: propagate content from description inner blocks to Modal editor [#42768]
 -   Patch - [Product Block Editor]: replace custom preview component by BlockPreview core [#42019]
 -   Patch - [Product Block Editor]: replace description button by editable block [#41862]
