@@ -71,6 +71,14 @@ The minimum numeric value that can be entered in the field.
 
 The maximum numeric value that can be entered in the field.
 
+### step
+
+- **Type:** `Number`
+- **Required:** `No`
+- **Default:** `1`
+
+The amount that is incremented or decremented when using the up/down arrows.
+
 ## Usage
 
 Here's a snippet that adds a field similar to the previous screenshot:
