@@ -20,7 +20,3 @@ image1=$(wp post list --post_type=attachment --field=ID --name="hoodie-with-logo
 image2=$(wp post list --post_type=attachment --field=ID --name="hoodie-green-1.jpg" --format=ids)
 image3=$(wp post list --post_type=attachment --field=ID --name="hoodie-2.jpg" --format=ids)
 wp post meta update $post_id _product_image_gallery "$image1,$image2,$image3"
-
-# Add some reviews to Hoodie.
-wp wc product_review create $post_id --name="Jane Smith" --email="customer@woocommerceblockse2etestsuite.com" --review="Nice album!" --rating=5 --user=1
-wp wc product_review create $post_id --name="Jane Smith" --email="customer@woocommerceblockse2etestsuite.com" --review="Not bad." --rating=4 --user=1

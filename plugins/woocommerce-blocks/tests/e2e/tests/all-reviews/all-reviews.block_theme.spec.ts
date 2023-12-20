@@ -19,7 +19,7 @@ const blockData = {
 };
 
 test.describe( `${ blockData.name } Block`, () => {
-	test( 'renders a review in the editor and the frontend', async ( {
+	test( 'block can be inserted and it successfully renders a review in the editor and the frontend', async ( {
 		admin,
 		editor,
 		page,
@@ -36,15 +36,10 @@ test.describe( `${ blockData.name } Block`, () => {
 	} );
 
 	test( 'can change sort order in the frontend', async ( {
-		admin,
-		editor,
 		page,
 		frontendUtils,
-		editorUtils,
 	} ) => {
-		await admin.createNewPost();
-		await editor.insertBlock( { name: blockData.name } );
-		await editorUtils.publishAndVisitPost();
+		await page.goto( '/all-reviews-block/' );
 
 		const block = await frontendUtils.getBlockByName( blockData.name );
 		let firstReview;
