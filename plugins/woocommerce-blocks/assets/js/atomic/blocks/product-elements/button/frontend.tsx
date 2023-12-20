@@ -146,9 +146,10 @@ const { state } = store< Store >( 'woocommerce/product-button', {
 					quantityToAdd
 				);
 
-				// Add a manual trigger of the event for backward compatibility
-				// and symmetry (remove event is triggered properly from Cart and Mini Cart).
-				// We'll try to unify the events in future.
+				// Adding a manual trigger of the event for backward compatibility
+				// and symmetry ("remove" event is triggered properly from Cart and Mini Cart).
+				// The events will be revisited and unified in scope of:
+				// https://github.com/woocommerce/woocommerce/pull/42946
 				yield doAction(
 					`experimental__woocommerce_blocks-cart-add-item`,
 					product
