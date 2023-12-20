@@ -10,13 +10,13 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\BlockRegistry;
  *
  * Note: Tests are run in separate processes, with global state not preserved,
  * because BlockRegistry is a singleton and we need to make sure it's reset between tests.
- *
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
 class BlockRegistryTest extends WC_Unit_Test_Case {
 	/**
 	 * Test that generic blocks are registered.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_generic_blocks_registered() {
 		$block_registry = BlockRegistry::get_instance();
@@ -36,6 +36,9 @@ class BlockRegistryTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Test that product fields blocks are registered.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_product_fields_blocks_registered() {
 		$block_registry = BlockRegistry::get_instance();
@@ -64,6 +67,9 @@ class BlockRegistryTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Test registering a block type.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_register_block_type_from_metadata() {
 		$block_registry = BlockRegistry::get_instance();
@@ -96,6 +102,9 @@ class BlockRegistryTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Test unregistering a block type.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_unregister() {
 		$block_registry = BlockRegistry::get_instance();
