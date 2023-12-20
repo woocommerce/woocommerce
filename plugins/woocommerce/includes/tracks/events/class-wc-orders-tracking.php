@@ -40,7 +40,7 @@ class WC_Orders_Tracking {
 	 * Send a track event when on the Order Listing page, and search results are being displayed.
 	 */
 	public function track_order_search() {
-		if ( ! OrderUtil::is_order_list_table_screen() || empty( $_REQUEST['s'] ) ) {
+		if ( ! OrderUtil::is_order_list_table_screen() || empty( $_REQUEST['s'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
@@ -185,8 +185,6 @@ class WC_Orders_Tracking {
 
 	/**
 	 * Adds the tracking scripts for product setting pages.
-	 *
-	 * @param string $hook Page hook.
 	 */
 	public function possibly_add_order_tracking_scripts() {
 		if ( ! OrderUtil::is_new_order_screen() && ! OrderUtil::is_order_edit_screen() && ! OrderUtil::is_order_list_table_screen() ) {
