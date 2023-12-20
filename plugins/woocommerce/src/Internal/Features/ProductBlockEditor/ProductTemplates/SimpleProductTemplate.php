@@ -16,12 +16,13 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 * The context name used to identify the editor.
 	 */
 	const GROUP_IDS = array(
-		'GENERAL'      => 'general',
-		'ORGANIZATION' => 'organization',
-		'PRICING'      => 'pricing',
-		'INVENTORY'    => 'inventory',
-		'SHIPPING'     => 'shipping',
-		'VARIATIONS'   => 'variations',
+		'GENERAL'         => 'general',
+		'ORGANIZATION'    => 'organization',
+		'PRICING'         => 'pricing',
+		'INVENTORY'       => 'inventory',
+		'SHIPPING'        => 'shipping',
+		'VARIATIONS'      => 'variations',
+		'LINKED_PRODUCTS' => 'linked-products',
 	);
 
 	/**
