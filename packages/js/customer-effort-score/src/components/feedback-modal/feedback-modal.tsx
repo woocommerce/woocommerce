@@ -28,6 +28,7 @@ function FeedbackModal( {
 	title,
 	description,
 	onModalClose,
+	onCancel,
 	children,
 	isSubmitButtonDisabled,
 	submitButtonLabel,
@@ -38,6 +39,7 @@ function FeedbackModal( {
 	title: string;
 	description?: string;
 	onModalClose?: () => void;
+	onCancel?: () => void;
 	children?: JSX.Element;
 	isSubmitButtonDisabled?: boolean;
 	submitButtonLabel?: string;
@@ -78,7 +80,7 @@ function FeedbackModal( {
 			) }
 			{ children }
 			<div className="woocommerce-feedback-modal__buttons">
-				<Button isTertiary onClick={ closeModal } name="cancel">
+				<Button isTertiary onClick={ onCancel } name="cancel">
 					{ cancelButtonLabel }
 				</Button>
 				<Button
