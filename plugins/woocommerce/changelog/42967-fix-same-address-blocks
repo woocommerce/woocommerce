@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update the check used to determine if the "Use same address for billing" box should be checked on the Checkout block.
