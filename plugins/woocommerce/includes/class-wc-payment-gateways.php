@@ -279,8 +279,7 @@ All at %6$s
 		// There was an old value, so this is an update.
 		if (
 			ArrayUtil::get_value_or_default( $value, 'enabled' ) === 'yes' &&
-			ArrayUtil::get_value_or_default( $old_value, 'enabled' ) !== 'yes' &&
-			isset( $value['title'] ) ) {
+			ArrayUtil::get_value_or_default( $old_value, 'enabled' ) !== 'yes' ) {
 			return true;
 		}
 		return false;
