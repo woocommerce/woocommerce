@@ -1,6 +1,6 @@
 # Product Collection - Collections
 
-_Note: Collections documented here are internal implementation. It's not a public API._
+_Note: Collections documented here are internal implementation. It's not a way to register custom Collections, however we're going to expose public API for that._
 
 Collections are a variations of Product Collection block with the predefined attributes which includes:
 
