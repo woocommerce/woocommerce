@@ -21,7 +21,7 @@
 		},
 		"displayStyle": {
 			"type": "string",
-			"default": "dropdown"
+			"default": "list"
 		},
 		"selectType": {
 			"type": "string",

@@ -109,11 +109,13 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 				( item ) => item.value === value && item.label === label
 			);
 
-			// if item already selected remove it from state:
-			// else add it to state:
 			if ( selectedItemIndex !== -1 ) {
 				selectedItems.splice( selectedItemIndex, 1 );
-			} else {
+			}
+
+			if ( context.selectType === 'single' && selectedItemIndex === -1 ) {
+				selectedItems.splice( 0, 1, { label, value } );
+			} else if ( selectedItemIndex === -1 ) {
 				selectedItems.push( {
 					label,
 					value,

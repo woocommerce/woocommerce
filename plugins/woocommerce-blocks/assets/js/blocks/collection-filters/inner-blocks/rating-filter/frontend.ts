@@ -51,9 +51,7 @@ store( 'woocommerce/collection-rating-filter', {
 				url.searchParams.delete( 'rating_filter' );
 			}
 
-			console.log( url.toString() );
-
-			navigate( url );
+			navigate( url, { force: true } );
 		},
 	},
 } );

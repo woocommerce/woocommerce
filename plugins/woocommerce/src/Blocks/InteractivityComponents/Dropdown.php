@@ -18,8 +18,7 @@ class Dropdown {
 		wp_enqueue_script( 'wc-interactivity-dropdown' );
 		wp_enqueue_style( 'wc-interactivity-dropdown' );
 
-		// @todo - default should be single , this is just for testing.
-		$select_type = $props['select_type'] ?? 'multiple';
+		$select_type = $props['select_type'] ?? 'single';
 
 		$selected_items = $props['selected_items'] ?? array();
 
