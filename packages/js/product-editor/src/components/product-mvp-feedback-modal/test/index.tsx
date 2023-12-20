@@ -28,7 +28,7 @@ describe( 'ProductMVPFeedbackModal', () => {
 		jest.resetAllMocks();
 	} );
 
-	it( 'should close the ProductMVPFeedback modal when skip button pressed', async () => {
+	it( 'should close the ProductMVPFeedback modal when X button pressed', async () => {
 		render(
 			<ProductMVPFeedbackModal
 				recordScoreCallback={ mockRecordScoreCallback }
@@ -37,7 +37,7 @@ describe( 'ProductMVPFeedbackModal', () => {
 		// Wait for the modal to render.
 		await screen.findByRole( 'dialog' );
 		// Press cancel button.
-		fireEvent.click( screen.getByRole( 'button', { name: /Skip/i } ) );
+		fireEvent.click( screen.getByRole( 'button', { name: /Close/i } ) );
 		expect( screen.queryByRole( 'dialog' ) ).not.toBeInTheDocument();
 	} );
 	it( 'should enable Send button when an option is checked', async () => {
