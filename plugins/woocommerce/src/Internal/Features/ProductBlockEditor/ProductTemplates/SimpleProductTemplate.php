@@ -1115,5 +1115,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
+
+		$linked_products_group->add_section(
+			array(
+				'id'             => 'product-linked-cross-sells-section',
+				'order'          => 20,
+				'attributes'     => array(
+					'title'       => __( 'Cross-sells', 'woocommerce' ),
+					'description' => __( 'By suggesting complementary products in the cart using cross-sells, you can significantly increase the average order value.', 'woocommerce' ),
+				),
+			)
+		);
 	}
 }
