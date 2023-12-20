@@ -3,6 +3,11 @@
  */
 import { expect, test } from '@woocommerce/e2e-playwright-utils';
 
+/**
+ * Internal dependencies
+ */
+import { reviews } from '../../test-data/data/data';
+
 const blockData = {
 	name: 'woocommerce/reviews-by-product',
 	selectors: {
@@ -28,11 +33,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		const doneButton = page.getByRole( 'button', { name: 'Done' } );
 		await doneButton.click();
 
-		await expect( page.getByText( 'Nice album!' ) ).toBeVisible();
+		await expect( page.getByText( reviews[ 0 ].review ) ).toBeVisible();
 
 		await editorUtils.publishAndVisitPost();
 
-		await expect( page.getByText( 'Nice album!' ) ).toBeVisible();
+		await expect( page.getByText( reviews[ 0 ].review ) ).toBeVisible();
 	} );
 
 	test( 'can change sort order in the frontend', async ( {
@@ -54,12 +59,12 @@ test.describe( `${ blockData.name } Block`, () => {
 		const block = await frontendUtils.getBlockByName( blockData.name );
 		let firstReview;
 		firstReview = block.locator( blockData.selectors.frontend.firstReview );
-		await expect( firstReview ).toHaveText( 'Not bad.' );
+		await expect( firstReview ).toHaveText( reviews[ 1 ].review );
 
 		const select = page.getByLabel( 'Order by' );
 		select.selectOption( 'Highest rating' );
 
 		firstReview = block.locator( blockData.selectors.frontend.firstReview );
-		await expect( firstReview ).toHaveText( 'Nice album!' );
+		await expect( firstReview ).toHaveText( reviews[ 0 ].review );
 	} );
 } );
