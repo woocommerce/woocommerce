@@ -150,6 +150,24 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				)
 			);
 		}
+
+		// Linked Products tab.
+		if ( Features::is_enabled( 'product-linked' ) ) {
+			$this->add_group(
+				array(
+					'id'             => $this::GROUP_IDS['LINKED_PRODUCTS'],
+					'order'          => 60,
+					'attributes'     => array(
+						'title' => __( 'Linked products', 'woocommerce' ),
+					),
+					'hideConditions' => array(
+						array(
+							'expression' => 'editedProduct.type === "grouped"',
+						),
+					),
+				)
+			);
+		}
 	}
 
 	/**
