@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Added missing CSS class on the empty-orders notice CTA in the My Account > Orders page

@@ -92,34 +92,7 @@ class Loader {
 		*/
 		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 
-		add_action( 'admin_init', array( __CLASS__, 'deactivate_wc_admin_plugin' ) );
-
 		add_action( 'load-themes.php', array( __CLASS__, 'add_appearance_theme_view_tracks_event' ) );
-	}
-
-	/**
-	 * If WooCommerce Admin is installed and activated, it will attempt to deactivate and show a notice.
-	 */
-	public static function deactivate_wc_admin_plugin() {
-		$plugin_path = PluginsHelper::get_plugin_path_from_slug( 'woocommerce-admin' );
-		if ( is_plugin_active( $plugin_path ) ) {
-			$path = PluginsHelper::get_plugin_path_from_slug( 'woocommerce-admin' );
-			deactivate_plugins( $path );
-			$notice_action = is_network_admin() ? 'network_admin_notices' : 'admin_notices';
-			add_action(
-				$notice_action,
-				function() {
-					echo '<div class="error"><p>';
-					printf(
-						/* translators: %s: is referring to the plugin's name. */
-						esc_html__( 'The %1$s plugin has been deactivated as the latest improvements are now included with the %2$s plugin.', 'woocommerce' ),
-						'<code>WooCommerce Admin</code>',
-						'<code>WooCommerce</code>'
-					);
-					echo '</p></div>';
-				}
-			);
-		}
 	}
 
 	/**

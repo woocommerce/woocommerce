@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Show a warning modal when the user tries to leave the assember hub (CYS).

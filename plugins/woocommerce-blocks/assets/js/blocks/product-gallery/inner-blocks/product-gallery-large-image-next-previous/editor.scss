@@ -1,0 +1,12 @@
+.wc-block-product-gallery-large-image-next-previous-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
+	position: absolute;
+	height: 50px;
+
+	svg {
+		z-index: 1;
+	}
+}

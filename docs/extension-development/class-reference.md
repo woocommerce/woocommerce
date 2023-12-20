@@ -1,5 +1,7 @@
 
-# Classes in WooCommerce
+---
+post_title: Classes in WooCommerce
+---
 
 ## [List of Classes in WooCommerce](https://github.com/woocommerce/woocommerce/blob/trunk/docs/extension-development/class-reference#section-1)
 

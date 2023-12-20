@@ -94,6 +94,22 @@ class WC_Helper_Subscriptions_API {
 				),
 			)
 		);
+
+		register_rest_route(
+			'wc/v3',
+			'/marketplace/subscriptions/install-url',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'install_url' ),
+				'permission_callback' => array( __CLASS__, 'get_permission' ),
+				'args'                => array(
+					'product_key' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -254,6 +270,50 @@ class WC_Helper_Subscriptions_API {
 		wp_send_json_success(
 			array(
 				'message' => __( 'This product has been activated.', 'woocommerce' ),
+			),
+		);
+	}
+
+	/**
+	 * Get the install URL for a WooCommerce.com product.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 */
+	public static function install_url( $request ) {
+		$product_key  = $request->get_param( 'product_key' );
+		$subscription = WC_Helper::get_subscription( $product_key );
+
+		if ( ! $subscription ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'We couldn\'t find a subscription for this product.', 'woocommerce' ),
+				),
+				400
+			);
+		}
+
+		if ( true === $subscription['local']['installed'] ) {
+			wp_send_json_success(
+				array(
+					'message' => __( 'This product is already installed.', 'woocommerce' ),
+				),
+			);
+		}
+
+		$install_url = WC_Helper::get_subscription_install_url( $subscription['product_key'] );
+
+		if ( ! $install_url ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'There was an error getting the install URL for this product.', 'woocommerce' ),
+				),
+				400
+			);
+		}
+
+		wp_send_json_success(
+			array(
+				'url' => $install_url,
 			),
 		);
 	}

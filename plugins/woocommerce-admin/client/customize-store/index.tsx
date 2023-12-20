@@ -160,6 +160,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		transitionalScreen: {
 			hasCompleteSurvey: false,
 		},
+		aiOnline: true,
 	} as customizeStoreStateMachineContext,
 	invoke: {
 		src: 'browserPopstateHandler',
@@ -214,22 +215,54 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			initial: 'preIntro',
 			states: {
 				preIntro: {
-					invoke: {
-						src: 'fetchIntroData',
-						onError: {
-							actions: 'assignFetchIntroDataError',
-							target: 'intro',
+					type: 'parallel',
+					states: {
+						checkAiStatus: {
+							initial: 'pending',
+							states: {
+								pending: {
+									invoke: {
+										src: 'fetchAiStatus',
+										onDone: {
+											actions: 'assignAiStatus',
+											target: 'success',
+										},
+										onError: {
+											actions: 'assignAiOffline',
+											target: 'success',
+										},
+									},
+								},
+								success: { type: 'final' },
+							},
 						},
-						onDone: {
-							target: 'intro',
-							actions: [
-								'assignThemeData',
-								'assignActiveThemeHasMods',
-								'assignCustomizeStoreCompleted',
-								'assignCurrentThemeIsAiGenerated',
-							],
+						fetchIntroData: {
+							initial: 'pending',
+							states: {
+								pending: {
+									invoke: {
+										src: 'fetchIntroData',
+										onError: {
+											actions:
+												'assignFetchIntroDataError',
+											target: 'success',
+										},
+										onDone: {
+											target: 'success',
+											actions: [
+												'assignThemeData',
+												'assignActiveThemeHasMods',
+												'assignCustomizeStoreCompleted',
+												'assignCurrentThemeIsAiGenerated',
+											],
+										},
+									},
+								},
+								success: { type: 'final' },
+							},
 						},
 					},
+					onDone: 'intro',
 				},
 				intro: {
 					meta: {
@@ -285,8 +318,21 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'assemblerHub',
+			initial: 'checkAiStatus',
 			states: {
+				checkAiStatus: {
+					invoke: {
+						src: 'fetchAiStatus',
+						onDone: {
+							actions: 'assignAiStatus',
+							target: 'assemblerHub',
+						},
+						onError: {
+							actions: 'assignAiOffline',
+							target: 'assemblerHub',
+						},
+					},
+				},
 				assemblerHub: {
 					entry: [
 						{ type: 'updateQueryStep', step: 'assembler-hub' },
@@ -387,6 +433,12 @@ export const CustomizeStoreController = ( {
 						pathFragments[ 2 ] === // [0] '', [1] 'customize-store', [2] step slug
 						( cond as { step: string | undefined } ).step
 					);
+				},
+				isAiOnline: ( _ctx ) => {
+					return _ctx.aiOnline;
+				},
+				isAiOffline: ( _ctx ) => {
+					return ! _ctx.aiOnline;
 				},
 			},
 		} );

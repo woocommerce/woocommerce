@@ -266,6 +266,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			{ product_id: productId, id: variationId },
 			variation
 		).then( async ( response: ProductVariation ) => {
+			// @ts-expect-error There are no types for this.
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product_variation',
@@ -293,12 +294,14 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		} ).then( async ( response: ProductVariation ) => {
 			onSelect( response )( false );
 
+			// @ts-expect-error There are no types for this.
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product',
 				productId,
 			] );
 
+			// @ts-expect-error There are no types for this.
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product_variation',
@@ -317,6 +320,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}
 
 	async function onBatchUpdate( values: Partial< ProductVariation >[] ) {
+		// @ts-expect-error There are no types for this.
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 
@@ -377,6 +381,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}
 
 	async function onBatchDelete( values: Pick< ProductVariation, 'id' >[] ) {
+		// @ts-expect-error There are no types for this.
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 

@@ -67,28 +67,36 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				.getByPlaceholder( 'Zone name' )
 				.fill( shippingZoneNameLocalPickup );
 
-			const input = await page.getByPlaceholder( 'Start typing to filter zones' );
+			const input = await page.getByPlaceholder(
+				'Start typing to filter zones'
+			);
 			input.click();
 			input.type( 'British Columbia, Canada' );
-			
-			await page
-				.getByText( 'British Columbia, Canada' ).last()
-				.click();
-			
-			// Close dropdown
-			await page.keyboard.press('Escape');
-			
-			await page.getByRole( 'link', { name: 'Limit to specific ZIP/postcodes' } ).click();
-			await page.getByPlaceholder( 'List 1 postcode per line' ).fill( maynePostal );
 
-			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
-			await page.getByText( 'Local pickup', { exact: true } ).click();
-			await page.getByRole('button', { name: 'Continue' } ).last().click();
-			await page.waitForLoadState( 'networkidle' );
-			
+			await page.getByText( 'British Columbia, Canada' ).last().click();
+
+			// Close dropdown
+			await page.keyboard.press( 'Escape' );
+
 			await page
-				.getByPlaceholder( 'e.g. Local pickup' )
-				.fill( 'Local pickup' );
+				.getByRole( 'link', {
+					name: 'Limit to specific ZIP/postcodes',
+				} )
+				.click();
+			await page
+				.getByPlaceholder( 'List 1 postcode per line' )
+				.fill( maynePostal );
+
+			await page
+				.getByRole( 'button', { name: 'Add shipping method' } )
+				.click();
+			await page.getByText( 'Local pickup', { exact: true } ).click();
+			await page
+				.getByRole( 'button', { name: 'Continue' } )
+				.last()
+				.click();
+			await page.waitForLoadState( 'networkidle' );
+
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
 
@@ -130,28 +138,32 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
 				{ waitUntil: 'networkidle' }
 			);
-			await page.getByPlaceholder( 'Zone name' ).fill( shippingZoneNameFreeShip );
+			await page
+				.getByPlaceholder( 'Zone name' )
+				.fill( shippingZoneNameFreeShip );
 
-			const input = await page.getByPlaceholder( 'Start typing to filter zones' );
+			const input = await page.getByPlaceholder(
+				'Start typing to filter zones'
+			);
 			input.click();
 			input.type( 'British Columbia, Canada' );
-			
-			await page
-				.getByText( 'British Columbia, Canada' ).last()
-				.click();
-			
+
+			await page.getByText( 'British Columbia, Canada' ).last().click();
+
 			// Close dropdown
-			await page.keyboard.press('Escape');
-			
-			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
+			await page.keyboard.press( 'Escape' );
+
+			await page
+				.getByRole( 'button', { name: 'Add shipping method' } )
+				.click();
 
 			await page.getByText( 'Free shipping', { exact: true } ).click();
-			await page.getByRole('button', { name: 'Continue' } ).last().click();
-			await page.waitForLoadState( 'networkidle' );
-			
 			await page
-				.getByPlaceholder( 'e.g. Free shipping' )
-				.fill( 'Free shipping' );
+				.getByRole( 'button', { name: 'Continue' } )
+				.last()
+				.click();
+			await page.waitForLoadState( 'networkidle' );
+
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
 
@@ -190,27 +202,31 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
 				{ waitUntil: 'networkidle' }
 			);
-			await page.getByPlaceholder( 'Zone name' ).fill( shippingZoneNameFlatRate );
+			await page
+				.getByPlaceholder( 'Zone name' )
+				.fill( shippingZoneNameFlatRate );
 
-			const input = await page.getByPlaceholder( 'Start typing to filter zones' );
+			const input = await page.getByPlaceholder(
+				'Start typing to filter zones'
+			);
 			input.click();
 			input.type( 'Canada' );
 
-			await page
-				.getByText('Canada').last()
-				.click();
-			
-				// Close dropdown
-			await page.keyboard.press('Escape');
+			await page.getByText( 'Canada' ).last().click();
 
-			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
+			// Close dropdown
+			await page.keyboard.press( 'Escape' );
+
+			await page
+				.getByRole( 'button', { name: 'Add shipping method' } )
+				.click();
 			await page.getByText( 'Flat rate', { exact: true } ).click();
-			await page.getByRole('button', { name: 'Continue' } ).last().click();
+			await page
+				.getByRole( 'button', { name: 'Continue' } )
+				.last()
+				.click();
 			await page.waitForLoadState( 'networkidle' );
 
-			await page
-				.getByPlaceholder( 'e.g. Standard national' )
-				.fill( 'Flat rate' );
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
 
@@ -220,7 +236,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 					.filter( { hasText: 'Flat rate' } )
 			).toBeVisible();
 
-			await page.locator( 'td:has-text("Flat rate") ~ td.wc-shipping-zone-actions a.wc-shipping-zone-action-edit' ).click();
+			await page
+				.locator(
+					'td:has-text("Flat rate") ~ td.wc-shipping-zone-actions a.wc-shipping-zone-action-edit'
+				)
+				.click();
 			await page.getByLabel( 'Cost', { exact: true } ).fill( '10' );
 			await page.getByRole( 'button', { name: 'Save' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
@@ -257,16 +277,16 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			);
 			await page.locator( '#zone_name' ).fill( shippingZoneNameUSRegion );
 
-			const input = await page.getByPlaceholder( 'Start typing to filter zones' );
+			const input = await page.getByPlaceholder(
+				'Start typing to filter zones'
+			);
 			input.click();
 			input.type( 'United States' );
 
-			await page
-				.getByText( 'United States' ).last()
-				.click();
-			
-				// Close dropdown
-			await page.keyboard.press('Escape');
+			await page.getByText( 'United States' ).last().click();
+
+			// Close dropdown
+			await page.keyboard.press( 'Escape' );
 
 			await page.locator( '#submit' ).click();
 			await page.waitForFunction( () => {
@@ -286,7 +306,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		//delete created shipping zone region after confirmation it exists
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
 
-		await page.locator( 'td:has-text("USA Zone") ~ td.wc-shipping-zone-actions a.wc-shipping-zone-action-edit' ).click();
+		await page
+			.locator(
+				'td:has-text("USA Zone") ~ td.wc-shipping-zone-actions a.wc-shipping-zone-action-edit'
+			)
+			.click();
 
 		//delete
 		await page.getByRole( 'button', { name: 'Remove' } ).click();
@@ -319,37 +343,41 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			);
 			await page.locator( '#zone_name' ).fill( shippingZoneNameFlatRate );
 
-			const input = await page.getByPlaceholder( 'Start typing to filter zones' );
+			const input = await page.getByPlaceholder(
+				'Start typing to filter zones'
+			);
 			input.click();
 			input.type( 'Canada' );
 
-			await page
-				.getByText( 'Canada' ).last()
-				.click();
-			
-				// Close dropdown
-			await page.keyboard.press('Escape');
+			await page.getByText( 'Canada' ).last().click();
+
+			// Close dropdown
+			await page.keyboard.press( 'Escape' );
 
 			await page.locator( 'text=Add shipping method' ).click();
 
 			await page.getByText( 'Flat rate', { exact: true } ).click();
-			await page.getByRole('button', { name: 'Continue' } ).last().click();
+			await page
+				.getByRole( 'button', { name: 'Continue' } )
+				.last()
+				.click();
 
 			await page.waitForLoadState( 'networkidle' );
 
-			await page
-				.getByPlaceholder( 'e.g. Standard national' )
-				.fill( 'Flat rate' );
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
-			
+
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
 					.filter( { hasText: 'Flat rate' } )
 			).toBeVisible();
 
-			await page.locator( 'td:has-text("Flat rate") ~ td.wc-shipping-zone-actions a.wc-shipping-zone-action-edit' ).click();
+			await page
+				.locator(
+					'td:has-text("Flat rate") ~ td.wc-shipping-zone-actions a.wc-shipping-zone-action-edit'
+				)
+				.click();
 			await page.locator( '#woocommerce_flat_rate_cost' ).fill( '10' );
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
@@ -435,20 +463,13 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 			method_id: 'flat_rate',
 			settings: {
 				cost: '10.00',
-				title: 'Flat rate',
 			},
 		} );
 		await api.post( `shipping/zones/${ shippingFreeId }/methods`, {
 			method_id: 'free_shipping',
-			settings: {
-				title: 'Free shipping',
-			}
 		} );
 		await api.post( `shipping/zones/${ shippingLocalId }/methods`, {
 			method_id: 'local_pickup',
-			settings: {
-				title: 'Local pickup',
-			}
 		} );
 	} );
 

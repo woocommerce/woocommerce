@@ -1,4 +1,6 @@
-# Classic Theme Developer Handbook
+---
+post_title: Classic Theme Developer Handbook
+---
 
 ---
 

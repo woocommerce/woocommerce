@@ -98,6 +98,11 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	generated_slug: string;
 	id: number;
 	low_stock_amount: number;
+	meta_data: {
+		id?: number;
+		key: string;
+		value?: string;
+	}[];
 	manage_stock: boolean;
 	menu_order: number;
 	name: string;

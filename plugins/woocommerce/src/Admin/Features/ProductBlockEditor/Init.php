@@ -67,8 +67,8 @@ class Init {
 
 			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
 
-			$block_registry = new BlockRegistry();
-			$block_registry->init();
+			// Make sure the block registry is initialized so that core blocks are registered.
+			BlockRegistry::get_instance();
 
 			$tracks = new Tracks();
 			$tracks->init();

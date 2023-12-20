@@ -1,4 +1,6 @@
-# WooCommerce grammar, punctuation and capitalization guide
+---
+post_title: WooCommerce grammar, punctuation and capitalization guide
+---
 
 Following grammar, punctuation and style guidelines helps keep our presentation consistent. Users have a better experience if they know what to expect and where to find the information they need.
 
@@ -45,8 +47,8 @@ Cases when we capitalize:
 Cases when we use lower case:
 
 - “ecommerce” (not “eCommerce”)
-- email address — `info@woo.com`
-- website URL — `developer.woo.com`
+- email address - `info@woo.com`
+- website URL - `developer.woo.com`
 
 ### Contractions
 
@@ -184,12 +186,12 @@ Use a hyphen – without spaces on either side to link words, or indicate a span
 - first-time user
 - Monday-Friday
 
-Use an em dash — without spaces on either side to indicate an aside.
+Use an em dash - without spaces on either side to indicate an aside.
 
 Use a true em dash, not hyphens – or –.
 
-- Multivariate testing—just one of our new Pro features—can help you grow your business.
-- Austin thought Brad was the donut thief, but he was wrong—it was Lain.
+- Multivariate testing-just one of our new Pro features-can help you grow your business.
+- Austin thought Brad was the donut thief, but he was wrong-it was Lain.
 
 #### Ellipses
 
@@ -221,7 +223,7 @@ Question marks follow the same placement convention explained in Periods.
 
 #### Quotation marks
 
-Periods and commas go within quotation marks. Question marks within quotes follow logic—if the question mark is part of the quotation, it goes within. If you’re asking a question that ends with a quote, it goes outside the quote.
+Periods and commas go within quotation marks. Question marks within quotes follow logic-if the question mark is part of the quotation, it goes within. If you’re asking a question that ends with a quote, it goes outside the quote.
 
 Use single quotation marks for quotes within quotes.
 
