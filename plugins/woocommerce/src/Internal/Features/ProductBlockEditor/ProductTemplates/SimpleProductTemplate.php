@@ -36,6 +36,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$this->add_inventory_group_blocks();
 		$this->add_shipping_group_blocks();
 		$this->add_variation_group_blocks();
+		$this->add_linked_products_group_blocks();
 	}
 
 	/**
@@ -1094,6 +1095,24 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'id'        => 'product-variation-items',
 				'blockName' => 'woocommerce/product-variation-items-field',
 				'order'     => 10,
+			)
+		);
+	}
+
+	private function add_linked_products_group_blocks() {
+		$linked_products_group = $this->get_group_by_id( $this::GROUP_IDS['LINKED_PRODUCTS'] );
+		if ( ! Features::is_enabled( 'product-virtual-downloadable' ) ) {
+			return;
+		}
+
+		$linked_products_group->add_section(
+			array(
+				'id'             => 'product-linked-upsells-section',
+				'order'          => 10,
+				'attributes'     => array(
+					'title'       => __( 'Upsells', 'woocommerce' ),
+					'description' => __( 'Upsells are typically products that are extra profitable or better quality or more expensive. Experiment with combinations to boost sales.', 'woocommerce' ),
+				),
 			)
 		);
 	}
