@@ -390,12 +390,7 @@ trait OrderAttributionMeta {
 		 * 'checkout-draft' is the checkout block's draft order status.
 		 * @see /Automattic/WooCommerce/Admin/API/Report/DataStore::get_excluded_report_order_statuses()
 		 */
-		$all_statuses_no_prefix = array_map(
-			function ( $status ) {
-				return str_replace( 'wc-', '', $status );
-			},
-			array_keys( wc_get_order_statuses() )
-		);
+		$all_statuses_no_prefix = str_replace( 'wc-', '', array_keys( wc_get_order_statuses() ) );
 		$excluded_statuses      = array( 'pending', 'failed', 'cancelled', 'auto-draft', 'trash', 'checkout-draft' );
 
 		// Get the valid customer orders.
