@@ -425,7 +425,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			'type'                 => $source_data['type'] ?? '',
 			'medium'               => $source_data['utm_medium'] ?? '',
 			'source'               => $source_data['utm_source'] ?? '',
-			'device_type'          => strtolower( $source_data['device_type'] ?? '(unknown)' ),
+			'device_type'          => strtolower( $source_data['device_type'] ?? 'unknown' ),
 			'origin_label'         => strtolower( $origin_label ),
 			'session_pages'        => $source_data['session_pages'] ?? 0,
 			'session_count'        => $source_data['session_count'] ?? 0,
