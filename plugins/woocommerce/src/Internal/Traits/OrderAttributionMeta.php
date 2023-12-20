@@ -308,7 +308,8 @@ trait OrderAttributionMeta {
 				break;
 
 			default:
-				$label = '';
+				$label  = '';
+				$source = __( 'Unknown', 'woocommerce' );
 				break;
 		}
 
