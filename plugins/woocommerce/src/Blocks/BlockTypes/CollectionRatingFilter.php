@@ -155,7 +155,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 
 		$rating_label = sprintf(
 			/* translators: %1$d is referring to rating value. Example: Rated 4 out of 5. */
-			__( 'Rated %1$d out of 5', 'woo-gutenberg-products-block' ),
+			__( 'Rated %1$d out of 5', 'woocommerce' ),
 			$rating,
 		);
 
