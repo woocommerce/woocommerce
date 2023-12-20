@@ -47,6 +47,12 @@ export function SwitchToClassicShortcodeButton( {
 			? __( 'Switched to classic cart.', 'woocommerce' )
 			: __( 'Switched to classic checkout.', 'woocommerce' );
 
+	const notice =
+		type === 'incompatible' ? 'incompatible_notice' : 'generic_notice';
+
+	const isCart = block === 'woocommerce/cart';
+	const shortcode = isCart ? 'cart' : 'checkout';
+
 	const { getBlocks } = useSelect( ( select ) => {
 		return {
 			getBlocks: select( blockEditorStore ).getBlocks,
@@ -67,11 +73,8 @@ export function SwitchToClassicShortcodeButton( {
 
 	const handleSwitchToClassicShortcodeClick = () => {
 		recordEvent( 'switch_to_classic_shortcode_click', {
-			shortcode: block === 'woocommerce/checkout' ? 'checkout' : 'cart',
-			notice:
-				type === 'incompatible'
-					? 'incompatible_notice'
-					: 'generic_notice',
+			shortcode,
+			notice,
 		} );
 		openModal();
 	};
@@ -79,11 +82,8 @@ export function SwitchToClassicShortcodeButton( {
 	const handleUndoClick = () => {
 		undo();
 		recordEvent( 'switch_to_classic_shortcode_undo', {
-			shortcode: block === 'woocommerce/checkout' ? 'checkout' : 'cart',
-			notice:
-				type === 'incompatible'
-					? 'incompatible_notice'
-					: 'generic_notice',
+			shortcode,
+			notice,
 		} );
 	};
 
@@ -96,11 +96,8 @@ export function SwitchToClassicShortcodeButton( {
 			} )
 		);
 		recordEvent( 'switch_to_classic_shortcode_confirm', {
-			shortcode: block === 'woocommerce/checkout' ? 'checkout' : 'cart',
-			notice:
-				type === 'incompatible'
-					? 'incompatible_notice'
-					: 'generic_notice',
+			shortcode,
+			notice,
 		} );
 		selectClassicShortcodeBlock();
 		createInfoNotice( snackbarLabel, {
@@ -117,11 +114,8 @@ export function SwitchToClassicShortcodeButton( {
 
 	const handleCancelClick = () => {
 		recordEvent( 'switch_to_classic_shortcode_cancel', {
-			shortcode: block === 'woocommerce/checkout' ? 'checkout' : 'cart',
-			notice:
-				type === 'incompatible'
-					? 'incompatible_notice'
-					: 'generic_notice',
+			shortcode,
+			notice,
 		} );
 		closeModal();
 	};
