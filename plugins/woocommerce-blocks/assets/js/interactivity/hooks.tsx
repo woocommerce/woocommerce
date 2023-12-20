@@ -65,8 +65,8 @@ const deepImmutable = < T extends Object = {} >( target: T ): T => {
 
 // Store stacks for the current scope and the default namespaces and export APIs
 // to interact with them.
-let scopeStack: any[] = [];
-let namespaceStack: string[] = [];
+const scopeStack: any[] = [];
+const namespaceStack: string[] = [];
 
 export const getContext = < T extends object >( namespace?: string ): T =>
 	getScope()?.context[ namespace || namespaceStack.slice( -1 ) ];
@@ -80,7 +80,7 @@ export const getElement = () => {
 	const { ref, state, props } = getScope();
 	return Object.freeze( {
 		ref: ref.current,
-		state: state,
+		state,
 		props: deepImmutable( props ),
 	} );
 };
@@ -186,7 +186,7 @@ const resolve = ( path, namespace ) => {
 };
 
 // Generate the evaluate function.
-const getEvaluate =
+export const getEvaluate =
 	( { scope } = {} ) =>
 	( entry, ...args ) => {
 		let { value: path, namespace } = entry;

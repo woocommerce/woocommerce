@@ -17,7 +17,7 @@ import { deepSignal, peek } from 'deepsignal';
  */
 import { createPortal } from './portals';
 import { useSignalEffect } from './utils';
-import { directive } from './hooks';
+import { directive, getScope, getEvaluate } from './hooks';
 import { SlotProvider, Slot, Fill } from './slots';
 import { navigate } from './router';
 
@@ -445,7 +445,8 @@ export default () => {
 					return currentValue.current;
 				}, [ inheritedValue, entry ] );
 
-				const key = eachKey?.value;
+				const scope = { ...getScope(), context: currentValue.current };
+				const key = getEvaluate( { scope } )( eachKey );
 
 				return (
 					<Provider value={ currentValue.current } key={ key }>
@@ -453,7 +454,8 @@ export default () => {
 					</Provider>
 				);
 			} );
-		}
+		},
+		{ priority: 20 }
 	);
 
 	directive( 'each-child', () => null );
