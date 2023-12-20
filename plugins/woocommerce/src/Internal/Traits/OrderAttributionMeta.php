@@ -108,7 +108,9 @@ trait OrderAttributionMeta {
 	}
 
 	/**
-	 * Filter the meta data to only the keys that we care about.
+	 * Filter an order's meta data to only the keys that we care about.
+	 *
+	 * Sets the origin value based on the source type.
 	 *
 	 * @param WC_Meta_Data[] $meta The meta data.
 	 *
@@ -130,26 +132,9 @@ trait OrderAttributionMeta {
 		}
 
 		// Determine the origin based on source type and referrer.
-		$source_type = $return['type'] ?? '';
-		switch ( $source_type ) {
-			case 'organic':
-				$origin = __( 'Organic search', 'woocommerce' );
-				break;
-
-			case 'referral':
-				$origin = __( 'Referral', 'woocommerce' );
-				break;
-
-			case 'typein':
-				$origin = __( 'Direct', 'woocommerce' );
-				break;
-
-			default:
-				$origin = __( 'Unknown', 'woocommerce' );
-				break;
-		}
-
-		$return['origin'] = $origin;
+		$source_type      = $return['type'] ?? '';
+		$source           = $return['utm_source'] ?? '';
+		$return['origin'] = $this->get_origin_label( $source_type, $source, true );
 
 		return $return;
 	}
@@ -275,40 +260,56 @@ trait OrderAttributionMeta {
 			$values['device_type'] = $this->get_device_type( $values );
 		}
 
-		// Set the origin label.
-		if ( array_key_exists( 'type', $values ) && array_key_exists( 'utm_source', $values ) ) {
-			$values['origin'] = $this->get_origin_label( $values['type'], $values['utm_source'] );
-		}
-
 		return $values;
 	}
 
 	/**
-	 * Get the label for the order origin
+	 * Get the label for the Order origin with placeholder where appropriate. Can be
+	 * translated (for DB / display) or untranslated (for Tracks).
 	 *
 	 * @param string $source_type The source type.
 	 * @param string $source      The source.
+	 * @param bool   $translated  Whether the label should be translated.
 	 *
 	 * @return string
 	 */
-	private function get_origin_label( string $source_type, string $source ): string {
+	private function get_origin_label( string $source_type, string $source, bool $translated = true ): string {
 		// Set up the label based on the source type.
 		switch ( $source_type ) {
 			case 'utm':
-				/* translators: %s is the source value */
-				$label = __( 'Source: %s', 'woocommerce' );
+				$label = $translated ?
+					/* translators: %s is the source value */
+					__( 'Source: %s', 'woocommerce' )
+					: 'Source: %s';
 				break;
 			case 'organic':
-				/* translators: %s is the source value */
-				$label = __( 'Organic: %s', 'woocommerce' );
+				$label = $translated ?
+					/* translators: %s is the source value */
+					__( 'Organic: %s', 'woocommerce' )
+					: 'Organic: %s';
 				break;
 			case 'referral':
-				/* translators: %s is the source value */
-				$label = __( 'Referral: %s', 'woocommerce' );
+				$label = $translated ?
+					/* translators: %s is the source value */
+					__( 'Referral: %s', 'woocommerce' )
+					: 'Referral: %s';
+				break;
+			case 'typein':
+				$label  = '';
+				$source = $translated ?
+					__( 'Direct', 'woocommerce' )
+					: 'Direct';
+				break;
+			case 'admin':
+				$label  = '';
+				$source = $translated ?
+					__( 'Web admin', 'woocommerce' )
+					: 'Web admin';
 				break;
 
 			default:
-				$label = '';
+				$label  = '';
+				$source = __( 'Unknown', 'woocommerce' );
 				break;
 		}
 
@@ -374,5 +375,47 @@ trait OrderAttributionMeta {
 		 * @param string $field       The field name.
 		 */
 		return (string) apply_filters( 'wc_order_attribution_field_description', $description, $field );
+	}
+
+	/**
+	 * Get the order history for the customer (data matches Customers report).
+	 *
+	 * @param mixed $customer_identifier The customer ID or billing email.
+	 *
+	 * @return array Order count, total spend, and average spend per order.
+	 */
+	private function get_customer_history( $customer_identifier ): array {
+
+		// Get the valid customer orders.
+		$args = array(
+			'limit'  => - 1,
+			'return' => 'objects',
+			// Don't count cancelled or failed orders.
+			'status' => array( 'pending', 'processing', 'on-hold', 'completed', 'refunded' ),
+			'type'   => 'shop_order',
+		);
+
+		// If the customer_identifier is a valid ID, use it. Otherwise, use the billing email.
+		if ( is_numeric( $customer_identifier ) && $customer_identifier > 0 ) {
+			$args['customer_id'] = $customer_identifier;
+		} else {
+			$args['billing_email'] = $customer_identifier;
+			$args['customer_id']   = 0;
+		}
+
+		$orders = wc_get_orders( $args );
+
+		// Populate the order_count and total_spent variables with the valid orders.
+		$order_count = count( $orders );
+		$total_spent = 0;
+		foreach ( $orders as $order ) {
+			$total_spent += $order->get_total() - $order->get_total_refunded();
+		}
+
+		return array(
+			'order_count'   => $order_count,
+			'total_spent'   => $total_spent,
+			'average_spent' => $order_count ? $total_spent / $order_count : 0,
+		);
 	}
 }
