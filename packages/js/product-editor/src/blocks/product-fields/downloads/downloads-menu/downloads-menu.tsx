@@ -12,15 +12,20 @@ import { chevronDown, chevronUp } from '@wordpress/icons';
 import { DownloadsMenuProps } from './types';
 import { MediaLibraryMenuItem } from '../media-library-menu-item';
 import { InsertUrlMenuItem } from '../insert-url-menu-item';
+import { UploadFilesMenuItem } from '../upload-files-menu-item';
 
 export function DownloadsMenu( {
 	allowedTypes,
+	maxUploadFileSize,
 	onUploadSuccess,
 	onUploadError,
 }: DownloadsMenuProps ) {
 	return (
 		<Dropdown
-			position="bottom left"
+			// @ts-expect-error missing prop in types.
+			popoverProps={ {
+				placement: 'bottom-end',
+			} }
 			contentClassName="woocommerce-downloads-menu__menu-content"
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<Button
@@ -36,6 +41,15 @@ export function DownloadsMenu( {
 			renderContent={ ( { onClose } ) => (
 				<div className="components-dropdown-menu__menu">
 					<MenuGroup>
+						<UploadFilesMenuItem
+							allowedTypes={ allowedTypes }
+							maxUploadFileSize={ maxUploadFileSize }
+							onUploadSuccess={ ( files ) => {
+								onUploadSuccess( files );
+								onClose();
+							} }
+							onUploadError={ onUploadError }
+						/>
 						<MediaLibraryMenuItem
 							allowedTypes={ allowedTypes }
 							onUploadSuccess={ ( files ) => {

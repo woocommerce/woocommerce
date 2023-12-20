@@ -1,0 +1,121 @@
+$line-height: 1.618;
+
+.wc-block-components-product-rating {
+	display: block;
+
+	span {
+		line-height: $line-height;
+	}
+
+	&__stars {
+		display: inline-block;
+		overflow: hidden;
+		position: relative;
+		width: 5.3em;
+		height: 1.618em;
+		line-height: $line-height;
+		font-size: 1em;
+		/* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
+		font-family: star;
+		font-weight: 400;
+
+		&.wc-block-grid__product-rating__stars {
+			margin: 0;
+		}
+
+		&::before {
+			content: "\53\53\53\53\53";
+			line-height: $line-height;
+			top: 0;
+			left: 0;
+			right: 0;
+			position: absolute;
+			opacity: 0.5;
+			color: inherit;
+			white-space: nowrap;
+		}
+		span {
+			overflow: hidden;
+			top: 0;
+			left: 0;
+			right: 0;
+			position: absolute;
+			color: inherit;
+			padding-top: 1.5em;
+		}
+		span::before {
+			content: "\53\53\53\53\53";
+			top: 0;
+			left: 0;
+			right: 0;
+			position: absolute;
+			color: inherit;
+			line-height: $line-height;
+			white-space: nowrap;
+		}
+	}
+
+	.wc-block-all-products & {
+		margin-top: 0;
+		margin-bottom: $gap-small;
+	}
+
+	&__container {
+		> * {
+			vertical-align: middle;
+		}
+	}
+
+	&__stars + &__reviews_count {
+		margin-left: $gap-smaller;
+	}
+
+	&__norating-container {
+		display: inline-flex;
+		flex-direction: row;
+		align-items: center;
+		gap: $gap-smaller;
+	}
+
+	&__norating {
+		display: inline-block;
+		overflow: hidden;
+		position: relative;
+		width: 1.5em;
+		height: 1.618em;
+		line-height: $line-height;
+		font-size: 1em;
+		/* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
+		font-family: star;
+		font-weight: 400;
+		-webkit-text-stroke: 2px var(--wp--preset--color--black, #000);
+		&::before {
+			content: "\53";
+			top: 0;
+			left: 0;
+			right: 0;
+			position: absolute;
+			color: transparent;
+			white-space: nowrap;
+			text-align: center;
+		}
+	}
+}
+
+.wc-block-all-products,
+.wp-block-query {
+	.is-loading {
+		.wc-block-components-product-rating {
+			@include placeholder();
+			width: 7em;
+		}
+	}
+
+	.wc-block-components-product-rating__container {
+		display: block;
+	}
+
+	.wc-block-components-product-rating__stars.wc-block-grid__product-rating__stars {
+		margin: inherit;
+	}
+}

@@ -1,4 +1,6 @@
-# CSS/Sass naming conventions
+---
+post_title: CSS/Sass naming conventions
+---
 
 Table of Contents:
 

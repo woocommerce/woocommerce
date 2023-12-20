@@ -90,7 +90,7 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 			array(
 				'source_type'     => '',
 				'source'          => '',
-				'expected_output' => 'None',
+				'expected_output' => 'Unknown',
 			),
 		);
 

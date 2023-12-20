@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add CLI command `wc hpos cleanup` to cleanup post and post meta data for migrated orders.

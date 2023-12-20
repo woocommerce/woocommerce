@@ -1,4 +1,6 @@
-# Writing high quality testing instructions
+---
+post_title: Writing high quality testing instructions
+---
 
 ## Introduction
 

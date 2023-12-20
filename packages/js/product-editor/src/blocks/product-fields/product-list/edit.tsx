@@ -24,7 +24,9 @@ import classNames from 'classnames';
 import {
 	AddProductsModal,
 	getProductImageStyle,
+	ReorderProductsModal,
 } from '../../../components/add-products-modal';
+import { BlockFill } from '../../../components/block-slot-fill';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { Shirt, Pants, Glasses } from './images';
 import { UploadsBlockAttributes } from './types';
@@ -36,10 +38,13 @@ import {
 export function Edit( {
 	attributes,
 	context: { postType },
+	clientId,
 }: ProductEditorBlockEditProps< UploadsBlockAttributes > ) {
 	const { property } = attributes;
 	const blockProps = useWooBlockProps( attributes );
 	const [ openAddProductsModal, setOpenAddProductsModal ] = useState( false );
+	const [ openReorderProductsModal, setOpenReorderProductsModal ] =
+		useState( false );
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ preventFetch, setPreventFetch ] = useState( false );
 	const [ groupedProductIds, setGroupedProductIds ] = useEntityProp<
@@ -72,6 +77,10 @@ export function Edit( {
 		setOpenAddProductsModal( true );
 	}
 
+	function handleReorderProductsButtonClick() {
+		setOpenReorderProductsModal( true );
+	}
+
 	function handleAddProductsModalSubmit( value: Product[] ) {
 		const newGroupedProducts = [ ...groupedProducts, ...value ];
 		setPreventFetch( true );
@@ -82,8 +91,18 @@ export function Edit( {
 		setOpenAddProductsModal( false );
 	}
 
+	function handleReorderProductsModalSubmit( value: Product[] ) {
+		setGroupedProducts( value );
+		setGroupedProductIds( value.map( ( product ) => product.id ) );
+		setOpenReorderProductsModal( false );
+	}
+
 	function handleAddProductsModalClose() {
 		setOpenAddProductsModal( false );
+	}
+
+	function handleReorderProductsModalClose() {
+		setOpenReorderProductsModal( false );
 	}
 
 	function removeProductHandler( product: Product ) {
@@ -103,14 +122,28 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<div className="wp-block-woocommerce-product-list-field__header">
-				<Button
-					onClick={ handleAddProductsButtonClick }
-					variant="secondary"
-				>
-					{ __( 'Add products', 'woocommerce' ) }
-				</Button>
-			</div>
+			<BlockFill
+				name="section-actions"
+				clientId={ clientId }
+				slotContainerBlockName="woocommerce/product-section"
+			>
+				<div className="wp-block-woocommerce-product-list-field__header">
+					{ ! isLoading && groupedProducts.length > 0 && (
+						<Button
+							onClick={ handleReorderProductsButtonClick }
+							variant="tertiary"
+						>
+							{ __( 'Reorder', 'woocommerce' ) }
+						</Button>
+					) }
+					<Button
+						onClick={ handleAddProductsButtonClick }
+						variant="secondary"
+					>
+						{ __( 'Add products', 'woocommerce' ) }
+					</Button>
+				</div>
+			</BlockFill>
 
 			<div className="wp-block-woocommerce-product-list-field__body">
 				{ ! isLoading && groupedProducts.length === 0 && (
@@ -292,6 +325,13 @@ export function Edit( {
 					initialValue={ groupedProducts }
 					onSubmit={ handleAddProductsModalSubmit }
 					onClose={ handleAddProductsModalClose }
+				/>
+			) }
+			{ openReorderProductsModal && (
+				<ReorderProductsModal
+					products={ groupedProducts }
+					onSubmit={ handleReorderProductsModalSubmit }
+					onClose={ handleReorderProductsModalClose }
 				/>
 			) }
 		</div>

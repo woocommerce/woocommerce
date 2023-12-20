@@ -130,6 +130,9 @@ class DateRangeFilterPicker extends Component {
 			focusOnMount = true,
 			popoverProps = { inline: true },
 		} = this.props;
+		if ( ! popoverProps.placement ) {
+			popoverProps.placement = 'bottom';
+		}
 		const contentClasses = classnames(
 			'woocommerce-filters-date__content',
 			{
@@ -143,7 +146,6 @@ class DateRangeFilterPicker extends Component {
 				</span>
 				<Dropdown
 					contentClassName={ contentClasses }
-					position="bottom"
 					expandOnMobile
 					focusOnMount={ focusOnMount }
 					popoverProps={ popoverProps }

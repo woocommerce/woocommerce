@@ -1,4 +1,6 @@
-# Customizing checkout fields using actions and filters
+---
+post_title: Customizing checkout fields using actions and filters
+---
 
 If you are unfamiliar with code and resolving potential conflicts, we have an extension that can help: [WooCommerce Checkout Field Editor](https://woo.com/products/woocommerce-checkout-field-editor/). Installing and activating this extension overrides any code below that you try to implement; and you cannot have custom checkout field code in your functions.php file when the extension is activated.
 
@@ -195,7 +197,7 @@ $fields['billing']['your_field']['options'] = array(
 
 ## Priority
 
-Priority in regards to PHP code helps establish when a bit of code — called a function — runs in relation to a page load. It is set inside of each function and is useful when overriding existing code for custom display.
+Priority in regards to PHP code helps establish when a bit of code - called a function - runs in relation to a page load. It is set inside of each function and is useful when overriding existing code for custom display.
 
 Code with a higher number set as the priority will run after code with a lower number, meaning code with a priority of 20 will run after code with 10 priority.
 

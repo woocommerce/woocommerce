@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add logging and an admin notice for Legacy REST API usages

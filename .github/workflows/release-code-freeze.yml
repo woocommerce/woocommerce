@@ -31,6 +31,7 @@ jobs:
             issues: write
             pull-requests: write
         outputs:
+            pnpmVersion: ${{ steps.read-pnpm-version.outputs.version }}
             isTodayAcceleratedFreeze: ${{ steps.get-versions.outputs.isTodayAcceleratedFreeze }}
             isTodayMonthlyFreeze: ${{ steps.get-versions.outputs.isTodayMonthlyFreeze }}
             acceleratedVersion: ${{ steps.get-versions.outputs.acceleratedVersion }}
@@ -46,10 +47,18 @@ jobs:
               with:
                   fetch-depth: 0
 
+            - name: Read PNPM Version
+              id: read-pnpm-version
+              shell: bash
+              run: |
+                version=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)
+                echo "version=$version" >> $GITHUB_OUTPUT
+                echo "PNPM Version: $version"
+
             - name: Setup PNPM
               uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
               with:
-                  version: '8.6.7'
+                  version: ${{ steps.read-pnpm-version.outputs.version }}
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -74,35 +83,35 @@ jobs:
               if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze milestone -o ${{ github.repository_owner }} -m ${{ steps.get-versions.outputs.monthlyMilestone }}
+              run: pnpm utils code-freeze milestone -o ${{ github.repository_owner }} -m ${{ steps.get-versions.outputs.monthlyMilestone }}
 
             - name: Create next monthly release branch
               id: branch
               if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze branch -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.monthlyBranch }}
+              run: pnpm utils code-freeze branch -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.monthlyBranch }}
 
             - name: Create next accelerated release branch
               id: branch-accel
               if: steps.get-versions.outputs.isTodayAcceleratedFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze branch -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.acceleratedBranch }}
+              run: pnpm utils code-freeze branch -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.acceleratedBranch }}
 
             - name: Bump versions for Beta.1 monthly release
               id: version-bump
               if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze version-bump -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.monthlyBranch }} -c ${{ steps.get-versions.outputs.monthlyVersion }}-beta.1
+              run: pnpm utils code-freeze version-bump -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.monthlyBranch }} -c ${{ steps.get-versions.outputs.monthlyVersion }}-beta.1
 
             - name: Bump versions for accelerated release
               id: version-bump-accel
               if: steps.get-versions.outputs.isTodayAcceleratedFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze version-bump -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.acceleratedBranch }} -c ${{ steps.get-versions.outputs.acceleratedVersion }} -af
+              run: pnpm utils code-freeze version-bump -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.acceleratedBranch }} -c ${{ steps.get-versions.outputs.acceleratedVersion }} -af
 
             - name: Prep accelerated release
               id: accel-release-prep
@@ -116,14 +125,14 @@ jobs:
               if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze version-bump ${{ steps.get-versions.outputs.monthlyMilestone }}-dev -o ${{ github.repository_owner }}
+              run: pnpm utils code-freeze version-bump ${{ steps.get-versions.outputs.monthlyMilestone }}-dev -o ${{ github.repository_owner }}
 
             - name: Generate changelog changes
               id: changelog
               if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze changelog -c -o ${{ github.repository_owner }} -v ${{ steps.get-versions.outputs.monthlyVersionXY }}
+              run: pnpm utils code-freeze changelog -c -o ${{ github.repository_owner }} -v ${{ steps.get-versions.outputs.monthlyVersionXY }}
               
 
     notify-slack:
@@ -142,7 +151,7 @@ jobs:
             - name: Setup PNPM
               uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
               with:
-                  version: '8.6.7'
+                  version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -182,8 +191,6 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  build: false
 
             - name: Build zip
               working-directory: plugins/woocommerce
@@ -212,8 +219,6 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  build: false
 
             - name: Build zip
               working-directory: plugins/woocommerce
@@ -242,7 +247,7 @@ jobs:
             - name: Setup PNPM
               uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
               with:
-                  version: '8.6.7'
+                  version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -287,7 +292,7 @@ jobs:
             - name: Setup PNPM
               uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
               with:
-                  version: '8.6.7'
+                  version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c

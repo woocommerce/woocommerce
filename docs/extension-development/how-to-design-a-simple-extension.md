@@ -1,4 +1,6 @@
-# How to design a simple extension
+---
+post_title: How to design a simple extension
+---
 
 ## Introduction
 

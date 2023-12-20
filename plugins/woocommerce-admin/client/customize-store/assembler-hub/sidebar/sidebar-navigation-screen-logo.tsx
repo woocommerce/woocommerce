@@ -128,8 +128,12 @@ const useLogoEdit = ( {
 		onSelectLogo( media );
 	};
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore The types for this are incorrect.
 	const { createErrorNotice } = useDispatch( noticesStore );
 	const onUploadError = ( message: string ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore The types for this are incorrect.
 		createErrorNotice( message, { type: 'snackbar' } );
 	};
 
@@ -447,7 +451,8 @@ export const SidebarNavigationScreenLogo = () => {
 								popoverProps={ {
 									className:
 										'woocommerce-customize-store__logo-dropdown-popover',
-									position: 'bottom left',
+									// @ts-expect-error outdated TS.
+									placement: 'bottom-end',
 								} }
 							>
 								{ ( { onClose } ) => (
