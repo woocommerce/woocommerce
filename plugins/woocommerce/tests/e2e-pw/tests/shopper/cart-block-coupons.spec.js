@@ -24,11 +24,14 @@ const coupons = [
 	},
 ];
 const couponLimitedCode = '10fixedcartlimited';
+const customerBilling = {
+	email: 'john.doe.merchant.test@example.com',
+};
 
 const pageTitle = 'Cart Block';
 const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
 
-let productId, limitedCouponId;
+let productId, orderId, limitedCouponId;
 
 test.describe( 'Cart Block Applying Coupons', () => {
 	const couponBatchId = new Array();
@@ -77,6 +80,20 @@ test.describe( 'Cart Block Applying Coupons', () => {
 			.then( ( response ) => {
 				limitedCouponId = response.data.id;
 			} );
+		// add order with applied limited coupon
+		await api
+			.post( 'orders', {
+				status: 'processing',
+				billing: customerBilling,
+				coupon_lines: [
+					{
+						code: couponLimitedCode,
+					},
+				],
+			} )
+			.then( ( response ) => {
+				orderId = response.data.id;
+			} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -91,6 +108,9 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		} );
 		await api.post( 'coupons/batch', {
 			delete: [ ...couponBatchId, limitedCouponId ],
+		} );
+		await api.post( 'orders/batch', {
+			delete: [ orderId ],
 		} );
 	} );
 
@@ -265,29 +285,8 @@ test.describe( 'Cart Block Applying Coupons', () => {
 
 	test( 'prevents cart block applying coupon with usage limit', async ( {
 		page,
-		context,
 	} ) => {
-		// go to merchant and create a new order with coupon usage 1/1
-		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
-		await page.waitForLoadState( 'networkidle' );
-		await page.locator( 'input[name="log"]' ).fill( admin.username );
-		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-		await page.locator( 'text=Log In' ).click();
-		await page.waitForLoadState( 'networkidle' );
-		page.on( 'dialog', ( dialog ) => dialog.accept( couponLimitedCode ) );
-		await page.locator( 'button.add-coupon' ).click();
-		await expect( page.locator( '.note_content' ) ).toContainText(
-			`Coupon applied: "${ couponLimitedCode }".`
-		);
-		await page.locator( 'button.save_order' ).click();
-		await expect(
-			page.locator( 'div.updated.notice.notice-success.is-dismissible', {
-				has: page.locator( 'p' ),
-			} )
-		).toContainText( 'Order updated.' );
-		await context.clearCookies(); // logs out admin
-
-		// add product to cart block and go to checkout
+		// add product to cart block and go to cart
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
 		await page.goto( pageSlug );
