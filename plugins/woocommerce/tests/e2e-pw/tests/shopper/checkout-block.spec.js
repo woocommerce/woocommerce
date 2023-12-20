@@ -700,9 +700,7 @@ test.describe( 'Checkout Block page', () => {
 		await clearFilters( page );
 	} );
 
-	test.only( 'allows existing customer to place an order', async ( {
-		page,
-	} ) => {
+	test( 'allows existing customer to place an order', async ( { page } ) => {
 		for ( let i = 1; i < 3; i++ ) {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
 			await page.waitForLoadState( 'networkidle' );
