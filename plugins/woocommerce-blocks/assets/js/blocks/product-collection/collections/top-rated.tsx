@@ -49,7 +49,7 @@ const attributes = {
 	collection: collection.name,
 };
 
-const heading: [ string, BlockAttributes?, InnerBlockTemplate[]? ] = [
+const heading: InnerBlockTemplate = [
 	'core/heading',
 	{
 		textAlign: 'center',
