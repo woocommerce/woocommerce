@@ -56,8 +56,32 @@ class PageController {
 	 * @return void
 	 */
 	private function init_hooks(): void {
-		self::add_action( 'load-woocommerce_page_wc-status', array( $this, 'setup_screen_options' ) );
-		self::add_action( 'load-woocommerce_page_wc-status', array( $this, 'handle_list_table_bulk_actions' ) );
+		self::add_action( 'load-woocommerce_page_wc-status', array( $this, 'maybe_do_logs_tab_action' ), 2 );
+
+		self::add_action( 'wc_logs_load_tab', array( $this, 'setup_screen_options' ) );
+		self::add_action( 'wc_logs_load_tab', array( $this, 'handle_list_table_bulk_actions' ) );
+	}
+
+	/**
+	 * Determine if the current tab on the Status page is Logs, and if so, fire an action.
+	 *
+	 * @return void
+	 */
+	private function maybe_do_logs_tab_action(): void {
+		$is_logs_tab = 'logs' === filter_input( INPUT_GET, 'tab' );
+
+		if ( $is_logs_tab ) {
+			$params = $this->get_query_params( array( 'view' ) );
+
+			/**
+			 * Action fires when the Logs tab starts loading.
+			 *
+			 * @param string $view The current view within the Logs tab.
+			 *
+			 * @since 8.5.0
+			 */
+			do_action( 'wc_logs_load_tab', $params['view'] );
+		}
 	}
 
 	/**
@@ -303,7 +327,7 @@ class PageController {
 	 * @return void
 	 */
 	private function render_search_results_view(): void {
-		$params     = $this->get_query_params( array( 'order', 'orderby', 'search', 'source', 'view' ) );
+		$params     = $this->get_query_params( array( 'view' ) );
 		$list_table = $this->get_list_table( $params['view'] );
 
 		$list_table->prepare_items();
@@ -423,17 +447,18 @@ class PageController {
 	/**
 	 * Register screen options for the logging views.
 	 *
+	 * @param string $view The current view within the Logs tab.
+	 *
 	 * @return void
 	 */
-	private function setup_screen_options(): void {
-		$params     = $this->get_query_params( array( 'view' ) );
+	private function setup_screen_options( string $view ): void {
 		$handler    = $this->get_default_handler();
 		$list_table = null;
 
 		switch ( $handler ) {
 			case LogHandlerFileV2::class:
-				if ( in_array( $params['view'], array( 'list_files', 'search_results' ), true ) ) {
-					$list_table = $this->get_list_table( $params['view'] );
+				if ( in_array( $view, array( 'list_files', 'search_results' ), true ) ) {
+					$list_table = $this->get_list_table( $view );
 				}
 				break;
 			case 'WC_Log_Handler_DB':
@@ -458,22 +483,24 @@ class PageController {
 	/**
 	 * Process bulk actions initiated from the log file list table.
 	 *
+	 * @param string $view The current view within the Logs tab.
+	 *
 	 * @return void
 	 */
-	private function handle_list_table_bulk_actions(): void {
+	private function handle_list_table_bulk_actions( string $view ): void {
 		// Bail if we're not using the file handler.
 		if ( LogHandlerFileV2::class !== $this->get_default_handler() ) {
 			return;
 		}
 
-		$params = $this->get_query_params( array( 'file_id', 'view' ) );
+		$params = $this->get_query_params( array( 'file_id' ) );
 
 		// Bail if this is not the list table view.
-		if ( 'list_files' !== $params['view'] ) {
+		if ( 'list_files' !== $view ) {
 			return;
 		}
 
-		$action = $this->get_list_table( $params['view'] )->current_action();
+		$action = $this->get_list_table( $view )->current_action();
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : $this->get_logs_tab_url();
