@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
+use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
 use WC_Order;
 
 /**
@@ -10,6 +11,8 @@ use WC_Order;
  * @since 8.5.0
  */
 class CustomerHistory {
+
+	use OrderAttributionMeta;
 
 	/**
 	 * Output the customer history template for the order.
@@ -47,54 +50,6 @@ class CustomerHistory {
 
 		$args['has_customer_id'] = $has_customer_id;
 		wc_get_template( 'order/customer-history.php', $args );
-	}
-
-	/**
-	 * Get the order history for the customer (matches Customers report).
-	 *
-	 * @param mixed $customer_identifier The customer ID or billing email.
-	 *
-	 * @return array Order count, total spend, and average spend per order.
-	 */
-	private function get_customer_history( $customer_identifier ): array {
-
-		// Get the valid customer orders.
-		$args = array(
-			'limit'  => - 1,
-			'return' => 'objects',
-			// Don't count cancelled or failed orders.
-			'status' => array( 'pending', 'processing', 'on-hold', 'completed', 'refunded' ),
-			'type'   => 'shop_order',
-		);
-
-		// If the customer_identifier is a valid ID, use it. Otherwise, use the billing email.
-		if ( is_numeric( $customer_identifier ) && $customer_identifier > 0 ) {
-			$args['customer_id'] = $customer_identifier;
-		} else {
-			$args['billing_email'] = $customer_identifier;
-			$args['customer_id']   = 0;
-		}
-
-		$orders = wc_get_orders( $args );
-
-		// Populate the order_count and total_spent variables with the valid orders.
-		$order_count = 0;
-		$total_spent = 0;
-		foreach ( $orders as $order ) {
-			$order_count ++;
-			$total_spent += $order->get_total();
-
-			// Remove any refunded amount from the total_spent.
-			foreach ( $order->get_refunds() as $refund ) {
-				$total_spent += $refund->get_total();
-			}
-		}
-
-		return array(
-			'order_count'   => $order_count,
-			'total_spent'   => $total_spent,
-			'average_spent' => $order_count ? $total_spent / $order_count : 0,
-		);
 	}
 
 }
