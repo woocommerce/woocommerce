@@ -62,7 +62,7 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 			const { item, selectedItems } = getContext< DropdownContext >();
 
 			return (
-				selectedItems?.some( ( i ) => {
+				selectedItems.some( ( i ) => {
 					return i.value === item.value && i.label === item.label;
 				} ) || false
 			);
@@ -102,15 +102,14 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 			} = context;
 
 			// check if item already selected
-			const selectedItemIndex =
-				selectedItems?.findIndex(
-					( item ) => item.value === value && item.label === label
-				) || -1;
+			const selectedItemIndex = selectedItems.findIndex(
+				( item ) => item.value === value && item.label === label
+			);
 
 			// if item already selected remove it from state:
 			// else add it to state:
 			if ( selectedItemIndex !== -1 ) {
-				selectedItems?.splice( selectedItemIndex, 1 );
+				selectedItems.splice( selectedItemIndex, 1 );
 			} else {
 				selectedItems.push( {
 					label,
@@ -118,7 +117,7 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 				} );
 			}
 
-				context.isOpen = false;
+			context.isOpen = false;
 
 			event.stopPropagation();
 		},
