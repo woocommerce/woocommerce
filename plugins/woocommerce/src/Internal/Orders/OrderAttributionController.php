@@ -269,7 +269,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 				'session'       => $session_length,
 				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
 				'prefix'        => $this->field_prefix,
-				'allowTracking' => 'yes' === $allow_tracking ? true : false,
+				'allowTracking' => 'yes' === $allow_tracking,
 			),
 		);
 
