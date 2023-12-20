@@ -147,6 +147,8 @@ class PageController {
 		$handler = $this->settings->get_default_handler();
 		$params  = $this->get_query_params( array( 'view' ) );
 
+		$this->render_section_nav();
+
 		if ( 'settings' === $params['view'] ) {
 			$this->settings->render_page();
 
@@ -173,6 +175,44 @@ class PageController {
 		 * @since 8.5.0
 		 */
 		do_action( 'wc_logs_render_page', $handler );
+	}
+
+	/**
+	 * Render navigation to switch between logs browsing and settings.
+	 *
+	 * @return void
+	 */
+	private function render_section_nav(): void {
+		$params       = $this->get_query_params( array( 'view' ) );
+		$browse_url   = $this->get_logs_tab_url();
+		$settings_url = add_query_arg( 'view', 'settings', $this->get_logs_tab_url() );
+
+		?>
+		<ul class="subsubsub">
+			<li>
+				<?php
+				printf(
+					'<a href="%1$s"%2$s>%3$s</a>',
+					esc_url( $browse_url ),
+					'settings' !== $params['view'] ? ' class="current"' : '',
+					esc_html__( 'Browse', 'woocommerce' )
+				);
+				?>
+				|
+			</li>
+			<li>
+				<?php
+				printf(
+					'<a href="%1$s"%2$s>%3$s</a>',
+					esc_url( $settings_url ),
+					'settings' === $params['view'] ? ' class="current"' : '',
+					esc_html__( 'Settings', 'woocommerce' )
+				);
+				?>
+			</li>
+		</ul>
+		<br class="clear">
+		<?php
 	}
 
 	/**
