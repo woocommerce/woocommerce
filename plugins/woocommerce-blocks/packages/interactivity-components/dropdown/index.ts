@@ -53,6 +53,11 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 				return selectedItems?.length && selectedItems[ 0 ].label
 					? selectedItems[ 0 ]?.label
 					: 'Select an option';
+			} else if (
+				selectType === 'multiple' &&
+				selectedItems.length === 0
+			) {
+				return 'Select options';
 			}
 
 			return '';
@@ -60,6 +65,8 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 
 		get isSelected(): boolean {
 			const { item, selectedItems } = getContext< DropdownContext >();
+
+			console.log( 'selectedItems', selectedItems );
 
 			return (
 				selectedItems.some( ( i ) => {
@@ -118,7 +125,6 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 			}
 
 			context.isOpen = false;
-
 			event.stopPropagation();
 		},
 	},

@@ -298,12 +298,14 @@ export default () => {
 				( { suffix } ) => suffix === 'default'
 			);
 
-			useEffect( () => {
-				// Prefetch the page if it is in the directive options.
-				if ( link?.prefetch ) {
-					// prefetch( href );
-				}
-			} );
+			// For some reason this useEffect crashes in Preact internals in some cases.
+			// Since it is a no-op right now, we can just comment it out.
+			// useEffect( () => {
+			// 	// Prefetch the page if it is in the directive options.
+			// 	if ( link?.prefetch ) {
+			// 		// prefetch( href );
+			// 	}
+			// } );
 
 			// Don't do anything if it's falsy.
 			if ( link !== false ) {
