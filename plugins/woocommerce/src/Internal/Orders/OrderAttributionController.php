@@ -411,7 +411,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			'session_pages'        => $source_data['session_pages'] ?? 0,
 			'session_count'        => $source_data['session_count'] ?? 0,
 			'order_total'          => $order->get_total(),
-			// Add 1 to include the current order (which is currently still Pending.
+			// Add 1 to include the current order (which is currently still Pending when the event is sent).
 			'customer_order_count' => $customer_info['order_count'] + 1,
 			'customer_registered'  => $order->get_customer_id() ? 'yes' : 'no',
 		);
