@@ -2,6 +2,10 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin, customer } = require( '../../test-data/data' );
 const { setFilterValue, clearFilters } = require( '../../utils/filters' );
+const {
+	fillShippingCheckoutBlocks,
+	fillBillingCheckoutBlocks,
+} = require( '../../utils/checkout' );
 
 const guestEmail = 'checkout-guest@example.com';
 const newAccountEmail = 'marge-test-account@example.com';
@@ -345,52 +349,15 @@ test.describe( 'Checkout Block page', () => {
 			page.getByRole( 'heading', { name: pageTitle } )
 		).toBeVisible();
 
-		// fill shipping address
 		await page.getByLabel( 'Email address' ).fill( guestEmail );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'First name' )
-			.fill( 'Homer' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'Last name' )
-			.fill( 'Simpson' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'Address', { exact: true } )
-			.fill( '123 Evergreen Terrace' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'City' )
-			.fill( 'Springfield' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'ZIP Code' )
-			.fill( '97403' );
+
+		// fill shipping address
+		await fillShippingCheckoutBlocks( page );
 
 		await page.getByLabel( 'Use same address for billing' ).click();
 
 		// fill billing details
-		await page
-			.getByRole( 'group', { name: 'Billing address' } )
-			.getByLabel( 'First name' )
-			.fill( 'Mister' );
-		await page
-			.getByRole( 'group', { name: 'Billing address' } )
-			.getByLabel( 'Last name' )
-			.fill( 'Burns' );
-		await page
-			.getByRole( 'group', { name: 'Billing address' } )
-			.getByLabel( 'Address', { exact: true } )
-			.fill( '156th Street' );
-		await page
-			.getByRole( 'group', { name: 'Billing address' } )
-			.getByLabel( 'City' )
-			.fill( 'Springfield' );
-		await page
-			.getByRole( 'group', { name: 'Billing address' } )
-			.getByLabel( 'ZIP Code' )
-			.fill( '98500' );
+		await fillBillingCheckoutBlocks( page );
 
 		// add note to the order
 		await page.getByLabel( 'Add a note to your order' ).check();
@@ -528,28 +495,11 @@ test.describe( 'Checkout Block page', () => {
 			page.getByRole( 'heading', { name: pageTitle } )
 		).toBeVisible();
 
-		// fill shipping address and check the toggle to use a different address for billing
 		await page.getByLabel( 'Email address' ).fill( customer.email );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'First name' )
-			.fill( 'Homer' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'Last name' )
-			.fill( 'Simpson' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'Address', { exact: true } )
-			.fill( '123 Evergreen Terrace' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'City' )
-			.fill( 'Springfield' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'ZIP Code' )
-			.fill( '97403' );
+
+		// fill shipping address and check the toggle to use a different address for billing
+		await fillShippingCheckoutBlocks( page );
+
 		await expect(
 			page.getByLabel( 'Use same address for billing' )
 		).toBeVisible();
@@ -572,28 +522,11 @@ test.describe( 'Checkout Block page', () => {
 			page.getByRole( 'heading', { name: pageTitle } )
 		).toBeVisible();
 
-		// fill shipping address
 		await page.getByLabel( 'Email address' ).fill( customer.email );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'First name' )
-			.fill( 'Lisa' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'Last name' )
-			.fill( 'Simpson' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'Address', { exact: true } )
-			.fill( '123 Evergreen Terrace' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'City' )
-			.fill( 'Springfield' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'ZIP Code' )
-			.fill( '97403' );
+
+		// fill shipping address
+		await fillShippingCheckoutBlocks( page );
+
 		await page
 			.locator( '.wc-block-components-loading-mask' )
 			.waitFor( { state: 'visible' } );
@@ -665,28 +598,10 @@ test.describe( 'Checkout Block page', () => {
 			page.getByRole( 'heading', { name: pageTitle } )
 		).toBeVisible();
 
-		// fill shipping address and check cash on delivery method
 		await page.getByLabel( 'Email address' ).fill( guestEmail );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'First name' )
-			.fill( 'Homer' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'Last name' )
-			.fill( 'Simpson' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'Address', { exact: true } )
-			.fill( '123 Evergreen Terrace' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'City' )
-			.fill( 'Springfield' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'ZIP Code' )
-			.fill( '97403' );
+
+		// fill shipping address and check cash on delivery method
+		await fillShippingCheckoutBlocks( page );
 		await page.getByLabel( 'Cash on delivery' ).check();
 		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 
@@ -811,28 +726,10 @@ test.describe( 'Checkout Block page', () => {
 			console.log( 'No shipping details prefilled, skipping action.' );
 		}
 
-		// fill shipping address and check cash on delivery method
 		await page.getByLabel( 'Email address' ).fill( customer.email );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'First name' )
-			.fill( 'Homer' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'Last name' )
-			.fill( 'Simpson' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'Address', { exact: true } )
-			.fill( '123 Evergreen Terrace' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'City' )
-			.fill( 'Springfield' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'ZIP Code' )
-			.fill( '97403' );
+
+		// fill shipping address and check cash on delivery method
+		await fillShippingCheckoutBlocks( page );
 		await page.getByLabel( 'Cash on delivery' ).check();
 		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 
@@ -908,28 +805,10 @@ test.describe( 'Checkout Block page', () => {
 		await page.getByLabel( 'Create an account?' ).check();
 		await expect( page.getByLabel( 'Create an account?' ) ).toBeChecked();
 
-		// fill shipping address and check cash on delivery method
 		await page.getByLabel( 'Email address' ).fill( newAccountEmail );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'First name' )
-			.fill( 'Marge' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'Last name' )
-			.fill( 'Simpson' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'Address', { exact: true } )
-			.fill( '123 Evergreen Terrace' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'City' )
-			.fill( 'Springfield' );
-		await page
-			.getByRole( 'group', { name: 'Shipping address' } )
-			.getByLabel( 'ZIP Code' )
-			.fill( '97403' );
+
+		// fill shipping address and check cash on delivery method
+		await fillShippingCheckoutBlocks( page, 'Marge' );
 		await page.getByLabel( 'Cash on delivery' ).check();
 		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 
