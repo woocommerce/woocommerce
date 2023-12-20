@@ -16,7 +16,6 @@ interface PriceTextFieldProps {
 	value: number;
 	onChange: ( value: number | undefined ) => void;
 	label?: string;
-	suffix?: string;
 }
 
 const formatNumber = ( val: number, currency: Currency ): string => {
