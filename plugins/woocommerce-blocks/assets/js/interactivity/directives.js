@@ -32,8 +32,10 @@ const mergeDeepSignals = ( target, source, overwrite ) => {
 				source[ `$${ k }` ].peek(),
 				overwrite
 			);
-		} else if ( overwrite || typeof peek( target, k ) === 'undefined' ) {
+		} else if ( typeof peek( target, k ) === 'undefined' ) {
 			target[ `$${ k }` ] = source[ `$${ k }` ];
+		} else if ( overwrite ) {
+			target[ k ] = peek( source, k );
 		}
 	}
 };
@@ -433,23 +435,20 @@ export default () => {
 
 			const list = evaluate( entry );
 			return list.map( ( item ) => {
-				const currentValue = useRef( deepSignal( {} ) );
+				const mergedContext = deepSignal( {} );
 
-				currentValue.current = useMemo( () => {
-					const itemProp = suffix === 'default' ? 'item' : suffix;
-					const newValue = deepSignal( {
-						[ namespace ]: { [ itemProp ]: item },
-					} );
-					mergeDeepSignals( newValue, inheritedValue );
-					mergeDeepSignals( currentValue.current, newValue, true );
-					return currentValue.current;
-				}, [ inheritedValue, entry ] );
+				const itemProp = suffix === 'default' ? 'item' : suffix;
+				const newValue = deepSignal( {
+					[ namespace ]: { [ itemProp ]: item },
+				} );
+				mergeDeepSignals( newValue, inheritedValue );
+				mergeDeepSignals( mergedContext, newValue, true );
 
-				const scope = { ...getScope(), context: currentValue.current };
+				const scope = { ...getScope(), context: mergedContext };
 				const key = getEvaluate( { scope } )( eachKey );
 
 				return (
-					<Provider value={ currentValue.current } key={ key }>
+					<Provider value={ mergedContext } key={ key }>
 						{ element.props.content }
 					</Provider>
 				);
