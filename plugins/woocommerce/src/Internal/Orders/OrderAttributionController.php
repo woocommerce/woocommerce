@@ -367,6 +367,10 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function set_order_source_data( array $source_data, WC_Order $order ) {
+		// If all the values are empty, bail.
+		if ( empty( array_filter( $source_data ) ) ) {
+			return;
+		}
 		foreach ( $source_data as $key => $value ) {
 			$order->add_meta_data( $this->get_meta_prefixed_field( $key ), $value );
 		}
