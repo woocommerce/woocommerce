@@ -1188,7 +1188,7 @@ class WC_Helper {
 			'install-url',
 			array(
 				'authenticated' => true,
-				'query_string'  => esc_url( '?product_key=' . $product_key ),
+				'query_string'  => esc_url( '?product_key=' . $product_key . '&wc_version=' . WC()->version ),
 			)
 		);
 

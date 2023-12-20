@@ -139,7 +139,7 @@ export default function Install( props: InstallProps ) {
 				stopInstall();
 
 				if ( url ) {
-					window.open( url, '_blank' );
+					window.open( url, '_self' );
 				} else {
 					addNotice(
 						props.subscription.product_key,
