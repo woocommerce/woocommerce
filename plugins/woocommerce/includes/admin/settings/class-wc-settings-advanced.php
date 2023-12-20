@@ -393,11 +393,12 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 
 		if ( ! is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ) {
 			$enable_legacy_api_setting['desc_tip'] = sprintf(
-			// translators: Placeholder is a URL.
+			// translators: Placeholders are URLs.
 				__(
-					'⚠️ <b>️The Legacy REST API will be removed in WooCommerce 9.0.</b> A separate WooCommerce extension will soon be available to keep it enabled. <b><a target="_blank" href="%s">Learn more about this change.</a></b>',
+					'⚠️ <b>️The Legacy REST API will be removed in WooCommerce 9.0.</b> A separate WooCommerce extension will soon be available to keep it enabled. You can check Legacy REST API usages in <b><a target="_blank" href="%1$s">the WooCommerce log files</a></b> (file names start with <code>legacy_rest_api_usages</code>). <b><a target="_blank" href="%2$s">Learn more about this change.</a></b>',
 					'woocommerce'
 				),
+				admin_url( 'admin.php?page=wc-status&tab=logs' ),
 				'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
 			);
 		}
