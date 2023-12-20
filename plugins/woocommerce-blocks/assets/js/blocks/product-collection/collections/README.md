@@ -38,7 +38,7 @@ To achieve this add additional property to collection definition:
 ```typescript
 type Collection = {
 	...;
-	unchangeableFilters: FilterName[];
+	hideControls: FilterName[];
 }
 ```
 

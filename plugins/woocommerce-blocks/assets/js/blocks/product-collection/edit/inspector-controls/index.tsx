@@ -32,7 +32,7 @@ import {
 } from '../../types';
 import { setQueryAttribute } from '../../utils';
 import { DEFAULT_FILTERS, getDefaultSettings } from '../../constants';
-import { getUnchangeableFilters } from '../../collections';
+import { getHiddenControls } from '../../collections';
 import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
 import InheritQueryControl from './inherit-query-control';
@@ -48,8 +48,8 @@ import FeaturedProductsControl from './featured-products-control';
 import CreatedControl from './created-control';
 
 const prepareShouldShowFilter =
-	( unchangeableFilters: FilterName[] ) => ( filter: FilterName ) => {
-		return ! unchangeableFilters.includes( filter );
+	( hideControls: FilterName[] ) => ( filter: FilterName ) => {
+		return ! hideControls.includes( filter );
 	};
 
 const ProductCollectionInspectorControls = (
@@ -57,8 +57,8 @@ const ProductCollectionInspectorControls = (
 ) => {
 	const { query, collection } = props.attributes;
 	const inherit = query?.inherit;
-	const unchangeableFilters = getUnchangeableFilters( collection );
-	const shouldShowFilter = prepareShouldShowFilter( unchangeableFilters );
+	const hideControls = getHiddenControls( collection );
+	const shouldShowFilter = prepareShouldShowFilter( hideControls );
 
 	const showQueryControls = inherit === false;
 	const showInheritQueryControls =

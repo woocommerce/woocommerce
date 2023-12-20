@@ -28,7 +28,7 @@ const collection = {
 	),
 	keywords: [ 'product collection' ],
 	scope: [],
-	unchangeableFilters: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
+	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
 };
 
 const attributes = {

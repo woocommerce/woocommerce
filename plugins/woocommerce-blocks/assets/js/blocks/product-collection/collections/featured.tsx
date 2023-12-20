@@ -25,7 +25,7 @@ const collection = {
 	description: __( 'Showcase your featured products.', 'woocommerce' ),
 	keywords: [ 'product collection' ],
 	scope: [],
-	unchangeableFilters: [ CoreFilterNames.INHERIT, CoreFilterNames.FEATURED ],
+	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.FEATURED ],
 };
 
 const attributes = {

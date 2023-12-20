@@ -52,7 +52,7 @@ export const getCollectionByName = ( collectionName?: CollectionName ) => {
 	return collections.find( ( { name } ) => name === collectionName );
 };
 
-export const getUnchangeableFilters = (
+export const getHiddenControls = (
 	collectionName?: CollectionName
 ): FilterName[] => {
 	if ( ! collectionName ) {
@@ -60,7 +60,7 @@ export const getUnchangeableFilters = (
 	}
 
 	const collection = getCollectionByName( collectionName );
-	return collection ? collection.unchangeableFilters : [];
+	return collection ? collection.hideControls : [];
 };
 
 export default registerCollections;

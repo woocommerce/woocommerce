@@ -21,7 +21,7 @@ const collection = {
 	description: __( 'Recommend your best-selling products.', 'woocommerce' ),
 	keywords: [ 'best selling', 'product collection' ],
 	scope: [],
-	unchangeableFilters: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
+	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
 };
 
 const attributes = {
