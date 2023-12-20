@@ -19,10 +19,18 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	private $file_controller;
 
 	/**
+	 * Instance of the Settings class.
+	 *
+	 * @var Settings
+	 */
+	private $settings;
+
+	/**
 	 * LogHandlerFileV2 class.
 	 */
 	public function __construct() {
 		$this->file_controller = wc_get_container()->get( FileController::class );
+		$this->settings        = wc_get_container()->get( Settings::class );
 	}
 
 	/**
@@ -181,12 +189,8 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 			$files
 		);
 
-		$deleted = $this->file_controller->delete_files( $file_ids );
-
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
-		/** This filter is documented in includes/class-wc-logger.php. */
-		$retention_days = absint( apply_filters( 'woocommerce_logger_days_to_retain_logs', 30 ) );
-		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$deleted        = $this->file_controller->delete_files( $file_ids );
+		$retention_days = $this->settings->get_retention_period();
 
 		if ( $deleted > 0 ) {
 			$this->handle(

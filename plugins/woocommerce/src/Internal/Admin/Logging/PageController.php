@@ -70,6 +70,7 @@ class PageController {
 
 		self::add_action( 'wc_logs_load_tab', array( $this, 'setup_screen_options' ) );
 		self::add_action( 'wc_logs_load_tab', array( $this, 'handle_list_table_bulk_actions' ) );
+		self::add_action( 'wc_logs_load_tab', array( $this, 'notices' ) );
 	}
 
 	/**
@@ -95,6 +96,34 @@ class PageController {
 	}
 
 	/**
+	 * Notices to display on Logs screens.
+	 *
+	 * @return void
+	 */
+	private function notices() {
+		if ( ! $this->settings->logging_is_enabled() ) {
+			add_action(
+				'admin_notices',
+				function() {
+					?>
+					<div class="notice notice-warning">
+						<p>
+							<?php
+							printf(
+								// translators: %s is a URL to another admin screen.
+								wp_kses_post( __( 'Logging is disabled. It can be enabled in <a href="%s">Logs Settings</a>.', 'woocommerce' ) ),
+								esc_url( add_query_arg( 'view', 'settings', $this->get_logs_tab_url() ) )
+							);
+							?>
+						</p>
+					</div>
+					<?php
+				}
+			);
+		}
+	}
+
+	/**
 	 * Get the canonical URL for the Logs tab of the Status admin page.
 	 *
 	 * @return string
@@ -110,27 +139,12 @@ class PageController {
 	}
 
 	/**
-	 * Determine the default log handler.
-	 *
-	 * @return string
-	 */
-	public function get_default_handler(): string {
-		$handler = Constants::get_constant( 'WC_LOG_HANDLER' );
-
-		if ( is_null( $handler ) || ! class_exists( $handler ) ) {
-			$handler = WC_Log_Handler_File::class;
-		}
-
-		return $handler;
-	}
-
-	/**
 	 * Render the "Logs" tab, depending on the current default log handler.
 	 *
 	 * @return void
 	 */
 	public function render(): void {
-		$handler = $this->get_default_handler();
+		$handler = $this->settings->get_default_handler();
 		$params  = $this->get_query_params( array( 'view' ) );
 
 		if ( 'settings' === $params['view'] ) {
@@ -478,7 +492,7 @@ class PageController {
 	 * @return void
 	 */
 	private function setup_screen_options( string $view ): void {
-		$handler    = $this->get_default_handler();
+		$handler    = $this->settings->get_default_handler();
 		$list_table = null;
 
 		switch ( $handler ) {
@@ -515,7 +529,7 @@ class PageController {
 	 */
 	private function handle_list_table_bulk_actions( string $view ): void {
 		// Bail if we're not using the file handler.
-		if ( LogHandlerFileV2::class !== $this->get_default_handler() ) {
+		if ( LogHandlerFileV2::class !== $this->settings->get_default_handler() ) {
 			return;
 		}
 

@@ -89,7 +89,7 @@ class Settings {
 	private function get_default_handler_setting_definition(): array {
 		$handler_options = array(
 			LogHandlerFileV2::class  => __( 'File system (default)', 'woocommerce' ),
-			WC_Log_Handler_DB::class => __( 'Database (this option is not recommended on live sites)', 'woocommerce' ),
+			WC_Log_Handler_DB::class => __( 'Database (not recommended on live sites)', 'woocommerce' ),
 		);
 
 		/**
@@ -111,6 +111,8 @@ class Settings {
 
 		$desc = array();
 
+		$desc[] = __( 'Note that if this setting is changed, any log entries that have already been recorded will remain stored in their current location, but will not migrate.', 'woocommerce' );
+
 		if ( in_array( $current_value, array( LogHandlerFileV2::class, WC_Log_Handler_File::class ) ) ) {
 			$log_directory = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) );
 
@@ -118,6 +120,15 @@ class Settings {
 				// translators: %s is a location in the filesystem.
 				__( 'Log files are stored in this directory: %s' ),
 				"<code>$log_directory</code>"
+			);
+		} elseif ( WC_Log_Handler_DB::class === $current_value ) {
+			global $wpdb;
+			$table = "{$wpdb->prefix}woocommerce_log";
+
+			$desc[] = sprintf(
+				// translators: %s is a location in the filesystem.
+				__( 'Log entries are stored in this database table: %s' ),
+				"<code>$table</code>"
 			);
 		}
 
@@ -212,7 +223,7 @@ class Settings {
 
 		return array(
 			'title'             => __( 'Level threshold', 'woocommerce' ),
-			'desc_tip'          => __( 'This sets the minimum severity level of logs that will be recorded. Lower severity levels will be ignored.', 'woocommerce' ),
+			'desc_tip'          => __( 'This sets the minimum severity level of logs that will be processed. Lower severity levels will be ignored.', 'woocommerce' ),
 			'id'                => self::PREFIX . 'level_threshold',
 			'type'              => 'select',
 			'value'             => $this->get_level_threshold(),
@@ -267,7 +278,7 @@ class Settings {
 	/**
 	 * Determine the current value of the default_handler setting.
 	 *
-	 * @return bool
+	 * @return string
 	 */
 	public function get_default_handler(): string {
 		$key = self::PREFIX . 'default_handler';
@@ -288,7 +299,7 @@ class Settings {
 	/**
 	 * Determine the current value of the retention_period_days setting.
 	 *
-	 * @return bool
+	 * @return int
 	 */
 	public function get_retention_period(): int {
 		$key = self::PREFIX . 'retention_period_days';
@@ -296,7 +307,11 @@ class Settings {
 		$retention_period = self::DEFAULTS['retention_period_days'];
 
 		if ( has_filter( 'woocommerce_logger_days_to_retain_logs' ) ) {
-			// TODO doc block goes here
+			/**
+			 * Filter the retention period of log entries.
+			 *
+			 * @param int $days The number of days to retain log entries.
+			 */
 			$retention_period = apply_filters( 'woocommerce_logger_days_to_retain_logs', $retention_period );
 		} else {
 			$retention_period = WC_Admin_Settings::get_option( $key );
@@ -314,7 +329,7 @@ class Settings {
 	/**
 	 * Determine the current value of the level_threshold setting.
 	 *
-	 * @return bool
+	 * @return string
 	 */
 	public function get_level_threshold(): string {
 		$key = self::PREFIX . 'level_threshold';

@@ -16,6 +16,12 @@ defined( 'ABSPATH' ) || exit;
  * WC_Logger class.
  */
 class WC_Logger implements WC_Logger_Interface {
+	/**
+	 * A toggle for enabling/disabling the logging system.
+	 *
+	 * @var bool
+	 */
+	protected $enabled;
 
 	/**
 	 * Stores registered log handlers.
@@ -38,6 +44,11 @@ class WC_Logger implements WC_Logger_Interface {
 	 * @param string $threshold Optional. Define an explicit threshold. May be configured via  WC_LOG_THRESHOLD. By default, all logs will be processed.
 	 */
 	public function __construct( $handlers = null, $threshold = null ) {
+		$this->enabled = wc_get_container()->get( Settings::class )->logging_is_enabled();
+		if ( ! $this->enabled ) {
+			return;
+		}
+
 		if ( null === $handlers ) {
 			$default_handler  = wc_get_container()->get( Settings::class )->get_default_handler();
 			$handler_instance = new $default_handler();
@@ -74,13 +85,7 @@ class WC_Logger implements WC_Logger_Interface {
 
 		// Support the constant as long as a valid log level has been set for it.
 		if ( null === $threshold ) {
-			$threshold = Constants::get_constant( 'WC_LOG_THRESHOLD' );
-			if ( null !== $threshold && ! WC_Log_Levels::is_valid_level( $threshold ) ) {
-				$threshold = null;
-			}
-		}
-
-		if ( null !== $threshold ) {
+			$threshold = wc_get_container()->get( Settings::class )->get_level_threshold();
 			$threshold = WC_Log_Levels::get_level_severity( $threshold );
 		}
 
@@ -95,9 +100,14 @@ class WC_Logger implements WC_Logger_Interface {
 	 * @return bool True if the log should be handled.
 	 */
 	protected function should_handle( $level ) {
+		if ( ! $this->enabled ) {
+			return false;
+		}
+
 		if ( null === $this->threshold ) {
 			return true;
 		}
+
 		return $this->threshold <= WC_Log_Levels::get_level_severity( $level );
 	}
 
@@ -140,6 +150,8 @@ class WC_Logger implements WC_Logger_Interface {
 	 *     'debug': Debug-level messages.
 	 * @param string $message Log message.
 	 * @param array  $context Optional. Additional information for log handlers.
+	 *
+	 * @return void
 	 */
 	public function log( $level, $message, $context = array() ) {
 		if ( ! WC_Log_Levels::is_valid_level( $level ) ) {
@@ -312,12 +324,7 @@ class WC_Logger implements WC_Logger_Interface {
 	 * @since 3.4.0
 	 */
 	public function clear_expired_logs() {
-		/**
-		 * Filter the retention period of log entries.
-		 *
-		 * @param int $days The number of days to retain log entries.
-		 */
-		$days      = absint( apply_filters( 'woocommerce_logger_days_to_retain_logs', 30 ) );
+		$days      = wc_get_container()->get( Settings::class )->get_retention_period();
 		$timestamp = strtotime( "-{$days} days" );
 
 		foreach ( $this->handlers as $handler ) {
