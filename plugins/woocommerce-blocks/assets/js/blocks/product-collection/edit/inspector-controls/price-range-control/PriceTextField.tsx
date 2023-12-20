@@ -27,33 +27,35 @@ const formatNumber = ( val: number, currency: Currency ): string => {
 	let [ whole, decimal ] = roundedValue.split( '.' );
 
 	// Apply the thousand separator
-	whole = whole.replace(
-		/\B(?=(\d{3})+(?!\d))/g,
-		currency.thousandSeparator
-	);
+	if ( currency.thousandSeparator ) {
+		whole = whole.replace(
+			/\B(?=(\d{3})+(?!\d))/g,
+			currency.thousandSeparator
+		);
+	}
 
 	// If there is no decimal part, we don't need to add decimal separator
 	if ( ! decimal ) {
 		return whole;
 	}
 
-	// Reassemble the number with the correct decimal separator
-	return currency?.decimalSeparator
-		? `${ whole }${ currency.decimalSeparator }${ decimal }`
-		: `${ whole }.${ decimal }`;
+	// Add the decimal separator to the number.
+	const decimalSeparator = currency.decimalSeparator || '.';
+	return `${ whole }${ decimalSeparator }${ decimal }`;
 };
 
-const formatValueWithCurrencySymbol = (
-	val: number | undefined,
-	currency: Currency
-) => {
+const formatCurrency = ( val: number | undefined, currency: Currency ) => {
 	if ( val === undefined || isNaN( val ) ) {
 		return undefined;
 	}
 
 	let formattedNumber = formatNumber( val, currency );
 
-	// Append prefix and suffix if they exist
+	/**
+	 * Add the currency symbol to the number.
+	 * For example, if the currency is USD, the value is 1000.00
+	 * It should be converted to $1,000.00
+	 */
 	if ( currency?.prefix ) {
 		formattedNumber = `${ currency.prefix }${ formattedNumber }`;
 	}
@@ -74,25 +76,46 @@ const PriceTextField: React.FC< PriceTextFieldProps > = ( {
 	const convertCurrencyStringToNumber = (
 		val: string
 	): number | undefined => {
-		// First, remove the currency symbol if any
+		/**
+		 * First, remove the currency symbol from the value.
+		 * For example, if the currency is USD, the value is $1,000.00
+		 * It should be converted to 1,000.00 before converting to a number.
+		 */
 		const valueWithoutCurrencySymbol = val
 			.replace( currency.prefix, '' )
 			.replace( currency.suffix, '' );
 
-		// Replace the thousand separator with an empty string and decimal separator with a dot
-		const normalizedValue = valueWithoutCurrencySymbol
-			.replace(
+		/**
+		 * Then, normalize the value to a number.
+		 * - Replace the decimal separator with a dot
+		 * - Remove the thousand separator
+		 *
+		 * For example, if the value is 1,000:00
+		 * - Replace the decimal separator with a dot: 1,000.00
+		 * - Remove the thousand separator: 1000.00
+		 */
+		let normalizedValue = valueWithoutCurrencySymbol;
+		if ( currency.decimalSeparator ) {
+			normalizedValue = normalizedValue.replace(
+				new RegExp( `\\${ currency.decimalSeparator }` ),
+				'.'
+			);
+		}
+		if ( currency.thousandSeparator ) {
+			normalizedValue = normalizedValue.replace(
 				new RegExp( `\\${ currency.thousandSeparator }`, 'g' ),
 				''
-			)
-			.replace( new RegExp( `\\${ currency.decimalSeparator }` ), '.' );
+			);
+		}
 
 		const numberValue = Number( normalizedValue );
 		if ( isNaN( numberValue ) ) {
 			return undefined;
 		}
 
-		// Price can't be negative
+		/**
+		 * If the value is negative, return 0.
+		 */
 		if ( numberValue < 0 ) {
 			return 0;
 		}
@@ -102,7 +125,7 @@ const PriceTextField: React.FC< PriceTextFieldProps > = ( {
 
 	return (
 		<InputControl
-			value={ formatValueWithCurrencySymbol( value, currency ) }
+			value={ formatCurrency( value, currency ) }
 			onChange={ ( val: string ) => {
 				const numberValue = convertCurrencyStringToNumber( val );
 				onChange( numberValue );
