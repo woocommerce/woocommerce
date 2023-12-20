@@ -352,7 +352,7 @@ class Settings {
 	 *
 	 * @return void
 	 */
-	public function render_page(): void {
+	public function render_form(): void {
 		$settings = $this->get_settings_definitions();
 
 		?>

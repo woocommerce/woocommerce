@@ -150,7 +150,7 @@ class PageController {
 		$this->render_section_nav();
 
 		if ( 'settings' === $params['view'] ) {
-			$this->settings->render_page();
+			$this->settings->render_form();
 
 			return;
 		}
