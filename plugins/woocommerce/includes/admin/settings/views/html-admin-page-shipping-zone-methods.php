@@ -98,7 +98,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row-blank">
 	<tr>
-		<td class="wc-shipping-zone-method-blank-state" colspan="4">
+		<td class="wc-shipping-zone-method-blank-state" colspan="5">
 			<p><?php esc_html_e( 'You can add multiple shipping methods within this zone. Only customers within the zone will see them.', 'woocommerce' ); ?></p>
 		</td>
 	</tr>
@@ -149,10 +149,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</article>
 				<footer>
 					<div class="inner">
-						<button id="btn-ok" data-status='{{ data.status }}' class="button button-primary button-large">
-							<div class="wc-backbone-modal-action-{{ data.status === 'new' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Create', 'woocommerce' ); ?></div>
-							<div class="wc-backbone-modal-action-{{ data.status === 'existing' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Save', 'woocommerce' ); ?></div>
-						</button>
+						<div>
+							<button id="btn-back" class="button button-large wc-backbone-modal-back-{{ data.status === 'new' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Back', 'woocommerce' ); ?></button>
+							<button id="btn-ok" data-status='{{ data.status }}' class="button button-primary button-large">
+								<div class="wc-backbone-modal-action-{{ data.status === 'new' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Create', 'woocommerce' ); ?></div>
+								<div class="wc-backbone-modal-action-{{ data.status === 'existing' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Save', 'woocommerce' ); ?></div>
+							</button>
+						</div>
 						<div class="wc-shipping-zone-method-modal-info wc-shipping-zone-method-modal-info-{{ data.status === 'existing' ? 'inactive' : 'active' }}"><?php esc_html_e( 'STEP 2 OF 2', 'woocommerce' ); ?></div>
 					</div>
 				</footer>
@@ -198,9 +201,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 								if ( ! $method->supports( 'shipping-zones' ) ) {
 									continue;
 								}
-								$description = wp_kses_post( $method->get_method_description() );
-								echo '<div class="wc-shipping-zone-method-input"><input type="radio" value="' . esc_attr( $method->id ) . '" id="' . esc_attr( $method->id ) . '" name="add_method_id"/><label for="' . esc_attr( $method->id ) . '">' . esc_html( $method->get_method_title() ) . '<span class="dashicons dashicons-yes"></span></label><div class="wc-shipping-zone-method-input-help-text"><span>' . esc_html( $description ) . '</span></div></div>';
+
+								echo '<div class="wc-shipping-zone-method-input"><input type="radio" value="' . esc_attr( $method->id ) . '" id="' . esc_attr( $method->id ) . '" name="add_method_id"/><label for="' . esc_attr( $method->id ) . '">' . esc_html( $method->get_method_title() ) . '<span class="dashicons dashicons-yes"></span></label></div>';
 							}
+
+							echo '<div class="wc-shipping-zone-method-input-help-text-container">';
+
+							foreach ( $methods_placed_in_order as $method ) {
+								if ( ! $method->supports( 'shipping-zones' ) ) {
+									continue;
+								}
+
+								echo '<div id=' . esc_attr( $method->id ) . '-description class="wc-shipping-zone-method-input-help-text"><span>' . wp_kses_post( wpautop( $method->get_method_description() ) ) . '</span></div>';
+							}
+							echo '</div>'
 							?>
 						</fieldset>
 					</form>

@@ -310,6 +310,16 @@ function activateProduct( subscription: Subscription ): Promise< void > {
 		);
 }
 
+function getInstallUrl( subscription: Subscription ): Promise< string > {
+	return apiFetch( {
+		path:
+			'/wc/v3/marketplace/subscriptions/install-url?product_key=' +
+			subscription.product_key,
+	} ).then( ( response ) => {
+		return ( response as { data: { url: string } } )?.data.url;
+	} );
+}
+
 function installProduct( subscription: Subscription ): Promise< void > {
 	return connectProduct( subscription ).then( () => {
 		return wpAjax( 'install-' + subscription.product_type, {
@@ -364,6 +374,23 @@ const removeNotice = ( productKey: string ) => {
 	dispatch( noticeStore ).removeNotice( productKey );
 };
 
+const subscriptionToProduct = ( subscription: Subscription ): Product => {
+	return {
+		id: subscription.product_id,
+		title: subscription.product_name,
+		image: '',
+		type: subscription.product_type as ProductType,
+		description: '',
+		vendorName: '',
+		vendorUrl: '',
+		icon: subscription.product_icon,
+		url: subscription.product_url,
+		price: -1,
+		averageRating: 0,
+		reviewsCount: 0,
+	};
+};
+
 // Append UTM parameters to a URL, being aware of existing query parameters
 const appendURLParams = (
 	url: string,
@@ -406,10 +433,12 @@ export {
 	fetchSearchResults,
 	fetchSubscriptions,
 	refreshSubscriptions,
+	getInstallUrl,
 	installProduct,
 	updateProduct,
 	addNotice,
 	removeNotice,
 	renewUrl,
 	subscribeUrl,
+	subscriptionToProduct,
 };

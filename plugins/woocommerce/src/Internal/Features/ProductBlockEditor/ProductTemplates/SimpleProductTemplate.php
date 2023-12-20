@@ -200,7 +200,23 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$pricing_columns  = $basic_details->add_block(
+
+		// This is needed until hide conditions can be applied to core blocks.
+		$pricing_conditional_wrapper = $basic_details->add_block(
+			array(
+				'id'             => 'product-pricing-conditional-wrapper',
+				'blockName'      => 'woocommerce/conditional',
+				'order'          => 30,
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				),
+			)
+		);
+
+		$pricing_wrapper  = Features::is_enabled( 'product-grouped' ) ? $pricing_conditional_wrapper : $basic_details;
+		$pricing_columns  = $pricing_wrapper->add_block(
 			array(
 				'id'        => 'product-pricing-columns',
 				'blockName' => 'core/columns',
@@ -279,6 +295,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes' => array(
 					'helpText' => null,
 					'label'    => null,
+					'property' => 'description',
 				),
 			)
 		);
@@ -775,48 +792,40 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				) : null,
 			)
 		);
-		$product_inventory_quantity_conditional = $product_inventory_inner_section->add_block(
+		$product_inventory_quantity_hide_conditions = array(
 			array(
-				'id'         => 'product-inventory-quantity-conditional-wrapper',
-				'blockName'  => 'woocommerce/conditional',
-				'order'      => 30,
-				'attributes' => array(
-					'mustMatch' => array(
-						'manage_stock' => array( true ),
-					),
-				),
+				'expression' => 'editedProduct.manage_stock === false',
+			),
+		);
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$product_inventory_quantity_hide_conditions[] = array(
+				'expression' => 'editedProduct.type === "grouped"',
+			);
+		}
+		$product_inventory_inner_section->add_block(
+			array(
+				'id'             => 'product-inventory-quantity',
+				'blockName'      => 'woocommerce/product-inventory-quantity-field',
+				'order'          => 30,
+				'hideConditions' => $product_inventory_quantity_hide_conditions,
 			)
 		);
-		$product_inventory_quantity_conditional->add_block(
+		$product_stock_status_hide_conditions = array(
 			array(
-				'id'        => 'product-inventory-quantity',
-				'blockName' => 'woocommerce/product-inventory-quantity-field',
-				'order'     => 10,
-			)
+				'expression' => 'editedProduct.manage_stock === true',
+			),
 		);
-		$product_stock_status_conditional = $product_inventory_section->add_block(
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$product_stock_status_hide_conditions[] = array(
+				'expression' => 'editedProduct.type === "grouped"',
+			);
+		}
+		$product_inventory_section->add_block(
 			array(
-				'id'             => 'product-stock-status-conditional-wrapper',
-				'blockName'      => 'woocommerce/conditional',
-				'order'          => 20,
+				'id'             => 'product-stock-status',
+				'blockName'      => 'woocommerce/product-radio-field',
+				'order'          => 10,
 				'attributes'     => array(
-					'mustMatch' => array(
-						'manage_stock' => array( false ),
-					),
-				),
-				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
-					array(
-						'expression' => 'editedProduct.type === "grouped"',
-					),
-				) : null,
-			)
-		);
-		$product_stock_status_conditional->add_block(
-			array(
-				'id'         => 'product-stock-status',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
-				'attributes' => array(
 					'title'    => __( 'Stock status', 'woocommerce' ),
 					'property' => 'stock_status',
 					'options'  => array(
@@ -834,6 +843,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						),
 					),
 				),
+				'hideConditions' => $product_stock_status_hide_conditions,
 			)
 		);
 		$product_inventory_advanced         = $product_inventory_section->add_block(
@@ -862,24 +872,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$product_out_of_stock_conditional   = $product_inventory_advanced_wrapper->add_block(
+		$product_inventory_advanced_wrapper->add_block(
 			array(
-				'id'         => 'product-out-of-stock-conditional-wrapper',
-				'blockName'  => 'woocommerce/conditional',
-				'order'      => 10,
-				'attributes' => array(
-					'mustMatch' => array(
-						'manage_stock' => array( true ),
-					),
-				),
-			)
-		);
-		$product_out_of_stock_conditional->add_block(
-			array(
-				'id'         => 'product-out-of-stock',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
-				'attributes' => array(
+				'id'             => 'product-out-of-stock',
+				'blockName'      => 'woocommerce/product-radio-field',
+				'order'          => 10,
+				'attributes'     => array(
 					'title'    => __( 'When out of stock', 'woocommerce' ),
 					'property' => 'backorders',
 					'options'  => array(
@@ -900,13 +898,23 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						),
 					),
 				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.manage_stock === false',
+					),
+				),
 			)
 		);
-		$product_out_of_stock_conditional->add_block(
+		$product_inventory_advanced_wrapper->add_block(
 			array(
-				'id'        => 'product-inventory-email',
-				'blockName' => 'woocommerce/product-inventory-email-field',
-				'order'     => 20,
+				'id'             => 'product-inventory-email',
+				'blockName'      => 'woocommerce/product-inventory-email-field',
+				'order'          => 20,
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.manage_stock === false',
+					),
+				),
 			)
 		);
 

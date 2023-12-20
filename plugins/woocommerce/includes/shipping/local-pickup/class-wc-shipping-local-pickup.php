@@ -90,9 +90,12 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	public function sanitize_cost( $value ) {
 		$value = is_null( $value ) ? '' : $value;
 		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
-		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ), wc_get_price_thousand_separator() ), '', $value );
+		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
 
-		if ( $value && ! is_numeric( $value ) ) {
+		$test_value = str_replace( wc_get_price_decimal_separator(), '.', $value );
+		$test_value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ), wc_get_price_thousand_separator() ), '', $test_value );
+
+		if ( $test_value && ! is_numeric( $test_value ) ) {
 			throw new Exception( __( 'Please enter a valid number', 'woocommerce' ) );
 		}
 

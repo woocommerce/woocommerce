@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
  * Contains backend logic for the Marketplace feature.
@@ -18,15 +19,16 @@ class Marketplace {
 	 * Class initialization, to be executed when the class is resolved by the container.
 	 */
 	final public function init() {
-		if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
-			add_action( 'admin_menu', array( $this, 'register_pages' ), 70 );
-			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-
-			// Add a Woo Marketplace link to the plugin install action links.
-			add_filter( 'install_plugins_tabs', array( $this, 'add_woo_plugin_install_action_link' ) );
-			add_action( 'install_plugins_pre_woo', array( $this, 'maybe_open_woo_tab' ) );
-			add_action( 'admin_print_styles-plugin-install.php', array( $this, 'add_plugins_page_styles' ) );
+		if ( false === FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
+			FeaturesController::change_feature_enable( 'marketplace', true );
 		}
+
+		add_action( 'admin_menu', array( $this, 'register_pages' ), 70 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		// Add a Woo Marketplace link to the plugin install action links.
+		add_filter( 'install_plugins_tabs', array( $this, 'add_woo_plugin_install_action_link' ) );
+		add_action( 'install_plugins_pre_woo', array( $this, 'maybe_open_woo_tab' ) );
+		add_action( 'admin_print_styles-plugin-install.php', array( $this, 'add_plugins_page_styles' ) );
 	}
 
 	/**

@@ -209,7 +209,7 @@ class FeaturesController {
 					),
 					'is_experimental'    => false,
 					'enabled_by_default' => true,
-					'disable_ui'         => false,
+					'disable_ui'         => true,
 					'is_legacy'          => true,
 				),
 				// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
