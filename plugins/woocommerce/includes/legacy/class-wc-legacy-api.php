@@ -184,15 +184,12 @@ class WC_Legacy_API {
 	 * extension is installed or the user has dismissed the notice.
 	 */
 	private function maybe_display_legacy_wc_api_usage_notice(): void {
-		if ( is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ) {
-			if ( WC_Admin_Notices::has_notice( 'legacy_api_usages_detected' ) ) {
-				WC_Admin_Notices::remove_notice( 'legacy_api_usages_detected', true );
-			}
-			return;
-		}
-
 		$legacy_api_usages = get_transient( 'wc_legacy_rest_api_usages' );
-		if ( false !== $legacy_api_usages && ! WC_Admin_Notices::user_has_dismissed_notice( 'legacy_api_usages_detected' ) ) {
+		if ( false === $legacy_api_usages || is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) || 'yes' !== get_option( 'woocommerce_api_enabled' ) ) {
+			if ( WC_Admin_Notices::has_notice( 'legacy_api_usages_detected' ) ) {
+				WC_Admin_Notices::remove_notice( 'legacy_api_usages_detected' );
+			}
+		} elseif ( ! WC_Admin_Notices::user_has_dismissed_notice( 'legacy_api_usages_detected' ) ) {
 			unset( $legacy_api_usages['user_agents']['unknown'] );
 			$user_agents = array_keys( $legacy_api_usages['user_agents'] );
 
@@ -205,7 +202,7 @@ class WC_Legacy_API {
 						esc_html__( 'WooCommerce Legacy REST API access detected', 'woocommerce' )
 					),
 					sprintf(
-						// translators: %1$d = count of Legacy REST API usages recorded, %2$s = date and time of first access, %3$d = count of known user agents registered, %4$s = URL.
+					// translators: %1$d = count of Legacy REST API usages recorded, %2$s = date and time of first access, %3$d = count of known user agents registered, %4$s = URL.
 						wpautop( wp_kses_data( __( '<p>The WooCommerce Legacy REST API has been accessed <b>%1$d</b> time(s) since <b>%2$s</b>. There are <b>%3$d</b> known user agent(s) registered. There are more details in <b><a target="_blank" href="%4$s">the WooCommerce log files</a></b> (file names start with <code>legacy_rest_api_usages</code>).', 'woocommerce' ) ) ),
 						$legacy_api_usages['total_count'],
 						$legacy_api_usages['first_usage'],
