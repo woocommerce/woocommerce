@@ -5,8 +5,12 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
+use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use WC_Order;
 
 /**
  * Class Edit.
@@ -77,6 +81,7 @@ class Edit {
 		add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable product permissions', 'woocommerce' ) . wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $screen_id, 'normal', 'default' );
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s actions', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Actions::output', $screen_id, 'side', 'high' );
+		self::maybe_register_order_attribution( $screen_id, $title );
 	}
 
 	/**
@@ -200,6 +205,71 @@ class Edit {
 	 */
 	private function add_order_taxonomies_meta_box() {
 		$this->taxonomies_meta_box->add_taxonomies_meta_boxes( $this->screen_id, $this->order->get_type() );
+	}
+
+	/**
+	 * Register order attribution meta boxes if the feature is enabled.
+	 *
+	 * @since 8.5.0
+	 *
+	 * @param string $screen_id Screen ID.
+	 * @param string $title     Title of the page.
+	 *
+	 * @return void
+	 */
+	private static function maybe_register_order_attribution( string $screen_id, string $title ) {
+		/**
+		 * Features controller.
+		 *
+		 * @var FeaturesController $feature_controller
+		 */
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+		if ( ! $feature_controller->feature_is_enabled( 'order_attribution' ) ) {
+			return;
+		}
+
+		/**
+		 * Order attribution meta box.
+		 *
+		 * @var OrderAttribution $order_attribution_meta_box
+		 */
+		$order_attribution_meta_box = wc_get_container()->get( OrderAttribution::class );
+
+		add_meta_box(
+			'woocommerce-order-source-data',
+			/* Translators: %s order type name. */
+			sprintf( __( '%s attribution', 'woocommerce' ), $title ),
+			function( $post_or_order ) use ( $order_attribution_meta_box ) {
+				$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
+				if ( $order instanceof WC_Order ) {
+					$order_attribution_meta_box->output( $order );
+				}
+			},
+			$screen_id,
+			'side',
+			'high'
+		);
+
+		/**
+		 * Customer history meta box.
+		 *
+		 * @var CustomerHistory $customer_history_meta_box
+		 */
+		$customer_history_meta_box = wc_get_container()->get( CustomerHistory::class );
+
+		add_meta_box(
+			'woocommerce-customer-history',
+			__( 'Customer history', 'woocommerce' ),
+			function( $post_or_order ) use ( $customer_history_meta_box ) {
+				$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
+				if ( $order instanceof WC_Order ) {
+					$customer_history_meta_box->output( $order );
+				}
+			},
+			$screen_id,
+			'side',
+			'high'
+		);
 	}
 
 	/**

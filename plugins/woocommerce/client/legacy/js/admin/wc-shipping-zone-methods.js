@@ -100,9 +100,23 @@
 					$( document.body ).on( 'click', '.wc-shipping-zone-method-settings', { view: this }, this.onConfigureShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add-method', { view: this }, this.onAddShippingMethod );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onConfigureShippingMethodSubmitted );
-					$( document.body ).on( 'wc_backbone_modal_response', this.onAddShippingMethodSubmitted );
+					$( document.body ).on( 'wc_region_picker_update', this.onUpdateZoneRegionPicker );
+					$( document.body ).on( 'wc_backbone_modal_next_response', this.onAddShippingMethodSubmitted );
+					$( document.body ).on( 'wc_backbone_modal_before_remove', this.onCloseConfigureShippingMethod );
+					$( document.body ).on( 'wc_backbone_modal_back_response', this.onConfigureShippingMethodBack );
 					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
+					$( document.body ).on( 'wc_backbone_modal_validation', { view: this }, this.validateFormArguments );
+					$( document.body ).on( 'wc_backbone_modal_loaded', { view: this }, this.onModalLoaded );
+				},
+				onUpdateZoneRegionPicker: function( event ) {
+					var value = event.detail,
+						attribute = 'zone_locations',
+						changes   = {};
+
+						changes[ attribute ] = value;
+						shippingMethodView.model.set( attribute, value );
+						shippingMethodView.model.logChanges( changes );
 				},
 				onUpdateZone: function( event ) {
 					var view      = event.data.view,
@@ -308,24 +322,30 @@
 						methods     = _.indexBy( model.get( 'methods' ), 'instance_id' ),
 						method      = methods[ instance_id ];
 
-					// Only load modal if supported
+					// Only load modal if supported.
 					if ( ! method.settings_html ) {
 						return true;
 					}
 
 					event.preventDefault();
 
+					method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
+
 					$( this ).WCBackboneModal({
 						template : 'wc-modal-shipping-method-settings',
 						variable : {
 							instance_id : instance_id,
-							method      : method
+							method      : method,
+							status	    : 'existing'
 						},
 						data : {
 							instance_id : instance_id,
-							method      : method
+							method      : method,
+							status	    : 'existing'
 						}
 					});
+
+					shippingMethodView.highlightOnFocus( '.wc-shipping-modal-price' );
 
 					$( document.body ).trigger( 'init_tooltips' );
 				},
@@ -365,6 +385,11 @@
 						);
 					}
 				},
+				onConfigureShippingMethodBack: function( event, target ) {
+					if ( 'wc-modal-shipping-method-settings' === target ) {
+						shippingMethodView.onAddShippingMethod( event );
+					}
+				},
 				showErrors: function( errors ) {
 					var error_html = '<div id="woocommerce_errors" class="error notice is-dismissible">';
 
@@ -374,6 +399,12 @@
 					error_html = error_html + '</div>';
 
 					$( 'table.wc-shipping-zone-methods' ).before( error_html );
+				},
+				highlightOnFocus: function( query ) {
+					const inputs = $( query );
+					inputs.focus( function() {
+						$( this ).select();
+					} );
 				},
 				onAddShippingMethod: function( event ) {
 					event.preventDefault();
@@ -386,10 +417,134 @@
 					});
 
 					$( '.wc-shipping-zone-method-selector select' ).trigger( 'change' );
+
+					$('.wc-shipping-zone-method-input input').change( function() {
+						const selected = $('.wc-shipping-zone-method-input input:checked');
+						const id = selected.attr( 'id' );
+						const description = $( `#${ id }-description` );
+						const descriptions = $( '.wc-shipping-zone-method-input-help-text' );
+						descriptions.css( 'display', 'none' );
+						description.css( 'display', 'block' );
+					});
 				},
-				onAddShippingMethodSubmitted: function( event, target, posted_data ) {
+				/**
+				 * The settings HTML is controlled and built by the settings api, so in order to refactor the 
+				 * markup, it needs to be manipulated here.
+				 */
+				reformatSettingsHTML: function( html ) {
+					const formattingFunctions = [
+						this.replaceHTMLTables,
+						this.moveAdvancedCostsHelpTip,
+						this.moveHTMLHelpTips,
+						this.addCurrencySymbol
+					];
+
+					return formattingFunctions.reduce( ( formattedHTML, fn ) => {
+						return fn( formattedHTML );
+					}, html );
+				},
+				moveAdvancedCostsHelpTip: function( html ) {
+					const htmlContent = $( html );
+					const advancedCostsHelpTip = htmlContent.find( '#wc-shipping-advanced-costs-help-text' );
+					advancedCostsHelpTip.addClass( 'wc-shipping-zone-method-fields-help-text' );
+
+					const input = htmlContent.find( '#woocommerce_flat_rate_cost' );
+					const fieldset = input.closest( 'fieldset' );
+					advancedCostsHelpTip.appendTo( fieldset );
+
+					return htmlContent.prop( 'outerHTML' );
+				},
+				addCurrencySymbol: function( html ) {
+					if ( ! window.wc.ShippingCurrencyContext || ! window.wc.ShippingCurrencyNumberFormat ) {
+						return html;
+					}
+					const htmlContent = $( html );
+					const priceInputs = htmlContent.find( '.wc-shipping-modal-price' );
+					const config = window.wc.ShippingCurrencyContext.getCurrencyConfig();
+					const { symbol, symbolPosition } = config;
+
+					priceInputs.addClass( `wc-shipping-currency-size-${ symbol.length }` );
+					priceInputs.addClass( `wc-shipping-currency-position-${ symbolPosition }` );
+					priceInputs.before( `<div class="wc-shipping-zone-method-currency wc-shipping-currency-position-${ symbolPosition }">${ symbol }</div>` );
+
+					priceInputs.each( ( i ) => {
+						const priceInput = $( priceInputs[ i ] );
+						const value = priceInput.attr( 'value' );
+						const formattedValue = window.wc.ShippingCurrencyNumberFormat( config, value );
+						priceInput.attr( 'value', formattedValue );
+					} );
+
+					return htmlContent.prop( 'outerHTML' );
+				},
+				moveHTMLHelpTips: function( html ) {
+					// These help tips aren't moved.
+					const helpTipsToRetain = [ 'woocommerce_flat_rate_cost', 'woocommerce_flat_rate_no_class_cost', 'woocommerce_flat_rate_class_cost_' ];
+
+					const htmlContent = $( html );
+					const labels = htmlContent.find( 'label' );
+					labels.each( ( i ) => {
+						const label = $( labels[ i ] );
+						const helpTip = label.find( '.woocommerce-help-tip' );
+
+						if ( helpTip.length === 0 ) {
+							return;
+						}
+
+						const id = label.attr( 'for' );
+
+						if ( helpTipsToRetain.some( ( tip ) => id.includes( tip ) ) ) {
+							const helpTip = htmlContent.find( `label[for=${ id }] span.woocommerce-help-tip` );
+							helpTip.addClass( 'wc-shipping-visible-help-text' );
+							return;
+						}
+
+						// woocommerce_free_shipping_ignore_discounts gets a helpTip appended to its label. Otherwise, add the text as the last element in the fieldset.
+						if ( id === 'woocommerce_free_shipping_ignore_discounts' ) {
+							const input = htmlContent.find( `#${ id }` );
+							const fieldset = input.closest( 'fieldset' );
+							const inputLabel = fieldset.find( 'label' );
+							inputLabel.append( helpTip );
+						} else {
+							const text = helpTip.data( 'tip' );
+							const input = htmlContent.find( `#${ id }` );
+							const fieldset = input.closest( 'fieldset' );
+
+							if ( fieldset.length && fieldset.find( '.wc-shipping-zone-method-fields-help-text' ).length === 0 ) {
+								fieldset.append( `<div class="wc-shipping-zone-method-fields-help-text">${ text }</div>` );
+							}
+						}
+
+						// Coupon discounts doesn't get a title on Free Shipping.
+						if ( label.text().trim() === 'Coupons discounts' ) {
+							label.text( '' );
+						}
+
+					} );
+
+					return htmlContent.prop( 'outerHTML' );
+				},
+				replaceHTMLTables: function ( html ) {
+					// Wrap the html content in a div
+					const htmlContent = $( '<div>' + html + '</div>' );
+
+					// `<table class="form-table" />` elements added by the Settings API need to be removed. 
+					// Modern browsers won't interpret other table elements like `td` not in a `table`, so 
+					// Removing the `table` is sufficient.
+					const innerTables = htmlContent.find( 'table.form-table' );
+					innerTables.each( ( i ) => {
+						const table = $( innerTables[ i ] );
+						const div = $( '<div class="wc-shipping-zone-method-fields" />' );
+						div.html( table.html() );
+						table.replaceWith( div );
+					} );
+
+					return htmlContent.prop('outerHTML');
+				},
+				onAddShippingMethodSubmitted: function( event, target, posted_data, closeModal ) {
 					if ( 'wc-modal-add-shipping-method' === target ) {
 						shippingMethodView.block();
+
+						$('#btn-next').addClass( 'is-busy' );
 
 						// Add method to zone via ajax call
 						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_add_method', {
@@ -408,26 +563,146 @@
 										);
 									}
 								}
-								// Trigger save if there are changes, or just re-render
-								if ( _.size( shippingMethodView.model.changes ) ) {
-									shippingMethodView.model.set( 'methods', response.data.methods );
-									shippingMethodView.model.trigger( 'change:methods' );
-									shippingMethodView.model.trigger( 'rerender' );
-								} else {
-									shippingMethodView.model.set( 'methods', response.data.methods );
-									shippingMethodView.model.trigger( 'change:methods' );
-									shippingMethodView.model.trigger( 'saved:methods' );
-								}
+
+								// Avoid triggering a rerender here because we don't want to show the method in the table in case merchant doesn't finish flow.
+								
+								shippingMethodView.model.set( 'methods', response.data.methods );
+
+								// Close original modal
+								closeModal();
 							}
+							var instance_id = response.data.instance_id, 
+							    method      = response.data.methods[ instance_id ];
+
 							shippingMethodView.unblock();
+
+							if ( method.settings_html ) {
+								method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
+
+								// Pop up next modal
+								$( this ).WCBackboneModal({
+									template : 'wc-modal-shipping-method-settings',
+									variable : {
+										instance_id : instance_id,
+										method      : method,
+										status	    : 'new'
+									},
+									data : {
+										instance_id : instance_id,
+										method      : method,
+										status	    : 'new'
+									}
+								});
+
+								shippingMethodView.highlightOnFocus( '.wc-shipping-modal-price' );
+							} else {
+								shippingMethodView.model.trigger( 'change:methods' );
+								shippingMethodView.model.trigger( 'saved:methods' );
+							}
+		
+							$( document.body ).trigger( 'init_tooltips' );
 						}, 'json' );
+					}
+				},
+				// Free Shipping has hidden field elements depending on data values.
+				possiblyHideFreeShippingRequirements: function( data ) {
+					if ( Object.keys( data ).includes( 'woocommerce_free_shipping_requires' ) ) {
+						const shouldHideRequirements = data.woocommerce_free_shipping_requires === null || 
+							data.woocommerce_free_shipping_requires === '' || 
+							data.woocommerce_free_shipping_requires === 'coupon';
+
+						const select = $( '#woocommerce_free_shipping_requires' );
+						const fieldset = select.closest( 'fieldset' );
+						const allOtherLabelElementsAfter = fieldset.nextAll( 'label' );
+						const allOtherFieldsetElementsAfter = fieldset.nextAll( 'fieldset' );
+
+						allOtherLabelElementsAfter.each( ( i ) => {
+							$( allOtherLabelElementsAfter[ i ] ).css( 'display', shouldHideRequirements ? 'none' : 'block' );
+						} );
+
+						allOtherFieldsetElementsAfter.each( ( i ) => {
+							$( allOtherFieldsetElementsAfter[ i ] ).css( 'display', shouldHideRequirements ? 'none' : 'block' );
+						} );
+					}
+				},
+				onModalLoaded: function( event, target ) {
+					if ( target === 'wc-modal-shipping-method-settings' ) {
+						const select = $( '#woocommerce_free_shipping_requires' );
+						if ( select.length > 0 ) {
+							event.data.view.possiblyHideFreeShippingRequirements( { woocommerce_free_shipping_requires: select.val() } );
+						}
+
+						event.data.view.possiblyAddShippingClassLink( event );
+					}
+				},
+				possiblyAddShippingClassLink: function( event ) {
+					const article = $( 'article.wc-modal-shipping-method-settings' );
+					const shippingClassesCount = article.data( 'shipping-classes-count' );
+					const status = article.data( 'status' );
+					const instance_id = article.data( 'id' );
+					const model = event.data.view.model;
+					const methods = _.indexBy( model.get( 'methods' ), 'instance_id' );
+					const method = methods[ instance_id ];
+
+					if ( method.id === 'flat_rate' && shippingClassesCount === 0 ) {
+						const link = article.find( '.wc-shipping-method-add-class-costs' );
+						link.css( 'display', 'block' );
+					}
+				},
+				validateFormArguments: function( event, target, data ) {
+					if ( target === 'wc-modal-add-shipping-method' ) {
+						if ( data.add_method_id ) {
+							const nextButton = document.getElementById( 'btn-next' );
+							nextButton.disabled = false;
+							nextButton.classList.remove( 'disabled' );
+						}
+					} else if ( target === 'wc-modal-shipping-method-settings' ) {
+						event.data.view.possiblyHideFreeShippingRequirements( data );
+					}
+				},
+				onCloseConfigureShippingMethod: function( event, target, post_data, addButtonCalled ) {
+					if ( target === 'wc-modal-shipping-method-settings' ) {
+						var btnData = $( '#btn-ok' ).data();
+
+						if ( ! addButtonCalled && btnData && btnData.status === 'new' ) {
+							shippingMethodView.block();
+
+							var view    = shippingMethodView,
+								model   = view.model,
+								methods   = _.indexBy( model.get( 'methods' ), 'instance_id' ),
+								changes = {},
+								instance_id = post_data.instance_id;
+
+							// Remove method to zone via ajax call
+							$.post( {
+								url: ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?') + 'action=woocommerce_shipping_zone_remove_method',
+								data: {
+									wc_shipping_zones_nonce: data.wc_shipping_zones_nonce,
+									instance_id: instance_id,
+									zone_id: data.zone_id,
+								},
+								success: function( { data } ) {
+									delete methods[instance_id];
+									changes.methods = changes.methods || data.methods;
+									model.set('methods', methods);
+									model.logChanges( changes );
+									view.clearUnloadConfirmation();
+									view.render();
+									shippingMethodView.unblock();
+								},
+								error: function( jqXHR, textStatus, errorThrown ) {
+									window.alert( data.strings.remove_method_failed );
+									shippingMethodView.unblock();
+								},
+								dataType: 'json'
+							});
+						}
 					}
 				},
 				onChangeShippingMethodSelector: function() {
 					var description = $( this ).find( 'option:selected' ).data( 'description' );
 					$( this ).parent().find( '.wc-shipping-zone-method-description' ).remove();
 					$( this ).after( '<div class="wc-shipping-zone-method-description">' + description + '</div>' );
-					$( this ).closest( 'article' ).height( $( this ).parent().height() );
 				},
 				onTogglePostcodes: function( event ) {
 					event.preventDefault();

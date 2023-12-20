@@ -1,4 +1,6 @@
-# WooCommerce Endpoints
+---
+post_title: WooCommerce Endpoints
+---
 
 **Note:** We are unable to provide support for customizations under our **[Support Policy](https://woo.com/support-policy/)**. If you need to further customize a snippet, or extend its functionality, we highly recommend [**Codeable**](https://codeable.io/?ref=z4Hnp), or a [**Certified WooExpert**](https://woo.com/experts/).
 

@@ -25,6 +25,7 @@ interface SelectTreeProps extends TreeControlProps {
 	treeRef?: React.ForwardedRef< HTMLOListElement >;
 	suffix?: JSX.Element | null;
 	isLoading?: boolean;
+	disabled?: boolean;
 	label: string | JSX.Element;
 	onInputChange?: ( value: string | undefined ) => void;
 	initialInputValue?: string | undefined;
@@ -36,6 +37,7 @@ export const SelectTree = function SelectTree( {
 	suffix = <SuffixIcon icon={ chevronDown } />,
 	placeholder,
 	isLoading,
+	disabled,
 	initialInputValue,
 	onInputChange,
 	shouldShowCreateButton,
@@ -98,6 +100,7 @@ export const SelectTree = function SelectTree( {
 		'aria-autocomplete': 'list',
 		'aria-controls': `${ props.id }-menu`,
 		autoComplete: 'off',
+		disabled,
 		onFocus: ( event ) => {
 			if ( ! isOpen ) {
 				setIsOpen( true );

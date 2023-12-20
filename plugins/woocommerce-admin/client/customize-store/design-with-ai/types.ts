@@ -39,6 +39,7 @@ export type designWithAiStateMachineContext = {
 	// If we require more data from options, previously provided core profiler details,
 	// we can retrieve them in preBusinessInfoDescription and then assign them here
 	spawnSaveDescriptionToOptionRef?: ReturnType< typeof spawn >;
+	aiOnline: boolean;
 };
 export type designWithAiStateMachineEvents =
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }

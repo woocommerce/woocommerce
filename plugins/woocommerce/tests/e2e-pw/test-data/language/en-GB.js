@@ -373,12 +373,12 @@ const en_GB = {
             element: '#search-inline-input-0',
             text: 'Move backward for selected items',
         },
-        {
-            name: 'Coupons',
-            heading: 'Coupons',
-            element: '.woocommerce-table__empty-item',
-            text: 'No data to display',
-        },
+        // {
+        //     name: 'Coupons',
+        //     heading: 'Coupons',
+        //     element: '.woocommerce-table__empty-item',
+        //     text: 'No data to display',
+        // },
         {
             name: 'Reports',
             heading: 'Orders',

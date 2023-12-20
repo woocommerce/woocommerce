@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WP_CLI;
@@ -63,6 +64,7 @@ class CLIRunner {
 		WP_CLI::add_command( 'wc cot verify_cot_data', array( $this, 'verify_cot_data' ) );
 		WP_CLI::add_command( 'wc cot enable', array( $this, 'enable' ) );
 		WP_CLI::add_command( 'wc cot disable', array( $this, 'disable' ) );
+		WP_CLI::add_command( 'wc hpos cleanup', array( $this, 'cleanup_post_data' ) );
 	}
 
 	/**
@@ -582,7 +584,8 @@ class CLIRunner {
 	 */
 	private function verify_meta_data( array $order_ids, array $failed_ids ) : array {
 		$meta_keys_to_ignore = array(
-			'_paid_date', // This is set by the CPT datastore but no longer used anywhere.
+			'_paid_date', // This has been deprecated and replaced by '_date_paid' in the CPT datastore.
+			'_completed_date', // This has been deprecated and replaced by '_date_completed' in the CPT datastore.
 			'_edit_lock',
 		);
 
@@ -859,6 +862,101 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				WP_CLI::success( __( 'Sync disabled.', 'woocommerce' ) );
 			}
 		}
+	}
+
+	/**
+	 * When HPOS is enabled, this command lets you remove redundant data from the postmeta table for migrated orders.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <all|id|range>...
+	 * : ID or range of orders to clean up.
+	 *
+	 * [--batch-size=<batch-size>]
+	 * : Number of orders to process per batch. Applies only to cleaning up of 'all' orders.
+	 * ---
+	 * default: 500
+	 * ---
+	 *
+	 * [--force]
+	 * : When true, post meta will be cleaned up even if the post appears to have been updated more recently than the order.
+	 * ---
+	 * default: false
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *    # Cleanup post data for order 314.
+	 *    $ wp wc hpos cleanup 314
+	 *
+	 *    # Cleanup postmeta for orders with IDs betweeen 10 and 100 and order 314.
+	 *    $ wp wc hpos cleanup 10-100 314
+	 *
+	 *    # Cleanup postmeta for all orders.
+	 *    wp wc hpos cleanup all
+	 *
+	 *    # Cleanup postmeta for all orders with a batch size of 200 (instead of the default 500).
+	 *    wp wc hpos cleanup all --batch-size=200
+	 *
+	 * @param array $args       Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
+	 * @return void
+	 */
+	public function cleanup_post_data( array $args = array(), array $assoc_args = array() ) {
+		if ( ! $this->synchronizer->custom_orders_table_is_authoritative() || $this->synchronizer->data_sync_is_enabled() ) {
+			WP_CLI::error( __( 'Cleanup can only be performed when HPOS is active and compatibility mode is disabled.', 'woocommerce' ) );
+		}
+		$handler = wc_get_container()->get( LegacyDataHandler::class );
+
+		$all_orders  = 'all' === $args[0];
+		$force       = (bool) ( $assoc_args['force'] ?? false );
+		$q_order_ids = $all_orders ? array() : $args;
+		$q_limit     = $all_orders ? absint( $assoc_args['batch-size'] ?? 500 ) : 0; // Limit per batch.
+
+		$order_count = $handler->count_orders_for_cleanup( $q_order_ids );
+		if ( ! $order_count ) {
+			WP_CLI::warning( __( 'No orders to cleanup.', 'woocommerce' ) );
+			return;
+		}
+
+		$progress = WP_CLI\Utils\make_progress_bar( __( 'HPOS cleanup', 'woocommerce' ), $order_count );
+		$count    = 0;
+
+		// translators: %d is the number of orders to clean up.
+		WP_CLI::log( sprintf( _n( 'Starting cleanup for %d order...', 'Starting cleanup for %d orders...', $order_count, 'woocommerce' ), $order_count ) );
+
+		do {
+			$order_ids = $handler->get_orders_for_cleanup( $q_order_ids, $q_limit );
+
+			foreach ( $order_ids as $order_id ) {
+				try {
+					$handler->cleanup_post_data( $order_id, $force );
+					$count++;
+
+					// translators: %d is an order ID.
+					WP_CLI::debug( sprintf( __( 'Cleanup completed for order %d.', 'woocommerce' ), $order_id ) );
+				} catch ( \Exception $e ) {
+					// translators: %1$d is an order ID, %2$s is an error message.
+					WP_CLI::warning( sprintf( __( 'An error occurred while cleaning up order %1$d: %2$s', 'woocommerce' ), $order_id, $e->getMessage() ) );
+				}
+
+				$progress->tick();
+			}
+
+			if ( ! $all_orders ) {
+				break;
+			}
+		} while ( $order_ids );
+
+		$progress->finish();
+
+		WP_CLI::success(
+			sprintf(
+				// translators: %d is the number of orders that were cleaned up.
+				_n( 'Cleanup completed for %d order.', 'Cleanup completed for %d orders.', $count, 'woocommerce' ),
+				$count
+			)
+		);
 	}
 
 }

@@ -132,7 +132,7 @@ const variations2 = [
 	},
 ];
 
-let variableProductId;
+let variableProductId, totalPrice;
 
 test.describe( 'Variable Product Page', () => {
 	const slug = variableProductName.replace( / /gi, '-' ).toLowerCase();
@@ -197,7 +197,7 @@ test.describe( 'Variable Product Page', () => {
 				.selectOption( attr.attributes[ 0 ].option );
 			await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
 			await expect(
-				page.locator( '.woocommerce-message' )
+				page.locator( '.is-success' )
 			).toContainText( getTranslationFor( 'has been added to your cart.' ) );
 		}
 
@@ -205,8 +205,18 @@ test.describe( 'Variable Product Page', () => {
 		await expect(
 			page.locator( 'td.product-name >> nth=0' )
 		).toContainText( variableProductName );
-		await expect( page.locator( 'tr.order-total > td' ) ).toContainText(
-			( +productPrice * 10 ).toString()
+
+		totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( productPrice * 10 )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( productPrice * 10 * 1.25 )
 		);
 	} );
 
@@ -220,7 +230,7 @@ test.describe( 'Variable Product Page', () => {
 		await page.goto( 'cart/' );
 		await page.locator( 'a.remove' ).click();
 
-		await expect( page.locator( '.cart-empty' ) ).toContainText(
+		await expect( page.locator( '.is-info' ) ).toContainText(
 			getTranslationFor( 'Your cart is currently empty.' )
 		);
 	} );
@@ -292,19 +302,52 @@ test.describe( 'Shopper > Update variable product', () => {
 		await page.locator( '#size' ).selectOption( 'Small' );
 
 		await page.locator( '#colour' ).selectOption( 'Red' );
-		await expect(
-			page.locator( '.woocommerce-variation-price' )
-		).toContainText( productPrice );
+
+		// handling assertion this way because taxes may or may not be enabled
+		totalPrice = await page
+			.locator( '.woocommerce-variation-price' )
+			.last()
+			.locator( 'bdi' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( productPrice )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( productPrice * 1.25 )
+		);
 
 		await page.locator( '#colour' ).selectOption( 'Green' );
-		await expect(
-			page.locator( '.woocommerce-variation-price' )
-		).toContainText( productPrice );
+
+		// handling assertion this way because taxes may or may not be enabled
+		totalPrice = await page
+			.locator( '.woocommerce-variation-price' )
+			.last()
+			.locator( 'bdi' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( productPrice )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( productPrice * 1.25 )
+		);
 
 		await page.locator( '#colour' ).selectOption( 'Blue' );
-		await expect(
-			page.locator( '.woocommerce-variation-price' )
-		).toContainText( productPrice );
+
+		// handling assertion this way because taxes may or may not be enabled
+		totalPrice = await page
+			.locator( '.woocommerce-variation-price' )
+			.last()
+			.locator( 'bdi' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( productPrice )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( productPrice * 1.25 )
+		);
 	} );
 
 	test( 'Shopper can change attributes to combination with dimensions and weight', async ( {
@@ -315,9 +358,20 @@ test.describe( 'Shopper > Update variable product', () => {
 		await page.locator( '#colour' ).selectOption( 'Red' );
 
 		await page.locator( '#size' ).selectOption( 'Small' );
-		await expect(
-			page.locator( '.woocommerce-variation-price' )
-		).toContainText( productPrice );
+
+		totalPrice = await page
+			.locator( '.woocommerce-variation-price' )
+			.last()
+			.locator( 'bdi' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( productPrice )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( productPrice * 1.25 )
+		);
+
 		await expect(
 			page.locator( '.woocommerce-product-attributes-item--weight' )
 		).toContainText( getTranslationFor('100 kg') );
@@ -326,9 +380,20 @@ test.describe( 'Shopper > Update variable product', () => {
 		).toContainText( getTranslationFor('5 × 10 × 10 cm') );
 
 		await page.locator( '#size' ).selectOption( 'XLarge' );
-		await expect(
-			page.locator( '.woocommerce-variation-price' )
-		).toContainText( ( +productPrice * 2 ).toString() );
+
+		totalPrice = await page
+			.locator( '.woocommerce-variation-price' )
+			.last()
+			.locator( 'bdi' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( productPrice * 2 )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( productPrice * 2 * 1.25 )
+		);
+
 		await expect(
 			page.locator( '.woocommerce-product-attributes-item--weight' )
 		).toContainText( getTranslationFor('400 kg') );
@@ -345,24 +410,64 @@ test.describe( 'Shopper > Update variable product', () => {
 		await page.locator( '#colour' ).selectOption( 'Red' );
 
 		await page.locator( '#size' ).selectOption( 'Small' );
-		await expect(
-			page.locator( '.woocommerce-variation-price' )
-		).toContainText( productPrice );
+
+		totalPrice = await page
+			.locator( '.woocommerce-variation-price' )
+			.last()
+			.locator( 'bdi' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( productPrice )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( productPrice * 1.25 )
+		);
 
 		await page.locator( '#size' ).selectOption( 'Medium' );
-		await expect(
-			page.locator( '.woocommerce-variation-price' )
-		).toContainText( productPrice );
+
+		totalPrice = await page
+			.locator( '.woocommerce-variation-price' )
+			.last()
+			.locator( 'bdi' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( productPrice )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( productPrice * 1.25 )
+		);
 
 		await page.locator( '#size' ).selectOption( 'Large' );
-		await expect(
-			page.locator( '.woocommerce-variation-price' )
-		).toContainText( ( +productPrice * 2 ).toString() );
+
+		totalPrice = await page
+			.locator( '.woocommerce-variation-price' )
+			.last()
+			.locator( 'bdi' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( productPrice * 2 )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( productPrice * 2 * 1.25 )
+		);
 
 		await page.locator( '#size' ).selectOption( 'XLarge' );
-		await expect(
-			page.locator( '.woocommerce-variation-price' )
-		).toContainText( ( +productPrice * 2 ).toString() );
+
+		totalPrice = await page
+			.locator( '.woocommerce-variation-price' )
+			.last()
+			.locator( 'bdi' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( productPrice * 2 )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( productPrice * 2 * 1.25 )
+		);
 	} );
 
 	test( 'Shopper can reset variations', async ( { page } ) => {
@@ -371,9 +476,19 @@ test.describe( 'Shopper > Update variable product', () => {
 		await page.locator( '#colour' ).selectOption( 'Red' );
 
 		await page.locator( '#size' ).selectOption( 'Small' );
-		await expect(
-			page.locator( '.woocommerce-variation-price' )
-		).toContainText( productPrice );
+
+		totalPrice = await page
+			.locator( '.woocommerce-variation-price' )
+			.last()
+			.locator( 'bdi' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( productPrice )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( productPrice * 1.25 )
+		);
 
 		await page.locator( 'a.reset_variations' ).click();
 

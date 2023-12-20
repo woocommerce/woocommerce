@@ -76,7 +76,7 @@ test.describe( 'Add product attributes', () => {
 					await expect(
 						page.getByRole( 'heading', {
 							name: getTranslationFor( 'New attribute' ),
-						} )
+						} ).first()
 					).toBeVisible();
 				} );
 			}
@@ -150,7 +150,7 @@ test.describe( 'Add product attributes', () => {
 			await test.step( `Expect "${ attributeName }" to appear on the list of saved attributes, and expand it.`, async () => {
 				const heading_attributeName = page.getByRole( 'heading', {
 					name: attributeName,
-				} );
+				} ).last();
 
 				await expect( heading_attributeName ).toBeVisible();
 				await heading_attributeName.click();

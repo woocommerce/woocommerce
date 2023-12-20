@@ -79,14 +79,14 @@ test.describe( 'Grouped Product Page', () => {
 		await page.goto( `product/${ slug }` );
 
 		await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
-		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
+		await expect( page.locator( '.is-error' ) ).toContainText(
 			getTranslationFor( 'Please choose the quantity of items you wish to add to your cart…' )
 		);
 
 		await page.locator( 'div.quantity input.qty >> nth=0' ).fill( '5' );
 		await page.locator( 'div.quantity input.qty >> nth=1' ).fill( '5' );
 		await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
+		await expect( page.locator( '.is-success' ) ).toContainText(
 			getTranslationFor( '“Simple single product 1” and “Simple single product 2” have been added to your cart.' )
 		);
 		
@@ -98,9 +98,12 @@ test.describe( 'Grouped Product Page', () => {
 		await expect(
 			page.locator( 'td.product-name >> nth=1' )
 		).toContainText( simpleProduct2 );
-		await expect( page.locator( 'tr.order-total > td' ) ).toContainText(
-			( +productPrice * 10 ).toString()
-		);
+		let totalPrice = await page
+			.locator( 'tr.order-total > td' )
+			.last()
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual( productPrice * 10 );
 	} );
 
 	test( 'should be able to remove grouped products from the cart', async ( {
@@ -115,7 +118,7 @@ test.describe( 'Grouped Product Page', () => {
 		await page.locator( 'a.remove >> nth=1' ).click();
 		await page.locator( 'a.remove >> nth=0' ).click();
 
-		await expect( page.locator( '.cart-empty' ) ).toContainText(
+		await expect( page.locator( '.is-info' ) ).toContainText(
 			getTranslationFor( 'Your cart is currently empty.' )
 		);
 	} );

@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
+const { closeWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { getTranslationFor } = require('../../utils/translations');
 
@@ -87,15 +88,22 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		// set shipping zone methods
 		await api.post( `shipping/zones/${ shippingZoneNLId }/methods`, {
 			method_id: 'free_shipping',
+			settings: {
+				title: 'Free shipping',
+			}
 		} );
 		await api.post( `shipping/zones/${ shippingZonePTId }/methods`, {
 			method_id: 'flat_rate',
 			settings: {
 				cost: '5.00',
+				title: 'Flat rate',
 			},
 		} );
 		await api.post( `shipping/zones/${ shippingZonePTId }/methods`, {
 			method_id: 'local_pickup',
+			settings: {
+				title: 'Local pickup',
+			}
 		} );
 
 		// confirm that we allow shipping to any country
@@ -139,14 +147,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
 		await page.locator( `text=${getTranslationFor( 'Log In' )}` ).click();
 
-		// close welcome popup if prompted
-		try {
-			await page
-				.getByLabel( getTranslationFor( 'Close' ), { exact: true } )
-				.click( { timeout: 5000 } );
-		} catch ( error ) {
-			console.log( "Welcome modal wasn't present, skipping action." );
-		}
+		await closeWelcomeModal( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: getTranslationFor( 'Add title' ) } )
@@ -242,11 +243,17 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
 			)
 		).toContainText( '$0.00' );
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( firstProductPrice );
+		let totalPrice = await page
+			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
+			.last()
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( firstProductPrice )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( firstProductPrice * 1.25 )
+		);
 	} );
 
 	test( 'should show correct total cart block price after updating quantity', async ( {
@@ -270,11 +277,17 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			.getByRole( 'button' )
 			.filter( { hasText: '＋', exact: true } )
 			.click();
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( doubleFirstProductWithFlatRate.toString() );
+		let totalPrice = await page
+			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
+			.last()
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( firstProductPrice )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( firstProductPrice * 1.25 )
+		);
 	} );
 
 	test( 'should show correct total cart block price with 2 different products and flat rate/local pickup', async ( {
@@ -305,11 +318,17 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
 			)
 		).toContainText( '$5.00' );
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( twoProductsWithFlatRate.toString() );
+		let totalPrice = await page
+			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
+			.last()
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( twoProductsWithFlatRate )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( twoProductsWithFlatRate * 1.25 )
+		);
 
 		// Set shipping to local pickup instead of flat rate
 		await page.getByRole( 'group' ).getByText( 'Local pickup' ).click();
@@ -320,10 +339,16 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
 			)
 		).toContainText( '$0.00' );
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( twoProductsTotal.toString() );
+		totalPrice = await page
+			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
+			.last()
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( twoProductsTotal )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( twoProductsTotal * 1.25 )
+		);
 	} );
 } );

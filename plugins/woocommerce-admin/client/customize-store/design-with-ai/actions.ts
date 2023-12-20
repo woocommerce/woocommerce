@@ -130,7 +130,7 @@ const assignFontPairing = assign<
 				fontPairing = 'Bodoni Moda + Overpass';
 				break;
 			case choice === 'Bold':
-				fontPairing = 'Plus Jakarta Sans + Plus Jakarta Sans';
+				fontPairing = 'Rubik + Inter';
 				break;
 		}
 
@@ -335,6 +335,33 @@ const redirectToAssemblerHub = async (
 	};
 
 	document.body.appendChild( iframe );
+
+	// Listen for back button click
+	window.addEventListener(
+		'popstate',
+		() => {
+			const apiLoaderUrl = getNewPath(
+				{},
+				'/customize-store/design-with-ai/api-call-loader',
+				{}
+			);
+
+			// Only catch the back button click when the user is on the main assember hub page
+			// and trying to go back to the api loader page
+			if ( 'admin.php' + window.location.search === apiLoaderUrl ) {
+				iframe.contentWindow?.postMessage(
+					{
+						type: 'assemberBackButtonClicked',
+					},
+					'*'
+				);
+				// When the user clicks the back button, push state changes to the previous step
+				// Set it back to the assember hub
+				window.history?.pushState( {}, '', assemblerUrl );
+			}
+		},
+		false
+	);
 };
 
 export const actions = {

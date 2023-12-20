@@ -421,7 +421,10 @@ class WC_Checkout {
 				}
 			}
 
-			$order->hold_applied_coupons( $data['billing_email'] );
+			if ( isset( $data['billing_email'] ) ) {
+				$order->hold_applied_coupons( $data['billing_email'] );
+			}
+
 			$order->set_created_via( 'checkout' );
 			$order->set_cart_hash( $cart_hash );
 			/**

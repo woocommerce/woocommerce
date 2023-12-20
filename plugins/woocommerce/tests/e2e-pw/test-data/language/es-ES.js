@@ -377,12 +377,12 @@ const es_ES = {
             element: '#search-inline-input-0',
             text: 'Retrocede a los artículos seleccionados',
         },
-        {
-            name: 'Cupones',
-            heading: 'Cupones',
-            element: '.woocommerce-table__empty-item',
-            text: 'No hay datos para mostrar',
-        },
+        // {
+        //     name: 'Cupones',
+        //     heading: 'Cupones',
+        //     element: '.woocommerce-table__empty-item',
+        //     text: 'No hay datos para mostrar',
+        // },
         {
             name: 'Informes',
             heading: 'Pedidos',

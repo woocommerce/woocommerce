@@ -65,7 +65,7 @@ test.describe( 'Customer can manage addresses in My Account > Addresses page', (
 		await page.locator( `text=${getTranslationFor( 'Save address' )}` ).click();
 
 		// verify billing address has been applied
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
+		await expect( page.locator( '.is-success' ) ).toContainText(
 			getTranslationFor( 'Address changed successfully.' )
 		);
 		await expect(
@@ -111,7 +111,7 @@ test.describe( 'Customer can manage addresses in My Account > Addresses page', (
 		await page.locator( `text=${getTranslationFor( 'Save address' )}` ).click();
 
 		// verify shipping address has been applied
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
+		await expect( page.locator( '.is-success' ) ).toContainText(
 			getTranslationFor( 'Address changed successfully.' )
 		);
 		await expect(

@@ -43,6 +43,30 @@ function HighlightTooltip( {
 	);
 	const [ node, setNode ] = useState( null );
 	const [ anchorRect, setAnchorRect ] = useState( null );
+	const showTooltip = ( container ) => {
+		const element = document.getElementById( id );
+		if ( element && useAnchor ) {
+			setAnchorRect( element.getBoundingClientRect() );
+		}
+		if ( container ) {
+			container.classList.add( SHOW_CLASS );
+		}
+		setShowHighlight( true );
+		onShow();
+	};
+
+	const triggerShowTooltip = ( container ) => {
+		let timeoutId = null;
+		if ( delay > 0 ) {
+			timeoutId = setTimeout( () => {
+				timeoutId = null;
+				showTooltip( container );
+			}, delay );
+		} else if ( ! showHighlight ) {
+			showTooltip( container );
+		}
+		return timeoutId;
+	};
 
 	useEffect( () => {
 		const element = document.getElementById( id );
@@ -93,11 +117,6 @@ function HighlightTooltip( {
 		}
 	}, [ show ] );
 
-	useLayoutEffect( () => {
-		window.addEventListener( 'resize', updateSize );
-		return () => window.removeEventListener( 'resize', updateSize );
-	}, [] );
-
 	function updateSize() {
 		if ( useAnchor ) {
 			const element = document.getElementById( id );
@@ -105,30 +124,10 @@ function HighlightTooltip( {
 		}
 	}
 
-	const triggerShowTooltip = ( container ) => {
-		let timeoutId = null;
-		if ( delay > 0 ) {
-			timeoutId = setTimeout( () => {
-				timeoutId = null;
-				showTooltip( container );
-			}, delay );
-		} else if ( ! showHighlight ) {
-			showTooltip( container );
-		}
-		return timeoutId;
-	};
-
-	const showTooltip = ( container ) => {
-		const element = document.getElementById( id );
-		if ( element && useAnchor ) {
-			setAnchorRect( element.getBoundingClientRect() );
-		}
-		if ( container ) {
-			container.classList.add( SHOW_CLASS );
-		}
-		setShowHighlight( true );
-		onShow();
-	};
+	useLayoutEffect( () => {
+		window.addEventListener( 'resize', updateSize );
+		return () => window.removeEventListener( 'resize', updateSize );
+	}, [] );
 
 	const triggerClose = () => {
 		setShowHighlight( false );

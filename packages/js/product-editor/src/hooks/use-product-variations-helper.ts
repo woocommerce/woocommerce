@@ -60,14 +60,19 @@ export function useProductVariationsHelper() {
 	);
 	const [ _isGenerating, setIsGenerating ] = useState( false );
 
-	const { isGeneratingVariations } = useSelect(
+	const { isGeneratingVariations, generateError } = useSelect(
 		( select ) => {
-			const { isGeneratingVariations: getIsGeneratingVariations } =
-				select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			const {
+				isGeneratingVariations: getIsGeneratingVariations,
+				generateProductVariationsError,
+			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 			return {
 				isGeneratingVariations: getIsGeneratingVariations<
 					boolean | undefined
 				>( {
+					product_id: productId,
+				} ),
+				generateError: generateProductVariationsError( {
 					product_id: productId,
 				} ),
 			};
@@ -99,6 +104,7 @@ export function useProductVariationsHelper() {
 
 		await Promise.all(
 			variations.map( ( variationId ) =>
+				// @ts-expect-error There are no types for this.
 				dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 					'postType',
 					'product_variation',
@@ -130,6 +136,7 @@ export function useProductVariationsHelper() {
 				}
 			)
 			.then( async ( response ) => {
+				// @ts-expect-error There are no types for this.
 				await dispatch( 'core' ).invalidateResolution(
 					'getEntityRecord',
 					[ 'postType', 'product', productId ]
@@ -163,5 +170,6 @@ export function useProductVariationsHelper() {
 	return {
 		generateProductVariations,
 		isGenerating,
+		generateError,
 	};
 }

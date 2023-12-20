@@ -11,10 +11,13 @@ import {
 	DropZone,
 	Button,
 	Spinner,
+	DropdownMenu,
+	MenuGroup,
+	MenuItem,
 } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useViewportMatch } from '@wordpress/compose';
-import { Icon, upload } from '@wordpress/icons';
+import { Icon, upload, moreVertical } from '@wordpress/icons';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 
@@ -71,14 +74,14 @@ const useLogoEdit = ( {
 	// @ts-ignore No types for this exist yet.
 	const { editEntityRecord } = useDispatch( coreStore );
 
-	const setIcon = ( newValue: string | undefined ) =>
+	const setIcon = ( newValue: string | undefined | null ) =>
 		// The new value needs to be `null` to reset the Site Icon.
 		editEntityRecord( 'root', 'site', undefined, {
 			site_icon: newValue ?? null,
 		} );
 
 	const setLogo = (
-		newValue: string | undefined,
+		newValue: string | undefined | null,
 		shouldForceSync = false
 	) => {
 		// `shouldForceSync` is used to force syncing when the attribute
@@ -125,8 +128,12 @@ const useLogoEdit = ( {
 		onSelectLogo( media );
 	};
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore The types for this are incorrect.
 	const { createErrorNotice } = useDispatch( noticesStore );
 	const onUploadError = ( message: string ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore The types for this are incorrect.
 		createErrorNotice( message, { type: 'snackbar' } );
 	};
 
@@ -144,11 +151,17 @@ const useLogoEdit = ( {
 		} );
 	};
 
+	const onRemoveLogo = () => {
+		setLogo( null );
+		setAttributes( { width: undefined } );
+	};
+
 	return {
 		onFilesDrop,
 		onInitialSelectLogo,
 		setIcon,
 		siteIconId,
+		onRemoveLogo,
 	};
 };
 
@@ -408,6 +421,12 @@ export const SidebarNavigationScreenLogo = () => {
 			updateBlockAttributes( clientId, newAttributes )
 		);
 	};
+
+	const { onInitialSelectLogo, onRemoveLogo } = useLogoEdit( {
+		shouldSyncIcon: attributes.shouldSyncIcon,
+		setAttributes,
+	} );
+
 	const isLoading =
 		siteLogoId === undefined ||
 		isRequestingMediaItem ||
@@ -422,8 +441,76 @@ export const SidebarNavigationScreenLogo = () => {
 			) }
 			content={
 				<div className="woocommerce-customize-store__sidebar-logo-content">
-					<div className="woocommerce-customize-store__sidebar-group-header">
-						{ __( 'Logo', 'woocommerce' ) }
+					<div className="woocommerce-customize-store__sidebar-group-header woocommerce-customize-store__logo-header-container">
+						<span>{ __( 'Logo', 'woocommerce' ) }</span>
+						{ siteLogoId && (
+							<DropdownMenu
+								icon={ moreVertical }
+								label={ __( 'Options', 'woocommerce' ) }
+								className="woocommerce-customize-store__logo-dropdown-menu"
+								popoverProps={ {
+									className:
+										'woocommerce-customize-store__logo-dropdown-popover',
+									// @ts-expect-error outdated TS.
+									placement: 'bottom-end',
+								} }
+							>
+								{ ( { onClose } ) => (
+									<>
+										<MenuGroup className="woocommerce-customize-store__logo-menu-group">
+											<MediaUploadCheck>
+												<MediaUpload
+													onSelect={ (
+														media: Parameters<
+															typeof onInitialSelectLogo
+														>[ 0 ]
+													) => {
+														onInitialSelectLogo(
+															media
+														);
+														onClose();
+													} }
+													allowedTypes={
+														ALLOWED_MEDIA_TYPES
+													}
+													render={ ( {
+														open,
+													}: {
+														open: () => void;
+													} ) => (
+														<MenuItem
+															onClick={ () => {
+																open();
+															} }
+														>
+															{ __(
+																'Replace',
+																'woocommerce'
+															) }
+														</MenuItem>
+													) }
+												/>
+											</MediaUploadCheck>
+										</MenuGroup>
+
+										<MenuGroup className="woocommerce-customize-store__logo-menu-group">
+											<MenuItem
+												className="woocommerce-customize-store__logo-menu-item-delete"
+												onClick={ () => {
+													onClose();
+													onRemoveLogo();
+												} }
+											>
+												{ __(
+													'Delete',
+													'woocommerce'
+												) }
+											</MenuItem>
+										</MenuGroup>
+									</>
+								) }
+							</DropdownMenu>
+						) }
 					</div>
 					<LogoEdit
 						siteLogoId={ siteLogoId }

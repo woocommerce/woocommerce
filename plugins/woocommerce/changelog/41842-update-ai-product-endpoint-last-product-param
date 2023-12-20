@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Customize Your Store: Update the call to the the AI product endpoint to add the new last_product param to the request.

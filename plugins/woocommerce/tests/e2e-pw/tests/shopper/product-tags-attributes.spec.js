@@ -3,6 +3,7 @@ const { admin } = require( '../../test-data/data' );
 const { getTranslationFor } = require('../../utils/translations');
 const { get } = require('http');
 const pageTitle = 'Product Showcase';
+const { goToPageEditor } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const singleProductPrice1 = '5.00';
@@ -267,17 +268,7 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 
 	test( 'can see products showcase', async ( { page } ) => {
 		// create as a merchant a new page with Products block
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-		const welcomeModalVisible = await page
-			.getByRole( 'heading', {
-				name: getTranslationFor( 'Welcome to the block editor'),
-			} )
-			.isVisible();
-
-		if ( welcomeModalVisible ) {
-			await page.getByRole( 'button', { name: getTranslationFor( 'Close' ) } ).click();
-		}
+		await goToPageEditor( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: getTranslationFor( 'Add Title' ) } )

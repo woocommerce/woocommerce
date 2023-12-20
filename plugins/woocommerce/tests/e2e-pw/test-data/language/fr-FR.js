@@ -357,12 +357,12 @@ const fr_FR = {
 			element: '#search-inline-input-0',
             text: 'Revenir aux articles sélectionnés',
 		},
-		{
-			name: 'Codes promo',
-			heading: 'Codes promo',
-			element: '.woocommerce-table__empty-item',
-            text: 'Aucune donnée à afficher.',
-		},
+		// {
+		// 	name: 'Codes promo',
+		// 	heading: 'Codes promo',
+		// 	element: '.woocommerce-table__empty-item',
+        //     text: 'Aucune donnée à afficher.',
+		// },
 		{
 			name: 'Rapports',
 			heading: 'Commandes',

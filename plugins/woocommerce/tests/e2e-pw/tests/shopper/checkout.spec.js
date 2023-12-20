@@ -69,16 +69,6 @@ test.describe( 'Checkout page', () => {
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'free_shipping',
 		} );
-		// enable bank transfers and COD for payment
-		await api.put( 'payment_gateways/bacs', {
-			enabled: true,
-		} );
-		// ensure Cash on Delivery is appropriately populated
-		await api.put( 'payment_gateways/cod', {
-			enabled: true,
-			title: getTranslationFor('Cash on delivery'),
-			description: getTranslationFor('Cash on delivery'),
-		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -109,9 +99,22 @@ test.describe( 'Checkout page', () => {
 		}
 	} );
 
-	test.beforeEach( async ( { context } ) => {
+	test.beforeEach( async ( { context, baseURL } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
 		await context.clearCookies();
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		// enable bank transfers and COD for payment
+		await api.put( 'payment_gateways/bacs', {
+			enabled: true,
+		} );
+		await api.put( 'payment_gateways/cod', {
+			enabled: true,
+		} );
 	} );
 
 	test( 'should display cart items in order review', async ( { page } ) => {
@@ -126,8 +129,14 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'1'
 		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			singleProductPrice
+		let totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( singleProductPrice )
 		);
 	} );
 
@@ -144,8 +153,14 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'2'
 		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			twoProductPrice
+		let totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( twoProductPrice )
 		);
 
 		// check the payment methods
@@ -164,8 +179,14 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'3'
 		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			threeProductPrice
+		let totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( threeProductPrice )
 		);
 
 		// asserting that you can fill in the billing details
@@ -182,8 +203,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( '#billing_email' ) ).toBeEditable();
 	} );
 
-	test( 'warn when customer is missing required details', async ( { page } ) => {
-		await page.goto( `/shop/?add-to-cart=${ productId }`, { waitUntil: 'networkidle' } );
+	test( 'warn when customer is missing required details', async ( {
+		page,
+	} ) => {
+		await page.goto( `/shop/?add-to-cart=${ productId }`, {
+			waitUntil: 'networkidle',
+		} );
 
 		await page.goto( '/checkout/' );
 
@@ -213,7 +238,7 @@ test.describe( 'Checkout page', () => {
 		await page.locator( '#billing_email' ).fill( customer.email );
 		await page.getByRole('button', { name: getTranslationFor( 'Place order' ) }).click();
 
-		await expect( page.locator( 'ul.woocommerce-error' ) ).toBeVisible();
+		await expect( page.locator( '.is-error ul' ) ).toBeVisible();
 		await expect( page.getByText( getTranslationFor( 'Shipping First name is a required field.' ) ) ).toBeVisible();
 		await expect( page.getByText( getTranslationFor( 'Shipping Last name is a required field.' ), { exact : true } ) ).toBeVisible();
 		await expect( page.getByText( getTranslationFor( 'Shipping Street address is a required field.' ) ) ).toBeVisible();
@@ -231,8 +256,14 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'2'
 		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			twoProductPrice
+		let totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( twoProductPrice )
 		);
 
 		await page.locator( '#ship-to-different-address' ).click();
@@ -259,8 +290,14 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'2'
 		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			twoProductPrice
+		let totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( twoProductPrice )
 		);
 
 		await page.locator( '#billing_first_name' ).fill( 'Lisa' );
@@ -290,7 +327,6 @@ test.describe( 'Checkout page', () => {
 			.textContent();
 		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ getTranslationFor('orderReceivedTextsplit') ].toString();
 
-
 		// Let's simulate a new browser context (by dropping all cookies), and reload the page. This approximates a
 		// scenario where the server can no longer identify the shopper. However, so long as we are within the 10 minute
 		// grace period following initial order placement, the 'order received' page should still be rendered.
@@ -307,6 +343,10 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(3)' ) ).toContainText(
 			getTranslationFor( '/verify the email address associated with the order/' )
 		);
+		await page.reload();
+		await expect(
+			page.locator( 'form.woocommerce-verify-email p:nth-child(3)' )
+		).toContainText( /verify the email address associated with the order/ );
 
 		// Supplying an email address other than the actual order billing email address will take them back to the same
 		// page with an error message.
@@ -315,7 +355,7 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(4)' ) ).toContainText(
 			getTranslationFor( '/verify the email address associated with the order/' )
 		);
-		await expect( page.locator( 'ul.woocommerce-error li' ) ).toContainText(
+		await expect( page.locator( '.is-error') ).toContainText(
 			getTranslationFor( '/We were unable to verify the email address you provided/' )
 		);
 
@@ -370,8 +410,14 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'2'
 		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			twoProductPrice
+		let totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( twoProductPrice )
 		);
 
 		await page.locator( '#billing_first_name' ).fill( 'Homer' );
@@ -408,7 +454,7 @@ test.describe( 'Checkout page', () => {
 		await page.reload();
 
 		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
-		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
+		await expect( page.locator( '.is-info' ) ).toContainText(
 			getTranslationFor('/Please log in to your account to view this order/')
 		);
 

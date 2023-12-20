@@ -23,6 +23,9 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                install: true
+                build: './tools/package-release'
 
             - name: Execute script
               run: ./tools/package-release/bin/dev prepare ${{ github.event.inputs.packages }}
@@ -32,7 +35,7 @@ jobs:
 
             - name: Get current date
               id: date
-              run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+              run: echo "date=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
 
             - name: Set all package string
               id: all_description

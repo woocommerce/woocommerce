@@ -27,6 +27,8 @@ export type NumberProps = {
 	onBlur?: () => void;
 	required?: boolean;
 	tooltip?: string;
+	disabled?: boolean;
+	step?: number;
 };
 
 export const NumberControl: React.FC< NumberProps > = ( {
@@ -40,6 +42,8 @@ export const NumberControl: React.FC< NumberProps > = ( {
 	required,
 	tooltip,
 	placeholder,
+	disabled,
+	step,
 }: NumberProps ) => {
 	const inputProps = useNumberInputProps( {
 		value: value || '',
@@ -65,6 +69,8 @@ export const NumberControl: React.FC< NumberProps > = ( {
 		>
 			<InputControl
 				{ ...inputProps }
+				step={ step }
+				disabled={ disabled }
 				id={ id }
 				suffix={ suffix }
 				placeholder={ placeholder }

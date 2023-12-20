@@ -400,12 +400,12 @@ const ar_AR = {
 			element: '#search-inline-input-0',
             text: 'الانتقال إلى الخلف للوصول إلى العناصر المُحدَّدة',
 		},
-		{
-			name: 'القسائم',
-			heading: 'القسائم',
-			element: '.woocommerce-table__empty-item',
-            text: 'لا توجد بيانات لعرضها',
-		},
+		// {
+		// 	name: 'القسائم',
+		// 	heading: 'القسائم',
+		// 	element: '.woocommerce-table__empty-item',
+        //     text: 'لا توجد بيانات لعرضها',
+		// },
 		{
 			name: 'التقارير',
 			heading: 'الطلبات',

@@ -1,17 +1,14 @@
 /**
  * External dependencies
  */
-import { ChangeEvent } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { createElement, useState } from '@wordpress/element';
 import { trash } from '@wordpress/icons';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { ImageGallery, ImageGalleryItem } from '@woocommerce/components';
-import { uploadMedia } from '@wordpress/media-utils';
 import {
 	Button,
-	FormFileUpload,
 	Modal,
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -34,28 +31,14 @@ export interface Image {
 
 export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 	downloableItem,
-	maxUploadFileSize = 10000000,
 	onCancel,
 	onChange,
 	onRemove,
 	onSave,
-	onUploadSuccess,
-	onUploadError,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isCopingToClipboard, setIsCopingToClipboard ] =
 		useState< boolean >( false );
-	const [ isFileUploading, setIsFileUploading ] =
-		useState< boolean >( false );
-
-	const { allowedMimeTypes } = useSelect( ( select ) => {
-		const { getEditorSettings } = select( 'core/editor' );
-		return getEditorSettings();
-	} );
-
-	const allowedTypes = allowedMimeTypes
-		? Object.values( allowedMimeTypes )
-		: [];
 
 	const { id = 0, file = '', name = '' } = downloableItem;
 
@@ -96,21 +79,6 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 		setIsCopingToClipboard( false );
 	}
 
-	async function handleFormFileUploadChange(
-		event: ChangeEvent< HTMLInputElement >
-	) {
-		setIsFileUploading( true );
-		const filesList = event.currentTarget.files as FileList;
-		await uploadMedia( {
-			allowedTypes,
-			filesList,
-			maxUploadFileSize,
-			onFileChange: onUploadSuccess,
-			onError: onUploadError,
-		} );
-		setIsFileUploading( false );
-	}
-
 	return (
 		<Modal
 			title={ sprintf(
@@ -145,21 +113,10 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 						<DownloadsCustomImage />
 					) }
 				</ImageGallery>
-				<FormFileUpload
-					onChange={ handleFormFileUploadChange }
-					render={ ( { openFileDialog } ) => (
-						<div>
-							<p>{ name }</p>
-							<Button
-								onClick={ openFileDialog }
-								isBusy={ isFileUploading }
-								disabled={ isFileUploading }
-							>
-								{ __( 'Replace', 'woocommerce' ) }
-							</Button>
-						</div>
-					) }
-				/>
+
+				<div className="components-form-file-upload">
+					<p>{ name }</p>
+				</div>
 			</div>
 			<BaseControl
 				id={ 'file-name-help' }

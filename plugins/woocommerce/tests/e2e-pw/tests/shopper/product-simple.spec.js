@@ -194,7 +194,7 @@ test.describe( 'Single Product Page', () => {
 		await page.locator( 'input.qty' ).fill( '5' );
 		await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
 
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
+		await expect( page.locator( '.is-success' ) ).toContainText(
 			getTranslationFor( 'have been added to your cart.' )
 		);
 
@@ -217,7 +217,7 @@ test.describe( 'Single Product Page', () => {
 		await page.goto( 'cart/' );
 		await page.locator( 'a.remove' ).click();
 
-		await expect( page.locator( '.cart-empty' ) ).toContainText(
+		await expect( page.locator( '.is-info' ) ).toContainText(
 			getTranslationFor( 'Your cart is currently empty.' )
 		);
 	} );
