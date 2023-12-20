@@ -262,6 +262,42 @@ class Cart extends AbstractBlock {
 	}
 
 	/**
+	 * Check if shipping calculator should be enabled based on how many zones have shipping options.
+	 *
+	 * If more than one zone has shipping options (including the fallback zone) then it should be enabled.
+	 *
+	 * @return bool
+	 */
+	protected function should_enable_shipping_calculator() {
+
+		// The fallback zone is guaranteed to be id 0. https://wordpress.org/support/topic/wc26-get-all-shipping-zones-and-respective-methods-objects/.
+		$fallback_shipping_zone     = \WC_Shipping_Zones::get_zone( 0 );
+		$other_zones                = \WC_Shipping_Zones::get_zones();
+		$number_of_fallback_methods = count( $fallback_shipping_zone->get_shipping_methods( true ) );
+
+		$zones_with_active_methods = array_reduce(
+			$other_zones,
+			function( $carry, $zone ) {
+				if ( count( \WC_Shipping_Zones::get_zone( $zone['id'] )->get_shipping_methods( true ) ) > 0 ) {
+					++$carry;
+				}
+				return $carry;
+			},
+			0
+		);
+
+		if ( $zones_with_active_methods > 1 ) {
+			return true;
+		}
+
+		if ( 1 === $zones_with_active_methods && $number_of_fallback_methods > 0 ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Register script and style assets for the block type before it is registered.
 	 *
 	 * This registers the scripts; it does not enqueue them.
