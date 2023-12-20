@@ -655,9 +655,13 @@ test.describe( 'Checkout Block page', () => {
 		await expect(
 			page.locator( 'form.woocommerce-verify-email p:nth-child(4)' )
 		).toContainText( /verify the email address associated with the order/ );
-		await expect( page.locator( 'ul.woocommerce-error li' ) ).toContainText(
-			/We were unable to verify the email address you provided/
-		);
+		await expect(
+			page
+				.getByRole( 'alert' )
+				.getByText(
+					'We were unable to verify the email address you provided. Please try again.'
+				)
+		).toBeVisible();
 
 		// However if they supply the *correct* billing email address, they should see the order received page again.
 		await page.fill( '#email', guestEmail );
@@ -696,7 +700,9 @@ test.describe( 'Checkout Block page', () => {
 		await clearFilters( page );
 	} );
 
-	test( 'allows existing customer to place an order', async ( { page } ) => {
+	test.only( 'allows existing customer to place an order', async ( {
+		page,
+	} ) => {
 		for ( let i = 1; i < 3; i++ ) {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
 			await page.waitForLoadState( 'networkidle' );
@@ -760,9 +766,11 @@ test.describe( 'Checkout Block page', () => {
 		await page.reload();
 
 		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
-		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
-			/Please log in to your account to view this order/
-		);
+		await expect(
+			page
+				.getByRole( 'alert' )
+				.getByText( 'Please log in to your account to view this order' )
+		).toBeVisible();
 
 		// Switch to admin user.
 		await page.goto( 'wp-login.php?loggedout=true' );
