@@ -356,8 +356,20 @@ class Settings {
 		$settings = $this->get_settings_definitions();
 
 		?>
-		<form id="mainform" class="wc-logs-settings" method="post" action="" enctype="multipart/form-data">
+		<form id="mainform" class="wc-logs-settings" method="post">
 			<?php WC_Admin_Settings::output_fields( $settings ); ?>
+			<?php
+			/**
+			 * Action fires after the built-in logging settings controls have been rendered.
+			 *
+			 * This is intended as a way to allow other logging settings controls to be added by extensions.
+			 *
+			 * @param bool $enabled True if logging is currently enabled.
+			 *
+			 * @since 8.5.0
+			 */
+			do_action( 'wc_logs_settings_form_fields', $this->logging_is_enabled() );
+			?>
 			<?php wp_nonce_field( self::PREFIX . 'settings' ); ?>
 			<?php submit_button( __( 'Save changes', 'woocommerce' ), 'primary', 'save_settings' ); ?>
 		</form>
