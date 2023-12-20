@@ -2102,25 +2102,6 @@ function wc_print_r( $expression, $return = false ) {
 }
 
 /**
- * Registers the default log handler.
- *
- * @since 3.0
- * @param array $handlers Handlers.
- * @return array
- */
-function wc_register_default_log_handler( $handlers ) {
-	$handler_class = Constants::get_constant( 'WC_LOG_HANDLER' );
-	if ( is_null( $handler_class ) || ! class_exists( $handler_class ) ) {
-		$handler_class = WC_Log_Handler_File::class;
-	}
-
-	array_push( $handlers, new $handler_class() );
-
-	return $handlers;
-}
-add_filter( 'woocommerce_register_log_handlers', 'wc_register_default_log_handler' );
-
-/**
  * Based on wp_list_pluck, this calls a method instead of returning a property.
  *
  * @since 3.0.0

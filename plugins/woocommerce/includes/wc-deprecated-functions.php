@@ -11,6 +11,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -1122,4 +1123,22 @@ function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $d
 function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
 	wc_deprecated_function( 'get_woocommerce_term_meta', '3.6', 'get_term_meta' );
 	return function_exists( 'get_term_meta' ) ? get_term_meta( $term_id, $key, $single ) : get_metadata( 'woocommerce_term', $term_id, $key, $single );
+}
+
+/**
+ * Registers the default log handler.
+ *
+ * @deprecated 8.5.0
+ * @since 3.0
+ * @param array $handlers Handlers.
+ * @return array
+ */
+function wc_register_default_log_handler( $handlers = array() ) {
+	wc_deprecated_function( 'wc_register_default_log_handler', '8.5.0' );
+
+	$default_handler = wc_get_container()->get( Settings::class )->get_default_handler();
+
+	array_push( $handlers, new $default_handler() );
+
+	return $handlers;
 }

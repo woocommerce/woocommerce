@@ -278,7 +278,7 @@ class Settings {
 			$handler = WC_Admin_Settings::get_option( $key );
 		}
 
-		if ( ! class_exists( $handler ) || ! is_a( $handler, WC_Log_Handler::class, true ) ) {
+		if ( ! class_exists( $handler ) || ! is_a( $handler, 'WC_Log_Handler_Interface', true ) ) {
 			$handler = self::DEFAULTS['default_handler'];
 		}
 

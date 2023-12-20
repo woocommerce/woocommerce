@@ -8,6 +8,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -38,7 +39,15 @@ class WC_Logger implements WC_Logger_Interface {
 	 */
 	public function __construct( $handlers = null, $threshold = null ) {
 		if ( null === $handlers ) {
-			$handlers = apply_filters( 'woocommerce_register_log_handlers', array() );
+			$default_handler  = wc_get_container()->get( Settings::class )->get_default_handler();
+			$handler_instance = new $default_handler();
+
+			/**
+			 * Filter the list of log handler class instances that will run whenever a log entry is added.
+			 *
+			 * @param WC_Log_Handler_Interface[]
+			 */
+			$handlers = apply_filters( 'woocommerce_register_log_handlers', array( $handler_instance ) );
 		}
 
 		$register_handlers = array();
