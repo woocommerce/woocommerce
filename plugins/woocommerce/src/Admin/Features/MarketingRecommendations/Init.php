@@ -57,8 +57,14 @@ class Init {
 	 * @return array
 	 */
 	public static function get_recommended_plugins(): array {
-		$specs   = self::get_specs();
-		return $specs;
+		$specs  = self::get_specs();
+		$result = array();
+
+		foreach ( $specs as $spec ) {
+			$result[] = self::object_to_array( $spec );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -122,5 +128,17 @@ class Init {
 		}
 
 		return false;
+	}
+
+	protected static function object_to_array($obj) {
+		if(is_object($obj)) $obj = (array) $obj;
+		if(is_array($obj)) {
+			$new = array();
+			foreach($obj as $key => $val) {
+				$new[$key] = self::object_to_array($val);
+			}
+		}
+		else $new = $obj;
+		return $new;
 	}
 }
