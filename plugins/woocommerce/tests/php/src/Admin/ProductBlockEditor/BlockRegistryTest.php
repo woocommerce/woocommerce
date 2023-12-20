@@ -7,6 +7,12 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\BlockRegistry;
 
 /**
  * Tests for the BlockRegistry class.
+ *
+ * Note: Tests are run in separate processes, with global state not preserved,
+ * because BlockRegistry is a singleton and we need to make sure it's reset between tests.
+ *
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
 class BlockRegistryTest extends WC_Unit_Test_Case {
 	/**
