@@ -9,7 +9,7 @@ type Props = {
 	label: string;
 };
 export const AttributeDropdown = ( { label }: Props ) => (
-	<div className="attribute-dropdown">
+	<div className="wc-block-attribute-filter style-dropdown">
 		<FormTokenField
 			suggestions={ [] }
 			placeholder={ sprintf(
