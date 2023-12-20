@@ -61,7 +61,7 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		foreach ( $this->sut->payment_gateways() as $gateway ) {
 			// Disable the gateway and save the settings.
 			$gateway->settings['enabled'] = 'no';
-			$gateway->settings['title'] = null;
+			$gateway->settings['title']   = null;
 			update_option( $gateway->get_option_key(), $gateway->settings );
 
 			// Enable the gateway and save its settings; this should send the email and add a log entry.
