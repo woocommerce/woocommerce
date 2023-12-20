@@ -9,6 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { __ } from '@wordpress/i18n';
+import { useQuery, UseQueryResult } from 'react-query';
 
 /**
  * Internal dependencies
@@ -185,7 +186,12 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	 * @return {string} The message to display to the user.
 	 */
 	const handleRequiresAction = useCallback(
-		async ( response: any, token: string, tempthreadID: string ) => {
+		async (
+			response: any,
+			token: string,
+			tempthreadID: string,
+			userQuery: string
+		) => {
 			const answer = response.answer;
 			const functionID: string = answer.function_id;
 			const runID: string = response.run_id;
@@ -251,7 +257,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 					return;
 				}
 				try {
-					const summaryPrompt = `Provide a helpful answer for the original query using the resulting data from the API request. The original query was "${ message }". Parse through the data and find the most relevant information to answer the query and provide it in a human-readable format. The data from the result of the API request is: ${ JSON.stringify(
+					const summaryPrompt = `Provide a helpful answer for the original query using the resulting data from the API request. The original query was "${ userQuery }". Parse through the data and find the most relevant information to answer the query and provide it in a human-readable format. The data from the result of the API request is: ${ JSON.stringify(
 						message
 					) }`;
 
@@ -320,7 +326,8 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 					const actionsAnswer = await handleRequiresAction(
 						response,
 						token,
-						tempthreadID
+						tempthreadID,
+						userQuery
 					);
 					answer = actionsAnswer || '';
 				} else {
@@ -329,21 +336,33 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				if ( ! answer || ! answer.length ) {
 					throw new Error( 'No message returned from assistant' );
 				}
+			} catch ( { message }: any ) {
+				recordWooAIAssistantTracks( 'send_message_error', {
+					message: userQuery,
+					error: message,
+				} );
+				// If the message loosely matches the text "message does not match the correct thread", we need to reset the threadID.
+				// This happens when the threadID is invalid.
+				// Use a regex to match the message, because the message may contain a timestamp. case-insensitive.
+				const regex = /message does not match the correct thread/i;
+				if ( regex.test( message ) ) {
+					setAndStorethreadID( '' );
+					// generate an informational message to let the user know that the thread was reset.
+					generateInformationalMessage(
+						'Oops! It looks like our saved conversation has expired. Please try again, keeping in mind that you may need to repeat some things.'
+					);
+				}
+			} finally {
 				// The reference to the original query is simply the message previous.
 				// We haven't updated the messages yet, so we can use the current length.
 				setAndStoreMessages( answer, 'assistant', messages.length );
-			} catch ( error ) {
-				handleError(
-					"I'm sorry, I had trouble generating a response for you."
-				);
-			} finally {
 				setLoading( false );
 			}
 		},
 		[
 			threadID,
+			generateInformationalMessage,
 			setAndStoreMessages,
-			handleError,
 			setAndStorethreadID,
 			handleRequiresAction,
 			prepareFormData,
