@@ -19,7 +19,8 @@ import classnames from 'classnames';
  * @param {string}   props.isSubmitButtonDisabled Boolean to enable/disable the send button.
  * @param {string}   props.submitButtonLabel      Label for the send button.
  * @param {string}   props.cancelButtonLabel      Label for the cancel button.
- * @param {Function} props.onModalClose           Callback for when user closes modal by clicking cancel.
+ * @param {Function} props.onModalClose           Function to call when user closes modal by clicking X.
+ * @param {Function} props.onCancel               Function to call when user presses cancel.
  * @param {Function} props.children               Children to be rendered.
  * @param {string}   props.className              Class name to addd to the modal.
  */

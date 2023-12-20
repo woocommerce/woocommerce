@@ -24,8 +24,8 @@ import { useDispatch } from '@wordpress/data';
  *
  * @param {Object}   props                     Component props.
  * @param {Function} props.recordScoreCallback Function to call when the results are sent.
- * @param {Function} props.onCloseModal        Callback method called when user closes the modal by clicking the X.
- * @param {Function} props.onSkipFeedback      Callback method called when user skips sending feedback.
+ * @param {Function} props.onCloseModal        Function to call when user closes the modal by clicking the X.
+ * @param {Function} props.onSkipFeedback      Function to call when user skips sending feedback.
  */
 function ProductMVPFeedbackModal( {
 	recordScoreCallback,
