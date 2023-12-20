@@ -73,6 +73,34 @@ final class CollectionFilters extends AbstractBlock {
 	}
 
 	/**
+	 * Render the block.
+	 *
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content    Block content.
+	 * @param WP_Block $block      Block instance.
+	 * @return string Rendered block type output.
+	 */
+	protected function render( $attributes, $content, $block ) {
+		$attributes_data = array(
+			'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-filters' ) ),
+			'class'               => 'wc-block-collection-filters',
+		);
+
+		if ( ! isset( $block->context['queryId'] ) ) {
+			$attributes_data['data-wc-navigation-id'] = sprintf(
+				'wc-collection-filters-%s',
+				md5( wp_json_encode( $block->parsed_block['innerBlocks'] ) )
+			);
+		}
+
+		return sprintf(
+			'<nav %1$s>%2$s</nav>',
+			get_block_wrapper_attributes( $attributes_data ),
+			$content
+		);
+	}
+
+	/**
 	 * Modify the context of inner blocks.
 	 *
 	 * @param array    $context The block context.

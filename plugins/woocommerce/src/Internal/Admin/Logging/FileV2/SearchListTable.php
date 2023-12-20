@@ -90,7 +90,9 @@ class SearchListTable extends WP_List_Table {
 			'offset'   => ( $this->get_pagenum() - 1 ) * $per_page,
 		);
 
-		$file_args = $this->page_controller->get_query_params( array( 'order', 'orderby', 'search', 'source' ) );
+		$file_args = $this->page_controller->get_query_params(
+			array( 'date_end', 'date_filter', 'date_start', 'order', 'orderby', 'search', 'source' )
+		);
 		$search    = $file_args['search'];
 		unset( $file_args['search'] );
 

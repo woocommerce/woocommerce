@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Skip BlockRegistry tests for now until we can figure out why they are flaky.
+
+

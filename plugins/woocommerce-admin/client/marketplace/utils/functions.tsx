@@ -310,6 +310,16 @@ function activateProduct( subscription: Subscription ): Promise< void > {
 		);
 }
 
+function getInstallUrl( subscription: Subscription ): Promise< string > {
+	return apiFetch( {
+		path:
+			'/wc/v3/marketplace/subscriptions/install-url?product_key=' +
+			subscription.product_key,
+	} ).then( ( response ) => {
+		return ( response as { data: { url: string } } )?.data.url;
+	} );
+}
+
 function installProduct( subscription: Subscription ): Promise< void > {
 	return connectProduct( subscription ).then( () => {
 		return wpAjax( 'install-' + subscription.product_type, {
@@ -423,6 +433,7 @@ export {
 	fetchSearchResults,
 	fetchSubscriptions,
 	refreshSubscriptions,
+	getInstallUrl,
 	installProduct,
 	updateProduct,
 	addNotice,
