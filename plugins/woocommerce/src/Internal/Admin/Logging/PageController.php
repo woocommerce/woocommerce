@@ -562,8 +562,7 @@ class PageController {
 	 * @return string
 	 */
 	private function format_line( string $line, int $line_number ): string {
-		$severity_levels = WC_Log_Levels::get_all_severity_levels();
-		$classes         = array( 'line' );
+		$classes = array( 'line' );
 
 		$line = esc_html( trim( $line ) );
 		if ( empty( $line ) ) {
@@ -583,11 +582,11 @@ class PageController {
 			$has_timestamp = true;
 		}
 
-		if ( isset( $segments[1] ) && in_array( strtolower( $segments[1] ), $severity_levels, true ) ) {
+		if ( isset( $segments[1] ) && WC_Log_Levels::is_valid_level( strtolower( $segments[1] ) ) ) {
 			$segments[1] = sprintf(
 				'<span class="%1$s">%2$s</span>',
 				esc_attr( 'log-level log-level--' . strtolower( $segments[1] ) ),
-				esc_html( $segments[1] )
+				esc_html( WC_Log_Levels::get_level_label( strtolower( $segments[1] ) ) )
 			);
 			$has_level   = true;
 		}
