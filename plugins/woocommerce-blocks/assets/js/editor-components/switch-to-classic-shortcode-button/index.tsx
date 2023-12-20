@@ -37,20 +37,19 @@ export function SwitchToClassicShortcodeButton( {
 	const closeModal = () => setOpen( false );
 	const { undo } = useDispatch( coreStore );
 
-	const switchButtonLabel =
-		block === 'woocommerce/cart'
-			? __( 'Switch to classic cart', 'woocommerce' )
-			: __( 'Switch to classic checkout', 'woocommerce' );
+	const isCart = block === 'woocommerce/cart';
 
-	const snackbarLabel =
-		block === 'woocommerce/cart'
-			? __( 'Switched to classic cart.', 'woocommerce' )
-			: __( 'Switched to classic checkout.', 'woocommerce' );
+	const switchButtonLabel = isCart
+		? __( 'Switch to classic cart', 'woocommerce' )
+		: __( 'Switch to classic checkout', 'woocommerce' );
+
+	const snackbarLabel = isCart
+		? __( 'Switched to classic cart.', 'woocommerce' )
+		: __( 'Switched to classic checkout.', 'woocommerce' );
 
 	const notice =
 		type === 'incompatible' ? 'incompatible_notice' : 'generic_notice';
 
-	const isCart = block === 'woocommerce/cart';
 	const shortcode = isCart ? 'cart' : 'checkout';
 
 	const { getBlocks } = useSelect( ( select ) => {
@@ -91,8 +90,7 @@ export function SwitchToClassicShortcodeButton( {
 		replaceBlock(
 			clientId,
 			createBlock( 'woocommerce/classic-shortcode', {
-				shortcode:
-					block === 'woocommerce/checkout' ? 'checkout' : 'cart',
+				shortcode,
 			} )
 		);
 		recordEvent( 'switch_to_classic_shortcode_confirm', {
