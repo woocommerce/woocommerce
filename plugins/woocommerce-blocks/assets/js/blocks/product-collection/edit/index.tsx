@@ -12,14 +12,13 @@ import { useSelect } from '@wordpress/data';
 import type { ProductCollectionAttributes } from '../types';
 import ProductCollectionPlaceholder from './product-collection-placeholder';
 import ProductCollectionContent from './product-collection-content';
-import PatternSelectionModal from './collection-selection-modal';
+import CollectionSelectionModal from './collection-selection-modal';
 import './editor.scss';
 
 const Edit = ( props: BlockEditProps< ProductCollectionAttributes > ) => {
 	const { clientId, attributes } = props;
 
-	const [ isPatternSelectionModalOpen, setIsPatternSelectionModalOpen ] =
-		useState( false );
+	const [ isSelectionModalOpen, setIsSelectionModalOpen ] = useState( false );
 	const hasInnerBlocks = useSelect(
 		( select ) =>
 			!! select( blockEditorStore ).getBlocks( clientId ).length,
@@ -34,16 +33,16 @@ const Edit = ( props: BlockEditProps< ProductCollectionAttributes > ) => {
 		<>
 			<Component
 				{ ...props }
-				openPatternSelectionModal={ () =>
-					setIsPatternSelectionModalOpen( true )
+				openCollectionSelectionModal={ () =>
+					setIsSelectionModalOpen( true )
 				}
 			/>
-			{ isPatternSelectionModalOpen && (
-				<PatternSelectionModal
+			{ isSelectionModalOpen && (
+				<CollectionSelectionModal
 					clientId={ clientId }
 					attributes={ attributes }
 					closePatternSelectionModal={ () =>
-						setIsPatternSelectionModalOpen( false )
+						setIsSelectionModalOpen( false )
 					}
 				/>
 			) }

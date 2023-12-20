@@ -84,7 +84,7 @@ const CollectionButton = ( {
 };
 
 const CollectionChooser = ( props: {
-	chosenCollection: CollectionName | undefined;
+	chosenCollection?: CollectionName | undefined;
 	onCollectionClick: ( name: string ) => void;
 } ) => {
 	const { chosenCollection, onCollectionClick } = props;

@@ -78,7 +78,7 @@ export interface ProductCollectionQuery {
 
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
-		openPatternSelectionModal: () => void;
+		openCollectionSelectionModal: () => void;
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';

@@ -16,7 +16,7 @@ import type { ProductCollectionEditComponentProps } from '../../types';
 export default function ToolbarControls(
 	props: ProductCollectionEditComponentProps
 ) {
-	const { attributes, openPatternSelectionModal, setAttributes } = props;
+	const { attributes, openCollectionSelectionModal, setAttributes } = props;
 	const { query, displayLayout } = attributes;
 
 	const setQueryAttributeBind = useMemo(
@@ -27,7 +27,7 @@ export default function ToolbarControls(
 	return (
 		<BlockControls>
 			<CollectionChooserToolbar
-				openPatternSelectionModal={ openPatternSelectionModal }
+				openCollectionSelectionModal={ openCollectionSelectionModal }
 			/>
 			{ ! query.inherit && (
 				<>
