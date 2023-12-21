@@ -1119,7 +1119,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						__( 'Upsells are typically products that are extra profitable or better quality or more expensive. Experiment with combinations to boost sales. %1$sLearn more about linked products.%2$s', 'woocommerce' ),
 						'<br /><a href="https://woo.com/document/related-products-up-sells-and-cross-sells/" target="_blank" rel="noreferrer">',
 						'</a>'
-					),		
+					),
 				),
 			)
 		);
