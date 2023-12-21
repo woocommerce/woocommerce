@@ -229,6 +229,7 @@ class Init {
 		 * @since 8.5.0
 		 */
 		$product_templates = apply_filters( 'woocommerce_product_editor_product_templates', $this->get_default_product_templates() );
+		$product_templates = $this->create_default_product_template_by_custom_product_type( $product_templates );
 
 		usort(
 			$product_templates,
@@ -309,24 +310,47 @@ class Init {
 			)
 		);
 
+		return $templates;
+	}
+
+	private function create_default_product_template_by_custom_product_type( array $templates ) {
 		// Getting the product types registered via the classic editor.
-		// This is not required when registering new product templates.
 		$registered_product_types = wc_get_product_types();
 
-		foreach ( $registered_product_types as $product_type => $title ) {
-			if ( in_array( $product_type, $this->supported_product_types, true ) ) {
+		$custom_product_types = array_filter(
+			$registered_product_types,
+			function ( $product_type ) {
+				return ! in_array( $product_type, $this->supported_product_types, true );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+
+		$templates_with_product_type = array_filter(
+			$templates,
+			function ( $template ) {
+				$product_data = $template->get_product_data();
+				return ! is_null( $product_data ) && array_key_exists( 'type', $product_data );
+			}
+		);
+
+		$custom_product_types_on_templates = array_map(
+			function ( $template ) {
+				$product_data = $template->get_product_data();
+				return $product_data['type'];
+			},
+			$templates_with_product_type
+		);
+
+		foreach ( $custom_product_types as $product_type => $title ) {
+			if ( in_array( $product_type, $custom_product_types_on_templates, true ) ) {
 				continue;
 			}
 
 			$templates[] = new ProductTemplate(
 				array(
-					'id'                 => $product_type . '-product-template',
-					'title'              => $title,
-					'description'        => null,
-					'order'              => ( count( $templates ) + 1 ) * 10,
-					'icon'               => null,
-					'layout_template_id' => null,
-					'product_data'       => array(
+					'id'           => $product_type . '-product-template',
+					'title'        => $title,
+					'product_data' => array(
 						'type' => $product_type,
 					),
 				)
