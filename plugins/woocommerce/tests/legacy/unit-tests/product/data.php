@@ -274,6 +274,41 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A test ensuring get_price_html works well for scheduled sales for issue #41898.
+	 */
+	public function test_get_price_html_for_scheduled_sales() {
+		// Set up 2 products with different prices and scheduled sale dates.
+		$product1 = new WC_Product_Simple();
+		$product2 = new WC_Product_Simple();
+
+		$yesterday           = gmdate( 'Y-m-d', strtotime( '-10 day' ) ) . ' 23:59:00';
+		$yesterday_timestamp = wc_string_to_timestamp( $yesterday );
+		$tomorrow            = gmdate( 'Y-m-d', strtotime( '+10 day' ) ) . ' 23:59:00';
+		$tomorrow_timestamp  = wc_string_to_timestamp( $tomorrow );
+
+		$product1->set_regular_price( '100.00' );
+		$product1->set_sale_price( '90.00' );
+		$product2->set_regular_price( '700.00' );
+		$product2->set_sale_price( '680.00' );
+
+		$product1->set_date_on_sale_from( $yesterday_timestamp );
+		$product1->set_date_on_sale_to( $tomorrow_timestamp );
+		$product2->set_date_on_sale_from( $yesterday_timestamp );
+		$product2->set_date_on_sale_to( $yesterday_timestamp );
+
+		$product1_id = $product1->save();
+		$product2_id = $product2->save();
+
+		$product = wc_get_product( $product1_id );
+		$this->assertEquals( $product1_id, $product->get_id() );
+		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>100.00</bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>90.00</bdi></span></ins>', $product->get_price_html() );
+
+		$product = wc_get_product( $product2_id );
+		$this->assertEquals( $product2_id, $product->get_id() );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>700.00</bdi></span>', $product->get_price_html() );
+	}
+
+	/**
 	 * Test: test_get_image_should_return_product_image.
 	 */
 	public function test_get_image_should_return_product_image() {
