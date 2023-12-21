@@ -22,7 +22,7 @@ const blockData = {
 		},
 	},
 	slug: 'single-product',
-	productPage: '/product/logo-collection/',
+	productPage: '/product/hoodie/',
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
@@ -40,7 +40,9 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 export const getVisibleLargeImageId = async (
 	mainImageBlockLocator: Locator
 ) => {
-	const mainImage = mainImageBlockLocator.locator( 'img' ).first() as Locator;
+	const mainImage = mainImageBlockLocator.locator(
+		'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
+	);
 
 	const mainImageContext = ( await mainImage.getAttribute(
 		'data-wc-context'
@@ -120,9 +122,7 @@ test.describe( `${ blockData.name }`, () => {
 			expect( visibleLargeImageId ).toBe( firstImageThumbnailId );
 		} );
 
-		// @todo: Fix this test. It's failing because the thumbnail images aren't generated correctly when the products are imported via .xml: https://github.com/woocommerce/woocommerce/issues/31646
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip( 'should change the image when the user click on a thumbnail image', async ( {
+		test( 'should change the image when the user click on a thumbnail image', async ( {
 			page,
 			editorUtils,
 			pageObject,
