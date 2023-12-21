@@ -103,7 +103,7 @@ class Init {
 	 * @return bool
 	 */
 	protected static function is_marketing_plugin( array $plugin_data ): bool {
-		$categories = $plugin_data['categories'] ?? [];
+		$categories = $plugin_data['categories'] ?? array();
 
 		return in_array( self::MARKETING_EXTENSION_CATEGORY_SLUG, $categories, true );
 	}
@@ -120,7 +120,7 @@ class Init {
 			return false;
 		}
 
-		$subcategories = $plugin_data['subcategories'] ?? [];
+		$subcategories = $plugin_data['subcategories'] ?? array();
 		foreach ( $subcategories as $subcategory ) {
 			if ( isset( $subcategory['slug'] ) && self::MARKETING_CHANNEL_SUBCATEGORY_SLUG === $subcategory['slug'] ) {
 				return true;
@@ -130,15 +130,18 @@ class Init {
 		return false;
 	}
 
-	protected static function object_to_array($obj) {
-		if(is_object($obj)) $obj = (array) $obj;
-		if(is_array($obj)) {
-			$new = array();
-			foreach($obj as $key => $val) {
-				$new[$key] = self::object_to_array($val);
-			}
+	protected static function object_to_array( $obj ) {
+		if ( is_object( $obj ) ) {
+			$obj = (array) $obj;
 		}
-		else $new = $obj;
+		if ( is_array( $obj ) ) {
+			$new = array();
+			foreach ( $obj as $key => $val ) {
+				$new[ $key ] = self::object_to_array( $val );
+			}
+		} else {
+			$new = $obj;
+		}
 		return $new;
 	}
 }

@@ -17,11 +17,11 @@ class DefaultMarketingRecommendations {
 	 * @return array Default specs.
 	 */
 	public static function get_all() {
-		// Read the JSON file
-		$json = file_get_contents( __DIR__ . '/recommendations.json', true);
+		// Read the JSON file.
+		$json = file_get_contents( __DIR__ . '/recommendations.json', true );
 
-		// Decode the JSON file
-		$json_data = json_decode($json,true);
+		// Decode the JSON file.
+		$json_data = json_decode( $json, true );
 
 		return $json_data;
 	}
