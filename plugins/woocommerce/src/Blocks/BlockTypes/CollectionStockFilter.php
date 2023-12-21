@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * CollectionStockFilter class.
@@ -147,6 +148,9 @@ final class CollectionStockFilter extends AbstractBlock {
 		$show_counts    = $attributes['showCounts'] ?? false;
 		$stock_statuses = wc_get_product_stock_status_options();
 
+		$text_color_class_and_style = StyleAttributesUtils::get_text_color_class_and_style( $attributes );
+		$text_color                 = $text_color_class_and_style['value'] ?? '';
+
 		// check the url params to select initial item on page load.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
 		$selected_stock_status = isset( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ) : '';
@@ -236,6 +240,7 @@ final class CollectionStockFilter extends AbstractBlock {
 						'items'         => $list_items,
 						'action'        => 'woocommerce/collection-stock-filter::actions.navigate',
 						'selected_item' => $selected_item,
+						'text_color'    => $text_color,
 					)
 				);
 				?>

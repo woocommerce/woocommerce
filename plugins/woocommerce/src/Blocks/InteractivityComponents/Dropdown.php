@@ -22,6 +22,9 @@ class Dropdown {
 
 		$selected_items = $props['selected_items'] ?? array();
 
+		$text_color       = $props['text_color'] ?? 'inherit';
+		$text_color_style = "color: {$text_color};";
+
 		// Items should be an array of objects with a label and value property.
 		$items = $props['items'] ?? array();
 
@@ -36,6 +39,8 @@ class Dropdown {
 		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) );
 
 		$wrapper_class = 'multiple' === $select_type ? '' : 'single-selection';
+
+		$input_id = wp_unique_id( 'wc-interactivity-dropdown-input-' );
 
 		ob_start();
 		?>
@@ -57,6 +62,7 @@ class Dropdown {
 										<span
 											class="components-form-token-field__token-text"
 											data-wc-text="context.item.label"
+											style="<?php echo esc_attr( $text_color_style ); ?>"
 										></span>
 										<button
 											type="button"
@@ -76,7 +82,10 @@ class Dropdown {
 										data-wc-key="<?php echo esc_attr( $selected['label'] ); ?>"
 										data-wc-each-child
 									>
-										<span class="components-form-token-field__token-text">
+										<span 
+											class="components-form-token-field__token-text"
+											style="<?php echo esc_attr( $text_color_style ); ?>"
+										>
 											<?php echo esc_html( $selected['label'] ); ?>
 										</span>
 										<button
@@ -90,7 +99,24 @@ class Dropdown {
 									</span>
 								<?php } ?>
 							<?php } ?>
-							<input id="components-form-token-input-1" type="text" autocomplete="off" data-wc-bind--placeholder="state.placeholderText" class="components-form-token-field__input" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-describedby="components-form-token-suggestions-howto-1" value="" data-wc-key="input">
+							<style>
+								#<?php echo esc_html( $input_id ); ?>::placeholder {
+									<?php echo esc_attr( $text_color_style ); ?>
+								}
+							</style>
+							<input 
+								id="<?php echo esc_attr( $input_id ); ?>" 
+								readonly
+								type="text" 
+								autocomplete="off" 
+								data-wc-bind--placeholder="state.placeholderText" 
+								class="components-form-token-field__input" 
+								role="combobox" 
+								aria-expanded="false" 
+								aria-autocomplete="list" 
+								value="" 
+								data-wc-key="input"
+							>
 							<ul hidden data-wc-bind--hidden="!context.isOpen" class="components-form-token-field__suggestions-list" id="components-form-token-suggestions-1" role="listbox"  data-wc-key="ul">
 								<?php
 								foreach ( $items as $item ) :
@@ -104,6 +130,7 @@ class Dropdown {
 										class="components-form-token-field__suggestion"
 										data-wc-bind--aria-selected="state.isSelected"
 										data-wc-context='<?php echo wp_json_encode( $context ); ?>'
+										style="<?php echo esc_attr( $text_color_style ); ?>"
 									>
 									<?php // This attribute supports HTML so should be sanitized by caller. ?>
 									<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
