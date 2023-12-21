@@ -61,6 +61,7 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		foreach ( $this->sut->payment_gateways() as $gateway ) {
 			// Disable the gateway and save the settings.
 			$gateway->settings['enabled'] = 'no';
+			$gateway->settings['title']   = null;
 			update_option( $gateway->get_option_key(), $gateway->settings );
 
 			// Enable the gateway and save its settings; this should send the email and add a log entry.
@@ -68,13 +69,13 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 			update_option( $gateway->get_option_key(), $gateway->settings );
 
 			// Check that the log entry was created.
-			$this->assertEquals( 'Payment gateway enabled: "' . $gateway->get_title() . '"', end( $fake_logger->infos )['message'] );
+			$this->assertEquals( 'Payment gateway enabled: "' . $gateway->get_method_title() . '"', end( $fake_logger->infos )['message'] );
 
 			// Check that the email was sent correctly.
 			$this->assertStringContainsString( '@', $email_details['to'][0] );
 			$this->assertEquals( get_option( 'admin_email' ), $email_details['to'][0] );
-			$this->assertEquals( '[Test Blog] Payment gateway "' . $gateway->get_title() . '" enabled', $email_details['subject'] );
-			$this->assertStringContainsString( 'The payment gateway "' . $gateway->get_title() . '" was just enabled on this site', $email_details['message'] );
+			$this->assertEquals( '[Test Blog] Payment gateway "' . $gateway->get_method_title() . '" enabled', $email_details['subject'] );
+			$this->assertStringContainsString( 'The payment gateway "' . $gateway->get_method_title() . '" was just enabled on this site', $email_details['message'] );
 			$this->assertStringContainsString( 'If you did not enable this payment gateway, please log in to your site and consider disabling it here:', $email_details['message'] );
 			$this->assertStringContainsString( '/wp-admin/admin.php?page=wc-settings&tab=checkout&section=' . $gateway->id, $email_details['message'] );
 

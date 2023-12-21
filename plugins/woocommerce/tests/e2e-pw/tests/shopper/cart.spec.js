@@ -50,7 +50,9 @@ test.describe( 'Cart page', () => {
 
 	test( 'should display no item in the cart', async ( { page } ) => {
 		await page.goto( '/cart/' );
-		await expect( page.getByText('Your cart is currently empty.') ).toBeVisible();
+		await expect(
+			page.getByText( 'Your cart is currently empty.' )
+		).toBeVisible();
 	} );
 
 	test( 'should add the product to the cart from the shop page', async ( {
@@ -122,7 +124,7 @@ test.describe( 'Cart page', () => {
 
 		await page.locator( 'a.remove' ).click();
 
-		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
+		await expect( page.locator( '.is-info' ) ).toContainText(
 			'Your cart is currently empty.'
 		);
 	} );

@@ -124,32 +124,34 @@ export const PrevButtonInsideImage = () => (
 
 export const NextButtonOutsideImage = () => (
 	<SVG
-		width="22"
-		height="38"
-		viewBox="0 0 22 38"
+		width="10"
+		height="16"
+		viewBox="0 0 10 16"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
 		className={ `wc-block-product-gallery-large-image-next-previous-right--outside-image` }
 	>
 		<path
-			d="M4.56666 0L0.766663 3.16667L15.3333 19L0.766663 34.8333L4.56666 38L21.6667 19L4.56666 0Z"
-			fill="black"
+			d="M1 1.28516L8 8.28516L1 15.2852"
+			stroke="black"
+			strokeWidth="1.5"
 		/>
 	</SVG>
 );
 
 export const PrevButtonOutsideImage = () => (
 	<SVG
-		width="22"
-		height="38"
-		viewBox="0 0 22 38"
+		width="10"
+		height="16"
+		viewBox="0 0 10 16"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
 		className={ `wc-block-product-gallery-large-image-next-previous-left--outside-image` }
 	>
 		<path
-			d="M17.7 0L21.5 3.16667L6.93334 19L21.5 34.8333L17.7 38L0.600002 19L17.7 0Z"
-			fill="black"
+			d="M9 1.28516L2 8.28516L9 15.2852"
+			stroke="black"
+			strokeWidth="1.5"
 		/>
 	</SVG>
 );

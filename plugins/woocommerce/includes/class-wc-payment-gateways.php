@@ -188,7 +188,7 @@ class WC_Payment_Gateways {
 		$admin_email          = get_option( 'admin_email' );
 		$user                 = get_user_by( 'email', $admin_email );
 		$username             = $user ? $user->user_login : $admin_email;
-		$gateway_title        = $gateway->get_title();
+		$gateway_title        = $gateway->get_method_title();
 		$gateway_settings_url = esc_url_raw( self_admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $gateway->id ) );
 		$site_name            = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 		$site_url             = home_url();
@@ -279,8 +279,7 @@ All at %6$s
 		// There was an old value, so this is an update.
 		if (
 			ArrayUtil::get_value_or_default( $value, 'enabled' ) === 'yes' &&
-			ArrayUtil::get_value_or_default( $old_value, 'enabled' ) !== 'yes' &&
-			isset( $value['title'] ) ) {
+			ArrayUtil::get_value_or_default( $old_value, 'enabled' ) !== 'yes' ) {
 			return true;
 		}
 		return false;

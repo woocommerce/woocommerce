@@ -41,6 +41,7 @@ import HandPickedProductsControl from './hand-picked-products-control';
 import LayoutOptionsControl from './layout-options-control';
 import FeaturedProductsControl from './featured-products-control';
 import CreatedControl from './created-control';
+import PriceRangeControl from './price-range-control';
 
 const ProductCollectionInspectorControls = (
 	props: BlockEditProps< ProductCollectionAttributes >
@@ -102,6 +103,7 @@ const ProductCollectionInspectorControls = (
 					<TaxonomyControls { ...queryControlProps } />
 					<FeaturedProductsControl { ...queryControlProps } />
 					<CreatedControl { ...queryControlProps } />
+					<PriceRangeControl { ...queryControlProps } />
 				</ToolsPanel>
 			) : null }
 			<ProductCollectionFeedbackPrompt />
