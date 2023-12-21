@@ -89,7 +89,7 @@ class PageController {
 			 *
 			 * @param string $view The current view within the Logs tab.
 			 *
-			 * @since 8.5.0
+			 * @since 8.6.0
 			 */
 			do_action( 'wc_logs_load_tab', $params['view'] );
 		}
@@ -168,11 +168,13 @@ class PageController {
 		}
 
 		/**
-		 * Action fires if the default logging handler is not one of the built-in ones.
+		 * Action fires only if there is not a built-in rendering method for the current default log handler.
+		 *
+		 * This is intended as a way for extensions to render log views for custom handlers.
 		 *
 		 * @param string $handler
 		 *
-		 * @since 8.5.0
+		 * @since 8.6.0
 		 */
 		do_action( 'wc_logs_render_page', $handler );
 	}

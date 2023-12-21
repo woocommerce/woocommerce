@@ -97,7 +97,7 @@ class Settings {
 		 *
 		 * @param array $handler_options An associative array of class_name => description.
 		 *
-		 * @since 8.5.0
+		 * @since 8.6.0
 		 */
 		$handler_options = apply_filters( 'woocommerce_logger_handler_options', $handler_options );
 
@@ -366,7 +366,7 @@ class Settings {
 			 *
 			 * @param bool $enabled True if logging is currently enabled.
 			 *
-			 * @since 8.5.0
+			 * @since 8.6.0
 			 */
 			do_action( 'wc_logs_settings_form_fields', $this->logging_is_enabled() );
 			?>
