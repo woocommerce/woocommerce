@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add React Testing Library and a basic test to the Woo AI plugin.
