@@ -8,11 +8,6 @@ import { getContext, store } from '@woocommerce/interactivity';
  */
 import './style.scss';
 
-/**
- * Internal dependencies
- */
-import './style.scss';
-
 export type DropdownContext = {
 	selectType: 'multiple' | 'single';
 	item: {
