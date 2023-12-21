@@ -5,10 +5,6 @@ PROJECT_PATH=$(pwd)
 BUILD_PATH="${PROJECT_PATH}/build"
 DEST_PATH="$BUILD_PATH/$PLUGIN_SLUG"
 
-# For building Blocks within Core as phase 2.
-export WOOCOMMERCE_BLOCKS_PHASE=2
-export NODE_ENV=production
-
 echo "Generating build directory..."
 rm -rf "$BUILD_PATH"
 mkdir -p "$DEST_PATH"
@@ -18,6 +14,13 @@ find "$PROJECT_PATH/assets/css/." ! -name '.gitkeep' -type f -exec rm -f {} + &&
 
 echo "Installing PHP and JS dependencies..."
 pnpm install
+
+
+# For building Blocks within Core as phase 2.
+# This needs to happen after pnpm install, otherwise wireit isn't installed.
+export WOOCOMMERCE_BLOCKS_PHASE=2
+export NODE_ENV=production
+
 echo "Running JS Build..."
 pnpm --filter='@woocommerce/plugin-woocommerce' build || exit "$?"
 echo "Cleaning up PHP dependencies..."
