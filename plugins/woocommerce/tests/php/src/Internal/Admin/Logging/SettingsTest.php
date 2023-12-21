@@ -24,7 +24,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	/**
 	 * Instance of the WC_Logger class.
 	 *
-	 * @var
+	 * @var WC_Logger
 	 */
 	private $logger;
 
@@ -173,9 +173,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 *          it's a valid value.
 	 */
 	public function test_retention_period_setting_with_filter() {
-		add_filter( 'woocommerce_logger_days_to_retain_logs', function() {
-			return 45;
-		} );
+		add_filter( 'woocommerce_logger_days_to_retain_logs', fn() => 45 );
 		$retention = $this->sut->get_retention_period();
 		$this->assertEquals( 45, $retention );
 		remove_all_filters( 'woocommerce_logger_days_to_retain_logs' );
@@ -197,9 +195,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 53, $handler );
 
 		// Filter overrides option.
-		add_filter( 'woocommerce_logger_days_to_retain_logs', function() {
-			return 45;
-		} );
+		add_filter( 'woocommerce_logger_days_to_retain_logs', fn() => 45 );
 		$retention = $this->sut->get_retention_period();
 		$this->assertEquals( 45, $retention );
 		remove_all_filters( 'woocommerce_logger_days_to_retain_logs' );
@@ -304,9 +300,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 *          woocommerce_logger_days_to_retain_logs hook has a filter.
 	 */
 	public function test_render_form_retention_period_input_disabled_with_filter() {
-		add_filter( 'woocommerce_logger_days_to_retain_logs', function() {
-			return 45;
-		} );
+		add_filter( 'woocommerce_logger_days_to_retain_logs', fn() => 45 );
 
 		ob_start();
 		$this->sut->render_form();

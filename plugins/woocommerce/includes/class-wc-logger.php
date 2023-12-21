@@ -44,6 +44,8 @@ class WC_Logger implements WC_Logger_Interface {
 			 * Filter the list of log handler class instances that will run whenever a log entry is added.
 			 *
 			 * @param WC_Log_Handler_Interface[]
+			 *
+			 * @since 3.0.0
 			 */
 			$handlers = apply_filters( 'woocommerce_register_log_handlers', array( $handler_instance ) );
 		}
@@ -308,7 +310,7 @@ class WC_Logger implements WC_Logger_Interface {
 	/**
 	 * Clear all logs older than a defined number of days. Defaults to 30 days.
 	 *
-	 * @since 3.4.0
+	 * @return void
 	 */
 	public function clear_expired_logs() {
 		$days      = wc_get_container()->get( Settings::class )->get_retention_period();

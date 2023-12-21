@@ -32,7 +32,7 @@ class LoggingServiceProvider extends AbstractServiceProvider {
 		$this->share( PageController::class )->addArguments(
 			array(
 				FileController::class,
-				Settings::class
+				Settings::class,
 			)
 		);
 

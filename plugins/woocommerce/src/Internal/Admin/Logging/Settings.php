@@ -19,7 +19,7 @@ class Settings {
 	/**
 	 * Default values for logging settings.
 	 *
-	 * const array
+	 * @const array
 	 */
 	private const DEFAULTS = array(
 		'logging_enabled'       => true,
@@ -31,7 +31,7 @@ class Settings {
 	/**
 	 * The prefix for settings keys used in the options table.
 	 *
-	 * const string
+	 * @const string
 	 */
 	private const PREFIX = 'woocommerce_logs_';
 
@@ -113,12 +113,12 @@ class Settings {
 
 		$desc[] = __( 'Note that if this setting is changed, any log entries that have already been recorded will remain stored in their current location, but will not migrate.', 'woocommerce' );
 
-		if ( in_array( $current_value, array( LogHandlerFileV2::class, WC_Log_Handler_File::class ) ) ) {
+		if ( in_array( $current_value, array( LogHandlerFileV2::class, WC_Log_Handler_File::class ), true ) ) {
 			$log_directory = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) );
 
 			$desc[] = sprintf(
 				// translators: %s is a location in the filesystem.
-				__( 'Log files are stored in this directory: %s' ),
+				__( 'Log files are stored in this directory: %s', 'woocommerce' ),
 				"<code>$log_directory</code>"
 			);
 		} elseif ( WC_Log_Handler_DB::class === $current_value ) {
@@ -127,7 +127,7 @@ class Settings {
 
 			$desc[] = sprintf(
 				// translators: %s is a location in the filesystem.
-				__( 'Log entries are stored in this database table: %s' ),
+				__( 'Log entries are stored in this database table: %s', 'woocommerce' ),
 				"<code>$table</code>"
 			);
 		}
@@ -311,6 +311,8 @@ class Settings {
 			 * Filter the retention period of log entries.
 			 *
 			 * @param int $days The number of days to retain log entries.
+			 *
+			 * @since 3.4.0
 			 */
 			$retention_period = apply_filters( 'woocommerce_logger_days_to_retain_logs', $retention_period );
 		} else {
