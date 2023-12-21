@@ -4,6 +4,7 @@ PLUGIN_SLUG="woocommerce"
 PROJECT_PATH=$(pwd)
 BUILD_PATH="${PROJECT_PATH}/build"
 DEST_PATH="$BUILD_PATH/$PLUGIN_SLUG"
+WOOCOMMERCE_BLOCKS_PHASE=2
 
 echo "Generating build directory..."
 rm -rf "$BUILD_PATH"
