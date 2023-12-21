@@ -87,7 +87,7 @@ jobs:
           name: all-blob-reports
           path: ${{ env.ALLURE_RESULTS_DIR }}
 
-      - name: Merge into HTML Report
+      - name: Merge into Report
         run: npx playwright merge-reports --reporter allure-playwright ${{ env.ALLURE_RESULTS_DIR }}
         
       - name: Generate Playwright E2E Test report.
