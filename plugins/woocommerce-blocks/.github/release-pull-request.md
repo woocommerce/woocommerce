@@ -18,7 +18,7 @@ This is the release pull request for WooCommerce Blocks plugin `{{version}}`.
 
 Please leave a comment on this PR with links to the following:
 
--   [ ] Release announcement (announcement post on developer.woocommerce.com published after release).
+-   [ ] Release announcement (announcement post on developer.woo.com published after release).
 
 {{#if devNoteItems}}
 **Developer Notes** - The following issues require developer notes in the release post:
