@@ -40,6 +40,10 @@
 		"step": {
 			"type": "number",
 			"default": 1
+		},
+		"showStepButtons": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {

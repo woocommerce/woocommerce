@@ -79,6 +79,14 @@ The maximum numeric value that can be entered in the field.
 
 The amount that is incremented or decremented when using the up/down arrows.
 
+### showStepButtons
+
+- **Type:** `Boolean`
+- **Required:** `No`
+- **Default:** `false`
+
+Shows + and - buttons to increment/decrement the numeric value.
+
 ## Usage
 
 Here's a snippet that adds a field similar to the previous screenshot:

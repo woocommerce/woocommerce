@@ -1,11 +1,14 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import classNames from 'classnames';
+import { plus, reset } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
+	Button,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
@@ -29,6 +32,7 @@ export type NumberProps = {
 	tooltip?: string;
 	disabled?: boolean;
 	step?: number;
+	showStepButtons?: boolean;
 };
 
 export const NumberControl: React.FC< NumberProps > = ( {
@@ -43,7 +47,8 @@ export const NumberControl: React.FC< NumberProps > = ( {
 	tooltip,
 	placeholder,
 	disabled,
-	step,
+	step = 1,
+	showStepButtons = false,
 }: NumberProps ) => {
 	const inputProps = useNumberInputProps( {
 		value: value || '',
@@ -72,7 +77,51 @@ export const NumberControl: React.FC< NumberProps > = ( {
 				step={ step }
 				disabled={ disabled }
 				id={ id }
-				suffix={ suffix }
+				suffix={
+					<>
+						{ suffix }
+						{ showStepButtons && (
+							<>
+								<Button
+									icon={ plus }
+									onClick={ () =>
+										onChange(
+											String(
+												parseFloat( value || '0' ) +
+													step
+											)
+										)
+									}
+									isSmall
+									aria-hidden="true"
+									aria-label={ __(
+										'Increment',
+										'woocommerce'
+									) }
+									tabIndex={ -1 }
+								/>
+								<Button
+									icon={ reset }
+									onClick={ () =>
+										onChange(
+											String(
+												parseFloat( value || '0' ) -
+													step
+											)
+										)
+									}
+									isSmall
+									aria-hidden="true"
+									aria-label={ __(
+										'Decrement',
+										'woocommerce'
+									) }
+									tabIndex={ -1 }
+								/>
+							</>
+						) }
+					</>
+				}
 				placeholder={ placeholder }
 				onBlur={ onBlur }
 			/>
