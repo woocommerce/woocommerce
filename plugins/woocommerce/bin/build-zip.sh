@@ -4,7 +4,10 @@ PLUGIN_SLUG="woocommerce"
 PROJECT_PATH=$(pwd)
 BUILD_PATH="${PROJECT_PATH}/build"
 DEST_PATH="$BUILD_PATH/$PLUGIN_SLUG"
-WOOCOMMERCE_BLOCKS_PHASE=2
+
+# For building Blocks within Core as phase 2.
+export WOOCOMMERCE_BLOCKS_PHASE=2
+export NODE_ENV=production
 
 echo "Generating build directory..."
 rm -rf "$BUILD_PATH"
