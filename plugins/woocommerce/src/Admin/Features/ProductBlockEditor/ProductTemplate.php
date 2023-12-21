@@ -3,7 +3,7 @@
  * WooCommerce Product Block Editor
  */
 
-namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor;
+namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 /**
  * The Product Template that represents the relation between the Product and
