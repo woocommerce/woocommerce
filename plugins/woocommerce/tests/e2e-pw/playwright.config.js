@@ -23,6 +23,7 @@ const config = {
 	workers: 4,
 	reporter: [
 		[ 'list' ],
+		[ 'blob' ],
 		[
 			'html',
 			{
