@@ -64,6 +64,7 @@ class Woo_AI {
 			'api_url'            => 'https://K.wordpress.org/plugins/info/1.0/woocommerce.json',
 			'repo_url'           => 'https://wordpress.org/plugins/woocommerce/',
 		);
+		include_once dirname( __FILE__ ) . '/class-woo-ai-assistant.php';
 
 		add_filter( 'jetpack_offline_mode', '__return_false' );
 		add_action( 'current_screen', array( $this, 'includes' ) );

@@ -35,7 +35,7 @@ export const ProductCategorySuggestions = () => {
 	>( [] );
 	const [ newSuggestions, setNewSuggestions ] = useState< string[] >( [] );
 	const [ showFeedback, setShowFeedback ] = useState( false );
-	let feedbackTimeout: number | null = null;
+	let feedbackTimeout: ReturnType< typeof setTimeout > | null = null;
 
 	useEffect( () => {
 		recordCategoryTracks( 'view_ui' );
