@@ -5,7 +5,6 @@ import classNames from 'classnames';
 import {
 	Button,
 	Dropdown,
-	Fill,
 	MenuGroup,
 	MenuItem,
 	Modal,
@@ -31,6 +30,7 @@ import { useEntityId } from '@wordpress/core-data';
  */
 import { ProductEditorSettings } from '../../../components';
 import { ProductTemplate } from '../../../components/editor';
+import { BlockFill } from '../../../components/block-slot-fill';
 import { useValidations } from '../../../contexts/validation-context';
 import {
 	WPError,
@@ -222,7 +222,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	}
 
 	return (
-		<Fill name={ rootClientId }>
+		<BlockFill
+			name="section-description"
+			clientId={ clientId }
+			slotContainerBlockName="woocommerce/product-section"
+		>
 			<div { ...blockProps }>
 				<p>
 					{ createInterpolateElement(
@@ -355,6 +359,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					</Modal>
 				) }
 			</div>
-		</Fill>
+		</BlockFill>
 	);
 }
