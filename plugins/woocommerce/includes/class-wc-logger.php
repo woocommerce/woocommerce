@@ -7,7 +7,6 @@
  * @package        WooCommerce\Classes
  */
 
-use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -16,13 +15,6 @@ defined( 'ABSPATH' ) || exit;
  * WC_Logger class.
  */
 class WC_Logger implements WC_Logger_Interface {
-	/**
-	 * A toggle for enabling/disabling the logging system.
-	 *
-	 * @var bool
-	 */
-	protected $enabled;
-
 	/**
 	 * Stores registered log handlers.
 	 *
@@ -44,11 +36,6 @@ class WC_Logger implements WC_Logger_Interface {
 	 * @param string $threshold Optional. Define an explicit threshold. May be configured via  WC_LOG_THRESHOLD. By default, all logs will be processed.
 	 */
 	public function __construct( $handlers = null, $threshold = null ) {
-		$this->enabled = wc_get_container()->get( Settings::class )->logging_is_enabled();
-		if ( ! $this->enabled ) {
-			return;
-		}
-
 		if ( null === $handlers ) {
 			$default_handler  = wc_get_container()->get( Settings::class )->get_default_handler();
 			$handler_instance = new $default_handler();
@@ -100,7 +87,7 @@ class WC_Logger implements WC_Logger_Interface {
 	 * @return bool True if the log should be handled.
 	 */
 	protected function should_handle( $level ) {
-		if ( ! $this->enabled ) {
+		if ( ! wc_get_container()->get( Settings::class )->logging_is_enabled() ) {
 			return false;
 		}
 
