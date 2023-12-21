@@ -313,6 +313,13 @@ class Init {
 		return $templates;
 	}
 
+	/**
+	 * Create default product template by custom product type if it does not have a
+	 * template associated yet.
+	 *
+	 * @param array $templates The registered product templates.
+	 * @return array The new templates.
+	 */
 	private function create_default_product_template_by_custom_product_type( array $templates ) {
 		// Getting the product types registered via the classic editor.
 		$registered_product_types = wc_get_product_types();
