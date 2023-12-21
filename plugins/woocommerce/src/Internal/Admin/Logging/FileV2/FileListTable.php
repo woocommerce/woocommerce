@@ -99,7 +99,7 @@ class FileListTable extends WP_List_Table {
 		$all_sources = $this->get_sources_list();
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
-		$current_source = $this->file_controller->sanitize_source( wp_unslash( $_GET['source'] ?? '' ) );
+		$current_source = File::sanitize_source( wp_unslash( $_GET['source'] ?? '' ) );
 
 		?>
 		<div class="alignleft actions">
@@ -236,7 +236,7 @@ class FileListTable extends WP_List_Table {
 			name="file_id[]"
 			value="<?php echo esc_attr( $item->get_file_id() ); ?>"
 		/>
-		<label for="cb-select-<?php echo esc_attr( $item->get_hash() ); ?>">
+		<label for="cb-select-<?php echo esc_attr( $item->get_file_id() ); ?>">
 			<span class="screen-reader-text">
 				<?php
 				printf(

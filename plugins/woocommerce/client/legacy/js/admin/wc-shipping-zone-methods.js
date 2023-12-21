@@ -345,6 +345,8 @@
 						}
 					});
 
+					shippingMethodView.highlightOnFocus( '.wc-shipping-modal-price' );
+
 					$( document.body ).trigger( 'init_tooltips' );
 				},
 				onConfigureShippingMethodSubmitted: function( event, target, posted_data ) {
@@ -397,6 +399,12 @@
 					error_html = error_html + '</div>';
 
 					$( 'table.wc-shipping-zone-methods' ).before( error_html );
+				},
+				highlightOnFocus: function( query ) {
+					const inputs = $( query );
+					inputs.focus( function() {
+						$( this ).select();
+					} );
 				},
 				onAddShippingMethod: function( event ) {
 					event.preventDefault();
@@ -585,6 +593,8 @@
 										status	    : 'new'
 									}
 								});
+
+								shippingMethodView.highlightOnFocus( '.wc-shipping-modal-price' );
 							} else {
 								shippingMethodView.model.trigger( 'change:methods' );
 								shippingMethodView.model.trigger( 'saved:methods' );

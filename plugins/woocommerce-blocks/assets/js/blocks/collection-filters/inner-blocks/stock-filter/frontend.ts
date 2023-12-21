@@ -53,5 +53,24 @@ store( 'woocommerce/collection-stock-filter', {
 
 			navigate( getUrl( filtersArr.join( ',' ) ) );
 		},
+		removeFilter: () => {
+			const { value } = getContext< { value: string } >();
+			// get the active filters from the url:
+			const url = new URL( window.location.href );
+			const currentFilters =
+				url.searchParams.get( 'filter_stock_status' ) || '';
+
+			// split out the active filters into an array.
+			const filtersArr =
+				currentFilters === '' ? [] : currentFilters.split( ',' );
+
+			const index = filtersArr.indexOf( value );
+
+			if ( index > -1 ) {
+				filtersArr.splice( index, 1 );
+			}
+
+			navigate( getUrl( filtersArr.join( ',' ) ) );
+		},
 	},
 } );

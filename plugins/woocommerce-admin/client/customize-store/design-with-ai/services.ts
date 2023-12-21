@@ -479,6 +479,17 @@ const resetPatternsAndProducts = () => async () => {
 		woocommerce_blocks_allow_ai_connection: 'yes',
 	} );
 
+	const response = await apiFetch< {
+		is_ai_generated: boolean;
+	} >( {
+		path: '/wc/private/ai/store-info',
+		method: 'GET',
+	} );
+
+	if ( response.is_ai_generated ) {
+		return;
+	}
+
 	return Promise.all( [
 		apiFetch( {
 			path: '/wc/private/ai/patterns',

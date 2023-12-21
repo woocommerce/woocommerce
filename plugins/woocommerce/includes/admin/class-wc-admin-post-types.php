@@ -54,10 +54,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
 
-		// Uploads.
-		add_filter( 'upload_dir', array( $this, 'upload_dir' ) );
-		add_filter( 'wp_unique_filename', array( $this, 'update_filename' ), 10, 3 );
-		add_action( 'media_upload_downloadable_product', array( $this, 'media_upload_downloadable_product' ) );
+		include_once __DIR__ . '/class-wc-admin-upload-downloadable-product.php';
 
 		// Hide template for CPT archive.
 		add_filter( 'theme_page_templates', array( $this, 'hide_cpt_archive_templates' ), 10, 3 );
@@ -740,100 +737,6 @@ class WC_Admin_Post_Types {
 			</div>
 		</div>
 		<?php
-	}
-
-	/**
-	 * Change upload dir for downloadable files.
-	 *
-	 * @param array $pathdata Array of paths.
-	 * @return array
-	 */
-	public function upload_dir( $pathdata ) {
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		if ( isset( $_POST['type'] ) && 'downloadable_product' === $_POST['type'] ) {
-
-			if ( empty( $pathdata['subdir'] ) ) {
-				$pathdata['path']   = $pathdata['path'] . '/woocommerce_uploads';
-				$pathdata['url']    = $pathdata['url'] . '/woocommerce_uploads';
-				$pathdata['subdir'] = '/woocommerce_uploads';
-			} else {
-				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];
-
-				$pathdata['path']   = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['path'] );
-				$pathdata['url']    = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['url'] );
-				$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
-			}
-		}
-		return $pathdata;
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
-	}
-
-	/**
-	 * Change filename for WooCommerce uploads and prepend unique chars for security.
-	 *
-	 * @param string $full_filename Original filename.
-	 * @param string $ext           Extension of file.
-	 * @param string $dir           Directory path.
-	 *
-	 * @return string New filename with unique hash.
-	 * @since 4.0
-	 */
-	public function update_filename( $full_filename, $ext, $dir ) {
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		if ( ! isset( $_POST['type'] ) || ! 'downloadable_product' === $_POST['type'] ) {
-			return $full_filename;
-		}
-
-		if ( ! strpos( $dir, 'woocommerce_uploads' ) ) {
-			return $full_filename;
-		}
-
-		if ( 'no' === get_option( 'woocommerce_downloads_add_hash_to_filename' ) ) {
-			return $full_filename;
-		}
-
-		return $this->unique_filename( $full_filename, $ext );
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
-	}
-
-	/**
-	 * Change filename to append random text.
-	 *
-	 * @param string $full_filename Original filename with extension.
-	 * @param string $ext           Extension.
-	 *
-	 * @return string Modified filename.
-	 */
-	public function unique_filename( $full_filename, $ext ) {
-		$ideal_random_char_length = 6;   // Not going with a larger length because then downloaded filename will not be pretty.
-		$max_filename_length      = 255; // Max file name length for most file systems.
-		$length_to_prepend        = min( $ideal_random_char_length, $max_filename_length - strlen( $full_filename ) - 1 );
-
-		if ( 1 > $length_to_prepend ) {
-			return $full_filename;
-		}
-
-		$suffix   = strtolower( wp_generate_password( $length_to_prepend, false, false ) );
-		$filename = $full_filename;
-
-		if ( strlen( $ext ) > 0 ) {
-			$filename = substr( $filename, 0, strlen( $filename ) - strlen( $ext ) );
-		}
-
-		$full_filename = str_replace(
-			$filename,
-			"$filename-$suffix",
-			$full_filename
-		);
-
-		return $full_filename;
-	}
-
-	/**
-	 * Run a filter when uploading a downloadable product.
-	 */
-	public function woocommerce_media_upload_downloadable_product() {
-		do_action( 'media_upload_file' );
 	}
 
 	/**

@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileController, FileListTable, SearchListTable };
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController, FileListTable, SearchListTable };
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Status;
 use WC_Log_Handler_File, WC_Log_Handler_DB;
@@ -374,7 +374,7 @@ class PageController {
 				'source'  => array(
 					'filter'  => FILTER_CALLBACK,
 					'options' => function( $source ) {
-						return $this->file_controller->sanitize_source( wp_unslash( $source ) );
+						return File::sanitize_source( wp_unslash( $source ) );
 					},
 				),
 				'view'    => array(
@@ -570,14 +570,17 @@ class PageController {
 			$line = '&nbsp;';
 		}
 
-		$segments = explode( ' ', $line, 3 );
+		$segments      = explode( ' ', $line, 3 );
+		$has_timestamp = false;
+		$has_level     = false;
 
 		if ( isset( $segments[0] ) && false !== strtotime( $segments[0] ) ) {
-			$classes[]   = 'log-entry';
-			$segments[0] = sprintf(
+			$classes[]     = 'log-entry';
+			$segments[0]   = sprintf(
 				'<span class="log-timestamp">%s</span>',
 				$segments[0]
 			);
+			$has_timestamp = true;
 		}
 
 		if ( isset( $segments[1] ) && in_array( strtolower( $segments[1] ), $severity_levels, true ) ) {
@@ -586,6 +589,28 @@ class PageController {
 				esc_attr( 'log-level log-level--' . strtolower( $segments[1] ) ),
 				esc_html( $segments[1] )
 			);
+			$has_level   = true;
+		}
+
+		if ( isset( $segments[2] ) && $has_timestamp && $has_level ) {
+			$message_chunks = explode( 'CONTEXT:', $segments[2], 2 );
+			if ( isset( $message_chunks[1] ) ) {
+				try {
+					$maybe_json = stripslashes( html_entity_decode( trim( $message_chunks[1] ) ) );
+					$context    = json_decode( $maybe_json, false, 512, JSON_THROW_ON_ERROR );
+
+					$message_chunks[1] = sprintf(
+						'<details><summary>%1$s</summary><pre>%2$s</pre></details>',
+						esc_html__( 'Additional context', 'woocommerce' ),
+						wp_json_encode( $context, JSON_PRETTY_PRINT )
+					);
+
+					$segments[2] = implode( ' ', $message_chunks );
+					$classes[]   = 'has-context';
+				} catch ( \JsonException $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+					// It's not valid JSON so don't do anything with it.
+				}
+			}
 		}
 
 		if ( count( $segments ) > 1 ) {
@@ -615,7 +640,7 @@ class PageController {
 	 * @return void
 	 */
 	private function render_search_field(): void {
-		$params     = $this->get_query_params( array( 'search', 'source' ) );
+		$params     = $this->get_query_params( array( 'date_end', 'date_filter', 'date_start', 'search', 'source' ) );
 		$defaults   = $this->get_query_param_defaults();
 		$file_count = $this->file_controller->get_files( $params, true );
 

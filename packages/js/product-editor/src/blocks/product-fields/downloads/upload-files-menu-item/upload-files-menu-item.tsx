@@ -30,6 +30,9 @@ export function UploadFilesMenuItem( {
 			maxUploadFileSize,
 			onFileChange: onUploadSuccess,
 			onError: onUploadError,
+			additionalData: {
+				type: 'downloadable_product',
+			},
 		} );
 	}
 

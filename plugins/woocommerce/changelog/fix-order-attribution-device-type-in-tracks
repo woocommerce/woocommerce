@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use non-translated device type in Order Attribution meta data and tracks event.

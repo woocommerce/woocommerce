@@ -20,6 +20,83 @@ final class CollectionRatingFilter extends AbstractBlock {
 	const RATING_FILTER_QUERY_VAR = 'rating_filter';
 
 	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 */
+	protected function initialize() {
+		parent::initialize();
+
+		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
+		add_filter( 'collection_active_filters_data', array( $this, 'register_active_filters_data' ), 10, 2 );
+	}
+
+	/**
+	 * Register the query param keys.
+	 *
+	 * @param array $filter_param_keys The active filters data.
+	 * @param array $url_param_keys    The query param parsed from the URL.
+	 *
+	 * @return array Active filters param keys.
+	 */
+	public function get_filter_query_param_keys( $filter_param_keys, $url_param_keys ) {
+		$price_param_keys = array_filter(
+			$url_param_keys,
+			function( $param ) {
+				return self::RATING_FILTER_QUERY_VAR === $param;
+			}
+		);
+
+		return array_merge(
+			$filter_param_keys,
+			$price_param_keys
+		);
+	}
+
+	/**
+	 * Register the active filters data.
+	 *
+	 * @param array $data   The active filters data.
+	 * @param array $params The query param parsed from the URL.
+	 * @return array Active filters data.
+	 */
+	public function register_active_filters_data( $data, $params ) {
+		if ( empty( $params[ self::RATING_FILTER_QUERY_VAR ] ) ) {
+			return $data;
+		}
+
+		$active_ratings = array_filter(
+			explode( ',', $params[ self::RATING_FILTER_QUERY_VAR ] )
+		);
+
+		if ( empty( $active_ratings ) ) {
+			return $data;
+		}
+
+		$active_ratings = array_map(
+			function( $rating ) {
+				return array(
+					/* translators: %d is the rating value. */
+					'title'      => sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating ),
+					'attributes' => array(
+						'data-wc-on--click' => 'woocommerce/collection-rating-filter::actions.removeFilter',
+						'data-wc-context'   => 'woocommerce/collection-rating-filter::' . wp_json_encode( array( 'value' => $rating ) ),
+					),
+				);
+			},
+			$active_ratings
+		);
+
+		$data['rating'] = array(
+			'type'  => __( 'Rating', 'woocommerce' ),
+			'items' => $active_ratings,
+		);
+
+		return $data;
+	}
+
+	/**
 	 * Include and render the block.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
