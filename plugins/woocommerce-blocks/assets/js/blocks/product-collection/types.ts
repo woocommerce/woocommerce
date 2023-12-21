@@ -38,6 +38,11 @@ export interface TimeFrame {
 	value?: string;
 }
 
+export interface PriceRange {
+	min?: number | undefined;
+	max?: number | undefined;
+}
+
 export interface ProductCollectionQuery {
 	exclude: string[];
 	inherit: boolean | null;
@@ -72,6 +77,7 @@ export interface ProductCollectionQuery {
 	woocommerceAttributes?: AttributeMetadata[];
 	isProductCollectionBlock?: boolean;
 	woocommerceHandPickedProducts?: string[];
+	priceRange?: undefined | PriceRange;
 }
 
 export type TProductCollectionOrder = 'asc' | 'desc';
