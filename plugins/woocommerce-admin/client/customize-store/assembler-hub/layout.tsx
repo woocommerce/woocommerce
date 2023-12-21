@@ -11,7 +11,7 @@ import {
 	useViewportMatch,
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { useState, useContext } from '@wordpress/element';
+import { useState, useContext, useEffect } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
@@ -49,6 +49,7 @@ import { Transitional } from '../transitional';
 import { CustomizeStoreContext } from './';
 import { recordEvent } from '@woocommerce/tracks';
 import { AiOfflineModal } from '~/customize-store/assembler-hub/onboarding-tour/ai-offline-modal';
+import { useQuery } from '@woocommerce/navigation';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -60,10 +61,17 @@ export const Layout = () => {
 	const { sendEvent, currentState, context } = useContext(
 		CustomizeStoreContext
 	);
+
 	const aiOnline = context.aiOnline;
+	const { customizing } = useQuery();
+
 	const [ showAiOfflineModal, setShowAiOfflineModal ] = useState(
-		! aiOnline
+		! aiOnline && customizing !== 'true'
 	);
+
+	useEffect( () => {
+		setShowAiOfflineModal( ! aiOnline && customizing !== 'true' );
+	}, [ aiOnline, customizing ] );
 
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();

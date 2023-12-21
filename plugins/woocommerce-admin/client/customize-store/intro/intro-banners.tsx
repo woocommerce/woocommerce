@@ -237,7 +237,11 @@ export const ExistingAiThemeBanner = ( {
 				recordEvent( 'customize_your_store_intro_customize_click' );
 				navigateOrParent(
 					window,
-					getNewPath( {}, '/customize-store/assembler-hub', {} )
+					getNewPath(
+						{ customizing: true },
+						'/customize-store/assembler-hub',
+						{}
+					)
 				);
 			} }
 			bannerButtonText={ __( 'Customize', 'woocommerce' ) }
