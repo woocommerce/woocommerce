@@ -19,6 +19,7 @@ export default {
 			'woocommerce'
 		),
 		image: <ShoppingBags />,
+		isDismissible: true,
 	},
 };
 

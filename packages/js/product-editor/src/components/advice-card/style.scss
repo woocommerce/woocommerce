@@ -1,7 +1,34 @@
 .woocommerce-advice-card {
-	.components-card__body {
-		display: flex;
-		justify-content: center;
-		align-items: center;
+	&.components-card {
+		.components-card__body {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+	}
+
+	.components-card {
+		&__header {
+			text-align: center;
+			padding: calc( 1.5 * $gap ) calc( 1.5 * $gap ) 0;
+			border-bottom: 0;
+			justify-content: right;
+		}
+
+		&__body {
+			padding: calc( 1.5 * $gap );
+		}
+
+		&__footer {
+			text-align: center;
+			font-weight: 400;
+			color: $gray-700;
+			border-top: 0;
+			padding: 0 calc( 1.5 * $gap ) calc( 1.5 * $gap );
+		}
+	}
+
+	.woocommerce-advice-card__dismiss-button {
+		color: $gray-700;
 	}
 }
