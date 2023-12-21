@@ -20,7 +20,7 @@ const config = {
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
 	retries: CI ? 4 : 2,
-	workers: 4,
+	workers: CI ? 2 : 4,
 	reporter: [
 		[ 'list' ],
 		[ 'blob' ],
