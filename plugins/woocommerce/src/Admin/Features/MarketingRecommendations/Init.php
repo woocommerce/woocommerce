@@ -4,6 +4,10 @@ namespace Automattic\WooCommerce\Admin\Features\MarketingRecommendations;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Marketing Recommendations engine.
+ * This goes through the specs and gets marketing recommendations.
+ */
 class Init {
 	/**
 	 * Slug of the category specifying marketing extensions on the Woo.com store.
@@ -130,6 +134,13 @@ class Init {
 		return false;
 	}
 
+	/**
+	 * Convert an object to an array.
+	 * This is used to convert the specs to an array so that they can be returned by the API.
+	 *
+	 * @param mixed $obj Object to convert.
+	 * @return array
+	 */
 	protected static function object_to_array( $obj ) {
 		if ( is_object( $obj ) ) {
 			$obj = (array) $obj;
