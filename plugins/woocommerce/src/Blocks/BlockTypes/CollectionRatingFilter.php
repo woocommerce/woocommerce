@@ -19,12 +19,12 @@ final class CollectionRatingFilter extends AbstractBlock {
 
 	const RATING_FILTER_QUERY_VAR = 'rating_filter';
 
-		/**
-		 * Initialize this block type.
-		 *
-		 * - Hook into WP lifecycle.
-		 * - Register the block with WordPress.
-		 */
+	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 */
 	protected function initialize() {
 		parent::initialize();
 
