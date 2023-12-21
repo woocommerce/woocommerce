@@ -17,6 +17,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 	} );
 
 	test( 'renders without crashing', async ( { page } ) => {
+		await page.reload( { waitUntil: 'load' } );
 		await page.waitForSelector( '#local-pickup-settings' );
 		expect( page.locator( '#local-pickup-settings' ) ).not.toBeNull();
 		expect(
