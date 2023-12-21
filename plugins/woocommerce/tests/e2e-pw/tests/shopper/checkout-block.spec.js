@@ -711,15 +711,19 @@ test.describe( 'Checkout Block page', () => {
 		).toBeVisible();
 
 		// click to log in and make sure you are on the same page after logging in
-		await page.getByText( 'Log in' ).click();
+		await page.locator( 'text=Log in.' ).click();
+		await page.waitForLoadState( 'networkidle' );
 		await page
 			.locator( 'input[name="username"]' )
 			.fill( customer.username );
 		await page
 			.locator( 'input[name="password"]' )
 			.fill( customer.password );
-		await page.locator( 'text=Log In' ).click();
+		await page.locator( 'text=Log in' ).click();
 		await page.waitForLoadState( 'networkidle' );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
 
 		// try to edit shipping details if already prefilled
 		try {
@@ -727,15 +731,12 @@ test.describe( 'Checkout Block page', () => {
 				.getByLabel( 'Edit address', { exact: true } )
 				.click( { timeout: 3000 } );
 		} catch ( error ) {
-			console.log( 'No shipping details prefilled, skipping action.' );
+			console.log( 'No shipping details found, filling it instead.' );
+			// fill shipping address and check cash on delivery method
+			await fillShippingCheckoutBlocks( page );
+			await page.getByLabel( 'Cash on delivery' ).check();
+			await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 		}
-
-		await page.getByLabel( 'Email address' ).fill( customer.email );
-
-		// fill shipping address and check cash on delivery method
-		await fillShippingCheckoutBlocks( page );
-		await page.getByLabel( 'Cash on delivery' ).check();
-		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 
 		// add note to the order
 		await page.getByLabel( 'Add a note to your order' ).check();
