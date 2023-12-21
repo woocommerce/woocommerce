@@ -261,7 +261,7 @@ test.describe( 'Checkout Block page', () => {
 		).toBeVisible();
 	} );
 
-	test.only( 'allows customer to choose available payment methods', async ( {
+	test( 'allows customer to choose available payment methods', async ( {
 		page,
 	} ) => {
 		// this time we're going to add two products to the cart
