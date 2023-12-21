@@ -52,6 +52,11 @@ export function SwitchToClassicShortcodeButton( {
 
 	const shortcode = isCart ? 'cart' : 'checkout';
 
+	const eventValue = {
+		shortcode,
+		notice,
+	};
+
 	const { getBlocks } = useSelect( ( select ) => {
 		return {
 			getBlocks: select( blockEditorStore ).getBlocks,
@@ -71,19 +76,13 @@ export function SwitchToClassicShortcodeButton( {
 	};
 
 	const handleSwitchToClassicShortcodeClick = () => {
-		recordEvent( 'switch_to_classic_shortcode_click', {
-			shortcode,
-			notice,
-		} );
+		recordEvent( 'switch_to_classic_shortcode_click', eventValue );
 		openModal();
 	};
 
 	const handleUndoClick = () => {
 		undo();
-		recordEvent( 'switch_to_classic_shortcode_undo', {
-			shortcode,
-			notice,
-		} );
+		recordEvent( 'switch_to_classic_shortcode_undo', eventValue );
 	};
 
 	const handleSwitchClick = () => {
@@ -93,10 +92,7 @@ export function SwitchToClassicShortcodeButton( {
 				shortcode,
 			} )
 		);
-		recordEvent( 'switch_to_classic_shortcode_confirm', {
-			shortcode,
-			notice,
-		} );
+		recordEvent( 'switch_to_classic_shortcode_confirm', eventValue );
 		selectClassicShortcodeBlock();
 		createInfoNotice( snackbarLabel, {
 			actions: [
@@ -111,10 +107,7 @@ export function SwitchToClassicShortcodeButton( {
 	};
 
 	const handleCancelClick = () => {
-		recordEvent( 'switch_to_classic_shortcode_cancel', {
-			shortcode,
-			notice,
-		} );
+		recordEvent( 'switch_to_classic_shortcode_cancel', eventValue );
 		closeModal();
 	};
 
