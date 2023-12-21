@@ -16,12 +16,13 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 * The context name used to identify the editor.
 	 */
 	const GROUP_IDS = array(
-		'GENERAL'      => 'general',
-		'ORGANIZATION' => 'organization',
-		'PRICING'      => 'pricing',
-		'INVENTORY'    => 'inventory',
-		'SHIPPING'     => 'shipping',
-		'VARIATIONS'   => 'variations',
+		'GENERAL'         => 'general',
+		'ORGANIZATION'    => 'organization',
+		'PRICING'         => 'pricing',
+		'INVENTORY'       => 'inventory',
+		'SHIPPING'        => 'shipping',
+		'VARIATIONS'      => 'variations',
+		'LINKED_PRODUCTS' => 'linked-products',
 	);
 
 	/**
@@ -146,6 +147,24 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'title' => __( 'Variations', 'woocommerce' ),
 					),
 					'hideConditions' => $variations_hide_conditions,
+				)
+			);
+		}
+
+		// Linked Products tab.
+		if ( Features::is_enabled( 'product-linked' ) ) {
+			$this->add_group(
+				array(
+					'id'             => $this::GROUP_IDS['LINKED_PRODUCTS'],
+					'order'          => 60,
+					'attributes'     => array(
+						'title' => __( 'Linked products', 'woocommerce' ),
+					),
+					'hideConditions' => Features::is_enabled( 'product-linked' ) ? array(
+						array(
+							'expression' => 'editedProduct.type === "grouped"',
+						),
+					) : null,
 				)
 			);
 		}

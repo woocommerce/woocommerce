@@ -22,6 +22,8 @@ jest.mock( '../../', () => ( {
 describe( 'OnboardingTour', () => {
 	let props: {
 		onClose: jest.Mock;
+		skipTour: jest.Mock;
+		takeTour: jest.Mock;
 		setShowWelcomeTour: jest.Mock;
 		showWelcomeTour: boolean;
 		setIsResizeHandleVisible: ( isVisible: boolean ) => void;
@@ -30,6 +32,8 @@ describe( 'OnboardingTour', () => {
 	beforeEach( () => {
 		props = {
 			onClose: jest.fn(),
+			skipTour: jest.fn(),
+			takeTour: jest.fn(),
 			setShowWelcomeTour: jest.fn(),
 			showWelcomeTour: true,
 			setIsResizeHandleVisible: jest.fn(),
@@ -61,9 +65,7 @@ describe( 'OnboardingTour', () => {
 			} )
 			.click();
 
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'customize_your_store_assembler_hub_tour_start'
-		);
+		expect( props.takeTour ).toHaveBeenCalled();
 	} );
 
 	it( 'should record an event when clicking on "Skip" button', () => {
@@ -75,12 +77,10 @@ describe( 'OnboardingTour', () => {
 			} )
 			.click();
 
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'customize_your_store_assembler_hub_tour_skip'
-		);
+		expect( props.skipTour ).toHaveBeenCalled();
 	} );
 
-	it( 'should record an event when clicking on "Skip" button', () => {
+	it( 'should record an event when clicking on the "Close Tour" button', () => {
 		render( <OnboardingTour { ...props } showWelcomeTour={ false } /> );
 
 		screen

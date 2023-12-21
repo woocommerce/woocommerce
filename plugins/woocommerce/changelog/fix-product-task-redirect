@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix product task redirection to allow use for external and grouped products with the new product editor.
