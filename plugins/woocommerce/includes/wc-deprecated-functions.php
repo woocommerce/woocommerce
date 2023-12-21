@@ -1128,7 +1128,7 @@ function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
 /**
  * Registers the default log handler.
  *
- * @deprecated 8.5.0
+ * @deprecated 8.6.0
  * @since 3.0
  * @param array $handlers Handlers.
  * @return array
