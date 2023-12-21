@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Shortcode cart checks for Store API reserved stock

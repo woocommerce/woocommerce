@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Trigger a hook when an order is updated on read from a post record or the post record backfilled.

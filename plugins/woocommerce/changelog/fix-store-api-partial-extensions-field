@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix an issue in which passing partial extensions data in Store API would return an error

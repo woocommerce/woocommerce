@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Fix the `wc_no_js` script so it avoids specifying its type unless necessary. This aligns it with core Wordpress functionality.
