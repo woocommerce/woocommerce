@@ -1,5 +1,8 @@
 .woocommerce-advice-card {
 	&.components-card {
+		box-shadow: none;
+		border: 1px dashed $gray-400;
+
 		.components-card__body {
 			display: flex;
 			justify-content: center;
