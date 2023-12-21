@@ -85,18 +85,6 @@ class ProductUpdater {
 			return new \WP_Error( 'missing_business_description', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
 		}
 
-		$last_business_description = get_option( 'last_business_description_with_ai_content_generated' );
-
-		if ( $last_business_description === $business_description ) {
-			if ( is_string( $business_description ) && is_string( $last_business_description ) ) {
-				return array(
-					'product_content' => array(),
-				);
-			} else {
-				return new \WP_Error( 'business_description_not_found', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
-			}
-		}
-
 		$dummy_products_to_update = $this->fetch_dummy_products_to_update();
 
 		if ( is_wp_error( $dummy_products_to_update ) ) {

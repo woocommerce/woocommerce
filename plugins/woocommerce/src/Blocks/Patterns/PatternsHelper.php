@@ -17,7 +17,7 @@ class PatternsHelper {
 	 *
 	 * @return string The image.
 	 */
-	public static function get_image_url( array $images, int $index, string $default_image ): string {
+	public static function get_image_url( $images, $index, $default_image ) {
 		$image = filter_var( $default_image, FILTER_VALIDATE_URL )
 			? $default_image
 			: plugins_url( $default_image, dirname( __DIR__, 2 ) );
