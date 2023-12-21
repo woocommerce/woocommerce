@@ -82,7 +82,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Check that log entries can be recorded while logging is enabled.
 	 */
-	public function test_logs_created_while_logging_enabled() {
+	public function test_logs_created_while_logging_enabled(): void {
 		$this->assertTrue( $this->sut->logging_is_enabled() );
 
 		$files = $this->file_controller->get_files();
@@ -97,7 +97,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Check that log entries cannot be recorded while logging is disabled.
 	 */
-	public function test_logs_not_created_while_logging_disabled() {
+	public function test_logs_not_created_while_logging_disabled(): void {
 		update_option( 'woocommerce_logs_logging_enabled', 'no' );
 		$this->assertFalse( $this->sut->logging_is_enabled() );
 
@@ -115,7 +115,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Check that the get_default_handler method returns the default value when nothing else has been set.
 	 */
-	public function test_default_handler_setting_default_value() {
+	public function test_default_handler_setting_default_value(): void {
 		$handler = $this->sut->get_default_handler();
 		$this->assertEquals( LogHandlerFileV2::class, $handler );
 	}
@@ -124,7 +124,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 * @testdox Check that the get_default_handler method returns the value set in WC_LOG_HANDLER as long as it's a
 	 *          valid handler class.
 	 */
-	public function test_default_handler_setting_with_constant() {
+	public function test_default_handler_setting_with_constant(): void {
 		Constants::set_constant( 'WC_LOG_HANDLER', WC_Log_Handler_DB::class );
 		$handler = $this->sut->get_default_handler();
 		$this->assertEquals( WC_Log_Handler_DB::class, $handler );
@@ -141,7 +141,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 * @testdox Check that the get_default_handler method returns the value set in the options table as long as it's a
 	 *          valid handler class.
 	 */
-	public function test_default_handler_setting_with_option_value() {
+	public function test_default_handler_setting_with_option_value(): void {
 		update_option( 'woocommerce_logs_default_handler', WC_Log_Handler_Email::class );
 		$handler = $this->sut->get_default_handler();
 		$this->assertEquals( WC_Log_Handler_Email::class, $handler );
@@ -163,7 +163,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Check that the get_retention_period method returns the default value when nothing else has been set.
 	 */
-	public function test_retention_period_setting_default_value() {
+	public function test_retention_period_setting_default_value(): void {
 		$retention = $this->sut->get_retention_period();
 		$this->assertEquals( 30, $retention );
 	}
@@ -172,7 +172,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 * @testdox Check that the get_retention_period method returns the value set by the filter callback as long as
 	 *          it's a valid value.
 	 */
-	public function test_retention_period_setting_with_filter() {
+	public function test_retention_period_setting_with_filter(): void {
 		add_filter( 'woocommerce_logger_days_to_retain_logs', fn() => 45 );
 		$retention = $this->sut->get_retention_period();
 		$this->assertEquals( 45, $retention );
@@ -189,7 +189,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 * @testdox Check that the get_retention_period method returns the value set in the options table as long as it's a
 	 *           valid value.
 	 */
-	public function test_retention_period_setting_with_option_value() {
+	public function test_retention_period_setting_with_option_value(): void {
 		update_option( 'woocommerce_logs_retention_period_days', 53 );
 		$handler = $this->sut->get_retention_period();
 		$this->assertEquals( 53, $handler );
@@ -211,7 +211,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Check that the get_level_threshold method returns the default value when nothing else has been set.
 	 */
-	public function test_level_threshold_setting_default_value() {
+	public function test_level_threshold_setting_default_value(): void {
 		$level = $this->sut->get_level_threshold();
 		$this->assertEquals( 'debug', $level );
 	}
@@ -220,7 +220,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 * @testdox Check that the get_level_threshold method returns the value set in WC_LOG_THRESHOLD as long as it's a
 	 *          valid level.
 	 */
-	public function test_level_threshold_setting_with_constant() {
+	public function test_level_threshold_setting_with_constant(): void {
 		Constants::set_constant( 'WC_LOG_THRESHOLD', 'alert' );
 		$level = $this->sut->get_level_threshold();
 		$this->assertEquals( 'alert', $level );
@@ -237,7 +237,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 * @testdox Check that the get_level_threshold method returns the value set in the options table as long as it's a
 	 *          valid level.
 	 */
-	public function test_level_threshold_setting_with_option_value() {
+	public function test_level_threshold_setting_with_option_value(): void {
 		update_option( 'woocommerce_logs_level_threshold', 'warning' );
 		$level = $this->sut->get_level_threshold();
 		$this->assertEquals( 'warning', $level );
@@ -259,7 +259,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Check that the settings form does not contain other settings controls when logging is disabled.
 	 */
-	public function test_render_form_logging_disabled_no_other_settings() {
+	public function test_render_form_logging_disabled_no_other_settings(): void {
 		update_option( 'woocommerce_logs_logging_enabled', 'no' );
 
 		ob_start();
@@ -276,7 +276,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Check that the settings form default handler control is disabled when the WC_LOG_HANDLER constant is set.
 	 */
-	public function test_render_form_default_handler_input_disabled_with_constant() {
+	public function test_render_form_default_handler_input_disabled_with_constant(): void {
 		Constants::set_constant( 'WC_LOG_HANDLER', WC_Log_Handler_DB::class );
 
 		ob_start();
@@ -299,7 +299,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 * @testdox Check that the settings form retention period control is disabled when the
 	 *          woocommerce_logger_days_to_retain_logs hook has a filter.
 	 */
-	public function test_render_form_retention_period_input_disabled_with_filter() {
+	public function test_render_form_retention_period_input_disabled_with_filter(): void {
 		add_filter( 'woocommerce_logger_days_to_retain_logs', fn() => 45 );
 
 		ob_start();
@@ -321,7 +321,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Check that the settings form level threshold control is disabled when the WC_LOG_THRESHOLD constant is set.
 	 */
-	public function test_render_form_level_threshold_input_disabled_with_constant() {
+	public function test_render_form_level_threshold_input_disabled_with_constant(): void {
 		Constants::set_constant( 'WC_LOG_THRESHOLD', 'error' );
 
 		ob_start();
