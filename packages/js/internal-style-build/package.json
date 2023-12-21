@@ -21,24 +21,10 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"main": "index.js",
-<<<<<<< HEAD
 	"files": [
 		"index.js",
 		"abstracts"
 	],
-=======
-	"dependencies": {
-		"@automattic/color-studio": "^2.5.0",
-		"@wordpress/base-styles": "wp-6.3",
-		"@wordpress/postcss-plugins-preset": "wp-6.0",
-		"css-loader": "^3.6.0",
-		"mini-css-extract-plugin": "^2.6.0",
-		"postcss-loader": "^4.3.0",
-		"sass-loader": "^10.2.1",
-		"webpack-remove-empty-scripts": "^0.7.3",
-		"webpack-rtl-plugin": "^2.0.0"
-	},
->>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 	"scripts": {
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",

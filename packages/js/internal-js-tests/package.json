@@ -42,21 +42,12 @@
 		"watch:build:project:esm": "wireit"
 	},
 	"dependencies": {
-<<<<<<< HEAD
 		"@testing-library/jest-dom": "5.16.2",
 		"@testing-library/react": "12.1.3",
 		"@wordpress/data": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
 		"@wordpress/jest-console": "^5.4.0",
 		"regenerator-runtime": "^0.13.11"
-=======
-		"@testing-library/jest-dom": "^5.16.2",
-		"@testing-library/react": "^12.1.3",
-		"@wordpress/data": "wp-6.3",
-		"@wordpress/i18n": "wp-6.3",
-		"@wordpress/jest-console": "^5.0.1",
-		"regenerator-runtime": "^0.13.9"
->>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.5",

@@ -34,7 +34,6 @@
 		"access": "public"
 	},
 	"scripts": {
-<<<<<<< HEAD
 		"build": "WIREIT_LOGGER='quiet-ci' pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" build:project",
 		"build:project": "pnpm --if-present /^build:project:.*$/",
 		"build:project:bundle": "wireit",
@@ -157,49 +156,5 @@
 				"package.json"
 			]
 		}
-=======
-		"turbo:build": "pnpm run build:js && pnpm run build:css",
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint src",
-		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"build:css": "webpack",
-		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
-		"prepack": "pnpm run clean && pnpm run build",
-		"lint:fix": "eslint src --fix"
-	},
-	"devDependencies": {
-		"@types/react": "^17.0.2",
-		"@types/wordpress__components": "^19.10.3",
-		"@woocommerce/eslint-plugin": "workspace:*",
-		"@woocommerce/internal-style-build": "workspace:*",
-		"@wordpress/browserslist-config": "wp-6.3",
-		"concurrently": "^7.0.0",
-		"css-loader": "^3.6.0",
-		"eslint": "^8.32.0",
-		"jest": "^27.5.1",
-		"jest-cli": "^27.5.1",
-		"postcss-loader": "^4.3.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
-		"rimraf": "^3.0.2",
-		"sass-loader": "^10.2.1",
-		"ts-jest": "^27.1.3",
-		"typescript": "^5.1.6",
-		"webpack": "^5.70.0",
-		"webpack-cli": "^3.3.12"
-	},
-	"peerDependencies": {
-		"@types/react": "^17.0.2",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
-	},
-	"dependencies": {
-		"@woocommerce/components": "workspace:*",
-		"@wordpress/components": "wp-6.3",
-		"@wordpress/element": "wp-6.3"
->>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 	}
 }

@@ -326,10 +326,7 @@ class WC_Admin_Menus {
 			'woocommerce_webhooks_per_page',
 			FileListTable::PER_PAGE_USER_OPTION_KEY,
 			SearchListTable::PER_PAGE_USER_OPTION_KEY,
-<<<<<<< HEAD
 			WC_Admin_Log_Table_List::PER_PAGE_USER_OPTION_KEY,
-=======
->>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 		);
 
 		if ( in_array( $option, $screen_options, true ) ) {

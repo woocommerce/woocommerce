@@ -52,15 +52,9 @@
 	"dependencies": {
 		"@woocommerce/expression-evaluation": "workspace:*",
 		"@wordpress/block-editor": "^9.8.0",
-<<<<<<< HEAD
 		"@wordpress/blocks": "^12.24.0",
 		"@wordpress/data": "wp-6.0",
 		"@wordpress/element": "wp-6.0"
-=======
-		"@wordpress/blocks": "^12.3.0",
-		"@wordpress/data": "wp-6.3",
-		"@wordpress/element": "wp-6.3"
->>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.5",

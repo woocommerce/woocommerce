@@ -61,19 +61,11 @@
 		"@woocommerce/experimental": "workspace:*",
 		"@woocommerce/explat": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
-<<<<<<< HEAD
 		"@wordpress/components": "wp-6.0",
 		"@wordpress/element": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
 		"classnames": "^2.3.2",
 		"gridicons": "^3.4.2",
-=======
-		"@wordpress/components": "wp-6.3",
-		"@wordpress/element": "wp-6.3",
-		"@wordpress/i18n": "wp-6.3",
-		"classnames": "^2.3.1",
-		"gridicons": "^3.4.0",
->>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 		"react": "^17.0.2",
 		"string-similarity": "4.0.4"
 	},
@@ -89,13 +81,8 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
-<<<<<<< HEAD
 		"@wordpress/browserslist-config": "wp-6.0",
 		"concurrently": "^7.6.0",
-=======
-		"@wordpress/browserslist-config": "wp-6.3",
-		"concurrently": "^7.0.0",
->>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 		"css-loader": "^3.6.0",
 		"eslint": "^8.55.0",
 		"jest": "~27.5.1",
