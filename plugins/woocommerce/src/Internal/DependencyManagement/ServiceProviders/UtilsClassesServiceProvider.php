@@ -34,7 +34,7 @@ class UtilsClassesServiceProvider extends AbstractServiceProvider {
 		PluginUtil::class,
 		COTMigrationUtil::class,
 		WebhookUtil::class,
-		TimeUtil::class
+		TimeUtil::class,
 	);
 
 	/**

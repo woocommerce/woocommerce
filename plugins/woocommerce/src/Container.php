@@ -78,7 +78,7 @@ final class Container {
 		MarketplaceServiceProvider::class,
 		BlockTemplatesServiceProvider::class,
 		LoggingServiceProvider::class,
-		EnginesServiceProvider::class
+		EnginesServiceProvider::class,
 	);
 
 	/**
