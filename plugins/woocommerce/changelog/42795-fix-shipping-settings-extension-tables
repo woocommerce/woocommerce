@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Revert Shipping Settings change of replacing tables, replace only for use in JS powered modals.

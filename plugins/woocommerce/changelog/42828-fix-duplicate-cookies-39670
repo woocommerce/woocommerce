@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove duplicate cookie headers from the response when adding multiple items to the cart programmatically.

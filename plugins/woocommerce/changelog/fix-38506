@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Adds missing aria-label and tabindex HTML attributes to the Help tip element for "Product data" on "Add new product" page

@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Adds test coverage for formatting of Portugese and Irish postcodes. Since it does not add user-facing functionality, a changelog entry is not needed.
-
-

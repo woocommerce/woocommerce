@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Delete trashed orders after `EMPTY_TRASH_DAYS` as defined by WordPress (HPOS)
