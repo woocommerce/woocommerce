@@ -1,5 +1,5 @@
 ---
-post_title: User experience guidelines - notices
+post_title: Notices
 ---
 
 ## Notices

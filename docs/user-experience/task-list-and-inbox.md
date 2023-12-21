@@ -1,5 +1,5 @@
 ---
-post_title: User experience guidelines - task list and inbox
+post_title: Task list and inbox
 ---
 
 ## Task List & Inbox

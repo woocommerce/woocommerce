@@ -1,5 +1,5 @@
 ---
-post_title: User experience guidelines - colors
+post_title: Colors
 ---
 
 ## Colors
