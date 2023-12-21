@@ -1,0 +1,25 @@
+/**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import React from 'react';
+
+/**
+ * Internal dependencies
+ */
+import { AdviceCard, AdviceCardProps } from '..';
+import { ShoppingBags } from '../../../images/shopping-bugs';
+
+export default {
+	title: 'Product Editor/components/AdviceCard',
+	component: AdviceCard,
+	args: {
+		tip: __(
+			'Tip: Upsells are typically products that are extra profitable or better quality or more expensive. Experiment with combinations to boost sales.',
+			'woocommerce'
+		),
+		image: <ShoppingBags />,
+	},
+};
+
+export const Default = ( args: AdviceCardProps ) => <AdviceCard { ...args } />;
