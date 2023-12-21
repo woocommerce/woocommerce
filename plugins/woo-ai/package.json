@@ -68,7 +68,7 @@
 		"@types/prop-types": "^15.7.11",
 		"@types/react-outside-click-handler": "^1.3.3",
 		"@woocommerce/ai": "workspace:0.1.0-beta.0",
-		"@woocommerce/components": "wp-6.4",
+		"@woocommerce/components": "wp-6.0",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/components": "wp-6.0",
