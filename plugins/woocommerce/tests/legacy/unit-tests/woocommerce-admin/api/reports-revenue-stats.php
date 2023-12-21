@@ -161,19 +161,23 @@ class WC_Admin_Tests_API_Reports_Revenue_Stats extends WC_REST_Unit_Test_Case {
 	public function test_it_returns_200_when_date_type_param_is_valid() {
 		// Given.
 		wp_set_current_user( $this->user );
-		$request = new WP_REST_Request( 'GET', $this->endpoint );
-		$request->set_query_params(
-			array(
-				'date_type' => 'date_created',
-			)
-		);
+		$allowed_values = array( 'date_paid', 'date_created', 'date_completed' );
 
-		// When.
-		$response = rest_do_request( $request );
-		$data     = $response->get_data();
+		foreach ( $allowed_values as $allowed_value ) {
+			$request = new WP_REST_Request( 'GET', $this->endpoint );
+			$request->set_query_params(
+				array(
+					'date_type' => $allowed_value,
+				)
+			);
 
-		// Then.
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $data ) );
+			// When.
+			$response = rest_do_request( $request );
+			$data     = $response->get_data();
+
+			// Then.
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertEquals( 2, count( $data ) );
+		}
 	}
 }
