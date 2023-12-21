@@ -1178,6 +1178,35 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get a subscriptions install URL.
+	 *
+	 * @param string $product_key Subscription product key.
+	 * @return string
+	 */
+	public static function get_subscription_install_url( $product_key ) {
+		$install_url_response = WC_Helper_API::get(
+			'install-url',
+			array(
+				'authenticated' => true,
+				'query_string'  => esc_url( '?product_key=' . $product_key . '&wc_version=' . WC()->version ),
+			)
+		);
+
+		$code = wp_remote_retrieve_response_code( $install_url_response );
+		if ( 200 !== $code ) {
+			self::log( sprintf( 'Install URL API call returned a non-200 response code (%d)', $code ) );
+			return '';
+		}
+
+		$body = json_decode( wp_remote_retrieve_body( $install_url_response ), true );
+		if ( empty( $body['data']['url'] ) ) {
+			self::log( sprintf( 'Install URL API call returned an invalid body: %s', wp_remote_retrieve_body( $install_url_response ) ) );
+			return '';
+		}
+		return $body['data']['url'];
+	}
+
+	/**
 	 * Deactivate a plugin.
 	 */
 	private static function _helper_plugin_deactivate() {

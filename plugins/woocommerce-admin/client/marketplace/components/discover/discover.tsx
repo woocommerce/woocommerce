@@ -73,6 +73,7 @@ export default function Discover(): JSX.Element | null {
 			{ groupsList.map( ( groups ) => (
 				<ProductList
 					key={ groups.id }
+					productGroup={ groups.id }
 					title={ groups.title }
 					products={ groups.items }
 					groupURL={ groups.url }

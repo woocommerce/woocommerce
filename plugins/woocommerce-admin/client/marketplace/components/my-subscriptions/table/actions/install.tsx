@@ -13,6 +13,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
 import {
 	addNotice,
+	getInstallUrl,
 	installProduct,
 	removeNotice,
 } from '../../../../utils/functions';
@@ -59,68 +60,102 @@ export default function Install( props: InstallProps ) {
 
 		startInstall();
 		removeNotice( props.subscription.product_key );
-		installProduct( props.subscription )
-			.then( () => {
-				loadSubscriptions( false ).then( () => {
+
+		if ( props.subscription.is_installable ) {
+			installProduct( props.subscription )
+				.then( () => {
+					loadSubscriptions( false ).then( () => {
+						addNotice(
+							props.subscription.product_key,
+							sprintf(
+								// translators: %s is the product name.
+								__(
+									'%s successfully installed.',
+									'woocommerce'
+								),
+								props.subscription.product_name
+							),
+							NoticeStatus.Success
+						);
+						stopInstall();
+					} );
+
+					recordEvent( 'marketplace_product_installed', {
+						product_zip_slug: props.subscription.zip_slug,
+						product_id: props.subscription.product_id,
+						product_current_version: props.subscription.version,
+					} );
+
+					if ( props.onSuccess ) {
+						props.onSuccess();
+					}
+				} )
+				.catch( ( error ) => {
+					loadSubscriptions( false ).then( () => {
+						let errorMessage = sprintf(
+							// translators: %s is the product name.
+							__( '%s couldn’t be installed.', 'woocommerce' ),
+							props.subscription.product_name
+						);
+						if ( error?.success === false && error?.data.message ) {
+							errorMessage += ' ' + error.data.message;
+						}
+						addNotice(
+							props.subscription.product_key,
+							errorMessage,
+							NoticeStatus.Error,
+							{
+								actions: [
+									{
+										label: __( 'Try again', 'woocommerce' ),
+										onClick: install,
+									},
+								],
+							}
+						);
+						stopInstall();
+
+						if ( props.onError ) {
+							props.onError();
+						}
+					} );
+
+					recordEvent( 'marketplace_product_install_failed', {
+						product_zip_slug: props.subscription.zip_slug,
+						product_id: props.subscription.product_id,
+						product_current_version: props.subscription.version,
+						error_message: error?.data?.message,
+					} );
+				} );
+		} else {
+			getInstallUrl( props.subscription ).then( ( url: string ) => {
+				recordEvent( 'marketplace_product_install_url', {
+					product_zip_slug: props.subscription.zip_slug,
+					product_id: props.subscription.product_id,
+					product_current_version: props.subscription.version,
+					product_install_url: url,
+				} );
+
+				stopInstall();
+
+				if ( url ) {
+					window.open( url, '_self' );
+				} else {
 					addNotice(
 						props.subscription.product_key,
 						sprintf(
 							// translators: %s is the product name.
-							__( '%s successfully installed.', 'woocommerce' ),
+							__(
+								'%s couldn’t be installed. Please install the product manually.',
+								'woocommerce'
+							),
 							props.subscription.product_name
 						),
-						NoticeStatus.Success
+						NoticeStatus.Error
 					);
-					stopInstall();
-				} );
-
-				recordEvent( 'marketplace_product_installed', {
-					product_zip_slug: props.subscription.zip_slug,
-					product_id: props.subscription.product_id,
-					product_current_version: props.subscription.version,
-				} );
-
-				if ( props.onSuccess ) {
-					props.onSuccess();
 				}
-			} )
-			.catch( ( error ) => {
-				loadSubscriptions( false ).then( () => {
-					let errorMessage = sprintf(
-						// translators: %s is the product name.
-						__( '%s couldn’t be installed.', 'woocommerce' ),
-						props.subscription.product_name
-					);
-					if ( error?.success === false && error?.data.message ) {
-						errorMessage += ' ' + error.data.message;
-					}
-					addNotice(
-						props.subscription.product_key,
-						errorMessage,
-						NoticeStatus.Error,
-						{
-							actions: [
-								{
-									label: __( 'Try again', 'woocommerce' ),
-									onClick: install,
-								},
-							],
-						}
-					);
-					stopInstall();
-
-					if ( props.onError ) {
-						props.onError();
-					}
-				} );
-
-				recordEvent( 'marketplace_product_install_failed', {
-					product_zip_slug: props.subscription.zip_slug,
-					product_id: props.subscription.product_id,
-					product_current_version: props.subscription.version,
-					error_message: error?.data?.message,
-				} );
 			} );
+		}
 	};
 
 	return (

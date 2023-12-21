@@ -13,7 +13,6 @@ import { ProductResponseItem } from '@woocommerce/types';
 import { Block as ProductImage } from '../../../atomic/blocks/product-elements/image/block';
 import { Block as ProductName } from '../../../atomic/blocks/product-elements/title/block';
 import { Block as ProductRating } from '../../../atomic/blocks/product-elements/rating/block';
-import { Block as ProductSaleBadge } from '../../../atomic/blocks/product-elements/sale-badge/block';
 import { Block as ProductPrice } from '../../../atomic/blocks/product-elements/price/block';
 import { Block as ProductButton } from '../../../atomic/blocks/product-elements/button/block';
 import { ImageSizing } from '../../../atomic/blocks/product-elements/image/types';
@@ -40,9 +39,9 @@ const CartCrossSellsProduct = ( {
 					<div>
 						<ProductImage
 							className={ '' }
-							showSaleBadge={ false }
+							showSaleBadge={ true }
 							productId={ product.id }
-							showProductLink={ false }
+							showProductLink={ true }
 							saleBadgeAlign={ 'left' }
 							imageSizing={ ImageSizing.SINGLE }
 							isDescendentOfQueryLoop={ false }
@@ -53,10 +52,6 @@ const CartCrossSellsProduct = ( {
 							showProductLink={ true }
 						/>
 						<ProductRating />
-						<ProductSaleBadge
-							productId={ product.id }
-							align={ 'left' }
-						/>
 						<ProductPrice />
 					</div>
 					<ProductButton />

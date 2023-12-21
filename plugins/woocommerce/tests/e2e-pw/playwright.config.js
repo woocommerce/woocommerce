@@ -43,6 +43,7 @@ const config = {
 			},
 		],
 		[ 'json', { outputFile: './test-results/test-results.json' } ],
+		[ 'github' ],
 	],
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {

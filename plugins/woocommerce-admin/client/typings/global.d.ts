@@ -24,6 +24,7 @@ declare global {
 			'product-virtual-downloadable': boolean;
 			'product-external-affiliate': boolean;
 			'product-grouped': boolean;
+			'product-linked': boolean;
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;

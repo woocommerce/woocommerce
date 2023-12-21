@@ -7,7 +7,7 @@ import { escapeHTML } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { Taxonomy } from './types';
+import type { Taxonomy } from '../../../types';
 
 async function getTaxonomiesMissingParents(
 	taxonomies: Taxonomy[],
