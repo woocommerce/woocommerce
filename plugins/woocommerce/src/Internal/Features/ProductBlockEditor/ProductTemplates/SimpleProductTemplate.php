@@ -151,7 +151,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			);
 		}
 
-		// Linked Products tabgit.
+		// Linked Products tab.
 		if ( Features::is_enabled( 'product-linked' ) ) {
 			$this->add_group(
 				array(
