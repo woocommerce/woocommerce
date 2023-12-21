@@ -1,8 +1,8 @@
 <?php
 /**
- * Display the Order Attribution Data metabox.
+ * Display the Order Attribution details metabox.
  *
- * This template is used to display the order source data metabox on the edit order screen.
+ * This template is used to display the order attribution data metabox on the edit order screen.
  *
  * @see     Automattic\WooCommerce\Internal\Orders\OrderAttributionController
  * @package WooCommerce\Templates
