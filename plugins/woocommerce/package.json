@@ -177,7 +177,6 @@
 		"ie 9"
 	],
 	"dependencies": {
-<<<<<<< HEAD
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/classic-assets": "workspace:*",
@@ -238,8 +237,5 @@
 				"!node_modules/@woocommerce/api/dist/**/__test_data__/"
 			]
 		}
-=======
-		"@wordpress/browserslist-config": "wp-6.3"
->>>>>>> c9e0020a05 (Poc/WooWizard assistant (#41673))
 	}
 }
