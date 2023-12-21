@@ -145,10 +145,19 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		};
 	}
 
-	function resolveIcon( iconName?: string | null ) {
-		if ( ! iconName || ! ( iconName in icons ) ) return undefined;
+	function resolveIcon( iconId?: string | null, alt?: string ) {
+		if ( ! iconId ) return undefined;
 
-		const { Icon, [ iconName as never ]: icon } = icons;
+		const { Icon } = icons;
+		let icon: JSX.Element;
+
+		if ( /^https?:\/\//.test( iconId ) ) {
+			icon = <img src={ iconId } alt={ alt } />;
+		} else {
+			if ( ! ( iconId in icons ) ) return undefined;
+
+			icon = icons[ iconId as never ];
+		}
 
 		return <Icon icon={ icon } size={ 24 } />;
 	}
@@ -165,7 +174,10 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					icon={
 						isSelected
 							? resolveIcon( 'check' )
-							: resolveIcon( productTemplate.icon )
+							: resolveIcon(
+									productTemplate.icon,
+									productTemplate.title
+							  )
 					}
 					iconPosition="left"
 					role="menuitemradio"

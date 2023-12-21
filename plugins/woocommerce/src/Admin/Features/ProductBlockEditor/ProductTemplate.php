@@ -163,7 +163,10 @@ class ProductTemplate {
 	/**
 	 * Set the template icon.
 	 *
-	 * @param string $icon The template icon.
+	 * @see https://github.com/WordPress/gutenberg/tree/trunk/packages/icons.
+	 *
+	 * @param string $icon The icon name from the @wordpress/components or a
+	 * url for an external image resource. 
 	 */
 	public function set_icon( string $icon ) {
 		$this->icon = $icon;
