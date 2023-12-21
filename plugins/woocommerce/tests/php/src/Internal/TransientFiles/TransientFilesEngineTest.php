@@ -222,7 +222,9 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 	/**
 	 * @testdox get_transient_files_directory throws if the calculated directory doesn't exist.
 	 */
-	public function test_get_transient_files_directory_throws_if_directory_does_not_exist() {
+	public function test_get_transient_files_directory_throws_if_filter_is_used_and_directory_does_not_exist() {
+		add_filter( 'woocommerce_transient_files_directory', fn( $default_dir) => 'foobar_dir' );
+
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
@@ -231,9 +233,33 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( "The base transient files directory doesn't exist: /wordpress/uploads/woocommerce_transient_files" );
+		$this->expectExceptionMessage( "The base transient files directory doesn't exist: foobar_dir" );
+
+		try {
+			$this->sut->get_transient_files_directory();
+		} finally {
+			remove_all_filters( 'woocommerce_transient_files_directory' );
+		}
+	}
+
+	/**
+	 * @testdox get_transient_files_directory creates the default base directory if it doesn't exist and the woocommerce_transient_files_directory filter is not used.
+	 */
+	public function test_get_transient_files_directory_creates_default_directory_if_it_does_not_exist() {
+		$created_dir = null;
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
+				'realpath'      => fn( $path ) => false,
+				'wp_mkdir_p'    => function( $directory ) use ( &$created_dir ) {
+					$created_dir = $directory;
+					return true; },
+			)
+		);
 
 		$this->sut->get_transient_files_directory();
+		$this->assertEquals( '/wordpress/uploads/woocommerce_transient_files', $created_dir );
 	}
 
 	/**

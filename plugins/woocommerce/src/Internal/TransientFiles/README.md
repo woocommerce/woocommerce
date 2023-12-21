@@ -57,6 +57,8 @@ Gets the base directory where existing transient files are stored. The actual di
 
 The default base directory is `woocommerce_transient_files` inside the WordPress uploads directory. A different directory specified via a dedicated [hook](#hooks).
 
+If the default base directory doesn't exist, this method will create it. If the dedicated hook is used to specify a different directory that doesn't exist, an exception will be thrown; it's the responsibility of either the caller or the code that sets the hook to ensure that the specified custom directory exists.
+
 
 ### get_transient_file_path
 

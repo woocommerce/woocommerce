@@ -76,15 +76,19 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 * The default base directory is the WordPress uploads directory plus "woocommerce_transient_files". This can
 	 * be changed by using the woocommerce_transient_files_directory filter.
 	 *
+	 * If the woocommerce_transient_files_directory filter is not used and the default base directory
+	 * doesn't exist, it will be created. If the filter is used it's the responsibility of the caller
+	 * to ensure that the custom directory exists, otherwise an exception will be thrown.
+	 *
 	 * The actual directory for each existing file will be the base directory plus the expiration date
 	 * of the file formatted as 'yyyy-mm-dd'.
 	 *
 	 * @return string Effective base directory where transient files are stored.
-	 * @throws Exception The base directory (possibly changed via filter) doesn't exist.
+	 * @throws Exception The custom base directory (as specified via filter) doesn't exist, or the default base directory can't be created.
 	 */
 	public function get_transient_files_directory(): string {
-		$upload_dir_info           = $this->legacy_proxy->call_function( 'wp_upload_dir' );
-		$transient_files_directory = untrailingslashit( $upload_dir_info['basedir'] ) . '/woocommerce_transient_files';
+		$upload_dir_info                   = $this->legacy_proxy->call_function( 'wp_upload_dir' );
+		$default_transient_files_directory = untrailingslashit( $upload_dir_info['basedir'] ) . '/woocommerce_transient_files';
 
 		/**
 		 * Filters the directory where transient files are stored.
@@ -97,11 +101,18 @@ class TransientFilesEngine implements RegisterHooksInterface {
 		 *
 		 * @since 8.5.0
 		 */
-		$transient_files_directory = apply_filters( 'woocommerce_transient_files_directory', $transient_files_directory );
+		$transient_files_directory = apply_filters( 'woocommerce_transient_files_directory', $default_transient_files_directory );
 
 		$realpathed_transient_files_directory = $this->legacy_proxy->call_function( 'realpath', $transient_files_directory );
 		if ( false === $realpathed_transient_files_directory ) {
-			throw new Exception( "The base transient files directory doesn't exist: $transient_files_directory" );
+			if ( $transient_files_directory === $default_transient_files_directory ) {
+				if ( ! $this->legacy_proxy->call_function( 'wp_mkdir_p', $transient_files_directory ) ) {
+					throw new Exception( "Can't create directory: $transient_files_directory" );
+				}
+				$realpathed_transient_files_directory = $this->legacy_proxy->call_function( 'realpath', $transient_files_directory );
+			} else {
+				throw new Exception( "The base transient files directory doesn't exist: $transient_files_directory" );
+			}
 		}
 
 		return untrailingslashit( $realpathed_transient_files_directory );

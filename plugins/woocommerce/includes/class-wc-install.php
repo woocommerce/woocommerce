@@ -240,9 +240,6 @@ class WC_Install {
 		'8.1.0' => array(
 			'wc_update_810_migrate_transactional_metadata_for_hpos',
 		),
-		'8.5.0' => array(
-			'wc_update_850_create_transient_files_directory',
-		),
 	);
 
 	/**
