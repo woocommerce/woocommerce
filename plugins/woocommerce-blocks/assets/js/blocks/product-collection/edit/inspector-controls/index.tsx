@@ -46,6 +46,7 @@ import HandPickedProductsControl from './hand-picked-products-control';
 import LayoutOptionsControl from './layout-options-control';
 import FeaturedProductsControl from './featured-products-control';
 import CreatedControl from './created-control';
+import PriceRangeControl from './price-range-control';
 
 const prepareShouldShowFilter =
 	( hideControls: FilterName[] ) => ( filter: FilterName ) => {
@@ -127,6 +128,7 @@ const ProductCollectionInspectorControls = (
 						<FeaturedProductsControl { ...queryControlProps } />
 					) }
 					<CreatedControl { ...queryControlProps } />
+					<PriceRangeControl { ...queryControlProps } />
 				</ToolsPanel>
 			) : null }
 			<ProductCollectionFeedbackPrompt />

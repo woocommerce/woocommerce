@@ -22,7 +22,7 @@ export const isSameAddress = < T extends ShippingAddress | BillingAddress >(
 	address1: T,
 	address2: T
 ): boolean => {
-	return Object.keys( ADDRESS_FIELDS_KEYS ).every( ( field: string ) => {
+	return ADDRESS_FIELDS_KEYS.every( ( field: string ) => {
 		return address1[ field as keyof T ] === address2[ field as keyof T ];
 	} );
 };
