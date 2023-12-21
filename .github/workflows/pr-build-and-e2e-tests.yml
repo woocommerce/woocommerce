@@ -44,7 +44,7 @@ jobs:
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
+              run: pnpm exec playwright install --with-deps
 
             - name: Get total number of Playwright E2E tests to be run.
               id: count_e2e_total
