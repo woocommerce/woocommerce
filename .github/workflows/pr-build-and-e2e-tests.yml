@@ -44,7 +44,7 @@ jobs:
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright install --with-deps
+              run: pnpm exec playwright install chromium
 
             - name: Get total number of Playwright E2E tests to be run.
               id: count_e2e_total
@@ -56,6 +56,12 @@ jobs:
                   echo "E2E_GRAND_TOTAL=$COUNT" >> $GITHUB_OUTPUT
 
             - name: Run Playwright tests
+              working-directory: plugins/woocommerce
+              env:
+                  USE_WP_ENV: 1
+                  E2E_MAX_FAILURES: 15
+                  FORCE_COLOR: 1
+              id: run_playwright_e2e_tests
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard }}
 
             - name: Upload blob report to GitHub Actions Artifacts
