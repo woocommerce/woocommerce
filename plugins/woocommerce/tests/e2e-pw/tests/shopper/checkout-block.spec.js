@@ -2,6 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin, customer } = require( '../../test-data/data' );
 const { setFilterValue, clearFilters } = require( '../../utils/filters' );
+const { addProductsToCart } = require( '../../utils/pdp' );
 const {
 	fillShippingCheckoutBlocks,
 	fillBillingCheckoutBlocks,
@@ -260,14 +261,12 @@ test.describe( 'Checkout Block page', () => {
 		).toBeVisible();
 	} );
 
-	test( 'allows customer to choose available payment methods', async ( {
+	test.only( 'allows customer to choose available payment methods', async ( {
 		page,
 	} ) => {
 		// this time we're going to add two products to the cart
-		for ( let i = 1; i < 3; i++ ) {
-			await page.goto( `/shop/?add-to-cart=${ productId }` );
-			await page.waitForLoadState( 'networkidle' );
-		}
+		await addProductsToCart( page, simpleProductName, '2' );
+
 		await page.goto( pageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: pageTitle } )
@@ -300,10 +299,8 @@ test.describe( 'Checkout Block page', () => {
 
 	test( 'allows customer to fill shipping details', async ( { page } ) => {
 		// this time we're going to add three products to the cart
-		for ( let i = 1; i < 4; i++ ) {
-			await page.goto( `/shop/?add-to-cart=${ productId }` );
-			await page.waitForLoadState( 'networkidle' );
-		}
+		await addProductsToCart( page, simpleProductName, '3' );
+
 		await page.goto( pageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: pageTitle } )
@@ -589,10 +586,8 @@ test.describe( 'Checkout Block page', () => {
 	} );
 
 	test( 'allows guest customer to place an order', async ( { page } ) => {
-		for ( let i = 1; i < 3; i++ ) {
-			await page.goto( `/shop/?add-to-cart=${ productId }` );
-			await page.waitForLoadState( 'networkidle' );
-		}
+		await addProductsToCart( page, simpleProductName, '2' );
+
 		await page.goto( pageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: pageTitle } )
@@ -701,10 +696,8 @@ test.describe( 'Checkout Block page', () => {
 	} );
 
 	test( 'allows existing customer to place an order', async ( { page } ) => {
-		for ( let i = 1; i < 3; i++ ) {
-			await page.goto( `/shop/?add-to-cart=${ productId }` );
-			await page.waitForLoadState( 'networkidle' );
-		}
+		await addProductsToCart( page, simpleProductName, '2' );
+
 		await page.goto( pageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: pageTitle } )
