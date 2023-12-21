@@ -193,7 +193,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_retention_period_setting_with_option_value() {
 		update_option( 'woocommerce_logs_retention_period_days', 53 );
-		$handler = $this->sut->get_default_handler();
+		$handler = $this->sut->get_retention_period();
 		$this->assertEquals( 53, $handler );
 
 		// Filter overrides option.
@@ -206,7 +206,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 		// Invalid number.
 		update_option( 'woocommerce_logs_retention_period_days', 'french toast' );
-		$handler = $this->sut->get_default_handler();
+		$handler = $this->sut->get_retention_period();
 		$this->assertEquals( 30, $handler );
 
 		delete_option( 'woocommerce_logs_retention_period_days' );
@@ -287,8 +287,8 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$this->sut->render_form();
 		$content = ob_get_clean();
 
-		$this->assertStringContainsString(
-			'name="woocommerce_logs_default_handler" value="Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2" type="radio" disabled',
+		$this->assertMatchesRegularExpression(
+			'/name="woocommerce_logs_default_handler"[^>]+disabled/',
 			$content
 		);
 		$this->assertStringContainsString(
@@ -303,10 +303,46 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 * @testdox Check that the settings form retention period control is disabled when the
 	 *          woocommerce_logger_days_to_retain_logs hook has a filter.
 	 */
-	public function test_render_form_retention_period_input_disabled_with_filter() {}
+	public function test_render_form_retention_period_input_disabled_with_filter() {
+		add_filter( 'woocommerce_logger_days_to_retain_logs', function() {
+			return 45;
+		} );
+
+		ob_start();
+		$this->sut->render_form();
+		$content = ob_get_clean();
+
+		$this->assertMatchesRegularExpression(
+			'/name="woocommerce_logs_retention_period_days"[^>]+disabled/',
+			$content
+		);
+		$this->assertStringContainsString(
+			'This setting cannot be changed here because it is being set by a filter on the <code>woocommerce_logger_days_to_retain_logs</code> hook',
+			$content
+		);
+
+		remove_all_filters( 'woocommerce_logger_days_to_retain_logs' );
+	}
 
 	/**
 	 * @testdox Check that the settings form level threshold control is disabled when the WC_LOG_THRESHOLD constant is set.
 	 */
-	public function test_render_form_level_threshold_input_disabled_with_constant() {}
+	public function test_render_form_level_threshold_input_disabled_with_constant() {
+		Constants::set_constant( 'WC_LOG_THRESHOLD', 'error' );
+
+		ob_start();
+		$this->sut->render_form();
+		$content = ob_get_clean();
+
+		$this->assertMatchesRegularExpression(
+			'/name="woocommerce_logs_level_threshold"[^>]+disabled/',
+			$content
+		);
+		$this->assertStringContainsString(
+			'This setting cannot be changed here because it is defined in the <code>WC_LOG_THRESHOLD</code> constant',
+			$content
+		);
+
+		Constants::clear_single_constant( 'WC_LOG_THRESHOLD' );
+	}
 }
