@@ -29,7 +29,7 @@ const {
 	getCacheGroups,
 } = require( './webpack-helpers' );
 
-const isProduction = NODE_ENV === 'production';
+const isProduction = process.env.WOOCOMMERCE_BLOCKS_NODE_ENV === 'production' || NODE_ENV === 'production';
 
 /**
  * Shared config for all script builds.
@@ -123,7 +123,7 @@ const getCoreConfig = ( options = {} ) => {
 				// content of the file
 				content: `
 woocommerce_blocks_phase = ${ process.env.WOOCOMMERCE_BLOCKS_PHASE || 3 }
-woocommerce_blocks_env = ${ NODE_ENV }
+woocommerce_blocks_env = ${ process.env.WOOCOMMERCE_BLOCKS_NODE_ENV }
 `.trim(),
 			} ),
 		],
