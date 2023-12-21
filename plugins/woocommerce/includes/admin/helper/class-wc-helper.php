@@ -1193,7 +1193,7 @@ class WC_Helper {
 						'product_key' => $product_key,
 						'wc_version'  => WC()->version,
 					)
-				)
+				),
 			)
 		);
 
