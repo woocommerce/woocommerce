@@ -356,7 +356,6 @@ class ProductCollection extends AbstractBlock {
 		$date_query          = $this->get_date_query( $query['timeFrame'] ?? array() );
 		$price_query_args    = $this->get_price_range_query_args( $query['priceRange'] ?? array() );
 
-
 		// We exclude applied filters to generate product ids for the filter blocks.
 		$applied_filters_query = $is_exclude_applied_filters ? array() : $this->get_queries_by_applied_filters();
 
@@ -1062,10 +1061,10 @@ class ProductCollection extends AbstractBlock {
 			return array();
 		}
 
-		return [
+		return array(
 			'isProductCollection' => true,
 			'priceRange'          => $price_range,
-		];
+		);
 	}
 
 	/**
