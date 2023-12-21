@@ -54,7 +54,6 @@ export const CartCheckoutSidebarCompatibilityNotice = ( {
 			] ) }
 		>
 			{ noticeText }
-			<div></div>
 			<SwitchToClassicShortcodeButton
 				block={ blockName }
 				clientId={ clientId }
