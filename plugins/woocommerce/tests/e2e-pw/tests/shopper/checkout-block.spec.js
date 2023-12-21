@@ -725,18 +725,28 @@ test.describe( 'Checkout Block page', () => {
 			page.getByRole( 'heading', { name: pageTitle } )
 		).toBeVisible();
 
-		// try to edit shipping details if already prefilled
-		try {
+		// if edit address is present click it, otherwise fill shipping details
+		if (
 			await page
 				.getByLabel( 'Edit address', { exact: true } )
-				.click( { timeout: 3000 } );
-		} catch ( error ) {
-			console.log( 'No shipping details found, filling it instead.' );
-			// fill shipping address and check cash on delivery method
+				.first()
+				.isVisible()
+		) {
+			await page
+				.getByLabel( 'Edit address', { exact: true } )
+				.first()
+				.click();
+		} else {
+			console.log(
+				'No saved shipping address found, filling it instead.'
+			);
+			// fill shipping address
 			await fillShippingCheckoutBlocks( page );
-			await page.getByLabel( 'Cash on delivery' ).check();
-			await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 		}
+
+		// check COD payment method
+		await page.getByLabel( 'Cash on delivery' ).check();
+		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 
 		// add note to the order
 		await page.getByLabel( 'Add a note to your order' ).check();
