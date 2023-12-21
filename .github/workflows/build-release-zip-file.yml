@@ -7,6 +7,10 @@ on:
         required: false
         default: ''
 
+env:
+  WOOCOMMERCE_BLOCKS_PHASE: 2
+  WOOCOMMERCE_BLOCKS_NODE_ENV: production
+
 permissions: {}
 
 jobs:
