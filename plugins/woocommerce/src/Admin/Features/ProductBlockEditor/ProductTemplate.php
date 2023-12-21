@@ -67,17 +67,29 @@ class ProductTemplate {
 	 * @param array $data The data.
 	 */
 	public function __construct( array $data ) {
-		$this->id                 = $data['id'];
-		$this->title              = $data['title'];
-		$this->product_data       = $data['product_data'];
-		$this->order              = $data['order'];
-		$this->layout_template_id = $data['layout_template_id'];
-		$this->description        = $data['description'];
-		$this->icon               = $data['icon'];
+		$this->id           = $data['id'];
+		$this->title        = $data['title'];
+		$this->product_data = $data['product_data'];
+
+		if ( isset( $data['order'] ) ) {
+			$this->order = $data['order'];
+		}
+
+		if ( isset( $data['layout_template_id'] ) ) {
+			$this->layout_template_id = $data['layout_template_id'];
+		}
+
+		if ( isset( $data['description'] ) ) {
+			$this->description = $data['description'];
+		}
+
+		if ( isset( $data['icon'] ) ) {
+			$this->icon = $data['icon'];
+		}
 	}
 
 	/**
-	 * Get the pattern ID.
+	 * Get the template ID.
 	 *
 	 * @return string The ID.
 	 */
@@ -86,7 +98,7 @@ class ProductTemplate {
 	}
 
 	/**
-	 * Get the pattern title.
+	 * Get the template title.
 	 *
 	 * @return string The title.
 	 */
@@ -122,7 +134,7 @@ class ProductTemplate {
 	}
 
 	/**
-	 * Get the pattern description.
+	 * Get the template description.
 	 *
 	 * @return string The description.
 	 */
@@ -131,16 +143,16 @@ class ProductTemplate {
 	}
 
 	/**
-	 * Set the pattern description.
+	 * Set the template description.
 	 *
-	 * @param string $description The pattern description.
+	 * @param string $description The template description.
 	 */
 	public function set_description( string $description ) {
 		$this->description = $description;
 	}
 
 	/**
-	 * Get the pattern icon.
+	 * Get the template icon.
 	 *
 	 * @return string The icon.
 	 */
@@ -149,16 +161,16 @@ class ProductTemplate {
 	}
 
 	/**
-	 * Set the pattern icon.
+	 * Set the template icon.
 	 *
-	 * @param string $icon The pattern icon.
+	 * @param string $icon The template icon.
 	 */
 	public function set_icon( string $icon ) {
 		$this->icon = $icon;
 	}
 
 	/**
-	 * Get the pattern order.
+	 * Get the template order.
 	 *
 	 * @return int The order.
 	 */
@@ -167,9 +179,9 @@ class ProductTemplate {
 	}
 
 	/**
-	 * Set the pattern order.
+	 * Set the template order.
 	 *
-	 * @param int $order The pattern order.
+	 * @param int $order The template order.
 	 */
 	public function set_order( int $order ) {
 		$this->order = $order;
