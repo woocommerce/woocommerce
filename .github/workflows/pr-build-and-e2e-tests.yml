@@ -12,111 +12,14 @@ concurrency:
 permissions: {}
 
 jobs:
-  
     e2e-tests-run:
-      name: Run Playwright E2E Tests in shards
-      runs-on: ubuntu-latest
-      timeout-minutes: 60
-      strategy:
-        fail-fast: false
-        matrix:
-          shard: [1/4, 2/4, 3/4, 4/4]
-      permissions:
-        contents: read
-      env:
-        ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
-        ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
-      outputs:
-        E2E_GRAND_TOTAL: ${{ steps.count_e2e_total.outputs.E2E_GRAND_TOTAL }}
-      steps:
-        - uses: actions/checkout@v3
-        
-        - name: Setup WooCommerce Monorepo
-          uses: ./.github/actions/setup-woocommerce-monorepo
-          with:
-            install: '@woocommerce/plugin-woocommerce...'
-            build: '@woocommerce/plugin-woocommerce'
-            
-        - name: Load docker images and start containers.
-          working-directory: plugins/woocommerce
-          env:
-            WP_ENV_PHP_VERSION: 7.4
-          run: pnpm env:test
-          
-        - name: Download and install Chromium browser.
-          working-directory: plugins/woocommerce
-          run: pnpm exec playwright install chromium
-          
-        - name: Get total number of Playwright E2E tests to be run.
-          id: count_e2e_total
-          working-directory: plugins/woocommerce
-          run: |
-              TOTAL_STR=$(pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --list | grep "Total:")
-              NO_PREFIX=${TOTAL_STR#*"Total: "}
-              COUNT=${NO_PREFIX%" tests in"*}
-              echo "E2E_GRAND_TOTAL=$COUNT" >> $GITHUB_OUTPUT
-              
-        - name: Run Playwright tests
-          run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard }}
-          
-        - name: Upload blob report to GitHub Actions Artifacts
-          if: always()
-          uses: actions/upload-artifact@v3
-          with:
-            name: all-blob-reports
-            path: blob-report
-            retention-days: 1
-  
-    merge-reports:
-      # Merge reports after playwright-tests, even if some shards have failed
-      if: always()
-      needs: [e2e-tests-run]
-
-      runs-on: ubuntu-latest
-      steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - name: Install dependencies
-        run: pnpm ci
-
-      - name: Download blob reports from GitHub Actions Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: all-blob-reports
-          path: ${{ env.ALLURE_RESULTS_DIR }}
-
-      - name: Merge into Report
-        run: npx playwright merge-reports --reporter allure-playwright ${{ env.ALLURE_RESULTS_DIR }}
-        
-      - name: Generate Playwright E2E Test report.
-        id: generate_e2e_report
-        if: |
-            always() &&
-            (
-              steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
-              steps.run_playwright_e2e_tests.conclusion != 'skipped' 
-            )
-        working-directory: plugins/woocommerce
-        run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
-
-      - name: Archive Playwright E2E test report
-        if: |
-            always() &&
-            steps.generate_e2e_report.conclusion == 'success'
-        uses: actions/upload-artifact@v3
-        with:
-            name: e2e-test-report---pr-${{ github.event.number }}
-            path: |
-                ${{ env.ALLURE_RESULTS_DIR }}
-                ${{ env.ALLURE_REPORT_DIR }}
-            if-no-files-found: ignore
-            retention-days: 5
-    
-    # e2e-tests-run:
         name: Runs E2E tests.
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
+        timeout-minutes: 60
+        strategy:
+            fail-fast: false
+            matrix:
+                shard: [1/4, 2/4, 3/4, 4/4]
         permissions:
             contents: read
         env:
@@ -130,8 +33,8 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
-                build: '@woocommerce/plugin-woocommerce'
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
@@ -152,15 +55,39 @@ jobs:
                   COUNT=${NO_PREFIX%" tests in"*}
                   echo "E2E_GRAND_TOTAL=$COUNT" >> $GITHUB_OUTPUT
 
-            - name: Run Playwright E2E tests.
-              timeout-minutes: 60
-              id: run_playwright_e2e_tests
-              env:
-                  USE_WP_ENV: 1
-                  E2E_MAX_FAILURES: 15
-                  FORCE_COLOR: 1
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+            - name: Run Playwright tests
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard }}
+
+            - name: Upload blob report to GitHub Actions Artifacts
+              if: always()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: all-blob-reports
+                  path: blob-report
+                  retention-days: 1
+
+    merge-reports:
+        # Merge reports after playwright-tests, even if some shards have failed
+        if: always()
+        needs: [e2e-tests-run]
+
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+            - name: Install dependencies
+              run: pnpm ci
+
+            - name: Download blob reports from GitHub Actions Artifacts
+              uses: actions/download-artifact@v3
+              with:
+                  name: all-blob-reports
+                  path: ${{ env.ALLURE_RESULTS_DIR }}
+
+            - name: Merge into Report
+              run: npx playwright merge-reports --reporter allure-playwright ${{ env.ALLURE_RESULTS_DIR }}
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
@@ -186,6 +113,78 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
+    # e2e-tests-run:
+    # name: Runs E2E tests.
+    # runs-on: ubuntu-20.04
+    # permissions:
+    #     contents: read
+    # env:
+    #     ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+    #     ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+    # outputs:
+    #     E2E_GRAND_TOTAL: ${{ steps.count_e2e_total.outputs.E2E_GRAND_TOTAL }}
+    # steps:
+    #     - uses: actions/checkout@v3
+
+    #     - name: Setup WooCommerce Monorepo
+    #       uses: ./.github/actions/setup-woocommerce-monorepo
+    #       with:
+    #         install: '@woocommerce/plugin-woocommerce...'
+    #         build: '@woocommerce/plugin-woocommerce'
+
+    #     - name: Load docker images and start containers.
+    #       working-directory: plugins/woocommerce
+    #       env:
+    #           WP_ENV_PHP_VERSION: 7.4
+    #       run: pnpm env:test
+
+    #     - name: Download and install Chromium browser.
+    #       working-directory: plugins/woocommerce
+    #       run: pnpm exec playwright install chromium
+
+    #     - name: Get total number of Playwright E2E tests to be run.
+    #       id: count_e2e_total
+    #       working-directory: plugins/woocommerce
+    #       run: |
+    #           TOTAL_STR=$(pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --list | grep "Total:")
+    #           NO_PREFIX=${TOTAL_STR#*"Total: "}
+    #           COUNT=${NO_PREFIX%" tests in"*}
+    #           echo "E2E_GRAND_TOTAL=$COUNT" >> $GITHUB_OUTPUT
+
+    #     - name: Run Playwright E2E tests.
+    #       timeout-minutes: 60
+    #       id: run_playwright_e2e_tests
+    #       env:
+    #           USE_WP_ENV: 1
+    #           E2E_MAX_FAILURES: 15
+    #           FORCE_COLOR: 1
+    #       working-directory: plugins/woocommerce
+    #       run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+
+    #     - name: Generate Playwright E2E Test report.
+    #       id: generate_e2e_report
+    #       if: |
+    #           always() &&
+    #           (
+    #             steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
+    #             steps.run_playwright_e2e_tests.conclusion != 'skipped'
+    #           )
+    #       working-directory: plugins/woocommerce
+    #       run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+    #     - name: Archive Playwright E2E test report
+    #       if: |
+    #           always() &&
+    #           steps.generate_e2e_report.conclusion == 'success'
+    #       uses: actions/upload-artifact@v3
+    #       with:
+    #           name: e2e-test-report---pr-${{ github.event.number }}
+    #           path: |
+    #               ${{ env.ALLURE_RESULTS_DIR }}
+    #               ${{ env.ALLURE_REPORT_DIR }}
+    #           if-no-files-found: ignore
+    #           retention-days: 5
+
     api-tests-run:
         name: Runs API tests.
         runs-on: ubuntu-20.04
@@ -200,8 +199,8 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
-                build: '@woocommerce/plugin-woocommerce'
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
@@ -253,8 +252,8 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
-                build: '@woocommerce/plugin-woocommerce'
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
