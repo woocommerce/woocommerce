@@ -51,10 +51,10 @@
 		"watch:build:project:esm": "wireit"
 	},
 	"dependencies": {
-		"@wordpress/api-fetch": "wp-6.0",
-		"@wordpress/compose": "wp-6.0",
-		"@wordpress/core-data": "wp-6.0",
-		"@wordpress/element": "wp-6.0",
+		"@wordpress/api-fetch": "wp-6.3",
+		"@wordpress/compose": "wp-6.3",
+		"@wordpress/core-data": "wp-6.3",
+		"@wordpress/element": "wp-6.3",
 		"classnames": "^2.3.2",
 		"debug": "^4.3.4",
 		"dompurify": "^2.4.7",
@@ -77,7 +77,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
-		"@wordpress/browserslist-config": "wp-6.0",
+		"@wordpress/browserslist-config": "wp-6.3",
 		"concurrently": "^7.6.0",
 		"copy-webpack-plugin": "^9.1.0",
 		"css-loader": "^3.6.0",
@@ -101,7 +101,7 @@
 	},
 	"peerDependencies": {
 		"@types/react": "^17.0.71",
-		"@wordpress/data": "wp-6.0",
+		"@wordpress/data": "wp-6.3",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
 	},
