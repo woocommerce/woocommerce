@@ -74,8 +74,10 @@ class OrderAttribution {
 
 		$this->format_meta_data( $meta );
 
-		$template_data = array(
+		$use_utm_labels = isset( $meta['type'] ) && 'utm' === $meta['type'];
+		$template_data  = array(
 			'meta'             => $meta,
+			'use_utm_labels'   => $use_utm_labels,
 			// Only show more details toggle if there is more than just the origin.
 			'has_more_details' => array( 'origin' ) !== array_keys( $meta ),
 		);

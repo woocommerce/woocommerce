@@ -55,21 +55,40 @@ defined( 'ABSPATH' ) || exit;
 		<?php endif; ?>
 
 		<?php if ( array_key_exists( 'utm_campaign', $meta ) ) : ?>
-			<h4><?php esc_html_e( 'UTM campaign', 'woocommerce' ); ?></h4>
+			<h4>
+				<?php if ( $use_utm_labels ) : ?>
+					<?php esc_html_e( 'UTM campaign', 'woocommerce' ); ?>
+				<?php else : ?>
+					<?php esc_html_e( 'Campaign', 'woocommerce' ); ?>
+				<?php endif; ?>
+			</h4>
 			<span class="order-attribution-utm-campaign">
 				<?php echo esc_html( $meta['utm_campaign'] ); ?>
 			</span>
 		<?php endif; ?>
 
 		<?php if ( array_key_exists( 'utm_source', $meta ) ) : ?>
-			<h4><?php esc_html_e( 'UTM source', 'woocommerce' ); ?></h4>
+			<h4>
+				<?php if ( $use_utm_labels ) : ?>
+					<?php esc_html_e( 'UTM source', 'woocommerce' ); ?>
+				<?php else : ?>
+					<?php esc_html_e( 'Source', 'woocommerce' ); ?>
+				<?php endif; ?>
+
+			</h4>
 			<span class="order-attribution-utm-source">
 				<?php echo esc_html( $meta['utm_source'] ); ?>
 			</span>
 		<?php endif; ?>
 
 		<?php if ( array_key_exists( 'utm_medium', $meta ) ) : ?>
-			<h4><?php esc_html_e( 'UTM medium', 'woocommerce' ); ?></h4>
+			<h4>
+				<?php if ( $use_utm_labels ) : ?>
+					<?php esc_html_e( 'UTM medium', 'woocommerce' ); ?>
+				<?php else : ?>
+					<?php esc_html_e( 'Medium', 'woocommerce' ); ?>
+				<?php endif; ?>
+			</h4>
 			<span class="order-attribution-utm-medium">
 				<?php echo esc_html( $meta['utm_medium'] ); ?>
 			</span>
