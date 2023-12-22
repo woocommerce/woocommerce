@@ -38,9 +38,8 @@ export interface CartState {
 	errors: ApiErrorResponse[];
 }
 
-const shippingAddress: Partial<
-	CartShippingAddress & { email: FormField }
-> = {};
+const shippingAddress: Partial< CartShippingAddress & { email: FormField } > =
+	{};
 Object.keys( defaultFields ).forEach( ( key ) => {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore the default fields contain keys for each field.
@@ -48,8 +47,7 @@ Object.keys( defaultFields ).forEach( ( key ) => {
 } );
 delete shippingAddress.email;
 
-const billingAddress: Partial< CartBillingAddress & { email: FormField } > =
-	{};
+const billingAddress: Partial< CartBillingAddress & { email: FormField } > = {};
 Object.keys( defaultFields ).forEach( ( key ) => {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore the default fields contain keys for each field.

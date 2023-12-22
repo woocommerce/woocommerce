@@ -49,7 +49,9 @@ const Form = ( {
 	// Track incoming props.
 	const currentFields = useShallowEqual( fields );
 	const currentFieldConfig = useShallowEqual( fieldConfig );
-	const currentCountry = useShallowEqual( objectHasProp(values, 'country' ) ? values.country : "" );
+	const currentCountry = useShallowEqual(
+		objectHasProp( values, 'country' ) ? values.country : ''
+	);
 
 	// Memoize the address form fields passed in from the parent component.
 	const addressFormFields = useMemo( (): AddressFormFields => {
@@ -86,7 +88,10 @@ const Form = ( {
 
 	// Maybe validate country when other fields change so user is notified that it's required.
 	useEffect( () => {
-		if ( addressType === 'shipping' && objectHasProp(values, 'country' ) ) {
+		if (
+			addressType === 'shipping' &&
+			objectHasProp( values, 'country' )
+		) {
 			validateShippingCountry( values );
 		}
 	}, [ values, addressType ] );
@@ -131,7 +136,10 @@ const Form = ( {
 					className: `wc-block-components-address-form__${ field.key }`,
 				};
 
-				if ( field.key === 'country' && objectHasProp(values, 'country' ) ) {
+				if (
+					field.key === 'country' &&
+					objectHasProp( values, 'country' )
+				) {
 					const Tag =
 						addressType === 'shipping'
 							? ShippingCountryInput
@@ -163,7 +171,10 @@ const Form = ( {
 					);
 				}
 
-				if ( field.key === 'state' && objectHasProp(values, 'state' ) ) {
+				if (
+					field.key === 'state' &&
+					objectHasProp( values, 'state' )
+				) {
 					const Tag =
 						addressType === 'shipping'
 							? ShippingStateInput
@@ -234,7 +245,9 @@ const Form = ( {
 							customValidationHandler(
 								inputObject,
 								field.key,
-								objectHasProp(values, "country") ? values.country : "",
+								objectHasProp( values, 'country' )
+									? values.country
+									: ''
 							)
 						}
 					/>
