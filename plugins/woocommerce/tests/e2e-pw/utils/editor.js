@@ -1,8 +1,11 @@
 const closeWelcomeModal = async ( { page } ) => {
-	if ( await page.getByLabel( 'Welcome to the block editor' ).isVisible() ) {
-		await page.getByLabel( 'Close', { exact: true } ).click();
-	} else {
-		console.log( "Welcome modal wasn't present, skipping action." );
+	// Close welcome popup if prompted
+	try {
+		await page
+			.getByLabel( 'Close', { exact: true } )
+			.click( { timeout: 5000 } );
+	} catch ( error ) {
+		// Welcome modal wasn't present, skipping action.
 	}
 };
 
