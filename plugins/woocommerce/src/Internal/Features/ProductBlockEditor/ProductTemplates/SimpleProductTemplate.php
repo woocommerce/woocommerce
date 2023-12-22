@@ -1103,8 +1103,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 * Adds the linked products group blocks to the template.
 	 */
 	private function add_linked_products_group_blocks() {
-		$linked_products_group = $this->get_group_by_id( $this::GROUP_IDS['LINKED_PRODUCTS'] );
 		if ( ! Features::is_enabled( 'product-virtual-downloadable' ) ) {
+			return;
+		}
+
+		$linked_products_group = $this->get_group_by_id( $this::GROUP_IDS['LINKED_PRODUCTS'] );
+		if ( ! isset( $linked_products_group ) ) {
 			return;
 		}
 
