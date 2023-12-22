@@ -78,8 +78,8 @@ jobs:
 
             - name: Upload blob report to GitHub Actions Artifacts
               if: always()
-              working_directory: plugins/woocommerce
               uses: actions/upload-artifact@v3
+              working-directory: plugins/woocommerce
               with:
                   name: all-blob-reports
                   path: ./tests/e2e-pw/test-results/report/blob-report
