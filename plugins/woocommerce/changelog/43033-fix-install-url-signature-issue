@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Changed an install-url request to POST instead of GET due to changes on Woo.com
-
