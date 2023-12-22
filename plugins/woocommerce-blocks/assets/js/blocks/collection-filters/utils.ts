@@ -6,7 +6,7 @@
  * @return {string|null} The color name or null if no built-in color is found.
  */
 export const extractBuiltInColor = ( blockClassString: string ) => {
-	const regex = /has-(?!link|text)([a-z-]+)-color/;
+	const regex = /has-(?!link|text|background)([a-z-]+)-color/;
 	const match = blockClassString.match( regex );
 	return match ? match[ 1 ] : null;
 };
