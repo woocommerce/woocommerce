@@ -282,4 +282,4 @@ private function save_shipping_instructions() {
 
 ## Conclusion
 
-By following the steps above, you can add and process new field blocks in the WooCommerce checkout block. For complete implementation and additional examples, refer to the provided [tutorial](https://developer.woo.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/) and the corresponding [GitHub repository](https://github.com).
+By following the steps above, you can add and process new field blocks in the WooCommerce checkout block. For complete implementation and additional examples, refer to the provided [tutorial](https://developer.woo.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/) and the corresponding [GitHub repository](https://github.com/woocommerce/wceu23-shipping-workshop-final/).
