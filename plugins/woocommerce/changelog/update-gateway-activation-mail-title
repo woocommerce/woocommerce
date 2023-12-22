@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure the gateway activation email does not depend on the gateway title being stored in the settings option

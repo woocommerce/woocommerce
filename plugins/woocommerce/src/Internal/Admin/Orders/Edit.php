@@ -238,7 +238,7 @@ class Edit {
 		add_meta_box(
 			'woocommerce-order-source-data',
 			/* Translators: %s order type name. */
-			sprintf( __( '%s information', 'woocommerce' ), $title ),
+			sprintf( __( '%s attribution', 'woocommerce' ), $title ),
 			function( $post_or_order ) use ( $order_attribution_meta_box ) {
 				$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
 				if ( $order instanceof WC_Order ) {

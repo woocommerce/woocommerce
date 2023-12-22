@@ -155,6 +155,29 @@ class OrderAttributionController implements RegisterHooksInterface {
 				$this->register_order_origin_column();
 			}
 		);
+
+		add_action(
+			'woocommerce_new_order',
+			function( $order_id, $order ) {
+				$this->maybe_set_admin_source( $order );
+			},
+			2,
+			10
+		);
+	}
+
+	/**
+	 * If the order is created in the admin, set the source type and origin to admin/Web admin.
+	 *
+	 * @param WC_Order $order The recently created order object.
+	 *
+	 * @since 8.5.0
+	 */
+	private function maybe_set_admin_source( WC_Order $order ) {
+		if ( function_exists( 'is_admin' ) && is_admin() ) {
+			$order->add_meta_data( $this->get_meta_prefixed_field( 'type' ), 'admin' );
+			$order->save();
+		}
 	}
 
 	/**
@@ -276,7 +299,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Output the data for the Origin column in the orders table.
+	 * Output the translated origin label for the Origin column in the orders table.
+	 *
+	 * Default to "Unknown" if no origin is set.
 	 *
 	 * @param WC_Order $order The order object.
 	 *
@@ -285,10 +310,11 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private function output_origin_column( WC_Order $order ) {
 		$source_type = $order->get_meta( $this->get_meta_prefixed_field( 'type' ) );
 		$source      = $order->get_meta( $this->get_meta_prefixed_field( 'utm_source' ) );
-		if ( ! $source ) {
-			$source = __( '(none)', 'woocommerce' );
+		$origin      = $this->get_origin_label( $source_type, $source );
+		if ( empty( $origin ) ) {
+			$origin = __( 'Unknown', 'woocommerce' );
 		}
-		echo esc_html( $this->get_origin_label( $source_type, $source ) );
+		echo esc_html( $origin );
 	}
 
 	/**
@@ -368,18 +394,27 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function send_order_tracks( array $source_data, WC_Order $order ) {
-		$tracks_data = array(
+		$origin_label        = $this->get_origin_label(
+			$source_data['type'] ?? '',
+			$source_data['utm_source'] ?? '',
+			false
+		);
+		$customer_identifier = $order->get_customer_id() ? $order->get_customer_id() : $order->get_billing_email();
+		$customer_info       = $this->get_customer_history( $customer_identifier );
+		$tracks_data         = array(
 			'order_id'             => $order->get_id(),
 			'type'                 => $source_data['type'] ?? '',
 			'medium'               => $source_data['utm_medium'] ?? '',
 			'source'               => $source_data['utm_source'] ?? '',
 			'device_type'          => strtolower( $source_data['device_type'] ?? '(unknown)' ),
+			'origin_label'         => strtolower( $origin_label ),
 			'session_pages'        => $source_data['session_pages'] ?? 0,
 			'session_count'        => $source_data['session_count'] ?? 0,
 			'order_total'          => $order->get_total(),
-			'customer_order_count' => wc_get_customer_order_count( $order->get_customer_id() ),
+			// Add 1 to include the current order (which is currently still Pending when the event is sent).
+			'customer_order_count' => $customer_info['order_count'] + 1,
+			'customer_registered'  => $order->get_customer_id() ? 'yes' : 'no',
 		);
-
 		$this->proxy->call_static( WC_Tracks::class, 'record_event', 'order_attribution', $tracks_data );
 	}
 

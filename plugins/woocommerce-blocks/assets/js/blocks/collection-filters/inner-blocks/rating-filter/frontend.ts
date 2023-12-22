@@ -48,5 +48,24 @@ store( 'woocommerce/collection-rating-filter', {
 
 			navigate( getUrl( filters ) );
 		},
+		removeFilter: () => {
+			const { value } = getContext< { value: string } >();
+			// get the active filters from the url:
+			const url = new URL( window.location.href );
+			const currentFilters =
+				url.searchParams.get( 'rating_filter' ) || '';
+
+			// split out the active filters into an array.
+			const filtersArr =
+				currentFilters === '' ? [] : currentFilters.split( ',' );
+
+			const index = filtersArr.indexOf( value );
+
+			if ( index > -1 ) {
+				filtersArr.splice( index, 1 );
+			}
+
+			navigate( getUrl( filtersArr ) );
+		},
 	},
 } );

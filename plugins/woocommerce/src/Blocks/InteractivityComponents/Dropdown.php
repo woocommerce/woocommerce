@@ -36,7 +36,19 @@ class Dropdown {
 
 		$action = $props['action'] ?? '';
 
+		$dropdown_context = array(
+			'selectedItems' => $selected_items,
+			'isOpen'        => false,
+			'selectType'    => $select_type,
+		);
+
+		$action = $props['action'] ?? '';
+
 		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) );
+
+		$wrapper_class = 'multiple' === $select_type ? '' : 'single-selection';
+
+		$input_id = wp_unique_id( 'wc-interactivity-dropdown-input-' );
 
 		$wrapper_class = 'multiple' === $select_type ? '' : 'single-selection';
 
