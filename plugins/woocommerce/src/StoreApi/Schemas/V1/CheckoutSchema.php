@@ -285,7 +285,7 @@ class CheckoutSchema extends AbstractSchema {
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
+				'required'    => $field['required'],
 			];
 
 			if ( 'select' === $field['type'] ) {
@@ -315,8 +315,6 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function sanitize_additional_fields( $fields, $request ) {
-		$fields = array_merge( array_fill_keys( array_keys( $this->get_additional_fields_schema() ), '' ), (array) $fields );
-
 		$fields = array_reduce(
 			array_keys( $fields ),
 			function( $carry, $key ) use ( $fields, $request ) {
@@ -339,11 +337,16 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return true|\WP_Error
 	 */
 	public function validate_additional_fields( $fields, $request ) {
-		$errors = new \WP_Error();
-		$fields = $this->sanitize_additional_fields( $fields, $request );
-		foreach ( array_keys( $fields ) as $key ) {
-			$properties = $this->get_additional_fields_schema();
-			$result     = rest_validate_value_from_schema( $fields[ $key ], $properties[ $key ], $key );
+		$errors     = new \WP_Error();
+		$fields     = $this->sanitize_additional_fields( $fields, $request );
+		$properties = $this->get_additional_fields_schema();
+
+		foreach ( array_keys( $properties ) as $key ) {
+			if ( ! isset( $fields[ $key ] ) && false === $properties[ $key ]['required'] ) {
+				continue;
+			}
+
+			$result = rest_validate_value_from_schema( $fields[ $key ], $properties[ $key ], $key );
 			if ( is_wp_error( $result ) ) {
 				$errors->add( $result->get_error_code(), $result->get_error_message() );
 			}

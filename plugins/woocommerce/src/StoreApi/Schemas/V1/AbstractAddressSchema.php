@@ -114,7 +114,6 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	 */
 	public function sanitize_callback( $address, $request, $param ) {
 		$validation_util = new ValidationUtils();
-		$address         = array_merge( array_fill_keys( array_keys( $this->get_properties() ), '' ), (array) $address );
 		$address         = array_reduce(
 			array_keys( $address ),
 			function( $carry, $key ) use ( $address, $validation_util, $request ) {
@@ -242,7 +241,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
+				'required'    => $field['required'],
 			];
 
 			if ( 'select' === $field['type'] ) {
