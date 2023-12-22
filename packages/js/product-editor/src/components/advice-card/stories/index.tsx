@@ -24,3 +24,8 @@ export default {
 };
 
 export const Default = ( args: AdviceCardProps ) => <AdviceCard { ...args } />;
+
+Default.args = {
+	// @todo: use an addon
+	onDismiss: console.log, // eslint-disable-line no-console
+};
