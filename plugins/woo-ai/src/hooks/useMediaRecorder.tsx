@@ -13,7 +13,7 @@ const useMediaRecorder = ( {
 	handleError,
 }: UseMediaRecorderProps ) => {
 	const [ isRecording, setIsRecording ] = useState( false );
-	const [ audioBlob, setAudioBlob ] = useState< Blob | null >( null );
+	const [ audioBlob, setAudioBlob ] = useState< Blob >( new Blob() );
 	const mediaRecorderRef = useRef< MediaRecorder | null >( null );
 
 	const handleDataAvailable = useCallback( ( e: BlobEvent ) => {
@@ -23,7 +23,7 @@ const useMediaRecorder = ( {
 	}, [] );
 
 	useEffect( () => {
-		if ( audioBlob && ! isRecording ) {
+		if ( audioBlob.size > 0 && ! isRecording ) {
 			onRecordingComplete( audioBlob );
 		}
 	}, [ audioBlob, isRecording, onRecordingComplete ] );
@@ -65,7 +65,7 @@ const useMediaRecorder = ( {
 		};
 	}, [ handleDataAvailable ] );
 
-	return { isRecording, startRecording, stopRecording };
+	return { isRecording, startRecording, stopRecording, audioBlob };
 };
 
 export default useMediaRecorder;
