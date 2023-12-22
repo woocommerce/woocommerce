@@ -68,6 +68,10 @@ class UpdateProducts extends UpdateContent {
 
 		$images = $this->verify_images( $images, $ai_connection, $token, $business_description );
 
+		if ( is_wp_error( $images ) ) {
+			return $images;
+		}
+
 		if ( empty( $business_description ) ) {
 			return new \WP_Error( 'missing_business_description', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
 		}
