@@ -206,7 +206,7 @@ final class QueryFilters {
 		}
 
 		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . $wp_query->get( 'filter_stock_status' ) . '")';
+		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', array_map( 'esc_sql', explode( ',', $wp_query->get( 'filter_stock_status' ) ) ) ) . '")';
 
 		return $args;
 	}
