@@ -60,29 +60,35 @@ store< PriceFilterStore >( 'woocommerce/collection-price-filter', {
 	},
 	actions: {
 		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
-			const { minRange, minPrice, maxPrice, maxRange } =
-				getContext< PriceFilterContext >();
+			const context = getContext< PriceFilterContext >();
+			const { minRange, minPrice, maxPrice, maxRange } = context;
 			const type = event.target.name;
 			const value = parseFloat( event.target.value );
+
+			const currentMinPrice =
+				type === 'min'
+					? Math.min(
+							Number.isNaN( value ) ? minRange : value,
+							maxRange - 1
+					  )
+					: minPrice;
+			const currentMaxPrice =
+				type === 'max'
+					? Math.max(
+							Number.isNaN( value ) ? maxRange : value,
+							minRange + 1
+					  )
+					: maxPrice;
+
+			context.minPrice = currentMinPrice;
+			context.maxPrice = currentMaxPrice;
 
 			navigate(
 				getUrl( {
 					minRange,
 					maxRange,
-					minPrice:
-						type === 'min'
-							? Math.min(
-									Number.isNaN( value ) ? minRange : value,
-									maxRange - 1
-							  )
-							: minPrice,
-					maxPrice:
-						type === 'max'
-							? Math.max(
-									Number.isNaN( value ) ? maxRange : value,
-									minRange + 1
-							  )
-							: maxPrice,
+					minPrice: currentMinPrice,
+					maxPrice: currentMaxPrice,
 				} )
 			);
 		},
