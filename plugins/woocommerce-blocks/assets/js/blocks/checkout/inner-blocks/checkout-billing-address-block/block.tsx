@@ -9,10 +9,7 @@ import {
 	noticeContexts,
 } from '@woocommerce/base-context';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
-import type {
-	ShippingAddress,
-	FormFieldsConfig
-} from '@woocommerce/settings';
+import type { ShippingAddress, FormFieldsConfig } from '@woocommerce/settings';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { CART_STORE_KEY } from '@woocommerce/block-data';

@@ -11,7 +11,7 @@ import { isEmail } from '@wordpress/url';
 const customValidationHandler = (
 	inputObject: HTMLInputElement,
 	field: string,
-	country: string,
+	country: string
 ): boolean => {
 	// Pass validation if the field is not required and is empty.
 	if ( ! inputObject.required && ! inputObject.value ) {
@@ -23,7 +23,7 @@ const customValidationHandler = (
 		country &&
 		! isPostcode( {
 			postcode: inputObject.value,
-			country: country,
+			country,
 		} )
 	) {
 		inputObject.setCustomValidity(
@@ -32,10 +32,7 @@ const customValidationHandler = (
 		return false;
 	}
 
-	if (
-		field === 'email' &&
-		! isEmail( inputObject.value )
-	) {
+	if ( field === 'email' && ! isEmail( inputObject.value ) ) {
 		inputObject.setCustomValidity(
 			__( 'Please enter a valid email address', 'woocommerce' )
 		);

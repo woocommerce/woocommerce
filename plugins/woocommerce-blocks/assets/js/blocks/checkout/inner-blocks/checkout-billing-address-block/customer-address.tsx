@@ -6,7 +6,7 @@ import { Form } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import type {
 	AddressFormValues,
-	FormFieldsConfig
+	FormFieldsConfig,
 } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';

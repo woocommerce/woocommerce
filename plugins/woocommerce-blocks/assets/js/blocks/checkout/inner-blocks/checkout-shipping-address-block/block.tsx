@@ -14,10 +14,7 @@ import {
 	CheckboxControl,
 } from '@woocommerce/blocks-components';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
-import type {
-	BillingAddress,
-	FormFieldsConfig
-} from '@woocommerce/settings';
+import type { BillingAddress, FormFieldsConfig } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { CART_STORE_KEY } from '@woocommerce/block-data';
 

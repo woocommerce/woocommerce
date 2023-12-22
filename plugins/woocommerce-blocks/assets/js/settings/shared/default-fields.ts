@@ -53,7 +53,7 @@ export interface CoreContactForm {
 export type AddressForm = CoreAddressForm & Record< string, FormField >;
 export type ContactForm = CoreContactForm & Record< string, FormField >;
 export type FormFields = AddressForm & ContactForm;
-export type AddressFormValues = Omit<ShippingAddress, "email">;
+export type AddressFormValues = Omit< ShippingAddress, 'email' >;
 export type ContactFormValues = { email: string };
 export type FormType = 'billing' | 'shipping' | 'contact';
 
@@ -70,12 +70,16 @@ export interface CoreAddress {
 	phone: string;
 }
 
-export type AdditionalValues = Record< Exclude<string, keyof CoreAddress>, string | boolean >;
+export type AdditionalValues = Record<
+	Exclude< string, keyof CoreAddress >,
+	string | boolean
+>;
 
-export type ShippingAddress = CoreAddress ;
+export type ShippingAddress = CoreAddress;
 export interface BillingAddress extends ShippingAddress {
 	email: string;
 }
+
 export type KeyedFormField = FormField & {
 	key: keyof FormFields;
 	errorMessage?: string;
@@ -83,7 +87,7 @@ export type KeyedFormField = FormField & {
 
 export type CountryAddressForm = Record< string, FormFields >;
 
-export type FormFieldsConfig = Record< keyof FormFields, Partial< FormField > >
+export type FormFieldsConfig = Record< keyof FormFields, Partial< FormField > >;
 
 /**
  * Default field properties.

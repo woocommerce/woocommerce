@@ -8,9 +8,8 @@ import type {
 	KeyedFormField,
 	FormFieldsConfig,
 	AddressFormValues,
-	ContactFormValues
+	ContactFormValues,
 } from '@woocommerce/settings';
-
 
 export type AddressFormFields = {
 	fields: KeyedFormField[];
@@ -25,7 +24,7 @@ export interface AddressFormProps {
 	// Type of form (billing or shipping).
 	addressType?: FormType;
 	// Array of fields in form.
-	fields: (keyof FormFields)[];
+	fields: ( keyof FormFields )[];
 	// Field configuration for fields in form.
 	fieldConfig?: FormFieldsConfig;
 	// Called with the new address data when the address form changes. This is only called when all required fields are filled and there are no validation errors.

@@ -8,7 +8,7 @@ import {
 	defaultFields,
 	KeyedFormField,
 	LocaleSpecificFormField,
-	FormFieldsConfig
+	FormFieldsConfig,
 } from '@woocommerce/settings';
 import { __, sprintf } from '@wordpress/i18n';
 import { isNumber, isString } from '@woocommerce/types';
@@ -69,9 +69,7 @@ const getSupportedCoreLocaleProps = (
  *
  * This supports new properties such as optionalLabel which are not used by core (yet).
  */
-const countryAddressForm: CountryAddressForm = Object.entries(
-	COUNTRY_LOCALE
-)
+const countryAddressForm: CountryAddressForm = Object.entries( COUNTRY_LOCALE )
 	.map( ( [ country, countryLocale ] ) => [
 		country,
 		Object.entries( countryLocale )

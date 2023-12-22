@@ -59,7 +59,7 @@ const CheckoutProcessor = () => {
 		shouldCreateAccount,
 		extensionData,
 		customerId,
-		additionalFields
+		additionalFields,
 	} = useSelect( ( select ) => {
 		const store = select( CHECKOUT_STORE_KEY );
 		return {
