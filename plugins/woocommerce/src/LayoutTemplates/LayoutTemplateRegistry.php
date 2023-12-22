@@ -63,12 +63,24 @@ final class LayoutTemplateRegistry {
 		);
 	}
 
+	public function instantiate_layout_templates( array $query_params ): array {
+		$layout_templates = array();
+
+		$class_names = $this->get_class_names( $query_params );
+		foreach ( $class_names as $class_name ) {
+			$layout_template    = new $class_name();
+			$layout_templates[] = $layout_template->to_json();
+		}
+
+		return $layout_templates;
+	}
+
 	/**
 	 * Get matching layout template class names.
 	 *
 	 * @return string[]
 	 */
-	public function get_class_names( array $query_params ): array {
+	private function get_class_names( array $query_params ): array {
 		$area_to_match = isset( $query_params['area'] ) ? $query_params['area'] : null;
 		$id_to_match   = isset( $query_params['id'] ) ? $query_params['id'] : null;
 

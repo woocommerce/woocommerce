@@ -107,15 +107,6 @@ class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 
 	private function get_layout_templates( array $query_params ): array {
 		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
-		$class_names              = $layout_template_registry->get_class_names( $query_params );
-
-		$layout_templates = array();
-
-		foreach ( $class_names as $class_name ) {
-			$layout_template    = new $class_name();
-			$layout_templates[] = $layout_template->to_json();
-		}
-
-		return $layout_templates;
+		return $layout_template_registry->instantiate_layout_templates( $query_params );
 	}
 }
