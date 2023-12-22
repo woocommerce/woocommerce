@@ -213,7 +213,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_level_threshold_setting_default_value(): void {
 		$level = $this->sut->get_level_threshold();
-		$this->assertEquals( 'debug', $level );
+		$this->assertEquals( 'none', $level );
 	}
 
 	/**
@@ -228,7 +228,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 		// Invalid level.
 		Constants::set_constant( 'WC_LOG_THRESHOLD', 'mascarpone' );
 		$level = $this->sut->get_level_threshold();
-		$this->assertEquals( 'debug', $level );
+		$this->assertEquals( 'none', $level );
 
 		Constants::clear_single_constant( 'WC_LOG_THRESHOLD' );
 	}
@@ -248,10 +248,10 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 'info', $level );
 		Constants::clear_single_constant( 'WC_LOG_THRESHOLD' );
 
-		// Invalid handler.
+		// Invalid level.
 		update_option( 'woocommerce_logs_level_threshold', 123 );
 		$level = $this->sut->get_level_threshold();
-		$this->assertEquals( 'debug', $level );
+		$this->assertEquals( 'none', $level );
 
 		delete_option( 'woocommerce_logs_level_threshold' );
 	}

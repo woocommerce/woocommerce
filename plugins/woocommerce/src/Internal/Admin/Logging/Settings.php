@@ -25,7 +25,7 @@ class Settings {
 		'logging_enabled'       => true,
 		'default_handler'       => LogHandlerFileV2::class,
 		'retention_period_days' => 30,
-		'level_threshold'       => 'debug',
+		'level_threshold'       => 'none',
 	);
 
 	/**
@@ -216,6 +216,9 @@ class Settings {
 			);
 		}
 
+		$labels         = WC_Log_Levels::get_all_level_labels();
+		$labels['none'] = __( 'None', 'woocommerce' );
+
 		$custom_attributes = array();
 		if ( $hardcoded ) {
 			$custom_attributes['disabled'] = 'true';
@@ -223,13 +226,13 @@ class Settings {
 
 		return array(
 			'title'             => __( 'Level threshold', 'woocommerce' ),
-			'desc_tip'          => __( 'This sets the minimum severity level of logs that will be processed. Lower severity levels will be ignored.', 'woocommerce' ),
+			'desc_tip'          => __( 'This sets the minimum severity level of logs that will be processed. Lower severity levels will be ignored. "None" means all logs will be processed.', 'woocommerce' ),
 			'id'                => self::PREFIX . 'level_threshold',
 			'type'              => 'select',
 			'value'             => $this->get_level_threshold(),
 			'default'           => self::DEFAULTS['level_threshold'],
 			'autoload'          => false,
-			'options'           => WC_Log_Levels::get_all_level_labels(),
+			'options'           => $labels,
 			'custom_attributes' => $custom_attributes,
 			'css'               => 'width:auto;',
 			'desc'              => $desc,
