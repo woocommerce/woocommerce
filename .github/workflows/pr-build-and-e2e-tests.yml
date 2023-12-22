@@ -19,19 +19,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                shard:
-                    [
-                        1/10,
-                        2/10,
-                        3/10,
-                        4/10,
-                        5/10,
-                        6/10,
-                        7/10,
-                        8/10,
-                        9/10,
-                        10/10,
-                    ]
+                shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         permissions:
             contents: read
         env:
