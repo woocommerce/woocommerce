@@ -4,7 +4,13 @@
 import { registerPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { box, plus, settings } from '@wordpress/icons';
-import { useEffect, useMemo, useRef } from '@wordpress/element';
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useState,
+	useRef,
+} from '@wordpress/element';
 import { dispatch, useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { addQueryArgs } from '@wordpress/url';
@@ -119,12 +125,58 @@ function useProductCommandLoader( { search } ) {
 const WooCommerceCommands = () => {
 	const { editedPostType } = useEditedPostType();
 	const origin = editedPostType ? editedPostType + '-editor' : null;
+	const [ selectedOption, setSelectedOption ] = useState( null );
+
 	const { isCommandPaletteOpen } = useSelect( ( select ) => {
 		const { isOpen } = select( commandsStore );
 		return {
 			isCommandPaletteOpen: isOpen(),
 		};
 	}, [] );
+
+	const handleClick = useCallback(
+		( event ) => {
+			const option = event.target.matches(
+				'.commands-command-menu__container [role="option"]'
+			)
+				? event.target
+				: event.target.closest(
+						'.commands-command-menu__container [role="option"]'
+				  );
+			if ( option ) {
+				const selOpt = option.attributes[ 'data-value' ].value;
+				recordEvent( 'woocommerce_command_palette_submit', {
+					name: selOpt,
+					origin,
+				} );
+			}
+		},
+		[ origin ]
+	);
+
+	const handleKeyDown = useCallback( () => {
+		if ( isCommandPaletteOpen ) {
+			const selectedEntry = document.querySelector(
+				'.commands-command-menu__container [role="option"][data-selected="true"]'
+			);
+			const selOpt = selectedEntry
+				? selectedEntry.attributes[ 'data-value' ].value
+				: null;
+			setSelectedOption( selOpt );
+		} else {
+			setSelectedOption( null );
+		}
+	}, [ isCommandPaletteOpen ] );
+
+	useEffect( () => {
+		document.addEventListener( 'keydown', handleKeyDown );
+		document.addEventListener( 'click', handleClick );
+		return () => {
+			document.removeEventListener( 'keydown', handleKeyDown );
+			document.removeEventListener( 'click', handleClick );
+		};
+	}, [ handleClick, handleKeyDown ] );
+
 	const wasCommandPaletteOpen = useRef( false );
 
 	useEffect( () => {
@@ -133,8 +185,31 @@ const WooCommerceCommands = () => {
 				origin,
 			} );
 		}
+		if ( ! isCommandPaletteOpen && wasCommandPaletteOpen.current ) {
+			const handleClosedPaletteKeyDown = ( event ) => {
+				if ( event.key === 'Enter' ) {
+					recordEvent( 'woocommerce_command_palette_submit', {
+						name: selectedOption,
+						origin,
+					} );
+				}
+				// Remove event listener after we detect the first key press.
+				document.removeEventListener(
+					'keydown',
+					handleClosedPaletteKeyDown
+				);
+			};
+			document.addEventListener( 'keydown', handleClosedPaletteKeyDown );
+			setTimeout( () => {
+				// Remove event listener after 50ms, that likely means the command palette wasn't closed with the keyboard.
+				document.removeEventListener(
+					'keydown',
+					handleClosedPaletteKeyDown
+				);
+			}, 50 );
+		}
 		wasCommandPaletteOpen.current = isCommandPaletteOpen;
-	}, [ isCommandPaletteOpen, origin ] );
+	}, [ selectedOption, isCommandPaletteOpen, origin ] );
 
 	useEffect( () => {
 		registerCommandWithTracking( {
