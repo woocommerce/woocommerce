@@ -36,6 +36,9 @@ import { Inspector } from './components/inspector-controls';
 import { AttributeCheckboxList } from './components/attribute-checkbox-list';
 import { AttributeDropdown } from './components/attribute-dropdown';
 import './style.scss';
+import { extractBuiltInColor } from '../../utils';
+import { useStyleProps } from '../../../../base/hooks';
+import styled from '@emotion/styled';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -54,6 +57,13 @@ const Edit = ( props: EditProps ) => {
 		displayStyle,
 		showCounts,
 	} = blockAttributes;
+
+	const { className, style } = useStyleProps( props.attributes );
+	const builtInColor = extractBuiltInColor( className );
+
+	const textColor = builtInColor
+		? `var(--wp--preset--color--${ builtInColor })`
+		: style.color;
 
 	const attributeObject = getAttributeFromId( attributeId );
 
@@ -233,6 +243,7 @@ const Edit = ( props: EditProps ) => {
 							attributeObject.label ||
 							__( 'attribute', 'woocommerce' )
 						}
+						textColor={ textColor || '' }
 					/>
 				) : (
 					<AttributeCheckboxList

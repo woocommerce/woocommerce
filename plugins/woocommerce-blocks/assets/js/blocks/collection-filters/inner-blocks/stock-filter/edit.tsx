@@ -13,12 +13,15 @@ import FormTokenField from '@woocommerce/base-components/form-token-field';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { getSetting } from '@woocommerce/settings';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
+import { useStyleProps } from '@woocommerce/base-hooks';
+import styled from '@emotion/styled';
 
 /**
  * Internal dependencies
  */
 import { BlockProps } from './types';
 import { Inspector } from './components/inspector';
+import { extractBuiltInColor } from '../../utils';
 
 type CollectionData = {
 	// attribute_counts: null | unknown;
@@ -39,6 +42,21 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 			props.attributes.className
 		),
 	} );
+
+	const { className, style } = useStyleProps( props.attributes );
+	const builtInColor = extractBuiltInColor( className );
+
+	const textColor = builtInColor
+		? `var(--wp--preset--color--${ builtInColor })`
+		: style.color;
+
+	const StyledFormTokenField = textColor
+		? styled( FormTokenField )`
+				.components-form-token-field__input::placeholder {
+					color: ${ textColor } !important;
+				}
+		  `
+		: FormTokenField;
 
 	const { showCounts, displayStyle } = props.attributes;
 	const stockStatusOptions: Record< string, string > = getSetting(
@@ -89,7 +107,7 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 						>
 							{ displayStyle === 'dropdown' ? (
 								<>
-									<FormTokenField
+									<StyledFormTokenField
 										className={ classnames( {
 											'single-selection': true,
 											'is-loading': false,

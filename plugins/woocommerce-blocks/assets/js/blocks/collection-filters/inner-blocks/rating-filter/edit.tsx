@@ -20,6 +20,7 @@ import { useState, useMemo, useEffect } from '@wordpress/element';
 import { CheckboxList } from '@woocommerce/blocks-components';
 import FormTokenField from '@woocommerce/base-components/form-token-field';
 import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
+import { useStyleProps } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -31,6 +32,8 @@ import { formatSlug, getActiveFilters, generateUniqueId } from './utils';
 import { useSetWraperVisibility } from '../../../filter-wrapper/context';
 import './editor.scss';
 import { Inspector } from '../attribute-filter/components/inspector-controls';
+import { extractBuiltInColor } from '../../utils';
+import styled from '@emotion/styled';
 
 const NoRatings = () => (
 	<Notice status="warning" isDismissible={ false }>
@@ -46,6 +49,21 @@ const NoRatings = () => (
 const Edit = ( props: BlockEditProps< Attributes > ) => {
 	const { className } = props.attributes;
 	const blockAttributes = props.attributes;
+
+	const { className: styleClass, style } = useStyleProps( props.attributes );
+	const builtInColor = extractBuiltInColor( styleClass );
+
+	const textColor = builtInColor
+		? `var(--wp--preset--color--${ builtInColor })`
+		: style.color;
+
+	const StyledFormTokenField = textColor
+		? styled( FormTokenField )`
+				.components-form-token-field__input::placeholder {
+					color: ${ textColor } !important;
+				}
+		  `
+		: FormTokenField;
 
 	const blockProps = useBlockProps( {
 		className: classnames( 'wc-block-rating-filter', className ),
@@ -192,7 +210,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 					>
 						{ blockAttributes.displayStyle === 'dropdown' ? (
 							<>
-								<FormTokenField
+								<StyledFormTokenField
 									key={ remountKey }
 									className={ classnames( {
 										'single-selection': ! multiple,
