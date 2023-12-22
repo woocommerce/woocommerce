@@ -105,7 +105,7 @@ jobs:
                   path: ${{ env.ALLURE_RESULTS_DIR }}
 
             - name: Merge into Report
-              run: npx playwright merge-reports --reporter allure-playwright ${{ env.ALLURE_RESULTS_DIR }}
+              run: pnpx playwright merge-reports --reporter allure-playwright ${{ env.ALLURE_RESULTS_DIR }}
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
@@ -116,7 +116,7 @@ jobs:
                     steps.run_playwright_e2e_tests.conclusion != 'skipped' 
                   )
               working-directory: plugins/woocommerce
-              run: npm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Archive Playwright E2E test report
               if: |
