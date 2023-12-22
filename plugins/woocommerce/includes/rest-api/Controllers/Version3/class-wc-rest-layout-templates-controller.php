@@ -78,18 +78,11 @@ class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 	}
 
 	public function get_items( $request ) {
-		$layout_templates = array();
-
-		$template_registry           = wc_get_container()->get( BlockTemplateRegistry::class );
-		$registered_layout_templates = $template_registry->get_all_registered();
-
-		foreach ( $registered_layout_templates as $layout_template ) {
-			if ( ! empty( $request['area'] ) && $layout_template->get_area() !== $request['area'] ) {
-				continue;
-			}
-
-			$layout_templates[] = $layout_template->to_json();
-		}
+		$layout_templates = $this->get_layout_templates(
+			array(
+				'area' => $request['area'],
+			)
+		);
 
 		$response = rest_ensure_response( $layout_templates );
 
@@ -97,17 +90,42 @@ class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 	}
 
 	public function get_item( $request ) {
-		$id = $request['id'];
+		$layout_templates = $this->get_layout_templates(
+			array(
+				'id' => $request['id'],
+			)
+		);
 
-		$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
-		$layout_template   = $template_registry->get_registered( $id );
-
-		if ( ! $layout_template ) {
+		if ( count( $layout_templates ) !== 1 ) {
 			return new WP_Error( 'woocommerce_rest_layout_template_invalid_id', __( 'Invalid layout template ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$response = rest_ensure_response( $layout_template->to_json() );
+		$response = rest_ensure_response( $layout_templates[0] );
 
 		return $response;
+	}
+
+	private function get_layout_templates( array $query_params ): array {
+		$area_to_match = isset( $query_params['area'] ) ? $query_params['area'] : null;
+		$id_to_match   = isset( $query_params['id'] ) ? $query_params['id'] : null;
+
+		$template_registry           = wc_get_container()->get( BlockTemplateRegistry::class );
+		$registered_layout_templates = $template_registry->get_all_registered();
+
+		$layout_templates = array();
+
+		foreach ( $registered_layout_templates as $layout_template ) {
+			if ( ! empty( $area_to_match ) && $layout_template->get_area() !== $area_to_match ) {
+				continue;
+			}
+
+			if ( ! empty( $id_to_match ) && $layout_template->get_id() !== $id_to_match ) {
+				continue;
+			}
+
+			$layout_templates[] = $layout_template->to_json();
+		}
+
+		return $layout_templates;
 	}
 }
