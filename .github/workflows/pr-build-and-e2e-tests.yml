@@ -19,7 +19,19 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                shard:
+                    [
+                        { number: 1, name: 1/10 },
+                        { number: 2, name: 2/10 },
+                        { number: 3, name: 3/10 },
+                        { number: 4, name: 4/10 },
+                        { number: 5, name: 5/10 },
+                        { number: 6, name: 6/10 },
+                        { number: 7, name: 7/10 },
+                        { number: 8, name: 8/10 },
+                        { number: 9, name: 9/10 },
+                        { number: 10, name: 10/10 },
+                    ]
         permissions:
             contents: read
         env:
@@ -62,13 +74,13 @@ jobs:
                   E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
               id: run_playwright_e2e_tests
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard }}
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
 
             - name: Upload blob report to GitHub Actions Artifacts
               if: always()
               uses: actions/upload-artifact@v4
               with:
-                  name: all-blob-reports-${{ matrix.shard }}
+                  name: all-blob-reports-${{ matrix.shard.number }}
                   path: ${{ env.ALLURE_RESULTS_DIR }}
                   retention-days: 1
                   compression-level: 9
@@ -91,8 +103,8 @@ jobs:
             - name: Download blob reports from GitHub Actions Artifacts
               uses: actions/download-artifact@v4
               with:
-                  name: all-blob-reports
                   path: ${{ env.ALLURE_RESULTS_DIR }}
+                  run-id: e2e-tests-run
 
             - name: Merge into single report
               working-directory: ${{ env.ALLURE_RESULTS_DIR }}
