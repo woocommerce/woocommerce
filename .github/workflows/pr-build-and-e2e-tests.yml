@@ -96,7 +96,10 @@ jobs:
               with:
                   node-version: 18
             - name: Install dependencies
-              run: npm ci
+              run: |
+                  npm i playwright
+                  npm i allure-playwright
+                  npm i allure-commandline
 
             - name: Download blob reports from GitHub Actions Artifacts
               uses: actions/download-artifact@v3
