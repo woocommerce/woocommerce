@@ -15,17 +15,6 @@ export default {
 };
 
 export const Default = ( args: ButtonWithDropdownMenuProps ) => {
-	const controls = [
-		{
-			title: 'First Menu Item Label',
-			onClick: function noRefCheck() {},
-		},
-		{
-			onClick: function noRefCheck() {},
-			title: 'Second Menu Item Label',
-		},
-	];
-
 	return (
 		<div
 			style={ {
@@ -34,7 +23,7 @@ export const Default = ( args: ButtonWithDropdownMenuProps ) => {
 				minHeight: '300px',
 			} }
 		>
-			<ButtonWithDropdownMenu controls={ controls } { ...args } />
+			<ButtonWithDropdownMenu { ...args } />
 		</div>
 	);
 };
@@ -42,4 +31,19 @@ export const Default = ( args: ButtonWithDropdownMenuProps ) => {
 Default.args = {
 	label: 'Add to store',
 	onButtonClick: console.log, // eslint-disable-line no-console
+	popoverProps: {
+		placement: 'bottom-end',
+		position: 'bottom left left',
+		offset: 0,
+	},
+	controls: [
+		{
+			title: 'First Menu Item Label',
+			onClick: function noRefCheck() {},
+		},
+		{
+			onClick: function noRefCheck() {},
+			title: 'Second Menu Item Label',
+		},
+	],
 };

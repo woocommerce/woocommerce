@@ -14,31 +14,37 @@ type PositionYAxis = 'top' | 'middle' | 'bottom';
 type PositionXAxis = 'left' | 'center' | 'right';
 type PositionCorner = 'top' | 'right' | 'bottom' | 'left';
 
+type PopoverPlacement =
+	| 'left'
+	| 'right'
+	| 'bottom'
+	| 'top'
+	| 'left-end'
+	| 'left-start'
+	| 'right-end'
+	| 'right-start'
+	| 'bottom-end'
+	| 'bottom-start'
+	| 'top-end'
+	| 'top-start'; // @todo: pick from core
+
+type popoverPosition =
+	| `${ PositionYAxis }`
+	| `${ PositionYAxis } ${ PositionXAxis }`
+	| `${ PositionYAxis } ${ PositionXAxis } ${ PositionCorner }`;
+
+type popoverProps = {
+	placement?: PopoverPlacement;
+	position?: popoverPosition;
+	offset?: number;
+};
+
 export interface ButtonWithDropdownMenuProps {
 	label: string;
 	variant?: Button.ButtonProps[ 'variant' ];
 	controls?: DropdownOption[];
-	popoverPlacement?:
-		| 'left'
-		| 'right'
-		| 'bottom'
-		| 'top'
-		| 'left-end'
-		| 'left-start'
-		| 'right-end'
-		| 'right-start'
-		| 'bottom-end'
-		| 'bottom-start'
-		| 'top-end'
-		| 'top-start'; // @todo: pick from core
 
-	popoverPosition?:
-		| `${ PositionYAxis }`
-		| `${ PositionYAxis } ${ PositionXAxis }`
-		| `${ PositionYAxis } ${ PositionXAxis } ${ PositionCorner }`;
-
-	offset?: number;
-
+	popoverProps?: popoverProps;
 	onButtonClick?: () => void;
 }
 
@@ -49,9 +55,15 @@ export const ButtonWithDropdownMenu: React.FC<
 	onButtonClick = () => {},
 	controls = [],
 	variant = 'primary',
-	popoverPlacement = 'bottom-end',
-	popoverPosition = 'bottom left left',
-	offset = 0,
+	popoverProps: {
+		placement = 'bottom-end',
+		position = 'bottom left left',
+		offset = 0,
+	} = {
+		placement: 'bottom-end',
+		position: 'bottom left left',
+		offset: 0,
+	},
 } ) => {
 	return (
 		<Flex
@@ -80,9 +92,9 @@ export const ButtonWithDropdownMenu: React.FC<
 					icon={ chevronDown }
 					label="Select a direction."
 					popoverProps={ {
-						placement: popoverPlacement,
+						placement,
 						// @ts-expect-error no exported member.
-						position: popoverPosition,
+						position,
 						offset,
 					} }
 				/>
