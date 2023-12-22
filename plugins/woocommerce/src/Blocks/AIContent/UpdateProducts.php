@@ -1,13 +1,13 @@
 <?php
 
-namespace Automattic\WooCommerce\Blocks\Patterns;
+namespace Automattic\WooCommerce\Blocks\AIContent;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use WP_Error;
 /**
  * Pattern Images class.
  */
-class ProductUpdater {
+class UpdateProducts extends UpdateContent {
 
 	/**
 	 * The dummy products.
@@ -62,24 +62,11 @@ class ProductUpdater {
 	 * @return array|WP_Error The generated content for the products. An error if the content could not be generated.
 	 */
 	public function generate_content( $ai_connection, $token, $images, $business_description ) {
-		if ( is_wp_error( $images ) ) {
-			return $images;
-		}
-
 		if ( is_wp_error( $token ) ) {
 			return $token;
 		}
 
-		if ( ! isset( $images['images'] ) || ! isset( $images['search_term'] ) ) {
-			$images = get_transient( 'woocommerce_ai_managed_images' );
-		}
-
-		if ( ! isset( $images['images'] ) || ! isset( $images['search_term'] ) ) {
-			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woocommerce' ) );
-		}
-
-		// This is required in case something interrupts the execution of the script and the endpoint is called again on retry.
-		set_transient( 'woocommerce_ai_managed_images', $images, 60 );
+		$images = $this->verify_images( $images, $ai_connection, $token, $business_description );
 
 		if ( empty( $business_description ) ) {
 			return new \WP_Error( 'missing_business_description', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
@@ -357,7 +344,7 @@ class ProductUpdater {
 		parse_str( $parsed_url['query'], $query_params );
 
 		unset( $query_params['h'], $query_params['w'] );
-		$query_params['w'] = 300;
+		$query_params['w'] = 250;
 		$new_query_string  = http_build_query( $query_params );
 
 		return $parsed_url['scheme'] . '://' . $parsed_url['host'] . $parsed_url['path'] . '?' . $new_query_string;

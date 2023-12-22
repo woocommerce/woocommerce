@@ -3,7 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\Images;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
-use Automattic\WooCommerce\Blocks\Patterns\PatternUpdater;
+use Automattic\WooCommerce\Blocks\AIContent\UpdatePatterns;
 
 /**
  * Pexels API client.
@@ -119,6 +119,12 @@ class Pexels {
 			return $response;
 		}
 
+		if ( isset( $response['code'] ) && 'completion_error' === $response['code'] ) {
+			$response_message = $response['message'] ?? '';
+
+			return new \WP_Error( 'search_term_definition_failed', __( 'The search term definition failed. The AI response was: ' . esc_html( $response_message ), 'woocommerce' ) );
+		}
+
 		if ( ! isset( $response['completion'] ) ) {
 			return new \WP_Error( 'search_term_definition_failed', __( 'The search term definition failed.', 'woocommerce' ) );
 		}
@@ -222,7 +228,7 @@ class Pexels {
 	 * @return array|\WP_Error The total number of required images, or WP_Error if the request failed.
 	 */
 	private function total_number_required_images() {
-		$patterns_dictionary = PatternUpdater::get_patterns_dictionary();
+		$patterns_dictionary = UpdatePatterns::get_patterns_dictionary();
 
 		if ( is_wp_error( $patterns_dictionary ) ) {
 			return $patterns_dictionary;

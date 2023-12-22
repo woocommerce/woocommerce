@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Blocks\Patterns;
+namespace Automattic\WooCommerce\Blocks\AIContent;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use WP_Error;
@@ -8,7 +8,7 @@ use WP_Error;
 /**
  * Pattern Images class.
  */
-class PatternUpdater {
+class UpdatePatterns extends UpdateContent {
 
 	/**
 	 * All patterns that are actively in use in the Assembler.
@@ -36,30 +36,12 @@ class PatternUpdater {
 	 * @return bool|WP_Error
 	 */
 	public function generate_content( $ai_connection, $token, $images, $business_description ) {
-		if ( is_wp_error( $images ) ) {
-			return $images;
-		}
-
 		if ( is_wp_error( $token ) ) {
 			return $token;
 		}
 
-		if ( ! isset( $images['images'] ) ) {
-			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woocommerce' ) );
-		}
-
-		if ( 0 === count( $images['images'] ) ) {
-			$images = get_transient( 'woocommerce_ai_managed_images' );
-		}
-
-		if ( empty( $images['images'] ) ) {
-			return new WP_Error( 'no_images_found', __( 'No images found.', 'woocommerce' ) );
-		}
-
-		// This is required in case something interrupts the execution of the script and the endpoint is called again on retry.
-		set_transient( 'woocommerce_ai_managed_images', $images, 60 );
-
-		$patterns_dictionary = self::get_patterns_dictionary();
+		$images              = $this->verify_images( $images, $ai_connection, $token, $business_description );
+		$patterns_dictionary = PatternsHelper::get_patterns_dictionary();
 
 		if ( is_wp_error( $patterns_dictionary ) ) {
 			return $patterns_dictionary;
@@ -467,7 +449,7 @@ class PatternUpdater {
 	}
 
 	/**
-	 * Returns the selected image format. Defaults to landscape.
+	 * Returns the selected image format. Defaults to portrait.
 	 *
 	 * @param array $selected_image The selected image to be assigned to the pattern.
 	 *
