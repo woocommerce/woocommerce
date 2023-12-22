@@ -14,19 +14,19 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 class RedirectionController {
 
 	/**
-	 * Supported post types.
+	 * Supported product types.
 	 *
 	 * @var array
 	 */
-	private $supported_post_types;
+	private $supported_product_types;
 
 	/**
 	 * Set up the hooks used for redirection.
 	 *
-	 * @param array $supported_post_types Array of supported post types.
+	 * @param array $supported_product_types Array of supported product types.
 	 */
-	public function __construct( $supported_post_types ) {
-		$this->supported_post_types = $supported_post_types;
+	public function __construct( $supported_product_types ) {
+		$this->supported_product_types = $supported_product_types;
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			add_action( 'current_screen', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
@@ -65,7 +65,7 @@ class RedirectionController {
 		$product = $product_id ? wc_get_product( $product_id ) : null;
 		$digital_product = $product->is_downloadable() || $product->is_virtual();
 
-		if ( $product && in_array( $product->get_type(), $this->supported_post_types, true ) ) {
+		if ( $product && in_array( $product->get_type(), $this->supported_product_types, true ) ) {
 			if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
 				return true;
 			}

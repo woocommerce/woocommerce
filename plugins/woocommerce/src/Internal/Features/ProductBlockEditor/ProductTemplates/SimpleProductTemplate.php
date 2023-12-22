@@ -16,12 +16,13 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 * The context name used to identify the editor.
 	 */
 	const GROUP_IDS = array(
-		'GENERAL'      => 'general',
-		'ORGANIZATION' => 'organization',
-		'PRICING'      => 'pricing',
-		'INVENTORY'    => 'inventory',
-		'SHIPPING'     => 'shipping',
-		'VARIATIONS'   => 'variations',
+		'GENERAL'         => 'general',
+		'ORGANIZATION'    => 'organization',
+		'PRICING'         => 'pricing',
+		'INVENTORY'       => 'inventory',
+		'SHIPPING'        => 'shipping',
+		'VARIATIONS'      => 'variations',
+		'LINKED_PRODUCTS' => 'linked-products',
 	);
 
 	/**
@@ -149,6 +150,24 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				)
 			);
 		}
+
+		// Linked Products tab.
+		if ( Features::is_enabled( 'product-linked' ) ) {
+			$this->add_group(
+				array(
+					'id'             => $this::GROUP_IDS['LINKED_PRODUCTS'],
+					'order'          => 60,
+					'attributes'     => array(
+						'title' => __( 'Linked products', 'woocommerce' ),
+					),
+					'hideConditions' => Features::is_enabled( 'product-linked' ) ? array(
+						array(
+							'expression' => 'editedProduct.type === "grouped"',
+						),
+					) : null,
+				)
+			);
+		}
 	}
 
 	/**
@@ -177,6 +196,13 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'title'       => __( 'Basic details', 'woocommerce' ),
 					'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
 				),
+			)
+		);
+		$basic_details->add_block(
+			array(
+				'id'        => 'product-details-section-description',
+				'blockName' => 'woocommerce/product-details-section-description',
+				'order'     => 10,
 			)
 		);
 		$basic_details->add_block(
