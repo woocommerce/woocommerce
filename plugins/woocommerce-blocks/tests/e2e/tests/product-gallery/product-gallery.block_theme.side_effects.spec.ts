@@ -22,7 +22,7 @@ const blockData = {
 		},
 	},
 	slug: 'single-product',
-	productPage: '/product/logo-collection/',
+	productPage: '/product/hoodie/',
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
@@ -40,7 +40,9 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 export const getVisibleLargeImageId = async (
 	mainImageBlockLocator: Locator
 ) => {
-	const mainImage = mainImageBlockLocator.locator( 'img' ).first() as Locator;
+	const mainImage = mainImageBlockLocator.locator(
+		'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
+	);
 
 	const mainImageContext = ( await mainImage.getAttribute(
 		'data-wc-context'
@@ -169,6 +171,147 @@ test.describe( `${ blockData.name }`, () => {
 			);
 
 			expect( newVisibleLargeImageId ).toBe( secondImageThumbnailId );
+		} );
+	} );
+
+	test.describe( 'with previous and next buttons', () => {
+		test( 'should change the image when the user click on the previous or next button', async ( {
+			page,
+			editorUtils,
+			pageObject,
+		} ) => {
+			await pageObject.addProductGalleryBlock( { cleanContent: true } );
+
+			await editorUtils.saveTemplate();
+
+			await Promise.all( [
+				page.goto( blockData.productPage, {
+					waitUntil: 'load',
+				} ),
+				waitForJavascriptFrontendFileIsLoaded( page ),
+			] );
+
+			const initialVisibleLargeImageId = await getVisibleLargeImageId(
+				await pageObject.getMainImageBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			const secondImageThumbnailId = await getThumbnailImageIdByNth(
+				1,
+				await pageObject.getThumbnailsBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			expect( initialVisibleLargeImageId ).not.toBe(
+				secondImageThumbnailId
+			);
+
+			const nextButton = page
+				.locator(
+					'.wc-block-product-gallery-large-image-next-previous--button'
+				)
+				.nth( 1 );
+			await nextButton.click();
+
+			const nextImageId = await getVisibleLargeImageId(
+				await pageObject.getMainImageBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			expect( nextImageId ).toBe( secondImageThumbnailId );
+
+			const previousButton = page
+				.locator(
+					'.wc-block-product-gallery-large-image-next-previous--button'
+				)
+				.first();
+			await previousButton.click();
+
+			const previousImageId = await getVisibleLargeImageId(
+				await pageObject.getMainImageBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			expect( previousImageId ).toBe( initialVisibleLargeImageId );
+		} );
+	} );
+
+	test.describe( 'with pager', () => {
+		test( 'should change the image when the user click on a pager item', async ( {
+			page,
+			editorUtils,
+			pageObject,
+		} ) => {
+			await pageObject.addProductGalleryBlock( { cleanContent: true } );
+
+			await editorUtils.saveTemplate();
+
+			await Promise.all( [
+				page.goto( blockData.productPage, {
+					waitUntil: 'load',
+				} ),
+				waitForJavascriptFrontendFileIsLoaded( page ),
+			] );
+
+			const initialVisibleLargeImageId = await getVisibleLargeImageId(
+				await pageObject.getMainImageBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			const secondImageThumbnailId = await getThumbnailImageIdByNth(
+				1,
+				await pageObject.getThumbnailsBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			const thirdImageThumbnailId = await getThumbnailImageIdByNth(
+				2,
+				await pageObject.getThumbnailsBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			expect( initialVisibleLargeImageId ).not.toBe(
+				secondImageThumbnailId
+			);
+			expect( initialVisibleLargeImageId ).not.toBe(
+				thirdImageThumbnailId
+			);
+
+			const pagerBlock = pageObject.getPagerBlock( { page: 'frontend' } );
+			const thirdPagerItem = ( await pagerBlock )
+				.locator( '.wc-block-product-gallery-pager__pager-item' )
+				.nth( 2 );
+			await thirdPagerItem.click();
+
+			let currentVisibleLargeImageId = await getVisibleLargeImageId(
+				await pageObject.getMainImageBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			expect( currentVisibleLargeImageId ).toBe( thirdImageThumbnailId );
+
+			const firstPagerItem = ( await pagerBlock )
+				.locator( '.wc-block-product-gallery-pager__pager-item' )
+				.first();
+			await firstPagerItem.click();
+
+			currentVisibleLargeImageId = await getVisibleLargeImageId(
+				await pageObject.getMainImageBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			expect( currentVisibleLargeImageId ).toBe(
+				initialVisibleLargeImageId
+			);
 		} );
 	} );
 
