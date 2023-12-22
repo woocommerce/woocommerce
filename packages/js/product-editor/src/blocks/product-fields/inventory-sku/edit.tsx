@@ -5,6 +5,9 @@ import { __ } from '@wordpress/i18n';
 import { BlockAttributes } from '@wordpress/blocks';
 import { createElement, createInterpolateElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
+import { addFilter } from '@wordpress/hooks';
+import { createHigherOrderComponent } from '@wordpress/compose';
+import { select } from '@wordpress/data';
 
 import {
 	BaseControl,
@@ -62,3 +65,51 @@ export function Edit( {
 		</div>
 	);
 }
+
+const handleProductInventoryAdvanced = createHigherOrderComponent(
+	( BlockEdit ) => {
+		return ( props ) => {
+			if (
+				props?.attributes?._templateBlockId !==
+				'product-inventory-advanced'
+			) {
+				return <BlockEdit { ...props } />;
+			}
+
+			// get the inventory section block instance
+			const advancedBlock = select( 'core/block-editor' ).getBlock(
+				props?.clientId
+			);
+
+			// No inner blocks, so we can render the default block edit.
+			if ( ! advancedBlock?.innerBlocks?.length ) {
+				return <BlockEdit { ...props } />;
+			}
+
+			// Find the `product-limit-purchase` block instance
+			const advancedSectionBlock = advancedBlock?.innerBlocks[ 0 ];
+			const limitPurchaseBlock = advancedSectionBlock?.innerBlocks?.find(
+				( block ) => {
+					return (
+						block?.attributes?._templateBlockId ===
+						'product-limit-purchase'
+					);
+				}
+			);
+
+			// Update the condition to don't render
+			if ( ! limitPurchaseBlock ) {
+				return null;
+			}
+
+			return <BlockEdit { ...props } />;
+		};
+	},
+	'checkAdvancedSection '
+);
+
+addFilter(
+	'editor.BlockEdit',
+	'woocommerce/handle-product-inventory-advanced',
+	handleProductInventoryAdvanced
+);

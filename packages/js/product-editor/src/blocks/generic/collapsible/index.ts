@@ -7,7 +7,7 @@ import { registerProductEditorBlockType } from '../../../utils';
  * Internal dependencies
  */
 import metadata from './block.json';
-import { Edit } from './edit';
+import { CollapsibleBlockEdit } from './edit';
 
 const { name } = metadata;
 
@@ -15,7 +15,7 @@ export { metadata, name };
 
 export const settings = {
 	example: {},
-	edit: Edit,
+	edit: CollapsibleBlockEdit,
 };
 
 export const init = () =>
