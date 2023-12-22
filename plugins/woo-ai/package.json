@@ -59,6 +59,7 @@
 		"start": "wp-scripts start",
 		"test:e2e": "wp-scripts test-e2e",
 		"test:unit": "wp-scripts test-unit-js --config tests/js/jest.config.js",
+		"test:unit:watch": "wp-scripts test-unit-js --watch --config tests/js/jest.config.js",
 		"uglify": "rm -f $npm_package_assets_js_min && for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done"
 	},
 	"dependencies": {
