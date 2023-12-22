@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
+use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
 class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 
@@ -106,23 +106,13 @@ class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 	}
 
 	private function get_layout_templates( array $query_params ): array {
-		$area_to_match = isset( $query_params['area'] ) ? $query_params['area'] : null;
-		$id_to_match   = isset( $query_params['id'] ) ? $query_params['id'] : null;
-
-		$template_registry           = wc_get_container()->get( BlockTemplateRegistry::class );
-		$registered_layout_templates = $template_registry->get_all_registered();
+		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
+		$class_names              = $layout_template_registry->get_class_names( $query_params );
 
 		$layout_templates = array();
 
-		foreach ( $registered_layout_templates as $layout_template ) {
-			if ( ! empty( $area_to_match ) && $layout_template->get_area() !== $area_to_match ) {
-				continue;
-			}
-
-			if ( ! empty( $id_to_match ) && $layout_template->get_id() !== $id_to_match ) {
-				continue;
-			}
-
+		foreach ( $class_names as $class_name ) {
+			$layout_template    = new $class_name();
 			$layout_templates[] = $layout_template->to_json();
 		}
 
