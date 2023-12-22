@@ -27,6 +27,10 @@
 		},
 		"collection": {
 			"type": "string"
+		},
+		"hideControls": {
+			"default": [],
+			"type": "array"
 		}
 	},
 	"providesContext": {

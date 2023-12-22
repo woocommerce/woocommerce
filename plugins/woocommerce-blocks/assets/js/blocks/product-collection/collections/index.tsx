@@ -10,7 +10,7 @@ import {
 /**
  * Internal dependencies
  */
-import { CollectionName, FilterName } from '../types';
+import { CollectionName } from '../types';
 import blockJson from '../block.json';
 import productCollection from './product-collection';
 import newArrivals from './new-arrivals';
@@ -50,17 +50,6 @@ export const getCollectionByName = ( collectionName?: CollectionName ) => {
 	}
 
 	return collections.find( ( { name } ) => name === collectionName );
-};
-
-export const getHiddenControls = (
-	collectionName?: CollectionName
-): FilterName[] => {
-	if ( ! collectionName ) {
-		return [];
-	}
-
-	const collection = getCollectionByName( collectionName );
-	return collection ? collection.hideControls : [];
 };
 
 export default registerCollections;

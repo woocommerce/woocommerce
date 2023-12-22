@@ -32,7 +32,6 @@ import {
 } from '../../types';
 import { setQueryAttribute } from '../../utils';
 import { DEFAULT_FILTERS, getDefaultSettings } from '../../constants';
-import { getHiddenControls } from '../../collections';
 import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
 import InheritQueryControl from './inherit-query-control';
@@ -56,9 +55,8 @@ const prepareShouldShowFilter =
 const ProductCollectionInspectorControls = (
 	props: BlockEditProps< ProductCollectionAttributes >
 ) => {
-	const { query, collection } = props.attributes;
+	const { query, collection, hideControls } = props.attributes;
 	const inherit = query?.inherit;
-	const hideControls = getHiddenControls( collection );
 	const shouldShowFilter = prepareShouldShowFilter( hideControls );
 
 	const showQueryControls = inherit === false;

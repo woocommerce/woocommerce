@@ -19,7 +19,6 @@ const collection = {
 		'Display all products in your catalog. Results can (change to) match the current template, page, or search term.',
 	keywords: [ 'all products' ],
 	scope: [],
-	hideControls: [],
 };
 
 const attributes = {
@@ -29,6 +28,7 @@ const attributes = {
 		inherit: true,
 	},
 	collection: collection.name,
+	hideControls: [],
 };
 
 const innerBlocks: InnerBlockTemplate[] = INNER_BLOCKS_TEMPLATE;

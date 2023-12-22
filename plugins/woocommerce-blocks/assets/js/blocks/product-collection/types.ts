@@ -17,6 +17,7 @@ export interface ProductCollectionAttributes {
 	tagName: string;
 	convertedFromProducts: boolean;
 	collection?: string;
+	hideControls: FilterName[];
 }
 
 export enum LayoutOptions {

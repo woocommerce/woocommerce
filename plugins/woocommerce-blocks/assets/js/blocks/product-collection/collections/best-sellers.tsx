@@ -21,7 +21,6 @@ const collection = {
 	description: __( 'Recommend your best-selling products.', 'woocommerce' ),
 	keywords: [ 'best selling', 'product collection' ],
 	scope: [],
-	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
 };
 
 const attributes = {
@@ -40,6 +39,7 @@ const attributes = {
 		pages: 1,
 	},
 	collection: collection.name,
+	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
 };
 
 const heading: InnerBlockTemplate = [

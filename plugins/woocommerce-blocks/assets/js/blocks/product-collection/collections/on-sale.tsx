@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import type {
-	BlockAttributes,
-	InnerBlockTemplate,
-	BlockIcon,
-} from '@wordpress/blocks';
+import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, percent } from '@wordpress/icons';
 
@@ -28,7 +24,6 @@ const collection = {
 	),
 	keywords: [ 'product collection' ],
 	scope: [],
-	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ON_SALE ],
 };
 
 const attributes = {
@@ -46,6 +41,7 @@ const attributes = {
 		pages: 1,
 	},
 	collection: collection.name,
+	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ON_SALE ],
 };
 
 const heading: InnerBlockTemplate = [
