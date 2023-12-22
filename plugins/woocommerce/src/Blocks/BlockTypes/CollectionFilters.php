@@ -218,9 +218,13 @@ final class CollectionFilters extends AbstractBlock {
 				}
 
 				$filter_query_vars = $query_vars;
-				unset( $filter_query_vars[ 'filter_' . str_replace( 'pa_', '', $attributes_to_count['taxonomy'] ) ] );
+
+				if ( 'and' !== strtolower( $attributes_to_count['queryType'] ) ) {
+					unset( $filter_query_vars[ 'filter_' . str_replace( 'pa_', '', $attributes_to_count['taxonomy'] ) ] );
+				}
 				unset( $filter_query_vars['taxonomy'] );
-				unset( $filter_query_vars['terms'] );
+				unset( $filter_query_vars['term'] );
+
 				foreach ( $filter_query_vars['tax_query'] as $key => $tax_query ) {
 					if ( is_array( $tax_query ) && $tax_query['taxonomy'] === $attributes_to_count['taxonomy'] ) {
 						unset( $filter_query_vars['tax_query'][ $key ] );
