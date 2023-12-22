@@ -31,6 +31,10 @@ final class LayoutTemplateRegistry {
 		return self::$instance;
 	}
 
+	public function is_registered( $layout_template_id ): bool {
+		return isset( $this->layout_templates_info[ $layout_template_id ] );
+	}
+
 	/**
 	 * Register a single layout template.
 	 *
@@ -41,7 +45,7 @@ final class LayoutTemplateRegistry {
 	 * @throws \ValueError If a layout template with the same ID already exists.
 	 */
 	public function register( $layout_template_id, $layout_template_area, $layout_template_class_name ) {
-		if ( isset( $this->layout_templates_info[ $layout_template_id ] ) ) {
+		if ( $this->is_registered( $layout_template_id ) ) {
 			throw new \ValueError( 'A layout template with the specified ID already exists in the registry.' );
 		}
 
@@ -63,13 +67,13 @@ final class LayoutTemplateRegistry {
 		);
 	}
 
-	public function instantiate_layout_templates( array $query_params ): array {
+	public function instantiate_layout_templates( array $query_params = array() ): array {
 		$layout_templates = array();
 
 		$class_names = $this->get_class_names( $query_params );
 		foreach ( $class_names as $class_name ) {
 			$layout_template    = new $class_name();
-			$layout_templates[] = $layout_template->to_json();
+			$layout_templates[] = $layout_template;
 		}
 
 		return $layout_templates;
@@ -80,7 +84,7 @@ final class LayoutTemplateRegistry {
 	 *
 	 * @return string[]
 	 */
-	private function get_class_names( array $query_params ): array {
+	private function get_class_names( array $query_params = array() ): array {
 		$area_to_match = isset( $query_params['area'] ) ? $query_params['area'] : null;
 		$id_to_match   = isset( $query_params['id'] ) ? $query_params['id'] : null;
 
