@@ -167,8 +167,8 @@ final class CollectionFilters extends AbstractBlock {
 
 			$price_results       = $filters->get_filtered_price( $filter_query_vars );
 			$data['price_range'] = array(
-				'min_price' => intval( floor( $price_results->min_price ) ),
-				'max_price' => intval( ceil( $price_results->max_price ) ),
+				'min_price' => intval( floor( $price_results->min_price ?? 0 ) ),
+				'max_price' => intval( ceil( $price_results->max_price ?? 0 ) ),
 			);
 		}
 

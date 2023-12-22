@@ -127,7 +127,6 @@ final class CollectionPriceFilter extends AbstractBlock {
 			return $content;
 		}
 
-		$wrapper_attributes  = get_block_wrapper_attributes();
 		$min_price           = intval( get_query_var( self::MIN_PRICE_QUERY_VAR, $min_range ) );
 		$max_price           = intval( get_query_var( self::MAX_PRICE_QUERY_VAR, $max_range ) );
 		$formatted_min_price = wc_price( $min_price, array( 'decimals' => 0 ) );
