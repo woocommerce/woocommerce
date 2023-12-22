@@ -5,6 +5,9 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
+/**
+ * Service provider for layout templates.
+ */
 class LayoutTemplatesServiceProvider extends AbstractServiceProvider {
 
 	/**
