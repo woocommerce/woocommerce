@@ -64,21 +64,6 @@ final class LayoutTemplateRegistry {
 	}
 
 	/**
-	 * Get a single layout template class name by ID.
-	 *
-	 * @param string $id Layout template ID.
-	 *
-	 * @return string|null
-	 */
-	public function get_class_name( string $id ): ?string {
-		$layout_template_info = isset( $this->layout_templates_info[ $id ] ) ? $this->layout_templates_info[ $id ] : null;
-
-		return ! empty( $template_template_info ) && isset( $layout_template_info['class_name'] )
-			? $layout_template_info['class_name']
-			: null;
-	}
-
-	/**
 	 * Get marching layout template class names.
 	 *
 	 * @return string[]
