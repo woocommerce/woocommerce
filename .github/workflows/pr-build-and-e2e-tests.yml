@@ -92,14 +92,11 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  node-version: 18
-            - name: Install dependencies
-              run: |
-                  npm i playwright
-                  npm i allure-playwright
-                  npm i allure-commandline
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Download blob reports from GitHub Actions Artifacts
               uses: actions/download-artifact@v3
