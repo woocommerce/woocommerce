@@ -12,13 +12,19 @@ import type {
 
 export interface ButtonWithDropdownMenuProps {
 	label: string;
+	variant?: Button.ButtonProps[ 'variant' ];
 	controls?: DropdownOption[];
 	onButtonClick?: () => void;
 }
 
 export const ButtonWithDropdownMenu: React.FC<
 	ButtonWithDropdownMenuProps
-> = ( { label, onButtonClick = () => {}, controls = [] } ) => {
+> = ( {
+	label,
+	onButtonClick = () => {},
+	controls = [],
+	variant = 'primary',
+} ) => {
 	return (
 		<Flex
 			className="woocommerce-button-with-dropdown-menu"
@@ -27,7 +33,7 @@ export const ButtonWithDropdownMenu: React.FC<
 		>
 			<FlexItem>
 				<Button
-					variant="primary"
+					variant={ variant }
 					onClick={ onButtonClick }
 					className="woocommerce-button-with-dropdown-menu__main-button"
 				>
@@ -37,9 +43,9 @@ export const ButtonWithDropdownMenu: React.FC<
 			<FlexItem>
 				<DropdownMenu
 					toggleProps={ {
-						variant: 'primary',
 						className:
 							'woocommerce-button-with-dropdown-menu__dropdown-button',
+						variant,
 					} }
 					controls={ controls }
 					icon={ chevronDown }
