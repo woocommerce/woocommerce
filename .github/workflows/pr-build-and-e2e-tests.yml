@@ -81,7 +81,7 @@ jobs:
               uses: actions/upload-artifact@v3
               with:
                   name: all-blob-reports
-                  path: plugins/woocommerce/tests/e2e-pw/test-results/blob-report
+                  path: ${{ env.ALLURE_RESULTS_DIR }}
                   retention-days: 1
 
     merge-reports:
