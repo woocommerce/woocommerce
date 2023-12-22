@@ -56,6 +56,11 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 			$source = $this->determine_source();
 		}
 
+		if ( $this->settings->get_file_entry_collapse_lines() ) {
+			// Remove line breaks so the whole entry is on one line in the file.
+			$message = str_replace( PHP_EOL, ' ', $message );
+		}
+
 		$entry = static::format_entry( $timestamp, $level, $message, $context );
 
 		$written = $this->file_controller->write_to_file( $source, $entry, $timestamp );
@@ -81,9 +86,6 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		$time_string  = static::format_time( $timestamp );
 		$level_string = strtoupper( $level );
 
-		// Remove line breaks so the whole entry is on one line in the file.
-		$formatted_message = str_replace( PHP_EOL, ' ', $message );
-
 		unset( $context['source'] );
 		if ( ! empty( $context ) ) {
 			if ( isset( $context['backtrace'] ) && true === filter_var( $context['backtrace'], FILTER_VALIDATE_BOOLEAN ) ) {
@@ -91,10 +93,10 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 			}
 
 			$formatted_context  = wp_json_encode( $context );
-			$formatted_message .= " CONTEXT: $formatted_context";
+			$message           .= " CONTEXT: $formatted_context";
 		}
 
-		$entry = "$time_string $level_string $formatted_message";
+		$entry = "$time_string $level_string $message";
 
 		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/** This filter is documented in includes/abstracts/abstract-wc-log-handler.php */

@@ -22,10 +22,11 @@ class Settings {
 	 * @const array
 	 */
 	private const DEFAULTS = array(
-		'logging_enabled'       => true,
-		'default_handler'       => LogHandlerFileV2::class,
-		'retention_period_days' => 30,
-		'level_threshold'       => 'none',
+		'logging_enabled'           => true,
+		'default_handler'           => LogHandlerFileV2::class,
+		'retention_period_days'     => 30,
+		'level_threshold'           => 'none',
+		'file_entry_collapse_lines' => true,
 	);
 
 	/**
@@ -50,7 +51,7 @@ class Settings {
 	private function get_settings_definitions(): array {
 		$settings = array(
 			'start'                 => array(
-				'title' => __( 'Logs Settings', 'woocommerce' ),
+				'title' => __( 'Logs settings', 'woocommerce' ),
 				'id'    => self::PREFIX . 'settings',
 				'type'  => 'title',
 			),
@@ -61,7 +62,7 @@ class Settings {
 				'type'     => 'checkbox',
 				'value'    => $this->logging_is_enabled() ? 'yes' : 'no',
 				'default'  => self::DEFAULTS['logging_enabled'] ? 'yes' : 'no',
-				'autoload' => true,
+				'autoload' => false,
 			),
 			'default_handler'       => array(),
 			'retention_period_days' => array(),
@@ -76,6 +77,13 @@ class Settings {
 			$settings['default_handler']       = $this->get_default_handler_setting_definition();
 			$settings['retention_period_days'] = $this->get_retention_period_days_setting_definition();
 			$settings['level_threshold']       = $this->get_level_threshold_setting_definition();
+		}
+
+		$default_handler = $this->get_default_handler();
+		if ( in_array( $default_handler, array( LogHandlerFileV2::class, WC_Log_Handler_File::class ), true ) ) {
+			$settings += $this->get_filesystem_settings_definitions();
+		} elseif ( WC_Log_Handler_DB::class === $default_handler ) {
+			$settings += $this->get_database_settings_definitions();
 		}
 
 		return $settings;
@@ -112,25 +120,6 @@ class Settings {
 		$desc = array();
 
 		$desc[] = __( 'Note that if this setting is changed, any log entries that have already been recorded will remain stored in their current location, but will not migrate.', 'woocommerce' );
-
-		if ( in_array( $current_value, array( LogHandlerFileV2::class, WC_Log_Handler_File::class ), true ) ) {
-			$log_directory = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) );
-
-			$desc[] = sprintf(
-				// translators: %s is a location in the filesystem.
-				__( 'Log files are stored in this directory: %s', 'woocommerce' ),
-				"<code>$log_directory</code>"
-			);
-		} elseif ( WC_Log_Handler_DB::class === $current_value ) {
-			global $wpdb;
-			$table = "{$wpdb->prefix}woocommerce_log";
-
-			$desc[] = sprintf(
-				// translators: %s is a location in the filesystem.
-				__( 'Log entries are stored in this database table: %s', 'woocommerce' ),
-				"<code>$table</code>"
-			);
-		}
 
 		$hardcoded = ! is_null( Constants::get_constant( 'WC_LOG_HANDLER' ) );
 		if ( $hardcoded ) {
@@ -240,6 +229,102 @@ class Settings {
 	}
 
 	/**
+	 * The definitions used by WC_Admin_Settings to render settings related to filesystem log handlers.
+	 *
+	 * @return array
+	 */
+	private function get_filesystem_settings_definitions(): array {
+		$location_info = array();
+		$directory     = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) );
+
+		$location_info[] = sprintf(
+			// translators: %s is a location in the filesystem.
+			__( 'Log files are stored in this directory: %s', 'woocommerce' ),
+			sprintf(
+				'<code>%s</code>',
+				esc_html( $directory )
+			)
+		);
+
+		if ( ! wp_is_writable( $directory ) ) {
+			$location_info[] = __( '⚠️ This directory does not appear to be writable.', 'woocommerce' );
+		}
+
+		$location_info[] = sprintf(
+			// translators: %1$s is a code variable. %2$s is the name of a file.
+			__( 'Change the location by defining the %1$s constant in your %2$s file with a new path.', 'woocommerce' ),
+			'<code>WC_LOG_DIR</code>',
+			'<code>wp-config.php</code>'
+		);
+
+		$settings = array(
+			'file_start'    => array(
+				'title' => __( 'File system settings', 'woocommerce' ),
+				'id'    => self::PREFIX . 'settings',
+				'type'  => 'title',
+			),
+			'log_directory' => array(
+				'type' => 'info',
+				'text' => implode( "\n\n", $location_info ),
+			),
+			'entry_format'  => array(),
+			'file_end'      => array(
+				'id'   => self::PREFIX . 'settings',
+				'type' => 'sectionend',
+			),
+		);
+
+		if ( LogHandlerFileV2::class === $this->get_default_handler() ) {
+			$settings['entry_format'] = array(
+				'title'    => __( 'Entry formatting', 'woocommerce' ),
+				'desc'     => __( 'Collapse log entries into one line each', 'woocommerce' ),
+				'desc_tip' => __( 'This ensures the data for each log entry is written to a single line in the log file.', 'woocommerce' ),
+				'id'       => self::PREFIX . 'file_entry_collapse_lines',
+				'type'     => 'checkbox',
+				'value'    => $this->get_file_entry_collapse_lines() ? 'yes' : 'no',
+				'default'  => self::DEFAULTS['file_entry_collapse_lines'] ? 'yes' : 'no',
+				'autoload' => false,
+			);
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * The definitions used by WC_Admin_Settings to render settings related to database log handlers.
+	 *
+	 * @return array
+	 */
+	private function get_database_settings_definitions(): array {
+		global $wpdb;
+		$table = "{$wpdb->prefix}woocommerce_log";
+
+		$location_info = sprintf(
+			// translators: %s is a location in the filesystem.
+			__( 'Log entries are stored in this database table: %s', 'woocommerce' ),
+			"<code>$table</code>"
+		);
+
+		$settings = array(
+			'file_start'     => array(
+				'title' => __( 'Database settings', 'woocommerce' ),
+				'id'    => self::PREFIX . 'settings',
+				'type'  => 'title',
+			),
+			'database_table' => array(
+				'type' => 'info',
+				'text' => $location_info,
+			),
+			'file_end'       => array(
+				'id'   => self::PREFIX . 'settings',
+				'type' => 'sectionend',
+			),
+		);
+
+		return $settings;
+	}
+
+	/**
 	 * Handle the submission of the settings form and update the settings values.
 	 *
 	 * @param string $view The current view within the Logs tab.
@@ -260,6 +345,35 @@ class Settings {
 
 			WC_Admin_Settings::save_fields( $settings );
 		}
+	}
+
+	/**
+	 * Render the settings page.
+	 *
+	 * @return void
+	 */
+	public function render_form(): void {
+		$settings = $this->get_settings_definitions();
+
+		?>
+		<form id="mainform" class="wc-logs-settings" method="post">
+			<?php WC_Admin_Settings::output_fields( $settings ); ?>
+			<?php
+			/**
+			 * Action fires after the built-in logging settings controls have been rendered.
+			 *
+			 * This is intended as a way to allow other logging settings controls to be added by extensions.
+			 *
+			 * @param bool $enabled True if logging is currently enabled.
+			 *
+			 * @since 8.6.0
+			 */
+			do_action( 'wc_logs_settings_form_fields', $this->logging_is_enabled() );
+			?>
+			<?php wp_nonce_field( self::PREFIX . 'settings' ); ?>
+			<?php submit_button( __( 'Save changes', 'woocommerce' ), 'primary', 'save_settings' ); ?>
+		</form>
+		<?php
 	}
 
 	/**
@@ -355,31 +469,22 @@ class Settings {
 	}
 
 	/**
-	 * Render the settings page.
+	 * Determine the current value of the file_entry_collapse_lines setting.
 	 *
-	 * @return void
+	 * @return bool
 	 */
-	public function render_form(): void {
-		$settings = $this->get_settings_definitions();
+	public function get_file_entry_collapse_lines(): bool {
+		$collapse = WC_Admin_Settings::get_option(
+			self::PREFIX . 'file_entry_collapse_lines',
+			self::DEFAULTS['file_entry_collapse_lines']
+		);
 
-		?>
-		<form id="mainform" class="wc-logs-settings" method="post">
-			<?php WC_Admin_Settings::output_fields( $settings ); ?>
-			<?php
-			/**
-			 * Action fires after the built-in logging settings controls have been rendered.
-			 *
-			 * This is intended as a way to allow other logging settings controls to be added by extensions.
-			 *
-			 * @param bool $enabled True if logging is currently enabled.
-			 *
-			 * @since 8.6.0
-			 */
-			do_action( 'wc_logs_settings_form_fields', $this->logging_is_enabled() );
-			?>
-			<?php wp_nonce_field( self::PREFIX . 'settings' ); ?>
-			<?php submit_button( __( 'Save changes', 'woocommerce' ), 'primary', 'save_settings' ); ?>
-		</form>
-		<?php
+		$collapse = filter_var( $collapse, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+
+		if ( is_null( $collapse ) ) {
+			$collapse = self::DEFAULTS['file_entry_collapse_lines'];
+		}
+
+		return $collapse;
 	}
 }
