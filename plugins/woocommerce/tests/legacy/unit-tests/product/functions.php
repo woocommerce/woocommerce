@@ -234,6 +234,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$cat1      = wp_insert_term( 'Cat One', 'product_cat' );
 		$cat1_term = get_term_by( 'id', $cat1['term_id'], 'product_cat' );
 		$cat2      = wp_insert_term( 'Cat Two', 'product_cat' );
+		$cat3      = wp_insert_term( 'Cat Three', 'product_cat' );
 
 		$product1 = WC_Helper_Product::create_simple_product();
 		$product1->set_name( 'Product 1' );
@@ -242,7 +243,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$product2 = WC_Helper_Product::create_simple_product();
 		$product2->set_name( 'Product 2' );
-		$product2->set_category_ids( array( $cat2['term_id'] ) );
+		$product2->set_category_ids( array( $cat2['term_id'], $cat3['term_id'] ) );
 		$product2->save();
 
 		$product3 = WC_Helper_Product::create_simple_product();
@@ -262,6 +263,15 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$products = wc_get_products(
 			array(
 				'product_category_id' => $cat2['term_id'],
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product2->get_id(), $products[0]->get_id() );
+
+		// Search by multiple category IDs.
+		$products = wc_get_products(
+			array(
+				'product_category_id' => array( $cat2['term_id'], $cat3['term_id'] ),
 			)
 		);
 		$this->assertCount( 1, $products );
