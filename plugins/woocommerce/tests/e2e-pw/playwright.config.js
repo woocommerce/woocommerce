@@ -23,7 +23,7 @@ const config = {
 	workers: CI ? 1 : 4,
 	reporter: [
 		[ 'list' ],
-		[ 'blob' ],
+		[ 'blob', { outputFolder: './tests/e2e-pw/test-results/blob-report' } ],
 		[
 			'html',
 			{

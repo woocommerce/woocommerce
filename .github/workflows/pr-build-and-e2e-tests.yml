@@ -81,7 +81,7 @@ jobs:
               uses: actions/upload-artifact@v3
               with:
                   name: all-blob-reports
-                  path: ./tests/e2e-pw/test-results/report/blob-report
+                  path: ./tests/e2e-pw/test-results/blob-report
                   retention-days: 1
 
     merge-reports:
