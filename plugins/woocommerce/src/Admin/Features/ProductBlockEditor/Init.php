@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTem
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplateLogger;
 use WP_Block_Editor_Context;
 
