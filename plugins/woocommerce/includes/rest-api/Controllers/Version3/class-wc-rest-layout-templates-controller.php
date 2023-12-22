@@ -5,13 +5,16 @@
  * Handles requests to /layout-templates.
  *
  * @package WooCommerce\RestApi
- * @since 8.5.0
+ * @since 8.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
+/**
+ * REST API Layout Templates controller class.
+ */
 class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 
 	/**
@@ -29,7 +32,7 @@ class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 	protected $rest_base = 'layout-templates';
 
 	/**
-	 * Register the routes for layouts.
+	 * Register the routes for template layouts.
 	 */
 	public function register_routes() {
 		register_rest_route(
@@ -69,14 +72,29 @@ class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 		);
 	}
 
-	public function get_items_permissions_check( $request ) {
+	/**
+	 * Check if a given request has access to read template layouts.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 */
+	public function get_items_permissions_check( $request ): bool {
 		return true;
 	}
 
-	public function get_item_permissions_check( $request ) {
+	/**
+	 * Check if a given request has access to read a template layout.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 */
+	public function get_item_permissions_check( $request ): bool {
 		return true;
 	}
 
+	/**
+	 * Handle request for template layouts.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 */
 	public function get_items( $request ) {
 		$layout_templates = $this->get_layout_templates(
 			array(
@@ -89,6 +107,11 @@ class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 		return $response;
 	}
 
+	/**
+	 * Handle request for a single template layout.
+	 *
+	 * @param WP_REST_Request $request The request.
+	 */
 	public function get_item( $request ) {
 		$layout_templates = $this->get_layout_templates(
 			array(
@@ -105,6 +128,11 @@ class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 		return $response;
 	}
 
+	/**
+	 * Get layout templates.
+	 *
+	 * @param array $query_params Query params.
+	 */
 	private function get_layout_templates( array $query_params ): array {
 		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
 
