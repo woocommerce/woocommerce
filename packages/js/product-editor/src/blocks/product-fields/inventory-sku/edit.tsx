@@ -69,6 +69,7 @@ export function Edit( {
 const handleProductInventoryAdvanced = createHigherOrderComponent(
 	( BlockEdit ) => {
 		return ( props ) => {
+			// Bailr early when it is not the Advanced section ('product-inventory-advanced')
 			if (
 				props?.attributes?._templateBlockId !==
 				'product-inventory-advanced'
@@ -76,7 +77,7 @@ const handleProductInventoryAdvanced = createHigherOrderComponent(
 				return <BlockEdit { ...props } />;
 			}
 
-			// get the inventory section block instance
+			// Get the Advanced block instance
 			const advancedBlock = select( 'core/block-editor' ).getBlock(
 				props?.clientId
 			);
