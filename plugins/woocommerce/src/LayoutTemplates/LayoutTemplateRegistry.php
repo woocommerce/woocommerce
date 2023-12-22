@@ -64,7 +64,7 @@ final class LayoutTemplateRegistry {
 	}
 
 	/**
-	 * Get marching layout template class names.
+	 * Get matching layout template class names.
 	 *
 	 * @return string[]
 	 */
