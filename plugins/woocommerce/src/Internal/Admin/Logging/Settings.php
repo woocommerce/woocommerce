@@ -242,10 +242,12 @@ class Settings {
 	/**
 	 * Handle the submission of the settings form and update the settings values.
 	 *
+	 * @param string $view The current view within the Logs tab.
+	 *
 	 * @return void
 	 */
-	private function save_settings(): void {
-		$is_saving = isset( $_POST['save_settings'] );
+	private function save_settings( string $view ): void {
+		$is_saving = 'settings' === $view && isset( $_POST['save_settings'] );
 
 		if ( $is_saving ) {
 			check_admin_referer( self::PREFIX . 'settings' );
