@@ -6,12 +6,14 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
+use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
+
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplateLogger;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
+
 use WP_Block_Editor_Context;
 
 /**
@@ -212,12 +214,12 @@ class Init {
 	 * Get the product editor settings.
 	 */
 	private function get_product_editor_settings() {
-		$layout_template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
 		$layout_template_logger   = BlockTemplateLogger::get_instance();
 
 		$editor_settings = array();
 
-		foreach ( $layout_template_registry->get_all_registered() as $layout_template ) {
+		foreach ( $layout_template_registry->instantiate_layout_templates() as $layout_template ) {
 			$editor_settings['layoutTemplates'][] = $layout_template->to_json();
 
 			$layout_template_logger->log_template_events_to_file( $layout_template->get_id() );
@@ -372,14 +374,22 @@ class Init {
 	 * Register product editor templates.
 	 */
 	public function register_product_editor_templates() {
-		$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
 
-		if ( ! $template_registry->get_registered( 'simple-product' ) ) {
-			$template_registry->register( new SimpleProductTemplate() );
+		if ( ! $layout_template_registry->is_registered( 'simple-product' ) ) {
+			$layout_template_registry->register(
+				'simple-product',
+				'product-form',
+				SimpleProductTemplate::class
+			);
 		}
 
-		if ( ! $template_registry->get_registered( 'product-variation' ) ) {
-			$template_registry->register( new ProductVariationTemplate() );
+		if ( ! $layout_template_registry->is_registered( 'product-variation' ) ) {
+			$layout_template_registry->register(
+				'product-variation',
+				'product-form',
+				ProductVariationTemplate::class
+			);
 		}
 	}
 }
