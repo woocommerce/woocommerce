@@ -42,9 +42,11 @@ store( 'woocommerce/collection-rating-filter', {
 				'woocommerce/interactivity-dropdown'
 			);
 
-			const filter = dropdownContext.selectedItem?.value;
+			const selectedItems = dropdownContext.selectedItems;
+			const items = selectedItems || [];
+			const filters = items.map( ( i ) => i.value );
 
-			navigate( getUrl( [ filter ] ) );
+			navigate( getUrl( filters ) );
 		},
 		removeFilter: () => {
 			const { value } = getContext< { value: string } >();
