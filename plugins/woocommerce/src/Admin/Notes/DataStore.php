@@ -37,6 +37,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			'layout'       => $note->get_layout(),
 			'image'        => $note->get_image(),
 			'is_deleted'   => (int) $note->get_is_deleted(),
+			'is_read'      => (int) $note->get_is_read(),
 		);
 
 		$note_to_be_inserted['content_data']  = wp_json_encode( $note->get_content_data() );
@@ -110,8 +111,8 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$note->set_date_created( $note_row->date_created );
 			$note->set_date_reminder( $note_row->date_reminder );
 			$note->set_is_snoozable( $note_row->is_snoozable );
-			$note->set_is_deleted( (bool) $note_row->is_deleted );
-			isset( $note_row->is_read ) && $note->set_is_read( (bool) $note_row->is_read );
+			$note->set_is_deleted( (int) $note_row->is_deleted );
+			isset( $note_row->is_read ) && $note->set_is_read( (int) $note_row->is_read );
 			$note->set_layout( $note_row->layout );
 			$note->set_image( $note_row->image );
 			$this->read_actions( $note );
