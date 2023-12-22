@@ -182,6 +182,10 @@ class CheckoutSchema extends AbstractSchema {
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'properties'  => $this->get_additional_fields_schema(),
+				'arg_options' => [
+					'sanitize_callback' => [ $this, 'sanitize_additional_fields' ],
+					'validate_callback' => [ $this, 'validate_additional_fields' ],
+				],
 			],
 			self::EXTENDING_KEY => $this->get_extended_schema( self::IDENTIFIER ),
 		];
@@ -273,27 +277,78 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_additional_fields_schema() {
-		$additional_fields_keys = $this->additional_fields_controller->get_additional_fields_keys();
-
-		$fields = $this->additional_fields_controller->get_additional_fields();
-
-		$additional_fields = array_filter(
-			$fields,
-			function( $key ) use ( $additional_fields_keys ) {
-				return in_array( $key, $additional_fields_keys, true );
-			},
-			ARRAY_FILTER_USE_KEY
-		);
+		$order_only_fields = $this->additional_fields_controller->get_order_only_fields();
 
 		$schema = [];
-		foreach ( $additional_fields as $key => $field ) {
-			$schema[ $key ] = [
+		foreach ( $order_only_fields as $key => $field ) {
+			$field_schema = [
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			];
+
+			if ( 'select' === $field['type'] ) {
+				$field_schema['enum'] = array_map(
+					function( $option ) {
+						return $option['value'];
+					},
+					$field['options']
+				);
+			}
+
+			if ( 'checkbox' === $field['type'] ) {
+				$field_schema['type'] = 'boolean';
+			}
+
+			$schema[ $key ] = $field_schema;
 		}
 		return $schema;
+	}
+
+
+	/**
+	 * Sanitize and format additional fields object.
+	 *
+	 * @param array            $fields Values being sanitized.
+	 * @param \WP_REST_Request $request The Request.
+	 * @return array
+	 */
+	public function sanitize_additional_fields( $fields, $request ) {
+		$fields = array_merge( array_fill_keys( array_keys( $this->get_additional_fields_schema() ), '' ), (array) $fields );
+
+		$fields = array_reduce(
+			array_keys( $fields ),
+			function( $carry, $key ) use ( $fields, $request ) {
+				$carry[ $key ] = rest_sanitize_request_arg( wp_unslash( $fields[ $key ] ), $request, $key );
+				return $carry;
+			},
+			[]
+		);
+
+		return $fields;
+	}
+
+	/**
+	 * Validate additional fields object.
+	 *
+	 * @see rest_validate_value_from_schema
+	 *
+	 * @param array            $fields Value being sanitized.
+	 * @param \WP_REST_Request $request The Request.
+	 * @return true|\WP_Error
+	 */
+	public function validate_additional_fields( $fields, $request ) {
+		$errors = new \WP_Error();
+		$fields = $this->sanitize_additional_fields( $fields, $request );
+		foreach ( array_keys( $fields ) as $key ) {
+			$properties = $this->get_additional_fields_schema();
+			$result     = rest_validate_value_from_schema( $fields[ $key ], $properties[ $key ], $key );
+			if ( is_wp_error( $result ) ) {
+				$errors->add( $result->get_error_code(), $result->get_error_message() );
+			}
+		}
+
+		return $errors->has_errors( $errors ) ? $errors : true;
 	}
 }

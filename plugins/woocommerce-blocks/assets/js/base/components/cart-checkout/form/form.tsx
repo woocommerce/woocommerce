@@ -20,37 +20,40 @@ import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import classnames from 'classnames';
+import { FormFieldsConfig } from '@woocommerce/settings';
+import { objectHasProp } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import { AddressFormProps, FieldConfig, AddressFormFields } from './types';
-import prepareAddressFields from './prepare-address-fields';
+import { AddressFormProps, AddressFormFields } from './types';
+import prepareFormFields from './prepare-form-fields';
 import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
 import Combobox from '../../combobox';
 
 /**
- * Checkout address form.
+ * Checkout form.
  */
-const AddressForm = ( {
+const Form = ( {
 	id = '',
 	fields,
-	fieldConfig = {} as FieldConfig,
+	fieldConfig = {} as FormFieldsConfig,
 	onChange,
 	addressType = 'shipping',
 	values,
+	children,
 }: AddressFormProps ): JSX.Element => {
-	const instanceId = useInstanceId( AddressForm );
+	const instanceId = useInstanceId( Form );
 
 	// Track incoming props.
 	const currentFields = useShallowEqual( fields );
 	const currentFieldConfig = useShallowEqual( fieldConfig );
-	const currentCountry = useShallowEqual( values.country );
+	const currentCountry = useShallowEqual( objectHasProp(values, 'country' ) ? values.country : "" );
 
 	// Memoize the address form fields passed in from the parent component.
 	const addressFormFields = useMemo( (): AddressFormFields => {
-		const preparedFields = prepareAddressFields(
+		const preparedFields = prepareFormFields(
 			currentFields,
 			currentFieldConfig,
 			currentCountry
@@ -83,7 +86,7 @@ const AddressForm = ( {
 
 	// Maybe validate country when other fields change so user is notified that it's required.
 	useEffect( () => {
-		if ( addressType === 'shipping' ) {
+		if ( addressType === 'shipping' && objectHasProp(values, 'country' ) ) {
 			validateShippingCountry( values );
 		}
 	}, [ values, addressType ] );
@@ -128,7 +131,7 @@ const AddressForm = ( {
 					className: `wc-block-components-address-form__${ field.key }`,
 				};
 
-				if ( field.key === 'country' ) {
+				if ( field.key === 'country' && objectHasProp(values, 'country' ) ) {
 					const Tag =
 						addressType === 'shipping'
 							? ShippingCountryInput
@@ -160,7 +163,7 @@ const AddressForm = ( {
 					);
 				}
 
-				if ( field.key === 'state' ) {
+				if ( field.key === 'state' && objectHasProp(values, 'state' ) ) {
 					const Tag =
 						addressType === 'shipping'
 							? ShippingStateInput
@@ -231,14 +234,15 @@ const AddressForm = ( {
 							customValidationHandler(
 								inputObject,
 								field.key,
-								values
+								objectHasProp(values, "country") ? values.country : "",
 							)
 						}
 					/>
 				);
 			} ) }
+			{ children }
 		</div>
 	);
 };
 
-export default AddressForm;
+export default Form;

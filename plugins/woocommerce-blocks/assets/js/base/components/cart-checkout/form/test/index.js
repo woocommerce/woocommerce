@@ -5,12 +5,12 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CheckoutProvider } from '@woocommerce/base-context';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
-import { ADDRESS_FIELDS_KEYS } from '@woocommerce/block-settings';
+import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
-import AddressForm from '../address-form';
+import Form from '../form';
 
 jest.mock( '@wordpress/element', () => {
 	return {
@@ -89,16 +89,16 @@ const inputAddress = async ( {
 	}
 };
 
-describe( 'AddressForm Component', () => {
+describe( 'Form Component', () => {
 	const WrappedAddressForm = ( { type } ) => {
 		const { setShippingAddress, shippingAddress } = useCheckoutAddress();
 
 		return (
-			<AddressForm
+			<Form
 				type={ type }
 				onChange={ setShippingAddress }
 				values={ shippingAddress }
-				fields={ ADDRESS_FIELDS_KEYS }
+				fields={ ADDRESS_FORM_KEYS }
 			/>
 		);
 	};
