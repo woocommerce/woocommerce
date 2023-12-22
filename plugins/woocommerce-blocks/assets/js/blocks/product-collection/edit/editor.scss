@@ -1,3 +1,9 @@
+$max-columns: 3;
+$min-button-width: 250px;
+$gap-count: calc(#{ $max-columns } - 1);
+$total-gap-width: calc(#{ $gap-count } * #{ $gap-small });
+$max-button-width: calc((100% - #{ $total-gap-width }) / #{ $max-columns });
+
 .wc-block-editor-product-collection-inspector-toolspanel__filters {
 	.wc-block-editor-product-collection-inspector__taxonomy-control:not(:last-child) {
 		margin-bottom: $grid-unit-30;
@@ -10,6 +16,17 @@
 	}
 }
 
+// Need to override high-specificity styles
+.wc-blocks-product-collection__placeholder.is-medium {
+	.components-placeholder__fieldset {
+		display: block;
+	}
+
+	.components-button.wc-blocks-product-collection__collection-button {
+		margin: 0;
+	}
+}
+
 .wc-blocks-product-collection__placeholder,
 .wc-blocks-product-collection__modal {
 	.wc-blocks-product-collection__selection-subtitle {
@@ -18,23 +35,11 @@
 
 	.wc-blocks-product-collection__collections-section {
 		display: grid;
-		grid-template-columns: 1fr 1fr 1fr;
+		grid-template-columns: repeat(auto-fill, minmax(max(#{ $min-button-width }, #{ $max-button-width }), 1fr));
 		grid-auto-rows: 1fr;
-		gap: $gap-small;
+		grid-gap: $gap-small;
 		margin: $gap-large auto;
 		max-width: 1000px;
-
-		@include breakpoint("<782px") {
-			grid-template-columns: 1fr 1fr;
-
-			.wc-blocks-product-collection__collection-button {
-				padding: $gap-smallest;
-
-				.wc-blocks-product-collection__collection-button-text {
-					padding: 0 0 0 $gap-smallest;
-				}
-			}
-		}
 	}
 
 	.wc-blocks-product-collection__collection-button {
