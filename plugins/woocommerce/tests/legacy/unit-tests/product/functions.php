@@ -290,7 +290,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product3->set_name( 'Product 3' );
 		$product3->save();
 
-		// Search by category slug.
+		// Search by tag slug.
 		$products = wc_get_products(
 			array(
 				'tag' => $tag1_term->slug,
@@ -299,7 +299,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $products );
 		$this->assertEquals( $product1->get_id(), $products[0]->get_id() );
 
-		// Search by category ID.
+		// Search by tag ID.
 		$products = wc_get_products(
 			array(
 				'product_tag_id' => $tag2['term_id'],
