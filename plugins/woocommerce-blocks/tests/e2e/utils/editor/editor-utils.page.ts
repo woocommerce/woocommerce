@@ -346,4 +346,9 @@ export class EditorUtils {
 		const postId = url.searchParams.get( 'post' );
 		await this.page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
 	}
+
+	async openWidgetEditor() {
+		await this.page.goto( '/wp-admin/widgets.php' );
+		await this.closeModalByName( 'Welcome to block Widgets' );
+	}
 }
