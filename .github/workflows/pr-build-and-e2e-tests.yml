@@ -78,10 +78,11 @@ jobs:
 
             - name: Upload blob report to GitHub Actions Artifacts
               if: always()
+              working_directory: plugins/woocommerce
               uses: actions/upload-artifact@v3
               with:
                   name: all-blob-reports
-                  path: blob-report
+                  path: ./tests/e2e-pw/test-results/report/blob-report
                   retention-days: 1
 
     merge-reports:
@@ -228,7 +229,7 @@ jobs:
               contains( needs.*.result, 'failure' )
             )
         runs-on: ubuntu-20.04
-        needs: [api-tests-run, e2e-tests-run]
+        needs: [api-tests-run, merge-reports]
         permissions:
             contents: read
             issues: write
@@ -301,7 +302,7 @@ jobs:
               contains( needs.*.result, 'failure' )
             )
         runs-on: ubuntu-20.04
-        needs: [api-tests-run, e2e-tests-run, k6-tests-run]
+        needs: [api-tests-run, merge-reports, k6-tests-run]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             PR_NUMBER: ${{ github.event.number }}
