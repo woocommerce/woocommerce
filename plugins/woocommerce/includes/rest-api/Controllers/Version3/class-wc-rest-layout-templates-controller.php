@@ -88,7 +88,7 @@ class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 				continue;
 			}
 
-			$layout_templates[] = $layout_template->get_formatted_template();
+			$layout_templates[] = $layout_template->to_json();
 		}
 
 		$response = rest_ensure_response( $layout_templates );
