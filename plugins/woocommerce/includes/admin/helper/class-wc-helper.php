@@ -1184,11 +1184,16 @@ class WC_Helper {
 	 * @return string
 	 */
 	public static function get_subscription_install_url( $product_key ) {
-		$install_url_response = WC_Helper_API::get(
+		$install_url_response = WC_Helper_API::post(
 			'install-url',
 			array(
 				'authenticated' => true,
-				'query_string'  => esc_url( '?product_key=' . $product_key . '&wc_version=' . WC()->version ),
+				'body'          => wp_json_encode(
+					array(
+						'product_key' => $product_key,
+						'wc_version'  => WC()->version,
+					)
+				),
 			)
 		);
 
