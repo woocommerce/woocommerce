@@ -32,10 +32,12 @@ export interface ButtonWithDropdownMenuProps {
 		| 'top-end'
 		| 'top-start'; // @todo: pick from core
 
-	position?:
+	popoverPosition?:
 		| `${ PositionYAxis }`
 		| `${ PositionYAxis } ${ PositionXAxis }`
 		| `${ PositionYAxis } ${ PositionXAxis } ${ PositionCorner }`;
+
+	offset?: number;
 
 	onButtonClick?: () => void;
 }
@@ -48,7 +50,8 @@ export const ButtonWithDropdownMenu: React.FC<
 	controls = [],
 	variant = 'primary',
 	popoverPlacement = 'bottom-end',
-	position = 'bottom left left',
+	popoverPosition = 'bottom left left',
+	offset = 0,
 } ) => {
 	return (
 		<Flex
@@ -79,7 +82,8 @@ export const ButtonWithDropdownMenu: React.FC<
 					popoverProps={ {
 						placement: popoverPlacement,
 						// @ts-expect-error no exported member.
-						position,
+						position: popoverPosition,
+						offset,
 					} }
 				/>
 			</FlexItem>
