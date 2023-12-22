@@ -105,6 +105,7 @@ jobs:
                   path: ${{ env.ALLURE_RESULTS_DIR }}
 
             - name: Merge into Report
+              working-directory: plugins/woocommerce
               run: pnpx playwright merge-reports --reporter allure-playwright ${{ env.ALLURE_RESULTS_DIR }}
 
             - name: Generate Playwright E2E Test report.
