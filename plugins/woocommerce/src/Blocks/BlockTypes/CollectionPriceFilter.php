@@ -121,7 +121,6 @@ final class CollectionPriceFilter extends AbstractBlock {
 
 		$price_range = $block->context['collectionData']['price_range'];
 
-		$wrapper_attributes  = get_block_wrapper_attributes();
 		$min_range           = $price_range['min_price'] / 10 ** $price_range['currency_minor_unit'];
 		$max_range           = $price_range['max_price'] / 10 ** $price_range['currency_minor_unit'];
 		$min_price           = intval( get_query_var( self::MIN_PRICE_QUERY_VAR, $min_range ) );
@@ -156,12 +155,10 @@ final class CollectionPriceFilter extends AbstractBlock {
 		$__high      = 100 * ( $max_price - $min_range ) / ( $max_range - $min_range );
 		$range_style = "--low: $__low%; --high: $__high%";
 
-		$data_directive = wp_json_encode( array( 'namespace' => 'woocommerce/collection-price-filter' ) );
-
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class'               => $show_input_fields && $inline_input ? 'inline-input' : '',
-				'data-wc-interactive' => $data_directive,
+				'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-price-filter' ) ),
 			)
 		);
 
@@ -171,8 +168,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 					class="min"
 					type="text"
 					value="%d"
-					data-wc-bind--value="state.minPrice"
-					data-wc-on--input="actions.setMinPrice"
+					data-wc-bind--value="context.minPrice"
 					data-wc-on--change="actions.updateProducts"
 				/>',
 				esc_attr( $min_price )
@@ -188,8 +184,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 					class="max"
 					type="text"
 					value="%d"
-					data-wc-bind--value="state.maxPrice"
-					data-wc-on--input="actions.setMaxPrice"
+					data-wc-bind--value="context.maxPrice"
 					data-wc-on--change="actions.updateProducts"
 				/>',
 				esc_attr( $max_price )
@@ -202,41 +197,43 @@ final class CollectionPriceFilter extends AbstractBlock {
 		ob_start();
 		?>
 			<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-				<div
-					class="range"
-					style="<?php echo esc_attr( $range_style ); ?>"
-					data-wc-bind--style="state.rangeStyle"
-				>
-					<div class="range-bar"></div>
-					<input
-						type="range"
-						class="min"
-						min="<?php echo esc_attr( $min_range ); ?>"
-						max="<?php echo esc_attr( $max_range ); ?>"
-						value="<?php echo esc_attr( $min_price ); ?>"
-						data-wc-bind--max="state.maxRange"
-						data-wc-bind--value="state.minPrice"
-						data-wc-class--active="state.isMinActive"
-						data-wc-on--input="actions.setMinPrice"
-						data-wc-on--change="actions.updateProducts"
+				<div data-wc-context="<?php echo esc_attr( wp_json_encode( $data ) ); ?>" >
+					<div
+						class="range"
+						style="<?php echo esc_attr( $range_style ); ?>"
+						data-wc-bind--style="state.rangeStyle"
 					>
-					<input
-						type="range"
-						class="max"
-						min="<?php echo esc_attr( $min_range ); ?>"
-						max="<?php echo esc_attr( $max_range ); ?>"
-						value="<?php echo esc_attr( $max_price ); ?>"
-						data-wc-bind--max="state.maxRange"
-						data-wc-bind--value="state.maxPrice"
-						data-wc-class--active="state.isMaxActive"
-						data-wc-on--input="actions.setMaxPrice"
-						data-wc-on--change="actions.updateProducts"
-					>
-				</div>
-				<div class="text">
-					<?php // $price_min and $price_max are escaped in the sprintf() calls above. ?>
-					<?php echo $price_min; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					<?php echo $price_max; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<div class="range-bar"></div>
+						<input
+							type="range"
+							class="min"
+							name="min"
+							min="<?php echo esc_attr( $min_range ); ?>"
+							max="<?php echo esc_attr( $max_range ); ?>"
+							value="<?php echo esc_attr( $min_price ); ?>"
+							data-wc-bind--min="context.minRange"
+							data-wc-bind--max="context.maxRange"
+							data-wc-bind--value="context.minPrice"
+							data-wc-on--change="actions.updateProducts"
+						>
+						<input
+							type="range"
+							class="max"
+							name="max"
+							min="<?php echo esc_attr( $min_range ); ?>"
+							max="<?php echo esc_attr( $max_range ); ?>"
+							value="<?php echo esc_attr( $max_price ); ?>"
+							data-wc-bind--min="context.minRange"
+							data-wc-bind--max="context.maxRange"
+							data-wc-bind--value="context.maxPrice"
+							data-wc-on--change="actions.updateProducts"
+						>
+					</div>
+					<div class="text">
+						<?php // $price_min and $price_max are escaped in the sprintf() calls above. ?>
+						<?php echo $price_min; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo $price_max; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</div>
 				</div>
 			</div>
 		<?php

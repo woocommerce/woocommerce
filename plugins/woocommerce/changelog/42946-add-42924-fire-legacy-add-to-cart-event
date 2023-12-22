@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Product Button: Trigger event `experimental__woocommerce_blocks-cart-add-item` in Products and Product Collection blocks.
