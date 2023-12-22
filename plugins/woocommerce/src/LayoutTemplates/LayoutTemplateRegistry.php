@@ -89,12 +89,12 @@ final class LayoutTemplateRegistry {
 
 		$class_names = array();
 
-		foreach ( $this->layout_templates_info as $layout_template_info ) {
-			if ( ! empty( $area_to_match ) && isset( $layout_template_info['area'] ) && $layout_template_info['area'] !== $area_to_match ) {
+		foreach ( $this->layout_templates_info as $id => $layout_template_info ) {
+			if ( ! empty( $area_to_match ) && $layout_template_info['area'] !== $area_to_match ) {
 				continue;
 			}
 
-			if ( ! empty( $id_to_match ) && isset( $layout_template_info['id'] ) && $layout_template_info['id'] !== $id_to_match ) {
+			if ( ! empty( $id_to_match ) && $id !== $id_to_match ) {
 				continue;
 			}
 
