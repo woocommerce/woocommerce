@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * CollectionAttributeFilter class.
@@ -197,6 +198,9 @@ final class CollectionAttributeFilter extends AbstractBlock {
 	 * @param bool  $attributes Block attributes.
 	 */
 	private function render_attribute_dropdown( $options, $attributes ) {
+		$text_color_class_and_style = StyleAttributesUtils::get_text_color_class_and_style( $attributes );
+		$text_color                 = $text_color_class_and_style['value'] ?? '';
+
 		$list_items    = array();
 		$selected_item = array();
 
@@ -218,6 +222,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 				'items'         => $list_items,
 				'action'        => 'woocommerce/collection-attribute-filter::actions.navigate',
 				'selected_item' => $selected_item,
+				'text_color'    => $text_color,
 			)
 		);
 	}

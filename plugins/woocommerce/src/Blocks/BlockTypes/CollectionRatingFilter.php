@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * Collection Rating Filter Block
@@ -110,6 +111,9 @@ final class CollectionRatingFilter extends AbstractBlock {
 			return '';
 		}
 
+		$text_color_class_and_style = StyleAttributesUtils::get_text_color_class_and_style( $attributes );
+		$text_color                 = $text_color_class_and_style['value'] ?? '';
+
 		$rating_counts = $block->context['collectionData']['rating_counts'] ?? array();
 		$display_style = $attributes['displayStyle'] ?? 'list';
 		$show_counts   = $attributes['showCounts'] ?? false;
@@ -130,7 +134,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 				'on_change' => 'woocommerce/collection-rating-filter::actions.onCheckboxChange',
 			)
 		) : Dropdown::render(
-			$this->get_dropdown_props( $rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'] )
+			$this->get_dropdown_props( $rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'], $text_color )
 		);
 
 		return sprintf(
@@ -211,7 +215,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 	 * @param string $select_type The select type. (single|multiple).
 	 * @return array<array-key, array>
 	 */
-	private function get_dropdown_props( $rating_counts, $selected_ratings_query, $show_counts, $select_type ) {
+	private function get_dropdown_props( $rating_counts, $selected_ratings_query, $show_counts, $select_type, $text_color ) {
 		$ratings_array = explode( ',', $selected_ratings_query );
 
 		$selected_items = array_reduce(
@@ -249,6 +253,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 			'select_type'    => $select_type,
 			'selected_items' => $selected_items,
 			'action'         => 'woocommerce/collection-rating-filter::actions.onDropdownChange',
+			'text_color'     => $text_color,
 		);
 	}
 }
