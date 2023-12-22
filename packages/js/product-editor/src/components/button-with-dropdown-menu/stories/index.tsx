@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { createElement } from 'react';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -12,9 +12,6 @@ import type { ButtonWithDropdownMenuProps } from '../';
 export default {
 	title: 'Product Editor/components/ButtonWithDropdownMenu',
 	component: ButtonWithDropdownMenu,
-	args: {
-		label: 'Woo',
-	},
 };
 
 export const Default = ( args: ButtonWithDropdownMenuProps ) => {
@@ -29,9 +26,10 @@ export const Default = ( args: ButtonWithDropdownMenuProps ) => {
 		},
 	];
 
-	return <ButtonWithDropdownMenu { ...args } controls={ controls } />;
+	return <ButtonWithDropdownMenu controls={ controls } { ...args } />;
 };
 
 Default.args = {
-	onMainButtonClick: console.log, // eslint-disable-line no-console
+	label: 'Add to store',
+	onButtonClick: console.log, // eslint-disable-line no-console
 };

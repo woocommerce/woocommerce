@@ -5,15 +5,20 @@ import { createElement } from '@wordpress/element';
 import { chevronDown } from '@wordpress/icons';
 import { Button, DropdownMenu, Flex, FlexItem } from '@wordpress/components';
 
+import type {
+	// @ts-expect-error no exported member.
+	DropdownOption,
+} from '@wordpress/components';
+
 export interface ButtonWithDropdownMenuProps {
 	label: string;
-	controls?: [];
-	onMainButtonClick?: () => void;
+	controls?: DropdownOption[];
+	onButtonClick?: () => void;
 }
 
 export const ButtonWithDropdownMenu: React.FC<
 	ButtonWithDropdownMenuProps
-> = ( { label, onMainButtonClick = () => {}, controls } ) => {
+> = ( { label, onButtonClick = () => {}, controls = [] } ) => {
 	return (
 		<Flex
 			className="woocommerce-button-with-dropdown-menu"
@@ -23,7 +28,7 @@ export const ButtonWithDropdownMenu: React.FC<
 			<FlexItem>
 				<Button
 					variant="primary"
-					onClick={ onMainButtonClick }
+					onClick={ onButtonClick }
 					className="woocommerce-button-with-dropdown-menu__main-button"
 				>
 					{ label }
@@ -39,7 +44,6 @@ export const ButtonWithDropdownMenu: React.FC<
 					controls={ controls }
 					icon={ chevronDown }
 					label="Select a direction."
-					onToggle={ function noRefCheck() {} }
 				/>
 			</FlexItem>
 		</Flex>
