@@ -26,7 +26,17 @@ export const Default = ( args: ButtonWithDropdownMenuProps ) => {
 		},
 	];
 
-	return <ButtonWithDropdownMenu controls={ controls } { ...args } />;
+	return (
+		<div
+			style={ {
+				display: 'flex',
+				justifyContent: 'center',
+				minHeight: '300px',
+			} }
+		>
+			<ButtonWithDropdownMenu controls={ controls } { ...args } />
+		</div>
+	);
 };
 
 Default.args = {
