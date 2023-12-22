@@ -54,8 +54,7 @@ class WC_Logger implements WC_Logger_Interface {
 
 		if ( ! empty( $handlers ) && is_array( $handlers ) ) {
 			foreach ( $handlers as $handler ) {
-				$implements = class_implements( $handler );
-				if ( is_object( $handler ) && is_array( $implements ) && in_array( 'WC_Log_Handler_Interface', $implements, true ) ) {
+				if ( $handler instanceof WC_Log_Handler_Interface ) {
 					$register_handlers[] = $handler;
 				} else {
 					wc_doing_it_wrong(
@@ -72,14 +71,12 @@ class WC_Logger implements WC_Logger_Interface {
 			}
 		}
 
-		// Support the constant as long as a valid log level has been set for it.
-		if ( null === $threshold ) {
+		if ( ! WC_Log_Levels::is_valid_level( $threshold ) ) {
 			$threshold = wc_get_container()->get( Settings::class )->get_level_threshold();
-			$threshold = WC_Log_Levels::get_level_severity( $threshold );
 		}
 
 		$this->handlers  = $register_handlers;
-		$this->threshold = $threshold;
+		$this->threshold = WC_Log_Levels::get_level_severity( $threshold );
 	}
 
 	/**
