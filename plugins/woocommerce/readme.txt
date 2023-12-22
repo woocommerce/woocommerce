@@ -175,6 +175,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix product task redirection to allow use for external and grouped products with the new product editor. [#43051](https://github.com/woocommerce/woocommerce/pull/43051)
 * Fix - Added missing CSS class on the empty-orders notice CTA in the My Account > Orders page [#41325](https://github.com/woocommerce/woocommerce/pull/41325)
 * Fix - Adds missing aria-label and tabindex HTML attributes to the Help tip element for "Product data" on "Add new product" page [#42854](https://github.com/woocommerce/woocommerce/pull/42854)
 * Fix - Add wc-settings to the footer when injecting wc-settings dependency [#41790](https://github.com/woocommerce/woocommerce/pull/41790)

@@ -24,32 +24,19 @@ export const useCreateProductByType = () => {
 	const isNewExperienceEnabled =
 		window.wcAdminFeatures[ 'new-product-management-experience' ];
 
-	const createProductByType = async ( type: ProductTypeKey ) => {
-		setIsRequesting( true );
-
+	const getProductEditPageLink = async (
+		type: ProductTypeKey,
+		classicEditor: boolean
+	) => {
 		if (
 			type === 'physical' ||
 			type === 'variable' ||
-			type === 'digital' ||
-			type === 'grouped' ||
-			type === 'external'
+			type === 'digital'
 		) {
-			if ( isNewExperienceEnabled ) {
-				navigateTo( { url: getNewPath( {}, '/add-product', {} ) } );
-				return;
-			}
-			const assignment = await loadExperimentAssignment(
-				EXPERIMENT_NAME
-			);
-			if ( assignment.variationName === 'treatment' ) {
-				const _feature_nonce = getAdminSetting( '_feature_nonce' );
-				window.location.href = getAdminLink(
-					`post-new.php?post_type=product&product_block_editor=1&_feature_nonce=${ _feature_nonce }`
-				);
-				return;
-			}
+			return classicEditor
+				? getAdminLink( 'post-new.php?post_type=product' )
+				: getNewPath( {}, '/add-product', {} );
 		}
-
 		try {
 			const data: {
 				id?: number;
@@ -61,15 +48,51 @@ export const useCreateProductByType = () => {
 				{ _fields: [ 'id' ] }
 			);
 			if ( data && data.id ) {
-				const link = getAdminLink(
-					`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true`
-				);
-				window.location.href = link;
-				return;
+				return classicEditor
+					? getAdminLink(
+							`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true`
+					  )
+					: getNewPath( {}, '/product/' + data.id, {} );
 			}
 			throw new Error( 'Unexpected empty data response from server' );
 		} catch ( error ) {
 			createNoticesFromResponse( error );
+		}
+	};
+
+	const createProductByType = async ( type: ProductTypeKey ) => {
+		setIsRequesting( true );
+
+		if (
+			type === 'physical' ||
+			type === 'variable' ||
+			type === 'digital' ||
+			type === 'grouped' ||
+			type === 'external'
+		) {
+			if ( isNewExperienceEnabled ) {
+				const url = await getProductEditPageLink( type, false );
+				if ( url ) {
+					navigateTo( { url } );
+				}
+				return;
+			}
+			const assignment = await loadExperimentAssignment(
+				EXPERIMENT_NAME
+			);
+			if ( assignment.variationName === 'treatment' ) {
+				const url = await getProductEditPageLink( type, true );
+				const _feature_nonce = getAdminSetting( '_feature_nonce' );
+				window.location.href =
+					url +
+					`&product_block_editor=1&_feature_nonce=${ _feature_nonce }`;
+				return;
+			}
+		}
+
+		const url = await getProductEditPageLink( type, true );
+		if ( url ) {
+			navigateTo( { url } );
 		}
 		setIsRequesting( false );
 	};
