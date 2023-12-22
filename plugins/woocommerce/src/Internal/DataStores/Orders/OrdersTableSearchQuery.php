@@ -93,10 +93,9 @@ class OrdersTableSearchQuery {
 		$where .= $wpdb->prepare(
 			"
 			search_query_items.order_item_name LIKE %s
-			OR `$order_table`.id IN ( $meta_sub_query )
 			",
 			'%' . $wpdb->esc_like( $this->search_term ) . '%'
-		);
+		) . " OR `$order_table`.id IN ( $meta_sub_query ) ";
 
 		return " ( $where ) ";
 	}
