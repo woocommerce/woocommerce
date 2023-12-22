@@ -2639,3 +2639,4 @@ LIMIT 250
 
 	return ! empty( $has_pending );
 }
+
