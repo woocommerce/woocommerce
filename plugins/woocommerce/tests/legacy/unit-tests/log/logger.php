@@ -53,7 +53,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		file_put_contents( $file, 'Test file content.' );
 		$log = new WC_Logger();
 		$log->clear( 'unit-tests' );
-		$this->assertEquals( '', file_get_contents( $file ) );
+		$this->assertFileDoesNotExist( $file );
 		// phpcs:enable WordPress.WP.AlternativeFunctions
 	}
 
