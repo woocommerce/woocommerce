@@ -96,7 +96,7 @@ jobs:
               with:
                   node-version: 18
             - name: Install dependencies
-              run: pnpm ci
+              run: npm ci
 
             - name: Download blob reports from GitHub Actions Artifacts
               uses: actions/download-artifact@v3
@@ -116,7 +116,7 @@ jobs:
                     steps.run_playwright_e2e_tests.conclusion != 'skipped' 
                   )
               working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+              run: npm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Archive Playwright E2E test report
               if: |
