@@ -7,6 +7,7 @@ import { isSameAddress } from '@woocommerce/base-utils';
  * Internal dependencies
  */
 import { STATUS, checkoutData } from './constants';
+import { AdditionalValues } from '@woocommerce/settings';
 
 export type CheckoutState = {
 	// Status of the checkout
@@ -31,11 +32,13 @@ export type CheckoutState = {
 	prefersCollection?: boolean | undefined;
 	// Custom checkout data passed to the store API on processing.
 	extensionData: Record< string, Record< string, unknown > >;
+	// Additional fields to be displayed on the checkout.
+	additionalFields: AdditionalValues;
 };
 
 export const defaultState: CheckoutState = {
 	redirectUrl: '',
-	status: STATUS.PRISTINE,
+	status: STATUS.IDLE,
 	hasError: false,
 	orderId: checkoutData.order_id,
 	customerId: checkoutData.customer_id,
@@ -48,4 +51,5 @@ export const defaultState: CheckoutState = {
 	shouldCreateAccount: false,
 	prefersCollection: undefined,
 	extensionData: {},
+	additionalFields: {},
 };
