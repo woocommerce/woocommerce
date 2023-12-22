@@ -78,13 +78,15 @@ jobs:
 
             - name: Upload blob report to GitHub Actions Artifacts
               if: always()
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: all-blob-reports
                   path: ${{ env.ALLURE_RESULTS_DIR }}
                   retention-days: 1
+                  compression-level: 9
 
     merge-reports:
+        name: Merge e2e test reports
         # Merge reports after playwright-tests, even if some shards have failed
         if: always()
         needs: [e2e-tests-run]
@@ -99,13 +101,13 @@ jobs:
                   build: '@woocommerce/plugin-woocommerce'
 
             - name: Download blob reports from GitHub Actions Artifacts
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   name: all-blob-reports
                   path: ${{ env.ALLURE_RESULTS_DIR }}
 
-            - name: Merge into Report
-              working-directory: plugins/woocommerce
+            - name: Merge into single report
+              working-directory: ${{ env.ALLURE_RESULTS_DIR }}
               run: pnpx playwright merge-reports --reporter allure-playwright ${{ env.ALLURE_RESULTS_DIR }}
 
             - name: Generate Playwright E2E Test report.
@@ -123,7 +125,7 @@ jobs:
               if: |
                   always() &&
                   steps.generate_e2e_report.conclusion == 'success'
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: e2e-test-report---pr-${{ github.event.number }}
                   path: |
@@ -178,7 +180,7 @@ jobs:
               if: |
                   always() &&
                   steps.generate_api_report.conclusion == 'success'
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: |
@@ -250,13 +252,13 @@ jobs:
                   path: repo
 
             - name: Download API test report artifact
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: artifacts/api
 
             - name: Download Playwright E2E test report artifact
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   name: e2e-test-report---pr-${{ github.event.number }}
                   path: artifacts/e2e
