@@ -72,7 +72,7 @@ final class BlockTemplateRegistry {
 	 *
 	 * @param string $id ID of the template.
 	 */
-	public function get_registered( $id ): BlockTemplateInterface {
+	public function get_registered( $id ): ?BlockTemplateInterface {
 		return isset( $this->templates[ $id ] ) ? $this->templates[ $id ] : null;
 	}
 }

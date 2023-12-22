@@ -17,7 +17,7 @@ import { deepSignal, peek } from 'deepsignal';
  */
 import { createPortal } from './portals';
 import { useSignalEffect } from './utils';
-import { directive } from './hooks';
+import { directive, getScope, getEvaluate } from './hooks';
 import { SlotProvider, Slot, Fill } from './slots';
 import { navigate } from './router';
 
@@ -32,10 +32,23 @@ const mergeDeepSignals = ( target, source, overwrite ) => {
 				source[ `$${ k }` ].peek(),
 				overwrite
 			);
-		} else if ( overwrite || typeof peek( target, k ) === 'undefined' ) {
+		} else if ( typeof peek( target, k ) === 'undefined' ) {
 			target[ `$${ k }` ] = source[ `$${ k }` ];
+		} else if ( overwrite ) {
+			target[ k ] = peek( source, k );
 		}
 	}
+};
+
+const deepClone = ( o ) => {
+	if ( isObject( o ) )
+		return Object.fromEntries(
+			Object.entries( o ).map( ( [ k, v ] ) => [ k, deepClone( v ) ] )
+		);
+	if ( Array.isArray( o ) ) {
+		return [ ...o.map( ( i ) => deepClone( i ) ) ];
+	}
+	return o;
 };
 
 export default () => {
@@ -54,7 +67,9 @@ export default () => {
 
 			currentValue.current = useMemo( () => {
 				const newValue = context
-					.map( ( c ) => deepSignal( { [ c.namespace ]: c.value } ) )
+					.map( ( c ) =>
+						deepSignal( { [ c.namespace ]: deepClone( c.value ) } )
+					)
 					.reduceRight( mergeDeepSignals );
 
 				mergeDeepSignals( newValue, inheritedValue );
@@ -298,12 +313,14 @@ export default () => {
 				( { suffix } ) => suffix === 'default'
 			);
 
-			useEffect( () => {
-				// Prefetch the page if it is in the directive options.
-				if ( link?.prefetch ) {
-					// prefetch( href );
-				}
-			} );
+			// For some reason this useEffect crashes in Preact internals in some cases.
+			// Since it is a no-op right now, we can just comment it out.
+			// useEffect( () => {
+			// 	// Prefetch the page if it is in the directive options.
+			// 	if ( link?.prefetch ) {
+			// 		// prefetch( href );
+			// 	}
+			// } );
 
 			// Don't do anything if it's falsy.
 			if ( link !== false ) {
@@ -411,4 +428,47 @@ export default () => {
 		),
 		{ priority: 4 }
 	);
+
+	directive(
+		'each',
+		( {
+			directives: {
+				each,
+				'each-key': [ eachKey ],
+			},
+			context: inheritedContext,
+			element,
+			evaluate,
+		} ) => {
+			const { Provider } = inheritedContext;
+			const inheritedValue = useContext( inheritedContext );
+
+			const [ entry ] = each;
+			const { namespace, suffix } = entry;
+
+			const list = evaluate( entry );
+			return list.map( ( item ) => {
+				const mergedContext = deepSignal( {} );
+
+				const itemProp = suffix === 'default' ? 'item' : suffix;
+				const newValue = deepSignal( {
+					[ namespace ]: { [ itemProp ]: item },
+				} );
+				mergeDeepSignals( newValue, inheritedValue );
+				mergeDeepSignals( mergedContext, newValue, true );
+
+				const scope = { ...getScope(), context: mergedContext };
+				const key = getEvaluate( { scope } )( eachKey );
+
+				return (
+					<Provider value={ mergedContext } key={ key }>
+						{ element.props.content }
+					</Provider>
+				);
+			} );
+		},
+		{ priority: 20 }
+	);
+
+	directive( 'each-child', () => null );
 };
