@@ -92,6 +92,9 @@ jobs:
         needs: [e2e-tests-run]
 
         runs-on: ubuntu-latest
+        env:
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
         steps:
             - uses: actions/checkout@v3
             - name: Setup WooCommerce Monorepo
@@ -107,7 +110,7 @@ jobs:
                   run-id: e2e-tests-run
 
             - name: Merge into single report
-              working-directory: ${{ env.ALLURE_RESULTS_DIR }}
+              working-directory: plugins/woocommerce
               run: pnpx playwright merge-reports --reporter allure-playwright ${{ env.ALLURE_RESULTS_DIR }}
 
             - name: Generate Playwright E2E Test report.
