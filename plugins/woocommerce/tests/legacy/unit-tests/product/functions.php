@@ -275,6 +275,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$tag1      = wp_insert_term( 'Tag One', 'product_tag' );
 		$tag1_term = get_term_by( 'id', $tag1['term_id'], 'product_tag' );
 		$tag2      = wp_insert_term( 'Tag Two', 'product_tag' );
+		$tag3      = wp_insert_term( 'Tag Three', 'product_tag' );
 
 		$product1 = WC_Helper_Product::create_simple_product();
 		$product1->set_name( 'Product 1' );
@@ -283,7 +284,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$product2 = WC_Helper_Product::create_simple_product();
 		$product2->set_name( 'Product 2' );
-		$product2->set_tag_ids( array( $tag2['term_id'] ) );
+		$product2->set_tag_ids( array( $tag2['term_id'], $tag3['term_id'] ) );
 		$product2->save();
 
 		$product3 = WC_Helper_Product::create_simple_product();
@@ -303,6 +304,15 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$products = wc_get_products(
 			array(
 				'product_tag_id' => $tag2['term_id'],
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product2->get_id(), $products[0]->get_id() );
+
+		// Search by multiple tag IDs.
+		$products = wc_get_products(
+			array(
+				'product_tag_id' => array( $tag2['term_id'], $tag3['term_id'] ),
 			)
 		);
 		$this->assertCount( 1, $products );
