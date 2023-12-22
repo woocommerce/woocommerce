@@ -93,11 +93,11 @@ const ProductCollectionInspectorControls = (
 					props.setAttributes( defaultSettings );
 				} }
 			>
-				<LayoutOptionsControl { ...displayControlProps } />
-				<ColumnsControl { ...displayControlProps } />
 				{ showInheritQueryControls && (
 					<InheritQueryControl { ...queryControlProps } />
 				) }
+				<LayoutOptionsControl { ...displayControlProps } />
+				<ColumnsControl { ...displayControlProps } />
 				{ showOrderControl && (
 					<OrderByControl { ...queryControlProps } />
 				) }
