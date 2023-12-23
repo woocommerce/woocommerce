@@ -7,7 +7,7 @@ use WP_Error;
 /**
  * Pattern Images class.
  */
-class UpdateProducts extends UpdateContent {
+class UpdateProducts {
 
 	/**
 	 * The dummy products.
@@ -66,7 +66,7 @@ class UpdateProducts extends UpdateContent {
 			return $token;
 		}
 
-		$images = $this->verify_images( $images, $ai_connection, $token, $business_description );
+		$images = ContentImageProcessor::verify_images( $images, $ai_connection, $token, $business_description );
 
 		if ( is_wp_error( $images ) ) {
 			return $images;
@@ -331,30 +331,6 @@ class UpdateProducts extends UpdateContent {
 	}
 
 	/**
-	 * Reduce the size of the image for the product to improve performance and
-	 * avoid memory exhaustion errors when uploading them to the media library.
-	 *
-	 * @param string $image_url The image URL.
-	 *
-	 * @return string
-	 */
-	private function adjust_image_size_for_products( $image_url ) {
-		$parsed_url = wp_parse_url( $image_url );
-
-		if ( ! isset( $parsed_url['query'] ) ) {
-			return $image_url;
-		}
-
-		parse_str( $parsed_url['query'], $query_params );
-
-		unset( $query_params['h'], $query_params['w'] );
-		$query_params['w'] = 250;
-		$new_query_string  = http_build_query( $query_params );
-
-		return $parsed_url['scheme'] . '://' . $parsed_url['host'] . $parsed_url['path'] . '?' . $new_query_string;
-	}
-
-	/**
 	 * Assigns the default content for the products.
 	 *
 	 * @param array $dummy_products_to_update The dummy products to update.
@@ -369,7 +345,7 @@ class UpdateProducts extends UpdateContent {
 			$image_src = $ai_selected_images[ $i ]['URL'] ?? '';
 
 			if ( wc_is_valid_url( $image_src ) ) {
-				$image_src = $this->adjust_image_size( $image_src, 'products' );
+				$image_src = ContentImageProcessor::adjust_image_size( $image_src, 'products' );
 			}
 
 			$image_alt = $ai_selected_images[ $i ]['title'] ?? '';

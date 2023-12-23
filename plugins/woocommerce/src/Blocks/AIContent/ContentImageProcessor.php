@@ -8,8 +8,10 @@ use WP_Error;
 
 /**
  * UpdateContent class.
+ *
+ * Process images for content
  */
-class UpdateContent {
+class ContentImageProcessor {
 
 	/**
 	 * Ensure that images are provided for assignment to products and patterns.
@@ -21,7 +23,7 @@ class UpdateContent {
 	 *
 	 * @return array|int|mixed|string|WP_Error
 	 */
-	protected function verify_images( $images, $ai_connection, $token, $business_description ) {
+	public static function verify_images( $images, $ai_connection, $token, $business_description ) {
 		if ( ! is_wp_error( $images ) && ! empty( $images['images'] ) && ! empty( $images['search_term'] ) ) {
 			return $images;
 		}
@@ -47,7 +49,7 @@ class UpdateContent {
 	 *
 	 * @return string
 	 */
-	protected function adjust_image_size( $image_url, $usage_type ) {
+	public static function adjust_image_size( $image_url, $usage_type ) {
 		$parsed_url = wp_parse_url( $image_url );
 
 		if ( ! isset( $parsed_url['query'] ) ) {

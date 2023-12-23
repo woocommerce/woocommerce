@@ -8,7 +8,7 @@ use WP_Error;
 /**
  * Pattern Images class.
  */
-class UpdatePatterns extends UpdateContent {
+class UpdatePatterns {
 
 	/**
 	 * All patterns that are actively in use in the Assembler.
@@ -40,7 +40,7 @@ class UpdatePatterns extends UpdateContent {
 			return $token;
 		}
 
-		$images              = $this->verify_images( $images, $ai_connection, $token, $business_description );
+		$images              = ContentImageProcessor::verify_images( $images, $ai_connection, $token, $business_description );
 		$patterns_dictionary = PatternsHelper::get_patterns_dictionary();
 
 		if ( is_wp_error( $patterns_dictionary ) ) {
@@ -441,7 +441,7 @@ class UpdatePatterns extends UpdateContent {
 				continue;
 			}
 
-			$selected_image_url = $this->adjust_image_size( $selected_image['URL'], 'patterns' );
+			$selected_image_url = ContentImageProcessor::adjust_image_size( $selected_image['URL'], 'patterns' );
 
 			$images[] = $selected_image_url;
 			$alts[]   = $selected_image['title'];
