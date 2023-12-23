@@ -7,7 +7,7 @@
  * @package        WooCommerce\Classes
  */
 
-use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
+use Automattic\WooCommerce\Utilities\LoggingUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -37,7 +37,7 @@ class WC_Logger implements WC_Logger_Interface {
 	 */
 	public function __construct( $handlers = null, $threshold = null ) {
 		if ( null === $handlers ) {
-			$default_handler  = wc_get_container()->get( Settings::class )->get_default_handler();
+			$default_handler  = LoggingUtil::get_default_handler();
 			$handler_instance = new $default_handler();
 
 			/**
@@ -72,7 +72,7 @@ class WC_Logger implements WC_Logger_Interface {
 		}
 
 		if ( ! WC_Log_Levels::is_valid_level( $threshold ) ) {
-			$threshold = wc_get_container()->get( Settings::class )->get_level_threshold();
+			$threshold = LoggingUtil::get_level_threshold();
 		}
 
 		$this->handlers  = $register_handlers;
@@ -86,7 +86,7 @@ class WC_Logger implements WC_Logger_Interface {
 	 * @return bool True if the log should be handled.
 	 */
 	protected function should_handle( $level ) {
-		if ( ! wc_get_container()->get( Settings::class )->logging_is_enabled() ) {
+		if ( ! LoggingUtil::logging_is_enabled() ) {
 			return false;
 		}
 
@@ -310,7 +310,7 @@ class WC_Logger implements WC_Logger_Interface {
 	 * @return void
 	 */
 	public function clear_expired_logs() {
-		$days      = wc_get_container()->get( Settings::class )->get_retention_period();
+		$days      = LoggingUtil::get_retention_period();
 		$timestamp = strtotime( "-{$days} days" );
 
 		foreach ( $this->handlers as $handler ) {
