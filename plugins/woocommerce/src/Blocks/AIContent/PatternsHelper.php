@@ -5,9 +5,9 @@ namespace Automattic\WooCommerce\Blocks\AIContent;
 use WP_Error;
 
 /**
- * Pattern Data Management class.
+ * Patterns Helper class.
  */
-class PatternDataManager {
+class PatternsHelper {
 	/**
 	 * Fetches the AI-selected image for the pattern or returns the default image.
 	 *
@@ -17,7 +17,7 @@ class PatternDataManager {
 	 *
 	 * @return string The image.
 	 */
-	public static function fetch_pattern_image( $images, $index, $default_image ) {
+	public static function get_image_url( $images, $index, $default_image ) {
 		$image = filter_var( $default_image, FILTER_VALIDATE_URL )
 			? $default_image
 			: plugins_url( $default_image, dirname( __DIR__, 2 ) );
