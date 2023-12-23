@@ -610,10 +610,13 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Get the delivery logs for this webhook.
 	 *
+	 * @deprecated 8.6.0
 	 * @since  3.3.0
 	 * @return string
 	 */
 	public function get_delivery_logs() {
+		wc_deprecated_function( 'WC_Webhook::get_delivery_logs', '8.6.0' );
+
 		return esc_url( add_query_arg( 'log_file', wc_get_log_file_name( 'webhooks-delivery' ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
 	}
 

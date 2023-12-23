@@ -1125,30 +1125,6 @@ function get_woocommerce_api_url( $path ) {
 }
 
 /**
- * Get a log file path.
- *
- * @since 2.2
- *
- * @param string $handle name.
- * @return string the log file path.
- */
-function wc_get_log_file_path( $handle ) {
-	return WC_Log_Handler_File::get_log_file_path( $handle );
-}
-
-/**
- * Get a log file name.
- *
- * @since 3.3
- *
- * @param string $handle Name.
- * @return string The log file name.
- */
-function wc_get_log_file_name( $handle ) {
-	return WC_Log_Handler_File::get_log_file_name( $handle );
-}
-
-/**
  * Recursively get page children.
  *
  * @param  int $page_id Page ID.

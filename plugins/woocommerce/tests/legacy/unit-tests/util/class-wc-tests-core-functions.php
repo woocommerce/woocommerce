@@ -281,6 +281,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_get_log_file_path() {
+		$this->setExpectedDeprecated( 'wc_get_log_file_path' );
+
 		$log_dir     = trailingslashit( WC_LOG_DIR );
 		$hash_name   = sanitize_file_name( wp_hash( 'unit-tests' ) );
 		$date_suffix = date( 'Y-m-d', time() ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date

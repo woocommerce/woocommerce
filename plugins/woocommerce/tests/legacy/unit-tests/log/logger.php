@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\Jetpack\Constants;
+
 /**
  * Class WC_Tests_Logger
  * @package WooCommerce\Tests\Log
@@ -48,13 +50,12 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_clear() {
-		// phpcs:disable WordPress.WP.AlternativeFunctions
-		$file = wc_get_log_file_path( 'unit-tests' );
-		file_put_contents( $file, 'Test file content.' );
+		$path = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . 'unit-tests.log';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
+		file_put_contents( $path, 'Test file content.' );
 		$log = new WC_Logger();
 		$log->clear( 'unit-tests' );
-		$this->assertFileDoesNotExist( $file );
-		// phpcs:enable WordPress.WP.AlternativeFunctions
+		$this->assertFileDoesNotExist( $path );
 	}
 
 	/**
