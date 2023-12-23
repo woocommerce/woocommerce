@@ -441,7 +441,9 @@ class UpdatePatterns extends UpdateContent {
 				continue;
 			}
 
-			$images[] = $selected_image['URL'];
+			$selected_image_url = $this->adjust_image_size( $selected_image['URL'], 'patterns' );
+
+			$images[] = $selected_image_url;
 			$alts[]   = $selected_image['title'];
 		}
 

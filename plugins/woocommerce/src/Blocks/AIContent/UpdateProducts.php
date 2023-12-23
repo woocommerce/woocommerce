@@ -369,7 +369,7 @@ class UpdateProducts extends UpdateContent {
 			$image_src = $ai_selected_images[ $i ]['URL'] ?? '';
 
 			if ( wc_is_valid_url( $image_src ) ) {
-				$image_src = $this->adjust_image_size_for_products( $ai_selected_images[ $i ]['URL'] );
+				$image_src = $this->adjust_image_size( $image_src, 'products' );
 			}
 
 			$image_alt = $ai_selected_images[ $i ]['title'] ?? '';
@@ -379,8 +379,8 @@ class UpdateProducts extends UpdateContent {
 				'description' => 'A product description',
 				'price'       => 'The product price',
 				'image'       => [
-					'src' => esc_url( $image_src ),
-					'alt' => esc_attr( $image_alt ),
+					'src' => $image_src,
+					'alt' => $image_alt,
 				],
 				'product_id'  => $dummy_products_to_update[ $i ]->get_id(),
 			];
