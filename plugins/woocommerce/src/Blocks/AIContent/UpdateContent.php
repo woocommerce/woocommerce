@@ -54,7 +54,7 @@ class UpdateContent {
 			return $image_url;
 		}
 
-		$width = 'products' === $usage_type ? 250 : 400;
+		$width = 'products' === $usage_type ? 250 : 500;
 
 		parse_str( $parsed_url['query'], $query_params );
 
