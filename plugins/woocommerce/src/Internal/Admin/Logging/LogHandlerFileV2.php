@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController };
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Log_Handler;
 
 /**
