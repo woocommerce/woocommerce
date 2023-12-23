@@ -56,6 +56,7 @@ Available READMe files for the WooCommerce plugin:
 - [`src/Blocks`](../plugins/woocommerce/src/Blocks/README.md)
 - [`src/Internal`](../plugins/woocommerce/src/Internal/README.md)
 - [`src/Internal/Admin/ProductForm`](../plugins/woocommerce/src/Internal/Admin/ProductForm/README.md)
+- [`src/TransientFiles`](../plugins/woocommerce/src/TransientFiles/README.md)
 - [`tests`](../plugins/woocommerce/tests/README.md)
 - [`tests/api-core-tests`](../plugins/woocommerce/tests/api-core-tests/README.md)
 - [`tests/e2e`](../plugins/woocommerce/tests/e2e/README.md)
