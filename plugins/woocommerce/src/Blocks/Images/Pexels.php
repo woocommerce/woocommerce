@@ -120,9 +120,7 @@ class Pexels {
 		}
 
 		if ( isset( $response['code'] ) && 'completion_error' === $response['code'] ) {
-			$response_message = $response['message'] ?? '';
-
-			return new \WP_Error( 'search_term_definition_failed', __( 'The search term definition failed. The AI response was: ' . esc_html( $response_message ), 'woocommerce' ) );
+			return new \WP_Error( 'search_term_definition_failed', __( 'The search term definition failed.', 'woocommerce' ) );
 		}
 
 		if ( ! isset( $response['completion'] ) ) {

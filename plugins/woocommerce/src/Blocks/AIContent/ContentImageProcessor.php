@@ -18,7 +18,7 @@ class ContentImageProcessor {
 	 *
 	 * @param array|WP_Error $images  The array of images.
 	 * @param Connection     $ai_connection  The AI connection.
-	 * @param string         $token  The JWT token. $token
+	 * @param string         $token  The JWT token.
 	 * @param string         $business_description The business description.
 	 *
 	 * @return array|int|mixed|string|WP_Error
