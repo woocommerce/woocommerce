@@ -7,7 +7,10 @@ import React from 'react';
  * Internal dependencies
  */
 import { ButtonWithDropdownMenu } from '../';
-import type { ButtonWithDropdownMenuProps } from '../';
+/**
+ * Types
+ */
+import type { ButtonWithDropdownMenuProps } from '../types';
 
 export default {
 	title: 'Product Editor/components/ButtonWithDropdownMenu',

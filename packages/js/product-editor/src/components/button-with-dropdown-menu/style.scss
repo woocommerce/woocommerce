@@ -11,7 +11,7 @@
 		border-bottom-left-radius: 0;
 
 		&.is-opened svg {
-			transform: rotate( 180deg );
+			transform: rotate( 180deg ); // @todo: consider to set the is-opened in the local state
 		}
 	}
 }
