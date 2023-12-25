@@ -71,8 +71,9 @@ export const ButtonWithDropdownMenu: React.FC<
 			justify="left"
 			gap={ 0 }
 			expanded={ false }
+			role="group"
 		>
-			<FlexItem>
+			<FlexItem role="none">
 				<Button
 					variant={ variant }
 					onClick={ onButtonClick }
@@ -81,7 +82,8 @@ export const ButtonWithDropdownMenu: React.FC<
 					{ label }
 				</Button>
 			</FlexItem>
-			<FlexItem>
+
+			<FlexItem role="none">
 				<DropdownMenu
 					toggleProps={ {
 						className:
