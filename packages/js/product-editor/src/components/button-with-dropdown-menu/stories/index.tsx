@@ -30,7 +30,8 @@ export const Default = ( args: ButtonWithDropdownMenuProps ) => {
 
 Default.args = {
 	label: 'Add to store',
-	onButtonClick: console.log, // eslint-disable-line no-console
+	variant: 'secondary',
+	defaultOpen: false,
 	popoverProps: {
 		placement: 'bottom-end',
 		position: 'bottom left left',
@@ -46,4 +47,5 @@ Default.args = {
 			title: 'Second Menu Item Label',
 		},
 	],
+	onButtonClick: console.log, // eslint-disable-line no-console
 };
