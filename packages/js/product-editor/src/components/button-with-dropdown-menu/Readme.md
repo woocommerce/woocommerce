@@ -15,11 +15,11 @@ import { ButtonWithDropdownMenu } from 'path_to_component';
     controls={ [
         {
             title: 'First Menu Item Label',
-            onClick: () => {},
+            onClick: () => console.log( 'First option clicked' ).
         },
         {
             title: 'Second Menu Item Label',
-            onClick: () => {},
+            onClick: () => console.log( 'Second option clicked' ).
         },
     ] }
     onButtonClick={() => console.log( 'Button clicked' ) }
