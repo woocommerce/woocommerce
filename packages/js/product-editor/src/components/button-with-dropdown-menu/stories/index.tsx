@@ -32,7 +32,8 @@ export const Default = ( args: ButtonWithDropdownMenuProps ) => {
 };
 
 Default.args = {
-	label: 'Add to store',
+	text: 'Add to store',
+	dropdownButtonLabel: 'More options',
 	variant: 'secondary',
 	defaultOpen: false,
 	popoverProps: {

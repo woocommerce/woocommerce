@@ -4,6 +4,7 @@
 import { createElement } from '@wordpress/element';
 import { chevronDown } from '@wordpress/icons';
 import { Button, DropdownMenu, Flex, FlexItem } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
@@ -12,7 +13,8 @@ import type { ButtonWithDropdownMenuProps } from './types';
 export const ButtonWithDropdownMenu: React.FC<
 	ButtonWithDropdownMenuProps
 > = ( {
-	label,
+	text,
+	dropdownButtonLabel = __( 'More options', 'woocommerce' ),
 	onButtonClick = () => {},
 	controls = [],
 	variant = 'primary',
@@ -41,7 +43,7 @@ export const ButtonWithDropdownMenu: React.FC<
 					onClick={ onButtonClick }
 					className="woocommerce-button-with-dropdown-menu__main-button"
 				>
-					{ label }
+					{ text }
 				</Button>
 			</FlexItem>
 
@@ -54,7 +56,7 @@ export const ButtonWithDropdownMenu: React.FC<
 					} }
 					controls={ controls }
 					icon={ chevronDown }
-					label="Select a direction."
+					label={ dropdownButtonLabel }
 					popoverProps={ {
 						placement,
 						// @ts-expect-error no exported member.
