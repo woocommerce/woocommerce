@@ -42,6 +42,7 @@ type popoverProps = {
 export interface ButtonWithDropdownMenuProps {
 	label: string;
 	variant?: Button.ButtonProps[ 'variant' ];
+	defaultOpen?: boolean;
 	controls?: DropdownOption[];
 
 	popoverProps?: popoverProps;
@@ -55,6 +56,7 @@ export const ButtonWithDropdownMenu: React.FC<
 	onButtonClick = () => {},
 	controls = [],
 	variant = 'primary',
+	defaultOpen = false,
 	popoverProps: {
 		placement = 'bottom-end',
 		position = 'bottom left left',
@@ -99,6 +101,7 @@ export const ButtonWithDropdownMenu: React.FC<
 						position,
 						offset,
 					} }
+					defaultOpen={ true }
 				/>
 			</FlexItem>
 		</Flex>
