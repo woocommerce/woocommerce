@@ -74,13 +74,13 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 		}
 
 		if ( empty( $filename ) ) {
-			return new Installer_Error( Installer_Error_Codes::UNKNOWN_FILENAME );
+			throw new Installer_Error( Installer_Error_Codes::UNKNOWN_FILENAME );
 		}
 
 		$result = activate_plugin( $filename );
 
 		if ( is_wp_error( $result ) ) {
-			return new Installer_Error( Installer_Error_Codes::PLUGIN_ACTIVATION_ERROR, $result->get_error_message() );
+			throw new Installer_Error( Installer_Error_Codes::PLUGIN_ACTIVATION_ERROR, $result->get_error_message() );
 		}
 	}
 
@@ -112,7 +112,7 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 		}
 
 		if ( empty( $theme_slug ) ) {
-			return new Installer_Error( Installer_Error_Codes::UNKNOWN_FILENAME );
+			throw new Installer_Error( Installer_Error_Codes::UNKNOWN_FILENAME );
 		}
 
 		switch_theme( $theme_slug );

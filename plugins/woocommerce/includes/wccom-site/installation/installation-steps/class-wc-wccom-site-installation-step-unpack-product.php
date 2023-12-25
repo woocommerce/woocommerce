@@ -39,7 +39,7 @@ class WC_WCCOM_Site_Installation_Step_Unpack_Product implements WC_WCCOM_Site_In
 		$unpacked_path = $upgrader->unpack_package( $this->state->get_download_path(), true );
 
 		if ( empty( $unpacked_path ) ) {
-			return new Installer_Error( Installer_Error_Codes::MISSING_UNPACKED_PATH );
+			throw new Installer_Error( Installer_Error_Codes::MISSING_UNPACKED_PATH );
 		}
 
 		$this->state->set_unpacked_path( $unpacked_path );
