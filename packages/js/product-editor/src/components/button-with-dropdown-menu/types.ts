@@ -40,7 +40,7 @@ type popoverProps = {
 
 export interface ButtonWithDropdownMenuProps {
 	text: string;
-	dropdownButtonLabel: string;
+	dropdownButtonLabel?: string;
 	variant?: ButtonVariant;
 	defaultOpen?: boolean;
 	controls?: DropdownOption[];
