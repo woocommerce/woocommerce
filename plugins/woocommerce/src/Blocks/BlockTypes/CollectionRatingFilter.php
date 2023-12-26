@@ -118,6 +118,10 @@ final class CollectionRatingFilter extends AbstractBlock {
 		$display_style = $attributes['displayStyle'] ?? 'list';
 		$show_counts   = $attributes['showCounts'] ?? false;
 
+		if ( empty( $rating_counts ) ) {
+			return '';
+		}
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
 		$selected_ratings_query_param = isset( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ) : '';
 
@@ -215,6 +219,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 	 * @param mixed  $selected_ratings_query The url query param for selected ratings.
 	 * @param bool   $show_counts Whether to show the counts.
 	 * @param string $select_type The select type. (single|multiple).
+	 * @param string $text_color The text color.
 	 * @return array<array-key, array>
 	 */
 	private function get_dropdown_props( $rating_counts, $selected_ratings_query, $show_counts, $select_type, $text_color ) {
