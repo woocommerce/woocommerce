@@ -1505,6 +1505,11 @@ export const COLOR_PALETTES = [
 				...color.styles.blocks,
 			},
 			elements: {
+				heading: {
+					color: {
+						text: 'var(--wp--preset--color--foreground)',
+					},
+				},
 				button: {
 					':active': {
 						color: {

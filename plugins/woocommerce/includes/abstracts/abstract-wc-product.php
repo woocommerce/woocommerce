@@ -267,9 +267,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string price
 	 */
 	public function get_price( $context = 'view' ) {
-		if ( $this->is_on_sale() ) {
-			return $this->get_prop( 'sale_price', $context );
-		}
 		return $this->get_prop( 'price', $context );
 	}
 
