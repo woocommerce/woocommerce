@@ -6,7 +6,12 @@ import { __ } from '@wordpress/i18n';
 import { Icon, help as helpIcon } from '@wordpress/icons';
 import { Tooltip } from '@wordpress/components';
 
-interface LabelProps {
+/**
+ * Internal dependencies
+ */
+import { sanitizeHTML } from '../../utils/sanitize-html';
+
+export interface LabelProps {
 	label: string;
 	required?: boolean;
 	tooltip?: string;
@@ -36,7 +41,11 @@ export const Label: React.FC< LabelProps > = ( {
 
 			{ tooltip && (
 				<Tooltip
-					text={ <span>{ tooltip }</span> }
+					text={
+						<span
+							dangerouslySetInnerHTML={ sanitizeHTML( tooltip ) }
+						></span>
+					}
 					position="top center"
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore Incorrect types.

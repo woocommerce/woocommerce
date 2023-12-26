@@ -281,6 +281,19 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Check if a given user has dismissed a given admin notice.
+	 *
+	 * @since 8.5.0
+	 *
+	 * @param string   $name The name of the admin notice to check.
+	 * @param int|null $user_id User id, or null for the current user.
+	 * @return bool True if the user has dismissed the notice.
+	 */
+	public static function user_has_dismissed_notice( string $name, ?int $user_id = null ): bool {
+		return (bool) get_user_meta( $user_id ?? get_current_user_id(), "dismissed_{$name}_notice", true );
+	}
+
+	/**
 	 * Add notices + styles if needed.
 	 */
 	public static function add_notices() {

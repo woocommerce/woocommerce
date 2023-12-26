@@ -63,3 +63,5 @@ export {
 	BlockFillProps,
 	BlockSlotProps,
 } from './block-slot-fill';
+
+export { Label as __experimentalLabel } from './label/label';

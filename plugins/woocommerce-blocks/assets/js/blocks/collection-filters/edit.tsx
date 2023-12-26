@@ -9,6 +9,7 @@ import type { AttributeSetting } from '@woocommerce/types';
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
 const template = [
+	[ 'woocommerce/collection-active-filters', {} ],
 	[
 		'core/heading',
 		{
