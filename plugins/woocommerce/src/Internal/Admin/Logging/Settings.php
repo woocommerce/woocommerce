@@ -450,24 +450,4 @@ class Settings {
 
 		return $threshold;
 	}
-
-	/**
-	 * Determine the current value of the file_entry_collapse_lines setting.
-	 *
-	 * @return bool
-	 */
-	public function get_file_entry_collapse_lines(): bool {
-		$collapse = WC_Admin_Settings::get_option(
-			self::PREFIX . 'file_entry_collapse_lines',
-			self::DEFAULTS['file_entry_collapse_lines']
-		);
-
-		$collapse = filter_var( $collapse, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-
-		if ( is_null( $collapse ) ) {
-			$collapse = self::DEFAULTS['file_entry_collapse_lines'];
-		}
-
-		return $collapse;
-	}
 }

@@ -257,26 +257,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Check that the get_file_entry_collapse_lines returns the value set in the options table as long as
-	 *          it's a valid value.
-	 */
-	public function test_file_entry_collapse_lines_setting(): void {
-		$collapse = $this->sut->get_file_entry_collapse_lines();
-		$this->assertTrue( $collapse );
-
-		update_option( 'woocommerce_logs_file_entry_collapse_lines', 'no' );
-		$collapse = $this->sut->get_file_entry_collapse_lines();
-		$this->assertFalse( $collapse );
-
-		// Invalid value.
-		update_option( 'woocommerce_logs_file_entry_collapse_lines', 'broccoli' );
-		$collapse = $this->sut->get_file_entry_collapse_lines();
-		$this->assertTrue( $collapse );
-
-		delete_option( 'woocommerce_logs_file_entry_collapse_lines' );
-	}
-
-	/**
 	 * @testdox Check that the settings form does not contain other settings controls when logging is disabled.
 	 */
 	public function test_render_form_logging_disabled_no_other_settings(): void {
