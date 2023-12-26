@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\Images;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
+use Automattic\WooCommerce\Blocks\AIContent\ContentProcessor;
 use Automattic\WooCommerce\Blocks\AIContent\UpdatePatterns;
 
 /**
@@ -27,6 +28,8 @@ class Pexels {
 	 * @return array|\WP_Error Array of images, or WP_Error if the request failed.
 	 */
 	public function get_images( $ai_connection, $token, $business_description ) {
+		$business_description = ContentProcessor::summarize_business_description( $business_description, $ai_connection, $token );
+
 		if ( str_word_count( $business_description ) === 1 ) {
 			$search_term = $business_description;
 		} else {
@@ -111,14 +114,6 @@ class Pexels {
 	 * @return mixed|\WP_Error
 	 */
 	private function define_search_term( $ai_connection, $token, $business_description ) {
-
-		if ( strlen( $business_description ) > 150 ) {
-			$prompt = sprintf( 'You are a professional writer. Read the following business description and write a text with less than 150 characters to summarize what the business is selling: "%s". Make sure you do not add double quotes in your response. Do not add any explanations in the response', $business_description );
-
-			$response = $ai_connection->fetch_ai_response( $token, $prompt, 30 );
-
-			$business_description = $response['completion'] ?? $business_description;
-		}
 
 		$prompt = sprintf( 'You are a teacher. Based on the following business description, \'%s\', describe to a child exactly what this store is selling in one or two words and be as precise as you can possibly be. Do not reply with generic words that could cause confusion and be associated with other businesses as a response. Make sure you do not add double quotes in your response. Do not add any explanations in the response', $business_description );
 

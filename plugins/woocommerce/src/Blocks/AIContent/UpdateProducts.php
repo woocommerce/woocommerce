@@ -66,7 +66,7 @@ class UpdateProducts {
 			return $token;
 		}
 
-		$images = ContentImageProcessor::verify_images( $images, $ai_connection, $token, $business_description );
+		$images = ContentProcessor::verify_images( $images, $ai_connection, $token, $business_description );
 
 		if ( is_wp_error( $images ) ) {
 			return $images;
@@ -345,7 +345,7 @@ class UpdateProducts {
 			$image_src = $ai_selected_images[ $i ]['URL'] ?? '';
 
 			if ( wc_is_valid_url( $image_src ) ) {
-				$image_src = ContentImageProcessor::adjust_image_size( $image_src, 'products' );
+				$image_src = ContentProcessor::adjust_image_size( $image_src, 'products' );
 			}
 
 			$image_alt = $ai_selected_images[ $i ]['title'] ?? '';
@@ -377,8 +377,10 @@ class UpdateProducts {
 	 * @return array|int|string|\WP_Error
 	 */
 	public function assign_ai_generated_content_to_dummy_products( $ai_connection, $token, $products_information_list, $business_description, $search_term ) {
-		if ( empty( $business_description ) ) {
-			return new \WP_Error( 'missing_store_description', __( 'The store description is required to generate content for your site.', 'woocommerce' ) );
+		$business_description = ContentProcessor::summarize_business_description( $business_description, $ai_connection, $token, 100 );
+
+		if ( is_wp_error( $business_description ) ) {
+			return $business_description;
 		}
 
 		$prompts = [];

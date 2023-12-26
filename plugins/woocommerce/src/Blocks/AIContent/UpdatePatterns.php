@@ -40,7 +40,7 @@ class UpdatePatterns {
 			return $token;
 		}
 
-		$images              = ContentImageProcessor::verify_images( $images, $ai_connection, $token, $business_description );
+		$images              = ContentProcessor::verify_images( $images, $ai_connection, $token, $business_description );
 		$patterns_dictionary = PatternsHelper::get_patterns_dictionary();
 
 		if ( is_wp_error( $patterns_dictionary ) ) {
@@ -441,7 +441,7 @@ class UpdatePatterns {
 				continue;
 			}
 
-			$selected_image_url = ContentImageProcessor::adjust_image_size( $selected_image['URL'], 'patterns' );
+			$selected_image_url = ContentProcessor::adjust_image_size( $selected_image['URL'], 'patterns' );
 
 			$images[] = $selected_image_url;
 			$alts[]   = $selected_image['title'];

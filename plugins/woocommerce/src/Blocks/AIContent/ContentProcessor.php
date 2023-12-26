@@ -7,11 +7,37 @@ use Automattic\WooCommerce\Blocks\Images\Pexels;
 use WP_Error;
 
 /**
- * UpdateContent class.
+ * ContentProcessor class.
  *
  * Process images for content
  */
-class ContentImageProcessor {
+class ContentProcessor {
+
+	/**
+	 * Summarize the business description to ensure better results are returned by AI.
+	 *
+	 * @param string     $business_description The business description.
+	 * @param Connection $ai_connection  The AI connection.
+	 * @param string     $token  The JWT token.
+	 * @param integer    $character_limit The character limit for the business description.
+	 *
+	 * @return mixed|WP_Error
+	 */
+	public static function summarize_business_description( $business_description, $ai_connection, $token, $character_limit = 150 ) {
+		if ( empty( $business_description ) ) {
+			return new WP_Error( 'business_description_not_found', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
+		}
+
+		if ( strlen( $business_description ) > $character_limit ) {
+			$prompt = sprintf( 'You are a professional writer. Read the following business description and write a text with less than %s characters to summarize the products the business is selling: "%s". Make sure you do not add double quotes in your response. Do not add any explanations in the response', $character_limit, $business_description );
+
+			$response = $ai_connection->fetch_ai_response( $token, $prompt, 30 );
+
+			$business_description = $response['completion'] ?? $business_description;
+		}
+
+		return $business_description;
+	}
 
 	/**
 	 * Ensure that images are provided for assignment to products and patterns.
