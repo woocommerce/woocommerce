@@ -2,18 +2,20 @@
  * External dependencies
  */
 import { useEntityProp } from '@wordpress/core-data';
+import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { closeSmall } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
+import { FormattedPrice } from '../../../components/formatted-price';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { LinkedProductListBlockAttributes } from './types';
-import { FormattedPrice } from '../../../components/formatted-price';
 
 export function Edit( {
 	attributes,
@@ -21,7 +23,7 @@ export function Edit( {
 }: ProductEditorBlockEditProps< LinkedProductListBlockAttributes > ) {
 	const { property } = attributes;
 	const blockProps = useWooBlockProps( attributes );
-	const [ linkedProductIds ] = useEntityProp< number[] >(
+	const [ linkedProductIds, setLinkedProductIds ] = useEntityProp< number[] >(
 		'postType',
 		postType,
 		property
@@ -43,6 +45,20 @@ export function Edit( {
 		},
 		[ linkedProductIds ]
 	);
+
+	function removeProductClickHandler( product: Product ) {
+		return function handleRemoveProductClick() {
+			const newLinkedProductIds = linkedProductIds.reduce< number[] >(
+				( list, current ) => {
+					if ( current === product.id ) return list;
+					return [ ...list, current ];
+				},
+				[]
+			);
+
+			setLinkedProductIds( newLinkedProductIds );
+		};
+	}
 
 	return (
 		<div { ...blockProps }>
@@ -80,7 +96,22 @@ export function Edit( {
 									/>
 								</div>
 							</div>
-							<div role="cell"></div>
+							<div
+								role="cell"
+								className="wp-block-woocommerce-product-linked-list-field__actions"
+							>
+								<Button
+									icon={ closeSmall }
+									size={ 24 }
+									aria-label={ __(
+										'Remove product',
+										'woocommerce'
+									) }
+									onClick={ removeProductClickHandler(
+										product
+									) }
+								/>
+							</div>
 						</div>
 					) ) }
 				</div>

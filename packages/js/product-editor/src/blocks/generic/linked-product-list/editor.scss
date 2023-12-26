@@ -66,4 +66,11 @@
 		font-size: 11px;
 		color: $gray-700;
 	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: $grid-unit;
+	}
 }
