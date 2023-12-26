@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @extends WC_REST_Controller
  */
-class WC_REST_WCCOM_Site_Installer_Controller_V2 extends WC_REST_Controller {
+class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.

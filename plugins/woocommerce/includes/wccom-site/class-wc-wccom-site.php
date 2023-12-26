@@ -221,7 +221,7 @@ class WC_WCCOM_Site {
 
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-error-codes.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-error.php';
-		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller-v2.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-ssr-controller.php';
 
 		require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-state.php';
@@ -240,7 +240,7 @@ class WC_WCCOM_Site {
 		);
 
 		$namespaces['wccom-site/v2'] = array(
-			'installer' => 'WC_REST_WCCOM_Site_Installer_Controller_V2',
+			'installer' => 'WC_REST_WCCOM_Site_Installer_Controller',
 		);
 
 		return $namespaces;
