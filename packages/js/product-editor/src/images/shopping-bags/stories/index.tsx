@@ -18,7 +18,4 @@ export default {
 	},
 };
 
-export const Default = ( args ) => <ShoppingBags { ...args } />;
-
-// Set the story name
-Default.storyName = 'Shopping Bags';
+export const Default = ShoppingBags;
