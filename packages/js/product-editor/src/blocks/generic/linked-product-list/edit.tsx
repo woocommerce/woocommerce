@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
 import { closeSmall, external } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
+import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -87,9 +88,18 @@ export function Edit( {
 									} }
 								/>
 								<div className="wp-block-woocommerce-product-linked-list-field__product-info">
-									<span className="wp-block-woocommerce-product-linked-list-field__product-name">
+									<a
+										className="wp-block-woocommerce-product-linked-list-field__product-name"
+										href={ getNewPath(
+											{},
+											`/product/${ product.id }`,
+											{}
+										) }
+										target="_blank"
+										rel="noreferrer"
+									>
 										{ product.name }
-									</span>
+									</a>
 									<FormattedPrice
 										product={ product }
 										className="wp-block-woocommerce-product-linked-list-field__product-price"
