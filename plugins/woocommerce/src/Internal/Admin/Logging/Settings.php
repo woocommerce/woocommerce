@@ -111,10 +111,7 @@ class Settings {
 
 		$current_value = $this->get_default_handler();
 		if ( ! array_key_exists( $current_value, $handler_options ) ) {
-			$handler_options[ $current_value ] = sprintf(
-				'<code>%s</code>',
-				$current_value
-			);
+			$handler_options[ $current_value ] = $current_value;
 		}
 
 		$desc = array();
