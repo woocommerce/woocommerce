@@ -673,7 +673,7 @@ class PageController {
 	private function format_line( string $line, int $line_number ): string {
 		$classes = array( 'line' );
 
-		$line = esc_html( trim( $line ) );
+		$line = esc_html( $line );
 		if ( empty( $line ) ) {
 			$line = '&nbsp;';
 		}
@@ -708,7 +708,7 @@ class PageController {
 					$context    = json_decode( $maybe_json, false, 512, JSON_THROW_ON_ERROR );
 
 					$message_chunks[1] = sprintf(
-						'<details><summary>%1$s</summary><pre>%2$s</pre></details>',
+						'<details><summary>%1$s</summary>%2$s</details>',
 						esc_html__( 'Additional context', 'woocommerce' ),
 						wp_json_encode( $context, JSON_PRETTY_PRINT )
 					);

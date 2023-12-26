@@ -1393,6 +1393,7 @@ table.wc_status_table--tools {
 		width: 100%;
 		scroll-margin-top: 6em;
 		position: relative;
+		white-space: pre-wrap;
 
 		&:before {
 			counter-increment: line;
@@ -1422,8 +1423,7 @@ table.wc_status_table--tools {
 				cursor: pointer;
 			}
 
-			pre {
-				margin-top: 0;
+			details {
 				white-space: pre-wrap;
 			}
 		}
