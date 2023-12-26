@@ -12,6 +12,7 @@ import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
+import { Product } from '@woocommerce/data';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -32,7 +33,6 @@ import {
 	useEntityBlockEditor,
 	useEntityProp,
 } from '@wordpress/core-data';
-import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
