@@ -66,3 +66,7 @@ export {
 
 export { Label as __experimentalLabel } from './label/label';
 export { ButtonWithDropdownMenu as __experimentalButtonWithDropdownMenu } from './button-with-dropdown-menu';
+export {
+	FormattedPrice as __experimentalFormattedPrice,
+	FormattedPriceProps,
+} from './formatted-price';
