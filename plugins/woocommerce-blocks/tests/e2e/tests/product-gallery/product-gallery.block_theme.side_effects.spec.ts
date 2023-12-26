@@ -8,6 +8,7 @@ import { Locator, Page } from '@playwright/test';
  * Internal dependencies
  */
 import { ProductGalleryPage } from './product-gallery.page';
+import { initial } from 'lodash';
 
 const blockData = {
 	name: 'woocommerce/product-gallery',
@@ -51,6 +52,20 @@ export const getVisibleLargeImageId = async (
 	const mainImageParsedContext = JSON.parse( mainImageContext );
 
 	return mainImageParsedContext.imageId;
+};
+
+export const getIsDialogOpen = async (
+	productGalleryBlock: Locator
+): Promise< boolean > => {
+	const productGalleryBlockContext = ( await productGalleryBlock.getAttribute(
+		'data-wc-context'
+	) ) as string;
+
+	const productGalleryBlockParsedContext = JSON.parse(
+		productGalleryBlockContext
+	);
+
+	return productGalleryBlockParsedContext.isDialogOpen;
 };
 
 const waitForJavascriptFrontendFileIsLoaded = async ( page: Page ) => {
@@ -312,6 +327,172 @@ test.describe( `${ blockData.name }`, () => {
 			expect( currentVisibleLargeImageId ).toBe(
 				initialVisibleLargeImageId
 			);
+		} );
+	} );
+
+	test.describe( 'within pop-up', () => {
+		test( 'should display the same selected image when the pop-up is opened', async ( {
+			page,
+			editorUtils,
+			pageObject,
+		} ) => {
+			await pageObject.addProductGalleryBlock( { cleanContent: false } );
+
+			await editorUtils.saveTemplate();
+
+			await Promise.all( [
+				page.goto( blockData.productPage, {
+					waitUntil: 'load',
+				} ),
+				waitForJavascriptFrontendFileIsLoaded( page ),
+			] );
+
+			const initialVisibleLargeImageId = await getVisibleLargeImageId(
+				await pageObject.getMainImageBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			const secondImageThumbnailId = await getThumbnailImageIdByNth(
+				1,
+				await pageObject.getThumbnailsBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			expect( initialVisibleLargeImageId ).not.toBe(
+				secondImageThumbnailId
+			);
+
+			const nextButton = page
+				.locator(
+					'.wc-block-product-gallery-large-image-next-previous--button'
+				)
+				.nth( 1 );
+			await nextButton.click();
+
+			const nextImageId = await getVisibleLargeImageId(
+				await pageObject.getMainImageBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			expect( nextImageId ).toBe( secondImageThumbnailId );
+
+			const largeImageBlock = await pageObject.getMainImageBlock( {
+				page: 'frontend',
+			} );
+			largeImageBlock.click();
+
+			const productGalleryPopUp = page.locator(
+				'.wc-block-product-gallery-dialog__overlay'
+			);
+
+			const popUpSelectedImageId = await getVisibleLargeImageId(
+				productGalleryPopUp.locator(
+					`[data-block-name="woocommerce/product-gallery-large-image"]`
+				)
+			);
+
+			expect( popUpSelectedImageId ).toBe( nextImageId );
+		} );
+
+		test( 'should reset to the first thumbnail when the pop-up is closed', async ( {
+			page,
+			editorUtils,
+			pageObject,
+		} ) => {
+			await pageObject.addProductGalleryBlock( { cleanContent: true } );
+
+			await editorUtils.saveTemplate();
+
+			await Promise.all( [
+				page.goto( blockData.productPage, {
+					waitUntil: 'load',
+				} ),
+				waitForJavascriptFrontendFileIsLoaded( page ),
+			] );
+
+			const largeImageBlock = await pageObject.getMainImageBlock( {
+				page: 'frontend',
+			} );
+			const initialVisibleLargeImageId = await getVisibleLargeImageId(
+				largeImageBlock
+			);
+
+			const secondImageThumbnailId = await getThumbnailImageIdByNth(
+				1,
+				await pageObject.getThumbnailsBlock( {
+					page: 'frontend',
+				} )
+			);
+
+			expect( initialVisibleLargeImageId ).not.toBe(
+				secondImageThumbnailId
+			);
+
+			const nextButton = page
+				.locator(
+					'.wc-block-product-gallery-large-image-next-previous--button'
+				)
+				.nth( 1 );
+			await nextButton.click();
+
+			const imageAfterClickingNextButton = await getVisibleLargeImageId(
+				largeImageBlock
+			);
+
+			expect( imageAfterClickingNextButton ).toBe(
+				secondImageThumbnailId
+			);
+
+			largeImageBlock.click();
+
+			const productGalleryPopUp = page.locator(
+				'.wc-block-product-gallery-dialog__overlay'
+			);
+
+			const popUpInitialSelectedImageId = await getVisibleLargeImageId(
+				productGalleryPopUp.locator(
+					`[data-block-name="woocommerce/product-gallery-large-image"]`
+				)
+			);
+
+			const popUpNextButton = productGalleryPopUp
+				.locator(
+					'.wc-block-product-gallery-large-image-next-previous--button'
+				)
+				.nth( 1 );
+			await popUpNextButton.click();
+
+			const popUpNextImageId = await getVisibleLargeImageId(
+				productGalleryPopUp.locator(
+					`[data-block-name="woocommerce/product-gallery-large-image"]`
+				)
+			);
+
+			expect( popUpInitialSelectedImageId ).not.toBe( popUpNextImageId );
+
+			const closePopUpButton = productGalleryPopUp.locator(
+				'.wc-block-product-gallery-dialog__close'
+			);
+			closePopUpButton.click();
+
+			await page.waitForFunction( () => {
+				const isPopUpOpen = document
+					.querySelector(
+						'.wc-block-product-gallery-dialog__overlay'
+					)
+					?.checkVisibility();
+
+				return isPopUpOpen === false;
+			} );
+
+			const singleProductImageId = await getVisibleLargeImageId(
+				largeImageBlock
+			);
+
+			expect( singleProductImageId ).toBe( initialVisibleLargeImageId );
 		} );
 	} );
 
