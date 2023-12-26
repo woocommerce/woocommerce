@@ -9,6 +9,16 @@ export const COLOR_PALETTES = [
 					theme: [
 						{
 							color: '#000000',
+							name: 'Primary',
+							slug: 'primary',
+						},
+						{
+							color: '#000000',
+							name: 'Secondary',
+							slug: 'secondary',
+						},
+						{
+							color: '#000000',
 							name: 'Foreground',
 							slug: 'foreground',
 						},
@@ -18,17 +28,7 @@ export const COLOR_PALETTES = [
 							slug: 'background',
 						},
 						{
-							color: '#000000',
-							name: 'Primary',
-							slug: 'primary',
-						},
-						{
-							color: '#ffe2c7',
-							name: 'Secondary',
-							slug: 'secondary',
-						},
-						{
-							color: '#F6F6F6',
+							color: '#ffffff',
 							name: 'Tertiary',
 							slug: 'tertiary',
 						},
