@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\BatchProcessing\{ BatchProcessingController, BatchProcessorInterface };
@@ -333,6 +332,24 @@ class DataSynchronizer implements BatchProcessorInterface {
 		);
 
 		return $interval;
+	}
+
+	/**
+	 * Keys that can be ignored during synchronization or verification.
+	 *
+	 * @since 7.8.0
+	 *
+	 * @return string[]
+	 */
+	public function get_ignored_order_props() {
+		return apply_filters(
+			'woocommerce_hpos_sync_ignored_order_props',
+			array(
+				'_paid_date', // This has been deprecated and replaced by '_date_paid' in the CPT datastore.
+				'_completed_date', // This has been deprecated and replaced by '_date_completed' in the CPT datastore.
+				'_edit_lock',
+			)
+		);
 	}
 
 	/**
