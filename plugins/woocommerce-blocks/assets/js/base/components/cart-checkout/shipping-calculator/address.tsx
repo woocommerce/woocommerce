@@ -75,7 +75,7 @@ const ShippingCalculatorAddress = ( {
 				} }
 				type="submit"
 			>
-				{ __( 'Update', 'woo-gutenberg-products-block' ) }
+				{ __( 'Update', 'woocommerce' ) }
 			</Button>
 		</form>
 	);

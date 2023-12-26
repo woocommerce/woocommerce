@@ -25,14 +25,14 @@ const Rating = ( {
 
 	const ratingText = sprintf(
 		/* translators: %f is referring to the average rating value */
-		__( 'Rated %f out of 5', 'woo-gutenberg-products-block' ),
+		__( 'Rated %f out of 5', 'woocommerce' ),
 		rating
 	);
 
 	const ratingHTML = {
 		__html: sprintf(
 			/* translators: %s is the rating value wrapped in HTML strong tags. */
-			__( 'Rated %s out of 5', 'woo-gutenberg-products-block' ),
+			__( 'Rated %s out of 5', 'woocommerce' ),
 			sprintf( '<strong class="rating">%f</strong>', rating )
 		),
 	};

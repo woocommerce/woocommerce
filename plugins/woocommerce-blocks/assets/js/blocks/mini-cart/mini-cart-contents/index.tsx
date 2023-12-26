@@ -17,7 +17,7 @@ import './inner-blocks';
 
 const settings: BlockConfiguration = {
 	apiVersion: 2,
-	title: __( 'Mini-Cart Contents', 'woo-gutenberg-products-block' ),
+	title: __( 'Mini-Cart Contents', 'woocommerce' ),
 	icon: {
 		src: (
 			<Icon
@@ -27,11 +27,8 @@ const settings: BlockConfiguration = {
 		),
 	},
 	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
-	description: __(
-		'Display a Mini-Cart widget.',
-		'woo-gutenberg-products-block'
-	),
+	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
+	description: __( 'Display a Mini-Cart widget.', 'woocommerce' ),
 	supports: {
 		align: false,
 		html: false,

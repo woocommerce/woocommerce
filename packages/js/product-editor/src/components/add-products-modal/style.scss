@@ -1,4 +1,5 @@
-.woocommerce-add-products-modal {
+.woocommerce-add-products-modal,
+.woocommerce-reorder-products-modal {
 	@include breakpoint(">600px") {
 		width: calc(100% - 32px);
 	}

@@ -63,15 +63,15 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 
 	const miniCartColorAttributes = {
 		priceColor: {
-			label: __( 'Price', 'woo-gutenberg-products-block' ),
+			label: __( 'Price', 'woocommerce' ),
 			context: 'price-color',
 		},
 		iconColor: {
-			label: __( 'Icon', 'woo-gutenberg-products-block' ),
+			label: __( 'Icon', 'woocommerce' ),
 			context: 'icon-color',
 		},
 		productCountColor: {
-			label: __( 'Product Count', 'woo-gutenberg-products-block' ),
+			label: __( 'Product Count', 'woocommerce' ),
 			context: 'product-count-color',
 		},
 	};
@@ -92,16 +92,11 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<PanelBody
-					title={ __( 'Settings', 'woo-gutenberg-products-block' ) }
-				>
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ToggleGroupControl
 						className="wc-block-editor-mini-cart__cart-icon-toggle"
 						isBlock={ true }
-						label={ __(
-							'Cart Icon',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Cart Icon', 'woocommerce' ) }
 						value={ miniCartIcon }
 						onChange={ ( value: 'cart' | 'bag' | 'bag-alt' ) => {
 							setAttributes( {
@@ -124,19 +119,13 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 					</ToggleGroupControl>
 					<BaseControl
 						id="wc-block-mini-cart__display-toggle"
-						label={ __(
-							'Display',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Display', 'woocommerce' ) }
 					>
 						<ToggleControl
-							label={ __(
-								'Display total price',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'Display total price', 'woocommerce' ) }
 							help={ __(
 								'Toggle to display the total price of products in the shopping cart. If no products have been added, the price will not display.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							checked={ ! hasHiddenPrice }
 							onChange={ () =>
@@ -151,7 +140,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							className="wc-block-editor-mini-cart__render-in-cart-and-checkout-toggle"
 							label={ __(
 								'Mini-Cart in cart and checkout pages',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							value={ cartAndCheckoutRenderStyle }
 							onChange={ ( value: boolean ) => {
@@ -161,32 +150,21 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							} }
 							help={ __(
 								'Select how the Mini-Cart behaves in the Cart and Checkout pages. This might affect the header layout.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						>
 							<ToggleGroupControlOption
 								value={ 'hidden' }
-								label={ __(
-									'Hide',
-									'woo-gutenberg-products-block'
-								) }
+								label={ __( 'Hide', 'woocommerce' ) }
 							/>
 							<ToggleGroupControlOption
 								value={ 'removed' }
-								label={ __(
-									'Remove',
-									'woo-gutenberg-products-block'
-								) }
+								label={ __( 'Remove', 'woocommerce' ) }
 							/>
 						</ToggleGroupControl>
 					) }
 				</PanelBody>
-				<PanelBody
-					title={ __(
-						'Cart Drawer',
-						'woo-gutenberg-products-block'
-					) }
-				>
+				<PanelBody title={ __( 'Cart Drawer', 'woocommerce' ) }>
 					{ templatePartEditUri && (
 						<>
 							<img
@@ -201,14 +179,14 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							<p>
 								{ __(
 									'When opened, the Mini-Cart drawer gives shoppers quick access to view their selected products and checkout.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 							</p>
 							<p className="wc-block-editor-mini-cart__drawer-link">
 								<ExternalLink href={ templatePartEditUri }>
 									{ __(
 										'Edit Mini-Cart Drawer template',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</ExternalLink>
 							</p>
@@ -216,15 +194,12 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 					) }
 					<BaseControl
 						id="wc-block-mini-cart__add-to-cart-behaviour-toggle"
-						label={ __(
-							'Behavior',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Behavior', 'woocommerce' ) }
 					>
 						<ToggleControl
 							label={ __(
 								'Open drawer when adding',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							onChange={ ( value ) => {
 								setAttributes( {
@@ -235,7 +210,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							} }
 							help={ __(
 								'Toggle to open the Mini-Cart drawer when a shopper adds a product to their cart.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							checked={ addToCartBehaviour === 'open_drawer' }
 						/>

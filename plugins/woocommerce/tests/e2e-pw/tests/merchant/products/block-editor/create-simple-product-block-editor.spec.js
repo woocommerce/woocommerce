@@ -96,6 +96,7 @@ test( 'can create a simple product', async ( { page } ) => {
 		.fill( productData.name );
 	await page
 		.locator( '[data-template-block-id="basic-details"] .components-summary-control' )
+		.last()
 		.fill( productData.summary );
 	await page
 		.locator(

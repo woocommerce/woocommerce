@@ -29,7 +29,7 @@ export const RatePrice = ( {
 		: parseInt( maxRate.price, 10 );
 	const priceElement =
 		minRatePrice === 0 ? (
-			<em>{ __( 'free', 'woo-gutenberg-products-block' ) }</em>
+			<em>{ __( 'free', 'woocommerce' ) }</em>
 		) : (
 			<FormattedMonetaryAmount
 				currency={ getCurrencyFromPriceResponse( minRate ) }
@@ -44,10 +44,7 @@ export const RatePrice = ( {
 				: createInterpolateElement(
 						minRatePrice === 0 && maxRatePrice === 0
 							? '<price />'
-							: __(
-									'from <price />',
-									'woo-gutenberg-products-block'
-							  ),
+							: __( 'from <price />', 'woocommerce' ),
 						{
 							price: priceElement,
 						}

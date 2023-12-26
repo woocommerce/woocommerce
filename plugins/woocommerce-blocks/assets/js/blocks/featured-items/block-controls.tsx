@@ -116,7 +116,7 @@ export const BlockControls = ( {
 							setAttributes( { mediaId: 0, mediaSrc: '' } )
 						}
 					>
-						{ __( 'Reset', 'woo-gutenberg-products-block' ) }
+						{ __( 'Reset', 'woocommerce' ) }
 					</ToolbarButton>
 				) : null }
 			</ToolbarGroup>

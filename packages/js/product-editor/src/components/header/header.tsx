@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { WooHeaderItem } from '@woocommerce/admin-layout';
-import { Product, ProductVariation } from '@woocommerce/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
@@ -46,11 +45,7 @@ export function Header( {
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord< Product | ProductVariation >(
-				'postType',
-				productType,
-				productId
-			);
+			return getEntityRecord( 'postType', productType, productId );
 		},
 		[ productId ]
 	);
@@ -95,7 +90,7 @@ export function Header( {
 										);
 										const url = getNewPath(
 											{ tab: 'variations' },
-											`/product/${ lastPersistedProduct.parent_id }`
+											`/product/${ lastPersistedProduct?.parent_id }`
 										);
 										navigateTo( { url } );
 									} }
@@ -117,13 +112,13 @@ export function Header( {
 								{ lastPersistedProduct?.name }
 							</span>
 							<span className="woocommerce-product-header__variable-product-id">
-								# { lastPersistedProduct.id }
+								# { lastPersistedProduct?.id }
 							</span>
 						</div>
 					) : (
 						getHeaderTitle(
 							editedProductName,
-							lastPersistedProduct.name
+							lastPersistedProduct?.name
 						)
 					) }
 				</h1>
@@ -132,18 +127,18 @@ export function Header( {
 					{ ! isVariation && (
 						<SaveDraftButton
 							productType={ productType }
-							productStatus={ lastPersistedProduct.status }
+							productStatus={ lastPersistedProduct?.status }
 						/>
 					) }
 
 					<PreviewButton
 						productType={ productType }
-						productStatus={ lastPersistedProduct.status }
+						productStatus={ lastPersistedProduct?.status }
 					/>
 
 					<PublishButton
 						productType={ productType }
-						productStatus={ lastPersistedProduct.status }
+						productStatus={ lastPersistedProduct?.status }
 					/>
 
 					<WooHeaderItem.Slot name="product" />

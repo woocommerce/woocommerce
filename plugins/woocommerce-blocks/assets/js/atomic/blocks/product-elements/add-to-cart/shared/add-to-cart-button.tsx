@@ -75,11 +75,11 @@ const ButtonComponent = ( {
 							'%d in cart',
 							'%d in cart',
 							quantityInCart,
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						quantityInCart
 				  )
-				: __( 'Add to cart', 'woo-gutenberg-products-block' ) }
+				: __( 'Add to cart', 'woocommerce' ) }
 			{ !! isDone && <Icon icon={ check } /> }
 		</Button>
 	);
@@ -165,8 +165,7 @@ const AddToCartButton = () => {
 			className="wc-block-components-product-add-to-cart-button"
 			href={ addToCartButtonData.url }
 			text={
-				addToCartButtonData.text ||
-				__( 'View Product', 'woo-gutenberg-products-block' )
+				addToCartButtonData.text || __( 'View Product', 'woocommerce' )
 			}
 			onClick={ () => {
 				dispatchStoreEvent( 'product-view-link', {

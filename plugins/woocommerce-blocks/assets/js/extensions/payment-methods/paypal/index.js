@@ -5,6 +5,8 @@ import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { __ } from '@wordpress/i18n';
 import { getPaymentMethodData, WC_ASSET_URL } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
+import { sanitizeHTML } from '@woocommerce/utils';
+import { RawHTML } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -17,7 +19,7 @@ const settings = getPaymentMethodData( 'paypal', {} );
  * Content component
  */
 const Content = () => {
-	return decodeEntities( settings.description || '' );
+	return <RawHTML>{ sanitizeHTML( settings.description || '' ) }</RawHTML>;
 };
 
 const paypalPaymentMethod = {
@@ -26,20 +28,16 @@ const paypalPaymentMethod = {
 		<img
 			src={ `${ WC_ASSET_URL }/images/paypal.png` }
 			alt={ decodeEntities(
-				settings.title || __( 'PayPal', 'woo-gutenberg-products-block' )
+				settings.title || __( 'PayPal', 'woocommerce' )
 			) }
 		/>
 	),
-	placeOrderButtonLabel: __(
-		'Proceed to PayPal',
-		'woo-gutenberg-products-block'
-	),
+	placeOrderButtonLabel: __( 'Proceed to PayPal', 'woocommerce' ),
 	content: <Content />,
 	edit: <Content />,
 	canMakePayment: () => true,
 	ariaLabel: decodeEntities(
-		settings?.title ||
-			__( 'Payment via PayPal', 'woo-gutenberg-products-block' )
+		settings?.title || __( 'Payment via PayPal', 'woocommerce' )
 	),
 	supports: {
 		features: settings.supports ?? [],

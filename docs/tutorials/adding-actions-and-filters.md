@@ -4,7 +4,7 @@ post_title: Adding actions and filters
 
 Like many WordPress plugins, WooCommerce provides a range of actions and filters through which developers can extend and modify the platform.
 
-Often, when writing new code or revising existing code, there is a desire to add new hooks—but this should always be done with thoughtfulness and care. This document aims to provide high-level guidance on the matter.
+Often, when writing new code or revising existing code, there is a desire to add new hooks-but this should always be done with thoughtfulness and care. This document aims to provide high-level guidance on the matter.
 
 Practices we generally allow, support and encourage include:
 
@@ -32,7 +32,7 @@ Please note that we provide example code throughout this guide to help illustrat
 
 Hooks come with a long-term obligation: the last thing we want is to add a new hook that developers come to depend on, only to strip it away again. However, this can lead to difficulties when the time comes to refactor a piece of code that contains hooks, sometimes delaying meaningful change or limiting how easily we can implement a change without compromising on backward compatibility commitments.
 
-For those reasons, we always prefer that—wherever reasonable—an existing hook or alternative approach in preference to adding a new hook.
+For those reasons, we always prefer that-wherever reasonable-an existing hook or alternative approach in preference to adding a new hook.
 
 ### Adding lifecycle hooks
 
@@ -165,9 +165,9 @@ $super_products_enabled = get_option( 'woocommerce_super_products_are_enabled', 
 
 ### Placement of filter hooks
 
-Filters should not be placed inside templates—only actions. If it is important that a value used within a template be filterable, then the relevant logic should be moved to whichever function or method decides to load the template—the result being passed in as a template variable.
+Filters should not be placed inside templates-only actions. If it is important that a value used within a template be filterable, then the relevant logic should be moved to whichever function or method decides to load the template-the result being passed in as a template variable.
 
-It is also preferred that filter hooks not be placed inside data-store classes, as this can reduce the integrity of those components: since, by design, they are replaceable by custom implementations—the risk of accidentally breaking those custom stores is higher.
+It is also preferred that filter hooks not be placed inside data-store classes, as this can reduce the integrity of those components: since, by design, they are replaceable by custom implementations-the risk of accidentally breaking those custom stores is higher.
 
 ### Enumeration values inside hook names
 

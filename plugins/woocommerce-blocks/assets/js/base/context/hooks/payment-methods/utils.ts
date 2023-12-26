@@ -48,36 +48,25 @@ export const prepareTotalItems = (
 	};
 
 	newTotals.push(
-		factory(
-			__( 'Subtotal:', 'woo-gutenberg-products-block' ),
-			'total_items'
-		)
+		factory( __( 'Subtotal:', 'woocommerce' ), 'total_items' )
 	);
 
-	newTotals.push(
-		factory( __( 'Fees:', 'woo-gutenberg-products-block' ), 'total_fees' )
-	);
+	newTotals.push( factory( __( 'Fees:', 'woocommerce' ), 'total_fees' ) );
 
 	newTotals.push(
-		factory(
-			__( 'Discount:', 'woo-gutenberg-products-block' ),
-			'total_discount'
-		)
+		factory( __( 'Discount:', 'woocommerce' ), 'total_discount' )
 	);
 
 	newTotals.push( {
 		key: 'total_tax',
-		label: __( 'Taxes:', 'woo-gutenberg-products-block' ),
+		label: __( 'Taxes:', 'woocommerce' ),
 		value: parseInt( totals.total_tax, 10 ),
 		valueWithTax: parseInt( totals.total_tax, 10 ),
 	} );
 
 	if ( needsShipping ) {
 		newTotals.push(
-			factory(
-				__( 'Shipping:', 'woo-gutenberg-products-block' ),
-				'total_shipping'
-			)
+			factory( __( 'Shipping:', 'woocommerce' ), 'total_shipping' )
 		);
 	}
 

@@ -13,7 +13,7 @@ import './editor.scss';
 export function NoPaymentMethodsNotice() {
 	const noticeContent = __(
 		'Your store does not have any payment methods that support the Checkout block. Once you have configured a compatible payment method it will be displayed here.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	);
 
 	return (
@@ -28,10 +28,7 @@ export function NoPaymentMethodsNotice() {
 				<ExternalLink
 					href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout` }
 				>
-					{ __(
-						'Configure Payment Methods',
-						'woo-gutenberg-products-block'
-					) }
+					{ __( 'Configure Payment Methods', 'woocommerce' ) }
 				</ExternalLink>
 			</div>
 		</Notice>

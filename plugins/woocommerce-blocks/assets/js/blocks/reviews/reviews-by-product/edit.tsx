@@ -12,6 +12,7 @@ import {
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { commentContent, Icon } from '@wordpress/icons';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -48,7 +49,7 @@ const ReviewsByProductEditor = ( {
 						'%d review',
 						'%d reviews',
 						item.details.review_count,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					item.details.review_count
 				) }
@@ -58,9 +59,9 @@ const ReviewsByProductEditor = ( {
 						'%1$s, has %2$d review',
 						'%1$s, has %2$d reviews',
 						item.details.review_count,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
-					item.name,
+					decodeEntities( item.name ),
 					item.details.review_count
 				) }
 			/>
@@ -71,7 +72,7 @@ const ReviewsByProductEditor = ( {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __( 'Product', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Product', 'woocommerce' ) }
 					initialOpen={ false }
 				>
 					<ProductControl
@@ -84,20 +85,13 @@ const ReviewsByProductEditor = ( {
 						isCompact={ true }
 					/>
 				</PanelBody>
-				<PanelBody
-					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
-				>
+				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
 					{ getSharedReviewContentControls(
 						attributes,
 						setAttributes
 					) }
 				</PanelBody>
-				<PanelBody
-					title={ __(
-						'List Settings',
-						'woo-gutenberg-products-block'
-					) }
-				>
+				<PanelBody title={ __( 'List Settings', 'woocommerce' ) }>
 					{ getSharedReviewListControls( attributes, setAttributes ) }
 				</PanelBody>
 			</InspectorControls>
@@ -108,10 +102,7 @@ const ReviewsByProductEditor = ( {
 		const onDone = () => {
 			setAttributes( { editMode: false } );
 			debouncedSpeak(
-				__(
-					'Showing Reviews by Product block preview.',
-					'woo-gutenberg-products-block'
-				)
+				__( 'Showing Reviews by Product block preview.', 'woocommerce' )
 			);
 		};
 
@@ -123,15 +114,12 @@ const ReviewsByProductEditor = ( {
 						className="block-editor-block-icon"
 					/>
 				}
-				label={ __(
-					'Reviews by Product',
-					'woo-gutenberg-products-block'
-				) }
+				label={ __( 'Reviews by Product', 'woocommerce' ) }
 				className="wc-block-reviews-by-product"
 			>
 				{ __(
 					'Show reviews of your product to build trust',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				<div className="wc-block-reviews__selection">
 					<ProductControl
@@ -147,7 +135,7 @@ const ReviewsByProductEditor = ( {
 						renderItem={ renderProductControlItem }
 					/>
 					<Button variant="primary" onClick={ onDone }>
-						{ __( 'Done', 'woo-gutenberg-products-block' ) }
+						{ __( 'Done', 'woocommerce' ) }
 					</Button>
 				</div>
 			</Placeholder>
@@ -158,10 +146,7 @@ const ReviewsByProductEditor = ( {
 		return renderEditMode();
 	}
 
-	const buttonTitle = __(
-		'Edit selected product',
-		'woo-gutenberg-products-block'
-	);
+	const buttonTitle = __( 'Edit selected product', 'woocommerce' );
 
 	return (
 		<>
@@ -175,10 +160,7 @@ const ReviewsByProductEditor = ( {
 						className="block-editor-block-icon"
 					/>
 				}
-				name={ __(
-					'Reviews by Product',
-					'woo-gutenberg-products-block'
-				) }
+				name={ __( 'Reviews by Product', 'woocommerce' ) }
 				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>
 		</>

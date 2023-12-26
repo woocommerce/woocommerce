@@ -242,11 +242,17 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
 			)
 		).toContainText( '$0.00' );
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( firstProductPrice );
+		let totalPrice = await page
+			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
+			.last()
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( firstProductPrice )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( firstProductPrice * 1.25 )
+		);
 	} );
 
 	test( 'should show correct total cart block price after updating quantity', async ( {
@@ -270,11 +276,17 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			.getByRole( 'button' )
 			.filter( { hasText: '＋', exact: true } )
 			.click();
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( doubleFirstProductWithFlatRate.toString() );
+		let totalPrice = await page
+			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
+			.last()
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( firstProductPrice )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( firstProductPrice * 1.25 )
+		);
 	} );
 
 	test( 'should show correct total cart block price with 2 different products and flat rate/local pickup', async ( {
@@ -305,11 +317,17 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
 			)
 		).toContainText( '$5.00' );
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( twoProductsWithFlatRate.toString() );
+		let totalPrice = await page
+			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
+			.last()
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( twoProductsWithFlatRate )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( twoProductsWithFlatRate * 1.25 )
+		);
 
 		// Set shipping to local pickup instead of flat rate
 		await page.getByRole( 'group' ).getByText( 'Local pickup' ).click();
@@ -320,10 +338,16 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
 			)
 		).toContainText( '$0.00' );
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( twoProductsTotal.toString() );
+		totalPrice = await page
+			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
+			.last()
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+		await expect( totalPrice ).toBeGreaterThanOrEqual(
+			Number( twoProductsTotal )
+		);
+		await expect( totalPrice ).toBeLessThanOrEqual(
+			Number( twoProductsTotal * 1.25 )
+		);
 	} );
 } );

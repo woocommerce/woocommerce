@@ -1,3 +1,27 @@
+// count symbols like one char
+function getCharArr( rowCut ) {
+	// eslint-disable-next-line prefer-const
+	let charArr = [],
+		subRow,
+		match,
+		char;
+
+	for ( let i = 0; i < rowCut.length; i++ ) {
+		subRow = rowCut.substring( i );
+		match = subRow.match( /^&[a-z0-9#]+;/ );
+
+		if ( match ) {
+			char = match[ 0 ];
+			charArr.push( char );
+			i += char.length - 1;
+		} else {
+			charArr.push( rowCut[ i ] );
+		}
+	}
+
+	return charArr;
+}
+
 // Copy-pasted from https://github.com/brankosekulic/trimHtml/blob/master/index.js
 // the published npm version of this code contains a bug that causes it throw exceptions.
 export function trimHtml( html, options ) {
@@ -130,28 +154,4 @@ export function trimHtml( html, options ) {
 		html: arr.join( '\n' ).replace( /\n/g, '' ),
 		more,
 	};
-}
-
-// count symbols like one char
-function getCharArr( rowCut ) {
-	// eslint-disable-next-line prefer-const
-	let charArr = [],
-		subRow,
-		match,
-		char;
-
-	for ( let i = 0; i < rowCut.length; i++ ) {
-		subRow = rowCut.substring( i );
-		match = subRow.match( /^&[a-z0-9#]+;/ );
-
-		if ( match ) {
-			char = match[ 0 ];
-			charArr.push( char );
-			i += char.length - 1;
-		} else {
-			charArr.push( rowCut[ i ] );
-		}
-	}
-
-	return charArr;
 }

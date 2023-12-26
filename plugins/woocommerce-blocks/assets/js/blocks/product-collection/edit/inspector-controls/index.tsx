@@ -41,6 +41,7 @@ import HandPickedProductsControl from './hand-picked-products-control';
 import LayoutOptionsControl from './layout-options-control';
 import FeaturedProductsControl from './featured-products-control';
 import CreatedControl from './created-control';
+import PriceRangeControl from './price-range-control';
 
 const ProductCollectionInspectorControls = (
 	props: BlockEditProps< ProductCollectionAttributes >
@@ -67,7 +68,7 @@ const ProductCollectionInspectorControls = (
 	return (
 		<InspectorControls>
 			<ToolsPanel
-				label={ __( 'Settings', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Settings', 'woocommerce' ) }
 				resetAll={ () => {
 					const defaultSettings = getDefaultSettings(
 						props.attributes
@@ -85,7 +86,7 @@ const ProductCollectionInspectorControls = (
 
 			{ displayQueryControls ? (
 				<ToolsPanel
-					label={ __( 'Filters', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Filters', 'woocommerce' ) }
 					resetAll={ ( resetAllFilters: ( () => void )[] ) => {
 						setQueryAttribute( props, DEFAULT_FILTERS );
 						resetAllFilters.forEach( ( resetFilter ) =>
@@ -102,6 +103,7 @@ const ProductCollectionInspectorControls = (
 					<TaxonomyControls { ...queryControlProps } />
 					<FeaturedProductsControl { ...queryControlProps } />
 					<CreatedControl { ...queryControlProps } />
+					<PriceRangeControl { ...queryControlProps } />
 				</ToolsPanel>
 			) : null }
 			<ProductCollectionFeedbackPrompt />

@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: https://woo.com/
  * Description: An eCommerce toolkit that helps you sell anything. Beautifully.
- * Version: 8.5.0-dev
+ * Version: 8.6.0-dev
  * Author: Automattic
  * Author URI: https://woo.com
  * Text Domain: woocommerce
@@ -19,6 +19,12 @@ defined( 'ABSPATH' ) || exit;
 if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
 	define( 'WC_PLUGIN_FILE', __FILE__ );
 }
+
+if ( ! defined( 'WC_BLOCKS_IS_FEATURE_PLUGIN' ) ) {
+	define( 'WC_BLOCKS_IS_FEATURE_PLUGIN', true );
+}
+
+// Test Change
 
 // Load core packages and the autoloader.
 require __DIR__ . '/src/Autoloader.php';

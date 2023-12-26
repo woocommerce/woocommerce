@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://www.npmjs.com/package/@woocommerce/create-product-editor-block/v/1.3.0) - 2023-12-14 
+
+-   Minor - Update template to use new function register_block_type_from_metadata [#42711]
+
 ## [1.2.0](https://www.npmjs.com/package/@woocommerce/create-product-editor-block/v/1.2.0) - 2023-12-07 
 
 -   Patch - Add __experimentalRole: 'content' to block properties [#41045]

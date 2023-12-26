@@ -69,15 +69,9 @@ const Edit = ( {
 	return (
 		<>
 			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
-					initialOpen
-				>
+				<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
 					<ToggleControl
-						label={ __(
-							'Show search field label',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Show search field label', 'woocommerce' ) }
 						checked={ hasLabel }
 						onChange={ () =>
 							setAttributes( { hasLabel: ! hasLabel } )
@@ -92,10 +86,7 @@ const Edit = ( {
 							className="screen-reader-text"
 							htmlFor="wc-block-product-search__label"
 						>
-							{ __(
-								'Search Label',
-								'woo-gutenberg-products-block'
-							) }
+							{ __( 'Search Label', 'woocommerce' ) }
 						</label>
 						<PlainText
 							className="wc-block-product-search__label"
@@ -114,7 +105,7 @@ const Edit = ( {
 						value={ placeholder }
 						placeholder={ __(
 							'Enter search placeholder text',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						onChange={ ( value ) =>
 							setAttributes( { placeholder: value } )
@@ -123,10 +114,7 @@ const Edit = ( {
 					<button
 						type="submit"
 						className="wc-block-product-search__button"
-						aria-label={ __(
-							'Search',
-							'woo-gutenberg-products-block'
-						) }
+						aria-label={ __( 'Search', 'woocommerce' ) }
 						onClick={ ( e ) => e.preventDefault() }
 						tabIndex={ -1 }
 					>

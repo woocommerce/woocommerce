@@ -10,7 +10,7 @@ export interface CalculatorButtonProps {
 }
 
 export const CalculatorButton = ( {
-	label = __( 'Calculate', 'woo-gutenberg-products-block' ),
+	label = __( 'Calculate', 'woocommerce' ),
 	isShippingCalculatorOpen,
 	setIsShippingCalculatorOpen,
 }: CalculatorButtonProps ): JSX.Element => {

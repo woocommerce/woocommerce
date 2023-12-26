@@ -12,7 +12,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { closeSmall, dragHandle } from '@wordpress/icons';
+import { closeSmall } from '@wordpress/icons';
 import {
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
@@ -21,13 +21,11 @@ import {
 } from '@woocommerce/components';
 import { CurrencyContext } from '@woocommerce/currency';
 import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
-import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
 import { AddProductsModalProps } from './types';
-import { useDraggable } from '../../hooks/use-draggable';
 
 export function getProductImageStyle( product: Product ) {
 	return product.images.length > 0
@@ -102,10 +100,6 @@ export function AddProductsModal( {
 			);
 		};
 	}
-
-	const { container, draggable, handler } = useDraggable( {
-		onSort: setSelectedProducts,
-	} );
 
 	return (
 		<Modal
@@ -204,29 +198,12 @@ export function AddProductsModal( {
 					</div>
 
 					{ Boolean( selectedProducts.length ) && (
-						<ul
-							{ ...container }
-							className={ classNames(
-								'woocommerce-add-products-modal__list',
-								container.className
-							) }
-						>
+						<ul className="woocommerce-add-products-modal__list">
 							{ selectedProducts.map( ( item ) => (
 								<li
-									{ ...draggable }
 									key={ item.id }
 									className="woocommerce-add-products-modal__list-item"
 								>
-									<Button
-										{ ...handler }
-										icon={ dragHandle }
-										variant="tertiary"
-										type="button"
-										aria-label={ __(
-											'Sortable handler',
-											'woocommerce'
-										) }
-									/>
 									<div
 										className="woocommerce-add-products-modal__list-item-image"
 										style={ getProductImageStyle( item ) }

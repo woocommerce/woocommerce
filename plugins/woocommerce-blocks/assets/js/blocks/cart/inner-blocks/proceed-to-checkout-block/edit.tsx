@@ -54,11 +54,11 @@ export const Edit = ( {
 						labels={ {
 							title: __(
 								'Proceed to Checkout button',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							default: __(
 								'WooCommerce Checkout Page',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 						} }
 					/>

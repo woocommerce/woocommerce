@@ -35,17 +35,14 @@ const EditProductLink = ( props: EditProductLinkProps ): JSX.Element | null => {
 						target="_blank"
 						rel="noopener noreferrer"
 					>
-						{ __(
-							"Edit this product's details",
-							'woo-gutenberg-products-block'
-						) }
+						{ __( "Edit this product's details", 'woocommerce' ) }
 						<Icon icon={ external } size={ 16 } />
 					</a>
 				</div>
 				<div className="wc-block-single-product__edit-card-description">
 					{ __(
 						'Edit details such as title, price, description and more.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				</div>
 			</div>

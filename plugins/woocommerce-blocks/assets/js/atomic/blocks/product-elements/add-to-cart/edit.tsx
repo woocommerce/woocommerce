@@ -43,18 +43,16 @@ const Edit = ( { attributes, setAttributes }: EditProps ) => {
 		>
 			<EditProductLink productId={ product.id } />
 			<InspectorControls>
-				<PanelBody
-					title={ __( 'Layout', 'woo-gutenberg-products-block' ) }
-				>
+				<PanelBody title={ __( 'Layout', 'woocommerce' ) }>
 					{ productSupportsAddToCartForm( product ) ? (
 						<ToggleControl
 							label={ __(
 								'Display form elements',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							help={ __(
 								'Depending on product type, allow customers to select a quantity, variations etc.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							checked={ showFormElements }
 							onChange={ () =>
@@ -71,7 +69,7 @@ const Edit = ( { attributes, setAttributes }: EditProps ) => {
 						>
 							{ __(
 								'This product does not support the block based add to cart form. A link to the product page will be shown instead.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</Notice>
 					) }
@@ -89,6 +87,6 @@ export default withProductSelector( {
 	label: BLOCK_TITLE,
 	description: __(
 		'Choose a product to display its add to cart form.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 } )( Edit );

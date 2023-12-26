@@ -52,11 +52,8 @@ export const Block = ( props: Props ): JSX.Element | null => {
 			style={ styleProps.style }
 		>
 			<Label
-				label={ __( 'Sale', 'woo-gutenberg-products-block' ) }
-				screenReaderLabel={ __(
-					'Product on sale',
-					'woo-gutenberg-products-block'
-				) }
+				label={ __( 'Sale', 'woocommerce' ) }
+				screenReaderLabel={ __( 'Product on sale', 'woocommerce' ) }
 			/>
 		</div>
 	);

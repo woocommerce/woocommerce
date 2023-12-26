@@ -30,7 +30,7 @@ interface ToggleButtonProps {
 const ToggleButton = ( { onToggle }: ToggleButtonProps ) => (
 	<ToolbarButton
 		icon={ settings }
-		label={ __( 'Display settings', 'woo-gutenberg-products-block' ) }
+		label={ __( 'Display settings', 'woocommerce' ) }
 		onClick={ onToggle }
 	/>
 );
@@ -86,10 +86,7 @@ const DisplaySettingsToolbar = ( {
 					<>
 						<NumberControl
 							{ ...numberControlProps }
-							label={ __(
-								'Items per Page',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'Items per Page', 'woocommerce' ) }
 							min={ 1 }
 							max={ 100 }
 							onChange={ handlePerPageChange }
@@ -98,10 +95,7 @@ const DisplaySettingsToolbar = ( {
 
 						<NumberControl
 							{ ...numberControlProps }
-							label={ __(
-								'Offset',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'Offset', 'woocommerce' ) }
 							min={ 0 }
 							max={ 100 }
 							onChange={ handleOffsetChange }
@@ -111,7 +105,7 @@ const DisplaySettingsToolbar = ( {
 						<BaseControl
 							help={ __(
 								'Limit the pages you want to show, even if the query has more results. To show all pages use 0 (zero).',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							id="woocommerce-products-block__display-settings-pages"
 						>
@@ -119,7 +113,7 @@ const DisplaySettingsToolbar = ( {
 								{ ...numberControlProps }
 								label={ __(
 									'Max page to show',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 								min={ 0 }
 								onChange={ handlePagesChange }

@@ -226,7 +226,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 					'%1$d item in cart',
 					'%1$d items in cart',
 					cartItemsCount,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				cartItemsCount
 		  )
@@ -236,7 +236,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 					'%1$d item in cart, total price of %2$s',
 					'%1$d items in cart, total price of %2$s',
 					cartItemsCount,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				cartItemsCount,
 				formatPrice(

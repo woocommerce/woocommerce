@@ -47,7 +47,7 @@ const Form = ( {
 	return (
 		<form ref={ formRef }>
 			<TextControl
-				label={ __( 'Location name', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Location name', 'woocommerce' ) }
 				name={ 'location_name' }
 				value={ values.name }
 				onChange={ setLocationField( 'name' ) }
@@ -57,10 +57,7 @@ const Form = ( {
 					event: React.InvalidEvent< HTMLInputElement >
 				) => {
 					event.target.setCustomValidity(
-						__(
-							'A Location title is required',
-							'woo-gutenberg-products-block'
-						)
+						__( 'A Location title is required', 'woocommerce' )
 					);
 				} }
 				onInput={ ( event: React.ChangeEvent< HTMLInputElement > ) => {
@@ -68,55 +65,43 @@ const Form = ( {
 				} }
 			/>
 			<TextControl
-				label={ __( 'Address', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Address', 'woocommerce' ) }
 				name={ 'location_address' }
-				placeholder={ __( 'Address', 'woo-gutenberg-products-block' ) }
+				placeholder={ __( 'Address', 'woocommerce' ) }
 				value={ values.address.address_1 }
 				onChange={ setLocationAddressField( 'address_1' ) }
 				autoComplete="off"
 			/>
 			<TextControl
-				label={ __( 'City', 'woo-gutenberg-products-block' ) }
+				label={ __( 'City', 'woocommerce' ) }
 				name={ 'location_city' }
 				hideLabelFromVision={ true }
-				placeholder={ __( 'City', 'woo-gutenberg-products-block' ) }
+				placeholder={ __( 'City', 'woocommerce' ) }
 				value={ values.address.city }
 				onChange={ setLocationAddressField( 'city' ) }
 				autoComplete="off"
 			/>
 			<TextControl
-				label={ __( 'Postcode / ZIP', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Postcode / ZIP', 'woocommerce' ) }
 				name={ 'location_postcode' }
 				hideLabelFromVision={ true }
-				placeholder={ __(
-					'Postcode / ZIP',
-					'woo-gutenberg-products-block'
-				) }
+				placeholder={ __( 'Postcode / ZIP', 'woocommerce' ) }
 				value={ values.address.postcode }
 				onChange={ setLocationAddressField( 'postcode' ) }
 				autoComplete="off"
 			/>
 			{ ! countryHasStates && (
 				<TextControl
-					placeholder={ __(
-						'State',
-						'woo-gutenberg-products-block'
-					) }
+					placeholder={ __( 'State', 'woocommerce' ) }
 					value={ selectedState }
 					onChange={ setLocationAddressField( 'state' ) }
 				/>
 			) }
 			<SelectControl
 				name="location_country_state"
-				label={ __(
-					'Country / State',
-					'woo-gutenberg-products-block'
-				) }
+				label={ __( 'Country / State', 'woocommerce' ) }
 				hideLabelFromVision={ true }
-				placeholder={ __(
-					'Country / State',
-					'woo-gutenberg-products-block'
-				) }
+				placeholder={ __( 'Country / State', 'woocommerce' ) }
 				value={ ( () => {
 					if ( ! selectedState && countryHasStates ) {
 						return `${ selectedCountry }:${
@@ -168,7 +153,7 @@ const Form = ( {
 			</SelectControl>
 
 			<TextControl
-				label={ __( 'Pickup details', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Pickup details', 'woocommerce' ) }
 				name={ 'pickup_details' }
 				value={ values.details }
 				onChange={ setLocationField( 'details' ) }

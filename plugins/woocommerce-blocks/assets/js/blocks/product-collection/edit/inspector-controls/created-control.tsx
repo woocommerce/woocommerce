@@ -30,7 +30,7 @@ const CreatedControl = ( props: QueryControlProps ) => {
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Created', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Created', 'woocommerce' ) }
 			hasValue={ () => timeFrame?.operator && timeFrame?.value }
 			onDeselect={ () => {
 				setQueryAttribute( {
@@ -41,10 +41,7 @@ const CreatedControl = ( props: QueryControlProps ) => {
 			<Flex direction="column" gap={ 3 }>
 				<FlexItem>
 					<ToggleGroupControl
-						label={ __(
-							'Created',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Created', 'woocommerce' ) }
 						isBlock
 						onChange={ ( value: ETimeFrameOperator ) => {
 							setQueryAttribute( {
@@ -61,7 +58,7 @@ const CreatedControl = ( props: QueryControlProps ) => {
 							label={ _x(
 								'Within',
 								'Product Collection query operator',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 						<ToggleGroupControlOption
@@ -69,7 +66,7 @@ const CreatedControl = ( props: QueryControlProps ) => {
 							label={ _x(
 								'Before',
 								'Product Collection query operator',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					</ToggleGroupControl>

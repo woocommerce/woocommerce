@@ -39,6 +39,7 @@ export function Edit( {
 
 	const displayBlocks = useSelect(
 		( select ) => {
+			// @ts-expect-error There are no types for this.
 			const product: Product = select( 'core' ).getEditedEntityRecord(
 				'postType',
 				postType,
@@ -56,12 +57,11 @@ export function Edit( {
 	);
 
 	return (
-		<div { ...blockProps }>
-			<DisplayState
-				state={ displayBlocks ? 'visible' : 'visually-hidden' }
-			>
-				<InnerBlocks templateLock="all" />
-			</DisplayState>
-		</div>
+		<DisplayState
+			{ ...blockProps }
+			state={ displayBlocks ? 'visible' : 'visually-hidden' }
+		>
+			<InnerBlocks templateLock="all" />
+		</DisplayState>
 	);
 }

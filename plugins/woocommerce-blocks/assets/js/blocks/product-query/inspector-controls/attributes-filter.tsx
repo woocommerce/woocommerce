@@ -33,12 +33,12 @@ export const AttributesFilter = ( props: ProductQueryBlock ) => {
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Product Attributes', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Product Attributes', 'woocommerce' ) }
 			hasValue={ () => query.__woocommerceAttributes?.length }
 		>
 			<ProductAttributeTermControl
 				messages={ {
-					search: __( 'Attributes', 'woo-gutenberg-products-block' ),
+					search: __( 'Attributes', 'woocommerce' ),
 				} }
 				selected={ selected }
 				onChange={ ( attributes ) => {
@@ -62,7 +62,7 @@ export const AttributesFilter = ( props: ProductQueryBlock ) => {
 				className="woocommerce-product-query-panel__external-link"
 				href={ EDIT_ATTRIBUTES_URL }
 			>
-				{ __( 'Manage attributes', 'woo-gutenberg-products-block' ) }
+				{ __( 'Manage attributes', 'woocommerce' ) }
 			</ExternalLink>
 		</ToolsPanelItem>
 	);

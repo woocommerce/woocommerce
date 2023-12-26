@@ -142,7 +142,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		prepareTotalItems( cartTotals, needsShipping )
 	);
 	const currentCartTotal = useRef( {
-		label: __( 'Total', 'woo-gutenberg-products-block' ),
+		label: __( 'Total', 'woocommerce' ),
 		value: parseInt( cartTotals.total_price, 10 ),
 	} );
 
@@ -152,7 +152,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 			needsShipping
 		);
 		currentCartTotal.current = {
-			label: __( 'Total', 'woo-gutenberg-products-block' ),
+			label: __( 'Total', 'woocommerce' ),
 			value: parseInt( cartTotals.total_price, 10 ),
 		};
 	}, [ cartTotals, needsShipping ] );

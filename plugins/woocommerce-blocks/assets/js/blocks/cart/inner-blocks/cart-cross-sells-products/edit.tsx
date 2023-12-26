@@ -30,13 +30,11 @@ export const Edit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<PanelBody
-					title={ __( 'Settings', 'woo-gutenberg-products-block' ) }
-				>
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<RangeControl
 						label={ __(
 							'Cross-Sells products to show',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ columns }
 						onChange={ ( value ) =>

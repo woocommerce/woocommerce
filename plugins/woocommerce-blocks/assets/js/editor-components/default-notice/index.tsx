@@ -104,16 +104,13 @@ export function DefaultNotice( { block }: { block: string } ) {
 		noticeContent = createInterpolateElement(
 			__(
 				'If you would like to use this block as your default checkout, <a>update your page settings</a>.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			{
 				a: (
 					// eslint-disable-next-line jsx-a11y/anchor-is-valid
 					<a href="#" onClick={ updatePage }>
-						{ __(
-							'update your page settings',
-							'woo-gutenberg-products-block'
-						) }
+						{ __( 'update your page settings', 'woocommerce' ) }
 					</a>
 				),
 			}
@@ -122,16 +119,13 @@ export function DefaultNotice( { block }: { block: string } ) {
 		noticeContent = createInterpolateElement(
 			__(
 				'If you would like to use this block as your default cart, <a>update your page settings</a>.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			),
 			{
 				a: (
 					// eslint-disable-next-line jsx-a11y/anchor-is-valid
 					<a href="#" onClick={ updatePage }>
-						{ __(
-							'update your page settings',
-							'woo-gutenberg-products-block'
-						) }
+						{ __( 'update your page settings', 'woocommerce' ) }
 					</a>
 				),
 			}
@@ -153,15 +147,12 @@ export function DefaultNotice( { block }: { block: string } ) {
 			onRemove={ () => setStatus( 'dismissed' ) }
 			spokenMessage={
 				settingStatus === 'updated'
-					? __(
-							'Page settings updated',
-							'woo-gutenberg-products-block'
-					  )
+					? __( 'Page settings updated', 'woocommerce' )
 					: noticeContent
 			}
 		>
 			{ settingStatus === 'updated' ? (
-				__( 'Page settings updated', 'woo-gutenberg-products-block' )
+				__( 'Page settings updated', 'woocommerce' )
 			) : (
 				<>
 					<p>{ noticeContent }</p>

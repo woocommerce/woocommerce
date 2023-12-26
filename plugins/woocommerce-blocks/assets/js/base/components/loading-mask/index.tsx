@@ -42,8 +42,7 @@ const LoadingMask = ( {
 			</div>
 			{ isLoading && (
 				<span className="screen-reader-text">
-					{ screenReaderLabel ||
-						__( 'Loading…', 'woo-gutenberg-products-block' ) }
+					{ screenReaderLabel || __( 'Loading…', 'woocommerce' ) }
 				</span>
 			) }
 		</div>

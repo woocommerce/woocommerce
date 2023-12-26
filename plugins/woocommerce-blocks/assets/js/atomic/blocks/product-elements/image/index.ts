@@ -33,7 +33,7 @@ const blockConfig: BlockConfiguration = {
 		'core/post-template',
 		'woocommerce/product-template',
 	],
-	textdomain: 'woo-gutenberg-products-block',
+	textdomain: 'woocommerce',
 	attributes,
 	supports,
 	edit,

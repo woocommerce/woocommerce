@@ -37,17 +37,9 @@ const Edit = ( {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __(
-						'Display Settings',
-						'woo-gutenberg-products-block'
-					) }
-				>
+				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
 					<ToggleGroupControl
-						label={ __(
-							'Display Style',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Display Style', 'woocommerce' ) }
 						value={ displayStyle }
 						onChange={ ( value: Attributes[ 'displayStyle' ] ) =>
 							setAttributes( {
@@ -58,17 +50,11 @@ const Edit = ( {
 					>
 						<ToggleGroupControlOption
 							value="list"
-							label={ __(
-								'List',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'List', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="chips"
-							label={ __(
-								'Chips',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'Chips', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 				</PanelBody>

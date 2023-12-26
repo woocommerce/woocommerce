@@ -38,10 +38,7 @@ const AccountSettingsLink = () => {
 	) }admin.php?page=wc-settings&tab=account`;
 
 	const linkText = createInterpolateElement(
-		`<a>${ __(
-			'Manage account settings',
-			'woo-gutenberg-products-block'
-		) }</a>`,
+		`<a>${ __( 'Manage account settings', 'woocommerce' ) }</a>`,
 		{
 			a: <ExternalLink href={ accountSettingsUrl } />,
 		}
@@ -69,56 +66,36 @@ export const BlockSettings = ( {
 			<PanelBody>
 				<AccountSettingsLink />
 			</PanelBody>
-			<PanelBody
-				title={ __(
-					'Display settings',
-					'woo-gutenberg-products-block'
-				) }
-			>
+			<PanelBody title={ __( 'Display settings', 'woocommerce' ) }>
 				<SelectControl
 					className="customer-account-display-style"
-					label={ __(
-						'Icon options',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Icon options', 'woocommerce' ) }
 					value={ displayStyle }
 					onChange={ ( value: DisplayStyle ) => {
 						setAttributes( { displayStyle: value } );
 					} }
 					help={ __(
 						'Choose if you want to include an icon with the customer account link.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					options={ [
 						{
 							value: DisplayStyle.ICON_AND_TEXT,
-							label: __(
-								'Icon and text',
-								'woo-gutenberg-products-block'
-							),
+							label: __( 'Icon and text', 'woocommerce' ),
 						},
 						{
 							value: DisplayStyle.TEXT_ONLY,
-							label: __(
-								'Text-only',
-								'woo-gutenberg-products-block'
-							),
+							label: __( 'Text-only', 'woocommerce' ),
 						},
 						{
 							value: DisplayStyle.ICON_ONLY,
-							label: __(
-								'Icon-only',
-								'woo-gutenberg-products-block'
-							),
+							label: __( 'Icon-only', 'woocommerce' ),
 						},
 					] }
 				/>
 				{ displayIconStyleSelector ? (
 					<ToggleGroupControl
-						label={ __(
-							'Display Style',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Display Style', 'woocommerce' ) }
 						value={ iconStyle }
 						onChange={ ( value: IconStyle ) =>
 							setAttributes( {

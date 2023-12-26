@@ -14,14 +14,11 @@ const NoReviewsPlaceholder = (): JSX.Element => {
 					className="block-editor-block-icon"
 				/>
 			}
-			label={ __(
-				'Reviews by Category',
-				'woo-gutenberg-products-block'
-			) }
+			label={ __( 'Reviews by Category', 'woocommerce' ) }
 		>
 			{ __(
 				'This block lists reviews for products from selected categories. The selected categories do not have any reviews yet, but they will show up here when they do.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		</Placeholder>
 	);

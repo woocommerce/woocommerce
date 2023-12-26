@@ -77,7 +77,7 @@ const TotalsTaxes = ( {
 					className
 				) }
 				currency={ currency }
-				label={ __( 'Taxes', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Taxes', 'woocommerce' ) }
 				value={ parseInt( totalTax, 10 ) }
 				description={ null }
 			/>

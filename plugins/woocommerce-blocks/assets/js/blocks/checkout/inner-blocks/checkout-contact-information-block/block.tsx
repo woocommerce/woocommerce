@@ -41,10 +41,7 @@ const Block = (): JSX.Element => {
 		getSetting( 'checkoutAllowsSignup', false ) && (
 			<CheckboxControl
 				className="wc-block-checkout__create-account"
-				label={ __(
-					'Create an account?',
-					'woo-gutenberg-products-block'
-				) }
+				label={ __( 'Create an account?', 'woocommerce' ) }
 				checked={ shouldCreateAccount }
 				onChange={ ( value ) =>
 					__internalSetShouldCreateAccount( value )
@@ -62,7 +59,7 @@ const Block = (): JSX.Element => {
 				type="email"
 				autoComplete="email"
 				errorId={ 'billing_email' }
-				label={ __( 'Email address', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Email address', 'woocommerce' ) }
 				value={ billingAddress.email }
 				required={ true }
 				onChange={ onChangeEmail }
@@ -71,7 +68,7 @@ const Block = (): JSX.Element => {
 						inputObject.setCustomValidity(
 							__(
 								'Please enter a valid email address',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							)
 						);
 						return false;

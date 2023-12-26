@@ -30,8 +30,6 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  build: false
 
             - name: Prepare plugin zips
               id: prepare

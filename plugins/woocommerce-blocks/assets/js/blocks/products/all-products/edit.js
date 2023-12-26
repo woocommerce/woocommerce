@@ -80,7 +80,7 @@ class Editor extends Component {
 	};
 
 	getTitle = () => {
-		return __( 'All Products', 'woo-gutenberg-products-block' );
+		return __( 'All Products', 'woocommerce' );
 	};
 
 	getIcon = () => {
@@ -94,10 +94,7 @@ class Editor extends Component {
 
 		if ( ! this.state.isEditing ) {
 			debouncedSpeak(
-				__(
-					'Showing All Products block preview.',
-					'woo-gutenberg-products-block'
-				)
+				__( 'Showing All Products block preview.', 'woocommerce' )
 			);
 		}
 	};
@@ -109,10 +106,7 @@ class Editor extends Component {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __(
-						'Layout Settings',
-						'woo-gutenberg-products-block'
-					) }
+					title={ __( 'Layout Settings', 'woocommerce' ) }
 					initialOpen
 				>
 					<GridLayoutControl
@@ -126,12 +120,7 @@ class Editor extends Component {
 						maxRows={ getSetting( 'maxRows', 6 ) }
 					/>
 				</PanelBody>
-				<PanelBody
-					title={ __(
-						'Content Settings',
-						'woo-gutenberg-products-block'
-					) }
-				>
+				<PanelBody title={ __( 'Content Settings', 'woocommerce' ) }>
 					{ getSharedContentControls( attributes, setAttributes ) }
 					{ getSharedListControls( attributes, setAttributes ) }
 				</PanelBody>
@@ -150,7 +139,7 @@ class Editor extends Component {
 							icon: 'edit',
 							title: __(
 								'Edit the layout of each product',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							onClick: () => this.togglePreview(),
 							isActive: isEditing,
@@ -203,13 +192,13 @@ class Editor extends Component {
 			<Placeholder icon={ this.getIcon() } label={ this.getTitle() }>
 				{ __(
 					'Display all products from your store as a grid.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 				<div className="wc-block-all-products-grid-item-template">
 					<Tip>
 						{ __(
 							'Edit the blocks inside the example below to change the content displayed for all products within the product grid.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</Tip>
 					<InnerBlockLayoutContextProvider
@@ -234,28 +223,25 @@ class Editor extends Component {
 							variant="primary"
 							onClick={ onDone }
 						>
-							{ __( 'Done', 'woo-gutenberg-products-block' ) }
+							{ __( 'Done', 'woocommerce' ) }
 						</Button>
 						<Button
 							className="wc-block-all-products__cancel-button"
 							variant="tertiary"
 							onClick={ onCancel }
 						>
-							{ __( 'Cancel', 'woo-gutenberg-products-block' ) }
+							{ __( 'Cancel', 'woocommerce' ) }
 						</Button>
 						<Button
 							className="wc-block-all-products__reset-button"
 							icon={ <Icon icon={ grid } /> }
 							label={ __(
 								'Reset layout to default',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 							onClick={ onReset }
 						>
-							{ __(
-								'Reset Layout',
-								'woo-gutenberg-products-block'
-							) }
+							{ __( 'Reset Layout', 'woocommerce' ) }
 						</Button>
 					</div>
 				</div>

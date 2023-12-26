@@ -30,8 +30,9 @@ export const blocksConfig = getSetting( 'wcBlocksConfig', {
 	wordCountType: 'words',
 } ) as WcBlocksConfig;
 
-export const WC_BLOCKS_IMAGE_URL = blocksConfig.pluginUrl + 'images/';
-export const WC_BLOCKS_BUILD_URL = blocksConfig.pluginUrl + 'build/';
+export const WC_BLOCKS_IMAGE_URL = blocksConfig.pluginUrl + 'assets/images/';
+export const WC_BLOCKS_BUILD_URL =
+	blocksConfig.pluginUrl + 'assets/client/blocks/';
 export const WC_BLOCKS_PHASE = blocksConfig.buildPhase;
 export const SHOP_URL = STORE_PAGES.shop?.permalink;
 export const CHECKOUT_PAGE_ID = STORE_PAGES.checkout?.id;
@@ -55,6 +56,12 @@ type CountryData = {
 	allowShipping: boolean;
 	states: Record< string, string >;
 	locale: Record< string, LocaleSpecificAddressField >;
+};
+
+type FieldsLocations = {
+	address: string[];
+	contact: string[];
+	additional: string[];
 };
 
 // Contains country names.
@@ -111,3 +118,35 @@ export const COUNTRY_LOCALE = Object.fromEntries(
 		return [ countryCode, countryData[ countryCode ].locale || [] ];
 	} )
 );
+
+const defaultFieldsLocations: FieldsLocations = {
+	address: [
+		'first_name',
+		'last_name',
+		'company',
+		'address_1',
+		'address_2',
+		'city',
+		'postcode',
+		'country',
+		'state',
+		'phone',
+	],
+	contact: [ 'email' ],
+	additional: [],
+};
+
+export const ADDRESS_FIELDS_KEYS = getSetting< FieldsLocations >(
+	'addressFieldsLocations',
+	defaultFieldsLocations
+).address;
+
+export const CONTACT_FIELDS_KEYS = getSetting< FieldsLocations >(
+	'addressFieldsLocations',
+	defaultFieldsLocations
+).contact;
+
+export const ADDITIONAL_FIELDS_KEYS = getSetting< FieldsLocations >(
+	'addressFieldsLocations',
+	defaultFieldsLocations
+).additional;

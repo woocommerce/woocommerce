@@ -10,6 +10,7 @@ import { registerCheckoutFilters, applyCheckoutFilter } from '../';
 jest.mock( '@woocommerce/settings', () => {
 	const originalModule = jest.requireActual( '@woocommerce/settings' );
 	return {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore We know @woocommerce/settings is an object.
 		...originalModule,
 		CURRENT_USER_IS_ADMIN: true,

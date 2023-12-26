@@ -135,7 +135,9 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 		add_action(
 			'woocommerce_store_api_checkout_update_order_from_request',
 			function ( $order, $request ) {
-				$params = $request->get_param( 'extensions' )['woocommerce/order-attribution'];
+				$extensions = $request->get_param( 'extensions' );
+				$params     = $extensions['woocommerce/order-attribution'] ?? array();
+
 				if ( empty( $params ) ) {
 					return;
 				}

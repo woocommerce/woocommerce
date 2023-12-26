@@ -32,24 +32,18 @@ export const Edit = ( {
 			<InspectorControls>
 				{ !! shippingEnabled && (
 					<PanelBody
-						title={ __(
-							'Shipping Calculations',
-							'woo-gutenberg-products-block'
-						) }
+						title={ __( 'Shipping Calculations', 'woocommerce' ) }
 					>
 						<p className="wc-block-checkout__controls-text">
 							{ __(
 								'Options that control shipping can be managed in your store settings.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</p>
 						<ExternalLink
 							href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=options` }
 						>
-							{ __(
-								'Manage shipping options',
-								'woo-gutenberg-products-block'
-							) }
+							{ __( 'Manage shipping options', 'woocommerce' ) }
 						</ExternalLink>{ ' ' }
 					</PanelBody>
 				) }

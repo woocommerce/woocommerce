@@ -75,10 +75,7 @@ const NoticeBanner = ( {
 				<Button
 					className="wc-block-components-notice-banner__dismiss"
 					icon={ close }
-					label={ __(
-						'Dismiss this notice',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Dismiss this notice', 'woocommerce' ) }
 					onClick={ dismiss }
 					showTooltip={ false }
 				/>

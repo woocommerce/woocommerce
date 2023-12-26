@@ -49,7 +49,7 @@ export const Edit = ( {
 	}, [] );
 	const incompatiblePaymentMethodMessage = __(
 		'Incompatible with block-based checkout',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	);
 	const wordCountType = blocksConfig.wordCountType;
 
@@ -64,16 +64,11 @@ export const Edit = ( {
 		>
 			<InspectorControls>
 				{ globalPaymentMethods.length > 0 && (
-					<PanelBody
-						title={ __(
-							'Methods',
-							'woo-gutenberg-products-block'
-						) }
-					>
+					<PanelBody title={ __( 'Methods', 'woocommerce' ) }>
 						<p className="wc-block-checkout__controls-text">
 							{ __(
 								'You currently have the following payment integrations active.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</p>
 						{ globalPaymentMethods.map( ( method ) => {
@@ -118,10 +113,7 @@ export const Edit = ( {
 						<ExternalLink
 							href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout` }
 						>
-							{ __(
-								'Manage payment methods',
-								'woo-gutenberg-products-block'
-							) }
+							{ __( 'Manage payment methods', 'woocommerce' ) }
 						</ExternalLink>
 					</PanelBody>
 				) }

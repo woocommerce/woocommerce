@@ -13,12 +13,7 @@ export const Edit = (): JSX.Element => {
 		<span { ...blockProps }>
 			{ sprintf(
 				/* translators: %d is the count of items in the cart. */
-				_n(
-					'(%d item)',
-					'(%d items)',
-					cartItemsCount,
-					'woo-gutenberg-products-block'
-				),
+				_n( '(%d item)', '(%d items)', cartItemsCount, 'woocommerce' ),
 				cartItemsCount
 			) }
 		</span>

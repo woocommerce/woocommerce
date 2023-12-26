@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woo.com/",
-	"version": "8.3.0",
+	"version": "8.6.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
@@ -26,14 +26,14 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.7.0",
-		"woocommerce/woocommerce-blocks": "11.7.0"
+		"woocommerce/action-scheduler": "3.7.1"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
 		"bamarni/composer-bin-plugin": "^1.4",
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
-		"phpunit/phpunit": "^9.0",
+		"mockery/mockery": "1.6.6",
+		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
 		"yoast/phpunit-polyfills": "^2.0",
 		"woocommerce/monorepo-plugin": "*"
@@ -41,9 +41,7 @@
 	"config": {
 		"optimize-autoloader": true,
 		"preferred-install": {
-			"woocommerce/action-scheduler": "dist",
-			"woocommerce/woocommerce-rest-api": "dist",
-			"woocommerce/woocommerce-blocks": "dist"
+			"woocommerce/action-scheduler": "dist"
 		},
 		"sort-packages": true,
 		"platform": {
@@ -70,7 +68,12 @@
 		},
 		"psr-0": {
 			"Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
-		}
+		},
+		"files": [
+			"src/StoreApi/deprecated.php",
+			"src/StoreApi/functions.php",
+			"src/Blocks/Domain/Services/functions.php"
+		]
 	},
 	"autoload-dev": {
 		"psr-4": {
@@ -124,9 +127,7 @@
 	"extra": {
 		"installer-paths": {
 			"packages/{$name}": [
-				"woocommerce/action-scheduler",
-				"woocommerce/woocommerce-blocks",
-				"woocommerce/woocommerce-admin"
+				"woocommerce/action-scheduler"
 			]
 		},
 		"scripts-description": {

@@ -14,10 +14,10 @@ export const AttributesPlaceholder = ( {
 	<Placeholder
 		className="wc-block-attribute-filter"
 		icon={ <Icon icon={ category } /> }
-		label={ __( 'Filter by Attribute', 'woo-gutenberg-products-block' ) }
+		label={ __( 'Filter by Attribute', 'woocommerce' ) }
 		instructions={ __(
 			'Enable customers to filter the product grid by selecting one or more attributes, such as color.',
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		) }
 	>
 		{ children }
@@ -29,7 +29,7 @@ export const NoAttributesPlaceholder = () => (
 		<p>
 			{ __(
 				"Attributes are needed for filtering your products. You haven't created any attributes yet.",
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		</p>
 		<Button
@@ -40,7 +40,7 @@ export const NoAttributesPlaceholder = () => (
 			) }
 			target="_top"
 		>
-			{ __( 'Add new attribute', 'woo-gutenberg-products-block' ) + ' ' }
+			{ __( 'Add new attribute', 'woocommerce' ) + ' ' }
 			<Icon icon={ external } />
 		</Button>
 		<Button
@@ -49,7 +49,7 @@ export const NoAttributesPlaceholder = () => (
 			href="https://docs.woocommerce.com/document/managing-product-taxonomies/"
 			target="_blank"
 		>
-			{ __( 'Learn more', 'woo-gutenberg-products-block' ) }
+			{ __( 'Learn more', 'woocommerce' ) }
 		</Button>
 	</AttributesPlaceholder>
 );

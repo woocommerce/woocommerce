@@ -83,24 +83,21 @@ const Pagination = ( {
 			<Label
 				screenReaderLabel={ __(
 					'Navigate to another page',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			/>
 			{ displayNextAndPreviousArrows && (
 				<button
 					className="wc-block-pagination-page wc-block-components-pagination__page wc-block-components-pagination-page--arrow"
 					onClick={ () => onPageChange( currentPage - 1 ) }
-					title={ __(
-						'Previous page',
-						'woo-gutenberg-products-block'
-					) }
+					title={ __( 'Previous page', 'woocommerce' ) }
 					disabled={ currentPage <= 1 }
 				>
 					<Label
 						label="&larr;"
 						screenReaderLabel={ __(
 							'Previous page',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					/>
 				</button>
@@ -124,7 +121,7 @@ const Pagination = ( {
 						label={ '1' }
 						screenReaderLabel={ sprintf(
 							/* translators: %d is the page number (1, 2, 3...). */
-							__( 'Page %d', 'woo-gutenberg-products-block' ),
+							__( 'Page %d', 'woocommerce' ),
 							1
 						) }
 					/>
@@ -135,7 +132,7 @@ const Pagination = ( {
 					className="wc-block-pagination-ellipsis wc-block-components-pagination__ellipsis"
 					aria-hidden="true"
 				>
-					{ __( '…', 'woo-gutenberg-products-block' ) }
+					{ __( '…', 'woocommerce' ) }
 				</span>
 			) }
 			{ pages.map( ( page ) => {
@@ -163,7 +160,7 @@ const Pagination = ( {
 							label={ page.toString() }
 							screenReaderLabel={ sprintf(
 								/* translators: %d is the page number (1, 2, 3...). */
-								__( 'Page %d', 'woo-gutenberg-products-block' ),
+								__( 'Page %d', 'woocommerce' ),
 								page
 							) }
 						/>
@@ -175,7 +172,7 @@ const Pagination = ( {
 					className="wc-block-pagination-ellipsis wc-block-components-pagination__ellipsis"
 					aria-hidden="true"
 				>
-					{ __( '…', 'woo-gutenberg-products-block' ) }
+					{ __( '…', 'woocommerce' ) }
 				</span>
 			) }
 			{ showLastPage && (
@@ -197,7 +194,7 @@ const Pagination = ( {
 						label={ totalPages.toString() }
 						screenReaderLabel={ sprintf(
 							/* translators: %d is the page number (1, 2, 3...). */
-							__( 'Page %d', 'woo-gutenberg-products-block' ),
+							__( 'Page %d', 'woocommerce' ),
 							totalPages
 						) }
 					/>
@@ -207,15 +204,12 @@ const Pagination = ( {
 				<button
 					className="wc-block-pagination-page wc-block-components-pagination__page wc-block-components-pagination-page--arrow"
 					onClick={ () => onPageChange( currentPage + 1 ) }
-					title={ __( 'Next page', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Next page', 'woocommerce' ) }
 					disabled={ currentPage >= totalPages }
 				>
 					<Label
 						label="&rarr;"
-						screenReaderLabel={ __(
-							'Next page',
-							'woo-gutenberg-products-block'
-						) }
+						screenReaderLabel={ __( 'Next page', 'woocommerce' ) }
 					/>
 				</button>
 			) }

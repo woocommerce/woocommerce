@@ -118,10 +118,7 @@ const Edit = ( {
 			{ isFeaturePluginBuild() && (
 				<InspectorControls key="inspector">
 					<PanelBody
-						title={ __(
-							'Dimensions',
-							'woo-gutenberg-products-block'
-						) }
+						title={ __( 'Dimensions', 'woocommerce' ) }
 						initialOpen
 					>
 						<UnitControl

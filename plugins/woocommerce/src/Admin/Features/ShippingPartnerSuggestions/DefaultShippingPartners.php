@@ -45,6 +45,7 @@ class DefaultShippingPartners {
 
 		return array(
 			array(
+				'id'                => 'woocommerce-shipstation-integration',
 				'name'              => 'ShipStation',
 				'slug'              => 'woocommerce-shipstation-integration',
 				'description'       => __( 'Powerful yet easy-to-use solution:', 'woocommerce' ),
@@ -90,6 +91,7 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'row', 'column' ),
 			),
 			array(
+				'id'                => 'skydropx-cotizador-y-envios',
 				'name'              => 'Skydropx',
 				'slug'              => 'skydropx-cotizador-y-envios',
 				'layout_column'     => array(
@@ -99,11 +101,12 @@ class DefaultShippingPartners {
 				'description'       => '',
 				'learn_more_link'   => 'https://wordpress.org/plugins/skydropx-cotizador-y-envios/',
 				'is_visible'        => array(
-					self::get_rules_for_countries( array( 'MX', 'CO' ) ),
+					self::get_rules_for_countries( array() ), // No countries eligible for SkydropX promotion at this time.
 				),
 				'available_layouts' => array( 'column' ),
 			),
 			array(
+				'id'                => 'envia',
 				'name'              => 'Envia',
 				'slug'              => '',
 				'description'       => '',
@@ -118,6 +121,50 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'column' ),
 			),
 			array(
+				'id'                => 'easyship-woocommerce-shipping-rates',
+				'name'              => 'Easyship',
+				'slug'              => 'easyship-woocommerce-shipping-rates',
+				'description'       => __( 'Simplified shipping with: ', 'woocommerce' ),
+				'layout_column'     => array(
+					'image'    => $asset_base_url . 'easyship-column.svg',
+					'features' => $column_layout_features,
+				),
+				'layout_row'        => array(
+					'image'    => $asset_base_url . 'easyship-row.svg',
+					'features' => array(
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Highly discounted shipping rates', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __(
+								'Seamless order sync and label printing',
+								'woocommerce'
+							),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Branded tracking experience', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Built-in Tax & Duties paperwork', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Free Plan Available', 'woocommerce' ),
+						),
+					),
+				),
+				'learn_more_link'   => 'https://woo.com/products/easyship-shipping-rates/',
+				'is_visible'        => array(
+					self::get_rules_for_countries( array( 'SG', 'HK', 'AU', 'NZ' ) ),
+				),
+				'available_layouts' => array( 'row', 'column' ),
+			),
+			array(
+				'id'                => 'sendcloud-shipping',
 				'name'              => 'Sendcloud',
 				'slug'              => 'sendcloud-shipping',
 				'description'       => __( 'All-in-one shipping tool:', 'woocommerce' ),
@@ -161,6 +208,7 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'row', 'column' ),
 			),
 			array(
+				'id'                => 'packlink-pro-shipping',
 				'name'              => 'Packlink',
 				'slug'              => 'packlink-pro-shipping',
 				'description'       => __( 'Optimize your full shipping process:', 'woocommerce' ),
@@ -209,6 +257,7 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'row', 'column' ),
 			),
 			array(
+				'id'                => 'woocommerce-services',
 				'name'              => 'WooCommerce Shipping',
 				'slug'              => 'woocommerce-services',
 				'description'       => __( 'Save time and money by printing your shipping labels right from your computer with WooCommerce Shipping. Try WooCommerce Shipping for free.', 'woocommerce' ),

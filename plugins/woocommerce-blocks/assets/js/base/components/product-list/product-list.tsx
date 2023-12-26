@@ -93,7 +93,7 @@ const announceLoadingCompletion = ( totalProducts: number ): void => {
 	}
 
 	if ( totalProducts === 0 ) {
-		speak( __( 'No products found', 'woo-gutenberg-products-block' ) );
+		speak( __( 'No products found', 'woocommerce' ) );
 	} else {
 		speak(
 			sprintf(
@@ -102,7 +102,7 @@ const announceLoadingCompletion = ( totalProducts: number ): void => {
 					'%d product found',
 					'%d products found',
 					totalProducts,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				totalProducts
 			)

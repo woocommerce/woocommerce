@@ -66,7 +66,8 @@ export function HeaderToolbar( {
 		return {
 			isTextModeEnabled: getEditorMode() === 'text',
 			isInserterEnabled: hasInserterItems(
-				getBlockRootClientId( getBlockSelectionEnd() )
+				getBlockRootClientId( getBlockSelectionEnd() ?? '' ) ??
+					undefined
 			),
 		};
 	}, [] );

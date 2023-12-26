@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
 
 /**
- * Simple Product Template.
+ * Product Variation Template.
  */
 class ProductVariationTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
 	/**
@@ -28,7 +28,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	const SINGLE_VARIATION_NOTICE_DISMISSED_OPTION = 'woocommerce_single_variation_notice_dismissed';
 
 	/**
-	 * SimpleProductTemplate constructor.
+	 * ProductVariationTemplate constructor.
 	 */
 	public function __construct() {
 		$this->add_group_blocks();
@@ -405,43 +405,24 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				),
 			)
 		);
-		$product_inventory_quantity_conditional = $product_inventory_inner_section->add_block(
+		$product_inventory_inner_section->add_block(
 			array(
-				'id'         => 'product-variation-inventory-quantity-conditional-wrapper',
-				'blockName'  => 'woocommerce/conditional',
-				'order'      => 30,
-				'attributes' => array(
-					'mustMatch' => array(
-						'manage_stock' => array( true ),
+				'id'             => 'product-variation-inventory-quantity',
+				'blockName'      => 'woocommerce/product-inventory-quantity-field',
+				'order'          => 10,
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.manage_stock === false',
 					),
 				),
 			)
 		);
-		$product_inventory_quantity_conditional->add_block(
+		$product_inventory_section->add_block(
 			array(
-				'id'        => 'product-variation-inventory-quantity',
-				'blockName' => 'woocommerce/product-inventory-quantity-field',
-				'order'     => 10,
-			)
-		);
-		$product_stock_status_conditional = $product_inventory_section->add_block(
-			array(
-				'id'         => 'product-variation-stock-status-conditional-wrapper',
-				'blockName'  => 'woocommerce/conditional',
-				'order'      => 20,
-				'attributes' => array(
-					'mustMatch' => array(
-						'manage_stock' => array( false ),
-					),
-				),
-			)
-		);
-		$product_stock_status_conditional->add_block(
-			array(
-				'id'         => 'product-variation-stock-status',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
-				'attributes' => array(
+				'id'             => 'product-variation-stock-status',
+				'blockName'      => 'woocommerce/product-radio-field',
+				'order'          => 10,
+				'attributes'     => array(
 					'title'    => __( 'Stock status', 'woocommerce' ),
 					'property' => 'stock_status',
 					'options'  => array(
@@ -457,6 +438,11 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 							'label' => __( 'On backorder', 'woocommerce' ),
 							'value' => 'onbackorder',
 						),
+					),
+				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.manage_stock === true',
 					),
 				),
 			)

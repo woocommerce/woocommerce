@@ -60,7 +60,7 @@ const PickupLocation = (): JSX.Element | null => {
 		<span className="wc-block-components-shipping-address">
 			{ sprintf(
 				/* translators: %s: shipping method name, e.g. "Amazon Locker" */
-				__( 'Collection from %s', 'woo-gutenberg-products-block' ),
+				__( 'Collection from %s', 'woocommerce' ),
 				pickupAddress
 			) + ' ' }
 		</span>

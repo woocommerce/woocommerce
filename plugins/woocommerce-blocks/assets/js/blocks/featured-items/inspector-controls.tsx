@@ -105,14 +105,9 @@ export const InspectorControls = ( {
 
 	return (
 		<GutenbergInspectorControls key="inspector">
-			<PanelBody
-				title={ __( 'Content', 'woo-gutenberg-products-block' ) }
-			>
+			<PanelBody title={ __( 'Content', 'woocommerce' ) }>
 				<ToggleControl
-					label={ __(
-						'Show description',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Show description', 'woocommerce' ) }
 					checked={ showDesc }
 					onChange={ () => setAttributes( { showDesc: ! showDesc } ) }
 				/>
@@ -122,15 +117,12 @@ export const InspectorControls = ( {
 				<>
 					{ focalPointPickerExists && (
 						<PanelBody
-							title={ __(
-								'Media settings',
-								'woo-gutenberg-products-block'
-							) }
+							title={ __( 'Media settings', 'woocommerce' ) }
 						>
 							<ToggleControl
 								label={ __(
 									'Fixed background',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 								checked={ hasParallax }
 								onChange={ () => {
@@ -142,7 +134,7 @@ export const InspectorControls = ( {
 							<ToggleControl
 								label={ __(
 									'Repeated background',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 								checked={ isRepeated }
 								onChange={ () => {
@@ -163,21 +155,18 @@ export const InspectorControls = ( {
 											>
 												{ __(
 													'Select “Cover” to have the image automatically fit its container.',
-													'woo-gutenberg-products-block'
+													'woocommerce'
 												) }
 											</span>
 											<span>
 												{ __(
 													'This may affect your ability to freely move the focal point of the image.',
-													'woo-gutenberg-products-block'
+													'woocommerce'
 												) }
 											</span>
 										</>
 									}
-									label={ __(
-										'Image fit',
-										'woo-gutenberg-products-block'
-									) }
+									label={ __( 'Image fit', 'woocommerce' ) }
 									value={ imageFit }
 									onChange={ ( value: ImageFit ) =>
 										setAttributes( {
@@ -186,18 +175,12 @@ export const InspectorControls = ( {
 									}
 								>
 									<ToggleGroupControlOption
-										label={ __(
-											'None',
-											'woo-gutenberg-products-block'
-										) }
+										label={ __( 'None', 'woocommerce' ) }
 										value="none"
 									/>
 									<ToggleGroupControlOption
 										/* translators: "Cover" is a verb that indicates an image covering the entire container. */
-										label={ __(
-											'Cover',
-											'woo-gutenberg-products-block'
-										) }
+										label={ __( 'Cover', 'woocommerce' ) }
 										value="cover"
 									/>
 								</ToggleGroupControl>
@@ -205,7 +188,7 @@ export const InspectorControls = ( {
 							<FocalPointPicker
 								label={ __(
 									'Focal Point Picker',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								) }
 								url={ backgroundImageSrc }
 								value={ focalPoint }
@@ -219,7 +202,7 @@ export const InspectorControls = ( {
 								<TextareaControl
 									label={ __(
 										'Alt text (alternative text)',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 									value={ alt }
 									onChange={ ( value: string ) => {
@@ -230,7 +213,7 @@ export const InspectorControls = ( {
 											<ExternalLink href="https://www.w3.org/WAI/tutorials/images/decision-tree">
 												{ __(
 													'Describe the purpose of the image',
-													'woo-gutenberg-products-block'
+													'woocommerce'
 												) }
 											</ExternalLink>
 										</>
@@ -242,10 +225,7 @@ export const InspectorControls = ( {
 					<PanelColorGradientSettings
 						__experimentalHasMultipleOrigins
 						__experimentalIsRenderedInSidebar
-						title={ __(
-							'Overlay',
-							'woo-gutenberg-products-block'
-						) }
+						title={ __( 'Overlay', 'woocommerce' ) }
 						initialOpen={ true }
 						settings={ [
 							{
@@ -259,18 +239,12 @@ export const InspectorControls = ( {
 										overlayGradient: value,
 									} );
 								},
-								label: __(
-									'Color',
-									'woo-gutenberg-products-block'
-								),
+								label: __( 'Color', 'woocommerce' ),
 							},
 						] }
 					>
 						<RangeControl
-							label={ __(
-								'Opacity',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'Opacity', 'woocommerce' ) }
 							value={ dimRatio }
 							onChange={ ( value ) =>
 								setAttributes( { dimRatio: value as number } )
@@ -325,7 +299,7 @@ export const withInspectorControls =
 		const contentPanel =
 			name === BLOCK_NAMES.featuredProduct ? (
 				<ToggleControl
-					label={ __( 'Show price', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Show price', 'woocommerce' ) }
 					checked={ showPrice }
 					onChange={ () =>
 						setAttributes( {

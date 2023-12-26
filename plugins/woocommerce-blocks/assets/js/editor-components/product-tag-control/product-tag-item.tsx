@@ -40,7 +40,7 @@ export const ProductTagItem = ( {
 					'%1$d product tagged as %2$s',
 					'%1$d products tagged as %2$s',
 					item.count,
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				item.count,
 				accessibleName

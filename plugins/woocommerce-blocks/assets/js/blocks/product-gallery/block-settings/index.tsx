@@ -28,12 +28,7 @@ export const ProductGalleryBlockSettings = ( {
 	} = context;
 	return (
 		<InspectorControls>
-			<PanelBody
-				title={ __(
-					'Gallery Navigation',
-					'woo-gutenberg-products-block'
-				) }
-			>
+			<PanelBody title={ __( 'Gallery Navigation', 'woocommerce' ) }>
 				<ProductGalleryPagerBlockSettings
 					context={ { productGalleryClientId, pagerDisplayMode } }
 				/>
@@ -51,17 +46,12 @@ export const ProductGalleryBlockSettings = ( {
 					} }
 				/>
 			</PanelBody>
-			<PanelBody
-				title={ __( 'Media Settings', 'woo-gutenberg-products-block' ) }
-			>
+			<PanelBody title={ __( 'Media Settings', 'woocommerce' ) }>
 				<ToggleControl
-					label={ __(
-						'Crop images to fit',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Crop images to fit', 'woocommerce' ) }
 					help={ __(
 						'Images will be cropped to fit within a square space.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					checked={ cropImages }
 					onChange={ () =>
@@ -72,13 +62,10 @@ export const ProductGalleryBlockSettings = ( {
 					className="wc-block-product-gallery__crop-images"
 				/>
 				<ToggleControl
-					label={ __(
-						'Zoom while hovering',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Zoom while hovering', 'woocommerce' ) }
 					help={ __(
 						'While hovering the large image will zoom in by 30%.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					checked={ hoverZoom }
 					onChange={ () =>
@@ -88,13 +75,10 @@ export const ProductGalleryBlockSettings = ( {
 					}
 				/>
 				<ToggleControl
-					label={ __(
-						'Full-screen when clicked',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Full-screen when clicked', 'woocommerce' ) }
 					help={ __(
 						'Clicking on the large image will open a full-screen gallery experience.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					checked={ fullScreenOnClick }
 					onChange={ () =>

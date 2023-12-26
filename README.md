@@ -25,10 +25,10 @@ nvm use
 # Install the PHP and Composer dependencies for all of the plugins, packages, and tools
 pnpm install
 # Build all of the plugins, packages, and tools in the monorepo
-pnpm run build
+pnpm build
 ```
 
-At this point you are now ready to begin developing and testing. All of the build outputs are cached running `pnpm run build` again will only build the plugins, packages, and tools that have changed since the last time you ran the command.
+At this point you are now ready to begin developing and testing. All of the build outputs are cached running `pnpm build` again will only build the plugins, packages, and tools that have changed since the last time you ran the command.
 
 Check out [our development guide](DEVELOPMENT.md) if you would like a more comprehensive look at working in our repository.
 

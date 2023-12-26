@@ -25,6 +25,10 @@ export function VariationActionsMenu( {
 }: VariationActionsMenuProps ) {
 	return (
 		<DropdownMenu
+			popoverProps={ {
+				// @ts-expect-error missing TS.
+				placement: 'left-start',
+			} }
 			icon={ moreVertical }
 			label={ __( 'Actions', 'woocommerce' ) }
 			toggleProps={ {

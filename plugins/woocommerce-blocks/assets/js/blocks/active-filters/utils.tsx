@@ -24,7 +24,7 @@ export const formatPriceRange = ( minPrice: number, maxPrice: number ) => {
 	if ( Number.isFinite( minPrice ) && Number.isFinite( maxPrice ) ) {
 		return sprintf(
 			/* translators: %1$s min price, %2$s max price */
-			__( 'Between %1$s and %2$s', 'woo-gutenberg-products-block' ),
+			__( 'Between %1$s and %2$s', 'woocommerce' ),
 			formatPrice( minPrice ),
 			formatPrice( maxPrice )
 		);
@@ -33,14 +33,14 @@ export const formatPriceRange = ( minPrice: number, maxPrice: number ) => {
 	if ( Number.isFinite( minPrice ) ) {
 		return sprintf(
 			/* translators: %s min price */
-			__( 'From %s', 'woo-gutenberg-products-block' ),
+			__( 'From %s', 'woocommerce' ),
 			formatPrice( minPrice )
 		);
 	}
 
 	return sprintf(
 		/* translators: %s max price */
-		__( 'Up to %s', 'woo-gutenberg-products-block' ),
+		__( 'Up to %s', 'woocommerce' ),
 		formatPrice( maxPrice )
 	);
 };
@@ -86,7 +86,7 @@ export const renderRemovableListItem = ( {
 	);
 	const removeText = sprintf(
 		/* translators: %s attribute value used in the filter. For example: yellow, green, small, large. */
-		__( 'Remove %s filter', 'woo-gutenberg-products-block' ),
+		__( 'Remove %s filter', 'woocommerce' ),
 		name
 	);
 

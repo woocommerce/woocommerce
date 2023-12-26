@@ -70,7 +70,7 @@ export const updateTotals = (
 							'%1$d item in cart',
 							'%1$d items in cart',
 							quantity,
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						quantity
 				  )
@@ -80,7 +80,7 @@ export const updateTotals = (
 							'%1$d item in cart, total price of %2$s',
 							'%1$d items in cart, total price of %2$s',
 							quantity,
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						),
 						quantity,
 						amount

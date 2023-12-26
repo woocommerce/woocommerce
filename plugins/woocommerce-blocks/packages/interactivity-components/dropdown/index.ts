@@ -3,15 +3,21 @@
  */
 import { getContext, store } from '@woocommerce/interactivity';
 
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
 export type DropdownContext = {
-	currentItem: {
+	selectType: 'multiple' | 'single';
+	item: {
 		label: string;
 		value: string;
 	};
-	selectedItem: {
+	selectedItems: {
 		label: string | null;
 		value: string | null;
-	};
+	}[];
 	hoveredItem: {
 		label: string | null;
 		value: string | null;
@@ -19,25 +25,45 @@ export type DropdownContext = {
 	isOpen: boolean;
 };
 
-store( 'woocommerce/interactivity-dropdown', {
+type DropdownStore = {
 	state: {
-		get placeholderText() {
-			const context = getContext< DropdownContext >();
-			const { selectedItem } = context;
+		placeholderText: string;
+		isSelected: boolean;
+	};
 
-			return selectedItem.label || 'Select an option';
+	actions: {
+		toggleIsOpen: () => void;
+		selectDropdownItem: ( event: MouseEvent ) => void;
+		unselectDropdownItem: ( event: MouseEvent ) => void;
+	};
+};
+
+store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
+	state: {
+		get placeholderText(): string {
+			const { selectType, selectedItems } =
+				getContext< DropdownContext >();
+
+			if ( selectType === 'single' ) {
+				return selectedItems?.length && selectedItems[ 0 ].label
+					? selectedItems[ 0 ]?.label
+					: 'Select an option';
+			} else if (
+				selectType === 'multiple' &&
+				selectedItems.length === 0
+			) {
+				return 'Select options';
+			}
+
+			return '';
 		},
-		get isSelected() {
-			const context = getContext< DropdownContext >();
 
-			const {
-				currentItem: { value },
-			} = context;
+		get isSelected(): boolean {
+			const { item, selectedItems } = getContext< DropdownContext >();
 
-			return (
-				context.selectedItem.value === value ||
-				context.hoveredItem.value === value
-			);
+			return selectedItems.some( ( i ) => {
+				return i.value === item.value && i.label === item.label;
+			} );
 		},
 	},
 	actions: {
@@ -46,47 +72,53 @@ store( 'woocommerce/interactivity-dropdown', {
 
 			context.isOpen = ! context.isOpen;
 		},
+		unselectDropdownItem: ( event: MouseEvent ) => {
+			const context = getContext< DropdownContext >();
+
+			const {
+				item: { label, value },
+				selectedItems,
+			} = context;
+
+			const items = selectedItems || [];
+			const selectedItemIndex = items.findIndex(
+				( item ) => item.value === value && item.label === label
+			);
+
+			if ( selectedItemIndex !== -1 ) {
+				items.splice( selectedItemIndex, 1 );
+			}
+
+			event.stopPropagation();
+		},
 		selectDropdownItem: ( event: MouseEvent ) => {
 			const context = getContext< DropdownContext >();
 
 			const {
-				currentItem: { label, value },
+				item: { label, value },
+				selectedItems,
 			} = context;
 
-			const { selectedItem } = context;
+			// check if item already selected
+			const selectedItemIndex = selectedItems.findIndex(
+				( item ) => item.value === value && item.label === label
+			);
 
-			if (
-				selectedItem.value === value &&
-				selectedItem.label === label
-			) {
-				context.selectedItem = {
-					label: null,
-					value: null,
-				};
-			} else {
-				context.selectedItem = { label, value };
+			if ( selectedItemIndex !== -1 ) {
+				selectedItems.splice( selectedItemIndex, 1 );
+			}
+
+			if ( context.selectType === 'single' && selectedItemIndex === -1 ) {
+				selectedItems.splice( 0, 1, { label, value } );
+			} else if ( selectedItemIndex === -1 ) {
+				selectedItems.push( {
+					label,
+					value,
+				} );
 			}
 
 			context.isOpen = false;
-
 			event.stopPropagation();
-		},
-		addHoverClass: () => {
-			const context = getContext< DropdownContext >();
-
-			const {
-				currentItem: { label, value },
-			} = context;
-
-			context.hoveredItem = { label, value };
-		},
-		removeHoverClass: () => {
-			const context = getContext< DropdownContext >();
-
-			context.hoveredItem = {
-				label: null,
-				value: null,
-			};
 		},
 	},
 } );

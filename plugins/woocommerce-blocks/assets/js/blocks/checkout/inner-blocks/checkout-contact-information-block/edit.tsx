@@ -44,22 +44,19 @@ export const Edit = ( {
 				<PanelBody
 					title={ __(
 						'Account creation and guest checkout',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				>
 					<p className="wc-block-checkout__controls-text">
 						{ __(
 							'Account creation and guest checkout settings can be managed in your store settings.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</p>
 					<ExternalLink
 						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=account` }
 					>
-						{ __(
-							'Manage account settings',
-							'woo-gutenberg-products-block'
-						) }
+						{ __( 'Manage account settings', 'woocommerce' ) }
 					</ExternalLink>
 				</PanelBody>
 			</InspectorControls>

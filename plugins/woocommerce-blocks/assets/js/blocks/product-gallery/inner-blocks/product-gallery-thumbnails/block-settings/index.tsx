@@ -31,19 +31,19 @@ import type { ProductGalleryThumbnailsSettingsProps } from '../../../types';
 const positionHelp: Record< ThumbnailsPosition, string > = {
 	[ ThumbnailsPosition.OFF ]: __(
 		'No thumbnails will be displayed.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	[ ThumbnailsPosition.LEFT ]: __(
 		'A strip of small images will appear to the left of the main gallery image.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	[ ThumbnailsPosition.BOTTOM ]: __(
 		'A strip of small images will appear below the main gallery image.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 	[ ThumbnailsPosition.RIGHT ]: __(
 		'A strip of small images will appear to the right of the main gallery image.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	),
 };
 
@@ -61,7 +61,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 			<ToggleGroupControl
 				className="wc-block-editor-product-gallery-thumbnails__position-toggle"
 				isBlock={ true }
-				label={ __( 'Thumbnails', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Thumbnails', 'woocommerce' ) }
 				value={ context.thumbnailsPosition }
 				help={
 					positionHelp[
@@ -76,7 +76,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 			>
 				<ToggleGroupControlOption
 					value={ ThumbnailsPosition.OFF }
-					label={ __( 'Off', 'woo-gutenberg-products-block' ) }
+					label={ __( 'Off', 'woocommerce' ) }
 				/>
 				<ToggleGroupControlOption
 					value={ ThumbnailsPosition.LEFT }
@@ -99,10 +99,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 			</ToggleGroupControl>
 			{ context.thumbnailsPosition !== ThumbnailsPosition.OFF && (
 				<RangeControl
-					label={ __(
-						'Number of Thumbnails',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Number of Thumbnails', 'woocommerce' ) }
 					value={ context.thumbnailsNumberOfThumbnails }
 					onChange={ ( value: number ) =>
 						updateBlockAttributes( productGalleryClientId, {
@@ -111,7 +108,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 					}
 					help={ __(
 						'Choose how many thumbnails (3-8) will display. If more images exist, a “View all” button will display.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					max={ maxNumberOfThumbnails }
 					min={ minNumberOfThumbnails }

@@ -36,7 +36,7 @@ const Edit = () => {
 					<p>
 						{ __(
 							'These products will vary depending on the main product in the page',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</p>
 				</Notice>

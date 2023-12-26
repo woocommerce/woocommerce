@@ -48,7 +48,7 @@ const EditorContainerBlock = ( {
 			<Placeholder icon={ icon } label={ name }>
 				{ __(
 					'The content for this block is hidden due to block settings.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</Placeholder>
 		);

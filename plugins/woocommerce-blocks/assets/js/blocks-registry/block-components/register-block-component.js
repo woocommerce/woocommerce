@@ -9,6 +9,47 @@ import deprecated from '@wordpress/deprecated';
 import { registeredBlockComponents } from './registered-block-components-init';
 
 /**
+ * Asserts that an option is of the given type. Otherwise, throws an error.
+ *
+ * @throws Will throw an error if the type of the option doesn't match the expected type.
+ * @param {Object} options      Object containing the option to validate.
+ * @param {string} optionName   Name of the option to validate.
+ * @param {string} expectedType Type expected for the option.
+ */
+const assertOption = ( options, optionName, expectedType ) => {
+	const actualType = typeof options[ optionName ];
+	if ( actualType !== expectedType ) {
+		throw new Error(
+			`Incorrect value for the ${ optionName } argument when registering a block component. It was a ${ actualType }, but must be a ${ expectedType }.`
+		);
+	}
+};
+
+/**
+ * Asserts that an option is a valid react element or lazy callback. Otherwise, throws an error.
+ *
+ * @throws Will throw an error if the type of the option doesn't match the expected type.
+ * @param {Object} options    Object containing the option to validate.
+ * @param {string} optionName Name of the option to validate.
+ */
+const assertBlockComponent = ( options, optionName ) => {
+	if ( options[ optionName ] ) {
+		if ( typeof options[ optionName ] === 'function' ) {
+			return;
+		}
+		if (
+			options[ optionName ].$$typeof &&
+			options[ optionName ].$$typeof === Symbol.for( 'react.lazy' )
+		) {
+			return;
+		}
+	}
+	throw new Error(
+		`Incorrect value for the ${ optionName } argument when registering a block component. Component must be a valid React Element or Lazy callback.`
+	);
+};
+
+/**
  * Register a Block Component.
  *
  * WooCommerce Blocks allows React Components to be used on the frontend of the store in place of
@@ -41,47 +82,6 @@ export function registerBlockComponent( options ) {
 
 	registeredBlockComponents[ context ][ blockName ] = component;
 }
-
-/**
- * Asserts that an option is a valid react element or lazy callback. Otherwise, throws an error.
- *
- * @throws Will throw an error if the type of the option doesn't match the expected type.
- * @param {Object} options    Object containing the option to validate.
- * @param {string} optionName Name of the option to validate.
- */
-const assertBlockComponent = ( options, optionName ) => {
-	if ( options[ optionName ] ) {
-		if ( typeof options[ optionName ] === 'function' ) {
-			return;
-		}
-		if (
-			options[ optionName ].$$typeof &&
-			options[ optionName ].$$typeof === Symbol.for( 'react.lazy' )
-		) {
-			return;
-		}
-	}
-	throw new Error(
-		`Incorrect value for the ${ optionName } argument when registering a block component. Component must be a valid React Element or Lazy callback.`
-	);
-};
-
-/**
- * Asserts that an option is of the given type. Otherwise, throws an error.
- *
- * @throws Will throw an error if the type of the option doesn't match the expected type.
- * @param {Object} options      Object containing the option to validate.
- * @param {string} optionName   Name of the option to validate.
- * @param {string} expectedType Type expected for the option.
- */
-const assertOption = ( options, optionName, expectedType ) => {
-	const actualType = typeof options[ optionName ];
-	if ( actualType !== expectedType ) {
-		throw new Error(
-			`Incorrect value for the ${ optionName } argument when registering a block component. It was a ${ actualType }, but must be a ${ expectedType }.`
-		);
-	}
-};
 
 /**
  * Alias of registerBlockComponent kept for backwards compatibility.

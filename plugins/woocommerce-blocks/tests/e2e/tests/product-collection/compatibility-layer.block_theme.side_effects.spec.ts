@@ -19,7 +19,7 @@ type Scenario = {
 	amount: number;
 };
 
-const singleOccurranceScenarios: Scenario[] = [
+const singleOccurrenceScenarios: Scenario[] = [
 	{
 		title: 'Before Main Content',
 		dataTestId: 'woocommerce_before_main_content',
@@ -46,7 +46,7 @@ const singleOccurranceScenarios: Scenario[] = [
 	},
 ];
 
-const multipleOccurranceScenarios: Scenario[] = [
+const multipleOccurrenceScenarios: Scenario[] = [
 	{
 		title: 'Before Shop Loop Item Title',
 		dataTestId: 'woocommerce_before_shop_loop_item_title',
@@ -79,7 +79,7 @@ const multipleOccurranceScenarios: Scenario[] = [
 	},
 ];
 
-const compatiblityPluginFileName = 'compatibility-plugin.php';
+const compatibilityPluginFileName = 'compatibility-plugin.php';
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async (
 		{ page, admin, editor, templateApiUtils, editorUtils },
@@ -100,53 +100,44 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 test.describe( 'Compatibility Layer with Product Collection block', () => {
 	test.beforeAll( async () => {
 		await installPluginFromPHPFile(
-			`${ __dirname }/${ compatiblityPluginFileName }`
+			`${ __dirname }/${ compatibilityPluginFileName }`
 		);
 	} );
 
-	test.describe(
-		'Product Archive with Product Collection block',
-		async () => {
-			test.beforeEach( async ( { pageObject } ) => {
-				await pageObject.replaceProductsWithProductCollectionInTemplate(
-					'woocommerce/woocommerce//archive-product'
-				);
-				await pageObject.goToProductCatalogFrontend();
+	test.describe( 'Product Archive with Product Collection block', async () => {
+		test.beforeEach( async ( { pageObject } ) => {
+			await pageObject.replaceProductsWithProductCollectionInTemplate(
+				'woocommerce/woocommerce//archive-product'
+			);
+			await pageObject.goToProductCatalogFrontend();
+		} );
+
+		for ( const scenario of singleOccurrenceScenarios ) {
+			test( `${ scenario.title } is attached to the page`, async ( {
+				pageObject,
+			} ) => {
+				const hooks = pageObject.locateByTestId( scenario.dataTestId );
+
+				await expect( hooks ).toHaveCount( scenario.amount );
+				await expect( hooks ).toHaveText( scenario.content );
 			} );
-
-			for ( const scenario of singleOccurranceScenarios ) {
-				test( `${ scenario.title } is attached to the page`, async ( {
-					pageObject,
-				} ) => {
-					const hooks = pageObject.locateByTestId(
-						scenario.dataTestId
-					);
-
-					await expect( hooks ).toHaveCount( scenario.amount );
-					await expect( hooks ).toHaveText( scenario.content );
-				} );
-			}
-
-			for ( const scenario of multipleOccurranceScenarios ) {
-				test( `${ scenario.title } is attached to the page`, async ( {
-					pageObject,
-				} ) => {
-					const hooks = pageObject.locateByTestId(
-						scenario.dataTestId
-					);
-
-					await expect( hooks ).toHaveCount( scenario.amount );
-					await expect( hooks.first() ).toHaveText(
-						scenario.content
-					);
-				} );
-			}
 		}
-	);
+
+		for ( const scenario of multipleOccurrenceScenarios ) {
+			test( `${ scenario.title } is attached to the page`, async ( {
+				pageObject,
+			} ) => {
+				const hooks = pageObject.locateByTestId( scenario.dataTestId );
+
+				await expect( hooks ).toHaveCount( scenario.amount );
+				await expect( hooks.first() ).toHaveText( scenario.content );
+			} );
+		}
+	} );
 
 	test.afterAll( async ( { requestUtils } ) => {
 		await uninstallPluginFromPHPFile(
-			`${ __dirname }/${ compatiblityPluginFileName }`
+			`${ __dirname }/${ compatibilityPluginFileName }`
 		);
 		await requestUtils.deleteAllTemplates( 'wp_template' );
 	} );

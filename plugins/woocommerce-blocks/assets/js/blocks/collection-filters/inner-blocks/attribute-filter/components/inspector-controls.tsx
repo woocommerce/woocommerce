@@ -3,11 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
+import { BlockEditProps } from '@wordpress/blocks';
 import {
 	PanelBody,
 	ToggleControl,
+	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
+	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
@@ -16,24 +19,19 @@ import {
  * Internal dependencies
  */
 import { AttributeSelectControls } from './attribute-select-controls';
-import { EditProps } from '../types';
+import { BlockAttributes } from '../types';
 
-export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
+export const Inspector = ( {
+	attributes,
+	setAttributes,
+}: BlockEditProps< BlockAttributes > ) => {
 	const { attributeId, showCounts, queryType, displayStyle, selectType } =
 		attributes;
 	return (
 		<InspectorControls key="inspector">
-			<PanelBody
-				title={ __(
-					'Display Settings',
-					'woo-gutenberg-products-block'
-				) }
-			>
+			<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
 				<ToggleControl
-					label={ __(
-						'Display product count',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Display product count', 'woocommerce' ) }
 					checked={ showCounts }
 					onChange={ () =>
 						setAttributes( {
@@ -44,7 +42,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				<ToggleGroupControl
 					label={ __(
 						'Allow selecting multiple options?',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 					value={ selectType || 'multiple' }
 					onChange={ ( value: string ) =>
@@ -56,31 +54,25 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				>
 					<ToggleGroupControlOption
 						value="multiple"
-						label={ __(
-							'Multiple',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Multiple', 'woocommerce' ) }
 					/>
 					<ToggleGroupControlOption
 						value="single"
-						label={ __( 'Single', 'woo-gutenberg-products-block' ) }
+						label={ __( 'Single', 'woocommerce' ) }
 					/>
 				</ToggleGroupControl>
 				{ selectType === 'multiple' && (
 					<ToggleGroupControl
-						label={ __(
-							'Filter Conditions',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Filter Conditions', 'woocommerce' ) }
 						help={
 							queryType === 'and'
 								? __(
 										'Choose to return filter results for all of the attributes selected.',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 								  )
 								: __(
 										'Choose to return filter results for any of the attributes selected.',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 								  )
 						}
 						value={ queryType }
@@ -93,25 +85,16 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 					>
 						<ToggleGroupControlOption
 							value="and"
-							label={ __(
-								'All',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'All', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="or"
-							label={ __(
-								'Any',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'Any', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 				) }
 				<ToggleGroupControl
-					label={ __(
-						'Display Style',
-						'woo-gutenberg-products-block'
-					) }
+					label={ __( 'Display Style', 'woocommerce' ) }
 					value={ displayStyle }
 					onChange={ ( value: string ) =>
 						setAttributes( {
@@ -122,22 +105,16 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				>
 					<ToggleGroupControlOption
 						value="list"
-						label={ __( 'List', 'woo-gutenberg-products-block' ) }
+						label={ __( 'List', 'woocommerce' ) }
 					/>
 					<ToggleGroupControlOption
 						value="dropdown"
-						label={ __(
-							'Dropdown',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Dropdown', 'woocommerce' ) }
 					/>
 				</ToggleGroupControl>
 			</PanelBody>
 			<PanelBody
-				title={ __(
-					'Content Settings',
-					'woo-gutenberg-products-block'
-				) }
+				title={ __( 'Content Settings', 'woocommerce' ) }
 				initialOpen={ false }
 			>
 				<AttributeSelectControls

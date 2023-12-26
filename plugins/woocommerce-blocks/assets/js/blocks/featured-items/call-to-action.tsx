@@ -51,10 +51,7 @@ export const CallToAction = ( {
 						[
 							'core/button',
 							{
-								text: __(
-									'Shop now',
-									'woo-gutenberg-products-block'
-								),
+								text: __( 'Shop now', 'woocommerce' ),
 								url: permalink,
 							},
 						],

@@ -46,7 +46,7 @@ const generateRate = (
 	price: string,
 	instanceID: number,
 	selected = false
-): typeof testPackage.shipping_rates[ 0 ] => {
+): ( typeof testPackage.shipping_rates )[ 0 ] => {
 	return {
 		rate_id: rateId,
 		name,

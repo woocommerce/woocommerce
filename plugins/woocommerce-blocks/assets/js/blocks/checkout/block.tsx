@@ -34,15 +34,9 @@ import { CheckoutBlockContext } from './context';
 const MustLoginPrompt = () => {
 	return (
 		<div className="wc-block-must-login-prompt">
-			{ __(
-				'You must be logged in to checkout.',
-				'woo-gutenberg-products-block'
-			) }{ ' ' }
+			{ __( 'You must be logged in to checkout.', 'woocommerce' ) }{ ' ' }
 			<a href={ LOGIN_TO_CHECKOUT_URL }>
-				{ __(
-					'Click here to log in.',
-					'woo-gutenberg-products-block'
-				) }
+				{ __( 'Click here to log in.', 'woocommerce' ) }
 			</a>
 		</div>
 	);
@@ -167,12 +161,12 @@ const Block = ( {
 		<BlockErrorBoundary
 			header={ __(
 				'Something went wrong. Please contact us for assistance.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 			text={ createInterpolateElement(
 				__(
 					'The checkout has encountered an unexpected error. <button>Try reloading the page</button>. If the error persists, please get in touch with us so we can assist.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				{
 					button: (

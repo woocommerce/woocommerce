@@ -60,8 +60,7 @@ To create a new package, add a new folder to `/packages`, containing…
     - Package description
     - Installation details
     - Usage example
-4. A `src` directory for the source of your module, which will be built by default using the `pnpm run turbo:build` command. Note that you'll want an `index.js` file that exports the package contents, see other packages for examples.
-
+4. A `src` directory for the source of your module. Note that you'll want an `index.js` file that exports the package contents, see other packages for examples.
 5. A blank Changelog file, `changelog.md`.
 
 ```

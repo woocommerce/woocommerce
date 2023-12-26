@@ -2,74 +2,34 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { Button, Modal } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { CustomizeStoreContext } from '..';
 export * from './use-onboarding-tour';
 
 type OnboardingTourProps = {
 	onClose: () => void;
+	skipTour: () => void;
+	takeTour: () => void;
 	showWelcomeTour: boolean;
-	setShowWelcomeTour: ( show: boolean ) => void;
 	setIsResizeHandleVisible: ( isVisible: boolean ) => void;
 };
 
 export const OnboardingTour = ( {
 	onClose,
-	setShowWelcomeTour,
+	skipTour,
+	takeTour,
 	showWelcomeTour,
 	setIsResizeHandleVisible,
 }: OnboardingTourProps ) => {
 	const [ placement, setPlacement ] =
 		useState< TourKitTypes.WooConfig[ 'placement' ] >( 'left' );
 
-	const { context } = useContext( CustomizeStoreContext );
-	const aiOnline = context.aiOnline;
-
 	if ( showWelcomeTour ) {
-		const takeTour = () => {
-			// Click on "Take a tour" button
-			recordEvent( 'customize_your_store_assembler_hub_tour_start' );
-			setShowWelcomeTour( false );
-		};
-
-		const skipTour = () => {
-			recordEvent( 'customize_your_store_assembler_hub_tour_skip' );
-			onClose();
-		};
-
-		if ( ! aiOnline ) {
-			return (
-				<Modal
-					className="woocommerce-customize-store__onboarding-welcome-modal"
-					title={ __( 'Welcome to your store!', 'woocommerce' ) }
-					onRequestClose={ skipTour }
-					shouldCloseOnClickOutside={ false }
-				>
-					<p>
-						{ __(
-							"We encountered some issues while generating content with AI. But don't worry — you can still customize the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
-							'woocommerce'
-						) }
-					</p>
-					<div className="woocommerce-customize-store__design-change-warning-modal-footer">
-						<Button onClick={ skipTour } variant="link">
-							{ __( 'Skip', 'woocommerce' ) }
-						</Button>
-						<Button onClick={ takeTour } variant="primary">
-							{ __( 'Take a tour', 'woocommerce' ) }
-						</Button>
-					</div>
-				</Modal>
-			);
-		}
-
 		return (
 			<TourKit
 				config={ {

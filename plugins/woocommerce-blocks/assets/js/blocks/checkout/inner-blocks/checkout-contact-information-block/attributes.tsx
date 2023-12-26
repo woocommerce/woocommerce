@@ -10,13 +10,10 @@ import formStepAttributes from '../../form-step/attributes';
 
 export default {
 	...formStepAttributes( {
-		defaultTitle: __(
-			'Contact information',
-			'woo-gutenberg-products-block'
-		),
+		defaultTitle: __( 'Contact information', 'woocommerce' ),
 		defaultDescription: __(
 			"We'll use this email to send you details and updates about your order.",
-			'woo-gutenberg-products-block'
+			'woocommerce'
 		),
 	} ),
 	className: {

@@ -93,10 +93,7 @@ const Editor = ( {
 			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 			{ /* @ts-ignore */ }
 			<BlockErrorBoundary
-				header={ __(
-					'Single Product Block Error',
-					'woo-gutenberg-products-block'
-				) }
+				header={ __( 'Single Product Block Error', 'woocommerce' ) }
 			>
 				<EditorBlockControls
 					setIsEditing={ setIsEditing }
@@ -120,7 +117,7 @@ const Editor = ( {
 									setIsEditing( false );
 								} }
 							>
-								{ __( 'Done', 'woo-gutenberg-products-block' ) }
+								{ __( 'Done', 'woocommerce' ) }
 							</Button>
 						</div>
 					</Placeholder>
@@ -128,10 +125,7 @@ const Editor = ( {
 					<div>
 						<InspectorControls>
 							<PanelBody
-								title={ __(
-									'Product',
-									'woo-gutenberg-products-block'
-								) }
+								title={ __( 'Product', 'woocommerce' ) }
 								initialOpen={ false }
 							>
 								<SharedProductControl

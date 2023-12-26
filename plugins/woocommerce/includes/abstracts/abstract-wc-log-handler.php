@@ -25,7 +25,7 @@ abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 	 * @return string Formatted time for use in log entry.
 	 */
 	protected static function format_time( $timestamp ) {
-		return date( 'c', $timestamp );
+		return gmdate( 'c', $timestamp );
 	}
 
 	/**
@@ -43,6 +43,14 @@ abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 		$level_string = strtoupper( $level );
 		$entry        = "{$time_string} {$level_string} {$message}";
 
+		/**
+		 * Filter the formatted log entry before it is written.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param string $entry The formatted entry.
+		 * @param array  $args  The raw data that gets assembled into a log entry.
+		 */
 		return apply_filters(
 			'woocommerce_format_log_entry',
 			$entry,

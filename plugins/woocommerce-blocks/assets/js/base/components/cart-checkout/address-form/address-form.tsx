@@ -5,6 +5,7 @@ import { isPostcode } from '@woocommerce/blocks-checkout';
 import {
 	ValidatedTextInput,
 	type ValidatedTextInputHandle,
+	CheckboxControl,
 } from '@woocommerce/blocks-components';
 import {
 	BillingCountryInput,
@@ -17,35 +18,27 @@ import {
 import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
-import { defaultAddressFields } from '@woocommerce/settings';
 import isShallowEqual from '@wordpress/is-shallow-equal';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
  */
-import {
-	AddressFormProps,
-	FieldType,
-	FieldConfig,
-	AddressFormFields,
-} from './types';
+import { AddressFormProps, FieldConfig, AddressFormFields } from './types';
 import prepareAddressFields from './prepare-address-fields';
 import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
-
-const defaultFields = Object.keys(
-	defaultAddressFields
-) as unknown as FieldType[];
+import Combobox from '../../combobox';
 
 /**
  * Checkout address form.
  */
 const AddressForm = ( {
 	id = '',
-	fields = defaultFields,
+	fields,
 	fieldConfig = {} as FieldConfig,
 	onChange,
-	type = 'shipping',
+	addressType = 'shipping',
 	values,
 }: AddressFormProps ): JSX.Element => {
 	const instanceId = useInstanceId( AddressForm );
@@ -64,11 +57,11 @@ const AddressForm = ( {
 		);
 		return {
 			fields: preparedFields,
-			type,
+			addressType,
 			required: preparedFields.filter( ( field ) => field.required ),
 			hidden: preparedFields.filter( ( field ) => field.hidden ),
 		};
-	}, [ currentFields, currentFieldConfig, currentCountry, type ] );
+	}, [ currentFields, currentFieldConfig, currentCountry, addressType ] );
 
 	// Stores refs for rendered fields so we can access them later.
 	const fieldsRef = useRef<
@@ -90,10 +83,10 @@ const AddressForm = ( {
 
 	// Maybe validate country when other fields change so user is notified that it's required.
 	useEffect( () => {
-		if ( type === 'shipping' ) {
+		if ( addressType === 'shipping' ) {
 			validateShippingCountry( values );
 		}
-	}, [ values, type ] );
+	}, [ values, addressType ] );
 
 	// Changing country may change format for postcodes.
 	useEffect( () => {
@@ -108,10 +101,25 @@ const AddressForm = ( {
 				if ( field.hidden ) {
 					return null;
 				}
-
+				if ( field.type === 'checkbox' ) {
+					return (
+						<CheckboxControl
+							className={ `wc-block-components-address-form__${ field.key }` }
+							label={ field.label }
+							key={ field.key }
+							checked={ Boolean( values[ field.key ] ) }
+							onChange={ ( checked: boolean ) => {
+								onChange( {
+									...values,
+									[ field.key ]: checked,
+								} );
+							} }
+						/>
+					);
+				}
 				const fieldProps = {
 					id: `${ id }-${ field.key }`,
-					errorId: `${ type }_${ field.key }`,
+					errorId: `${ addressType }_${ field.key }`,
 					label: field.required ? field.label : field.optionalLabel,
 					autoCapitalize: field.autocapitalize,
 					autoComplete: field.autocomplete,
@@ -122,7 +130,7 @@ const AddressForm = ( {
 
 				if ( field.key === 'country' ) {
 					const Tag =
-						type === 'shipping'
+						addressType === 'shipping'
 							? ShippingCountryInput
 							: BillingCountryInput;
 					return (
@@ -154,7 +162,7 @@ const AddressForm = ( {
 
 				if ( field.key === 'state' ) {
 					const Tag =
-						type === 'shipping'
+						addressType === 'shipping'
 							? ShippingStateInput
 							: BillingStateInput;
 					return (
@@ -169,6 +177,31 @@ const AddressForm = ( {
 									state: newValue,
 								} )
 							}
+						/>
+					);
+				}
+
+				if ( field.type === 'select' ) {
+					if ( typeof field.options === 'undefined' ) {
+						return null;
+					}
+
+					return (
+						<Combobox
+							key={ field.key }
+							{ ...fieldProps }
+							className={ classnames(
+								'wc-block-components-select-input',
+								`wc-block-components-select-input-${ field.key }`
+							) }
+							value={ values[ field.key ] }
+							onChange={ ( newValue: string ) => {
+								onChange( {
+									...values,
+									[ field.key ]: newValue,
+								} );
+							} }
+							options={ field.options }
 						/>
 					);
 				}

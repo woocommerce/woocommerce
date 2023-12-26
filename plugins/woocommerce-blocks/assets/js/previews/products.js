@@ -6,7 +6,7 @@ import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 
 const shortDescription = __(
 	'Fly your WordPress banner with this beauty! Deck out your office space or add it to your kids walls. This banner will spruce up any space it’s hung!',
-	'woo-gutenberg-products-block'
+	'woocommerce'
 );
 
 export const previewProducts = [
@@ -56,8 +56,8 @@ export const previewProducts = [
 			price_range: null,
 		},
 		add_to_cart: {
-			text: __( 'Add to cart', 'woo-gutenberg-products-block' ),
-			description: __( 'Add to cart', 'woo-gutenberg-products-block' ),
+			text: __( 'Add to cart', 'woocommerce' ),
+			description: __( 'Add to cart', 'woocommerce' ),
 		},
 		has_options: false,
 		is_purchasable: true,

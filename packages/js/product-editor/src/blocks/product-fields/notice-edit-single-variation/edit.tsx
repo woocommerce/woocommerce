@@ -37,6 +37,7 @@ export function Edit( {
 		isParentResolving,
 	}: { parentName: string; isParentResolving: boolean } = useSelect(
 		( select ) => {
+			// @ts-expect-error There are no types for this.
 			const { getEditedEntityRecord, hasFinishedResolution } =
 				select( 'core' );
 			const { name }: Product = getEditedEntityRecord(

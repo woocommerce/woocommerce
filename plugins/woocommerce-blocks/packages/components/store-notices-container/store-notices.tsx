@@ -145,7 +145,7 @@ const StoreNotices = ( {
 								status === 'error'
 									? __(
 											'Please fix the following errors before continuing',
-											'woo-gutenberg-products-block'
+											'woocommerce'
 									  )
 									: ''
 							}

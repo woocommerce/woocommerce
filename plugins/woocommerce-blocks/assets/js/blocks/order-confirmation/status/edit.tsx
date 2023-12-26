@@ -19,7 +19,7 @@ const Edit = (): JSX.Element => {
 			<p>
 				{ __(
 					'Thank you. Your order has been received.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</p>
 		</div>

@@ -106,10 +106,7 @@ const ShippingSelector = ( {
 	const Price =
 		rate.min === undefined ? (
 			<span className="wc-block-checkout__shipping-method-option-price">
-				{ __(
-					'calculated with an address',
-					'woo-gutenberg-products-block'
-				) }
+				{ __( 'calculated with an address', 'woocommerce' ) }
 			</span>
 		) : (
 			<RatePrice minRate={ rate.min } maxRate={ rate.max } />
@@ -210,20 +207,15 @@ export const Edit = ( {
 			) }
 		>
 			<InspectorControls>
-				<PanelBody
-					title={ __( 'Appearance', 'woo-gutenberg-products-block' ) }
-				>
+				<PanelBody title={ __( 'Appearance', 'woocommerce' ) }>
 					<p className="wc-block-checkout__controls-text">
 						{ __(
 							'Choose how this block is displayed to your customers.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</p>
 					<ToggleControl
-						label={ __(
-							'Show icon',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Show icon', 'woocommerce' ) }
 						checked={ showIcon }
 						onChange={ () =>
 							setAttributes( {
@@ -232,10 +224,7 @@ export const Edit = ( {
 						}
 					/>
 					<ToggleControl
-						label={ __(
-							'Show costs',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Show costs', 'woocommerce' ) }
 						checked={ showPrice }
 						onChange={ () =>
 							setAttributes( {
@@ -244,40 +233,29 @@ export const Edit = ( {
 						}
 					/>
 				</PanelBody>
-				<PanelBody
-					title={ __(
-						'Shipping Methods',
-						'woo-gutenberg-products-block'
-					) }
-				>
+				<PanelBody title={ __( 'Shipping Methods', 'woocommerce' ) }>
 					<p className="wc-block-checkout__controls-text">
 						{ __(
 							'Methods can be made managed in your store settings.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					</p>
 					<ExternalLinkCard
 						key={ 'shipping_methods' }
 						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
-						title={ __(
-							'Shipping',
-							'woo-gutenberg-products-block'
-						) }
+						title={ __( 'Shipping', 'woocommerce' ) }
 						description={ __(
 							'Manage your shipping zones, methods, and rates.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					/>
 					<ExternalLinkCard
 						key={ 'pickup_location' }
 						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=pickup_location` }
-						title={ __(
-							'Local Pickup',
-							'woo-gutenberg-products-block'
-						) }
+						title={ __( 'Local Pickup', 'woocommerce' ) }
 						description={ __(
 							'Allow customers to choose a local pickup location during checkout.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 					/>
 				</PanelBody>

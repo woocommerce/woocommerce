@@ -31,57 +31,16 @@ const cartItemErrorCodes = [
 const preloadedCheckoutData = getSetting( 'checkoutData', {} );
 
 /**
- * When an order was not created for the checkout, for example, when an item
- * was out of stock, this component will be shown instead of the checkout form.
- *
- * The error message is derived by the hydrated API request passed to the
- * checkout block.
- */
-const CheckoutOrderError = () => {
-	const checkoutData = {
-		code: '',
-		message: '',
-		...( preloadedCheckoutData || {} ),
-	};
-
-	const errorData = {
-		code: checkoutData.code || 'unknown',
-		message:
-			decodeEntities( checkoutData.message ) ||
-			__(
-				'There was a problem checking out. Please try again. If the problem persists, please get in touch with us so we can assist.',
-				'woo-gutenberg-products-block'
-			),
-	};
-
-	return (
-		<div className="wc-block-checkout-error">
-			<Icon
-				className="wc-block-checkout-error__image"
-				icon={ removeCart }
-				size={ 100 }
-			/>
-			<ErrorTitle errorData={ errorData } />
-			<ErrorMessage errorData={ errorData } />
-			<ErrorButton errorData={ errorData } />
-		</div>
-	);
-};
-
-/**
  * Get the error message to display.
  *
  * @param {Object} props           Incoming props for the component.
  * @param {Object} props.errorData Object containing code and message.
  */
 const ErrorTitle = ( { errorData } ) => {
-	let heading = __( 'Checkout error', 'woo-gutenberg-products-block' );
+	let heading = __( 'Checkout error', 'woocommerce' );
 
 	if ( cartItemErrorCodes.includes( errorData.code ) ) {
-		heading = __(
-			'There is a problem with your cart',
-			'woo-gutenberg-products-block'
-		);
+		heading = __( 'There is a problem with your cart', 'woocommerce' );
 	}
 
 	return (
@@ -102,10 +61,7 @@ const ErrorMessage = ( { errorData } ) => {
 		message =
 			message +
 			' ' +
-			__(
-				'Please edit your cart and try again.',
-				'woo-gutenberg-products-block'
-			);
+			__( 'Please edit your cart and try again.', 'woocommerce' );
 	}
 
 	return <p className="wc-block-checkout-error__description">{ message }</p>;
@@ -118,11 +74,11 @@ const ErrorMessage = ( { errorData } ) => {
  * @param {Object} props.errorData Object containing code and message.
  */
 const ErrorButton = ( { errorData } ) => {
-	let buttonText = __( 'Retry', 'woo-gutenberg-products-block' );
+	let buttonText = __( 'Retry', 'woocommerce' );
 	let buttonUrl = 'javascript:window.location.reload(true)';
 
 	if ( cartItemErrorCodes.includes( errorData.code ) ) {
-		buttonText = __( 'Edit your cart', 'woo-gutenberg-products-block' );
+		buttonText = __( 'Edit your cart', 'woocommerce' );
 		buttonUrl = CART_URL;
 	}
 
@@ -132,6 +88,44 @@ const ErrorButton = ( { errorData } ) => {
 				{ buttonText }
 			</a>
 		</span>
+	);
+};
+
+/**
+ * When an order was not created for the checkout, for example, when an item
+ * was out of stock, this component will be shown instead of the checkout form.
+ *
+ * The error message is derived by the hydrated API request passed to the
+ * checkout block.
+ */
+const CheckoutOrderError = () => {
+	const checkoutData = {
+		code: '',
+		message: '',
+		...( preloadedCheckoutData || {} ),
+	};
+
+	const errorData = {
+		code: checkoutData.code || 'unknown',
+		message:
+			decodeEntities( checkoutData.message ) ||
+			__(
+				'There was a problem checking out. Please try again. If the problem persists, please get in touch with us so we can assist.',
+				'woocommerce'
+			),
+	};
+
+	return (
+		<div className="wc-block-checkout-error">
+			<Icon
+				className="wc-block-checkout-error__image"
+				icon={ removeCart }
+				size={ 100 }
+			/>
+			<ErrorTitle errorData={ errorData } />
+			<ErrorMessage errorData={ errorData } />
+			<ErrorButton errorData={ errorData } />
+		</div>
 	);
 };
 

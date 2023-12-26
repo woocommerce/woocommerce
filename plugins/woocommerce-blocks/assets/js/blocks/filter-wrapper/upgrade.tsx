@@ -83,7 +83,7 @@ export const UpgradeNotice = ( {
 			onClick={ upgradeFilterBlockHandler }
 			variant="primary"
 		>
-			{ __( 'Upgrade block', 'woo-gutenberg-products-block' ) }
+			{ __( 'Upgrade block', 'woocommerce' ) }
 		</Button>,
 	];
 
@@ -91,7 +91,7 @@ export const UpgradeNotice = ( {
 		<Warning actions={ actions }>
 			{ __(
 				'Filter block: We have improved this block to make styling easier. Upgrade it using the button below.',
-				'woo-gutenberg-products-block'
+				'woocommerce'
 			) }
 		</Warning>
 	);

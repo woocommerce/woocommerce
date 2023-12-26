@@ -41,19 +41,13 @@ const translations = {
 	ratingAdded: ( rating: string ): string =>
 		sprintf(
 			/* translators: %s is referring to the average rating value */
-			__(
-				'Rated %s out of 5 filter added.',
-				'woo-gutenberg-products-block'
-			),
+			__( 'Rated %s out of 5 filter added.', 'woocommerce' ),
 			rating
 		),
 	ratingRemoved: ( rating: string ): string =>
 		sprintf(
 			/* translators: %s is referring to the average rating value */
-			__(
-				'Rated %s out of 5 filter added.',
-				'woo-gutenberg-products-block'
-			),
+			__( 'Rated %s out of 5 filter added.', 'woocommerce' ),
 			rating
 		),
 };
@@ -354,10 +348,7 @@ const RatingFilterBlock = ( {
 								)
 								.map( ( option ) => option.value ) }
 							disabled={ isLoading }
-							placeholder={ __(
-								'Select Rating',
-								'woo-gutenberg-products-block'
-							) }
+							placeholder={ __( 'Select Rating', 'woocommerce' ) }
 							onChange={ ( tokens: string[] ) => {
 								if ( ! multiple && tokens.length > 1 ) {
 									tokens = [ tokens[ tokens.length - 1 ] ];
@@ -441,19 +432,19 @@ const RatingFilterBlock = ( {
 							messages={ {
 								added: __(
 									'Rating filter added.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								removed: __(
 									'Rating filter removed.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								remove: __(
 									'Remove rating filter.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								__experimentalInvalid: __(
 									'Invalid rating filter.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 							} }
 						/>
@@ -485,7 +476,7 @@ const RatingFilterBlock = ( {
 							} }
 							screenReaderLabel={ __(
 								'Reset rating filter',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					) }

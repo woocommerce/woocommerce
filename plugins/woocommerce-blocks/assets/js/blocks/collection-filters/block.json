@@ -8,13 +8,14 @@
 		"WooCommerce",
 		"Filters"
 	],
-	"textdomain": "woo-gutenberg-products-block",
+	"textdomain": "woocommerce",
 	"supports": {
 		"html": false,
 		"reusable": false
 	},
 	"usesContext": [
-		"query"
+		"query",
+		"queryId"
 	],
 	"providesContext": {
 		"collectionData": "collectionData"

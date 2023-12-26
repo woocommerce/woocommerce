@@ -21,28 +21,28 @@ import { getDefaultQuery } from '../../constants';
 
 const orderOptions = [
 	{
-		label: __( 'A → Z', 'woo-gutenberg-products-block' ),
+		label: __( 'A → Z', 'woocommerce' ),
 		value: 'title/asc',
 	},
 	{
-		label: __( 'Z → A', 'woo-gutenberg-products-block' ),
+		label: __( 'Z → A', 'woocommerce' ),
 		value: 'title/desc',
 	},
 	{
-		label: __( 'Newest to oldest', 'woo-gutenberg-products-block' ),
+		label: __( 'Newest to oldest', 'woocommerce' ),
 		value: 'date/desc',
 	},
 	{
-		label: __( 'Oldest to newest', 'woo-gutenberg-products-block' ),
+		label: __( 'Oldest to newest', 'woocommerce' ),
 		value: 'date/asc',
 	},
 	{
 		value: 'popularity/desc',
-		label: __( 'Best Selling', 'woo-gutenberg-products-block' ),
+		label: __( 'Best Selling', 'woocommerce' ),
 	},
 	{
 		value: 'rating/desc',
-		label: __( 'Top Rated', 'woo-gutenberg-products-block' ),
+		label: __( 'Top Rated', 'woocommerce' ),
 	},
 ];
 
@@ -53,7 +53,7 @@ const OrderByControl = ( props: QueryControlProps ) => {
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Order by', 'woo-gutenberg-products-block' ) }
+			label={ __( 'Order by', 'woocommerce' ) }
 			hasValue={ () =>
 				order !== defaultQuery?.order ||
 				orderBy !== defaultQuery?.orderBy
@@ -66,7 +66,7 @@ const OrderByControl = ( props: QueryControlProps ) => {
 			<SelectControl
 				value={ `${ orderBy }/${ order }` }
 				options={ orderOptions }
-				label={ __( 'Order by', 'woo-gutenberg-products-block' ) }
+				label={ __( 'Order by', 'woocommerce' ) }
 				onChange={ ( value ) => {
 					const [ newOrderBy, newOrder ] = value.split( '/' );
 					setQueryAttribute( {

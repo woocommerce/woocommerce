@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <h2 class="wc-shipping-zones-heading">
 	<span><?php esc_html_e( 'Shipping zones', 'woocommerce' ); ?></span>
-	<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ) ); ?>" class="button-primary"><?php esc_html_e( 'Add zone', 'woocommerce' ); ?></a>
+	<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add zone', 'woocommerce' ); ?></a>
 </h2>
 <p class="wc-shipping-zone-heading-help-text"><?php echo esc_html_e( 'A shipping zone consists of the region(s) you\'d like to ship to and the shipping method(s) offered. A shopper can only be matched to one zone, and we\'ll use their shipping address to show them the methods available in their area.', 'woocommerce' ); ?></p>
 <table class="wc-shipping-zones widefat">
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</thead>
 	<tbody class="wc-shipping-zone-rows wc-shipping-tables-tbody"></tbody>
 
-	<tfoot data-id="0" class="wc-shipping-zone-worldwide">
+	<tfoot data-id="0" class="wc-shipping-zone-worldwide wc-shipping-zone-rows-tfoot">
 		<td width="1%" class="wc-shipping-zone-worldwide"></td>
 		<td class="wc-shipping-zone-name">
 			<?php esc_html_e( 'Rest of the world', 'woocommerce' ); ?>
@@ -55,7 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <script type="text/html" id="tmpl-wc-shipping-zone-row-blank">
 	<?php if ( 0 === $method_count ) : ?>
 		<tr>
-			<td class="wc-shipping-zones-blank-state" colspan="4">
+			<td class="wc-shipping-zones-blank-state" colspan="5">
 				<p class="main"><?php _e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
 				<p><?php _e( 'For example:', 'woocommerce' ); ?></p>
 				<ul>

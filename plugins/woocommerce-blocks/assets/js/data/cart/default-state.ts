@@ -1,7 +1,14 @@
 /**
  * External dependencies
  */
-import type { Cart, CartMeta, ApiErrorResponse } from '@woocommerce/types';
+import type {
+	Cart,
+	CartMeta,
+	ApiErrorResponse,
+	CartShippingAddress,
+	CartBillingAddress,
+} from '@woocommerce/types';
+import { AddressField, defaultFields } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -30,37 +37,33 @@ export interface CartState {
 	metaData: CartMeta;
 	errors: ApiErrorResponse[];
 }
+
+const shippingAddress: Partial<
+	CartShippingAddress & { email: AddressField }
+> = {};
+Object.keys( defaultFields ).forEach( ( key ) => {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore the default fields contain keys for each field.
+	shippingAddress[ key ] = '';
+} );
+delete shippingAddress.email;
+
+const billingAddress: Partial< CartBillingAddress & { email: AddressField } > =
+	{};
+Object.keys( defaultFields ).forEach( ( key ) => {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore the default fields contain keys for each field.
+	billingAddress[ key ] = '';
+} );
+
 export const defaultCartState: CartState = {
 	cartItemsPendingQuantity: EMPTY_PENDING_QUANTITY,
 	cartItemsPendingDelete: EMPTY_PENDING_DELETE,
 	cartData: {
 		coupons: EMPTY_CART_COUPONS,
 		shippingRates: EMPTY_SHIPPING_RATES,
-		shippingAddress: {
-			first_name: '',
-			last_name: '',
-			company: '',
-			address_1: '',
-			address_2: '',
-			city: '',
-			state: '',
-			postcode: '',
-			country: '',
-			phone: '',
-		},
-		billingAddress: {
-			first_name: '',
-			last_name: '',
-			company: '',
-			address_1: '',
-			address_2: '',
-			city: '',
-			state: '',
-			postcode: '',
-			country: '',
-			phone: '',
-			email: '',
-		},
+		shippingAddress: shippingAddress as CartShippingAddress,
+		billingAddress: billingAddress as CartBillingAddress,
 		items: EMPTY_CART_ITEMS,
 		itemsCount: 0,
 		itemsWeight: 0,

@@ -96,10 +96,7 @@ const ActiveFiltersBlock = ( {
 			return null;
 		}
 
-		const stockStatusLabel = __(
-			'Stock Status',
-			'woo-gutenberg-products-block'
-		);
+		const stockStatusLabel = __( 'Stock Status', 'woocommerce' );
 
 		return (
 			<li>
@@ -149,7 +146,7 @@ const ActiveFiltersBlock = ( {
 			return null;
 		}
 		return renderRemovableListItem( {
-			type: __( 'Price', 'woo-gutenberg-products-block' ),
+			type: __( 'Price', 'woocommerce' ),
 			name: formatPriceRange( minPrice, maxPrice ),
 			removeCallback: () => {
 				removeArgsFromFilterUrl( 'max_price', 'min_price' );
@@ -245,7 +242,7 @@ const ActiveFiltersBlock = ( {
 			return null;
 		}
 
-		const ratingLabel = __( 'Rating', 'woo-gutenberg-products-block' );
+		const ratingLabel = __( 'Rating', 'woocommerce' );
 
 		return (
 			<li>
@@ -258,10 +255,7 @@ const ActiveFiltersBlock = ( {
 							type: ratingLabel,
 							name: sprintf(
 								/* translators: %s is referring to the average rating value */
-								__(
-									'Rated %s out of 5',
-									'woo-gutenberg-products-block'
-								),
+								__( 'Rated %s out of 5', 'woocommerce' ),
 								slug
 							),
 							removeCallback: () => {
@@ -349,25 +343,13 @@ const ActiveFiltersBlock = ( {
 					{ isEditor ? (
 						<>
 							{ renderRemovableListItem( {
-								type: __(
-									'Size',
-									'woo-gutenberg-products-block'
-								),
-								name: __(
-									'Small',
-									'woo-gutenberg-products-block'
-								),
+								type: __( 'Size', 'woocommerce' ),
+								name: __( 'Small', 'woocommerce' ),
 								displayStyle: blockAttributes.displayStyle,
 							} ) }
 							{ renderRemovableListItem( {
-								type: __(
-									'Color',
-									'woo-gutenberg-products-block'
-								),
-								name: __(
-									'Blue',
-									'woo-gutenberg-products-block'
-								),
+								type: __( 'Color', 'woocommerce' ),
+								name: __( 'Blue', 'woocommerce' ),
 								displayStyle: blockAttributes.displayStyle,
 							} ) }
 						</>
@@ -401,13 +383,10 @@ const ActiveFiltersBlock = ( {
 						} }
 					>
 						<Label
-							label={ __(
-								'Clear All',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'Clear All', 'woocommerce' ) }
 							screenReaderLabel={ __(
 								'Clear All Filters',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						/>
 					</button>

@@ -13,8 +13,7 @@ const isConversionPossible = () => {
 	return true;
 };
 
-const getButtonLabel = () =>
-	__( 'Transform into blocks', 'woo-gutenberg-products-block' );
+const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
 
 const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
 	[
@@ -89,7 +88,7 @@ const onClickCallback = ( {
 const getDescription = () => {
 	return __(
 		'This block represents the classic template used to display the order confirmation. The actual rendered template may appear different from this placeholder.',
-		'woo-gutenberg-products-block'
+		'woocommerce'
 	);
 };
 
@@ -97,55 +96,44 @@ const getSkeleton = () => {
 	return (
 		<div className="woocommerce-page">
 			<div className="woocommerce-order">
-				<h1>
-					{ __( 'Order received', 'woo-gutenberg-products-block' ) }
-				</h1>
+				<h1>{ __( 'Order received', 'woocommerce' ) }</h1>
 				<p className="woocommerce-notice woocommerce-notice--success woocommerce-thankyou-order-confirmation">
 					{ __(
 						'Thank you. Your order has been received.',
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					) }
 				</p>
 				<ul className="woocommerce-order-overview woocommerce-thankyou-order-details order_details">
 					<li className="woocommerce-order-overview__order order">
-						{ __( 'Order number', 'woo-gutenberg-products-block' ) }
-						: <strong>123</strong>
+						{ __( 'Order number', 'woocommerce' ) }:{ ' ' }
+						<strong>123</strong>
 					</li>
 					<li className="woocommerce-order-overview__date date">
-						{ __( 'Date', 'woo-gutenberg-products-block' ) }:{ ' ' }
+						{ __( 'Date', 'woocommerce' ) }:{ ' ' }
 						<strong>May 25, 2023</strong>
 					</li>
 					<li className="woocommerce-order-overview__email email">
-						{ __( 'Email', 'woo-gutenberg-products-block' ) }:{ ' ' }
+						{ __( 'Email', 'woocommerce' ) }:{ ' ' }
 						<strong>shopper@woo.com</strong>
 					</li>
 					<li className="woocommerce-order-overview__total total">
-						{ __( 'Total', 'woo-gutenberg-products-block' ) }:{ ' ' }
+						{ __( 'Total', 'woocommerce' ) }:{ ' ' }
 						<strong>$20.00</strong>
 					</li>
 				</ul>
 
 				<section className="woocommerce-order-details">
 					<h2 className="woocommerce-order-details__title">
-						{ __(
-							'Order details',
-							'woo-gutenberg-products-block'
-						) }
+						{ __( 'Order details', 'woocommerce' ) }
 					</h2>
 					<table className="woocommerce-table woocommerce-table--order-details shop_table order_details">
 						<thead>
 							<tr>
 								<th className="woocommerce-table__product-name product-name">
-									{ __(
-										'Product',
-										'woo-gutenberg-products-block'
-									) }
+									{ __( 'Product', 'woocommerce' ) }
 								</th>
 								<th className="woocommerce-table__product-table product-total">
-									{ __(
-										'Total',
-										'woo-gutenberg-products-block'
-									) }
+									{ __( 'Total', 'woocommerce' ) }
 								</th>
 							</tr>
 						</thead>
@@ -166,21 +154,13 @@ const getSkeleton = () => {
 						<tfoot>
 							<tr>
 								<th scope="row">
-									{ __(
-										'Subtotal',
-										'woo-gutenberg-products-block'
-									) }
-									:
+									{ __( 'Subtotal', 'woocommerce' ) }:
 								</th>
 								<td>$20.00</td>
 							</tr>
 							<tr>
 								<th scope="row">
-									{ __(
-										'Total',
-										'woo-gutenberg-products-block'
-									) }
-									:
+									{ __( 'Total', 'woocommerce' ) }:
 								</th>
 								<td>$20.00</td>
 							</tr>
@@ -192,10 +172,7 @@ const getSkeleton = () => {
 					<section className="woocommerce-columns woocommerce-columns--2 woocommerce-columns--addresses col2-set addresses">
 						<div className="woocommerce-column woocommerce-column--1 woocommerce-column--billing-address col-1">
 							<h2 className="woocommerce-column__title">
-								{ __(
-									'Billing address',
-									'woo-gutenberg-products-block'
-								) }
+								{ __( 'Billing address', 'woocommerce' ) }
 							</h2>
 							<address>
 								123 Main St
@@ -208,10 +185,7 @@ const getSkeleton = () => {
 
 						<div className="woocommerce-column woocommerce-column--2 woocommerce-column--shipping-address col-2">
 							<h2 className="woocommerce-column__title">
-								{ __(
-									'Shipping address',
-									'woo-gutenberg-products-block'
-								) }
+								{ __( 'Shipping address', 'woocommerce' ) }
 							</h2>
 							<address>
 								123 Main St

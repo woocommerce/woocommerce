@@ -229,7 +229,7 @@ const ProductTemplateEdit = ( {
 		return (
 			<p { ...blockProps }>
 				{ ' ' }
-				{ __( 'No results found.', 'woo-gutenberg-products-block' ) }
+				{ __( 'No results found.', 'woocommerce' ) }
 			</p>
 		);
 	}

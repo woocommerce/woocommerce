@@ -75,6 +75,7 @@ const AddToCartFormContext = createContext( {
  * @return {AddToCartFormContext} Returns the add to cart form data context value
  */
 export const useAddToCartFormContext = () => {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	return useContext( AddToCartFormContext );
 };
@@ -245,7 +246,7 @@ export const AddToCartFormStateContextProvider = ( {
 							data.processingResponse?.message ||
 							__(
 								'Something went wrong. Please contact us for assistance.',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							);
 						createErrorNotice( message, {
 							id: 'add-to-cart',
@@ -315,6 +316,7 @@ export const AddToCartFormStateContextProvider = ( {
 	};
 	return (
 		<AddToCartFormContext.Provider
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			value={ contextData }
 		>

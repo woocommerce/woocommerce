@@ -91,7 +91,7 @@ const Block = ( { noShippingPlaceholder = null } ): ReactElement | null => {
 			<p>
 				{ __(
 					'Shipping options will be displayed here after entering your full shipping address.',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				) }
 			</p>
 		);
@@ -117,13 +117,13 @@ const Block = ( { noShippingPlaceholder = null } ): ReactElement | null => {
 								>
 									{ __(
 										'There are no shipping options available. Please check your shipping address.',
-										'woo-gutenberg-products-block'
+										'woocommerce'
 									) }
 								</NoticeBanner>
 							) : (
 								__(
 									'Add a shipping address to view shipping options.',
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								)
 							) }
 						</>

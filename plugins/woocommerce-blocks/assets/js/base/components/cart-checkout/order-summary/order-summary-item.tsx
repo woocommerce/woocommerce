@@ -139,7 +139,7 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 								'%d item',
 								'%d items',
 								quantity,
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							),
 							quantity
 						) }
@@ -188,7 +188,7 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 						'Total price for %1$d %2$s item: %3$s',
 						'Total price for %1$d %2$s items: %3$s',
 						quantity,
-						'woo-gutenberg-products-block'
+						'woocommerce'
 					),
 					quantity,
 					name,

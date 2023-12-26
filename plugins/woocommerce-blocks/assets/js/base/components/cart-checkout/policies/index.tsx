@@ -27,10 +27,7 @@ const Policies = (): JSX.Element => {
 					>
 						{ PRIVACY_PAGE_NAME
 							? decodeEntities( PRIVACY_PAGE_NAME )
-							: __(
-									'Privacy Policy',
-									'woo-gutenberg-products-block'
-							  ) }
+							: __( 'Privacy Policy', 'woocommerce' ) }
 					</a>
 				</li>
 			) }
@@ -43,10 +40,7 @@ const Policies = (): JSX.Element => {
 					>
 						{ TERMS_PAGE_NAME
 							? decodeEntities( TERMS_PAGE_NAME )
-							: __(
-									'Terms and Conditions',
-									'woo-gutenberg-products-block'
-							  ) }
+							: __( 'Terms and Conditions', 'woocommerce' ) }
 					</a>
 				</li>
 			) }

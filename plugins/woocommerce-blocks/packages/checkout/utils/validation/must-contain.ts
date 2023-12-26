@@ -13,7 +13,7 @@ const mustContain = ( value: string, requiredValue: string ): true | never => {
 				/* translators: %1$s value passed to filter, %2$s : value that must be included. */
 				__(
 					'Returned value must include %1$s, you passed "%2$s"',
-					'woo-gutenberg-products-block'
+					'woocommerce'
 				),
 				requiredValue,
 				value

@@ -7,4 +7,4 @@ head_dir=$(cd "$(dirname "$script_dir")" && cd ../../.. && pwd)
 relative_path=${script_dir#$head_dir/}
 
 # Run the main script in the container for better performance.
-wp-env run tests-cli -- bash wp-content/plugins/$relative_path/scripts/index.sh
+wp-env run tests-cli -- bash wp-content/plugins/woocommerce/blocks-bin/playwright/scripts/index.sh

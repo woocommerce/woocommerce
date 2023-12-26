@@ -47,17 +47,9 @@ const Edit = ( {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __(
-						'Display Settings',
-						'woo-gutenberg-products-block'
-					) }
-				>
+				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
 					<ToggleControl
-						label={ __(
-							'Display product count',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Display product count', 'woocommerce' ) }
 						checked={ showCounts }
 						onChange={ () =>
 							setAttributes( {
@@ -68,7 +60,7 @@ const Edit = ( {
 					<ToggleGroupControl
 						label={ __(
 							'Allow selecting multiple options?',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						value={ selectType || 'multiple' }
 						onChange={ ( value: string ) =>
@@ -80,24 +72,15 @@ const Edit = ( {
 					>
 						<ToggleGroupControlOption
 							value="multiple"
-							label={ __(
-								'Multiple',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'Multiple', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="single"
-							label={ __(
-								'Single',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'Single', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 					<ToggleGroupControl
-						label={ __(
-							'Display Style',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Display Style', 'woocommerce' ) }
 						value={ displayStyle }
 						onChange={ ( value ) =>
 							setAttributes( {
@@ -108,27 +91,21 @@ const Edit = ( {
 					>
 						<ToggleGroupControlOption
 							value="list"
-							label={ __(
-								'List',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'List', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="dropdown"
-							label={ __(
-								'Dropdown',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'Dropdown', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 					<ToggleControl
 						label={ __(
 							"Show 'Apply filters' button",
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						help={ __(
 							'Products will update when the button is clicked.',
-							'woo-gutenberg-products-block'
+							'woocommerce'
 						) }
 						checked={ showFilterButton }
 						onChange={ ( value ) =>

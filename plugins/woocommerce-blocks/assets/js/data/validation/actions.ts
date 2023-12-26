@@ -20,7 +20,7 @@ export const setValidationErrors = (
 /**
  * Clears validation errors for the given ids.
  *
- * @param  errors Array of error ids to clear.
+ * @param errors Array of error ids to clear.
  */
 export const clearValidationErrors = ( errors?: string[] | undefined ) => ( {
 	type: types.CLEAR_VALIDATION_ERRORS,

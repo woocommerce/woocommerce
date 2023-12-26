@@ -22,12 +22,9 @@ const LoginPrompt = () => {
 
 	return (
 		<>
-			{ __(
-				'Already have an account? ',
-				'woo-gutenberg-products-block'
-			) }
+			{ __( 'Already have an account? ', 'woocommerce' ) }
 			<a href={ LOGIN_TO_CHECKOUT_URL }>
-				{ __( 'Log in.', 'woo-gutenberg-products-block' ) }
+				{ __( 'Log in.', 'woocommerce' ) }
 			</a>
 		</>
 	);

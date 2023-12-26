@@ -11,6 +11,7 @@ import type {
 } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { ADDRESS_FIELDS_KEYS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -26,7 +27,6 @@ const CustomerAddress = ( {
 	defaultEditing?: boolean;
 } ) => {
 	const {
-		defaultAddressFields,
 		billingAddress,
 		setShippingAddress,
 		setBillingAddress,
@@ -57,10 +57,6 @@ const CustomerAddress = ( {
 			setEditing( true );
 		}
 	}, [ editing, hasValidationErrors, invalidProps.length ] );
-
-	const addressFieldKeys = Object.keys(
-		defaultAddressFields
-	) as ( keyof AddressFields )[];
 
 	const onChangeAddress = useCallback(
 		( values: Partial< BillingAddress > ) => {
@@ -101,17 +97,12 @@ const CustomerAddress = ( {
 					type="billing"
 					onChange={ onChangeAddress }
 					values={ billingAddress }
-					fields={ addressFieldKeys }
+					fields={ ADDRESS_FIELDS_KEYS }
 					fieldConfig={ addressFieldsConfig }
 				/>
 			</>
 		),
-		[
-			addressFieldKeys,
-			addressFieldsConfig,
-			billingAddress,
-			onChangeAddress,
-		]
+		[ addressFieldsConfig, billingAddress, onChangeAddress ]
 	);
 
 	return (

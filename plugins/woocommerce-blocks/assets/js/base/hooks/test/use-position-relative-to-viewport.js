@@ -37,6 +37,7 @@ describe( 'usePositionRelativeToViewport', () => {
 		const observe = jest.fn();
 		const unobserve = jest.fn();
 
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		IntersectionObserver = jest.fn( () => ( {
 			observe,
@@ -61,8 +62,10 @@ describe( 'usePositionRelativeToViewport', () => {
 		( { position, isIntersecting, top } ) => {
 			let intersectionObserverCallback = ( entries ) => entries;
 
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			IntersectionObserver = jest.fn( ( callback ) => {
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore
 				intersectionObserverCallback = callback;
 

@@ -99,14 +99,14 @@ const RevertClassicTemplateButton = () => {
 						>
 							{ __(
 								'Revert to Classic Product Template',
-								'woo-gutenberg-products-block'
+								'woocommerce'
 							) }
 						</Button>
 						<span>
 							{ createInterpolateElement(
 								__(
 									`The <strongText /> template doesn’t allow for reordering or customizing blocks, but might work better with your extensions`,
-									'woo-gutenberg-products-block'
+									'woocommerce'
 								),
 								{
 									strongText: (
