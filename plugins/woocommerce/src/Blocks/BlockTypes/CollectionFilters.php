@@ -54,25 +54,6 @@ final class CollectionFilters extends AbstractBlock {
 	}
 
 	/**
-	 * Extra data passed through from server to client for block.
-	 *
-	 * @param array $attributes  Any attributes that currently are available from the block.
-	 *                           Note, this will be empty in the editor context when the block is
-	 *                           not in the post content on editor load.
-	 */
-	protected function enqueue_data( array $attributes = [] ) {
-		parent::enqueue_data( $attributes );
-
-		if ( ! is_admin() ) {
-			/**
-			 * At this point, WP starts rendering the Collection Filters block,
-			 * we can safely unset the current response.
-			 */
-			$this->current_response = null;
-		}
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -81,6 +62,16 @@ final class CollectionFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		if ( is_admin() ) {
+			return $content;
+		}
+
+		/**
+		 * At this point, WP starts rendering the Collection Filters block,
+		 * we can safely unset the current response.
+		 */
+		$this->current_response = null;
+
 		$attributes_data = array(
 			'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-filters' ) ),
 			'class'               => 'wc-block-collection-filters',

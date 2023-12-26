@@ -339,4 +339,11 @@ export class EditorUtils {
 			.getByText( 'Site updated.' )
 			.waitFor();
 	}
+
+	async publishAndVisitPost() {
+		await this.editor.publishPost();
+		const url = new URL( this.page.url() );
+		const postId = url.searchParams.get( 'post' );
+		await this.page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
+	}
 }
