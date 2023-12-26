@@ -185,6 +185,7 @@ class Init {
 				'variable_product_block_tour_shown',
 				'local_attributes_notice_dismissed_ids',
 				'variable_items_without_price_notice_dismissed',
+				'product_upsells_advice_dismissed',
 			)
 		);
 	}
