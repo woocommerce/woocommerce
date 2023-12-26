@@ -86,8 +86,8 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 				$context['backtrace'] = static::get_backtrace();
 			}
 
-			$formatted_context  = wp_json_encode( $context );
-			$message           .= " CONTEXT: $formatted_context";
+			$formatted_context = wp_json_encode( $context );
+			$message          .= " CONTEXT: $formatted_context";
 		}
 
 		$entry = "$time_string $level_string $message";
