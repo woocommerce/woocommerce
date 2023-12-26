@@ -1128,6 +1128,15 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					),
 				),
 			)
+		)->add_block(
+			array(
+				'id'         => 'product-linked-upsells',
+				'blockName'  => 'woocommerce/product-linked-list-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property' => 'upsell_ids',
+				),
+			)
 		);
 
 		$linked_product_upsells_section->add_block(
@@ -1169,6 +1178,15 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'      => 10,
 				'attributes' => array(
 					'property' => 'upsell_ids',
+				),
+			)
+		)->add_block(
+			array(
+				'id'         => 'product-linked-cross-sells',
+				'blockName'  => 'woocommerce/product-linked-list-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property' => 'cross_sell_ids',
 				),
 			)
 		);
