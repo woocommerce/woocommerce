@@ -1160,7 +1160,7 @@ function wc_get_log_file_path( $handle ) {
 	$file_id   = LoggingUtil::generate_log_file_id( $handle, null, time() );
 	$hash      = LoggingUtil::generate_log_file_hash( $file_id );
 
-	return "{$directory}{$file_id}-{$hash}";
+	return "{$directory}{$file_id}-{$hash}.log";
 }
 
 /**

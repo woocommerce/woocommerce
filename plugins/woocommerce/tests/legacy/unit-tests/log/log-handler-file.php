@@ -97,7 +97,6 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_remove() {
-		$this->setExpectedDeprecated( 'wc_get_log_file_name' );
 		$handler  = new WC_Log_Handler_File();
 		$log_name = 'test_remove';
 		$handler->handle( time(), 'debug', 'debug', array( 'source' => $log_name ) );
