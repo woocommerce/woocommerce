@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { closeSmall } from '@wordpress/icons';
+import { closeSmall, external } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
 
@@ -100,6 +100,17 @@ export function Edit( {
 								role="cell"
 								className="wp-block-woocommerce-product-linked-list-field__actions"
 							>
+								<Button
+									icon={ external }
+									size={ 24 }
+									aria-label={ __(
+										'See product page',
+										'woocommerce'
+									) }
+									href={ product.permalink }
+									target="_blank"
+									rel="noreferrer"
+								/>
 								<Button
 									icon={ closeSmall }
 									size={ 24 }
