@@ -32,6 +32,7 @@ import {
 	useEntityBlockEditor,
 	useEntityProp,
 } from '@wordpress/core-data';
+import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -97,7 +98,16 @@ export function BlockEditor( {
 		};
 	}, [ canUserCreateMedia, _settings ] );
 
-	const [ productType ] = useEntityProp( 'postType', postType, 'type' );
+	const [ productType ] = useEntityProp< Product[ 'type' ] >(
+		'postType',
+		postType,
+		'type'
+	);
+	const [ productMetaData ] = useEntityProp< Product[ 'meta_data' ] >(
+		'postType',
+		postType,
+		'meta_data'
+	);
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
@@ -108,17 +118,35 @@ export function BlockEditor( {
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	useLayoutEffect( () => {
-		const productTemplates = settings?.productTemplates ?? [];
-		const productTemplate = productTemplates.find(
-			( template ) => template.productData.type === productType
+		// Loads the product template id from the product's meta data.
+		const productTemplateMetaData = productMetaData.find(
+			( metaData ) => metaData.key === '_product_template_id'
 		);
+
+		const productTemplates = settings?.productTemplates ?? [];
+		const productTemplate = productTemplates.find( ( template ) => {
+			if (
+				productTemplateMetaData?.value &&
+				productTemplateMetaData.value === template.id
+			) {
+				return true;
+			}
+
+			if ( ! productType ) {
+				return false;
+			}
+
+			// Fallback to the product type if the product does not have any product
+			// template associated to itself.
+			return template.productData.type === productType;
+		} );
 
 		const layoutTemplates = settings?.layoutTemplates ?? [];
 
 		let layoutTemplateId = productTemplate?.layoutTemplateId;
-		// Product variations do not have a related product template but
-		// they do have a layout template
-		if ( postType === 'product_variation' ) {
+		// A product variation is not a product type so we can not use it to
+		// fallback to a default layout template. We use a post type instead.
+		if ( ! layoutTemplateId && postType === 'product_variation' ) {
 			layoutTemplateId = 'product-variation';
 		}
 
@@ -141,7 +169,7 @@ export function BlockEditor( {
 			...settings,
 			productTemplate,
 		} as Partial< ProductEditorSettings > );
-	}, [ settings, postType, productType ] );
+	}, [ settings, postType, productMetaData, productType ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( select ) => {
