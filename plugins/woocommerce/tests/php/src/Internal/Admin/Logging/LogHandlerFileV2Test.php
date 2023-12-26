@@ -143,7 +143,7 @@ MESSAGE;
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$actual_content   = file_get_contents( reset( $paths ) );
-		$expected_content = gmdate( 'c', $time ) . ' DEBUG How to win 1. Bake cookies 2. ??? 3. Profit' . "\n";
+		$expected_content = gmdate( 'c', $time ) . ' DEBUG ' . $message . "\n";
 
 		$this->assertEquals( $expected_content, $actual_content );
 	}

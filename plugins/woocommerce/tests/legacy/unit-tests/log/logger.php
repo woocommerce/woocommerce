@@ -53,6 +53,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		$path = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . 'unit-tests.log';
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 		file_put_contents( $path, 'Test file content.' );
+		$this->assertFileExists( $path );
 		$log = new WC_Logger();
 		$log->clear( 'unit-tests' );
 		$this->assertFileDoesNotExist( $path );
