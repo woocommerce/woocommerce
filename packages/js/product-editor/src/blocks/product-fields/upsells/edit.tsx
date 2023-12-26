@@ -1,6 +1,11 @@
 /**
  * External dependencies
  */
+import { useUserPreferences } from '@woocommerce/data';
+
+/**
+ * External dependencies
+ */
 import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { __ } from '@wordpress/i18n';
@@ -17,7 +22,12 @@ export function UpsellsBlockEdit( { attributes }: UpsellsBlockEditComponent ) {
 
 	const isEmpty = true; // @todo: implement.
 
-	if ( isEmpty ) {
+	const {
+		updateUserPreferences,
+		product_upsells_advice_dismissed: upsellsAdviceDismissed,
+	} = useUserPreferences();
+
+	if ( isEmpty && upsellsAdviceDismissed !== 'yes' ) {
 		return (
 			<div { ...blockProps }>
 				<AdviceCard
@@ -27,6 +37,11 @@ export function UpsellsBlockEdit( { attributes }: UpsellsBlockEditComponent ) {
 					) }
 					image={ <ShoppingBags /> }
 					isDismissible={ true }
+					onDismiss={ () => {
+						updateUserPreferences( {
+							product_upsells_advice_dismissed: 'yes',
+						} );
+					} }
 				/>
 			</div>
 		);
