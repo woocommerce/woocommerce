@@ -337,11 +337,17 @@ class DataSynchronizer implements BatchProcessorInterface {
 	/**
 	 * Keys that can be ignored during synchronization or verification.
 	 *
-	 * @since 7.8.0
+	 * @since 8.6.0
 	 *
 	 * @return string[]
 	 */
 	public function get_ignored_order_props() {
+		/**
+		 * Allows modifying the list of order properties that are ignored during HPOS synchronization or verification.
+		 *
+		 * @param string[] List of order properties or meta keys.
+		 * @since 8.6.0
+		 */
 		return apply_filters(
 			'woocommerce_hpos_sync_ignored_order_props',
 			array(
