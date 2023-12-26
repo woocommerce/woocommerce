@@ -5,6 +5,8 @@
  * @package WC_Beta_Tester
  */
 
+defined( 'ABSPATH' ) || exit;
+
 if ( ! class_exists( 'WP_CLI_Command' ) ) {
 	return;
 }

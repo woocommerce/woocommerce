@@ -5,7 +5,12 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
+use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
+use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use WC_Order;
 
 /**
  * Class Edit.
@@ -25,6 +30,13 @@ class Edit {
 	 * @var CustomMetaBox
 	 */
 	private $custom_meta_box;
+
+	/**
+	 * Instance of the TaxonomiesMetaBox class. Used to render meta box for taxonomies.
+	 *
+	 * @var TaxonomiesMetaBox
+	 */
+	private $taxonomies_meta_box;
 
 	/**
 	 * Instance of WC_Order to be used in metaboxes.
@@ -48,6 +60,13 @@ class Edit {
 	private $message;
 
 	/**
+	 * Controller for orders page. Used to determine redirection URLs.
+	 *
+	 * @var PageController
+	 */
+	private $orders_page_controller;
+
+	/**
 	 * Hooks all meta-boxes for order edit page. This is static since this may be called by post edit form rendering.
 	 *
 	 * @param string $screen_id Screen ID.
@@ -62,6 +81,7 @@ class Edit {
 		add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable product permissions', 'woocommerce' ) . wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $screen_id, 'normal', 'default' );
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s actions', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Actions::output', $screen_id, 'side', 'high' );
+		self::maybe_register_order_attribution( $screen_id, $title );
 	}
 
 	/**
@@ -97,23 +117,42 @@ class Edit {
 	}
 
 	/**
+	 * Returns the PageController for this edit form. This method is protected to allow child classes to overwrite the PageController object and return custom links.
+	 *
+	 * @since 8.0.0
+	 *
+	 * @return PageController PageController object.
+	 */
+	protected function get_page_controller() {
+		if ( ! isset( $this->orders_page_controller ) ) {
+			$this->orders_page_controller = wc_get_container()->get( PageController::class );
+		}
+		return $this->orders_page_controller;
+	}
+
+	/**
 	 * Setup hooks, actions and variables needed to render order edit page.
 	 *
 	 * @param \WC_Order $order Order object.
 	 */
 	public function setup( \WC_Order $order ) {
 		$this->order    = $order;
-		$wc_screen_id   = wc_get_page_screen_id( 'shop-order' );
 		$current_screen = get_current_screen();
 		$current_screen->is_block_editor( false );
 		$this->screen_id = $current_screen->id;
 		if ( ! isset( $this->custom_meta_box ) ) {
 			$this->custom_meta_box = wc_get_container()->get( CustomMetaBox::class );
 		}
+
+		if ( ! isset( $this->taxonomies_meta_box ) ) {
+			$this->taxonomies_meta_box = wc_get_container()->get( TaxonomiesMetaBox::class );
+		}
+
 		$this->add_save_meta_boxes();
 		$this->handle_order_update();
 		$this->add_order_meta_boxes( $this->screen_id, __( 'Order', 'woocommerce' ) );
 		$this->add_order_specific_meta_box();
+		$this->add_order_taxonomies_meta_box();
 
 		/**
 		 * From wp-admin/includes/meta-boxes.php.
@@ -122,7 +161,7 @@ class Edit {
 		 *
 		 * @since 3.8.0.
 		 */
-		do_action( 'add_meta_boxes', $wc_screen_id, $this->order );
+		do_action( 'add_meta_boxes', $this->screen_id, $this->order );
 
 		/**
 		 * Provides an opportunity to inject custom meta boxes into the order editor screen. This
@@ -132,7 +171,7 @@ class Edit {
 		 *
 		 * @oaram WC_Order $order The order being edited.
 		 */
-		do_action( 'add_meta_boxes_' . $wc_screen_id, $this->order );
+		do_action( 'add_meta_boxes_' . $this->screen_id, $this->order );
 
 		$this->enqueue_scripts();
 	}
@@ -160,12 +199,85 @@ class Edit {
 	}
 
 	/**
+	 * Render custom meta box.
+	 *
+	 * @return void
+	 */
+	private function add_order_taxonomies_meta_box() {
+		$this->taxonomies_meta_box->add_taxonomies_meta_boxes( $this->screen_id, $this->order->get_type() );
+	}
+
+	/**
+	 * Register order attribution meta boxes if the feature is enabled.
+	 *
+	 * @since 8.5.0
+	 *
+	 * @param string $screen_id Screen ID.
+	 * @param string $title     Title of the page.
+	 *
+	 * @return void
+	 */
+	private static function maybe_register_order_attribution( string $screen_id, string $title ) {
+		/**
+		 * Features controller.
+		 *
+		 * @var FeaturesController $feature_controller
+		 */
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+		if ( ! $feature_controller->feature_is_enabled( 'order_attribution' ) ) {
+			return;
+		}
+
+		/**
+		 * Order attribution meta box.
+		 *
+		 * @var OrderAttribution $order_attribution_meta_box
+		 */
+		$order_attribution_meta_box = wc_get_container()->get( OrderAttribution::class );
+
+		add_meta_box(
+			'woocommerce-order-source-data',
+			/* Translators: %s order type name. */
+			sprintf( __( '%s attribution', 'woocommerce' ), $title ),
+			function( $post_or_order ) use ( $order_attribution_meta_box ) {
+				$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
+				if ( $order instanceof WC_Order ) {
+					$order_attribution_meta_box->output( $order );
+				}
+			},
+			$screen_id,
+			'side',
+			'high'
+		);
+
+		/**
+		 * Customer history meta box.
+		 *
+		 * @var CustomerHistory $customer_history_meta_box
+		 */
+		$customer_history_meta_box = wc_get_container()->get( CustomerHistory::class );
+
+		add_meta_box(
+			'woocommerce-customer-history',
+			__( 'Customer history', 'woocommerce' ),
+			function( $post_or_order ) use ( $customer_history_meta_box ) {
+				$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
+				if ( $order instanceof WC_Order ) {
+					$customer_history_meta_box->output( $order );
+				}
+			},
+			$screen_id,
+			'side',
+			'high'
+		);
+	}
+
+	/**
 	 * Takes care of updating order data. Fires action that metaboxes can hook to for order data updating.
 	 *
 	 * @return void
 	 */
 	public function handle_order_update() {
-		global $theorder;
 		if ( ! isset( $this->order ) ) {
 			return;
 		}
@@ -175,6 +287,10 @@ class Edit {
 		}
 
 		check_admin_referer( $this->get_order_edit_nonce_action() );
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized later on by taxonomies_meta_box object.
+		$taxonomy_input = isset( $_POST['tax_input'] ) ? wp_unslash( $_POST['tax_input'] ) : null;
+		$this->taxonomies_meta_box->save_taxonomies( $this->order, $taxonomy_input );
 
 		/**
 		 * Save meta for shop order.
@@ -186,12 +302,48 @@ class Edit {
 		 */
 		do_action( 'woocommerce_process_shop_order_meta', $this->order->get_id(), $this->order );
 
+		$this->custom_meta_box->handle_metadata_changes($this->order);
+
 		// Order updated message.
 		$this->message = 1;
 
-		// Refresh the order from DB.
-		$this->order = wc_get_order( $this->order->get_id() );
-		$theorder    = $this->order;
+		// Claim lock.
+		$edit_lock = wc_get_container()->get( EditLock::class );
+		$edit_lock->lock( $this->order );
+
+		$this->redirect_order( $this->order );
+	}
+
+	/**
+	 * Helper method to redirect to order edit page.
+	 *
+	 * @since 8.0.0
+	 *
+	 * @param \WC_Order $order Order object.
+	 */
+	private function redirect_order( \WC_Order $order ) {
+		$redirect_to = $this->get_page_controller()->get_edit_url( $order->get_id() );
+		if ( isset( $this->message ) ) {
+			$redirect_to = add_query_arg( 'message', $this->message, $redirect_to );
+		}
+		wp_safe_redirect(
+			/**
+			 * Filter the URL used to redirect after an order is updated. Similar to the WP post's `redirect_post_location` filter.
+			 *
+			 * @param string    $redirect_to The redirect destination URL.
+			 * @param int       $order_id The order ID.
+			 * @param \WC_Order $order The order object.
+			 *
+			 * @since 8.0.0
+			 */
+			apply_filters(
+				'woocommerce_redirect_order_location',
+				$redirect_to,
+				$order->get_id(),
+				$order
+			)
+		);
+		exit;
 	}
 
 	/**
@@ -253,10 +405,10 @@ class Edit {
 	private function render_wrapper_start( $notice = '', $message = '' ) {
 		$post_type = get_post_type_object( $this->order->get_type() );
 
-		$edit_page_url = wc_get_container()->get( PageController::class )->get_edit_url( $this->order->get_id() );
+		$edit_page_url = $this->get_page_controller()->get_edit_url( $this->order->get_id() );
 		$form_action   = 'edit_order';
 		$referer       = wp_get_referer();
-		$new_page_url  = wc_get_container()->get( PageController::class )->get_new_page_url( $this->order->get_type() );
+		$new_page_url  = $this->get_page_controller()->get_new_page_url( $this->order->get_type() );
 
 		?>
 		<div class="wrap">
@@ -298,9 +450,23 @@ class Edit {
 		?>
 		>
 		<?php wp_nonce_field( $this->get_order_edit_nonce_action() ); ?>
+		<?php
+		/**
+		 * Fires at the top of the order edit form. Can be used as a replacement for edit_form_top hook for HPOS.
+		 *
+		 * @param \WC_Order $order Order object.
+		 *
+		 * @since 8.0.0
+		 */
+		do_action( 'order_edit_form_top', $this->order );
+
+		wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false );
+		wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
+		?>
 		<input type="hidden" id="hiddenaction" name="action" value="<?php echo esc_attr( $form_action ); ?>"/>
 		<input type="hidden" id="original_order_status" name="original_order_status" value="<?php echo esc_attr( $this->order->get_status() ); ?>"/>
 		<input type="hidden" id="referredby" name="referredby" value="<?php echo $referer ? esc_url( $referer ) : ''; ?>"/>
+		<input type="hidden" id="post_ID" name="post_ID" value="<?php echo esc_attr( $this->order->get_id() ); ?>"/>
 		<div id="poststuff">
 		<div id="post-body"
 		class="metabox-holder columns-<?php echo ( 1 === get_current_screen()->get_columns() ) ? '1' : '2'; ?>">

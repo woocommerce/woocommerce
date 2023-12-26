@@ -3,16 +3,14 @@
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 
-import { useSelect } from '@wordpress/data';
-import { createElement, useRef } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { createElement, useEffect } from '@wordpress/element';
 import { SelectFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
-import { WPDataActions } from '../';
-import * as actions from './actions';
 import * as selectors from './selectors';
 import { WPDataSelectors } from '../types';
 
@@ -24,62 +22,52 @@ type PluginHydrationData = {
 export const withPluginsHydration = ( data: PluginHydrationData ) =>
 	createHigherOrderComponent< Record< string, unknown > >(
 		( OriginalComponent ) => ( props ) => {
-			const dataRef = useRef( data );
-
-			useSelect(
-				// @ts-expect-error registry is not defined in the wp.data typings
+			const shouldHydrate = useSelect(
 				(
 					select: (
 						key: typeof STORE_NAME
-					) => SelectFromMap< typeof selectors > & WPDataSelectors,
-					registry: {
-						dispatch: (
-							store: string
-						) => typeof actions & WPDataActions;
-					}
+					) => SelectFromMap< typeof selectors > & WPDataSelectors
 				) => {
-					if ( ! dataRef.current ) {
+					if ( ! data ) {
 						return;
 					}
 
 					const { isResolving, hasFinishedResolution } =
 						select( STORE_NAME );
-					const {
-						startResolution,
-						finishResolution,
-						updateActivePlugins,
-						updateInstalledPlugins,
-						updateIsJetpackConnected,
-					} = registry.dispatch( STORE_NAME );
-
-					if (
+					return (
 						! isResolving( 'getActivePlugins', [] ) &&
 						! hasFinishedResolution( 'getActivePlugins', [] )
-					) {
-						startResolution( 'getActivePlugins', [] );
-						startResolution( 'getInstalledPlugins', [] );
-						startResolution( 'isJetpackConnected', [] );
-						updateActivePlugins(
-							dataRef.current.activePlugins,
-							true
-						);
-						updateInstalledPlugins(
-							dataRef.current.installedPlugins,
-							true
-						);
-						updateIsJetpackConnected(
-							dataRef.current.jetpackStatus &&
-								dataRef.current.jetpackStatus.isActive
-								? true
-								: false
-						);
-						finishResolution( 'getActivePlugins', [] );
-						finishResolution( 'getInstalledPlugins', [] );
-						finishResolution( 'isJetpackConnected', [] );
-					}
+					);
 				},
 				[]
 			);
+
+			const {
+				startResolution,
+				finishResolution,
+				updateActivePlugins,
+				updateInstalledPlugins,
+				updateIsJetpackConnected,
+			} = useDispatch( STORE_NAME );
+
+			useEffect( () => {
+				if ( ! shouldHydrate ) {
+					return;
+				}
+				startResolution( 'getActivePlugins', [] );
+				startResolution( 'getInstalledPlugins', [] );
+				startResolution( 'isJetpackConnected', [] );
+				updateActivePlugins( data.activePlugins, true );
+				updateInstalledPlugins( data.installedPlugins, true );
+				updateIsJetpackConnected(
+					data.jetpackStatus && data.jetpackStatus.isActive
+						? true
+						: false
+				);
+				finishResolution( 'getActivePlugins', [] );
+				finishResolution( 'getInstalledPlugins', [] );
+				finishResolution( 'isJetpackConnected', [] );
+			}, [ shouldHydrate ] );
 
 			return <OriginalComponent { ...props } />;
 		},

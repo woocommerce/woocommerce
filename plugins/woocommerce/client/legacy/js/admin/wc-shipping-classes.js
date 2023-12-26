@@ -8,44 +8,16 @@
 
 			// Backbone model
 			ShippingClass       = Backbone.Model.extend({
-				changes: {},
-				logChanges: function( changedRows ) {
-					var changes = this.changes || {};
-
-					_.each( changedRows, function( row, id ) {
-						changes[ id ] = _.extend( changes[ id ] || { term_id : id }, row );
-					} );
-
-					this.changes = changes;
-					this.trigger( 'change:classes' );
-				},
-				save: function() {
-					if ( _.size( this.changes ) ) {
-						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_classes_save_changes', {
-							wc_shipping_classes_nonce : data.wc_shipping_classes_nonce,
-							changes                 : this.changes
-						}, this.onSaveResponse, 'json' );
-					} else {
-						shippingClass.trigger( 'saved:classes' );
-					}
-				},
-				discardChanges: function( id ) {
-					var changes      = this.changes || {};
-
-					// Delete all changes
-					delete changes[ id ];
-
-					// No changes? Disable save button.
-					if ( 0 === _.size( this.changes ) ) {
-						shippingClassView.clearUnloadConfirmation();
-					}
+				save: function( changes ) {
+					$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_classes_save_changes', {
+						wc_shipping_classes_nonce : data.wc_shipping_classes_nonce,
+						changes,
+					}, this.onSaveResponse, 'json' );
 				},
 				onSaveResponse: function( response, textStatus ) {
 					if ( 'success' === textStatus ) {
 						if ( response.success ) {
 							shippingClass.set( 'classes', response.data.shipping_classes );
-							shippingClass.trigger( 'change:classes' );
-							shippingClass.changes = {};
 							shippingClass.trigger( 'saved:classes' );
 						} else if ( response.data ) {
 							window.alert( response.data );
@@ -61,14 +33,11 @@
 			ShippingClassView = Backbone.View.extend({
 				rowTemplate: $row_template,
 				initialize: function() {
-					this.listenTo( this.model, 'change:classes', this.setUnloadConfirmation );
-					this.listenTo( this.model, 'saved:classes', this.clearUnloadConfirmation );
 					this.listenTo( this.model, 'saved:classes', this.render );
-					$tbody.on( 'change', { view: this }, this.updateModelOnChange );
-					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
-					$save_button.on( 'click', { view: this }, this.onSubmit );
-					$( document.body ).on( 'click', '.wc-shipping-class-add', { view: this }, this.onAddNewRow );
-					$( document.body ).on( 'click', '.wc-shipping-class-save-changes', { view: this }, this.onSubmit );
+					$( document.body ).on( 'click', '.wc-shipping-class-add-new', { view: this }, this.configureNewShippingClass );
+					$( document.body ).on( 'wc_backbone_modal_response', { view: this }, this.onConfigureShippingClassSubmitted );
+					$( document.body ).on( 'wc_backbone_modal_loaded', { view: this }, this.onLoadBackboneModal );
+					$( document.body ).on( 'wc_backbone_modal_validation', this.validateFormArguments );
 				},
 				block: function() {
 					$( this.el ).block({
@@ -83,8 +52,8 @@
 					$( this.el ).unblock();
 				},
 				render: function() {
-					var classes       = _.indexBy( this.model.get( 'classes' ), 'term_id' ),
-						view        = this;
+					var classes = _.indexBy( this.model.get( 'classes' ), 'term_id' ),
+						view    = this;
 
 					this.$el.empty();
 					this.unblock();
@@ -123,114 +92,111 @@
 					$tr.find( '.edit' ).hide();
 					$tr.find( '.wc-shipping-class-edit' ).on( 'click', { view: this }, this.onEditRow );
 					$tr.find( '.wc-shipping-class-delete' ).on( 'click', { view: this }, this.onDeleteRow );
-					$tr.find( '.editing .wc-shipping-class-edit' ).trigger('click');
-					$tr.find( '.wc-shipping-class-cancel-edit' ).on( 'click', { view: this }, this.onCancelEditRow );
+				},
+				configureNewShippingClass: function( event ) {
+					event.preventDefault();
+					const term_id = 'new-1-' + Date.now();
 
-					// Editing?
-					if ( true === rowData.editing ) {
-						$tr.addClass( 'editing' );
-						$tr.find( '.wc-shipping-class-edit' ).trigger( 'click' );
+					$( this ).WCBackboneModal({
+						template : 'wc-shipping-class-configure',
+						variable : {
+							term_id,
+							action: 'create',
+						},
+						data : {
+							term_id,
+							action: 'create',
+						}
+					});
+				},
+				onConfigureShippingClassSubmitted: function( event, target, posted_data ) {
+					if ( target === 'wc-shipping-class-configure' ) {
+						const view = event.data.view;
+						const model = view.model;
+						const isNewRow = posted_data.term_id.includes( 'new-1-' );
+						const rowData = {
+							...posted_data,
+						};
+
+						if ( isNewRow ) {
+							rowData.newRow = true;
+						}
+						
+						view.block();
+
+						model.save( {
+							[ posted_data.term_id ]: rowData
+						} );
 					}
 				},
-				onSubmit: function( event ) {
-					event.data.view.block();
-					event.data.view.model.save();
-					event.preventDefault();
-				},
-				onAddNewRow: function( event ) {
-					event.preventDefault();
-
-					var view    = event.data.view,
-						model   = view.model,
-						classes   = _.indexBy( model.get( 'classes' ), 'term_id' ),
-						changes = {},
-						size    = _.size( classes ),
-						newRow  = _.extend( {}, data.default_shipping_class, {
-							term_id: 'new-' + size + '-' + Date.now(),
-							editing: true,
-							newRow : true
-						} );
-
-					changes[ newRow.term_id ] = newRow;
-
-					model.logChanges( changes );
-					view.renderRow( newRow );
-					$( '.wc-shipping-classes-blank-state' ).remove();
+				validateFormArguments: function( element, target, data ) {
+					const requiredFields = [ 'name', 'description' ];
+					const formIsComplete = Object.keys( data ).every( key => {
+						if ( ! requiredFields.includes( key ) ) {
+							return true;
+						}
+						if ( Array.isArray( data[ key ] ) ) {
+							return data[ key ].length && !!data[ key ][ 0 ];
+						}
+						return !!data[ key ];
+					} );
+					const createButton = document.getElementById( 'btn-ok' );
+					createButton.disabled = ! formIsComplete;
+					createButton.classList.toggle( 'disabled', ! formIsComplete );
 				},
 				onEditRow: function( event ) {
+					const term_id = $( this ).closest('tr').data('id');
+					const model =  event.data.view.model;
+					const classes = _.indexBy( model.get( 'classes' ), 'term_id' );
+					const rowData = classes[ term_id ];
+					
 					event.preventDefault();
-					$( this ).closest('tr').addClass('editing');
-					$( this ).closest('tr').find('.view').hide();
-					$( this ).closest('tr').find('.edit').show();
-					event.data.view.model.trigger( 'change:classes' );
+					$( this ).WCBackboneModal({
+						template : 'wc-shipping-class-configure',
+						variable : {
+							action: 'edit',
+							...rowData
+						},
+						data : {
+							action: 'edit',
+							...rowData
+						}
+					});
+				},
+				onLoadBackboneModal: function( event, target ) {
+					if ( 'wc-shipping-class-configure' === target ) {
+						const modalContent = $('.wc-backbone-modal-content');
+						const term_id = modalContent.data('id');
+						const model =  event.data.view.model;
+						const classes = _.indexBy( model.get( 'classes' ), 'term_id' );
+						const rowData = classes[ term_id ];
+
+						if ( rowData ) {
+							// Support select boxes
+							$('.wc-backbone-modal-content').find( 'select' ).each( function() {
+								var attribute = $( this ).data( 'attribute' );
+								$( this ).find( 'option[value="' + rowData[ attribute ] + '"]' ).prop( 'selected', true );
+							} );
+						}
+					}
+					
 				},
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
-						classes = _.indexBy( model.get( 'classes' ), 'term_id' ),
-						changes = {},
 						term_id = $( this ).closest('tr').data('id');
 
 					event.preventDefault();
 
-					if ( classes[ term_id ] ) {
-						delete classes[ term_id ];
-						changes[ term_id ] = _.extend( changes[ term_id ] || {}, { deleted : 'deleted' } );
-						model.set( 'classes', classes );
-						model.logChanges( changes );
-					}
+					view.block();
 
-					view.render();
+					model.save( {
+						[ term_id ]: {
+							term_id,
+							deleted: 'deleted',
+						}
+					} );
 				},
-				onCancelEditRow: function( event ) {
-					var view    = event.data.view,
-						model   = view.model,
-						row     = $( this ).closest('tr'),
-						term_id = $( this ).closest('tr').data('id'),
-						classes = _.indexBy( model.get( 'classes' ), 'term_id' );
-
-					event.preventDefault();
-					model.discardChanges( term_id );
-
-					if ( classes[ term_id ] ) {
-						classes[ term_id ].editing = false;
-						row.after( view.rowTemplate( classes[ term_id ] ) );
-						view.initRow( classes[ term_id ] );
-					}
-
-					row.remove();
-				},
-				setUnloadConfirmation: function() {
-					this.needsUnloadConfirm = true;
-					$save_button.prop( 'disabled', false );
-				},
-				clearUnloadConfirmation: function() {
-					this.needsUnloadConfirm = false;
-					$save_button.attr( 'disabled', 'disabled' );
-				},
-				unloadConfirmation: function( event ) {
-					if ( event.data.view.needsUnloadConfirm ) {
-						event.returnValue = data.strings.unload_confirmation_msg;
-						window.event.returnValue = data.strings.unload_confirmation_msg;
-						return data.strings.unload_confirmation_msg;
-					}
-				},
-				updateModelOnChange: function( event ) {
-					var model     = event.data.view.model,
-						$target   = $( event.target ),
-						term_id   = $target.closest( 'tr' ).data( 'id' ),
-						attribute = $target.data( 'attribute' ),
-						value     = $target.val(),
-						classes   = _.indexBy( model.get( 'classes' ), 'term_id' ),
-						changes = {};
-
-					if ( ! classes[ term_id ] || classes[ term_id ][ attribute ] !== value ) {
-						changes[ term_id ] = {};
-						changes[ term_id ][ attribute ] = value;
-					}
-
-					model.logChanges( changes );
-				}
 			} ),
 			shippingClass = new ShippingClass({
 				classes: data.classes

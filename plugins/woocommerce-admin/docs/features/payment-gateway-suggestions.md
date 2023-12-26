@@ -6,11 +6,11 @@ After merchants click on a recommendation, plugins from this source will then wa
 
 ### Quick start
 
-Gateway suggestions are retreived from a REST API and can be added via a remote JSON data source or filtered with the `woocommerce_admin_payment_gateway_suggestion_specs` filter.
+Gateway suggestions are retrieved from a REST API and can be added via a remote JSON data source or filtered with the `woocommerce_admin_payment_gateway_suggestion_specs` filter.
 
 To quickly get started with an example plugin, run the following:
 
-`WC_EXT=payment-gateway-suggestions pnpm example --filter=woocommerce/client/admin`
+`WC_EXT=payment-gateway-suggestions pnpm example --filter=@woocommerce/admin-library`
 
 This will create a new plugin that when activated will add two new gateway suggestions.  The first is a simple gateway demonstrating how configuration fields can be pulled from the gateway class to create a configuration form.  The second gateway shows a more customized approach via SlotFill.
 
@@ -22,7 +22,7 @@ If a user is not opted into marketplace suggestions or polling fails, the gatewa
 
 ## Remote Data Source Schema
 
-The data source schema defines the recommended payment gateways and required plugins to kick of the setup process. The goal of this config is to provide the mininum amount of information possible to show a list of gateways and allow the gateways themselves to define specifics around configuration.
+The data source schema defines the recommended payment gateways and required plugins to kick of the setup process. The goal of this config is to provide the minimum amount of information possible to show a list of gateways and allow the gateways themselves to define specifics around configuration.
 
 ```json
 [

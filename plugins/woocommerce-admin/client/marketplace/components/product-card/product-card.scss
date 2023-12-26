@@ -1,0 +1,251 @@
+@import '../../stylesheets/_variables.scss';
+
+.woocommerce-marketplace {
+	&__product-card {
+		padding: $large-gap;
+		border-radius: $grid-unit-05 !important;
+
+		/* When product card is loading, contents will be empty and we render skeleton loader wireframes: */
+		&.is-loading {
+			overflow: hidden;
+			pointer-events: none;
+
+			.woocommerce-marketplace__product-card__content {
+				overflow: hidden;
+			}
+
+			&.woocommerce-marketplace__product-card--extension .woocommerce-marketplace__product-card__title,
+			.woocommerce-marketplace__product-card__description,
+			.woocommerce-marketplace__product-card__price {
+				width: 100vw;
+			}
+
+			.woocommerce-marketplace__product-card__image,
+			.woocommerce-marketplace__product-card__vendor,
+			.woocommerce-marketplace__product-card__description,
+			.woocommerce-marketplace__product-card__price,
+			.woocommerce-marketplace__product-card__icon,
+			.woocommerce-marketplace__product-card__title {
+				background: $skeleton-loader-color;
+			}
+
+			// Font size of these elements times line height
+			.woocommerce-marketplace__product-card__vendor,
+			.woocommerce-marketplace__product-card__description,
+			.woocommerce-marketplace__product-card__price {
+				height: calc(13px * 1.5);
+			}
+
+			&.woocommerce-marketplace__product-card--extension .woocommerce-marketplace__product-card__title {
+				height: 48px;
+			}
+
+			&.woocommerce-marketplace__product-card--theme .woocommerce-marketplace__product-card__title {
+				height: 24px;
+			}
+
+			.woocommerce-marketplace__product-card__vendor,
+			.woocommerce-marketplace__product-card__price {
+				width: 8em;
+			}
+
+			&.woocommerce-marketplace__product-card--theme .woocommerce-marketplace__product-card__price {
+				margin-top: 22px;
+			}
+
+			// Font size of this elements times line height times number lines
+			.woocommerce-marketplace__product-card__description {
+				height: calc(13px * 1.5 * 3);
+			}
+		}
+
+		&.is-small {
+			padding: $medium-gap;
+
+			.woocommerce-marketplace__product-card__description,
+			.woocommerce-marketplace__product-card__price {
+				display: none;
+			}
+
+			.woocommerce-marketplace__product-card__content {
+				display: block;
+			}
+
+			.woocommerce-marketplace__product-card__details {
+				align-items: center;
+			}
+
+			.woocommerce-marketplace__product-card__title {
+				font-size: 14px;
+				line-height: 20px;
+			}
+		}
+
+		&:hover {
+			outline: 1.5px solid var(--wp-admin-theme-color);
+		}
+
+		&__content {
+			display: grid;
+			align-items: flex-start;
+			gap: $medium-gap;
+			justify-content: space-between;
+			height: 100%;
+			grid-template-rows: auto 1fr 20px;
+		}
+
+		&__header {
+			align-self: stretch;
+		}
+
+		&__icon {
+			width: $grid-unit-60;
+			height: $grid-unit-60;
+			flex-shrink: 0;
+			border-radius: $grid-unit;
+		}
+
+		&__details {
+			display: flex;
+			justify-content: flex-start;
+			align-items: flex-start;
+			gap: $medium-gap;
+			background: $white;
+		}
+
+		&__meta {
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+			color: $gray-900;
+		}
+
+		&__title {
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 2;
+			color: $gray-900;
+			font-size: $editor-font-size;
+			font-style: normal;
+			font-weight: 600;
+			line-height: $large-gap;
+			margin: -4px 0 0;
+			padding: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		&__link {
+			&,
+			&:hover,
+			&:active {
+				color: $gray-900;
+				text-decoration: none;
+			}
+
+			/* Use the ::after trick to make the whole card clickable: */
+			&::after {
+				bottom: 0;
+				content: '';
+				left: 0;
+				position: absolute;
+				right: 0;
+				top: 0;
+			}
+		}
+
+		&__vendor {
+			display: flex;
+			gap: $grid-unit-05;
+			margin: 0;
+			padding: 0;
+			/* Allow vendor link to "punch through" the "whole card clickable" trick: */
+			position: relative;
+		}
+
+		&__vendor a {
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 1;
+			text-decoration: none;
+		}
+
+		&__description {
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 3;
+			margin: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		&__price {
+			align-items: flex-end;
+			gap: $grid-unit-05;
+			align-self: stretch;
+			text-decoration: none !important;
+			color: $gray-900 !important;
+			font-style: normal;
+			font-weight: 500;
+			line-height: $medium-gap;
+		}
+
+		&__price-billing {
+			color: $gray-600;
+			font-size: $default-font-size;
+			font-style: normal;
+			font-weight: 400;
+			line-height: $medium-gap;
+		}
+
+		&.woocommerce-marketplace__product-card--theme {
+			padding: 0;
+			overflow: hidden;
+
+			.woocommerce-marketplace__product-card__content {
+				grid-template-rows: auto 1fr auto;
+				grid-template-columns: 2fr 1fr;
+			}
+			.woocommerce-marketplace__product-card__image {
+				border-bottom: 1px solid $gray-200;
+				grid-column-start: span 2;
+				overflow: hidden;
+				padding-top: 75%;
+				position: relative;
+			}
+			.woocommerce-marketplace__product-card__image-inner {
+				width: 100%;
+				position: absolute;
+				top: 0;
+				left: 0;
+				bottom: 0;
+				right: 0;
+			}
+			.woocommerce-marketplace__product-card__header {
+				padding-left: $medium-gap;
+			}
+			.woocommerce-marketplace__product-card__price {
+				margin-right: $medium-gap;
+				text-align: right;
+				display: inline-flex;
+				align-items: flex-end;
+			}
+			.woocommerce-marketplace__product-card__price-label {
+				margin-left: auto;
+				line-height: 1.5;
+			}
+			.woocommerce-marketplace__product-card__price-billing {
+				line-height: 1.5;
+			}
+		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-medium) {
+	.woocommerce-marketplace {
+		&__product-card {
+			margin-top: 0;
+		}
+	}
+}
+

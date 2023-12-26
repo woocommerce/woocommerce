@@ -333,6 +333,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 				if ( 0 === $index ) {
 					$product->set_image_id( $attachment_id );
+					wc_product_attach_featured_image( $attachment_id, $product );
 				} else {
 					$gallery[] = $attachment_id;
 				}
@@ -430,6 +431,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Comment status.
 		if ( isset( $request['reviews_allowed'] ) ) {
 			$product->set_reviews_allowed( $request['reviews_allowed'] );
+		}
+
+		// Post password.
+		if ( isset( $request['post_password'] ) ) {
+			$product->set_post_password( $request['post_password'] );
 		}
 
 		// Virtual.
@@ -1140,6 +1146,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'default'     => true,
 					'context'     => array( 'view', 'edit' ),
 				),
+				'post_password'         => array(
+					'description' => __( 'Post password.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
 				'average_rating'        => array(
 					'description' => __( 'Reviews average rating.', 'woocommerce' ),
 					'type'        => 'string',
@@ -1494,6 +1505,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			// Add has_options if needed.
 			if ( in_array( 'has_options', $fields, true ) ) {
 				$data['has_options'] = $product->has_options( $context );
+			}
+
+			if ( in_array( 'post_password', $fields, true ) ) {
+				$data['post_password'] = $product->get_post_password( $context );
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );

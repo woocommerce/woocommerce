@@ -2,13 +2,12 @@
  * External dependencies
  */
 import { useFormContext } from '@woocommerce/components';
-
+import { __experimentalAttributes as Attributes } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { Attributes } from '../../fields/attributes';
 
 export const AttributesField = () => {
 	const {

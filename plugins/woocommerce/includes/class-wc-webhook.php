@@ -997,9 +997,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			),
 			'order.deleted'    => array(
 				'wp_trash_post',
+				'woocommerce_trash_order',
 			),
 			'order.restored'   => array(
 				'untrashed_post',
+				'woocommerce_untrash_order',
 			),
 			'product.created'  => array(
 				'woocommerce_process_product_meta',

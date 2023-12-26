@@ -32,7 +32,7 @@ export const TriggerCronJob = () => {
 	}
 
 	return (
-		<div className="trigger-cron-job">
+		<div className="select-description">
 			{ ! cronList ? (
 				<p>Loading ...</p>
 			) : (

@@ -8,7 +8,7 @@ This package contains automated API tests for WooCommerce, based on Playwright a
 - [Introduction](#introduction)
 - [About the Environment](#about-the-environment)
 - [Test Variables](#test-variables)
-- [Guide for writing tests](#guide-for-writing-tests)
+- [Guide for writing API tests](#guide-for-writing-api-tests)
   - [What aspects of the API should we test?](#what-aspects-of-the-api-should-we-test)
   - [Creating test structure](#creating-test-structure)
   - [Test Data Setup/Teardown](#test-data-setupteardown)
@@ -38,7 +38,7 @@ WooCommerce's `api-core-tests` are powered by Playwright. The test site is spun 
 
 - `nvm use`
 - `pnpm install`
-- `pnpm run build --filter=woocommerce`
+- `pnpm --filter='@woocommerce/plugin-woocommerce' build`
 - `cd plugins/woocommerce`
 - `pnpm env:test`
 - `pnpm test:api-pw`
@@ -62,7 +62,7 @@ The following environment variables can be configured as shown in `.env.example`
 
 ```
 # Your site's base URL, not including a trailing slash
-BASE_URL="https://mysite.com"
+API_BASE_URL="https://mysite.com"
 
 # The admin user's username or generated consumer key
 USER_KEY=""
@@ -130,7 +130,7 @@ After you run a test, it's best to restart the environment to start from a fresh
 - `pnpm env:destroy` when you make changes to `.wp-env.json`
 - `pnpm env:test` to spin up the test environment
 
-## Guide for writing tests
+## Guide for writing API tests
 
 When writing new tests, a good source on how to get started is to reference the [existing tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests/tests). Data that is required for the tests should be located in an equivalent file in the [data](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests/data) folder.
 

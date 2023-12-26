@@ -1,4 +1,6 @@
 const { devices } = require( '@playwright/test' );
+require( 'dotenv' ).config( { path: __dirname + '/.env' } );
+
 const {
 	ALLURE_RESULTS_DIR,
 	BASE_URL,
@@ -11,7 +13,7 @@ const {
 const config = {
 	timeout: DEFAULT_TIMEOUT_OVERRIDE
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
-		: 90 * 1000,
+		: 120 * 1000,
 	expect: { timeout: 20 * 1000 },
 	outputDir: './test-results/report',
 	globalSetup: require.resolve( './global-setup' ),
@@ -41,6 +43,7 @@ const config = {
 			},
 		],
 		[ 'json', { outputFile: './test-results/test-results.json' } ],
+		[ 'github' ],
 	],
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {

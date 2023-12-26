@@ -15,6 +15,7 @@ export type QueryProductAttribute = {
 	type: string;
 	order_by: string;
 	has_archives: boolean;
+	generate_slug: boolean;
 };
 
 type Query = {

@@ -9,7 +9,6 @@ declare global {
 		wcAdminFeatures: {
 			'activity-panels': boolean;
 			analytics: boolean;
-			'block-editor-feature-enabled': boolean;
 			coupons: boolean;
 			'customer-effort-score-tracks': boolean;
 			homescreen: boolean;
@@ -22,6 +21,10 @@ declare global {
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
 			'product-variation-management': boolean;
+			'product-virtual-downloadable': boolean;
+			'product-external-affiliate': boolean;
+			'product-grouped': boolean;
+			'product-linked': boolean;
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
@@ -36,6 +39,15 @@ declare global {
 			'shipping-setting-tour': boolean;
 		};
 		wp: {
+			updates?: {
+				ajax: ( action, data: {
+					slug?: string;
+					plugin?: string;
+					theme?: string;
+					success?: function;
+					error?: function;
+				} ) => JQuery.Promise;
+			};
 			autosave?: {
 				server: {
 					postChanged: () => boolean;
@@ -48,6 +60,9 @@ declare global {
 				isDirty: () => boolean;
 			};
 		};
+		getUserSetting?: ( name: string ) => string | undefined;
+		setUserSetting?: ( name: string, value: string ) => void;
+		deleteUserSetting?: ( name: string ) => void;
 	}
 }
 

@@ -8,19 +8,13 @@ You need Composer to use the packages. If you don't have it installed, go and ch
 
 ## Developing new packages
 
-To create a package and/or feature plugin for core, you can base your plugin on the example package here:
-
-https://github.com/woocommerce/woocommerce-example-package
+To create a package and/or feature plugin for core, you can base your plugin on [the example package](https://github.com/woocommerce/woocommerce-example-package).
 
 Packages require a Package class which inits the package and returns version information, and Packages also require that you use the `jetpack-autoloader` package which prevents version conflicts should the same package be used by multiple plugins at once. This is shown in the example package above.
 
 ## Publishing a package
 
-Your package should be published to Packagist. For example:
-
-https://packagist.org/packages/woocommerce/woocommerce-example-package
-
-The package name in this case is `woocommerce/woocommerce-example-package`.
+Your package should be published to Packagist ([example](https://packagist.org/packages/woocommerce/woocommerce-example-package)). The package name in this case is `woocommerce/woocommerce-example-package`.
 
 ## Including packages in core
 
@@ -30,7 +24,7 @@ Edit `composer.json` in the root directory and add the package and package versi
 {
   "name": "woocommerce/woocommerce",
   "description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
-  "homepage": "https://woocommerce.com/",
+  "homepage": "https://woo.com/",
   "type": "wordpress-plugin",
   "license": "GPL-3.0-or-later",
   "prefer-stable": true,
@@ -47,7 +41,7 @@ Edit `composer.json` in the root directory and add the package and package versi
 
 Next, if your package contains user translatable strings you'll need to edit `bin/package-update.sh` and instruct it to change your package textdomain to the `woocommerce` textdomain. For example:
 
-```
+```shell
 find ./packages/woocommerce-example-package -iname '*.php' -exec sed -i.bak -e "s/, 'woocommerce-example-package'/, 'woocommerce'/g" {} \;
 ```
 
@@ -67,7 +61,7 @@ You can add tests to ensure your package is loaded to the WooCommerce unit-tests
 
 Once you have defined your package requirements, run
 
-```
+```shell
 composer install
 ```
 

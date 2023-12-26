@@ -13,7 +13,10 @@
 		"promptly": "^3.2.0"
 	},
 	"engines": {
-		"node": "^16.13.1",
-		"pnpm": "^7.13.3"
+		"node": "^16.14.1",
+		"pnpm": "^8.12.1"
+	},
+	"devDependencies": {
+		"wireit": "0.14.1"
 	}
 }

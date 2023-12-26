@@ -20,10 +20,19 @@ function escapeCSVValue( value: string | number ) {
 	let stringValue = value.toString();
 
 	// Prevent CSV injection.
-	// See: http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
+	// See: https://owasp.org/www-community/attacks/CSV_Injection
 	// See: WC_CSV_Exporter::escape_data()
-	if ( [ '=', '+', '-', '@' ].includes( stringValue.charAt( 0 ) ) ) {
-		stringValue = '"\t' + stringValue + '"';
+	if (
+		[
+			'=',
+			'+',
+			'-',
+			'@',
+			String.fromCharCode( 0x09 ), // tab
+			String.fromCharCode( 0x0d ), // carriage return
+		].includes( stringValue.charAt( 0 ) )
+	) {
+		stringValue = '"\'' + stringValue + '"';
 	} else if ( stringValue.match( /[,"\s]/ ) ) {
 		stringValue = '"' + stringValue.replace( /"/g, '""' ) + '"';
 	}

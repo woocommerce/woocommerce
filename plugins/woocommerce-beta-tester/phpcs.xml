@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<ruleset name="WooCommerce Beta Tester Coding Standards">
+	<description>WooCommerce Beta Tester PHP_CodeSniffer ruleset.</description>
+
+	<file>./woocommerce-beta-tester.php</file>	
+	<file>./includes/</file>
+	<file>./api/</file>
+
+	<!-- Show progress, show the error codes for each message (source). -->
+	<arg value="ps" />
+
+	<!-- Strip the filepaths in reports down to the relevant bit. -->
+	<arg name="basepath" value="./" />
+
+	<!-- Check up to 8 files simultaneously. -->
+	<arg name="parallel" value="8" />
+
+	<!-- Configs -->
+	<config name="minimum_supported_wp_version" value="5.2" />
+	<config name="testVersion" value="7.4-" />
+
+	<!-- Rules -->
+	<rule ref="WooCommerce-Core" />
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array" value="woocommerce-beta-tester" />
+		</properties>
+	</rule>
+
+	<rule ref="WooCommerce.Commenting.CommentHooks.MissingHookComment">
+		<exclude-pattern>includes/</exclude-pattern>
+		<exclude-pattern>api/</exclude-pattern>
+	</rule>
+	
+	<rule ref="Squiz.Commenting.FileComment.Missing">
+		<exclude-pattern>includes/</exclude-pattern>
+		<exclude-pattern>api/</exclude-pattern>
+	</rule>
+</ruleset>

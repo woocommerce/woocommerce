@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update locator to reduce flakiness when running tests against a JN site

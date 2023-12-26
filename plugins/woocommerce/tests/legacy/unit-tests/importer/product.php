@@ -34,8 +34,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
-		$this->csv_file = dirname( __FILE__ ) . '/sample.csv';
-		$this->sut = new WC_Product_CSV_Importer(
+		$this->csv_file       = dirname( __FILE__ ) . '/sample.csv';
+		$this->sut            = new WC_Product_CSV_Importer(
 			$this->csv_file,
 			array(
 				'mapping'          => $this->get_csv_mapped_items(),
@@ -108,14 +108,14 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	public function test_import_for_admin_users() {
 		// In most cases, an admin user will run the import.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-		$results  = $this->sut->import();
+		$results = $this->sut->import();
 
 		$this->assertEquals( 0, count( $results['failed'] ) );
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
 		$this->assertEquals(
 			7,
-			count( $results['imported'] ),
+			count( $results['imported'] ) + count( $results['imported_variations'] ),
 			'One import item references a downloadable file stored in an unapproved location: if the import is triggered by an admin user, that location will be automatically approved.'
 		);
 	}
@@ -126,11 +126,11 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	public function test_import_for_shop_managers() {
 		// In some cases, a shop manager may run the import.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
-		$results  = $this->sut->import();
+		$results = $this->sut->import();
 
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
-		$this->assertEquals( 6, count( $results['imported'] ) );
+		$this->assertEquals( 6, count( $results['imported'] ) + count( $results['imported_variations'] ) );
 		$this->assertEquals(
 			1,
 			count( $results['failed'] ),
@@ -276,8 +276,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'visible',
 				'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
-				'',
-				'',
+				'Jul 8, 2023',
+				'1689239400',
 				'taxable',
 				'standard',
 				'1',
@@ -290,7 +290,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'',
 				'1',
 				'Lorem ipsum dolor sit amet.',
-				'',
+				'4',
 				'5',
 				'Music > Albums, Music',
 				'Woo',
@@ -341,7 +341,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'short_description'     => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'description'           => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'date_on_sale_from'     => '2017-01-01',
-				'date_on_sale_to'       => '2030-01-01',
+				'date_on_sale_to'       => '2030-01-01 0:00:00',
 				'tax_status'            => 'taxable',
 				'tax_class'             => 'standard',
 				'stock_status'          => 'instock',
@@ -384,8 +384,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'catalog_visibility'    => 'visible',
 				'short_description'     => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'description'           => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
-				'date_on_sale_from'     => null,
-				'date_on_sale_to'       => null,
+				'date_on_sale_from'     => 'Jul 8, 2023',
+				'date_on_sale_to'       => '2023-07-13T09:10:00Z',
 				'tax_status'            => 'taxable',
 				'tax_class'             => 'standard',
 				'stock_status'          => 'instock',
@@ -398,7 +398,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'height'                => '',
 				'reviews_allowed'       => true,
 				'purchase_note'         => 'Lorem ipsum dolor sit amet.',
-				'sale_price'            => '',
+				'sale_price'            => '4',
 				'regular_price'         => '5',
 				'shipping_class_id'     => 0,
 				'download_limit'        => 10,
@@ -437,8 +437,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'catalog_visibility' => 'visible',
 				'short_description'  => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'description'        => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
-				'date_on_sale_from'  => null,
-				'date_on_sale_to'    => null,
+				'date_on_sale_from'  => '2023-07-08 05:10:15',
+				'date_on_sale_to'    => '2023/07/13',
 				'tax_status'         => 'taxable',
 				'tax_class'          => 'standard',
 				'stock_status'       => 'instock',
@@ -451,13 +451,13 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'height'             => '',
 				'reviews_allowed'    => false,
 				'purchase_note'      => 'Lorem ipsum dolor sit amet.',
-				'sale_price'         => '',
+				'sale_price'         => '180',
 				'regular_price'      => '199',
 				'shipping_class_id'  => 0,
 				'download_limit'     => 0,
 				'download_expiry'    => 0,
-				'product_url'        => 'https://woocommerce.com/products/product-csv-import-suite/',
-				'button_text'        => 'Buy on WooCommerce.com',
+				'product_url'        => 'https://woo.com/products/product-csv-import-suite/',
+				'button_text'        => 'Buy on Woo.com',
 				'status'             => 'publish',
 				'raw_image_id'       => null,
 				'virtual'            => false,
@@ -700,7 +700,9 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * Test that directory traversal is prevented.
 	 */
 	public function test_server_path_traversal() {
-		self::file_copy( $this->csv_file, ABSPATH . '../sample.csv' );
+		if ( ! file_exists( ABSPATH . '../sample.csv' ) ) {
+			self::file_copy( $this->csv_file, ABSPATH . '../sample.csv' );
+		}
 
 		$_POST['file_url'] = '../sample.csv';
 		$import_controller = new WC_Product_CSV_Importer_Controller();

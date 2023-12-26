@@ -8,7 +8,7 @@
 {{#author}}
  * Author: {{author}}
 {{/author}}
- * Author URI: https://woocommerce.com
+ * Author URI: https://woo.com
  * Text Domain: {{textdomain}}
  * Domain Path: /languages
  *
@@ -37,7 +37,7 @@ use {{slugPascalCase}}\Admin\Setup;
  */
 function {{slugSnakeCase}}_missing_wc_notice() {
 	/* translators: %s WC download URL link. */
-	echo '<div class="error"><p><strong>' . sprintf( esc_html__( '{{title}} requires WooCommerce to be installed and active. You can download %s here.', '{{slugSnakeCase}}' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( '{{title}} requires WooCommerce to be installed and active. You can download %s here.', '{{slugSnakeCase}}' ), '<a href="https://woo.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
 }
 
 register_activation_hook( __FILE__, '{{slugSnakeCase}}_activate' );

@@ -140,7 +140,6 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 										<span>
 											{ formatDate(
 												timeFormat,
-												// @ts-expect-error TODO - fix this type error with moment
 												moment().startOf( 'day' )
 											) }
 										</span>
@@ -149,14 +148,13 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 										<span>
 											{ formatDate(
 												timeFormat,
-												// @ts-expect-error TODO - fix this type error with moment
 												moment().endOf( 'day' )
 											) }
 										</span>
 									),
 									moreLink: (
 										<Link
-											href="https://woocommerce.com/document/managing-products/#product-data"
+											href="https://woo.com/document/managing-products/#product-data"
 											target="_blank"
 											type="external"
 											onClick={ () =>

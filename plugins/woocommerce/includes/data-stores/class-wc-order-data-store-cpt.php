@@ -538,7 +538,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$unpaid_orders = $wpdb->get_col(
 			$wpdb->prepare(
-				// @codingStandardsIgnoreStart
+			// @codingStandardsIgnoreStart
 				"SELECT posts.ID
 				FROM {$wpdb->posts} AS posts
 				WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
@@ -577,6 +577,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					'_shipping_address_index',
 					'_billing_last_name',
 					'_billing_email',
+					'_billing_phone',
 				)
 			)
 		);
@@ -602,6 +603,16 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 							FROM {$wpdb->prefix}woocommerce_order_items as order_items
 							WHERE order_item_name LIKE %s",
 							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
+						)
+					),
+					$wpdb->get_col(
+						$wpdb->prepare(
+							"SELECT DISTINCT os.order_id FROM {$wpdb->prefix}wc_order_stats os
+							INNER JOIN {$wpdb->prefix}wc_customer_lookup cl ON os.customer_id = cl.customer_id
+							INNER JOIN {$wpdb->usermeta} um ON cl.user_id = um.user_id
+							WHERE (um.meta_key = 'billing_phone' OR um.meta_key = 'shipping_phone')
+							AND um.meta_value = %s",
+							wc_clean( $term )
 						)
 					)
 				)
@@ -1169,5 +1180,21 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			array()
 		);
 		WC_Order::prime_raw_meta_data_cache( $raw_meta_data_collection, 'orders' );
+	}
+
+	/**
+	 * Attempts to restore the specified order back to its original status (after having been trashed).
+	 *
+	 * @param WC_Order $order The order to be untrashed.
+	 *
+	 * @return bool If the operation was successful.
+	 */
+	public function untrash_order( WC_Order $order ): bool {
+		if ( ! wp_untrash_post( $order->get_id() ) ) {
+			return false;
+		}
+
+		$order->set_status( get_post_field( 'post_status', $order->get_id() ) );
+		return (bool) $order->save();
 	}
 }

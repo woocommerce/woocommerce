@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\Admin\Notes\Note;
+
 /**
  * Class WC_Install_Test.
  */
@@ -105,4 +107,80 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $db_delta_result );
 	}
 
+	/**
+	 * Test that delete_obsolete_notes deletes notes.
+	 */
+	public function test_delete_obsolete_notes_deletes_notes() {
+		$data_store = \WC_Data_Store::load( 'admin-note' );
+
+		$note_name = 'wc-admin-welcome-note';
+
+		$note = new Note();
+		$note->set_name( $note_name );
+		$note->set_status( Note::E_WC_ADMIN_NOTE_UNACTIONED );
+		$note->add_action( 'test-action', 'Primary Action', 'https://example.com', Note::E_WC_ADMIN_NOTE_UNACTIONED, true );
+		$note->add_action( 'test-action-2', 'Action 2', 'https://example.com' );
+		$data_store->create( $note );
+
+		$this->assertEquals( 1, count( $data_store->get_notes_with_name( $note_name ) ) );
+
+		WC_Install::delete_obsolete_notes();
+
+		$this->assertEmpty( $data_store->get_notes_with_name( $note_name ) );
+
+	}
+
+	/**
+	 * Test that delete_obsolete_notes doesn't delete other notes.
+	 */
+	public function test_delete_obsolete_notes_deletes_only_selected_notes() {
+		$data_store = \WC_Data_Store::load( 'admin-note' );
+
+		$note_name = 'wc-admin-welcome-note';
+
+		$note = new Note();
+		$note->set_name( $note_name );
+		$note->set_status( Note::E_WC_ADMIN_NOTE_UNACTIONED );
+		$note->add_action( 'test-action', 'Primary Action', 'https://example.com', Note::E_WC_ADMIN_NOTE_UNACTIONED, true );
+		$note->add_action( 'test-action-2', 'Action 2', 'https://example.com' );
+		$data_store->create( $note );
+
+		$note_name_2 = 'wc-admin-welcome-note-from-the-queen';
+
+		$note_2 = new Note();
+		$note_2->set_name( $note_name_2 );
+		$note_2->set_status( Note::E_WC_ADMIN_NOTE_UNACTIONED );
+		$note_2->add_action( 'test-action', 'Primary Action', 'https://example.com', Note::E_WC_ADMIN_NOTE_UNACTIONED, true );
+		$note_2->add_action( 'test-action-2', 'Action 2', 'https://example.com' );
+		$data_store->create( $note_2 );
+
+		$this->assertEquals( '2', $data_store->get_notes_count( array( Note::E_WC_ADMIN_NOTE_INFORMATIONAL ), array() ) );
+
+		WC_Install::delete_obsolete_notes();
+
+		$this->assertEmpty( $data_store->get_notes_with_name( $note_name ) );
+		$this->assertEquals( '1', $data_store->get_notes_count( array( Note::E_WC_ADMIN_NOTE_INFORMATIONAL ), array() ) );
+
+		$data_store->delete( $note_2 );
+	}
+
+	/**
+	 * Test that maybe_set_store_id only sets an ID when it isn't already present.
+	 */
+	public function test_maybe_set_store_id() {
+
+		// simulate a store ID not being set.
+		delete_option( \WC_Install::STORE_ID_OPTION );
+		\WC_Install::maybe_set_store_id();
+		$store_id = get_option( \WC_Install::STORE_ID_OPTION );
+		// uuid4 is 36 characters long.
+		$this->assertSame( 36, strlen( $store_id ) );
+
+		// simulate a store ID already being set.
+		\WC_Install::maybe_set_store_id();
+		$existing_store_id = get_option( \WC_Install::STORE_ID_OPTION );
+		$this->assertSame( $store_id, $existing_store_id );
+		// cleanup.
+		delete_option( \WC_Install::STORE_ID_OPTION );
+	}
 }

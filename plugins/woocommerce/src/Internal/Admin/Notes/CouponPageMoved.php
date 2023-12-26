@@ -35,7 +35,7 @@ class CouponPageMoved {
 
 		add_action( 'admin_init', [ $this, 'possibly_add_note' ] );
 		add_action( 'admin_init', [ $this, 'redirect_to_coupons' ] );
-		add_action( 'woocommerce_admin_newly_installed', [ $this, 'disable_legacy_menu_for_new_install' ] );
+		add_action( 'woocommerce_newly_installed', [ $this, 'disable_legacy_menu_for_new_install' ] );
 	}
 
 	/**

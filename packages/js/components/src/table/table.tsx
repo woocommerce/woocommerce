@@ -244,6 +244,7 @@ const Table: React.VFC< TableProps > = ( {
 							const iconLabel =
 								sortedBy === key && sortDir !== ASC
 									? sprintf(
+											/* translators: %s: column label */
 											__(
 												'Sort by %s in ascending order',
 												'woocommerce'
@@ -251,6 +252,7 @@ const Table: React.VFC< TableProps > = ( {
 											screenReaderLabel || label
 									  )
 									: sprintf(
+											/* translators: %s: column label */
 											__(
 												'Sort by %s in descending order',
 												'woocommerce'

@@ -143,8 +143,6 @@ class OrderHelper {
 	 * Helper method to drop custom tables if present.
 	 */
 	public static function delete_order_custom_tables() {
-		$features_controller = wc_get_container()->get( Featurescontroller::class );
-		$features_controller->change_feature_enable( 'custom_order_tables', true );
 		$synchronizer = wc_get_container()
 			->get( DataSynchronizer::class );
 		if ( $synchronizer->check_orders_table_exists() ) {
@@ -158,24 +156,22 @@ class OrderHelper {
 	 * @param boolean $enabled TRUE to enable COT or FALSE to disable.
 	 * @return void
 	 */
-	public static function toggle_cot( bool $enabled ) {
+	public static function toggle_cot_feature_and_usage( bool $enabled ) {
 		$features_controller = wc_get_container()->get( Featurescontroller::class );
 		$features_controller->change_feature_enable( 'custom_order_tables', $enabled );
 
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, wc_bool_to_string( $enabled ) );
+		wp_cache_flush();
 
 		// Confirm things are really correct.
 		$wc_data_store = WC_Data_Store::load( 'order' );
-		assert( is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) === $enabled );
+		assert( is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) === $enabled, 'data store\'s classname is "' . $wc_data_store->get_current_class_name() . '", but $enabled is "' . ( $enabled ? 'true' : 'false' ) . '"' );
 	}
 
 	/**
 	 * Helper method to create custom tables if not present.
 	 */
 	public static function create_order_custom_table_if_not_exist() {
-		$features_controller = wc_get_container()->get( Featurescontroller::class );
-		$features_controller->change_feature_enable( 'custom_order_tables', true );
-
 		$synchronizer = wc_get_container()->get( DataSynchronizer::class );
 		if ( ! $synchronizer->check_orders_table_exists() ) {
 			$synchronizer->create_database_tables();
@@ -189,7 +185,7 @@ class OrderHelper {
 	 */
 	public static function create_complex_wp_post_order() {
 		$current_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		self::toggle_cot( false );
+		self::toggle_cot_feature_and_usage( false );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$uniq_cust_id = wp_generate_password( 10, false );
@@ -259,7 +255,7 @@ class OrderHelper {
 		$order->save();
 		$order->save_meta_data();
 
-		self::toggle_cot( $current_cot_state );
+		self::toggle_cot_feature_and_usage( $current_cot_state );
 
 		return $order->get_id();
 	}
@@ -353,5 +349,4 @@ class OrderHelper {
 
 		return $order;
 	}
-
 }

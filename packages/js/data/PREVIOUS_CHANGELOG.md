@@ -22,7 +22,7 @@
 ## Breaking changes
 
 -   Fix the batch fetch logic for the options data store. #7587
--   Add backwards compability for old function format. #7688
+-   Add backwards compatibility for old function format. #7688
 -   Add console warning for inbox note contents exceeding 320 characters and add dompurify dependency. #7869
 -   Fix race condition in data package's options module. #7947
 -   Remove dev dependency `@woocommerce/wc-admin-settings`. #8057

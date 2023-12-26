@@ -45,14 +45,13 @@ export const ProductMoreMenu = () => {
 				className="woocommerce-product-form-more-menu"
 				label={ __( 'More product options', 'woocommerce' ) }
 				icon={ moreVertical }
-				popoverProps={ { position: 'bottom left' } }
 			>
 				{ ( { onClose } ) => (
 					<>
-						<FeedbackMenuItem onClose={ onClose } />
+						<FeedbackMenuItem onClick={ onClose } />
 						<ClassicEditorMenuItem
 							productId={ values.id }
-							onClose={ onClose }
+							onClick={ onClose }
 						/>
 					</>
 				) }

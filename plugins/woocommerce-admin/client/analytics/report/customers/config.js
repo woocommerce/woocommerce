@@ -84,7 +84,7 @@ export const advancedFilters = applyFilters(
 	CUSTOMERS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
 		title: _x(
-			'Customers match {{select /}} filters',
+			'Customers match <select/> filters',
 			'A sentence describing filters for Customers. See screen shot for context: https://cloudup.com/cCsm3GeXJbE',
 			'woocommerce'
 		),
@@ -100,7 +100,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
-						'{{title}}Name{{/title}} {{rule /}} {{filter /}}',
+						'<title>Name</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select customer name', 'woocommerce' ),
@@ -151,7 +151,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
-						'{{title}}Country / Region{{/title}} {{rule /}} {{filter /}}',
+						'<title>Country / Region</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select country / region', 'woocommerce' ),
@@ -205,7 +205,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a customer username filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
-						'{{title}}Username{{/title}} {{rule /}} {{filter /}}',
+						'<title>Username</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select customer username', 'woocommerce' ),
@@ -247,7 +247,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a customer email filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
-						'{{title}}Email{{/title}} {{rule /}} {{filter /}}',
+						'<title>Email</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select customer email', 'woocommerce' ),
@@ -293,7 +293,7 @@ export const advancedFilters = applyFilters(
 						'woocommerce'
 					),
 					title: __(
-						'{{title}}No. of Orders{{/title}} {{rule /}} {{filter /}}',
+						'<title>No. of Orders</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 				},
@@ -339,7 +339,7 @@ export const advancedFilters = applyFilters(
 						'woocommerce'
 					),
 					title: __(
-						'{{title}}Total Spend{{/title}} {{rule /}} {{filter /}}',
+						'<title>Total Spend</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 				},
@@ -388,7 +388,7 @@ export const advancedFilters = applyFilters(
 						'woocommerce'
 					),
 					title: __(
-						'{{title}}AOV{{/title}} {{rule /}} {{filter /}}',
+						'<title>AOV</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 				},
@@ -436,7 +436,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
-						'{{title}}Registered{{/title}} {{rule /}} {{filter /}}',
+						'<title>Registered</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select registered date', 'woocommerce' ),
@@ -472,7 +472,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
-						'{{title}}Last active{{/title}} {{rule /}} {{filter /}}',
+						'<title>Last active</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select registered date', 'woocommerce' ),

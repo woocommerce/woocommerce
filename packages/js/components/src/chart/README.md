@@ -94,7 +94,7 @@ Name | Type | Default | Description
 `legendPosition` | One of: 'bottom', 'side', 'top', 'hidden' | `null` | Position the legend must be displayed in. If it's not defined, it's calculated depending on the viewport width and the mode
 `legendTotals` | Object | `null` | Values to overwrite the legend totals. If not defined, the sum of all line values will be used
 `screenReaderFormat` | One of type: string, func | `'%B %-d, %Y'` | A datetime formatting string or overriding function to format the screen reader labels
-`showHeaderControls` | Boolean | `true` | Wether header UI controls must be displayed
+`showHeaderControls` | Boolean | `true` | Whether header UI controls must be displayed
 `title` | String | `null` | A title describing this chart
 `tooltipLabelFormat` | One of type: string, func | `'%B %-d, %Y'` | A datetime formatting string or overriding function to format the tooltip label
 `tooltipValueFormat` | One of type: string, func | `','` | A number formatting string or function to format the value displayed in the tooltips

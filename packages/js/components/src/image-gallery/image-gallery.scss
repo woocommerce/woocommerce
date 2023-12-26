@@ -3,7 +3,7 @@
         display: block;
     }
 
-    .woocommerce-sortable {
+    .woocommerce-sortable, &__wrapper {
         display: grid;
         grid-template-columns: inherit;
         grid-gap: $gap;

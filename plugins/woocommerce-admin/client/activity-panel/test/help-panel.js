@@ -15,7 +15,7 @@ describe( 'Activity Panels', () => {
 			const fixtures = [
 				{
 					id: 'woocommerce_payments',
-					text: 'WooCommerce Payments',
+					text: 'WooPayments',
 				},
 				{
 					id: 'stripe',
@@ -39,7 +39,7 @@ describe( 'Activity Panels', () => {
 				},
 				{
 					id: 'payfast',
-					text: 'PayFast',
+					text: 'Payfast',
 				},
 				{
 					id: 'eway',

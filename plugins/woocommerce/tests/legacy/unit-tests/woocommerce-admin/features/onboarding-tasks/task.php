@@ -296,7 +296,7 @@ class WC_Admin_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the parent list ID is retreived.
+	 * Test that the parent list ID is retrieved.
 	 */
 	public function test_get_list_id() {
 		$task = new TestTask(

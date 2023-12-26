@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add name and parent_id to the ProductVariation type definition

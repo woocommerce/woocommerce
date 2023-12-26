@@ -1,40 +1,48 @@
 /**
  * External dependencies
  */
-import { Product, ProductStatus } from '@woocommerce/data';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
-import { Button } from '@wordpress/components';
-import { useEntityProp } from '@wordpress/core-data';
-import { useDispatch } from '@wordpress/data';
-import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { createElement } from '@wordpress/element';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { MouseEvent } from 'react';
+import { Product } from '@woocommerce/data';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import { getProductErrorMessage } from '../../../utils/get-product-error-message';
+import { recordProductEvent } from '../../../utils/record-product-event';
 import { usePublish } from '../hooks/use-publish';
+import { PublishButtonProps } from './types';
+import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 
-export function PublishButton(
-	props: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' >
-) {
-	const [ productStatus ] = useEntityProp< ProductStatus | 'auto-draft' >(
-		'postType',
-		'product',
-		'status'
-	);
-
-	const isCreating = productStatus === 'auto-draft';
-
+export function PublishButton( {
+	productStatus,
+	productType = 'product',
+	...props
+}: PublishButtonProps ) {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
 
+	const { maybeShowFeedbackBar } = useFeedbackBar();
+
 	const publishButtonProps = usePublish( {
+		productType,
+		productStatus,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
-			const noticeContent = isCreating
-				? __( 'Product successfully created.', 'woocommerce' )
-				: __( 'Product published.', 'woocommerce' );
+			const isPublished =
+				productType === 'product' ? productStatus === 'publish' : true;
+
+			if ( isPublished ) {
+				recordProductEvent( 'product_update', savedProduct );
+			}
+
+			const noticeContent = isPublished
+				? __( 'Product updated.', 'woocommerce' )
+				: __( 'Product added.', 'woocommerce' );
 			const noticeOptions = {
 				icon: '🎉',
 				actions: [
@@ -54,17 +62,16 @@ export function PublishButton(
 
 			createSuccessNotice( noticeContent, noticeOptions );
 
+			maybeShowFeedbackBar();
+
 			if ( productStatus === 'auto-draft' ) {
 				const url = getNewPath( {}, `/product/${ savedProduct.id }` );
 				navigateTo( { url } );
 			}
 		},
-		onPublishError() {
-			const noticeContent = isCreating
-				? __( 'Failed to create product.', 'woocommerce' )
-				: __( 'Failed to publish product.', 'woocommerce' );
-
-			createErrorNotice( noticeContent );
+		onPublishError( error ) {
+			const message = getProductErrorMessage( error );
+			createErrorNotice( message );
 		},
 	} );
 

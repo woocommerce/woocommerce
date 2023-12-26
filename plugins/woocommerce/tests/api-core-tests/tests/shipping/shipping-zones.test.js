@@ -1,13 +1,15 @@
-/* eslint-disable */ 
+/* eslint-disable */
 const { test, expect } = require('@playwright/test');
 const { getShippingZoneExample } = require( '../../data' );
-
+const { API_BASE_URL } = process.env;
+const shouldSkip = API_BASE_URL != undefined;
 /**
  * Tests for the WooCommerce Shipping zones API.
  * @group api
  * @group shipping
  */
-test.describe( 'Shipping zones API tests', () => {
+
+test.describe.serial( 'Shipping zones API tests', () => {
 
 	//Shipping zone to be created, retrieved, updated, and deleted by the tests.
 	let shippingZone = getShippingZoneExample();
@@ -47,7 +49,7 @@ test.describe( 'Shipping zones API tests', () => {
 		const response = await request.put( `/wp-json/wc/v3/shipping/zones/0`,{
 			data:newZoneDetails
 		})
-	
+
 		//validate response
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 403 );
@@ -78,7 +80,7 @@ test.describe( 'Shipping zones API tests', () => {
 	} );
 
 	test( 'can retrieve a shipping zone', async ({request}) => {
-		//call API to retrive the created shipping zone
+		//call API to retrieve the created shipping zone
 		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
 		const responseJSON = await response.json();
 
@@ -86,9 +88,9 @@ test.describe( 'Shipping zones API tests', () => {
 		expect( response.status() ).toEqual( 200 );
 		expect( responseJSON.id ).toEqual( shippingZone.id );
 	} );
-	
+
 	test( 'can list all shipping zones', async ({request}) => {
-		//call API to retrive all the shipping zones
+		//call API to retrieve all the shipping zones
 		const response = await request.get( 'wp-json/wc/v3/shipping/zones');
 		const responseJSON = await response.json();
 
@@ -96,7 +98,7 @@ test.describe( 'Shipping zones API tests', () => {
 		expect( response.status() ).toEqual( 200 );
 		//2nd shipping zone (0-based) will have the new shipping zone id
 		expect( responseJSON[1].id ).toEqual(shippingZone.id);
-		
+
 	} );
 
 	test( 'can update a shipping zone', async ({request}) => {
@@ -119,10 +121,10 @@ test.describe( 'Shipping zones API tests', () => {
 
 	test( 'can add a shipping region to a shipping zone', async ({request}) => {
 
-		//call API to retrive the locations of the last created shipping zone
+		//call API to retrieve the locations of the last created shipping zone
 		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`);
 		expect( response.status() ).toEqual( 200 );
-		
+
 		//no locations exist initially
 		//update the locations of a shipping zone region to include GB (UK) and US
 		const putResponse2Countries = await request.put( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`,{
@@ -167,8 +169,10 @@ test.describe( 'Shipping zones API tests', () => {
 		});
 
 		const putResponseStateOnlyJSON = await putResponseStateOnly.json();
-		expect( putResponseStateOnly.status() ).toEqual( 200 );
-		expect( putResponseStateOnlyJSON).toHaveLength(0);
+		await expect( putResponseStateOnly.status() ).toEqual( 200 );
+
+		// running on external hosts, this can be 0 or 1
+		expect([0, 1]).toContain(putResponseStateOnlyJSON.length);
 
 	} );
 
@@ -178,18 +182,21 @@ test.describe( 'Shipping zones API tests', () => {
 		const deleteResponse = await request.delete( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`,{
 			data:{force:true}
 		})
-		
+
 		const deleteResponseJSON = await deleteResponse.json();
 
 		//validate response
-		expect( deleteResponse.status() ).toEqual( 200 );
-		expect( deleteResponseJSON.id ).toEqual( shippingZone.id );
+		await expect( deleteResponse.status() ).toEqual( 200 );
+		await expect( deleteResponseJSON.id ).toEqual( shippingZone.id );
 
-		//call API to attempt to retrieve the deleted shipping zone
-		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
-		//validate response
-		expect( response.status() ).toEqual( 404 );
+		// only run on wp-env because caching on external hosts makes unreliable
+		if ( ! shouldSkip ) {
+			//call API to attempt to retrieve the deleted shipping zone
+			const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
+			//validate response
+			await expect( response.status() ).toEqual( 404 );
+		}
 	} );
 
-	
+
 } );

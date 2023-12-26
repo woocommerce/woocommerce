@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a bug where between WC installs the beta tester would crash trying to log.

@@ -7,7 +7,6 @@
  */
 
 use Automattic\WooCommerce\Utilities\NumberUtil;
-use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -257,7 +256,7 @@ class WC_Discounts {
 		}
 
 		$coupon_code = $coupon->get_code();
-		if ( StringUtil::is_null_or_whitespace( $this->discounts[ $coupon_code ] ?? null ) ) {
+		if ( ! isset( $this->discounts[ $coupon_code ] ) || ! is_array( $this->discounts[ $coupon_code ] ) ) {
 			$this->discounts[ $coupon_code ] = array_fill_keys( array_keys( $this->items ), 0 );
 		}
 

@@ -4,7 +4,7 @@
 import { SlotFillProvider } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
-import { Component, lazy, Suspense, createContext } from '@wordpress/element';
+import { Component, lazy, Suspense, useEffect } from '@wordpress/element';
 import {
 	unstable_HistoryRouter as HistoryRouter,
 	Route,
@@ -15,8 +15,7 @@ import {
 } from 'react-router-dom';
 import { Children, cloneElement } from 'react';
 import PropTypes from 'prop-types';
-import { get, isFunction, identity, memoize } from 'lodash';
-import { parse } from 'qs';
+import { isFunction, identity } from 'lodash';
 import {
 	CustomerEffortScoreModalContainer,
 	triggerExitPageCesSurvey,
@@ -31,6 +30,10 @@ import {
 import { recordPageView } from '@woocommerce/tracks';
 import '@woocommerce/notices';
 import { PluginArea } from '@wordpress/plugins';
+import {
+	LayoutContextProvider,
+	getLayoutContextValue,
+} from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
@@ -40,8 +43,9 @@ import { Controller, getPages } from './controller';
 import { Header } from '../header';
 import { Footer } from './footer';
 import Notices from './notices';
-import TransientNotices from './transient-notices';
+import { TransientNotices } from './transient-notices';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { usePageClasses } from './hooks/use-page-classes';
 import '~/activity-panel';
 import '~/mobile-banner';
 import './navigation';
@@ -52,38 +56,30 @@ const StoreAlerts = lazy( () =>
 
 const WCPayUsageModal = lazy( () =>
 	import(
-		/* webpackChunkName: "wcpay-usage-modal" */ '../tasks/fills/PaymentGatewaySuggestions/components/WCPay/UsageModal'
+		/* webpackChunkName: "wcpay-usage-modal" */ '../task-lists/fills/PaymentGatewaySuggestions/components/WCPay/UsageModal'
 	)
-);
-
-const LayoutContextPrototype = {
-	getExtendedContext( newItem ) {
-		return { ...this, path: [ ...this.path, newItem ] };
-	},
-	toString() {
-		return this.path.join( '/' );
-	},
-	path: [],
-};
-
-export const LayoutContext = createContext(
-	LayoutContextPrototype.getExtendedContext( 'root' )
 );
 
 export class PrimaryLayout extends Component {
 	render() {
-		const { children } = this.props;
+		const {
+			children,
+			showStoreAlerts = true,
+			showNotices = true,
+		} = this.props;
+
 		return (
 			<div
 				className="woocommerce-layout__primary"
 				id="woocommerce-layout__primary"
 			>
-				{ window.wcAdminFeatures[ 'store-alerts' ] && (
-					<Suspense fallback={ null }>
-						<StoreAlerts />
-					</Suspense>
-				) }
-				<Notices />
+				{ window.wcAdminFeatures[ 'store-alerts' ] &&
+					showStoreAlerts && (
+						<Suspense fallback={ null }>
+							<StoreAlerts />
+						</Suspense>
+					) }
+				{ showNotices && <Notices /> }
 				{ children }
 			</div>
 		);
@@ -112,59 +108,18 @@ const WithReactRouterProps = ( { children } ) => {
 	} );
 };
 
-/**
- * Wraps _Layout with WithReactRouterProps for non-embedded page renders
- * We need this because the hooks fail for embedded page renders as there is no Router context above it.
- *
- * @param {Object} props React component props
- */
-const LayoutSwitchWrapper = ( props ) => {
-	if ( props.isEmbedded ) {
-		return <_Layout { ...props } />;
-	}
-	return (
-		<WithReactRouterProps>
-			<_Layout { ...props } />
-		</WithReactRouterProps>
-	);
-};
+function _Layout( {
+	activePlugins,
+	installedPlugins,
+	isEmbedded,
+	isJetpackConnected,
+	location,
+	match,
+	page,
+} ) {
+	usePageClasses( page );
 
-class _Layout extends Component {
-	memoizedLayoutContext = memoize( ( page ) =>
-		LayoutContextPrototype.getExtendedContext(
-			page?.navArgs?.id?.toLowerCase() || 'page'
-		)
-	);
-
-	componentDidMount() {
-		this.recordPageViewTrack();
-		triggerExitPageCesSurvey();
-	}
-
-	componentDidUpdate( prevProps ) {
-		const previousPath = get( prevProps, 'location.pathname' );
-		const currentPath = get( this.props, 'location.pathname' );
-
-		if ( ! previousPath || ! currentPath ) {
-			return;
-		}
-
-		if ( previousPath !== currentPath ) {
-			this.recordPageViewTrack();
-			setTimeout( () => {
-				triggerExitPageCesSurvey();
-			}, 0 );
-		}
-	}
-
-	recordPageViewTrack() {
-		const {
-			activePlugins,
-			installedPlugins,
-			isEmbedded,
-			isJetpackConnected,
-		} = this.props;
-
+	function recordPageViewTrack() {
 		const navigationFlag = {
 			has_navigation: !! window.wcNavigation,
 		};
@@ -178,7 +133,7 @@ class _Layout extends Component {
 			return;
 		}
 
-		const pathname = get( this.props, 'location.pathname' );
+		const { pathname } = location;
 		if ( ! pathname ) {
 			return;
 		}
@@ -199,74 +154,99 @@ class _Layout extends Component {
 		} );
 	}
 
-	getQuery( searchString ) {
-		if ( ! searchString ) {
-			return {};
-		}
+	useEffect( () => {
+		triggerExitPageCesSurvey();
+	}, [] );
 
-		const search = searchString.substring( 1 );
-		return parse( search );
-	}
+	useEffect( () => {
+		recordPageViewTrack();
+		setTimeout( () => {
+			triggerExitPageCesSurvey();
+		}, 0 );
+	}, [ location?.pathname ] );
 
-	isWCPaySettingsPage() {
-		const { page, section, tab } = getQuery();
+	function isWCPaySettingsPage() {
+		const { page: queryPage, section, tab } = getQuery();
 		return (
-			page === 'wc-settings' &&
+			queryPage === 'wc-settings' &&
 			tab === 'checkout' &&
 			section === 'woocommerce_payments'
 		);
 	}
 
-	render() {
-		const { isEmbedded, ...restProps } = this.props;
-		const { location, page } = this.props;
-		const { breadcrumbs } = page;
-		const query = this.getQuery( location && location.search );
+	const { breadcrumbs, layout = { header: true, footer: true } } = page;
+	const {
+		header: showHeader = true,
+		footer: showFooter = true,
+		showPluginArea = true,
+	} = layout;
 
-		return (
-			<LayoutContext.Provider
-				value={ this.memoizedLayoutContext( page ) }
-			>
-				<SlotFillProvider>
-					<div className="woocommerce-layout">
+	const query = getQuery();
+
+	useEffect( () => {
+		const wpbody = document.getElementById( 'wpbody' );
+		if ( showHeader ) {
+			wpbody?.classList.remove( 'no-header' );
+		} else {
+			wpbody?.classList.add( 'no-header' );
+		}
+	}, [ showHeader ] );
+
+	return (
+		<LayoutContextProvider
+			value={ getLayoutContextValue( [
+				page?.navArgs?.id?.toLowerCase() || 'page',
+			] ) }
+		>
+			<SlotFillProvider>
+				<div className="woocommerce-layout">
+					{ showHeader && (
 						<Header
 							sections={
 								isFunction( breadcrumbs )
-									? breadcrumbs( this.props )
+									? breadcrumbs( { match } )
 									: breadcrumbs
 							}
 							isEmbedded={ isEmbedded }
 							query={ query }
 						/>
-						<TransientNotices />
-						{ ! isEmbedded && (
-							<PrimaryLayout>
-								<div className="woocommerce-layout__main">
-									<Controller
-										{ ...restProps }
-										query={ query }
-									/>
-								</div>
-							</PrimaryLayout>
-						) }
-
-						{ isEmbedded && this.isWCPaySettingsPage() && (
-							<Suspense fallback={ null }>
-								<WCPayUsageModal />
-							</Suspense>
-						) }
-						<Footer />
-						<CustomerEffortScoreModalContainer />
-					</div>
-					<PluginArea scope="woocommerce-admin" />
-					{ window.wcAdminFeatures.navigation && (
-						<PluginArea scope="woocommerce-navigation" />
 					) }
-					<PluginArea scope="woocommerce-tasks" />
-				</SlotFillProvider>
-			</LayoutContext.Provider>
-		);
-	}
+					<TransientNotices />
+					{ ! isEmbedded && (
+						<PrimaryLayout
+							showNotices={ page?.layout?.showNotices }
+							showStoreAlerts={ page?.layout?.showStoreAlerts }
+						>
+							<div className="woocommerce-layout__main">
+								<Controller
+									page={ page }
+									match={ match }
+									query={ query }
+								/>
+							</div>
+						</PrimaryLayout>
+					) }
+
+					{ isEmbedded && isWCPaySettingsPage() && (
+						<Suspense fallback={ null }>
+							<WCPayUsageModal />
+						</Suspense>
+					) }
+					{ showFooter && <Footer /> }
+					<CustomerEffortScoreModalContainer />
+				</div>
+				{ showPluginArea && (
+					<>
+						<PluginArea scope="woocommerce-admin" />
+						{ window.wcAdminFeatures.navigation && (
+							<PluginArea scope="woocommerce-navigation" />
+						) }
+						<PluginArea scope="woocommerce-tasks" />
+					</>
+				) }
+			</SlotFillProvider>
+		</LayoutContextProvider>
+	);
 }
 
 _Layout.propTypes = {
@@ -288,6 +268,23 @@ _Layout.propTypes = {
 		] ).isRequired,
 		wpOpenMenu: PropTypes.string,
 	} ).isRequired,
+};
+
+/**
+ * Wraps _Layout with WithReactRouterProps for non-embedded page renders
+ * We need this because the hooks fail for embedded page renders as there is no Router context above it.
+ *
+ * @param {Object} props React component props
+ */
+const LayoutSwitchWrapper = ( props ) => {
+	if ( props.isEmbedded ) {
+		return <_Layout { ...props } />;
+	}
+	return (
+		<WithReactRouterProps>
+			<_Layout { ...props } />
+		</WithReactRouterProps>
+	);
 };
 
 const dataEndpoints = getAdminSetting( 'dataEndpoints' );

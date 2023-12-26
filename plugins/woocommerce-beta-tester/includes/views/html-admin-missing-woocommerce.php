@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 			<?php
 			$installed_plugins = get_plugins();
 			if ( isset( $installed_plugins['woocommerce/woocommerce.php'] ) ) :
-			?>
+				?>
 			<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=woocommerce/woocommerce.php&plugin_status=active' ), 'activate-plugin_woocommerce/woocommerce.php' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Activate WooCommerce', 'woocommerce-beta-tester' ); ?></a>
 			<?php endif; ?>
 			<?php if ( current_user_can( 'deactivate_plugin', 'woocommerce-beta-tester/woocommerce-beta-tester.php' ) ) : ?>

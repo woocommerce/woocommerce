@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Fix unintended reset of isRequesting when updating settings, add preemptive set isRequesting when optimistically updating settings

@@ -1,7 +1,21 @@
 /**
+ * External dependencies
+ */
+import { render } from '@testing-library/react';
+import { recordPageView } from '@woocommerce/tracks';
+
+/**
  * Internal dependencies
  */
 import { updateLinkHref } from '../controller';
+import { EmbedLayout } from '../index';
+
+jest.mock( '@woocommerce/admin-layout', () => {
+	return {
+		LayoutContextProvider: () => null,
+		getLayoutContextValue: () => null,
+	};
+} );
 
 describe( 'updateLinkHref', () => {
 	const timeExcludedScreens = [ 'stock', 'settings', 'customers' ];
@@ -61,5 +75,30 @@ describe( 'updateLinkHref', () => {
 		updateLinkHref( item, nextQuery, timeExcludedScreens );
 
 		expect( item.href ).toBe( WP_ADMIN_URL );
+	} );
+
+	it( 'should filter out undefined query values', () => {
+		const item = { href: REPORT_URL };
+		updateLinkHref(
+			item,
+			{ ...nextQuery, test: undefined, anotherParam: undefined },
+			timeExcludedScreens
+		);
+		const encodedPath = encodeURIComponent( '/analytics/orders' );
+
+		expect( item.href ).toBe(
+			`admin.php?page=wc-admin&path=${ encodedPath }&fruit=apple&dish=cobbler`
+		);
+	} );
+} );
+
+describe( 'Layout', () => {
+	it( 'should call recordPageView with correct parameters', () => {
+		window.history.pushState( {}, 'Page Title', '/url?search' );
+		render( <EmbedLayout /> );
+		expect( recordPageView ).toHaveBeenCalledWith( '/url?search', {
+			has_navigation: true,
+			is_embedded: true,
+		} );
 	} );
 } );

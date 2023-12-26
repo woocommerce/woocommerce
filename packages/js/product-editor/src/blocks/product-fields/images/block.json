@@ -1,0 +1,42 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/product-images-field",
+	"title": "Product images",
+	"category": "widgets",
+	"description": "The product images.",
+	"keywords": [ "products", "image", "images", "gallery" ],
+	"textdomain": "default",
+	"attributes": {
+		"mediaId": {
+			"type": "number",
+			"__experimentalRole": "content"
+		},
+		"property": {
+			"type": "string"
+		},
+		"multiple": {
+			"type": "boolean",
+			"default": true
+		},
+		"images": {
+			"__experimentalRole": "content",
+			"type": "array",
+			"items": {
+				"type": "number"
+			},
+			"default": []
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	},
+	"editorStyle": "file:./editor.css",
+	"usesContext": [ "postType" ]
+}

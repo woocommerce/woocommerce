@@ -1,0 +1,52 @@
+.woocommerce-marketplace__likert-scale {
+	display: flex;
+	list-style: none;
+	margin: 0;
+	border: 2px solid transparent;
+
+	&.validation-failed {
+		border-color: $alert-red;
+	}
+}
+
+.woocommerce-marketplace__likert-scale-item {
+	margin: 0;
+	width: 100%;
+	font-size: 11px;
+
+	label {
+		align-items: center;
+		aspect-ratio: 91.6 / 48;
+		border: 1.5px solid transparent;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		justify-content: center;
+		padding: 16px 8px;
+		text-align: center;
+	}
+
+	input:checked + label {
+		border-color: var(--wp-admin-theme-color-darker-10);
+		background: #e6f1f5;
+	}
+
+	// Improve a11y (especially keyboard navigation) by transferring the outline from the (now hidden) checkbox to its label
+	input:focus {
+		margin-top: -99px;
+
+		& + label {
+			outline: 2px solid var(--wp-admin-theme-color);
+			outline-offset: 2px;
+		}
+	}
+}
+
+.woocommerce-marketplace__likert-scale-icon {
+	font-size: 24px;
+}
+
+.woocommerce-marketplace__likert-scale-text {
+	font-size: 11px;
+}

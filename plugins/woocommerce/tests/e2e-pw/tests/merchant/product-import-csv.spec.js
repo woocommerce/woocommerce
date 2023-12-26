@@ -170,7 +170,7 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		);
 
 		// verify the error message if you go without providing CSV file
-		await page.click( 'button[value="Continue"]' );
+		await page.locator( 'button[value="Continue"]' ).click();
 		await expect( page.locator( 'div.error.inline' ) ).toContainText(
 			errorMessage
 		);
@@ -184,13 +184,13 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		// Select the CSV file and upload it
 		const [ fileChooser ] = await Promise.all( [
 			page.waitForEvent( 'filechooser' ),
-			page.click( '#upload' ),
+			page.locator( '#upload' ).click(),
 		] );
 		await fileChooser.setFiles( filePath );
-		await page.click( 'button[value="Continue"]' );
+		await page.locator( 'button[value="Continue"]' ).click();
 
 		// Click on run the importer
-		await page.click( 'button[value="Run the importer"]' );
+		await page.locator( 'button[value="Run the importer"]' ).click();
 
 		// Confirm that the import is done
 		await expect(
@@ -198,22 +198,21 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		).toContainText( 'Import complete!', { timeout: 120000 } );
 
 		// View the products
-		await page.click( 'text=View products' );
+		await page.locator( 'text=View products' ).click();
 
 		// Search for "import" to narrow the results to just the products we imported
-		await page.fill( '#post-search-input', 'Imported' );
-		await page.click( '#search-submit' );
+		await page.locator( '#post-search-input' ).fill( 'Imported' );
+		await page.locator( '#search-submit' ).click();
 
 		// Compare imported products to what's expected
-		await page.waitForSelector( 'a.row-title', {
-			state: 'visible',
-			timeout: 120000, // search can take a while
-		} );
-		const productTitles = await page.$$eval( 'a.row-title', ( elements ) =>
-			elements.map( ( item ) => item.innerHTML )
+		await expect( page.locator( 'a.row-title' ) ).toHaveCount(
+			productNames.length
 		);
+		const productTitles = await page
+			.locator( 'a.row-title' )
+			.allTextContents();
 
-		await expect( productTitles.sort() ).toEqual( productNames.sort() );
+		expect( productTitles.sort() ).toEqual( productNames.sort() );
 	} );
 
 	test( 'can override the existing products via CSV import', async ( {
@@ -226,14 +225,14 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		// Put the CSV Override products file, set checkbox and proceed further
 		const [ fileChooser ] = await Promise.all( [
 			page.waitForEvent( 'filechooser' ),
-			page.click( '#upload' ),
+			page.locator( '#upload' ).click(),
 		] );
 		await fileChooser.setFiles( filePathOverride );
-		await page.click( '#woocommerce-importer-update-existing' );
-		await page.click( 'button[value="Continue"]' );
+		await page.locator( '#woocommerce-importer-update-existing' ).click();
+		await page.locator( 'button[value="Continue"]' ).click();
 
 		// Click on run the importer
-		await page.click( 'button[value="Run the importer"]' );
+		await page.locator( 'button[value="Run the importer"]' ).click();
 
 		// Confirm that the import is done
 		await expect(
@@ -241,29 +240,29 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		).toContainText( 'Import complete!', { timeout: 120000 } ); // import can take a while
 
 		// View the products
-		await page.click( 'text=View products' );
+		await page.locator( 'text=View products' ).click();
 
 		// Search for "import" to narrow the results to just the products we imported
-		await page.fill( '#post-search-input', 'Imported' );
-		await page.click( '#search-submit' );
+		await page.locator( '#post-search-input' ).fill( 'Imported' );
+		await page.locator( '#search-submit' ).click();
 
 		// Compare imported products to what's expected
-		await page.waitForSelector( 'a.row-title' );
-		const productTitles = await page.$$eval( 'a.row-title', ( elements ) =>
-			elements.map( ( item ) => item.innerHTML )
+		await expect( page.locator( 'a.row-title' ) ).toHaveCount(
+			productNamesOverride.length
 		);
+		const productTitles = await page
+			.locator( 'a.row-title' )
+			.allInnerTexts();
 
-		await expect( productTitles.sort() ).toEqual(
-			productNamesOverride.sort()
-		);
+		expect( productTitles.sort() ).toEqual( productNamesOverride.sort() );
 
 		// Compare product prices to what's expected
-		await page.waitForSelector( 'td.price.column-price' );
-		const productPrices = await page.$$eval( '.amount', ( elements ) =>
-			elements.map( ( item ) => item.innerText )
+		await expect( page.locator( '.amount' ) ).toHaveCount(
+			productPricesOverride.length
 		);
+		const productPrices = await page.locator( '.amount' ).allInnerTexts();
 
-		await expect( productPrices.sort() ).toStrictEqual(
+		expect( productPrices.sort() ).toStrictEqual(
 			productPricesOverride.sort()
 		);
 	} );

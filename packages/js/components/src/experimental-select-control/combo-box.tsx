@@ -45,9 +45,8 @@ export const ComboBox = ( {
 			return;
 		}
 
-		event.preventDefault();
-
 		if ( document.activeElement !== inputRef.current ) {
+			event.preventDefault();
 			inputRef.current.focus();
 			event.stopPropagation();
 		}
@@ -76,8 +75,8 @@ export const ComboBox = ( {
 					<input
 						{ ...inputProps }
 						ref={ ( node ) => {
+							inputRef.current = node;
 							if ( typeof inputProps.ref === 'function' ) {
-								inputRef.current = node;
 								(
 									inputProps.ref as unknown as (
 										node: HTMLInputElement | null

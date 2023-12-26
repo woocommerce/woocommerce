@@ -14,7 +14,8 @@ jQuery( function ( $ ) {
 				.on( 'click', 'a.debug-report', this.generateReport )
 				.on( 'click', '#copy-for-support', this.copyReport )
 				.on( 'aftercopy', '#copy-for-support', this.copySuccess )
-				.on( 'aftercopyfailure', '#copy-for-support', this.copyFail );
+				.on( 'aftercopyfailure', '#copy-for-support', this.copyFail )
+				.on( 'click', '#download-for-support', this.downloadReport );
 		},
 
 		/**
@@ -112,6 +113,21 @@ jQuery( function ( $ ) {
 		copyFail: function() {
 			$( '.copy-error' ).removeClass( 'hidden' );
 			$( '#debug-report' ).find( 'textarea' ).trigger( 'focus' ).trigger( 'select' );
+		},
+
+		downloadReport: function() {
+			var ssr_text = new Blob( [ $( '#debug-report' ).find( 'textarea' ).val() ], { type: 'text/plain' } );
+
+			var domain = window.location.hostname;
+			var datetime = new Date().toISOString().slice( 0, 19 ).replace( /:/g, '-' );
+
+			var a = document.createElement( 'a' );
+			a.download = 'SystemStatusReport_' + domain + '_' + datetime + '.txt';
+			a.href = window.URL.createObjectURL( ssr_text );
+			a.textContent = 'Download ready';
+			a.style='display:none';
+			a.click();
+			a.remove();
 		}
 	};
 

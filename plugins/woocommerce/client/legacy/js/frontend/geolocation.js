@@ -83,17 +83,14 @@ jQuery( function( $ ) {
 		// Updates our (cookie-based) cache of the hash value. Expires in 1 hour.
 		Cookies.set( 'woocommerce_geo_hash', hash, { expires: 1 / 24 } );
 
-		var this_page = window.location.toString();
+		const urlQuery     = new URL( window.location ).searchParams;
+		const existingHash = urlQuery.get( 'v' );
 
-		if ( this_page.indexOf( '?v=' ) > 0 || this_page.indexOf( '&v=' ) > 0 ) {
-			this_page = this_page.replace( /v=[^&]+/, 'v=' + hash );
-		} else if ( this_page.indexOf( '?' ) > 0 ) {
-			this_page = this_page + '&v=' + hash;
-		} else {
-			this_page = this_page + '?v=' + hash;
+		// If the current URL does not contain the expected hash, redirect.
+		if ( existingHash !== hash ) {
+			urlQuery.set( 'v', hash );
+			window.location.search = '?' + urlQuery.toString();
 		}
-
-		window.location = this_page;
 	};
 
 	/**

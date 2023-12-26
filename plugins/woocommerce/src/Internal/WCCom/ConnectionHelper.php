@@ -1,6 +1,6 @@
 <?php
 /**
- * Helpers for managing connection to WooCommerce.com.
+ * Helpers for managing connection to Woo.com.
  */
 
 namespace Automattic\WooCommerce\Internal\WCCom;
@@ -10,11 +10,11 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class WCConnectionHelper.
  *
- * Helpers for managing connection to WooCommerce.com.
+ * Helpers for managing connection to Woo.com.
  */
 final class ConnectionHelper {
 	/**
-	 * Check if WooCommerce.com account is connected.
+	 * Check if Woo.com account is connected.
 	 *
 	 * @since 4.4.0
 	 * @return bool Whether account is connected.

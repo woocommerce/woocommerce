@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Rewrite withNavigationHydration to work Gutenberg 15.5+

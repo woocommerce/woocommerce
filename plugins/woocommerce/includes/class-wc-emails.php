@@ -298,8 +298,8 @@ class WC_Emails {
 				$this->get_blogname(),
 				$domain,
 				$domain,
-				'<a href="https://woocommerce.com">WooCommerce</a>',
-				'<a href="https://woocommerce.com">WooCommerce</a>',
+				'<a href="https://woo.com">WooCommerce</a>',
+				'<a href="https://woo.com">WooCommerce</a>',
 			),
 			$string
 		);

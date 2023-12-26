@@ -9,6 +9,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Orders\Edit as OrderEdit;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -215,7 +216,7 @@ class WC_Admin_Meta_Boxes {
 		$post_id = absint( $post_id );
 
 		// $post_id and $post are required
-		if ( empty( $post_id ) || empty( $post ) || self::$saved_meta_boxes ) {
+		if ( empty( $post_id ) || empty( $post ) || ! is_a( $post, 'WP_Post' ) || self::$saved_meta_boxes ) {
 			return;
 		}
 
@@ -247,6 +248,10 @@ class WC_Admin_Meta_Boxes {
 
 		// Check the post type.
 		if ( in_array( $post->post_type, wc_get_order_types( 'order-meta-boxes' ), true ) ) {
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				return;
+			}
+
 			/**
 			 * Save meta for shop order.
 			 *

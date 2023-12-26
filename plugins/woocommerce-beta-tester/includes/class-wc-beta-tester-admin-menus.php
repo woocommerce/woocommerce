@@ -49,7 +49,7 @@ A clear and concise description of what you expected to happen.
 
 **Isolating the problem (mark completed items with an [x]):**
 - [ ] I have deactivated other plugins and confirmed this bug occurs when only WooCommerce plugin is active.
-- [ ] This bug happens with a default WordPress theme active, or [Storefront](https://woocommerce.com/storefront/).
+- [ ] This bug happens with a default WordPress theme active, or [Storefront](https://woo.com/storefront/).
 - [ ] I can reproduce this bug consistently using the steps above.
 
 **WordPress Environment**
@@ -125,7 +125,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 
 				$version_string = '';
 				$network_string = '';
-				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
+				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woo.com' ) ) {
 					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
 						/* translators: %s: plugin latest version */
 						$version_string = sprintf( esc_html__( '%s is available', 'woocommerce-beta-tester' ), $plugin['version_latest'] );

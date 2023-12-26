@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback } from '@wordpress/element';
+import { useCallback, useEffect, useRef } from '@wordpress/element';
 
 export function useCallbackOnLinkClick( onClick: ( link: string ) => void ) {
 	const onNodeClick = useCallback(
@@ -20,17 +20,21 @@ export function useCallbackOnLinkClick( onClick: ( link: string ) => void ) {
 		[ onClick ]
 	);
 
-	return useCallback(
-		( node: HTMLElement ) => {
+	const nodeRef = useRef< HTMLElement | null >( null );
+
+	useEffect( () => {
+		const node = nodeRef.current;
+		if ( node ) {
+			node.addEventListener( 'click', onNodeClick );
+		}
+		return () => {
 			if ( node ) {
-				node.addEventListener( 'click', onNodeClick );
+				node.removeEventListener( 'click', onNodeClick );
 			}
-			return () => {
-				if ( node ) {
-					node.removeEventListener( 'click', onNodeClick );
-				}
-			};
-		},
-		[ onNodeClick ]
-	);
+		};
+	}, [ onNodeClick ] );
+
+	return useCallback( ( node: HTMLElement ) => {
+		nodeRef.current = node;
+	}, [] );
 }

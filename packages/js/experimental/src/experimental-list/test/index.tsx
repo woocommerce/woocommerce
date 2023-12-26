@@ -163,7 +163,7 @@ describe( 'Experimental List', () => {
 	} );
 
 	describe( 'ExperimentalListItemCollapse', () => {
-		it( 'should not render its children intially, but an extra list footer with show text', () => {
+		it( 'should not render its children initially, but an extra list footer with show text', () => {
 			const { container } = render(
 				<ExperimentalCollapsibleList
 					collapseLabel="Show less"

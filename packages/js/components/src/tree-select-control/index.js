@@ -64,6 +64,7 @@ import { ARROW_DOWN, ARROW_UP, ENTER, ESCAPE, ROOT_VALUE } from './constants';
  * @param {string}                     [props.className]                  The class name for this component
  * @param {boolean}                    [props.disabled]                   Disables the component
  * @param {boolean}                    [props.includeParent]              Includes parent with selection.
+ * @param {boolean}                    [props.individuallySelectParent]   Considers parent as a single item (default: false).
  * @param {boolean}                    [props.alwaysShowPlaceholder]      Will always show placeholder (default: false)
  * @param {Option[]}                   [props.options]                    Options to show in the component
  * @param {string[]}                   [props.value]                      Selected values
@@ -71,6 +72,8 @@ import { ARROW_DOWN, ARROW_UP, ENTER, ESCAPE, ROOT_VALUE } from './constants';
  * @param {Function}                   [props.onChange]                   Callback when the selector changes
  * @param {(visible: boolean) => void} [props.onDropdownVisibilityChange] Callback when the visibility of the dropdown options is changed.
  * @param {Function}                   [props.onInputChange]              Callback when the selector changes
+ * @param {number}                     [props.minFilterQueryLength]       Minimum input length to filter results by.
+ * @param {boolean}                    [props.clearOnSelect]              Clear input on select (default: true).
  * @return {JSX.Element} The component
  */
 const TreeSelectControl = ( {
@@ -88,7 +91,10 @@ const TreeSelectControl = ( {
 	onDropdownVisibilityChange = noop,
 	onInputChange = noop,
 	includeParent = false,
+	individuallySelectParent = false,
 	alwaysShowPlaceholder = false,
+	minFilterQueryLength = 3,
+	clearOnSelect = true,
 } ) => {
 	let instanceId = useInstanceId( TreeSelectControl );
 	instanceId = id ?? instanceId;
@@ -126,7 +132,8 @@ const TreeSelectControl = ( {
 
 	const filterQuery = inputControlValue.trim().toLowerCase();
 	// we only trigger the filter when there are more than 3 characters in the input.
-	const filter = filterQuery.length >= 3 ? filterQuery : '';
+	const filter =
+		filterQuery.length >= minFilterQueryLength ? filterQuery : '';
 
 	/**
 	 * Optimizes the performance for getting the tags info
@@ -227,7 +234,10 @@ const TreeSelectControl = ( {
 				 * @return {boolean} True if checked, false otherwise.
 				 */
 				get() {
-					if ( includeParent && this.value !== ROOT_VALUE ) {
+					if (
+						( includeParent && this.value !== ROOT_VALUE ) ||
+						individuallySelectParent
+					) {
 						return cache.selectedValues.includes( this.value );
 					}
 					if ( this.hasChildren ) {
@@ -250,10 +260,50 @@ const TreeSelectControl = ( {
 					}
 					return (
 						! this.checked &&
-						this.leaves.some(
+						this.children.some(
 							( opt ) => opt.checked || opt.partialChecked
 						)
 					);
+				},
+			},
+			isVisible: {
+				/**
+				 * Returns whether this option should be visible based on search.
+				 * All options are visible when not searching. Otherwise, true if this option is
+				 * a search result or it has a descendent that is being searched for.
+				 *
+				 * @return {boolean} True if option should be visible, false otherwise.
+				 */
+				get() {
+					// everything is visible when not searching.
+					if ( ! isSearching ) {
+						return true;
+					}
+
+					// Exit true if this is searched result.
+					if ( this.isSearchResult ) {
+						return true;
+					}
+
+					// If any children are search results, remain visible.
+					if ( this.hasChildren ) {
+						return this.children.some( ( opt ) => opt.isVisible );
+					}
+
+					return this.leaves.some( ( opt ) => opt.isSearchResult );
+				},
+			},
+			isSearchResult: {
+				/**
+				 * Returns whether this option is a searched result.
+				 *
+				 * @return {boolean} True if option is being searched, false otherwise.
+				 */
+				get() {
+					if ( ! isSearching ) {
+						return false;
+					}
+					return !! this.filterMatch;
 				},
 			},
 			expanded: {
@@ -265,7 +315,7 @@ const TreeSelectControl = ( {
 				 */
 				get() {
 					return (
-						isSearching ||
+						( isSearching && this.isVisible ) ||
 						this.value === ROOT_VALUE ||
 						cache.expandedValues.includes( this.value )
 					);
@@ -273,19 +323,29 @@ const TreeSelectControl = ( {
 			},
 		};
 
+		/**
+		 * Decompose accented characters into their composable parts, then remove accents.
+		 * See https://www.unicode.org/reports/tr15/ and https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize.
+		 */
+		const removeAccents = ( str ) => {
+			return str.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' );
+		};
+
 		const reduceOptions = ( acc, { children = [], ...option } ) => {
 			if ( children.length ) {
 				option.children = children.reduce( reduceOptions, [] );
+			}
 
-				if ( ! option.children.length ) {
-					return acc;
+			if ( isSearching ) {
+				const labelWithAccentsRemoved = removeAccents( option.label );
+				const filterWithAccentsRemoved = removeAccents( filter );
+				const match = labelWithAccentsRemoved
+					.toLowerCase()
+					.indexOf( filterWithAccentsRemoved );
+				if ( match > -1 ) {
+					option.label = highlightOptionLabel( option.label, match );
+					option.filterMatch = true;
 				}
-			} else if ( isSearching ) {
-				const match = option.label.toLowerCase().indexOf( filter );
-				if ( match === -1 ) {
-					return acc;
-				}
-				option.label = highlightOptionLabel( option.label, match );
 			}
 
 			Object.defineProperties( option, descriptors );
@@ -321,6 +381,11 @@ const TreeSelectControl = ( {
 
 		if ( ENTER === event.key ) {
 			setTreeVisible( true );
+
+			if ( event.target.type === 'checkbox' ) {
+				event.target.click();
+			}
+
 			event.preventDefault();
 		}
 
@@ -419,10 +484,21 @@ const TreeSelectControl = ( {
 	 */
 	const handleParentChange = ( checked, option ) => {
 		let newValue;
-		const changedValues = option.leaves
-			.filter( ( opt ) => opt.checked !== checked )
-			.map( ( opt ) => opt.value );
-		if ( includeParent && option.value !== ROOT_VALUE ) {
+		const changedValues = individuallySelectParent
+			? [ option.value ]
+			: option.leaves
+					.filter( ( opt ) => opt.checked !== checked )
+					.map( ( opt ) => opt.value );
+		/**
+		 * If includeParent is true, we need to add the parent value to the array of
+		 * changed values. However, if for some reason includeParent AND individuallySelectParent
+		 * are both set to true, we want to avoid duplicating the parent value in the array.
+		 */
+		if (
+			includeParent &&
+			! individuallySelectParent &&
+			option.value !== ROOT_VALUE
+		) {
 			changedValues.push( option.value );
 		}
 		if ( checked ) {
@@ -452,10 +528,12 @@ const TreeSelectControl = ( {
 			handleSingleChange( checked, option, parent );
 		}
 
-		onInputChange( '' );
-		setInputControlValue( '' );
-		if ( ! nodesExpanded.includes( option.parent ) ) {
-			controlRef.current.focus();
+		if ( clearOnSelect ) {
+			onInputChange( '' );
+			setInputControlValue( '' );
+			if ( ! nodesExpanded.includes( option.parent ) ) {
+				controlRef.current.focus();
+			}
 		}
 	};
 
@@ -475,6 +553,7 @@ const TreeSelectControl = ( {
 	 * @param {Event} e Event returned by the On Change function in the Input control
 	 */
 	const handleOnInputChange = ( e ) => {
+		setTreeVisible( true );
 		onInputChange( e.target.value );
 		setInputControlValue( e.target.value );
 	};

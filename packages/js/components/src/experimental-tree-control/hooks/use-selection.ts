@@ -122,8 +122,6 @@ export function useSelection( {
 			if ( item.children.length && ! shouldNotRecursivelySelect ) {
 				value.push( ...getDeepChildren( item ) );
 			}
-		} else if ( item.children?.length ) {
-			return;
 		}
 
 		if ( checked ) {

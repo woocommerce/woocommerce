@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Corrects imported ContainerInterface. It was not replaced because of the leading backslash.

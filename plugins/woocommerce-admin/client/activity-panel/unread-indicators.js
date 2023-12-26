@@ -22,7 +22,7 @@ const UNREAD_NOTES_QUERY = {
 	order: 'desc',
 };
 
-export function isNotesPanelVisible( select ) {
+export function hasUnreadNotes( select ) {
 	const { getNotes, getNotesError, isResolving } = select( NOTES_STORE_NAME );
 
 	const { getCurrentUser } = select( USER_STORE_NAME );

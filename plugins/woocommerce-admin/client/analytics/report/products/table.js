@@ -215,6 +215,7 @@ class ProductsReportTable extends Component {
 							{ productCategories.length > 1 && (
 								<Tag
 									label={ sprintf(
+										/* translators: %d: number of categories */
 										_x(
 											'+%d more',
 											'categories',

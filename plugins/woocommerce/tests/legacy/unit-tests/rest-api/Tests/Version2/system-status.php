@@ -17,16 +17,50 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	use ArraySubsetAsserts;
 
 	/**
-	 * Setup our test server.
+	 * User variable.
+	 *
+	 * @var int
 	 */
-	public function setUp(): void {
-		parent::setUp();
-		$this->endpoint = new WC_REST_System_Status_Controller();
-		$this->user     = $this->factory->user->create(
+	protected static int $administrator_user;
+
+	/**
+	 * User variable.
+	 *
+	 * @var int
+	 */
+	protected static int $no_user = 0;
+
+	/**
+	 * Setup once before running tests.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$administrator_user = $factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
+	}
+
+	/**
+	 * Fetches the System Status Report data and caches it.
+	 * @param  int $user The ID of a WordPress user to switch to before fetching the data.
+	 * @return Array An array of the data returned by the System Status Report endpoint.
+	 */
+	private function fetch_or_get_system_status_data_for_user( int $user ) {
+		if ( $user < 0 ) {
+			return null;
+		}
+
+		static $system_status_data = array();
+		if ( ! isset( $system_status_data[ 'user' . $user ] ) ) {
+			wp_set_current_user( $user );
+			$response                             = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
+			$data                                 = $response->get_data();
+			$system_status_data[ 'user' . $user ] = $data;
+		}
+		return $system_status_data[ 'user' . $user ];
 	}
 
 	/**
@@ -45,7 +79,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_without_permission() {
-		wp_set_current_user( 0 );
+		wp_set_current_user( self::$no_user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -58,18 +92,14 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_system_status_info_returns_root_properties() {
 		$this->skip_on_php_8_1();
-
-		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-		$data     = $response->get_data();
-
-		$this->assertArrayHasKey( 'environment', $data );
-		$this->assertArrayHasKey( 'database', $data );
-		$this->assertArrayHasKey( 'active_plugins', $data );
-		$this->assertArrayHasKey( 'theme', $data );
-		$this->assertArrayHasKey( 'settings', $data );
-		$this->assertArrayHasKey( 'security', $data );
-		$this->assertArrayHasKey( 'pages', $data );
+		$system_status_data = $this->fetch_or_get_system_status_data_for_user( self::$administrator_user );
+		$this->assertArrayHasKey( 'environment', $system_status_data );
+		$this->assertArrayHasKey( 'database', $system_status_data );
+		$this->assertArrayHasKey( 'active_plugins', $system_status_data );
+		$this->assertArrayHasKey( 'theme', $system_status_data );
+		$this->assertArrayHasKey( 'settings', $system_status_data );
+		$this->assertArrayHasKey( 'security', $system_status_data );
+		$this->assertArrayHasKey( 'pages', $system_status_data );
 	}
 
 	/**
@@ -80,17 +110,22 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_environment() {
 		$this->skip_on_php_8_1();
 
-		wp_set_current_user( $this->user );
-		$response    = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-		$data        = $response->get_data();
-		$environment = (array) $data['environment'];
+		$store_id = get_option( \WC_Install::STORE_ID_OPTION, null );
+		if ( empty( $store_id ) ) {
+			$store_id = 'a1b2c3d4-e5f6-a1b2-c3d4-a1b2c3d4e5f6';
+			update_option( \WC_Install::STORE_ID_OPTION, $store_id );
+		}
+
+		$environment = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['environment'];
 
 		// Make sure all expected data is present.
-		$this->assertEquals( 32, count( $environment ) );
+		$this->assertEquals( 33, count( $environment ) );
 
 		// Test some responses to make sure they match up.
 		$this->assertEquals( get_option( 'home' ), $environment['home_url'] );
 		$this->assertEquals( get_option( 'siteurl' ), $environment['site_url'] );
+		$this->assertEquals( get_option( \WC_Install::STORE_ID_OPTION, null ), $environment['store_id'] );
+		$this->assertEquals( $store_id, $environment['store_id'] );
 		$this->assertEquals( WC()->version, $environment['version'] );
 	}
 
@@ -103,10 +138,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$this->skip_on_php_8_1();
 
 		global $wpdb;
-		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-		$data     = $response->get_data();
-		$database = (array) $data['database'];
+		$database = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['database'];
 
 		$this->assertEquals( get_option( 'woocommerce_db_version' ), $database['wc_database_version'] );
 		$this->assertEquals( $wpdb->prefix, $database['database_prefix'] );
@@ -124,7 +156,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_active_plugins() {
 		$this->skip_on_php_8_1();
 
-		wp_set_current_user( $this->user );
+		wp_set_current_user( self::$administrator_user );
 
 		$actual_plugins = array( 'hello.php' );
 		update_option( 'active_plugins', $actual_plugins );
@@ -145,13 +177,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_system_status_info_theme() {
 		$this->skip_on_php_8_1();
-
-		wp_set_current_user( $this->user );
 		$active_theme = wp_get_theme();
-
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-		$data     = $response->get_data();
-		$theme    = (array) $data['theme'];
+		$theme        = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['theme'];
 
 		$this->assertEquals( 13, count( $theme ) );
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -166,17 +193,13 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_settings() {
 		$this->skip_on_php_8_1();
 
-		wp_set_current_user( $this->user );
-
 		$term_response = array();
 		$terms         = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
 		foreach ( $terms as $term ) {
 			$term_response[ $term->slug ] = strtolower( $term->name );
 		}
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-		$data     = $response->get_data();
-		$settings = (array) $data['settings'];
+		$settings = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['settings'];
 
 		$this->assertEquals( 17, count( $settings ) );
 		$this->assertEquals( ( 'yes' === get_option( 'woocommerce_api_enabled' ) ), $settings['api_enabled'] );
@@ -192,11 +215,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_security() {
 		$this->skip_on_php_8_1();
 
-		wp_set_current_user( $this->user );
-
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-		$data     = $response->get_data();
-		$settings = (array) $data['security'];
+		$settings = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['security'];
 
 		$this->assertEquals( 2, count( $settings ) );
 		$this->assertEquals( 'https' === substr( wc_get_page_permalink( 'shop' ), 0, 5 ), $settings['secure_connection'] );
@@ -211,10 +230,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_pages() {
 		$this->skip_on_php_8_1();
 
-		wp_set_current_user( $this->user );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-		$data     = $response->get_data();
-		$pages    = $data['pages'];
+		$pages = $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['pages'];
 		$this->assertEquals( 5, count( $pages ) );
 	}
 
@@ -244,7 +260,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_tools() {
-		wp_set_current_user( $this->user );
+		wp_set_current_user( self::$administrator_user );
 
 		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
@@ -290,7 +306,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_tools_without_permission() {
-		wp_set_current_user( 0 );
+		wp_set_current_user( self::$no_user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status/tools' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -301,7 +317,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_tool() {
-		wp_set_current_user( $this->user );
+		wp_set_current_user( self::$administrator_user );
 
 		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
@@ -324,7 +340,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_tool_without_permission() {
-		wp_set_current_user( 0 );
+		wp_set_current_user( self::$no_user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status/tools/recount_terms' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -335,7 +351,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_execute_system_tool() {
-		wp_set_current_user( $this->user );
+		wp_set_current_user( self::$administrator_user );
 
 		$tools_controller = new WC_REST_System_Status_Tools_Controller();
 		$raw_tools        = $tools_controller->get_tools();
@@ -361,7 +377,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_execute_system_status_tool_without_permission() {
-		wp_set_current_user( 0 );
+		wp_set_current_user( self::$no_user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/recount_terms' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}

@@ -86,7 +86,7 @@ final class FunctionsMockerHack extends CodeHack {
 	}
 
 	/**
-	 * Hacks code by replacing elegible function invocations with an invocation to this class' static method with the same name.
+	 * Hacks code by replacing eligible function invocations with an invocation to this class' static method with the same name.
 	 *
 	 * @param string $code The code to hack.
 	 * @param string $path The path of the file containing the code to hack.

@@ -1,0 +1,17 @@
+
+.woocommerce-customize-store {
+	.smooth-transition {
+		.woocommerce-onboarding-loader-wrapper {
+			min-height: auto;
+			.woocommerce-onboarding-loader-container {
+				min-height: auto;
+			}
+		}
+	}
+}
+
+.progress-bar.smooth-transition {
+	.woocommerce-onboarding-progress-bar__filler {
+		transition: width linear 2s;
+	}
+}

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add props to allow passing a classname to the feedback modal

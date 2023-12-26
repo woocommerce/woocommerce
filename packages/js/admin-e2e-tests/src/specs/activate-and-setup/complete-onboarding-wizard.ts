@@ -100,16 +100,11 @@ export const testAdminOnboardingWizard = () => {
 			await profileWizard.business.expandRecommendedBusinessFeatures();
 
 			expect( page ).toMatchElement( 'a', {
-				text: 'WooCommerce Payments',
+				text: 'WooPayments',
 			} );
 
 			await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
 			await profileWizard.continue();
-		} );
-
-		it( 'can complete the theme selection section', async () => {
-			await profileWizard.themes.isDisplayed();
-			await profileWizard.themes.continueWithActiveTheme();
 		} );
 
 		it( 'can select the right currency on settings page related to the onboarding country', async () => {
@@ -185,24 +180,17 @@ export const testSelectiveBundleWCPay = () => {
 			await profileWizard.continue();
 		} );
 
-		it( 'can choose not to install any extensions', async () => {
+		it( 'can choose not to install any extensions, and finish the rest of the wizard successfully', async () => {
 			await profileWizard.business.freeFeaturesIsDisplayed();
 			// Add WC Pay check
 			await profileWizard.business.expandRecommendedBusinessFeatures();
 
 			expect( page ).not.toMatchElement( 'a', {
-				text: 'WooCommerce Payments',
+				text: 'WooPayments',
 			} );
 
 			await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
 			await profileWizard.continue();
-		} );
-
-		it( 'can finish the rest of the wizard successfully', async () => {
-			await profileWizard.themes.isDisplayed();
-
-			//  This navigates to the home screen
-			await profileWizard.themes.continueWithActiveTheme();
 		} );
 
 		it( 'should display the choose payments task, and not the woocommerce payments task', async () => {
@@ -324,20 +312,17 @@ export const testDifferentStoreCurrenciesWCPay = () => {
 
 				if ( spec.isWCPaySupported ) {
 					expect( page ).toMatchElement( 'a', {
-						text: 'WooCommerce Payments',
+						text: 'WooPayments',
 					} );
 				} else {
 					expect( page ).not.toMatchElement( 'a', {
-						text: 'WooCommerce Payments',
+						text: 'WooPayments',
 					} );
 				}
 
 				await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
-				await profileWizard.continue();
-				await profileWizard.themes.isDisplayed();
-
 				//  This navigates to the home screen
-				await profileWizard.themes.continueWithActiveTheme();
+				await profileWizard.continue();
 			} );
 
 			it( `can select ${ spec.expectedCurrency } as the currency for ${ spec.countryRegion }`, async () => {
@@ -385,7 +370,7 @@ export const testSubscriptionsInclusion = () => {
 			await profileWizard.productTypes.isDisplayed( 7 );
 			await profileWizard.productTypes.selectProduct( 'Subscriptions' );
 			await expect( page ).not.toMatchElement( 'p', {
-				text: 'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.',
+				text: 'The following extensions will be added to your site for free: WooPayments. An account is required to use this feature.',
 			} );
 
 			await profileWizard.continue();
@@ -405,12 +390,12 @@ export const testSubscriptionsInclusion = () => {
 			await profileWizard.continue();
 		} );
 
-		it( 'should display the WooCommerce Payments extension after it has been installed', async () => {
+		it( 'should display the WooPayments extension after it has been installed', async () => {
 			await profileWizard.business.freeFeaturesIsDisplayed();
 			await profileWizard.business.expandRecommendedBusinessFeatures();
 
 			expect( page ).toMatchElement( 'a', {
-				text: 'WooCommerce Payments',
+				text: 'WooPayments',
 			} );
 		} );
 
@@ -464,7 +449,7 @@ export const testSubscriptionsInclusion = () => {
 			await profileWizard.productTypes.isDisplayed( 7 );
 			await profileWizard.productTypes.selectProduct( 'Subscriptions' );
 			await expect( page ).toMatchElement( 'p', {
-				text: 'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.',
+				text: 'The following extensions will be added to your site for free: WooPayments. An account is required to use this feature.',
 			} );
 
 			await profileWizard.continue();
@@ -484,12 +469,12 @@ export const testSubscriptionsInclusion = () => {
 			await profileWizard.continue();
 		} );
 
-		it( 'cannot see the WooCommerce Payments extension after it has been installed', async () => {
+		it( 'cannot see the WooPayments extension after it has been installed', async () => {
 			await profileWizard.business.freeFeaturesIsDisplayed();
 			await profileWizard.business.expandRecommendedBusinessFeatures();
 
 			expect( page ).not.toMatchElement( 'a', {
-				text: 'WooCommerce Payments',
+				text: 'WooPayments',
 			} );
 		} );
 
@@ -583,7 +568,6 @@ export const testBusinessDetailsForm = () => {
 			await profileWizard.business.expandRecommendedBusinessFeatures();
 			await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
 			await profileWizard.continue();
-			await profileWizard.themes.isDisplayed();
 		} );
 	} );
 };

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reworking error handling and return value for useBackgroundRemoval hook.

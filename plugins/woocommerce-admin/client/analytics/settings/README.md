@@ -1,7 +1,7 @@
 Settings
 =======
 
-The settings used to modify the way data is retreived or displayed in WooCommerce reports.
+The settings used to modify the way data is retrieved or displayed in WooCommerce reports.
 
 ## Extending Settings
 

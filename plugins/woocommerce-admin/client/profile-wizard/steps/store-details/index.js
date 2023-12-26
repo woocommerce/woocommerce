@@ -181,7 +181,7 @@ export class StoreDetails extends Component {
 		 * `await` and performs an update aysnchronously. This means the following
 		 * screen may not be initialized with correct profile settings.
 		 *
-		 * This comment may be removed when a refactor to wp.data datatores is complete.
+		 * This comment may be removed when a refactor to wp.data datastores is complete.
 		 */
 		if (
 			region !== 'US' &&

@@ -4,11 +4,6 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
-/**
- * Internal dependencies
- */
-import { SchemaDiff } from './git';
-
 export const execAsync = promisify( exec );
 
 /**
@@ -39,16 +34,6 @@ export const getHookName = ( name: string ): string => {
 	}
 
 	return name.replace( /(\'|\")/g, '' ).trim();
-};
-
-/**
- * Determine if schema diff object contains schemas that are equal.
- *
- * @param {Array<SchemaDiff>} schemaDiffs
- * @return {boolean|void} If the schema diff describes schemas that are equal.
- */
-export const areSchemasEqual = ( schemaDiffs: SchemaDiff[] ): boolean => {
-	return ! schemaDiffs.some( ( s ) => ! s.areEqual );
 };
 
 /**

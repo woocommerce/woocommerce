@@ -20,7 +20,7 @@ import { Text, useSlot } from '@woocommerce/experimental';
  */
 import './style.scss';
 import useIsScrolled from '../hooks/useIsScrolled';
-import { TasksReminderBar, useActiveSetupTasklist } from '../tasks';
+import { TasksReminderBar, useActiveSetupTasklist } from '../task-lists';
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 
@@ -29,7 +29,7 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const activeSetupList = useActiveSetupTasklist();
 	const siteTitle = getSetting( 'siteTitle', '' );
 	const pageTitle = sections.slice( -1 )[ 0 ];
-	const isScrolled = useIsScrolled();
+	const { isScrolled } = useIsScrolled();
 	let debounceTimer = null;
 
 	const className = classnames( 'woocommerce-layout__header', {
@@ -50,7 +50,7 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 				return;
 			}
 
-			wpBody.style.marginTop = `${ headerElement.current.offsetHeight }px`;
+			wpBody.style.marginTop = `${ headerElement.current.clientHeight }px`;
 		}, 200 );
 	};
 

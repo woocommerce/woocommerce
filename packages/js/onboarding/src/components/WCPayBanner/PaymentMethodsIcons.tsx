@@ -12,31 +12,31 @@ import {
 	Visa,
 	MasterCard,
 	Amex,
+	WooPay,
 	ApplePay,
 	Giropay,
 	GooglePay,
 	CB,
-	DinersClub,
 	Discover,
 	UnionPay,
 	JCB,
-	Sofort,
 } from './Icons';
 
-export const PaymentMethodsIcons = () => (
+export const PaymentMethodsIcons: React.VFC< {
+	isWooPayEligible: boolean;
+} > = ( { isWooPayEligible = false } ) => (
 	<div className="woocommerce-recommended-payments-banner__footer_icon_container">
 		<Visa />
 		<MasterCard />
 		<Amex />
+		{ isWooPayEligible && <WooPay /> }
 		<ApplePay />
 		<GooglePay />
 		<CB />
 		<Giropay />
-		<DinersClub />
 		<Discover />
 		<UnionPay />
 		<JCB />
-		<Sofort />
 		<Text variant="caption" as="p" size="12" lineHeight="16px">
 			{ __( '& more.', 'woocommerce' ) }
 		</Text>

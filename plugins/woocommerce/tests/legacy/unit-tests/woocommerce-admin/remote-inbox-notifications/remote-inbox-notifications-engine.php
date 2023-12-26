@@ -97,7 +97,14 @@ class WC_Admin_Tests_RemoteInboxNotifications_RemoteInboxNotificationsEngine ext
 		$note_from_db = new Note();
 		$note_from_db->set_locale( 'en_US' );
 		$note_from_db->set_name( 'test' );
-
+		$note_from_db->set_actions(
+			array(
+				(object) array(
+					'id'   => 123,
+					'name' => 'test-action',
+				),
+			)
+		);
 		add_filter(
 			'locale',
 			function( $locale ) {
@@ -109,5 +116,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_RemoteInboxNotificationsEngine ext
 		$this->assertEquals( $note->get_title(), '名稱' );
 		$this->assertEquals( $note->get_content(), '內容' );
 		$this->assertEquals( $note->get_actions()[0]->label, '標籤' );
+		$this->assertEquals( $note->get_actions()[0]->id, 123 );
+
 	}
 }

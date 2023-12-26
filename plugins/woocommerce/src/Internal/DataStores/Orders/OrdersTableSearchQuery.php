@@ -33,7 +33,7 @@ class OrdersTableSearchQuery {
 	 */
 	public function __construct( OrdersTableQuery $query ) {
 		$this->query       = $query;
-		$this->search_term = "'" . esc_sql( '%' . urldecode( $query->get( 's' ) ) . '%' ) . "'";
+		$this->search_term = urldecode( $query->get( 's' ) );
 	}
 
 	/**
@@ -78,8 +78,9 @@ class OrdersTableSearchQuery {
 	 * @return string
 	 */
 	private function generate_where(): string {
+		global $wpdb;
 		$where             = '';
-		$possible_order_id = (string) absint( $this->query->get( 's' ) );
+		$possible_order_id = (string) absint( $this->search_term );
 		$order_table       = $this->query->get_table_name( 'orders' );
 
 		// Support the passing of an order ID as the search term.
@@ -89,10 +90,13 @@ class OrdersTableSearchQuery {
 
 		$meta_sub_query = $this->generate_where_for_meta_table();
 
-		$where .= "
-			search_query_items.order_item_name LIKE $this->search_term
+		$where .= $wpdb->prepare(
+			"
+			search_query_items.order_item_name LIKE %s
 			OR `$order_table`.id IN ( $meta_sub_query )
-		";
+			",
+			'%' . $wpdb->esc_like( $this->search_term ) . '%'
+		);
 
 		return " ( $where ) ";
 	}
@@ -107,15 +111,19 @@ class OrdersTableSearchQuery {
 	 * @return string The where clause for meta table.
 	 */
 	private function generate_where_for_meta_table(): string {
+		global $wpdb;
 		$meta_table  = $this->query->get_table_name( 'meta' );
 		$meta_fields = $this->get_meta_fields_to_be_searched();
-		return "
+		return $wpdb->prepare(
+			"
 SELECT search_query_meta.order_id
 FROM $meta_table as search_query_meta
 WHERE search_query_meta.meta_key IN ( $meta_fields )
-AND search_query_meta.meta_value LIKE $this->search_term
+AND search_query_meta.meta_value LIKE %s
 GROUP BY search_query_meta.order_id
-";
+",
+			'%' . $wpdb->esc_like( $this->search_term ) . '%'
+		);
 	}
 
 	/**

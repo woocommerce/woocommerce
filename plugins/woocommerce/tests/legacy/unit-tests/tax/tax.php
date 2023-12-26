@@ -1,6 +1,6 @@
 <?php
 /**
- * Test tax funcitons.
+ * Test tax functions.
  *
  * @package WooCommerce\Tests\Tax
  * @since   3.4.0

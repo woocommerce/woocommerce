@@ -22,8 +22,9 @@ none
 # Logs
 logs/
 
-# Eslint Cache
+# Eslint
 .eslintcache
+eslint_report.json
 
 # Environment files
 wp-cli.local.yml
@@ -40,8 +41,10 @@ npm-debug.log
 build/
 build-module/
 build-style/
+build-style.js
 build-types/
 dist/
+oclif.manifest.json
 
 # Project files
 node_modules/
@@ -81,6 +84,9 @@ plugins/woocommerce/includes/react-admin/feature-config.php
 # PHP lint
 phpcs-report.xml
 
+#PHP Unit
+.phpunit.result.cache
+
 # Allure directories
 allure-report
 allure-results
@@ -89,8 +95,17 @@ allure-results
 changes.json
 .env
 
-# Turborepo
+# Build Cache
 .turbo
+.wireit
 
 # Support .gitkeep Files
 !.gitkeep
+
+# default docs manifest
+/manifest.json
+
+# Metrics tests
+/artifacts
+/plugins/*/artifacts
+/tools/*/artifacts

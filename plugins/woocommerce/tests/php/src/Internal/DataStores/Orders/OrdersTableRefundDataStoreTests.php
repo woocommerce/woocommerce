@@ -79,7 +79,7 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 	 */
 	public function test_refunds_backfill() {
 		$this->enable_cot_sync();
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 		$order  = OrderHelper::create_complex_data_store_order( $this->order_data_store );
 		$refund = wc_create_refund(
 			array(
@@ -99,6 +99,32 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 		$this->assertEquals( $refund->get_id(), $refreshed_refund->get_id() );
 		$this->assertEquals( 10, $refreshed_refund->get_amount() );
 		$this->assertEquals( 'Test', $refreshed_refund->get_reason() );
+	}
+
+	/**
+	 * @testDox Test that refund props are set as expected with HPOS enabled.
+	 */
+	public function test_refund_data_is_set() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = OrderHelper::create_order();
+		$user  = $this->factory()->user->create_and_get( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user->ID );
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+				'reason'   => 'Test',
+			)
+		);
+		$refund->save();
+
+		$refreshed_refund = wc_get_order( $order->get_id() )->get_refunds()[0];
+		$this->assertEquals( $refund->get_id(), $refreshed_refund->get_id() );
+		$this->assertEquals( 10, $refreshed_refund->get_data()['amount'] );
+		$this->assertEquals( 'Test', $refreshed_refund->get_data()['reason'] );
+		$this->assertEquals( $user->ID, $refreshed_refund->get_data()['refunded_by'] );
 	}
 
 }

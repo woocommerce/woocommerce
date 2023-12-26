@@ -27,11 +27,24 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 
 	const { primaryButton = { text: '', isDisabled: false, isHidden: false } } =
 		steps[ currentStepIndex ].meta;
+	const { secondaryButton = { text: '' } } = steps[ currentStepIndex ].meta;
+	const { skipButton = { text: '', isVisible: false } } =
+		steps[ currentStepIndex ].meta;
+
+	const SkipButton = (
+		<Button
+			className="woocommerce-tour-kit-step-navigation__skip-btn"
+			variant="tertiary"
+			onClick={ onDismiss( 'skip-btn' ) }
+		>
+			{ skipButton.text || __( 'Skip', 'woocommerce' ) }
+		</Button>
+	);
 
 	const NextButton = (
 		<Button
 			className="woocommerce-tour-kit-step-navigation__next-btn"
-			isPrimary
+			variant="primary"
 			disabled={ primaryButton.isDisabled }
 			onClick={ onNextStep }
 		>
@@ -42,10 +55,10 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 	const BackButton = (
 		<Button
 			className="woocommerce-tour-kit-step-navigation__back-btn"
-			isSecondary
+			variant="secondary"
 			onClick={ onPreviousStep }
 		>
-			{ __( 'Back', 'woocommerce' ) }
+			{ secondaryButton.text || __( 'Back', 'woocommerce' ) }
 		</Button>
 	);
 
@@ -53,11 +66,12 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 		if ( isLastStep ) {
 			return (
 				<div>
+					{ skipButton.isVisible ? SkipButton : null }
 					{
 						! isFirstStep ? BackButton : null // For 1 step tours, isFirstStep and isLastStep can be true simultaneously.
 					}
 					<Button
-						isPrimary
+						variant="primary"
 						disabled={ primaryButton.isDisabled }
 						className="woocommerce-tour-kit-step-navigation__done-btn"
 						onClick={ onDismiss( 'done-btn' ) }
@@ -69,11 +83,17 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 		}
 
 		if ( isFirstStep ) {
-			return <div>{ NextButton }</div>;
+			return (
+				<div>
+					{ skipButton.isVisible ? SkipButton : null }
+					{ NextButton }
+				</div>
+			);
 		}
 
 		return (
 			<div>
+				{ skipButton.isVisible ? SkipButton : null }
 				{ BackButton }
 				{ NextButton }
 			</div>

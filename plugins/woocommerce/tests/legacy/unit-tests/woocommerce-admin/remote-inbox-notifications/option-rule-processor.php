@@ -63,14 +63,14 @@ class WC_Admin_Tests_RemoteInboxNotifications_OptionRuleProcessor extends WC_Uni
 	 *
 	 * @group fast
 	 */
-	public function test_rule_passes_for_contains() {
-		add_option( 'contain_item', array( 'test' ) );
+	public function test_rule_passes_for_contains_array() {
+		add_option( 'array_contain_item', array( 'test' ) );
 		$processor = new OptionRuleProcessor();
 		$rule      = json_decode(
 			'
 			{
 				"type": "option",
-				"option_name": "contain_item",
+				"option_name": "array_contain_item",
 				"value": "test",
 				"default": [],
 				"operation": "contains"
@@ -84,7 +84,36 @@ class WC_Admin_Tests_RemoteInboxNotifications_OptionRuleProcessor extends WC_Uni
 		$rule->value = 'not_included';
 		$result      = $processor->process( $rule, null );
 		$this->assertEquals( false, $result );
-		delete_option( 'contain_item' );
+		delete_option( 'array_contain_item' );
+	}
+
+	/**
+	 * Test contains of substring
+	 *
+	 * @group fast
+	 */
+	public function test_rule_passes_for_contains_substring() {
+		add_option( 'string_contain_substring', array( 'test' ) );
+		$processor = new OptionRuleProcessor();
+		$rule      = json_decode(
+			'
+			{
+				"type": "option",
+				"option_name": "string_contain_substring",
+				"value": "test",
+				"default": "",
+				"operation": "contains"
+			}
+			'
+		);
+
+		$result = $processor->process( $rule, null );
+		$this->assertEquals( true, $result );
+
+		$rule->value = 'not_included';
+		$result      = $processor->process( $rule, null );
+		$this->assertEquals( false, $result );
+		delete_option( 'string_contain_substring' );
 	}
 
 	/**

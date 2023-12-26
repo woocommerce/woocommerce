@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
+import { Spinner } from '@woocommerce/components';
 import {
 	// @ts-ignore
 	__experimentalHeading as Heading,
 } from '@wordpress/components';
-import { Spinner } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -14,14 +14,16 @@ import { useLiveBranchesData } from './hooks/live-branches';
 import { BranchList } from './components/BranchList';
 
 export const App = () => {
-	const { branches, isLoading } = useLiveBranchesData();
+	const { branches, isLoading, isError } = useLiveBranchesData();
 
 	return (
 		<>
 			<Heading level={ 1 }>
 				Live Branches - Install and test WooCommerce PRs
 			</Heading>
-			{ isLoading ? <Spinner /> : <BranchList branches={ branches } /> }
+			{ isError && <p>Something Went Wrong!</p> }
+			{ isLoading && <Spinner /> }
+			{ ! isError && ! isLoading && <BranchList branches={ branches } /> }
 		</>
 	);
 };

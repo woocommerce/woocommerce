@@ -98,7 +98,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	 */
 	public function test_get_delivery_url() {
 		$object   = new WC_Webhook();
-		$expected = 'https://woocommerce.com';
+		$expected = 'https://woo.com';
 		$object->set_delivery_url( $expected );
 		$this->assertEquals( $expected, $object->get_delivery_url() );
 	}

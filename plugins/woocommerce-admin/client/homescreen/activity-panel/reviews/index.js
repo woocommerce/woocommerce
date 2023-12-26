@@ -150,8 +150,9 @@ class ReviewsPanel extends Component {
 
 		const title = interpolateComponents( {
 			mixedString: sprintf(
+				/* translators: product reviewer as author, and product name  */
 				__(
-					'{{authorLink}}%s{{/authorLink}}{{verifiedCustomerIcon/}} reviewed {{productLink}}%s{{/productLink}}',
+					'{{authorLink}}%1$s{{/authorLink}}{{verifiedCustomerIcon/}} reviewed {{productLink}}%2$s{{/productLink}}',
 					'woocommerce'
 				),
 				review.reviewer,

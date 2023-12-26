@@ -11,11 +11,11 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { Tabs } from '../';
-import { Edit as Tab } from '../../tab/edit';
+import { TabBlockEdit as Tab } from '../../../blocks/generic/tab/edit';
 
-jest.mock( '@wordpress/block-editor', () => ( {
-	...jest.requireActual( '@wordpress/block-editor' ),
-	useBlockProps: jest.fn(),
+jest.mock( '@woocommerce/block-templates', () => ( {
+	...jest.requireActual( '@woocommerce/block-templates' ),
+	useWooBlockProps: jest.fn(),
 } ) );
 
 jest.mock( '@woocommerce/navigation', () => ( {
@@ -24,9 +24,19 @@ jest.mock( '@woocommerce/navigation', () => ( {
 	getQuery: jest.fn().mockReturnValue( {} ),
 } ) );
 
+const blockProps = {
+	setAttributes: () => {},
+	className: '',
+	clientId: '',
+	isSelected: false,
+};
+
 function MockTabs( { onChange = jest.fn() } ) {
 	const [ selected, setSelected ] = useState< string | null >( null );
 	const mockContext = {
+		editedProduct: null,
+		postId: 1,
+		postType: 'product',
 		selectedTab: selected,
 	};
 
@@ -39,16 +49,28 @@ function MockTabs( { onChange = jest.fn() } ) {
 				} }
 			/>
 			<Tab
-				attributes={ { id: 'test1', title: 'Test button 1' } }
+				{ ...blockProps }
+				attributes={ { id: 'test1', title: 'Test button 1', order: 1 } }
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore editedProduct is not used, so we can just ignore the fact that our context doesn't have it
 				context={ mockContext }
+				name="test1"
 			/>
 			<Tab
-				attributes={ { id: 'test2', title: 'Test button 2' } }
+				{ ...blockProps }
+				attributes={ { id: 'test2', title: 'Test button 2', order: 2 } }
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore editedProduct is not used, so we can just ignore the fact that our context doesn't have it
 				context={ mockContext }
+				name="test2"
 			/>
 			<Tab
-				attributes={ { id: 'test3', title: 'Test button 3' } }
+				{ ...blockProps }
+				attributes={ { id: 'test3', title: 'Test button 3', order: 3 } }
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore editedProduct is not used, so we can just ignore the fact that our context doesn't have it
 				context={ mockContext }
+				name="test3"
 			/>
 		</SlotFillProvider>
 	);

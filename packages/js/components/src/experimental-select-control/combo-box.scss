@@ -11,14 +11,23 @@
 	box-sizing: border-box;
 
 	&--disabled {
-		opacity: 0.5;
+		background-color: $gray-100;
+		border-color: $gray-400;
+		opacity: 1.0;
+		.woocommerce-experimental-select-control {
+			&__items-wrapper {
+				opacity: 0.5;
+			}
+			&__suffix {
+				fill: $gray-400;
+			}
+		}
 	}
 }
 
 .woocommerce-experimental-select-control__items-wrapper {
 	display: flex;
 	flex-grow: 1;
-	flex-wrap: wrap;
 	align-items: center;
 	padding: 2px $gap-smaller;
 

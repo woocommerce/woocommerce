@@ -13,6 +13,14 @@ defined( 'ABSPATH' ) || exit;
  * given number of seconds.
  */
 class WCAdminActiveForRuleProcessor implements RuleProcessorInterface {
+
+	/**
+	 * Provides the amount of time wcadmin has been active for.
+	 *
+	 * @var WCAdminActiveForProvider
+	 */
+	protected $wcadmin_active_for_provider;
+
 	/**
 	 * Constructor
 	 *

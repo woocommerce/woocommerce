@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement, Component, Fragment } from '@wordpress/element';
-import interpolateComponents from '@automattic/interpolate-components';
 import { SelectControl } from '@wordpress/components';
 import { find, partial } from 'lodash';
 import classnames from 'classnames';
@@ -14,7 +13,10 @@ import moment from 'moment';
  * Internal dependencies
  */
 import DatePicker from '../calendar/date-picker';
-import { textContent } from './utils';
+import {
+	backwardsCompatibleCreateInterpolateElement as createInterpolateElement,
+	textContent,
+} from './utils';
 
 const dateStringFormat = __( 'MMM D, YYYY', 'woocommerce' );
 const dateFormat = __( 'MM/DD/YYYY', 'woocommerce' );
@@ -46,7 +48,7 @@ class DateFilter extends Component {
 
 	getBetweenString() {
 		return _x(
-			'{{after /}}{{span}} and {{/span}}{{before /}}',
+			'<after/><span> and </span><before/>',
 			'Date range inputs arranged on a single line',
 			'woocommerce'
 		);
@@ -65,32 +67,22 @@ class DateFilter extends Component {
 		let filterStr = before.format( dateStringFormat );
 
 		if ( rule.value === 'between' ) {
-			filterStr = interpolateComponents( {
-				mixedString: this.getBetweenString(),
-				components: {
-					after: (
-						<Fragment>
-							{ after.format( dateStringFormat ) }
-						</Fragment>
-					),
-					before: (
-						<Fragment>
-							{ before.format( dateStringFormat ) }
-						</Fragment>
-					),
-					span: <Fragment />,
-				},
+			filterStr = createInterpolateElement( this.getBetweenString(), {
+				after: (
+					<Fragment>{ after.format( dateStringFormat ) }</Fragment>
+				),
+				before: (
+					<Fragment>{ before.format( dateStringFormat ) }</Fragment>
+				),
+				span: <Fragment />,
 			} );
 		}
 
 		return textContent(
-			interpolateComponents( {
-				mixedString: config.labels.title,
-				components: {
-					filter: <Fragment>{ filterStr }</Fragment>,
-					rule: <Fragment>{ rule.label }</Fragment>,
-					title: <Fragment />,
-				},
+			createInterpolateElement( config.labels.title, {
+				filter: <Fragment>{ filterStr }</Fragment>,
+				rule: <Fragment>{ rule.label }</Fragment>,
+				title: <Fragment />,
 			} )
 		);
 	}
@@ -198,23 +190,20 @@ class DateFilter extends Component {
 			afterText,
 			afterError,
 		} = this.state;
-		return interpolateComponents( {
-			mixedString: this.getBetweenString(),
-			components: {
-				after: this.getFormControl( {
-					date: after,
-					error: afterError,
-					onUpdate: partial( this.onRangeDateChange, 'after' ),
-					text: afterText,
-				} ),
-				before: this.getFormControl( {
-					date: before,
-					error: beforeError,
-					onUpdate: partial( this.onRangeDateChange, 'before' ),
-					text: beforeText,
-				} ),
-				span: <span className="separator" />,
-			},
+		return createInterpolateElement( this.getBetweenString(), {
+			after: this.getFormControl( {
+				date: after,
+				error: afterError,
+				onUpdate: partial( this.onRangeDateChange, 'after' ),
+				text: afterText,
+			} ),
+			before: this.getFormControl( {
+				date: before,
+				error: beforeError,
+				onUpdate: partial( this.onRangeDateChange, 'before' ),
+				text: beforeText,
+			} ),
+			span: <span className="separator" />,
 		} );
 	}
 
@@ -238,36 +227,33 @@ class DateFilter extends Component {
 		const { rule } = this.state;
 		const { labels, rules } = config;
 		const screenReaderText = this.getScreenReaderText( rule, config );
-		const children = interpolateComponents( {
-			mixedString: labels.title,
-			components: {
-				title: <span className={ className } />,
-				rule: (
-					<SelectControl
-						className={ classnames(
-							className,
-							'woocommerce-filters-advanced__rule'
-						) }
-						options={ rules }
-						value={ rule }
-						onChange={ this.onRuleChange }
-						aria-label={ labels.rule }
-					/>
-				),
-				filter: (
-					<div
-						className={ classnames(
-							className,
-							'woocommerce-filters-advanced__input-range',
-							{
-								'is-between': rule === 'between',
-							}
-						) }
-					>
-						{ this.getFilterInputs() }
-					</div>
-				),
-			},
+		const children = createInterpolateElement( labels.title, {
+			title: <span className={ className } />,
+			rule: (
+				<SelectControl
+					className={ classnames(
+						className,
+						'woocommerce-filters-advanced__rule'
+					) }
+					options={ rules }
+					value={ rule }
+					onChange={ this.onRuleChange }
+					aria-label={ labels.rule }
+				/>
+			),
+			filter: (
+				<div
+					className={ classnames(
+						className,
+						'woocommerce-filters-advanced__input-range',
+						{
+							'is-between': rule === 'between',
+						}
+					) }
+				>
+					{ this.getFilterInputs() }
+				</div>
+			),
 		} );
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (

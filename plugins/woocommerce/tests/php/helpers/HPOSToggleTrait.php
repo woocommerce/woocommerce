@@ -4,10 +4,7 @@ namespace Automattic\WooCommerce\RestApi\UnitTests;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
-use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use WC_Data_Store;
 
 /**
  * Trait HPOSToggleTrait.
@@ -28,14 +25,14 @@ trait HPOSToggleTrait {
 		OrderHelper::delete_order_custom_tables();
 		OrderHelper::create_order_custom_table_if_not_exist();
 
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 	}
 
 	/**
 	 * Call in teardown to disable COT/HPOS.
 	 */
 	public function clean_up_cot_setup(): void {
-		$this->toggle_cot( false );
+		$this->toggle_cot_feature_and_usage( false );
 
 		// Add back removed filter.
 		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
@@ -43,13 +40,21 @@ trait HPOSToggleTrait {
 	}
 
 	/**
-	 * Enables or disables the custom orders table across WP temporarily.
+	 * Enables or disables the custom orders table feature, and sets the orders table as authoritative, across WP temporarily.
 	 *
 	 * @param boolean $enabled TRUE to enable COT or FALSE to disable.
 	 * @return void
 	 */
-	private function toggle_cot( bool $enabled ): void {
-		OrderHelper::toggle_cot( $enabled );
+	private function toggle_cot_feature_and_usage( bool $enabled ): void {
+		OrderHelper::toggle_cot_feature_and_usage( $enabled );
+	}
+
+	/**
+	 * Set the orders table or the posts table as the authoritative table to store orders.
+	 * @param bool $cot_authoritative True to set the orders table as authoritative, false to set the posts table as authoritative.
+	 */
+	protected function toggle_cot_authoritative( bool $cot_authoritative ) {
+		OrderHelper::toggle_cot_feature_and_usage( $cot_authoritative );
 	}
 
 	/**

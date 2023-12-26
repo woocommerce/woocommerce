@@ -33,8 +33,11 @@ class DatabaseUtil {
 	 * @return array An array containing the names of the tables that currently don't exist in the database.
 	 */
 	public function get_missing_tables( string $creation_queries ): array {
-		$dbdelta_output = $this->dbdelta( $creation_queries, false );
-		$parsed_output  = $this->parse_dbdelta_output( $dbdelta_output );
+		global $wpdb;
+		$suppress_errors = $wpdb->suppress_errors( true );
+		$dbdelta_output  = $this->dbdelta( $creation_queries, false );
+		$wpdb->suppress_errors( $suppress_errors );
+		$parsed_output = $this->parse_dbdelta_output( $dbdelta_output );
 		return $parsed_output['created_tables'];
 	}
 
@@ -49,7 +52,7 @@ class DatabaseUtil {
 
 		foreach ( $dbdelta_output as $table_name => $result ) {
 			if ( "Created table $table_name" === $result ) {
-				$created_tables[] = $table_name;
+				$created_tables[] = str_replace( '(', '', $table_name );
 			}
 		}
 
@@ -126,15 +129,14 @@ class DatabaseUtil {
 			$index_name = 'PRIMARY';
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL
-		return $wpdb->get_col(
-			"
-SELECT column_name FROM INFORMATION_SCHEMA.STATISTICS
-WHERE table_name='$table_name'
-AND table_schema='" . DB_NAME . "'
-AND index_name='$index_name'"
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$results = $wpdb->get_results( $wpdb->prepare( "SHOW INDEX FROM $table_name WHERE Key_name = %s", $index_name ) );
+
+		if ( empty( $results ) ) {
+			return array();
+		}
+
+		return array_column( $results, 'Column_name' );
 	}
 
 	/**
@@ -231,23 +233,62 @@ AND index_name='$index_name'"
 	 */
 	public function insert_on_duplicate_key_update( $table_name, $data, $format ) : int {
 		global $wpdb;
+		if ( empty( $data ) ) {
+			return 0;
+		}
 
-		$columns             = array_keys( $data );
+		$columns      = array_keys( $data );
+		$value_format = array();
+		$values       = array();
+		$index        = 0;
+		// Directly use NULL for placeholder if the value is NULL, since otherwise $wpdb->prepare will convert it to empty string.
+		foreach ( $data as $key => $value ) {
+			if ( is_null( $value ) ) {
+				$value_format[] = 'NULL';
+			} else {
+				$values[]       = $value;
+				$value_format[] = $format[ $index ];
+			}
+			$index++;
+		}
 		$column_clause       = '`' . implode( '`, `', $columns ) . '`';
-		$value_placeholders  = implode( ', ', array_values( $format ) );
+		$value_format_clause = implode( ', ', $value_format );
 		$on_duplicate_clause = $this->generate_on_duplicate_statement_clause( $columns );
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Values are escaped in $wpdb->prepare.
 		$sql = $wpdb->prepare(
 			"
 INSERT INTO $table_name ( $column_clause )
-VALUES ( $value_placeholders )
+VALUES ( $value_format_clause )
 $on_duplicate_clause
 ",
-			array_values( $data )
+			$values
 		);
 		// phpcs:enable
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared.
 		return $wpdb->query( $sql );
 	}
 
+	/**
+	 * Get max index length.
+	 *
+	 * @return int Max index length.
+	 */
+	public function get_max_index_length() : int {
+		/**
+		 * Filters the maximum index length in the database.
+		 *
+		 * Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
+		 * As of WP 4.2, however, they moved to utf8mb4, which uses 4 bytes per character. This means that an index which
+		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
+		 *
+		 * Additionally, MyISAM engine also limits the index size to 1000 bytes. We add this filter so that interested folks on InnoDB engine can increase the size till allowed 3071 bytes.
+		 *
+		 * @param int $max_index_length Maximum index length. Default 191.
+		 *
+		 * @since 8.0.0
+		 */
+		$max_index_length = apply_filters( 'woocommerce_database_max_index_length', 191 );
+		// Index length cannot be more than 768, which is 3078 bytes in utf8mb4 and max allowed by InnoDB engine.
+		return min( absint( $max_index_length ), 767 );
+	}
 }

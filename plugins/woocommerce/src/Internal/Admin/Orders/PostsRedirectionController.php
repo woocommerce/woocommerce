@@ -84,7 +84,7 @@ class PostsRedirectionController {
 			$new_url = add_query_arg(
 				array(
 					'action'           => $action,
-					'order'            => $posts,
+					'id'               => $posts,
 					'_wp_http_referer' => $this->page_controller->get_orders_url(),
 					'_wpnonce'         => wp_create_nonce( 'bulk-orders' ),
 				),

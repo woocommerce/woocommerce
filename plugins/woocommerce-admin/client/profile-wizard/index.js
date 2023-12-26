@@ -31,7 +31,6 @@ import Industry from './steps/industry';
 import ProductTypes from './steps/product-types';
 import ProfileWizardHeader from './header';
 import StoreDetails from './steps/store-details';
-import Theme from './steps/theme';
 import { getAdminSetting } from '~/utils/admin-settings';
 import './style.scss';
 
@@ -159,14 +158,6 @@ class ProfileWizard extends Component {
 			isComplete:
 				profileItems.hasOwnProperty( 'product_count' ) &&
 				profileItems.product_count !== null,
-		} );
-		steps.push( {
-			key: 'theme',
-			container: Theme,
-			label: __( 'Theme', 'woocommerce' ),
-			isComplete:
-				profileItems.hasOwnProperty( 'theme' ) &&
-				profileItems.theme !== null,
 		} );
 		/**
 		 * Filter for Onboarding steps configuration.

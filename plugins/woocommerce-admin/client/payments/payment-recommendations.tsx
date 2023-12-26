@@ -26,7 +26,7 @@ import { getPluginSlug } from '~/utils';
 import { isWcPaySupported } from './utils';
 
 const SEE_MORE_LINK =
-	'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
+	'https://woo.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
 
 const WcPayPromotionGateway = document.querySelector(
 	'[data-gateway_id="pre_install_woocommerce_payments_promotion"]'

@@ -512,7 +512,7 @@ class WC_Admin_Report {
 			}
 
 			if ( $data_key ) {
-				$prepared_data[ $time ][1] += $d->$data_key;
+				$prepared_data[ $time ][1] += is_numeric( $d->$data_key ) ? $d->$data_key : 0;
 			} else {
 				$prepared_data[ $time ][1] ++;
 			}

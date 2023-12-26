@@ -38,6 +38,7 @@ class WC_Tracks {
 				'url'            => home_url(),
 				'blog_lang'      => get_user_locale( $user_id ),
 				'blog_id'        => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
+				'store_id'       => get_option( \WC_Install::STORE_ID_OPTION, null ),
 				'products_count' => self::get_products_count(),
 				'wc_version'     => WC()->version,
 			);

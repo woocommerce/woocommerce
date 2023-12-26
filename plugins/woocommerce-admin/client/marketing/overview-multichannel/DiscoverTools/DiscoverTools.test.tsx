@@ -58,7 +58,7 @@ describe( 'DiscoverTools component', () => {
 	} );
 
 	describe( 'With plugins loaded', () => {
-		it( 'should render `direct_install: true` plugins with "Install plugin" button', () => {
+		it( 'should render `direct_install: true` plugins with "Install extension" button', () => {
 			(
 				useRecommendedPluginsWithoutChannels as jest.Mock
 			 ).mockReturnValue( {
@@ -69,9 +69,9 @@ describe( 'DiscoverTools component', () => {
 						title: 'Google Listings and Ads',
 						description:
 							'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.',
-						url: 'https://woocommerce.com/products/google-listings-and-ads/?utm_source=marketingtab&utm_medium=product&utm_campaign=wcaddons',
+						url: 'https://woo.com/products/google-listings-and-ads/?utm_source=marketingtab&utm_medium=product&utm_campaign=wcaddons',
 						direct_install: true,
-						icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/google.svg',
+						icon: 'https://woo.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/google.svg',
 						product: 'google-listings-and-ads',
 						plugin: 'google-listings-and-ads/google-listings-and-ads.php',
 						categories: [ 'marketing' ],
@@ -92,7 +92,7 @@ describe( 'DiscoverTools component', () => {
 			} );
 			render( <DiscoverTools /> );
 
-			// Assert that we have the "Sales channels" tab, the plugin name, the "Built by WooCommerce" pill, and the "Install plugin" button.
+			// Assert that we have the "Sales channels" tab, the plugin name, the "Built by WooCommerce" pill, and the "Install extension" button.
 			expect( screen.getByText( 'Sales channels' ) ).toBeInTheDocument();
 			expect(
 				screen.getByText( 'Google Listings and Ads' )
@@ -100,7 +100,9 @@ describe( 'DiscoverTools component', () => {
 			expect(
 				screen.getByText( 'Built by WooCommerce' )
 			).toBeInTheDocument();
-			expect( screen.getByText( 'Install plugin' ) ).toBeInTheDocument();
+			expect(
+				screen.getByText( 'Install extension' )
+			).toBeInTheDocument();
 		} );
 
 		it( 'should render `direct_install: false` plugins with "View details" button', () => {
@@ -114,9 +116,9 @@ describe( 'DiscoverTools component', () => {
 						title: 'WooCommerce Zapier',
 						description:
 							'Integrate your WooCommerce store with 5000+ cloud apps and services today. Trusted by 11,000+ users.',
-						url: 'https://woocommerce.com/products/woocommerce-zapier/?utm_source=marketingtab&utm_medium=product&utm_campaign=wcaddons',
+						url: 'https://woo.com/products/woocommerce-zapier/?utm_source=marketingtab&utm_medium=product&utm_campaign=wcaddons',
 						direct_install: false,
-						icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/zapier.png',
+						icon: 'https://woo.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/zapier.png',
 						product: 'woocommerce-zapier',
 						plugin: 'woocommerce-zapier/woocommerce-zapier.php',
 						categories: [ 'marketing' ],

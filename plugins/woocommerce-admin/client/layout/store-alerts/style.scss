@@ -76,7 +76,7 @@
 }
 
 .is-alert-update {
-	$alert-color: #11a0d2;
+	$alert-color: var(--wp-admin-theme-color, #11a0d2);
 
 	&::before {
 		background-color: $alert-color;

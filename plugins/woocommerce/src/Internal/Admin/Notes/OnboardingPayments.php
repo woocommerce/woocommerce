@@ -59,7 +59,7 @@ class OnboardingPayments {
 		$note->add_action(
 			'view-payment-gateways',
 			__( 'Learn more', 'woocommerce' ),
-			'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_medium=product',
+			'https://woo.com/product-category/woocommerce-extensions/payment-gateways/?utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			true
 		);

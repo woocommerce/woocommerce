@@ -48,7 +48,7 @@ class Package {
 	 */
 	public static function init() {
 		// Avoid double initialization when the feature plugin is in use.
-		if ( defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
+		if (defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
 			self::$active_version = WC_ADMIN_VERSION_NUMBER;
 			return;
 		}

@@ -24,6 +24,7 @@ import {
 	ReportStatObjectInfer,
 	ReportStatQueryParams,
 } from './types';
+import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
 
@@ -57,4 +58,7 @@ declare module '@wordpress/data' {
 		key: typeof STORE_NAME
 	): DispatchFromMap< typeof actions & WPDataActions >;
 	function select( key: typeof STORE_NAME ): ReportsSelect;
+	function resolveSelect(
+		key: typeof STORE_NAME
+	): PromiseifySelectors< ReportsSelect >;
 }

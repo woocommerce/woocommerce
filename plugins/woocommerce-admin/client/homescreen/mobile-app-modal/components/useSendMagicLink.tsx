@@ -15,7 +15,7 @@ export const SendMagicLinkStates = {
 	ERROR: 'error',
 } as const;
 export type SendMagicLinkStates =
-	typeof SendMagicLinkStates[ keyof typeof SendMagicLinkStates ];
+	( typeof SendMagicLinkStates )[ keyof typeof SendMagicLinkStates ];
 
 export type MagicLinkResponse = {
 	data: unknown;
@@ -47,7 +47,7 @@ export const useSendMagicLink = () => {
 					setRequestState( SendMagicLinkStates.ERROR );
 					createNotice(
 						'error',
-						__( 'Sorry, an unknown error occured.', 'woocommerce' )
+						__( 'Sorry, an unknown error occurred.', 'woocommerce' )
 					);
 				}
 			} )

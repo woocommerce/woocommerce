@@ -12,6 +12,8 @@ const DEFAULT_STATE = {
 	params: [],
 	status: '',
 	dbUpdateVersions: [],
+	loggingLevels: null,
+	blockTemplateLoggingThreshold: null,
 };
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
@@ -79,6 +81,17 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				dbUpdateVersions: action.versions,
+			};
+		case TYPES.SET_LOGGING_LEVELS:
+			return {
+				...state,
+				loggingLevels: action.loggingLevels,
+			};
+		case TYPES.SET_BLOCK_TEMPLATE_LOGGING_THRESHOLD:
+			return {
+				...state,
+				blockTemplateLoggingThreshold:
+					action.blockTemplateLoggingThreshold,
 			};
 		default:
 			return state;

@@ -76,66 +76,65 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
 
 		// open modal for adding line items
-		await page.click( 'button.add-line-item' );
-		await page.click( 'button.add-order-item' );
+		await page.locator( 'button.add-line-item' ).click();
+		await page.locator( 'button.add-order-item' ).click();
 
 		// search for product to add
-		await page.click( 'text=Search for a product…' );
-		await page.type(
-			'input:below(:text("Search for a product…"))',
-			productName
-		);
-		await page.click(
-			'li.select2-results__option.select2-results__option--highlighted'
-		);
+		await page.locator( 'text=Search for a product…' ).click();
+		await page
+			.locator( '.select2-search--dropdown' )
+			.getByRole( 'combobox' )
+			.type( productName );
+		await page
+			.locator(
+				'li.select2-results__option.select2-results__option--highlighted'
+			)
+			.click();
 
-		await page.click( 'button#btn-ok' );
+		await page.locator( 'button#btn-ok' ).click();
 
 		// apply coupon
 		page.on( 'dialog', ( dialog ) => dialog.accept( couponCode ) );
-		await page.click( 'button.add-coupon' );
+		await page.locator( 'button.add-coupon' ).click();
 
-		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).toBeVisible();
 		await expect(
-			page.locator( '.wc-order-totals td.label >> nth=1' )
-		).toContainText( 'Coupon(s)' );
+			page.locator('#woocommerce-order-items li').filter({ hasText: couponCode })
+		).toBeVisible();
 		await expect(
-			page.locator( '.wc-order-totals td.label >> nth=2' )
-		).toContainText( 'Order Total' );
+			page.getByRole( 'cell', { name: 'Coupon(s)' } )
+		).toBeVisible();
 		await expect(
-			page.locator( '.wc-order-totals td.total >> nth=1' )
-		).toContainText( couponAmount );
+			page.getByRole( 'cell', { name: `- $${ couponAmount }.00` } )
+		).toBeVisible();
 		await expect(
-			page.locator( '.wc-order-totals td.total >> nth=2' )
-		).toContainText( discountedPrice );
+			page.getByRole('cell', { name: `$${ discountedPrice }`, exact: true })
+		).toBeVisible();
 	} );
 
 	test( 'can remove a coupon', async ( { page } ) => {
 		await page.goto( `/wp-admin/post.php?post=${ orderId }&action=edit` );
 		// assert that there is a coupon on the order
-		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).toBeVisible();
 		await expect(
-			page.locator( '.wc-order-totals td.label >> nth=1' )
-		).toContainText( 'Coupon(s)' );
+			page.locator('#woocommerce-order-items li').filter({ hasText: couponCode })
+		).toBeVisible();
 		await expect(
-			page.locator( '.wc-order-totals td.label >> nth=2' )
-		).toContainText( 'Order Total' );
+			page.getByRole( 'cell', { name: 'Coupon(s)' } )
+		).toBeVisible();
 		await expect(
-			page.locator( '.wc-order-totals td.total >> nth=1' )
-		).toContainText( couponAmount );
+			page.getByRole( 'cell', { name: `- $${ couponAmount }.00` } )
+		).toBeVisible();
 		await expect(
-			page.locator( '.wc-order-totals td.total >> nth=2' )
-		).toContainText( discountedPrice );
+			page.getByRole('cell', { name: `$${ discountedPrice }`, exact: true })
+		).toBeVisible();
 		// remove the coupon
-		await page.dispatchEvent( 'a.remove-coupon', 'click' ); // have to use dispatchEvent because nothing visible to click on
+		await page.locator( 'a.remove-coupon' ).dispatchEvent( 'click' ); // have to use dispatchEvent because nothing visible to click on
 
 		// make sure the coupon was removed
-		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).not.toBeVisible();
 		await expect(
-			page.locator( '.wc-order-totals td.label >> nth=1' )
-		).toContainText( 'Order Total' );
+			page.locator( '.wc_coupon_list li', { hasText: couponCode } )
+		).not.toBeVisible();
 		await expect(
-			page.locator( '.wc-order-totals td.total >> nth=1' )
-		).toContainText( productPrice );
+			page.getByRole('cell', { name: `$${ productPrice }` }).nth(1)
+		).toBeVisible();
 	} );
 } );

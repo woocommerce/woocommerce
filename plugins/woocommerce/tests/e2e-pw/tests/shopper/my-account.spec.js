@@ -45,7 +45,7 @@ test.describe( 'My account page', () => {
 			page.locator(
 				'.woocommerce-MyAccount-navigation-link--customer-logout'
 			)
-		).toContainText( 'Logout' );
+		).toContainText( 'Log out' );
 	} );
 
 	for ( let i = 0; i < pages.length; i++ ) {

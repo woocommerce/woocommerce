@@ -180,18 +180,22 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 	 * Test for output_sections.
 	 */
 	public function test_output_sections() {
+		global $current_section;
 		$sut = new WC_Settings_Example();
 
-		$expected = <<<'HTML'
+		$domain = WP_TESTS_DOMAIN;
+
+		$expected = <<<HTML
 			<ul class="subsubsub">
 				<li>
-					<a href="http://example.org/wp-admin/admin.php?page=wc-settings&tab=example&section=" class="">General</a> | </li>
+					<a href="http://$domain/wp-admin/admin.php?page=wc-settings&tab=example&section=" class="">General</a> | </li>
 				<li>
-					<a href="http://example.org/wp-admin/admin.php?page=wc-settings&tab=example&section=new_section" class="">New Section</a></li>
+					<a href="http://$domain/wp-admin/admin.php?page=wc-settings&tab=example&section=new_section" class="">New Section</a></li>
 			</ul>
 			<br class="clear" />
 HTML;
 
+		$current_section = 'foobar';
 		$this->assertOutputsHTML( $expected, array( $sut, 'output_sections' ) );
 	}
 

@@ -129,7 +129,7 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_truncated_key( $key ) {
-		return '<code>&hellip;' . esc_html( $key['truncated_key'] ) . '</code>';
+		return '<code>***' . esc_html( $key['truncated_key'] ) . '</code>';
 	}
 
 	/**

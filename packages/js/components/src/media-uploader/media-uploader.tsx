@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, DropZone, FormFileUpload } from '@wordpress/components';
-import { createElement } from 'react';
+import { Fragment, createElement } from 'react';
 import {
 	MediaItem,
 	MediaUpload,
@@ -24,7 +24,8 @@ type MediaUploaderProps = {
 	MediaUploadComponent?: < T extends boolean = false >(
 		props: MediaUpload.Props< T >
 	) => JSX.Element;
-	multipleSelect?: boolean;
+	multipleSelect?: boolean | string;
+	value?: number | number[];
 	onSelect?: (
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		value: ( { id: number } & { [ k: string ]: any } ) | MediaItem[]
@@ -34,9 +35,11 @@ type MediaUploaderProps = {
 		message: string;
 		file: File;
 	} ) => void;
-	onUpload?: ( files: MediaItem[] ) => void;
-	onFileUploadChange?: ( files: MediaItem[] ) => void;
+	onMediaGalleryOpen?: () => void;
+	onUpload?: ( files: MediaItem | MediaItem[] ) => void;
+	onFileUploadChange?: ( files: MediaItem | MediaItem[] ) => void;
 	uploadMedia?: ( options: UploadMediaOptions ) => Promise< void >;
+	additionalData?: Record< string, unknown >;
 };
 
 export const MediaUploader = ( {
@@ -47,25 +50,31 @@ export const MediaUploader = ( {
 	maxUploadFileSize = 10000000,
 	MediaUploadComponent = MediaUpload,
 	multipleSelect = false,
+	value,
 	onError = () => null,
 	onFileUploadChange = () => null,
+	onMediaGalleryOpen = () => null,
 	onUpload = () => null,
 	onSelect = () => null,
 	uploadMedia = wpUploadMedia,
+	additionalData,
 }: MediaUploaderProps ) => {
-	const getFormFileUploadAcceptedFiles = () =>
-		allowedMediaTypes.map( ( type ) => `${ type }/*` );
+	const multiple = Boolean( multipleSelect );
 
 	return (
 		<FormFileUpload
-			accept={ getFormFileUploadAcceptedFiles().toString() }
-			multiple={ true }
+			accept={ allowedMediaTypes.toString() }
+			multiple={ multiple }
 			onChange={ ( { currentTarget } ) => {
 				uploadMedia( {
+					allowedTypes: allowedMediaTypes,
 					filesList: currentTarget.files as FileList,
-					onError,
-					onFileChange: onFileUploadChange,
 					maxUploadFileSize,
+					onError,
+					onFileChange( files ) {
+						onFileUploadChange( multiple ? files : files[ 0 ] );
+					},
+					additionalData,
 				} );
 			} }
 			render={ ( { openFileDialog } ) => (
@@ -92,24 +101,42 @@ export const MediaUploader = ( {
 						</div>
 
 						<MediaUploadComponent
+							value={ value }
 							onSelect={ onSelect }
 							allowedTypes={ allowedMediaTypes }
+							// @ts-expect-error - TODO multiple also accepts string.
 							multiple={ multipleSelect }
-							render={ ( { open } ) => (
-								<Button variant="secondary" onClick={ open }>
-									{ buttonText }
-								</Button>
-							) }
+							render={ ( { open } ) =>
+								buttonText ? (
+									<Button
+										variant="secondary"
+										onClick={ () => {
+											onMediaGalleryOpen();
+											open();
+										} }
+									>
+										{ buttonText }
+									</Button>
+								) : (
+									<Fragment />
+								)
+							}
 						/>
 
 						{ hasDropZone && (
 							<DropZone
-								onFilesDrop={ ( files ) =>
+								onFilesDrop={ ( droppedFiles ) =>
 									uploadMedia( {
-										filesList: files,
-										onError,
-										onFileChange: onUpload,
+										allowedTypes: allowedMediaTypes,
+										filesList: droppedFiles,
 										maxUploadFileSize,
+										onError,
+										onFileChange( files ) {
+											onUpload(
+												multiple ? files : files[ 0 ]
+											);
+										},
+										additionalData,
 									} )
 								}
 							/>

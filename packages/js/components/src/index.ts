@@ -27,7 +27,7 @@ export { MediaUploader } from './media-uploader';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
 export { default as MenuTitle } from './ellipsis-menu/menu-title';
 export { default as OrderStatus } from './order-status';
-export { default as Pagination } from './pagination';
+export * from './pagination';
 export { default as Pill } from './pill';
 export { default as Plugins } from './plugins';
 export { default as ProductImage } from './product-image';
@@ -84,7 +84,7 @@ export { DynamicForm } from './dynamic-form';
 export { default as TourKit } from './tour-kit';
 export * as TourKitTypes from './tour-kit/types';
 export { CollapsibleContent } from './collapsible-content';
-export { createOrderedChildren, sortFillsByOrder } from './utils';
+export { createOrderedChildren, sortFillsByOrder, escapeHTML } from './utils';
 export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-product-field-item';
 export { WooProductSectionItem as __experimentalWooProductSectionItem } from './woo-product-section-item';
 export { WooProductTabItem as __experimentalWooProductTabItem } from './woo-product-tab-item';
@@ -99,8 +99,12 @@ export {
 	TreeControl as __experimentalTreeControl,
 	Item as TreeItemType,
 } from './experimental-tree-control';
-export { SelectTree as __experimentalSelectTreeControl } from './experimental-select-tree-control';
+export {
+	SelectTree as __experimentalSelectTreeControl,
+	SelectTreeMenuSlot as __experimentalSelectTreeMenuSlot,
+} from './experimental-select-tree-control';
 export { default as TreeSelectControl } from './tree-select-control';
+export { default as PhoneNumberInput } from './phone-number-input';
 
 // Exports below can be removed once the @woocommerce/product-editor package is released.
 export {
@@ -108,3 +112,4 @@ export {
 	ProductFieldSection as __experimentalProductFieldSection,
 } from './product-section-layout';
 export { DisplayState } from './display-state';
+export { ProgressBar } from './progress-bar';

@@ -1,0 +1,49 @@
+.woocommerce-cys-choice-container {
+	display: flex;
+	flex-direction: column;
+	padding: 16px;
+	border: 1px solid $gray-200;
+	border-radius: 2px;
+	width: 100%;
+	cursor: pointer;
+
+	&[data-selected] {
+		border-radius: 2px;
+		border-color: transparent;
+		box-shadow: 0 0 0 2px var(--wp-admin-theme-color);
+	}
+
+	&:focus-visible {
+		border: 2px solid  var(--wp-admin-theme-color);
+		padding: $gap-large $gap;
+	}
+}
+
+.woocommerce-cys-choice {
+	display: flex;
+	flex-direction: column;
+
+	.woocommerce-cys-choice-input {
+		opacity: 0;
+		position: absolute;
+	}
+
+	label {
+		color: #1e1e1e;
+		font-size: 16px;
+		font-style: normal;
+		font-weight: 500;
+		line-height: 20px; /* 125% */
+		letter-spacing: -0.24px;
+		margin-bottom: 8px;
+	}
+
+	p {
+		margin: 0;
+		color: #757575;
+		font-size: 13px;
+		font-style: normal;
+		font-weight: 400;
+		line-height: 16px; /* 123.077% */
+	}
+}

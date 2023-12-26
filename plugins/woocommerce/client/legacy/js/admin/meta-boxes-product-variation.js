@@ -47,16 +47,18 @@ jQuery( function ( $ ) {
 				'woocommerce_variations_loaded',
 				this.variations_loaded
 			);
-			$( document.body )
-				.on( 'woocommerce_variations_added', this.variation_added )
-				.on(
-					'keyup',
-					'.wc_input_variations_price',
-					this.maybe_enable_button_to_add_price_to_variations
-				);
+			$( document.body ).on(
+				'keyup',
+				'.wc_input_variations_price',
+				this.maybe_enable_button_to_add_price_to_variations
+			);
 		},
 
-		create_variations: function () {
+		create_variations: function ( event ) {
+			if ( $( this ).hasClass( 'disabled' ) ) {
+				event.preventDefault();
+				return;
+			}
 			var new_attribute_data = $(
 				'.woocommerce_variation_new_attribute_data'
 			);
@@ -322,21 +324,6 @@ jQuery( function ( $ ) {
 			} );
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
-		},
-
-		/**
-		 * Run actions when added a variation
-		 *
-		 * @param {Object} event
-		 * @param {Int} qty
-		 */
-		variation_added: function ( event, qty ) {
-			if ( 1 === qty ) {
-				wc_meta_boxes_product_variations_actions.variations_loaded(
-					null,
-					true
-				);
-			}
 		},
 
 		/**
@@ -655,8 +642,8 @@ jQuery( function ( $ ) {
 			} );
 
 			$( '.wc-metaboxes-wrapper' ).on(
-				'click',
-				'a.do_variation_action',
+				'change',
+				'#field_to_edit',
 				this.do_variation_action
 			);
 
@@ -993,11 +980,17 @@ jQuery( function ( $ ) {
 					$(
 						'button.cancel-variation-changes, button.save-variation-changes'
 					).prop( 'disabled', false );
-					$( '#variable_product_options' ).trigger(
-						'woocommerce_variations_added',
-						1
+
+					wc_meta_boxes_product_variations_pagenav.update_single_quantity();
+					wc_meta_boxes_product_variations_actions.variations_loaded(
+						null,
+						true
 					);
+
 					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
+
+					$( '#variable_product_options' ).trigger( 'woocommerce_variations_added', 1 );
+
 					wc_meta_boxes_product_variations_ajax.unblock();
 				}
 			);
@@ -1070,6 +1063,12 @@ jQuery( function ( $ ) {
 								page = total_pages;
 							}
 
+							if ( total_pages === 0 ) {
+								$( '.generate_variations' ).text(
+									'Generate variations'
+								);
+							}
+
 							wc_meta_boxes_product_variations_pagenav.go_to_page(
 								page,
 								-1
@@ -1079,6 +1078,10 @@ jQuery( function ( $ ) {
 				} else {
 					wc_meta_boxes_product_variations_ajax.unblock();
 				}
+
+				window.wcTracks.recordEvent( 'product_variations_buttons', {
+					action: 'remove_variation',
+				} );
 			}
 
 			return false;
@@ -1110,25 +1113,20 @@ jQuery( function ( $ ) {
 					woocommerce_admin_meta_boxes_variations.ajax_url,
 					data,
 					function ( response ) {
-						var count = parseInt( response, 10 );
+						const count = parseInt( response, 10 ) || 0;
 
-						if ( 1 === count ) {
-							window.alert(
-								count +
-									' ' +
-									woocommerce_admin_meta_boxes_variations.i18n_variation_added
-							);
-						} else if ( 0 === count || count > 1 ) {
-							window.alert(
-								count +
-									' ' +
-									woocommerce_admin_meta_boxes_variations.i18n_variations_added
-							);
-						} else {
-							window.alert(
-								woocommerce_admin_meta_boxes_variations.i18n_no_variations_added
-							);
-						}
+						const message =
+							count === 1
+								? woocommerce_admin_meta_boxes_variations.i18n_variation_added
+								: woocommerce_admin_meta_boxes_variations.i18n_variations_added.replace(
+										'%qty%',
+										count
+								  );
+
+						window.wp.data.dispatch( 'core/notices' ).createSuccessNotice(
+							message,
+							{ icon: '🎉' }
+						);
 
 						wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
 
@@ -1137,15 +1135,18 @@ jQuery( function ( $ ) {
 								1,
 								count
 							);
-							$( '#variable_product_options' ).trigger(
-								'woocommerce_variations_added',
-								count
+							$( '.generate_variations' ).text(
+								'Regenerate variations'
 							);
 						} else {
 							wc_meta_boxes_product_variations_ajax.unblock();
 						}
 					}
 				);
+
+				window.wcTracks.recordEvent( 'product_variations_buttons', {
+					action: 'generate_variations',
+				} );
 			}
 
 			return false;
@@ -1195,7 +1196,7 @@ jQuery( function ( $ ) {
 		 * Actions
 		 */
 		do_variation_action: function () {
-			var do_variation_action = $( 'select.variation_actions' ).val(),
+			var do_variation_action = $( this ).val(),
 				data = {},
 				changes = 0,
 				value;
@@ -1307,6 +1308,7 @@ jQuery( function ( $ ) {
 				$( '#variable_product_options' )
 					.find( '.variation-needs-update' )
 					.removeClass( 'variation-needs-update' );
+				$( '.generate_variations' ).text( 'Generate variations' );
 			} else {
 				wc_meta_boxes_product_variations_ajax.check_for_changes();
 			}
@@ -1342,13 +1344,15 @@ jQuery( function ( $ ) {
 				'.woocommerce_variations'
 			);
 			if ( parseInt( wrapper.attr( 'data-total' ) ) > 0 ) {
-				$( '.add-variation-container' ).addClass( 'hidden' );
+				$( '#variable_product_options_inner' ).removeClass(
+					'no-variations'
+				);
 				$( '#field_to_edit' ).removeClass( 'hidden' );
-				$( 'a.do_variation_action' ).removeClass( 'hidden' );
 			} else {
-				$( '.add-variation-container' ).removeClass( 'hidden' );
+				$( '#variable_product_options_inner' ).addClass(
+					'no-variations'
+				);
 				$( '#field_to_edit' ).addClass( 'hidden' );
-				$( 'a.do_variation_action' ).addClass( 'hidden' );
 			}
 		},
 
@@ -1376,10 +1380,6 @@ jQuery( function ( $ ) {
 		 */
 		init: function () {
 			$( document.body )
-				.on(
-					'woocommerce_variations_added',
-					this.update_single_quantity
-				)
 				.on(
 					'change',
 					'.variations-pagenav .page-selector',
@@ -1416,46 +1416,35 @@ jQuery( function ( $ ) {
 			// Set the new total of variations
 			wrapper.attr( 'data-total', total );
 
-			if ( 1 === total ) {
-				displaying_num.text(
-					woocommerce_admin_meta_boxes_variations.i18n_variation_count_single.replace(
-						'%qty%',
-						total
-					)
-				);
-			} else {
-				displaying_num.text(
-					woocommerce_admin_meta_boxes_variations.i18n_variation_count_plural.replace(
-						'%qty%',
-						total
-					)
-				);
-			}
+			const message =
+				total === 1
+					? woocommerce_admin_meta_boxes_variations.i18n_variation_count_single
+					: woocommerce_admin_meta_boxes_variations.i18n_variation_count_plural.replace(
+							'%qty%',
+							total
+					  );
+
+			displaying_num.text( message );
 
 			return total;
 		},
 
 		/**
 		 * Update variations quantity when add a new variation
-		 *
-		 * @param {Object} event
-		 * @param {Int} qty
 		 */
-		update_single_quantity: function ( event, qty ) {
-			if ( 1 === qty ) {
-				var page_nav = $( '.variations-pagenav' );
+		update_single_quantity: function () {
+			wc_meta_boxes_product_variations_pagenav.update_variations_count(
+				1
+			);
 
-				wc_meta_boxes_product_variations_pagenav.update_variations_count(
-					qty
-				);
+			const page_nav = $( '.variations-pagenav' );
 
-				if ( page_nav.is( ':hidden' ) ) {
-					$( 'option, optgroup', '.variation_actions' ).show();
-					$( '.variation_actions' ).val( 'delete_all' );
-					$( '#variable_product_options' ).find( '.toolbar' ).show();
-					page_nav.show();
-					$( '.pagination-links', page_nav ).hide();
-				}
+			if ( page_nav.is( ':hidden' ) ) {
+				$( 'option, optgroup', '.variation_actions' ).show();
+				$( '.variation_actions' ).val( 'bulk_actions' );
+				$( '#variable_product_options' ).find( '.toolbar' ).show();
+				page_nav.show();
+				$( '.pagination-links', page_nav ).hide();
 			}
 		},
 
@@ -1498,13 +1487,13 @@ jQuery( function ( $ ) {
 				toolbar.not( '.toolbar-top, .toolbar-buttons' ).hide();
 				page_nav.hide();
 				$( 'option, optgroup', variation_action ).hide();
-				$( '.variation_actions' ).val( 'delete_all' );
+				$( '.variation_actions' ).val( 'bulk_actions' );
 				$( 'option[data-global="true"]', variation_action ).show();
 			} else {
 				toolbar.show();
 				page_nav.show();
 				$( 'option, optgroup', variation_action ).show();
-				$( '.variation_actions' ).val( 'delete_all' );
+				$( '.variation_actions' ).val( 'bulk_actions' );
 
 				// Show/hide links
 				if ( 1 === total_pages ) {

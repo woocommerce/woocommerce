@@ -1,188 +1,281 @@
-const { test, expect } = require( '@playwright/test' );
+const { test, expect, Page, Locator } = require( '@playwright/test' );
+const { admin } = require( '../../test-data/data' );
+
+const EXPECTED_SECTION_HEADERS = [ 'Performance', 'Charts', 'Leaderboards' ];
+
+let /**
+	 * @type {number}
+	 */
+	userId,
+	/**
+	 * @type {Locator}
+	 */
+	headings_sections,
+	/**
+	 * @type {Locator}
+	 */
+	heading_performance,
+	/**
+	 * @type {Locator}
+	 */
+	buttons_ellipsis,
+	/**
+	 * @type {Locator}
+	 */ menuitem_moveUp,
+	/**
+	 * @type {Locator}
+	 */ menuitem_moveDown,
+	/**
+	 * @type {Page}
+	 */
+	page;
+
+const base64String = Buffer.from(
+	`${ admin.username }:${ admin.password }`
+).toString( 'base64' );
+
+const headers = {
+	Authorization: `Basic ${ base64String }`,
+	cookie: '',
+};
+
+const hidePerformanceSection = async () => {
+	const response =
+		await test.step( `Send POST request to hide Performance section`, async () => {
+			const request = page.request;
+			const url = `/wp-json/wp/v2/users/${ userId }`;
+			const params = { _locale: 'user' };
+			const dashboard_sections = JSON.stringify( [
+				{ key: 'store-performance', isVisible: false },
+			] );
+			const data = {
+				id: userId,
+				woocommerce_meta: {
+					dashboard_sections,
+				},
+			};
+
+			const response = await request.post( url, {
+				data,
+				params,
+				headers,
+			} );
+
+			return response;
+		} );
+
+	await test.step( `Assert response status is OK`, async () => {
+		expect( response.ok() ).toBeTruthy();
+	} );
+
+	await test.step( `Inspect the response payload to verify that Performance section was successfully hidden`, async () => {
+		const { woocommerce_meta } = await response.json();
+		const { dashboard_sections } = woocommerce_meta;
+		const sections = JSON.parse( dashboard_sections );
+		const performanceSection = sections.find(
+			( { key } ) => key === 'store-performance'
+		);
+		expect( performanceSection.isVisible ).toBeFalsy();
+	} );
+};
+
+const resetSections = async () => {
+	const response =
+		await test.step( `Send POST request to reset all sections`, async () => {
+			const request = page.request;
+			const url = `/wp-json/wp/v2/users/${ userId }`;
+			const params = { _locale: 'user' };
+			const data = {
+				id: userId,
+				woocommerce_meta: {
+					dashboard_sections: '',
+				},
+			};
+
+			const response = await request.post( url, {
+				data,
+				params,
+				headers,
+			} );
+
+			return response;
+		} );
+
+	await test.step( `Assert response status is OK`, async () => {
+		expect( response.ok() ).toBeTruthy();
+	} );
+
+	await test.step( `Verify that sections were reset`, async () => {
+		const { woocommerce_meta } = await response.json();
+		const { dashboard_sections } = woocommerce_meta;
+
+		expect( dashboard_sections ).toHaveLength( 0 );
+	} );
+};
 
 test.describe( 'Analytics pages', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.afterEach( async ( { page } ) => {
-		// do some cleanup after each test to make sure things are where they should be
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview',
-			{ waitForLoadState: 'networkidle' }
-		);
+	test.beforeAll( async ( { browser } ) => {
+		page = await browser.newPage();
 
-		// Grab all of the section headings
-		const sections = await page.$$(
-			'h2.woocommerce-section-header__title'
-		);
-		if ( sections.length < 3 ) {
-			// performance section is hidden
-			await page.click( '//button[@title="Add more sections"]' );
-			await page.click( '//button[@title="Add Performance section"]' );
-			await page.waitForSelector( 'h2:has-text("Performance")', {
-				state: 'visible',
+		await test.step( `Send GET request to get the current user id`, async () => {
+			const request = page.request;
+			const data = {
+				_fields: 'id',
+			};
+			const response = await request.get( '/wp-json/wp/v2/users/me', {
+				data,
+				headers,
 			} );
-			await page.waitForLoadState( 'networkidle' );
-		}
-		const lastSection = await page.textContent(
-			'h2.woocommerce-section-header__title >> nth=2'
-		);
-		if ( lastSection === 'Performance' ) {
-			// sections are in the wrong order
-			await page.click(
-				'//button[@title="Choose which analytics to display and the section name"]'
-			);
-			await page.click( 'text=Move up' );
-			await page.click(
-				'//button[@title="Choose which analytics to display and the section name"]'
-			);
-			await page.click( 'text=Move up' );
+			const { id } = await response.json();
 
-			// wait for the changes to be saved
-			await page.waitForResponse(
-				( response ) =>
-					response.url().includes( '/users/' ) &&
-					response.status() === 200
-			);
-		}
+			userId = id;
+		} );
+
+		await resetSections();
+
+		await test.step( `Initialize locators`, async () => {
+			const pattern = new RegExp( EXPECTED_SECTION_HEADERS.join( '|' ) );
+
+			headings_sections = page.getByRole( 'heading', {
+				name: pattern,
+			} );
+
+			heading_performance = page.getByRole( 'heading', {
+				name: 'Performance',
+			} );
+
+			buttons_ellipsis = page.getByRole( 'button', {
+				name: 'Choose which',
+			} );
+
+			menuitem_moveUp = page.getByRole( 'menuitem', {
+				name: 'Move up',
+			} );
+
+			menuitem_moveDown = page.getByRole( 'menuitem', {
+				name: 'Move down',
+			} );
+		} );
 	} );
 
-	test( 'a user should see 3 sections by default - Performance, Charts, and Leaderboards', async ( {
-		page,
-	} ) => {
-		// Create an array of the sections we're expecting to find.
-		const arrExpectedSections = [ 'Charts', 'Leaderboards', 'Performance' ];
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview',
-			{ waitForLoadState: 'networkidle' }
-		);
-
-		for ( const expectedSection of arrExpectedSections ) {
-			await test.step(
-				`Assert that the "${ expectedSection }" section is visible`,
-				async () => {
-					await expect(
-						page.locator( 'h2.woocommerce-section-header__title', {
-							hasText: expectedSection,
-						} )
-					).toBeVisible();
-				}
+	test.beforeEach( async () => {
+		await test.step( `Go to Analytics > Overview`, async () => {
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 			);
+		} );
+	} );
+
+	test.afterEach( async () => {
+		await resetSections();
+	} );
+
+	test.afterAll( async () => {
+		await page.close();
+	} );
+
+	test( 'a user should see 3 sections by default - Performance, Charts, and Leaderboards', async () => {
+		for ( const expectedSection of EXPECTED_SECTION_HEADERS ) {
+			await test.step( `Assert that the "${ expectedSection }" section is visible`, async () => {
+				await expect(
+					headings_sections.filter( { hasText: expectedSection } )
+				).toBeVisible();
+			} );
 		}
 	} );
 
 	test.describe( 'moving sections', () => {
-		test.use( { storageState: process.env.ADMINSTATE } );
+		test( 'should not display move up for the top, or move down for the bottom section', async () => {
+			await test.step( `Check the top section`, async () => {
+				await buttons_ellipsis.first().click();
+				await expect( menuitem_moveUp ).not.toBeVisible();
+				await expect( menuitem_moveDown ).toBeVisible();
+				await page.keyboard.press( 'Escape' );
+			} );
 
-		test( 'should not display move up for the top, or move down for the bottom section', async ( {
-			page,
-		} ) => {
-			await page.goto(
-				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
-			);
-			// check the top section
-			await page
-				.locator( 'button.woocommerce-ellipsis-menu__toggle' )
-				.first()
-				.click();
-			await expect( page.locator( 'text=Move up' ) ).not.toBeVisible();
-			await expect( page.locator( 'text=Move down' ) ).toBeVisible();
-			await page.keyboard.press( 'Escape' );
-
-			// check the bottom section
-			await page
-				.locator( 'button.woocommerce-ellipsis-menu__toggle' )
-				.last()
-				.click();
-			await expect( page.locator( 'text=Move down' ) ).not.toBeVisible();
-			await expect( page.locator( 'text=Move up' ) ).toBeVisible();
-			await page.keyboard.press( 'Escape' );
+			await test.step( `Check the bottom section`, async () => {
+				await buttons_ellipsis.last().click();
+				await expect( menuitem_moveDown ).not.toBeVisible();
+				await expect( menuitem_moveUp ).toBeVisible();
+				await page.keyboard.press( 'Escape' );
+			} );
 		} );
 
-		test( 'should allow a user to move a section down', async ( {
-			page,
-		} ) => {
-			await page.goto(
-				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
-			);
-			const firstSection = await page
-				.locator( 'h2.woocommerce-section-header__title >> nth=0' )
-				.innerText();
-			const secondSection = await page
-				.locator( 'h2.woocommerce-section-header__title >> nth=1' )
-				.innerText();
+		test( 'should allow a user to move a section down', async () => {
+			const firstSection = await headings_sections.first().innerText();
+			const secondSection = await headings_sections.nth( 1 ).innerText();
 
-			await page.click(
-				'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=0'
-			);
-			await page.click( 'text=Move down' );
+			await test.step( `Move first section down`, async () => {
+				await buttons_ellipsis.first().click();
+				await menuitem_moveDown.click();
+			} );
 
-			// second section becomes first section, first becomes second
-			await expect(
-				page.locator( 'h2.woocommerce-section-header__title >> nth=0' )
-			).toHaveText( secondSection );
-			await expect(
-				page.locator( 'h2.woocommerce-section-header__title >> nth=1' )
-			).toHaveText( firstSection );
+			await test.step( `Expect the second section to become first, and first becomes second.`, async () => {
+				await expect( headings_sections.first() ).toHaveText(
+					secondSection
+				);
+
+				await expect( headings_sections.nth( 1 ) ).toHaveText(
+					firstSection
+				);
+			} );
 		} );
 
-		test( 'should allow a user to move a section up', async ( {
-			page,
-		} ) => {
-			await page.goto(
-				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
-			);
-			const firstSection = await page
-				.locator( 'h2.woocommerce-section-header__title >> nth=0' )
-				.innerText();
-			const secondSection = await page
-				.locator( 'h2.woocommerce-section-header__title >> nth=1' )
-				.innerText();
+		test( 'should allow a user to move a section up', async () => {
+			const firstSection = await headings_sections.first().innerText();
+			const secondSection = await headings_sections.nth( 1 ).innerText();
 
-			await page.click(
-				'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=1'
-			);
-			await page.click( 'text=Move up' );
+			await test.step( `Move second section up`, async () => {
+				await buttons_ellipsis.nth( 1 ).click();
+				await menuitem_moveUp.click();
+			} );
 
-			// second section becomes first section, first becomes second
-			await expect(
-				page.locator( 'h2.woocommerce-section-header__title >> nth=0' )
-			).toHaveText( secondSection );
-			await expect(
-				page.locator( 'h2.woocommerce-section-header__title >> nth=1' )
-			).toHaveText( firstSection );
+			await test.step( `Expect second section becomes first section, first becomes second`, async () => {
+				await expect( headings_sections.first() ).toHaveText(
+					secondSection
+				);
+				await expect( headings_sections.nth( 1 ) ).toHaveText(
+					firstSection
+				);
+			} );
 		} );
 	} );
 
-	test( 'should allow a user to remove a section', async ( { page } ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
-		);
-		// clicks the first button to the right of the Performance heading
-		await page.click( 'button:right-of(:text("Performance")) >> nth=0' );
-		await page.click( 'text=Remove section' );
-		// Grab all of the section headings
-		await page.waitForLoadState( 'networkidle' );
-		const sections = await page.$$(
-			'h2.woocommerce-section-header__title'
-		);
-		await expect( sections.length ).toEqual( 2 );
+	test( 'should allow a user to remove a section', async () => {
+		await test.step( `Remove the Performance section`, async () => {
+			await page
+				.getByRole( 'button', {
+					name: 'Choose which analytics to display and the section name',
+				} )
+				.click();
+			await page
+				.getByRole( 'menuitem', { name: 'Remove section' } )
+				.click();
+			await page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/users' ) && response.ok()
+			);
+		} );
+
+		await test.step( `Expect the Performance section to be hidden`, async () => {
+			await expect( headings_sections ).toHaveCount( 2 );
+			await expect( heading_performance ).not.toBeVisible();
+		} );
 	} );
 
-	test( 'should allow a user to add a section back in', async ( {
-		page,
-	} ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
-		);
-		// button only shows when not all sections visible, so remove a section
-		await page.click( 'button:right-of(:text("Performance")) >> nth=0' );
-		await page.click( 'text=Remove section' );
+	test( 'should allow a user to add a section back in', async () => {
+		await hidePerformanceSection( page );
+		await page.reload();
 
-		// add section
-		await page.click( '//button[@title="Add more sections"]' );
-		await page.click( '//button[@title="Add Performance section"]' );
-		await expect(
-			page.locator( 'h2.woocommerce-section-header__title >> nth=2' )
-		).toContainText( 'Performance' );
+		await test.step( `Add the Performance section back in.`, async () => {
+			await page.getByTitle( 'Add more sections' ).click();
+			await page.getByTitle( 'Add Performance section' ).click();
+		} );
+
+		await test.step( `Expect the Performance section to be added back.`, async () => {
+			await expect( heading_performance ).toBeVisible();
+		} );
 	} );
 } );

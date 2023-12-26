@@ -16,12 +16,12 @@ Our most critical targets are:
 
 * WooCommerce core (this repository)
 * WooCommerce [Blocks](https://wordpress.org/plugins/woo-gutenberg-products-block/) and [Admin](https://wordpress.org/plugins/woocommerce-admin/) packages and plugins
-* WooCommerce.com -- the primary marketplace and marketing site, and all of it subdomains, e.g. [developer.woocommerce.com](https://developer.woocommerce.com/)
-* wordpress.com -- hosted WooCommerce for Business and eCommerce offering on WordPress.com.
+* Woo.com -- the primary marketplace and marketing site, and all of it subdomains, e.g. [developer.woo.com](https://developer.woo.com/)
+* WordPress.com -- hosted WooCommerce for Business and eCommerce offering on WordPress.com.
 
 For more targets, see the `In Scope` section on [HackerOne](https://hackerone.com/automattic).
 
-_Please note that the **WordPress software is a separate entity** from Automattic. Please report vulnerabilities for WordPress through [the WordPress Foundation's HackerOne page](https://hackerone.com/wordpress)._
+Please note that the **WordPress software is a separate entity** from Automattic. Please report vulnerabilities for WordPress through [the WordPress Foundation's HackerOne page](https://hackerone.com/wordpress).
 
 ## Guidelines
 
@@ -31,7 +31,7 @@ We're committed to working with security researchers to resolve the vulnerabilit
 *   Pen-testing Production:
     *   Please **setup a local environment** instead whenever possible. Most of our code is open source (see above).
     *   If that's not possible, **limit any data access/modification** to the bare minimum necessary to reproduce a PoC.
-    *   **_Don't_ automate form submissions!** That's very annoying for us, because it adds extra work for the volunteers who manage those systems, and reduces the signal/noise ratio in our communication channels.
+    *   **Don't automate form submissions!** That's very annoying for us, because it adds extra work for the volunteers who manage those systems, and reduces the signal/noise ratio in our communication channels.
     *   To be eligible for a bounty, please follow all of these guidelines.
 *   Be Patient - Give us a reasonable time to correct the issue before you disclose the vulnerability.
 

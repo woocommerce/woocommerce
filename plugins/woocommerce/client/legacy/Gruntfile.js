@@ -6,11 +6,11 @@ module.exports = function ( grunt ) {
 		// Setting folder templates.
 		dirs: {
 			css: 'css',
-			cssDest: '../../assets/css',
+			cssDest: 'build/css',
 			fonts: 'assets/fonts',
 			images: 'assets/images',
 			js: 'js',
-			jsDest: '../../assets/js',
+			jsDest: 'build/js',
 			php: 'includes',
 		},
 
@@ -229,10 +229,20 @@ module.exports = function ( grunt ) {
 				],
 			},
 			js: {
-				cwd: '<%= dirs.js %>/',
-				expand: true,
-				src: '**',
-				dest: '<%= dirs.jsDest %>/',
+				files: [
+					{
+						cwd: '<%= dirs.js %>/',
+						expand: true,
+						src: '**',
+						dest: '<%= dirs.jsDest %>/',
+					},
+					{
+						expand: true,
+						flatten: true,
+						src: ['node_modules/sourcebuster/dist/sourcebuster*','node_modules/sourcebuster/LICENSE'],
+						dest: '<%= dirs.jsDest %>/sourcebuster/',
+					}
+				],
 			},
 		},
 	} );
@@ -243,7 +253,7 @@ module.exports = function ( grunt ) {
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
-	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
+	grunt.loadNpmTasks( 'grunt-contrib-uglify-es' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );

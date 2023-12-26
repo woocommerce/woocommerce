@@ -4,7 +4,6 @@
 import { AUTO_DRAFT_NAME } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 import { useDispatch, resolveSelect } from '@wordpress/data';
-
 import { useEffect, useState } from '@wordpress/element';
 
 export function useProductEntityRecord(

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
-import { Logger } from 'cli-core/src/logger';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 import { join } from 'path';
 
 /**
@@ -11,14 +11,12 @@ import { join } from 'path';
 import {
 	scanChangesForDB,
 	scanChangesForHooks,
-	scanChangesForSchema,
 	scanChangesForTemplates,
 	ScanType,
 } from '../../lib/scan-changes';
 import {
 	printDatabaseUpdates,
 	printHookResults,
-	printSchemaChange,
 	printTemplateResults,
 } from '../../print';
 
@@ -33,7 +31,7 @@ const program = new Command()
 	.command( 'scan' )
 	.argument(
 		'<type>',
-		'Type of change to scan for. Options: templates, hooks, database, schema.'
+		'Type of change to scan for. Options: templates, hooks, database.'
 	)
 	.argument(
 		'<compare>',
@@ -46,7 +44,7 @@ const program = new Command()
 	)
 	.option(
 		'-s, --since <sinceVersion>',
-		'Specify the version used to determine which changes are included (version listed in @since code doc). Only needed for hook, template, schema changes.'
+		'Specify the version used to determine which changes are included (version listed in @since code doc). Only needed for hook and template changes.'
 	)
 	.option(
 		'-src, --source <source>',
@@ -62,12 +60,10 @@ const program = new Command()
 		const { since: sinceVersion, source, outputStyle } = options;
 
 		if (
-			( scanType === 'hooks' ||
-				scanType === 'templates' ||
-				scanType === 'schema' ) &&
+			( scanType === 'hooks' || scanType === 'templates' ) &&
 			! sinceVersion
 		) {
-			throw new Error(
+			Logger.error(
 				`To scan for ${ scanType } changes you must provide the since argument.`
 			);
 		}
@@ -128,26 +124,9 @@ const program = new Command()
 					printEmptyNotice( 'database' );
 				}
 				break;
-			case 'schema':
-				const schemaChanges = await scanChangesForSchema(
-					compare,
-					base,
-					source
-				);
-				if ( schemaChanges && schemaChanges.length && sinceVersion ) {
-					printSchemaChange(
-						schemaChanges,
-						sinceVersion,
-						'cli',
-						Logger.notice
-					);
-				} else {
-					printEmptyNotice( 'schema' );
-				}
-				break;
 			default:
-				throw new Error(
-					'Invalid scan type. Options: templates, hooks, database, schema.'
+				Logger.error(
+					`Invalid scan type: ${ scanType } Options: templates, hooks, database.`
 				);
 		}
 	} );

@@ -1,12 +1,12 @@
 {
 	"name": "woocommerce/woocommerce-beta-tester",
 	"description": "Run the beta versions of WooCommerce.",
-	"homepage": "https://woocommerce.com/",
+	"homepage": "https://woo.com/",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
-	"version": "2.2.0",
+	"version": "2.3.0",
 	"require": {
 		"composer/installers": "~1.7"
 	},

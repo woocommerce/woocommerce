@@ -37,6 +37,12 @@ describe( 'EditProductLinkModal', () => {
 				}
 				onCancel={ () => {} }
 				onSaved={ () => {} }
+				saveHandler={ () =>
+					new Promise( () => ( {
+						slug: 'test-slug',
+						permalink: 'http://test-link',
+					} ) )
+				}
 			/>
 		);
 		expect(
@@ -57,6 +63,12 @@ describe( 'EditProductLinkModal', () => {
 				}
 				onCancel={ () => {} }
 				onSaved={ () => {} }
+				saveHandler={ () =>
+					new Promise( () => ( {
+						slug: 'test-slug',
+						permalink: 'http://test-link',
+					} ) )
+				}
 			/>
 		);
 		userEvent.type(
@@ -82,6 +94,12 @@ describe( 'EditProductLinkModal', () => {
 				}
 				onCancel={ () => {} }
 				onSaved={ () => {} }
+				saveHandler={ () =>
+					new Promise( () => ( {
+						slug: 'test-slug',
+						permalink: 'http://test-link',
+					} ) )
+				}
 			/>
 		);
 		userEvent.type(

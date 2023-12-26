@@ -1,0 +1,64 @@
+name: Generate ZIP file
+
+on: [pull_request]
+
+jobs:
+  generate-zip-file:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-zip') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Setup node version and npm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --no-optional
+
+      - name: Generate ZIP file
+        run: npm run package-plugin:deploy
+
+      - name: Create temp folder
+        run: mkdir wc-blocks-pr-release__temp
+
+      - name: Rename and move ZIP file
+        run: mv woocommerce-gutenberg-products-block.zip wc-blocks-pr-release__temp/woocommerce-gutenberg-products-block-${{ github.event.pull_request.number }}.zip
+
+      - name: Transfer ZIP file via SFTP
+        uses: AbleLincoln/push-to-sftp@v2.1
+        with:
+          host: ${{ secrets.FTP_HOST }}
+          port: 22
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          sourceDir: ./wc-blocks-pr-release__temp/
+          targetDir: ${{ secrets.FTP_DIR }}
+
+      - name: Add release ZIP URL as comment to the PR
+        uses: ./.github/comments-aggregator
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          section-id: release-zip-url
+          order: 1
+          content: |
+            The release ZIP for this PR is accessible via:
+            ```
+            https://wcblocks.wpcomstaging.com/wp-content/uploads/woocommerce-gutenberg-products-block-${{ github.event.pull_request.number }}.zip
+            ```
+
+      - name: Delete ZIP file
+        run: rm -rf wc-blocks-pr-release__temp

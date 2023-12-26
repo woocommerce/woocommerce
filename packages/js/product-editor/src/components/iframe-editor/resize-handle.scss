@@ -1,0 +1,36 @@
+.resizable-editor__drag-handle {
+    -webkit-appearance: none;
+    appearance: none;
+    background: none;
+    border: 0;
+    border-radius: 2px;
+    bottom: 0;
+    cursor: ew-resize;
+    margin: auto 0;
+    outline: none;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    width: 12px;
+    height: 100px;
+
+    &.is-left {
+        left: -16px;
+    }
+
+    &.is-right {
+        right: -16px;
+    }
+
+    &:after {
+        background: #949494;
+        border-radius: 2px;
+        bottom: 24px;
+        content: "";
+        left: 4px;
+        position: absolute;
+        right: 0;
+        top: 24px;
+        width: 4px;
+    }
+}

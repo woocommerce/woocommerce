@@ -3,7 +3,7 @@ on:
     workflow_dispatch:
         inputs:
             packages:
-                description: 'Enter a specific package to release, or packages separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input to the default "-a" will prepare to release all eligible packages. When releasing a package for the first time, pass the "--initialRelease" flag.'
+                description: 'Enter a specific package to release, or packages separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input to the default "-a" will prepare to release all eligible packages.'
                 required: false
                 default: '-a'
 
@@ -18,9 +18,14 @@ jobs:
             pull-requests: write
         steps:
             - uses: actions/checkout@v3
+              with:
+                  fetch-depth: '0'
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                install: true
+                build: './tools/package-release'
 
             - name: Execute script
               run: ./tools/package-release/bin/dev prepare ${{ github.event.inputs.packages }}
@@ -30,7 +35,7 @@ jobs:
 
             - name: Get current date
               id: date
-              run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+              run: echo "date=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
 
             - name: Set all package string
               id: all_description

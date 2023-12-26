@@ -347,6 +347,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		} else {
 			add_post_meta( $coupon->get_id(), '_used_by', strtolower( $used_by ) );
 		}
+
+		$this->refresh_coupon_data( $coupon );
 	}
 
 	/**
@@ -375,6 +377,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			if ( $meta_id ) {
 				delete_metadata_by_mid( 'post', $meta_id );
 				$coupon->set_used_by( (array) get_post_meta( $coupon->get_id(), '_used_by' ) );
+				$this->refresh_coupon_data( $coupon );
 			}
 		}
 
@@ -404,6 +407,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$id
 			)
 		);
+
+		$this->refresh_coupon_data( $coupon );
 
 		// Get the latest value direct from the DB, instead of possibly the WP meta cache.
 		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = 'usage_count' AND post_id = %d;", $id ) );
@@ -532,16 +537,16 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		);
 
 		$query_for_tentative_usages = $this->get_tentative_usage_query( $coupon->get_id() );
-		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM DUAL' );
+		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM ' . $wpdb->posts . ' LIMIT 1' );
 
 		$coupon_usage_key = '_coupon_held_' . ( (int) $db_timestamp + $held_time ) . '_' . wp_generate_password( 6, false );
 
 		$insert_statement = $wpdb->prepare(
 			"
 			INSERT INTO $wpdb->postmeta ( post_id, meta_key, meta_value )
-			SELECT %d, %s, %s FROM DUAL
+			SELECT %d, %s, %s FROM $wpdb->posts
 			WHERE ( $query_for_usages ) + ( $query_for_tentative_usages ) < %d
-			",
+			LIMIT 1",
 			$coupon->get_id(),
 			$coupon_usage_key,
 			'',
@@ -556,7 +561,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
 			if ( false !== $result ) {
 				// Clear meta cache.
-				wp_cache_delete( WC_Coupon::generate_meta_cache_key( $coupon->get_id(), 'coupons' ), 'coupons' );
+				$this->refresh_coupon_data( $coupon );
 				break;
 			}
 		}
@@ -629,15 +634,15 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		); // WPCS: unprepared SQL ok.
 
 		$query_for_tentative_usages = $this->get_tentative_usage_query_for_user( $coupon->get_id(), $user_aliases );
-		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM DUAL' );
+		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM ' . $wpdb->posts . ' LIMIT 1' );
 
 		$coupon_used_by_meta_key    = '_maybe_used_by_' . ( (int) $db_timestamp + $held_time ) . '_' . wp_generate_password( 6, false );
 		$insert_statement           = $wpdb->prepare(
 			"
 			INSERT INTO $wpdb->postmeta ( post_id, meta_key, meta_value )
-			SELECT %d, %s, %s FROM DUAL
+			SELECT %d, %s, %s FROM $wpdb->posts
 			WHERE ( $query_for_usages ) + ( $query_for_tentative_usages ) < %d
-			",
+			LIMIT 1",
 			$coupon->get_id(),
 			$coupon_used_by_meta_key,
 			$user_alias,
@@ -651,7 +656,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
 			if ( false !== $result ) {
 				// Clear meta cache.
-				wp_cache_delete( WC_Coupon::generate_meta_cache_key( $coupon->get_id(), 'coupons' ), 'coupons' );
+				$this->refresh_coupon_data( $coupon );
 				break;
 			}
 		}
@@ -691,6 +696,18 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$user_aliases
 			)
 		); // WPCS: unprepared SQL ok.
+	}
+
+	/**
+	 * This function clears coupon data from the WP cache after certain operations which, for performance reasons,
+	 * are done via SQL queries.
+	 *
+	 * @param \WC_Coupon $coupon The coupon object.
+	 * @return void
+	 */
+	private function refresh_coupon_data( &$coupon ) {
+		wp_cache_delete( $coupon->get_meta_cache_key(), 'coupons' );
+		wp_cache_delete( $coupon->get_id(), 'post_meta' );
 	}
 
 	/**

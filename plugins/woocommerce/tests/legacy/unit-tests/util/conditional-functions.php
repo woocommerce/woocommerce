@@ -74,12 +74,12 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Callback for chaning home url to https.
+	 * Callback for changing home url to https.
 	 *
 	 * @return string
 	 */
 	public function _https_url() {
-		return 'https://example.org';
+		return 'https://' . WP_TESTS_DOMAIN . '';
 	}
 
 	/**

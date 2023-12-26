@@ -22,11 +22,13 @@ import {
  */
 import { PRODUCT_DETAILS_SLUG } from '../../constants';
 import { EditProductLinkModal } from '../edit-product-link-modal';
+import { useProductHelper } from '../../hooks/use-product-helper';
 
 export const DetailsNameField = ( {} ) => {
+	const { updateProductWithStatus } = useProductHelper();
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
-	const { getInputProps, values, touched, errors, setValue } =
+	const { getInputProps, values, touched, errors, setValue, resetForm } =
 		useFormContext< Product >();
 
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
@@ -102,6 +104,33 @@ export const DetailsNameField = ( {} ) => {
 					product={ values }
 					onCancel={ () => setShowProductLinkEditModal( false ) }
 					onSaved={ () => setShowProductLinkEditModal( false ) }
+					saveHandler={ async ( slug ) => {
+						const updatedProduct = await updateProductWithStatus(
+							values.id,
+							{
+								slug,
+							},
+							values.status,
+							true
+						);
+						if ( updatedProduct && updatedProduct.id ) {
+							// only reset the updated slug and permalink fields.
+							resetForm(
+								{
+									...values,
+									slug: updatedProduct.slug,
+									permalink: updatedProduct.permalink,
+								},
+								touched,
+								errors
+							);
+
+							return {
+								slug: updatedProduct.slug,
+								permalink: updatedProduct.permalink,
+							};
+						}
+					} }
 				/>
 			) }
 		</div>

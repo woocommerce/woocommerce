@@ -74,13 +74,16 @@ export function SingleImageField( {
 					role="region"
 				>
 					<MediaUploader
+						multipleSelect={ false }
 						onError={ () => null }
 						onSelect={ ( image ) =>
 							handleChange( image as MediaItem )
 						}
-						onUpload={ ( [ image ] ) => handleChange( image ) }
-						onFileUploadChange={ ( [ image ] ) =>
-							handleChange( image )
+						onUpload={ ( image ) =>
+							! Array.isArray( image ) && handleChange( image )
+						}
+						onFileUploadChange={ ( image ) =>
+							! Array.isArray( image ) && handleChange( image )
 						}
 						label={ __(
 							'Drag image here or click to upload',

@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { chevronDown, chevronUp } from '@wordpress/icons';
 import classNames from 'classnames';
 import { createElement, forwardRef } from 'react';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -48,7 +49,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				{ ...headingProps }
 				className="experimental-woocommerce-tree-item__heading"
 			>
-				{ /* eslint-disable-next-line jsx-a11y/label-has-for */ }
+				{ /* eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control */ }
 				<label className="experimental-woocommerce-tree-item__label">
 					{ selection.multiple ? (
 						<CheckboxControl
@@ -60,13 +61,11 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 						/>
 					) : (
 						<input
-							type="radio"
+							type="checkbox"
+							className="experimental-woocommerce-tree-item__checkbox"
 							checked={ selection.checkedStatus === 'checked' }
-							className="components-radio-control__input"
 							onChange={ ( event ) =>
-								selection.onSelectChild(
-									event.currentTarget.checked
-								)
+								selection.onSelectChild( event.target.checked )
 							}
 						/>
 					) }
@@ -74,7 +73,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 					{ typeof getLabel === 'function' ? (
 						getLabel( item )
 					) : (
-						<span>{ item.data.label }</span>
+						<span>{ decodeEntities( item.data.label ) }</span>
 					) }
 				</label>
 

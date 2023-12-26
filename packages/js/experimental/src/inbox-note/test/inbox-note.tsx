@@ -23,12 +23,14 @@ jest.mock( 'react-visibility-sensor', () =>
 	} )
 );
 
+window.open = jest.fn();
+
 describe( 'InboxNoteCard', () => {
 	const note = {
 		id: 1,
 		name: 'wc-admin-wc-helper-connection',
 		type: 'info',
-		title: 'Connect to WooCommerce.com',
+		title: 'Connect to Woo.com',
 		content: 'Connect to get important product notifications and updates.',
 		status: 'unactioned',
 		date_created: '2020-05-10T16:57:31',
@@ -183,7 +185,7 @@ describe( 'InboxNoteCard', () => {
 			);
 		} );
 
-		it( 'should call onVisible when visiblity sensor calls it', () => {
+		it( 'should call onVisible when visibility sensor calls it', () => {
 			const onVisible = jest.fn();
 			const { getByText } = render(
 				<InboxNoteCard
@@ -197,7 +199,7 @@ describe( 'InboxNoteCard', () => {
 			expect( onVisible ).toHaveBeenCalledWith( note );
 		} );
 
-		it( 'should call onVisible when visiblity sensor calls it, but only once', () => {
+		it( 'should call onVisible when visibility sensor calls it, but only once', () => {
 			const onVisible = jest.fn();
 			const { getByText } = render(
 				<InboxNoteCard

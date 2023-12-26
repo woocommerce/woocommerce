@@ -20,6 +20,7 @@ import {
 	TablePlaceholder,
 	Link,
 } from '@woocommerce/components';
+import { isWCAdmin } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -28,7 +29,7 @@ import {
 	CardHeaderTitle,
 	CreateNewCampaignModal,
 } from '~/marketing/components';
-import { useCampaigns } from '~/marketing/hooks';
+import { useCampaignTypes, useCampaigns } from '~/marketing/hooks';
 import './Campaigns.scss';
 
 const tableCaption = __( 'Campaigns', 'woocommerce' );
@@ -59,6 +60,7 @@ export const Campaigns = () => {
 	const [ page, setPage ] = useState( 1 );
 	const [ isModalOpen, setModalOpen ] = useState( false );
 	const { loading, data, meta } = useCampaigns( page, perPage );
+	const { data: dataCampaignTypes } = useCampaignTypes();
 	const total = meta?.total;
 
 	const getContent = () => {
@@ -137,7 +139,16 @@ export const Campaigns = () => {
 									<FlexBlock>
 										<Flex direction="column" gap={ 1 }>
 											<FlexItem className="woocommerce-marketing-campaigns-card__campaign-title">
-												<Link href={ el.manageUrl }>
+												<Link
+													type={
+														isWCAdmin(
+															el.manageUrl
+														)
+															? 'wc-admin'
+															: 'external'
+													}
+													href={ el.manageUrl }
+												>
 													{ el.title }
 												</Link>
 											</FlexItem>
@@ -158,6 +169,7 @@ export const Campaigns = () => {
 		);
 	};
 
+	const showCreateCampaignButton = !! dataCampaignTypes?.length;
 	const showFooter = !! ( total && total > perPage );
 
 	return (
@@ -166,12 +178,14 @@ export const Campaigns = () => {
 				<CardHeaderTitle>
 					{ __( 'Campaigns', 'woocommerce' ) }
 				</CardHeaderTitle>
-				<Button
-					variant="secondary"
-					onClick={ () => setModalOpen( true ) }
-				>
-					{ __( 'Create new campaign', 'woocommerce' ) }
-				</Button>
+				{ showCreateCampaignButton && (
+					<Button
+						variant="secondary"
+						onClick={ () => setModalOpen( true ) }
+					>
+						{ __( 'Create new campaign', 'woocommerce' ) }
+					</Button>
+				) }
 				{ isModalOpen && (
 					<CreateNewCampaignModal
 						onRequestClose={ () => setModalOpen( false ) }

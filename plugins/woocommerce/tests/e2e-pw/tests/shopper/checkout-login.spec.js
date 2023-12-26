@@ -119,12 +119,12 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		page,
 	} ) => {
 		await page.goto( '/checkout/' );
-		await page.click( 'text=Click here to login' );
+		await page.locator( 'text=Click here to login' ).click();
 
 		// fill in the customer account info
-		await page.fill( '#username', customer.username );
-		await page.fill( '#password', customer.password );
-		await page.click( 'button[name="login"]' );
+		await page.locator( '#username' ).fill( customer.username );
+		await page.locator( '#password' ).fill( customer.password );
+		await page.locator( 'button[name="login"]' ).click();
 
 		// billing form should pre-populate
 		await expect( page.locator( '#billing_first_name' ) ).toHaveValue(
@@ -153,20 +153,16 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		);
 
 		// place an order
-		await page.click( 'text=Place order' );
+		await page.locator( 'text=Place order' ).click();
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'Order received'
 		);
 
 		await page.waitForLoadState( 'networkidle' );
 		// get order ID from the page
-		const orderReceivedHtmlElement = await page.$(
-			'.woocommerce-order-overview__order.order'
-		);
-		const orderReceivedText = await page.evaluate(
-			( element ) => element.textContent,
-			orderReceivedHtmlElement
-		);
+		const orderReceivedText = await page
+			.locator( '.woocommerce-order-overview__order.order' )
+			.textContent();
 		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
 		await expect( page.locator( 'ul > li.email' ) ).toContainText(
@@ -176,8 +172,8 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		// check my account page
 		await page.goto( '/my-account/' );
 		await expect( page.url() ).toContain( 'my-account/' );
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'My account'
-		);
+		await expect(
+			page.getByRole( 'heading', { name: 'My account' } )
+		).toBeVisible();
 	} );
 } );

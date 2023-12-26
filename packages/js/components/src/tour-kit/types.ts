@@ -12,7 +12,7 @@ export interface WooStep extends Step {
 	meta: {
 		/** Unique name for step, mainly used for tracking. */
 		name: string | null;
-		heading: string | null;
+		heading: string | React.ReactElement | null;
 		descriptions: {
 			desktop: string | React.ReactElement | null;
 			mobile?: string | React.ReactElement | null;
@@ -23,6 +23,15 @@ export interface WooStep extends Step {
 			/** Disable the button or not. Default to False */
 			isDisabled?: boolean;
 			isHidden?: boolean;
+		};
+		secondaryButton?: {
+			/** Set a text for the button. Default to "Back" */
+			text?: string;
+		};
+		skipButton?: {
+			/** Set a text for the button. Default to "Skip" */
+			text?: string;
+			isVisible?: boolean;
 		};
 	};
 	/** Auto apply the focus state for the element. Default to null */

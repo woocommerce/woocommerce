@@ -11,7 +11,7 @@ export default ( { width = 196, height = 41 } ) => (
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
 	>
-		<title>WooCommerce Payments</title>
+		<title>WooPayments</title>
 		<path
 			fillRule="evenodd"
 			clipRule="evenodd"

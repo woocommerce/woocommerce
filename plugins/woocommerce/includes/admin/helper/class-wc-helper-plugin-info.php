@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Helper_Plugin_Info Class
  *
- * Provides the "View Information" core modals with data for WooCommerce.com
+ * Provides the "View Information" core modals with data for Woo.com
  * hosted extensions.
  */
 class WC_Helper_Plugin_Info {
@@ -22,6 +22,7 @@ class WC_Helper_Plugin_Info {
 	 */
 	public static function load() {
 		add_filter( 'plugins_api', array( __CLASS__, 'plugins_api' ), 20, 3 );
+		add_filter( 'themes_api', array( __CLASS__, 'themes_api' ), 20, 3 );
 	}
 
 	/**
@@ -37,7 +38,31 @@ class WC_Helper_Plugin_Info {
 		if ( 'plugin_information' !== $action ) {
 			return $response;
 		}
+		return self::maybe_override_products_api( $response, $action, $args );
+	}
 
+	/**
+	 * Theme information callback for Woo themes.
+	 *
+	 * @param object $response The response core needs to display the modal.
+	 * @param string $action The requested themes_api() action.
+	 * @param object $args Arguments passed to themes_api().
+	 */
+	public static function themes_api( $response, $action, $args ) {
+		if ( 'theme_information' !== $action ) {
+			return $response;
+		}
+		return self::maybe_override_products_api( $response, $action, $args );
+	}
+
+	/**
+	 * Override the products API to fetch data from the Helper API if it's a Woo product.
+	 *
+	 * @param object $response The response core needs to display the modal.
+	 * @param string $action The requested action.
+	 * @param object $args Arguments passed to the API.
+	 */
+	public static function maybe_override_products_api( $response, $action, $args ) {
 		if ( empty( $args->slug ) ) {
 			return $response;
 		}

@@ -25,3 +25,11 @@ export function getIsEmailDisabled( state ) {
 export function getDBUpdateVersions( state ) {
 	return state.dbUpdateVersions;
 }
+
+export function getLoggingLevels( state ) {
+	return state.loggingLevels;
+}
+
+export function getBlockTemplateLoggingThreshold( state ) {
+	return state.blockTemplateLoggingThreshold;
+}

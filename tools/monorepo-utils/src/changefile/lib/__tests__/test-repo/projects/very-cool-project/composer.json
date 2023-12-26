@@ -1,0 +1,5 @@
+{
+    "require": {
+        "automattic/jetpack-changelogger": "99.99"
+    }
+}

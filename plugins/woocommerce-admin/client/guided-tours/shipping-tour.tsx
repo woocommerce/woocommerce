@@ -122,12 +122,12 @@ const spotlitElementsSelectors: Array< NonEmptySelectorArray > = [
 		// top left = table header cell for sort handles
 		'th.wc-shipping-zone-sort',
 		// bottom right = worldwide region cell
-		'tr.wc-shipping-zone-worldwide > td.wc-shipping-zone-region',
+		'tfoot.wc-shipping-zone-worldwide tr > td.wc-shipping-zone-region',
 	],
 	[
 		// selectors for rightmost column (shipping methods)
 		'th.wc-shipping-zone-methods',
-		'tr.wc-shipping-zone-worldwide > td.wc-shipping-zone-methods',
+		'tfoot.wc-shipping-zone-worldwide tr > td.wc-shipping-zone-methods',
 	],
 ];
 
@@ -205,6 +205,7 @@ export const ShippingTour: React.FC< {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { show: showTour } = useShowShippingTour();
 	const [ step, setStepNumber ] = useState( 0 );
+	const { createNotice } = useDispatch( 'core/notices' );
 
 	const tourConfig: TourKitTypes.WooConfig = {
 		placement: 'auto',
@@ -250,14 +251,14 @@ export const ShippingTour: React.FC< {
 							<>
 								<span>
 									{ __(
-										'We added a few shipping zones for you based on your location, but you can manage them at any time.',
+										"Specify the areas you'd like to ship to! Give each zone a name, then list the regions you'd like to include. Your regions can be as specific as a zip code or as broad as a country. Shoppers will only see the methods available in their region.",
 										'woocommerce'
 									) }
 								</span>
 								<br />
 								<span>
 									{ __(
-										'A shipping zone is a geographic area where a certain set of shipping methods are offered.',
+										"We've added some shipping zones to get you started — you can manage them by selecting Edit or Delete.",
 										'woocommerce'
 									) }
 								</span>
@@ -274,18 +275,45 @@ export const ShippingTour: React.FC< {
 					name: 'shipping-methods',
 					heading: __( 'Shipping methods', 'woocommerce' ),
 					descriptions: {
-						desktop: __(
-							'We defaulted to some recommended shipping methods based on your store location, but you can manage them at any time within each shipping zone settings.',
-							'woocommerce'
+						desktop: (
+							<>
+								<span>
+									{ __(
+										"Add one or more shipping methods you'd like to offer to shoppers in your zones.",
+										'woocommerce'
+									) }
+								</span>
+								<br />
+								<span>
+									{ __(
+										"For example, we've added the “Free shipping” method for shoppers in your country. You can edit, add to, or remove shipping methods by selecting Edit or Delete.",
+										'woocommerce'
+									) }
+								</span>
+							</>
 						),
 					},
 				},
 			},
 		],
-		closeHandler: ( steps, stepIndex, source ) => {
-			updateOptions( {
+		closeHandler: async ( steps, stepIndex, source ) => {
+			const update = await updateOptions( {
 				[ REVIEWED_DEFAULTS_OPTION ]: 'yes',
 			} );
+
+			if ( ! update.success ) {
+				createNotice(
+					'error',
+					__(
+						'There was a problem marking the shipping tour as completed.',
+						'woocommerce'
+					)
+				);
+				recordEvent(
+					'walkthrough_settings_shipping_updated_option_error'
+				);
+			}
+
 			if ( source === 'close-btn' ) {
 				recordEvent( 'walkthrough_settings_shipping_dismissed', {
 					step_name: steps[ stepIndex ].meta.name,
@@ -308,7 +336,7 @@ export const ShippingTour: React.FC< {
 				heading: __( 'WooCommerce Shipping', 'woocommerce' ),
 				descriptions: {
 					desktop: __(
-						'Print USPS and DHL labels straight from your WooCommerce dashboard and save on shipping thanks to discounted rates. You can manage WooCommerce Shipping in this section.',
+						'Print USPS and DHL labels straight from your Woo dashboard and save on shipping thanks to discounted rates. You can manage WooCommerce Shipping in this section.',
 						'woocommerce'
 					),
 				},
@@ -326,7 +354,7 @@ export const ShippingTour: React.FC< {
 				heading: __( 'WooCommerce Shipping', 'woocommerce' ),
 				descriptions: {
 					desktop: __(
-						'If you’d like to speed up your process and print your shipping label straight from your WooCommerce dashboard, WooCommerce Shipping may be for you! ',
+						'If you’d like to speed up your process and print your shipping label straight from your Woo dashboard, WooCommerce Shipping may be for you! ',
 						'woocommerce'
 					),
 				},

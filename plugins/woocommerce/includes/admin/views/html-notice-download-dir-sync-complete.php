@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 	<p>
 		<?php
 		$settings_screen_link = '<a href="' . esc_url( get_admin_url( null, 'admin.php?page=wc-settings&tab=products&section=download_urls' ) ) . '">';
-		$documentation_link   = '<a href="https://woocommerce.com/document/approved-download-directories">';
+		$documentation_link   = '<a href="https://woo.com/document/approved-download-directories">';
 		$closing_link         = '</a>';
 
 		printf(

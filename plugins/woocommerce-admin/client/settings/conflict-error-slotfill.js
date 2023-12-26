@@ -27,7 +27,7 @@ const { Fill, Slot } = createSlotFill( '__EXPERIMENTAL__WcAdminConflictError' );
 
 const LearnMore = () => (
 	<Button
-		href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/"
+		href="https://woo.com/document/setting-up-taxes-in-woocommerce/"
 		target="_blank"
 	>
 		{ __( 'Learn more', 'woocommerce' ) }

@@ -51,6 +51,15 @@ export function* getReportItems(
 		path: addQueryArgs( `${ NAMESPACE }/reports/${ endpoint }`, query ),
 	};
 
+	if ( endpoint === 'performance-indicators' && ! query.stats ) {
+		yield setReportItems( endpoint, query, {
+			data: [],
+			totalResults: 0,
+			totalPages: 0,
+		} );
+		return;
+	}
+
 	try {
 		const response: {
 			headers: Map< string, string >;

@@ -124,7 +124,7 @@ class WC_REST_WCCOM_Site_Installer_Controller_V2 extends WC_REST_Controller {
 	}
 
 	/**
-	 * Install WooCommerce.com products.
+	 * Install Woo.com products.
 	 *
 	 * @since 7.7.0
 	 * @param WP_REST_Request $request Full details about the request.

@@ -24,7 +24,7 @@ Each menu item is defined by an array containing `id`, `title`, `parent`, and `p
 
 -   `report` (string): The report's id.
 -   `title` (string): The title shown in the sidebar.
--   `parent` (string): The item's parent in the navigational heirarchy.
+-   `parent` (string): The item's parent in the navigational hierarchy.
 -   `path` (string): The report's relative path.
 
 Next, hook into the JavaScript reports filter, `woocommerce_admin_reports_list`, to add a report component.

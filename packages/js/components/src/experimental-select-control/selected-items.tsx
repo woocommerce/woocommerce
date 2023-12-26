@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
+import classnames from 'classnames';
+import { createElement } from '@wordpress/element';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -10,6 +12,7 @@ import Tag from '../tag';
 import { getItemLabelType, getItemValueType } from './types';
 
 type SelectedItemsProps< ItemType > = {
+	isReadOnly: boolean;
 	items: ItemType[];
 	getItemLabel: getItemLabelType< ItemType >;
 	getItemValue: getItemValueType< ItemType >;
@@ -22,14 +25,34 @@ type SelectedItemsProps< ItemType > = {
 };
 
 export const SelectedItems = < ItemType, >( {
+	isReadOnly,
 	items,
 	getItemLabel,
 	getItemValue,
 	getSelectedItemProps,
 	onRemove,
 }: SelectedItemsProps< ItemType > ) => {
+	const classes = classnames(
+		'woocommerce-experimental-select-control__selected-items',
+		{
+			'is-read-only': isReadOnly,
+		}
+	);
+
+	if ( isReadOnly ) {
+		return (
+			<div className={ classes }>
+				{ items
+					.map( ( item ) => {
+						return decodeEntities( getItemLabel( item ) );
+					} )
+					.join( ', ' ) }
+			</div>
+		);
+	}
+
 	return (
-		<>
+		<div className={ classes }>
 			{ items.map( ( item, index ) => {
 				return (
 					// Disable reason: We prevent the default action to keep the input focused on click.
@@ -42,6 +65,9 @@ export const SelectedItems = < ItemType, >( {
 							selectedItem: item,
 							index,
 						} ) }
+						onMouseDown={ ( event ) => {
+							event.preventDefault();
+						} }
 						onClick={ ( event ) => {
 							event.preventDefault();
 						} }
@@ -56,6 +82,6 @@ export const SelectedItems = < ItemType, >( {
 					</div>
 				);
 			} ) }
-		</>
+		</div>
 	);
 };

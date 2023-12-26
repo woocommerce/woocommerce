@@ -25,15 +25,46 @@ class Definition extends BaseDefinition {
 	 * @return object
 	 */
 	protected function resolveClass( string $concrete ) {
+		$instance = new $concrete();
+		$this->invokeInit( $instance );
+		return $instance;
+	}
+
+	/**
+	 * Invoke methods on resolved instance, including 'init'.
+	 *
+	 * @param object $instance The concrete to invoke methods on.
+	 *
+	 * @return object
+	 */
+	protected function invokeMethods( $instance ) {
+		$this->invokeInit( $instance );
+		parent::invokeMethods( $instance );
+		return $instance;
+	}
+
+	/**
+	 * Invoke the 'init' method on a resolved object.
+	 *
+	 * Constructor injection causes backwards compatibility problems
+	 * so we will rely on method injection via an internal method.
+	 *
+	 * @param object $instance The resolved object.
+	 * @return void
+	 */
+	private function invokeInit( $instance ) {
 		$resolved = $this->resolveArguments( $this->arguments );
-		$concrete = new $concrete();
 
-		// Constructor injection causes backwards compatibility problems
-		// so we will rely on method injection via an internal method.
-		if ( method_exists( $concrete, static::INJECTION_METHOD ) ) {
-			call_user_func_array( array( $concrete, static::INJECTION_METHOD ), $resolved );
+		if ( method_exists( $instance, static::INJECTION_METHOD ) ) {
+			call_user_func_array( array( $instance, static::INJECTION_METHOD ), $resolved );
 		}
+	}
 
-		return $concrete;
+	/**
+	 * Forget the cached resolved object, so the next time it's requested
+	 * it will be resolved again.
+	 */
+	public function forgetResolved() {
+		$this->resolved = null;
 	}
 }

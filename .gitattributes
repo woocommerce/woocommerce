@@ -1,0 +1,15 @@
+*       text=auto
+
+# Force LF In Configuration Files
+*.md    text    eol=lf
+*.json  text    eol=lf
+*.yml   text    eol=lf
+
+# Force LF In Code Files
+*.php   text    eol=lf
+*.js    text    eol=lf
+*.jsx   text    eol=lf
+*.ts    text    eol=lf
+*.tsx   text    eol=lf
+*.css   text    eol=lf
+*.scss  text    eol=lf

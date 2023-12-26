@@ -107,6 +107,23 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
+	 * Check if an order exists by id.
+	 *
+	 * @since 8.0.0
+	 *
+	 * @param int $order_id The order id to check.
+	 * @return bool True if an order exists with the given name.
+	 */
+	public function order_exists( $order_id ) : bool {
+		if ( ! $order_id ) {
+			return false;
+		}
+
+		$post_object = get_post( $order_id );
+		return ! is_null( $post_object ) && in_array( $post_object->post_type, wc_get_order_types(), true );
+	}
+
+	/**
 	 * Method to read an order from the database.
 	 *
 	 * @param WC_Order $order Order object.
@@ -120,7 +137,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
 		}
 
-		$order->set_props(
+		$this->set_order_props(
+			$order,
 			array(
 				'parent_id'     => $post_object->post_parent,
 				'date_created'  => $this->string_to_timestamp( $post_object->post_date_gmt ),
@@ -140,6 +158,43 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		 */
 		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
 			$order->set_discount_total( (float) get_post_meta( $order->get_id(), '_cart_discount', true ) - (float) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
+		}
+	}
+
+	/**
+	 * Set the properties of an object and log the first error found while doing so.
+	 *
+	 * @param $order WC_Order $order Order object.
+	 * @param array          $props The properties to set.
+	 */
+	private function set_order_props( &$order, array $props ) {
+		$errors = $order->set_props( $props );
+
+		if ( ! $errors instanceof WP_Error ) {
+			return;
+		}
+
+		$order_id = $order->get_id();
+		$logger   = WC()->call_function( 'wc_get_logger' );
+
+		foreach ( $errors->get_error_codes() as $error_code ) {
+			$property_name = $errors->get_error_data( $error_code )['property_name'] ?? '';
+			$error_message = $errors->get_error_message( $error_code );
+			$logger->warning(
+				sprintf(
+				/* translators: %1$s = order ID, %2$s = order id, %3$s = error message. */
+					__( 'Error when setting property \'%1$s\' for order %2$d: %3$s', 'woocommerce' ),
+					$property_name,
+					$order_id,
+					$error_message
+				),
+				array(
+					'error_code'    => $error_code,
+					'error_message' => $error_message,
+					'order_id'      => $order_id,
+					'property_name' => $property_name,
+				)
+			);
 		}
 	}
 
@@ -204,7 +259,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$args = wp_parse_args(
 			$args,
 			array(
-				'force_delete' => false,
+				'force_delete'     => false,
+				'suppress_filters' => false,
 			)
 		);
 
@@ -212,14 +268,60 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			return;
 		}
 
+		$do_filters = ! $args['suppress_filters'];
+
 		if ( $args['force_delete'] ) {
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately before an order is deleted from the database.
+				 *
+				 * @since 8.0.0
+				 *
+				 * @param int      $order_id ID of the order about to be deleted.
+				 * @param WC_Order $order    Instance of the order that is about to be deleted.
+				 */
+				do_action( 'woocommerce_before_delete_order', $id, $order );
+			}
+
 			wp_delete_post( $id );
 			$order->set_id( 0 );
-			do_action( 'woocommerce_delete_order', $id );
+
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately after an order is deleted.
+				 *
+				 * @since
+				 *
+				 * @param int $order_id ID of the order that has been deleted.
+				 */
+				do_action( 'woocommerce_delete_order', $id );
+			}
 		} else {
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately before an order is trashed.
+				 *
+				 * @since 8.0.0
+				 *
+				 * @param int      $order_id ID of the order about to be trashed.
+				 * @param WC_Order $order    Instance of the order that is about to be trashed.
+				 */
+				do_action( 'woocommerce_before_trash_order', $id, $order );
+			}
+
 			wp_trash_post( $id );
 			$order->set_status( 'trash' );
-			do_action( 'woocommerce_trash_order', $id );
+
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately after an order is trashed.
+				 *
+				 * @since
+				 *
+				 * @param int      $order_id ID of the order that has been trashed.
+				 */
+				do_action( 'woocommerce_trash_order', $id );
+			}
 		}
 	}
 
@@ -302,7 +404,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function read_order_data( &$order, $post_object ) {
 		$id = $order->get_id();
 
-		$order->set_props(
+		$this->set_order_props(
+			$order,
 			array(
 				'currency'           => get_post_meta( $id, '_order_currency', true ),
 				'discount_total'     => get_post_meta( $id, '_cart_discount', true ),
@@ -599,11 +702,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
-	 * Helper method to update order metadata from intialized order object.
+	 * Helper method to update order metadata from initialized order object.
 	 *
 	 * @param WC_Abstract_Order $order Order object.
 	 */
-	private function update_order_meta_from_object( $order ) {
+	protected function update_order_meta_from_object( $order ) {
 		if ( is_null( $order->get_meta() ) ) {
 			return;
 		}
@@ -612,13 +715,24 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		foreach ( $order->get_meta_data() as $meta_data ) {
 			if ( isset( $existing_meta_data[ $meta_data->key ] ) ) {
-				if ( $existing_meta_data[ $meta_data->key ] === $meta_data->value ) {
+				// We don't know if the meta is single or array, so we assume it to be an array.
+				$meta_value = is_array( $meta_data->value ) ? $meta_data->value : array( $meta_data->value );
+
+				if ( $existing_meta_data[ $meta_data->key ] === $meta_value ) {
 					unset( $existing_meta_data[ $meta_data->key ] );
 					continue;
 				}
 
-				unset( $existing_meta_data[ $meta_data->key ] );
-				delete_post_meta( $order->get_id(), $meta_data->key );
+				if ( is_array( $existing_meta_data[ $meta_data->key ] ) ) {
+					$value_index = array_search( maybe_serialize( $meta_data->value ), $existing_meta_data[ $meta_data->key ], true );
+					if ( false !== $value_index ) {
+						unset( $existing_meta_data[ $meta_data->key ][ $value_index ] );
+						if ( 0 === count( $existing_meta_data[ $meta_data->key ] ) ) {
+							unset( $existing_meta_data[ $meta_data->key ] );
+						}
+						continue;
+					}
+				}
 			}
 			add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
 		}
@@ -632,7 +746,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		);
 
 		foreach ( $keys_to_delete as $meta_key ) {
-			delete_post_meta( $order->get_id(), $meta_key );
+			if ( isset( $existing_meta_data[ $meta_key ] ) ) {
+				foreach ( $existing_meta_data[ $meta_key ] as $meta_value ) {
+					delete_post_meta( $order->get_id(), $meta_key, maybe_unserialize( $meta_value ) );
+				}
+			}
 		}
 
 		$this->update_post_meta( $order );

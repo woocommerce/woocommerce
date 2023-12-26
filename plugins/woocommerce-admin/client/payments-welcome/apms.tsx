@@ -35,7 +35,7 @@ export const apms: Apm[] = [
 		title: strings.apms.paypal.title,
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/paypal.png`,
 		description: strings.apms.paypal.description,
-		link: 'https://woocommerce.com/products/woocommerce-paypal-payments/',
+		link: 'https://woo.com/products/woocommerce-paypal-payments/',
 		extension: 'woocommerce-paypal-payments',
 	},
 	{
@@ -43,7 +43,7 @@ export const apms: Apm[] = [
 		title: strings.apms.amazonpay.title,
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/amazonpay.png`,
 		description: strings.apms.amazonpay.description,
-		link: 'https://woocommerce.com/products/pay-with-amazon/',
+		link: 'https://woo.com/products/pay-with-amazon/',
 		extension: 'woocommerce-gateway-amazon-payments-advanced',
 	},
 	{
@@ -51,7 +51,7 @@ export const apms: Apm[] = [
 		title: strings.apms.klarna.title,
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/klarna.png`,
 		description: strings.apms.klarna.description,
-		link: 'https://woocommerce.com/products/klarna-payments/',
+		link: 'https://woo.com/products/klarna-payments/',
 		extension: 'klarna-payments-for-woocommerce',
 	},
 ];
@@ -70,14 +70,14 @@ const ApmNotice = ( { enabledApms }: { enabledApms: Set< Apm > } ) => {
 		.map( ( apm ) => apm.title )
 		.join( ', ' );
 	return (
-		<Card className="connect-account__apms-notice">
-			<CardBody>
-				<Notice status={ 'info' } isDismissible={ false }>
-					<Icon icon={ download } />
-					<div>{ strings.apms.installText( extensions ) }</div>
-				</Notice>
-			</CardBody>
-		</Card>
+		<Notice
+			status={ 'info' }
+			isDismissible={ false }
+			className="woopayments-welcome-page__apms-notice"
+		>
+			<Icon icon={ download } />
+			<div>{ strings.apms.installText( extensions ) }</div>
+		</Notice>
 	);
 };
 
@@ -116,7 +116,7 @@ const ApmList: React.FunctionComponent< ApmListProps > = ( {
 	return (
 		<>
 			<ApmNotice enabledApms={ enabledApms } />
-			<Card size="large" className="connect-account__apms">
+			<Card size="large" className="woopayments-welcome-page__apms">
 				<CardHeader>
 					<h1>{ strings.apms.addMoreWaysToPay }</h1>
 				</CardHeader>
@@ -124,7 +124,7 @@ const ApmList: React.FunctionComponent< ApmListProps > = ( {
 					<List items={ apmsList } />
 				</CardBody>
 				<CardFooter>
-					<ExternalLink href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/wallets/?categoryIds=28682&collections=product&page=1">
+					<ExternalLink href="https://woo.com/product-category/woocommerce-extensions/payment-gateways/wallets/?categoryIds=28682&collections=product&page=1">
 						{ strings.apms.seeMore }
 					</ExternalLink>
 				</CardFooter>

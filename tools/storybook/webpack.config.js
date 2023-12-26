@@ -41,6 +41,7 @@ module.exports = ( storybookConfig ) => {
 
 	storybookConfig.resolve.modules = [
 		path.join( __dirname, '../../plugins/woocommerce-admin/client' ),
+		path.join( __dirname, '../../packages/js/product-editor/src' ),
 		'node_modules',
 	];
 
@@ -68,9 +69,30 @@ module.exports = ( storybookConfig ) => {
 				{
 					from: path.resolve(
 						__dirname,
+						`../../packages/js/onboarding/build-style/*.css`
+					),
+					to: `./onboarding-css/[name][ext]`,
+				},
+				{
+					from: path.resolve(
+						__dirname,
+						`../../packages/js/product-editor/build-style/*.css`
+					),
+					to: `./product-editor-css/[name][ext]`,
+				},
+				{
+					from: path.resolve(
+						__dirname,
 						`../../packages/js/experimental/build-style/*.css`
 					),
 					to: `./experimental-css/[name][ext]`,
+				},
+				{
+					from: path.resolve(
+						__dirname,
+						`../../plugins/woocommerce/assets/client/admin/app/*.css`
+					),
+					to: `./app-css/[name][ext]`,
 				},
 			],
 		} )

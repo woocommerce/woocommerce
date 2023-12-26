@@ -409,7 +409,7 @@ class WC_Admin_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the list ID is retreived.
+	 * Test that the list ID is retrieved.
 	 */
 	public function test_get_list_id() {
 		$this->assertEquals( 'setup', $this->list->get_list_id() );

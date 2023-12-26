@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix table alias issue in order field queries.

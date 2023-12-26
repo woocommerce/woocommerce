@@ -14,6 +14,7 @@ import {
 	REPORTS_STORE_NAME,
 	SETTINGS_STORE_NAME,
 	QUERY_DEFAULTS,
+	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
 import {
 	appendTimestamp,
@@ -149,7 +150,7 @@ class RevenueReportTable extends Component {
 			const orderLink = (
 				<Link
 					href={
-						'edit.php?post_type=shop_order&m=' +
+						`edit.php?post_type=shop_order&order_date_type=${ this.props.dateType }&m=` +
 						formatDate( 'Ymd', row.date_start )
 					}
 					type="wp-admin"
@@ -293,7 +294,7 @@ RevenueReportTable.contextType = CurrencyContext;
  * @return {Object} formatted tableData prop
  */
 const formatProps = memoize(
-	( isError, isRequesting, tableQuery, revenueData ) => ( {
+	( isError, isRequesting, tableQuery, revenueData, dateType ) => ( {
 		tableData: {
 			items: {
 				data: get( revenueData, [ 'data', 'intervals' ], EMPTY_ARRAY ),
@@ -303,14 +304,16 @@ const formatProps = memoize(
 			isRequesting,
 			query: tableQuery,
 		},
+		dateType,
 	} ),
-	( isError, isRequesting, tableQuery, revenueData ) =>
+	( isError, isRequesting, tableQuery, revenueData, dateType ) =>
 		[
 			isError,
 			isRequesting,
 			stringify( tableQuery ),
 			get( revenueData, [ 'totalResults' ], 0 ),
 			get( revenueData, [ 'data', 'intervals' ], EMPTY_ARRAY ).length,
+			dateType,
 		].join( ':' )
 );
 
@@ -352,6 +355,8 @@ export default compose(
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			SETTINGS_STORE_NAME
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
+		const { getOption } = select( OPTIONS_STORE_NAME );
+		const dateType = getOption( 'woocommerce_date_type' ) || 'date_paid';
 		const datesFromQuery = getCurrentDates( query, defaultDateRange );
 		const { getReportStats, getReportStatsError, isResolving } =
 			select( REPORTS_STORE_NAME );
@@ -380,6 +385,12 @@ export default compose(
 			filteredTableQuery,
 		] );
 
-		return formatProps( isError, isRequesting, tableQuery, revenueData );
+		return formatProps(
+			isError,
+			isRequesting,
+			tableQuery,
+			revenueData,
+			dateType
+		);
 	} )
 )( RevenueReportTable );

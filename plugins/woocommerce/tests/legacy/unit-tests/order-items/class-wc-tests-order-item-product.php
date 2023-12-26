@@ -43,11 +43,34 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$product_item->set_total( '10.00' );
 		$this->assertEquals( '10.00', $product_item->get_total() );
 
+		$product_item->set_total( '' );
+		$this->assertEquals( '0.00', $product_item->get_total() );
+
 		$product_item->set_subtotal_tax( '0.50' );
 		$this->assertEquals( '0.50', $product_item->get_subtotal_tax() );
 
 		$product_item->set_total_tax( '0.30' );
 		$this->assertEquals( '0.30', $product_item->get_total_tax() );
+	}
+
+	/**
+	 * Test get item shipping total
+	 */
+	public function test_get_item_shipping_total() {
+		$order    = WC_Helper_Order::create_order_with_fees_and_shipping();
+		$order_id = $order->get_id();
+
+		array_values( $order->get_items( 'shipping' ) )[0]->set_total( '10.17' );
+		$order->save();
+
+		$order = wc_get_order( $order_id );
+		$this->assertEquals( '10.17', $order->get_line_total( array_values( $order->get_items( 'shipping' ) )[0], true ) );
+
+		array_values( $order->get_items( 'shipping' ) )[0]->set_total( '' );
+		$order->save();
+
+		$order = wc_get_order( $order_id );
+		$this->assertEquals( '0.00', $order->get_line_total( array_values( $order->get_items( 'shipping' ) )[0], true ) );
 	}
 
 	/**
@@ -122,14 +145,14 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$product->save();
 
 		$order = new WC_Order();
-		$order->set_billing_email( 'test@woocommerce.com' );
+		$order->set_billing_email( 'test@woo.com' );
 		$order->save();
 
 		$product_item = new WC_Order_Item_Product();
 		$product_item->set_product( $product );
 		$product_item->set_order_id( $order->get_id() );
 
-		$expected_regex = '/download_file=.*&order=wc_order_.*&email=test%40woocommerce.com&key=100/';
+		$expected_regex = '/download_file=.*&order=wc_order_.*&email=test%40woo.com&key=100/';
 		$this->assertMatchesRegularExpression( $expected_regex, $product_item->get_item_download_url( 100 ) );
 	}
 

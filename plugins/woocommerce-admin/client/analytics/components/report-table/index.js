@@ -138,7 +138,7 @@ const ReportTable = ( props ) => {
 	};
 
 	const filterShownHeaders = ( headers, hiddenKeys ) => {
-		// If no user preferences, set visibilty based on column default.
+		// If no user preferences, set visibility based on column default.
 		if ( ! hiddenKeys ) {
 			return headers.map( ( header ) => ( {
 				...header,
@@ -146,7 +146,7 @@ const ReportTable = ( props ) => {
 			} ) );
 		}
 
-		// Set visibilty based on user preferences.
+		// Set visibility based on user preferences.
 		return headers.map( ( header ) => ( {
 			...header,
 			visible: header.required || ! hiddenKeys.includes( header.key ),

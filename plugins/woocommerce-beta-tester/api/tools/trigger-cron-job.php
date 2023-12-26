@@ -1,4 +1,7 @@
 <?php
+
+defined( 'ABSPATH' ) || exit;
+
 register_woocommerce_admin_test_helper_rest_route(
 	'/tools/get-cron-list/v1',
 	'tools_get_cron_list',
@@ -11,8 +14,8 @@ register_woocommerce_admin_test_helper_rest_route(
 	'trigger_selected_cron',
 	array(
 		'methods' => 'POST',
-		'args'                => array(
-			'hook'     => array(
+		'args'    => array(
+			'hook'      => array(
 				'description'       => 'Name of the cron that will be triggered.',
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
@@ -26,6 +29,9 @@ register_woocommerce_admin_test_helper_rest_route(
 	)
 );
 
+/**
+ * A tool to list the crons for WooCommerce Admin.
+ */
 function tools_get_cron_list() {
 	$crons  = _get_cron_array();
 	$events = array();
@@ -47,6 +53,11 @@ function tools_get_cron_list() {
 	return new WP_REST_Response( $events, 200 );
 }
 
+/**
+ * A tool to trigger a selected cron.
+ *
+ * @param WP_REST_Request $request The full request data.
+ */
 function trigger_selected_cron( $request ) {
 	$hook      = $request->get_param( 'hook' );
 	$signature = $request->get_param( 'signature' );
@@ -66,10 +77,13 @@ function trigger_selected_cron( $request ) {
 				return $scheduled;
 			}
 
-			add_filter( 'cron_request', function( array $cron_request ) {
-				$cron_request['url'] = add_query_arg( 'run-cron', 1, $cron_request['url'] );
-				return $cron_request;
-			} );
+			add_filter(
+				'cron_request',
+				function( array $cron_request ) {
+					$cron_request['url'] = add_query_arg( 'run-cron', 1, $cron_request['url'] );
+					return $cron_request;
+				}
+			);
 
 			spawn_cron();
 			sleep( 1 );
@@ -79,6 +93,12 @@ function trigger_selected_cron( $request ) {
 	return false;
 }
 
+/**
+ * Schedules a cron event.
+ *
+ * @param string $hook The hook to schedule.
+ * @param array  $args The arguments to use for the event.
+ */
 function schedule_event( $hook, $args = array() ) {
 	$event = (object) array(
 		'hook'      => $hook,
@@ -87,7 +107,8 @@ function schedule_event( $hook, $args = array() ) {
 		'args'      => $args,
 	);
 	$crons = (array) _get_cron_array();
-	$key   = md5( serialize( $event->args ) );
+	// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+	$key = md5( serialize( $event->args ) );
 
 	$crons[ $event->timestamp ][ $event->hook ][ $key ] = array(
 		'schedule' => $event->schedule,

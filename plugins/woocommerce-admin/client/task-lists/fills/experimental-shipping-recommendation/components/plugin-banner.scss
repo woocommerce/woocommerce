@@ -1,0 +1,87 @@
+.woocommerce-task-shipping-recommendation__plugins-install {
+	padding: $gap-large calc($gap + $gap-smallest);
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	justify-content: space-around;
+	margin-bottom: $gap-large;
+
+	&.dual {
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		width: 285px;
+
+		p {
+			margin-top: 0;
+			margin-bottom: 15px;
+			color: $gray-700;
+		}
+
+		.plugins-install__plugin-banner-image {
+			display: flex;
+			margin-bottom: $gap-large;
+			img {
+				width: 120px;
+				height: 28px;
+			}
+		}
+	}
+
+	&.single {
+		display: flex;
+		.plugins-install__list {
+			max-width: 360px;
+		}
+	}
+
+	.plugins-install__plugin-banner-image {
+		display: flex;
+		width: 150px;
+
+		img {
+			width: 100%;
+		}
+	}
+
+	.plugins-install__list {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-around;
+		gap: calc($gap-smaller + $gap-smallest / 2);
+	}
+
+	.woocommerce-task-shipping-recommendations_plugins-buttons {
+		display: flex;
+		justify-content: space-between;
+		margin-top: $gap-large;
+		flex-grow: 1;
+		align-items: flex-end;
+
+		button {
+			min-width: 40%;
+			padding-inline: $gap-smaller;
+			margin-inline: $gap-smallest;
+		}
+	}
+
+	.plugins-install__list-item {
+		display: flex;
+		align-items: center;
+	}
+
+	.plugins-install__list-icon {
+		margin-right: $gap-small;
+	}
+}
+
+.woocommerce-task-shipping-recommendation_plugins-install-container {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.woocommerce-task-shipping-recommendations_skip-button.dual {
+	// we only want this to center this in a dual partner layout
+	margin-inline: calc(50% - 34px);
+}

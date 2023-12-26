@@ -2,15 +2,14 @@
  * External dependencies
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { useSelect } from '@wordpress/data';
-import { createElement, useRef } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { createElement, useEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
 import { ProfileItems } from './types';
-import { OnboardingSelector } from './';
 
 export const withOnboardingHydration = ( data: {
 	profileItems: ProfileItems;
@@ -21,38 +20,53 @@ export const withOnboardingHydration = ( data: {
 		( OriginalComponent ) => ( props ) => {
 			const onboardingRef = useRef( data );
 
-			useSelect(
-				// @ts-expect-error // @ts-expect-error registry is not defined in the wp.data typings
-				( select: ( s: string ) => OnboardingSelector, registry ) => {
-					if ( ! onboardingRef.current ) {
-						return;
-					}
-
+			const { isResolvingGroup, hasFinishedResolutionGroup } = useSelect(
+				( select ) => {
 					const { isResolving, hasFinishedResolution } =
 						select( STORE_NAME );
-					const {
-						startResolution,
-						finishResolution,
-						setProfileItems,
-					} = registry.dispatch( STORE_NAME );
-
-					const { profileItems } = onboardingRef.current;
-
-					if (
-						profileItems &&
-						! hydratedProfileItems &&
-						! isResolving( 'getProfileItems', [] ) &&
-						! hasFinishedResolution( 'getProfileItems', [] )
-					) {
-						startResolution( 'getProfileItems', [] );
-						setProfileItems( profileItems, true );
-						finishResolution( 'getProfileItems', [] );
-
-						hydratedProfileItems = true;
-					}
-				},
-				[]
+					return {
+						isResolvingGroup: isResolving( 'getProfileItems', [] ),
+						hasFinishedResolutionGroup: hasFinishedResolution(
+							'getProfileItems',
+							[]
+						),
+					};
+				}
 			);
+
+			const { startResolution, finishResolution, setProfileItems } =
+				useDispatch( STORE_NAME );
+
+			useEffect( () => {
+				if ( ! onboardingRef.current ) {
+					return;
+				}
+
+				const { profileItems } = onboardingRef.current;
+				if ( ! profileItems ) {
+					return;
+				}
+
+				if (
+					profileItems &&
+					! hydratedProfileItems &&
+					// Ensure that profile items have finished resolving to prevent race conditions
+					! isResolvingGroup &&
+					! hasFinishedResolutionGroup
+				) {
+					startResolution( 'getProfileItems', [] );
+					setProfileItems( profileItems, true );
+					finishResolution( 'getProfileItems', [] );
+
+					hydratedProfileItems = true;
+				}
+			}, [
+				finishResolution,
+				setProfileItems,
+				startResolution,
+				isResolvingGroup,
+				hasFinishedResolutionGroup,
+			] );
 
 			return <OriginalComponent { ...props } />;
 		},

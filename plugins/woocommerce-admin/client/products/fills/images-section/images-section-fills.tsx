@@ -38,7 +38,7 @@ export const ImagesSectionFills = () => (
 						</span>
 						<Link
 							className="woocommerce-form-section__header-link"
-							href="https://woocommerce.com/posts/fast-high-quality-product-photos/"
+							href="https://woo.com/posts/fast-high-quality-product-photos/"
 							target="_blank"
 							type="external"
 							onClick={ () => {

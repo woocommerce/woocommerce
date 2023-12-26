@@ -12,6 +12,11 @@ inputs:
         description: The Playwright configuration file to use.
         default: playwright.config.js
 
+outputs:
+    result:
+        description: Whether the test passed or failed.
+        value: ${{ steps.run-e2e-tests.conclusion }}
+
 runs:
     using: composite
     steps:

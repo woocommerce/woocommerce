@@ -121,20 +121,44 @@ describe( 'utils', () => {
 
 	it( 'should get the request identifier with no arguments', () => {
 		const key = getRequestIdentifier( 'CREATE_ITEM' );
-		expect( key ).toBe( 'CREATE_ITEM/[]' );
+		expect( key ).toBe( 'CREATE_ITEM:[]' );
 	} );
 
 	it( 'should get the request identifier with a single argument', () => {
 		const key = getRequestIdentifier( 'CREATE_ITEM', 'string_arg' );
-		expect( key ).toBe( 'CREATE_ITEM/["string_arg"]' );
+		expect( key ).toBe( 'CREATE_ITEM:["string_arg"]' );
 	} );
 
-	it( 'should get the request identifier with multiple arguments', () => {
+	it( 'should get the request identifier with array arguments', () => {
+		const key = getRequestIdentifier( 'CREATE_ITEM', 'string_arg', [
+			'A',
+			'B',
+		] );
+		expect( key ).toBe( 'CREATE_ITEM:[["A","B"],"string_arg"]' );
+	} );
+
+	it( 'should get the request identifier with object arguments', () => {
 		const key = getRequestIdentifier( 'CREATE_ITEM', 'string_arg', {
-			object_property: 'object_value',
+			object_property: { key: 'object_value' },
 		} );
 		expect( key ).toBe(
-			'CREATE_ITEM/["string_arg","{"object_property":"object_value"}"]'
+			'CREATE_ITEM:[{"object_property":{"key":"object_value"}},"string_arg"]'
+		);
+	} );
+
+	it( 'should get the request identifier with any argument', () => {
+		const key = getRequestIdentifier(
+			'CREATE_ITEM',
+			'string_arg',
+			{
+				object_property: { array_property: [ 'A', 'B' ] },
+			},
+			null,
+			100,
+			false
+		);
+		expect( key ).toBe(
+			'CREATE_ITEM:[100,{"object_property":{"array_property":["A","B"]}},false,null,"string_arg"]'
 		);
 	} );
 
@@ -143,7 +167,7 @@ describe( 'utils', () => {
 			b: '2',
 			a: '1',
 		} );
-		expect( key ).toBe( 'CREATE_ITEM/["string_arg","{"a":"1","b":"2"}"]' );
+		expect( key ).toBe( 'CREATE_ITEM:[{"a":"1","b":"2"},"string_arg"]' );
 	} );
 
 	it( 'should directly return the action when the action does not match the resource name', () => {

@@ -85,3 +85,10 @@ export const sortFillsByOrder: Slot.Props[ 'children' ] = ( fills ) => {
 
 	return <Fragment>{ sortedFills }</Fragment>;
 };
+
+export const escapeHTML = ( string: string ) => {
+	return string
+		.replace( /&/g, '&amp;' )
+		.replace( />/g, '&gt;' )
+		.replace( /</g, '&lt;' );
+};

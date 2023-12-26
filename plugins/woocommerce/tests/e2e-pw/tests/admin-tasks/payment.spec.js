@@ -4,13 +4,15 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 test.describe( 'Payment setup task', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeEach( async ( { page } ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
-		);
-		await page.click( 'text=Skip setup store details' );
-		await page.click( 'button >> text=No thanks' );
-		await page.waitForLoadState( 'networkidle' );
+	test.beforeEach( async ( { page, baseURL } ) => {
+		await new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc-admin',
+		} ).post( 'onboarding/profile', {
+			skipped: true,
+		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -32,7 +34,7 @@ test.describe( 'Payment setup task', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await page.click( 'text=Set up payments' );
+		await page.locator( 'text=Set up payments' ).click();
 		await expect(
 			page.locator( '.woocommerce-layout__header-wrapper > h1' )
 		).toHaveText( 'Set up payments' );
@@ -51,13 +53,23 @@ test.describe( 'Payment setup task', () => {
 			.catch( () => {} );
 
 		// fill in bank transfer form
-		await page.fill( '//input[@placeholder="Account name"]', 'Savings' );
-		await page.fill( '//input[@placeholder="Account number"]', '1234' );
-		await page.fill( '//input[@placeholder="Bank name"]', 'Test Bank' );
-		await page.fill( '//input[@placeholder="Sort code"]', '12' );
-		await page.fill( '//input[@placeholder="IBAN"]', '12 3456 7890' );
-		await page.fill( '//input[@placeholder="BIC / Swift"]', 'ABBA' );
-		await page.click( 'text=Save' );
+		await page
+			.locator( '//input[@placeholder="Account name"]' )
+			.fill( 'Savings' );
+		await page
+			.locator( '//input[@placeholder="Account number"]' )
+			.fill( '1234' );
+		await page
+			.locator( '//input[@placeholder="Bank name"]' )
+			.fill( 'Test Bank' );
+		await page.locator( '//input[@placeholder="Sort code"]' ).fill( '12' );
+		await page
+			.locator( '//input[@placeholder="IBAN"]' )
+			.fill( '12 3456 7890' );
+		await page
+			.locator( '//input[@placeholder="BIC / Swift"]' )
+			.fill( 'ABBA' );
+		await page.locator( 'text=Save' ).click();
 
 		// check that bank transfers were set up
 		await expect(
@@ -114,9 +126,11 @@ test.describe( 'Payment setup task', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		// enable COD payment option
-		await page.click(
-			'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
-		);
+		await page
+			.locator(
+				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
+			)
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );

@@ -125,7 +125,7 @@ StaticMockerHack::add_method_mocks([
 
 Inside your test files you can create classes that extend classes marked as `final` thanks to the `BypassFinalsHack` that is registered at bootstrap time. No extra configuration is needed.
 
-If you want to try it out, mark the `WC_Admin_Foobar` in the previos example as `final`, then add the following to the tests file: `class WC_Admin_Foobar_Subclass extends WC_Admin_Foobar {}`. Without the hack you would get a `Class WC_Admin_Foobar_Subclass may not inherit from final class (WC_Admin_Foobar)` error when trying to run the tests. 
+If you want to try it out, mark the `WC_Admin_Foobar` in the previous example as `final`, then add the following to the tests file: `class WC_Admin_Foobar_Subclass extends WC_Admin_Foobar {}`. Without the hack you would get a `Class WC_Admin_Foobar_Subclass may not inherit from final class (WC_Admin_Foobar)` error when trying to run the tests. 
 
 ## How it works under the hood
 

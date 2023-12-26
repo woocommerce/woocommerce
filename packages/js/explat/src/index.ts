@@ -18,6 +18,7 @@ declare global {
 	interface Window {
 		wcTracks: {
 			isEnabled: boolean;
+			enable?: ( cb: () => void ) => void;
 		};
 	}
 }

@@ -33,10 +33,6 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'features',
 		);
 
-		if ( wc_get_container()->get( CustomOrdersTableController::class )->is_feature_visible() ) {
-			$expected[] = 'custom_data_stores';
-		}
-
 		$this->assertEquals( $expected, $section_names );
 	}
 
@@ -119,38 +115,6 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 		}
 
 		$this->assertEquals( $expected, $settings_ids_and_types );
-	}
-
-	/**
-	 * @testdox get_settings('') should take the cart page id from the woocommerce_cart_shortcode_tag filter.
-	 */
-	public function test_get_default_settings_takes_cart_page_id_from_filter() {
-		$original_id = null;
-
-		add_filter(
-			'woocommerce_cart_shortcode_tag',
-			function ( $id ) use ( &$original_id ) {
-				$original_id = $id;
-				return 'foobar';
-			},
-			10,
-			1
-		);
-
-		$sut                 = new WC_Settings_Advanced();
-		$settings            = $sut->get_settings_for_section( '' );
-		$setting             = current(
-			array_filter(
-				$settings,
-				function( $value ) {
-					return 'woocommerce_cart_page_id' === $value['id'];
-				}
-			)
-		);
-		$actual_setting_desc = $setting['desc'];
-
-		$this->assertEquals( 'woocommerce_cart', $original_id );
-		$this->assertEquals( 'Page contents: [foobar]', $actual_setting_desc );
 	}
 
 	/**

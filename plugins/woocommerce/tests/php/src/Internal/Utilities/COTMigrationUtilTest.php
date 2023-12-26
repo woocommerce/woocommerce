@@ -19,11 +19,31 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * @var bool
+	 */
+	private $prev_cot_state;
+
+	/**
 	 * Set-up subject under test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = wc_get_container()->get( COTMigrationUtil::class );
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$cot_controller       = wc_get_container()->get( CustomOrdersTableController::class );
+		$this->prev_cot_state = $cot_controller->custom_orders_table_usage_is_enabled();
+	}
+
+	/**
+	 * Restore the COT state after the test.
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+		parent::tearDown();
 	}
 
 	/**
@@ -78,6 +98,10 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 		$data_sync_mock->method( 'get_sync_status' )->willReturn( array( 'current_pending_count' => 0 ) );
 		$data_sync_mock->method( 'data_sync_is_enabled' )->willReturn( true );
 
+		// This is needed to prevent "Call to private method Mock_DataSynchronizer_xxxx::process_added_option" errors.
+		remove_filter( 'updated_option', array( $data_sync_mock, 'process_updated_option' ), 999, 3 );
+		remove_filter( 'added_option', array( $data_sync_mock, 'process_added_option' ), 999, 2 );
+
 		$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
 		$this->sut      = new COTMigrationUtil();
 		$this->sut->init( $cot_controller, $data_sync_mock );
@@ -95,10 +119,61 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 		$data_sync_mock->method( 'get_sync_status' )->willReturn( array( 'current_pending_count' => 0 ) );
 		$data_sync_mock->method( 'data_sync_is_enabled' )->willReturn( false );
 
+		// This is needed to prevent "Call to private method Mock_DataSynchronizer_xxxx::process_added_option" errors.
+		remove_filter( 'updated_option', array( $data_sync_mock, 'process_updated_option' ), 999, 3 );
+		remove_filter( 'added_option', array( $data_sync_mock, 'process_added_option' ), 999, 2 );
+
 		$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
 		$this->sut      = new COTMigrationUtil();
 		$this->sut->init( $cot_controller, $data_sync_mock );
 		$this->assertFalse( $this->sut->is_custom_order_tables_in_sync() );
 	}
 
+	/**
+	 * @testdox `get_table_for_orders` should return the name of the posts table when HPOS is not in use.
+	 */
+	public function test_get_table_for_orders_posts() {
+		global $wpdb;
+
+		OrderHelper::toggle_cot_feature_and_usage( false );
+
+		$table_name = $this->sut->get_table_for_orders();
+		$this->assertEquals( $wpdb->posts, $table_name );
+	}
+
+	/**
+	 * @testdox `get_table_for_orders` should return the name of the orders table when HPOS is in use.
+	 */
+	public function test_get_table_for_orders_hpos() {
+		global $wpdb;
+
+		OrderHelper::toggle_cot_feature_and_usage( true );
+
+		$table_name = $this->sut->get_table_for_orders();
+		$this->assertEquals( "{$wpdb->prefix}wc_orders", $table_name );
+	}
+
+	/**
+	 * @testdox `get_table_for_order_meta` should return the name of the postmeta table when HPOS is not in use.
+	 */
+	public function test_get_table_for_order_meta_posts() {
+		global $wpdb;
+
+		OrderHelper::toggle_cot_feature_and_usage( false );
+
+		$table_name = $this->sut->get_table_for_order_meta();
+		$this->assertEquals( $wpdb->postmeta, $table_name );
+	}
+
+	/**
+	 * @testdox `get_table_for_order_meta` should return the name of the orders meta table when HPOS is in use.
+	 */
+	public function test_get_table_for_order_meta_hpos() {
+		global $wpdb;
+
+		OrderHelper::toggle_cot_feature_and_usage( true );
+
+		$table_name = $this->sut->get_table_for_order_meta();
+		$this->assertEquals( "{$wpdb->prefix}wc_orders_meta", $table_name );
+	}
 }

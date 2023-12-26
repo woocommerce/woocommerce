@@ -85,7 +85,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the import paramaters.
+	 * Test the import parameters.
 	 */
 	public function test_import_params() {
 		global $wpdb;

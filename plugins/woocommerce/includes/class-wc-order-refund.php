@@ -49,6 +49,8 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @var array
 	 */
 	protected $legacy_datastore_props = array(
+		'_refund_amount',
+		'_refund_reason',
 		'_refunded_by',
 		'_refunded_payment',
 	);

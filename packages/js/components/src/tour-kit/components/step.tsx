@@ -3,7 +3,7 @@
  */
 import { withViewportMatch } from '@wordpress/viewport';
 import { Card, CardBody, CardFooter, CardHeader } from '@wordpress/components';
-import { createElement, useEffect } from '@wordpress/element';
+import { createElement, useEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -60,6 +60,8 @@ const Step: React.FunctionComponent<
 		descriptions[ isViewportMobile ? 'mobile' : 'desktop' ] ??
 		descriptions.desktop;
 
+	const stepRef = useRef< HTMLDivElement | undefined >();
+
 	const focusElementSelector =
 		steps[ currentStepIndex ].focusElement?.[
 			isViewportMobile ? 'mobile' : 'desktop'
@@ -79,11 +81,21 @@ const Step: React.FunctionComponent<
 	useEffect( () => {
 		if ( focusElement ) {
 			setInitialFocusedElement( focusElement );
+		} else {
+			// If no focus element is found, focus the last button in the step so that the user can navigate using keyboard.
+			const buttons = stepRef.current?.querySelectorAll( 'button' );
+			if ( buttons && buttons.length ) {
+				setInitialFocusedElement( buttons[ buttons.length - 1 ] );
+			}
 		}
 	}, [ focusElement, setInitialFocusedElement ] );
 
 	return (
-		<Card className="woocommerce-tour-kit-step" isElevated>
+		<Card
+			ref={ stepRef as React.LegacyRef< HTMLDivElement > }
+			className="woocommerce-tour-kit-step"
+			elevation={ 2 }
+		>
 			<CardHeader isBorderless={ true } size="small">
 				<StepControls onDismiss={ onDismiss } />
 			</CardHeader>

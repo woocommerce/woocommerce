@@ -199,7 +199,8 @@ class OrdersReportTable extends Component {
 							: [],
 						formattedProducts.map( ( product ) => ( {
 							label: sprintf(
-								__( '%s× %s', 'woocommerce' ),
+								/* translators: 1: quantity, 2: product name */
+								__( '%1$s× %2$s', 'woocommerce' ),
 								product.quantity,
 								product.label
 							),
@@ -209,7 +210,8 @@ class OrdersReportTable extends Component {
 					value: formattedProducts
 						.map( ( { quantity, label } ) =>
 							sprintf(
-								__( '%s× %s', 'woocommerce' ),
+								/* translators: %1$s: quantity, %2$s: product name */
+								__( '%1$s× %2$s', 'woocommerce' ),
 								quantity,
 								label
 							)

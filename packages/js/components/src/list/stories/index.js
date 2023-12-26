@@ -72,8 +72,8 @@ export default {
 export const Default = () => {
 	const listItems = [
 		{
-			title: 'WooCommerce.com',
-			href: 'https://woocommerce.com',
+			title: 'Woo.com',
+			href: 'https://woo.com',
 			onClick: logItemClick,
 		},
 		{
@@ -105,8 +105,8 @@ export const BeforeAndAfter = () => {
 		{
 			before: <Gridicon icon="cart" />,
 			after: <Gridicon icon="chevron-right" />,
-			title: 'WooCommerce.com',
-			href: 'https://woocommerce.com',
+			title: 'Woo.com',
+			href: 'https://woo.com',
 			onClick: logItemClick,
 		},
 		{
@@ -143,10 +143,10 @@ export const CustomStyleAndTags = () => {
 		{
 			before: <Gridicon icon="cart" />,
 			after: <Gridicon icon="chevron-right" />,
-			title: 'WooCommerce.com',
-			href: 'https://woocommerce.com',
+			title: 'Woo.com',
+			href: 'https://woo.com',
 			onClick: logItemClick,
-			listItemTag: 'woocommerce.com-link',
+			listItemTag: 'woo.com-link',
 		},
 		{
 			before: <Gridicon icon="my-sites" />,

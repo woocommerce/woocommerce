@@ -57,6 +57,13 @@ export const createResolvers = ( {
 		const urlParameters = getUrlParameters( namespace, query || {} );
 		const resourceQuery = cleanQuery( query || {}, namespace );
 
+		yield controls.dispatch(
+			storeName,
+			'startResolution',
+			`get${ pluralResourceName }TotalCount`,
+			[ query ]
+		);
+
 		// Require ID when requesting specific fields to later update the resource data.
 		if (
 			resourceQuery &&
@@ -98,6 +105,16 @@ export const createResolvers = ( {
 	};
 
 	const getItemsTotalCount = function* ( query?: Partial< ItemQuery > ) {
+		const startedTotalCountUsingGetItems: boolean = yield controls.select(
+			storeName,
+			'hasStartedResolution',
+			`get${ pluralResourceName }`,
+			[ query ]
+		);
+		// Skip resolver as we get the total count from the getItems query as well with same query parameters.
+		if ( startedTotalCountUsingGetItems ) {
+			return;
+		}
 		const totalsQuery = {
 			...( query || {} ),
 			page: 1,

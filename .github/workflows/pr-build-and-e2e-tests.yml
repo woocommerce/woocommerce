@@ -13,7 +13,6 @@ permissions: {}
 
 jobs:
     e2e-tests-run:
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
         permissions:
@@ -28,13 +27,15 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                install: '@woocommerce/plugin-woocommerce...'
+                build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               env:
-                  ENABLE_HPOS: 0
                   WP_ENV_PHP_VERSION: 7.4
-              run: pnpm run env:test
+              run: pnpm env:test
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -96,12 +97,15 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                install: '@woocommerce/plugin-woocommerce...'
+                build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               env:
                   ENABLE_HPOS: 0
-              run: pnpm env:test --filter=woocommerce
+              run: pnpm --filter=@woocommerce/plugin-woocommerce env:test
 
             - name: Run Playwright API tests.
               id: run_playwright_api_tests
@@ -137,6 +141,7 @@ jobs:
 
     k6-tests-run:
         name: Runs k6 Performance tests
+        if: github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -145,14 +150,17 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                install: '@woocommerce/plugin-woocommerce...'
+                build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               env:
                   ENABLE_HPOS: 0
               run: |
-                  pnpm env:dev --filter=woocommerce
-                  pnpm env:performance-init --filter=woocommerce
+                  pnpm --filter=@woocommerce/plugin-woocommerce env:dev
+                  pnpm --filter=@woocommerce/plugin-woocommerce env:performance-init
 
             - name: Install k6
               run: |
@@ -167,6 +175,7 @@ jobs:
         if: |
             always() && 
             ! github.event.pull_request.head.repo.fork &&
+            github.event.pull_request.user.login != 'github-actions[bot]' &&
             (
               contains( needs.*.result, 'success' ) ||
               contains( needs.*.result, 'failure' )
@@ -239,6 +248,7 @@ jobs:
         if: |
             always() && 
             ! github.event.pull_request.head.repo.fork &&
+            github.event.pull_request.user.login != 'github-actions[bot]' &&
             (
               contains( needs.*.result, 'success' ) ||
               contains( needs.*.result, 'failure' )

@@ -14,7 +14,7 @@ const defaultProps = {
 	annualPrice: 120,
 	label: 'Product type label',
 	description: 'Product type description',
-	moreUrl: 'https://woocommerce.com/my-product-type',
+	moreUrl: 'https://woo.com/my-product-type',
 	slug: 'my-product-type',
 };
 

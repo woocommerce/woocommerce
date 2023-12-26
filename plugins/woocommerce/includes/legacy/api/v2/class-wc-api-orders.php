@@ -761,7 +761,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 *
 	 * @param WC_Order $order
 	 * @param array $posted
-	 * @param string $type
+	 * @param string $type Type of address; 'billing' or 'shipping'.
 	 */
 	protected function update_address( $order, $posted, $type = 'billing' ) {
 		foreach ( $posted as $key => $value ) {

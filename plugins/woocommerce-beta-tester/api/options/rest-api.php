@@ -1,11 +1,15 @@
 <?php
 
+use function WP_CLI\Utils\esc_like;
+
+defined( 'ABSPATH' ) || exit;
+
 register_woocommerce_admin_test_helper_rest_route(
 	'/options',
 	'wca_test_helper_get_options',
 	array(
 		'methods' => 'GET',
-		'args'                => array(
+		'args'    => array(
 			'page'     => array(
 				'description'       => 'Current page of the collection.',
 				'type'              => 'integer',
@@ -32,28 +36,39 @@ register_woocommerce_admin_test_helper_rest_route(
 	'wca_test_helper_delete_option',
 	array(
 		'methods' => 'DELETE',
-		'args'                => array(
+		'args'    => array(
 			'option_names' => array(
-				'type'              => 'string',
+				'type' => 'string',
 			),
 		),
 	)
 );
 
+/**
+ * A helper to delete options.
+ *
+ * @param WP_REST_Request $request The full request data.
+ */
 function wca_test_helper_delete_option( $request ) {
 	global $wpdb;
-	$option_names = explode( ',', $request->get_param( 'option_names' ) );
-    $option_names = array_map( function( $option_name ) {
-        return "'" . $option_name . "'";
-    }, $option_names );
+	$option_names  = explode( ',', $request->get_param( 'option_names' ) );
+	$option_tokens = implode( ',', array_fill( 0, count( $option_names ), '%s' ) );
 
-    $option_names = implode( ',', $option_names );
-    $query = "delete from {$wpdb->prefix}options where option_name in ({$option_names})";
-	$wpdb->query( $query );
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->prefix}options WHERE option_name IN ({$option_tokens})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			...$option_names,
+		)
+	);
 
 	return new WP_REST_RESPONSE( null, 204 );
 }
 
+/**
+ * A helper to get options.
+ *
+ * @param WP_REST_Request $request The full request data.
+ */
 function wca_test_helper_get_options( $request ) {
 	global $wpdb;
 
@@ -61,18 +76,24 @@ function wca_test_helper_get_options( $request ) {
 	$page     = $request->get_param( 'page' );
 	$search   = $request->get_param( 'search' );
 
-	$query = "
-        select option_id, option_name, option_value, autoload
-        from {$wpdb->prefix}options
-    ";
+	$query = "SELECT option_id, option_name, option_value, autoload FROM {$wpdb->prefix}options";
 
 	if ( $search ) {
-		$query .= "where option_name like '%{$search}%'";
+		$search = $wpdb->esc_like( $search );
+		$search = "%{$search}%";
+		$query .= ' WHERE option_name LIKE %s';
 	}
 
-	$query .= ' order by option_id desc limit 30';
+	$query .= ' ORDER BY option_id DESC LIMIT %d OFFSET %d';
+	$offset = ( $page - 1 ) * $per_page;
 
-	$options = $wpdb->get_results( $query );
+	if ( $search ) {
+		$query = $wpdb->prepare( $query, $search, $per_page, $offset ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	} else {
+		$query = $wpdb->prepare( $query, $per_page, $offset ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	$options = $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 	return new WP_REST_Response( $options, 200 );
 }

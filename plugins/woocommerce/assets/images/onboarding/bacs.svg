@@ -8,7 +8,7 @@
     <rect width="32" height="32" rx="16" fill="#8E9196" />
     <mask
         id="bacs0"
-        mask-type="alpha"
+        style="mask-type:alpha"
         maskUnits="userSpaceOnUse"
         x="8"
         y="8"
@@ -27,7 +27,7 @@
     </g>
     <mask
         id="bacs1"
-        mask-type="alpha"
+        style="mask-type:alpha"
         maskUnits="userSpaceOnUse"
         x="39"
         y="10"
@@ -52,7 +52,7 @@
     <rect x="64" width="32" height="32" rx="16" fill="#8E9196" />
     <mask
         id="bacs2"
-        mask-type="alpha"
+        style="mask-type:alpha"
         maskUnits="userSpaceOnUse"
         x="72"
         y="8"
