@@ -17,7 +17,7 @@ export { init as initToggle } from './generic/toggle';
 /*
  * Product Field blocks
  */
-export { init as attributesInit } from './product-fields/attributes';
+export { init as initAttributes } from './product-fields/attributes';
 export { init as initCatalogVisibility } from './product-fields/catalog-visibility';
 export { init as initDescription } from './product-fields/description';
 export { init as initDownloads } from './product-fields/downloads';
@@ -41,3 +41,5 @@ export { init as initTag } from './product-fields/tag';
 export { init as initVariationItems } from './product-fields/variation-items';
 export { init as initVariationOptions } from './product-fields/variation-options';
 export { init as initVariations } from './product-fields/variations';
+
+export { init as attributesInit } from './product-fields/attributes'; // deprecated
