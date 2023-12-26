@@ -7,9 +7,6 @@ import React from 'react';
  * Internal dependencies
  */
 import { ButtonWithDropdownMenu } from '../';
-/**
- * Types
- */
 import type { ButtonWithDropdownMenuProps } from '../types';
 
 export default {

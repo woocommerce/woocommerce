@@ -63,7 +63,7 @@ export const ButtonWithDropdownMenu: React.FC<
 						position,
 						offset,
 					} }
-					defaultOpen={ true }
+					defaultOpen={ defaultOpen }
 				/>
 			</FlexItem>
 		</Flex>
