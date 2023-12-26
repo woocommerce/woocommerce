@@ -61,16 +61,6 @@ export function CashRegister( {
 					fill={ colorTwo }
 				/>
 			</G>
-			<defs>
-				<clipPath id="clip0_13540_198076">
-					<rect
-						width="88"
-						height="73.3333"
-						fill="white"
-						transform="translate(0 14.6667)"
-					/>
-				</clipPath>
-			</defs>
 		</SVG>
 	);
 }
