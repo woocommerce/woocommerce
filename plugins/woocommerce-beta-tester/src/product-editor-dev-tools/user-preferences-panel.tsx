@@ -25,22 +25,31 @@ export function UserPreferencesTabPanel( {
 	const { updateUserPreferences, ...userPreferences } = useUserPreferences();
 
 	const update = useCallback(
-		( preferences: UserPreferences | UserPreferenceProp, value? ) => {
+		(
+			preferences: UserPreferences | UserPreferenceProp,
+			value?,
+			force = false
+		) => {
 			const dataToUpdate =
 				typeof preferences === 'string'
 					? { [ preferences ]: value }
 					: preferences;
 
 			/*
-			 * Only update the preferences already defined.
+			 * When force is not True,
+			 * only update the preferences already defined
 			 * @todo: consider to implement straight in the data layer.
 			 */
-			Object.keys( dataToUpdate ).forEach( ( key: string ) => {
-				const userPreferenceKey = key as UserPreferenceProp;
-				if ( ! userPreferences.hasOwnProperty( userPreferenceKey ) ) {
-					delete dataToUpdate[ userPreferenceKey ];
-				}
-			} );
+			if ( ! force ) {
+				Object.keys( dataToUpdate ).forEach( ( key: string ) => {
+					const userPreferenceKey = key as UserPreferenceProp;
+					if (
+						! userPreferences.hasOwnProperty( userPreferenceKey )
+					) {
+						delete dataToUpdate[ userPreferenceKey ];
+					}
+				} );
+			}
 
 			updateUserPreferences( dataToUpdate );
 		},
