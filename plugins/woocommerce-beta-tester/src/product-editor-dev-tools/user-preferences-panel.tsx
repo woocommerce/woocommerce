@@ -11,7 +11,7 @@ import { TabPanel } from './tab-panel';
 
 declare global {
 	interface Window {
-		__wca: object;
+		__wcbt: object;
 	}
 }
 
@@ -57,8 +57,8 @@ export function UserPreferencesTabPanel( {
 	);
 
 	// Expose updateUserPreferences globaly for debugging purposes.
-	window.__wca = {
-		...window.__wca,
+	window.__wcbt = {
+		...window.__wcbt,
 		updateUserPreferences: update,
 		userPreferences,
 	};
