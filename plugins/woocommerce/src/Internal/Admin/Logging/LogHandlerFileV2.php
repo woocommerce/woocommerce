@@ -55,11 +55,6 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 			$source = $this->determine_source();
 		}
 
-		if ( $this->settings->get_file_entry_collapse_lines() ) {
-			// Remove line breaks so the whole entry is on one line in the file.
-			$message = str_replace( PHP_EOL, ' ', $message );
-		}
-
 		$entry = static::format_entry( $timestamp, $level, $message, $context );
 
 		$written = $this->file_controller->write_to_file( $source, $entry, $timestamp );

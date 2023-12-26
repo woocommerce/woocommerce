@@ -257,7 +257,7 @@ class Settings {
 			'<code>wp-config.php</code>'
 		);
 
-		$settings = array(
+		return array(
 			'file_start'    => array(
 				'title' => __( 'File system settings', 'woocommerce' ),
 				'id'    => self::PREFIX . 'settings',
@@ -273,21 +273,6 @@ class Settings {
 				'type' => 'sectionend',
 			),
 		);
-
-		if ( LogHandlerFileV2::class === $this->get_default_handler() ) {
-			$settings['entry_format'] = array(
-				'title'    => __( 'Entry formatting', 'woocommerce' ),
-				'desc'     => __( 'Collapse log entries into one line each', 'woocommerce' ),
-				'desc_tip' => __( 'This ensures the data for each log entry is written to a single line in the log file.', 'woocommerce' ),
-				'id'       => self::PREFIX . 'file_entry_collapse_lines',
-				'type'     => 'checkbox',
-				'value'    => $this->get_file_entry_collapse_lines() ? 'yes' : 'no',
-				'default'  => self::DEFAULTS['file_entry_collapse_lines'] ? 'yes' : 'no',
-				'autoload' => false,
-			);
-		}
-
-		return $settings;
 	}
 
 	/**
@@ -305,7 +290,7 @@ class Settings {
 			"<code>$table</code>"
 		);
 
-		$settings = array(
+		return array(
 			'file_start'     => array(
 				'title' => __( 'Database settings', 'woocommerce' ),
 				'id'    => self::PREFIX . 'settings',
@@ -320,8 +305,6 @@ class Settings {
 				'type' => 'sectionend',
 			),
 		);
-
-		return $settings;
 	}
 
 	/**
