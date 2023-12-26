@@ -3,7 +3,7 @@
  */
 import { useMemo } from '@wordpress/element';
 import classnames from 'classnames';
-import { useBlockProps } from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { Disabled } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown } from '@wordpress/icons';
@@ -95,6 +95,7 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 			{
 				<div { ...blockProps }>
 					<Inspector { ...props } />
+					<InnerBlocks allowedBlocks={ [ 'core/heading' ] } />
 					<Disabled>
 						<div
 							className={ classnames(

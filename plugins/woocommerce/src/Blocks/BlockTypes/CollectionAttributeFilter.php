@@ -133,7 +133,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			empty( $block->context['collectionData']['attribute_counts'] ) ||
 			empty( $attributes['attributeId'] )
 		) {
-			return $content;
+			return '';
 		}
 
 		$product_attribute = wc_get_attribute( $attributes['attributeId'] );
@@ -180,13 +180,14 @@ final class CollectionAttributeFilter extends AbstractBlock {
 		);
 
 		return sprintf(
-			'<div %1$s>%2$s</div>',
+			'<div %1$s>%2$s%3$s</div>',
 			get_block_wrapper_attributes(
 				array(
 					'data-wc-context'     => wp_json_encode( $context ),
 					'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-attribute-filter' ) ),
 				)
 			),
+			$content,
 			$filter_content
 		);
 	}

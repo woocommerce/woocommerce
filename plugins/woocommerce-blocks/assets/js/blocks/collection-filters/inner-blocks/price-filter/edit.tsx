@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import classNames from 'classnames';
 
 /**
@@ -23,6 +23,7 @@ const Edit = ( props: EditProps ) => {
 	return (
 		<div { ...blockProps }>
 			<Inspector { ...props } />
+			<InnerBlocks allowedBlocks={ [ 'core/heading' ] } />
 			<PriceSlider { ...props } />
 		</div>
 	);

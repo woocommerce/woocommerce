@@ -139,10 +139,12 @@ final class CollectionRatingFilter extends AbstractBlock {
 
 		return sprintf(
 			'<div %1$s>
-				<div class="wc-block-rating-filter__controls">%2$s</div>
+				%2$s
+				<div class="wc-block-rating-filter__controls">%3$s</div>
 				<div class="wc-block-rating-filter__actions"></div>
 			</div>',
 			$wrapper_attributes,
+			$content,
 			$input
 		);
 	}

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Disabled } from '@wordpress/components';
@@ -23,6 +23,7 @@ const Edit = ( props: EditProps ) => {
 	return (
 		<div { ...blockProps }>
 			<Inspector { ...props } />
+			<InnerBlocks allowedBlocks={ [ 'core/heading' ] } />
 			<Disabled>
 				<ul
 					className={ classNames( 'wc-block-active-filters__list', {

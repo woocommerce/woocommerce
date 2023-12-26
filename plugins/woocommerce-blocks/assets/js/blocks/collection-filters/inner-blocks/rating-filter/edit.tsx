@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown } from '@wordpress/icons';
 import classnames from 'classnames';
-import { useBlockProps } from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import Rating, {
 	RatingValues,
@@ -21,6 +21,7 @@ import { CheckboxList } from '@woocommerce/blocks-components';
 import FormTokenField from '@woocommerce/base-components/form-token-field';
 import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
 import { useStyleProps } from '@woocommerce/base-hooks';
+import styled from '@emotion/styled';
 
 /**
  * Internal dependencies
@@ -33,7 +34,6 @@ import { useSetWraperVisibility } from '../../../filter-wrapper/context';
 import './editor.scss';
 import { Inspector } from '../attribute-filter/components/inspector-controls';
 import { extractBuiltInColor } from '../../utils';
-import styled from '@emotion/styled';
 
 const NoRatings = () => (
 	<Notice status="warning" isDismissible={ false }>
@@ -197,6 +197,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		<>
 			<Inspector { ...props } />
 			<div { ...blockProps }>
+				<InnerBlocks allowedBlocks={ [ 'core/heading' ] } />
 				<Disabled>
 					{ displayNoProductRatingsNotice && <NoRatings /> }
 					<div

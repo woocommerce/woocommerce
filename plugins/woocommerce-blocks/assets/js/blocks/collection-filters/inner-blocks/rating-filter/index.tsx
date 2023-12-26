@@ -4,7 +4,7 @@
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, starEmpty } from '@wordpress/icons';
 import classNames from 'classnames';
-import { useBlockProps } from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -35,7 +35,9 @@ registerBlockType( metadata, {
 				{ ...useBlockProps.save( {
 					className: classNames( 'is-loading', className ),
 				} ) }
-			/>
+			>
+				<InnerBlocks.Content />
+			</div>
 		);
 	},
 } );
