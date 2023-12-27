@@ -11,7 +11,6 @@ import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
  */
 import edit from './edit';
 import metadata from './block.json';
-import type { Attributes } from './types';
 
 registerBlockType( metadata, {
 	icon: {
@@ -27,5 +26,4 @@ registerBlockType( metadata, {
 	},
 	edit,
 	save: InnerBlocks.Content,
-	},
 } );

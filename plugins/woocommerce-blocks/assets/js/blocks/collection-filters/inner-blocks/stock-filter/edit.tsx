@@ -3,7 +3,11 @@
  */
 import { useMemo } from '@wordpress/element';
 import classnames from 'classnames';
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import {
+	InnerBlocks,
+	useBlockProps,
+	useInnerBlocksProps,
+} from '@wordpress/block-editor';
 import { Disabled } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown } from '@wordpress/icons';
@@ -41,6 +45,15 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 			'wc-block-stock-filter',
 			props.attributes.className
 		),
+	} );
+
+	const innerBlockProps = useInnerBlocksProps( blockProps, {
+		template: [
+			[
+				'core/heading',
+				{ content: __( 'Filter by Stock Status', 'woocommerce' ) },
+			],
+		],
 	} );
 
 	const { className, style } = useStyleProps( props.attributes );
@@ -93,7 +106,7 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 	return (
 		<>
 			{
-				<div { ...blockProps }>
+				<div { ...innerBlockProps }>
 					<Inspector { ...props } />
 					<InnerBlocks allowedBlocks={ [ 'core/heading' ] } />
 					<Disabled>

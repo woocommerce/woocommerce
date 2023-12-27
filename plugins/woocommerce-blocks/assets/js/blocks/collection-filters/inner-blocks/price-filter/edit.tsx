@@ -1,8 +1,13 @@
 /**
  * External dependencies
  */
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import {
+	InnerBlocks,
+	useBlockProps,
+	useInnerBlocksProps,
+} from '@wordpress/block-editor';
 import classNames from 'classnames';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -20,8 +25,17 @@ const Edit = ( props: EditProps ) => {
 		} ),
 	} );
 
+	const innerBlockProps = useInnerBlocksProps( blockProps, {
+		template: [
+			[
+				'core/heading',
+				{ content: __( 'Filter by Price', 'woocommerce' ), level: 3 },
+			],
+		],
+	} );
+
 	return (
-		<div { ...blockProps }>
+		<div { ...innerBlockProps }>
 			<Inspector { ...props } />
 			<InnerBlocks allowedBlocks={ [ 'core/heading' ] } />
 			<PriceSlider { ...props } />

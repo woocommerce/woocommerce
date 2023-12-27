@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import {
 	BlockControls,
 	InnerBlocks,
 	useBlockProps,
+	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
 import {
@@ -25,7 +26,6 @@ import {
 	withSpokenMessages,
 	Notice,
 } from '@wordpress/components';
-import styled from '@emotion/styled';
 
 /**
  * Internal dependencies
@@ -96,6 +96,27 @@ const Edit = ( props: EditProps ) => {
 	} );
 
 	const blockProps = useBlockProps();
+
+	const template = [
+		[
+			'core/heading',
+			{
+				content: attributeObject
+					? sprintf(
+							// translators: %s is the attribute label.
+							__( 'Filter by %s', 'woocommerce' ),
+							attributeObject.label
+					  )
+					: __( 'Filter Products by Attribute', 'woocommerce' ),
+				level: 3,
+			},
+		],
+	];
+
+	const innerBlockProps = useInnerBlocksProps( blockProps, {
+		allowedBlocks: [ 'core/heading' ],
+		template,
+	} );
 
 	useEffect( () => {
 		if ( ! attributeObject?.taxonomy ) {
@@ -188,9 +209,8 @@ const Edit = ( props: EditProps ) => {
 	);
 
 	const Wrapper = ( { children }: { children: ReactNode } ) => (
-		<div { ...blockProps }>
+		<div { ...innerBlockProps }>
 			<Toolbar />
-			<InnerBlocks allowedBlocks={ [ 'core/heading' ] } />
 			{ children }
 		</div>
 	);
