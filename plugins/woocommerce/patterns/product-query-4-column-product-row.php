@@ -5,6 +5,7 @@
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query
  */
+
 ?>
 <!-- wp:query {"query":{"perPage":"4","pages":0,"offset":0,"postType":"product","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceStockStatus":["instock","outofstock","onbackorder"]},"displayLayout":{"type":"flex","columns":4},"namespace":"woocommerce/product-query","layout":{"type":"default"}} -->
 <div class="wp-block-query"><!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template"} -->

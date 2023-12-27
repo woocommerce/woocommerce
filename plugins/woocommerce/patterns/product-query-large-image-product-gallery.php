@@ -5,6 +5,7 @@
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query
  */
+
 ?>
 <!-- wp:group {"style":{"spacing":{"margin":{"top":"0px","bottom":"80px"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group" style="margin-top:0px;margin-bottom:80px">
