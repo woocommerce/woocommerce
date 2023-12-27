@@ -232,6 +232,17 @@ export class EditorUtils {
 		return firstBlockIndex < secondBlockIndex;
 	}
 
+	async waitForSiteEditorFinishLoading() {
+		await this.page
+			.frameLocator( 'iframe[title="Editor canvas"i]' )
+			.locator( 'body > *' )
+			.first()
+			.waitFor();
+		await this.page
+			.locator( '.edit-site-canvas-loader' )
+			.waitFor( { state: 'hidden' } );
+	}
+
 	async setLayoutOption(
 		option:
 			| 'Align Top'
