@@ -232,6 +232,17 @@ export class EditorUtils {
 		return firstBlockIndex < secondBlockIndex;
 	}
 
+	async waitForSiteEditorFinishLoading() {
+		await this.page
+			.frameLocator( 'iframe[title="Editor canvas"i]' )
+			.locator( 'body > *' )
+			.first()
+			.waitFor();
+		await this.page
+			.locator( '.edit-site-canvas-loader' )
+			.waitFor( { state: 'hidden' } );
+	}
+
 	async setLayoutOption(
 		option:
 			| 'Align Top'
@@ -338,5 +349,12 @@ export class EditorUtils {
 			.getByRole( 'button', { name: 'Dismiss this notice' } )
 			.getByText( 'Site updated.' )
 			.waitFor();
+	}
+
+	async publishAndVisitPost() {
+		await this.editor.publishPost();
+		const url = new URL( this.page.url() );
+		const postId = url.searchParams.get( 'post' );
+		await this.page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
 	}
 }

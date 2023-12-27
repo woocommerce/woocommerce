@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Traits;
 
 use Automattic\WooCommerce\Vendor\Detection\MobileDetect;
+use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use Exception;
 use WC_Meta_Data;
 use WC_Order;
@@ -385,13 +386,19 @@ trait OrderAttributionMeta {
 	 * @return array Order count, total spend, and average spend per order.
 	 */
 	private function get_customer_history( $customer_identifier ): array {
+		/*
+		 * Exclude the statuses that aren't valid for the Customers report.
+		 * 'checkout-draft' is the checkout block's draft order status. `any` is added by V2 Orders REST.
+		 * @see /Automattic/WooCommerce/Admin/API/Report/DataStore::get_excluded_report_order_statuses()
+		 */
+		$all_order_statuses = ReportsController::get_order_statuses();
+		$excluded_statuses  = array( 'pending', 'failed', 'cancelled', 'auto-draft', 'trash', 'checkout-draft', 'any' );
 
 		// Get the valid customer orders.
 		$args = array(
 			'limit'  => - 1,
 			'return' => 'objects',
-			// Don't count cancelled or failed orders.
-			'status' => array( 'pending', 'processing', 'on-hold', 'completed', 'refunded' ),
+			'status' => array_diff( $all_order_statuses, $excluded_statuses ),
 			'type'   => 'shop_order',
 		);
 

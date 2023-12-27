@@ -52,7 +52,7 @@ export const PriceSlider = ( { attributes }: EditProps ) => {
 	);
 
 	return (
-		<>
+		<div>
 			<div className="range">
 				<div className="range-bar"></div>
 				<input
@@ -76,6 +76,6 @@ export const PriceSlider = ( { attributes }: EditProps ) => {
 				{ priceMin }
 				{ priceMax }
 			</div>
-		</>
+		</div>
 	);
 };
