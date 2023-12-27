@@ -8,24 +8,15 @@
  * @since   7.8.0
  */
 
-use WC_REST_WCCOM_Site_Installer_Error_Codes as Installer_Error_Codes;
-use WC_REST_WCCOM_Site_Installer_Error as Installer_Error;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API WCCOM System Status Report Controller Class.
  *
- * @extends WC_REST_Controller
+ * @extends WC_REST_WCCOM_Site_Controller
  */
-class WC_REST_WCCOM_Site_SSR_Controller extends WC_REST_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wccom-site/v1';
+class WC_REST_WCCOM_Site_SSR_Controller extends WC_REST_WCCOM_Site_Controller {
 
 	/**
 	 * Route base.
@@ -62,36 +53,8 @@ class WC_REST_WCCOM_Site_SSR_Controller extends WC_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return bool|WP_Error
 	 */
-	public function check_permission( $request ) {
-		$current_user = wp_get_current_user();
-
-		if ( empty( $current_user ) || ( $current_user instanceof WP_User && ! $current_user->exists() ) ) {
-			/**
-			 * This filter allows to provide a custom error message when the user is not authenticated.
-			 *
-			 * @since 7.8.0
-			 */
-			$error = apply_filters(
-				WC_WCCOM_Site::AUTH_ERROR_FILTER_NAME,
-				new Installer_Error( Installer_Error_Codes::NOT_AUTHENTICATED )
-			);
-			return new WP_Error(
-				$error->get_error_code(),
-				$error->get_error_message(),
-				array( 'status' => $error->get_http_code() )
-			);
-		}
-
-		if ( ! user_can( $current_user, 'manage_woocommerce' ) ) {
-			$error = new Installer_Error( Installer_Error_Codes::NO_PERMISSION );
-			return new WP_Error(
-				$error->get_error_code(),
-				$error->get_error_message(),
-				array( 'status' => $error->get_http_code() )
-			);
-		}
-
-		return true;
+	public function user_has_permission( $user ) : bool {
+		return user_can( $user, 'manage_woocommerce' );
 	}
 
 	/**
