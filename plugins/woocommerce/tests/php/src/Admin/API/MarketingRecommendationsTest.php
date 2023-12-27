@@ -24,6 +24,11 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 	 */
 	const ENDPOINT = '/wc-admin/marketing/recommendations';
 
+	/**
+	 * Response mock
+	 *
+	 * @var response.
+	 */
 	private $response_mock_ref;
 
 	/**
@@ -108,6 +113,9 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'pre_http_request', $response_mock_ref, 10, 3 );
 	}
 
+	/**
+	 * Tear down.
+	 */
 	public function tearDown(): void {
 		remove_filter( 'pre_http_request', $response_mock_ref );
 	}

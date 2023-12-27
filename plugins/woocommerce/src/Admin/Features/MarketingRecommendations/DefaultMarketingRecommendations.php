@@ -29,35 +29,35 @@ class DefaultMarketingRecommendations {
 		// Subcategories.
 		$sales_channels = array(
 			'slug' => 'sales-channels',
-			'name' => __( 'Sales channels', 'wccom' ),
+			'name' => __( 'Sales channels', 'woocommerce' ),
 		);
 		$email          = array(
 			'slug' => 'email',
-			'name' => __( 'Email', 'wccom' ),
+			'name' => __( 'Email', 'woocommerce' ),
 		);
 		$automations    = array(
 			'slug' => 'automations',
-			'name' => __( 'Automations', 'wccom' ),
+			'name' => __( 'Automations', 'woocommerce' ),
 		);
 		$conversion     = array(
 			'slug' => 'conversion',
-			'name' => __( 'Conversion', 'wccom' ),
+			'name' => __( 'Conversion', 'woocommerce' ),
 		);
 		$crm            = array(
 			'slug' => 'crm',
-			'name' => __( 'CRM', 'wccom' ),
+			'name' => __( 'CRM', 'woocommerce' ),
 		);
 
 		// Tags.
 		$built_by_woocommerce = array(
 			'slug' => 'built-by-woocommerce',
-			'name' => __( 'Built by WooCommerce', 'wccom' ),
+			'name' => __( 'Built by WooCommerce', 'woocommerce' ),
 		);
 
 		return array(
 			array(
 				'title'          => 'Google Listings and Ads',
-				'description'    => __( 'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.', 'wccom' ),
+				'description'    => __( 'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/google-listings-and-ads/{$utm_string}",
 				'direct_install' => true,
 				'icon'           => "{$icon_dir_url}/google.svg",
@@ -75,7 +75,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'Pinterest for WooCommerce',
-				'description'    => __( 'Grow your business on Pinterest! Use this official plugin to allow shoppers to Pin products while browsing your store, track conversions, and advertise on Pinterest.', 'wccom' ),
+				'description'    => __( 'Grow your business on Pinterest! Use this official plugin to allow shoppers to Pin products while browsing your store, track conversions, and advertise on Pinterest.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/pinterest-for-woocommerce/{$utm_string}",
 				'direct_install' => true,
 				'icon'           => "{$icon_dir_url}/pinterest.svg",
@@ -93,7 +93,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'TikTok for WooCommerce',
-				'description'    => __( 'Create advertising campaigns and reach one billion global users with TikTok for WooCommerce.', 'wccom' ),
+				'description'    => __( 'Create advertising campaigns and reach one billion global users with TikTok for WooCommerce.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/tiktok-for-woocommerce/{$utm_string}",
 				'direct_install' => true,
 				'icon'           => "{$icon_dir_url}/tiktok.jpg",
@@ -109,7 +109,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'MailPoet',
-				'description'    => __( 'Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.', 'wccom' ),
+				'description'    => __( 'Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/mailpoet/{$utm_string}",
 				'direct_install' => true,
 				'icon'           => "{$icon_dir_url}/mailpoet.svg",
@@ -127,7 +127,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'Mailchimp for WooCommerce',
-				'description'    => __( 'Send targeted campaigns, recover abandoned carts and more with Mailchimp.', 'wccom' ),
+				'description'    => __( 'Send targeted campaigns, recover abandoned carts and more with Mailchimp.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/mailchimp-for-woocommerce/{$utm_string}",
 				'direct_install' => true,
 				'icon'           => "{$icon_dir_url}/mailchimp.svg",
@@ -143,7 +143,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'Klaviyo for WooCommerce',
-				'description'    => __( 'Grow and retain customers with intelligent, impactful email and SMS marketing automation and a consolidated view of customer interactions.', 'wccom' ),
+				'description'    => __( 'Grow and retain customers with intelligent, impactful email and SMS marketing automation and a consolidated view of customer interactions.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/klaviyo-for-woocommerce/{$utm_string}",
 				'direct_install' => true,
 				'icon'           => "{$icon_dir_url}/klaviyo.png",
@@ -159,7 +159,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'AutomateWoo',
-				'description'    => __( 'Convert and retain customers with automated marketing that does the hard work for you.', 'wccom' ),
+				'description'    => __( 'Convert and retain customers with automated marketing that does the hard work for you.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/automatewoo/{$utm_string}",
 				'direct_install' => false,
 				'icon'           => "{$icon_dir_url}/automatewoo.svg",
@@ -177,7 +177,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'AutomateWoo Refer a Friend',
-				'description'    => __( 'Boost your organic sales by adding a customer referral program to your WooCommerce store.', 'wccom' ),
+				'description'    => __( 'Boost your organic sales by adding a customer referral program to your WooCommerce store.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/automatewoo-refer-a-friend/{$utm_string}",
 				'direct_install' => false,
 				'icon'           => "{$icon_dir_url}/automatewoo.svg",
@@ -195,7 +195,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'AutomateWoo Birthdays',
-				'description'    => __( 'Delight customers and boost organic sales with a special WooCommerce birthday email (and coupon!) on their special day.', 'wccom' ),
+				'description'    => __( 'Delight customers and boost organic sales with a special WooCommerce birthday email (and coupon!) on their special day.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/automatewoo-birthdays/{$utm_string}",
 				'direct_install' => false,
 				'icon'           => "{$icon_dir_url}/automatewoo.svg",
@@ -213,7 +213,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'Trustpilot Reviews',
-				'description'    => __( 'Collect and showcase verified reviews that consumers trust.', 'wccom' ),
+				'description'    => __( 'Collect and showcase verified reviews that consumers trust.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/trustpilot-reviews/{$utm_string}",
 				'direct_install' => true,
 				'icon'           => "{$icon_dir_url}/trustpilot.png",
@@ -229,7 +229,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'Vimeo for WooCommerce',
-				'description'    => __( 'Turn your product images into stunning videos that engage and convert audiences - no video experience required.', 'wccom' ),
+				'description'    => __( 'Turn your product images into stunning videos that engage and convert audiences - no video experience required.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/vimeo/{$utm_string}",
 				'direct_install' => true,
 				'icon'           => "{$icon_dir_url}/vimeo.png",
@@ -245,7 +245,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'Jetpack CRM for WooCommerce',
-				'description'    => __( 'Harness data from WooCommerce to grow your business. Manage leads, customers, and segments, through automation, quotes, invoicing, billing, and email marketing. Power up your store with CRM.', 'wccom' ),
+				'description'    => __( 'Harness data from WooCommerce to grow your business. Manage leads, customers, and segments, through automation, quotes, invoicing, billing, and email marketing. Power up your store with CRM.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/jetpack-crm/{$utm_string}",
 				'direct_install' => true,
 				'icon'           => "{$icon_dir_url}/jetpack-crm.svg",
@@ -261,7 +261,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'WooCommerce Zapier',
-				'description'    => __( 'Integrate your WooCommerce store with 5000+ cloud apps and services today. Trusted by 11,000+ users.', 'wccom' ),
+				'description'    => __( 'Integrate your WooCommerce store with 5000+ cloud apps and services today. Trusted by 11,000+ users.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/woocommerce-zapier/{$utm_string}",
 				'direct_install' => false,
 				'icon'           => "{$icon_dir_url}/zapier.png",
@@ -277,7 +277,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'Salesforce',
-				'description'    => __( 'Sync your website\'s data like contacts, products, and orders over Salesforce CRM with Salesforce Integration for WooCommerce.', 'wccom' ),
+				'description'    => __( 'Sync your website\'s data like contacts, products, and orders over Salesforce CRM with Salesforce Integration for WooCommerce.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/integration-with-salesforce-for-woocommerce/{$utm_string}",
 				'direct_install' => false,
 				'icon'           => "{$icon_dir_url}/salesforce.jpg",
@@ -293,7 +293,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'Personalized Coupons',
-				'description'    => __( 'Generate dynamic personalized coupons for your customers that increase purchase rates.', 'wccom' ),
+				'description'    => __( 'Generate dynamic personalized coupons for your customers that increase purchase rates.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/automatewoo/{$utm_string}",
 				'direct_install' => false,
 				'icon'           => "{$icon_dir_url}/automatewoo-personalized-coupons.svg",
@@ -307,7 +307,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'Smart Coupons',
-				'description'    => __( 'Powerful, "all in one" solution for gift certificates, store credits, discount coupons and vouchers.', 'wccom' ),
+				'description'    => __( 'Powerful, "all in one" solution for gift certificates, store credits, discount coupons and vouchers.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/smart-coupons/{$utm_string}",
 				'direct_install' => false,
 				'icon'           => "{$icon_dir_url}/woocommerce-smart-coupons.svg",
@@ -321,7 +321,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'URL Coupons',
-				'description'    => __( 'Create a unique URL that applies a discount and optionally adds one or more products to the customer\'s cart.', 'wccom' ),
+				'description'    => __( 'Create a unique URL that applies a discount and optionally adds one or more products to the customer\'s cart.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/url-coupons/{$utm_string}",
 				'direct_install' => false,
 				'icon'           => "{$icon_dir_url}/woocommerce-url-coupons.svg",
@@ -335,7 +335,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'WooCommerce Store Credit',
-				'description'    => __( 'Create "store credit" coupons for customers which are redeemable at checkout.', 'wccom' ),
+				'description'    => __( 'Create "store credit" coupons for customers which are redeemable at checkout.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/store-credit/{$utm_string}",
 				'direct_install' => false,
 				'icon'           => "{$icon_dir_url}/woocommerce-store-credit.svg",
@@ -349,7 +349,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'Free Gift Coupons',
-				'description'    => __( 'Give away a free item to any customer with the coupon code.', 'wccom' ),
+				'description'    => __( 'Give away a free item to any customer with the coupon code.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/free-gift-coupons/{$utm_string}",
 				'direct_install' => false,
 				'icon'           => "{$icon_dir_url}/woocommerce-free-gift-coupons.svg",
@@ -363,7 +363,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'Group Coupons',
-				'description'    => __( 'Coupons for groups. Provides the option to have coupons that are restricted to group members or roles. Works with the free Groups plugin.', 'wccom' ),
+				'description'    => __( 'Coupons for groups. Provides the option to have coupons that are restricted to group members or roles. Works with the free Groups plugin.', 'woocommerce' ),
 				'url'            => "https://woo.com/products/group-coupons/{$utm_string}",
 				'direct_install' => false,
 				'icon'           => "{$icon_dir_url}/woocommerce-group-coupons.svg",
