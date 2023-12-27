@@ -4,14 +4,13 @@
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, starEmpty } from '@wordpress/icons';
 import classNames from 'classnames';
-import { useBlockProps } from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
 import edit from './edit';
 import metadata from './block.json';
-import type { Attributes } from './types';
 
 registerBlockType( metadata, {
 	icon: {
@@ -26,16 +25,5 @@ registerBlockType( metadata, {
 		...metadata.attributes,
 	},
 	edit,
-	// Save the props to post content.
-	save( { attributes }: { attributes: Attributes } ) {
-		const { className } = attributes;
-
-		return (
-			<div
-				{ ...useBlockProps.save( {
-					className: classNames( 'is-loading', className ),
-				} ) }
-			/>
-		);
-	},
+	save: InnerBlocks.Content,
 } );
