@@ -156,16 +156,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		if ( Features::is_enabled( 'product-linked' ) ) {
 			$this->add_group(
 				array(
-					'id'             => $this::GROUP_IDS['LINKED_PRODUCTS'],
-					'order'          => 60,
-					'attributes'     => array(
+					'id'         => $this::GROUP_IDS['LINKED_PRODUCTS'],
+					'order'      => 60,
+					'attributes' => array(
 						'title' => __( 'Linked products', 'woocommerce' ),
 					),
-					'hideConditions' => Features::is_enabled( 'product-linked' ) ? array(
-						array(
-							'expression' => 'editedProduct.type === "grouped"',
-						),
-					) : null,
 				)
 			);
 		}
@@ -1119,7 +1114,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			return;
 		}
 
-		$linked_products_group->add_section(
+		$linked_product_upsells_section = $linked_products_group->add_section(
 			array(
 				'id'         => 'product-linked-upsells-section',
 				'order'      => 10,
@@ -1135,17 +1130,33 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			)
 		);
 
+		$linked_product_upsells_section->add_block(
+			array(
+				'id'         => 'product-linked-upsells',
+				'blockName'  => 'woocommerce/product-upsells',
+				'order'      => 10,
+				'attributes' => array(
+					'property' => 'upsell_ids',
+				),
+			)
+		);
+
 		$linked_products_group->add_section(
 			array(
-				'id'         => 'product-linked-cross-sells-section',
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => 'product-linked-cross-sells-section',
+				'order'          => 20,
+				'attributes'     => array(
 					'title'       => __( 'Cross-sells', 'woocommerce' ),
 					'description' => sprintf(
 						/* translators: %1$s: Learn more about linked products. %2$s: Learn more about linked products.*/
 						__( 'By suggesting complementary products in the cart using cross-sells, you can significantly increase the average order value. %1$sLearn more about linked products.%2$s', 'woocommerce' ),
 						'<br /><a href="https://woo.com/document/related-products-up-sells-and-cross-sells/" target="_blank" rel="noreferrer">',
 						'</a>'
+					),
+				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
 					),
 				),
 			)
