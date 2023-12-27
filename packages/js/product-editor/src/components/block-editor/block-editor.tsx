@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
+import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
@@ -12,6 +12,7 @@ import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
+import { Product } from '@woocommerce/data';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -22,8 +23,6 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	BlockTools,
-	EditorSettings,
-	EditorBlockListSettings,
 	ObserveTyping,
 } from '@wordpress/block-editor';
 // It doesn't seem to notice the External dependency block whn @ts-ignore is added.
@@ -32,37 +31,26 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore store should be included.
 	useEntityBlockEditor,
+	useEntityProp,
 } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
-import { ProductEditorContext } from '../../types';
 import { PostTypeContext } from '../../contexts/post-type-context';
-import { ModalEditor } from '../modal-editor';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
-
-type BlockEditorSettings = Partial<
-	EditorSettings & EditorBlockListSettings
-> & {
-	templates?: Record< string, Template[] >;
-};
-
-type BlockEditorProps = {
-	context: Partial< ProductEditorContext >;
-	productType: string;
-	productId: number;
-	settings: BlockEditorSettings | undefined;
-};
+import { ModalEditor } from '../modal-editor';
+import { ProductEditorSettings } from '../editor';
+import { BlockEditorProps } from './types';
 
 export function BlockEditor( {
 	context,
 	settings: _settings,
-	productType,
+	postType,
 	productId,
 }: BlockEditorProps ) {
-	useConfirmUnsavedProductChanges( productType );
+	useConfirmUnsavedProductChanges( postType );
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
@@ -82,7 +70,7 @@ export function BlockEditor( {
 		return () => window.removeEventListener( 'scroll', wpPinMenuEvent );
 	}, [] );
 
-	const settings: BlockEditorSettings = useMemo( () => {
+	const settings = useMemo< Partial< ProductEditorSettings > >( () => {
 		const mediaSettings = canUserCreateMedia
 			? {
 					mediaUpload( {
@@ -110,27 +98,78 @@ export function BlockEditor( {
 		};
 	}, [ canUserCreateMedia, _settings ] );
 
+	const [ productType ] = useEntityProp< Product[ 'type' ] >(
+		'postType',
+		postType,
+		'type'
+	);
+	const [ productMetaData ] = useEntityProp< Product[ 'meta_data' ] >(
+		'postType',
+		postType,
+		'meta_data'
+	);
+
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
-		productType,
+		postType,
 		{ id: productId }
 	);
 
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	useLayoutEffect( () => {
-		const template = settings?.templates?.[ productType ];
+		// Loads the product template id from the product's meta data.
+		const productTemplateMetaData = productMetaData.find(
+			( metaData ) => metaData.key === '_product_template_id'
+		);
 
-		if ( ! template ) {
+		const productTemplates = settings?.productTemplates ?? [];
+		const productTemplate = productTemplates.find( ( template ) => {
+			if (
+				productTemplateMetaData?.value &&
+				productTemplateMetaData.value === template.id
+			) {
+				return true;
+			}
+
+			if ( ! productType ) {
+				return false;
+			}
+
+			// Fallback to the product type if the product does not have any product
+			// template associated to itself.
+			return template.productData.type === productType;
+		} );
+
+		const layoutTemplates = settings?.layoutTemplates ?? [];
+
+		let layoutTemplateId = productTemplate?.layoutTemplateId;
+		// A product variation is not a product type so we can not use it to
+		// fallback to a default layout template. We use a post type instead.
+		if ( ! layoutTemplateId && postType === 'product_variation' ) {
+			layoutTemplateId = 'product-variation';
+		}
+
+		const layoutTemplate = layoutTemplates.find(
+			( template ) => template.id === layoutTemplateId
+		);
+
+		if ( ! layoutTemplate ) {
 			return;
 		}
 
-		const blockInstances = synchronizeBlocksWithTemplate( [], template );
+		const blockInstances = synchronizeBlocksWithTemplate(
+			[],
+			layoutTemplate.blockTemplates
+		);
 
 		onChange( blockInstances, {} );
 
-		updateEditorSettings( settings ?? {} );
-	}, [ productType, productId ] );
+		updateEditorSettings( {
+			...settings,
+			productTemplate,
+		} as Partial< ProductEditorSettings > );
+	}, [ settings, postType, productMetaData, productType ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( select ) => {
