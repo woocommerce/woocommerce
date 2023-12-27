@@ -20,13 +20,6 @@ defined( 'ABSPATH' ) || exit;
 class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Controller {
 
 	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wccom-site/v2';
-
-	/**
 	 * Route base.
 	 *
 	 * @var string
