@@ -111,7 +111,7 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<div className="woocommerce-add-products-modal__form-group-content">
+			<div className="wp-block-woocommerce-product-linked-list-field__form-group-content">
 				<SelectControl< Product >
 					{ ...selectProps }
 					items={ state.searchedProducts }
@@ -131,10 +131,10 @@ export function Edit( {
 						<Menu
 							isOpen={ isOpen }
 							getMenuProps={ getMenuProps }
-							className="woocommerce-add-products-modal__menu"
+							className="wp-block-woocommerce-product-linked-list-field__menu"
 						>
 							{ isFetching ? (
-								<div className="woocommerce-add-products-modal__menu-loading">
+								<div className="wp-block-woocommerce-product-linked-list-field__menu-loading">
 									<Spinner />
 								</div>
 							) : (
@@ -147,24 +147,24 @@ export function Edit( {
 										getItemProps={ ( options ) => ( {
 											...getItemProps( options ),
 											className:
-												'woocommerce-add-products-modal__menu-item',
+												'wp-block-woocommerce-product-linked-list-field__menu-item',
 										} ) }
 									>
 										<>
 											<div
-												className="woocommerce-add-products-modal__menu-item-image"
+												className="wp-block-woocommerce-product-linked-list-field__menu-item-image"
 												style={ getProductImageStyle(
 													item
 												) }
 											/>
-											<div className="woocommerce-add-products-modal__menu-item-content">
-												<div className="woocommerce-add-products-modal__menu-item-title">
+											<div className="wp-block-woocommerce-product-linked-list-field__menu-item-content">
+												<div className="wp-block-woocommerce-product-linked-list-field__menu-item-title">
 													{ item.name }
 												</div>
 
 												<FormattedPrice
 													product={ item }
-													className="woocommerce-add-products-modal__menu-item-description"
+													className="wp-block-woocommerce-product-linked-list-field__menu-item-description"
 												/>
 											</div>
 										</>
@@ -176,76 +176,80 @@ export function Edit( {
 				</SelectControl>
 			</div>
 
-			<div role="table">
-				<div role="rowgroup">
-					<div role="rowheader">
-						<div role="columnheader">
-							{ __( 'Product', 'woocommerce' ) }
+			{ Boolean( state.linkedProducts.length ) && (
+				<div role="table">
+					<div role="rowgroup">
+						<div role="rowheader">
+							<div role="columnheader">
+								{ __( 'Product', 'woocommerce' ) }
+							</div>
+							<div
+								role="columnheader"
+								aria-label={ __( 'Actions', 'woocommerce' ) }
+							/>
 						</div>
-						<div
-							role="columnheader"
-							aria-label={ __( 'Actions', 'woocommerce' ) }
-						/>
 					</div>
-				</div>
-				<div role="rowgroup">
-					{ state.linkedProducts.map( ( product ) => (
-						<div role="row" key={ product.id }>
-							<div role="cell">
-								<div
-									className="wp-block-woocommerce-product-linked-list-field__product-image"
-									style={ getProductImageStyle( product ) }
-								/>
-								<div className="wp-block-woocommerce-product-linked-list-field__product-info">
-									<a
-										className="wp-block-woocommerce-product-linked-list-field__product-name"
-										href={ getNewPath(
-											{},
-											`/product/${ product.id }`,
-											{}
+					<div role="rowgroup">
+						{ state.linkedProducts.map( ( product ) => (
+							<div role="row" key={ product.id }>
+								<div role="cell">
+									<div
+										className="wp-block-woocommerce-product-linked-list-field__product-image"
+										style={ getProductImageStyle(
+											product
 										) }
+									/>
+									<div className="wp-block-woocommerce-product-linked-list-field__product-info">
+										<a
+											className="wp-block-woocommerce-product-linked-list-field__product-name"
+											href={ getNewPath(
+												{},
+												`/product/${ product.id }`,
+												{}
+											) }
+											target="_blank"
+											rel="noreferrer"
+										>
+											{ product.name }
+										</a>
+										<FormattedPrice
+											product={ product }
+											className="wp-block-woocommerce-product-linked-list-field__product-price"
+										/>
+									</div>
+								</div>
+								<div
+									role="cell"
+									className="wp-block-woocommerce-product-linked-list-field__actions"
+								>
+									<Button
+										icon={ external }
+										size={ 24 }
+										aria-label={ __(
+											'See product page',
+											'woocommerce'
+										) }
+										href={ product.permalink }
 										target="_blank"
 										rel="noreferrer"
-									>
-										{ product.name }
-									</a>
-									<FormattedPrice
-										product={ product }
-										className="wp-block-woocommerce-product-linked-list-field__product-price"
+									/>
+									<Button
+										icon={ closeSmall }
+										size={ 24 }
+										aria-label={ __(
+											'Remove product',
+											'woocommerce'
+										) }
+										onClick={ removeProductClickHandler(
+											product
+										) }
 									/>
 								</div>
 							</div>
-							<div
-								role="cell"
-								className="wp-block-woocommerce-product-linked-list-field__actions"
-							>
-								<Button
-									icon={ external }
-									size={ 24 }
-									aria-label={ __(
-										'See product page',
-										'woocommerce'
-									) }
-									href={ product.permalink }
-									target="_blank"
-									rel="noreferrer"
-								/>
-								<Button
-									icon={ closeSmall }
-									size={ 24 }
-									aria-label={ __(
-										'Remove product',
-										'woocommerce'
-									) }
-									onClick={ removeProductClickHandler(
-										product
-									) }
-								/>
-							</div>
-						</div>
-					) ) }
+						) ) }
+					</div>
 				</div>
-			</div>
+			) }
 		</div>
 	);
 }
