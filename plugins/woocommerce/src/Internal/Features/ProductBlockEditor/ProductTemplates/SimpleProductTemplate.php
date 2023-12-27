@@ -161,11 +161,6 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'attributes'     => array(
 						'title' => __( 'Linked products', 'woocommerce' ),
 					),
-					'hideConditions' => Features::is_enabled( 'product-linked' ) ? array(
-						array(
-							'expression' => 'editedProduct.type === "grouped"',
-						),
-					) : null,
 				)
 			);
 		}
@@ -1146,6 +1141,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						__( 'By suggesting complementary products in the cart using cross-sells, you can significantly increase the average order value. %1$sLearn more about linked products.%2$s', 'woocommerce' ),
 						'<br /><a href="https://woo.com/document/related-products-up-sells-and-cross-sells/" target="_blank" rel="noreferrer">',
 						'</a>'
+					),
+				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
 					),
 				),
 			)
