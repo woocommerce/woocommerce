@@ -27,6 +27,13 @@ abstract class WC_REST_WCCOM_Site_Controller extends WC_REST_Controller {
 	 */
 	protected $namespace = 'wccom-site/v2';
 
+	/**
+	 * Check whether user has permission to access controller's endpoints.
+	 *
+	 * @since 8.6.0
+	 * @param WP_USER $user User object.
+	 * @return bool
+	 */
 	abstract protected function user_has_permission( $user ) : bool;
 
 	/**
@@ -35,10 +42,9 @@ abstract class WC_REST_WCCOM_Site_Controller extends WC_REST_Controller {
 	 * Please note that access to this endpoint is also governed by the WC_WCCOM_Site::authenticate_wccom() method.
 	 *
 	 * @since  7.8.0
-	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return bool|WP_Error
 	 */
-	public function check_permission( ) {
+	public function check_permission() {
 		$current_user = wp_get_current_user();
 
 		if ( empty( $current_user ) || ( $current_user instanceof WP_User && ! $current_user->exists() ) ) {

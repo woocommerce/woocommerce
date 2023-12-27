@@ -8,7 +8,6 @@
  * @since   7.8.0
  */
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -45,13 +44,11 @@ class WC_REST_WCCOM_Site_SSR_Controller extends WC_REST_WCCOM_Site_Controller {
 	}
 
 	/**
-	 * Check permissions.
+	 * Check whether user has permission to access controller's endpoints.
 	 *
-	 * Please note that access to this endpoint is also governed by the WC_WCCOM_Site::authenticate_wccom() method.
-	 *
-	 * @since  7.8.0
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return bool|WP_Error
+	 * @since 8.6.0
+	 * @param WP_USER $user User object.
+	 * @return bool
 	 */
 	public function user_has_permission( $user ) : bool {
 		return user_can( $user, 'manage_woocommerce' );

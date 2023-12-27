@@ -27,7 +27,7 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 	protected $rest_base = 'installer';
 
 	/**
-	 * Register the routes for product reviews.
+	 * Register the routes for plugin auto-installer.
 	 *
 	 * @since 7.7.0
 	 */
@@ -80,7 +80,7 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 	 * Check whether user has permission to access controller's endpoints.
 	 *
 	 * @since 8.6.0
-	 * @param WP_USER $user User object
+	 * @param WP_USER $user User object.
 	 * @return bool
 	 */
 	public function user_has_permission( $user ) : bool {
