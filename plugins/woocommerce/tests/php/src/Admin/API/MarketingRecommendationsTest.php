@@ -49,8 +49,8 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 				return array(
 					'success' => true,
 					'body'    => wp_json_encode(
-						[
-							[
+						array(
+							array(
 								'title'          => 'Example Marketing Channel',
 								'description'    => 'List your products and create ads, etc.',
 								'url'            => 'https://woo.com/products/example-channel',
@@ -58,16 +58,16 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 								'icon'           => 'https://woo.com/example.svg',
 								'product'        => 'example-channel',
 								'plugin'         => 'example-channel/example-channel.php',
-								'categories'     => [ Init::MARKETING_EXTENSION_CATEGORY_SLUG ],
-								'subcategories'  => [
-									[
+								'categories'     => array( Init::MARKETING_EXTENSION_CATEGORY_SLUG ),
+								'subcategories'  => array(
+									array(
 										'slug' => Init::MARKETING_CHANNEL_SUBCATEGORY_SLUG,
 										'name' => 'Sales channels',
-									],
-								],
-								'tags'           => [],
-							],
-							[
+									),
+								),
+								'tags'           => array(),
+							),
+							array(
 								'title'          => 'Example Marketing Extension',
 								'description'    => 'Automate your customer communications, etc.',
 								'url'            => 'https://woo.com/products/example-marketing-extension',
@@ -75,16 +75,16 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 								'icon'           => 'https://woo.com/example-marketing-extension.svg',
 								'product'        => 'example-marketing-extension',
 								'plugin'         => 'example-marketing-extension/example-marketing-extension.php',
-								'categories'     => [ Init::MARKETING_EXTENSION_CATEGORY_SLUG ],
-								'subcategories'  => [
-									[
+								'categories'     => array( Init::MARKETING_EXTENSION_CATEGORY_SLUG ),
+								'subcategories'  => array(
+									array(
 										'slug' => 'email',
 										'name' => 'Email',
-									],
-								],
-								'tags'           => [],
-							],
-							[
+									),
+								),
+								'tags'           => array(),
+							),
+							array(
 								'title'          => 'Example NON Marketing Extension',
 								'description'    => 'Handle coupons, etc.',
 								'url'            => 'https://woo.com/products/example-random-extension',
@@ -92,11 +92,11 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 								'icon'           => 'https://woo.com/example-random-extension.svg',
 								'product'        => 'example-random-extension',
 								'plugin'         => 'example-random-extension/example-random-extension.php',
-								'categories'     => [ 'coupons' ],
-								'subcategories'  => [],
-								'tags'           => [],
-							],
-						]
+								'categories'     => array( 'coupons' ),
+								'subcategories'  => array(),
+								'tags'           => array(),
+							),
+						)
 					),
 				);
 			}
@@ -116,8 +116,8 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 	 * Tests that the marketing channel recommendations are returned by the endpoint.
 	 */
 	public function test_returns_recommended_marketing_channels() {
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT );
-		$request->set_query_params( [ 'category' => 'channels' ] );
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT );
+		$request->set_query_params( array( 'category' => 'channels' ) );
 
 		// $data should contain mocked data from `setUp` method above.
 		$data = rest_get_server()->dispatch( $request )->get_data();
@@ -139,8 +139,8 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 	 * Tests that the marketing extension recommendations are returned by the endpoint.
 	 */
 	public function test_returns_recommended_marketing_extensions() {
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT );
-		$request->set_query_params( [ 'category' => 'extensions' ] );
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT );
+		$request->set_query_params( array( 'category' => 'extensions' ) );
 
 		// $data should contain mocked data from `setUp` method above.
 		$data = rest_get_server()->dispatch( $request )->get_data();
@@ -162,8 +162,8 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 	 * Tests that the endpoint returns an error if the provided category is invalid.
 	 */
 	public function test_returns_error_if_invalid_category_provided() {
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT );
-		$request->set_query_params( [ 'category' => 'test-non-existing-invalid-category' ] );
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT );
+		$request->set_query_params( array( 'category' => 'test-non-existing-invalid-category' ) );
 
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
