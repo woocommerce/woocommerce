@@ -3,12 +3,24 @@
  */
 import { useEntityProp } from '@wordpress/core-data';
 import { Button } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
-import { createElement } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	useCallback,
+	useEffect,
+	useReducer,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { closeSmall, external } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
+import {
+	__experimentalSelectControl as SelectControl,
+	__experimentalSelectControlMenu as Menu,
+	__experimentalSelectControlMenuItem as MenuItem,
+	useAsyncFilter,
+	Spinner,
+} from '@woocommerce/components';
+import { Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 
 /**
@@ -16,7 +28,22 @@ import { getNewPath } from '@woocommerce/navigation';
  */
 import { FormattedPrice } from '../../../components/formatted-price';
 import { ProductEditorBlockEditProps } from '../../../types';
+import {
+	getLoadLinkedProductsDispatcher,
+	getRemoveLinkedProductDispatcher,
+	getSearchProductsDispatcher,
+	getSelectSearchedProductDispatcher,
+	reducer,
+} from './reducer';
 import { LinkedProductListBlockAttributes } from './types';
+
+export function getProductImageStyle( product: Product ) {
+	return product.images.length > 0
+		? {
+				backgroundImage: `url(${ product.images[ 0 ].src })`,
+		  }
+		: undefined;
+}
 
 export function Edit( {
 	attributes,
@@ -24,37 +51,58 @@ export function Edit( {
 }: ProductEditorBlockEditProps< LinkedProductListBlockAttributes > ) {
 	const { property } = attributes;
 	const blockProps = useWooBlockProps( attributes );
+	const [ state, dispatch ] = useReducer( reducer, {
+		linkedProducts: [],
+		searchedProducts: [],
+	} );
+	const loadLinkedProductsDispatcher =
+		getLoadLinkedProductsDispatcher( dispatch );
+	const searchProductsDispatcher = getSearchProductsDispatcher( dispatch );
+	const selectSearchedProductDispatcher =
+		getSelectSearchedProductDispatcher( dispatch );
+	const removeLinkedProductDispatcher =
+		getRemoveLinkedProductDispatcher( dispatch );
+
 	const [ linkedProductIds, setLinkedProductIds ] = useEntityProp< number[] >(
 		'postType',
 		postType,
 		property
 	);
 
-	const linkedProducts = useSelect(
-		( select ) => {
-			const { getProducts } = select( PRODUCTS_STORE_NAME );
+	useEffect( () => {
+		if ( ! state.selectedProduct ) {
+			loadLinkedProductsDispatcher( linkedProductIds );
+		}
+	}, [ linkedProductIds, state.selectedProduct ] );
 
-			if ( linkedProductIds.length === 0 ) {
-				return [];
-			}
-
-			return (
-				getProducts< Product[] >( {
-					include: linkedProductIds,
-				} ) ?? []
-			);
+	const filter = useCallback(
+		( search = '' ) => {
+			return searchProductsDispatcher( linkedProductIds, search );
 		},
 		[ linkedProductIds ]
 	);
 
+	useEffect( () => {
+		filter();
+	}, [ filter ] );
+
+	const { isFetching, ...selectProps } = useAsyncFilter< Product >( {
+		filter,
+	} );
+
+	function handleSelect( product: Product ) {
+		const newLinkedProductIds = selectSearchedProductDispatcher(
+			product,
+			state.linkedProducts
+		);
+		setLinkedProductIds( newLinkedProductIds );
+	}
+
 	function removeProductClickHandler( product: Product ) {
 		return function handleRemoveProductClick() {
-			const newLinkedProductIds = linkedProductIds.reduce< number[] >(
-				( list, current ) => {
-					if ( current === product.id ) return list;
-					return [ ...list, current ];
-				},
-				[]
+			const newLinkedProductIds = removeLinkedProductDispatcher(
+				product,
+				state.linkedProducts
 			);
 
 			setLinkedProductIds( newLinkedProductIds );
@@ -63,6 +111,71 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
+			<div className="woocommerce-add-products-modal__form-group-content">
+				<SelectControl< Product >
+					{ ...selectProps }
+					items={ state.searchedProducts }
+					placeholder={ __( 'Search for products', 'woocommerce' ) }
+					label=""
+					selected={ null }
+					onSelect={ handleSelect }
+					__experimentalOpenMenuOnFocus
+				>
+					{ ( {
+						items,
+						isOpen,
+						highlightedIndex,
+						getMenuProps,
+						getItemProps,
+					} ) => (
+						<Menu
+							isOpen={ isOpen }
+							getMenuProps={ getMenuProps }
+							className="woocommerce-add-products-modal__menu"
+						>
+							{ isFetching ? (
+								<div className="woocommerce-add-products-modal__menu-loading">
+									<Spinner />
+								</div>
+							) : (
+								items.map( ( item, index ) => (
+									<MenuItem< Product >
+										key={ item.id }
+										index={ index }
+										isActive={ highlightedIndex === index }
+										item={ item }
+										getItemProps={ ( options ) => ( {
+											...getItemProps( options ),
+											className:
+												'woocommerce-add-products-modal__menu-item',
+										} ) }
+									>
+										<>
+											<div
+												className="woocommerce-add-products-modal__menu-item-image"
+												style={ getProductImageStyle(
+													item
+												) }
+											/>
+											<div className="woocommerce-add-products-modal__menu-item-content">
+												<div className="woocommerce-add-products-modal__menu-item-title">
+													{ item.name }
+												</div>
+
+												<FormattedPrice
+													product={ item }
+													className="woocommerce-add-products-modal__menu-item-description"
+												/>
+											</div>
+										</>
+									</MenuItem>
+								) )
+							) }
+						</Menu>
+					) }
+				</SelectControl>
+			</div>
+
 			<div role="table">
 				<div role="rowgroup">
 					<div role="rowheader">
@@ -76,16 +189,12 @@ export function Edit( {
 					</div>
 				</div>
 				<div role="rowgroup">
-					{ linkedProducts.map( ( product ) => (
+					{ state.linkedProducts.map( ( product ) => (
 						<div role="row" key={ product.id }>
 							<div role="cell">
 								<div
 									className="wp-block-woocommerce-product-linked-list-field__product-image"
-									style={ {
-										backgroundImage: product.images[ 0 ]
-											? `url(${ product.images[ 0 ].src })`
-											: undefined,
-									} }
+									style={ getProductImageStyle( product ) }
 								/>
 								<div className="wp-block-woocommerce-product-linked-list-field__product-info">
 									<a
