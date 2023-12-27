@@ -26,6 +26,14 @@ import {
 } from './reducer';
 import { LinkedProductListBlockAttributes } from './types';
 
+export function getProductImageStyle( product: Product ) {
+	return product.images.length > 0
+		? {
+				backgroundImage: `url(${ product.images[ 0 ].src })`,
+		  }
+		: undefined;
+}
+
 export function Edit( {
 	attributes,
 	context: { postType },
