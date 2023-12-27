@@ -6,11 +6,7 @@ import { Link } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useInstanceId } from '@wordpress/compose';
-import {
-	createElement,
-	createInterpolateElement,
-	Fragment,
-} from '@wordpress/element';
+import { createElement, createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
