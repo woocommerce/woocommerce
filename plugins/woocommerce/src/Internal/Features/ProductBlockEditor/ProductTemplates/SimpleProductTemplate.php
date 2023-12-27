@@ -270,6 +270,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'label' => __( 'List price', 'woocommerce' ),
 					/* translators: PricingTab: This is a link tag to the pricing tab. */
 					'help'  => __( 'Manage more settings in <PricingTab>Pricing.</PricingTab>', 'woocommerce' ),
+					'tooltip' => __( 'Regular price tooltip', 'woocommerce' ),
 				),
 			)
 		);
@@ -290,6 +291,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'      => 10,
 				'attributes' => array(
 					'label' => __( 'Sale price', 'woocommerce' ),
+					'tooltip' => __( 'Sale tooltip', 'woocommerce' ),
 				),
 			)
 		);
@@ -649,6 +651,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes' => array(
 					'name'  => 'regular_price',
 					'label' => __( 'List price', 'woocommerce' ),
+					'tooltip' => __( 'Regular price tooltip', 'woocommerce' ),
 				),
 			)
 		);
@@ -668,7 +671,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-sale-price-field',
 				'order'      => 10,
 				'attributes' => array(
-					'label' => __( 'Sale price', 'woocommerce' ),
+					'label'   => __( 'Sale price', 'woocommerce' ),
+					'tooltip' => __( 'Sale tooltip', 'woocommerce' ),
 				),
 			)
 		);
