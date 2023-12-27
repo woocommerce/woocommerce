@@ -156,9 +156,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		if ( Features::is_enabled( 'product-linked' ) ) {
 			$this->add_group(
 				array(
-					'id'             => $this::GROUP_IDS['LINKED_PRODUCTS'],
-					'order'          => 60,
-					'attributes'     => array(
+					'id'         => $this::GROUP_IDS['LINKED_PRODUCTS'],
+					'order'      => 60,
+					'attributes' => array(
 						'title' => __( 'Linked products', 'woocommerce' ),
 					),
 				)
@@ -1132,9 +1132,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 
 		$linked_products_group->add_section(
 			array(
-				'id'         => 'product-linked-cross-sells-section',
-				'order'      => 20,
-				'attributes' => array(
+				'id'             => 'product-linked-cross-sells-section',
+				'order'          => 20,
+				'attributes'     => array(
 					'title'       => __( 'Cross-sells', 'woocommerce' ),
 					'description' => sprintf(
 						/* translators: %1$s: Learn more about linked products. %2$s: Learn more about linked products.*/
