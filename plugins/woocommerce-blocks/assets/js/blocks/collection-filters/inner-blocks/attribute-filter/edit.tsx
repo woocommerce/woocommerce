@@ -7,7 +7,6 @@ import {
 	BlockControls,
 	InnerBlocks,
 	useBlockProps,
-	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
 import {
@@ -26,6 +25,7 @@ import {
 	withSpokenMessages,
 	Notice,
 } from '@wordpress/components';
+import { Template } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -97,7 +97,7 @@ const Edit = ( props: EditProps ) => {
 
 	const blockProps = useBlockProps();
 
-	const template = [
+	const template: Template[] = [
 		[
 			'core/heading',
 			{
@@ -112,11 +112,6 @@ const Edit = ( props: EditProps ) => {
 			},
 		],
 	];
-
-	const innerBlockProps = useInnerBlocksProps( blockProps, {
-		allowedBlocks: [ 'core/heading' ],
-		template,
-	} );
 
 	useEffect( () => {
 		if ( ! attributeObject?.taxonomy ) {
@@ -209,7 +204,7 @@ const Edit = ( props: EditProps ) => {
 	);
 
 	const Wrapper = ( { children }: { children: ReactNode } ) => (
-		<div { ...innerBlockProps }>
+		<div { ...blockProps }>
 			<Toolbar />
 			{ children }
 		</div>
@@ -261,6 +256,10 @@ const Edit = ( props: EditProps ) => {
 	return (
 		<Wrapper>
 			<Inspector { ...props } />
+			<InnerBlocks
+				template={ template }
+				allowedBlocks={ [ 'core/heading' ] }
+			/>
 			<Disabled>
 				{ displayStyle === 'dropdown' ? (
 					<AttributeDropdown

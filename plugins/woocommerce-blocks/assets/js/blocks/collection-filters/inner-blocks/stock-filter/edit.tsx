@@ -3,18 +3,14 @@
  */
 import { useMemo } from '@wordpress/element';
 import classnames from 'classnames';
-import {
-	InnerBlocks,
-	useBlockProps,
-	useInnerBlocksProps,
-} from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { Disabled } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown } from '@wordpress/icons';
 import { CheckboxList } from '@woocommerce/blocks-components';
 import Label from '@woocommerce/base-components/filter-element-label';
 import FormTokenField from '@woocommerce/base-components/form-token-field';
-import type { BlockEditProps } from '@wordpress/blocks';
+import type { BlockEditProps, Template } from '@wordpress/blocks';
 import { getSetting } from '@woocommerce/settings';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
 import { useStyleProps } from '@woocommerce/base-hooks';
@@ -47,14 +43,12 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 		),
 	} );
 
-	const innerBlockProps = useInnerBlocksProps( blockProps, {
-		template: [
-			[
-				'core/heading',
-				{ content: __( 'Filter by Stock Status', 'woocommerce' ) },
-			],
+	const template: Template[] = [
+		[
+			'core/heading',
+			{ content: __( 'Filter by Stock Status', 'woocommerce' ) },
 		],
-	} );
+	];
 
 	const { className, style } = useStyleProps( props.attributes );
 	const builtInColor = extractBuiltInColor( className );
@@ -106,9 +100,12 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 	return (
 		<>
 			{
-				<div { ...innerBlockProps }>
+				<div { ...blockProps }>
 					<Inspector { ...props } />
-					<InnerBlocks allowedBlocks={ [ 'core/heading' ] } />
+					<InnerBlocks
+						template={ template }
+						allowedBlocks={ [ 'core/heading' ] }
+					/>
 					<Disabled>
 						<div
 							className={ classnames(

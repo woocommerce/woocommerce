@@ -4,12 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown } from '@wordpress/icons';
 import classnames from 'classnames';
-import {
-	InnerBlocks,
-	useBlockProps,
-	useInnerBlocksProps,
-} from '@wordpress/block-editor';
-import type { BlockEditProps } from '@wordpress/blocks';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import type { BlockEditProps, Template } from '@wordpress/blocks';
 import Rating, {
 	RatingValues,
 } from '@woocommerce/base-components/product-rating';
@@ -73,15 +69,12 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		className: classnames( 'wc-block-rating-filter', className ),
 	} );
 
-	const innerBlockProps = useInnerBlocksProps( blockProps, {
-		allowedBlocks: [ 'core/heading' ],
-		template: [
-			[
-				'core/heading',
-				{ content: __( 'Filter by Rating', 'woocommerce' ), level: 3 },
-			],
+	const template: Template[] = [
+		[
+			'core/heading',
+			{ content: __( 'Filter by Rating', 'woocommerce' ), level: 3 },
 		],
-	} );
+	];
 
 	const isEditor = true;
 
@@ -210,8 +203,11 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 	return (
 		<>
 			<Inspector { ...props } />
-			<div { ...innerBlockProps }>
-				<InnerBlocks { ...innerBlockProps } />
+			<div { ...blockProps }>
+				<InnerBlocks
+					template={ template }
+					allowedBlocks={ [ 'core/heading' ] }
+				/>
 				<Disabled>
 					{ displayNoProductRatingsNotice && <NoRatings /> }
 					<div
