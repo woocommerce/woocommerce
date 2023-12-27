@@ -44,13 +44,14 @@ function useProductMetadata( postType?: string ) {
 		value: string | undefined,
 		id?: number
 	): void {
+		const entry: Metadata< string > = { key, value };
+		if ( id ) {
+			entry.id = id;
+		}
+
 		updateMetadata( [
 			...metadata.filter( ( item ) => item.key !== key ),
-			{
-				key,
-				value,
-				id,
-			},
+			entry,
 		] );
 	}
 
