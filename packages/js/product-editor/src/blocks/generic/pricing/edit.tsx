@@ -6,7 +6,11 @@ import { Link } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useInstanceId } from '@wordpress/compose';
-import { createElement, createInterpolateElement } from '@wordpress/element';
+import {
+	createElement,
+	createInterpolateElement,
+	Fragment,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
@@ -21,13 +25,14 @@ import { useCurrencyInputProps } from '../../../hooks/use-currency-input-props';
 import { PricingBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import { Label } from '../../../components/label/label';
 
 export function Edit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< PricingBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { property, label, help, disabled } = attributes;
+	const { property, label, help, disabled, tooltip } = attributes;
 	const [ price, setPrice ] = useProductEntityProp< string >( property, {
 		postType,
 		fallbackValue: '',
@@ -54,6 +59,7 @@ export function Edit( {
 		BaseControl,
 		'wp-block-woocommerce-product-pricing-field'
 	) as string;
+	const labelToShow = label || __( 'Price', 'woocommerce' );
 
 	return (
 		<div { ...blockProps }>
@@ -63,7 +69,13 @@ export function Edit( {
 					disabled={ disabled }
 					id={ priceId }
 					name={ property }
-					label={ label || __( 'Price', 'woocommerce' ) }
+					label={
+						tooltip ? (
+							<Label label={ labelToShow } tooltip={ tooltip } />
+						) : (
+							labelToShow
+						)
+					}
 				/>
 			</BaseControl>
 		</div>
