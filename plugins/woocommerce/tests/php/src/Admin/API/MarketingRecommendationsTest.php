@@ -49,7 +49,7 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 		Init::delete_specs_transient();
 
 		// Mock the response from woocommerce.com API.
-		$response_mock_ref = function( $preempt, $parsed_args, $url ) {
+		$this->response_mock_ref = function( $preempt, $parsed_args, $url ) {
 			if ( str_contains( $url, 'https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json' ) ) {
 				return array(
 					'success' => true,
@@ -110,14 +110,14 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 		};
 
 		// Make a new request -- this should populate the cache with the fake data.
-		add_filter( 'pre_http_request', $response_mock_ref, 10, 3 );
+		add_filter( 'pre_http_request', $this->response_mock_ref, 10, 3 );
 	}
 
 	/**
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'pre_http_request', $response_mock_ref );
+		remove_filter( 'pre_http_request', $this->response_mock_ref );
 	}
 
 	/**
@@ -135,7 +135,7 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'Example Marketing Channel', $data[0]['title'] );
 
 		// Remove filter to test that a new request should return the cached data.
-		remove_filter( 'pre_http_request', $response_mock_ref );
+		remove_filter( 'pre_http_request', $this->response_mock_ref );
 
 		$data = rest_get_server()->dispatch( $request )->get_data();
 
@@ -158,7 +158,7 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'Example Marketing Extension', $data[0]['title'] );
 
 		// Remove filter to test that a new request should return the cached data.
-		remove_filter( 'pre_http_request', $response_mock_ref );
+		remove_filter( 'pre_http_request', $this->response_mock_ref );
 
 		$data = rest_get_server()->dispatch( $request )->get_data();
 
