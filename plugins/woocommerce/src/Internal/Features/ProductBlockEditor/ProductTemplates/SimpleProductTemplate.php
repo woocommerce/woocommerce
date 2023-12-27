@@ -1114,7 +1114,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			return;
 		}
 
-		$linked_products_group->add_section(
+		$linked_product_upsells_section = $linked_products_group->add_section(
 			array(
 				'id'         => 'product-linked-upsells-section',
 				'order'      => 10,
@@ -1126,6 +1126,17 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'<br /><a href="https://woo.com/document/related-products-up-sells-and-cross-sells/" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
+				),
+			)
+		);
+
+		$linked_product_upsells_section->add_block(
+			array(
+				'id'         => 'product-linked-upsells',
+				'blockName'  => 'woocommerce/product-upsells',
+				'order'      => 10,
+				'attributes' => array(
+					'property' => 'upsell_ids',
 				),
 			)
 		);
