@@ -105,13 +105,13 @@ export type QueryControlProps = {
 };
 
 export enum CoreCollectionNames {
-	PRODUCT_CATALOG = 'woocommerce-blocks/product-collection/product-catalog',
-	CUSTOM = 'woocommerce-blocks/product-collection/custom',
-	BEST_SELLERS = 'woocommerce-blocks/product-collection/best-sellers',
-	FEATURED = 'woocommerce-blocks/product-collection/featured',
-	NEW_ARRIVALS = 'woocommerce-blocks/product-collection/new-arrivals',
-	ON_SALE = 'woocommerce-blocks/product-collection/on-sale',
-	TOP_RATED = 'woocommerce-blocks/product-collection/top-rated',
+	PRODUCT_CATALOG = 'woocommerce/product-collection/product-catalog',
+	CUSTOM = 'woocommerce/product-collection/custom',
+	BEST_SELLERS = 'woocommerce/product-collection/best-sellers',
+	FEATURED = 'woocommerce/product-collection/featured',
+	NEW_ARRIVALS = 'woocommerce/product-collection/new-arrivals',
+	ON_SALE = 'woocommerce/product-collection/on-sale',
+	TOP_RATED = 'woocommerce/product-collection/top-rated',
 }
 
 export enum CoreFilterNames {
