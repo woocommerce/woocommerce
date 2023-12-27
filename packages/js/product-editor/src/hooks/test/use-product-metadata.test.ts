@@ -60,4 +60,26 @@ describe( 'useProductMetadata', () => {
 			},
 		] );
 	} );
+
+	it( 'should update the metadata with new values for a specific key', async () => {
+		const { updateByKey } = renderHook( () => useProductMetadata() ).result
+			.current;
+
+		updateByKey( 'field1', 'value2' );
+
+		expect( mockFnMetadataProp ).toHaveBeenCalledWith( [
+			{
+				key: 'field1',
+				value: 'value2', // updated value
+			},
+			{
+				key: 'field2',
+				value: 'value1',
+			},
+			{
+				key: 'existing_field',
+				value: 'value1',
+			},
+		] );
+	} );
 } );
