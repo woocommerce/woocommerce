@@ -24,8 +24,6 @@ if ( isExperimentalBuild() ) {
 			),
 		},
 		edit,
-		save() {
-			return <InnerBlocks.Content />;
-		},
+		save: InnerBlocks.Content,
 	} );
 }

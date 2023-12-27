@@ -15,8 +15,6 @@ import Edit from './edit';
 if ( isExperimentalBuild() ) {
 	registerBlockType( metadata, {
 		edit: Edit,
-		save() {
-			return <InnerBlocks.Content />;
-		},
+		save: InnerBlocks.Content,
 	} );
 }

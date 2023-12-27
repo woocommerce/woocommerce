@@ -26,18 +26,6 @@ registerBlockType( metadata, {
 		...metadata.attributes,
 	},
 	edit,
-	// Save the props to post content.
-	save( { attributes }: { attributes: Attributes } ) {
-		const { className } = attributes;
-
-		return (
-			<div
-				{ ...useBlockProps.save( {
-					className: classNames( 'is-loading', className ),
-				} ) }
-			>
-				<InnerBlocks.Content />
-			</div>
-		);
+	save: InnerBlocks.Content,
 	},
 } );
