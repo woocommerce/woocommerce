@@ -17,6 +17,8 @@ export function CrossSellsBlockEdit( {
 }: CrossSellsBlockEditComponent ) {
 	const blockProps = useWooBlockProps( attributes );
 
+	console.log( { CrossSellsBlockEdit } );
+
 	const isEmpty = true; // @todo: implement.
 
 	if ( isEmpty ) {
