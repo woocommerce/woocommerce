@@ -28,7 +28,13 @@ export function Edit( {
 	context: { postType },
 }: ProductEditorBlockEditProps< PricingBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { property, label, help, disabled, tooltip } = attributes;
+	const {
+		property,
+		label = __( 'Price', 'woocommerce' ),
+		help,
+		disabled,
+		tooltip,
+	} = attributes;
 	const [ price, setPrice ] = useProductEntityProp< string >( property, {
 		postType,
 		fallbackValue: '',
@@ -55,7 +61,6 @@ export function Edit( {
 		BaseControl,
 		'wp-block-woocommerce-product-pricing-field'
 	) as string;
-	const labelToShow = label || __( 'Price', 'woocommerce' );
 
 	return (
 		<div { ...blockProps }>
@@ -67,9 +72,9 @@ export function Edit( {
 					name={ property }
 					label={
 						tooltip ? (
-							<Label label={ labelToShow } tooltip={ tooltip } />
+							<Label label={ label } tooltip={ tooltip } />
 						) : (
-							labelToShow
+							label
 						)
 					}
 				/>
