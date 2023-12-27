@@ -57,35 +57,35 @@ export function getLoadLinkedProductsDispatcher(
 				},
 			} );
 			return Promise.resolve( [] );
-		} else {
-			dispatch( {
-				type: 'LOADING_LINKED_PRODUCTS',
-				payload: {
-					isLoading: true,
-				},
-			} );
-			return resolveSelect( PRODUCTS_STORE_NAME )
-				.getProducts< Product[] >( {
-					include: linkedProductIds,
-				} )
-				.then( ( response ) => {
-					dispatch( {
-						type: 'SET_LINKED_PRODUCTS',
-						payload: {
-							linkedProducts: response,
-						},
-					} );
-					return response;
-				} )
-				.finally( () => {
-					dispatch( {
-						type: 'LOADING_LINKED_PRODUCTS',
-						payload: {
-							isLoading: false,
-						},
-					} );
-				} );
 		}
+
+		dispatch( {
+			type: 'LOADING_LINKED_PRODUCTS',
+			payload: {
+				isLoading: true,
+			},
+		} );
+		return resolveSelect( PRODUCTS_STORE_NAME )
+			.getProducts< Product[] >( {
+				include: linkedProductIds,
+			} )
+			.then( ( response ) => {
+				dispatch( {
+					type: 'SET_LINKED_PRODUCTS',
+					payload: {
+						linkedProducts: response,
+					},
+				} );
+				return response;
+			} )
+			.finally( () => {
+				dispatch( {
+					type: 'LOADING_LINKED_PRODUCTS',
+					payload: {
+						isLoading: false,
+					},
+				} );
+			} );
 	};
 }
 
