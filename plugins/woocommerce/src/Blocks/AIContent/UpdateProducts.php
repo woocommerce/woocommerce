@@ -1,13 +1,13 @@
 <?php
 
-namespace Automattic\WooCommerce\Blocks\Patterns;
+namespace Automattic\WooCommerce\Blocks\AIContent;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use WP_Error;
 /**
  * Pattern Images class.
  */
-class ProductUpdater {
+class UpdateProducts {
 
 	/**
 	 * The dummy products.
@@ -62,39 +62,18 @@ class ProductUpdater {
 	 * @return array|WP_Error The generated content for the products. An error if the content could not be generated.
 	 */
 	public function generate_content( $ai_connection, $token, $images, $business_description ) {
-		if ( is_wp_error( $images ) ) {
-			return $images;
-		}
-
 		if ( is_wp_error( $token ) ) {
 			return $token;
 		}
 
-		if ( ! isset( $images['images'] ) || ! isset( $images['search_term'] ) ) {
-			$images = get_transient( 'woocommerce_ai_managed_images' );
-		}
+		$images = ContentProcessor::verify_images( $images, $ai_connection, $token, $business_description );
 
-		if ( ! isset( $images['images'] ) || ! isset( $images['search_term'] ) ) {
-			return new \WP_Error( 'images_not_found', __( 'No images provided for generating AI content.', 'woocommerce' ) );
+		if ( is_wp_error( $images ) ) {
+			return $images;
 		}
-
-		// This is required in case something interrupts the execution of the script and the endpoint is called again on retry.
-		set_transient( 'woocommerce_ai_managed_images', $images, 60 );
 
 		if ( empty( $business_description ) ) {
 			return new \WP_Error( 'missing_business_description', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
-		}
-
-		$last_business_description = get_option( 'last_business_description_with_ai_content_generated' );
-
-		if ( $last_business_description === $business_description ) {
-			if ( is_string( $business_description ) && is_string( $last_business_description ) ) {
-				return array(
-					'product_content' => array(),
-				);
-			} else {
-				return new \WP_Error( 'business_description_not_found', __( 'No business description provided for generating AI content.', 'woocommerce' ) );
-			}
 		}
 
 		$dummy_products_to_update = $this->fetch_dummy_products_to_update();
@@ -352,30 +331,6 @@ class ProductUpdater {
 	}
 
 	/**
-	 * Reduce the size of the image for the product to improve performance and
-	 * avoid memory exhaustion errors when uploading them to the media library.
-	 *
-	 * @param string $image_url The image URL.
-	 *
-	 * @return string
-	 */
-	private function adjust_image_size_for_products( $image_url ) {
-		$parsed_url = wp_parse_url( $image_url );
-
-		if ( ! isset( $parsed_url['query'] ) ) {
-			return $image_url;
-		}
-
-		parse_str( $parsed_url['query'], $query_params );
-
-		unset( $query_params['h'], $query_params['w'] );
-		$query_params['w'] = 300;
-		$new_query_string  = http_build_query( $query_params );
-
-		return $parsed_url['scheme'] . '://' . $parsed_url['host'] . $parsed_url['path'] . '?' . $new_query_string;
-	}
-
-	/**
 	 * Assigns the default content for the products.
 	 *
 	 * @param array $dummy_products_to_update The dummy products to update.
@@ -390,7 +345,7 @@ class ProductUpdater {
 			$image_src = $ai_selected_images[ $i ]['URL'] ?? '';
 
 			if ( wc_is_valid_url( $image_src ) ) {
-				$image_src = $this->adjust_image_size_for_products( $ai_selected_images[ $i ]['URL'] );
+				$image_src = ContentProcessor::adjust_image_size( $image_src, 'products' );
 			}
 
 			$image_alt = $ai_selected_images[ $i ]['title'] ?? '';
@@ -400,8 +355,8 @@ class ProductUpdater {
 				'description' => 'A product description',
 				'price'       => 'The product price',
 				'image'       => [
-					'src' => esc_url( $image_src ),
-					'alt' => esc_attr( $image_alt ),
+					'src' => $image_src,
+					'alt' => $image_alt,
 				],
 				'product_id'  => $dummy_products_to_update[ $i ]->get_id(),
 			];
@@ -422,8 +377,10 @@ class ProductUpdater {
 	 * @return array|int|string|\WP_Error
 	 */
 	public function assign_ai_generated_content_to_dummy_products( $ai_connection, $token, $products_information_list, $business_description, $search_term ) {
-		if ( empty( $business_description ) ) {
-			return new \WP_Error( 'missing_store_description', __( 'The store description is required to generate content for your site.', 'woocommerce' ) );
+		$business_description = ContentProcessor::summarize_business_description( $business_description, $ai_connection, $token, 100 );
+
+		if ( is_wp_error( $business_description ) ) {
+			return $business_description;
 		}
 
 		$prompts = [];

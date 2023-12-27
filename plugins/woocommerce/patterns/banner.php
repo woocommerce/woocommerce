@@ -5,7 +5,7 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 $banner_title       = $content['titles'][0]['default'] ?? '';
 $banner_button      = $content['buttons'][0]['default'] ?? '';
