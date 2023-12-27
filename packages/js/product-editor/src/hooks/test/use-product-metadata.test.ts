@@ -69,16 +69,16 @@ describe( 'useProductMetadata', () => {
 
 		expect( mockFnMetadataProp ).toHaveBeenCalledWith( [
 			{
+				key: 'existing_field',
+				value: 'value1',
+			},
+			{
 				key: 'field1',
 				value: 'value2', // updated value
 			},
 			{
 				key: 'field2',
-				value: 'value1',
-			},
-			{
-				key: 'existing_field',
-				value: 'value1',
+				value: 'value2',
 			},
 		] );
 	} );
