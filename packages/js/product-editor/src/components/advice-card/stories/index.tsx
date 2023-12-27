@@ -8,7 +8,7 @@ import React from 'react';
  * Internal dependencies
  */
 import { AdviceCard, AdviceCardProps } from '..';
-import { ShoppingBags } from '../../../images/shopping-bugs';
+import { ShoppingBags } from '../../../images/shopping-bags';
 
 export default {
 	title: 'Product Editor/components/AdviceCard',
