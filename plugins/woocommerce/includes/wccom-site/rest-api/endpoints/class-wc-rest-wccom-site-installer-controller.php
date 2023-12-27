@@ -57,8 +57,15 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 						),
 					),
 				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/reset',
+			array(
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'reset_install' ),
 					'permission_callback' => array( $this, 'check_permission' ),
 					'args'                => array(
