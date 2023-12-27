@@ -46,7 +46,10 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 	const template: Template[] = [
 		[
 			'core/heading',
-			{ content: __( 'Filter by Stock Status', 'woocommerce' ) },
+			{
+				content: __( 'Filter by Stock Status', 'woocommerce' ),
+				level: 3,
+			},
 		],
 	];
 
