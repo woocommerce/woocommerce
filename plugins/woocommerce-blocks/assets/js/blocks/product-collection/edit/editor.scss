@@ -47,18 +47,15 @@ $max-button-width: calc((100% - #{ $total-gap-width }) / #{ $max-columns });
 		display: flex;
 		align-items: flex-start;
 		height: auto;
-		border: 1px solid;
-		border-radius: $universal-border-radius var(--wp-admin-theme-color);
+		border-radius: $universal-border-radius;
 		box-sizing: border-box;
-		box-shadow: none;
 		padding: $gap-smallest $gap-small;
 		margin: 0;
 
 		&.is-primary {
-			border: 2px solid var(--wp-admin-theme-color-darker-20);
+			box-shadow: 0 0 0 2px var(--wp-admin-theme-color, #3858e9);
 			color: var(--wp-admin-theme-color-darker-20);
 			background-color: var(--wc-content-bg, #fff);
-			margin: -1px;
 
 			&:hover {
 				background-color: var(--wc-content-bg, #fff);
