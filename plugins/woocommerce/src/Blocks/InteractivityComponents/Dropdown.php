@@ -18,10 +18,8 @@ class Dropdown {
 		wp_enqueue_script( 'wc-interactivity-dropdown' );
 		wp_enqueue_style( 'wc-interactivity-dropdown' );
 
-		$select_type = $props['select_type'] ?? 'single';
-
-		$selected_items = $props['selected_items'] ?? array();
-
+		$select_type      = $props['select_type'] ?? 'single';
+		$selected_items   = $props['selected_items'] ?? array();
 		$text_color       = $props['text_color'] ?? 'inherit';
 		$text_color_style = "color: {$text_color};";
 
@@ -34,25 +32,17 @@ class Dropdown {
 			'selectType'    => $select_type,
 		);
 
-		$action = $props['action'] ?? '';
+		$action        = $props['action'] ?? '';
+		$namespace     = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) );
+		$wrapper_class = 'multiple' === $select_type ? '' : 'single-selection';
+		$input_id      = wp_unique_id( 'wc-interactivity-dropdown-input-' );
 
-		$dropdown_context = array(
-			'selectedItems' => $selected_items,
-			'isOpen'        => false,
-			'selectType'    => $select_type,
+		wp_add_inline_style(
+			'wc-interactivity-dropdown',
+			"#$input_id::placeholder {
+					$text_color_style
+			}"
 		);
-
-		$action = $props['action'] ?? '';
-
-		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) );
-
-		$wrapper_class = 'multiple' === $select_type ? '' : 'single-selection';
-
-		$input_id = wp_unique_id( 'wc-interactivity-dropdown-input-' );
-
-		$wrapper_class = 'multiple' === $select_type ? '' : 'single-selection';
-
-		$input_id = wp_unique_id( 'wc-interactivity-dropdown-input-' );
 
 		ob_start();
 		?>
@@ -110,12 +100,7 @@ class Dropdown {
 										</button>
 									</span>
 								<?php } ?>
-							<?php } ?>
-							<style>
-								#<?php echo esc_html( $input_id ); ?>::placeholder {
-									<?php echo esc_attr( $text_color_style ); ?>
-								}
-							</style>
+							<?php } ?>							
 							<input 
 								id="<?php echo esc_attr( $input_id ); ?>" 
 								readonly
