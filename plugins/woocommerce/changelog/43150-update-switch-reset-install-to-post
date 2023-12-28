@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Improve availability of rest installation endpoint by changing the request method.
+Improve availability of the reset installation process endpoint by changing request method.
