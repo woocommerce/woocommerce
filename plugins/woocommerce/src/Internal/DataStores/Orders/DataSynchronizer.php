@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\BatchProcessing\{ BatchProcessingController, BatchProcessorInterface };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
@@ -348,12 +349,15 @@ class DataSynchronizer implements BatchProcessorInterface {
 		 * @param string[] List of order properties or meta keys.
 		 * @since 8.6.0
 		 */
-		return apply_filters(
-			'woocommerce_hpos_sync_ignored_order_props',
+		$ignored_props = apply_filters( 'woocommerce_hpos_sync_ignored_order_props', array() );
+		$ignored_props = array_filter( array_map( 'trim', array_filter( $ignored_props, 'is_string' ) ) );
+
+		return array_merge(
+			$ignored_props,
 			array(
 				'_paid_date', // This has been deprecated and replaced by '_date_paid' in the CPT datastore.
 				'_completed_date', // This has been deprecated and replaced by '_date_completed' in the CPT datastore.
-				'_edit_lock',
+				EditLock::META_KEY_NAME,
 			)
 		);
 	}
