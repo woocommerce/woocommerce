@@ -30,16 +30,46 @@ class WC_Orders_Tracking {
 
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_created_date_change' ), 10 );
 
-		add_action( 'load-edit.php', array( $this, 'track_order_search' ) );
-		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_order_search' ) ); // HPOS.
+		add_action( 'load-edit.php', array( $this, 'track_search_in_orders_list' ) );
+		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_search_in_orders_list' ) ); // HPOS.
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_order_tracking_scripts' ) );
 	}
 
 	/**
 	 * Send a track event when on the Order Listing page, and search results are being displayed.
+	 *
+	 * @deprecated 8.6.0
+	 *
+	 * @param array  $order_ids Array of order_ids that are matches for the search.
+	 * @param string $term The string that was used in the search.
+	 * @param array  $search_fields Fields that were used in the original search.
 	 */
-	public function track_order_search() {
+	public function track_order_search( $order_ids, $term, $search_fields ) {
+		wc_deprecated_function( __METHOD__, '8.6.0', 'WC_Orders_Tracking::track_search_in_orders_list' );
+
+		// Since `woocommerce_shop_order_search_results` can run in the front-end context, exit if get_current_screen isn't defined.
+		if ( ! function_exists( 'get_current_screen' ) ) {
+			return $order_ids;
+		}
+
+		$screen = get_current_screen();
+
+		// We only want to record this track when the filter is executed on the order listing page.
+		if ( 'edit-shop_order' === $screen->id ) {
+			// we are on the order listing page, and query results are being shown.
+			WC_Tracks::record_event( 'orders_view_search' );
+		}
+
+		return $order_ids;
+	}
+
+	/**
+	 * Send a track event when on the Order Listing page, and search results are being displayed.
+	 *
+	 * @since 8.6.0
+	 */
+	public function track_search_in_orders_list() {
 		if ( ! OrderUtil::is_order_list_table_screen() || empty( $_REQUEST['s'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
