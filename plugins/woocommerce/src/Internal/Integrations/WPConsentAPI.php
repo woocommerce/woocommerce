@@ -18,11 +18,11 @@ class WPConsentAPI {
 
 
 	/**
-     * Identifier of the consent category used for order attribution.
+	 * Identifier of the consent category used for order attribution.
 	 *
 	 * @var string
 	 */
-	public static $CONSENT_CATEGORY = 'marketing';
+	public static $consent_category = 'marketing';
 
 	/**
 	 * Register the consent API.
@@ -67,7 +67,7 @@ class WPConsentAPI {
 		add_filter(
 			'wc_order_attribution_allow_tracking',
 			function() {
-				return function_exists( 'wp_has_consent' ) && wp_has_consent( self::$CONSENT_CATEGORY );
+				return function_exists( 'wp_has_consent' ) && wp_has_consent( self::$consent_category );
 			}
 		);
 	}
@@ -104,7 +104,7 @@ class WPConsentAPI {
 			'wp-consent-api-integration',
 			sprintf(
 				'window.wc_order_attribution.params.consentCategory = %s;',
-				wp_json_encode( self::$CONSENT_CATEGORY )
+				wp_json_encode( self::$consent_category )
 			),
 			'before'
 		);
