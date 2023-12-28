@@ -110,4 +110,44 @@ class LayoutTemplateRegistryTest extends WC_Unit_Test_Case {
 			$this->assertInstanceOf( $template_info['class_name'], $layout_template );
 		}
 	}
+
+	/**
+	 * Test instantiating layout templates with area query param.
+	 */
+	public function test_instantiate_with_area_query_param() {
+		foreach ( $this->layout_templates_to_register as $template_id => $template_info ) {
+			$this->layout_template_registry->register( $template_id, $template_info['area'], $template_info['class_name'] );
+		}
+
+		$layout_templates = $this->layout_template_registry->instantiate_layout_templates(
+			array( 'area' => 'product-form' )
+		);
+
+		$this->assertCount( 2, $layout_templates );
+
+		foreach ( $layout_templates as $layout_template ) {
+			$template_info = $this->layout_templates_to_register[ $layout_template->get_id() ];
+			$this->assertInstanceOf( $template_info['class_name'], $layout_template );
+		}
+	}
+
+	/**
+	 * Test instantiating layout templates with id query param.
+	 */
+	public function test_instantiate_with_id_query_param() {
+		foreach ( $this->layout_templates_to_register as $template_id => $template_info ) {
+			$this->layout_template_registry->register( $template_id, $template_info['area'], $template_info['class_name'] );
+		}
+
+		$layout_templates = $this->layout_template_registry->instantiate_layout_templates(
+			array( 'id' => 'simple-product' )
+		);
+
+		$this->assertCount( 1, $layout_templates );
+
+		foreach ( $layout_templates as $layout_template ) {
+			$template_info = $this->layout_templates_to_register[ $layout_template->get_id() ];
+			$this->assertInstanceOf( $template_info['class_name'], $layout_template );
+		}
+	}
 }
