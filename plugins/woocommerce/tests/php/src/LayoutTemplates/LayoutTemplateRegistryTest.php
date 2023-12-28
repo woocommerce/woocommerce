@@ -150,4 +150,21 @@ class LayoutTemplateRegistryTest extends WC_Unit_Test_Case {
 			$this->assertInstanceOf( $template_info['class_name'], $layout_template );
 		}
 	}
+
+	/**
+	 * Test layout templates are only instantiated once.
+	 */
+	public function test_cached_instances() {
+		$this->layout_template_registry->register( 'test-layout-template', 'test', TestLayoutTemplate::class );
+
+		$layout_templates = $this->layout_template_registry->instantiate_layout_templates(
+			array( 'id' => 'test-layout-template' )
+		);
+
+		$layout_templates_again = $this->layout_template_registry->instantiate_layout_templates(
+			array( 'id' => 'test-layout-template' )
+		);
+
+		$this->assertSame( $layout_templates_again[0], $layout_templates[0] );
+	}
 }
