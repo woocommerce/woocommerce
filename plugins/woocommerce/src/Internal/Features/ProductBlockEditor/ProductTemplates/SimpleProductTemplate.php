@@ -1175,7 +1175,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 							'Tip: By suggesting complementary products in the cart using cross-sells, you can significantly increase the average order value.',
 							'woocommerce'
 						),
-						'isDismissible' => false,
+						'isDismissible' => true,
 					),
 				),
 			)

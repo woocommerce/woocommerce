@@ -1,25 +1,17 @@
 /**
  * External dependencies
  */
+import { Button } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import {
-	Button,
-	Card,
-	CardBody,
-	CardFooter,
-	CardHeader,
-} from '@wordpress/components';
 import { close } from '@wordpress/icons';
 import { useInstanceId } from '@wordpress/compose';
 import { useUserPreferences } from '@woocommerce/data';
 
-export interface AdviceCardProps {
-	tip?: string;
-	isDismissible?: boolean;
-	onDismiss?: () => void;
-	image?: React.ReactNode;
-}
+/**
+ * Internal dependencies
+ */
+import { AdviceCardProps } from './types';
 
 export const AdviceCard: React.FC< AdviceCardProps > = ( {
 	tip,
@@ -56,19 +48,27 @@ export const AdviceCard: React.FC< AdviceCardProps > = ( {
 	}
 
 	return (
-		<Card className="woocommerce-advice-card">
-			{ isDismissible && (
-				<CardHeader>
+		<div className="woocommerce-advice-card">
+			<div className="woocommerce-advice-card__body">
+				{ isDismissible && (
 					<Button
 						className="woocommerce-advice-card__dismiss-button"
 						onClick={ onDismiss }
 						icon={ close }
 						label={ __( 'Dismiss', 'woocommerce' ) }
 					/>
-				</CardHeader>
-			) }
-			<CardBody>{ image }</CardBody>
-			{ tip && tip.length > 0 && <CardFooter>{ tip }</CardFooter> }
-		</Card>
+				) }
+
+				{ image && (
+					<div className="woocommerce-advice-card__image">
+						{ image }
+					</div>
+				) }
+
+				{ Boolean( tip?.length ) && (
+					<p className="woocommerce-advice-card__tip">{ tip }</p>
+				) }
+			</div>
+		</div>
 	);
 };
