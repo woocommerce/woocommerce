@@ -205,7 +205,7 @@ class WC_Orders_Tracking {
 
 		if (
 			( $post_edit_page['path'] === $referring_page['path'] ) &&
-			( isset( $post_edit_page['query'] ) || false !== strpos( $referring_page['query'], $post_edit_page['query'] ) ) &&
+			( ! isset( $post_edit_page['query'] ) || false !== strpos( $referring_page['query'], $post_edit_page['query'] ) ) &&
 			( isset( $referring_args['action'] ) && 'edit' === $referring_args['action'] ) &&
 			'shop_order' === OrderUtil::get_order_type( $order_id )
 		) {
