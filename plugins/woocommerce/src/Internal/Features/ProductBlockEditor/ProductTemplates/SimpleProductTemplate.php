@@ -1114,7 +1114,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			return;
 		}
 
-		$linked_product_upsells_section = $linked_products_group->add_section(
+		$linked_products_group->add_section(
 			array(
 				'id'         => 'product-linked-upsells-section',
 				'order'      => 10,
@@ -1139,18 +1139,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			)
 		);
 
-		$linked_product_upsells_section->add_block(
-			array(
-				'id'         => 'product-linked-upsells',
-				'blockName'  => 'woocommerce/product-upsells',
-				'order'      => 10,
-				'attributes' => array(
-					'property' => 'upsell_ids',
-				),
-			)
-		);
-
-		$linked_product_cross_sells_section = $linked_products_group->add_section(
+		$linked_products_group->add_section(
 			array(
 				'id'             => 'product-linked-cross-sells-section',
 				'order'          => 20,
@@ -1167,17 +1156,6 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					array(
 						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
 					),
-				),
-			)
-		);
-
-		$linked_product_cross_sells_section->add_block(
-			array(
-				'id'         => 'product-linked-cross-sells',
-				'blockName'  => 'woocommerce/product-cross-sells',
-				'order'      => 10,
-				'attributes' => array(
-					'property' => 'upsell_ids',
 				),
 			)
 		)->add_block(
