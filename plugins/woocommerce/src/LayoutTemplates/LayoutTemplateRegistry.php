@@ -24,6 +24,13 @@ final class LayoutTemplateRegistry {
 	protected $layout_templates_info = array();
 
 	/**
+	 * Layout template instances.
+	 *
+	 * @var array
+	 */
+	protected $layout_template_instances = array();
+
+	/**
 	 * Get the instance of the class.
 	 */
 	public static function get_instance(): LayoutTemplateRegistry {
@@ -101,7 +108,18 @@ final class LayoutTemplateRegistry {
 	 * @param string $class_name Class name of the layout template.
 	 */
 	private function get_layout_template_instance( $class_name ) {
-		return new $class_name();
+		$layout_template_instance = isset( $this->layout_template_instances[ $class_name ] )
+			? $this->layout_template_instances[ $class_name ]
+			: null;
+
+		if ( ! empty( $layout_template_instance ) ) {
+			return $layout_template_instance;
+		}
+
+		$layout_template_instance                       = new $class_name();
+		$this->layout_template_instances[ $class_name ] = $layout_template_instance;
+
+		return $layout_template_instance;
 	}
 
 	/**
