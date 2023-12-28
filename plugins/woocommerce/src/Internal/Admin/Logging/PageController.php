@@ -400,6 +400,17 @@ class PageController {
 				?>
 			<?php endwhile; ?>
 		</section>
+		<script>
+			// Clear the line number hash and highlight with a click.
+			document.documentElement.addEventListener( 'click', ( event ) => {
+				if ( window.location.hash && ! event.target.classList.contains( 'line-anchor' ) ) {
+					let scrollPos = document.documentElement.scrollTop;
+					window.location.hash = '';
+					document.documentElement.scrollTop = scrollPos;
+					history.replaceState( null, '', window.location.pathname + window.location.search );
+				}
+			} );
+		</script>
 		<?php
 	}
 
