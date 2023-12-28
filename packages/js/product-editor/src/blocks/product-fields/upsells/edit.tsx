@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { AdviceCard } from '../../../components/advice-card';
-import { ShoppingBags } from '../../../images/shopping-bugs';
+import { ShoppingBags } from '../../../images/shopping-bags';
 import type { UpsellsBlockEditComponent } from './types';
 
 export function UpsellsBlockEdit( { attributes }: UpsellsBlockEditComponent ) {
