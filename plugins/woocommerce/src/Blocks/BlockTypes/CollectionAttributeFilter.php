@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * CollectionAttributeFilter class.
@@ -132,7 +133,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			empty( $block->context['collectionData']['attribute_counts'] ) ||
 			empty( $attributes['attributeId'] )
 		) {
-			return $content;
+			return '';
 		}
 
 		$product_attribute = wc_get_attribute( $attributes['attributeId'] );
@@ -179,13 +180,14 @@ final class CollectionAttributeFilter extends AbstractBlock {
 		);
 
 		return sprintf(
-			'<div %1$s>%2$s</div>',
+			'<div %1$s>%2$s%3$s</div>',
 			get_block_wrapper_attributes(
 				array(
 					'data-wc-context'     => wp_json_encode( $context ),
 					'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-attribute-filter' ) ),
 				)
 			),
+			$content,
 			$filter_content
 		);
 	}
@@ -197,6 +199,9 @@ final class CollectionAttributeFilter extends AbstractBlock {
 	 * @param bool  $attributes Block attributes.
 	 */
 	private function render_attribute_dropdown( $options, $attributes ) {
+		$text_color_class_and_style = StyleAttributesUtils::get_text_color_class_and_style( $attributes );
+		$text_color                 = $text_color_class_and_style['value'] ?? '';
+
 		$list_items    = array();
 		$selected_item = array();
 
@@ -218,6 +223,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 				'items'         => $list_items,
 				'action'        => 'woocommerce/collection-attribute-filter::actions.navigate',
 				'selected_item' => $selected_item,
+				'text_color'    => $text_color,
 			)
 		);
 	}

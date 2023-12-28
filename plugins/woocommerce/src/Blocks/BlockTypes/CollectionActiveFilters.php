@@ -49,7 +49,7 @@ final class CollectionActiveFilters extends AbstractBlock {
 		$active_filters = apply_filters( 'collection_active_filters_data', array(), $this->get_filter_query_params( $query_id ) );
 
 		if ( empty( $active_filters ) ) {
-			return $content;
+			return '';
 		}
 
 		$context = array(
@@ -68,8 +68,8 @@ final class CollectionActiveFilters extends AbstractBlock {
 		ob_start();
 		?>
 
-		<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		<div <?php echo $wrapper_attributes; ?>>
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+			<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<ul class="wc-block-active-filters__list %3$s">
 				<?php foreach ( $active_filters as $filter ) : ?>
 				<li>
