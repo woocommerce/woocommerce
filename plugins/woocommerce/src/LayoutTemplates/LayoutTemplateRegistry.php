@@ -88,11 +88,20 @@ final class LayoutTemplateRegistry {
 
 		$class_names = $this->get_class_names( $query_params );
 		foreach ( $class_names as $class_name ) {
-			$layout_template    = new $class_name();
+			$layout_template    = $this->get_layout_template_instance( $class_name );
 			$layout_templates[] = $layout_template;
 		}
 
 		return $layout_templates;
+	}
+
+	/**
+	 * Instantiate a single layout template and return it.
+	 *
+	 * @param string $class_name Class name of the layout template.
+	 */
+	private function get_layout_template_instance( $class_name ) {
+		return new $class_name();
 	}
 
 	/**
