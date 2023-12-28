@@ -92,7 +92,6 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 			templateApiUtils,
 			editorUtils,
 		} );
-		await pageObject.createNewPostAndInsertBlock();
 		await use( pageObject );
 	},
 } );
