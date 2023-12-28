@@ -298,7 +298,7 @@ const es_ES = {
     'Save $50.00': 'Ahorra $50.00',
     'Save address': 'Guardar dirección',
     'Save attributes': 'Guardar atributos',
-    'Save changes': 'Guardar los cambios',
+    'Save changes': 'Guardar cambios',
     'Save shipping classes': 'Guardar clases de envío',
     'Search for a product…': 'Busca un producto…',
     '"Search for a product…"': '"Busca un producto…"',
