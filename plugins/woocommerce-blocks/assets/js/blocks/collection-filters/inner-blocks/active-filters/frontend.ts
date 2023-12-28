@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { store, navigate, getContext } from '@woocommerce/interactivity';
+import { store, getContext } from '@woocommerce/interactivity';
+
+/**
+ * Internal dependencies
+ */
+import { navigate } from '../../utils';
 
 type ActiveFiltersContext = {
 	queryId: number;
