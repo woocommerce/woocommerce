@@ -5,20 +5,18 @@
 	"title": "Collection Attribute Filter",
 	"description": "Enable customers to filter the product grid by selecting one or more attributes, such as color.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 2,
-	"ancestor": [
-		"woocommerce/collection-filters"
-	],
+	"ancestor": [ "woocommerce/collection-filters" ],
 	"supports": {
-		"interactivity": true
+		"interactivity": true,
+		"color": {
+			"text": true,
+			"background": false
+		}
 	},
-	"usesContext": [
-		"collectionData"
-	],
+	"usesContext": [ "collectionData" ],
 	"attributes": {
 		"queryParam": {
 			"type": "object",

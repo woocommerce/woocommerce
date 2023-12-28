@@ -116,7 +116,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 			empty( $block->context['collectionData'] ) ||
 			empty( $block->context['collectionData']['price_range'] )
 		) {
-			return $content;
+			return '';
 		}
 
 		$price_range = $block->context['collectionData']['price_range'];
@@ -147,7 +147,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 
 		// Max range shouldn't be 0.
 		if ( ! $max_range ) {
-			return $content;
+			return '';
 		}
 
 		// CSS variables for the range bar style.
@@ -197,6 +197,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 		ob_start();
 		?>
 			<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+				<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<div data-wc-context="<?php echo esc_attr( wp_json_encode( $data ) ); ?>" >
 					<div
 						class="range"
