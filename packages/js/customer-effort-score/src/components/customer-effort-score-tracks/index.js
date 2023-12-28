@@ -84,15 +84,6 @@ function _CustomerEffortScoreTracks( {
 		return null;
 	}
 
-	const onNoticeShown = () => {
-		recordEvent( 'ces_snackbar_view', {
-			action,
-			store_age: storeAgeInWeeks,
-			ces_location: 'inside',
-			...trackProps,
-		} );
-	};
-
 	const addActionToShownOption = () => {
 		updateOptions( {
 			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
@@ -100,6 +91,16 @@ function _CustomerEffortScoreTracks( {
 				...( cesShownForActions || [] ),
 			],
 		} );
+	};
+
+	const onNoticeShown = () => {
+		recordEvent( 'ces_snackbar_view', {
+			action,
+			store_age: storeAgeInWeeks,
+			ces_location: 'inside',
+			...trackProps,
+		} );
+		addActionToShownOption();
 	};
 
 	const onNoticeDismissed = () => {
