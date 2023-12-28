@@ -20,6 +20,7 @@ import { AdviceCard } from '../../../components/advice-card';
 import { ShoppingBags } from '../../../images/shopping-bags';
 import { CashRegister } from '../../../images/cash-register';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { Skeleton } from './skeleton/skeleton';
 import {
 	getLoadLinkedProductsDispatcher,
 	getRemoveLinkedProductDispatcher,
@@ -122,6 +123,8 @@ export function Edit( {
 					onSelect={ handleSelect }
 				/>
 			</div>
+
+			{ state.isLoading && <Skeleton /> }
 
 			{ ! state.isLoading && state.linkedProducts.length === 0 && (
 				<AdviceCard
