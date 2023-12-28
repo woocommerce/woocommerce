@@ -5,8 +5,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Modal } from '@wordpress/components';
 import { useDispatch, select } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
-import apiFetch from '@wordpress/api-fetch';
-import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { __ } from '@wordpress/i18n';
 
@@ -14,11 +12,14 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './index.scss';
-import makeWCRestApiCall from '../utils/wcRestApi';
 import MessageItem from './message-item';
-import recordWooAIAssistantTracks from './utils';
+import { recordWooAIAssistantTracks } from './utils';
 import ChatInputForm from './chat-input-form';
 import TypingIndicator from '../components/typing-indicator';
+import useWooAssistantApiCall from '../hooks/useWooAssistantApiCall';
+import useSetAndStoreMessages from '../hooks/useSetAndStoreMessages';
+import { WOO_AI_PLUGIN_NAME } from '../constants';
+import { preferencesChatHistory, preferencesThreadID } from './constants';
 
 export type Message = {
 	sender: 'user' | 'assistant';
@@ -31,10 +32,6 @@ export type Message = {
 type ChatModalProps = {
 	onClose: () => void;
 };
-
-const WOO_AI_PLUGIN_NAME = 'woo-ai-plugin';
-const preferencesThreadID = 'assistant-thread-id';
-const preferencesChatHistory = 'woo-ai-chat-history';
 
 const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 	const [ messages, setMessages ] = useState< Message[] >( [] );
@@ -106,20 +103,6 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		}
 	}, [ messages ] );
 
-	const prepareFormData = useCallback(
-		( message: string, token: string, tempthreadID?: string ) => {
-			const formData = new FormData();
-			formData.append( 'message', message );
-			formData.append( 'token', token );
-			const _thread_id = tempthreadID || threadID || '';
-			if ( threadID && threadID.length > 0 ) {
-				formData.append( 'thread_id', _thread_id );
-			}
-			return formData;
-		},
-		[ threadID ]
-	);
-
 	const handleError = useCallback( ( message: string ) => {
 		setIsResponseError( true );
 		setMessages( ( prevMessages ) => [
@@ -132,39 +115,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			},
 		] );
 	}, [] );
-
-	const setAndStoreMessages = useCallback(
-		(
-			message: string,
-			sender: 'assistant' | 'user',
-			userQueryIndex?: number,
-			type?: 'actionable' | 'informational'
-		) => {
-			const chatMessage: Message = {
-				sender,
-				text: message,
-				timestamp: new Date().getTime(),
-				type: type || 'actionable',
-			};
-			if ( typeof userQueryIndex === 'number' && userQueryIndex >= 0 ) {
-				chatMessage.userQueryIndex = userQueryIndex;
-			}
-			// @todo: we might want to replace the message with a message that says we're having trouble.
-			if ( typeof message !== 'string' ) {
-				return;
-			}
-			setMessages( ( prevMessages ) => {
-				const updatedMessages = [ ...prevMessages, chatMessage ];
-				setStorageData(
-					WOO_AI_PLUGIN_NAME,
-					preferencesChatHistory,
-					JSON.stringify( updatedMessages )
-				);
-				return updatedMessages;
-			} );
-		},
-		[ setStorageData ]
-	);
+	const setAndStoreMessages = useSetAndStoreMessages( { setMessages } );
 
 	const generateInformationalMessage = useCallback(
 		( message ) => {
@@ -178,196 +129,30 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 		[ setAndStoreMessages ]
 	);
 
-	/**
-	 *
-	 * @param {any}    response The response from the assistant API.
-	 * @param {string} token    The Jetpack token.
-	 * @return {string} The message to display to the user.
-	 */
-	const handleRequiresAction = useCallback(
-		async (
-			response: any,
-			token: string,
-			tempthreadID: string,
-			userQuery: string
-		) => {
-			const answer = response.answer;
-			const functionID: string = answer.function_id;
-			const runID: string = response.run_id;
-
-			generateInformationalMessage(
-				"I'm trying to accomplish that for you now..."
-			);
-			let message = '';
-
-			if ( answer.function_name === 'makeWCRestApiCall' ) {
-				const functionArguments = answer.function_args;
-				try {
-					const responseBody = ( await makeWCRestApiCall(
-						functionArguments
-					) ) as string;
-					message = responseBody;
-					// Make an API call to update the chat with the result of the function call
-				} catch ( error ) {
-					handleError(
-						"I'm sorry, I had trouble performing this task for you."
-					);
-				}
-
-				/* 
-                    Update the thread with the result of the function call. Otherwise, the run is stuck at 'pending'.
-                    That would prevent us from appending new messages to the thread.
-                    We're doing this even if the function call failed, because we want to be able to continue the conversation.
-                */
-				try {
-					const formData = prepareFormData(
-						// @todo: not sure about this message arg
-						message,
-						token,
-						tempthreadID
-					);
-					formData.append( 'run_id', runID );
-					formData.append( 'tool_call_id', functionID );
-					formData.append( 'output', message );
-
-					await apiFetch( {
-						url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard/submit-tool-output',
-						method: 'POST',
-						body: formData,
-					} );
-				} catch ( error ) {
-					handleError(
-						"I believe that I was able to accomplish the task you requested, but I'm having trouble updating our conversation."
-					);
-				}
-
-				// At this point, if there's an error, we don't continue with a summary.
-				if ( isResponseError ) {
-					setMessages( ( prevMessages ) => [
-						...prevMessages,
-						{
-							sender: 'assistant',
-							text: message,
-							timestamp: new Date().getTime(),
-							type: 'actionable',
-						},
-					] );
-					setLoading( false );
-					return;
-				}
-				try {
-					const summaryPrompt = `Provide a helpful answer for the original query using the resulting data from the API request. The original query was "${ userQuery }". Parse through the data and find the most relevant information to answer the query and provide it in a human-readable format. The data from the result of the API request is: ${ JSON.stringify(
-						message
-					) }`;
-
-					const summaryFormData = prepareFormData(
-						summaryPrompt,
-						token
-					);
-
-					const summaryResponse = ( await apiFetch( {
-						url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard',
-						method: 'POST',
-						body: summaryFormData,
-					} ) ) as any;
-					message = summaryResponse.answer as string;
-				} catch ( error ) {
-					handleError(
-						"I believe that I was able to accomplish the task you requested, but I'm having trouble summarizing the results."
-					);
-				}
-			}
-			return message;
-		},
-		[
-			generateInformationalMessage,
-			handleError,
-			isResponseError,
-			prepareFormData,
-		]
-	);
-
 	const setAndStorethreadID = useCallback(
 		( newthreadID: string ) => {
-			setStorageData(
-				WOO_AI_PLUGIN_NAME,
-				preferencesThreadID,
-				newthreadID
-			);
-			setThreadID( newthreadID );
-		},
-		[ setStorageData ]
-	);
-
-	const makeWooAssistantApiCall = useCallback(
-		async ( userQuery: string ) => {
-			recordWooAIAssistantTracks( 'send_message', {
-				message: userQuery,
-			} );
-			let answer = '';
-			setLoading( true );
-
-			try {
-				const { token } = await requestJetpackToken();
-				const formData = prepareFormData( userQuery, token );
-				const response = ( await apiFetch( {
-					url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard',
-					method: 'POST',
-					body: formData,
-				} ) ) as any;
-				const newthreadID = response.thread_id;
-				const tempthreadID = newthreadID || threadID;
-				if ( ! threadID && newthreadID ) {
-					setAndStorethreadID( newthreadID );
-				}
-
-				if ( response.status === 'requires_action' ) {
-					const actionsAnswer = await handleRequiresAction(
-						response,
-						token,
-						tempthreadID,
-						userQuery
-					);
-					answer = actionsAnswer || '';
-				} else {
-					answer = response.answer;
-				}
-				if ( ! answer || ! answer.length ) {
-					throw new Error( 'No message returned from assistant' );
-				}
-			} catch ( { message }: any ) {
-				recordWooAIAssistantTracks( 'send_message_error', {
-					message: userQuery,
-					error: message,
-				} );
-				// If the message loosely matches the text "message does not match the correct thread", we need to reset the threadID.
-				// This happens when the threadID is invalid.
-				// Use a regex to match the message, because the message may contain a timestamp. case-insensitive.
-				const regex = /message does not match the correct thread/i;
-				if ( regex.test( message ) ) {
-					setAndStorethreadID( '' );
-					// generate an informational message to let the user know that the thread was reset.
-					generateInformationalMessage(
-						'Oops! It looks like our saved conversation has expired. Please try again, keeping in mind that you may need to repeat some things.'
-					);
-				}
-			} finally {
-				// The reference to the original query is simply the message previous.
-				// We haven't updated the messages yet, so we can use the current length.
-				setAndStoreMessages( answer, 'assistant', messages.length );
-				setLoading( false );
+			if ( newthreadID !== threadID ) {
+				setThreadID( newthreadID );
+				setStorageData(
+					WOO_AI_PLUGIN_NAME,
+					preferencesThreadID,
+					newthreadID
+				);
 			}
 		},
-		[
-			threadID,
-			generateInformationalMessage,
-			setAndStoreMessages,
-			setAndStorethreadID,
-			handleRequiresAction,
-			prepareFormData,
-			messages.length,
-		]
+		[ setStorageData, threadID ]
 	);
+
+	const { makeWooAssistantApiCall } = useWooAssistantApiCall( {
+		setAndStorethreadID,
+		generateInformationalMessage,
+		messages,
+		setMessages,
+		setLoading,
+		handleError,
+		isResponseError,
+		threadID,
+	} );
 
 	const retryUserQuery = useCallback(
 		async ( index: number ) => {
@@ -475,6 +260,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 			title="Woo Wizard Assistant"
 			onRequestClose={ onClose }
 			className="woo-ai-assistant-chat-modal"
+			shouldCloseOnClickOutside={ false }
 		>
 			<ul className="woo-chat-history" ref={ parent }>
 				{ ! messages.length && <OnboardingMessage /> }

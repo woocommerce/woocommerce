@@ -11,7 +11,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Message } from './chat-modal';
-import recordWooAIAssistantTracks from './utils';
+import { recordWooAIAssistantTracks } from './utils';
 
 type MessageItemProps = {
 	message: Message;
