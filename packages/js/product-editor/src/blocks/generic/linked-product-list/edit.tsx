@@ -13,9 +13,12 @@ import { Product } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
+import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { ProductList } from '../../../components/product-list';
 import { ProductSelect } from '../../../components/product-select';
-import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import { AdviceCard } from '../../../components/advice-card';
+import { ShoppingBags } from '../../../images/shopping-bags';
+import { CashRegister } from '../../../images/cash-register';
 import { ProductEditorBlockEditProps } from '../../../types';
 import {
 	getLoadLinkedProductsDispatcher,
@@ -24,21 +27,40 @@ import {
 	getSelectSearchedProductDispatcher,
 	reducer,
 } from './reducer';
-import { LinkedProductListBlockAttributes } from './types';
+import {
+	LinkedProductListBlockAttributes,
+	LinkedProductListBlockEmptyState,
+} from './types';
 
-export function getProductImageStyle( product: Product ) {
-	return product.images.length > 0
-		? {
-				backgroundImage: `url(${ product.images[ 0 ].src })`,
-		  }
-		: undefined;
+export function EmptyStateImage( {
+	image,
+	tip: description,
+}: LinkedProductListBlockEmptyState ) {
+	switch ( image ) {
+		case 'CashRegister':
+			return <CashRegister />;
+		case 'ShoppingBags':
+			return <ShoppingBags />;
+		default:
+			if ( /^https?:\/\//.test( image ) ) {
+				return (
+					<img
+						src={ image }
+						alt={ description }
+						height={ 88 }
+						width={ 88 }
+					/>
+				);
+			}
+			return null;
+	}
 }
 
 export function Edit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< LinkedProductListBlockAttributes > ) {
-	const { property } = attributes;
+	const { property, emptyState } = attributes;
 	const blockProps = useWooBlockProps( attributes );
 	const [ state, dispatch ] = useReducer( reducer, {
 		linkedProducts: [],
@@ -101,7 +123,15 @@ export function Edit( {
 				/>
 			</div>
 
-			{ Boolean( state.linkedProducts.length ) && (
+			{ ! state.isLoading && state.linkedProducts.length === 0 && (
+				<AdviceCard
+					image={ <EmptyStateImage { ...emptyState } /> }
+					tip={ emptyState.tip }
+					isDismissible={ emptyState.isDismissible }
+				/>
+			) }
+
+			{ ! state.isLoading && state.linkedProducts.length > 0 && (
 				<ProductList
 					products={ state.linkedProducts }
 					onRemove={ handleRemoveProductClick }
