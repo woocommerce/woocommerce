@@ -21,7 +21,7 @@ import './editor.scss';
 interface SwitchToClassicShortcodeButtonProps {
 	block: 'woocommerce/cart' | 'woocommerce/checkout';
 	clientId: string;
-	type: string;
+	type: 'incompatible' | 'generic';
 }
 
 export function SwitchToClassicShortcodeButton( {
