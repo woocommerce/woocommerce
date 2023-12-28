@@ -240,6 +240,9 @@ class WC_Install {
 		'8.1.0' => array(
 			'wc_update_810_migrate_transactional_metadata_for_hpos',
 		),
+		'8.6.0' => array(
+			'wc_update_860_remove_recommended_marketing_plugins_transient',
+		),
 	);
 
 	/**
