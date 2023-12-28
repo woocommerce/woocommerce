@@ -33,6 +33,9 @@ class WC_WCCOM_Site_Installation_Step_Unpack_Product implements WC_WCCOM_Site_In
 
 	/**
 	 * Run the step installation process.
+	 *
+	 * @return WC_WCCOM_Site_Installation_State
+	 * @throws WC_REST_WCCOM_Site_Installer_Error If the package unpacked path is not returned.
 	 */
 	public function run() {
 		$upgrader      = WC_WCCOM_Site_Installer::get_wp_upgrader();
