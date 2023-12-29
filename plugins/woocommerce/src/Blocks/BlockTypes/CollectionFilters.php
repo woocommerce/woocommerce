@@ -167,7 +167,7 @@ final class CollectionFilters extends AbstractBlock {
 			unset( $filter_query_vars['min_price'], $filter_query_vars['max_price'] );
 
 			if ( ! empty( $filter_query_vars['meta_query'] ) ) {
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				$filter_query_vars['meta_query'] = $this->remove_query_array( $filter_query_vars['meta_query'], 'key', '_price' );
 			}
 
@@ -184,7 +184,7 @@ final class CollectionFilters extends AbstractBlock {
 			unset( $filter_query_vars['filter_stock_status'] );
 
 			if ( ! empty( $filter_query_vars['meta_query'] ) ) {
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				$filter_query_vars['meta_query'] = $this->remove_query_array( $filter_query_vars['meta_query'], 'key', '_stock_status' );
 			}
 
