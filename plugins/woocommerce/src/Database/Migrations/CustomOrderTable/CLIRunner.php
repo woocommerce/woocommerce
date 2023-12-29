@@ -65,6 +65,7 @@ class CLIRunner {
 		WP_CLI::add_command( 'wc cot enable', array( $this, 'enable' ) );
 		WP_CLI::add_command( 'wc cot disable', array( $this, 'disable' ) );
 		WP_CLI::add_command( 'wc hpos cleanup', array( $this, 'cleanup_post_data' ) );
+		WP_CLI::add_command( 'wc hpos status', array( $this, 'status' ) );
 	}
 
 	/**
@@ -955,4 +956,27 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		);
 	}
 
+	/**
+	 * Displays a summary of HPOS situation on this site.
+	 *
+	 * @since 8.6.0
+	 *
+	 * @param array $args       Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
+	 */
+	public function status( array $args = array(), array $assoc_args = array() ) {
+		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
+
+		WP_CLI::log( sprintf( __( 'HPOS enabled?: %s', 'woocommerce' ), wc_bool_to_string( $this->controller->custom_orders_table_usage_is_enabled() ) ) );
+		WP_CLI::log( sprintf( __( 'Compatibility mode enabled?: %s', 'woocommerce' ), wc_bool_to_string( $this->synchronizer->data_sync_is_enabled() ) ) );
+		WP_CLI::log( sprintf( __( 'Unsynced orders: %d', 'woocommerce' ), $this->synchronizer->get_current_orders_pending_sync_count() ) );
+		WP_CLI::log(
+			sprintf(
+				__( 'Orders subject to cleanup: %d', 'woocommerce' ),
+				( $this->synchronizer->custom_orders_table_is_authoritative() && ! $this->synchronizer->data_sync_is_enabled() )
+				? $legacy_handler->count_orders_for_cleanup()
+				: 0
+			)
+		);
+	}
 }
