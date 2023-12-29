@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { createElement, useState } from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
@@ -58,7 +58,15 @@ function _CustomerEffortScoreTracks( {
 	updateOptions,
 	createNotice,
 } ) {
-	const [ modalShown, setModalShown ] = useState( false );
+	useEffect( () => {
+		if ( cesShownForActions && ! cesShownForActions.includes( action ) )
+			updateOptions( {
+				[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
+					action,
+					...( cesShownForActions || [] ),
+				],
+			} );
+	}, [] );
 
 	if ( resolving ) {
 		return null;
@@ -69,30 +77,6 @@ function _CustomerEffortScoreTracks( {
 		return null;
 	}
 
-	// We only want to return null early if the modal was already shown
-	// for this action *before* this component was initially instantiated.
-	//
-	// We want to make sure we still render CustomerEffortScore below
-	// (we don't want to return null early), if the modal was shown for this
-	// instantiation, so that the component doesn't go away while we are
-	// still showing it.
-	if (
-		cesShownForActions &&
-		cesShownForActions.indexOf( action ) !== -1 &&
-		! modalShown
-	) {
-		return null;
-	}
-
-	const addActionToShownOption = () => {
-		updateOptions( {
-			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
-				action,
-				...( cesShownForActions || [] ),
-			],
-		} );
-	};
-
 	const onNoticeShown = () => {
 		recordEvent( 'ces_snackbar_view', {
 			action,
@@ -100,7 +84,6 @@ function _CustomerEffortScoreTracks( {
 			ces_location: 'inside',
 			...trackProps,
 		} );
-		addActionToShownOption();
 	};
 
 	const onNoticeDismissed = () => {
@@ -110,8 +93,6 @@ function _CustomerEffortScoreTracks( {
 			ces_location: 'inside',
 			...trackProps,
 		} );
-
-		addActionToShownOption();
 	};
 
 	const onModalDismissed = () => {
@@ -124,16 +105,12 @@ function _CustomerEffortScoreTracks( {
 	};
 
 	const onModalShown = () => {
-		setModalShown( true );
-
 		recordEvent( 'ces_view', {
 			action,
 			store_age: storeAgeInWeeks,
 			ces_location: 'inside',
 			...trackProps,
 		} );
-
-		addActionToShownOption();
 	};
 
 	const recordScore = ( score, secondScore, comments ) => {
