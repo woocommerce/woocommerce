@@ -1,5 +1,72 @@
 @import "../../../assets/js/blocks/shared/styles/style";
 
+.new-interactivity-dropdown {
+	position: relative;
+	width: 100%;
+	gap: 16px;
+
+	.new-interactivity-dropdown__placeholder {
+		@include font-size(smaller);
+	}
+
+	.dropdown {
+		.dropdown-selection {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: $gap-small;
+			border: 1px solid $gray-700;
+			border-radius: em(4px);
+			background-color: white;
+			cursor: pointer;
+
+			&:focus {
+				outline: none;
+				border-color: #007bff;
+			}
+		}
+
+		.svg-container {
+			> svg {
+				position: absolute;
+				right: 8px;
+				top: 50%;
+				transform: translateY(-50%);
+				pointer-events: none;
+			}
+		}
+
+		.dropdown-list {
+			position: absolute;
+			width: 100%;
+			background: white;
+			border: 1px solid $gray-700;
+			border-radius: em(4px);
+			z-index: 1000;
+			margin-top: $gap-smaller;
+
+			.dropdown-option {
+				margin: $gap-small;
+				padding: $gap-small;
+				border-radius: 4px;
+				border: 1px solid $gray-400;
+				@include font-size(smaller);
+				cursor: pointer;
+				&:hover,
+				&:focus {
+					background-color: #f8f9fa;
+				}
+			}
+		}
+	}
+
+	label {
+		display: block;
+		margin-bottom: 5px;
+		font-weight: bold;
+	}
+}
+
 .wc-interactivity-dropdown {
 	@include includeFormTokenFieldFix();
 	position: relative;
@@ -40,7 +107,8 @@
 		}
 	}
 
-	.wc-blocks-components-form-token-field-wrapper .components-form-token-field__input-container {
+	.wc-blocks-components-form-token-field-wrapper
+		.components-form-token-field__input-container {
 		@include reset-color();
 		@include reset-typography();
 		border: 0;
@@ -86,15 +154,17 @@
 		margin-bottom: 0;
 	}
 
-	.wc-blocks-components-form-token-field-wrapper:not(.single-selection) .components-form-token-field__input-container {
-		padding: $gap-smallest 30px $gap-smallest  $gap-smaller;
+	.wc-blocks-components-form-token-field-wrapper:not(.single-selection)
+		.components-form-token-field__input-container {
+		padding: $gap-smallest 30px $gap-smallest $gap-smaller;
 
 		.components-form-token-field__token-text {
 			background-color: $white;
 			border: 1px solid;
 			border-right: 0;
 			border-radius: 25px 0 0 25px;
-			padding: em($gap-smallest) em($gap-smaller) em($gap-smallest) em($gap-small);
+			padding: em($gap-smallest) em($gap-smaller) em($gap-smallest)
+				em($gap-small);
 			line-height: 22px;
 		}
 
@@ -137,7 +207,9 @@
 		}
 	}
 
-	.editor-styles-wrapper .wc-block-stock-filter .wc-block-stock-filter__button {
+	.editor-styles-wrapper
+		.wc-block-stock-filter
+		.wc-block-stock-filter__button {
 		margin-top: em($gap-smaller);
 		padding: em($gap-smaller) em($gap);
 		@include font-size(small);

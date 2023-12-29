@@ -71,6 +71,8 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 			const context = getContext< DropdownContext >();
 
 			context.isOpen = ! context.isOpen;
+
+			console.log( 'toggleIsOpen', context.isOpen );
 		},
 		unselectDropdownItem: ( event: MouseEvent ) => {
 			const context = getContext< DropdownContext >();
