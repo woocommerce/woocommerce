@@ -178,7 +178,10 @@ class LayoutTemplateRegistryTest extends WC_Unit_Test_Case {
 			array( 'id' => 'test-layout-template' )
 		);
 
-		$this->assertSame( $layout_templates_again[0], $layout_templates[0] );
+		$this->assertCount( 1, $layout_templates );
+		$this->assertCount( 1, $layout_templates_again );
+
+		$this->assertSame( current( $layout_templates_again ), current( $layout_templates ) );
 	}
 
 	/**
