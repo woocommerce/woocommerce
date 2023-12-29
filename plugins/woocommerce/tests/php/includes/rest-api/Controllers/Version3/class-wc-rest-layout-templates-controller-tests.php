@@ -63,4 +63,24 @@ class WC_REST_Layout_Templates_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'simple-product', $data );
 		$this->assertArrayHasKey( 'product-variation', $data );
 	}
+
+	/**
+	 * Test getting a single layout template.
+	 */
+	public function test_get_single_item() {
+		$response = $this->do_rest_get_request( 'layout-templates/test-layout-template' );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertNotEmpty( $data );
+
+		$this->assertEquals( 'test-layout-template', $data['id'] );
+		$this->assertEquals( 'test', $data['area'] );
+
+		$this->assertArrayHasKey( 'title', $data );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertArrayHasKey( 'blockTemplates', $data );
+	}
 }
