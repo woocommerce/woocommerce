@@ -152,8 +152,9 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 	],
 ];
 
+export const coreQueryPaginationBlockName = 'core/query-pagination';
 export const INNER_BLOCKS_PAGINATION_TEMPLATE: InnerBlockTemplate = [
-	'core/query-pagination',
+	coreQueryPaginationBlockName,
 	{
 		layout: {
 			type: 'flex',
