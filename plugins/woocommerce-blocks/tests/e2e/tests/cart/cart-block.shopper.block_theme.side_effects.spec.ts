@@ -217,7 +217,7 @@ test.describe( 'Shopper → Cart block', () => {
 			page.getByLabel(
 				`Quantity of ${ SIMPLE_VIRTUAL_PRODUCT_NAME } in your cart.`
 			)
-		).toHaveValue( '4' );
+		).toHaveValue( '5' );
 
 		// Via the minus button
 		await page
