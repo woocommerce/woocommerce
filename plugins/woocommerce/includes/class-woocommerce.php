@@ -298,13 +298,32 @@ final class WooCommerce {
 	public function log_errors() {
 		$error = error_get_last();
 		if ( $error && in_array( $error['type'], array( E_ERROR, E_PARSE, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) ) {
+			$error_copy = $error;
+			$message    = $error_copy['message'];
+			unset( $error_copy['message'] );
+
+			$context = array(
+				'source' => 'fatal-errors',
+				'error'  => $error_copy,
+			);
+
+			if ( false !== strpos( $message, 'Stack trace:' ) ) {
+				$segments  = explode( 'Stack trace:', $message );
+				$message   = str_replace( PHP_EOL, ' ', trim( $segments[0] ) );
+				$backtrace = array_map(
+					'trim',
+					explode( PHP_EOL, $segments[1] )
+				);
+
+				$context['backtrace'] = $backtrace;
+			} else {
+				$context['backtrace'] = true;
+			}
+
 			$logger = wc_get_logger();
 			$logger->critical(
-				/* translators: 1: error message 2: file name and path 3: line number */
-				sprintf( __( '%1$s in %2$s on line %3$s', 'woocommerce' ), $error['message'], $error['file'], $error['line'] ) . PHP_EOL,
-				array(
-					'source' => 'fatal-errors',
-				)
+				$message,
+				$context
 			);
 
 			/**
