@@ -167,4 +167,53 @@ class LayoutTemplateRegistryTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $layout_templates_again[0], $layout_templates[0] );
 	}
+
+	/**
+	 * Test layout template instantiation actions are fired.
+	 */
+	public function test_instantiation_actions() {
+		$before_instantiation_hook_called = false;
+
+		$before_instantiation_hook = function( string $layout_template_id, string $area ) use ( &$before_instantiation_hook_called ) {
+			$before_instantiation_hook_called = true;
+
+			$this->assertEquals( 'test-layout-template', $layout_template_id );
+			$this->assertEquals( 'test', $area );
+		};
+
+		$after_instantiation_hook_called = false;
+
+		$after_instantiation_hook = function( string $layout_template_id, string $area, $layout_template ) use ( &$after_instantiation_hook_called ) {
+			$after_instantiation_hook_called = true;
+
+			$this->assertEquals( 'test-layout-template', $layout_template_id );
+			$this->assertEquals( 'test', $area );
+
+			$this->assertInstanceOf( TestLayoutTemplate::class, $layout_template );
+		};
+
+		try {
+			add_action( 'woocommerce_layout_template_before_instantiation', $before_instantiation_hook, 10, 2 );
+			add_action( 'woocommerce_layout_template_after_instantiation', $after_instantiation_hook, 10, 3 );
+
+			$this->layout_template_registry->register( 'test-layout-template', 'test', TestLayoutTemplate::class );
+
+			$this->layout_template_registry->instantiate_layout_templates(
+				array( 'id' => 'test-layout-template' )
+			);
+
+			$this->assertTrue(
+				$before_instantiation_hook_called,
+				'woocommerce_layout_template_before_instantiation hook was not called.'
+			);
+
+			$this->assertTrue(
+				$after_instantiation_hook_called,
+				'woocommerce_layout_template_after_instantiation hook was not called.'
+			);
+		} finally {
+			remove_action( 'woocommerce_layout_template_before_instantiation', $before_instantiation_hook );
+			remove_action( 'woocommerce_layout_template_after_instantiation', $after_instantiation_hook );
+		}
+	}
 }
