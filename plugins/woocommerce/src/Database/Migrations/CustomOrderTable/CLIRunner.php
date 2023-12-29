@@ -66,6 +66,7 @@ class CLIRunner {
 		WP_CLI::add_command( 'wc cot disable', array( $this, 'disable' ) );
 		WP_CLI::add_command( 'wc hpos cleanup', array( $this, 'cleanup_post_data' ) );
 		WP_CLI::add_command( 'wc hpos status', array( $this, 'status' ) );
+		WP_CLI::add_command( 'wc hpos diff', array( $this, 'diff' ) );
 	}
 
 	/**
@@ -977,6 +978,78 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				? $legacy_handler->count_orders_for_cleanup()
 				: 0
 			)
+		);
+	}
+
+	/**
+	 * Displays differences for an order between the HPOS and post datastore.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>
+	 * :The ID of the order.
+	 *
+	 * [--format=<format>]
+	 * : Render output in a particular format.
+	 * ---
+	 * default: table
+	 * options:
+	 *   - table
+	 *   - csv
+	 *   - json
+	 *   - yaml
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *    # Find differences between datastores for order 123.
+	 *    $ wp wc hpos diff 123
+	 *
+	 *    # Find differences for order 123 and display as CSV.
+	 *    $ wp wc hpos diff 123 --format=csv
+	 *
+	 * @since 8.6.0
+	 *
+	 * @param array $args       Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
+	 */
+	public function diff( array $args = array(), array $assoc_args = array() ) {
+		$id = absint( $args[0] );
+
+		try {
+			$diff = wc_get_container()->get( LegacyDataHandler::class )->get_diff_for_order( $id );
+		} catch ( \Exception $e ) {
+			// translators: %1$d is an order ID, %2$s is an error message.
+			WP_CLI::error( sprintf( __( 'An error occurred while computing a diff for order %1$d: %2$s', 'woocommerce' ), $id, $e->getMessage() ) );
+		}
+
+		if ( ! $diff ) {
+			WP_CLI::success( __( 'No differences found.', 'woocommerce' ) );
+			return;
+		}
+
+		// Format the diff array.
+		$diff = array_map(
+			function( $key, $hpos_value, $cpt_value ) {
+				return array(
+					'property'   => $key,
+					'hpos'       => $hpos_value,
+					'post'       => $cpt_value,
+				);
+			},
+			array_keys( $diff ),
+			array_column( $diff, 0 ),
+			array_column( $diff, 1 ),
+		);
+
+		WP_CLI::warning(
+			// translators: %d is an order ID.
+			sprintf( __( 'Differences found for order %d:', 'woocommerce' ), $id )
+		);
+		WP_CLI\Utils\format_items(
+			$assoc_args['format'] ?? 'table',
+			$diff,
+			array( 'property', 'hpos', 'post' )
 		);
 	}
 }
