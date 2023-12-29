@@ -96,8 +96,9 @@ final class LayoutTemplateRegistry {
 
 		$layout_templates_info = $this->get_matching_layout_templates_info( $query_params );
 		foreach ( $layout_templates_info as $layout_template_info ) {
-			$layout_template    = $this->get_layout_template_instance( $layout_template_info );
-			$layout_templates[] = $layout_template;
+			$layout_template = $this->get_layout_template_instance( $layout_template_info );
+
+			$layout_templates[ $layout_template->get_id() ] = $layout_template;
 		}
 
 		return $layout_templates;
@@ -108,7 +109,7 @@ final class LayoutTemplateRegistry {
 	 *
 	 * @param array $layout_template_info Layout template info.
 	 */
-	private function get_layout_template_instance( $layout_template_info ) {
+	private function get_layout_template_instance( $layout_template_info ): BlockTemplateInterface {
 		$class_name = $layout_template_info['class_name'];
 
 		// Return the instance if it already exists.
