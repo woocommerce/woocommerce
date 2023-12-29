@@ -10,9 +10,10 @@ import { staticFormDataToObject } from '~/utils/static-form-helper';
 
 type FormElements = {
 	post?: HTMLFormElement;
+	order?: HTMLFormElement;
 } & HTMLCollectionOf< HTMLFormElement >;
 const forms: FormElements = document.forms;
-if ( forms?.post ) {
+if ( forms?.post || forms?.order ) {
 	let triggeredSaveOrDeleteButton = false;
 	const saveButton = document.querySelector( '.save_order' );
 	const deleteButton = document.querySelector( '.submitdelete' );
@@ -27,14 +28,19 @@ if ( forms?.post ) {
 			triggeredSaveOrDeleteButton = true;
 		} );
 	}
-	const formData = staticFormDataToObject( forms.post );
+	const formData = staticFormDataToObject(
+		( forms?.post || forms?.order ) as HTMLFormElement
+	);
 	addCustomerEffortScoreExitPageListener( 'shop_order_update', () => {
 		if ( triggeredSaveOrDeleteButton ) {
 			return false;
 		}
-		const newFormData = forms.post
-			? staticFormDataToObject( forms.post )
-			: {};
+		const newFormData =
+			forms?.post || forms?.order
+				? staticFormDataToObject(
+						( forms?.post || forms?.order ) as HTMLFormElement
+				  )
+				: {};
 		for ( const key of Object.keys( formData ) ) {
 			const value =
 				typeof formData[ key ] === 'object'

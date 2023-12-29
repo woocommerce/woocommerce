@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\COTMigrationServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\EnginesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\FeaturesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\LoggingServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\MarketingServiceProvider;
@@ -22,6 +23,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Option
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderAttributionServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductAttributesLookupServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductDownloadsServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductImageBySKUServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductReviewsServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
@@ -59,6 +61,7 @@ final class Container {
 		OrdersDataStoreServiceProvider::class,
 		ProductAttributesLookupServiceProvider::class,
 		ProductDownloadsServiceProvider::class,
+		ProductImageBySKUServiceProvider::class,
 		ProductReviewsServiceProvider::class,
 		ProxiesServiceProvider::class,
 		RestockRefundedItemsAdjusterServiceProvider::class,
@@ -75,6 +78,7 @@ final class Container {
 		MarketplaceServiceProvider::class,
 		BlockTemplatesServiceProvider::class,
 		LoggingServiceProvider::class,
+		EnginesServiceProvider::class,
 	);
 
 	/**

@@ -14,7 +14,7 @@ export const AttributeCheckboxList = ( {
 	showCounts,
 }: Props ) => (
 	<CheckboxList
-		className="attribute-checkbox-list"
+		className="wc-block-attribute-filter style-list"
 		onChange={ () => null }
 		options={ attributeTerms.map( ( term ) => ( {
 			label: (

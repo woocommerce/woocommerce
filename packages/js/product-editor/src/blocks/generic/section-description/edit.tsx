@@ -1,14 +1,13 @@
 /**
  * External dependencies
  */
-import { Fill } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 
 /**
  * Internal dependencies
  */
+import { BlockFill } from '../../../components/block-slot-fill';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { SectionDescriptionBlockAttributes } from './types';
 
@@ -19,19 +18,14 @@ export function SectionDescriptionBlockEdit( {
 	const { content } = attributes;
 	const blockProps = useWooBlockProps( attributes );
 
-	const rootClientId = useSelect(
-		( select ) => {
-			const { getBlockRootClientId } = select( 'core/block-editor' );
-			return getBlockRootClientId( clientId );
-		},
-		[ clientId ]
-	);
-
-	if ( ! rootClientId ) return;
-
 	return (
-		<Fill { ...blockProps } name={ rootClientId }>
+		<BlockFill
+			{ ...blockProps }
+			name="section-description"
+			clientId={ clientId }
+			slotContainerBlockName="woocommerce/product-section"
+		>
 			<div>{ content }</div>
-		</Fill>
+		</BlockFill>
 	);
 }

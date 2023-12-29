@@ -11,6 +11,7 @@ export const registerCommandWithTracking = ( {
 	label,
 	icon,
 	callback,
+	origin,
 } ) => {
 	dispatch( commandsStore ).registerCommand( {
 		name,
@@ -19,6 +20,7 @@ export const registerCommandWithTracking = ( {
 		callback: ( ...args ) => {
 			queueRecordEvent( 'woocommerce_command_palette_submit', {
 				name,
+				origin,
 			} );
 
 			callback( ...args );

@@ -23,6 +23,38 @@ class OrderAttribution {
 	}
 
 	/**
+	 * Format the meta data for display.
+	 *
+	 * @since 8.5.0
+	 *
+	 * @param array $meta The array of meta data to format.
+	 *
+	 * @return void
+	 */
+	public function format_meta_data( array &$meta ) {
+
+		if ( array_key_exists( 'device_type', $meta ) ) {
+
+			switch ( $meta['device_type'] ) {
+				case 'Mobile':
+					$meta['device_type'] = __( 'Mobile', 'woocommerce' );
+					break;
+				case 'Tablet':
+					$meta['device_type'] = __( 'Tablet', 'woocommerce' );
+					break;
+				case 'Desktop':
+					$meta['device_type'] = __( 'Desktop', 'woocommerce' );
+					break;
+
+				default:
+					$meta['device_type'] = __( 'Unknown', 'woocommerce' );
+					break;
+			}
+		}
+
+	}
+
+	/**
 	 * Output the attribution data metabox for the order.
 	 *
 	 * @since 8.5.0
@@ -39,6 +71,8 @@ class OrderAttribution {
 			esc_html_e( 'No order source data available.', 'woocommerce' );
 			return;
 		}
+
+		$this->format_meta_data( $meta );
 
 		$template_data = array(
 			'meta'             => $meta,

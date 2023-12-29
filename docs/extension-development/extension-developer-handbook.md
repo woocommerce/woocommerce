@@ -8,7 +8,7 @@ Your WooCommerce extension should:
 
 - Adhere to all WordPress plugin coding standards, as well as [best practice guidelines](https://developer.wordpress.org/plugins/plugin-basics/best-practices/) for harmonious existence within WordPress and alongside other WordPress plugins.
 - Have a single core purpose and use WooCommerce features as much as possible.
-- Not do anything malicious, illegal, or dishonest — for example, inserting spam links or executable code via third-party systems if not part of the service or  explicitly permitted in the service’s terms of use.
+- Not do anything malicious, illegal, or dishonest - for example, inserting spam links or executable code via third-party systems if not part of the service or  explicitly permitted in the service’s terms of use.
 - Adhere to WooCommerce [compatibility and interoperability guidelines](https://woo.com/document/marketplace-overview/#section-9).
 
 Merchants make use of WooCommerce extensions daily, and should have a unified and pleasant experience while doing so without advertising invading their WP Admin or store.
@@ -185,7 +185,7 @@ Always develop with [WP_DEBUG](http://codex.wordpress.org/Debugging_in_WordPress
 
 ## [Separate Business Logic & Presentation Logic](https://woo.com/document/create-a-plugin/#section-20)
 
-It’s a good practice to separate business logic (i.e., how the plugin works) from [presentation logic](http://en.wikipedia.org/wiki/Presentation_logic) (i.e., how it looks). Two separate pieces of logic are more easily maintained and swapped if necessary. An example is to have two different classes — one for displaying the end results, and one for the admin settings page.
+It’s a good practice to separate business logic (i.e., how the plugin works) from [presentation logic](http://en.wikipedia.org/wiki/Presentation_logic) (i.e., how it looks). Two separate pieces of logic are more easily maintained and swapped if necessary. An example is to have two different classes - one for displaying the end results, and one for the admin settings page.
 
 ## [Use Transients to Store Offsite Information](https://woo.com/document/create-a-plugin/#section-21)
 

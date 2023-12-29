@@ -42,7 +42,7 @@ Use these resources to help take some of the heavy lifting off of fetching and t
 
 #### API Clients
 
-#### [WooCommerce REST API — JavaScript](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api)
+#### [WooCommerce REST API - JavaScript](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api)
 
 The official JavaScript library for working with the WooCommerce REST API.
 

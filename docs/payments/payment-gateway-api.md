@@ -120,7 +120,7 @@ $this->form_fields = array(
 
 #### process_payment( $order_id )
 
-Now for the most important part of the gateway — handling payment and processing the order. Process_payment also tells WC where to redirect the user, and this is done with a returned array.
+Now for the most important part of the gateway - handling payment and processing the order. Process_payment also tells WC where to redirect the user, and this is done with a returned array.
 
 Here is an example of a process_payment function from the Cheque gateway:
 
@@ -245,7 +245,7 @@ add_action( 'woocommerce_api_wc_gateway_paypal', array( $this, 'check_ipn_respon
 
 WooCommerce will call your gateway and run the action when the URL is called.
 
-For more information, see [WC_API — The WooCommerce API Callback](https://woo.com/document/wc_api-the-woocommerce-api-callback/).
+For more information, see [WC_API - The WooCommerce API Callback](https://woo.com/document/wc_api-the-woocommerce-api-callback/).
 
 ## Hooks in Gateways
 

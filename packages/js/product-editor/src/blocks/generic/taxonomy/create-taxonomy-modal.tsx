@@ -21,7 +21,7 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import { Taxonomy } from './types';
+import type { Taxonomy } from '../../../types';
 import useTaxonomySearch from './use-taxonomy-search';
 
 type CreateTaxonomyModalProps = {

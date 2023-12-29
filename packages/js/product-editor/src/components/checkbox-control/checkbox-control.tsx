@@ -8,6 +8,7 @@ import { Icon, help } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
+import { sanitizeHTML } from '../../utils/sanitize-html';
 
 export type CheckboxProps = {
 	label: string;
@@ -56,7 +57,13 @@ export const Checkbox: React.FC< CheckboxProps > = ( {
 				/>
 				{ tooltip && (
 					<Tooltip
-						text={ <span>{ tooltip }</span> }
+						text={
+							<span
+								dangerouslySetInnerHTML={ sanitizeHTML(
+									tooltip
+								) }
+							></span>
+						}
 						position="top center"
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore Incorrect types.

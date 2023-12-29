@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "8.3.0",
+	"version": "8.6.0",
 	"homepage": "https://woo.com/",
 	"repository": {
 		"type": "git",
@@ -169,7 +169,7 @@
 	},
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
 	},
 	"browserslist": [
 		"> 0.1%",

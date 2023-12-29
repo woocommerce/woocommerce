@@ -208,7 +208,10 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_message( $log ) {
-		return esc_html( $log['message'] );
+		return sprintf(
+			'<pre>%s</pre>',
+			esc_html( $log['message'] )
+		);
 	}
 
 	/**
