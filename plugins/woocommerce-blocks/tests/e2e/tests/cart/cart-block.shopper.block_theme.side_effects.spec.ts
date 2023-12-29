@@ -258,10 +258,6 @@ test.describe( 'Shopper → Cart block', () => {
 		frontendUtils,
 		page,
 	} ) => {
-		await page.goto( `${ BASE_URL }/?setup_cross_sells` );
-		await expect(
-			page.getByText( 'Cross-Sells products set up.' )
-		).toBeVisible();
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
@@ -269,13 +265,12 @@ test.describe( 'Shopper → Cart block', () => {
 		await page.waitForSelector(
 			'.wp-block-woocommerce-cart-cross-sells-block'
 		);
+		// Cap is the cross sells product that will be added to the cart
 		await page
-			.locator(
-				'.wp-block-cart-cross-sells-product__product-add-to-cart .wc-block-components-product-button__button'
-			)
+			.getByRole( 'button', { name: 'Add to cart: “Cap”' } )
 			.click();
 		await expect(
-			page.getByLabel( `Quantity of 32GB USB Stick in your cart.` )
+			page.getByLabel( `Quantity of Cap in your cart.` )
 		).toHaveValue( '1' );
 	} );
 } );
