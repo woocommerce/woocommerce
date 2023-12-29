@@ -25,7 +25,10 @@ final class QueryFilters {
 	 * @return array
 	 */
 	public function main_query_filter( $args, $wp_query ) {
-		if ( ! $wp_query->is_main_query() ) {
+		if (
+			! $wp_query->is_main_query() ||
+			'product_query' !== $wp_query->get('wc_query')
+		) {
 			return $args;
 		}
 
