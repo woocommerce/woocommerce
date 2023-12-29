@@ -40,7 +40,7 @@ jobs:
             releasesFrozenToday: ${{ steps.get-versions.outputs.releasesFrozenToday }}
             acceleratedBranch: ${{ steps.get-versions.outputs.acceleratedBranch }}
             monthlyBranch: ${{ steps.get-versions.outputs.monthlyBranch }}
-            monthlyMilestone: ${{ steps.get-versions.outputs.monthlyMilestone }}
+            monthlyMilestone: ${{ steps.get-versions.outputs.monthlyMilestone }}            
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -51,9 +51,9 @@ jobs:
               id: read-pnpm-version
               shell: bash
               run: |
-                  version=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)
-                  echo "version=$version" >> $GITHUB_OUTPUT
-                  echo "PNPM Version: $version"
+                version=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)
+                echo "version=$version" >> $GITHUB_OUTPUT
+                echo "PNPM Version: $version"
 
             - name: Setup PNPM
               uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
@@ -133,6 +133,7 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: pnpm utils code-freeze changelog -c -o ${{ github.repository_owner }} -v ${{ steps.get-versions.outputs.monthlyVersionXY }}
+              
 
     notify-slack:
         name: 'Sends code freeze notification to Slack'
@@ -193,8 +194,6 @@ jobs:
 
             - name: Build zip
               working-directory: plugins/woocommerce
-              env:
-                  WOOCOMMERCE_BLOCKS_PHASE: 1
               run: bash bin/build-zip.sh
 
             - name: Upload the zip file as an artifact
@@ -239,7 +238,7 @@ jobs:
     slack-upload-monthly:
         name: Upload Beta to Slack
         runs-on: ubuntu-20.04
-        needs: [code-freeze-prep, notify-slack, build-monthly]
+        needs: [ code-freeze-prep, notify-slack, build-monthly ]
         if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' && inputs.skipSlackPing != true }}
         steps:
             - name: Checkout code
@@ -278,13 +277,13 @@ jobs:
 
             - name: Send release zip to Slack
               id: send-file-slack
-              run: |
+              run : |
                   pnpm utils slack file "${{ secrets.CODE_FREEZE_BOT_TOKEN }}" "Here's the generated release build for ${{ needs.code-freeze-prep.outputs.monthlyVersion }}-beta.1" "${{ steps.download.outputs.download-path }}/woocommerce.zip" "${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}" --reply-ts ${{ needs.notify-slack.outputs.ts }} --filename "woocommerce.${{ needs.code-freeze-prep.outputs.monthlyVersion }}-beta.1.zip"
 
     slack-upload-accelerated:
         name: Upload Accelerated to Slack
         runs-on: ubuntu-20.04
-        needs: [code-freeze-prep, notify-slack, build-a]
+        needs: [ code-freeze-prep, notify-slack, build-a ]
         if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' && inputs.skipSlackPing != true }}
         steps:
             - name: Checkout code
@@ -323,13 +322,13 @@ jobs:
 
             - name: Send release zip to Slack
               id: send-file-slack
-              run: |
+              run : |
                   pnpm utils slack file "${{ secrets.CODE_FREEZE_BOT_TOKEN }}" "Here's the generated release build for ${{ needs.code-freeze-prep.outputs.acceleratedVersion }}" "${{ steps.download.outputs.download-path }}/woocommerce.zip" "${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}" --reply-ts ${{ needs.notify-slack.outputs.ts }} --filename "woocommerce.${{ needs.code-freeze-prep.outputs.acceleratedVersion }}.zip"
 
     github-upload-monthly:
         name: Create single-zipped GitHub asset (Monthly)
         runs-on: ubuntu-20.04
-        needs: [code-freeze-prep, build-monthly]
+        needs: [ code-freeze-prep, build-monthly ]
         if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' }}
         steps:
             - id: download
@@ -355,7 +354,7 @@ jobs:
     github-upload-accelerated:
         name: Create single-zipped GitHub asset (Accelerated)
         runs-on: ubuntu-20.04
-        needs: [code-freeze-prep, build-a]
+        needs: [ code-freeze-prep, build-a ]
         if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' }}
         steps:
             - id: download
