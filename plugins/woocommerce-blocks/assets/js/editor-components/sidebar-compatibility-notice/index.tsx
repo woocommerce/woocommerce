@@ -42,9 +42,6 @@ export const CartCheckoutSidebarCompatibilityNotice = ( {
 		}
 	);
 
-	const blockName =
-		block === 'cart' ? 'woocommerce/cart' : 'woocommerce/checkout';
-
 	return (
 		<Notice
 			onRemove={ dismissNotice }
@@ -55,7 +52,7 @@ export const CartCheckoutSidebarCompatibilityNotice = ( {
 		>
 			{ noticeText }
 			<SwitchToClassicShortcodeButton
-				block={ blockName }
+				block={ `woocommerce/${ block }` }
 				clientId={ clientId }
 				type={ 'generic' }
 			/>
