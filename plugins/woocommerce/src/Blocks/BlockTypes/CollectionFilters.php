@@ -263,17 +263,17 @@ final class CollectionFilters extends AbstractBlock {
 	 * @return array
 	 */
 	private function remove_query_array( $queries, $key, $value ) {
-		if( empty($queries)) {
+		if ( empty( $queries ) ) {
 			return $queries;
 		}
 
-		foreach ($queries as $query_key => $query ) {
-			if( isset( $query[$key]) && $query[$key] === $value ) {
-				unset( $queries[$query_key]);
+		foreach ( $queries as $query_key => $query ) {
+			if ( isset( $query[ $key ] ) && $query[ $key ] === $value ) {
+				unset( $queries[ $query_key ] );
 			}
 
 			if ( isset( $query['relation'] ) ) {
-				$queries[$query_key] = $this->remove_query_array( $query, $key, $value );
+				$queries[ $query_key ] = $this->remove_query_array( $query, $key, $value );
 			}
 		}
 
