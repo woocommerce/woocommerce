@@ -42,6 +42,14 @@ final class LayoutTemplateRegistry {
 	}
 
 	/**
+	 * Unregister all layout templates.
+	 */
+	public function unregister_all() {
+		$this->layout_templates_info     = array();
+		$this->layout_template_instances = array();
+	}
+
+	/**
 	 * Check if a layout template is registered.
 	 *
 	 * @param string $layout_template_id Layout template ID.
