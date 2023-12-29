@@ -326,7 +326,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					case 'tel':
 						$option_value = $value['value'];
 
-						?><tr<?php echo esc_html( $row_class_attribute ); ?>>
+						?>
+						<tr<?php echo esc_html( $row_class_attribute ); ?>>
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -625,7 +626,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 
 						?>
-						<tr class="single_select_page <?php echo esc_attr( $value['row_class'] );?>">
+						<tr class="single_select_page <?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -650,7 +651,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							);
 						}
 						?>
-						<tr class="single_select_page <?php echo esc_attr( $value['row_class'] );?>">
+						<tr class="single_select_page <?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
 							</th>
