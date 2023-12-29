@@ -87,6 +87,12 @@ class TestLayoutTemplate implements BlockTemplateInterface {
 	 * Get the layout template blocks.
 	 */
 	public function to_json(): array {
-		return array();
+		return array(
+			'id'             => $this->get_id(),
+			'title'          => $this->get_title(),
+			'description'    => $this->get_description(),
+			'area'           => $this->get_area(),
+			'blockTemplates' => array(),
+		);
 	}
 }
