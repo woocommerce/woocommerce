@@ -65,6 +65,19 @@ class WC_REST_Layout_Templates_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting all layout templates for an invalid area.
+	 */
+	public function test_get_all_items_for_invalid_area() {
+		$response = $this->do_rest_get_request( 'layout-templates', array( 'area' => 'invalid-area' ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEmpty( $data );
+	}
+
+	/**
 	 * Test getting a single layout template.
 	 */
 	public function test_get_single_item() {
