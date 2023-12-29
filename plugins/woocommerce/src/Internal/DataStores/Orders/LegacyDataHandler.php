@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -196,6 +198,57 @@ class LegacyDataHandler {
 	}
 
 	/**
+	 * Builds an array with properties and metadata for which HPOS and post record have different values.
+	 * Given it's mostly informative nature, it doesn't perform any deep or recursive searches and operates only on top-level properties/metadata.
+	 *
+	 * @since 8.6.0
+	 *
+	 * @param int $order_id Order ID.
+	 * @return array Array of [HPOS value, post value] keyed by property, for all properties where HPOS and post value differ.
+	 */
+	public function get_diff_for_order( int $order_id ): array {
+		$diff           = array();
+
+		$hpos_order = $this->get_order_from_datastore( $order_id, 'hpos' );
+		$cpt_order  = $this->get_order_from_datastore( $order_id, 'cpt' );
+
+		if ( $hpos_order->get_type() !== $cpt_order->get_type() ) {
+			$diff['type'] = array( $hpos_order->get_type(), $cpt_order->get_type() );
+		}
+
+		$hpos_meta = $this->order_meta_to_array( $hpos_order );
+		$cpt_meta  = $this->order_meta_to_array( $cpt_order );
+
+		// Consider only keys for which we actually have a corresponding HPOS column or are meta.
+		$all_keys = array_unique(
+			array_diff(
+				array_merge(
+					$this->get_order_base_props(),
+					array_keys( $hpos_meta ),
+					array_keys( $cpt_meta )
+				),
+				$this->data_synchronizer->get_ignored_order_props()
+			)
+		);
+
+		foreach ( $all_keys as $key ) {
+			$val1 = in_array( $key, $this->get_order_base_props() ) ? $hpos_order->{"get_$key"}() : ( $hpos_meta[ $key ] ?? null );
+			$val2 = in_array( $key, $this->get_order_base_props() ) ? $cpt_order->{"get_$key"}() : ( $cpt_meta[ $key ] ?? null );
+
+			// Workaround for https://github.com/woocommerce/woocommerce/issues/43126.
+			if ( ! $val2 && in_array( $key, array( '_billing_address_index', '_shipping_address_index' ), true ) ) {
+				$val2 = get_post_meta( $order_id, $key, true );
+			}
+
+			if ( $val1 != $val2 ) {
+				$diff[ $key ] = array( $val1, $val2 );
+			}
+		}
+
+		return $diff;
+	}
+
+	/**
 	 * Returns an order object as seen by either the HPOS or CPT datastores.
 	 *
 	 * @since 8.6.0
@@ -239,6 +292,42 @@ class LegacyDataHandler {
 		$data_store->read( $order );
 
 		return $order;
+	}
+
+	/**
+	 * Returns all metadata in an order object as an array.
+	 *
+	 * @param \WC_Order $order Order instance.
+	 * @return array Array of metadata grouped by meta key.
+	 */
+	private function order_meta_to_array( \WC_Order &$order ): array {
+		$result = array();
+
+		foreach ( ArrayUtil::select( $order->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD ) as &$meta ) {
+			if ( array_key_exists( $meta['key'], $result ) ) {
+				$result[ $meta['key'] ] = array( $result[ $meta['key'] ] );
+				$result[ $meta['key'] ][] = $meta['value'];
+			} else {
+				$result[ $meta['key'] ] = $meta['value'];
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Returns names of all order base properties supported by HPOS.
+	 *
+	 * @return string[] Property names.
+	 */
+	private function get_order_base_props(): array {
+		return array_column(
+			call_user_func_array(
+				'array_merge',
+				array_values( $this->data_store->get_all_order_column_mappings() )
+			),
+			'name'
+		);
 	}
 
 }
