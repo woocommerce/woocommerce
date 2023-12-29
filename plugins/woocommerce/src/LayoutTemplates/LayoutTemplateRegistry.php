@@ -80,6 +80,7 @@ final class LayoutTemplateRegistry {
 		}
 
 		$this->layout_templates_info[ $layout_template_id ] = array(
+			'id'         => $layout_template_id,
 			'area'       => $layout_template_area,
 			'class_name' => $layout_template_class_name,
 		);
@@ -110,6 +111,8 @@ final class LayoutTemplateRegistry {
 	private function get_layout_template_instance( $layout_template_info ) {
 		$class_name = $layout_template_info['class_name'];
 
+		// Return the instance if it already exists.
+
 		$layout_template_instance = isset( $this->layout_template_instances[ $class_name ] )
 			? $this->layout_template_instances[ $class_name ]
 			: null;
@@ -118,8 +121,35 @@ final class LayoutTemplateRegistry {
 			return $layout_template_instance;
 		}
 
+		// Call the before instantiation hooks.
+
+		/**
+		 * Fires before a layout template is instantiated.
+		 *
+		 * @param string $layout_template_id Layout template ID.
+		 * @param string $layout_template_area Layout template area.
+		 *
+		 * @since 8.6.0
+		 */
+		do_action( 'woocommerce_layout_template_before_instantiation', $layout_template_info['id'], $layout_template_info['area'] );
+
+		// Instantiate the layout template.
+
 		$layout_template_instance                       = new $class_name();
 		$this->layout_template_instances[ $class_name ] = $layout_template_instance;
+
+		// Call the after instantiation hooks.
+
+		/**
+		 * Fires after a layout template is instantiated.
+		 *
+		 * @param string $layout_template_id Layout template ID.
+		 * @param string $layout_template_area Layout template area.
+		 * @param BlockTemplateInterface $layout_template Layout template instance.
+		 *
+		 * @since 8.6.0
+		 */
+		do_action( 'woocommerce_layout_template_after_instantiation', $layout_template_info['id'], $layout_template_info['area'], $layout_template_instance );
 
 		return $layout_template_instance;
 	}
@@ -135,12 +165,12 @@ final class LayoutTemplateRegistry {
 
 		$matching_layout_templates_info = array();
 
-		foreach ( $this->layout_templates_info as $id => $layout_template_info ) {
+		foreach ( $this->layout_templates_info as $layout_template_info ) {
 			if ( ! empty( $area_to_match ) && $layout_template_info['area'] !== $area_to_match ) {
 				continue;
 			}
 
-			if ( ! empty( $id_to_match ) && $id !== $id_to_match ) {
+			if ( ! empty( $id_to_match ) && $layout_template_info['id'] !== $id_to_match ) {
 				continue;
 			}
 
