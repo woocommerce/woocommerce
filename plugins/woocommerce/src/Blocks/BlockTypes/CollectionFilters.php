@@ -163,7 +163,12 @@ final class CollectionFilters extends AbstractBlock {
 
 		if ( ! empty( $collection_data_params['calculate_price_range'] ) ) {
 			$filter_query_vars = $query_vars;
+
 			unset( $filter_query_vars['min_price'], $filter_query_vars['max_price'] );
+
+			if ( ! empty( $filter_query_vars['meta_query'] ) ) {
+				$filter_query_vars['meta_query'] = $this->remove_query_array( $filter_query_vars['meta_query'], 'key', '_price' );
+			}
 
 			$price_results       = $filters->get_filtered_price( $filter_query_vars );
 			$data['price_range'] = array(
@@ -174,7 +179,12 @@ final class CollectionFilters extends AbstractBlock {
 
 		if ( ! empty( $collection_data_params['calculate_stock_status_counts'] ) ) {
 			$filter_query_vars = $query_vars;
+
 			unset( $filter_query_vars['filter_stock_status'] );
+
+			if ( ! empty( $filter_query_vars['meta_query'] ) ) {
+				$filter_query_vars['meta_query'] = $this->remove_query_array( $filter_query_vars['meta_query'], 'key', '_stock_status' );
+			}
 
 			$counts = $filters->get_stock_status_counts( $filter_query_vars );
 
@@ -193,11 +203,7 @@ final class CollectionFilters extends AbstractBlock {
 			$filter_query_vars = $query_vars;
 
 			if ( ! empty( $filter_query_vars['tax_query'] ) ) {
-				foreach ( $filter_query_vars['tax_query'] as $key => $tax_query ) {
-					if ( isset( $tax_query['rating_filter'] ) && $tax_query['rating_filter'] ) {
-						unset( $filter_query_vars['tax_query'][ $key ] );
-					}
-				}
+				$filter_query_vars['tax_query'] = $this->remove_query_array( $filter_query_vars['tax_query'], 'rating_filter', true );
 			}
 
 			$counts                = $filters->get_rating_counts( $filter_query_vars );
@@ -222,13 +228,14 @@ final class CollectionFilters extends AbstractBlock {
 				if ( 'and' !== strtolower( $attributes_to_count['queryType'] ) ) {
 					unset( $filter_query_vars[ 'filter_' . str_replace( 'pa_', '', $attributes_to_count['taxonomy'] ) ] );
 				}
-				unset( $filter_query_vars['taxonomy'] );
-				unset( $filter_query_vars['term'] );
 
-				foreach ( $filter_query_vars['tax_query'] as $key => $tax_query ) {
-					if ( is_array( $tax_query ) && $tax_query['taxonomy'] === $attributes_to_count['taxonomy'] ) {
-						unset( $filter_query_vars['tax_query'][ $key ] );
-					}
+				unset(
+					$filter_query_vars['taxonomy'],
+					$filter_query_vars['term']
+				);
+
+				if ( ! empty( $filter_query_vars['tax_query'] ) ) {
+					$filter_query_vars['tax_query'] = $this->remove_query_array( $filter_query_vars['tax_query'], 'taxonomy', $attributes_to_count['taxonomy'] );
 				}
 
 				$counts = $filters->get_attribute_counts( $filter_query_vars, $attributes_to_count['taxonomy'] );
@@ -243,6 +250,34 @@ final class CollectionFilters extends AbstractBlock {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Remove query array from tax or meta query by searching for arrays that
+	 * contain exact key => value pair.
+	 *
+	 * @param array  $queries tax_query or meta_query.
+	 * @param string $key     Array key to search for.
+	 * @param mixed  $value   Value to compare with search result.
+	 *
+	 * @return array
+	 */
+	private function remove_query_array( $queries, $key, $value ) {
+		if( empty($queries)) {
+			return $queries;
+		}
+
+		foreach ($queries as $query_key => $query ) {
+			if( isset( $query[$key]) && $query[$key] === $value ) {
+				unset( $queries[$query_key]);
+			}
+
+			if ( isset( $query['relation'] ) ) {
+				$queries[$query_key] = $this->remove_query_array( $query, $key, $value );
+			}
+		}
+
+		return $queries;
 	}
 
 	/**
