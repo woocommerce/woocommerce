@@ -93,9 +93,9 @@ final class LayoutTemplateRegistry {
 	public function instantiate_layout_templates( array $query_params = array() ): array {
 		$layout_templates = array();
 
-		$class_names = $this->get_class_names( $query_params );
-		foreach ( $class_names as $class_name ) {
-			$layout_template    = $this->get_layout_template_instance( $class_name );
+		$layout_templates_info = $this->get_matching_layout_templates_info( $query_params );
+		foreach ( $layout_templates_info as $layout_template_info ) {
+			$layout_template    = $this->get_layout_template_instance( $layout_template_info );
 			$layout_templates[] = $layout_template;
 		}
 
@@ -105,9 +105,11 @@ final class LayoutTemplateRegistry {
 	/**
 	 * Instantiate a single layout template and return it.
 	 *
-	 * @param string $class_name Class name of the layout template.
+	 * @param array $layout_template_info Layout template info.
 	 */
-	private function get_layout_template_instance( $class_name ) {
+	private function get_layout_template_instance( $layout_template_info ) {
+		$class_name = $layout_template_info['class_name'];
+
 		$layout_template_instance = isset( $this->layout_template_instances[ $class_name ] )
 			? $this->layout_template_instances[ $class_name ]
 			: null;
@@ -123,15 +125,15 @@ final class LayoutTemplateRegistry {
 	}
 
 	/**
-	 * Get matching layout template class names.
+	 * Get matching layout templates info.
 	 *
 	 * @param array $query_params Query params.
 	 */
-	private function get_class_names( array $query_params = array() ): array {
+	private function get_matching_layout_templates_info( array $query_params = array() ): array {
 		$area_to_match = isset( $query_params['area'] ) ? $query_params['area'] : null;
 		$id_to_match   = isset( $query_params['id'] ) ? $query_params['id'] : null;
 
-		$class_names = array();
+		$matching_layout_templates_info = array();
 
 		foreach ( $this->layout_templates_info as $id => $layout_template_info ) {
 			if ( ! empty( $area_to_match ) && $layout_template_info['area'] !== $area_to_match ) {
@@ -142,9 +144,9 @@ final class LayoutTemplateRegistry {
 				continue;
 			}
 
-			$class_names[] = $layout_template_info['class_name'];
+			$matching_layout_templates_info[] = $layout_template_info;
 		}
 
-		return $class_names;
+		return $matching_layout_templates_info;
 	}
 }
