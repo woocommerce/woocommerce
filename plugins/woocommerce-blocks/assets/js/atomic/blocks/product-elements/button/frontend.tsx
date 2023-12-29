@@ -152,7 +152,7 @@ const { state } = store< Store >( 'woocommerce/product-button', {
 				// https://github.com/woocommerce/woocommerce/pull/42946
 				yield doAction(
 					`experimental__woocommerce_blocks-cart-add-item`,
-					product
+					{ product }
 				);
 
 				// After the cart is updated, sync the temporary number of items again.
