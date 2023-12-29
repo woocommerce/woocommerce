@@ -6,7 +6,6 @@ import {
 	installPluginFromPHPFile,
 	uninstallPluginFromPHPFile,
 } from '@woocommerce/e2e-mocks/custom-plugins';
-import { BASE_URL } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
