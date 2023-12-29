@@ -207,7 +207,7 @@ class LegacyDataHandler {
 	 * @return array Array of [HPOS value, post value] keyed by property, for all properties where HPOS and post value differ.
 	 */
 	public function get_diff_for_order( int $order_id ): array {
-		$diff           = array();
+		$diff = array();
 
 		$hpos_order = $this->get_order_from_datastore( $order_id, 'hpos' );
 		$cpt_order  = $this->get_order_from_datastore( $order_id, 'cpt' );
@@ -232,15 +232,15 @@ class LegacyDataHandler {
 		);
 
 		foreach ( $all_keys as $key ) {
-			$val1 = in_array( $key, $this->get_order_base_props() ) ? $hpos_order->{"get_$key"}() : ( $hpos_meta[ $key ] ?? null );
-			$val2 = in_array( $key, $this->get_order_base_props() ) ? $cpt_order->{"get_$key"}() : ( $cpt_meta[ $key ] ?? null );
+			$val1 = in_array( $key, $this->get_order_base_props(), true ) ? $hpos_order->{"get_$key"}() : ( $hpos_meta[ $key ] ?? null );
+			$val2 = in_array( $key, $this->get_order_base_props(), true ) ? $cpt_order->{"get_$key"}() : ( $cpt_meta[ $key ] ?? null );
 
 			// Workaround for https://github.com/woocommerce/woocommerce/issues/43126.
 			if ( ! $val2 && in_array( $key, array( '_billing_address_index', '_shipping_address_index' ), true ) ) {
 				$val2 = get_post_meta( $order_id, $key, true );
 			}
 
-			if ( $val1 != $val2 ) {
+			if ( $val1 != $val2 ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 				$diff[ $key ] = array( $val1, $val2 );
 			}
 		}
@@ -268,7 +268,7 @@ class LegacyDataHandler {
 		}
 
 		$classname = wc_get_order_type( $data_store->get_order_type( $order_id ) )['class_name'];
-		$order = new $classname;
+		$order     = new $classname();
 		$order->set_id( $order_id );
 
 		// Switch datastore if necessary.
@@ -305,7 +305,7 @@ class LegacyDataHandler {
 
 		foreach ( ArrayUtil::select( $order->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD ) as &$meta ) {
 			if ( array_key_exists( $meta['key'], $result ) ) {
-				$result[ $meta['key'] ] = array( $result[ $meta['key'] ] );
+				$result[ $meta['key'] ]   = array( $result[ $meta['key'] ] );
 				$result[ $meta['key'] ][] = $meta['value'];
 			} else {
 				$result[ $meta['key'] ] = $meta['value'];

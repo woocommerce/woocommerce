@@ -968,11 +968,18 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	public function status( array $args = array(), array $assoc_args = array() ) {
 		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
 
+		// translators: %s is either 'yes' or 'no'.
 		WP_CLI::log( sprintf( __( 'HPOS enabled?: %s', 'woocommerce' ), wc_bool_to_string( $this->controller->custom_orders_table_usage_is_enabled() ) ) );
+
+		// translators: %s is either 'yes' or 'no'.
 		WP_CLI::log( sprintf( __( 'Compatibility mode enabled?: %s', 'woocommerce' ), wc_bool_to_string( $this->synchronizer->data_sync_is_enabled() ) ) );
+
+		// translators: %d is an order count.
 		WP_CLI::log( sprintf( __( 'Unsynced orders: %d', 'woocommerce' ), $this->synchronizer->get_current_orders_pending_sync_count() ) );
+
 		WP_CLI::log(
 			sprintf(
+				/* translators: %d is an order count. */
 				__( 'Orders subject to cleanup: %d', 'woocommerce' ),
 				( $this->synchronizer->custom_orders_table_is_authoritative() && ! $this->synchronizer->data_sync_is_enabled() )
 				? $legacy_handler->count_orders_for_cleanup()
@@ -1032,9 +1039,9 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		$diff = array_map(
 			function( $key, $hpos_value, $cpt_value ) {
 				return array(
-					'property'   => $key,
-					'hpos'       => $hpos_value,
-					'post'       => $cpt_value,
+					'property' => $key,
+					'hpos'     => $hpos_value,
+					'post'     => $cpt_value,
 				);
 			},
 			array_keys( $diff ),
