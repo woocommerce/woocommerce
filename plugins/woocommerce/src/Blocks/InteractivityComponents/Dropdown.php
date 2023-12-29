@@ -44,6 +44,8 @@ class Dropdown {
 			}"
 		);
 
+		$wrapper_class = 'multiple' === $select_type ? '' : 'single-selection';
+
 		ob_start();
 		?>
 		<div data-wc-interactive='<?php echo esc_attr( $namespace ); ?>'>
@@ -100,7 +102,7 @@ class Dropdown {
 										</button>
 									</span>
 								<?php } ?>
-							<?php } ?>							
+							<?php } ?>				
 							<input 
 								id="<?php echo esc_attr( $input_id ); ?>" 
 								readonly

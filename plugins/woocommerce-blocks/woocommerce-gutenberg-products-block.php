@@ -5,7 +5,7 @@
  * Description: WooCommerce blocks for the Gutenberg editor.
  * Version: 11.8.0-dev
  * Author: Automattic
- * Author URI: https://woocommerce.com
+ * Author URI: https://woo.com/
  * Text Domain:  woo-gutenberg-products-block
  * Requires at least: 6.4
  * Requires PHP: 7.4
