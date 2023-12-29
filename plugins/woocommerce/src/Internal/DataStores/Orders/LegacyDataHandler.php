@@ -195,6 +195,50 @@ class LegacyDataHandler {
 		return $order_modified_gmt >= $post_modified_gmt;
 	}
 
+	/**
+	 * Returns an order object as seen by either the HPOS or CPT datastores.
+	 *
+	 * @since 8.6.0
+	 *
+	 * @param int    $order_id      Order ID.
+	 * @param string $data_store_id Datastore to use. Should be either 'hpos' or 'cpt'. Defaults to 'hpos'.
+	 * @return \WC_Order Order instance.
+	 */
+	public function get_order_from_datastore( int $order_id, string $data_store_id = 'hpos' ) {
+		$data_store = ( 'hpos' === $data_store_id ) ? $this->data_store : $this->data_store->get_cpt_data_store_instance();
 
+		wp_cache_delete( \WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
+
+		// Prime caches if we can.
+		if ( method_exists( $data_store, 'prime_caches_for_orders' ) ) {
+			$data_store->prime_caches_for_orders( array( $order_id ), array() );
+		}
+
+		$classname = wc_get_order_type( $data_store->get_order_type( $order_id ) )['class_name'];
+		$order = new $classname;
+		$order->set_id( $order_id );
+
+		// Switch datastore if necessary.
+		$update_data_store_func = function ( $data_store ) {
+			// Each order object contains a reference to its data store, but this reference is itself
+			// held inside of an instance of WC_Data_Store, so we create that first.
+			$data_store_wrapper = \WC_Data_Store::load( 'order' );
+
+			// Bind $data_store to our WC_Data_Store.
+			( function ( $data_store ) {
+				$this->current_class_name = get_class( $data_store );
+				$this->instance           = $data_store;
+			} )->call( $data_store_wrapper, $data_store );
+
+			// Finally, update the $order object with our WC_Data_Store( $data_store ) instance.
+			$this->data_store = $data_store_wrapper;
+		};
+		$update_data_store_func->call( $order, $data_store );
+
+		// Read order.
+		$data_store->read( $order );
+
+		return $order;
+	}
 
 }
