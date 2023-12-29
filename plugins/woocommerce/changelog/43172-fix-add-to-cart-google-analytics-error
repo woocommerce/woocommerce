@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Product Button: update the signature of the `experimental__woocommerce_blocks-cart-add-item` event so it doesn't cause issue with existing extensions.
+
