@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Product Button: remove the `experimental__woocommerce_blocks-cart-add-item` event to avoid conflicts with extensions.
+
