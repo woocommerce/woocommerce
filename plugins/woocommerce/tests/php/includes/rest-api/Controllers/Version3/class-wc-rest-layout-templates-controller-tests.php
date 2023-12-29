@@ -83,4 +83,13 @@ class WC_REST_Layout_Templates_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'description', $data );
 		$this->assertArrayHasKey( 'blockTemplates', $data );
 	}
+
+	/**
+	 * Test getting a single layout template with invalid id.
+	 */
+	public function test_get_single_item_with_invalid_id() {
+		$response = $this->do_rest_get_request( 'layout-templates/invalid-layout-template' );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
 }
