@@ -9,10 +9,12 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { AdviceCard } from '../../../components/advice-card';
-import { ShoppingBags } from '../../../images/shopping-bags';
-import type { UpsellsBlockEditComponent } from './types';
+import type { CrossSellsBlockEditComponent } from './types';
+import { CashRegister } from '../../../images/cash-register';
 
-export function UpsellsBlockEdit( { attributes }: UpsellsBlockEditComponent ) {
+export function CrossSellsBlockEdit( {
+	attributes,
+}: CrossSellsBlockEditComponent ) {
 	const blockProps = useWooBlockProps( attributes );
 
 	const isEmpty = true; // @todo: implement.
@@ -22,10 +24,10 @@ export function UpsellsBlockEdit( { attributes }: UpsellsBlockEditComponent ) {
 			<div { ...blockProps }>
 				<AdviceCard
 					tip={ __(
-						'Upsells are products that are extra profitable or better quality or more expensive. Experiment with combinations to boost sales.',
+						'Tip: By suggesting complementary products in the cart using cross-sells, you can significantly increase the average order value.',
 						'woocommerce'
 					) }
-					image={ <ShoppingBags /> }
+					image={ <CashRegister /> }
 					isDismissible={ true }
 				/>
 			</div>
