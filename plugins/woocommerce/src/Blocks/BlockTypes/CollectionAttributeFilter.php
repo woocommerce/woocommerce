@@ -179,7 +179,6 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			$attribute_terms
 		);
 
-
 		$filter_content = 'dropdown' === $attributes['displayStyle'] ? $this->render_attribute_dropdown( $attribute_options, $attributes ) : $this->render_attribute_list( $attribute_options, $attributes );
 
 		$context = array(
