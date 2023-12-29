@@ -98,6 +98,15 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
+	 * Meta keys that are considered ephemereal and do not trigger a full save (updating modified date) when changed.
+	 *
+	 * @var string[]
+	 */
+	protected $ephemeral_meta_keys = array(
+		EditLock::META_KEY_NAME,
+	);
+
+	/**
 	 * Handles custom metadata in the wc_orders_meta table.
 	 *
 	 * @var OrdersTableDataStoreMeta
@@ -2964,9 +2973,7 @@ CREATE TABLE $meta_table (
 	private function should_save_after_meta_change( $order, $meta = null ) {
 		$current_time      = $this->legacy_proxy->call_function( 'current_time', 'mysql', 1 );
 		$current_date_time = new \WC_DateTime( $current_time, new \DateTimeZone( 'GMT' ) );
-		$skip_for          = array(
-			EditLock::META_KEY_NAME,
-		);
-		return $order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) && ( ! is_object( $meta ) || ! in_array( $meta->key, $skip_for, true ) );
+
+		return $order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) && ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
 	}
 }

@@ -8,6 +8,7 @@ export function ShoppingBags( {
 	colorOne = '#E0E0E0',
 	colorTwo = '#F0F0F0',
 	size = '88',
+	style = {},
 } ) {
 	return (
 		<SVG
@@ -16,6 +17,7 @@ export function ShoppingBags( {
 			viewBox="0 0 88 88"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
+			style={ style }
 		>
 			<Path
 				d="M59.5299 29.3511H6.48494C4.38544 44.6382 0.74386 74.8826 0.105058 79.5685C-0.505262 84.0386 1.48031 87.9998 7.72592 87.9998H58.293C64.5386 87.9998 66.5241 84.0386 65.9138 79.5685C65.275 74.8826 61.6294 44.6382 59.534 29.3511H59.5299Z"

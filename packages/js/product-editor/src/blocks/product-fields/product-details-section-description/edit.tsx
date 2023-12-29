@@ -117,12 +117,19 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 				await validate( productTemplate.productData );
 
-				await editEntityRecord(
-					'postType',
-					'product',
-					productId,
-					productTemplate.productData
-				);
+				const productMetaData =
+					productTemplate.productData.meta_data ?? [];
+
+				await editEntityRecord( 'postType', 'product', productId, {
+					...productTemplate.productData,
+					meta_data: [
+						...productMetaData,
+						{
+							key: '_product_template_id',
+							value: productTemplate.id,
+						},
+					],
+				} );
 
 				await saveEditedEntityRecord< Product >(
 					'postType',

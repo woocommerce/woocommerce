@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
-import { BlockControls, useBlockProps } from '@wordpress/block-editor';
+import {
+	BlockControls,
+	InnerBlocks,
+	useBlockProps,
+} from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
 import {
 	useCollection,
@@ -21,6 +25,7 @@ import {
 	withSpokenMessages,
 	Notice,
 } from '@wordpress/components';
+import { Template } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -36,6 +41,8 @@ import { Inspector } from './components/inspector-controls';
 import { AttributeCheckboxList } from './components/attribute-checkbox-list';
 import { AttributeDropdown } from './components/attribute-dropdown';
 import './style.scss';
+import { extractBuiltInColor } from '../../utils';
+import { useStyleProps } from '../../../../base/hooks';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -54,6 +61,13 @@ const Edit = ( props: EditProps ) => {
 		displayStyle,
 		showCounts,
 	} = blockAttributes;
+
+	const { className, style } = useStyleProps( props.attributes );
+	const builtInColor = extractBuiltInColor( className );
+
+	const textColor = builtInColor
+		? `var(--wp--preset--color--${ builtInColor })`
+		: style.color;
 
 	const attributeObject = getAttributeFromId( attributeId );
 
@@ -82,6 +96,22 @@ const Edit = ( props: EditProps ) => {
 	} );
 
 	const blockProps = useBlockProps();
+
+	const template: Template[] = [
+		[
+			'core/heading',
+			{
+				content: attributeObject
+					? sprintf(
+							// translators: %s is the attribute label.
+							__( 'Filter by %s', 'woocommerce' ),
+							attributeObject.label
+					  )
+					: __( 'Filter Products by Attribute', 'woocommerce' ),
+				level: 3,
+			},
+		],
+	];
 
 	useEffect( () => {
 		if ( ! attributeObject?.taxonomy ) {
@@ -226,6 +256,10 @@ const Edit = ( props: EditProps ) => {
 	return (
 		<Wrapper>
 			<Inspector { ...props } />
+			<InnerBlocks
+				template={ template }
+				allowedBlocks={ [ 'core/heading' ] }
+			/>
 			<Disabled>
 				{ displayStyle === 'dropdown' ? (
 					<AttributeDropdown
@@ -233,6 +267,7 @@ const Edit = ( props: EditProps ) => {
 							attributeObject.label ||
 							__( 'attribute', 'woocommerce' )
 						}
+						textColor={ textColor || '' }
 					/>
 				) : (
 					<AttributeCheckboxList
