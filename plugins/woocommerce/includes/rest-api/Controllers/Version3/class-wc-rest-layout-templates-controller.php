@@ -123,7 +123,7 @@ class WC_REST_Layout_Templates_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_layout_template_invalid_id', __( 'Invalid layout template ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$response = rest_ensure_response( $layout_templates[0] );
+		$response = rest_ensure_response( current( $layout_templates ) );
 
 		return $response;
 	}
