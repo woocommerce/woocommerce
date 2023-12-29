@@ -94,6 +94,19 @@ class LayoutTemplateRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test unregistering a layout template.
+	 */
+	public function test_unregister() {
+		$this->layout_template_registry->register( 'test-layout-template', 'test', TestLayoutTemplate::class );
+
+		$this->assertTrue( $this->layout_template_registry->is_registered( 'test-layout-template' ) );
+
+		$this->layout_template_registry->unregister_all( 'test-layout-template' );
+
+		$this->assertFalse( $this->layout_template_registry->is_registered( 'test-layout-template' ) );
+	}
+
+	/**
 	 * Test instantiating layout templates.
 	 */
 	public function test_instantiate() {
