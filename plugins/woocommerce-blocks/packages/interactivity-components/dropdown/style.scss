@@ -3,45 +3,56 @@
 	width: 100%;
 	gap: 16px;
 
-	.selected-badge {
-		padding: 5px 10px;
-		background-color: #e9ecef;
-		border-radius: 20px;
-		font-size: 14px;
-		line-height: 20px;
+	color: inherit;
+	font-family: inherit;
+	font-size: inherit;
+	font-style: inherit;
+	font-weight: inherit;
+	letter-spacing: inherit;
+	line-height: inherit;
+	text-decoration: inherit;
+	text-transform: inherit;
+
+	.wc-interactivity-dropdown__selected-badge {
+		@include font-size(smaller);
+		padding: 0.25em 0.25em 0.25em 0.75em;
+		border-radius: em(20px);
+		border: 1px solid $black;
 		display: inline-flex;
 		align-items: center;
-		gap: 5px;
+		gap: em(4px);
 
-		.badge-remove {
+		.wc-interactivity-dropdown__badge-text {
+			margin-right: 0.25em;
+		}
+
+		.wc-interactivity-dropdown__badge-remove {
+			background-color: $gray-200;
 			cursor: pointer;
-			font-size: 16px;
-			&:hover {
-				color: #dc3545;
-			}
+			border-radius: em(20px);
 		}
 	}
 
-	.wc-interactivity-dropdown__placeholder {
-		@include font-size(smaller);
-	}
-
-	.dropdown {
-		.dropdown-selection {
+	.wc-interactivity-dropdown__dropdown {
+		.wc-interactivity-dropdown__dropdown-selection {
 			display: flex;
-			padding: $gap-small;
+			padding: 4px 30px 4px 8px;
 			border: 1px solid $gray-700;
 			border-radius: em(4px);
-			background-color: white;
 			cursor: pointer;
+			align-items: center;
 
-			&:focus {
-				outline: none;
-				border-color: #007bff;
+			.wc-interactivity-dropdown__placeholder {
+				@include font-size(smaller);
+				margin: 0.25em 0;
+				display: flex;
+				justify-content: center;
+				flex-direction: column;
+				height: 30px;
 			}
 		}
 
-		.svg-container {
+		.wc-interactivity-dropdown__svg-container {
 			> svg {
 				position: absolute;
 				right: 8px;
@@ -51,7 +62,7 @@
 			}
 		}
 
-		.dropdown-list {
+		.wc-interactivity-dropdown__dropdown-list {
 			position: absolute;
 			width: 100%;
 			background: white;
@@ -60,25 +71,19 @@
 			z-index: 1000;
 			margin-top: $gap-smaller;
 
-			.dropdown-option {
+			.wc-interactivity-dropdown__dropdown-option {
 				margin: $gap-small;
 				padding: $gap-small;
-				border-radius: 4px;
+				border-radius: em(4px);
 				border: 1px solid $gray-400;
-				@include font-size(smaller);
+				@include font-size(small);
 				cursor: pointer;
 				&:hover,
 				&:focus,
 				&.is-selected {
-					background-color: #f8f9fa;
+					background-color: $gray-100;
 				}
 			}
 		}
-	}
-
-	label {
-		display: block;
-		margin-bottom: 5px;
-		font-weight: bold;
 	}
 }
