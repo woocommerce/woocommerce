@@ -27,8 +27,6 @@ jobs:
 
       - name: Build zip
         working-directory: plugins/woocommerce
-        env:
-            WOOCOMMERCE_BLOCKS_PHASE: 1
         run: bash bin/build-zip.sh
 
       - name: Deploy nightly build

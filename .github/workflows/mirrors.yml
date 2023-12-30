@@ -21,8 +21,6 @@ jobs:
 
       - name: Build zip
         working-directory: plugins/woocommerce
-        env:
-            WOOCOMMERCE_BLOCKS_PHASE: 1
         run: bash bin/build-zip.sh
 
       - name: Upload the zip file as an artifact
