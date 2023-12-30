@@ -137,7 +137,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'order'      => 20,
 				'attributes' => array(
 					'property' => 'description',
-					'label'    => __( 'Note <optional />', 'woocommerce' ),
+					'label'    => __( 'Note (optional)', 'woocommerce' ),
 					'helpText' => 'Enter an optional note displayed on the product page when customers select this variation.',
 				),
 			)
