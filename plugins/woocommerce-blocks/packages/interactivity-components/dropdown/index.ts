@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { getContext, store } from '@woocommerce/interactivity';
+/**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -47,12 +51,12 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 			if ( selectType === 'single' ) {
 				return selectedItems?.length && selectedItems[ 0 ].label
 					? selectedItems[ 0 ]?.label
-					: 'Select an option';
+					: __( 'Select an option', 'woocommerce' );
 			} else if (
 				selectType === 'multiple' &&
 				selectedItems.length === 0
 			) {
-				return 'Select options';
+				return __( 'Select options', 'woocommerce' );
 			}
 
 			return '';

@@ -177,12 +177,6 @@ final class CollectionStockFilter extends AbstractBlock {
 			)
 		);
 
-		// Just for the dropdown, we can only select 1 item.
-		$selected_item = $selected_items[0] ?? array(
-			'label' => null,
-			'value' => null,
-		);
-
 		$data_directive = wp_json_encode( array( 'namespace' => 'woocommerce/collection-stock-filter' ) );
 
 		ob_start();
@@ -239,10 +233,10 @@ final class CollectionStockFilter extends AbstractBlock {
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 				echo Dropdown::render(
 					array(
-						'items'         => $list_items,
-						'action'        => 'woocommerce/collection-stock-filter::actions.navigate',
-						'selected_item' => $selected_item,
-						'text_color'    => $text_color,
+						'items'          => $list_items,
+						'action'         => 'woocommerce/collection-stock-filter::actions.navigate',
+						'selected_items' => $selected_items,
+						'text_color'     => $text_color,
 					)
 				);
 				?>
