@@ -16,7 +16,7 @@
 	.wc-interactivity-dropdown__selected-badge {
 		@include font-size(smaller);
 		padding: 0.25em 0.25em 0.25em 0.75em;
-		margin: 2px 4px;
+		margin: 2px 0;
 		border-radius: em(20px);
 		border: 1px solid $black;
 		display: inline-flex;
