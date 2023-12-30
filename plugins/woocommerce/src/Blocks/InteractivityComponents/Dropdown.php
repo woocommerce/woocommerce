@@ -40,16 +40,17 @@ class Dropdown {
 			<div class="wc-interactivity-dropdown" data-wc-on--click="actions.toggleIsOpen" data-wc-context='<?php echo esc_attr( wp_json_encode( $dropdown_context ) ); ?>' >
 				<div class="dropdown" tabindex="-1" >
 					<div class="dropdown-selection" id="options-dropdown" tabindex="0" aria-haspopup="listbox">
+						<span class="wc-interactivity-dropdown__placeholder" data-wc-text="state.placeholderText">
+							<?php echo esc_html( $default_placeholder ); ?>
+						</span>
 						<?php if ( 'multiple' === $select_type ) { ?>
 							<div class="selected-options">
 								<template
 										data-wc-each="context.selectedItems"
 										data-wc-each-key="context.item.value"
 									>
-										<div 
-											class="selected-badge"
-											data-wc-text="context.item.label"
-										>
+										<div class="selected-badge">
+											<span data-wc-text="context.item.label"></span>
 											<span class="badge-remove">&times;</span>
 										</div>
 								</template>
@@ -57,19 +58,15 @@ class Dropdown {
 								<?php foreach ( $selected_items as $selected ) { ?>
 									<div 
 										class="selected-badge"
-										data-wc-key="<?php echo esc_attr( $selected['label'] ); ?>"
+										data-wc-key="<?php echo esc_attr( $selected['value'] ); ?>"
 										data-wc-each-child
 									>
-											Rated 1 out of 5 (1)
+											<?php echo esc_html( $selected['label'] ); ?>
 											<span class="badge-remove">&times;</span>
 									</div>
 								<?php } ?>
 							</div>
-						<?php } ?>
-
-						<span class="wc-interactivity-dropdown__placeholder" data-wc-text="state.placeholderText">
-							<?php echo esc_html( $default_placeholder ); ?>
-						</span>
+						<?php } ?>						
 						<span class="svg-container">
 							<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="30" height="30" >
 								<path d="M17.5 11.6L12 16l-5.5-4.4.9-1.2L12 14l4.5-3.6 1 1.2z" ></path>
@@ -77,10 +74,10 @@ class Dropdown {
 						</span>
 					</div>
 					<div data-wc-bind--hidden="!context.isOpen" class="dropdown-list" aria-labelledby="options-dropdown" role="listbox">
-					<?php
-					foreach ( $items as $item ) :
-						$context = array( 'item' => $item );
-						?>
+						<?php
+						foreach ( $items as $item ) :
+							$context = array( 'item' => $item );
+							?>
 							<div 
 								class="dropdown-option" 
 								role="option" 
@@ -99,7 +96,7 @@ class Dropdown {
 				</div>
 			</div>
 		</div>
-		<?php
-		return ob_get_clean();
+							<?php
+							return ob_get_clean();
 	}
 }

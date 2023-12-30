@@ -148,14 +148,13 @@ final class CollectionStockFilter extends AbstractBlock {
 	private function get_stock_filter_html( $stock_counts, $attributes ) {
 		$display_style  = $attributes['displayStyle'] ?? 'list';
 		$show_counts    = $attributes['showCounts'] ?? false;
+		$select_type    = $attributes['selectType'] ?? 'single';
 		$stock_statuses = wc_get_product_stock_status_options();
-
-		$text_color_class_and_style = StyleAttributesUtils::get_text_color_class_and_style( $attributes );
-		$text_color                 = $text_color_class_and_style['value'] ?? '';
 
 		// check the url params to select initial item on page load.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
-		$selected_stock_status = isset( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ) : '';
+		$query                   = isset( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ) : '';
+		$selected_stock_statuses = explode( ',', $query );
 
 		$list_items = array_map(
 			function( $item ) use ( $stock_statuses, $show_counts ) {
@@ -171,8 +170,8 @@ final class CollectionStockFilter extends AbstractBlock {
 		$selected_items = array_values(
 			array_filter(
 				$list_items,
-				function( $item ) use ( $selected_stock_status ) {
-						return $item['value'] === $selected_stock_status;
+				function( $item ) use ( $selected_stock_statuses ) {
+						return in_array( $item['value'], $selected_stock_statuses, true );
 				}
 			)
 		);
@@ -236,7 +235,7 @@ final class CollectionStockFilter extends AbstractBlock {
 						'items'          => $list_items,
 						'action'         => 'woocommerce/collection-stock-filter::actions.navigate',
 						'selected_items' => $selected_items,
-						'text_color'     => $text_color,
+						'select_type'    => $select_type,
 					)
 				);
 				?>
