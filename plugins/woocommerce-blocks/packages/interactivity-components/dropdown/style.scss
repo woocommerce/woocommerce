@@ -5,6 +5,25 @@
 	width: 100%;
 	gap: 16px;
 
+	.selected-badge {
+		padding: 5px 10px;
+		background-color: #e9ecef; // Light grey background
+		border-radius: 20px; // Rounded corners for badge
+		font-size: 14px;
+		line-height: 20px;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px; // Space between the text and the remove icon
+
+		.badge-remove {
+			cursor: pointer;
+			font-size: 16px;
+			&:hover {
+				color: #dc3545; // Slightly darker color on hover
+			}
+		}
+	}
+
 	.new-interactivity-dropdown__placeholder {
 		@include font-size(smaller);
 	}

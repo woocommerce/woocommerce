@@ -50,6 +50,33 @@ class Dropdown {
 			<div class="new-interactivity-dropdown" data-wc-on--click="actions.toggleIsOpen" data-wc-context='<?php echo esc_attr( wp_json_encode( $dropdown_context ) ); ?>' >
 				<div class="dropdown" tabindex="-1" >
 					<div class="dropdown-selection" id="options-dropdown" tabindex="0" aria-haspopup="listbox">
+						<?php if ( 'multiple' === $select_type ) { ?>
+							<div class="selected-options">
+								<template
+										data-wc-each="context.selectedItems"
+										data-wc-each-key="context.item.value"
+									>
+										<div 
+											class="selected-badge"
+											data-wc-text="context.item.label"
+										>
+											<span class="badge-remove">&times;</span>
+										</div>
+								</template>
+
+								<?php foreach ( $selected_items as $selected ) { ?>
+									<div 
+										class="selected-badge"
+										data-wc-key="<?php echo esc_attr( $selected['label'] ); ?>"
+										data-wc-each-child
+									>
+											Rated 1 out of 5 (1)
+											<span class="badge-remove">&times;</span>
+									</div>
+								<?php } ?>
+							</div>
+						<?php } ?>
+
 						<span class="new-interactivity-dropdown__placeholder">Select an option</span>
 						<span class="svg-container">
 							<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="30" height="30" >
@@ -58,9 +85,24 @@ class Dropdown {
 						</span>
 					</div>
 					<div data-wc-bind--hidden="!context.isOpen" class="dropdown-list" aria-labelledby="options-dropdown" role="listbox">
-						<div class="dropdown-option" role="option" tabindex="0">In stock</div>
-						<div class="dropdown-option" role="option" tabindex="0">Out of stock</div>
-						<div class="dropdown-option" role="option" tabindex="0">On backorder</div>
+					<?php
+					foreach ( $items as $item ) :
+						$context = array( 'item' => $item );
+						?>
+							<div 
+								class="dropdown-option" 
+								role="option" 
+								tabindex="0"
+								data-wc-on--click--select-item="actions.selectDropdownItem"
+								data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>"
+								data-wc-class--is-selected="state.isSelected"
+								class="components-form-token-field__suggestion"
+								data-wc-bind--aria-selected="state.isSelected"
+								data-wc-context='<?php echo wp_json_encode( $context ); ?>'
+							>
+								<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							</div>
+						<?php endforeach; ?>
 					</div>
 				</div>
 			</div>
