@@ -27,6 +27,13 @@ Label that appears on top of the price field.
 
 Help text that appears below the price field.
 
+### tooltip
+
+-   **Type:** `String`
+-   **Required:** `No`
+
+Tooltip text that is shown when hovering the icon at the side of the label.
+
 ## Usage
 
 Here's the code that adds the field from the screenshot after the Summary field:
@@ -45,6 +52,7 @@ if ( ! function_exists( 'add_pricing_field' ) ) {
           'label'    => __( 'Example price field', 'woocommerce'),
           'property' => 'custom_price',
           'help'     => 'This is a help text',
+          'tooltip'  => 'This is a tooltip',
         ],
       ]
     );

@@ -34,6 +34,8 @@ class Dropdown {
 		$namespace           = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) );
 		$default_placeholder = 'single' === $select_type ? __( 'Select an option', 'woocommerce' ) : __( 'Select options', 'woocommerce' );
 
+		$wrapper_class = 'multiple' === $select_type ? '' : 'single-selection';
+
 		ob_start();
 		?>
 		<div data-wc-interactive='<?php echo esc_attr( $namespace ); ?>'>
