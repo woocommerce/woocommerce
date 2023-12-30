@@ -140,7 +140,6 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 			} );
 
 		setDisplayedOptions( newOptions );
-		setRemountKey( generateUniqueId() );
 	}, [
 		blockAttributes.showCounts,
 		blockAttributes.isPreview,
