@@ -11,7 +11,9 @@ import { InnerBlocks } from '@wordpress/block-editor';
  */
 import './style.scss';
 import metadata from './block.json';
+import wrapperMetadata from './wrapper/block.json';
 import Edit from './edit';
+import EditWrapper from './wrapper/edit';
 
 if ( isExperimentalBuild() ) {
 	registerBlockType( metadata, {
@@ -24,6 +26,20 @@ if ( isExperimentalBuild() ) {
 			),
 		},
 		edit: Edit,
+		save: InnerBlocks.Content,
+	} );
+
+	// Register a variant wrapped in Collection Filter for discoverability
+	registerBlockType( wrapperMetadata, {
+		icon: {
+			src: (
+				<Icon
+					icon={ currencyDollar }
+					className="wc-block-editor-components-block-icon"
+				/>
+			),
+		},
+		edit: EditWrapper,
 		save: InnerBlocks.Content,
 	} );
 }
