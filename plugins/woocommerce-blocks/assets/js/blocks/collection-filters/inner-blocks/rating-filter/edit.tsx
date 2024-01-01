@@ -32,7 +32,7 @@ import { Attributes } from './types';
 import { formatSlug, getActiveFilters, generateUniqueId } from './utils';
 import { useSetWraperVisibility } from '../../../filter-wrapper/context';
 import './editor.scss';
-import { Inspector } from '../attribute-filter/components/inspector-controls';
+import { Inspector } from './components/inspector';
 import { extractBuiltInColor } from '../../utils';
 
 const NoRatings = () => (
