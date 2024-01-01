@@ -5,7 +5,10 @@ PROJECT_PATH=$(pwd)
 BUILD_PATH="${PROJECT_PATH}/build"
 DEST_PATH="$BUILD_PATH/$PLUGIN_SLUG"
 
-export WOOCOMMERCE_BLOCKS_PHASE=1
+if [ -z "${WOOCOMMERCE_BLOCKS_PHASE}" ]; then
+    export WOOCOMMERCE_BLOCKS_PHASE=1
+fi
+
 echo "Generating build directory..."
 rm -rf "$BUILD_PATH"
 mkdir -p "$DEST_PATH"
