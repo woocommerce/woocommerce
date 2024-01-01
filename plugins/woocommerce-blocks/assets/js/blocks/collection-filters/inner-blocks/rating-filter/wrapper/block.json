@@ -1,5 +1,5 @@
 {
-	"name": "woocommerce/collection-rating-filter",
+	"name": "woocommerce/filter-by-rating",
 	"version": "1.0.0",
 	"title": "Filter by Rating (2)",
 	"description": "Enable customers to filter the product collection by rating.",
