@@ -111,18 +111,14 @@ final class CollectionPriceFilter extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if (
-			is_admin() ||
-			empty( $block->context['collectionData'] ) ||
-			empty( $block->context['collectionData']['price_range'] )
-		) {
+		// don't render if its admin, or ajax in progress.
+		if ( is_admin() || wp_doing_ajax() ) {
 			return '';
 		}
 
-		$price_range = $block->context['collectionData']['price_range'];
-
-		$min_range           = $price_range['min_price'] / 10 ** $price_range['currency_minor_unit'];
-		$max_range           = $price_range['max_price'] / 10 ** $price_range['currency_minor_unit'];
+		$price_range         = $block->context['collectionData']['price_range'] ?? [];
+		$min_range           = $price_range['min_price'] ?? 0;
+		$max_range           = $price_range['max_price'] ?? 0;
 		$min_price           = intval( get_query_var( self::MIN_PRICE_QUERY_VAR, $min_range ) );
 		$max_price           = intval( get_query_var( self::MAX_PRICE_QUERY_VAR, $max_range ) );
 		$formatted_min_price = wc_price( $min_price, array( 'decimals' => 0 ) );
@@ -135,32 +131,30 @@ final class CollectionPriceFilter extends AbstractBlock {
 			'maxRange' => $max_range,
 		);
 
-		wc_initial_state(
-			'woocommerce/collection-price-filter',
-			$data
-		);
-
 		list (
 			'showInputFields' => $show_input_fields,
 			'inlineInput' => $inline_input
 		) = $attributes;
 
-		// Max range shouldn't be 0.
-		if ( ! $max_range ) {
-			return '';
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class'               => $show_input_fields && $inline_input ? 'inline-input' : '',
+				'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-price-filter' ) ),
+				'data-wc-context'     => wp_json_encode( $data ),
+			)
+		);
+
+		if ( $min_range === $max_range || ! $max_range ) {
+			return sprintf(
+				'<div %s></div>',
+				$wrapper_attributes
+			);
 		}
 
 		// CSS variables for the range bar style.
 		$__low       = 100 * ( $min_price - $min_range ) / ( $max_range - $min_range );
 		$__high      = 100 * ( $max_price - $min_range ) / ( $max_range - $min_range );
 		$range_style = "--low: $__low%; --high: $__high%";
-
-		$wrapper_attributes = get_block_wrapper_attributes(
-			array(
-				'class'               => $show_input_fields && $inline_input ? 'inline-input' : '',
-				'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-price-filter' ) ),
-			)
-		);
 
 		$price_min = $show_input_fields ?
 			sprintf(
@@ -198,7 +192,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 		?>
 			<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				<div data-wc-context="<?php echo esc_attr( wp_json_encode( $data ) ); ?>" >
+				<div class="filter-controls">
 					<div
 						class="range"
 						style="<?php echo esc_attr( $range_style ); ?>"
