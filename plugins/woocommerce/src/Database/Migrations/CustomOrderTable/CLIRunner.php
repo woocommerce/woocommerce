@@ -1038,6 +1038,10 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		// Format the diff array.
 		$diff = array_map(
 			function( $key, $hpos_value, $cpt_value ) {
+				// Format for dates.
+				$hpos_value = is_a( $hpos_value, \WC_DateTime::class ) ? $hpos_value->format( DATE_ATOM ) : $hpos_value;
+				$cpt_value  = is_a( $cpt_value, \WC_DateTime::class ) ? $cpt_value->format( DATE_ATOM ) : $cpt_value;
+
 				return array(
 					'property' => $key,
 					'hpos'     => $hpos_value,
