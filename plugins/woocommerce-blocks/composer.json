@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/woocommerce-blocks",
 	"description": "WooCommerce blocks for the Gutenberg editor.",
-	"homepage": "https://woocommerce.com/",
+	"homepage": "https://woo.com/",
 	"type": "wordpress-plugin",
 	"version": "11.8.0-dev",
 	"license": "GPL-3.0-or-later",

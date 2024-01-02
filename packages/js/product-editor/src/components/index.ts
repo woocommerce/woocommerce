@@ -56,3 +56,13 @@ export {
 	AddProductsModal as __experimentalAddProductsModal,
 	AddProductsModalProps,
 } from './add-products-modal';
+
+export {
+	BlockFill as __experimentalBlockFill,
+	BlockSlot as __experimentalBlockSlot,
+	BlockFillProps,
+	BlockSlotProps,
+} from './block-slot-fill';
+
+export { Label as __experimentalLabel } from './label/label';
+export { ButtonWithDropdownMenu as __experimentalButtonWithDropdownMenu } from './button-with-dropdown-menu';

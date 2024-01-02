@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use WP_Query;
+use WC_Tax;
 
 /**
  * ProductCollection class.
@@ -95,6 +96,8 @@ class ProductCollection extends AbstractBlock {
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'add_navigation_id_directive' ), 10, 3 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
+
+		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
 	}
 
 	/**
@@ -181,7 +184,7 @@ class ProductCollection extends AbstractBlock {
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $attributes = [] ) {
+	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 
 		// The `loop_shop_per_page` filter can be found in WC_Query::product_query().
@@ -209,6 +212,7 @@ class ProductCollection extends AbstractBlock {
 		$handpicked_products = $request->get_param( 'woocommerceHandPickedProducts' );
 		$featured            = $request->get_param( 'featured' );
 		$time_frame          = $request->get_param( 'timeFrame' );
+		$price_range         = $request->get_param( 'priceRange' );
 		// This argument is required for the tests to PHP Unit Tests to run correctly.
 		// Most likely this argument is being accessed in the test environment image.
 		$args['author'] = '';
@@ -223,6 +227,7 @@ class ProductCollection extends AbstractBlock {
 				'handpicked_products' => $handpicked_products,
 				'featured'            => $featured,
 				'timeFrame'           => $time_frame,
+				'priceRange'          => $price_range,
 			)
 		);
 	}
@@ -306,10 +311,11 @@ class ProductCollection extends AbstractBlock {
 		);
 
 		$is_on_sale          = $query['woocommerceOnSale'] ?? false;
-		$product_attributes  = $query['woocommerceAttributes'] ?? [];
-		$taxonomies_query    = $this->get_filter_by_taxonomies_query( $query['tax_query'] ?? [] );
-		$handpicked_products = $query['woocommerceHandPickedProducts'] ?? [];
+		$product_attributes  = $query['woocommerceAttributes'] ?? array();
+		$taxonomies_query    = $this->get_filter_by_taxonomies_query( $query['tax_query'] ?? array() );
+		$handpicked_products = $query['woocommerceHandPickedProducts'] ?? array();
 		$time_frame          = $query['timeFrame'] ?? null;
+		$price_range         = $query['priceRange'] ?? null;
 
 		$final_query = $this->get_final_query_args(
 			$common_query_values,
@@ -322,6 +328,7 @@ class ProductCollection extends AbstractBlock {
 				'handpicked_products' => $handpicked_products,
 				'featured'            => $query['featured'] ?? false,
 				'timeFrame'           => $time_frame,
+				'priceRange'          => $price_range,
 			),
 			$is_exclude_applied_filters
 		);
@@ -337,23 +344,26 @@ class ProductCollection extends AbstractBlock {
 	 * @param bool  $is_exclude_applied_filters Whether to exclude the applied filters or not.
 	 */
 	private function get_final_query_args( $common_query_values, $query, $is_exclude_applied_filters = false ) {
-		$handpicked_products = $query['handpicked_products'] ?? [];
-		$orderby_query       = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : [];
+		$handpicked_products = $query['handpicked_products'] ?? array();
+		$orderby_query       = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : array();
 		$on_sale_query       = $this->get_on_sale_products_query( $query['on_sale'] );
 		$stock_query         = $this->get_stock_status_query( $query['stock_status'] );
-		$visibility_query    = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query, $query['stock_status'] ) : [];
+		$visibility_query    = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query, $query['stock_status'] ) : array();
 		$featured_query      = $this->get_featured_query( $query['featured'] ?? false );
 		$attributes_query    = $this->get_product_attributes_query( $query['product_attributes'] );
-		$taxonomies_query    = $query['taxonomies_query'] ?? [];
+		$taxonomies_query    = $query['taxonomies_query'] ?? array();
 		$tax_query           = $this->merge_tax_queries( $visibility_query, $attributes_query, $taxonomies_query, $featured_query );
-		$date_query          = $this->get_date_query( $query['timeFrame'] ?? [] );
+		$date_query          = $this->get_date_query( $query['timeFrame'] ?? array() );
+		$price_query_args    = $this->get_price_range_query_args( $query['priceRange'] ?? array() );
 
 		// We exclude applied filters to generate product ids for the filter blocks.
-		$applied_filters_query = $is_exclude_applied_filters ? [] : $this->get_queries_by_applied_filters();
+		$applied_filters_query = $is_exclude_applied_filters ? array() : $this->get_queries_by_applied_filters();
 
-		$merged_query = $this->merge_queries( $common_query_values, $orderby_query, $on_sale_query, $stock_query, $tax_query, $applied_filters_query, $date_query );
+		$merged_query = $this->merge_queries( $common_query_values, $orderby_query, $on_sale_query, $stock_query, $tax_query, $applied_filters_query, $date_query, $price_query_args );
 
-		return $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
+		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
+
+		return $result;
 	}
 
 	/**
@@ -381,7 +391,7 @@ class ProductCollection extends AbstractBlock {
 	private function merge_queries( ...$queries ) {
 		$merged_query = array_reduce(
 			$queries,
-			function( $acc, $query ) {
+			function ( $acc, $query ) {
 				if ( ! is_array( $query ) ) {
 					return $acc;
 				}
@@ -489,6 +499,8 @@ class ProductCollection extends AbstractBlock {
 				'posts_per_page',
 				'suppress_filters',
 				'tax_query',
+				'isProductCollection',
+				'priceRange',
 			)
 		);
 
@@ -547,15 +559,13 @@ class ProductCollection extends AbstractBlock {
 		foreach ( $new as $key => $value ) {
 			if ( is_numeric( $key ) ) {
 				$base[] = $value;
-			} else {
-				if ( is_array( $value ) ) {
-					if ( ! isset( $base[ $key ] ) ) {
-						$base[ $key ] = array();
-					}
-					$base[ $key ] = $this->array_merge_recursive_replace_non_array_properties( $base[ $key ], $value );
-				} else {
-					$base[ $key ] = $value;
+			} elseif ( is_array( $value ) ) {
+				if ( ! isset( $base[ $key ] ) ) {
+					$base[ $key ] = array();
 				}
+					$base[ $key ] = $this->array_merge_recursive_replace_non_array_properties( $base[ $key ], $value );
+			} else {
+				$base[ $key ] = $value;
 			}
 		}
 
@@ -675,14 +685,14 @@ class ProductCollection extends AbstractBlock {
 	 * @return array
 	 */
 	private function merge_tax_queries( ...$queries ) {
-		$tax_query = [];
+		$tax_query = array();
 		foreach ( $queries as $query ) {
 			if ( ! empty( $query['tax_query'] ) ) {
 				$tax_query = array_merge( $tax_query, $query['tax_query'] );
 			}
 		}
 		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-		return [ 'tax_query' => $tax_query ];
+		return array( 'tax_query' => $tax_query );
 	}
 
 	/**
@@ -748,23 +758,23 @@ class ProductCollection extends AbstractBlock {
 	 */
 	private function get_filter_by_taxonomies_query( $tax_query ): array {
 		if ( ! is_array( $tax_query ) ) {
-			return [];
+			return array();
 		}
 
 		/**
 		 * Get an array of taxonomy names associated with the "product" post type because
 		 * we also want to include custom taxonomies associated with the "product" post type.
 		 */
-		$product_taxonomies = get_taxonomies( [ 'object_type' => [ 'product' ] ], 'names' );
+		$product_taxonomies = get_taxonomies( array( 'object_type' => array( 'product' ) ), 'names' );
 		$result             = array_filter(
 			$tax_query,
-			function( $item ) use ( $product_taxonomies ) {
+			function ( $item ) use ( $product_taxonomies ) {
 				return isset( $item['taxonomy'] ) && in_array( $item['taxonomy'], $product_taxonomies, true );
 			}
 		);
 
 		// phpcs:ignore WordPress.DB.SlowDBQuery
-		return ! empty( $result ) ? [ 'tax_query' => $result ] : [];
+		return ! empty( $result ) ? array( 'tax_query' => $result ) : array();
 	}
 
 	/**
@@ -807,19 +817,19 @@ class ProductCollection extends AbstractBlock {
 		$min_price = get_query_var( PriceFilter::MIN_PRICE_QUERY_VAR );
 		$max_price = get_query_var( PriceFilter::MAX_PRICE_QUERY_VAR );
 
-		$max_price_query = empty( $max_price ) ? array() : [
+		$max_price_query = empty( $max_price ) ? array() : array(
 			'key'     => '_price',
 			'value'   => $max_price,
 			'compare' => '<',
 			'type'    => 'numeric',
-		];
+		);
 
-		$min_price_query = empty( $min_price ) ? array() : [
+		$min_price_query = empty( $min_price ) ? array() : array(
 			'key'     => '_price',
 			'value'   => $min_price,
 			'compare' => '>=',
 			'type'    => 'numeric',
-		];
+		);
 
 		if ( empty( $min_price_query ) && empty( $max_price_query ) ) {
 			return array();
@@ -847,7 +857,7 @@ class ProductCollection extends AbstractBlock {
 
 		$queries = array_reduce(
 			$attributes_filter_query_args,
-			function( $acc, $query_args ) {
+			function ( $acc, $query_args ) {
 				$attribute_name       = $query_args['filter'];
 				$attribute_query_type = $query_args['query_type'];
 
@@ -912,7 +922,7 @@ class ProductCollection extends AbstractBlock {
 
 		$this->attributes_filter_query_args = array_reduce(
 			wc_get_attribute_taxonomies(),
-			function( $acc, $attribute ) {
+			function ( $acc, $attribute ) {
 				$acc[ $attribute->attribute_name ] = array(
 					'filter'     => AttributeFilter::FILTER_QUERY_VAR_PREFIX . $attribute->attribute_name,
 					'query_type' => AttributeFilter::QUERY_TYPE_QUERY_VAR_PREFIX . $attribute->attribute_name,
@@ -939,7 +949,7 @@ class ProductCollection extends AbstractBlock {
 
 		$filtered_stock_status_values = array_filter(
 			explode( ',', $filter_stock_status_values ),
-			function( $stock_status ) {
+			function ( $stock_status ) {
 				return in_array( $stock_status, StockFilter::get_stock_status_query_var_values(), true );
 			}
 		);
@@ -980,7 +990,7 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$rating_terms = array_map(
-			function( $rating ) use ( $product_visibility_terms ) {
+			function ( $rating ) use ( $product_visibility_terms ) {
 				return $product_visibility_terms[ 'rated-' . $rating ];
 			},
 			$parsed_filter_rating_values
@@ -1011,7 +1021,7 @@ class ProductCollection extends AbstractBlock {
 	 * }
 	 * @return array Date query array; empty if parameters are invalid.
 	 */
-	private function get_date_query( array $time_frame ) : array {
+	private function get_date_query( array $time_frame ): array {
 		// Validate time_frame elements.
 		if ( empty( $time_frame['operator'] ) || empty( $time_frame['value'] ) ) {
 			return array();
@@ -1032,5 +1042,184 @@ class ProductCollection extends AbstractBlock {
 		);
 	}
 
+	/**
+	 * Get query arguments for price range filter.
+	 * We are adding these extra query arguments to be used in `posts_clauses`
+	 * because there are 2 special edge cases we wanna handle for Price range filter:
+	 * Case 1: Prices excluding tax are displayed including tax
+	 * Case 2: Prices including tax are displayed excluding tax
+	 *
+	 * Both of these cases require us to modify SQL query to get the correct results.
+	 *
+	 * See add_price_range_filter_posts_clauses function in this file for more details.
+	 *
+	 * @param array $price_range Price range with min and max values.
+	 * @return array Query arguments.
+	 */
+	public function get_price_range_query_args( $price_range ) {
+		if ( empty( $price_range ) ) {
+			return array();
+		}
 
+		return array(
+			'isProductCollection' => true,
+			'priceRange'          => $price_range,
+		);
+	}
+
+	/**
+	 * Add the `posts_clauses` filter to the main query.
+	 *
+	 * @param array    $clauses The query clauses.
+	 * @param WP_Query $query   The WP_Query instance.
+	 */
+	public function add_price_range_filter_posts_clauses( $clauses, $query ) {
+		$query_vars                  = $query->query_vars;
+		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
+		if ( ! $is_product_collection_block ) {
+			return $clauses;
+		}
+
+		$price_range = $query_vars['priceRange'] ?? null;
+		if ( empty( $price_range ) ) {
+			return $clauses;
+		}
+
+		global $wpdb;
+		$adjust_for_taxes = $this->should_adjust_price_range_for_taxes();
+		$clauses['join']  = $this->append_product_sorting_table_join( $clauses['join'] );
+
+		$min_price = $price_range['min'] ?? null;
+		if ( $min_price ) {
+			if ( $adjust_for_taxes ) {
+				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price, 'min_price', '>=' );
+			} else {
+				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price >= %f ', $min_price );
+			}
+		}
+
+		$max_price = $price_range['max'] ?? null;
+		if ( $max_price ) {
+			if ( $adjust_for_taxes ) {
+				$clauses['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price, 'max_price', '<=' );
+			} else {
+				$clauses['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price <= %f ', $max_price );
+			}
+		}
+
+		return $clauses;
+	}
+
+	/**
+	 * Determines if price filters need adjustment based on the tax display settings.
+	 *
+	 * This function checks if there's a discrepancy between how prices are stored in the database
+	 * and how they are displayed to the user, specifically with respect to tax inclusion or exclusion.
+	 * It returns true if an adjustment is needed, indicating that the price filters should account for this
+	 * discrepancy to display accurate prices.
+	 *
+	 * @return bool True if the price filters need to be adjusted for tax display settings, false otherwise.
+	 */
+	private function should_adjust_price_range_for_taxes() {
+		$display_setting      = get_option( 'woocommerce_tax_display_shop' ); // Tax display setting ('incl' or 'excl').
+		$price_storage_method = wc_prices_include_tax() ? 'incl' : 'excl';
+
+		return $display_setting !== $price_storage_method;
+	}
+
+	/**
+	 * Join wc_product_meta_lookup to posts if not already joined.
+	 *
+	 * @param string $sql SQL join.
+	 * @return string
+	 */
+	protected function append_product_sorting_table_join( $sql ) {
+		global $wpdb;
+
+		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
+			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
+		}
+		return $sql;
+	}
+
+	/**
+	 * Get query for price filters when dealing with displayed taxes.
+	 *
+	 * @param float  $price_filter Price filter to apply.
+	 * @param string $column Price being filtered (min or max).
+	 * @param string $operator Comparison operator for column.
+	 * @return string Constructed query.
+	 */
+	protected function get_price_filter_query_for_displayed_taxes( $price_filter, $column = 'min_price', $operator = '>=' ) {
+		global $wpdb;
+
+		// Select only used tax classes to avoid unwanted calculations.
+		$product_tax_classes = $wpdb->get_col( "SELECT DISTINCT tax_class FROM {$wpdb->wc_product_meta_lookup};" );
+
+		if ( empty( $product_tax_classes ) ) {
+			return '';
+		}
+
+		$or_queries = array();
+
+		// We need to adjust the filter for each possible tax class and combine the queries into one.
+		foreach ( $product_tax_classes as $tax_class ) {
+			$adjusted_price_filter = $this->adjust_price_filter_for_tax_class( $price_filter, $tax_class );
+			$or_queries[]          = $wpdb->prepare(
+				'( wc_product_meta_lookup.tax_class = %s AND wc_product_meta_lookup.`' . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )',
+				$tax_class,
+				$adjusted_price_filter
+			);
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		return $wpdb->prepare(
+			' AND (
+				wc_product_meta_lookup.tax_status = "taxable" AND ( 0=1 OR ' . implode( ' OR ', $or_queries ) . ')
+				OR ( wc_product_meta_lookup.tax_status != "taxable" AND wc_product_meta_lookup.`' . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )
+			) ',
+			$price_filter
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * Adjusts a price filter based on a tax class and whether or not the amount includes or excludes taxes.
+	 *
+	 * This calculation logic is based on `wc_get_price_excluding_tax` and `wc_get_price_including_tax` in core.
+	 *
+	 * @param float  $price_filter Price filter amount as entered.
+	 * @param string $tax_class Tax class for adjustment.
+	 * @return float
+	 */
+	protected function adjust_price_filter_for_tax_class( $price_filter, $tax_class ) {
+		$tax_display    = get_option( 'woocommerce_tax_display_shop' );
+		$tax_rates      = WC_Tax::get_rates( $tax_class );
+		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
+
+		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
+		if ( 'incl' === $tax_display ) {
+			/**
+			 * Filters if taxes should be removed from locations outside the store base location.
+			 *
+			 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing
+			 * with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10
+			 * regardless of location and taxes.
+			 *
+			 * @since 2.6.0
+			 *
+			 * @internal Matches filter name in WooCommerce core.
+			 *
+			 * @param boolean $adjust_non_base_location_prices True by default.
+			 * @return boolean
+			 */
+			$taxes = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $price_filter, $base_tax_rates, true ) : WC_Tax::calc_tax( $price_filter, $tax_rates, true );
+			return $price_filter - array_sum( $taxes );
+		}
+
+		// If prices are shown excl. tax, add taxes to match the prices stored in the DB.
+		$taxes = WC_Tax::calc_tax( $price_filter, $tax_rates, false );
+
+		return $price_filter + array_sum( $taxes );
+	}
 }

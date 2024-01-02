@@ -1,14 +1,18 @@
 {
 	"name": "woocommerce/collection-stock-filter",
 	"version": "1.0.0",
-	"title": "Stock Filter",
+	"title": "Collection Stock Filter",
 	"description": "Enable customers to filter the product collection by stock status.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce", "filter", "stock" ],
 	"supports": {
 		"interactivity": true,
 		"html": false,
-		"multiple": false
+		"multiple": false,
+		"color": {
+			"text": true,
+			"background": false
+		}
 	},
 	"attributes": {
 		"className": {

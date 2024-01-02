@@ -26,7 +26,11 @@ store( 'woocommerce/collection-stock-filter', {
 				'woocommerce/interactivity-dropdown'
 			);
 
-			navigate( getUrl( context.selectedItem.value || '' ) );
+			const selectedItems = context.selectedItems;
+			const items = selectedItems || [];
+			const filters = items.map( ( i ) => i.value );
+
+			navigate( getUrl( filters.join( ',' ) ) );
 		},
 		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
 			// get the active filters from the url:
@@ -49,6 +53,25 @@ store( 'woocommerce/collection-stock-filter', {
 				if ( index > -1 ) {
 					filtersArr.splice( index, 1 );
 				}
+			}
+
+			navigate( getUrl( filtersArr.join( ',' ) ) );
+		},
+		removeFilter: () => {
+			const { value } = getContext< { value: string } >();
+			// get the active filters from the url:
+			const url = new URL( window.location.href );
+			const currentFilters =
+				url.searchParams.get( 'filter_stock_status' ) || '';
+
+			// split out the active filters into an array.
+			const filtersArr =
+				currentFilters === '' ? [] : currentFilters.split( ',' );
+
+			const index = filtersArr.indexOf( value );
+
+			if ( index > -1 ) {
+				filtersArr.splice( index, 1 );
 			}
 
 			navigate( getUrl( filtersArr.join( ',' ) ) );

@@ -13,16 +13,28 @@ use WP_Error;
  */
 class FileController {
 	/**
+	 * The maximum number of rotations for a file before they start getting overwritten.
+	 *
+	 * This number should not go above 10, or it will cause issues with the glob patterns.
+	 *
+	 * const int
+	 */
+	private const MAX_FILE_ROTATIONS = 10;
+
+	/**
 	 * Default values for arguments for the get_files method.
 	 *
 	 * @const array
 	 */
 	public const DEFAULTS_GET_FILES = array(
-		'offset'   => 0,
-		'order'    => 'desc',
-		'orderby'  => 'modified',
-		'per_page' => 20,
-		'source'   => '',
+		'date_end'    => 0,
+		'date_filter' => '',
+		'date_start'  => 0,
+		'offset'      => 0,
+		'order'       => 'desc',
+		'orderby'     => 'modified',
+		'per_page'    => 20,
+		'source'      => '',
 	);
 
 	/**
@@ -78,16 +90,124 @@ class FileController {
 	}
 
 	/**
+	 * Get the file size limit that determines when to rotate a file.
+	 *
+	 * @return int
+	 */
+	private function get_file_size_limit(): int {
+		$default = 5 * MB_IN_BYTES;
+
+		/**
+		 * Filter the threshold size of a log file at which point it will get rotated.
+		 *
+		 * @since 3.4.0
+		 *
+		 * @param int $file_size_limit The file size limit in bytes.
+		 */
+		$file_size_limit = apply_filters( 'woocommerce_log_file_size_limit', $default );
+
+		if ( ! is_int( $file_size_limit ) || $file_size_limit < 1 ) {
+			return $default;
+		}
+
+		return $file_size_limit;
+	}
+
+	/**
+	 * Write a log entry to the appropriate file, after rotating the file if necessary.
+	 *
+	 * @param string   $source The source property of the log entry, which determines which file to write to.
+	 * @param string   $text   The contents of the log entry to add to a file.
+	 * @param int|null $time   Optional. The time of the log entry as a Unix timestamp. Defaults to the current time.
+	 *
+	 * @return bool True if the contents were successfully written to the file.
+	 */
+	public function write_to_file( string $source, string $text, ?int $time = null ): bool {
+		if ( is_null( $time ) ) {
+			$time = time();
+		}
+
+		$file_id = File::generate_file_id( $source, null, $time );
+		$file    = $this->get_file_by_id( $file_id );
+
+		if ( $file instanceof File && $file->get_file_size() >= $this->get_file_size_limit() ) {
+			$rotated = $this->rotate_file( $file->get_file_id() );
+
+			if ( $rotated ) {
+				$file = null;
+			} else {
+				return false;
+			}
+		}
+
+		if ( ! $file instanceof File ) {
+			$new_path = $this->log_directory . $this->generate_filename( $source, $time );
+			$file     = new File( $new_path );
+		}
+
+		return $file->write( $text );
+	}
+
+	/**
+	 * Generate the full name of a file based on source and date values.
+	 *
+	 * @param string $source The source property of a log entry, which determines the filename.
+	 * @param int    $time   The time of the log entry as a Unix timestamp.
+	 *
+	 * @return string
+	 */
+	private function generate_filename( string $source, int $time ): string {
+		$file_id = File::generate_file_id( $source, null, $time );
+		$hash    = File::generate_hash( $file_id );
+
+		return "$file_id-$hash.log";
+	}
+
+	/**
+	 * Get all the rotations of a file and increment them, so that they overwrite the previous file with that rotation.
+	 *
+	 * @param string $file_id A file ID (file basename without the hash).
+	 *
+	 * @return bool True if the file and all its rotations were successfully rotated.
+	 */
+	private function rotate_file( $file_id ): bool {
+		$rotations = $this->get_file_rotations( $file_id );
+
+		if ( is_wp_error( $rotations ) || ! isset( $rotations['current'] ) ) {
+			return false;
+		}
+
+		$max_rotation_marker = self::MAX_FILE_ROTATIONS - 1;
+
+		// Don't rotate a file with the maximum rotation.
+		unset( $rotations[ $max_rotation_marker ] );
+
+		$results = array();
+		// Rotate starting with oldest first and working backwards.
+		for ( $i = $max_rotation_marker; $i >= 0; $i -- ) {
+			if ( isset( $rotations[ $i ] ) ) {
+				$results[] = $rotations[ $i ]->rotate();
+			}
+		}
+		$results[] = $rotations['current']->rotate();
+
+		return ! in_array( false, $results, true );
+	}
+
+	/**
 	 * Get an array of log files.
 	 *
 	 * @param array $args      {
 	 *     Optional. Arguments to filter and sort the files that are returned.
 	 *
-	 *     @type int    $offset   Omit this number of files from the beginning of the list. Works with $per_page to do pagination.
-	 *     @type string $order    The sort direction. 'asc' or 'desc'. Defaults to 'desc'.
-	 *     @type string $orderby  The property to sort the list by. 'created', 'modified', 'source', 'size'. Defaults to 'modified'.
-	 *     @type int    $per_page The number of files to include in the list. Works with $offset to do pagination.
-	 *     @type string $source   Only include files from this source.
+	 *     @type int    $date_end    The end of the date range to filter by, as a Unix timestamp.
+	 *     @type string $date_filter Filter files by one of the date props. 'created' or 'modified'.
+	 *     @type int    $date_start  The beginning of the date range to filter by, as a Unix timestamp.
+	 *     @type int    $offset      Omit this number of files from the beginning of the list. Works with $per_page to do pagination.
+	 *     @type string $order       The sort direction. 'asc' or 'desc'. Defaults to 'desc'.
+	 *     @type string $orderby     The property to sort the list by. 'created', 'modified', 'source', 'size'. Defaults to 'modified'.
+	 *     @type int    $per_page    The number of files to include in the list. Works with $offset to do pagination.
+	 *     @type string $source      Only include files from this source.
 	 * }
 	 * @param bool  $count_only Optional. True to return a total count of the files.
 	 *
@@ -106,11 +226,30 @@ class FileController {
 			);
 		}
 
-		if ( true === $count_only ) {
-			return count( $paths );
+		$files = $this->convert_paths_to_objects( $paths );
+
+		if ( $args['date_filter'] && $args['date_start'] && $args['date_end'] ) {
+			switch ( $args['date_filter'] ) {
+				case 'created':
+					$files = array_filter(
+						$files,
+						fn( $file ) => $file->get_created_timestamp() >= $args['date_start']
+							&& $file->get_created_timestamp() <= $args['date_end']
+					);
+					break;
+				case 'modified':
+					$files = array_filter(
+						$files,
+						fn( $file ) => $file->get_modified_timestamp() >= $args['date_start']
+							&& $file->get_modified_timestamp() <= $args['date_end']
+					);
+					break;
+			}
 		}
 
-		$files = $this->convert_paths_to_objects( $paths );
+		if ( true === $count_only ) {
+			return count( $files );
+		}
 
 		$multi_sorter = function( $sort_sets, $order_sets ) {
 			$comparison = 0;
@@ -196,14 +335,19 @@ class FileController {
 		$paths = array();
 
 		foreach ( $file_ids as $file_id ) {
-			$glob = glob( $this->log_directory . $file_id . '*.log' );
+			// Look for the standard filename format first, which includes a hash.
+			$glob = glob( $this->log_directory . $file_id . '-*.log' );
+
+			if ( ! $glob ) {
+				$glob = glob( $this->log_directory . $file_id . '.log' );
+			}
 
 			if ( is_array( $glob ) ) {
 				$paths = array_merge( $paths, $glob );
 			}
 		}
 
-		$files = $this->convert_paths_to_objects( $paths );
+		$files = $this->convert_paths_to_objects( array_unique( $paths ) );
 
 		return $files;
 	}
@@ -222,6 +366,13 @@ class FileController {
 			return new WP_Error(
 				'wc_log_file_error',
 				esc_html__( 'This file does not exist.', 'woocommerce' )
+			);
+		}
+
+		if ( count( $result ) > 1 ) {
+			return new WP_Error(
+				'wc_log_file_error',
+				esc_html__( 'Multiple files match this ID.', 'woocommerce' )
 			);
 		}
 
@@ -247,19 +398,32 @@ class FileController {
 		$rotations = array();
 
 		$source  = $file->get_source();
-		$created = gmdate( 'Y-m-d', $file->get_created_timestamp() );
+		$created = 0;
+		if ( $file->has_standard_filename() ) {
+			$created = $file->get_created_timestamp();
+		}
 
 		if ( is_null( $file->get_rotation() ) ) {
 			$current['current'] = $file;
 		} else {
-			$current_file_id = $source . '-' . $created;
+			$current_file_id = File::generate_file_id( $source, null, $created );
 			$result          = $this->get_file_by_id( $current_file_id );
 			if ( ! is_wp_error( $result ) ) {
 				$current['current'] = $result;
 			}
 		}
 
-		$rotation_pattern = $this->log_directory . $source . '.[0123456789]-' . $created . '*.log';
+		$rotations_pattern = sprintf(
+			'.[%s]',
+			implode(
+				'',
+				range( 0, self::MAX_FILE_ROTATIONS - 1 )
+			)
+		);
+
+		$created_pattern = $created ? '-' . gmdate( 'Y-m-d', $created ) . '-' : '';
+
+		$rotation_pattern = $this->log_directory . $source . $rotations_pattern . $created_pattern . '*.log';
 		$rotation_paths   = glob( $rotation_pattern );
 		$rotation_files   = $this->convert_paths_to_objects( $rotation_paths );
 		foreach ( $rotation_files as $rotation_file ) {
@@ -322,7 +486,7 @@ class FileController {
 	 *
 	 * @param array $file_ids An array of file IDs (file basename without the hash).
 	 *
-	 * @return int
+	 * @return int The number of files that were deleted.
 	 */
 	public function delete_files( array $file_ids ): int {
 		$deleted = 0;
@@ -330,7 +494,7 @@ class FileController {
 		$files = $this->get_files_by_id( $file_ids );
 		foreach ( $files as $file ) {
 			$result = false;
-			if ( $file->is_readable() ) {
+			if ( $file->is_writable() ) {
 				$result = $file->delete();
 			}
 
@@ -507,16 +671,5 @@ class FileController {
 	 */
 	public function invalidate_cache(): bool {
 		return WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
-	}
-
-	/**
-	 * Sanitize the source property of a log file.
-	 *
-	 * @param string $source The source property of a log file.
-	 *
-	 * @return string
-	 */
-	public function sanitize_source( string $source ): string {
-		return sanitize_file_name( $source );
 	}
 }

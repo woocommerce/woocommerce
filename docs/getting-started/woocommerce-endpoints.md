@@ -6,7 +6,7 @@ post_title: WooCommerce Endpoints
 
 Endpoints are an extra part in the website URL that is detected to show different content when present.
 
-For example: You may have a ‘my account’ page shown at URL **yoursite.com/my-account**. When the endpoint ‘edit-account’ is appended to this URL, making it ‘**yoursite.com/my-account/edit-account**‘ then the **Edit account page** is shown instead of the **My account page**.
+For example: You may have a 'my account' page shown at URL **yoursite.com/my-account**. When the endpoint 'edit-account' is appended to this URL, making it '**yoursite.com/my-account/edit-account**' then the **Edit account page** is shown instead of the **My account page**.
 
 This allows us to show different content without the need for multiple pages and shortcodes, and reduces the amount of content that needs to be installed.
 
@@ -51,7 +51,7 @@ If you want to include an endpoint in your menus, you need to use the Links sect
 
 Enter the full URL to the endpoint and then insert that into your menu.
 
-Remember that some endpoints, such as view-order, require an order ID to work. In general, we don’t recommend adding these endpoints to your menus. These pages can instead be accessed via the my-account page.
+Remember that some endpoints, such as view-order, require an order ID to work. In general, we don't recommend adding these endpoints to your menus. These pages can instead be accessed via the my-account page.
 
 ## Using endpoints in Payment Gateway Plugins
 
@@ -74,7 +74,7 @@ Gateways need to use these methods for full 2.1+ compatibility.
 
 ### Endpoints are not working
 
-On Windows servers, the **web.config** file may not be set correctly to allow for the endpoints to work correctly. In this case, clicking on endpoint links (e.g. /edit-account/ or /customer-logout/) may appear to do nothing except refresh the page. In order to resolve this, try simplifying the **web.config** file on your Windows server. Here’s a sample file configuration:
+On Windows servers, the **web.config** file may not be set correctly to allow for the endpoints to work correctly. In this case, clicking on endpoint links (e.g. /edit-account/ or /customer-logout/) may appear to do nothing except refresh the page. In order to resolve this, try simplifying the **web.config** file on your Windows server. Here's a sample file configuration:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -99,7 +99,7 @@ On Windows servers, the **web.config** file may not be set correctly to allow fo
 
 ### Pages direct to wrong place
 
-Landing on the wrong page when clicking an endpoint URL is typically caused by incorrect settings. For example, clicking ‘Edit address’ on your account page takes you to the Shop page instead of the edit address form means you selected the wrong page in settings. Confirm that your pages are correctly configured and that a different page is used for each section.
+Landing on the wrong page when clicking an endpoint URL is typically caused by incorrect settings. For example, clicking 'Edit address' on your account page takes you to the Shop page instead of the edit address form means you selected the wrong page in settings. Confirm that your pages are correctly configured and that a different page is used for each section.
 
 ### How to Remove “Downloads” from My Account
 

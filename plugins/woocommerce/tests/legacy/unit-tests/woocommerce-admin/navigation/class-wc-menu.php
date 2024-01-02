@@ -99,7 +99,9 @@ class WC_Admin_Tests_Navigation_Menu extends WC_Unit_Test_Case {
 	/**
 	 * Test adding an existing menu ID.
 	 */
-	public function test_add_dupliacte_plugin_items() {
+	public function test_add_duplicate_plugin_items() {
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Admin\Features\Navigation\Menu::add_item' );
+
 		$item = array(
 			'id'         => 'test-duplicate-item',
 			'title'      => 'Test Duplicate Item',

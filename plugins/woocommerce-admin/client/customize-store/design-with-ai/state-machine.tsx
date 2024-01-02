@@ -323,19 +323,8 @@ export const designWithAiStateMachineDefinition = createMachine(
 								},
 							},
 							chooseFontPairing: {
-								initial: 'executeOrSkip',
+								initial: 'pending',
 								states: {
-									executeOrSkip: {
-										always: [
-											{
-												target: 'pending',
-												cond: 'isAiOnline',
-											},
-											{
-												target: 'success',
-											},
-										],
-									},
 									pending: {
 										entry: [ 'assignFontPairing' ],
 										always: {

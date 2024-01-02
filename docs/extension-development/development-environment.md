@@ -4,7 +4,7 @@ post_title: Setting up your development environment
 
 ## Introduction
 
-Building an extension for WooCommerce is a straightforward process, but there are a several moving parts and a few supporting software tools you’ll want to familiarize yourself with. This guide will walk you through the steps of getting a basic development environment set up for building WooCommerce extensions.
+Building an extension for WooCommerce is a straightforward process, but there are a several moving parts and a few supporting software tools you'll want to familiarize yourself with. This guide will walk you through the steps of getting a basic development environment set up for building WooCommerce extensions.
 
 If you would like to contribute to the WooCommerce core platform; please read our [contributor documentation and guidelines](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment).
 
@@ -22,11 +22,11 @@ WooCommerce extensions are a specialized type of WordPress plugin. If you are ne
 [PNpm](https://pnpm.io/)
 [Composer](https://getcomposer.org/download/)
 
-Note: If you’re working on a Windows machine, you may want to take a look at the Building Extensions in Windows Environments section of this guide before proceeding.
+Note: If you're working on a Windows machine, you may want to take a look at the Building Extensions in Windows Environments section of this guide before proceeding.
 
 ### Setting up your reusable WordPress development environment
 
-In addition to the software listed above, you’ll also want to have some way of setting up a local development server stack. There are a number of different tools available for this, each with a certain set of functionality and limitations. We recommend choosing an option below that fits your preferred workflow best.
+In addition to the software listed above, you'll also want to have some way of setting up a local development server stack. There are a number of different tools available for this, each with a certain set of functionality and limitations. We recommend choosing an option below that fits your preferred workflow best.
 
 ### WordPress-specific tools
 
@@ -42,7 +42,7 @@ In addition to the software listed above, you’ll also want to have some way of
 
 [WAMP](https://www.wampserver.com/en/) – A Windows web development environment that lets you create applications with Apache2, PHP, and MySQL.
 
-[XAMPP](https://www.apachefriends.org/index.html) – An easy-to-install Apache distribution containing MariaDB, PHP, and Perl. It’s available for Windows, Linux, and OS X.
+[XAMPP](https://www.apachefriends.org/index.html) – An easy-to-install Apache distribution containing MariaDB, PHP, and Perl. It's available for Windows, Linux, and OS X.
 
 ### Minimum server requirements
 
@@ -52,7 +52,7 @@ Regardless of the tool you choose for managing your development environment, you
 
 While development environments can vary, the basic file structure for a WordPress environment should be consistent.
 
-When developing a WooCommerce extension, you’ll usually be doing most of your work within the public_html directory of your local server. For now, take some time to familiarize yourself with a few key paths:
+When developing a WooCommerce extension, you'll usually be doing most of your work within the public_html directory of your local server. For now, take some time to familiarize yourself with a few key paths:
 
 `wp-content/debug.log` – This is the file where WordPress writes the important output such as errors and other messages useful for debugging.
 
@@ -62,7 +62,7 @@ When developing a WooCommerce extension, you’ll usually be doing most of your 
 
 ## Adding WooCommerce Core to your environment
 
-When developing an extension for WooCommerce, it’s helpful to install a development version of WooCommerce core.
+When developing an extension for WooCommerce, it's helpful to install a development version of WooCommerce core.
 
 ### Clone the WC Core repo into `wp-content/plugins/`
 
@@ -81,7 +81,7 @@ Found '/path/to/woocommerce/.nvmrc' with version <v12>
 Now using node v12.21.0 (npm v6.14.11)
 ```
 
-Note: if you don’t have the required version of Node installed, NVM will alert you so you can install it:
+Note: if you don't have the required version of Node installed, NVM will alert you so you can install it:
 
 ```sh
 Found '/path/to/woocommerce/.nvmrc' with version <v12>
@@ -104,7 +104,7 @@ pnpm build
 
 Running this script will compile the JavaScript and CSS that WooCommerce needs to operate. If you try to run WooCommerce on your server without generating the compiled assets, you may experience errors and other unwanted side-effects.
 
-Note: In some environments, you may see an out-of-memory error when you try to build WooCommerce. If this happens, you simply need to adjust the memory_limit setting in your environment’s php.ini configuration to a higher value. The process for changing this value varies depending on the environment management tooling you use, so it’s best to consult your tool’s documentation before making any changes.
+Note: In some environments, you may see an out-of-memory error when you try to build WooCommerce. If this happens, you simply need to adjust the memory_limit setting in your environment's php.ini configuration to a higher value. The process for changing this value varies depending on the environment management tooling you use, so it's best to consult your tool's documentation before making any changes.
 
 ## Adding WooCommerce Admin to your environment
 
@@ -126,7 +126,7 @@ Found '/path/to/woocommerce-admin/.nvmrc' with version <lts/*>
 Now using node v14.16.0 (npm v6.14.11)
 ```
 
-Note: if you don’t have the required version of Node installed, NVM will alert you so you can install it.
+Note: if you don't have the required version of Node installed, NVM will alert you so you can install it.
 
 ```sh
 Found '/path/to/woocommerce-admin/.nvmrc' with version <v12>
@@ -174,7 +174,7 @@ Found '/path/to/woocommerce-gutenberg-products-block/.nvmrc' with version <lts/*
 Now using node v14.16.0 (npm v6.14.11)
 ```
 
-Note: if you don’t have the required version of Node installed, NVM will alert you so you can install it.
+Note: if you don't have the required version of Node installed, NVM will alert you so you can install it.
 
 ```sh
 Found '/path/to/woocommerce-gutenberg-products-block/.nvmrc' with version <v12>
@@ -197,7 +197,7 @@ This will compile and minify the JavaScript and CSS from the /assets directory t
 
 ## Finishing up
 
-Once you have WooCommerce and its sibling extensions installed in your WordPress environment, start up your server, browse to your site and handle any initial setup steps or importing you’d like to do. This is a good time to load sample data and activate themes and plugins.
+Once you have WooCommerce and its sibling extensions installed in your WordPress environment, start up your server, browse to your site and handle any initial setup steps or importing you'd like to do. This is a good time to load sample data and activate themes and plugins.
 
 Depending on which extensions you installed in your environment you should have one or more of the following directories in your `public_html` directory:
 
