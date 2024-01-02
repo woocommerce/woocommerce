@@ -177,6 +177,9 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 						{ ! isLoading && product.description }
 					</p>
 				) }
+				{ isLoading && (
+					<div className="woocommerce-marketplace__product-card__footer" />
+				) }
 				{ ! isLoading && (
 					<ProductCardFooter
 						currencySymbol={ currencySymbol }

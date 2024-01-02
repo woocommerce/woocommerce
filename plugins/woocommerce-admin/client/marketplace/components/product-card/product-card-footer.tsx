@@ -14,7 +14,7 @@ export interface ProductCardFooterProps {
 function ProductCardFooter( props: ProductCardFooterProps ) {
 	const { price, currencySymbol, averageRating, reviewsCount } = props;
 	return (
-		<footer className="woocommerce-marketplace__product-card-footer">
+		<footer className="woocommerce-marketplace__product-card__footer">
 			<div className="woocommerce-marketplace__product-card__price">
 				<span className="woocommerce-marketplace__product-card__price-label">
 					{
