@@ -21,7 +21,7 @@ To activate High-Performance Order Storage, existing stores will first need to g
 ![wc_schedule_pending_batch_process Screen](https://woo.com/wp-content/uploads/2023/10/2.jpg?w=650)
 ![wc_run_batch_process Screen](https://woo.com/wp-content/uploads/2023/10/New-Project-5.jpg?w=650)
 
-4/ After both tables are successfully synchronized, you’ll be able to select the option to switch to High-Performance Order Storage (HPOS).
+4/ After both tables are successfully synchronized, you'll be able to select the option to switch to High-Performance Order Storage (HPOS).
   
 - It is advisable to maintain compatibility mode for some time to ensure a seamless transition. In case of any issues, reverting to the post table can be done instantly.
 
