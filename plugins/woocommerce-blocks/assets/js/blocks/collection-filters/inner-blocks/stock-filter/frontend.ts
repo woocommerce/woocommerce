@@ -4,6 +4,7 @@
 import { store, navigate, getContext } from '@woocommerce/interactivity';
 import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
 import { HTMLElementEvent } from '@woocommerce/types';
+import { CheckboxListContext } from '../../../../../../packages/interactivity-components/checkbox-list';
 
 const getUrl = ( activeFilters: string ) => {
 	const url = new URL( window.location.href );
@@ -20,18 +21,34 @@ const getUrl = ( activeFilters: string ) => {
 
 store( 'woocommerce/collection-stock-filter', {
 	actions: {
-		// "on select" handler passed to the dropdown component.
-		navigate: () => {
-			const context = getContext< DropdownContext >(
+		onCheckboxChange: () => {
+			const checkboxContext = getContext< CheckboxListContext >(
+				'woocommerce/interactivity-checkbox-list'
+			);
+
+			const filters = checkboxContext.items
+				.filter( ( item ) => {
+					return item.checked;
+				} )
+				.map( ( item ) => {
+					return item.value;
+				} );
+
+			navigate( getUrl( filters.join( ',' ) ) );
+		},
+
+		onDropdownChange: () => {
+			const dropdownContext = getContext< DropdownContext >(
 				'woocommerce/interactivity-dropdown'
 			);
 
-			const selectedItems = context.selectedItems;
+			const selectedItems = dropdownContext.selectedItems;
 			const items = selectedItems || [];
 			const filters = items.map( ( i ) => i.value );
 
 			navigate( getUrl( filters.join( ',' ) ) );
 		},
+
 		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
 			// get the active filters from the url:
 			const url = new URL( window.location.href );
@@ -57,6 +74,7 @@ store( 'woocommerce/collection-stock-filter', {
 
 			navigate( getUrl( filtersArr.join( ',' ) ) );
 		},
+
 		removeFilter: () => {
 			const { value } = getContext< { value: string } >();
 			// get the active filters from the url:

@@ -59,23 +59,28 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 	} );
 
 	const listOptions = useMemo( () => {
-		return Object.entries( stockStatusOptions ).map( ( [ key, value ] ) => {
-			const count =
-				// @ts-expect-error - there is a fault with useCollectionData types, it can be non-array.
-				( filteredCounts as CollectionData )?.stock_status_counts?.find(
+		return Object.entries( stockStatusOptions )
+			.map( ( [ key, value ] ) => {
+				const count = (
+					filteredCounts as unknown as CollectionData
+				 )?.stock_status_counts?.find(
 					( item: StockStatusCount ) => item.status === key
 				)?.count;
 
-			return {
-				value: key,
-				label: (
-					<Label
-						name={ value }
-						count={ showCounts && count ? Number( count ) : null }
-					/>
-				),
-			};
-		} );
+				return {
+					value: key,
+					label: (
+						<Label
+							name={ value }
+							count={
+								showCounts && count ? Number( count ) : null
+							}
+						/>
+					),
+					count,
+				};
+			} )
+			.filter( ( item ) => item.label.props.count > 0 );
 	}, [ stockStatusOptions, filteredCounts, showCounts ] );
 
 	return (

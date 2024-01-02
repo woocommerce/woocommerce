@@ -121,7 +121,14 @@ final class CollectionRatingFilter extends AbstractBlock {
 			)
 		);
 
-		if ( empty( $rating_counts ) ) {
+		$filtered_rating_counts = array_filter(
+			$rating_counts,
+			function( $rating ) {
+				return $rating['count'] > 0;
+			}
+		);
+
+		if ( empty( $filtered_rating_counts ) ) {
 			return sprintf(
 				'<div %s></div>',
 				$wrapper_attributes
@@ -133,11 +140,11 @@ final class CollectionRatingFilter extends AbstractBlock {
 
 		$input = 'list' === $display_style ? CheckboxList::render(
 			array(
-				'items'     => $this->get_checkbox_list_items( $rating_counts, $selected_ratings_query_param, $show_counts ),
+				'items'     => $this->get_checkbox_list_items( $filtered_rating_counts, $selected_ratings_query_param, $show_counts ),
 				'on_change' => 'woocommerce/collection-rating-filter::actions.onCheckboxChange',
 			)
 		) : Dropdown::render(
-			$this->get_dropdown_props( $rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'] )
+			$this->get_dropdown_props( $filtered_rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'] )
 		);
 
 		return sprintf(
