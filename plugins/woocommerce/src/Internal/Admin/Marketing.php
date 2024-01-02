@@ -145,7 +145,7 @@ class Marketing {
 
 	/**
 	 * Order marketing menu items alphabeticaly.
-	 * Overview should be first.
+	 * Overview should be first, and Coupons should be second, followed by other marketing menu items.
 	 *
 	 * @return  void
 	 */
