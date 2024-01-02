@@ -2,13 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Icon, chevronDown } from '@wordpress/icons';
 import classnames from 'classnames';
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps, Template } from '@wordpress/blocks';
-import Rating, {
-	RatingValues,
-} from '@woocommerce/base-components/product-rating';
+import Rating from '@woocommerce/base-components/product-rating';
 import {
 	useQueryStateByKey,
 	useQueryStateByContext,
@@ -18,10 +15,7 @@ import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean, isObject, objectHasProp } from '@woocommerce/types';
 import { useState, useMemo, useEffect } from '@wordpress/element';
 import { CheckboxList } from '@woocommerce/blocks-components';
-import FormTokenField from '@woocommerce/base-components/form-token-field';
 import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
-import { useStyleProps } from '@woocommerce/base-hooks';
-import styled from '@emotion/styled';
 
 /**
  * Internal dependencies
@@ -29,11 +23,11 @@ import styled from '@emotion/styled';
 import { previewOptions } from './preview';
 import './style.scss';
 import { Attributes } from './types';
-import { formatSlug, getActiveFilters, generateUniqueId } from './utils';
+import { getActiveFilters } from './utils';
 import { useSetWraperVisibility } from '../../../filter-wrapper/context';
 import './editor.scss';
 import { Inspector } from './components/inspector';
-import { extractBuiltInColor } from '../../utils';
+import { PreviewDropdown } from '../components/preview-dropdown';
 
 const NoRatings = () => (
 	<Notice status="warning" isDismissible={ false }>
@@ -49,21 +43,6 @@ const NoRatings = () => (
 const Edit = ( props: BlockEditProps< Attributes > ) => {
 	const { className } = props.attributes;
 	const blockAttributes = props.attributes;
-
-	const { className: styleClass, style } = useStyleProps( props.attributes );
-	const builtInColor = extractBuiltInColor( styleClass );
-
-	const textColor = builtInColor
-		? `var(--wp--preset--color--${ builtInColor })`
-		: style.color;
-
-	const StyledFormTokenField = textColor
-		? styled( FormTokenField )`
-				.components-form-token-field__input::placeholder {
-					color: ${ textColor } !important;
-				}
-		  `
-		: FormTokenField;
 
 	const blockProps = useBlockProps( {
 		className: classnames( 'wc-block-rating-filter', className ),
@@ -111,20 +90,8 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		initialFilters
 	);
 
-	/*
-		FormTokenField forces the dropdown to reopen on reset, so we create a unique ID to use as the components key.
-		This will force the component to remount on reset when we change this value.
-		More info: https://github.com/woocommerce/woocommerce-blocks/pull/6920#issuecomment-1222402482
-	 */
-	const [ remountKey, setRemountKey ] = useState( generateUniqueId() );
 	const [ displayNoProductRatingsNotice, setDisplayNoProductRatingsNotice ] =
 		useState( false );
-
-	const multiple = blockAttributes.selectType !== 'single';
-
-	const showChevron = multiple
-		? ! isLoading && checked.length < displayedOptions.length
-		: ! isLoading && checked.length === 0;
 
 	/**
 	 * Compare intersection of all ratings and filtered counts to get a list of options to display.
@@ -173,7 +140,6 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 			} );
 
 		setDisplayedOptions( newOptions );
-		setRemountKey( generateUniqueId() );
 	}, [
 		blockAttributes.showCounts,
 		blockAttributes.isPreview,
@@ -221,107 +187,19 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 					>
 						{ blockAttributes.displayStyle === 'dropdown' ? (
 							<>
-								<StyledFormTokenField
-									key={ remountKey }
-									className={ classnames( {
-										'single-selection': ! multiple,
-										'is-loading': isLoading,
-									} ) }
-									style={ {
-										borderStyle: 'none',
-									} }
-									suggestions={ displayedOptions
-										.filter(
-											( option ) =>
-												! checked.includes(
-													option.value
-												)
-										)
-										.map( ( option ) => option.value ) }
-									disabled={ isLoading }
-									placeholder={ __(
-										'Select Rating',
-										'woocommerce'
-									) }
-									onChange={ () => {
-										// noop
-									} }
-									value={ checked }
-									// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-									// @ts-ignore - FormTokenField doesn't accept custom components, forcing it here to display component
-									displayTransform={ ( value ) => {
-										const resultWithZeroCount = {
-											value,
-											label: (
-												<Rating
-													key={
-														Number(
-															value
-														) as RatingValues
-													}
-													rating={
-														Number(
-															value
-														) as RatingValues
-													}
-													ratedProductsCount={ 0 }
-												/>
-											),
-										};
-										const resultWithNonZeroCount =
-											displayedOptions.find(
-												( option ) =>
-													option.value === value
-											);
-
-										const displayedResult =
-											resultWithNonZeroCount ||
-											resultWithZeroCount;
-
-										const { label, value: rawValue } =
-											displayedResult;
-
-										// A label - JSX component - is extended with faked string methods to allow using JSX element as an option in FormTokenField
-										const extendedLabel = Object.assign(
-											{},
-											label,
-											{
-												toLocaleLowerCase: () =>
-													rawValue,
-												substring: (
-													start: number,
-													end: number
-												) =>
-													start === 0 && end === 1
-														? label
-														: '',
-											}
-										);
-										return extendedLabel;
-									} }
-									saveTransform={ formatSlug }
-									messages={ {
-										added: __(
-											'Rating filter added.',
-											'woocommerce'
-										),
-										removed: __(
-											'Rating filter removed.',
-											'woocommerce'
-										),
-										remove: __(
-											'Remove rating filter.',
-											'woocommerce'
-										),
-										__experimentalInvalid: __(
-											'Invalid rating filter.',
-											'woocommerce'
-										),
-									} }
+								<PreviewDropdown
+									placeholder={
+										blockAttributes.selectType === 'single'
+											? __(
+													'Select a rating',
+													'woocommerce'
+											  )
+											: __(
+													'Select ratings',
+													'woocommerce'
+											  )
+									}
 								/>
-								{ showChevron && (
-									<Icon icon={ chevronDown } size={ 30 } />
-								) }
 							</>
 						) : (
 							<CheckboxList

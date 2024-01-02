@@ -211,9 +211,6 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			return '';
 		}
 
-		$text_color_class_and_style = StyleAttributesUtils::get_text_color_class_and_style( $attributes );
-		$text_color                 = $text_color_class_and_style['value'] ?? '';
-
 		$list_items    = array();
 		$selected_item = array();
 
@@ -232,10 +229,9 @@ final class CollectionAttributeFilter extends AbstractBlock {
 
 		return Dropdown::render(
 			array(
-				'items'         => $list_items,
-				'action'        => 'woocommerce/collection-attribute-filter::actions.navigate',
-				'selected_item' => $selected_item,
-				'text_color'    => $text_color,
+				'items'          => $list_items,
+				'action'         => 'woocommerce/collection-attribute-filter::actions.navigate',
+				'selected_items' => array( $selected_item ),
 			)
 		);
 	}
