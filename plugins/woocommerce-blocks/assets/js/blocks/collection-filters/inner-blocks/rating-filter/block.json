@@ -10,7 +10,8 @@
 		"color": {
 			"background": false,
 			"text": true
-		}
+		},
+		"inserter": false
 	},
 	"ancestor": [ "woocommerce/collection-filters" ],
 	"usesContext": [ "collectionData" ],

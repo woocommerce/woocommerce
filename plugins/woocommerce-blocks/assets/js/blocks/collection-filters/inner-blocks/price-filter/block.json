@@ -5,20 +5,15 @@
 	"title": "Collection Price Filter",
 	"description": "Enable customers to filter the product collection by choosing a price range.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 2,
-	"ancestor": [
-		"woocommerce/collection-filters"
-	],
+	"ancestor": [ "woocommerce/collection-filters" ],
 	"supports": {
-		"interactivity": true
+		"interactivity": true,
+		"inserter": false
 	},
-	"usesContext": [
-		"collectionData"
-	],
+	"usesContext": [ "collectionData" ],
 	"attributes": {
 		"queryParam": {
 			"type": "object",

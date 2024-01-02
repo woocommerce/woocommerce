@@ -14,7 +14,8 @@
 		"color": {
 			"text": true,
 			"background": false
-		}
+		},
+		"inserter": false
 	},
 	"usesContext": [ "collectionData" ],
 	"attributes": {

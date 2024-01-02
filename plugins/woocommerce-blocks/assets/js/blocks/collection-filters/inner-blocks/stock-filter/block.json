@@ -12,7 +12,8 @@
 		"color": {
 			"text": true,
 			"background": false
-		}
+		},
+		"inserter": false
 	},
 	"attributes": {
 		"className": {
