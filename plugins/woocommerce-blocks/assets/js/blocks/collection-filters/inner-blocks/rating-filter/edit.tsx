@@ -23,7 +23,7 @@ import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
 import { previewOptions } from './preview';
 import './style.scss';
 import { Attributes } from './types';
-import { getActiveFilters, generateUniqueId } from './utils';
+import { getActiveFilters } from './utils';
 import { useSetWraperVisibility } from '../../../filter-wrapper/context';
 import './editor.scss';
 import { Inspector } from '../attribute-filter/components/inspector-controls';
