@@ -578,10 +578,13 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					}
 				}
 
+
+				$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'command-palette' );
+				$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER .  'wp-admin-scripts/' . $script_assets_filename;
 				wp_enqueue_script(
 					'wc-admin-command-palette',
 					WCAdminAssets::get_url( 'wp-admin-scripts/command-palette', 'js' ),
-					array(),
+					$script_assets['dependencies'],
 					WCAdminAssets::get_file_version( 'js' ),
 					true
 				);
@@ -617,10 +620,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					}, $analytics_reports );
 					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
 
+					$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'command-palette-analytics' );
+					$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER .  'wp-admin-scripts/' . $script_assets_filename;
 					wp_enqueue_script(
 						'wc-admin-command-palette-analytics',
 						WCAdminAssets::get_url( 'wp-admin-scripts/command-palette-analytics', 'js' ),
-						array(),
+						$script_assets['dependencies'],
 						WCAdminAssets::get_file_version( 'js' ),
 						true
 					);
