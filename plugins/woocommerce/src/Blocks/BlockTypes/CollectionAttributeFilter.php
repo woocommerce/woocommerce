@@ -128,24 +128,32 @@ final class CollectionAttributeFilter extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if (
-			is_admin() ||
-			empty( $block->context['collectionData']['attribute_counts'] ) ||
-			empty( $attributes['attributeId'] )
-		) {
+		// don't render if its admin, or ajax in progress.
+		if ( is_admin() || wp_doing_ajax() || empty( $attributes['attributeId'] ) ) {
 			return '';
 		}
 
 		$product_attribute = wc_get_attribute( $attributes['attributeId'] );
-
-		$attribute_counts = array_reduce(
-			$block->context['collectionData']['attribute_counts'],
+		$attribute_counts  = array_reduce(
+			$block->context['collectionData']['attribute_counts'] ?? [],
 			function( $acc, $count ) {
 				$acc[ $count['term'] ] = $count['count'];
 				return $acc;
 			},
 			[]
 		);
+
+		if ( empty( $attribute_counts ) ) {
+			return sprintf(
+				'<div %s></div>',
+				get_block_wrapper_attributes(
+					array(
+						'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-attribute-filter' ) ),
+					)
+				),
+			);
+
+		}
 
 		$attribute_terms = get_terms(
 			array(
@@ -199,6 +207,10 @@ final class CollectionAttributeFilter extends AbstractBlock {
 	 * @param bool  $attributes Block attributes.
 	 */
 	private function render_attribute_dropdown( $options, $attributes ) {
+		if ( empty( $options ) ) {
+			return '';
+		}
+
 		$list_items    = array();
 		$selected_item = array();
 
@@ -231,6 +243,10 @@ final class CollectionAttributeFilter extends AbstractBlock {
 	 * @param bool  $attributes Block attributes.
 	 */
 	private function render_attribute_list( $options, $attributes ) {
+		if ( empty( $options ) ) {
+			return '';
+		}
+
 		$output = '<ul class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list">';
 		foreach ( $options as $option ) {
 			$output .= $this->render_list_item_template( $option, $attributes['showCounts'] );

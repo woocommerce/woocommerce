@@ -21,7 +21,7 @@ const getUrl = ( context: PriceFilterContext ) => {
 		searchParams.delete( 'min_price' );
 	}
 
-	if ( maxPrice < maxRange ) {
+	if ( maxPrice < maxRange && maxPrice > minRange ) {
 		searchParams.set( 'max_price', maxPrice.toString() );
 	} else {
 		searchParams.delete( 'max_price' );

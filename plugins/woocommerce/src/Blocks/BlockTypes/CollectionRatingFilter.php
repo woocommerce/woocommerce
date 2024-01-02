@@ -115,19 +115,22 @@ final class CollectionRatingFilter extends AbstractBlock {
 		$display_style = $attributes['displayStyle'] ?? 'list';
 		$show_counts   = $attributes['showCounts'] ?? false;
 
-		if ( empty( $rating_counts ) ) {
-			return '';
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
-		$selected_ratings_query_param = isset( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ) : '';
-
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'data-wc-interactive' => 'woocommerce/collection-rating-filter',
 				'class'               => 'wc-block-rating-filter',
 			)
 		);
+
+		if ( empty( $rating_counts ) ) {
+			return sprintf(
+				'<div %s></div>',
+				$wrapper_attributes
+			);
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
+		$selected_ratings_query_param = isset( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ) : '';
 
 		$input = 'list' === $display_style ? CheckboxList::render(
 			array(
