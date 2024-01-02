@@ -81,6 +81,12 @@
 			}
 		}
 
+		&-footer {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
 		&:hover {
 			outline: 1.5px solid var(--wp-admin-theme-color);
 		}
@@ -196,6 +202,24 @@
 			font-style: normal;
 			font-weight: 400;
 			line-height: $medium-gap;
+		}
+
+		&__rating {
+			display: flex;
+			gap: 2px;
+		}
+
+		&__rating-icon {
+			color: #deb100;
+		}
+
+		&__rating-average {
+			font-weight: 600;
+		}
+
+		&__rating-count {
+			color: $gray-600;
+			font-weight: 400;
 		}
 
 		&.woocommerce-marketplace__product-card--theme {
