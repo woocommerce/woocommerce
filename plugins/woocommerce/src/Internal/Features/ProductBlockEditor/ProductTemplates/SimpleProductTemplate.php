@@ -1168,7 +1168,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-linked-list-field',
 				'order'      => 10,
 				'attributes' => array(
-					'property' => 'cross_sell_ids',
+					'property'   => 'cross_sell_ids',
 					'emptyState' => array(
 						'image'         => 'CashRegister',
 						'tip'           => __(
