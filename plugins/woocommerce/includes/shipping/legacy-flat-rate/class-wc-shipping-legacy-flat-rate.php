@@ -383,6 +383,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	public function get_extra_cost( $cost_string, $type, $package ) {
 		$cost         = $cost_string;
 		$cost_percent = false;
+		$cost_operator = '';
 		// @codingStandardsIgnoreStart
 		$pattern      =
 			'/' .           // Start regex.

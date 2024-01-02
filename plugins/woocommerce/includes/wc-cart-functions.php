@@ -107,6 +107,7 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 		$products = array_fill_keys( array_keys( $products ), 1 );
 	}
 
+	$product_id = null;
 	foreach ( $products as $product_id => $qty ) {
 		/* translators: %s: product name */
 		$titles[] = apply_filters( 'woocommerce_add_to_cart_qty_html', ( $qty > 1 ? absint( $qty ) . ' &times; ' : '' ), $product_id ) . apply_filters( 'woocommerce_add_to_cart_item_name_in_quotes', sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), strip_tags( get_the_title( $product_id ) ) ), $product_id );
@@ -419,6 +420,10 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 		$method_count = absint( $method_counts[ $key ] );
 	} else {
 		$method_count = 0;
+	}
+
+	if ( ! isset( $package['rates'] ) || ! is_array( $package['rates'] ) ) {
+		$package['rates'] = [];
 	}
 
 	// If not set, not available, or available methods have changed, set to the DEFAULT option.
