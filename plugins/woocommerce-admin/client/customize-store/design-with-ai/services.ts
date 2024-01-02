@@ -514,7 +514,6 @@ const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
 	} );
 };
 
-
 export const services = {
 	browserPopstateHandler,
 	queryAiEndpoint,
