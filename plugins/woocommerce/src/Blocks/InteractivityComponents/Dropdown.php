@@ -24,15 +24,18 @@ class Dropdown {
 		// Items should be an array of objects with a label and value property.
 		$items = $props['items'] ?? array();
 
+		$default_placeholder = 'single' === $select_type ? __( 'Select an option', 'woocommerce' ) : __( 'Select options', 'woocommerce' );
+		$placeholder         = $props['placeholder'] ?? $default_placeholder;
+
 		$dropdown_context = array(
-			'selectedItems' => $selected_items,
-			'isOpen'        => false,
-			'selectType'    => $select_type,
+			'selectedItems'      => $selected_items,
+			'isOpen'             => false,
+			'selectType'         => $select_type,
+			'defaultPlaceholder' => $placeholder,
 		);
 
-		$action              = $props['action'] ?? '';
-		$namespace           = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) );
-		$default_placeholder = 'single' === $select_type ? __( 'Select an option', 'woocommerce' ) : __( 'Select options', 'woocommerce' );
+		$action    = $props['action'] ?? '';
+		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) );
 
 		ob_start();
 		?>
@@ -41,7 +44,7 @@ class Dropdown {
 				<div class="wc-interactivity-dropdown__dropdown" tabindex="-1" >
 					<div class="wc-interactivity-dropdown__dropdown-selection" id="options-dropdown" tabindex="0" aria-haspopup="listbox">
 						<span class="wc-interactivity-dropdown__placeholder" data-wc-text="state.placeholderText">
-							<?php echo esc_html( $default_placeholder ); ?>
+							<?php echo esc_html( $placeholder ); ?>
 						</span>
 						<?php if ( 'multiple' === $select_type ) { ?>
 							<div class="selected-options">

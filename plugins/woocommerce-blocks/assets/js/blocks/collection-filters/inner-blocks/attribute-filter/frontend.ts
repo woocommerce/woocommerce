@@ -50,10 +50,10 @@ store( 'woocommerce/collection-attribute-filter', {
 
 			const context = getContext< AttributeFilterContext >();
 
-			if ( dropdownContext.selectedItem.value ) {
+			if ( dropdownContext.selectedItems[ 0 ].value ) {
 				navigate(
 					getUrl(
-						[ dropdownContext.selectedItem.value ],
+						[ dropdownContext.selectedItems[ 0 ].value ],
 						context.attributeSlug,
 						context.queryType
 					)

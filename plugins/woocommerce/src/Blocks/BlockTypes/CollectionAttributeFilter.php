@@ -214,6 +214,8 @@ final class CollectionAttributeFilter extends AbstractBlock {
 		$list_items    = array();
 		$selected_item = array();
 
+		$product_attribute = wc_get_attribute( $attributes['attributeId'] );
+
 		foreach ( $options as $option ) {
 			$item = array(
 				'label' => $attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $option['name'], $option['count'] ) : $option['name'],
@@ -231,7 +233,9 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			array(
 				'items'          => $list_items,
 				'action'         => 'woocommerce/collection-attribute-filter::actions.navigate',
-				'selected_items' => array( $selected_item ),
+				'selected_items' => empty( $selected_item ) ? array() : array( $selected_item ),
+				// translators: %s is a product attribute name.
+				'placeholder'    => sprintf( __( 'Select %s', 'woocommerce' ), $product_attribute->name ),
 			)
 		);
 	}
