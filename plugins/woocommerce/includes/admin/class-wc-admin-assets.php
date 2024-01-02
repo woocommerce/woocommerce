@@ -578,7 +578,13 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					}
 				}
 
-				WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette' );
+				wp_enqueue_script(
+					'wc-admin-command-palette',
+					WCAdminAssets::get_url( 'wp-admin-scripts/command-palette', 'js' ),
+					array(),
+					WCAdminAssets::get_file_version( 'js' ),
+					true
+				);
 				wp_localize_script(
 					'wc-admin-command-palette',
 					'wcCommandPaletteSettings',
@@ -611,7 +617,13 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					}, $analytics_reports );
 					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
 
-					WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette-analytics' );
+					wp_enqueue_script(
+						'wc-admin-command-palette-analytics',
+						WCAdminAssets::get_url( 'wp-admin-scripts/command-palette-analytics', 'js' ),
+						array(),
+						WCAdminAssets::get_file_version( 'js' ),
+						true
+					);
 					wp_localize_script(
 						'wc-admin-command-palette-analytics',
 						'wcCommandPaletteAnalytics',
