@@ -26,7 +26,11 @@ store( 'woocommerce/collection-stock-filter', {
 				'woocommerce/interactivity-dropdown'
 			);
 
-			navigate( getUrl( context.selectedItem.value || '' ) );
+			const selectedItems = context.selectedItems;
+			const items = selectedItems || [];
+			const filters = items.map( ( i ) => i.value );
+
+			navigate( getUrl( filters.join( ',' ) ) );
 		},
 		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
 			// get the active filters from the url:
