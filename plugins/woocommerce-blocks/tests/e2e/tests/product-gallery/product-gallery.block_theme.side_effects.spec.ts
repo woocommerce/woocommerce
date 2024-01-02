@@ -8,7 +8,6 @@ import { Locator, Page } from '@playwright/test';
  * Internal dependencies
  */
 import { ProductGalleryPage } from './product-gallery.page';
-import { initial } from 'lodash';
 
 const blockData = {
 	name: 'woocommerce/product-gallery',
