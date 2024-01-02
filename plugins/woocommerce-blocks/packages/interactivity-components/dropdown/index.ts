@@ -2,9 +2,6 @@
  * External dependencies
  */
 import { getContext, store } from '@woocommerce/interactivity';
-/**
- * External dependencies
- */
 import { __ } from '@wordpress/i18n';
 
 /**
