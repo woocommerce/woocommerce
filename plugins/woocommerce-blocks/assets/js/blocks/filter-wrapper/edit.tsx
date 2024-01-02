@@ -5,12 +5,19 @@ import {
 	useBlockProps,
 	InnerBlocks,
 	InspectorControls,
+	BlockControls,
 } from '@wordpress/block-editor';
 import { createBlock, type BlockEditProps } from '@wordpress/blocks';
-import { PanelBody, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useCallback } from '@wordpress/element';
+import { replace } from '@wordpress/icons';
+import {
+	PanelBody,
+	Button,
+	ToolbarButton,
+	ToolbarGroup,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -76,6 +83,18 @@ const Edit = ( { attributes, clientId }: BlockEditProps< Attributes > ) => {
 					</Button>
 				</PanelBody>
 			</InspectorControls>
+			<BlockControls>
+				<ToolbarGroup>
+					<ToolbarButton
+						onClick={ upgradeBlock }
+						icon={ replace }
+						label={ __(
+							'Upgrade to new filter block',
+							'woocommerce'
+						) }
+					/>
+				</ToolbarGroup>
+			</BlockControls>
 			<InnerBlocks
 				allowedBlocks={ [ 'core/heading' ] }
 				template={ [
