@@ -11,6 +11,7 @@ Various code snippets you can add to your site to enable custom functionality:
 - [Adjust the quantity input values](./adjust-quantity-input-values.md)
 - [Change a currency symbol](./change-a-currency-symbol.md)
 - [Change number of related products output](./number-of-products-per-row.md)
+- [Override loop template and show quantities next to add to cart buttons.](./override-loop-template-show-quantities-next-add-cart.md)
 - [Rename a country](./rename-a-country.md)
 - [Unhook and remove WooCommerce emails](./unhook--remove-woocommerce-emails.md)
 - [Useful Functions](./useful-functions.md)

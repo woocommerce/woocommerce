@@ -12,7 +12,7 @@ Add your own or modify shipping states in WooCommerce.
 if ( ! function_exists( 'YOUR_PREFIX_add_or_modify_states' ) ) {
   /**
    * Add or modify States
-   * 
+   *
    * @param array $states Existing country states.
    * @return array $states Modified country states.
    */

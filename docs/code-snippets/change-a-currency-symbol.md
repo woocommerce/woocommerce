@@ -10,18 +10,18 @@ Add this code to your child theme’s `functions.php` file or via a plugin that 
 if ( ! function_exists( 'YOUR_PREFIX_change_currency_symbol' ) ) {
   /**
    * Change a currency symbol
-   * 
+   *
    * @param string $currency_symbol Existing currency symbols.
    * @param string $currency Currency code.
    * @return string $currency_symbol Updated currency symbol(s).
-   */  
+   */
   function YOUR_PREFIX_change_currency_symbol( $currency_symbol, $currency ) {
     switch ( $currency ) {
       case 'AUD': $currency_symbol = 'AUD$'; break;
     }
 
-    return $currency_symbol;       
+    return $currency_symbol;
   }
-  add_filter( 'woocommerce_currency_symbol', 'YOUR_PREFIX_change_currency_symbol', 10, 2 );  
+  add_filter( 'woocommerce_currency_symbol', 'YOUR_PREFIX_change_currency_symbol', 10, 2 );
 }
 ```

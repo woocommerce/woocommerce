@@ -8,7 +8,7 @@ Add this code to your child theme’s `functions.php` file or via a plugin that 
 if ( ! function_exists( 'YOUR_PREFIX_add_currency_name' ) ) {
   /**
    * Add custom currency
-   * 
+   *
    * @param array $currencies Existing currencies.
    * @return array $currencies Updated currencies.
    */
@@ -23,7 +23,7 @@ if ( ! function_exists( 'YOUR_PREFIX_add_currency_name' ) ) {
 if ( ! function_exists( 'YOUR_PREFIX_add_currency_symbol' ) ) {
   /**
    * Add custom currency symbol
-   * 
+   *
    * @param string $currency_symbol Existing currency symbols.
    * @param string $currency Currency code.
    * @return string $currency_symbol Updated currency symbol(s).
