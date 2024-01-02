@@ -37,6 +37,6 @@ Please note that this check is currently not being enforced: the product editor 
 
 ## Related documentation
 
-- [Examples on Template API usage](../../plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md)
-- [Related hooks and Template API documentation](../../plugins/woocommerce/src/Admin/BlockTemplates/README.md)
+- [Examples on Template API usage](https://github.com/woocommerce/woocommerce/plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md)
+- [Related hooks and Template API documentation](https://github.com/woocommerce/woocommerce/plugins/woocommerce/src/Admin/BlockTemplates/README.md)
 - [Generic blocks documentation](../../packages/js/product-editor/src/blocks/generic/README.md)
