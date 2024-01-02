@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * Collection Rating Filter Block
@@ -114,15 +115,22 @@ final class CollectionRatingFilter extends AbstractBlock {
 		$display_style = $attributes['displayStyle'] ?? 'list';
 		$show_counts   = $attributes['showCounts'] ?? false;
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
-		$selected_ratings_query_param = isset( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ) : '';
-
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'data-wc-interactive' => 'woocommerce/collection-rating-filter',
 				'class'               => 'wc-block-rating-filter',
 			)
 		);
+
+		if ( empty( $rating_counts ) ) {
+			return sprintf(
+				'<div %s></div>',
+				$wrapper_attributes
+			);
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
+		$selected_ratings_query_param = isset( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ) : '';
 
 		$input = 'list' === $display_style ? CheckboxList::render(
 			array(
@@ -135,10 +143,12 @@ final class CollectionRatingFilter extends AbstractBlock {
 
 		return sprintf(
 			'<div %1$s>
-				<div class="wc-block-rating-filter__controls">%2$s</div>
+				%2$s
+				<div class="wc-block-rating-filter__controls">%3$s</div>
 				<div class="wc-block-rating-filter__actions"></div>
 			</div>',
 			$wrapper_attributes,
+			$content,
 			$input
 		);
 	}

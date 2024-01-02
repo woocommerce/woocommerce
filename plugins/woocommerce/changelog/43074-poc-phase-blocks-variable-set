@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Set WOOCOMMERCE_BLOCKS_PHASE to 1 for the production build.
-

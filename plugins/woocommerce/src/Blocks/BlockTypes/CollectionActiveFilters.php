@@ -48,10 +48,6 @@ final class CollectionActiveFilters extends AbstractBlock {
 		 */
 		$active_filters = apply_filters( 'collection_active_filters_data', array(), $this->get_filter_query_params( $query_id ) );
 
-		if ( empty( $active_filters ) ) {
-			return $content;
-		}
-
 		$context = array(
 			'queryId' => $query_id,
 			'params'  => array_keys( $this->get_filter_query_params( $query_id ) ),
@@ -68,22 +64,24 @@ final class CollectionActiveFilters extends AbstractBlock {
 		ob_start();
 		?>
 
-		<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		<div <?php echo $wrapper_attributes; ?>>
-			<ul class="wc-block-active-filters__list %3$s">
-				<?php foreach ( $active_filters as $filter ) : ?>
-				<li>
-					<span class="wc-block-active-filters__list-item-type"><?php echo esc_html( $filter['type'] ); ?>: </span>
-					<ul>
-						<?php $this->render_items( $filter['items'], $attributes['displayStyle'] ); ?>
-					</ul>
-				</li>
-				<?php endforeach; ?>
-			</ul>
-			<button class="wc-block-active-filters__clear-all" data-wc-on--click="actions.clearAll">
-				<span aria-hidden="true"><?php echo esc_html__( 'Clear All', 'woocommerce' ); ?></span>
-				<span class="screen-reader-text"><?php echo esc_html__( 'Clear All Filters', 'woocommerce' ); ?></span>
-			</button>
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+			<?php if ( ! empty( $active_filters ) ) : ?>
+				<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<ul class="wc-block-active-filters__list %3$s">
+					<?php foreach ( $active_filters as $filter ) : ?>
+					<li>
+						<span class="wc-block-active-filters__list-item-type"><?php echo esc_html( $filter['type'] ); ?>: </span>
+						<ul>
+							<?php $this->render_items( $filter['items'], $attributes['displayStyle'] ); ?>
+						</ul>
+					</li>
+					<?php endforeach; ?>
+				</ul>
+				<button class="wc-block-active-filters__clear-all" data-wc-on--click="actions.clearAll">
+					<span aria-hidden="true"><?php echo esc_html__( 'Clear All', 'woocommerce' ); ?></span>
+					<span class="screen-reader-text"><?php echo esc_html__( 'Clear All Filters', 'woocommerce' ); ?></span>
+				</button>
+			<?php endif; ?>
 		</div>
 
 		<?php
