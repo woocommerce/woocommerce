@@ -44,7 +44,7 @@ class Marketing {
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 5 );
 		add_action( 'admin_menu', array( $this, 'add_parent_menu_item' ), 6 );
 
-		// Overwrite submenu defualt ordering for marketing menu. Hight priority gives plugins chance to register their own menu items.
+		// Overwrite submenu default ordering for marketing menu. High priority gives plugins the chance to register their own menu items.
 		add_action( 'admin_menu', array( $this, 'reorder_marketing_submenu' ), 99 );
 
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'component_settings' ), 30 );
