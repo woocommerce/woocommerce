@@ -3,9 +3,10 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\AI;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-use Automattic\WooCommerce\Blocks\Patterns\PatternUpdater;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\UpdatePatterns;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
+use WP_Error;
 
 /**
  * Patterns class.
@@ -73,7 +74,7 @@ class Patterns extends AbstractRoute {
 	 *
 	 * @param  \WP_REST_Request $request Request object.
 	 *
-	 * @return bool|string|\WP_Error|\WP_REST_Response
+	 * @return WP_Error|\WP_HTTP_Response|\WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		$business_description = sanitize_text_field( wp_unslash( $request['business_description'] ) );
@@ -91,9 +92,9 @@ class Patterns extends AbstractRoute {
 		$images = $request['images'];
 
 		try {
-			( new PatternUpdater() )->generate_content( $ai_connection, $token, $images, $business_description );
+			( new UpdatePatterns() )->generate_content( $ai_connection, $token, $images, $business_description );
 			return rest_ensure_response( array( 'ai_content_generated' => true ) );
-		} catch ( \WP_Error $e ) {
+		} catch ( WP_Error $e ) {
 			return $this->error_to_response( $e );
 		}
 	}
@@ -103,7 +104,7 @@ class Patterns extends AbstractRoute {
 	 *
 	 * @param  \WP_REST_Request $request Request object.
 	 *
-	 * @return bool|string|\WP_Error|\WP_REST_Response
+	 * @return bool|string|WP_Error|\WP_REST_Response
 	 */
 	protected function get_route_delete_response( \WP_REST_Request $request ) {
 		PatternsHelper::delete_patterns_ai_data_post();

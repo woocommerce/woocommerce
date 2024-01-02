@@ -91,8 +91,10 @@ class StoreTitle extends AbstractRoute {
 			);
 		}
 
-		$store_title = get_option( 'blogname' );
-		if ( ! ( empty( $store_title ) || self::DEFAULT_TITLE === $store_title ) ) {
+		$store_title                 = get_option( 'blogname' );
+		$previous_ai_generated_title = get_option( 'ai_generated_site_title' );
+
+		if ( self::DEFAULT_TITLE === $store_title || ( ! empty( $store_title ) && $previous_ai_generated_title !== $store_title ) ) {
 			return rest_ensure_response( array( 'ai_content_generated' => false ) );
 		}
 
@@ -101,6 +103,7 @@ class StoreTitle extends AbstractRoute {
 			return $this->error_to_response( $ai_generated_title );
 		}
 
+		update_option( 'ai_generated_site_title', $ai_generated_title );
 		update_option( self::STORE_TITLE_OPTION_NAME, $ai_generated_title );
 
 		return rest_ensure_response(

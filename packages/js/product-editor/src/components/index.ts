@@ -65,3 +65,4 @@ export {
 } from './block-slot-fill';
 
 export { Label as __experimentalLabel } from './label/label';
+export { ButtonWithDropdownMenu as __experimentalButtonWithDropdownMenu } from './button-with-dropdown-menu';

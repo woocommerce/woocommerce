@@ -583,11 +583,7 @@ class CLIRunner {
 	 * @return array Failed IDs with meta details.
 	 */
 	private function verify_meta_data( array $order_ids, array $failed_ids ) : array {
-		$meta_keys_to_ignore = array(
-			'_paid_date', // This has been deprecated and replaced by '_date_paid' in the CPT datastore.
-			'_completed_date', // This has been deprecated and replaced by '_date_completed' in the CPT datastore.
-			'_edit_lock',
-		);
+		$meta_keys_to_ignore = $this->synchronizer->get_ignored_order_props();
 
 		global $wpdb;
 		if ( ! count( $order_ids ) ) {
