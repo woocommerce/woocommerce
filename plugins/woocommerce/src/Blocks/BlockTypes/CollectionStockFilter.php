@@ -148,14 +148,13 @@ final class CollectionStockFilter extends AbstractBlock {
 	private function get_stock_filter_html( $stock_counts, $attributes ) {
 		$display_style  = $attributes['displayStyle'] ?? 'list';
 		$show_counts    = $attributes['showCounts'] ?? false;
+		$select_type    = $attributes['selectType'] ?? 'single';
 		$stock_statuses = wc_get_product_stock_status_options();
-
-		$text_color_class_and_style = StyleAttributesUtils::get_text_color_class_and_style( $attributes );
-		$text_color                 = $text_color_class_and_style['value'] ?? '';
 
 		// check the url params to select initial item on page load.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
-		$selected_stock_status = isset( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ) : '';
+		$query                   = isset( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ) : '';
+		$selected_stock_statuses = explode( ',', $query );
 
 		$list_items = array_map(
 			function( $item ) use ( $stock_statuses, $show_counts ) {
@@ -171,16 +170,10 @@ final class CollectionStockFilter extends AbstractBlock {
 		$selected_items = array_values(
 			array_filter(
 				$list_items,
-				function( $item ) use ( $selected_stock_status ) {
-						return $item['value'] === $selected_stock_status;
+				function( $item ) use ( $selected_stock_statuses ) {
+						return in_array( $item['value'], $selected_stock_statuses, true );
 				}
 			)
-		);
-
-		// Just for the dropdown, we can only select 1 item.
-		$selected_item = $selected_items[0] ?? array(
-			'label' => null,
-			'value' => null,
 		);
 
 		$data_directive = wp_json_encode( array( 'namespace' => 'woocommerce/collection-stock-filter' ) );
@@ -203,7 +196,7 @@ final class CollectionStockFilter extends AbstractBlock {
 											aria-invalid="false"
 											data-wc-on--change="actions.updateProducts"
 											value="<?php echo esc_attr( $stock_count['status'] ); ?>"
-											<?php checked( strpos( $selected_stock_status, $stock_count['status'] ) !== false, 1 ); ?>
+											<?php checked( strpos( $query, $stock_count['status'] ) !== false, 1 ); ?>
 										>
 											<svg class="wc-block-components-checkbox__mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 20">
 												<path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"></path>
@@ -239,10 +232,10 @@ final class CollectionStockFilter extends AbstractBlock {
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
 				echo Dropdown::render(
 					array(
-						'items'         => $list_items,
-						'action'        => 'woocommerce/collection-stock-filter::actions.navigate',
-						'selected_item' => $selected_item,
-						'text_color'    => $text_color,
+						'items'          => $list_items,
+						'action'         => 'woocommerce/collection-stock-filter::actions.navigate',
+						'selected_items' => $selected_items,
+						'select_type'    => $select_type,
 					)
 				);
 				?>

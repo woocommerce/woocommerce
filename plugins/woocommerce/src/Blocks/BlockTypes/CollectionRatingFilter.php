@@ -111,9 +111,6 @@ final class CollectionRatingFilter extends AbstractBlock {
 			return '';
 		}
 
-		$text_color_class_and_style = StyleAttributesUtils::get_text_color_class_and_style( $attributes );
-		$text_color                 = $text_color_class_and_style['value'] ?? '';
-
 		$rating_counts = $block->context['collectionData']['rating_counts'] ?? array();
 		$display_style = $attributes['displayStyle'] ?? 'list';
 		$show_counts   = $attributes['showCounts'] ?? false;
@@ -141,7 +138,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 				'on_change' => 'woocommerce/collection-rating-filter::actions.onCheckboxChange',
 			)
 		) : Dropdown::render(
-			$this->get_dropdown_props( $rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'], $text_color )
+			$this->get_dropdown_props( $rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'] )
 		);
 
 		return sprintf(
@@ -222,10 +219,9 @@ final class CollectionRatingFilter extends AbstractBlock {
 	 * @param mixed  $selected_ratings_query The url query param for selected ratings.
 	 * @param bool   $show_counts Whether to show the counts.
 	 * @param string $select_type The select type. (single|multiple).
-	 * @param string $text_color The text color.
 	 * @return array<array-key, array>
 	 */
-	private function get_dropdown_props( $rating_counts, $selected_ratings_query, $show_counts, $select_type, $text_color ) {
+	private function get_dropdown_props( $rating_counts, $selected_ratings_query, $show_counts, $select_type ) {
 		$ratings_array = explode( ',', $selected_ratings_query );
 
 		$selected_items = array_reduce(
@@ -263,7 +259,6 @@ final class CollectionRatingFilter extends AbstractBlock {
 			'select_type'    => $select_type,
 			'selected_items' => $selected_items,
 			'action'         => 'woocommerce/collection-rating-filter::actions.onDropdownChange',
-			'text_color'     => $text_color,
 		);
 	}
 }
