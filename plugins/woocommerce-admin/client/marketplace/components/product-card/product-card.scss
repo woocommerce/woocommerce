@@ -93,9 +93,7 @@
 
 		&__content {
 			display: grid;
-			align-items: flex-start;
 			gap: $medium-gap;
-			justify-content: space-between;
 			height: 100%;
 			grid-template-rows: auto 1fr 20px;
 		}
@@ -186,6 +184,7 @@
 		}
 
 		&__price {
+			display: flex;
 			align-items: flex-end;
 			gap: $grid-unit-05;
 			align-self: stretch;
