@@ -71,6 +71,7 @@
 			border-radius: em(4px);
 			z-index: 1000;
 			margin-top: $gap-smaller;
+			box-sizing: border-box;
 
 			.wc-interactivity-dropdown__dropdown-option {
 				margin: $gap-small;
