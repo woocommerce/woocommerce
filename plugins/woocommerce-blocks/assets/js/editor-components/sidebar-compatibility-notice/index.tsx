@@ -30,7 +30,7 @@ export const CartCheckoutSidebarCompatibilityNotice = ( {
 
 	const noticeText = createInterpolateElement(
 		__(
-			"Some extensions don't yet support this block, which may impact the shopper experience. <a>Learn more</a>",
+			"Some extensions don't yet support this block, which may impact the shopper experience. To make sure this feature is right for your store, <a>review the list of compatible extensions</a>.",
 			'woocommerce'
 		),
 		{
