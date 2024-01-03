@@ -221,16 +221,15 @@
 		}
 
 		&.woocommerce-marketplace__product-card--theme {
-			padding: 0;
+			padding: 0 0 $medium-gap;
 			overflow: hidden;
 
 			.woocommerce-marketplace__product-card__content {
 				grid-template-rows: auto 1fr auto;
-				grid-template-columns: 2fr 1fr;
+				grid-template-columns: 1fr;
 			}
 			.woocommerce-marketplace__product-card__image {
 				border-bottom: 1px solid $gray-200;
-				grid-column-start: span 2;
 				overflow: hidden;
 				padding-top: 75%;
 				position: relative;
@@ -245,6 +244,9 @@
 			}
 			.woocommerce-marketplace__product-card__header {
 				padding-left: $medium-gap;
+			}
+			.woocommerce-marketplace__product-card__footer {
+				padding: 0 $medium-gap;
 			}
 			.woocommerce-marketplace__product-card__price {
 				margin-right: $medium-gap;
