@@ -308,7 +308,7 @@ class UpdatePatterns {
 								$ai_response_content[ $counter ] = $ai_response_content[ $counter - 1 ] ?? '';
 							}
 
-							$patterns[ $i ]['content']['titles'][ $j ]['default'] = $this->sanitize_string($ai_response_content[ $counter ]);
+							$patterns[ $i ]['content']['titles'][ $j ]['default'] = $this->sanitize_string( $ai_response_content[ $counter ] );
 
 							$counter ++;
 						}
