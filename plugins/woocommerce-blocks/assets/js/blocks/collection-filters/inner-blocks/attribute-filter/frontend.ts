@@ -15,6 +15,10 @@ interface ActiveAttributeFilterContext extends AttributeFilterContext {
 	value: string;
 }
 
+function nonNullable< T >( value: T ): value is NonNullable< T > {
+	return value !== null && value !== undefined;
+}
+
 function getUrl(
 	selectedTerms: string[],
 	slug: string,
@@ -47,18 +51,14 @@ store( 'woocommerce/collection-attribute-filter', {
 			const dropdownContext = getContext< DropdownContext >(
 				'woocommerce/interactivity-dropdown'
 			);
-
 			const context = getContext< AttributeFilterContext >();
+			const filters = dropdownContext.selectedItems
+				.map( ( item ) => item.value )
+				.filter( nonNullable );
 
-			if ( dropdownContext.selectedItem.value ) {
-				navigate(
-					getUrl(
-						[ dropdownContext.selectedItem.value ],
-						context.attributeSlug,
-						context.queryType
-					)
-				);
-			}
+			navigate(
+				getUrl( filters, context.attributeSlug, context.queryType )
+			);
 		},
 		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
 			if ( ! event.target.value ) return;

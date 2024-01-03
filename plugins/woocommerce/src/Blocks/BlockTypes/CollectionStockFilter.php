@@ -151,6 +151,8 @@ final class CollectionStockFilter extends AbstractBlock {
 		$select_type    = $attributes['selectType'] ?? 'single';
 		$stock_statuses = wc_get_product_stock_status_options();
 
+		$placeholder_text = 'single' === $select_type ? __( 'Select stock status', 'woocommerce' ) : __( 'Select stock statuses', 'woocommerce' );
+
 		// check the url params to select initial item on page load.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
 		$query                   = isset( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ) : '';
@@ -215,6 +217,7 @@ final class CollectionStockFilter extends AbstractBlock {
 						'action'         => 'woocommerce/collection-stock-filter::actions.onDropdownChange',
 						'selected_items' => $selected_items,
 						'select_type'    => $select_type,
+						'placeholder'    => $placeholder_text,
 					)
 				);
 				?>

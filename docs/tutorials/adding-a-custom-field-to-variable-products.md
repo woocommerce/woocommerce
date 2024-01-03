@@ -12,7 +12,7 @@ To do this tutorial you will need to have a WordPress install with the WooCommer
 
 ## Setting up the plugin
 
-To get started, let’s do the steps to [create a skeleton plugin](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extension).
+To get started, let's do the steps to [create a skeleton plugin](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extension).
 
 First, navigate to your wp-content/plugins folder, then run:
 
@@ -28,7 +28,7 @@ npm install # Install dependencies
 npm run build # Build the javascript
 ```
 
-WordPress has its own class file naming convention which doesn’t work with PSR-4 out of the box. To learn more about Naming Conventions see the [WP Handbook](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/php/#naming-conventions). We will use the standard format of “class-my-classname.php” format, so let’s go to the composer.json file and change the autoload to:
+WordPress has its own class file naming convention which doesn't work with PSR-4 out of the box. To learn more about Naming Conventions see the [WP Handbook](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/php/#naming-conventions). We will use the standard format of “class-my-classname.php” format, so let's go to the composer.json file and change the autoload to:
 
 ```json
 "autoload": {
@@ -50,11 +50,11 @@ Our aim is to create a new custom text field for WooCommerce products to save ne
 
 WooCommerce allows us to add our code to these sections through [hooks](https://developer.wordpress.org/plugins/hooks/), which are a standard WordPress method to extend code. In the “Inventory” section we have the following action hooks available to us:
 
-For our Woo extension, we’ll be appending our field right at the end with `woocommerce_product_options_inventory_product_data`.
+For our Woo extension, we'll be appending our field right at the end with `woocommerce_product_options_inventory_product_data`.
 
 ## Creating our class
 
-Let’s get started with creating a new class which will hold the code for the field. Add a new file with the name `class-product-fields.php` to the `/includes/admin/` folder. Within the class, we add our namespace, an abort if anyone tries to call the file directly and a \_\_construct method which calls the `hooks()` method:
+Let's get started with creating a new class which will hold the code for the field. Add a new file with the name `class-product-fields.php` to the `/includes/admin/` folder. Within the class, we add our namespace, an abort if anyone tries to call the file directly and a \_\_construct method which calls the `hooks()` method:
 
 ```php
 <?php
@@ -73,7 +73,7 @@ class ProductFields {
 }
 ```
 
-Then in Terminal we run `composer dump-autoload -o` to regenerate the class map. Once that’s done, we add the class to our `setup.php` \_\_construct() function like so:
+Then in Terminal we run `composer dump-autoload -o` to regenerate the class map. Once that's done, we add the class to our `setup.php` \_\_construct() function like so:
 
 ```php
 class Setup {
@@ -107,7 +107,7 @@ public function add_field() {
 }
 ```
 
-Let’s take a look at the arguments in the array. The ID will be used as meta_key in the database. The Label and Description are shown in the data section, and by setting desc_tip to true, it will be shown as a hover over the info icon. The last argument value ensures that if a value is already stored, then it will be shown.
+Let's take a look at the arguments in the array. The ID will be used as meta_key in the database. The Label and Description are shown in the data section, and by setting desc_tip to true, it will be shown as a hover over the info icon. The last argument value ensures that if a value is already stored, then it will be shown.
 
 For the div class, the class names `show_if_simple` and `show_if_variable` will control when our section is shown. This is linked to JS code which dynamically hides/reveals sections. If for example, we wanted to hide the section from variable products, then we can simply delete `show_if_variable`.
 
@@ -123,7 +123,7 @@ public function save_field( $post_id, $post ) {
 }
 ```
 
-This function checks if our new field is in the POST array. If yes, we create the product object, update our metadata and save the metadata. The `update_meta_data` function will either update an existing meta field or add a new one. And as we’re inserting into the database, we must [sanitize our field value](https://developer.wordpress.org/apis/security/sanitizing/).
+This function checks if our new field is in the POST array. If yes, we create the product object, update our metadata and save the metadata. The `update_meta_data` function will either update an existing meta field or add a new one. And as we're inserting into the database, we must [sanitize our field value](https://developer.wordpress.org/apis/security/sanitizing/).
 
 And to make it all work, we add the hooks:
 
@@ -142,7 +142,7 @@ At this point you have a working extension that saves a custom field for a produ
 Showing the field in the store
 If we want to display the new field in our store, then we can do this with the `get_meta()` method of the Woo product class: `$product->get_meta( '\_new_stock_information' )`
 
-Let’s get started by creating a new file /includes/class-product.php. You may have noticed that this is outside the `/admin/` folder as this code will run in the front. So when we set up the class, we also adjust the namespace accordingly:
+Let's get started by creating a new file /includes/class-product.php. You may have noticed that this is outside the `/admin/` folder as this code will run in the front. So when we set up the class, we also adjust the namespace accordingly:
 
 ```php
 <?php
@@ -162,7 +162,7 @@ class Product {
 
 Again we run `composer dump-autoload -o` to update our class map.
 
-If you took a look at the extension setup you may have noticed that `/admin/setup.php` is only called if we’re within WP Admin. So to call our new class we’ll add it directly in `/woo-product-field.php`:
+If you took a look at the extension setup you may have noticed that `/admin/setup.php` is only called if we're within WP Admin. So to call our new class we'll add it directly in `/woo-product-field.php`:
 
 ```php
 public function __construct() {
@@ -173,7 +173,7 @@ public function __construct() {
 }
 ```
 
-For adding the field to the front we have several options. We could create a theme template, but if we are working with a WooCommerce-compatible theme and don’t need to make any other changes then a quick way is to use hooks. If we look into `/woocommerce/includes/wc-template-hooks.php` we can see all the existing actions for `woocommerce_single_product_summary` which controls the section at the top of the product page:
+For adding the field to the front we have several options. We could create a theme template, but if we are working with a WooCommerce-compatible theme and don't need to make any other changes then a quick way is to use hooks. If we look into `/woocommerce/includes/wc-template-hooks.php` we can see all the existing actions for `woocommerce_single_product_summary` which controls the section at the top of the product page:
 
 For our extension, let's add the new stock information after the excerpt by using 21 as the priority:
 
@@ -183,7 +183,7 @@ private function hooks() {
 }
 ```
 
-In our function we output the stock information with the [appropriate escape function](https://developer.wordpress.org/apis/security/escaping/), in this case, I’m suggesting to use `esc_html()` to force plain text.
+In our function we output the stock information with the [appropriate escape function](https://developer.wordpress.org/apis/security/escaping/), in this case, I'm suggesting to use `esc_html()` to force plain text.
 
 ```php
 public function add_stock_info() {
@@ -197,7 +197,7 @@ public function add_stock_info() {
 
 Now if we refresh the product page our stock information will be shown just below the excerpt:
 
-Fantastic! You have completed this tutorial and have a working WooCommerce extension that adds a new custom field and shows it in the store! 🎉I hope it’s shown you how easily you can extend WooCommerce through hooks and tailor it to your or your client’s shop requirements!
+Fantastic! You have completed this tutorial and have a working WooCommerce extension that adds a new custom field and shows it in the store! 🎉I hope it's shown you how easily you can extend WooCommerce through hooks and tailor it to your or your client's shop requirements!
 
 Below is a bonus task if you are interested in variable products. Feel free to come back to this later.
 
@@ -205,7 +205,7 @@ Below is a bonus task if you are interested in variable products. Feel free to c
 
 The above example was done with a simple product. But what if we have variations, for example, a T-Shirt in multiple sizes and we wanted to store different stock information for each variant? WooCommerce lets us do that with the [variable product type](https://woo.com/document/variable-product/).
 
-A variable product type has variations as its children. To add a custom field to a variation, we can use the `woocommerce_variation_options_inventory` hook, and to save `woocommerce_save_product_variation` so let’s update our `hooks()` method with the new action hooks like so:
+A variable product type has variations as its children. To add a custom field to a variation, we can use the `woocommerce_variation_options_inventory` hook, and to save `woocommerce_save_product_variation` so let's update our `hooks()` method with the new action hooks like so:
 
 ```php
 private function hooks() {

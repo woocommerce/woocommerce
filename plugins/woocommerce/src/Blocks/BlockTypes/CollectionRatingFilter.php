@@ -228,7 +228,8 @@ final class CollectionRatingFilter extends AbstractBlock {
 	 * @return array<array-key, array>
 	 */
 	private function get_dropdown_props( $rating_counts, $selected_ratings_query, $show_counts, $select_type ) {
-		$ratings_array = explode( ',', $selected_ratings_query );
+		$ratings_array    = explode( ',', $selected_ratings_query );
+		$placeholder_text = 'single' === $select_type ? __( 'Select a rating', 'woocommerce' ) : __( 'Select ratings', 'woocommerce' );
 
 		$selected_items = array_reduce(
 			$rating_counts,
@@ -265,6 +266,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 			'select_type'    => $select_type,
 			'selected_items' => $selected_items,
 			'action'         => 'woocommerce/collection-rating-filter::actions.onDropdownChange',
+			'placeholder'    => $placeholder_text,
 		);
 	}
 }
