@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add useProductMetadata hook to perform update in multiple meta entries at same time

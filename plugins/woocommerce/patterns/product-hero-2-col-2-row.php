@@ -5,7 +5,7 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 $image1 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/man-person-winter-photography-guy-statue.jpg' );
 $image2 = PatternsHelper::get_image_url( $images, 1, 'assets/images/pattern-placeholders/pattern-fashion-clothing-outerwear-wool-scarf.png' );

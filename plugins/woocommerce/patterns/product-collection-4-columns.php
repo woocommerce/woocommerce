@@ -4,7 +4,6 @@
  * Slug: woocommerce-blocks/product-collection-4-columns
  * Categories: WooCommerce
  */
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
 
 $products_title = $content['titles'][0]['default'] ?? '';
 ?>
