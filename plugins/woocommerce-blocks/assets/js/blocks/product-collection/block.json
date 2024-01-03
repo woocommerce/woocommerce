@@ -36,7 +36,8 @@
 	"providesContext": {
 		"queryId": "queryId",
 		"query": "query",
-		"displayLayout": "displayLayout"
+		"displayLayout": "displayLayout",
+		"collection": "collection"
 	},
 	"supports": {
 		"align": [ "wide", "full" ],
