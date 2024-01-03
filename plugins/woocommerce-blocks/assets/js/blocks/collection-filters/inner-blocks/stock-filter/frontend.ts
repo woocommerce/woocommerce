@@ -36,7 +36,6 @@ store( 'woocommerce/collection-stock-filter', {
 
 			navigate( getUrl( filters.join( ',' ) ) );
 		},
-
 		onDropdownChange: () => {
 			const dropdownContext = getContext< DropdownContext >(
 				'woocommerce/interactivity-dropdown'
@@ -48,7 +47,6 @@ store( 'woocommerce/collection-stock-filter', {
 
 			navigate( getUrl( filters.join( ',' ) ) );
 		},
-
 		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
 			// get the active filters from the url:
 			const url = new URL( window.location.href );
@@ -74,7 +72,6 @@ store( 'woocommerce/collection-stock-filter', {
 
 			navigate( getUrl( filtersArr.join( ',' ) ) );
 		},
-
 		removeFilter: () => {
 			const { value } = getContext< { value: string } >();
 			// get the active filters from the url:
