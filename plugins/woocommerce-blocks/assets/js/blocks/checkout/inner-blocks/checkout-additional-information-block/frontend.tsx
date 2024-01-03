@@ -27,6 +27,7 @@ const FrontendBlock = ( {
 	children: JSX.Element;
 	className?: string;
 } ) => {
+	console.log( { title, description, showStepNumber, children, className } );
 	const checkoutIsProcessing = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).isProcessing()
 	);
