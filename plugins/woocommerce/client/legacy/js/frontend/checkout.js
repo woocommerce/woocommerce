@@ -407,7 +407,7 @@ jQuery( function( $ ) {
 						var $form = $( 'form.checkout' );
 
 						// Remove notices from all sources
-						$( '.woocommerce-error, .woocommerce-message' ).remove();
+						$( '.woocommerce-error, .woocommerce-message, .is-error, .is-success' ).remove();
 
 						// Add new errors returned by this event
 						if ( data.messages ) {
@@ -626,7 +626,7 @@ jQuery( function( $ ) {
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'apply_coupon' ),
 				data:		data,
 				success:	function( code ) {
-					$( '.woocommerce-error, .woocommerce-message' ).remove();
+					$( '.woocommerce-error, .woocommerce-message, .is-error, .is-success' ).remove();
 					$form.removeClass( 'processing' ).unblock();
 
 					if ( code ) {
@@ -666,7 +666,7 @@ jQuery( function( $ ) {
 				url:     wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_coupon' ),
 				data:    data,
 				success: function( code ) {
-					$( '.woocommerce-error, .woocommerce-message' ).remove();
+					$( '.woocommerce-error, .woocommerce-message, .is-error, .is-success' ).remove();
 					container.removeClass( 'processing' ).unblock();
 
 					if ( code ) {
