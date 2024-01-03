@@ -13,15 +13,8 @@ import classNames from 'classnames';
  * Internal dependencies
  */
 import { FormattedPrice } from '../formatted-price';
+import { ProductImage } from '../product-image';
 import { ProductListProps } from './types';
-
-export function getProductImageStyle( product: Product ) {
-	return product.images.length > 0
-		? {
-				backgroundImage: `url(${ product.images[ 0 ].src })`,
-		  }
-		: undefined;
-}
 
 export function ProductList( {
 	products,
@@ -59,9 +52,9 @@ export function ProductList( {
 					{ products.map( ( product ) => (
 						<div role="row" key={ product.id }>
 							<div role="cell">
-								<div
+								<ProductImage
+									product={ product }
 									className="woocommerce-product-list__product-image"
-									style={ getProductImageStyle( product ) }
 								/>
 								<div className="woocommerce-product-list__product-info">
 									<a

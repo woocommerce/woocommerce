@@ -80,3 +80,8 @@ export {
 	ProductSelect as __experimentalProductSelect,
 	ProductSelectProps,
 } from './product-select';
+
+export {
+	ProductImage as __experimentalProductImage,
+	ProductImageProps,
+} from './product-image';

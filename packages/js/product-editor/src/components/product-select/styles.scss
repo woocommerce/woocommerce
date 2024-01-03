@@ -15,13 +15,6 @@
 			gap: $grid-unit + $grid-unit-05;
 
 			&-image {
-				width: $grid-unit-40;
-				height: $grid-unit-40;
-				border-radius: $grid-unit-05;
-				background-color: $gray-200;
-				background-position: center center;
-				background-repeat: no-repeat;
-				background-size: cover;
 				flex-shrink: 0;
 			}
 

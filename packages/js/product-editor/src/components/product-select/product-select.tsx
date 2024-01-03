@@ -11,21 +11,14 @@ import {
 	Spinner,
 } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
 import { FormattedPrice } from '../formatted-price';
+import { ProductImage } from '../product-image';
 import { ProductSelectProps } from './types';
-import classNames from 'classnames';
-
-export function getProductImageStyle( product: Product ) {
-	return product.images.length > 0
-		? {
-				backgroundImage: `url(${ product.images[ 0 ].src })`,
-		  }
-		: undefined;
-}
 
 export function ProductSelect( {
 	className,
@@ -75,9 +68,9 @@ export function ProductSelect( {
 								} ) }
 							>
 								<>
-									<div
+									<ProductImage
+										product={ item }
 										className="woocommerce-product-select__menu-item-image"
-										style={ getProductImageStyle( item ) }
 									/>
 									<div className="woocommerce-product-select__menu-item-content">
 										<div className="woocommerce-product-select__menu-item-title">
