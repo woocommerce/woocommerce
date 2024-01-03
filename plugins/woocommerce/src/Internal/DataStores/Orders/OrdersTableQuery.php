@@ -346,6 +346,7 @@ class OrdersTableQuery {
 			'day'   => '',
 		);
 
+		$precision = null;
 		if ( is_numeric( $date ) ) {
 			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
 			$precision = 'second';
@@ -1131,7 +1132,7 @@ class OrdersTableQuery {
 		$values = is_array( $values ) ? $values : array( $values );
 		$ids    = array();
 		$emails = array();
-
+		$pieces = array();
 		foreach ( $values as $value ) {
 			if ( is_array( $value ) ) {
 				$sql      = $this->generate_customer_query( $value, 'AND' );
