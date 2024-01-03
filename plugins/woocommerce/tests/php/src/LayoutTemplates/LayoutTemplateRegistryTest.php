@@ -208,9 +208,23 @@ class LayoutTemplateRegistryTest extends WC_Unit_Test_Case {
 			$this->assertInstanceOf( TestLayoutTemplate::class, $layout_template );
 		};
 
+		$deprecated_register_hook_called = false;
+
+		$deprecated_register_hook = function( $layout_template ) use ( &$deprecated_register_hook_called ) {
+			$deprecated_register_hook_called = true;
+
+			$this->assertInstanceOf( TestLayoutTemplate::class, $layout_template );
+
+			$this->assertEquals( 'test-layout-template', $layout_template->get_id() );
+			$this->assertEquals( 'test', $layout_template->get_area() );
+
+		};
+
 		try {
 			add_action( 'woocommerce_layout_template_before_instantiation', $before_instantiation_hook, 10, 2 );
 			add_action( 'woocommerce_layout_template_after_instantiation', $after_instantiation_hook, 10, 3 );
+
+			add_action( 'woocommerce_block_template_register', $deprecated_register_hook );
 
 			$this->layout_template_registry->register( 'test-layout-template', 'test', TestLayoutTemplate::class );
 
@@ -227,9 +241,16 @@ class LayoutTemplateRegistryTest extends WC_Unit_Test_Case {
 				$after_instantiation_hook_called,
 				'woocommerce_layout_template_after_instantiation hook was not called.'
 			);
+
+			$this->assertTrue(
+				$deprecated_register_hook_called,
+				'woocommerce_block_template_register hook was not called.'
+			);
 		} finally {
 			remove_action( 'woocommerce_layout_template_before_instantiation', $before_instantiation_hook );
 			remove_action( 'woocommerce_layout_template_after_instantiation', $after_instantiation_hook );
+
+			remove_action( 'woocommerce_block_template_register', $deprecated_register_hook );
 		}
 	}
 }
