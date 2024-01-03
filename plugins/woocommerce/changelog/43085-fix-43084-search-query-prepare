@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix bug when searching orders with a term starting with d, s, or f.
