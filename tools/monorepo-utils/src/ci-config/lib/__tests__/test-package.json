@@ -1,5 +1,6 @@
 {
     "name": "test-package-json",
+    "version": "1.0.0-dev",
     "config": {
         "ci": {
             "lint": {
