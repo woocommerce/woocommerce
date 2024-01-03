@@ -6,79 +6,74 @@
 	// Helper functions.
 	const $ = document.querySelector.bind( document );
 	const propertyAccessor = ( obj, path ) => path.split( '.' ).reduce( ( acc, part ) => acc && acc[ part ], obj );
+	const returnNull = () => null;
 
 	/**
-	 * Flattens the sbjs.get object into our schema compatible object
-	 * according to the fields configuration.
-	 * More info at https://sbjs.rocks/#/usage.
+	 * Get the order attribution data.
 	 *
-	 * @returns {array} key value paris in `Object.entries` format.
+	 * Returns object full of `null`s if tracking is disabled.
+	 *
+	 * @returns {Object} Schema compatible object.
 	 */
-	wc_order_attribution.getData =
-		() => Object.entries( wc_order_attribution.fields )
-				.map( ( [ key, accessor ] ) => [ key, propertyAccessor( sbjs.get, accessor ) ] );
+	function getData() {
+		const accessor = params.allowTracking ? propertyAccessor : returnNull;
+		const entries = Object.entries( wc_order_attribution.fields )
+				.map( ( [ key, property ] ) => [ key, accessor( sbjs.get, property ) ] );
+		return Object.fromEntries( entries );
+	}
 
 	/**
-	 * Initialize the module.
+	 * Update `wc_order_attribution` input elements' values.
+	 *
+	 * @param {Object} values Object containing field values.
 	 */
-	function initOrderTracking() {
-		if ( params.allowTracking === 'no' ) {
-			removeTrackingCookies();
-			return;
-		}
-
-		/**
-		 * Initialize sourcebuster.js.
-		 */
-		sbjs.init( {
-			lifetime: Number( params.lifetime ),
-			session_length: Number( params.session ),
-			timezone_offset: '0', // utc
-		} );
-
-		/**
-		 * Callback to set visitor source values in the checkout
-		 * and register forms using sourcebuster object values.
-		 * More info at https://sbjs.rocks/#/usage.
-		 */
-		const setFormValues = () => {
-
-			if ( sbjs.get ) {
-				for( const [ key, value ] of wc_order_attribution.getData() ) {
-					$( `input[name="${params.prefix}${key}"]` ).value = value;
-				}
+	function updateFormValues( values ) {
+		// Update inputs if any exist.
+		if( $( `input[name^="${params.prefix}"]` ) ) {
+			for( const key of Object.keys( wc_order_attribution.fields ) ) {
+				$( `input[name="${params.prefix}${key}"]` ).value = values && values[ key ] || '';
 			}
-		};
-
-		/**
-		 * Add source values to the classic checkout form.
-		 */
-		if ( $( 'form.woocommerce-checkout' ) !== null ) {
-			const previousInitCheckout = document.body.oninit_checkout;
-			document.body.oninit_checkout = () => {
-				setFormValues();
-				previousInitCheckout && previousInitCheckout();
-			};
 		}
 
-		/**
-		 * Add source values to register form.
-		 */
-		if ( $( '.woocommerce form.register' ) !== null ) {
-			setFormValues();
+	};
+
+	/**
+	 * Update Checkout extension data.
+	 *
+	 * @param {Object} values Object containing field values.
+	 */
+	function updateCheckoutBlockData( values ) {
+		// Update Checkout block data if available.
+		if ( window.wp && window.wp.data && window.wp.data.dispatch && window.wc && window.wc.wcBlocksData ) {
+			window.wp.data.dispatch( window.wc.wcBlocksData.CHECKOUT_STORE_KEY ).__internalSetExtensionData(
+				'woocommerce/order-attribution',
+				values,
+				true
+			);
 		}
 	}
 
 	/**
-	 * Enable or disable order tracking analytics and marketing consent init and change.
+	 * Initialize sourcebuster & set data, or clear cookies & data.
+	 *
+	 * @param {boolean} allow Whether to allow tracking or disable it.
 	 */
-	wc_order_attribution.setAllowTrackingConsent = ( allow ) => {
+	wc_order_attribution.setOrderTracking = function( allow ) {
+		params.allowTracking = allow;
 		if ( ! allow ) {
-			return;
+			// Reset cookies, and clear form data.
+			removeTrackingCookies();
+		} else {
+			// If not done yet, initialize sourcebuster.js which populates `sbjs.get` object.
+			sbjs.init( {
+				lifetime: Number( params.lifetime ),
+				session_length: Number( params.session ),
+				timezone_offset: '0', // utc
+			} );
 		}
-
-		params.allowTracking = 'yes';
-		initOrderTracking();
+		const values = getData();
+		updateFormValues( values );
+		updateCheckoutBlockData( values );
 	}
 
 	/**
@@ -105,6 +100,15 @@
 	}
 
 	// Run init.
-	initOrderTracking();
+	wc_order_attribution.setOrderTracking( params.allowTracking );
+
+	// Wait for (async) classic checkout initialization and set source values once loaded.
+	if ( $( 'form.woocommerce-checkout' ) !== null ) {
+		const previousInitCheckout = document.body.oninit_checkout;
+		document.body.oninit_checkout = () => {
+			updateFormValues( getData() );
+			previousInitCheckout && previousInitCheckout();
+		};
+	}
 
 }( window.wc_order_attribution ) );

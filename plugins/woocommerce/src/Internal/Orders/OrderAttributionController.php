@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Integrations\WPConsentAPI;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
 use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
@@ -28,6 +29,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 	use OrderAttributionMeta {
 		get_prefixed_field_name as public;
 	}
+
+	/**
+	 * The WPConsentAPI integration instance.
+	 *
+	 * @var WPConsentAPI
+	 */
+	private $consent;
 
 	/**
 	 * The FeatureController instance.
@@ -59,11 +67,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 *
 	 * @param LegacyProxy         $proxy      The legacy proxy.
 	 * @param FeaturesController  $controller The feature controller.
+	 * @param WPConsentAPI        $consent    The WPConsentAPI integration.
 	 * @param WC_Logger_Interface $logger     The logger object. If not provided, it will be obtained from the proxy.
 	 */
-	final public function init( LegacyProxy $proxy, FeaturesController $controller, ?WC_Logger_Interface $logger = null ) {
+	final public function init( LegacyProxy $proxy, FeaturesController $controller, WPConsentAPI $consent, ?WC_Logger_Interface $logger = null ) {
 		$this->proxy              = $proxy;
 		$this->feature_controller = $controller;
+		$this->consent            = $consent;
 		$this->logger             = $logger ?? $proxy->call_function( 'wc_get_logger' );
 		$this->set_fields_and_prefix();
 	}
@@ -83,6 +93,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 		if ( ! $this->feature_controller->feature_is_enabled( 'order_attribution' ) ) {
 			return;
 		}
+
+		// Register WPConsentAPI integration.
+		$this->consent->register();
 
 		add_action(
 			'wp_enqueue_scripts',
@@ -213,7 +226,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 		wp_enqueue_script(
 			'wc-order-attribution',
 			plugins_url( "assets/js/frontend/order-attribution{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
-			array( 'sourcebuster-js' ),
+			// Technically, we do not need 'wp-data', 'wc-blocks-checkout' for classic checkout,
+			// but we do not seem to distingush and load blocks scripts there anyway.
+			array( 'sourcebuster-js', 'wp-data', 'wc-blocks-checkout' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
@@ -254,7 +269,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 				'session'       => $session_length,
 				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
 				'prefix'        => $this->field_prefix,
-				'allowTracking' => $allow_tracking,
+				'allowTracking' => 'yes' === $allow_tracking,
 			),
 			'fields' => $this->fields,
 		);
@@ -354,6 +369,10 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function set_order_source_data( array $source_data, WC_Order $order ) {
+		// If all the values are empty, bail.
+		if ( empty( array_filter( $source_data ) ) ) {
+			return;
+		}
 		foreach ( $source_data as $key => $value ) {
 			$order->add_meta_data( $this->get_meta_prefixed_field_name( $key ), $value );
 		}
@@ -408,7 +427,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			'source_type'          => $source_data['source_type'] ?? '',
 			'medium'               => $source_data['utm_medium'] ?? '',
 			'source'               => $source_data['utm_source'] ?? '',
-			'device_type'          => strtolower( $source_data['device_type'] ?? '(unknown)' ),
+			'device_type'          => strtolower( $source_data['device_type'] ?? 'unknown' ),
 			'origin_label'         => strtolower( $origin_label ),
 			'session_pages'        => $source_data['session_pages'] ?? 0,
 			'session_count'        => $source_data['session_count'] ?? 0,
