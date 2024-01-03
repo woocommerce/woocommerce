@@ -11,7 +11,6 @@ import { PreviewDropdown } from '../../components/preview-dropdown';
 
 type Props = {
 	label: string;
-	textColor: string;
 };
 
 export const AttributeDropdown = ( { label }: Props ) => {

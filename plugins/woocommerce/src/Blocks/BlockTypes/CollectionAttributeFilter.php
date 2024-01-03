@@ -211,8 +211,10 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			return '';
 		}
 
-		$list_items    = array();
-		$selected_item = array();
+		$list_items     = array();
+		$selected_items = array();
+
+		$product_attribute = wc_get_attribute( $attributes['attributeId'] );
 
 		foreach ( $options as $option ) {
 			$item = array(
@@ -223,7 +225,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			$list_items[] = $item;
 
 			if ( $option['selected'] ) {
-				$selected_item = $item;
+				$selected_items[] = $item;
 			}
 		}
 
@@ -231,7 +233,10 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			array(
 				'items'          => $list_items,
 				'action'         => 'woocommerce/collection-attribute-filter::actions.navigate',
-				'selected_items' => array( $selected_item ),
+				'selected_items' => $selected_items,
+				'select_type'    => $attributes['selectType'] ?? 'multiple',
+				// translators: %s is a product attribute name.
+				'placeholder'    => sprintf( __( 'Select %s', 'woocommerce' ), $product_attribute->name ),
 			)
 		);
 	}

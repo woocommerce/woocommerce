@@ -24,15 +24,18 @@ class Dropdown {
 		// Items should be an array of objects with a label and value property.
 		$items = $props['items'] ?? array();
 
+		$default_placeholder = 'single' === $select_type ? __( 'Select an option', 'woocommerce' ) : __( 'Select options', 'woocommerce' );
+		$placeholder         = $props['placeholder'] ?? $default_placeholder;
+
 		$dropdown_context = array(
-			'selectedItems' => $selected_items,
-			'isOpen'        => false,
-			'selectType'    => $select_type,
+			'selectedItems'      => $selected_items,
+			'isOpen'             => false,
+			'selectType'         => $select_type,
+			'defaultPlaceholder' => $placeholder,
 		);
 
-		$action              = $props['action'] ?? '';
-		$namespace           = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) );
-		$default_placeholder = 'single' === $select_type ? __( 'Select an option', 'woocommerce' ) : __( 'Select options', 'woocommerce' );
+		$action    = $props['action'] ?? '';
+		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) );
 
 		ob_start();
 		?>
@@ -41,7 +44,7 @@ class Dropdown {
 				<div class="wc-interactivity-dropdown__dropdown" tabindex="-1" >
 					<div class="wc-interactivity-dropdown__dropdown-selection" id="options-dropdown" tabindex="0" aria-haspopup="listbox">
 						<span class="wc-interactivity-dropdown__placeholder" data-wc-text="state.placeholderText">
-							<?php echo esc_html( $default_placeholder ); ?>
+							<?php echo esc_html( $placeholder ); ?>
 						</span>
 						<?php if ( 'multiple' === $select_type ) { ?>
 							<div class="selected-options">
@@ -51,14 +54,15 @@ class Dropdown {
 									>
 										<div class="wc-interactivity-dropdown__selected-badge">
 											<span class="wc-interactivity-dropdown__badge-text" data-wc-text="context.item.label"></span>
-											<svg 
-												data-wc-on--click="actions.unselectDropdownItem" 
-												class="wc-interactivity-dropdown__badge-remove" 
-												width="24" 
-												height="24" 
+											<svg
+												data-wc-on--click="actions.unselectDropdownItem"
+												data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>"
+												class="wc-interactivity-dropdown__badge-remove"
+												width="24"
+												height="24"
 												xmlns="http://www.w3.org/2000/svg"
 												viewBox="0 0 24 24"
-												aria-hidden="true" 
+												aria-hidden="true"
 											>
 												<path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"></path>
 											</svg>
@@ -66,27 +70,28 @@ class Dropdown {
 								</template>
 
 								<?php foreach ( $selected_items as $selected ) { ?>
-									<div 
+									<div
 										class="wc-interactivity-dropdown__selected-badge"
-										data-wc-key="<?php echo esc_attr( $selected['label'] ); ?>"
+										data-wc-key="<?php echo esc_attr( $selected['value'] ); ?>"
 										data-wc-each-child
 									>
 											<span class="wc-interactivity-dropdown__badge-text"><?php echo esc_html( $selected['label'] ); ?></span>
-											<svg 
-												data-wc-on--click="actions.unselectDropdownItem" 
-												class="wc-interactivity-dropdown__badge-remove" 
-												width="24" 
-												height="24" 
+											<svg
+												data-wc-on--click="actions.unselectDropdownItem"
+												data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>"
+												class="wc-interactivity-dropdown__badge-remove"
+												width="24"
+												height="24"
 												xmlns="http://www.w3.org/2000/svg"
 												viewBox="0 0 24 24"
-												aria-hidden="true" 
+												aria-hidden="true"
 											>
 												<path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"></path>
 											</svg>
 									</div>
 								<?php } ?>
 							</div>
-						<?php } ?>						
+						<?php } ?>
 						<span class="wc-interactivity-dropdown__svg-container">
 							<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="30" height="30" >
 								<path d="M17.5 11.6L12 16l-5.5-4.4.9-1.2L12 14l4.5-3.6 1 1.2z" ></path>
@@ -98,9 +103,9 @@ class Dropdown {
 						foreach ( $items as $item ) :
 							$context = array( 'item' => $item );
 							?>
-							<div 
-								class="wc-interactivity-dropdown__dropdown-option" 
-								role="option" 
+							<div
+								class="wc-interactivity-dropdown__dropdown-option"
+								role="option"
 								tabindex="0"
 								data-wc-on--click--select-item="actions.selectDropdownItem"
 								data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>"
