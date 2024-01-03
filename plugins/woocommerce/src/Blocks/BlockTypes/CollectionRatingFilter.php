@@ -3,7 +3,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * Collection Rating Filter Block
