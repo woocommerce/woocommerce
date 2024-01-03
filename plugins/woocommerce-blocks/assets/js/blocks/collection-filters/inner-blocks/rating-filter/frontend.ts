@@ -37,7 +37,6 @@ store( 'woocommerce/collection-rating-filter', {
 
 			navigate( getUrl( filters ) );
 		},
-
 		onDropdownChange: () => {
 			const dropdownContext = getContext< DropdownContext >(
 				'woocommerce/interactivity-dropdown'
@@ -49,7 +48,6 @@ store( 'woocommerce/collection-rating-filter', {
 
 			navigate( getUrl( filters ) );
 		},
-
 		removeFilter: () => {
 			const { value } = getContext< { value: string } >();
 			// get the active filters from the url:
