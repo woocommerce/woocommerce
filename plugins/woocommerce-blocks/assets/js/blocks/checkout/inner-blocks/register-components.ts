@@ -114,7 +114,7 @@ registerCheckoutBlock( {
 	component: lazy(
 		() =>
 			import(
-				/* webpackChunkName: "checkout-blocks/additional-information" */ './checkout-additional-information-block/block'
+				/* webpackChunkName: "checkout-blocks/additional-information" */ './checkout-additional-information-block/frontend'
 			)
 	),
 } );
