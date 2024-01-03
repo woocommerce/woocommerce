@@ -39,6 +39,7 @@ export type WoocommerceMeta = UserPreferences & {
 	task_list_tracked_started_tasks?: string;
 	variable_items_without_price_notice_dismissed?: string;
 	local_attributes_notice_dismissed_ids?: string;
+	product_advice_card_dismissed?: string;
 };
 
 export type WCUser<
