@@ -75,3 +75,8 @@ export {
 	ProductList as __experimentalProductList,
 	ProductListProps,
 } from './product-list';
+
+export {
+	ProductSelect as __experimentalProductSelect,
+	ProductSelectProps,
+} from './product-select';
