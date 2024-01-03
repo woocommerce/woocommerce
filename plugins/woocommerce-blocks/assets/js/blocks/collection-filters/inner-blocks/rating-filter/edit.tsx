@@ -26,7 +26,7 @@ import { Attributes } from './types';
 import { getActiveFilters } from './utils';
 import { useSetWraperVisibility } from '../../../filter-wrapper/context';
 import './editor.scss';
-import { Inspector } from '../attribute-filter/components/inspector-controls';
+import { Inspector } from './components/inspector';
 import { PreviewDropdown } from '../components/preview-dropdown';
 
 const NoRatings = () => (
