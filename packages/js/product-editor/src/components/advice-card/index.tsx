@@ -64,6 +64,7 @@ export const AdviceCard: React.FC< AdviceCardProps > = ( {
 						onClick={ onDismiss }
 						icon={ close }
 						label={ __( 'Dismiss', 'woocommerce' ) }
+						isSmall={ true }
 					/>
 				</CardHeader>
 			) }
