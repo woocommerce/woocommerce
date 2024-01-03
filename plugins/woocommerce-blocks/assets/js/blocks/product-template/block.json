@@ -6,13 +6,14 @@
 	"category": "woocommerce",
 	"description": "Contains the block elements used to render a product.",
 	"keywords": [ "WooCommerce" ],
-    "textdomain": "woocommerce",
+	"textdomain": "woocommerce",
 	"usesContext": [
 		"queryId",
 		"query",
 		"queryContext",
 		"displayLayout",
-		"templateSlug"
+		"templateSlug",
+		"collection"
 	],
 	"supports": {
 		"inserter": false,
