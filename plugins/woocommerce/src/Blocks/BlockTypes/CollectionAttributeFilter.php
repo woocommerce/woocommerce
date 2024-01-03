@@ -179,7 +179,9 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			$attribute_terms
 		);
 
-		$filter_content = 'dropdown' === $attributes['displayStyle'] ? $this->render_attribute_dropdown( $attribute_options, $attributes ) : $this->render_attribute_checkbox_list( $attribute_options, $attributes );
+		$filter_content = 'dropdown' === $attributes['displayStyle'] ?
+			$this->render_attribute_dropdown( $attribute_options, $attributes ) :
+			$this->render_attribute_checkbox_list( $attribute_options, $attributes );
 
 		$context = array(
 			'attributeSlug' => str_replace( 'pa_', '', $product_attribute->slug ),
@@ -240,13 +242,15 @@ final class CollectionAttributeFilter extends AbstractBlock {
 	 * Render the attribute filter checkbox list.
 	 *
 	 * @param mixed $options Attribute filter options to render in the checkbox list.
-	 * @param mixed $show_counts Whether to show counts for each option.
+	 * @param mixed $attributes Block attributes.
 	 * @return string
 	 */
-	private function render_attribute_checkbox_list( $options, $show_counts ) {
+	private function render_attribute_checkbox_list( $options, $attributes ) {
 		if ( empty( $options ) ) {
 			return '';
 		}
+
+		$show_counts = $attributes['showCounts'] ?? false;
 
 		$list_options = array_map(
 			function( $option ) use ( $show_counts ) {
