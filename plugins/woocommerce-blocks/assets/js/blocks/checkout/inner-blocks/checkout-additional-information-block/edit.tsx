@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { useBlockProps } from '@wordpress/block-editor';
-import Noninteractive from '@woocommerce/base-components/noninteractive';
+import { FormStepBlock } from '@woocommerce/blocks/checkout/form-step';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -10,14 +11,29 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 import Block from './block';
 import './editor.scss';
 
-export const Edit = (): JSX.Element => {
-	const blockProps = useBlockProps();
+export const Edit = ( {
+	attributes,
+	setAttributes,
+}: {
+	attributes: {
+		title: string;
+		description: string;
+		showStepNumber: boolean;
+		className: string;
+	};
+	setAttributes: ( attributes: Record< string, unknown > ) => void;
+} ): JSX.Element => {
 	return (
-		<div { ...blockProps }>
-			<Noninteractive>
-				<Block />
-			</Noninteractive>
-		</div>
+		<FormStepBlock
+			setAttributes={ setAttributes }
+			attributes={ attributes }
+			className={ classnames(
+				'wc-block-checkout__additional-information-fields',
+				attributes?.className
+			) }
+		>
+			<Block />
+		</FormStepBlock>
 	);
 };
 
