@@ -6,10 +6,13 @@ import { FormStep } from '@woocommerce/blocks-components';
 import { ADDITIONAL_FORM_KEYS } from '@woocommerce/block-settings';
 import { useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import { withFilteredAttributes } from '@woocommerce/shared-hocs';
+
 /**
  * Internal dependencies
  */
 import Block from './block';
+import attributes from './attributes';
 
 const FrontendBlock = ( {
 	title,
@@ -24,6 +27,7 @@ const FrontendBlock = ( {
 	children: JSX.Element;
 	className?: string;
 } ) => {
+	console.log( { title, description, showStepNumber, children, className } );
 	const checkoutIsProcessing = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).isProcessing()
 	);
@@ -50,4 +54,4 @@ const FrontendBlock = ( {
 	);
 };
 
-export default FrontendBlock;
+export default withFilteredAttributes( attributes )( FrontendBlock );
