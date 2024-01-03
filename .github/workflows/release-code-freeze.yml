@@ -118,7 +118,7 @@ jobs:
               if: steps.get-versions.outputs.isTodayAcceleratedFreeze == 'yes'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm utils code-freeze accelerated-prep -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.acceleratedBranch }} -c ${{ steps.get-versions.outputs.acceleratedVersion }} ${{ steps.get-versions.outputs.acceleratedReleaseDate }}
+              run: pnpm utils code-freeze accelerated-prep -o ${{ github.repository_owner }} -b ${{ steps.get-versions.outputs.acceleratedBranch }} -c ${{ steps.get-versions.outputs.acceleratedVersion }} --dry-run true ${{ steps.get-versions.outputs.acceleratedReleaseDate }}
 
             # - name: Prepare trunk for next development cycle
             #   id: prep-trunk
