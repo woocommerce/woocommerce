@@ -10,7 +10,7 @@
     {
       "post_title": "WooCommerce developer documentation",
       "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/README.md",
-      "hash": "f6b0d0ca980696b1cfafec32d237bc06b3ab9c1cf84ac9e6e38a844a32ef63df",
+      "hash": "5090b3208cadaa22f3c85d563ccd8f86194ff9e61c614df6021be805050713f2",
       "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/README.md",
       "id": "65f434b31529b2793f7f7adcadfec487c797bdd2",
       "links": {
@@ -407,7 +407,7 @@
       "categories": []
     },
     {
-      "content": "\n> ⚠️ **Notice:** This documentation is currently a **work in progress**. Please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!\n\nThis handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.\n\nThe product editor's UI consists of Groups (currently rendered as tabs), Sections, and Fields, which are all blocks. For guidelines on how to extend the product editor (e.g. where to add blocks), please refer to the [Product Editor Extensibility Guidelines](./product-editor-extensibility-guidelines.md).\n\n![Product editor structure](https://woocommerce.files.wordpress.com/2023/09/groups-sections-fields.jpg)\n\nThe form's structure is defined in PHP using a Template, which is a tree structure of blocks. The template can be modified by using the Template API to add new Groups, Sections, and Fields as well as remove existing ones.\n\nFor more information about when to perform template modifications, see the [block template lifecycle](./block-template-lifecycle.md).\n\nMany extensibility implementations can be done using only the PHP-based Block Template API alongside our library of [generic blocks](https://github.com/woocommerce/woocommerce/packages/js/product-editor/src/blocks/generic/README.md). More complex interactivity can be implemented using JavaScript and React (the same library used to implement the core blocks used in the product editor). [@woocommerce/create-product-editor-block](https://github.com/woocommerce/woocommerce/packages/js/create-product-editor-block/README.md) can help scaffold a development environment with JavaScript and React.\n\n## Declaring compatibility with the product editor\n\nTo declare compatibility with the product editor, add the following to your plugin's root PHP file:\n\n```php\nuse Automattic\\WooCommerce\\Utilities\\FeaturesUtil;\n\nadd_action(\n\t'before_woocommerce_init',\n\tfunction() {\n\t\tif ( class_exists( FeaturesUtil::class ) ) {\n\t\t\tFeaturesUtil::declare_compatibility( 'product_block_editor', plugin_basename( __FILE__ ), true );\n\t\t}\n\t}\n);\n```\n\nPlease note that this check is currently not being enforced: the product editor can still be enabled even without this declaration. However, we might enforce this in the future, so it is recommended to declare compatibility as soon as possible.\n\n## Related documentation\n\n- [Examples on Template API usage](https://github.com/woocommerce/woocommerce/plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md)\n- [Related hooks and Template API documentation](https://github.com/woocommerce/woocommerce/plugins/woocommerce/src/Admin/BlockTemplates/README.md)\n- [Generic blocks documentation](https://github.com/woocommerce/woocommerce/packages/js/product-editor/src/blocks/generic/README.md)\n",
+      "content": "\n> ⚠️ **Notice:** This documentation is currently a **work in progress**. Please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!\n\nThis handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.\n\nThe product editor's UI consists of Groups (currently rendered as tabs), Sections, and Fields, which are all blocks. For guidelines on how to extend the product editor (e.g. where to add blocks), please refer to the [Product Editor Extensibility Guidelines](./product-editor-extensibility-guidelines.md).\n\n![Product editor structure](https://woocommerce.files.wordpress.com/2023/09/groups-sections-fields.jpg)\n\nThe form's structure is defined in PHP using a Template, which is a tree structure of blocks. The template can be modified by using the Template API to add new Groups, Sections, and Fields as well as remove existing ones.\n\nFor more information about when to perform template modifications, see the [block template lifecycle](./block-template-lifecycle.md).\n\nMany extensibility implementations can be done using only the PHP-based Block Template API alongside our library of [generic blocks](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/product-editor/src/blocks/generic/README.md). More complex interactivity can be implemented using JavaScript and React (the same library used to implement the core blocks used in the product editor). [@woocommerce/create-product-editor-block](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/create-product-editor-block/README.md) can help scaffold a development environment with JavaScript and React.\n\n## Declaring compatibility with the product editor\n\nTo declare compatibility with the product editor, add the following to your plugin's root PHP file:\n\n```php\nuse Automattic\\WooCommerce\\Utilities\\FeaturesUtil;\n\nadd_action(\n\t'before_woocommerce_init',\n\tfunction() {\n\t\tif ( class_exists( FeaturesUtil::class ) ) {\n\t\t\tFeaturesUtil::declare_compatibility( 'product_block_editor', plugin_basename( __FILE__ ), true );\n\t\t}\n\t}\n);\n```\n\nPlease note that this check is currently not being enforced: the product editor can still be enabled even without this declaration. However, we might enforce this in the future, so it is recommended to declare compatibility as soon as possible.\n\n## Related documentation\n\n- [Examples on Template API usage](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md)\n- [Related hooks and Template API documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/BlockTemplates/README.md)\n- [Generic blocks documentation](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/product-editor/src/blocks/generic/README.md)\n",
       "category_slug": "product-editor-development",
       "category_title": "Product Editor Development",
       "posts": [
@@ -421,7 +421,7 @@
         {
           "post_title": "Block template lifecycle",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/block-template-lifecycle.md",
-          "hash": "5a5f00caa749aaca8690fcadddb098102718058eb5746e1ad7a0bfa22cced9a7",
+          "hash": "219ca8603a4a9393e9da0eb19fe9b82cdfae9a0842ebe2c04f9645c088d6c001",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/block-template-lifecycle.md",
           "id": "0c29c74a7e7e9fd88562df1afa489659f460879e"
         }
@@ -450,7 +450,7 @@
         {
           "post_title": "Naming conventions",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/naming-conventions.md",
-          "hash": "23fe092182f86c2b37f4483d30635dbf9355b87553c700f49fbab5eedfdacf56",
+          "hash": "83f01ecabec5b9851373d008a9b2b64f39c069e57091b50a569da482cc0ff94a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/naming-conventions.md",
           "id": "7a64e9ba2411bdae46c6ff274a8f65c10d9ba59f",
           "links": {
@@ -756,5 +756,5 @@
       "categories": []
     }
   ],
-  "hash": "58d36a1005cbba894a91564452007150822dd7f3b8569061ae0bfacfda8ac379"
+  "hash": "da17a5300f7cdfc26652b33fdcd17cda461127f6f64a1d380b880c1d8ca181f6"
 }

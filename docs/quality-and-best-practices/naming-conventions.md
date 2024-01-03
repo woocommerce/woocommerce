@@ -18,7 +18,7 @@ There are some additional conventions that apply, depending on the location of t
 
 ### `/src`
 
-Classes defined inside `/src` follow the [PSR-4](https://www.php-fig.org/psr/psr-4/) standard. See the [README for `/src`](https://github.com/woocommerce/woocommerce/plugins/woocommerce/src/README.md) for more information.
+Classes defined inside `/src` follow the [PSR-4](https://www.php-fig.org/psr/psr-4/) standard. See the [README for `/src`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/README.md) for more information.
 
 The following conventions apply to this directory:
 
@@ -34,7 +34,7 @@ For example, the class defined in `src/Util/StringUtil.php` should be named `Str
 
 ### `/includes`
 
-The `/includes` directory contains legacy code that does not follow the PSR-4 standard. See the [README for `/includes`](https://github.com/woocommerce/woocommerce/plugins/woocommerce/includes/README.md) for more information.
+The `/includes` directory contains legacy code that does not follow the PSR-4 standard. See the [README for `/includes`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/README.md) for more information.
 
 The following conventions apply to this directory:
 
