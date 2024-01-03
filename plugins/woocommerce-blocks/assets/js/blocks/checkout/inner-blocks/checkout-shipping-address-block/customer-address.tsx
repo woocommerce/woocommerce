@@ -89,7 +89,7 @@ const CustomerAddress = ( {
 
 	const renderAddressFormComponent = useCallback(
 		() => (
-			<Form
+			<Form< AddressFormValues >
 				id="shipping"
 				addressType="shipping"
 				onChange={ onChangeAddress }

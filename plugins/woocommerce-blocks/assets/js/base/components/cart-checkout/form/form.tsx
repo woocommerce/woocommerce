@@ -20,7 +20,11 @@ import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import classnames from 'classnames';
-import { FormFieldsConfig } from '@woocommerce/settings';
+import {
+	AddressFormValues,
+	ContactFormValues,
+	FormFieldsConfig,
+} from '@woocommerce/settings';
 import { objectHasProp } from '@woocommerce/types';
 
 /**
@@ -35,7 +39,7 @@ import Combobox from '../../combobox';
 /**
  * Checkout form.
  */
-const Form = ( {
+const Form = < T extends AddressFormValues | ContactFormValues >( {
 	id = '',
 	fields,
 	fieldConfig = {} as FormFieldsConfig,
@@ -43,7 +47,7 @@ const Form = ( {
 	addressType = 'shipping',
 	values,
 	children,
-}: AddressFormProps ): JSX.Element => {
+}: AddressFormProps< T > ): JSX.Element => {
 	const instanceId = useInstanceId( Form );
 
 	// Track incoming props.

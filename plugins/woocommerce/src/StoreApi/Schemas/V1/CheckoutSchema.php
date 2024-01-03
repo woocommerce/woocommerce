@@ -186,6 +186,7 @@ class CheckoutSchema extends AbstractSchema {
 					'sanitize_callback' => [ $this, 'sanitize_additional_fields' ],
 					'validate_callback' => [ $this, 'validate_additional_fields' ],
 				],
+				'required'    => [ $this, 'is_additional_fields_required' ],
 			],
 			self::EXTENDING_KEY => $this->get_extended_schema( self::IDENTIFIER ),
 		];
@@ -306,6 +307,21 @@ class CheckoutSchema extends AbstractSchema {
 		return $schema;
 	}
 
+	/**
+	 * Check if any additional field is required, so that the parent item is required as well.
+	 *
+	 * @return bool
+	 */
+	protected function is_additional_fields_required() {
+		$additional_fields_schema = $this->get_additional_fields_schema();
+		return array_reduce(
+			array_keys( $additional_fields_schema ),
+			function( $carry, $key ) use ( $additional_fields_schema ) {
+				return $carry || $additional_fields_schema[ $key ]['required'];
+			},
+			false
+		);
+	}
 
 	/**
 	 * Sanitize and format additional fields object.
@@ -318,7 +334,7 @@ class CheckoutSchema extends AbstractSchema {
 		$fields = array_reduce(
 			array_keys( $fields ),
 			function( $carry, $key ) use ( $fields, $request ) {
-				$carry[ $key ] = rest_sanitize_request_arg( wp_unslash( $fields[ $key ] ), $request, $key );
+				$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $fields[ $key ] ), $request, $key );
 				return $carry;
 			},
 			[]

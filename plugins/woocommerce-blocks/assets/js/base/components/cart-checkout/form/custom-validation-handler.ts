@@ -38,6 +38,7 @@ const customValidationHandler = (
 		);
 		return false;
 	}
+
 	return true;
 };
 

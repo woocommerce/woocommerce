@@ -7,15 +7,13 @@ import {
 	useStoreEvents,
 	noticeContexts,
 } from '@woocommerce/base-context';
-import { getSetting } from '@woocommerce/settings';
+import { ContactFormValues, getSetting } from '@woocommerce/settings';
 import {
 	StoreNoticesContainer,
-	ValidatedTextInput,
 	CheckboxControl,
 } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
-import { isEmail } from '@wordpress/url';
 import { CONTACT_FORM_KEYS } from '@woocommerce/block-settings';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 
@@ -55,7 +53,7 @@ const Block = (): JSX.Element => {
 		/>
 	);
 
-	const onChangeForm = ( newAddress ) => {
+	const onChangeForm = ( newAddress: ContactFormValues ) => {
 		const { email, ...additionalValues } = newAddress;
 		onChangeEmail( email );
 		setAdditionalFields( additionalValues );
@@ -71,7 +69,7 @@ const Block = (): JSX.Element => {
 			<StoreNoticesContainer
 				context={ noticeContexts.CONTACT_INFORMATION }
 			/>
-			<Form
+			<Form< ContactFormValues >
 				id="contact"
 				addressType="contact"
 				onChange={ onChangeForm }
