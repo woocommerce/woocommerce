@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { useEntityProp } from '@wordpress/core-data';
 import { Button } from '@wordpress/components';
 import {
 	createElement,
@@ -27,6 +26,7 @@ import { getNewPath } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { FormattedPrice } from '../../../components/formatted-price';
+import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { ProductEditorBlockEditProps } from '../../../types';
 import {
 	getLoadLinkedProductsDispatcher,
@@ -63,21 +63,19 @@ export function Edit( {
 	const removeLinkedProductDispatcher =
 		getRemoveLinkedProductDispatcher( dispatch );
 
-	const [ linkedProductIds, setLinkedProductIds ] = useEntityProp< number[] >(
-		'postType',
-		postType,
-		property
-	);
+	const [ linkedProductIds, setLinkedProductIds ] = useProductEntityProp<
+		number[]
+	>( property, { postType } );
 
 	useEffect( () => {
 		if ( ! state.selectedProduct ) {
-			loadLinkedProductsDispatcher( linkedProductIds );
+			loadLinkedProductsDispatcher( linkedProductIds ?? [] );
 		}
 	}, [ linkedProductIds, state.selectedProduct ] );
 
 	const filter = useCallback(
 		( search = '' ) => {
-			return searchProductsDispatcher( linkedProductIds, search );
+			return searchProductsDispatcher( linkedProductIds ?? [], search );
 		},
 		[ linkedProductIds ]
 	);
