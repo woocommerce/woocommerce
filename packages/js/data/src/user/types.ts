@@ -31,7 +31,7 @@ export type UserPreferences = {
 	local_attributes_notice_dismissed_ids?: number[];
 	variable_items_without_price_notice_dismissed?: Record< number, string >;
 	product_advice_card_dismissed?: {
-		[ key: string ]: number;
+		[ key: string ]: 'yes' | 'no';
 	};
 };
 
