@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { getContext, store } from '@woocommerce/interactivity';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -11,6 +10,7 @@ import './style.scss';
 
 export type DropdownContext = {
 	selectType: 'multiple' | 'single';
+	defaultPlaceholder: string;
 	item: {
 		label: string;
 		value: string;
@@ -42,18 +42,18 @@ type DropdownStore = {
 store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 	state: {
 		get placeholderText(): string {
-			const { selectType, selectedItems } =
+			const { selectType, selectedItems, defaultPlaceholder } =
 				getContext< DropdownContext >();
 
 			if ( selectType === 'single' ) {
 				return selectedItems?.length && selectedItems[ 0 ].label
 					? selectedItems[ 0 ]?.label
-					: __( 'Select an option', 'woocommerce' );
+					: defaultPlaceholder;
 			} else if (
 				selectType === 'multiple' &&
 				selectedItems.length === 0
 			) {
-				return __( 'Select options', 'woocommerce' );
+				return defaultPlaceholder;
 			}
 
 			return '';
