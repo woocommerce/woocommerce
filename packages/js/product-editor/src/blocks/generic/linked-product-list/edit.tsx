@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
 import {
 	createElement,
 	Fragment,
@@ -10,7 +9,6 @@ import {
 	useReducer,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { closeSmall, external } from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	__experimentalSelectControl as SelectControl,
@@ -20,12 +18,12 @@ import {
 	Spinner,
 } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
-import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import { FormattedPrice } from '../../../components/formatted-price';
+import { ProductList } from '../../../components/product-list';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { ProductEditorBlockEditProps } from '../../../types';
 import {
@@ -96,15 +94,13 @@ export function Edit( {
 		setLinkedProductIds( newLinkedProductIds );
 	}
 
-	function removeProductClickHandler( product: Product ) {
-		return function handleRemoveProductClick() {
-			const newLinkedProductIds = removeLinkedProductDispatcher(
-				product,
-				state.linkedProducts
-			);
+	function handleRemoveProductClick( product: Product ) {
+		const newLinkedProductIds = removeLinkedProductDispatcher(
+			product,
+			state.linkedProducts
+		);
 
-			setLinkedProductIds( newLinkedProductIds );
-		};
+		setLinkedProductIds( newLinkedProductIds );
 	}
 
 	return (
@@ -175,78 +171,10 @@ export function Edit( {
 			</div>
 
 			{ Boolean( state.linkedProducts.length ) && (
-				<div role="table">
-					<div role="rowgroup">
-						<div role="rowheader">
-							<div role="columnheader">
-								{ __( 'Product', 'woocommerce' ) }
-							</div>
-							<div
-								role="columnheader"
-								aria-label={ __( 'Actions', 'woocommerce' ) }
-							/>
-						</div>
-					</div>
-					<div role="rowgroup">
-						{ state.linkedProducts.map( ( product ) => (
-							<div role="row" key={ product.id }>
-								<div role="cell">
-									<div
-										className="wp-block-woocommerce-product-linked-list-field__product-image"
-										style={ getProductImageStyle(
-											product
-										) }
-									/>
-									<div className="wp-block-woocommerce-product-linked-list-field__product-info">
-										<a
-											className="wp-block-woocommerce-product-linked-list-field__product-name"
-											href={ getNewPath(
-												{},
-												`/product/${ product.id }`,
-												{}
-											) }
-											target="_blank"
-											rel="noreferrer"
-										>
-											{ product.name }
-										</a>
-										<FormattedPrice
-											product={ product }
-											className="wp-block-woocommerce-product-linked-list-field__product-price"
-										/>
-									</div>
-								</div>
-								<div
-									role="cell"
-									className="wp-block-woocommerce-product-linked-list-field__actions"
-								>
-									<Button
-										icon={ external }
-										size={ 24 }
-										aria-label={ __(
-											'See product page',
-											'woocommerce'
-										) }
-										href={ product.permalink }
-										target="_blank"
-										rel="noreferrer"
-									/>
-									<Button
-										icon={ closeSmall }
-										size={ 24 }
-										aria-label={ __(
-											'Remove product',
-											'woocommerce'
-										) }
-										onClick={ removeProductClickHandler(
-											product
-										) }
-									/>
-								</div>
-							</div>
-						) ) }
-					</div>
-				</div>
+				<ProductList
+					products={ state.linkedProducts }
+					onRemove={ handleRemoveProductClick }
+				/>
 			) }
 		</div>
 	);

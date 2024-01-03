@@ -70,3 +70,8 @@ export {
 	FormattedPrice as __experimentalFormattedPrice,
 	FormattedPriceProps,
 } from './formatted-price';
+
+export {
+	ProductList as __experimentalProductList,
+	ProductListProps,
+} from './product-list';
