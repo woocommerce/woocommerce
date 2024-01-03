@@ -13,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { DisplayLayoutToolbarProps } from '../../types';
+import { DisplayLayoutControlProps } from '../../types';
 import { getDefaultDisplayLayout } from '../../constants';
 
 const columnsLabel = __( 'Columns', 'woocommerce' );
@@ -23,7 +23,7 @@ const toggleHelp = __(
 	'woocommerce'
 );
 
-const ColumnsControl = ( props: DisplayLayoutToolbarProps ) => {
+const ColumnsControl = ( props: DisplayLayoutControlProps ) => {
 	const { type, columns, shrinkColumns } = props.displayLayout;
 	const showColumnsControl = type === 'flex';
 

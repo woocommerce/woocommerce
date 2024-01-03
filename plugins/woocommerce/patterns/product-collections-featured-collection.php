@@ -6,8 +6,6 @@
  * Block Types: core/query/woocommerce/product-query
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-
 $collection_title = $content['titles'][0]['default'] ?? '';
 ?>
 
