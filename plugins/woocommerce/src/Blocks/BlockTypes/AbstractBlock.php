@@ -59,7 +59,7 @@ abstract class AbstractBlock {
 	 *
 	 * @var array
 	 */
-	protected $block_hook_placements = array();
+	protected $hooked_block_placements = array();
 
 	/**
 	 * Constructor.
@@ -504,7 +504,7 @@ abstract class AbstractBlock {
 		/**
 		 * If the block has no hook placements, return early.
 		 */
-		if ( empty( $this->block_hook_placements ) ) {
+		if ( empty( $this->hooked_block_placements ) ) {
 			return $hooked_blocks;
 		}
 
@@ -532,7 +532,7 @@ abstract class AbstractBlock {
 		$theme_include_list = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
 
 		if ( $context && in_array( $active_theme_name, $theme_include_list, true ) ) {
-			foreach ( $this->block_hook_placements as $placement ) {
+			foreach ( $this->hooked_block_placements as $placement ) {
 				if (
 					$placement['position'] === $position &&
 					$placement['anchor'] === $anchor_block &&

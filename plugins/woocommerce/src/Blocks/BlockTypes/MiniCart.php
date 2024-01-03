@@ -57,7 +57,7 @@ class MiniCart extends AbstractBlock {
 	 *
 	 * @var array
 	 */
-	protected $block_hook_placements = array(
+	protected $hooked_block_placements = array(
 		array(
 			'position' => 'after',
 			'anchor'   => 'core/navigation',
