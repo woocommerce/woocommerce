@@ -14,7 +14,6 @@ import type { UpsellsBlockEditComponent } from './types';
 
 export function UpsellsBlockEdit( { attributes }: UpsellsBlockEditComponent ) {
 	const blockProps = useWooBlockProps( attributes );
-	console.log( '(001) blockProps: ', blockProps );
 
 	const isEmpty = true; // @todo: implement.
 
