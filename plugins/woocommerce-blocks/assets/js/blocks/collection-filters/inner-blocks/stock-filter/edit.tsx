@@ -77,10 +77,10 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 							}
 						/>
 					),
-					count,
+					count: count || 0,
 				};
 			} )
-			.filter( ( item ) => item.label.props.count > 0 );
+			.filter( ( item ) => item.count > 0 );
 	}, [ stockStatusOptions, filteredCounts, showCounts ] );
 
 	return (
