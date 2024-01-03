@@ -33,7 +33,27 @@ if ( isExperimentalBuild() ) {
 		},
 		variations: [
 			{
-				name: 'active-filters',
+				name: 'woocommerce/collection-filters-variant',
+				title: __( 'Collection Filters (v)', 'woocommerce' ),
+				description: __(
+					'Enable customers to filter the product collection.',
+					'woocommerce'
+				),
+				attributes: {
+					filterType: 'collection-filters',
+				},
+				icon: {
+					src: (
+						<Icon
+							icon={ more }
+							className="wc-block-editor-components-block-icon"
+						/>
+					),
+				},
+				isDefault: true,
+			},
+			{
+				name: 'woocommerce/active-filters-variant',
 				title: __( 'Active Product Filters', 'woocommerce' ),
 				description: __(
 					'Display the currently active filters.',
@@ -50,10 +70,9 @@ if ( isExperimentalBuild() ) {
 						/>
 					),
 				},
-				isDefault: true,
 			},
 			{
-				name: 'price-filter',
+				name: 'woocommerce/price-filter-variant',
 				title: __( 'Filter Products by Price', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by choosing a price range.',
@@ -73,7 +92,7 @@ if ( isExperimentalBuild() ) {
 				},
 			},
 			{
-				name: 'stock-filter',
+				name: 'woocommerce/stock-filter-variant',
 				title: __( 'Filter Products by Stock', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by stock status.',
@@ -92,7 +111,7 @@ if ( isExperimentalBuild() ) {
 				},
 			},
 			{
-				name: 'attribute-filter',
+				name: 'woocommerce/attribute-filter-variant',
 				title: __( 'Filter Products by Attribute', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product grid by selecting one or more attributes, such as color.',
@@ -111,7 +130,7 @@ if ( isExperimentalBuild() ) {
 				},
 			},
 			{
-				name: 'rating-filter',
+				name: 'woocommerce/rating-filter-variant',
 				title: __( 'Filter Products by Rating', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by rating.',

@@ -8,7 +8,8 @@ export type FilterType =
 	| 'attribute-filter'
 	| 'rating-filter'
 	| 'active-filters'
-	| 'stock-filter';
+	| 'stock-filter'
+	| 'collection-filters';
 
 export type BlockAttributes = {
 	filterType: FilterType;
