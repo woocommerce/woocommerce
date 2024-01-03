@@ -179,9 +179,16 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			$attribute_terms
 		);
 
+		$filtered_options = array_filter(
+			$attribute_options,
+			function( $option ) {
+				return $option['count'] > 0;
+			}
+		);
+
 		$filter_content = 'dropdown' === $attributes['displayStyle'] ?
-			$this->render_attribute_dropdown( $attribute_options, $attributes ) :
-			$this->render_attribute_checkbox_list( $attribute_options, $attributes );
+			$this->render_attribute_dropdown( $filtered_options, $attributes ) :
+			$this->render_attribute_checkbox_list( $filtered_options, $attributes );
 
 		$context = array(
 			'attributeSlug' => str_replace( 'pa_', '', $product_attribute->slug ),
