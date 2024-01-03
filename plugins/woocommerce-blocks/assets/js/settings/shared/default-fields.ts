@@ -55,6 +55,7 @@ export type ContactForm = CoreContactForm & Record< string, FormField >;
 export type FormFields = AddressForm & ContactForm;
 export type AddressFormValues = Omit< ShippingAddress, 'email' >;
 export type ContactFormValues = { email: string };
+export type AdditionalInformationFormValues = Record< string, string >;
 export type FormType =
 	| 'billing'
 	| 'shipping'
