@@ -7,7 +7,6 @@ import {
 	useEffect,
 	useReducer,
 } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 
