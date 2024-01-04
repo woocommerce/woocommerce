@@ -126,7 +126,6 @@ jobs:
                     steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
                     steps.run_playwright_e2e_tests.conclusion != 'skipped' 
                   )
-              working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean input/ --output output/
 
             - name: Archive Playwright E2E test report
