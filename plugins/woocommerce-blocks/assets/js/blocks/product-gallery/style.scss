@@ -155,15 +155,16 @@ $admin-bar-mobile-height: 46px;
 		width: 100%;
 		display: flex;
 		align-items: center;
+		scroll-snap-align: none center;
 	}
 
 	.wc-block-product-gallery-large-image__container {
 		display: flex;
 		overflow-x: hidden;
 		scroll-snap-type: x mandatory;
+		scroll-behavior: auto;
 		width: fit-content;
 		height: fit-content;
-		scroll-behavior: auto;
 		align-items: center;
 	}
 

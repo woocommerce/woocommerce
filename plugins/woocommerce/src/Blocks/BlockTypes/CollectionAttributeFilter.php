@@ -2,7 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 
 /**
  * CollectionAttributeFilter class.
@@ -179,7 +179,16 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			$attribute_terms
 		);
 
-		$filter_content = 'dropdown' === $attributes['displayStyle'] ? $this->render_attribute_dropdown( $attribute_options, $attributes ) : $this->render_attribute_list( $attribute_options, $attributes );
+		$filtered_options = array_filter(
+			$attribute_options,
+			function( $option ) {
+				return $option['count'] > 0;
+			}
+		);
+
+		$filter_content = 'dropdown' === $attributes['displayStyle'] ?
+			$this->render_attribute_dropdown( $filtered_options, $attributes ) :
+			$this->render_attribute_checkbox_list( $filtered_options, $attributes );
 
 		$context = array(
 			'attributeSlug' => str_replace( 'pa_', '', $product_attribute->slug ),
@@ -211,8 +220,10 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			return '';
 		}
 
-		$list_items    = array();
-		$selected_item = array();
+		$list_items     = array();
+		$selected_items = array();
+
+		$product_attribute = wc_get_attribute( $attributes['attributeId'] );
 
 		foreach ( $options as $option ) {
 			$item = array(
@@ -223,7 +234,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			$list_items[] = $item;
 
 			if ( $option['selected'] ) {
-				$selected_item = $item;
+				$selected_items[] = $item;
 			}
 		}
 
@@ -231,75 +242,45 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			array(
 				'items'          => $list_items,
 				'action'         => 'woocommerce/collection-attribute-filter::actions.navigate',
-				'selected_items' => array( $selected_item ),
+				'selected_items' => $selected_items,
+				'select_type'    => $attributes['selectType'] ?? 'multiple',
+				// translators: %s is a product attribute name.
+				'placeholder'    => sprintf( __( 'Select %s', 'woocommerce' ), $product_attribute->name ),
 			)
 		);
 	}
 
 	/**
-	 * Render the list.
+	 * Render the attribute filter checkbox list.
 	 *
-	 * @param array $options    Data to render the list.
-	 * @param bool  $attributes Block attributes.
+	 * @param mixed $options Attribute filter options to render in the checkbox list.
+	 * @param mixed $attributes Block attributes.
+	 * @return string
 	 */
-	private function render_attribute_list( $options, $attributes ) {
+	private function render_attribute_checkbox_list( $options, $attributes ) {
 		if ( empty( $options ) ) {
 			return '';
 		}
 
-		$output = '<ul class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list">';
-		foreach ( $options as $option ) {
-			$output .= $this->render_list_item_template( $option, $attributes['showCounts'] );
-		}
-		$output .= '</ul>';
-		return $output;
-	}
+		$show_counts = $attributes['showCounts'] ?? false;
 
-	/**
-	 * Render the list item.
-	 *
-	 * @param array $option      Data to render the list item.
-	 * @param bool  $show_counts Whether to display the count.
-	 */
-	private function render_list_item_template( $option, $show_counts ) {
-		$count_html = $show_counts ?
-			sprintf(
-				'<span class="wc-filter-element-label-list-count">
-				<span aria-hidden="true">%1$s</span>
-				<span class="screen-reader-text">%2$s</span>
-				</span>',
-				$option['count'],
-				// translators: %d is the number of products.
-				sprintf( _n( '%d product', '%d products', $option['count'], 'woocommerce' ), $option['count'] )
-			) :
-			'';
+		$list_options = array_map(
+			function( $option ) use ( $show_counts ) {
+				return array(
+					'id'      => $option['slug'] . '-' . $option['term_id'],
+					'checked' => $option['selected'],
+					'label'   => $show_counts ? sprintf( '%1$s (%2$d)', $option['name'], $option['count'] ) : $option['name'],
+					'value'   => $option['slug'],
+				);
+			},
+			$options
+		);
 
-		$template = '<li>
-			<div class="wc-block-components-checkbox wc-block-checkbox-list__checkbox">
-				<label for="%1$s">
-					<input
-						id="%1$s"
-						class="wc-block-components-checkbox__input"
-						type="checkbox"
-						aria-invalid="false"
-						data-wc-on--change="actions.updateProducts"
-						data-wc-context=\'{ "attributeTermSlug": "%5$s" }\'
-						value="%5$s"
-						%4$s
-					/>
-					<svg class="wc-block-components-checkbox__mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 20"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"></path></svg>
-					<span class="wc-block-components-checkbox__label">%2$s %3$s</span>
-				</label>
-			</div>
-		</li>';
-
-		return sprintf(
-			$template,
-			esc_attr( $option['slug'] ) . '-' . $option['term_id'],
-			esc_html( $option['name'] ),
-			$count_html,
-			checked( $option['selected'], true, false ),
-			esc_attr( $option['slug'] )
+		return CheckboxList::render(
+			array(
+				'items'     => $list_options,
+				'on_change' => 'woocommerce/collection-attribute-filter::actions.updateProducts',
+			)
 		);
 	}
 }

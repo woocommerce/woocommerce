@@ -3,7 +3,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * Collection Rating Filter Block
@@ -122,7 +121,14 @@ final class CollectionRatingFilter extends AbstractBlock {
 			)
 		);
 
-		if ( empty( $rating_counts ) ) {
+		$filtered_rating_counts = array_filter(
+			$rating_counts,
+			function( $rating ) {
+				return $rating['count'] > 0;
+			}
+		);
+
+		if ( empty( $filtered_rating_counts ) ) {
 			return sprintf(
 				'<div %s></div>',
 				$wrapper_attributes
@@ -134,11 +140,11 @@ final class CollectionRatingFilter extends AbstractBlock {
 
 		$input = 'list' === $display_style ? CheckboxList::render(
 			array(
-				'items'     => $this->get_checkbox_list_items( $rating_counts, $selected_ratings_query_param, $show_counts ),
+				'items'     => $this->get_checkbox_list_items( $filtered_rating_counts, $selected_ratings_query_param, $show_counts ),
 				'on_change' => 'woocommerce/collection-rating-filter::actions.onCheckboxChange',
 			)
 		) : Dropdown::render(
-			$this->get_dropdown_props( $rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'] )
+			$this->get_dropdown_props( $filtered_rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'] )
 		);
 
 		return sprintf(
@@ -222,7 +228,8 @@ final class CollectionRatingFilter extends AbstractBlock {
 	 * @return array<array-key, array>
 	 */
 	private function get_dropdown_props( $rating_counts, $selected_ratings_query, $show_counts, $select_type ) {
-		$ratings_array = explode( ',', $selected_ratings_query );
+		$ratings_array    = explode( ',', $selected_ratings_query );
+		$placeholder_text = 'single' === $select_type ? __( 'Select a rating', 'woocommerce' ) : __( 'Select ratings', 'woocommerce' );
 
 		$selected_items = array_reduce(
 			$rating_counts,
@@ -259,6 +266,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 			'select_type'    => $select_type,
 			'selected_items' => $selected_items,
 			'action'         => 'woocommerce/collection-rating-filter::actions.onDropdownChange',
+			'placeholder'    => $placeholder_text,
 		);
 	}
 }
