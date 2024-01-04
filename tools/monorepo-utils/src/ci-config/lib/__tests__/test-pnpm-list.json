@@ -1,0 +1,35 @@
+[
+  {
+    "name": "project-a",
+    "path": "/project-a",
+    "dependencies": {
+      "project-b": {
+        "from": "project-b",
+        "version": "link:../project-b",
+        "path": "/project-b"
+      }
+    },
+    "devDependencies": {
+      "project-c": {
+        "from": "project-c",
+        "version": "link:../project-c",
+        "path": "/project-c"
+      }
+    }
+  },
+  {
+    "name": "project-b",
+    "path": "/project-b",
+    "dependencies": {
+      "project-c": {
+        "from": "project-c",
+        "version": "link:../project-c",
+        "path": "/project-c"
+      }
+    }
+  },
+  {
+    "name": "project-c",
+    "path": "/project-c"
+  }
+]
