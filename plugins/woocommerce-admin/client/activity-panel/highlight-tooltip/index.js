@@ -144,11 +144,18 @@ function HighlightTooltip( {
 		<div className="highlight-tooltip__portal">
 			{ showHighlight ? (
 				<>
-					<IsolatedEventContainer className="highlight-tooltip__overlay" />
+					{
+						/* eslint-disable jsx-a11y/no-static-element-interactions */
+						<div
+							className="highlight-tooltip__overlay"
+							onMouseDown={ () => setShowHighlight( false ) }
+						/>
+						/* eslint-enable jsx-a11y/no-static-element-interactions */
+					}
 					<Popover
 						className="highlight-tooltip__popover"
 						noArrow={ false }
-						anchorRect={ anchorRect }
+						anchor={ document.getElementById( id ) }
 						focusOnMount="container"
 					>
 						<Card size="medium">
