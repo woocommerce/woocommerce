@@ -69,6 +69,7 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 			array(
 				OrdersTableDataStore::class,
 				DataSynchronizer::class,
+				LegacyDataCleanup::class,
 				OrdersTableRefundDataStore::class,
 				BatchProcessingController::class,
 				FeaturesController::class,

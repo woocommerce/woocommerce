@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\PluginUtil;
-use ActionScheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -66,6 +65,13 @@ class CustomOrdersTableController {
 	 * @var DataSynchronizer
 	 */
 	private $data_synchronizer;
+
+	/**
+	 * The data cleanup instance to use.
+	 *
+	 * @var LegacyDataCleanup
+	 */
+	private $data_cleanup;
 
 	/**
 	 * The batch processing controller to use.
@@ -130,6 +136,7 @@ class CustomOrdersTableController {
 	 * @internal
 	 * @param OrdersTableDataStore       $data_store The data store to use.
 	 * @param DataSynchronizer           $data_synchronizer The data synchronizer to use.
+	 * @param LegacyDataCleanup          $data_cleanup The legacy data cleanup instance to use.
 	 * @param OrdersTableRefundDataStore $refund_data_store The refund data store to use.
 	 * @param BatchProcessingController  $batch_processing_controller The batch processing controller to use.
 	 * @param FeaturesController         $features_controller The features controller instance to use.
@@ -140,6 +147,7 @@ class CustomOrdersTableController {
 	final public function init(
 		OrdersTableDataStore $data_store,
 		DataSynchronizer $data_synchronizer,
+		LegacyDataCleanup $data_cleanup,
 		OrdersTableRefundDataStore $refund_data_store,
 		BatchProcessingController $batch_processing_controller,
 		FeaturesController $features_controller,
@@ -149,6 +157,7 @@ class CustomOrdersTableController {
 	) {
 		$this->data_store                  = $data_store;
 		$this->data_synchronizer           = $data_synchronizer;
+		$this->data_cleanup                = $data_cleanup;
 		$this->batch_processing_controller = $batch_processing_controller;
 		$this->refund_data_store           = $refund_data_store;
 		$this->features_controller         = $features_controller;
@@ -391,6 +400,7 @@ class CustomOrdersTableController {
 			'setting'             => $this->get_hpos_setting_for_feature(),
 			'additional_settings' => array(
 				$this->get_hpos_setting_for_sync(),
+				$this->get_hpos_setting_for_cleanup(),
 			),
 		);
 
@@ -562,6 +572,29 @@ class CustomOrdersTableController {
 			'desc_tip'             => $get_sync_message,
 			'description_is_error' => $get_description_is_error,
 			'row_class'            => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+		);
+	}
+
+	/**
+	 * Configures the HPOS setting for the "legacy cleanup" functionality.
+	 *
+	 * @since 8.6.0
+	 * @return array Setting array.
+	 */
+	private function get_hpos_setting_for_cleanup() : array {
+		if ( 'yes' === get_transient( 'wc_installing' ) ) {
+			return array();
+		}
+
+		return array(
+			'id'        => $this->data_cleanup::FEATURE_OPTION_NAME,
+			'title'     => '',
+			'type'      => 'checkbox',
+			'value'     => fn() => get_option( $this->data_cleanup::FEATURE_OPTION_NAME ),
+			'desc'      => __( 'Clean up data from legacy tables.', 'woocommerce' ),
+			'desc_tip'  => '',
+			'disabled'  => fn() => ! $this->data_cleanup->can_be_enabled(),
+			'row_class' => $this->data_cleanup::FEATURE_OPTION_NAME,
 		);
 	}
 

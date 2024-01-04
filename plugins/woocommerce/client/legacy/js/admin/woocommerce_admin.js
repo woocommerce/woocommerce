@@ -757,4 +757,49 @@
 		wc_order_lock.init();
 	} );
 
+	$( function() {
+		/**
+		 * Handles toggling of HPOS-related settings based on current selections.
+		 */
+		var hpos_settings = {
+			cleanup_enabled: false,
+
+			init: function() {
+				if ( 0 === $( '.woocommerce_page_wc-settings .wc-settings-row-woocommerce_custom_orders_table_enabled' ).length ) {
+					return;
+				}
+
+				this.$hpos         = $( 'input[name="woocommerce_custom_orders_table_enabled"]' );
+				this.$data_sync    = $( 'input[name="woocommerce_custom_orders_table_data_sync_enabled"]' );
+				this.$data_cleanup = $( 'input[name="woocommerce_hpos_legacy_data_cleanup_enabled"]' );
+
+				this.$hpos.on( 'change', this.refresh_cleanup );
+				this.$data_sync.on( 'change', this.refresh_cleanup );
+				this.$data_cleanup.on( 'change', this.cleanup_toggled );
+
+				this.cleanup_toggled();
+				this.refresh_cleanup();
+			},
+
+			cleanup_toggled: function() {
+				hpos_settings.cleanup_enabled = hpos_settings.$data_cleanup.is( ':checked' );
+			},
+
+			refresh_cleanup: function() {
+				var hpos_enabled      = 'yes' === hpos_settings.$hpos.filter( ':checked' ).val();
+				var data_sync_enabled = hpos_settings.$data_sync.is( ':checked' );
+
+				if ( hpos_enabled && ! data_sync_enabled ) {
+					hpos_settings.$data_cleanup.prop( 'disabled', false );
+					hpos_settings.$data_cleanup.prop( 'checked', hpos_settings.cleanup_enabled );
+				} else {
+					hpos_settings.$data_cleanup.prop( 'checked', false );
+					hpos_settings.$data_cleanup.prop( 'disabled', true );
+				}
+			},
+		};
+
+		hpos_settings.init();
+	} );
+
 } )( jQuery, woocommerce_admin );

@@ -5676,11 +5676,13 @@ img.help_tip {
  * Settings / Advanced / Features
  */
 .woocommerce_page_wc-settings {
-	.wc-settings-row-woocommerce_custom_orders_table_enabled td.forminp {
+	.wc-settings-row-woocommerce_custom_orders_table_enabled td.forminp,
+	.wc-settings-row-woocommerce_custom_orders_table_data_sync_enabled td.forminp {
 		padding-bottom: 0;
 	}
 
-	.wc-settings-row-woocommerce_custom_orders_table_data_sync_enabled td.forminp {
+	.wc-settings-row-woocommerce_custom_orders_table_data_sync_enabled td.forminp,
+	.wc-settings-row-woocommerce_hpos_legacy_data_cleanup_enabled td.forminp {
 		padding-top: 0;
 	}
 }
