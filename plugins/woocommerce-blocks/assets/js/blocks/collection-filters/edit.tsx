@@ -49,8 +49,10 @@ const Edit = ( props: EditProps ) => {
 
 	const template = templates[ props.attributes.filterType ];
 
+	const blockProps = useBlockProps();
+
 	return (
-		<nav>
+		<nav { ...blockProps }>
 			<InnerBlocks
 				template={ template }
 				allowedBlocks={ allowedBlocks }
