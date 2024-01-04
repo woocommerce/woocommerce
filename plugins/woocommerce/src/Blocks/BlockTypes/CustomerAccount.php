@@ -37,7 +37,7 @@ class CustomerAccount extends AbstractBlock {
 	 */
 	protected function initialize() {
 		parent::initialize();
-		add_action( 'hooked_block_types', array( $this, 'register_hooked_block' ), 11, 4 );
+		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 11, 4 );
 	}
 
 	/**
