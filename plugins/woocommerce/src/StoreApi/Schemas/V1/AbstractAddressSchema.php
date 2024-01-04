@@ -107,10 +107,12 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	/**
 	 * Sanitize and format the given address object.
 	 *
-	 * @param array $address Value being sanitized.
+	 * @param array            $address Value being sanitized.
+	 * @param \WP_REST_Request $request The Request.
+	 * @param string           $param The param being sanitized.
 	 * @return array
 	 */
-	public function sanitize_callback( $address ) {
+	public function sanitize_callback( $address, $request, $param ) {
 		$validation_util = new ValidationUtils();
 		$properties      = $this->get_properties();
 		$address         = array_reduce(
@@ -125,6 +127,10 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						break;
 					case 'postcode':
 						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
+						break;
+					case 'email':
+						// Skip email here it will be sanitized in BillingAddressSchema.
+						$carry [ $key ] = $address[ $key ];
 						break;
 					default:
 						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $properties[ $key ], $key );
