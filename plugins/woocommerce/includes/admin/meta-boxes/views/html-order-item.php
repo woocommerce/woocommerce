@@ -18,7 +18,7 @@ $is_visible   = $product && $product->is_visible();
 /**
  * Filter the order item name.
  *
- * @since 8.4.0
+ * @since 8.6.0
  * @param string $item_name The order item's name.
  * @param WC_Order_Item $item The order item object.
  * @param bool $is_visible Item's product visibility in the catalog.
