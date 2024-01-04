@@ -31,6 +31,7 @@ function HighlightTooltip( {
 	delay,
 	onShow = noop,
 	useAnchor = false,
+	shouldCloseOnClickOutside = true,
 } ) {
 	const [ showHighlight, setShowHighlight ] = useState(
 		delay > 0 ? null : show
@@ -125,7 +126,11 @@ function HighlightTooltip( {
 						/* eslint-disable jsx-a11y/no-static-element-interactions */
 						<div
 							className="highlight-tooltip__overlay"
-							onMouseDown={ () => setShowHighlight( false ) }
+							onMouseDown={ ( event ) =>
+								shouldCloseOnClickOutside
+									? setShowHighlight( false )
+									: event.stopPropagation()
+							}
 						/>
 						/* eslint-enable jsx-a11y/no-static-element-interactions */
 					}
