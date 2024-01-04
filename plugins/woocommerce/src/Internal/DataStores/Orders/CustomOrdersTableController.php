@@ -335,7 +335,7 @@ class CustomOrdersTableController {
 			return;
 		}
 
-		if ( filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
+		if ( ! $this->data_cleanup->is_enabled() && filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
 		}
 	}
@@ -482,6 +482,10 @@ class CustomOrdersTableController {
 		};
 
 		$get_sync_message = function() {
+			if ( $this->data_cleanup->is_enabled() ) {
+				return '';
+			}
+
 			$orders_pending_sync_count = $this->get_orders_pending_sync_count();
 			$sync_in_progress          = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
 			$sync_enabled              = $this->data_synchronizer->data_sync_is_enabled();
