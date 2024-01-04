@@ -26,7 +26,6 @@ export function UpsellsBlockEdit( { attributes }: UpsellsBlockEditComponent ) {
 						'woocommerce'
 					) }
 					image={ <ShoppingBags /> }
-					isDismissible={ true }
 				/>
 			</div>
 		);

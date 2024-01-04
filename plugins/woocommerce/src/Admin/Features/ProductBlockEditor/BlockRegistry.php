@@ -37,6 +37,7 @@ class BlockRegistry {
 		'woocommerce/product-taxonomy-field',
 		'woocommerce/product-text-field',
 		'woocommerce/product-number-field',
+		'woocommerce/product-linked-list-field',
 	);
 
 	/**
