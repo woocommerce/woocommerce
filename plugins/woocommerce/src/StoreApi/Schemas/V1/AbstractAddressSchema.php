@@ -114,11 +114,10 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	 */
 	public function sanitize_callback( $address, $request, $param ) {
 		$validation_util = new ValidationUtils();
-		$properties      = $this->get_properties();
 		$address         = (array) $address;
 		$address         = array_reduce(
 			array_keys( $address ),
-			function( $carry, $key ) use ( $address, $validation_util, $properties ) {
+			function( $carry, $key ) use ( $address, $validation_util ) {
 				switch ( $key ) {
 					case 'country':
 						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
@@ -129,12 +128,8 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 					case 'postcode':
 						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
 						break;
-					case 'email':
-						// Skip email here it will be sanitized in BillingAddressSchema.
-						$carry [ $key ] = $address[ $key ];
-						break;
 					default:
-						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $properties[ $key ], $key );
+						$carry[ $key ] = $address[ $key ];
 						break;
 				}
 				return $carry;
