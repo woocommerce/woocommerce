@@ -155,6 +155,13 @@ class MarketingCampaigns extends WC_REST_Controller {
 			];
 		}
 
+		if ( $item->get_sales() instanceof Price ) {
+			$data['sales'] = [
+				'value'    => wc_format_decimal( $item->get_sales()->get_value() ),
+				'currency' => $item->get_sales()->get_currency(),
+			];
+		}
+
 		$context = $request['context'] ?? 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
@@ -199,6 +206,24 @@ class MarketingCampaigns extends WC_REST_Controller {
 				],
 				'cost'       => [
 					'description' => __( 'Cost of the marketing campaign.', 'woocommerce' ),
+					'context'     => [ 'view' ],
+					'readonly'    => true,
+					'type'        => 'object',
+					'properties'  => [
+						'value'    => [
+							'type'     => 'string',
+							'context'  => [ 'view' ],
+							'readonly' => true,
+						],
+						'currency' => [
+							'type'     => 'string',
+							'context'  => [ 'view' ],
+							'readonly' => true,
+						],
+					],
+				],
+				'sales'       => [
+					'description' => __( 'Sales of the marketing campaign.', 'woocommerce' ),
 					'context'     => [ 'view' ],
 					'readonly'    => true,
 					'type'        => 'object',
