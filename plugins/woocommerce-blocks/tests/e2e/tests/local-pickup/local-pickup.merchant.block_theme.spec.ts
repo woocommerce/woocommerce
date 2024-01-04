@@ -24,9 +24,9 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		);
 		await page.waitForSelector( '#local-pickup-settings' );
 		expect( page.locator( '#local-pickup-settings' ) ).not.toBeNull();
-		expect(
-			await page.locator( '#inspector-checkbox-control-0' ).isChecked()
-		).toBeTruthy();
+		await expect(
+			page.locator( '#inspector-checkbox-control-0' )
+		).toBeChecked();
 	} );
 
 	test.describe( 'Core Settings', () => {
@@ -47,7 +47,9 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			);
 
 			expect(
-				await page.locator( '#inspector-checkbox-control-0' ).isChecked()
+				await page
+					.locator( '#inspector-checkbox-control-0' )
+					.isChecked()
 			).toBeFalsy();
 
 			await admin.visitAdminPage(
@@ -55,7 +57,9 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 				'page=wc-settings&tab=shipping&section=options'
 			);
 			expect(
-				await page.locator( '#woocommerce_shipping_cost_requires_address' )
+				await page.locator(
+					'#woocommerce_shipping_cost_requires_address'
+				)
 			).not.toBeNull();
 
 			await utils.enableLocalPickup( admin, page );
@@ -65,7 +69,9 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 				'page=wc-settings&tab=shipping&section=options'
 			);
 			expect(
-				await page.locator( '#woocommerce_shipping_cost_requires_address' )
+				await page.locator(
+					'#woocommerce_shipping_cost_requires_address'
+				)
 			).not.toBeNull();
 		} );
 	} );

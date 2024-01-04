@@ -17,10 +17,14 @@ export const utilsLocalPickup = {
 			'admin.php',
 			'page=wc-settings&tab=shipping&section=pickup_location'
 		);
-		const checkbox = await page.locator( '#inspector-checkbox-control-0' );
+		const text = 'Enable local pickup';
 
-		if ( ! checkbox.isChecked() ) {
-			await checkbox.click();
+		const input = page.locator(
+			`//label[text()='${ text }']/preceding-sibling::span`
+		);
+
+		if ( ! ( await input.locator( 'svg' ).isVisible() ) ) {
+			await page.getByText( text ).click();
 			await utilsLocalPickup.savelocalPickupSettings( admin, page );
 		}
 	},
@@ -30,10 +34,14 @@ export const utilsLocalPickup = {
 			'page=wc-settings&tab=shipping&section=pickup_location'
 		);
 
-		const checkbox = await page.locator( '#inspector-checkbox-control-0' );
+		const text = 'Enable local pickup';
 
-		if ( checkbox.isChecked() ) {
-			await checkbox.click();
+		const input = page.locator(
+			`//label[text()='${ text }']/preceding-sibling::span`
+		);
+
+		if ( await input.locator( 'svg' ).isVisible() ) {
+			await page.getByText( text ).click();
 			await utilsLocalPickup.savelocalPickupSettings( admin, page );
 		}
 	},
