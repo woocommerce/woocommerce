@@ -53,7 +53,16 @@ const productGallery = {
 		},
 	},
 	actions: {
-		closeDialog: () => {
+		closeDialog: ( event: MouseEvent ) => {
+			// Prevent closing the dialog when clicking on the image.
+			if (
+				( event.target as HTMLElement ).classList.contains(
+					'wc-block-woocommerce-product-gallery-large-image__image'
+				)
+			) {
+				return;
+			}
+
 			const context = getContext();
 			closeDialog( context );
 		},
