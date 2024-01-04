@@ -103,15 +103,20 @@ jobs:
                   install: '@woocommerce/plugin-woocommerce...'
                   build: '@woocommerce/plugin-woocommerce'
 
+            - name: Create Directories
+              run: |
+                  mkdir -p input
+                  mkdir -p output
+
             - name: Download blob reports from GitHub Actions Artifacts
               uses: actions/download-artifact@v4
               with:
-                  path: ${{ env.ALLURE_RESULTS_DIR }}
+                  path: input/
                   run-id: e2e-tests-run
 
             - name: Merge into single report
               working-directory: plugins/woocommerce
-              run: pnpx playwright merge-reports --reporter allure-playwright ${{ env.ALLURE_RESULTS_DIR }}
+              run: pnpx playwright merge-reports --reporter allure-playwright input/
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
@@ -122,7 +127,7 @@ jobs:
                     steps.run_playwright_e2e_tests.conclusion != 'skipped' 
                   )
               working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+              run: pnpm exec allure generate --clean input/ --output output/
 
             - name: Archive Playwright E2E test report
               if: |
@@ -132,8 +137,8 @@ jobs:
               with:
                   name: e2e-test-report---pr-${{ github.event.number }}
                   path: |
-                      ${{ env.ALLURE_RESULTS_DIR }}
-                      ${{ env.ALLURE_REPORT_DIR }}
+                      input/
+                      output/
                   if-no-files-found: ignore
                   retention-days: 5
 
