@@ -9,14 +9,16 @@ import { getContext, store } from '@woocommerce/interactivity';
 import './style.scss';
 
 export type DropdownContext = {
-	currentItem: {
+	selectType: 'multiple' | 'single';
+	defaultPlaceholder: string;
+	item: {
 		label: string;
 		value: string;
 	};
-	selectedItem: {
+	selectedItems: {
 		label: string | null;
 		value: string | null;
-	};
+	}[];
 	hoveredItem: {
 		label: string | null;
 		value: string | null;
@@ -26,10 +28,6 @@ export type DropdownContext = {
 
 type DropdownStore = {
 	state: {
-		selectedItem?: {
-			label: string | null;
-			value: string | null;
-		};
 		placeholderText: string;
 		isSelected: boolean;
 	};
@@ -37,61 +35,90 @@ type DropdownStore = {
 	actions: {
 		toggleIsOpen: () => void;
 		selectDropdownItem: ( event: MouseEvent ) => void;
+		unselectDropdownItem: ( event: MouseEvent ) => void;
 	};
 };
 
-const { state } = store< DropdownStore >(
-	'woocommerce/interactivity-dropdown',
-	{
-		state: {
-			get placeholderText(): string {
-				const { selectedItem } = state;
+store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
+	state: {
+		get placeholderText(): string {
+			const { selectType, selectedItems, defaultPlaceholder } =
+				getContext< DropdownContext >();
 
-				return selectedItem?.label || 'Select an option';
-			},
+			if ( selectType === 'single' ) {
+				return selectedItems?.length && selectedItems[ 0 ].label
+					? selectedItems[ 0 ]?.label
+					: defaultPlaceholder;
+			} else if (
+				selectType === 'multiple' &&
+				selectedItems.length === 0
+			) {
+				return defaultPlaceholder;
+			}
 
-			get isSelected(): boolean {
-				const { currentItem } = getContext< DropdownContext >();
-				const { selectedItem } = state;
-
-				return selectedItem?.value === currentItem.value;
-			},
+			return '';
 		},
-		actions: {
-			toggleIsOpen: () => {
-				const context = getContext< DropdownContext >();
 
-				context.isOpen = ! context.isOpen;
-			},
-			selectDropdownItem: ( event: MouseEvent ) => {
-				const context = getContext< DropdownContext >();
-				const { selectedItem } = state;
+		get isSelected(): boolean {
+			const { item, selectedItems } = getContext< DropdownContext >();
 
-				const {
-					currentItem: { label, value },
-				} = context;
-
-				if (
-					selectedItem?.value === value &&
-					selectedItem?.label === label
-				) {
-					state.selectedItem = {
-						label: null,
-						value: null,
-					};
-					context.selectedItem = {
-						label: null,
-						value: null,
-					};
-				} else {
-					state.selectedItem = { label, value };
-					context.selectedItem = { label, value };
-				}
-
-				context.isOpen = false;
-
-				event.stopPropagation();
-			},
+			return selectedItems.some( ( i ) => {
+				return i.value === item.value && i.label === item.label;
+			} );
 		},
-	}
-);
+	},
+	actions: {
+		toggleIsOpen: () => {
+			const context = getContext< DropdownContext >();
+			context.isOpen = ! context.isOpen;
+		},
+		unselectDropdownItem: ( event: MouseEvent ) => {
+			const context = getContext< DropdownContext >();
+
+			const {
+				item: { label, value },
+				selectedItems,
+			} = context;
+
+			const items = selectedItems || [];
+			const selectedItemIndex = items.findIndex(
+				( item ) => item.value === value && item.label === label
+			);
+
+			if ( selectedItemIndex !== -1 ) {
+				items.splice( selectedItemIndex, 1 );
+			}
+
+			event.stopPropagation();
+		},
+		selectDropdownItem: ( event: MouseEvent ) => {
+			const context = getContext< DropdownContext >();
+
+			const {
+				item: { label, value },
+				selectedItems,
+			} = context;
+
+			// check if item already selected
+			const selectedItemIndex = selectedItems.findIndex(
+				( item ) => item.value === value && item.label === label
+			);
+
+			if ( selectedItemIndex !== -1 ) {
+				selectedItems.splice( selectedItemIndex, 1 );
+			}
+
+			if ( context.selectType === 'single' && selectedItemIndex === -1 ) {
+				selectedItems.splice( 0, 1, { label, value } );
+			} else if ( selectedItemIndex === -1 ) {
+				selectedItems.push( {
+					label,
+					value,
+				} );
+			}
+
+			context.isOpen = false;
+			event.stopPropagation();
+		},
+	},
+} );

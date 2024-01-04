@@ -11,13 +11,7 @@ import {
 	LayoutContextProvider,
 	useExtendLayout,
 } from '@woocommerce/admin-layout';
-import {
-	EditorSettings,
-	EditorBlockListSettings,
-} from '@wordpress/block-editor';
-import { Template } from '@wordpress/blocks';
 import { Popover } from '@wordpress/components';
-import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -37,18 +31,7 @@ import { InterfaceSkeleton } from '@wordpress/interface';
 import { Header } from '../header';
 import { BlockEditor } from '../block-editor';
 import { ValidationProvider } from '../../contexts/validation-context';
-
-export type ProductEditorSettings = Partial<
-	EditorSettings & EditorBlockListSettings
-> & {
-	templates: Record< string, Template[] >;
-};
-
-type EditorProps = {
-	product: Pick< Product, 'id' | 'type' >;
-	productType?: string;
-	settings: ProductEditorSettings | undefined;
-};
+import { EditorProps } from './types';
 
 export function Editor( {
 	product,
@@ -80,7 +63,7 @@ export function Editor( {
 									<>
 										<BlockEditor
 											settings={ settings }
-											productType={ productType }
+											postType={ productType }
 											productId={ product.id }
 											context={ {
 												selectedTab,

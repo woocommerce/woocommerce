@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Integrations\WPConsentAPI;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
 use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
@@ -28,6 +29,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 	use OrderAttributionMeta {
 		get_prefixed_field as public;
 	}
+
+	/**
+	 * The WPConsentAPI integration instance.
+	 *
+	 * @var WPConsentAPI
+	 */
+	private $consent;
 
 	/**
 	 * The FeatureController instance.
@@ -59,11 +67,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 *
 	 * @param LegacyProxy         $proxy      The legacy proxy.
 	 * @param FeaturesController  $controller The feature controller.
+	 * @param WPConsentAPI        $consent    The WPConsentAPI integration.
 	 * @param WC_Logger_Interface $logger     The logger object. If not provided, it will be obtained from the proxy.
 	 */
-	final public function init( LegacyProxy $proxy, FeaturesController $controller, ?WC_Logger_Interface $logger = null ) {
+	final public function init( LegacyProxy $proxy, FeaturesController $controller, WPConsentAPI $consent, ?WC_Logger_Interface $logger = null ) {
 		$this->proxy              = $proxy;
 		$this->feature_controller = $controller;
+		$this->consent            = $consent;
 		$this->logger             = $logger ?? $proxy->call_function( 'wc_get_logger' );
 		$this->set_fields_and_prefix();
 	}
@@ -83,6 +93,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 		if ( ! $this->feature_controller->feature_is_enabled( 'order_attribution' ) ) {
 			return;
 		}
+
+		// Register WPConsentAPI integration.
+		$this->consent->register();
 
 		add_action(
 			'wp_enqueue_scripts',
@@ -155,6 +168,29 @@ class OrderAttributionController implements RegisterHooksInterface {
 				$this->register_order_origin_column();
 			}
 		);
+
+		add_action(
+			'woocommerce_new_order',
+			function( $order_id, $order ) {
+				$this->maybe_set_admin_source( $order );
+			},
+			2,
+			10
+		);
+	}
+
+	/**
+	 * If the order is created in the admin, set the source type and origin to admin/Web admin.
+	 *
+	 * @param WC_Order $order The recently created order object.
+	 *
+	 * @since 8.5.0
+	 */
+	private function maybe_set_admin_source( WC_Order $order ) {
+		if ( function_exists( 'is_admin' ) && is_admin() ) {
+			$order->add_meta_data( $this->get_meta_prefixed_field( 'type' ), 'admin' );
+			$order->save();
+		}
 	}
 
 	/**
@@ -190,7 +226,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 		wp_enqueue_script(
 			'wc-order-attribution',
 			plugins_url( "assets/js/frontend/order-attribution{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
-			array( 'sourcebuster-js' ),
+			// Technically, we do not need 'wp-data', 'wc-blocks-checkout' for classic checkout,
+			// but we do not seem to distingush and load blocks scripts there anyway.
+			array( 'sourcebuster-js', 'wp-data', 'wc-blocks-checkout' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
@@ -231,7 +269,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 				'session'       => $session_length,
 				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
 				'prefix'        => $this->field_prefix,
-				'allowTracking' => $allow_tracking,
+				'allowTracking' => 'yes' === $allow_tracking,
 			),
 		);
 
@@ -276,7 +314,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Output the data for the Origin column in the orders table.
+	 * Output the translated origin label for the Origin column in the orders table.
+	 *
+	 * Default to "Unknown" if no origin is set.
 	 *
 	 * @param WC_Order $order The order object.
 	 *
@@ -285,10 +325,11 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private function output_origin_column( WC_Order $order ) {
 		$source_type = $order->get_meta( $this->get_meta_prefixed_field( 'type' ) );
 		$source      = $order->get_meta( $this->get_meta_prefixed_field( 'utm_source' ) );
-		if ( ! $source ) {
-			$source = __( '(none)', 'woocommerce' );
+		$origin      = $this->get_origin_label( $source_type, $source );
+		if ( empty( $origin ) ) {
+			$origin = __( 'Unknown', 'woocommerce' );
 		}
-		echo esc_html( $this->get_origin_label( $source_type, $source ) );
+		echo esc_html( $origin );
 	}
 
 	/**
@@ -326,6 +367,10 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function set_order_source_data( array $source_data, WC_Order $order ) {
+		// If all the values are empty, bail.
+		if ( empty( array_filter( $source_data ) ) ) {
+			return;
+		}
 		foreach ( $source_data as $key => $value ) {
 			$order->add_meta_data( $this->get_meta_prefixed_field( $key ), $value );
 		}
@@ -368,18 +413,27 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function send_order_tracks( array $source_data, WC_Order $order ) {
-		$tracks_data = array(
+		$origin_label        = $this->get_origin_label(
+			$source_data['type'] ?? '',
+			$source_data['utm_source'] ?? '',
+			false
+		);
+		$customer_identifier = $order->get_customer_id() ? $order->get_customer_id() : $order->get_billing_email();
+		$customer_info       = $this->get_customer_history( $customer_identifier );
+		$tracks_data         = array(
 			'order_id'             => $order->get_id(),
 			'type'                 => $source_data['type'] ?? '',
 			'medium'               => $source_data['utm_medium'] ?? '',
 			'source'               => $source_data['utm_source'] ?? '',
-			'device_type'          => strtolower( $source_data['device_type'] ?? '(unknown)' ),
+			'device_type'          => strtolower( $source_data['device_type'] ?? 'unknown' ),
+			'origin_label'         => strtolower( $origin_label ),
 			'session_pages'        => $source_data['session_pages'] ?? 0,
 			'session_count'        => $source_data['session_count'] ?? 0,
 			'order_total'          => $order->get_total(),
-			'customer_order_count' => wc_get_customer_order_count( $order->get_customer_id() ),
+			// Add 1 to include the current order (which is currently still Pending when the event is sent).
+			'customer_order_count' => $customer_info['order_count'] + 1,
+			'customer_registered'  => $order->get_customer_id() ? 'yes' : 'no',
 		);
-
 		$this->proxy->call_static( WC_Tracks::class, 'record_event', 'order_attribution', $tracks_data );
 	}
 

@@ -557,6 +557,25 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		}
 
 		/**
+		 * Enqueue a script in the block editor.
+		 * Similar to `WCAdminAssets::register_script()` but without enqueuing unnecessary dependencies.
+		 *
+		 * @return void
+		 */
+		private function enqueue_block_editor_script( $script_path_name, $script_name ) {
+			$script_assets_filename = WCAdminAssets::get_script_asset_filename( $script_path_name, $script_name );
+			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER .  $script_path_name . '/' . $script_assets_filename;
+
+			wp_enqueue_script(
+				'wc-admin-' . $script_name,
+				WCAdminAssets::get_url( $script_path_name . '/' . $script_name, 'js' ),
+				$script_assets['dependencies'],
+				WCAdminAssets::get_file_version( 'js' ),
+				true
+			);
+		}
+
+		/**
 		 * Enqueue block editor assets.
 		 *
 		 * @return void
@@ -578,7 +597,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					}
 				}
 
-				WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette' );
+				self::enqueue_block_editor_script( 'wp-admin-scripts', 'command-palette' );
 				wp_localize_script(
 					'wc-admin-command-palette',
 					'wcCommandPaletteSettings',
@@ -611,7 +630,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					}, $analytics_reports );
 					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
 
-					WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette-analytics' );
+					self::enqueue_block_editor_script( 'wp-admin-scripts', 'command-palette-analytics' );
 					wp_localize_script(
 						'wc-admin-command-palette-analytics',
 						'wcCommandPaletteAnalytics',

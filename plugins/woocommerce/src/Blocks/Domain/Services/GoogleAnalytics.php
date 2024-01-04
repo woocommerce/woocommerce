@@ -69,8 +69,19 @@ class GoogleAnalytics {
 		}
 
 		if ( ! wp_script_is( 'google-tag-manager', 'registered' ) ) {
+			// Using an array with strategies as the final argument to wp_register_script was introduced in WP 6.3.
+			// WC requires at least 6.3 at the point of adding this, so it's safe to leave in without version checks.
 			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_register_script( 'google-tag-manager', 'https://www.googletagmanager.com/gtag/js?id=' . $settings['ga_id'], [], null, false );
+			wp_register_script(
+				'google-tag-manager',
+				'https://www.googletagmanager.com/gtag/js?id=' . $settings['ga_id'],
+				[],
+				null,
+				[
+					'in_footer' => false,
+					'strategy'  => 'async',
+				]
+			);
 			wp_add_inline_script(
 				'google-tag-manager',
 				"

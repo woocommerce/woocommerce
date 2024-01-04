@@ -16,7 +16,7 @@ You will make it harder for WordPress to detect what page you are trying to reac
 - `http://yoursite.com/about-page/` (this is the URL of a standard page)
 - `http://yoursite.com/product-category/category-x/` (this is the URL leading to a product category)
 
-What would happen if we remove that ‘product-category’ part?
+What would happen if we remove that 'product-category' part?
 
 -   `http://yoursite.com/about-page/`
 -   `http://yoursite.com/category-x/`

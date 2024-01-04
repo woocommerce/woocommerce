@@ -1391,7 +1391,6 @@ table.wc_status_table--tools {
 	.line {
 		display: block;
 		width: 100%;
-		scroll-margin-top: 6em;
 		position: relative;
 
 		&:before {
@@ -1407,6 +1406,7 @@ table.wc_status_table--tools {
 		&:target {
 			box-shadow: 0 0.16em 0.16em -0.16em #c3c4c7, 0 -0.16em 0.16em -0.16em #c3c4c7;
 			z-index: 1;
+			scroll-margin-top: 50vh;
 
 			.line-content {
 				background: #fff8c5;
@@ -4310,8 +4310,6 @@ table.wc_shipping {
 				}
 
 				&.wc-shipping-modal-price {
-					color: #757575;
-
 					&.wc-shipping-currency-position-left,
 					&.wc-shipping-currency-position-left_space {
 
@@ -4372,7 +4370,7 @@ table.wc_shipping {
 	.wc-backbone-modal-back-inactive {
 		display: none;
 	}
-	
+
 	#btn-next.is-busy {
 		background-image: linear-gradient(-45deg, #fafafa 33%, #e0e0e0 33%, #e0e0e0 70%, #fafafa 70%);
 		animation-duration: 2.5s;

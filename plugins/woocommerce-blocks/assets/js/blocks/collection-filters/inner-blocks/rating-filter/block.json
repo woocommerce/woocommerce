@@ -6,7 +6,11 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {
-		"interactivity": true
+		"interactivity": true,
+		"color": {
+			"background": false,
+			"text": true
+		}
 	},
 	"ancestor": [ "woocommerce/collection-filters" ],
 	"usesContext": [ "collectionData" ],

@@ -65,7 +65,7 @@ After testing:
 -   [ ] After the wp.org workflow completes, confirm the following
     -   [ ] Confirm svn tag is correct, e.g. [{{version}}](https://plugins.svn.wordpress.org/woo-gutenberg-products-block/tags/{{version}}/)
     -   [ ] Changelog, Version, and Last Updated on [WP.org plugin page](https://wordpress.org/plugins/woo-gutenberg-products-block/) is correct.
-    -   [ ] Confirm [WooCommerce.com plugin page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/) is updated. Note: this can take several hours, feel free to check it the following day.
+    -   [ ] Confirm [Woo.com plugin page](https://woo.com/customize/) is updated. Note: this can take several hours, feel free to check it the following day.
     -   [ ] Download zip and smoke test.
     -   [ ] Test updating plugin from previous version.
 
@@ -97,7 +97,7 @@ This only needs done if the patch release needs to be included in WooCommerce Co
 
 You only need to post public release announcements and update relevant public facing docs if this patch release is deployed to WP.org. Otherwise, you can skip this section.
 
--   [ ] Post release announcement on [WooCommerce Developer Blog](https://developer.woocommerce.com/category/release-post/woocommerce-blocks-release-notes/).
+-   [ ] Post release announcement on [WooCommerce Developer Blog](https://developer.woo.com/category/release-post/woocommerce-blocks-release-notes/).
     -   Ping porters from each team to know which changelog entries need to be highlighted. Ask them to write a short text and optionally provide a screenshot. They can use previous posts for inspiration, we usually try to highlight new features or API changes.
     -   Ensure the release notes are included in the post verbatim.
     -   Don't forget to use category `WooCommerce Blocks Release Notes` for the post.
