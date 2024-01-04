@@ -20,6 +20,27 @@ class CustomerAccount extends AbstractBlock {
 	protected $block_name = 'customer-account';
 
 	/**
+	 * Block Hook API placements.
+	 *
+	 * @var array
+	 */
+	protected $hooked_block_placements = array(
+		array(
+			'position' => 'after',
+			'anchor'   => 'core/navigation',
+			'area'     => 'header',
+		),
+	);
+
+	/**
+	 * Initialize this block type.
+	 */
+	protected function initialize() {
+		parent::initialize();
+		add_action( 'hooked_block_types', array( $this, 'register_hooked_block' ), 11, 4 );
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
