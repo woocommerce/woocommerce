@@ -177,17 +177,19 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 						{ ! isLoading && product.description }
 					</p>
 				) }
-				{ isLoading && (
-					<div className="woocommerce-marketplace__product-card__footer" />
-				) }
-				{ ! isLoading && (
-					<ProductCardFooter
-						currencySymbol={ currencySymbol }
-						price={ product.price }
-						averageRating={ product.averageRating }
-						reviewsCount={ product.reviewsCount }
-					/>
-				) }
+				<footer className="woocommerce-marketplace__product-card__footer">
+					{ isLoading && (
+						<div className="woocommerce-marketplace__product-card__price" />
+					) }
+					{ ! isLoading && (
+						<ProductCardFooter
+							currencySymbol={ currencySymbol }
+							price={ product.price }
+							averageRating={ product.averageRating }
+							reviewsCount={ product.reviewsCount }
+						/>
+					) }
+				</footer>
 			</div>
 		</Card>
 	);
