@@ -2,7 +2,7 @@
 post_title: Translating WooCommerce
 ---
 
-WooCommerce is already translated into several languages and is translation-ready right out of the box. All that’s needed is a translation file for your language.
+WooCommerce is already translated into several languages and is translation-ready right out of the box. All that's needed is a translation file for your language.
 
 There are several methods to create a translation, most of which are outlined in the WordPress Codex. In most cases you can contribute to the project on [https://translate.wordpress.org/projects/wp-plugins/woocommerce/](https://translate.wordpress.org/projects/wp-plugins/woocommerce/).
 
@@ -25,7 +25,7 @@ We encourage contributions to our translations. If you want to add translated st
 
 Both stable and development versions of WooCommerce are available for translation. When you install or update WooCommerce, WordPress will automatically fetch a 100% complete translation for your language. If such a translation isn't available, you can either download it manually or contribute to complete the translation, benefiting all users.
 
-If you’re new to translating, check out the [translators handbook](https://make.wordpress.org/polyglots/handbook/tools/glotpress-translate-wordpress-org/) to get started.
+If you're new to translating, check out the [translators handbook](https://make.wordpress.org/polyglots/handbook/tools/glotpress-translate-wordpress-org/) to get started.
 
 ### Downloading translations from translate.wordpress.org manually
 
@@ -149,9 +149,9 @@ In order to fix it, navigate to WooCommerce settings corresponding to the string
 
 Navigate back to the Checkout page – translations should be reflected there.
 
-### I have translated the strings I needed, but some of them don’t show up translated on the front end. Why?
+### I have translated the strings I needed, but some of them don't show up translated on the front end. Why?
 
-If some of your translated strings don’t show up as expected on your WooCommerce site, the first thing to check is if these strings have both a Single and Plural form in the Source text section. To do so, open the corresponding translation on [https://translate.wordpress.org/projects/wp-plugins/woocommerce/](https://translate.wordpress.org/projects/wp-plugins/woocommerce/), e.g. [the translation for Product and Products](https://translate.wordpress.org/projects/wp-plugins/woocommerce/stable/de/default/?filters%5Bstatus%5D=either&filters%5Boriginal_id%5D=577764&filters%5Btranslation_id%5D=24210880).
+If some of your translated strings don't show up as expected on your WooCommerce site, the first thing to check is if these strings have both a Single and Plural form in the Source text section. To do so, open the corresponding translation on [https://translate.wordpress.org/projects/wp-plugins/woocommerce/](https://translate.wordpress.org/projects/wp-plugins/woocommerce/), e.g. [the translation for Product and Products](https://translate.wordpress.org/projects/wp-plugins/woocommerce/stable/de/default/?filters%5Bstatus%5D=either&filters%5Boriginal_id%5D=577764&filters%5Btranslation_id%5D=24210880).
 
 This screenshot shows that the Singular translation is available:
 

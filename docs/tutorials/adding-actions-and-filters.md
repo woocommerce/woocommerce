@@ -45,10 +45,10 @@ Lifecycle hooks can be used to communicate that a lifecycle event is about to st
 
 In general, lifecycle hooks:
 
-* Come in pairs (‘before’ and ‘after’)
+* Come in pairs ('before' and 'after')
 * Are always actions, never filters
-* The ‘before’ hook will generally always provide callbacks with the arguments array, if there is one
-* The ‘after’ hook will generally also provide callbacks with the function’s return value, if there is one
+* The 'before' hook will generally always provide callbacks with the arguments array, if there is one
+* The 'after' hook will generally also provide callbacks with the function's return value, if there is one
 
 Note that lifecycle hooks primarily exist to let other systems observe, rather than to modify the result. Of course, this does not stop the function author from additionally providing a filter hook that serves this function.
 
@@ -92,7 +92,7 @@ function get_product_metrics( $args ): array {
 
 ### Modifying function input and output (global rendering functions)
 
-In the case of global rendering or formatting functions (so-called “template tags”), where it is not readily possible to implement better alternatives, it is permissible to add filters for both the function arguments and the function’s return value.
+In the case of global rendering or formatting functions (so-called “template tags”), where it is not readily possible to implement better alternatives, it is permissible to add filters for both the function arguments and the function's return value.
 
 This should be done sparingly, and only where necessary. Remember that while providing opportunities for other components to perform extensive customization, it can potentially derail other components which expect unmodified output.
 
