@@ -688,7 +688,6 @@ class WC_Helper {
 	 * Maybe redirect to the new Marketplace installer.
 	 */
 	private static function maybe_redirect_to_new_marketplace_installer() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// Redirect requires the "install" URL parameter to be passed.
 		if ( empty( $_GET['install'] ) ) {
 			return;
@@ -699,40 +698,51 @@ class WC_Helper {
 				array(
 					'page'    => 'wc-addons',
 					'section' => 'helper',
-				),
-				isset( $_GET['redirect-to-wc-admin'] ),
-				sanitize_text_field( wp_unslash( $_GET['install'] ) )
+				)
 			)
 		);
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
 	 * Get helper redirect URL.
 	 *
 	 * @param array  $args Query args.
-	 * @param bool   $redirect_to_wc_admin Whether to redirect to WC Admin.
-	 * @param string $install_product_key Optional Product key to install.
 	 * @return string
 	 */
-	private static function get_helper_redirect_url( $args = array(), $redirect_to_wc_admin = false, $install_product_key = '' ) {
+	private static function get_helper_redirect_url( $args = array() ) {
 		global $current_screen;
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$redirect_to_wc_admin = isset( $_GET['redirect-to-wc-admin'] )
+			? sanitize_text_field( wp_unslash( $_GET['redirect-to-wc-admin'] ) )
+			: '';
+		$install_product_key = isset( $_GET['install'] ) ? sanitize_text_field( wp_unslash( $_GET['install'] ) ) : '';
+		debug($redirect_to_wc_admin, 'get_helper_redirect_url');
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
 		if (
 			'woocommerce_page_wc-addons' === $current_screen->id &&
 			FeaturesUtil::feature_is_enabled( 'marketplace' ) &&
 			(
-				true === $redirect_to_wc_admin ||
+				false === empty( $redirect_to_wc_admin ) ||
 				false === empty( $install_product_key )
 			)
 		) {
-			$new_url = add_query_arg(
-				array(
-					'page' => 'wc-admin',
-					'tab'  => 'my-subscriptions',
-					'path' => rawurlencode( '/extensions' ),
-				),
-				admin_url( 'admin.php' )
-			);
+
+			if ( strpos( $redirect_to_wc_admin, admin_url( 'admin.php' ) ) === 0 ) {
+				$new_url = $redirect_to_wc_admin;
+			} else {
+				$new_url = add_query_arg(
+					array(
+						'page' => 'wc-admin',
+						'tab'  => 'my-subscriptions',
+						'path' => rawurlencode( '/extensions' ),
+					),
+					admin_url( 'admin.php' )
+				);
+			}
+
+			debug($new_url, '$new_url');
 			if ( ! empty( $install_product_key ) ) {
 				$new_url = add_query_arg(
 					array(
@@ -767,7 +777,8 @@ class WC_Helper {
 		);
 
 		if ( isset( $_GET['redirect-to-wc-admin'] ) ) {
-			$redirect_url_args['redirect-to-wc-admin'] = 1;
+			debug( $_GET['redirect-to-wc-admin'], 'add url' );
+			$redirect_url_args['redirect-to-wc-admin'] = sanitize_text_field( wp_unslash( $_GET['redirect-to-wc-admin'] ) );
 		}
 
 		if ( isset( $_GET['install'] ) ) {
@@ -841,9 +852,7 @@ class WC_Helper {
 					array(
 						'page'    => 'wc-addons',
 						'section' => 'helper',
-					),
-					isset( $_GET['redirect-to-wc-admin'] ),
-					isset( $_GET['install'] ) ? sanitize_text_field( wp_unslash( $_GET['install'] ) ) : ''
+					)
 				)
 			);
 			die();
@@ -905,9 +914,7 @@ class WC_Helper {
 					'page'             => 'wc-addons',
 					'section'          => 'helper',
 					'wc-helper-status' => 'helper-connected',
-				),
-				isset( $_GET['redirect-to-wc-admin'] ),
-				isset( $_GET['install'] ) ? sanitize_text_field( wp_unslash( $_GET['install'] ) ) : ''
+				)
 			)
 		);
 		die();
@@ -932,9 +939,7 @@ class WC_Helper {
 				'page'             => 'wc-addons',
 				'section'          => 'helper',
 				'wc-helper-status' => 'helper-disconnected',
-			),
-			isset( $_GET['redirect-to-wc-admin'] ),
-			isset( $_GET['install'] ) ? sanitize_text_field( wp_unslash( $_GET['install'] ) ) : ''
+			)
 		);
 
 		self::disconnect();
@@ -960,9 +965,7 @@ class WC_Helper {
 				'section'          => 'helper',
 				'filter'           => self::get_current_filter(),
 				'wc-helper-status' => 'helper-refreshed',
-			),
-			isset( $_GET['redirect-to-wc-admin'] ),
-			isset( $_GET['install'] ) ? sanitize_text_field( wp_unslash( $_GET['install'] ) ) : ''
+			)
 		);
 
 		wp_safe_redirect( $redirect_uri );
