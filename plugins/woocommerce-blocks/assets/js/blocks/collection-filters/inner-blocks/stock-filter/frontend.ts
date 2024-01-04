@@ -1,10 +1,15 @@
 /**
  * External dependencies
  */
-import { store, navigate, getContext } from '@woocommerce/interactivity';
+import { store, getContext } from '@woocommerce/interactivity';
 import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
 import { HTMLElementEvent } from '@woocommerce/types';
 import { CheckboxListContext } from '@woocommerce/interactivity-components/checkbox-list';
+
+/**
+ * Internal dependencies
+ */
+import { navigate } from '../../utils';
 
 const getUrl = ( activeFilters: string ) => {
 	const url = new URL( window.location.href );
