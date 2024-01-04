@@ -115,6 +115,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	public function sanitize_callback( $address, $request, $param ) {
 		$validation_util = new ValidationUtils();
 		$properties      = $this->get_properties();
+		$address         = (array) $address;
 		$address         = array_reduce(
 			array_keys( $address ),
 			function( $carry, $key ) use ( $address, $validation_util, $properties ) {
