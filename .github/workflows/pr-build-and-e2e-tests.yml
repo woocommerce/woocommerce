@@ -105,8 +105,8 @@ jobs:
 
             - name: Create Directories
               run: |
-                  mkdir -p input
-                  mkdir -p output
+                  mkdir -p  /home/runner/work/input
+                  mkdir -p  /home/runner/work/output
 
             - name: Download blob reports from GitHub Actions Artifacts
               uses: actions/download-artifact@v4
@@ -116,7 +116,7 @@ jobs:
 
             - name: Merge into single report
               working-directory: plugins/woocommerce
-              run: pnpx playwright merge-reports --reporter allure-playwright input/
+              run: pnpx playwright merge-reports --reporter allure-playwright  /home/runner/work/input/
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
@@ -126,7 +126,7 @@ jobs:
                     steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
                     steps.run_playwright_e2e_tests.conclusion != 'skipped' 
                   )
-              run: pnpm exec allure generate --clean input/ --output output/
+              run: pnpm exec allure generate --clean  /home/runner/work/input/ --output  /home/runner/work/output/
 
             - name: Archive Playwright E2E test report
               if: |
@@ -136,8 +136,8 @@ jobs:
               with:
                   name: e2e-test-report---pr-${{ github.event.number }}
                   path: |
-                      input/
-                      output/
+                      /home/runner/work/input/
+                      /home/runner/work/output/
                   if-no-files-found: ignore
                   retention-days: 5
 
