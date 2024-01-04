@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+[Product Block Editor]: add className prop to ButtonWithDropdownMenu component
