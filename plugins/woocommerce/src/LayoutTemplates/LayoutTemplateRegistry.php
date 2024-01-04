@@ -130,18 +130,6 @@ final class LayoutTemplateRegistry {
 			return $layout_template_instance;
 		}
 
-		// Call the before instantiation hooks.
-
-		/**
-		 * Fires before a layout template is instantiated.
-		 *
-		 * @param string $layout_template_id Layout template ID.
-		 * @param string $layout_template_area Layout template area.
-		 *
-		 * @since 8.6.0
-		 */
-		do_action( 'woocommerce_layout_template_before_instantiation', $layout_template_info['id'], $layout_template_info['area'] );
-
 		// Instantiate the layout template.
 
 		$layout_template_instance                       = new $class_name();
