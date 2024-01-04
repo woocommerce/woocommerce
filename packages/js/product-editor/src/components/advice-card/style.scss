@@ -33,5 +33,9 @@ $card-border-width: 2px;
 
 	.woocommerce-advice-card__dismiss-button {
 		color: $gray-700;
+		&.is-small.has-icon:not(.has-text) {
+			padding: 0;
+			min-width: 24px;
+		}
 	}
 }
