@@ -14,13 +14,12 @@ import { Product } from '@woocommerce/data';
  * Internal dependencies
  */
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
-import { ProductList } from '../../../components/product-list';
+import { ProductList, Skeleton } from '../../../components/product-list';
 import { ProductSelect } from '../../../components/product-select';
 import { AdviceCard } from '../../../components/advice-card';
 import { ShoppingBags } from '../../../images/shopping-bags';
 import { CashRegister } from '../../../images/cash-register';
 import { ProductEditorBlockEditProps } from '../../../types';
-import { Skeleton } from './skeleton/skeleton';
 import {
 	getLoadLinkedProductsDispatcher,
 	getRemoveLinkedProductDispatcher,
