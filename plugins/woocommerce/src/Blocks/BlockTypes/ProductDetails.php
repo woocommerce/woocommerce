@@ -32,14 +32,6 @@ class ProductDetails extends AbstractBlock {
 		register_block_style(
 			'woocommerce/product-details',
 			array(
-				'name'  => 'modern',
-				'label' => __( 'Modern', 'woocommerce' ),
-			)
-		);
-
-		register_block_style(
-			'woocommerce/product-details',
-			array(
 				'name'  => 'minimal',
 				'label' => __( 'Minimal', 'woocommerce' ),
 			)
