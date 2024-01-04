@@ -45,12 +45,7 @@ if ( firstAttribute ) {
 }
 
 const Edit = ( props: EditProps ) => {
-	const filterType = props.attributes.filterType;
-
-	const allowedBlocks =
-		filterType === 'collection-filters'
-			? getAllowedBlocks( DISALLOWED_COLLECTION_FILTERS_BLOCKS )
-			: getAllowedBlocks( DISALLOWED_BLOCKS );
+	const allowedBlocks = getAllowedBlocks( DISALLOWED_BLOCKS );
 
 	const template = templates[ props.attributes.filterType ];
 
