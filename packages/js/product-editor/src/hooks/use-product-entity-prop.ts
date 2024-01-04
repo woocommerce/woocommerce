@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useEntityProp } from '@wordpress/core-data';
-import { useCallback, useMemo, useState } from '@wordpress/element';
+import { useCallback, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
