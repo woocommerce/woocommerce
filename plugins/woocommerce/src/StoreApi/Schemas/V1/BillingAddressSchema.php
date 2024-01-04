@@ -47,13 +47,11 @@ class BillingAddressSchema extends AbstractAddressSchema {
 	/**
 	 * Sanitize and format the given address object.
 	 *
-	 * @param array            $address Value being sanitized.
-	 * @param \WP_REST_Request $request The Request.
-	 * @param string           $param The param being sanitized.
+	 * @param array $address Value being sanitized.
 	 * @return array
 	 */
-	public function sanitize_callback( $address, $request, $param ) {
-		$address          = parent::sanitize_callback( $address, $request, $param );
+	public function sanitize_callback( $address ) {
+		$address          = parent::sanitize_callback( $address );
 		$address['email'] = sanitize_text_field( wp_unslash( $address['email'] ) );
 		return $address;
 	}
