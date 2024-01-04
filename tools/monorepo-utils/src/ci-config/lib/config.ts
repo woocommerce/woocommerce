@@ -1,8 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+/**
+ * Internal dependencies
+ */
+import { PackageJSON } from './package-loader';
+
 /**
  * A configuration error type.
  */
 export class ConfigError extends Error {}
+
+/**
+ * The type of the job.
+ */
+export const enum JobType {
+	Lint = 'lint',
+	Test = 'test',
+}
 
 /**
  * Parses and validates a raw change config entry.
@@ -38,6 +52,11 @@ function parseChangesConfig( raw: unknown ): RegExp[] {
  */
 interface LintJobConfig {
 	/**
+	 * The type of the job.
+	 */
+	type: JobType.Lint;
+
+	/**
 	 * The changes that should trigger this job.
 	 */
 	changes: RegExp[];
@@ -67,6 +86,7 @@ function parseLintJobConfig( raw: any ): LintJobConfig {
 	}
 
 	return {
+		type: JobType.Lint,
 		changes: parseChangesConfig( raw.changes ),
 		command: raw.command,
 	};
@@ -135,6 +155,11 @@ interface TestEnvConfig {
  * The configuration of a test job.
  */
 interface TestJobConfig {
+	/**
+	 * The type of the job.
+	 */
+	type: JobType.Test;
+
 	/**
 	 * The name for the job.
 	 */
@@ -215,6 +240,7 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 	}
 
 	const config: TestJobConfig = {
+		type: JobType.Test,
 		name: raw.name,
 		changes: parseChangesConfig( raw.changes ),
 		command: raw.command,
@@ -245,18 +271,18 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 }
 
 /**
+ * The configuration of a job.
+ */
+export type JobConfig = LintJobConfig | TestJobConfig;
+
+/**
  * A project's CI configuration.
  */
 interface CIConfig {
 	/**
-	 * The configuration for the lint job.
+	 * The configuration for jobs in this config.
 	 */
-	lint?: LintJobConfig;
-
-	/**
-	 * Configuration for any test jobs.
-	 */
-	tests?: TestJobConfig[];
+	jobs: JobConfig[];
 }
 
 /**
@@ -264,23 +290,33 @@ interface CIConfig {
  *
  * @param {Object} raw The raw config.
  */
-export function parseCIConfig( raw: any ): CIConfig {
-	const config: CIConfig = {};
+export function parseCIConfig( raw: PackageJSON ): CIConfig {
+	const config: CIConfig = {
+		jobs: [],
+	};
 
-	if ( raw.lint ) {
-		if ( typeof raw.lint !== 'object' ) {
+	const ciConfig = raw.config?.ci;
+
+	if ( ! ciConfig ) {
+		return config;
+	}
+
+	if ( ciConfig.lint ) {
+		if ( typeof ciConfig.lint !== 'object' ) {
 			throw new ConfigError( 'The "lint" option must be an object.' );
 		}
 
-		config.lint = parseLintJobConfig( raw.lint );
+		config.jobs.push( parseLintJobConfig( ciConfig.lint ) );
 	}
 
-	if ( raw.tests ) {
-		if ( ! Array.isArray( raw.tests ) ) {
+	if ( ciConfig.tests ) {
+		if ( ! Array.isArray( ciConfig.tests ) ) {
 			throw new ConfigError( 'The "tests" option must be an array.' );
 		}
 
-		config.tests = raw.tests.map( parseTestJobConfig );
+		for ( const rawTestConfig of ciConfig.tests ) {
+			config.jobs.push( parseTestJobConfig( rawTestConfig ) );
+		}
 	}
 
 	return config;

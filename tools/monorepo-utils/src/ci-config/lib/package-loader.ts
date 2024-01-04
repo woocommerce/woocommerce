@@ -4,10 +4,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-type PackageJSON = {
+export interface PackageJSON {
 	name: string;
 	config?: { ci?: any };
-};
+}
 
 // We're going to store a cache of package files so that we don't load
 // ones that we have already loaded. The key is the normalized path
