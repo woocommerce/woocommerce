@@ -1,0 +1,4 @@
+*** WooCommerce ***
+
+2024-01-09 - Version 8.5.0.40
+* Update - Deploy of WooCommerce 8.5.0.40
