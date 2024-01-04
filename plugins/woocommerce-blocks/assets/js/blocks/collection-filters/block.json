@@ -4,19 +4,13 @@
 	"title": "Collection Filters",
 	"description": "A block that adds product filters to the product collection.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce",
-		"Filters"
-	],
+	"keywords": [ "WooCommerce", "Filters" ],
 	"textdomain": "woocommerce",
 	"supports": {
 		"html": false,
 		"reusable": false
 	},
-	"usesContext": [
-		"query",
-		"queryId"
-	],
+	"usesContext": [ "query", "queryId" ],
 	"providesContext": {
 		"collectionData": "collectionData"
 	},
@@ -24,6 +18,9 @@
 		"collectionData": {
 			"type": "object",
 			"default": {}
+		},
+		"filterType": {
+			"type": "string"
 		}
 	},
 	"apiVersion": 2,

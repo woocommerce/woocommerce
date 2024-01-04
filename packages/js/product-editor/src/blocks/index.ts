@@ -36,3 +36,4 @@ export { init as initText } from './generic/text';
 export { init as initNumber } from './generic/number';
 export { init as initUpsells } from './product-fields/upsells';
 export { init as initCrossSells } from './product-fields/cross-sells';
+export { init as initLinkedProductList } from './generic/linked-product-list';

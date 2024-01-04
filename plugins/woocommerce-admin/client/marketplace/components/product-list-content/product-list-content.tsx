@@ -58,6 +58,8 @@ export default function ProductListContent( props: {
 									: {} ),
 							} )
 						),
+						averageRating: product.averageRating,
+						reviewsCount: product.reviewsCount,
 						description: product.description,
 					} }
 					tracksData={ {

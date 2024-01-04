@@ -1,9 +1,14 @@
 /**
  * External dependencies
  */
-import { getContext, navigate, store } from '@woocommerce/interactivity';
+import { getContext, store } from '@woocommerce/interactivity';
 import { CheckboxListContext } from '@woocommerce/interactivity-components/checkbox-list';
 import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
+
+/**
+ * Internal dependencies
+ */
+import { navigate } from '../../utils';
 
 function getUrl( filters: Array< string | null > ) {
 	filters = filters.filter( Boolean );

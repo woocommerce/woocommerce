@@ -6,13 +6,14 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block;
+use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
+
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplateLogger;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
+
 use WP_Block_Editor_Context;
 
 /**
@@ -67,6 +68,8 @@ class Init {
 			add_filter( 'woocommerce_register_post_type_product_variation', array( $this, 'enable_rest_api_for_product_variation' ) );
 
 			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
+
+			add_action( 'rest_api_init', array( $this, 'register_product_editor_templates' ) );
 
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
@@ -182,6 +185,7 @@ class Init {
 				'variable_product_block_tour_shown',
 				'local_attributes_notice_dismissed_ids',
 				'variable_items_without_price_notice_dismissed',
+				'product_advice_card_dismissed',
 			)
 		);
 	}
@@ -211,12 +215,12 @@ class Init {
 	 * Get the product editor settings.
 	 */
 	private function get_product_editor_settings() {
-		$layout_template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
 		$layout_template_logger   = BlockTemplateLogger::get_instance();
 
 		$editor_settings = array();
 
-		foreach ( $layout_template_registry->get_all_registered() as $layout_template ) {
+		foreach ( $layout_template_registry->instantiate_layout_templates() as $layout_template ) {
 			$editor_settings['layoutTemplates'][] = $layout_template->to_json();
 
 			$layout_template_logger->log_template_events_to_file( $layout_template->get_id() );
@@ -370,9 +374,23 @@ class Init {
 	/**
 	 * Register product editor templates.
 	 */
-	private function register_product_editor_templates() {
-		$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
-		$template_registry->register( new SimpleProductTemplate() );
-		$template_registry->register( new ProductVariationTemplate() );
+	public function register_product_editor_templates() {
+		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
+
+		if ( ! $layout_template_registry->is_registered( 'simple-product' ) ) {
+			$layout_template_registry->register(
+				'simple-product',
+				'product-form',
+				SimpleProductTemplate::class
+			);
+		}
+
+		if ( ! $layout_template_registry->is_registered( 'product-variation' ) ) {
+			$layout_template_registry->register(
+				'product-variation',
+				'product-form',
+				ProductVariationTemplate::class
+			);
+		}
 	}
 }
