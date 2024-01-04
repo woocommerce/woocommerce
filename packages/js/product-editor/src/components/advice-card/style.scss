@@ -6,7 +6,7 @@ $card-border-width: 2px;
 	background-color: $white;
 	border-radius: 4px;
 	height: 233px;
-	padding: $gap;
+	padding: calc( 2 * $gap );
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -29,6 +29,10 @@ $card-border-width: 2px;
 		color: $gray-700;
 		border-top: 0;
 		padding: 0 0 $gap;
+	}
+
+	&.is-dismissible {
+		padding: $gap;
 	}
 
 	.woocommerce-advice-card__dismiss-button {

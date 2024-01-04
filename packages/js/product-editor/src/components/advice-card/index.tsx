@@ -7,6 +7,7 @@ import { Button } from '@wordpress/components';
 import { close } from '@wordpress/icons';
 import { useInstanceId } from '@wordpress/compose';
 import { useUserPreferences } from '@woocommerce/data';
+import classNames from 'classnames';
 
 export interface AdviceCardProps {
 	tip?: string;
@@ -50,7 +51,12 @@ export const AdviceCard: React.FC< AdviceCardProps > = ( {
 	}
 
 	return (
-		<div className="woocommerce-advice-card" role="group">
+		<div
+			className={ classNames( 'woocommerce-advice-card', {
+				'is-dismissible': isDismissible,
+			} ) }
+			role="group"
+		>
 			{ isDismissible && (
 				<div className="woocommerce-advice-card__header">
 					<Button
