@@ -1,12 +1,18 @@
 /**
- * Extracts the built-in color from a block class name string if it exists.
- * Returns null if no built-in color is found.
- *
- * @param  blockClassString The block class name string.
- * @return {string|null} The color name or null if no built-in color is found.
+ * External dependencies
  */
-export const extractBuiltInColor = ( blockClassString: string ) => {
-	const regex = /has-(?!link|text|background)([a-z-]+)-color/;
-	const match = blockClassString.match( regex );
-	return match ? match[ 1 ] : null;
+import { getBlockTypes } from '@wordpress/blocks';
+
+/**
+ * Returns an array of allowed block names excluding the disallowedBlocks array.
+ *
+ * @param disallowedBlocks Array of block names to disallow.
+ * @return Array of allowed block names.
+ */
+export const getAllowedBlocks = ( disallowedBlocks: string[] ) => {
+	const allBlocks = getBlockTypes();
+
+	return allBlocks
+		.map( ( block ) => block.name )
+		.filter( ( name ) => ! disallowedBlocks.includes( name ) );
 };

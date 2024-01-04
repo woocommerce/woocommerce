@@ -310,7 +310,9 @@ trait OrderAttributionMeta {
 
 			default:
 				$label  = '';
-				$source = __( 'Unknown', 'woocommerce' );
+				$source = $translated ?
+					__( 'Unknown', 'woocommerce' )
+					: 'Unknown';
 				break;
 		}
 

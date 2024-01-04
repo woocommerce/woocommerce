@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+[Experimental] In interactivity filters do not display filter options that would result in 0 products.

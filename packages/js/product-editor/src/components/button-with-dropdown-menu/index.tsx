@@ -28,10 +28,13 @@ export const ButtonWithDropdownMenu: React.FC<
 		position: 'bottom left left',
 		offset: 0,
 	},
+	className,
 } ) => {
 	return (
 		<Flex
-			className="woocommerce-button-with-dropdown-menu"
+			className={ `woocommerce-button-with-dropdown-menu${
+				className?.length ? ' ' + className : ''
+			}` }
 			justify="left"
 			gap={ 0 }
 			expanded={ false }

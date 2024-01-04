@@ -6,27 +6,20 @@ import classnames from 'classnames';
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { Disabled } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Icon, chevronDown } from '@wordpress/icons';
 import { CheckboxList } from '@woocommerce/blocks-components';
 import Label from '@woocommerce/base-components/filter-element-label';
-import FormTokenField from '@woocommerce/base-components/form-token-field';
 import type { BlockEditProps, Template } from '@wordpress/blocks';
 import { getSetting } from '@woocommerce/settings';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
-import { useStyleProps } from '@woocommerce/base-hooks';
-import styled from '@emotion/styled';
 
 /**
  * Internal dependencies
  */
 import { BlockProps } from './types';
 import { Inspector } from './components/inspector';
-import { extractBuiltInColor } from '../../utils';
+import { PreviewDropdown } from '../components/preview-dropdown';
 
 type CollectionData = {
-	// attribute_counts: null | unknown;
-	// price_range: null | unknown;
-	// rating_counts: null | unknown;
 	stock_status_counts: StockStatusCount[];
 };
 
@@ -53,21 +46,6 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 		],
 	];
 
-	const { className, style } = useStyleProps( props.attributes );
-	const builtInColor = extractBuiltInColor( className );
-
-	const textColor = builtInColor
-		? `var(--wp--preset--color--${ builtInColor })`
-		: style.color;
-
-	const StyledFormTokenField = textColor
-		? styled( FormTokenField )`
-				.components-form-token-field__input::placeholder {
-					color: ${ textColor } !important;
-				}
-		  `
-		: FormTokenField;
-
 	const { showCounts, displayStyle } = props.attributes;
 	const stockStatusOptions: Record< string, string > = getSetting(
 		'stockStatusOptions',
@@ -81,23 +59,28 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 	} );
 
 	const listOptions = useMemo( () => {
-		return Object.entries( stockStatusOptions ).map( ( [ key, value ] ) => {
-			const count =
-				// @ts-expect-error - there is a fault with useCollectionData types, it can be non-array.
-				( filteredCounts as CollectionData )?.stock_status_counts?.find(
+		return Object.entries( stockStatusOptions )
+			.map( ( [ key, value ] ) => {
+				const count = (
+					filteredCounts as unknown as CollectionData
+				 )?.stock_status_counts?.find(
 					( item: StockStatusCount ) => item.status === key
 				)?.count;
 
-			return {
-				value: key,
-				label: (
-					<Label
-						name={ value }
-						count={ showCounts && count ? Number( count ) : null }
-					/>
-				),
-			};
-		} );
+				return {
+					value: key,
+					label: (
+						<Label
+							name={ value }
+							count={
+								showCounts && count ? Number( count ) : null
+							}
+						/>
+					),
+					count: count || 0,
+				};
+			} )
+			.filter( ( item ) => item.count > 0 );
 	}, [ stockStatusOptions, filteredCounts, showCounts ] );
 
 	return (
@@ -121,27 +104,29 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 						>
 							{ displayStyle === 'dropdown' ? (
 								<>
-									<StyledFormTokenField
-										className={ classnames( {
-											'single-selection': true,
-											'is-loading': false,
-										} ) }
-										suggestions={ [] }
-										placeholder={ __(
-											'Select stock status',
-											'woocommerce'
-										) }
-										onChange={ () => null }
-										value={ [] }
+									<PreviewDropdown
+										placeholder={
+											props.attributes.selectType ===
+											'single'
+												? __(
+														'Select stock status',
+														'woocommerce'
+												  )
+												: __(
+														'Select stock statuses',
+														'woocommerce'
+												  )
+										}
 									/>
-									<Icon icon={ chevronDown } size={ 30 } />
 								</>
 							) : (
 								<CheckboxList
 									className={ 'wc-block-stock-filter-list' }
 									options={ listOptions }
 									checked={ [] }
-									onChange={ () => null }
+									onChange={ () => {
+										// noop
+									} }
 									isLoading={ false }
 									isDisabled={ true }
 								/>

@@ -199,6 +199,34 @@ export const queryAiEndpoint = createMachine(
 	}
 );
 
+const resetPatternsAndProducts = () => async () => {
+	await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_blocks_allow_ai_connection: 'yes',
+	} );
+
+	const response = await apiFetch< {
+		is_ai_generated: boolean;
+	} >( {
+		path: '/wc/private/ai/store-info',
+		method: 'GET',
+	} );
+
+	if ( response.is_ai_generated ) {
+		return;
+	}
+
+	return Promise.all( [
+		apiFetch( {
+			path: '/wc/private/ai/patterns',
+			method: 'DELETE',
+		} ),
+		apiFetch( {
+			path: '/wc/private/ai/products',
+			method: 'DELETE',
+		} ),
+	] );
+};
+
 export const updateStorePatterns = async (
 	context: designWithAiStateMachineContext
 ) => {
@@ -219,6 +247,11 @@ export const updateStorePatterns = async (
 					context.businessInfoDescription.descriptionText,
 			},
 		} );
+
+		if ( ! images.length ) {
+			await resetPatternsAndProducts()();
+			return;
+		}
 
 		const [ response ] = await Promise.all< {
 			ai_content_generated: boolean;
@@ -472,34 +505,6 @@ const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
 			lookAndFeel: context.lookAndFeel.choice,
 		},
 	} );
-};
-
-const resetPatternsAndProducts = () => async () => {
-	await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-		woocommerce_blocks_allow_ai_connection: 'yes',
-	} );
-
-	const response = await apiFetch< {
-		is_ai_generated: boolean;
-	} >( {
-		path: '/wc/private/ai/store-info',
-		method: 'GET',
-	} );
-
-	if ( response.is_ai_generated ) {
-		return;
-	}
-
-	return Promise.all( [
-		apiFetch( {
-			path: '/wc/private/ai/patterns',
-			method: 'DELETE',
-		} ),
-		apiFetch( {
-			path: '/wc/private/ai/products',
-			method: 'DELETE',
-		} ),
-	] );
 };
 
 export const services = {
