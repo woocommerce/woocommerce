@@ -46,6 +46,10 @@ jest.mock( '@wordpress/api-fetch', () =>
 						value: ( ( page * perPage + index ) * 0.25 ).toString(),
 						currency: 'USD',
 					},
+					sales: {
+						value: ( ( page * perPage + index ) * 0.25 ).toString(),
+						currency: 'USD',
+					},
 				};
 			}
 		);
