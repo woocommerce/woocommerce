@@ -29,7 +29,6 @@ describe( 'Package Loader', () => {
 				if ( path === __dirname + '/test-package.json' ) {
 					return JSON.stringify( {
 						name: 'foo',
-						version: '1.0.0',
 					} );
 				}
 
@@ -40,7 +39,6 @@ describe( 'Package Loader', () => {
 
 			expect( loadedFile ).toMatchObject( {
 				name: 'foo',
-				version: '1.0.0',
 			} );
 		} );
 
@@ -49,7 +47,6 @@ describe( 'Package Loader', () => {
 				if ( path === __dirname + '/test-package.json' ) {
 					return JSON.stringify( {
 						name: 'foo',
-						version: '1.0.0',
 					} );
 				}
 
@@ -69,7 +66,6 @@ describe( 'Package Loader', () => {
 
 			expect( cachedFile ).toMatchObject( {
 				name: 'foo',
-				version: '1.0.0',
 			} );
 		} );
 	} );

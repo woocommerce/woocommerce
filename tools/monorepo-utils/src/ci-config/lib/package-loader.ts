@@ -6,9 +6,6 @@ import path from 'path';
 
 type PackageJSON = {
 	name: string;
-	version: string;
-	dependencies?: Record< string, string >;
-	devDependencies?: Record< string, string >;
 	config?: { ci?: any };
 };
 
