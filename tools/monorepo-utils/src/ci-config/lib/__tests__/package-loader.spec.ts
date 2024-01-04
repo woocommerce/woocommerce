@@ -1,14 +1,14 @@
 /**
  * External dependencies
  */
-import fs from 'fs';
+import fs from 'node:fs';
 
 /**
  * Internal dependencies
  */
 import { loadPackage } from '../package-loader';
 
-jest.mock( 'fs' );
+jest.mock( 'node:fs' );
 
 describe( 'Package Loader', () => {
 	describe( 'loadPackage', () => {
