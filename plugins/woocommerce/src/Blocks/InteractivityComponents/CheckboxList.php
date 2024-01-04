@@ -24,12 +24,9 @@ class CheckboxList {
 		wp_enqueue_script( 'wc-interactivity-checkbox-list' );
 		wp_enqueue_style( 'wc-interactivity-checkbox-list' );
 
-		$items = $props['items'] ?? array();
-
+		$items                 = $props['items'] ?? array();
 		$checkbox_list_context = array( 'items' => $items );
-
-		// Items should be an array of objects with a label (which can be plaintext or HTML) and value property.
-		$items = $props['items'] ?? array();
+		$on_change             = $props['on_change'] ?? '';
 
 		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-checkbox-list' ) );
 
@@ -50,7 +47,7 @@ class CheckboxList {
 											type="checkbox" 
 											aria-invalid="false"
 											data-wc-on--change--select-item="actions.selectCheckboxItem"
-											data-wc-on--change--parent-action="<?php echo esc_attr( $props['on_change'] ?? '' ); ?>"
+											data-wc-on--change--parent-action="<?php echo esc_attr( $on_change ); ?>"
 											value="<?php echo esc_attr( $item['value'] ); ?>"
 											<?php checked( $item['checked'], 1 ); ?>
 										>

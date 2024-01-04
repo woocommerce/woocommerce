@@ -1,13 +1,14 @@
 /**
  * External dependencies
  */
-import { store, navigate, getContext } from '@woocommerce/interactivity';
+import { store, getContext } from '@woocommerce/interactivity';
 import { formatPrice, getCurrency } from '@woocommerce/price-format';
 import { HTMLElementEvent } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
+import { navigate } from '../../utils';
 import type { PriceFilterContext, PriceFilterStore } from './types';
 
 const getUrl = ( context: PriceFilterContext ) => {
