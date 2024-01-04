@@ -238,7 +238,7 @@ export const updateStorePatterns = async (
 
 		const { images } = await apiFetch< {
 			ai_content_generated: boolean;
-			images: Array< unknown >;
+			images: { images: Array< unknown >; search_term: string };
 		} >( {
 			path: '/wc/private/ai/images',
 			method: 'POST',
@@ -248,7 +248,7 @@ export const updateStorePatterns = async (
 			},
 		} );
 
-		if ( ! images.length ) {
+		if ( ! images.images.length ) {
 			await resetPatternsAndProducts()();
 			return;
 		}
