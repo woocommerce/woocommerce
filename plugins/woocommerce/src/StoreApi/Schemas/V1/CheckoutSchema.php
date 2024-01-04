@@ -326,15 +326,20 @@ class CheckoutSchema extends AbstractSchema {
 	/**
 	 * Sanitize and format additional fields object.
 	 *
-	 * @param array            $fields Values being sanitized.
-	 * @param \WP_REST_Request $request The Request.
+	 * @param array $fields Values being sanitized.
 	 * @return array
 	 */
-	public function sanitize_additional_fields( $fields, $request ) {
-		$fields = array_reduce(
+	public function sanitize_additional_fields( $fields ) {
+		$properties = $this->get_additional_fields_schema();
+		$fields     = array_reduce(
 			array_keys( $fields ),
-			function( $carry, $key ) use ( $fields, $request ) {
-				$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $fields[ $key ] ), $request, $key );
+			function( $carry, $key ) use ( $fields, $properties ) {
+				if ( ! isset( $properties[ $key ] ) ) {
+					return $carry;
+				}
+				$field_schema   = $properties[ $key ];
+				$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $fields[ $key ] ), $field_schema, $key );
+				$carry[ $key ]  = wp_kses( $rest_sanitized, [] );
 				return $carry;
 			},
 			[]
@@ -362,7 +367,9 @@ class CheckoutSchema extends AbstractSchema {
 				continue;
 			}
 
-			$result = rest_validate_value_from_schema( $fields[ $key ], $properties[ $key ], $key );
+			$field_value = isset( $fields[ $key ] ) ? $fields[ $key ] : null;
+
+			$result = rest_validate_value_from_schema( $field_value, $properties[ $key ], $key );
 			if ( is_wp_error( $result ) ) {
 				$errors->add( $result->get_error_code(), $result->get_error_message() );
 			}
