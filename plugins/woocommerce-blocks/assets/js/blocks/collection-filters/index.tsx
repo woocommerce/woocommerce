@@ -34,7 +34,7 @@ if ( isExperimentalBuild() ) {
 		variations: [
 			{
 				name: 'woocommerce/collection-filters-variant',
-				title: __( 'Collection Filters (v)', 'woocommerce' ),
+				title: __( 'Collection Filters', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection.',
 					'woocommerce'
