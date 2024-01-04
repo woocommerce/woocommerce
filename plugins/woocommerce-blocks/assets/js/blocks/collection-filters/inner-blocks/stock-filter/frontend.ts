@@ -4,7 +4,7 @@
 import { store, navigate, getContext } from '@woocommerce/interactivity';
 import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
 import { HTMLElementEvent } from '@woocommerce/types';
-import { CheckboxListContext } from '../../../../../../packages/interactivity-components/checkbox-list';
+import { CheckboxListContext } from '@woocommerce/interactivity-components/checkbox-list';
 
 const getUrl = ( activeFilters: string ) => {
 	const url = new URL( window.location.href );
