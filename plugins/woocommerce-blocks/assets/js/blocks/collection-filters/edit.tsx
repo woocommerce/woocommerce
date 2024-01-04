@@ -13,34 +13,8 @@ import { EditProps, FilterType } from './types';
 import { getAllowedBlocks } from './utils';
 
 const DISALLOWED_BLOCKS = [
-	// don't allow nesting filter blocks
-	'woocommerce/collection-active-filters',
-	'woocommerce/collection-price-filter',
-	'woocommerce/collection-stock-filter',
-	'woocommerce/collection-rating-filter',
-	'woocommerce/collection-attribute-filter',
-	// don't allow nesting old filter blocks
 	'woocommerce/filter-wrapper',
-	// don't allow nesting variants
-	'woocommerce/collection-filters-variant',
-	'woocommerce/rating-filter-variant',
-	'woocommerce/price-filter-variant',
-	'woocommerce/active-filters-variant',
-	'woocommerce/attribute-filter-variant',
-	'woocommerce/stock-filter-variant',
-];
-
-const DISALLOWED_COLLECTION_FILTERS_BLOCKS = [
 	'woocommerce/collection-filters',
-	// don't allow nesting variants
-	'woocommerce/collection-filters-variant',
-	'woocommerce/rating-filter-variant',
-	'woocommerce/price-filter-variant',
-	'woocommerce/active-filters-variant',
-	'woocommerce/attribute-filter-variant',
-	'woocommerce/stock-filter-variant',
-	// don't allow nesting old filter blocks
-	'woocommerce/filter-wrapper',
 ];
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
