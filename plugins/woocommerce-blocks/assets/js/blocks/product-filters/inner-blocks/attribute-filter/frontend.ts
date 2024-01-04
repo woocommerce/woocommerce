@@ -50,7 +50,7 @@ function getSelectedTermsFromUrl( slug: string ) {
 		.filter( Boolean );
 }
 
-store( 'woocommerce/collection-attribute-filter', {
+store( 'woocommerce/product-filters-attribute', {
 	actions: {
 		navigate: () => {
 			const dropdownContext = getContext< DropdownContext >(

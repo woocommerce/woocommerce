@@ -13,7 +13,7 @@ type ActiveFiltersContext = {
 	params: string[];
 };
 
-store( 'woocommerce/collection-active-filters', {
+store( 'woocommerce/product-filters-active', {
 	actions: {
 		clearAll: () => {
 			const { params } = getContext< ActiveFiltersContext >();

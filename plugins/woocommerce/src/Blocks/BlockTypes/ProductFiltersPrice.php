@@ -2,16 +2,25 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * CollectionPriceFilter class.
+ * Product Filters: Price Block
+ *
+ * @package Automattic\WooCommerce\Blocks\BlockTypes
  */
-final class CollectionPriceFilter extends AbstractBlock {
+final class ProductFiltersPrice extends AbstractBlock {
 
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'collection-price-filter';
+	protected $block_name = 'product-filters-price';
+
+	/**
+	 * Full block namespace, used to correspond with interactivity API.
+	 *
+	 * @var string
+	 */
+	private $block_namespace = 'woocommerce/product-filters-price';
 
 	const MIN_PRICE_QUERY_VAR = 'min_price';
 	const MAX_PRICE_QUERY_VAR = 'max_price';
@@ -93,7 +102,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 				array(
 					'title'      => $title,
 					'attributes' => array(
-						'data-wc-on--click' => 'woocommerce/collection-price-filter::actions.reset',
+						'data-wc-on--click' => "$this->block_namespace::actions.reset",
 					),
 				),
 			),
@@ -139,7 +148,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class'               => $show_input_fields && $inline_input ? 'inline-input' : '',
-				'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-price-filter' ) ),
+				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->block_namespace ) ),
 				'data-wc-context'     => wp_json_encode( $data ),
 			)
 		);

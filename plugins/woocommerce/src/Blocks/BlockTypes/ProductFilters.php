@@ -5,15 +5,25 @@ use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Package;
 
 /**
- * CollectionFilters class.
+ * Product Filters Block
+ *
+ * @package Automattic\WooCommerce\Blocks\BlockTypes
  */
-final class CollectionFilters extends AbstractBlock {
+final class ProductFilters extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'collection-filters';
+	protected $block_name = 'product-filters';
+
+
+	/**
+	 * Full block namespace, used to correspond with interactivity API.
+	 *
+	 * @var string
+	 */
+	private $block_namespace = 'woocommerce/product-filters';
 
 	/**
 	 * Cache the current response from the API.
@@ -87,13 +97,13 @@ final class CollectionFilters extends AbstractBlock {
 		$this->current_response = null;
 
 		$attributes_data = array(
-			'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-filters' ) ),
-			'class'               => 'wc-block-collection-filters',
+			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->block_namespace ) ),
+			'class'               => 'wc-block-product-filters',
 		);
 
 		if ( ! isset( $block->context['queryId'] ) ) {
 			$attributes_data['data-wc-navigation-id'] = sprintf(
-				'wc-collection-filters-%s',
+				'wc-product-filters-%s',
 				md5( wp_json_encode( $block->parsed_block['innerBlocks'] ) )
 			);
 		}
@@ -123,7 +133,7 @@ final class CollectionFilters extends AbstractBlock {
 		 * hydrate and cache the collection data response.
 		 */
 		if (
-			"woocommerce/{$this->block_name}" === $parent_block->name &&
+			$this->block_namespace === $parent_block->name &&
 			! isset( $this->current_response )
 		) {
 			$this->current_response = $this->get_aggregated_collection_data( $parent_block );

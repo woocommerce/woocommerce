@@ -5,16 +5,25 @@ use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 
 /**
- * CollectionStockFilter class.
+ * Product Filters: Stock Status Block
+ *
+ * @package Automattic\WooCommerce\Blocks\BlockTypes
  */
-final class CollectionStockFilter extends AbstractBlock {
+final class ProductFiltersStockStatus extends AbstractBlock {
 
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'collection-stock-filter';
+	protected $block_name = 'product-filters-stock-status';
+
+	/**
+	 * Full block namespace, used to correspond with interactivity API.
+	 *
+	 * @var string
+	 */
+	private $block_namespace = 'woocommerce/product-filters-stock-status';
 
 	const STOCK_STATUS_QUERY_VAR = 'filter_stock_status';
 
@@ -80,8 +89,8 @@ final class CollectionStockFilter extends AbstractBlock {
 				return array(
 					'title'      => $stock_status_options[ $status ],
 					'attributes' => array(
-						'data-wc-on--click' => 'woocommerce/collection-stock-filter::actions.removeFilter',
-						'data-wc-context'   => 'woocommerce/collection-stock-filter::' . wp_json_encode( array( 'value' => $status ) ),
+						'data-wc-on--click' => "$this->block_namespace::actions.removeFilter",
+						'data-wc-context'   => "$this->block_namespace::" . wp_json_encode( array( 'value' => $status ) ),
 					),
 				);
 			},
@@ -190,7 +199,7 @@ final class CollectionStockFilter extends AbstractBlock {
 			)
 		);
 
-		$data_directive = wp_json_encode( array( 'namespace' => 'woocommerce/collection-stock-filter' ) );
+		$data_directive = wp_json_encode( array( 'namespace' => $this->block_namespace ) );
 
 		ob_start();
 		?>
@@ -202,7 +211,7 @@ final class CollectionStockFilter extends AbstractBlock {
 				echo CheckboxList::render(
 					array(
 						'items'     => $list_items,
-						'on_change' => 'woocommerce/collection-stock-filter::actions.onCheckboxChange',
+						'on_change' => "$this->block_namespace::actions.onCheckboxChange",
 					)
 				);
 				?>
@@ -214,7 +223,7 @@ final class CollectionStockFilter extends AbstractBlock {
 				echo Dropdown::render(
 					array(
 						'items'          => $list_items,
-						'action'         => 'woocommerce/collection-stock-filter::actions.onDropdownChange',
+						'action'         => "$this->block_namespace::actions.onDropdownChange",
 						'selected_items' => $selected_items,
 						'select_type'    => $select_type,
 						'placeholder'    => $placeholder_text,

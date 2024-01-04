@@ -2,15 +2,24 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * CollectionAttributeFilter class.
+ * Product Filters: Active Block
+ *
+ * @package Automattic\WooCommerce\Blocks\BlockTypes
  */
-final class CollectionActiveFilters extends AbstractBlock {
+final class ProductFiltersActive extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'collection-active-filters';
+	protected $block_name = 'product-filters-active';
+
+	/**
+	 * Full block namespace, used to correspond with interactivity API.
+	 *
+	 * @var string
+	 */
+	private $block_namespace = 'woocommerce/product-filters-active';
 
 	/**
 	 * Render the block.
@@ -56,7 +65,7 @@ final class CollectionActiveFilters extends AbstractBlock {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class'               => 'wc-block-active-filters',
-				'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-active-filters' ) ),
+				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->block_namespace ) ),
 				'data-wc-context'     => wp_json_encode( $context ),
 			)
 		);

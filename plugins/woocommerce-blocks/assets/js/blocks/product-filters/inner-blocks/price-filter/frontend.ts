@@ -35,7 +35,7 @@ const getUrl = ( context: PriceFilterContext ) => {
 	return url.href;
 };
 
-store< PriceFilterStore >( 'woocommerce/collection-price-filter', {
+store< PriceFilterStore >( 'woocommerce/product-filters-price', {
 	state: {
 		rangeStyle: () => {
 			const { minPrice, maxPrice, minRange, maxRange } =

@@ -1,14 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"name": "woocommerce/collection-active-filters",
+	"name": "woocommerce/product-filters-active",
 	"version": "1.0.0",
-	"title": "Collection Active Filters",
+	"title": "Product Filters: Active Filters",
 	"description": "Display the currently active filters.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 2,
-	"ancestor": [ "woocommerce/collection-filters" ],
+	"ancestor": [ "woocommerce/product-filters" ],
 	"supports": {
 		"interactivity": true,
 		"color": {

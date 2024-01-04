@@ -22,23 +22,23 @@ const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 const firstAttribute = ATTRIBUTES.find( Boolean );
 
 const templates: Partial< Record< FilterType, Template[] > > = {
-	'active-filters': [ [ 'woocommerce/collection-active-filters', {} ] ],
-	'price-filter': [ [ 'woocommerce/collection-price-filter', {} ] ],
-	'stock-filter': [ [ 'woocommerce/collection-stock-filter', {} ] ],
-	'rating-filter': [ [ 'woocommerce/collection-rating-filter', {} ] ],
-	'collection-filters': [
-		[ 'woocommerce/collection-active-filters', {} ],
-		[ 'woocommerce/collection-price-filter', {} ],
-		[ 'woocommerce/collection-stock-filter', {} ],
-		[ 'woocommerce/collection-rating-filter', {} ],
-		[ 'woocommerce/collection-attribute-filter', {} ],
+	'active-filters': [ [ 'woocommerce/product-filters-active', {} ] ],
+	'price-filter': [ [ 'woocommerce/product-filters-price', {} ] ],
+	'stock-filter': [ [ 'woocommerce/product-filters-stock', {} ] ],
+	'rating-filter': [ [ 'woocommerce/product-filters-rating', {} ] ],
+	'product-filters': [
+		[ 'woocommerce/product-filters-active', {} ],
+		[ 'woocommerce/product-filters-price', {} ],
+		[ 'woocommerce/product-filters-stock-status', {} ],
+		[ 'woocommerce/product-filters-rating', {} ],
+		[ 'woocommerce/product-filters-attribute', {} ],
 	],
 };
 
 if ( firstAttribute ) {
 	templates[ 'attribute-filter' ] = [
 		[
-			'woocommerce/collection-attribute-filter',
+			'woocommerce/product-filters-attribute',
 			{ attributeId: parseInt( firstAttribute?.attribute_id, 10 ) },
 		],
 	];
