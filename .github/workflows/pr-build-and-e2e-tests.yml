@@ -111,7 +111,7 @@ jobs:
             - name: Download blob reports from GitHub Actions Artifacts
               uses: actions/download-artifact@v4
               with:
-                  path: input/
+                  path: /home/runner/work/input/
                   run-id: e2e-tests-run
 
             - name: Merge into single report
