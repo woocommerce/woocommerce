@@ -255,7 +255,7 @@ export const updateStorePatterns = async (
 			method: 'GET',
 		} );
 
-		if ( ! images.length && ! is_ai_generated ) {
+		if ( ! images.length ) {
 			await resetPatternsAndProducts()();
 			return;
 		}
