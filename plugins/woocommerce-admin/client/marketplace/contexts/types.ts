@@ -14,6 +14,8 @@ export type MarketplaceContextType = {
 	setIsLoading: ( isLoading: boolean ) => void;
 	selectedTab: string;
 	setSelectedTab: ( tab: string ) => void;
+	products: Product[];
+	setProducts: ( products: Product[] ) => void;
 };
 
 export type SubscriptionsContextType = {
@@ -23,12 +25,6 @@ export type SubscriptionsContextType = {
 	refreshSubscriptions: () => Promise< void >;
 	isLoading: boolean;
 	setIsLoading: ( isLoading: boolean ) => void;
-};
-
-export type InstallFlowContextType = {
-	isConnected: boolean;
-	product?: Product;
-	setProduct: ( product: Product ) => void;
 };
 
 export enum NoticeStatus {

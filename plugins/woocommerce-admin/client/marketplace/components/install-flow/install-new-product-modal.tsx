@@ -4,7 +4,7 @@
 import { ButtonGroup, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { useState, useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,6 +16,7 @@ import { installingStore } from '~/marketplace/contexts/install-store';
 import { installProduct } from '~/marketplace/utils/functions';
 import { Subscription } from '../my-subscriptions/types';
 import { WP_ADMIN_PLUGIN_LIST_URL } from '../constants';
+import { SubscriptionsContext } from '~/marketplace/contexts/subscriptions-context';
 
 type InstallNewProductModalProps = {
 	onClose: () => void;
@@ -26,9 +27,12 @@ function InstallNewProductModal( props: InstallNewProductModalProps ) {
 	const [ isInstalling, setIsInstalling ] = useState( false );
 	const [ installationDone, setInstallationDone ] = useState( false );
 	const [ subscription, setSubscription ] = useState< Subscription >();
+	const { subscriptions, refreshSubscriptions } =
+		useContext( SubscriptionsContext );
 
 	// TODO: Hit Woo.com Helper API endpoint for creating orders
-	function order(): Promise< Subscription > {
+	function order(): Promise< number > {
+		return new Promise.resolve( 5278104 );
 		return new Promise( ( resolve ) => {
 			resolve( {
 				product_key: 'wporg-5278104',
@@ -73,6 +77,14 @@ function InstallNewProductModal( props: InstallNewProductModalProps ) {
 
 	function orderAndInstall() {
 		setIsInstalling( true );
+
+		return order().then( ( product_id ) => {
+			// refresh subscriptions
+			refreshSubscriptions( false ).then( () => {
+				// Find product subscription
+				subscriptions.
+			} );
+		} );
 		// TODO: Issue tracks event
 		return order()
 			.then( ( subscriptionData ) => {

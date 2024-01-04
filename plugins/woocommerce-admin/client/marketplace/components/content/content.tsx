@@ -17,7 +17,6 @@ import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { fetchSearchResults } from '../../utils/functions';
 import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
-import { InstallFlowContextProvider } from '../../contexts/install-flow-context';
 import {
 	recordMarketplaceView,
 	recordLegacyTabView,
@@ -132,12 +131,10 @@ export default function Content(): JSX.Element {
 	return (
 		<div className="woocommerce-marketplace__content">
 			<SubscriptionsContextProvider>
-				<InstallFlowContextProvider>
-					<>
-						<InstallFlow />
-						{ renderContent() }
-					</>
-				</InstallFlowContextProvider>
+				<>
+					<InstallFlow />
+					{ renderContent() }
+				</>
 			</SubscriptionsContextProvider>
 		</div>
 	);

@@ -3,13 +3,11 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useContext } from '@wordpress/element';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import { InstallFlowContext } from '~/marketplace/contexts/install-flow-context';
 import { Product } from '../product-list/types';
 import { getAdminSetting } from '~/utils/admin-settings';
 
@@ -21,8 +19,6 @@ export default function ProductPrice( props: { product: Product } ) {
 
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
-	const { setProduct } = useContext( InstallFlowContext );
-
 	const installedProducts = wccomSettings.installedProducts;
 
 	const isInstalled = !! installedProducts.find(
@@ -31,10 +27,13 @@ export default function ProductPrice( props: { product: Product } ) {
 
 	function openInstallModal() {
 		navigateTo( {
-			url: getNewPath( { install: 'new' } ),
+			url: getNewPath( {
+				install: 'new',
+				product_id: product.id,
+				product_name: product.title,
+				product_icon: product.icon,
+			} ),
 		} );
-
-		setProduct( props.product );
 	}
 
 	if ( product.isInstallable && ! isInstalled ) {

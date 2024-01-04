@@ -2,16 +2,22 @@
  * External dependencies
  */
 import { useQuery, getNewPath, navigateTo } from '@woocommerce/navigation';
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import ConnectModal from './connect-modal';
-import { InstallFlowContext } from '~/marketplace/contexts/install-flow-context';
 import InstallNewProductModal from '~/marketplace/components/install-flow/install-new-product-modal';
 import InstallSubscriptionModal from '~/marketplace/components/install-flow/install-subscription-modal';
 import { MARKETPLACE_PATH } from '~/marketplace/components/constants';
+import { getAdminSetting } from '~/utils/admin-settings';
+
+type ProductInfo = {
+	id: number;
+	name: string;
+	icon: string;
+};
 
 function InstallFlow() {
 	const [ showConnectModal, setShowConnectModal ] = useState( false );
@@ -19,9 +25,15 @@ function InstallFlow() {
 		useState( false );
 	const [ showInstallSubscriptionModal, setShowInstallSubscriptionModal ] =
 		useState( false );
+	const [ productInfo, setProductInfo ] = useState< ProductInfo >();
+	const [ isConnected, setIsConnected ] = useState< boolean >();
 	const [ productKey, setProductKey ] = useState< string >();
 	const query = useQuery();
-	const { isConnected, product } = useContext( InstallFlowContext );
+
+	useEffect( () => {
+		const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+		setIsConnected( wccomSettings?.isConnected );
+	}, [] );
 
 	useEffect( () => {
 		if ( ! query.install ) {
@@ -38,7 +50,11 @@ function InstallFlow() {
 		// If connected but install param is "new", we install new product
 		if ( query.install === 'new' ) {
 			setShowInstallNewProductModal( true );
-
+			setProductInfo( {
+				id: parseInt( query.product_id, 10 ),
+				name: query.product_name,
+				icon: query.product_icon,
+			} );
 			return;
 		}
 
@@ -68,14 +84,14 @@ function InstallFlow() {
 		<>
 			{ showConnectModal && (
 				<ConnectModal
-					product={ product }
+					productInfo={ productInfo }
 					onClose={ onClose }
 					installingProductKey={ query?.install }
 				/>
 			) }
 			{ showInstallNewProductModal && (
 				<InstallNewProductModal
-					product={ product }
+					productInfo={ product }
 					onClose={ onClose }
 				/>
 			) }
