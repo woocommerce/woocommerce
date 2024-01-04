@@ -28,7 +28,6 @@ export function CrossSellsBlockEdit( {
 						'woocommerce'
 					) }
 					image={ <CashRegister /> }
-					isDismissible={ true }
 				/>
 			</div>
 		);
