@@ -18,7 +18,6 @@ export const utilsLocalPickup = {
 			'page=wc-settings&tab=shipping&section=pickup_location'
 		);
 		const text = 'Enable local pickup';
-
 		const input = page.locator(
 			`//label[text()='${ text }']/preceding-sibling::span`
 		);
@@ -35,7 +34,6 @@ export const utilsLocalPickup = {
 		);
 
 		const text = 'Enable local pickup';
-
 		const input = page.locator(
 			`//label[text()='${ text }']/preceding-sibling::span`
 		);
@@ -62,12 +60,68 @@ export const utilsLocalPickup = {
 					'.components-modal__content button:text("Delete location")'
 				)
 				.click();
-			expect( page.locator( '.components-modal__content' ) ).toBeNull();
+			await expect(
+				page.locator( '.components-modal__content' )
+			).toHaveCount( 0 );
 		}
 
 		await page.waitForSelector(
 			'.pickup-locations tbody tr td:has-text("When you add a pickup location, it will appear here.")'
 		);
+		await utilsLocalPickup.savelocalPickupSettings( admin, page );
+	},
+	removeCostForLocalPickup: async ( admin, page ) => {
+		const text = 'Add a price for customers who choose local pickup';
+		const input = page.locator(
+			`//label[text()='${ text }']/preceding-sibling::span`
+		);
+
+		if ( await input.locator( 'svg' ).isVisible() ) {
+			await page.getByText( text ).click();
+			await utilsLocalPickup.savelocalPickupSettings( admin, page );
+		}
+	},
+	addPickupLocation: async ( admin, page, location ) => {
+		await admin.visitAdminPage(
+			'admin.php',
+			'page=wc-settings&tab=shipping&section=pickup_location'
+		);
+
+		await page.getByText( 'Add pickup location' ).click();
+
+		await page
+			.locator( '.components-modal__content input[name="location_name"]' )
+			.fill( location.name );
+		await page
+			.locator(
+				'.components-modal__content input[name="location_address"]'
+			)
+			.fill( location.address );
+		await page
+			.locator( '.components-modal__content input[name="location_city"]' )
+			.fill( location.city );
+		await page
+			.locator(
+				'.components-modal__content input[name="location_postcode"]'
+			)
+			.fill( location.postcode );
+		await page
+			.locator(
+				'.components-modal__content select[name="location_country_state"]'
+			)
+			.selectOption( location.state );
+
+		await page
+			.locator(
+				'.components-modal__content input[name="pickup_details"]'
+			)
+			.fill( location.details );
+		await page
+			.locator(
+				'.components-modal__content button.components-button.is-primary'
+			)
+			.click();
+
 		await utilsLocalPickup.savelocalPickupSettings( admin, page );
 	},
 };
