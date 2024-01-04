@@ -154,6 +154,11 @@
 			}
 		}
 
+		/* Allow the "add to store" button to "punch through" the "whole card clickable" trick: */
+		&__add-to-store {
+			position: relative;
+		}
+
 		&__vendor {
 			display: flex;
 			gap: $grid-unit-05;

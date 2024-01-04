@@ -19,6 +19,7 @@ export type SearchAPIProductType = {
 	vendor_name: string;
 	vendor_url: string;
 	icon: string;
+	is_installable: boolean;
 };
 
 export interface Product {
@@ -40,6 +41,7 @@ export interface Product {
 	group?: string;
 	searchTerm?: string;
 	category?: string;
+	isInstallable: boolean;
 }
 
 export interface ProductTracksData {

@@ -137,6 +137,7 @@ async function fetchSearchResults(
 							price: product.raw_price ?? product.price,
 							averageRating: product.rating ?? 0,
 							reviewsCount: product.reviews_count ?? 0,
+							isInstallable: product.is_installable,
 						};
 					}
 				);

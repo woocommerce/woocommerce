@@ -59,6 +59,7 @@ export default function ProductListContent( props: {
 							} )
 						),
 						description: product.description,
+						isInstallable: product.isInstallable,
 					} }
 					tracksData={ {
 						position: index + 1,

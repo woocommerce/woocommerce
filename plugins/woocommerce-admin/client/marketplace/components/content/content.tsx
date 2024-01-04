@@ -17,10 +17,12 @@ import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { fetchSearchResults } from '../../utils/functions';
 import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
+import { InstallFlowContextProvider } from '../../contexts/install-flow-context';
 import {
 	recordMarketplaceView,
 	recordLegacyTabView,
 } from '../../utils/tracking';
+import InstallFlow from '../install-flow/install-flow';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -121,11 +123,7 @@ export default function Content(): JSX.Element {
 			case 'discover':
 				return <Discover />;
 			case 'my-subscriptions':
-				return (
-					<SubscriptionsContextProvider>
-						<MySubscriptions />
-					</SubscriptionsContextProvider>
-				);
+				return <MySubscriptions />;
 			default:
 				return <></>;
 		}
@@ -133,7 +131,14 @@ export default function Content(): JSX.Element {
 
 	return (
 		<div className="woocommerce-marketplace__content">
-			{ renderContent() }
+			<SubscriptionsContextProvider>
+				<InstallFlowContextProvider>
+					<>
+						<InstallFlow />
+						{ renderContent() }
+					</>
+				</InstallFlowContextProvider>
+			</SubscriptionsContextProvider>
 		</div>
 	);
 }

@@ -13,6 +13,7 @@ import { useQuery } from '@woocommerce/navigation';
 import './product-card.scss';
 import { Product, ProductTracksData, ProductType } from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
+import ProductPrice from './product-price';
 
 export interface ProductCardProps {
 	type?: string;
@@ -36,9 +37,6 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		price: 0,
 		image: '',
 	};
-
-	// We hardcode this for now while we only display prices in USD.
-	const currencySymbol = '$';
 
 	function recordTracksEvent( event: string, data: ExtraProperties ) {
 		const tracksData = props.tracksData;
@@ -176,21 +174,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 				) }
 				<div className="woocommerce-marketplace__product-card__price">
 					{ ! isLoading && (
-						<>
-							<span className="woocommerce-marketplace__product-card__price-label">
-								{
-									// '0' is a free product
-									product.price === 0
-										? __( 'Free download', 'woocommerce' )
-										: currencySymbol + product.price
-								}
-							</span>
-							<span className="woocommerce-marketplace__product-card__price-billing">
-								{ product.price === 0
-									? ''
-									: __( ' annually', 'woocommerce' ) }
-							</span>
-						</>
+						<ProductPrice product={ props.product } />
 					) }
 				</div>
 			</div>

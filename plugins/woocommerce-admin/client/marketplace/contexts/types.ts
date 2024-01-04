@@ -7,6 +7,7 @@ import { Options } from '@wordpress/notices';
  * Internal dependencies
  */
 import { Subscription } from '../components/my-subscriptions/types';
+import { Product } from '../components/product-list/types';
 
 export type MarketplaceContextType = {
 	isLoading: boolean;
@@ -22,6 +23,12 @@ export type SubscriptionsContextType = {
 	refreshSubscriptions: () => Promise< void >;
 	isLoading: boolean;
 	setIsLoading: ( isLoading: boolean ) => void;
+};
+
+export type InstallFlowContextType = {
+	isConnected: boolean;
+	product?: Product;
+	setProduct: ( product: Product ) => void;
 };
 
 export enum NoticeStatus {
