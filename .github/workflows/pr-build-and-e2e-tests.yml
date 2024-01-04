@@ -112,8 +112,11 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   path: /home/runner/work/input/
+                  pattern: all-blob-reports-*
                   run-id: e2e-tests-run
                   merge-multiple: true
+
+            - run: ls -R /home/runner/work/input/
 
             - name: Merge into single report
               working-directory: plugins/woocommerce
