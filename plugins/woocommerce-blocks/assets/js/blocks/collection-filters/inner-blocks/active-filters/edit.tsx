@@ -5,7 +5,7 @@ import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Disabled } from '@wordpress/components';
-import { Template, getBlockTypes } from '@wordpress/blocks';
+import { Template } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
