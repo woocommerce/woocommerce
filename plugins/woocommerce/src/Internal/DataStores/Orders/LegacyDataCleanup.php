@@ -184,7 +184,7 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 		$enable = wc_string_to_bool( $new_value );
 
 		if ( $enable ) {
-			$this->batch_processing->remove_processor( $this->data_synchronizer::class );
+			$this->batch_processing->remove_processor( get_class( $this->data_synchronizer ) );
 			$this->batch_processing->enqueue_processor( self::class );
 		} else {
 			$this->batch_processing->remove_processor( self::class );
