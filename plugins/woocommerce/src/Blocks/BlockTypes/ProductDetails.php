@@ -39,7 +39,7 @@ class ProductDetails extends AbstractBlock {
 
 		return null;
 	}
-	
+
 	/**
 	 * Render the block.
 	 *
