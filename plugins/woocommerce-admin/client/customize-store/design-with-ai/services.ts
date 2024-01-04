@@ -248,13 +248,6 @@ export const updateStorePatterns = async (
 			},
 		} );
 
-		const { is_ai_generated } = await apiFetch< {
-			is_ai_generated: boolean;
-		} >( {
-			path: '/wc/private/ai/store-info',
-			method: 'GET',
-		} );
-
 		if ( ! images.length ) {
 			await resetPatternsAndProducts()();
 			return;
