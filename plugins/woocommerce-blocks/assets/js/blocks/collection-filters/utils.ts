@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { getBlockTypes } from '@wordpress/blocks';
+import { navigate as navigateFn } from '@woocommerce/interactivity';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Returns an array of allowed block names excluding the disallowedBlocks array.
@@ -16,3 +18,13 @@ export const getAllowedBlocks = ( disallowedBlocks: string[] ) => {
 		.map( ( block ) => block.name )
 		.filter( ( name ) => ! disallowedBlocks.includes( name ) );
 };
+
+const isBlockTheme = getSetting< boolean >( 'isBlockTheme' );
+const isProductArchive = getSetting< boolean >( 'isProductArchive' );
+
+export function navigate( href: string, options = {} ) {
+	if ( ! isBlockTheme && isProductArchive ) {
+		return ( window.location.href = href );
+	}
+	return navigateFn( href, options );
+}
