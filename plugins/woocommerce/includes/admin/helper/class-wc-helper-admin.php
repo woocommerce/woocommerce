@@ -46,6 +46,7 @@ class WC_Helper_Admin {
 			'userAvatar'  => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
 			'storeCountry' => wc_get_base_location()['country'],
 			'inAppPurchaseURLParams' => WC_Admin_Addons::get_in_app_purchase_url_params(),
+			'installedProducts' => array_merge( WC_Helper::get_local_plugins(), WC_Helper::get_local_themes() ),
 		);
 
 		return $settings;

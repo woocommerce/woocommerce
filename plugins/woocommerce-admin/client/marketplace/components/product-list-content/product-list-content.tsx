@@ -35,6 +35,8 @@ export default function ProductListContent( props: {
 					key={ product.id }
 					type={ props.type }
 					product={ {
+						id: product.id,
+						slug: product.slug,
 						title: product.title,
 						image: product.image,
 						type: product.type,

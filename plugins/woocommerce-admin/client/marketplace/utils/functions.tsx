@@ -125,6 +125,7 @@ async function fetchSearchResults(
 					( product: SearchAPIProductType ): Product => {
 						return {
 							id: product.id,
+							slug: product.slug,
 							title: product.title,
 							image: product.image,
 							type: product.type,

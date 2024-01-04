@@ -24,6 +24,7 @@ export type SearchAPIProductType = {
 
 export interface Product {
 	id?: number;
+	slug?: string;
 	position?: number;
 	title: string;
 	image: string;

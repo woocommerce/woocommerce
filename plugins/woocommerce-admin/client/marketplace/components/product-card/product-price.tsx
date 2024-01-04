@@ -11,6 +11,7 @@ import { navigateTo, getNewPath } from '@woocommerce/navigation';
  */
 import { InstallFlowContext } from '~/marketplace/contexts/install-flow-context';
 import { Product } from '../product-list/types';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export default function ProductPrice( props: { product: Product } ) {
 	const { product } = props;
@@ -18,7 +19,15 @@ export default function ProductPrice( props: { product: Product } ) {
 	// We hardcode this for now while we only display prices in USD.
 	const currencySymbol = '$';
 
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+
 	const { setProduct } = useContext( InstallFlowContext );
+
+	const installedProducts = wccomSettings.installedProducts;
+
+	const isInstalled = !! installedProducts.find(
+		( item ) => item.slug === product.slug
+	);
 
 	function openInstallModal() {
 		navigateTo( {
@@ -28,7 +37,7 @@ export default function ProductPrice( props: { product: Product } ) {
 		setProduct( props.product );
 	}
 
-	if ( product.isInstallable ) {
+	if ( product.isInstallable && ! isInstalled ) {
 		return (
 			<>
 				<span className="woocommerce-marketplace__product-card__add-to-store">

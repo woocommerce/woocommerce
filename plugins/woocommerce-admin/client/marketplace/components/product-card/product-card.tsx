@@ -173,7 +173,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 					</p>
 				) }
 				<div className="woocommerce-marketplace__product-card__price">
-					{ ! isLoading && (
+					{ ! isLoading && props.product && (
 						<ProductPrice product={ props.product } />
 					) }
 				</div>
