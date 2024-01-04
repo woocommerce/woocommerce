@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { InnerBlocks } from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
 import type { AttributeSetting } from '@woocommerce/types';
 import { Template } from '@wordpress/blocks';
