@@ -10,14 +10,8 @@ import {
 	CardHeader,
 	CardFooter,
 	Button,
-	IsolatedEventContainer,
 } from '@wordpress/components';
-import {
-	useState,
-	useEffect,
-	createPortal,
-	useLayoutEffect,
-} from '@wordpress/element';
+import { useState, useEffect, createPortal } from '@wordpress/element';
 import { close } from '@wordpress/icons';
 import { noop } from 'lodash';
 
@@ -42,12 +36,7 @@ function HighlightTooltip( {
 		delay > 0 ? null : show
 	);
 	const [ node, setNode ] = useState( null );
-	const [ anchorRect, setAnchorRect ] = useState( null );
 	const showTooltip = ( container ) => {
-		const element = document.getElementById( id );
-		if ( element && useAnchor ) {
-			setAnchorRect( element.getBoundingClientRect() );
-		}
 		if ( container ) {
 			container.classList.add( SHOW_CLASS );
 		}
@@ -116,18 +105,6 @@ function HighlightTooltip( {
 			}
 		}
 	}, [ show ] );
-
-	function updateSize() {
-		if ( useAnchor ) {
-			const element = document.getElementById( id );
-			setAnchorRect( element.getBoundingClientRect() );
-		}
-	}
-
-	useLayoutEffect( () => {
-		window.addEventListener( 'resize', updateSize );
-		return () => window.removeEventListener( 'resize', updateSize );
-	}, [] );
 
 	const triggerClose = () => {
 		setShowHighlight( false );
