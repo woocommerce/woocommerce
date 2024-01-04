@@ -1,32 +1,41 @@
+$card-border-color: $gray-400;
+$card-border-width: 2px;
+
 .woocommerce-advice-card {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	min-height: calc(32 * $grid-unit);
-	border-radius: 2px;
-	border: 1px dashed $gray-400;
-	padding: $grid-unit-20;
+	&.components-card {
+		box-shadow: none;
+		background-image: url( "data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23" + str-slice( '#{ $card-border-color }', 2 ) + "' stroke-width='#{ $card-border-width }' stroke-dasharray='4 4' stroke-dashoffset='46' stroke-linecap='butt'/%3e%3c/svg%3e" );
+		border-radius: 4px;
 
-	&__body {
-		position: relative;
-		display: flex;
-		flex-direction: column;
-		gap: $grid-unit-30;
-		justify-content: center;
-		align-items: center;
-		padding: $grid-unit-40 $grid-unit-80;
+		.components-card__body {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
 	}
 
-	&__dismiss-button {
-		position: absolute;
-		top: -6px;
-		right: -6px;
+	.components-card {
+		&__header {
+			text-align: center;
+			padding: $gap $gap 0;
+			border-bottom: 0;
+			justify-content: right;
+		}
+
+		&__body {
+			padding: calc( 1.5 * $gap ) $gap;
+		}
+
+		&__footer {
+			text-align: center;
+			font-weight: 400;
+			color: $gray-700;
+			border-top: 0;
+			padding: 0 $gap calc( 3 * $gap );
+		}
+	}
+
+	.woocommerce-advice-card__dismiss-button {
 		color: $gray-700;
-	}
-
-	&__tip {
-		text-align: center;
-		margin: 0;
 	}
 }
