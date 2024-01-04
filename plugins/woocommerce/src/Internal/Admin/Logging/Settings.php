@@ -121,10 +121,9 @@ class Settings {
 		$hardcoded = ! is_null( Constants::get_constant( 'WC_LOG_HANDLER' ) );
 		if ( $hardcoded ) {
 			$desc[] = sprintf(
-				// translators: %1$s is the name of a code variable. %2$s is the name of a file.
-				__( 'This setting cannot be changed here because it is defined in the %1$s constant, probably in your %2$s file.', 'woocommerce' ),
-				'<code>WC_LOG_HANDLER</code>',
-				'<b>wp-config.php</b>'
+				// translators: %s is the name of a code variable.
+				__( 'This setting cannot be changed here because it is defined in the %s constant.', 'woocommerce' ),
+				'<code>WC_LOG_HANDLER</code>'
 			);
 		}
 
@@ -212,7 +211,7 @@ class Settings {
 
 		return array(
 			'title'             => __( 'Level threshold', 'woocommerce' ),
-			'desc_tip'          => __( 'This sets the minimum severity level of logs that will be processed. Lower severity levels will be ignored. "None" means all logs will be processed.', 'woocommerce' ),
+			'desc_tip'          => __( 'This sets the minimum severity level of logs that will be stored. Lower severity levels will be ignored. "None" means all logs will be stored.', 'woocommerce' ),
 			'id'                => self::PREFIX . 'level_threshold',
 			'type'              => 'select',
 			'value'             => $this->get_level_threshold(),
