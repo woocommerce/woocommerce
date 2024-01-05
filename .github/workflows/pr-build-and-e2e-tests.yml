@@ -280,7 +280,7 @@ jobs:
               uses: actions/github-script@v6
               env:
                   API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
-                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
+                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/output/widgets/summary.json
                   PR_NUMBER: ${{ github.event.number }}
                   SHA: ${{ github.event.pull_request.head.sha }}
               with:
