@@ -4,6 +4,11 @@
 import https from 'node:http';
 
 /**
+ * Internal dependencies
+ */
+import { TestEnvConfigVars } from './config';
+
+/**
  * The response for the WordPress.org stability check API.
  */
 interface StableCheckResponse {
@@ -11,13 +16,11 @@ interface StableCheckResponse {
 }
 
 /**
- * Uses the WordPress API to get the downlod URL to the latest version of an X.X version line. This
- * also accepts "latest-X" to get an offset from the latest version of WordPress.
+ * Gets all of the available WordPress versions and their associated stability.
  *
- * @param {string} wpVersion The version of WordPress to look for.
- * @return {Promise.<string>} The precise WP version download URL.
+ * @return {Promise.<Object>} The response from the WordPress.org API.
  */
-async function getPreciseWPVersionURL( wpVersion: string ): Promise< string > {
+function getWordPressVersions(): Promise< StableCheckResponse > {
 	return new Promise< StableCheckResponse >( ( resolve, reject ) => {
 		// We're going to use the WordPress.org API to get information about available versions of WordPress.
 		const request = https.get(
@@ -39,72 +42,81 @@ async function getPreciseWPVersionURL( wpVersion: string ): Promise< string > {
 		request.on( 'error', ( error ) => {
 			reject( error );
 		} );
-	} ).then( ( allVersions ) => {
-		// Note: allVersions is an object where the keys are the version and the value is information about the version's status.
+	} );
+}
 
-		// If we're requesting a "latest" offset then we need to figure out what version line we're offsetting from.
-		const latestSubMatch = wpVersion.match( /^latest(?:-([0-9]+))?$/i );
-		if ( latestSubMatch ) {
-			for ( const version in allVersions ) {
-				if ( allVersions[ version ] !== 'latest' ) {
-					continue;
-				}
+/**
+ * Uses the WordPress API to get the downlod URL to the latest version of an X.X version line. This
+ * also accepts "latest-X" to get an offset from the latest version of WordPress.
+ *
+ * @param {string} wpVersion The version of WordPress to look for.
+ * @return {Promise.<string>} The precise WP version download URL.
+ */
+async function getPreciseWPVersionURL( wpVersion: string ): Promise< string > {
+	const allVersions = await getWordPressVersions();
 
-				// We don't care about the patch version because we will
-				// the latest version from the version line below.
-				const versionParts = version.match( /^([0-9]+)\.([0-9]+)/ );
-
-				// We're going to subtract the offset to figure out the right version.
-				let offset = latestSubMatch[ 1 ]
-					? parseInt( latestSubMatch[ 1 ], 10 )
-					: 0;
-				let majorVersion = parseInt( versionParts[ 1 ], 10 );
-				let minorVersion = parseInt( versionParts[ 2 ], 10 );
-				while ( offset > 0 ) {
-					minorVersion--;
-					if ( minorVersion < 0 ) {
-						majorVersion--;
-						minorVersion = 9;
-					}
-					offset--;
-				}
-
-				// Set the version that we found in the offset.
-				wpVersion = majorVersion + '.' + minorVersion;
-			}
-		}
-
-		// Scan through all of the versions to find the latest version in the version line.
-		let latestVersion = null;
-		let latestPatch = -1;
-		for ( const v in allVersions ) {
-			// Parse the version so we can make sure we're looking for the latest.
-			const matches = v.match( /([0-9]+)\.([0-9]+)(?:\.([0-9]+))?/ );
-
-			// We only care about the correct minor version.
-			const minor = `${ matches[ 1 ] }.${ matches[ 2 ] }`;
-			if ( minor !== wpVersion ) {
+	// If we're requesting a "latest" offset then we need to figure out what version line we're offsetting from.
+	const latestSubMatch = wpVersion.match( /^latest(?:-([0-9]+))?$/i );
+	if ( latestSubMatch ) {
+		for ( const version in allVersions ) {
+			if ( allVersions[ version ] !== 'latest' ) {
 				continue;
 			}
 
-			// Track the latest version in the line.
-			const patch =
-				matches[ 3 ] === undefined ? 0 : parseInt( matches[ 3 ], 10 );
+			// We don't care about the patch version because we will
+			// the latest version from the version line below.
+			const versionParts = version.match( /^([0-9]+)\.([0-9]+)/ );
 
-			if ( patch > latestPatch ) {
-				latestPatch = patch;
-				latestVersion = v;
+			// We're going to subtract the offset to figure out the right version.
+			let offset = latestSubMatch[ 1 ]
+				? parseInt( latestSubMatch[ 1 ], 10 )
+				: 0;
+			let majorVersion = parseInt( versionParts[ 1 ], 10 );
+			let minorVersion = parseInt( versionParts[ 2 ], 10 );
+			while ( offset > 0 ) {
+				minorVersion--;
+				if ( minorVersion < 0 ) {
+					majorVersion--;
+					minorVersion = 9;
+				}
+				offset--;
 			}
+
+			// Set the version that we found in the offset.
+			wpVersion = majorVersion + '.' + minorVersion;
+		}
+	}
+
+	// Scan through all of the versions to find the latest version in the version line.
+	let latestVersion = null;
+	let latestPatch = -1;
+	for ( const v in allVersions ) {
+		// Parse the version so we can make sure we're looking for the latest.
+		const matches = v.match( /([0-9]+)\.([0-9]+)(?:\.([0-9]+))?/ );
+
+		// We only care about the correct minor version.
+		const minor = `${ matches[ 1 ] }.${ matches[ 2 ] }`;
+		if ( minor !== wpVersion ) {
+			continue;
 		}
 
-		if ( ! latestVersion ) {
-			throw new Error(
-				`Unable to find latest version for version line ${ wpVersion }.`
-			);
-		}
+		// Track the latest version in the line.
+		const patch =
+			matches[ 3 ] === undefined ? 0 : parseInt( matches[ 3 ], 10 );
 
-		return `https://wordpress.org/wordpress-${ latestVersion }.zip`;
-	} );
+		if ( patch > latestPatch ) {
+			latestPatch = patch;
+			latestVersion = v;
+		}
+	}
+
+	if ( ! latestVersion ) {
+		throw new Error(
+			`Unable to find latest version for version line ${ wpVersion }.`
+		);
+	}
+
+	return `https://wordpress.org/wordpress-${ latestVersion }.zip`;
 }
 
 /**
@@ -163,28 +175,26 @@ export interface TestEnvVars {
  * Parses the test environment's configuration and returns any environment variables that
  * should be set.
  *
- * @param {Object} testEnvConfig The test environment configuration.
+ * @param {Object} config The test environment configuration.
  * @return {Promise.<Object>} The environment variables for the test environment.
  */
 export async function parseTestEnvConfig(
-	testEnvConfig
+	config: TestEnvConfigVars
 ): Promise< TestEnvVars > {
 	const envVars: TestEnvVars = {};
 
 	// Convert `wp-env` configuration options to environment variables.
-	if ( testEnvConfig.wpVersion ) {
+	if ( config.wpVersion ) {
 		try {
-			envVars.WP_ENV_CORE = await parseWPVersion(
-				testEnvConfig.wpVersion
-			);
+			envVars.WP_ENV_CORE = await parseWPVersion( config.wpVersion );
 		} catch ( error ) {
 			throw new Error(
 				`Failed to parse WP version: ${ error.message }.`
 			);
 		}
 	}
-	if ( testEnvConfig.phpVersion ) {
-		envVars.WP_ENV_PHP_VERSION = testEnvConfig.phpVersion;
+	if ( config.phpVersion ) {
+		envVars.WP_ENV_PHP_VERSION = config.phpVersion;
 	}
 
 	return envVars;

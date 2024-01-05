@@ -95,7 +95,7 @@ function parseLintJobConfig( raw: any ): LintJobConfig {
 /**
  * The configuration vars for test environments.
  */
-interface TestEnvConfigVars {
+export interface TestEnvConfigVars {
 	/**
 	 * The version of WordPress that should be used.
 	 */
