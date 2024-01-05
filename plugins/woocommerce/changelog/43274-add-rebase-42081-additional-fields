@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow additional fields to be rendered at the end of the Checkout block.
