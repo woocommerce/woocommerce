@@ -75,7 +75,7 @@ class WC_Helper_Admin {
 		}
 
 		if ( isset( $current_screen->id ) && 'woocommerce_page_wc-admin' === $current_screen->id ) {
-			$connect_url_args['redirect-to-wc-admin'] = rawurlencode( admin_url( $_SERVER['REQUEST_URI'] ) );
+			$connect_url_args['redirect-to-wc-admin'] = rawurlencode( home_url( $_SERVER['REQUEST_URI'] ) );
 		}
 
 		return add_query_arg(

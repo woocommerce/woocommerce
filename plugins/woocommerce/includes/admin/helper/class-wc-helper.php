@@ -713,24 +713,22 @@ class WC_Helper {
 		global $current_screen;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$redirect_to_wc_admin = isset( $_GET['redirect-to-wc-admin'] )
-			? sanitize_text_field( wp_unslash( $_GET['redirect-to-wc-admin'] ) )
+		$redirect_admin_url = isset( $_GET['redirect_admin_url'] )
+			? $_GET['redirect_admin_url']
 			: '';
 		$install_product_key = isset( $_GET['install'] ) ? sanitize_text_field( wp_unslash( $_GET['install'] ) ) : '';
-		debug($redirect_to_wc_admin, 'get_helper_redirect_url');
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if (
 			'woocommerce_page_wc-addons' === $current_screen->id &&
 			FeaturesUtil::feature_is_enabled( 'marketplace' ) &&
 			(
-				false === empty( $redirect_to_wc_admin ) ||
+				false === empty( $redirect_admin_url ) ||
 				false === empty( $install_product_key )
 			)
 		) {
-
-			if ( strpos( $redirect_to_wc_admin, admin_url( 'admin.php' ) ) === 0 ) {
-				$new_url = $redirect_to_wc_admin;
+			if ( strpos( $redirect_admin_url, admin_url( 'admin.php' ) ) === 0 ) {
+				$new_url = $redirect_admin_url;
 			} else {
 				$new_url = add_query_arg(
 					array(
@@ -742,7 +740,6 @@ class WC_Helper {
 				);
 			}
 
-			debug($new_url, '$new_url');
 			if ( ! empty( $install_product_key ) ) {
 				$new_url = add_query_arg(
 					array(
@@ -776,11 +773,6 @@ class WC_Helper {
 			'wc-helper-nonce'  => wp_create_nonce( 'connect' ),
 		);
 
-		if ( isset( $_GET['redirect-to-wc-admin'] ) ) {
-			debug( $_GET['redirect-to-wc-admin'], 'add url' );
-			$redirect_url_args['redirect-to-wc-admin'] = sanitize_text_field( wp_unslash( $_GET['redirect-to-wc-admin'] ) );
-		}
-
 		if ( isset( $_GET['install'] ) ) {
 			$redirect_url_args['install'] = sanitize_text_field( wp_unslash( $_GET['install'] ) );
 		}
@@ -794,8 +786,8 @@ class WC_Helper {
 			'oauth/request_token',
 			array(
 				'body' => array(
-					'home_url'     => home_url(),
-					'redirect_uri' => $redirect_uri,
+					'home_url'             => home_url(),
+					'redirect_uri'         => $redirect_uri,
 				),
 			)
 		);
@@ -820,9 +812,10 @@ class WC_Helper {
 
 		$connect_url = add_query_arg(
 			array(
-				'home_url'     => rawurlencode( home_url() ),
-				'redirect_uri' => rawurlencode( $redirect_uri ),
-				'secret'       => rawurlencode( $secret ),
+				'home_url'            => rawurlencode( home_url() ),
+				'redirect_uri'        => rawurlencode( $redirect_uri ),
+				'secret'              => rawurlencode( $secret ),
+				'redirect_admin_url'  => isset( $_GET['redirect-to-wc-admin'] ) ? rawurlencode( $_GET['redirect-to-wc-admin'] ) : '',
 			),
 			WC_Helper_API::url( 'oauth/authorize' )
 		);
@@ -911,9 +904,10 @@ class WC_Helper {
 		wp_safe_redirect(
 			self::get_helper_redirect_url(
 				array(
-					'page'             => 'wc-addons',
-					'section'          => 'helper',
-					'wc-helper-status' => 'helper-connected',
+					'page'               => 'wc-addons',
+					'section'            => 'helper',
+					'wc-helper-status'   => 'helper-connected',
+					'redirect_admin_url' => isset( $_GET['redirect_admin_url'] ) ? rawurlencode( sanitize_text_field( $_GET['redirect_admin_url'] ) ) : '',
 				)
 			)
 		);
