@@ -93,6 +93,11 @@ export function getFileChanges(
 
 	const changes: ProjectFileChanges = {};
 	for ( const projectName in projectPaths ) {
+		// Projects with no paths have no changed files for us to identify.
+		if ( ! projectPaths[ projectName ] ) {
+			continue;
+		}
+
 		const projectChanges = getChangedFilesForProject(
 			projectPaths[ projectName ],
 			changedFilePaths

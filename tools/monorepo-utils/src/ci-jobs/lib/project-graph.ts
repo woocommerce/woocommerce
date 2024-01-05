@@ -24,6 +24,12 @@ export interface ProjectNode {
  * Builds a dependency graph of all projects in the monorepo and returns the root node.
  */
 export function buildProjectGraph(): ProjectNode {
+	// Get the root of the monorepo.
+	const monorepoRoot = path.join(
+		execSync( 'pnpm -w root', { encoding: 'utf-8' } ),
+		'..'
+	);
+
 	// PNPM provides us with a flat list of all projects
 	// in the workspace and their dependencies.
 	const workspace = JSON.parse(
@@ -39,7 +45,7 @@ export function buildProjectGraph(): ProjectNode {
 		// Use a relative path to the project so that it's easier for us to work with
 		const projectPath = project.path.replace(
 			new RegExp(
-				'#^' + process.cwd().replace( '#', '\\#' ) + path.sep + '?#'
+				`^${ monorepoRoot.replace( /\\/g, '\\\\' ) }${ path.sep }?`
 			),
 			''
 		);
@@ -66,6 +72,14 @@ export function buildProjectGraph(): ProjectNode {
 		nodes[ project.name ] = node;
 	}
 
+	// One thing to keep in mind is that, technically, our dependency graph has multiple roots.
+	// Each package that has no dependencies is a "root", however, for simplicity, we will
+	// add these root packages under the monorepo root in order to have a clean graph.
+	// Since the monorepo root has no CI config this won't cause any problems.
+	// Track this by recording all of the dependencies and removing them
+	// from the rootless list if they are added as a dependency.
+	const rootlessDependencies = workspace.map( ( project ) => project.name );
+
 	// Now we can scan through all of the nodes and hook them up to their respective dependency nodes.
 	for ( const project of workspace ) {
 		const node = nodes[ project.name ];
@@ -79,6 +93,25 @@ export function buildProjectGraph(): ProjectNode {
 				node.dependencies.push( nodes[ dependency ] );
 			}
 		}
+
+		// Mark any dependencies that have a dependent as not being rootless.
+		// A rootless dependency is one that nothing depends on.
+		for ( const dependency of node.dependencies ) {
+			const index = rootlessDependencies.indexOf( dependency.name );
+			if ( index > -1 ) {
+				rootlessDependencies.splice( index, 1 );
+			}
+		}
+	}
+
+	// Track the rootless dependencies now that we have them.
+	for ( const rootless of rootlessDependencies ) {
+		// Don't add the root node as a dependency of itself.
+		if ( rootless === rootNode.name ) {
+			continue;
+		}
+
+		rootNode.dependencies.push( nodes[ rootless ] );
 	}
 
 	return rootNode;
