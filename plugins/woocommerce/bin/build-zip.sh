@@ -19,6 +19,7 @@ find "$PROJECT_PATH/assets/css/." ! -name '.gitkeep' -type f -exec rm -f {} + &&
 echo "Installing PHP and JS dependencies..."
 pnpm install
 echo "Running JS Build..."
+export NODE_ENV=production
 pnpm --filter='@woocommerce/plugin-woocommerce' build || exit "$?"
 echo "Cleaning up PHP dependencies..."
 composer install --no-dev || exit "$?"
