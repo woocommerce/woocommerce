@@ -103,24 +103,13 @@ jobs:
                   install: '@woocommerce/plugin-woocommerce...'
                   build: '@woocommerce/plugin-woocommerce'
 
-            - name: Create Directories
-              run: |
-                  mkdir -p  /home/runner/work/input
-                  mkdir -p  /home/runner/work/output
-
             - name: Download blob reports from GitHub Actions Artifacts
               uses: actions/download-artifact@v4
               with:
-                  path: /home/runner/work/input/
+                  path: ${{ env.ALLURE_RESULTS_DIR }}
                   pattern: all-blob-reports-*
                   run-id: e2e-tests-run
                   merge-multiple: true
-
-            - run: ls -R /home/runner/work/input/
-
-            # - name: Merge into single report
-            #   working-directory: plugins/woocommerce
-            #   run: pnpx playwright merge-reports --reporter allure-playwright  /home/runner/work/input/
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
@@ -131,7 +120,7 @@ jobs:
                     steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
                     steps.run_playwright_e2e_tests.conclusion != 'skipped' 
                   )
-              run: pnpm exec allure generate --clean  /home/runner/work/input/ --output  /home/runner/work/output/
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Archive Playwright E2E test report
               if: |
@@ -141,8 +130,8 @@ jobs:
               with:
                   name: e2e-test-report---pr-${{ github.event.number }}
                   path: |
-                      /home/runner/work/input/
-                      /home/runner/work/output/
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
 
@@ -280,7 +269,7 @@ jobs:
               uses: actions/github-script@v6
               env:
                   API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
-                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/output/widgets/summary.json
+                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
                   PR_NUMBER: ${{ github.event.number }}
                   SHA: ${{ github.event.pull_request.head.sha }}
               with:
