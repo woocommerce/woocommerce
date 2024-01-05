@@ -6,11 +6,11 @@ import fs from 'node:fs';
 /**
  * Internal dependencies
  */
-import { loadPackage } from '../package-loader';
+import { loadPackage } from '../package-file';
 
 jest.mock( 'node:fs' );
 
-describe( 'Package Loader', () => {
+describe( 'Package File', () => {
 	describe( 'loadPackage', () => {
 		it( "should throw for file that doesn't exist", () => {
 			jest.mocked( fs.readFileSync ).mockImplementation( ( path ) => {

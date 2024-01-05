@@ -5,11 +5,18 @@ import { execSync } from 'node:child_process';
 import path from 'node:path';
 
 /**
+ * Internal dependencies
+ */
+import { CIConfig, parseCIConfig } from './config';
+import { loadPackage } from './package-file';
+
+/**
  * A node in the project dependency graph.
  */
 interface ProjectNode {
 	name: string;
 	path: string;
+	ciConfig?: CIConfig;
 	dependencies: ProjectNode[];
 }
 
@@ -43,9 +50,16 @@ export function buildProjectGraph(): ProjectGraph {
 			''
 		);
 
+		const packageFile = loadPackage(
+			path.join( project.path, 'package.json' )
+		);
+
+		const ciConfig = parseCIConfig( packageFile );
+
 		const node = {
 			name: project.name,
 			path: projectPath,
+			ciConfig,
 			dependencies: [],
 		};
 

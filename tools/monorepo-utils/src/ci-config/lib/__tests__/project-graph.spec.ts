@@ -7,9 +7,13 @@ import fs from 'node:fs';
 /**
  * Internal dependencies
  */
+import { parseCIConfig } from '../config';
+import { loadPackage } from '../package-file';
 import { buildProjectGraph } from '../project-graph';
 
 jest.mock( 'node:child_process' );
+jest.mock( '../config' );
+jest.mock( '../package-file' );
 
 describe( 'Project Graph', () => {
 	describe( 'buildProjectGraph', () => {
@@ -24,8 +28,32 @@ describe( 'Project Graph', () => {
 				throw new Error( 'Invalid command' );
 			} );
 
+			jest.mocked( loadPackage ).mockImplementation( ( path ) => {
+				if ( ! path.endsWith( 'package.json' ) ) {
+					throw new Error( 'Invalid path' );
+				}
+
+				const matches = path.match( /\/([^/]+)\/package.json$/ );
+
+				return {
+					name: matches[ 1 ],
+				};
+			} );
+
+			jest.mocked( parseCIConfig ).mockImplementation(
+				( packageFile ) => {
+					expect( packageFile ).toMatchObject( {
+						name: expect.stringMatching( /project-[abc]/ ),
+					} );
+
+					return { jobs: [] };
+				}
+			);
+
 			const graph = await buildProjectGraph();
 
+			expect( loadPackage ).toHaveBeenCalled();
+			expect( parseCIConfig ).toHaveBeenCalled();
 			expect( graph ).toMatchObject( {
 				'project-a': {
 					name: 'project-a',

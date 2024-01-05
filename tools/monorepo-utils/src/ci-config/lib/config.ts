@@ -3,7 +3,7 @@
 /**
  * Internal dependencies
  */
-import { PackageJSON } from './package-loader';
+import { PackageJSON } from './package-file';
 
 /**
  * A configuration error type.
@@ -273,12 +273,12 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 /**
  * The configuration of a job.
  */
-export type JobConfig = LintJobConfig | TestJobConfig;
+type JobConfig = LintJobConfig | TestJobConfig;
 
 /**
  * A project's CI configuration.
  */
-interface CIConfig {
+export interface CIConfig {
 	/**
 	 * The configuration for jobs in this config.
 	 */
