@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useId, useRef } from '@wordpress/element';
 import { ComboboxControl } from 'wordpress-components';
 import { ValidationInputError } from '@woocommerce/blocks-components';
@@ -45,9 +45,13 @@ const Combobox = ( {
 	options,
 	value,
 	required = false,
-	errorMessage = __( 'Please select a value.', 'woocommerce' ),
 	errorId: incomingErrorId,
 	autoComplete = 'off',
+	errorMessage = sprintf(
+		/* translators: %s select label */
+		__( 'Please select a valid %s', 'woocommerce' ),
+		label.toLowerCase()
+	),
 }: ComboboxProps ): JSX.Element => {
 	const controlRef = useRef< HTMLDivElement >( null );
 	const fallbackId = useId();
