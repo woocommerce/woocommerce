@@ -223,15 +223,11 @@ class Checkout extends AbstractBlock {
 		 */
 		$additional_information_inner_blocks = '$0' . PHP_EOL . PHP_EOL . '<div data-block-name="woocommerce/checkout-additional-information-block" class="wp-block-woocommerce-checkout-additional-information-block"></div>' . PHP_EOL . PHP_EOL;
 		$has_additional_information_regex    = '/<div[^<]*?data-block-name="woocommerce\/checkout-additional-information-block"[^>]*?>/mi';
-		$has_additional_information_block          = preg_match( $has_additional_information_regex, $content );
+		$has_additional_information_block    = preg_match( $has_additional_information_regex, $content );
 
 		if ( ! $has_additional_information_block ) {
 			$payment_block_regex = '/<div[^<]*?data-block-name="woocommerce\/checkout-payment-block" class="wp-block-woocommerce-checkout-payment-block"[^>]*?><\/div>/mi';
-			//$old = $content;
-			//echo htmlentities( json_encode( $content ) );
-			$content                      = preg_replace( $payment_block_regex, $additional_information_inner_blocks, $content );
-			//echo htmlentities( json_encode( $content ) );
-			//die();
+			$content             = preg_replace( $payment_block_regex, $additional_information_inner_blocks, $content );
 		}
 
 		return $content;
