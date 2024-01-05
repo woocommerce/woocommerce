@@ -158,8 +158,7 @@
 	left: auto;
 }
 
-.wc-block-product-on-sale[data-content-visibility*='"image":false'] {
-	.wc-block-grid__product-onsale,
+.wc-block-grid[data-content-visibility*='"image":false'] {
 	.wc-block-grid__product-onsale {
 		display: none;
 	}
