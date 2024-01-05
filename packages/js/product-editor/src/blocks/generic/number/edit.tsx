@@ -32,7 +32,6 @@ export function Edit( {
 		tooltip,
 		disabled,
 		step,
-		showStepButtons,
 	} = attributes;
 	const [ value, setValue ] = useProductEntityProp( property, {
 		postType,
@@ -96,7 +95,6 @@ export function Edit( {
 				tooltip={ tooltip }
 				disabled={ disabled }
 				step={ step }
-				showStepButtons={ showStepButtons }
 			/>
 		</div>
 	);
