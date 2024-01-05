@@ -232,7 +232,7 @@ final class QueryFilters {
 		$args['join']     = $this->append_product_sorting_table_join( $args['join'] );
 
 		if ( $wp_query->get( 'min_price' ) ) {
-			$min_price_filter = intval( $wp_query->get( 'min_price') );
+			$min_price_filter = intval( $wp_query->get( 'min_price' ) );
 
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price_filter, 'min_price', '>=' );
@@ -242,7 +242,7 @@ final class QueryFilters {
 		}
 
 		if ( $wp_query->get( 'max_price' ) ) {
-			$max_price_filter = intval( $wp_query->get( 'max_price') );
+			$max_price_filter = intval( $wp_query->get( 'max_price' ) );
 
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price_filter, 'max_price', '<=' );
