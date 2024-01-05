@@ -1,15 +1,14 @@
-/** @typedef { import('@woocommerce/type-defs/address-fields').CountryAddressFields } CountryAddressFields */
-
 /**
  * External dependencies
  */
 import {
-	AddressField,
-	AddressFields,
-	CountryAddressFields,
+	FormField,
+	FormFields,
+	CountryAddressForm,
 	defaultFields,
-	KeyedAddressField,
-	LocaleSpecificAddressField,
+	KeyedFormField,
+	LocaleSpecificFormField,
+	FormFieldsConfig,
 } from '@woocommerce/settings';
 import { __, sprintf } from '@wordpress/i18n';
 import { isNumber, isString } from '@woocommerce/types';
@@ -24,9 +23,9 @@ import { COUNTRY_LOCALE } from '@woocommerce/block-settings';
  * @return {Object} Supported locale fields.
  */
 const getSupportedCoreLocaleProps = (
-	localeField: LocaleSpecificAddressField
-): Partial< AddressField > => {
-	const fields: Partial< AddressField > = {};
+	localeField: LocaleSpecificFormField
+): Partial< FormField > => {
+	const fields: Partial< FormField > = {};
 
 	if ( localeField.label !== undefined ) {
 		fields.label = localeField.label;
@@ -70,9 +69,7 @@ const getSupportedCoreLocaleProps = (
  *
  * This supports new properties such as optionalLabel which are not used by core (yet).
  */
-const countryAddressFields: CountryAddressFields = Object.entries(
-	COUNTRY_LOCALE
-)
+const countryAddressForm: CountryAddressForm = Object.entries( COUNTRY_LOCALE )
 	.map( ( [ country, countryLocale ] ) => [
 		country,
 		Object.entries( countryLocale )
@@ -100,17 +97,17 @@ const countryAddressFields: CountryAddressFields = Object.entries(
  * @param {Array}  fields         List of field keys--only address fields matching these will be returned.
  * @param {Object} fieldConfigs   Fields config contains field specific overrides at block level which may, for example, hide a field.
  * @param {string} addressCountry Address country code. If unknown, locale fields will not be merged.
- * @return {CountryAddressFields} Object containing address fields.
+ * @return {CountryAddressForm} Object containing address fields.
  */
-const prepareAddressFields = (
-	fields: ( keyof AddressFields )[],
-	fieldConfigs: Record< string, Partial< AddressField > >,
+const prepareFormFields = (
+	fields: ( keyof FormFields )[],
+	fieldConfigs: FormFieldsConfig,
 	addressCountry = ''
-): KeyedAddressField[] => {
-	const localeConfigs: AddressFields =
-		addressCountry && countryAddressFields[ addressCountry ] !== undefined
-			? countryAddressFields[ addressCountry ]
-			: ( {} as AddressFields );
+): KeyedFormField[] => {
+	const localeConfigs: FormFields =
+		addressCountry && countryAddressForm[ addressCountry ] !== undefined
+			? countryAddressForm[ addressCountry ]
+			: ( {} as FormFields );
 
 	return fields
 		.map( ( field ) => {
@@ -128,4 +125,4 @@ const prepareAddressFields = (
 		.sort( ( a, b ) => a.index - b.index );
 };
 
-export default prepareAddressFields;
+export default prepareFormFields;

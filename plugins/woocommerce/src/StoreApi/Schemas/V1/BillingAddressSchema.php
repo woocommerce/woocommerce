@@ -53,17 +53,19 @@ class BillingAddressSchema extends AbstractAddressSchema {
 	 * @return array
 	 */
 	public function sanitize_callback( $address, $request, $param ) {
-		$address          = parent::sanitize_callback( $address, $request, $param );
-		$address['email'] = sanitize_text_field( wp_unslash( $address['email'] ) );
+		$address = parent::sanitize_callback( $address, $request, $param );
+		if ( isset( $address['email'] ) ) {
+			$address['email'] = sanitize_email( wp_unslash( $address['email'] ) );
+		}
 		return $address;
 	}
 
 	/**
 	 * Validate the given address object.
 	 *
-	 * @param array            $address Value being sanitized.
+	 * @param array            $address Value being validated.
 	 * @param \WP_REST_Request $request The Request.
-	 * @param string           $param The param being sanitized.
+	 * @param string           $param The param being validated.
 	 * @return true|\WP_Error
 	 */
 	public function validate_callback( $address, $request, $param ) {
