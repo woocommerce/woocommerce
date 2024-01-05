@@ -53,17 +53,20 @@ export const utilsLocalPickup = {
 			'page=wc-settings&tab=shipping&section=pickup_location'
 		);
 
-		const editButtons = await page.$$(
+		const editButtons = page.locator(
 			'.pickup-locations tbody tr .button-link-edit'
 		);
+		const buttonsCount = await editButtons.count();
 
-		for ( const button of editButtons ) {
+		for ( let i = 0; i < buttonsCount; i++ ) {
+			const button = editButtons.nth( i );
 			await button.click();
-			await page
-				.locator(
-					'.components-modal__content button:text("Delete location")'
-				)
-				.click();
+
+			const deleteButton = page.locator(
+				'.components-modal__content button:text("Delete location")'
+			);
+			await deleteButton.click();
+
 			await expect(
 				page.locator( '.components-modal__content' )
 			).toHaveCount( 0 );
