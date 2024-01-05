@@ -39,13 +39,15 @@ After the merchant has completed all the actions that are required for your plug
 
 If you're offering multiple payment methods within the plugin, present the choices clearly to the merchant and provide an indication of which payment methods are enabled.
 
-<img width="1393" alt="Payment methods" src="https://woocommerce.files.wordpress.com/2024/01/payment-methods.png">
+!
+
+![Payment methods](https://woocommerce.files.wordpress.com/2024/01/payment-methods.png")
 
 If a payment method is not available for any reason, provide clear and informative error messages that help users diagnose and resolve issues.
 
 Your plugin needs to inform the merchant that it's ready to process payments. Until then, display an inline warning notice in the plugin settings as a reminder to the merchant. Do not implement a top level banner for the warning notice.
 
-<img width="1393" alt="Inline notice" src="https://woocommerce.files.wordpress.com/2024/01/inline-notice.png">
+![Inline notice](https://woocommerce.files.wordpress.com/2024/01/inline-notice.png)
 
 ---
 
@@ -64,7 +66,7 @@ Payment buttons consist of up to three elements: a button component, payment log
 [Anatomy.png]
 
 Don’t place any text outside the surface area of the button.
-<img width="1321" alt="Cart layout 2" src="https://woocommerce.files.wordpress.com/2024/01/cart-layout-2.png">
+![Cart layout 2](https://woocommerce.files.wordpress.com/2024/01/cart-layout-2.png")
 
 ### Layout and spacing
 
