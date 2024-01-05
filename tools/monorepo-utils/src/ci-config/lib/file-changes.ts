@@ -6,13 +6,44 @@ import { execSync } from 'node:child_process';
 /**
  * Internal dependencies
  */
-import { ProjectGraph } from './project-graph';
+import { ProjectNode } from './project-graph';
 
 /**
  * A map of changed files keyed by the project name.
  */
-interface ProjectFileChanges {
+export interface ProjectFileChanges {
 	[ name: string ]: string[];
+}
+
+/**
+ * Gets the project path for every project in the graph.
+ *
+ * @param {Object} graph The project graph to process.
+ * @return {Object} The project paths keyed by the project name.
+ */
+function getProjectPaths( graph: ProjectNode ): { [ name: string ]: string } {
+	const projectPaths: { [ name: string ]: string } = {};
+
+	const queue = [ graph ];
+	const visited: { [ name: string ]: boolean } = {};
+	while ( queue.length > 0 ) {
+		const node = queue.shift();
+		if ( ! node ) {
+			continue;
+		}
+
+		if ( visited[ node.name ] ) {
+			continue;
+		}
+
+		projectPaths[ node.name ] = node.path;
+
+		visited[ node.name ] = true;
+
+		queue.push( ...node.dependencies );
+	}
+
+	return projectPaths;
 }
 
 /**
@@ -49,9 +80,11 @@ function getChangedFilesForProject(
  * @return {Object} A map of changed files keyed by the project name.
  */
 export function getFileChanges(
-	projectGraph: ProjectGraph,
+	projectGraph: ProjectNode,
 	baseRef: string
 ): ProjectFileChanges {
+	const projectPaths = getProjectPaths( projectGraph );
+
 	// We're going to use git to figure out what files have changed.
 	const output = execSync( `git diff --name-only ${ baseRef }`, {
 		encoding: 'utf8',
@@ -59,12 +92,15 @@ export function getFileChanges(
 	const changedFilePaths = output.split( '\n' );
 
 	const changes: ProjectFileChanges = {};
-	for ( const projectName in projectGraph ) {
-		const project = projectGraph[ projectName ];
+	for ( const projectName in projectPaths ) {
 		const projectChanges = getChangedFilesForProject(
-			project.path,
+			projectPaths[ projectName ],
 			changedFilePaths
 		);
+		if ( projectChanges.length === 0 ) {
+			continue;
+		}
+
 		changes[ projectName ] = projectChanges;
 	}
 

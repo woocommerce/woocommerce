@@ -55,40 +55,38 @@ describe( 'Project Graph', () => {
 			expect( loadPackage ).toHaveBeenCalled();
 			expect( parseCIConfig ).toHaveBeenCalled();
 			expect( graph ).toMatchObject( {
-				'project-a': {
-					name: 'project-a',
-					path: '/project-a',
-					dependencies: [
-						{
-							name: 'project-b',
-							path: '/project-b',
-							dependencies: [
-								{
-									name: 'project-c',
-									path: '/project-c',
+				name: 'project-a',
+				path: '/project-a',
+				ciConfig: {
+					jobs: [],
+				},
+				dependencies: [
+					{
+						name: 'project-b',
+						path: '/project-b',
+						ciConfig: {
+							jobs: [],
+						},
+						dependencies: [
+							{
+								name: 'project-c',
+								path: '/project-c',
+								ciConfig: {
+									jobs: [],
 								},
-							],
+								dependencies: [],
+							},
+						],
+					},
+					{
+						name: 'project-c',
+						path: '/project-c',
+						ciConfig: {
+							jobs: [],
 						},
-						{
-							name: 'project-c',
-							path: '/project-c',
-						},
-					],
-				},
-				'project-b': {
-					name: 'project-b',
-					path: '/project-b',
-					dependencies: [
-						{
-							name: 'project-c',
-							path: '/project-c',
-						},
-					],
-				},
-				'project-c': {
-					name: 'project-c',
-					path: '/project-c',
-				},
+						dependencies: [],
+					},
+				],
 			} );
 		} );
 	} );

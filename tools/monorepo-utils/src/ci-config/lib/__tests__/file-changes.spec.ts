@@ -26,21 +26,26 @@ baz/project-d/baz.js`;
 
 			const fileChanges = await getFileChanges(
 				{
-					'project-a': {
-						name: 'project-a',
-						path: 'test/project-a',
-						dependencies: [],
-					},
-					'project-b': {
-						name: 'project-b',
-						path: 'foo/project-b',
-						dependencies: [],
-					},
-					'project-c': {
-						name: 'project-c',
-						path: 'bar/project-c',
-						dependencies: [],
-					},
+					name: 'project-a',
+					path: 'test/project-a',
+					dependencies: [
+						{
+							name: 'project-b',
+							path: 'foo/project-b',
+							dependencies: [
+								{
+									name: 'project-c',
+									path: 'bar/project-c',
+									dependencies: [],
+								},
+							],
+						},
+						{
+							name: 'project-c',
+							path: 'bar/project-c',
+							dependencies: [],
+						},
+					],
 				},
 				'origin/trunk'
 			);

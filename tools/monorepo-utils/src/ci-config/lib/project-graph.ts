@@ -13,7 +13,7 @@ import { loadPackage } from './package-file';
 /**
  * A node in the project dependency graph.
  */
-interface ProjectNode {
+export interface ProjectNode {
 	name: string;
 	path: string;
 	ciConfig?: CIConfig;
@@ -21,16 +21,9 @@ interface ProjectNode {
 }
 
 /**
- * All of the project nodes keyed by their project name.
- */
-export interface ProjectGraph {
-	[ name: string ]: ProjectNode;
-}
-
-/**
  * Builds a dependency graph of all projects in the monorepo and returns the root node.
  */
-export function buildProjectGraph(): ProjectGraph {
+export function buildProjectGraph(): ProjectNode {
 	// PNPM provides us with a flat list of all projects
 	// in the workspace and their dependencies.
 	const workspace = JSON.parse(
@@ -40,7 +33,8 @@ export function buildProjectGraph(): ProjectGraph {
 	// Start by building an object containing all of the nodes keyed by their project name.
 	// This will let us link them together quickly by iterating through the list of
 	// dependencies and adding the applicable nodes.
-	const nodes: ProjectGraph = {};
+	const nodes: { [ name: string ]: ProjectNode } = {};
+	let rootNode;
 	for ( const project of workspace ) {
 		// Use a relative path to the project so that it's easier for us to work with
 		const projectPath = project.path.replace(
@@ -63,6 +57,12 @@ export function buildProjectGraph(): ProjectGraph {
 			dependencies: [],
 		};
 
+		// The first entry that `pnpm list` returns is the workspace root.
+		// This will be the root node of our graph.
+		if ( ! rootNode ) {
+			rootNode = node;
+		}
+
 		nodes[ project.name ] = node;
 	}
 
@@ -81,5 +81,5 @@ export function buildProjectGraph(): ProjectGraph {
 		}
 	}
 
-	return nodes;
+	return rootNode;
 }
