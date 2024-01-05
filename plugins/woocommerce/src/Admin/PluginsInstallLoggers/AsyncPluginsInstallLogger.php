@@ -20,7 +20,7 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	 * @param string $option_name option name.
 	 */
 	public function __construct( string $option_name ) {
-		$this->option_name  = $option_name;
+		$this->option_name = $option_name;
 		add_option(
 			$this->option_name,
 			array(
@@ -223,7 +223,18 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 				continue;
 			}
 
-			$track_data[ 'install_time_' . $this->get_plugin_track_key( $plugin ) ] = $this->get_timeframe( $data['time'][ $plugin ] );
+			$plugin_track_key                                  = $this->get_plugin_track_key( $plugin );
+			$install_time                                      = $this->get_timeframe( $data['time'][ $plugin ] );
+			$track_data[ 'install_time_' . $plugin_track_key ] = $install_time;
+
+			wc_admin_record_tracks_event(
+				'coreprofiler_store_extension_installed_and_activated',
+				array(
+					'success'             => true,
+					'installed_extension' => $plugin_track_key,
+					'install_time'        => $install_time,
+				)
+			);
 		}
 
 		wc_admin_record_tracks_event( 'coreprofiler_store_extensions_installed_and_activated', $track_data );

@@ -154,11 +154,20 @@ const recordFailedPluginInstallations = (
 	_context: unknown,
 	_event: PluginsInstallationCompletedWithErrorsEvent
 ) => {
+	const failedExtensions = _event.payload.errors.map(
+		( error: PluginInstallError ) => getPluginTrackKey( error.plugin )
+	);
+
 	recordEvent( 'coreprofiler_store_extensions_installed_and_activated', {
 		success: false,
-		failed_extensions: _event.payload.errors.map(
-			( error: PluginInstallError ) => getPluginTrackKey( error.plugin )
-		),
+		failed_extensions: failedExtensions,
+	} );
+
+	failedExtensions.forEach( ( extension ) => {
+		recordEvent( 'coreprofiler_store_extension_installed_and_activated', {
+			success: false,
+			installed_extension: extension,
+		} );
 	} );
 };
 
