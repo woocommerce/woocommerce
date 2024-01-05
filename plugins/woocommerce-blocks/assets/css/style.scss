@@ -158,12 +158,6 @@
 	left: auto;
 }
 
-.wc-block-grid[data-content-visibility*='"image":false'] {
-	.wc-block-grid__product-onsale {
-		display: none;
-	}
-}
-
 // Element spacing.
 .wc-block-grid__product {
 	// Prevent link and image taking the full width unnecessarily, which might cause: https://github.com/woocommerce/woocommerce-blocks/issues/11438
