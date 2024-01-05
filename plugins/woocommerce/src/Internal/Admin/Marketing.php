@@ -17,6 +17,20 @@ class Marketing {
 	use CouponsMovedTrait;
 
 	/**
+	 * Constant representing the key for the submenu name value in the global $submenu array.
+	 *
+	 * @var int
+	 */
+	const SUBMENU_NAME_KEY = 0;
+
+	/**
+	 * Constant representing the key for the submenu location value in the global $submenu array.
+	 *
+	 * @var int
+	 */
+	const SUBMENU_LOCATION_KEY = 2;
+
+	/**
 	 * Class instance.
 	 *
 	 * @var Marketing instance
@@ -157,13 +171,12 @@ class Marketing {
 		}
 
 		$marketing_submenu = $submenu['woocommerce-marketing'];
-
-		$new_order = array();
+		$new_menu_order    = array();
 
 		// Overview should be first.
-		$overview_key = array_search( 'Overview', array_column( $marketing_submenu, 0 ) );
+		$overview_key = array_search( 'Overview', array_column( $marketing_submenu, self::SUBMENU_NAME_KEY ) );
 		if ( false !== $overview_key ) {
-			$new_order[] = $marketing_submenu[ $overview_key ];
+			$new_menu_order[] = $marketing_submenu[ $overview_key ];
 			array_splice( $marketing_submenu, $overview_key, 1 );
 		}
 
@@ -172,17 +185,17 @@ class Marketing {
 			 * If Overview is not found we may be on a site witha different language.
 			 * We can use a fallback and try to find the overview page by its path.
 			 */
-			$overview_key = array_search( 'admin.php?page=wc-admin&path=/marketing', array_column( $marketing_submenu, 2 ) );
+			$overview_key = array_search( 'admin.php?page=wc-admin&path=/marketing', array_column( $marketing_submenu, self::SUBMENU_LOCATION_KEY ) );
 			if ( false !== $overview_key ) {
-				$new_order[] = $marketing_submenu[ $overview_key ];
+				$new_menu_order[] = $marketing_submenu[ $overview_key ];
 				array_splice( $marketing_submenu, $overview_key, 1 );
 			}
 		}
 
 		// Coupons should be second.
-		$coupons_key = array_search( 'Coupons', array_column( $marketing_submenu, 0 ) );
+		$coupons_key = array_search( 'Coupons', array_column( $marketing_submenu, self::SUBMENU_NAME_KEY ) );
 		if ( false !== $coupons_key ) {
-			$new_order[] = $marketing_submenu[ $coupons_key ];
+			$new_menu_order[] = $marketing_submenu[ $coupons_key ];
 			array_splice( $marketing_submenu, $coupons_key, 1 );
 		}
 
@@ -191,9 +204,9 @@ class Marketing {
 			 * If Coupons is not found we may be on a site witha different language.
 			 * We can use a fallback and try to find the coupons page by its path.
 			 */
-			$coupons_key = array_search( 'admin.php?post_type=shop_coupon', array_column( $marketing_submenu, 2 ) );
+			$coupons_key = array_search( 'edit.php?post_type=shop_coupon', array_column( $marketing_submenu, self::SUBMENU_LOCATION_KEY ) );
 			if ( false !== $coupons_key ) {
-				$new_order[] = $marketing_submenu[ $coupons_key ];
+				$new_menu_order[] = $marketing_submenu[ $coupons_key ];
 				array_splice( $marketing_submenu, $coupons_key, 1 );
 			}
 		}
@@ -206,9 +219,9 @@ class Marketing {
 			}
 		);
 
-		$new_order = array_merge( $new_order, $marketing_submenu );
+		$new_menu_order = array_merge( $new_menu_order, $marketing_submenu );
 
-		$submenu['woocommerce-marketing'] = $new_order;
+		$submenu['woocommerce-marketing'] = $new_menu_order;
 	}
 
 	/**
