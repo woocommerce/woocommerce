@@ -2549,6 +2549,9 @@ importers:
       '@woocommerce/experimental':
         specifier: workspace:*
         version: link:../experimental
+      '@woocommerce/expression-evaluation':
+        specifier: workspace:*
+        version: link:../expression-evaluation
       '@woocommerce/navigation':
         specifier: workspace:^
         version: link:../navigation
