@@ -786,8 +786,8 @@ class WC_Helper {
 			'oauth/request_token',
 			array(
 				'body' => array(
-					'home_url'             => home_url(),
-					'redirect_uri'         => $redirect_uri,
+					'home_url'     => home_url(),
+					'redirect_uri' => $redirect_uri,
 				),
 			)
 		);
