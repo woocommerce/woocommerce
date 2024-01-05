@@ -124,7 +124,7 @@ jobs:
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
-              working_directory: plugins/woocommerce
+              working-directory: plugins/woocommerce
               if: |
                   always() &&
                   (
