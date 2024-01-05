@@ -232,7 +232,7 @@ final class QueryFilters {
 		$args['join']     = $this->append_product_sorting_table_join( $args['join'] );
 
 		if ( $wp_query->get( 'min_price' ) ) {
-			$min_price_filter = $this->prepare_price_filter( $wp_query->get( 'min_price' ) );
+			$min_price_filter = intval( $wp_query->get( 'min_price' ) );
 
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price_filter, 'min_price', '>=' );
@@ -242,7 +242,7 @@ final class QueryFilters {
 		}
 
 		if ( $wp_query->get( 'max_price' ) ) {
-			$max_price_filter = $this->prepare_price_filter( $wp_query->get( 'max_price' ) );
+			$max_price_filter = intval( $wp_query->get( 'max_price' ) );
 
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price_filter, 'max_price', '<=' );
@@ -348,16 +348,6 @@ final class QueryFilters {
 		$database = wc_prices_include_tax() ? 'incl' : 'excl';
 
 		return $display !== $database;
-	}
-
-	/**
-	 * Converts price filter from subunits to decimal.
-	 *
-	 * @param string|int $price_filter Raw price filter in subunit format.
-	 * @return float Price filter in decimal format.
-	 */
-	private function prepare_price_filter( $price_filter ) {
-		return floatval( $price_filter / ( 10 ** wc_get_price_decimals() ) );
 	}
 
 	/**
