@@ -71,30 +71,30 @@ Don’t place any text outside the surface area of the button.
 ### Layout and spacing
 
 The spacing between and around the Label and Payment Logo adapts based on the size of the button.
-[Layout and spacing 0.png]
+![Layout and spacing 0.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Layout-and-spacing-0.png)
 
 ### Adaptive height
 
 The height of the button can adapt based on the needs of the theme.
-[Layout and spacing.png]
+![Layout and spacing.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Layout-and-spacing.png)
 
 ### Button size
 
 Make payment buttons the same size, no bigger or smaller than other payment buttons, including the CTAs “Add to cart” and “Proceed to checkout”
-[Same button size.png]
+![Same button size.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Same-button-size.png)
 
 ### Button width
 
 Use the same width size for all payment buttons. Don’t make the width larger or smaller than other payment buttons.
-[button width.png]
+![button width.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Button-width.png)
 
 ### Minimum width
 
 Buttons have a minimum width to ensure readability.
-[Layout and spacing-2.png]
+![Layout and spacing-2.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Layout-and-spacing-2.png)
 
 Follow the minimum width of each payment button size. Don’t squeeze payment buttons in a single line.
-[Minimum width.png]
+![Minimum width.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Minimum-width.png)
 
 ### Button Shape
 
@@ -102,7 +102,7 @@ Use the same corner radius for all payment buttons. Don’t make the corner radi
 
 Default corner radius: 4px
 Maximum corner radius: ½ button height
-[Corner radius.png]
+![Corner radius.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Corner-radius.png)
 
 ### Button Label
 
@@ -125,27 +125,27 @@ The button label should appear in sentence case, with only the first letter of t
 # Payment button style
 
 Use the appropriate button style depending on the site theme.
-[Button styles.png]
+![Button styles.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Button-styles.png)
 
 ### Dark
 
 Use on white or light-color backgrounds. Don’t use on black or dark backgrounds.
-[Dark.png]
+![Dark.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Dark.png)
 
 ### Light
 
 Use on dark-color backgrounds. Don’t use on white or light backgrounds.
-[Light.png]
+![Light.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Light.png)
 
 ### Light with outline
 
 Use on white or light-color backgrounds that don’t provide sufficient contrast. Don’t use on dark or saturated backgrounds.
-[Light with outline.png]
+![Light with outline.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Light-with-outline.png)
 
 ### Button style and specifications
 
 Buttons should contain the following states for resting, loading, active, and loading contexts. For additional guidance, follow the general Woo accessibility guidelines.
-[Button States and specifications]
+![Button States and specifications](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Button-States-and-specifications.png)
 
 # Payment button layout
 
@@ -154,24 +154,24 @@ Define the position and alignment of buttons in relationship to their container,
 ### Product pages
 
 Position payment buttons correctly in relation to “Add to Cart” in horizontal or vertical layout, place payment buttons to the right of or below the “Add to Cart” button.
-[Product page layout.png]
+![Product page layout.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Product-page-layout.png)
 
 ### Cart
 
 Position payment buttons correctly in relation to “Proceed to checkout” buttons in vertical layout. Place payment buttons above the “Proceed to checkout” button. Do not place payment buttons below the button or in between.
-[Cart layout.png]
+![Cart layout.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Cart-layout.png)
 
 ### Express checkout
 
 Position payment buttons correctly in horizontal layout, consistent in size and spacing. If a second row is required, left-align the buttons.
-[Express checkout layout.png]
+![Express checkout layout.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Express-checkout-layout.png)
 
 ### Mobile view
 
 Express payment buttons on mobile should occupy the full width. Don’t use the express payment border as it reduces the view area.
-[Mobile view.png]
+![Mobile view.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Mobile-view.png)
 
 ### Clear space
 
 Maintain the minimum amount of clear space on all sides of the payment button. The clear space adapts based on the size of the button.
-[Clear space.png]
+![Clear space.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Clear-space.png)
