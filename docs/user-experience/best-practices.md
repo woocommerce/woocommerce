@@ -1,5 +1,5 @@
 ---
-post_title: User experience guidelines - best practices
+post_title: User Experience Best practices
 ---
 
 ## Best practices
