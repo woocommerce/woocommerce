@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { isSameAddress } from '@woocommerce/base-utils';
+import { AdditionalValues } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { STATUS, checkoutData } from './constants';
-import { AdditionalValues } from '@woocommerce/settings';
 
 export type CheckoutState = {
 	// Status of the checkout

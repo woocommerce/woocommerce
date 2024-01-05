@@ -1,9 +1,13 @@
 /**
+ * External dependencies
+ */
+import { AdditionalValues } from '@woocommerce/settings';
+
+/**
  * Internal dependencies
  */
 import { ACTION_TYPES as types } from './action-types';
 import { ReturnOrGeneratorYieldUnion } from '../mapped-types';
-import { AdditionalValues } from '@woocommerce/settings';
 
 // `Thunks are functions that can be dispatched, similar to actions creators
 export * from './thunks';
