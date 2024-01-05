@@ -1,0 +1,18 @@
+{
+	"name": "woocommerce/product-details",
+	"version": "1.0.0",
+	"icon": "info",
+	"title": "Product Details",
+	"description": "Display a product's description, attributes, and reviews.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"align": true,
+		"spacing": {
+			"margin": true
+		}
+	},
+	"textdomain": "woocommerce",
+	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

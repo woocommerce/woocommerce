@@ -78,22 +78,15 @@ test.describe( 'Cart Calculate Shipping', () => {
 		// set shipping zone methods
 		await api.post( `shipping/zones/${ shippingZoneDEId }/methods`, {
 			method_id: 'free_shipping',
-			settings: {
-				title: 'Free shipping',
-			},
 		} );
 		await api.post( `shipping/zones/${ shippingZoneFRId }/methods`, {
 			method_id: 'flat_rate',
 			settings: {
-				title: 'Flat rate',
 				cost: '5.00',
 			},
 		} );
 		await api.post( `shipping/zones/${ shippingZoneFRId }/methods`, {
 			method_id: 'local_pickup',
-			settings: {
-				title: 'Local pickup',
-			},
 		} );
 		// confirm that we allow shipping to any country
 		await api.put( 'settings/general/woocommerce_allowed_countries', {
@@ -174,9 +167,9 @@ test.describe( 'Cart Calculate Shipping', () => {
 		await page.locator( 'text=Local pickup' ).click();
 
 		// Verify updated shipping costs
-		await expect( page.locator( '.order-total .amount' ).first() ).toContainText(
-			`$${ firstProductPrice }`
-		);
+		await expect(
+			page.locator( '.order-total .amount' ).first()
+		).toContainText( `$${ firstProductPrice }` );
 	} );
 
 	test( 'should show correct total cart price after updating quantity', async ( {

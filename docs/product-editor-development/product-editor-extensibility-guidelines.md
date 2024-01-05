@@ -1,4 +1,6 @@
-# Product editor extensibility guidelines
+---
+post_title: Product editor extensibility guidelines
+---
 
 > ⚠️ **Notice:** These guidelines are currently a **work in progress**. Please be aware that some details might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
 
@@ -44,11 +46,11 @@ Like everything in the new product form, each extension point is a separate bloc
 
 ### Product form groups (tabs)
 
-The new product form consists of groups currently displayed as tabs. Each is a separate view and may contain any number of sections and subsections. All areas serve a specific purpose, allowing merchants to quickly find the information they’re looking for (both in default Woo features and extensions).
+The new product form consists of groups currently displayed as tabs. Each is a separate view and may contain any number of sections and subsections. All areas serve a specific purpose, allowing merchants to quickly find the information they're looking for (both in default Woo features and extensions).
 
-![Product form groups](https://woocommerce.files.wordpress.com/2023/11/product-editor-ext-guidelines-form-groups.gif)
+![Product form groups](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/product-editor-ext-guidelines-form-groups.gif)
 
-If a tab doesn’t contain any sections, it won’t be shown to merchants.
+If a tab doesn't contain any sections, it won't be shown to merchants.
 
 - **General:** Essential product information, including the name, image, and description. This tab is also where key features live for non-standard product types: downloads, groups, links, etc.
 - **Organization:** This tab contains all the data used to organize and categorize product information: from categories to attributes. Best for extensions that provide new ways to describe products, e.g., product identifiers, statuses, special tags, etc.
@@ -57,7 +59,7 @@ If a tab doesn’t contain any sections, it won’t be shown to merchants.
 - **Shipping:** All the information merchants need to enter to present customers with accurate shipping rates at checkout. Best for physical product details that may impact shipping (e.g. capacity or volume), additional shipping carrier settings, or custom shipping options.
 - **Variations:** Contains variation options and product variations.
 
-Custom product types manage the visibility of the default groups and add new ones. This is particularly useful if a custom product has a unique structure and requires extra information that isn’t included in the default groups.
+Custom product types manage the visibility of the default groups and add new ones. This is particularly useful if a custom product has a unique structure and requires extra information that isn't included in the default groups.
 
 [Learn more about custom product types](#custom-product-types)
 
@@ -65,7 +67,7 @@ Custom product types manage the visibility of the default groups and add new one
 
 Depending on the type of your extension (and your use case), you can pick the interface location that best suits how users will interact with it.
 
-To choose, put yourself in the merchant’s shoes: where would you go to find this feature? What is it related to? Adding your extension to a group of similar features will help make it easier for merchants to find your extension.
+To choose, put yourself in the merchant's shoes: where would you go to find this feature? What is it related to? Adding your extension to a group of similar features will help make it easier for merchants to find your extension.
 
 See the guide below for some practical examples.
 
@@ -77,7 +79,7 @@ The extension allows merchants to enter a product identifier, such as ISBN, EAN,
 
 ##### Our recommendations
 
-The identifier is a single piece of information that helps merchants describe and categorize the product across their store and other sales channels. It’s best suited to be added as a field in the Product catalog section in the Organization group.
+The identifier is a single piece of information that helps merchants describe and categorize the product across their store and other sales channels. It's best suited to be added as a field in the Product catalog section in the Organization group.
 
 [Learn more about fields](#fields)
 
@@ -95,7 +97,7 @@ With so much advanced functionality, the plugin would best register a new produc
 
 ### Fields
 
-![Fields example](https://woocommerce.files.wordpress.com/2023/11/product-editor-ext-guidelines-fields.png)
+![Fields example](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/product-editor-ext-guidelines-fields.png)
 
 Fields are the simplest type of extension. They let users add extra product information, replace or manage the visibility of other fields assigned to a specific product type, and control the contents of other fields.
 
@@ -104,13 +106,13 @@ Fields are the simplest type of extension. They let users add extra product info
 - Single-field, supplementary features
 - Showing or hiding form elements depending on specific conditions
 
-❌ **What they *aren’t* for:**
+❌ **What they *aren't* for:**
 
 - Multi-field or multi-step forms
 - Complex tables, e.g., permissions, restrictions, shipping volumes, etc
 - Embedded third-party experiences and websites
 
-Field extensions should always be logically related to the form area they are in. For example, if you’re building a dropshipping extension, your warehouse selection field should live in the first section of the Inventory group. To ensure an excellent experience for our merchants, we do not recommend placing it in a separate group, section, or subsection.
+Field extensions should always be logically related to the form area they are in. For example, if you're building a dropshipping extension, your warehouse selection field should live in the first section of the Inventory group. To ensure an excellent experience for our merchants, we do not recommend placing it in a separate group, section, or subsection.
 
 **Other use cases include:**
 
@@ -120,17 +122,17 @@ Field extensions should always be logically related to the form area they are in
 
 ### Subsections
 
-![Subsections example](https://woocommerce.files.wordpress.com/2023/11/product-editor-ext-guidelines-subsections.png)
+![Subsections example](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/product-editor-ext-guidelines-subsections.png)
 
 Subsections add extra fields to existing form groups. They are small forms with a low to medium level of complexity. This interface location works best for extensions that add extra features that build off an existing Woo functionality.
 
 ✅ **What they *are* for:**
 
-- Relevant features that can be crucial to merchants’ product creation flow
+- Relevant features that can be crucial to merchants' product creation flow
 - 2-5 field forms with simple functionality, e.g., dimensions or tax settings
 - Lists of items, e.g., attachments, channels, or accounts
 
-❌ **What they *aren’t* for:**
+❌ **What they *aren't* for:**
 
 - Simple extensions with 1-2 fields
 - Multi-step forms and complex tables
@@ -138,7 +140,7 @@ Subsections add extra fields to existing form groups. They are small forms with 
 
 💡 **Example:**
 
-If you’re developing an extension that allows merchants to upload 360 images or videos, you could add it as a field or a button in the Images section in the General tab. This way, merchants can create the perfect product gallery without jumping between multiple tabs.
+If you're developing an extension that allows merchants to upload 360 images or videos, you could add it as a field or a button in the Images section in the General tab. This way, merchants can create the perfect product gallery without jumping between multiple tabs.
 
 **Other use cases include:**
 
@@ -148,17 +150,17 @@ If you’re developing an extension that allows merchants to upload 360 images o
 
 ### Sections
 
-![Sections example](https://woocommerce.files.wordpress.com/2023/11/product-editor-ext-guidelines-sections.png)
+![Sections example](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/product-editor-ext-guidelines-sections.png)
 
 Sections are significant parts of the form that may consist of multiple subsections and fields. They should be used sparsely throughout the form, so merchants are not overwhelmed with options while filling out the information about their products.
 
 ✅ **What they *are* for:**
 
 - Complex forms with multiple fields, tables, and list items
-- Standalone features that don’t build off of anything else
+- Standalone features that don't build off of anything else
 - Extensions that rely on user-created items, such as tags or attributes
 
-❌ **What they *aren’t* for:**
+❌ **What they *aren't* for:**
 
 - Simple extensions with 1-2 fields
 - Read-only descriptions, setup guides, and advertisements
@@ -166,7 +168,7 @@ Sections are significant parts of the form that may consist of multiple subsecti
 
 💡 **Example:**
 
-If you’re working on an extension that allows merchants to offer discounts based on the number of purchased items, you may consider adding a new section in the Pricing tab. This will give you enough space to present the information in a legible, easy-to-navigate manner.
+If you're working on an extension that allows merchants to offer discounts based on the number of purchased items, you may consider adding a new section in the Pricing tab. This will give you enough space to present the information in a legible, easy-to-navigate manner.
 
 **Other use cases include:**
 
@@ -176,11 +178,11 @@ If you’re working on an extension that allows merchants to offer discounts bas
 
 ### Top bar (header) *(future feature)*
 
-![Top bar example](https://woocommerce.files.wordpress.com/2023/11/product-editor-ext-guidelines-top-bar.png)
+![Top bar example](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/product-editor-ext-guidelines-top-bar.png)
 
-Top bar extensions offer supplementary experiences **not vital** to the critical product creation flows. They’re secondary, meaning that they shouldn’t contain information that may impact the product’s overall quality or completeness.
+Top bar extensions offer supplementary experiences **not vital** to the critical product creation flows. They're secondary, meaning that they shouldn't contain information that may impact the product's overall quality or completeness.
 
-Each top bar extension has its unique icon in the top navigation bar. Note that when the number of extensions exceeds 4, they’re truncated in a dropdown menu.
+Each top bar extension has its unique icon in the top navigation bar. Note that when the number of extensions exceeds 4, they're truncated in a dropdown menu.
 
 For example, top bar extensions can be used to:
 
@@ -192,11 +194,11 @@ Depending on their roles, top bar extensions can be displayed in either a **popo
 
 ### Dialog extensions *(future feature)*
 
-![Dialog example](https://woocommerce.files.wordpress.com/2023/11/product-editor-ext-guidelines-dialog-extensions.png)
+![Dialog example](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/product-editor-ext-guidelines-dialog-extensions.png)
 
 Dialog extensions differ from other extensions as they are unrelated to any section or functionality within the product form. They can connect to third-party systems or come with complex interfaces that require a separate, focused experience.
 
-Dialogs can have different sizes (small, medium, large, or custom) and trigger locations (text or icon button anywhere in the form or in the form’s top bar).
+Dialogs can have different sizes (small, medium, large, or custom) and trigger locations (text or icon button anywhere in the form or in the form's top bar).
 
 ✅ **What they *are* for:**
 
@@ -204,7 +206,7 @@ Dialogs can have different sizes (small, medium, large, or custom) and trigger l
 - Advanced configuration and setup flows
 - Dedicated content embedded from a third-party service
 
-❌ **What they *aren’t* for:**
+❌ **What they *aren't* for:**
 
 - Single-field features or simple settings screens
 - Small functionalities that could fit within the form
@@ -226,9 +228,9 @@ With custom product types, you can:
 - Add and hide sections within a group
 - Add and hide subsections and fields
     - Includes core fields
-    - Can be set up conditionally based on a custom field’s value
+    - Can be set up conditionally based on a custom field's value
 
-Custom product types include niche and specific use cases, such as bookings, tickets, gift cards, rentals, etc. Here’s when we suggest you should consider creating a custom product type:
+Custom product types include niche and specific use cases, such as bookings, tickets, gift cards, rentals, etc. Here's when we suggest you should consider creating a custom product type:
 
 - Your extension consists of several different form sections scattered across several different tabs
 - Using just your extension, merchants can completely a product

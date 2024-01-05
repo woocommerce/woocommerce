@@ -1,8 +1,10 @@
-# Handling merchant onboarding
+---
+post_title: Handling merchant onboarding
+---
 
 ## Introduction
 
-Onboarding is a critical part of the merchant’s user experience. It helps set them up for success and ensures they’re not only using your extension correctly but also getting the most out of it. There are a few especially useful features that you can take advantage of as a developer to help onboard merchants who are using your extension:
+Onboarding is a critical part of the merchant's user experience. It helps set them up for success and ensures they're not only using your extension correctly but also getting the most out of it. There are a few especially useful features that you can take advantage of as a developer to help onboard merchants who are using your extension:
 
 - Setup tasks
 - Store management links
@@ -19,7 +21,7 @@ Setup tasks appear on the WooCommerce Admin home screen and prompt a merchant to
 
 ### Registering the task with PHP
 
-To register your task as an extended task list item, you’ll need to hook in to the `woocommerce_get_registered_extended_tasks` filter with a function that appends your task to the array the filter provides.
+To register your task as an extended task list item, you'll need to hook in to the `woocommerce_get_registered_extended_tasks` filter with a function that appends your task to the array the filter provides.
 
 ```php
 // Task registration
@@ -33,9 +35,9 @@ function my_extension_register_the_task( $registered_tasks_list_items ) {
 add_filter( 'woocommerce_get_registered_extended_tasks', 'my_extension_register_the_task', 10, 1 );
 ```
 
-### Registering the task’s JavaScript
+### Registering the task's JavaScript
 
-In addition to registering the task name, you’ll also need to register and enqueue the transpiled JavaScript file containing your task component, its configuration, and its event-handlers. A common way to do this is to create a dedicated registration function that hooks into the `admin_enqueue_scripts` action in WordPress. If you do things this way, you can nest the `add_filter` call for `woocommerce_get_registered_extended_tasks` in this function as well. Below is an annotated example of how this registration might look:
+In addition to registering the task name, you'll also need to register and enqueue the transpiled JavaScript file containing your task component, its configuration, and its event-handlers. A common way to do this is to create a dedicated registration function that hooks into the `admin_enqueue_scripts` action in WordPress. If you do things this way, you can nest the `add_filter` call for `woocommerce_get_registered_extended_tasks` in this function as well. Below is an annotated example of how this registration might look:
 
 ```php
 // Register the task list item and the JS.
@@ -189,11 +191,11 @@ addFilter(
 );
 ```
 
-In the example above, the extension does a few different things. Let’s break it down:
+In the example above, the extension does a few different things. Let's break it down:
 
 #### Handle imports
 
-First, import any functions, components, or other utilities from external dependencies. We’ve kept WooCommerce-related dependencies separate from others for the sake of keeping things tidy. In a real-world extension, you may be importing other local modules. In those cases, we recommend creating a visually separate section for those imports as well.
+First, import any functions, components, or other utilities from external dependencies. We've kept WooCommerce-related dependencies separate from others for the sake of keeping things tidy. In a real-world extension, you may be importing other local modules. In those cases, we recommend creating a visually separate section for those imports as well.
 
 ```js
 // External dependencies
@@ -205,7 +207,7 @@ import { Card, CardBody } from '@wordpress/components'``;
 import { getHistory, getNewPath } from '@woocommerce/navigation'``;
 ```
 
-The `addFilter` function allows us to hook in to JavaScript filters the same way that the traditional PHP call to `add_filter()` does. The `apiFetch` utility allows our extension to query the WordPress REST API without needing to deal with keys or authentication. Finally, the `Card` and `CardBody` are predefined React components that we’ll use as building blocks for our extension’s Task component.
+The `addFilter` function allows us to hook in to JavaScript filters the same way that the traditional PHP call to `add_filter()` does. The `apiFetch` utility allows our extension to query the WordPress REST API without needing to deal with keys or authentication. Finally, the `Card` and `CardBody` are predefined React components that we'll use as building blocks for our extension's Task component.
 
 #### Create Event Handlers
 
@@ -228,13 +230,13 @@ const markTaskComplete = () => {
 };
 ```
 
-In the example above, the event handler uses `apiFetch` to set the `woocommerce_admin_add_task_example_complete` option’s value to `true` and then updates the component’s state data and redirects the browser to the Admin root. In the case of an error, we’re simply logging it to the console, but you may want to implement your own solution here.
+In the example above, the event handler uses `apiFetch` to set the `woocommerce_admin_add_task_example_complete` option's value to `true` and then updates the component's state data and redirects the browser to the Admin root. In the case of an error, we're simply logging it to the console, but you may want to implement your own solution here.
 
-The `markTaskIncomplete` function is more or less an inverse of `markTaskComplete` that toggles the task’s completion status in the opposite direction.
+The `markTaskIncomplete` function is more or less an inverse of `markTaskComplete` that toggles the task's completion status in the opposite direction.
 
 #### Construct the component
 
-Next, we create a [functional component](https://reactjs.org/docs/components-and-props.html) that returns our task card. The intermixed JavaScript/HTML syntax we’re using here is called JSX. If you’re unfamiliar with it, you can [read more about it in the React docs](https://reactjs.org/docs/introducing-jsx.html).
+Next, we create a [functional component](https://reactjs.org/docs/components-and-props.html) that returns our task card. The intermixed JavaScript/HTML syntax we're using here is called JSX. If you're unfamiliar with it, you can [read more about it in the React docs](https://reactjs.org/docs/introducing-jsx.html).
 
 ```js
 const Task = () => {
@@ -261,11 +263,11 @@ const Task = () => {
 };
 ```
 
-In the example above, we’re using the `Card` and `CardBody` components to construct our task’s component. The `div` inside the `CardBody` uses a [JavaScript expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Expressions_and_Operators#Expressions) (`{}`) to embed a ternary operator that uses the component’s state to determine whether to display the task as complete or incomplete.
+In the example above, we're using the `Card` and `CardBody` components to construct our task's component. The `div` inside the `CardBody` uses a [JavaScript expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Expressions_and_Operators#Expressions) (`{}`) to embed a ternary operator that uses the component's state to determine whether to display the task as complete or incomplete.
 
 #### Configure task and add it to the WooCommerce task list
 
-Finally, we’ll set some configuration values for our task and then use the `addFilter` function to append our task to the WooCommerce Admin Onboarding Task List.
+Finally, we'll set some configuration values for our task and then use the `addFilter` function to append our task to the WooCommerce Admin Onboarding Task List.
 
 ```js
 addFilter(
@@ -291,7 +293,7 @@ addFilter(
 );
 ```
 
-In the example above, we’re setting our task’s configuration as we pass it into the filter for simplicity, but in a real-world extension, you might encapsulate this somewhere else for better separation of concerns. Below is a list of properties that the task-list component supports for tasks.
+In the example above, we're setting our task's configuration as we pass it into the filter for simplicity, but in a real-world extension, you might encapsulate this somewhere else for better separation of concerns. Below is a list of properties that the task-list component supports for tasks.
 
 | Name           | Type       | Required | Description |
 |----------------|------------|----------|-------------|
@@ -303,8 +305,8 @@ In the example above, we’re setting our task’s configuration as we pass it i
 | visible        | Boolean    | Yes      | Whether the task is visible or not |
 | additionalInfo | String     | No       | Additional information |
 | time           | String     | Yes      | Time it takes to finish up the task |
-| isDismissable  | Boolean    | No       | Whether the task is dismissable or not. If false the Dismiss button won’t be visible |
-| onDismiss      | Function   | No       | Callback method that it’s triggered on dismission |
+| isDismissable  | Boolean    | No       | Whether the task is dismissable or not. If false the Dismiss button won't be visible |
+| onDismiss      | Function   | No       | Callback method that it's triggered on dismission |
 | type           | String     | Yes      | Type of task list item, setup items will be in the store setup and extension in the extensions setup |
 
 
@@ -324,13 +326,13 @@ Adding your own store management links is a simple process that involves:
 
 ### Installing the Icons package
 
-Store management links use the `@wordpress/icons` package. If your extension isn’t already using it, you’ll need to add it to your extension’s list of dependencies.
+Store management links use the `@wordpress/icons` package. If your extension isn't already using it, you'll need to add it to your extension's list of dependencies.
 
 `npm` `install` ` @wordpress``/icons ` `--save`
 
 ### Enqueuing the JavaScript
 
-The logic that adds your custom link to the store management section will live in a JavaScript file. We’ll register and enqueue that file with WordPress in our PHP file:
+The logic that adds your custom link to the store management section will live in a JavaScript file. We'll register and enqueue that file with WordPress in our PHP file:
 
 ```js
 function custom_store_management_link() {
@@ -345,11 +347,11 @@ add_action( 'admin_enqueue_scripts', 'custom_store_management_link' );
 
 ```
 
-The first argument of this call is a handle, the name by which WordPress will refer to the script we’re enqueuing. The second argument is the URL where the script is located.
+The first argument of this call is a handle, the name by which WordPress will refer to the script we're enqueuing. The second argument is the URL where the script is located.
 
-The third argument is an array of script dependencies. By supplying the `wp-hooks` handle in that array, we’re ensuring that our script will have access to the `addFilter` function we’ll be using to add our link to WooCommerce’s list.
+The third argument is an array of script dependencies. By supplying the `wp-hooks` handle in that array, we're ensuring that our script will have access to the `addFilter` function we'll be using to add our link to WooCommerce's list.
 
-The fourth argument is a priority, which determines the order in which JavaScripts are loaded in WordPress. We’re setting a priority of 10 in our example. It’s important that your script runs before the store management section is rendered. With that in mind, make sure your priority value is lower than 15 to ensure your link is rendered properly.
+The fourth argument is a priority, which determines the order in which JavaScripts are loaded in WordPress. We're setting a priority of 10 in our example. It's important that your script runs before the store management section is rendered. With that in mind, make sure your priority value is lower than 15 to ensure your link is rendered properly.
 
 ### Supply your link via JavaScript
 
@@ -379,13 +381,13 @@ addFilter(
 
 ## Using Admin Notes
 
-Admin Notes are meant for displaying insightful information about your WooCommerce store, extensions, activity, and achievements. They’re also useful for displaying information that can help with the day-to-day tasks of managing and optimizing a store. A good general rule is to use Admin Notes for information that is:
+Admin Notes are meant for displaying insightful information about your WooCommerce store, extensions, activity, and achievements. They're also useful for displaying information that can help with the day-to-day tasks of managing and optimizing a store. A good general rule is to use Admin Notes for information that is:
 
 1.  Timely
 2.  Relevant
 3.  Useful
 
-With that in mind, you might consider using Admin Notes to celebrate a particular milestone that a merchant has passed, or to provide additional guidance about using a specific feature or flow. Conversely, you shouldn’t use Admin Notes to send repeated messages about the same topic or target all users with a note that is only relevant to a subset of merchants. It’s okay to use Admin Notes for specific promotions, but you shouldn’t abuse the system. Use your best judgement and remember the home screen is meant to highlight a store’s most important actionable tasks.
+With that in mind, you might consider using Admin Notes to celebrate a particular milestone that a merchant has passed, or to provide additional guidance about using a specific feature or flow. Conversely, you shouldn't use Admin Notes to send repeated messages about the same topic or target all users with a note that is only relevant to a subset of merchants. It's okay to use Admin Notes for specific promotions, but you shouldn't abuse the system. Use your best judgement and remember the home screen is meant to highlight a store's most important actionable tasks.
 
 Despite being a part of the new React-powered admin experience in WooCommerce, Admin Notes are available to developers via a standard PHP interface.
 
@@ -512,11 +514,11 @@ register_deactivation_hook( __FILE__, 'my_great_extension_deactivate' );
 
 ### Breaking it down
 
-Let’s break down the example above to examine what each section does.
+Let's break down the example above to examine what each section does.
 
 #### Namespacing and feature availability checks
 
-First, we’re doing some basic namespacing and feature availability checks, along with a safeguard to make sure this file only executes within the WordPress application space.
+First, we're doing some basic namespacing and feature availability checks, along with a safeguard to make sure this file only executes within the WordPress application space.
 
 ```php
 namespace My\Wonderfully\Namespaced\Extension\Area;
@@ -535,7 +537,7 @@ if ( ! class_exists( 'WC_Data_Store' ) ) {
 
 #### Using Note and NoteTraits objects
 
-Next, we define a simple class that will serve as a note provider for our note. To create and manage note objects, we’ll import the `Note` and `NotesTraits` classes from WooCommerce Admin.
+Next, we define a simple class that will serve as a note provider for our note. To create and manage note objects, we'll import the `Note` and `NotesTraits` classes from WooCommerce Admin.
 
 ```php
 class ExampleNote {
@@ -552,9 +554,9 @@ Before proceeding, create a constant called `NOTE_NAME` and assign a unique note
 
 `const NOTE_NAME = 'my-prefix-example-note';`
 
-#### Configure the note’s details
+#### Configure the note's details
 
-Once you’ve set your note’s name, you can define and configure your note. The `NoteTraits` class will call `self::get_note()` when performing operations, so you should encapsulate your note’s instantiation and configuration in a static function called `get_note()` that returns a `Note` object.
+Once you've set your note's name, you can define and configure your note. The `NoteTraits` class will call `self::get_note()` when performing operations, so you should encapsulate your note's instantiation and configuration in a static function called `get_note()` that returns a `Note` object.
 
 ```php
 public static function get_note() {
@@ -563,7 +565,7 @@ public static function get_note() {
 }
 ```
 
-Inside our `get_note()` function, we’ll handle any logic for collecting data our Note may need to display. Our example note will include information about when the extension was activated, so this bit of code is just for demonstration. You might include other logic here depending on what data your note should contain.
+Inside our `get_note()` function, we'll handle any logic for collecting data our Note may need to display. Our example note will include information about when the extension was activated, so this bit of code is just for demonstration. You might include other logic here depending on what data your note should contain.
 
 ```php
 $activated_time = current_time( 'timestamp', 0);
@@ -571,7 +573,7 @@ $activated_time_formatted = date( 'F jS', $activated_time );
 
 ```
 
-Next, we’ll instantiate a new `Note` object.
+Next, we'll instantiate a new `Note` object.
 
 `$note = new Note();`
 
@@ -579,7 +581,7 @@ Once we have an instance of the Note class, we can work with its API to set its 
 
 `$note->set_title( 'Getting Started' );`
 
-Then we’ll use some of the timestamp data we collected above to set the note’s content.
+Then we'll use some of the timestamp data we collected above to set the note's content.
 
 ```php
 $note->set_content(
@@ -599,13 +601,13 @@ $note->set_content_data( (object) array(
 ) );
 ```
 
-Next, we’ll set the note’s `type` property. Note types are defined as enum-style class constants in the `Note` class. Available note types are _error_, _warning_, _update_, _info_, and _marketing_. When selecting a note type, be aware that the _error_ and _update_ result in the note being shown as a Store Alert, not in the Inbox. It’s best to avoid using these types of notes unless you absolutely need to.
+Next, we'll set the note's `type` property. Note types are defined as enum-style class constants in the `Note` class. Available note types are _error_, _warning_, _update_, _info_, and _marketing_. When selecting a note type, be aware that the _error_ and _update_ result in the note being shown as a Store Alert, not in the Inbox. It's best to avoid using these types of notes unless you absolutely need to.
 
 `$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );`
 
-Admin Notes also support a few different layouts. You can specify `banner`, `plain`, or `thumbnail` as the layout. If you’re interested in seeing the different layouts in action, take a look at [this simple plugin](https://gist.github.com/octaedro/864315edaf9c6a2a6de71d297be1ed88) that you can install to experiment with them.
+Admin Notes also support a few different layouts. You can specify `banner`, `plain`, or `thumbnail` as the layout. If you're interested in seeing the different layouts in action, take a look at [this simple plugin](https://gist.github.com/octaedro/864315edaf9c6a2a6de71d297be1ed88) that you can install to experiment with them.
 
-We’ll choose `plain` as our layout, but it’s also the default, so we could leave this property alone and the effect would be the same.
+We'll choose `plain` as our layout, but it's also the default, so we could leave this property alone and the effect would be the same.
 
 `$note->set_layout( 'plain' );`
 
@@ -613,14 +615,14 @@ If you have an image that you want to add to your Admin Note, you can specify it
 
 `$note->set_image( '' );`
 
-Next, we’ll set the values for our Admin Note’s `name` and `source` properties. As a best practice, you should store your extension’s name (i.e. its slug) in the `source` property of the note. You can use the `name` property to support multiple sub-types of notes. This gives you a handy way of namespacing your notes and managing them at both a high and low level.
+Next, we'll set the values for our Admin Note's `name` and `source` properties. As a best practice, you should store your extension's name (i.e. its slug) in the `source` property of the note. You can use the `name` property to support multiple sub-types of notes. This gives you a handy way of namespacing your notes and managing them at both a high and low level.
 
 ```php
 $note->set_source( 'inbox-note-example');
 $note->set_name( self::NOTE_NAME );
 ```
 
-Admin Notes can support 0, 1, or 2 actions (buttons). You can use these actions to capture events that trigger asynchronous processes or help the merchant navigate to a particular view to complete a step, or even simply to provide an external link for further information. The `add_action()` function takes up to three arguments. The first is the action name, which can be used for event handling, the second renders as a label for the action’s button, and the third is an optional URL for actions that require navigation.
+Admin Notes can support 0, 1, or 2 actions (buttons). You can use these actions to capture events that trigger asynchronous processes or help the merchant navigate to a particular view to complete a step, or even simply to provide an external link for further information. The `add_action()` function takes up to three arguments. The first is the action name, which can be used for event handling, the second renders as a label for the action's button, and the third is an optional URL for actions that require navigation.
 
 ```php
 $note->add_action(
@@ -639,7 +641,7 @@ Finally, remember to have the `get_note()` function return the configured Note o
 
 To add and delete notes, you can use the helper functions that are part of the `NoteTraits` class: `possibly_add_note()` and its counterpart `possibly_delete_note()`. These functions will handle some of the repetitive logic related to note management and will also run checks to help you avoid creating duplicate notes.
 
-Our example extension ties these calls to activation and deactivation hooks for the sake of simplicity. While there are many events for which you may want to add Notes to a merchant’s inbox, deleting notes upon deactivation and uninstallation is an important part of managing your extension’s lifecycle.
+Our example extension ties these calls to activation and deactivation hooks for the sake of simplicity. While there are many events for which you may want to add Notes to a merchant's inbox, deleting notes upon deactivation and uninstallation is an important part of managing your extension's lifecycle.
 
 ```php
 function my_great_extension_activate() {

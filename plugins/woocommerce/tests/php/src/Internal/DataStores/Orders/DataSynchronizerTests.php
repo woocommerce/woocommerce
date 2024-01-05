@@ -25,13 +25,18 @@ class DataSynchronizerTests extends HposTestCase {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$this->reset_legacy_proxy_mocks();
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
 		OrderHelper::create_order_custom_table_if_not_exist();
 		OrderHelper::toggle_cot_feature_and_usage( false );
-		$this->sut = wc_get_container()->get( DataSynchronizer::class );
+		$this->sut = $container->get( DataSynchronizer::class );
 	}
 
 	/**
@@ -528,6 +533,53 @@ class DataSynchronizerTests extends HposTestCase {
 		$this->assertContains( $order2->get_id(), $orders );
 		$this->assertContains( $order3->get_id(), $orders );
 		$this->assertNotContains( $order1->get_id(), $orders );
+	}
+
+	/**
+	 * Test that trashed orders are deleted after the time set in `EMPTY_TRASH_DAYS`.
+	 */
+	public function test_trashed_order_deletion(): void {
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		$order = new WC_Order();
+		$order->save();
+
+		// Ensure the placeholder post is there.
+		$placeholder = get_post( $order->get_id() );
+		$this->assertEquals( $order->get_id(), $placeholder->ID );
+
+		// Trashed orders should be deleted by the collection mechanism.
+		$order->get_data_store()->delete( $order );
+		$this->assertEquals( $order->get_status(), 'trash' );
+		$order->save();
+
+		// Run scheduled deletion.
+		do_action( 'wp_scheduled_delete' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+
+		// Refresh order and ensure it's *not* gone.
+		$order = wc_get_order( $order->get_id() );
+		$this->assertNotNull( $order );
+
+		// Time-travel into the future so that the time required to delete a trashed order has passed.
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'time' => function() {
+					return time() + DAY_IN_SECONDS * EMPTY_TRASH_DAYS + 1;
+				},
+			)
+		);
+
+		// Run scheduled deletion.
+		do_action( 'wp_scheduled_delete' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+
+		// Ensure the placeholder post is gone.
+		$placeholder = get_post( $order->get_id() );
+		$this->assertNull( $placeholder );
+
+		// Refresh order and ensure it's gone.
+		$order = wc_get_order( $order->get_id() );
+		$this->assertFalse( $order );
 	}
 
 	/**

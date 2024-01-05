@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Updates the OnboardingThemes->get_recommended_themes() method to check the filtered response to see if any of the themes are active.

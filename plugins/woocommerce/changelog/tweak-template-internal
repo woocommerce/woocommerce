@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Move Template implementation classes to internal namespace

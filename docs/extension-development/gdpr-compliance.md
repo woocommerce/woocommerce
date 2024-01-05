@@ -1,4 +1,6 @@
-# GDPR Compliance Guidelines for WooCommerce Extensions
+---
+post_title: GDPR Compliance Guidelines for WooCommerce Extensions
+---
 
 ## Introduction
 
@@ -60,7 +62,7 @@ The General Data Protection Regulation (GDPR) is in effect, granting EU resident
 
 ### Privacy Policy Documentation
 
-- Maintain an up-to-date privacy policy detailing your plugin’s data handling.
+- Maintain an up-to-date privacy policy detailing your plugin's data handling.
 - Include browser storage methods and third-party data sharing in your documentation.
 
 ### Data Cleanup

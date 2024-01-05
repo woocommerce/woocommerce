@@ -1,5 +1,7 @@
 
-# Classes in WooCommerce
+---
+post_title: Classes in WooCommerce
+---
 
 ## [List of Classes in WooCommerce](https://github.com/woocommerce/woocommerce/blob/trunk/docs/extension-development/class-reference#section-1)
 
@@ -9,7 +11,7 @@ For a list of Classes in WooCommerce, please see the [WooCommerce Code Reference
 
 ### [WooCommerce](https://github.com/woocommerce/woocommerce/blob/trunk/docs/extension-development/class-reference#section-3)
 
-The main class is `woocommerce` which is available globally via the `$woocommerce` variable. This handles the main functions of WooCommerce and init’s other classes, stores site-wide variables, and handles error/success messages. The woocommerce class initializes the following classes when constructed:
+The main class is `woocommerce` which is available globally via the `$woocommerce` variable. This handles the main functions of WooCommerce and init's other classes, stores site-wide variables, and handles error/success messages. The woocommerce class initializes the following classes when constructed:
 
 -   `WC_Query` – stored in `$woocommerce->query`
 -   `WC_Customer` – stored in `$woocommerce->customer`

@@ -4,11 +4,13 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileController, FileListTable, SearchListTable };
+use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController, FileListTable, SearchListTable };
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Status;
-use WP_List_Table;
+use WC_Log_Handler_File, WC_Log_Handler_DB;
 use WC_Log_Levels;
+use WP_List_Table;
 
 /**
  * PageController class.
@@ -82,7 +84,7 @@ class PageController {
 		$handler = Constants::get_constant( 'WC_LOG_HANDLER' );
 
 		if ( is_null( $handler ) || ! class_exists( $handler ) ) {
-			$handler = \WC_Log_Handler_File::class;
+			$handler = WC_Log_Handler_File::class;
 		}
 
 		return $handler;
@@ -196,21 +198,27 @@ class PageController {
 		$rotations         = $this->file_controller->get_file_rotations( $file->get_file_id() );
 		$rotation_url_base = add_query_arg( 'view', 'single_file', $this->get_logs_tab_url() );
 
-		$delete_url = add_query_arg(
+		$download_url           = add_query_arg(
+			array(
+				'action'  => 'export',
+				'file_id' => array( $file->get_file_id() ),
+			),
+			wp_nonce_url( $this->get_logs_tab_url(), 'bulk-log-files' )
+		);
+		$delete_url             = add_query_arg(
 			array(
 				'action'  => 'delete',
 				'file_id' => array( $file->get_file_id() ),
 			),
 			wp_nonce_url( $this->get_logs_tab_url(), 'bulk-log-files' )
 		);
-
-		$stream      = $file->get_stream();
-		$line_number = 1;
-
 		$delete_confirmation_js = sprintf(
 			"return window.confirm( '%s' )",
 			esc_js( __( 'Delete this log file permanently?', 'woocommerce' ) )
 		);
+
+		$stream      = $file->get_stream();
+		$line_number = 1;
 
 		?>
 		<header id="logs-header" class="wc-logs-header">
@@ -256,6 +264,14 @@ class PageController {
 			<?php endif; ?>
 			<div class="wc-logs-single-file-actions">
 				<?php
+				// Download button.
+				printf(
+					'<a href="%1$s" class="button button-secondary">%2$s</a>',
+					esc_url( $download_url ),
+					esc_html__( 'Download', 'woocommerce' )
+				);
+				?>
+				<?php
 				// Delete button.
 				printf(
 					'<a href="%1$s" class="button button-secondary" onclick="%2$s">%3$s</a>',
@@ -278,6 +294,17 @@ class PageController {
 				?>
 			<?php endwhile; ?>
 		</section>
+		<script>
+			// Clear the line number hash and highlight with a click.
+			document.documentElement.addEventListener( 'click', ( event ) => {
+				if ( window.location.hash && ! event.target.classList.contains( 'line-anchor' ) ) {
+					let scrollPos = document.documentElement.scrollTop;
+					window.location.hash = '';
+					document.documentElement.scrollTop = scrollPos;
+					history.replaceState( null, '', window.location.pathname + window.location.search );
+				}
+			} );
+		</script>
 		<?php
 	}
 
@@ -358,7 +385,7 @@ class PageController {
 				'source'  => array(
 					'filter'  => FILTER_CALLBACK,
 					'options' => function( $source ) {
-						return $this->file_controller->sanitize_source( wp_unslash( $source ) );
+						return File::sanitize_source( wp_unslash( $source ) );
 					},
 				),
 				'view'    => array(
@@ -410,11 +437,22 @@ class PageController {
 	 * @return void
 	 */
 	private function setup_screen_options(): void {
-		$params = $this->get_query_params( array( 'view' ) );
+		$params     = $this->get_query_params( array( 'view' ) );
+		$handler    = $this->get_default_handler();
+		$list_table = null;
 
-		if ( in_array( $params['view'], array( 'list_files', 'search_results' ), true ) ) {
-			$list_table = $this->get_list_table( $params['view'] );
+		switch ( $handler ) {
+			case LogHandlerFileV2::class:
+				if ( in_array( $params['view'], array( 'list_files', 'search_results' ), true ) ) {
+					$list_table = $this->get_list_table( $params['view'] );
+				}
+				break;
+			case 'WC_Log_Handler_DB':
+					$list_table = WC_Admin_Status::get_db_log_list_table();
+				break;
+		}
 
+		if ( $list_table instanceof WP_List_Table ) {
 			// Ensure list table columns are initialized early enough to enable column hiding, if available.
 			$list_table->prepare_column_headers();
 
@@ -434,6 +472,11 @@ class PageController {
 	 * @return void
 	 */
 	private function handle_list_table_bulk_actions(): void {
+		// Bail if we're not using the file handler.
+		if ( LogHandlerFileV2::class !== $this->get_default_handler() ) {
+			return;
+		}
+
 		$params = $this->get_query_params( array( 'file_id', 'view' ) );
 
 		// Bail if this is not the list table view.
@@ -464,6 +507,17 @@ class PageController {
 			}
 
 			switch ( $action ) {
+				case 'export':
+					if ( 1 === count( $file_ids ) ) {
+						$export_error = $this->file_controller->export_single_file( reset( $file_ids ) );
+					} else {
+						$export_error = $this->file_controller->export_multiple_files( $file_ids );
+					}
+
+					if ( is_wp_error( $export_error ) ) {
+						wp_die( wp_kses_post( $export_error ) );
+					}
+					break;
 				case 'delete':
 					$deleted  = $this->file_controller->delete_files( $file_ids );
 					$sendback = add_query_arg( 'deleted', $deleted, $sendback );
@@ -527,14 +581,17 @@ class PageController {
 			$line = '&nbsp;';
 		}
 
-		$segments = explode( ' ', $line, 3 );
+		$segments      = explode( ' ', $line, 3 );
+		$has_timestamp = false;
+		$has_level     = false;
 
 		if ( isset( $segments[0] ) && false !== strtotime( $segments[0] ) ) {
-			$classes[]   = 'log-entry';
-			$segments[0] = sprintf(
+			$classes[]     = 'log-entry';
+			$segments[0]   = sprintf(
 				'<span class="log-timestamp">%s</span>',
 				$segments[0]
 			);
+			$has_timestamp = true;
 		}
 
 		if ( isset( $segments[1] ) && in_array( strtolower( $segments[1] ), $severity_levels, true ) ) {
@@ -543,6 +600,28 @@ class PageController {
 				esc_attr( 'log-level log-level--' . strtolower( $segments[1] ) ),
 				esc_html( $segments[1] )
 			);
+			$has_level   = true;
+		}
+
+		if ( isset( $segments[2] ) && $has_timestamp && $has_level ) {
+			$message_chunks = explode( 'CONTEXT:', $segments[2], 2 );
+			if ( isset( $message_chunks[1] ) ) {
+				try {
+					$maybe_json = stripslashes( html_entity_decode( trim( $message_chunks[1] ) ) );
+					$context    = json_decode( $maybe_json, false, 512, JSON_THROW_ON_ERROR );
+
+					$message_chunks[1] = sprintf(
+						'<details><summary>%1$s</summary><pre>%2$s</pre></details>',
+						esc_html__( 'Additional context', 'woocommerce' ),
+						wp_json_encode( $context, JSON_PRETTY_PRINT )
+					);
+
+					$segments[2] = implode( ' ', $message_chunks );
+					$classes[]   = 'has-context';
+				} catch ( \JsonException $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+					// It's not valid JSON so don't do anything with it.
+				}
+			}
 		}
 
 		if ( count( $segments ) > 1 ) {
@@ -572,7 +651,7 @@ class PageController {
 	 * @return void
 	 */
 	private function render_search_field(): void {
-		$params     = $this->get_query_params( array( 'search', 'source' ) );
+		$params     = $this->get_query_params( array( 'date_end', 'date_filter', 'date_start', 'search', 'source' ) );
 		$defaults   = $this->get_query_param_defaults();
 		$file_count = $this->file_controller->get_files( $params, true );
 

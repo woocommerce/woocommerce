@@ -363,8 +363,9 @@ function wc_body_class( $classes ) {
  * @since 3.4.0
  */
 function wc_no_js() {
+	$type_attr = current_theme_supports( 'html5', 'script' ) ? '' : " type='text/javascript'";
 	?>
-	<script type="text/javascript">
+	<script<?php echo $type_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 		(function () {
 			var c = document.body.className;
 			c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
@@ -2723,10 +2724,30 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 			return;
 		}
 
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order ) {
+			return;
+		}
+
 		wc_get_template(
 			'order/order-details.php',
 			array(
-				'order_id' => $order_id,
+				'order_id'       => $order_id,
+				/**
+				 * Determines if the order downloads table should be shown (in the context of the order details
+				 * template).
+				 *
+				 * By default, this is true if the order has at least one dowloadable items and download is permitted
+				 * (which is partly determined by the order status). For special cases, though, this can be overridden
+				 * and the downloads table can be forced to render (or forced not to render).
+				 *
+				 * @since 8.5.0
+				 *
+				 * @param bool     $show_downloads If the downloads table should be shown.
+				 * @param WC_Order $order          The related order.
+				 */
+				'show_downloads' => apply_filters( 'woocommerce_order_downloads_table_show_downloads', ( $order->has_downloadable_item() && $order->is_download_permitted() ), $order ),
 			)
 		);
 	}

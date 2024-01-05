@@ -67,9 +67,6 @@ test.describe( 'Checkout page', () => {
 		] );
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'free_shipping',
-			settings: {
-				title: 'Free shipping',
-			}
 		} );
 	} );
 
@@ -117,7 +114,6 @@ test.describe( 'Checkout page', () => {
 		await api.put( 'payment_gateways/cod', {
 			enabled: true,
 		} );
-
 	} );
 
 	test( 'should display cart items in order review', async ( { page } ) => {
@@ -132,10 +128,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'1'
 		);
-		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
+		let totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( singleProductPrice )
 		);
@@ -154,10 +152,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'2'
 		);
-		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
+		let totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
@@ -178,10 +178,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'3'
 		);
-		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
+		let totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( threeProductPrice )
 		);
@@ -200,24 +202,44 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( '#billing_email' ) ).toBeEditable();
 	} );
 
-	test( 'warn when customer is missing required details', async ( { page } ) => {
-		await page.goto( `/shop/?add-to-cart=${ productId }`, { waitUntil: 'networkidle' } );
+	test( 'warn when customer is missing required details', async ( {
+		page,
+	} ) => {
+		await page.goto( `/shop/?add-to-cart=${ productId }`, {
+			waitUntil: 'networkidle',
+		} );
 
 		await page.goto( '/checkout/' );
 
 		// first try submitting the form with no fields complete
-		await page.getByRole('button', { name: 'Place order' }).click();
-		await expect( page.locator('form[name="checkout"]').getByRole('alert') ).toBeVisible();
-		await expect( page.getByText( 'Billing First name is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing Last name is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing Street address is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing Town / City is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing ZIP Code is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing Phone is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Billing Email address is a required field.' ) ).toBeVisible();
+		await page.getByRole( 'button', { name: 'Place order' } ).click();
+		await expect(
+			page.locator( 'form[name="checkout"]' ).getByRole( 'alert' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Billing First name is a required field.' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Billing Last name is a required field.' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Billing Street address is a required field.' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Billing Town / City is a required field.' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Billing ZIP Code is a required field.' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Billing Phone is a required field.' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Billing Email address is a required field.' )
+		).toBeVisible();
 
 		// toggle ship to different address, fill out billing info and confirm error shown
-		await page.getByText('Ship to a different address?').click();
+		await page.getByText( 'Ship to a different address?' ).click();
 		await page.locator( '#billing_first_name' ).fill( 'Homer' );
 		await page.locator( '#billing_last_name' ).fill( 'Simpson' );
 		await page
@@ -229,14 +251,24 @@ test.describe( 'Checkout page', () => {
 		await page.locator( '#billing_postcode' ).fill( '97403' );
 		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
 		await page.locator( '#billing_email' ).fill( customer.email );
-		await page.getByRole('button', { name: 'Place order' }).click();
+		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
-		await expect( page.locator( 'ul.woocommerce-error' ) ).toBeVisible();
-		await expect( page.getByText( 'Shipping First name is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Shipping Last name is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Shipping Street address is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Shipping Town / City is a required field.' ) ).toBeVisible();
-		await expect( page.getByText( 'Shipping ZIP Code is a required field.' ) ).toBeVisible();
+		await expect( page.locator( '.is-error ul' ) ).toBeVisible();
+		await expect(
+			page.getByText( 'Shipping First name is a required field.' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Shipping Last name is a required field.' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Shipping Street address is a required field.' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Shipping Town / City is a required field.' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Shipping ZIP Code is a required field.' )
+		).toBeVisible();
 	} );
 
 	test( 'allows customer to fill shipping details', async ( { page } ) => {
@@ -249,10 +281,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'2'
 		);
-		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
+		let totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
@@ -281,10 +315,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'2'
 		);
-		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
+		let totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
@@ -315,7 +351,6 @@ test.describe( 'Checkout page', () => {
 			.textContent();
 		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
-
 		// Let's simulate a new browser context (by dropping all cookies), and reload the page. This approximates a
 		// scenario where the server can no longer identify the shopper. However, so long as we are within the 10 minute
 		// grace period following initial order placement, the 'order received' page should still be rendered.
@@ -327,20 +362,24 @@ test.describe( 'Checkout page', () => {
 
 		// Let's simulate a scenario where the 10 minute grace period has expired. This time, we expect the shopper to
 		// be presented with a request to verify their email address.
-		await setFilterValue( page, 'woocommerce_order_email_verification_grace_period', 0 );
-		await page.reload();
-		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(3)' ) ).toContainText(
-			/verify the email address associated with the order/
+		await setFilterValue(
+			page,
+			'woocommerce_order_email_verification_grace_period',
+			0
 		);
+		await page.reload();
+		await expect(
+			page.locator( 'form.woocommerce-verify-email p:nth-child(3)' )
+		).toContainText( /verify the email address associated with the order/ );
 
 		// Supplying an email address other than the actual order billing email address will take them back to the same
 		// page with an error message.
 		await page.fill( '#email', 'incorrect@email.address' );
 		await page.locator( 'form.woocommerce-verify-email button' ).click();
-		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(4)' ) ).toContainText(
-			/verify the email address associated with the order/
-		);
-		await expect( page.locator( 'ul.woocommerce-error li' ) ).toContainText(
+		await expect(
+			page.locator( 'form.woocommerce-verify-email p:nth-child(4)' )
+		).toContainText( /verify the email address associated with the order/ );
+		await expect( page.locator( '.is-error' ) ).toContainText(
 			/We were unable to verify the email address you provided/
 		);
 
@@ -362,7 +401,9 @@ test.describe( 'Checkout page', () => {
 		);
 
 		await expect(
-			page.getByRole( 'heading', { name: `Order #${ guestOrderId } details` } )
+			page.getByRole( 'heading', {
+				name: `Order #${ guestOrderId } details`,
+			} )
 		).toBeVisible();
 		await expect( page.locator( '.wc-order-item-name' ) ).toContainText(
 			simpleProductName
@@ -381,8 +422,12 @@ test.describe( 'Checkout page', () => {
 
 	test( 'allows existing customer to place order', async ( { page } ) => {
 		await page.goto( 'my-account/' );
-		await page.locator( 'input[name="username"]' ).fill( customer.username );
-		await page.locator( 'input[name="password"]' ).fill( customer.password );
+		await page
+			.locator( 'input[name="username"]' )
+			.fill( customer.username );
+		await page
+			.locator( 'input[name="password"]' )
+			.fill( customer.password );
 		await page.locator( 'text=Log In' ).click();
 		await page.waitForLoadState( 'networkidle' );
 		for ( let i = 1; i < 3; i++ ) {
@@ -394,10 +439,12 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
 			'2'
 		);
-		let totalPrice = await page.getByRole( 'row', { name: 'Total' } ).last().locator( 'td' ).textContent();
-		console.log( `Total Price: ${ totalPrice }` );
-		totalPrice = Number( totalPrice.replace( /[^\d.-]/g, '' ) );
-		console.log( `Number: ${ totalPrice }` );
+		let totalPrice = await page
+			.getByRole( 'row', { name: 'Total' } )
+			.last()
+			.locator( 'td' )
+			.textContent();
+		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
 		await expect( totalPrice ).toBeGreaterThanOrEqual(
 			Number( twoProductPrice )
 		);
@@ -436,7 +483,7 @@ test.describe( 'Checkout page', () => {
 		await page.reload();
 
 		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
-		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
+		await expect( page.locator( '.is-info' ) ).toContainText(
 			/Please log in to your account to view this order/
 		);
 

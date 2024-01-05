@@ -557,6 +557,25 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		}
 
 		/**
+		 * Enqueue a script in the block editor.
+		 * Similar to `WCAdminAssets::register_script()` but without enqueuing unnecessary dependencies.
+		 *
+		 * @return void
+		 */
+		private function enqueue_block_editor_script( $script_path_name, $script_name ) {
+			$script_assets_filename = WCAdminAssets::get_script_asset_filename( $script_path_name, $script_name );
+			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER .  $script_path_name . '/' . $script_assets_filename;
+
+			wp_enqueue_script(
+				'wc-admin-' . $script_name,
+				WCAdminAssets::get_url( $script_path_name . '/' . $script_name, 'js' ),
+				$script_assets['dependencies'],
+				WCAdminAssets::get_file_version( 'js' ),
+				true
+			);
+		}
+
+		/**
 		 * Enqueue block editor assets.
 		 *
 		 * @return void
@@ -567,13 +586,18 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( is_array( $settings_tabs ) && count( $settings_tabs ) > 0  ) {
 				$formatted_settings_tabs = array();
 				foreach ($settings_tabs as $key => $label) {
-					$formatted_settings_tabs[] = array(
-						'key'   => is_string( $key ) ? $key : '',
-						'label' => is_string( $label ) ? $label : '',
-					);
+					if (
+						is_string( $key ) && $key !== "" &&
+						is_string( $label ) && $label !== ""
+					) {
+						$formatted_settings_tabs[] = array(
+							'key'   => $key,
+							'label' => wp_strip_all_tags( $label ),
+						);
+					}
 				}
 
-				WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette' );
+				self::enqueue_block_editor_script( 'wp-admin-scripts', 'command-palette' );
 				wp_localize_script(
 					'wc-admin-command-palette',
 					'wcCommandPaletteSettings',
@@ -588,13 +612,25 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				$analytics_reports = Analytics::get_report_pages();
 				if ( is_array( $analytics_reports ) && count( $analytics_reports ) > 0 ) {
 					$formatted_analytics_reports = array_map( function( $report ) {
-						return array(
-							'title' => is_string( $report['title'] ) ? $report['title']: '' ,
-							'path' => is_string( $report['path'] ) ? $report['path']: '',
-						);
+						if ( ! is_array( $report ) ) {
+							return null;
+						}
+						$title = array_key_exists( 'title', $report ) ? $report['title'] : '';
+						$path = array_key_exists( 'path', $report ) ? $report['path'] : '';
+						if (
+							is_string( $title ) && $title !== "" &&
+							is_string( $path ) && $path !== ""
+						) {
+							return array(
+								'title' => wp_strip_all_tags( $title ),
+								'path' => $path,
+							);
+						}
+						return null;
 					}, $analytics_reports );
+					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
 
-					WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette-analytics' );
+					self::enqueue_block_editor_script( 'wp-admin-scripts', 'command-palette-analytics' );
 					wp_localize_script(
 						'wc-admin-command-palette-analytics',
 						'wcCommandPaletteAnalytics',

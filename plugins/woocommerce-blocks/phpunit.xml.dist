@@ -1,0 +1,15 @@
+<phpunit
+	bootstrap="tests/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	verbose="true"
+	>
+	<testsuites>
+		<testsuite name="WooCommerce Blocks Test Suite">
+			<directory suffix=".php">./tests/php</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

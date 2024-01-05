@@ -88,55 +88,56 @@ test.describe( 'General tab', () => {
 			}
 		} );
 
-		test( 'can create a simple product', async ( { page } ) => {
-			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
-			await clickOnTab( 'General', page );
-			await page
-				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
-				.fill( productData.name );
-			await page
-				.locator( '.components-summary-control' )
-				.fill( productData.summary );
-			await page
-				.locator(
-					'[id^="wp-block-woocommerce-product-regular-price-field"]'
-				)
-				.first()
-				.fill( productData.productPrice );
-			await page
-				.locator(
-					'[id^="wp-block-woocommerce-product-sale-price-field"]'
-				)
-				.first()
-				.fill( productData.salePrice );
+test( 'can create a simple product', async ( { page } ) => {
+	await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
+	await clickOnTab( 'General', page );
+	await page
+		.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
+		.fill( productData.name );
+	await page
+		.locator( '[data-template-block-id="basic-details"] .components-summary-control' )
+		.last()
+		.fill( productData.summary );
+	await page
+		.locator(
+			'[id^="wp-block-woocommerce-product-regular-price-field"]'
+		)
+		.first()
+		.fill( productData.productPrice );
+	await page
+		.locator(
+			'[id^="wp-block-woocommerce-product-sale-price-field"]'
+		)
+		.first()
+		.fill( productData.salePrice );
 
-			await page
-				.locator( '.woocommerce-product-header__actions' )
-				.getByRole( 'button', {
-					name: 'Add',
-				} )
-				.click();
+	await page
+		.locator( '.woocommerce-product-header__actions' )
+		.getByRole( 'button', {
+			name: 'Add',
+		} )
+		.click();
 
-			const element = await page.locator(
-				'div.components-snackbar__content'
-			);
-			const textContent = await element.innerText();
+	const element = await page.locator(
+		'div.components-snackbar__content'
+	);
+	const textContent = await element.innerText();
 
-			await expect( textContent ).toMatch( /Product added/ );
+	await expect( textContent ).toMatch( /Product added/ );
 
-			const title = await page.locator(
-				'.woocommerce-product-header__title'
-			);
+	const title = await page.locator(
+		'.woocommerce-product-header__title'
+	);
 
-			// Save product ID
-			const productIdRegex = /product%2F(\d+)/;
-			const url = await page.url();
-			const productIdMatch = productIdRegex.exec( url );
-			productId = productIdMatch ? productIdMatch[ 1 ] : null;
+	// Save product ID
+	const productIdRegex = /product%2F(\d+)/;
+	const url = await page.url();
+	const productIdMatch = productIdRegex.exec( url );
+	productId = productIdMatch ? productIdMatch[ 1 ] : null;
 
-			await expect( productId ).toBeDefined();
-			await expect( title ).toHaveText( productData.name );
-		} );
+	await expect( productId ).toBeDefined();
+	await expect( title ).toHaveText( productData.name );
+} );
 		test( 'can not create a product with duplicated SKU', async ( {
 			page,
 		} ) => {
@@ -146,7 +147,7 @@ test.describe( 'General tab', () => {
 				.locator( '//input[@placeholder="e.g. 12 oz Coffee Mug"]' )
 				.fill( productData.name );
 			await page
-				.locator( '.components-summary-control' )
+				.locator( '[data-template-block-id="basic-details"] .components-summary-control' )
 				.fill( productData.summary );
 			await page
 				.locator(

@@ -1,4 +1,6 @@
-# Logging in WooCommerce
+---
+post_title: Logging in WooCommerce
+---
 
 WooCommerce has its own robust system for logging, which can be used for debugging during development, catching errors on production, or even sending notifications when specific events occur. By default, WooCommerce uses this logger to record errors, warnings, and other notices that may be useful for troubleshooting problems with a store. Many extensions for WooCommerce also make use of the logger for similar purposes.
 
@@ -6,7 +8,7 @@ WooCommerce has its own robust system for logging, which can be used for debuggi
 
 Depending on the log handler(s) used, you can view the entries created by the logger by going to **WooCommerce > Status > Logs**.
 
-![Log file viewer](_media/log-critical.jpg)
+![Log file viewer](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/log-critical.jpg)
 
 ## Log levels
 

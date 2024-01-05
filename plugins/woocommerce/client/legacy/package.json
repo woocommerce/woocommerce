@@ -1,17 +1,24 @@
 {
-	"name": "woocommerce/client/legacy",
+	"name": "@woocommerce/classic-assets",
+	"private": true,
 	"version": "1.0.0",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
-	"private": true,
 	"main": "Gruntfile.js",
+	"files": [
+		"build"
+	],
 	"scripts": {
-		"turbo:build": "grunt assets",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"start": "nodemon --watch js --watch css -e js,scss --exec pnpm build"
+		"build": "WIREIT_LOGGER='quiet-ci' pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" build:project",
+		"build:project": "pnpm --if-present /^build:project:.*$/",
+		"build:project:assets": "wireit",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"watch:build": "WIREIT_LOGGER='quiet-ci' pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel watch:build:project",
+		"watch:build:project": "pnpm build:project --watch"
 	},
 	"devDependencies": {
-		"@types/node": "^16.18.18",
+		"@types/node": "^16.18.68",
 		"@wordpress/stylelint-config": "19.1.0",
 		"autoprefixer": "9.8.6",
 		"browserslist": "4.19.3",
@@ -31,11 +38,34 @@
 		"grunt-sass": "3.1.0",
 		"grunt-stylelint": "0.16.0",
 		"gruntify-eslint": "5.0.0",
-		"nodemon": "^2.0.21",
-		"sass": "^1.45.0",
-		"stylelint": "13.8.0"
+		"sass": "^1.69.5",
+		"stylelint": "13.8.0",
+		"wireit": "0.14.1"
 	},
 	"dependencies": {
 		"sourcebuster": "github:woocommerce/sourcebuster-js#v1.1.2"
+	},
+	"wireit": {
+		"build:project:assets": {
+			"command": "grunt assets",
+			"clean": "if-file-deleted",
+			"files": [
+				"Gruntfile.js",
+				"js/**/*.js",
+				"css/**/*.scss"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"package.json"
+			]
+		}
 	}
 }

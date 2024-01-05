@@ -2,11 +2,40 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.2.0) - 2023-12-20 
+
+-   Patch - Fix menu not being pinned correctly with certain screen widths [#42791]
+-   Patch - [Product Block Editor]: fix Input control issue in Manage download limit form [#41796]
+-   Minor - Add ordering support to the product list [#41709]
+-   Minor - Add product list block [#41653]
+-   Minor - Add step prop to NumberControl [#42928]
+-   Minor - Add useProductMetadata hook to perform update in multiple meta entries at same time [#42961]
+-   Minor - Allow uploading downloadable products by drag & drop and without the Media Library component [#42702]
+-   Minor - Create section description block [#41929]
+-   Minor - Move action button ( reorder and add products ) inline with the section header [#42929]
+-   Minor - Support HTML in checkbox-control tooltip and Label tooltip [#42926]
+-   Minor - Use DisplayState as a direct wrapper of the woocommerce/conditional block [#42909]
+-   Patch - [Product Block Editor]: add story for Label component [#42953]
+-   Patch - [Product Block Editor]: introduce UI state [#41859]
+-   Minor - Expose Taxonomy and TaxonomyMetadata types [#42962]
+-   Minor - Remove deprecated use of position for Dropdown component, using popoverProps.placement instead. [#41845]
+-   Minor - Update products list field to add re-order option. [#42766]
+-   Patch - [Product Block Editor]: expose Label component [#42959]
+-   Patch - [Product Block Editor]: move modal editor out of the description block edit component [#41878]
+-   Patch - [Product Block Editor]: propagate content from description inner blocks to Modal editor [#42768]
+-   Patch - [Product Block Editor]: replace custom preview component by BlockPreview core [#42019]
+-   Patch - [Product Block Editor]: replace description button by editable block [#41862]
+-   Minor - Add empty state when no attributes #41679 [#41679]
+-   Minor - Add max-width to tooltip #41797 [#41797]
+-   Minor - Show feedback bar only once #41787 [#41787]
+-   Patch - [Product Block Editor]: minor Summary block enhancements [#41839]
+-   Patch - [Product Block editor]: rename component edit function [#41741]
+
 ## [1.1.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.1.0) - 2023-11-28 
 
 -   Patch - Update internal dependency.
--   Minor - Remove downloads list fixed height #41744 [#41744]
 -   Patch - [Product Block Editor]: remove unused block attributes [#41674]
+-   Minor - Remove downloads list fixed height #41744 [#41744]
 
 ## [1.0.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.0.0) - 2023-11-27 
 

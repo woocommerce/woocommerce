@@ -29,6 +29,12 @@ export type RecommendThemesAPIResponse = {
 	};
 };
 
+export type aiStatusResponse = {
+	status: {
+		indicator: 'major' | 'critical' | 'ok';
+	};
+};
+
 export type customizeStoreStateMachineContext = {
 	themeConfiguration: Record< string, unknown >; // placeholder for theme configuration until we know what it looks like
 	intro: {
@@ -42,4 +48,5 @@ export type customizeStoreStateMachineContext = {
 	transitionalScreen: {
 		hasCompleteSurvey: boolean;
 	};
+	aiOnline: boolean;
 };

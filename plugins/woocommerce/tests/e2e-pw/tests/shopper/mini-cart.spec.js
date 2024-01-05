@@ -1,10 +1,12 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
+const { closeWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const pageTitle = 'Mini Cart';
 const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
 const miniCartButton = '.wc-block-mini-cart__button';
+const miniCartBadge = '.wc-block-mini-cart__badge';
 
 const simpleProductName = 'Single Hundred Product';
 const simpleProductDesc = 'Lorem ipsum dolor sit amet.';
@@ -143,14 +145,7 @@ test.describe( 'Mini Cart block page', () => {
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
 		await page.locator( 'text=Log In' ).click();
 
-		// Close welcome popup if prompted
-		try {
-			await page
-				.getByLabel( 'Close', { exact: true } )
-				.click( { timeout: 5000 } );
-		} catch ( error ) {
-			console.log( "Welcome modal wasn't present, skipping action." );
-		}
+		await closeWelcomeModal( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
@@ -198,9 +193,7 @@ test.describe( 'Mini Cart block page', () => {
 
 		// go to page with mini cart block and test with the product added
 		await page.goto( pageSlug );
-		await expect(
-			page.locator( '.wc-block-mini-cart__button' )
-		).toContainText( `$${ singleProductSalePrice }` );
+		await expect( page.locator( miniCartBadge ) ).toContainText( '1' );
 		await page.locator( miniCartButton ).click();
 		await expect(
 			page.getByRole( 'heading', { name: 'Your cart (1 item)' } )
@@ -216,9 +209,7 @@ test.describe( 'Mini Cart block page', () => {
 		await expect(
 			page.getByRole( 'heading', { name: 'Your cart (2 items)' } )
 		).toBeVisible();
-		await expect(
-			page.locator( '.wc-block-mini-cart__button' )
-		).toContainText( `$${ singleProductSalePrice * 2 }` );
+		await expect( page.locator( miniCartBadge ) ).toContainText( '2' );
 		await expect(
 			page.locator( '.wc-block-components-totals-item__value' )
 		).toContainText( `$${ singleProductSalePrice * 2 }` );
@@ -280,7 +271,7 @@ test.describe( 'Mini Cart block page', () => {
 		await page
 			.getByRole( 'button', { name: 'Update', exact: true } )
 			.click();
-		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
+		await expect( page.locator( '.is-info' ) ).toContainText(
 			'Shipping costs updated.'
 		);
 
@@ -288,9 +279,7 @@ test.describe( 'Mini Cart block page', () => {
 		await expect(
 			page.getByRole( 'heading', { name: pageTitle } )
 		).toBeVisible();
-		await expect(
-			page.locator( '.wc-block-mini-cart__button' )
-		).toContainText( `$${ totalInclusiveTax }` );
+		await expect( page.locator( miniCartBadge ) ).toContainText( '1' );
 		await page.locator( miniCartButton ).click();
 		await expect(
 			page.locator( '.wc-block-components-totals-item__value' )

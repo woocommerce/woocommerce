@@ -1,4 +1,6 @@
-# WooCommerce developer resources
+---
+post_title: WooCommerce developer resources
+---
 
 This guide is a great starting point for WooCommerce development. From setting up your first online store to diving deep into advanced features, you'll find what you need here. New to WooCommerce? Start with the basics. Experienced and looking for specific documentation or community discussions? We've got that covered too. Navigate through the sections below to find the resources tailored for you.
 
@@ -8,7 +10,7 @@ There are a few different ways you might want to get started utilizing WooCommer
 
 ### [Installing and setting up WooCommerce](https://woo.com/document/build-online-store/)
 
-If you’re brand new to Woo, this guide will show you How to build an online store on WooCommerce. This is where you can learn the ins and outs of how WooCommerce works before you start developing.
+If you're brand new to Woo, this guide will show you How to build an online store on WooCommerce. This is where you can learn the ins and outs of how WooCommerce works before you start developing.
 
 ### [Extension Development Quick Start](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extension)
 
@@ -71,7 +73,7 @@ While WooCommerce Blocks are now the easiest and most flexible way to display yo
 
 ### [WooCommerce on GitHub](https://github.com/woocommerce)
 
-This is the official WooCommerce organization on GitHub. Here you’ll find the majority of development work that happens on open source projects that the WooCommerce team maintains.
+This is the official WooCommerce organization on GitHub. Here you'll find the majority of development work that happens on open source projects that the WooCommerce team maintains.
 
 ### [Automattic on GitHub](https://github.com/automattic)
 
@@ -87,7 +89,7 @@ This is the official WordPress organization on GitHub –– a go-to source for 
 
 ### [WordPress Developer Resources](https://developer.wordpress.org/)
 
-All the resources you need for developing with WordPress. If you’re not familiar with the WordPress development ecosystem, this is a great place to start.
+All the resources you need for developing with WordPress. If you're not familiar with the WordPress development ecosystem, this is a great place to start.
 
 ### [WooCommerce Community Slack](https://woo.com/community-slack)
 

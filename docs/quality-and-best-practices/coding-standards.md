@@ -1,4 +1,6 @@
-# Coding standards for the code snippets within the WooCommerce documentation
+---
+post_title: Coding standards
+---
 
 ## Position of hooks
 

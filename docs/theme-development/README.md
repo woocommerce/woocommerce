@@ -1,4 +1,6 @@
-# Theme Design and Development at Woo
+---
+post_title: Theme Design and Development at Woo
+---
 
 ## Classic Themes
 

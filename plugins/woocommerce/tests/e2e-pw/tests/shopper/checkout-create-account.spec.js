@@ -66,9 +66,6 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		] );
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'free_shipping',
-			settings: {
-				title: 'Free shipping',
-			}
 		} );
 		await api.put( 'payment_gateways/cod', {
 			enabled: true,

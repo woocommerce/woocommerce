@@ -1,4 +1,6 @@
-# Resources for debugging
+---
+post_title: Resources for debugging
+---
 
 ## WordPress
 

@@ -21,7 +21,7 @@ export default () => {
 		>
 			<mask
 				id={ maskId }
-				mask-type="alpha"
+				style={ { maskType: 'alpha' } }
 				maskUnits="userSpaceOnUse"
 				x="2"
 				y="3"

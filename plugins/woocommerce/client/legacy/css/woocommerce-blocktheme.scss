@@ -182,9 +182,18 @@
 		}
 	}
 
+	// Ensure variation label is vertically centered.
+	div.product form.cart table.variations td select {
+		min-width: 70%; // Fix for Safari.
+	}
+
+	div.product form.cart table.variations td,
 	div.product form.cart table.variations th {
-		// Ensure variation label is vertically centered.
-		line-height: 3.5rem;
+		vertical-align: middle;
+	}
+
+	.single_variation_wrap .woocommerce-variation {
+		margin-bottom: var(--wp--style--block-gap);
 	}
 }
 

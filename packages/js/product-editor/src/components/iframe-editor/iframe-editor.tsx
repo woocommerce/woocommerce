@@ -31,31 +31,49 @@ import { HeaderToolbar } from './header-toolbar/header-toolbar';
 import { ResizableEditor } from './resizable-editor';
 import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
+import { store as productEditorUiStore } from '../../store/product-editor-ui';
 
 type IframeEditorProps = {
-	closeModal?: () => void;
 	initialBlocks?: BlockInstance[];
 	onChange?: ( blocks: BlockInstance[] ) => void;
 	onClose?: () => void;
 	onInput?: ( blocks: BlockInstance[] ) => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
+	showBackButton?: boolean;
 };
 
 export function IframeEditor( {
-	closeModal = () => {},
-	initialBlocks = [],
 	onChange = () => {},
 	onClose,
 	onInput = () => {},
 	settings: __settings,
+	showBackButton = false,
 }: IframeEditorProps ) {
 	const [ resizeObserver ] = useResizeObserver();
-	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
-	const [ temporalBlocks, setTemporalBlocks ] =
-		useState< BlockInstance[] >( initialBlocks );
+	const [ temporalBlocks, setTemporalBlocks ] = useState< BlockInstance[] >(
+		[]
+	);
+
+	// Pick the blocks from the store.
+	const blocks: BlockInstance[] = useSelect( ( select ) => {
+		return select( productEditorUiStore ).getModalEditorBlocks();
+	}, [] );
+
+	/*
+	 * Set the initial blocks from the store.
+	 * @todo: probably we can get rid of the initialBlocks prop.
+	 */
+	useEffect( () => {
+		setTemporalBlocks( blocks );
+	}, [] ); // eslint-disable-line
+
+	const { setModalEditorBlocks: setBlocks, setModalEditorContentHasChanged } =
+		useDispatch( productEditorUiStore );
+
 	const { appendEdit } = useEditorHistory( {
 		setBlocks,
 	} );
+
 	const {
 		appendEdit: tempAppendEdit,
 		hasRedo,
@@ -127,15 +145,16 @@ export function IframeEditor( {
 						onSave={ () => {
 							appendEdit( temporalBlocks );
 							setBlocks( temporalBlocks );
+							setModalEditorContentHasChanged( true );
 							onChange( temporalBlocks );
-							closeModal();
+							onClose?.();
 						} }
 						onCancel={ () => {
 							appendEdit( blocks );
 							setBlocks( blocks );
 							onChange( blocks );
 							setTemporalBlocks( blocks );
-							closeModal();
+							onClose?.();
 						} }
 					/>
 					<div className="woocommerce-iframe-editor__main">
@@ -157,7 +176,7 @@ export function IframeEditor( {
 							{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 							{ /* @ts-ignore */ }
 							<BlockEditorKeyboardShortcuts.Register />
-							{ onClose && (
+							{ showBackButton && onClose && (
 								<BackButton
 									onClick={ () => {
 										setTimeout( onClose, 550 );

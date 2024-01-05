@@ -42,6 +42,7 @@ describe( 'Intro Modals', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
+					aiOnline: true,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -96,6 +97,7 @@ describe( 'Intro Modals', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
+					aiOnline: true,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -148,6 +150,7 @@ describe( 'Intro Modals', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
+					aiOnline: true,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }

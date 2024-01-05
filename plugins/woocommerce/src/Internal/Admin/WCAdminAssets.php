@@ -410,8 +410,9 @@ class WCAdminAssets {
 	 * Injects wp-shared-settings as a dependency if it's present.
 	 */
 	public function inject_wc_settings_dependencies() {
+		$wp_scripts = wp_scripts();
 		if ( wp_script_is( 'wc-settings', 'registered' ) ) {
-			$handles_for_injection = [
+			$handles_for_injection = array(
 				'wc-admin-layout',
 				'wc-csv',
 				'wc-currency',
@@ -426,11 +427,31 @@ class WCAdminAssets {
 				'wc-tracks',
 				'wc-block-templates',
 				'wc-product-editor',
-			];
+			);
 			foreach ( $handles_for_injection as $handle ) {
-				$script = wp_scripts()->query( $handle, 'registered' );
+				$script = $wp_scripts->query( $handle, 'registered' );
 				if ( $script instanceof _WP_Dependency ) {
 					$script->deps[] = 'wc-settings';
+					$wp_scripts->add_data( $handle, 'group', 1 );
+				}
+			}
+			foreach ( $wp_scripts->registered as $handle => $script ) {
+				// scripts that are loaded in the footer has extra->group = 1.
+				if ( array_intersect( $handles_for_injection, $script->deps ) && ! isset( $script->extra['group'] ) ) {
+					// Append the script to footer.
+					$wp_scripts->add_data( $handle, 'group', 1 );
+					// Show a warning.
+					$error_handle  = 'wc-settings-dep-in-header';
+					$used_deps     = implode( ', ', array_intersect( $handles_for_injection, $script->deps ) );
+					$error_message = "Scripts that have a dependency on [$used_deps] must be loaded in the footer, {$handle} was registered to load in the header, but has been switched to load in the footer instead. See https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5059";
+					// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter,WordPress.WP.EnqueuedResourceParameters.MissingVersion
+					wp_register_script( $error_handle, '' );
+					wp_enqueue_script( $error_handle );
+					wp_add_inline_script(
+						$error_handle,
+						sprintf( 'console.warn( "%s" );', $error_message )
+					);
+
 				}
 			}
 		}

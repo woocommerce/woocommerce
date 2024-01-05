@@ -10,6 +10,13 @@ import { recordPageView } from '@woocommerce/tracks';
 import { updateLinkHref } from '../controller';
 import { EmbedLayout } from '../index';
 
+jest.mock( '@woocommerce/admin-layout', () => {
+	return {
+		LayoutContextProvider: () => null,
+		getLayoutContextValue: () => null,
+	};
+} );
+
 describe( 'updateLinkHref', () => {
 	const timeExcludedScreens = [ 'stock', 'settings', 'customers' ];
 

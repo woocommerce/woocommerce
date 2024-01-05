@@ -104,6 +104,7 @@ export function useProductVariationsHelper() {
 
 		await Promise.all(
 			variations.map( ( variationId ) =>
+				// @ts-expect-error There are no types for this.
 				dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 					'postType',
 					'product_variation',
@@ -135,6 +136,7 @@ export function useProductVariationsHelper() {
 				}
 			)
 			.then( async ( response ) => {
+				// @ts-expect-error There are no types for this.
 				await dispatch( 'core' ).invalidateResolution(
 					'getEntityRecord',
 					[ 'postType', 'product', productId ]

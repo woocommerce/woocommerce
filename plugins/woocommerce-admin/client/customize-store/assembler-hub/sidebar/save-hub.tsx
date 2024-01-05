@@ -60,6 +60,8 @@ export const SaveHub = () => {
 	const { __unstableMarkLastChangeAsPersistent } =
 		useDispatch( blockEditorStore );
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore The types for this are incorrect.
 	const { createErrorNotice } = useDispatch( noticesStore );
 
 	const {
@@ -165,6 +167,8 @@ export const SaveHub = () => {
 			resetHighlightedBlockIndex();
 			navigator.goToParent();
 		} catch ( error ) {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore The types for this are incorrect.
 			createErrorNotice(
 				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
 			);
@@ -179,6 +183,8 @@ export const SaveHub = () => {
 			await save();
 			sendEvent( 'FINISH_CUSTOMIZATION' );
 		} catch ( error ) {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore The types for this are incorrect.
 			createErrorNotice(
 				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
 			);

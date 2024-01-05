@@ -247,6 +247,8 @@ function ScaledBlockPreview( {
 			>
 				<CustomIframeComponent
 					aria-hidden
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore disabled prop exists
 					scrolling={ isScrollable ? 'yes' : 'no' }
 					tabIndex={ -1 }
 					readonly={ ! isNavigable }

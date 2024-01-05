@@ -1,10 +1,12 @@
-# Shipping method API
+---
+post_title: Shipping method API
+---
 
 WooCommerce has a shipping method API which plugins can use to add their own rates. This article will take you through the steps to creating a new shipping method and interacting with the API.
 
 ## Create a plugin
 
-First off, create a regular WordPress/WooCommerce plugin – see our [Extension Developer Handbook](/docs/extension-development/extension-developer-handbook.md) to get started. You’ll define your shipping method class in this plugin file and maintain it outside of WooCommerce.
+First off, create a regular WordPress/WooCommerce plugin – see our [Extension Developer Handbook](/docs/extension-development/extension-developer-handbook.md) to get started. You'll define your shipping method class in this plugin file and maintain it outside of WooCommerce.
 
 ## Create a function to house your class
 
@@ -22,7 +24,7 @@ add_action( 'woocommerce_shipping_init', 'your_shipping_method_init' );
 
 ## Create your class
 
-Create your class and place it inside the function you just created. Make sure it extends the shipping method class so that you have access to the API. You’ll see below we also init our shipping method options.
+Create your class and place it inside the function you just created. Make sure it extends the shipping method class so that you have access to the API. You'll see below we also init our shipping method options.
 
 ``` php
 if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
@@ -72,7 +74,7 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 
 ## Defining settings/options
 
-You can then define your options using the settings API. In the snippets above you’ll notice we init_form_fields and init_settings. These load up the settings API. To see how to add settings, see [WooCommerce settings API](https://woo.com/document/settings-api/).
+You can then define your options using the settings API. In the snippets above you'll notice we init_form_fields and init_settings. These load up the settings API. To see how to add settings, see [WooCommerce settings API](https://woo.com/document/settings-api/).
 
 ## The calculate_shipping() method
 

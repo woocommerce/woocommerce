@@ -202,7 +202,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 	}
 
 	.update-plugins .update-count {
-		background-color: var(--wp-admin-theme-color);
+		background-color: var(--wp-admin-theme-color, #d54e21);
 		border-radius: 10px;
 		color: #fff;
 		display: inline-block;
@@ -477,7 +477,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 
 		.addon-product-group-see-more,
 		.addon-product-group-see-more:visited {
-			color: var(--wp-admin-theme-color);
+			color: var(--wp-admin-theme-color, #007cba);
 			/* Primary / Blue */
 			display: block;
 			font-size: 13px;
@@ -582,7 +582,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 
 				h2,
 				h3 {
-					color: var(--wp-admin-theme-color);
+					color: var(--wp-admin-theme-color, #007cba);
 					font-size: 20px;
 					font-weight: 400;
 					letter-spacing: -0.32px;
@@ -620,7 +620,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 					}
 
 					h2 {
-						color: var(--wp-admin-theme-color);
+						color: var(--wp-admin-theme-color, #2c3338);
 					}
 				}
 
@@ -718,8 +718,8 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 
 				.button {
 					background-color: #fff;
-					border-color: var(--wp-admin-theme-color);
-					color: var(--wp-admin-theme-color);
+					border-color: var(--wp-admin-theme-color, #007cba);
+					color: var(--wp-admin-theme-color, #007cba);
 					float: right;
 					font-size: 13px;
 					height: 36px;
@@ -857,7 +857,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 	max-width: 1200px;
 
 	.update-plugins .update-count {
-		background-color: var(--wp-admin-theme-color);
+		background-color: var(--wp-admin-theme-color, #d54e21);
 		border-radius: 10px;
 		color: #fff;
 		display: inline-block;
@@ -912,7 +912,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 	overflow: hidden;
 
 	&.updated {
-		border-left-color: var(--wp-admin-theme-color) !important;
+		border-left-color: var(--wp-admin-theme-color, $woocommerce) !important;
 	}
 
 	a.skip,
@@ -1391,7 +1391,6 @@ table.wc_status_table--tools {
 	.line {
 		display: block;
 		width: 100%;
-		scroll-margin-top: 6em;
 		position: relative;
 
 		&:before {
@@ -1407,6 +1406,7 @@ table.wc_status_table--tools {
 		&:target {
 			box-shadow: 0 0.16em 0.16em -0.16em #c3c4c7, 0 -0.16em 0.16em -0.16em #c3c4c7;
 			z-index: 1;
+			scroll-margin-top: 50vh;
 
 			.line-content {
 				background: #fff8c5;
@@ -1414,6 +1414,17 @@ table.wc_status_table--tools {
 
 			.log-level:before {
 				color: #fff8c5;
+			}
+		}
+
+		&.has-context {
+			summary {
+				cursor: pointer;
+			}
+
+			pre {
+				margin-top: 0;
+				white-space: pre-wrap;
 			}
 		}
 	}
@@ -1560,6 +1571,33 @@ table.wc_status_table--tools {
 
 		.column-source {
 			width: 15%;
+		}
+
+		.column-context {
+			width: 10%;
+		}
+	}
+
+	.column-message {
+		pre {
+			margin: 0;
+			white-space: pre-wrap;
+		}
+	}
+
+	.column-context {
+		.button {
+			span {
+				line-height: 1.3;
+			}
+		}
+	}
+
+	.log-context {
+		display: none;
+
+		pre {
+			white-space: pre-wrap;
 		}
 	}
 }
@@ -3057,7 +3095,7 @@ ul.wc_coupon_list_block {
 			}
 
 			&:hover {
-				border: 2px solid var(--wp-admin-theme-color);
+				border: 2px solid var(--wp-admin-theme-color, #00a0d2);
 			}
 		}
 
@@ -4006,6 +4044,7 @@ table.wc_shipping {
 .wc-shipping-zone-settings {
 	#zone_name {
 		width: 600px;
+		padding: 2px 8px;
 	}
 
 	th {
@@ -4044,7 +4083,6 @@ table.wc_shipping {
 		margin: 0.5em 0 0;
 		text-decoration: underline;
 		display: block;
-		font-family: $font-sf-pro-text;
 		font-size: 13px;
 		font-weight: 400;
 		line-height: 16px;
@@ -4065,7 +4103,6 @@ table.wc_shipping {
 		}
 
 		.description {
-			font-family: $font-sf-pro-text;
 			font-size: 13px;
 			font-weight: 400;
 			line-height: 18px;
@@ -4115,7 +4152,6 @@ table.wc_shipping {
 
 	.wc-backbone-modal-main article {
 		padding: 0 32px 32px 32px;
-		
 	}
 
 	.wc-backbone-modal-main header{
@@ -4124,7 +4160,6 @@ table.wc_shipping {
 
 	.wc-backbone-modal-main footer {
 		padding: 20px 32px 12px 32px;
-		
 	}
 
 	.wc-backbone-modal-main .wc-backbone-modal-header h1 {
@@ -4168,7 +4203,6 @@ table.wc_shipping {
 				display: none;
 			}
 		}
-		
 	}
 
 	.wc-shipping-method-add-class-costs {
@@ -4186,7 +4220,7 @@ table.wc_shipping {
 			height: 1px;
 			overflow: hidden;
 			position: absolute;
-			white-space: nowrap; 
+			white-space: nowrap;
 			width: 1px;
 
 			&:checked + label {
@@ -4206,17 +4240,14 @@ table.wc_shipping {
 			margin: 12px 0;
 			border-radius: 4px;
 		}
+	}
 
-		.wc-shipping-zone-method-input-help-text {
-			position: absolute;
-    		bottom: -30px;
-			height: 30px;
-			display: none;
-		}
+	.wc-shipping-zone-method-input-help-text-container {
+		min-height: 40px;
+	}
 
-		input:checked ~ .wc-shipping-zone-method-input-help-text {
-			display: block;
-		}
+	.wc-shipping-zone-method-input-help-text {
+		display: none;
 	}
 
 	.wc-shipping-zone-method-selector {
@@ -4237,7 +4268,7 @@ table.wc_shipping {
 			font-size: 24px;
 		}
 	}
-	
+
 	.wc-shipping-zone-method-fields {
 
 		& > label {
@@ -4258,7 +4289,7 @@ table.wc_shipping {
 			margin-bottom: 24px;
 			position: relative;
 
-			input, 
+			input,
 			select {
 				margin: 6px 0;
 				padding: 12px;
@@ -4279,8 +4310,6 @@ table.wc_shipping {
 				}
 
 				&.wc-shipping-modal-price {
-					color: #757575;
-
 					&.wc-shipping-currency-position-left,
 					&.wc-shipping-currency-position-left_space {
 
@@ -4337,6 +4366,25 @@ table.wc_shipping {
 		line-height: 16px;
 		color: #757575;
 	}
+
+	.wc-backbone-modal-back-inactive {
+		display: none;
+	}
+
+	#btn-next.is-busy {
+		background-image: linear-gradient(-45deg, #fafafa 33%, #e0e0e0 33%, #e0e0e0 70%, #fafafa 70%);
+		animation-duration: 2.5s;
+		animation-timing-function: linear;
+		animation-delay: 0s;
+		animation-iteration-count: infinite;
+		animation-direction: normal;
+		animation-fill-mode: none;
+		animation-play-state: running;
+		animation-name: components-button__busy-animation;
+		animation-timeline: auto;
+		animation-range-start: normal;
+		color: #757575;
+	}
 }
 
 .wc-backbone-modal-add-shipping-method .wc-backbone-modal-main article {
@@ -4362,7 +4410,7 @@ table {
 	.edit {
 		margin: 5px 0;
 	}
-	
+
 	.edit > input,
 	.edit > select {
 		width: 100%;
@@ -4390,7 +4438,7 @@ table {
 	}
 }
 
-.wc-shipping-class-hide-sibling-view + .view { 
+.wc-shipping-class-hide-sibling-view + .view {
 	display: none;
 }
 
@@ -4398,18 +4446,16 @@ table {
 	display: flex;
 	align-items: center;
 
-	.button-primary {
-		display: inline-block;
+	.page-title-action {
 		margin: 0 12px;
 	}
-} 
+}
 
 .wc-shipping-zone-heading-help-text {
 	max-width: 800px;
 }
 
 .wc-shipping-zone-heading-help-text {
-	font-family: $font-sf-pro-text;
 	color: #3C434A;
 	font-size: 13px;
 	font-style: normal;
@@ -4418,7 +4464,6 @@ table {
 }
 
 .wc-shipping-zone-help-text {
-	font-family: $font-sf-pro-text;
 	color: #3C434A;
 	font-size: 12px;
 	font-style: normal;
@@ -4426,23 +4471,24 @@ table {
 	line-height: 17px;
 }
 
+#wc-shipping-zone-region-picker-root .woocommerce-tree-select-control .components-base-control {
+	padding: 2px 8px;
+	border-radius: 4px;
+
+	.woocommerce-tree-select-control__control-input {
+		font-size: 14px;
+	}
+}
+
 table.wc-shipping-zones,
 table.wc-shipping-zone-methods,
 table.wc-shipping-classes {
-	font-family: $font-sf-pro-text;
 	font-size: 14px;
-	font-weight: 400;
-	line-height: 20px;
-	color: #000000;
-
-	&.widefat p {
-		color: #000000;
-	}
 
 	thead tr th {
-		color: #646970;
 		vertical-align: middle;
-		padding: 12px;
+		padding: 1em;
+		font-weight: 600;
 	}
 
 	tbody tr td {
@@ -4455,8 +4501,6 @@ table.wc-shipping-classes {
 
 	tfoot tr td {
 		padding: 24px 12px;
-		background-color: #F6F7F7;
-		color: #000000;
 		vertical-align: top;
 
 		&:last-child {
@@ -4466,13 +4510,8 @@ table.wc-shipping-classes {
 
 	td,
 	th {
-		background: #fff;
 		display: table-cell !important;
-		font-family: $font-sf-pro-text;
 		font-size: 14px;
-		font-weight: 400;
-		line-height: 20px;
-		color: #000000;
 		vertical-align: middle;
 		padding: 24px 12px;
 
@@ -4492,6 +4531,18 @@ table.wc-shipping-classes {
 		}
 	}
 
+	.wc-shipping-zone-rows,
+	.wc-shipping-zone-method-rows,
+	.wc-shipping-class-rows {
+		tr:nth-child(even) td {
+			background: #f9f9f9;
+		}
+	}
+
+	.wc-shipping-zone-rows-tfoot .even td {
+		background: #f9f9f9;
+	}
+
 	td.wc-shipping-zones-blank-state,
 	td.wc-shipping-zone-method-blank-state {
 		overflow: hidden;
@@ -4508,7 +4559,7 @@ table.wc-shipping-classes {
 
 		p,
 		li {
-			color: var(--wc-secondary-text);
+			color: var(--wc-secondary-text, $woocommerce);
 			font-size: 1.2em;
 			line-height: 1.2em;
 			margin: 0 0 1.5em;
@@ -4552,16 +4603,6 @@ table.wc-shipping-classes {
 	}
 
 	tbody.wc-shipping-tables-tbody {
-		td {
-			border-top: 1px solid #C3C4C7;
-		}
-
-		tr:first-child {
-			td {
-				border-top: 0;
-			}
-		}
-
 		.wc-shipping-zone-name,
 		.wc-shipping-zone-method-title,
 		.wc-shipping-class-name {
@@ -4591,6 +4632,8 @@ table.wc-shipping-classes {
 		&::before {
 			content: "";
 			mask: url(../images/icons/move-icon.svg);
+			mask-image: url(../images/icons/move-icon.svg);
+			-webkit-mask-image: url(../images/icons/move-icon.svg);
 			background-color: #1E1E1E;
 			display: block;
 			width: 17px;
@@ -4631,12 +4674,7 @@ table.wc-shipping-classes {
 
 		a.wc-shipping-zone-actions,
 		a.wc-shipping-zone-actions:hover {
-			color: #D63638;
-		}
-
-		a.wc-shipping-zone-action-edit,
-		a.wc-shipping-zone-action-edit:hover {
-			color: #0675C4;
+			color: var(--wc-red);
 		}
 	}
 
@@ -4658,8 +4696,6 @@ table.wc-shipping-classes {
 	}
 
 	td.wc-shipping-zone-methods {
-		color: #555;
-
 		.method_disabled {
 			text-decoration: line-through;
 		}
@@ -4755,8 +4791,8 @@ table.wc-shipping-classes {
 .woocommerce-input-toggle {
 	height: 16px;
 	width: 32px;
-	border: 2px solid var(--wp-admin-theme-color);
-	background-color: var(--wp-admin-theme-color);
+	border: 2px solid var(--wp-admin-theme-color, $woocommerce);
+	background-color: var(--wp-admin-theme-color, $woocommerce);
 	display: inline-block;
 	text-indent: -9999px;
 	border-radius: 10em;
@@ -4872,7 +4908,7 @@ img.help_tip {
 
 .status-enabled::before {
 	@include icon("\e015");
-	color: var(--wp-admin-theme-color);
+	color: var(--wp-admin-theme-color, $woocommerce);
 }
 
 .status-disabled::before {
@@ -4897,7 +4933,7 @@ img.help_tip {
 		margin-left: 0.5em;
 
 		a {
-			color: var(--wp-admin-theme-color);
+			color: var(--wp-admin-theme-color, $woocommerce);
 		}
 	}
 
@@ -8045,21 +8081,21 @@ table.bar_chart {
 		}
 
 		li.active {
-			border-color: var(--wp-admin-theme-color);
-			color: var(--wp-admin-theme-color);
+			border-color: var(--wp-admin-theme-color, $woocommerce);
+			color: var(--wp-admin-theme-color, $woocommerce);
 
 			&::before {
-				border-color: var(--wp-admin-theme-color);
+				border-color: var(--wp-admin-theme-color, $woocommerce);
 			}
 		}
 
 		li.done {
-			border-color: var(--wp-admin-theme-color);
-			color: var(--wp-admin-theme-color);
+			border-color: var(--wp-admin-theme-color, $woocommerce);
+			color: var(--wp-admin-theme-color, $woocommerce);
 
 			&::before {
-				border-color: var(--wp-admin-theme-color);
-				background: var(--wp-admin-theme-color);
+				border-color: var(--wp-admin-theme-color, $woocommerce);
+				background: var(--wp-admin-theme-color, $woocommerce);
 			}
 		}
 	}
@@ -8225,21 +8261,21 @@ table.bar_chart {
 		progress::-webkit-progress-value {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
-			background: var(--wp-admin-theme-color);
+			background: var(--wp-admin-theme-color, $woocommerce);
 			transition: width 1s ease;
 		}
 
 		progress::-moz-progress-bar {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
-			background: var(--wp-admin-theme-color);
+			background: var(--wp-admin-theme-color, $woocommerce);
 			transition: width 1s ease;
 		}
 
 		progress::-ms-fill {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
-			background: var(--wp-admin-theme-color);
+			background: var(--wp-admin-theme-color, $woocommerce);
 			transition: width 1s ease;
 		}
 
@@ -8332,7 +8368,7 @@ table.bar_chart {
 
 			&::before {
 				@include icon("\e015");
-				color: var(--wp-admin-theme-color);
+				color: var(--wp-admin-theme-color, $woocommerce);
 				position: static;
 				font-size: 100px;
 				display: block;
@@ -8443,8 +8479,8 @@ table.bar_chart {
 					margin: 12px 12px 0 0;
 
 					&.current {
-						background: var(--wp-admin-theme-color);
-						border: 1px solid var(--wp-admin-theme-color);
+						background: var(--wp-admin-theme-color, #007cba);
+						border: 1px solid var(--wp-admin-theme-color, #007cba);
 
 						a {
 							color: #fff;

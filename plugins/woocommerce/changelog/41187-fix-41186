@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Import variations count fails when importing more than 30 products

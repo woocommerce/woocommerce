@@ -20,6 +20,6 @@
 		"reusable": false,
 		"inserter": false,
 		"lock": false,
-		"__experimentalToolbar": false
+		"__experimentalToolbar": true
 	}
 }

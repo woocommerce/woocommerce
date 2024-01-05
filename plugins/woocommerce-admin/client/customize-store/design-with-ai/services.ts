@@ -199,13 +199,41 @@ export const queryAiEndpoint = createMachine(
 	}
 );
 
+const resetPatternsAndProducts = () => async () => {
+	await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_blocks_allow_ai_connection: 'yes',
+	} );
+
+	const response = await apiFetch< {
+		is_ai_generated: boolean;
+	} >( {
+		path: '/wc/private/ai/store-info',
+		method: 'GET',
+	} );
+
+	if ( response.is_ai_generated ) {
+		return;
+	}
+
+	return Promise.all( [
+		apiFetch( {
+			path: '/wc/private/ai/patterns',
+			method: 'DELETE',
+		} ),
+		apiFetch( {
+			path: '/wc/private/ai/products',
+			method: 'DELETE',
+		} ),
+	] );
+};
+
 export const updateStorePatterns = async (
 	context: designWithAiStateMachineContext
 ) => {
 	try {
 		// TODO: Probably move this to a more appropriate place with a check. We should set this when the user granted permissions during the onboarding phase.
 		await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-			woocommerce_blocks_allow_ai_connection: true,
+			woocommerce_blocks_allow_ai_connection: 'yes',
 		} );
 
 		const { images } = await apiFetch< {
@@ -219,6 +247,11 @@ export const updateStorePatterns = async (
 					context.businessInfoDescription.descriptionText,
 			},
 		} );
+
+		if ( ! images.length ) {
+			await resetPatternsAndProducts()();
+			return;
+		}
 
 		const [ response ] = await Promise.all< {
 			ai_content_generated: boolean;
@@ -259,7 +292,8 @@ export const updateStorePatterns = async (
 					method: 'POST',
 					data: {
 						products_information: product,
-						index,
+						last_product:
+							index === response.product_content.length - 1,
 					},
 				} );
 			}
@@ -440,7 +474,7 @@ export const assembleSite = async (
 };
 
 const installAndActivateTheme = async () => {
-	const themeSlug = 'twentytwentythree';
+	const themeSlug = 'twentytwentyfour';
 
 	try {
 		await apiFetch( {
@@ -480,4 +514,5 @@ export const services = {
 	updateStorePatterns,
 	saveAiResponseToOption,
 	installAndActivateTheme,
+	resetPatternsAndProducts,
 };

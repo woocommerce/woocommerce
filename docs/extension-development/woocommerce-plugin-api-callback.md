@@ -1,4 +1,6 @@
-# WooCommerce Plugin API Callback Documentation
+---
+post_title: WooCommerce Plugin API Callback Documentation
+---
 
 ## Overview
 

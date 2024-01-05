@@ -1,10 +1,12 @@
-# Conditional tags
+---
+post_title: Conditional tags
+---
 
 ## What are “conditional tags”?
 
 The conditional tags of WooCommerce and WordPress can be used in your template files to change what content is displayed based on what *conditions* the page matches. For example, you may want to display a snippet of text above the shop page. With the `is_shop()` conditional tag, you can.
 
-Because WooCommerce uses custom post types, you can also use many of WordPress’ conditional tags. See [codex.wordpress.org/Conditional_Tags](https://codex.wordpress.org/Conditional_Tags) for a list of the tags included with WordPress.
+Because WooCommerce uses custom post types, you can also use many of WordPress' conditional tags. See [codex.wordpress.org/Conditional_Tags](https://codex.wordpress.org/Conditional_Tags) for a list of the tags included with WordPress.
 
 **Note**: You can only use conditional query tags after the `posts_selection` [action hook](https://codex.wordpress.org/Plugin_API/Action_Reference#Actions_Run_During_a_Typical_Request) in WordPress (the `wp` action hook is the first one through which you can use these conditionals). For themes, this means the conditional tag will never work properly if you are using it in the body of functions.php.
 
@@ -29,18 +31,18 @@ The list below holds the main conditional tags. To see all conditional tags, vis
 - `is_product_category()`  
   Returns true when viewing a product category archive.
 - `is_product_category( 'shirts' )`  
-  When the product category page for the ‘shirts’ category is being displayed.
+  When the product category page for the 'shirts' category is being displayed.
 - `is_product_category( array( 'shirts', 'games' ) )`  
-  When the product category page for the ‘shirts’ or ‘games’ category is being displayed.
+  When the product category page for the 'shirts' or 'games' category is being displayed.
 
 ### Product tag page
 
 - `is_product_tag()`  
   Returns true when viewing a product tag archive
 - `is_product_tag( 'shirts' )`  
-  When the product tag page for the ‘shirts’ tag is being displayed.
+  When the product tag page for the 'shirts' tag is being displayed.
 - `is_product_tag( array( 'shirts', 'games' ) )`  
-  When the product tag page for the ‘shirts’ or ‘games’ tags is being displayed.
+  When the product tag page for the 'shirts' or 'games' tags is being displayed.
 
 ### Single product page
 
@@ -60,7 +62,7 @@ The list below holds the main conditional tags. To see all conditional tags, vis
 ### Customer account pages
 
 - `is_account_page()`  
-  Returns true on the customer’s account pages.
+  Returns true on the customer's account pages.
 
 ### Endpoint
 

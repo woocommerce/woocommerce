@@ -27,7 +27,10 @@ export function InventoryMenuItem( {
 
 	return (
 		<Dropdown
-			position="middle right"
+			// @ts-expect-error missing prop in types.
+			popoverProps={ {
+				placement: 'right-start',
+			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<MenuItem
 					onClick={ () => {

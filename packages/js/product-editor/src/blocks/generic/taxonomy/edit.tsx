@@ -19,9 +19,12 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { CreateTaxonomyModal } from './create-taxonomy-modal';
-import { Taxonomy, TaxonomyMetadata } from './types';
 import useTaxonomySearch from './use-taxonomy-search';
-import { ProductEditorBlockEditProps } from '../../../types';
+import type {
+	ProductEditorBlockEditProps,
+	Taxonomy,
+	TaxonomyMetadata,
+} from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 
 interface TaxonomyBlockAttributes extends BlockAttributes {
@@ -40,6 +43,7 @@ export function Edit( {
 	const blockProps = useWooBlockProps( attributes );
 	const { hierarchical }: TaxonomyMetadata = useSelect(
 		( select ) =>
+			// @ts-expect-error There are no types for this.
 			select( 'core' ).getTaxonomy( attributes.slug ) || {
 				hierarchical: false,
 			}

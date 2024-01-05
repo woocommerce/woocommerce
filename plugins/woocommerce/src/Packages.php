@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce;
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -20,12 +22,29 @@ class Packages {
 	private function __construct() {}
 
 	/**
-	 * Array of package names and their main package classes.
+	 * Array of package names and their main package classes. Once a package has been merged into WooCommerce
+	 * directly it should be removed from here and added to the merged packages array.
 	 *
 	 * @var array Key is the package name/directory, value is the main package class which handles init.
 	 */
-	protected static $packages = array(
-		'woocommerce-blocks'   => '\\Automattic\\WooCommerce\\Blocks\\Package'
+	protected static $packages = array();
+
+	/**
+	 * Array of package names and their main package classes.
+	 *
+	 * One a package has been merged into WooCommerce Core it should be moved fron the package list and placed in
+	 * this list. This will ensure that the feature plugin is disabled as well as provide the class to handle
+	 * initialization for the now-merged feature plugin.
+	 *
+	 * Once a package has been merged into WooCommerce Core it should have its slug added here. This will ensure
+	 * that we deactivate the feature plugin automaticatlly to prevent any problems caused by conflicts between
+	 * the two versions caused by them both being active.
+	 *
+	 * @var array Key is the package name/directory, value is the main package class which handles init.
+	 */
+	protected static $merged_packages = array(
+		'woocommerce-admin'                    => '\\Automattic\\WooCommerce\\Admin\\Composer\\Package',
+		'woocommerce-gutenberg-products-block' => '\\Automattic\\WooCommerce\\Blocks\\Package',
 	);
 
 	/**
@@ -41,7 +60,8 @@ class Packages {
 	 * Callback for WordPress init hook.
 	 */
 	public static function on_init() {
-		self::load_packages();
+		self::deactivate_merged_packages();
+		self::initialize_packages();
 	}
 
 	/**
@@ -55,13 +75,58 @@ class Packages {
 	}
 
 	/**
+	 * Deactivates merged feature plugins.
+	 *
+	 * Once a feature plugin is merged into WooCommerce Core it should be deactivated. This method will
+	 * ensure that a plugin gets deactivated. Note that for the first request it will still be active,
+	 * and as such, there may be some odd behavior. This is unlikely to cause any issues though
+	 * because it will be deactivated on the request that updates or activates WooCommerce.
+	 */
+	protected static function deactivate_merged_packages() {
+		// Developers may need to be able to run merged feature plugins alongside merged packages for testing purposes.
+		if ( Constants::is_true( 'WC_ALLOW_MERGED_FEATURE_PLUGINS' ) ) {
+			return;
+		}
+
+		// Scroll through all of the active plugins and disable them if they're merged packages.
+		$active_plugins = get_option( 'active_plugins', array() );
+		// Deactivate the plugin if possible so that there are no conflicts.
+		foreach ( $active_plugins as $active_plugin_path ) {
+			$plugin_file = basename( plugin_basename( $active_plugin_path ), '.php' );
+			if ( ! isset( self::$merged_packages[ $plugin_file ] ) ) {
+				continue;
+			}
+
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+			// Make sure to display a message informing the user that the plugin has been deactivated.
+			$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $active_plugin_path );
+			deactivate_plugins( $active_plugin_path );
+			add_action(
+				'admin_notices',
+				function() use ( $plugin_data ) {
+					echo '<div class="error"><p>';
+					printf(
+						/* translators: %s: is referring to the plugin's name. */
+						esc_html__( 'The %1$s plugin has been deactivated as the latest improvements are now included with the %2$s plugin.', 'woocommerce' ),
+						'<code>' . esc_html( $plugin_data['Name'] ) . '</code>',
+						'<code>WooCommerce</code>'
+					);
+					echo '</p></div>';
+				}
+			);
+		}
+	}
+
+	/**
 	 * Loads packages after plugins_loaded hook.
 	 *
 	 * Each package should include an init file which loads the package so it can be used by core.
 	 */
-	protected static function load_packages() {
-		// Initialize WooCommerce Admin.
-		\Automattic\WooCommerce\Admin\Composer\Package::init();
+	protected static function initialize_packages() {
+		foreach ( self::$merged_packages as $package_name => $package_class ) {
+			call_user_func( array( $package_class, 'init' ) );
+		}
 
 		foreach ( self::$packages as $package_name => $package_class ) {
 			if ( ! self::package_exists( $package_name ) ) {

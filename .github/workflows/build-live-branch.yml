@@ -30,13 +30,13 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  build: false
 
             - name: Prepare plugin zips
               id: prepare
               env:
                   CURRENT_VERSION: ${{ steps.version.outputs.version }}
+                  # Build with experimental blocks.
+                  WOOCOMMERCE_BLOCKS_PHASE: 3
               run: |
 
                   # Current version must compare greather than any previously used current version for this PR.

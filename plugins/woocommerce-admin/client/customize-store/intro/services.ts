@@ -8,6 +8,19 @@ import { resolveSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 
+/**
+ * Internal dependencies
+ */
+import { aiStatusResponse } from '../types';
+
+export const fetchAiStatus = () => async (): Promise< aiStatusResponse > => {
+	const response = await fetch(
+		'https://status.openai.com/api/v2/status.json'
+	);
+	const data = await response.json();
+	return data;
+};
+
 export const fetchThemeCards = async () => {
 	const themes = await apiFetch( {
 		path: '/wc-admin/onboarding/themes/recommended',

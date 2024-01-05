@@ -143,6 +143,8 @@ export function Edit( {
 				label={ __( 'Schedule sale', 'woocommerce' ) }
 				checked={ showScheduleSale }
 				onChange={ handleToggleChange }
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore disabled prop exists
 				disabled={ ! isSalePriceGreaterThanZero }
 			/>
 

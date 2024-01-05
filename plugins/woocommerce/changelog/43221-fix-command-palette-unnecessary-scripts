@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix `Store "core/interface" is already registered.` error in the block editor.

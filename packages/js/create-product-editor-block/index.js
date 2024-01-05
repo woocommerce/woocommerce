@@ -33,6 +33,7 @@ module.exports = {
 			'@wordpress/prettier-config',
 			'@wordpress/stylelint-config',
 			'eslint-import-resolver-typescript',
+			'@woocommerce/product-editor',
 		],
 		customScripts: {
 			postinstall: 'composer install',

@@ -1,4 +1,6 @@
-# WooCommerce extension developer handbook
+---
+post_title: WooCommerce extension developer handbook
+---
 
 Want to create a plugin to extend WooCommerce? WooCommerce extensions are the same as regular WordPress plugins. For more information, visit [Writing a plugin](https://developer.wordpress.org/plugins/).
 
@@ -6,7 +8,7 @@ Your WooCommerce extension should:
 
 - Adhere to all WordPress plugin coding standards, as well as [best practice guidelines](https://developer.wordpress.org/plugins/plugin-basics/best-practices/) for harmonious existence within WordPress and alongside other WordPress plugins.
 - Have a single core purpose and use WooCommerce features as much as possible.
-- Not do anything malicious, illegal, or dishonest — for example, inserting spam links or executable code via third-party systems if not part of the service or  explicitly permitted in the service’s terms of use.
+- Not do anything malicious, illegal, or dishonest - for example, inserting spam links or executable code via third-party systems if not part of the service or  explicitly permitted in the service’s terms of use.
 - Adhere to WooCommerce [compatibility and interoperability guidelines](https://woo.com/document/marketplace-overview/#section-9).
 
 Merchants make use of WooCommerce extensions daily, and should have a unified and pleasant experience while doing so without advertising invading their WP Admin or store.
@@ -63,7 +65,7 @@ Code conventions also prevent basic mistakes, as [Apple made with iOS 7.0.6](htt
 
 Avoid creating custom database tables. Whenever possible, use WordPress [post types](http://codex.wordpress.org/Post_Types#Custom_Post_Types), [taxonomies](http://codex.wordpress.org/Taxonomies), and [options](http://codex.wordpress.org/Creating_Options_Pages).
 
-Consider the permanence of your data. Here’s a quick primer:
+Consider the permanence of your data. Here's a quick primer:
 
 - If the data may not always be present (i.e., it expires), use a transient.
 - If the data is persistent but not always present, consider using the WP Cache.
@@ -141,15 +143,15 @@ Use the follow headers to declare “required” and “tested up to” versions
 
 ## [Plugin URI](https://woo.com/document/create-a-plugin/#section-11)
 
-Ensure that the Plugin URI line of the above plugin header is provided. This line should contain the URL of the plugin’s product/sale page or to a dedicated page for the plugin on your website.
+Ensure that the Plugin URI line of the above plugin header is provided. This line should contain the URL of the plugin's product/sale page or to a dedicated page for the plugin on your website.
 
 ## [Make it Extensible](https://woo.com/document/create-a-plugin/#section-13)
 
-Developers should use WordPress actions and filters to allow for modification/customization without requiring users to touch the plugin’s core code base.
+Developers should use WordPress actions and filters to allow for modification/customization without requiring users to touch the plugin's core code base.
 
-If your plugin creates a front-end output, we recommend to having a templating engine in place so users can create custom template files in their theme’s WooCommerce folder to overwrite the plugin’s template files.
+If your plugin creates a front-end output, we recommend to having a templating engine in place so users can create custom template files in their theme's WooCommerce folder to overwrite the plugin's template files.
 
-For more information, check out Pippin’s post on [Writing Extensible Plugins with Actions and Filters](http://code.tutsplus.com/tutorials/writing-extensible-plugins-with-actions-and-filters--wp-26759).
+For more information, check out Pippin's post on [Writing Extensible Plugins with Actions and Filters](http://code.tutsplus.com/tutorials/writing-extensible-plugins-with-actions-and-filters--wp-26759).
 
 ## [Use of External Libraries](https://woo.com/document/create-a-plugin/#section-14)
 
@@ -157,7 +159,7 @@ The use of entire external libraries is typically not suggested as this can open
 
 ## [Remove Unused Code](https://woo.com/document/create-a-plugin/#section-15)
 
-With version control, there’s no reason to leave commented-out code; it’s annoying to scroll through and read. Remove it and add it back later if needed.
+With version control, there's no reason to leave commented-out code; it's annoying to scroll through and read. Remove it and add it back later if needed.
 
 ## [Comment](https://woo.com/document/create-a-plugin/#section-16)
 
@@ -165,7 +167,7 @@ If you have a function, what does the function do? There should be comments for 
 
 ## [Avoid God Objects](https://woo.com/document/create-a-plugin/#section-17)
 
-[God Objects](http://en.wikipedia.org/wiki/God_object) are objects that know or do too much. The point of object-oriented programming is to take a large problem and break it into smaller parts. When functions do too much, it’s hard to follow their logic, making bugs harder to fix. Instead of having massive functions, break them down into smaller pieces.
+[God Objects](http://en.wikipedia.org/wiki/God_object) are objects that know or do too much. The point of object-oriented programming is to take a large problem and break it into smaller parts. When functions do too much, it's hard to follow their logic, making bugs harder to fix. Instead of having massive functions, break them down into smaller pieces.
 
 ## [Test Extension Quality & Security with Quality Insights Tool](https://woo.com/document/create-a-plugin/#section-18)
 
@@ -183,20 +185,20 @@ Always develop with [WP_DEBUG](http://codex.wordpress.org/Debugging_in_WordPress
 
 ## [Separate Business Logic & Presentation Logic](https://woo.com/document/create-a-plugin/#section-20)
 
-It’s a good practice to separate business logic (i.e., how the plugin works) from [presentation logic](http://en.wikipedia.org/wiki/Presentation_logic) (i.e., how it looks). Two separate pieces of logic are more easily maintained and swapped if necessary. An example is to have two different classes — one for displaying the end results, and one for the admin settings page.
+It’s a good practice to separate business logic (i.e., how the plugin works) from [presentation logic](http://en.wikipedia.org/wiki/Presentation_logic) (i.e., how it looks). Two separate pieces of logic are more easily maintained and swapped if necessary. An example is to have two different classes - one for displaying the end results, and one for the admin settings page.
 
 ## [Use Transients to Store Offsite Information](https://woo.com/document/create-a-plugin/#section-21)
 
-If you provide a service via an API, it’s best to store that information so future queries can be done faster and the load on your service is lessened. [WordPress transients](http://codex.wordpress.org/Transients_API) can be used to store data for a certain amount of time.
+If you provide a service via an API, it's best to store that information so future queries can be done faster and the load on your service is lessened. [WordPress transients](http://codex.wordpress.org/Transients_API) can be used to store data for a certain amount of time.
 
 ## [Logging Data](https://woo.com/document/create-a-plugin/#section-22)
 
 You may want to log data that can be useful for debugging purposes. This is great with two conditions:
 
-- Allow any logging as an ‘opt in’.
+- Allow any logging as an 'opt in'.
 - Use the [WC_Logger](https://woo.com/wc-apidocs/class-WC_Logger.html) class. A user can then view logs on their system status page.
 
-If adding logging to your extension, here’s a snippet for presenting a link to the logs, in a way the extension user can easily make use of.
+If adding logging to your extension, here's a snippet for presenting a link to the logs, in a way the extension user can easily make use of.
 
 ```php
 $label = \_\_( 'Enable Logging', 'your-textdomain-here' );

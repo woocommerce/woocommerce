@@ -1,36 +1,62 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { createElement, useState } from '@wordpress/element';
 import {
-	BlockAttributes,
-	BlockInstance,
-	parse,
-	serialize,
-} from '@wordpress/blocks';
-import { Button } from '@wordpress/components';
+	createElement,
+	useEffect,
+	useState,
+	Fragment,
+} from '@wordpress/element';
+import { BlockInstance, parse, serialize } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
+import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { recordEvent } from '@woocommerce/tracks';
 import { useEntityProp } from '@wordpress/core-data';
+import { __ } from '@wordpress/i18n';
+import {
+	BlockControls,
+	// @ts-expect-error no exported member.
+	useInnerBlocksProps,
+	// @ts-expect-error no exported member.
+	BlockPreview,
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
-import { ContentPreview } from '../../../components/content-preview';
-import { ModalEditor } from '../../../components/modal-editor';
-import { ProductEditorBlockEditProps } from '../../../types';
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
+import { store } from '../../../store/product-editor-ui';
+import type { DescriptionBlockEditComponent } from './types';
+import FullEditorToolbarButton from './components/full-editor-toolbar-button';
 
 /**
- * Internal dependencies
+ * Check whether the parsed blocks become from the summary block.
+ *
+ * @param {BlockInstance[]} blocks - The block list
+ * @return {string|false} The content of the freeform block if it's a freeform block, false otherwise.
  */
+export function getContentFromFreeform(
+	blocks: BlockInstance[]
+): false | string {
+	// Check whether the parsed blocks become from the summary block:
+	const isCoreFreeformBlock =
+		blocks.length === 1 && blocks[ 0 ].name === 'core/freeform';
+
+	if ( isCoreFreeformBlock ) {
+		return blocks[ 0 ].attributes.content;
+	}
+
+	return false;
+}
 
 /**
  * By default the blocks variable always contains one paragraph
  * block with empty content, that causes the description to never
  * be empty. This function removes the default block to keep
  * the description empty.
+ *
+ * todo: this is not optimal. We cannot rely on the content attribute to
+ * determine whether the description is empty or not
  *
  * @param blocks The block list
  * @return Empty array if there is only one block with empty content
@@ -48,45 +74,106 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 
 export function DescriptionBlockEdit( {
 	attributes,
-}: ProductEditorBlockEditProps< BlockAttributes > ) {
-	const blockProps = useWooBlockProps( attributes );
-	const [ isModalOpen, setIsModalOpen ] = useState( false );
+}: DescriptionBlockEditComponent ) {
 	const [ description, setDescription ] = useEntityProp< string >(
 		'postType',
 		'product',
 		'description'
 	);
 
+	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
+		BlockInstance[]
+	>( [] );
+
+	// Pick Modal editor data from the store.
+	const { isModalEditorOpen, modalEditorBlocks, hasChanged } = useSelect(
+		( select ) => {
+			return {
+				isModalEditorOpen: select( store ).isModalEditorOpen(),
+				modalEditorBlocks: select( store ).getModalEditorBlocks(),
+				hasChanged: select( store ).getModalEditorContentHasChanged(),
+			};
+		},
+		[]
+	);
+
+	// Parse the description into blocks.
+	useEffect( () => {
+		if ( ! description ) {
+			setDescriptionBlocks( [] );
+			return;
+		}
+
+		/*
+		 * First quick check to avoid parsing process,
+		 * since it's an expensive operation.
+		 */
+		if ( description.indexOf( '<!-- wp:' ) === -1 ) {
+			return;
+		}
+
+		const parsedBlocks = parse( description );
+		// Check whether the parsed blocks become from the summary block:
+		if ( getContentFromFreeform( parsedBlocks ) ) {
+			return;
+		}
+
+		setDescriptionBlocks( parsedBlocks );
+	}, [ description ] );
+
+	/*
+	 * From Modal Editor -> Description entity.
+	 * Update the description when the modal editor blocks change.
+	 */
+	useEffect( () => {
+		if ( ! hasChanged ) {
+			return;
+		}
+
+		if ( ! modalEditorBlocks?.length ) {
+			setDescription( '' );
+		}
+
+		const html = serialize( clearDescriptionIfEmpty( modalEditorBlocks ) );
+		setDescription( html );
+	}, [ modalEditorBlocks, setDescription, hasChanged ] );
+
+	const blockProps = useWooBlockProps( attributes, {
+		className: classNames( { 'has-blocks': !! description.length } ),
+		tabIndex: 0,
+	} );
+
+	const innerBlockProps = useInnerBlocksProps(
+		{},
+		{
+			templateLock: 'contentOnly',
+			allowedBlocks: [ 'woocommerce/product-summary-field' ],
+		}
+	);
+
 	return (
 		<div { ...blockProps }>
-			<Button
-				variant="secondary"
-				onClick={ () => {
-					setIsModalOpen( true );
-					recordEvent( 'product_add_description_click' );
-				} }
-			>
-				{ description.length
-					? __( 'Edit description', 'woocommerce' )
-					: __( 'Add description', 'woocommerce' ) }
-			</Button>
-			{ isModalOpen && (
-				<ModalEditor
-					initialBlocks={ parse( description ) }
-					onChange={ ( blocks ) => {
-						const html = serialize(
-							clearDescriptionIfEmpty( blocks )
-						);
-						setDescription( html );
-					} }
-					onClose={ () => setIsModalOpen( false ) }
-					title={ __( 'Edit description', 'woocommerce' ) }
-				/>
+			{ !! descriptionBlocks?.length ? (
+				<>
+					<BlockControls>
+						<FullEditorToolbarButton
+							text={ __( 'Edit in full editor', 'woocommerce' ) }
+						/>
+					</BlockControls>
+
+					<BlockPreview
+						blocks={ descriptionBlocks }
+						viewportWidth={ 800 }
+						additionalStyles={ [
+							{ css: 'body { padding: 32px; height: 10000px }' }, // hack: setting height to 10000px to ensure the preview is not cut off.
+						] }
+					/>
+				</>
+			) : (
+				<div { ...innerBlockProps } />
 			) }
-			{ !! description.length && (
-				<ContentPreview content={ description } />
-			) }
-			{ isModalOpen && <ModalEditorWelcomeGuide /> }
+
+			{ isModalEditorOpen && <ModalEditorWelcomeGuide /> }
 		</div>
 	);
 }

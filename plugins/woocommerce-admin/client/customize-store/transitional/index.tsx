@@ -39,12 +39,14 @@ export const Transitional = ( {
 	hasCompleteSurvey,
 	isSurveyOpen,
 	setSurveyOpen,
+	aiOnline,
 }: {
 	editor: React.ReactNode;
 	sendEvent: ( event: events ) => void;
 	hasCompleteSurvey: boolean;
 	isSurveyOpen: boolean;
 	setSurveyOpen: ( isOpen: boolean ) => void;
+	aiOnline: boolean;
 } ) => {
 	const homeUrl: string = getSetting( 'homeUrl', '' );
 	const isEditorLoading = useIsSiteEditorLoading();
@@ -54,7 +56,7 @@ export const Transitional = ( {
 
 	return (
 		<div className="woocommerce-customize-store__transitional">
-			{ isSurveyOpen && (
+			{ isSurveyOpen && aiOnline && (
 				<Modal
 					title={ __( 'Share feedback', 'woocommerce' ) }
 					onRequestClose={ () => closeSurvey() }
@@ -95,7 +97,7 @@ export const Transitional = ( {
 				<div className="woocommerce-customize-store__transitional-main-actions">
 					<WooCYSSecondaryButtonSlot />
 
-					{ ! hasCompleteSurvey && (
+					{ ! hasCompleteSurvey && aiOnline && (
 						<Button
 							className="woocommerce-customize-store__transitional-preview-button"
 							variant="secondary"

@@ -1,6 +1,62 @@
 // TODO: Fetch AI-picked color palettes from the backend API
 export const COLOR_PALETTES = [
 	{
+		title: 'New - Neutral',
+		version: 2,
+		settings: {
+			color: {
+				palette: {
+					theme: [
+						{
+							color: '#000000',
+							name: 'Primary',
+							slug: 'primary',
+						},
+						{
+							color: '#000000',
+							name: 'Secondary',
+							slug: 'secondary',
+						},
+						{
+							color: '#000000',
+							name: 'Foreground',
+							slug: 'foreground',
+						},
+						{
+							color: '#ffffff',
+							name: 'Background',
+							slug: 'background',
+						},
+						{
+							color: '#ffffff',
+							name: 'Tertiary',
+							slug: 'tertiary',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			color: {
+				background: 'var(--wp--preset--color--background)',
+				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--primary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
+				link: {
+					color: {
+						text: 'var(--wp--preset--color--foreground)',
+					},
+				},
+			},
+		},
+	},
+	{
 		title: 'Ancient Bronze',
 		version: 2,
 		settings: {
@@ -1068,6 +1124,293 @@ export const COLOR_PALETTES = [
 		},
 		wpcom_category: 'Dark',
 	},
+	{
+		title: 'Blueberry Sorbet',
+		version: 2,
+		settings: {
+			color: {
+				palette: {
+					theme: [
+						{
+							color: '#2038B6',
+							name: 'Primary',
+							slug: 'primary',
+						},
+						{
+							color: '#BD4089',
+							name: 'Secondary',
+							slug: 'secondary',
+						},
+						{
+							color: '#2038B6',
+							name: 'Foreground',
+							slug: 'foreground',
+						},
+						{
+							color: '#FDFBEF',
+							name: 'Background',
+							slug: 'background',
+						},
+						{
+							color: '#F8F2E2',
+							name: 'Tertiary',
+							slug: 'tertiary',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			color: {
+				background: 'var(--wp--preset--color--background)',
+				text: 'var(--wp--preset--color--foreground)',
+			},
+		},
+	},
+	{
+		title: 'Green Thumb',
+		version: 2,
+		settings: {
+			color: {
+				palette: {
+					theme: [
+						{
+							color: '#164A41',
+							name: 'Primary',
+							slug: 'primary',
+						},
+						{
+							color: '#4B7B4D',
+							name: 'Secondary',
+							slug: 'secondary',
+						},
+						{
+							color: '#164A41',
+							name: 'Foreground',
+							slug: 'foreground',
+						},
+						{
+							color: '#ffffff',
+							name: 'Background',
+							slug: 'background',
+						},
+						{
+							color: '#CEEAC4',
+							name: 'Tertiary',
+							slug: 'tertiary',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			color: {
+				background: 'var(--wp--preset--color--background)',
+				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--primary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
+				link: {
+					color: {
+						text: 'var(--wp--preset--color--secondary)',
+					},
+					':hover': {
+						color: {
+							text: 'var(--wp--preset--color--foreground)',
+						},
+					},
+				},
+			},
+		},
+	},
+	{
+		title: 'Golden Haze',
+		version: 2,
+		settings: {
+			color: {
+				palette: {
+					theme: [
+						{
+							color: '#232224',
+							name: 'Primary',
+							slug: 'primary',
+						},
+						{
+							color: '#EBB54F',
+							name: 'Secondary',
+							slug: 'secondary',
+						},
+						{
+							color: '#515151',
+							name: 'Foreground',
+							slug: 'foreground',
+						},
+						{
+							color: '#ffffff',
+							name: 'Background',
+							slug: 'background',
+						},
+						{
+							color: '#FFF0AE',
+							name: 'Tertiary',
+							slug: 'tertiary',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			color: {
+				background: 'var(--wp--preset--color--background)',
+				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--secondary)',
+						text: 'var(--wp--preset--color--foreground)',
+					},
+				},
+				link: {
+					color: {
+						text: 'var(--wp--preset--color--secondary)',
+					},
+					':hover': {
+						color: {
+							text: 'var(--wp--preset--color--foreground)',
+						},
+					},
+				},
+			},
+		},
+	},
+	{
+		title: 'Golden Indigo',
+		version: 2,
+		settings: {
+			color: {
+				palette: {
+					theme: [
+						{
+							color: '#4866C0',
+							name: 'Primary',
+							slug: 'primary',
+						},
+						{
+							color: '#C09F50',
+							name: 'Secondary',
+							slug: 'secondary',
+						},
+						{
+							color: '#405AA7',
+							name: 'Foreground',
+							slug: 'foreground',
+						},
+						{
+							color: '#ffffff',
+							name: 'Background',
+							slug: 'background',
+						},
+						{
+							color: '#FBF5EE',
+							name: 'Tertiary',
+							slug: 'tertiary',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			color: {
+				background: 'var(--wp--preset--color--background)',
+				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--primary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
+				link: {
+					color: {
+						text: 'var(--wp--preset--color--secondary)',
+					},
+					':hover': {
+						color: {
+							text: 'var(--wp--preset--color--foreground)',
+						},
+					},
+				},
+			},
+		},
+	},
+	{
+		title: 'Ice',
+		version: 2,
+		settings: {
+			color: {
+				palette: {
+					theme: [
+						{
+							slug: 'primary',
+							color: '#3473FE',
+							name: 'Primary',
+						},
+						{
+							slug: 'secondary',
+							color: '#12123F',
+							name: 'Secondary',
+						},
+						{
+							slug: 'foreground',
+							color: '#12123F',
+							name: 'Foreground',
+						},
+						{
+							slug: 'background',
+							color: '#F1F4FA',
+							name: 'Background',
+						},
+						{
+							slug: 'tertiary',
+							color: '#DBE6EE',
+							name: 'Tertiary',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			color: {
+				background: 'var(--wp--preset--color--background)',
+				text: 'var(--wp--preset--color--foreground)',
+			},
+			elements: {
+				button: {
+					color: {
+						background: 'var(--wp--preset--color--primary)',
+						text: 'var(--wp--preset--color--background)',
+					},
+				},
+				link: {
+					color: {
+						text: 'var(--wp--preset--color--foreground)',
+					},
+					':hover': {
+						color: {
+							text: 'var(--wp--preset--color--primary)',
+						},
+					},
+				},
+			},
+		},
+	},
 ].map( ( color ) => {
 	// Add base styles settings for elements to ensure that the colors are applied correctly since default TT3 theme does not have right styles.
 	// These styles are referenced in the theme.json file of the creatio-2 theme.
@@ -1162,6 +1505,11 @@ export const COLOR_PALETTES = [
 				...color.styles.blocks,
 			},
 			elements: {
+				heading: {
+					color: {
+						text: 'var(--wp--preset--color--foreground)',
+					},
+				},
 				button: {
 					':active': {
 						color: {
@@ -1217,3 +1565,28 @@ export const COLOR_PALETTES = [
 		},
 	};
 } );
+
+export const DEFAULT_COLOR_PALETTE_TITLES = [
+	'New - Neutral',
+	'Blueberry Sorbet',
+	'Ancient Bronze',
+	'Crimson Tide',
+	'Purple Twilight',
+	'Green Thumb',
+	'Golden Haze',
+	'Golden Indigo',
+	'Arctic Dawn',
+	'Raspberry Chocolate',
+	'Canary',
+	'Ice',
+	'Rustic Rosewood',
+	'Cinnamon Latte',
+	'Lightning',
+	'Aquamarine Night',
+	'Charcoal',
+	'Slate',
+];
+
+export const DEFAULT_COLOR_PALETTES = DEFAULT_COLOR_PALETTE_TITLES.map(
+	( title ) => COLOR_PALETTES.find( ( palette ) => palette.title === title )
+);

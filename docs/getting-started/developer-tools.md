@@ -1,4 +1,6 @@
-# WooCommerce developer tools
+---
+post_title: WooCommerce developer tools
+---
 
 This guide provides an overview of essential tools and libraries for WooCommerce development. It's intended for developers looking to enhance their WooCommerce projects efficiently.
 
@@ -18,7 +20,7 @@ This is the command-line interface for [WordPress](https://wordpress.org/). You 
 
 #### [wp-env](https://www.npmjs.com/package/@wordpress/env)
 
-This command-line tool lets you easily set up a local WordPress environment for building and testing plugins and themes. It’s simple to install and requires no configuration.
+This command-line tool lets you easily set up a local WordPress environment for building and testing plugins and themes. It's simple to install and requires no configuration.
 
 #### [eslint-plugin](https://www.npmjs.com/package/@woocommerce/eslint-plugin)
 
@@ -40,7 +42,7 @@ Use these resources to help take some of the heavy lifting off of fetching and t
 
 #### API Clients
 
-#### [WooCommerce REST API — JavaScript](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api)
+#### [WooCommerce REST API - JavaScript](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api)
 
 The official JavaScript library for working with the WooCommerce REST API.
 

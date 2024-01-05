@@ -8,7 +8,10 @@ import { AnyInterpreter, Sender } from 'xstate';
 /**
  * Internal dependencies
  */
-import { CustomizeStoreComponent } from '../types';
+import {
+	CustomizeStoreComponent,
+	customizeStoreStateMachineContext,
+} from '../types';
 import { designWithAiStateMachineDefinition } from './state-machine';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
@@ -33,10 +36,15 @@ export type DesignWithAiComponentMeta = {
 
 export const DesignWithAiController = ( {
 	parentMachine,
+	parentContext,
 }: {
 	parentMachine?: AnyInterpreter;
 	sendEventToParent?: Sender< customizeStoreStateMachineEvents >;
+	parentContext?: customizeStoreStateMachineContext;
 } ) => {
+	// Assign aiOnline value from the parent context if it exists. Otherwise, ai is online by default.
+	designWithAiStateMachineDefinition.context.aiOnline =
+		parentContext?.aiOnline ?? true;
 	const [ state, send, service ] = useMachine(
 		designWithAiStateMachineDefinition,
 		{
@@ -84,10 +92,16 @@ export const DesignWithAiController = ( {
 };
 
 //loader should send event 'THEME_SUGGESTED' when it's done
-export const DesignWithAi: CustomizeStoreComponent = ( { parentMachine } ) => {
+export const DesignWithAi: CustomizeStoreComponent = ( {
+	parentMachine,
+	context,
+} ) => {
 	return (
 		<>
-			<DesignWithAiController parentMachine={ parentMachine } />
+			<DesignWithAiController
+				parentMachine={ parentMachine }
+				parentContext={ context }
+			/>
 		</>
 	);
 };

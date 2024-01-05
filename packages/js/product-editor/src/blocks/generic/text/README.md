@@ -61,7 +61,7 @@ Placeholder text that appears in the field when it's empty.
         -   **Required:** `No`
 -   **Required:** `No`
 
-Reffers to the type of the input. The `value` can be [any valid input type](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types). The message is used as a custom error `message` for the [typeMismatch](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/typeMismatch) validity.
+Refers to the type of the input. The `value` can be [any valid input type](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types). The message is used as a custom error `message` for the [typeMismatch](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/typeMismatch) validity.
 
 ### pattern
 
@@ -74,7 +74,7 @@ Reffers to the type of the input. The `value` can be [any valid input type](http
         -   **Required:** `No`
 -   **Required:** `No`
 
-Reffers to the validation pattern of the input. The `value` can be [any valid regular expression](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern). The `message` is used as a custom error message for the [patternMismatch](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/patternMismatch) validity.
+Refers to the validation pattern of the input. The `value` can be [any valid regular expression](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern). The `message` is used as a custom error message for the [patternMismatch](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/patternMismatch) validity.
 
 ### minLength
 
@@ -87,7 +87,7 @@ Reffers to the validation pattern of the input. The `value` can be [any valid re
         -   **Required:** `No`
 -   **Required:** `No`
 
-Reffers to the minimum string length constraint of the input. The `value` can be [any positive integer](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/minLength). The `message` is used as a custom error message for the [tooShort](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/tooShort) validity.
+Refers to the minimum string length constraint of the input. The `value` can be [any positive integer](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/minLength). The `message` is used as a custom error message for the [tooShort](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/tooShort) validity.
 
 ### maxLength
 
@@ -100,7 +100,7 @@ Reffers to the minimum string length constraint of the input. The `value` can be
         -   **Required:** `No`
 -   **Required:** `No`
 
-Reffers to the maximum string length constraint of the input. The `value` can be [any positive integer](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/maxLength). The `message` is used as a custom error message for the [tooLong](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/tooLong) validity.
+Refers to the maximum string length constraint of the input. The `value` can be [any positive integer](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/maxLength). The `message` is used as a custom error message for the [tooLong](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/tooLong) validity.
 
 ### min
 
@@ -113,7 +113,7 @@ Reffers to the maximum string length constraint of the input. The `value` can be
         -   **Required:** `No`
 -   **Required:** `No`
 
-Reffers to the [minimum](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/min) value that is acceptable and valid for the input containing the attribute. The `value` must be less than or equal to the value of the `max` attribute. The `message` is used as a custom error message for the [rangeUnderflow](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/rangeUnderflow) validity.
+Refers to the [minimum](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/min) value that is acceptable and valid for the input containing the attribute. The `value` must be less than or equal to the value of the `max` attribute. The `message` is used as a custom error message for the [rangeUnderflow](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/rangeUnderflow) validity.
 
 ### max
 
@@ -126,7 +126,7 @@ Reffers to the [minimum](https://developer.mozilla.org/en-US/docs/Web/HTML/Attri
         -   **Required:** `No`
 -   **Required:** `No`
 
-Reffers to the [maximum](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/max) value that is acceptable and valid for the input containing the attribute. The `value` must be greater than or equal to the value of the `min` attribute. The `message` is used as a custom error message for the [rangeOverflow](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/rangeOverflow) validity.
+Refers to the [maximum](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/max) value that is acceptable and valid for the input containing the attribute. The `value` must be greater than or equal to the value of the `min` attribute. The `message` is used as a custom error message for the [rangeOverflow](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/rangeOverflow) validity.
 
 ## Usage
 

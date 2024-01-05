@@ -77,12 +77,13 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 			'%s', // possible serialized context.
 		);
 
+		unset( $context['source'] );
 		if ( ! empty( $context ) ) {
-			try {
-				$insert['context'] = serialize( $context ); // @codingStandardsIgnoreLine.
-			} catch ( Exception $e ) {
-				$insert['context'] = serialize( 'There was an error while serializing the context: ' . $e->getMessage() );
+			if ( isset( $context['backtrace'] ) && true === filter_var( $context['backtrace'], FILTER_VALIDATE_BOOLEAN ) ) {
+				$context['backtrace'] = self::get_backtrace();
 			}
+
+			$insert['context'] = wp_json_encode( $context, JSON_PRETTY_PRINT );
 		}
 
 		return false !== $wpdb->insert( "{$wpdb->prefix}woocommerce_log", $insert, $format );

@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Adds filter `woocommerce_order_received_verify_known_shoppers` to allow known shoppers to access the order received page without being logged in.

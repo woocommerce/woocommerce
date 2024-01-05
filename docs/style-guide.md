@@ -1,4 +1,6 @@
-# Technical documentation style guide
+---
+post_title: Technical documentation style guide
+---
 
 This style guide is intended to provide guidelines for creating effective and user-friendly tutorials and how-to guides for WooCommerce technical documentation that will live in repo and be editable and iterative by open source contributors and WooCommerce teams.
 
@@ -6,12 +8,12 @@ This style guide is intended to provide guidelines for creating effective and us
 
 ### Language style
 
-- It’s important to use clear and concise language that is easy to understand. Use active voice and avoid using jargon or technical terms that may be unfamiliar to the user. The tone should be friendly and approachable, and should encourage the user to take action.
+- It's important to use clear and concise language that is easy to understand. Use active voice and avoid using jargon or technical terms that may be unfamiliar to the user. The tone should be friendly and approachable, and should encourage the user to take action.
 
 - Articles are written in the 3rd-person voice.
   Example: “Add an embed block to your page.”
 
-- Use American English for spelling and punctuation styles, or consider using a different word that doesn’t have a different spelling in other English variants.
+- Use American English for spelling and punctuation styles, or consider using a different word that doesn't have a different spelling in other English variants.
 
 - Use sentence case (not title case) for docs titles and subheadings.
   Example: “Introduction to the launch experience” rather than “Introduction to the Launch Experience.”
@@ -21,7 +23,7 @@ This style guide is intended to provide guidelines for creating effective and us
 
 ### Writing tips
 
-- Our target audience has a range of roles and abilities. When creating a tutorial or how-to guide, it’s important to consider the intended audience. Are they beginners or advanced users? What is their technical background? Understanding the audience can help guide the level of detail and the choice of language used in the guide.
+- Our target audience has a range of roles and abilities. When creating a tutorial or how-to guide, it's important to consider the intended audience. Are they beginners or advanced users? What is their technical background? Understanding the audience can help guide the level of detail and the choice of language used in the guide.
 
 - Use language understable even by readers with little technical knowledge and readers whose first language might not be English.
 
@@ -62,7 +64,9 @@ Note: While we've outlined specific rules above, all other default linting rules
     - Use the ATX-style (`#`) for headers.
 
     ```markdown
+---
     # This is an H1
+---
     ## This is an H2
     ```
 
@@ -126,7 +130,7 @@ Visual aids such as screenshots, diagrams, code snippets and videos can be very 
 
 Phrases that are more familiarly known in their acronym form can be used. The first time an acronym appears on any page, the full phrase must be included, followed by its acronym in parentheticals.
 
-Example: We’ve enhanced the querying functionality in WooCommerce with the introduction of High Performance Order Storage (HPOS).
+Example: We've enhanced the querying functionality in WooCommerce with the introduction of High Performance Order Storage (HPOS).
 
 After that, the acronym can be used for the remainder of the page.
 
@@ -136,7 +140,7 @@ When deciding if a term is common, consider the impact on translation and future
 
 ### Article content
 
-When creating a how-to guide, it’s important to use a consistent and easy-to-follow format. Here is a suggested template for a software how-to guide:
+When creating a how-to guide, it's important to use a consistent and easy-to-follow format. Here is a suggested template for a software how-to guide:
 
 **Introduction**: Provide an overview of the task or feature that the guide covers.
 
@@ -157,7 +161,7 @@ When creating a how-to guide, it’s important to use a consistent and easy-to-f
 
 ## Testing
 
-Before publishing a tutorial or guide, it’s important to test it thoroughly to ensure that the instructions are accurate and easy to follow.
+Before publishing a tutorial or guide, it's important to test it thoroughly to ensure that the instructions are accurate and easy to follow.
 
 ## Structure
 

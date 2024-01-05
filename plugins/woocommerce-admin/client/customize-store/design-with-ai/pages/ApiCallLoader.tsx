@@ -99,7 +99,10 @@ const loaderSteps = [
 ];
 
 // Make the loader last longer and provide a smoother progress by duplicating the steps.
-const createAugmentedSteps = ( steps: typeof loaderSteps ) => {
+const createAugmentedSteps = (
+	steps: typeof loaderSteps,
+	numOfDupes: number
+) => {
 	// Duplicate each step, so we can animate each one
 	// (e.g. each step will be duplicated 3 times, and each duplicate will
 	// have different progress)
@@ -112,8 +115,7 @@ const createAugmentedSteps = ( steps: typeof loaderSteps ) => {
 			if ( ! nextItem ) return [ item ];
 
 			// If there is a next item, we're not at the end of the array
-			// so return the current item, plus two duplicates
-			const numOfDupes = 2;
+			// so return the current item, plus duplicates
 			const duplicates = [ item ];
 			const progressIncreaseBy =
 				( nextItem.progress - item.progress ) / numOfDupes;
@@ -149,7 +151,10 @@ export const ApiCallLoader = () => {
 		preload( openingTheDoors );
 	}, [] );
 
-	const augmentedSteps = createAugmentedSteps( loaderSteps.slice( 0, -1 ) );
+	const augmentedSteps = createAugmentedSteps(
+		loaderSteps.slice( 0, -1 ),
+		10
+	);
 
 	return (
 		<Loader>
@@ -182,7 +187,7 @@ export const ApiCallLoader = () => {
 
 export const AssembleHubLoader = () => {
 	// Show the last two steps of the loader so that the last frame is the shortest time possible
-	const augmentedSteps = createAugmentedSteps( loaderSteps.slice( -2 ) );
+	const augmentedSteps = createAugmentedSteps( loaderSteps.slice( -2 ), 10 );
 
 	const [ progress, setProgress ] = useState( augmentedSteps[ 0 ].progress );
 

@@ -44,6 +44,7 @@ describe( 'Intro Banners', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
+					aiOnline: true,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -81,6 +82,7 @@ describe( 'Intro Banners', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
+					aiOnline: true,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -124,6 +126,7 @@ describe( 'Intro Banners', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
+					aiOnline: true,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
