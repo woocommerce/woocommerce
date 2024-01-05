@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes handling for cookie consent for order attribution.
