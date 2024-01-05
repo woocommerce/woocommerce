@@ -493,6 +493,9 @@ importers:
       '@wordpress/blocks':
         specifier: ^12.24.0
         version: 12.24.0(react@17.0.2)
+      '@wordpress/core-data':
+        specifier: wp-6.0
+        version: 4.4.5(react@17.0.2)
       '@wordpress/data':
         specifier: wp-6.0
         version: 6.6.1(react@17.0.2)
@@ -8539,7 +8542,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.12.9
-      '@babel/helper-create-class-features-plugin': 7.23.6(@babel/core@7.12.9)
+      '@babel/helper-create-class-features-plugin': 7.23.5(@babel/core@7.12.9)
       '@babel/helper-plugin-utils': 7.22.5
 
   /@babel/plugin-transform-private-methods@7.23.3(@babel/core@7.23.5):
@@ -8549,7 +8552,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.23.5
-      '@babel/helper-create-class-features-plugin': 7.23.6(@babel/core@7.23.5)
+      '@babel/helper-create-class-features-plugin': 7.23.5(@babel/core@7.23.5)
       '@babel/helper-plugin-utils': 7.22.5
 
   /@babel/plugin-transform-private-methods@7.23.3(@babel/core@7.23.6):
@@ -22570,7 +22573,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.6
       '@wordpress/compose': 4.2.0(react@17.0.2)
-      '@wordpress/deprecated': 3.41.0
+      '@wordpress/deprecated': 3.6.1
       '@wordpress/element': 3.2.0
       '@wordpress/is-shallow-equal': 4.24.0
       '@wordpress/priority-queue': 2.47.0
@@ -52985,7 +52988,7 @@ packages:
       webpack: '>=5.32.0'
     dependencies:
       ansis: 1.5.6
-      webpack: 5.89.0(webpack-cli@3.3.12)
+      webpack: 5.89.0(webpack-cli@5.1.4)
 
   /webpack-rtl-plugin@2.0.0:
     resolution: {integrity: sha512-lROgFkiPjapg9tcZ8FiLWeP5pJoG00018aEjLTxSrVldPD1ON+LPlhKPHjb7eE8Bc0+KL23pxcAjWDGOv9+UAw==}
