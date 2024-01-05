@@ -1250,7 +1250,7 @@ if ( ! function_exists( 'woocommerce_product_taxonomy_archive_header' ) ) {
 	 * Output the products header on taxonomy archives.
 	 */
 	function woocommerce_product_taxonomy_archive_header() {
-		if ( true || is_product_taxonomy() ) {
+		if ( is_product_taxonomy() ) {
 			wc_get_template( 'loop/header.php' );
 		}
 	}
