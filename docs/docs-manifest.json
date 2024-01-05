@@ -684,9 +684,9 @@
         },
         {
           "post_title": "Notices",
-          "menu_title": "Notices guidelines",
+          "menu_title": "Notice guidelines",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/notices.md",
-          "hash": "f22c6bcb18dcb67ce48c1d9c0937c02d892088256f083903d8c2fab3afcf19d4",
+          "hash": "dcce0de4b0fb6a7e3d423ad6c4f536cb9541cd7bf979c2fd216b8b4ca8f9ec7a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/notices.md",
           "id": "8c5de3126ef21043cfc064a6c7105f7b64ff3ecf"
         },
@@ -764,5 +764,5 @@
       "categories": []
     }
   ],
-  "hash": "521fc9ae78bf8d3cc086e1f7433d8fc30c4ce4e865f549d9cff0b5053c6786e3"
+  "hash": "87ed7094c2a46b64f367b0967f44779b273577f0c3f696227c76b3694d6fe09a"
 }
