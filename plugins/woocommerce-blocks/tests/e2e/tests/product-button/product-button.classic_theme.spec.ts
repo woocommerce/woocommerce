@@ -25,7 +25,7 @@ const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 	},
 } );
 test.describe( `${ blockData.name } Block`, () => {
-	test.beforeAll( async ( { page } ) => {
+	test.beforeEach( async ( { page } ) => {
 		await page.goto( '/product-collection/' );
 	} );
 
