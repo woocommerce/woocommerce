@@ -48,20 +48,17 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 				'page=wc-settings&tab=shipping&section=pickup_location'
 			);
 
-			expect(
-				await page
-					.locator( '#inspector-checkbox-control-0' )
-					.isChecked()
-			).toBeFalsy();
+			await expect(
+				page.locator( '#inspector-checkbox-control-0' )
+			).not.toBeChecked();
 
 			await admin.visitAdminPage(
 				'admin.php',
 				'page=wc-settings&tab=shipping&section=options'
 			);
+
 			expect(
-				await page.locator(
-					'#woocommerce_shipping_cost_requires_address'
-				)
+				page.locator( '#woocommerce_shipping_cost_requires_address' )
 			).not.toBeNull();
 
 			await utils.enableLocalPickup( admin, page );
@@ -70,10 +67,9 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 				'admin.php',
 				'page=wc-settings&tab=shipping&section=options'
 			);
+
 			expect(
-				await page.locator(
-					'#woocommerce_shipping_cost_requires_address'
-				)
+				page.locator( '#woocommerce_shipping_cost_requires_address' )
 			).not.toBeNull();
 		} );
 	} );
@@ -92,24 +88,21 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			);
 
 			const text = 'Enable local pickup';
+			const xpath = `//label[text()='${ text }']/preceding-sibling::span`;
 			const checkedState = page
-				.locator(
-					`//label[text()='${ text }']/preceding-sibling::span`
-				)
+				.locator( xpath )
 				.locator( 'svg' )
 				.isVisible();
 
 			await page.getByText( text ).click();
 			await utils.savelocalPickupSettings( admin, page );
 
-			expect(
-				await page
-					.locator(
-						`//label[text()='${ text }']/preceding-sibling::span`
-					)
-					.locator( 'svg' )
-					.isVisible()
-			).not.toBe( checkedState );
+			const newCheckedState = page
+				.locator( xpath )
+				.locator( 'svg' )
+				.isVisible();
+
+			expect( newCheckedState ).not.toBe( checkedState );
 		} );
 
 		test( 'Allows the title to be changed', async ( { admin, page } ) => {
@@ -124,7 +117,9 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 
 			await utils.savelocalPickupSettings( admin, page );
 
-			expect( await page.locator( 'input[name="local_pickup_title"]' )).toHaveValue( 'Local Pickup Test #1' );
+			await expect(
+				page.locator( 'input[name="local_pickup_title"]' )
+			).toHaveValue( 'Local Pickup Test #1' );
 
 			await page
 				.locator( 'input[name="local_pickup_title"]' )
@@ -132,7 +127,9 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 
 			await utils.savelocalPickupSettings( admin, page );
 
-			expect( await page.locator( 'input[name="local_pickup_title"]' )).toHaveValue( 'Local Pickup Test #2' );
+			await expect(
+				page.locator( 'input[name="local_pickup_title"]' )
+			).toHaveValue( 'Local Pickup Test #2' );
 		} );
 
 		test( 'Allows toggling of add price field state', async ( {
@@ -145,24 +142,22 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			);
 
 			const text = 'Add a price for customers who choose local pickup';
+			const xpath = `//label[text()='${ text }']/preceding-sibling::span`;
+
 			const checkedState = page
-				.locator(
-					`//label[text()='${ text }']/preceding-sibling::span`
-				)
+				.locator( xpath )
 				.locator( 'svg' )
 				.isVisible();
 
 			await page.getByText( text ).click();
 			await utils.savelocalPickupSettings( admin, page );
 
-			expect(
-				await page
-					.locator(
-						`//label[text()='${ text }']/preceding-sibling::span`
-					)
-					.locator( 'svg' )
-					.isVisible()
-			).not.toBe( checkedState );
+			const newCheckedState = page
+				.locator( xpath )
+				.locator( 'svg' )
+				.isVisible();
+
+			expect( newCheckedState ).not.toBe( checkedState );
 		} );
 
 		test( 'Cost and tax status can be set', async ( { admin, page } ) => {
@@ -176,6 +171,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 				`//label[text()='${ text }']/preceding-sibling::span`
 			);
 
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( ! ( await input.locator( 'svg' ).isVisible() ) ) {
 				await page.getByText( text ).click();
 			}
@@ -188,11 +184,12 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 
 			await utils.savelocalPickupSettings( admin, page );
 
-			expect(
-				await page.locator( 'input[name="local_pickup_cost"]' )
+			await expect(
+				page.locator( 'input[name="local_pickup_cost"]' )
 			).toHaveValue( '20' );
-			expect(
-				await page.locator( 'select[name="local_pickup_tax_status"]' )
+
+			await expect(
+				page.locator( 'select[name="local_pickup_tax_status"]' )
 			).toHaveValue( 'none' );
 		} );
 	} );
@@ -215,7 +212,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			} );
 
 			await expect(
-				await page.locator(
+				page.locator(
 					'.pickup-locations tbody > tr > td.sortable-table__column-name.align-left'
 				)
 			).toHaveText(
@@ -252,7 +249,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			await utils.savelocalPickupSettings( admin, page );
 
 			await expect(
-				await page.locator(
+				page.locator(
 					'.pickup-locations tbody > tr > td.sortable-table__column-name.align-left'
 				)
 			).toHaveText(

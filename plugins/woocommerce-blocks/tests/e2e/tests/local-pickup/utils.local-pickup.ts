@@ -1,3 +1,7 @@
+/**
+ * External dependencies
+ */
+
 import { expect } from '@woocommerce/e2e-playwright-utils';
 
 export const utilsLocalPickup = {
