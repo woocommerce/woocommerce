@@ -437,17 +437,29 @@ $admin-bar-mobile-height: 46px;
 			.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
 				font-size: 1rem;
 			}
+
+			.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+				font-size: 0.6rem;
+			}
 		}
 
 		@container (width > 70px) {
 			.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
 				font-size: 1.2rem;
 			}
+
+			.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+				font-size: 0.8rem;
+			}
 		}
 
 		@container (width > 100px) {
 			.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
 				font-size: 1.4rem;
+			}
+
+			.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+				font-size: 1rem;
 			}
 		}
 	}
