@@ -8,7 +8,7 @@ import { HTMLElementEvent } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { navigate } from '../../utils';
+import { navigate } from '../../frontend';
 
 type AttributeFilterContext = {
 	attributeSlug: string;

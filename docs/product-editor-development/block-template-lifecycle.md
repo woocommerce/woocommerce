@@ -29,7 +29,7 @@ After a template instance is created, blocks can be added to or removed from a t
 
 Blocks can be added or removed immediately after instantiation.
 
-See the [Automattic\WooCommerce\Admin\BlockTemplates](../../plugins/woocommerce/src/Admin/BlockTemplates/README.md) documentation for more information about these methods.
+See the [Automattic\WooCommerce\Admin\BlockTemplates](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/BlockTemplates/README.md) documentation for more information about these methods.
 
 ### Actions
 
@@ -42,7 +42,7 @@ The following actions are fired when blocks are added to or removed from a templ
 
 **In order for your action hooks to be called for all block additions and removals for a template, you should call `add_action()` for each of these hooks before the template is instantiated, in or before an `init` action hook, priority 3 or lower.**
 
-See the [Automattic\WooCommerce\Admin\BlockTemplates](../../plugins/woocommerce/src/Admin/BlockTemplates/README.md) documentation for more information about these hooks.
+See the [Automattic\WooCommerce\Admin\BlockTemplates](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/BlockTemplates/README.md) documentation for more information about these hooks.
 
 ## Registration
 
