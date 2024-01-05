@@ -248,7 +248,20 @@ export const updateStorePatterns = async (
 			},
 		} );
 
+		const { is_ai_generated } = await apiFetch< {
+			is_ai_generated: boolean;
+		} >( {
+			path: '/wc/private/ai/store-info',
+			method: 'GET',
+		} );
+
 		if ( ! images.images.length ) {
+			if ( is_ai_generated ) {
+				throw new Error(
+					'AI content not generated: images not available'
+				);
+			}
+
 			await resetPatternsAndProducts()();
 			return;
 		}
