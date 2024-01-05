@@ -12,7 +12,7 @@ jest.mock( 'node:child_process' );
 
 describe( 'File Changes', () => {
 	describe( 'getFileChanges', () => {
-		it( 'should associate git changes with projects', async () => {
+		it( 'should associate git changes with projects', () => {
 			jest.mocked( execSync ).mockImplementation( ( command ) => {
 				if ( command === 'git diff --name-only origin/trunk' ) {
 					return `test/project-a/package.json
@@ -24,7 +24,7 @@ baz/project-d/baz.js`;
 				throw new Error( 'Invalid command' );
 			} );
 
-			const fileChanges = await getFileChanges(
+			const fileChanges = getFileChanges(
 				{
 					name: 'project-a',
 					path: 'test/project-a',

@@ -17,7 +17,7 @@ jest.mock( '../package-file' );
 
 describe( 'Project Graph', () => {
 	describe( 'buildProjectGraph', () => {
-		it( 'should build graph from pnpm list', async () => {
+		it( 'should build graph from pnpm list', () => {
 			jest.mocked( execSync ).mockImplementation( ( command ) => {
 				if ( command === 'pnpm -r list --only-projects --json' ) {
 					return fs.readFileSync(
@@ -50,7 +50,7 @@ describe( 'Project Graph', () => {
 				}
 			);
 
-			const graph = await buildProjectGraph();
+			const graph = buildProjectGraph();
 
 			expect( loadPackage ).toHaveBeenCalled();
 			expect( parseCIConfig ).toHaveBeenCalled();

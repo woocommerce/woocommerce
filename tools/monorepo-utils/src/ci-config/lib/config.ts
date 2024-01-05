@@ -50,7 +50,7 @@ function parseChangesConfig( raw: unknown ): RegExp[] {
 /**
  * The configuration of the lint job.
  */
-interface LintJobConfig {
+export interface LintJobConfig {
 	/**
 	 * The type of the job.
 	 */
@@ -154,7 +154,7 @@ interface TestEnvConfig {
 /**
  * The configuration of a test job.
  */
-interface TestJobConfig {
+export interface TestJobConfig {
 	/**
 	 * The type of the job.
 	 */
@@ -183,7 +183,7 @@ interface TestJobConfig {
 	/**
 	 * The key(s) to use when identifying what jobs should be triggered by a cascade.
 	 */
-	cascade?: string[];
+	cascadeKeys?: string[];
 }
 
 /**
@@ -264,7 +264,7 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 	}
 
 	if ( raw.cascade ) {
-		config.cascade = parseTestCascade( raw.cascade );
+		config.cascadeKeys = parseTestCascade( raw.cascade );
 	}
 
 	return config;

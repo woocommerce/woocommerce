@@ -157,7 +157,7 @@ describe( 'Config', () => {
 						name: 'default',
 						changes: [ new RegExp( '/src\\/.*\\.[jt]sx?$/' ) ],
 						command: 'foo',
-						cascade: [ 'bar' ],
+						cascadeKeys: [ 'bar' ],
 					},
 				],
 			} );

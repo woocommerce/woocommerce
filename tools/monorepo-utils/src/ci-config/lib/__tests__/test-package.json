@@ -45,12 +45,6 @@
                         "foo",
                         "bar"
                     ]
-                },
-                {
-                    "name": "Report",
-                    "changes": "report/.*",
-                    "command": "bar",
-                    "report": "foo"
                 }
             ]
         }
