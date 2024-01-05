@@ -573,7 +573,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					) {
 						$formatted_settings_tabs[] = array(
 							'key'   => $key,
-							'label' => $label,
+							'label' => wp_strip_all_tags( $label ),
 						);
 					}
 				}
@@ -603,7 +603,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 							is_string( $path ) && $path !== ""
 						) {
 							return array(
-								'title' => $title,
+								'title' => wp_strip_all_tags( $title ),
 								'path' => $path,
 							);
 						}
