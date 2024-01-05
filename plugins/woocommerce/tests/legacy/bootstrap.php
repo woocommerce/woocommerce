@@ -108,7 +108,7 @@ class WC_Unit_Tests_Bootstrap {
 				$helpers_directory = $tests_directory . '/php/helpers';
 
 				// Support loading top-level classes from the `php/helpers` directory.
-				if ( ! str_contains( $class, '\\' ) ) {
+				if ( false === strpos( $class, '\\' ) ) {
 					$helper_path = realpath( "$helpers_directory/$class.php" );
 
 					if ( dirname( $helper_path ) === $helpers_directory && file_exists( $helper_path ) ) {
