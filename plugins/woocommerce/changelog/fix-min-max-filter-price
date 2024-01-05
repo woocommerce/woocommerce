@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Filter Blocks: fix the filtering price to make it work with any number of decimal setting.
+
+
