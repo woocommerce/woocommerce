@@ -4,6 +4,7 @@
 import { JobType, LintJobConfig, TestJobConfig } from './config';
 import { ProjectFileChanges } from './file-changes';
 import { ProjectNode } from './project-graph';
+import { TestEnvVars, parseTestEnvConfig } from './test-environment';
 
 /**
  * A linting job.
@@ -14,13 +15,21 @@ interface LintJob {
 }
 
 /**
+ * A testing job environment.
+ */
+interface TestJobEnv {
+	start: string;
+	envVars: TestEnvVars;
+}
+
+/**
  * A testing job.
  */
 interface TestJob {
 	projectName: string;
 	name: string;
 	command: string;
-	hasTestEnv: boolean;
+	testEnv?: TestJobEnv;
 }
 
 /**
@@ -78,14 +87,14 @@ function createLintJob(
  * @param {Object}         config      The config object for the test job.
  * @param {Array.<string>} changes     The file changes that have occurred for the project.
  * @param {Array.<string>} cascadeKeys The cascade keys that have been triggered in dependencies.
- * @return {Object|null} The job that should be run or null if no job should be run.
+ * @return {Promise.<Object|null>} The job that should be run or null if no job should be run.
  */
-function createTestJob(
+async function createTestJob(
 	projectName: string,
 	config: TestJobConfig,
 	changes: string[],
 	cascadeKeys: string[]
-): TestJob | null {
+): Promise< TestJob | null > {
 	let triggered = false;
 
 	// Some jobs can be configured to trigger when a dependency has a job that
@@ -120,12 +129,22 @@ function createTestJob(
 		return null;
 	}
 
-	return {
+	const createdJob: TestJob = {
 		projectName,
 		name: config.name,
 		command: config.command,
-		hasTestEnv: !! config.testEnv,
 	};
+
+	// We want to make sure that we're including the configuration for
+	// any test environment that the job will need in order to run.
+	if ( config.testEnv ) {
+		createdJob.testEnv = {
+			start: config.testEnv.start,
+			envVars: await parseTestEnvConfig( config.testEnv.config ),
+		};
+	}
+
+	return createdJob;
 }
 
 /**
@@ -134,13 +153,13 @@ function createTestJob(
  * @param {Object}         node         The current project node to examine.
  * @param {Object}         changedFiles The files that have changed for the project.
  * @param {Array.<string>} cascadeKeys  The cascade keys that have been triggered in dependencies.
- * @return {Object} The jobs that have been created for the project.
+ * @return {Promise.<Object>} The jobs that have been created for the project.
  */
-function createJobsForProject(
+async function createJobsForProject(
 	node: ProjectNode,
 	changedFiles: ProjectFileChanges,
 	cascadeKeys: string[]
-): Jobs {
+): Promise< Jobs > {
 	// We're going to traverse the project graph and check each node for any jobs that should be triggered.
 	const newJobs: Jobs = {
 		lint: [],
@@ -154,7 +173,7 @@ function createJobsForProject(
 		// Each dependency needs to have its own cascade keys so that they don't cross-contaminate.
 		const dependencyCascade = [ ...cascadeKeys ];
 
-		const dependencyJobs = createJobsForProject(
+		const dependencyJobs = await createJobsForProject(
 			dependency,
 			changedFiles,
 			dependencyCascade
@@ -198,7 +217,7 @@ function createJobsForProject(
 			}
 
 			case JobType.Test: {
-				const created = createTestJob(
+				const created = await createTestJob(
 					node.name,
 					jobConfig,
 					changedFiles[ node.name ] ?? [],
@@ -230,11 +249,11 @@ function createJobsForProject(
  *
  * @param {Object} root    The root node for the project graph.
  * @param {Object} changes The file changes that have occurred.
- * @return {Object} The jobs that should be run.
+ * @return {Promise.<Object>} The jobs that should be run.
  */
 export function createJobsForChanges(
 	root: ProjectNode,
 	changes: ProjectFileChanges
-): Jobs {
+): Promise< Jobs > {
 	return createJobsForProject( root, changes, [] );
 }

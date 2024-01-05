@@ -3,11 +3,14 @@
  */
 import { JobType } from '../config';
 import { createJobsForChanges } from '../job-processing';
+import { parseTestEnvConfig } from '../test-environment';
+
+jest.mock( '../test-environment' );
 
 describe( 'Job Processing', () => {
 	describe( 'getFileChanges', () => {
-		it( 'should do nothing with no CI configs', () => {
-			const jobs = createJobsForChanges(
+		it( 'should do nothing with no CI configs', async () => {
+			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
 					path: 'test',
@@ -20,8 +23,8 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
-		it( 'should trigger lint job for single node', () => {
-			const jobs = createJobsForChanges(
+		it( 'should trigger lint job for single node', async () => {
+			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
 					path: 'test',
@@ -49,8 +52,8 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
-		it( 'should not trigger lint job for single node with no changes', () => {
-			const jobs = createJobsForChanges(
+		it( 'should not trigger lint job for single node with no changes', async () => {
+			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
 					path: 'test',
@@ -72,8 +75,8 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
-		it( 'should trigger lint job for project graph', () => {
-			const jobs = createJobsForChanges(
+		it( 'should trigger lint job for project graph', async () => {
+			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
 					path: 'test',
@@ -136,8 +139,8 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
-		it( 'should trigger lint job for project graph with empty config parent', () => {
-			const jobs = createJobsForChanges(
+		it( 'should trigger lint job for project graph with empty config parent', async () => {
+			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
 					path: 'test',
@@ -191,8 +194,8 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
-		it( 'should trigger test job for single node', () => {
-			const jobs = createJobsForChanges(
+		it( 'should trigger test job for single node', async () => {
+			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
 					path: 'test',
@@ -219,12 +222,11 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				name: 'Default',
 				command: 'test-cmd',
-				hasTestEnv: false,
 			} );
 		} );
 
-		it( 'should not trigger test job for single node with no changes', () => {
-			const jobs = createJobsForChanges(
+		it( 'should not trigger test job for single node with no changes', async () => {
+			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
 					path: 'test',
@@ -247,8 +249,8 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
-		it( 'should trigger test job for project graph', () => {
-			const jobs = createJobsForChanges(
+		it( 'should trigger test job for project graph', async () => {
+			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
 					path: 'test',
@@ -308,18 +310,16 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				name: 'Default',
 				command: 'test-cmd',
-				hasTestEnv: false,
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-b',
 				name: 'Default B',
 				command: 'test-cmd-b',
-				hasTestEnv: false,
 			} );
 		} );
 
-		it( 'should trigger test job for dependent without changes when dependency has matching cascade key', () => {
-			const jobs = createJobsForChanges(
+		it( 'should trigger test job for dependent without changes when dependency has matching cascade key', async () => {
+			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
 					path: 'test',
@@ -364,18 +364,16 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				name: 'Default',
 				command: 'test-cmd',
-				hasTestEnv: false,
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-a',
 				name: 'Default A',
 				command: 'test-cmd-a',
-				hasTestEnv: false,
 			} );
 		} );
 
-		it( 'should isolate dependency cascade keys to prevent cross-dependency matching', () => {
-			const jobs = createJobsForChanges(
+		it( 'should isolate dependency cascade keys to prevent cross-dependency matching', async () => {
+			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
 					path: 'test',
@@ -436,13 +434,58 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				name: 'Default',
 				command: 'test-cmd',
-				hasTestEnv: false,
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-a',
 				name: 'Default A',
 				command: 'test-cmd-a',
-				hasTestEnv: false,
+			} );
+		} );
+
+		it( 'should trigger test job for single node and parse test environment config', async () => {
+			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {
+				WP_ENV_CORE: 'https://wordpress.org/latest.zip',
+			} );
+
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								name: 'Default',
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+								testEnv: {
+									start: 'test-start',
+									config: {
+										wpVersion: 'latest',
+									},
+								},
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				testEnv: {
+					start: 'test-start',
+					envVars: {
+						WP_ENV_CORE: 'https://wordpress.org/latest.zip',
+					},
+				},
 			} );
 		} );
 	} );
