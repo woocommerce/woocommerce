@@ -33,7 +33,7 @@ export function useValidation< T >(
 		ref,
 		error: context.errors[ validatorId ],
 		isValidating,
-		async validate( newData: Record< string, unknown > ) {
+		async validate( newData?: Record< string, unknown > ) {
 			setIsValidating( true );
 			return context
 				.validateField( validatorId, newData )
