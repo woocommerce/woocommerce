@@ -241,7 +241,7 @@ class Cart extends ControllerTestCase {
 							'address_1' => '',
 							'address_2' => '',
 							'city'      => '',
-							'state'     => 'CA',
+							'state'     => '',
 							'postcode'  => '',
 							'country'   => 'US',
 						),
