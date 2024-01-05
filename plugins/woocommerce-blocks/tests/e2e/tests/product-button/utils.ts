@@ -10,8 +10,7 @@ export const blockData = {
 	mainClass: '.wc-block-product-button',
 	selectors: {
 		frontend: {
-			productsToDisplayBlockTheme: 16,
-			productsToDisplayClassicTheme: 9,
+			productsToDisplay: 16,
 		},
 		editor: {},
 	},

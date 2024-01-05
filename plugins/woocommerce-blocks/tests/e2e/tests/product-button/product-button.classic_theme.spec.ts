@@ -25,15 +25,14 @@ const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 	},
 } );
 test.describe( `${ blockData.name } Block`, () => {
-	test.beforeEach( async ( { productCollectionPage } ) => {
-		await productCollectionPage.createNewPostAndInsertBlock();
-		await productCollectionPage.publishAndGoToFrontend();
+	test.beforeAll( async ( { page } ) => {
+		await page.goto( '/product-collection/' );
 	} );
 
 	test( 'should be visible', async ( { frontendUtils } ) => {
 		const blocks = await frontendUtils.getBlockByName( blockData.slug );
 		await expect( blocks ).toHaveCount(
-			blockData.selectors.frontend.productsToDisplayClassicTheme
+			blockData.selectors.frontend.productsToDisplay
 		);
 	} );
 
@@ -63,7 +62,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 		await block.click();
 		await expect( block.getByRole( 'button' ) ).toHaveText( '1 in cart' );
-		await expect( block.getByRole( 'link' ) ).toBeVisible();
+		await expect( block.getByRole( 'link' ) ).toHaveText( 'View cart' );
 
 		await frontendUtils.goToCheckout();
 		const productElement = page.getByText( productName, {
