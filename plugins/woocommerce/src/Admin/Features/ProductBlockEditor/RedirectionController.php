@@ -21,6 +21,13 @@ class RedirectionController {
 	private $supported_product_types;
 
 	/**
+	 * Registered product templates.
+	 *
+	 * @var array
+	 */
+	private $product_templates = array();
+
+	/**
 	 * Set up the hooks used for redirection.
 	 *
 	 * @param array $supported_product_types Array of supported product types.
@@ -62,8 +69,17 @@ class RedirectionController {
 	 * @param integer $product_id Product ID.
 	 */
 	protected function is_product_supported( $product_id ): bool {
-		$product = $product_id ? wc_get_product( $product_id ) : null;
-		$digital_product = $product->is_downloadable() || $product->is_virtual();
+		$product             = $product_id ? wc_get_product( $product_id ) : null;
+		$digital_product     = $product->is_downloadable() || $product->is_virtual();
+		$product_template_id = $product->get_meta( '_product_template_id' );
+
+		if ( isset( $product_template_id ) ) {
+			foreach ( $this->product_templates as $product_template ) {
+				if ( $product_template_id === $product_template->get_id() && ! is_null( $product_template->get_layout_template_id() ) ) {
+					return true;
+				}
+			}
+		}
 
 		if ( $product && in_array( $product->get_type(), $this->supported_product_types, true ) ) {
 			if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
@@ -73,6 +89,15 @@ class RedirectionController {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Check if a product is supported by the new experience.
+	 *
+	 * @param array $product_tempaltes The registered product teamplates.
+	 */
+	public function set_product_templates( array $product_templates ): void {
+		$this->product_templates = $product_templates;
 	}
 
 	/**
