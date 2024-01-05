@@ -1,5 +1,6 @@
 ---
 post_title: Notices
+menu_title: Notice guidelines
 ---
 
 ## Notices
