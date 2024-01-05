@@ -21,9 +21,20 @@ test.describe( `${ blockData.name } Block`, () => {
 	test( 'should be visible', async ( { frontendUtils } ) => {
 		const blocks = await frontendUtils.getBlockByName( blockData.slug );
 		await expect( blocks ).toHaveCount(
-			blockData.selectors.frontend.productsToDisplay
+			blockData.selectors.frontend.productsToDisplayBlockTheme
 		);
 	} );
+
+	test( 'should not enqueue add-to-cart-script', async ( { page } ) => {
+		let isScriptEnqueued = false;
+		page.on( 'request', ( request ) => {
+			if ( request.url().includes( 'add-to-cart.min.js' ) )
+				isScriptEnqueued = true;
+		} );
+		await page.reload();
+		expect( isScriptEnqueued ).toBe( false );
+	} );
+
 	test( 'should add product to the cart', async ( {
 		frontendUtils,
 		page,
@@ -114,7 +125,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		const blocks = await frontendUtils.getBlockByName( blockData.slug );
 		const buttonWithNewText = blocks.getByText( 'Buy Now' );
 		await expect( buttonWithNewText ).toHaveCount(
-			blockData.selectors.frontend.productsToDisplay
+			blockData.selectors.frontend.productsToDisplayBlockTheme
 		);
 	} );
 
