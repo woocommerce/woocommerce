@@ -76,7 +76,7 @@ jobs:
               id: run_playwright_e2e_tests
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
 
-            - name: Upload blob report to GitHub Actions Artifacts
+            - name: Upload reports to GitHub Actions Artifacts
               if: always()
               uses: actions/upload-artifact@v4
               with:
@@ -118,12 +118,13 @@ jobs:
 
             - run: ls -R /home/runner/work/input/
 
-            - name: Merge into single report
-              working-directory: plugins/woocommerce
-              run: pnpx playwright merge-reports --reporter allure-playwright  /home/runner/work/input/
+            # - name: Merge into single report
+            #   working-directory: plugins/woocommerce
+            #   run: pnpx playwright merge-reports --reporter allure-playwright  /home/runner/work/input/
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
+              working_directory: plugins/woocommerce
               if: |
                   always() &&
                   (
