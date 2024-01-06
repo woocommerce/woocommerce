@@ -312,6 +312,9 @@ $admin-bar-mobile-height: 46px;
 	button {
 		border: none;
 		background: none;
+		color: inherit;
+		font-size: inherit;
+		font-weight: inherit;
 		padding: 0;
 		cursor: pointer;
 	}
