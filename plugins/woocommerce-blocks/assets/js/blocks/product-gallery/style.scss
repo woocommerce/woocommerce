@@ -308,6 +308,13 @@ $admin-bar-mobile-height: 46px;
 	margin-top: 0;
 	margin-bottom: 0;
 	padding: 0;
+
+	button {
+		border: none;
+		background: none;
+		padding: 0;
+		cursor: pointer;
+	}
 }
 
 .wc-block-product-gallery-pager__pager-item {
