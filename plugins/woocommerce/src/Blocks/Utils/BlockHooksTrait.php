@@ -8,13 +8,6 @@ namespace Automattic\WooCommerce\Blocks\Utils;
  */
 trait BlockHooksTrait {
 	/**
-	 * Block Hook API placements.
-	 *
-	 * @var array
-	 */
-	protected $hooked_block_placements = array();
-
-	/**
 	 * Callback for `hooked_block_types` to auto-inject the mini-cart block into headers after navigation.
 	 *
 	 * @param array                    $hooked_blocks An array of block slugs hooked into a given context.
@@ -29,7 +22,7 @@ trait BlockHooksTrait {
 		/**
 		 * If the block has no hook placements, return early.
 		 */
-		if ( empty( $this->hooked_block_placements ) ) {
+		if ( ! isset( $this->hooked_block_placements ) || empty( $this->hooked_block_placements ) ) {
 			return $hooked_blocks;
 		}
 
