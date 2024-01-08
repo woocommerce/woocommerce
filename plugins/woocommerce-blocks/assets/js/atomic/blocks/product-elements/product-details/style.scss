@@ -1,17 +1,14 @@
 /*
  * Minimal style.
  */
-.wp-block-woocommerce-product-details.is-style-minimal .woocommerce-tabs {
-
-	ul.wc-tabs {
-
+body .wp-block-woocommerce-product-details.is-style-minimal {
+	ul.tabs.wc-tabs {
 		padding: 0;
 		border-bottom-width: 0;
 		border-bottom-color: inherit; /* Backward compatibility for TT3, TT2. */
 
 		&::after,
 		&::before {
-
 			display: none;
 		}
 
