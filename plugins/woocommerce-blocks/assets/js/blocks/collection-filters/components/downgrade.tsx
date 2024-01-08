@@ -7,7 +7,7 @@ import { PanelBody, Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { createBlock, BlockInstance } from '@wordpress/blocks';
 
-const Inspector = ( { clientId }: { clientId: string } ) => {
+const Downgrade = ( { clientId }: { clientId: string } ) => {
 	const { replaceBlock } = useDispatch( 'core/block-editor' );
 	const block = useSelect( ( select ) => {
 		return select( 'core/block-editor' ).getBlock( clientId );
@@ -69,4 +69,4 @@ const Inspector = ( { clientId }: { clientId: string } ) => {
 	);
 };
 
-export default Inspector;
+export default Downgrade;
