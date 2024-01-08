@@ -14,11 +14,7 @@ import {
 	CheckboxControl,
 } from '@woocommerce/blocks-components';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
-import type {
-	BillingAddress,
-	AddressField,
-	AddressFields,
-} from '@woocommerce/settings';
+import type { BillingAddress, FormFieldsConfig } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { CART_STORE_KEY } from '@woocommerce/block-data';
 
@@ -93,7 +89,7 @@ const Block = ( {
 		showApartmentField,
 		showPhoneField,
 		requirePhoneField,
-	] ) as Record< keyof AddressFields, Partial< AddressField > >;
+	] ) as FormFieldsConfig;
 
 	const WrapperComponent = isEditor ? Noninteractive : Fragment;
 	const noticeContext = useShippingAsBilling

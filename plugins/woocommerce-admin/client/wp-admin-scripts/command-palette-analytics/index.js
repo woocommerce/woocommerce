@@ -3,6 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { chartBar } from '@wordpress/icons';
+import { useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { addQueryArgs } from '@wordpress/url';
 
@@ -10,8 +11,9 @@ import { addQueryArgs } from '@wordpress/url';
  * Internal dependencies
  */
 import { registerCommandWithTracking } from '../command-palette/register-command-with-tracking';
+import { useEditedPostType } from '../command-palette/use-edited-post-type';
 
-const registerWooCommerceAnalyticsCommand = ( { label, path } ) => {
+const registerWooCommerceAnalyticsCommand = ( { label, path, origin } ) => {
 	registerCommandWithTracking( {
 		name: `woocommerce${ path }`,
 		label: sprintf(
@@ -26,24 +28,31 @@ const registerWooCommerceAnalyticsCommand = ( { label, path } ) => {
 				path,
 			} );
 		},
+		origin,
 	} );
 };
 
 const WooCommerceAnalyticsCommands = () => {
-	if (
-		window.hasOwnProperty( 'wcCommandPaletteAnalytics' ) &&
-		window.wcCommandPaletteAnalytics.hasOwnProperty( 'reports' ) &&
-		Array.isArray( window.wcCommandPaletteAnalytics.reports )
-	) {
-		const analyticsReports = window.wcCommandPaletteAnalytics.reports;
+	const { editedPostType } = useEditedPostType();
+	const origin = editedPostType ? editedPostType + '-editor' : null;
 
-		analyticsReports.forEach( ( analyticsReport ) => {
-			registerWooCommerceAnalyticsCommand( {
-				label: analyticsReport.title,
-				path: analyticsReport.path,
+	useEffect( () => {
+		if (
+			window.hasOwnProperty( 'wcCommandPaletteAnalytics' ) &&
+			window.wcCommandPaletteAnalytics.hasOwnProperty( 'reports' ) &&
+			Array.isArray( window.wcCommandPaletteAnalytics.reports )
+		) {
+			const analyticsReports = window.wcCommandPaletteAnalytics.reports;
+
+			analyticsReports.forEach( ( analyticsReport ) => {
+				registerWooCommerceAnalyticsCommand( {
+					label: analyticsReport.title,
+					path: analyticsReport.path,
+					origin,
+				} );
 			} );
-		} );
-	}
+		}
+	}, [ origin ] );
 
 	return null;
 };

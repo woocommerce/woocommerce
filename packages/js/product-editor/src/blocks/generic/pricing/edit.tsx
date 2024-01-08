@@ -21,13 +21,20 @@ import { useCurrencyInputProps } from '../../../hooks/use-currency-input-props';
 import { PricingBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import { Label } from '../../../components/label/label';
 
 export function Edit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< PricingBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { property, label, help, disabled } = attributes;
+	const {
+		property,
+		label = __( 'Price', 'woocommerce' ),
+		help,
+		disabled,
+		tooltip,
+	} = attributes;
 	const [ price, setPrice ] = useProductEntityProp< string >( property, {
 		postType,
 		fallbackValue: '',
@@ -63,7 +70,13 @@ export function Edit( {
 					disabled={ disabled }
 					id={ priceId }
 					name={ property }
-					label={ label || __( 'Price', 'woocommerce' ) }
+					label={
+						tooltip ? (
+							<Label label={ label } tooltip={ tooltip } />
+						) : (
+							label
+						)
+					}
 				/>
 			</BaseControl>
 		</div>

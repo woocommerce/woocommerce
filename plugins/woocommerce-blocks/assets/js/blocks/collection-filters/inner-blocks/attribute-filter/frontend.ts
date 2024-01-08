@@ -1,15 +1,28 @@
 /**
  * External dependencies
  */
-import { store, navigate, getContext } from '@woocommerce/interactivity';
+import { store, getContext } from '@woocommerce/interactivity';
 import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
 import { HTMLElementEvent } from '@woocommerce/types';
+
+/**
+ * Internal dependencies
+ */
+import { navigate } from '../../frontend';
 
 type AttributeFilterContext = {
 	attributeSlug: string;
 	queryType: 'or' | 'and';
 	selectType: 'single' | 'multiple';
 };
+
+interface ActiveAttributeFilterContext extends AttributeFilterContext {
+	value: string;
+}
+
+function nonNullable< T >( value: T ): value is NonNullable< T > {
+	return value !== null && value !== undefined;
+}
 
 function getUrl(
 	selectedTerms: string[],
@@ -43,18 +56,14 @@ store( 'woocommerce/collection-attribute-filter', {
 			const dropdownContext = getContext< DropdownContext >(
 				'woocommerce/interactivity-dropdown'
 			);
-
 			const context = getContext< AttributeFilterContext >();
+			const filters = dropdownContext.selectedItems
+				.map( ( item ) => item.value )
+				.filter( nonNullable );
 
-			if ( dropdownContext.selectedItem.value ) {
-				navigate(
-					getUrl(
-						[ dropdownContext.selectedItem.value ],
-						context.attributeSlug,
-						context.queryType
-					)
-				);
-			}
+			navigate(
+				getUrl( filters, context.attributeSlug, context.queryType )
+			);
 		},
 		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
 			if ( ! event.target.value ) return;
@@ -86,6 +95,16 @@ store( 'woocommerce/collection-attribute-filter', {
 					context.queryType
 				)
 			);
+		},
+		removeFilter: () => {
+			const { attributeSlug, queryType, value } =
+				getContext< ActiveAttributeFilterContext >();
+
+			let selectedTerms = getSelectedTermsFromUrl( attributeSlug );
+
+			selectedTerms = selectedTerms.filter( ( item ) => item !== value );
+
+			navigate( getUrl( selectedTerms, attributeSlug, queryType ) );
 		},
 	},
 } );

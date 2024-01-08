@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add additional lint to woocommerce-blocks that ensures bad imports are not introduced.

@@ -5,7 +5,7 @@
 	"homepage": "https://woo.com/",
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
 	},
 	"private": true,
 	"repository": {
@@ -28,7 +28,7 @@
 		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",
-		"git:update-hooks": "if test -d .git; then rm -r .git/hooks && mkdir -p .git/hooks && husky install; else husky install; fi",
+		"git:update-hooks": "if test -d .git; then rm -rf .git/hooks && mkdir -p .git/hooks && husky install; else husky install; fi",
 		"create-extension": "node ./tools/create-extension/index.js",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
 		"utils": "node ./tools/monorepo-utils/dist/index.js"

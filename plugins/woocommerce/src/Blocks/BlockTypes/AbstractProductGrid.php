@@ -614,6 +614,10 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			return '';
 		}
 
+		if ( empty( $this->attributes['contentVisibility']['image'] ) ) {
+			return '';
+		}
+
 		if ( ! $product->is_on_sale() ) {
 			return;
 		}

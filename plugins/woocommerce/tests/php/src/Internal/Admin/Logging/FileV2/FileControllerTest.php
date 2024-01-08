@@ -4,9 +4,11 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Logging\FileV2;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
-use WC_Log_Handler_File;
+use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController };
 use WC_Unit_Test_Case;
+
+// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_read_fopen, WordPress.WP.AlternativeFunctions.file_system_read_fclose
 
 /**
  * FileControllerTest class.
@@ -15,7 +17,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Instance of the logging class.
 	 *
-	 * @var WC_Log_Handler_File|null
+	 * @var LogHandlerFileV2|null
 	 */
 	private $handler;
 
@@ -44,7 +46,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->handler = new WC_Log_Handler_File();
+		$this->handler = new LogHandlerFileV2();
 		$this->sut     = new FileController();
 	}
 
@@ -71,13 +73,123 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The write_to_file method should create a new file with the proper filename when it doesn't exist yet.
+	 */
+	public function test_write_to_file_new() {
+		$source  = 'unit-testing';
+		$content = 'test';
+
+		$result = $this->sut->write_to_file( $source, $content );
+		$this->assertTrue( $result );
+
+		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$this->assertCount( 1, $paths );
+
+		$path = reset( $paths );
+		$file = new File( $path );
+
+		$this->assertStringStartsWith( $source, $file->get_basename() );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$actual_content = file_get_contents( $path );
+		$this->assertEquals( $content . "\n", $actual_content );
+	}
+
+	/**
+	 * @testdox The write_to_file method should append content to an existing file of the correct source that isn't rotated.
+	 */
+	public function test_write_to_file_existing() {
+		$time = time();
+		$hash = wp_hash( 'cheddar' );
+
+		$existing_files = array(
+			'target' => 'unit-testing-' . gmdate( 'Y-m-d', $time ) . '-' . $hash . '.log',
+			'other1' => 'unit-testing.0-' . gmdate( 'Y-m-d', $time ) . '-' . $hash . '.log',
+			'other2' => 'unit-testing-' . gmdate( 'Y-m-d', strtotime( '-2 days' ) ) . '-' . $hash . '.log',
+		);
+		foreach ( $existing_files as $filename ) {
+			$path     = Constants::get_constant( 'WC_LOG_DIR' ) . $filename;
+			$resource = fopen( $path, 'a' );
+			fclose( $resource );
+		}
+
+		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$this->assertCount( 3, $paths );
+
+		$source  = 'unit-testing';
+		$content = 'test';
+
+		$result = $this->sut->write_to_file( $source, $content, $time );
+		$this->assertTrue( $result );
+
+		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$this->assertCount( 3, $paths );
+
+		$target_path = Constants::get_constant( 'WC_LOG_DIR' ) . $existing_files['target'];
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$actual_content = file_get_contents( $target_path );
+		$this->assertEquals( $content . "\n", $actual_content );
+	}
+
+	/**
+	 * @testdox The write_to_file method should rotate a file that has reached the size limit and then write the content to a fresh file.
+	 */
+	public function test_write_to_file_needs_rotation() {
+		$time = time();
+		$path = Constants::get_constant( 'WC_LOG_DIR' ) . 'unit-testing-' . gmdate( 'Y-m-d', $time ) . '-' . wp_hash( 'cheddar' ) . '.log';
+
+		$resource         = fopen( $path, 'a' );
+		$existing_content = random_bytes( 200 ) . "\n";
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+		fwrite( $resource, $existing_content );
+		fclose( $resource );
+
+		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$this->assertCount( 1, $paths );
+
+		// Set the file size low to induce log rotation.
+		$filter_callback = fn() => 100;
+		add_filter( 'woocommerce_log_file_size_limit', $filter_callback );
+
+		$source      = 'unit-testing';
+		$new_content = 'test';
+
+		$result = $this->sut->write_to_file( $source, $new_content, $time );
+		$this->assertTrue( $result );
+
+		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$this->assertCount( 2, $paths );
+
+		foreach ( $paths as $path ) {
+			$file = new File( $path );
+
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$actual_content = file_get_contents( $file->get_path() );
+
+			switch ( true ) {
+				case is_null( $file->get_rotation() ):
+					$this->assertEquals( $new_content . "\n", $actual_content );
+					break;
+				case 0 === $file->get_rotation():
+					$this->assertEquals( $existing_content, $actual_content );
+					break;
+				default:
+					$this->fail();
+					break;
+			}
+		}
+
+		remove_filter( 'woocommerce_log_file_size_limit', $filter_callback );
+	}
+
+	/**
 	 * @testdox The get_files method should retrieve log files as File instances, in a specified order.
 	 */
 	public function test_get_files_with_files(): void {
-		$this->handler->handle( time(), 'debug', '1', array() ); // No source defaults to "log" as source.
+		$this->handler->handle( strtotime( '-5 days' ), 'debug', '1', array() ); // No source defaults to "plugin-woocommerce" as source.
 		$this->handler->handle( time(), 'debug', '2', array( 'source' => 'unit-testing' ) );
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_wp_debug_backtrace_summary -- Unit test.
-		$this->handler->handle( time(), 'debug', wp_debug_backtrace_summary(), array( 'source' => 'unit-testing' ) ); // Increase file size.
+		$this->handler->handle( time(), 'debug', random_bytes( 100 ), array( 'source' => 'unit-testing' ) ); // Increase file size.
 
 		$files = $this->sut->get_files();
 		$this->assertCount( 2, $files );
@@ -94,7 +206,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 			)
 		);
 		$first_file = array_shift( $files );
-		$this->assertEquals( 'log', $first_file->get_source() );
+		$this->assertEquals( 'plugin-woocommerce', $first_file->get_source() );
 		$second_file = array_shift( $files );
 		$this->assertEquals( 'unit-testing', $second_file->get_source() );
 
@@ -106,6 +218,17 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		);
 		$first_file = array_shift( $files );
 		$this->assertEquals( 'unit-testing', $first_file->get_source() );
+
+		$files = $this->sut->get_files(
+			array(
+				'date_filter' => 'created',
+				'date_start'  => strtotime( '-6 days' ),
+				'date_end'    => strtotime( '-4 days' ),
+			)
+		);
+		$this->assertCount( 1, $files );
+		$first_file = array_shift( $files );
+		$this->assertEquals( 'plugin-woocommerce', $first_file->get_source() );
 	}
 
 	/**
@@ -123,13 +246,21 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	 * @testdox The get_files_by_id method should return an array of File instances given an array of valid file IDs.
 	 */
 	public function test_get_files_by_id() {
+		// Create a log file with an accompanying rotation.
 		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
+		$file1_path = glob( Constants::get_constant( 'WC_LOG_DIR' ) . '*.log' );
+		$file1      = new File( reset( $file1_path ) );
+		$file1->rotate();
+		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
+
 		$this->handler->handle( time(), 'debug', '2', array( 'source' => 'unit-testing2' ) );
 		$this->handler->handle( time(), 'debug', '3', array( 'source' => 'unit-testing3' ) );
+
 		$file_id_1 = 'unit-testing1-' . gmdate( 'Y-m-d', time() );
 		$file_id_2 = 'unit-testing2-' . gmdate( 'Y-m-d', time() );
+		$files     = $this->sut->get_files_by_id( array( $file_id_1, $file_id_2 ) );
 
-		$files = $this->sut->get_files_by_id( array( $file_id_1, $file_id_2 ) );
+		// The retrieved files should not include the rotation.
 		$this->assertCount( 2, $files );
 
 		$sources = array_map(
@@ -166,47 +297,53 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	 * @testdox The get_file_rotations method should return an associative array of File instances.
 	 */
 	public function test_get_file_rotations() {
-		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
-		$this->handler->handle( time(), 'debug', '2', array( 'source' => 'unit-testing2' ) );
-		$file_id = 'unit-testing1-' . gmdate( 'Y-m-d', time() );
+		$target_file_path = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-file.log';
+		$other_file_path  = Constants::get_constant( 'WC_LOG_DIR' ) . 'other-test-file.log';
 
-		$reflection = new \ReflectionClass( get_class( $this->handler ) );
-		$method     = $reflection->getMethod( 'log_rotate' );
-		$method->setAccessible( true );
+		$oldest_file = new File( $target_file_path );
+		$oldest_file->write( 'test' );
+		$oldest_file->rotate();
+		$oldest_file->rotate();
 
-		// Handler has to be reset after rotating a log file because it caches handles.
-		$method->invoke( $this->handler, 'unit-testing1' );
-		$this->handler = new WC_Log_Handler_File();
-		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
-		$method->invoke( $this->handler, 'unit-testing1' );
-		$this->handler = new WC_Log_Handler_File();
-		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
+		$middle_file = new File( $target_file_path );
+		$middle_file->write( 'test' );
+		$middle_file->rotate();
 
+		$newest_file = new File( $target_file_path );
+		$newest_file->write( 'test' );
+
+		$other_file = new File( $other_file_path );
+		$other_file->write( 'test' );
+
+		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$this->assertCount( 4, $paths );
+
+		$file_id   = 'test-file';
 		$rotations = $this->sut->get_file_rotations( $file_id );
 
 		$this->assertCount( 3, $rotations );
 		$this->assertArrayHasKey( 'current', $rotations );
 		$this->assertNull( $rotations['current']->get_rotation() );
-		$this->assertEquals( 'unit-testing1', $rotations['current']->get_source() );
+		$this->assertEquals( 'test-file', $rotations['current']->get_source() );
 		$this->assertArrayHasKey( 0, $rotations );
 		$this->assertEquals( 0, $rotations[0]->get_rotation() );
-		$this->assertEquals( 'unit-testing1', $rotations[0]->get_source() );
+		$this->assertEquals( 'test-file', $rotations[0]->get_source() );
 		$this->assertArrayHasKey( 1, $rotations );
 		$this->assertEquals( 1, $rotations[1]->get_rotation() );
-		$this->assertEquals( 'unit-testing1', $rotations[1]->get_source() );
+		$this->assertEquals( 'test-file', $rotations[1]->get_source() );
 	}
 
 	/**
 	 * @testdox The get_file_sources method should return a unique array of sources.
 	 */
 	public function test_get_file_sources(): void {
-		$this->handler->handle( time(), 'debug', '1', array() ); // No source defaults to "log" as source.
+		$this->handler->handle( time(), 'debug', '1', array() ); // No source defaults to "plugin-woocommerce" as source.
 		$this->handler->handle( time(), 'debug', '2', array( 'source' => 'unit-testing' ) );
 		$this->handler->handle( time(), 'debug', '3', array( 'source' => 'unit-testing' ) );
 
 		$sources = $this->sut->get_file_sources();
 		$this->assertCount( 2, $sources );
-		$this->assertContains( 'log', $sources );
+		$this->assertContains( 'plugin-woocommerce', $sources );
 		$this->assertContains( 'unit-testing', $sources );
 	}
 
@@ -220,7 +357,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 3, $this->sut->get_files( array(), true ) );
 
-		$files   = $this->sut->get_files( array( 'source' => 'log' ) );
+		$files   = $this->sut->get_files( array( 'source' => 'plugin-woocommerce' ) );
 		$file_id = $files[0]->get_file_id();
 		$deleted = $this->sut->delete_files( array( $file_id ) );
 		$this->assertEquals( 1, $deleted );
@@ -273,3 +410,5 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'A trip to the food bar', $match['line'] );
 	}
 }
+
+// phpcs:enable WordPress.WP.AlternativeFunctions.file_system_read_fopen, WordPress.WP.AlternativeFunctions.file_system_read_fclose

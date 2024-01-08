@@ -176,7 +176,10 @@ jQuery( function ( $ ) {
 	function change_product_type_tip( content ) {
 		$( '#tiptip_holder' ).removeAttr( 'style' );
 		$( '#tiptip_arrow' ).removeAttr( 'style' );
-		$( '.woocommerce-product-type-tip' ).tipTip( {
+		$( '.woocommerce-product-type-tip' )
+		.attr( 'tabindex', '0' )
+		.attr( 'aria-label', $( '<div />' ).html( content ).text() ) // Remove HTML tags.
+		.tipTip( {
 			attribute: 'data-tip',
 			content: content,
 			fadeIn: 50,

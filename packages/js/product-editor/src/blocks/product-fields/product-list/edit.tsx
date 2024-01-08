@@ -26,6 +26,7 @@ import {
 	getProductImageStyle,
 	ReorderProductsModal,
 } from '../../../components/add-products-modal';
+import { BlockFill } from '../../../components/block-slot-fill';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { Shirt, Pants, Glasses } from './images';
 import { UploadsBlockAttributes } from './types';
@@ -37,6 +38,7 @@ import {
 export function Edit( {
 	attributes,
 	context: { postType },
+	clientId,
 }: ProductEditorBlockEditProps< UploadsBlockAttributes > ) {
 	const { property } = attributes;
 	const blockProps = useWooBlockProps( attributes );
@@ -120,22 +122,28 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<div className="wp-block-woocommerce-product-list-field__header">
-				{ ! isLoading && groupedProducts.length > 0 && (
+			<BlockFill
+				name="section-actions"
+				clientId={ clientId }
+				slotContainerBlockName="woocommerce/product-section"
+			>
+				<div className="wp-block-woocommerce-product-list-field__header">
+					{ ! isLoading && groupedProducts.length > 0 && (
+						<Button
+							onClick={ handleReorderProductsButtonClick }
+							variant="tertiary"
+						>
+							{ __( 'Reorder', 'woocommerce' ) }
+						</Button>
+					) }
 					<Button
-						onClick={ handleReorderProductsButtonClick }
-						variant="tertiary"
+						onClick={ handleAddProductsButtonClick }
+						variant="secondary"
 					>
-						{ __( 'Reorder', 'woocommerce' ) }
+						{ __( 'Add products', 'woocommerce' ) }
 					</Button>
-				) }
-				<Button
-					onClick={ handleAddProductsButtonClick }
-					variant="secondary"
-				>
-					{ __( 'Add products', 'woocommerce' ) }
-				</Button>
-			</div>
+				</div>
+			</BlockFill>
 
 			<div className="wp-block-woocommerce-product-list-field__body">
 				{ ! isLoading && groupedProducts.length === 0 && (

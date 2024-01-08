@@ -98,6 +98,17 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 			}
 			break;
 
+		case types.SET_ADDITIONAL_FIELDS:
+			if ( action.additionalFields !== undefined ) {
+				newState = {
+					...state,
+					additionalFields: {
+						...state.additionalFields,
+						...action.additionalFields,
+					},
+				};
+			}
+			break;
 		case types.SET_USE_SHIPPING_AS_BILLING:
 			if (
 				action.useShippingAsBilling !== undefined &&

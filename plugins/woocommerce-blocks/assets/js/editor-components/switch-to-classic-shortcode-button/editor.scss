@@ -1,0 +1,33 @@
+.wc-blocks-switch-to-classic-shortcode-modal-content {
+	max-width: 480px;
+
+	p {
+		margin-top: 0;
+	}
+}
+
+.wc-blocks-switch-to-classic-shortcode-modal-actions {
+	text-align: right;
+
+	button {
+		margin-left: 4px;
+		display: inline-block;
+	}
+}
+
+ul.cross-list {
+	list-style: none outside;
+	margin: 0 0 24px 1em;
+	padding: 0;
+
+	li {
+		list-style: none outside;
+		margin: 1em 0;
+		padding: 0;
+
+		&::before {
+			content: "❌";
+			margin-right: 0.5em;
+		}
+	}
+}

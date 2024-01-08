@@ -109,6 +109,14 @@ const blocks = {
 		customDir: 'collection-filters/inner-blocks/attribute-filter',
 		isExperimental: true,
 	},
+	'collection-rating-filter': {
+		customDir: 'collection-filters/inner-blocks/rating-filter',
+		isExperimental: true,
+	},
+	'collection-active-filters': {
+		customDir: 'collection-filters/inner-blocks/active-filters',
+		isExperimental: true,
+	},
 	'order-confirmation-summary': {
 		customDir: 'order-confirmation/summary',
 	},
@@ -191,6 +199,12 @@ const entries = {
 			'./assets/js/atomic/blocks/product-elements/add-to-cart-form/index.tsx',
 		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}' ),
 
+		// Interactivity component styling
+		'wc-interactivity-checkbox-list':
+			'./packages/interactivity-components/checkbox-list/index.ts',
+		'wc-interactivity-dropdown':
+			'./packages/interactivity-components/dropdown/index.ts',
+
 		// Templates
 		'wc-blocks-classic-template-revert-button-style':
 			'./assets/js/templates/revert-button/index.tsx',
@@ -209,6 +223,8 @@ const entries = {
 		// interactivity components, exported as separate entries for now
 		'wc-interactivity-dropdown':
 			'./packages/interactivity-components/dropdown/index.ts',
+		'wc-interactivity-checkbox-list':
+			'./packages/interactivity-components/checkbox-list/index.ts',
 	},
 	main: {
 		// Shared blocks code

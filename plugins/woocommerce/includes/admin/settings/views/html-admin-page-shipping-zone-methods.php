@@ -98,7 +98,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row-blank">
 	<tr>
-		<td class="wc-shipping-zone-method-blank-state" colspan="4">
+		<td class="wc-shipping-zone-method-blank-state" colspan="5">
 			<p><?php esc_html_e( 'You can add multiple shipping methods within this zone. Only customers within the zone will see them.', 'woocommerce' ); ?></p>
 		</td>
 	</tr>

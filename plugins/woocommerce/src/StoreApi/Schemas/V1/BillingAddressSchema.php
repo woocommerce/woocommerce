@@ -53,17 +53,19 @@ class BillingAddressSchema extends AbstractAddressSchema {
 	 * @return array
 	 */
 	public function sanitize_callback( $address, $request, $param ) {
-		$address          = parent::sanitize_callback( $address, $request, $param );
-		$address['email'] = sanitize_text_field( wp_unslash( $address['email'] ) );
+		$address = parent::sanitize_callback( $address, $request, $param );
+		if ( isset( $address['email'] ) ) {
+			$address['email'] = sanitize_email( wp_unslash( $address['email'] ) );
+		}
 		return $address;
 	}
 
 	/**
 	 * Validate the given address object.
 	 *
-	 * @param array            $address Value being sanitized.
+	 * @param array            $address Value being validated.
 	 * @param \WP_REST_Request $request The Request.
-	 * @param string           $param The param being sanitized.
+	 * @param string           $param The param being validated.
 	 * @return true|\WP_Error
 	 */
 	public function validate_callback( $address, $request, $param ) {
@@ -119,8 +121,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 				},
 				[]
 			);
-
-			$address_object = \array_merge(
+			$address_object            = \array_merge(
 				[
 					'first_name' => $address->get_billing_first_name(),
 					'last_name'  => $address->get_billing_last_name(),
@@ -145,7 +146,15 @@ class BillingAddressSchema extends AbstractAddressSchema {
 				$address_object[ $field ] = '';
 			}
 
-			return $this->prepare_html_response( $address_object );
+			foreach ( $address_object as $key => $value ) {
+				if ( isset( $this->get_properties()[ $key ]['type'] ) && 'boolean' === $this->get_properties()[ $key ]['type'] ) {
+					$address_object[ $key ] = (bool) $value;
+				} else {
+					$address_object[ $key ] = $this->prepare_html_response( $value );
+				}
+			}
+			return $address_object;
+
 		}
 		throw new RouteException(
 			'invalid_object_type',
