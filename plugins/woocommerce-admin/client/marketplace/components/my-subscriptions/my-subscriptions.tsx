@@ -24,6 +24,7 @@ import { Subscription } from './types';
 import { RefreshButton } from './table/actions/refresh-button';
 import Notices from './notices';
 import InstallModal from './table/actions/install-modal';
+import { connectUrl } from '../../utils/functions';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
@@ -70,7 +71,7 @@ export default function MySubscriptions(): JSX.Element {
 						'woocommerce'
 					) }
 				</p>
-				<Button href={ wccomSettings?.connectURL } variant="primary">
+				<Button href={ connectUrl() } variant="primary">
 					{ __( 'Connect Account', 'woocommerce' ) }
 				</Button>
 			</div>

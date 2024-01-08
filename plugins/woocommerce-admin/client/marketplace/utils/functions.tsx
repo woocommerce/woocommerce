@@ -10,7 +10,7 @@ import { Icon } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { LOCALE } from '../../utils/admin-settings';
+import { LOCALE, getAdminSetting } from '../../utils/admin-settings';
 import { CategoryAPIItem } from '../components/category-selector/types';
 import {
 	MARKETPLACE_CART_PATH,
@@ -424,6 +424,18 @@ const subscribeUrl = ( subscription: Subscription ): string => {
 	] );
 };
 
+const connectUrl = (): string => {
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+
+	if ( ! wccomSettings.connectURL ) {
+		return '';
+	}
+
+	return appendURLParams( wccomSettings.connectURL, [
+		[ 'redirect_admin_url', encodeURIComponent( window.location.href ) ],
+	] );
+};
+
 export {
 	ProductGroup,
 	appendURLParams,
@@ -441,4 +453,5 @@ export {
 	renewUrl,
 	subscribeUrl,
 	subscriptionToProduct,
+	connectUrl,
 };
