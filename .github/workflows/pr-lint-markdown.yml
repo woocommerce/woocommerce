@@ -1,6 +1,6 @@
 name: MarkdownLint on PR
 on:
-    workflow_displatch:
+    workflow_dispatch:
         paths-ignore:
             - '**/changelog/**'
 
