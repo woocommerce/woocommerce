@@ -10,6 +10,7 @@ export type NumberInputProps = {
 	onFocus: ( event: React.FocusEvent< HTMLInputElement > ) => void;
 	onKeyUp: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 	onBlur: ( event: React.FocusEvent ) => void;
+	onKeyDown: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 };
 
 type Props = {
@@ -53,6 +54,11 @@ export const useNumberInputProps = ( {
 			}
 			if ( onKeyUp ) {
 				onKeyUp( event );
+			}
+		},
+		onKeyDown( event: React.KeyboardEvent< HTMLInputElement > ) {
+			if ( event.code === 'ArrowUp' || event.code === 'ArrowDown' ) {
+				event.preventDefault();
 			}
 		},
 		onChange( newValue: string ) {
