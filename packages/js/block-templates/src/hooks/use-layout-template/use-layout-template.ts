@@ -15,7 +15,7 @@ import { useEntityRecord } from '@wordpress/core-data';
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 
-export const useLayoutTemplate = ( layoutTemplateId: string ) => {
+export const useLayoutTemplate = ( layoutTemplateId: string | undefined ) => {
 	const layoutTemplateEntity = useSelect( ( select: typeof WPSelect ) => {
 		const { getEntity } = select( 'core' );
 		return getEntity( 'root', 'wcLayoutTemplate' );
