@@ -8,6 +8,14 @@ import { ComboboxControlOption } from '@woocommerce/base-components/combobox';
  */
 import { getSetting } from './utils';
 
+// A list of attributes that can be added to a custom field when registering it.
+type CustomFieldAttributes =
+	| 'maxLength'
+	| 'disabled'
+	| 'readOnly'
+	| 'pattern'
+	| 'placeholder';
+
 export interface FormField {
 	// The label for the field.
 	label: string;
@@ -27,6 +35,8 @@ export interface FormField {
 	type?: string;
 	// The options if this is a select field
 	options?: ComboboxControlOption[];
+	// Additional attributes added when registering a field
+	attributes?: Record< CustomFieldAttributes, string >;
 }
 
 export interface LocaleSpecificFormField extends Partial< FormField > {
