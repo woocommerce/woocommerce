@@ -38,6 +38,7 @@ import {
  */
 import useProductEntityProp from '../../hooks/use-product-entity-prop';
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
+import { useProductTemplate } from '../../hooks/use-product-template';
 import { PostTypeContext } from '../../contexts/post-type-context';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { ModalEditor } from '../modal-editor';
@@ -107,6 +108,11 @@ export function BlockEditor( {
 		{ postType }
 	);
 
+	const { productTemplate } = useProductTemplate(
+		productTemplateId,
+		productType
+	);
+
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
 		postType,
@@ -116,21 +122,6 @@ export function BlockEditor( {
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	useLayoutEffect( () => {
-		const productTemplates = settings?.productTemplates ?? [];
-		const productTemplate = productTemplates.find( ( template ) => {
-			if ( productTemplateId === template.id ) {
-				return true;
-			}
-
-			if ( ! productType ) {
-				return false;
-			}
-
-			// Fallback to the product type if the product does not have any product
-			// template associated to itself.
-			return template.productData.type === productType;
-		} );
-
 		const layoutTemplates = settings?.layoutTemplates ?? [];
 
 		let layoutTemplateId = productTemplate?.layoutTemplateId;
@@ -159,7 +150,7 @@ export function BlockEditor( {
 			...settings,
 			productTemplate,
 		} as Partial< ProductEditorSettings > );
-	}, [ settings, postType, productTemplateId, productType ] );
+	}, [ settings, postType, productTemplate, productType ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( select ) => {
