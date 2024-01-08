@@ -201,7 +201,7 @@ See an example of [Passing a value from the client through to server side paymen
 
 Implementing the correct loading of your client side asset registration is tricky for the blocks integration. This is because there are some dependencies on the _loading order_ of dependent assets in the request. To remove the complexity of this for extension consumers here, the server side API interface helps with ensuring you can register any assets and data to pass along to your client side payment method from the server and handles the correct loading order of those assets.
 
-First, you create a class that extends `Automattic\WooCommerce\Blocks\Payments\Integration\AbstractPaymentMethodType` (or you can implement the `Automattic\WooCommerce\Blocks\Payments\PaymentMethodTypeInterface`, but you get some functionality for free via the abstract class).
+First, you create a class that extends `Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType` (or you can implement the `Automattic\WooCommerce\Blocks\Payments\PaymentMethodTypeInterface`, but you get some functionality for free via the abstract class).
 
 In your class:
 
@@ -232,11 +232,11 @@ This contains various details about the payment result returned to the client an
 
 ### Putting it all together
 
-So you've created a class extending `Automattic\WooCommerce\Blocks\Payments\Integration\AbstractPaymentMethodType`, but you still need to _register_ this with the server side handling of payment methods. In order to do this you need to register a callback on the `woocommerce_blocks_payment_method_type_registration` action. Your callback will receive an instance of `Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry` which has a `register` method for registering an instance of the class you created. It's also recommended that you register your callback on this action within the context of a callback on the `woocommerce_blocks_loaded` action.
+So you've created a class extending `Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType`, but you still need to _register_ this with the server side handling of payment methods. In order to do this you need to register a callback on the `woocommerce_blocks_payment_method_type_registration` action. Your callback will receive an instance of `Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry` which has a `register` method for registering an instance of the class you created. It's also recommended that you register your callback on this action within the context of a callback on the `woocommerce_blocks_loaded` action.
 
-> Note: With Cart and Checkout Blocks currently only available in the WooCommerce Blocks Feature plugin, you will want to make sure you check for the availability of the `Automattic\WooCommerce\Blocks\Payments\Integration\AbstractPaymentMethodType` class before registering your payment method integration server side.
+> Note: With Cart and Checkout Blocks currently only available in the WooCommerce Blocks Feature plugin, you will want to make sure you check for the availability of the `Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType` class before registering your payment method integration server side.
 
-So for example, assuming your class that extends `Automattic\WooCommerce\Blocks\Payments\Integration\AbstractPaymentMethodType` is named `MyPaymentMethod`. You would have this somewhere in your extension's bootstrap:
+So for example, assuming your class that extends `Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType` is named `MyPaymentMethod`. You would have this somewhere in your extension's bootstrap:
 
 ```php
 use MyPlugin\MyPaymentMethod;

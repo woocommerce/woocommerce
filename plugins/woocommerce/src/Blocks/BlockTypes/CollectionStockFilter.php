@@ -2,7 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 
 /**
  * CollectionStockFilter class.
@@ -158,15 +158,27 @@ final class CollectionStockFilter extends AbstractBlock {
 		$query                   = isset( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ) : '';
 		$selected_stock_statuses = explode( ',', $query );
 
+		$filtered_stock_counts = array_filter(
+			$stock_counts,
+			function( $stock_count ) {
+				return $stock_count['count'] > 0;
+			}
+		);
+
+		if ( empty( $filtered_stock_counts ) ) {
+			return '';
+		}
+
 		$list_items = array_map(
-			function( $item ) use ( $stock_statuses, $show_counts ) {
+			function( $item ) use ( $stock_statuses, $show_counts, $selected_stock_statuses ) {
 				$label = $show_counts ? $stock_statuses[ $item['status'] ] . ' (' . $item['count'] . ')' : $stock_statuses[ $item['status'] ];
 				return array(
-					'label' => $label,
-					'value' => $item['status'],
+					'label'   => $label,
+					'value'   => $item['status'],
+					'checked' => in_array( $item['status'], $selected_stock_statuses, true ),
 				);
 			},
-			$stock_counts
+			$filtered_stock_counts
 		);
 
 		$selected_items = array_values(
@@ -184,50 +196,17 @@ final class CollectionStockFilter extends AbstractBlock {
 		?>
 
 		<div data-wc-interactive='<?php echo esc_attr( $data_directive ); ?>'>
-			<?php if ( 'list' === $display_style ) : ?>
-				<div class="wc-block-stock-filter style-list">
-					<ul class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list">
-						<?php foreach ( $stock_counts as $stock_count ) { ?>
-							<li>
-								<div class="wc-block-components-checkbox wc-block-checkbox-list__checkbox">
-									<label for="<?php echo esc_attr( $stock_count['status'] ); ?>">
-										<input
-											id="<?php echo esc_attr( $stock_count['status'] ); ?>"
-											class="wc-block-components-checkbox__input"
-											type="checkbox"
-											aria-invalid="false"
-											data-wc-on--change="actions.updateProducts"
-											value="<?php echo esc_attr( $stock_count['status'] ); ?>"
-											<?php checked( strpos( $query, $stock_count['status'] ) !== false, 1 ); ?>
-										>
-											<svg class="wc-block-components-checkbox__mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 20">
-												<path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"></path>
-											</svg>
-											<span class="wc-block-components-checkbox__label">
-												<?php echo esc_html( $stock_statuses[ $stock_count['status'] ] ); ?>
-
-												<?php if ( $show_counts ) : ?>
-													<?php
-													// translators: %s: number of products.
-													$screen_reader_text = sprintf( _n( '%s product', '%s products', $stock_count['count'], 'woocommerce' ), number_format_i18n( $stock_count['count'] ) );
-													?>
-													<span>
-														<span aria-hidden="true">
-															<?php $show_counts ? print( esc_html( '(' . $stock_count['count'] . ')' ) ) : null; ?>
-														</span>
-														<span class="screen-reader-text">
-															<?php esc_html( $screen_reader_text ); ?>
-														</span>
-													</span>
-												<?php endif; ?>
-											</span>
-									</label>
-								</div>
-							</li>
-						<?php } ?>
-					</ul>
-				</div>
-			<?php endif; ?>
+			<?php if ( 'list' === $display_style ) { ?>
+				<?php
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CheckboxList::render() escapes output.
+				echo CheckboxList::render(
+					array(
+						'items'     => $list_items,
+						'on_change' => 'woocommerce/collection-stock-filter::actions.onCheckboxChange',
+					)
+				);
+				?>
+			<?php } ?>
 
 			<?php if ( 'dropdown' === $display_style ) : ?>
 				<?php
@@ -235,7 +214,7 @@ final class CollectionStockFilter extends AbstractBlock {
 				echo Dropdown::render(
 					array(
 						'items'          => $list_items,
-						'action'         => 'woocommerce/collection-stock-filter::actions.navigate',
+						'action'         => 'woocommerce/collection-stock-filter::actions.onDropdownChange',
 						'selected_items' => $selected_items,
 						'select_type'    => $select_type,
 						'placeholder'    => $placeholder_text,

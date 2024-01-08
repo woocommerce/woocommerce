@@ -31,12 +31,12 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore store should be included.
 	useEntityBlockEditor,
-	useEntityProp,
 } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
+import useProductEntityProp from '../../hooks/use-product-entity-prop';
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
 import { PostTypeContext } from '../../contexts/post-type-context';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
@@ -98,15 +98,13 @@ export function BlockEditor( {
 		};
 	}, [ canUserCreateMedia, _settings ] );
 
-	const [ productType ] = useEntityProp< Product[ 'type' ] >(
-		'postType',
+	const [ productType ] = useProductEntityProp< Product[ 'type' ] >( 'type', {
 		postType,
-		'type'
-	);
-	const [ productMetaData ] = useEntityProp< Product[ 'meta_data' ] >(
-		'postType',
-		postType,
-		'meta_data'
+	} );
+
+	const [ productTemplateId ] = useProductEntityProp< string >(
+		'meta_data._product_template_id',
+		{ postType }
 	);
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
@@ -118,17 +116,9 @@ export function BlockEditor( {
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	useLayoutEffect( () => {
-		// Loads the product template id from the product's meta data.
-		const productTemplateMetaData = productMetaData.find(
-			( metaData ) => metaData.key === '_product_template_id'
-		);
-
 		const productTemplates = settings?.productTemplates ?? [];
 		const productTemplate = productTemplates.find( ( template ) => {
-			if (
-				productTemplateMetaData?.value &&
-				productTemplateMetaData.value === template.id
-			) {
+			if ( productTemplateId === template.id ) {
 				return true;
 			}
 
@@ -169,7 +159,7 @@ export function BlockEditor( {
 			...settings,
 			productTemplate,
 		} as Partial< ProductEditorSettings > );
-	}, [ settings, postType, productMetaData, productType ] );
+	}, [ settings, postType, productTemplateId, productType ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( select ) => {

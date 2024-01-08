@@ -135,8 +135,8 @@ async function fetchSearchResults(
 							url: product.link,
 							// Due to backwards compatibility, raw_price is from search API, price is from featured API
 							price: product.raw_price ?? product.price,
-							averageRating: product.rating ?? 0,
-							reviewsCount: product.reviews_count ?? 0,
+							averageRating: product.rating ?? null,
+							reviewsCount: product.reviews_count ?? null,
 						};
 					}
 				);

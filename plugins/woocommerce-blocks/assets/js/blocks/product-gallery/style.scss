@@ -155,15 +155,16 @@ $admin-bar-mobile-height: 46px;
 		width: 100%;
 		display: flex;
 		align-items: center;
+		scroll-snap-align: none center;
 	}
 
 	.wc-block-product-gallery-large-image__container {
 		display: flex;
 		overflow-x: hidden;
 		scroll-snap-type: x mandatory;
+		scroll-behavior: auto;
 		width: fit-content;
 		height: fit-content;
-		scroll-behavior: auto;
 		align-items: center;
 	}
 
@@ -401,6 +402,7 @@ $admin-bar-mobile-height: 46px;
 	}
 
 	.wc-block-product-gallery-thumbnails__thumbnail__overlay {
+		container-type: inline-size;
 		cursor: pointer;
 		display: flex;
 		flex-direction: column;
@@ -411,8 +413,10 @@ $admin-bar-mobile-height: 46px;
 		top: 0;
 		width: 100%;
 		height: 100%;
+		line-height: 1.5;
 
 		.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
+			font-size: 1.2rem;
 			font-weight: 700;
 		}
 
@@ -425,28 +429,37 @@ $admin-bar-mobile-height: 46px;
 			color: #fff;
 		}
 
-		@mixin thumbnail-overlay-text-font-size($remaining-count-size, $view-all-size, $view-all-display: block) {
+		@container (width < 70px) {
+			.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+				display: none;
+			}
+
 			.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
-				font-size: $remaining-count-size;
+				font-size: 1rem;
 			}
 
 			.wc-block-product-gallery-thumbnails__thumbnail__view-all {
-				font-size: $view-all-size;
-				display: $view-all-display;
+				font-size: 0.6rem;
 			}
 		}
 
-		@include thumbnail-overlay-text-font-size(clamp(1rem, 1.5vw, 2rem), clamp(0.75rem, 0.5vw, 2rem));
+		@container (width > 70px) {
+			.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
+				font-size: 1.2rem;
+			}
 
-		@for $i from 3 through 8 {
-			#{$gallery}[data-thumbnails-number-of-thumbnails='#{$i}'] & {
-				@if $i == 3 {
-					@include thumbnail-overlay-text-font-size(clamp(1rem, 1.5vw, 2rem), clamp(0.75rem, 0.5vw, 2rem));
-				} @else if $i == 4 or $i == 5 {
-					@include thumbnail-overlay-text-font-size(clamp(1rem, 1.25vw, 2rem), clamp(0.75rem, 0.25vw, 2rem));
-				} @else { // For 6, 7, and 8
-					@include thumbnail-overlay-text-font-size(clamp(1rem, 1.25vw, 2rem), null, none);
-				}
+			.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+				font-size: 0.8rem;
+			}
+		}
+
+		@container (width > 100px) {
+			.wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count {
+				font-size: 1.4rem;
+			}
+
+			.wc-block-product-gallery-thumbnails__thumbnail__view-all {
+				font-size: 1rem;
 			}
 		}
 	}

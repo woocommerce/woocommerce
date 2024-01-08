@@ -54,6 +54,23 @@ final class CollectionFilters extends AbstractBlock {
 	}
 
 	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
+		global $pagenow;
+		parent::enqueue_data( $attributes );
+
+		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme(), true );
+		$this->asset_data_registry->add( 'isProductArchive', is_shop() || is_product_taxonomy(), true );
+		$this->asset_data_registry->add( 'isSiteEditor', 'site-editor.php' === $pagenow, true );
+		$this->asset_data_registry->add( 'isWidgetEditor', 'widgets.php' === $pagenow || 'customize.php' === $pagenow, true );
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
