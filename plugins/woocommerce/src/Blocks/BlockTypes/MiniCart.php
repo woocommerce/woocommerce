@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
+use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 
 /**
  * Mini-Cart class.
@@ -17,6 +18,8 @@ use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
  * @internal
  */
 class MiniCart extends AbstractBlock {
+	use BlockHooksTrait;
+
 	/**
 	 * Block name.
 	 *
