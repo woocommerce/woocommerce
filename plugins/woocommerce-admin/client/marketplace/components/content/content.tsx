@@ -21,7 +21,7 @@ import {
 	recordMarketplaceView,
 	recordLegacyTabView,
 } from '../../utils/tracking';
-import InstallFlow from '../install-flow/install-flow';
+import InstallNewProductModal from '../install-flow/install-new-product-modal';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -122,7 +122,11 @@ export default function Content(): JSX.Element {
 			case 'discover':
 				return <Discover />;
 			case 'my-subscriptions':
-				return <MySubscriptions />;
+				return (
+					<SubscriptionsContextProvider>
+						<MySubscriptions />
+					</SubscriptionsContextProvider>
+				);
 			default:
 				return <></>;
 		}
@@ -130,12 +134,8 @@ export default function Content(): JSX.Element {
 
 	return (
 		<div className="woocommerce-marketplace__content">
-			<SubscriptionsContextProvider>
-				<>
-					<InstallFlow />
-					{ renderContent() }
-				</>
-			</SubscriptionsContextProvider>
+			<InstallNewProductModal products={ products } />
+			{ renderContent() }
 		</div>
 	);
 }

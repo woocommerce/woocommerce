@@ -20,7 +20,6 @@ import { WP_ADMIN_PLUGIN_LIST_URL } from '../constants';
 
 type InstallSubscriptionModalProps = {
 	onClose: () => void;
-	product?: Product;
 	productKey: string;
 };
 

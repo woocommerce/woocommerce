@@ -13,13 +13,12 @@ import ProductCard from '~/marketplace/components/product-card/product-card';
 import { Product } from '~/marketplace/components/product-list/types';
 
 type ConnectModalProps = {
-	onClose: () => void;
 	installingProductKey: string;
 	product?: Product;
 };
 
 function ConnectModal( props: ConnectModalProps ) {
-	const modalContent = (
+	return (
 		<>
 			{ props.product && (
 				<ProductCard
@@ -41,7 +40,6 @@ function ConnectModal( props: ConnectModalProps ) {
 			<ButtonGroup className="woocommerce-marketplace__header-account-modal-button-group">
 				<Button
 					variant="tertiary"
-					onClick={ props.onClose }
 					className="woocommerce-marketplace__header-account-modal-button"
 					key={ 'cancel' }
 				>
@@ -54,12 +52,6 @@ function ConnectModal( props: ConnectModalProps ) {
 				/>
 			</ButtonGroup>
 		</>
-	);
-
-	return withModal(
-		modalContent,
-		__( 'Connect', 'woocommerce' ),
-		props.onClose
 	);
 }
 

@@ -61,6 +61,62 @@ class WC_Helper {
 		include_once dirname( __FILE__ ) . '/class-wc-helper-compat.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-admin.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-subscriptions-api.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-orders-api.php';
+
+		// Point API base to local WCCOM
+add_filter( 'woocommerce_helper_api_base', function ( $base ) {
+	return 'https://woocommerce.test/wp-json/helper/1.0';
+} );
+
+// Disable SSL verification for HTTPS calls to local WCCOM
+add_filter( 'woocommerce_helper_api_request_args', function ( $args ) {
+	$args['sslverify']          = false;
+	$args['reject_unsafe_urls'] = false;
+	$args['timeout']            = 60;
+	$args['user-agent']         = bin2hex( random_bytes(16) );
+
+	return $args;
+} );
+
+// Make sure local WCCOM passes the "is host external" check for
+// wp_safe_remote_request().
+add_filter( 'http_request_host_is_external', function ( $r, $host ) {
+	if ( 'woocommerce.test' === $host ) {
+		$r = true;
+	}
+
+	return $r;
+}, 10, 2 );
+
+// Change the marketplace base url for the woocommerce plugin.
+add_filter( 'marketplace_base_url', function ( $domain ) {
+	return 'https://woocommerce.test';
+} );
+
+// Disable some checks when working locally.
+add_filter( 'http_request_args', function ( $args, $url ) {
+	if ( strpos( $url, 'woocommerce.test' ) !== false ) {
+		$args['sslverify']          = false;
+		$args['reject_unsafe_urls'] = false;
+	}
+
+	return $args;
+}, 10, 2 );
+
+// Inspect requests made to the WooCommerce.com
+function action_http_api_debug( $response, $context, $class, $args, $url ) {
+	if ( $context !== 'response' ) {
+		return;
+	}
+
+	if ( strpos( $url, 'woocommerce.test' ) !== false ) {
+		wc_get_logger()->debug( implode( ', ', $args['headers'] ) );
+	}
+}
+
+add_filter('transient_wc_addons_featured', function ($value, $transient) {
+	return false;
+}, 10, 2);
 	}
 
 	/**
@@ -1026,6 +1082,11 @@ class WC_Helper {
 	 * @return bool True if activated, false otherwise.
 	 */
 	public static function activate_helper_subscription( $product_key ) {
+		// If $product_key starts with "wporg-", accept it and return success.
+		if ( str_starts_with( $product_key, 'wporg-' ) ) {
+			return true;
+		}
+
 		$subscription = self::get_subscription( $product_key );
 		if ( ! $subscription ) {
 			throw new Exception( __( 'Subscription not found', 'woocommerce' ) );
@@ -1126,6 +1187,11 @@ class WC_Helper {
 	 * @return bool True if deactivated, false otherwise.
 	 */
 	public static function deactivate_helper_subscription( $product_key ) {
+		// If $product_key starts with "wporg-", accept it and return success.
+		if ( str_starts_with( $product_key, 'wporg-' ) ) {
+			return true;
+		}
+
 		$subscription = self::get_subscription( $product_key );
 		if ( ! $subscription ) {
 			throw new Exception( __( 'Subscription not found', 'woocommerce' ) );

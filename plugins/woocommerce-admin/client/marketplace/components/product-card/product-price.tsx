@@ -10,6 +10,7 @@ import { navigateTo, getNewPath } from '@woocommerce/navigation';
  */
 import { Product } from '../product-list/types';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { recordEvent } from '@woocommerce/tracks';
 
 export default function ProductPrice( props: { product: Product } ) {
 	const { product } = props;
@@ -19,19 +20,20 @@ export default function ProductPrice( props: { product: Product } ) {
 
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
-	const installedProducts = wccomSettings.installedProducts;
+	const installedProducts: string[] = wccomSettings?.installedProducts;
 
 	const isInstalled = !! installedProducts.find(
-		( item ) => item.slug === product.slug
+		( item ) => item === product.slug
 	);
 
 	function openInstallModal() {
+		recordEvent( 'marketplace_add_to_store_clicked', {
+			product_id: product.id,
+		} );
+
 		navigateTo( {
 			url: getNewPath( {
-				install: 'new',
-				product_id: product.id,
-				product_name: product.title,
-				product_icon: product.icon,
+				installProduct: product.id,
 			} ),
 		} );
 	}

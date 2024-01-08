@@ -7,7 +7,7 @@ export default function withModal(
 	comp: JSX.Element,
 	title: string,
 	onClose: () => void
-) {
+): JSX.Element {
 	return (
 		<Modal
 			title={ title }

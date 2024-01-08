@@ -322,12 +322,16 @@ function getInstallUrl( subscription: Subscription ): Promise< string > {
 	} );
 }
 
+function downloadProduct( subscription: Subscription ): Promise< void > {
+	return wpAjax( 'install-' + subscription.product_type, {
+		// The slug prefix is required for the install to use WCCOM install filters.
+		slug: 'woocommerce-com-' + subscription.product_slug,
+	} );
+}
+
 function installProduct( subscription: Subscription ): Promise< void > {
 	return connectProduct( subscription ).then( () => {
-		return wpAjax( 'install-' + subscription.product_type, {
-			// The slug prefix is required for the install to use WCCOM install filters.
-			slug: 'woocommerce-com-' + subscription.product_slug,
-		} )
+		return downloadProduct( subscription )
 			.then( () => {
 				return activateProduct( subscription );
 			} )
@@ -344,6 +348,17 @@ function updateProduct( subscription: Subscription ): Promise< void > {
 	return wpAjax( 'update-' + subscription.product_type, {
 		slug: subscription.local.slug,
 		[ subscription.product_type ]: subscription.local.path,
+	} );
+}
+
+function createOrder( productId: number ): Promise< string > {
+	return apiFetch( {
+		path: '/wc/v3/marketplace/create-order',
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify( { product_id: productId } ),
 	} );
 }
 
@@ -390,6 +405,7 @@ const subscriptionToProduct = ( subscription: Subscription ): Product => {
 		price: -1,
 		averageRating: 0,
 		reviewsCount: 0,
+		isInstallable: false,
 	};
 };
 
@@ -436,8 +452,10 @@ export {
 	fetchSubscriptions,
 	refreshSubscriptions,
 	getInstallUrl,
+	downloadProduct,
 	installProduct,
 	updateProduct,
+	createOrder,
 	addNotice,
 	removeNotice,
 	renewUrl,

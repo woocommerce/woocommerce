@@ -12,22 +12,17 @@ import InstallNewProductModal from '~/marketplace/components/install-flow/instal
 import InstallSubscriptionModal from '~/marketplace/components/install-flow/install-subscription-modal';
 import { MARKETPLACE_PATH } from '~/marketplace/components/constants';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { Product } from '~/marketplace/components/product-list/types';
 
-type ProductInfo = {
-	id: number;
-	name: string;
-	icon: string;
-};
-
-function InstallFlow() {
+function InstallFlow( props: { products: Product[] } ) {
 	const [ showConnectModal, setShowConnectModal ] = useState( false );
 	const [ showInstallNewProductModal, setShowInstallNewProductModal ] =
 		useState( false );
 	const [ showInstallSubscriptionModal, setShowInstallSubscriptionModal ] =
 		useState( false );
-	const [ productInfo, setProductInfo ] = useState< ProductInfo >();
 	const [ isConnected, setIsConnected ] = useState< boolean >();
 	const [ productKey, setProductKey ] = useState< string >();
+	const [ product, setProduct ] = useState< Product >();
 	const query = useQuery();
 
 	useEffect( () => {
@@ -36,32 +31,44 @@ function InstallFlow() {
 	}, [] );
 
 	useEffect( () => {
-		if ( ! query.install ) {
-			return;
-		}
-
-		// If not connected, show connect modal
-		if ( ! isConnected ) {
-			setShowConnectModal( true );
-
+		if ( ! query.install && ! query.installProduct ) {
 			return;
 		}
 
 		// If connected but install param is "new", we install new product
-		if ( query.install === 'new' ) {
-			setShowInstallNewProductModal( true );
-			setProductInfo( {
-				id: parseInt( query.product_id, 10 ),
-				name: query.product_name,
-				icon: query.product_icon,
-			} );
+		if ( query.installProduct ) {
+			const productId = parseInt( query.installProduct, 10 );
+
+			if ( ! productId ) {
+				return;
+			}
+
+			const productToInstall = props.products.find(
+				( item ) => item.id === productId
+			);
+
+			if ( ! productToInstall ) {
+				return;
+			}
+
+			setProduct( productToInstall );
+
+			if ( ! isConnected ) {
+				setShowConnectModal( true );
+			} else {
+				setShowInstallNewProductModal( true );
+			}
+
 			return;
 		}
 
-		// If connected but install param is not "new" we install from existing subscriptions
+		if ( query.install ) {
+			// Find subscription
+		}
+
 		setShowInstallSubscriptionModal( true );
 		setProductKey( query.install );
-	}, [ query, isConnected ] );
+	}, [ query, isConnected, props.products ] );
 
 	function onClose() {
 		setShowConnectModal( false );
@@ -73,6 +80,7 @@ function InstallFlow() {
 				{
 					...query,
 					install: undefined,
+					installProduct: undefined,
 				},
 				MARKETPLACE_PATH,
 				{}
@@ -80,30 +88,7 @@ function InstallFlow() {
 		} );
 	}
 
-	return (
-		<>
-			{ showConnectModal && (
-				<ConnectModal
-					productInfo={ productInfo }
-					onClose={ onClose }
-					installingProductKey={ query?.install }
-				/>
-			) }
-			{ showInstallNewProductModal && (
-				<InstallNewProductModal
-					productInfo={ product }
-					onClose={ onClose }
-				/>
-			) }
-			{ showInstallSubscriptionModal && (
-				<InstallSubscriptionModal
-					product={ product }
-					onClose={ onClose }
-					productKey={ productKey ?? '' }
-				/>
-			) }
-		</>
-	);
+	return <>Test.</>;
 }
 
 export default InstallFlow;
