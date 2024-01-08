@@ -22,7 +22,6 @@ add_action( 'wp_footer', 'YOUR_PREFIX_custom_message' );
 Use a consistent prefix for all function calls. For the code snippets in this repo, use the prefix `YOUR_PREFIX`.
 
 ### Example
-
 ```php
 /**
  * Add custom discount.
