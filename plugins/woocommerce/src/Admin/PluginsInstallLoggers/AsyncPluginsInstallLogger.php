@@ -129,6 +129,15 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 		$option['plugins'][ $plugin_name ]['status']   = 'failed';
 		$option['status']                              = 'failed';
 
+		wc_admin_record_tracks_event(
+			'coreprofiler_store_extension_installed_and_activated',
+			array(
+				'success'             => false,
+				'installed_extension' => $plugin_name,
+				'error_message'       => $error_message,
+			)
+		);
+
 		$this->update( $option );
 	}
 
