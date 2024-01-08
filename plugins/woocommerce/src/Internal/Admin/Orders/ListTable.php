@@ -532,6 +532,9 @@ class ListTable extends WP_List_Table {
 			$this->order_query_args['s'] = $search_term;
 			$this->has_filter            = true;
 		}
+
+		$filter = trim( sanitize_text_field( $this->request['filter'] ) );
+
 	}
 
 	/**
