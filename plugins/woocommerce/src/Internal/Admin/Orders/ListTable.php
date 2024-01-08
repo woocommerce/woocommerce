@@ -1537,4 +1537,57 @@ class ListTable extends WP_List_Table {
 		return $html;
 	}
 
+	/**
+	 * Renders the search box with various options to limit order search results.
+	 * @param string $text The search button text.
+	 * @param string $input_id The search input ID.
+	 *
+	 * @return void
+	 */
+	public function search_box( $text, $input_id ) {
+		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) {
+			return;
+		}
+
+		$input_id = $input_id . '-search-input';
+
+		if ( ! empty( $_REQUEST['orderby'] ) ) {
+			echo '<input type="hidden" name="orderby" value="' . esc_attr( $_REQUEST['orderby'] ) . '" />';
+		}
+		if ( ! empty( $_REQUEST['order'] ) ) {
+			echo '<input type="hidden" name="order" value="' . esc_attr( $_REQUEST['order'] ) . '" />';
+		}
+		if ( ! empty( $_REQUEST['post_mime_type'] ) ) {
+			echo '<input type="hidden" name="post_mime_type" value="' . esc_attr( $_REQUEST['post_mime_type'] ) . '" />';
+		}
+		if ( ! empty( $_REQUEST['detached'] ) ) {
+			echo '<input type="hidden" name="detached" value="' . esc_attr( $_REQUEST['detached'] ) . '" />';
+		}
+		?>
+		<p class="search-box">
+			<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo $text; ?>:</label>
+			<input type="search" id="<?php echo esc_attr( $input_id ); ?>" name="s" value="<?php _admin_search_query(); ?>" />
+			<?php $this->search_filter(); ?>
+			<?php submit_button( $text, '', '', false, array( 'id' => 'search-submit' ) ); ?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Renders the search filter dropdown.
+	 *
+	 * @return void
+	 */
+	private function search_filter() {
+		$options = array(
+			'customers' => __( 'Customers', 'woocommerce' ),
+			'products'  => __( 'Products', 'woocommerce' ),
+			'all'       => __( 'All', 'woocommerce' ),
+		);
+?>
+		<select name="filter" id="order-search-filter">
+			<?php foreach ( $options as $value => $label ) { ?>
+				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, isset( $_REQUEST['filter'] ) ? $_REQUEST['filter'] : 'customers' ); ?>><?php echo esc_html( $label ); ?></option>
+			<?php }
+	}
 }
