@@ -29,6 +29,8 @@ store( 'woocommerce/interactivity-checkbox-list', {
 			const context = getContext< CheckboxListContext >();
 			const value = event.target.value;
 
+			console.log( 'selectCheckboxItem', value );
+
 			context.items = context.items.map( ( item ) => {
 				if ( item.value.toString() === value ) {
 					return {
