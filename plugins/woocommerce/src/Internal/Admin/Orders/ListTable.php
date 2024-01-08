@@ -372,7 +372,7 @@ class ListTable extends WP_List_Table {
 			'type'     => $this->order_type,
 		);
 
-		foreach ( array( 'status', 's', 'm', '_customer_user' ) as $query_var ) {
+		foreach ( array( 'status', 's', 'm', '_customer_user', 'search_filter' ) as $query_var ) {
 			$this->request[ $query_var ] = sanitize_text_field( wp_unslash( $_REQUEST[ $query_var ] ?? '' ) );
 		}
 
@@ -533,8 +533,10 @@ class ListTable extends WP_List_Table {
 			$this->has_filter            = true;
 		}
 
-		$filter = trim( sanitize_text_field( $this->request['filter'] ) );
-
+		$filter = trim( sanitize_text_field( $this->request['search_filter'] ) );
+		if( ! empty( $filter ) ) {
+			$this->order_query_args['search_filter'] = $filter;
+		}
 	}
 
 	/**
@@ -1588,9 +1590,9 @@ class ListTable extends WP_List_Table {
 			'all'       => __( 'All', 'woocommerce' ),
 		);
 ?>
-		<select name="filter" id="order-search-filter">
+		<select name="search_filter" id="order-search-filter">
 			<?php foreach ( $options as $value => $label ) { ?>
-				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, isset( $_REQUEST['filter'] ) ? $_REQUEST['filter'] : 'customers' ); ?>><?php echo esc_html( $label ); ?></option>
+				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, isset( $_REQUEST['search_filter'] ) ? $_REQUEST['search_filter'] : 'customers' ); ?>><?php echo esc_html( $label ); ?></option>
 			<?php }
 	}
 }
