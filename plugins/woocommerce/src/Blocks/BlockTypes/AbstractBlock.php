@@ -55,13 +55,6 @@ abstract class AbstractBlock {
 	protected $integration_registry;
 
 	/**
-	 * Block Hook API placements.
-	 *
-	 * @var array
-	 */
-	protected $hooked_block_placements = array();
-
-	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi            $asset_api Instance of the asset API.
