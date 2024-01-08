@@ -13,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { CustomizeStoreComponent } from '../types';
+import { CustomizeStoreComponent, FlowType } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
 import { ThemeCard } from './theme-card';
 import {
@@ -30,6 +30,7 @@ import {
 	DefaultBanner,
 	ExistingAiThemeBanner,
 	ExistingThemeBanner,
+	CoreBanner,
 } from './intro-banners';
 
 export type events =
@@ -51,6 +52,7 @@ const BANNER_COMPONENTS = {
 	'jetpack-offline': JetpackOfflineBanner,
 	'existing-ai-theme': ExistingAiThemeBanner,
 	'existing-theme': ExistingThemeBanner,
+	[ FlowType.noAI ]: CoreBanner,
 	default: DefaultBanner,
 };
 
@@ -82,8 +84,10 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
-
 	switch ( true ) {
+		case context.flowType === FlowType.noAI:
+			bannerStatus = FlowType.noAI;
+			break;
 		case isNetworkOffline:
 			bannerStatus = 'network-offline';
 			break;

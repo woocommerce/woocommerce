@@ -15,10 +15,11 @@ import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { FontPairing } from './global-styles';
 import { CustomizeStoreContext } from '..';
+import { FlowType } from '~/customize-store/types';
 
 export const SidebarNavigationScreenTypography = () => {
 	const { context } = useContext( CustomizeStoreContext );
-	const aiOnline = context.aiOnline;
+	const aiOnline = context.flowType === FlowType.AIOnline;
 
 	const label = aiOnline
 		? __(

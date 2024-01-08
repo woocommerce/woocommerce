@@ -10,6 +10,7 @@ import { AnyInterpreter, Sender } from 'xstate';
  */
 import {
 	CustomizeStoreComponent,
+	FlowType,
 	customizeStoreStateMachineContext,
 } from '../types';
 import { designWithAiStateMachineDefinition } from './state-machine';
@@ -44,7 +45,7 @@ export const DesignWithAiController = ( {
 } ) => {
 	// Assign aiOnline value from the parent context if it exists. Otherwise, ai is online by default.
 	designWithAiStateMachineDefinition.context.aiOnline =
-		parentContext?.aiOnline ?? true;
+		parentContext?.flowType === FlowType.AIOnline;
 	const [ state, send, service ] = useMachine(
 		designWithAiStateMachineDefinition,
 		{
