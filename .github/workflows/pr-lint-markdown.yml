@@ -20,7 +20,7 @@ jobs:
                   files: |
                       **/*.md
                   files_ignore: |
-                      docs/**.md
+                      docs/**/*.md
                       plugins/woocommerce-docs/tests/src/Blocks/fixtures/*.md
 
             - name: Get docs changed files
