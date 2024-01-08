@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Don't trigger jQuery add to cart function when the button is clicked on classic themes
