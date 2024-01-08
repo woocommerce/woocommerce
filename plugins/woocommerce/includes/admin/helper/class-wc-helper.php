@@ -716,8 +716,9 @@ class WC_Helper {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$redirect_admin_url = isset( $_GET['redirect_admin_url'] )
 			? esc_url_raw(
-				wp_unslash(
-					urldecode( $_GET['redirect_admin_url'] )
+				urldecode(
+					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+					wp_unslash( $_GET['redirect_admin_url'] )
 				)
 			)
 			: '';
@@ -823,8 +824,9 @@ class WC_Helper {
 				'redirect_admin_url' => isset( $_GET['redirect_admin_url'] )
 					? rawurlencode(
 						esc_url_raw(
-							wp_unslash(
-								urldecode( $_GET['redirect_admin_url'] )
+							urldecode(
+								// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+								wp_unslash( $_GET['redirect_admin_url'] )
 							)
 						)
 					)
