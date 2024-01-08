@@ -12,6 +12,7 @@ import type { AttributeSetting } from '@woocommerce/types';
  */
 import { EditProps, FilterType } from './types';
 import { getAllowedBlocks } from './utils';
+import Downgrade from './components/downgrade';
 import Warning from './components/warning';
 import './editor.scss';
 
@@ -65,6 +66,7 @@ const Edit = ( props: EditProps ) => {
 	return (
 		<nav { ...blockProps }>
 			{ ! isNested && <Warning /> }
+			<Downgrade clientId={ props.clientId } />
 			<InnerBlocks
 				template={ template }
 				allowedBlocks={ allowedBlocks }
