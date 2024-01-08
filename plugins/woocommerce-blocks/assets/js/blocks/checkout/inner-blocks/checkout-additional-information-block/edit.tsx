@@ -4,6 +4,7 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import { FormStepBlock } from '@woocommerce/blocks/checkout/form-step';
 import classnames from 'classnames';
+import { ADDITIONAL_FORM_KEYS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -22,7 +23,11 @@ export const Edit = ( {
 		className: string;
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+} ) => {
+	if ( ADDITIONAL_FORM_KEYS.length === 0 ) {
+		return null;
+	}
+
 	return (
 		<FormStepBlock
 			setAttributes={ setAttributes }
