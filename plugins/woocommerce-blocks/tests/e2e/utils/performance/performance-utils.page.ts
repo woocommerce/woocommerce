@@ -20,41 +20,39 @@ export class PerformanceUtils {
 
 	async getLoadingDurations(): Promise< ReturnType< Page[ 'evaluate' ] > > {
 		return this.page.evaluate( () => {
-			const [ navigationEntry ] = performance.getEntriesByType(
+			const [
+				{
+					requestStart,
+					responseStart,
+					responseEnd,
+					domContentLoadedEventEnd,
+					loadEventEnd,
+				},
+			] = performance.getEntriesByType(
 				'navigation'
 			) as PerformanceNavigationTiming[];
+
 			const paintTimings = performance.getEntriesByType( 'paint' );
 
-			const calculateTiming = ( name: string ) => {
-				const paint = paintTimings.find(
-					( entry ) => entry.name === name
-				);
-				return paint
-					? paint.startTime - navigationEntry.responseEnd
-					: 0;
-			};
-
 			return {
-				serverResponse:
-					navigationEntry.responseStart -
-					navigationEntry.requestStart,
-				firstPaint: calculateTiming( 'first-paint' ),
-				domContentLoaded:
-					navigationEntry.domContentLoadedEventEnd -
-					navigationEntry.responseEnd,
-				loaded:
-					navigationEntry.loadEventEnd - navigationEntry.responseEnd,
-				firstContentfulPaint: calculateTiming(
-					'first-contentful-paint'
-				),
-				firstBlock: performance.now() - navigationEntry.responseEnd,
+				serverResponse: responseStart - requestStart,
+				firstPaint:
+					paintTimings.find( ( { name } ) => name === 'first-paint' )
+						.startTime - responseEnd,
+				domContentLoaded: domContentLoadedEventEnd - responseEnd,
+				loaded: loadEventEnd - responseEnd,
+				firstContentfulPaint:
+					paintTimings.find(
+						( { name } ) => name === 'first-contentful-paint'
+					).startTime - responseEnd,
+				firstBlock: performance.now() - responseEnd,
 			};
 		} );
 	}
 
 	logPerformanceResult( description: string, times: number[] ) {
 		const roundedTimes = times.map(
-			( time ) => Math.round( time * 100 ) / 100
+			( time ) => Math.round( time + Number.EPSILON * 100 ) / 100
 		);
 		const average =
 			roundedTimes.reduce( ( a, b ) => a + b, 0 ) / roundedTimes.length;
