@@ -57,7 +57,7 @@
         {
           "post_title": "Customizing checkout fields using actions and filters",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/customising-checkout-fields.md",
-          "hash": "824709d5b6510f95057cc2f5cd567da3618b846a0965a0d7d16173b022c15360",
+          "hash": "1dd9544e2f4a9b51fc012a0aa97921c312409b1be8dde62103d49ddc41d6da25",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/customising-checkout-fields.md",
           "id": "83097d3b7414557fc80dcf9f8f1a708bbdcdd884"
         },
@@ -113,7 +113,7 @@
         {
           "post_title": "WooCommerce Git flow",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/woocommerce-git-flow.md",
-          "hash": "8ec57df0d2e60750710cca9a22eca778753a74d2f258413a9e28379f65957094",
+          "hash": "8af49829a2bd2f92259f789f20c6f8e2fad0db378e871c7c0135fa2ca8238fa2",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/woocommerce-git-flow.md",
           "id": "9e5c2da0c341b88f32483ec2435740cd16d48676"
         },
@@ -247,7 +247,7 @@
         {
           "post_title": "Adding store management links",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/how-to-add-your-own-store-management-links.md",
-          "hash": "c95b6cf5e325222d90ceca0c13c4a837cc3927d68b0dc64fe39af154fa8b1e35",
+          "hash": "7302122881bb9d1e54606a32d787bdace34f4467ec4ee70f38bb9383686695eb",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/how-to-add-your-own-store-management-links.md",
           "id": "ae8fc356aa7555b87477462eaa80130a044d00f9"
         },
@@ -311,7 +311,7 @@
         {
           "post_title": "WooCommerce Endpoints",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/woocommerce-endpoints.md",
-          "hash": "9e6be07e7abb85ab7ab39597aacb1c27099776a322f164708c806bbee2c7e38e",
+          "hash": "55e2839373c56dfee5880f907b53056b4de6f2cdb688cb7a601a5347f2f503c6",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/woocommerce-endpoints.md",
           "id": "31a11f74bcd9f21f97cd4c6c719240b3d84e40f4"
         },
@@ -325,7 +325,7 @@
         {
           "post_title": "WooCommerce developer tools",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-tools.md",
-          "hash": "df8a55c2795aab540dbb5883bddbda142252c80b9a4108305133dc51da9e3914",
+          "hash": "61c995250202edcd4a7ad2febe5f7f2eda79a830dd123d5797dc95eb4d833c6a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-tools.md",
           "id": "2ed3659ae0153c8fb3252c417bb0eb43ea60f862"
         },
@@ -350,14 +350,14 @@
       "categories": []
     },
     {
-      "content": "\nWooCommerce has traditionally stored store orders and related order information (like refunds) as custom WordPress post types or post meta records. This comes with performance issues.\n\n[High-Performance Order Storage (HPOS)](https://developer.woo.com/2022/09/14/high-performance-order-storage-progress-report/) also previously known as “Custom Order Tables” is a solution that provides an easy-to-understand and solid database structure – specifically designed for eCommerce needs. It uses the WooCommerce CRUD design to store order data in custom tables – optimized for WooCommerce queries with minimal impact on the store's performance.\n\nIn January 2022, we published the [initial plan for the Custom Order Tables feature](https://developer.woo.com/2022/01/17/the-plan-for-the-woocommerce-custom-order-table/) and since then, we've been working hard to bring the High-Performance Order Storage (HPOS) to WooCommerce Core. In May 2022, we invited you to [test the order migration process](https://developer.woo.com/2022/05/16/call-for-early-testing-custom-order-table-migrations/) and provide feedback on how our initial work performs on real stores of varied configurations.\n\nFrom WooCommerce 8.2, released on October 2023, [High-Performance Order Storage (HPOS)](https://developer.woo.com/2022/09/14/high-performance-order-storage-progress-report/)  is officially released under the stable flag and will be enabled by default for new installations.\n\n## [What's New with High-Performance Order Storage?](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-1)\n\nBringing High-Performance Order Storage (HPOS) to WooCommerce improves these three essential properties for eCommerce stores.\n\n1/ **Scalability**\n\nThe rise in the number of customers and customer orders increases the load on your store's database – making it difficult to handle customer order requests and deliver a seamless user experience.\n\nWith High-Performance Order Storage, you get dedicated tables for data like orders and order addresses and thus dedicated indexes which results in fewer read/write operations and fewer busy tables. This feature enables eCommerce stores of all shapes and sizes to scale their business to their maximum potential – without expert intervention.\n\n2/  **Reliability**\n\nHigh-Performance Order Storage makes implementing and restoring targeted data backup easier. You'll no longer need to worry about losing orders, inventory numbers, or client information with reliable backup in these custom order tables. It'll also facilitate implementing read/write locks and prevent race conditions.\n\n3/ **Simplicity**\n\nYou no longer have to go through a single huge database to locate underlying data and WooCommerce entries.\n\nWith High-Performance Order Storage, you can easily browse through the separate tables and easy-to-handle entries, independent of the table  `_posts`, to find data or understand the table structure. It also lets you easily develop new plugins, implement designs for shops and products, and modify WooCommerce with more flexibility.\n\n## [Background](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-2)\n\nBefore the release of version 8.2, WooCommerce relied on the `_post` and `_postmeta` table structures to store order information, which has served well over the years.\n\nHowever, High-Performance Order Storage introduces dedicated tables for data like orders and order addresses and thus dedicated indexes which results in fewer read/write operations and fewer busy tables. This feature enables eCommerce stores of all shapes and sizes to scale their business to their maximum potential – without expert intervention.\n\nThe order data is synced from `_posts` and `_postmeta` table to four custom order tables:\n\n1. `_wc_orders`\n2. `_wc_order_addresses`\n3. `_wc_order_operational_data`\n4. `_wc_orders_meta`\n\n\n## [Enabling the feature](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-3)\n\nFrom WooCommerce 8.2, released on October 2023, HPOS is enabled by default for new installations. Existing stores can check [How to enable HPOS](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/enable-hpos.md)\n\n## [Database tables](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-4)\n\nA number of database tables are used to store order data by HPOS. The `get_all_table_names` method in [the OrdersTableDataStore class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/OrdersTableDataStore.php) will return the names of all the tables.\n\n## [Authoritative tables](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-5)\n\nAt any given time, while the HPOS feature is enabled, there are two roles for the involved database tables: _authoritative_ and _backup_. The authoritative tables are the working tables, where order data will be stored to and retrieved from during normal operation of the store. The _backup_ tables will receive a copy of the authoritative data whenever [synchronization](#synchronization) happens.\n\nIf the `woocommerce_custom_orders_table_enabled` options is set to true, HPOS is active and [the new tables](#database-tables) are authoritative, while the posts and post meta tables act as the backup tables. If the option is set to false, it's the other way around. The option can be changed via admin UI (WooCommerce - Settings - Advanced - Custom data stores).\n\n[The CustomOrdersTableController class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/CustomOrdersTableController.php) hooks on the `woocommerce_order_data_store` filter so that `WC_Data_Store::load( 'order' );` will return either an instance of [OrdersTableDataStore](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/OrdersTableDataStore.php) or an instance of [WC_Order_Data_Store_CPT](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/data-stores/class-wc-order-data-store-cpt.php), depending on which are the authoritative tables.\n\nIn order to preserve data integrity, switching the authoritative tables (from the new tables to the posts table or the other way around) isn't allowed while there are orders pending synchronization.\n\n## [Synchronization](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-6)\n\n_Synchronization_ is the process of applying all the pending changes in the authoritative tables to the backup tables. _Orders pending synchronization_ are orders that have been modified in the authoritative tables but the changes haven't been applied to the backup tables yet.\n\nThis can happen in a number of ways:\n\n\n### Immediate synchronization\n\nIf the `woocommerce_custom_orders_table_data_sync_enabled` setting is set to true, synchronization happens automatically and immediately as soon as the orders are changed in the authoritative tables.\n\n\n### Manual synchronization\n\nWhen immediate synchronization is disabled, it can be triggered manually via command line as follows: `wp wc cot sync`. It can also be triggered programmatically as follows:\n\n```php\n$synchronizer = wc_get_container()->get(Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\DataSynchronizer::class);\n$order_ids = $synchronizer->get_next_batch_to_process( $batch_size );\nif ( count( $order_ids ) ) {\n\t$synchronizer->process_batch( $order_ids );\n}\n```\n\nwhere `$batch_size` is the maximum count of orders to process.\n\n\n### Scheduled synchronization\n\nIf immediate synchronization gets activated (`woocommerce_custom_orders_table_data_sync_enabled` is set to true) while there are orders pending synchronization, an instance of [DataSynchronizer](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/DataSynchronizer.php) will be enqueued using [BatchProcessingController](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/BatchProcessing/BatchProcessingController.php) so that the synchronization of created/modified/deleted orders will happen in batches via scheduled actions. This scheduling happens inside [CustomOrdersTableController](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/CustomOrdersTableController.php), by means of hooking into `woocommerce_update_options_advanced_custom_data_stores`.\n\nIf for some reason immediate synchronization is already active but synchronization is not scheduled, a trick to restart it is to go to the settings page (WooCommerce - Settings - Advanced - Custom data stores) and hit \"Save\" even without making any changes. As long as \"Keep the posts table and the orders tables synchronized\" is checked the synchronization scheduling will happen, even if it was checked before.\n\nIf the `woocommerce_auto_flip_authoritative_table_roles` option is set to true (there's a checkbox for it in the settings page), the authoritative tables will be switched automatically once all the orders have been synchronized. This is handled by [the CustomOrdersTableController class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/CustomOrdersTableController.php).\n\n\n### Deletion synchronization\n\nSynchronization of order deletions is tricky: if an order exists in one set of tables (new tables or posts) but not in the other, it's not clear if the missing orders need to be created or if the existing orders need to be deleted. Theoretically, the orders missing from the backup tables imply the former and the orders missing from the authoritative tables imply the latter; but that's dangerous as a bug in the involved code could easily lead to the deletion of legitimate orders.\n\nTo achieve a robust order deletion synchronization mechanism the following is done. Whenever an order is deleted and immediate synchronization is disabled, a record is created in the `wp_wc_orders_meta` table that has `deleted_from` as the key and the name of the authoritative table the order was deleted from (`wp_wc_orders` or the posts table). Then at synchronization time these records are processed (the corresponding orders are deleted from the corresponding tables) and deleted afterwards.\n\nAn exception to the above are the [placeholder records](#placeholder-records): these are deleted immediately when the corresponding order is deleted from `wp_wc_orders`, even if immediate synchronization is disabled.\n\nWhen the “**High-Performance Order Storage**” and “**Compatibility mode**” are enabled, WooCommerce populates the HPOS tables with data from posts & postmeta tables. The synchronization between the tables is [explained in detail in this document](https://developer.woo.com/2022/09/29/high-performance-order-storage-backward-compatibility-and-synchronization/#synchronization).\n\n\n> You can find a deeper explanation about the synchronization between the tables in [this document about high-performance-order-storage-backward-compatibility-and-synchronization](https://developer.woo.com/2022/09/29/high-performance-order-storage-backward-compatibility-and-synchronization/#synchronization).\n\n## [Placeholder records](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-7)\n\nOrder IDs must match in both the authoritative tables and the backup tables, otherwise synchronization wouldn't be possible. The order IDs that are compared for order identification and synchronization purposes are the ones from the `id` field in both the `wp_wc_orders` table and the posts table.\n\nIf the posts table is authoritative, achieving an order ID match is easy: the record in `wp_wc_orders` is created with the same ID and that's it. However, when the new orders tables are authoritative there's a problem: the posts table is used to store multiple types of data, not only orders; and by the time synchronization needs to happen, a non-order post could already exist having the same ID as the order to synchronize.\n\nTo solve this, _placeholder records_ are used. Whenever the new orders tables are authoritative and immediate synchronization is disabled, creating a new order will cause a record with post type `shop_order_placehold` and the same ID as the order to be created in the posts table; this effectively \"reserves\" the order ID in the posts table. Then, at synchronization time, the record is filled appropriately and its post type is changed to `shop_order`.\n\n\n## [Order Data Storage](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-8)\n\nYou can switch between data stores freely to sync the data between the tables.\n\n-   If you select  **“WordPress Post Tables”**, the system will save the order data within  `_post`  and  `_postmeta`  tables. The order tables are not utilized in this scenario.\n\n![Select WordPress Post Tables](https://woo.com/wp-content/uploads/2023/10/image-18.png?w=650)\n\n-   If you select  **“High-Performance Order Storage”**, the system will save the order data within the new WooCommerce order tables\n\n![Select High-Performance Order Storage](https://woo.com/wp-content/uploads/2023/10/image-19.png?w=650)\n\n-   If you select  **“WordPress Post Tables”** and **“Enable compatibility mode”**, the system will sync the order data between the posts/postmeta and the WooCommerce order tables.\n\n![Select WordPress Post Tables and Enable compatibility mode](https://woo.com/wp-content/uploads/2023/10/image-20.png?w=650)\n\n\n## [Incompatible Plugins](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-9)\n\nIf you are using a plugin that is not compatible with High-Performance Order Storage, then the HPOS option will be disabled under  **WooCommerce > Settings > Advanced > Features**.\n\n![Incompatible plugin](https://woo.com/wp-content/uploads/2023/10/image-21.png?w=650)\n\n-   You can click on “**View and manage**” to review the list of incompatible plugins\n-   Or you can visit  `https://example.com/wp-admin/plugins.php?plugin_status=incompatible_with_feature&feature_id=custom_order_tables`  to review the list of incompatible plugins (please replace  `example.com`  with your site domain)\n\n![Plugins page](https://woo.com/wp-content/uploads/2023/10/image-22.png?w=650)\n\n> **Note:** If you are using a third-party extension that isn't working properly with High-Performance Order Storage then please notify the developers of the extension and ask them to update their extension to add support for HPOS. It's up to the extension developers to add support for HPOS. We have [developer resources and documentation](https://developer.woo.com/2022/09/14/high-performance-order-storage-progress-report/)  available to help with their integration efforts.\n\n\n## [Disabling HPOS](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-10)\n\nIf you encounter problems or if you need to continue working with plugins that are not yet compatible with HPOS, then we recommend temporarily switching back to  **WordPress posts storage**.\n\nTo do this, navigate to  **WooCommerce ▸ Settings ▸ Advanced ▸ Features**  and start by making sure that  **compatibility mode** is enabled. If it was not already enabled, you may find you need to wait for some time while order data is synchronized across data-stores.\n\n![WooCommerce ▸ Settings ▸ Advanced ▸ Features Screen](https://woo.com/wp-content/uploads/2023/10/hpos-feature-settings.png?w=650)\n\nOnce synchronization has completed, you can select  **WordPress posts storage (legacy)**  as your preferred option. You can also disable compatibility mode at this point. Once you are ready to re-enable HPOS, simply follow the instructions posted at the  [start of this doc](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-3). Finally, remember to save this page between changes!\n\nAs noted earlier, we also strongly recommend reaching out to the support teams of any plugins that are incompatible, so they can take corrective action.\n",
+      "content": "\nWooCommerce has traditionally stored store orders and related order information (like refunds) as custom WordPress post types or post meta records. This comes with performance issues.\n\n[High-Performance Order Storage (HPOS)](https://developer.woo.com/2022/09/14/high-performance-order-storage-progress-report/) also previously known as “Custom Order Tables” is a solution that provides an easy-to-understand and solid database structure – specifically designed for eCommerce needs. It uses the WooCommerce CRUD design to store order data in custom tables – optimized for WooCommerce queries with minimal impact on the store's performance.\n\nIn January 2022, we published the [initial plan for the Custom Order Tables feature](https://developer.woo.com/2022/01/17/the-plan-for-the-woocommerce-custom-order-table/) and since then, we've been working hard to bring the High-Performance Order Storage (HPOS) to WooCommerce Core. In May 2022, we invited you to [test the order migration process](https://developer.woo.com/2022/05/16/call-for-early-testing-custom-order-table-migrations/) and provide feedback on how our initial work performs on real stores of varied configurations.\n\nFrom WooCommerce 8.2, released on October 2023, [High-Performance Order Storage (HPOS)](https://developer.woo.com/2022/09/14/high-performance-order-storage-progress-report/)  is officially released under the stable flag and will be enabled by default for new installations.\n\n## [What's New with High-Performance Order Storage?](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-1)\n\nBringing High-Performance Order Storage (HPOS) to WooCommerce improves these three essential properties for eCommerce stores.\n\n1/ **Scalability**\n\nThe rise in the number of customers and customer orders increases the load on your store's database – making it difficult to handle customer order requests and deliver a seamless user experience.\n\nWith High-Performance Order Storage, you get dedicated tables for data like orders and order addresses and thus dedicated indexes which results in fewer read/write operations and fewer busy tables. This feature enables eCommerce stores of all shapes and sizes to scale their business to their maximum potential – without expert intervention.\n\n2/  **Reliability**\n\nHigh-Performance Order Storage makes implementing and restoring targeted data backup easier. You'll no longer need to worry about losing orders, inventory numbers, or client information with reliable backup in these custom order tables. It'll also facilitate implementing read/write locks and prevent race conditions.\n\n3/ **Simplicity**\n\nYou no longer have to go through a single huge database to locate underlying data and WooCommerce entries.\n\nWith High-Performance Order Storage, you can easily browse through the separate tables and easy-to-handle entries, independent of the table  `_posts`, to find data or understand the table structure. It also lets you easily develop new plugins, implement designs for shops and products, and modify WooCommerce with more flexibility.\n\n## [Background](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-2)\n\nBefore the release of version 8.2, WooCommerce relied on the `_post` and `_postmeta` table structures to store order information, which has served well over the years.\n\nHowever, High-Performance Order Storage introduces dedicated tables for data like orders and order addresses and thus dedicated indexes which results in fewer read/write operations and fewer busy tables. This feature enables eCommerce stores of all shapes and sizes to scale their business to their maximum potential – without expert intervention.\n\nThe order data is synced from `_posts` and `_postmeta` table to four custom order tables:\n\n1. `_wc_orders`\n2. `_wc_order_addresses`\n3. `_wc_order_operational_data`\n4. `_wc_orders_meta`\n\n\n## [Enabling the feature](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-3)\n\nFrom WooCommerce 8.2, released on October 2023, HPOS is enabled by default for new installations. Existing stores can check [How to enable HPOS](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/enable-hpos.md)\n\n## [Database tables](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-4)\n\nA number of database tables are used to store order data by HPOS. The `get_all_table_names` method in [the OrdersTableDataStore class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/OrdersTableDataStore.php) will return the names of all the tables.\n\n## [Authoritative tables](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-5)\n\nAt any given time, while the HPOS feature is enabled, there are two roles for the involved database tables: _authoritative_ and _backup_. The authoritative tables are the working tables, where order data will be stored to and retrieved from during normal operation of the store. The _backup_ tables will receive a copy of the authoritative data whenever [synchronization](#synchronization) happens.\n\nIf the `woocommerce_custom_orders_table_enabled` options is set to true, HPOS is active and [the new tables](#database-tables) are authoritative, while the posts and post meta tables act as the backup tables. If the option is set to false, it's the other way around. The option can be changed via admin UI (WooCommerce - Settings - Advanced - Custom data stores).\n\n[The CustomOrdersTableController class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/CustomOrdersTableController.php) hooks on the `woocommerce_order_data_store` filter so that `WC_Data_Store::load( 'order' );` will return either an instance of [OrdersTableDataStore](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/OrdersTableDataStore.php) or an instance of [WC_Order_Data_Store_CPT](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/data-stores/class-wc-order-data-store-cpt.php), depending on which are the authoritative tables.\n\nIn order to preserve data integrity, switching the authoritative tables (from the new tables to the posts table or the other way around) isn't allowed while there are orders pending synchronization.\n\n## [Synchronization](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-6)\n\n_Synchronization_ is the process of applying all the pending changes in the authoritative tables to the backup tables. _Orders pending synchronization_ are orders that have been modified in the authoritative tables but the changes haven't been applied to the backup tables yet.\n\nThis can happen in a number of ways:\n\n\n### Immediate synchronization\n\nIf the `woocommerce_custom_orders_table_data_sync_enabled` setting is set to true, synchronization happens automatically and immediately as soon as the orders are changed in the authoritative tables.\n\n\n### Manual synchronization\n\nWhen immediate synchronization is disabled, it can be triggered manually via command line as follows: `wp wc cot sync`. It can also be triggered programmatically as follows:\n\n```php\n$synchronizer = wc_get_container()->get(Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\DataSynchronizer::class);\n$order_ids = $synchronizer->get_next_batch_to_process( $batch_size );\nif ( count( $order_ids ) ) {\n\t$synchronizer->process_batch( $order_ids );\n}\n```\n\nwhere `$batch_size` is the maximum count of orders to process.\n\n\n### Scheduled synchronization\n\nIf immediate synchronization gets activated (`woocommerce_custom_orders_table_data_sync_enabled` is set to true) while there are orders pending synchronization, an instance of [DataSynchronizer](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/DataSynchronizer.php) will be enqueued using [BatchProcessingController](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/BatchProcessing/BatchProcessingController.php) so that the synchronization of created/modified/deleted orders will happen in batches via scheduled actions. This scheduling happens inside [CustomOrdersTableController](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/CustomOrdersTableController.php), by means of hooking into `woocommerce_update_options_advanced_custom_data_stores`.\n\nIf for some reason immediate synchronization is already active but synchronization is not scheduled, a trick to restart it is to go to the settings page (WooCommerce - Settings - Advanced - Custom data stores) and hit \"Save\" even without making any changes. As long as \"Keep the posts table and the orders tables synchronized\" is checked the synchronization scheduling will happen, even if it was checked before.\n\nIf the `woocommerce_auto_flip_authoritative_table_roles` option is set to true (there's a checkbox for it in the settings page), the authoritative tables will be switched automatically once all the orders have been synchronized. This is handled by [the CustomOrdersTableController class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/CustomOrdersTableController.php).\n\n\n### Deletion synchronization\n\nSynchronization of order deletions is tricky: if an order exists in one set of tables (new tables or posts) but not in the other, it's not clear if the missing orders need to be created or if the existing orders need to be deleted. Theoretically, the orders missing from the backup tables imply the former and the orders missing from the authoritative tables imply the latter; but that's dangerous as a bug in the involved code could easily lead to the deletion of legitimate orders.\n\nTo achieve a robust order deletion synchronization mechanism the following is done. Whenever an order is deleted and immediate synchronization is disabled, a record is created in the `wp_wc_orders_meta` table that has `deleted_from` as the key and the name of the authoritative table the order was deleted from (`wp_wc_orders` or the posts table). Then at synchronization time these records are processed (the corresponding orders are deleted from the corresponding tables) and deleted afterwards.\n\nAn exception to the above are the [placeholder records](#placeholder-records): these are deleted immediately when the corresponding order is deleted from `wp_wc_orders`, even if immediate synchronization is disabled.\n\nWhen the “**High-Performance Order Storage**” and “**Compatibility mode**” are enabled, WooCommerce populates the HPOS tables with data from posts & postmeta tables. The synchronization between the tables is [explained in detail in this document](https://developer.woo.com/2022/09/29/high-performance-order-storage-backward-compatibility-and-synchronization/#synchronization).\n\n\n> You can find a deeper explanation about the synchronization between the tables in [this document about high-performance-order-storage-backward-compatibility-and-synchronization](https://developer.woo.com/2022/09/29/high-performance-order-storage-backward-compatibility-and-synchronization/#synchronization).\n\n## [Placeholder records](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-7)\n\nOrder IDs must match in both the authoritative tables and the backup tables, otherwise synchronization wouldn't be possible. The order IDs that are compared for order identification and synchronization purposes are the ones from the `id` field in both the `wp_wc_orders` table and the posts table.\n\nIf the posts table is authoritative, achieving an order ID match is easy: the record in `wp_wc_orders` is created with the same ID and that's it. However, when the new orders tables are authoritative there's a problem: the posts table is used to store multiple types of data, not only orders; and by the time synchronization needs to happen, a non-order post could already exist having the same ID as the order to synchronize.\n\nTo solve this, _placeholder records_ are used. Whenever the new orders tables are authoritative and immediate synchronization is disabled, creating a new order will cause a record with post type `shop_order_placehold` and the same ID as the order to be created in the posts table; this effectively \"reserves\" the order ID in the posts table. Then, at synchronization time, the record is filled appropriately and its post type is changed to `shop_order`.\n\n\n## [Order Data Storage](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-8)\n\nYou can switch between data stores freely to sync the data between the tables.\n\n-   If you select  **“WordPress Post Tables”**, the system will save the order data within  `_post`  and  `_postmeta`  tables. The order tables are not utilized in this scenario.\n\n![Select WordPress Post Tables](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/image-18.png)\n\n-   If you select  **“High-Performance Order Storage”**, the system will save the order data within the new WooCommerce order tables\n\n![Select High-Performance Order Storage](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/image-19.png)\n\n-   If you select  **“WordPress Post Tables”** and **“Enable compatibility mode”**, the system will sync the order data between the posts/postmeta and the WooCommerce order tables.\n\n![Select WordPress Post Tables and Enable compatibility mode](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/image-20.png)\n\n\n## [Incompatible Plugins](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-9)\n\nIf you are using a plugin that is not compatible with High-Performance Order Storage, then the HPOS option will be disabled under  **WooCommerce > Settings > Advanced > Features**.\n\n![Incompatible plugin](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/image-21.png)\n\n-   You can click on “**View and manage**” to review the list of incompatible plugins\n-   Or you can visit  `https://example.com/wp-admin/plugins.php?plugin_status=incompatible_with_feature&feature_id=custom_order_tables`  to review the list of incompatible plugins (please replace  `example.com`  with your site domain)\n\n![Plugins page](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/image-22.png)\n\n> **Note:** If you are using a third-party extension that isn't working properly with High-Performance Order Storage then please notify the developers of the extension and ask them to update their extension to add support for HPOS. It's up to the extension developers to add support for HPOS. We have [developer resources and documentation](https://developer.woo.com/2022/09/14/high-performance-order-storage-progress-report/)  available to help with their integration efforts.\n\n\n## [Disabling HPOS](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-10)\n\nIf you encounter problems or if you need to continue working with plugins that are not yet compatible with HPOS, then we recommend temporarily switching back to  **WordPress posts storage**.\n\nTo do this, navigate to  **WooCommerce ▸ Settings ▸ Advanced ▸ Features**  and start by making sure that  **compatibility mode** is enabled. If it was not already enabled, you may find you need to wait for some time while order data is synchronized across data-stores.\n\n![WooCommerce ▸ Settings ▸ Advanced ▸ Features Screen](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/hpos-feature-settings.png)\n\nOnce synchronization has completed, you can select  **WordPress posts storage (legacy)**  as your preferred option. You can also disable compatibility mode at this point. Once you are ready to re-enable HPOS, simply follow the instructions posted at the  [start of this doc](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-3). Finally, remember to save this page between changes!\n\nAs noted earlier, we also strongly recommend reaching out to the support teams of any plugins that are incompatible, so they can take corrective action.\n",
       "category_slug": "high-performance-order-storage",
       "category_title": "High Performance Order Storage",
       "posts": [
         {
           "post_title": "How to enable HPOS",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/enable-hpos.md",
-          "hash": "0facbf686039b3bdb4eeeb1054b05e9c66abf6f638d6b09ee7c022b4d9f2ab06",
+          "hash": "a2359d77c82f206e3bf6cac5a2369da83b26354bb0ec8d911e0679e7b944fbbc",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/enable-hpos.md",
           "id": "9d41c63f3d0cb17ada82a65bf4a26a1978cc34b0"
         }
@@ -371,7 +371,7 @@
         {
           "post_title": "Translating WooCommerce",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/localization-translation/translating-woocommerce.md",
-          "hash": "b5ca40522784ac8f4d8ec9aa15b92d9fdcdbe7e0221abc662efd00c76a6c5e3b",
+          "hash": "10543305b89e9f5f4f0f603c34fc9e8b11501693eb99276259feb5ecfa41f070",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/localization-translation/translating-woocommerce.md",
           "id": "017b9f80a086d119f8bac193c9b4d87d1efff67d"
         }
@@ -407,14 +407,14 @@
       "categories": []
     },
     {
-      "content": "\n> ⚠️ **Notice:** This documentation is currently a **work in progress**. Please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!\n\nThis handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.\n\nThe product editor's UI consists of Groups (currently rendered as tabs), Sections, and Fields, which are all blocks. For guidelines on how to extend the product editor (e.g. where to add blocks), please refer to the [Product Editor Extensibility Guidelines](./product-editor-extensibility-guidelines.md).\n\n![Product editor structure](https://woocommerce.files.wordpress.com/2023/09/groups-sections-fields.jpg)\n\nThe form's structure is defined in PHP using a Template, which is a tree structure of blocks. The template can be modified by using the Template API to add new Groups, Sections, and Fields as well as remove existing ones.\n\nFor more information about when to perform template modifications, see the [block template lifecycle](./block-template-lifecycle.md).\n\nMany extensibility implementations can be done using only the PHP-based Block Template API alongside our library of [generic blocks](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/product-editor/src/blocks/generic/README.md). More complex interactivity can be implemented using JavaScript and React (the same library used to implement the core blocks used in the product editor). [@woocommerce/create-product-editor-block](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/create-product-editor-block/README.md) can help scaffold a development environment with JavaScript and React.\n\n## Declaring compatibility with the product editor\n\nTo declare compatibility with the product editor, add the following to your plugin's root PHP file:\n\n```php\nuse Automattic\\WooCommerce\\Utilities\\FeaturesUtil;\n\nadd_action(\n\t'before_woocommerce_init',\n\tfunction() {\n\t\tif ( class_exists( FeaturesUtil::class ) ) {\n\t\t\tFeaturesUtil::declare_compatibility( 'product_block_editor', plugin_basename( __FILE__ ), true );\n\t\t}\n\t}\n);\n```\n\nPlease note that this check is currently not being enforced: the product editor can still be enabled even without this declaration. However, we might enforce this in the future, so it is recommended to declare compatibility as soon as possible.\n\n## Related documentation\n\n- [Examples on Template API usage](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md)\n- [Related hooks and Template API documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/BlockTemplates/README.md)\n- [Generic blocks documentation](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/product-editor/src/blocks/generic/README.md)\n",
+      "content": "\n> ⚠️ **Notice:** This documentation is currently a **work in progress**. Please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!\n\nThis handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.\n\nThe product editor's UI consists of Groups (currently rendered as tabs), Sections, and Fields, which are all blocks. For guidelines on how to extend the product editor (e.g. where to add blocks), please refer to the [Product Editor Extensibility Guidelines](./product-editor-extensibility-guidelines.md).\n\n![Product editor structure](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/groups-sections-fields.jpg)\n\nThe form's structure is defined in PHP using a Template, which is a tree structure of blocks. The template can be modified by using the Template API to add new Groups, Sections, and Fields as well as remove existing ones.\n\nFor more information about when to perform template modifications, see the [block template lifecycle](./block-template-lifecycle.md).\n\nMany extensibility implementations can be done using only the PHP-based Block Template API alongside our library of [generic blocks](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/product-editor/src/blocks/generic/README.md). More complex interactivity can be implemented using JavaScript and React (the same library used to implement the core blocks used in the product editor). [@woocommerce/create-product-editor-block](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/create-product-editor-block/README.md) can help scaffold a development environment with JavaScript and React.\n\n## Declaring compatibility with the product editor\n\nTo declare compatibility with the product editor, add the following to your plugin's root PHP file:\n\n```php\nuse Automattic\\WooCommerce\\Utilities\\FeaturesUtil;\n\nadd_action(\n\t'before_woocommerce_init',\n\tfunction() {\n\t\tif ( class_exists( FeaturesUtil::class ) ) {\n\t\t\tFeaturesUtil::declare_compatibility( 'product_block_editor', plugin_basename( __FILE__ ), true );\n\t\t}\n\t}\n);\n```\n\nPlease note that this check is currently not being enforced: the product editor can still be enabled even without this declaration. However, we might enforce this in the future, so it is recommended to declare compatibility as soon as possible.\n\n## Related documentation\n\n- [Examples on Template API usage](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md)\n- [Related hooks and Template API documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/BlockTemplates/README.md)\n- [Generic blocks documentation](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/product-editor/src/blocks/generic/README.md)\n",
       "category_slug": "product-editor-development",
       "category_title": "Product Editor Development",
       "posts": [
         {
           "post_title": "Product editor extensibility guidelines",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor-extensibility-guidelines.md",
-          "hash": "a2f04ef9d513dd59c961d42b4900698e27b6035dbd08113327a2ca14afef370b",
+          "hash": "928ef3c2cea40c4d4d523adcd46969ad154250c43bcd7656a8fc241c349d9359",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor-extensibility-guidelines.md",
           "id": "a837eb947d31fcff3c6e1f775926ba5eb13cd790"
         },
@@ -436,7 +436,7 @@
         {
           "post_title": "Writing high quality testing instructions",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/writing-high-quality-testing-instructions.md",
-          "hash": "fd1c5414d7bf88e5a669c3b66353c575b34659f09edb1895e5c409862c08a936",
+          "hash": "0543405b9340b272c461f01bc714e73b79627680b269152677ea9a0376c707e3",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/writing-high-quality-testing-instructions.md",
           "id": "56a8ef0ef0afec9c884f655e7fdd23d9666c9d00"
         },
@@ -479,9 +479,9 @@
           "id": "e561b46694dba223c38b87613ce4907e4e14333a"
         },
         {
-          "post_title": "Coding standards for the code snippets within the WooCommerce documentation",
+          "post_title": "Coding standards",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/coding-standards.md",
-          "hash": "a7bcab848a3107977bfbf09f9713424bd18310a7f84f8d267e34d514762a9512",
+          "hash": "cf20404a26327b978f9181b23225772359b52a540bb543ecd22a8db25f81656e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/coding-standards.md",
           "id": "b09a572b8a452b6cd795e0985daa85f06e5889fb"
         }
@@ -496,7 +496,7 @@
         {
           "post_title": "Extending WooCommerce Analytics reports",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/reporting/extending-woocommerce-admin-reports.md",
-          "hash": "c60b12b0a77e4f36f831371b56259a4c3c176071d707cde4f46530c9b4c6e5e4",
+          "hash": "3411b7d43aa8abeabd096506e8ace97b7425f4b5c99919fa49d2816c9cf76402",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/reporting/extending-woocommerce-admin-reports.md",
           "id": "3ef20148084c97d7f62b565b92df844392ac27f7"
         },
@@ -521,18 +521,9 @@
         {
           "post_title": "Getting started with the REST API",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/rest-api/getting-started.md",
-          "hash": "258be1ff18b8aada9b7c9823c14cebf0f45edb7657b96f20788a8aaa2731ac2b",
+          "hash": "2e8afa9859226cc51cfb4ec315779c0df3c9bb748210e9e381e94cd2aa8a771e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/rest-api/getting-started.md",
-          "id": "ad7fceb11d06571fb060f72c414896b425d6b72b",
-          "links": {
-            "_media/permalinks.webp": "ed738744242254be5075e37c4b843602b39e9a39",
-            "_media/keys.png": "833427adb1b61280ca82dcc252acdf0ca9e22498",
-            "_media/postman.png": "357fdb82aa69fd00944a4a8fb13d31387531587c",
-            "_media/insomnia.png": "dbc76ff28be8d7e745f256961b9bf60832fe07ec",
-            "_media/sslerror.png": "bae852d391f664c5503d782f86d640c20e3cee8e",
-            "_media/postman-ssl.png": "11f6d99871f01ba839a51abc1c4875d0e052fbf1",
-            "_media/insomnia-ssl.png": "0b08529e646c086e64ffc6b38bc92b3a9de93067"
-          }
+          "id": "ad7fceb11d06571fb060f72c414896b425d6b72b"
         }
       ],
       "categories": []
@@ -581,7 +572,7 @@
         {
           "post_title": "Thumbnail Image Regeneration",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/thumbnail-image-regeneration.md",
-          "hash": "dc513b4d1336e38c9fb5d9c4fbf307e184c82643f137207fbfd488dc9ee46a89",
+          "hash": "1f32e423fe3c4eddb7e78e5957d043445e65fada3b11265b380ae59adeab327e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/thumbnail-image-regeneration.md",
           "id": "733e1b16276d64f128ba0e337ca68ec3de0bf68f"
         },
@@ -593,12 +584,6 @@
           "id": "ec1f05ca7c14ed81a52553fa1c3f1045df5f6a4f"
         },
         {
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/marketplace-guidelines.md",
-          "hash": "5ca562b2f4cabefe47b0d08334f39d56e8d3e6dc31ea347000d3bb221e51d0a1",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/marketplace-guidelines.md",
-          "id": "d166aa9f8d039c444df468655b22b322df0cba37"
-        },
-        {
           "post_title": "Image sizing for theme developers",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/image-sizes.md",
           "hash": "a1204441b4e1701dd079db49b4ef8c8ab5dcb8cc2c12829ccf1fedbd85f7009f",
@@ -608,17 +593,14 @@
         {
           "post_title": "Fixing outdated WooCommerce templates",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/fixing-outdated-woocommerce-templates.md",
-          "hash": "d1c17364420473477f6e82e6875720a5e07967476a29b0bf623b5dc1891de100",
+          "hash": "cb1af5e4810b903e733123ddadd6d08379fd7c9cdf8977c0ed8fffd79dc06d58",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/fixing-outdated-woocommerce-templates.md",
-          "id": "1fa09bbc2137a65288cc1576c1053224db7187ed",
-          "links": {
-            "_media/fix_outdated_theme_templates.png": "34bae1919b92027dccdf15e847222c51a920d35a"
-          }
+          "id": "1fa09bbc2137a65288cc1576c1053224db7187ed"
         },
         {
           "post_title": "Conditional tags",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/conditional-tags.md",
-          "hash": "34ca87bfe83e451022088c2cf0771ded2a45982637450993137d6d7f576c9dd7",
+          "hash": "0de60ad04a67f17249f1b6de4bf130fa48b8d9a27eb5f3b893f903763ad67043",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/conditional-tags.md",
           "id": "a08cc0796290477cad7d9bc6737960985f5f6f41"
         },
@@ -666,44 +648,73 @@
           "id": "3688c201cc09c7e848cf6c279637c08584ccc334"
         },
         {
-          "post_title": "User experience guidelines - task list and inbox",
+          "post_title": "Testing",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/testing.md",
+          "hash": "ce3a74eae9c0990573be34ff37e671aa8e0939f6acff27026b5c73cd858d335c",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/testing.md",
+          "id": "b84afc5cff54e84581a115ea589c3d86da0682fe"
+        },
+        {
+          "post_title": "Task list and inbox",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/task-list-and-inbox.md",
-          "hash": "11e99799b5a4aeae0da01ba63b7f34146b8d62d85a98a0f918c612703f80b909",
+          "hash": "f00c11916dde089e0597f524b84d57cacdacdcb8cf4a89effcb1abd723af91bc",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/task-list-and-inbox.md",
           "id": "b461277e71a10e801d0d454a8578b83462991753"
         },
         {
-          "post_title": "User experience guidelines - onboarding",
+          "post_title": "Settings",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/settings.md",
+          "hash": "81d0af6bed8ba99471459004a1bd6359e2f9aa61f692f7f731b14dfb274eab32",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/settings.md",
+          "id": "6dea5dda4ebbd3a320383267fd2099be140aeb46"
+        },
+        {
+          "post_title": "Payments onboarding & setup",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/payments-design-guidelines.md",
+          "hash": "ea178be065874a249e1d25c5a79a33d69a80d23296573a5d7cd947a255ff408d",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/payments-design-guidelines.md",
+          "id": "7102e90d66b86ce2bdacc86d3e631a78a35738ca"
+        },
+        {
+          "post_title": "Onboarding",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/onboarding.md",
-          "hash": "65901cd0a2274057f453dd7b5ce1869b4869604e26fd7e129cf608df39e3df71",
+          "hash": "9140ab42f73166fc6fbf282f9f662975100d3000a79c3a96f0859054223548ed",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/onboarding.md",
           "id": "0a68990f3a0c3ddc1994372f7f35389340ca8ff5"
         },
         {
-          "post_title": "User experience guidelines - notices",
+          "post_title": "Notices",
+          "menu_title": "Notice guidelines",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/notices.md",
-          "hash": "249525d77ebb638ed5a368722404cf37bea48c044d74aba0696e3efd01677aaa",
+          "hash": "dcce0de4b0fb6a7e3d423ad6c4f536cb9541cd7bf979c2fd216b8b4ca8f9ec7a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/notices.md",
           "id": "8c5de3126ef21043cfc064a6c7105f7b64ff3ecf"
         },
         {
-          "post_title": "User experience guidelines - colors",
+          "post_title": "Navigation",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/navigation.md",
+          "hash": "7813b8219070c7b5b2a0013637f4c46cd47a749bd7fb95380046732a288f70fb",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/navigation.md",
+          "id": "c86422f15d038c5142c31f2c05b82b79c938142b"
+        },
+        {
+          "post_title": "Colors",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/colors.md",
-          "hash": "ef56a8e5f69a016a36f7cb4fe03715111cdc0949920195d8c55a3c080fe100b0",
+          "hash": "af8046c9179b7580f6a57a48c0cc9dbd9830e970904da42603b52aacc2d431fd",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/colors.md",
           "id": "b1a24b922f58b754e87ea5a1b83ec54a946a795a"
         },
         {
-          "post_title": "User experience guidelines - best practices",
+          "post_title": "User Experience Best practices",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/best-practices.md",
-          "hash": "b028a7560c2ef2e9ece4ef50b831fdf5bc73563c589bd5584ed6838e92005937",
+          "hash": "c641148c99c6f9c63fcc6a8381d3fc21deeb2df83614dfdffa01b2f5c85e580f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/best-practices.md",
           "id": "dd2c00da004cf6dfa2366c0d01928c84a2ae016a"
         },
         {
-          "post_title": "User experience guidelines - accessibility",
+          "post_title": "Accessibility",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/accessibility.md",
-          "hash": "2371b2438b255d0115d8823416e5ed9d1956fbb9583322296b96098b8f2376a5",
+          "hash": "fc5176111b226d51350d3d016d97c43d6072c981604507f2fc6499971b90191c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/accessibility.md",
           "id": "f16c7944f4acdaf71c1719df6ac0440738670070"
         }
@@ -717,12 +728,9 @@
         {
           "post_title": "Logging in WooCommerce",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/utilities/logging.md",
-          "hash": "bc2bdf656259fba15ff0b3158473feae1e240c1764c71b95e7a728dae2410733",
+          "hash": "85ac9f1ae9cac4f32b673aec872a78dbb2cdec6c26016d4c5d222b9a9089892b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/utilities/logging.md",
-          "id": "59f330940976f228e619e662c74b49476776aa59",
-          "links": {
-            "_media/log-critical.jpg": "91ab9cd586d0493192e27697858a59bc5e6706e4"
-          }
+          "id": "59f330940976f228e619e662c74b49476776aa59"
         },
         {
           "post_title": "Configuring caching plugins for WooCommerce",
@@ -756,5 +764,5 @@
       "categories": []
     }
   ],
-  "hash": "da17a5300f7cdfc26652b33fdcd17cda461127f6f64a1d380b880c1d8ca181f6"
+  "hash": "87ed7094c2a46b64f367b0967f44779b273577f0c3f696227c76b3694d6fe09a"
 }

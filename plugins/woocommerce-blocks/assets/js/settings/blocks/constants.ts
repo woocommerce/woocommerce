@@ -4,7 +4,7 @@
 import {
 	getSetting,
 	STORE_PAGES,
-	LocaleSpecificAddressField,
+	LocaleSpecificFormField,
 } from '@woocommerce/settings';
 
 export type WordCountType =
@@ -55,7 +55,7 @@ type CountryData = {
 	allowBilling: boolean;
 	allowShipping: boolean;
 	states: Record< string, string >;
-	locale: Record< string, LocaleSpecificAddressField >;
+	locale: Record< string, LocaleSpecificFormField >;
 };
 
 type FieldsLocations = {
@@ -136,17 +136,17 @@ const defaultFieldsLocations: FieldsLocations = {
 	additional: [],
 };
 
-export const ADDRESS_FIELDS_KEYS = getSetting< FieldsLocations >(
+export const ADDRESS_FORM_KEYS = getSetting< FieldsLocations >(
 	'addressFieldsLocations',
 	defaultFieldsLocations
 ).address;
 
-export const CONTACT_FIELDS_KEYS = getSetting< FieldsLocations >(
+export const CONTACT_FORM_KEYS = getSetting< FieldsLocations >(
 	'addressFieldsLocations',
 	defaultFieldsLocations
 ).contact;
 
-export const ADDITIONAL_FIELDS_KEYS = getSetting< FieldsLocations >(
+export const ADDITIONAL_FORM_KEYS = getSetting< FieldsLocations >(
 	'addressFieldsLocations',
 	defaultFieldsLocations
 ).additional;

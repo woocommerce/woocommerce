@@ -238,7 +238,7 @@ export const updateStorePatterns = async (
 
 		const { images } = await apiFetch< {
 			ai_content_generated: boolean;
-			images: Array< unknown >;
+			images: { images: Array< unknown >; search_term: string };
 		} >( {
 			path: '/wc/private/ai/images',
 			method: 'POST',
@@ -248,7 +248,20 @@ export const updateStorePatterns = async (
 			},
 		} );
 
-		if ( ! images.length ) {
+		const { is_ai_generated } = await apiFetch< {
+			is_ai_generated: boolean;
+		} >( {
+			path: '/wc/private/ai/store-info',
+			method: 'GET',
+		} );
+
+		if ( ! images.images.length ) {
+			if ( is_ai_generated ) {
+				throw new Error(
+					'AI content not generated: images not available'
+				);
+			}
+
 			await resetPatternsAndProducts()();
 			return;
 		}

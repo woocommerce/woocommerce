@@ -2,16 +2,15 @@
  * External dependencies
  */
 import { useState, useCallback, useEffect } from '@wordpress/element';
-import { AddressForm } from '@woocommerce/base-components/cart-checkout';
+import { Form } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import type {
-	BillingAddress,
-	AddressField,
-	AddressFields,
+	AddressFormValues,
+	FormFieldsConfig,
 } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
-import { ADDRESS_FIELDS_KEYS } from '@woocommerce/block-settings';
+import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -23,7 +22,7 @@ const CustomerAddress = ( {
 	addressFieldsConfig,
 	defaultEditing = false,
 }: {
-	addressFieldsConfig: Record< keyof AddressFields, Partial< AddressField > >;
+	addressFieldsConfig: FormFieldsConfig;
 	defaultEditing?: boolean;
 } ) => {
 	const {
@@ -59,7 +58,7 @@ const CustomerAddress = ( {
 	}, [ editing, hasValidationErrors, invalidProps.length ] );
 
 	const onChangeAddress = useCallback(
-		( values: Partial< BillingAddress > ) => {
+		( values: AddressFormValues ) => {
 			setBillingAddress( values );
 			if ( useBillingAsShipping ) {
 				setShippingAddress( values );
@@ -92,12 +91,12 @@ const CustomerAddress = ( {
 	const renderAddressFormComponent = useCallback(
 		() => (
 			<>
-				<AddressForm
+				<Form
 					id="billing"
-					type="billing"
+					addressType="billing"
 					onChange={ onChangeAddress }
 					values={ billingAddress }
-					fields={ ADDRESS_FIELDS_KEYS }
+					fields={ ADDRESS_FORM_KEYS }
 					fieldConfig={ addressFieldsConfig }
 				/>
 			</>

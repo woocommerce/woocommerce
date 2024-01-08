@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove deprecation notices of anchorRect and IsolatedEventContainer coming from HighlightTooltip component.

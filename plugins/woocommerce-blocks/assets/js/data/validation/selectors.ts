@@ -8,7 +8,7 @@ import type { State } from './reducers';
  *
  * @param { State }  state   The current state.
  * @param { string } errorId The error ID.
- * @return { string } 		The validation error.
+ * @return { string } The validation error.
  */
 export const getValidationError = ( state: State, errorId: string ) =>
 	state[ errorId ];
@@ -18,7 +18,7 @@ export const getValidationError = ( state: State, errorId: string ) =>
  *
  * @param { State }  state   The current state.
  * @param { string } errorId The error ID.
- * @return { string } 		The validation error ID.
+ * @return { string } The validation error ID.
  */
 export const getValidationErrorId = ( state: State, errorId: string ) => {
 	if ( ! state.hasOwnProperty( errorId ) || state[ errorId ].hidden ) {
