@@ -125,8 +125,8 @@ class OrderAttributionTest extends WP_UnitTestCase {
 				$this->assertEquals( '/', $args['meta']['utm_content'] ?? '' );
 				$this->assertEquals( 'referral', $args['meta']['utm_medium'] ?? '' );
 				$this->assertEquals( 'woocommerce.com', $args['meta']['utm_source'] ?? '' );
-				$this->assertEquals( 'https://woocommerce.com/', $args['meta']['url'] ?? '' );
-				$this->assertEquals( 'referral', $args['meta']['type'] ?? '' );
+				$this->assertEquals( 'https://woocommerce.com/', $args['meta']['referrer'] ?? '' );
+				$this->assertEquals( 'referral', $args['meta']['source_type'] ?? '' );
 
 				$this->assertTrue( $args['has_more_details'] );
 			},
