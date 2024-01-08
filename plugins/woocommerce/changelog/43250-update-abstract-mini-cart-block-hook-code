@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Abstract the Block Hooks logic from the Mini Cart class to the AbstractBlock class to other blocks can benefit.
+Abstract the Block Hooks logic from the Mini Cart class to its own trait class so other blocks can benefit.

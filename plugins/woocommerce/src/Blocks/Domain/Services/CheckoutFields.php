@@ -314,7 +314,11 @@ class CheckoutFields {
 			'label'          => $options['label'],
 			'hidden'         => false,
 			'type'           => $type,
-			'optionalLabel'  => empty( $options['optionalLabel'] ) ? '' : $options['optionalLabel'],
+			'optionalLabel'  => empty( $options['optionalLabel'] ) ? sprintf(
+				/* translators: %s Field label. */
+				__( '%s (optional)', 'woocommerce' ),
+				$options['label']
+			) : $options['optionalLabel'],
 			'required'       => empty( $options['required'] ) ? false : $options['required'],
 			'autocomplete'   => empty( $options['autocomplete'] ) ? '' : $options['autocomplete'],
 			'autocapitalize' => empty( $options['autocapitalize'] ) ? '' : $options['autocapitalize'],
@@ -449,6 +453,24 @@ class CheckoutFields {
 	 */
 	public function get_additional_fields_keys() {
 		return $this->fields_locations['additional'];
+	}
+
+	/**
+	 * Returns an array of fields definitions only meant for order.
+	 *
+	 * @return array An array of fields definitions.
+	 */
+	public function get_order_only_fields() {
+		// For now, all contact fields are order only fields, along with additional fields.
+		$order_fields_keys = array_merge( $this->get_contact_fields_keys(), $this->get_additional_fields_keys() );
+
+		return array_filter(
+			$this->get_additional_fields(),
+			function( $key ) use ( $order_fields_keys ) {
+				return in_array( $key, $order_fields_keys, true );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
 	}
 
 	/**

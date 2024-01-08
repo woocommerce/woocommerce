@@ -144,6 +144,7 @@ export function IncompatibleExtensionsNotice( {
 					<SwitchToClassicShortcodeButton
 						block={ block }
 						clientId={ clientId }
+						type={ 'incompatible' }
 					/>
 				</div>
 			</div>

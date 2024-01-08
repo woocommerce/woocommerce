@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
+use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 
 /**
  * Mini-Cart class.
@@ -17,6 +18,8 @@ use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
  * @internal
  */
 class MiniCart extends AbstractBlock {
+	use BlockHooksTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -85,8 +88,8 @@ class MiniCart extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
-		add_action( 'hooked_block_types', array( $this, 'register_hooked_block' ), 10, 4 );
 		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
+		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 10, 4 );
 	}
 
 	/**
