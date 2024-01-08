@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
+import { createElement, Fragment, useState } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import classNames from 'classnames';
 import { plus, reset } from '@wordpress/icons';
@@ -32,7 +32,6 @@ export type NumberProps = {
 	tooltip?: string;
 	disabled?: boolean;
 	step?: number;
-	showStepButtons?: boolean;
 };
 
 export const NumberControl: React.FC< NumberProps > = ( {
@@ -48,14 +47,25 @@ export const NumberControl: React.FC< NumberProps > = ( {
 	placeholder,
 	disabled,
 	step = 1,
-	showStepButtons = false,
 }: NumberProps ) => {
+	const id = useInstanceId( BaseControl, 'product_number_field' ) as string;
+	const [ isFocused, setIsFocused ] = useState( false );
+	const unfocusIfOutside = ( event: React.FocusEvent ) => {
+		if (
+			! document
+				.getElementById( id )
+				?.parentElement?.contains( event.relatedTarget )
+		) {
+			setIsFocused( false );
+			onBlur?.();
+		}
+	};
 	const inputProps = useNumberInputProps( {
 		value: value || '',
 		onChange,
+		onFocus: () => setIsFocused( true ),
+		onBlur: unfocusIfOutside,
 	} );
-
-	const id = useInstanceId( BaseControl, 'product_number_field' ) as string;
 
 	return (
 		<BaseControl
@@ -77,12 +87,15 @@ export const NumberControl: React.FC< NumberProps > = ( {
 				step={ step }
 				disabled={ disabled }
 				id={ id }
+				type="number"
+				className="woocommerce-number-control"
 				suffix={
 					<>
 						{ suffix }
-						{ showStepButtons && (
+						{ isFocused && (
 							<>
 								<Button
+									className="woocommerce-number-control__increment"
 									icon={ plus }
 									onClick={ () =>
 										onChange(
@@ -92,6 +105,7 @@ export const NumberControl: React.FC< NumberProps > = ( {
 											)
 										)
 									}
+									onBlur={ unfocusIfOutside }
 									isSmall
 									aria-hidden="true"
 									aria-label={ __(
@@ -102,6 +116,8 @@ export const NumberControl: React.FC< NumberProps > = ( {
 								/>
 								<Button
 									icon={ reset }
+									className="woocommerce-number-control__decrement"
+									onBlur={ unfocusIfOutside }
 									onClick={ () =>
 										onChange(
 											String(
@@ -123,7 +139,6 @@ export const NumberControl: React.FC< NumberProps > = ( {
 					</>
 				}
 				placeholder={ placeholder }
-				onBlur={ onBlur }
 			/>
 		</BaseControl>
 	);
