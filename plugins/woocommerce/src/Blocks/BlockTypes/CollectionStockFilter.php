@@ -181,6 +181,8 @@ final class CollectionStockFilter extends AbstractBlock {
 			$filtered_stock_counts
 		);
 
+		$list_items = array_values( $list_items );
+
 		$selected_items = array_values(
 			array_filter(
 				$list_items,
