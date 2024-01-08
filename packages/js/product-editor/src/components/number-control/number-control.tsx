@@ -87,7 +87,6 @@ export const NumberControl: React.FC< NumberProps > = ( {
 				step={ step }
 				disabled={ disabled }
 				id={ id }
-				type="number"
 				className="woocommerce-number-control"
 				suffix={
 					<>
