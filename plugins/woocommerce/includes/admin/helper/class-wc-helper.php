@@ -649,7 +649,9 @@ class WC_Helper {
 			return;
 		}
 
-		self::maybe_redirect_to_new_marketplace_installer();
+		if ( ! empty( $_GET['install'] ) ) {
+			self::maybe_redirect_to_new_marketplace_installer();
+		}
 
 		if ( empty( $_GET['section'] ) || 'helper' !== $_GET['section'] ) {
 			return;
@@ -688,11 +690,6 @@ class WC_Helper {
 	 * Maybe redirect to the new Marketplace installer.
 	 */
 	private static function maybe_redirect_to_new_marketplace_installer() {
-		// Redirect requires the "install" URL parameter to be passed.
-		if ( empty( $_GET['install'] ) ) {
-			return;
-		}
-
 		wp_safe_redirect(
 			self::get_helper_redirect_url(
 				array(
@@ -706,15 +703,16 @@ class WC_Helper {
 	/**
 	 * Get helper redirect URL.
 	 *
-	 * @param array  $args Query args.
+	 * @param array $args Query args.
 	 * @return string
 	 */
 	private static function get_helper_redirect_url( $args = array() ) {
 		global $current_screen;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$redirect_admin_url = isset( $_GET['redirect_admin_url'] )
-			? urldecode( $_GET['redirect_admin_url'] )
+		$redirect_admin_url  = isset( $_GET['redirect_admin_url'] )
+		// phpcs:disable-line WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			? urldecode( $_GET['redirect_admin_url'] ) // Skip sanitization to prevent urlencoded characters from being removed.
 			: '';
 		$install_product_key = isset( $_GET['install'] ) ? sanitize_text_field( wp_unslash( $_GET['install'] ) ) : '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -812,10 +810,10 @@ class WC_Helper {
 
 		$connect_url = add_query_arg(
 			array(
-				'home_url'            => rawurlencode( home_url() ),
-				'redirect_uri'        => rawurlencode( $redirect_uri ),
-				'secret'              => rawurlencode( $secret ),
-				'redirect_admin_url'  => isset( $_GET['redirect_admin_url'] ) ? rawurlencode( $_GET['redirect_admin_url'] ) : '',
+				'home_url'           => rawurlencode( home_url() ),
+				'redirect_uri'       => rawurlencode( $redirect_uri ),
+				'secret'             => rawurlencode( $secret ),
+				'redirect_admin_url' => isset( $_GET['redirect_admin_url'] ) ? rawurlencode( $_GET['redirect_admin_url'] ) : '',
 			),
 			WC_Helper_API::url( 'oauth/authorize' )
 		);
