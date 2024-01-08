@@ -61,7 +61,9 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 */
 	public function __construct() {
 		self::add_filter( 'pre_update_option_' . self::FEATURE_OPTION_NAME, array( $this, 'pre_update_option' ), 999, 2 );
+		self::add_action( 'add_option_' . self::FEATURE_OPTION_NAME, array( $this, 'process_added_option' ), 999, 2 );
 		self::add_action( 'update_option_' . self::FEATURE_OPTION_NAME, array( $this, 'process_updated_option' ), 999, 2 );
+		self::add_action( 'delete_option_' . self::FEATURE_OPTION_NAME, array( $this, 'process_deleted_option' ), 999 );
 	}
 
 	/**
@@ -175,7 +177,24 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	}
 
 	/**
-	 * Hooked onto 'updated_option' to enqueue the batch processor as needed.
+	 * Hooked onto 'add_option' to enqueue the batch processor (if needed).
+	 *
+	 * @param string $option Name of the option to add.
+	 * @param mixed  $value  Value of the option.
+	 */
+	private function process_added_option( string $option, $value ) {
+		$this->process_updated_option( false, $value );
+	}
+
+	/**
+	 * Hooked onto 'delete_option' to remove the batch processor.
+	 */
+	private function process_deleted_option() {
+		$this->process_updated_option( false, false );
+	}
+
+	/**
+	 * Hooked onto 'update_option' to enqueue the batch processor as needed.
 	 *
 	 * @param mixed $old_value Previous option value.
 	 * @param mixed $new_value New option value.
