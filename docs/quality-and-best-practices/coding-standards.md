@@ -7,7 +7,6 @@ post_title: Coding standards
 Position hooks below the function call, as this follows the common pattern in the WordPress and WooCommerce ecosystem.
 
 ### Example
-
 ```php
 /**
  * Add custom message.
