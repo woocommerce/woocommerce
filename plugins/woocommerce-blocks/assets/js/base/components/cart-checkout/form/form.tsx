@@ -138,6 +138,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					errorMessage: field.errorMessage,
 					required: field.required,
 					className: `wc-block-components-address-form__${ field.key }`,
+					...field.attributes,
 				};
 
 				if (
