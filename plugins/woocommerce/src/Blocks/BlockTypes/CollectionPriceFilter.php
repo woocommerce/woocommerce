@@ -116,6 +116,13 @@ final class CollectionPriceFilter extends AbstractBlock {
 			return '';
 		}
 
+		if (
+			empty( $block->context['collectionData'] ) ||
+			empty( $block->context['collectionData']['price_range'] )
+		) {
+			return '';
+		}
+
 		$price_range         = $block->context['collectionData']['price_range'] ?? [];
 		$min_range           = $price_range['min_price'] ?? 0;
 		$max_range           = $price_range['max_price'] ?? 0;
@@ -145,6 +152,7 @@ final class CollectionPriceFilter extends AbstractBlock {
 		);
 
 		if ( $min_range === $max_range || ! $max_range ) {
+			return '';
 			return sprintf(
 				'<div %s></div>',
 				$wrapper_attributes

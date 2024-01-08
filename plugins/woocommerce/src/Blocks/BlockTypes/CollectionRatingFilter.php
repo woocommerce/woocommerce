@@ -114,6 +114,10 @@ final class CollectionRatingFilter extends AbstractBlock {
 		$display_style = $attributes['displayStyle'] ?? 'list';
 		$show_counts   = $attributes['showCounts'] ?? false;
 
+		if ( empty( $rating_counts ) ) {
+			return '';
+		}
+
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'data-wc-interactive' => 'woocommerce/collection-rating-filter',

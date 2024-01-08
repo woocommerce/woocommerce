@@ -129,7 +129,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		// don't render if its admin, or ajax in progress.
-		if ( is_admin() || wp_doing_ajax() || empty( $attributes['attributeId'] ) ) {
+		if ( is_admin() || wp_doing_ajax() || empty( $attributes['attributeId'] || empty( $block->context['collectionData']['attribute_counts'] ) ) ) {
 			return '';
 		}
 
