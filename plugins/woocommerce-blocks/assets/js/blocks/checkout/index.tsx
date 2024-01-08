@@ -159,7 +159,7 @@ const settings = {
 				);
 			},
 		},
-		// Adds the additional information block
+		// Adds the additional information block.
 		{
 			save( { attributes }: { attributes: { className: string } } ) {
 				return (
