@@ -62,7 +62,7 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 					'wc-block-components-text-input',
 					className,
 					{
-						'is-active': isActive || value,
+						'is-active': isActive || value || rest.placeholder,
 					}
 				) }
 			>
