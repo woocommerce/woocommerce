@@ -193,9 +193,15 @@ const recordSuccessfulPluginInstallation = (
 	};
 
 	for ( const installedPlugin of installationCompletedResult.installedPlugins ) {
-		trackData[
-			'install_time_' + getPluginTrackKey( installedPlugin.plugin )
-		] = getTimeFrame( installedPlugin.installTime );
+		const pluginKey = getPluginTrackKey( installedPlugin.plugin );
+		const installTime = getTimeFrame( installedPlugin.installTime );
+		trackData[ 'install_time_' + pluginKey ] = installTime;
+
+		recordEvent( 'coreprofiler_store_extension_installed_and_activated', {
+			success: true,
+			installed_extension: pluginKey,
+			install_time: installTime,
+		} );
 	}
 
 	recordEvent(
