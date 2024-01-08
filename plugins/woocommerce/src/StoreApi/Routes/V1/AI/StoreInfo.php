@@ -2,8 +2,8 @@
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\AI;
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-use Automattic\WooCommerce\Blocks\Patterns\ProductUpdater;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\UpdateProducts;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 
 /**
@@ -60,7 +60,7 @@ class StoreInfo extends AbstractRoute {
 	 * @return bool|string|\WP_Error|\WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		$product_updater = new ProductUpdater();
+		$product_updater = new UpdateProducts();
 		$patterns        = PatternsHelper::get_patterns_ai_data_post();
 
 		$products = $product_updater->fetch_product_ids( 'dummy' );

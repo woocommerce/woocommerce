@@ -4,7 +4,7 @@ post_title: WooCommerce Git flow
 
 For core development, we use the following structure and flow.
 
-![Git Flow](https://woocommerce.files.wordpress.com/2023/10/flow-1.png)
+![Git Flow WooCommerce uses for core development](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/flow-1.png)
 
 ## Branches
 

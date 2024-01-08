@@ -26,7 +26,7 @@ On this page, we will share some guidelines to help you assess the impact degree
 - It only updates automated tests, things related to infrastructure not included in the WooCommerce release package, or other projects in the monorepo not included in the release package.
 - It only contains readme or changelog changes.
 - Fixes a low-priority bug such as a typo etc.
-- Doesn’t need to be verified in multiple environment types.
+- Doesn't need to be verified in multiple environment types.
 - Regular scheduled (not a fix release) core version bumps for the Blocks package (as testing will already be scheduled).
 - It's part of a feature that hasn't been released as a whole yet (i.e. it's behind a feature flag currently in progress).
 

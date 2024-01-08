@@ -37,7 +37,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 						'Allow selecting multiple options?',
 						'woocommerce'
 					) }
-					value={ selectType || 'multiple' }
+					value={ selectType || 'single' }
 					onChange={ ( value: string ) =>
 						setAttributes( {
 							selectType: value,

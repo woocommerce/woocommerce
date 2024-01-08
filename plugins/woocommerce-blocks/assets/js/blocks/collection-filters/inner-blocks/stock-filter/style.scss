@@ -1,10 +1,5 @@
 @import "../../../shared/styles/style";
 
-//  Import styles we need to render the checkbox list and checkbox control.
-@import "../../../../../../packages/components/checkbox-list/style";
-@import "../../../../../../packages/components/checkbox-control/style";
-
-
 .wp-block-woocommerce-stock-filter {
 	h1,
 	h2,
@@ -124,7 +119,7 @@
 }
 
 .wc-blocks-components-form-token-field-wrapper:not(.single-selection) .components-form-token-field__input-container {
-	padding: $gap-smallest 30px $gap-smallest  $gap-smaller;
+	padding: $gap-smallest 30px $gap-smallest $gap-smaller;
 
 	.components-form-token-field__token-text {
 		background-color: $white;

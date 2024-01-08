@@ -10,7 +10,7 @@ import type { ReactElement } from 'react';
 import {
 	PackageRateRenderOption,
 	TernaryFlag,
-} from '../shipping-rates-control-package';
+} from '../shipping-rates-control-package/types';
 
 export interface PackagesProps {
 	// Array of packages
