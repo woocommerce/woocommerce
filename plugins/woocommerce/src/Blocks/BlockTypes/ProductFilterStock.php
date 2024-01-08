@@ -5,16 +5,23 @@ use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 
 /**
- * CollectionStockFilter class.
+ * ProductFilterStock class.
  */
-final class CollectionStockFilter extends AbstractBlock {
+final class ProductFilterStock extends AbstractBlock {
 
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'collection-stock-filter';
+	protected $block_name = 'product-filter-stock';
+
+	/**
+	 * Interactivity namespace.
+	 *
+	 * @var string
+	 */
+	protected $interactivity_namespace = 'woocommerce/product-filter-stock';
 
 	const STOCK_STATUS_QUERY_VAR = 'filter_stock_status';
 
@@ -75,13 +82,15 @@ final class CollectionStockFilter extends AbstractBlock {
 			return $data;
 		}
 
+		$action_namespace = $this->interactivity_namespace;
+
 		$active_stock_statuses = array_map(
-			function( $status ) use ( $stock_status_options ) {
+			function( $status ) use ( $stock_status_options, $action_namespace ) {
 				return array(
 					'title'      => $stock_status_options[ $status ],
 					'attributes' => array(
-						'data-wc-on--click' => 'woocommerce/collection-stock-filter::actions.removeFilter',
-						'data-wc-context'   => 'woocommerce/collection-stock-filter::' . wp_json_encode( array( 'value' => $status ) ),
+						'data-wc-on--click' => "$action_namespace::actions.removeFilter",
+						'data-wc-context'   => "$action_namespace::" . wp_json_encode( array( 'value' => $status ) ),
 					),
 				);
 			},
@@ -169,16 +178,18 @@ final class CollectionStockFilter extends AbstractBlock {
 			return '';
 		}
 
-		$list_items = array_map(
-			function( $item ) use ( $stock_statuses, $show_counts, $selected_stock_statuses ) {
-				$label = $show_counts ? $stock_statuses[ $item['status'] ] . ' (' . $item['count'] . ')' : $stock_statuses[ $item['status'] ];
-				return array(
-					'label'   => $label,
-					'value'   => $item['status'],
-					'checked' => in_array( $item['status'], $selected_stock_statuses, true ),
-				);
-			},
-			$filtered_stock_counts
+		$list_items = array_values(
+			array_map(
+				function( $item ) use ( $stock_statuses, $show_counts, $selected_stock_statuses ) {
+					$label = $show_counts ? $stock_statuses[ $item['status'] ] . ' (' . $item['count'] . ')' : $stock_statuses[ $item['status'] ];
+					return array(
+						'label'   => $label,
+						'value'   => $item['status'],
+						'checked' => in_array( $item['status'], $selected_stock_statuses, true ),
+					);
+				},
+				$filtered_stock_counts
+			)
 		);
 
 		$selected_items = array_values(
@@ -190,7 +201,7 @@ final class CollectionStockFilter extends AbstractBlock {
 			)
 		);
 
-		$data_directive = wp_json_encode( array( 'namespace' => 'woocommerce/collection-stock-filter' ) );
+		$data_directive = wp_json_encode( array( 'namespace' => $this->interactivity_namespace ) );
 
 		ob_start();
 		?>
@@ -202,7 +213,7 @@ final class CollectionStockFilter extends AbstractBlock {
 				echo CheckboxList::render(
 					array(
 						'items'     => $list_items,
-						'on_change' => 'woocommerce/collection-stock-filter::actions.onCheckboxChange',
+						'on_change' => "{$this->interactivity_namespace}::actions.onCheckboxChange",
 					)
 				);
 				?>
@@ -214,7 +225,7 @@ final class CollectionStockFilter extends AbstractBlock {
 				echo Dropdown::render(
 					array(
 						'items'          => $list_items,
-						'action'         => 'woocommerce/collection-stock-filter::actions.onDropdownChange',
+						'action'         => "{$this->interactivity_namespace}::actions.onDropdownChange",
 						'selected_items' => $selected_items,
 						'select_type'    => $select_type,
 						'placeholder'    => $placeholder_text,

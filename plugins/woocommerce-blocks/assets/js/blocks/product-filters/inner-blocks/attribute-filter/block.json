@@ -1,14 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"name": "woocommerce/collection-attribute-filter",
+	"name": "woocommerce/product-filters-attribute",
 	"version": "1.0.0",
-	"title": "Collection Attribute Filter",
+	"title": "Product Filters: Attribute",
 	"description": "Enable customers to filter the product grid by selecting one or more attributes, such as color.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 2,
-	"ancestor": [ "woocommerce/collection-filters" ],
+	"ancestor": [ "woocommerce/product-filters" ],
 	"supports": {
 		"interactivity": true,
 		"color": {

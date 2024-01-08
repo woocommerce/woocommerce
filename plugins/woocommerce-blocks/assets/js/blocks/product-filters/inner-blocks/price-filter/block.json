@@ -1,14 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"name": "woocommerce/collection-price-filter",
+	"name": "woocommerce/product-filters-price",
 	"version": "1.0.0",
-	"title": "Collection Price Filter",
+	"title": "Product Filters: Price",
 	"description": "Enable customers to filter the product collection by choosing a price range.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 2,
-	"ancestor": [ "woocommerce/collection-filters" ],
+	"ancestor": [ "woocommerce/product-filters" ],
 	"supports": {
 		"interactivity": true
 	},

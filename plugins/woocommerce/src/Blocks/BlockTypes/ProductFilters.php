@@ -5,15 +5,22 @@ use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Package;
 
 /**
- * CollectionFilters class.
+ * Product Filters Block.
  */
-final class CollectionFilters extends AbstractBlock {
+final class ProductFilters extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'collection-filters';
+	protected $block_name = 'product-filters';
+
+	/**
+	 * Interactivity namespace.
+	 *
+	 * @var string
+	 */
+	protected $interactivity_namespace = 'woocommerce/product-filters';
 
 	/**
 	 * Cache the current response from the API.
@@ -90,7 +97,7 @@ final class CollectionFilters extends AbstractBlock {
 		$this->current_response = null;
 
 		$attributes_data = array(
-			'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-filters' ) ),
+			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->interactivity_namespace ) ),
 			'class'               => 'wc-block-collection-filters',
 		);
 

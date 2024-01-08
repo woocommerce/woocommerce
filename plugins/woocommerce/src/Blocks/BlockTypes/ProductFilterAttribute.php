@@ -5,16 +5,23 @@ use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 
 /**
- * CollectionAttributeFilter class.
+ * ProductFilterAttribute class.
  */
-final class CollectionAttributeFilter extends AbstractBlock {
+final class ProductFilterAttribute extends AbstractBlock {
 
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'collection-attribute-filter';
+	protected $block_name = 'product-filter-attribute';
+
+	/**
+	 * Interactivity namespace.
+	 *
+	 * @var string
+	 */
+	protected $interactivity_namespace = 'woocommerce/product-filter-attribute';
 
 	/**
 	 * Initialize this block type.
@@ -86,18 +93,20 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			}
 		);
 
+		$action_namespace = $this->interactivity_namespace;
+
 		foreach ( $active_product_attributes as $product_attribute ) {
 			$terms = explode( ',', get_query_var( "filter_{$product_attribute}" ) );
 
 			// Get attribute term by slug.
 			$terms = array_map(
-				function( $term ) use ( $product_attribute ) {
+				function( $term ) use ( $product_attribute, $action_namespace ) {
 					$term_object = get_term_by( 'slug', $term, "pa_{$product_attribute}" );
 					return array(
 						'title'      => $term_object->name,
 						'attributes' => array(
-							'data-wc-on--click' => 'woocommerce/collection-attribute-filter::actions.removeFilter',
-							'data-wc-context'   => 'woocommerce/collection-attribute-filter::' . wp_json_encode(
+							'data-wc-on--click' => "$action_namespace::actions.removeFilter",
+							'data-wc-context'   => "$action_namespace::" . wp_json_encode(
 								array(
 									'value'         => $term,
 									'attributeSlug' => $product_attribute,
@@ -148,7 +157,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 				'<div %s></div>',
 				get_block_wrapper_attributes(
 					array(
-						'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-attribute-filter' ) ),
+						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->interactivity_namespace ) ),
 					)
 				),
 			);
@@ -201,7 +210,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 			get_block_wrapper_attributes(
 				array(
 					'data-wc-context'     => wp_json_encode( $context ),
-					'data-wc-interactive' => wp_json_encode( array( 'namespace' => 'woocommerce/collection-attribute-filter' ) ),
+					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->interactivity_namespace ) ),
 				)
 			),
 			$content,
@@ -241,7 +250,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 		return Dropdown::render(
 			array(
 				'items'          => $list_items,
-				'action'         => 'woocommerce/collection-attribute-filter::actions.navigate',
+				'action'         => "{$this->interactivity_namespace}::actions.navigate",
 				'selected_items' => $selected_items,
 				'select_type'    => $attributes['selectType'] ?? 'multiple',
 				// translators: %s is a product attribute name.
@@ -279,7 +288,7 @@ final class CollectionAttributeFilter extends AbstractBlock {
 		return CheckboxList::render(
 			array(
 				'items'     => $list_options,
-				'on_change' => 'woocommerce/collection-attribute-filter::actions.updateProducts',
+				'on_change' => "{$this->interactivity_namespace}::actions.updateProducts",
 			)
 		);
 	}

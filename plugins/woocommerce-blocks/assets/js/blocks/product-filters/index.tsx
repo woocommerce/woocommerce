@@ -33,14 +33,14 @@ if ( isExperimentalBuild() ) {
 		},
 		variations: [
 			{
-				name: 'woocommerce/collection-filters-variant',
-				title: __( 'Collection Filters', 'woocommerce' ),
+				name: 'woocommerce/product-filters-wrapper',
+				title: __( 'Product Filters', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection.',
 					'woocommerce'
 				),
 				attributes: {
-					filterType: 'collection-filters',
+					filterType: 'product-filters',
 				},
 				icon: {
 					src: (
@@ -53,8 +53,8 @@ if ( isExperimentalBuild() ) {
 				isDefault: true,
 			},
 			{
-				name: 'woocommerce/active-filters-variant',
-				title: __( 'Active Product Filters', 'woocommerce' ),
+				name: 'woocommerce/product-filters-active-wrapper',
+				title: __( 'Product Filters: Active Filters', 'woocommerce' ),
 				description: __(
 					'Display the currently active filters.',
 					'woocommerce'
@@ -72,8 +72,8 @@ if ( isExperimentalBuild() ) {
 				},
 			},
 			{
-				name: 'woocommerce/price-filter-variant',
-				title: __( 'Filter Products by Price', 'woocommerce' ),
+				name: 'woocommerce/product-filters-price',
+				title: __( 'Product Filters: Price', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by choosing a price range.',
 					'woocommerce'
@@ -92,8 +92,8 @@ if ( isExperimentalBuild() ) {
 				},
 			},
 			{
-				name: 'woocommerce/stock-filter-variant',
-				title: __( 'Filter Products by Stock', 'woocommerce' ),
+				name: 'woocommerce/product-filters-stock-status-wrapper',
+				title: __( 'Product Filters: Stock Status', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by stock status.',
 					'woocommerce'
@@ -111,10 +111,10 @@ if ( isExperimentalBuild() ) {
 				},
 			},
 			{
-				name: 'woocommerce/attribute-filter-variant',
-				title: __( 'Filter Products by Attribute', 'woocommerce' ),
+				name: 'woocommerce/product-filters-attribute-wrapper',
+				title: __( 'Product Filters: Attribute', 'woocommerce' ),
 				description: __(
-					'Enable customers to filter the product grid by selecting one or more attributes, such as color.',
+					'Enable customers to filter the product collection by selecting one or more attributes, such as color.',
 					'woocommerce'
 				),
 				attributes: {
@@ -130,8 +130,8 @@ if ( isExperimentalBuild() ) {
 				},
 			},
 			{
-				name: 'woocommerce/rating-filter-variant',
-				title: __( 'Filter Products by Rating', 'woocommerce' ),
+				name: 'woocommerce/product-filters-rating-wrapper',
+				title: __( 'Product Filters: Rating', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by rating.',
 					'woocommerce'

@@ -24,7 +24,7 @@ const getUrl = ( activeFilters: string ) => {
 	return url.href;
 };
 
-store( 'woocommerce/collection-stock-filter', {
+store( 'woocommerce/product-filters-stock', {
 	actions: {
 		onCheckboxChange: () => {
 			const checkboxContext = getContext< CheckboxListContext >(

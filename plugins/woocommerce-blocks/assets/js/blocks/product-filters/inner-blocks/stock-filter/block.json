@@ -1,19 +1,19 @@
 {
-	"name": "woocommerce/collection-rating-filter",
+	"name": "woocommerce/product-filters-stock",
 	"version": "1.0.0",
-	"title": "Collection Rating Filter",
-	"description": "Enable customers to filter the product collection by rating.",
+	"title": "Product Filters: Stock",
+	"description": "Enable customers to filter the product collection by stock status.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [ "WooCommerce", "filter", "stock" ],
 	"supports": {
 		"interactivity": true,
+		"html": false,
+		"multiple": false,
 		"color": {
-			"background": false,
-			"text": true
+			"text": true,
+			"background": false
 		}
 	},
-	"ancestor": [ "woocommerce/collection-filters" ],
-	"usesContext": [ "collectionData" ],
 	"attributes": {
 		"className": {
 			"type": "string",
@@ -38,10 +38,12 @@
 		"queryParam": {
 			"type": "object",
 			"default": {
-				"calculate_rating_counts": "true"
+				"calculate_stock_status_counts": "true"
 			}
 		}
 	},
+	"usesContext": [ "collectionData" ],
+	"ancestor": [ "woocommerce/product-filters" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 2,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
