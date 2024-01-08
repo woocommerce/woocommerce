@@ -86,6 +86,7 @@ export const NumberControl: React.FC< NumberProps > = ( {
 				{ ...inputProps }
 				step={ step }
 				disabled={ disabled }
+				autoComplete="off"
 				id={ id }
 				className="woocommerce-number-control"
 				suffix={
