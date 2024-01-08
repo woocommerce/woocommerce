@@ -1125,8 +1125,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		/**
 		 * Filter the query used to find a matching variation within a variable product.
 		 *
+		 * @since 8.6.0
+		 *
 		 * @param  string     $query   The SQL query.
 		 * @param  WC_Product $product The variable product.
+		 *
 		 * @return string
 		 */
 		$query = apply_filters( 'woocommerce_find_matching_product_variation_query', $query, $product );
@@ -1156,10 +1159,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				/**
 				 * Filter whether it should match any value or not.
 				 *
+				 * @since 8.6.0
+				 *
 				 * @param  bool   $match_any_value The result of '' === $attribute_value.
 				 * @param  string $attribute_value The attribute value.
 				 * @param  string $attribute_key   The attribute key.
 				 * @param  int    $variation_id    The variation ID.
+				 *
 				 * @return bool
 				 */
 				$match_any_value = apply_filters( 'woocommerce_find_matching_product_variation_match_any', '' === $attribute_value, $attribute_value, $attribute_key, $variation_id );
