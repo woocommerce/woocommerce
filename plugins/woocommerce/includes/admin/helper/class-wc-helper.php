@@ -715,7 +715,11 @@ class WC_Helper {
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$redirect_admin_url = isset( $_GET['redirect_admin_url'] )
-			? urldecode( $_GET['redirect_admin_url'] )
+			? esc_url_raw(
+				wp_unslash(
+					urldecode( $_GET['redirect_admin_url'] )
+				)
+			)
 			: '';
 		$install_product_key = isset( $_GET['install'] ) ? sanitize_text_field( wp_unslash( $_GET['install'] ) ) : '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -813,10 +817,18 @@ class WC_Helper {
 
 		$connect_url = add_query_arg(
 			array(
-				'home_url'            => rawurlencode( home_url() ),
-				'redirect_uri'        => rawurlencode( $redirect_uri ),
-				'secret'              => rawurlencode( $secret ),
-				'redirect_admin_url' => isset( $_GET['redirect_admin_url'] ) ? rawurlencode( $_GET['redirect_admin_url'] ) : '',
+				'home_url'           => rawurlencode( home_url() ),
+				'redirect_uri'       => rawurlencode( $redirect_uri ),
+				'secret'             => rawurlencode( $secret ),
+				'redirect_admin_url' => isset( $_GET['redirect_admin_url'] )
+					? rawurlencode(
+						esc_url_raw(
+							wp_unslash(
+								urldecode( $_GET['redirect_admin_url'] )
+							)
+						)
+					)
+					: '',
 			),
 			WC_Helper_API::url( 'oauth/authorize' )
 		);
