@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import prepareAddressFields from '@woocommerce/base-components/cart-checkout/address-form/prepare-address-fields';
+import prepareFormFields from '@woocommerce/base-components/cart-checkout/form/prepare-form-fields';
 import { isEmail } from '@wordpress/url';
 import type {
 	CartResponseBillingAddress,
@@ -12,7 +12,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import {
 	SHIPPING_COUNTRIES,
 	SHIPPING_STATES,
-	ADDRESS_FIELDS_KEYS,
+	ADDRESS_FORM_KEYS,
 } from '@woocommerce/block-settings';
 
 /**
@@ -22,7 +22,7 @@ export const isSameAddress = < T extends ShippingAddress | BillingAddress >(
 	address1: T,
 	address2: T
 ): boolean => {
-	return ADDRESS_FIELDS_KEYS.every( ( field: string ) => {
+	return ADDRESS_FORM_KEYS.every( ( field: string ) => {
 		return address1[ field as keyof T ] === address2[ field as keyof T ];
 	} );
 };
@@ -89,14 +89,14 @@ export const emptyHiddenAddressFields = <
 >(
 	address: T
 ): T => {
-	const addressFields = prepareAddressFields(
-		ADDRESS_FIELDS_KEYS,
+	const addressForm = prepareFormFields(
+		ADDRESS_FORM_KEYS,
 		{},
 		address.country
 	);
 	const newAddress = Object.assign( {}, address ) as T;
 
-	addressFields.forEach( ( { key = '', hidden = false } ) => {
+	addressForm.forEach( ( { key = '', hidden = false } ) => {
 		if ( hidden && isValidAddressKey( key, address ) ) {
 			newAddress[ key ] = '';
 		}
@@ -156,13 +156,13 @@ export const isAddressComplete = (
 	if ( ! address.country ) {
 		return false;
 	}
-	const addressFields = prepareAddressFields(
-		ADDRESS_FIELDS_KEYS,
+	const addressForm = prepareFormFields(
+		ADDRESS_FORM_KEYS,
 		{},
 		address.country
 	);
 
-	return addressFields.every(
+	return addressForm.every(
 		( { key = '', hidden = false, required = false } ) => {
 			if ( hidden || ! required ) {
 				return true;

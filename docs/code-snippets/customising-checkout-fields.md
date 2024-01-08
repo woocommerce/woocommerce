@@ -205,7 +205,7 @@ The priority argument is set during the [add_action](https://developer.wordpress
 
 In the example below, blue text is the name of the hook we're modifying, green text is the name of our custom function, and red is the priority we set.
 
-![Setting priority for the hooked function](https://woo.com/wp-content/uploads/2012/04/priority-markup.png)
+![Setting priority for the hooked function](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/priority-markup.png)
 
 ## Examples
 
@@ -294,7 +294,7 @@ function my_custom_checkout_field_display_admin_order_meta($order){
 }
 ```
 
-![It's alive!](https://woo.com/wp-content/uploads/2012/04/WooCommerce-Codex-Shipping-Field-Hook.png)
+![adding custom sthipping and billing fields](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/Webp-to-PNG-Shipping-Field-Hook.png)
 
 It's alive!
 
@@ -332,7 +332,7 @@ function my_custom_checkout_field( $checkout ) {
 
 This gives us:
 
-![WooCommerce Codex - Checkout Field Hook](https://woo.com/wp-content/uploads/2012/04/WooCommerce-Codex-Checkout-Field-Hook.png)
+![WooCommerce Codex - Checkout Field Hook](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/WooCommerce-Codex-Checkout-Field-Hook.png)
 
 Next we need to validate the field when the checkout form is posted. For this example the field is required and not optional:
 
@@ -352,7 +352,7 @@ function my_custom_checkout_field_process() {
 
 A checkout error is displayed if the field is blank:
 
-![WooCommerce Codex - Checkout Field Notice](https://woo.com/wp-content/uploads/2012/04/WooCommerce-Codex-Checkout-Field-Notice.png)
+![WooCommerce Codex - Checkout Field Notice](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/WooCommerce-Codex-Checkout-Field-Notice.png)
 
 Finally, let's save the new field to order custom fields using the following code:
 
@@ -386,7 +386,7 @@ function my_custom_checkout_field_display_admin_order_meta( $order ){
 
 This is the result:
 
-[![checkout_field_custom_field_admin](https://woo.com/wp-content/uploads/2012/04/checkout_field_custom_field_admin.png)](https://woo.com/wp-content/uploads/2012/04/checkout_field_custom_field_admin.png)
+![checkout_field_custom_field_admin](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/checkout_field_custom_field_admin.png)
 
 ### Make phone number not required
 
