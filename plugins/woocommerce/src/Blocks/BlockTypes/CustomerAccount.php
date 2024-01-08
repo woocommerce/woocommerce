@@ -3,11 +3,14 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 
 /**
  * CustomerAccount class.
  */
 class CustomerAccount extends AbstractBlock {
+	use BlockHooksTrait;
+
 	const TEXT_ONLY   = 'text_only';
 	const ICON_ONLY   = 'icon_only';
 	const DISPLAY_ALT = 'alt';
