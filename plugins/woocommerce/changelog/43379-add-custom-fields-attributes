@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow adding attributes when registering custom checkout fields in the Checkout block.
