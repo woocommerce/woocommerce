@@ -40,6 +40,7 @@ const closeDialog = ( context: ProductGalleryContext ) => {
 	context.isDialogOpen = false;
 	// Reset the main image.
 	context.selectedImage = context.firstMainImageId;
+	document.body.classList.remove( 'modal-open' );
 };
 
 const productGallery = {
@@ -60,6 +61,7 @@ const productGallery = {
 		openDialog: () => {
 			const context = getContext();
 			context.isDialogOpen = true;
+			document.body.classList.add( 'modal-open' );
 		},
 		selectImage: () => {
 			const context = getContext();
