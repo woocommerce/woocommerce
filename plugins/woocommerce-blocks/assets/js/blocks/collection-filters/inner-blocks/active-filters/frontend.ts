@@ -7,6 +7,7 @@ import { store, getContext } from '@woocommerce/interactivity';
  * Internal dependencies
  */
 import { navigate } from '../../frontend';
+import { shouldFailLint } from '../../utils';
 
 type ActiveFiltersContext = {
 	queryId: number;
@@ -20,7 +21,7 @@ store( 'woocommerce/collection-active-filters', {
 			const url = new URL( window.location.href );
 			const { searchParams } = url;
 
-			thisShouldFail();
+			shouldFailLint();
 
 			params.forEach( ( param ) => searchParams.delete( param ) );
 			navigate( url.href );
