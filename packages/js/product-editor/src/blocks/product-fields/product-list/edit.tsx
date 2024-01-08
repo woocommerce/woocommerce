@@ -155,6 +155,7 @@ export function Edit( {
 							'Tip: Group together items that have a clear relationship or compliment each other well, e.g., garment bundles, camera kits, or skincare product sets.',
 							'woocommerce'
 						) }
+						isDismissible={ false }
 					>
 						<Shirt />
 						<Pants />
