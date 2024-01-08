@@ -333,6 +333,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 				if ( 0 === $index ) {
 					$product->set_image_id( $attachment_id );
+					wc_product_attach_featured_image( $attachment_id, $product );
 				} else {
 					$gallery[] = $attachment_id;
 				}

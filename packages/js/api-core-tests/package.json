@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
 	},
 	"scripts": {
 		"e2e": "jest",

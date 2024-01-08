@@ -82,7 +82,7 @@
 		"storybook:deploy": "rimraf ./storybook/dist/* && pnpm run storybook:build && gh-pages -d ./storybook/dist",
 		"test:js": "wireit",
 		"test:debug": "ndb .",
-		"test:e2e": "sh ./bin/check-env.sh && npx playwright test --config=tests/e2e/playwright.config.ts",
+		"test:e2e": "sh ./bin/check-env.sh && pnpm playwright test --config=tests/e2e/playwright.config.ts",
 		"test:e2e:report": "sh ./bin/check-env.sh && npx playwright test --config=tests/e2e/playwright.config.ts --reporter=html",
 		"test:e2e:side-effects": "pnpm run test:e2e -- --config=tests/e2e/playwright.side-effects.config.ts",
 		"test:e2e:side-effects:report": "pnpm run test:e2e:report -- --config=tests/e2e/playwright.side-effects.config.ts",
@@ -92,7 +92,7 @@
 		"test:e2e:jest:dev": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js",
 		"test:e2e:jest:dev-watch": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --watch",
 		"test:e2e:jest:update": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --updateSnapshot",
-		"env:start": "pnpm run wp-env start && ./tests/e2e/bin/test-env-setup.sh",
+		"env:start": "pnpm --filter='@woocommerce/block-library' wp-env start && ./tests/e2e/bin/test-env-setup.sh",
 		"env:restart": "pnpm run wp-env clean all && pnpm run wp-env start && ./tests/e2e/bin/test-env-setup.sh",
 		"env:stop": "pnpm run wp-env stop",
 		"test:help": "wp-scripts test-unit-js --help",
@@ -272,7 +272,7 @@
 	},
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.1.0",

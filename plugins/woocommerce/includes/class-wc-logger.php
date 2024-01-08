@@ -303,6 +303,11 @@ class WC_Logger implements WC_Logger_Interface {
 	 * @since 3.4.0
 	 */
 	public function clear_expired_logs() {
+		/**
+		 * Filter the retention period of log entries.
+		 *
+		 * @param int $days The number of days to retain log entries.
+		 */
 		$days      = absint( apply_filters( 'woocommerce_logger_days_to_retain_logs', 30 ) );
 		$timestamp = strtotime( "-{$days} days" );
 

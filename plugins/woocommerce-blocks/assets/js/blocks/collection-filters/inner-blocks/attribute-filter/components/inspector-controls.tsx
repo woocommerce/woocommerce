@@ -3,11 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
+import { BlockEditProps } from '@wordpress/blocks';
 import {
 	PanelBody,
 	ToggleControl,
+	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
+	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
@@ -16,9 +19,12 @@ import {
  * Internal dependencies
  */
 import { AttributeSelectControls } from './attribute-select-controls';
-import { EditProps } from '../types';
+import { BlockAttributes } from '../types';
 
-export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
+export const Inspector = ( {
+	attributes,
+	setAttributes,
+}: BlockEditProps< BlockAttributes > ) => {
 	const { attributeId, showCounts, queryType, displayStyle, selectType } =
 		attributes;
 	return (

@@ -3,7 +3,7 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\AI;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
-use Automattic\WooCommerce\Blocks\Patterns\ProductUpdater;
+use Automattic\WooCommerce\Blocks\AIContent\UpdateProducts;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 
 /**
@@ -110,7 +110,7 @@ class Products extends AbstractRoute {
 
 		$images = $request['images'];
 
-		$populate_products = ( new ProductUpdater() )->generate_content( $ai_connection, $token, $images, $business_description );
+		$populate_products = ( new UpdateProducts() )->generate_content( $ai_connection, $token, $images, $business_description );
 
 		if ( is_wp_error( $populate_products ) ) {
 			return $this->error_to_response( $populate_products );
@@ -138,7 +138,7 @@ class Products extends AbstractRoute {
 	 * @return bool|string|\WP_Error|\WP_REST_Response
 	 */
 	protected function get_route_delete_response( \WP_REST_Request $request ) {
-		( new ProductUpdater() )->reset_products_content();
+		( new UpdateProducts() )->reset_products_content();
 		return rest_ensure_response( array( 'removed' => true ) );
 	}
 }

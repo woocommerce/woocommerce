@@ -3239,4 +3239,25 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertContains( 'user@woo.test', $coupon->get_used_by( 'edit' ) );
 	}
 
+	/**
+	 * Tests that changes to certain keys don't trigger full order updates.
+	 */
+	public function test_ephemeral_meta_updates() {
+		$this->toggle_cot_authoritative( true );
+
+		// Set order in the past so that we can accurately compare dates.
+		$order = WC_Helper_Order::create_order();
+		$order->set_date_modified( time() - DAY_IN_SECONDS );
+		$order->save();
+
+		$date_modified = $order->get_date_modified();
+		$order->update_meta_data( '_edit_lock', 'whatever' );
+		$order->save_meta_data();
+		$this->assertEquals( $date_modified, $order->get_date_modified() );
+
+		$order->update_meta_data( 'other_meta', 'whatever' );
+		$order->save_meta_data();
+		$this->assertNotEquals( $date_modified, $order->get_date_modified() );
+	}
+
 }

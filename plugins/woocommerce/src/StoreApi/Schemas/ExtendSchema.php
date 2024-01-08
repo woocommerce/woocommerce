@@ -333,7 +333,7 @@ final class ExtendSchema {
 			return [
 				/* translators: %s: extension namespace */
 				'description' => sprintf( __( 'Extension data registered by %s', 'woocommerce' ), $namespace ),
-				'type'        => 'array',
+				'type'        => [ 'array', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'items'       => $schema,
 			];
@@ -341,7 +341,7 @@ final class ExtendSchema {
 		return [
 			/* translators: %s: extension namespace */
 			'description' => sprintf( __( 'Extension data registered by %s', 'woocommerce' ), $namespace ),
-			'type'        => 'object',
+			'type'        => [ 'object', 'null' ],
 			'context'     => [ 'view', 'edit' ],
 			'properties'  => $schema,
 		];

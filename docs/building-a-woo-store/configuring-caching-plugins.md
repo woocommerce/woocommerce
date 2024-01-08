@@ -4,7 +4,7 @@ post_title: Configuring caching plugins for WooCommerce
 
 ## Excluding Pages from the Cache
 
-Oftentimes if using caching plugins they’ll already exclude these pages. Otherwise make sure you exclude the following pages from the cache through your caching systems respective settings.
+Oftentimes if using caching plugins they'll already exclude these pages. Otherwise make sure you exclude the following pages from the cache through your caching systems respective settings.
 
 - Cart
 - My Account
@@ -14,7 +14,7 @@ These pages need to stay dynamic since they display information specific to the 
 
 ## Excluding WooCommerce Session from the Cache
 
-If the caching system you’re using offers database caching, it might be helpful to exclude `_wc_session_` from being cached. This will be dependent on the plugin or host caching so refer to the specific instructions or docs for that system.
+If the caching system you're using offers database caching, it might be helpful to exclude `_wc_session_` from being cached. This will be dependent on the plugin or host caching so refer to the specific instructions or docs for that system.
 
 ## Excluding WooCommerce Cookies from the Cache
 
@@ -28,21 +28,22 @@ Cookies in WooCommerce help track the products in your customers cart, can keep 
 | woocommerce_recently_viewed | session | Powers the Recent Viewed Products widget. |
 | store_notice[notice id] | session | Allows customers to dismiss the Store Notice. |
 
-We’re unable to cover all options, but we have added some tips for the popular caching plugins. For more specific support, please reach out to the support team responsible for your caching integration.
+
+We're unable to cover all options, but we have added some tips for the popular caching plugins. For more specific support, please reach out to the support team responsible for your caching integration.
 
 ### W3 Total Cache Minify Settings
 
-Ensure you add ‘mfunc’ to the ‘Ignored comment stems’ option in the Minify settings.
+Ensure you add 'mfunc' to the 'Ignored comment stems' option in the Minify settings.
 
 ### WP-Rocket
 
-WooCommerce is fully compatible with WP-Rocket. Please ensure that the following pages (Cart, Checkout, My Account) are not to be cached in the plugin’s settings.
+WooCommerce is fully compatible with WP-Rocket. Please ensure that the following pages (Cart, Checkout, My Account) are not to be cached in the plugin's settings.
 
 We recommend avoiding JavaScript file minification.
 
 ### WP Super Cache
 
-WooCommerce is natively compatible with WP Super Cache. WooCommerce sends information to WP Super Cache so that it doesn’t cache the Cart, Checkout, or My Account pages by default.
+WooCommerce is natively compatible with WP Super Cache. WooCommerce sends information to WP Super Cache so that it doesn't cache the Cart, Checkout, or My Account pages by default.
 
 ### Varnish
 
@@ -95,6 +96,6 @@ unset beresp.http.set-cookie;
 
 ### Why is my Password Reset stuck in a loop?
 
-This is due to the My Account page being cached, Some hosts with server-side caching don’t prevent my-account.php from being cached.
+This is due to the My Account page being cached, Some hosts with server-side caching don't prevent my-account.php from being cached.
 
-If you’re unable to reset your password and keep being returned to the login screen, please speak to your host to make sure this page is being excluded from their caching.
+If you're unable to reset your password and keep being returned to the login screen, please speak to your host to make sure this page is being excluded from their caching.

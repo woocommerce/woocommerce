@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+[Experimental] support passing a placeholder text to the interactivity Dropdown component.

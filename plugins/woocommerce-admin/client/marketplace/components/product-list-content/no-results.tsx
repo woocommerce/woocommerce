@@ -101,6 +101,7 @@ export default function NoResults( props: {
 							title={ productListTitle( productGroup.id ) }
 							products={ productGroup.items }
 							groupURL={ productGroup.url }
+							productGroup={ productGroup.id }
 							type={ productGroup.itemType }
 							key={ productGroup.id }
 						/>

@@ -6,17 +6,6 @@ WooCommerce 2.6 introduced an API for storing and managing payment tokens for ga
 
 This guide offers a few useful tutorials for using the new API as well as all the various methods available to you.
 
-## Table Of Contents
-
-* [Tutorials](#tutorials)
-    * [Adding Payment Token API Support To Your Gateway](#adding-payment-token-api-support-to-your-gateway)
-    * [Creating A New Token Type](#creating-a-new-token-type)
-* [Classes](#classes)
-    * [WC_Payment_Tokens](#wc_payment_tokens)
-    * [WC_Payment_Token_CC](#wc_payment_token_cc)
-    * [WC_Payment_Token_eCheck](#wc_payment_token_echeck)
-    * [WC_Payment_Token](#wc_payment_token)
-
 ## Tutorials
 
 ### Adding Payment Token API Support To Your Gateway
