@@ -308,7 +308,7 @@ class CheckoutFields {
 			'hidden'         => false,
 			'type'           => $type,
 			'optionalLabel'  => empty( $options['optionalLabel'] ) ? sprintf(
-				/* translators: %s Field label. */
+			/* translators: %s Field label. */
 				__( '%s (optional)', 'woocommerce' ),
 				$options['label']
 			) : $options['optionalLabel'],
@@ -316,6 +316,55 @@ class CheckoutFields {
 			'autocomplete'   => empty( $options['autocomplete'] ) ? '' : $options['autocomplete'],
 			'autocapitalize' => empty( $options['autocapitalize'] ) ? '' : $options['autocapitalize'],
 		);
+
+		// We check if attributes are valid. This is done to prevent too much nesting and also to allow field registration
+		// even if the attributes property is invalid. We can just skip it and register the field without attributes.
+		$has_attributes = false;
+		if ( ! empty( $options['attributes'] ) ) {
+
+			if ( ! is_array( $options['attributes'] ) || 0 === count( $options['attributes'] ) ) {
+				$message = sprintf( 'An invalid attributes value was supplied when registering field with id: "%s". %s', $id, 'Attributes must be a non-empty array.' );
+				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			}
+			$has_attributes = true;
+		}
+
+		if ( $has_attributes ) {
+
+			// These are formatted in camelCase because React components expect them that way.
+			$allowed_attributes = array(
+				'placeholder',
+				'maxLength',
+				'disabled',
+				'readOnly',
+				'pattern',
+			);
+
+			$valid_attributes = array_filter(
+				$options['attributes'],
+				function( $_, $key ) use ( $allowed_attributes ) {
+					return in_array( $key, $allowed_attributes, true );
+				},
+				ARRAY_FILTER_USE_BOTH
+			);
+
+			// Any invalid attributes should show a doing_it_wrong warning. It shouldn't stop field registration, though.
+			if ( count( $options['attributes'] ) !== count( $valid_attributes ) ) {
+				$invalid_attributes = array_diff_key( $options['attributes'], $valid_attributes );
+				$message            = sprintf( 'Invalid attribute found when registering field with id: "%s". Attributes: %s are not allowed.', $id, implode( ', ', $invalid_attributes ) );
+				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			}
+
+			// Escape attributes to remove any malicious code.
+			$cleaned_attributes = array_map(
+				function( $value ) {
+					return esc_attr( $value );
+				},
+				$valid_attributes
+			);
+
+			$field_data['attributes'] = $cleaned_attributes;
+		}
 
 		/**
 		 * Handle Checkbox fields.
