@@ -39,6 +39,10 @@
 				display: inline-block;
 			}
 
+			&:hover {
+				opacity: 1;
+			}
+
 			&.active {
 				color: inherit;
 				background: inherit;
