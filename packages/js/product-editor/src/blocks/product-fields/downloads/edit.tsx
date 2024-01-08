@@ -13,7 +13,7 @@ import {
 import { closeSmall } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { ListItem, Sortable } from '@woocommerce/components';
+import { ListItem, MediaUploader, Sortable } from '@woocommerce/components';
 import { Product, ProductDownload } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -31,6 +31,7 @@ import {
 	ManageDownloadLimitsModalProps,
 } from '../../../components/manage-download-limits-modal';
 import { EditDownloadsModal } from './edit-downloads-modal';
+import { UploadImage } from './upload-image';
 
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
@@ -249,36 +250,53 @@ export function Edit( {
 			</div>
 
 			<div className="wp-block-woocommerce-product-downloads-field__body">
-				{ ! Boolean( downloads.length ) && (
-					<div className="wp-block-woocommerce-product-downloads-field__drop-zone-content">
-						<p className="wp-block-woocommerce-product-downloads-field__drop-zone-label">
-							{ createInterpolateElement(
-								__(
-									'Supported file types: <Types /> and more. <link>View all</link>',
-									'woocommerce'
-								),
-								{
-									Types: (
-										<Fragment>
-											PNG, JPG, PDF, PPT, DOC, MP3, MP4
-										</Fragment>
-									),
-									link: (
-										// eslint-disable-next-line jsx-a11y/anchor-has-content
-										<a
-											href="https://codex.wordpress.org/Uploading_Files"
-											target="_blank"
-											rel="noreferrer"
-											onClick={ ( event ) =>
-												event.stopPropagation()
-											}
-										/>
-									),
-								}
-							) }
-						</p>
-					</div>
-				) }
+				<MediaUploader
+					label={
+						! Boolean( downloads.length ) ? (
+							<div className="wp-block-woocommerce-product-downloads-field__drop-zone-content">
+								<UploadImage />
+								<p className="wp-block-woocommerce-product-downloads-field__drop-zone-label">
+									{ createInterpolateElement(
+										__(
+											'Supported file types: <Types /> and more. <link>View all</link>',
+											'woocommerce'
+										),
+										{
+											Types: (
+												<Fragment>
+													PNG, JPG, PDF, PPT, DOC,
+													MP3, MP4
+												</Fragment>
+											),
+											link: (
+												// eslint-disable-next-line jsx-a11y/anchor-has-content
+												<a
+													href="https://codex.wordpress.org/Uploading_Files"
+													target="_blank"
+													rel="noreferrer"
+													onClick={ ( event ) =>
+														event.stopPropagation()
+													}
+												/>
+											),
+										}
+									) }
+								</p>
+							</div>
+						) : (
+							''
+						)
+					}
+					buttonText=""
+					allowedMediaTypes={ allowedTypes }
+					multipleSelect={ 'add' }
+					onUpload={ handleFileUpload }
+					onFileUploadChange={ handleFileUpload }
+					onError={ handleUploadError }
+					additionalData={ {
+						type: 'downloadable_product',
+					} }
+				/>
 
 				{ Boolean( downloads.length ) && (
 					<Sortable className="wp-block-woocommerce-product-downloads-field__table">

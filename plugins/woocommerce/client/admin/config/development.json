@@ -24,6 +24,7 @@
 		"product-virtual-downloadable": true,
 		"product-external-affiliate": true,
 		"product-grouped": true,
+		"product-linked": true,
 		"remote-inbox-notifications": true,
 		"remote-free-extensions": true,
 		"settings": false,

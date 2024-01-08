@@ -159,7 +159,7 @@ Arguments like `--context`, `--fields`, `--field`, `--format` can be used on any
 
 The `--porcelain` argument can be used on any `create` or `update` command to just get back the ID of the object, instead of a response.
 
-Updating or creating some fields will require passing JSON. These are fields that contain arrays of information — for example, setting [https://woocommerce.github.io/woocommerce-rest-api-docs/#customer-properties](billing information) using the customer command. This is just passing key/value pairs.
+Updating or creating some fields will require passing JSON. These are fields that contain arrays of information - for example, setting [https://woocommerce.github.io/woocommerce-rest-api-docs/#customer-properties](billing information) using the customer command. This is just passing key/value pairs.
 
 Example:
 

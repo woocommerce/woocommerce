@@ -127,7 +127,7 @@ final class BlockTypesController {
 		 *
 		 * @param array $allowed_namespaces List of namespaces.
 		 */
-		$allowed_namespaces = array_merge( [ 'woocommerce', 'woocommerce-checkout' ], (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_namespace', [] ) );
+		$allowed_namespaces = array_merge( array( 'woocommerce', 'woocommerce-checkout' ), (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_namespace', array() ) );
 
 		/**
 		 * Filters the list of allowed Block Names
@@ -138,17 +138,17 @@ final class BlockTypesController {
 		 *
 		 * @param array $allowed_namespaces List of namespaces.
 		 */
-		$allowed_blocks = (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_block', [] );
+		$allowed_blocks = (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_block', array() );
 
 		if ( ! in_array( $block_namespace, $allowed_namespaces, true ) && ! in_array( $block_name, $allowed_blocks, true ) ) {
 			return $content;
 		}
 
 		$attributes              = (array) $block['attrs'];
-		$exclude_attributes      = [ 'className', 'align' ];
-		$escaped_data_attributes = [
+		$exclude_attributes      = array( 'className', 'align' );
+		$escaped_data_attributes = array(
 			'data-block-name="' . esc_attr( $block['blockName'] ) . '"',
-		];
+		);
 
 		foreach ( $attributes as $key => $value ) {
 			if ( in_array( $key, $exclude_attributes, true ) ) {
@@ -215,7 +215,7 @@ final class BlockTypesController {
 	protected function get_block_types() {
 		global $pagenow;
 
-		$block_types = [
+		$block_types = array(
 			'ActiveFilters',
 			'AddToCartForm',
 			'AllProducts',
@@ -281,7 +281,7 @@ final class BlockTypesController {
 			'OrderConfirmation\BillingWrapper',
 			'OrderConfirmation\ShippingWrapper',
 			'OrderConfirmation\AdditionalInformation',
-		];
+		);
 
 		$block_types = array_merge(
 			$block_types,
@@ -300,29 +300,31 @@ final class BlockTypesController {
 			$block_types[] = 'CollectionStockFilter';
 			$block_types[] = 'CollectionPriceFilter';
 			$block_types[] = 'CollectionAttributeFilter';
+			$block_types[] = 'CollectionRatingFilter';
+			$block_types[] = 'CollectionActiveFilters';
 		}
 
 		/**
 		 * This disables specific blocks in Widget Areas by not registering them.
 		 */
-		if ( in_array( $pagenow, [ 'widgets.php', 'themes.php', 'customize.php' ], true ) && ( empty( $_GET['page'] ) || 'gutenberg-edit-site' !== $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( in_array( $pagenow, array( 'widgets.php', 'themes.php', 'customize.php' ), true ) && ( empty( $_GET['page'] ) || 'gutenberg-edit-site' !== $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$block_types = array_diff(
 				$block_types,
-				[
+				array(
 					'AllProducts',
 					'Cart',
 					'Checkout',
-				]
+				)
 			);
 		}
 
 		/**
 		 * This disables specific blocks in Post and Page editor by not registering them.
 		 */
-		if ( in_array( $pagenow, [ 'post.php', 'post-new.php' ], true ) ) {
+		if ( in_array( $pagenow, array( 'post.php', 'post-new.php' ), true ) ) {
 			$block_types = array_diff(
 				$block_types,
-				[
+				array(
 					'AddToCartForm',
 					'Breadcrumbs',
 					'CatalogSorting',
@@ -340,7 +342,7 @@ final class BlockTypesController {
 					'OrderConfirmation\BillingWrapper',
 					'OrderConfirmation\ShippingWrapper',
 					'OrderConfirmation\AdditionalInformation',
-				]
+				)
 			);
 		}
 

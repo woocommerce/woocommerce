@@ -13,7 +13,7 @@ There are various reasons why a function, method, or feature may be deprecated. 
 - We may want to standardise naming conventions.
 - We may find opportunities to merge similar functions to avoid reusing the same code in difference places.
 
-Whilst deprecation notices are not ideal or attractive, they are just _warnings_ — not errors. 
+Whilst deprecation notices are not ideal or attractive, they are just _warnings_ - not errors. 
 
 _*Store owners:* deprecation warnings do not mean your store is broken, it just serves as a reminder that code will need to be updated._
 
@@ -25,9 +25,9 @@ When we deprecate something in WooCommerce, we take a few actions to make it cle
 2. We add a warning notice using our own `wc_deprecated_function` function that shows what version, what function, and what replacement is available. More on that in a bit.
 3. We remove usage of the deprecated function throughout the codebase.
 
-The function or method itself is not removed from the codebase. This preserves backwards compatibility until removed — usually over a year or several major releases into the future.
+The function or method itself is not removed from the codebase. This preserves backwards compatibility until removed - usually over a year or several major releases into the future.
 
-We mentioned `wc_deprecated_function` above – this is our own wrapper for the `_deprecated_function` WordPress function. It works very similar except for that it forces a log entry instead of displaying it — regardless of the value of `WP_DEBUG` during AJAX events — so that AJAX requests are not broken by the notice.
+We mentioned `wc_deprecated_function` above – this is our own wrapper for the `_deprecated_function` WordPress function. It works very similar except for that it forces a log entry instead of displaying it - regardless of the value of `WP_DEBUG` during AJAX events - so that AJAX requests are not broken by the notice.
 
 ## What happens when a deprecated function is called?
 
@@ -41,7 +41,7 @@ This tells you what is deprecated, since when, where, and what replacement is av
 
 Notices and warnings are usually shown inline, but there are some plugins you can use to collect and show them nicely in the footer of your site. Consider, for example, [Query Monitor](https://wordpress.org/plugins/query-monitor/).
 
-### Warnings in production (store owners — read this!)
+### Warnings in production (store owners - read this!)
 
 Showing PHP notices and warnings (or any error for that matter) is highly discouraged on your production stores. They can reveal information about your setup that a malicious user could exploit to gain access to your store. Make sure they are hidden from public view and optionally logged instead.
 

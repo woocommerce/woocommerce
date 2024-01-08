@@ -130,7 +130,7 @@ const assignFontPairing = assign<
 				fontPairing = 'Bodoni Moda + Overpass';
 				break;
 			case choice === 'Bold':
-				fontPairing = 'Plus Jakarta Sans + Plus Jakarta Sans';
+				fontPairing = 'Rubik + Inter';
 				break;
 		}
 

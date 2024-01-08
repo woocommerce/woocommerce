@@ -281,7 +281,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	public function sanitize_cost( $value ) {
 		$value = is_null( $value ) ? '' : $value;
 		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
-		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ), wc_get_price_thousand_separator() ), '', $value );
+		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
 		// Thrown an error on the front end if the evaluate_cost will fail.
 		$dummy_cost = $this->evaluate_cost(
 			$value,
