@@ -44,7 +44,7 @@ MultipleChildren.args = {
 	),
 
 	children: (
-		<Flex justify="center">
+		<Flex justify="center" style={ { gap: '16px ' } }>
 			<Shirt />
 			<Pants />
 			<Glasses />
