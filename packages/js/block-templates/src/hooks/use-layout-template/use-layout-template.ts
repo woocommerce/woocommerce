@@ -17,8 +17,8 @@ import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 
 export const useLayoutTemplate = ( layoutTemplateId: string | undefined ) => {
 	const layoutTemplateEntity = useSelect( ( select: typeof WPSelect ) => {
-		const { getEntity } = select( 'core' );
-		return getEntity( 'root', 'wcLayoutTemplate' );
+		const { getEntityConfig } = select( 'core' );
+		return getEntityConfig( 'root', 'wcLayoutTemplate' );
 	} );
 
 	const { addEntities } = useDispatch( 'core' );
