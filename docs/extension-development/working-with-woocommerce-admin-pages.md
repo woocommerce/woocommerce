@@ -65,14 +65,15 @@ Registering a React-powered page is similar to connecting a PHP page, but with s
 ### Example: Adding a new WooCommerce Admin page
 
 ```php
-function add_extension_register_page() {
+if ( ! function_exists( 'YOUR_PREFIX_add_extension_register_page' ) ) {
+  function YOUR_PREFIX_add_extension_register_page() {
     if ( ! function_exists( 'wc_admin_register_page' ) ) {
         return;
     }
  
     wc_admin_register_page( array(
         'id'       => 'my-example-page',
-        'title'    => 'My Example Page',
+        'title'    => __( 'My Example Page', 'YOUR-TEXTDOMAIN' ),
         'parent'   => 'woocommerce',
         'path'     => '/example',
         'nav_args' => array(
@@ -80,8 +81,9 @@ function add_extension_register_page() {
             'parent' => 'woocommerce',
         ),
     ) );
+  }
 }
-add_action( 'admin_menu', 'add_extension_register_page' );
+add_action( 'admin_menu', 'YOUR_PREFIX_add_extension_register_page' );
 ```
 
 In the example above, we encapsulated our call to [`wc_admin_register_page()`](https://woocommerce.github.io/code-reference/namespaces/default.html#function_wc_admin_register_page) in a function that we have hooked to the [`admin_menu`](https://developer.wordpress.org/reference/hooks/admin_menu/) action. Once you have registered a page with the controller, you can supply a React component on the client side.
