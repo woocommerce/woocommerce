@@ -365,8 +365,8 @@ export class EditorUtils {
 
 	/**
 	 * Unlike the `insertBlock` method, which manipulates the block tree
-	 * directly, this method simluates real user behavior when trying to insert
-	 * a block to the editor by searching for block name then clicking on the
+	 * directly, this method simulates real user behavior when inserting a
+	 * block to the editor by searching for block name then clicking on the
 	 * first matching result.
 	 *
 	 * Besides, some blocks that manipulate their attributes after insertion
