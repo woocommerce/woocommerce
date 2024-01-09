@@ -163,10 +163,11 @@ const recordFailedPluginInstallations = (
 		failed_extensions: failedExtensions,
 	} );
 
-	failedExtensions.forEach( ( extension ) => {
+	_event.payload.errors.forEach( ( error: PluginInstallError ) => {
 		recordEvent( 'coreprofiler_store_extension_installed_and_activated', {
 			success: false,
-			extension,
+			extension: getPluginTrackKey( error.plugin ),
+			error_message: error.error,
 		} );
 	} );
 };
