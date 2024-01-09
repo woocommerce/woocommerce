@@ -90,6 +90,7 @@ In the example above, we encapsulated our call to [`wc_admin_register_page()`](h
 
 ```js
 import { addFilter } from '@wordpress/hooks';
+import { __ } from '@wordpress/i18n';
  
 const MyExamplePage = () => <h1>My Example Extension</h1>;
  
@@ -97,7 +98,7 @@ addFilter( 'woocommerce_admin_pages_list', 'my-namespace', ( pages ) => {
     pages.push( {
         container: MyExamplePage,
         path: '/example',
-        breadcrumbs: [ 'My Example Page' ],
+        breadcrumbs: [ __( 'My Example Page', 'YOUR-TEXTDOMAIN' ) ],
         navArgs: {
             id: 'my-example-page',
         },
