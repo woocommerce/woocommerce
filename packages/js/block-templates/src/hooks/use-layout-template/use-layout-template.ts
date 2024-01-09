@@ -39,7 +39,12 @@ export const useLayoutTemplate = ( layoutTemplateId: string | undefined ) => {
 	const { record: layoutTemplate, isResolving } = useEntityRecord(
 		'root',
 		'wcLayoutTemplate',
-		layoutTemplateId
+		layoutTemplateId,
+		// Only perform the query if we have a layout template ID; otherwise, just return null.
+		// Note: Until we are using Gutenberg 17.2, the REST API will still be triggered even
+		// when the query is disabled due to a regression. See:
+		// https://github.com/WordPress/gutenberg/pull/56108
+		{ enabled: !! layoutTemplateId }
 	);
 
 	return { layoutTemplate, isResolving };
