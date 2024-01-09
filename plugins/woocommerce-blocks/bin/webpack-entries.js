@@ -94,27 +94,27 @@ const blocks = {
 	},
 	'single-product': {},
 	'stock-filter': {},
-	'collection-filters': {
+	'product-filters': {
 		isExperimental: true,
 	},
-	'collection-stock-filter': {
+	'product-filters-stock': {
 		isExperimental: true,
-		customDir: 'collection-filters/inner-blocks/stock-filter',
+		customDir: 'product-filters/inner-blocks/stock-filter',
 	},
-	'collection-price-filter': {
-		customDir: 'collection-filters/inner-blocks/price-filter',
-		isExperimental: true,
-	},
-	'collection-attribute-filter': {
-		customDir: 'collection-filters/inner-blocks/attribute-filter',
+	'product-filters-price': {
+		customDir: 'product-filters/inner-blocks/price-filter',
 		isExperimental: true,
 	},
-	'collection-rating-filter': {
-		customDir: 'collection-filters/inner-blocks/rating-filter',
+	'product-filters-attribute': {
+		customDir: 'product-filters/inner-blocks/attribute-filter',
 		isExperimental: true,
 	},
-	'collection-active-filters': {
-		customDir: 'collection-filters/inner-blocks/active-filters',
+	'product-filters-rating': {
+		customDir: 'product-filters/inner-blocks/rating-filter',
+		isExperimental: true,
+	},
+	'product-filters-active': {
+		customDir: 'product-filters/inner-blocks/active-filters',
 		isExperimental: true,
 	},
 	'order-confirmation-summary': {
