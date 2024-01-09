@@ -26,12 +26,20 @@ End-to-end tests are powered by Playwright. The test site is spun up using `wp-e
 
 ### Running tests for the first time
 
+In the root directory, run:
+
 ```sh
 nvm use
 ```
 
 ```sh
-npm install
+pnpm install
+```
+
+Now change directory to `plugins/woocommerce-blocks/`:
+
+```sh
+cd plugins/woocommerce-blocks/
 ```
 
 ```sh
