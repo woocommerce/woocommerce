@@ -11,6 +11,10 @@
 		"property": {
 			"type": "string",
 			"__experimentalRole": "content"
+		},
+		"emptyState": {
+			"type": "object",
+			"default": {}
 		}
 	},
 	"supports": {

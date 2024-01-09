@@ -1,16 +1,20 @@
 /**
  * External dependencies
  */
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
+import { Template } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
 import { getSetting } from '@woocommerce/settings';
 import type { AttributeSetting } from '@woocommerce/types';
-import { Template } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import { EditProps, FilterType } from './types';
 import { getAllowedBlocks } from './utils';
+import Downgrade from './components/downgrade';
+import Warning from './components/warning';
+import './editor.scss';
 
 const DISALLOWED_BLOCKS = [
 	'woocommerce/filter-wrapper',
@@ -51,8 +55,18 @@ const Edit = ( props: EditProps ) => {
 
 	const blockProps = useBlockProps();
 
+	const isNested = useSelect( ( select ) => {
+		const { getBlockParentsByBlockName } = select( 'core/block-editor' );
+		return !! getBlockParentsByBlockName(
+			props.clientId,
+			'woocommerce/product-collection'
+		).length;
+	} );
+
 	return (
 		<nav { ...blockProps }>
+			{ ! isNested && <Warning /> }
+			<Downgrade clientId={ props.clientId } />
 			<InnerBlocks
 				template={ template }
 				allowedBlocks={ allowedBlocks }

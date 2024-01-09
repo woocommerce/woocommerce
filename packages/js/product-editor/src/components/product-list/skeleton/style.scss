@@ -1,0 +1,33 @@
+.woocommerce-product-list {
+	@mixin skeleton {
+		@include placeholder();
+		background-color: $gray-200;
+		border-radius: $grid-unit-05;
+	}
+
+	.skeleton {
+		@include skeleton();
+	}
+
+	[role="columnheader"] .skeleton {
+		width: $grid-unit-80;
+	}
+
+	&__product-image.skeleton {
+		width: $grid-unit-40;
+		height: $grid-unit-40;
+	}
+
+	&__product-name.skeleton {
+		width: 100px;
+	}
+
+	&__product-price.skeleton {
+		width: 80px;
+	}
+
+	&__actions .skeleton {
+		width: $grid-unit-40;
+		height: $grid-unit-40;
+	}
+}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes possible duplication of certain Tracks events when HPOS is active.

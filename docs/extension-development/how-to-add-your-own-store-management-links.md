@@ -72,4 +72,4 @@ addFilter(
 
 Here's a screen shot using our new custom store management link:
 
-![screen shot of custom store management link in wp-admin](https://i.imgur.com/yvXeSya.png)
+![screen shot of custom store management link in wp-admin](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/yvXeSya.png)

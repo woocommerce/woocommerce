@@ -7,7 +7,7 @@ import type {
 	CartShippingAddress,
 	CartBillingAddress,
 } from '@woocommerce/types';
-import { AddressFields, AddressField } from '@woocommerce/settings';
+import { FormFieldsConfig } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -23,7 +23,7 @@ const AddressCard = ( {
 	address: CartShippingAddress | CartBillingAddress;
 	onEdit: () => void;
 	target: string;
-	fieldConfig: Record< keyof AddressFields, Partial< AddressField > >;
+	fieldConfig: FormFieldsConfig;
 } ): JSX.Element | null => {
 	return (
 		<div className="wc-block-components-address-card">
