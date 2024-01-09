@@ -166,7 +166,7 @@ const recordFailedPluginInstallations = (
 	failedExtensions.forEach( ( extension ) => {
 		recordEvent( 'coreprofiler_store_extension_installed_and_activated', {
 			success: false,
-			installed_extension: extension,
+			extension,
 		} );
 	} );
 };
@@ -199,7 +199,7 @@ const recordSuccessfulPluginInstallation = (
 
 		recordEvent( 'coreprofiler_store_extension_installed_and_activated', {
 			success: true,
-			installed_extension: pluginKey,
+			extension: pluginKey,
 			install_time: installTime,
 		} );
 	}
