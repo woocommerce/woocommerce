@@ -15,6 +15,7 @@ type ApiParamError = {
 	id: string;
 	code: string;
 	message: string;
+	data?: ApiErrorResponseData;
 };
 
 /**
