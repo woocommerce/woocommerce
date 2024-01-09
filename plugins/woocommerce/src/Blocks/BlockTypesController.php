@@ -281,6 +281,7 @@ final class BlockTypesController {
 			'OrderConfirmation\BillingWrapper',
 			'OrderConfirmation\ShippingWrapper',
 			'OrderConfirmation\AdditionalInformation',
+			'OrderConfirmation\AdditionalInformationWrapper',
 		);
 
 		$block_types = array_merge(
@@ -342,6 +343,7 @@ final class BlockTypesController {
 					'OrderConfirmation\BillingWrapper',
 					'OrderConfirmation\ShippingWrapper',
 					'OrderConfirmation\AdditionalInformation',
+					'OrderConfirmation\AdditionalInformationWrapper',
 				)
 			);
 		}
