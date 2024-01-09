@@ -1,3 +1,8 @@
+---
+post_title: User Experience Guidelines - Settings
+menu_title: Settings
+---
+
 # Settings
 
 **Make extension settings easy to understand.** Only include settings options that are crucial to the overall functionality of the product.

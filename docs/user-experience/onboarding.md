@@ -1,5 +1,6 @@
 ---
-post_title: Onboarding
+post_title: User Experience Guidelines - Onboarding
+menu_title: Onboarding
 ---
 
 ## Onboarding
@@ -12,13 +13,8 @@ The first experience your users have with your extension is crucial. A user act
 
 - Use the standard WordPress notice format and WooCommerce admin notices API.
 - Notices should be dismissible. Users should always have a clear way to close the notice.
-<<<<<<< HEAD
 - Keep the post-activation notice with the WordPress plugin area in context of the plugin listing—do not display it on the dashboard, or any other parts of the platform.
 - Don't display more than one notice.
-=======
-- Keep the post-activation notice with the WordPress plugin area in context of the plugin listing-do not display it on the dashboard, or any other parts of the platform.
-- Don’t display more than one notice.
->>>>>>> trunk
 - Try to keep the notice copy between 125 to 200 characters.
 
 If no action is required for setup it's best to rely on other onboarding aids such as the Task List (link to component) and Inbox (link to component) to help users discover features and use your plugin.
