@@ -46,7 +46,7 @@ function getWordPressVersions(): Promise< StableCheckResponse > {
 }
 
 /**
- * Uses the WordPress API to get the downlod URL to the latest version of an X.X version line. This
+ * Uses the WordPress API to get the download URL to the latest version of an X.X version line. This
  * also accepts "latest-X" to get an offset from the latest version of WordPress.
  *
  * @param {string} wpVersion The version of WordPress to look for.
