@@ -9,7 +9,7 @@ $card-border-width: 2px;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-
+	gap: $gap;
 
 	&__header {
 		display: flex;
@@ -20,15 +20,12 @@ $card-border-width: 2px;
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		padding: 0 0 $gap;
 	}
 
 	&__footer {
 		text-align: center;
 		font-weight: 400;
 		color: $gray-700;
-		border-top: 0;
-		padding: 0 0 $gap;
 	}
 
 	&.is-dismissible {
