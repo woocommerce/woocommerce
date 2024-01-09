@@ -16,7 +16,6 @@ const Edit = (): JSX.Element => {
 
 	return (
 		<div { ...blockProps }>
-			<Skeleton tag="h3" numberOfLines={ 1 } maxWidth="25%" />
 			<Skeleton numberOfLines={ 3 } />
 		</div>
 	);
