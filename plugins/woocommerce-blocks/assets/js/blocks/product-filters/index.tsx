@@ -72,7 +72,7 @@ if ( isExperimentalBuild() ) {
 				},
 			},
 			{
-				name: 'woocommerce/product-filters-price',
+				name: 'woocommerce/product-filters-price-wrapper',
 				title: __( 'Product Filters: Price', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by choosing a price range.',
