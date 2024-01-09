@@ -2558,7 +2558,6 @@ FROM $order_meta_table
 			$r_order = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
 			$this->maybe_backfill_post_record( $r_order );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
-			$this->maybe_cleanup_post_record( $order );
 		}
 
 		return $changes;
@@ -2584,25 +2583,6 @@ FROM $order_meta_table
 	private function maybe_backfill_post_record( $order ) {
 		if ( $this->should_backfill_post_record() ) {
 			$this->backfill_post_record( $order );
-		}
-	}
-
-	/**
-	 * Removes legacy data for an order (if legacy cleanup is enabled).
-	 *
-	 * @param \WC_Order $order The order object.
-	 *
-	 * @since 8.6.0
-	 */
-	private function maybe_cleanup_post_record( &$order ) {
-		$cleanup = wc_get_container()->get( LegacyDataCleanup::class );
-		if ( ! $cleanup->is_enabled() ) {
-			return;
-		}
-
-		try {
-			$cleanup->process_batch( array( $order->get_id() ) );
-		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- this order (and the associated error) will be picked up by the cleanup process eventually.
 		}
 	}
 
