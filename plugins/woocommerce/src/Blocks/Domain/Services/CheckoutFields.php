@@ -474,6 +474,40 @@ class CheckoutFields {
 	}
 
 	/**
+	 * Validate an additional field against any custom validation rules. The result should be a WP_Error or true.
+	 *
+	 * @param true|\WP_Error $result       The current result of validating the field against the schema (before any custom validation has been applied).
+	 * @param string         $key          The key of the field.
+	 * @param mixed          $field_value  The value of the field.
+	 * @param array          $field_schema The schema of the field.
+	 *
+	 * @since 8.6.0
+	 */
+	public function validate_field( $result, $key, $field_value, $field_schema ) {
+
+		/**
+		 * Filter the result of validating an additional field.
+		 *
+		 * @param true|\WP_Error $result       The current result of validating the field.
+		 * @param mixed          $field_value  The value of the field.
+		 * @param array          $field_schema The schema of the field.
+		 * @param string         $key          The key of the field.
+		 *
+		 * @since 8.6.0
+		 */
+		$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, $result, $field_value, $field_schema, $key );
+
+		if ( is_wp_error( $filtered_result ) || true === $filtered_result ) {
+			return $filtered_result;
+		}
+
+		// Show a warning and return the original result from schema validation if the filter returns something unexpected.
+		_doing_it_wrong( 'woocommerce_blocks_validate_additional_field_' . $key, 'The filter should return a WP_Error or true.', '8.6.0' );
+		return $result;
+
+	}
+
+	/**
 	 * Update the default locale with additional fields without country limitations.
 	 *
 	 * @param array $locale The locale to update.
