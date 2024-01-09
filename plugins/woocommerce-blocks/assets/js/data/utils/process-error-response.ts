@@ -109,6 +109,21 @@ const getErrorContextFromParam = ( param: string ): string | undefined => {
 };
 
 /**
+ * Gets appropriate error context from additional field location.
+ */
+const getErrorContextFromAdditionalFieldLocation = (
+	location: string
+): string | undefined => {
+	switch ( location ) {
+		case 'contact':
+			return noticeContexts.CONTACT_INFORMATION;
+
+		default:
+			return undefined;
+	}
+};
+
+/**
  * Processes the response for an invalid param error, with response code rest_invalid_param.
  */
 const processInvalidParamResponse = (
