@@ -1185,7 +1185,7 @@ function wc_create_order_note( $order_id, $note, $is_customer_note = false, $add
 function wc_delete_order_note( $note_id ) {
 	$delete = wp_delete_comment( $note_id, true );
 
-	if($delete) {
+	if ( $delete ) {
 		/**
 		 * Action hook fired after an order note is deleted.
 		 *
