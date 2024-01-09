@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment, useState } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	useEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import classNames from 'classnames';
 import { plus, reset } from '@wordpress/icons';
@@ -67,6 +73,26 @@ export const NumberControl: React.FC< NumberProps > = ( {
 		onBlur: unfocusIfOutside,
 	} );
 
+	const [ increment, setIncrement ] = useState( 0 );
+
+	const timeoutRef = useRef< number | null >( null );
+
+	const incrementValue = () =>
+		onChange( String( parseFloat( value || '0' ) + increment ) );
+
+	useEffect( () => {
+		if ( increment !== 0 ) {
+			timeoutRef.current = setTimeout( incrementValue, 100 );
+		} else if ( timeoutRef.current ) {
+			clearTimeout( timeoutRef.current );
+		}
+		return () => {
+			if ( timeoutRef.current ) {
+				clearTimeout( timeoutRef.current );
+			}
+		};
+	}, [ increment, value ] );
+
 	return (
 		<BaseControl
 			className={ classNames( {
@@ -97,14 +123,16 @@ export const NumberControl: React.FC< NumberProps > = ( {
 								<Button
 									className="woocommerce-number-control__increment"
 									icon={ plus }
-									onClick={ () =>
+									onMouseDown={ () => {
 										onChange(
 											String(
 												parseFloat( value || '0' ) +
 													step
 											)
-										)
-									}
+										);
+										setIncrement( step );
+									} }
+									onMouseUp={ () => setIncrement( 0 ) }
 									onBlur={ unfocusIfOutside }
 									isSmall
 									aria-hidden="true"
@@ -118,14 +146,16 @@ export const NumberControl: React.FC< NumberProps > = ( {
 									icon={ reset }
 									className="woocommerce-number-control__decrement"
 									onBlur={ unfocusIfOutside }
-									onClick={ () =>
+									onMouseDown={ () => {
 										onChange(
 											String(
 												parseFloat( value || '0' ) -
 													step
 											)
-										)
-									}
+										);
+										setIncrement( -step );
+									} }
+									onMouseUp={ () => setIncrement( 0 ) }
 									isSmall
 									aria-hidden="true"
 									aria-label={ __(
