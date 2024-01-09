@@ -175,10 +175,6 @@ class Marketing {
 
 		// Overview should be first.
 		$overview_key = array_search( 'Overview', array_column( $marketing_submenu, self::SUBMENU_NAME_KEY ), true );
-		if ( false !== $overview_key ) {
-			$new_menu_order[] = $marketing_submenu[ $overview_key ];
-			array_splice( $marketing_submenu, $overview_key, 1 );
-		}
 
 		if ( false === $overview_key ) {
 			/*
@@ -186,18 +182,15 @@ class Marketing {
 			 * We can use a fallback and try to find the overview page by its path.
 			 */
 			$overview_key = array_search( 'admin.php?page=wc-admin&path=/marketing', array_column( $marketing_submenu, self::SUBMENU_LOCATION_KEY ), true );
-			if ( false !== $overview_key ) {
-				$new_menu_order[] = $marketing_submenu[ $overview_key ];
-				array_splice( $marketing_submenu, $overview_key, 1 );
-			}
+		}
+
+		if ( false !== $overview_key ) {
+			$new_menu_order[] = $marketing_submenu[ $overview_key ];
+			array_splice( $marketing_submenu, $overview_key, 1 );
 		}
 
 		// Coupons should be second.
 		$coupons_key = array_search( 'Coupons', array_column( $marketing_submenu, self::SUBMENU_NAME_KEY ), true );
-		if ( false !== $coupons_key ) {
-			$new_menu_order[] = $marketing_submenu[ $coupons_key ];
-			array_splice( $marketing_submenu, $coupons_key, 1 );
-		}
 
 		if ( false === $coupons_key ) {
 			/*
@@ -205,11 +198,19 @@ class Marketing {
 			 * We can use a fallback and try to find the coupons page by its path.
 			 */
 			$coupons_key = array_search( 'edit.php?post_type=shop_coupon', array_column( $marketing_submenu, self::SUBMENU_LOCATION_KEY ), true );
-			if ( false !== $coupons_key ) {
-				$new_menu_order[] = $marketing_submenu[ $coupons_key ];
-				array_splice( $marketing_submenu, $coupons_key, 1 );
-			}
 		}
+
+		if ( false !== $coupons_key ) {
+			$new_menu_order[] = $marketing_submenu[ $coupons_key ];
+			array_splice( $marketing_submenu, $coupons_key, 1 );
+		}
+
+
+		if ( false !== $coupons_key ) {
+			$new_menu_order[] = $marketing_submenu[ $coupons_key ];
+			array_splice( $marketing_submenu, $coupons_key, 1 );
+		}
+
 
 		// Sort the rest of the items alphabetically.
 		usort(
