@@ -37,6 +37,7 @@
 		}
 	},
 	"providesContext": {
+		"id": "id",
 		"queryId": "queryId",
 		"query": "query",
 		"displayLayout": "displayLayout"
