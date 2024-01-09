@@ -1,5 +1,5 @@
 ---
-post_title: User Experience Guidelines - Task list and inbox
+post_title: User Experience Guidelines - Task List and Inbox
 menu_title: Task list and inbox
 ---
 
