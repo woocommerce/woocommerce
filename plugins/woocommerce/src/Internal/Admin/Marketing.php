@@ -205,13 +205,6 @@ class Marketing {
 			array_splice( $marketing_submenu, $coupons_key, 1 );
 		}
 
-
-		if ( false !== $coupons_key ) {
-			$new_menu_order[] = $marketing_submenu[ $coupons_key ];
-			array_splice( $marketing_submenu, $coupons_key, 1 );
-		}
-
-
 		// Sort the rest of the items alphabetically.
 		usort(
 			$marketing_submenu,
