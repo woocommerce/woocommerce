@@ -455,7 +455,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$customer_order = new \WC_Order();
 		$customer_order->set_billing_first_name( 'Customer name' );
 		$customer_order->set_billing_email( 'customer@woo.test' );
-		$customer_order->set_status('completed' );
+		$customer_order->set_status( 'completed' );
 		$customer_order->save();
 
 		$test_product = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Product name' ) );

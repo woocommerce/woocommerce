@@ -39,17 +39,19 @@ class OrdersTableSearchQuery {
 	 * @param OrdersTableQuery $query The order query object.
 	 */
 	public function __construct( OrdersTableQuery $query ) {
-		$this->query       = $query;
-		$this->search_term = urldecode( $query->get( 's' ) );
+		$this->query          = $query;
+		$this->search_term    = urldecode( $query->get( 's' ) );
 		$this->search_filters = $this->sanitize_search_filters( urldecode( $query->get( 'search_filter' ) ) );
 	}
 
 	/**
 	 * Sanitize search filter param.
 	 *
+	 * @param string $search_filter Search filter param.
+	 *
 	 * @return array Array of search filters.
 	 */
-	private function sanitize_search_filters( $search_filter ) : array {
+	private function sanitize_search_filters( string $search_filter ) : array {
 		$available_filters = array(
 			'customers', // customers also searches in meta.
 			'products',
@@ -130,7 +132,6 @@ class OrdersTableSearchQuery {
 		$possible_order_id = (string) absint( $this->search_term );
 		$order_table       = $this->query->get_table_name( 'orders' );
 
-
 		// Support the passing of an order ID as the search term.
 		if ( (string) $this->query->get( 's' ) === $possible_order_id ) {
 			$where[] = "`$order_table`.id = $possible_order_id";
@@ -157,14 +158,14 @@ class OrdersTableSearchQuery {
 
 		$order_table = $this->query->get_table_name( 'orders' );
 
-		if( 'products' === $search_filter ) {
+		if ( 'products' === $search_filter ) {
 			return $wpdb->prepare(
 				'search_query_items.order_item_name LIKE %s',
 				'%' . $wpdb->esc_like( $this->search_term ) . '%'
 			);
 		}
 
-		if( 'customers' === $search_filter ) {
+		if ( 'customers' === $search_filter ) {
 			$meta_sub_query = $this->generate_where_for_meta_table();
 			return "`$order_table`.id IN ( $meta_sub_query ) ";
 		}
@@ -185,10 +186,11 @@ class OrdersTableSearchQuery {
 		$meta_table  = $this->query->get_table_name( 'meta' );
 		$meta_fields = $this->get_meta_fields_to_be_searched();
 
-		if ( $meta_fields === '' ) {
+		if ( '' === $meta_fields ) {
 			return '-1';
 		}
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $meta_fields is already escaped before imploding, $meta_table is hardcoded.
 		return $wpdb->prepare(
 			"
 SELECT search_query_meta.order_id
@@ -199,6 +201,7 @@ GROUP BY search_query_meta.order_id
 ",
 			'%' . $wpdb->esc_like( $this->search_term ) . '%'
 		);
+		// phpcs:enable
 	}
 
 	/**

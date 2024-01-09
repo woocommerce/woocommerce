@@ -534,7 +534,7 @@ class ListTable extends WP_List_Table {
 		}
 
 		$filter = trim( sanitize_text_field( $this->request['search-filter'] ) );
-		if( ! empty( $filter ) ) {
+		if ( ! empty( $filter ) ) {
 			$this->order_query_args['search_filter'] = $filter;
 		}
 	}
@@ -728,7 +728,7 @@ class ListTable extends WP_List_Table {
 		global $wpdb;
 
 		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
-		$utc_offset = wc_timezone_offset();
+		$utc_offset   = wc_timezone_offset();
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$order_dates = $wpdb->get_results(
@@ -1352,7 +1352,7 @@ class ListTable extends WP_List_Table {
 	 * @return int Number of orders that were trashed.
 	 */
 	private function do_delete( array $ids, bool $force_delete = false ): int {
-		$changed      = 0;
+		$changed = 0;
 
 		foreach ( $ids as $id ) {
 			$order = wc_get_order( $id );
@@ -1544,6 +1544,7 @@ class ListTable extends WP_List_Table {
 
 	/**
 	 * Renders the search box with various options to limit order search results.
+	 *
 	 * @param string $text The search button text.
 	 * @param string $input_id The search input ID.
 	 *
@@ -1557,20 +1558,14 @@ class ListTable extends WP_List_Table {
 		$input_id = $input_id . '-search-input';
 
 		if ( ! empty( $_REQUEST['orderby'] ) ) {
-			echo '<input type="hidden" name="orderby" value="' . esc_attr( $_REQUEST['orderby'] ) . '" />';
+			echo '<input type="hidden" name="orderby" value="' . esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) ) ) . '" />';
 		}
 		if ( ! empty( $_REQUEST['order'] ) ) {
-			echo '<input type="hidden" name="order" value="' . esc_attr( $_REQUEST['order'] ) . '" />';
-		}
-		if ( ! empty( $_REQUEST['post_mime_type'] ) ) {
-			echo '<input type="hidden" name="post_mime_type" value="' . esc_attr( $_REQUEST['post_mime_type'] ) . '" />';
-		}
-		if ( ! empty( $_REQUEST['detached'] ) ) {
-			echo '<input type="hidden" name="detached" value="' . esc_attr( $_REQUEST['detached'] ) . '" />';
+			echo '<input type="hidden" name="order" value="' . esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) ) . '" />';
 		}
 		?>
 		<p class="search-box">
-			<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo $text; ?>:</label>
+			<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo esc_html( $text ); ?>:</label>
 			<input type="search" id="<?php echo esc_attr( $input_id ); ?>" name="s" value="<?php _admin_search_query(); ?>" />
 			<?php $this->search_filter(); ?>
 			<?php submit_button( $text, '', '', false, array( 'id' => 'search-submit' ) ); ?>
@@ -1589,10 +1584,11 @@ class ListTable extends WP_List_Table {
 			'products'  => __( 'Products', 'woocommerce' ),
 			'all'       => __( 'All', 'woocommerce' ),
 		);
-?>
+		?>
 		<select name="search-filter" id="order-search-filter">
 			<?php foreach ( $options as $value => $label ) { ?>
-				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, $_REQUEST['search-filter'] ?? 'all' ); ?>><?php echo esc_html( $label ); ?></option>
-			<?php }
+				<option value="<?php echo esc_attr( wp_unslash( sanitize_text_field( $value ) ) ); ?>" <?php selected( $value, sanitize_text_field( wp_unslash( $_REQUEST['search-filter'] ?? 'all' ) ) ); ?>><?php echo esc_html( $label ); ?></option>
+				<?php
+			}
 	}
 }
