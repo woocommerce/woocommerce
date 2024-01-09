@@ -459,6 +459,21 @@ class CheckoutFields {
 	}
 
 	/**
+	 * Gets the location of a field.
+	 *
+	 * @param string $field_key The key of the field to get the location for.
+	 * @return string The location of the field.
+	 */
+	public function get_field_location( $field_key ) {
+		foreach ( $this->fields_locations as $location => $fields ) {
+			if ( in_array( $field_key, $fields, true ) ) {
+				return $location;
+			}
+		}
+		return '';
+	}
+
+	/**
 	 * Update the default locale with additional fields without country limitations.
 	 *
 	 * @param array $locale The locale to update.
