@@ -42,7 +42,12 @@ export const getErrorDetails = (
 			acc,
 			[
 				param,
-				{ code, message, additional_errors: additionalErrors = [] },
+				{
+					code,
+					message,
+					additional_errors: additionalErrors = [],
+					data,
+				},
 			]
 		) => {
 			return [
@@ -52,6 +57,7 @@ export const getErrorDetails = (
 					id: `${ param }_${ code }`,
 					code,
 					message: decodeEntities( message ),
+					data,
 				},
 				...( Array.isArray( additionalErrors )
 					? additionalErrors.flatMap( ( additionalError ) => {
