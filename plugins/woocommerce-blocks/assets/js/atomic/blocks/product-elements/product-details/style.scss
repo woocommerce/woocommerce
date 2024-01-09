@@ -1,7 +1,12 @@
 /*
  * Minimal style.
+ *
+ * We need this selector to work in both the editor and the front-end context, and
+ * to be specific enough to override core's rules being at specificity (0,4,3) `.woocommerce div.product .woocommerce-tabs ul.tabs li`.
+ *
+ * This is why we use the `html body` selector which set the specificity to (0,4,4).
  */
-body .wp-block-woocommerce-product-details.is-style-minimal {
+html body .wp-block-woocommerce-product-details.is-style-minimal {
 	ul.tabs.wc-tabs {
 		padding: 0;
 		border-bottom-width: 0;
