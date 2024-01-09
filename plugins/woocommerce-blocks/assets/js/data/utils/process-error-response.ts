@@ -7,6 +7,9 @@ import {
 	objectHasProp,
 	ApiErrorResponse,
 	isApiErrorResponse,
+	ApiErrorResponseData,
+	isObject,
+	isString,
 } from '@woocommerce/types';
 import { noticeContexts } from '@woocommerce/base-context/event-emit/utils';
 
@@ -139,11 +142,25 @@ const processInvalidParamResponse = (
 ) => {
 	const errorDetails = getErrorDetails( response );
 
-	errorDetails.forEach( ( { code, message, id, param } ) => {
+	errorDetails.forEach( ( { code, message, id, param, data } ) => {
+		let additionalFieldContext: string | undefined = '';
+		// Check if this error response comes from an additional field.
+		if (
+			isObject( data ) &&
+			objectHasProp( data, 'key' ) &&
+			objectHasProp( data, 'location' ) &&
+			isString( data.location )
+		) {
+			additionalFieldContext = getErrorContextFromAdditionalFieldLocation(
+				data.location
+			);
+		}
+
 		createNotice( 'error', message, {
 			id,
 			context:
 				context ||
+				additionalFieldContext ||
 				getErrorContextFromParam( param ) ||
 				getErrorContextFromCode( code ),
 		} );
