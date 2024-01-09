@@ -193,6 +193,9 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			);
 		}
 
+		// Get additional field keys here as we need to know if they are present in the address for validation.
+		$additional_keys = array_keys( $this->get_additional_address_fields_schema() );
+
 		foreach ( array_keys( $address ) as $key ) {
 
 			// Skip email here it will be validated in BillingAddressSchema.
@@ -210,6 +213,12 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			}
 
 			$result = rest_validate_value_from_schema( $address[ $key ], $properties[ $key ], $key );
+
+			// Check if a field is in the list of additional fields then validate the value against the custom validation rules defined for it.
+			if ( in_array( $key, $additional_keys, true ) ) {
+				$result = $this->additional_fields_controller->validate_field( $result, $key, $address[ $key ], $properties[ $key ] );
+			}
+
 			if ( is_wp_error( $result ) ) {
 				$errors->add( $result->get_error_code(), $result->get_error_message() );
 			}
