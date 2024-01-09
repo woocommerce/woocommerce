@@ -61,7 +61,9 @@ const productGallery = {
 		openDialog: () => {
 			const context = getContext();
 			context.isDialogOpen = true;
-			document.body.classList.add( 'modal-open' );
+			document.body.classList.add(
+				'wc-block-product-gallery-modal-open'
+			);
 		},
 		selectImage: () => {
 			const context = getContext();
