@@ -8,17 +8,15 @@ export type NumberInputProps = {
 	value: string;
 	onChange: ( value: string ) => void;
 	onFocus: ( event: React.FocusEvent< HTMLInputElement > ) => void;
-	onBlur: ( event: React.FocusEvent ) => void;
 	onKeyDown: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
+	onKeyUp: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 };
 
 type Props = {
 	value: string;
 	onChange: ( value: string ) => void;
 	onFocus?: ( event: React.FocusEvent< HTMLInputElement > ) => void;
-	onKeyUp?: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 	onKeyDown?: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
-	onBlur?: ( event: React.FocusEvent ) => void;
 };
 
 export const useNumberInputProps = ( {
@@ -26,7 +24,6 @@ export const useNumberInputProps = ( {
 	onChange,
 	onFocus,
 	onKeyDown,
-	onBlur,
 }: Props ) => {
 	const { formatNumber, parseNumber } = useProductHelper();
 
@@ -38,9 +35,9 @@ export const useNumberInputProps = ( {
 				onFocus( event );
 			}
 		},
-		onBlur( event ) {
-			if ( onBlur ) {
-				onBlur( event );
+		onKeyUp( event: React.KeyboardEvent< HTMLInputElement > ) {
+			if ( event.code === 'ArrowUp' || event.code === 'ArrowDown' ) {
+				event.preventDefault();
 			}
 		},
 		onKeyDown( event: React.KeyboardEvent< HTMLInputElement > ) {
