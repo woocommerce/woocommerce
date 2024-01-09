@@ -58,7 +58,6 @@ To register a React-powered page, use the [`wc_admin_register_page()`](https://w
 * `nav_args` (_optional_) — An array of parameters for registering items in WooCommerce Navigation. (see usage below)
     * `order` – Order number for presentation.
     * `parent` – Menu for item to fall under. For example: `woocommerce`, `woocommerce-settings` or `woocommerce-analytics`. Categories added by an extension are available as well.
-    * `parentPath` - The path to the parent page (the `path` value of the query arg for the parent page's url) to highlight in the menu when this page is active. This is useful for pages that are not direct children of a WooCommerce menu item.
 
 Registering a React-powered page is similar to connecting a PHP page, but with some key differences. Registering pages will automatically create WordPress menu items for them, with the appropriate hierarchy based on the value of `parent`.
 
@@ -101,6 +100,7 @@ addFilter( 'woocommerce_admin_pages_list', 'my-namespace', ( pages ) => {
         breadcrumbs: [ __( 'My Example Page', 'YOUR-TEXTDOMAIN' ) ],
         navArgs: {
             id: 'my-example-page',
+            parentPath: '/other-example',
         },
     } );
  
@@ -111,6 +111,8 @@ addFilter( 'woocommerce_admin_pages_list', 'my-namespace', ( pages ) => {
 Above, we’re creating a simple [functional React component](https://reactjs.org/docs/components-and-props.html#function-and-class-components) for the sake of demonstration, but a real-world extension would likely have a more complex nesting of components.
 
 When supplying a component to the list of WooCommerce Admin Pages, it’s important to make sure that the value you specify for `navArgs.id` matches the `id` for the page you register with `PageController` in your call to [`wc_admin_register_page()`](https://woocommerce.github.io/code-reference/namespaces/default.html#function_wc_admin_register_page).
+
+Pass the path to the parent page (the `path` value of the query arg for the parent page's url) as `navArgs.parentPath` to highlight that parent page's menu when this page is active.
 
 ## Further reading
 
