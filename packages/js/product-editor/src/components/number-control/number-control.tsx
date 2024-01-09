@@ -70,7 +70,6 @@ export const NumberControl: React.FC< NumberProps > = ( {
 		value: value || '',
 		onChange,
 		onFocus: () => setIsFocused( true ),
-		onBlur: unfocusIfOutside,
 	} );
 
 	const [ increment, setIncrement ] = useState( 0 );
@@ -169,6 +168,7 @@ export const NumberControl: React.FC< NumberProps > = ( {
 					</>
 				}
 				placeholder={ placeholder }
+				onBlur={ unfocusIfOutside }
 			/>
 		</BaseControl>
 	);
