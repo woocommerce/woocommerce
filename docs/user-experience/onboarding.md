@@ -1,5 +1,6 @@
 ---
-post_title: Onboarding
+post_title: User Experience Guidelines - Onboarding
+menu_title: Onboarding
 ---
 
 ## Onboarding

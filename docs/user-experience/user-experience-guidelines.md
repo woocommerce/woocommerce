@@ -1,5 +1,5 @@
 ---
-post_title: User experience guidelines
+post_title: User Experience Guidelines
 ---
 
 This guide covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.
