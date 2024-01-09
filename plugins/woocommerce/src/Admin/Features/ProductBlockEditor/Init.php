@@ -62,7 +62,7 @@ class Init {
 			array_push( $this->supported_product_types, 'grouped' );
 		}
 
-		$this->redirection_controller = new RedirectionController( $this->supported_product_types );
+		$this->redirection_controller = new RedirectionController();
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {

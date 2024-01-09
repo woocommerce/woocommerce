@@ -12,14 +12,6 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
  * Handle redirecting to the old or new editor based on features and support.
  */
 class RedirectionController {
-
-	/**
-	 * Supported product types.
-	 *
-	 * @var array
-	 */
-	private $supported_product_types;
-
 	/**
 	 * Registered product templates.
 	 *
@@ -29,12 +21,8 @@ class RedirectionController {
 
 	/**
 	 * Set up the hooks used for redirection.
-	 *
-	 * @param array $supported_product_types Array of supported product types.
 	 */
-	public function __construct( $supported_product_types ) {
-		$this->supported_product_types = $supported_product_types;
-
+	public function __construct() {
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			add_action( 'current_screen', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
 			add_action( 'current_screen', array( $this, 'redirect_non_supported_product_types' ), 30, 0 );
