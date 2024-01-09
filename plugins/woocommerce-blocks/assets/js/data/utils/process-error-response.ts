@@ -117,7 +117,8 @@ const getErrorContextFromAdditionalFieldLocation = (
 	switch ( location ) {
 		case 'contact':
 			return noticeContexts.CONTACT_INFORMATION;
-
+		case 'additional':
+			return noticeContexts.ADDITIONAL_INFORMATION;
 		default:
 			return undefined;
 	}
