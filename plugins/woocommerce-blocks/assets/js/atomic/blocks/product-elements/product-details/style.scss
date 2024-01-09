@@ -43,6 +43,12 @@ html body .wp-block-woocommerce-product-details.is-style-minimal {
 
 			&:hover {
 				opacity: 1;
+
+				a {
+					color: inherit;
+					border: none;
+					text-decoration: none;
+				}
 			}
 
 			&.active {
