@@ -28,6 +28,7 @@ Cookies in WooCommerce help track the products in your customers cart, can keep 
 | woocommerce_recently_viewed | session | Powers the Recent Viewed Products widget. |
 | store_notice[notice id] | session | Allows customers to dismiss the Store Notice. |
 
+
 We're unable to cover all options, but we have added some tips for the popular caching plugins. For more specific support, please reach out to the support team responsible for your caching integration.
 
 ### W3 Total Cache Minify Settings
