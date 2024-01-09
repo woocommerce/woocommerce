@@ -2,10 +2,12 @@
  * External dependencies
  */
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
+import type { AdditionalField } from '../additional-fields/types';
 import './style.scss';
 
 const Edit = ( {
@@ -20,6 +22,15 @@ const Edit = ( {
 	const blockProps = useBlockProps( {
 		className: 'wc-block-order-confirmation-additional-fields-wrapper',
 	} );
+
+	const additionalFields = getSetting< AdditionalField[] >(
+		'checkoutAdditionalFields',
+		{}
+	);
+
+	if ( Object.entries( additionalFields ).length === 0 ) {
+		return null;
+	}
 
 	return (
 		<div { ...blockProps }>
