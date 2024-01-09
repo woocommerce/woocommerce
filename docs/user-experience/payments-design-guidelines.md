@@ -1,5 +1,5 @@
 ---
-post_title: User Experiance Guidelines - Payments Onboarding and Setup
+post_title: User Experience Guidelines - Payments Onboarding and Setup
 menu_title: Payments Onboarding and Setup
 ---
 

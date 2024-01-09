@@ -1,5 +1,5 @@
 ---
-post_title: User Experiance Guidelines - Navigation
+post_title: User Experience Guidelines - Navigation
 menu_title: Navigation
 ---
 

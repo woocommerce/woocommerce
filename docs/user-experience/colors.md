@@ -1,5 +1,5 @@
 ---
-post_title: User Experiance Guidelines - Colors
+post_title: User Experience Guidelines - Colors
 menu_title: Colors
 ---
 
