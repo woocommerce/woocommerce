@@ -52,7 +52,6 @@ test.describe( 'Mini-Cart template part', async () => {
 		const templatePartRow = page.getByRole( 'row', {
 			name: templateName,
 		} );
-		await expect( templatePartRow ).toBeVisible();
 		await expect( templatePartRow ).toContainText( 'Customized' );
 		templatePartRow.getByRole( 'button', { name: 'Actions' } ).click();
 

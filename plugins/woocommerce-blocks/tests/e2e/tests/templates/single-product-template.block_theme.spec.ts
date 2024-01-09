@@ -39,15 +39,14 @@ test.describe( 'Single Product template', async () => {
 		const templateRow = page.getByRole( 'row', {
 			name: templateName,
 		} );
-		await expect( templateRow ).toBeVisible();
 		await expect( templateRow ).toContainText( 'Customized' );
 		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
-
 		await page
 			.getByRole( 'menuitem', {
 				name: 'Clear customizations',
 			} )
 			.click();
+
 		await expect( templateRow ).not.toContainText( 'Customized' );
 		await page.goto( permalink );
 		await expect(
