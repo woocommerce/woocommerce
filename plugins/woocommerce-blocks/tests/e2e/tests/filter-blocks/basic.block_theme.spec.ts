@@ -40,39 +40,31 @@ const filterBlocks = [
 	},
 ];
 
-test.describe( 'Filter blocks registration and rendering', async () => {
+test.describe( 'Filter blocks registration', async () => {
 	test.beforeEach( async ( { admin } ) => {
 		await admin.createNewPost();
 	} );
 
 	test( 'Wrapper block can be inserted through the inserter', async ( {
-		page,
+		editor,
 		editorUtils,
 	} ) => {
-		await editorUtils.openGlobalBlockInserter();
-		await page.getByPlaceholder( 'Search' ).fill( wrapperBlock.title );
+		await editorUtils.insertBlockUsingGlobalInserter( wrapperBlock.title );
 
 		await expect(
-			page.getByRole( 'listbox', { name: 'Blocks' } )
-		).toContainText( wrapperBlock.title );
-
-		await page.getByRole( 'option', { name: wrapperBlock.title } ).click();
-
-		expect(
-			await editorUtils.getBlockByName( wrapperBlock.title )
-		).toBeTruthy();
+			editor.canvas.getByLabel( `Block: ${ wrapperBlock.title }` )
+		).toBeVisible();
 	} );
 
 	test( 'Wrapper block contains all filter blocks by default', async ( {
+		editor,
 		editorUtils,
 	} ) => {
-		await editorUtils.insertBlock( {
-			name: wrapperBlock.name,
-		} );
+		await editorUtils.insertBlockUsingGlobalInserter( wrapperBlock.title );
 		for ( const block of filterBlocks ) {
-			expect(
-				await editorUtils.getBlockByName( block.title )
-			).toBeTruthy();
+			await expect(
+				editor.canvas.getByLabel( `Block: ${ block.title }` )
+			).toBeVisible();
 		}
 	} );
 
@@ -80,31 +72,24 @@ test.describe( 'Filter blocks registration and rendering', async () => {
 		editor,
 		editorUtils,
 	} ) => {
-		await editorUtils.insertBlock( {
-			name: wrapperBlock.name,
-		} );
+		await editorUtils.insertBlockUsingGlobalInserter( wrapperBlock.title );
 		for ( const block of filterBlocks ) {
-			expect( editor.canvas.getByText( block.heading ) ).toBeTruthy();
+			await expect(
+				editor.canvas.getByText( block.heading )
+			).toBeVisible();
 		}
 	} );
 
 	test( 'Variations can be inserted through the inserter.', async ( {
-		page,
+		editor,
 		editorUtils,
 	} ) => {
 		for ( const block of filterBlocks ) {
-			await editorUtils.openGlobalBlockInserter();
-			await page.getByPlaceholder( 'Search' ).fill( block.variation );
+			await editorUtils.insertBlockUsingGlobalInserter( block.variation );
 
 			await expect(
-				page.getByRole( 'listbox', { name: 'Blocks' } )
-			).toContainText( block.variation );
-
-			await page.getByRole( 'option', { name: block.variation } ).click();
-
-			expect(
-				await editorUtils.getBlockByName( block.title )
-			).toBeTruthy();
+				editor.canvas.getByLabel( `Block: ${ block.title }` )
+			).toBeVisible();
 		}
 	} );
 } );
