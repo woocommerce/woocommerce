@@ -47,7 +47,7 @@ class Init {
 		$specs = MarketingRecommendationsDataSourcePoller::get_instance()->get_specs_from_data_sources();
 
 		// Fetch specs if they don't yet exist.
-		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
+		if ( ! is_array( $specs ) || 0 === count( $specs ) ) {
 			return DefaultMarketingRecommendations::get_all();
 		}
 
