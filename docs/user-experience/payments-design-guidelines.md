@@ -1,3 +1,8 @@
+---
+post_title: User Experiance Guidelines - Payments onboarding
+menu_title: Payments Onboarding and Setup
+---
+
 # Payments onboarding & setup
 
 Follow the overall [user experience guidelines for WooCommerce](https://github.com/woocommerce/woocommerce/blob/trunk/docs/user-experience/user-experience-guidelines.md).
