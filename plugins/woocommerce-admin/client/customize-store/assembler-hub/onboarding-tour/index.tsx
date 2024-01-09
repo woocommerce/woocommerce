@@ -10,6 +10,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 export * from './use-onboarding-tour';
+import { FlowType } from '~/customize-store/types';
 
 type OnboardingTourProps = {
 	onClose: () => void;
@@ -17,17 +18,52 @@ type OnboardingTourProps = {
 	takeTour: () => void;
 	showWelcomeTour: boolean;
 	setIsResizeHandleVisible: ( isVisible: boolean ) => void;
+	flowType: FlowType.AIOnline | FlowType.noAI;
+};
+
+const getLabels = ( flowType: FlowType.AIOnline | FlowType.noAI ) => {
+	switch ( flowType ) {
+		case FlowType.AIOnline:
+			return {
+				heading: __(
+					'Welcome to your AI-generated store!',
+					'woocommerce'
+				),
+				descriptions: {
+					desktop: __(
+						'This is where you can start customizing the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what’s possible.',
+						'woocommerce'
+					),
+				},
+			};
+		case FlowType.noAI:
+			return {
+				heading: __(
+					"Discover what's possible with the store designer",
+					'woocommerce'
+				),
+				descriptions: {
+					desktop: __(
+						"Start designing your store, including adding your logo, changing color schemes, and choosing layouts. Take a quick tour to discover what's possible.",
+						'woocommerce'
+					),
+				},
+			};
+	}
 };
 
 export const OnboardingTour = ( {
 	onClose,
 	skipTour,
 	takeTour,
+	flowType,
 	showWelcomeTour,
 	setIsResizeHandleVisible,
 }: OnboardingTourProps ) => {
 	const [ placement, setPlacement ] =
 		useState< TourKitTypes.WooConfig[ 'placement' ] >( 'left' );
+
+	const { heading, descriptions } = getLabels( flowType );
 
 	if ( showWelcomeTour ) {
 		return (
@@ -71,16 +107,8 @@ export const OnboardingTour = ( {
 								primaryButton: {
 									text: __( 'Take a tour', 'woocommerce' ),
 								},
-								descriptions: {
-									desktop: __(
-										"This is where you can start customizing the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
-										'woocommerce'
-									),
-								},
-								heading: __(
-									'Welcome to your AI-generated store!',
-									'woocommerce'
-								),
+								descriptions,
+								heading,
 								skipButton: {
 									isVisible: true,
 								},

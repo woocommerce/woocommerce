@@ -4,7 +4,7 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
-import { EventObject, Sender, createMachine } from 'xstate';
+import { Sender, createMachine } from 'xstate';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { useMachine, useSelector } from '@xstate/react';
 import {
@@ -222,64 +222,59 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						// eslint-disable-next-line xstate/prefer-always
 						'': [
 							{
-								target: 'intro',
+								target: 'fetchIntroData',
 								cond: 'isNotWooExpress',
 								actions: 'assignNoAI',
 							},
 							{
-								target: 'preIntro',
+								target: 'checkAiStatus',
 								cond: 'isWooExpress',
 							},
 						],
 					},
 				},
-				preIntro: {
-					type: 'parallel',
+				checkAiStatus: {
+					initial: 'pending',
 					states: {
-						checkAiStatus: {
-							initial: 'pending',
-							states: {
-								pending: {
-									invoke: {
-										src: 'fetchAiStatus',
-										onDone: {
-											actions: 'assignAiStatus',
-											target: 'success',
-										},
-										onError: {
-											actions: 'assignAiOffline',
-											target: 'success',
-										},
-									},
+						pending: {
+							invoke: {
+								src: 'fetchAiStatus',
+								onDone: {
+									actions: 'assignAiStatus',
+									target: 'success',
 								},
-								success: { type: 'final' },
+								onError: {
+									actions: 'assignAiOffline',
+									target: 'success',
+								},
 							},
 						},
-						fetchIntroData: {
-							initial: 'pending',
-							states: {
-								pending: {
-									invoke: {
-										src: 'fetchIntroData',
-										onError: {
-											actions:
-												'assignFetchIntroDataError',
-											target: 'success',
-										},
-										onDone: {
-											target: 'success',
-											actions: [
-												'assignThemeData',
-												'assignActiveThemeHasMods',
-												'assignCustomizeStoreCompleted',
-												'assignCurrentThemeIsAiGenerated',
-											],
-										},
-									},
+						success: { type: 'final' },
+					},
+					onDone: 'fetchIntroData',
+				},
+				fetchIntroData: {
+					initial: 'pending',
+					states: {
+						pending: {
+							invoke: {
+								src: 'fetchIntroData',
+								onError: {
+									actions: 'assignFetchIntroDataError',
+									target: 'success',
 								},
-								success: { type: 'final' },
+								onDone: {
+									target: 'success',
+									actions: [
+										'assignThemeData',
+										'assignActiveThemeHasMods',
+										'assignCustomizeStoreCompleted',
+										'assignCurrentThemeIsAiGenerated',
+									],
+								},
 							},
 						},
+						success: { type: 'final' },
 					},
 					onDone: 'intro',
 				},

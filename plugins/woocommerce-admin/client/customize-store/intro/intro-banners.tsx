@@ -21,6 +21,7 @@ export const BaseIntroBanner = ( {
 	bannerTitle,
 	bannerText,
 	bannerClass,
+	showAIDisclaimer,
 	buttonIsLink,
 	bannerButtonOnClick,
 	bannerButtonText,
@@ -30,6 +31,7 @@ export const BaseIntroBanner = ( {
 	bannerTitle: string;
 	bannerText: string;
 	bannerClass: string;
+	showAIDisclaimer: boolean;
 	buttonIsLink?: boolean;
 	bannerButtonOnClick?: () => void;
 	bannerButtonText?: string;
@@ -58,23 +60,25 @@ export const BaseIntroBanner = ( {
 						</Button>
 					) }
 					{ secondaryButton }
-					<p className="ai-disclaimer">
-						{ interpolateComponents( {
-							mixedString: __(
-								'Powered by experimental AI. {{link}}Learn more{{/link}}',
-								'woocommerce'
-							),
-							components: {
-								link: (
-									<Link
-										href="https://automattic.com/ai-guidelines"
-										target="_blank"
-										type="external"
-									/>
+					{ showAIDisclaimer && (
+						<p className="ai-disclaimer">
+							{ interpolateComponents( {
+								mixedString: __(
+									'Powered by experimental AI. {{link}}Learn more{{/link}}',
+									'woocommerce'
 								),
-							},
-						} ) }
-					</p>
+								components: {
+									link: (
+										<Link
+											href="https://automattic.com/ai-guidelines"
+											target="_blank"
+											type="external"
+										/>
+									),
+								},
+							} ) }
+						</p>
+					) }
 				</div>
 				{ children }
 			</div>
@@ -95,6 +99,7 @@ export const NetworkOfflineBanner = () => {
 			) }
 			bannerClass="offline-banner"
 			bannerButtonOnClick={ () => {} }
+			showAIDisclaimer={ true }
 		/>
 	);
 };
@@ -122,6 +127,7 @@ export const JetpackOfflineBanner = ( {
 				} );
 			} }
 			bannerButtonText={ __( 'Find out how', 'woocommerce' ) }
+			showAIDisclaimer={ true }
 		/>
 	);
 };
@@ -147,6 +153,7 @@ export const ExistingThemeBanner = ( {
 				setOpenDesignChangeWarningModal( true );
 			} }
 			bannerButtonText={ __( 'Design with AI', 'woocommerce' ) }
+			showAIDisclaimer={ true }
 		/>
 	);
 };
@@ -174,6 +181,7 @@ export const DefaultBanner = ( {
 				} );
 			} }
 			bannerButtonText={ __( 'Design with AI', 'woocommerce' ) }
+			showAIDisclaimer={ true }
 		/>
 	);
 };
@@ -199,11 +207,12 @@ export const ThemeHasModsBanner = ( {
 				setOpenDesignChangeWarningModal( true );
 			} }
 			bannerButtonText={ __( 'Design with AI', 'woocommerce' ) }
+			showAIDisclaimer={ true }
 		/>
 	);
 };
 
-export const CoreBanner = () => {
+export const NoAIBanner = () => {
 	return (
 		<BaseIntroBanner
 			bannerTitle={ __( 'Design your own', 'woocommerce' ) }
@@ -211,8 +220,19 @@ export const CoreBanner = () => {
 				'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
 				'woocommerce'
 			) }
-			bannerClass="core-banner"
-			bannerButtonOnClick={ () => {} }
+			bannerClass="no-ai-banner"
+			bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
+			bannerButtonOnClick={ () => {
+				navigateOrParent(
+					window,
+					getNewPath(
+						{ customizing: true },
+						'/customize-store/assembler-hub',
+						{}
+					)
+				);
+			} }
+			showAIDisclaimer={ false }
 		/>
 	);
 };
@@ -260,6 +280,7 @@ export const ExistingAiThemeBanner = ( {
 			} }
 			bannerButtonText={ __( 'Customize', 'woocommerce' ) }
 			secondaryButton={ secondaryButton }
+			showAIDisclaimer={ true }
 		>
 			<div className={ 'woocommerce-block-preview-container' }>
 				<div className="iframe-container">

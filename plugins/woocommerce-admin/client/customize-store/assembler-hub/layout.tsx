@@ -243,11 +243,13 @@ export const Layout = () => {
 						</div>
 						{ ! isEditorLoading &&
 							shouldTourBeShown &&
-							! showAiOfflineModal && (
+							( FlowType.AIOnline === context.flowType ||
+								FlowType.noAI === context.flowType ) && (
 								<OnboardingTour
 									skipTour={ skipTour }
 									takeTour={ takeTour }
 									onClose={ onClose }
+									flowType={ context.flowType }
 									{ ...onboardingTourProps }
 								/>
 							) }

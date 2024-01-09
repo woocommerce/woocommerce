@@ -30,7 +30,7 @@ import {
 	DefaultBanner,
 	ExistingAiThemeBanner,
 	ExistingThemeBanner,
-	CoreBanner,
+	NoAIBanner,
 } from './intro-banners';
 
 export type events =
@@ -52,7 +52,7 @@ const BANNER_COMPONENTS = {
 	'jetpack-offline': JetpackOfflineBanner,
 	'existing-ai-theme': ExistingAiThemeBanner,
 	'existing-theme': ExistingThemeBanner,
-	[ FlowType.noAI ]: CoreBanner,
+	[ FlowType.noAI ]: NoAIBanner,
 	default: DefaultBanner,
 };
 
