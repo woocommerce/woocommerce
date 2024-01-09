@@ -11,7 +11,7 @@ final class ProductFiltersPrice extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'prooduct-filters-price';
+	protected $block_name = 'product-filters-price';
 
 	/**
 	 * Interactivity namespace.
