@@ -370,8 +370,38 @@ class CheckoutSchema extends AbstractSchema {
 			$field_value = isset( $fields[ $key ] ) ? $fields[ $key ] : null;
 
 			$result = rest_validate_value_from_schema( $field_value, $properties[ $key ], $key );
+
+			/**
+			 * Filter the result of validating an additional field.
+			 *
+			 * @param true|\WP_Error $result       The current result of validating the field.
+			 * @param mixed          $field_value  The value of the field.
+			 * @param array          $field_schema The schema for the field.
+			 * @param string         $key          The key of the field.
+			 *
+			 * @since 8.6.0
+			 */
+			$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, $result, $field_value, $properties[ $key ], $key );
+
+			// If filtered result is not true and not WP_Error then show a warning and continue as normal.
+			if ( true !== $filtered_result && ! is_wp_error( $filtered_result ) ) {
+				_doing_it_wrong( esc_html( 'woocommerce_blocks_validate_additional_field_' . $key ), 'The filter must return either true or a WP_Error object.', '8.6.0' );
+			}
+
+			if ( is_wp_error( $filtered_result ) ) {
+				$location = $this->additional_fields_controller->get_field_location( $key );
+				$filtered_result->add_data(
+					[
+						'key'      => $key,
+						'location' => $location,
+					]
+				);
+			}
+
+			$result = $filtered_result;
+
 			if ( is_wp_error( $result ) ) {
-				$errors->add( $result->get_error_code(), $result->get_error_message() );
+				$errors->add( $result->get_error_code(), $result->get_error_message(), $result->get_error_data() );
 			}
 		}
 
