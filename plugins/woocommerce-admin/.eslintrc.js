@@ -13,4 +13,11 @@ module.exports = {
 			},
 		},
 	],
+	settings: {
+		'import/resolver': {
+			typescript: {
+				project: 'plugins/woocommerce-admin/tsconfig.json',
+			},
+		},
+	},
 };
