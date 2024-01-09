@@ -194,7 +194,7 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 						className={ column.className }
 						width={ column.width }
 						dangerouslySetInnerHTML={
-							column.className.includes( 'sort' )
+							( column.className.includes( 'sort' ) || column.className.includes( 'renewals' ) )
 								? {
 										__html: column.html,
 								  }
