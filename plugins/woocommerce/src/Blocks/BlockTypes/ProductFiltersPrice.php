@@ -11,14 +11,14 @@ final class ProductFiltersPrice extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'prooduct-filter-price';
+	protected $block_name = 'prooduct-filters-price';
 
 	/**
 	 * Interactivity namespace.
 	 *
 	 * @var string
 	 */
-	protected $interactivity_namespace = 'woocommerce/product-filter-price';
+	protected $interactivity_namespace = 'woocommerce/product-filters-price';
 
 	const MIN_PRICE_QUERY_VAR = 'min_price';
 	const MAX_PRICE_QUERY_VAR = 'max_price';
