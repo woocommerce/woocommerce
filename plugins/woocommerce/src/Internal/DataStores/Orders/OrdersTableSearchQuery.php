@@ -29,7 +29,7 @@ class OrdersTableSearchQuery {
 	 *
 	 * @var string
 	 */
-	private $search_filter;
+	private $search_filters;
 
 	/**
 	 * Creates the JOIN and WHERE clauses needed to execute a search of orders.
@@ -41,22 +41,24 @@ class OrdersTableSearchQuery {
 	public function __construct( OrdersTableQuery $query ) {
 		$this->query       = $query;
 		$this->search_term = urldecode( $query->get( 's' ) );
-		$this->search_filter = urldecode( $query->get( 'search_filter' ) );
-
-		$this->sanitize_search_filter();
+		$this->search_filters = $this->sanitize_search_filters( urldecode( $query->get( 'search_filter' ) ) );
 	}
 
 	/**
 	 * Sanitize search filter param.
+	 *
+	 * @return array Array of search filters.
 	 */
-	public function sanitize_search_filter() {
+	private function sanitize_search_filters( $search_filter ) : array {
 		$available_filters = array(
-			'customers',
+			'customers', // customers also searches in meta.
 			'products',
-			'all'
 		);
-		if ( ! in_array( $this->search_filter, $available_filters ) ) {
-			$this->search_filter = 'all';
+
+		if ( 'all' === $search_filter || '' === $search_filter ) {
+			return $available_filters;
+		} else {
+			return array_intersect( $available_filters, array( $search_filter ) );
 		}
 	}
 
@@ -86,16 +88,34 @@ class OrdersTableSearchQuery {
 	 * @return string
 	 */
 	private function generate_join(): string {
-		if( 'products' !== $this->search_filter && 'all' !== $this->search_filter ) {
-			return '';
+		$join = array();
+
+		foreach ( $this->search_filters as $search_filter ) {
+			$join[] = $this->generate_join_for_search_filter( $search_filter );
 		}
 
-		$orders_table = $this->query->get_table_name( 'orders' );
-		$items_table  = $this->query->get_table_name( 'items' );
+		return implode( ' ', $join );
+	}
 
-		return "
-			LEFT JOIN $items_table AS search_query_items ON search_query_items.order_id = $orders_table.id
-		";
+	/**
+	 * Generate JOIN clause for different search filter.
+	 * Right now we only have the products filter that actually does any join, but in future we may add more, for example, in order search, or payment tokens etc. This function is to make it easier to add more filters in the future.
+	 *
+	 * If a search filter needs a join, it will also need a where clause.
+	 *
+	 * @param string $search_filter Name of the search filter.
+	 *
+	 * @return string JOIN clause.
+	 */
+	private function generate_join_for_search_filter( $search_filter ) : string {
+		if ( 'products' === $search_filter ) {
+			$orders_table = $this->query->get_table_name( 'orders' );
+			$items_table  = $this->query->get_table_name( 'items' );
+			return "
+				LEFT JOIN $items_table AS search_query_items ON search_query_items.order_id = $orders_table.id
+			";
+		}
+		return '';
 	}
 
 	/**
@@ -106,28 +126,49 @@ class OrdersTableSearchQuery {
 	 * @return string
 	 */
 	private function generate_where(): string {
-		global $wpdb;
-		$where             = '';
+		$where             = array();
 		$possible_order_id = (string) absint( $this->search_term );
 		$order_table       = $this->query->get_table_name( 'orders' );
 
+
 		// Support the passing of an order ID as the search term.
 		if ( (string) $this->query->get( 's' ) === $possible_order_id ) {
-			$where = "`$order_table`.id = $possible_order_id OR ";
+			$where[] = "`$order_table`.id = $possible_order_id";
 		}
 
-		$meta_sub_query = $this->generate_where_for_meta_table();
+		foreach ( $this->search_filters as $search_filter ) {
+			$where[] = $this->generate_where_for_search_filter( $search_filter );
+		}
 
-		if( $this->search_filter === 'products' || $this->search_filter === 'all' ) {
-			$where .= $wpdb->prepare(
-				'search_query_items.order_item_name LIKE %s OR',
+		$where = implode( ' OR ', $where );
+
+		return " ( $where ) ";
+	}
+
+	/**
+	 * Generates where clause for different search filter. Right now we only have the products and customers filter that actually use any `where`, but in future we may add more, for example, in order search, or payment tokens etc. This function is to make it easier to add more filters in the future.
+	 *
+	 * @param string $search_filter Name of the search filter.
+	 *
+	 * @return string WHERE clause.
+	 */
+	private function generate_where_for_search_filter( string $search_filter ) : string {
+		global $wpdb;
+
+		$order_table = $this->query->get_table_name( 'orders' );
+
+		if( 'products' === $search_filter ) {
+			return $wpdb->prepare(
+				'search_query_items.order_item_name LIKE %s',
 				'%' . $wpdb->esc_like( $this->search_term ) . '%'
 			);
 		}
 
-		$where .= "`$order_table`.id IN ( $meta_sub_query ) ";
-
-		return " ( $where ) ";
+		if( 'customers' === $search_filter ) {
+			$meta_sub_query = $this->generate_where_for_meta_table();
+			return "`$order_table`.id IN ( $meta_sub_query ) ";
+		}
+		return '';
 	}
 
 	/**
@@ -169,14 +210,10 @@ GROUP BY search_query_meta.order_id
 	 * @return string
 	 */
 	private function get_meta_fields_to_be_searched(): string {
-		$meta_fields_to_search = array();
-
-		if( $this->search_filter === 'customers' || $this->search_filter === 'all' ) {
-			$meta_fields_to_search = array(
-				'_billing_address_index',
-				'_shipping_address_index',
-			);
-		}
+		$meta_fields_to_search = array(
+			'_billing_address_index',
+			'_shipping_address_index',
+		);
 
 		/**
 		 * Controls the order meta keys to be included in search queries.
