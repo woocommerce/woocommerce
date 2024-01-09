@@ -9,30 +9,6 @@
 	const returnNull = () => null;
 
 	/**
-	 * Map of order attribution field names to sbjs.get property accessors.
-	 */
-	wc_order_attribution.fields = {
-		// main fields.
-		type: 'current.typ',
-		url: 'current_add.rf',
-
-		// utm fields.
-		utm_campaign: 'current.cmp',
-		utm_source: 'current.src',
-		utm_medium: 'current.mdm',
-		utm_content: 'current.cnt',
-		utm_id: 'current.id',
-		utm_term: 'current.trm',
-
-		// additional fields.
-		session_entry: 'current_add.ep',
-		session_start_time: 'current_add.fd',
-		session_pages: 'session.pgs',
-		session_count: 'udata.vst',
-		user_agent: 'udata.uag',
-	};
-
-	/**
 	 * Get the order attribution data.
 	 *
 	 * Returns object full of `null`s if tracking is disabled.
