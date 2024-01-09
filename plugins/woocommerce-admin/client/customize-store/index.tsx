@@ -39,11 +39,13 @@ import {
 	CustomizeStoreComponentMeta,
 	CustomizeStoreComponent,
 	customizeStoreStateMachineContext,
+	FlowType,
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
 import { navigateOrParent, attachParentListeners } from './utils';
 import useBodyClass from './hooks/use-body-class';
+import { isWooExpress } from '~/utils/is-woo-express';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -160,7 +162,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		transitionalScreen: {
 			hasCompleteSurvey: false,
 		},
-		aiOnline: true,
+		flowType: FlowType.noAI,
 	} as customizeStoreStateMachineContext,
 	invoke: {
 		src: 'browserPopstateHandler',
@@ -212,8 +214,25 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		intro: {
 			id: 'intro',
-			initial: 'preIntro',
+			initial: 'flowType',
 			states: {
+				flowType: {
+					on: {
+						// Always is not available in the current version of XState.
+						// eslint-disable-next-line xstate/prefer-always
+						'': [
+							{
+								target: 'intro',
+								cond: 'isNotWooExpress',
+								actions: 'assignNoAI',
+							},
+							{
+								target: 'preIntro',
+								cond: 'isWooExpress',
+							},
+						],
+					},
+				},
 				preIntro: {
 					type: 'parallel',
 					states: {
@@ -435,11 +454,13 @@ export const CustomizeStoreController = ( {
 					);
 				},
 				isAiOnline: ( _ctx ) => {
-					return _ctx.aiOnline;
+					return _ctx.flowType === FlowType.AIOnline;
 				},
 				isAiOffline: ( _ctx ) => {
-					return ! _ctx.aiOnline;
+					return _ctx.flowType === FlowType.AIOffline;
 				},
+				isWooExpress: () => isWooExpress(),
+				isNotWooExpress: () => ! isWooExpress(),
 			},
 		} );
 	}, [ actionOverrides, servicesOverrides ] );

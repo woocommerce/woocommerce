@@ -19,7 +19,6 @@ import FrequentlyAskedQuestionsSimple from './faq-simple';
 
 declare global {
 	interface Window {
-		wcCalypsoBridge: unknown;
 		location: Location;
 		wcSettings: {
 			admin: {
