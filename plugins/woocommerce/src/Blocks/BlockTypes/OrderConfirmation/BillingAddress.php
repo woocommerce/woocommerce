@@ -2,6 +2,9 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+
 /**
  * BillingAddress class.
  */
@@ -30,7 +33,23 @@ class BillingAddress extends AbstractOrderConfirmationBlock {
 
 		$address = '<address>' . wp_kses_post( $order->get_formatted_billing_address() ) . '</address>';
 		$phone   = $order->get_billing_phone() ? '<p class="woocommerce-customer-details--phone">' . esc_html( $order->get_billing_phone() ) . '</p>' : '';
+		$custom  = '';
 
-		return $address . $phone;
+		$additional_fields_controller = Package::container()->get( CheckoutFields::class );
+		$additional_fields            = $additional_fields_controller->get_fields_for_location( 'address' );
+
+		if ( $additional_fields ) {
+			foreach ( $additional_fields as $additional_field_key => $additional_field ) {
+				$value = $additional_fields_controller->get_field_from_order( $additional_field_key, $order, 'billing' );
+
+				if ( '' === $value ) {
+					continue;
+				}
+
+				$custom .= '<p class="woocommerce-customer-details--custom woocommerce-customer-details--' . esc_attr( $additional_field_key ) . '"><strong>' . wp_kses_post( $additional_field['label'] ) . '</strong> ' . wp_kses_post( $value ) . '</p>';
+			}
+		}
+
+		return $address . $phone . $custom;
 	}
 }

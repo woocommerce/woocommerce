@@ -44,7 +44,10 @@ class AdditionalFields extends AbstractOrderConfirmationBlock {
 	 */
 	protected function render_additional_fields( $order ) {
 		$additional_fields_controller = Package::container()->get( CheckoutFields::class );
-		$additional_fields            = $additional_fields_controller->get_fields_for_location( 'additional' );
+		$additional_fields            = array_merge(
+			Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'contact' ),
+			Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'additional' )
+		);
 
 		if ( empty( $additional_fields ) ) {
 			return '';

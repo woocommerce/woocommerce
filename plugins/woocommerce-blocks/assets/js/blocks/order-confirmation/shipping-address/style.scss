@@ -32,10 +32,18 @@
 		width: 100% !important;
 		display: block;
 		box-sizing: border-box;
-		margin: 0 0 $gap;
+		margin: 0;
+		font-style: normal;
+	}
+	p {
+		margin: $gap-smaller 0 0;
 
-		&:last-child {
-			margin-bottom: 0;
+		strong {
+			font-weight: bold;
+			display: block;
+			&::after {
+				content: ":";
+			}
 		}
 	}
 }
