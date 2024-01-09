@@ -33,6 +33,7 @@ class ShippingAddress extends AbstractOrderConfirmationBlock {
 
 		$address = '<address>' . wp_kses_post( $order->get_formatted_shipping_address() ) . '</address>';
 		$phone   = $order->get_shipping_phone() ? '<p class="woocommerce-customer-details--phone">' . esc_html( $order->get_shipping_phone() ) . '</p>' : '';
+		$custom  = '';
 
 		$controller = Package::container()->get( CheckoutFields::class );
 		$custom     = $this->render_additional_fields(
