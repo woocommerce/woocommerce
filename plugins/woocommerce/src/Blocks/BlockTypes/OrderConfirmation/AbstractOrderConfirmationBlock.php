@@ -299,7 +299,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 		);
 
 		register_block_pattern(
-			'woocommerce/order-confirmation-additional-information-heading',
+			'woocommerce/order-confirmation-additional-fields-heading',
 			array(
 				'title'    => '',
 				'inserter' => false,

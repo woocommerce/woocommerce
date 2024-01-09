@@ -1,8 +1,8 @@
 {
-	"name": "woocommerce/order-confirmation-additional-information-wrapper",
+	"name": "woocommerce/order-confirmation-additional-fields-wrapper",
 	"version": "1.0.0",
-	"title": "Additional Information Section",
-	"description": "Display the additional information section.",
+	"title": "Additional Fields Section",
+	"description": "Display the additional fields section.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"attributes": {

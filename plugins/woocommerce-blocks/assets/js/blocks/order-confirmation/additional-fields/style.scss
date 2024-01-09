@@ -1,0 +1,30 @@
+.wc-block-order-confirmation-additional-fields-list {
+	border: 1px solid $universal-border-light;
+	border-radius: $universal-border-radius;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	dt {
+		font-style: normal;
+		font-weight: bold;
+		width: 50%;
+		padding: $gap 0 $gap $gap;
+		box-sizing: border-box;
+		border-bottom: 1px solid $universal-border-light;
+
+		&:last-of-type {
+			border-bottom: 0;
+		}
+	}
+	dd {
+		margin-left: auto;
+		width: 50%;
+		padding: $gap $gap $gap calc(#{$gap-large} + 2px);
+		box-sizing: border-box;
+		border-bottom: 1px solid $universal-border-light;
+
+		&:last-of-type {
+			border-bottom: 0;
+		}
+	}
+}

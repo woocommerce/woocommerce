@@ -147,11 +147,14 @@ const blocks = {
 	'order-confirmation-status': {
 		customDir: 'order-confirmation/status',
 	},
-	'order-confirmation-additional-information-wrapper': {
-		customDir: 'order-confirmation/additional-information-wrapper',
-	},
 	'order-confirmation-additional-information': {
 		customDir: 'order-confirmation/additional-information',
+	},
+	'order-confirmation-additional-fields-wrapper': {
+		customDir: 'order-confirmation/additional-fields-wrapper',
+	},
+	'order-confirmation-additional-fields': {
+		customDir: 'order-confirmation/additional-fields',
 	},
 };
 

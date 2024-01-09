@@ -18,7 +18,7 @@ const Edit = ( {
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ) => {
 	const blockProps = useBlockProps( {
-		className: 'wc-block-order-confirmation-additional-information-wrapper',
+		className: 'wc-block-order-confirmation-additional-fields-wrapper',
 	} );
 
 	return (
@@ -34,6 +34,14 @@ const Edit = ( {
 							content: attributes.heading || '',
 							onChangeContent: ( value: string ) =>
 								setAttributes( { heading: value } ),
+						},
+					],
+					[
+						'woocommerce/order-confirmation-additional-fields',
+						{
+							lock: {
+								remove: true,
+							},
 						},
 					],
 					[
