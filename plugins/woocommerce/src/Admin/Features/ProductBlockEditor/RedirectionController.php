@@ -72,7 +72,7 @@ class RedirectionController {
 			}
 
 			$product_data = $product_template->get_product_data();
-			$product_type = $product_data[ 'type' ];
+			$product_type = $product_data['type'];
 
 			if ( isset( $product_type ) && $product_type !== $product->get_type() ) {
 				continue;
