@@ -64,6 +64,7 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 		self::add_action( 'add_option_' . self::FEATURE_OPTION_NAME, array( $this, 'process_added_option' ), 999, 2 );
 		self::add_action( 'update_option_' . self::FEATURE_OPTION_NAME, array( $this, 'process_updated_option' ), 999, 2 );
 		self::add_action( 'delete_option_' . self::FEATURE_OPTION_NAME, array( $this, 'process_deleted_option' ), 999 );
+		self::add_action( 'shutdown', array( $this, 'maybe_reschedule_cleanup' ) );
 	}
 
 	/**
@@ -218,6 +219,20 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 */
 	private function pre_update_option( $new_value, $old_value ) {
 		return $this->can_be_enabled() ? $new_value : 'no';
+	}
+
+	/**
+	 * Hooked onto 'shutdown' to re-schedule the cleanup if necessary.
+	 */
+	private function maybe_reschedule_cleanup() {
+		if ( ! $this->is_enabled() ) {
+			return;
+		}
+
+		$orders_left = ! empty( $this->get_next_batch_to_process( 1 ) );
+		if ( $orders_left && ! $this->batch_processing->is_enqueued( self::class ) ) {
+			$this->batch_processing->enqueue_processor( self::class );
+		}
 	}
 
 }
