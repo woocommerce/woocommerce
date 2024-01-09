@@ -298,5 +298,14 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 			)
 		);
 
+		register_block_pattern(
+			'woocommerce/order-confirmation-additional-information-heading',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
+			)
+		);
+
 	}
 }
