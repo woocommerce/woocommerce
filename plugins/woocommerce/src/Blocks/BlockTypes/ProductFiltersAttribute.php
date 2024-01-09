@@ -5,23 +5,23 @@ use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 
 /**
- * ProductFilterAttribute class.
+ * Product Filters: Attribute Block.
  */
-final class ProductFilterAttribute extends AbstractBlock {
+final class ProductFiltersAttribute extends AbstractBlock {
 
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filter-attribute';
+	protected $block_name = 'product-filters-attribute';
 
 	/**
 	 * Interactivity namespace.
 	 *
 	 * @var string
 	 */
-	protected $interactivity_namespace = 'woocommerce/product-filter-attribute';
+	protected $interactivity_namespace = 'woocommerce/product-filters-attribute';
 
 	/**
 	 * Initialize this block type.

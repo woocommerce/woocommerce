@@ -5,24 +5,24 @@ use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
 
 /**
- * Product Filter: Rating Block
+ * Product Filters: Rating Block
  *
  * @package Automattic\WooCommerce\Blocks\BlockTypes
  */
-final class ProductFilterRating extends AbstractBlock {
+final class ProductFiltersRating extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filter-rating';
+	protected $block_name = 'product-filters-rating';
 
 	/**
 	 * Interactivity namespace.
 	 *
 	 * @var string
 	 */
-	protected $interactivity_namespace = 'woocommerce/product-filter-rating';
+	protected $interactivity_namespace = 'woocommerce/product-filters-rating';
 
 	const RATING_FILTER_QUERY_VAR = 'rating_filter';
 

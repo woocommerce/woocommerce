@@ -2,9 +2,9 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * ProductFilterPrice class.
+ * Product Filters: Price Block.
  */
-final class ProductFilterPrice extends AbstractBlock {
+final class ProductFiltersPrice extends AbstractBlock {
 
 	/**
 	 * Block name.

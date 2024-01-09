@@ -5,23 +5,23 @@ use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 
 /**
- * ProductFilterStock class.
+ * Product Filters: Stock Status Block.
  */
-final class ProductFilterStock extends AbstractBlock {
+final class ProductFiltersStockStatus extends AbstractBlock {
 
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filter-stock';
+	protected $block_name = 'product-filters-stock-status';
 
 	/**
 	 * Interactivity namespace.
 	 *
 	 * @var string
 	 */
-	protected $interactivity_namespace = 'woocommerce/product-filter-stock';
+	protected $interactivity_namespace = 'woocommerce/product-filters-stock-status';
 
 	const STOCK_STATUS_QUERY_VAR = 'filter_stock_status';
 

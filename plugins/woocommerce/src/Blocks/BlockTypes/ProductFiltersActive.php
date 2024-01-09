@@ -2,22 +2,22 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * ProductFilterActive class.
+ * Product Filters: Active Block.
  */
-final class ProductFilterActive extends AbstractBlock {
+final class ProductFiltersActive extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filter-active';
+	protected $block_name = 'product-filters-active';
 
 	/**
 	 * Interactivity namespace.
 	 *
 	 * @var string
 	 */
-	protected $interactivity_namespace = 'woocommerce/product-filter-active';
+	protected $interactivity_namespace = 'woocommerce/product-filters-active';
 
 	/**
 	 * Render the block.
