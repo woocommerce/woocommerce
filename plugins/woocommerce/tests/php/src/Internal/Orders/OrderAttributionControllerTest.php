@@ -24,7 +24,7 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 	 *
 	 * @var OrderAttributionController
 	 */
-	protected OrderAttributionController $attribution_fields_class;
+	protected OrderAttributionController $attribution_class;
 
 	/**
 	 * Sets up the fixture, for example, open a network connection.
@@ -35,7 +35,7 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
-		$this->attribution_fields_class = new OrderAttributionController();
+		$this->attribution_class = new OrderAttributionController();
 
 		/** @var MockableLegacyProxy $legacy_proxy */
 		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
@@ -55,7 +55,7 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 			->onlyMethods( array( 'log' ) )
 			->getMock();
 
-		$this->attribution_fields_class->init( $legacy_proxy, $feature_mock, $wp_consent_mock, $logger_mock );
+		$this->attribution_class->init( $legacy_proxy, $feature_mock, $wp_consent_mock, $logger_mock );
 	}
 
 	/**
@@ -98,8 +98,8 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 			function( $order ) {
 				$this->output_origin_column( $order );
 			},
-			$this->attribution_fields_class,
-			$this->attribution_fields_class
+			$this->attribution_class,
+			$this->attribution_class
 		);
 
 		foreach ( $test_cases as $test_case ) {
