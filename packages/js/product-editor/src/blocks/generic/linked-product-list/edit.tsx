@@ -127,10 +127,11 @@ export function Edit( {
 
 			{ ! state.isLoading && state.linkedProducts.length === 0 && (
 				<AdviceCard
-					image={ <EmptyStateImage { ...emptyState } /> }
 					tip={ emptyState.tip }
 					isDismissible={ emptyState.isDismissible }
-				/>
+				>
+					<EmptyStateImage { ...emptyState } />
+				</AdviceCard>
 			) }
 
 			{ ! state.isLoading && state.linkedProducts.length > 0 && (
