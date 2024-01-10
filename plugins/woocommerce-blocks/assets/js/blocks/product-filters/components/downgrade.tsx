@@ -7,6 +7,11 @@ import { PanelBody, Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { createBlock, BlockInstance } from '@wordpress/blocks';
 
+/**
+ * Internal dependencies
+ */
+import { UPGRADE_MAP } from './upgrade';
+
 const Downgrade = ( { clientId }: { clientId: string } ) => {
 	const { replaceBlock } = useDispatch( 'core/block-editor' );
 	const block = useSelect( ( select ) => {
@@ -16,10 +21,12 @@ const Downgrade = ( { clientId }: { clientId: string } ) => {
 	const downgradeBlock = () => {
 		if ( ! block ) return;
 		const filterBlock = block.innerBlocks[ 0 ];
-		const filterType = filterBlock.name.replace(
-			'woocommerce/collection-',
-			''
-		);
+		const filterType = Object.entries( UPGRADE_MAP ).find(
+			( [ , value ] ) => value === filterBlock.name
+		)?.[ 0 ];
+
+		if ( ! filterType ) return;
+
 		const innerBlocks: BlockInstance[] = [
 			createBlock( `woocommerce/${ filterType }`, {
 				...filterBlock.attributes,
