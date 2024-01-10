@@ -9,9 +9,6 @@ import {
 	Toolbar,
 	ToolbarButton,
 	ToolbarGroup,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	// eslint-disable-next-line @woocommerce/dependency-group
 	ToolbarItem,
 } from '@wordpress/components';
 
@@ -73,6 +70,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				{ ! isCoverItem && (
 					<ToolbarGroup>
 						{ allowDragging && (
+							// @ts-expect-error - TODO: Maybe the type should be fixed upstream, placeholder is not required.
 							<ToolbarButton
 								icon={ () => (
 									<SortableHandle itemIndex={ childIndex } />
@@ -80,6 +78,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 								label={ __( 'Drag to reorder', 'woocommerce' ) }
 							/>
 						) }
+						{ /* @ts-expect-error - TODO: Maybe the type should be fixed upstream, placeholder is not required. */ }
 						<ToolbarButton
 							disabled={ childIndex < 2 }
 							onClick={ () => movePrevious() }
@@ -96,6 +95,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				) }
 				{ ! isCoverItem && (
 					<ToolbarGroup>
+						{ /* @ts-expect-error - TODO: Maybe the type should be fixed upstream, placeholder is not required. */ }
 						<ToolbarButton
 							onClick={ () => setAsCoverImage( childIndex ) }
 							label={ __( 'Set as cover', 'woocommerce' ) }
@@ -113,6 +113,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 							}
 							allowedTypes={ [ 'image' ] }
 							render={ ( { open } ) => (
+								// @ts-expect-error - TODO: Maybe the type should be fixed upstream, placeholder is not required.
 								<ToolbarButton onClick={ open }>
 									{ __( 'Replace', 'woocommerce' ) }
 								</ToolbarButton>
@@ -122,6 +123,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				) }
 				{ isCoverItem && (
 					<ToolbarGroup>
+						{ /* @ts-expect-error - TODO: Maybe the type should be fixed upstream, placeholder is not required. */ }
 						<ToolbarButton
 							onClick={ () => removeItem( childIndex ) }
 							icon={ trash }
@@ -132,6 +134,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 				{ ! isCoverItem && (
 					<ToolbarGroup>
 						<ToolbarItem>
+							{ /* @ts-expect-error - TODO: fix this error. */ }
 							{ ( toggleProps: {
 								'data-toolbar-item': boolean;
 								ref: React.ForwardedRef<

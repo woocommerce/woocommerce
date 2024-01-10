@@ -199,6 +199,7 @@ export const SelectTree = function SelectTree( {
 							/>
 						</ComboBox>
 					) : (
+						// @ts-expect-error - TODO: fix this, InputHTMLAttributes is not compatible with TextControl props.
 						<TextControl
 							{ ...inputProps }
 							value={ decodeEntities( props.createValue || '' ) }

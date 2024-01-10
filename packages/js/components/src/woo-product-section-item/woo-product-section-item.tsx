@@ -11,6 +11,7 @@ import deprecated from '@wordpress/deprecated';
  */
 import { createOrderedChildren, sortFillsByOrder } from '../utils';
 import { ProductFillLocationType } from '../woo-product-tab-item';
+import { FillComponentProps, SlotComponentProps } from '../types';
 
 type WooProductSectionItemProps = {
 	id: string;
@@ -24,8 +25,10 @@ type WooProductSectionSlotProps = {
 
 const DEFAULT_SECTION_ORDER = 20;
 
-export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
-	Slot: React.FC< Slot.Props & WooProductSectionSlotProps >;
+export const WooProductSectionItem: React.FC<
+	WooProductSectionItemProps & { children: React.ReactNode }
+> & {
+	Slot: React.FC< SlotComponentProps & WooProductSectionSlotProps >;
 } = ( { children, tabs } ) => {
 	deprecated( `__experimentalWooProductSectionItem`, {
 		version: '13.0.0',
@@ -40,9 +43,9 @@ export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
 					name={ `woocommerce_product_section_${ tabName }` }
 					key={ tabName }
 				>
-					{ ( fillProps: Fill.Props ) => {
+					{ ( fillProps: FillComponentProps ) => {
 						return createOrderedChildren<
-							Fill.Props & { tabName: string }
+							FillComponentProps & { tabName: string }
 						>( children, sectionOrder || DEFAULT_SECTION_ORDER, {
 							tabName,
 							...fillProps,
@@ -55,6 +58,7 @@ export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
 };
 
 WooProductSectionItem.Slot = ( { fillProps, tab } ) => (
+	// @ts-expect-error - TODO: fix this type issue.
 	<Slot
 		name={ `woocommerce_product_section_${ tab }` }
 		fillProps={ fillProps }
