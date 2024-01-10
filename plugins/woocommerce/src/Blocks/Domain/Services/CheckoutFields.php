@@ -484,23 +484,39 @@ class CheckoutFields {
 	 */
 	public function validate_field( $key, $field_value, $field_schema ) {
 
-		/**
-		 * Filter the result of validating an additional field.
-		 *
-		 * @param \WP_Error $error        A WP_Error that extensions may add errors to.
-		 * @param mixed     $field_value  The value of the field.
-		 * @param array     $field_schema The schema of the field.
-		 * @param string    $key          The key of the field.
-		 *
-		 * @since 8.6.0
-		 */
-		$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, new \WP_Error(), $field_value, $field_schema, $key );
+		try {
+			/**
+			 * Filter the result of validating an additional field.
+			 *
+			 * @param \WP_Error $error A WP_Error that extensions may add errors to.
+			 * @param mixed $field_value The value of the field.
+			 * @param array $field_schema The schema of the field.
+			 * @param string $key The key of the field.
+			 *
+			 * @since 8.6.0
+			 */
+			$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, new \WP_Error(), $field_value, $field_schema, $key );
+		} catch ( \Exception $e ) {
+
+			// One of the filters errored so skip them and validate the field. This allows the checkout process to continue.
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error(
+				sprintf(
+					'The filter %s encountered an error. The field will not have any custom validation applied to it. %s',
+					'woocommerce_blocks_validate_additional_field_' . esc_html( $key ),
+					esc_html( $e->getMessage() )
+				),
+				E_USER_WARNING
+			);
+
+			return new \WP_Error();
+		}
 
 		if ( is_wp_error( $filtered_result ) ) {
 			return $filtered_result;
 		}
 
-		// If the filters didn't return a valid value, ignore them and return an empty WP_Error. This allows the order to complete.
+		// If the filters didn't return a valid value, ignore them and return an empty WP_Error. This allows the checkout process to continue.
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		trigger_error(
 			sprintf(
