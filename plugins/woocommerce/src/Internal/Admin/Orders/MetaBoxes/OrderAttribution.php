@@ -74,7 +74,7 @@ class OrderAttribution {
 
 		$this->format_meta_data( $meta );
 
-		$use_utm_labels = isset( $meta['type'] ) && 'utm' === $meta['type'];
+		$use_utm_labels = isset( $meta['source_type'] ) && 'utm' === $meta['source_type'];
 		$template_data  = array(
 			'meta'             => $meta,
 			'use_utm_labels'   => $use_utm_labels,
