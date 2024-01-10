@@ -17,13 +17,6 @@ final class ProductFiltersAttribute extends AbstractBlock {
 	protected $block_name = 'product-filters-attribute';
 
 	/**
-	 * Interactivity namespace.
-	 *
-	 * @var string
-	 */
-	protected $interactivity_namespace = 'woocommerce/product-filters-attribute';
-
-	/**
 	 * Initialize this block type.
 	 *
 	 * - Hook into WP lifecycle.
@@ -93,7 +86,7 @@ final class ProductFiltersAttribute extends AbstractBlock {
 			}
 		);
 
-		$action_namespace = $this->interactivity_namespace;
+		$action_namespace = $this->get_full_block_name();
 
 		foreach ( $active_product_attributes as $product_attribute ) {
 			$terms = explode( ',', get_query_var( "filter_{$product_attribute}" ) );
@@ -157,7 +150,7 @@ final class ProductFiltersAttribute extends AbstractBlock {
 				'<div %s></div>',
 				get_block_wrapper_attributes(
 					array(
-						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->interactivity_namespace ) ),
+						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
 					)
 				),
 			);
@@ -210,7 +203,7 @@ final class ProductFiltersAttribute extends AbstractBlock {
 			get_block_wrapper_attributes(
 				array(
 					'data-wc-context'     => wp_json_encode( $context ),
-					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->interactivity_namespace ) ),
+					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
 				)
 			),
 			$content,
@@ -250,7 +243,7 @@ final class ProductFiltersAttribute extends AbstractBlock {
 		return Dropdown::render(
 			array(
 				'items'          => $list_items,
-				'action'         => "{$this->interactivity_namespace}::actions.navigate",
+				'action'         => "{$this->get_full_block_name()}::actions.navigate",
 				'selected_items' => $selected_items,
 				'select_type'    => $attributes['selectType'] ?? 'multiple',
 				// translators: %s is a product attribute name.
@@ -288,7 +281,7 @@ final class ProductFiltersAttribute extends AbstractBlock {
 		return CheckboxList::render(
 			array(
 				'items'     => $list_options,
-				'on_change' => "{$this->interactivity_namespace}::actions.updateProducts",
+				'on_change' => "{$this->get_full_block_name()}::actions.updateProducts",
 			)
 		);
 	}

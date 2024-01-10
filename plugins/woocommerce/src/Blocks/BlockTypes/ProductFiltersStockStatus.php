@@ -16,13 +16,6 @@ final class ProductFiltersStockStatus extends AbstractBlock {
 	 */
 	protected $block_name = 'product-filters-stock-status';
 
-	/**
-	 * Interactivity namespace.
-	 *
-	 * @var string
-	 */
-	protected $interactivity_namespace = 'woocommerce/product-filters-stock-status';
-
 	const STOCK_STATUS_QUERY_VAR = 'filter_stock_status';
 
 	/**
@@ -82,7 +75,7 @@ final class ProductFiltersStockStatus extends AbstractBlock {
 			return $data;
 		}
 
-		$action_namespace = $this->interactivity_namespace;
+		$action_namespace = $this->get_full_block_name();
 
 		$active_stock_statuses = array_map(
 			function( $status ) use ( $stock_status_options, $action_namespace ) {
@@ -201,7 +194,7 @@ final class ProductFiltersStockStatus extends AbstractBlock {
 			)
 		);
 
-		$data_directive = wp_json_encode( array( 'namespace' => $this->interactivity_namespace ) );
+		$data_directive = wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) );
 
 		ob_start();
 		?>
@@ -213,7 +206,7 @@ final class ProductFiltersStockStatus extends AbstractBlock {
 				echo CheckboxList::render(
 					array(
 						'items'     => $list_items,
-						'on_change' => "{$this->interactivity_namespace}::actions.onCheckboxChange",
+						'on_change' => "{$this->get_full_block_name()}::actions.onCheckboxChange",
 					)
 				);
 				?>
@@ -225,7 +218,7 @@ final class ProductFiltersStockStatus extends AbstractBlock {
 				echo Dropdown::render(
 					array(
 						'items'          => $list_items,
-						'action'         => "{$this->interactivity_namespace}::actions.onDropdownChange",
+						'action'         => "{$this->get_full_block_name()}::actions.onDropdownChange",
 						'selected_items' => $selected_items,
 						'select_type'    => $select_type,
 						'placeholder'    => $placeholder_text,

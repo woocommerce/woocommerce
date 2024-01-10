@@ -17,13 +17,6 @@ final class ProductFiltersRating extends AbstractBlock {
 	 */
 	protected $block_name = 'product-filters-rating';
 
-	/**
-	 * Interactivity namespace.
-	 *
-	 * @var string
-	 */
-	protected $interactivity_namespace = 'woocommerce/product-filters-rating';
-
 	const RATING_FILTER_QUERY_VAR = 'rating_filter';
 
 	/**
@@ -87,8 +80,8 @@ final class ProductFiltersRating extends AbstractBlock {
 					/* translators: %d is the rating value. */
 					'title'      => sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating ),
 					'attributes' => array(
-						'data-wc-on--click' => "{$this->interactivity_namespace}::actions.removeFilter",
-						'data-wc-context'   => "{$this->interactivity_namespace}::" . wp_json_encode( array( 'value' => $rating ) ),
+						'data-wc-on--click' => "{$this->get_full_block_name()}::actions.removeFilter",
+						'data-wc-context'   => "{$this->get_full_block_name()}::" . wp_json_encode( array( 'value' => $rating ) ),
 					),
 				);
 			},
@@ -123,7 +116,7 @@ final class ProductFiltersRating extends AbstractBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'data-wc-interactive' => $this->interactivity_namespace,
+				'data-wc-interactive' => $this->get_full_block_name(),
 				'class'               => 'wc-block-rating-filter',
 			)
 		);
@@ -148,7 +141,7 @@ final class ProductFiltersRating extends AbstractBlock {
 		$input = 'list' === $display_style ? CheckboxList::render(
 			array(
 				'items'     => $this->get_checkbox_list_items( $filtered_rating_counts, $selected_ratings_query_param, $show_counts ),
-				'on_change' => "{$this->interactivity_namespace}::actions.onCheckboxChange",
+				'on_change' => "{$this->get_full_block_name()}::actions.onCheckboxChange",
 			)
 		) : Dropdown::render(
 			$this->get_dropdown_props( $filtered_rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'] )
@@ -272,7 +265,7 @@ final class ProductFiltersRating extends AbstractBlock {
 			),
 			'select_type'    => $select_type,
 			'selected_items' => $selected_items,
-			'action'         => "{$this->interactivity_namespace}::actions.onDropdownChange",
+			'action'         => "{$this->get_full_block_name()}::actions.onDropdownChange",
 			'placeholder'    => $placeholder_text,
 		);
 	}

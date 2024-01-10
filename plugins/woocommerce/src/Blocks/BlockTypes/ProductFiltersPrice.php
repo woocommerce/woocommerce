@@ -13,13 +13,6 @@ final class ProductFiltersPrice extends AbstractBlock {
 	 */
 	protected $block_name = 'product-filters-price';
 
-	/**
-	 * Interactivity namespace.
-	 *
-	 * @var string
-	 */
-	protected $interactivity_namespace = 'woocommerce/product-filters-price';
-
 	const MIN_PRICE_QUERY_VAR = 'min_price';
 	const MAX_PRICE_QUERY_VAR = 'max_price';
 
@@ -100,7 +93,7 @@ final class ProductFiltersPrice extends AbstractBlock {
 				array(
 					'title'      => $title,
 					'attributes' => array(
-						'data-wc-on--click' => "{$this->interactivity_namespace}::actions.reset",
+						'data-wc-on--click' => "{$this->get_full_block_name()}::actions.reset",
 					),
 				),
 			),
@@ -146,7 +139,7 @@ final class ProductFiltersPrice extends AbstractBlock {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class'               => $show_input_fields && $inline_input ? 'inline-input' : '',
-				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->interactivity_namespace ) ),
+				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
 				'data-wc-context'     => wp_json_encode( $data ),
 			)
 		);

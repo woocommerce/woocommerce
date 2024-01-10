@@ -16,13 +16,6 @@ final class ProductFilters extends AbstractBlock {
 	protected $block_name = 'product-filters';
 
 	/**
-	 * Interactivity namespace.
-	 *
-	 * @var string
-	 */
-	protected $interactivity_namespace = 'woocommerce/product-filters';
-
-	/**
 	 * Cache the current response from the API.
 	 *
 	 * @var array
@@ -97,7 +90,7 @@ final class ProductFilters extends AbstractBlock {
 		$this->current_response = null;
 
 		$attributes_data = array(
-			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->interactivity_namespace ) ),
+			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
 			'class'               => 'wc-block-collection-filters',
 		);
 

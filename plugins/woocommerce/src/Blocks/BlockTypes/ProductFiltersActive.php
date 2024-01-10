@@ -13,13 +13,6 @@ final class ProductFiltersActive extends AbstractBlock {
 	protected $block_name = 'product-filters-active';
 
 	/**
-	 * Interactivity namespace.
-	 *
-	 * @var string
-	 */
-	protected $interactivity_namespace = 'woocommerce/product-filters-active';
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -63,7 +56,7 @@ final class ProductFiltersActive extends AbstractBlock {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class'               => 'wc-block-active-filters',
-				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->interactivity_namespace ) ),
+				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
 				'data-wc-context'     => wp_json_encode( $context ),
 			)
 		);
