@@ -18,6 +18,25 @@ class ProductDetails extends AbstractBlock {
 	 * It isn't necessary register block assets because it is a server side block.
 	 */
 	protected function register_block_type_assets() {
+
+		// Register block styles.
+		register_block_style(
+			'woocommerce/product-details',
+			array(
+				'name'       => 'classic',
+				'label'      => __( 'Classic', 'woocommerce' ),
+				'is_default' => true,
+			)
+		);
+
+		register_block_style(
+			'woocommerce/product-details',
+			array(
+				'name'  => 'minimal',
+				'label' => __( 'Minimal', 'woocommerce' ),
+			)
+		);
+
 		return null;
 	}
 

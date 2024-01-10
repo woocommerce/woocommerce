@@ -1,4 +1,3 @@
-
 ---
 post_title: Classes in WooCommerce
 ---

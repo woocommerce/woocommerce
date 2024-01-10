@@ -2,8 +2,6 @@
 post_title: Conditional tags
 ---
 
-**Note:** This is a **Developer level** doc. If you are unfamiliar with code/tags and resolving potential conflicts, select a [WooExpert or Developer](https://woo.com/customizations/) for assistance. We are unable to provide support for customizations under our [Support Policy](https://woo.com/support-policy/).
-
 ## What are “conditional tags”?
 
 The conditional tags of WooCommerce and WordPress can be used in your template files to change what content is displayed based on what *conditions* the page matches. For example, you may want to display a snippet of text above the shop page. With the `is_shop()` conditional tag, you can.

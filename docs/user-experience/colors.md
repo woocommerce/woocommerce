@@ -1,8 +1,7 @@
 ---
-post_title: User experience guidelines - colors
+post_title: User Experience Guidelines - Colors
+menu_title: Colors
 ---
-
-## Colors
 
 When creating extensions for the WordPress wp-admin, use the core colors, respect the user's WordPress admin color scheme selection, and ensure your designs pass AA level guidelines.
 

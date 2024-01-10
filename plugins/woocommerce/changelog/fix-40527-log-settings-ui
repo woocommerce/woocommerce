@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Make the new log file handler the default logging handler and add a settings screen for configuring the logging system

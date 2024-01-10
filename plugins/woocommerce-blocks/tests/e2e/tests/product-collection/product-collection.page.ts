@@ -115,6 +115,7 @@ class ProductCollectionPage {
 		} );
 		await this.chooseCollectionInPost( collection );
 		await this.refreshLocators( 'editor' );
+		await this.editor.openDocumentSettingsSidebar();
 	}
 
 	async publishAndGoToFrontend() {

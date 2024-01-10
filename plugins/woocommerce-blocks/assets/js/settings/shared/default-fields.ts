@@ -8,7 +8,7 @@ import { ComboboxControlOption } from '@woocommerce/base-components/combobox';
  */
 import { getSetting } from './utils';
 
-export interface AddressField {
+export interface FormField {
 	// The label for the field.
 	label: string;
 	// The label for the field if made optional.
@@ -29,26 +29,38 @@ export interface AddressField {
 	options?: ComboboxControlOption[];
 }
 
-export interface LocaleSpecificAddressField extends Partial< AddressField > {
+export interface LocaleSpecificFormField extends Partial< FormField > {
 	priority?: number | undefined;
 }
 
-export interface CoreAddressFields {
-	first_name: AddressField;
-	last_name: AddressField;
-	company: AddressField;
-	address_1: AddressField;
-	address_2: AddressField;
-	country: AddressField;
-	city: AddressField;
-	state: AddressField;
-	postcode: AddressField;
-	phone: AddressField;
+export interface CoreAddressForm {
+	first_name: FormField;
+	last_name: FormField;
+	company: FormField;
+	address_1: FormField;
+	address_2: FormField;
+	country: FormField;
+	city: FormField;
+	state: FormField;
+	postcode: FormField;
+	phone: FormField;
 }
 
-export type AddressFields = CoreAddressFields & Record< string, AddressField >;
+export interface CoreContactForm {
+	email: FormField;
+}
 
-export type AddressType = 'billing' | 'shipping';
+export type AddressForm = CoreAddressForm & Record< string, FormField >;
+export type ContactForm = CoreContactForm & Record< string, FormField >;
+export type FormFields = AddressForm & ContactForm;
+export type AddressFormValues = Omit< ShippingAddress, 'email' >;
+export type ContactFormValues = { email: string };
+export type AdditionalInformationFormValues = Record< string, string >;
+export type FormType =
+	| 'billing'
+	| 'shipping'
+	| 'contact'
+	| 'additional-information';
 
 export interface CoreAddress {
 	first_name: string;
@@ -63,21 +75,29 @@ export interface CoreAddress {
 	phone: string;
 }
 
-export type ShippingAddress = CoreAddress & Record< string, string | boolean >;
+export type AdditionalValues = Record<
+	Exclude< string, keyof CoreAddress >,
+	string | boolean
+>;
 
-export type KeyedAddressField = AddressField & {
-	key: keyof AddressFields;
-	errorMessage?: string;
-};
+export type ShippingAddress = CoreAddress;
 export interface BillingAddress extends ShippingAddress {
 	email: string;
 }
-export type CountryAddressFields = Record< string, AddressFields >;
+
+export type KeyedFormField = FormField & {
+	key: keyof FormFields;
+	errorMessage?: string;
+};
+
+export type CountryAddressForm = Record< string, FormFields >;
+
+export type FormFieldsConfig = Record< keyof FormFields, Partial< FormField > >;
 
 /**
  * Default field properties.
  */
-export const defaultFields: AddressFields =
-	getSetting< AddressFields >( 'defaultFields' );
+export const defaultFields: FormFields =
+	getSetting< FormFields >( 'defaultFields' );
 
 export default defaultFields;

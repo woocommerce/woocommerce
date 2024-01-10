@@ -10,7 +10,7 @@ const selectors = {
 		zoomWhileHoveringSetting:
 			"xpath=//label[contains(text(), 'Zoom while hovering')]/preceding-sibling::span/input",
 		fullScreenOnClickSetting:
-			"xpath=//label[contains(text(), 'Full-screen when clicked')]/preceding-sibling::span/input",
+			"xpath=//label[contains(text(), 'Open pop-up when clicked')]/preceding-sibling::span/input",
 	},
 };
 
