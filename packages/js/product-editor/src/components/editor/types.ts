@@ -24,7 +24,6 @@ export type LayoutTemplate = {
 export type ProductEditorSettings = Partial<
 	EditorSettings & EditorBlockListSettings
 > & {
-	layoutTemplates: LayoutTemplate[];
 	productTemplates: ProductTemplate[];
 	productTemplate?: ProductTemplate;
 };
