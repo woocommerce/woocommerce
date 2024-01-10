@@ -15,6 +15,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { TRACKS_SOURCE } from '../../../constants';
 import { VariationActionsMenuItemProps } from '../types';
 import { handlePrompt } from '../../../utils/handle-prompt';
+import { VariationActionsMenuItem } from '../variation-actions-menu-item';
 
 const MODAL_CLASS_NAME = 'downloads_menu_item__upload_files_modal';
 const MODAL_WRAPPER_CLASS_NAME =
@@ -28,6 +29,7 @@ export function DownloadsMenuItem( {
 	selection,
 	onChange,
 	onClose,
+	type = 'single-variation',
 }: VariationActionsMenuItemProps ) {
 	const ids = Array.isArray( selection )
 		? selection.map( ( { id } ) => id )
@@ -199,6 +201,10 @@ export function DownloadsMenuItem( {
 					>
 						{ __( 'Set download expiry', 'woocommerce' ) }
 					</MenuItem>
+					<VariationActionsMenuItem.Slot
+						group={ 'downloads' }
+						type={ type }
+					/>
 				</div>
 			) }
 		/>
