@@ -28,6 +28,8 @@ import {
 	actions as introActions,
 } from './intro';
 import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
+import { DesignWithoutAi } from './design-without-ai';
+
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
 import {
 	events as transitionalEvents,
@@ -194,6 +196,13 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					},
 				},
 				{
+					target: 'designWithoutAi',
+					cond: {
+						type: 'hasStepInUrl',
+						step: 'design',
+					},
+				},
+				{
 					target: 'assemblerHub',
 					cond: {
 						type: 'hasStepInUrl',
@@ -222,64 +231,59 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						// eslint-disable-next-line xstate/prefer-always
 						'': [
 							{
-								target: 'intro',
+								target: 'fetchIntroData',
 								cond: 'isNotWooExpress',
 								actions: 'assignNoAI',
 							},
 							{
-								target: 'preIntro',
+								target: 'checkAiStatus',
 								cond: 'isWooExpress',
 							},
 						],
 					},
 				},
-				preIntro: {
-					type: 'parallel',
+				checkAiStatus: {
+					initial: 'pending',
 					states: {
-						checkAiStatus: {
-							initial: 'pending',
-							states: {
-								pending: {
-									invoke: {
-										src: 'fetchAiStatus',
-										onDone: {
-											actions: 'assignAiStatus',
-											target: 'success',
-										},
-										onError: {
-											actions: 'assignAiOffline',
-											target: 'success',
-										},
-									},
+						pending: {
+							invoke: {
+								src: 'fetchAiStatus',
+								onDone: {
+									actions: 'assignAiStatus',
+									target: 'success',
 								},
-								success: { type: 'final' },
+								onError: {
+									actions: 'assignAiOffline',
+									target: 'success',
+								},
 							},
 						},
-						fetchIntroData: {
-							initial: 'pending',
-							states: {
-								pending: {
-									invoke: {
-										src: 'fetchIntroData',
-										onError: {
-											actions:
-												'assignFetchIntroDataError',
-											target: 'success',
-										},
-										onDone: {
-											target: 'success',
-											actions: [
-												'assignThemeData',
-												'assignActiveThemeHasMods',
-												'assignCustomizeStoreCompleted',
-												'assignCurrentThemeIsAiGenerated',
-											],
-										},
-									},
+						success: { type: 'final' },
+					},
+					onDone: 'fetchIntroData',
+				},
+				fetchIntroData: {
+					initial: 'pending',
+					states: {
+						pending: {
+							invoke: {
+								src: 'fetchIntroData',
+								onError: {
+									actions: 'assignFetchIntroDataError',
+									target: 'success',
 								},
-								success: { type: 'final' },
+								onDone: {
+									target: 'success',
+									actions: [
+										'assignThemeData',
+										'assignActiveThemeHasMods',
+										'assignCustomizeStoreCompleted',
+										'assignCurrentThemeIsAiGenerated',
+									],
+								},
 							},
 						},
+						success: { type: 'final' },
 					},
 					onDone: 'intro',
 				},
@@ -297,6 +301,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					actions: [ 'recordTracksDesignWithAIClicked' ],
 					target: 'designWithAi',
 				},
+				DESIGN_WITHOUT_AI: {
+					actions: [ 'recordTracksDesignWithAIClicked' ],
+					target: 'designWithoutAi',
+				},
 				SELECTED_NEW_THEME: {
 					actions: [ 'recordTracksThemeSelected' ],
 					target: 'appearanceTask',
@@ -310,6 +318,22 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						'recordTracksBrowseAllThemesClicked',
 						'redirectToThemes',
 					],
+				},
+			},
+		},
+		designWithoutAi: {
+			initial: 'preDesignWithoutAi',
+			states: {
+				preDesignWithoutAi: {
+					always: {
+						target: 'designWithoutAi',
+					},
+				},
+				designWithoutAi: {
+					entry: [ { type: 'updateQueryStep', step: 'design' } ],
+					meta: {
+						component: DesignWithoutAi,
+					},
 				},
 			},
 		},
