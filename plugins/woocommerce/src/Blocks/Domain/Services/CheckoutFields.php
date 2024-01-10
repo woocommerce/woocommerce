@@ -476,34 +476,33 @@ class CheckoutFields {
 	/**
 	 * Validate an additional field against any custom validation rules. The result should be a WP_Error or true.
 	 *
-	 * @param true|\WP_Error $result       The current result of validating the field against the schema (before any custom validation has been applied).
-	 * @param string         $key          The key of the field.
-	 * @param mixed          $field_value  The value of the field.
-	 * @param array          $field_schema The schema of the field.
+	 * @param string $key          The key of the field.
+	 * @param mixed  $field_value  The value of the field.
+	 * @param array  $field_schema The schema of the field.
 	 *
 	 * @since 8.6.0
 	 */
-	public function validate_field( $result, $key, $field_value, $field_schema ) {
+	public function validate_field( $key, $field_value, $field_schema ) {
 
 		/**
 		 * Filter the result of validating an additional field.
 		 *
-		 * @param true|\WP_Error $result       The current result of validating the field.
-		 * @param mixed          $field_value  The value of the field.
-		 * @param array          $field_schema The schema of the field.
-		 * @param string         $key          The key of the field.
+		 * @param \WP_Error $error        A WP_Error that extensions may add errors to.
+		 * @param mixed     $field_value  The value of the field.
+		 * @param array     $field_schema The schema of the field.
+		 * @param string    $key          The key of the field.
 		 *
 		 * @since 8.6.0
 		 */
-		$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, $result, $field_value, $field_schema, $key );
+		$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, new \WP_Error(), $field_value, $field_schema, $key );
 
-		if ( is_wp_error( $filtered_result ) || true === $filtered_result ) {
+		if ( is_wp_error( $filtered_result ) ) {
 			return $filtered_result;
 		}
 
 		// Show a warning and return the original result from schema validation if the filter returns something unexpected.
-		_doing_it_wrong( 'woocommerce_blocks_validate_additional_field_' . $key, 'The filter should return a WP_Error or true.', '8.6.0' );
-		return $result;
+		_doing_it_wrong( esc_html( 'woocommerce_blocks_validate_additional_field_' . $key ), 'The filter should return a WP_Error.', '8.6.0' );
+		return new \WP_Error();
 
 	}
 
