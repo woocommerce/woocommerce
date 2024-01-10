@@ -91,8 +91,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				WOO_AI_PLUGIN_NAME,
 				preferencesChatHistory
 			);
-			// check that each message text property is a string, otherwise we'll get an error when rendering
-			// unset the message in question if it's not a string
+			// Check that each message text property is a string, otherwise we'll get an error when rendering.
 			if ( storedMessages ) {
 				const parsedMessages = JSON.parse( storedMessages );
 				const filteredMessages = parsedMessages.filter(

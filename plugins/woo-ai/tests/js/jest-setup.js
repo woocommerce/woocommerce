@@ -16,4 +16,10 @@ afterEach( () => {
 	jest.clearAllTimers();
 } );
 
-global.ResizeObserver = require( 'resize-observer-polyfill' );
+window.HTMLElement.prototype.scrollIntoView = jest.fn();
+const localStorageMock = {
+	getItem: jest.fn(),
+	setItem: jest.fn(),
+	clear: jest.fn(),
+};
+global.localStorage = localStorageMock;

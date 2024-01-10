@@ -13,11 +13,11 @@ import {
 import makeWCRestApiCall from '../utils/wcRestApi';
 
 interface ApiResponse {
-	answer: any; // Replace 'any' with a more specific type if available
+	answer: any;
 	function_id: string;
 	run_id: string;
 	function_name: string;
-	function_args: any; // Replace 'any' with a more specific type if available
+	function_args: any;
 	status: string;
 }
 
@@ -63,20 +63,6 @@ const useHandleRequiresAction = ( {
 			if ( answer.function_name === 'makeWCRestApiCall' ) {
 				const functionArguments = answer.function_args;
 				try {
-					if (
-						[ 'DELETE', 'PUT' ].includes(
-							functionArguments.httpVerb
-						)
-					) {
-						recordWooAIAssistantTracks( 'rest_api_delete', {
-							message: userQuery,
-							functionArguments,
-						} );
-						throw new Error(
-							"I'm sorry, but I cannot delete or modify data as I'm still an experimental feature."
-						);
-					}
-
 					const responseBody = await makeWCRestApiCall(
 						functionArguments
 					);
@@ -120,6 +106,7 @@ const useHandleRequiresAction = ( {
 					);
 				}
 
+				// At this point, if there's an error, we don't continue with a summary.
 				if ( isResponseError ) {
 					setMessages( ( prevMessages ) => [
 						...prevMessages,
@@ -134,7 +121,27 @@ const useHandleRequiresAction = ( {
 					return Promise.reject();
 				}
 
-				// Additional logic for handling summary can be added here if needed
+				try {
+					const summaryPrompt = `Provide a helpful answer for the original query using the resulting data from the API request. The original query was "${ userQuery }". Parse through the data and find the most relevant information to answer the query and provide it in a human-readable format. The data from the result of the API request is: ${ JSON.stringify(
+						message
+					) }`;
+
+					const summaryFormData = prepareFormData(
+						summaryPrompt,
+						token
+					);
+
+					const summaryResponse = ( await apiFetch( {
+						url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard',
+						method: 'POST',
+						body: summaryFormData,
+					} ) ) as any;
+					message = summaryResponse.answer as string;
+				} catch ( error ) {
+					handleError(
+						"I believe that I was able to accomplish the task you requested, but I'm having trouble summarizing the results."
+					);
+				}
 			}
 			return message;
 		},

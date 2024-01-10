@@ -13,6 +13,7 @@
 	"devDependencies": {
 		"@babel/preset-react": "7.23.3",
 		"@babel/preset-typescript": "7.23.2",
+		"@formkit/auto-animate": "^0.8.1",
 		"@svgr/webpack": "^8.1.0",
 		"@testing-library/dom": "9.3.3",
 		"@testing-library/jest-dom": "5.16.5",
@@ -33,6 +34,7 @@
 		"babel-jest": "~27.5.1",
 		"eslint": "^8.55.0",
 		"prettier": "npm:wp-prettier@^2.8.5",
+		"resize-observer-polyfill": "1.5.1",
 		"ts-loader": "^9.5.1",
 		"typescript": "^5.3.3",
 		"uglify-js": "^3.17.4",
@@ -65,7 +67,6 @@
 	"dependencies": {
 		"@automattic/tour-kit": "^1.1.1",
 		"@emotion/react": "^11.11.1",
-		"@formkit/auto-animate": "^0.8.1",
 		"@types/prop-types": "^15.7.11",
 		"@types/react-outside-click-handler": "^1.3.3",
 		"@woocommerce/ai": "workspace:0.1.0-beta.0",
