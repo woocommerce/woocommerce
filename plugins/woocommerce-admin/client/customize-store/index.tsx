@@ -226,21 +226,17 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			initial: 'flowType',
 			states: {
 				flowType: {
-					on: {
-						// Always is not available in the current version of XState.
-						// eslint-disable-next-line xstate/prefer-always
-						'': [
-							{
-								target: 'fetchIntroData',
-								cond: 'isNotWooExpress',
-								actions: 'assignNoAI',
-							},
-							{
-								target: 'checkAiStatus',
-								cond: 'isWooExpress',
-							},
-						],
-					},
+					always: [
+						{
+							target: 'fetchIntroData',
+							cond: 'isNotWooExpress',
+							actions: 'assignNoAI',
+						},
+						{
+							target: 'checkAiStatus',
+							cond: 'isWooExpress',
+						},
+					],
 				},
 				checkAiStatus: {
 					initial: 'pending',
@@ -361,8 +357,17 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'checkAiStatus',
+			initial: 'preCheckAiStatus',
 			states: {
+				preCheckAiStatus: {
+					always: [
+						{
+							cond: 'isWooExpress',
+							target: 'checkAiStatus',
+						},
+						{ cond: 'isNotWooExpress', target: 'assemblerHub' },
+					],
+				},
 				checkAiStatus: {
 					invoke: {
 						src: 'fetchAiStatus',
@@ -406,6 +411,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				},
 				GO_BACK_TO_DESIGN_WITH_AI: {
 					target: 'designWithAi',
+				},
+				GO_BACK_TO_DESIGN_WITHOUT_AI: {
+					target: 'intro',
 				},
 			},
 		},

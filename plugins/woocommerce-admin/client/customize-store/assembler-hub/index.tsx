@@ -61,17 +61,18 @@ type CustomizeStoreComponentProps = Parameters< CustomizeStoreComponent >[ 0 ];
 
 export const CustomizeStoreContext = createContext< {
 	sendEvent: CustomizeStoreComponentProps[ 'sendEvent' ];
-	context: Partial< CustomizeStoreComponentProps[ 'context' ] >;
+	context: CustomizeStoreComponentProps[ 'context' ];
 	currentState: CustomizeStoreComponentProps[ 'currentState' ];
 } >( {
 	sendEvent: () => {},
-	context: {},
+	context: {} as CustomizeStoreComponentProps[ 'context' ],
 	currentState: 'assemblerHub',
 } );
 
 export type events =
 	| { type: 'FINISH_CUSTOMIZATION' }
-	| { type: 'GO_BACK_TO_DESIGN_WITH_AI' };
+	| { type: 'GO_BACK_TO_DESIGN_WITH_AI' }
+	| { type: 'GO_BACK_TO_DESIGN_WITHOUT_AI' };
 
 const initializeAssembleHub = () => {
 	if ( ! window.wcBlockSettings ) {
