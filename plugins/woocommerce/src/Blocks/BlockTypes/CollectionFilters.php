@@ -1,8 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 
 /**
  * CollectionFilters class.
@@ -51,6 +51,23 @@ final class CollectionFilters extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_action( 'render_block_context', array( $this, 'modify_inner_blocks_context' ), 10, 3 );
+	}
+
+	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
+		global $pagenow;
+		parent::enqueue_data( $attributes );
+
+		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme(), true );
+		$this->asset_data_registry->add( 'isProductArchive', is_shop() || is_product_taxonomy(), true );
+		$this->asset_data_registry->add( 'isSiteEditor', 'site-editor.php' === $pagenow, true );
+		$this->asset_data_registry->add( 'isWidgetEditor', 'widgets.php' === $pagenow || 'customize.php' === $pagenow, true );
 	}
 
 	/**
@@ -144,21 +161,144 @@ final class CollectionFilters extends AbstractBlock {
 			return array();
 		}
 
-		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data(
-			add_query_arg(
-				array_merge(
-					$this->get_formatted_products_params( $block->context['query'] ?? array() ),
-					$collection_data_params,
-				),
-				'/wc/store/v1/products/collection-data'
-			)
+		$data = array(
+			'min_price'           => null,
+			'max_price'           => null,
+			'attribute_counts'    => null,
+			'stock_status_counts' => null,
+			'rating_counts'       => null,
 		);
 
-		if ( ! empty( $response['body'] ) ) {
-			return json_decode( wp_json_encode( $response['body'] ), true );
+		$filters = Package::container()->get( QueryFilters::class );
+
+		if ( ! empty( $block->context['query'] ) && ! $block->context['query']['inherit'] ) {
+			$query_vars = build_query_vars_from_query_block( $block, 1 );
+		} else {
+			global $wp_query;
+			$query_vars = array_filter( $wp_query->query_vars );
 		}
 
-		return array();
+		if ( ! empty( $collection_data_params['calculate_price_range'] ) ) {
+			$filter_query_vars = $query_vars;
+
+			unset( $filter_query_vars['min_price'], $filter_query_vars['max_price'] );
+
+			if ( ! empty( $filter_query_vars['meta_query'] ) ) {
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				$filter_query_vars['meta_query'] = $this->remove_query_array( $filter_query_vars['meta_query'], 'key', '_price' );
+			}
+
+			$price_results       = $filters->get_filtered_price( $filter_query_vars );
+			$data['price_range'] = array(
+				'min_price' => intval( floor( $price_results->min_price ?? 0 ) ),
+				'max_price' => intval( ceil( $price_results->max_price ?? 0 ) ),
+			);
+		}
+
+		if ( ! empty( $collection_data_params['calculate_stock_status_counts'] ) ) {
+			$filter_query_vars = $query_vars;
+
+			unset( $filter_query_vars['filter_stock_status'] );
+
+			if ( ! empty( $filter_query_vars['meta_query'] ) ) {
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				$filter_query_vars['meta_query'] = $this->remove_query_array( $filter_query_vars['meta_query'], 'key', '_stock_status' );
+			}
+
+			$counts = $filters->get_stock_status_counts( $filter_query_vars );
+
+			$data['stock_status_counts'] = array();
+
+			foreach ( $counts as $key => $value ) {
+				$data['stock_status_counts'][] = array(
+					'status' => $key,
+					'count'  => $value,
+				);
+			}
+		}
+
+		if ( ! empty( $collection_data_params['calculate_rating_counts'] ) ) {
+			// Regenerate the products query vars without rating filter.
+			$filter_query_vars = $query_vars;
+
+			if ( ! empty( $filter_query_vars['tax_query'] ) ) {
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				$filter_query_vars['tax_query'] = $this->remove_query_array( $filter_query_vars['tax_query'], 'rating_filter', true );
+			}
+
+			$counts                = $filters->get_rating_counts( $filter_query_vars );
+			$data['rating_counts'] = array();
+
+			foreach ( $counts as $key => $value ) {
+				$data['rating_counts'][] = array(
+					'rating' => $key,
+					'count'  => $value,
+				);
+			}
+		}
+
+		if ( ! empty( $collection_data_params['calculate_attribute_counts'] ) ) {
+			foreach ( $collection_data_params['calculate_attribute_counts'] as $attributes_to_count ) {
+				if ( ! isset( $attributes_to_count['taxonomy'] ) ) {
+					continue;
+				}
+
+				$filter_query_vars = $query_vars;
+
+				if ( 'and' !== strtolower( $attributes_to_count['queryType'] ) ) {
+					unset( $filter_query_vars[ 'filter_' . str_replace( 'pa_', '', $attributes_to_count['taxonomy'] ) ] );
+				}
+
+				unset(
+					$filter_query_vars['taxonomy'],
+					$filter_query_vars['term']
+				);
+
+				if ( ! empty( $filter_query_vars['tax_query'] ) ) {
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+					$filter_query_vars['tax_query'] = $this->remove_query_array( $filter_query_vars['tax_query'], 'taxonomy', $attributes_to_count['taxonomy'] );
+				}
+
+				$counts = $filters->get_attribute_counts( $filter_query_vars, $attributes_to_count['taxonomy'] );
+
+				foreach ( $counts as $key => $value ) {
+					$data['attribute_counts'][] = array(
+						'term'  => $key,
+						'count' => $value,
+					);
+				}
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Remove query array from tax or meta query by searching for arrays that
+	 * contain exact key => value pair.
+	 *
+	 * @param array  $queries tax_query or meta_query.
+	 * @param string $key     Array key to search for.
+	 * @param mixed  $value   Value to compare with search result.
+	 *
+	 * @return array
+	 */
+	private function remove_query_array( $queries, $key, $value ) {
+		if ( empty( $queries ) ) {
+			return $queries;
+		}
+
+		foreach ( $queries as $query_key => $query ) {
+			if ( isset( $query[ $key ] ) && $query[ $key ] === $value ) {
+				unset( $queries[ $query_key ] );
+			}
+
+			if ( isset( $query['relation'] ) ) {
+				$queries[ $query_key ] = $this->remove_query_array( $query, $key, $value );
+			}
+		}
+
+		return $queries;
 	}
 
 	/**
@@ -192,101 +332,6 @@ final class CollectionFilters extends AbstractBlock {
 		}
 
 		return $results;
-	}
-
-	/**
-	 * Get formatted products params for ProductCollectionData route from the
-	 * query context.
-	 *
-	 * @param array $query The query context.
-	 * @return array
-	 */
-	private function get_formatted_products_params( $query ) {
-		$params = array();
-
-		if ( empty( $query['isProductCollectionBlock'] ) ) {
-			return $params;
-		}
-
-		/**
-		 * The following params can be passed directly to Store API endpoints.
-		 */
-		$shared_params = array( 'exclude', 'offset', 'search' );
-
-		/**
-		 * The following params just need to transform the key, their value can
-		 * be passed as it is to the Store API.
-		 */
-		$mapped_params = array(
-			'woocommerceStockStatus'        => 'stock_status',
-			'woocommerceOnSale'             => 'on_sale',
-			'woocommerceHandPickedProducts' => 'include',
-		);
-
-		$taxonomy_mapper = function( $key ) {
-			$mapping = array(
-				'product_tag' => 'tag',
-				'product_cat' => 'category',
-			);
-
-			return $mapping[ $key ] ?? '_unstable_tax_' . $key;
-		};
-
-		array_walk(
-			$query,
-			function( $value, $key ) use ( $shared_params, $mapped_params, $taxonomy_mapper, &$params ) {
-				if ( in_array( $key, $shared_params, true ) ) {
-					$params[ $key ] = $value;
-				}
-
-				if ( in_array( $key, array_keys( $mapped_params ), true ) ) {
-					$params[ $mapped_params[ $key ] ] = $value;
-				}
-
-				/**
-				 * The value of taxQuery and woocommerceAttributes need additional
-				 * transformation to the shape that Store API accepts.
-				 */
-				if ( 'taxQuery' === $key && is_array( $value ) ) {
-					array_walk(
-						$value,
-						function( $terms, $taxonomy ) use ( $taxonomy_mapper, &$params ) {
-							$params[ $taxonomy_mapper( $taxonomy ) ] = implode( ',', $terms );
-						}
-					);
-				}
-
-				if ( 'woocommerceAttributes' === $key && is_array( $value ) ) {
-					array_walk(
-						$value,
-						function( $attribute ) use ( &$params ) {
-							$params['attributes'][] = array(
-								'attribute' => $attribute['taxonomy'],
-								'term_id'   => $attribute['termId'],
-							);
-						}
-					);
-				}
-			}
-		);
-
-		/**
-		 * Product Collection determines the product visibility based on stock
-		 * statuses. We need to pass the catalog_visibility param to the Store
-		 * API to make sure the product visibility is correct.
-		 */
-		$params['catalog_visibility'] = is_search() ? 'search' : 'visible';
-
-		/**
-		* `false` values got removed from `add_query_arg`, so we need to convert
-		* them to numeric.
-		*/
-		return array_map(
-			function( $param ) {
-				return is_bool( $param ) ? +$param : $param;
-			},
-			$params
-		);
 	}
 
 }

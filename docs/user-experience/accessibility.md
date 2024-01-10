@@ -1,5 +1,6 @@
 ---
-post_title: User experience guidelines - accessibility
+post_title: User Experience Guidelines - Accessibility
+menu_title: Accessibility
 ---
 
 ## Accessibility

@@ -50,6 +50,7 @@ import { CustomizeStoreContext } from './';
 import { recordEvent } from '@woocommerce/tracks';
 import { AiOfflineModal } from '~/customize-store/assembler-hub/onboarding-tour/ai-offline-modal';
 import { useQuery } from '@woocommerce/navigation';
+import { FlowType } from '../types';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -62,7 +63,7 @@ export const Layout = () => {
 		CustomizeStoreContext
 	);
 
-	const aiOnline = context.aiOnline;
+	const aiOnline = context.flowType === FlowType.AIOnline;
 	const { customizing } = useQuery();
 
 	const [ showAiOfflineModal, setShowAiOfflineModal ] = useState(
@@ -130,7 +131,7 @@ export const Layout = () => {
 						hasCompleteSurvey={
 							!! context?.transitionalScreen?.hasCompleteSurvey
 						}
-						aiOnline={ !! context?.aiOnline }
+						aiOnline={ context?.flowType === FlowType.AIOnline }
 					/>
 				</EntityProvider>
 			</EntityProvider>

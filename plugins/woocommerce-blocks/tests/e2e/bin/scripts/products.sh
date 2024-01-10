@@ -20,3 +20,8 @@ image1=$(wp post list --post_type=attachment --field=ID --name="hoodie-with-logo
 image2=$(wp post list --post_type=attachment --field=ID --name="hoodie-green-1.jpg" --format=ids)
 image3=$(wp post list --post_type=attachment --field=ID --name="hoodie-2.jpg" --format=ids)
 wp post meta update $post_id _product_image_gallery "$image1,$image2,$image3"
+
+# This is a non-hacky work around to set up the cross sells product.
+product_id=$(wp post list --post_type=product --field=ID --name="Cap" --format=ids)
+crossell_id=$(wp post list --post_type=product --field=ID --name="Beanie" --format=ids)
+wp post meta update $crossell_id _crosssell_ids "$product_id"

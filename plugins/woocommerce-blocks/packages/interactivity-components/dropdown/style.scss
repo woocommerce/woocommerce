@@ -1,145 +1,91 @@
-@import "../../../assets/js/blocks/shared/styles/style";
-
 .wc-interactivity-dropdown {
-	@include includeFormTokenFieldFix();
 	position: relative;
-	display: flex;
-	gap: $gap;
-	align-items: flex-start;
+	width: 100%;
+	gap: 16px;
 
-	.wc-block-components-filter-submit-button {
-		height: 36px;
-		line-height: 1;
-	}
+	color: inherit;
+	font-family: inherit;
+	font-size: inherit;
+	font-style: inherit;
+	font-weight: inherit;
+	letter-spacing: inherit;
+	line-height: inherit;
+	text-decoration: inherit;
+	text-transform: inherit;
 
-	> svg {
-		position: absolute;
-		right: 8px;
-		top: 50%;
-		transform: translateY(-50%);
-		pointer-events: none;
-	}
+	.wc-interactivity-dropdown__selected-badge {
+		@include font-size(smaller);
+		padding: 0.25em 0.25em 0.25em 0.75em;
+		margin: 2px 0;
+		border-radius: em(20px);
+		border: 1px solid $black;
+		display: inline-flex;
+		align-items: center;
+		gap: em(4px);
 
-	.wc-blocks-components-form-token-field-wrapper {
-		flex-grow: 1;
-		max-width: unset;
-		width: 0;
-		height: max-content;
-
-		&:not(.is-loading) {
-			border: 1px solid $gray-700 !important;
-			border-radius: 4px;
+		.wc-interactivity-dropdown__badge-text {
+			margin-right: 0.25em;
 		}
 
-		&.is-loading {
+		.wc-interactivity-dropdown__badge-remove {
+			background-color: $gray-200;
+			cursor: pointer;
+			border-radius: em(20px);
+		}
+	}
+
+	.wc-interactivity-dropdown__dropdown {
+		.wc-interactivity-dropdown__dropdown-selection {
+			display: flex;
+			padding: 4px 30px 4px 8px;
+			border: 1px solid $gray-700;
 			border-radius: em(4px);
-		}
+			cursor: pointer;
+			align-items: center;
 
-		.components-form-token-field {
-			border-radius: inherit;
-		}
-	}
-
-	.wc-blocks-components-form-token-field-wrapper .components-form-token-field__input-container {
-		@include reset-color();
-		@include reset-typography();
-		border: 0;
-		padding: $gap-smaller;
-		border-radius: inherit;
-
-		.components-form-token-field__input {
-			@include font-size(small);
-
-			&::placeholder {
-				color: $black;
+			.wc-interactivity-dropdown__placeholder {
+				@include font-size(smaller);
+				margin: 0.25em 0;
+				display: flex;
+				justify-content: center;
+				flex-direction: column;
+				height: 30px;
 			}
 		}
 
-		.components-form-token-field__suggestions-list {
-			border: 1px solid $gray-700;
-			border-radius: 4px;
-			margin-top: $gap-smaller;
-			max-height: 21em;
+		.wc-interactivity-dropdown__svg-container {
+			> svg {
+				position: absolute;
+				right: 8px;
+				top: 50%;
+				transform: translateY(-50%);
+				pointer-events: none;
+			}
+		}
 
-			.components-form-token-field__suggestion {
-				color: $black;
-				border: 1px solid $gray-400;
-				border-radius: 4px;
+		.wc-interactivity-dropdown__dropdown-list {
+			position: absolute;
+			width: 100%;
+			background: $white;
+			border: 1px solid $gray-700;
+			border-radius: em(4px);
+			z-index: 1000;
+			margin-top: $gap-smaller;
+			box-sizing: border-box;
+
+			.wc-interactivity-dropdown__dropdown-option {
 				margin: $gap-small;
 				padding: $gap-small;
-
-				&.is-selected,
-				&:hover {
-					background: $gray-100;
-					color: $gray-800;
+				border-radius: em(4px);
+				border: 1px solid $gray-400;
+				@include font-size(small);
+				cursor: pointer;
+				&:hover,
+				&:focus,
+				&.is-selected {
+					background-color: $gray-100;
 				}
 			}
 		}
-
-		.components-form-token-field__token,
-		.components-form-token-field__suggestion {
-			@include font-size(small);
-		}
-	}
-
-	.wc-block-components-product-rating {
-		margin-bottom: 0;
-	}
-
-	.wc-blocks-components-form-token-field-wrapper:not(.single-selection) .components-form-token-field__input-container {
-		padding: $gap-smallest 30px $gap-smallest  $gap-smaller;
-
-		.components-form-token-field__token-text {
-			background-color: $white;
-			border: 1px solid;
-			border-right: 0;
-			border-radius: 25px 0 0 25px;
-			padding: em($gap-smallest) em($gap-smaller) em($gap-smallest) em($gap-small);
-			line-height: 22px;
-		}
-
-		> .components-form-token-field__input {
-			margin: em($gap-smallest) 0;
-		}
-
-		.components-button.components-form-token-field__remove-token {
-			background-color: $white;
-			border: 1px solid;
-			border-left: 0;
-			border-radius: 0 25px 25px 0;
-			padding: 1px em($gap-smallest) 0 0;
-
-			&.has-icon svg {
-				background-color: $gray-200;
-				border-radius: 25px;
-			}
-		}
-	}
-
-	.wc-block-stock-filter__actions {
-		align-items: center;
-		display: flex;
-		gap: $gap;
-		justify-content: flex-end;
-		margin-top: $gap;
-
-		// The specificity here is needed to overwrite the margin-top that is inherited on WC block template pages such as Shop.
-		button[type="submit"]:not(.wp-block-search__button).wc-block-components-filter-submit-button {
-			margin-left: 0;
-			margin-top: 0;
-			@include font-size(small);
-		}
-
-		.wc-block-stock-filter__button {
-			margin-top: em($gap-smaller);
-			padding: em($gap-smaller) em($gap);
-			@include font-size(small);
-		}
-	}
-
-	.editor-styles-wrapper .wc-block-stock-filter .wc-block-stock-filter__button {
-		margin-top: em($gap-smaller);
-		padding: em($gap-smaller) em($gap);
-		@include font-size(small);
 	}
 }

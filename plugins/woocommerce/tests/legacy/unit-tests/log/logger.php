@@ -5,12 +5,45 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\Jetpack\Constants;
+
 /**
  * Class WC_Tests_Logger
  * @package WooCommerce\Tests\Log
  * @since 2.3
  */
 class WC_Tests_Logger extends WC_Unit_Test_Case {
+	/**
+	 * Set up to do before running any of these tests.
+	 *
+	 * @return void
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+		self::delete_all_log_files();
+	}
+
+	/**
+	 * Tear down after each test.
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		self::delete_all_log_files();
+		parent::tearDown();
+	}
+
+	/**
+	 * Delete all existing log files.
+	 *
+	 * @return void
+	 */
+	private static function delete_all_log_files(): void {
+		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		foreach ( $files as $file ) {
+			unlink( $file );
+		}
+	}
 
 	/**
 	 * Test add().
@@ -48,13 +81,13 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_clear() {
-		// phpcs:disable WordPress.WP.AlternativeFunctions
-		$file = wc_get_log_file_path( 'unit-tests' );
-		file_put_contents( $file, 'Test file content.' );
+		$path = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . 'unit-tests.log';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
+		file_put_contents( $path, 'Test file content.' );
+		$this->assertFileExists( $path );
 		$log = new WC_Logger();
 		$log->clear( 'unit-tests' );
-		$this->assertEquals( '', file_get_contents( $file ) );
-		// phpcs:enable WordPress.WP.AlternativeFunctions
+		$this->assertFileDoesNotExist( $path );
 	}
 
 	/**

@@ -244,6 +244,7 @@ module.exports = {
 				'plugin:@woocommerce/eslint-plugin/recommended',
 				'plugin:you-dont-need-lodash-underscore/compatible',
 				'plugin:@typescript-eslint/recommended',
+				'plugin:import/errors',
 			],
 			rules: {
 				'@typescript-eslint/no-explicit-any': 'error',
@@ -278,6 +279,31 @@ module.exports = {
 					},
 				],
 				'react/react-in-jsx-scope': 'off',
+				// Explicitly turning this on because we need to catch import errors that we don't catch with TS right now
+				// due to it only being run in a checking capacity.
+				'import/named': 'error',
+				//  These should absolutely be linted, but due to there being a large number
+				//  of changes needed to fix for example `export *` of packages with only default exports
+				//  we will leave these as warnings for now until those can be fixed.
+				'import/namespace': 'warn',
+				'import/export': 'warn',
+			},
+			settings: {
+				'import/parsers': {
+					'@typescript-eslint/parser': [ '.ts', '.tsx' ],
+				},
+				'import/resolver': {
+					typescript: {}, // this loads <rootdir>/tsconfig.json to eslint
+				},
+				'import/core-modules': [
+					// We should lint these modules imports, but the types are way out of date.
+					// To support us not inadvertently introducing new import errors this lint exists, but to avoid
+					// having to fix hundreds of import errors for @wordpress packages we ignore them.
+					'@wordpress/components',
+					'@wordpress/element',
+					'@wordpress/blocks',
+					'@wordpress/notices',
+				],
 			},
 		},
 		{
