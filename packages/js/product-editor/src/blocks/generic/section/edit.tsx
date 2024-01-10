@@ -37,7 +37,7 @@ export function SectionBlockEdit( {
 	);
 	const SectionTagName = title ? 'fieldset' : 'div';
 	const HeadingTagName = SectionTagName === 'fieldset' ? 'legend' : 'div';
-	const tooltipClassName = `wp-block-woocommerce-product-section__heading-tooltip-${ clientId }`;
+	const tooltipClassName = `wp-block-woocommerce-product-section__heading-tooltip`;
 
 	return (
 		<SectionTagName { ...blockProps }>
