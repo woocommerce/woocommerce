@@ -17,6 +17,7 @@ import { InventoryMenuItem } from '../inventory-menu-item';
 import { ShippingMenuItem } from '../shipping-menu-item';
 import { ToggleVisibilityMenuItem } from '../toggle-visibility-menu-item';
 import { DownloadsMenuItem } from '../downloads-menu-item';
+import { VariationActionsMenuItem } from '../variation-actions-menu-item';
 
 export function VariationsActionsMenu( {
 	selection,
@@ -60,22 +61,29 @@ export function VariationsActionsMenu( {
 							onChange={ onChange }
 							onClose={ onClose }
 						/>
+						<VariationActionsMenuItem.Slot
+							group={ '_main' }
+							type={ 'quick-update' }
+						/>
 					</MenuGroup>
 					<MenuGroup>
 						<PricingMenuItem
 							selection={ selection }
 							onChange={ onChange }
 							onClose={ onClose }
+							type="quick-update"
 						/>
 						<InventoryMenuItem
 							selection={ selection }
 							onChange={ onChange }
 							onClose={ onClose }
+							type="quick-update"
 						/>
 						<ShippingMenuItem
 							selection={ selection }
 							onChange={ onChange }
 							onClose={ onClose }
+							type="quick-update"
 						/>
 						{ window.wcAdminFeatures[
 							'product-virtual-downloadable'
@@ -84,8 +92,13 @@ export function VariationsActionsMenu( {
 								selection={ selection }
 								onChange={ onChange }
 								onClose={ onClose }
+								type="quick-update"
 							/>
 						) }
+						<VariationActionsMenuItem.Slot
+							group={ '_secondary' }
+							type={ 'quick-update' }
+						/>
 					</MenuGroup>
 					<MenuGroup>
 						<MenuItem
@@ -99,6 +112,10 @@ export function VariationsActionsMenu( {
 						>
 							{ __( 'Delete', 'woocommerce' ) }
 						</MenuItem>
+						<VariationActionsMenuItem.Slot
+							group={ '_tertiary' }
+							type={ 'quick-update' }
+						/>
 					</MenuGroup>
 				</div>
 			) }

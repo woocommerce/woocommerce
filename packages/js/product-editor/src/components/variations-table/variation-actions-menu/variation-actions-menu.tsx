@@ -17,6 +17,7 @@ import { InventoryMenuItem } from '../inventory-menu-item';
 import { PricingMenuItem } from '../pricing-menu-item';
 import { ToggleVisibilityMenuItem } from '../toggle-visibility-menu-item';
 import { DownloadsMenuItem } from '../downloads-menu-item';
+import { VariationActionsMenuItem } from '../variation-actions-menu-item';
 
 export function VariationActionsMenu( {
 	selection,
@@ -67,6 +68,10 @@ export function VariationActionsMenu( {
 							onChange={ onChange }
 							onClose={ onClose }
 						/>
+						<VariationActionsMenuItem.Slot
+							group={ '_main' }
+							type={ 'single-variation' }
+						/>
 					</MenuGroup>
 					<MenuGroup>
 						<PricingMenuItem
@@ -93,6 +98,10 @@ export function VariationActionsMenu( {
 								onClose={ onClose }
 							/>
 						) }
+						<VariationActionsMenuItem.Slot
+							group={ '_secondary' }
+							type={ 'single-variation' }
+						/>
 					</MenuGroup>
 					<MenuGroup>
 						<MenuItem
@@ -107,6 +116,10 @@ export function VariationActionsMenu( {
 						>
 							{ __( 'Delete', 'woocommerce' ) }
 						</MenuItem>
+						<VariationActionsMenuItem.Slot
+							group={ '_tertiary' }
+							type={ 'single-variation' }
+						/>
 					</MenuGroup>
 				</>
 			) }
