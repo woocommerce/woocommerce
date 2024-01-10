@@ -175,6 +175,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix WooCommerce Settings and Analytics commands with tags breaking the command palette [#43269](https://github.com/woocommerce/woocommerce/pull/43269)
 * Fix - Fix fatal error. Do not access change_feature_enable() statically. [#43428](https://github.com/woocommerce/woocommerce/pull/43428)
 
 
