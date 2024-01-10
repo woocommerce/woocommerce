@@ -219,6 +219,23 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 1 );
 		} );
 
+		test( 'Products can be filtered based on featured status.', async ( {
+			pageObject,
+		} ) => {
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.setShowOnlyFeaturedProducts( {
+				featured: true,
+			} );
+
+			// In test data we have only 6 products on sale
+			await expect( pageObject.products ).toHaveCount( 6 );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 6 );
+		} );
+
 		test.describe( 'Inherit query from template', () => {
 			test( 'Inherit query from template should not be visible on posts', async ( {
 				pageObject,

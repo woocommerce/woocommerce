@@ -258,6 +258,31 @@ class ProductCollectionPage {
 		if ( isLocatorsRefreshNeeded ) await this.refreshLocators( 'editor' );
 	}
 
+	async setShowOnlyFeaturedProducts(
+		{
+			featured,
+			isLocatorsRefreshNeeded,
+		}: {
+			featured: boolean;
+			isLocatorsRefreshNeeded?: boolean;
+		} = {
+			featured: true,
+			isLocatorsRefreshNeeded: true,
+		}
+	) {
+		const sidebarSettings = await this.locateSidebarSettings();
+		const input = sidebarSettings.getByLabel(
+			SELECTORS.featuredControlLabel
+		);
+		if ( featured ) {
+			await input.check();
+		} else {
+			await input.uncheck();
+		}
+
+		if ( isLocatorsRefreshNeeded ) await this.refreshLocators( 'editor' );
+	}
+
 	async setFilterComboboxValue( filterName: string, filterValue: string[] ) {
 		const sidebarSettings = await this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel( filterName );
