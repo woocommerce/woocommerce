@@ -17,7 +17,7 @@ import { InventoryMenuItem } from '../inventory-menu-item';
 import { ShippingMenuItem } from '../shipping-menu-item';
 import { ToggleVisibilityMenuItem } from '../toggle-visibility-menu-item';
 import { DownloadsMenuItem } from '../downloads-menu-item';
-import { VariationActionsMenuItem } from '../variation-actions-menu-item';
+import { VariationActionsMenuItem } from '../variation-actions/variation-actions-menu-item';
 
 export function VariationsActionsMenu( {
 	selection,

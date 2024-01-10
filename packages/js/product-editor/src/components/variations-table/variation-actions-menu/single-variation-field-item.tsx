@@ -6,7 +6,7 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { VariationActionsMenuItem } from '../variation-actions-menu-item';
+import { VariationActionsMenuItem } from '../variation-actions/variation-actions-menu-item';
 
 type SingleVariationMenuItemProps = {
 	children?: React.ReactNode;
