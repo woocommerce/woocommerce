@@ -34,20 +34,9 @@ test.describe( 'Products by Attribute template', async () => {
 		// Verify the edition can be reverted.
 		await admin.visitAdminPage(
 			'site-editor.php',
-			'path=/wp_template/all'
+			`path=/${ templateType }/all`
 		);
-		const templateRow = page.getByRole( 'row', {
-			name: templateName,
-		} );
-		await expect( templateRow ).toContainText( 'Customized' );
-		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
-		await page
-			.getByRole( 'menuitem', {
-				name: 'Clear customizations',
-			} )
-			.click();
-
-		await expect( templateRow ).not.toContainText( 'Customized' );
+		await editorUtils.revertTemplateCustomizations( templateName );
 		await page.goto( permalink );
 		await expect(
 			page.getByText( 'Hello World in the template' )

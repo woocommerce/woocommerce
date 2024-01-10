@@ -351,6 +351,22 @@ export class EditorUtils {
 			.waitFor();
 	}
 
+	async revertTemplateCustomizations( templateName: string ) {
+		const templateRow = this.page.getByRole( 'row', {
+			name: templateName,
+		} );
+		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
+		await this.page
+			.getByRole( 'menuitem', {
+				name: 'Clear customizations',
+			} )
+			.click();
+		await this.page
+			.getByRole( 'button', { name: 'Dismiss this notice' } )
+			.getByText( `"${ templateName }" reverted.` )
+			.waitFor();
+	}
+
 	async publishAndVisitPost() {
 		await this.editor.publishPost();
 		const url = new URL( this.page.url() );

@@ -47,20 +47,9 @@ test.describe( 'Mini-Cart template part', async () => {
 		// Verify the edition can be reverted.
 		await admin.visitAdminPage(
 			'site-editor.php',
-			'path=/wp_template_part/all'
+			`path=/${ templateType }/all`
 		);
-		const templatePartRow = page.getByRole( 'row', {
-			name: templateName,
-		} );
-		await expect( templatePartRow ).toContainText( 'Customized' );
-		templatePartRow.getByRole( 'button', { name: 'Actions' } ).click();
-
-		await page
-			.getByRole( 'menuitem', {
-				name: 'Clear customizations',
-			} )
-			.click();
-		await expect( templatePartRow ).not.toContainText( 'Customized' );
+		await editorUtils.revertTemplateCustomizations( templateName );
 		await page.goto( permalink );
 		await page.getByLabel( 'Add to cart' ).first().click();
 		block = await frontendUtils.getBlockByName( miniCartBlockName );
