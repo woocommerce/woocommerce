@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Shards e2e tests for execution on CI
