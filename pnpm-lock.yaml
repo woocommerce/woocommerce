@@ -4785,6 +4785,9 @@ importers:
       luxon:
         specifier: ^3.4.4
         version: 3.4.4
+      minimatch:
+        specifier: ^9.0.3
+        version: 9.0.3
       octokit:
         specifier: ^2.1.0
         version: 2.1.0

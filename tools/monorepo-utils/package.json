@@ -35,6 +35,7 @@
 		"gray-matter": "^4.0.3",
 		"js-yaml": "^4.1.0",
 		"luxon": "^3.4.4",
+		"minimatch": "^9.0.3",
 		"octokit": "^2.1.0",
 		"ora": "^5.4.1",
 		"promptly": "^3.2.0",

@@ -1,4 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * External dependencies
+ */
+import { makeRe } from 'minimatch';
 
 /**
  * Internal dependencies
@@ -25,7 +28,14 @@ export const enum JobType {
  */
 function parseChangesConfig( raw: unknown ): RegExp[] {
 	if ( typeof raw === 'string' ) {
-		return [ new RegExp( raw ) ];
+		const regex = makeRe( raw );
+		if ( ! regex ) {
+			throw new ConfigError(
+				'Changes configuration is an invalid glob pattern.'
+			);
+		}
+
+		return [ regex ];
 	}
 
 	if ( ! Array.isArray( raw ) ) {
@@ -42,7 +52,14 @@ function parseChangesConfig( raw: unknown ): RegExp[] {
 			);
 		}
 
-		changes.push( new RegExp( entry ) );
+		const regex = makeRe( entry );
+		if ( ! regex ) {
+			throw new ConfigError(
+				'Changes configuration is an invalid glob pattern.'
+			);
+		}
+
+		changes.push( regex );
 	}
 	return changes;
 }

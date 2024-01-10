@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { makeRe } from 'minimatch';
+
+/**
  * Internal dependencies
  */
 import { JobType, parseCIConfig } from '../config';
@@ -17,7 +22,7 @@ describe( 'Config', () => {
 				config: {
 					ci: {
 						lint: {
-							changes: '/src\\/.*\\.[jt]sx?$/',
+							changes: '/src/**/*.{js,jsx,ts,tsx}',
 							command: 'foo',
 						},
 					},
@@ -28,7 +33,7 @@ describe( 'Config', () => {
 				jobs: [
 					{
 						type: JobType.Lint,
-						changes: [ new RegExp( '/src\\/.*\\.[jt]sx?$/' ) ],
+						changes: [ makeRe( '/src/**/*.{js,jsx,ts,tsx}' ) ],
 						command: 'foo',
 					},
 				],
@@ -42,8 +47,8 @@ describe( 'Config', () => {
 					ci: {
 						lint: {
 							changes: [
-								'/src\\/.*\\.[jt]sx?$/',
-								'/test\\/.*\\.[jt]sx?$/',
+								'/src/**/*.{js,jsx,ts,tsx}',
+								'/test/**/*.{js,jsx,ts,tsx}',
 							],
 							command: 'foo',
 						},
@@ -56,8 +61,8 @@ describe( 'Config', () => {
 					{
 						type: JobType.Lint,
 						changes: [
-							new RegExp( '/src\\/.*\\.[jt]sx?$/' ),
-							new RegExp( '/test\\/.*\\.[jt]sx?$/' ),
+							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
+							makeRe( '/test/**/*.{js,jsx,ts,tsx}' ),
 						],
 						command: 'foo',
 					},
@@ -73,7 +78,7 @@ describe( 'Config', () => {
 						tests: [
 							{
 								name: 'default',
-								changes: '/src\\/.*\\.[jt]sx?$/',
+								changes: '/src/**/*.{js,jsx,ts,tsx}',
 								command: 'foo',
 							},
 						],
@@ -86,7 +91,7 @@ describe( 'Config', () => {
 					{
 						type: JobType.Test,
 						name: 'default',
-						changes: [ new RegExp( '/src\\/.*\\.[jt]sx?$/' ) ],
+						changes: [ makeRe( '/src/**/*.{js,jsx,ts,tsx}' ) ],
 						command: 'foo',
 					},
 				],
@@ -101,7 +106,7 @@ describe( 'Config', () => {
 						tests: [
 							{
 								name: 'default',
-								changes: '/src\\/.*\\.[jt]sx?$/',
+								changes: '/src/**/*.{js,jsx,ts,tsx}',
 								command: 'foo',
 								testEnv: {
 									start: 'bar',
@@ -120,7 +125,7 @@ describe( 'Config', () => {
 					{
 						type: JobType.Test,
 						name: 'default',
-						changes: [ new RegExp( '/src\\/.*\\.[jt]sx?$/' ) ],
+						changes: [ makeRe( '/src/**/*.{js,jsx,ts,tsx}' ) ],
 						command: 'foo',
 						testEnv: {
 							start: 'bar',
@@ -141,7 +146,7 @@ describe( 'Config', () => {
 						tests: [
 							{
 								name: 'default',
-								changes: '/src\\/.*\\.[jt]sx?$/',
+								changes: '/src/**/*.{js,jsx,ts,tsx}',
 								command: 'foo',
 								cascade: 'bar',
 							},
@@ -155,7 +160,7 @@ describe( 'Config', () => {
 					{
 						type: JobType.Test,
 						name: 'default',
-						changes: [ new RegExp( '/src\\/.*\\.[jt]sx?$/' ) ],
+						changes: [ makeRe( '/src/**/*.{js,jsx,ts,tsx}' ) ],
 						command: 'foo',
 						cascadeKeys: [ 'bar' ],
 					},
