@@ -23,8 +23,13 @@ export const useProductTemplate = (
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
+	const productTemplateIdToFind =
+		productType === 'variable'
+			? 'standard-product-template'
+			: productTemplateId;
+
 	let matchingProductTemplate = productTemplates.find(
-		( productTemplate ) => productTemplateId === productTemplate.id
+		( productTemplate ) => productTemplateIdToFind === productTemplate.id
 	);
 
 	if ( ! matchingProductTemplate ) {
