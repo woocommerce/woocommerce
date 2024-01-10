@@ -1,39 +1,38 @@
 const { test, expect } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
-const { closeWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const simpleProductName = 'Cart Coupons Product';
+const simpleProductName = 'Checkout Coupons Product';
 const singleProductFullPrice = '110.00';
 const singleProductSalePrice = '55.00';
 const coupons = [
 	{
-		code: '5fixedcart',
+		code: '5fixedcheckout',
 		discount_type: 'fixed_cart',
 		amount: '5.00',
 	},
 	{
-		code: '50percoff',
+		code: '50percoffcheckout',
 		discount_type: 'percent',
 		amount: '50',
 	},
 	{
-		code: '10fixedproduct',
+		code: '10fixedproductcheckout',
 		discount_type: 'fixed_product',
 		amount: '10.00',
 	},
 ];
-const couponLimitedCode = '10fixedcartlimited';
+const couponLimitedCode = '10fixedcheckoutlimited';
 const customerBilling = {
 	email: 'john.doe.merchant.test@example.com',
 };
 
-const pageTitle = 'Cart Block';
+const pageTitle = 'Checkout Block';
 const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
 
 let productId, orderId, limitedCouponId;
 
-test.describe( 'Cart Block Applying Coupons', () => {
+test.describe( 'Checkout Block Applying Coupons', () => {
 	const couponBatchId = new Array();
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -119,15 +118,22 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		await context.clearCookies();
 	} );
 
-	test( 'can create Cart Block page', async ( { page } ) => {
-		// create a new page with cart block
+	test( 'can create checkout block page', async ( { page } ) => {
+		// create a new page with checkout block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
 		await page.waitForLoadState( 'networkidle' );
 		await page.locator( 'input[name="log"]' ).fill( admin.username );
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
 		await page.locator( 'text=Log In' ).click();
 
-		await closeWelcomeModal( { page } );
+		// Close welcome popup if prompted
+		try {
+			await page
+				.getByLabel( 'Close', { exact: true } )
+				.click( { timeout: 5000 } );
+		} catch ( error ) {
+			console.log( "Welcome modal wasn't present, skipping action." );
+		}
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
@@ -137,7 +143,7 @@ test.describe( 'Cart Block Applying Coupons', () => {
 			.getByRole( 'document', {
 				name: 'Empty block; start writing or type forward slash to choose a block',
 			} )
-			.fill( '/cart' );
+			.fill( '/checkout' );
 		await page.keyboard.press( 'Enter' );
 		await page
 			.getByRole( 'button', { name: 'Publish', exact: true } )
@@ -151,11 +157,11 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		).toBeVisible();
 	} );
 
-	test( 'allows cart block to apply coupon of any type', async ( {
+	test( 'allows checkout block to apply coupon of any type', async ( {
 		page,
 	} ) => {
 		const totals = [ '$50.00', '$27.50', '$45.00' ];
-		// add product to cart block
+		// add product to cart block and go to checkout
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
 		await page.goto( pageSlug );
@@ -195,11 +201,13 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		}
 	} );
 
-	test( 'allows cart block to apply multiple coupons', async ( { page } ) => {
+	test( 'allows checkout block to apply multiple coupons', async ( {
+		page,
+	} ) => {
 		const totals = [ '$50.00', '$22.50', '$12.50' ];
 		const totalsReverse = [ '$17.50', '$45.00', '$55.00' ];
 		const discounts = [ '-$5.00', '-$32.50', '-$42.50' ];
-		// add product to cart block
+		// add product to cart block and go to checkout
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
 		await page.goto( pageSlug );
@@ -245,10 +253,10 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		}
 	} );
 
-	test( 'prevents cart block applying same coupon twice', async ( {
+	test( 'prevents checkout block applying same coupon twice', async ( {
 		page,
 	} ) => {
-		// add product to cart block
+		// add product to cart block and go to checkout
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
 		await page.goto( pageSlug );
@@ -283,10 +291,10 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		).toBeVisible();
 	} );
 
-	test( 'prevents cart block applying coupon with usage limit', async ( {
+	test( 'prevents checkout block applying coupon with usage limit', async ( {
 		page,
 	} ) => {
-		// add product to cart block and go to cart
+		// add product to cart block and go to checkout
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
 		await page.goto( pageSlug );
