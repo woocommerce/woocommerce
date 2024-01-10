@@ -52,6 +52,32 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
+		it( 'should not trigger a lint job that has already been created', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint',
+								jobCreated: true,
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
 		it( 'should not trigger lint job for single node with no changes', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -223,6 +249,33 @@ describe( 'Job Processing', () => {
 				name: 'Default',
 				command: 'test-cmd',
 			} );
+		} );
+
+		it( 'should not trigger a test job that has already been created', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								name: 'Default',
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+								jobCreated: true,
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
 		it( 'should not trigger test job for single node with no changes', async () => {

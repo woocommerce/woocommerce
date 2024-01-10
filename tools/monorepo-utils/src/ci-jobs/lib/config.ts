@@ -22,6 +22,31 @@ export const enum JobType {
 }
 
 /**
+ * The base config requirements for all jobs.
+ */
+interface BaseJobConfig {
+	/**
+	 * The type of the job.
+	 */
+	type: JobType;
+
+	/**
+	 * The changes that should trigger this job.
+	 */
+	changes: RegExp[];
+
+	/**
+	 * The command to run for the job.
+	 */
+	command: string;
+
+	/**
+	 * Indicates whether or not a job has been created for this config.
+	 */
+	jobCreated?: boolean;
+}
+
+/**
  * Parses and validates a raw change config entry.
  *
  * @param {string|string[]} raw The raw config to parse.
@@ -67,21 +92,11 @@ function parseChangesConfig( raw: unknown ): RegExp[] {
 /**
  * The configuration of the lint job.
  */
-export interface LintJobConfig {
+export interface LintJobConfig extends BaseJobConfig {
 	/**
 	 * The type of the job.
 	 */
 	type: JobType.Lint;
-
-	/**
-	 * The changes that should trigger this job.
-	 */
-	changes: RegExp[];
-
-	/**
-	 * The linting command to run.
-	 */
-	command: string;
 }
 
 /**
@@ -171,7 +186,7 @@ interface TestEnvConfig {
 /**
  * The configuration of a test job.
  */
-export interface TestJobConfig {
+export interface TestJobConfig extends BaseJobConfig {
 	/**
 	 * The type of the job.
 	 */
@@ -181,16 +196,6 @@ export interface TestJobConfig {
 	 * The name for the job.
 	 */
 	name: string;
-
-	/**
-	 * The changes that should trigger this job.
-	 */
-	changes: RegExp[];
-
-	/**
-	 * The test command to run.
-	 */
-	command: string;
 
 	/**
 	 * The configuration for the test environment if one is needed.

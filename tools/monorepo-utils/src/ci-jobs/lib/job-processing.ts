@@ -201,6 +201,11 @@ async function createJobsForProject(
 	}
 
 	for ( const jobConfig of node.ciConfig.jobs ) {
+		// Make sure that we don't queue the same job more than once.
+		if ( jobConfig.jobCreated ) {
+			continue;
+		}
+
 		switch ( jobConfig.type ) {
 			case JobType.Lint: {
 				const created = createLintJob(
@@ -212,6 +217,7 @@ async function createJobsForProject(
 					break;
 				}
 
+				jobConfig.jobCreated = true;
 				newJobs.lint.push( created );
 				break;
 			}
@@ -227,6 +233,7 @@ async function createJobsForProject(
 					break;
 				}
 
+				jobConfig.jobCreated = true;
 				newJobs.test.push( created );
 
 				// We need to track any cascade keys that this job is associated with so that
