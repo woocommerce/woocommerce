@@ -99,6 +99,7 @@ export const BlockEditor = ( {} ) => {
 			// This is a temporary solution until the block library is fixed.
 
 			const pageId =
+				// @ts-expect-error - TODO: Fix this.
 				findPageIdByLinkOrTitle( event, pages ) ||
 				findPageIdByBlockClientId( event );
 

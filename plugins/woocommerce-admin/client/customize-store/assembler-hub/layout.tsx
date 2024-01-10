@@ -117,6 +117,7 @@ export const Layout = () => {
 		currentState.transitionalScreen === 'transitional'
 	) {
 		return (
+			// @ts-expect-error - TODO: Fix this.
 			<EntityProvider kind="root" type="site">
 				<EntityProvider
 					kind="postType"
@@ -146,6 +147,7 @@ export const Layout = () => {
 			} }
 		>
 			<HighlightedBlockContextProvider>
+				{ /* @ts-expect-error - TODO: Fix this. */ }
 				<EntityProvider kind="root" type="site">
 					<EntityProvider
 						kind="postType"
@@ -158,6 +160,7 @@ export const Layout = () => {
 								animate={ 'view' }
 							>
 								<SiteHub
+									// @ts-expect-error - TODO: Fix this.
 									as={ motion.div }
 									variants={ {
 										view: { x: 0 },

@@ -13,6 +13,7 @@ import {
 } from '@wordpress/components';
 import { chevronUp, chevronDown, external } from '@wordpress/icons';
 import classnames from 'classnames';
+import { ModalProps } from '@wordpress/components/build-types/modal/types';
 
 /**
  * Internal dependencies
@@ -35,7 +36,7 @@ const isExternalURL = ( url: string ) =>
  * Modal's title and children props are omitted because they are specified within the component
  * and not needed to be specified by the consumer.
  */
-type CreateCampaignModalProps = Omit< Modal.Props, 'title' | 'children' >;
+type CreateCampaignModalProps = Omit< ModalProps, 'title' | 'children' >;
 
 export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	const { className, ...restProps } = props;
@@ -57,6 +58,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	};
 
 	return (
+		// @ts-expect-error - TODO: Fix this.
 		<Modal
 			{ ...restProps }
 			className={ classnames(

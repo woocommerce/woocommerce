@@ -69,6 +69,7 @@ export const IntroOptIn = ( {
 				<div className="woocommerce-profiler-intro-opt-in__footer">
 					<CheckboxControl
 						className="core-profiler__checkbox"
+						// @ts-expect-error - TODO: Fix this.
 						label={ interpolateComponents( {
 							mixedString: __(
 								'I agree to share my data to tailor my store setup experience and get more relevant content (WooCommerce will never rent or sell your data, and you can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking.{{/link}})',

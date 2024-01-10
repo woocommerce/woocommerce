@@ -95,12 +95,10 @@ export const SaveHub = () => {
 	);
 
 	const {
-		// @ts-ignore No types for this exist yet.
 		editEntityRecord,
-		// @ts-ignore No types for this exist yet.
 		saveEditedEntityRecord,
-		// @ts-ignore No types for this exist yet.
 		__experimentalSaveSpecifiedEntityEdits: saveSpecifiedEntityEdits,
+		// @ts-expect-error - TODO: Fix this.
 	} = useDispatch( coreStore );
 
 	const save = useCallback( async () => {

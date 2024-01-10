@@ -6,6 +6,10 @@ import {
 	createOrderedChildren,
 	sortFillsByOrder,
 } from '@woocommerce/components';
+import {
+	FillComponentProps,
+	SlotComponentProps,
+} from '@woocommerce/components/build-types/types';
 
 export const EXPERIMENTAL_WC_HOMESCREEN_WC_PAY_FEATURE_SLOT_NAME =
 	'experimental_woocommerce_wcpay_feature';
@@ -36,7 +40,7 @@ export const WooHomescreenWCPayFeatureItem = ( {
 } ) => {
 	return (
 		<Fill name={ EXPERIMENTAL_WC_HOMESCREEN_WC_PAY_FEATURE_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( fillProps: FillComponentProps ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
 		</Fill>
@@ -46,8 +50,9 @@ export const WooHomescreenWCPayFeatureItem = ( {
 WooHomescreenWCPayFeatureItem.Slot = ( {
 	fillProps,
 }: {
-	fillProps?: Slot.Props;
+	fillProps?: SlotComponentProps;
 } ) => (
+	// @ts-expect-error - TODO: Fix this.
 	<Slot
 		name={ EXPERIMENTAL_WC_HOMESCREEN_WC_PAY_FEATURE_SLOT_NAME }
 		fillProps={ fillProps }

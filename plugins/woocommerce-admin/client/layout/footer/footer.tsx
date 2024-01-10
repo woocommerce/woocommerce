@@ -25,6 +25,7 @@ export const Footer: React.FC = () => {
 				'at-bottom': atBottom,
 			} ) }
 		>
+			{ /* @ts-expect-error - TODO: Fix this. */ }
 			<WooFooterItem.Slot />
 		</div>
 	);

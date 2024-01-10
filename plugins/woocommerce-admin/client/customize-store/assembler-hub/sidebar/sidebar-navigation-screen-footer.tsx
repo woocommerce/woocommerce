@@ -83,6 +83,7 @@ export const SidebarNavigationScreenFooter = () => {
 	}, [ blocks, footerPatterns ] );
 
 	const onClickFooterPattern = useCallback(
+		// @ts-expect-error - TODO: Fix this.
 		( pattern, selectedBlocks ) => {
 			setSelectedPattern( pattern );
 			onChange( [ ...blocks.slice( 0, -1 ), selectedBlocks[ 0 ] ], {

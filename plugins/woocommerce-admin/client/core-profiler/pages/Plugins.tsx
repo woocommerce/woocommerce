@@ -131,7 +131,10 @@ export const Plugins = ( {
 				components: {
 					span: <span />,
 					link: (
-						<Button isLink onClick={ submitInstallationRequest } />
+						<Button
+							variant="link"
+							onClick={ submitInstallationRequest }
+						/>
 					),
 				},
 		  } )

@@ -49,6 +49,7 @@ const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 			) }
 		>
 			<CardHeader onClick={ handleClick }>
+				{ /* @ts-expect-error - TODO: Fix this. */ }
 				<CardHeaderTitle>{ header }</CardHeaderTitle>
 				<Button
 					isSmall

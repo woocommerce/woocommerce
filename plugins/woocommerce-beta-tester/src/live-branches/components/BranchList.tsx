@@ -2,9 +2,7 @@
  * External dependencies
  */
 import {
-	// @ts-ignore
 	__experimentalItemGroup as ItemGroup,
-	// @ts-ignore
 	__experimentalItem as Item,
 	Button,
 	Spinner,
@@ -108,7 +106,7 @@ const BranchInfo = ( { branch }: { branch: Branch } ) => {
 };
 
 const WooCommerceVersionInfo = () => {
-	// @ts-ignore
+	// @ts-expect-error - TODO: Fix this.
 	const version = window?.wc?.wcSettings?.WC_VERSION || 'unknown';
 
 	return (
@@ -153,6 +151,7 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 					) }
 					{ ! activeBranch && <WooCommerceVersionInfo /> }
 				</CardBody>
+				{ /* @ts-expect-error - TODO: Fix this. */ }
 				<CardFooter></CardFooter>
 			</Card>
 			<Card elevation={ 3 } css={ cardStyle }>
@@ -188,6 +187,7 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 						key={ selectedBranch.version }
 					/>
 				</CardBody>
+				{ /* @ts-expect-error - TODO: Fix this. */ }
 				<CardFooter></CardFooter>
 			</Card>
 			{ installedBranchesExist && (
@@ -206,6 +206,7 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 							) ) }
 						</ItemGroup>
 					</CardBody>
+					{ /* @ts-expect-error - TODO: Fix this. */ }
 					<CardFooter></CardFooter>
 				</Card>
 			) }

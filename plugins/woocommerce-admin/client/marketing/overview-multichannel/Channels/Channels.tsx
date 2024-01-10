@@ -77,10 +77,12 @@ export const Channels = forwardRef< ChannelsRef, ChannelsProps >(
 		return (
 			<Card className="woocommerce-marketing-channels-card">
 				<CardHeader>
+					{ /* @ts-expect-error - TODO: Fix this. */ }
 					<CardHeaderTitle>
 						{ __( 'Channels', 'woocommerce' ) }
 					</CardHeaderTitle>
 					{ ! hasRegisteredChannels && (
+						// @ts-expect-error - TODO: Fix this.
 						<CardHeaderDescription>
 							{ __(
 								'Start by adding a channel to your store',

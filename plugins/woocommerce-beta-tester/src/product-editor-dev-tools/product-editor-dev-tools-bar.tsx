@@ -80,7 +80,7 @@ export function ProductEditorDevToolsBar( {
 
 	const [ selectedTab, setSelectedTab ] = useState< string >( 'inspector' );
 
-	function handleNavigate( _childIndex: number, child: HTMLButtonElement ) {
+	function handleNavigate( _childIndex: number, child: HTMLElement ) {
 		child.click();
 	}
 

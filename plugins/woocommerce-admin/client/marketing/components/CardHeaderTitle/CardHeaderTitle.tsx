@@ -3,7 +3,9 @@
  */
 import './CardHeaderTitle.scss';
 
-export const CardHeaderTitle: React.FC = ( { children } ) => {
+export const CardHeaderTitle: React.FC< { children: React.ReactNode } > = ( {
+	children,
+} ) => {
 	return (
 		<div className="woocommerce-marketing-card-header-title">
 			{ children }

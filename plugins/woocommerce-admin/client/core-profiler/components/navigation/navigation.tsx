@@ -62,7 +62,7 @@ export const Navigation = ( {
 								'woocommerce-profiler-navigation-skip-link',
 								classNames.mobile ? 'mobile' : ''
 							) }
-							isLink
+							variant="link"
 						>
 							{ skipText }
 						</Button>

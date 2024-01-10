@@ -103,6 +103,7 @@ export const SmartPluginCardBody = ( {
 		return (
 			<Button
 				variant="secondary"
+				// @ts-expect-error - TODO: Fix this.
 				href={ getInAppPurchaseUrl( plugin.url ) }
 				disabled={ buttonDisabled }
 				onClick={ () => {

@@ -15,6 +15,7 @@ export function ProductEditorDevToolsMenu( {
 } ) {
 	return (
 		<WooProductMoreMenuItem order={ 1000 }>
+			{ /* @ts-expect-error - TODO: Fix this. */ }
 			{ ( { onClose }: { onClose: () => void } ) => (
 				<MenuGroup label={ __( 'Developer tools', 'woocommerce' ) }>
 					<MenuItem

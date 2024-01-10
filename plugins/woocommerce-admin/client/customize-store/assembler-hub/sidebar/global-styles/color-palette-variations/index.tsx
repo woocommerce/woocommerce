@@ -1,11 +1,7 @@
-// Reference: https://github.com/WordPress/gutenberg/blob/d5ab7238e53d0947d4bb0853464b1c58325b6130/packages/edit-site/src/components/global-styles/style-variations-container.js
-// @ts-expect-error -- No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
-
 /**
  * External dependencies
  */
+import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';

@@ -27,6 +27,7 @@ export function UserPreferencesTabPanel( {
 	const update = useCallback(
 		(
 			preferences: UserPreferences | UserPreferenceProp,
+			// @ts-expect-error - TODO: Fix this implicit any.
 			value?,
 			force = false
 		) => {

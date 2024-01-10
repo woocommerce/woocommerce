@@ -58,11 +58,13 @@ const useLogoEdit = ( {
 	const { siteIconId, mediaUpload } = useSelect( ( select ) => {
 		// @ts-ignore No types for this exist yet.
 		const { canUser, getEditedEntityRecord } = select( coreStore );
+		// @ts-expect-error - TODO: Fix this.
 		const _canUserEdit = canUser( 'update', 'settings' );
 		const siteSettings = _canUserEdit
 			? getEditedEntityRecord( 'root', 'site' )
 			: undefined;
 
+		// @ts-expect-error - TODO: Fix this.
 		const _siteIconId = siteSettings?.site_icon;
 		return {
 			siteIconId: _siteIconId,
@@ -376,17 +378,20 @@ export const SidebarNavigationScreenLogo = () => {
 
 	const { siteLogoId, canUserEdit, mediaItemData, isRequestingMediaItem } =
 		useSelect( ( select ) => {
-			// @ts-ignore No types for this exist yet.
 			const { canUser, getEntityRecord, getEditedEntityRecord } =
+				// @ts-expect-error - TODO: Fix this.
 				select( coreStore );
 
+			// @ts-expect-error - TODO: Fix this.
 			const _canUserEdit = canUser( 'update', 'settings' );
 			const siteSettings = _canUserEdit
 				? getEditedEntityRecord( 'root', 'site' )
 				: undefined;
+			// @ts-expect-error - TODO: Fix this.
 			const siteData = getEntityRecord( 'root', '__unstableBase' );
 			const _siteLogoId = _canUserEdit
-				? siteSettings?.site_logo
+				? // @ts-expect-error - TODO: Fix this.
+				  siteSettings?.site_logo
 				: siteData?.site_logo;
 
 			const mediaItem =
@@ -451,7 +456,6 @@ export const SidebarNavigationScreenLogo = () => {
 								popoverProps={ {
 									className:
 										'woocommerce-customize-store__logo-dropdown-popover',
-									// @ts-expect-error outdated TS.
 									placement: 'bottom-end',
 								} }
 							>
@@ -516,6 +520,7 @@ export const SidebarNavigationScreenLogo = () => {
 						siteLogoId={ siteLogoId }
 						attributes={ attributes }
 						setAttributes={ setAttributes }
+						// @ts-expect-error - TODO: Fix this.
 						canUserEdit={ canUserEdit }
 						mediaItemData={ mediaItemData }
 						isLoading={ isLoading }

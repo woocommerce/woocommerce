@@ -369,8 +369,8 @@ const updateGlobalStyles = async ( {
 	);
 
 	const globalStylesId = await resolveSelect(
+		// @ts-expect-error - TODO: Fix this.
 		coreStore
-		// @ts-ignore No types for this exist yet.
 	).__experimentalGetCurrentGlobalStylesId();
 
 	// @ts-ignore No types for this exist yet.
@@ -390,6 +390,7 @@ const updateGlobalStyles = async ( {
 				fontPairing?.settings || {}
 			),
 		},
+		// @ts-expect-error - TODO: Fix this.
 		{
 			throwOnError: true,
 		}
@@ -410,6 +411,7 @@ const updateTemplate = async ( {
 	invalidateResolutionForStoreSelector( '__experimentalGetTemplateForLink' );
 
 	const patterns = ( await resolveSelect(
+		// @ts-expect-error - TODO: Fix this.
 		coreStore
 		// @ts-ignore No types for this exist yet.
 	).getBlockPatterns() ) as Pattern[];
@@ -428,20 +430,23 @@ const updateTemplate = async ( {
 	content = setLogoWidth( content );
 
 	const currentTemplate = await resolveSelect(
+		// @ts-expect-error - TODO: Fix this.
 		coreStore
-		// @ts-ignore No types for this exist yet.
 	).__experimentalGetTemplateForLink( '/' );
 
-	// @ts-ignore No types for this exist yet.
+	// @ts-expect-error - TODO: Fix this.
 	const { saveEntityRecord } = dispatch( coreStore );
 
 	await saveEntityRecord(
 		'postType',
+		// @ts-expect-error - TODO: Fix this.
 		currentTemplate.type,
 		{
+			// @ts-expect-error - TODO: Fix this.
 			id: currentTemplate.id,
 			content,
 		},
+		// @ts-expect-error - TODO: Fix this.
 		{
 			throwOnError: true,
 		}
