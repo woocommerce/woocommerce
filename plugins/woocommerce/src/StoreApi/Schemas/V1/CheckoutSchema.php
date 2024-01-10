@@ -369,11 +369,13 @@ class CheckoutSchema extends AbstractSchema {
 
 			$field_value = isset( $fields[ $key ] ) ? $fields[ $key ] : null;
 
-			// Run schema validation first then custom validation after.
 			$result = rest_validate_value_from_schema( $field_value, $properties[ $key ], $key );
-			$result = $this->additional_fields_controller->validate_field( $result, $key, $field_value, $properties[ $key ] );
 
-			if ( is_wp_error( $result ) ) {
+			// Only allow custom validation on fields that pass the schema validation.
+			if ( true === $result ) {
+				$result = $this->additional_fields_controller->validate_field( $key, $field_value, $properties[ $key ] );
+			}
+
 				$location = $this->additional_fields_controller->get_field_location( $key );
 				$result->add_data(
 					[
