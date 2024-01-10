@@ -628,7 +628,7 @@ export function getAllowedIntervalsForQuery(
 	defaultDateRange = 'period=&compare=previous_year'
 ) {
 	const { period } = getDateParamsFromQuery( query, defaultDateRange );
-	let allowed = [];
+	let allowed: string[] = [];
 	if ( period === 'custom' ) {
 		const { primary } = getCurrentDates( query );
 		const differenceInDays = getDateDifferenceInDays(

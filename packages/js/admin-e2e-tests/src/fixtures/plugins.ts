@@ -51,8 +51,8 @@ async function deactivateAndDeletePlugin( pluginName: string ) {
 }
 export async function deactivateAndDeleteAllPlugins( except: string[] = [] ) {
 	let plugins = await getPlugins();
-	const skippedPlugins = [];
-	const promises = [];
+	const skippedPlugins: string[] = [];
+	const promises: Promise< unknown >[] = [];
 	for ( const plugin of plugins ) {
 		const splitPluginName = plugin.plugin.split( '/' );
 		const slug = splitPluginName[ 1 ] || splitPluginName[ 0 ];
