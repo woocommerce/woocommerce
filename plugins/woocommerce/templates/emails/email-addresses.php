@@ -36,6 +36,7 @@ $shipping   = $order->get_formatted_shipping_address();
 				<?php if ( $order->get_billing_email() ) : ?>
 					<br/><?php echo esc_html( $order->get_billing_email() ); ?>
 				<?php endif; ?>
+				<?php do_action( 'woocommerce_email_customer_address_section', 'billing', $order, $sent_to_admin, $plain_text ); ?>
 			</address>
 		</td>
 		<?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && $shipping ) : ?>
@@ -47,6 +48,7 @@ $shipping   = $order->get_formatted_shipping_address();
 					<?php if ( $order->get_shipping_phone() ) : ?>
 						<br /><?php echo wc_make_phone_clickable( $order->get_shipping_phone() ); ?>
 					<?php endif; ?>
+					<?php do_action( 'woocommerce_email_customer_address_section', 'shipping', $order, $sent_to_admin, $plain_text ); ?>
 				</address>
 			</td>
 		<?php endif; ?>

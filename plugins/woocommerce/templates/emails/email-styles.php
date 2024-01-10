@@ -165,6 +165,23 @@ body {
 	border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
 }
 
+.additional-fields {
+	padding: 12px 12px 0;
+	color: <?php echo esc_attr( $text_lighter_20 ); ?>;
+	border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
+}
+
+.additional-fields dt {
+	font-weight: bold;
+	margin: 0;
+	padding: 0;
+}
+
+.additional-fields dd {
+	margin: 0 0 12px;
+	padding: 0;
+}
+
 .text {
 	color: <?php echo esc_attr( $text ); ?>;
 	font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;

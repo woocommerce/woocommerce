@@ -9,6 +9,8 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -197,6 +199,8 @@ class WC_Emails {
 		add_action( 'woocommerce_email_order_meta', array( $this, 'order_meta' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'customer_details' ), 10, 3 );
 		add_action( 'woocommerce_email_customer_details', array( $this, 'email_addresses' ), 20, 3 );
+		add_action( 'woocommerce_email_customer_details', array( $this, 'additional_checkout_fields' ), 30, 3 );
+		add_action( 'woocommerce_email_customer_address_section', array( $this, 'additional_address_fields' ), 30, 4 );
 
 		// Hooks for sending emails during store events.
 		add_action( 'woocommerce_low_stock_notification', array( $this, 'low_stock' ) );
@@ -589,6 +593,91 @@ class WC_Emails {
 					'sent_to_admin' => $sent_to_admin,
 				)
 			);
+		}
+	}
+
+	/**
+	 * Renders any additional fields captured during block based checkout.
+	 *
+	 * @param WC_Order $order         Order instance.
+	 * @param bool     $sent_to_admin If should sent to admin.
+	 * @param bool     $plain_text    If is plain text email.
+	 */
+	public function additional_checkout_fields( $order, $sent_to_admin = false, $plain_text = false ) {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return;
+		}
+
+		$checkout_fields  = Package::container()->get( CheckoutFields::class );
+		$fields           = $checkout_fields->get_fields_for_location( 'additional' );
+		$formatted_fields = array();
+
+		foreach ( $fields as $field_key => $field ) {
+			$value = $checkout_fields->get_field_from_order( $field_key, $order );
+
+			if ( '' === $value ) {
+				continue;
+			}
+
+			if ( 'checkbox' === $field['type'] ) {
+				$value = $value ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' );
+			}
+
+			$formatted_fields[] = array(
+				'label' => $field['label'],
+				'value' => $value,
+			);
+		}
+
+		if ( ! $formatted_fields ) {
+			return;
+		}
+
+		echo '<h2>' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2>';
+		echo '<dl class="additional-fields" style="margin-bottom: 40px;">';
+		foreach ( $formatted_fields as $field ) {
+			echo '<dt>' . wp_kses_post( $field['label'] ) . '</dt>';
+			echo '<dd>' . wp_kses_post( $field['value'] ) . '</dd>';
+		}
+		echo '</dl>';
+	}
+
+	/**
+	 * Renders any additional address fields captured during block based checkout.
+	 *
+	 * @param string   $address_type Address type.
+	 * @param WC_Order $order         Order instance.
+	 * @param bool     $sent_to_admin If should sent to admin.
+	 * @param bool     $plain_text    If is plain text email.
+	 */
+	public function additional_address_fields( $address_type, $order, $sent_to_admin = false, $plain_text = false ) {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return;
+		}
+
+		$checkout_fields  = Package::container()->get( CheckoutFields::class );
+		$fields           = $checkout_fields->get_fields_for_location( 'address' );
+		$formatted_fields = array();
+
+		foreach ( $fields as $field_key => $field ) {
+			$value = $checkout_fields->get_field_from_order( $field_key, $order, 'billing' );
+
+			if ( '' === $value ) {
+				continue;
+			}
+
+			$formatted_fields[] = array(
+				'label' => $field['label'],
+				'value' => $value,
+			);
+		}
+
+		if ( ! $formatted_fields ) {
+			return;
+		}
+
+		foreach ( $formatted_fields as $field ) {
+			echo '<br/><strong>' . wp_kses_post( $field['label'] ) . ':</strong> ' . wp_kses_post( $field['value'] );
 		}
 	}
 
