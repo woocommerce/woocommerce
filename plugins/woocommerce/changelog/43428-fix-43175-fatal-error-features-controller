@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix fatal error. Do not access change_feature_enable() statically.
