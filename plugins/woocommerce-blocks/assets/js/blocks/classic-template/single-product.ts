@@ -55,6 +55,7 @@ const getBlockifiedTemplate = () =>
 		),
 		createBlock( 'woocommerce/product-details', {
 			align: 'wide',
+			className: 'is-style-minimal',
 		} ),
 		createBlock( 'woocommerce/related-products', {
 			align: 'wide',
