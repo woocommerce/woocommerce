@@ -22,23 +22,22 @@ export const useProductTemplate = (
 ) => {
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
-	const productTemplate = productTemplates.find( ( template ) => {
-		if ( productTemplateId === template.id ) {
-			return true;
-		}
 
-		if ( ! productType ) {
-			return false;
-		}
+	let matchingProductTemplate = productTemplates.find(
+		( productTemplate ) => productTemplateId === productTemplate.id
+	);
 
-		// Fallback to the product type if the product does not have any product
-		// template associated to itself.
-		return template.productData.type === productType;
-	} );
+	if ( ! matchingProductTemplate ) {
+		// Fallback to the first template with the same product type.
+		matchingProductTemplate = productTemplates.find(
+			( productTemplate ) =>
+				productTemplate.productData.type === productType
+		);
+	}
 
 	// When we switch to getting the product template from the API,
 	// this will be needed.
 	const isResolving = false;
 
-	return { productTemplate, isResolving };
+	return { productTemplate: matchingProductTemplate, isResolving };
 };
