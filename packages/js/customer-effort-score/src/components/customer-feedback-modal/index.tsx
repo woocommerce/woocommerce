@@ -292,10 +292,10 @@ function CustomerFeedbackModal( {
 				) }
 
 			<div className="woocommerce-customer-effort-score__buttons">
-				<Button isTertiary onClick={ closeModal } name="cancel">
+				<Button variant="tertiary" onClick={ closeModal } name="cancel">
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
-				<Button isPrimary onClick={ sendScore } name="send">
+				<Button variant="tertiary" onClick={ sendScore } name="send">
 					{ __( 'Share', 'woocommerce' ) }
 				</Button>
 			</div>

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement, useState } from '@wordpress/element';
-import PropTypes from 'prop-types';
 import { Button, Modal } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import classnames from 'classnames';
@@ -60,6 +59,8 @@ function FeedbackModal( {
 		return null;
 	}
 
+	const variant = isSubmitButtonDisabled ? 'secondary' : 'primary';
+
 	return (
 		<Modal
 			className={ classnames( 'woocommerce-feedback-modal', className ) }
@@ -81,12 +82,11 @@ function FeedbackModal( {
 			) }
 			{ children }
 			<div className="woocommerce-feedback-modal__buttons">
-				<Button isTertiary onClick={ onCancel } name="cancel">
+				<Button variant="tertiary" onClick={ onCancel } name="cancel">
 					{ cancelButtonLabel }
 				</Button>
 				<Button
-					isPrimary={ ! isSubmitButtonDisabled }
-					isSecondary={ isSubmitButtonDisabled }
+					variant={ variant }
 					onClick={ () => {
 						onSubmit();
 						setOpen( false );
@@ -100,15 +100,5 @@ function FeedbackModal( {
 		</Modal>
 	);
 }
-
-FeedbackModal.propTypes = {
-	onSubmit: PropTypes.func.isRequired,
-	title: PropTypes.string,
-	description: PropTypes.string,
-	onModalClose: PropTypes.func,
-	isSubmitButtonDisabled: PropTypes.bool,
-	submitButtonLabel: PropTypes.string,
-	cancelButtonLabel: PropTypes.string,
-};
 
 export { FeedbackModal };
