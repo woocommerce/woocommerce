@@ -24,6 +24,7 @@ export function ParagraphRTLControl( {
 	return (
 		<>
 			{ isRTL() && (
+				// @ts-expect-error - TODO: Fix this.
 				<ToolbarButton
 					icon={ formatLtr }
 					title={ _x(

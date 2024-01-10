@@ -26,6 +26,7 @@ export const MoreMenu = () => {
 			>
 				{ ( { onClose }: { onClose: () => void } ) => (
 					<>
+						{ /* @ts-expect-error - TODO: fix this */ }
 						<WooProductMoreMenuItem.Slot
 							fillProps={ { onClose } }
 						/>

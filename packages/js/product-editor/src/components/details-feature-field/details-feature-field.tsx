@@ -27,6 +27,7 @@ export const DetailsFeatureField = () => {
 
 	return (
 		<CheckboxControl
+			// @ts-expect-error - This type seems incorrect.
 			label={
 				<>
 					{ __( 'Feature this product', 'woocommerce' ) }

@@ -4,10 +4,7 @@
 import { Ref } from 'react';
 import { createElement, forwardRef } from '@wordpress/element';
 import classNames from 'classnames';
-import {
-	// @ts-expect-error `__experimentalInputControl` does exist.
-	__experimentalInputControl as InputControl,
-} from '@wordpress/components';
+import { __experimentalInputControl as InputControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -30,6 +27,7 @@ export const TextControl = forwardRef( function ForwardedTextControl(
 	ref: Ref< HTMLInputElement >
 ) {
 	return (
+		// @ts-expect-error - TODO: fix TextControlProps, it inherits alot of conflicting prop types from HTML.
 		<InputControl
 			{ ...props }
 			ref={ ref }

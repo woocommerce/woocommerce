@@ -81,6 +81,7 @@ export function ProductList( {
 							>
 								<Button
 									icon={ external }
+									// @ts-expect-error - TODO: this is deprecated, fix this, Button doesn't take a number for size anymore.
 									size={ 24 }
 									aria-label={ __(
 										'See product page',
@@ -92,6 +93,7 @@ export function ProductList( {
 								/>
 								<Button
 									icon={ closeSmall }
+									// @ts-expect-error - TODO: this is deprecated, fix this, Button doesn't take a number for size anymore.
 									size={ 24 }
 									aria-label={ __(
 										'Remove product',

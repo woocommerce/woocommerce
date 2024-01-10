@@ -37,7 +37,6 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 		'id'
 	);
 	const product: Product = useSelect( ( select ) =>
-		// @ts-expect-error There are no types for this.
 		select( 'core' ).getEditedEntityRecord(
 			'postType',
 			'product',
@@ -70,10 +69,7 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 		}
 	}
 
-	function selectTabOnNavigate(
-		_childIndex: number,
-		child: HTMLButtonElement
-	) {
+	function selectTabOnNavigate( _childIndex: number, child: HTMLElement ) {
 		child.click();
 	}
 
@@ -84,6 +80,7 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 			className="woocommerce-product-tabs"
 			orientation="horizontal"
 		>
+			{ /* @ts-expect-error - I think the type for Slot children is wrong upstream. */ }
 			<Slot
 				fillProps={
 					{

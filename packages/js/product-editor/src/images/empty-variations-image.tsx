@@ -5,7 +5,10 @@ import { SVG, Path, Rect, G } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { createElement } from '@wordpress/element';
 
-export function EmptyVariationsImage( props: React.SVGProps< SVGSVGElement > ) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ValidSVGProps = typeof SVG extends ( props: infer P ) => any ? P : never;
+
+export function EmptyVariationsImage( props: ValidSVGProps ) {
 	const gId = useInstanceId( G, 'clip' ) as string;
 
 	return (

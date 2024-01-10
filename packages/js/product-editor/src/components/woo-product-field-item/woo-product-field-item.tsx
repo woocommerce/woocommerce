@@ -13,6 +13,10 @@ import {
 	useSlotContext,
 	SlotContextHelpersType,
 } from '@woocommerce/components';
+import {
+	FillComponentProps,
+	SlotComponentProps,
+} from '@woocommerce/components/build-types/types';
 
 /**
  * Internal dependencies
@@ -58,9 +62,9 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 			name={ `woocommerce_product_field_${ sectionName }` }
 			key={ fieldId }
 		>
-			{ ( fillProps: Fill.Props ) =>
+			{ ( fillProps: FillComponentProps ) =>
 				createOrderedChildren<
-					Fill.Props &
+					FillComponentProps &
 						SlotContextHelpersType & {
 							sectionName: string;
 						},
@@ -80,8 +84,10 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	);
 };
 
-export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
-	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
+export const WooProductFieldItem: React.FC<
+	WooProductFieldItemProps & { children: React.ReactNode }
+> & {
+	Slot: React.FC< SlotComponentProps & WooProductFieldSlotProps >;
 } = ( { children, sections, id } ) => {
 	return (
 		<>
@@ -106,6 +112,7 @@ WooProductFieldItem.Slot = ( { fillProps, section } ) => {
 	const { filterRegisteredFills } = useSlotContext();
 
 	return (
+		// @ts-expect-error - I think Slot props type issues need to be fixed in @wordpress/components.
 		<Slot
 			name={ `woocommerce_product_field_${ section }` }
 			fillProps={ fillProps }
@@ -116,6 +123,7 @@ WooProductFieldItem.Slot = ( { fillProps, section } ) => {
 				}
 
 				return Children.map(
+					// @ts-expect-error - TODO: fix this, ? is not adequate to solve the type issue here.
 					sortFillsByOrder( filterRegisteredFills( fills ) )?.props
 						.children,
 					( child ) => (

@@ -92,13 +92,8 @@ export const CreateAttributeTermModal: React.FC<
 	return (
 		<Modal
 			title={ __( 'Create attribute', 'woocommerce' ) }
-			onRequestClose={ (
-				event:
-					| React.KeyboardEvent< Element >
-					| React.MouseEvent< Element >
-					| React.FocusEvent< Element >
-			) => {
-				event.stopPropagation();
+			onRequestClose={ ( event ) => {
+				event?.stopPropagation();
 				onCancel();
 			} }
 			className="woocommerce-create-attribute-term-modal"
@@ -112,6 +107,7 @@ export const CreateAttributeTermModal: React.FC<
 				errors={ {} }
 				onSubmit={ onAdd }
 			>
+				{ /* @ts-expect-error - This type seems incorrect. */ }
 				{ ( {
 					getInputProps,
 					handleSubmit,
@@ -147,14 +143,14 @@ export const CreateAttributeTermModal: React.FC<
 							/>
 							<div className="woocommerce-create-attribute-term-modal__buttons">
 								<Button
-									isSecondary
+									variant="secondary"
 									label={ __( 'Cancel', 'woocommerce' ) }
 									onClick={ () => onCancel() }
 								>
 									{ __( 'Cancel', 'woocommerce' ) }
 								</Button>
 								<Button
-									isPrimary
+									variant="primary"
 									isBusy={ isCreating }
 									label={ __(
 										'Add attribute',

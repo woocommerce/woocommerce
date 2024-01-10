@@ -30,7 +30,6 @@ export function useProductEdits( productType = <string>'product' ) {
 
 	const { edits } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
 			const { getEntityRecordNonTransientEdits } = select( 'core' );
 
 			const _edits = getEntityRecordNonTransientEdits(

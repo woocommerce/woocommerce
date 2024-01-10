@@ -73,7 +73,6 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 		setErrorMessage( null );
 		setIsCreating( true );
 		try {
-			// @ts-expect-error There are no types for this.
 			const newTaxonomy: Taxonomy = await saveEntityRecord(
 				'taxonomy',
 				slug,
@@ -81,7 +80,6 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 					name,
 					parent: parent ? parent.id : null,
 				},
-				// @ts-expect-error There are no types for this.
 				{
 					throwOnError: true,
 				}

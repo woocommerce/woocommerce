@@ -2,13 +2,14 @@
  * External dependencies
  */
 import { Product } from '@woocommerce/data';
-import { Button, Icon } from '@wordpress/components';
+import { Icon } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { check } from '@wordpress/icons';
 import { createElement, Fragment } from '@wordpress/element';
 import { MouseEvent, ReactNode } from 'react';
+import { ButtonProps } from '@wordpress/components/build-types/button/types';
 
 /**
  * Internal dependencies
@@ -28,7 +29,7 @@ export function useSaveDraft( {
 }: SaveDraftButtonProps & {
 	onSaveSuccess?( product: Product ): void;
 	onSaveError?( error: WPError ): void;
-} ): Button.ButtonProps {
+} ): ButtonProps {
 	const [ productId ] = useEntityProp< number >(
 		'postType',
 		productType,
@@ -37,7 +38,6 @@ export function useSaveDraft( {
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
 			const isSaving = isSavingEntityRecord< boolean >(
@@ -66,10 +66,11 @@ export function useSaveDraft( {
 		( productStatus !== 'publish' && ! hasEdits ) ||
 		isValidating;
 
-	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
-	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+	async function handleClick(
+		event: MouseEvent< HTMLButtonElement > & MouseEvent< HTMLAnchorElement >
+	) {
 		if ( ariaDisabled ) {
 			return event.preventDefault();
 		}
@@ -84,7 +85,7 @@ export function useSaveDraft( {
 			await editEntityRecord( 'postType', productType, productId, {
 				status: 'draft',
 			} );
-			// @ts-expect-error There are no types for this.
+
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				productType,
@@ -118,6 +119,7 @@ export function useSaveDraft( {
 		);
 	}
 
+	// @ts-expect-error TODO: Fix this, this type is not correct.
 	return {
 		children,
 		...props,

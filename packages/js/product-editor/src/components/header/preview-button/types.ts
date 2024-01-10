@@ -2,10 +2,10 @@
  * External dependencies
  */
 import { Product } from '@woocommerce/data';
-import { Button } from '@wordpress/components';
+import { ButtonProps } from '@wordpress/components/build-types/button/types';
 
 export type PreviewButtonProps = Omit<
-	Button.AnchorProps,
+	ButtonProps,
 	'aria-disabled' | 'variant' | 'href' | 'children'
 > & {
 	productStatus: Product[ 'status' ];

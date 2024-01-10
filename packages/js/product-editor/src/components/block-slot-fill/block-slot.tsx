@@ -11,5 +11,6 @@ import { getName } from './utils/get-name';
 import { BlockSlotProps } from './types';
 
 export function BlockSlot( { name, clientId, ...props }: BlockSlotProps ) {
+	// @ts-expect-error - It seems Slot prop types are incorrect.
 	return <Slot { ...props } name={ getName( name, clientId ) } />;
 }

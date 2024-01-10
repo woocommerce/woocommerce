@@ -15,9 +15,9 @@ import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
 	Button,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
+import { InputChangeCallback } from '@wordpress/components/build-types/input-control/types';
 
 /**
  * Internal dependencies
@@ -27,7 +27,7 @@ import { Label } from '../label/label';
 
 export type NumberProps = {
 	value: string;
-	onChange: ( selected: string ) => void;
+	onChange: InputChangeCallback;
 	label: string;
 	suffix?: string;
 	help?: string;
@@ -77,6 +77,7 @@ export const NumberControl: React.FC< NumberProps > = ( {
 	const timeoutRef = useRef< number | null >( null );
 
 	const incrementValue = () =>
+		// @ts-expect-error Fix this, its not type safe.
 		onChange( String( parseFloat( value || '0' ) + increment ) );
 
 	useEffect( () => {
@@ -123,6 +124,7 @@ export const NumberControl: React.FC< NumberProps > = ( {
 									className="woocommerce-number-control__increment"
 									icon={ plus }
 									onMouseDown={ () => {
+										// @ts-expect-error Fix this, its not type safe.
 										onChange(
 											String(
 												parseFloat( value || '0' ) +
@@ -146,6 +148,7 @@ export const NumberControl: React.FC< NumberProps > = ( {
 									className="woocommerce-number-control__decrement"
 									onBlur={ unfocusIfOutside }
 									onMouseDown={ () => {
+										// @ts-expect-error Fix this, its not type safe.
 										onChange(
 											String(
 												parseFloat( value || '0' ) -

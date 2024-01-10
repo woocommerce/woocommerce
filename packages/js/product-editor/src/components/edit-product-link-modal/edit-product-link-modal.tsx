@@ -102,11 +102,11 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 					) }
 				/>
 				<div className="woocommerce-product-link-edit-modal__buttons">
-					<Button isSecondary onClick={ () => onCancel() }>
+					<Button variant="secondary" onClick={ () => onCancel() }>
 						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 					<Button
-						isPrimary
+						variant="primary"
 						isBusy={ isSaving }
 						disabled={ isSaving || slug === product.slug }
 						onClick={ async () => {

@@ -22,7 +22,6 @@ export function useConfirmUnsavedProductChanges(
 	const { hasEdits } = useProductEdits( productType );
 	const { isSaving } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {

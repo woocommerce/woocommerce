@@ -10,7 +10,6 @@ import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -94,6 +93,7 @@ export function Edit( {
 					{ ...inputProps }
 					id={ salePriceId }
 					name={ 'sale_price' }
+					// @ts-expect-error TODO: Fix validators, these controls expect HTMLInputElement.
 					ref={ salePriceRef }
 					label={
 						tooltip ? (
@@ -102,6 +102,7 @@ export function Edit( {
 							label
 						)
 					}
+					// @ts-expect-error TODO: Fix validators, these controls expect HTMLInputElement.
 					onBlur={ validateSalePrice }
 				/>
 			</BaseControl>

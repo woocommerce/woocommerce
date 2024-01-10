@@ -311,6 +311,7 @@ export const AttributeTermInputField: React.FC<
 												<CheckboxControl
 													onChange={ () => null }
 													checked={ isSelected }
+													// @ts-expect-error - TODO: fix this.
 													label={
 														<span>
 															{ item.name }

@@ -149,6 +149,7 @@ export const CustomAttributeTermInputField: React.FC<
 												checked={ value.includes(
 													item
 												) }
+												// @ts-expect-error - this type seems incorrect.
 												label={
 													<span> { item } </span>
 												}

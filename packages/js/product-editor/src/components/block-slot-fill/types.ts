@@ -1,16 +1,19 @@
 /**
  * External dependencies
  */
-import { Fill, Slot } from '@wordpress/components';
+import {
+	FillComponentProps,
+	SlotComponentProps,
+} from '@woocommerce/components/build-types/types';
 
 export type BlockSlotFillProps = {
 	clientId: string;
 	name: string;
 };
 
-export type BlockSlotProps = BlockSlotFillProps & Slot.Props;
+export type BlockSlotProps = BlockSlotFillProps & SlotComponentProps;
 
 export type BlockFillProps = BlockSlotFillProps &
-	Fill.Props & {
+	FillComponentProps & {
 		slotContainerBlockName: string;
 	};

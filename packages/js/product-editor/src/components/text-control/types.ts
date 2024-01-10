@@ -1,4 +1,12 @@
 /**
+ * External dependencies
+ */
+import {
+	InputChangeCallback,
+	Size,
+} from '@wordpress/components/build-types/input-control/types';
+
+/**
  * This must inherit the InputControlProp from @wordpress/components
  * but it has not been exported yet
  */
@@ -15,5 +23,6 @@ export type TextControlProps = Omit<
 	tooltip?: string;
 	prefix?: React.ReactNode;
 	suffix?: React.ReactNode;
-	onChange?( value: string ): void;
+	onChange?: InputChangeCallback;
+	size?: Size;
 };

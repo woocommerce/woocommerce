@@ -17,13 +17,9 @@ type ProductFieldSectionProps = {
 	className?: string;
 };
 
-export const ProductFieldSection: React.FC< ProductFieldSectionProps > = ( {
-	id,
-	title,
-	description,
-	className,
-	children,
-} ) => (
+export const ProductFieldSection: React.FC<
+	ProductFieldSectionProps & { children: React.ReactNode }
+> = ( { id, title, description, className, children } ) => (
 	<ProductSectionLayout
 		title={ title }
 		description={ description }

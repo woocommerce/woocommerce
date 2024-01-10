@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { isValidElement } from 'react';
-import { Fill } from '@wordpress/components';
-import { cloneElement, createElement } from '@wordpress/element';
+import { cloneElement } from '@wordpress/element';
+import { FillComponentProps } from '@woocommerce/components/build-types/types';
+import { isCallable } from '@woocommerce/components/build-types/utils';
 
 type ChildrenProps = {
 	order: number;
@@ -19,13 +20,11 @@ type ChildrenProps = {
  * @param {Object} injectProps - Props to inject.
  * @return {Object} Object with the keys: children and props.
  */
-function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
-	children: React.ReactNode,
-	order: number,
-	props: T,
-	injectProps?: S
-) {
-	if ( typeof children === 'function' ) {
+function getChildrenAndProps<
+	T = FillComponentProps,
+	S = Record< string, unknown >
+>( children: React.ReactNode, order: number, props: T, injectProps?: S ) {
+	if ( isCallable( children ) ) {
 		return {
 			children: children( { ...props, order, ...injectProps } ),
 			props: { order, ...injectProps },
@@ -59,7 +58,10 @@ function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
  * @param {Object} injectProps - Props to inject.
  * @return {Node} Node.
  */
-function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
+function createOrderedChildren<
+	T = FillComponentProps,
+	S = Record< string, unknown >
+>(
 	children: React.ReactNode,
 	order: number,
 	props: T,
@@ -67,6 +69,7 @@ function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 ): React.ReactElement {
 	const { children: childrenToRender, props: propsToRender } =
 		getChildrenAndProps( children, order, props, injectProps );
+	// @ts-expect-error - TODO: It seems children is not a strictly valid argument to cloneElement.
 	return cloneElement( childrenToRender, propsToRender );
 }
 export { createOrderedChildren };

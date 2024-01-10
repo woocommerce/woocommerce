@@ -26,7 +26,6 @@ export function VariationActionsMenu( {
 	return (
 		<DropdownMenu
 			popoverProps={ {
-				// @ts-expect-error missing TS.
 				placement: 'left-start',
 			} }
 			icon={ moreVertical }
@@ -50,6 +49,7 @@ export function VariationActionsMenu( {
 						) }
 					>
 						<MenuItem
+							// @ts-expect-error missing prop in types.
 							href={ selection.permalink }
 							target="_blank"
 							rel="noreferrer"
@@ -98,6 +98,7 @@ export function VariationActionsMenu( {
 						<MenuItem
 							isDestructive
 							label={ __( 'Delete variation', 'woocommerce' ) }
+							// @ts-expect-error missing prop in types.
 							variant="link"
 							onClick={ () => {
 								onDelete( selection );

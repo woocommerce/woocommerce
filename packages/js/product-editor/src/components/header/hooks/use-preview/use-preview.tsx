@@ -15,6 +15,7 @@ import { MouseEvent } from 'react';
 import { useValidations } from '../../../../contexts/validation-context';
 import { WPError } from '../../../../utils/get-product-error-message';
 import { PreviewButtonProps } from '../../preview-button';
+import { ButtonAsAnchorProps } from '@wordpress/components/build-types/button/types';
 
 export function usePreview( {
 	productStatus,
@@ -27,7 +28,7 @@ export function usePreview( {
 }: PreviewButtonProps & {
 	onSaveSuccess?( product: Product ): void;
 	onSaveError?( error: WPError ): void;
-} ): Button.AnchorProps {
+} ): ButtonAsAnchorProps {
 	const anchorRef = useRef< HTMLAnchorElement >();
 
 	const [ productId ] = useEntityProp< number >(
@@ -44,7 +45,6 @@ export function usePreview( {
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
 			const isSaving = isSavingEntityRecord< boolean >(
@@ -69,7 +69,6 @@ export function usePreview( {
 
 	const ariaDisabled = disabled || isDisabled || isValidating;
 
-	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	let previewLink: URL | undefined;
@@ -85,7 +84,9 @@ export function usePreview( {
 	 *
 	 * @param event
 	 */
-	async function handleClick( event: MouseEvent< HTMLAnchorElement > ) {
+	async function handleClick(
+		event: MouseEvent< HTMLAnchorElement > & MouseEvent< HTMLButtonElement >
+	) {
 		if ( ariaDisabled ) {
 			return event.preventDefault();
 		}
@@ -151,12 +152,14 @@ export function usePreview( {
 		target: '_blank',
 		...props,
 		ref( element: HTMLAnchorElement ) {
+			// @ts-expect-error TODO: Fix this, this type is not correct.
 			if ( typeof props.ref === 'function' ) props.ref( element );
 			anchorRef.current = element;
 		},
 		'aria-disabled': ariaDisabled,
 		// Note that the href is always passed for a11y support. So
 		// the final rendered element is always an anchor.
+		// @ts-expect-error - TODO: fix this, fallback to empty string?
 		href: previewLink?.toString(),
 		variant: 'tertiary',
 		onClick: handleClick,

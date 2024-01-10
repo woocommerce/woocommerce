@@ -70,14 +70,14 @@ export const CreateTagModal: React.FC< CreateTagModalProps > = ( {
 				/>
 				<div className="woocommerce-create-new-tag-modal__buttons">
 					<Button
-						isSecondary
+						variant="secondary"
 						onClick={ () => onCancel() }
 						disabled={ isCreating }
 					>
 						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 					<Button
-						isPrimary
+						variant="primary"
 						disabled={ tagName.length === 0 || isCreating }
 						isBusy={ isCreating }
 						onClick={ () => {

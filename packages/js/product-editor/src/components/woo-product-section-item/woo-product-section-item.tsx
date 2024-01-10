@@ -4,6 +4,10 @@
 import React from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
+import {
+	FillComponentProps,
+	SlotComponentProps,
+} from '@woocommerce/components/build-types/types';
 
 /**
  * Internal dependencies
@@ -23,8 +27,10 @@ type WooProductSectionSlotProps = {
 
 const DEFAULT_SECTION_ORDER = 20;
 
-export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
-	Slot: React.FC< Slot.Props & WooProductSectionSlotProps >;
+export const WooProductSectionItem: React.FC<
+	WooProductSectionItemProps & { children: React.ReactNode }
+> & {
+	Slot: React.FC< SlotComponentProps & WooProductSectionSlotProps >;
 } = ( { children, tabs } ) => {
 	return (
 		<>
@@ -33,9 +39,9 @@ export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
 					name={ `woocommerce_product_section_${ tabName }` }
 					key={ tabName }
 				>
-					{ ( fillProps: Fill.Props ) => {
+					{ ( fillProps: FillComponentProps ) => {
 						return createOrderedChildren<
-							Fill.Props & { tabName: string }
+							FillComponentProps & { tabName: string }
 						>( children, sectionOrder || DEFAULT_SECTION_ORDER, {
 							tabName,
 							...fillProps,
@@ -48,6 +54,7 @@ export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
 };
 
 WooProductSectionItem.Slot = ( { fillProps, tab } ) => (
+	// @ts-expect-error - I think Slot props type issues need to be fixed in @wordpress/components.
 	<Slot
 		name={ `woocommerce_product_section_${ tab }` }
 		fillProps={ fillProps }

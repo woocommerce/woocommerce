@@ -22,11 +22,9 @@ import classNames from 'classnames';
 import {
 	Button,
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error - useEntityId types don't exist yet
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp, useEntityId } from '@wordpress/core-data';
 
@@ -47,17 +45,13 @@ export function Edit( {
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
-
 	const { hasEdit } = useProductEdits();
-
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
 
 	const productId = useEntityId( 'postType', 'product' );
 	const product: Product = useSelect( ( select ) =>
-		// @ts-expect-error There are no types for this.
 		select( 'core' ).getEditedEntityRecord(
 			'postType',
 			'product',
@@ -73,8 +67,7 @@ export function Edit( {
 	);
 
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
+		// @ts-expect-error - TODO: Make types compatible for selectors.
 		( select: WCDataSelector ) => {
 			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
 			if ( productId ) {
@@ -171,6 +164,7 @@ export function Edit( {
 				>
 					<InputControl
 						id={ nameControlId }
+						// @ts-expect-error - TODO: Fix this.
 						ref={ nameRef }
 						name="name"
 						// eslint-disable-next-line jsx-a11y/no-autofocus
@@ -179,7 +173,10 @@ export function Edit( {
 							'e.g. 12 oz Coffee Mug',
 							'woocommerce'
 						) }
-						onChange={ setName }
+						onChange={ ( newValue: string | undefined ) =>
+							// @ts-expect-error - TODO: Fix this it's not type safe.
+							setName( newValue )
+						}
 						value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
 						autoComplete="off"
 						data-1p-ignore
@@ -200,7 +197,6 @@ export function Edit( {
 						onCancel={ () => setShowProductLinkEditModal( false ) }
 						onSaved={ () => setShowProductLinkEditModal( false ) }
 						saveHandler={ async ( updatedSlug ) => {
-							// @ts-expect-error There are no types for this.
 							const { slug, permalink }: Product =
 								await saveEntityRecord( 'postType', 'product', {
 									id: product.id,

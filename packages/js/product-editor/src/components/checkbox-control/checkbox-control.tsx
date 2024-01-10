@@ -57,6 +57,7 @@ export const Checkbox: React.FC< CheckboxProps > = ( {
 				/>
 				{ tooltip && (
 					<Tooltip
+						// @ts-expect-error TODO: Fix this?
 						text={
 							<span
 								dangerouslySetInnerHTML={ sanitizeHTML(
@@ -65,8 +66,6 @@ export const Checkbox: React.FC< CheckboxProps > = ( {
 							></span>
 						}
 						position="top center"
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore Incorrect types.
 						className={
 							'woocommerce-product-form__checkbox-tooltip'
 						}

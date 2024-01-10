@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { InputChangeCallback } from '@wordpress/components/build-types/input-control/types';
+
+/**
  * Internal dependencies
  */
 import { useProductHelper } from './use-product-helper';
@@ -6,7 +11,7 @@ import { deferSelectInFocus } from '../utils';
 
 export type NumberInputProps = {
 	value: string;
-	onChange: ( value: string ) => void;
+	onChange: InputChangeCallback;
 	onFocus: ( event: React.FocusEvent< HTMLInputElement > ) => void;
 	onKeyDown: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 	onKeyUp: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
@@ -14,7 +19,7 @@ export type NumberInputProps = {
 
 type Props = {
 	value: string;
-	onChange: ( value: string ) => void;
+	onChange: InputChangeCallback;
 	onFocus?: ( event: React.FocusEvent< HTMLInputElement > ) => void;
 	onKeyDown?: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 };
@@ -45,18 +50,22 @@ export const useNumberInputProps = ( {
 			const step = Number( event.currentTarget.step || '1' );
 			if ( event.code === 'ArrowUp' ) {
 				event.preventDefault();
+				// @ts-expect-error: TODO - fix this its not type safe.
 				onChange( String( amount + step ) );
 			}
 			if ( event.code === 'ArrowDown' ) {
 				event.preventDefault();
+				// @ts-expect-error: TODO - fix this its not type safe.
 				onChange( String( amount - step ) );
 			}
 			if ( onKeyDown ) {
 				onKeyDown( event );
 			}
 		},
-		onChange( newValue: string ) {
+		onChange( newValue: string | undefined ) {
+			// @ts-expect-error: TODO - fix this its not type safe.
 			const sanitizeValue = parseNumber( newValue );
+			// @ts-expect-error: TODO - fix this its not type safe.
 			onChange( sanitizeValue );
 		},
 	};

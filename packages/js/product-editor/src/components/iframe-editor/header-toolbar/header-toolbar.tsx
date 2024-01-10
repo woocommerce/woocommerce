@@ -97,6 +97,7 @@ export function HeaderToolbar( {
 					ref={ inserterButton }
 					as={ Button }
 					className="woocommerce-iframe-editor__header-toolbar-inserter-toggle"
+					// @ts-expect-error - Cannot properly handle button props.
 					variant="primary"
 					isPressed={ isInserterOpened }
 					onMouseDown={ (
@@ -117,6 +118,7 @@ export function HeaderToolbar( {
 				{ isLargeViewport && (
 					<ToolbarItem
 						as={ ToolSelector }
+						// @ts-expect-error - type property is missing.
 						disabled={ isTextModeEnabled }
 					/>
 				) }
@@ -127,6 +129,7 @@ export function HeaderToolbar( {
 			<div className="woocommerce-iframe-editor__header-toolbar-right">
 				<ToolbarItem
 					as={ Button }
+					// @ts-expect-error - can't handle button props.
 					variant="tertiary"
 					className="woocommerce-modal-actions__cancel-button"
 					onClick={ onCancel }
@@ -134,6 +137,7 @@ export function HeaderToolbar( {
 				/>
 				<ToolbarItem
 					as={ Button }
+					// @ts-expect-error - can't handle button props.
 					variant="primary"
 					className="woocommerce-modal-actions__done-button"
 					onClick={ onSave }

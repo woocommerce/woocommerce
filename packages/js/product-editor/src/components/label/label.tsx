@@ -41,6 +41,7 @@ export const Label: React.FC< LabelProps > = ( {
 
 			{ tooltip && (
 				<Tooltip
+					// @ts-expect-error TODO: Is this error valid?
 					text={
 						<span
 							dangerouslySetInnerHTML={ sanitizeHTML( tooltip ) }

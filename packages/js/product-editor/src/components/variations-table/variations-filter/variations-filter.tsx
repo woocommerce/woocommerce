@@ -20,10 +20,10 @@ import {
 	Button,
 	CheckboxControl,
 	Dropdown,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 	Spinner,
 } from '@wordpress/components';
+import { InputChangeCallback } from '@wordpress/components/build-types/input-control/types';
 
 /**
  * Internal dependencies
@@ -183,8 +183,9 @@ export function VariationsFilter( {
 		}
 	}
 
-	const handleInputControlChange = useDebounce(
-		function handleInputControlChange( value: string ) {
+	const handleInputControlChange = useDebounce< InputChangeCallback >(
+		function handleInputControlChange( value: string | undefined ) {
+			// @ts-expect-error TODO: fix this, `value` can be undefined.
 			setSearch( value );
 			setOptions( [] );
 			setCurrentPage( 1 );
@@ -203,7 +204,6 @@ export function VariationsFilter( {
 	return (
 		<Dropdown
 			className="woocommerce-product-variations-filter"
-			// @ts-expect-error Property 'onClose' does not exist
 			onClose={ handleClose }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<Button

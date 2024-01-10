@@ -2,11 +2,11 @@
  * External dependencies
  */
 import type { Product } from '@woocommerce/data';
-import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { MouseEvent } from 'react';
+import { ButtonProps } from '@wordpress/components/build-types/button/types';
 
 /**
  * Internal dependencies
@@ -26,7 +26,7 @@ export function usePublish( {
 }: PublishButtonProps & {
 	onPublishSuccess?( product: Product ): void;
 	onPublishError?( error: WPError ): void;
-} ): Button.ButtonProps {
+} ): ButtonProps {
 	const { isValidating, validate } = useValidations< Product >();
 
 	const [ productId ] = useEntityProp< number >(
@@ -38,11 +38,8 @@ export function usePublish( {
 	const { isSaving, isDirty } = useSelect(
 		( select ) => {
 			const {
-				// @ts-expect-error There are no types for this.
 				isSavingEntityRecord,
-				// @ts-expect-error There are no types for this.
 				hasEditsForEntityRecord,
-				// @ts-expect-error There are no types for this.
 				getRawEntityRecord,
 			} = select( 'core' );
 
@@ -73,10 +70,11 @@ export function usePublish( {
 	const isPublished =
 		productType === 'product' ? productStatus === 'publish' : true;
 
-	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
-	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+	async function handleClick(
+		event: MouseEvent< HTMLButtonElement > & MouseEvent< HTMLAnchorElement >
+	) {
 		if ( onClick ) {
 			onClick( event );
 		}
@@ -146,6 +144,7 @@ export function usePublish( {
 		}
 	}
 
+	// @ts-expect-error TODO: Fix this, this type is not complete.
 	return {
 		children: isPublished
 			? __( 'Update', 'woocommerce' )

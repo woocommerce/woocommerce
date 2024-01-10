@@ -74,6 +74,7 @@ export function Editor( {
 									</>
 								}
 							/>
+							{ /* @ts-expect-error - this type is still exported. */ }
 							<Popover.Slot />
 						</ValidationProvider>
 					</ShortcutProvider>

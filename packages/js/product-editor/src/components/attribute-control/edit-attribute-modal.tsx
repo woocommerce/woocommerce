@@ -280,14 +280,14 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 				</div>
 				<div className="woocommerce-edit-attribute-modal__buttons">
 					<Button
-						isSecondary
+						variant="secondary"
 						label={ cancelAccessibleLabel }
 						onClick={ () => onCancel() }
 					>
 						{ cancelLabel }
 					</Button>
 					<Button
-						isPrimary
+						variant="primary"
 						label={ updateAccessibleLabel }
 						onClick={ () => {
 							onEdit(

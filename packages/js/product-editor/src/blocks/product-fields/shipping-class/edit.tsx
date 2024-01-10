@@ -21,6 +21,7 @@ import {
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useEntityProp } from '@wordpress/core-data';
+import { Option } from '@woocommerce/components/build-types/select-control/types';
 
 /**
  * Internal dependencies
@@ -34,7 +35,10 @@ type ServerErrorResponse = {
 	code: string;
 };
 
-export const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
+// TODO - fix this, key should be provided to options.
+type ControlOption = Omit< Option, 'key' >;
+
+export const DEFAULT_SHIPPING_CLASS_OPTIONS: ControlOption[] = [
 	{ value: '', label: __( 'No shipping class', 'woocommerce' ) },
 	{
 		value: ADD_NEW_SHIPPING_CLASS_OPTION_VALUE,
@@ -44,7 +48,7 @@ export const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
 
 function mapShippingClassToSelectOption(
 	shippingClasses: ProductShippingClass[]
-): SelectControl.Option[] {
+): ControlOption[] {
 	return shippingClasses.map( ( { slug, name } ) => ( {
 		value: slug,
 		label: name,
@@ -155,6 +159,7 @@ export function Edit( {
 							setShippingClass( value );
 						} }
 						label={ __( 'Shipping class', 'woocommerce' ) }
+						// @ts-expect-error - TODO: Type these options properly.
 						options={ [
 							...DEFAULT_SHIPPING_CLASS_OPTIONS,
 							...mapShippingClassToSelectOption(

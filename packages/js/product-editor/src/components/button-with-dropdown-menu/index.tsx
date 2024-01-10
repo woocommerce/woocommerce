@@ -62,7 +62,6 @@ export const ButtonWithDropdownMenu: React.FC<
 					label={ dropdownButtonLabel }
 					popoverProps={ {
 						placement,
-						// @ts-expect-error no exported member.
 						position,
 						offset,
 					} }

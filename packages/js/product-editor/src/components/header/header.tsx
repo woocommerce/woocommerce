@@ -10,6 +10,7 @@ import { Button, Tooltip } from '@wordpress/components';
 import { chevronLeft, group, Icon } from '@wordpress/icons';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -45,7 +46,11 @@ export function Header( {
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord( 'postType', productType, productId );
+			return getEntityRecord< Product >(
+				'postType',
+				productType,
+				productId
+			);
 		},
 		[ productId ]
 	);
@@ -80,7 +85,7 @@ export function Header( {
 							<div className="woocommerce-product-header__back-tooltip-wrapper">
 								<Button
 									icon={ chevronLeft }
-									isTertiary={ true }
+									variant="tertiary"
 									onClick={ () => {
 										recordEvent(
 											'product_variation_back_to_main_product',

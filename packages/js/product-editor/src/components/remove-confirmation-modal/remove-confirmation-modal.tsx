@@ -9,6 +9,7 @@ import { Button, Modal } from '@wordpress/components';
  * Internal dependencies
  */
 import { RemoveConfirmationModalProps } from './types';
+import { SyntheticEvent } from 'react';
 
 export function RemoveConfirmationModal( {
 	title,
@@ -31,13 +32,8 @@ export function RemoveConfirmationModal( {
 	return (
 		<Modal
 			title={ title }
-			onRequestClose={ (
-				event:
-					| React.KeyboardEvent< Element >
-					| React.MouseEvent< Element >
-					| React.FocusEvent< Element >
-			) => {
-				if ( ! event.isPropagationStopped() && onCancel ) {
+			onRequestClose={ ( event ) => {
+				if ( ! event?.isPropagationStopped() && onCancel ) {
 					onCancel();
 				}
 			} }

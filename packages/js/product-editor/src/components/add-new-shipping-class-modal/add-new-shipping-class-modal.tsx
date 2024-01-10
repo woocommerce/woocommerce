@@ -65,11 +65,11 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 				}
 			/>
 			<div className="woocommerce-add-new-shipping-class-modal__buttons">
-				<Button isSecondary onClick={ onCancel }>
+				<Button variant="secondary" onClick={ onCancel }>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button
-					isPrimary
+					variant="primary"
 					isBusy={ isLoading }
 					disabled={ ! isValidForm || isLoading }
 					onClick={ handleAdd }
@@ -138,6 +138,7 @@ export function AddNewShippingClassModal( {
 				errors={ {} }
 				onSubmit={ handleSubmit }
 			>
+				{ /* @ts-expect-error - TODO: fix this. */ }
 				{ ( childrenProps: {
 					handleSubmit: () => Promise< ProductShippingClass >;
 				} ) => (

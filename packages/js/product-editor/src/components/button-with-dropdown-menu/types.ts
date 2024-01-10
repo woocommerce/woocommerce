@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import { ButtonProps } from '@wordpress/components/build-types/button/types';
 import type {
 	// @ts-expect-error no exported member.
 	DropdownOption,
 } from '@wordpress/components';
 
-type ButtonVariant = Button.ButtonProps[ 'variant' ];
+type ButtonVariant = ButtonProps[ 'variant' ];
 
 type PositionYAxis = 'top' | 'middle' | 'bottom';
 type PositionXAxis = 'left' | 'center' | 'right';

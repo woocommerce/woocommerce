@@ -2,8 +2,14 @@
  * External dependencies
  */
 import React, { ReactElement, ReactNode } from 'react';
-import { Slot, Fill, TabPanel } from '@wordpress/components';
+import { Slot, Fill } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
+import {
+	FillComponentProps,
+	SlotComponentProps,
+	Tab,
+	TabPanelProps,
+} from '@woocommerce/components/build-types/types';
 
 /**
  * Internal dependencies
@@ -16,25 +22,27 @@ type WooProductTabItemProps = {
 	id: string;
 	pluginId: string;
 	tabProps:
-		| TabPanel.Tab
+		| Tab
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		| ( ( fillProps: Record< string, any > | undefined ) => TabPanel.Tab );
+		| ( ( fillProps: Record< string, any > | undefined ) => Tab );
 	templates?: Array< ProductFillLocationType >;
 };
 
 type WooProductFieldSlotProps = {
 	template: string;
 	children: (
-		tabs: TabPanel.Tab[],
+		tabs: Tab[],
 		tabChildren: Record< string, ReactNode >
 	) => ReactElement | null;
 };
 
 const DEFAULT_TAB_ORDER = 20;
 
-export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
+export const WooProductTabItem: React.FC<
+	WooProductTabItemProps & { children: React.ReactNode }
+> & {
 	Slot: React.VFC<
-		Omit< Slot.Props, 'children' > & WooProductFieldSlotProps
+		Omit< SlotComponentProps, 'children' > & WooProductFieldSlotProps
 	>;
 } = ( { children, tabProps, templates } ) => {
 	if ( ! templates ) {
@@ -49,10 +57,11 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 					name={ `woocommerce_product_tab_${ templateData.name }` }
 					key={ templateData.name }
 				>
-					{ ( fillProps: Fill.Props ) => {
-						return createOrderedChildren< Fill.Props >(
+					{ ( fillProps: FillComponentProps ) => {
+						return createOrderedChildren< FillComponentProps >(
 							children,
 							templateData.order || DEFAULT_TAB_ORDER,
+							// @ts-expect-error - I think this arg is valid, the type issue is in @wordpress/components.
 							{},
 							{
 								tabProps,
@@ -69,6 +78,7 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 };
 
 WooProductTabItem.Slot = ( { fillProps, template, children } ) => (
+	// @ts-expect-error - I think Slot props type issues need to be fixed in @wordpress/components.
 	<Slot
 		name={ `woocommerce_product_tab_${ template }` }
 		fillProps={ fillProps }
@@ -96,7 +106,7 @@ WooProductTabItem.Slot = ( { fillProps, template, children } ) => (
 				},
 				{ childrenMap: {}, tabs: [] } as {
 					childrenMap: Record< string, ReactElement >;
-					tabs: Array< TabPanel.Tab & { order: number } >;
+					tabs: Array< TabPanelProps[ 'tabs' ] & { order: number } >;
 				}
 			);
 			const orderedTabs = tabData.tabs.sort( ( a, b ) => {

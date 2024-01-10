@@ -10,7 +10,6 @@ import {
 	BaseControl,
 	Button,
 	Modal,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -124,7 +123,9 @@ export function ManageDownloadLimitsModal( {
 
 	const downloadLimitInputProps = useNumberInputProps( {
 		value: downloadLimit,
-		onChange: setDownloadLimit,
+		onChange: ( nextValue: string | undefined ) =>
+			// @ts-expect-error Fix this, `nextValue` can be undefined.
+			setDownloadLimit( nextValue ),
 	} );
 
 	const downloadLimitProps = {
@@ -159,7 +160,9 @@ export function ManageDownloadLimitsModal( {
 
 	const downloadExpiryInputProps = useNumberInputProps( {
 		value: downloadExpiry,
-		onChange: setDownloadExpiry,
+		onChange: ( nextValue: string | undefined ) =>
+			// @ts-expect-error Fix this, `nextValue` can be undefined.
+			setDownloadExpiry( nextValue ),
 	} );
 
 	const downloadExpiryProps = {

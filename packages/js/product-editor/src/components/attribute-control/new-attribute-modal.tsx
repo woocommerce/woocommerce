@@ -209,6 +209,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					attributes: [ null ],
 				} }
 			>
+				{ /* @ts-expect-error TODO: fix this. */ }
 				{ ( {
 					values,
 					setValue,
@@ -275,13 +276,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					return (
 						<Modal
 							title={ title }
-							onRequestClose={ (
-								event:
-									| React.KeyboardEvent< Element >
-									| React.MouseEvent< Element >
-									| React.FocusEvent< Element >
-							) => {
-								if ( ! event.isPropagationStopped() ) {
+							onRequestClose={ ( event ) => {
+								if ( ! event?.isPropagationStopped() ) {
 									onCancel();
 								}
 							} }
@@ -472,14 +468,14 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							</div>
 							<div className="woocommerce-new-attribute-modal__buttons">
 								<Button
-									isSecondary
+									variant="secondary"
 									label={ cancelLabel }
 									onClick={ () => onCancel() }
 								>
 									{ cancelLabel }
 								</Button>
 								<Button
-									isPrimary
+									variant="primary"
 									label={ addAccessibleLabel }
 									disabled={
 										values.attributes.length === 1 &&

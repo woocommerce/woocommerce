@@ -26,7 +26,6 @@ export function VariationsActionsMenu( {
 }: VariationsActionsMenuProps ) {
 	return (
 		<Dropdown
-			// @ts-expect-error missing prop in types.
 			popoverProps={ {
 				placement: 'bottom-end',
 			} }
@@ -90,6 +89,7 @@ export function VariationsActionsMenu( {
 					<MenuGroup>
 						<MenuItem
 							isDestructive
+							// @ts-expect-error missing prop in types.
 							variant="link"
 							onClick={ () => {
 								onDelete( selection );

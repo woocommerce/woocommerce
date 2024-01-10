@@ -68,7 +68,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const productId = useEntityId( 'postType', 'product' );
 
 	const { validate } = useValidations< Product >();
-	// @ts-expect-error There are no types for this.
+
 	const { editEntityRecord, saveEditedEntityRecord, saveEntityRecord } =
 		useDispatch( 'core' );
 	const { createSuccessNotice, createErrorNotice } =
@@ -87,7 +87,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	const { isSaving } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
@@ -235,7 +234,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						},
 					],
 				},
-				// @ts-expect-error Expected 3 arguments, but got 4.
 				{
 					throwOnError: true,
 				}
@@ -275,7 +273,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 				<Dropdown
 					focusOnMount={ false }
-					// @ts-expect-error Property does exists
 					popoverProps={ {
 						placement: 'bottom-start',
 					} }
@@ -302,7 +299,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 								<MenuGroup>
 									<Dropdown
 										focusOnMount={ false }
-										// @ts-expect-error Property does exists
 										popoverProps={ {
 											placement: 'right-start',
 										} }

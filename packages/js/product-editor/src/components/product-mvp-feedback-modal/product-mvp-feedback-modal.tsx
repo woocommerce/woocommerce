@@ -172,6 +172,7 @@ function ProductMVPFeedbackModal( {
 						) }
 						value={ email }
 						onChange={ ( value: string ) => setEmail( value ) }
+						// @ts-expect-error - TODO: check if props are correct here.
 						rows={ 5 }
 						help={ __(
 							'In case you want to participate in further discussion and future user research.',

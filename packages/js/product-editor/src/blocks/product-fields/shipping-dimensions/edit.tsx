@@ -19,7 +19,6 @@ import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -205,6 +204,7 @@ export function Edit( {
 						} ) }
 						help={ dimensionsWidthValidationError }
 					>
+						{ /* @ts-expect-error - TODO: Fix this. */ }
 						<InputControl { ...dimensionsWidthProps } />
 					</BaseControl>
 
@@ -219,6 +219,7 @@ export function Edit( {
 						} ) }
 						help={ dimensionsLengthValidationError }
 					>
+						{ /* @ts-expect-error - TODO: fix this. */ }
 						<InputControl { ...dimensionsLengthProps } />
 					</BaseControl>
 
@@ -233,6 +234,7 @@ export function Edit( {
 						} ) }
 						help={ dimensionsHeightValidationError }
 					>
+						{ /* @ts-expect-error - TODO: Fix this. */ }
 						<InputControl { ...dimensionsHeightProps } />
 					</BaseControl>
 
@@ -244,6 +246,7 @@ export function Edit( {
 						} ) }
 						help={ weightValidationError }
 					>
+						{ /* @ts-expect-error - TODO: fix this. */ }
 						<InputControl { ...weightProps } />
 					</BaseControl>
 				</div>
