@@ -114,12 +114,6 @@ jobs:
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
               working-directory: plugins/woocommerce
-              if: |
-                  always() &&
-                  (
-                    steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
-                    steps.run_playwright_e2e_tests.conclusion != 'skipped' 
-                  )
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Archive Playwright E2E test report
