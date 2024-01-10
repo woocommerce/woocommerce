@@ -162,16 +162,16 @@ final class WC_Cart_Session {
 				 */
 				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values, $product );
 
-				/**
-				 * Allow 3rd parties to override this item's is_purchasable() result with cart item data.
-				 *
-				 * @param bool       $is_purchasable If false, the item will not be added to the cart. Default: product's is_purchasable() status.
-				 * @param string     $key Cart item key.
-				 * @param array      $values Cart item values e.g. quantity and product_id.
-				 * @param WC_Product $product The product being added to the cart.
-				 *
-				 * @since 7.0.0
-				 */
+			/**
+			 * Allow 3rd parties to override this item's is_purchasable() result with cart item data.
+			 *
+			 * @param bool       $is_purchasable If false, the item will not be added to the cart. Default: product's is_purchasable() status.
+			 * @param string     $key Cart item key.
+			 * @param array      $values Cart item values e.g. quantity and product_id.
+			 * @param WC_Product $product The product being added to the cart.
+			 *
+			 * @since 7.0.0
+			 */
 			} elseif ( ! apply_filters( 'woocommerce_cart_item_is_purchasable', $product->is_purchasable(), $key, $values, $product ) ) {
 				$update_cart_session = true;
 				/* translators: %s: product name */
@@ -252,45 +252,14 @@ final class WC_Cart_Session {
 	/**
 	 * Will set cart cookies if needed and when possible.
 	 *
-	 * Headers are only updated if headers have not yet been sent.
-	 *
 	 * @since 3.2.0
 	 */
 	public function maybe_set_cart_cookies() {
-		if ( headers_sent() || ! did_action( 'wp_loaded' ) ) {
-			return;
-		}
-		if ( ! $this->cart->is_empty() ) {
-			$this->set_cart_cookies( true );
-		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
-			$this->set_cart_cookies( false );
-		}
-		$this->dedupe_cookies();
-	}
-
-	/**
-	 * Remove duplicate cookies from the response.
-	 */
-	private function dedupe_cookies() {
-		$final_cookies  = array();
-		$update_cookies = false;
-
-		foreach ( headers_list() as $header ) {
-			if ( stripos( $header, 'Set-Cookie:' ) === false ) {
-				continue;
-			}
-			list(, $cookie_value)             = explode( ':', $header, 2 );
-			list($cookie_name, $cookie_value) = explode( '=', trim( $cookie_value ), 2 );
-			if ( array_key_exists( $cookie_name, $final_cookies ) ) {
-				$update_cookies = true;
-			}
-			$final_cookies[ $cookie_name ] = $cookie_value;
-		}
-		if ( $update_cookies ) {
-			header_remove( 'Set-Cookie' );
-			foreach ( $final_cookies as $cookie_name => $cookie_value ) {
-				// Using header here preserves previous cookie args.
-				header( "Set-Cookie: {$cookie_name}={$cookie_value}", false );
+		if ( ! headers_sent() && did_action( 'wp_loaded' ) ) {
+			if ( ! $this->cart->is_empty() ) {
+				$this->set_cart_cookies( true );
+			} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
+				$this->set_cart_cookies( false );
 			}
 		}
 	}
@@ -363,7 +332,6 @@ final class WC_Cart_Session {
 			foreach ( $setcookies as $name => $value ) {
 				if ( ! isset( $_COOKIE[ $name ] ) || $_COOKIE[ $name ] !== $value ) {
 					wc_setcookie( $name, $value );
-					$_COOKIE[ $name ] = $value;
 				}
 			}
 		} else {
