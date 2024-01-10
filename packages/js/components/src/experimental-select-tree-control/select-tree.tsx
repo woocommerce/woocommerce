@@ -29,6 +29,7 @@ interface SelectTreeProps extends TreeControlProps {
 	label: string | JSX.Element;
 	onInputChange?: ( value: string | undefined ) => void;
 	initialInputValue?: string | undefined;
+	placeholder?: string;
 }
 
 export const SelectTree = function SelectTree( {

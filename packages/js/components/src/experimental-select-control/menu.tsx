@@ -80,7 +80,6 @@ export const Menu = ( {
 		>
 			<div>
 				<Popover
-					// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
 					__unstableSlotName="woocommerce-select-control-menu"
 					focusOnMount={ false }
 					className={ classnames(

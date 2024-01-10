@@ -2,12 +2,23 @@
  * External dependencies
  */
 import { isValidElement, Fragment } from 'react';
-import { Slot, Fill } from '@wordpress/components';
 import { cloneElement, createElement } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { FillComponentProps } from './types';
 
 type ChildrenProps = {
 	order: number;
 };
+
+// Type guard function to check if children is a function, while still type narrowing correctly.
+function isCallable(
+	children: unknown
+): children is ( props: unknown ) => React.ReactNode {
+	return typeof children === 'function';
+}
 
 /**
  * Returns an object with the children and props that will be used by `cloneElement`. They will change depending on the
@@ -19,13 +30,11 @@ type ChildrenProps = {
  * @param {Object} injectProps - Props to inject.
  * @return {Object} Object with the keys: children and props.
  */
-function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
-	children: React.ReactNode,
-	order: number,
-	props: T,
-	injectProps?: S
-) {
-	if ( typeof children === 'function' ) {
+function getChildrenAndProps<
+	T = FillComponentProps,
+	S = Record< string, unknown >
+>( children: React.ReactNode, order: number, props: T, injectProps?: S ) {
+	if ( isCallable( children ) ) {
 		return {
 			children: children( { ...props, order, ...injectProps } ),
 			props: { order, ...injectProps },

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import React, { ReactElement, ReactNode } from 'react';
-import { Slot, Fill, TabPanel } from '@wordpress/components';
+import { Slot, Fill } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 import deprecated from '@wordpress/deprecated';
 
@@ -10,6 +10,7 @@ import deprecated from '@wordpress/deprecated';
  * Internal dependencies
  */
 import { createOrderedChildren } from '../utils';
+import { FillComponentProps, SlotComponentProps, Tab } from '../types';
 
 export type ProductFillLocationType = { name: string; order?: number };
 
@@ -17,25 +18,27 @@ type WooProductTabItemProps = {
 	id: string;
 	pluginId: string;
 	tabProps:
-		| TabPanel.Tab
+		| Tab
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		| ( ( fillProps: Record< string, any > | undefined ) => TabPanel.Tab );
+		| ( ( fillProps: Record< string, any > | undefined ) => Tab );
 	templates?: Array< ProductFillLocationType >;
 };
 
 type WooProductFieldSlotProps = {
 	template: string;
 	children: (
-		tabs: TabPanel.Tab[],
+		tabs: Tab[],
 		tabChildren: Record< string, ReactNode >
 	) => ReactElement | null;
 };
 
 const DEFAULT_TAB_ORDER = 20;
 
-export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
-	Slot: React.VFC<
-		Omit< Slot.Props, 'children' > & WooProductFieldSlotProps
+export const WooProductTabItem: React.FC<
+	WooProductTabItemProps & { children: React.ReactNode }
+> & {
+	Slot: React.FC<
+		Omit< SlotComponentProps, 'children' > & WooProductFieldSlotProps
 	>;
 } = ( { children, tabProps, templates } ) => {
 	deprecated( `__experimentalWooProductTabItem`, {
@@ -56,10 +59,11 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 					name={ `woocommerce_product_tab_${ templateData.name }` }
 					key={ templateData.name }
 				>
-					{ ( fillProps: Fill.Props ) => {
-						return createOrderedChildren< Fill.Props >(
+					{ ( fillProps: FillComponentProps ) => {
+						return createOrderedChildren< FillComponentProps >(
 							children,
 							templateData.order || DEFAULT_TAB_ORDER,
+							// @ts-expect-error - TODO: Maybe the type should be fixed upstream if this is valid arg?
 							{},
 							{
 								tabProps,
@@ -76,6 +80,7 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 };
 
 WooProductTabItem.Slot = ( { fillProps, template, children } ) => (
+	// @ts-expect-error - TODO: Maybe the type should be fixed upstream, I think this is valid.
 	<Slot
 		name={ `woocommerce_product_tab_${ template }` }
 		fillProps={ fillProps }
@@ -103,7 +108,7 @@ WooProductTabItem.Slot = ( { fillProps, template, children } ) => (
 				},
 				{ childrenMap: {}, tabs: [] } as {
 					childrenMap: Record< string, ReactElement >;
-					tabs: Array< TabPanel.Tab & { order: number } >;
+					tabs: ( Tab & { order: number } )[];
 				}
 			);
 			const orderedTabs = tabData.tabs.sort( ( a, b ) => {

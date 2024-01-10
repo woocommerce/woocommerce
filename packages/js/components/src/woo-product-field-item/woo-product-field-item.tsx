@@ -21,7 +21,7 @@ type WooProductFieldItemProps = {
 
 type WooProductFieldSlotProps = {
 	section: string;
-};
+} & FillComponentProps;
 
 type WooProductFieldFillProps = {
 	fieldName: string;
@@ -31,6 +31,9 @@ type WooProductFieldFillProps = {
 };
 
 const DEFAULT_FIELD_ORDER = 20;
+
+type FillComponentProps = typeof Fill extends React.FC< infer P > ? P : never;
+type SlotComponentProps = typeof Slot extends React.FC< infer P > ? P : never;
 
 const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	fieldName,
@@ -57,9 +60,9 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 			name={ `woocommerce_product_field_${ sectionName }` }
 			key={ fieldId }
 		>
-			{ ( fillProps: Fill.Props ) =>
+			{ ( fillProps: FillComponentProps ) =>
 				createOrderedChildren<
-					Fill.Props &
+					FillComponentProps &
 						SlotContextHelpersType & {
 							sectionName: string;
 						},
@@ -79,8 +82,10 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	);
 };
 
-export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
-	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
+export const WooProductFieldItem: React.FC<
+	WooProductFieldItemProps & { children: React.ReactNode }
+> & {
+	Slot: React.FC< SlotComponentProps & WooProductFieldSlotProps >;
 } = ( { children, sections, id } ) => {
 	return (
 		<>
@@ -105,6 +110,7 @@ WooProductFieldItem.Slot = ( { fillProps, section } ) => {
 	const { filterRegisteredFills } = useSlotContext();
 
 	return (
+		// @ts-expect-error - TODO: fix this type.
 		<Slot
 			name={ `woocommerce_product_field_${ section }` }
 			fillProps={ fillProps }
