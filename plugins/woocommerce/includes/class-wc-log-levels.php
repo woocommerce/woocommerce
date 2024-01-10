@@ -78,7 +78,7 @@ abstract class WC_Log_Levels {
 	 * @return bool True if $level is a valid level.
 	 */
 	public static function is_valid_level( $level ) {
-		return array_key_exists( strtolower( $level ), self::$level_to_severity );
+		return is_string( $level ) && array_key_exists( strtolower( $level ), self::$level_to_severity );
 	}
 
 	/**
