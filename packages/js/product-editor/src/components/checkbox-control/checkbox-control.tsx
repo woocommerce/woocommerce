@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { CheckboxControl, Tooltip } from '@wordpress/components';
+import { CheckboxControl } from '@wordpress/components';
+import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
 import { Icon, help } from '@wordpress/icons';
 
 /**
