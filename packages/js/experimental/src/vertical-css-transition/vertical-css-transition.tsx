@@ -9,7 +9,7 @@ import {
 	useRef,
 } from '@wordpress/element';
 import { CSSTransitionProps } from 'react-transition-group/CSSTransition';
-import { CSSTransition } from 'react-transition-group';
+import { CSSTransition, TransitionStatus } from 'react-transition-group';
 
 export type VerticalCSSTransitionProps<
 	Ref extends HTMLElement | undefined = undefined
@@ -79,13 +79,12 @@ export const VerticalCSSTransition: React.FC< VerticalCSSTransitionProps > = ( {
 		exited: { maxHeight: 0 },
 	};
 
-	const getTransitionStyle = (
-		state: 'entering' | 'entered' | 'exiting' | 'exited'
-	) => {
+	const getTransitionStyle = ( state: TransitionStatus ) => {
 		const timeouts = getTimeouts();
 		const appearing =
 			cssTransitionRef.current &&
 			cssTransitionRef.current.context &&
+			// @ts-expect-error - TODO: fix this type, the context is wrong.
 			cssTransitionRef.current.context.isMounting;
 		let duration;
 		if ( state.startsWith( 'enter' ) ) {
@@ -121,12 +120,13 @@ export const VerticalCSSTransition: React.FC< VerticalCSSTransitionProps > = ( {
 			in={ transitionIn }
 			ref={ cssTransitionRef }
 		>
-			{ ( state: 'entering' | 'entered' | 'exiting' | 'exited' ) => (
+			{ ( state: TransitionStatus ) => (
 				<div
 					className="vertical-css-transition-container"
 					style={ getTransitionStyle( state ) }
 					ref={ collapseContainerRef }
 				>
+					{ /* @ts-expect-error: TODO - looks like this is an upstream type issue. */ }
 					{ children }
 				</div>
 			) }
