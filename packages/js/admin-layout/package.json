@@ -53,8 +53,8 @@
 	},
 	"dependencies": {
 		"@woocommerce/components": "workspace:*",
-		"@wordpress/components": "wp-6.0",
-		"@wordpress/element": "wp-6.0"
+		"@wordpress/components": "wp-6.4",
+		"@wordpress/element": "wp-6.4"
 	},
 	"devDependencies": {
 		"@types/react": "^18.0.21",

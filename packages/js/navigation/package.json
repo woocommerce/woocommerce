@@ -55,9 +55,9 @@
 	},
 	"dependencies": {
 		"@wordpress/api-fetch": "wp-6.0",
-		"@wordpress/components": "wp-6.0",
+		"@wordpress/components": "wp-6.4",
 		"@wordpress/compose": "wp-6.0",
-		"@wordpress/element": "wp-6.0",
+		"@wordpress/element": "wp-6.4",
 		"@wordpress/hooks": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
 		"@wordpress/notices": "wp-6.0",
