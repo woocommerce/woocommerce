@@ -39,7 +39,7 @@ const Rating = ( {
 			height: size + 'px',
 		};
 
-		const _stars = [];
+		const _stars: JSX.Element[] = [];
 		for ( let i = 0; i < totalStars; i++ ) {
 			const Icon = _icon || StarIcon;
 			_stars.push( <Icon key={ 'star-' + i } style={ starStyles } /> );

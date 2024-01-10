@@ -12,6 +12,7 @@ import {
 import { SyntheticEvent, useCallback } from 'react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { PLUGINS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
+import { ButtonProps } from '@wordpress/components/build-types/button/types';
 
 type PluginsProps = {
 	onComplete: (
@@ -26,7 +27,7 @@ type PluginsProps = {
 	onAbort?: () => void;
 	abortText?: string;
 	installText?: string;
-	installButtonVariant?: Button.BaseProps[ 'variant' ];
+	installButtonVariant?: ButtonProps[ 'variant' ];
 	learnMoreLink?: string;
 	learnMoreText?: string;
 	onLearnMore?: () => void;
@@ -81,7 +82,7 @@ export const Plugins = ( {
 	);
 
 	const installAndActivate = useCallback(
-		async ( event?: SyntheticEvent< HTMLAnchorElement > ) => {
+		async ( event?: SyntheticEvent ) => {
 			if ( event ) {
 				event.preventDefault();
 			}
@@ -119,7 +120,7 @@ export const Plugins = ( {
 		return (
 			<>
 				<Button
-					isPrimary
+					variant="primary"
 					isBusy={ isRequesting }
 					onClick={ installAndActivate }
 				>
@@ -141,7 +142,11 @@ export const Plugins = ( {
 	if ( ! pluginSlugs.length ) {
 		return (
 			<Fragment>
-				<Button isPrimary isBusy={ isRequesting } onClick={ onSkip }>
+				<Button
+					variant="primary"
+					isBusy={ isRequesting }
+					onClick={ onSkip }
+				>
 					{ __( 'Continue', 'woocommerce' ) }
 				</Button>
 			</Fragment>
@@ -166,19 +171,19 @@ export const Plugins = ( {
 				{ installText }
 			</Button>
 			{ onSkip && (
-				<Button isTertiary onClick={ onSkip }>
+				<Button variant="tertiary" onClick={ onSkip }>
 					{ skipText }
 				</Button>
 			) }
 			{ learnMoreLink && (
 				<a href={ learnMoreLink } target="_blank" rel="noreferrer">
-					<Button isTertiary onClick={ onLearnMore }>
+					<Button variant="tertiary" onClick={ onLearnMore }>
 						{ learnMoreText }
 					</Button>
 				</a>
 			) }
 			{ onAbort && (
-				<Button isTertiary onClick={ onAbort }>
+				<Button variant="tertiary" onClick={ onAbort }>
 					{ abortText }
 				</Button>
 			) }

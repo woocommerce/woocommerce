@@ -17,8 +17,13 @@ import { MediaItem, MediaUpload } from '@wordpress/media-utils';
  * Internal dependencies
  */
 import { MediaUploadComponentType } from './types';
+import { PopoverProps } from '../types';
+import { isCallable } from '../utils';
 
-const POPOVER_PROPS = {
+const POPOVER_PROPS: {
+	className: string;
+	placement: PopoverProps[ 'placement' ];
+} = {
 	className: 'woocommerce-image-gallery__toolbar-dropdown-popover',
 	placement: 'bottom-start',
 };
@@ -68,7 +73,7 @@ export function ImageGalleryToolbarDropdown( {
 							) }
 						/>
 					</MenuGroup>
-					{ typeof children === 'function'
+					{ isCallable( children )
 						? children( { onClose } )
 						: Children.map(
 								children,

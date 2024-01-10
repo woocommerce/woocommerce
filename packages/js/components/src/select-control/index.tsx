@@ -391,7 +391,7 @@ export class SelectControl extends Component< Props, State > {
 
 	getOptionsByQuery( options: Option[], query: string | null ) {
 		const { getSearchExpression, maxResults, onFilter } = this.props;
-		const filtered = [];
+		const filtered: Option[] = [];
 
 		// Create a regular expression to filter the options.
 		const expression = getSearchExpression!(

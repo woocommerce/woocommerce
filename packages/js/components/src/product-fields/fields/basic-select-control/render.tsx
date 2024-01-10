@@ -9,10 +9,12 @@ import { SelectControl } from '@wordpress/components';
  */
 import { BaseProductFieldProps } from '../types';
 
-type SelectControlFieldProps = BaseProductFieldProps< string | string[] > & {
-	multiple?: boolean;
-	options: SelectControl.Option[];
-};
+type SelectControlProps = typeof SelectControl extends React.FC< infer P >
+	? P
+	: never;
+
+type SelectControlFieldProps = BaseProductFieldProps< string | string[] > &
+	SelectControlProps;
 const SelectControlField: React.FC< SelectControlFieldProps > = ( {
 	label,
 	value,
@@ -21,6 +23,7 @@ const SelectControlField: React.FC< SelectControlFieldProps > = ( {
 	options = [],
 } ) => {
 	return (
+		// @ts-expect-error - The upstream type for `multiple` seems a bit odd, it says `false | undefined`.
 		<SelectControl
 			multiple={ multiple }
 			label={ label }

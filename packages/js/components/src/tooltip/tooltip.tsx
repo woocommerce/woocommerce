@@ -60,12 +60,15 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 
 				{ isPopoverVisible && (
 					<Popover
+						// @ts-expect-error - TODO: Fix this, this argument should be "firstElement" | boolean.
 						focusOnMount="container"
 						position={ position }
 						className="woocommerce-tooltip__text"
-						onFocusOutside={ ( event: FocusEvent ) => {
+						onFocusOutside={ ( event ) => {
 							if (
-								event.relatedTarget?.classList.contains(
+								(
+									event as FocusEvent
+								 ).relatedTarget?.classList.contains(
 									className
 								)
 							) {

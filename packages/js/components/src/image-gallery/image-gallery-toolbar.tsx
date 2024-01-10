@@ -85,6 +85,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 							icon={ chevronLeft }
 							label={ __( 'Move previous', 'woocommerce' ) }
 						/>
+						{ /* @ts-expect-error - TODO: Maybe the type should be fixed upstream, placeholder is not required. */ }
 						<ToolbarButton
 							onClick={ () => moveNext() }
 							icon={ chevronRight }

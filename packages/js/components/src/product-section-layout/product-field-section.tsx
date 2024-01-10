@@ -18,13 +18,9 @@ type ProductFieldSectionProps = {
 	className?: string;
 };
 
-export const ProductFieldSection: React.FC< ProductFieldSectionProps > = ( {
-	id,
-	title,
-	description,
-	className,
-	children,
-} ) => {
+export const ProductFieldSection: React.FC<
+	ProductFieldSectionProps & { children: React.ReactNode }
+> = ( { id, title, description, className, children } ) => {
 	deprecated( `__experimentalProductFieldSection`, {
 		version: '13.0.0',
 		plugin: '@woocommerce/components',

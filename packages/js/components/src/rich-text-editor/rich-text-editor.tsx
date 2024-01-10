@@ -100,6 +100,7 @@ export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 							placeholder={ placeholder }
 						/>
 					</ShortcutProvider>
+					{ /* @ts-expect-error - It looks like this type is not properly exposed in @wordpress/components */ }
 					<Popover.Slot />
 				</BlockEditorProvider>
 			</SlotFillProvider>

@@ -95,7 +95,7 @@ class Tags extends Component< Props > {
 				{ showClearButton && (
 					<Button
 						className="woocommerce-select-control__clear"
-						isLink
+						variant="link"
 						onClick={ this.removeAll }
 					>
 						<Icon

@@ -20,6 +20,7 @@ const CheckboxField: React.FC< CheckboxFieldProps > = ( {
 		<CheckboxControl
 			label={ label }
 			onChange={ onChange }
+			// @ts-expect-error - TODO: it looks like this arg is invalid.
 			selected={ value }
 		/>
 	);

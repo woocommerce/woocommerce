@@ -121,6 +121,7 @@ WooProductFieldItem.Slot = ( { fillProps, section } ) => {
 				}
 
 				return Children.map(
+					// @ts-expect-error - TODO: fix this type.
 					sortFillsByOrder( filterRegisteredFills( fills ) )?.props
 						.children,
 					( child ) => (

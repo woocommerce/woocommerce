@@ -11,7 +11,6 @@ import {
 	CardBody,
 	CardFooter,
 	CardHeader,
-	// @ts-expect-error: Suppressing Module '"@wordpress/components"' has no exported member '__experimentalText'
 	__experimentalText as Text,
 } from '@wordpress/components';
 
@@ -221,7 +220,6 @@ const TableCard: React.VFC< TableCardProps > = ( {
 				) }
 			</CardBody>
 
-			{ /* @ts-expect-error: justify is missing from the latest @types/wordpress__components */ }
 			<CardFooter justify="center">
 				{ isLoading ? (
 					<TableSummaryPlaceholder />

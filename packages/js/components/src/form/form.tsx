@@ -24,6 +24,7 @@ import _omit from 'lodash/omit';
  * Internal dependencies
  */
 import { FormContext, FormErrors } from './form-context';
+import { isCallable } from '../utils';
 
 type FormProps< Values > = {
 	/**
@@ -214,7 +215,8 @@ function FormComponent< Values extends Record< string, any > >(
 				// happen after setting the error state.
 
 				const isValid = ! Object.keys( newErrors || {} ).length;
-				const nameValuePairs = [];
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const nameValuePairs: { name: string; value: any }[] = [];
 				for ( const key in valuesToSet ) {
 					const nameValuePair = {
 						name: key,
@@ -395,8 +397,9 @@ function FormComponent< Values extends Record< string, any > >(
 	};
 
 	function getChildren() {
-		if ( typeof children === 'function' ) {
+		if ( isCallable( children ) ) {
 			const element = children( getStateAndHelpers() );
+			// @ts-expect-error - TODO: fix this, it appears ReactNode is not a valid type to pass to cloneElement.
 			return cloneElement( element );
 		}
 		return children;

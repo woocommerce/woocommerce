@@ -14,12 +14,9 @@ type ProductSectionLayoutProps = {
 	className?: string;
 };
 
-export const ProductSectionLayout: React.FC< ProductSectionLayoutProps > = ( {
-	title,
-	description,
-	className,
-	children,
-} ) => {
+export const ProductSectionLayout: React.FC<
+	ProductSectionLayoutProps & { children: React.ReactNode }
+> = ( { title, description, className, children } ) => {
 	deprecated( `__experimentalProductSectionLayout`, {
 		version: '13.0.0',
 		plugin: '@woocommerce/components',

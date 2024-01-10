@@ -92,7 +92,7 @@ const Step: React.FunctionComponent<
 
 	return (
 		<Card
-			ref={ stepRef as React.LegacyRef< HTMLDivElement > }
+			ref={ stepRef }
 			className="woocommerce-tour-kit-step"
 			elevation={ 2 }
 		>

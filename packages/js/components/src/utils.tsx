@@ -1,20 +1,20 @@
 /**
  * External dependencies
  */
-import { isValidElement, Fragment } from 'react';
+import { isValidElement, Fragment, ReactElement } from 'react';
 import { cloneElement, createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { FillComponentProps } from './types';
+import { FillComponentProps, SlotComponentProps } from './types';
 
 type ChildrenProps = {
 	order: number;
 };
 
 // Type guard function to check if children is a function, while still type narrowing correctly.
-function isCallable(
+export function isCallable(
 	children: unknown
 ): children is ( props: unknown ) => React.ReactNode {
 	return typeof children === 'function';
@@ -68,7 +68,10 @@ function getChildrenAndProps<
  * @param {Object} injectProps - Props to inject.
  * @return {Node} Node.
  */
-function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
+function createOrderedChildren<
+	T = FillComponentProps,
+	S = Record< string, unknown >
+>(
 	children: React.ReactNode,
 	order: number,
 	props: T,
@@ -76,7 +79,7 @@ function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
 ): React.ReactElement {
 	const { children: childrenToRender, props: propsToRender } =
 		getChildrenAndProps( children, order, props, injectProps );
-	return cloneElement( childrenToRender, propsToRender );
+	return cloneElement( childrenToRender as ReactElement, propsToRender );
 }
 export { createOrderedChildren };
 
@@ -86,8 +89,9 @@ export { createOrderedChildren };
  * @param {Array} fills - slot's `Fill`s.
  * @return {Node} Node.
  */
-export const sortFillsByOrder: Slot.Props[ 'children' ] = ( fills ) => {
+export const sortFillsByOrder: SlotComponentProps[ 'children' ] = ( fills ) => {
 	// Copy fills array here because its type is readonly array that doesn't have .sort method in Typescript definition.
+	// @ts-expect-error - TODO: fix this, ReactNode technically can't be iterated over, perhaps fills type is not correct.
 	const sortedFills = [ ...fills ].sort( ( a, b ) => {
 		return a[ 0 ].props.order - b[ 0 ].props.order;
 	} );
