@@ -21,7 +21,7 @@ export const useProductTemplate = (
 	productType: ProductType | undefined
 ) => {
 	const productTemplates =
-		window.productBlockEditorSettings.productTemplates ?? [];
+		window.productBlockEditorSettings?.productTemplates ?? [];
 	const productTemplate = productTemplates.find( ( template ) => {
 		if ( productTemplateId === template.id ) {
 			return true;
