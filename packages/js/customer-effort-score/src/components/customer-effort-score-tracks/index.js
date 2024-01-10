@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { createElement, useEffect } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
@@ -58,16 +58,6 @@ function _CustomerEffortScoreTracks( {
 	updateOptions,
 	createNotice,
 } ) {
-	useEffect( () => {
-		if ( cesShownForActions && ! cesShownForActions.includes( action ) )
-			updateOptions( {
-				[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
-					action,
-					...( cesShownForActions || [] ),
-				],
-			} );
-	}, [] );
-
 	if ( resolving ) {
 		return null;
 	}
@@ -84,6 +74,14 @@ function _CustomerEffortScoreTracks( {
 			ces_location: 'inside',
 			...trackProps,
 		} );
+		if ( ! cesShownForActions || ! cesShownForActions.includes( action ) ) {
+			updateOptions( {
+				[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
+					action,
+					...( cesShownForActions || [] ),
+				],
+			} );
+		}
 	};
 
 	const onNoticeDismissed = () => {
