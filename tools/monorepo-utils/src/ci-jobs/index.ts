@@ -10,6 +10,7 @@ import { Logger } from '../core/logger';
 import { buildProjectGraph } from './lib/project-graph';
 import { getFileChanges } from './lib/file-changes';
 import { createJobsForChanges } from './lib/job-processing';
+import { isGithubCI } from '../core/environment';
 
 const program = new Command( 'ci-jobs' )
 	.description(
@@ -20,10 +21,40 @@ const program = new Command( 'ci-jobs' )
 		'Base ref to compare the current ref against for change detection.'
 	)
 	.action( async ( baseRef: string ) => {
+		Logger.startTask( 'Parsing Project Graph', true );
 		const projectGraph = buildProjectGraph();
+		Logger.endTask( true );
+
+		Logger.startTask( 'Pulling File Changes', true );
 		const fileChanges = getFileChanges( projectGraph, baseRef );
-		const jobs = createJobsForChanges( projectGraph, fileChanges );
-		Logger.notice( JSON.stringify( jobs, null, '\\t' ) );
+		Logger.endTask( true );
+
+		Logger.startTask( 'Creating Jobs', true );
+		const jobs = await createJobsForChanges( projectGraph, fileChanges );
+		Logger.endTask( true );
+
+		if ( isGithubCI() ) {
+			Logger.notice( JSON.stringify( jobs, null, '\t' ) );
+			return;
+		}
+
+		if ( jobs.lint.length > 0 ) {
+			Logger.notice( 'Lint Jobs' );
+			for ( const job of jobs.lint ) {
+				Logger.notice( `-  ${ job.projectName } - ${ job.command }` );
+			}
+		} else {
+			Logger.notice( 'No lint jobs to run.' );
+		}
+
+		if ( jobs.test.length > 0 ) {
+			Logger.notice( 'Test Jobs' );
+			for ( const job of jobs.test ) {
+				Logger.notice( `-  ${ job.projectName } - ${ job.command }` );
+			}
+		} else {
+			Logger.notice( 'No test jobs to run.' );
+		}
 	} );
 
 export default program;
