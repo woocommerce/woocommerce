@@ -215,8 +215,9 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			$result = rest_validate_value_from_schema( $address[ $key ], $properties[ $key ], $key );
 
 			// Check if a field is in the list of additional fields then validate the value against the custom validation rules defined for it.
-			if ( in_array( $key, $additional_keys, true ) ) {
-				$result = $this->additional_fields_controller->validate_field( $result, $key, $address[ $key ], $properties[ $key ] );
+			// Skip additional validation if the schema validation failed.
+			if ( true === $result && in_array( $key, $additional_keys, true ) ) {
+				$result = $this->additional_fields_controller->validate_field( $key, $address[ $key ], $properties[ $key ] );
 			}
 
 			if ( is_wp_error( $result ) ) {
