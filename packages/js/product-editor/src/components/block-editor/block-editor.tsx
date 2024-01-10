@@ -59,7 +59,8 @@ function getLayoutTemplateId(
 		return 'product-variation';
 	}
 
-	return undefined;
+	// Fallback to simple product if no layout template is set.
+	return 'simple-product';
 }
 export function BlockEditor( {
 	context,
