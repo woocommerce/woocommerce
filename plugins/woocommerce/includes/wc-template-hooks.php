@@ -58,7 +58,7 @@ add_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
  *
  * @see woocommerce_product_taxonomy_archive_header()
  */
-add_action( 'woocommerce_before_main_content', 'woocommerce_product_taxonomy_archive_header', 40 );
+add_action( 'woocommerce_shop_loop_header', 'woocommerce_product_taxonomy_archive_header' );
 
 /**
  * Archive descriptions.
