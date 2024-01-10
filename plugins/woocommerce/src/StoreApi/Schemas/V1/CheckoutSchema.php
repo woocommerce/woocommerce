@@ -376,15 +376,12 @@ class CheckoutSchema extends AbstractSchema {
 				$result = $this->additional_fields_controller->validate_field( $key, $field_value, $properties[ $key ] );
 			}
 
+			if ( is_wp_error( $result ) && $result->has_errors() ) {
 				$location = $this->additional_fields_controller->get_field_location( $key );
-				$result->add_data(
-					[
-						'key'      => $key,
-						'location' => $location,
-					]
-				);
-
-				$errors->add( $result->get_error_code(), $result->get_error_message(), $result->get_error_data() );
+				foreach ( $result->get_error_codes() as $code ) {
+					$result->add_data( [ 'location' => $location, 'key' => $key ] , $code );
+				}
+				$errors->merge_from( $result );
 			}
 		}
 
