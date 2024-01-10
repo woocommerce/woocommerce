@@ -57,14 +57,6 @@ const Edit = ( {
 							},
 						},
 					],
-					[
-						'woocommerce/order-confirmation-additional-information',
-						{
-							lock: {
-								remove: true,
-							},
-						},
-					],
 				] }
 			/>
 		</div>
