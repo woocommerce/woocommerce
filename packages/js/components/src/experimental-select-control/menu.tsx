@@ -17,12 +17,18 @@ import {
  */
 import { getMenuPropsType } from './types';
 
+type PopoverProps = typeof Popover extends React.ForwardRefExoticComponent<
+	infer T
+>
+	? T
+	: never;
+
 type MenuProps = {
 	children?: JSX.Element | JSX.Element[];
 	getMenuProps: getMenuPropsType;
 	isOpen: boolean;
 	className?: string;
-	position?: Popover.Position;
+	position?: PopoverProps[ 'position' ];
 	scrollIntoViewOnOpen?: boolean;
 };
 

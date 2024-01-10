@@ -74,51 +74,54 @@ export const DynamicForm: React.FC< DynamicFormProps > = ( {
 			onSubmit={ onSubmit }
 			validate={ validate }
 		>
-			{ ( {
-				getInputProps,
-				handleSubmit,
-			}: {
-				getInputProps: ( name: string ) => FormInputProps;
-				handleSubmit: () => void;
-			} ) => {
-				return (
-					<div className="woocommerce-component_dynamic-form">
-						{ fields.map( ( field ) => {
-							if (
-								field.type &&
-								! ( field.type in fieldTypeMap )
-							) {
-								/* eslint-disable no-console */
-								console.warn(
-									`Field type of ${ field.type } not current supported in DynamicForm component`
+			{
+				// @ts-expect-error - returns JSX.Element
+				( {
+					getInputProps,
+					handleSubmit,
+				}: {
+					getInputProps: ( name: string ) => FormInputProps;
+					handleSubmit: () => void;
+				} ) => {
+					return (
+						<div className="woocommerce-component_dynamic-form">
+							{ fields.map( ( field ) => {
+								if (
+									field.type &&
+									! ( field.type in fieldTypeMap )
+								) {
+									/* eslint-disable no-console */
+									console.warn(
+										`Field type of ${ field.type } not current supported in DynamicForm component`
+									);
+									/* eslint-enable no-console */
+									return null;
+								}
+
+								const Control =
+									fieldTypeMap[ field.type || 'default' ];
+								return (
+									<Control
+										key={ field.id }
+										field={ field }
+										{ ...getInputProps( field.id ) }
+									/>
 								);
-								/* eslint-enable no-console */
-								return null;
-							}
+							} ) }
 
-							const Control =
-								fieldTypeMap[ field.type || 'default' ];
-							return (
-								<Control
-									key={ field.id }
-									field={ field }
-									{ ...getInputProps( field.id ) }
-								/>
-							);
-						} ) }
-
-						<Button
-							isPrimary
-							isBusy={ isBusy }
-							onClick={ () => {
-								handleSubmit();
-							} }
-						>
-							{ submitLabel }
-						</Button>
-					</div>
-				);
-			} }
+							<Button
+								variant="primary"
+								isBusy={ isBusy }
+								onClick={ () => {
+									handleSubmit();
+								} }
+							>
+								{ submitLabel }
+							</Button>
+						</div>
+					);
+				}
+			}
 		</Form>
 	);
 };

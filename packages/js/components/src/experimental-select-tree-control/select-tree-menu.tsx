@@ -21,11 +21,17 @@ import {
 	TreeControlProps,
 } from '../experimental-tree-control';
 
+type PopoverProps = typeof Popover extends React.ForwardRefExoticComponent<
+	infer T
+>
+	? T
+	: never;
+
 type MenuProps = {
 	isEventOutside: ( event: React.FocusEvent ) => boolean;
 	isOpen: boolean;
 	isLoading?: boolean;
-	position?: Popover.Position;
+	position?: PopoverProps[ 'position' ];
 	scrollIntoViewOnOpen?: boolean;
 	items: LinkedTree[];
 	treeRef?: React.ForwardedRef< HTMLOListElement >;
