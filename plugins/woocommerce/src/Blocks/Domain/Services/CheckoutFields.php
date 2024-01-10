@@ -500,7 +500,16 @@ class CheckoutFields {
 			return $filtered_result;
 		}
 
-		return new \WP_Error( 'invalid_additional_field_validation_result', 'Invalid result for woocommerce_blocks_validate_additional_field_' . esc_html( $key ) . '. The filter should return a WP_Error.' );
+		// If the filters didn't return a valid value, ignore them and return an empty WP_Error. This allows the order to complete.
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+		trigger_error(
+			sprintf(
+				'The filter %s did not return a valid value. The field will not have any custom validation applied to it.',
+				'woocommerce_blocks_validate_additional_field_' . esc_html( $key )
+			),
+			E_USER_WARNING
+		);
+		return new \WP_Error();
 	}
 
 	/**
