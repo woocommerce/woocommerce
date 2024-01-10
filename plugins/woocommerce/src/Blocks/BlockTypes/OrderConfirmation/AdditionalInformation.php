@@ -28,20 +28,8 @@ class AdditionalInformation extends AbstractOrderConfirmationBlock {
 			return $content;
 		}
 
-		$content .= $this->render_hook_content( $order );
-
-		return $content;
-	}
-
-	/**
-	 * Render thanks page hooks.
-	 *
-	 * @param \WC_Order $order Order object.
-	 * @return string
-	 */
-	protected function render_hook_content( $order ) {
 		$this->remove_core_hooks();
-		$content  = $this->get_hook_content( 'woocommerce_thankyou_' . $order->get_payment_method(), [ $order->get_id() ] );
+		$content .= $this->get_hook_content( 'woocommerce_thankyou_' . $order->get_payment_method(), [ $order->get_id() ] );
 		$content .= $this->get_hook_content( 'woocommerce_thankyou', [ $order->get_id() ] );
 		$this->restore_core_hooks();
 
