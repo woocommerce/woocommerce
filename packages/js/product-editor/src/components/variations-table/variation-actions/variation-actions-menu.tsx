@@ -3,6 +3,7 @@
  */
 import {
 	Button,
+	Dropdown,
 	DropdownMenu,
 	MenuGroup,
 	MenuItem,
@@ -139,9 +140,9 @@ export function VariationActionsMenu( {
 
 	if ( isQuickUpdate ) {
 		return (
-			<DropdownMenu
+			<Dropdown
+				// @ts-expect-error missing prop in types.
 				popoverProps={ {
-					// @ts-expect-error missing TS.
 					placement: 'bottom-end',
 				} }
 				renderToggle={ ( {
