@@ -10,7 +10,6 @@ import {
 /**
  * Internal dependencies
  */
-import type { AdditionalField } from '../additional-fields/types';
 import './style.scss';
 
 const Edit = ( {
