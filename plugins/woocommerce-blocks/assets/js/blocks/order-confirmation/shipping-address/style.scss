@@ -35,7 +35,7 @@
 		margin: 0;
 		font-style: normal;
 	}
-	p {
+	p:not(.woocommerce-customer-details--phone) {
 		margin: $gap-smaller 0 0;
 
 		strong {

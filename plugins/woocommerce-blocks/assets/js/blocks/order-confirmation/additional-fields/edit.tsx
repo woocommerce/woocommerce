@@ -2,24 +2,26 @@
  * External dependencies
  */
 import { useBlockProps } from '@wordpress/block-editor';
-import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
+import {
+	ADDITIONAL_FORM_FIELDS,
+	CONTACT_FORM_FIELDS,
+} from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { AdditionalField } from './types';
 
 const Edit = (): JSX.Element => {
 	const blockProps = useBlockProps( {
 		className: 'wc-block-order-confirmation-additional-fields',
 	} );
 
-	const additionalFields = getSetting< AdditionalField[] >(
-		'checkoutAdditionalFields',
-		{}
-	);
+	const additionalFields = {
+		...ADDITIONAL_FORM_FIELDS,
+		...CONTACT_FORM_FIELDS,
+	};
 
 	return (
 		<div { ...blockProps }>

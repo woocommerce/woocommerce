@@ -2,12 +2,14 @@
  * External dependencies
  */
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
-import { getSetting } from '@woocommerce/settings';
+import {
+	ADDITIONAL_FORM_FIELDS,
+	CONTACT_FORM_FIELDS,
+} from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
-import type { AdditionalField } from '../additional-fields/types';
 import './style.scss';
 
 const Edit = ( {
@@ -23,10 +25,10 @@ const Edit = ( {
 		className: 'wc-block-order-confirmation-additional-fields-wrapper',
 	} );
 
-	const additionalFields = getSetting< AdditionalField[] >(
-		'checkoutAdditionalFields',
-		{}
-	);
+	const additionalFields = {
+		...ADDITIONAL_FORM_FIELDS,
+		...CONTACT_FORM_FIELDS,
+	};
 
 	if ( Object.entries( additionalFields ).length === 0 ) {
 		return null;
