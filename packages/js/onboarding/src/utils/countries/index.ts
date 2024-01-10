@@ -34,7 +34,7 @@ export const findCountryOption = (
 		return null;
 	}
 
-	let match = null;
+	let match: CountryStateOption | null = null;
 	let matchSimilarity = minimumSimilarity;
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return -- don't want to put this inside the loop
 	const mappingRegion = getMappingRegion( location );

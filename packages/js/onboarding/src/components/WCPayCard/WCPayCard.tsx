@@ -18,11 +18,9 @@ type WCPayCardHeaderProps = {
 	logoHeight?: number;
 };
 
-export const WCPayCardHeader: React.FC< WCPayCardHeaderProps > = ( {
-	logoWidth = 196,
-	logoHeight = 41,
-	children,
-} ) => (
+export const WCPayCardHeader: React.FC<
+	WCPayCardHeaderProps & { children: React.ReactNode }
+> = ( { logoWidth = 196, logoHeight = 41, children } ) => (
 	<CardHeader as="h2">
 		<WCPayLogo width={ logoWidth } height={ logoHeight } />
 		{ children }
@@ -65,10 +63,12 @@ export const WCPayCardBody: React.VFC< WCPayCardBodyProps > = ( {
 	</CardBody>
 );
 
-export const WCPayCardFooter: React.FC = ( { children } ) => (
-	<CardFooter>{ children }</CardFooter>
-);
+export const WCPayCardFooter: React.FC< { children: React.ReactNode } > = ( {
+	children,
+} ) => <CardFooter>{ children }</CardFooter>;
 
-export const WCPayCard: React.FC = ( { children } ) => {
+export const WCPayCard: React.FC< { children: React.ReactNode } > = ( {
+	children,
+} ) => {
 	return <Card className="woocommerce-task-payment-wcpay">{ children }</Card>;
 };

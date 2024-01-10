@@ -3,6 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { Slot, Fill } from '@wordpress/components';
+import { SlotComponentProps } from '@woocommerce/components/build-types/types';
 
 type WooOnboardingTaskListHeaderProps = {
 	id: string;
@@ -19,8 +20,9 @@ type WooOnboardingTaskListHeaderProps = {
 export const WooOnboardingTaskListHeader = ( {
 	id,
 	...props
-}: WooOnboardingTaskListHeaderProps & Slot.Props ) => (
+}: WooOnboardingTaskListHeaderProps & SlotComponentProps ) => (
 	<Fill
+		// @ts-expect-error - I think Fill props type issues need to be fixed in @wordpress/components.
 		name={ 'woocommerce_onboarding_task_list_header_' + id }
 		{ ...props }
 	/>
@@ -29,8 +31,9 @@ export const WooOnboardingTaskListHeader = ( {
 WooOnboardingTaskListHeader.Slot = ( {
 	id,
 	fillProps,
-}: WooOnboardingTaskListHeaderProps & Slot.Props ) => (
+}: WooOnboardingTaskListHeaderProps & SlotComponentProps ) => (
 	<Slot
+		// @ts-expect-error - I think Slot props type issues need to be fixed in @wordpress/components.
 		name={ 'woocommerce_onboarding_task_list_header_' + id }
 		fillProps={ fillProps }
 	/>

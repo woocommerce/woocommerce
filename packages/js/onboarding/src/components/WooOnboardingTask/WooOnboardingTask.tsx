@@ -4,6 +4,7 @@
 import { createElement, useEffect } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { Slot, Fill } from '@wordpress/components';
+import { SlotComponentProps } from '@woocommerce/components/build-types/types';
 
 /**
  * Internal dependencies
@@ -39,7 +40,7 @@ type WooOnboardingTaskProps = {
 	variant?: string;
 };
 
-type WooOnboardingTaskSlotProps = Slot.Props & {
+type WooOnboardingTaskSlotProps = SlotComponentProps & {
 	id: string;
 };
 
@@ -68,6 +69,7 @@ WooOnboardingTask.Slot = ( { id, fillProps } ) => {
 
 	return (
 		<Slot
+			// @ts-expect-error - I think Slot props type issues need to be fixed in @wordpress/components.
 			name={ 'woocommerce_onboarding_task_' + id }
 			fillProps={ fillProps }
 		/>
