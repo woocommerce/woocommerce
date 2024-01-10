@@ -165,7 +165,10 @@ export function Edit( {
 				value={ value }
 				disabled={ disabled }
 				label={ label }
-				onChange={ setValue }
+				onChange={ ( newValue ) => {
+					// @ts-expect-error - TODO: Fix this, it's not type safe.
+					setValue( newValue );
+				} }
 				onBlur={ () => {
 					if ( hasEdit( property ) ) {
 						validate();

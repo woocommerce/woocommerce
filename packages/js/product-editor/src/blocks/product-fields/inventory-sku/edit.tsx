@@ -8,12 +8,8 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp } from '@wordpress/core-data';
 
 /**
@@ -56,6 +52,7 @@ export function Edit( {
 				<InputControl
 					name={ 'woocommerce-product-sku' }
 					onChange={ setSku }
+					// @ts-expect-error - TODO: Fix this.
 					value={ sku || '' }
 				/>
 			</BaseControl>

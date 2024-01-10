@@ -43,7 +43,7 @@ export function Edit( {
 			{ isOptionsNoticeVisible && (
 				<Notice content={ content } title={ title } type={ type }>
 					<Button
-						isSecondary={ true }
+						variant="secondary"
 						onClick={ () =>
 							navigateTo( {
 								url: getNewPath( { tab: 'variations' } ),

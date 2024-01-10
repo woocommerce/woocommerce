@@ -27,6 +27,7 @@ export default function FullEditorToolbarButton( {
 	);
 
 	return (
+		// @ts-expect-error - TODO: Fix this.
 		<ToolbarButton
 			label={ label }
 			onClick={ () => {

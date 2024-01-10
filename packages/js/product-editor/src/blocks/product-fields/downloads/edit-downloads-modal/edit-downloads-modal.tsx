@@ -11,7 +11,6 @@ import {
 	Button,
 	Modal,
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -86,13 +85,11 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 				__( 'Edit %s', 'woocommerce' ),
 				name
 			) }
-			onRequestClose={ (
-				event:
-					| React.KeyboardEvent< Element >
-					| React.MouseEvent< Element >
-					| React.FocusEvent< Element >
-			) => {
-				if ( ! event.isPropagationStopped() && ! isCopingToClipboard ) {
+			onRequestClose={ ( event ) => {
+				if (
+					! event?.isPropagationStopped() &&
+					! isCopingToClipboard
+				) {
 					recordEvent( 'product_downloads_modal_cancel' );
 					onCancel();
 				}

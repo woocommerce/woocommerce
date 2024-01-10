@@ -14,12 +14,8 @@ import { getSetting } from '@woocommerce/settings';
 import { useInstanceId } from '@wordpress/compose';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp } from '@wordpress/core-data';
 
 /**
@@ -98,6 +94,7 @@ export function Edit( {
 						>
 							<InputControl
 								id={ id }
+								// @ts-expect-error - TODO: Fix this it's not type safe.
 								ref={ lowStockAmountRef }
 								name={ 'low_stock_amount' }
 								placeholder={ sprintf(
@@ -105,8 +102,13 @@ export function Edit( {
 									__( '%d (store default)', 'woocommerce' ),
 									notifyLowStockAmount
 								) }
-								onChange={ setLowStockAmount }
+								onChange={ ( newValue ) => {
+									// @ts-expect-error - TODO: Fix this it's not type safe.
+									setLowStockAmount( newValue );
+								} }
+								// @ts-expect-error - TODO: Fix this it's not type safe.
 								onBlur={ validateLowStockAmount }
+								// @ts-expect-error - TODO: Fix this it's not type safe.
 								value={ lowStockAmount }
 								type="number"
 								min={ 0 }

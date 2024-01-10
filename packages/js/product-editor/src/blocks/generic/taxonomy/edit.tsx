@@ -43,7 +43,6 @@ export function Edit( {
 	const blockProps = useWooBlockProps( attributes );
 	const { hierarchical }: TaxonomyMetadata = useSelect(
 		( select ) =>
-			// @ts-expect-error There are no types for this.
 			select( 'core' ).getTaxonomy( attributes.slug ) || {
 				hierarchical: false,
 			}

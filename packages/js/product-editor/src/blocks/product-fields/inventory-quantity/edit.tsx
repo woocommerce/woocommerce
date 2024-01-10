@@ -80,10 +80,16 @@ export function Edit( {
 						<InputControl
 							id={ stockQuantityId }
 							name="stock_quantity"
+							// @ts-expect-error - TODO: Fix this.
 							ref={ stockQuantityRef }
 							label={ __( 'Available quantity', 'woocommerce' ) }
+							// @ts-expect-error - TODO: Fix this.
 							value={ stockQuantity }
-							onChange={ setStockQuantity }
+							onChange={ ( newValue ) => {
+								// @ts-expect-error - TODO: Fix this, it's not type safe.
+								setStockQuantity( newValue );
+							} }
+							// @ts-expect-error - TODO: Fix this.
 							onBlur={ validateStockQuantity }
 							type="number"
 							min={ 0 }

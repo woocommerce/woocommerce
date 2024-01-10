@@ -80,7 +80,10 @@ export function Edit( {
 		<div { ...blockProps }>
 			<NumberControl
 				label={ label }
-				onChange={ setValue }
+				onChange={ ( newValue ) => {
+					// @ts-expect-error - TODO: Fix this, it's not type safe.
+					setValue( newValue );
+				} }
 				value={ value || '' }
 				help={ help }
 				suffix={ suffix }

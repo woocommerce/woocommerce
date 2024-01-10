@@ -372,9 +372,10 @@ export function Edit( {
 						removeDownload( selectedDownload );
 						setSelectedDownload( null );
 					} }
-					onChange={ ( text: string ) => {
+					onChange={ ( text ) => {
 						setSelectedDownload( {
 							...selectedDownload,
+							// @ts-expect-error - Fix this it's not typesafe.
 							name: text,
 						} );
 					} }

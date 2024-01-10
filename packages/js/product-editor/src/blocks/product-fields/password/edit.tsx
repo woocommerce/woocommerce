@@ -9,7 +9,6 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	BaseControl,
 	CheckboxControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -59,7 +58,10 @@ export function Edit( {
 					<InputControl
 						id={ postPasswordId }
 						value={ postPassword }
-						onChange={ setPostPassword }
+						onChange={ ( newValue ) => {
+							// @ts-expect-error - TODO: Fix this its not type safe.
+							setPostPassword( newValue );
+						} }
 					/>
 				</BaseControl>
 			) }
