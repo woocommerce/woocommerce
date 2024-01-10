@@ -22,7 +22,7 @@ import {
 	DatePicker,
 	DateTimePicker as WpDateTimePicker,
 	Dropdown,
-	// @ts-expect-error `__experimentalInputControl` does exist.
+	// eslint-disable-next-line
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -79,7 +79,7 @@ export const DateTimePickerControl = forwardRef(
 			'inspector-date-time-picker-control',
 			props.id
 		) as string;
-		const inputControl = useRef< InputControl >();
+		const inputControl = useRef< HTMLInputElement >();
 
 		const displayFormat = useMemo( () => {
 			if ( dateTimeFormat ) {
@@ -185,17 +185,18 @@ export const DateTimePickerControl = forwardRef(
 				// the issue where the user ends up typing the same value. Unless they
 				// are typing extra slow. Without this workaround, we miss the last
 				// character typed.
-				const lastTypedValue = inputControl.current.value;
-
+				const lastTypedValue = inputControl?.current?.value;
 				const newDateTime = maybeForceTime(
 					isUserTypedInput
-						? parseAsLocalDateTime( lastTypedValue )
+						? // @ts-expect-error - TODO: fix the type of lastTypedValue.
+						  parseAsLocalDateTime( lastTypedValue )
 						: parseAsISODateTime( newInputString, true )
 				);
 				const isDateTimeSame =
 					newDateTime.isSame( inputStringDateTime );
 
 				if ( isUserTypedInput ) {
+					// @ts-expect-error - TODO: fix the type of lastTypedValue.
 					setInputString( lastTypedValue );
 				} else if ( ! isDateTimeSame ) {
 					setInputString( formatDateTimeForDisplay( newDateTime ) );
@@ -206,6 +207,7 @@ export const DateTimePickerControl = forwardRef(
 					! isDateTimeSame
 				) {
 					onChangeRef.current(
+						// @ts-expect-error - TODO: fix the type of lastTypedValue.
 						newDateTime.isValid()
 							? formatDateTimeAsISO( newDateTime )
 							: lastTypedValue,
@@ -290,7 +292,6 @@ export const DateTimePickerControl = forwardRef(
 					className
 				) }
 				focusOnMount={ false }
-				// @ts-expect-error `onToggle` does exist.
 				onToggle={ callOnBlurIfDropdownIsNotOpening }
 				renderToggle={ ( { isOpen, onClose, onToggle } ) => (
 					<BaseControl id={ id } label={ label } help={ help }>
@@ -304,13 +305,15 @@ export const DateTimePickerControl = forwardRef(
 								}
 							} }
 							disabled={ disabled }
+							// @ts-expect-error - TODO: fix the type of currentDate.
 							value={ getUserInputOrUpdatedCurrentDate() }
-							onChange={ ( newValue: string ) =>
+							onChange={ ( newValue ) => {
 								debouncedSetInputStringAndMaybeCallOnChange(
+									// @ts-expect-error - TODO: fix the type of debouncedSetInputStringAndMaybeCallOnChange to match newValue.
 									newValue,
 									true
-								)
-							}
+								);
+							} }
 							onBlur={ (
 								event: React.FocusEvent< HTMLInputElement >
 							) => {
@@ -363,23 +366,19 @@ export const DateTimePickerControl = forwardRef(
 
 					return (
 						<Picker
-							// @ts-expect-error null is valid for currentDate
 							currentDate={
 								inputStringDateTime.isValid()
 									? formatDateTimeAsISO( inputStringDateTime )
 									: null
 							}
-							onChange={ ( newDateTimeISOString: string ) =>
+							onChange={ ( newDateTimeISOString ) =>
 								setInputStringAndMaybeCallOnChange(
+									// @ts-expect-error - TODO: fix the type of setInputStringAndMaybeCallOnChange to match newDateTimeISOString.
 									newDateTimeISOString,
 									false
 								)
 							}
 							is12Hour={ is12HourPicker }
-							// Opt out of the Reset and Help buttons, as they are going to be removed.
-							// These properties are removed in @wordpress/components 25.0.0 (Gutenberg 15.9.0).
-							__nextRemoveResetButton
-							__nextRemoveHelpButton
 						/>
 					);
 				} }
