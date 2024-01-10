@@ -9,13 +9,13 @@ If a post-activation notice is required, keep it within the WordPress plugin are
 
 Use the standard WordPress notice format and WooCommerce admin notices API.
 
-### Language
+## Language
 
 Providing timely feedback like success and error messages is essential for ensuring that the user understands whether changes have been made.
 
 Use short but meaningful messages that communicate what is happening. Ensure that the message provides instructions on what the user needs to do to continue. Proper punctuation should be used if the message contains multiple sentences. Avoid abbreviations.
 
-### Design
+## Design
 
 The placement of feedback is vital so the user notices it. For example, when validation messages are needed to prompt the user to enter data, get the user's attention by displaying a message close to the inputs where data needs to be revised.
 
