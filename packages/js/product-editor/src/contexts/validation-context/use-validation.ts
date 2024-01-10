@@ -33,11 +33,13 @@ export function useValidation< T >(
 		ref,
 		error: context.errors[ validatorId ],
 		isValidating,
-		async validate() {
+		async validate( newData?: Record< string, unknown > ) {
 			setIsValidating( true );
-			return context.validateField( validatorId ).finally( () => {
-				setIsValidating( false );
-			} );
+			return context
+				.validateField( validatorId, newData )
+				.finally( () => {
+					setIsValidating( false );
+				} );
 		},
 	};
 }

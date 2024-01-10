@@ -5,7 +5,7 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 $testimonials_title = $content['titles'][0]['default'] ?? '';
 $description        = $content['descriptions'][0]['default'] ?? '';

@@ -10,9 +10,9 @@ Payment gateways in WooCommerce are class based and can be added through tradit
 
 Payment gateways come in several varieties:
 
-1.  **Form based** – This is where the user must click a button on a form that then redirects them to the payment processor on the gateway’s own website. _Example_: PayPal standard, Authorize.net DPM
+1.  **Form based** – This is where the user must click a button on a form that then redirects them to the payment processor on the gateway's own website. _Example_: PayPal standard, Authorize.net DPM
 2.  **iFrame based** – This is when the gateway payment system is loaded inside an iframe on your store. _Example_: SagePay Form, PayPal Advanced
-3.  **Direct** – This is when the payment fields are shown directly on the checkout page and the payment is made when ‘place order’ is pressed. _Example_: PayPal Pro, Authorize.net AIM
+3.  **Direct** – This is when the payment fields are shown directly on the checkout page and the payment is made when 'place order' is pressed. _Example_: PayPal Pro, Authorize.net AIM
 4.  **Offline** – No online payment is made. _Example_: Cheque, Bank Transfer
 
 Form and iFrame based gateways post data offsite, meaning there are less security issues for you to think about. Direct gateways, however, require server security to be implemented ([SSL certificates](https://woo.com/document/ssl-and-https/), etc.) and may also require a level of [PCI compliance](https://woo.com/document/pci-dss-compliance-and-woocommerce/).
@@ -23,7 +23,7 @@ Form and iFrame based gateways post data offsite, meaning there are less securit
 
 **Note:** We are unable to provide support for customizations under our [Support Policy](https://woo.com/support-policy/). If you are unfamiliar with code/templates and resolving potential conflicts, select a [WooExpert or Developer](https://woo.com/customizations/)  for assistance.
 
-**Note:** The instructions below are for the default Checkout page. If you’re looking to add a custom payment method for the new Checkout block, check out [this documentation.](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)
+**Note:** The instructions below are for the default Checkout page. If you're looking to add a custom payment method for the new Checkout block, check out [this documentation.](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)
 
 Payment gateways should be created as additional plugins that hook into WooCommerce. Inside the plugin, you need to create a class after plugins are loaded. Example:
 
@@ -62,8 +62,8 @@ Most methods are inherited from the WC_Payment_Gateway class, but some are requ
 
 Within your constructor, you should define the following variables:
 
-- `$this->id` – Unique ID for your gateway, e.g., ‘your_gateway’
-- `$this->icon` – If you want to show an image next to the gateway’s name on the frontend, enter a URL to an image.
+- `$this->id` – Unique ID for your gateway, e.g., 'your_gateway'
+- `$this->icon` – If you want to show an image next to the gateway's name on the frontend, enter a URL to an image.
 - `$this->has_fields` – Bool. Can be set to true if you want payment fields to show on the checkout (if doing a direct integration).
 - `$this->method_title` – Title of the payment method shown on the admin page.
 - `$this->method_description` – Description for the payment method shown on the admin page.
@@ -75,7 +75,7 @@ $this->init\_form\_fields();
 $this->init_settings();
 ```
 
-We’ll cover `init_form_fields()` later, but this basically defines your settings that are then loaded with `init_settings()`.
+We'll cover `init_form_fields()` later, but this basically defines your settings that are then loaded with `init_settings()`.
 
 After `init_settings()` is called, you can get the settings and load them into variables, meaning:
 
@@ -91,7 +91,7 @@ add_action( 'woocommerce_update_options_payment_gateways\_' . $this->id, array( 
 
 #### init_form_fields()
 
-Use this method to set `$this->form_fields` – these are options you’ll show in admin on your gateway settings page and make use of the [WC Settings API](https://woo.com/document/settings-api/ "https://woo.com/document/settings-api/").
+Use this method to set `$this->form_fields` – these are options you'll show in admin on your gateway settings page and make use of the [WC Settings API](https://woo.com/document/settings-api/ "https://woo.com/document/settings-api/").
 
 A basic set of settings for your gateway would consist of _enabled_, _title_ and _description_:
 
@@ -166,7 +166,7 @@ return;
 
 WooCommerce will catch this error and show it on the checkout page.
 
-Stock levels are updated via actions (`woocommerce_payment_complete` and in transitions between order statuses), so it’s no longer needed to manually call the methods reducing stock levels while processing the payment.
+Stock levels are updated via actions (`woocommerce_payment_complete` and in transitions between order statuses), so it's no longer needed to manually call the methods reducing stock levels while processing the payment.
 
 ### Updating Order Status and Adding Notes
 
@@ -197,7 +197,7 @@ If you are creating an advanced, direct gateway (i.e., one that takes payment o
 $this->has_fields = true;
 ```
 
-This tells the checkout to output a ‘payment_box’ containing your direct payment form that you define next.
+This tells the checkout to output a 'payment_box' containing your direct payment form that you define next.
 
 Create a method called `payment_fields()` – this contains your form, most likely to have credit card details.
 
@@ -249,6 +249,6 @@ For more information, see [WC_API - The WooCommerce API Callback](https://woo.c
 
 ## Hooks in Gateways
 
-It’s important to note that adding hooks inside gateway classes may not trigger. Gateways are only loaded when needed, such as during checkout and on the settings page in admin.
+It's important to note that adding hooks inside gateway classes may not trigger. Gateways are only loaded when needed, such as during checkout and on the settings page in admin.
 
 You should keep hooks outside of the class or use WC-API if you need to hook into WordPress events from your class.

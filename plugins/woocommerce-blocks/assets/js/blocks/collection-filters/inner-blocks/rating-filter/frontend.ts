@@ -1,9 +1,14 @@
 /**
  * External dependencies
  */
-import { getContext, navigate, store } from '@woocommerce/interactivity';
+import { getContext, store } from '@woocommerce/interactivity';
 import { CheckboxListContext } from '@woocommerce/interactivity-components/checkbox-list';
 import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
+
+/**
+ * Internal dependencies
+ */
+import { navigate } from '../../frontend';
 
 function getUrl( filters: Array< string | null > ) {
 	filters = filters.filter( Boolean );
@@ -42,9 +47,11 @@ store( 'woocommerce/collection-rating-filter', {
 				'woocommerce/interactivity-dropdown'
 			);
 
-			const filter = dropdownContext.selectedItem?.value;
+			const selectedItems = dropdownContext.selectedItems;
+			const items = selectedItems || [];
+			const filters = items.map( ( i ) => i.value );
 
-			navigate( getUrl( [ filter ] ) );
+			navigate( getUrl( filters ) );
 		},
 		removeFilter: () => {
 			const { value } = getContext< { value: string } >();

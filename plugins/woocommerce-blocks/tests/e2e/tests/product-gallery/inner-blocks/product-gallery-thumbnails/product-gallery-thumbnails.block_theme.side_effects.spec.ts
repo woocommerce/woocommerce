@@ -65,10 +65,6 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( thumbnailsBlock ).toBeVisible();
 
-		// We should refactor this.
-		// eslint-disable-next-line playwright/no-wait-for-timeout
-		await page.waitForTimeout( 500 );
-
 		// Test the default (left) position of thumbnails by cross-checking:
 		// - The Gallery block has the classes "is-layout-flex" and "is-nowrap".
 		// - The Thumbnails block has a lower index than the Large Image block.

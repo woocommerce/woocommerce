@@ -203,6 +203,20 @@ export const ThemeHasModsBanner = ( {
 	);
 };
 
+export const CoreBanner = () => {
+	return (
+		<BaseIntroBanner
+			bannerTitle={ __( 'Design your own', 'woocommerce' ) }
+			bannerText={ __(
+				'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
+				'woocommerce'
+			) }
+			bannerClass="core-banner"
+			bannerButtonOnClick={ () => {} }
+		/>
+	);
+};
+
 export const ExistingAiThemeBanner = ( {
 	setOpenDesignChangeWarningModal,
 }: {
@@ -237,7 +251,11 @@ export const ExistingAiThemeBanner = ( {
 				recordEvent( 'customize_your_store_intro_customize_click' );
 				navigateOrParent(
 					window,
-					getNewPath( {}, '/customize-store/assembler-hub', {} )
+					getNewPath(
+						{ customizing: true },
+						'/customize-store/assembler-hub',
+						{}
+					)
 				);
 			} }
 			bannerButtonText={ __( 'Customize', 'woocommerce' ) }

@@ -31,11 +31,13 @@ class BlockRegistry {
 		'woocommerce/product-pricing-field',
 		'woocommerce/product-section',
 		'woocommerce/product-section-description',
+		'woocommerce/product-details-section-description',
 		'woocommerce/product-tab',
 		'woocommerce/product-toggle-field',
 		'woocommerce/product-taxonomy-field',
 		'woocommerce/product-text-field',
 		'woocommerce/product-number-field',
+		'woocommerce/product-linked-list-field',
 	);
 
 	/**

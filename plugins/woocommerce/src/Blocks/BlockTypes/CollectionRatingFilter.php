@@ -114,9 +114,6 @@ final class CollectionRatingFilter extends AbstractBlock {
 		$display_style = $attributes['displayStyle'] ?? 'list';
 		$show_counts   = $attributes['showCounts'] ?? false;
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
-		$selected_ratings_query_param = isset( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ) : '';
-
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'data-wc-interactive' => 'woocommerce/collection-rating-filter',
@@ -124,21 +121,40 @@ final class CollectionRatingFilter extends AbstractBlock {
 			)
 		);
 
+		$filtered_rating_counts = array_filter(
+			$rating_counts,
+			function( $rating ) {
+				return $rating['count'] > 0;
+			}
+		);
+
+		if ( empty( $filtered_rating_counts ) ) {
+			return sprintf(
+				'<div %s></div>',
+				$wrapper_attributes
+			);
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
+		$selected_ratings_query_param = isset( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::RATING_FILTER_QUERY_VAR ] ) ) : '';
+
 		$input = 'list' === $display_style ? CheckboxList::render(
 			array(
-				'items'     => $this->get_checkbox_list_items( $rating_counts, $selected_ratings_query_param, $show_counts ),
+				'items'     => $this->get_checkbox_list_items( $filtered_rating_counts, $selected_ratings_query_param, $show_counts ),
 				'on_change' => 'woocommerce/collection-rating-filter::actions.onCheckboxChange',
 			)
 		) : Dropdown::render(
-			$this->get_dropdown_props( $rating_counts, $selected_ratings_query_param, $show_counts )
+			$this->get_dropdown_props( $filtered_rating_counts, $selected_ratings_query_param, $show_counts, $attributes['selectType'] )
 		);
 
 		return sprintf(
 			'<div %1$s>
-				<div class="wc-block-rating-filter__controls">%2$s</div>
+				%2$s
+				<div class="wc-block-rating-filter__controls">%3$s</div>
 				<div class="wc-block-rating-filter__actions"></div>
 			</div>',
 			$wrapper_attributes,
+			$content,
 			$input
 		);
 	}
@@ -205,22 +221,24 @@ final class CollectionRatingFilter extends AbstractBlock {
 	/**
 	 * Get the dropdown props.
 	 *
-	 * @param mixed $rating_counts The rating counts.
-	 * @param mixed $selected_ratings_query The url query param for selected ratings.
-	 * @param mixed $show_counts Whether to show the counts.
+	 * @param mixed  $rating_counts The rating counts.
+	 * @param mixed  $selected_ratings_query The url query param for selected ratings.
+	 * @param bool   $show_counts Whether to show the counts.
+	 * @param string $select_type The select type. (single|multiple).
 	 * @return array<array-key, array>
 	 */
-	private function get_dropdown_props( $rating_counts, $selected_ratings_query, $show_counts ) {
-		$ratings_array = explode( ',', $selected_ratings_query );
+	private function get_dropdown_props( $rating_counts, $selected_ratings_query, $show_counts, $select_type ) {
+		$ratings_array    = explode( ',', $selected_ratings_query );
+		$placeholder_text = 'single' === $select_type ? __( 'Select a rating', 'woocommerce' ) : __( 'Select ratings', 'woocommerce' );
 
-		$selected_item = array_reduce(
+		$selected_items = array_reduce(
 			$rating_counts,
 			function( $carry, $rating ) use ( $ratings_array, $show_counts ) {
 				if ( in_array( (string) $rating['rating'], $ratings_array, true ) ) {
 					$count       = $rating['count'];
 					$count_label = $show_counts ? "($count)" : '';
 					$rating_str  = (string) $rating['rating'];
-					return array(
+					$carry[]     = array(
 						/* translators: %d is referring to the average rating value. Example: Rated 4 out of 5. */
 						'label' => sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating_str ) . ' ' . $count_label,
 						'value' => $rating['rating'],
@@ -232,7 +250,7 @@ final class CollectionRatingFilter extends AbstractBlock {
 		);
 
 		return array(
-			'items'         => array_map(
+			'items'          => array_map(
 				function ( $rating ) use ( $show_counts ) {
 					$count = $rating['count'];
 					$count_label = $show_counts ? "($count)" : '';
@@ -245,8 +263,10 @@ final class CollectionRatingFilter extends AbstractBlock {
 				},
 				$rating_counts
 			),
-			'selected_item' => $selected_item,
-			'action'        => 'woocommerce/collection-rating-filter::actions.onDropdownChange',
+			'select_type'    => $select_type,
+			'selected_items' => $selected_items,
+			'action'         => 'woocommerce/collection-rating-filter::actions.onDropdownChange',
+			'placeholder'    => $placeholder_text,
 		);
 	}
 }

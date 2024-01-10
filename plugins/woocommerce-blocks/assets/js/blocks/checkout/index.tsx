@@ -116,6 +116,11 @@ const settings = {
 									{},
 									[]
 								),
+								createBlock(
+									'woocommerce/checkout-additional-information-block',
+									{},
+									[]
+								),
 								showOrderNotes
 									? createBlock(
 											'woocommerce/checkout-order-note-block',
@@ -152,6 +157,84 @@ const settings = {
 					( block: { name: string } ) =>
 						block.name === 'woocommerce/checkout-fields-block'
 				);
+			},
+		},
+		// Adds the additional information block.
+		{
+			save( { attributes }: { attributes: { className: string } } ) {
+				return (
+					<div
+						className={ classnames(
+							'is-loading',
+							attributes.className
+						) }
+					/>
+				);
+			},
+			isEligible: (
+				_attributes: Record< string, unknown >,
+				innerBlocks: BlockInstance[]
+			) => {
+				const checkoutFieldsBlock = innerBlocks.find(
+					( block: { name: string } ) =>
+						block.name === 'woocommerce/checkout-fields-block'
+				);
+
+				if ( ! checkoutFieldsBlock ) {
+					return false;
+				}
+
+				// Top level block is the fields block, we then need to search within that for the additional information block.
+				return ! checkoutFieldsBlock.innerBlocks.some(
+					( block: { name: string } ) =>
+						block.name ===
+						'woocommerce/checkout-additional-information-block'
+				);
+			},
+			migrate: (
+				attributes: Record< string, unknown >,
+				innerBlocks: BlockInstance[]
+			) => {
+				const checkoutFieldsBlockIndex = innerBlocks.findIndex(
+					( block: { name: string } ) =>
+						block.name === 'woocommerce/checkout-fields-block'
+				);
+
+				if ( checkoutFieldsBlockIndex === -1 ) {
+					return false;
+				}
+
+				const checkoutFieldsBlock =
+					innerBlocks[ checkoutFieldsBlockIndex ];
+
+				const insertIndex = checkoutFieldsBlock.innerBlocks.findIndex(
+					( block: { name: string } ) =>
+						block.name ===
+						'wp-block-woocommerce-checkout-payment-block'
+				);
+
+				if ( insertIndex === -1 ) {
+					return false;
+				}
+
+				innerBlocks[ checkoutFieldsBlockIndex ] =
+					checkoutFieldsBlock.innerBlocks
+						.slice( 0, insertIndex )
+						.concat(
+							createBlock(
+								'woocommerce/checkout-additional-information-block',
+								{},
+								[]
+							)
+						)
+						.concat(
+							innerBlocks.slice(
+								insertIndex + 1,
+								innerBlocks.length
+							)
+						);
+
+				return [ attributes, innerBlocks ];
 			},
 		},
 	],
