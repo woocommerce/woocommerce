@@ -70,7 +70,7 @@ export const getErrorDetails = (
 							) {
 								return [];
 							}
-							return [
+							const errorObject = [
 								{
 									param,
 									id: `${ param }_${ additionalError.code }`,
@@ -80,6 +80,13 @@ export const getErrorDetails = (
 									),
 								},
 							];
+							if ( typeof additionalError.data !== 'undefined' ) {
+								return [
+									...errorObject,
+									...getErrorDetails( additionalError ),
+								];
+							}
+							return errorObject;
 					  } )
 					: [] ),
 			];
