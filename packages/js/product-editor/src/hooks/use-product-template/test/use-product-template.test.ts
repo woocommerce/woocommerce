@@ -48,6 +48,17 @@ describe( 'useProductTemplate', () => {
 						type: 'simple',
 					},
 				},
+				{
+					id: 'standard-product-template',
+					title: 'Standard Product Template',
+					description: 'Standard Product Template description',
+					icon: 'icon',
+					layoutTemplateId: 'layout-template-4',
+					order: 4,
+					productData: {
+						type: 'simple',
+					},
+				},
 			],
 		};
 	} );
@@ -83,9 +94,19 @@ describe( 'useProductTemplate', () => {
 
 	it( 'should return undefined if no matching product template by id or type', () => {
 		const { result } = renderHook( () =>
-			useProductTemplate( 'invalid-template-id', 'variable' )
+			useProductTemplate( 'invalid-template-id', 'external' )
 		);
 
 		expect( result.current.productTemplate ).toBeUndefined();
+	} );
+
+	it( 'should use the standard product template if the product type is variable', () => {
+		const { result } = renderHook( () =>
+			useProductTemplate( 'template-1', 'variable' )
+		);
+
+		expect( result.current.productTemplate?.id ).toEqual(
+			'standard-product-template'
+		);
 	} );
 } );
