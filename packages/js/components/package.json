@@ -81,7 +81,7 @@
 		"@wordpress/blocks": "^11.21.0",
 		"@wordpress/components": "wp-6.4",
 		"@wordpress/compose": "wp-6.0",
-		"@wordpress/core-data": "wp-6.0",
+		"@wordpress/core-data": "wp-6.4",
 		"@wordpress/date": "wp-6.0",
 		"@wordpress/deprecated": "wp-6.0",
 		"@wordpress/dom": "wp-6.0",

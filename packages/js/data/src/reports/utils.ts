@@ -28,7 +28,7 @@ import {
 	ReportStatEndpoint,
 	ReportStatObject,
 } from './types';
-import type { ReportsSelect } from './';
+import type { ReportStatObjectInfer, ReportsSelect } from './';
 
 type Filter = {
 	param: string;
@@ -457,7 +457,7 @@ export function getReportChartData< T extends ReportStatEndpoint >(
 	if ( stats.totalResults > MAX_PER_PAGE ) {
 		let isFetching = true;
 		let isError = false;
-		const pagedData = [];
+		const pagedData: ReportStatObjectInfer< T >[] = [];
 		const totalPages = Math.ceil( stats.totalResults / MAX_PER_PAGE );
 		let pagesFetched = 1;
 

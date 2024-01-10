@@ -10,7 +10,8 @@
 		"jsx": "react",
 		"jsxFactory": "createElement",
 		"jsxFragmentFactory": "Fragment",
-		"typeRoots": []
+		"typeRoots": [],
+		"noImplicitAny": false
 	},
 	"exclude": [
 		"node_modules",
