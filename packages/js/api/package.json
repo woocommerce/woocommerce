@@ -70,6 +70,14 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			}
+		}
+	},
 	"wireit": {
 		"build:project:typescript": {
 			"command": "tsc --project tsconfig.json",

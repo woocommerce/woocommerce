@@ -237,6 +237,14 @@
 		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
 	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "client/**/*{js,ts,tsx,scss}"
+			}
+		}
+	},
 	"wireit": {
 		"build:project:bundle": {
 			"command": "webpack",

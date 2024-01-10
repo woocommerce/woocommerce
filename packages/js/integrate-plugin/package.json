@@ -79,6 +79,14 @@
 		"webpack-cli": "^3.3.12",
 		"wireit": "0.14.1"
 	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			}
+		}
+	},
 	"wireit": {
 		"build:project:cjs": {
 			"command": "tsc --project tsconfig-cjs.json",

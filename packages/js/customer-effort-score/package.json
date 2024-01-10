@@ -104,6 +104,14 @@
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
 	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			}
+		}
+	},
 	"wireit": {
 		"build:project:bundle": {
 			"command": "webpack",

@@ -85,6 +85,14 @@
 			"pnpm test-staged"
 		]
 	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			}
+		}
+	},
 	"wireit": {
 		"build:project:cjs": {
 			"command": "tsc --project tsconfig-cjs.json",

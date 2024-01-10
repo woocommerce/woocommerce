@@ -70,53 +70,18 @@
 		"wp_org_slug": "woocommerce",
 		"build_step": "pnpm build:zip",
 		"ci": {
-			"name": "WP: latest",
-			"customCommands": {
-				"lint": "lint:php:changes:branch ${baseRef}",
-				"test:php": "test:php:env"
-			},
-			"testEnvCommand": "env:test",
-			"testEnvConfig": {
-				"wpVersion": "latest"
-			},
-			"additionalTasks": [
-				{
-					"name": "PHP 8.0",
-					"commandFilter": [
-						"test:php"
-					],
-					"testEnvConfig": {
-						"phpVersion": "8.0"
-					}
-				},
-				{
-					"name": "WP: nightly",
-					"commandFilter": [
-						"test:php"
-					],
-					"testEnvConfig": {
-						"wpVersion": "nightly"
-					}
-				},
-				{
-					"name": "WP: latest-1",
-					"commandFilter": [
-						"test:php"
-					],
-					"testEnvConfig": {
-						"wpVersion": "latest-1"
-					}
-				},
-				{
-					"name": "WP: latest-2",
-					"commandFilter": [
-						"test:php"
-					],
-					"testEnvConfig": {
-						"wpVersion": "latest-2"
-					}
-				}
-			]
+			"lint": {
+				"command": "lint:php:changes:branch origin/trunk",
+				"changes": [
+					"composer.lock",
+					"includes/**/*.php",
+					"patterns/**/*.php",
+					"src/**/*.php",
+					"templates/**/*.php",
+					"tests/php/**/*.php",
+					"tests/unit-tests/**/*.php"
+				]
+			}
 		}
 	},
 	"devDependencies": {

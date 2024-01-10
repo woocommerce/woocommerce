@@ -350,6 +350,14 @@
 		"build",
 		"blocks.ini"
 	],
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "assets/**/*{js,ts,tsx,scss}"
+			}
+		}
+	},
 	"wireit": {
 		"build:project:bundle": {
 			"command": "webpack",
