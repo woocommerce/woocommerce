@@ -8,6 +8,10 @@ import {
 	createOrderedChildren,
 	sortFillsByOrder,
 } from '@woocommerce/components';
+import {
+	FillComponentProps,
+	SlotComponentProps,
+} from '@woocommerce/components/build-types/types';
 
 export const WC_HEADER_SLOT_NAME = 'woocommerce_header_item';
 
@@ -49,11 +53,11 @@ export const WooHeaderItem: React.FC< {
 	children?: React.ReactNode;
 	order?: number;
 } > & {
-	Slot: React.FC< Slot.Props & { name?: string } >;
+	Slot: React.FC< SlotComponentProps & { name?: string } >;
 } = ( { children, order = 1, name = '' } ) => {
 	return (
 		<Fill name={ getSlotFillName( name ) }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( fillProps: FillComponentProps ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
 		</Fill>
@@ -61,6 +65,7 @@ export const WooHeaderItem: React.FC< {
 };
 
 WooHeaderItem.Slot = ( { fillProps, name = '' } ) => (
+	//  @ts-expect-error - I think this issue with slot children type should be fixed upstream.
 	<Slot name={ getSlotFillName( name ) } fillProps={ fillProps }>
 		{ sortFillsByOrder }
 	</Slot>
