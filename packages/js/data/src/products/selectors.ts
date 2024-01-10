@@ -150,7 +150,7 @@ export const getPermalinkParts = createSelector(
  *
  * @param {ProductState} state     - The current state.
  * @param {number}       productId - The product ID.
- * @return {PartialProduct[]}  - The related products.
+ * @return {PartialProduct[]}        The related products.
  */
 export const getRelatedProducts = (
 	state: ProductState,
