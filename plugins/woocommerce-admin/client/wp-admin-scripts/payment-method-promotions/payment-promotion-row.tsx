@@ -178,7 +178,7 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 								<Button
 									className="button alignright"
 									onClick={ () => installPaymentGateway() }
-									isSecondary
+									variant="secondary"
 									isBusy={ installing }
 									aria-disabled={ installing }
 								>

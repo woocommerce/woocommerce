@@ -41,7 +41,7 @@ const DEFAULT_TAB_ORDER = 20;
 export const WooProductTabItem: React.FC<
 	WooProductTabItemProps & { children: React.ReactNode }
 > & {
-	Slot: React.VFC<
+	Slot: React.FC<
 		Omit< SlotComponentProps, 'children' > & WooProductFieldSlotProps
 	>;
 } = ( { children, tabProps, templates } ) => {
@@ -61,7 +61,6 @@ export const WooProductTabItem: React.FC<
 						return createOrderedChildren< FillComponentProps >(
 							children,
 							templateData.order || DEFAULT_TAB_ORDER,
-							// @ts-expect-error - I think this arg is valid, the type issue is in @wordpress/components.
 							{},
 							{
 								tabProps,

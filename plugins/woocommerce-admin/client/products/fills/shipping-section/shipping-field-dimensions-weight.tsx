@@ -8,7 +8,6 @@ import { useSelect } from '@wordpress/data';
 import { __experimentalUseProductHelper as useProductHelper } from '@woocommerce/product-editor';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
@@ -47,7 +46,7 @@ export const ShippingDimensionsWeightField = () => {
 				{ ...inputWeightProps }
 				value={ formatNumber( String( inputWeightProps.value ) ) }
 				label={ __( 'Weight', 'woocommerce' ) }
-				suffix={ weightUnit }
+				suffix={ weightUnit as string }
 			/>
 		</BaseControl>
 	);

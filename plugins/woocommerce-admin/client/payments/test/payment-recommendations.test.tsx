@@ -31,7 +31,7 @@ jest.mock( '@woocommerce/components', () => ( {
 	List: ( {
 		items,
 	}: {
-		items: { key: string; title: string; after?: React.Component }[];
+		items: { key: string; title: string; after?: React.ReactNode }[];
 	} ) => (
 		<div>
 			{ items.map( ( item ) => (

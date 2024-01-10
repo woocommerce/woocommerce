@@ -147,7 +147,7 @@ export default function InstallModal() {
 		}
 	};
 	const modalButtons = () => {
-		const buttons = [];
+		const buttons: JSX.Element[] = [];
 		if ( isInstalled ) {
 			buttons.push(
 				<Button

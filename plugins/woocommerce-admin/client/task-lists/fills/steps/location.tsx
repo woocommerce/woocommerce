@@ -127,6 +127,7 @@ const StoreLocation = ( {
 			onSubmit={ onSubmit }
 			validate={ validate }
 		>
+			{ /* @ts-expect-error TODO: Fix this. */ }
 			{ ( {
 				getInputProps,
 				handleSubmit,
@@ -139,7 +140,7 @@ const StoreLocation = ( {
 						setValue={ setValue }
 					/>
 					<Button
-						isPrimary
+						variant="primary"
 						onClick={ handleSubmit }
 						isBusy={ isSubmitting }
 					>

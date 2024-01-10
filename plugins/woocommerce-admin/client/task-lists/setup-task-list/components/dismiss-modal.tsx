@@ -40,7 +40,7 @@ const DismissModal = ( {
 								{ dismissActionText }
 							</Button>
 							<Button
-								isPrimary
+								variant="primary"
 								onClick={ () => {
 									hideTasks( 'remove_card' );
 									setShowDismissModal( false );

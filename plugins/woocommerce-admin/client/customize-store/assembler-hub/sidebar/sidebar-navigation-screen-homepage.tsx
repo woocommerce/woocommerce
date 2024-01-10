@@ -12,8 +12,6 @@ import {
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
-
-// @ts-expect-error Missing type in core-data.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 import { recordEvent } from '@woocommerce/tracks';
 

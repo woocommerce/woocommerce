@@ -6,6 +6,10 @@ import {
 	createOrderedChildren,
 	sortFillsByOrder,
 } from '@woocommerce/components';
+import {
+	FillComponentProps,
+	SlotComponentProps,
+} from '@woocommerce/components/build-types/types';
 
 export const EXPERIMENTAL_WC_HOMESCREEN_HEADER_BANNER_SLOT_NAME =
 	'woocommerce_homescreen_experimental_header_banner_item';
@@ -36,7 +40,7 @@ export const WooHomescreenHeaderBannerItem = ( {
 } ) => {
 	return (
 		<Fill name={ EXPERIMENTAL_WC_HOMESCREEN_HEADER_BANNER_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( fillProps: FillComponentProps ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
 		</Fill>
@@ -46,8 +50,9 @@ export const WooHomescreenHeaderBannerItem = ( {
 WooHomescreenHeaderBannerItem.Slot = ( {
 	fillProps,
 }: {
-	fillProps?: Slot.Props;
+	fillProps?: SlotComponentProps;
 } ) => (
+	// @ts-expect-error - This seems like a type issue with Slot.
 	<Slot
 		name={ EXPERIMENTAL_WC_HOMESCREEN_HEADER_BANNER_SLOT_NAME }
 		fillProps={ fillProps }

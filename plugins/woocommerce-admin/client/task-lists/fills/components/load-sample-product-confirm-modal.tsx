@@ -33,10 +33,10 @@ export const LoadSampleProductConfirmModal: React.VFC< Props > = ( {
 				) }
 			</Text>
 			<div className="woocommerce-confirmation-modal-actions">
-				<Button isSecondary onClick={ onCancel }>
+				<Button variant="secondary" onClick={ onCancel }>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
-				<Button isPrimary onClick={ onImport }>
+				<Button variant="primary" onClick={ onImport }>
 					{ __( 'Import sample products', 'woocommerce' ) }
 				</Button>
 			</div>

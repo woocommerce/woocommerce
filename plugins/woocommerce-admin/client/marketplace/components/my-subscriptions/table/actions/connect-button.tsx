@@ -5,6 +5,7 @@ import { Button } from '@wordpress/components';
 import { useContext, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
+import { ButtonProps } from '@wordpress/components/build-types/button/types';
 
 /**
  * Internal dependencies
@@ -21,7 +22,7 @@ import { NoticeStatus } from '../../../../contexts/types';
 interface ConnectProps {
 	subscription: Subscription;
 	onClose?: () => void;
-	variant?: Button.ButtonVariant;
+	variant?: ButtonProps[ 'variant' ];
 }
 
 export default function ConnectButton( props: ConnectProps ) {

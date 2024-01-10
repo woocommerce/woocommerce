@@ -18,6 +18,7 @@ export const InventoryStockOutField = () => {
 	delete backordersProp.value;
 
 	return (
+		// @ts-expect-error - TODO: Fix this.
 		<RadioControl
 			label={ __( 'When out of stock', 'woocommerce' ) }
 			options={ [

@@ -6,6 +6,7 @@ import { dispatch, useSelect } from '@wordpress/data';
 import { useContext } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
+import { ButtonProps } from '@wordpress/components/build-types/button/types';
 
 /**
  * Internal dependencies
@@ -23,7 +24,7 @@ import { NoticeStatus } from '../../../../contexts/types';
 
 interface InstallProps {
 	subscription: Subscription;
-	variant?: Button.ButtonVariant;
+	variant?: ButtonProps[ 'variant' ];
 	onSuccess?: () => void;
 	onError?: () => void;
 }

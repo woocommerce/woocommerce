@@ -38,6 +38,7 @@ export const SiteHub = forwardRef(
 			isTransparent: boolean;
 			className: string;
 			as: string;
+			// @ts-expect-error - TODO: Fix this.
 			variants: motion.Variants;
 		},
 		ref

@@ -87,7 +87,7 @@ const renderTabs = (
 		setUrlTabParam( tabKey );
 	};
 
-	const tabContent = [];
+	const tabContent: JSX.Element[] = [];
 	for ( const tabKey in visibleTabs ) {
 		tabContent.push(
 			tabs[ tabKey ]?.href ? (

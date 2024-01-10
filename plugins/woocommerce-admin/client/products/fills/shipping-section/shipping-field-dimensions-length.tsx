@@ -8,7 +8,6 @@ import { __experimentalUseProductHelper as useProductHelper } from '@woocommerce
 
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';

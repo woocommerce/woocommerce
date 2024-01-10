@@ -12,7 +12,6 @@ import interpolateComponents from '@automattic/interpolate-components';
 import { CurrencyContext } from '@woocommerce/currency';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 

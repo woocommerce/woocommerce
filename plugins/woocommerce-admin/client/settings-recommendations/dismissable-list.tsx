@@ -19,6 +19,7 @@ const OptionNameContext = createContext( '' );
 
 export const DismissableListHeading: React.FC< {
 	onDismiss?: () => void;
+	children: React.ReactNode;
 } > = ( { children, onDismiss = () => null } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const dismissOptionName = useContext( OptionNameContext );
@@ -54,6 +55,7 @@ export const DismissableListHeading: React.FC< {
 export const DismissableList: React.FC< {
 	dismissOptionName: string;
 	className?: string;
+	children: React.ReactNode;
 } > = ( { children, className, dismissOptionName } ) => {
 	const isVisible = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } =

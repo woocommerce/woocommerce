@@ -63,7 +63,6 @@ export const WooProductTabItem: React.FC<
 						return createOrderedChildren< FillComponentProps >(
 							children,
 							templateData.order || DEFAULT_TAB_ORDER,
-							// @ts-expect-error - TODO: Maybe the type should be fixed upstream if this is valid arg?
 							{},
 							{
 								tabProps,

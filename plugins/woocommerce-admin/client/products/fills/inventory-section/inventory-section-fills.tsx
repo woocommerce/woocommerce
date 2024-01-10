@@ -81,12 +81,14 @@ export const InventorySectionFills: React.FC< InventorySectionFillsType > = ( {
 				>
 					<Card>
 						<CardBody>
+							{ /* @ts-expect-error - TODO: Fix this. */ }
 							<WooProductFieldItem.Slot
 								section={ basicSectionId }
 							/>
 							<CollapsibleContent
 								toggleText={ __( 'Advanced', 'woocommerce' ) }
 							>
+								{ /* @ts-expect-error - TODO: Fix this. */ }
 								<WooProductFieldItem.Slot
 									section={ advancedSectionId }
 								/>

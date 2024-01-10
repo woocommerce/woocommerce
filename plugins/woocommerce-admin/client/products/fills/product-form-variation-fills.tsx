@@ -70,6 +70,7 @@ const Tabs = () => (
 			pluginId={ PLUGIN_ID }
 			tabProps={ tabPropData.pricing }
 		>
+			{ /* @ts-expect-error - TODO: Fix this. */ }
 			<WooProductSectionItem.Slot tab={ VARIANT_TAB_PRICING_ID } />
 		</WooProductTabItem>
 		<WooProductTabItem
@@ -78,6 +79,7 @@ const Tabs = () => (
 			pluginId={ PLUGIN_ID }
 			tabProps={ tabPropData.inventory }
 		>
+			{ /* @ts-expect-error - TODO: Fix this. */ }
 			<WooProductSectionItem.Slot tab={ VARIANT_TAB_INVENTORY_ID } />
 		</WooProductTabItem>
 		<WooProductTabItem
@@ -86,7 +88,9 @@ const Tabs = () => (
 			pluginId={ PLUGIN_ID }
 			tabProps={ tabPropData.shipping }
 		>
+			{ /* @ts-expect-error - TODO: Fix this. */ }
 			{ ( { product }: { product: PartialProduct } ) => (
+				// @ts-expect-error - TODO: Fix this.
 				<WooProductSectionItem.Slot
 					tab={ VARIANT_TAB_SHIPPING_ID }
 					fillProps={ { product } }

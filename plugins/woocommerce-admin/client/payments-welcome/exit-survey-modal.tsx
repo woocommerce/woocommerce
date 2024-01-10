@@ -149,14 +149,18 @@ function ExitSurveyModal( {}: {
 
 			<div className="woopayments-welcome-page__survey-buttons">
 				<Button
-					isTertiary
+					variant="tertiary"
 					isDestructive
 					onClick={ exitSurvey }
 					name="cancel"
 				>
 					{ strings.survey.cancelButton }
 				</Button>
-				<Button isSecondary onClick={ sendFeedback } name="send">
+				<Button
+					variant="secondary"
+					onClick={ sendFeedback }
+					name="send"
+				>
 					{ strings.survey.submitButton }
 				</Button>
 			</div>

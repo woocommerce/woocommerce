@@ -60,7 +60,7 @@ export const PartnerCard: React.FC< {
 					{ terms }
 				</div>
 				<Button
-					isSecondary
+					variant="secondary"
 					onClick={ onClick }
 					isBusy={ isBusy }
 					disabled={ isBusy }

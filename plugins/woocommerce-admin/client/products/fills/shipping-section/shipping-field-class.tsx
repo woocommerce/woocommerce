@@ -14,6 +14,7 @@ import interpolateComponents from '@automattic/interpolate-components';
 import { recordEvent } from '@woocommerce/tracks';
 import { SelectControl } from '@wordpress/components';
 import { AddNewShippingClassModal } from '@woocommerce/product-editor';
+import { Option } from '@woocommerce/components/build-types/select-control/types';
 
 /**
  * Internal dependencies
@@ -25,7 +26,10 @@ import {
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { ProductShippingSectionPropsType } from './index';
 
-export const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
+// TODO: This should be fixed by adding key to these items.
+type OptionWithoutKey = Omit< Option, 'key' >;
+
+export const DEFAULT_SHIPPING_CLASS_OPTIONS: OptionWithoutKey[] = [
 	{ value: '', label: __( 'No shipping class', 'woocommerce' ) },
 	{
 		value: ADD_NEW_SHIPPING_CLASS_OPTION_VALUE,
@@ -35,7 +39,7 @@ export const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
 
 function mapShippingClassToSelectOption(
 	shippingClasses: ProductShippingClass[]
-): SelectControl.Option[] {
+): OptionWithoutKey[] {
 	return shippingClasses.map( ( { slug, name } ) => ( {
 		value: slug,
 		label: name,

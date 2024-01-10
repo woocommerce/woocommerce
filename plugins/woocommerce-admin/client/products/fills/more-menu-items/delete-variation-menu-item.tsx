@@ -42,13 +42,9 @@ export const DeleteVariationMenuItem = ( {
 		variationId,
 	} );
 
-	const [ name ] = useEntityProp< string >(
-		'postType',
-		'product_variation',
-		'name'
-	);
+	const [ name ] = useEntityProp( 'postType', 'product_variation', 'name' );
 
-	const [ status ] = useEntityProp< string >(
+	const [ status ] = useEntityProp(
 		'postType',
 		'product_variation',
 		'status'
@@ -130,6 +126,7 @@ export const DeleteVariationMenuItem = ( {
 			<MenuGroup>
 				<MenuItem
 					isDestructive
+					// @ts-expect-error - TODO: Fix this.
 					variant="tertiary"
 					onClick={ handleMenuItemClick }
 				>

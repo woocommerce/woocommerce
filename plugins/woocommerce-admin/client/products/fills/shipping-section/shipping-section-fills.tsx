@@ -88,6 +88,7 @@ export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
 				>
 					<Card>
 						<CardBody className="product-shipping-section__classes">
+							{ /* @ts-expect-error - TODO: Fix this. */ }
 							<WooProductFieldItem.Slot
 								section={ basicSectionId }
 							/>
@@ -105,6 +106,7 @@ export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
 							<div className="product-shipping-section__dimensions-body">
 								<div className="product-shipping-section__dimensions-body-col">
 									{ hasResolvedUnits && (
+										// @ts-expect-error - TODO: Fix this/
 										<WooProductFieldItem.Slot
 											section={ dimensionsSectionId }
 											fillProps={
@@ -132,6 +134,7 @@ export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
 				sections={ [ { name: basicSectionId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 			>
+				{ /* @ts-expect-error - TODO: Fix this. */ }
 				{ ( { product }: ProductShippingSectionPropsType ) => (
 					<ShippingClassField product={ product } />
 				) }
@@ -141,6 +144,7 @@ export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
 				sections={ [ { name: dimensionsSectionId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 			>
+				{ /* @ts-expect-error - TODO: Fix this. */ }
 				{ ( { ...props }: ShippingDimensionsPropsType ) => (
 					<ShippingDimensionsWidthField { ...props } />
 				) }
@@ -150,6 +154,7 @@ export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
 				sections={ [ { name: dimensionsSectionId, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
 			>
+				{ /* @ts-expect-error - TODO: Fix this. */ }
 				{ ( { ...props }: ShippingDimensionsPropsType ) => (
 					<ShippingDimensionsLengthField { ...props } />
 				) }
@@ -159,6 +164,7 @@ export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
 				sections={ [ { name: dimensionsSectionId, order: 5 } ] }
 				pluginId={ PLUGIN_ID }
 			>
+				{ /* @ts-expect-error - TODO: Fix this. */ }
 				{ ( { ...props }: ShippingDimensionsPropsType ) => (
 					<ShippingDimensionsHeightField { ...props } />
 				) }

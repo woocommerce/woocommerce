@@ -70,6 +70,7 @@ export const ProductVariationDetailsSection: React.FC = () => {
 			<Card>
 				<CardBody>
 					<CheckboxControl
+						// @ts-expect-error - TODO: Fix this.
 						label={
 							<>
 								{ __( 'Visible to customers', 'woocommerce' ) }

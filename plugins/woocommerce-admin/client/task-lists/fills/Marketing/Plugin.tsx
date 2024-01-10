@@ -72,7 +72,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 					<Button
 						disabled={ isDisabled }
 						isBusy={ isBusy }
-						isSecondary
+						variant="secondary"
 						href={ getAdminLink( manageUrl ) }
 						onClick={ () => {
 							recordEvent( 'marketing_manage', {
@@ -88,7 +88,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 					<Button
 						disabled={ isDisabled }
 						isBusy={ isBusy }
-						isSecondary
+						variant="secondary"
 						onClick={ () => installAndActivate( slug ) }
 					>
 						{ __( 'Activate', 'woocommerce' ) }
@@ -98,7 +98,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 					<Button
 						disabled={ isDisabled }
 						isBusy={ isBusy }
-						isSecondary
+						variant="secondary"
 						onClick={ () => installAndActivate( slug ) }
 					>
 						{ __( 'Get started', 'woocommerce' ) }

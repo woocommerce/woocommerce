@@ -75,6 +75,7 @@ export const Transitional = ( {
 				</Modal>
 			) }
 			<SiteHub
+				// @ts-expect-error - TODO: Fix this.
 				as={ motion.div }
 				variants={ {
 					view: { x: 0 },

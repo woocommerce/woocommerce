@@ -77,7 +77,7 @@ const SkipButton: React.FC< {
 			) }
 			<div className="woocommerce-profile-wizard__footer">
 				<Button
-					isLink
+					variant="link"
 					className="woocommerce-profile-wizard__footer-link"
 					onClick={ () => {
 						if ( trackingAllowed ) {
@@ -90,7 +90,7 @@ const SkipButton: React.FC< {
 					{ __( 'Skip', 'woocommerce' ) }
 				</Button>
 				<Button
-					isTertiary
+					variant="tertiary"
 					label={ skipSetupText }
 					onClick={ () => {
 						setSkipSetupPopoverVisibility( true );
@@ -100,6 +100,7 @@ const SkipButton: React.FC< {
 				</Button>
 				{ isSkipSetupPopoverVisible && (
 					<Popover
+						// @ts-expect-error - TODO: Fix this, container is not valid.
 						focusOnMount="container"
 						position="top center"
 						onClose={ () => setSkipSetupPopoverVisibility( false ) }

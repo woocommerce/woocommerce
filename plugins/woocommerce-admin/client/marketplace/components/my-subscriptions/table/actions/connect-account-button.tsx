@@ -3,6 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { ButtonProps } from '@wordpress/components/build-types/button/types';
 
 /**
  * Internal dependencies
@@ -10,7 +11,7 @@ import { __ } from '@wordpress/i18n';
 import { getAdminSetting } from '../../../../../utils/admin-settings';
 
 interface RenewProps {
-	variant?: Button.ButtonVariant;
+	variant?: ButtonProps[ 'variant' ];
 	install?: string;
 }
 

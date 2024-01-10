@@ -107,6 +107,7 @@ const ApmList: React.FunctionComponent< ApmListProps > = ( {
 		),
 		before: <img src={ apm.icon } alt="" />,
 		after: (
+			// @ts-expect-error - TODO: Fix this.
 			<ToggleControl
 				checked={ enabledApms.has( apm ) }
 				onChange={ () => handleToggleChange( apm ) }

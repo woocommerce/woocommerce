@@ -45,6 +45,7 @@ export const PricingTaxesClassField = () => {
 	}
 
 	return (
+		// @ts-expect-error - TODO: Fix this.
 		<RadioControl
 			{ ...taxClassProps }
 			label={

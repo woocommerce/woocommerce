@@ -117,7 +117,11 @@ export const ShippingRecommendation: React.FC<
 				'woocommerce'
 			),
 			content: isJetpackConnected ? (
-				<Button onClick={ redirect } isBusy={ isRedirecting } isPrimary>
+				<Button
+					onClick={ redirect }
+					isBusy={ isRedirecting }
+					variant="primary"
+				>
 					{ __( 'Complete task', 'woocommerce' ) }
 				</Button>
 			) : (

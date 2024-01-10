@@ -6,6 +6,10 @@ import {
 	createOrderedChildren,
 	sortFillsByOrder,
 } from '@woocommerce/components';
+import {
+	FillComponentProps,
+	SlotComponentProps,
+} from '@woocommerce/components/build-types/types';
 
 type WooTaskListCompletionProps = {
 	children: React.ReactNode;
@@ -38,7 +42,7 @@ export const WooTaskListCompletion = ( {
 }: WooTaskListCompletionProps ) => {
 	return (
 		<Fill name={ EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( fillProps: FillComponentProps ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
 		</Fill>
@@ -57,8 +61,10 @@ export type WooTaskListCompletionFillProps = {
 WooTaskListCompletion.Slot = ( {
 	fillProps,
 }: {
-	fillProps: Slot.Props & WooTaskListCompletionFillProps;
+	fillProps: Omit< SlotComponentProps, 'name' > &
+		WooTaskListCompletionFillProps;
 } ) => (
+	// @ts-expect-error - TODO: Fix this.
 	<Slot
 		name={ EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME }
 		fillProps={ fillProps }

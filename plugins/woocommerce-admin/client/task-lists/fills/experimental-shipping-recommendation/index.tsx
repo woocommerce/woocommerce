@@ -47,6 +47,7 @@ registerPlugin( 'wc-admin-onboarding-task-shipping-recommendation', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="shipping-recommendation">
+			{ /* @ts-expect-error - TODO: Fix this. */ }
 			{ ( { onComplete, query, task }: TaskProps ) => (
 				<ShippingRecommendationWrapper
 					onComplete={ onComplete }

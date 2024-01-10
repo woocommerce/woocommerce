@@ -36,7 +36,7 @@ const WCPaySettingBanner = () => {
 				actionButton={
 					<Button
 						href={ WC_PAY_SETUP_URL }
-						isPrimary
+						variant="primary"
 						onClick={ recordTrack }
 					>
 						{ __( 'Get started', 'woocommerce' ) }

@@ -28,7 +28,7 @@ export const Configure: React.FC<
 	return (
 		<>
 			<Button
-				isPrimary
+				variant="primary"
 				disabled={ isPending }
 				isBusy={ isPending }
 				onClick={ () => {

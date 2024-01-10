@@ -261,7 +261,7 @@ export function version( subscription: Subscription ): TableRow {
 }
 
 export function actions( subscription: Subscription ): TableRow {
-	let actionButton = null;
+	let actionButton: JSX.Element | null = null;
 	if ( subscription.product_key === '' ) {
 		actionButton = <SubscribeButton subscription={ subscription } />;
 	} else if ( subscription.expired ) {

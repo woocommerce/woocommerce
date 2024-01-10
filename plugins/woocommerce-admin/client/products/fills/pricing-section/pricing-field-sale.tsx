@@ -19,7 +19,6 @@ import moment from 'moment';
 import { CurrencyContext } from '@woocommerce/currency';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 	ToggleControl,
 } from '@wordpress/components';

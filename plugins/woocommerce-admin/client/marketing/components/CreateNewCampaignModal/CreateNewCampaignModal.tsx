@@ -58,7 +58,6 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	};
 
 	return (
-		// @ts-expect-error - TODO: Fix this.
 		<Modal
 			{ ...restProps }
 			className={ classnames(

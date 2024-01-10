@@ -114,7 +114,7 @@ declare global {
  * @param {Array} items An array of items to match against.
  */
 export const getMatchingItem = ( items: Item[] ): Item | null => {
-	let matchedItem = null;
+	let matchedItem: Item | null = null;
 	let highestMatchScore = 0;
 
 	items.forEach( ( item ) => {

@@ -2,8 +2,12 @@
  * External dependencies
  */
 import { isValidElement } from 'react';
-import { Slot, Fill } from '@wordpress/components';
 import { cloneElement } from '@wordpress/element';
+import {
+	FillComponentProps,
+	SlotComponentProps,
+} from '@woocommerce/components/build-types/types';
+import { isCallable } from '@woocommerce/components/build-types/utils';
 
 /**
  * Ordered fill item.
@@ -16,9 +20,10 @@ import { cloneElement } from '@wordpress/element';
 export const createOrderedChildren = (
 	children: React.ReactNode,
 	order: number,
-	props: Fill.Props
+	props: FillComponentProps
 ) => {
-	if ( typeof children === 'function' ) {
+	if ( isCallable( children ) ) {
+		// @ts-expect-error - TODO: Fix this.
 		return cloneElement( children( props ), { order } );
 	} else if ( isValidElement( children ) ) {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -34,8 +39,9 @@ export const createOrderedChildren = (
  * @param {Array} fills - slot's `Fill`s.
  * @return {Node} Node.
  */
-export const sortFillsByOrder: Slot.Props[ 'children' ] = ( fills ) => {
+export const sortFillsByOrder: SlotComponentProps[ 'children' ] = ( fills ) => {
 	// Copy fills array here because its type is readonly array that doesn't have .sort method in Typescript definition.
+	// @ts-expect-error - TODO: Fix this, fills is supposedly non-iterable.
 	const sortedFills = [ ...fills ].sort( ( a, b ) => {
 		return a[ 0 ].props.order - b[ 0 ].props.order;
 	} );

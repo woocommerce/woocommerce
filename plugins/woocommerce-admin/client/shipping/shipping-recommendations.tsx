@@ -52,7 +52,9 @@ const useInstallPlugin = () => {
 	return [ pluginsBeingSetup, handleSetup ] as const;
 };
 
-export const ShippingRecommendationsList: React.FC = ( { children } ) => (
+export const ShippingRecommendationsList: React.FC< {
+	children: React.ReactNode;
+} > = ( { children } ) => (
 	<DismissableList
 		className="woocommerce-recommended-shipping-extensions"
 		dismissOptionName="woocommerce_settings_shipping_recommendations_hidden"
@@ -84,7 +86,7 @@ export const ShippingRecommendationsList: React.FC = ( { children } ) => (
 				className="woocommerce-recommended-shipping-extensions__more_options_cta"
 				href="https://woo.com/product-category/woocommerce-extensions/shipping-methods/?utm_source=shipping_recommendations"
 				target="_blank"
-				isTertiary
+				variant="tertiary"
 			>
 				{ __( 'See more options', 'woocommerce' ) }
 				<VisuallyHidden>

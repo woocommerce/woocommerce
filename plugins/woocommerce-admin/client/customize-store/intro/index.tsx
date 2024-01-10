@@ -136,6 +136,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			) }
 			<div className="woocommerce-customize-store-header">
 				<SiteHub
+					// @ts-expect-error - TODO: Fix this.
 					as={ motion.div }
 					variants={ {
 						view: { x: 0 },

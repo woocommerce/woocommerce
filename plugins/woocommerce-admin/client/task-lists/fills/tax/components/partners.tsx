@@ -12,12 +12,9 @@ import classnames from 'classnames';
 import { TaxChildProps } from '../utils';
 import './partners.scss';
 
-export const Partners: React.FC< TaxChildProps > = ( {
-	children,
-	isPending,
-	onManual,
-	onDisable,
-} ) => {
+export const Partners: React.FC<
+	TaxChildProps & { children: React.ReactNode }
+> = ( { children, isPending, onManual, onDisable } ) => {
 	const classes = classnames(
 		'woocommerce-task-card',
 		'woocommerce-tax-partners',
@@ -37,7 +34,7 @@ export const Partners: React.FC< TaxChildProps > = ( {
 				<ul className="woocommerce-tax-partners__other-actions">
 					<li>
 						<Button
-							isTertiary
+							variant="tertiary"
 							disabled={ isPending }
 							isBusy={ isPending }
 							onClick={ () => {
@@ -49,7 +46,7 @@ export const Partners: React.FC< TaxChildProps > = ( {
 					</li>
 					<li>
 						<Button
-							isTertiary
+							variant="tertiary"
 							disabled={ isPending }
 							isBusy={ isPending }
 							onClick={ () => {

@@ -21,5 +21,6 @@ export const WooCYSSecondaryButtonSlot = () => {
 		return null;
 	}
 
+	// @ts-expect-error - TODO: Fix this.
 	return <WooCYSSecondaryButton.Slot />;
 };

@@ -6,6 +6,10 @@ import {
 	createOrderedChildren,
 	sortFillsByOrder,
 } from '@woocommerce/components';
+import {
+	FillComponentProps,
+	SlotComponentProps,
+} from '@woocommerce/components/build-types/types';
 
 export const EXPERIMENTAL_WC_TASKLIST_FOOTER_SLOT_NAME =
 	'experimental_woocommerce_tasklist_footer_item';
@@ -42,7 +46,7 @@ export const ExperimentalWooTaskListFooterItem = ( {
 } ) => {
 	return (
 		<Fill name={ EXPERIMENTAL_WC_TASKLIST_FOOTER_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( fillProps: FillComponentProps ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
 		</Fill>
@@ -52,8 +56,9 @@ export const ExperimentalWooTaskListFooterItem = ( {
 ExperimentalWooTaskListFooterItem.Slot = ( {
 	fillProps,
 }: {
-	fillProps?: Slot.Props;
+	fillProps?: SlotComponentProps[ 'fillProps' ];
 } ) => (
+	// @ts-expect-error - I think Slot props type issues need to be fixed in @wordpress/components.
 	<Slot
 		name={ EXPERIMENTAL_WC_TASKLIST_FOOTER_SLOT_NAME }
 		fillProps={ fillProps }

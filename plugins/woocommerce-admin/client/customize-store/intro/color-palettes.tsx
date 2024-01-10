@@ -10,7 +10,7 @@ export const ColorPalettes = ( {
 	colorPalettes: ColorPalette[];
 	totalPalettes: number;
 } ) => {
-	let extra = null;
+	let extra: JSX.Element | null = null;
 
 	if ( totalPalettes > 4 ) {
 		extra = <li className="more_palettes">+{ totalPalettes - 4 }</li>;

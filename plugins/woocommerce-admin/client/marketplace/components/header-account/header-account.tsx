@@ -99,10 +99,12 @@ export default function HeaderAccount(): JSX.Element {
 						>
 							<MenuItem
 								className="woocommerce-marketplace__menu-item"
+								// @ts-expect-error - TODO: Fix this.
 								href={ accountOrConnect }
 							>
 								{ connectionDetails() }
 							</MenuItem>
+							{ /* @ts-expect-error - TODO: Fix this. */ }
 							<MenuItem href={ accountURL }>
 								<Icon
 									icon={ external }

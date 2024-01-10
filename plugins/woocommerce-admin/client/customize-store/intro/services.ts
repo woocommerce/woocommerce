@@ -80,11 +80,13 @@ export const fetchIntroData = async () => {
 	let currentThemeIsAiGenerated = false;
 	if (
 		maybePreviousTemplate &&
+		// @ts-expect-error - TODO: Fix this.
 		currentTemplate?.id === maybePreviousTemplate
 	) {
 		currentThemeIsAiGenerated = true;
 	}
 
+	// @ts-expect-error - TODO: Fix this.
 	const hasModifiedPages = rawPages?.some(
 		( page: { _links: { [ key: string ]: string[] } } ) => {
 			return page._links?.[ 'version-history' ]?.length > 1;
@@ -92,7 +94,9 @@ export const fetchIntroData = async () => {
 	);
 
 	const activeThemeHasMods =
+		// @ts-expect-error - TODO: Fix this.
 		!! currentTemplate?.modified ||
+		// @ts-expect-error - TODO: Fix this.
 		styleRevs?.length > 0 ||
 		hasModifiedPages;
 

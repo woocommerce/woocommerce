@@ -12,7 +12,7 @@ import { render } from '@testing-library/react';
 import { ProductSettings } from '../';
 
 jest.mock( '@woocommerce/admin-layout', () => ( {
-	WooHeaderItem: ( props: { children: () => React.ReactElement } ) => (
+	WooHeaderItem: ( props: { children: React.ReactNode } ) => (
 		<Fragment { ...props }>{ props.children }</Fragment>
 	),
 } ) );

@@ -211,7 +211,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 							{ ! completed && showActionButton && (
 								<Button
 									className="woocommerce-task-list__item-action"
-									isPrimary
+									variant="primary"
 									onClick={ (
 										event:
 											| React.MouseEvent

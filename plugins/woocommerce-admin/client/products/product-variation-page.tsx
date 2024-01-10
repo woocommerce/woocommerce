@@ -42,6 +42,7 @@ export default function ProductPage() {
 			render: () => (
 				<>
 					<WooProductMoreMenuItem>
+						{ /* @ts-expect-error - TODO: Fix this */ }
 						{ ( { onClose }: { onClose: () => void } ) => (
 							<>
 								<DeleteVariationMenuItem onClose={ onClose } />

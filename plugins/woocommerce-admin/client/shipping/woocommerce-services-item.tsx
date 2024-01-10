@@ -26,7 +26,7 @@ const WooCommerceServicesItem: React.FC< {
 
 	const handleSetupClick = () => {
 		onSetupClick( [ 'woocommerce-services' ] ).then( () => {
-			const actions = [];
+			const actions: { url: string; label: string }[] = [];
 			if ( ! isSiteConnectedToJetpack ) {
 				actions.push( {
 					url: getAdminLink( 'plugins.php' ),
@@ -73,7 +73,7 @@ const WooCommerceServicesItem: React.FC< {
 			</div>
 			<div className="woocommerce-list__item-after">
 				<Button
-					isSecondary
+					variant="secondary"
 					onClick={ handleSetupClick }
 					isBusy={ pluginsBeingSetup.includes(
 						'woocommerce-services'

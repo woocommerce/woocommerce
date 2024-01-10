@@ -8,22 +8,23 @@ import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
 import { __experimentalWooProductTabItem as WooProductTabItem } from '@woocommerce/product-editor';
 import { PartialProduct } from '@woocommerce/data';
 import classnames from 'classnames';
+import { Tab } from '@woocommerce/components/build-types/types';
 
 /**
  * Internal dependencies
  */
 import './product-form-layout.scss';
 import { useHeaderHeight } from '~/header/use-header-height';
+import { isCallable } from '@woocommerce/components/build-types/utils';
 
 type ProductFormLayoutProps = {
 	id: string;
 	product?: PartialProduct;
 };
 
-export const ProductFormLayout: React.FC< ProductFormLayoutProps > = ( {
-	id,
-	product,
-} ) => {
+export const ProductFormLayout: React.FC<
+	ProductFormLayoutProps & { children?: React.ReactNode }
+> = ( { id, product } ) => {
 	const query = getQuery() as Record< string, string >;
 
 	useEffect( () => {
@@ -49,7 +50,7 @@ export const ProductFormLayout: React.FC< ProductFormLayoutProps > = ( {
 		}
 	}, [ adminBarHeight, headerHeight ] );
 
-	const getTooltipTabs = ( tabs: TabPanel.Tab[] ) => {
+	const getTooltipTabs = ( tabs: Tab[] ) => {
 		return tabs.map( ( tab ) => ( {
 			name: tab.name,
 			title: tab.disabled ? (
@@ -78,6 +79,7 @@ export const ProductFormLayout: React.FC< ProductFormLayoutProps > = ( {
 
 	return (
 		<>
+			{ /* @ts-expect-error - TODO: Fix this. */ }
 			<WooProductTabItem.Slot
 				template={ 'tab/' + id }
 				fillProps={ { product } }
@@ -106,7 +108,7 @@ export const ProductFormLayout: React.FC< ProductFormLayoutProps > = ( {
 								const child = childrenMap[ tab.name ];
 								return (
 									<div className={ classes } key={ tab.name }>
-										{ typeof child === 'function'
+										{ isCallable( child )
 											? child( product )
 											: child }
 									</div>

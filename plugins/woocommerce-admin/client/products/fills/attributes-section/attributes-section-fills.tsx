@@ -55,6 +55,7 @@ export const AttributesSectionFills = () => (
 					</>
 				}
 			>
+				{ /* @ts-expect-error - TODO: Fix this. */ }
 				<WooProductFieldItem.Slot section={ ATTRIBUTES_SECTION_ID } />
 			</ProductSectionLayout>
 		</WooProductSectionItem>

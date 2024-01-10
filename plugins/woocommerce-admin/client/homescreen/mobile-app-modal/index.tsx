@@ -120,6 +120,7 @@ export const MobileAppModal = () => {
 	return (
 		<>
 			{ guideIsOpen && (
+				// @ts-expect-error - TODO: Fix this.
 				<Guide
 					onFinish={ () => {
 						updateOptions( {
@@ -152,6 +153,14 @@ export const MobileAppModal = () => {
 export const MOBILE_APP_MODAL_HELP_ENTRY_FILTER_CALLBACK =
 	'wc/admin/mobile-app-help-entry-callback';
 
+type HelpMenuEntry = {
+	title: string;
+	link: string;
+	linkType: string;
+};
+
+type HelpMenuCallback = ( helpMenuEntries: HelpMenuEntry[] ) => HelpMenuEntry[];
+
 /**
  * This component exists to add the mobile app entry to the help panel.
  * If the user has no pathway to achieve the required Jetpack connection,
@@ -160,7 +169,7 @@ export const MOBILE_APP_MODAL_HELP_ENTRY_FILTER_CALLBACK =
 export const MobileAppHelpMenuEntryLoader = () => {
 	const { state } = useJetpackPluginState();
 
-	const filterHelpMenuEntries = useCallback(
+	const filterHelpMenuEntries = useCallback< HelpMenuCallback >(
 		( helpMenuEntries ) => {
 			if (
 				state === JetpackPluginStates.INITIALIZING ||

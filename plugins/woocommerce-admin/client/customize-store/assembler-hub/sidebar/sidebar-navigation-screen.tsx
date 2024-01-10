@@ -106,6 +106,7 @@ export const SidebarNavigationScreen = ( {
 							showTooltip={ false }
 						/>
 					) }
+					{ /* @ts-expect-error - TODO: Fix this. */ }
 					<Heading
 						className="edit-site-sidebar-navigation-screen__title"
 						color={ '#e0e0e0' /* $gray-200 */ }

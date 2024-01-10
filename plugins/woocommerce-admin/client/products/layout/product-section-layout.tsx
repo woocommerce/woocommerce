@@ -15,12 +15,9 @@ type ProductSectionLayoutProps = {
 	className?: string;
 };
 
-export const ProductSectionLayout: React.FC< ProductSectionLayoutProps > = ( {
-	title,
-	description,
-	className,
-	children,
-} ) => {
+export const ProductSectionLayout: React.FC<
+	ProductSectionLayoutProps & { children?: React.ReactNode }
+> = ( { title, description, className, children } ) => {
 	return (
 		<FormSection
 			title={ title }

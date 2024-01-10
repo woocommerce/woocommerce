@@ -4,6 +4,7 @@
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { queueRecordEvent } from '@woocommerce/tracks';
+import { ButtonProps } from '@wordpress/components/build-types/button/types';
 
 /**
  * Internal dependencies
@@ -13,7 +14,7 @@ import { Subscription } from '../../types';
 
 interface SubscribeProps {
 	subscription: Subscription;
-	variant?: Button.ButtonVariant;
+	variant?: ButtonProps[ 'variant' ];
 }
 
 export default function SubscribeButton( props: SubscribeProps ) {

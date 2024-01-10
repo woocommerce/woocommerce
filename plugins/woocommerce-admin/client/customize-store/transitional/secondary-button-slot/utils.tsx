@@ -6,6 +6,10 @@ import {
 	sortFillsByOrder,
 	createOrderedChildren,
 } from '@woocommerce/components';
+import {
+	FillComponentProps,
+	SlotComponentProps,
+} from '@woocommerce/components/build-types/types';
 
 export const EXPERIMENTAL_WC_CYS_TRANSITIONAL_PAGE_SECONDARY_BUTTON_SLOT_NAME =
 	'customize_your_store_transitional_page_secondary_button';
@@ -36,7 +40,7 @@ export const WooCYSSecondaryButton: React.FC< {
 	children?: React.ReactNode;
 	order?: number;
 } > & {
-	Slot: React.FC< Slot.Props >;
+	Slot: React.FC< SlotComponentProps >;
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill
@@ -44,7 +48,7 @@ export const WooCYSSecondaryButton: React.FC< {
 				EXPERIMENTAL_WC_CYS_TRANSITIONAL_PAGE_SECONDARY_BUTTON_SLOT_NAME
 			}
 		>
-			{ ( fillProps: Fill.Props ) => {
+			{ ( fillProps: FillComponentProps ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
 		</Fill>
@@ -52,6 +56,7 @@ export const WooCYSSecondaryButton: React.FC< {
 };
 
 WooCYSSecondaryButton.Slot = ( { fillProps } ) => (
+	// @ts-expect-error - This seems like a type issue with Slot.
 	<Slot
 		name={
 			EXPERIMENTAL_WC_CYS_TRANSITIONAL_PAGE_SECONDARY_BUTTON_SLOT_NAME

@@ -138,6 +138,7 @@ export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
 				>
 					<Card>
 						<CardBody>
+							{ /* @ts-expect-error - TODO: Fix this. */ }
 							<WooProductFieldItem.Slot
 								section={ basicSectionId }
 							/>
@@ -145,12 +146,14 @@ export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
 					</Card>
 					<Card>
 						<CardBody>
+							{ /* @ts-expect-error - TODO: Fix this. */ }
 							<WooProductFieldItem.Slot
 								section={ taxesSectionId }
 							/>
 							<CollapsibleContent
 								toggleText={ __( 'Advanced', 'woocommerce' ) }
 							>
+								{ /* @ts-expect-error - TODO: Fix this. */ }
 								<WooProductFieldItem.Slot
 									section={ taxesAdvancedSectionId }
 								/>

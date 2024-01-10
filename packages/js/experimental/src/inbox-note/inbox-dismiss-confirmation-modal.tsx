@@ -34,11 +34,11 @@ export const InboxDismissConfirmationModal: React.FC<
 					) }
 				</p>
 				<div className="woocommerce-inbox-dismiss-confirmation_buttons">
-					<Button isSecondary onClick={ () => onClose() }>
+					<Button variant="secondary" onClick={ () => onClose() }>
 						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 					<Button
-						isSecondary
+						variant="secondary"
 						isBusy={ inAction }
 						disabled={ inAction }
 						onClick={ () => {

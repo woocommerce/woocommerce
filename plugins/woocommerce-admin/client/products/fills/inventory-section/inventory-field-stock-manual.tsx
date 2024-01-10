@@ -17,6 +17,7 @@ export const InventoryStockManualField = () => {
 	delete inputProps.value;
 
 	return (
+		// @ts-expect-error - TODO: Fix this.
 		<RadioControl
 			label={ __( 'Stock status', 'woocommerce' ) }
 			options={ [

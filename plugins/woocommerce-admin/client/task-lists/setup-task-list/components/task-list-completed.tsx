@@ -37,10 +37,10 @@ export const TaskListCompleted = ( {
 									'woocommerce'
 								) }
 							</h2>
-							<Button isSecondary onClick={ keepTasks }>
+							<Button variant="secondary" onClick={ keepTasks }>
 								{ __( 'Keep list', 'woocommerce' ) }
 							</Button>
-							<Button isPrimary onClick={ hideTasks }>
+							<Button variant="primary" onClick={ hideTasks }>
 								{ __( 'Hide this list', 'woocommerce' ) }
 							</Button>
 						</div>

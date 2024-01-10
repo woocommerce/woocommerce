@@ -18,6 +18,7 @@ export const PricingTaxesChargeField = () => {
 	delete taxStatusProps.value;
 
 	return (
+		// @ts-expect-error - TODO: Fix this.
 		<RadioControl
 			{ ...taxStatusProps }
 			label={ __( 'Charge sales tax on', 'woocommerce' ) }

@@ -25,13 +25,13 @@ export default function Notices() {
 		return notice.options?.actions.map( ( action ) => {
 			return {
 				...action,
-				variant: 'link',
+				variant: 'link' as const,
 				className: 'is-link',
 			};
 		} );
 	};
 
-	const errorNotices = [];
+	const errorNotices: JSX.Element[] = [];
 	for ( const notice of notices ) {
 		errorNotices.push(
 			<Notice

@@ -55,7 +55,7 @@ const WooCommerceServicesItem: React.FC< {
 				</span>
 			</div>
 			<div className="woocommerce-list__item-after">
-				<Button isSecondary onClick={ handleSetupClick }>
+				<Button variant="secondary" onClick={ handleSetupClick }>
 					{ isWCSInstalled
 						? __( 'Activate', 'woocommerce' )
 						: __( 'Get started', 'woocommerce' ) }

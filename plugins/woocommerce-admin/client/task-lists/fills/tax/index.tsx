@@ -31,7 +31,9 @@ import { ManualConfiguration } from './manual-configuration';
 import { Partners } from './components/partners';
 import { WooCommerceTax } from './woocommerce-tax';
 
-const TaskCard: React.FC = ( { children } ) => {
+const TaskCard: React.FC< { children: React.ReactNode } > = ( {
+	children,
+} ) => {
 	return (
 		<Card className="woocommerce-task-card">
 			<CardBody>{ children }</CardBody>
@@ -247,6 +249,7 @@ registerPlugin( 'wc-admin-onboarding-task-tax', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="tax">
+			{ /* @ts-expect-error - TODO: Fix this. */ }
 			{ ( { onComplete, query, task }: TaxProps ) => (
 				<Tax onComplete={ onComplete } query={ query } task={ task } />
 			) }

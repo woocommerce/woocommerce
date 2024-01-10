@@ -17,6 +17,7 @@ const CustomizeStoreHeader = ( {
 	task: TaskType;
 	goToTask: React.MouseEventHandler;
 } ) => {
+	const variant = task.isComplete ? 'secondary' : 'primary';
 	return (
 		<div
 			className={ `woocommerce-task-header__contents-container woocommerce-task-header__${ task.id }` }
@@ -37,11 +38,7 @@ const CustomizeStoreHeader = ( {
 						'woocommerce'
 					) }
 				</p>
-				<Button
-					isSecondary={ task.isComplete }
-					isPrimary={ ! task.isComplete }
-					onClick={ goToTask }
-				>
+				<Button variant={ variant } onClick={ goToTask }>
 					{ __( 'Start customizing', 'woocommerce' ) }
 				</Button>
 			</div>
