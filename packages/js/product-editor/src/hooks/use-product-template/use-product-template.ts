@@ -28,15 +28,20 @@ export const useProductTemplate = (
 			? 'standard-product-template'
 			: productTemplateId;
 
+	const productTypeToFind =
+		productType === 'variable' ? 'simple' : productType;
+
 	let matchingProductTemplate = productTemplates.find(
-		( productTemplate ) => productTemplateIdToFind === productTemplate.id
+		( productTemplate ) =>
+			productTemplate.id === productTemplateIdToFind &&
+			productTemplate.productData.type === productTypeToFind
 	);
 
 	if ( ! matchingProductTemplate ) {
 		// Fallback to the first template with the same product type.
 		matchingProductTemplate = productTemplates.find(
 			( productTemplate ) =>
-				productTemplate.productData.type === productType
+				productTemplate.productData.type === productTypeToFind
 		);
 	}
 
