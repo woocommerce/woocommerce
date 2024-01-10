@@ -7,12 +7,10 @@ import fs from 'node:fs';
 /**
  * Internal dependencies
  */
-import { parseCIConfig } from '../config';
 import { loadPackage } from '../package-file';
 import { buildProjectGraph } from '../project-graph';
 
 jest.mock( 'node:child_process' );
-jest.mock( '../config' );
 jest.mock( '../package-file' );
 
 describe( 'Project Graph', () => {
@@ -38,46 +36,44 @@ describe( 'Project Graph', () => {
 				}
 
 				const matches = path.match( /\/([^/]+)\/package.json$/ );
+				if ( matches[ 1 ] === 'project-a' ) {
+					return JSON.parse(
+						fs.readFileSync( __dirname + '/test-package.json', {
+							encoding: 'utf8',
+						} )
+					);
+				}
 
 				return {
 					name: matches[ 1 ],
 				};
 			} );
 
-			jest.mocked( parseCIConfig ).mockImplementation(
-				( packageFile ) => {
-					expect( packageFile ).toMatchObject( {
-						name: expect.stringMatching( /project-[abcd]/ ),
-					} );
-
-					return { jobs: [] };
-				}
-			);
-
 			const graph = buildProjectGraph();
 
 			expect( loadPackage ).toHaveBeenCalled();
-			expect( parseCIConfig ).toHaveBeenCalled();
 			expect( graph ).toMatchObject( {
 				name: 'project-a',
 				path: 'project-a',
 				ciConfig: {
-					jobs: [],
+					jobs: [
+						{
+							command: 'foo',
+							type: 'lint',
+							changes: [
+								/^(?:src(?:\/|\/(?:(?!(?:\/|^)\.).)*?\/)(?!\.)[^/]*?\.js|src(?:\/|\/(?:(?!(?:\/|^)\.).)*?\/)(?!\.)[^/]*?\.jsx|src(?:\/|\/(?:(?!(?:\/|^)\.).)*?\/)(?!\.)[^/]*?\.ts|src(?:\/|\/(?:(?!(?:\/|^)\.).)*?\/)(?!\.)[^/]*?\.tsx)$/
+							],
+						},
+					],
 				},
 				dependencies: [
 					{
 						name: 'project-b',
 						path: 'project-b',
-						ciConfig: {
-							jobs: [],
-						},
 						dependencies: [
 							{
 								name: 'project-c',
 								path: 'project-c',
-								ciConfig: {
-									jobs: [],
-								},
 								dependencies: [],
 							},
 						],
@@ -85,24 +81,15 @@ describe( 'Project Graph', () => {
 					{
 						name: 'project-c',
 						path: 'project-c',
-						ciConfig: {
-							jobs: [],
-						},
 						dependencies: [],
 					},
 					{
 						name: 'project-d',
 						path: 'project-d',
-						ciConfig: {
-							jobs: [],
-						},
 						dependencies: [
 							{
 								name: 'project-c',
 								path: 'project-c',
-								ciConfig: {
-									jobs: [],
-								},
 								dependencies: [],
 							},
 						],
