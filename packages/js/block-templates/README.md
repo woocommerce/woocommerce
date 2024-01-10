@@ -17,11 +17,11 @@ import metadata from './block.json';
 import { Edit } from './edit';
 
 registerWooBlockType( {
-  name: metadata.name,
-  metadata: metadata,
-  settings: {
-    edit: Edit,
-  }
+	name: metadata.name,
+	metadata: metadata,
+	settings: {
+		edit: Edit,
+	},
 } );
 ```
 
@@ -32,6 +32,43 @@ registerWooBlockType( {
 #### Returns
 
 - `WPBlockType | undefined`: The block type if it was registered successfully, otherwise `undefined`.
+
+### useLayoutTemplate
+
+This hook is used to retrieve a layout template from the server.
+
+#### Usage
+
+```js
+import { useLayoutTemplate } from '@woocommerce/block-templates';
+
+export function Example() {
+	const { layoutTemplate, isResolving } =
+		useLayoutTemplate( 'my-layout-template' );
+
+	return (
+		<div>
+			{ isResolving && <p>Loading layout template...</p> }
+			{ layoutTemplate && (
+				<p>{ JSON.stringify( layoutTemplate, null, 4 ) }</p>
+			) }
+			{ ! layoutTemplate && ! isResolving && (
+				<p>'Layout template does not exist!'</p>
+			) }
+		</div>
+	);
+}
+```
+
+#### Parameters
+
+- _layoutTemplateId_ `string`: The id of the layout template to retrieve.
+
+#### Returns
+
+- `Object`
+    - _layoutTemplate_ `Object | undefined`: The layout template if it was found, otherwise `null`.
+    - _isResolving_ `boolean`: Whether or not the layout template is resolving.
 
 ### useWooBlockProps
 
@@ -45,25 +82,18 @@ If you define a ref for the element, it is important to pass the ref to this hoo
 import { useWooBlockProps } from '@woocommerce/block-templates';
 
 export function Edit( { attributes } ) {
-  const { blockProps } = useWooBlockProps( 
-    attributes,
-    {
-      className: 'my-block',
-    }
-  );
+	const { blockProps } = useWooBlockProps( attributes, {
+		className: 'my-block',
+	} );
 
-  return (
-    <div { ...blockProps }>
-      Block content
-    </div>
-  );
+	return <div { ...blockProps }>Block content</div>;
 }
 ```
 
 #### Parameters
 
-- _attributes_: `Object`: Block attributes.
-- _props_: `Object`: Optional. Props to pass to the element.
+- _attributes_ `Object`: Block attributes.
+- _props_ `Object`: Optional. Props to pass to the element.
 
 #### Returns
 

@@ -47,6 +47,7 @@ export const Edit = ( {
 		[ 'woocommerce/checkout-billing-address-block', {}, [] ],
 		[ 'woocommerce/checkout-shipping-methods-block', {}, [] ],
 		[ 'woocommerce/checkout-payment-block', {}, [] ],
+		[ 'woocommerce/checkout-additional-information-block', {}, [] ],
 		[ 'woocommerce/checkout-order-note-block', {}, [] ],
 		[ 'woocommerce/checkout-terms-block', {}, [] ],
 		[ 'woocommerce/checkout-actions-block', {}, [] ],

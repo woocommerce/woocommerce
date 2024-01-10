@@ -13,12 +13,12 @@ export interface AdviceCardProps {
 	tip?: string;
 	isDismissible?: boolean;
 	onDismiss?: () => void;
-	image?: React.ReactNode;
+	children?: React.ReactNode;
 }
 
 export const AdviceCard: React.FC< AdviceCardProps > = ( {
 	tip,
-	image = null,
+	children = null,
 	isDismissible = true,
 	onDismiss,
 } ) => {
@@ -68,7 +68,7 @@ export const AdviceCard: React.FC< AdviceCardProps > = ( {
 					/>
 				</div>
 			) }
-			<div className="woocommerce-advice-card__body">{ image }</div>
+			<div className="woocommerce-advice-card__body">{ children }</div>
 			{ tip && tip.length > 0 && (
 				<div className="woocommerce-advice-card__footer">{ tip }</div>
 			) }

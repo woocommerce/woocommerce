@@ -1392,6 +1392,7 @@ table.wc_status_table--tools {
 		display: block;
 		width: 100%;
 		position: relative;
+		white-space: pre-wrap;
 
 		&:before {
 			counter-increment: line;
@@ -1422,8 +1423,7 @@ table.wc_status_table--tools {
 				cursor: pointer;
 			}
 
-			pre {
-				margin-top: 0;
+			details {
 				white-space: pre-wrap;
 			}
 		}
@@ -1490,6 +1490,14 @@ table.wc_status_table--tools {
 		padding: 0.46em 0;
 		border: 1px dashed #c3c4c7;
 		line-height: 2.3;
+	}
+}
+
+.wc-logs-settings {
+	.wc-settings-row-logs-retention-period-days {
+		td {
+			line-height: 2;
+		}
 	}
 }
 
