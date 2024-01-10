@@ -281,6 +281,7 @@
 		"@dnd-kit/utilities": "^3.2.2",
 		"@emotion/styled": "^11.11.0",
 		"@preact/signals": "^1.2.2",
+		"@types/uuid": "^9.0.7",
 		"@woocommerce/tracks": "workspace:^",
 		"@wordpress/autop": "3.16.0",
 		"@wordpress/compose": "5.5.0",
@@ -315,7 +316,6 @@
 		"trim-html": "0.1.9",
 		"use-debounce": "9.0.4",
 		"usehooks-ts": "^2.9.1",
-		"@types/uuid": "^9.0.7",
 		"uuid": "^9.0.1",
 		"wordpress-components": "npm:@wordpress/components@14.2.0"
 	},
