@@ -54,7 +54,7 @@ trait OrderAuthorizationTrait {
 	public function validate_billing_email_matches_order( $order_id, $billing_email ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! $order || ! $billing_email || $order->get_billing_email() !== $billing_email ) {
+		if ( ! $order || ! $order->email_is_valid( $billing_email ) ) {
 			throw new RouteException( 'woocommerce_rest_invalid_billing_email', __( 'Invalid billing email provided.', 'woocommerce' ), 401 );
 		}
 	}
