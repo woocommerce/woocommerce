@@ -109,4 +109,12 @@ describe( 'useProductTemplate', () => {
 			'standard-product-template'
 		);
 	} );
+
+	it( 'should use the product type to match if the product template id matches a template with a different product type', () => {
+		const { result } = renderHook( () =>
+			useProductTemplate( 'template-2', 'simple' )
+		);
+
+		expect( result.current.productTemplate?.id ).toEqual( 'template-1' );
+	} );
 } );
