@@ -6,7 +6,7 @@ export type BaseQueryParams< Fields = string > = {
 	after: string;
 	before: string;
 	exclude: string;
-	include: string;
+	include: string | number[];
 	offset: number;
 	order: 'asc' | 'desc';
 	orderby: 'date' | 'id' | 'include' | 'title' | 'slug';
