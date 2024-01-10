@@ -500,10 +500,7 @@ class CheckoutFields {
 			return $filtered_result;
 		}
 
-		// Show a warning and return the original result from schema validation if the filter returns something unexpected.
-		_doing_it_wrong( esc_html( 'woocommerce_blocks_validate_additional_field_' . $key ), 'The filter should return a WP_Error.', '8.6.0' );
-		return new \WP_Error();
-
+		return new \WP_Error( 'invalid_additional_field_validation_result', 'Invalid result for woocommerce_blocks_validate_additional_field_' . esc_html( $key ) . '. The filter should return a WP_Error.' );
 	}
 
 	/**
