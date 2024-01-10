@@ -11,6 +11,7 @@ import { AnyInterpreter } from 'xstate';
  */
 import { Intro } from '../';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
+import { FlowType } from '~/customize-store/types';
 
 jest.mock( '../../assembler-hub/site-hub', () => ( {
 	SiteHub: jest.fn( () => null ),
@@ -44,7 +45,7 @@ describe( 'Intro Banners', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					aiOnline: true,
+					flowType: FlowType.AIOnline,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -82,7 +83,7 @@ describe( 'Intro Banners', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					aiOnline: true,
+					flowType: FlowType.AIOnline,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -126,7 +127,7 @@ describe( 'Intro Banners', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					aiOnline: true,
+					flowType: FlowType.AIOnline,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }

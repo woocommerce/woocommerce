@@ -55,6 +55,7 @@ async function processDirectory(
 			category.content = frontMatter.content;
 			category.category_slug = frontMatter.category_slug;
 			category.category_title = frontMatter.category_title;
+			category.menu_title = frontMatter.menu_title;
 		}
 		// derive the category title from the directory name, capitalize first letter of each word.
 		const categoryFolder = path.basename( subDirectory );

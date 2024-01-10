@@ -13,7 +13,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Utilities\NumberUtil;
-use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil };
 
 defined( 'ABSPATH' ) || exit;
 
@@ -614,7 +614,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return string
 	 */
 	public function get_delivery_logs() {
-		return esc_url( add_query_arg( 'log_file', wc_get_log_file_name( 'webhooks-delivery' ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
+		return add_query_arg( 'source', 'webhooks-delivery', LoggingUtil::get_logs_tab_url() );
 	}
 
 	/**

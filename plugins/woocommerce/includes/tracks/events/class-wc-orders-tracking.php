@@ -23,15 +23,15 @@ class WC_Orders_Tracking {
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_order_action' ), 51 );
 
 		add_action( 'load-edit.php', array( $this, 'track_orders_view' ), 10 );
-		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_orders_view' ), 10 ); // HPOS.
+		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_orders_view' ), 999 ); // HPOS.
 
 		add_action( 'load-post-new.php', array( $this, 'track_add_order_from_edit' ), 10 );
-		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_add_order_from_edit' ), 10 ); // HPOS.
+		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_add_order_from_edit' ), 999 ); // HPOS.
 
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_created_date_change' ), 10 );
 
 		add_action( 'load-edit.php', array( $this, 'track_search_in_orders_list' ) );
-		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_search_in_orders_list' ) ); // HPOS.
+		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_search_in_orders_list' ), 999 ); // HPOS.
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_order_tracking_scripts' ) );
 	}

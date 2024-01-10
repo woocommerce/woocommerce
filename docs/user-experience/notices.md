@@ -1,5 +1,6 @@
 ---
-post_title: Notices
+post_title: User Experience Guidelines - Notices
+menu_title: Notices
 ---
 
 ## Notices

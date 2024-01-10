@@ -3,27 +3,22 @@
  */
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import {
-	Button,
-	Card,
-	CardBody,
-	CardFooter,
-	CardHeader,
-} from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { close } from '@wordpress/icons';
 import { useInstanceId } from '@wordpress/compose';
 import { useUserPreferences } from '@woocommerce/data';
+import classNames from 'classnames';
 
 export interface AdviceCardProps {
 	tip?: string;
 	isDismissible?: boolean;
 	onDismiss?: () => void;
-	image?: React.ReactNode;
+	children?: React.ReactNode;
 }
 
 export const AdviceCard: React.FC< AdviceCardProps > = ( {
 	tip,
-	image = null,
+	children = null,
 	isDismissible = true,
 	onDismiss,
 } ) => {
@@ -56,19 +51,27 @@ export const AdviceCard: React.FC< AdviceCardProps > = ( {
 	}
 
 	return (
-		<Card className="woocommerce-advice-card">
+		<div
+			className={ classNames( 'woocommerce-advice-card', {
+				'is-dismissible': isDismissible,
+			} ) }
+			role="group"
+		>
 			{ isDismissible && (
-				<CardHeader>
+				<div className="woocommerce-advice-card__header">
 					<Button
 						className="woocommerce-advice-card__dismiss-button"
 						onClick={ onDismiss }
 						icon={ close }
 						label={ __( 'Dismiss', 'woocommerce' ) }
+						isSmall={ true }
 					/>
-				</CardHeader>
+				</div>
 			) }
-			<CardBody>{ image }</CardBody>
-			{ tip && tip.length > 0 && <CardFooter>{ tip }</CardFooter> }
-		</Card>
+			<div className="woocommerce-advice-card__body">{ children }</div>
+			{ tip && tip.length > 0 && (
+				<div className="woocommerce-advice-card__footer">{ tip }</div>
+			) }
+		</div>
 	);
 };

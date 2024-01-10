@@ -19,30 +19,42 @@ use WP_Post;
  */
 trait OrderAttributionMeta {
 
-	/** @var string[] */
+	/**
+	 * The default fields and their sourcebuster accesors,
+	 * to show in the source data metabox.
+	 *
+	 * @var string[]
+	 * */
 	private $default_fields = array(
 		// main fields.
-		'type',
-		'url',
+		'source_type'        => 'current.typ',
+		'referrer'           => 'current_add.rf',
 
 		// utm fields.
-		'utm_campaign',
-		'utm_source',
-		'utm_medium',
-		'utm_content',
-		'utm_id',
-		'utm_term',
+		'utm_campaign'       => 'current.cmp',
+		'utm_source'         => 'current.src',
+		'utm_medium'         => 'current.mdm',
+		'utm_content'        => 'current.cnt',
+		'utm_id'             => 'current.id',
+		'utm_term'           => 'current.trm',
 
 		// additional fields.
-		'session_entry',
-		'session_start_time',
-		'session_pages',
-		'session_count',
-		'user_agent',
+		'session_entry'      => 'current_add.ep',
+		'session_start_time' => 'current_add.fd',
+		'session_pages'      => 'session.pgs',
+		'session_count'      => 'udata.vst',
+		'user_agent'         => 'udata.uag',
 	);
 
 	/** @var array */
 	private $fields = array();
+
+	/**
+	 * Cached `array_keys( $fields )`.
+	 *
+	 * @var array
+	 * */
+	private $field_names = array();
 
 	/** @var string */
 	private $field_prefix = '';
@@ -67,7 +79,7 @@ trait OrderAttributionMeta {
 	}
 
 	/**
-	 * Set the meta fields and the field prefix.
+	 * Set the fields and the field prefix.
 	 *
 	 * @return void
 	 */
@@ -79,7 +91,8 @@ trait OrderAttributionMeta {
 		 *
 		 * @param string[] $fields The fields to show.
 		 */
-		$this->fields = (array) apply_filters( 'wc_order_attribution_tracking_fields', $this->default_fields );
+		$this->fields      = (array) apply_filters( 'wc_order_attribution_tracking_fields', $this->default_fields );
+		$this->field_names = array_keys( $this->fields );
 		$this->set_field_prefix();
 	}
 
@@ -119,11 +132,11 @@ trait OrderAttributionMeta {
 	 */
 	private function filter_meta_data( array $meta ): array {
 		$return = array();
-		$prefix = $this->get_meta_prefixed_field( '' );
+		$prefix = $this->get_meta_prefixed_field_name( '' );
 
 		foreach ( $meta as $item ) {
 			if ( str_starts_with( $item->key, $prefix ) ) {
-				$return[ $this->unprefix_meta_field( $item->key ) ] = $item->value;
+				$return[ $this->unprefix_meta_field_name( $item->key ) ] = $item->value;
 			}
 		}
 
@@ -133,7 +146,7 @@ trait OrderAttributionMeta {
 		}
 
 		// Determine the origin based on source type and referrer.
-		$source_type      = $return['type'] ?? '';
+		$source_type      = $return['source_type'] ?? '';
 		$source           = $return['utm_source'] ?? '';
 		$return['origin'] = $this->get_origin_label( $source_type, $source, true );
 
@@ -143,50 +156,34 @@ trait OrderAttributionMeta {
 	/**
 	 * Get the field name with the appropriate prefix.
 	 *
-	 * @param string $field Field name.
+	 * @param string $name Field name.
 	 *
 	 * @return string The prefixed field name.
 	 */
-	private function get_prefixed_field( $field ): string {
-		return "{$this->field_prefix}{$field}";
+	private function get_prefixed_field_name( $name ): string {
+		return "{$this->field_prefix}{$name}";
 	}
 
 	/**
 	 * Get the field name with the meta prefix.
 	 *
-	 * @param string $field The field name.
+	 * @param string $name The field name.
 	 *
 	 * @return string The prefixed field name.
 	 */
-	private function get_meta_prefixed_field( string $field ): string {
-		// Map some of the fields to the correct meta name.
-		if ( 'type' === $field ) {
-			$field = 'source_type';
-		} elseif ( 'url' === $field ) {
-			$field = 'referrer';
-		}
-
-		return "_{$this->get_prefixed_field( $field )}";
+	private function get_meta_prefixed_field_name( string $name ): string {
+		return "_{$this->get_prefixed_field_name( $name )}";
 	}
 
 	/**
 	 * Remove the meta prefix from the field name.
 	 *
-	 * @param string $field The prefixed field.
+	 * @param string $name The prefixed fieldname .
 	 *
 	 * @return string
 	 */
-	private function unprefix_meta_field( string $field ): string {
-		$return = str_replace( "_{$this->field_prefix}", '', $field );
-
-		// Map some of the fields to the correct meta name.
-		if ( 'source_type' === $return ) {
-			$return = 'type';
-		} elseif ( 'referrer' === $return ) {
-			$return = 'url';
-		}
-
-		return $return;
+	private function unprefix_meta_field_name( string $name ): string {
+		return str_replace( "_{$this->field_prefix}", '', $name );
 	}
 
 	/**
@@ -218,19 +215,19 @@ trait OrderAttributionMeta {
 
 
 	/**
-	 * Map posted, prefixed values to fields.
+	 * Map posted, prefixed values to field values.
 	 * Used for the classic forms.
 	 *
 	 * @param array $raw_values The raw values from the POST form.
 	 *
 	 * @return array
 	 */
-	private function get_unprefixed_fields( array $raw_values = array() ): array {
+	private function get_unprefixed_field_values( array $raw_values = array() ): array {
 		$values = array();
 
 		// Look through each field in POST data.
-		foreach ( $this->fields as $field ) {
-			$values[ $field ] = $raw_values[ $this->get_prefixed_field( $field ) ] ?? '(none)';
+		foreach ( $this->field_names as $field_name ) {
+			$values[ $field_name ] = $raw_values[ $this->get_prefixed_field_name( $field_name ) ] ?? '(none)';
 		}
 
 		return $values;
@@ -247,13 +244,13 @@ trait OrderAttributionMeta {
 		$values = array();
 
 		// Look through each field in given data.
-		foreach ( $this->fields as $field ) {
-			$value = sanitize_text_field( wp_unslash( $raw_values[ $field ] ) );
+		foreach ( $this->field_names as $field_name ) {
+			$value = sanitize_text_field( wp_unslash( $raw_values[ $field_name ] ) );
 			if ( '(none)' === $value ) {
 				continue;
 			}
 
-			$values[ $field ] = $value;
+			$values[ $field_name ] = $value;
 		}
 
 		// Set the device type if possible using the user agent.
@@ -361,13 +358,13 @@ trait OrderAttributionMeta {
 	/**
 	 * Get the description for the order attribution field.
 	 *
-	 * @param string $field The field name.
+	 * @param string $field_name The field name.
 	 *
 	 * @return string
 	 */
-	private function get_field_description( string $field ): string {
+	private function get_field_description( string $field_name ): string {
 		/* translators: %s is the field name */
-		$description = sprintf( __( 'Order attribution field: %s', 'woocommerce' ), $field );
+		$description = sprintf( __( 'Order attribution field: %s', 'woocommerce' ), $field_name );
 
 		/**
 		 * Filter the description for the order attribution field.
@@ -375,9 +372,9 @@ trait OrderAttributionMeta {
 		 * @since 8.5.0
 		 *
 		 * @param string $description The description for the order attribution field.
-		 * @param string $field       The field name.
+		 * @param string $field_name  The field name.
 		 */
-		return (string) apply_filters( 'wc_order_attribution_field_description', $description, $field );
+		return (string) apply_filters( 'wc_order_attribution_field_description', $description, $field_name );
 	}
 
 	/**

@@ -1,4 +1,3 @@
-
 ---
 post_title: Removing /product/ , /product-category/ , or /shop/ from URLs
 ---

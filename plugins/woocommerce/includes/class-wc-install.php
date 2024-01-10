@@ -240,6 +240,9 @@ class WC_Install {
 		'8.1.0' => array(
 			'wc_update_810_migrate_transactional_metadata_for_hpos',
 		),
+		'8.6.0' => array(
+			'wc_update_860_remove_recommended_marketing_plugins_transient',
+		),
 	);
 
 	/**
@@ -2585,6 +2588,10 @@ EOT;
 <!-- wp:woocommerce/checkout-payment-block -->
 <div class="wp-block-woocommerce-checkout-payment-block"></div>
 <!-- /wp:woocommerce/checkout-payment-block -->
+
+<!-- wp:woocommerce/checkout-additional-information-block -->
+<div class="wp-block-woocommerce-checkout-additional-information-block"></div>
+<!-- /wp:woocommerce/checkout-additional-information-block -->
 
 <!-- wp:woocommerce/checkout-order-note-block -->
 <div class="wp-block-woocommerce-checkout-order-note-block"></div>

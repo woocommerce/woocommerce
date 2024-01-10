@@ -493,7 +493,7 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 	} );
 
-	test.describe( 'full-screen when clicked option', () => {
+	test.describe( 'open pop-up when clicked option', () => {
 		test( 'should be enabled by default', async ( {
 			pageObject,
 			editor,
