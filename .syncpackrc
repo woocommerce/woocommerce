@@ -30,7 +30,9 @@
 			]
 		},
 		{
-			"dependencies": [ "**" ],
+			"dependencies": [
+				"**"
+			],
 			"packages": [
 				"@woocommerce/block-library"
 			],
@@ -49,7 +51,7 @@
 			"dependencies": [
 				"@types/react"
 			],
-			"pinVersion": "^17.0.71",
+			"pinVersion": "^18.0.21",
 			"packages": [
 				"**"
 			]
@@ -58,7 +60,7 @@
 			"dependencies": [
 				"@types/react-dom"
 			],
-			"pinVersion": "^17.0.25",
+			"pinVersion": "^18.0.6",
 			"packages": [
 				"**"
 			]
@@ -80,7 +82,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^17.0.2"
+			"pinVersion": "^18.2.0"
 		},
 		{
 			"dependencies": [
@@ -99,50 +101,6 @@
 				"**"
 			],
 			"pinVersion": "^8.55.0"
-		},
-		{
-			"dependencies": [
-				"@wordpress/babel-plugin-import-jsx-pragma",
-				"@wordpress/babel-preset-default",
-				"@wordpress/stylelint-config",
-				"@wordpress/scripts",
-				"@wordpress/jest-console",
-				"@wordpress/dependency-extraction-webpack-plugin",
-				"@wordpress/e2e-test-utils",
-				"@wordpress/jest-preset-default",
-				"@wordpress/postcss-plugins-preset",
-				"@wordpress/custom-templated-path-webpack-plugin",
-				"@wordpress/postcss-themes"
-			],
-			"packages": [
-				"**"
-			],
-			"isIgnored": true
-		},
-		{
-			"dependencies": [
-				"@wordpress/block**",
-				"@wordpress/viewport",
-				"@wordpress/interface",
-				"@wordpress/router",
-				"@wordpress/edit-site"
-			],
-			"packages": [
-				"@woocommerce/block-templates",
-				"@woocommerce/product-editor",
-				"@woocommerce/admin-library",
-				"@woocommerce/components"
-			],
-			"isIgnored": true
-		},
-		{
-			"dependencies": [
-				"@wordpress/**"
-			],
-			"packages": [
-				"@woocommerce/experimental"
-			],
-			"isIgnored": true
 		},
 		{
 			"dependencies": [
@@ -179,24 +137,6 @@
 				"**"
 			],
 			"pinVersion": "wp-6.4"
-		},
-		{
-			"dependencies": [
-				"@wordpress/**"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "wp-6.0"
-		},
-		{
-			"dependencies": [
-				"@types/wordpress__components"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^19.10.5"
 		},
 		{
 			"dependencies": [
@@ -261,9 +201,7 @@
 			"dependencies": [
 				"@types/node",
 				"@types/react",
-				"@types/wordpress__components",
 				"@typescript-eslint/**",
-				"@wordpress/**",
 				"config",
 				"eslint",
 				"node",

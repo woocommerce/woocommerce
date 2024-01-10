@@ -65,7 +65,6 @@
 		"@types/jest": "^27.5.2",
 		"@types/react-transition-group": "^4.4.10",
 		"@types/testing-library__jest-dom": "^5.14.9",
-		"@types/wordpress__components": "^19.10.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
@@ -86,8 +85,8 @@
 		"wireit": "0.14.1"
 	},
 	"peerDependencies": {
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
 	},
 	"scripts": {
 		"build": "WIREIT_LOGGER='quiet-ci' pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" build:project",

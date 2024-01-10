@@ -87,12 +87,11 @@
 		"@testing-library/user-event": "13.5.0",
 		"@types/dompurify": "^2.4.0",
 		"@types/jest": "^27.5.2",
-		"@types/react": "^17.0.71",
+		"@types/react": "^18.0.21",
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@types/wordpress__block-editor": "7.0.0",
 		"@types/wordpress__block-library": "2.6.1",
 		"@types/wordpress__blocks": "11.0.7",
-		"@types/wordpress__components": "^19.10.5",
 		"@types/wordpress__core-data": "2.4.5",
 		"@types/wordpress__data": "6.0.2",
 		"@types/wordpress__date": "3.3.2",
@@ -116,8 +115,8 @@
 		"mini-css-extract-plugin": "^2.7.6",
 		"postcss": "^8.4.32",
 		"postcss-loader": "^4.3.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
 		"rimraf": "^3.0.2",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
@@ -148,10 +147,10 @@
 		"watch:build:project:esm": "wireit"
 	},
 	"peerDependencies": {
-		"@types/react": "^17.0.71",
+		"@types/react": "^18.0.21",
 		"@wordpress/data": "wp-6.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
 	},
 	"wireit": {
 		"build:project:bundle": {

@@ -67,7 +67,6 @@
 		"@types/wordpress__block-editor": "7.0.0",
 		"@types/wordpress__block-library": "2.6.1",
 		"@types/wordpress__blocks": "11.0.7",
-		"@types/wordpress__components": "^19.10.5",
 		"@types/wordpress__rich-text": "3.4.6",
 		"@woocommerce/csv-export": "workspace:*",
 		"@woocommerce/currency": "workspace:*",
@@ -118,12 +117,12 @@
 		"react-transition-group": "^4.4.5"
 	},
 	"peerDependencies": {
-		"@types/react": "^17.0.71",
-		"@types/react-dom": "^17.0.25",
+		"@types/react": "^18.0.21",
+		"@types/react-dom": "^18.0.6",
 		"@wordpress/data": "wp-6.0",
 		"lodash": "^4.17.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -153,7 +152,6 @@
 		"@types/prop-types": "^15.7.11",
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@types/uuid": "^8.3.4",
-		"@types/wordpress__components": "^19.10.5",
 		"@types/wordpress__data": "6.0.0",
 		"@types/wordpress__media-utils": "3.0.0",
 		"@types/wordpress__viewport": "2.5.4",
@@ -169,7 +167,7 @@
 		"jest-cli": "~27.5.1",
 		"postcss": "^8.4.32",
 		"postcss-loader": "^4.3.0",
-		"react": "^17.0.2",
+		"react": "^18.2.0",
 		"rimraf": "^3.0.2",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",

@@ -63,7 +63,7 @@
 		"@testing-library/jest-dom": "5.16.2",
 		"@testing-library/react-hooks": "8.0.1",
 		"@types/jest": "^27.5.2",
-		"@types/react": "^17.0.71",
+		"@types/react": "^18.0.21",
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@types/wordpress__block-editor": "7.0.0",
 		"@types/wordpress__blocks": "11.0.7",
@@ -78,8 +78,8 @@
 		"jest-cli": "~27.5.1",
 		"postcss": "^8.4.32",
 		"postcss-loader": "^4.3.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
 		"rimraf": "^3.0.2",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
@@ -89,9 +89,9 @@
 		"wireit": "0.14.1"
 	},
 	"peerDependencies": {
-		"@types/react": "^17.0.71",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"@types/react": "^18.0.21",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
 	},
 	"publishConfig": {
 		"access": "public"
