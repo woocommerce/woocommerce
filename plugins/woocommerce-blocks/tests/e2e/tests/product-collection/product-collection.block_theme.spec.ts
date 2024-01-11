@@ -258,6 +258,32 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 0 );
 		} );
 
+		test( 'Products can be filtered based on price range.', async ( {
+			pageObject,
+		} ) => {
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.addFilter( 'Price Range' );
+			await pageObject.setPriceRange( {
+				min: '18.33',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 7 );
+
+			await pageObject.setPriceRange( {
+				min: '15.28',
+				max: '17.21',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 1 );
+
+			await pageObject.setPriceRange( {
+				max: '17.29',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 4 );
+		} );
+
 		test.describe( 'Inherit query from template', () => {
 			test( 'Inherit query from template should not be visible on posts', async ( {
 				pageObject,

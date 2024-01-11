@@ -44,6 +44,10 @@ export const SELECTORS = {
 			last3months: 'last 3 months',
 		},
 	},
+	priceRangeFilter: {
+		min: 'MIN',
+		max: 'MAX',
+	},
 };
 
 type Collections =
@@ -193,6 +197,7 @@ class ProductCollectionPage {
 			| 'Show Product Attributes'
 			| 'Featured'
 			| 'Created'
+			| 'Price Range'
 	) {
 		await this.page
 			.getByRole( 'button', { name: 'Filters options' } )
@@ -317,6 +322,20 @@ class ProductCollectionPage {
 
 		await operatorButton.click();
 		await rangeButton.click();
+	}
+
+	async setPriceRange( { min, max }: { min?: string; max?: string } = {} ) {
+		const minInputSelector = SELECTORS.priceRangeFilter.min;
+		const maxInputSelector = SELECTORS.priceRangeFilter.max;
+
+		const sidebarSettings = await this.locateSidebarSettings();
+		const minInput = sidebarSettings.getByLabel( minInputSelector );
+		const maxInput = sidebarSettings.getByLabel( maxInputSelector );
+
+		await minInput.fill( min || '' );
+		await maxInput.fill( max || '' );
+		// Value is applied on blur so it's required.
+		await maxInput.blur();
 	}
 
 	async setFilterComboboxValue( filterName: string, filterValue: string[] ) {
