@@ -8,11 +8,11 @@ import {
 	useReducer,
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { Product } from '@woocommerce/data';
+import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { reusableBlock } from '@wordpress/icons';
-import { useSelect } from '@wordpress/data';
+import { resolveSelect } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -64,7 +64,7 @@ export function EmptyStateImage( {
 	}
 }
 
-export function Edit( {
+export function LinkedProductListBlockEdit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< LinkedProductListBlockAttributes > ) {
@@ -76,16 +76,6 @@ export function Edit( {
 	} );
 
 	const productId = useEntityId( 'postType', postType );
-	const product: Product = useSelect(
-		( select ) =>
-			// @ts-expect-error There are no types for this.
-			select( 'core' ).getEditedEntityRecord(
-				'postType',
-				'product',
-				productId
-			),
-		[ productId ]
-	);
 
 	const loadLinkedProductsDispatcher =
 		getLoadLinkedProductsDispatcher( dispatch );
@@ -134,12 +124,32 @@ export function Edit( {
 		setLinkedProductIds( newLinkedProductIds );
 	}
 
-	function choseProductsForMe() {
-		if ( ! product?.related_ids ) {
-			return;
-		}
+	async function choseProductsForMe() {
+		const { getRelatedProducts } = resolveSelect( PRODUCTS_STORE_NAME );
+		dispatch( {
+			type: 'LOADING_LINKED_PRODUCTS',
+			payload: {
+				isLoading: true,
+			},
+		} );
 
-		setLinkedProductIds( product.related_ids );
+		const relatedProducts = ( await getRelatedProducts(
+			productId
+		) ) as Product[];
+
+		dispatch( {
+			type: 'LOADING_LINKED_PRODUCTS',
+			payload: {
+				isLoading: false,
+			},
+		} );
+
+		const newLinkedProducts = selectSearchedProductDispatcher(
+			relatedProducts,
+			[]
+		);
+
+		setLinkedProductIds( newLinkedProducts );
 	}
 
 	return (
