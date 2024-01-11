@@ -2,6 +2,10 @@
 post_title: User Experience Best Practices
 ---
 
+Best-practices in user experience refer to the optimal methods and strategies for developing with WooCommerce. These practices focus on improving usability and ensuring the design is effective and efficient for the intended audience.
+
+## Best Practices
+
 **Plugin name should simply state the feature of the plugin and not use an existing core feature or extension in its' title**. The plugin name should appear at all times in the UI as a functional and original name. e.g “Appointments” instead of “VendorXYZ Bookings Plugin for WooCommerce.”
 
 **Avoid creating new UI**. Before considering a new UI, review the WordPress interface to see if a component can be repurposed. Follow existing UI navigation patterns so merchants have context on where they are when navigating to a new experience.

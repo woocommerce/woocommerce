@@ -3,6 +3,10 @@ post_title: User Experience Guidelines - Payments Onboarding and Setup
 menu_title: Payments Onboarding and Setup
 ---
 
+This section provides guidelines for WooCommerce plugin developers on integrating and configuring payment plugins. It covers various types, including processors, gateways, and digital wallets, emphasizing the importance of a user-friendly setup process.
+
+## Getting Started
+
 Follow the overall [user experience guidelines for WooCommerce](https://github.com/woocommerce/woocommerce/blob/trunk/docs/user-experience/user-experience-guidelines.md).
 
 Payments plugins come in many types: payment processors and gateways, wallets, Buy Now Pay Later, crypto, and more.

@@ -3,6 +3,10 @@ post_title: User Experience Guidelines - Settings
 menu_title: Settings
 ---
 
+Settings should focus on creating an accessible and intuitive interface for customizing the plugin's features. The goal is to design settings that are easily navigable, understandable, and efficient, allowing users to tailor the plugin's functionalities to their specific needs and preferences. A well-designed settings interface significantly enhances the overall usability and satisfaction of the plugin.
+
+## Best Practices
+
 **Make extension settings easy to understand.** Only include settings options that are crucial to the overall functionality of the product.
 
 **Use smart defaults wherever possible**, rather than asking the merchant to configure.

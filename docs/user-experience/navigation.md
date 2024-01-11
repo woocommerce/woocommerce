@@ -3,6 +3,10 @@ post_title: User Experience Guidelines - Navigation
 menu_title: Navigation
 ---
 
+Navigation in user experience is about how users move through your WooCommerce site. Good navigation is intuitive and straightforward, allowing users to find information quickly and easily, leading to a better overall experience and increased likelihood of successful transactions.
+
+## Best Practices
+
 **Menu Structure.** Place your product navigation elements within the existing WooCommerce taxonomy.
 
 Examples:
