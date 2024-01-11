@@ -43,11 +43,11 @@ jobs:
     name: 'Lint - ${{ matrix.projectName }}'
     runs-on: 'ubuntu-20.04'
     needs: 'project-jobs'
-    if: ${{ needs.project-matrix.outputs.lint-jobs != '[]' }}
+    if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON( needs.project-matrix.outputs.lint-jobs ) }}
+        include: ${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
     steps:
       - uses: 'actions/checkout@v3'
         name: 'Checkout'
@@ -61,13 +61,13 @@ jobs:
           build: '${{ matrix.projectName }}'
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
-  project-jobs-evaluation:
+  evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
     # Since we are dynamically generating a matrix for the project jobs, however, we can't
     # rely on on any specific job being present. We can get around this limitation by
     # using a job that runs after all the others and either passes or fails based
     # on the results of the other jobs in the workflow.
-    name: 'Evaluate Job Statuses'
+    name: 'Evaluate Project Job Statuses'
     runs-on: 'ubuntu-20.04'
     needs: [ 
       'project-jobs',
@@ -75,7 +75,7 @@ jobs:
     ]
     if: ${{ always() }}
     steps:
-      - name: 'Evaluate Job Statuses'
+      - name: 'Evaluation'
         run: |
           result="${{ needs.project-jobs.result }}"
           if [[ $result != "success" && $result != "skipped" ]]; then
