@@ -281,11 +281,16 @@ final class WC_Cart_Session {
 			}
 			list(, $cookie_value)             = explode( ':', $header, 2 );
 			list($cookie_name, $cookie_value) = explode( '=', trim( $cookie_value ), 2 );
-			if ( array_key_exists( $cookie_name, $final_cookies ) ) {
-				$update_cookies = true;
+
+			// Check if the cookie is one of the specified types.
+			if ( in_array( $cookie_name, array( 'woocommerce_items_in_cart', 'woocommerce_cart_hash' ), true ) ) {
+				if ( array_key_exists( $cookie_name, $final_cookies ) ) {
+					$update_cookies = true;
+				}
+				$final_cookies[ $cookie_name ] = $cookie_value;
 			}
-			$final_cookies[ $cookie_name ] = $cookie_value;
 		}
+
 		if ( $update_cookies ) {
 			header_remove( 'Set-Cookie' );
 			foreach ( $final_cookies as $cookie_name => $cookie_value ) {
