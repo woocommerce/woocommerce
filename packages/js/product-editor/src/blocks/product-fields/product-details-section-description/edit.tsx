@@ -35,7 +35,10 @@ import {
 	WPError,
 	getProductErrorMessage,
 } from '../../../utils/get-product-error-message';
-import { ProductEditorBlockEditProps, ProductTemplate } from '../../../types';
+import type {
+	ProductEditorBlockEditProps,
+	ProductTemplate,
+} from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
