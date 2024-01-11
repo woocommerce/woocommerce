@@ -19,7 +19,6 @@ export function BlockFill( {
 }: BlockFillProps ) {
 	const closestAncestorClientId = useSelect(
 		( select ) => {
-			// @ts-expect-error Outdated type definition.
 			const { getBlockParentsByBlockName } =
 				select( 'core/block-editor' );
 

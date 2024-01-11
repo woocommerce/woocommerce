@@ -26,6 +26,7 @@ export function useVariationSwitcher( {
 				return {};
 			}
 			const { getEntityRecord } = select( 'core' );
+			// @ts-expect-error - TODO: update @wordpress/data package.
 			const parentProduct = getEntityRecord< { variations: number[] } >(
 				'postType',
 				parentProductType || 'product',

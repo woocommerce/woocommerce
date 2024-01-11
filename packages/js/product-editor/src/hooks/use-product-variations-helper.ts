@@ -67,6 +67,7 @@ export function useProductVariationsHelper() {
 				generateProductVariationsError,
 			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 			return {
+				// @ts-expect-error - TODO: update @wordpress/data package.
 				isGeneratingVariations: getIsGeneratingVariations<
 					boolean | undefined
 				>( {

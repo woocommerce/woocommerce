@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { Product } from '@woocommerce/data';
-import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { MouseEvent } from 'react';
+import { ButtonAsAnchorProps } from '@wordpress/components/build-types/button/types';
 
 /**
  * Internal dependencies
@@ -15,7 +15,6 @@ import { MouseEvent } from 'react';
 import { useValidations } from '../../../../contexts/validation-context';
 import { WPError } from '../../../../utils/get-product-error-message';
 import { PreviewButtonProps } from '../../preview-button';
-import { ButtonAsAnchorProps } from '@wordpress/components/build-types/button/types';
 
 export function usePreview( {
 	productStatus,
@@ -47,6 +46,7 @@ export function usePreview( {
 		( select ) => {
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
+			// @ts-expect-error - TODO: update @wordpress/data package.
 			const isSaving = isSavingEntityRecord< boolean >(
 				'postType',
 				productType,
@@ -55,6 +55,7 @@ export function usePreview( {
 
 			return {
 				isDisabled: isSaving,
+				// @ts-expect-error - TODO: update @wordpress/data package.
 				hasEdits: hasEditsForEntityRecord< boolean >(
 					'postType',
 					productType,

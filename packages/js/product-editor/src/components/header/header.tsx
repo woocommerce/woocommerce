@@ -46,6 +46,7 @@ export function Header( {
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
+			// @ts-expect-error - TODO: update @wordpress/data package.
 			return getEntityRecord< Product >(
 				'postType',
 				productType,

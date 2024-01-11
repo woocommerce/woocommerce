@@ -40,6 +40,7 @@ export function useSaveDraft( {
 		( select ) => {
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
+			// @ts-expect-error - TODO: update @wordpress/data package.
 			const isSaving = isSavingEntityRecord< boolean >(
 				'postType',
 				productType,
@@ -48,6 +49,7 @@ export function useSaveDraft( {
 
 			return {
 				isDisabled: isSaving,
+				// @ts-expect-error - TODO: update @wordpress/data package.
 				hasEdits: hasEditsForEntityRecord< boolean >(
 					'postType',
 					productType,
@@ -86,6 +88,7 @@ export function useSaveDraft( {
 				status: 'draft',
 			} );
 
+			// @ts-expect-error - TODO: update @wordpress/data package.
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				productType,

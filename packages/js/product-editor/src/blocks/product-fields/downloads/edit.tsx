@@ -15,9 +15,6 @@ import { MediaItem } from '@wordpress/media-utils';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { ListItem, MediaUploader, Sortable } from '@woocommerce/components';
 import { Product, ProductDownload } from '@woocommerce/data';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp } from '@wordpress/core-data';
 
 /**
@@ -76,7 +73,7 @@ export function Edit( {
 		return getEditorSettings();
 	} );
 
-	const allowedTypes = allowedMimeTypes
+	const allowedTypes: string[] = allowedMimeTypes
 		? Object.values( allowedMimeTypes )
 		: [];
 

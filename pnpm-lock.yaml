@@ -2667,9 +2667,6 @@ importers:
       '@types/wordpress__block-library':
         specifier: 2.6.1
         version: 2.6.1
-      '@types/wordpress__data':
-        specifier: 6.0.2
-        version: 6.0.2
       '@types/wordpress__date':
         specifier: 3.3.2
         version: 3.3.2

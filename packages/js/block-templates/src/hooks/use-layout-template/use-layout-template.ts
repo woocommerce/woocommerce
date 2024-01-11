@@ -6,7 +6,6 @@ import { useEntityRecord } from '@wordpress/core-data';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 
 export const useLayoutTemplate = ( layoutTemplateId: string | undefined ) => {
-	// @ts-expect-error - TODO: Fix this, add deps arg.
 	const layoutTemplateEntity = useSelect( ( select: typeof WPSelect ) => {
 		const { getEntityConfig } = select( 'core' );
 		return getEntityConfig( 'root', 'wcLayoutTemplate' );

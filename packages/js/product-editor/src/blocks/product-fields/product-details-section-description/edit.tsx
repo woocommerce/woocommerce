@@ -90,6 +90,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
+				// @ts-expect-error - TODO: update @wordpress/data package.
 				isSaving: isSavingEntityRecord< boolean >(
 					'postType',
 					'product',

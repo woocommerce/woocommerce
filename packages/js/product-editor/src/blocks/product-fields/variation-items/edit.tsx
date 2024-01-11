@@ -66,6 +66,7 @@ export function Edit( {
 
 			return {
 				totalCountWithoutPrice:
+					// @ts-expect-error - TODO: Fix this.
 					getProductVariationsTotalCount< number >(
 						totalCountWithoutPriceRequestParams
 					),

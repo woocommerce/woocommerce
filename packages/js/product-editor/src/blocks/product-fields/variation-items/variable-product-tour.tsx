@@ -49,6 +49,7 @@ export const VariableProductTour: React.FC = () => {
 			);
 			return {
 				totalCount:
+					// @ts-expect-error - TODO: update @wordpress/data package.
 					getProductVariationsTotalCount< number >( requestParams ),
 			};
 		},

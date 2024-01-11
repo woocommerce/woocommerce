@@ -67,7 +67,6 @@ export function Edit( {
 	);
 
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
-		// @ts-expect-error - TODO: Make types compatible for selectors.
 		( select: WCDataSelector ) => {
 			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
 			if ( productId ) {

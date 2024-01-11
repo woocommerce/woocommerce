@@ -25,6 +25,7 @@ export function useConfirmUnsavedProductChanges(
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
+				// @ts-expect-error - TODO: update @wordpress/data package.
 				isSaving: isSavingEntityRecord< boolean >(
 					'postType',
 					productType,

@@ -44,6 +44,7 @@ export function usePublish( {
 			} = select( 'core' );
 
 			return {
+				// @ts-expect-error - TODO: update @wordpress/data package.
 				isSaving: isSavingEntityRecord< boolean >(
 					'postType',
 					productType,
@@ -54,6 +55,7 @@ export function usePublish( {
 					productType,
 					productId
 				),
+				// @ts-expect-error - TODO: update @wordpress/data package.
 				currentPost: getRawEntityRecord< boolean >(
 					'postType',
 					productType,

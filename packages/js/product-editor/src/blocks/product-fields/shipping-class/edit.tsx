@@ -132,6 +132,7 @@ export function Edit( {
 		);
 		return {
 			shippingClasses:
+				// @ts-expect-error - TODO: Fix this.
 				getProductShippingClasses< ProductShippingClass[] >() ?? [],
 		};
 	}, [] );
