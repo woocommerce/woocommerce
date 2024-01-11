@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { select, resolveSelect } from '@wordpress/data';
-import { Product } from '@woocommerce/data';
+import type { Product } from '@woocommerce/data';
 
 export default async function getRelatedProducts( productId: number ) {
 	const { getEntityRecord } = select( 'core' );
