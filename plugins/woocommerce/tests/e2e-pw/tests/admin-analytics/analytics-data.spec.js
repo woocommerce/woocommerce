@@ -286,6 +286,13 @@ test.describe( 'Analytics-related tests', () => {
 	test( 'use advanced filters on orders report', async( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Forders' );
 
+		// FTUX tour on first run through
+		try {
+			await page.getByLabel('Close Tour').click( { timeout: 5000 } );
+		} catch (e) {
+			console.log( 'Tour was not visible, skipping.' );
+		}
+
 		// no filters applied
 		await expect( page.getByRole( 'menuitem', { name: 'Orders 10 No change from Previous year:' } ) ).toBeVisible();
 		await expect( page.getByRole( 'menuitem', { name: 'Net sales $1,229.30 No change from Previous year:' } ) ).toBeVisible();
