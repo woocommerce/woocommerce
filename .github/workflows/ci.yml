@@ -36,9 +36,9 @@ jobs:
               baseRef = 'origin/' + baseRef;
             }
             const child_process = require( 'node:child_process' );
-            const jobs = JSON.parse(
-              child_process.execSync( 'pnpm utils ci-jobs ' + baseRef, { encoding: 'utf8' } )
-            );
+            const output = child_process.execSync( 'pnpm utils ci-jobs ' + baseRef, { encoding: 'utf8' } );
+            console.log( output );
+            const jobs = JSON.parse( output );
             console.log( jobs );
             for ( const jobType in jobs ) {
               core.setOutput( jobType, JSON.stringify( jobs[ jobType ] ) );
