@@ -16,7 +16,7 @@ export type SectionActionsProps = Omit<
 	containerBlockName?: string;
 };
 
-export default function SectionActions( {
+export function SectionActions( {
 	containerBlockName = 'woocommerce/product-section',
 	...restProps
 }: SectionActionsProps ) {
