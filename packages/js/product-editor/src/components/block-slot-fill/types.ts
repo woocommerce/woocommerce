@@ -4,7 +4,7 @@
 import { Fill, Slot } from '@wordpress/components';
 
 export type BlockSlotFillProps = {
-	name: string;
+	name: 'section-actions' | 'section-description';
 };
 
 export type BlockSlotProps = BlockSlotFillProps & Slot.Props;
