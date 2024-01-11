@@ -100,10 +100,10 @@ class OrdersTableSearchQuery {
 	}
 
 	/**
-	 * Generate JOIN clause for different search filter.
-	 * Right now we only have the products filter that actually does any join, but in future we may add more, for example, in order search, or payment tokens etc. This function is to make it easier to add more filters in the future.
+	 * Generate JOIN clause for a given search filter.
+	 * Right now we only have the products filter that actually does a JOIN, but in the future we may add more -- for example, custom order fields, payment tokens and so on. This function makes it easier to add more filters in the future.
 	 *
-	 * If a search filter needs a join, it will also need a where clause.
+	 * If a search filter needs a JOIN, it will also need a WHERE clause.
 	 *
 	 * @param string $search_filter Name of the search filter.
 	 *
@@ -141,13 +141,13 @@ class OrdersTableSearchQuery {
 			$where[] = $this->generate_where_for_search_filter( $search_filter );
 		}
 
-		$where = implode( ' OR ', $where );
+		$where_statement = implode( ' OR ', $where );
 
-		return " ( $where ) ";
+		return " ( $where_statement ) ";
 	}
 
 	/**
-	 * Generates where clause for different search filter. Right now we only have the products and customers filter that actually use any `where`, but in future we may add more, for example, in order search, or payment tokens etc. This function is to make it easier to add more filters in the future.
+	 * Generates WHERE clause for a given search filter. Right now we only have the products and customers filters that actually use WHERE, but the in future we may add more -- for example, order custom fields, payment tokens etc. This function makes it easier to add more filters in the future.
 	 *
 	 * @param string $search_filter Name of the search filter.
 	 *
