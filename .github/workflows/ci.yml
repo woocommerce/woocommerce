@@ -39,3 +39,52 @@ jobs:
             }
             const child_process = require( 'node:child_process' );
             child_process.execSync( 'pnpm utils ci-jobs ' + baseRef );
+  project-lint-jobs:
+    name: 'Lint - ${{ matrix.projectName }}'
+    runs-on: 'ubuntu-20.04'
+    needs: 'project-jobs'
+    if: ${{ needs.project-matrix.outputs.lint-jobs != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON( needs.project-matrix.outputs.lint-jobs ) }}
+    steps:
+      - uses: 'actions/checkout@v3'
+        name: 'Checkout'
+        with:
+          fetch-depth: 0
+      - uses: './.github/actions/setup-woocommerce-monorepo'
+        name: 'Setup Monorepo'
+        id: 'setup-monorepo'
+        with:
+          install: '${{ matrix.projectName }}...'
+          build: '${{ matrix.projectName }}'
+      - name: 'Lint'
+        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
+  project-jobs-evaluation:
+    # In order to add a required status check we need a consistent job that we can grab onto.
+    # Since we are dynamically generating a matrix for the project jobs, however, we can't
+    # rely on on any specific job being present. We can get around this limitation by
+    # using a job that runs after all the others and either passes or fails based
+    # on the results of the other jobs in the workflow.
+    name: 'Evaluate Job Statuses'
+    runs-on: 'ubuntu-20.04'
+    needs: [ 
+      'project-jobs',
+      'project-lint-jobs'
+    ]
+    if: ${{ always() }}
+    steps:
+      - name: 'Evaluate Job Statuses'
+        run: |
+          result="${{ needs.project-jobs.result }}"
+          if [[ $result != "success" && $result != "skipped" ]]; then
+            echo "An error occurred generating the CI jobs."
+            exit 1
+          fi
+          result="${{ needs.project-lint-jobs.result }}"
+          if [[ $result != "success" && $result != "skipped" ]]; then
+            echo "One or more lint jobs have failed."
+            exit 1
+          fi
+          echo "All jobs have completed successfully."
