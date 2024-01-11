@@ -169,17 +169,11 @@ body {
 	padding: 12px 12px 0;
 	color: <?php echo esc_attr( $text_lighter_20 ); ?>;
 	border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
+	list-style: none outside;
 }
 
-.additional-fields dt {
-	font-weight: bold;
-	margin: 0;
-	padding: 0;
-}
-
-.additional-fields dd {
-	margin: 0 0 12px;
-	padding: 0;
+.additional-fields li {
+	margin: 0 0 12px 0;
 }
 
 .text {

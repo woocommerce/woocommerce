@@ -616,7 +616,7 @@ class WC_Emails {
 		$formatted_fields = array();
 
 		foreach ( $fields as $field_key => $field ) {
-			$value = $checkout_fields->get_field_from_order( $field_key, $order );
+			$value = $checkout_fields->get_field_from_order( $field_key, $order, $address_type );
 
 			if ( '' === $value ) {
 				continue;
@@ -636,13 +636,19 @@ class WC_Emails {
 			return;
 		}
 
-		echo '<h2>' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2>';
-		echo '<dl class="additional-fields" style="margin-bottom: 40px;">';
-		foreach ( $formatted_fields as $field ) {
-			echo '<dt>' . wp_kses_post( $field['label'] ) . '</dt>';
-			echo '<dd>' . wp_kses_post( $field['value'] ) . '</dd>';
+		if ( $plain_text ) {
+			echo "\n" . esc_html( wc_strtoupper( __( 'Additional information', 'woocommerce' ) ) ) . "\n\n";
+			foreach ( $formatted_fields as $field ) {
+				printf( "%s: %s\n", wp_kses_post( $field['label'] ), wp_kses_post( $field['value'] ) );
+			}
+		} else {
+			echo '<h2>' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2>';
+			echo '<ul class="additional-fields" style="margin-bottom: 40px;">';
+			foreach ( $formatted_fields as $field ) {
+				printf( '<li><strong>%s</strong>: %s</li>', wp_kses_post( $field['label'] ), wp_kses_post( $field['value'] ) );
+			}
+			echo '</ul>';
 		}
-		echo '</dl>';
 	}
 
 	/**
@@ -663,10 +669,14 @@ class WC_Emails {
 		$formatted_fields = array();
 
 		foreach ( $fields as $field_key => $field ) {
-			$value = $checkout_fields->get_field_from_order( $field_key, $order, 'billing' );
+			$value = $checkout_fields->get_field_from_order( $field_key, $order, $address_type );
 
 			if ( '' === $value ) {
 				continue;
+			}
+
+			if ( 'checkbox' === $field['type'] ) {
+				$value = $value ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' );
 			}
 
 			$formatted_fields[] = array(
@@ -679,8 +689,14 @@ class WC_Emails {
 			return;
 		}
 
-		foreach ( $formatted_fields as $field ) {
-			echo '<br/><strong>' . wp_kses_post( $field['label'] ) . ':</strong> ' . wp_kses_post( $field['value'] );
+		if ( $plain_text ) {
+			foreach ( $formatted_fields as $field ) {
+				printf( "%s: %s\n", wp_kses_post( $field['label'] ), wp_kses_post( $field['value'] ) );
+			}
+		} else {
+			foreach ( $formatted_fields as $field ) {
+				printf( '<br><strong>%s</strong>: %s', wp_kses_post( $field['label'] ), wp_kses_post( $field['value'] ) );
+			}
 		}
 	}
 
