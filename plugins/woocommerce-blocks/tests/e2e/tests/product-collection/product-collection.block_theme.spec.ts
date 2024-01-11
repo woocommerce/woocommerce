@@ -245,18 +245,18 @@ test.describe( 'Product Collection', () => {
 			await pageObject.addFilter( 'Created' );
 			await pageObject.setCreatedFilter( {
 				operator: 'within',
-				range: 'last30days',
+				range: 'last3months',
 			} );
 
-			await expect( pageObject.products ).toHaveCount( 9 );
+			// Products are created with the fixed publish date back in 2019
+			// so there's no products published in last 3 months.
+			await expect( pageObject.products ).toHaveCount( 0 );
 
 			await pageObject.setCreatedFilter( {
 				operator: 'before',
-				range: 'last30days',
+				range: 'last3months',
 			} );
 
-			// Products are created when env is setup so we don't have flexibility here.
-			// Basically on CI, every time all the products will be created within last 24h.
 			await expect( pageObject.products ).toHaveCount( 0 );
 
 			await pageObject.publishAndGoToFrontend();
