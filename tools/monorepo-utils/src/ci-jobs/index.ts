@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
+import { setOutput } from '@actions/core';
 
 /**
  * Internal dependencies
@@ -34,7 +35,8 @@ const program = new Command( 'ci-jobs' )
 		Logger.endTask( true );
 
 		if ( isGithubCI() ) {
-			Logger.notice( JSON.stringify( jobs, null, '\t' ) );
+			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
+			setOutput( 'test-jobs', JSON.stringify( jobs.test ) );
 			return;
 		}
 

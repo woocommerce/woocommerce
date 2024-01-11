@@ -17,8 +17,8 @@ jobs:
     name: 'Build Project Jobs'
     runs-on: 'ubuntu-20.04'
     outputs:
-      lint: ${{ steps.project-jobs.outputs.lint }}
-      test: ${{ steps.project-jobs.outputs.test }}
+      lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
+      test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
     steps:
       - uses: 'actions/checkout@v3'
         name: 'Checkout'
@@ -26,6 +26,8 @@ jobs:
           fetch-depth: 0
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
+        with:
+          php-version: false # We don't want to waste time installing PHP since we aren't using it in this job.
       - uses: actions/github-script@v6
         name: 'Build Matrix'
         id: 'project-jobs'
@@ -36,10 +38,4 @@ jobs:
               baseRef = 'origin/' + baseRef;
             }
             const child_process = require( 'node:child_process' );
-            const output = child_process.execSync( 'pnpm utils ci-jobs ' + baseRef, { encoding: 'utf8' } );
-            console.log( output );
-            const jobs = JSON.parse( output );
-            console.log( jobs );
-            for ( const jobType in jobs ) {
-              core.setOutput( jobType, JSON.stringify( jobs[ jobType ] ) );
-            }
+            child_process.execSync( 'pnpm utils ci-jobs ' + baseRef );
