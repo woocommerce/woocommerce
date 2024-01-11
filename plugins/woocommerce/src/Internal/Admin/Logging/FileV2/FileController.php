@@ -86,7 +86,7 @@ class FileController {
 	 * Class FileController
 	 */
 	public function __construct() {
-		$this->log_directory = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) );
+		$this->log_directory = trailingslashit( Constants::get_constant( 'WC_LOG_DIR' ) );
 	}
 
 	/**

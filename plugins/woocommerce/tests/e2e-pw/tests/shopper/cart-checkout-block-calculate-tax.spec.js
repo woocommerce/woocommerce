@@ -8,8 +8,14 @@ const productPrice = '100.00';
 const messyProductPrice = '13.47';
 const secondProductName = 'Second Product Cart Block Taxing';
 
-const pageTitle = 'Cart Block';
-const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
+const cartBlockPageTitle = 'Cart Block';
+const cartBlockPageSlug = cartBlockPageTitle
+	.replace( / /gi, '-' )
+	.toLowerCase();
+const checkoutBlockPageTitle = 'Checkout Block';
+const checkoutBlockPageSlug = checkoutBlockPageTitle
+	.replace( / /gi, '-' )
+	.toLowerCase();
 
 let productId,
 	productId2,
@@ -24,7 +30,7 @@ let productId,
 	shippingZoneId,
 	shippingMethodId;
 
-test.describe( 'Shopper Cart Block Tax Display', () => {
+test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
@@ -111,7 +117,7 @@ test.describe( 'Shopper Cart Block Tax Display', () => {
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( pageTitle );
+			.fill( cartBlockPageTitle );
 		await page.getByRole( 'button', { name: 'Add default block' } ).click();
 		await page
 			.getByRole( 'document', {
@@ -127,32 +133,92 @@ test.describe( 'Shopper Cart Block Tax Display', () => {
 			.getByRole( 'button', { name: 'Publish', exact: true } )
 			.click();
 		await expect(
-			page.getByText( `${ pageTitle } is now live.` )
+			page.getByText( `${ cartBlockPageTitle } is now live.` )
 		).toBeVisible();
 	} );
 
-	test( 'that inclusive tax is displayed properly in Cart Block page', async ( {
+	test( 'can create Checkout Block page', async ( { page } ) => {
+		// create a new page with checkout block
+		await page.goto( 'wp-admin/post-new.php?post_type=page' );
+		await page.waitForLoadState( 'networkidle' );
+		await page.locator( 'input[name="log"]' ).fill( admin.username );
+		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
+		await page.locator( 'text=Log In' ).click();
+
+		// Close welcome popup if prompted
+		try {
+			await page
+				.getByLabel( 'Close', { exact: true } )
+				.click( { timeout: 5000 } );
+		} catch ( error ) {
+			console.log( "Welcome modal wasn't present, skipping action." );
+		}
+
+		await page
+			.getByRole( 'textbox', { name: 'Add title' } )
+			.fill( checkoutBlockPageTitle );
+		await page.getByRole( 'button', { name: 'Add default block' } ).click();
+		await page
+			.getByRole( 'document', {
+				name: 'Empty block; start writing or type forward slash to choose a block',
+			} )
+			.fill( '/checkout' );
+		await page.keyboard.press( 'Enter' );
+		await page
+			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.click();
+		await page
+			.getByRole( 'region', { name: 'Editor publish' } )
+			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.click();
+		await expect(
+			page.getByText( `${ checkoutBlockPageTitle } is now live.` )
+		).toBeVisible();
+	} );
+
+	test( 'that inclusive tax is displayed properly in blockbased Cart & Checkout pages', async ( {
 		page,
 	} ) => {
-		await page.goto( pageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
-		).toBeVisible();
+		await test.step( 'Load cart page and confirm price display', async () => {
+			await page.goto( cartBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: cartBlockPageTitle } )
+			).toBeVisible();
 
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-subtotal-block'
-			)
-		).toContainText( '$125.00' );
-		await expect(
-			page.locator( '.wc-block-components-totals-footer-item' )
-		).toContainText( '$125.00' );
-		await expect(
-			page.locator( '.wc-block-components-totals-footer-item-tax' )
-		).toHaveText( 'Including $25.00 Nasty Tax' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-subtotal-block'
+				)
+			).toContainText( '$125.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$125.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item-tax' )
+			).toHaveText( 'Including $25.00 Nasty Tax' );
+		} );
+
+		await test.step( 'Load checkout page and confirm price display', async () => {
+			await page.goto( checkoutBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			).toBeVisible();
+
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-subtotal-block'
+				)
+			).toContainText( '$125.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$125.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item-tax' )
+			).toHaveText( 'Including $25.00 Nasty Tax' );
+		} );
 	} );
 
-	test( 'that exclusive tax is displayed properly in Cart Block page', async ( {
+	test( 'that exclusive tax is displayed properly in blockbased Cart & Checkout pages', async ( {
 		page,
 		baseURL,
 	} ) => {
@@ -165,26 +231,48 @@ test.describe( 'Shopper Cart Block Tax Display', () => {
 		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
 			value: 'excl',
 		} );
-		await page.goto( pageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
-		).toBeVisible();
 
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-subtotal-block'
-			)
-		).toContainText( '$100.00' );
-		await expect(
-			page.locator( '.wc-block-components-totals-footer-item' )
-		).toContainText( '$125.00' );
-		await expect(
-			page.locator( '.wc-block-components-totals-taxes' )
-		).toContainText( '$25.00' );
+		await test.step( 'Load cart page and confirm price display', async () => {
+			await page.goto( cartBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: cartBlockPageTitle } )
+			).toBeVisible();
+
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-subtotal-block'
+				)
+			).toContainText( '$100.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$125.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-taxes' )
+			).toContainText( '$25.00' );
+		} );
+
+		await test.step( 'Load checkout page and confirm price display', async () => {
+			await page.goto( checkoutBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			).toBeVisible();
+
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-subtotal-block'
+				)
+			).toContainText( '$100.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$125.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-taxes' )
+			).toContainText( '$25.00' );
+		} );
 	} );
 } );
 
-test.describe( 'Shopper Cart Block Tax Rounding', () => {
+test.describe( 'Shopper Cart & Checkout Block Tax Rounding', () => {
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
@@ -294,7 +382,7 @@ test.describe( 'Shopper Cart Block Tax Rounding', () => {
 		} );
 	} );
 
-	test( 'that tax rounding is present at subtotal level', async ( {
+	test( 'that tax rounding is present at subtotal level in blockbased Cart & Checkout pages', async ( {
 		page,
 		baseURL,
 	} ) => {
@@ -313,25 +401,47 @@ test.describe( 'Shopper Cart Block Tax Rounding', () => {
 		await api.put( 'settings/tax/woocommerce_tax_total_display', {
 			value: 'single',
 		} );
-		await page.goto( pageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
-		).toBeVisible();
 
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-subtotal-block'
-			)
-		).toContainText( '$40.41' );
-		await expect(
-			page.locator( '.wc-block-components-totals-footer-item' )
-		).toContainText( '$50.12' );
-		await expect(
-			page.locator( '.wc-block-components-totals-taxes' )
-		).toContainText( '$9.71' );
+		await test.step( 'Load cart page and confirm price display', async () => {
+			await page.goto( cartBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: cartBlockPageTitle } )
+			).toBeVisible();
+
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-subtotal-block'
+				)
+			).toContainText( '$40.41' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$50.12' );
+			await expect(
+				page.locator( '.wc-block-components-totals-taxes' )
+			).toContainText( '$9.71' );
+		} );
+
+		await test.step( 'Load checkout page and confirm price display', async () => {
+			await page.goto( checkoutBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			).toBeVisible();
+
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-subtotal-block'
+				)
+			).toContainText( '$40.41' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$50.12' );
+			await expect(
+				page.locator( '.wc-block-components-totals-taxes' )
+			).toContainText( '$9.71' );
+		} );
 	} );
 
-	test( 'that tax rounding is off at subtotal level', async ( {
+	test( 'that tax rounding is off at subtotal level in blockbased Cart & Checkout pages', async ( {
 		page,
 		baseURL,
 	} ) => {
@@ -350,33 +460,62 @@ test.describe( 'Shopper Cart Block Tax Rounding', () => {
 		await api.put( 'settings/tax/woocommerce_tax_total_display', {
 			value: 'itemized',
 		} );
-		await page.goto( pageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
-		).toBeVisible();
 
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-subtotal-block'
-			)
-		).toContainText( '$40.41' );
-		await expect(
-			page.locator( '.wc-block-components-totals-footer-item' )
-		).toContainText( '$50.12' );
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-taxes-block'
-			)
-		).toContainText( '$6.87' );
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-taxes-block'
-			)
-		).toContainText( '$2.84' );
+		await test.step( 'Load cart page and confirm price display', async () => {
+			await page.goto( cartBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: cartBlockPageTitle } )
+			).toBeVisible();
+
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-subtotal-block'
+				)
+			).toContainText( '$40.41' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$50.12' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-taxes-block'
+				)
+			).toContainText( '$6.87' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-taxes-block'
+				)
+			).toContainText( '$2.84' );
+		} );
+
+		await test.step( 'Load checkout page and confirm price display', async () => {
+			await page.goto( checkoutBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			).toBeVisible();
+
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-subtotal-block'
+				)
+			).toContainText( '$40.41' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$50.12' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-taxes-block'
+				)
+			).toContainText( '$6.87' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-taxes-block'
+				)
+			).toContainText( '$2.84' );
+		} );
 	} );
 } );
 
-test.describe( 'Shopper Cart Block Tax Levels', () => {
+test.describe( 'Shopper Cart & Checkout Block Tax Levels', () => {
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
@@ -558,41 +697,78 @@ test.describe( 'Shopper Cart Block Tax Levels', () => {
 			'Shipping costs updated.'
 		);
 
-		await page.goto( pageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
-		).toBeVisible();
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-subtotal-block'
-			)
-		).toContainText( '$100.00' );
-		await expect(
-			page.locator( '.wc-block-components-totals-footer-item' )
-		).toContainText( '$118.75' );
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-taxes-block'
-			)
-		).toContainText( '$10.00' );
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-taxes-block'
-			)
-		).toContainText( '$5.00' );
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-taxes-block'
-			)
-		).toContainText( '$2.50' );
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-taxes-block'
-			)
-		).toContainText( '$1.25' );
+		await test.step( 'Load cart page and confirm price display', async () => {
+			await page.goto( cartBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: cartBlockPageTitle } )
+			).toBeVisible();
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-subtotal-block'
+				)
+			).toContainText( '$100.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$118.75' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-taxes-block'
+				)
+			).toContainText( '$10.00' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-taxes-block'
+				)
+			).toContainText( '$5.00' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-taxes-block'
+				)
+			).toContainText( '$2.50' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-taxes-block'
+				)
+			).toContainText( '$1.25' );
+		} );
+
+		await test.step( 'Load checkout page and confirm price display', async () => {
+			await page.goto( checkoutBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			).toBeVisible();
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-subtotal-block'
+				)
+			).toContainText( '$100.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$118.75' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-taxes-block'
+				)
+			).toContainText( '$10.00' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-taxes-block'
+				)
+			).toContainText( '$5.00' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-taxes-block'
+				)
+			).toContainText( '$2.50' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-taxes-block'
+				)
+			).toContainText( '$1.25' );
+		} );
 	} );
 
-	test( 'that applying taxes in Cart Block of 2 different levels (2 excluded) calculates properly', async ( {
+	test( 'that applying taxes in blockbased Cart & Checkout of 2 different levels (2 excluded) calculates properly', async ( {
 		page,
 		baseURL,
 	} ) => {
@@ -605,32 +781,60 @@ test.describe( 'Shopper Cart Block Tax Levels', () => {
 		await api.put( 'settings/tax/woocommerce_tax_total_display', {
 			value: 'itemized',
 		} );
-		await page.goto( pageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
-		).toBeVisible();
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-subtotal-block'
-			)
-		).toContainText( '$100.00' );
-		await expect(
-			page.locator( '.wc-block-components-totals-footer-item' )
-		).toContainText( '$115.00' );
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-taxes-block'
-			)
-		).toContainText( '$10.00' );
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-taxes-block'
-			)
-		).toContainText( '$5.00' );
+
+		await test.step( 'Load cart page and confirm price display', async () => {
+			await page.goto( cartBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: cartBlockPageTitle } )
+			).toBeVisible();
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-subtotal-block'
+				)
+			).toContainText( '$100.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$115.00' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-taxes-block'
+				)
+			).toContainText( '$10.00' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-taxes-block'
+				)
+			).toContainText( '$5.00' );
+		} );
+
+		await test.step( 'Load checkout page and confirm price display', async () => {
+			await page.goto( checkoutBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			).toBeVisible();
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-subtotal-block'
+				)
+			).toContainText( '$100.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$115.00' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-taxes-block'
+				)
+			).toContainText( '$10.00' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-taxes-block'
+				)
+			).toContainText( '$5.00' );
+		} );
 	} );
 } );
 
-test.describe( 'Shipping Cart Block Tax', () => {
+test.describe( 'Shipping Cart & Checkout Block Tax', () => {
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
@@ -743,23 +947,47 @@ test.describe( 'Shipping Cart Block Tax', () => {
 		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
 			value: 'incl',
 		} );
-		await page.goto( pageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
-		).toBeVisible();
 
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-subtotal-block'
-			)
-		).toContainText( '$115.00' );
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-cart-order-summary-shipping-block'
-			)
-		).toContainText( '$23.00' );
-		await expect(
-			page.locator( '.wc-block-components-totals-footer-item' )
-		).toContainText( '$138.00' );
+		await test.step( 'Load cart page and confirm price display', async () => {
+			await page.goto( cartBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: cartBlockPageTitle } )
+			).toBeVisible();
+
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-subtotal-block'
+				)
+			).toContainText( '$115.00' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-cart-order-summary-shipping-block'
+				)
+			).toContainText( '$23.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$138.00' );
+		} );
+
+		await test.step( 'Load checkout page and confirm price display', async () => {
+			await page.goto( checkoutBlockPageSlug );
+			await expect(
+				page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			).toBeVisible();
+
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-subtotal-block'
+				)
+			).toContainText( '$115.00' );
+			await expect(
+				page.locator(
+					'.wp-block-woocommerce-checkout-order-summary-shipping-block'
+				)
+			).toContainText( '$23.00' );
+			await expect(
+				page.locator( '.wc-block-components-totals-footer-item' )
+			).toContainText( '$138.00' );
+		} );
 	} );
 } );
