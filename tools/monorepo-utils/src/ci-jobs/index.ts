@@ -50,7 +50,7 @@ const program = new Command( 'ci-jobs' )
 		if ( jobs.test.length > 0 ) {
 			Logger.notice( 'Test Jobs' );
 			for ( const job of jobs.test ) {
-				Logger.notice( `-  ${ job.projectName } - ${ job.command }` );
+				Logger.notice( `-  ${ job.projectName } - ${ job.name }` );
 			}
 		} else {
 			Logger.notice( 'No test jobs to run.' );

@@ -62,7 +62,18 @@
 			"lint": {
 				"command": "lint",
 				"changes": "src/**/*.ts"
-			}
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"tsconfig.json",
+						"src/**/*.ts"
+					]
+				}
+			]
 		}
 	}
 }

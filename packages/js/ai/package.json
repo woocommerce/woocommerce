@@ -110,7 +110,15 @@
 			"lint": {
 				"command": "lint",
 				"changes": "src/**/*.{js,jsx,ts,tsx}"
-			}
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": "src/**/*.{js,jsx,ts,tsx}",
+					"cascade": "test:js"
+				}
+			]
 		}
 	},
 	"wireit": {

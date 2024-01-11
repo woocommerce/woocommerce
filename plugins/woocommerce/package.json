@@ -81,7 +81,101 @@
 					"tests/php/**/*.php",
 					"tests/unit-tests/**/*.php"
 				]
-			}
+			},
+			"tests": [
+				{
+					"name": "PHP",
+					"command": "test:php",
+					"changes": [
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "PHP 8.0",
+					"command": "test:php",
+					"changes": [
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "8.0"
+						}
+					}
+				},
+				{
+					"name": "PHP WP: nightly",
+					"command": "test:php",
+					"changes": [
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "nightly"
+						}
+					}
+				},
+				{
+					"name": "PHP WP: latest - 1",
+					"command": "test:php",
+					"changes": [
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "latest-1"
+						}
+					}
+				},
+				{
+					"name": "PHP WP: latest - 2",
+					"command": "test:php",
+					"changes": [
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "latest-2"
+						}
+					}
+				}
+			]
 		}
 	},
 	"devDependencies": {

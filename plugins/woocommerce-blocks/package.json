@@ -355,7 +355,21 @@
 			"lint": {
 				"command": "lint",
 				"changes": "assets/**/*{js,ts,tsx,scss}"
-			}
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"webpack.config.js",
+						"babel.config.js",
+						"tsconfig.json",
+						"assets/**/*{js,ts,tsx,scss}"
+					],
+					"cascade": "test:js"
+				}
+			]
 		}
 	},
 	"wireit": {

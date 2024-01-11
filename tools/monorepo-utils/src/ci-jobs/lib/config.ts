@@ -146,6 +146,9 @@ export interface TestEnvConfigVars {
  */
 function parseTestEnvConfigVars( raw: any ): TestEnvConfigVars {
 	const config: TestEnvConfigVars = {};
+	if ( ! raw ) {
+		return config;
+	}
 
 	if ( raw.wpVersion ) {
 		if ( typeof raw.wpVersion !== 'string' ) {

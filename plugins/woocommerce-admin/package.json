@@ -242,7 +242,21 @@
 			"lint": {
 				"command": "lint",
 				"changes": "client/**/*{js,ts,tsx,scss}"
-			}
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"webpack.config.js",
+						"babel.config.js",
+						"tsconfig.json",
+						"client/**/*.{js,jsx,ts,tsx,scss}"
+					],
+					"cascade": "test:js"
+				}
+			]
 		}
 	},
 	"wireit": {
@@ -256,8 +270,7 @@
 			"files": [
 				"webpack.config.js",
 				"tsconfig.json",
-				"client/**/*.{js,jsx,ts,tsx}",
-				"client/**/*.scss"
+				"client/**/*.{js,jsx,ts,tsx,scss}"
 			],
 			"output": [
 				"build"
