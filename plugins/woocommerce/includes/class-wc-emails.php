@@ -609,7 +609,10 @@ class WC_Emails {
 		}
 
 		$checkout_fields  = Package::container()->get( CheckoutFields::class );
-		$fields           = $checkout_fields->get_fields_for_location( 'additional' );
+		$fields           = array_merge(
+			$checkout_fields->get_fields_for_location( 'contact' ),
+			$checkout_fields->get_fields_for_location( 'additional' )
+		);
 		$formatted_fields = array();
 
 		foreach ( $fields as $field_key => $field ) {

@@ -36,7 +36,19 @@ $shipping   = $order->get_formatted_shipping_address();
 				<?php if ( $order->get_billing_email() ) : ?>
 					<br/><?php echo esc_html( $order->get_billing_email() ); ?>
 				<?php endif; ?>
-				<?php do_action( 'woocommerce_email_customer_address_section', 'billing', $order, $sent_to_admin, $plain_text ); ?>
+				<?php
+				/**
+				 * Fires after the core address fields in emails.
+				 *
+				 * @since 8.6.0
+				 *
+				 * @param string $type Address type. Either 'billing' or 'shipping'.
+				 * @param WC_Order $order Order instance.
+				 * @param bool $sent_to_admin If this email is being sent to the admin or not.
+				 * @param bool $plain_text If this email is plain text or not.
+				 */
+				do_action( 'woocommerce_email_customer_address_section', 'billing', $order, $sent_to_admin, $plain_text );
+				?>
 			</address>
 		</td>
 		<?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && $shipping ) : ?>
@@ -48,7 +60,19 @@ $shipping   = $order->get_formatted_shipping_address();
 					<?php if ( $order->get_shipping_phone() ) : ?>
 						<br /><?php echo wc_make_phone_clickable( $order->get_shipping_phone() ); ?>
 					<?php endif; ?>
-					<?php do_action( 'woocommerce_email_customer_address_section', 'shipping', $order, $sent_to_admin, $plain_text ); ?>
+					<?php
+					/**
+					 * Fires after the core address fields in emails.
+					 *
+					 * @since 8.6.0
+					 *
+					 * @param string $type Address type. Either 'billing' or 'shipping'.
+					 * @param WC_Order $order Order instance.
+					 * @param bool $sent_to_admin If this email is being sent to the admin or not.
+					 * @param bool $plain_text If this email is plain text or not.
+					 */
+					do_action( 'woocommerce_email_customer_address_section', 'shipping', $order, $sent_to_admin, $plain_text );
+					?>
 				</address>
 			</td>
 		<?php endif; ?>
