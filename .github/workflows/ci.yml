@@ -80,12 +80,10 @@ jobs:
         with:
           install: '${{ matrix.projectName }}...'
           build: '${{ matrix.projectName }}'
-      - name: 'Check'
-        run: 'echo "${{ matrix.testEnv }}"'
       - name: 'Prepare Test Environment'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv != '' }}
-        env: ${{ matrix.testEnv.envVars != '' && fromJson( '{}' ) || matrix.testEnv.envVars }}
+
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
       - name: 'Test'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
