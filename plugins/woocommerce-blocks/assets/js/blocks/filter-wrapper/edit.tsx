@@ -8,7 +8,7 @@ import { isExperimentalBuild } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import { EditProps } from './types';
-import Upgrade from '../collection-filters/components/upgrade';
+import Upgrade from '../product-filters/components/upgrade';
 
 const Edit = ( { attributes, clientId }: EditProps ) => {
 	const blockProps = useBlockProps();

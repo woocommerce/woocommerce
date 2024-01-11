@@ -19,10 +19,11 @@ const config = {
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
-	retries: CI ? 4 : 2,
-	workers: 4,
+	retries: 2,
+	workers: CI ? 1 : 4,
 	reporter: [
 		[ 'list' ],
+		[ 'blob', { outputFolder: ALLURE_RESULTS_DIR ?? './tests/e2e-pw/test-results/allure-results' } ],
 		[
 			'html',
 			{
