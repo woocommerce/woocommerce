@@ -47,7 +47,7 @@ function stringifyEntityId< ID, T extends { id?: ID } >( entity: T ): T {
 	return { ...entity, id: stringifyId( entity.id ) };
 }
 
-export function Edit( {
+export function DownloadBlockEdit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< UploadsBlockAttributes > ) {
