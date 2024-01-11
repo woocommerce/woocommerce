@@ -39,7 +39,11 @@ export function BlockFill( {
 		[ clientId, slotContainerBlockName ]
 	);
 
-	if ( ! closestAncestorClientId ) return null;
+	if ( ! closestAncestorClientId ) {
+		// eslint-disable-next-line no-console
+		console.warn( 'No closest ancestor client ID found for block fill.' );
+		return null;
+	}
 
 	return (
 		<Fill { ...props } name={ getName( name, closestAncestorClientId ) } />
