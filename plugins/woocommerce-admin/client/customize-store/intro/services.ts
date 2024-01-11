@@ -1,9 +1,7 @@
-// @ts-expect-error -- No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
+import { store as coreStore } from '@wordpress/core-data';
 import { resolveSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
@@ -32,7 +30,6 @@ export const fetchThemeCards = async () => {
 
 export const fetchIntroData = async () => {
 	const currentTemplatePromise =
-		// @ts-expect-error No types for this exist yet.
 		resolveSelect( coreStore ).__experimentalGetTemplateForLink( '/' );
 
 	const maybePreviousTemplatePromise = resolveSelect(
@@ -40,10 +37,8 @@ export const fetchIntroData = async () => {
 	).getOption( 'woocommerce_admin_customize_store_completed_theme_id' );
 
 	const styleRevsPromise =
-		// @ts-expect-error No types for this exist yet.
 		resolveSelect( coreStore ).getCurrentThemeGlobalStylesRevisions();
 
-	// @ts-expect-error No types for this exist yet.
 	const hasModifiedPagesPromise = resolveSelect( coreStore ).getEntityRecords(
 		'postType',
 		'page',
@@ -80,13 +75,11 @@ export const fetchIntroData = async () => {
 	let currentThemeIsAiGenerated = false;
 	if (
 		maybePreviousTemplate &&
-		// @ts-expect-error - TODO: Fix this.
 		currentTemplate?.id === maybePreviousTemplate
 	) {
 		currentThemeIsAiGenerated = true;
 	}
 
-	// @ts-expect-error - TODO: Fix this.
 	const hasModifiedPages = rawPages?.some(
 		( page: { _links: { [ key: string ]: string[] } } ) => {
 			return page._links?.[ 'version-history' ]?.length > 1;
@@ -94,9 +87,7 @@ export const fetchIntroData = async () => {
 	);
 
 	const activeThemeHasMods =
-		// @ts-expect-error - TODO: Fix this.
 		!! currentTemplate?.modified ||
-		// @ts-expect-error - TODO: Fix this.
 		styleRevs?.length > 0 ||
 		hasModifiedPages;
 

@@ -10,3 +10,10 @@ export type FormInputProps = {
 	className: string;
 	help: string | null;
 };
+
+// Type guard function to check if children is a function, while still type narrowing correctly.
+export function isCallable(
+	children: unknown
+): children is ( props: unknown ) => React.ReactNode {
+	return typeof children === 'function';
+}

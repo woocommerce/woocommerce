@@ -18,6 +18,7 @@ export const useBlogPosts = ( category: string ) => {
 			return {
 				isLoading: isResolving( 'getBlogPosts', [ category ] ),
 				error: getBlogPostsError( category ),
+				// @ts-expect-error TODO: fix this.
 				posts: getBlogPosts< Post[] >( category ),
 			};
 		},

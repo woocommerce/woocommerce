@@ -36,6 +36,7 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 	return useSelect(
 		( select ) => {
 			const { hasFinishedResolution, getCampaigns } = select( STORE_KEY );
+			// @ts-expect-error TODO: fix this.
 			const { campaignsPage, meta } = getCampaigns< CampaignsPagination >(
 				page,
 				perPage

@@ -83,14 +83,12 @@ const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
 
 const markTaskComplete = async () => {
 	const currentTemplate = await resolveSelect(
-		// @ts-expect-error - TODO: Fix this
 		coreStore
 	).__experimentalGetTemplateForLink( '/' );
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_admin_customize_store_completed: 'yes',
 		// we use this on the intro page to determine if this same theme was used in the last customization
 		woocommerce_admin_customize_store_completed_theme_id:
-			// @ts-expect-error TODO: Fis this.
 			currentTemplate.id ?? undefined,
 	} );
 };

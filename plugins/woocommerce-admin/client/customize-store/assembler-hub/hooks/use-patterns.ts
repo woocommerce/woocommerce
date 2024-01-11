@@ -30,13 +30,8 @@ export type PatternWithBlocks = Pattern & {
 export const usePatterns = () => {
 	const { blockPatterns, isLoading } = useSelect(
 		( select ) => ( {
-			blockPatterns: select(
-				// @ts-expect-error - TODO: Fix this.
-				coreStore
-				// @ts-ignore - This is valid.
-			).getBlockPatterns() as Pattern[],
+			blockPatterns: select( coreStore ).getBlockPatterns() as Pattern[],
 			isLoading:
-				// @ts-ignore - This is valid.
 				! select( coreStore ).hasFinishedResolution(
 					'getBlockPatterns'
 				),

@@ -27,6 +27,7 @@ export const PricingTaxesClassField = () => {
 			);
 			return {
 				isResolving: ! hasFinishedResolution( 'getTaxClasses' ),
+				// @ts-expect-error TODO: fix this.
 				taxClasses: getTaxClasses< TaxClass[] >(),
 			};
 		}

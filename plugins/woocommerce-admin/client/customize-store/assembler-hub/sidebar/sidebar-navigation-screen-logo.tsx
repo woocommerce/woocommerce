@@ -63,11 +63,9 @@ const useLogoEdit = ( {
 			? getEditedEntityRecord( 'root', 'site' )
 			: undefined;
 
-		// @ts-expect-error - TODO: Fix this.
 		const _siteIconId = siteSettings?.site_icon;
 		return {
 			siteIconId: _siteIconId,
-			// @ts-ignore No types for this exist yet.
 			mediaUpload: select( blockEditorStore ).getSettings().mediaUpload,
 		};
 	}, [] );
@@ -378,7 +376,6 @@ export const SidebarNavigationScreenLogo = () => {
 	const { siteLogoId, canUserEdit, mediaItemData, isRequestingMediaItem } =
 		useSelect( ( select ) => {
 			const { canUser, getEntityRecord, getEditedEntityRecord } =
-				// @ts-expect-error - TODO: Fix this.
 				select( coreStore );
 
 			const _canUserEdit = canUser( 'update', 'settings' );
@@ -387,20 +384,16 @@ export const SidebarNavigationScreenLogo = () => {
 				: undefined;
 			const siteData = getEntityRecord( 'root', '__unstableBase' );
 			const _siteLogoId = _canUserEdit
-				? // @ts-expect-error - TODO: Fix this.
-				  siteSettings?.site_logo
-				: // @ts-expect-error - TODO: Fix this.
-				  siteData?.site_logo;
+				? siteSettings?.site_logo
+				: siteData?.site_logo;
 
 			const mediaItem =
 				_siteLogoId &&
-				// @ts-expect-error - TODO: Fix this.
 				select( coreStore ).getMedia( _siteLogoId, {
 					context: 'view',
 				} );
 			const _isRequestingMediaItem =
 				_siteLogoId &&
-				// @ts-expect-error - TODO: Fix this.
 				! select( coreStore ).hasFinishedResolution( 'getMedia', [
 					_siteLogoId,
 					{ context: 'view' },
@@ -518,7 +511,6 @@ export const SidebarNavigationScreenLogo = () => {
 						siteLogoId={ siteLogoId }
 						attributes={ attributes }
 						setAttributes={ setAttributes }
-						// @ts-expect-error - TODO: Fix this.
 						canUserEdit={ canUserEdit }
 						mediaItemData={ mediaItemData }
 						isLoading={ isLoading }

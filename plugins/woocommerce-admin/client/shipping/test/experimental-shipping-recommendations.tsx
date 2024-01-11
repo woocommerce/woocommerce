@@ -9,13 +9,15 @@ import { useSelect } from '@wordpress/data';
  */
 import ShippingRecommendations from '../experimental-shipping-recommendations';
 
+type FCWithChildren = React.FC< { children: React.ReactNode } >;
+
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
 } ) );
 jest.mock( '../../settings-recommendations/dismissable-list', () => ( {
-	DismissableList: ( ( { children } ) => children ) as React.FC,
-	DismissableListHeading: ( ( { children } ) => children ) as React.FC,
+	DismissableList: ( { children } ) => children as FCWithChildren,
+	DismissableListHeading: ( ( { children } ) => children ) as FCWithChildren,
 } ) );
 jest.mock( '@woocommerce/admin-layout', () => {
 	const mockContext = {

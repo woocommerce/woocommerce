@@ -73,6 +73,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 						disabled={ isDisabled }
 						isBusy={ isBusy }
 						variant="secondary"
+						// @ts-expect-error TODO: fix this.
 						href={ getAdminLink( manageUrl ) }
 						onClick={ () => {
 							recordEvent( 'marketing_manage', {

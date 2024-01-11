@@ -128,7 +128,6 @@
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@types/tinymce": "^4.6.9",
 		"@types/wordpress__compose": "4.0.1",
-		"@types/wordpress__data": "6.0.0",
 		"@types/wordpress__data-controls": "~2.2.0",
 		"@types/wordpress__media-utils": "3.0.0",
 		"@types/wordpress__notices": "3.3.0",

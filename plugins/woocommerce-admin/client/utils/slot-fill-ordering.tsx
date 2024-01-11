@@ -7,7 +7,11 @@ import {
 	FillComponentProps,
 	SlotComponentProps,
 } from '@woocommerce/components/build-types/types';
-import { isCallable } from '@woocommerce/components/build-types/utils';
+
+/**
+ * Internal dependencies
+ */
+import { isCallable } from './types';
 
 /**
  * Ordered fill item.

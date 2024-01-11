@@ -236,6 +236,7 @@ registerPlugin( 'wc-admin-onboarding-task-marketing', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="marketing">
+			{ /* @ts-expect-error Slot contents is not properly typed. */ }
 			{ ( { onComplete }: MarketingProps ) => {
 				return <Marketing onComplete={ onComplete } />;
 			} }

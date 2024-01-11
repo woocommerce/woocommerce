@@ -77,6 +77,7 @@ const PurchaseTaskItem = ( { defaultTaskItem }: PurchaseTaskItemProps ) => {
 const PurchaseTaskItemFill = () => {
 	return (
 		<WooOnboardingTaskListItem id="purchase">
+			{ /* @ts-expect-error Slot contents is not typed properly. */ }
 			{ ( { defaultTaskItem }: PurchaseTaskItemProps ) => (
 				<PurchaseTaskItem defaultTaskItem={ defaultTaskItem } />
 			) }

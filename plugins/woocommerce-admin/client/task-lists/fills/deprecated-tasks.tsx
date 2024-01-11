@@ -50,6 +50,7 @@ const DeprecatedWooOnboardingTaskFills = () => {
 		<>
 			{ deprecatedTasks.map( ( task ) => (
 				<WooOnboardingTask id={ task.id } key={ task.id }>
+					{ /* @ts-expect-error Slot contents is not typed properly. */ }
 					{ () => task.container }
 				</WooOnboardingTask>
 			) ) }

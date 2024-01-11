@@ -15,7 +15,7 @@ import { Tab } from '@woocommerce/components/build-types/types';
  */
 import './product-form-layout.scss';
 import { useHeaderHeight } from '~/header/use-header-height';
-import { isCallable } from '@woocommerce/components/build-types/utils';
+import { isCallable } from '../../utils/types';
 
 type ProductFormLayoutProps = {
 	id: string;

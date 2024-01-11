@@ -54,6 +54,7 @@ export const useRecommendedPluginsWithoutChannels =
 
 			return {
 				loading: ! hasFinishedResolution( selector, [ category ] ),
+				// @ts-expect-error TODO: fix this.
 				data: getRecommendedPlugins< RecommendedPlugin[] >( category ),
 			};
 		}, [] );
@@ -75,6 +76,7 @@ export const useRecommendedPluginsWithoutChannels =
 		const recommendedPluginsWithoutChannels = differenceWith(
 			dataRecommendedPlugins,
 			dataRecommendedChannels || [],
+			// @ts-expect-error TODO: fix this.
 			( a, b ) => a.product === b.product
 		);
 
@@ -86,6 +88,7 @@ export const useRecommendedPluginsWithoutChannels =
 		return {
 			isInitializing,
 			isLoading: loading,
+			// @ts-expect-error TODO: fix this.
 			data: isInitializing ? [] : recommendedPluginsWithoutChannels,
 			installAndActivate,
 		};

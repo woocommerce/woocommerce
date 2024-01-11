@@ -32,6 +32,7 @@ export const useInstalledPluginsWithoutChannels =
 
 				return {
 					installedPlugins:
+						// @ts-expect-error TODO: fix this.
 						getInstalledPlugins< InstalledPlugin[] >(),
 					activatingPlugins: getActivatingPlugins(),
 				};

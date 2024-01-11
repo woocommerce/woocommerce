@@ -45,6 +45,7 @@ export const useCampaignTypes = (): UseCampaignTypes => {
 		( select ) => {
 			const { hasFinishedResolution, getCampaignTypes } =
 				select( STORE_KEY );
+			// @ts-expect-error TODO: fix this.
 			const campaignTypesState = getCampaignTypes< CampaignTypesState >();
 
 			return {

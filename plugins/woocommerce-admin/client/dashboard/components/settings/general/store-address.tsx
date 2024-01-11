@@ -324,7 +324,7 @@ export function StoreAddress( {
 		setValue
 	);
 
-	const isLocaleKey = ( key: string ): key is keyof typeof locale => {
+	const isLocaleKey = ( key: string ) => {
 		return locale.hasOwnProperty( key );
 	};
 

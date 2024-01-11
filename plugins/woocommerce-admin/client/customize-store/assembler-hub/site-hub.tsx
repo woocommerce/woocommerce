@@ -44,11 +44,9 @@ export const SiteHub = forwardRef(
 		ref
 	) => {
 		const { siteTitle } = useSelect( ( select ) => {
-			// @ts-expect-error TODO: Fix this.
 			const { getSite } = select( coreStore );
 
 			return {
-				// @ts-expect-error - TODO: Fix this.
 				siteTitle: getSite()?.title,
 			};
 		}, [] );

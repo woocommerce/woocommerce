@@ -3364,9 +3364,6 @@ importers:
       '@types/wordpress__compose':
         specifier: 4.0.1
         version: 4.0.1
-      '@types/wordpress__data':
-        specifier: 6.0.0
-        version: 6.0.0
       '@types/wordpress__data-controls':
         specifier: ~2.2.0
         version: 2.2.0

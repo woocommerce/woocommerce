@@ -69,6 +69,7 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 	return useSelect( ( select ) => {
 		const { hasFinishedResolution, getRegisteredChannels } =
 			select( STORE_KEY );
+		// @ts-expect-error TODO: fix this.
 		const state = getRegisteredChannels< RegisteredChannelsState >();
 
 		return {

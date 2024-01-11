@@ -98,7 +98,6 @@ export const SaveHub = () => {
 		editEntityRecord,
 		saveEditedEntityRecord,
 		__experimentalSaveSpecifiedEntityEdits: saveSpecifiedEntityEdits,
-		// @ts-expect-error - TODO: Fix this.
 	} = useDispatch( coreStore );
 
 	const save = useCallback( async () => {

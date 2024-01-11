@@ -4,7 +4,11 @@
 import { isValidElement } from 'react';
 import { cloneElement } from '@wordpress/element';
 import { FillComponentProps } from '@woocommerce/components/build-types/types';
-import { isCallable } from '@woocommerce/components/build-types/utils';
+
+/**
+ * Internal dependencies
+ */
+import { isCallable } from '../types';
 
 type ChildrenProps = {
 	order: number;

@@ -24,6 +24,7 @@ export const useRecommendedChannels = (): UseRecommendedChannels => {
 		const { hasFinishedResolution, getRecommendedChannels } =
 			select( STORE_KEY );
 		const { data, error } =
+			// @ts-expect-error TODO: fix this.
 			getRecommendedChannels< RecommendedChannelsState >();
 
 		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
@@ -36,6 +37,7 @@ export const useRecommendedChannels = (): UseRecommendedChannels => {
 		const nonActiveRecommendedChannels =
 			data &&
 			differenceWith( data, activePlugins, ( a, b ) => {
+				// @ts-expect-error TODO: fix this.
 				return a.product === b;
 			} );
 

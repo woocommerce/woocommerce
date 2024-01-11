@@ -79,8 +79,10 @@ export const Variations: React.FC = () => {
 					requestParams,
 				] ),
 				variations:
+					// @ts-expect-error TODO: fix this.
 					getProductVariations< ProductVariation[] >( requestParams ),
 				totalCount:
+					// @ts-expect-error TODO: fix this.
 					getProductVariationsTotalCount< number >( requestParams ),
 			};
 		},

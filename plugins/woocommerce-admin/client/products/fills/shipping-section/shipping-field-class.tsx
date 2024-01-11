@@ -99,6 +99,7 @@ export const ShippingClassField: React.FC<
 					'getProductShippingClasses'
 				),
 				shippingClasses:
+					// @ts-expect-error TODO: fix this.
 					getProductShippingClasses< ProductShippingClass[] >(),
 			};
 		},
@@ -150,6 +151,7 @@ export const ShippingClassField: React.FC<
 							}
 							shippingClassProps.onChange( value );
 						} }
+						// @ts-expect-error TODO: fix this.
 						options={ [
 							...DEFAULT_SHIPPING_CLASS_OPTIONS,
 							...mapShippingClassToSelectOption(

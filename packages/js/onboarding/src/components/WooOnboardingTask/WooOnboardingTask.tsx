@@ -57,7 +57,7 @@ type WooOnboardingTaskSlotProps = SlotComponentProps & {
 const WooOnboardingTask: React.FC<
 	WooOnboardingTaskProps & { children: React.ReactNode }
 > & {
-	Slot: React.FC< WooOnboardingTaskSlotProps >;
+	Slot: React.FC< Omit< WooOnboardingTaskSlotProps, 'name' > >;
 } = ( { id, ...props } ) => {
 	return <Fill name={ 'woocommerce_onboarding_task_' + id } { ...props } />;
 };

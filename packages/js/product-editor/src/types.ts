@@ -3,6 +3,13 @@
  */
 import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
 
+// Type guard function to check if children is a function, while still type narrowing correctly.
+export function isCallable(
+	children: unknown
+): children is ( props: unknown ) => React.ReactNode {
+	return typeof children === 'function';
+}
+
 export interface ProductEditorContext {
 	postId: number;
 	postType: string;
