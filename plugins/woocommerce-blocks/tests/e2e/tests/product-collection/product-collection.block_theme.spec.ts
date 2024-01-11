@@ -224,6 +224,7 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await expect( pageObject.products ).toHaveCount( 9 );
 
+			await pageObject.addFilter( 'Featured' );
 			await pageObject.setShowOnlyFeaturedProducts( {
 				featured: true,
 			} );

@@ -179,6 +179,7 @@ class ProductCollectionPage {
 			| 'Keyword'
 			| 'Show Taxonomies'
 			| 'Show Product Attributes'
+			| 'Featured'
 	) {
 		await this.page
 			.getByRole( 'button', { name: 'Filters options' } )
