@@ -449,6 +449,7 @@ function wc_scheduled_sales() {
 
 				if ( $sale_price ) {
 					$product->set_price( $sale_price );
+					$product->set_date_on_sale_from( '' );
 				} else {
 					$product->set_date_on_sale_to( '' );
 					$product->set_date_on_sale_from( '' );
