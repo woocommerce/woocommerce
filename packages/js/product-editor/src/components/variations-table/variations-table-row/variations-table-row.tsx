@@ -27,7 +27,7 @@ import {
 	getProductStockStatusClass,
 	truncate,
 } from '../../../utils';
-import { SingleUpdateMenu } from '../variation-actions';
+import { SingleUpdateMenu } from '../variation-actions-menus';
 import { VariationsTableRowProps } from './types';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );

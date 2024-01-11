@@ -28,7 +28,7 @@ import { VariationsFilter } from './variations-filter';
 import { useVariations } from './use-variations';
 import { TableRowSkeleton } from './table-row-skeleton';
 import { VariationsTableRow } from './variations-table-row';
-import { QuickUpdateMenu } from './variation-actions';
+import { QuickUpdateMenu } from './variation-actions-menus';
 
 type VariationsTableProps = {
 	noticeText?: string;

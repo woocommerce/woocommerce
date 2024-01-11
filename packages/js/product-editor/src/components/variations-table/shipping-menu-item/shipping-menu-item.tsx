@@ -14,7 +14,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { TRACKS_SOURCE } from '../../../constants';
 import { VariationActionsMenuItemProps } from '../types';
 import { handlePrompt } from '../../../utils/handle-prompt';
-import { VariationActionsMenuItem } from '../variation-actions/variation-actions-menu-item';
+import { VariationActionsMenuItem } from '../variation-actions-menus/variation-actions-menu-item';
 
 export function ShippingMenuItem( {
 	selection,

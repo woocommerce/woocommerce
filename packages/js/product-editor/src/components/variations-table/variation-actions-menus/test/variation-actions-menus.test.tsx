@@ -9,7 +9,7 @@ import React, { createElement } from 'react';
 /**
  * Internal dependencies
  */
-import { SingleUpdateMenu } from '../';
+import { SingleUpdateMenu, QuickUpdateMenu } from '..';
 import { TRACKS_SOURCE } from '../../../../constants';
 import { PRODUCT_STOCK_STATUS_KEYS } from '../../../../utils/get-product-stock-status';
 
@@ -24,6 +24,53 @@ const mockVariation = {
 	name: '',
 	parent_id: 1,
 } as ProductVariation;
+
+const anotherMockVariation = {
+	id: 10,
+	manage_stock: false,
+	attributes: [],
+	downloads: [],
+	name: '',
+	parent_id: 1,
+} as ProductVariation;
+
+describe( 'QuickUpdateMenu', () => {
+	let onChangeMock: jest.Mock, onDeleteMock: jest.Mock;
+	beforeEach( () => {
+		onChangeMock = jest.fn();
+		onDeleteMock = jest.fn();
+		( recordEvent as jest.Mock ).mockClear();
+	} );
+
+	it( 'should render dropdown with pricing, inventory, and delete options when opened', () => {
+		const { queryByText, getByRole } = render(
+			<QuickUpdateMenu
+				selection={ [ mockVariation, anotherMockVariation ] }
+				onChange={ onChangeMock }
+				onDelete={ onDeleteMock }
+			/>
+		);
+		fireEvent.click( getByRole( 'button', { name: 'Quick update' } ) );
+		expect( queryByText( 'Update stock' ) ).toBeInTheDocument();
+		expect( queryByText( 'Set list price' ) ).toBeInTheDocument();
+		expect( queryByText( 'Toggle visibility' ) ).toBeInTheDocument();
+	} );
+
+	it( 'should call onDelete when Delete menuItem is clicked', async () => {
+		const { getByRole, getByText } = render(
+			<QuickUpdateMenu
+				selection={ [ mockVariation, anotherMockVariation ] }
+				onChange={ onChangeMock }
+				onDelete={ onDeleteMock }
+			/>
+		);
+		await fireEvent.click(
+			getByRole( 'button', { name: 'Quick update' } )
+		);
+		await fireEvent.click( getByText( 'Delete' ) );
+		expect( onDeleteMock ).toHaveBeenCalled();
+	} );
+} );
 
 describe( 'SingleUpdateMenu', () => {
 	let onChangeMock: jest.Mock, onDeleteMock: jest.Mock;

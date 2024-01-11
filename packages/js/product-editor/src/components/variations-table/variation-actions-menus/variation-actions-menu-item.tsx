@@ -20,12 +20,7 @@ const getGroupName = ( group?: string, type?: string ) => {
 	return group ? `${ name }_${ group }${ nameSuffix }` : name;
 };
 
-export const VariationActionsMenuItem: React.FC< {
-	children?: React.ReactNode;
-	order?: number;
-	group?: string;
-	type?: string;
-} > & {
+export const VariationActionsMenuItem: React.FC< MenuItemProps > & {
 	Slot: React.FC< Slot.Props & { group: string; type: string } >;
 } = ( { children, order = 1, group = '_main', type } ) => {
 	if ( type ) {
