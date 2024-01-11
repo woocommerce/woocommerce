@@ -299,7 +299,7 @@ final class WC_Cart_Session {
 			header_remove( 'Set-Cookie' );
 			foreach ( $final_cookies as $cookie ) {
 				// Using header here preserves previous cookie args.
-				header( "Set-Cookie: {$cookie}", false );
+				header( $cookie, false );
 			}
 		}
 	}
