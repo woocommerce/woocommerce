@@ -38,6 +38,7 @@ import {
 } from '../../../utils/get-product-error-message';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
+import SectionActions from '../../../components/block-slot-fill/section-actions';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
@@ -253,11 +254,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	}
 
 	return (
-		<BlockFill
-			name="section-description"
-			clientId={ clientId }
-			slotContainerBlockName="woocommerce/product-section"
-		>
+		<SectionActions>
 			<div { ...blockProps }>
 				<p>
 					{ createInterpolateElement(

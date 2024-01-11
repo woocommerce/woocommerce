@@ -37,6 +37,7 @@ import { Shirt } from '../../../images/shirt';
 import { Pants } from '../../../images/pants';
 import { Glasses } from '../../../images/glasses';
 import { AdviceCard } from '../../../components/advice-card';
+import SectionActions from '../../../components/block-slot-fill/section-actions';
 
 export function Edit( {
 	attributes,
@@ -125,10 +126,7 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<BlockFill
-				name="section-actions"
-				slotContainerBlockName="woocommerce/product-section"
-			>
+			<SectionActions>
 				<div className="wp-block-woocommerce-product-list-field__header">
 					{ ! isLoading && groupedProducts.length > 0 && (
 						<Button
@@ -145,7 +143,7 @@ export function Edit( {
 						{ __( 'Add products', 'woocommerce' ) }
 					</Button>
 				</div>
-			</BlockFill>
+			</>
 
 			<div className="wp-block-woocommerce-product-list-field__body">
 				{ ! isLoading && groupedProducts.length === 0 && (

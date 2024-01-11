@@ -4,7 +4,10 @@
 import { Fill } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
-import { useBlockEditContext } from '@wordpress/block-editor';
+import {
+	// @ts-expect-error no exported member.
+	useBlockEditContext,
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
