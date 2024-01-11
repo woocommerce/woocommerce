@@ -24,7 +24,7 @@ baseTest.describe('Products > Delete Product', () => {
 	});
 
 	const test = apiFixture.extend({
-		productId: async ({baseURL, api}, use) => {
+		productId: async ({api}, use) => {
 			let productId;
 
 			await api
