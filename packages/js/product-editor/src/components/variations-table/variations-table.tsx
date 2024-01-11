@@ -28,7 +28,12 @@ import { VariationsFilter } from './variations-filter';
 import { useVariations } from './use-variations';
 import { TableRowSkeleton } from './table-row-skeleton';
 import { VariationsTableRow } from './variations-table-row';
-import { QuickUpdateMenu } from './variation-actions-menus';
+import {
+	QuickUpdateMenu,
+	VariationSingleUpdateMenuItem,
+	VariationQuickUpdateMenuItem,
+} from './variation-actions-menus';
+import { VariationActionsMenuItem } from './variation-actions-menus/variation-actions-menu-item';
 
 type VariationsTableProps = {
 	noticeText?: string;
@@ -489,6 +494,29 @@ export const VariationsTable = forwardRef<
 					</div>
 				) }
 			</div>
+			<VariationSingleUpdateMenuItem group={ 'downloads' } order={ 10 }>
+				<p>Test 1</p>
+			</VariationSingleUpdateMenuItem>
+			<VariationQuickUpdateMenuItem group={ 'shipping' } order={ 10 }>
+				<p>Test 2</p>
+			</VariationQuickUpdateMenuItem>
+			<VariationActionsMenuItem group={ '_main' } order={ 10 }>
+				<p>Test 3</p>
+			</VariationActionsMenuItem>
+			<VariationActionsMenuItem
+				group={ '_secondary' }
+				order={ 10 }
+				type={ 'quick-update' }
+			>
+				<p>Test 4</p>
+			</VariationActionsMenuItem>
+			<VariationActionsMenuItem
+				group={ 'pricing' }
+				order={ 10 }
+				type={ 'single-update' }
+			>
+				<p>Test 5</p>
+			</VariationActionsMenuItem>
 		</div>
 	);
 } );
