@@ -2,7 +2,7 @@
 post_title: WooCommerce developer documentation
 ---
 
-> ⚠️ **Notice:** This documentation is currently a **work in progress**. While it's open to the public for transparency and collaboration, please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
+**Notice:** This documentation is currently a **work in progress**. While it's open to the public for transparency and collaboration, please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
 
 This is your go-to place to find everything you need to know to get started with WooCommerce development, including implementation details for specific parts of the WooCommerce code base. 
 
