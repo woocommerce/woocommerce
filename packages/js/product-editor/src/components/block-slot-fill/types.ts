@@ -4,7 +4,6 @@
 import { Fill, Slot } from '@wordpress/components';
 
 export type BlockSlotFillProps = {
-	clientId: string;
 	name: string;
 };
 

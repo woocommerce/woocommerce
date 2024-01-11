@@ -4,6 +4,7 @@
 import { Fill } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
+import { useBlockEditContext } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -13,10 +14,11 @@ import { BlockFillProps } from './types';
 
 export function BlockFill( {
 	name,
-	clientId,
 	slotContainerBlockName,
 	...props
 }: BlockFillProps ) {
+	const { clientId } = useBlockEditContext();
+
 	const closestAncestorClientId = useSelect(
 		( select ) => {
 			// @ts-expect-error Outdated type definition.
