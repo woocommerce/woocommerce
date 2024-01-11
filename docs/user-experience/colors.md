@@ -3,8 +3,6 @@ post_title: User Experience Guidelines - Colors
 menu_title: Colors
 ---
 
-## Colors
-
 When creating extensions for the WordPress wp-admin, use the core colors, respect the user's WordPress admin color scheme selection, and ensure your designs pass AA level guidelines.
 
 When using components with text, such as buttons, cards, or navigation, the background-to-text contrast ratio should be at least 4.5:1 to be [WCAG AA compliant](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html). Be sure to [test your color contrast ratios](https://webaim.org/resources/contrastchecker/) to abide by WCAG standards.

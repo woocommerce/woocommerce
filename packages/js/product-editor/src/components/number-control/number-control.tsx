@@ -40,6 +40,10 @@ export type NumberProps = {
 	step?: number;
 };
 
+const MEDIUM_DELAY = 500;
+
+const SHORT_DELAY = 100;
+
 export const NumberControl: React.FC< NumberProps > = ( {
 	value,
 	onChange,
@@ -76,12 +80,18 @@ export const NumberControl: React.FC< NumberProps > = ( {
 
 	const timeoutRef = useRef< number | null >( null );
 
+	const isInitialClick = useRef< boolean >( false );
+
 	const incrementValue = () =>
 		onChange( String( parseFloat( value || '0' ) + increment ) );
 
 	useEffect( () => {
 		if ( increment !== 0 ) {
-			timeoutRef.current = setTimeout( incrementValue, 100 );
+			timeoutRef.current = setTimeout(
+				incrementValue,
+				isInitialClick.current ? MEDIUM_DELAY : SHORT_DELAY
+			);
+			isInitialClick.current = false;
 		} else if ( timeoutRef.current ) {
 			clearTimeout( timeoutRef.current );
 		}
@@ -91,6 +101,8 @@ export const NumberControl: React.FC< NumberProps > = ( {
 			}
 		};
 	}, [ increment, value ] );
+
+	const resetIncrement = () => setIncrement( 0 );
 
 	return (
 		<BaseControl
@@ -130,8 +142,10 @@ export const NumberControl: React.FC< NumberProps > = ( {
 											)
 										);
 										setIncrement( step );
+										isInitialClick.current = true;
 									} }
-									onMouseUp={ () => setIncrement( 0 ) }
+									onMouseLeave={ resetIncrement }
+									onMouseUp={ resetIncrement }
 									onBlur={ unfocusIfOutside }
 									isSmall
 									aria-hidden="true"
@@ -153,8 +167,10 @@ export const NumberControl: React.FC< NumberProps > = ( {
 											)
 										);
 										setIncrement( -step );
+										isInitialClick.current = true;
 									} }
-									onMouseUp={ () => setIncrement( 0 ) }
+									onMouseLeave={ resetIncrement }
+									onMouseUp={ resetIncrement }
 									isSmall
 									aria-hidden="true"
 									aria-label={ __(

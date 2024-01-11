@@ -21,7 +21,21 @@ image2=$(wp post list --post_type=attachment --field=ID --name="hoodie-green-1.j
 image3=$(wp post list --post_type=attachment --field=ID --name="hoodie-2.jpg" --format=ids)
 wp post meta update $post_id _product_image_gallery "$image1,$image2,$image3"
 
+# Create a tag, so we can add tests for tag-related blocks and templates.
+tag_id=$(wp wc product_tag create --name="Recommended" --slug="recommended" --description="Curated products selected by our experts" --porcelain --user=1)
+wp wc product update $post_id --tags="[ { \"id\": $tag_id } ]" --user=1
+
 # This is a non-hacky work around to set up the cross sells product.
 product_id=$(wp post list --post_type=product --field=ID --name="Cap" --format=ids)
 crossell_id=$(wp post list --post_type=product --field=ID --name="Beanie" --format=ids)
 wp post meta update $crossell_id _crosssell_ids "$product_id"
+
+# Enable attribute archives.
+attribute_ids=$(wp wc product_attribute list --fields=id --format=ids --user=1)
+if [ -n "$attribute_ids" ]; then
+  for id in $attribute_ids; do
+    wp wc product_attribute update "$id" --has_archives=true --user=1
+  done
+else
+  echo "No attribute IDs found."
+fi
