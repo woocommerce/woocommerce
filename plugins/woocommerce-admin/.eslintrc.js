@@ -16,10 +16,7 @@ module.exports = {
 	settings: {
 		'import/resolver': {
 			typescript: {
-				project: [ './tsconfig.json' ],
-			},
-			node: {
-				project: [ './tsconfig.json' ],
+				project: [ 'plugins/woocommerce-admin/tsconfig.json' ],
 			},
 		},
 	},
