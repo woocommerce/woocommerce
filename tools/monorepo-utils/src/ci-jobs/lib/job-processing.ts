@@ -19,8 +19,8 @@ interface LintJob {
  */
 interface TestJobEnv {
 	shouldCreate: boolean;
-	start: string;
 	envVars: TestEnvVars;
+	start?: string;
 }
 
 /**
@@ -136,7 +136,6 @@ async function createTestJob(
 		command: config.command,
 		testEnv: {
 			shouldCreate: false,
-			start: '',
 			envVars: {},
 		},
 	};
@@ -146,8 +145,8 @@ async function createTestJob(
 	if ( config.testEnv ) {
 		createdJob.testEnv = {
 			shouldCreate: true,
-			start: config.testEnv.start,
 			envVars: await parseTestEnvConfig( config.testEnv.config ),
+			start: config.testEnv.start,
 		};
 	}
 

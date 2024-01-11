@@ -248,6 +248,10 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 		} );
 
@@ -363,11 +367,19 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-b',
 				name: 'Default B',
 				command: 'test-cmd-b',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 		} );
 
@@ -417,11 +429,19 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-a',
 				name: 'Default A',
 				command: 'test-cmd-a',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 		} );
 
@@ -487,11 +507,19 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-a',
 				name: 'Default A',
 				command: 'test-cmd-a',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 		} );
 
@@ -534,6 +562,7 @@ describe( 'Job Processing', () => {
 				name: 'Default',
 				command: 'test-cmd',
 				testEnv: {
+					shouldCreate: true,
 					start: 'test-start',
 					envVars: {
 						WP_ENV_CORE: 'https://wordpress.org/latest.zip',
