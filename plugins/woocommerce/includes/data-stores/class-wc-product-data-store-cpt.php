@@ -648,7 +648,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 
 			$product_price_props = array( 'date_on_sale_from', 'date_on_sale_to', 'regular_price', 'sale_price', 'product_type' );
-			if ( count( array_intersect( $product_price_props, $this->updated_props ) ) > 0 || array_key_exists( 'price', $product->get_changes() ) ) {
+			if ( count( array_intersect( $product_price_props, $this->updated_props ) ) > 0 ) {
 				if ( $product->is_on_sale( 'edit' ) ) {
 					update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
 					$product->set_price( $product->get_sale_price( 'edit' ) );
