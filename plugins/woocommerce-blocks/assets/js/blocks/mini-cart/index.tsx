@@ -72,3 +72,15 @@ addFilter(
 		return blockSettings;
 	}
 );
+
+addFilter(
+	'blocks.navigation.__experimentalAllowedInnerBlocks',
+	'woocommerce/mini-cart',
+	function ( allowedBlocks: string[] ) {
+		if ( allowedBlocks.includes( 'woocommerce/mini-cart' ) ) {
+			return allowedBlocks;
+		}
+
+		return [ ...allowedBlocks, 'woocommerce/mini-cart' ];
+	}
+);
