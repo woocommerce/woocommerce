@@ -8,11 +8,10 @@ import {
 	useReducer,
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { reusableBlock } from '@wordpress/icons';
-import { resolveSelect } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -39,6 +38,7 @@ import {
 	LinkedProductListBlockAttributes,
 	LinkedProductListBlockEmptyState,
 } from './types';
+import getRelatedProducts from '../../../utils/get-related-products';
 
 export function EmptyStateImage( {
 	image,
@@ -125,7 +125,6 @@ export function LinkedProductListBlockEdit( {
 	}
 
 	async function chooseProductsForMe() {
-		const { getRelatedProducts } = resolveSelect( PRODUCTS_STORE_NAME );
 		dispatch( {
 			type: 'LOADING_LINKED_PRODUCTS',
 			payload: {
@@ -143,6 +142,10 @@ export function LinkedProductListBlockEdit( {
 				isLoading: false,
 			},
 		} );
+
+		if ( ! relatedProducts ) {
+			return;
+		}
 
 		const newLinkedProducts = selectSearchedProductDispatcher(
 			relatedProducts,
