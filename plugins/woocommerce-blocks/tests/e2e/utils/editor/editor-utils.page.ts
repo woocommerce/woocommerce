@@ -376,6 +376,9 @@ export class EditorUtils {
 	async insertBlockUsingGlobalInserter( blockTitle: string ) {
 		await this.openGlobalBlockInserter();
 		await this.page.getByPlaceholder( 'Search' ).fill( blockTitle );
-		await this.page.getByRole( 'option', { name: blockTitle } ).click();
+		await this.page
+			.getByRole( 'option', { name: blockTitle, exact: true } )
+			.first()
+			.click();
 	}
 }

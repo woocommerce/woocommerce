@@ -30,7 +30,7 @@ const filterBlocks = [
 		name: 'woocommerce/product-filters-attribute',
 		title: 'Product Filters: Attribute',
 		variation: 'Product Filters: Attribute',
-		heading: 'Product Filters: Attribute',
+		heading: 'Filter by ', // The attribute filter comes with a dynamic title
 	},
 	{
 		name: 'woocommerce/product-filters-active',
@@ -52,7 +52,9 @@ test.describe( 'Filter blocks registration', async () => {
 		await editorUtils.insertBlockUsingGlobalInserter( wrapperBlock.title );
 
 		await expect(
-			editor.canvas.getByLabel( `Block: ${ wrapperBlock.title }` )
+			editor.canvas.getByLabel( `Block: ${ wrapperBlock.title }`, {
+				exact: true,
+			} )
 		).toBeVisible();
 	} );
 
@@ -75,7 +77,10 @@ test.describe( 'Filter blocks registration', async () => {
 		await editorUtils.insertBlockUsingGlobalInserter( wrapperBlock.title );
 		for ( const block of filterBlocks ) {
 			await expect(
-				editor.canvas.getByText( block.heading )
+				editor.canvas
+					.getByLabel( `Block: ${ block.title }` )
+					.getByLabel( 'Block: Heading' )
+					.and( editor.canvas.getByText( block.heading ) )
 			).toBeVisible();
 		}
 	} );
