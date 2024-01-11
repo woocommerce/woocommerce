@@ -91,6 +91,7 @@ jobs:
                 changed_manifest="${{ steps.docs-manifest.outputs.all_changed_files  }}"
                 if [ -n "$changed_files" ]; then
                   lint_results=""
+                  failed_check=""
                   for file in $changed_files; do
                     lint_result=$( { cat "$file" | markdownlint --stdin -c docs/.markdownlint.json ; } 2>&1 ) || rc="$?"
                     if [ $rc -ne 0 ]; then
@@ -101,7 +102,7 @@ jobs:
                   if [ $rc -ne 0 ]; then
                     echo -e "${RED}Linting failed for one or more files${NC}"
                     echo -e "$lint_results"
-                    exit 1
+                    failed_check="lint"
                   else
                     echo -e "${GREEN}Linting successful for all files.${NC}"
                   fi
@@ -109,6 +110,10 @@ jobs:
                   if [ -z "$changed_manifest" ]; then
                     echo -e "${RED}Changes in the docs folder require updating the manifest${NC}"
                     echo -e "Generate a manifest with `pnpm utils md-docs create docs woocommerce -o docs/docs-manifest.json`"
+                    failed_check="manifest"
+                  fi
+
+                  if [ -n "$failed_check" ]; then
                     exit 1
                   fi
                 else
