@@ -19,7 +19,7 @@ import { PricingMenuItem } from '../pricing-menu-item';
 import { ToggleVisibilityMenuItem } from '../toggle-visibility-menu-item';
 import { DownloadsMenuItem } from '../downloads-menu-item';
 import { VariationActionsMenuItem } from './variation-actions-menu-item';
-import { QUICK_UPDATE, SINGLE_VARIATION } from './constants';
+import { QUICK_UPDATE, SINGLE_UPDATE } from './constants';
 import { UpdateStockMenuItem } from '../update-stock-menu-item';
 import { SetListPriceMenuItem } from '../set-list-price-menu-item';
 
@@ -28,7 +28,7 @@ export function VariationActions( {
 	onChange,
 	onDelete,
 	onClose,
-	type = SINGLE_VARIATION,
+	type = SINGLE_UPDATE,
 }: VariationActionsMenuProps & {
 	onClose: () => void;
 	type: string;

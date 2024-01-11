@@ -13,7 +13,7 @@ import { ProductVariation } from '@woocommerce/data';
  */
 import { VariationActionsMenuProps } from './types';
 import { TRACKS_SOURCE } from '../../../constants';
-import { SINGLE_VARIATION } from './constants';
+import { SINGLE_UPDATE } from './constants';
 import { VariationActions } from './variation-actions';
 
 export function SingleUpdateMenu( {
@@ -44,7 +44,7 @@ export function SingleUpdateMenu( {
 					onClose={ onClose }
 					onChange={ onChange }
 					onDelete={ onDelete }
-					type={ SINGLE_VARIATION }
+					type={ SINGLE_UPDATE }
 				/>
 			) }
 		</DropdownMenu>

@@ -12,7 +12,7 @@ import {
  * Internal dependencies
  */
 import { MenuItemProps } from './types';
-import { QUICK_UPDATE, SINGLE_VARIATION } from './constants';
+import { QUICK_UPDATE, SINGLE_UPDATE } from './constants';
 
 const getGroupName = ( group?: string, type?: string ) => {
 	const name = 'woocommerce-actions-menu-slot';
@@ -35,7 +35,7 @@ export const VariationActionsMenuItem: React.FC< MenuItemProps > & {
 
 	return (
 		<>
-			{ [ QUICK_UPDATE, SINGLE_VARIATION ].map( ( actionType ) => (
+			{ [ QUICK_UPDATE, SINGLE_UPDATE ].map( ( actionType ) => (
 				<Fill
 					key={ actionType }
 					name={ getGroupName( group, actionType ) }
@@ -71,7 +71,7 @@ export const VariationSingleUpdateMenuItem = ( {
 		<VariationActionsMenuItem
 			{ ...props }
 			group={ group }
-			type={ 'single-variation' }
+			type={ SINGLE_UPDATE }
 		/>
 	);
 };
@@ -84,7 +84,7 @@ export const VariationQuickUpdateMenuItem = ( {
 		<VariationActionsMenuItem
 			{ ...props }
 			group={ group }
-			type={ 'quick-update' }
+			type={ QUICK_UPDATE }
 		/>
 	);
 };
