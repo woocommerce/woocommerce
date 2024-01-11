@@ -3320,8 +3320,8 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_unserialize_meta_with_nonexistent_class() {
 		global $wpdb;
-		$META_KEY   = 'test_unserialize_meta_with_nonexistent_class';
-		$META_VALUE = 'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.833300000000001;s:9:"longitude";d:4.3333000000000004;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}}';
+		$meta_key   = 'test_unserialize_meta_with_nonexistent_class';
+		$meta_value = 'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.833300000000001;s:9:"longitude";d:4.3333000000000004;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}}';
 
 		$this->toggle_cot_authoritative( true );
 		$this->enable_cot_sync();
@@ -3331,21 +3331,32 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order->save();
 		$order_id = $order->get_id();
 
-		$wpdb->query( "INSERT INTO {$order_meta_table} (order_id, meta_key, meta_value) VALUES ({$order_id}, '{$META_KEY}', '{$META_VALUE}')" );
+		$wpdb->query( "INSERT INTO {$order_meta_table} (order_id, meta_key, meta_value) VALUES ({$order_id}, '{$meta_key}', '{$meta_value}')" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		$order->set_date_modified( time() );
 		$order->save();
 
-		// there is a suspicion that syncing with `__PHP_Incomplete_Class` objects in meta causes a fatal error, so let's sync the HPOS order to the CPT store
+		// There is a suspicion that syncing with `__PHP_Incomplete_Class` objects in meta causes a fatal error, so let's sync the HPOS order to the CPT store.
 		$order->get_data_store()->backfill_post_record( $order );
 
-		// another possible way to force sync
+		// Another possible way to force sync.
 		$orders = array( $order_id => $order );
 		$this->sut->read_multiple( $orders );
 
-		$order_results = wc_get_orders(array('limit' => 300, 'offset' => 0, 'order' => 'DESC', 'order_by' => 'ID', 'return' => 'objects', 'meta_key' => $META_KEY, 'meta_value' => '', 'meta_compare' => '!='));
-		$meta = $order_results[0]->get_meta( $META_KEY );
+		$order_results = wc_get_orders(
+			array(
+				'limit'        => 300,
+				'offset'       => 0,
+				'order'        => 'DESC',
+				'order_by'     => 'ID',
+				'return'       => 'objects',
+				'meta_key'     => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value'   => '', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_compare' => '!=',
+			)
+		);
+		$meta          = $order_results[0]->get_meta( $meta_key );
 
-		// unfortunately all the properties of `__PHP_Incomplete_Class` objects are private, so we can't test them directly
+		// Unfortunately all the properties of `__PHP_Incomplete_Class` objects are private, so we can't test them directly.
 		$this->assertNotEmpty( $meta );
 		$this->assertEquals( '__PHP_Incomplete_Class', get_class( $meta ) );
 	}
