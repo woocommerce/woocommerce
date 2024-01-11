@@ -229,12 +229,33 @@ test.describe( 'Product Collection', () => {
 				featured: true,
 			} );
 
-			// In test data we have only 6 products on sale
-			await expect( pageObject.products ).toHaveCount( 6 );
+			// In test data we have only 4 featured products.
+			await expect( pageObject.products ).toHaveCount( 4 );
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect( pageObject.products ).toHaveCount( 6 );
+			await expect( pageObject.products ).toHaveCount( 4 );
+		} );
+
+		test( 'Products can be filtered based on created date.', async ( {
+			pageObject,
+		} ) => {
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.addFilter( 'Created' );
+			await pageObject.setCreatedFilter( {
+				operator: 'within',
+				range: 'last30days',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.setCreatedFilter( {
+				operator: 'before',
+				range: 'last30days',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 0 );
 		} );
 
 		test.describe( 'Inherit query from template', () => {
