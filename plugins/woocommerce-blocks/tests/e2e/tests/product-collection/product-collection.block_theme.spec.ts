@@ -255,6 +255,12 @@ test.describe( 'Product Collection', () => {
 				range: 'last30days',
 			} );
 
+			// Products are created when env is setup so we don't have flexibility here.
+			// Basically on CI, every time all the products will be created within last 24h.
+			await expect( pageObject.products ).toHaveCount( 0 );
+
+			await pageObject.publishAndGoToFrontend();
+
 			await expect( pageObject.products ).toHaveCount( 0 );
 		} );
 
@@ -280,6 +286,10 @@ test.describe( 'Product Collection', () => {
 			await pageObject.setPriceRange( {
 				max: '17.29',
 			} );
+
+			await expect( pageObject.products ).toHaveCount( 4 );
+
+			await pageObject.publishAndGoToFrontend();
 
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
