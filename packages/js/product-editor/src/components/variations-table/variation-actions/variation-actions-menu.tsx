@@ -8,7 +8,7 @@ import {
 	MenuGroup,
 	MenuItem,
 } from '@wordpress/components';
-import { createElement } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { chevronDown, chevronUp, moreVertical } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
@@ -27,6 +27,8 @@ import { ToggleVisibilityMenuItem } from '../toggle-visibility-menu-item';
 import { DownloadsMenuItem } from '../downloads-menu-item';
 import { VariationActionsMenuItem } from './variation-actions-menu-item';
 import { QUICK_UPDATE, SINGLE_VARIATION } from './constants';
+import { UpdateStockMenuItem } from '../update-stock-menu-item';
+import { SetListPriceMenuItem } from '../set-list-price-menu-item';
 
 export function VariationActionsMenu( {
 	selection,
@@ -36,24 +38,34 @@ export function VariationActionsMenu( {
 	type = SINGLE_VARIATION,
 }: VariationActionsMenuProps ) {
 	const isQuickUpdate = type === QUICK_UPDATE;
-	function getContent( { onClose }: { onClose: () => void } ) {
+
+	function getMainMenuGroup( onClose: () => void ) {
 		return (
-			<div
-				className={ classNames( {
-					'components-dropdown-menu__menu': isQuickUpdate,
-				} ) }
+			<MenuGroup
+				label={
+					isQuickUpdate
+						? undefined
+						: sprintf(
+								/** Translators: Variation ID */
+								__( 'Variation Id: %s', 'woocommerce' ),
+								( selection as ProductVariation ).id
+						  )
+				}
 			>
-				<MenuGroup
-					label={
-						! isQuickUpdate
-							? sprintf(
-									/** Translators: Variation ID */
-									__( 'Variation Id: %s', 'woocommerce' ),
-									( selection as ProductVariation ).id
-							  )
-							: undefined
-					}
-				>
+				{ isQuickUpdate ? (
+					<>
+						<UpdateStockMenuItem
+							selection={ selection }
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
+						<SetListPriceMenuItem
+							selection={ selection }
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
+					</>
+				) : (
 					<MenuItem
 						href={ ( selection as ProductVariation ).permalink }
 						target="_blank"
@@ -68,16 +80,29 @@ export function VariationActionsMenu( {
 					>
 						{ __( 'Preview', 'woocommerce' ) }
 					</MenuItem>
-					<ToggleVisibilityMenuItem
-						selection={ selection }
-						onChange={ onChange }
-						onClose={ onClose }
-					/>
-					<VariationActionsMenuItem.Slot
-						group={ '_main' }
-						type={ type }
-					/>
-				</MenuGroup>
+				) }
+
+				<ToggleVisibilityMenuItem
+					selection={ selection }
+					onChange={ onChange }
+					onClose={ onClose }
+				/>
+				<VariationActionsMenuItem.Slot
+					group={ '_main' }
+					type={ type }
+				/>
+			</MenuGroup>
+		);
+	}
+
+	function getContent( { onClose }: { onClose: () => void } ) {
+		return (
+			<div
+				className={ classNames( {
+					'components-dropdown-menu__menu': isQuickUpdate,
+				} ) }
+			>
+				{ getMainMenuGroup( onClose ) }
 				<MenuGroup>
 					<PricingMenuItem
 						selection={ selection }
