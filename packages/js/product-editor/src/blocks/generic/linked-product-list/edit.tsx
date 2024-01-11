@@ -124,7 +124,7 @@ export function LinkedProductListBlockEdit( {
 		setLinkedProductIds( newLinkedProductIds );
 	}
 
-	async function choseProductsForMe() {
+	async function chooseProductsForMe() {
 		const { getRelatedProducts } = resolveSelect( PRODUCTS_STORE_NAME );
 		dispatch( {
 			type: 'LOADING_LINKED_PRODUCTS',
@@ -158,7 +158,7 @@ export function LinkedProductListBlockEdit( {
 				<Button
 					variant="tertiary"
 					icon={ reusableBlock }
-					onClick={ choseProductsForMe }
+					onClick={ chooseProductsForMe }
 				>
 					{ __( 'Choose products for me', 'woocommerce' ) }
 				</Button>
