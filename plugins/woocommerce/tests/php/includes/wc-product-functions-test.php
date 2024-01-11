@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
+// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
  * Class WC_Stock_Functions_Tests.
  */
@@ -204,9 +205,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	public function test_wc_scheduled_sales_sale_start() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_price( 100 );
-		$product->set_regular_price( 100);
+		$product->set_regular_price( 100 );
 		$product->set_sale_price( 50 );
-		$product->set_date_on_sale_from(  date('Y-m-d H:i:s', time() + 10 )  );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + 10 ) );
 		$product->save();
 
 		// Bypass product after save hook to prevent price change on save.
@@ -225,9 +226,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	public function test_wc_scheduled_sales_sale_end() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_price( 100 );
-		$product->set_regular_price( 100);
+		$product->set_regular_price( 100 );
 		$product->set_sale_price( 50 );
-		$product->set_date_on_sale_to(  date('Y-m-d H:i:s', time() + 10 )  );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + 10 ) );
 		$product->save();
 
 		// Bypass product after save hook to prevent price change on save.
