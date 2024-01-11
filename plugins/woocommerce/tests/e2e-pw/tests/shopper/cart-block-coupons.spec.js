@@ -3,7 +3,7 @@ const { admin } = require( '../../test-data/data' );
 const { closeWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const simpleProductName = 'A Simple Product';
+const simpleProductName = 'Cart Coupons Product';
 const singleProductFullPrice = '110.00';
 const singleProductSalePrice = '55.00';
 const coupons = [
@@ -23,11 +23,15 @@ const coupons = [
 		amount: '10.00',
 	},
 ];
+const couponLimitedCode = '10fixedcartlimited';
+const customerBilling = {
+	email: 'john.doe.merchant.test@example.com',
+};
 
 const pageTitle = 'Cart Block';
 const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
 
-let product1Id;
+let productId, orderId, limitedCouponId;
 
 test.describe( 'Cart Block Applying Coupons', () => {
 	const couponBatchId = new Array();
@@ -52,7 +56,7 @@ test.describe( 'Cart Block Applying Coupons', () => {
 				sale_price: singleProductSalePrice,
 			} )
 			.then( ( response ) => {
-				product1Id = response.data.id;
+				productId = response.data.id;
 			} );
 		// add coupons
 		await api
@@ -64,6 +68,32 @@ test.describe( 'Cart Block Applying Coupons', () => {
 					couponBatchId.push( response.data.create[ i ].id );
 				}
 			} );
+		// add limited coupon
+		await api
+			.post( 'coupons', {
+				code: couponLimitedCode,
+				discount_type: 'fixed_cart',
+				amount: '10.00',
+				usage_limit: 1,
+				usage_count: 1,
+			} )
+			.then( ( response ) => {
+				limitedCouponId = response.data.id;
+			} );
+		// add order with applied limited coupon
+		await api
+			.post( 'orders', {
+				status: 'processing',
+				billing: customerBilling,
+				coupon_lines: [
+					{
+						code: couponLimitedCode,
+					},
+				],
+			} )
+			.then( ( response ) => {
+				orderId = response.data.id;
+			} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -74,9 +104,14 @@ test.describe( 'Cart Block Applying Coupons', () => {
 			version: 'wc/v3',
 		} );
 		await api.post( 'products/batch', {
-			delete: [ product1Id ],
+			delete: [ productId ],
 		} );
-		await api.post( 'coupons/batch', { delete: [ ...couponBatchId ] } );
+		await api.post( 'coupons/batch', {
+			delete: [ ...couponBatchId, limitedCouponId ],
+		} );
+		await api.post( 'orders/batch', {
+			delete: [ orderId ],
+		} );
 	} );
 
 	test.beforeEach( async ( { context } ) => {
@@ -121,7 +156,7 @@ test.describe( 'Cart Block Applying Coupons', () => {
 	} ) => {
 		const totals = [ '$50.00', '$27.50', '$45.00' ];
 		// add product to cart block
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
 		await page.goto( pageSlug );
 		await expect(
@@ -165,7 +200,7 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		const totalsReverse = [ '$17.50', '$45.00', '$55.00' ];
 		const discounts = [ '-$5.00', '-$32.50', '-$42.50' ];
 		// add product to cart block
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
 		await page.goto( pageSlug );
 		await expect(
@@ -214,7 +249,7 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		page,
 	} ) => {
 		// add product to cart block
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
 		await page.goto( pageSlug );
 		await expect(
@@ -245,6 +280,30 @@ test.describe( 'Cart Block Applying Coupons', () => {
 				.getByText(
 					`Coupon code "${ coupons[ 0 ].code }" has already been applied.`
 				)
+		).toBeVisible();
+	} );
+
+	test( 'prevents cart block applying coupon with usage limit', async ( {
+		page,
+	} ) => {
+		// add product to cart block and go to cart
+		await page.goto( `/shop/?add-to-cart=${ productId }` );
+		await page.waitForLoadState( 'networkidle' );
+		await page.goto( pageSlug );
+		await expect(
+			page.getByRole( 'heading', { name: pageTitle } )
+		).toBeVisible();
+
+		// add coupon with usage limit
+		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
+		await page
+			.locator( '#wc-block-components-totals-coupon__input-0' )
+			.fill( couponLimitedCode );
+		await page.getByText( 'Apply', { exact: true } ).click();
+		await expect(
+			page
+				.getByRole( 'alert' )
+				.getByText( 'Coupon usage limit has been reached.' )
 		).toBeVisible();
 	} );
 } );

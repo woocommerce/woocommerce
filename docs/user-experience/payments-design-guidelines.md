@@ -3,8 +3,6 @@ post_title: User Experience Guidelines - Payments Onboarding and Setup
 menu_title: Payments Onboarding and Setup
 ---
 
-# Payments onboarding & setup
-
 Follow the overall [user experience guidelines for WooCommerce](https://github.com/woocommerce/woocommerce/blob/trunk/docs/user-experience/user-experience-guidelines.md).
 
 Payments plugins come in many types: payment processors and gateways, wallets, Buy Now Pay Later, crypto, and more.

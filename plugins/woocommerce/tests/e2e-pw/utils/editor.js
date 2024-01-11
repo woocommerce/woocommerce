@@ -1,26 +1,11 @@
-const { test } = require( '@playwright/test' );
-
 const closeWelcomeModal = async ( { page } ) => {
-	const welcomeModalVisible =
-		await test.step( 'Check if the Welcome modal appeared', async () => {
-			return await page
-				.getByRole( 'heading', {
-					name: 'Welcome to the block editor',
-				} )
-				.isVisible();
-		} );
-
-	if ( welcomeModalVisible ) {
-		await test.step( 'Welcome modal appeared. Close it.', async () => {
-			await page
-				.getByRole( 'document' )
-				.getByRole( 'button', { name: 'Close' } )
-				.click();
-		} );
-	} else {
-		await test.step( 'Welcome modal did not appear.', async () => {
-			// do nothing.
-		} );
+	// Close welcome popup if prompted
+	try {
+		await page
+			.getByLabel( 'Close', { exact: true } )
+			.click( { timeout: 5000 } );
+	} catch ( error ) {
+		// Welcome modal wasn't present, skipping action.
 	}
 };
 
