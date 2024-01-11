@@ -9,6 +9,14 @@ import {
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
+import { Button } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { reusableBlock } from '@wordpress/icons';
+import { useSelect } from '@wordpress/data';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useEntityId } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -66,6 +74,19 @@ export function Edit( {
 		linkedProducts: [],
 		searchedProducts: [],
 	} );
+
+	const productId = useEntityId( 'postType', postType );
+	const product: Product = useSelect(
+		( select ) =>
+			// @ts-expect-error There are no types for this.
+			select( 'core' ).getEditedEntityRecord(
+				'postType',
+				'product',
+				productId
+			),
+		[ productId ]
+	);
+
 	const loadLinkedProductsDispatcher =
 		getLoadLinkedProductsDispatcher( dispatch );
 	const searchProductsDispatcher = getSearchProductsDispatcher( dispatch );
@@ -95,25 +116,44 @@ export function Edit( {
 		filter();
 	}, [ filter ] );
 
-	function handleSelect( product: Product ) {
+	function handleSelect( selectedProduct: Product ) {
 		const newLinkedProductIds = selectSearchedProductDispatcher(
-			product,
+			selectedProduct,
 			state.linkedProducts
 		);
+
 		setLinkedProductIds( newLinkedProductIds );
 	}
 
-	function handleRemoveProductClick( product: Product ) {
+	function handleRemoveProductClick( removedProduct: Product ) {
 		const newLinkedProductIds = removeLinkedProductDispatcher(
-			product,
+			removedProduct,
 			state.linkedProducts
 		);
 
 		setLinkedProductIds( newLinkedProductIds );
+	}
+
+	function choseProductsForMe() {
+		if ( ! product?.related_ids ) {
+			return;
+		}
+
+		setLinkedProductIds( product.related_ids );
 	}
 
 	return (
 		<div { ...blockProps }>
+			<div className="wp-block-woocommerce-product-linked-list-field__form-group-header">
+				<Button
+					variant="tertiary"
+					icon={ reusableBlock }
+					onClick={ choseProductsForMe }
+				>
+					{ __( 'Choose products for me', 'woocommerce' ) }
+				</Button>
+			</div>
+
 			<div className="wp-block-woocommerce-product-linked-list-field__form-group-content">
 				<ProductSelect
 					items={ state.searchedProducts }
