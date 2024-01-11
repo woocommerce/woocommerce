@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Limit cookie deduping to WooCommerce cookies only.
