@@ -301,7 +301,7 @@ importers:
         version: 12.1.3(react-dom@18.2.0)(react@18.2.0)
       '@testing-library/react-hooks':
         specifier: 8.0.1
-        version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react@18.2.0)
+        version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react-test-renderer@18.2.0)(react@18.2.0)
       '@testing-library/user-event':
         specifier: 13.5.0
         version: 13.5.0(@testing-library/dom@9.3.3)
@@ -508,7 +508,7 @@ importers:
         version: 5.16.2
       '@testing-library/react-hooks':
         specifier: 8.0.1
-        version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react@18.2.0)
+        version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react-test-renderer@18.2.0)(react@18.2.0)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -562,6 +562,9 @@ importers:
         version: 18.2.0
       react-dom:
         specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+      react-test-renderer:
+        specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
       rimraf:
         specifier: ^3.0.2
@@ -818,7 +821,7 @@ importers:
         version: 12.1.3(react-dom@18.2.0)(react@18.2.0)
       '@testing-library/react-hooks':
         specifier: 8.0.1
-        version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react@18.2.0)
+        version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react-test-renderer@18.2.0)(react@18.2.0)
       '@testing-library/user-event':
         specifier: 13.5.0
         version: 13.5.0(@testing-library/dom@8.11.3)
@@ -885,6 +888,9 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.2.0
+      react-test-renderer:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
       rimraf:
         specifier: ^3.0.2
         version: 3.0.2
@@ -1223,8 +1229,8 @@ importers:
         specifier: 12.1.3
         version: 12.1.3(react-dom@18.2.0)(react@18.2.0)
       '@testing-library/react-hooks':
-        specifier: 7.0.2
-        version: 7.0.2(react-dom@18.2.0)(react@18.2.0)
+        specifier: 8.0.1
+        version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react-test-renderer@18.2.0)(react@18.2.0)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -1270,6 +1276,9 @@ importers:
       jest-cli:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
+      react-test-renderer:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
       redux:
         specifier: ^4.2.1
         version: 4.2.1
@@ -1996,7 +2005,7 @@ importers:
         version: 5.16.2
       '@testing-library/react-hooks':
         specifier: 8.0.1
-        version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react@18.2.0)
+        version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react-test-renderer@18.2.0)(react@18.2.0)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -2645,7 +2654,7 @@ importers:
         version: 12.1.3(react-dom@18.2.0)(react@18.2.0)
       '@testing-library/react-hooks':
         specifier: 8.0.1
-        version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react@18.2.0)
+        version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react-test-renderer@18.2.0)(react@18.2.0)
       '@testing-library/user-event':
         specifier: 13.5.0
         version: 13.5.0(@testing-library/dom@9.3.3)
@@ -2732,6 +2741,9 @@ importers:
         version: 18.2.0
       react-dom:
         specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+      react-test-renderer:
+        specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
       rimraf:
         specifier: ^3.0.2
@@ -3320,8 +3332,8 @@ importers:
         specifier: 12.1.3
         version: 12.1.3(react-dom@18.2.0)(react@18.2.0)
       '@testing-library/react-hooks':
-        specifier: 7.0.2
-        version: 7.0.2(react-dom@18.2.0)(react@18.2.0)
+        specifier: 8.0.1
+        version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react-test-renderer@18.2.0)(react@18.2.0)
       '@testing-library/user-event':
         specifier: 13.5.0
         version: 13.5.0(@testing-library/dom@8.11.3)
@@ -3604,6 +3616,9 @@ importers:
       react-refresh:
         specifier: ^0.14.0
         version: 0.14.0
+      react-test-renderer:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
       readline-sync:
         specifier: ^1.4.10
         version: 1.4.10
@@ -3995,8 +4010,8 @@ importers:
         specifier: 12.1.5
         version: 12.1.5(react-dom@17.0.2)(react@18.2.0)
       '@testing-library/react-hooks':
-        specifier: 7.0.2
-        version: 7.0.2(react-dom@17.0.2)(react-test-renderer@17.0.2)(react@18.2.0)
+        specifier: 8.0.1
+        version: 8.0.1(@types/react@18.2.47)(react-dom@17.0.2)(react-test-renderer@18.2.0)(react@18.2.0)
       '@testing-library/user-event':
         specifier: 13.5.0
         version: 13.5.0(@testing-library/dom@9.3.3)
@@ -4334,8 +4349,8 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5(typescript@5.3.2)(webpack@5.88.2)
       react-test-renderer:
-        specifier: 17.0.2
-        version: 17.0.2(react@18.2.0)
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
       redux:
         specifier: 4.2.1
         version: 4.2.1
@@ -19147,29 +19162,6 @@ packages:
       redent: 3.0.0
     dev: true
 
-  /@testing-library/react-hooks@7.0.2(react-dom@17.0.2)(react-test-renderer@17.0.2)(react@18.2.0):
-    resolution: {integrity: sha512-dYxpz8u9m4q1TuzfcUApqi8iFfR6R0FaMbr2hjZJy1uC8z+bO/K4v8Gs9eogGKYQop7QsrBTFkv/BCF7MzD2Cg==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      react: ^18.2.0
-      react-dom: '>=16.9.0'
-      react-test-renderer: '>=16.9.0'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
-      react-test-renderer:
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.23.6
-      '@types/react': 18.2.47
-      '@types/react-dom': 18.0.10
-      '@types/react-test-renderer': 18.0.7
-      react: 18.2.0
-      react-dom: 17.0.2(react@18.2.0)
-      react-error-boundary: 3.1.4(react@18.2.0)
-      react-test-renderer: 17.0.2(react@18.2.0)
-    dev: true
-
   /@testing-library/react-hooks@7.0.2(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-dYxpz8u9m4q1TuzfcUApqi8iFfR6R0FaMbr2hjZJy1uC8z+bO/K4v8Gs9eogGKYQop7QsrBTFkv/BCF7MzD2Cg==}
     engines: {node: '>=12'}
@@ -19192,7 +19184,31 @@ packages:
       react-error-boundary: 3.1.4(react@18.2.0)
     dev: true
 
-  /@testing-library/react-hooks@8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react@18.2.0):
+  /@testing-library/react-hooks@8.0.1(@types/react@18.2.47)(react-dom@17.0.2)(react-test-renderer@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-Aqhl2IVmLt8IovEVarNDFuJDVWVvhnr9/GCU6UUnrYXwgDFF9h2L2o2P9KBni1AST5sT6riAyoukFLyjQUgD/g==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      '@types/react': ^18.0.21
+      react: ^18.2.0
+      react-dom: ^16.9.0 || ^17.0.0
+      react-test-renderer: ^16.9.0 || ^17.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      react-dom:
+        optional: true
+      react-test-renderer:
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.23.5
+      '@types/react': 18.2.47
+      react: 18.2.0
+      react-dom: 17.0.2(react@18.2.0)
+      react-error-boundary: 3.1.4(react@18.2.0)
+      react-test-renderer: 18.2.0(react@18.2.0)
+    dev: true
+
+  /@testing-library/react-hooks@8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react-test-renderer@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-Aqhl2IVmLt8IovEVarNDFuJDVWVvhnr9/GCU6UUnrYXwgDFF9h2L2o2P9KBni1AST5sT6riAyoukFLyjQUgD/g==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -19213,6 +19229,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-error-boundary: 3.1.4(react@18.2.0)
+      react-test-renderer: 18.2.0(react@18.2.0)
     dev: true
 
   /@testing-library/react@12.1.3(react-dom@18.2.0)(react@18.2.0):
@@ -23259,7 +23276,7 @@ packages:
     peerDependencies:
       react: ^18.2.0
     dependencies:
-      '@babel/runtime': 7.23.5
+      '@babel/runtime': 7.23.6
       '@wordpress/api-fetch': 6.3.1
       '@wordpress/blocks': 11.21.0(react@18.2.0)
       '@wordpress/data': 6.6.1(react@18.2.0)
@@ -45541,7 +45558,7 @@ packages:
       postcss: 8.4.32
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@5.1.4)
+      webpack: 5.89.0(webpack-cli@3.3.12)
 
   /postcss-loader@6.2.1(postcss@8.4.32)(webpack@5.89.0):
     resolution: {integrity: sha512-WbbYpmAaKcux/P66bZ40bpWsBucjx/TTgVVzRZ9yUO8yQfVBlameJ0ZGVaPfH64hNSBh63a+ICP5nqOpBA0w+Q==}
@@ -47973,7 +47990,7 @@ packages:
     dependencies:
       object-assign: 4.1.1
       react: 18.2.0
-      react-is: 17.0.2
+      react-is: 18.2.0
 
   /react-sizeme@3.0.2:
     resolution: {integrity: sha512-xOIAOqqSSmKlKFJLO3inBQBdymzDuXx4iuwkNcJmC96jeiOg5ojByvL+g3MW9LPEsojLbC6pf68zOfobK8IPlw==}
@@ -48036,7 +48053,6 @@ packages:
       react-is: 16.13.1
       scheduler: 0.19.1
     dev: true
-    bundledDependencies: false
 
   /react-test-renderer@17.0.2(react@18.2.0):
     resolution: {integrity: sha512-yaQ9cB89c17PUb0x6UfWRs7kQCorVdHlutU1boVPEsB8IDZH6n9tHxMacc3y0JoXOJUsZb/t/Mb8FUWMKaM7iQ==}
@@ -48048,6 +48064,17 @@ packages:
       react-is: 17.0.2
       react-shallow-renderer: 16.15.0(react@18.2.0)
       scheduler: 0.20.2
+
+  /react-test-renderer@18.2.0(react@18.2.0):
+    resolution: {integrity: sha512-JWD+aQ0lh2gvh4NM3bBM42Kx+XybOxCpgYK7F8ugAlpaTSnWsX+39Z4XkOykGZAHrjwwTZT3x3KxswVWxHPUqA==}
+    peerDependencies:
+      react: ^18.2.0
+    dependencies:
+      react: 18.2.0
+      react-is: 18.2.0
+      react-shallow-renderer: 16.15.0(react@18.2.0)
+      scheduler: 0.23.0
+    dev: true
 
   /react-transition-group@4.4.5(react-dom@17.0.2)(react@18.2.0):
     resolution: {integrity: sha512-pZcd1MCJoiKiBR2NRxeCRg13uCXbydPnmB4EOeRrY7480qNWO8IIgQG6zlDkm6uRMsURXPuKq0GWtiM59a5Q6g==}
@@ -49372,7 +49399,7 @@ packages:
       sass: 1.69.5
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@5.1.4)
+      webpack: 5.89.0(webpack-cli@3.3.12)
 
   /sass-loader@12.6.0(sass@1.69.5)(webpack@5.89.0):
     resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}

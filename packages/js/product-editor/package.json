@@ -115,6 +115,7 @@
 		"postcss-loader": "^4.3.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
+		"react-test-renderer": "18.2.0",
 		"rimraf": "^3.0.2",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
