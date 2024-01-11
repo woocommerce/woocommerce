@@ -38,7 +38,7 @@ jobs:
             if ( baseRef ) {
               baseRef = 'origin/' + baseRef;
             }
-            const child_process = require( 'child_process' );
+            const child_process = require( 'node:child_process' );
             const jobs = JSON.parse(
               child_process.execSync( 'pnpm utils ci-jobs ' + baseRef, { encoding: 'utf8' } )
             );
