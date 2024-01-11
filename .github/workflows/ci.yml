@@ -82,8 +82,8 @@ jobs:
           build: '${{ matrix.projectName }}'
       - name: 'Prepare Test Environment'
         id: 'prepare-test-environment'
-        if: ${{ matrix.testEnv != '' }}
-
+        if: ${{ matrix.testEnv.shouldCreated }}
+        env: ${{ matrix.testEnv.envVars }}
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
       - name: 'Test'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'

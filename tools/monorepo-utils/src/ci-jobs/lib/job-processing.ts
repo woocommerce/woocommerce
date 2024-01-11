@@ -18,6 +18,7 @@ interface LintJob {
  * A testing job environment.
  */
 interface TestJobEnv {
+	shouldCreate: boolean;
 	start: string;
 	envVars: TestEnvVars;
 }
@@ -29,7 +30,7 @@ interface TestJob {
 	projectName: string;
 	name: string;
 	command: string;
-	testEnv?: TestJobEnv;
+	testEnv: TestJobEnv;
 }
 
 /**
@@ -133,12 +134,18 @@ async function createTestJob(
 		projectName,
 		name: config.name,
 		command: config.command,
+		testEnv: {
+			shouldCreate: false,
+			start: '',
+			envVars: {},
+		},
 	};
 
 	// We want to make sure that we're including the configuration for
 	// any test environment that the job will need in order to run.
 	if ( config.testEnv ) {
 		createdJob.testEnv = {
+			shouldCreate: true,
 			start: config.testEnv.start,
 			envVars: await parseTestEnvConfig( config.testEnv.config ),
 		};
