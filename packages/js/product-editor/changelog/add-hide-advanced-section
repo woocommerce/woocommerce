@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add HOC to hide inventory collapsible block when nothing is inside it

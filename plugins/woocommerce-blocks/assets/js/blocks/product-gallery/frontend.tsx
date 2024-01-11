@@ -51,6 +51,9 @@ const productGallery = {
 		get pagerDotFillOpacity(): number {
 			return state.isSelected ? 1 : 0.2;
 		},
+		get pagerButtonPressed(): boolean {
+			return state.isSelected ? true : false;
+		},
 	},
 	actions: {
 		closeDialog: () => {

@@ -2,6 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin, customer } = require( '../../test-data/data' );
 const { setFilterValue, clearFilters } = require( '../../utils/filters' );
+const { addProductsToCart } = require( '../../utils/pdp' );
 
 const guestEmail = 'checkout-guest@example.com';
 
@@ -143,10 +144,7 @@ test.describe( 'Checkout page', () => {
 		page,
 	} ) => {
 		// this time we're going to add two products to the cart
-		for ( let i = 1; i < 3; i++ ) {
-			await page.goto( `/shop/?add-to-cart=${ productId }` );
-			await page.waitForLoadState( 'networkidle' );
-		}
+		await addProductsToCart( page, simpleProductName, '2' );
 
 		await page.goto( '/checkout/' );
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
@@ -169,10 +167,7 @@ test.describe( 'Checkout page', () => {
 
 	test( 'allows customer to fill billing details', async ( { page } ) => {
 		// this time we're going to add three products to the cart
-		for ( let i = 1; i < 4; i++ ) {
-			await page.goto( `/shop/?add-to-cart=${ productId }` );
-			await page.waitForLoadState( 'networkidle' );
-		}
+		await addProductsToCart( page, simpleProductName, '3' );
 
 		await page.goto( '/checkout/' );
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
@@ -253,7 +248,7 @@ test.describe( 'Checkout page', () => {
 		await page.locator( '#billing_email' ).fill( customer.email );
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
-		await expect( page.locator( 'ul.woocommerce-error' ) ).toBeVisible();
+		await expect( page.locator( '.is-error ul' ) ).toBeVisible();
 		await expect(
 			page.getByText( 'Shipping First name is a required field.' )
 		).toBeVisible();
@@ -272,10 +267,7 @@ test.describe( 'Checkout page', () => {
 	} );
 
 	test( 'allows customer to fill shipping details', async ( { page } ) => {
-		for ( let i = 1; i < 3; i++ ) {
-			await page.goto( `/shop/?add-to-cart=${ productId }` );
-			await page.waitForLoadState( 'networkidle' );
-		}
+		await addProductsToCart( page, simpleProductName, '2' );
 
 		await page.goto( '/checkout/' );
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
@@ -306,10 +298,7 @@ test.describe( 'Checkout page', () => {
 	} );
 
 	test( 'allows guest customer to place an order', async ( { page } ) => {
-		for ( let i = 1; i < 3; i++ ) {
-			await page.goto( `/shop/?add-to-cart=${ productId }` );
-			await page.waitForLoadState( 'networkidle' );
-		}
+		await addProductsToCart( page, simpleProductName, '2' );
 
 		await page.goto( '/checkout/' );
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
@@ -379,7 +368,7 @@ test.describe( 'Checkout page', () => {
 		await expect(
 			page.locator( 'form.woocommerce-verify-email p:nth-child(4)' )
 		).toContainText( /verify the email address associated with the order/ );
-		await expect( page.locator( 'ul.woocommerce-error li' ) ).toContainText(
+		await expect( page.locator( '.is-error' ) ).toContainText(
 			/We were unable to verify the email address you provided/
 		);
 
@@ -430,10 +419,7 @@ test.describe( 'Checkout page', () => {
 			.fill( customer.password );
 		await page.locator( 'text=Log In' ).click();
 		await page.waitForLoadState( 'networkidle' );
-		for ( let i = 1; i < 3; i++ ) {
-			await page.goto( `/shop/?add-to-cart=${ productId }` );
-			await page.waitForLoadState( 'networkidle' );
-		}
+		await addProductsToCart( page, simpleProductName, '2' );
 
 		await page.goto( '/checkout/' );
 		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
@@ -483,7 +469,7 @@ test.describe( 'Checkout page', () => {
 		await page.reload();
 
 		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
-		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
+		await expect( page.locator( '.is-info' ) ).toContainText(
 			/Please log in to your account to view this order/
 		);
 

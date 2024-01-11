@@ -112,7 +112,7 @@ class OrderAttributionTest extends WP_UnitTestCase {
 		add_action(
 			'woocommerce_before_template_part',
 			function( $template_name, $template_path, $located, $args ) {
-				$this->assertEquals( 'Referral', $args['meta']['origin'] ?? '' );
+				$this->assertEquals( 'Referral: Woocommerce.com', $args['meta']['origin'] ?? '' );
 				$this->assertEquals( 'Desktop', $args['meta']['device_type'] ?? '' );
 				$this->assertEquals(
 					'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
@@ -125,8 +125,8 @@ class OrderAttributionTest extends WP_UnitTestCase {
 				$this->assertEquals( '/', $args['meta']['utm_content'] ?? '' );
 				$this->assertEquals( 'referral', $args['meta']['utm_medium'] ?? '' );
 				$this->assertEquals( 'woocommerce.com', $args['meta']['utm_source'] ?? '' );
-				$this->assertEquals( 'https://woocommerce.com/', $args['meta']['url'] ?? '' );
-				$this->assertEquals( 'referral', $args['meta']['type'] ?? '' );
+				$this->assertEquals( 'https://woocommerce.com/', $args['meta']['referrer'] ?? '' );
+				$this->assertEquals( 'referral', $args['meta']['source_type'] ?? '' );
 
 				$this->assertTrue( $args['has_more_details'] );
 			},

@@ -232,6 +232,17 @@ export class EditorUtils {
 		return firstBlockIndex < secondBlockIndex;
 	}
 
+	async waitForSiteEditorFinishLoading() {
+		await this.page
+			.frameLocator( 'iframe[title="Editor canvas"i]' )
+			.locator( 'body > *' )
+			.first()
+			.waitFor();
+		await this.page
+			.locator( '.edit-site-canvas-loader' )
+			.waitFor( { state: 'hidden' } );
+	}
+
 	async setLayoutOption(
 		option:
 			| 'Align Top'
@@ -338,5 +349,52 @@ export class EditorUtils {
 			.getByRole( 'button', { name: 'Dismiss this notice' } )
 			.getByText( 'Site updated.' )
 			.waitFor();
+	}
+
+	async revertTemplateCustomizations( templateName: string ) {
+		const templateRow = this.page.getByRole( 'row', {
+			name: templateName,
+		} );
+		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
+		await this.page
+			.getByRole( 'menuitem', {
+				name: 'Clear customizations',
+			} )
+			.click();
+		await this.page
+			.getByRole( 'button', { name: 'Dismiss this notice' } )
+			.getByText( `"${ templateName }" reverted.` )
+			.waitFor();
+	}
+
+	async publishAndVisitPost() {
+		await this.editor.publishPost();
+		const url = new URL( this.page.url() );
+		const postId = url.searchParams.get( 'post' );
+		await this.page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
+	}
+
+	async openWidgetEditor() {
+		await this.page.goto( '/wp-admin/widgets.php' );
+		await this.closeModalByName( 'Welcome to block Widgets' );
+	}
+
+	/**
+	 * Unlike the `insertBlock` method, which manipulates the block tree
+	 * directly, this method simulates real user behavior when inserting a
+	 * block to the editor by searching for block name then clicking on the
+	 * first matching result.
+	 *
+	 * Besides, some blocks that manipulate their attributes after insertion
+	 * aren't work probably with `insertBlock` as that method requires
+	 * attributes object and uses that data to creat the block object.
+	 */
+	async insertBlockUsingGlobalInserter( blockTitle: string ) {
+		await this.openGlobalBlockInserter();
+		await this.page.getByPlaceholder( 'Search' ).fill( blockTitle );
+		await this.page
+			.getByRole( 'option', { name: blockTitle, exact: true } )
+			.first()
+			.click();
 	}
 }

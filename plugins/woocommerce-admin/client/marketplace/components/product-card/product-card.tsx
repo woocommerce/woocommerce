@@ -11,6 +11,7 @@ import { useQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './product-card.scss';
+import ProductCardFooter from './product-card-footer';
 import { Product, ProductTracksData, ProductType } from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
 
@@ -35,6 +36,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		url: '',
 		price: 0,
 		image: '',
+		averageRating: null,
+		reviewsCount: null,
 	};
 
 	// We hardcode this for now while we only display prices in USD.
@@ -174,25 +177,19 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 						{ ! isLoading && product.description }
 					</p>
 				) }
-				<div className="woocommerce-marketplace__product-card__price">
-					{ ! isLoading && (
-						<>
-							<span className="woocommerce-marketplace__product-card__price-label">
-								{
-									// '0' is a free product
-									product.price === 0
-										? __( 'Free download', 'woocommerce' )
-										: currencySymbol + product.price
-								}
-							</span>
-							<span className="woocommerce-marketplace__product-card__price-billing">
-								{ product.price === 0
-									? ''
-									: __( ' annually', 'woocommerce' ) }
-							</span>
-						</>
+				<footer className="woocommerce-marketplace__product-card__footer">
+					{ isLoading && (
+						<div className="woocommerce-marketplace__product-card__price" />
 					) }
-				</div>
+					{ ! isLoading && (
+						<ProductCardFooter
+							currencySymbol={ currencySymbol }
+							price={ product.price }
+							averageRating={ product.averageRating }
+							reviewsCount={ product.reviewsCount }
+						/>
+					) }
+				</footer>
 			</div>
 		</Card>
 	);

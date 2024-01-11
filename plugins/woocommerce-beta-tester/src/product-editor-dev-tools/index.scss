@@ -83,6 +83,7 @@
 	font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
 }
 
+.woocommerce-product-editor-dev-tools-user-preferences,
 .woocommerce-product-editor-dev-tools-product {
 	display: flex;
 	flex-direction: row;
@@ -90,6 +91,7 @@
 	height: 100%;
 }
 
+.woocommerce-product-editor-dev-tools-user-preferences-entity,
 .woocommerce-product-editor-dev-tools-product-entity {
 	flex: 1;
 

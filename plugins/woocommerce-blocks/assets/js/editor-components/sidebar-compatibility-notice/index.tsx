@@ -11,24 +11,33 @@ import classnames from 'classnames';
  */
 import './editor.scss';
 import { useCompatibilityNotice } from './use-compatibility-notice';
+import { SwitchToClassicShortcodeButton } from '../switch-to-classic-shortcode-button';
+
+interface CartCheckoutSidebarCompatibilityNoticeProps {
+	block: 'cart' | 'checkout';
+	clientId: string;
+}
 
 export const CartCheckoutSidebarCompatibilityNotice = ( {
 	block,
-}: {
-	block: 'cart' | 'checkout';
-} ) => {
+	clientId,
+}: CartCheckoutSidebarCompatibilityNoticeProps ) => {
 	const [ isVisible, dismissNotice ] = useCompatibilityNotice( block );
+
+	if ( ! isVisible ) {
+		return null;
+	}
 
 	const noticeText = createInterpolateElement(
 		__(
-			'The Cart & Checkout Blocks are built to optimize for faster checkout. To make sure this feature is right for your store, <a>review the list of compatible extensions</a>.',
+			"Some extensions don't yet support this block, which may impact the shopper experience. To make sure this feature is right for your store, <a>review the list of compatible extensions</a>.",
 			'woocommerce'
 		),
 		{
 			a: (
 				// Suppress the warning as this <a> will be interpolated into the string with content.
 				// eslint-disable-next-line jsx-a11y/anchor-has-content
-				<ExternalLink href="https://woocommerce.com/document/cart-checkout-blocks-support-status/#section-3" />
+				<ExternalLink href="https://woo.com/document/cart-checkout-blocks-status/#section-10" />
 			),
 		}
 	);
@@ -42,6 +51,11 @@ export const CartCheckoutSidebarCompatibilityNotice = ( {
 			] ) }
 		>
 			{ noticeText }
+			<SwitchToClassicShortcodeButton
+				block={ `woocommerce/${ block }` }
+				clientId={ clientId }
+				type={ 'generic' }
+			/>
 		</Notice>
 	);
 };

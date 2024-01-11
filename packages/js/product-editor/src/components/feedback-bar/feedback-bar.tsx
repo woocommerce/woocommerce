@@ -12,7 +12,6 @@ import {
 	createElement,
 	createInterpolateElement,
 	Fragment,
-	useState,
 } from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
 import { Pill } from '@woocommerce/components';
@@ -31,10 +30,9 @@ export type FeedbackBarProps = {
 };
 
 export function FeedbackBar( { productType }: FeedbackBarProps ) {
-	const { shouldShowFeedbackBar } = useFeedbackBar();
+	const { hideFeedbackBar, shouldShowFeedbackBar } = useFeedbackBar();
 	const { showCesModal, showProductMVPFeedbackModal } =
 		useCustomerEffortScoreModal();
-	const [ isFeedbackBarHidden, setIsFeedbackBarHidden ] = useState( false );
 
 	const getProductTracksProps = () => {
 		const tracksProps = {
@@ -177,7 +175,6 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 				type: 'snackbar',
 			}
 		);
-		setIsFeedbackBarHidden( true );
 	};
 
 	const onTurnOffEditorClick = () => {
@@ -185,7 +182,7 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 			...getProductTracksProps(),
 		} );
 
-		setIsFeedbackBarHidden( true );
+		hideFeedbackBar();
 
 		showProductMVPFeedbackModal();
 	};
@@ -195,12 +192,12 @@ export function FeedbackBar( { productType }: FeedbackBarProps ) {
 			...getProductTracksProps(),
 		} );
 
-		setIsFeedbackBarHidden( true );
+		hideFeedbackBar();
 	};
 
 	return (
 		<>
-			{ shouldShowFeedbackBar && ! isFeedbackBarHidden && (
+			{ shouldShowFeedbackBar && (
 				<div className="woocommerce-product-mvp-ces-footer">
 					<Pill>Beta</Pill>
 					<div className="woocommerce-product-mvp-ces-footer__message">

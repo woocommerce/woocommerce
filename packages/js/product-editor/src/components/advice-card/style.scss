@@ -1,0 +1,42 @@
+$card-border-color: $gray-400;
+$card-border-width: 2px;
+
+.woocommerce-advice-card {
+	background-image: url( "data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23" + str-slice( '#{ $card-border-color }', 2 ) + "' stroke-width='#{ $card-border-width }' stroke-dasharray='4 4' stroke-dashoffset='46' stroke-linecap='butt'/%3e%3c/svg%3e" );
+	background-color: $white;
+	border-radius: 4px;
+	padding: calc( 2 * $gap );
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	gap: $gap;
+
+	&__header {
+		display: flex;
+		justify-content: right;
+	}
+
+	&__body {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	&__footer {
+		text-align: center;
+		font-weight: 400;
+		color: $gray-700;
+	}
+
+	&.is-dismissible {
+		padding: $gap;
+	}
+
+	.woocommerce-advice-card__dismiss-button {
+		color: $gray-700;
+		&.is-small.has-icon:not(.has-text) {
+			padding: 0;
+			min-width: 24px;
+		}
+	}
+}

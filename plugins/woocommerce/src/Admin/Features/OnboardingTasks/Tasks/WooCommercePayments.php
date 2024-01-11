@@ -88,15 +88,8 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_additional_info() {
-		if ( WCPayPromotionInit::is_woopay_eligible() ) {
-			return __(
-				'By using WooPayments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> (including WooPay <a href="https://wordpress.com/tos/#more-woopay-specifically" target="_blank">merchant terms</a>) and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
-				'woocommerce'
-			);
-		}
-
 		return __(
-			'By using WooPayments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
+			'Accept credit/debit cards and other popular payment methods with no setup or monthly fees — and manage payments right from your store dashboard.',
 			'woocommerce'
 		);
 	}
