@@ -32,6 +32,7 @@ import {
 } from '../../../components/manage-download-limits-modal';
 import { EditDownloadsModal } from './edit-downloads-modal';
 import { UploadImage } from './upload-image';
+import { SectionActions } from '../../../components/block-slot-fill';
 
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
@@ -232,7 +233,7 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<div className="wp-block-woocommerce-product-downloads-field__header">
+			<SectionActions>
 				{ Boolean( downloads.length ) && (
 					<Button
 						variant="tertiary"
@@ -247,7 +248,7 @@ export function Edit( {
 					onUploadSuccess={ handleFileUpload }
 					onUploadError={ handleUploadError }
 				/>
-			</div>
+			</SectionActions>
 
 			<div className="wp-block-woocommerce-product-downloads-field__body">
 				<MediaUploader
