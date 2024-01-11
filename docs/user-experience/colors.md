@@ -3,7 +3,7 @@ post_title: User Experience Guidelines - Colors
 menu_title: Colors
 ---
 
-Colors in user experience play a crucial role in how users perceive and interact with your products. In the context of WooCommerce and WordPress wp-admin, the use of color is not just a design choice but a compliance necessity. This document emphasizes the importance of adhering to WordPress core colors and respecting the user's admin color scheme selection. It highlights the need for designs to pass AA level guidelines for accessibility, ensuring inclusivity for all users.
+ This document emphasizes the importance of adhering to WordPress core colors and respecting the user's admin color scheme selection. It highlights the need for designs to pass AA level guidelines for accessibility, ensuring inclusivity for all users.
 
 ## Best Practices
 
