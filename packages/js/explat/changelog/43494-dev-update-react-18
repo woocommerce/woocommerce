@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update React to 18, update `@wordpress/data` to wp-6.4, fix and ignore new type errors.
