@@ -63,7 +63,10 @@ VariationActionsMenuItem.Slot = ( { fillProps, group = '_main', type } ) => {
 	);
 };
 
-export function SingleVariationMenuItem( { group, ...props }: MenuItemProps ) {
+export const VariationSingleUpdateMenuItem = ( {
+	group,
+	...props
+}: MenuItemProps ) => {
 	return (
 		<VariationActionsMenuItem
 			{ ...props }
@@ -71,12 +74,12 @@ export function SingleVariationMenuItem( { group, ...props }: MenuItemProps ) {
 			type={ 'single-variation' }
 		/>
 	);
-}
+};
 
-export function VariationQuickUpdateMenuItem( {
+export const VariationQuickUpdateMenuItem = ( {
 	group,
 	...props
-}: MenuItemProps ) {
+}: MenuItemProps ) => {
 	return (
 		<VariationActionsMenuItem
 			{ ...props }
@@ -84,4 +87,4 @@ export function VariationQuickUpdateMenuItem( {
 			type={ 'quick-update' }
 		/>
 	);
-}
+};
