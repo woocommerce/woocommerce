@@ -23,7 +23,7 @@ export default function SectionActions( {
 	return (
 		<BlockFill
 			{ ...restProps }
-			name="section-description"
+			name="section-actions"
 			slotContainerBlockName={ containerBlockName }
 		/>
 	);
