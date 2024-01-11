@@ -38,7 +38,7 @@ import { Glasses } from '../../../images/glasses';
 import { AdviceCard } from '../../../components/advice-card';
 import { SectionActions } from '../../../components/block-slot-fill';
 
-export function Edit( {
+export function ProductListBlockEdit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< UploadsBlockAttributes > ) {
