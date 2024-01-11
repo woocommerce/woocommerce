@@ -9,9 +9,7 @@ import { SelectControl } from '@wordpress/components';
  */
 import { BaseProductFieldProps } from '../types';
 
-type SelectControlProps = typeof SelectControl extends React.FC< infer P >
-	? P
-	: never;
+type SelectControlProps = React.ComponentProps< typeof SelectControl >;
 
 type SelectControlFieldProps = BaseProductFieldProps< string | string[] > &
 	SelectControlProps;

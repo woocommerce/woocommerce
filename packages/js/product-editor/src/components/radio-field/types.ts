@@ -3,11 +3,7 @@
  */
 import { RadioControl } from '@wordpress/components';
 
-type RadioProps = typeof RadioControl extends (
-	props: infer P
-) => JSX.Element | null
-	? P
-	: never;
+type RadioProps = React.ComponentProps< typeof RadioControl >;
 
 export type RadioFieldProps = Omit< RadioProps, 'label' > & {
 	title: string;

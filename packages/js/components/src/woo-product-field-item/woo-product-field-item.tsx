@@ -12,6 +12,7 @@ import deprecated from '@wordpress/deprecated';
 import { createOrderedChildren, sortFillsByOrder } from '../utils';
 import { useSlotContext, SlotContextHelpersType } from '../slot-context';
 import { ProductFillLocationType } from '../woo-product-tab-item';
+import { FillComponentProps, SlotComponentProps } from '../types';
 
 type WooProductFieldItemProps = {
 	id: string;
@@ -31,9 +32,6 @@ type WooProductFieldFillProps = {
 };
 
 const DEFAULT_FIELD_ORDER = 20;
-
-type FillComponentProps = typeof Fill extends React.FC< infer P > ? P : never;
-type SlotComponentProps = typeof Slot extends React.FC< infer P > ? P : never;
 
 const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	fieldName,
