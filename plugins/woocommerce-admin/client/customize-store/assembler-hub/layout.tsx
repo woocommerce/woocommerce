@@ -51,6 +51,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { AiOfflineModal } from '~/customize-store/assembler-hub/onboarding-tour/ai-offline-modal';
 import { useQuery } from '@woocommerce/navigation';
 import { FlowType } from '../types';
+import { isOfflineAIFlow } from '../guards';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -63,16 +64,17 @@ export const Layout = () => {
 		CustomizeStoreContext
 	);
 
-	const aiOnline = context.flowType === FlowType.AIOnline;
 	const { customizing } = useQuery();
 
 	const [ showAiOfflineModal, setShowAiOfflineModal ] = useState(
-		! aiOnline && customizing !== 'true'
+		isOfflineAIFlow( context.flowType ) && customizing !== 'true'
 	);
 
 	useEffect( () => {
-		setShowAiOfflineModal( ! aiOnline && customizing !== 'true' );
-	}, [ aiOnline, customizing ] );
+		setShowAiOfflineModal(
+			isOfflineAIFlow( context.flowType ) && customizing !== 'true'
+		);
+	}, [ context.flowType, customizing ] );
 
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
