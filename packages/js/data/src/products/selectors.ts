@@ -157,7 +157,7 @@ export const getPermalinkParts = createSelector(
 export const getRelatedProducts = (
 	state: ProductState,
 	productId: number
-) => {
+): PartialProduct[] => {
 	const product = state.data[ productId ];
 	if ( ! product?.related_ids ) {
 		return [];
