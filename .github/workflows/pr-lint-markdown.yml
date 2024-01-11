@@ -30,6 +30,13 @@ jobs:
                 files: |
                   docs/**/*.md
 
+            - name: Get docs manifest
+              id: docs-manifest
+              uses: tj-actions/changed-files@v37
+              with:
+                files: |
+                  docs/docs-manifest.json
+
             - name: Setup PNPM
               uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
               with:
@@ -81,20 +88,33 @@ jobs:
                 set -e
                 rc=0
                 changed_files="${{ steps.docs-changed-files.outputs.all_changed_files  }}"
+                changed_manifest="${{ steps.docs-manifest.outputs.all_changed_files  }}"
                 if [ -n "$changed_files" ]; then
                   lint_results=""
+                  failed_check=""
                   for file in $changed_files; do
                     lint_result=$( { cat "$file" | markdownlint --stdin -c docs/.markdownlint.json ; } 2>&1 ) || rc="$?"
                     if [ $rc -ne 0 ]; then
                       lint_results="$lint_results\n>>>Linting failed for file: $file <<<\n$lint_result\n--------"
                     fi
                   done
+
                   if [ $rc -ne 0 ]; then
                     echo -e "${RED}Linting failed for one or more files${NC}"
                     echo -e "$lint_results"
-                    exit 1
+                    failed_check="lint"
                   else
                     echo -e "${GREEN}Linting successful for all files.${NC}"
+                  fi
+
+                  if [ -z "$changed_manifest" ]; then
+                    echo -e "${RED}Changes in the docs folder require updating the manifest${NC}"
+                    echo -e "Generate a manifest with `pnpm utils md-docs create docs woocommerce -o docs/docs-manifest.json`"
+                    failed_check="manifest"
+                  fi
+             
+                  if [ -n "$failed_check" ]; then
+                    exit 1
                   fi
                 else
                   echo "No docs markdown files changed."
