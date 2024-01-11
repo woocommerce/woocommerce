@@ -10,10 +10,9 @@ export type VariationActionsMenuProps = {
 	onDelete(
 		variation: ProductVariation | Partial< ProductVariation >[]
 	): void;
-	type?: string;
 };
 
-export type SingleVariationMenuItemProps = {
+export type MenuItemProps = {
 	children?: React.ReactNode;
 	order?: number;
 	group?: string;

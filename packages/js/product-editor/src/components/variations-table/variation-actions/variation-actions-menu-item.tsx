@@ -11,7 +11,7 @@ import {
 /**
  * Internal dependencies
  */
-import { SingleVariationMenuItemProps } from './types';
+import { MenuItemProps } from './types';
 import { QUICK_UPDATE, SINGLE_VARIATION } from './constants';
 
 const getGroupName = ( group?: string, type?: string ) => {
@@ -68,15 +68,25 @@ VariationActionsMenuItem.Slot = ( { fillProps, group = '_main', type } ) => {
 	);
 };
 
-export function SingleVariationMenuItem( {
-	group,
-	...props
-}: SingleVariationMenuItemProps ) {
+export function SingleVariationMenuItem( { group, ...props }: MenuItemProps ) {
 	return (
 		<VariationActionsMenuItem
 			{ ...props }
 			group={ group }
 			type={ 'single-variation' }
+		/>
+	);
+}
+
+export function VariationQuickUpdateMenuItem( {
+	group,
+	...props
+}: MenuItemProps ) {
+	return (
+		<VariationActionsMenuItem
+			{ ...props }
+			group={ group }
+			type={ 'quick-update' }
 		/>
 	);
 }

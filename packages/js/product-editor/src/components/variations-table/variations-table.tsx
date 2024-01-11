@@ -28,8 +28,7 @@ import { VariationsFilter } from './variations-filter';
 import { useVariations } from './use-variations';
 import { TableRowSkeleton } from './table-row-skeleton';
 import { VariationsTableRow } from './variations-table-row';
-import { VariationActionsMenu } from './variation-actions';
-import { QUICK_UPDATE } from './variation-actions/constants';
+import { QuickUpdateMenu } from './variation-actions';
 
 type VariationsTableProps = {
 	noticeText?: string;
@@ -376,14 +375,13 @@ export const VariationsTable = forwardRef<
 								) }
 							</div>
 							<div className="woocommerce-product-variations__actions">
-								<VariationActionsMenu
+								<QuickUpdateMenu
 									selection={ selected }
 									disabled={
 										! areSomeSelected && ! isSelectingAll
 									}
 									onChange={ handleUpdateAll }
 									onDelete={ handleDeleteAll }
-									type={ QUICK_UPDATE }
 								/>
 							</div>
 						</div>
