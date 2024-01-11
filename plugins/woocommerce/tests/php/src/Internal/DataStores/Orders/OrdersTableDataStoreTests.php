@@ -3319,18 +3319,35 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * Tests that unserializing meta that contains a non-existent class doesn't cause a fatal error.
 	 */
 	public function test_unserialize_meta_with_nonexistent_class() {
-		// $this->toggle_cot_authoritative( true );
+		global $wpdb;
+		$META_KEY   = 'test_unserialize_meta_with_nonexistent_class';
+		$META_VALUE = 'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.833300000000001;s:9:"longitude";d:4.3333000000000004;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}}';
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+		$order_meta_table = $this->sut::get_meta_table_name();
 
 		$order = WC_Helper_Order::create_order();
-		// $order->set_date_modified( time() - DAY_IN_SECONDS );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$wpdb->query( "INSERT INTO {$order_meta_table} (order_id, meta_key, meta_value) VALUES ({$order_id}, '{$META_KEY}', '{$META_VALUE}')" );
+		$order->set_date_modified( time() );
 		$order->save();
 
-		// $order->update_meta_data( 'test', new \WC_DateTime( 'now', new \DateTimeZone( 'UTC' ) ) );
-		$order->update_meta_data( 'test', 'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.833300000000001;s:9:"longitude";d:4.3333000000000004;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}}' );
-		$order->save_meta_data();
+		// there is a suspicion that syncing with `__PHP_Incomplete_Class` objects in meta causes a fatal error, so let's sync the HPOS order to the CPT store
+		$order->get_data_store()->backfill_post_record( $order );
 
-		echo $order->get_meta( 'test' );
-		$this->assertNotFalse( $order->get_meta( 'test' ) );
+		// another possible way to force sync
+		$orders = array( $order_id => $order );
+		$this->sut->read_multiple( $orders );
+
+		$order_results = wc_get_orders(array('limit' => 300, 'offset' => 0, 'order' => 'DESC', 'order_by' => 'ID', 'return' => 'objects', 'meta_key' => $META_KEY, 'meta_value' => '', 'meta_compare' => '!='));
+		$meta = $order_results[0]->get_meta( $META_KEY );
+
+		// unfortunately all the properties of `__PHP_Incomplete_Class` objects are private, so we can't test them directly
+		$this->assertNotEmpty( $meta );
+		$this->assertEquals( '__PHP_Incomplete_Class', get_class( $meta ) );
 	}
 
 }
