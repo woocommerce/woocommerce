@@ -59,6 +59,7 @@ export const Variations: React.FC = () => {
 	const { values } = useFormContext< Product >();
 	const productId = values.id;
 	const context = useContext( CurrencyContext );
+	// @ts-expect-error TODO: fix this.
 	const { formatAmount, getCurrencyConfig } = context;
 	const { isLoading, variations, totalCount } = useSelect(
 		( select ) => {

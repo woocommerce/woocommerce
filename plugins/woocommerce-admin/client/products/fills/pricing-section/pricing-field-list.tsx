@@ -30,6 +30,7 @@ export const PricingListField: React.FC< PricingListFieldProps > = ( {
 } ) => {
 	const { getInputProps } = useFormContext< Product >();
 	const context = useContext( CurrencyContext );
+	// @ts-expect-error: TODO: fix this
 	const { getCurrencyConfig, formatAmount } = context;
 	const currencyConfig = getCurrencyConfig();
 
