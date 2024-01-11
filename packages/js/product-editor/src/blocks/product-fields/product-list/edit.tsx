@@ -143,7 +143,7 @@ export function Edit( {
 						{ __( 'Add products', 'woocommerce' ) }
 					</Button>
 				</div>
-			</>
+			</SectionActions>
 
 			<div className="wp-block-woocommerce-product-list-field__body">
 				{ ! isLoading && groupedProducts.length === 0 && (

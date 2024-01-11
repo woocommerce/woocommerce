@@ -387,6 +387,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					</Modal>
 				) }
 			</div>
-		</BlockFill>
+		</SectionActions>
 	);
 }
