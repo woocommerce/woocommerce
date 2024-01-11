@@ -127,7 +127,6 @@ export function Edit( {
 		<div { ...blockProps }>
 			<BlockFill
 				name="section-actions"
-				clientId={ clientId }
 				slotContainerBlockName="woocommerce/product-section"
 			>
 				<div className="wp-block-woocommerce-product-list-field__header">
