@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add e2e test for shopper coupon usage contraints
