@@ -64,7 +64,7 @@ baseTest.describe('Products > Delete Product', () => {
 			).toContainText('1 product moved to the Trash.');
 
 			const response = await api.get(`products/${productId}`);
-			await expect(response.data.status).toBe('trash');
+			expect(response.data.status).toBe('trash');
 		});
 	});
 
@@ -87,7 +87,7 @@ baseTest.describe('Products > Delete Product', () => {
 			).toContainText('1 product moved to the Trash.');
 
 			const response = await api.get(`products/${productId}`);
-			await expect(response.data.status).toBe('trash');
+			expect(response.data.status).toBe('trash');
 		});
 	});
 
@@ -115,7 +115,7 @@ baseTest.describe('Products > Delete Product', () => {
 			).toContainText('1 product permanently deleted.');
 
 			const response = await api.get(`products/${productId}`);
-			await expect(response.status).toEqual(404);
+			expect(response.status).toEqual(404);
 		});
 	});
 });
