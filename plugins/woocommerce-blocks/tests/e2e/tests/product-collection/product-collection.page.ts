@@ -309,14 +309,14 @@ class ProductCollectionPage {
 		}
 
 		const operatorSelector = SELECTORS.createdFilter.operator[ operator ];
-		const dateRangeSelector = SELECTORS.createdFilter.range[ range ];
+		const rangeSelector = SELECTORS.createdFilter.range[ range ];
 
 		const sidebarSettings = await this.locateSidebarSettings();
 		const operatorButton = sidebarSettings.getByLabel( operatorSelector );
-		const dateRangeButton = sidebarSettings.getByLabel( dateRangeSelector );
+		const rangeButton = sidebarSettings.getByLabel( rangeSelector );
 
-		operatorButton.click();
-		dateRangeButton.click();
+		await operatorButton.click();
+		await rangeButton.click();
 	}
 
 	async setFilterComboboxValue( filterName: string, filterValue: string[] ) {
