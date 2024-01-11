@@ -154,21 +154,23 @@ export const getPermalinkParts = createSelector(
  * @param {number}       productId - The product ID.
  * @return {PartialProduct[]}        The related products.
  */
-export const getRelatedProducts = (
-	state: ProductState,
-	productId: number
-): PartialProduct[] => {
-	const product = state.data[ productId ];
-	if ( ! product?.related_ids ) {
-		return [];
+export const getRelatedProducts = createSelector(
+	( state: ProductState, productId: number ): PartialProduct[] => {
+		const product = state.data[ productId ];
+		if ( ! product?.related_ids ) {
+			return [];
+		}
+
+		const relatedProducts = getProducts( state, {
+			include: product.related_ids,
+		} );
+
+		return relatedProducts || [];
+	},
+	( state, productId ) => {
+		return [ state.data[ productId ] ];
 	}
-
-	const relatedProducts = getProducts( state, {
-		include: product.related_ids,
-	} );
-
-	return relatedProducts || [];
-};
+);
 
 export type ProductsSelectors = {
 	getCreateProductError: WPDataSelector< typeof getCreateProductError >;
