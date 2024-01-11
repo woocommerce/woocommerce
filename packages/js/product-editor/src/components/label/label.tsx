@@ -47,10 +47,7 @@ export const Label: React.FC< LabelProps > = ( {
 						></span>
 					}
 					position="top center"
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore Incorrect types.
 					className={ 'woocommerce-product-form-label__tooltip' }
-					delay={ 0 }
 				>
 					<span className="woocommerce-product-form-label__icon">
 						<Icon icon={ helpIcon } size={ 18 } fill="#949494" />
