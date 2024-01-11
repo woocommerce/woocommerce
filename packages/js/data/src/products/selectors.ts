@@ -33,9 +33,11 @@ export const getProducts = createSelector(
 		if ( ! ids ) {
 			return defaultValue;
 		}
-		if ( query._fields ) {
+		if ( query && typeof query._fields !== 'undefined' ) {
+			const fields = query._fields;
+
 			return ids.map( ( id ) => {
-				return query._fields.reduce(
+				return fields.reduce(
 					(
 						product: PartialProduct,
 						field: keyof PartialProduct
