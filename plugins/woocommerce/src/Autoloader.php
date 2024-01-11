@@ -19,6 +19,8 @@ class Autoloader {
 	 */
 	private function __construct() {}
 
+	// Action Trigger Test
+
 	/**
 	 * Require the autoloader and return the result.
 	 *
