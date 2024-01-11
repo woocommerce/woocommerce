@@ -37,9 +37,14 @@ class Server {
 	 * Register REST API routes.
 	 */
 	public function register_rest_routes() {
+		$container = wc_get_container();
 		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
 			foreach ( $controllers as $controller_name => $controller_class ) {
 				$this->controllers[ $namespace ][ $controller_name ] = new $controller_class();
+				$this->controllers[ $namespace ][ $controller_name ] =
+					0 === strpos( $controller_class, 'WC_REST_' ) ?
+						new $controller_class() :
+						$container->get( $controller_class );
 				$this->controllers[ $namespace ][ $controller_name ]->register_routes();
 			}
 		}
