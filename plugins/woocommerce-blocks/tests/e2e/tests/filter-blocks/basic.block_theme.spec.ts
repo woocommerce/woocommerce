@@ -10,32 +10,32 @@ const wrapperBlock = {
 const filterBlocks = [
 	{
 		name: 'woocommerce/product-filters-price',
-		title: 'Collection Price Filter',
-		variation: 'Filter Products by Price',
+		title: 'Product Filters: Price',
+		variation: 'Product Filters: Price',
 		heading: 'Filter by Price',
 	},
 	{
 		name: 'woocommerce/product-filters-stock-status',
-		title: 'Collection Stock Filter',
-		variation: 'Filter Products by Stock',
+		title: 'Product Filters: Stock Status',
+		variation: 'Product Filters: Stock Status',
 		heading: 'Filter by Stock Status',
 	},
 	{
 		name: 'woocommerce/product-filters-rating',
-		title: 'Collection Rating Filter',
-		variation: 'Filter Products by Rating',
+		title: 'Product Filters: Rating',
+		variation: 'Product Filters: Rating',
 		heading: 'Filter by Rating',
 	},
 	{
 		name: 'woocommerce/product-filters-attribute',
-		title: 'Collection Attribute Filter',
-		variation: 'Filter Products by Attribute',
-		heading: 'Filter Products by Attribute',
+		title: 'Product Filters: Attribute',
+		variation: 'Product Filters: Attribute',
+		heading: 'Product Filters: Attribute',
 	},
 	{
 		name: 'woocommerce/product-filters-active',
-		title: 'Collection Active Filters',
-		variation: 'Active Product Filters',
+		title: 'Product Filters: Active Filters',
+		variation: 'Product Filters: Active Filters',
 		heading: 'Active Filters',
 	},
 ];
