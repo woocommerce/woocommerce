@@ -26,9 +26,6 @@ jobs:
           fetch-depth: 0
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
-        with:
-          install: 'monorepo-utils...'
-          build: 'monorepo-utils'
       - uses: actions/github-script@v6
         name: 'Build Matrix'
         id: 'project-jobs'
