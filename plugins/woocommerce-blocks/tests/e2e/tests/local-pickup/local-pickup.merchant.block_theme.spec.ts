@@ -50,7 +50,6 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 
 	test( 'user can toggle the price field state', async ( { page } ) => {
 		await utils.enableLocalPickupCosts( { page } );
-		await utils.savelocalPickupSettings( { page } );
 
 		await expect(
 			page.getByLabel(
@@ -59,7 +58,6 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		).toBeChecked();
 
 		await utils.disableLocalPickupCosts( { page } );
-		await utils.savelocalPickupSettings( { page } );
 
 		await expect(
 			page.getByLabel(
@@ -70,7 +68,6 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 
 	test( 'user can edit costs and tax status', async ( { page } ) => {
 		await utils.enableLocalPickupCosts( { page } );
-		await utils.savelocalPickupSettings( { page } );
 
 		await expect(
 			page.getByLabel(
