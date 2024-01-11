@@ -199,9 +199,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Price is changed when scheduled date for product is passed.
+	 * @testDox Sales price is applied when scheduled sale starts.
 	 */
-	public function test_wc_scheduled_sales() {
+	public function test_wc_scheduled_sales_sale_start() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_price( 100 );
 		$product->set_regular_price( 100);
@@ -217,5 +217,26 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		wc_scheduled_sales();
 
 		$this->assertEquals( 50, wc_get_product( $product->get_id() )->get_price() );
+	}
+
+	/**
+	 * @testDox Sales price is removed when scheduled sale ends.
+	 */
+	public function test_wc_scheduled_sales_sale_end() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100);
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_to(  date('Y-m-d H:i:s', time() + 10 )  );
+		$product->save();
+
+		// Bypass product after save hook to prevent price change on save.
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 5 );
+
+		$this->assertEquals( 50, wc_get_product( $product->get_id() )->get_price() );
+
+		wc_scheduled_sales();
+
+		$this->assertEquals( 100, wc_get_product( $product->get_id() )->get_price() );
 	}
 }
