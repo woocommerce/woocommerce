@@ -177,23 +177,8 @@ class DefaultPaymentGateways {
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/eway.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/eway.png',
 				'plugins'             => array( 'woocommerce-gateway-eway' ),
-				'is_visible'          => array(
-					self::get_rules_for_countries(
-						array(
-							'NZ',
-							'HK',
-							'SG',
-							'AU',
-						)
-					),
-					self::get_rules_for_cbd( false ),
-				),
-				'category_other'      => array(
-					'NZ',
-					'HK',
-					'SG',
-					'AU',
-				),
+				'is_visible'          => false,
+				'category_other'      => false,
 				'category_additional' => array(),
 			),
 			array(
@@ -871,21 +856,9 @@ class DefaultPaymentGateways {
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/zipco.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/zipco.png',
 				'plugins'             => array( 'zipmoney-payments-woocommerce' ),
-				'is_visible'          => array(
-					self::get_rules_for_countries(
-						array(
-							'US',
-							'NZ',
-							'AU',
-						)
-					),
-				),
+				'is_visible'          => false,
 				'category_other'      => array(),
-				'category_additional' => array(
-					'US',
-					'NZ',
-					'AU',
-				),
+				'category_additional' => array(),
 			),
 		);
 
@@ -1035,7 +1008,6 @@ class DefaultPaymentGateways {
 				'affirm',
 				'afterpay',
 				'klarna_payments',
-				'zipmoney',
 			],
 			'CA' => [
 				'woocommerce_payments',
@@ -1200,24 +1172,19 @@ class DefaultPaymentGateways {
 				'stripe',
 				'ppcp-gateway',
 				'square_credit_card',
-				'eway',
 				'afterpay',
 				'klarna_payments',
-				'zipmoney',
 			],
 			'NZ' => [
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
-				'eway',
 				'klarna_payments',
-				'zipmoney',
 			],
 			'HK' => [
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
-				'eway',
 				'payoneer-checkout',
 			],
 			'JP' => [
@@ -1226,7 +1193,7 @@ class DefaultPaymentGateways {
 				'square_credit_card',
 				'amazon_payments_advanced',
 			],
-			'SG' => [ 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'eway' ],
+			'SG' => [ 'woocommerce_payments', 'stripe', 'ppcp-gateway' ],
 			'CN' => [ 'ppcp-gateway', 'payoneer-checkout' ],
 			'FJ' => [],
 			'GU' => [],

@@ -216,6 +216,7 @@ class PluginsHelper {
 			);
 
 			if ( is_wp_error( $api ) ) {
+				error_log( print_r( $api, true ) );
 				$properties = array(
 					'error_message'     => sprintf(
 						// translators: %s: plugin slug (example: woocommerce-services).

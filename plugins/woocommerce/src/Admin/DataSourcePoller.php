@@ -172,6 +172,8 @@ abstract class DataSourcePoller {
 			),
 			array(
 				'user-agent' => 'WooCommerce/' . WC_VERSION . '; ' . home_url( '/' ),
+				'timeout'    => 120,
+				'sslverify'  => false,
 			)
 		);
 
