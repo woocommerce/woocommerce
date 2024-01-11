@@ -39,7 +39,7 @@ export const WooHeaderNavigationItem: React.FC< {
 	children?: React.ReactNode;
 	order?: number;
 } > & {
-	Slot: React.FC< SlotComponentProps >;
+	Slot: React.FC< Omit< SlotComponentProps, 'name' > >;
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill name={ WC_HEADER_NAVIGATION_SLOT_NAME }>
@@ -50,7 +50,7 @@ export const WooHeaderNavigationItem: React.FC< {
 	);
 };
 
-WooHeaderNavigationItem.Slot = ( { fillProps }: SlotComponentProps ) => (
+WooHeaderNavigationItem.Slot = ( { fillProps } ) => (
 	//  @ts-expect-error - I think this issue with slot children type should be fixed upstream.
 	<Slot name={ WC_HEADER_NAVIGATION_SLOT_NAME } fillProps={ fillProps }>
 		{ sortFillsByOrder }

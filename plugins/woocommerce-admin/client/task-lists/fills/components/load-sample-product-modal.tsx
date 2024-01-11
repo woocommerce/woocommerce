@@ -18,6 +18,7 @@ const LoadSampleProductModal: React.FC = () => {
 			title=""
 			onRequestClose={ () => {} }
 		>
+			{ /* @ts-expect-error - We don't get the size prop typed here for some reason. */ }
 			<Spinner color="#007cba" size={ 48 } />
 			<Text className="woocommerce-load-sample-product-modal__title">
 				{ __( 'Loading sample products', 'woocommerce' ) }

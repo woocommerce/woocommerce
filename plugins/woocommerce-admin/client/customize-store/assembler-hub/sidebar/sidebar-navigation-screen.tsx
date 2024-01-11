@@ -7,13 +7,9 @@
 import classnames from 'classnames';
 import { useContext, useState } from '@wordpress/element';
 import {
-	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
-	// @ts-ignore No types for this exist yet.
 	__experimentalHeading as Heading,
-	// @ts-ignore No types for this exist yet.
 	__experimentalUseNavigator as useNavigator,
-	// @ts-ignore No types for this exist yet.
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { isRTL, __ } from '@wordpress/i18n';

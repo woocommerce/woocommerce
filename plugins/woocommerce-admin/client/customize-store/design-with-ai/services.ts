@@ -390,7 +390,6 @@ const updateGlobalStyles = async ( {
 				fontPairing?.settings || {}
 			),
 		},
-		// @ts-expect-error - TODO: Fix this.
 		{
 			throwOnError: true,
 		}
@@ -446,7 +445,6 @@ const updateTemplate = async ( {
 			id: currentTemplate.id,
 			content,
 		},
-		// @ts-expect-error - TODO: Fix this.
 		{
 			throwOnError: true,
 		}

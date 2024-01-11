@@ -42,6 +42,7 @@ export default function ProductPage() {
 			render: () => (
 				<>
 					<WooProductMoreMenuItem>
+						{ /* @ts-expect-error - The slot contents is not properly typed. */ }
 						{ ( { onClose }: { onClose: () => void } ) => (
 							<MoreMenuFill onClose={ onClose } />
 						) }

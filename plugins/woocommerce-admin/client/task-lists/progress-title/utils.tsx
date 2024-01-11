@@ -16,7 +16,7 @@ export const WooTaskListProgressTitleItem: React.FC< {
 	children?: React.ReactNode;
 	order?: number;
 } > & {
-	Slot: React.FC< SlotComponentProps >;
+	Slot: React.FC< Omit< SlotComponentProps, 'name' > >;
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill name={ WC_TASKLIST_EXPERIMENTAL_PROGRESS_TITLE_SLOT_NAME }>
@@ -29,7 +29,7 @@ export const WooTaskListProgressTitleItem: React.FC< {
 
 WooTaskListProgressTitleItem.Slot = ( { fillProps } ) => {
 	return (
-		// @ts-expect-error - TODO: Fix this.
+		// @ts-expect-error - The Slot component is not properly typed.
 		<Slot
 			name={ WC_TASKLIST_EXPERIMENTAL_PROGRESS_TITLE_SLOT_NAME }
 			fillProps={ fillProps }

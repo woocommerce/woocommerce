@@ -22,6 +22,7 @@ const WoocommercePaymentsTaskItem = () => {
 
 	return (
 		<WooOnboardingTaskListItem id="woocommerce-payments">
+			{ /* @ts-expect-error - TODO: Need to type the Slot contents. */ }
 			{ ( {
 				defaultTaskItem: DefaultTaskItem,
 			}: {

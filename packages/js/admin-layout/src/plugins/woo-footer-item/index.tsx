@@ -37,7 +37,7 @@ export const WooFooterItem: React.FC< {
 	children?: React.ReactNode;
 	order?: number;
 } > & {
-	Slot: React.FC< SlotComponentProps >;
+	Slot: React.FC< Omit< SlotComponentProps, 'name' > >;
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill name={ WC_FOOTER_SLOT_NAME }>

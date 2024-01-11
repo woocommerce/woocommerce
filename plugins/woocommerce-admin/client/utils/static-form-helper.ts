@@ -29,7 +29,7 @@ export function staticFormDataToObject( elForm: HTMLFormElement ) {
 				}
 				break;
 			case 'select-multiple':
-				const options = [];
+				const options: string[] = [];
 				for ( const option of ( field as HTMLSelectElement ).options ) {
 					if ( option.selected ) {
 						options.push( option.value );
