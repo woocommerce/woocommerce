@@ -4,36 +4,36 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 const wrapperBlock = {
-	name: 'woocommerce/collection-filters',
-	title: 'Collection Filters',
+	name: 'woocommerce/product-filters',
+	title: 'Product Filters',
 };
 const filterBlocks = [
 	{
-		name: 'woocommerce/collection-price-filter',
+		name: 'woocommerce/product-filters-price',
 		title: 'Collection Price Filter',
 		variation: 'Filter Products by Price',
 		heading: 'Filter by Price',
 	},
 	{
-		name: 'woocommerce/collection-stock-filter',
+		name: 'woocommerce/product-filters-stock-status',
 		title: 'Collection Stock Filter',
 		variation: 'Filter Products by Stock',
 		heading: 'Filter by Stock Status',
 	},
 	{
-		name: 'woocommerce/collection-rating-filter',
+		name: 'woocommerce/product-filters-rating',
 		title: 'Collection Rating Filter',
 		variation: 'Filter Products by Rating',
 		heading: 'Filter by Rating',
 	},
 	{
-		name: 'woocommerce/collection-attribute-filter',
+		name: 'woocommerce/product-filters-attribute',
 		title: 'Collection Attribute Filter',
 		variation: 'Filter Products by Attribute',
 		heading: 'Filter Products by Attribute',
 	},
 	{
-		name: 'woocommerce/collection-active-filters',
+		name: 'woocommerce/product-filters-active',
 		title: 'Collection Active Filters',
 		variation: 'Active Product Filters',
 		heading: 'Active Filters',
