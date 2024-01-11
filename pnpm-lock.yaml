@@ -41,6 +41,9 @@ importers:
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:packages/js/eslint-plugin
+      '@woocommerce/monorepo-utils':
+        specifier: workspace:*
+        version: link:tools/monorepo-utils
       '@wordpress/data':
         specifier: wp-6.0
         version: 6.6.1(react@17.0.2)
@@ -4816,6 +4819,9 @@ importers:
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
+      copy-webpack-plugin:
+        specifier: ^9.1.0
+        version: 9.1.0(webpack@5.89.0)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
@@ -4825,9 +4831,18 @@ importers:
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.6)(jest@27.5.1)(typescript@5.3.3)
+      ts-loader:
+        specifier: ^9.5.1
+        version: 9.5.1(typescript@5.3.3)(webpack@5.89.0)
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
+      webpack:
+        specifier: ^5.89.0
+        version: 5.89.0(webpack-cli@3.3.12)
+      webpack-cli:
+        specifier: ^3.3.12
+        version: 3.3.12(webpack@5.89.0)
       wireit:
         specifier: 0.14.1
         version: 0.14.1
@@ -5765,6 +5780,7 @@ packages:
       '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
       '@babel/helper-split-export-declaration': 7.22.6
       semver: 6.3.1
+    dev: true
 
   /@babel/helper-create-class-features-plugin@7.23.6(@babel/core@7.23.6):
     resolution: {integrity: sha512-cBXU1vZni/CpGF29iTu4YRbOZt3Wat6zCoMDxRF1MayiEc4URxOj31tT65HUM0CRpMowA3HCJaAOVOUnMf96cw==}
@@ -8579,7 +8595,7 @@ packages:
     dependencies:
       '@babel/core': 7.12.9
       '@babel/helper-annotate-as-pure': 7.22.5
-      '@babel/helper-create-class-features-plugin': 7.23.6(@babel/core@7.12.9)
+      '@babel/helper-create-class-features-plugin': 7.23.5(@babel/core@7.12.9)
       '@babel/helper-plugin-utils': 7.22.5
       '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.12.9)
 
@@ -8591,7 +8607,7 @@ packages:
     dependencies:
       '@babel/core': 7.23.5
       '@babel/helper-annotate-as-pure': 7.22.5
-      '@babel/helper-create-class-features-plugin': 7.23.6(@babel/core@7.23.5)
+      '@babel/helper-create-class-features-plugin': 7.23.5(@babel/core@7.23.5)
       '@babel/helper-plugin-utils': 7.22.5
       '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.23.5)
 
