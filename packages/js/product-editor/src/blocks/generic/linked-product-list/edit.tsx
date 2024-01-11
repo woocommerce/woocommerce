@@ -106,18 +106,18 @@ export function LinkedProductListBlockEdit( {
 		filter();
 	}, [ filter ] );
 
-	function handleSelect( selectedProduct: Product ) {
+	function handleSelect( product: Product ) {
 		const newLinkedProductIds = selectSearchedProductDispatcher(
-			selectedProduct,
+			product,
 			state.linkedProducts
 		);
 
 		setLinkedProductIds( newLinkedProductIds );
 	}
 
-	function handleRemoveProductClick( removedProduct: Product ) {
+	function handleRemoveProductClick( product: Product ) {
 		const newLinkedProductIds = removeLinkedProductDispatcher(
-			removedProduct,
+			product,
 			state.linkedProducts
 		);
 
