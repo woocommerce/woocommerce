@@ -3,7 +3,7 @@ post_title: User Experience Guidelines - Accessibility
 menu_title: Accessibility
 ---
 
-Accessibility in user experience is about designing your WooCommerce store to be usable by all people, including those with disabilities. It involves creating interfaces that accommodate a range of abilities, ensuring everyone can navigate, understand, and interact with your site effectively.
+It's important to consider acecssibility in your WooCommerce Extensions and Themes, creating interfaces that accommodate a range of abilities, ensuring everyone can navigate, understand, and interact with your site effectively.
 
 ## Accessibility Guidelines
 

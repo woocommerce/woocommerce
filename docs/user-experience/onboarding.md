@@ -3,7 +3,7 @@ post_title: User Experience Guidelines - Onboarding
 menu_title: Onboarding
 ---
 
-The first experience your users have with your extension is crucial. A user activating your extension for the first time provides an opportunity to onboard new and reorient returning users the right way. Is it clear to the user how to get started? Keep in mind that the more difficult the setup, the more likely a user will abandon the product altogether so keep it simple and direct.
+The first experience your users have with your extension is crucial. A user activating your extension for the first time provides an opportunity to onboard new and reorient returning users the right way. The more difficult the setup, the more likely a user will abandon the product altogether so keep it simple and direct.
 
 ## Best Practices
 

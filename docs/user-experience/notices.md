@@ -3,7 +3,7 @@ post_title: User Experience Guidelines - Notices
 menu_title: Notices
 ---
 
-Notices in user experience involve crafting clear and impactful messages within the plugin interface. These notices should guide, inform, and alert the users about various functions, updates, or any necessary actions. Effective notice design enhances user interaction, ensuring that important information is communicated succinctly and appropriately within the WooCommerce environment.
+Notices should guide, inform, and alert the users about various functions, updates, or any necessary actions. Effective notice design enhances user interaction, ensuring that important information is communicated succinctly and appropriately within the WooCommerce environment.
 
 ## Best Practices
 
