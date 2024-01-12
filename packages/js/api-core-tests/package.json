@@ -55,10 +55,10 @@
 			"lint": {
 				"command": "lint",
 				"changes": [
-					"data/**/*.js",
-					"endpoints/**/*.js",
-					"tests/**/*.js",
-					"utils/**/*.js"
+					"data/**/*.{js,ts,tsx}",
+					"endpoints/**/*.{js,ts,tsx}",
+					"tests/**/*.{js,ts,tsx}",
+					"utils/**/*.{js,ts,tsx}"
 				]
 			}
 		}
