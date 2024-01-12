@@ -33,22 +33,24 @@ class ShippingAddress extends AbstractOrderConfirmationBlock {
 
 		$address = '<address>' . wp_kses_post( $order->get_formatted_shipping_address() ) . '</address>';
 		$phone   = $order->get_shipping_phone() ? '<p class="woocommerce-customer-details--phone">' . esc_html( $order->get_shipping_phone() ) . '</p>' : '';
-		$custom  = '';
 
-		$controller        = Package::container()->get( CheckoutFields::class );
-		$additional_fields = $controller->get_order_additional_fields_with_values( $order, 'address', 'shipping' );
-
-		if ( $additional_fields ) {
-			foreach ( $additional_fields as $additional_field_key => $additional_field ) {
-				$custom .= sprintf(
-					'<p class="woocommerce-customer-details--custom woocommerce-customer-details--%1$s"><strong>%2$s</strong> %3$s</p>',
-					esc_attr( $additional_field_key ),
-					wp_kses_post( $additional_field['label'] ),
-					wp_kses_post( $additional_field['value'] )
-				);
-			}
-		}
+		$controller = Package::container()->get( CheckoutFields::class );
+		$custom     = $this->render_additional_fields(
+			$controller->get_order_additional_fields_with_values( $order, 'address', 'shipping' )
+		);
 
 		return $address . $phone . $custom;
+	}
+
+	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
+		parent::enqueue_data( $attributes );
+		$this->asset_data_registry->add( 'additionalAddressFields', Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'address' ), true );
 	}
 }

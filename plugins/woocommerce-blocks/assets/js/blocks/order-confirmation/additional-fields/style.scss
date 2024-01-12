@@ -1,4 +1,4 @@
-.wc-block-order-confirmation-additional-fields-list {
+.wc-block-order-confirmation-additional-fields .wc-block-components-additional-fields-list {
 	border: 1px solid $universal-border-light;
 	border-radius: $universal-border-radius;
 	padding: 0;
@@ -18,6 +18,10 @@
 		padding: $gap;
 		box-sizing: border-box;
 		margin: 0;
+
+		&::after {
+			display: none;
+		}
 	}
 	dd {
 		padding: $gap;
@@ -27,7 +31,7 @@
 	}
 }
 @media screen and (max-width: 768px) {
-	.wc-block-order-confirmation-additional-fields-list {
+	.wc-block-order-confirmation-additional-fields .wc-block-components-additional-fields-list {
 		display: block;
 		dt {
 			border-bottom: 0;

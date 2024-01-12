@@ -151,17 +151,21 @@ export const ADDITIONAL_FORM_KEYS = getSetting< FieldsLocations >(
 	defaultFieldsLocations
 ).additional;
 
-interface CheckoutField {
+export interface CheckoutField {
 	label: string;
 	type: string;
 	options: { label: string; value: string }[];
 }
 
 export const ADDITIONAL_FORM_FIELDS = getSetting< CheckoutField[] >(
-	'checkoutAdditionalFields',
+	'additionalFields',
 	{}
 );
 export const CONTACT_FORM_FIELDS = getSetting< CheckoutField[] >(
-	'checkoutContactFields',
+	'additionalContactFields',
+	{}
+);
+export const ADDRESS_FORM_FIELDS = getSetting< CheckoutField[] >(
+	'additionalAddressFields',
 	{}
 );

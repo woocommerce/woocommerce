@@ -7,6 +7,7 @@ import {
 	ADDITIONAL_FORM_FIELDS,
 	CONTACT_FORM_FIELDS,
 } from '@woocommerce/block-settings';
+import { AdditionalFieldsPlaceholder } from '@woocommerce/base-components/cart-checkout';
 
 /**
  * Internal dependencies
@@ -25,30 +26,9 @@ const Edit = (): JSX.Element => {
 
 	return (
 		<div { ...blockProps }>
-			<dl className="wc-block-order-confirmation-additional-fields-list">
-				{ Object.entries( additionalFields ).map( ( [ , field ] ) => {
-					const { label, type, options } = field;
-					let sampleValue = __(
-						'Customer provided value',
-						'woocommerce'
-					);
-
-					if ( type === 'checkbox' ) {
-						sampleValue = __( 'Yes', 'woocommerce' );
-					}
-
-					if ( type === 'select' ) {
-						sampleValue = options[ 0 ].label;
-					}
-
-					return (
-						<>
-							<dt>{ label }</dt>
-							<dd>{ sampleValue }</dd>
-						</>
-					);
-				} ) }
-			</dl>
+			<AdditionalFieldsPlaceholder
+				additionalFields={ additionalFields }
+			/>
 		</div>
 	);
 };
