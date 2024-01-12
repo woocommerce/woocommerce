@@ -12,7 +12,7 @@ The lifecycle of a template is as follows:
 
 - [Creation](#creation)
 - [Block addition and removal](#block-addition-and-removal)
-    - [Actions](#actions)
+  - [Actions](#actions)
 - [Registration](#registration)
 - [Sent to client](#sent-to-client)
 - [Rendered on client](#rendered-on-client)
@@ -40,26 +40,28 @@ The following actions are fired when blocks are added to or removed from a templ
 -  `woocommerce_product_editor_block_template_{template_name}_after_remove_block_{block_id}`
 -  `woocommerce_product_editor_block_template_after_remove_block`
 
-**In order for your action hooks to be called for all block additions and removals for a template, you should call `add_action()` for each of these hooks before the template is instantiated, in or before an `init` action hook, priority 3 or lower.**
+**In order for your action hooks to be called for all block additions and removals for a template, you should call `add_action()` for each of these hooks before the template is instantiated, in or before an `rest_api_init` action hook, priority 9 or lower.**
 
 See the [Automattic\WooCommerce\Admin\BlockTemplates](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/BlockTemplates/README.md) documentation for more information about these hooks.
 
 ## Registration
 
-After a template is instantiated, it can be registered with the `Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry`.
+A template class can be registered with the `Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry`. 
 
-Registration is required in order for the template to be sent to the client. 
+Registration is required in order for the template to be available to be sent to the client (via the `/wc/v3/layout-templates` REST API endpoint).
+
+The default templates are registered in the `rest_api_init` action hook, priority 10.
 
 Blocks can be added or removed from a template before or after it is registered, but the template cannot be modified after it is sent to the client.
 
-**In order for the template to be sent to the client, it should be in or before the `admin_enqueue_scripts` action hook, priority 9 or lower.**
+**In order for the template to be sent to the client, it should be registered in or before the `rest_request_before_callbacks` filter hook. They can be registered in the `rest_api_init` hook.**
 
 ## Sent to client
 
-A template is sent to the client in or after the `admin_enqueue_scripts` action hook, priority 10 or higher.
+A template is sent to the client in the handler for the `/wcv3/layout-templates` REST API endpoint, after the `rest_request_before_callbacks` filter hook.
 
 Any template modification after this point will not be sent to the client.
 
 ## Rendered on client
 
-When the template is rendered on the client, all blocks in the template have their `hideConditions` evaluated to determine whether they should be rendered or not.
+When the template is rendered on the client, all blocks in the template have their `hideConditions` and `disableConditions` evaluated to determine whether they should be rendered or not.
