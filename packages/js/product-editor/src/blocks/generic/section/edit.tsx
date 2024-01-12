@@ -21,7 +21,6 @@ import { ProductEditorBlockEditProps } from '../../../types';
 
 export function SectionBlockEdit( {
 	attributes,
-	clientId,
 }: ProductEditorBlockEditProps< SectionBlockAttributes > ) {
 	const { description, title, blockGap } = attributes;
 
