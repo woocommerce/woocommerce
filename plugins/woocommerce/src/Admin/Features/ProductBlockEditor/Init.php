@@ -86,9 +86,6 @@ class Init {
 
 			// Make sure the block template logger is initialized before any templates are created.
 			BlockTemplateLogger::get_instance();
-
-			$this->register_layout_templates();
-			$this->register_product_templates();
 		}
 	}
 
