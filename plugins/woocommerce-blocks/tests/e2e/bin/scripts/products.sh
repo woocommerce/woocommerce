@@ -30,6 +30,10 @@ product_id=$(wp post list --post_type=product --field=ID --name="Cap" --format=i
 crossell_id=$(wp post list --post_type=product --field=ID --name="Beanie" --format=ids)
 wp post meta update $crossell_id _crosssell_ids "$product_id"
 
+# Set a product out of stock
+simple_product_id=$(wp post list --post_type=product --field=ID --name="T-Shirt with Logo" --format=ids)
+wp wc product update $simple_product_id --in_stock=false --user=1
+
 # Enable attribute archives.
 attribute_ids=$(wp wc product_attribute list --fields=id --format=ids --user=1)
 if [ -n "$attribute_ids" ]; then
