@@ -82,6 +82,8 @@ class Init {
 
 			$tracks = new Tracks();
 			$tracks->init();
+
+			$this->register_product_templates();
 		}
 	}
 
