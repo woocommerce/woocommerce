@@ -12,7 +12,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 8.5.0-dev
+ * @version 8.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -32,7 +32,7 @@ $multiple = count( $notices ) > 1;
 	</svg>
 	<div class="wc-block-components-notice-banner__content">
 		<?php if ( $multiple ) { ?>
-			<p class="wc-block-components-notice-banner__summary"><?php esc_html_e( 'The following problems were found:', 'woo-gutenberg-products-block' ); ?></p>
+			<p class="wc-block-components-notice-banner__summary"><?php esc_html_e( 'The following problems were found:', 'woocommerce' ); ?></p>
 			<ul>
 			<?php foreach ( $notices as $notice ) : ?>
 				<li<?php echo wc_get_notice_data_attr( $notice ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>

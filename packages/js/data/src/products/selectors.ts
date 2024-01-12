@@ -33,9 +33,11 @@ export const getProducts = createSelector(
 		if ( ! ids ) {
 			return defaultValue;
 		}
-		if ( query._fields ) {
+		if ( query && typeof query._fields !== 'undefined' ) {
+			const fields = query._fields;
+
 			return ids.map( ( id ) => {
-				return query._fields.reduce(
+				return fields.reduce(
 					(
 						product: PartialProduct,
 						field: keyof PartialProduct
@@ -145,6 +147,31 @@ export const getPermalinkParts = createSelector(
 	}
 );
 
+/**
+ * Returns an array of related products for a given product ID.
+ *
+ * @param {ProductState} state     - The current state.
+ * @param {number}       productId - The product ID.
+ * @return {PartialProduct[]}        The related products.
+ */
+export const getRelatedProducts = createSelector(
+	( state: ProductState, productId: number ): PartialProduct[] => {
+		const product = state.data[ productId ];
+		if ( ! product?.related_ids ) {
+			return [];
+		}
+
+		const relatedProducts = getProducts( state, {
+			include: product.related_ids,
+		} );
+
+		return relatedProducts || [];
+	},
+	( state, productId ) => {
+		return [ state.data[ productId ] ];
+	}
+);
+
 export type ProductsSelectors = {
 	getCreateProductError: WPDataSelector< typeof getCreateProductError >;
 	getProduct: WPDataSelector< typeof getProduct >;
@@ -153,4 +180,5 @@ export type ProductsSelectors = {
 	getProductsError: WPDataSelector< typeof getProductsError >;
 	isPending: WPDataSelector< typeof isPending >;
 	getPermalinkParts: WPDataSelector< typeof getPermalinkParts >;
+	getRelatedProducts: WPDataSelector< typeof getRelatedProducts >;
 } & WPDataSelectors;
