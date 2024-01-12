@@ -264,7 +264,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 							// phpcs:ignore
 							echo $external_link_icon;
 							echo '</a>';
-							if ( count( (array) $plugin_suggestions ) ) {
+							if ( count( $plugin_suggestions ) ) {
 								foreach ( $plugin_suggestions as $plugin_suggestion ) {
 									$alt = str_replace( '.png', '', basename( $plugin_suggestion->image_72x72 ) );
 									// phpcs:ignore
