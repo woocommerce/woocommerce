@@ -363,22 +363,25 @@
         },
         {
           "post_title": "Setting up your development environment",
+          "tags": "tutorial, setup",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/development-environment.md",
-          "hash": "49d2d6e888234cb92fd28d07c8eded5fb89b585cc7522ab28d4d037d4b9a5bcc",
+          "hash": "6f2b2c1b4b04422a51802b019b5cc9371c3d5602c63cbf7cb0269449b492936d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/development-environment.md",
           "id": "9080572a3904349c44c565ca7e1bef1212c58757"
         },
         {
           "post_title": "WooCommerce developer tools",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-tools.md",
-          "hash": "61c995250202edcd4a7ad2febe5f7f2eda79a830dd123d5797dc95eb4d833c6a",
+          "hash": "80898fd693e37743bd89737426eab354fe42325676f19331f5162f52073a85cc",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-tools.md",
           "id": "2ed3659ae0153c8fb3252c417bb0eb43ea60f862"
         },
         {
           "post_title": "WooCommerce developer resources",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-resources.md",
-          "hash": "90d987fbc979a911dd9109e3da5cee570227b800d063e81ab0698e06b2360013",
+          "hash": "19cd3ca199f0d4d88d4e0ccc19996168381dffe506a12a8812046de6ff159e0a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-resources.md",
           "id": "77008656b040d376b7cea7b3c7cc8860c6aec70e"
         },
@@ -695,66 +698,73 @@
       "category_title": "User Experience",
       "posts": [
         {
-          "post_title": "User experience guidelines",
+          "post_title": "User Experience Guidelines",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/user-experience-guidelines.md",
-          "hash": "f79db616d0e30b77a20fe06c714bbb49a41cc4a5ef33cfa6b6ca8dac6d1ac826",
+          "hash": "cabe654aa834a59bf95fdebc4d48aa0cb57967a74e1728a4f15ff48cb9ee2cc5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/user-experience-guidelines.md",
           "id": "3688c201cc09c7e848cf6c279637c08584ccc334"
         },
         {
-          "post_title": "Testing",
+          "post_title": "User Experience Guidelines - Testing",
+          "menu_title": "Testing",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/testing.md",
-          "hash": "ce3a74eae9c0990573be34ff37e671aa8e0939f6acff27026b5c73cd858d335c",
+          "hash": "8bb7cad59c3d030cfd87652557d37f711e1eabe5f034363346e3e163feefc1cc",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/testing.md",
           "id": "b84afc5cff54e84581a115ea589c3d86da0682fe"
         },
         {
-          "post_title": "Task list and inbox",
+          "post_title": "User Experience Guidelines - Task List and Inbox",
+          "menu_title": "Task list and inbox",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/task-list-and-inbox.md",
-          "hash": "f00c11916dde089e0597f524b84d57cacdacdcb8cf4a89effcb1abd723af91bc",
+          "hash": "19d00e5b84a2d44d3b6642db7a47b1f66ce95ff06dbd1cef43e0da456ef2d7dd",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/task-list-and-inbox.md",
           "id": "b461277e71a10e801d0d454a8578b83462991753"
         },
         {
-          "post_title": "Settings",
+          "post_title": "User Experience Guidelines - Settings",
+          "menu_title": "Settings",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/settings.md",
-          "hash": "81d0af6bed8ba99471459004a1bd6359e2f9aa61f692f7f731b14dfb274eab32",
+          "hash": "afd4d9d154e1eb0c36cb386a500ec213e1839bde0531f7894b6e2ef01c15f0b3",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/settings.md",
           "id": "6dea5dda4ebbd3a320383267fd2099be140aeb46"
         },
         {
-          "post_title": "Payments onboarding & setup",
+          "post_title": "User Experience Guidelines - Payments Onboarding and Setup",
+          "menu_title": "Payments Onboarding and Setup",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/payments-design-guidelines.md",
-          "hash": "ea178be065874a249e1d25c5a79a33d69a80d23296573a5d7cd947a255ff408d",
+          "hash": "90152a1d978f6e2f0804a00c447b2a8da65c336ef0979de2b2a4f7936780dfa8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/payments-design-guidelines.md",
           "id": "7102e90d66b86ce2bdacc86d3e631a78a35738ca"
         },
         {
-          "post_title": "Onboarding",
+          "post_title": "User Experience Guidelines - Onboarding",
+          "menu_title": "Onboarding",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/onboarding.md",
-          "hash": "9140ab42f73166fc6fbf282f9f662975100d3000a79c3a96f0859054223548ed",
+          "hash": "f2cd1abc171e70c479e1a736081e30ad9c52f6aff2ae8f0b8b11b901ba00e9cf",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/onboarding.md",
           "id": "0a68990f3a0c3ddc1994372f7f35389340ca8ff5"
         },
         {
-          "post_title": "Notices",
-          "menu_title": "Notice guidelines",
+          "post_title": "User Experience Guidelines - Notices",
+          "menu_title": "Notices",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/notices.md",
-          "hash": "dcce0de4b0fb6a7e3d423ad6c4f536cb9541cd7bf979c2fd216b8b4ca8f9ec7a",
+          "hash": "0c461061985aef302b9c785cdcb4e45e5f8e325a425ca685dca90b5bdef9d7f3",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/notices.md",
           "id": "8c5de3126ef21043cfc064a6c7105f7b64ff3ecf"
         },
         {
-          "post_title": "Navigation",
+          "post_title": "User Experience Guidelines - Navigation",
+          "menu_title": "Navigation",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/navigation.md",
-          "hash": "7813b8219070c7b5b2a0013637f4c46cd47a749bd7fb95380046732a288f70fb",
+          "hash": "20f94bf5fdfe27173bf776eb46a6d5ca9261e6ed16143df927936482262cb11d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/navigation.md",
           "id": "c86422f15d038c5142c31f2c05b82b79c938142b"
         },
         {
-          "post_title": "Colors",
+          "post_title": "User Experience Guidelines - Colors",
+          "menu_title": "Colors",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/colors.md",
-          "hash": "af8046c9179b7580f6a57a48c0cc9dbd9830e970904da42603b52aacc2d431fd",
+          "hash": "9865f7752b28116b731e7380102616e476559a751445c0e3cf20ef0b04ee83fe",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/colors.md",
           "id": "b1a24b922f58b754e87ea5a1b83ec54a946a795a"
         },
@@ -766,9 +776,10 @@
           "id": "dd2c00da004cf6dfa2366c0d01928c84a2ae016a"
         },
         {
-          "post_title": "Accessibility",
+          "post_title": "User Experience Guidelines - Accessibility",
+          "menu_title": "Accessibility",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/accessibility.md",
-          "hash": "fc5176111b226d51350d3d016d97c43d6072c981604507f2fc6499971b90191c",
+          "hash": "d5a2e50c98202e2a0e36dd3f7809c02a9e02134cf31be9b3d7f9158791331ee4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/accessibility.md",
           "id": "f16c7944f4acdaf71c1719df6ac0440738670070"
         }
@@ -798,5 +809,5 @@
       "categories": []
     }
   ],
-  "hash": "2013c14c82af9fb2387ae498ba1a04ded5918e87902a9bcf73664577c16275e7"
+  "hash": "63818a42704090b48371657cf79540f88c478173f94899000ba298b00d2e9b62"
 }
