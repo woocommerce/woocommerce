@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { JobType, LintJobConfig, TestJobConfig } from './config';
+import { CommandVarOptions, JobType, LintJobConfig, TestJobConfig } from './config';
 import { ProjectFileChanges } from './file-changes';
 import { ProjectNode } from './project-graph';
 import { TestEnvVars, parseTestEnvConfig } from './test-environment';
@@ -42,17 +42,46 @@ interface Jobs {
 }
 
 /**
+ * The options to be used when creating jobs.
+ */
+export interface CreateOptions {
+	commandVars?: { [ key in CommandVarOptions ]: string };
+}
+
+/**
+ * Replaces any variable tokens in the command with their value.
+ * 
+ * @param {string} command The command to process.
+ * @param {Object} options The options to use when creating the job.
+ * @return {string} The command after token replacements.
+ */
+function replaceCommandVars( command: string, options: CreateOptions ): string {
+	return command.replace(
+		/<([^>]+)>/g,
+		( _match, key ) => {
+			if ( options.commandVars?.[ key ] === undefined ) {
+				throw new Error( `Missing command variable '${ key }'.` );
+			}
+
+			return options.commandVars[ key ];
+		}
+	)
+}
+
+/**
  * Checks the config against the changes and creates one if it should be run.
  *
  * @param {string}         projectName The name of the project that the job is for.
  * @param {Object}         config      The config object for the lint job.
  * @param {Array.<string>} changes     The file changes that have occurred for the project.
+ * @param {Object}         options     The options to use when creating the job.
  * @return {Object|null} The job that should be run or null if no job should be run.
  */
 function createLintJob(
 	projectName: string,
 	config: LintJobConfig,
-	changes: string[]
+	changes: string[],
+	options: CreateOptions
 ): LintJob | null {
 	let triggered = false;
 
@@ -77,7 +106,7 @@ function createLintJob(
 
 	return {
 		projectName,
-		command: config.command,
+		command: replaceCommandVars( config.command, options ),
 	};
 }
 
@@ -87,6 +116,7 @@ function createLintJob(
  * @param {string}         projectName The name of the project that the job is for.
  * @param {Object}         config      The config object for the test job.
  * @param {Array.<string>} changes     The file changes that have occurred for the project.
+ * @param {Object}         options     The options to use when creating the job.
  * @param {Array.<string>} cascadeKeys The cascade keys that have been triggered in dependencies.
  * @return {Promise.<Object|null>} The job that should be run or null if no job should be run.
  */
@@ -94,6 +124,7 @@ async function createTestJob(
 	projectName: string,
 	config: TestJobConfig,
 	changes: string[],
+	options: CreateOptions,
 	cascadeKeys: string[]
 ): Promise< TestJob | null > {
 	let triggered = false;
@@ -133,7 +164,7 @@ async function createTestJob(
 	const createdJob: TestJob = {
 		projectName,
 		name: config.name,
-		command: config.command,
+		command: replaceCommandVars( config.command, options ),
 		testEnv: {
 			shouldCreate: false,
 			envVars: {},
@@ -146,7 +177,7 @@ async function createTestJob(
 		createdJob.testEnv = {
 			shouldCreate: true,
 			envVars: await parseTestEnvConfig( config.testEnv.config ),
-			start: config.testEnv.start,
+			start: replaceCommandVars( config.testEnv.start, options ),
 		};
 	}
 
@@ -158,12 +189,14 @@ async function createTestJob(
  *
  * @param {Object}         node         The current project node to examine.
  * @param {Object}         changedFiles The files that have changed for the project.
+ * @param {Object}         options      The options to use when creating the job.
  * @param {Array.<string>} cascadeKeys  The cascade keys that have been triggered in dependencies.
  * @return {Promise.<Object>} The jobs that have been created for the project.
  */
 async function createJobsForProject(
 	node: ProjectNode,
 	changedFiles: ProjectFileChanges,
+	options: CreateOptions,
 	cascadeKeys: string[]
 ): Promise< Jobs > {
 	// We're going to traverse the project graph and check each node for any jobs that should be triggered.
@@ -182,6 +215,7 @@ async function createJobsForProject(
 		const dependencyJobs = await createJobsForProject(
 			dependency,
 			changedFiles,
+			options,
 			dependencyCascade
 		);
 		newJobs.lint.push( ...dependencyJobs.lint );
@@ -217,7 +251,8 @@ async function createJobsForProject(
 				const created = createLintJob(
 					node.name,
 					jobConfig,
-					changedFiles[ node.name ] ?? []
+					changedFiles[ node.name ] ?? [],
+					options
 				);
 				if ( ! created ) {
 					break;
@@ -233,6 +268,7 @@ async function createJobsForProject(
 					node.name,
 					jobConfig,
 					changedFiles[ node.name ] ?? [],
+					options,
 					cascadeKeys
 				);
 				if ( ! created ) {
@@ -262,11 +298,13 @@ async function createJobsForProject(
  *
  * @param {Object} root    The root node for the project graph.
  * @param {Object} changes The file changes that have occurred.
+ * @param {Object} options The options to use when creating the job.
  * @return {Promise.<Object>} The jobs that should be run.
  */
 export function createJobsForChanges(
 	root: ProjectNode,
-	changes: ProjectFileChanges
+	changes: ProjectFileChanges,
+	options: CreateOptions
 ): Promise< Jobs > {
-	return createJobsForProject( root, changes, [] );
+	return createJobsForProject( root, changes, options, [] );
 }

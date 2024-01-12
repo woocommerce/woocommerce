@@ -31,7 +31,15 @@ const program = new Command( 'ci-jobs' )
 		Logger.endTask( true );
 
 		Logger.startTask( 'Creating Jobs', true );
-		const jobs = await createJobsForChanges( projectGraph, fileChanges );
+		const jobs = await createJobsForChanges(
+			projectGraph,
+			fileChanges,
+			{
+				commandVars: {
+					baseRef,
+				},
+			}
+		);
 		Logger.endTask( true );
 
 		if ( isGithubCI() ) {

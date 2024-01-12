@@ -40,6 +40,45 @@ describe( 'Config', () => {
 			} );
 		} );
 
+		it( 'should validate lint command vars', () => {
+			const parsed = parseCIConfig( {
+				name: 'foo',
+				config: {
+					ci: {
+						lint: {
+							changes: '/src/**/*.{js,jsx,ts,tsx}',
+							command: 'foo <baseRef>',
+						},
+					},
+				},
+			} );
+
+			expect( parsed ).toMatchObject( {
+				jobs: [
+					{
+						type: JobType.Lint,
+						changes: [ makeRe( '/src/**/*.{js,jsx,ts,tsx}' ) ],
+						command: 'foo <baseRef>',
+					},
+				],
+			} );
+
+			const expectation = () => {
+				parseCIConfig( {
+					name: 'foo',
+					config: {
+						ci: {
+							lint: {
+								changes: '/src/**/*.{js,jsx,ts,tsx}',
+								command: 'foo <invalid>',
+							},
+						},
+					},
+				} );
+			}
+			expect( expectation ).toThrow();
+		} );
+
 		it( 'should parse lint config with changes array', () => {
 			const parsed = parseCIConfig( {
 				name: 'foo',

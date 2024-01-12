@@ -71,7 +71,7 @@
 		"build_step": "pnpm build:zip",
 		"ci": {
 			"lint": {
-				"command": "lint:php:changes:branch origin/trunk",
+				"command": "lint:php:changes:branch <baseRef>",
 				"changes": [
 					"composer.lock",
 					"includes/**/*.php",

@@ -22,6 +22,14 @@ export const enum JobType {
 }
 
 /**
+ * The variables that can be used in tokens on command strings
+ * that will be replaced during job creation.
+ */
+export enum CommandVarOptions {
+	BaseRef = 'baseRef',
+}
+
+/**
  * The base config requirements for all jobs.
  */
 interface BaseJobConfig {
@@ -100,6 +108,33 @@ export interface LintJobConfig extends BaseJobConfig {
 }
 
 /**
+ * Checks to see whether or not the variables in a command are valid.
+ * 
+ * @param {string} command The command to validate.
+ */
+function validateCommandVars( command: string ) {
+	const matches = command.matchAll( /<([^>]+)>/g );
+	if ( ! matches ) {
+		return;
+	}
+
+	const commandOptions: string[] = Object.values( CommandVarOptions );
+	for ( const match of matches ) {
+		if ( match.length !== 2 ) {
+			throw new ConfigError(
+				'Invalid command variable. Variables must be in the format "<variable>".'
+			);
+		}
+
+		if ( ! commandOptions.includes( match[ 1 ] ) ) {
+			throw new ConfigError(
+				`Invalid command variable "${ match[ 1 ] }".`
+			);
+		}
+	}
+}
+
+/**
  * Parses the lint job configuration.
  *
  * @param {Object} raw The raw config to parse.
@@ -116,6 +151,8 @@ function parseLintJobConfig( raw: any ): LintJobConfig {
 			'A string "command" option is required for the lint job.'
 		);
 	}
+
+	validateCommandVars( raw.command );
 
 	return {
 		type: JobType.Lint,
@@ -264,6 +301,8 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		);
 	}
 
+	validateCommandVars( raw.command );
+
 	const config: TestJobConfig = {
 		type: JobType.Test,
 		name: raw.name,
@@ -281,6 +320,8 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 				'A string "start" option is required for test environments.'
 			);
 		}
+
+		validateCommandVars( raw.testEnv.start );
 
 		config.testEnv = {
 			start: raw.testEnv.start,
