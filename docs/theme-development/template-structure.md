@@ -123,5 +123,7 @@ If you are a theme developer or using a theme with custom templates, you must de
 
 If your theme has a `woocommerce.php` file, you will be unable to override the `woocommerce/archive-product.php` custom template in your theme, as `woocommerce.php` has priority over other template files. This is intended to prevent display issues.
 
-> Need support with editing your Woo store? WooExpert agencies are here to help. They are trusted agencies with a proven track record of building highly customized, scalable online stores.
+---
+
+Need support with editing your Woo store? WooExpert agencies are here to help. They are trusted agencies with a proven track record of building highly customized, scalable online stores.
 [Hire an Expert](https://woo.com/customizations/).
