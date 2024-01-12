@@ -70,10 +70,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		}
 	}
 
-	useEffect( () => {
-		getCurrentVariationsPage( { product_id: productId } );
-	}, [ productId ] );
-
 	function onPageChange( page: number ) {
 		getCurrentVariationsPage( {
 			product_id: productId,
@@ -452,6 +448,12 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	} = useProductVariationsHelper();
 
 	const wasGenerating = useRef( false );
+
+	useEffect( () => {
+		if ( ! isGenerating ) {
+			getCurrentVariationsPage( { product_id: productId } );
+		}
+	}, [ productId, isGenerating ] );
 
 	useEffect( () => {
 		if ( isGenerating ) {

@@ -7,8 +7,7 @@ import {
 } from '@woocommerce/components/build-types/types';
 
 export type BlockSlotFillProps = {
-	clientId: string;
-	name: string;
+	name: 'section-actions' | 'section-description';
 };
 
 export type BlockSlotProps = BlockSlotFillProps & SlotComponentProps;

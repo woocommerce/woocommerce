@@ -2,6 +2,17 @@
  * External dependencies
  */
 import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
+import { Product } from '@woocommerce/data';
+
+export type ProductTemplate = {
+	id: string;
+	title: string;
+	description: string | null;
+	icon: string | null;
+	order: number;
+	layoutTemplateId: string;
+	productData: Partial< Product >;
+};
 
 // Type guard function to check if children is a function, while still type narrowing correctly.
 export function isCallable(

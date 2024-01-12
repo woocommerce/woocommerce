@@ -29,14 +29,16 @@ import { useEntityId } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { ProductEditorSettings } from '../../../components';
-import { ProductTemplate } from '../../../components/editor';
 import { BlockFill } from '../../../components/block-slot-fill';
 import { useValidations } from '../../../contexts/validation-context';
 import {
 	WPError,
 	getProductErrorMessage,
 } from '../../../utils/get-product-error-message';
-import { ProductEditorBlockEditProps } from '../../../types';
+import type {
+	ProductEditorBlockEditProps,
+	ProductTemplate,
+} from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
@@ -254,7 +256,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	return (
 		<BlockFill
 			name="section-description"
-			clientId={ clientId }
 			slotContainerBlockName="woocommerce/product-section"
 		>
 			<div { ...blockProps }>

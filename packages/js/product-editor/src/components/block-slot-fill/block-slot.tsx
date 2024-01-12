@@ -3,6 +3,10 @@
  */
 import { Slot } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
+import {
+	// @ts-expect-error no exported member.
+	useBlockEditContext,
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -10,7 +14,8 @@ import { createElement } from '@wordpress/element';
 import { getName } from './utils/get-name';
 import { BlockSlotProps } from './types';
 
-export function BlockSlot( { name, clientId, ...props }: BlockSlotProps ) {
+export function BlockSlot( { name, ...props }: BlockSlotProps ) {
+	const { clientId } = useBlockEditContext();
 	// @ts-expect-error - It seems Slot prop types are incorrect.
 	return <Slot { ...props } name={ getName( name, clientId ) } />;
 }
