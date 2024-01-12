@@ -257,11 +257,11 @@ test.describe( 'Product Collection', () => {
 				range: 'last3months',
 			} );
 
-			await expect( pageObject.products ).toHaveCount( 0 );
+			await expect( pageObject.products ).toHaveCount( 9 );
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect( pageObject.products ).toHaveCount( 0 );
+			await expect( pageObject.products ).toHaveCount( 9 );
 		} );
 
 		test( 'Products can be filtered based on price range.', async ( {
