@@ -1248,12 +1248,10 @@ WHERE
 		$post_order_modified_date = is_null( $post_order_modified_date ) ? 0 : $post_order_modified_date->getTimestamp();
 
 		/**
-		 * We are here because there was difference in posts and order data, although the sync is enabled.
-		 * When order modified date is more recent than post modified date, it can only mean that COT definitely has more updated version of the order.
-		 *
-		 * In a case where post meta was updated (without updating post_modified date), post_modified would be equal to order_modified date.
-		 *
-		 * So we write back to the order table when order modified date is more recent than post modified date. Otherwise, we write to the post table.
+		 * We are here because there was difference in the post and order data even though sync is enabled. If the modified date in 
+		 * the post is the same or more recent than the modified date in the order object, we update the order object with the data
+		 * from the post. The opposite case is handled in 'backfill_post_record'. This mitigates the case where other plugins write
+		 * to the post or postmeta directly.
 		 */
 		if ( $post_order_modified_date >= $order_modified_date ) {
 			$this->migrate_post_record( $order, $post_order );
