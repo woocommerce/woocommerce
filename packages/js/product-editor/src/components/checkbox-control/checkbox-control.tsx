@@ -58,7 +58,6 @@ export const Checkbox: React.FC< CheckboxProps > = ( {
 				/>
 				{ tooltip && (
 					<Tooltip
-						// @ts-expect-error TODO: Fix this?
 						text={
 							<span
 								dangerouslySetInnerHTML={ sanitizeHTML(

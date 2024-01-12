@@ -75,7 +75,8 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 						focusOnMount="container"
 						position={ position }
 						className="woocommerce-tooltip__text"
-						onFocusOutside={ ( event ) => {
+						// @ts-expect-error - The type of onFocusOutside is incorrect.
+						onFocusOutside={ ( event: FocusEvent ) => {
 							if (
 								event.relatedTarget?.classList.contains(
 									uniqueIdentifier
