@@ -37,9 +37,7 @@ module.exports = {
 		// Force some modulse  to resolve with the CJS entry point, because Jest does not support package.json.exports.
 		uuid: require.resolve( 'uuid' ),
 		memize: require.resolve( 'memize' ),
-		yjs: require.resolve( 'yjs' ),
-		lib0: require.resolve( 'lib0' ),
-		'lib0/observable': require.resolve( 'lib0/observable' ),
+		'@wordpress/core-data': require.resolve( '@wordpress/core-data' ),
 	},
 	restoreMocks: true,
 	setupFiles: [
