@@ -41,7 +41,6 @@ const program = new Command( 'ci-jobs' )
 		if ( isGithubCI() ) {
 			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
 			setOutput( 'test-jobs', JSON.stringify( jobs.test ) );
-			return;
 		}
 
 		if ( jobs.lint.length > 0 ) {
