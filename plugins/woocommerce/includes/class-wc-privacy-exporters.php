@@ -69,7 +69,7 @@ class WC_Privacy_Exporters {
 
 		$orders = wc_get_orders( $order_query );
 
-		if ( is_array( $orders ) && 0 < count( $orders ) ) {
+		if ( 0 < count( $orders ) ) {
 			foreach ( $orders as $order ) {
 				$data_to_export[] = array(
 					'group_id'          => 'woocommerce_orders',
