@@ -1,8 +1,8 @@
 {
 	"name": "woocommerce/order-confirmation-additional-fields",
 	"version": "1.0.0",
-	"title": "Additional Checkout Fields",
-	"description": "Displays additional fields present on the checkout for the current order.",
+	"title": "Additional Field List",
+	"description": "Display the list of additional field values from the current order.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {
