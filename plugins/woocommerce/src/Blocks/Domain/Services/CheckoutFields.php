@@ -343,7 +343,7 @@ class CheckoutFields {
 			$valid_attributes = array_filter(
 				$options['attributes'],
 				function( $_, $key ) use ( $allowed_attributes ) {
-					return in_array( $key, $allowed_attributes, true ) || strpos( $key, 'aria-' ) === 0;
+					return in_array( $key, $allowed_attributes, true ) || strpos( $key, 'aria-' ) === 0 || strpos( $key, 'data-' ) === 0;
 				},
 				ARRAY_FILTER_USE_BOTH
 			);
