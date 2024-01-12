@@ -66,16 +66,10 @@ export function SectionBlockEdit( {
 							) }
 						</h2>
 
-						<BlockSlot
-							name="section-actions"
-							clientId={ clientId }
-						/>
+						<BlockSlot name="section-actions" />
 					</div>
 
-					<BlockSlot
-						name="section-description"
-						clientId={ clientId }
-					/>
+					<BlockSlot name="section-description" />
 				</HeadingTagName>
 			) }
 
