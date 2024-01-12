@@ -10,7 +10,6 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplateLogger;
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 
@@ -83,9 +82,6 @@ class Init {
 
 			$tracks = new Tracks();
 			$tracks->init();
-
-			// Make sure the block template logger is initialized before any templates are created.
-			BlockTemplateLogger::get_instance();
 		}
 	}
 

@@ -4,6 +4,8 @@ namespace Automattic\WooCommerce\LayoutTemplates;
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
 
+use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplateLogger;
+
 /**
  * Layout template registry.
  */
@@ -100,13 +102,21 @@ final class LayoutTemplateRegistry {
 	 * @param array $query_params Query params.
 	 */
 	public function instantiate_layout_templates( array $query_params = array() ): array {
+		// Make sure the block template logger is initialized before the templates are created,
+		// so that the logger will collect the template events.
+		$logger = BlockTemplateLogger::get_instance();
+
 		$layout_templates = array();
 
 		$layout_templates_info = $this->get_matching_layout_templates_info( $query_params );
 		foreach ( $layout_templates_info as $layout_template_info ) {
 			$layout_template = $this->get_layout_template_instance( $layout_template_info );
 
-			$layout_templates[ $layout_template->get_id() ] = $layout_template;
+			$layout_template_id = $layout_template->get_id();
+
+			$layout_templates[ $layout_template_id ] = $layout_template;
+
+			$logger->log_template_events_to_file( $layout_template_id );
 		}
 
 		return $layout_templates;
