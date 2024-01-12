@@ -38,6 +38,7 @@ jobs:
               baseRef = 'origin/' + baseRef;
             }
             const child_process = require( 'node:child_process' );
+            child_process.execSync( 'pnpm -r list --only-projects --json', { stdio: 'inherit' } );
             child_process.execSync( 'pnpm utils ci-jobs ' + baseRef, { stdio: 'inherit' } );
   project-lint-jobs:
     name: 'Lint - ${{ matrix.projectName }}'
