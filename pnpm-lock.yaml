@@ -4828,6 +4828,9 @@ importers:
       jest:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
+      replace:
+        specifier: ^1.2.2
+        version: 1.2.2
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.6)(jest@27.5.1)(typescript@5.3.3)
