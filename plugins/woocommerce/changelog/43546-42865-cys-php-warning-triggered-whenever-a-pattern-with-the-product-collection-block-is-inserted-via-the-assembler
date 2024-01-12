@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+CYS: fix php warning raise by the Product Collection block.
