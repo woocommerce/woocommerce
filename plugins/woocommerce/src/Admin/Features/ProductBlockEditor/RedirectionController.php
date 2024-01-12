@@ -71,7 +71,7 @@ class RedirectionController {
 				continue;
 			}
 
-			$product_data = $product_template->get_product_data();
+			$product_data      = $product_template->get_product_data();
 			$product_data_type = $product_data['type'];
 			// Treat a variable product as a simple product since there is not a product template
 			// for variable products.
