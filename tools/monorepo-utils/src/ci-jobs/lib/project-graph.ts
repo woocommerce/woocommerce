@@ -32,25 +32,14 @@ function parseWorkspaceDependencies( packageFile: PackageJSON ): string[] {
 	// We're going to grab a list of all of the dependencies that are mapped
 	// to packages within our PNPM workspace. This will let us know which
 	// ones to map when we create the project graph.
-
-	if ( packageFile.dependencies ) {
-		for ( const dependency in packageFile.dependencies ) {
-			const constraint = packageFile.dependencies[ dependency ];
-			if ( ! constraint.startsWith( 'workspace:' ) ) {
-				continue;
-			}
-
-			if ( dependencyList.includes( dependency ) ) {
-				continue;
-			}
-
-			dependencyList.push( dependency );
+	const dependencyTypes = [ 'dependencies', 'devDependencies' ];
+	for ( const type of dependencyTypes ) {
+		if ( ! packageFile[ type ] ) {
+			continue;
 		}
-	}
 
-	if ( packageFile.devDependencies ) {
-		for ( const dependency in packageFile.devDependencies ) {
-			const constraint = packageFile.devDependencies[ dependency ];
+		for ( const dependency in packageFile[ type ] ) {
+			const constraint: string = packageFile[ type ][ dependency ];
 			if ( ! constraint.startsWith( 'workspace:' ) ) {
 				continue;
 			}
