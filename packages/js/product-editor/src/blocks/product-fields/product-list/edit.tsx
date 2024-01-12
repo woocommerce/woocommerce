@@ -26,7 +26,6 @@ import {
 	getProductImageStyle,
 	ReorderProductsModal,
 } from '../../../components/add-products-modal';
-import { BlockFill } from '../../../components/block-slot-fill';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { UploadsBlockAttributes } from './types';
 import {
@@ -37,11 +36,11 @@ import { Shirt } from '../../../images/shirt';
 import { Pants } from '../../../images/pants';
 import { Glasses } from '../../../images/glasses';
 import { AdviceCard } from '../../../components/advice-card';
+import { SectionActions } from '../../../components/block-slot-fill';
 
-export function Edit( {
+export function ProductListBlockEdit( {
 	attributes,
 	context: { postType },
-	clientId,
 }: ProductEditorBlockEditProps< UploadsBlockAttributes > ) {
 	const { property } = attributes;
 	const blockProps = useWooBlockProps( attributes );
@@ -125,11 +124,7 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<BlockFill
-				name="section-actions"
-				clientId={ clientId }
-				slotContainerBlockName="woocommerce/product-section"
-			>
+			<SectionActions>
 				<div className="wp-block-woocommerce-product-list-field__header">
 					{ ! isLoading && groupedProducts.length > 0 && (
 						<Button
@@ -146,7 +141,7 @@ export function Edit( {
 						{ __( 'Add products', 'woocommerce' ) }
 					</Button>
 				</div>
-			</BlockFill>
+			</SectionActions>
 
 			<div className="wp-block-woocommerce-product-list-field__body">
 				{ ! isLoading && groupedProducts.length === 0 && (
