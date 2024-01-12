@@ -132,9 +132,9 @@ export function LinkedProductListBlockEdit( {
 			},
 		} );
 
-		const relatedProducts = ( await getRelatedProducts(
-			productId
-		) ) as Product[];
+		const relatedProducts = ( await getRelatedProducts( productId, {
+			fallbackToRandomProducts: true,
+		} ) ) as Product[];
 
 		dispatch( {
 			type: 'LOADING_LINKED_PRODUCTS',
