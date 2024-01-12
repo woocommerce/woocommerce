@@ -85,7 +85,7 @@ export function VariationActions( {
 					onClose={ onClose }
 				/>
 				<VariationQuickUpdateMenuItem.Slot
-					group={ '_main' }
+					group={ 'top-level' }
 					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
 			</MenuGroup>
@@ -117,7 +117,7 @@ export function VariationActions( {
 					/>
 				) }
 				<VariationQuickUpdateMenuItem.Slot
-					group={ '_secondary' }
+					group={ 'secondary' }
 					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
 			</MenuGroup>
@@ -139,7 +139,7 @@ export function VariationActions( {
 					{ __( 'Delete', 'woocommerce' ) }
 				</MenuItem>
 				<VariationQuickUpdateMenuItem.Slot
-					group={ '_tertiary' }
+					group={ 'tertiary' }
 					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
 			</MenuGroup>

@@ -29,7 +29,12 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 	Slot: React.FC<
 		Slot.Props & { group: string; supportsMultipleSelection: boolean }
 	>;
-} = ( { children, order = 1, group = '_main', supportsMultipleSelection } ) => {
+} = ( {
+	children,
+	order = 1,
+	group = 'top-level',
+	supportsMultipleSelection,
+} ) => {
 	return (
 		<Fill name={ getGroupName( group, supportsMultipleSelection ) }>
 			{ ( fillProps: Fill.Props ) =>
@@ -41,7 +46,7 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 
 VariationQuickUpdateMenuItem.Slot = ( {
 	fillProps,
-	group = '_main',
+	group = 'top-level',
 	supportsMultipleSelection,
 } ) => {
 	return (
