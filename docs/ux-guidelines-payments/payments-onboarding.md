@@ -3,17 +3,6 @@ post_title: User Experience Guidelines - Payments Onboarding and Setup
 menu_title: Payments Onboarding and Setup
 ---
 
-Follow the overall [user experience guidelines for WooCommerce](https://github.com/woocommerce/woocommerce/blob/trunk/docs/user-experience/user-experience-guidelines.md).
-
-Payments plugins come in many types: payment processors and gateways, wallets, Buy Now Pay Later, crypto, and more.
-
-The choice between payment plugins depends on the specific needs and preferences of the merchant and their customers. Some merchants may choose to use multiple types of payment plugins to offer their customers a wider range of payment options.
-
-A merchant can discover a payments plugin in the following ways:
-- Through direct installation from WordPress plugins.
-- Through Woo’s public list of payment services on the Marketplace.
-- Through the admin onboarding tasks and payments settings. To be added to the list of payment gateways in the Woo admin, the payments plugin must meet the criteria listed in these guidelines.
-
 ## Payments onboarding
 
 Plugin authors should actively guide merchants through setup of the plugin once installed and activated.
