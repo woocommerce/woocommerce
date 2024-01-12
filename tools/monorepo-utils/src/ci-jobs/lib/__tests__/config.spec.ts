@@ -75,7 +75,7 @@ describe( 'Config', () => {
 						},
 					},
 				} );
-			}
+			};
 			expect( expectation ).toThrow();
 		} );
 

@@ -1,7 +1,12 @@
 /**
  * Internal dependencies
  */
-import { CommandVarOptions, JobType, LintJobConfig, TestJobConfig } from './config';
+import {
+	CommandVarOptions,
+	JobType,
+	LintJobConfig,
+	TestJobConfig,
+} from './config';
 import { ProjectFileChanges } from './file-changes';
 import { ProjectNode } from './project-graph';
 import { TestEnvVars, parseTestEnvConfig } from './test-environment';
@@ -50,22 +55,19 @@ export interface CreateOptions {
 
 /**
  * Replaces any variable tokens in the command with their value.
- * 
+ *
  * @param {string} command The command to process.
  * @param {Object} options The options to use when creating the job.
  * @return {string} The command after token replacements.
  */
 function replaceCommandVars( command: string, options: CreateOptions ): string {
-	return command.replace(
-		/<([^>]+)>/g,
-		( _match, key ) => {
-			if ( options.commandVars?.[ key ] === undefined ) {
-				throw new Error( `Missing command variable '${ key }'.` );
-			}
-
-			return options.commandVars[ key ];
+	return command.replace( /<([^>]+)>/g, ( _match, key ) => {
+		if ( options.commandVars?.[ key ] === undefined ) {
+			throw new Error( `Missing command variable '${ key }'.` );
 		}
-	)
+
+		return options.commandVars[ key ];
+	} );
 }
 
 /**

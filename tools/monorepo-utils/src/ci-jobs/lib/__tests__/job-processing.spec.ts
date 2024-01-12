@@ -76,7 +76,7 @@ describe( 'Job Processing', () => {
 				{
 					commandVars: {
 						baseRef: 'test-base-ref',
-					}
+					},
 				}
 			);
 
@@ -344,7 +344,7 @@ describe( 'Job Processing', () => {
 				{
 					commandVars: {
 						baseRef: 'test-base-ref',
-					}
+					},
 				}
 			);
 
@@ -667,7 +667,7 @@ describe( 'Job Processing', () => {
 				{
 					commandVars: {
 						baseRef: 'test-base-ref',
-					}
+					},
 				}
 			);
 

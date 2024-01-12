@@ -109,7 +109,7 @@ export interface LintJobConfig extends BaseJobConfig {
 
 /**
  * Checks to see whether or not the variables in a command are valid.
- * 
+ *
  * @param {string} command The command to validate.
  */
 function validateCommandVars( command: string ) {
