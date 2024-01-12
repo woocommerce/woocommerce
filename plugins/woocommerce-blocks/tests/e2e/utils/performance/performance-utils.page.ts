@@ -78,7 +78,7 @@ export class PerformanceUtils {
 		if (
 			! fs.existsSync( PerformanceUtils.PERFORMANCE_REPORT_DIRECTORY )
 		) {
-			fs.mkdirSync( PerformanceUtils.PERFORMANCE_REPORT_FILENAME );
+			fs.mkdirSync( PerformanceUtils.PERFORMANCE_REPORT_DIRECTORY );
 		}
 	}
 
