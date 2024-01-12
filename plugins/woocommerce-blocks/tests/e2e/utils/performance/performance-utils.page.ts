@@ -86,6 +86,7 @@ export class PerformanceUtils {
 		try {
 			fs.appendFileSync( filePath, data );
 		} catch ( error ) {
+			// eslint-disable-next-line no-console
 			console.error( 'Error writing to file:', error );
 		}
 	}

@@ -102,9 +102,9 @@ test.describe( 'Cart performance', () => {
 				'button.wc-block-components-quantity-selector__button--plus'
 			);
 			const response = await page.waitForResponse(
-				( response ) =>
-					response.url().includes( '/wc/store/v1/batch' ) &&
-					response.status() === 207
+				( responseFromWait ) =>
+					responseFromWait.url().includes( '/wc/store/v1/batch' ) &&
+					responseFromWait.status() === 207
 			);
 			await expect( response.ok() ).toBeTruthy();
 
@@ -141,9 +141,9 @@ test.describe( 'Cart performance', () => {
 			);
 
 			const response = await page.waitForResponse(
-				( response ) =>
-					response.url().includes( '/wc/store/v1/batch' ) &&
-					response.status() === 207
+				( responseFromWait ) =>
+					responseFromWait.url().includes( '/wc/store/v1/batch' ) &&
+					responseFromWait.status() === 207
 			);
 
 			await expect( response.ok() ).toBeTruthy();
