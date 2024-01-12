@@ -117,7 +117,7 @@ class WC_Privacy_Exporters {
 		$customer_download_log_data_store = WC_Data_Store::load( 'customer-download-log' );
 		$downloads                        = $customer_download_data_store->get_downloads( $downloads_query );
 
-		if ( is_array( $downloads ) && 0 < count( $downloads ) ) {
+		if ( 0 < count( $downloads ) ) {
 			foreach ( $downloads as $download ) {
 				$data_to_export[] = array(
 					'group_id'          => 'woocommerce_downloads',
