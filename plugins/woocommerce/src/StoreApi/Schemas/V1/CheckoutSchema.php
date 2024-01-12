@@ -379,7 +379,13 @@ class CheckoutSchema extends AbstractSchema {
 			if ( is_wp_error( $result ) && $result->has_errors() ) {
 				$location = $this->additional_fields_controller->get_field_location( $key );
 				foreach ( $result->get_error_codes() as $code ) {
-					$result->add_data( [ 'location' => $location, 'key' => $key ] , $code );
+					$result->add_data(
+						[
+							'location' => $location,
+							'key'      => $key,
+						],
+						$code
+					);
 				}
 				$errors->merge_from( $result );
 			}
