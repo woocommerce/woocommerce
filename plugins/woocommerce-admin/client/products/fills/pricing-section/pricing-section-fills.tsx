@@ -57,7 +57,6 @@ export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
 	const { sanitizePrice } = useProductHelper();
 
 	const context = useContext( CurrencyContext );
-	// @ts-expect-error: TODO: fix this
 	const { getCurrencyConfig } = context;
 	const currencyConfig = getCurrencyConfig();
 

@@ -48,7 +48,6 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 	} );
 
 	const context = useContext( CurrencyContext );
-	// @ts-expect-error: TODO: fix this
 	const { getCurrencyConfig, formatAmount } = context;
 	const currencyConfig = getCurrencyConfig();
 
