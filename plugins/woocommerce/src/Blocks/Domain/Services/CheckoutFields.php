@@ -338,6 +338,9 @@ class CheckoutFields {
 				'disabled',
 				'readOnly',
 				'pattern',
+				'autocomplete',
+				'autocapitalize',
+				'title',
 			);
 
 			$valid_attributes = array_filter(
