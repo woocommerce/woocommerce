@@ -1,4 +1,4 @@
-Significance: minor
+Significance: patch
 Type: add
+Comment: This functionality is behind a feature flag.
 
-Surface additional checkout fields on block based Order Confirmation page
