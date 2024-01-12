@@ -224,18 +224,6 @@ class Init {
 	 * Get the product editor settings.
 	 */
 	private function get_product_editor_settings() {
-		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
-		$layout_template_logger   = BlockTemplateLogger::get_instance();
-
-		$editor_settings = array();
-
-		foreach ( $layout_template_registry->instantiate_layout_templates() as $layout_template ) {
-			$editor_settings['layoutTemplates'][] = $layout_template->to_json();
-
-			$layout_template_logger->log_template_events_to_file( $layout_template->get_id() );
-			$editor_settings['layoutTemplateEvents'][] = $layout_template_logger->get_formatted_template_events( $layout_template->get_id() );
-		}
-
 		$editor_settings['productTemplates'] = array_map(
 			function ( $product_template ) {
 				return $product_template->to_json();
