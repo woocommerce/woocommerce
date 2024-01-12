@@ -113,6 +113,20 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 				if ( field.hidden ) {
 					return null;
 				}
+
+				const fieldProps = {
+					id: `${ id }-${ field.key }`,
+					errorId: `${ addressType }_${ field.key }`,
+					label: field.required ? field.label : field.optionalLabel,
+					// These may come from core locale settings or the attributes option on custom fields.
+					autoCapitalize: field.autocapitalize,
+					autoComplete: field.autocomplete,
+					errorMessage: field.errorMessage,
+					required: field.required,
+					className: `wc-block-components-address-form__${ field.key }`,
+					...field.attributes,
+				};
+
 				if ( field.type === 'checkbox' ) {
 					return (
 						<CheckboxControl
@@ -126,20 +140,10 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 									[ field.key ]: checked,
 								} );
 							} }
+							{ ...fieldProps }
 						/>
 					);
 				}
-				const fieldProps = {
-					id: `${ id }-${ field.key }`,
-					errorId: `${ addressType }_${ field.key }`,
-					label: field.required ? field.label : field.optionalLabel,
-					autoCapitalize: field.autocapitalize,
-					autoComplete: field.autocomplete,
-					errorMessage: field.errorMessage,
-					required: field.required,
-					className: `wc-block-components-address-form__${ field.key }`,
-					...field.attributes,
-				};
 
 				if (
 					field.key === 'country' &&
