@@ -66,7 +66,7 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 	if ( wc_tax_enabled() ) :
 		$total_taxes = count( $order_taxes );
 		?>
-		<?php for ( $i = 0;  $i < $total_taxes_count; $i++ ) : ?>
+		<?php for ( $i = 0;  $i < $total_taxes; $i++ ) : ?>
 			<td class="line_tax" width="1%"></td>
 		<?php endfor; ?>
 	<?php endif; ?>
