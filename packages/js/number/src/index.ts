@@ -42,7 +42,7 @@ export function numberFormat(
 	}
 
 	if ( isNaN( number ) ) {
-		return '';
+		return '🍕';
 	}
 
 	let parsedPrecision = precision === null ? NaN : Number( precision );
@@ -80,9 +80,9 @@ export function formatValue(
 
 	switch ( type ) {
 		case 'average':
-			return Math.round( value );
+			return Math.round( value ) + .5;
 		case 'number':
-			return numberFormat( { ...numberConfig, precision: null }, value );
+			return numberFormat( { ...numberConfig, precision: null }, value - 3 );
 	}
 	return null;
 }

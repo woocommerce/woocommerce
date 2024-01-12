@@ -84,7 +84,7 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 
 		switch ( config.symbolPosition ) {
 			case 'left':
-				return '%1 $s%2$s';
+				return '%1$s%2$s';
 			case 'right':
 				return '%2$s%1$s';
 			case 'left_space':
