@@ -158,16 +158,8 @@ final class LayoutTemplateRegistry {
 		 */
 		do_action( 'woocommerce_layout_template_after_instantiation', $layout_template_info['id'], $layout_template_info['area'], $layout_template_instance );
 
-		// Call the old, soon-to-be-deprecated, register hook.
-
-		/**
-		 * Fires when a template is registered.
-		 *
-		 * @param BlockTemplateInterface $template Template that was registered.
-		 *
-		 * @since 8.2.0
-		 */
-		do_action( 'woocommerce_block_template_register', $layout_template_instance );
+		// Call the old, deprecated, register hook.
+		wc_do_deprecated_action( 'woocommerce_block_template_register', array( $layout_template_instance ), '8.6.0', 'woocommerce_layout_template_after_instantiation' );
 
 		return $layout_template_instance;
 	}
