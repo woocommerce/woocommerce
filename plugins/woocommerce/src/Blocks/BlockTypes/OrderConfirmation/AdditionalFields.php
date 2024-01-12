@@ -43,30 +43,20 @@ class AdditionalFields extends AbstractOrderConfirmationBlock {
 	 * @return string
 	 */
 	protected function render_additional_fields( $order ) {
-		$additional_fields_controller = Package::container()->get( CheckoutFields::class );
-		$additional_fields            = array_merge(
-			$additional_fields_controller->get_fields_for_location( 'contact' ),
-			$additional_fields_controller->get_fields_for_location( 'additional' )
+		$controller = Package::container()->get( CheckoutFields::class );
+		$fields     = array_merge(
+			$controller->get_order_additional_fields_with_values( $order, 'contact' ),
+			$controller->get_order_additional_fields_with_values( $order, 'additional' )
 		);
 
-		if ( empty( $additional_fields ) ) {
+		if ( empty( $fields ) ) {
 			return '';
 		}
 
 		$content = '<dl class="wc-block-order-confirmation-additional-fields-list">';
-		foreach ( $additional_fields as $additional_field_key => $additional_field ) {
-			$value = $additional_fields_controller->get_field_from_order( $additional_field_key, $order );
-
-			if ( '' === $value ) {
-				continue;
-			}
-
-			if ( 'checkbox' === $additional_field['type'] ) {
-				$value = $value ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' );
-			}
-
-			$content .= '<dt>' . esc_html( $additional_field['label'] ) . '</dt>';
-			$content .= '<dd>' . esc_html( $value ) . '</dd>';
+		foreach ( $fields as $field ) {
+			$content .= '<dt>' . esc_html( $field['label'] ) . '</dt>';
+			$content .= '<dd>' . esc_html( $field['value'] ) . '</dd>';
 		}
 		$content .= '</dl>';
 

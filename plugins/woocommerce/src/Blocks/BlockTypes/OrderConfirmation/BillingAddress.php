@@ -35,18 +35,17 @@ class BillingAddress extends AbstractOrderConfirmationBlock {
 		$phone   = $order->get_billing_phone() ? '<p class="woocommerce-customer-details--phone">' . esc_html( $order->get_billing_phone() ) . '</p>' : '';
 		$custom  = '';
 
-		$additional_fields_controller = Package::container()->get( CheckoutFields::class );
-		$additional_fields            = $additional_fields_controller->get_fields_for_location( 'address' );
+		$controller        = Package::container()->get( CheckoutFields::class );
+		$additional_fields = $controller->get_order_additional_fields_with_values( $order, 'address', 'billing' );
 
 		if ( $additional_fields ) {
 			foreach ( $additional_fields as $additional_field_key => $additional_field ) {
-				$value = $additional_fields_controller->get_field_from_order( $additional_field_key, $order, 'billing' );
-
-				if ( '' === $value ) {
-					continue;
-				}
-
-				$custom .= '<p class="woocommerce-customer-details--custom woocommerce-customer-details--' . esc_attr( $additional_field_key ) . '"><strong>' . wp_kses_post( $additional_field['label'] ) . '</strong> ' . wp_kses_post( $value ) . '</p>';
+				$custom .= sprintf(
+					'<p class="woocommerce-customer-details--custom woocommerce-customer-details--%1$s"><strong>%2$s</strong> %3$s</p>',
+					esc_attr( $additional_field_key ),
+					wp_kses_post( $additional_field['label'] ),
+					wp_kses_post( $additional_field['value'] )
+				);
 			}
 		}
 
