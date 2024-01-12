@@ -224,13 +224,13 @@ test.describe( 'Product Collection', () => {
 				'Out of stock',
 			] );
 
-			await expect( pageObject.products ).toHaveText( [
+			await expect( pageObject.productTitles ).toHaveText( [
 				'T-Shirt with Logo',
 			] );
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect( pageObject.products ).toHaveText( [
+			await expect( pageObject.productTitles ).toHaveText( [
 				'T-Shirt with Logo',
 			] );
 		} );
