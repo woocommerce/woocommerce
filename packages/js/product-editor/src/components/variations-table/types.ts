@@ -9,5 +9,5 @@ export type VariationActionsMenuItemProps = {
 		variation: Partial< ProductVariation > | Partial< ProductVariation >[]
 	): void;
 	onClose(): void;
-	type?: string;
+	supportsMultipleSelection?: boolean;
 };

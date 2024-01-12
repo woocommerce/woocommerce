@@ -18,8 +18,7 @@ import { InventoryMenuItem } from '../inventory-menu-item';
 import { PricingMenuItem } from '../pricing-menu-item';
 import { ToggleVisibilityMenuItem } from '../toggle-visibility-menu-item';
 import { DownloadsMenuItem } from '../downloads-menu-item';
-import { VariationActionsMenuItem } from './variation-actions-menu-item';
-import { QUICK_UPDATE, SINGLE_UPDATE } from './constants';
+import { VariationQuickUpdateMenuItem } from './variation-quick-update-menu-item';
 import { UpdateStockMenuItem } from '../update-stock-menu-item';
 import { SetListPriceMenuItem } from '../set-list-price-menu-item';
 
@@ -28,21 +27,20 @@ export function VariationActions( {
 	onChange,
 	onDelete,
 	onClose,
-	type = SINGLE_UPDATE,
+	supportsMultipleSelection = false,
 }: VariationActionsMenuProps & {
 	onClose: () => void;
-	type: string;
+	supportsMultipleSelection: boolean;
 } ) {
-	const isQuickUpdate = type === QUICK_UPDATE;
 	return (
 		<div
 			className={ classNames( {
-				'components-dropdown-menu__menu': isQuickUpdate,
+				'components-dropdown-menu__menu': supportsMultipleSelection,
 			} ) }
 		>
 			<MenuGroup
 				label={
-					isQuickUpdate
+					supportsMultipleSelection
 						? undefined
 						: sprintf(
 								/** Translators: Variation ID */
@@ -51,7 +49,7 @@ export function VariationActions( {
 						  )
 				}
 			>
-				{ isQuickUpdate ? (
+				{ supportsMultipleSelection ? (
 					<>
 						<UpdateStockMenuItem
 							selection={ selection }
@@ -86,9 +84,9 @@ export function VariationActions( {
 					onChange={ onChange }
 					onClose={ onClose }
 				/>
-				<VariationActionsMenuItem.Slot
+				<VariationQuickUpdateMenuItem.Slot
 					group={ '_main' }
-					type={ type }
+					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
 			</MenuGroup>
 			<MenuGroup>
@@ -96,38 +94,38 @@ export function VariationActions( {
 					selection={ selection }
 					onChange={ onChange }
 					onClose={ onClose }
-					type={ type }
+					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
 				<InventoryMenuItem
 					selection={ selection }
 					onChange={ onChange }
 					onClose={ onClose }
-					type={ type }
+					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
 				<ShippingMenuItem
 					selection={ selection }
 					onChange={ onChange }
 					onClose={ onClose }
-					type={ type }
+					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
 				{ window.wcAdminFeatures[ 'product-virtual-downloadable' ] && (
 					<DownloadsMenuItem
 						selection={ selection }
 						onChange={ onChange }
 						onClose={ onClose }
-						type={ type }
+						supportsMultipleSelection={ supportsMultipleSelection }
 					/>
 				) }
-				<VariationActionsMenuItem.Slot
+				<VariationQuickUpdateMenuItem.Slot
 					group={ '_secondary' }
-					type={ type }
+					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
 			</MenuGroup>
 			<MenuGroup>
 				<MenuItem
 					isDestructive
 					label={
-						! isQuickUpdate
+						! supportsMultipleSelection
 							? __( 'Delete variation', 'woocommerce' )
 							: undefined
 					}
@@ -140,9 +138,9 @@ export function VariationActions( {
 				>
 					{ __( 'Delete', 'woocommerce' ) }
 				</MenuItem>
-				<VariationActionsMenuItem.Slot
+				<VariationQuickUpdateMenuItem.Slot
 					group={ '_tertiary' }
-					type={ type }
+					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
 			</MenuGroup>
 		</div>

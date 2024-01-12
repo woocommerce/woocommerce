@@ -10,7 +10,6 @@ import { chevronDown, chevronUp } from '@wordpress/icons';
  * Internal dependencies
  */
 import { VariationActionsMenuProps } from './types';
-import { QUICK_UPDATE } from './constants';
 import { VariationActions } from './variation-actions';
 
 export function QuickUpdateMenu( {
@@ -43,7 +42,7 @@ export function QuickUpdateMenu( {
 					onClose={ onClose }
 					onChange={ onChange }
 					onDelete={ onDelete }
-					type={ QUICK_UPDATE }
+					supportsMultipleSelection={ true }
 				/>
 			) }
 		/>

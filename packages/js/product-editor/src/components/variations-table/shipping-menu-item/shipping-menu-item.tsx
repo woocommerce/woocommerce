@@ -14,13 +14,13 @@ import { recordEvent } from '@woocommerce/tracks';
 import { TRACKS_SOURCE } from '../../../constants';
 import { VariationActionsMenuItemProps } from '../types';
 import { handlePrompt } from '../../../utils/handle-prompt';
-import { VariationActionsMenuItem } from '../variation-actions-menus/variation-actions-menu-item';
+import { VariationQuickUpdateMenuItem } from '../variation-actions-menus/variation-quick-update-menu-item';
 
 export function ShippingMenuItem( {
 	selection,
 	onChange,
 	onClose,
-	type = 'single-variation',
+	supportsMultipleSelection = false,
 }: VariationActionsMenuItemProps ) {
 	const ids = Array.isArray( selection )
 		? selection.map( ( { id } ) => id )
@@ -241,9 +241,9 @@ export function ShippingMenuItem( {
 					>
 						{ __( 'Set weight', 'woocommerce' ) }
 					</MenuItem>
-					<VariationActionsMenuItem.Slot
+					<VariationQuickUpdateMenuItem.Slot
 						group={ 'shipping' }
-						type={ type }
+						supportsMultipleSelection={ supportsMultipleSelection }
 					/>
 				</div>
 			) }

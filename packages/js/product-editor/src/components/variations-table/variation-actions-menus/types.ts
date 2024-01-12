@@ -16,5 +16,5 @@ export type MenuItemProps = {
 	children?: React.ReactNode;
 	order?: number;
 	group?: string;
-	type?: string;
+	supportsMultipleSelection?: boolean;
 };
