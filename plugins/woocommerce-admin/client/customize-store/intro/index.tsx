@@ -125,6 +125,10 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 	const BannerComponent = BANNER_COMPONENTS[ bannerStatus ];
 
+	const sidebarMessage = `Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using ${
+		context.flowType === FlowType.AIOnline ? 'AI' : 'our store designer'
+	}.`;
+
 	return (
 		<>
 			{ ModalComponent && (
@@ -158,12 +162,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						</button>
 						{ __( 'Customize your store', 'woocommerce' ) }
 					</div>
-					<p>
-						{ __(
-							'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI.',
-							'woocommerce'
-						) }
-					</p>
+					<p>{ __( sidebarMessage, 'woocommerce' ) }</p>
 				</div>
 
 				<div className="woocommerce-customize-store-main">
