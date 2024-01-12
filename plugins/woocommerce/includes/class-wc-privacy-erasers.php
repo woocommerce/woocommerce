@@ -134,7 +134,7 @@ class WC_Privacy_Erasers {
 
 		$orders = wc_get_orders( $order_query );
 
-		if ( is_array( $orders ) && 0 < count( $orders ) ) {
+		if ( 0 < count( $orders ) ) {
 			foreach ( $orders as $order ) {
 				if ( apply_filters( 'woocommerce_privacy_erase_order_personal_data', $erasure_enabled, $order ) ) {
 					self::remove_order_personal_data( $order );
