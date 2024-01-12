@@ -220,32 +220,34 @@ export function ImageBlockEdit( {
 					</div>
 				) : (
 					<SectionActions>
-						<MediaUploader
-							value={
-								Array.isArray( propertyValue )
-									? propertyValue.map( ( { id } ) => id )
-									: propertyValue?.id ?? undefined
-							}
-							multipleSelect={ multiple ? 'add' : false }
-							onError={ () => null }
-							onFileUploadChange={ uploadHandler(
-								'product_images_add_via_file_upload_area'
-							) }
-							onMediaGalleryOpen={ () => {
-								recordEvent(
-									'product_images_media_gallery_open'
-								);
-							} }
-							onSelect={ handleSelect }
-							onUpload={ uploadHandler(
-								'product_images_add_via_drag_and_drop_upload'
-							) }
-							label={ '' }
-							buttonText={ __(
-								'Choose an image',
-								'woocommerce'
-							) }
-						/>
+						<div className="woocommerce-product-form__media-uploader">
+							<MediaUploader
+								value={
+									Array.isArray( propertyValue )
+										? propertyValue.map( ( { id } ) => id )
+										: propertyValue?.id ?? undefined
+								}
+								multipleSelect={ multiple ? 'add' : false }
+								onError={ () => null }
+								onFileUploadChange={ uploadHandler(
+									'product_images_add_via_file_upload_area'
+								) }
+								onMediaGalleryOpen={ () => {
+									recordEvent(
+										'product_images_media_gallery_open'
+									);
+								} }
+								onSelect={ handleSelect }
+								onUpload={ uploadHandler(
+									'product_images_add_via_drag_and_drop_upload'
+								) }
+								label={ '' }
+								buttonText={ __(
+									'Choose an image',
+									'woocommerce'
+								) }
+							/>
+						</div>
 					</SectionActions>
 				) }
 			</div>
