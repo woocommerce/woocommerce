@@ -24,38 +24,39 @@ baseTest.describe('Products > Delete Product', () => {
 	});
 
 	const test = apiFixture.extend({
-		productId: async ({api}, use) => {
-			let productId;
+		product: async ({api}, use) => {
+			const product = {
+				id: 0,
+				name: `Product ${Date.now()}`,
+				type: 'simple',
+				regular_price: '12.99'
+			}
 
 			await api
-				.post('products', {
-					name: 'Product to delete',
-					type: 'simple',
-					regular_price: '12.99',
-				})
+				.post('products', product)
 				.then((response) => {
-					productId = response.data.id;
+					product.id = response.data.id;
 				});
 
-			await use(productId);
+			await use(product);
 
 			// permanently delete the product if it still exists
-			const r = await api.get(`products/${productId}`);
+			const r = await api.get(`products/${product.id}`);
 			if (r.status !== 404) {
-				await api.delete(`products/${productId}`, {
+				await api.delete(`products/${product.id}`, {
 					force: true,
 				});
 			}
 		},
 	});
 
-	test('can delete a product from edit view', async ({page, productId, api}) => {
+	test('can delete a product from edit view', async ({page, product, api}) => {
 		await test.step('Navigate to product edit page', async () => {
-			await page.goto(`wp-admin/post.php?post=${productId}&action=edit`);
+			await page.goto(`wp-admin/post.php?post=${product.id}&action=edit`);
 		});
 
 		await test.step('Move product to trash', async () => {
-			await page.locator('#delete-action > a').click();
+			await page.getByRole('link', {name: 'Move to Trash'}).click();
 		});
 
 		await test.step('Verify product was trashed', async () => {
@@ -63,22 +64,22 @@ baseTest.describe('Products > Delete Product', () => {
 				page.locator('#message').last()
 			).toContainText('1 product moved to the Trash.');
 
-			const response = await api.get(`products/${productId}`);
+			const response = await api.get(`products/${product.id}`);
 			expect(response.data.status).toBe('trash');
 		});
 	});
 
-	test('can quick delete a product from product list', async ({page, productId, api}) => {
+	test('can quick delete a product from product list', async ({page, product, api}) => {
 		await test.step('Navigate to products list page', async () => {
 			await page.goto(`wp-admin/edit.php?post_type=product`);
 		});
 
 		await test.step('Move product to trash', async () => {
 			// mouse over the product row to display the quick actions
-			await page.locator(`#post-${productId}`).hover();
+			await page.locator(`#post-${product.id}`).hover();
 
 			// move product to trash
-			await page.locator(`#post-${productId} .submitdelete`).click();
+			await page.locator(`#post-${product.id} .submitdelete`).click();
 		});
 
 		await test.step('Verify product was trashed', async () => {
@@ -86,14 +87,14 @@ baseTest.describe('Products > Delete Product', () => {
 				page.locator('#message').last()
 			).toContainText('1 product moved to the Trash.');
 
-			const response = await api.get(`products/${productId}`);
+			const response = await api.get(`products/${product.id}`);
 			expect(response.data.status).toBe('trash');
 		});
 	});
 
-	test('can permanently delete a product from trash list', async ({page, productId, api}) => {
+	test('can permanently delete a product from trash list', async ({page, product, api}) => {
 		// trash the product
-		await api.delete(`products/${productId}`, {
+		await api.delete(`products/${product.id}`, {
 			force: false,
 		});
 
@@ -103,10 +104,10 @@ baseTest.describe('Products > Delete Product', () => {
 
 		await test.step('Permanently delete the product', async () => {
 			// mouse over the product row to display the quick actions
-			await page.locator(`#post-${productId}`).hover();
+			await page.locator(`#post-${product.id}`).hover();
 
 			// delete the product
-			await page.locator(`#post-${productId} .submitdelete`).click();
+			await page.locator(`#post-${product.id} .submitdelete`).click();
 		});
 
 		await test.step('Verify product was permanently deleted', async () => {
@@ -114,7 +115,7 @@ baseTest.describe('Products > Delete Product', () => {
 				page.locator('#message').last()
 			).toContainText('1 product permanently deleted.');
 
-			const response = await api.get(`products/${productId}`);
+			const response = await api.get(`products/${product.id}`);
 			expect(response.status).toEqual(404);
 		});
 	});
