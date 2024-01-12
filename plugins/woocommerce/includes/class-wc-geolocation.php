@@ -98,7 +98,6 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function get_external_ip_address() {
-		$transient_name      = null;
 		$external_ip_address = '0.0.0.0';
 
 		if ( '' !== self::get_ip_address() ) {
