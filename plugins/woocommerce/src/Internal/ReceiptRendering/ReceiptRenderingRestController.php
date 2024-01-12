@@ -2,15 +2,10 @@
 
 namespace Automattic\WooCommerce\Internal\ReceiptRendering;
 
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
-use Automattic\WooCommerce\Proxies\LegacyProxy;
-use \WP_HTTP_Response;
 use \WP_REST_Server;
 use \WP_REST_Request;
-use \WP_REST_Response;
 use \WP_Error;
-use \Exception;
 use \InvalidArgumentException;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
@@ -18,75 +13,29 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
  * Controller for the REST endpoints associated to the receipt rendering engine.
  * The endpoints require the read_shop_order capability for the order at hand.
  */
-class ReceiptRenderingRestController implements RegisterHooksInterface {
+class ReceiptRenderingRestController extends RestApiController {
 	use AccessiblePrivateMethods;
 
 	/**
-	 * The root namespace for the JSON REST API endpoints.
+	 * Get the WooCommerce REST API namespace for the class.
 	 *
-	 * @var string
+	 * @return string
 	 */
-	private string $route_namespace = 'wc/v3';
-
-	/**
-	 * Holds authentication error messages for each HTTP verb.
-	 *
-	 * @var array
-	 */
-	private array $authentication_errors_by_method;
-
-	/**
-	 * Class constructor.
-	 */
-	public function __construct() {
-		$this->authentication_errors_by_method = array(
-			'GET'    => array(
-				'code'    => 'woocommerce_rest_cannot_view',
-				'message' => __( 'Sorry, you cannot view resources.', 'woocommerce' ),
-			),
-			'POST'   => array(
-				'code'    => 'woocommerce_rest_cannot_create',
-				'message' => __( 'Sorry, you cannot create resources.', 'woocommerce' ),
-			),
-			'DELETE' => array(
-				'code'    => 'woocommerce_rest_cannot_delete',
-				'message' => __( 'Sorry, you cannot delete resources.', 'woocommerce' ),
-			),
-		);
-	}
-
-	/**
-	 * Register the hooks used by the class.
-	 */
-	public function register() {
-		self::add_filter( 'woocommerce_rest_api_get_rest_namespaces', array( $this, 'handle_woocommerce_rest_api_get_rest_namespaces' ) );
-	}
-
-	/**
-	 * Handle the woocommerce_rest_api_get_rest_namespaces filter
-	 * to add ourselves to the list of REST API controllers registered by WooCommerce.
-	 *
-	 * @param array $namespaces The original list of WooCommerce REST API namespaces/controllers.
-	 * @return array The updated list of WooCommerce REST API namespaces/controllers.
-	 */
-	private function handle_woocommerce_rest_api_get_rest_namespaces( array $namespaces ): array {
-		$namespaces['wc/v3']['order-receipts'] = self::class;
-		return $namespaces;
+	protected function get_rest_api_namespace(): string {
+		return 'order-receipts';
 	}
 
 	/**
 	 * Register the REST API endpoints handled by this controller.
 	 */
 	public function register_routes() {
-		self::mark_method_as_accessible( 'run' );
-
 		register_rest_route(
 			$this->route_namespace,
 			'/orders/(?P<id>[\d]+)/receipt',
 			array(
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => fn( $request ) => $this->run( 'create_order_receipt', $request ),
+					'callback'            => fn( $request ) => $this->run( $request, 'create_order_receipt' ),
 					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_shop_order', $request->get_param( 'id' ) ),
 					'args'                => $this->get_args_for_create_order_receipt(),
 					'schema'              => $this->get_schema_for_get_and_post_order_receipt(),
@@ -100,7 +49,7 @@ class ReceiptRenderingRestController implements RegisterHooksInterface {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => fn( $request ) => $this->run( 'get_order_receipt', $request ),
+					'callback'            => fn( $request ) => $this->run( $request, 'get_order_receipt' ),
 					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'read_shop_order', $request->get_param( 'id' ) ),
 					'args'                => $this->get_args_for_get_order_receipt(),
 					'schema'              => $this->get_schema_for_get_and_post_order_receipt(),
@@ -108,89 +57,6 @@ class ReceiptRenderingRestController implements RegisterHooksInterface {
 			)
 		);
 
-	}
-
-	/**
-	 * Handle a request for one of the provided REST API endpoints.
-	 *
-	 * If an exception is thrown, the exception message will be returned as part of the response
-	 * if the user has the 'manage_woocommerce' capability.
-	 *
-	 * @param string          $method_name The name of the class method to execute.
-	 * @param WP_REST_Request $request The incoming HTTP REST request.
-	 * @return WP_Error|WP_HTTP_Response|WP_REST_Response The response to send back to the client.
-	 */
-	private function run( string $method_name, WP_REST_Request $request ) {
-		try {
-			return rest_ensure_response( $this->$method_name( $request ) );
-		} catch ( Exception $ex ) {
-			wc_get_logger()->error( "ReceiptRenderingRestController: when executing method $method_name: {$ex->getMessage()}" );
-			return $this->internal_wp_error( $ex );
-		}
-	}
-
-	/**
-	 * Return an WP_Error object for an internal server error, with exception information if the current user is an admin.
-	 *
-	 * @param Exception $exception The exception to maybe include information from.
-	 * @return WP_Error
-	 */
-	private function internal_wp_error( Exception $exception ): WP_Error {
-		$data = array( 'status' => 500 );
-		if ( $this->current_user_can( 'manage_woocommerce' ) ) {
-			$data['exception_message'] = $exception->getMessage();
-		}
-		$data['exception_message'] = $exception->getMessage();
-
-		return new WP_Error( 'woocommerce_rest_internal_error', __( 'Internal server error', 'woocommerce' ), $data );
-	}
-
-	/**
-	 * Permission check for JSON REST API endpoints.
-	 *
-	 * @param WP_REST_Request $request The incoming HTTP REST request.
-	 * @param string          $required_capability_name The name of the required capability.
-	 * @param mixed           ...$extra_args Extra arguments to be used for the permission check.
-	 * @return bool|WP_Error True if the current user has the capability, an "Unauthorized" error otherwise.
-	 */
-	private function check_permission( WP_REST_Request $request, string $required_capability_name, ...$extra_args ) {
-		return $this->check_permission_by_method( $request->get_method(), $required_capability_name, $extra_args );
-	}
-
-	/**
-	 * Permission check for REST API endpoints, given the request method.
-	 *
-	 * @param string $method The HTTP method of the request.
-	 * @param string $required_capability_name The name of the required capability.
-	 * @param mixed  ...$extra_args Extra arguments to be used for the permission check.
-	 * @return bool|WP_Error True if the current user has the capability, an "Unauthorized" error otherwise.
-	 */
-	private function check_permission_by_method( string $method, string $required_capability_name, ...$extra_args ) {
-		if ( $this->current_user_can( $required_capability_name, $extra_args ) ) {
-			return true;
-		}
-
-		$error_information = $this->authentication_errors_by_method[ $method ] ?? null;
-		if ( is_null( $error_information ) ) {
-			return false;
-		}
-
-		return new WP_Error(
-			$error_information['code'],
-			$error_information['message'],
-			array( 'status' => rest_authorization_required_code() )
-		);
-	}
-
-	/**
-	 * Check if the current user has a given capability.
-	 *
-	 * @param string $capability The capability to check.
-	 * @param mixed  ...$extra_args Extra arguments to be passed to current_user_can.
-	 * @return bool True if the user has the specified capability.
-	 */
-	private function current_user_can( string $capability, ...$extra_args ): bool {
-		return wc_get_container()->get( LegacyProxy::class )->call_function( 'current_user_can', $capability, $extra_args );
 	}
 
 	/**
@@ -250,7 +116,7 @@ class ReceiptRenderingRestController implements RegisterHooksInterface {
 	 * @param string $filename The filename to return the information for.
 	 * @return array The data for the actual response to be returned.
 	 */
-	private function get_response_for_file( string $filename ) {
+	private function get_response_for_file( string $filename ): array {
 		$expiration_date = TransientFilesEngine::get_expiration_date( $filename );
 		$public_url      = wc_get_container()->get( TransientFilesEngine::class )->get_public_url( $filename );
 
@@ -336,19 +202,6 @@ class ReceiptRenderingRestController implements RegisterHooksInterface {
 				'readonly'    => true,
 				'default'     => false,
 			),
-		);
-	}
-
-	/**
-	 * Get the base schema for the REST API endpoints.
-	 *
-	 * @return array
-	 */
-	private function get_base_schema(): array {
-		return array(
-			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title'   => 'order receipts',
-			'type'    => 'object',
 		);
 	}
 }
