@@ -5,7 +5,7 @@ const path = require( 'path' );
 
 // These modules need to be transformed because they are not transpiled to CommonJS.
 // The top-level keys are the names of the packages and the values are the file
-// regexes that need to be transformed. Note that these are relative to the 
+// regexes that need to be transformed. Note that these are relative to the
 // package root and should be treated as such.
 const transformModules = {
 	'is-plain-obj': {
@@ -37,6 +37,7 @@ module.exports = {
 		// Force some modulse  to resolve with the CJS entry point, because Jest does not support package.json.exports.
 		uuid: require.resolve( 'uuid' ),
 		memize: require.resolve( 'memize' ),
+		lib0: require.resolve( 'lib0' ),
 	},
 	restoreMocks: true,
 	setupFiles: [
@@ -53,15 +54,17 @@ module.exports = {
 	],
 	// The keys for the transformed modules contains the name of the packages that should be transformed.
 	transformIgnorePatterns: [
-		'node_modules/(?!(?:\\.pnpm|' + Object.keys( transformModules ).join( '|' ) + ')/)',
-		__dirname
+		'node_modules/(?!(?:\\.pnpm|' +
+			Object.keys( transformModules ).join( '|' ) +
+			')/)',
+		__dirname,
 	],
 	// The values for the transformed modules contain an object with the transforms to apply.
 	transform: Object.entries( transformModules ).reduce(
 		( acc, [ moduleName, transform ] ) => {
 			for ( const key in transform ) {
 				acc[ `node_modules/${ moduleName }/${ key }` ] =
-				transform[ key ];
+					transform[ key ];
 			}
 
 			return acc;
