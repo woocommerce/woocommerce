@@ -156,7 +156,7 @@ export const BlockEditor = ( {} ) => {
 					blocks={ renderedBlocks }
 					onChange={
 						// We need to pass onChange for the logo screen so that logo block can be updated when we change the logo attributes in logo sidebar navigation screen component.
-						// We also need to pass onChange for the assembler hub screen so when a block set an attributes during the block initialization, the block editor will be updated.
+						// We also need to pass onChange for the assembler hub screen so when a block set an attribute during the block initialization, the block editor will be updated.
 						// For other screens, we don't need to pass onChange. Otherwise, we'll get a race condition issue where the block editor will be updated twice: once from the onChange in the sidebar component, and once from the onChange in the block editor component.
 						[
 							'/customize-store/assembler-hub/logo',
