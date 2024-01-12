@@ -39,7 +39,7 @@ Template files can be found within the **/woocommerce/templates/** directory:
 | v8.4.0         | [View template files](https://github.com/woocommerce/woocommerce/tree/8.4.0/plugins/woocommerce/templates) |
 
 ---
-
+<!-- markdownlint-disable MD033 -->
 <details>
 <summary>Expand to view files of all major previous versions</summary>
 
@@ -100,8 +100,8 @@ Template files can be found within the **/woocommerce/templates/** directory:
 | v3.1.0  | [View template files](https://github.com/woocommerce/woocommerce/tree/3.1.0/templates)                     |
 | v3.0.0  | [View template files](https://github.com/woocommerce/woocommerce/tree/3.0.0/templates)                     |
 | v2.6.0  | [View template files](https://github.com/woocommerce/woocommerce/tree/2.6.0/templates)                     |
-
 </details>
+<!-- markdownlint-enable MD033 -->
 
 ---
 
