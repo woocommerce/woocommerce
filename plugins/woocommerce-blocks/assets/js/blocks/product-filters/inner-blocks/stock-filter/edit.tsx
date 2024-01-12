@@ -36,16 +36,6 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 		),
 	} );
 
-	const template: Template[] = [
-		[
-			'core/heading',
-			{
-				content: __( 'Filter by Stock Status', 'woocommerce' ),
-				level: 3,
-			},
-		],
-	];
-
 	const { showCounts, displayStyle } = props.attributes;
 	const stockStatusOptions: Record< string, string > = getSetting(
 		'stockStatusOptions',
@@ -88,10 +78,6 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 			{
 				<div { ...blockProps }>
 					<Inspector { ...props } />
-					<InnerBlocks
-						template={ template }
-						allowedBlocks={ [ 'core/heading' ] }
-					/>
 					<Disabled>
 						<div
 							className={ classnames(

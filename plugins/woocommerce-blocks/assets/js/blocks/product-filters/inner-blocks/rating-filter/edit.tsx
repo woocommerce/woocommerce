@@ -48,13 +48,6 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		className: classnames( 'wc-block-rating-filter', className ),
 	} );
 
-	const template: Template[] = [
-		[
-			'core/heading',
-			{ content: __( 'Filter by Rating', 'woocommerce' ), level: 3 },
-		],
-	];
-
 	const isEditor = true;
 
 	const setWrapperVisibility = useSetWraperVisibility();
@@ -170,10 +163,6 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		<>
 			<Inspector { ...props } />
 			<div { ...blockProps }>
-				<InnerBlocks
-					template={ template }
-					allowedBlocks={ [ 'core/heading' ] }
-				/>
 				<Disabled>
 					{ displayNoProductRatingsNotice && <NoRatings /> }
 					<div

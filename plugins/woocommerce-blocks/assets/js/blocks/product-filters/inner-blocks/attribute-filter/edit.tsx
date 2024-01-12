@@ -88,22 +88,6 @@ const Edit = ( props: EditProps ) => {
 
 	const blockProps = useBlockProps();
 
-	const template: Template[] = [
-		[
-			'core/heading',
-			{
-				content: attributeObject
-					? sprintf(
-							// translators: %s is the attribute label.
-							__( 'Filter by %s', 'woocommerce' ),
-							attributeObject.label
-					  )
-					: __( 'Filter Products by Attribute', 'woocommerce' ),
-				level: 3,
-			},
-		],
-	];
-
 	useEffect( () => {
 		if ( ! attributeObject?.taxonomy ) {
 			return;
@@ -194,7 +178,7 @@ const Edit = ( props: EditProps ) => {
 		</AttributesPlaceholder>
 	);
 
-	const Wrapper = ( { children }: { children: ReactNode } ) => (
+	const Wrapper = ( { children }: { children: React.ReactNode } ) => (
 		<div { ...blockProps }>
 			<Toolbar />
 			{ children }
@@ -247,10 +231,6 @@ const Edit = ( props: EditProps ) => {
 	return (
 		<Wrapper>
 			<Inspector { ...props } />
-			<InnerBlocks
-				template={ template }
-				allowedBlocks={ [ 'core/heading' ] }
-			/>
 			<Disabled>
 				{ displayStyle === 'dropdown' ? (
 					<AttributeDropdown

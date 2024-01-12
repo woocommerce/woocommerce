@@ -2,15 +2,15 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * FilterWrapper class.
+ * The ProductFiltersWrapper block class.
  */
-class FilterWrapper extends AbstractBlock {
+class ProductFiltersWrapper extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'filter-wrapper';
+	protected $block_name = 'product-filters-wrapper';
 
 	/**
 	 * Get the frontend style handle for this block type.
