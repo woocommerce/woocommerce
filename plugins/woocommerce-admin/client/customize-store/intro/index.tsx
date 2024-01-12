@@ -30,7 +30,7 @@ import {
 	DefaultBanner,
 	ExistingAiThemeBanner,
 	ExistingThemeBanner,
-	CoreBanner,
+	NoAIBanner,
 } from './intro-banners';
 
 export type events =
@@ -39,7 +39,8 @@ export type events =
 	| { type: 'CLICKED_ON_BREADCRUMB' }
 	| { type: 'SELECTED_BROWSE_ALL_THEMES' }
 	| { type: 'SELECTED_ACTIVE_THEME'; payload: { theme: string } }
-	| { type: 'SELECTED_NEW_THEME'; payload: { theme: string } };
+	| { type: 'SELECTED_NEW_THEME'; payload: { theme: string } }
+	| { type: 'DESIGN_WITHOUT_AI' };
 
 export * as actions from './actions';
 export * as services from './services';
@@ -52,7 +53,7 @@ const BANNER_COMPONENTS = {
 	'jetpack-offline': JetpackOfflineBanner,
 	'existing-ai-theme': ExistingAiThemeBanner,
 	'existing-theme': ExistingThemeBanner,
-	[ FlowType.noAI ]: CoreBanner,
+	[ FlowType.noAI ]: NoAIBanner,
 	default: DefaultBanner,
 };
 

@@ -7,6 +7,7 @@ import { Button, Popover } from '@wordpress/components';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { FocusEvent, KeyboardEvent } from 'react';
 import { Icon, help } from '@wordpress/icons';
+import { useInstanceId } from '@wordpress/compose';
 
 type Position =
 	| 'top left'
@@ -36,9 +37,19 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 } ) => {
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 
+	const uniqueIdentifier = useInstanceId(
+		Tooltip,
+		'product_tooltip'
+	) as string;
+
 	return (
 		<>
-			<div className="woocommerce-tooltip">
+			<div
+				className={ classnames(
+					'woocommerce-tooltip',
+					uniqueIdentifier
+				) }
+			>
 				<Button
 					className={ classnames(
 						'woocommerce-tooltip__button',
@@ -66,10 +77,8 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 						className="woocommerce-tooltip__text"
 						onFocusOutside={ ( event ) => {
 							if (
-								(
-									event as FocusEvent
-								 ).relatedTarget?.classList.contains(
-									className
+								event.relatedTarget?.classList.contains(
+									uniqueIdentifier
 								)
 							) {
 								return;

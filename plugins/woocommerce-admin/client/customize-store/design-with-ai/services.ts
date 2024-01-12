@@ -19,12 +19,8 @@ import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/compo
 import { designWithAiStateMachineContext } from './types';
 import { FONT_PAIRINGS } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
-import {
-	patternsToNameMap,
-	getTemplatePatterns,
-} from '../assembler-hub/hooks/use-home-templates';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
-import { setLogoWidth } from '../utils';
+import { updateTemplate } from '../data/actions';
 
 const { escalate } = actions;
 
@@ -388,56 +384,6 @@ const updateGlobalStyles = async ( {
 				colorPalette?.settings || {},
 				fontPairing?.settings || {}
 			),
-		},
-		{
-			throwOnError: true,
-		}
-	);
-};
-
-// Update the current theme template
-const updateTemplate = async ( {
-	homepageTemplateId,
-}: {
-	homepageTemplateId: keyof typeof HOMEPAGE_TEMPLATES;
-} ) => {
-	// @ts-ignore No types for this exist yet.
-	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
-
-	// Ensure that the patterns are up to date because we populate images and content in previous step.
-	invalidateResolutionForStoreSelector( 'getBlockPatterns' );
-	invalidateResolutionForStoreSelector( '__experimentalGetTemplateForLink' );
-
-	const patterns = ( await resolveSelect(
-		coreStore
-		// @ts-ignore No types for this exist yet.
-	).getBlockPatterns() ) as Pattern[];
-	const patternsByName = patternsToNameMap( patterns );
-	const homepageTemplate = getTemplatePatterns(
-		HOMEPAGE_TEMPLATES[ homepageTemplateId ].blocks,
-		patternsByName
-	);
-
-	let content = [ ...homepageTemplate ]
-		.filter( Boolean )
-		.map( ( pattern ) => pattern.content )
-		.join( '\n\n' );
-
-	// Replace the logo width with the default width.
-	content = setLogoWidth( content );
-
-	const currentTemplate = await resolveSelect(
-		coreStore
-	).__experimentalGetTemplateForLink( '/' );
-
-	const { saveEntityRecord } = dispatch( coreStore );
-
-	await saveEntityRecord(
-		'postType',
-		currentTemplate.type,
-		{
-			id: currentTemplate.id,
-			content,
 		},
 		{
 			throwOnError: true,

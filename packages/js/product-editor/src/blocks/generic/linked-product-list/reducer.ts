@@ -8,7 +8,7 @@ export type State = {
 	linkedProducts: Product[];
 	searchedProducts: Product[];
 	isLoading?: boolean;
-	selectedProduct?: Product;
+	selectedProduct?: Product | Product[];
 };
 
 export type ActionType =
@@ -120,10 +120,14 @@ export function getSelectSearchedProductDispatcher(
 	dispatch: ( value: Action ) => void
 ) {
 	return function selectSearchedProductDispatcher(
-		selectedProduct: Product,
+		selectedProduct: Product | Product[],
 		linkedProducts: Product[]
 	) {
-		const newLinkedProducts = [ ...linkedProducts, selectedProduct ];
+		if ( ! Array.isArray( selectedProduct ) ) {
+			selectedProduct = [ selectedProduct ];
+		}
+
+		const newLinkedProducts = [ ...linkedProducts, ...selectedProduct ];
 
 		dispatch( {
 			type: 'SELECT_SEARCHED_PRODUCT',
