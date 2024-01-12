@@ -416,7 +416,7 @@ class WC_Privacy_Exporters {
 			)
 		);
 
-		if ( is_array( $tokens ) && 0 < count( $tokens ) ) {
+		if ( 0 < count( $tokens ) ) {
 			foreach ( $tokens as $token ) {
 				$data_to_export[] = array(
 					'group_id'          => 'woocommerce_tokens',
