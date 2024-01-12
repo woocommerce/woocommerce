@@ -1,5 +1,5 @@
 ---
-post_title: User Experience Guidelines - Notices
+post_title: WooCommerce Extension Guidelines - Notices
 menu_title: Notices
 ---
 

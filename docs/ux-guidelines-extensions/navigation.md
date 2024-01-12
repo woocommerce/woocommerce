@@ -1,5 +1,5 @@
 ---
-post_title: User Experience Guidelines - Navigation
+post_title: WooCommerce Extension Guidelines - Navigation
 menu_title: Navigation
 ---
 

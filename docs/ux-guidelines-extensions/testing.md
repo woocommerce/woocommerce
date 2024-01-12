@@ -1,5 +1,5 @@
 ---
-post_title: User Experience Guidelines - Testing
+post_title: WooCommerce Extension Guidelines - Testing
 menu_title: Testing
 ---
 

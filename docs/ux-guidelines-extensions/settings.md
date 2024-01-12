@@ -1,5 +1,5 @@
 ---
-post_title: User Experience Guidelines - Settings
+post_title: WooCommerce Extension Guidelines - Settings
 menu_title: Settings
 ---
 

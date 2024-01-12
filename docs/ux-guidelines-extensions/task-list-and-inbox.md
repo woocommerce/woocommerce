@@ -1,5 +1,5 @@
 ---
-post_title: User Experience Guidelines - Task List and Inbox
+post_title: WooCommerce Extension Guidelines - Task List and Inbox
 menu_title: Task list and Inbox
 ---
 
