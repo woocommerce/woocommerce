@@ -186,6 +186,20 @@ test.describe( 'Product Collection', () => {
 			);
 		} );
 
+		test( 'Products can be filtered based on tags.', async ( {
+			pageObject,
+		} ) => {
+			const filterName = 'Product tags';
+			await pageObject.addFilter( 'Show Taxonomies' );
+			await pageObject.setFilterComboboxValue( filterName, [
+				'Recommended',
+			] );
+			await expect( pageObject.productTitles ).toHaveText( [ 'Hoodie' ] );
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.productTitles ).toHaveText( [ 'Hoodie' ] );
+		} );
+
 		test( 'Products can be filtered based on product attributes like color, size etc.', async ( {
 			pageObject,
 		} ) => {
