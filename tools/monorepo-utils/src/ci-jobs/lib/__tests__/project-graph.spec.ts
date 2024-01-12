@@ -31,22 +31,41 @@ describe( 'Project Graph', () => {
 			} );
 
 			jest.mocked( loadPackage ).mockImplementation( ( path ) => {
-				if ( ! path.endsWith( 'package.json' ) ) {
-					throw new Error( 'Invalid path' );
+				const matches = path.match( /project-([abcd])\/package.json$/ );
+				if ( ! matches ) {
+					throw new Error( `Invalid project path: ${ path }.` );
 				}
 
-				const matches = path.match( /\/([^/]+)\/package.json$/ );
-				if ( matches[ 1 ] === 'project-a' ) {
-					return JSON.parse(
-						fs.readFileSync( __dirname + '/test-package.json', {
-							encoding: 'utf8',
-						} )
-					);
+				const packageFile = JSON.parse(
+					fs.readFileSync( __dirname + '/test-package.json', {
+						encoding: 'utf8',
+					} )
+				);
+
+				packageFile.name = 'project-' + matches[ 1 ];
+
+				switch ( matches[ 1 ] ) {
+					case 'a':
+						packageFile.dependencies = {
+							'project-b': 'workspace:*',
+						};
+						packageFile.devDependencies = {
+							'project-c': 'workspace:*',
+						};
+						break;
+					case 'b':
+						packageFile.dependencies = {
+							'project-c': 'workspace:*',
+						};
+						break;
+					case 'd':
+						packageFile.devDependencies = {
+							'project-c': 'workspace:*',
+						};
+						break;
 				}
 
-				return {
-					name: matches[ 1 ],
-				};
+				return packageFile;
 			} );
 
 			const graph = buildProjectGraph();
