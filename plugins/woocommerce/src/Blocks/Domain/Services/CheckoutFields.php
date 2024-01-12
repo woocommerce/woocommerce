@@ -510,7 +510,7 @@ class CheckoutFields {
 					E_USER_WARNING
 				);
 			}
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 
 			// One of the filters errored so skip them and validate the field. This allows the checkout process to continue.
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
