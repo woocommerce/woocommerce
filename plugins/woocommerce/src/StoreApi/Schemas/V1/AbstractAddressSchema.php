@@ -220,7 +220,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 				$result = $this->additional_fields_controller->validate_field( $key, $address[ $key ], $properties[ $key ] );
 			}
 
-			if ( is_wp_error( $result ) ) {
+			if ( is_wp_error( $result ) && $result->has_errors() ) {
 				$errors->add( $result->get_error_code(), $result->get_error_message() );
 			}
 		}
