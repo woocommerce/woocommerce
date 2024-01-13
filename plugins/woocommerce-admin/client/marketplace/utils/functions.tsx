@@ -236,6 +236,16 @@ function disconnectProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
+type WpAjaxReponse = {
+	success: boolean;
+	data: WpAjaxResponseData;
+};
+
+type WpAjaxResponseData = {
+	errorMessage?: string;
+	activateUrl?: string;
+};
+
 function wpAjax(
 	action: string,
 	data: {
@@ -244,7 +254,7 @@ function wpAjax(
 		theme?: string;
 		success?: boolean;
 	}
-): Promise< void > {
+): Promise< WpAjaxReponse > {
 	return new Promise( ( resolve, reject ) => {
 		if ( ! window.wp.updates ) {
 			reject( __( 'Please reload and try again', 'woocommerce' ) );
@@ -253,21 +263,15 @@ function wpAjax(
 
 		window.wp.updates.ajax( action, {
 			...data,
-			success: ( response: {
-				success?: boolean;
-				errorMessage?: string;
-			} ) => {
-				if ( response.success === false ) {
-					reject( {
-						success: false,
-						data: {
-							message: response.errorMessage,
-						},
-					} );
-				}
-				resolve();
+			success: ( response: WpAjaxResponseData ) => {
+				console.log( 'wpajax success', response );
+				resolve( {
+					success: true,
+					data: response,
+				} );
 			},
-			error: ( error: { errorMessage: string } ) => {
+			error: ( error: WpAjaxResponseData ) => {
+				console.log( 'wpajax error', error );
 				reject( {
 					success: false,
 					data: {
@@ -286,6 +290,7 @@ function activateProduct( subscription: Subscription ): Promise< void > {
 	const url = '/wc/v3/marketplace/subscriptions/activate';
 	const data = new URLSearchParams();
 	data.append( 'product_key', subscription.product_key );
+	data.append( 'subscription', JSON.stringify( subscription ) );
 	return apiFetch( {
 		path: url.toString(),
 		method: 'POST',
@@ -322,10 +327,11 @@ function getInstallUrl( subscription: Subscription ): Promise< string > {
 	} );
 }
 
-function downloadProduct( subscription: Subscription ): Promise< void > {
+function downloadProduct( subscription: Subscription ) {
+	console.log( 'downloading product' );
 	return wpAjax( 'install-' + subscription.product_type, {
 		// The slug prefix is required for the install to use WCCOM install filters.
-		slug: 'woocommerce-com-' + subscription.product_slug,
+		slug: subscription.zip_slug,
 	} );
 }
 
@@ -344,21 +350,10 @@ function installProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
-function updateProduct( subscription: Subscription ): Promise< void > {
+function updateProduct( subscription: Subscription ): Promise< WpAjaxReponse > {
 	return wpAjax( 'update-' + subscription.product_type, {
 		slug: subscription.local.slug,
 		[ subscription.product_type ]: subscription.local.path,
-	} );
-}
-
-function createOrder( productId: number ): Promise< string > {
-	return apiFetch( {
-		path: '/wc/v3/marketplace/create-order',
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify( { product_id: productId } ),
 	} );
 }
 
@@ -453,9 +448,9 @@ export {
 	refreshSubscriptions,
 	getInstallUrl,
 	downloadProduct,
+	activateProduct,
 	installProduct,
 	updateProduct,
-	createOrder,
 	addNotice,
 	removeNotice,
 	renewUrl,

@@ -215,8 +215,8 @@ class WC_Helper_Subscriptions_API {
 	 * @param WP_REST_Request $request Request object.
 	 */
 	public static function activate( $request ) {
-		$product_key  = $request->get_param( 'product_key' );
-		$subscription = WC_Helper::get_subscription( $product_key );
+		$subscription = $request->get_param( 'subscription');
+		$subscription = json_decode( $subscription, true );
 
 		if ( ! $subscription ) {
 			wp_send_json_error(
@@ -244,12 +244,14 @@ class WC_Helper_Subscriptions_API {
 			);
 		}
 
+		$installed_plugins = get_plugins();
 		if ( 'plugin' === $subscription['product_type'] ) {
-			$success = activate_plugin( $subscription['local']['path'] );
+			$success = activate_plugin( 'woocommerce-google-analytics-integration' );
 			if ( is_wp_error( $success ) ) {
 				wp_send_json_error(
 					array(
 						'message' => __( 'There was an error activating this plugin.', 'woocommerce' ),
+						'details' => $success->get_error_message(),
 					),
 					400
 				);

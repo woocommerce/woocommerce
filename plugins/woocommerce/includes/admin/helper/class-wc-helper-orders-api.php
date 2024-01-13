@@ -58,37 +58,30 @@ class WC_Helper_Orders_API {
 	}
 
 	public static function create_order( $request ) {
-		$response = WC_Helper_API::post(
-			'create-order',
-			array(
-				'authenticated' => true,
-				'body' 		=> array(
-					'product_id' => $request['product_id'],
+		try {
+			$response = WC_Helper_API::post(
+				'create-order',
+				array(
+					'authenticated' => true,
+					'body' 		=> array(
+						'product_id' => $request['product_id'],
+					)
 				)
-			)
-		);
+			);
 
-		if ( is_wp_error( $response ) ) {
-			return new WP_Error( 'wc_helper_api_error', $response->get_error_message(), array( 'status' => $response->get_error_code() ) );
+			return new \WP_REST_Response(
+				json_decode( wp_remote_retrieve_body( $response ), true ),
+				wp_remote_retrieve_response_code( $response )
+			);
+		} catch ( Exception $e ) {
+			return new \WP_REST_Response(
+				array(
+					'message' => 'Could not start the installation process. Reason: ' . $e->getMessage(),
+					'code'    => 'could-not-install',
+				),
+				500
+			);
 		}
-
-		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return new WP_Error( 'wc_helper_api_error', wp_remote_retrieve_response_message( $response ), array( 'status' => wp_remote_retrieve_response_code( $response ) ) );
-		}
-
-		$subscription = wp_remote_retrieve_body( $response );
-
-		$response = WC_Helper::get_subscription_local_data( $subscription );
-
-		var_dump( $response );
-		die();
-
-		return $response;
-
-		// See what the response is.
-			// If it's an error, return the error.
-			// If it's a redirect, relay it.
-			// If it's a success, return the data.
 	}
 }
 

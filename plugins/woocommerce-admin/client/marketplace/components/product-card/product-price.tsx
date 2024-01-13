@@ -4,13 +4,13 @@
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { Product } from '../product-list/types';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { recordEvent } from '@woocommerce/tracks';
 
 export default function ProductPrice( props: { product: Product } ) {
 	const { product } = props;
