@@ -41,7 +41,7 @@
 		"lint:fix:lang:js": "eslint src --fix",
 		"lint:lang:js": "eslint src",
 		"prepack": "pnpm build",
-		"test:js": "wireit",
+		"test:js": "jest --config ./jest.config.json --passWithNoTests",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:cjs": "wireit",
@@ -136,12 +136,6 @@
 		"watch:build:project:esm": {
 			"command": "tsc --project tsconfig.json --watch",
 			"service": true
-		},
-		"test:js": {
-			"command": "jest --config ./jest.config.json --passWithNoTests",
-			"dependencies": [
-				"build:project"
-			]
 		},
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
