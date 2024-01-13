@@ -212,6 +212,11 @@ async function createJobsForProject(
 	const newCascadeKeys = [];
 	for ( const dependency of node.dependencies ) {
 		// Each dependency needs to have its own cascade keys so that they don't cross-contaminate.
+
+		// Keey in mind that arrays are passed by reference in JavaScript. This means that any changes
+		// we make to the cascade keys array will be reflected in the parent scope. We need to copy
+		// the array before recursing our dependencies so that we don't accidentally add keys from
+		// one dependency to a sibling and accidentally trigger jobs that shouldn't be run.
 		const dependencyCascade = [ ...cascadeKeys ];
 
 		const dependencyJobs = await createJobsForProject(
@@ -231,8 +236,11 @@ async function createJobsForProject(
 	}
 
 	// Now that we're done looking at the dependencies we can add the cascade keys that
-	// they created. Make sure to avoid adding duplicates so that we don't waste time
-	// checking the same keys multiple times when we create the jobs.
+	// they created. This is deliberately modifying the function argument so that the
+	// "dependencyCascade" array created above will contain any of the keys that were
+	// triggered by children downstream. Make sure to avoid adding duplicates
+	// so that we don't waste time checking the same keys multiple times
+	// when we create the jobs.
 	cascadeKeys.push(
 		...newCascadeKeys.filter( ( value ) => ! cascadeKeys.includes( value ) )
 	);
