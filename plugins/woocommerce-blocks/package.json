@@ -44,8 +44,8 @@
 	"scripts": {
 		"analyze-bundles": "cross-env WP_BUNDLE_ANALYZER=1 pnpm run build",
 		"changelog": "composer install && composer exec -- changelogger",
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" build:project",
-		"build:project": "pnpm --if-present /^build:project:.*$/",
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
 		"build:check-assets": "rimraf build/* && cross-env ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
 		"build:deploy": "rimraf vendor/* && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 composer install --no-dev && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 pnpm run build --loglevel error",
@@ -103,8 +103,9 @@
 		"ts:log-errors": "npm --silent run ts:check | npx -y @bartekbp/typescript-checkstyle > checkstyle.xml",
 		"wp-env": "wp-env",
 		"wp-env:config": "./bin/wp-env-pre-config.sh",
-		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel watch:build:project",
-		"watch:build:project": "webpack --watch"
+		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
+		"watch:build:project:bundle": "wireit"
 	},
 	"devDependencies": {
 		"@actions/core": "1.10.0",
@@ -403,6 +404,10 @@
 			"dependencies": [
 				"dependencyOutputs"
 			]
+		},
+		"watch:build:project:bundle": {
+			"command": "webpack --watch",
+			"service": true
 		},
 		"test:js": {
 			"command": "wp-scripts test-unit-js --config tests/js/jest.config.json",

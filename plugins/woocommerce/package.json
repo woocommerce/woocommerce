@@ -10,8 +10,9 @@
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" build:project",
-		"build:project": "wireit",
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project:copy-assets": "wireit",
 		"build:zip": "./bin/build-zip.sh",
 		"changelog": "composer install && composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
@@ -54,8 +55,9 @@
 		"test:unit": "pnpm test:php",
 		"test:unit:env": "pnpm test:php:env",
 		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
-		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel watch:build:project",
-		"watch:build:project": "nodemon --exec \"pnpm run\" build:project"
+		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
+		"watch:build:project:copy-assets": "wireit"
 	},
 	"lint-staged": {
 		"*.php": [
@@ -252,7 +254,7 @@
 		"ignoreRoot": []
 	},
 	"wireit": {
-		"build:project": {
+		"build:project:copy-assets": {
 			"command": "rm -rf assets/client/blocks assets/client/admin assets/js assets/css && cp -r ../woocommerce-admin/build assets/client/admin && cp -r client/legacy/build/js assets/js && cp -r client/legacy/build/css assets/css && cp -r ../woocommerce-blocks/build assets/client/blocks && cp -r ../woocommerce-blocks/blocks.ini blocks.ini",
 			"clean": "if-file-deleted",
 			"files": [],
@@ -266,6 +268,10 @@
 			"dependencies": [
 				"dependencyOutputs"
 			]
+		},
+		"watch:build:project:copy-assets": {
+			"command": "nodemon --exec \"pnpm run\" build:project",
+			"service": true
 		},
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
