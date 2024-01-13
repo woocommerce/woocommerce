@@ -100,6 +100,28 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"babel.config.js",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}",
+						"typings/**/*.ts"
+					],
+					"cascade": "test:js"
+				}
+			]
+		}
+	},
 	"wireit": {
 		"build:project:bundle": {
 			"command": "webpack",
