@@ -60,7 +60,7 @@
 		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
-		"wireit": "0.14.1"
+		"wireit": "0.14.3"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

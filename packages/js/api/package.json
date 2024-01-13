@@ -65,7 +65,7 @@
 		"jest": "~27.5.1",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
-		"wireit": "0.14.1"
+		"wireit": "0.14.3"
 	},
 	"publishConfig": {
 		"access": "public"

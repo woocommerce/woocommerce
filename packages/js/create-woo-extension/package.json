@@ -22,6 +22,6 @@
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extensionv#readme",
 	"devDependencies": {
-		"wireit": "0.14.1"
+		"wireit": "0.14.3"
 	}
 }
