@@ -125,6 +125,7 @@ async function fetchSearchResults(
 					( product: SearchAPIProductType ): Product => {
 						return {
 							id: product.id,
+							slug: product.slug,
 							title: product.title,
 							image: product.image,
 							type: product.type,
@@ -135,8 +136,9 @@ async function fetchSearchResults(
 							url: product.link,
 							// Due to backwards compatibility, raw_price is from search API, price is from featured API
 							price: product.raw_price ?? product.price,
-							averageRating: product.rating ?? null,
-							reviewsCount: product.reviews_count ?? null,
+							averageRating: product.rating ?? 0,
+							reviewsCount: product.reviews_count ?? 0,
+							isInstallable: product.is_installable,
 						};
 					}
 				);
@@ -234,6 +236,16 @@ function disconnectProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
+type WpAjaxReponse = {
+	success: boolean;
+	data: WpAjaxResponseData;
+};
+
+type WpAjaxResponseData = {
+	errorMessage?: string;
+	activateUrl?: string;
+};
+
 function wpAjax(
 	action: string,
 	data: {
@@ -242,7 +254,7 @@ function wpAjax(
 		theme?: string;
 		success?: boolean;
 	}
-): Promise< void > {
+): Promise< WpAjaxReponse > {
 	return new Promise( ( resolve, reject ) => {
 		if ( ! window.wp.updates ) {
 			reject( __( 'Please reload and try again', 'woocommerce' ) );
@@ -251,21 +263,13 @@ function wpAjax(
 
 		window.wp.updates.ajax( action, {
 			...data,
-			success: ( response: {
-				success?: boolean;
-				errorMessage?: string;
-			} ) => {
-				if ( response.success === false ) {
-					reject( {
-						success: false,
-						data: {
-							message: response.errorMessage,
-						},
-					} );
-				}
-				resolve();
+			success: ( response: WpAjaxResponseData ) => {
+				resolve( {
+					success: true,
+					data: response,
+				} );
 			},
-			error: ( error: { errorMessage: string } ) => {
+			error: ( error: WpAjaxResponseData ) => {
 				reject( {
 					success: false,
 					data: {
@@ -320,12 +324,16 @@ function getInstallUrl( subscription: Subscription ): Promise< string > {
 	} );
 }
 
+function downloadProduct( subscription: Subscription ) {
+	return wpAjax( 'install-' + subscription.product_type, {
+		// The slug prefix is required for the install to use WCCOM install filters.
+		slug: subscription.zip_slug,
+	} );
+}
+
 function installProduct( subscription: Subscription ): Promise< void > {
 	return connectProduct( subscription ).then( () => {
-		return wpAjax( 'install-' + subscription.product_type, {
-			// The slug prefix is required for the install to use WCCOM install filters.
-			slug: 'woocommerce-com-' + subscription.product_slug,
-		} )
+		return downloadProduct( subscription )
 			.then( () => {
 				return activateProduct( subscription );
 			} )
@@ -338,7 +346,7 @@ function installProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
-function updateProduct( subscription: Subscription ): Promise< void > {
+function updateProduct( subscription: Subscription ): Promise< WpAjaxReponse > {
 	return wpAjax( 'update-' + subscription.product_type, {
 		slug: subscription.local.slug,
 		[ subscription.product_type ]: subscription.local.path,
@@ -386,8 +394,9 @@ const subscriptionToProduct = ( subscription: Subscription ): Product => {
 		icon: subscription.product_icon,
 		url: subscription.product_url,
 		price: -1,
-		averageRating: 0,
-		reviewsCount: 0,
+		averageRating: null,
+		reviewsCount: null,
+		isInstallable: false,
 	};
 };
 
@@ -446,6 +455,8 @@ export {
 	fetchSubscriptions,
 	refreshSubscriptions,
 	getInstallUrl,
+	downloadProduct,
+	activateProduct,
 	installProduct,
 	updateProduct,
 	addNotice,
