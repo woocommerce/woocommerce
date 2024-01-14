@@ -67,11 +67,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				.getByPlaceholder( 'Zone name' )
 				.fill( shippingZoneNameLocalPickup );
 
-			const input = page.getByPlaceholder(
-				'Start typing to filter zones'
-			);
-			input.click();
-			input.fill( 'British Columbia, Canada' );
+			const input = page
+				.getByPlaceholder( 'Start typing to filter zones' )
+				.or( page.getByRole( 'combobox' ) );
+			await input.click();
+			await input.fill( 'British Columbia, Canada' );
 
 			await page.getByText( 'British Columbia, Canada' ).last().click();
 
@@ -139,11 +139,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				.getByPlaceholder( 'Zone name' )
 				.fill( shippingZoneNameFreeShip );
 
-			const input = page.getByPlaceholder(
-				'Start typing to filter zones'
-			);
-			input.click();
-			input.fill( 'British Columbia, Canada' );
+			const input = page
+				.getByPlaceholder( 'Start typing to filter zones' )
+				.or( page.getByRole( 'combobox' ) );
+			await input.click();
+			await input.fill( 'British Columbia, Canada' );
 
 			await page.getByText( 'British Columbia, Canada' ).last().click();
 
