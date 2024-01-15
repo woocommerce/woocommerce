@@ -13,7 +13,6 @@ import { getSetting } from './utils';
 type CustomFieldAttributes = Pick<
 	AllHTMLAttributes< HTMLInputElement >,
 	| 'maxLength'
-	| 'disabled'
 	| 'readOnly'
 	| 'pattern'
 	| 'title'

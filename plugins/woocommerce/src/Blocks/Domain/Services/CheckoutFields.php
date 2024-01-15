@@ -410,7 +410,6 @@ class CheckoutFields {
 		// These are formatted in camelCase because React components expect them that way.
 		$allowed_attributes = array(
 			'maxLength',
-			'disabled',
 			'readOnly',
 			'pattern',
 			'autocomplete',
