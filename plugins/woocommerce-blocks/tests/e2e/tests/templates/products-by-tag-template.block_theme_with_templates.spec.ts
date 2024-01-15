@@ -2,28 +2,19 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import {
-	BLOCK_THEME_SLUG,
-	BLOCK_THEME_WITH_TEMPLATES_SLUG,
-	cli,
-} from '@woocommerce/e2e-utils';
+import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
-const permalink = '/?s=shirt&post_type=product';
-const templateName = 'Product Search Results';
-const templatePath = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//product-search-results`;
+const permalink = '/product-tag/recommended/';
+const templateName = 'Products by Tag';
+const templatePath = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_tag`;
 const templateType = 'wp_template';
 
-test.describe( 'Product Search Results template', async () => {
+test.describe( 'Product by Tag template', async () => {
 	test( "theme template has priority over WooCommerce's and can be modified", async ( {
 		admin,
 		editorUtils,
 		page,
 	} ) => {
-		// Switch to block theme with WooCommerce templates.
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
-		);
-
 		// Edit the theme template.
 		await admin.visitSiteEditor( {
 			postId: templatePath,
@@ -53,18 +44,11 @@ test.describe( 'Product Search Results template', async () => {
 
 		await expect(
 			page
-				.getByText(
-					'Product Search Results template loaded from theme'
-				)
+				.getByText( 'Products by Tag template loaded from theme' )
 				.first()
 		).toBeVisible();
 		await expect(
 			page.getByText( 'Hello World in the template' )
 		).toHaveCount( 0 );
-
-		// Switch back to default block theme.
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
-		);
 	} );
 } );

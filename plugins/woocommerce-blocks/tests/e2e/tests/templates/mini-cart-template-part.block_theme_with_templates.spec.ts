@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import {
-	BLOCK_THEME_SLUG,
-	BLOCK_THEME_WITH_TEMPLATES_SLUG,
-	cli,
-} from '@woocommerce/e2e-utils';
+import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 const permalink = '/shop';
 const templateName = 'Mini-Cart';
@@ -21,11 +17,6 @@ test.describe( 'Mini-Cart template part', async () => {
 		editorUtils,
 		page,
 	} ) => {
-		// Switch to block theme with WooCommerce templates.
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
-		);
-
 		// Edit the theme template part.
 		await admin.visitSiteEditor( {
 			postId: templatePath,
@@ -69,11 +60,6 @@ test.describe( 'Mini-Cart template part', async () => {
 		);
 		await expect( page.getByRole( 'dialog' ) ).not.toContainText(
 			'Hello World in the template'
-		);
-
-		// Switch back to default block theme.
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
 		);
 	} );
 } );

@@ -71,8 +71,24 @@ tests to a separate test suite:
 npm run test:e2e:side-effects
 ```
 
-_Note: All commands parameters of `test:e2e` can be used for
+_Note: All command parameters of `test:e2e` can be used for
 `test:e2e:side-effects`._
+
+### Tests with a classic theme and a block theme with custom templates
+
+By default, e2e tests run in a non-customized block theme. However, we also have
+some e2e tests which run specifically in a classic theme and in a block theme
+with custom templates. They can be run like this:
+
+```sh
+npm run test:e2e:classic-theme
+```
+
+```sh
+npm run test:e2e:block-theme-with-templates
+```
+
+_Note: All command parameters of `test:e2e` can be used for these commands too.
 
 ### Other ways of running tests
 

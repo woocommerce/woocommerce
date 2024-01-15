@@ -2,28 +2,19 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import {
-	BLOCK_THEME_SLUG,
-	BLOCK_THEME_WITH_TEMPLATES_SLUG,
-	cli,
-} from '@woocommerce/e2e-utils';
+import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
-const permalink = '/product/hoodie';
-const templateName = 'Single Product';
-const templatePath = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//single-product`;
+const permalink = '/color/blue';
+const templateName = 'Products by Attribute';
+const templatePath = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_attribute`;
 const templateType = 'wp_template';
 
-test.describe( 'Single Product template', async () => {
+test.describe( 'Product by Attribute template', async () => {
 	test( "theme template has priority over WooCommerce's and can be modified", async ( {
 		admin,
 		editorUtils,
 		page,
 	} ) => {
-		// Switch to block theme with WooCommerce templates.
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
-		);
-
 		// Edit the theme template.
 		await admin.visitSiteEditor( {
 			postId: templatePath,
@@ -53,16 +44,11 @@ test.describe( 'Single Product template', async () => {
 
 		await expect(
 			page
-				.getByText( 'Single Product template loaded from theme' )
+				.getByText( 'Products by Attribute template loaded from theme' )
 				.first()
 		).toBeVisible();
 		await expect(
 			page.getByText( 'Hello World in the template' )
 		).toHaveCount( 0 );
-
-		// Switch back to default block theme.
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
-		);
 	} );
 } );

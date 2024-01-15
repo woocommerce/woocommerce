@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import {
-	BLOCK_THEME_SLUG,
-	BLOCK_THEME_WITH_TEMPLATES_SLUG,
-	cli,
-} from '@woocommerce/e2e-utils';
+import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 const permalink = '/product-category/clothing';
 const templateName = 'Products by Category';
@@ -19,11 +15,6 @@ test.describe( 'Product by Category template', async () => {
 		editorUtils,
 		page,
 	} ) => {
-		// Switch to block theme with WooCommerce templates.
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
-		);
-
 		// Edit the theme template.
 		await admin.visitSiteEditor( {
 			postId: templatePath,
@@ -59,10 +50,5 @@ test.describe( 'Product by Category template', async () => {
 		await expect(
 			page.getByText( 'Hello World in the template' )
 		).toHaveCount( 0 );
-
-		// Switch back to default block theme.
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
-		);
 	} );
 } );

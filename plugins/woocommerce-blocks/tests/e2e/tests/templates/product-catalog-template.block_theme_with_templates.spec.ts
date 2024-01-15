@@ -8,22 +8,17 @@ import {
 	cli,
 } from '@woocommerce/e2e-utils';
 
-const permalink = '/color/blue';
-const templateName = 'Products by Attribute';
-const templatePath = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_attribute`;
+const permalink = '/shop';
+const templateName = 'Product Catalog';
+const templatePath = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//archive-product`;
 const templateType = 'wp_template';
 
-test.describe( 'Product by Attribute template', async () => {
+test.describe( 'Product Catalog template', async () => {
 	test( "theme template has priority over WooCommerce's and can be modified", async ( {
 		admin,
 		editorUtils,
 		page,
 	} ) => {
-		// Switch to block theme with WooCommerce templates.
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
-		);
-
 		// Edit the theme template.
 		await admin.visitSiteEditor( {
 			postId: templatePath,
@@ -53,16 +48,11 @@ test.describe( 'Product by Attribute template', async () => {
 
 		await expect(
 			page
-				.getByText( 'Products by Attribute template loaded from theme' )
+				.getByText( 'Product Catalog template loaded from theme' )
 				.first()
 		).toBeVisible();
 		await expect(
 			page.getByText( 'Hello World in the template' )
 		).toHaveCount( 0 );
-
-		// Switch back to default block theme.
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
-		);
 	} );
 } );
