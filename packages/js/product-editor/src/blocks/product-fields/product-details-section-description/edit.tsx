@@ -29,14 +29,16 @@ import { useEntityId } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { ProductEditorSettings } from '../../../components';
-import { ProductTemplate } from '../../../components/editor';
 import { BlockFill } from '../../../components/block-slot-fill';
 import { useValidations } from '../../../contexts/validation-context';
 import {
 	WPError,
 	getProductErrorMessage,
 } from '../../../utils/get-product-error-message';
-import { ProductEditorBlockEditProps } from '../../../types';
+import type {
+	ProductEditorBlockEditProps,
+	ProductTemplate,
+} from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
@@ -203,7 +205,10 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		try {
 			if ( isSaving ) return;
 
-			await validate( unsupportedProductTemplate?.productData );
+			const { id: productTemplateId, productData } =
+				unsupportedProductTemplate as ProductTemplate;
+
+			await validate( productData );
 
 			const product = ( await saveEditedEntityRecord< Product >(
 				'postType',
@@ -214,6 +219,8 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 				}
 			) ) ?? { id: productId };
 
+			const productMetaData = productData?.meta_data ?? [];
+
 			// Avoiding to save some changes that are not supported by the current product template.
 			// So in this case those changes are saved directly to the server.
 			await saveEntityRecord(
@@ -221,7 +228,14 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 				'product',
 				{
 					...product,
-					...unsupportedProductTemplate?.productData,
+					...productData,
+					meta_data: [
+						...productMetaData,
+						{
+							key: '_product_template_id',
+							value: productTemplateId,
+						},
+					],
 				},
 				// @ts-expect-error Expected 3 arguments, but got 4.
 				{
@@ -243,7 +257,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	return (
 		<BlockFill
 			name="section-description"
-			clientId={ clientId }
 			slotContainerBlockName="woocommerce/product-section"
 		>
 			<div { ...blockProps }>

@@ -1,4 +1,7 @@
-# Navigation
+---
+post_title: User Experience Guidelines - Navigation
+menu_title: Navigation
+---
 
 **Menu Structure.** Place your product navigation elements within the existing WooCommerce taxonomy.
 

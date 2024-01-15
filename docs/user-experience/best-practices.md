@@ -1,8 +1,6 @@
 ---
-post_title: User Experience Best practices
+post_title: User Experience Best Practices
 ---
-
-## Best practices
 
 **Plugin name should simply state the feature of the plugin and not use an existing core feature or extension in its' title**. The plugin name should appear at all times in the UI as a functional and original name. e.g “Appointments” instead of “VendorXYZ Bookings Plugin for WooCommerce.”
 

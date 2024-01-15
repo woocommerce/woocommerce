@@ -115,8 +115,8 @@
 		"@babel/plugin-proposal-class-properties": "7.18.6",
 		"@babel/plugin-proposal-optional-chaining": "7.21.0",
 		"@babel/plugin-syntax-jsx": "7.22.5",
-		"@babel/polyfill": "7.12.1",
 		"@babel/preset-react": "7.23.3",
+		"@babel/polyfill": "7.12.1",
 		"@babel/preset-typescript": "7.23.2",
 		"@bartekbp/typescript-checkstyle": "5.0.0",
 		"@octokit/action": "5.0.2",
@@ -281,7 +281,6 @@
 		"@dnd-kit/utilities": "^3.2.2",
 		"@emotion/styled": "^11.11.0",
 		"@preact/signals": "^1.2.2",
-		"@types/uuid": "^9.0.7",
 		"@woocommerce/tracks": "workspace:^",
 		"@wordpress/autop": "3.16.0",
 		"@wordpress/compose": "5.5.0",
@@ -316,7 +315,6 @@
 		"trim-html": "0.1.9",
 		"use-debounce": "9.0.4",
 		"usehooks-ts": "^2.9.1",
-		"uuid": "^9.0.1",
 		"wordpress-components": "npm:@wordpress/components@14.2.0"
 	},
 	"peerDependencies": {
@@ -352,6 +350,28 @@
 		"build",
 		"blocks.ini"
 	],
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "assets/**/*{js,ts,tsx,scss}"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"webpack.config.js",
+						"babel.config.js",
+						"tsconfig.json",
+						"assets/**/*{js,ts,tsx,scss}"
+					],
+					"cascade": "test:js"
+				}
+			]
+		}
+	},
 	"wireit": {
 		"build:project:bundle": {
 			"command": "webpack",

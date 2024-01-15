@@ -78,6 +78,36 @@ export function* getProduct( productId: number ) {
 	}
 }
 
+export function* getRelatedProducts( productId: number ) {
+	try {
+		// Get the product.
+		const product: Product = yield resolveSelect(
+			STORE_NAME,
+			'getProduct',
+			productId
+		);
+
+		// Pick the related products IDs.
+		const relatedProductsIds = product.related_ids;
+		if ( ! relatedProductsIds?.length ) {
+			return [];
+		}
+
+		// Get the related products.
+		const relatedProducts: Product[] = yield resolveSelect(
+			STORE_NAME,
+			'getProducts',
+			{
+				include: relatedProductsIds,
+			}
+		);
+
+		return relatedProducts;
+	} catch ( error ) {
+		throw error;
+	}
+}
+
 export function* getProductsTotalCount( query: Partial< ProductQuery > ) {
 	try {
 		const totalsQuery = {

@@ -1,9 +1,7 @@
 ---
-post_title: Notices
-menu_title: Notice guidelines
+post_title: User Experience Guidelines - Notices
+menu_title: Notices
 ---
-
-## Notices
 
 Use notices primarily to provide user feedback in response to an action. Avoid using notices to communicate offers or announcements. Don't apply brand colors, fonts, or illustrations to your notices.
 
@@ -11,13 +9,13 @@ If a post-activation notice is required, keep it within the WordPress plugin are
 
 Use the standard WordPress notice format and WooCommerce admin notices API.
 
-### Language
+## Language
 
 Providing timely feedback like success and error messages is essential for ensuring that the user understands whether changes have been made.
 
 Use short but meaningful messages that communicate what is happening. Ensure that the message provides instructions on what the user needs to do to continue. Proper punctuation should be used if the message contains multiple sentences. Avoid abbreviations.
 
-### Design
+## Design
 
 The placement of feedback is vital so the user notices it. For example, when validation messages are needed to prompt the user to enter data, get the user's attention by displaying a message close to the inputs where data needs to be revised.
 

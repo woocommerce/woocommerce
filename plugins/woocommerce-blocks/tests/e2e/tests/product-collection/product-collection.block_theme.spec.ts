@@ -186,6 +186,20 @@ test.describe( 'Product Collection', () => {
 			);
 		} );
 
+		test( 'Products can be filtered based on tags.', async ( {
+			pageObject,
+		} ) => {
+			const filterName = 'Product tags';
+			await pageObject.addFilter( 'Show Taxonomies' );
+			await pageObject.setFilterComboboxValue( filterName, [
+				'Recommended',
+			] );
+			await expect( pageObject.productTitles ).toHaveText( [ 'Hoodie' ] );
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.productTitles ).toHaveText( [ 'Hoodie' ] );
+		} );
+
 		test( 'Products can be filtered based on product attributes like color, size etc.', async ( {
 			pageObject,
 		} ) => {
@@ -203,20 +217,22 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 1 );
 		} );
 
-		// TODO There are no products with stock status 'Out of stock' in test data.
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip( 'Products can be filtered based on stock status (in stock, out of stock, or backorder).', async ( {
+		test( 'Products can be filtered based on stock status (in stock, out of stock, or backorder).', async ( {
 			pageObject,
 		} ) => {
 			await pageObject.setFilterComboboxValue( 'Stock status', [
 				'Out of stock',
 			] );
 
-			await expect( pageObject.products ).toHaveCount( 1 );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'T-Shirt with Logo',
+			] );
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect( pageObject.products ).toHaveCount( 1 );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'T-Shirt with Logo',
+			] );
 		} );
 
 		test.describe( 'Inherit query from template', () => {

@@ -13,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { CustomizeStoreComponent } from '../types';
+import { CustomizeStoreComponent, FlowType } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
 import { ThemeCard } from './theme-card';
 import {
@@ -30,6 +30,7 @@ import {
 	DefaultBanner,
 	ExistingAiThemeBanner,
 	ExistingThemeBanner,
+	NoAIBanner,
 } from './intro-banners';
 
 export type events =
@@ -38,7 +39,8 @@ export type events =
 	| { type: 'CLICKED_ON_BREADCRUMB' }
 	| { type: 'SELECTED_BROWSE_ALL_THEMES' }
 	| { type: 'SELECTED_ACTIVE_THEME'; payload: { theme: string } }
-	| { type: 'SELECTED_NEW_THEME'; payload: { theme: string } };
+	| { type: 'SELECTED_NEW_THEME'; payload: { theme: string } }
+	| { type: 'DESIGN_WITHOUT_AI' };
 
 export * as actions from './actions';
 export * as services from './services';
@@ -51,6 +53,7 @@ const BANNER_COMPONENTS = {
 	'jetpack-offline': JetpackOfflineBanner,
 	'existing-ai-theme': ExistingAiThemeBanner,
 	'existing-theme': ExistingThemeBanner,
+	[ FlowType.noAI ]: NoAIBanner,
 	default: DefaultBanner,
 };
 
@@ -82,8 +85,10 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
-
 	switch ( true ) {
+		case context.flowType === FlowType.noAI:
+			bannerStatus = FlowType.noAI;
+			break;
 		case isNetworkOffline:
 			bannerStatus = 'network-offline';
 			break;

@@ -54,6 +54,7 @@
 		"@wordpress/block-editor": "^9.8.0",
 		"@wordpress/blocks": "^12.24.0",
 		"@wordpress/data": "wp-6.0",
+		"@wordpress/core-data": "wp-6.0",
 		"@wordpress/element": "wp-6.0"
 	},
 	"devDependencies": {
@@ -94,6 +95,27 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}",
+						"typings/**/*.ts"
+					],
+					"cascade": "test:js"
+				}
+			]
+		}
 	},
 	"wireit": {
 		"build:project:bundle": {

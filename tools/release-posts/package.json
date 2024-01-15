@@ -40,5 +40,16 @@
 		"open": "^8.4.2",
 		"semver": "^7.5.4",
 		"ts-node": "^10.9.2"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": [
+					"commands/**/*.ts",
+					"lib/**/*.ts"
+				]
+			}
+		}
 	}
 }

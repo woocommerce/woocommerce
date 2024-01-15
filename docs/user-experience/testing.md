@@ -1,4 +1,7 @@
-# Testing
+---
+post_title: User Experience Guidelines - Testing
+menu_title: Testing
+---
 
 Users must be able to perform all actions of the functionality provided. This can be achieved by running user tests.
 

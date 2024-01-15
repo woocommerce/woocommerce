@@ -9,6 +9,7 @@ import { AnyInterpreter } from 'xstate';
  * Internal dependencies
  */
 import { Intro } from '../';
+import { FlowType } from '~/customize-store/types';
 
 jest.mock( '../../assembler-hub/site-hub', () => ( {
 	SiteHub: jest.fn( () => null ),
@@ -42,7 +43,7 @@ describe( 'Intro Modals', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					aiOnline: true,
+					flowType: FlowType.AIOnline,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -97,7 +98,7 @@ describe( 'Intro Modals', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					aiOnline: true,
+					flowType: FlowType.AIOnline,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -150,7 +151,7 @@ describe( 'Intro Modals', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					aiOnline: true,
+					flowType: FlowType.AIOnline,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }

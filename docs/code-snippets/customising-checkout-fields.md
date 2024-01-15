@@ -290,7 +290,7 @@ function custom_override_checkout_fields( $fields ) {
 add_action( 'woocommerce_admin_order_data_after_shipping_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
 
 function my_custom_checkout_field_display_admin_order_meta($order){
-    echo '<p><strong>'. esc_html__( 'Phone From Checkout Form' ) . ':</strong> ' . esc_html( get_post_meta( $order->get_id(), '_shipping_phone', true ) ) . '</p>';
+    echo '<p><strong>'. esc_html__( 'Phone From Checkout Form' ) . ':</strong> ' . esc_html( $order->get_meta( '_shipping_phone', true ) ) . '</p>';
 }
 ```
 
@@ -364,7 +364,9 @@ add_action( 'woocommerce_checkout_update_order_meta', 'my_custom_checkout_field_
 
 function my_custom_checkout_field_update_order_meta( $order_id ) {
     if ( ! empty( $_POST['my_field_name'] ) ) {
-        update_post_meta( $order_id, 'My Field', sanitize_text_field( $_POST['my_field_name'] ) );
+        $order = wc_get_order( $order_id );
+        $order->update_meta_data( 'My Field', sanitize_text_field( $_POST['my_field_name'] ) );
+        $order->save_meta_data();
     }
 }
 ```
@@ -380,7 +382,7 @@ If you wish to display the custom field value on the admin order edition page, y
 add_action( 'woocommerce_admin_order_data_after_billing_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
 
 function my_custom_checkout_field_display_admin_order_meta( $order ){
-    echo '<p><strong>' . esc_html__( 'My Field' ) . ':</strong> ' . esc_html( get_post_meta( $order->id, 'My Field', true ) ) . '</p>';
+    echo '<p><strong>' . esc_html__( 'My Field' ) . ':</strong> ' . esc_html( $order->get_meta( 'My Field', true ) ) . '</p>';
 }
 ```
 
