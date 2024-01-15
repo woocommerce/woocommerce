@@ -3360,7 +3360,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( 'object', gettype( $meta ) );
 		$this->assertEquals( '__PHP_Incomplete_Class', get_class( $meta ) );
 
-		$meta_object_vars = get_object_vars($meta);
+		$meta_object_vars = get_object_vars( $meta );
 		$this->assertEquals( 'geoiprecord', $meta_object_vars['__PHP_Incomplete_Class_Name'] );
 		$this->assertEquals( 'Belgium', $meta_object_vars['country_name'] );
 		$this->assertEquals( 'Brussels', $meta_object_vars['city'] );
