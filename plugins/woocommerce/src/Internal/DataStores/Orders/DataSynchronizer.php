@@ -5,9 +5,9 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\BatchProcessing\{ BatchProcessingController, BatchProcessorInterface };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
@@ -81,6 +81,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private $error_logger;
 
 	/**
+	 * The instance of the LegacyProxy object to use.
+	 *
+	 * @var LegacyProxy
+	 */
+	private $legacy_proxy;
+
+	/**
 	 * The order cache controller.
 	 *
 	 * @var OrderCacheController
@@ -103,6 +110,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 		self::add_action( 'woocommerce_refund_created', array( $this, 'handle_updated_order' ), 100 );
 		self::add_action( 'woocommerce_update_order', array( $this, 'handle_updated_order' ), 100 );
 		self::add_action( 'wp_scheduled_auto_draft_delete', array( $this, 'delete_auto_draft_orders' ), 9 );
+		self::add_action( 'wp_scheduled_delete', array( $this, 'delete_trashed_orders' ), 9 );
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'added_option', array( $this, 'process_added_option' ), 999, 2 );
 		self::add_filter( 'deleted_option', array( $this, 'process_deleted_option' ), 999 );
@@ -136,6 +144,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 		$this->data_store                  = $data_store;
 		$this->database_util               = $database_util;
 		$this->posts_to_cot_migrator       = $posts_to_cot_migrator;
+		$this->legacy_proxy                = $legacy_proxy;
 		$this->error_logger                = $legacy_proxy->call_function( 'wc_get_logger' );
 		$this->order_cache_controller      = $order_cache_controller;
 		$this->batch_processing_controller = $batch_processing_controller;
@@ -324,6 +333,33 @@ class DataSynchronizer implements BatchProcessorInterface {
 		);
 
 		return $interval;
+	}
+
+	/**
+	 * Keys that can be ignored during synchronization or verification.
+	 *
+	 * @since 8.6.0
+	 *
+	 * @return string[]
+	 */
+	public function get_ignored_order_props() {
+		/**
+		 * Allows modifying the list of order properties that are ignored during HPOS synchronization or verification.
+		 *
+		 * @param string[] List of order properties or meta keys.
+		 * @since 8.6.0
+		 */
+		$ignored_props = apply_filters( 'woocommerce_hpos_sync_ignored_order_props', array() );
+		$ignored_props = array_filter( array_map( 'trim', array_filter( $ignored_props, 'is_string' ) ) );
+
+		return array_merge(
+			$ignored_props,
+			array(
+				'_paid_date', // This has been deprecated and replaced by '_date_paid' in the CPT datastore.
+				'_completed_date', // This has been deprecated and replaced by '_date_completed' in the CPT datastore.
+				EditLock::META_KEY_NAME,
+			)
+		);
 	}
 
 	/**
@@ -964,6 +1000,41 @@ ORDER BY orders.id ASC
 		 * @since 7.7.0
 		 */
 		do_action( 'woocommerce_scheduled_auto_draft_delete' );
+	}
+
+	/**
+	 * Handles deletion of trashed orders after `EMPTY_TRASH_DAYS` as defined by WordPress.
+	 *
+	 * @since 8.5.0
+	 *
+	 * @return void
+	 */
+	private function delete_trashed_orders() {
+		if ( ! $this->custom_orders_table_is_authoritative() ) {
+			return;
+		}
+
+		$delete_timestamp = $this->legacy_proxy->call_function( 'time' ) - ( DAY_IN_SECONDS * EMPTY_TRASH_DAYS );
+		$args             = array(
+			'status'        => 'trash',
+			'limit'         => self::ORDERS_SYNC_BATCH_SIZE,
+			'date_modified' => '<' . $delete_timestamp,
+		);
+
+		$orders = wc_get_orders( $args );
+		if ( ! $orders || ! is_array( $orders ) ) {
+			return;
+		}
+
+		foreach ( $orders as $order ) {
+			if ( $order->get_status() !== 'trash' ) {
+				continue;
+			}
+			if ( $order->get_date_modified()->getTimestamp() >= $delete_timestamp ) {
+				continue;
+			}
+			$order->delete( true );
+		}
 	}
 
 	/**

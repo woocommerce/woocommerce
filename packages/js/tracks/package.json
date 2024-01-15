@@ -6,7 +6,7 @@
 	"license": "GPL-3.0-or-later",
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
 	},
 	"keywords": [
 		"wordpress",
@@ -69,6 +69,14 @@
 		"*.(t|j)s?(x)": [
 			"pnpm lint:fix"
 		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			}
+		}
 	},
 	"wireit": {
 		"build:project:cjs": {

@@ -5,12 +5,12 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
-$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/sweet-organic-lemons.png' );
-$image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/fresh-organic-tomatoes.png' );
-$image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholders/fresh-lettuce-washed.png' );
-$image4 = PatternsHelper::get_image_url( $images, 3, 'images/pattern-placeholders/russet-organic-potatoes.png' );
+$image1 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/sweet-organic-lemons.png' );
+$image2 = PatternsHelper::get_image_url( $images, 1, 'assets/images/pattern-placeholders/fresh-organic-tomatoes.png' );
+$image3 = PatternsHelper::get_image_url( $images, 2, 'assets/images/pattern-placeholders/fresh-lettuce-washed.png' );
+$image4 = PatternsHelper::get_image_url( $images, 3, 'assets/images/pattern-placeholders/russet-organic-potatoes.png' );
 
 $first_title        = $content['titles'][0]['default'] ?? '';
 $first_description  = $content['descriptions'][0]['default'] ?? '';

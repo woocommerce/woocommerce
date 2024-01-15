@@ -10,7 +10,7 @@ import { Icon } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { LOCALE } from '../../utils/admin-settings';
+import { LOCALE, getAdminSetting } from '../../utils/admin-settings';
 import { CategoryAPIItem } from '../components/category-selector/types';
 import {
 	MARKETPLACE_CART_PATH,
@@ -135,8 +135,8 @@ async function fetchSearchResults(
 							url: product.link,
 							// Due to backwards compatibility, raw_price is from search API, price is from featured API
 							price: product.raw_price ?? product.price,
-							averageRating: product.rating ?? 0,
-							reviewsCount: product.reviews_count ?? 0,
+							averageRating: product.rating ?? null,
+							reviewsCount: product.reviews_count ?? null,
 						};
 					}
 				);
@@ -310,6 +310,16 @@ function activateProduct( subscription: Subscription ): Promise< void > {
 		);
 }
 
+function getInstallUrl( subscription: Subscription ): Promise< string > {
+	return apiFetch( {
+		path:
+			'/wc/v3/marketplace/subscriptions/install-url?product_key=' +
+			subscription.product_key,
+	} ).then( ( response ) => {
+		return ( response as { data: { url: string } } )?.data.url;
+	} );
+}
+
 function installProduct( subscription: Subscription ): Promise< void > {
 	return connectProduct( subscription ).then( () => {
 		return wpAjax( 'install-' + subscription.product_type, {
@@ -364,6 +374,23 @@ const removeNotice = ( productKey: string ) => {
 	dispatch( noticeStore ).removeNotice( productKey );
 };
 
+const subscriptionToProduct = ( subscription: Subscription ): Product => {
+	return {
+		id: subscription.product_id,
+		title: subscription.product_name,
+		image: '',
+		type: subscription.product_type as ProductType,
+		description: '',
+		vendorName: '',
+		vendorUrl: '',
+		icon: subscription.product_icon,
+		url: subscription.product_url,
+		price: -1,
+		averageRating: 0,
+		reviewsCount: 0,
+	};
+};
+
 // Append UTM parameters to a URL, being aware of existing query parameters
 const appendURLParams = (
 	url: string,
@@ -397,6 +424,18 @@ const subscribeUrl = ( subscription: Subscription ): string => {
 	] );
 };
 
+const connectUrl = (): string => {
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+
+	if ( ! wccomSettings.connectURL ) {
+		return '';
+	}
+
+	return appendURLParams( wccomSettings.connectURL, [
+		[ 'redirect_admin_url', encodeURIComponent( window.location.href ) ],
+	] );
+};
+
 export {
 	ProductGroup,
 	appendURLParams,
@@ -406,10 +445,13 @@ export {
 	fetchSearchResults,
 	fetchSubscriptions,
 	refreshSubscriptions,
+	getInstallUrl,
 	installProduct,
 	updateProduct,
 	addNotice,
 	removeNotice,
 	renewUrl,
 	subscribeUrl,
+	subscriptionToProduct,
+	connectUrl,
 };

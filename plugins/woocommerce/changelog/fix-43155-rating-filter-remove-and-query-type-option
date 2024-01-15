@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Rating Filter block: fix wrong import path that points to Attribute Filter block's inspector component.
+
+

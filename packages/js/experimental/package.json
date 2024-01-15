@@ -6,7 +6,7 @@
 	"license": "GPL-3.0-or-later",
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
 	},
 	"keywords": [
 		"wordpress",
@@ -113,6 +113,28 @@
 			"pnpm lint:fix",
 			"pnpm test-staged"
 		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"babel.config.js",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}",
+						"typings/**/*.ts"
+					],
+					"cascade": "test:js"
+				}
+			]
+		}
 	},
 	"wireit": {
 		"build:project:bundle": {

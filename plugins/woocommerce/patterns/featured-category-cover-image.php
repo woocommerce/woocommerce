@@ -5,9 +5,9 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
-$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/table-wood-house-chair-floor-window.jpg' );
+$image1 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/table-wood-house-chair-floor-window.jpg' );
 
 $category_title = $content['titles'][0]['default'] ?? '';
 $description    = $content['descriptions'][0]['default'] ?? '';

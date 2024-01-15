@@ -12,7 +12,7 @@
 	],
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/expression-evaluation/README.md",
 	"repository": {
@@ -73,6 +73,14 @@
 			"pnpm lint:fix",
 			"pnpm test-staged"
 		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			}
+		}
 	},
 	"wireit": {
 		"build:project:cjs": {

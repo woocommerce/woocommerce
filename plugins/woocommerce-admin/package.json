@@ -139,6 +139,7 @@
 		"@woocommerce/admin-e2e-tests": "workspace:*",
 		"@woocommerce/admin-layout": "workspace:*",
 		"@woocommerce/ai": "workspace:0.1.0-beta.0",
+		"@woocommerce/block-templates": "workspace:*",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/csv-export": "workspace:*",
 		"@woocommerce/currency": "workspace:*",
@@ -183,7 +184,7 @@
 		"cross-env": "^7.0.3",
 		"css-loader": "^6.8.1",
 		"eslint": "^8.55.0",
-		"eslint-import-resolver-typescript": "^2.7.1",
+		"eslint-import-resolver-typescript": "3.6.1",
 		"eslint-import-resolver-webpack": "^0.13.8",
 		"eslint-plugin-import": "^2.29.0",
 		"eslint-plugin-react": "^7.33.2",
@@ -234,7 +235,29 @@
 	},
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "client/**/*{js,ts,tsx,scss}"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"webpack.config.js",
+						"babel.config.js",
+						"tsconfig.json",
+						"client/**/*.{js,jsx,ts,tsx,scss}"
+					],
+					"cascade": "test:js"
+				}
+			]
+		}
 	},
 	"wireit": {
 		"build:project:bundle": {
@@ -247,8 +270,7 @@
 			"files": [
 				"webpack.config.js",
 				"tsconfig.json",
-				"client/**/*.{js,jsx,ts,tsx}",
-				"client/**/*.scss"
+				"client/**/*.{js,jsx,ts,tsx,scss}"
 			],
 			"output": [
 				"build"
@@ -326,6 +348,10 @@
 				"node_modules/@woocommerce/components/build-module",
 				"node_modules/@woocommerce/components/build-style",
 				"node_modules/@woocommerce/components/build-types",
+				"node_modules/@woocommerce/block-templates/build",
+				"node_modules/@woocommerce/block-templates/build-module",
+				"node_modules/@woocommerce/block-templates/build-style",
+				"node_modules/@woocommerce/block-templates/build-types",
 				"node_modules/@woocommerce/ai/build",
 				"node_modules/@woocommerce/ai/build-module",
 				"node_modules/@woocommerce/ai/build-style",

@@ -4,11 +4,11 @@ post_title: Customizing checkout fields using actions and filters
 
 If you are unfamiliar with code and resolving potential conflicts, we have an extension that can help: [WooCommerce Checkout Field Editor](https://woo.com/products/woocommerce-checkout-field-editor/). Installing and activating this extension overrides any code below that you try to implement; and you cannot have custom checkout field code in your functions.php file when the extension is activated.
 
-Custom code should be copied into your child theme’s **functions.php** file.
+Custom code should be copied into your child theme's **functions.php** file.
 
 ## How Are Checkout Fields Loaded to WooCommerce?
 
-The billing and shipping fields for checkout pull from the countries class `class-wc-countries.php` and the **`get_address_fields`** function. This allows WooCommerce to enable/disable fields based on the user’s location.
+The billing and shipping fields for checkout pull from the countries class `class-wc-countries.php` and the **`get_address_fields`** function. This allows WooCommerce to enable/disable fields based on the user's location.
 
 Before returning these fields, WooCommerce puts the fields through a *filter*. This allows them to be edited by third-party plugins, themes and your own custom code.
 
@@ -69,7 +69,7 @@ That means you have **full control** over checkout fields – you only need to
 
 ## Overriding Core Fields
 
-Hooking into the  **`woocommerce_checkout_fields`** filter lets you override any field. As an example, let’s change the placeholder on the order_comments fields. Currently, it’s set to:
+Hooking into the  **`woocommerce_checkout_fields`** filter lets you override any field. As an example, let's change the placeholder on the order_comments fields. Currently, it's set to:
 
 ```php
 _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce' );
@@ -116,7 +116,7 @@ function custom_override_checkout_fields( $fields ) {
 }
 ```
 
-Here’s a full list of fields in the array passed to `woocommerce_checkout_fields`:
+Here's a full list of fields in the array passed to `woocommerce_checkout_fields`:
 
 -   Billing
     -   `billing_first_name`
@@ -186,7 +186,7 @@ function custom_override_default_address_fields( $address_fields ) {
 
 ### Defining select options
 
-If you are adding a field with type ‘select’, as stated above you would define key/value pairs. For example:
+If you are adding a field with type 'select', as stated above you would define key/value pairs. For example:
 
 ```php
 $fields['billing']['your_field']['options'] = array(
@@ -197,15 +197,15 @@ $fields['billing']['your_field']['options'] = array(
 
 ## Priority
 
-Priority in regards to PHP code helps establish when a bit of code — called a function — runs in relation to a page load. It is set inside of each function and is useful when overriding existing code for custom display.
+Priority in regards to PHP code helps establish when a bit of code - called a function - runs in relation to a page load. It is set inside of each function and is useful when overriding existing code for custom display.
 
 Code with a higher number set as the priority will run after code with a lower number, meaning code with a priority of 20 will run after code with 10 priority.
 
-The priority argument is set during the [add_action](https://developer.wordpress.org/reference/functions/add_action/) function, after you establish which hook you’re connecting to and what the name of your custom function will be.
+The priority argument is set during the [add_action](https://developer.wordpress.org/reference/functions/add_action/) function, after you establish which hook you're connecting to and what the name of your custom function will be.
 
-In the example below, blue text is the name of the hook we’re modifying, green text is the name of our custom function, and red is the priority we set.
+In the example below, blue text is the name of the hook we're modifying, green text is the name of our custom function, and red is the priority we set.
 
-![Setting priority for the hooked function](https://woo.com/wp-content/uploads/2012/04/priority-markup.png)
+![Setting priority for the hooked function](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/priority-markup.png)
 
 ## Examples
 
@@ -224,7 +224,7 @@ function wc_empty_cart_redirect_url() {
 add_filter( 'woocommerce_return_to_shop_redirect', 'wc_empty_cart_redirect_url', 10 );
 ```
 
-There, we can see the priority is set to 10. This is the typical default for WooCommerce functions and scripts, so that may not be sufficient to override that button’s functionality.
+There, we can see the priority is set to 10. This is the typical default for WooCommerce functions and scripts, so that may not be sufficient to override that button's functionality.
 
 Instead, we can change the priority to any number greater than 10. While 11 would work, best practice dictates we use increments of ten, so 20, 30, and so on.
 
@@ -239,7 +239,7 @@ function wc_empty_cart_redirect_url() {
 add_filter( 'woocommerce_return_to_shop_redirect', 'wc_empty_cart_redirect_url', 20 );
 ```
 
-With priority, we can have two functions that are acting on the same hook. Normally this would cause a variety of problems, but since we’ve established one has a higher priority than the other, our site will only load the appropriate function, and we will be taken to the Specials page as intended with the code below.
+With priority, we can have two functions that are acting on the same hook. Normally this would cause a variety of problems, but since we've established one has a higher priority than the other, our site will only load the appropriate function, and we will be taken to the Specials page as intended with the code below.
 
 ```php
 /**
@@ -265,7 +265,7 @@ add_filter( 'woocommerce_return_to_shop_redirect', 'wc_empty_cart_redirect_url',
 
 ### Adding Custom Shipping And Billing Fields
 
-Adding fields is done in a similar way to overriding fields. For example, let’s add a new field to shipping fields – `shipping_phone`:
+Adding fields is done in a similar way to overriding fields. For example, let's add a new field to shipping fields – `shipping_phone`:
 
 ```php
 // Hook in
@@ -290,19 +290,19 @@ function custom_override_checkout_fields( $fields ) {
 add_action( 'woocommerce_admin_order_data_after_shipping_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
 
 function my_custom_checkout_field_display_admin_order_meta($order){
-    echo '<p><strong>'. esc_html__( 'Phone From Checkout Form' ) . ':</strong> ' . esc_html( get_post_meta( $order->get_id(), '_shipping_phone', true ) ) . '</p>';
+    echo '<p><strong>'. esc_html__( 'Phone From Checkout Form' ) . ':</strong> ' . esc_html( $order->get_meta( '_shipping_phone', true ) ) . '</p>';
 }
 ```
 
-![It's alive!](https://woo.com/wp-content/uploads/2012/04/WooCommerce-Codex-Shipping-Field-Hook.png)
+![adding custom sthipping and billing fields](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/Webp-to-PNG-Shipping-Field-Hook.png)
 
-It’s alive!
+It's alive!
 
 What do we do with the new field? Nothing. Because we defined the field in the `checkout_fields` array, the field is automatically processed and saved to the order post meta (in this case, \_shipping_phone). If you want to add validation rules, see the checkout class where there are additional hooks you can use.
 
 ### Adding a Custom Special Field
 
-To add a custom field is similar. Let’s add a new field to checkout, after the order notes, by hooking into the following:
+To add a custom field is similar. Let's add a new field to checkout, after the order notes, by hooking into the following:
 
 ```php
 /**
@@ -332,7 +332,7 @@ function my_custom_checkout_field( $checkout ) {
 
 This gives us:
 
-![WooCommerce Codex - Checkout Field Hook](https://woo.com/wp-content/uploads/2012/04/WooCommerce-Codex-Checkout-Field-Hook.png)
+![WooCommerce Codex - Checkout Field Hook](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/WooCommerce-Codex-Checkout-Field-Hook.png)
 
 Next we need to validate the field when the checkout form is posted. For this example the field is required and not optional:
 
@@ -352,9 +352,9 @@ function my_custom_checkout_field_process() {
 
 A checkout error is displayed if the field is blank:
 
-![WooCommerce Codex - Checkout Field Notice](https://woo.com/wp-content/uploads/2012/04/WooCommerce-Codex-Checkout-Field-Notice.png)
+![WooCommerce Codex - Checkout Field Notice](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/WooCommerce-Codex-Checkout-Field-Notice.png)
 
-Finally, let’s save the new field to order custom fields using the following code:
+Finally, let's save the new field to order custom fields using the following code:
 
 ```php
 /**
@@ -364,7 +364,9 @@ add_action( 'woocommerce_checkout_update_order_meta', 'my_custom_checkout_field_
 
 function my_custom_checkout_field_update_order_meta( $order_id ) {
     if ( ! empty( $_POST['my_field_name'] ) ) {
-        update_post_meta( $order_id, 'My Field', sanitize_text_field( $_POST['my_field_name'] ) );
+        $order = wc_get_order( $order_id );
+        $order->update_meta_data( 'My Field', sanitize_text_field( $_POST['my_field_name'] ) );
+        $order->save_meta_data();
     }
 }
 ```
@@ -380,13 +382,13 @@ If you wish to display the custom field value on the admin order edition page, y
 add_action( 'woocommerce_admin_order_data_after_billing_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
 
 function my_custom_checkout_field_display_admin_order_meta( $order ){
-    echo '<p><strong>' . esc_html__( 'My Field' ) . ':</strong> ' . esc_html( get_post_meta( $order->id, 'My Field', true ) ) . '</p>';
+    echo '<p><strong>' . esc_html__( 'My Field' ) . ':</strong> ' . esc_html( $order->get_meta( 'My Field', true ) ) . '</p>';
 }
 ```
 
 This is the result:
 
-[![checkout_field_custom_field_admin](https://woo.com/wp-content/uploads/2012/04/checkout_field_custom_field_admin.png)](https://woo.com/wp-content/uploads/2012/04/checkout_field_custom_field_admin.png)
+![checkout_field_custom_field_admin](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/checkout_field_custom_field_admin.png)
 
 ### Make phone number not required
 

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import { Slot } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -15,13 +14,13 @@ import {
 /**
  * Internal dependencies
  */
+import { BlockSlot } from '../../../components/block-slot-fill';
 import { sanitizeHTML } from '../../../utils/sanitize-html';
 import { SectionBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
 
 export function SectionBlockEdit( {
 	attributes,
-	clientId,
 }: ProductEditorBlockEditProps< SectionBlockAttributes > ) {
 	const { description, title, blockGap } = attributes;
 
@@ -37,35 +36,39 @@ export function SectionBlockEdit( {
 	);
 	const SectionTagName = title ? 'fieldset' : 'div';
 	const HeadingTagName = SectionTagName === 'fieldset' ? 'legend' : 'div';
-	const tooltipClassName = `wp-block-woocommerce-product-section__heading-tooltip-${ clientId }`;
+	const tooltipClassName = `wp-block-woocommerce-product-section__heading-tooltip`;
 
 	return (
 		<SectionTagName { ...blockProps }>
 			{ title && (
 				<HeadingTagName className="wp-block-woocommerce-product-section__heading">
-					<h2 className="wp-block-woocommerce-product-section__heading-title">
-						{ title }
-						{ description && (
-							<Tooltip
-								className={ tooltipClassName }
-								text={
-									<p
-										className="wp-block-woocommerce-product-section__heading-description"
-										dangerouslySetInnerHTML={ sanitizeHTML(
-											description
-										) }
-									/>
-								}
-								position={ 'bottom center' }
-								helperText={ __(
-									'View helper text',
-									'woocommerce'
-								) }
-							/>
-						) }
-					</h2>
+					<div className="wp-block-woocommerce-product-section__heading-title-wrapper">
+						<h2 className="wp-block-woocommerce-product-section__heading-title">
+							{ title }
+							{ description && (
+								<Tooltip
+									className={ tooltipClassName }
+									text={
+										<p
+											className="wp-block-woocommerce-product-section__heading-description"
+											dangerouslySetInnerHTML={ sanitizeHTML(
+												description
+											) }
+										/>
+									}
+									position={ 'bottom center' }
+									helperText={ __(
+										'View helper text',
+										'woocommerce'
+									) }
+								/>
+							) }
+						</h2>
 
-					<Slot name={ clientId } />
+						<BlockSlot name="section-actions" />
+					</div>
+
+					<BlockSlot name="section-description" />
 				</HeadingTagName>
 			) }
 

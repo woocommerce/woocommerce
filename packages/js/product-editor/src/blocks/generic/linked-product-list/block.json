@@ -1,0 +1,31 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/product-linked-list-field",
+	"title": "Linked product list",
+	"category": "widgets",
+	"description": "The linked product list.",
+	"keywords": [ "products", "linked", "list" ],
+	"textdomain": "default",
+	"attributes": {
+		"property": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"emptyState": {
+			"type": "object",
+			"default": {}
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	},
+	"editorStyle": "file:./editor.css",
+	"usesContext": [ "postType" ]
+}

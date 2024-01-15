@@ -24,22 +24,29 @@ import classNames from 'classnames';
 import {
 	AddProductsModal,
 	getProductImageStyle,
+	ReorderProductsModal,
 } from '../../../components/add-products-modal';
 import { ProductEditorBlockEditProps } from '../../../types';
-import { Shirt, Pants, Glasses } from './images';
 import { UploadsBlockAttributes } from './types';
 import {
 	getProductStockStatus,
 	getProductStockStatusClass,
 } from '../../../utils';
+import { Shirt } from '../../../images/shirt';
+import { Pants } from '../../../images/pants';
+import { Glasses } from '../../../images/glasses';
+import { AdviceCard } from '../../../components/advice-card';
+import { SectionActions } from '../../../components/block-slot-fill';
 
-export function Edit( {
+export function ProductListBlockEdit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< UploadsBlockAttributes > ) {
 	const { property } = attributes;
 	const blockProps = useWooBlockProps( attributes );
 	const [ openAddProductsModal, setOpenAddProductsModal ] = useState( false );
+	const [ openReorderProductsModal, setOpenReorderProductsModal ] =
+		useState( false );
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ preventFetch, setPreventFetch ] = useState( false );
 	const [ groupedProductIds, setGroupedProductIds ] = useEntityProp<
@@ -72,6 +79,10 @@ export function Edit( {
 		setOpenAddProductsModal( true );
 	}
 
+	function handleReorderProductsButtonClick() {
+		setOpenReorderProductsModal( true );
+	}
+
 	function handleAddProductsModalSubmit( value: Product[] ) {
 		const newGroupedProducts = [ ...groupedProducts, ...value ];
 		setPreventFetch( true );
@@ -82,8 +93,18 @@ export function Edit( {
 		setOpenAddProductsModal( false );
 	}
 
+	function handleReorderProductsModalSubmit( value: Product[] ) {
+		setGroupedProducts( value );
+		setGroupedProductIds( value.map( ( product ) => product.id ) );
+		setOpenReorderProductsModal( false );
+	}
+
 	function handleAddProductsModalClose() {
 		setOpenAddProductsModal( false );
+	}
+
+	function handleReorderProductsModalClose() {
+		setOpenReorderProductsModal( false );
 	}
 
 	function removeProductHandler( product: Product ) {
@@ -103,33 +124,38 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<div className="wp-block-woocommerce-product-list-field__header">
-				<Button
-					onClick={ handleAddProductsButtonClick }
-					variant="secondary"
-				>
-					{ __( 'Add products', 'woocommerce' ) }
-				</Button>
-			</div>
+			<SectionActions>
+				<div className="wp-block-woocommerce-product-list-field__header">
+					{ ! isLoading && groupedProducts.length > 0 && (
+						<Button
+							onClick={ handleReorderProductsButtonClick }
+							variant="tertiary"
+						>
+							{ __( 'Reorder', 'woocommerce' ) }
+						</Button>
+					) }
+					<Button
+						onClick={ handleAddProductsButtonClick }
+						variant="secondary"
+					>
+						{ __( 'Add products', 'woocommerce' ) }
+					</Button>
+				</div>
+			</SectionActions>
 
 			<div className="wp-block-woocommerce-product-list-field__body">
 				{ ! isLoading && groupedProducts.length === 0 && (
-					<div className="wp-block-woocommerce-product-list-field__empty-state">
-						<div
-							className="wp-block-woocommerce-product-list-field__empty-state-illustration"
-							role="presentation"
-						>
-							<Shirt />
-							<Pants />
-							<Glasses />
-						</div>
-						<p className="wp-block-woocommerce-product-list-field__empty-state-tip">
-							{ __(
-								'Tip: Group together items that have a clear relationship or compliment each other well, e.g., garment bundles, camera kits, or skincare product sets.',
-								'woocommerce'
-							) }
-						</p>
-					</div>
+					<AdviceCard
+						tip={ __(
+							'Tip: Group together items that have a clear relationship or compliment each other well, e.g., garment bundles, camera kits, or skincare product sets.',
+							'woocommerce'
+						) }
+						isDismissible={ false }
+					>
+						<Shirt />
+						<Pants />
+						<Glasses />
+					</AdviceCard>
 				) }
 
 				{ ! isLoading && groupedProducts.length > 0 && (
@@ -292,6 +318,13 @@ export function Edit( {
 					initialValue={ groupedProducts }
 					onSubmit={ handleAddProductsModalSubmit }
 					onClose={ handleAddProductsModalClose }
+				/>
+			) }
+			{ openReorderProductsModal && (
+				<ReorderProductsModal
+					products={ groupedProducts }
+					onSubmit={ handleReorderProductsModalSubmit }
+					onClose={ handleReorderProductsModalClose }
 				/>
 			) }
 		</div>

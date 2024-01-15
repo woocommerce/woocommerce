@@ -10,7 +10,7 @@
 	],
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
 	},
 	"bin": {
 		"e2e-builds": "./build.js"
@@ -44,5 +44,13 @@
 		"*.(t|j)s?(x)": [
 			"pnpm lint:fix"
 		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "build.js"
+			}
+		}
 	}
 }

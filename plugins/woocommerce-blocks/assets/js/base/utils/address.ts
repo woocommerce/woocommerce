@@ -1,22 +1,18 @@
 /**
  * External dependencies
  */
-import prepareAddressFields from '@woocommerce/base-components/cart-checkout/address-form/prepare-address-fields';
+import prepareFormFields from '@woocommerce/base-components/cart-checkout/form/prepare-form-fields';
 import { isEmail } from '@wordpress/url';
 import type {
 	CartResponseBillingAddress,
 	CartResponseShippingAddress,
 } from '@woocommerce/types';
-import {
-	AddressFields,
-	defaultAddressFields,
-	ShippingAddress,
-	BillingAddress,
-} from '@woocommerce/settings';
+import { ShippingAddress, BillingAddress } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	SHIPPING_COUNTRIES,
 	SHIPPING_STATES,
+	ADDRESS_FORM_KEYS,
 } from '@woocommerce/block-settings';
 
 /**
@@ -26,10 +22,9 @@ export const isSameAddress = < T extends ShippingAddress | BillingAddress >(
 	address1: T,
 	address2: T
 ): boolean => {
-	return Object.keys( defaultAddressFields ).every(
-		( field: string ) =>
-			address1[ field as keyof T ] === address2[ field as keyof T ]
-	);
+	return ADDRESS_FORM_KEYS.every( ( field: string ) => {
+		return address1[ field as keyof T ] === address2[ field as keyof T ];
+	} );
 };
 
 /**
@@ -94,13 +89,14 @@ export const emptyHiddenAddressFields = <
 >(
 	address: T
 ): T => {
-	const fields = Object.keys(
-		defaultAddressFields
-	) as ( keyof AddressFields )[];
-	const addressFields = prepareAddressFields( fields, {}, address.country );
+	const addressForm = prepareFormFields(
+		ADDRESS_FORM_KEYS,
+		{},
+		address.country
+	);
 	const newAddress = Object.assign( {}, address ) as T;
 
-	addressFields.forEach( ( { key = '', hidden = false } ) => {
+	addressForm.forEach( ( { key = '', hidden = false } ) => {
 		if ( hidden && isValidAddressKey( key, address ) ) {
 			newAddress[ key ] = '';
 		}
@@ -160,12 +156,13 @@ export const isAddressComplete = (
 	if ( ! address.country ) {
 		return false;
 	}
-	const fields = Object.keys(
-		defaultAddressFields
-	) as ( keyof AddressFields )[];
-	const addressFields = prepareAddressFields( fields, {}, address.country );
+	const addressForm = prepareFormFields(
+		ADDRESS_FORM_KEYS,
+		{},
+		address.country
+	);
 
-	return addressFields.every(
+	return addressForm.every(
 		( { key = '', hidden = false, required = false } ) => {
 			if ( hidden || ! required ) {
 				return true;

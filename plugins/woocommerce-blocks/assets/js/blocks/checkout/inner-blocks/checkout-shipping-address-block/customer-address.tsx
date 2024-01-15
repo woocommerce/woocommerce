@@ -2,15 +2,15 @@
  * External dependencies
  */
 import { useState, useCallback, useEffect } from '@wordpress/element';
-import { AddressForm } from '@woocommerce/base-components/cart-checkout';
+import { Form } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import type {
-	ShippingAddress,
-	AddressField,
-	AddressFields,
+	FormFieldsConfig,
+	AddressFormValues,
 } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -22,11 +22,10 @@ const CustomerAddress = ( {
 	addressFieldsConfig,
 	defaultEditing = false,
 }: {
-	addressFieldsConfig: Record< keyof AddressFields, Partial< AddressField > >;
+	addressFieldsConfig: FormFieldsConfig;
 	defaultEditing?: boolean;
 } ) => {
 	const {
-		defaultAddressFields,
 		shippingAddress,
 		setShippingAddress,
 		setBillingAddress,
@@ -57,11 +56,8 @@ const CustomerAddress = ( {
 		}
 	}, [ editing, hasValidationErrors, invalidProps.length ] );
 
-	const addressFieldKeys = Object.keys(
-		defaultAddressFields
-	) as ( keyof AddressFields )[];
 	const onChangeAddress = useCallback(
-		( values: Partial< ShippingAddress > ) => {
+		( values: AddressFormValues ) => {
 			setShippingAddress( values );
 			if ( useShippingAsBilling ) {
 				setBillingAddress( values );
@@ -93,21 +89,16 @@ const CustomerAddress = ( {
 
 	const renderAddressFormComponent = useCallback(
 		() => (
-			<AddressForm
+			<Form< AddressFormValues >
 				id="shipping"
-				type="shipping"
+				addressType="shipping"
 				onChange={ onChangeAddress }
 				values={ shippingAddress }
-				fields={ addressFieldKeys }
+				fields={ ADDRESS_FORM_KEYS }
 				fieldConfig={ addressFieldsConfig }
 			/>
 		),
-		[
-			addressFieldKeys,
-			addressFieldsConfig,
-			onChangeAddress,
-			shippingAddress,
-		]
+		[ addressFieldsConfig, onChangeAddress, shippingAddress ]
 	);
 
 	return (

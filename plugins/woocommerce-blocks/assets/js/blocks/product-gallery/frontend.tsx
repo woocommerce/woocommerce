@@ -40,6 +40,7 @@ const closeDialog = ( context: ProductGalleryContext ) => {
 	context.isDialogOpen = false;
 	// Reset the main image.
 	context.selectedImage = context.firstMainImageId;
+	document.body.classList.remove( 'wc-block-product-gallery-modal-open' );
 };
 
 const productGallery = {
@@ -51,6 +52,9 @@ const productGallery = {
 		get pagerDotFillOpacity(): number {
 			return state.isSelected ? 1 : 0.2;
 		},
+		get pagerButtonPressed(): boolean {
+			return state.isSelected ? true : false;
+		},
 	},
 	actions: {
 		closeDialog: () => {
@@ -60,6 +64,9 @@ const productGallery = {
 		openDialog: () => {
 			const context = getContext();
 			context.isDialogOpen = true;
+			document.body.classList.add(
+				'wc-block-product-gallery-modal-open'
+			);
 		},
 		selectImage: () => {
 			const context = getContext();
@@ -109,8 +116,24 @@ const productGallery = {
 				attributes: true,
 			} );
 
+			const clearVariationsLink = document.querySelector(
+				'.wp-block-add-to-cart-form .reset_variations'
+			);
+
+			const selectFirstImage = () => {
+				context.selectedImage = context.firstMainImageId;
+			};
+
+			if ( clearVariationsLink ) {
+				clearVariationsLink.addEventListener(
+					'click',
+					selectFirstImage
+				);
+			}
+
 			return () => {
 				observer.disconnect();
+				document.removeEventListener( 'click', selectFirstImage );
 			};
 		},
 		keyboardAccess: () => {

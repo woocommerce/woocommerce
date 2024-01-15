@@ -78,14 +78,14 @@ test.describe( 'Grouped Product Page', () => {
 		await page.goto( `product/${ slug }` );
 
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
-		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
+		await expect( page.locator( '.is-error' ) ).toContainText(
 			'Please choose the quantity of items you wish to add to your cart…'
 		);
 
 		await page.locator( 'div.quantity input.qty >> nth=0' ).fill( '5' );
 		await page.locator( 'div.quantity input.qty >> nth=1' ).fill( '5' );
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
+		await expect( page.locator( '.is-success' ) ).toContainText(
 			`“${ simpleProduct1 }” and “${ simpleProduct2 }” have been added to your cart.`
 		);
 
@@ -116,7 +116,7 @@ test.describe( 'Grouped Product Page', () => {
 		await page.locator( 'a.remove >> nth=1' ).click();
 		await page.locator( 'a.remove >> nth=0' ).click();
 
-		await expect( page.locator( '.cart-empty' ) ).toContainText(
+		await expect( page.locator( '.is-info' ) ).toContainText(
 			'Your cart is currently empty.'
 		);
 	} );

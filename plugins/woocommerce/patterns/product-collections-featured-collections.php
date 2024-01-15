@@ -5,12 +5,12 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
-$image1 = PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/technology-white-camera-photography-vintage-photographer.png' );
-$image2 = PatternsHelper::get_image_url( $images, 1, 'images/pattern-placeholders/leather-guitar-typewriter-red-gadget-sofa.png' );
-$image3 = PatternsHelper::get_image_url( $images, 2, 'images/pattern-placeholders/music-technology-play-equipment-studio-gadget.png' );
-$image4 = PatternsHelper::get_image_url( $images, 3, 'images/pattern-placeholders/technology-joystick-gadget-console-games-playstation.png' );
+$image1 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/technology-white-camera-photography-vintage-photographer.png' );
+$image2 = PatternsHelper::get_image_url( $images, 1, 'assets/images/pattern-placeholders/leather-guitar-typewriter-red-gadget-sofa.png' );
+$image3 = PatternsHelper::get_image_url( $images, 2, 'assets/images/pattern-placeholders/music-technology-play-equipment-studio-gadget.png' );
+$image4 = PatternsHelper::get_image_url( $images, 3, 'assets/images/pattern-placeholders/technology-joystick-gadget-console-games-playstation.png' );
 
 $first_title   = $content['titles'][0]['default'] ?? '';
 $second_title  = $content['titles'][1]['default'] ?? '';

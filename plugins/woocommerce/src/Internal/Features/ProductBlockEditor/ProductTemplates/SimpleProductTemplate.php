@@ -16,12 +16,13 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 * The context name used to identify the editor.
 	 */
 	const GROUP_IDS = array(
-		'GENERAL'      => 'general',
-		'ORGANIZATION' => 'organization',
-		'PRICING'      => 'pricing',
-		'INVENTORY'    => 'inventory',
-		'SHIPPING'     => 'shipping',
-		'VARIATIONS'   => 'variations',
+		'GENERAL'         => 'general',
+		'ORGANIZATION'    => 'organization',
+		'PRICING'         => 'pricing',
+		'INVENTORY'       => 'inventory',
+		'SHIPPING'        => 'shipping',
+		'VARIATIONS'      => 'variations',
+		'LINKED_PRODUCTS' => 'linked-products',
 	);
 
 	/**
@@ -35,6 +36,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$this->add_inventory_group_blocks();
 		$this->add_shipping_group_blocks();
 		$this->add_variation_group_blocks();
+		$this->add_linked_products_group_blocks();
 	}
 
 	/**
@@ -149,6 +151,19 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				)
 			);
 		}
+
+		// Linked Products tab.
+		if ( Features::is_enabled( 'product-linked' ) ) {
+			$this->add_group(
+				array(
+					'id'         => $this::GROUP_IDS['LINKED_PRODUCTS'],
+					'order'      => 60,
+					'attributes' => array(
+						'title' => __( 'Linked products', 'woocommerce' ),
+					),
+				)
+			);
+		}
 	}
 
 	/**
@@ -181,6 +196,13 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$basic_details->add_block(
 			array(
+				'id'        => 'product-details-section-description',
+				'blockName' => 'woocommerce/product-details-section-description',
+				'order'     => 10,
+			)
+		);
+		$basic_details->add_block(
+			array(
 				'id'         => 'product-name',
 				'blockName'  => 'woocommerce/product-name-field',
 				'order'      => 10,
@@ -200,7 +222,23 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$pricing_columns  = $basic_details->add_block(
+
+		// This is needed until hide conditions can be applied to core blocks.
+		$pricing_conditional_wrapper = $basic_details->add_block(
+			array(
+				'id'             => 'product-pricing-conditional-wrapper',
+				'blockName'      => 'woocommerce/conditional',
+				'order'          => 30,
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "grouped"',
+					),
+				),
+			)
+		);
+
+		$pricing_wrapper  = Features::is_enabled( 'product-grouped' ) ? $pricing_conditional_wrapper : $basic_details;
+		$pricing_columns  = $pricing_wrapper->add_block(
 			array(
 				'id'        => 'product-pricing-columns',
 				'blockName' => 'core/columns',
@@ -279,6 +317,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes' => array(
 					'helpText' => null,
 					'label'    => null,
+					'property' => 'description',
 				),
 			)
 		);
@@ -775,48 +814,40 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				) : null,
 			)
 		);
-		$product_inventory_quantity_conditional = $product_inventory_inner_section->add_block(
+		$product_inventory_quantity_hide_conditions = array(
 			array(
-				'id'         => 'product-inventory-quantity-conditional-wrapper',
-				'blockName'  => 'woocommerce/conditional',
-				'order'      => 30,
-				'attributes' => array(
-					'mustMatch' => array(
-						'manage_stock' => array( true ),
-					),
-				),
+				'expression' => 'editedProduct.manage_stock === false',
+			),
+		);
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$product_inventory_quantity_hide_conditions[] = array(
+				'expression' => 'editedProduct.type === "grouped"',
+			);
+		}
+		$product_inventory_inner_section->add_block(
+			array(
+				'id'             => 'product-inventory-quantity',
+				'blockName'      => 'woocommerce/product-inventory-quantity-field',
+				'order'          => 30,
+				'hideConditions' => $product_inventory_quantity_hide_conditions,
 			)
 		);
-		$product_inventory_quantity_conditional->add_block(
+		$product_stock_status_hide_conditions = array(
 			array(
-				'id'        => 'product-inventory-quantity',
-				'blockName' => 'woocommerce/product-inventory-quantity-field',
-				'order'     => 10,
-			)
+				'expression' => 'editedProduct.manage_stock === true',
+			),
 		);
-		$product_stock_status_conditional = $product_inventory_section->add_block(
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$product_stock_status_hide_conditions[] = array(
+				'expression' => 'editedProduct.type === "grouped"',
+			);
+		}
+		$product_inventory_section->add_block(
 			array(
-				'id'             => 'product-stock-status-conditional-wrapper',
-				'blockName'      => 'woocommerce/conditional',
-				'order'          => 20,
+				'id'             => 'product-stock-status',
+				'blockName'      => 'woocommerce/product-radio-field',
+				'order'          => 10,
 				'attributes'     => array(
-					'mustMatch' => array(
-						'manage_stock' => array( false ),
-					),
-				),
-				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
-					array(
-						'expression' => 'editedProduct.type === "grouped"',
-					),
-				) : null,
-			)
-		);
-		$product_stock_status_conditional->add_block(
-			array(
-				'id'         => 'product-stock-status',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
-				'attributes' => array(
 					'title'    => __( 'Stock status', 'woocommerce' ),
 					'property' => 'stock_status',
 					'options'  => array(
@@ -834,6 +865,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						),
 					),
 				),
+				'hideConditions' => $product_stock_status_hide_conditions,
 			)
 		);
 		$product_inventory_advanced         = $product_inventory_section->add_block(
@@ -862,24 +894,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$product_out_of_stock_conditional   = $product_inventory_advanced_wrapper->add_block(
+		$product_inventory_advanced_wrapper->add_block(
 			array(
-				'id'         => 'product-out-of-stock-conditional-wrapper',
-				'blockName'  => 'woocommerce/conditional',
-				'order'      => 10,
-				'attributes' => array(
-					'mustMatch' => array(
-						'manage_stock' => array( true ),
-					),
-				),
-			)
-		);
-		$product_out_of_stock_conditional->add_block(
-			array(
-				'id'         => 'product-out-of-stock',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
-				'attributes' => array(
+				'id'             => 'product-out-of-stock',
+				'blockName'      => 'woocommerce/product-radio-field',
+				'order'          => 10,
+				'attributes'     => array(
 					'title'    => __( 'When out of stock', 'woocommerce' ),
 					'property' => 'backorders',
 					'options'  => array(
@@ -900,13 +920,23 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						),
 					),
 				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.manage_stock === false',
+					),
+				),
 			)
 		);
-		$product_out_of_stock_conditional->add_block(
+		$product_inventory_advanced_wrapper->add_block(
 			array(
-				'id'        => 'product-inventory-email',
-				'blockName' => 'woocommerce/product-inventory-email-field',
-				'order'     => 20,
+				'id'             => 'product-inventory-email',
+				'blockName'      => 'woocommerce/product-inventory-email-field',
+				'order'          => 20,
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.manage_stock === false',
+					),
+				),
 			)
 		);
 
@@ -1067,6 +1097,87 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'id'        => 'product-variation-items',
 				'blockName' => 'woocommerce/product-variation-items-field',
 				'order'     => 10,
+			)
+		);
+	}
+
+	/**
+	 * Adds the linked products group blocks to the template.
+	 */
+	private function add_linked_products_group_blocks() {
+		$linked_products_group = $this->get_group_by_id( $this::GROUP_IDS['LINKED_PRODUCTS'] );
+		if ( ! isset( $linked_products_group ) ) {
+			return;
+		}
+
+		$linked_products_group->add_section(
+			array(
+				'id'         => 'product-linked-upsells-section',
+				'order'      => 10,
+				'attributes' => array(
+					'title'       => __( 'Upsells', 'woocommerce' ),
+					'description' => sprintf(
+						/* translators: %1$s: Learn more about linked products. %2$s: Learn more about linked products.*/
+						__( 'Upsells are typically products that are extra profitable or better quality or more expensive. Experiment with combinations to boost sales. %1$sLearn more about linked products.%2$s', 'woocommerce' ),
+						'<br /><a href="https://woo.com/document/related-products-up-sells-and-cross-sells/" target="_blank" rel="noreferrer">',
+						'</a>'
+					),
+				),
+			)
+		)->add_block(
+			array(
+				'id'         => 'product-linked-upsells',
+				'blockName'  => 'woocommerce/product-linked-list-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property'   => 'upsell_ids',
+					'emptyState' => array(
+						'image'         => 'ShoppingBags',
+						'tip'           => __(
+							'Tip: Upsells are products that are extra profitable or better quality or more expensive. Experiment with combinations to boost sales.',
+							'woocommerce'
+						),
+						'isDismissible' => true,
+					),
+				),
+			)
+		);
+
+		$linked_products_group->add_section(
+			array(
+				'id'             => 'product-linked-cross-sells-section',
+				'order'          => 20,
+				'attributes'     => array(
+					'title'       => __( 'Cross-sells', 'woocommerce' ),
+					'description' => sprintf(
+						/* translators: %1$s: Learn more about linked products. %2$s: Learn more about linked products.*/
+						__( 'By suggesting complementary products in the cart using cross-sells, you can significantly increase the average order value. %1$sLearn more about linked products.%2$s', 'woocommerce' ),
+						'<br /><a href="https://woo.com/document/related-products-up-sells-and-cross-sells/" target="_blank" rel="noreferrer">',
+						'</a>'
+					),
+				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
+					),
+				),
+			)
+		)->add_block(
+			array(
+				'id'         => 'product-linked-cross-sells',
+				'blockName'  => 'woocommerce/product-linked-list-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property'   => 'cross_sell_ids',
+					'emptyState' => array(
+						'image'         => 'CashRegister',
+						'tip'           => __(
+							'Tip: By suggesting complementary products in the cart using cross-sells, you can significantly increase the average order value.',
+							'woocommerce'
+						),
+						'isDismissible' => true,
+					),
+				),
 			)
 		);
 	}

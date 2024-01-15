@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
 	},
 	"scripts": {
 		"e2e": "jest",
@@ -49,5 +49,18 @@
 		"*.(t|j)s?(x)": [
 			"eslint --fix"
 		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": [
+					"data/**/*.{js,ts,tsx}",
+					"endpoints/**/*.{js,ts,tsx}",
+					"tests/**/*.{js,ts,tsx}",
+					"utils/**/*.{js,ts,tsx}"
+				]
+			}
+		}
 	}
 }

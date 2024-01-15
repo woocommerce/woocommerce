@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update template to use new function register_block_type_from_metadata

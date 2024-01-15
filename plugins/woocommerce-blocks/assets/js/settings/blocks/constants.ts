@@ -4,7 +4,7 @@
 import {
 	getSetting,
 	STORE_PAGES,
-	LocaleSpecificAddressField,
+	LocaleSpecificFormField,
 } from '@woocommerce/settings';
 
 export type WordCountType =
@@ -55,7 +55,13 @@ type CountryData = {
 	allowBilling: boolean;
 	allowShipping: boolean;
 	states: Record< string, string >;
-	locale: Record< string, LocaleSpecificAddressField >;
+	locale: Record< string, LocaleSpecificFormField >;
+};
+
+type FieldsLocations = {
+	address: string[];
+	contact: string[];
+	additional: string[];
 };
 
 // Contains country names.
@@ -112,3 +118,35 @@ export const COUNTRY_LOCALE = Object.fromEntries(
 		return [ countryCode, countryData[ countryCode ].locale || [] ];
 	} )
 );
+
+const defaultFieldsLocations: FieldsLocations = {
+	address: [
+		'first_name',
+		'last_name',
+		'company',
+		'address_1',
+		'address_2',
+		'city',
+		'postcode',
+		'country',
+		'state',
+		'phone',
+	],
+	contact: [ 'email' ],
+	additional: [],
+};
+
+export const ADDRESS_FORM_KEYS = getSetting< FieldsLocations >(
+	'addressFieldsLocations',
+	defaultFieldsLocations
+).address;
+
+export const CONTACT_FORM_KEYS = getSetting< FieldsLocations >(
+	'addressFieldsLocations',
+	defaultFieldsLocations
+).contact;
+
+export const ADDITIONAL_FORM_KEYS = getSetting< FieldsLocations >(
+	'addressFieldsLocations',
+	defaultFieldsLocations
+).additional;

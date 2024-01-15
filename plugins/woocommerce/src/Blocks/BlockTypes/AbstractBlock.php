@@ -71,6 +71,15 @@ abstract class AbstractBlock {
 	}
 
 	/**
+	 * Get the interactivity namespace. Only used when utilizing the interactivity API.
+
+	 * @return string The interactivity namespace, used to namespace interactivity API actions and state.
+	 */
+	protected function get_full_block_name() {
+		return $this->namespace . '/' . $this->block_name;
+	}
+
+	/**
 	 * The default render_callback for all blocks. This will ensure assets are enqueued just in time, then render
 	 * the block (if applicable).
 	 *

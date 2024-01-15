@@ -4,7 +4,8 @@ namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
-
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Package;
 
 /**
  * CheckoutSchema class.
@@ -46,6 +47,13 @@ class CheckoutSchema extends AbstractSchema {
 	protected $image_attachment_schema;
 
 	/**
+	 * Additional fields controller.
+	 *
+	 * @var CheckoutFields
+	 */
+	protected $additional_fields_controller;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param ExtendSchema     $extend Rest Extending instance.
@@ -53,9 +61,10 @@ class CheckoutSchema extends AbstractSchema {
 	 */
 	public function __construct( ExtendSchema $extend, SchemaController $controller ) {
 		parent::__construct( $extend, $controller );
-		$this->billing_address_schema  = $this->controller->get( BillingAddressSchema::IDENTIFIER );
-		$this->shipping_address_schema = $this->controller->get( ShippingAddressSchema::IDENTIFIER );
-		$this->image_attachment_schema = $this->controller->get( ImageAttachmentSchema::IDENTIFIER );
+		$this->billing_address_schema       = $this->controller->get( BillingAddressSchema::IDENTIFIER );
+		$this->shipping_address_schema      = $this->controller->get( ShippingAddressSchema::IDENTIFIER );
+		$this->image_attachment_schema      = $this->controller->get( ImageAttachmentSchema::IDENTIFIER );
+		$this->additional_fields_controller = Package::container()->get( CheckoutFields::class );
 	}
 
 	/**
@@ -168,6 +177,17 @@ class CheckoutSchema extends AbstractSchema {
 					],
 				],
 			],
+			'additional_fields' => [
+				'description' => __( 'Additional fields to be persisted on the order.', 'woocommerce' ),
+				'type'        => 'object',
+				'context'     => [ 'view', 'edit' ],
+				'properties'  => $this->get_additional_fields_schema(),
+				'arg_options' => [
+					'sanitize_callback' => [ $this, 'sanitize_additional_fields' ],
+					'validate_callback' => [ $this, 'validate_additional_fields' ],
+				],
+				'required'    => $this->is_additional_fields_required(),
+			],
 			self::EXTENDING_KEY => $this->get_extended_schema( self::IDENTIFIER ),
 		];
 	}
@@ -205,6 +225,7 @@ class CheckoutSchema extends AbstractSchema {
 				'payment_details' => $this->prepare_payment_details_for_response( $payment_result->payment_details ),
 				'redirect_url'    => $payment_result->redirect_url,
 			],
+			'additional_fields' => $this->get_additional_fields_response( $order ),
 			self::EXTENDING_KEY => $this->get_extended_data( self::IDENTIFIER ),
 		];
 	}
@@ -229,5 +250,131 @@ class CheckoutSchema extends AbstractSchema {
 			array_keys( $payment_details ),
 			$payment_details
 		);
+	}
+
+	/**
+	 * Get the additional fields response.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return array
+	 */
+	protected function get_additional_fields_response( \WC_Order $order ) {
+		$fields   = $this->additional_fields_controller->get_all_fields_from_order( $order );
+		$response = [];
+
+		foreach ( $fields as $key => $value ) {
+			if ( 0 === strpos( $key, '/billing/' ) || 0 === strpos( $key, '/shipping/' ) ) {
+				continue;
+			}
+			$response[ $key ] = $value;
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Get the schema for additional fields.
+	 *
+	 * @return array
+	 */
+	protected function get_additional_fields_schema() {
+		$order_only_fields = $this->additional_fields_controller->get_order_only_fields();
+
+		$schema = [];
+		foreach ( $order_only_fields as $key => $field ) {
+			$field_schema = [
+				'description' => $field['label'],
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+				'required'    => $field['required'],
+			];
+
+			if ( 'select' === $field['type'] ) {
+				$field_schema['enum'] = array_map(
+					function( $option ) {
+						return $option['value'];
+					},
+					$field['options']
+				);
+			}
+
+			if ( 'checkbox' === $field['type'] ) {
+				$field_schema['type'] = 'boolean';
+			}
+
+			$schema[ $key ] = $field_schema;
+		}
+		return $schema;
+	}
+
+	/**
+	 * Check if any additional field is required, so that the parent item is required as well.
+	 *
+	 * @return bool
+	 */
+	public function is_additional_fields_required() {
+		$additional_fields_schema = $this->get_additional_fields_schema();
+		return array_reduce(
+			array_keys( $additional_fields_schema ),
+			function( $carry, $key ) use ( $additional_fields_schema ) {
+				return $carry || $additional_fields_schema[ $key ]['required'];
+			},
+			false
+		);
+	}
+
+	/**
+	 * Sanitize and format additional fields object.
+	 *
+	 * @param array $fields Values being sanitized.
+	 * @return array
+	 */
+	public function sanitize_additional_fields( $fields ) {
+		$properties = $this->get_additional_fields_schema();
+		$fields     = array_reduce(
+			array_keys( $fields ),
+			function( $carry, $key ) use ( $fields, $properties ) {
+				if ( ! isset( $properties[ $key ] ) ) {
+					return $carry;
+				}
+				$field_schema   = $properties[ $key ];
+				$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $fields[ $key ] ), $field_schema, $key );
+				$carry[ $key ]  = wp_kses( $rest_sanitized, [] );
+				return $carry;
+			},
+			[]
+		);
+
+		return $fields;
+	}
+
+	/**
+	 * Validate additional fields object.
+	 *
+	 * @see rest_validate_value_from_schema
+	 *
+	 * @param array            $fields Value being sanitized.
+	 * @param \WP_REST_Request $request The Request.
+	 * @return true|\WP_Error
+	 */
+	public function validate_additional_fields( $fields, $request ) {
+		$errors     = new \WP_Error();
+		$fields     = $this->sanitize_additional_fields( $fields, $request );
+		$properties = $this->get_additional_fields_schema();
+
+		foreach ( array_keys( $properties ) as $key ) {
+			if ( ! isset( $fields[ $key ] ) && false === $properties[ $key ]['required'] ) {
+				continue;
+			}
+
+			$field_value = isset( $fields[ $key ] ) ? $fields[ $key ] : null;
+
+			$result = rest_validate_value_from_schema( $field_value, $properties[ $key ], $key );
+			if ( is_wp_error( $result ) ) {
+				$errors->add( $result->get_error_code(), $result->get_error_message() );
+			}
+		}
+
+		return $errors->has_errors( $errors ) ? $errors : true;
 	}
 }

@@ -49,6 +49,9 @@ class Init {
 
 		// Add currency symbol to orders endpoint response.
 		add_filter( 'woocommerce_rest_prepare_shop_order_object', array( __CLASS__, 'add_currency_symbol_to_order_response' ) );
+
+		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-upload-downloadable-product.php';
+
 	}
 
 	/**

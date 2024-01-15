@@ -16,7 +16,14 @@
 		margin: 0 0 calc(2 * $gap) 0;
 		width: 100%;
 
-		.wp-block-woocommerce-product-section__heading-title {
+		&-title-wrapper {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: $grid-unit-20;
+		}
+
+		&-title {
 			margin: 0;
 			font-size: 20px;
 			font-weight: 500;
@@ -56,4 +63,8 @@
 		margin: 0;
 		max-width: 300px;
 	}
+}
+
+.woocommerce-tooltip > .wp-block-woocommerce-product-section__heading-tooltip {
+	margin-left: $gap-small;
 }

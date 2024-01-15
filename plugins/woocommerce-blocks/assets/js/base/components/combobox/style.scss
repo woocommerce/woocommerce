@@ -1,3 +1,9 @@
+// For when the Combobox is being used as a select custom field.
+.wc-block-components-select-input {
+	position: relative;
+	margin-top: $gap;
+}
+
 .wc-block-components-form .wc-block-components-combobox,
 .wc-block-components-combobox {
 	.wc-block-components-combobox-control {

@@ -5,7 +5,7 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 $banner_title       = $content['titles'][0]['default'] ?? '';
 $banner_button      = $content['buttons'][0]['default'] ?? '';
@@ -31,9 +31,9 @@ $second_description = $content['descriptions'][1]['default'] ?? '';
 
 		<!-- wp:buttons {"style":{"spacing":{"blockGap":"0","margin":{"top":"20px","bottom":"0"}}}} -->
 		<div class="wp-block-buttons" style="margin-top:20px;margin-bottom:0">
-			<!-- wp:button {"style":{"typography":{"fontSize":"16px"},"color":{"text":"#000000","background":"#ffffff"},"border":{"width":"0px","style":"none"}},"className":"is-style-fill"} -->
+			<!-- wp:button {"style":{"typography":{"fontSize":"16px"},"border":{"width":"0px","style":"none"}},"className":"is-style-fill"} -->
 			<div class="wp-block-button has-custom-font-size is-style-fill" style="font-size:16px">
-				<a class="wp-block-button__link has-text-color has-background wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" style="border-style:none;border-width:0px;color:#000000;background-color:#ffffff">
+				<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" style="border-style:none;border-width:0px;">
 					<?php echo esc_html( $banner_button ); ?>
 				</a>
 			</div>
@@ -47,7 +47,7 @@ $second_description = $content['descriptions'][1]['default'] ?? '';
 	<div class="wp-block-column is-vertically-aligned-center">
 		<!-- wp:image {"id":1,"sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image size-full">
-			<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'images/pattern-placeholders/music-needle-turntable-black-and-white-white-photography.jpg' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a banner.', 'woocommerce' ); ?>" class="wp-image-1" />
+			<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/music-needle-turntable-black-and-white-white-photography.jpg' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a banner.', 'woocommerce' ); ?>" class="wp-image-1" />
 		</figure>
 		<!-- /wp:image -->
 	</div>

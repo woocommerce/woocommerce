@@ -14,7 +14,7 @@
 	},
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
 	},
 	"devDependencies": {
 		"wireit": "0.14.1"

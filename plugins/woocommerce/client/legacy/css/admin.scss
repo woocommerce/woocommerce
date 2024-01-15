@@ -1391,8 +1391,8 @@ table.wc_status_table--tools {
 	.line {
 		display: block;
 		width: 100%;
-		scroll-margin-top: 6em;
 		position: relative;
+		white-space: pre-wrap;
 
 		&:before {
 			counter-increment: line;
@@ -1407,6 +1407,7 @@ table.wc_status_table--tools {
 		&:target {
 			box-shadow: 0 0.16em 0.16em -0.16em #c3c4c7, 0 -0.16em 0.16em -0.16em #c3c4c7;
 			z-index: 1;
+			scroll-margin-top: 50vh;
 
 			.line-content {
 				background: #fff8c5;
@@ -1414,6 +1415,16 @@ table.wc_status_table--tools {
 
 			.log-level:before {
 				color: #fff8c5;
+			}
+		}
+
+		&.has-context {
+			summary {
+				cursor: pointer;
+			}
+
+			details {
+				white-space: pre-wrap;
 			}
 		}
 	}
@@ -1479,6 +1490,14 @@ table.wc_status_table--tools {
 		padding: 0.46em 0;
 		border: 1px dashed #c3c4c7;
 		line-height: 2.3;
+	}
+}
+
+.wc-logs-settings {
+	.wc-settings-row-logs-retention-period-days {
+		td {
+			line-height: 2;
+		}
 	}
 }
 
@@ -1564,6 +1583,13 @@ table.wc_status_table--tools {
 
 		.column-context {
 			width: 10%;
+		}
+	}
+
+	.column-message {
+		pre {
+			margin: 0;
+			white-space: pre-wrap;
 		}
 	}
 
@@ -4026,6 +4052,7 @@ table.wc_shipping {
 .wc-shipping-zone-settings {
 	#zone_name {
 		width: 600px;
+		padding: 2px 8px;
 	}
 
 	th {
@@ -4064,7 +4091,6 @@ table.wc_shipping {
 		margin: 0.5em 0 0;
 		text-decoration: underline;
 		display: block;
-		font-family: $font-sf-pro-text;
 		font-size: 13px;
 		font-weight: 400;
 		line-height: 16px;
@@ -4085,7 +4111,6 @@ table.wc_shipping {
 		}
 
 		.description {
-			font-family: $font-sf-pro-text;
 			font-size: 13px;
 			font-weight: 400;
 			line-height: 18px;
@@ -4293,8 +4318,6 @@ table.wc_shipping {
 				}
 
 				&.wc-shipping-modal-price {
-					color: #757575;
-
 					&.wc-shipping-currency-position-left,
 					&.wc-shipping-currency-position-left_space {
 
@@ -4355,7 +4378,7 @@ table.wc_shipping {
 	.wc-backbone-modal-back-inactive {
 		display: none;
 	}
-	
+
 	#btn-next.is-busy {
 		background-image: linear-gradient(-45deg, #fafafa 33%, #e0e0e0 33%, #e0e0e0 70%, #fafafa 70%);
 		animation-duration: 2.5s;
@@ -4431,8 +4454,7 @@ table {
 	display: flex;
 	align-items: center;
 
-	.button-primary {
-		display: inline-block;
+	.page-title-action {
 		margin: 0 12px;
 	}
 }
@@ -4442,7 +4464,6 @@ table {
 }
 
 .wc-shipping-zone-heading-help-text {
-	font-family: $font-sf-pro-text;
 	color: #3C434A;
 	font-size: 13px;
 	font-style: normal;
@@ -4451,7 +4472,6 @@ table {
 }
 
 .wc-shipping-zone-help-text {
-	font-family: $font-sf-pro-text;
 	color: #3C434A;
 	font-size: 12px;
 	font-style: normal;
@@ -4459,23 +4479,24 @@ table {
 	line-height: 17px;
 }
 
+#wc-shipping-zone-region-picker-root .woocommerce-tree-select-control .components-base-control {
+	padding: 2px 8px;
+	border-radius: 4px;
+
+	.woocommerce-tree-select-control__control-input {
+		font-size: 14px;
+	}
+}
+
 table.wc-shipping-zones,
 table.wc-shipping-zone-methods,
 table.wc-shipping-classes {
-	font-family: $font-sf-pro-text;
 	font-size: 14px;
-	font-weight: 400;
-	line-height: 20px;
-	color: #000000;
-
-	&.widefat p {
-		color: #000000;
-	}
 
 	thead tr th {
-		color: #646970;
 		vertical-align: middle;
-		padding: 12px;
+		padding: 1em;
+		font-weight: 600;
 	}
 
 	tbody tr td {
@@ -4488,8 +4509,6 @@ table.wc-shipping-classes {
 
 	tfoot tr td {
 		padding: 24px 12px;
-		background-color: #F6F7F7;
-		color: #000000;
 		vertical-align: top;
 
 		&:last-child {
@@ -4499,13 +4518,8 @@ table.wc-shipping-classes {
 
 	td,
 	th {
-		background: #fff;
 		display: table-cell !important;
-		font-family: $font-sf-pro-text;
 		font-size: 14px;
-		font-weight: 400;
-		line-height: 20px;
-		color: #000000;
 		vertical-align: middle;
 		padding: 24px 12px;
 
@@ -4523,6 +4537,18 @@ table.wc-shipping-classes {
 		.wc-shipping-zone-sort {
 			text-align: center;
 		}
+	}
+
+	.wc-shipping-zone-rows,
+	.wc-shipping-zone-method-rows,
+	.wc-shipping-class-rows {
+		tr:nth-child(even) td {
+			background: #f9f9f9;
+		}
+	}
+
+	.wc-shipping-zone-rows-tfoot .even td {
+		background: #f9f9f9;
 	}
 
 	td.wc-shipping-zones-blank-state,
@@ -4585,16 +4611,6 @@ table.wc-shipping-classes {
 	}
 
 	tbody.wc-shipping-tables-tbody {
-		td {
-			border-top: 1px solid #C3C4C7;
-		}
-
-		tr:first-child {
-			td {
-				border-top: 0;
-			}
-		}
-
 		.wc-shipping-zone-name,
 		.wc-shipping-zone-method-title,
 		.wc-shipping-class-name {
@@ -4624,6 +4640,8 @@ table.wc-shipping-classes {
 		&::before {
 			content: "";
 			mask: url(../images/icons/move-icon.svg);
+			mask-image: url(../images/icons/move-icon.svg);
+			-webkit-mask-image: url(../images/icons/move-icon.svg);
 			background-color: #1E1E1E;
 			display: block;
 			width: 17px;
@@ -4664,12 +4682,7 @@ table.wc-shipping-classes {
 
 		a.wc-shipping-zone-actions,
 		a.wc-shipping-zone-actions:hover {
-			color: #D63638;
-		}
-
-		a.wc-shipping-zone-action-edit,
-		a.wc-shipping-zone-action-edit:hover {
-			color: #0675C4;
+			color: var(--wc-red);
 		}
 	}
 
@@ -4691,8 +4704,6 @@ table.wc-shipping-classes {
 	}
 
 	td.wc-shipping-zone-methods {
-		color: #555;
-
 		.method_disabled {
 			text-decoration: line-through;
 		}

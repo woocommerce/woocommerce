@@ -6,7 +6,7 @@
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/api/README.md",
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"pnpm": "^8.12.1"
 	},
 	"repository": {
 		"type": "git",
@@ -69,6 +69,27 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}",
+						"typings/**/*.ts"
+					],
+					"cascade": "test:js"
+				}
+			]
+		}
 	},
 	"wireit": {
 		"build:project:typescript": {

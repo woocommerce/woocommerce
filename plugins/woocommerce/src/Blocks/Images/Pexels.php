@@ -3,7 +3,8 @@
 namespace Automattic\WooCommerce\Blocks\Images;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
-use Automattic\WooCommerce\Blocks\Patterns\PatternUpdater;
+use Automattic\WooCommerce\Blocks\AIContent\ContentProcessor;
+use Automattic\WooCommerce\Blocks\AIContent\UpdatePatterns;
 
 /**
  * Pexels API client.
@@ -27,6 +28,8 @@ class Pexels {
 	 * @return array|\WP_Error Array of images, or WP_Error if the request failed.
 	 */
 	public function get_images( $ai_connection, $token, $business_description ) {
+		$business_description = ContentProcessor::summarize_business_description( $business_description, $ai_connection, $token );
+
 		if ( str_word_count( $business_description ) === 1 ) {
 			$search_term = $business_description;
 		} else {
@@ -93,7 +96,10 @@ class Pexels {
 			return new \WP_Error( 'woocommerce_no_images_found', __( 'No images found.', 'woocommerce' ) );
 		}
 
-		return $refined_images;
+		return array(
+			'images'      => $refined_images,
+			'search_term' => $search_term,
+		);
 	}
 
 	/**
@@ -108,12 +114,17 @@ class Pexels {
 	 * @return mixed|\WP_Error
 	 */
 	private function define_search_term( $ai_connection, $token, $business_description ) {
-		$prompt = sprintf( 'Based on the description "%s", generate one word that precisely describe what this business is selling. The returned word should be as accurate as possible to describe the products sold, do not include any adjectives or descriptions of the qualities of the product. The generated word must exist in the english dictionary and not be a proper name, the returned word should be simple, do not add any explanations.', $business_description );
+
+		$prompt = sprintf( 'You are a teacher. Based on the following business description, \'%s\', describe to a child exactly what this store is selling in one or two words and be as precise as you can possibly be. Do not reply with generic words that could cause confusion and be associated with other businesses as a response. Make sure you do not add double quotes in your response. Do not add any explanations in the response', $business_description );
 
 		$response = $ai_connection->fetch_ai_response( $token, $prompt, 30 );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
+		}
+
+		if ( isset( $response['code'] ) && 'completion_error' === $response['code'] ) {
+			return new \WP_Error( 'search_term_definition_failed', __( 'The search term definition failed.', 'woocommerce' ) );
 		}
 
 		if ( ! isset( $response['completion'] ) ) {
@@ -141,7 +152,7 @@ class Pexels {
 			}
 		}
 
-		$prompt = sprintf( 'Compare the following business description: "%s" with the image titles listed in the JSON below: if the image is not aligned with what the business is selling, delete the description from the list. Do not include any explanations or introductions to the response. The JSON is: %s', $business_description, wp_json_encode( $image_titles ) );
+		$prompt = sprintf( 'Given that you own a store described as "%s", remove from the following JSON all titles that do not represent products that could be sold on your store: %s', $business_description, wp_json_encode( $image_titles ) );
 
 		$response = $ai_connection->fetch_ai_response( $token, $prompt, 30 );
 
@@ -219,7 +230,7 @@ class Pexels {
 	 * @return array|\WP_Error The total number of required images, or WP_Error if the request failed.
 	 */
 	private function total_number_required_images() {
-		$patterns_dictionary = PatternUpdater::get_patterns_dictionary();
+		$patterns_dictionary = UpdatePatterns::get_patterns_dictionary();
 
 		if ( is_wp_error( $patterns_dictionary ) ) {
 			return $patterns_dictionary;

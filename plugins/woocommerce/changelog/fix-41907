@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add hook 'woocommerce_hpos_sync_ignored_order_props' to allow keys to be ignored during HPOS sync/verification.
