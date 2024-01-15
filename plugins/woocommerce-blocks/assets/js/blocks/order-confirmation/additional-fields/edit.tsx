@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useBlockProps } from '@wordpress/block-editor';
-import { __ } from '@wordpress/i18n';
 import {
 	ADDITIONAL_FORM_FIELDS,
 	CONTACT_FORM_FIELDS,
