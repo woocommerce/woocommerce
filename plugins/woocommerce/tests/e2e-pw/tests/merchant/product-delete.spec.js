@@ -50,9 +50,11 @@ baseTest.describe('Products > Delete Product', () => {
 		},
 	});
 
-	test('can delete a product from edit view', async ({page, product, api}) => {
+	test('can delete a product from edit view', async ({page, product}) => {
+		const editUrl = `wp-admin/post.php?post=${product.id}&action=edit`;
+
 		await test.step('Navigate to product edit page', async () => {
-			await page.goto(`wp-admin/post.php?post=${product.id}&action=edit`);
+			await page.goto(editUrl);
 		});
 
 		await test.step('Move product to trash', async () => {
@@ -60,16 +62,23 @@ baseTest.describe('Products > Delete Product', () => {
 		});
 
 		await test.step('Verify product was trashed', async () => {
+			// Verify displayed message
 			await expect(
 				page.locator('#message').last()
 			).toContainText('1 product moved to the Trash.');
 
-			const response = await api.get(`products/${product.id}`);
-			expect(response.data.status).toBe('trash');
+			// Verify the product is now in the trash
+			await page.goto(`wp-admin/edit.php?post_status=trash&post_type=product`);
+			await expect(page.locator(`#post-${product.id}`)).toBeVisible();
+
+			// Verify the product cannot be edited via direct URL
+			await page.goto(editUrl);
+			await expect(page.getByText('You cannot edit this item because it is in the Trash. Please restore it and try again.')).toBeVisible();
+
 		});
 	});
 
-	test('can quick delete a product from product list', async ({page, product, api}) => {
+	test('can quick delete a product from product list', async ({page, product}) => {
 		await test.step('Navigate to products list page', async () => {
 			await page.goto(`wp-admin/edit.php?post_type=product`);
 		});
@@ -83,12 +92,18 @@ baseTest.describe('Products > Delete Product', () => {
 		});
 
 		await test.step('Verify product was trashed', async () => {
+			// Verify displayed message
 			await expect(
 				page.locator('#message').last()
 			).toContainText('1 product moved to the Trash.');
 
-			const response = await api.get(`products/${product.id}`);
-			expect(response.data.status).toBe('trash');
+			// Verify the product is now in the trash
+			await page.goto(`wp-admin/edit.php?post_status=trash&post_type=product`);
+			await expect(page.locator(`#post-${product.id}`)).toBeVisible();
+
+			// Verify the product cannot be edited via direct URL
+			await page.goto(`wp-admin/post.php?post=${product.id}&action=edit`);
+			await expect(page.getByText('You cannot edit this item because it is in the Trash. Please restore it and try again.')).toBeVisible();
 		});
 	});
 
@@ -115,8 +130,8 @@ baseTest.describe('Products > Delete Product', () => {
 				page.locator('#message').last()
 			).toContainText('1 product permanently deleted.');
 
-			const response = await api.get(`products/${product.id}`);
-			expect(response.status).toEqual(404);
+			await page.goto(`wp-admin/post.php?post=${product.id}&action=edit`);
+			await expect(page.getByText('You attempted to edit an item that does not exist. Perhaps it was deleted?')).toBeVisible();
 		});
 	});
 });
