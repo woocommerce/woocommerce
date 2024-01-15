@@ -8,13 +8,6 @@
       "id": "2c687171ced32ac451780d6ac95b29d19c70b0b5"
     },
     {
-      "post_title": "Technical documentation style guide",
-      "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/style-guide.md",
-      "hash": "2cb3143697ed78734ddae9b099f97e2b1571fbbfa207688831ebd3259cea28a5",
-      "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/style-guide.md",
-      "id": "31c5323b13e890330b0a9813610c91ec3a2dfe26"
-    },
-    {
       "post_title": "WooCommerce developer documentation",
       "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/README.md",
       "hash": "5090b3208cadaa22f3c85d563ccd8f86194ff9e61c614df6021be805050713f2",
@@ -22,8 +15,7 @@
       "id": "65f434b31529b2793f7f7adcadfec487c797bdd2",
       "links": {
         "extension-development/building-your-first-extension.md": "278c2822fe06f1ab72499a757ef0c4981cfbffb5",
-        "extension-development/how-to-design-a-simple-extension.md": "375f7e18a2e656e662d3189041caeb9c80e7c9e3",
-        "style-guide.md": "31c5323b13e890330b0a9813610c91ec3a2dfe26"
+        "extension-development/how-to-design-a-simple-extension.md": "375f7e18a2e656e662d3189041caeb9c80e7c9e3"
       }
     }
   ],
@@ -214,6 +206,30 @@
       "categories": []
     },
     {
+      "content": "\nJust like WooCommerce itself, our developer docs are open source and editable by the community. This category outlines guidance and best practices to follow when contributing documentation.",
+      "category_slug": "contributing-docs",
+      "category_title": "Contribute to Docs",
+      "posts": [
+        {
+          "post_title": "Technical Documentation Style Guide",
+          "menu_title": "Style Guide",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/style-guide.md",
+          "hash": "a2e6d040886cc29e4dca7afe04f7a64a4bd6855114614d319e80fec363b5bbd8",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/style-guide.md",
+          "id": "5020907d57ae845a6477a36f59ec8c2f5f7b4b01"
+        },
+        {
+          "post_title": "Contributing Technical Documentation",
+          "menu_title": "Contributing Docs",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/contributing-docs.md",
+          "hash": "da06968371eafc59debabc1aa5207b7869d37c5751974c519fa46e3c5d807b6c",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/contributing-docs.md",
+          "id": "71c1a72bfd4d5ae6aa656d4264b1bf3beb6eca1c"
+        }
+      ],
+      "categories": []
+    },
+    {
       "category_slug": "data-management",
       "category_title": "Data Management",
       "posts": [
@@ -248,6 +264,17 @@
       "category_slug": "extension-development",
       "category_title": "Extension Development",
       "posts": [
+        {
+          "post_title": "Working with WooCommerce Admin Pages",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
+          "hash": "e1b2c1cdfa2a2009e8587cfc66ea35655f00fa74226db73eade56a0746152a1f",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
+          "id": "6f9cc63bc4c614b9e01174069a5ddc4f3d7aa467",
+          "links": {
+            "../../plugins/woocommerce/includes/react-admin/connect-existing-pages.php": "19af727c05cd2eaf8ee8a3c29f95387ca41e0c98",
+            "../../plugins/woocommerce/src/Internal/Admin/Analytics.php": "15aadab6f196323e46081508e2ff3a37b36a659a"
+          }
+        },
         {
           "post_title": "WooCommerce Plugin API Callback Documentation",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/woocommerce-plugin-api-callback.md",
@@ -705,15 +732,15 @@
           "post_title": "User Experience Guidelines - Testing",
           "menu_title": "Testing",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/testing.md",
-          "hash": "8bb7cad59c3d030cfd87652557d37f711e1eabe5f034363346e3e163feefc1cc",
+          "hash": "90c96aa1e0d06271b9e4f8152708db95996748b92eeb71452eafcd6f5b986499",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/testing.md",
           "id": "b84afc5cff54e84581a115ea589c3d86da0682fe"
         },
         {
           "post_title": "User Experience Guidelines - Task List and Inbox",
-          "menu_title": "Task list and inbox",
+          "menu_title": "Task list and Inbox",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/task-list-and-inbox.md",
-          "hash": "19d00e5b84a2d44d3b6642db7a47b1f66ce95ff06dbd1cef43e0da456ef2d7dd",
+          "hash": "f43297e52a9d05424051869c33673328795c5891bbc0b6153d82f388a38e76d8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/task-list-and-inbox.md",
           "id": "b461277e71a10e801d0d454a8578b83462991753"
         },
@@ -721,7 +748,7 @@
           "post_title": "User Experience Guidelines - Settings",
           "menu_title": "Settings",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/settings.md",
-          "hash": "afd4d9d154e1eb0c36cb386a500ec213e1839bde0531f7894b6e2ef01c15f0b3",
+          "hash": "a98aad69fdcb9d601faced6b5ce71e5fa6aad59abd0c87f2449d7e520daf4ef2",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/settings.md",
           "id": "6dea5dda4ebbd3a320383267fd2099be140aeb46"
         },
@@ -729,7 +756,7 @@
           "post_title": "User Experience Guidelines - Payments Onboarding and Setup",
           "menu_title": "Payments Onboarding and Setup",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/payments-design-guidelines.md",
-          "hash": "90152a1d978f6e2f0804a00c447b2a8da65c336ef0979de2b2a4f7936780dfa8",
+          "hash": "29b28b670cf6cbffde1bd70229197a2a4b3e8846b27608f25b35148d8ece4447",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/payments-design-guidelines.md",
           "id": "7102e90d66b86ce2bdacc86d3e631a78a35738ca"
         },
@@ -737,7 +764,7 @@
           "post_title": "User Experience Guidelines - Onboarding",
           "menu_title": "Onboarding",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/onboarding.md",
-          "hash": "f2cd1abc171e70c479e1a736081e30ad9c52f6aff2ae8f0b8b11b901ba00e9cf",
+          "hash": "cc694344870968233c1442b06f1a95deaca07125bb6f83bfddd7376787d70de6",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/onboarding.md",
           "id": "0a68990f3a0c3ddc1994372f7f35389340ca8ff5"
         },
@@ -745,7 +772,7 @@
           "post_title": "User Experience Guidelines - Notices",
           "menu_title": "Notices",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/notices.md",
-          "hash": "0c461061985aef302b9c785cdcb4e45e5f8e325a425ca685dca90b5bdef9d7f3",
+          "hash": "89045d275b9f84a4a53810128c5eca19a4db8d73684afa31e876c2f4dd2cdf30",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/notices.md",
           "id": "8c5de3126ef21043cfc064a6c7105f7b64ff3ecf"
         },
@@ -753,7 +780,7 @@
           "post_title": "User Experience Guidelines - Navigation",
           "menu_title": "Navigation",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/navigation.md",
-          "hash": "20f94bf5fdfe27173bf776eb46a6d5ca9261e6ed16143df927936482262cb11d",
+          "hash": "f81a55192902711762d368717eed465cd8ee11de0d37b8c2612bb627c5bbee9b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/navigation.md",
           "id": "c86422f15d038c5142c31f2c05b82b79c938142b"
         },
@@ -761,14 +788,14 @@
           "post_title": "User Experience Guidelines - Colors",
           "menu_title": "Colors",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/colors.md",
-          "hash": "9865f7752b28116b731e7380102616e476559a751445c0e3cf20ef0b04ee83fe",
+          "hash": "8b42290d4faa79f00ea849a63f6624947fa850219e547061ff92d977d8df27e9",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/colors.md",
           "id": "b1a24b922f58b754e87ea5a1b83ec54a946a795a"
         },
         {
-          "post_title": "User Experience Best practices",
+          "post_title": "User Experience Best Practices",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/best-practices.md",
-          "hash": "c641148c99c6f9c63fcc6a8381d3fc21deeb2df83614dfdffa01b2f5c85e580f",
+          "hash": "ef0e5f5be22f627ec091df9b60497c2415346ceba9cb7d33c86cc9d26bbe2ef4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/best-practices.md",
           "id": "dd2c00da004cf6dfa2366c0d01928c84a2ae016a"
         },
@@ -776,7 +803,7 @@
           "post_title": "User Experience Guidelines - Accessibility",
           "menu_title": "Accessibility",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/accessibility.md",
-          "hash": "d5a2e50c98202e2a0e36dd3f7809c02a9e02134cf31be9b3d7f9158791331ee4",
+          "hash": "80e3799ed54790a5f7565f23ef97d73f18c8f7ef6091656340ca1dc0176e8b5c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/accessibility.md",
           "id": "f16c7944f4acdaf71c1719df6ac0440738670070"
         }
@@ -806,5 +833,5 @@
       "categories": []
     }
   ],
-  "hash": "517e90cb48ecbb2373167c64e9a07c08c5dca6e72322462ec82a3e136bf37d2d"
+  "hash": "6baa0b5197356cdd4bc009decb77160a03877f2ecdda9017ad9a6dcd655d552c"
 }
