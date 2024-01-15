@@ -191,7 +191,7 @@ class DefaultPaymentGateways {
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/eway.png',
 				'plugins'             => array( 'woocommerce-gateway-eway' ),
 				'is_visible'          => false,
-				'category_other'      => false,
+				'category_other'      => array(),
 				'category_additional' => array(),
 			),
 			array(
