@@ -108,6 +108,9 @@
 	min-height: 248px;
 	width: 100%;
 	align-items: center;
+	padding-left: 50px;
+	padding-right: 40px;
+	position: relative;
 
 	&.offline-banner {
 		background: rgba(242, 237, 255, 0.6) url(../assets/images/intro-banner-offline.svg) no-repeat center right;
@@ -115,45 +118,39 @@
 		background-position-y: 29px;
 	}
 
-	&.existing-ai-theme-banner {
+	&.existing-ai-theme-banner, &.existing-no-ai-theme-banner {
 		background: rgba(246, 247, 247, 1);
 
 		.woocommerce-customize-store-banner-content {
 			width: 100%;
 			display: flex;
-		}
+			justify-content: space-between;
 
-		.woocommerce-block-preview-container {
-			flex: 1;
-			position: relative;
-		}
-
-		.iframe-container {
-			pointer-events: none;
-			overflow: hidden;
-			position: absolute;
-			top: -24px;
-			right: 15%;
+			.banner-actions {
+				width: 50%;
+			}
 		}
 
 		.preview-iframe {
-			width: 480px;
-			height: 301px;
-			zoom: 2.5;
+			pointer-events: none;
+			position: absolute;
+			bottom: -497px;
+			right: 50px;
+			width: 1100px;
+			height: 710px;
 			-moz-transform: scale(0.3);
 			-moz-transform-origin: top right;
 			-o-transform: scale(0.3);
 			-o-transform-origin: top right;
 			-webkit-transform: scale(0.3);
 			-webkit-transform-origin: top right;
-			border-top-left-radius: 8px;
-			border-top-right-radius: 8px;
+			border-top-left-radius: 28px;
+			border-top-right-radius: 28px;
 		}
 	}
 
 	.woocommerce-customize-store-banner-content {
 		width: 450px;
-		margin-left: 50px;
 
 		@media only screen and (min-width: 1400px) {
 			width: 700px;

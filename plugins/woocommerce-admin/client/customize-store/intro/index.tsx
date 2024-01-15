@@ -31,6 +31,7 @@ import {
 	ExistingAiThemeBanner,
 	ExistingThemeBanner,
 	NoAIBanner,
+	ExistingNoAiThemeBanner,
 } from './intro-banners';
 
 export type events =
@@ -54,6 +55,7 @@ const BANNER_COMPONENTS = {
 	'existing-ai-theme': ExistingAiThemeBanner,
 	'existing-theme': ExistingThemeBanner,
 	[ FlowType.noAI ]: NoAIBanner,
+	'existing-no-ai-theme': ExistingNoAiThemeBanner,
 	default: DefaultBanner,
 };
 
@@ -86,8 +88,13 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
 	switch ( true ) {
-		case context.flowType === FlowType.noAI:
+		case context.flowType === FlowType.noAI &&
+			! customizeStoreTaskCompleted:
 			bannerStatus = FlowType.noAI;
+			break;
+		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
+			console.log( 'foo' );
+			bannerStatus = 'existing-no-ai-theme';
 			break;
 		case isNetworkOffline:
 			bannerStatus = 'network-offline';

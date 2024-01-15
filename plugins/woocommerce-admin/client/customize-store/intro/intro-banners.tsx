@@ -26,6 +26,7 @@ export const BaseIntroBanner = ( {
 	bannerButtonOnClick,
 	bannerButtonText,
 	secondaryButton,
+	previewBanner,
 	children,
 }: {
 	bannerTitle: string;
@@ -36,6 +37,7 @@ export const BaseIntroBanner = ( {
 	bannerButtonOnClick?: () => void;
 	bannerButtonText?: string;
 	secondaryButton?: React.ReactNode;
+	previewBanner: React.ReactNode;
 	children?: React.ReactNode;
 } ) => {
 	return (
@@ -82,6 +84,7 @@ export const BaseIntroBanner = ( {
 				</div>
 				{ children }
 			</div>
+			{ previewBanner }
 		</div>
 	);
 };
@@ -287,5 +290,39 @@ export const ExistingAiThemeBanner = ( {
 				</div>
 			</div>
 		</BaseIntroBanner>
+	);
+};
+
+export const ExistingNoAiThemeBanner = ( {
+	setOpenDesignChangeWarningModal,
+}: {
+	setOpenDesignChangeWarningModal: ( arg0: boolean ) => void;
+} ) => {
+	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
+
+	return (
+		<BaseIntroBanner
+			bannerTitle={ __( 'Edit your custom theme', 'woocommerce' ) }
+			bannerText={ __(
+				'Continue to customize your store using the store designer. Change your color palette, fonts, page layouts, and more.',
+				'woocommerce'
+			) }
+			bannerClass="existing-no-ai-theme-banner"
+			buttonIsLink={ false }
+			bannerButtonOnClick={ () => {
+				recordEvent( 'customize_your_store_intro_customize_click' );
+				navigateOrParent(
+					window,
+					getNewPath(
+						{ customizing: true },
+						'/customize-store/assembler-hub',
+						{}
+					)
+				);
+			} }
+			bannerButtonText={ __( 'Customize your theme', 'woocommerce' ) }
+			showAIDisclaimer={ false }
+			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
+		></BaseIntroBanner>
 	);
 };
