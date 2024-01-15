@@ -268,7 +268,10 @@
 		"webpack-cli": "5.1.4",
 		"wireit": "^0.14.1",
 		"wp-types": "3.63.0",
-		"zenhub-api": "0.2.0"
+		"zenhub-api": "0.2.0",
+		"promptfoo": "0.33.1",
+		"node-fetch": "3.3.2",
+		"node-html-parser": " 6.1.11"
 	},
 	"engines": {
 		"node": "^16.14.1",

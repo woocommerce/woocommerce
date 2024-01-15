@@ -1,0 +1,35 @@
+# Load prompts
+prompts: [prompt1.txt, prompt2.txt, prompt3.txt]
+outputPath: './history.html'
+
+# Set an LLM
+providers: ['exec: node ./index.mjs']
+
+# These test properties are applied to every test
+defaultTest:
+    options:
+        providers:
+            - id: openai:gpt-3.5-turbo
+              config:
+                  apiKey: OPEN_AI_API_KEY
+
+tests:
+    - description: 'Ensure that the Products matches with the prompt'
+      options:
+          postprocess: |
+              const products = JSON.parse(output).products;
+              return products
+
+      assert:
+          - type: model-graded-closedqa
+            value: is a JSON object with an array of products. Ensure that each product has a name that matches the company business. Ensure that the price matches with the product.
+
+    - description: 'Ensure that the Patterns matches with the prompt'
+      options:
+          postprocess: |
+              const patterns = JSON.parse(output).patterns;
+              return JSON.stringify(patterns)
+
+      assert:
+          - type: model-graded-closedqa
+            value: is a JSON object with an array of strings that match the company business or invite the user to buy a product. Ensure that the patterns match with the company business.
