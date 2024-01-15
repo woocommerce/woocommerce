@@ -752,7 +752,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 						'post_id'    => $order->get_id(),
 						'meta_key'   => $meta_data->key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 						'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-					)
+					),
+					array( '%d', '%s', '%s' )
 				);
 
 				if ( ! $result ) {
