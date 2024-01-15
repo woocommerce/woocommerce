@@ -328,58 +328,75 @@ class CheckoutFields {
 			}
 		}
 
-		/**
-		 * Handle Select fields.
-		 */
 		if ( 'select' === $type ) {
-			if ( empty( $options['options'] ) || ! is_array( $options['options'] ) ) {
-				$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'Fields of type "select" must have an array of "options".' );
-				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			$result = $this->process_select_field( $options, $field_data );
+
+			// $result will be false if an error that will prevent the field being registered is encountered.
+			if ( false === $result ) {
 				return;
 			}
-
-			// Select fields are always required. Log a warning if it's set explicitly as false.
-			$field_data['required'] = true;
-			if ( isset( $options['required'] ) && false === $options['required'] ) {
-				$message = sprintf( 'Registering select fields as optional is not supported. "%s" will be registered as required.', $id );
-				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			}
-
-			$cleaned_options = array();
-			$added_values    = array();
-
-			// Check all entries in $options['options'] has a key and value member.
-			foreach ( $options['options'] as $option ) {
-				if ( ! isset( $option['value'] ) || ! isset( $option['label'] ) ) {
-					$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'Fields of type "select" must have an array of "options" and each option must contain a "value" and "label" member.' );
-					_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-					return;
-				}
-
-				$sanitized_value = sanitize_text_field( $option['value'] );
-				$sanitized_label = sanitize_text_field( $option['label'] );
-
-				if ( in_array( $sanitized_value, $added_values, true ) ) {
-					$message = sprintf( 'Duplicate key found when registering field with id: "%s". The value in each option of "select" fields must be unique. Duplicate value "%s" found. The duplicate key will be removed.', $id, $sanitized_value );
-					_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-					continue;
-				}
-
-				$added_values[] = $sanitized_value;
-
-				$cleaned_options[] = array(
-					'value' => $sanitized_value,
-					'label' => $sanitized_label,
-				);
-			}
-
-			$field_data['options'] = $cleaned_options;
+			$field_data = $result;
 		}
 
 		// Insert new field into the correct location array.
-		$this->additional_fields[ $id ] = $field_data;
-
+		$this->additional_fields[ $id ]        = $field_data;
 		$this->fields_locations[ $location ][] = $id;
+	}
+
+	/**
+	 * Processes the options for a select field and returns the new field_options array.
+	 *
+	 * @param array $options     The options supplied during field registration.
+	 * @param array $field_data  The field data array to be updated.
+	 *
+	 * @return array|false The updated $field_data array or false if an error was encountered.
+	 */
+	private function process_select_field( $options, $field_data ) {
+		$id = $options['id'];
+
+		if ( empty( $options['options'] ) || ! is_array( $options['options'] ) ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'Fields of type "select" must have an array of "options".' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		// Select fields are always required. Log a warning if it's set explicitly as false.
+		$field_data['required'] = true;
+		if ( isset( $options['required'] ) && false === $options['required'] ) {
+			$message = sprintf( 'Registering select fields as optional is not supported. "%s" will be registered as required.', $id );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+		}
+
+		$cleaned_options = array();
+		$added_values    = array();
+
+		// Check all entries in $options['options'] has a key and value member.
+		foreach ( $options['options'] as $option ) {
+			if ( ! isset( $option['value'] ) || ! isset( $option['label'] ) ) {
+				$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'Fields of type "select" must have an array of "options" and each option must contain a "value" and "label" member.' );
+				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+				return false;
+			}
+
+			$sanitized_value = sanitize_text_field( $option['value'] );
+			$sanitized_label = sanitize_text_field( $option['label'] );
+
+			if ( in_array( $sanitized_value, $added_values, true ) ) {
+				$message = sprintf( 'Duplicate key found when registering field with id: "%s". The value in each option of "select" fields must be unique. Duplicate value "%s" found. The duplicate key will be removed.', $id, $sanitized_value );
+				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+				continue;
+			}
+
+			$added_values[] = $sanitized_value;
+
+			$cleaned_options[] = array(
+				'value' => $sanitized_value,
+				'label' => $sanitized_label,
+			);
+		}
+
+		$field_data['options'] = $cleaned_options;
+		return $field_data;
 	}
 
 	/**
