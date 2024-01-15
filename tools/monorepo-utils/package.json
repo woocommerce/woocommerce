@@ -6,13 +6,20 @@
 	"homepage": "https://github.com/woocommerce/woocommerce",
 	"license": "GPLv2",
 	"repository": "woocommerce/woocommerce",
+	"private": true,
+	"bin": {
+		"monorepo-utils": "./bin/run"
+	},
 	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"files": [
+		"bin",
+		"dist",
+		"fonts"
+	],
 	"scripts": {
-		"build": "tsc",
-		"postinstall": "pnpm build",
+		"build": "webpack --config webpack.config.js && replace '\r\n' '\n' fonts/Standard.flf",
 		"lint": "eslint . --ext .ts",
-		"start": "tsc --watch",
+		"start": "webpack --config webpack.config.js --watch",
 		"test": "pnpm test:js",
 		"test:js": "jest"
 	},
@@ -35,6 +42,7 @@
 		"gray-matter": "^4.0.3",
 		"js-yaml": "^4.1.0",
 		"luxon": "^3.4.4",
+		"minimatch": "^9.0.3",
 		"octokit": "^2.1.0",
 		"ora": "^5.4.1",
 		"promptly": "^3.2.0",
@@ -46,14 +54,38 @@
 		"@types/jest": "^27.5.2",
 		"@types/node": "^16.18.68",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"copy-webpack-plugin": "^9.1.0",
 		"eslint": "^8.55.0",
 		"jest": "~27.5.1",
+		"replace": "^1.2.2",
 		"ts-jest": "~29.1.1",
+		"ts-loader": "^9.5.1",
 		"typescript": "^5.3.3",
+		"webpack": "^5.89.0",
+		"webpack-cli": "^3.3.12",
 		"wireit": "0.14.1"
 	},
 	"engines": {
 		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.ts"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"tsconfig.json",
+						"src/**/*.ts"
+					]
+				}
+			]
+		}
 	}
 }
