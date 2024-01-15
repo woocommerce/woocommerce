@@ -14,17 +14,17 @@ From WooCommerce 8.2, released on October 2023, [High-Performance Order Storage 
 
 Bringing High-Performance Order Storage (HPOS) to WooCommerce improves these three essential properties for eCommerce stores.
 
-1. **Scalability**
+### Scalability
 
 The rise in the number of customers and customer orders increases the load on your store’s database - making it difficult to handle customer order requests and deliver a seamless user experience.
 
 With High-Performance Order Storage, you get dedicated tables for data like orders and order addresses and thus dedicated indexes which results in fewer read/write operations and fewer busy tables. This feature enables eCommerce stores of all shapes and sizes to scale their business to their maximum potential - without expert intervention.
 
-2. **Reliability**
+### Reliability
 
 High-Performance Order Storage makes implementing and restoring targeted data backup easier. You’ll no longer need to worry about losing orders, inventory numbers, or client information with reliable backup in these custom order tables. It’ll also facilitate implementing read/write locks and prevent race conditions.
 
-3. **Simplicity**
+### Simplicity
 
 You no longer have to go through a single huge database to locate underlying data and WooCommerce entries.
 
