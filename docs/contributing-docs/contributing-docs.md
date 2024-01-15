@@ -109,9 +109,10 @@ You don't need to regenerate the manifest if you only make changes to a page's c
 These instructions presume you're currently have your `docs/` branch open and you've made your required changes to any files.
 
 1. In your command line, navigate to your repo's folder.
+2. Run `pnpm --filter=monorepo-utils install`.
 2. Run `pnpm --filter=monorepo-utils build`.
 3. Run `pnpm utils md-docs create docs woocommerce`.
-4. A file called `manifest.json` will appear in your repo's root. Rename this folder to `docs-manifest.json` and move it into the `/docs` folder. You'll need to overwrite the existing `/docs/docs-manifest.json` file in the process.
+4. A file called `manifest.json` will appear in your repo's root. Rename this file to `docs-manifest.json` and move it into the `/docs` folder. You'll need to overwrite the existing `/docs/docs-manifest.json` file in the process.
 
 If you are a non-technical contributor who isn't experienced with command line tools, we're still happy to receive your contributions. If you're unable to include an updated manifest, please ensure that you mention this in your pull request's description.
 
