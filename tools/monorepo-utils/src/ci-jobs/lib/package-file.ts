@@ -7,6 +7,8 @@ import path from 'node:path';
 export interface PackageJSON {
 	name: string;
 	config?: { ci?: any };
+	dependencies?: { [ key: string ]: string };
+	devDependencies?: { [ key: string ]: string };
 }
 
 // We're going to store a cache of package files so that we don't load
