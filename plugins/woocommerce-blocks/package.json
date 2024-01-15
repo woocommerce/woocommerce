@@ -355,7 +355,10 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "assets/**/*{js,ts,tsx,scss}"
+				"changes": [
+					"assets/**/*{js,ts,tsx,scss}",
+					"packages/**/*.{js,ts,tsx,scss}"
+				]
 			},
 			"tests": [
 				{
@@ -366,7 +369,8 @@
 						"webpack.config.js",
 						"babel.config.js",
 						"tsconfig.json",
-						"assets/**/*{js,ts,tsx,scss}"
+						"assets/**/*.{js,ts,tsx,scss}",
+						"packages/**/*.{js,ts,tsx,scss}"
 					],
 					"cascade": "test:js"
 				}

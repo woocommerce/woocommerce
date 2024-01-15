@@ -125,22 +125,20 @@ export function ProductListBlockEdit( {
 	return (
 		<div { ...blockProps }>
 			<SectionActions>
-				<div className="wp-block-woocommerce-product-list-field__header">
-					{ ! isLoading && groupedProducts.length > 0 && (
-						<Button
-							onClick={ handleReorderProductsButtonClick }
-							variant="tertiary"
-						>
-							{ __( 'Reorder', 'woocommerce' ) }
-						</Button>
-					) }
+				{ ! isLoading && groupedProducts.length > 0 && (
 					<Button
-						onClick={ handleAddProductsButtonClick }
-						variant="secondary"
+						onClick={ handleReorderProductsButtonClick }
+						variant="tertiary"
 					>
-						{ __( 'Add products', 'woocommerce' ) }
+						{ __( 'Reorder', 'woocommerce' ) }
 					</Button>
-				</div>
+				) }
+				<Button
+					onClick={ handleAddProductsButtonClick }
+					variant="secondary"
+				>
+					{ __( 'Add products', 'woocommerce' ) }
+				</Button>
 			</SectionActions>
 
 			<div className="wp-block-woocommerce-product-list-field__body">
