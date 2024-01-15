@@ -337,7 +337,8 @@ test.describe( 'Restricted Coupons', () => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'expired-coupon' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		await expect( page.getByText( 'This coupon has expired.' ) ).toBeVisible();
@@ -347,7 +348,8 @@ test.describe( 'Restricted Coupons', () => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'min-max-spend-individual' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		// failed because we need to have at least $50 in cart (single product is only $20)
@@ -359,13 +361,15 @@ test.describe( 'Restricted Coupons', () => {
 			await page.waitForLoadState( 'networkidle' );
 		}
 		// passed because we're between 50 and 200 dollars
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'min-max-spend-individual' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		await expect( page.getByText( 'Coupon code applied successfully.' ) ).toBeVisible();
 
 		// fail because the min-max coupon can only be used by itself
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'no-sale-use-limit' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		await expect( page.getByText( 'Sorry, coupon "min-max-spend-individual" has already been applied and cannot be used in conjunction with other coupons.' ) ).toBeVisible();
@@ -376,18 +380,17 @@ test.describe( 'Restricted Coupons', () => {
 			await page.waitForLoadState( 'networkidle' );
 		}
 		// failed because we're over 200 dollars
-		await page.goto( '/cart/' );
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'min-max-spend-individual' );
-		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
-		await expect( page.getByText( 'The maximum spend for this coupon is $200.00.' ) ).toBeVisible();
-		await expect( page.getByText( 'Sorry, it seems the coupon "min-max-spend-individual" is invalid - it has now been removed from your order.' ) ).toBeVisible();
+		await page.goto( '/checkout/' );
+		await expect( page.getByText( 'There are some issues with the items in your cart. Please go back to the cart page and resolve these issues before checking out.' ) ).toBeVisible();
+		await page.getByRole( 'link', { name: 'Return to cart' } ).click();
 	} );
 
 	test( 'coupon cannot be used on sale item', async( { page } ) => {
 		await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'no-sale-use-limit' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		// failed because this product is on sale
@@ -432,7 +435,8 @@ test.describe( 'Restricted Coupons', () => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'no-sale-use-limit' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		// failed because this coupon code has been used too much
@@ -447,7 +451,8 @@ test.describe( 'Restricted Coupons', () => {
 		await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'product-and-category-included' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		// failed because this product is not included for coupon
@@ -458,7 +463,8 @@ test.describe( 'Restricted Coupons', () => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'product-and-category-included' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		// succeeded
@@ -469,7 +475,8 @@ test.describe( 'Restricted Coupons', () => {
 		await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'product-and-category-included' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		// failed because this product is excluded from coupon
@@ -480,7 +487,8 @@ test.describe( 'Restricted Coupons', () => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'product-and-category-included' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		// succeeded
@@ -491,12 +499,12 @@ test.describe( 'Restricted Coupons', () => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		// succeeded so far because we don't know who the customr is
 		await expect( page.getByText( 'Coupon code applied successfully.' ) ).toBeVisible();
-		await page.getByRole( 'link', { name: 'Proceed to checkout' } ).click();
 
 		await page.getByLabel( 'First name' ).fill( 'Marge' );
 		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
@@ -521,11 +529,11 @@ test.describe( 'Restricted Coupons', () => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		await expect( page.getByText( 'Coupon code applied successfully.' ) ).toBeVisible();
-		await page.getByRole( 'link', { name: 'Proceed to checkout' } ).click();
 
 		await page.getByLabel( 'First name' ).fill( 'Homer' );
 		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
@@ -545,12 +553,12 @@ test.describe( 'Restricted Coupons', () => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.goto( '/cart/' );
+		await page.goto( '/checkout/' );
+		await page.getByRole( 'link', { name: 'Click here to enter your code' } ).click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		// succeeded so far because we don't know who the customr is
 		await expect( page.getByText( 'Coupon code applied successfully.' ) ).toBeVisible();
-		await page.getByRole( 'link', { name: 'Proceed to checkout' } ).click();
 
 		await page.getByLabel( 'First name' ).fill( 'Homer' );
 		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
