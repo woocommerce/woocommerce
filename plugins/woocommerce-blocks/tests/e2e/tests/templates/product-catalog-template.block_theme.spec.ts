@@ -4,11 +4,11 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 const permalink = '/shop';
-const templateName = 'Product catalog';
+const templateName = 'Product Catalog';
 const templatePath = 'woocommerce/woocommerce//archive-product';
 const templateType = 'wp_template';
 
-test.describe( 'Product catalog template', async () => {
+test.describe( 'Product Catalog template', async () => {
 	test( 'can be modified and reverted', async ( {
 		admin,
 		editorUtils,
