@@ -987,7 +987,7 @@ WHERE
 	/**
 	 * Get unpaid orders last updated before the specified date.
 	 *
-	 * @param  int $date This timestamp is expected in the timezone in WordPress settings legacy reason, even though it's not a good practice.
+	 * @param  int $date This timestamp is expected in the timezone in WordPress settings for legacy reason, even though it's not a good practice.
 	 *
 	 * @return array Array of order IDs.
 	 */
