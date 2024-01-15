@@ -10,7 +10,7 @@ provide invaluable insights into assessing the ramifications of modifications an
 It's important to note that these flows remain dynamic, evolving in lockstep with the platform. They regularly undergo
 updates, additions, and re-prioritization to stay aligned with the evolving needs of our system.
 
-## Products 🛒
+## Products
 
 | Route    | Flow name                  | Endpoint                       | Test File                                                   |
 |----------|----------------------------|--------------------------------|-------------------------------------------------------------|
@@ -23,7 +23,7 @@ updates, additions, and re-prioritization to stay aligned with the evolving need
 | Products | Can update a product       | `/wp-json/wc/v3/products/{id}` | `tests/api-core-tests/tests/products/products-crud.test.js` |
 | Products | Can delete a product       | `/wp-json/wc/v3/products/{id}` | `tests/api-core-tests/tests/products/products-crud.test.js` |
 
-## Orders 📃
+## Orders
 
 | Route  | Flow name                                                        | Endpoints                    | Test File                                                 |
 |--------|------------------------------------------------------------------|------------------------------|-----------------------------------------------------------|
@@ -35,13 +35,13 @@ updates, additions, and re-prioritization to stay aligned with the evolving need
 | Orders | Can search orders                                                | `/wp-json/wc/v3/orders`      | `tests/api-core-tests/tests/orders/order-search.test.js`  |
 | Orders | Can add new Order complex – multiple product types & tax classes | `/wp-json/wc/v3/orders`      | `tests/api-core-tests/tests/orders/order-complex.test.js` |
 
-## Refunds 💸
+## Refunds
 
 | Route   | Flow name           | Endpoints                            | Test File                                           |
 |---------|---------------------|--------------------------------------|-----------------------------------------------------|
 | Refunds | Can refund an order | `/wp-json/wc/v3/orders/{id}/refunds` | `tests/api-core-tests/tests/refunds/refund.test.js` |
 
-## Coupons 🤑
+## Coupons
 
 | Route   | Flow name                 | Endpoints                            | Test File                                            |
 |---------|---------------------------|--------------------------------------|------------------------------------------------------|
@@ -50,7 +50,7 @@ updates, additions, and re-prioritization to stay aligned with the evolving need
 | Coupons | Can delete a coupon       | `/wp-json/wc/v3/coupons/{id}`        | `tests/api-core-tests/tests/coupons/coupons.test.js` |
 | Coupons | Can add a coupon to order | `/wp-json/wc/v3/orders/{id}/coupons` | `tests/api-core-tests/tests/coupons/coupons.test.js` |
 
-## Shipping 🚚
+## Shipping
 
 | Route            | Flow name                                     | Endpoints                                    | Test File                                                    |
 |------------------|-----------------------------------------------|----------------------------------------------|--------------------------------------------------------------|
