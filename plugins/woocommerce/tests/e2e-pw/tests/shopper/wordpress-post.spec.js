@@ -5,7 +5,7 @@ test.describe('WordPress', async () => {
 
 	test.beforeEach(async ({page}) => {
 		await page.goto('hello-world/');
-		await expect(page.getByText('Hello world!')).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Hello world!' })).toBeVisible();
 	});
 
 	test('logged-in customer can comment on a post', async ({page}) => {
