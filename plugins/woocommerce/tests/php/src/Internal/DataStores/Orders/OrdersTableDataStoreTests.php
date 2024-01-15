@@ -1207,7 +1207,8 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_get_unpaid_orders(): void {
 		// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- Intentional usage since timezone is changed for this file.
-		$now = current_time( 'timestamp', 1 );
+		$now_gmt = current_time( 'timestamp', 1 );
+		$now_ist = current_time( 'timestamp', 0 ); // IST (Indian standard time) is 5.5 hours ahead of GMT and is set as timezone for this class.
 
 		// Create a few orders.
 		$orders_by_status = array(
@@ -1220,7 +1221,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 				$order = new \WC_Order();
 				$this->switch_data_store( $order, $this->sut );
 				$order->set_status( $order_status );
-				$order->set_date_modified( $now - DAY_IN_SECONDS );
+				$order->set_date_modified( $now_gmt - DAY_IN_SECONDS );
 				$order->save();
 
 				if ( ! $order->is_paid() ) {
@@ -1233,11 +1234,11 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( $orders_by_status['wc-completed'], $this->sut->get_order_count( 'wc-completed' ) );
 
 		// Find unpaid orders.
-		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now ) );
-		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now - HOUR_IN_SECONDS ) );
+		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now_ist ) );
+		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now_ist - HOUR_IN_SECONDS ) );
 
-		$this->assertCount( 0, $this->sut->get_unpaid_orders( $now - DAY_IN_SECONDS ) );
-
+		// No unpaid orders from before yesterday.
+		$this->assertCount( 0, $this->sut->get_unpaid_orders( $now_ist - DAY_IN_SECONDS ) );
 	}
 
 	/**
