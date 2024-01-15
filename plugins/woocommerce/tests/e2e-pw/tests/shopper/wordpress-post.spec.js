@@ -12,12 +12,9 @@ test.describe('WordPress', async () => {
 
 	test('logged-in customer can comment on a post', async ({page}) => {
 		let comment = `This is a test comment ${Date.now()}`;
-		await page.locator('textarea#comment').fill(comment);
-		await page.locator('input#submit').click();
-		await expect(
-			page.locator('div.comment-content').last()
-		).toContainText(comment);
-		await page.pause();
+		await page.getByRole('textbox', {name: 'comment'}).fill(comment);
+		await page.getByRole('button', {name: 'Post Comment'}).click();
+		await expect(page.getByText(comment)).toBeVisible();
 	});
 });
 
