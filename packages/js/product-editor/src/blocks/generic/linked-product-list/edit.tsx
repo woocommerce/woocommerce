@@ -127,7 +127,6 @@ export function LinkedProductListBlockEdit( {
 	}
 
 	const [ isChoosingProducts, setIsChoosingProducts ] = useState( false );
-
 	async function chooseProductsForMe() {
 		dispatch( {
 			type: 'LOADING_LINKED_PRODUCTS',
@@ -171,6 +170,7 @@ export function LinkedProductListBlockEdit( {
 					icon={ reusableBlock }
 					onClick={ chooseProductsForMe }
 					isBusy={ isChoosingProducts }
+					disabled={ isChoosingProducts }
 				>
 					{ __( 'Choose products for me', 'woocommerce' ) }
 				</Button>
