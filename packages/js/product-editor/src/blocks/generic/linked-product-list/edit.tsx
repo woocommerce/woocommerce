@@ -39,6 +39,7 @@ import {
 	LinkedProductListBlockEmptyState,
 } from './types';
 import getRelatedProducts from '../../../utils/get-related-products';
+import { SectionActions } from '../../../components/block-slot-fill';
 
 export function EmptyStateImage( {
 	image,
@@ -157,7 +158,7 @@ export function LinkedProductListBlockEdit( {
 
 	return (
 		<div { ...blockProps }>
-			<div className="wp-block-woocommerce-product-linked-list-field__form-group-header">
+			<SectionActions>
 				<Button
 					variant="tertiary"
 					icon={ reusableBlock }
@@ -165,7 +166,7 @@ export function LinkedProductListBlockEdit( {
 				>
 					{ __( 'Choose products for me', 'woocommerce' ) }
 				</Button>
-			</div>
+			</SectionActions>
 
 			<div className="wp-block-woocommerce-product-linked-list-field__form-group-content">
 				<ProductSelect
