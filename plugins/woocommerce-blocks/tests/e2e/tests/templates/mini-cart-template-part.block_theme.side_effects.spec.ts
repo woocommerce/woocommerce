@@ -2,21 +2,31 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import {
+	BLOCK_THEME_SLUG,
+	BLOCK_THEME_WITH_TEMPLATES_SLUG,
+	cli,
+} from '@woocommerce/e2e-utils';
 
 const permalink = '/shop';
 const templateName = 'Mini-Cart';
-const templatePath = 'woocommerce/woocommerce//mini-cart';
+const templatePath = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//mini-cart`;
 const templateType = 'wp_template_part';
 const miniCartBlockName = 'woocommerce/mini-cart';
 
 test.describe( 'Mini-Cart template part', async () => {
-	test( 'can be modified and reverted', async ( {
+	test( "theme template has priority over WooCommerce's and can be modified", async ( {
 		admin,
 		frontendUtils,
 		editorUtils,
 		page,
 	} ) => {
-		// Verify the template can be edited.
+		// Switch to block theme with WooCommerce templates.
+		await cli(
+			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
+		);
+
+		// Edit the theme template part.
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
@@ -44,7 +54,7 @@ test.describe( 'Mini-Cart template part', async () => {
 			'Hello World in the template'
 		);
 
-		// Verify the edition can be reverted.
+		// Revert edition and verify the template from the theme is used.
 		await admin.visitAdminPage(
 			'site-editor.php',
 			`path=/${ templateType }/all`
@@ -54,8 +64,16 @@ test.describe( 'Mini-Cart template part', async () => {
 		await page.getByLabel( 'Add to cart' ).first().click();
 		block = await frontendUtils.getBlockByName( miniCartBlockName );
 		await block.click();
+		await expect( page.getByRole( 'dialog' ) ).toContainText(
+			'Mini-Cart template part loaded from theme'
+		);
 		await expect( page.getByRole( 'dialog' ) ).not.toContainText(
 			'Hello World in the template'
+		);
+
+		// Switch back to default block theme.
+		await cli(
+			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
 		);
 	} );
 } );
