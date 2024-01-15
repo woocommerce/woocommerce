@@ -3335,13 +3335,6 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order->set_date_modified( time() );
 		$order->save();
 
-		// There is a suspicion that syncing with `__PHP_Incomplete_Class` objects in meta causes a fatal error, so let's sync the HPOS order to the CPT store.
-		$order->get_data_store()->backfill_post_record( $order );
-
-		// Another possible way to force sync.
-		$orders = array( $order_id => $order );
-		$this->sut->read_multiple( $orders );
-
 		$order_results = wc_get_orders(
 			array(
 				'limit'        => 300,
