@@ -132,7 +132,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 					'woocommerce'
 			  )
 			: __(
-					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using our store designer',
+					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using our store designer.',
 					'woocommerce'
 			  );
 
