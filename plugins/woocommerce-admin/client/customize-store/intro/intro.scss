@@ -118,6 +118,10 @@
 		background-position-y: 29px;
 	}
 
+	&.no-ai-banner {
+		background: rgba(242, 237, 255, 0.6) url(../assets/images/intro-banner-no-ai.svg) no-repeat center right;
+	}
+
 	&.existing-ai-theme-banner, &.existing-no-ai-theme-banner {
 		background: rgba(246, 247, 247, 1);
 
@@ -176,7 +180,6 @@
 			line-height: 23.87px;
 			font-weight: 500;
 			color: #000;
-			margin-top: 28px;
 			padding: 0;
 		}
 
@@ -189,6 +192,7 @@
 				color: #757575;
 				font-size: 12px;
 				margin-top: 10px;
+				margin-bottom: 0;
 				line-height: 18px;
 
 				a {
