@@ -12,7 +12,7 @@ The lifecycle of a template is as follows:
 
 - [Creation](#creation)
 - [Block addition and removal](#block-addition-and-removal)
-  - [Actions](#actions)
+    - [Actions](#actions)
 - [Registration](#registration)
 - [Sent to client](#sent-to-client)
 - [Rendered on client](#rendered-on-client)
