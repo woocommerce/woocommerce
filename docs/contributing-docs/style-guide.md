@@ -1,5 +1,6 @@
 ---
-post_title: Technical documentation style guide
+post_title: Technical Documentation Style Guide
+menu_title: Style Guide
 ---
 
 This style guide is intended to provide guidelines for creating effective and user-friendly tutorials and how-to guides for WooCommerce technical documentation that will live in repo and be editable and iterative by open source contributors and WooCommerce teams.
