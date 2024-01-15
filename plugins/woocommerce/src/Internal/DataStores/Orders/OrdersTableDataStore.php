@@ -1248,7 +1248,7 @@ WHERE
 		$post_order_modified_date = is_null( $post_order_modified_date ) ? 0 : $post_order_modified_date->getTimestamp();
 
 		/**
-		 * We are here because there was difference in the post and order data even though sync is enabled. If the modified date in 
+		 * We are here because there was difference in the post and order data even though sync is enabled. If the modified date in
 		 * the post is the same or more recent than the modified date in the order object, we update the order object with the data
 		 * from the post. The opposite case is handled in 'backfill_post_record'. This mitigates the case where other plugins write
 		 * to the post or postmeta directly.
