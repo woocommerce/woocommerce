@@ -242,66 +242,17 @@ class CheckoutFields {
 	 * @return \WP_Error|void True if the field was registered, a WP_Error otherwise.
 	 */
 	public function register_checkout_field( $options ) {
-		if ( empty( $options['id'] ) ) {
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', 'A checkout field cannot be registered without an id.', '8.6.0' );
+
+		// Check the options and show warnings if they're not supplied. Return early if an error that would prevent registration is encountered.
+		$result = $this->validate_options( $options );
+		if ( false === $result ) {
 			return;
 		}
 
-		// Having fewer than 2 after exploding around a / means there is no namespace.
-		if ( count( explode( '/', $options['id'] ) ) < 2 ) {
-			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'A checkout field id must consist of namespace/name.' );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			return;
-		}
-
-		if ( empty( $options['label'] ) ) {
-			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field label is required.' );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			return;
-		}
-
-		if ( empty( $options['location'] ) ) {
-			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field location is required.' );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			return;
-		}
-
-		if ( ! in_array( $options['location'], array_keys( $this->fields_locations ), true ) ) {
-			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field location is invalid.' );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			return;
-		}
-
-		$type = 'text';
-		if ( ! empty( $options['type'] ) ) {
-			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
-				$message = sprintf(
-					'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
-					$options['id'],
-					$options['type'],
-					implode( ', ', $this->supported_field_types )
-				);
-				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-				return;
-			}
-			$type = $options['type'];
-		}
-
-		// At this point, the essentials fields and its location should be set.
-		$location = $options['location'];
+		// The above validate_options function ensures these options are valid. Type might not be supplied but then it defaults to text.
 		$id       = $options['id'];
-		// Check to see if field is already in the array.
-		if ( ! empty( $this->additional_fields[ $id ] ) || in_array( $id, $this->fields_locations[ $location ], true ) ) {
-			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'The field is already registered.' );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			return;
-		}
-
-		// Hidden fields are not supported right now. They will be registered with hidden => false.
-		if ( ! empty( $options['hidden'] ) && true === $options['hidden'] ) {
-			$message = sprintf( 'Registering a field with hidden set to true is not supported. The field "%s" will be registered as visible.', $id );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-		}
+		$location = $options['location'];
+		$type     = $options['type'] ?? 'text';
 
 		$field_data = array(
 			'label'         => $options['label'],
@@ -340,6 +291,77 @@ class CheckoutFields {
 		// Insert new field into the correct location array.
 		$this->additional_fields[ $id ]        = $field_data;
 		$this->fields_locations[ $location ][] = $id;
+	}
+
+	/**
+	 * Validates the "base" options (id, label, location) and shows warnings if they're not supplied.
+	 *
+	 * @param array $options The options supplied during field registration.
+	 * @return bool false if an error was encountered, true otherwise.
+	 */
+	private function validate_options( $options ) {
+		if ( empty( $options['id'] ) ) {
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', 'A checkout field cannot be registered without an id.', '8.6.0' );
+			return false;
+		}
+
+		// Having fewer than 2 after exploding around a / means there is no namespace.
+		if ( count( explode( '/', $options['id'] ) ) < 2 ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'A checkout field id must consist of namespace/name.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		if ( empty( $options['label'] ) ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field label is required.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		if ( empty( $options['location'] ) ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field location is required.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		if ( ! in_array( $options['location'], array_keys( $this->fields_locations ), true ) ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field location is invalid.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		// At this point, the essentials fields and its location should be set and valid.
+		$location = $options['location'];
+		$id       = $options['id'];
+
+		// Check to see if field is already in the array.
+		if ( ! empty( $this->additional_fields[ $id ] ) || in_array( $id, $this->fields_locations[ $location ], true ) ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'The field is already registered.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		// Hidden fields are not supported right now. They will be registered with hidden => false.
+		if ( ! empty( $options['hidden'] ) && true === $options['hidden'] ) {
+			$message = sprintf( 'Registering a field with hidden set to true is not supported. The field "%s" will be registered as visible.', $id );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			// Don't return here unlike the other fields because this is not an issue that will prevent registration.
+		}
+
+		if ( ! empty( $options['type'] ) ) {
+			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
+				$message = sprintf(
+					'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
+					$id,
+					$options['type'],
+					implode( ', ', $this->supported_field_types )
+				);
+				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
