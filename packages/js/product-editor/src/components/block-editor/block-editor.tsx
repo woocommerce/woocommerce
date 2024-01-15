@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
+import { Template, synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
@@ -149,7 +149,7 @@ export function BlockEditor( {
 
 		const blockInstances = synchronizeBlocksWithTemplate(
 			[],
-			layoutTemplate.blockTemplates
+			( layoutTemplate as { blockTemplates: Template[] } ).blockTemplates
 		);
 
 		onChange( blockInstances, {} );
