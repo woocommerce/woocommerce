@@ -70,50 +70,109 @@
 		"wp_org_slug": "woocommerce",
 		"build_step": "pnpm build:zip",
 		"ci": {
-			"name": "WP: latest",
-			"customCommands": {
-				"lint": "lint:php:changes:branch ${baseRef}",
-				"test:php": "test:php:env"
+			"lint": {
+				"command": "lint:php:changes:branch <baseRef>",
+				"changes": [
+					"composer.lock",
+					"includes/**/*.php",
+					"patterns/**/*.php",
+					"src/**/*.php",
+					"templates/**/*.php",
+					"tests/php/**/*.php",
+					"tests/unit-tests/**/*.php"
+				]
 			},
-			"testEnvCommand": "env:test",
-			"testEnvConfig": {
-				"wpVersion": "latest"
-			},
-			"additionalTasks": [
+			"tests": [
+				{
+					"name": "PHP",
+					"command": "test:php:env",
+					"changes": [
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
 				{
 					"name": "PHP 8.0",
-					"commandFilter": [
-						"test:php"
+					"command": "test:php:env",
+					"changes": [
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php"
 					],
-					"testEnvConfig": {
-						"phpVersion": "8.0"
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "8.0"
+						}
 					}
 				},
 				{
-					"name": "WP: nightly",
-					"commandFilter": [
-						"test:php"
+					"name": "PHP WP: nightly",
+					"command": "test:php:env",
+					"changes": [
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php"
 					],
-					"testEnvConfig": {
-						"wpVersion": "nightly"
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "nightly"
+						}
 					}
 				},
 				{
-					"name": "WP: latest-1",
-					"commandFilter": [
-						"test:php"
+					"name": "PHP WP: latest - 1",
+					"command": "test:php:env",
+					"changes": [
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php"
 					],
-					"testEnvConfig": {
-						"wpVersion": "latest-1"
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "latest-1"
+						}
 					}
 				},
 				{
-					"name": "WP: latest-2",
-					"commandFilter": [
-						"test:php"
+					"name": "PHP WP: latest - 2",
+					"command": "test:php:env",
+					"changes": [
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php"
 					],
-					"testEnvConfig": {
-						"wpVersion": "latest-2"
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "latest-2"
+						}
 					}
 				}
 			]
@@ -222,6 +281,7 @@
 				"node_modules/@woocommerce/e2e-core-tests/CHANGELOG.md",
 				"node_modules/@woocommerce/api/dist/",
 				"node_modules/@woocommerce/admin-e2e-tests/build",
+				"node_modules/@woocommerce/classic-assets/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/block-library/blocks.ini",
 				"node_modules/@woocommerce/admin-library/build",
