@@ -1,0 +1,3 @@
+Significance: patch
+Type: tweak
+Comment: Migrate the Mini Cart block e2e tests from Puppeteer to Playwright.
