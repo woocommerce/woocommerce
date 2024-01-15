@@ -28,7 +28,7 @@ Inside each subfolder you'll find various markdown files. When imported into the
 2. For each modification you'd like to make, create a new branch off `trunk` in your fork that starts with `docs/`. For example, if you're adding a doc about improving extension performance, you could call your branch `docs/improve-extension-performance`.
     * Note that you don't need to create a new branch for each file that you change. If you have lots of very similar modifications, you can make them all at once on a single branch.
 3. Create and modify docs as required. Make sure you reference the guidelines below when doing so.
-4. Verify whether you need to [regenerate the docs manifest](#). If you do, regenerate it.
+4. Verify whether you need to [regenerate the docs manifest](#10-regenerating-the-docs-manifest). If you do, regenerate it.
 5. Commit the changes you just made, then push them to your remote GitHub repo.
 6. [Open a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) that merges your branch with the WooCommerce monorepo's trunk branch.
     * To do this, when creating the pull request, set the `base repository` to `woocommerce/woocommerce`, the `base` to `trunk`, the `head repository` to `yourgithubusername/woocommerce` and the `compare` to the branch you created (eg: `docs/improve-extension-performance`).
@@ -39,7 +39,7 @@ Inside each subfolder you'll find various markdown files. When imported into the
 
 1. Create a new markdown file inside the category folder with a descriptive name. For example, to add a `Building Responsive Themes` page to the `Theme Development` category, you could create a file called `docs/theme-development/building-responsive-themes.md`. Note that the file name you choose will determine the document's URL. File names shouldn't include spaces.
 2. Referencing the instructions below, set the page's metadata at the very top of your file.
-3. Write your content below the metadata. If your content includes images, refer to the [including images](#) section of this guide.
+3. Write your content below the metadata. If your content includes images, refer to the [including images](#7-including-images-in-posts) section of this guide.
     * Please note that you don't need to include your page's title (eg: `# Building Responsive Themes`) in the content, as this will automatically be included.
 
 ### Using Front Matter
@@ -53,6 +53,7 @@ post_title: Your Post Title Goes Here
 ```
 
 Optionally, you can set additional metadata. The following fields are supported:
+
 ```yaml
 ---
 post_title: Your Post Title Goes Here

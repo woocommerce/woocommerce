@@ -65,10 +65,8 @@ Note: While we've outlined specific rules above, all other default linting rules
     - Use the ATX-style (`#`) for headers.
 
     ```markdown
----
-    # This is an H1
----
-    ## This is an H2
+      # This is an H1
+      ## This is an H2
     ```
 
    [Reference: MD003](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md#md003---heading-style)
@@ -77,8 +75,8 @@ Note: While we've outlined specific rules above, all other default linting rules
     - Indent list items with 4 spaces.
 
     ```markdown
-    - Item 1
-        - Subitem 1.1
+      - Item 1
+          - Subitem 1.1
     ```
 
    [Reference: MD007]([https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md)#md007---unordered-list-indentation)
