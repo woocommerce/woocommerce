@@ -16,7 +16,6 @@ type CustomFieldAttributes = Pick<
 	| 'disabled'
 	| 'readOnly'
 	| 'pattern'
-	| 'placeholder'
 	| 'title'
 	| 'autoCapitalize'
 	| 'autoComplete'
