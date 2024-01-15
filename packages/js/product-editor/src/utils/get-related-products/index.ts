@@ -10,6 +10,7 @@ type getRelatedProductsOptions = {
 };
 
 const POSTS_NUMBER_TO_RANDOMIZE = 30;
+const POSTS_NUMBER_TO_PICK = 5;
 
 /**
  * Return related products for a given product ID.
@@ -52,10 +53,10 @@ export default async function getRelatedProducts(
 
 		const lastPostIds = lastPost.map( ( post ) => post.id );
 
-		// Pick five random post IDs
+		// Pick POSTS_NUMBER_TO_PICK random post IDs
 		relatedProductIds = lastPostIds
-			?.sort( () => Math.random() - 0.5 )
-			.slice( 0, 5 );
+			.sort( () => Math.random() - 0.5 )
+			.slice( 0, POSTS_NUMBER_TO_PICK );
 	}
 
 	return ( await resolveSelect( 'core' ).getEntityRecords(
