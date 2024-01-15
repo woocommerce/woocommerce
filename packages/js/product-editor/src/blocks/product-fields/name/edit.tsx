@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { useWooBlockProps } from '@woocommerce/block-templates';
 import { useInstanceId } from '@wordpress/compose';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
@@ -18,10 +17,12 @@ import {
 	WCDataSelector,
 	Product,
 } from '@woocommerce/data';
+import { useWooBlockProps } from '@woocommerce/block-templates';
 import classNames from 'classnames';
 import {
 	Button,
 	BaseControl,
+	Tooltip,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
@@ -164,7 +165,14 @@ export function Edit( {
 	}
 
 	function renderFeaturedSuffix() {
-		return <Button icon={ starEmpty } onClick={ handleSuffixClick } />;
+		return (
+			<Tooltip
+				text={ __( 'Mark as featured', 'woocommerce' ) }
+				position="top center"
+			>
+				<Button icon={ starEmpty } onClick={ handleSuffixClick } />
+			</Tooltip>
+		);
 	}
 
 	return (
