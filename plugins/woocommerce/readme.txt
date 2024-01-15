@@ -175,6 +175,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Use GMT date when fetching orders to auto-cancel. [#43641](https://github.com/woocommerce/woocommerce/pull/43641)
 * Fix - Fix Mini-Cart total price disappearing when hovering or focusing the Mini-Cart button [#43550](https://github.com/woocommerce/woocommerce/pull/43550)
 * Fix - Fix product prices not being updated on scheduled automatically. [#43497](https://github.com/woocommerce/woocommerce/pull/43497)
 * Fix - Fixed a bug that prevented notice templates from being overwritten. [#43506](https://github.com/woocommerce/woocommerce/pull/43506)
