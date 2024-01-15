@@ -57,7 +57,7 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 								order,
 								fillProps
 							)
-					}
+						}
 					</Fill>
 				) ) }
 			</>
