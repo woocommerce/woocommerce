@@ -136,8 +136,8 @@ async function fetchSearchResults(
 							url: product.link,
 							// Due to backwards compatibility, raw_price is from search API, price is from featured API
 							price: product.raw_price ?? product.price,
-							averageRating: product.rating ?? 0,
-							reviewsCount: product.reviews_count ?? 0,
+							averageRating: product.rating ?? null,
+							reviewsCount: product.reviews_count ?? null,
 							isInstallable: product.is_installable,
 						};
 					}
@@ -324,16 +324,19 @@ function getInstallUrl( subscription: Subscription ): Promise< string > {
 	} );
 }
 
-function downloadProduct( subscription: Subscription ) {
-	return wpAjax( 'install-' + subscription.product_type, {
+function downloadProduct( productType: string, zipSlug: string ) {
+	return wpAjax( 'install-' + productType, {
 		// The slug prefix is required for the install to use WCCOM install filters.
-		slug: subscription.zip_slug,
+		slug: zipSlug,
 	} );
 }
 
 function installProduct( subscription: Subscription ): Promise< void > {
 	return connectProduct( subscription ).then( () => {
-		return downloadProduct( subscription )
+		return downloadProduct(
+			subscription.product_type,
+			subscription.zip_slug
+		)
 			.then( () => {
 				return activateProduct( subscription );
 			} )

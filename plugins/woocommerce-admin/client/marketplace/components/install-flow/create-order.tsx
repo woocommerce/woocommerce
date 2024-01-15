@@ -3,15 +3,13 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 
-/**
- * Internal dependencies
- */
-import { Subscription } from '../my-subscriptions/types';
-
 type CreateOrderSuccessResponse = {
 	success: true;
 	data: {
-		subscription: Subscription;
+		product_id: number;
+		zip_slug: string;
+		product_type: string;
+		documentation_url: string;
 	};
 };
 

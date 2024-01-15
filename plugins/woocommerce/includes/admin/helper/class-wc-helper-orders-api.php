@@ -33,12 +33,8 @@ class WC_Helper_Orders_API {
 		);
 	}
 
-	/**
-	 * The Extensions page can only be accessed by users with the manage_woocommerce
-	 * capability. So the API mimics that behavior.
-	 */
 	public static function get_permission() {
-		return current_user_can( 'manage_woocommerce' );
+		return WC_Helper_Subscriptions_API::get_permission();
 	}
 
 	public static function create_order( $request ) {
@@ -60,7 +56,7 @@ class WC_Helper_Orders_API {
 		} catch ( Exception $e ) {
 			return new \WP_REST_Response(
 				array(
-					'message' => 'Could not start the installation process. Reason: ' . $e->getMessage(),
+					'message' => __('Could not start the installation process. Reason: ', 'woocommerce' ) . $e->getMessage(),
 					'code'    => 'could-not-install',
 				),
 				500

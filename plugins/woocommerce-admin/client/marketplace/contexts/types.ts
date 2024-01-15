@@ -7,7 +7,6 @@ import { Options } from '@wordpress/notices';
  * Internal dependencies
  */
 import { Subscription } from '../components/my-subscriptions/types';
-import { Product } from '../components/product-list/types';
 
 export type MarketplaceContextType = {
 	isLoading: boolean;

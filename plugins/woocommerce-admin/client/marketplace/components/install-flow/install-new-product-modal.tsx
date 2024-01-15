@@ -17,7 +17,6 @@ import { Product } from '~/marketplace/components/product-list/types';
 import { installingStore } from '~/marketplace/contexts/install-store';
 import { downloadProduct } from '~/marketplace/utils/functions';
 import { createOrder } from './create-order';
-import { Subscription } from '../my-subscriptions/types';
 import { getAdminSetting } from '~/utils/admin-settings';
 import {
 	MARKETPLACE_PATH,
@@ -41,10 +40,10 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 	const [ installStatus, setInstallStatus ] = useState< InstallFlowStatus >(
 		InstallFlowStatus.notInstalled
 	);
-	const [ subscription, setSubscription ] = useState< Subscription >();
 	const [ product, setProduct ] = useState< Product >();
 	const [ installedProducts, setInstalledProducts ] = useState< string[] >();
 	const [ activateUrl, setActivateUrl ] = useState< string >();
+	const [ documentationUrl, setDocumentationUrl ] = useState< string >();
 	const [ showModal, setShowModal ] = useState< boolean >( false );
 	const [ notice, setNotice ] = useState< {
 		message: string;
@@ -158,33 +157,27 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 					throw response;
 				}
 
-				const subscriptionData = response.data.subscription;
+				dispatch( installingStore ).startInstalling( product.id );
+				setDocumentationUrl( response.data.documentation_url );
 
-				setSubscription( subscriptionData );
+				return downloadProduct(
+					response.data.product_type,
+					response.data.zip_slug
+				).then( ( downloadResponse ) => {
+					dispatch( installingStore ).stopInstalling( product.id );
 
-				dispatch( installingStore ).startInstalling(
-					subscriptionData.product_key
-				);
+					if ( downloadResponse.data.activateUrl ) {
+						setActivateUrl( downloadResponse.data.activateUrl );
 
-				return downloadProduct( subscriptionData ).then(
-					( downloadResponse ) => {
-						dispatch( installingStore ).stopInstalling(
-							subscriptionData.product_key
+						setInstallStatus(
+							InstallFlowStatus.installedCanActivate
 						);
-
-						if ( downloadResponse.data.activateUrl ) {
-							setActivateUrl( downloadResponse.data.activateUrl );
-
-							setInstallStatus(
-								InstallFlowStatus.installedCanActivate
-							);
-						} else {
-							setInstallStatus(
-								InstallFlowStatus.installedCannotActivate
-							);
-						}
+					} else {
+						setInstallStatus(
+							InstallFlowStatus.installedCannotActivate
+						);
 					}
-				);
+				} );
 			} )
 			.catch( ( error ) => {
 				/**
@@ -195,12 +188,14 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 					setNotice( {
 						status: 'warning',
 						message: __(
-							'Missing information. Redirecting to Woo.com to continue the installation.',
+							'We need your address to complete installing this product. We will redirect you to Woo.com checkout. Afterwards, you will be able to install the product.',
 							'woocommerce'
 						),
 					} );
 
-					window.location.href = error.data.redirect_location;
+					setTimeout( () => {
+						window.location.href = error.data.redirect_location;
+					}, 5000 );
 				} else {
 					setInstallStatus( InstallFlowStatus.installFailed );
 					setNotice( {
@@ -217,6 +212,9 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 	}
 
 	function onClose() {
+		setInstallStatus( InstallFlowStatus.notInstalled );
+		setNotice( undefined );
+
 		navigateTo( {
 			url: getNewPath(
 				{
@@ -255,7 +253,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 
 		if ( installStatus === InstallFlowStatus.installedCannotActivate ) {
 			return __(
-				'Extension successfully installed. Keep the momentum going and start setting up your extension.',
+				"Extension successfully installed but we can't activate it at the moment. Please visit the plugins page to see more.",
 				'woocommerce'
 			);
 		}
@@ -272,11 +270,11 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 
 	function secondaryButton(): React.ReactElement {
 		if ( installStatus === InstallFlowStatus.activated ) {
-			if ( subscription?.documentation_url ) {
+			if ( documentationUrl ) {
 				return (
 					<Button
 						variant="tertiary"
-						href={ subscription.documentation_url }
+						href={ documentationUrl }
 						className="woocommerce-marketplace__header-account-modal-button"
 						key={ 'docs' }
 					>
@@ -345,7 +343,10 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 				onClick={ orderAndInstall }
 				key={ 'install' }
 				isBusy={ installStatus === InstallFlowStatus.installing }
-				disabled={ installStatus === InstallFlowStatus.installing }
+				disabled={
+					installStatus === InstallFlowStatus.installing ||
+					installStatus === InstallFlowStatus.installFailed
+				}
 			>
 				{ __( 'Install', 'woocommerce' ) }
 			</Button>
@@ -370,6 +371,11 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 			style={ { borderRadius: 4 } }
 			overlayClassName="woocommerce-marketplace__header-account-modal-overlay"
 		>
+			{ notice && (
+				<Notice status={ notice.status } isDismissible={ false }>
+					{ notice.message }
+				</Notice>
+			) }
 			<p className="woocommerce-marketplace__header-account-modal-text">
 				{ getDescription() }
 			</p>
@@ -384,12 +390,6 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 					} }
 				/>
 			) }
-			{ notice && (
-				<Notice status={ notice.status } isDismissible={ false }>
-					{ notice.message }
-				</Notice>
-			) }
-
 			<ButtonGroup className="woocommerce-marketplace__header-account-modal-button-group">
 				{ secondaryButton() }
 				{ primaryButton() }

@@ -13,11 +13,7 @@ import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import { Product } from '~/marketplace/components/product-list/types';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-export interface ProductCardFooterProps {
-	product: Product;
-}
-
-function ProductCardFooter( props: ProductCardFooterProps ) {
+function ProductCardFooter( props: { product: Product } ) {
 	const { product } = props;
 	const [ isInstalled, setIsInstalled ] = useState( false );
 
