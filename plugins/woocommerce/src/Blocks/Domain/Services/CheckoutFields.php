@@ -316,16 +316,15 @@ class CheckoutFields {
 		);
 
 		$field_data['attributes'] = $this->register_field_attributes( $id, $options['attributes'] ?? [] );
-		/**
-		 * Handle Checkbox fields.
-		 */
+
 		if ( 'checkbox' === $type ) {
-			// Checkbox fields are always optional. Log a warning if it's set explicitly as true.
-			$field_data['required'] = false;
-			if ( isset( $options['required'] ) && true === $options['required'] ) {
-				$message = sprintf( 'Registering checkbox fields as required is not supported. "%s" will be registered as optional.', $id );
-				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			$result = $this->process_checkbox_field( $options, $field_data );
+
+			// $result will be false if an error that will prevent the field being registered is encountered.
+			if ( false === $result ) {
+				return;
 			}
+			$field_data = $result;
 		}
 
 		if ( 'select' === $type ) {
@@ -396,6 +395,28 @@ class CheckoutFields {
 		}
 
 		$field_data['options'] = $cleaned_options;
+		return $field_data;
+	}
+
+	/**
+	 * Processes the options for a checkbox field and returns the new field_options array.
+	 *
+	 * @param array $options     The options supplied during field registration.
+	 * @param array $field_data  The field data array to be updated.
+	 *
+	 * @return array|false The updated $field_data array or false if an error was encountered.
+	 */
+	private function process_checkbox_field( $options, $field_data ) {
+		$id = $options['id'];
+
+		// Checkbox fields are always optional. Log a warning if it's set explicitly as true.
+		$field_data['required'] = false;
+
+		if ( isset( $options['required'] ) && true === $options['required'] ) {
+			$message = sprintf( 'Registering checkbox fields as required is not supported. "%s" will be registered as optional.', $id );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+		}
+
 		return $field_data;
 	}
 
