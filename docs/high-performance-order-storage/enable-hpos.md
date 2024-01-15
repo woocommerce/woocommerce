@@ -6,22 +6,22 @@ From WooCommerce 8.2, released on October 2023, HPOS is enabled by default for n
 
 To activate High-Performance Order Storage, existing stores will first need to get both the posts and orders table in sync, which can be done by turning on the setting "**Enable compatibility mode (synchronizes orders to the posts table)**".
 
-1/ Navigate to  **WooCommerce > Settings > Advanced > Features**
-2/ Turn on the  **"Enable compatibility mode (synchronizes orders to the posts table)"**  setting.
+1. Navigate to **WooCommerce > Settings > Advanced > Features**
+2. Turn on the **"Enable compatibility mode (synchronizes orders to the posts table)"** setting.
 
 ![Enable HPOS Screen](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/New-Project-4.jpg)
 
-3/ Once this setting is activated, background actions will be scheduled.
+3. Once this setting is activated, background actions will be scheduled.
 
-- The action  `wc_schedule_pending_batch_process`  checks whether there are orders that need to be backfilled.
+- The action `wc_schedule_pending_batch_process` checks whether there are orders that need to be backfilled.
 - If there are, it schedules another action `wc_run_batch_process` that actually backfills the orders to post storage.
-- You can either wait for these actions to run on their own, which should be quite soon, or you can go to  **WooCommerce > Status > Scheduled Actions**, find the actions and click on the run button.
+- You can either wait for these actions to run on their own, which should be quite soon, or you can go to **WooCommerce > Status > Scheduled Actions**, find the actions and click on the run button.
 - The action will backfill 25 orders at a time, if there are more orders to be synced, then more actions will be scheduled as soon as the previous actions are completed.
 
 ![wc_schedule_pending_batch_process Screen](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/2.jpg)
 ![wc_run_batch_process Screen](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/New-Project-5.jpg)
 
-4/ After both tables are successfully synchronized, you'll be able to select the option to switch to High-Performance Order Storage (HPOS).
+4. After both tables are successfully synchronized, you'll be able to select the option to switch to High-Performance Order Storage (HPOS).
   
 - It is advisable to maintain compatibility mode for some time to ensure a seamless transition. In case of any issues, reverting to the post table can be done instantly.
 
