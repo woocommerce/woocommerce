@@ -13,7 +13,7 @@ menu_title: Settings
 
 **Avoid long, tedious lists of many different types of settings.** This overwhelms the user with so many options that the product feels unusable to them. Consider using separate pages or sections for different types of settings, or progressive disclosure that surfaces the most used settings and hides everything else.
 
-**Use impersonal titles and text**, eg. “Reports” instead of “My reports.” Exception: If referring to the user is necessary for understanding the setting, use the second person (“you”) rather than the first person (“I”).
+**Use impersonal titles and text**, eg. "Reports" instead of "My reports." Exception: If referring to the user is necessary for understanding the setting, use the second person ("you") rather than the first person ("I").
 
 **Include helper text** for settings or sections that are not easily understandable.
 

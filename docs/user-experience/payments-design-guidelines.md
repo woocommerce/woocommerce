@@ -85,7 +85,7 @@ The height of the button can adapt based on the needs of the theme.
 
 ### Button size
 
-Make payment buttons the same size, no bigger or smaller than other payment buttons, including the CTAs “Add to cart” and “Proceed to checkout”
+Make payment buttons the same size, no bigger or smaller than other payment buttons, including the CTAs "Add to cart" and "Proceed to checkout"
 
 ![Same button size.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Same-button-size.png)
 
@@ -169,13 +169,13 @@ Define the position and alignment of buttons in relationship to their container,
 
 ### Product pages
 
-Position payment buttons correctly in relation to “Add to Cart” in horizontal or vertical layout, place payment buttons to the right of or below the “Add to Cart” button.
+Position payment buttons correctly in relation to "Add to Cart" in horizontal or vertical layout, place payment buttons to the right of or below the "Add to Cart" button.
 
 ![Product page layout.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Product-page-layout.png)
 
 ### Cart
 
-Position payment buttons correctly in relation to “Proceed to checkout” buttons in vertical layout. Place payment buttons above the “Proceed to checkout” button. Do not place payment buttons below the button or in between.
+Position payment buttons correctly in relation to "Proceed to checkout" buttons in vertical layout. Place payment buttons above the "Proceed to checkout" button. Do not place payment buttons below the button or in between.
 
 ![Cart layout.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Cart-layout.png)
 

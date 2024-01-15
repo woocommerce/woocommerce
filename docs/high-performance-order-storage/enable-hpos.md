@@ -2,12 +2,12 @@
 post_title: How to enable HPOS
 ---
 
-From WooCommerce 8.2, released on October 2023, HPOS is enabled by default for new installations. Existing stores can switch to the “High-Performance Order Storage” from “WordPress Posts Storage” by following the below steps.
+From WooCommerce 8.2, released on October 2023, HPOS is enabled by default for new installations. Existing stores can switch to the "High-Performance Order Storage" from "WordPress Posts Storage" by following the below steps.
 
-To activate High-Performance Order Storage, existing stores will first need to get both the posts and orders table in sync, which can be done by turning on the setting “**Enable compatibility mode (synchronizes orders to the posts table)**“.
+To activate High-Performance Order Storage, existing stores will first need to get both the posts and orders table in sync, which can be done by turning on the setting "**Enable compatibility mode (synchronizes orders to the posts table)**".
 
 1/ Navigate to  **WooCommerce > Settings > Advanced > Features**
-2/ Turn on the  **“Enable compatibility mode (synchronizes orders to the posts table)”**  setting.
+2/ Turn on the  **"Enable compatibility mode (synchronizes orders to the posts table)"**  setting.
 
 ![Enable HPOS Screen](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/New-Project-4.jpg)
 
