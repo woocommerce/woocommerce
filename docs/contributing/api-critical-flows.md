@@ -1,5 +1,6 @@
 ---
 post_title: API critical flows
+tags: reference
 ---
 
 In our documentation, we've pinpointed the essential user flows within the WooCommerce Core API. These flows serve as
