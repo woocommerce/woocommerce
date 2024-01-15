@@ -3356,9 +3356,15 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		);
 		$meta          = $order_results[0]->get_meta( $meta_key );
 
-		// Unfortunately all the properties of `__PHP_Incomplete_Class` objects are private, so we can't test them directly.
 		$this->assertNotEmpty( $meta );
+		$this->assertEquals( 'object', gettype( $meta ) );
 		$this->assertEquals( '__PHP_Incomplete_Class', get_class( $meta ) );
+
+		$meta_object_vars = get_object_vars($meta);
+		$this->assertEquals( 'geoiprecord', $meta_object_vars['__PHP_Incomplete_Class_Name'] );
+		$this->assertEquals( 'Belgium', $meta_object_vars['country_name'] );
+		$this->assertEquals( 'Brussels', $meta_object_vars['city'] );
+		$this->assertEquals( 'Europe/Brussels', $meta_object_vars['timezone'] );
 	}
 
 }
