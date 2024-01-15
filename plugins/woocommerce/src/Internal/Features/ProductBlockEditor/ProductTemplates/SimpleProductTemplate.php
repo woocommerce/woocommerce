@@ -354,7 +354,6 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 							'value'   => 'url',
 							'message' => __( 'Link to the external product is an invalid URL.', 'woocommerce' ),
 						),
-						'required'    => __( 'Link to the external product is required.', 'woocommerce' ),
 					),
 				)
 			);

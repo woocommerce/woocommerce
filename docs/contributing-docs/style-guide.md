@@ -1,5 +1,6 @@
 ---
-post_title: Technical documentation style guide
+post_title: Technical Documentation Style Guide
+menu_title: Style Guide
 ---
 
 This style guide is intended to provide guidelines for creating effective and user-friendly tutorials and how-to guides for WooCommerce technical documentation that will live in repo and be editable and iterative by open source contributors and WooCommerce teams.
@@ -64,10 +65,8 @@ Note: While we've outlined specific rules above, all other default linting rules
     - Use the ATX-style (`#`) for headers.
 
     ```markdown
----
-    # This is an H1
----
-    ## This is an H2
+      # This is an H1
+      ## This is an H2
     ```
 
    [Reference: MD003](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md#md003---heading-style)
@@ -76,8 +75,8 @@ Note: While we've outlined specific rules above, all other default linting rules
     - Indent list items with 4 spaces.
 
     ```markdown
-    - Item 1
-        - Subitem 1.1
+      - Item 1
+          - Subitem 1.1
     ```
 
    [Reference: MD007]([https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md)#md007---unordered-list-indentation)
