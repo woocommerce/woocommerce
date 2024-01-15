@@ -1,18 +1,18 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { useWooBlockProps } from '@woocommerce/block-templates';
+import { useInstanceId } from '@wordpress/compose';
+import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	createElement,
 	Fragment,
 	useEffect,
 	useState,
 } from '@wordpress/element';
-
-import { useInstanceId } from '@wordpress/compose';
+import { __ } from '@wordpress/i18n';
+import { starEmpty } from '@wordpress/icons';
 import { cleanForSlug } from '@wordpress/url';
-import { useSelect, useDispatch } from '@wordpress/data';
-import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
@@ -33,13 +33,13 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { AUTO_DRAFT_NAME } from '../../../utils';
 import { EditProductLinkModal } from '../../../components/edit-product-link-modal';
+import { Label } from '../../../components/label/label';
 import { useValidation } from '../../../contexts/validation-context';
-import { NameBlockAttributes } from './types';
 import { useProductEdits } from '../../../hooks/use-product-edits';
 import { ProductEditorBlockEditProps } from '../../../types';
-import { Label } from '../../../components/label/label';
+import { AUTO_DRAFT_NAME } from '../../../utils';
+import { NameBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
@@ -156,6 +156,10 @@ export function Edit( {
 		}
 	}, [] );
 
+	function renderFeaturedSuffix() {
+		return <Button icon={ starEmpty } />;
+	}
+
 	return (
 		<>
 			<div { ...blockProps }>
@@ -189,6 +193,7 @@ export function Edit( {
 								validateName();
 							}
 						} }
+						suffix={ renderFeaturedSuffix() }
 					/>
 				</BaseControl>
 
