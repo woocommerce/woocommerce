@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use GMT date when fetching orders to auto-cancel.
