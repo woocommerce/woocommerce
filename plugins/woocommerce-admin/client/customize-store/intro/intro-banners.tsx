@@ -37,7 +37,7 @@ export const BaseIntroBanner = ( {
 	bannerButtonOnClick?: () => void;
 	bannerButtonText?: string;
 	secondaryButton?: React.ReactNode;
-	previewBanner: React.ReactNode;
+	previewBanner?: React.ReactNode;
 	children?: React.ReactNode;
 } ) => {
 	return (
