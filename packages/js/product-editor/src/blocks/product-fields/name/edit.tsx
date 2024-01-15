@@ -10,7 +10,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { starEmpty } from '@wordpress/icons';
+import { starEmpty, starFilled } from '@wordpress/icons';
 import { cleanForSlug } from '@wordpress/url';
 import {
 	PRODUCTS_STORE_NAME,
@@ -158,10 +158,11 @@ export function Edit( {
 		}
 	}, [] );
 
-	const [ _, setFeatured ] = useProductEntityProp< boolean >( 'featured' );
+	const [ featured, setFeatured ] =
+		useProductEntityProp< boolean >( 'featured' );
 
 	function handleSuffixClick() {
-		setFeatured( true );
+		setFeatured( ! featured );
 	}
 
 	function renderFeaturedSuffix() {
@@ -170,7 +171,19 @@ export function Edit( {
 				text={ __( 'Mark as featured', 'woocommerce' ) }
 				position="top center"
 			>
-				<Button icon={ starEmpty } onClick={ handleSuffixClick } />
+				{ featured ? (
+					<Button
+						icon={ starFilled }
+						aria-label={ __( 'Unmark as featured', 'woocommerce' ) }
+						onClick={ handleSuffixClick }
+					/>
+				) : (
+					<Button
+						icon={ starEmpty }
+						aria-label={ __( 'Mark as featured', 'woocommerce' ) }
+						onClick={ handleSuffixClick }
+					/>
+				) }
 			</Tooltip>
 		);
 	}
