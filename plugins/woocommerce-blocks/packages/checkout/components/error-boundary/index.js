@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element'
+import { Component } from '@wordpress/element';
 
 class CheckoutSlotErrorBoundary extends Component {
 	state = { errorMessage: '', hasError: false };
@@ -11,6 +11,7 @@ class CheckoutSlotErrorBoundary extends Component {
 			typeof error.statusText !== 'undefined' &&
 			typeof error.status !== 'undefined'
 		) {
+			// This is a comment.
 			return {
 				errorMessage: (
 					<>
