@@ -54,5 +54,13 @@
 		"*.(t|j)s?(x)": [
 			"eslint --fix"
 		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.js"
+			}
+		}
 	}
 }

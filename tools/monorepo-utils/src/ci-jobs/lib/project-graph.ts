@@ -8,7 +8,7 @@ import path from 'node:path';
  * Internal dependencies
  */
 import { CIConfig, parseCIConfig } from './config';
-import { loadPackage } from './package-file';
+import { PackageJSON, loadPackage } from './package-file';
 
 /**
  * A node in the project dependency graph.
@@ -21,6 +21,41 @@ export interface ProjectNode {
 }
 
 /**
+ * Parses the dependency list from the package file and returns the package names.
+ *
+ * @param {Object} packageFile The package file contents.
+ * @return {Array.<string>} The list of dependencies.
+ */
+function parseWorkspaceDependencies( packageFile: PackageJSON ): string[] {
+	const dependencyList: string[] = [];
+
+	// We're going to grab a list of all of the dependencies that are mapped
+	// to packages within our PNPM workspace. This will let us know which
+	// ones to map when we create the project graph.
+	const dependencyTypes = [ 'dependencies', 'devDependencies' ];
+	for ( const type of dependencyTypes ) {
+		if ( ! packageFile[ type ] ) {
+			continue;
+		}
+
+		for ( const dependency in packageFile[ type ] ) {
+			const constraint: string = packageFile[ type ][ dependency ];
+			if ( ! constraint.startsWith( 'workspace:' ) ) {
+				continue;
+			}
+
+			if ( dependencyList.includes( dependency ) ) {
+				continue;
+			}
+
+			dependencyList.push( dependency );
+		}
+	}
+
+	return dependencyList;
+}
+
+/**
  * Builds a dependency graph of all projects in the monorepo and returns the root node.
  */
 export function buildProjectGraph(): ProjectNode {
@@ -30,11 +65,15 @@ export function buildProjectGraph(): ProjectNode {
 		'..'
 	);
 
-	// PNPM provides us with a flat list of all projects
-	// in the workspace and their dependencies.
+	// PNPM provides us with a flat list of all projects in the workspace.
 	const workspace = JSON.parse(
 		execSync( 'pnpm -r list --only-projects --json', { encoding: 'utf-8' } )
 	);
+
+	// Unfortunately, PNPM does not provide us with any dependency information
+	// unless install has been run. In order to get around this we will pull
+	// the dependency information directly from the package files.
+	const packageDependencies: { [ name: string ]: string[] } = {};
 
 	// Start by building an object containing all of the nodes keyed by their project name.
 	// This will let us link them together quickly by iterating through the list of
@@ -69,6 +108,11 @@ export function buildProjectGraph(): ProjectNode {
 			rootNode = node;
 		}
 
+		// Track the dependencies for the project so that we can link
+		// them together after all of the nodes have been created.
+		packageDependencies[ project.name ] =
+			parseWorkspaceDependencies( packageFile );
+
 		nodes[ project.name ] = node;
 	}
 
@@ -80,18 +124,18 @@ export function buildProjectGraph(): ProjectNode {
 	// from the rootless list if they are added as a dependency.
 	const rootlessDependencies = workspace.map( ( project ) => project.name );
 
-	// Now we can scan through all of the nodes and hook them up to their respective dependency nodes.
-	for ( const project of workspace ) {
-		const node = nodes[ project.name ];
-		if ( project.dependencies ) {
-			for ( const dependency in project.dependencies ) {
-				node.dependencies.push( nodes[ dependency ] );
-			}
+	for ( const packageName in packageDependencies ) {
+		const node = nodes[ packageName ];
+		if ( ! node ) {
+			throw new Error( `Unable to find node for ${ packageName }` );
 		}
-		if ( project.devDependencies ) {
-			for ( const dependency in project.devDependencies ) {
-				node.dependencies.push( nodes[ dependency ] );
+
+		for ( const dependency of packageDependencies[ packageName ] ) {
+			if ( ! nodes[ dependency ] ) {
+				throw new Error( `Unable to find node for ${ dependency }` );
 			}
+
+			node.dependencies.push( nodes[ dependency ] );
 		}
 
 		// Mark any dependencies that have a dependent as not being rootless.

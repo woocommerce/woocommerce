@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+[Product Block Editor]: introduce `<SectionActions />` slot

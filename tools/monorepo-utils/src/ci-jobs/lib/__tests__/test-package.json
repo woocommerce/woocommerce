@@ -3,26 +3,26 @@
     "config": {
         "ci": {
             "lint": {
-                "changes": "src/.*\\.[jt]sx?$",
+				"changes": "src/**/*\\.{js,jsx,ts,tsx}",
                 "command": "foo"
             },
             "test": [
                 {
                     "name": "Minimal",
-                    "changes": ".*",
+                    "changes": "*",
                     "command": "foo"
                 },
                 {
                     "name": "Changes Array",
                     "changes": [
-                        "foo/.*",
-                        "bar/.*"
+                        "foo/**/*",
+                        "bar/**/*"
                     ],
                     "command": "foo"
                 },
                 {
                     "name": "Test Environment",
-                    "changes": "env/.*",
+                    "changes": "env/**/*",
                     "command": "bar",
                     "testEnv": {
                         "start": "foo",
@@ -33,13 +33,13 @@
                 },
                 {
                     "name": "Single Cascade",
-                    "changes": "cascade/.*",
+                    "changes": "cascade/**/*",
                     "command": "bar",
                     "cascade": "foo"
                 },
                 {
                     "name": "Array Cascade",
-                    "changes": "cascade/.*",
+                    "changes": "cascade/**/*",
                     "command": "bar",
                     "cascade": [
                         "foo",

@@ -63,4 +63,14 @@
 		margin: 0;
 		max-width: 300px;
 	}
+
+	&__actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: $grid-unit;
+	}
+}
+
+.woocommerce-tooltip > .wp-block-woocommerce-product-section__heading-tooltip {
+	margin-left: $gap-small;
 }

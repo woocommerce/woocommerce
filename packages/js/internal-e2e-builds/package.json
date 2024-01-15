@@ -44,5 +44,13 @@
 		"*.(t|j)s?(x)": [
 			"pnpm lint:fix"
 		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "build.js"
+			}
+		}
 	}
 }
