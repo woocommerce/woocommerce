@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Slot, Fill } from '@wordpress/components';
+import { Slot, Fill, MenuItem } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 import {
 	createOrderedChildren,
@@ -14,6 +14,8 @@ import {
 import { MenuItemProps } from './types';
 import { QUICK_UPDATE, SINGLE_UPDATE } from './constants';
 
+const DEFAULT_ORDER = 20;
+
 const getGroupName = ( group?: string, isMultipleSelection?: boolean ) => {
 	const name = 'woocommerce-actions-menu-slot';
 	const nameSuffix = isMultipleSelection
@@ -22,13 +24,19 @@ const getGroupName = ( group?: string, isMultipleSelection?: boolean ) => {
 	return group ? `${ name }_${ group }${ nameSuffix }` : name;
 };
 
+const getMenuItem = ( children: React.ReactNode ) => (
+	<MenuItem>
+		<span>{ children }</span>
+	</MenuItem>
+);
+
 export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 	Slot: React.FC<
 		Slot.Props & { group: string; supportsMultipleSelection: boolean }
 	>;
 } = ( {
 	children,
-	order = 1,
+	order = DEFAULT_ORDER,
 	group = 'top-level',
 	supportsMultipleSelection,
 } ) => {
@@ -44,8 +52,12 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 						) }
 					>
 						{ ( fillProps: Fill.Props ) =>
-							createOrderedChildren( children, order, fillProps )
-						}
+							createOrderedChildren(
+								getMenuItem( children ),
+								order,
+								fillProps
+							)
+					}
 					</Fill>
 				) ) }
 			</>
@@ -54,7 +66,11 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 	return (
 		<Fill name={ getGroupName( group, supportsMultipleSelection ) }>
 			{ ( fillProps: Fill.Props ) =>
-				createOrderedChildren( children, order, fillProps )
+				createOrderedChildren(
+					getMenuItem( children ),
+					order,
+					fillProps
+				)
 			}
 		</Fill>
 	);

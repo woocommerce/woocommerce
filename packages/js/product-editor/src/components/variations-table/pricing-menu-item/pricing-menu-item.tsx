@@ -436,11 +436,13 @@ export function PricingMenuItem( {
 						>
 							{ __( 'Schedule sale', 'woocommerce' ) }
 						</MenuItem>
+						<VariationQuickUpdateMenuItem.Slot
+							group={ 'pricing' }
+							supportsMultipleSelection={
+								supportsMultipleSelection
+							}
+						/>
 					</MenuGroup>
-					<VariationQuickUpdateMenuItem.Slot
-						group={ 'pricing' }
-						supportsMultipleSelection={ supportsMultipleSelection }
-					/>
 				</div>
 			) }
 		/>
