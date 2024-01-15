@@ -33,7 +33,10 @@ describe( 'Config', () => {
 				jobs: [
 					{
 						type: JobType.Lint,
-						changes: [ makeRe( '/src/**/*.{js,jsx,ts,tsx}' ) ],
+						changes: [
+							/^package\.json$/,
+							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
+						],
 						command: 'foo',
 					},
 				],
@@ -57,7 +60,10 @@ describe( 'Config', () => {
 				jobs: [
 					{
 						type: JobType.Lint,
-						changes: [ makeRe( '/src/**/*.{js,jsx,ts,tsx}' ) ],
+						changes: [
+							/^package\.json$/,
+							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
+						],
 						command: 'foo <baseRef>',
 					},
 				],
@@ -100,6 +106,7 @@ describe( 'Config', () => {
 					{
 						type: JobType.Lint,
 						changes: [
+							/^package\.json$/,
 							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
 							makeRe( '/test/**/*.{js,jsx,ts,tsx}' ),
 						],
@@ -130,7 +137,10 @@ describe( 'Config', () => {
 					{
 						type: JobType.Test,
 						name: 'default',
-						changes: [ makeRe( '/src/**/*.{js,jsx,ts,tsx}' ) ],
+						changes: [
+							/^package\.json$/,
+							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
+						],
 						command: 'foo',
 					},
 				],
@@ -164,7 +174,10 @@ describe( 'Config', () => {
 					{
 						type: JobType.Test,
 						name: 'default',
-						changes: [ makeRe( '/src/**/*.{js,jsx,ts,tsx}' ) ],
+						changes: [
+							/^package\.json$/,
+							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
+						],
 						command: 'foo',
 						testEnv: {
 							start: 'bar',
@@ -199,7 +212,10 @@ describe( 'Config', () => {
 					{
 						type: JobType.Test,
 						name: 'default',
-						changes: [ makeRe( '/src/**/*.{js,jsx,ts,tsx}' ) ],
+						changes: [
+							/^package\.json$/,
+							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
+						],
 						command: 'foo',
 						cascadeKeys: [ 'bar' ],
 					},
