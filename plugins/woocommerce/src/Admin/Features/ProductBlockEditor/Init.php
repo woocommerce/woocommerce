@@ -282,19 +282,6 @@ class Init {
 				),
 			)
 		);
-		$templates[] = new ProductTemplate(
-			array(
-				'id'                 => 'variable-product-template',
-				'title'              => __( 'Variable product', 'woocommerce' ),
-				'description'        => __( 'A product with variations like color or size.', 'woocommerce' ),
-				'order'              => 40,
-				'icon'               => null,
-				'layout_template_id' => 'simple-product',
-				'product_data'       => array(
-					'type' => 'variable',
-				),
-			)
-		);
 
 		return $templates;
 	}
