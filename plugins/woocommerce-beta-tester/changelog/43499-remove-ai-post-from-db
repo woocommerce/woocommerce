@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove the patterns_ai_data post from DB when resetting the CYS.

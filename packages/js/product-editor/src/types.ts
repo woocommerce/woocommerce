@@ -2,6 +2,17 @@
  * External dependencies
  */
 import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
+import { Product } from '@woocommerce/data';
+
+export type ProductTemplate = {
+	id: string;
+	title: string;
+	description: string | null;
+	icon: string | null;
+	order: number;
+	layoutTemplateId: string;
+	productData: Partial< Product >;
+};
 
 export interface ProductEditorContext {
 	postId: number;

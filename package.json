@@ -17,9 +17,6 @@
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
-	"bin": {
-		"utils": "./tools/monorepo-utils/bin/run"
-	},
 	"scripts": {
 		"build": "pnpm -r build",
 		"test": "pnpm -r test",
@@ -31,13 +28,14 @@
 		"git:update-hooks": "if test -d .git; then rm -rf .git/hooks && mkdir -p .git/hooks && husky install; else husky install; fi",
 		"create-extension": "node ./tools/create-extension/index.js",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
-		"utils": "node ./tools/monorepo-utils/dist/index.js"
+		"utils": "./tools/monorepo-utils/bin/run"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.23.5",
 		"@babel/runtime": "^7.23.5",
 		"@types/node": "^16.18.68",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/monorepo-utils": "workspace:*",
 		"@wordpress/data": "wp-6.0",
 		"@wordpress/eslint-plugin": "14.7.0",
 		"@wordpress/prettier-config": "2.17.0",

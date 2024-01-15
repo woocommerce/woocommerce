@@ -9,6 +9,13 @@ import {
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
+import { Button } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { reusableBlock } from '@wordpress/icons';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useEntityId } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -31,6 +38,7 @@ import {
 	LinkedProductListBlockAttributes,
 	LinkedProductListBlockEmptyState,
 } from './types';
+import getRelatedProducts from '../../../utils/get-related-products';
 
 export function EmptyStateImage( {
 	image,
@@ -56,7 +64,7 @@ export function EmptyStateImage( {
 	}
 }
 
-export function Edit( {
+export function LinkedProductListBlockEdit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< LinkedProductListBlockAttributes > ) {
@@ -66,6 +74,9 @@ export function Edit( {
 		linkedProducts: [],
 		searchedProducts: [],
 	} );
+
+	const productId = useEntityId( 'postType', postType );
+
 	const loadLinkedProductsDispatcher =
 		getLoadLinkedProductsDispatcher( dispatch );
 	const searchProductsDispatcher = getSearchProductsDispatcher( dispatch );
@@ -100,6 +111,7 @@ export function Edit( {
 			product,
 			state.linkedProducts
 		);
+
 		setLinkedProductIds( newLinkedProductIds );
 	}
 
@@ -112,8 +124,49 @@ export function Edit( {
 		setLinkedProductIds( newLinkedProductIds );
 	}
 
+	async function chooseProductsForMe() {
+		dispatch( {
+			type: 'LOADING_LINKED_PRODUCTS',
+			payload: {
+				isLoading: true,
+			},
+		} );
+
+		const relatedProducts = ( await getRelatedProducts(
+			productId
+		) ) as Product[];
+
+		dispatch( {
+			type: 'LOADING_LINKED_PRODUCTS',
+			payload: {
+				isLoading: false,
+			},
+		} );
+
+		if ( ! relatedProducts ) {
+			return;
+		}
+
+		const newLinkedProducts = selectSearchedProductDispatcher(
+			relatedProducts,
+			[]
+		);
+
+		setLinkedProductIds( newLinkedProducts );
+	}
+
 	return (
 		<div { ...blockProps }>
+			<div className="wp-block-woocommerce-product-linked-list-field__form-group-header">
+				<Button
+					variant="tertiary"
+					icon={ reusableBlock }
+					onClick={ chooseProductsForMe }
+				>
+					{ __( 'Choose products for me', 'woocommerce' ) }
+				</Button>
+			</div>
+
 			<div className="wp-block-woocommerce-product-linked-list-field__form-group-content">
 				<ProductSelect
 					items={ state.searchedProducts }
