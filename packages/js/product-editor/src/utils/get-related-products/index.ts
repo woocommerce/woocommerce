@@ -16,8 +16,8 @@ const POSTS_NUMBER_TO_RANDOMIZE = 30;
  * If fallbackToRandomProducts is true,
  * return random products if no related products are found.
  *
- * @param {number}  productId - Product ID.
- * @param {boolean} options   - Options.
+ * @param {number}                    productId - Product ID.
+ * @param {getRelatedProductsOptions} options   - Options.
  * @return {Promise<Product[] | undefined>} Related products.
  */
 export default async function getRelatedProducts(

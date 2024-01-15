@@ -17,7 +17,7 @@ getRelatedProducts( productId, options )
 
 - `productId` (number): The ID of the product for which related products are to be fetched.
 - `options` (Object): An object containing the following property:
-  - `fallbackToRandomProducts` (boolean): Optional. If set to `true`, the function will return random products if no related products are found. Default is `false`.
++ `fallbackToRandomProducts` (boolean): Optional. If set to `true`, the function will return random products if no related products are found. Default is `false`.
 
 #### Return
 
