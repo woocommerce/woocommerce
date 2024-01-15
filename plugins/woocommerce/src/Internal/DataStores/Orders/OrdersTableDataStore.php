@@ -2882,6 +2882,8 @@ CREATE TABLE $meta_table (
 	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) {
+		global $wpdb;
+
 		if ( $this->should_backfill_post_record() && isset( $meta->id ) ) {
 			// Let's get the actual meta key before its deleted for backfilling. We cannot delete just by ID because meta IDs are different in HPOS and posts tables.
 			$db_meta = $this->data_store_meta->get_metadata_by_id( $meta->id );
@@ -2896,7 +2898,25 @@ CREATE TABLE $meta_table (
 
 		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
 			self::$backfilling_order_ids[] = $object->get_id();
-			delete_post_meta( $object->get_id(), $meta->key, $meta->value );
+			try {
+				delete_post_meta( $object->get_id(), $meta->key, $meta->value );
+			} catch ( \Throwable $th ) {
+				$incomplete_object_message = 'The script tried to modify a property on an incomplete object';
+				if ( $incomplete_object_message !== substr( $th->getMessage(), 0, strlen( $incomplete_object_message ) ) ) {
+					throw $th;
+				}
+
+				$meta_value  = maybe_serialize( $meta_data->value );
+				$wpdb->delete(
+					_get_meta_table( 'post' ),
+					array(
+						'post_id' => $object->get_id(),
+						'meta_key' => $meta->key,
+						'meta_value' => $meta_value,
+					),
+					array( '%d', '%s', '%s' )
+				);
+			}
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 

@@ -707,6 +707,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param WC_Abstract_Order $order Order object.
 	 */
 	protected function update_order_meta_from_object( $order ) {
+		global $wpdb;
+
 		if ( is_null( $order->get_meta() ) ) {
 			return;
 		}
@@ -734,7 +736,29 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					}
 				}
 			}
-			add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
+			try {
+				add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
+			} catch (\Throwable $th) {
+				$incomplete_object_message = 'The script tried to modify a property on an incomplete object';
+				if ( $incomplete_object_message !== substr( $th->getMessage(), 0, strlen( $incomplete_object_message ) ) ) {
+					throw $th;
+				}
+
+				$meta_value  = maybe_serialize( $meta_data->value );
+				$result = $wpdb->insert(
+					_get_meta_table( 'post' ),
+					array(
+						'post_id'    => $order->get_id(),
+						'meta_key'   => $meta_data->key,
+						'meta_value' => $meta_value,
+					)
+				);
+
+				if ( ! $result ) {
+					throw $th;
+				}
+				wp_cache_delete( $order->get_id(), 'post_meta' );
+			}
 		}
 
 		// Find remaining meta that was deleted from the order but still present in the associated post.
