@@ -1,4 +1,4 @@
-Significance: minor
+Significance: patch
 Type: update
+Comment: This functionality is behind a feature flag.
 
-Surface additional checkout fields in order emails
