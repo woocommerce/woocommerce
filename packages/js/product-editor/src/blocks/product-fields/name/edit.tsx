@@ -37,6 +37,7 @@ import { EditProductLinkModal } from '../../../components/edit-product-link-moda
 import { Label } from '../../../components/label/label';
 import { useValidation } from '../../../contexts/validation-context';
 import { useProductEdits } from '../../../hooks/use-product-edits';
+import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { AUTO_DRAFT_NAME } from '../../../utils';
 import { NameBlockAttributes } from './types';
@@ -156,8 +157,14 @@ export function Edit( {
 		}
 	}, [] );
 
+	const [ _, setFeatured ] = useProductEntityProp< boolean >( 'featured' );
+
+	function handleSuffixClick() {
+		setFeatured( true );
+	}
+
 	function renderFeaturedSuffix() {
-		return <Button icon={ starEmpty } />;
+		return <Button icon={ starEmpty } onClick={ handleSuffixClick } />;
 	}
 
 	return (
