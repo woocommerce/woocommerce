@@ -705,6 +705,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * Helper method to update order metadata from initialized order object.
 	 *
 	 * @param WC_Abstract_Order $order Order object.
+	 * @throws \Throwable If adding post meta fails with both `add_post_meta` and `$wpdb->insert`.
 	 */
 	protected function update_order_meta_from_object( $order ) {
 		global $wpdb;
@@ -738,19 +739,19 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			}
 			try {
 				add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
-			} catch (\Throwable $th) {
+			} catch ( \Throwable $th ) {
 				$incomplete_object_message = 'The script tried to modify a property on an incomplete object';
-				if ( $incomplete_object_message !== substr( $th->getMessage(), 0, strlen( $incomplete_object_message ) ) ) {
+				if ( substr( $th->getMessage(), 0, strlen( $incomplete_object_message ) ) !== $incomplete_object_message ) {
 					throw $th;
 				}
 
-				$meta_value  = maybe_serialize( $meta_data->value );
-				$result = $wpdb->insert(
+				$meta_value = maybe_serialize( $meta_data->value );
+				$result     = $wpdb->insert(
 					_get_meta_table( 'post' ),
 					array(
 						'post_id'    => $order->get_id(),
-						'meta_key'   => $meta_data->key,
-						'meta_value' => $meta_value,
+						'meta_key'   => $meta_data->key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 					)
 				);
 

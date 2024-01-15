@@ -2880,6 +2880,7 @@ CREATE TABLE $meta_table (
 	 * @param \stdClass $meta (containing at least ->id).
 	 *
 	 * @return bool
+	 * @throws \Throwable If deleting post meta fails with both `delete_post_meta` and `$wpdb->delete`.
 	 */
 	public function delete_meta( &$object, $meta ) {
 		global $wpdb;
@@ -2902,17 +2903,17 @@ CREATE TABLE $meta_table (
 				delete_post_meta( $object->get_id(), $meta->key, $meta->value );
 			} catch ( \Throwable $th ) {
 				$incomplete_object_message = 'The script tried to modify a property on an incomplete object';
-				if ( $incomplete_object_message !== substr( $th->getMessage(), 0, strlen( $incomplete_object_message ) ) ) {
+				if ( substr( $th->getMessage(), 0, strlen( $incomplete_object_message ) ) !== $incomplete_object_message ) {
 					throw $th;
 				}
 
-				$meta_value  = maybe_serialize( $meta_data->value );
+				$meta_value = maybe_serialize( $meta_data->value );
 				$wpdb->delete(
 					_get_meta_table( 'post' ),
 					array(
-						'post_id' => $object->get_id(),
-						'meta_key' => $meta->key,
-						'meta_value' => $meta_value,
+						'post_id'    => $object->get_id(),
+						'meta_key'   => $meta->key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 					),
 					array( '%d', '%s', '%s' )
 				);
