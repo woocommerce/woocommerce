@@ -1,6 +1,6 @@
 ---
-post_title: Classic Theme Developer Handbook
-menu_title: Classic Theme Development
+post_title: Classic theme development handbook
+menu_title: Classic theme development
 ---
 
 ---
