@@ -150,3 +150,22 @@ export const ADDITIONAL_FORM_KEYS = getSetting< FieldsLocations >(
 	'addressFieldsLocations',
 	defaultFieldsLocations
 ).additional;
+
+export interface CheckoutField {
+	label: string;
+	type: string;
+	options: { label: string; value: string }[];
+}
+
+export const ADDITIONAL_FORM_FIELDS = getSetting< CheckoutField[] >(
+	'additionalFields',
+	{}
+);
+export const CONTACT_FORM_FIELDS = getSetting< CheckoutField[] >(
+	'additionalContactFields',
+	{}
+);
+export const ADDRESS_FORM_FIELDS = getSetting< CheckoutField[] >(
+	'additionalAddressFields',
+	{}
+);

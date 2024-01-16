@@ -7,6 +7,9 @@ import {
 	objectHasProp,
 	ApiErrorResponse,
 	isApiErrorResponse,
+	ApiErrorResponseData,
+	isObject,
+	isString,
 } from '@woocommerce/types';
 import { noticeContexts } from '@woocommerce/base-context/event-emit/utils';
 
@@ -15,6 +18,7 @@ type ApiParamError = {
 	id: string;
 	code: string;
 	message: string;
+	data?: ApiErrorResponseData;
 };
 
 /**
@@ -41,7 +45,12 @@ export const getErrorDetails = (
 			acc,
 			[
 				param,
-				{ code, message, additional_errors: additionalErrors = [] },
+				{
+					code,
+					message,
+					additional_errors: additionalErrors = [],
+					data,
+				},
 			]
 		) => {
 			return [
@@ -51,6 +60,7 @@ export const getErrorDetails = (
 					id: `${ param }_${ code }`,
 					code,
 					message: decodeEntities( message ),
+					data,
 				},
 				...( Array.isArray( additionalErrors )
 					? additionalErrors.flatMap( ( additionalError ) => {
@@ -60,7 +70,7 @@ export const getErrorDetails = (
 							) {
 								return [];
 							}
-							return [
+							const errorObject = [
 								{
 									param,
 									id: `${ param }_${ additionalError.code }`,
@@ -70,6 +80,13 @@ export const getErrorDetails = (
 									),
 								},
 							];
+							if ( typeof additionalError.data !== 'undefined' ) {
+								return [
+									...errorObject,
+									...getErrorDetails( additionalError ),
+								];
+							}
+							return errorObject;
 					  } )
 					: [] ),
 			];
@@ -108,6 +125,22 @@ const getErrorContextFromParam = ( param: string ): string | undefined => {
 };
 
 /**
+ * Gets appropriate error context from additional field location.
+ */
+const getErrorContextFromAdditionalFieldLocation = (
+	location: string
+): string | undefined => {
+	switch ( location ) {
+		case 'contact':
+			return noticeContexts.CONTACT_INFORMATION;
+		case 'additional':
+			return noticeContexts.ADDITIONAL_INFORMATION;
+		default:
+			return undefined;
+	}
+};
+
+/**
  * Processes the response for an invalid param error, with response code rest_invalid_param.
  */
 const processInvalidParamResponse = (
@@ -116,11 +149,25 @@ const processInvalidParamResponse = (
 ) => {
 	const errorDetails = getErrorDetails( response );
 
-	errorDetails.forEach( ( { code, message, id, param } ) => {
+	errorDetails.forEach( ( { code, message, id, param, data } ) => {
+		let additionalFieldContext: string | undefined = '';
+		// Check if this error response comes from an additional field.
+		if (
+			isObject( data ) &&
+			objectHasProp( data, 'key' ) &&
+			objectHasProp( data, 'location' ) &&
+			isString( data.location )
+		) {
+			additionalFieldContext = getErrorContextFromAdditionalFieldLocation(
+				data.location
+			);
+		}
+
 		createNotice( 'error', message, {
 			id,
 			context:
 				context ||
+				additionalFieldContext ||
 				getErrorContextFromParam( param ) ||
 				getErrorContextFromCode( code ),
 		} );

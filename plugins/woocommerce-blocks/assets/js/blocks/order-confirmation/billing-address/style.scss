@@ -1,5 +1,7 @@
 // Parent element should hide column when there is no address.
 .woocommerce-order-confirmation-address-wrapper {
+	margin-block-start: $gap-large * 2;
+
 	.wp-block-column:empty {
 		display: none;
 	}
@@ -14,6 +16,11 @@
 		margin-top: 0 !important;
 	}
 }
+.wc-block-order-confirmation-billing-wrapper {
+	.wp-block-heading {
+		margin-top: 0;
+	}
+}
 .wc-block-order-confirmation-billing-address {
 	border: 1px solid $universal-border-light;
 	border-radius: $universal-border-radius;
@@ -24,10 +31,18 @@
 		width: 100% !important;
 		display: block;
 		box-sizing: border-box;
-		margin: 0 0 $gap;
+		margin: 0;
+		font-style: normal;
+	}
+	p:not(.woocommerce-customer-details--phone) {
+		margin: $gap-smaller 0 0;
 
-		&:last-child {
-			margin-bottom: 0;
+		strong {
+			font-weight: bold;
+			display: block;
+			&::after {
+				content: ":";
+			}
 		}
 	}
 }
