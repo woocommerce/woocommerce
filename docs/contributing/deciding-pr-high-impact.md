@@ -1,6 +1,6 @@
 ---
 post_title: How to assess the impact of a pull request
-menu_title: Assessing PR Impact
+menu_title: Assessing PR impact
 tags: how-to
 ---
 

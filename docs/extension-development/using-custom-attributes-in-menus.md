@@ -1,5 +1,5 @@
 ---
-post_title: Managing Custom Attributes in WooCommerce Menus and Taxonomy Archives
+post_title: Managing custom attributes in WooCommerce menus and taxonomy archives
 menu_title: Custom attributes in menus
 tags: how-to
 ---

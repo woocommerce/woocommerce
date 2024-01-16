@@ -1,5 +1,5 @@
 ---
-post_title: Thumbnail Image Regeneration
+post_title: Thumbnail image regeneration
 tags: reference
 ---
 

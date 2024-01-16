@@ -1,5 +1,5 @@
 ---
-post_title: Creating Custom Settings for WooCommerce Extensions
+post_title: Creating custom settings for WooCommerce extensions
 menu_title: Creating custom settings
 tags: how-to
 ---

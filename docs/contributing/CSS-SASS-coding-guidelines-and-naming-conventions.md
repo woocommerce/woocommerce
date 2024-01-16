@@ -1,6 +1,6 @@
 ---
-post_title: WooCommerce CSS and SASS Guidelines and Naming Conventions
-menu_title: CSS/SASS Conventions
+post_title: WooCommerce CSS and SASS guidelines and naming conventions
+menu_title: CSS/SASS conventions
 tags: reference
 ---
 

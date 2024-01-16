@@ -1,6 +1,6 @@
 ---
-post_title: Managing the Lifecycle of WooCommerce Block Templates
-menu_title: Block Template Lifecycle
+post_title: Managing the lifecycle of WooCommerce block templates
+menu_title: Block template lifecycle
 tags: reference
 ---
 

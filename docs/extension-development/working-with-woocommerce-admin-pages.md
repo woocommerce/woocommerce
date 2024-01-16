@@ -1,6 +1,6 @@
 ---
-post_title: Working with WooCommerce Admin Pages
-menu_title: Working with Admin Pages
+post_title: Integrating admin pages into WooCommerce extensions
+menu_title: Integrating admin pages
 tags: how-to
 ---
 

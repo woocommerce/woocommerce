@@ -1,5 +1,6 @@
 ---
-post_title: WooCommerce Plugin API Callbacks
+post_title: WooCommerce plugin API callbacks
+menu_title: Plugin API callbacks
 tags: reference
 ---
 

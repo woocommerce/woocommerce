@@ -1,5 +1,5 @@
 ---
-post_title: How to Translate WooCommerce
+post_title: How to translate WooCommerce
 menu_title: Translating WooCommerce
 tags: how-to
 ---

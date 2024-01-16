@@ -1,6 +1,6 @@
 ---
 post_title: Developing using WooCommerce CRUD objects
-Menu_title: WooCommerce CRUD objects
+Menu_title: Using CRUD objects
 tags: reference
 ---
 

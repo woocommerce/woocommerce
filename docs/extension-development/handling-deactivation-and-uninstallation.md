@@ -1,6 +1,6 @@
 ---
-post_title: Managing Extension Deactivation and Uninstallation
-menu_title: Manage Deactivation and Uninstallation
+post_title: Managing extension deactivation and uninstallation
+menu_title: Manage deactivation and uninstallation
 tags: how-to
 ---
 
