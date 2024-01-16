@@ -14,6 +14,7 @@ For plugins that use OAuth or a third party experience to obtain permission from
 The merchant is redirected to the payments plugin to complete configuration and completes any required authentication as part of this step.
 
 For example:
+
 - Prompt the merchant to login to or create an account with the payment provider.
 - Ask the merchant to complete configuration for billing plans, payouts, or notifications.
 
