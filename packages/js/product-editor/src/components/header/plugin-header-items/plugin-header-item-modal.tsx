@@ -12,13 +12,15 @@ import { PinnedItems } from '@wordpress/interface';
  * Internal dependencies
  */
 import { PINNED_ITEMS_SCOPE } from '../../../constants';
+import { PluginHeaderItemModalProps } from './types';
 
-export const PluginHeaderItemModal: React.FC< {
-	children?: React.ReactNode;
-	label?: string;
-	icon?: React.ReactNode;
-	order?: number;
-} > = ( { children, label, icon, order = 20 } ) => {
+export const PluginHeaderItemModal: React.FC< PluginHeaderItemModalProps > = ( {
+	children,
+	label,
+	icon,
+	order = 20,
+	title,
+} ) => {
 	const [ isOpen, setOpen ] = useState( false );
 	return (
 		<PinnedItems scope={ PINNED_ITEMS_SCOPE } order={ order }>
@@ -31,7 +33,7 @@ export const PluginHeaderItemModal: React.FC< {
 				/>
 				{ isOpen && (
 					<Modal
-						title={ label || '' }
+						title={ title }
 						onRequestClose={ () => setOpen( false ) }
 					>
 						{ children }

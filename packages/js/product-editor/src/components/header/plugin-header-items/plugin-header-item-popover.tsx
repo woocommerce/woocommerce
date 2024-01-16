@@ -12,14 +12,12 @@ import { PinnedItems } from '@wordpress/interface';
  * Internal dependencies
  */
 import { PINNED_ITEMS_SCOPE } from '../../../constants';
+import { PluginHeaderItemPopoverProps } from './types';
 
-export const PluginHeaderItemPopover: React.FC< {
-	children?: React.ReactNode;
-	label?: string;
-	icon?: React.ReactNode;
-	order?: number;
-} > = ( { children, label, icon, order = 20 } ) => {
-	const [ isVisible, setIsVisible ] = useState( false );
+export const PluginHeaderItemPopover: React.FC<
+	PluginHeaderItemPopoverProps
+> = ( { children, label, icon, order = 20 } ) => {
+	const [ isVisible, setVisible ] = useState( false );
 	return (
 		<PinnedItems scope={ PINNED_ITEMS_SCOPE } order={ order }>
 			<>
@@ -27,12 +25,12 @@ export const PluginHeaderItemPopover: React.FC< {
 					variant="tertiary"
 					icon={ icon }
 					label={ label }
-					onClick={ () => setIsVisible( ! isVisible ) }
+					onClick={ () => setVisible( ! isVisible ) }
 				/>
 				{ isVisible && (
 					<Popover
-						onFocusOutside={ () => setIsVisible( false ) }
-						onClose={ () => setIsVisible( false ) }
+						onFocusOutside={ () => setVisible( false ) }
+						onClose={ () => setVisible( false ) }
 						focusOnMount="container"
 					>
 						{ children }
