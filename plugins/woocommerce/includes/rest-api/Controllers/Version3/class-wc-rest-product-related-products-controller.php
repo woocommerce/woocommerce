@@ -127,6 +127,12 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 		return $this->tags;
 	}
 
+	/**
+	 * Get the related products.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return object
+	 */
 	public function get_items( $request ) {
 		$id     = $request->get_param( 'id' );
 		$object = wc_get_product( $id );
@@ -134,7 +140,10 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 		$categories = $request->get_param( 'categories' );
 		$tags       = $request->get_param( 'tags' );
 
-		// Filter the related product categories.
+		/*
+		 * If categories param is defined,
+		 * filter the related products by the categories.
+		 */
 		if ( ! empty( $categories ) ) {
 			$this->categories = $categories;
 			add_filter(
@@ -144,7 +153,10 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 			);
 		}
 
-		// Filter the related product tags.
+		/*
+		 * If tags param is defined,
+		 * filter the related products by the tags.
+		 */
 		if ( ! empty( $tags ) ) {
 			$this->tags = $tags;
 			add_filter(
