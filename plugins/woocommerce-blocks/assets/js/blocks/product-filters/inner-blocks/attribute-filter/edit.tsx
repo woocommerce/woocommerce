@@ -1,13 +1,9 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
-import {
-	BlockControls,
-	InnerBlocks,
-	useBlockProps,
-} from '@wordpress/block-editor';
+import { BlockControls, useBlockProps } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
 import {
 	useCollection,
@@ -25,7 +21,6 @@ import {
 	withSpokenMessages,
 	Notice,
 } from '@wordpress/components';
-import { Template } from '@wordpress/blocks';
 
 /**
  * Internal dependencies

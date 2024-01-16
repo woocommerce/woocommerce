@@ -3,7 +3,6 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import classNames from 'classnames';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies

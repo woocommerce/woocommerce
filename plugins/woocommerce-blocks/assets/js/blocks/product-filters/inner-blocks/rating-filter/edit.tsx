@@ -3,8 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
-import type { BlockEditProps, Template } from '@wordpress/blocks';
+import { useBlockProps } from '@wordpress/block-editor';
+import type { BlockEditProps } from '@wordpress/blocks';
 import Rating from '@woocommerce/base-components/product-rating';
 import {
 	useQueryStateByKey,

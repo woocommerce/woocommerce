@@ -12,6 +12,7 @@ import {
 } from '@wordpress/icons';
 import { isExperimentalBuild } from '@woocommerce/block-settings';
 import { __ } from '@wordpress/i18n';
+import { toggle } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -19,7 +20,6 @@ import { __ } from '@wordpress/i18n';
 import metadata from './block.json';
 import edit from './edit';
 import save from './save';
-import { toggle } from '../../icons';
 
 if ( isExperimentalBuild() ) {
 	registerBlockType( metadata, {

@@ -5,7 +5,6 @@ import { registerBlockType } from '@wordpress/blocks';
 import { Icon } from '@wordpress/icons';
 import { toggle } from '@woocommerce/icons';
 import { isExperimentalBuild } from '@woocommerce/block-settings';
-import { InnerBlocks } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies

@@ -4,7 +4,6 @@
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, box } from '@wordpress/icons';
 import { isExperimentalBuild } from '@woocommerce/block-settings';
-import { InnerBlocks } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
