@@ -4,12 +4,14 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
-const permalink = '/shop';
-const templateName = 'Mini-Cart';
-const templatePath = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//mini-cart`;
-const templateType = 'wp_template_part';
-const miniCartBlockName = 'woocommerce/mini-cart';
-const userText = 'Hello World in the template part';
+const testData = {
+	permalink: '/shop',
+	templateName: 'Mini-Cart',
+	templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//mini-cart`,
+	templateType: 'wp_template_part',
+	miniCartBlockName: 'woocommerce/mini-cart',
+	userText: 'Hello World in the template part',
+};
 
 test.describe( 'Mini-Cart template part', async () => {
 	test( "theme template has priority over WooCommerce's and can be modified", async ( {
@@ -20,8 +22,8 @@ test.describe( 'Mini-Cart template part', async () => {
 	} ) => {
 		// Edit the theme template part.
 		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
+			postId: testData.templatePath,
+			postType: testData.templateType,
 		} );
 		await editorUtils.enterEditMode();
 		await editorUtils.closeWelcomeGuideModal();
@@ -35,30 +37,36 @@ test.describe( 'Mini-Cart template part', async () => {
 		await page
 			.frameLocator( 'iframe[name="editor-canvas"]' )
 			.getByLabel( 'Empty block' )
-			.fill( userText );
+			.fill( testData.userText );
 		await editorUtils.saveTemplate();
 
-		await page.goto( permalink );
+		await page.goto( testData.permalink );
 		await page.getByLabel( 'Add to cart' ).first().click();
-		let block = await frontendUtils.getBlockByName( miniCartBlockName );
+		let block = await frontendUtils.getBlockByName(
+			testData.miniCartBlockName
+		);
 		await block.click();
-		await expect( page.getByRole( 'dialog' ) ).toContainText( userText );
+		await expect( page.getByRole( 'dialog' ) ).toContainText(
+			testData.userText
+		);
 
 		// Revert edition and verify the template from the theme is used.
 		await admin.visitAdminPage(
 			'site-editor.php',
-			`path=/${ templateType }/all`
+			`path=/${ testData.templateType }/all`
 		);
-		await editorUtils.revertTemplateCustomizations( templateName );
-		await page.goto( permalink );
+		await editorUtils.revertTemplateCustomizations( testData.templateName );
+		await page.goto( testData.permalink );
 		await page.getByLabel( 'Add to cart' ).first().click();
-		block = await frontendUtils.getBlockByName( miniCartBlockName );
+		block = await frontendUtils.getBlockByName(
+			testData.miniCartBlockName
+		);
 		await block.click();
 		await expect( page.getByRole( 'dialog' ) ).toContainText(
 			'Mini-Cart template part loaded from theme'
 		);
 		await expect( page.getByRole( 'dialog' ) ).not.toContainText(
-			userText
+			testData.userText
 		);
 	} );
 } );
