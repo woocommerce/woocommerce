@@ -130,7 +130,7 @@
     {
       "content": "\nJoin the WooCommerce community of contributors. Find out how to build with WooCommerce and help enhance the Woo ecosystem.\n",
       "category_slug": "contributing",
-      "category_title": "Contributing",
+      "category_title": "Contribute to Woo",
       "posts": [
         {
           "post_title": "WooCommerce Git flow",
@@ -142,63 +142,63 @@
         {
           "post_title": "String localization guidelines",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/string-localisation-guidelines.md",
-          "hash": "739c443c044897af00262325577ed6a9f0091df066a57f71bab99b706e847968",
+          "hash": "e945b634f356c7f02a6e09221b2ed8e421445bca5f0e395d229577294f19fe51",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/string-localisation-guidelines.md",
           "id": "b7a92f1f63f72a2263be940b362fd90aa0ea2cdb"
         },
         {
           "post_title": "Reporting security issues",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/reporting-security-issues.md",
-          "hash": "f833f3efb3a13b5285eeaedd9fd772c18ba88a508ac8ed4afd5aaa560aea6fde",
+          "hash": "bcde607b3fcfc6db19c6dec2b05f25197bc668bc63df92ad9bb4ddf3718a4d9b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/reporting-security-issues.md",
           "id": "363d7eb1b42e6974cfab7f62659b4effc8417774"
         },
         {
           "post_title": "Naming conventions",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/naming-conventions.md",
-          "hash": "03c3ca1d97171d3d74ad2c036044121b3c2ae1489de7454bd4101b6232713b45",
+          "hash": "23650be6b072cfef58dcb70593d6fbcbe95856f027b305e27baca9e0c75d67a4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/naming-conventions.md",
           "id": "019d7e8eefc341de559728b9c3e9c5e17dfc1d6d"
         },
         {
           "post_title": "Minification of SCSS and JS",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/minification-of-SCSS-and-JS.md",
-          "hash": "954a98d3d1ba425c2f63f22d0a4df29c05592f5f396026d95f4da42656283d0f",
+          "hash": "6ea93ef5c047f313bab25bb7ee901ee68bbb18aaa0f011b653f2a072c1f7a9ba",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/minification-of-SCSS-and-JS.md",
           "id": "bb50c2ce61a6c5465c95e6a94982c4c1e7944fd7"
         },
         {
           "post_title": "Deprecation in core",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/deprecation-in-core.md",
-          "hash": "de056cc0f30e78e3684e197000be5f05ed104e2d1570d6e8d4219aef93d6bc71",
+          "hash": "b892f9861c53c60381edacc308b1621c886ff75c03a0179107d87bd28f6a3167",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/deprecation-in-core.md",
           "id": "d4eee11fdec129af35c471b2366df285217c6ec6"
         },
         {
           "post_title": "How to decide if a pull request is high impact",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/deciding-pr-high-impact.md",
-          "hash": "2e777ca46bbff6dc4e4eff3cbaa8418118d7d2e40697e88019957ad335e834e3",
+          "hash": "a68c519ef60637181bfd63f0f66e6e9927732d6aa9e9b8a1662f4533e80c38ee",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/deciding-pr-high-impact.md",
           "id": "40d381fdc10bff338677228736249ba87df9e102"
         },
         {
           "post_title": "Common issues",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/common-issues.md",
-          "hash": "c6140fdd99793a5aca9ca92489babc37878f3e4bfcbbadd9275e1cafb8b24075",
+          "hash": "1b2bd5cb506d7843ec6e6687e3e6a96717fdd0501ca37a9269054ee64afcf389",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/common-issues.md",
           "id": "5766fb43cf9135d5a2cceaf0d386ec14b57c9ba0"
         },
         {
           "post_title": "API critical flows",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/api-critical-flows.md",
-          "hash": "e6582590a1303937b74904d01105d0cdbe0a682a40d8c6188ac116398b6d4e7d",
+          "hash": "6bb974a66de42846f058cc8675fa436068f7e52e8b9066e1d2b93dc5c2ae5fab",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/api-critical-flows.md",
           "id": "0fa8b2fa4bcb3b00c647504523a05857a90c434a"
         },
         {
           "post_title": "CSS SASS coding guidelines and naming conventions",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/CSS-SASS-coding-guidelines-and-naming-conventions.md",
-          "hash": "214dfeed99b2d2f4ee2e7ec99af25467a7d68cb09eff0ec3b1c72e962f99f703",
+          "hash": "5dcdb00ab0209a277ead39ac21ad3a6befe2d23ae80548e3a405c513d00f712e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/CSS-SASS-coding-guidelines-and-naming-conventions.md",
           "id": "42e4e4a593b67fd844f2d7b366259d64cf2332ab"
         }
@@ -206,7 +206,7 @@
       "categories": []
     },
     {
-      "content": "\nJust like WooCommerce itself, our developer docs are open source and editable by the community. This category outlines guidance and best practices to follow when contributing documentation.",
+      "content": "\nJust like WooCommerce itself, our developer docs are open source and editable by the community. This category outlines guidance and best practices to follow when contributing documentation.\n ",
       "category_slug": "contributing-docs",
       "category_title": "Contribute to Docs",
       "posts": [
@@ -214,7 +214,7 @@
           "post_title": "Technical Documentation Style Guide",
           "menu_title": "Style Guide",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/style-guide.md",
-          "hash": "a2e6d040886cc29e4dca7afe04f7a64a4bd6855114614d319e80fec363b5bbd8",
+          "hash": "4c5dd9358dda32b6570baaea33ff12ee26386007c7b7f120eca54e753b485beb",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/style-guide.md",
           "id": "5020907d57ae845a6477a36f59ec8c2f5f7b4b01"
         },
@@ -222,7 +222,7 @@
           "post_title": "Contributing Technical Documentation",
           "menu_title": "Contributing Docs",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/contributing-docs.md",
-          "hash": "da06968371eafc59debabc1aa5207b7869d37c5751974c519fa46e3c5d807b6c",
+          "hash": "08c51b50b47987639aa1df68563748a001435404411780517667057dfca984db",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/contributing-docs.md",
           "id": "71c1a72bfd4d5ae6aa656d4264b1bf3beb6eca1c"
         }
@@ -833,5 +833,5 @@
       "categories": []
     }
   ],
-  "hash": "6baa0b5197356cdd4bc009decb77160a03877f2ecdda9017ad9a6dcd655d552c"
+  "hash": "d5939fefc478b058059233ec03bbc541f7bdc97fc2cda61fa8efc7572f7867f4"
 }
