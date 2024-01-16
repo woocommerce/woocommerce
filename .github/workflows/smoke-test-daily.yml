@@ -68,13 +68,14 @@ jobs:
               if: |
                   always() &&
                   steps.generate_api_report.conclusion == 'success'
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: ${{ env.API_ARTIFACT }}
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
+                  compression-level: 9
                   retention-days: 20
 
     e2e-tests:
@@ -135,7 +136,7 @@ jobs:
               with:
                   name: all-blob-reports-${{ matrix.shard.number }}
                   path: ${{ env.ALLURE_RESULTS_DIR }}
-                  retention-days: 1
+                  retention-days: 20
                   compression-level: 9
 
     e2e-tests-success:
@@ -187,7 +188,7 @@ jobs:
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
-                  retention-days: 5
+                  retention-days: 20
 
     k6-tests:
         name: k6 tests on nightly build
@@ -209,7 +210,7 @@ jobs:
             - name: Update performance test site with E2E test
               id: update-perf-site
               continue-on-error: true
-              uses: ./.github/actions/tests/run-e2e-tests
+              uses: ./.github/actions/tests/run-k6-tests
               with:
                   report-name: k6-daily-update-site--run-${{ github.run_number }}
                   tests: update-woocommerce.spec.js
