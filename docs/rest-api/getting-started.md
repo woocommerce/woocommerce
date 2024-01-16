@@ -81,7 +81,7 @@ If your server utilizes FastCGI, check that your [authorization headers are prop
 
 ### Consumer key is missing
 
-Occasionally servers may not parse the Authorization header correctly (if you see a “Consumer key is missing” error when authenticating over SSL, you have a server issue).
+Occasionally servers may not parse the Authorization header correctly (if you see a "Consumer key is missing" error when authenticating over SSL, you have a server issue).
 
 In this case, you may provide the consumer key/secret as query string parameters instead. Example:
 

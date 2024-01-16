@@ -1,6 +1,6 @@
 # Webhooks
 
-> ⚠️ **Notice:** This documentation is currently a **work in progress**. Please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
+> **Notice:** This documentation is currently a **work in progress**. Please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
 
 > **Note**: We are unable to provide support for customizations under our **[Support Policy](http://www.woocommerce.com/support-policy)**. If you need to further customize a snippet, or extend its functionality, we highly recommend [**Codeable**](https://codeable.io/?ref=z4Hnp), or a [**Certified WooExpert**](https://woocommerce.com/experts/).
 
@@ -33,9 +33,9 @@ To create a new webhook:
 
 3/  **Enter**.
 
-- **Name**: The  **name**  is auto-generated as “Webhook created on [date and time of creation]” as a standard to facilitate creation. Change the name to something else.
+- **Name**: The  **name**  is auto-generated as "Webhook created on [date and time of creation]" as a standard to facilitate creation. Change the name to something else.
 - **Status**: Set to **Active** (delivers payload),  **Paused** (does not deliver), or **Disabled** (does not deliver due delivery failures).
-- **Topic**: Indicate when the webhook should be triggered –  **Order Created**,  **Product Deleted**, or **Customer Updated**. There are also  **Action** and  **Custom** options.
+- **Topic**: Indicate when the webhook should be triggered -  **Order Created**,  **Product Deleted**, or **Customer Updated**. There are also  **Action** and  **Custom** options.
     - **Action Event**: This option is available when the Topic is a WooCommerce **Action**, such as  `woocommerce_add_to_cart`  for when customers add products to the shopping cart.
     - **Custom Topic**: This option is for  **advanced users only**. It’s possible to introduce new, customized topics with the help of  `woocommerce_webhook_topic_hooks`  filter.
 - **Delivery URL**: URL where the webhook payload is delivered.

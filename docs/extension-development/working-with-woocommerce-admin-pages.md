@@ -21,11 +21,11 @@ wc_admin_connect_page(
 
 The [`wc_admin_connect_page()`](https://woocommerce.github.io/code-reference/namespaces/default.html#function_wc_admin_connect_page) function accepts an array of arguments, two of which are optional:
 
-* `id` (**required**) — This identifies the page with the controller.
-* `parent` (_optional_) — This value denotes the page as a child of a parent (using the parent’s ID) and is used for generating breadcrumbs.
-* `screen_id` (**required**) — This corresponds to [`PageController::get_current_screen_id()`](https://woocommerce.github.io/code-reference/classes/Automattic-WooCommerce-Admin-PageController.html#method_get_current_screen_id). It is used to determine the current page. (see note below)
-* `title` (**required**) — This corresponds to the page’s title and is used to build breadcrumbs. You can supply a string or an array of breadcrumb pieces here.
-* `path` (_optional_) — This is the page’s relative path. Used for linking breadcrumb pieces when this page is a parent.
+* `id` (**required**) - This identifies the page with the controller.
+* `parent` (_optional_) - This value denotes the page as a child of a parent (using the parent’s ID) and is used for generating breadcrumbs.
+* `screen_id` (**required**) - This corresponds to [`PageController::get_current_screen_id()`](https://woocommerce.github.io/code-reference/classes/Automattic-WooCommerce-Admin-PageController.html#method_get_current_screen_id). It is used to determine the current page. (see note below)
+* `title` (**required**) - This corresponds to the page’s title and is used to build breadcrumbs. You can supply a string or an array of breadcrumb pieces here.
+* `path` (_optional_) - This is the page’s relative path. Used for linking breadcrumb pieces when this page is a parent.
 
 In the example above, you can see how to use an array to construct breadcrumbs for your extension. WooCommerce will attach a link leading to the `path` value to the first piece in the title array. All subsequent pieces are rendered as text and not linked.
 
@@ -48,16 +48,16 @@ You can also use the `wc_admin_current_screen_id` filter to make any changes nec
 
 To register a React-powered page, use the [`wc_admin_register_page()`](https://woocommerce.github.io/code-reference/namespaces/default.html#function_wc_admin_register_page) function. It accepts an array of arguments:
 
-* `id` (**required**) — This identifies the page with the controller.
-* `parent` (_optional_) — This denotes the page as a child of `parent` (using the parent’s ID) and is used for generating breadcrumbs.
-* `title` (**required**) — This corresponds to the page’s title and is used to build breadcrumbs. You can supply a String or an Array of breadcrumb pieces here.
-* `path` (**required**) — This is the page’s path (relative to `#wc-admin`). It is used for identifying this page and for linking breadcrumb pieces when this page is a parent.
-* `capability` (_optional_) — User capability needed to access this page. The default value is `manage_options`.
-* `icon` (_optional_) — Use this to apply a Dashicons helper class or base64-encoded SVG. Include the entire dashicon class name, ie `dashicons-*`. Note that this won’t be included in WooCommerce Admin Navigation.
-* `position` (_optional_) — Menu item position for parent pages. See: [`add_menu_page()`](https://developer.wordpress.org/reference/functions/add_menu_page/).
-* `nav_args` (_optional_) — An array of parameters for registering items in WooCommerce Navigation. (see usage below)
-    * `order` – Order number for presentation.
-    * `parent` – Menu for item to fall under. For example: `woocommerce`, `woocommerce-settings` or `woocommerce-analytics`. Categories added by an extension are available as well.
+* `id` (**required**) - This identifies the page with the controller.
+* `parent` (_optional_) - This denotes the page as a child of `parent` (using the parent’s ID) and is used for generating breadcrumbs.
+* `title` (**required**) - This corresponds to the page’s title and is used to build breadcrumbs. You can supply a String or an Array of breadcrumb pieces here.
+* `path` (**required**) - This is the page’s path (relative to `#wc-admin`). It is used for identifying this page and for linking breadcrumb pieces when this page is a parent.
+* `capability` (_optional_) - User capability needed to access this page. The default value is `manage_options`.
+* `icon` (_optional_) - Use this to apply a Dashicons helper class or base64-encoded SVG. Include the entire dashicon class name, ie `dashicons-*`. Note that this won’t be included in WooCommerce Admin Navigation.
+* `position` (_optional_) - Menu item position for parent pages. See: [`add_menu_page()`](https://developer.wordpress.org/reference/functions/add_menu_page/).
+* `nav_args` (_optional_) - An array of parameters for registering items in WooCommerce Navigation. (see usage below)
+    * `order` - Order number for presentation.
+    * `parent` - Menu for item to fall under. For example: `woocommerce`, `woocommerce-settings` or `woocommerce-analytics`. Categories added by an extension are available as well.
 
 Registering a React-powered page is similar to connecting a PHP page, but with some key differences. Registering pages will automatically create WordPress menu items for them, with the appropriate hierarchy based on the value of `parent`.
 

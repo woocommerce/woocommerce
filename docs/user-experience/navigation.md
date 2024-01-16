@@ -22,4 +22,4 @@ Extensions drawer (Woo Express)
 
 **Keep menu structure simple.** Use existing WooCommerce menu structures as much as possible to reduce redundancies. If your plugin must introduce multiple pages or areas, consider grouping them in tabs using existing components to remain consistent with WooCommerce structure. 
 
-**No top level navigation.** If your product is extending WooCommerce, then there’s a 99.9% chance your product navigation, and settings should live within the WooCommerce nav structure—see above menu structure examples.
+**No top level navigation.** If your product is extending WooCommerce, then there’s a 99.9% chance your product navigation, and settings should live within the WooCommerce nav structure-see above menu structure examples.
