@@ -150,6 +150,12 @@ const blocks = {
 	'order-confirmation-additional-information': {
 		customDir: 'order-confirmation/additional-information',
 	},
+	'order-confirmation-additional-fields-wrapper': {
+		customDir: 'order-confirmation/additional-fields-wrapper',
+	},
+	'order-confirmation-additional-fields': {
+		customDir: 'order-confirmation/additional-fields',
+	},
 };
 
 // Returns the entries for each block given a relative path (ie: `index.js`,

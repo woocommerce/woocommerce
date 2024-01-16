@@ -606,13 +606,21 @@ class CheckoutFields {
 	 * Returns an array of fields for a given group.
 	 *
 	 * @param string $location The location to get fields for (address|contact|additional).
-	 *
-	 * @return array An array of fields.
+	 * @return array An array of fields definitions.
 	 */
 	public function get_fields_for_location( $location ) {
 		if ( in_array( $location, array_keys( $this->fields_locations ), true ) ) {
-			return $this->fields_locations[ $location ];
+			$order_fields_keys = $this->fields_locations[ $location ];
+
+			return array_filter(
+				$this->get_additional_fields(),
+				function( $key ) use ( $order_fields_keys ) {
+					return in_array( $key, $order_fields_keys, true );
+				},
+				ARRAY_FILTER_USE_KEY
+			);
 		}
+		return [];
 	}
 
 	/**
@@ -620,7 +628,7 @@ class CheckoutFields {
 	 *
 	 * @param string $key The field key.
 	 * @param mixed  $value The field value.
-	 * @param string $location The gslocation to validate the field for (address|contact|additional).
+	 * @param string $location The location to validate the field for (address|contact|additional).
 	 *
 	 * @return true|\WP_Error True if the field is valid, a WP_Error otherwise.
 	 */
@@ -942,4 +950,50 @@ class CheckoutFields {
 		);
 	}
 
+	/**
+	 * Get additional fields for an order.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @param string    $location The location to get fields for (address|contact|additional).
+	 * @param string    $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
+	 * @return array An array of fields definitions as well as their values formatted for display.
+	 */
+	public function get_order_additional_fields_with_values( $order, $location, $group = '' ) {
+		$fields             = $this->get_fields_for_location( $location );
+		$fields_with_values = array();
+
+		foreach ( $fields as $field_key => $field ) {
+			$value = $this->format_additional_field_value(
+				$this->get_field_from_order( $field_key, $order, $group ),
+				$field
+			);
+			if ( '' === $value ) {
+				continue;
+			}
+			$fields_with_values[ $field_key ]          = $field;
+			$fields_with_values[ $field_key ]['value'] = $value;
+		}
+
+		return $fields_with_values;
+	}
+
+	/**
+	 * Formats a raw field value for display based on its type definition.
+	 *
+	 * @param string $value Value to format.
+	 * @param array  $field Additional field definition.
+	 * @return string
+	 */
+	public function format_additional_field_value( $value, $field ) {
+		if ( 'checkbox' === $field['type'] ) {
+			$value = $value ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' );
+		}
+
+		if ( 'select' === $field['type'] ) {
+			$options = array_column( $field['options'], 'label', 'value' );
+			$value   = isset( $options[ $value ] ) ? $options[ $value ] : $value;
+		}
+
+		return $value;
+	}
 }

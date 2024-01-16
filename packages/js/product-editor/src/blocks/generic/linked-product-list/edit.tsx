@@ -6,6 +6,7 @@ import {
 	useCallback,
 	useEffect,
 	useReducer,
+	useState,
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
@@ -98,7 +99,12 @@ export function LinkedProductListBlockEdit( {
 
 	const filter = useCallback(
 		( search = '' ) => {
-			return searchProductsDispatcher( linkedProductIds ?? [], search );
+			// Exclude the current product and any already linked products.
+			const exclude = [ productId ];
+			if ( linkedProductIds ) {
+				exclude.push( ...linkedProductIds );
+			}
+			return searchProductsDispatcher( exclude, search );
 		},
 		[ linkedProductIds ]
 	);
@@ -125,6 +131,8 @@ export function LinkedProductListBlockEdit( {
 		setLinkedProductIds( newLinkedProductIds );
 	}
 
+	const [ isChoosingProducts, setIsChoosingProducts ] = useState( false );
+
 	async function chooseProductsForMe() {
 		dispatch( {
 			type: 'LOADING_LINKED_PRODUCTS',
@@ -133,9 +141,11 @@ export function LinkedProductListBlockEdit( {
 			},
 		} );
 
-		const relatedProducts = ( await getRelatedProducts(
-			productId
-		) ) as Product[];
+		setIsChoosingProducts( true );
+
+		const relatedProducts = ( await getRelatedProducts( productId, {
+			fallbackToRandomProducts: true,
+		} ) ) as Product[];
 
 		dispatch( {
 			type: 'LOADING_LINKED_PRODUCTS',
@@ -143,6 +153,8 @@ export function LinkedProductListBlockEdit( {
 				isLoading: false,
 			},
 		} );
+
+		setIsChoosingProducts( false );
 
 		if ( ! relatedProducts ) {
 			return;
@@ -163,6 +175,8 @@ export function LinkedProductListBlockEdit( {
 					variant="tertiary"
 					icon={ reusableBlock }
 					onClick={ chooseProductsForMe }
+					isBusy={ isChoosingProducts }
+					disabled={ isChoosingProducts }
 				>
 					{ __( 'Choose products for me', 'woocommerce' ) }
 				</Button>
