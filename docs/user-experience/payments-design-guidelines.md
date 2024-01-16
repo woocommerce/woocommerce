@@ -12,7 +12,7 @@ The choice between payment plugins depends on the specific needs and preferences
 A merchant can discover a payments plugin in the following ways:
 
 - Through direct installation from WordPress plugins.
-- Through Woo’s public list of payment services on the Marketplace.
+- Through Woo's public list of payment services on the Marketplace.
 - Through the admin onboarding tasks and payments settings. To be added to the list of payment gateways in the Woo admin, the payments plugin must meet the criteria listed in these guidelines.
 
 ## Payments onboarding
@@ -40,7 +40,7 @@ Follow the Woo User Experience guidelines for [Settings](docs/user-experience/se
 
 Include sensible default settings to minimize the configuration effort for the user.
 
-After the merchant has completed all the actions that are required for your plugin’s onboarding, merchants are redirected back to the Woo admin to select payment methods to offer and configure additional settings for the plugin.
+After the merchant has completed all the actions that are required for your plugin's onboarding, merchants are redirected back to the Woo admin to select payment methods to offer and configure additional settings for the plugin.
 
 If you're offering multiple payment methods within the plugin, present the choices clearly to the merchant and provide an indication of which payment methods are enabled.
 
@@ -69,7 +69,7 @@ Height for payment buttons ranges from 40px (Small) to 56px (Large). The default
 Payment buttons consist of up to three elements: a button component, payment logo, and optional label.
 [Anatomy.png]
 
-Don’t place any text outside the surface area of the button.
+Don't place any text outside the surface area of the button.
 
 ![Cart layout 2](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Cart-layout-2.png")
 
@@ -93,7 +93,7 @@ Make payment buttons the same size, no bigger or smaller than other payment butt
 
 ### Button width
 
-Use the same width size for all payment buttons. Don’t make the width larger or smaller than other payment buttons.
+Use the same width size for all payment buttons. Don't make the width larger or smaller than other payment buttons.
 
 ![button width.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Button-width.png)
 
@@ -103,13 +103,13 @@ Buttons have a minimum width to ensure readability.
 
 ![Layout and spacing-2.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Layout-and-spacing-2.png)
 
-Follow the minimum width of each payment button size. Don’t squeeze payment buttons in a single line.
+Follow the minimum width of each payment button size. Don't squeeze payment buttons in a single line.
 
 ![Minimum width.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Minimum-width.png)
 
 ### Button Shape
 
-Use the same corner radius for all payment buttons. Don’t make the corner radius larger or smaller than other payment buttons.
+Use the same corner radius for all payment buttons. Don't make the corner radius larger or smaller than other payment buttons.
 
 - Default corner radius: 4px
 - Maximum corner radius: ½ button height
@@ -143,19 +143,19 @@ Use the appropriate button style depending on the site theme.
 
 ### Dark
 
-Use on white or light-color backgrounds. Don’t use on black or dark backgrounds.
+Use on white or light-color backgrounds. Don't use on black or dark backgrounds.
 
 ![Dark.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Dark.png)
 
 ### Light
 
-Use on dark-color backgrounds. Don’t use on white or light backgrounds.
+Use on dark-color backgrounds. Don't use on white or light backgrounds.
 
 ![Light.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Light.png)
 
 ### Light with outline
 
-Use on white or light-color backgrounds that don’t provide sufficient contrast. Don’t use on dark or saturated backgrounds.
+Use on white or light-color backgrounds that don't provide sufficient contrast. Don't use on dark or saturated backgrounds.
 
 ![Light with outline.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Light-with-outline.png)
 
@@ -189,7 +189,7 @@ Position payment buttons correctly in horizontal layout, consistent in size and 
 
 ### Mobile view
 
-Express payment buttons on mobile should occupy the full width. Don’t use the express payment border as it reduces the view area.
+Express payment buttons on mobile should occupy the full width. Don't use the express payment border as it reduces the view area.
 
 ![Mobile view.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Mobile-view.png)
 

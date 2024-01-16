@@ -12,8 +12,8 @@ To create custom translations you can consider using [Poedit](https://poedit.net
 
 To set your WordPress site's language:
 
-1. Go to `WP Admin » Settings » General` and adjust the `Site Language`.
-2. Go to `WP Admin » Dashboard » Updates` and click the `Update Translations` button.
+1. Go to `WP Admin > Settings > General` and adjust the `Site Language`.
+2. Go to `WP Admin > Dashboard > Updates` and click the `Update Translations` button.
 
 Once this has been done, the shop displays in your locale if the language file exists. Otherwise, you need to create the language files (process explained below).
 
@@ -67,7 +67,7 @@ To get started:
     ![screenshot](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/Screen-Shot-2013-05-09-at-10.20.58.png)
 
 5. Save after translating strings. The `.mo` file is generated automatically.
-6. Update your `.po` file by opening it and then go to `Catalog » Update from POT file`.
+6. Update your `.po` file by opening it and then go to `Catalog > Update from POT file`.
 7. Choose the file and it will be updated accordingly.
 
 ## Making your translation upgrade safe
@@ -124,7 +124,7 @@ In order to fix it, navigate to WooCommerce settings corresponding to the string
 
 **Local pickup**:
 
-1.  Go to `WooCommerce » Settings » Shipping » Shipping Zones`.
+1.  Go to `WooCommerce > Settings > Shipping > Shipping Zones`.
 2.  Select the shipping zone where "Local pickup" is listed.
 3.  Open "Local pickup" settings.
 4.  Rename the method using your translation.
@@ -132,7 +132,7 @@ In order to fix it, navigate to WooCommerce settings corresponding to the string
 
 **Cash on delivery**:
 
-1.  Go to `WooCommerce » Settings » Payments`.
+1.  Go to `WooCommerce > Settings > Payments`.
 2.  Select the "Cash on delivery" payment method.
 3.  Open its settings.
 4.  Rename the method title, description, and instructions using your translation.
@@ -140,7 +140,7 @@ In order to fix it, navigate to WooCommerce settings corresponding to the string
 
 **Privacy policy message**:
 
-1.  Go to `WooCommerce » Settings » Accounts & Privacy`.
+1.  Go to `WooCommerce > Settings > Accounts & Privacy`.
 2.  Scroll to the "Privacy policy" section.
 3.  Edit both the `Registration privacy policy` and `Checkout privacy policy` fields with your translation.
 4.  Save the settings.

@@ -2,7 +2,7 @@
 post_title: Product editor extensibility guidelines
 ---
 
-> ⚠️ **Notice:** These guidelines are currently a **work in progress**. Please be aware that some details might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
+> **Notice:** These guidelines are currently a **work in progress**. Please be aware that some details might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
 
 Changelog:
 
@@ -101,12 +101,12 @@ With so much advanced functionality, the plugin would best register a new produc
 
 Fields are the simplest type of extension. They let users add extra product information, replace or manage the visibility of other fields assigned to a specific product type, and control the contents of other fields.
 
-✅ **What they *are* for:**
+**What they *are* for:**
 
 - Single-field, supplementary features
 - Showing or hiding form elements depending on specific conditions
 
-❌ **What they *aren't* for:**
+**What they *aren't* for:**
 
 - Multi-field or multi-step forms
 - Complex tables, e.g., permissions, restrictions, shipping volumes, etc
@@ -126,19 +126,19 @@ Field extensions should always be logically related to the form area they are in
 
 Subsections add extra fields to existing form groups. They are small forms with a low to medium level of complexity. This interface location works best for extensions that add extra features that build off an existing Woo functionality.
 
-✅ **What they *are* for:**
+**What they *are* for:**
 
 - Relevant features that can be crucial to merchants' product creation flow
 - 2-5 field forms with simple functionality, e.g., dimensions or tax settings
 - Lists of items, e.g., attachments, channels, or accounts
 
-❌ **What they *aren't* for:**
+**What they *aren't* for:**
 
 - Simple extensions with 1-2 fields
 - Multi-step forms and complex tables
 - Read-only descriptions, setup guides, and advertisements
 
-💡 **Example:**
+**Example:**
 
 If you're developing an extension that allows merchants to upload 360 images or videos, you could add it as a field or a button in the Images section in the General tab. This way, merchants can create the perfect product gallery without jumping between multiple tabs.
 
@@ -154,19 +154,19 @@ If you're developing an extension that allows merchants to upload 360 images or 
 
 Sections are significant parts of the form that may consist of multiple subsections and fields. They should be used sparsely throughout the form, so merchants are not overwhelmed with options while filling out the information about their products.
 
-✅ **What they *are* for:**
+**What they *are* for:**
 
 - Complex forms with multiple fields, tables, and list items
 - Standalone features that don't build off of anything else
 - Extensions that rely on user-created items, such as tags or attributes
 
-❌ **What they *aren't* for:**
+**What they *aren't* for:**
 
 - Simple extensions with 1-2 fields
 - Read-only descriptions, setup guides, and advertisements
 - Multi-step setup wizards and external content
 
-💡 **Example:**
+**Example:**
 
 If you're working on an extension that allows merchants to offer discounts based on the number of purchased items, you may consider adding a new section in the Pricing tab. This will give you enough space to present the information in a legible, easy-to-navigate manner.
 
@@ -200,13 +200,13 @@ Dialog extensions differ from other extensions as they are unrelated to any sect
 
 Dialogs can have different sizes (small, medium, large, or custom) and trigger locations (text or icon button anywhere in the form or in the form's top bar).
 
-✅ **What they *are* for:**
+**What they *are* for:**
 
 - Focused experiences that require taking over most of the screen
 - Advanced configuration and setup flows
 - Dedicated content embedded from a third-party service
 
-❌ **What they *aren't* for:**
+**What they *aren't* for:**
 
 - Single-field features or simple settings screens
 - Small functionalities that could fit within the form
