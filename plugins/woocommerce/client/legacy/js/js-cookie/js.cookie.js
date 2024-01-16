@@ -1,165 +1,147 @@
-/*!
- * JavaScript Cookie v2.1.4
- * https://github.com/js-cookie/js-cookie
- *
- * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
- * Released under the MIT license
- */
-;(function (factory) {
-	var registeredInModuleLoader = false;
-	if (typeof define === 'function' && define.amd) {
-		define(factory);
-		registeredInModuleLoader = true;
-	}
-	if (typeof exports === 'object') {
-		module.exports = factory();
-		registeredInModuleLoader = true;
-	}
-	if (!registeredInModuleLoader) {
-		var OldCookies = window.Cookies;
-		var api = window.Cookies = factory();
-		api.noConflict = function () {
-			window.Cookies = OldCookies;
-			return api;
-		};
-	}
-}(function () {
-	function extend () {
-		var i = 0;
-		var result = {};
-		for (; i < arguments.length; i++) {
-			var attributes = arguments[ i ];
-			for (var key in attributes) {
-				result[key] = attributes[key];
+/*! js-cookie v3.0.5 | MIT */
+;
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+		typeof define === 'function' && define.amd ? define(factory) :
+			(global = typeof globalThis !== 'undefined' ? globalThis : global || self, (function () {
+				var current = global.Cookies;
+				var exports = global.Cookies = factory();
+				exports.noConflict = function () { global.Cookies = current; return exports; };
+			})());
+})(this, (function () { 'use strict';
+
+	/* eslint-disable no-var */
+	function assign (target) {
+		for (var i = 1; i < arguments.length; i++) {
+			var source = arguments[i];
+			for (var key in source) {
+				target[key] = source[key];
 			}
 		}
-		return result;
+		return target
 	}
+	/* eslint-enable no-var */
 
-	function init (converter) {
-		function api (key, value, attributes) {
-			var result;
+	/* eslint-disable no-var */
+	var defaultConverter = {
+		read: function (value) {
+			if (value[0] === '"') {
+				value = value.slice(1, -1);
+			}
+			return value.replace(/(%[\dA-F]{2})+/gi, decodeURIComponent)
+		},
+		write: function (value) {
+			return encodeURIComponent(value).replace(
+				/%(2[346BF]|3[AC-F]|40|5[BDE]|60|7[BCD])/g,
+				decodeURIComponent
+			)
+		}
+	};
+	/* eslint-enable no-var */
+
+	/* eslint-disable no-var */
+
+	function init (converter, defaultAttributes) {
+		function set (name, value, attributes) {
 			if (typeof document === 'undefined') {
-				return;
+				return
 			}
 
-			// Write
+			attributes = assign({}, defaultAttributes, attributes);
 
-			if (arguments.length > 1) {
-				attributes = extend({
-					path: '/'
-				}, api.defaults, attributes);
-
-				if (typeof attributes.expires === 'number') {
-					var expires = new Date();
-					expires.setMilliseconds(expires.getMilliseconds() + attributes.expires * 864e+5);
-					attributes.expires = expires;
-				}
-
-				// We're using "expires" because "max-age" is not supported by IE
-				attributes.expires = attributes.expires ? attributes.expires.toUTCString() : '';
-
-				try {
-					result = JSON.stringify(value);
-					if (/^[\{\[]/.test(result)) {
-						value = result;
-					}
-				} catch (e) {}
-
-				if (!converter.write) {
-					value = encodeURIComponent(String(value))
-						.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
-				} else {
-					value = converter.write(value, key);
-				}
-
-				key = encodeURIComponent(String(key));
-				key = key.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
-				key = key.replace(/[\(\)]/g, escape);
-
-				var stringifiedAttributes = '';
-
-				for (var attributeName in attributes) {
-					if (!attributes[attributeName]) {
-						continue;
-					}
-					stringifiedAttributes += '; ' + attributeName;
-					if (attributes[attributeName] === true) {
-						continue;
-					}
-					stringifiedAttributes += '=' + attributes[attributeName];
-				}
-				return (document.cookie = key + '=' + value + stringifiedAttributes);
+			if (typeof attributes.expires === 'number') {
+				attributes.expires = new Date(Date.now() + attributes.expires * 864e5);
+			}
+			if (attributes.expires) {
+				attributes.expires = attributes.expires.toUTCString();
 			}
 
-			// Read
+			name = encodeURIComponent(name)
+				.replace(/%(2[346B]|5E|60|7C)/g, decodeURIComponent)
+				.replace(/[()]/g, escape);
 
-			if (!key) {
-				result = {};
+			var stringifiedAttributes = '';
+			for (var attributeName in attributes) {
+				if (!attributes[attributeName]) {
+					continue
+				}
+
+				stringifiedAttributes += '; ' + attributeName;
+
+				if (attributes[attributeName] === true) {
+					continue
+				}
+
+				// Considers RFC 6265 section 5.2:
+				// ...
+				// 3.  If the remaining unparsed-attributes contains a %x3B (";")
+				//     character:
+				// Consume the characters of the unparsed-attributes up to,
+				// not including, the first %x3B (";") character.
+				// ...
+				stringifiedAttributes += '=' + attributes[attributeName].split(';')[0];
+			}
+
+			return (document.cookie =
+				name + '=' + converter.write(value, name) + stringifiedAttributes)
+		}
+
+		function get (name) {
+			if (typeof document === 'undefined' || (arguments.length && !name)) {
+				return
 			}
 
 			// To prevent the for loop in the first place assign an empty array
-			// in case there are no cookies at all. Also prevents odd result when
-			// calling "get()"
+			// in case there are no cookies at all.
 			var cookies = document.cookie ? document.cookie.split('; ') : [];
-			var rdecode = /(%[0-9A-Z]{2})+/g;
-			var i = 0;
-
-			for (; i < cookies.length; i++) {
+			var jar = {};
+			for (var i = 0; i < cookies.length; i++) {
 				var parts = cookies[i].split('=');
-				var cookie = parts.slice(1).join('=');
-
-				if (cookie.charAt(0) === '"') {
-					cookie = cookie.slice(1, -1);
-				}
+				var value = parts.slice(1).join('=');
 
 				try {
-					var name = parts[0].replace(rdecode, decodeURIComponent);
-					cookie = converter.read ?
-						converter.read(cookie, name) : converter(cookie, name) ||
-						cookie.replace(rdecode, decodeURIComponent);
+					var found = decodeURIComponent(parts[0]);
+					jar[found] = converter.read(value, found);
 
-					if (this.json) {
-						try {
-							cookie = JSON.parse(cookie);
-						} catch (e) {}
-					}
-
-					if (key === name) {
-						result = cookie;
-						break;
-					}
-
-					if (!key) {
-						result[name] = cookie;
+					if (name === found) {
+						break
 					}
 				} catch (e) {}
 			}
 
-			return result;
+			return name ? jar[name] : jar
 		}
 
-		api.set = api;
-		api.get = function (key) {
-			return api.call(api, key);
-		};
-		api.getJSON = function () {
-			return api.apply({
-				json: true
-			}, [].slice.call(arguments));
-		};
-		api.defaults = {};
-
-		api.remove = function (key, attributes) {
-			api(key, '', extend(attributes, {
-				expires: -1
-			}));
-		};
-
-		api.withConverter = init;
-
-		return api;
+		return Object.create(
+			{
+				set,
+				get,
+				remove: function (name, attributes) {
+					set(
+						name,
+						'',
+						assign({}, attributes, {
+							expires: -1
+						})
+					);
+				},
+				withAttributes: function (attributes) {
+					return init(this.converter, assign({}, this.attributes, attributes))
+				},
+				withConverter: function (converter) {
+					return init(assign({}, this.converter, converter), this.attributes)
+				}
+			},
+			{
+				attributes: { value: Object.freeze(defaultAttributes) },
+				converter: { value: Object.freeze(converter) }
+			}
+		)
 	}
 
-	return init(function () {});
+	var api = init(defaultConverter, { path: '/' });
+	/* eslint-enable no-var */
+
+	return api;
+
 }));
