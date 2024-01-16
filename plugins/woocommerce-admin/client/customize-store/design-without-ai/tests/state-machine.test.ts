@@ -68,7 +68,7 @@ describe( 'Design Without AI state machine', () => {
 			).toBeTruthy();
 		} );
 
-		it( "should not transit to installAndActivateTheme state when the url isn't /design", () => {
+		it( "should not transit to preAssembleSite state when the url isn't /design", () => {
 			const hasStepInUrl = jest.fn( () => false );
 			const machine = designWithNoAiStateMachineDefinition.withConfig( {
 				guards: {
@@ -79,9 +79,7 @@ describe( 'Design Without AI state machine', () => {
 			const machineInterpret = interpret( machine ).start();
 
 			expect(
-				machineInterpret
-					.getSnapshot()
-					.matches( 'installAndActivateTheme' )
+				machineInterpret.getSnapshot().matches( 'preAssembleSite' )
 			).toBeFalsy();
 		} );
 	} );
