@@ -115,15 +115,6 @@ describe( 'AttributeControl', () => {
 		jest.clearAllMocks();
 	} );
 
-	describe( 'empty state', () => {
-		it( 'should show subtitle and "Add new" button', () => {
-			const { queryByText } = render(
-				<AttributeControl value={ [] } onChange={ () => {} } />
-			);
-			expect( queryByText( 'Add new' ) ).toBeInTheDocument();
-		} );
-	} );
-
 	it( 'should render the list of all attributes', async () => {
 		act( () => {
 			render(

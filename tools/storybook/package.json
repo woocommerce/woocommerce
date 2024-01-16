@@ -50,7 +50,7 @@
 		"react-dom": "^17.0.2",
 		"typescript": "^5.3.3",
 		"webpack": "^5.89.0",
-		"wireit": "0.14.1"
+		"wireit": "0.14.3"
 	},
 	"dependencies": {
 		"@babel/preset-typescript": "^7.23.3"

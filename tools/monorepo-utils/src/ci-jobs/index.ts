@@ -21,14 +21,25 @@ const program = new Command( 'ci-jobs' )
 		'<base-ref>',
 		'Base ref to compare the current ref against for change detection.'
 	)
-	.action( async ( baseRef: string ) => {
+	.option(
+		'-f --force',
+		'Forces all projects to be marked as changed.',
+		false
+	)
+	.action( async ( baseRef: string, options ) => {
 		Logger.startTask( 'Parsing Project Graph', true );
 		const projectGraph = buildProjectGraph();
 		Logger.endTask( true );
 
-		Logger.startTask( 'Pulling File Changes', true );
-		const fileChanges = getFileChanges( projectGraph, baseRef );
-		Logger.endTask( true );
+		let fileChanges;
+		if ( options.force ) {
+			Logger.warn( 'Forcing all projects to be marked as changed.' );
+			fileChanges = true;
+		} else {
+			Logger.startTask( 'Pulling File Changes', true );
+			fileChanges = getFileChanges( projectGraph, baseRef );
+			Logger.endTask( true );
+		}
 
 		Logger.startTask( 'Creating Jobs', true );
 		const jobs = await createJobsForChanges( projectGraph, fileChanges, {
