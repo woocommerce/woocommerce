@@ -34,7 +34,7 @@ module.exports = {
 			__dirname,
 			'build/mocks/style-mock.js'
 		),
-		// Force some modulse  to resolve with the CJS entry point, because Jest does not support package.json.exports.
+		// Force some modules to resolve with the CJS entry point, because Jest does not support package.json.exports.
 		uuid: require.resolve( 'uuid' ),
 		memize: require.resolve( 'memize' ),
 		'@wordpress/core-data': require.resolve( '@wordpress/core-data' ),
