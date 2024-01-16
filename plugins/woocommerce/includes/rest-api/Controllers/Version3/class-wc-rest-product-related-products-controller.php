@@ -64,10 +64,10 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 	public function get_items( $request ) {
 		$product_id  = $request->get_param( 'product_id' );
 		$object      = wc_get_product( $product_id );
-		$related_ids = wc_get_related_products( $product_id );
+		$ids         = wc_get_related_products( $product_id );
 
 		return (object) array(
-			'related_product_ids' => $related_ids,
+			'ids' => $ids,
 		);
 	}
 }
