@@ -10,7 +10,8 @@
 	"apiVersion": 2,
 	"ancestor": [ "woocommerce/product-filters" ],
 	"supports": {
-		"interactivity": true
+		"interactivity": true,
+		"inserter": false
 	},
 	"usesContext": [ "collectionData" ],
 	"attributes": {

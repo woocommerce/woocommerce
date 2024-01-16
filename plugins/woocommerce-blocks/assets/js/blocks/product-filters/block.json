@@ -15,11 +15,10 @@
 		"collectionData": "collectionData"
 	},
 	"attributes": {
-		"collectionData": {
-			"type": "object",
-			"default": {}
-		},
 		"filterType": {
+			"type": "string"
+		},
+		"heading": {
 			"type": "string"
 		}
 	},

@@ -9,6 +9,7 @@
 		"interactivity": true,
 		"html": false,
 		"multiple": false,
+		"inserter": false,
 		"color": {
 			"text": true,
 			"background": false

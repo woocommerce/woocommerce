@@ -11,6 +11,7 @@
 	"ancestor": [ "woocommerce/product-filters" ],
 	"supports": {
 		"interactivity": true,
+		"inserter": false,
 		"color": {
 			"text": true,
 			"background": false
