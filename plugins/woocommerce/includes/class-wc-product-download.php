@@ -252,7 +252,7 @@ class WC_Product_Download implements ArrayAccess {
 	private function raise_invalid_file_exception( string $download_file ): void {
 		throw new Exception(
 			sprintf(
-			/* translators: %1$s is the downloadable file path, %2$s is an opening link tag, %3%s is a closing link tag. */
+				/* translators: %1$s is the downloadable file path, %2$s is an opening link tag, %3%s is a closing link tag. */
 				__( 'The downloadable file %s cannot be used as it does not exist on the server, or is not located within an approved directory. Please contact a site administrator for help. %2$sLearn more.%3$s', 'woocommerce' ),
 				'<code>' . $download_file . '</code>',
 				'<a href="https://woo.com/document/approved-download-directories">',
