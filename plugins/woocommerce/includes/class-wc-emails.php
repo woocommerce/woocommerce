@@ -608,43 +608,25 @@ class WC_Emails {
 			return;
 		}
 
-		$checkout_fields  = Package::container()->get( CheckoutFields::class );
-		$fields           = array_merge(
-			$checkout_fields->get_fields_for_location( 'contact' ),
-			$checkout_fields->get_fields_for_location( 'additional' )
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+		$fields          = array_merge(
+			$checkout_fields->get_order_additional_fields_with_values( $order, 'contact' ),
+			$checkout_fields->get_order_additional_fields_with_values( $order, 'additional' )
 		);
-		$formatted_fields = array();
 
-		foreach ( $fields as $field_key => $field ) {
-			$value = $checkout_fields->get_field_from_order( $field_key, $order, $address_type );
-
-			if ( '' === $value ) {
-				continue;
-			}
-
-			if ( 'checkbox' === $field['type'] ) {
-				$value = $value ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' );
-			}
-
-			$formatted_fields[] = array(
-				'label' => $field['label'],
-				'value' => $value,
-			);
-		}
-
-		if ( ! $formatted_fields ) {
+		if ( ! $fields ) {
 			return;
 		}
 
 		if ( $plain_text ) {
 			echo "\n" . esc_html( wc_strtoupper( __( 'Additional information', 'woocommerce' ) ) ) . "\n\n";
-			foreach ( $formatted_fields as $field ) {
+			foreach ( $fields as $field ) {
 				printf( "%s: %s\n", wp_kses_post( $field['label'] ), wp_kses_post( $field['value'] ) );
 			}
 		} else {
 			echo '<h2>' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2>';
 			echo '<ul class="additional-fields" style="margin-bottom: 40px;">';
-			foreach ( $formatted_fields as $field ) {
+			foreach ( $fields as $field ) {
 				printf( '<li><strong>%s</strong>: %s</li>', wp_kses_post( $field['label'] ), wp_kses_post( $field['value'] ) );
 			}
 			echo '</ul>';
@@ -664,37 +646,17 @@ class WC_Emails {
 			return;
 		}
 
-		$checkout_fields  = Package::container()->get( CheckoutFields::class );
-		$fields           = $checkout_fields->get_fields_for_location( 'address' );
-		$formatted_fields = array();
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+		$fields          = $checkout_fields->get_order_additional_fields_with_values( $order, 'address', $address_type );
 
-		foreach ( $fields as $field_key => $field ) {
-			$value = $checkout_fields->get_field_from_order( $field_key, $order, $address_type );
-
-			if ( '' === $value ) {
-				continue;
-			}
-
-			if ( 'checkbox' === $field['type'] ) {
-				$value = $value ? __( 'Yes', 'woocommerce' ) : __( 'No', 'woocommerce' );
-			}
-
-			$formatted_fields[] = array(
-				'label' => $field['label'],
-				'value' => $value,
-			);
-		}
-
-		if ( ! $formatted_fields ) {
+		if ( ! $fields ) {
 			return;
 		}
 
-		if ( $plain_text ) {
-			foreach ( $formatted_fields as $field ) {
+		foreach ( $fields as $field ) {
+			if ( $plain_text ) {
 				printf( "%s: %s\n", wp_kses_post( $field['label'] ), wp_kses_post( $field['value'] ) );
-			}
-		} else {
-			foreach ( $formatted_fields as $field ) {
+			} else {
 				printf( '<br><strong>%s</strong>: %s', wp_kses_post( $field['label'] ), wp_kses_post( $field['value'] ) );
 			}
 		}
