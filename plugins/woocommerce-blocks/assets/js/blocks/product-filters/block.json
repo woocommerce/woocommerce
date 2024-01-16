@@ -20,6 +20,10 @@
 		},
 		"heading": {
 			"type": "string"
+		},
+		"collectionData": {
+			"type": "object",
+			"default": {}
 		}
 	},
 	"apiVersion": 2,
