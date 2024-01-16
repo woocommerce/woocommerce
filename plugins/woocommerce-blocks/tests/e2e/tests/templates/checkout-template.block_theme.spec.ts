@@ -119,9 +119,7 @@ test.describe( 'Test editing the checkout template', async () => {
 		await frontendUtils.addToCart();
 		await frontendUtils.goToCheckout();
 		await expect(
-			frontendUtils.page
-				.getByText( userText )
-				.first()
+			frontendUtils.page.getByText( userText ).first()
 		).toBeVisible();
 	} );
 } );

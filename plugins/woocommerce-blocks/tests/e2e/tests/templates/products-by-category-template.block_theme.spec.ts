@@ -29,9 +29,7 @@ test.describe( 'Products by Category template', async () => {
 		} );
 		await editorUtils.saveTemplate();
 		await page.goto( permalink );
-		await expect(
-			page.getByText( userText ).first()
-		).toBeVisible();
+		await expect( page.getByText( userText ).first() ).toBeVisible();
 
 		// Verify the edition can be reverted.
 		await admin.visitAdminPage(
@@ -40,9 +38,7 @@ test.describe( 'Products by Category template', async () => {
 		);
 		await editorUtils.revertTemplateCustomizations( templateName );
 		await page.goto( permalink );
-		await expect(
-			page.getByText( userText )
-		).toHaveCount( 0 );
+		await expect( page.getByText( userText ) ).toHaveCount( 0 );
 	} );
 
 	test( 'defaults to the Product Catalog template', async ( {
@@ -66,9 +62,7 @@ test.describe( 'Products by Category template', async () => {
 		await editorUtils.saveTemplate();
 		await page.goto( permalink );
 		await expect(
-			page
-				.getByText( userTextInCatalogTemplate )
-				.first()
+			page.getByText( userTextInCatalogTemplate ).first()
 		).toBeVisible();
 
 		// Verify the edition can be reverted.
@@ -78,8 +72,8 @@ test.describe( 'Products by Category template', async () => {
 		);
 		await editorUtils.revertTemplateCustomizations( 'Product Catalog' );
 		await page.goto( permalink );
-		await expect(
-			page.getByText( userTextInCatalogTemplate )
-		).toHaveCount( 0 );
+		await expect( page.getByText( userTextInCatalogTemplate ) ).toHaveCount(
+			0
+		);
 	} );
 } );

@@ -117,8 +117,6 @@ test.describe( 'Test editing the cart template', async () => {
 		} );
 		await editorUtils.saveTemplate();
 		await page.goto( permalink, { waitUntil: 'domcontentloaded' } );
-		await expect(
-			page.getByText( userText ).first()
-		).toBeVisible();
+		await expect( page.getByText( userText ).first() ).toBeVisible();
 	} );
 } );

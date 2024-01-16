@@ -28,9 +28,7 @@ test.describe( 'Product Catalog template', async () => {
 		} );
 		await editorUtils.saveTemplate();
 		await page.goto( permalink );
-		await expect(
-			page.getByText( userText ).first()
-		).toBeVisible();
+		await expect( page.getByText( userText ).first() ).toBeVisible();
 
 		// Verify the edition can be reverted.
 		await admin.visitAdminPage(
@@ -40,8 +38,6 @@ test.describe( 'Product Catalog template', async () => {
 		await editorUtils.revertTemplateCustomizations( templateName );
 		await page.goto( permalink );
 
-		await expect(
-			page.getByText( userText )
-		).toHaveCount( 0 );
+		await expect( page.getByText( userText ) ).toHaveCount( 0 );
 	} );
 } );

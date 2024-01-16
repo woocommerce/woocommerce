@@ -41,9 +41,7 @@ test.describe( 'Mini-Cart template part', async () => {
 		await page.getByLabel( 'Add to cart' ).first().click();
 		let block = await frontendUtils.getBlockByName( miniCartBlockName );
 		await block.click();
-		await expect( page.getByRole( 'dialog' ) ).toContainText(
-			userText
-		);
+		await expect( page.getByRole( 'dialog' ) ).toContainText( userText );
 
 		// Verify the edition can be reverted.
 		await admin.visitAdminPage(
