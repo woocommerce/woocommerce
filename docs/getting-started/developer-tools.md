@@ -1,5 +1,6 @@
 ---
 post_title: WooCommerce developer tools
+menu_title: Developer tools
 tags: reference
 ---
 

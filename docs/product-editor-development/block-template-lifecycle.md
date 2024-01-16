@@ -1,5 +1,7 @@
 ---
-post_title: Block template lifecycle
+post_title: Managing the lifecycle of WooCommerce block templates
+menu_title: Block template lifecycle
+tags: reference
 ---
 
 A block template is a tree structure of blocks that define the product editor's form structure.

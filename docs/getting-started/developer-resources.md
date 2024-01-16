@@ -1,5 +1,6 @@
 ---
 post_title: WooCommerce developer resources
+menu_title: Developer resources
 tags: reference
 ---
 
