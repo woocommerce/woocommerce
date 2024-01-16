@@ -1,5 +1,6 @@
 ---
 post_title: Reporting security issues
+tags: how-to
 ---
 
 WooCommerce cares deeply about security and works hard to keep our merchants and their customers safe. 
