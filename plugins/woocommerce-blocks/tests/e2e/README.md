@@ -43,21 +43,21 @@ cd plugins/woocommerce-blocks/
 ```
 
 ```sh
-npm run env:start
+pnpm run env:start
 ```
 
 ```sh
-npm run test:e2e
+pnpm run test:e2e
 ```
 
 ### To run the test again, re-create the environment to start with a fresh state
 
 ```sh
-npm run env:restart
+pnpm run env:restart
 ```
 
 ```sh
-npm run test:e2e
+pnpm run test:e2e
 ```
 
 ### Tests with side effects
@@ -68,7 +68,7 @@ custom plugins) are tests with side effects and we
 tests to a separate test suite:
 
 ```sh
-npm run test:e2e:side-effects
+pnpm run test:e2e:side-effects
 ```
 
 _Note: All command parameters of `test:e2e` can be used for
@@ -81,11 +81,11 @@ some e2e tests which run specifically in a classic theme and in a block theme
 with custom templates. They can be run like this:
 
 ```sh
-npm run test:e2e:classic-theme
+pnpm run test:e2e:classic-theme
 ```
 
 ```sh
-npm run test:e2e:block-theme-with-templates
+pnpm run test:e2e:block-theme-with-templates
 ```
 
 _Note: All command parameters of `test:e2e` can be used for these commands too.
@@ -95,31 +95,31 @@ _Note: All command parameters of `test:e2e` can be used for these commands too.
 Headless mode:
 
 ```sh
-npm run test:e2e
+pnpm run test:e2e
 ```
 
 Interactive UI mode:
 
 ```sh
-npm run test:e2e -- --ui
+pnpm run test:e2e -- --ui
 ```
 
 Headed mode:
 
 ```sh
-npm run test:e2e -- --headed
+pnpm run test:e2e -- --headed
 ```
 
 Debug mode:
 
 ```sh
-npm run test:e2e -- --debug
+pnpm run test:e2e -- --debug
 ```
 
 Running a single test:
 
 ```sh
-npm run test:e2e ./tests/e2e/tests/example.spec.ts
+pnpm run test:e2e ./tests/e2e/tests/example.spec.ts
 ```
 
 To see all options, run the following command:
