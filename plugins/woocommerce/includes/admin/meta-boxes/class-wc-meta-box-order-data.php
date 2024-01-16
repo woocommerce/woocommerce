@@ -35,8 +35,10 @@ class WC_Meta_Box_Order_Data {
 
 	/**
 	 * Init billing and shipping fields we display + save.
+	 *
+	 * @param WC_Order|false $order Order object.
 	 */
-	public static function init_address_fields() {
+	public static function init_address_fields( $order = false ) {
 
 		/**
 		 * Provides an opportunity to modify the list of order billing fields displayed on the admin.
@@ -44,6 +46,7 @@ class WC_Meta_Box_Order_Data {
 		 * @since 1.4.0
 		 *
 		 * @param array Billing fields.
+		 * @param WC_Order|false $order Order object.
 		 */
 		self::$billing_fields = apply_filters(
 			'woocommerce_admin_billing_fields',
@@ -94,7 +97,8 @@ class WC_Meta_Box_Order_Data {
 				'phone'      => array(
 					'label' => __( 'Phone', 'woocommerce' ),
 				),
-			)
+			),
+			$order
 		);
 
 		/**
@@ -103,6 +107,7 @@ class WC_Meta_Box_Order_Data {
 		 * @since 1.4.0
 		 *
 		 * @param array Shipping fields.
+		 * @param WC_Order|false $order Order object.
 		 */
 		self::$shipping_fields = apply_filters(
 			'woocommerce_admin_shipping_fields',
@@ -150,7 +155,8 @@ class WC_Meta_Box_Order_Data {
 				'phone'      => array(
 					'label' => __( 'Phone', 'woocommerce' ),
 				),
-			)
+			),
+			$order
 		);
 	}
 
@@ -166,7 +172,7 @@ class WC_Meta_Box_Order_Data {
 
 		$order = $theorder;
 
-		self::init_address_fields();
+		self::init_address_fields( $order );
 
 		if ( WC()->payment_gateways() ) {
 			$payment_gateways = WC()->payment_gateways->payment_gateways();
@@ -509,7 +515,9 @@ class WC_Meta_Box_Order_Data {
 
 									$field_name = 'shipping_' . $key;
 
-									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+									if ( isset( $field['value'] ) ) {
+										$field_value = $field['value'];
+									} elseif ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
 										$field_value = $order->{"get_$field_name"}( 'edit' );
 									} else {
 										$field_value = $order->get_meta( '_' . $field_name );
@@ -604,8 +612,6 @@ class WC_Meta_Box_Order_Data {
 			throw new Exception( __( 'Payment method is missing.', 'woocommerce' ), 400 );
 		}
 
-		self::init_address_fields();
-
 		// Ensure gateways are loaded in case they need to insert data into the emails.
 		WC()->payment_gateways();
 		WC()->shipping();
@@ -618,6 +624,8 @@ class WC_Meta_Box_Order_Data {
 		if ( ! $order->get_order_key() ) {
 			$props['order_key'] = wc_generate_order_key();
 		}
+
+		self::init_address_fields( $order );
 
 		// Update customer.
 		$customer_id = isset( $_POST['customer_user'] ) ? absint( $_POST['customer_user'] ) : 0;

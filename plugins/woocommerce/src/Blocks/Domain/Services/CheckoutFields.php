@@ -224,6 +224,94 @@ class CheckoutFields {
 	public function init() {
 		add_action( 'woocommerce_blocks_checkout_enqueue_data', array( $this, 'add_fields_data' ) );
 		add_action( 'woocommerce_blocks_cart_enqueue_data', array( $this, 'add_fields_data' ) );
+		add_filter( 'woocommerce_admin_billing_fields', array( $this, 'admin_address_fields' ), 10, 2 );
+		add_filter( 'woocommerce_admin_billing_fields', array( $this, 'admin_contact_fields' ), 10, 2 );
+		add_filter( 'woocommerce_admin_shipping_fields', array( $this, 'admin_address_fields' ), 10, 2 );
+		add_filter( 'woocommerce_admin_shipping_fields', array( $this, 'admin_additional_fields' ), 10, 2 );
+	}
+
+	/**
+	 * Injects address fields in WC admin orders screen.
+	 *
+	 * @param array             $fields The fields to show.
+	 * @param \WC_Order|boolean $order The order to show the fields for.
+	 * @return array
+	 */
+	public function admin_address_fields( $fields, $order ) {
+		if ( ! $order instanceof \WC_Order ) {
+			return $fields;
+		}
+
+		// Inject address fields before email/phone fields.
+		$additional_fields = $this->get_order_additional_fields_with_values(
+			$order,
+			'address',
+			doing_action( 'woocommerce_admin_billing_fields' ) ? 'billing' : 'shipping'
+		);
+
+		$inject_address_fields = array();
+
+		foreach ( $additional_fields as $additional_field_key => $additional_field ) {
+			$inject_address_fields[ $additional_field_key ] = array(
+				'label' => $additional_field['label'],
+				'show'  => true,
+				'value' => $additional_field['value'],
+			);
+		}
+
+		array_splice( $fields, array_search( 'state', array_keys( $fields ), true ) + 1, 0, $inject_address_fields );
+
+		return $fields;
+	}
+
+	/**
+	 * Injects contact fields in WC admin orders screen.
+	 *
+	 * @param array             $fields The fields to show.
+	 * @param \WC_Order|boolean $order The order to show the fields for.
+	 * @return array
+	 */
+	public function admin_contact_fields( $fields, $order ) {
+		if ( ! $order instanceof \WC_Order ) {
+			return $fields;
+		}
+
+		$additional_fields = $this->get_order_additional_fields_with_values( $order, 'contact' );
+
+		foreach ( $additional_fields as $additional_field_key => $additional_field ) {
+			$fields[ $additional_field_key ] = array(
+				'label' => $additional_field['label'],
+				'show'  => true,
+				'value' => $additional_field['value'],
+			);
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * Injects additional fields in WC admin orders screen.
+	 *
+	 * @param array             $fields The fields to show.
+	 * @param \WC_Order|boolean $order The order to show the fields for.
+	 * @return array
+	 */
+	public function admin_additional_fields( $fields, $order ) {
+		if ( ! $order instanceof \WC_Order ) {
+			return $fields;
+		}
+
+		$additional_fields = $this->get_order_additional_fields_with_values( $order, 'additional' );
+
+		foreach ( $additional_fields as $additional_field_key => $additional_field ) {
+			$fields[ $additional_field_key ] = array(
+				'label' => $additional_field['label'],
+				'show'  => true,
+				'value' => $additional_field['value'],
+			);
+		}
+
+		return $fields;
 	}
 
 	/**
