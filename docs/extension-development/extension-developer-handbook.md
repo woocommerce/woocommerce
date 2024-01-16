@@ -171,7 +171,7 @@ If you have a function, what does the function do? There should be comments for 
 
 ## [Test Extension Quality & Security with Quality Insights Tool](https://woo.com/document/create-a-plugin/#section-18)
 
-Integrate the [Quality Insights Toolkit (QIT)](https://woocommerce.github.io/qit-documentation/) into your development workflow to ensure your extension adheres to WordPress / WooCommerce quality and security standards. The QIT allows the ability to test your extensions against new releases of PHP, WooCommerce, and WordPress, as well as other active extensions, at the same time. The following tests are available today:
+Integrate the [Quality Insights Toolkit (QIT)](https://woocommerce.github.io/qit-documentation/) into your development workflow to ensure your extension adheres to WordPress / WooCommerce quality and security standards. The QIT allows the ability to test your extensions against new releases of PHP, WooCommerce, and WordPress, as well as other active extensions, at the same time. Additionally, the toolkit includes a [command-line interface (CLI) tool](https://woocommerce.github.io/qit-documentation/#/cli/getting-started) that allows you to run and view tests against [development builds](https://woocommerce.github.io/qit-documentation/#/cli/running-tests?id=testing-development-builds). This helps to catch errors before releasing a new version. The following tests are available today:
 
 - [End-to-End](https://woocommerce.github.io/qit-documentation/#/test-types/e2e)
 - [Activation](https://woocommerce.github.io/qit-documentation/#/test-types/activation)
