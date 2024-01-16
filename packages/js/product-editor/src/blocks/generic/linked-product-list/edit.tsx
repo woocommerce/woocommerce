@@ -171,6 +171,7 @@ export function LinkedProductListBlockEdit( {
 					icon={ reusableBlock }
 					onClick={ chooseProductsForMe }
 					isBusy={ isChoosingProducts }
+					disabled={ isChoosingProducts }
 				>
 					{ __( 'Choose products for me', 'woocommerce' ) }
 				</Button>
