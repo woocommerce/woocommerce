@@ -26,7 +26,7 @@ const mockVariation = {
 } as ProductVariation;
 
 const anotherMockVariation = {
-	id: 10,
+	id: 11,
 	manage_stock: false,
 	attributes: [],
 	downloads: [],
