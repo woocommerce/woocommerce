@@ -37,7 +37,7 @@ describe( 'getMenuItem', () => {
 } );
 
 describe( 'getGroupName', () => {
-	it( 'should get group name for pricing group as multiple and single update', () => {
+	it( 'should get group name for pricing group for multiple and single update', () => {
 		const group = 'pricing';
 		const isMultipleSelection = true;
 		const groupNameSingle = getGroupName( group, ! isMultipleSelection );
