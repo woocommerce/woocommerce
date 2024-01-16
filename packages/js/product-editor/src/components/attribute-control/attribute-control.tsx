@@ -34,6 +34,7 @@ import { NewAttributeModal } from './new-attribute-modal';
 import { RemoveConfirmationModal } from '../remove-confirmation-modal';
 import { TRACKS_SOURCE } from '../../constants';
 import { AttributeEmptyStateSkeleton } from './attribute-empty-state-skeleton';
+import { SectionActions } from '../block-slot-fill';
 
 type AttributeControlProps = {
 	value: EnhancedProductAttribute[];
@@ -236,15 +237,17 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	return (
 		<div className="woocommerce-attribute-field">
-			<Button
-				variant="secondary"
-				className="woocommerce-add-attribute-list-item__add-button"
-				onClick={ () => {
-					openNewModal();
-				} }
-			>
-				{ uiStrings.newAttributeListItemLabel }
-			</Button>
+			<SectionActions>
+				<Button
+					variant="secondary"
+					className="woocommerce-add-attribute-list-item__add-button"
+					onClick={ () => {
+						openNewModal();
+					} }
+				>
+					{ uiStrings.newAttributeListItemLabel }
+				</Button>
+			</SectionActions>
 			{ uiStrings.notice && (
 				<Notice
 					isDismissible={ true }

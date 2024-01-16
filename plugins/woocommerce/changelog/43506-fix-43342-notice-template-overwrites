@@ -1,4 +1,0 @@
-Significance: major
-Type: fix
-
-Fixed a bug that prevented notice templates from being overwritten.

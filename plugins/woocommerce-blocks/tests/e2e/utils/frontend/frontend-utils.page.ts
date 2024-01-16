@@ -56,6 +56,12 @@ export class FrontendUtils {
 		} );
 	}
 
+	async goToMiniCart() {
+		await this.page.goto( '/mini-cart', {
+			waitUntil: 'domcontentloaded',
+		} );
+	}
+
 	async goToShop() {
 		await this.page.goto( '/shop', {
 			waitUntil: 'commit',

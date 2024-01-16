@@ -3,7 +3,7 @@ post_title: WooCommerce Extension Guidelines - Task List and Inbox
 menu_title: Task list and Inbox
 ---
 
-Plugins should choose between implementing a Task or Inbox note based on the following guidelines. Avoid implementing both Task and Inbox note for the same message, which adds clutter and reduces the impact of the message.
+Plugins should choose between implementing a Task or Inbox note based on the following guidelines. Avoid implementing both Task and Inbox note for the same message, which adds clutter and reduces the impact of the message.
 
 Use the Task List and Inbox sparingly. Messages should be clear, concise, and maintain a consistent tone. Follow the [Grammar, Punctuation, and Capitalization guide](https://woo.com/document/grammar-punctuation-style-guide/).
 

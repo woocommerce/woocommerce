@@ -21,7 +21,6 @@ import { ProductEditorBlockEditProps } from '../../../types';
 
 export function SectionBlockEdit( {
 	attributes,
-	clientId,
 }: ProductEditorBlockEditProps< SectionBlockAttributes > ) {
 	const { description, title, blockGap } = attributes;
 
@@ -66,16 +65,12 @@ export function SectionBlockEdit( {
 							) }
 						</h2>
 
-						<BlockSlot
-							name="section-actions"
-							clientId={ clientId }
-						/>
+						<div className="wp-block-woocommerce-product-section__actions">
+							<BlockSlot name="section-actions" />
+						</div>
 					</div>
 
-					<BlockSlot
-						name="section-description"
-						clientId={ clientId }
-					/>
+					<BlockSlot name="section-description" />
 				</HeadingTagName>
 			) }
 

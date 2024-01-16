@@ -21,11 +21,11 @@ The placement of feedback is vital so the user notices it. For example, when val
 
 ![visualization of four different notice designs next to one another](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/notices1.png)
 
-**Success** message: When the user performs an action that is executed successfully.
+**Success** message: When the user performs an action that is executed successfully.
 
-**Error Message**: When the user performs an action that could not be completed. (This can include validation messages.) When requiring the user to input data, make sure you verify whether each field meets the requirements, such as format, ranges, and if the field is required. Provide validation messages that are adjacent to each field so that the user can act on each in context. Avoid technical jargon.
+**Error Message**: When the user performs an action that could not be completed. (This can include validation messages.) When requiring the user to input data, make sure you verify whether each field meets the requirements, such as format, ranges, and if the field is required. Provide validation messages that are adjacent to each field so that the user can act on each in context. Avoid technical jargon.
 
-**Warning Message**: When the user performs an action that may have completed successfully, but the user should review it and proceed with caution.
+**Warning Message**: When the user performs an action that may have completed successfully, but the user should review it and proceed with caution.
 
 **Informational Message**: When it's necessary to provide information before the user executes any action on the screen. Examples can be limitations within a time period or when a global setting limits actions on the current screen.
 

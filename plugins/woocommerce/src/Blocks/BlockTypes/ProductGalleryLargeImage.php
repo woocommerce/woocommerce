@@ -87,9 +87,9 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		return strtr(
 			'<div class="wc-block-product-gallery-large-image wp-block-woocommerce-product-gallery-large-image" {directives}>
-				<div class="wc-block-product-gallery-large-image__container">
+				<ul class="wc-block-product-gallery-large-image__container">
 					{main_images}
-				</div>
+				</ul>
 					{content}
 			</div>',
 			array(
@@ -142,7 +142,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		$main_image_with_wrapper = array_map(
 			function( $main_image_element ) {
-				return "<div class='wc-block-product-gallery-large-image__wrapper'>" . $main_image_element . '</div>';
+				return "<li class='wc-block-product-gallery-large-image__wrapper'>" . $main_image_element . '</li>';
 			},
 			$main_images
 		);

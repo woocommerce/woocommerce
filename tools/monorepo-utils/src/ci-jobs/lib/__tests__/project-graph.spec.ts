@@ -7,12 +7,10 @@ import fs from 'node:fs';
 /**
  * Internal dependencies
  */
-import { parseCIConfig } from '../config';
 import { loadPackage } from '../package-file';
 import { buildProjectGraph } from '../project-graph';
 
 jest.mock( 'node:child_process' );
-jest.mock( '../config' );
 jest.mock( '../package-file' );
 
 describe( 'Project Graph', () => {
@@ -33,51 +31,69 @@ describe( 'Project Graph', () => {
 			} );
 
 			jest.mocked( loadPackage ).mockImplementation( ( path ) => {
-				if ( ! path.endsWith( 'package.json' ) ) {
-					throw new Error( 'Invalid path' );
+				const matches = path.match( /project-([abcd])\/package.json$/ );
+				if ( ! matches ) {
+					throw new Error( `Invalid project path: ${ path }.` );
 				}
 
-				const matches = path.match( /\/([^/]+)\/package.json$/ );
+				const packageFile = JSON.parse(
+					fs.readFileSync( __dirname + '/test-package.json', {
+						encoding: 'utf8',
+					} )
+				);
 
-				return {
-					name: matches[ 1 ],
-				};
+				packageFile.name = 'project-' + matches[ 1 ];
+
+				switch ( matches[ 1 ] ) {
+					case 'a':
+						packageFile.dependencies = {
+							'project-b': 'workspace:*',
+						};
+						packageFile.devDependencies = {
+							'project-c': 'workspace:*',
+						};
+						break;
+					case 'b':
+						packageFile.dependencies = {
+							'project-c': 'workspace:*',
+						};
+						break;
+					case 'd':
+						packageFile.devDependencies = {
+							'project-c': 'workspace:*',
+						};
+						break;
+				}
+
+				return packageFile;
 			} );
-
-			jest.mocked( parseCIConfig ).mockImplementation(
-				( packageFile ) => {
-					expect( packageFile ).toMatchObject( {
-						name: expect.stringMatching( /project-[abcd]/ ),
-					} );
-
-					return { jobs: [] };
-				}
-			);
 
 			const graph = buildProjectGraph();
 
 			expect( loadPackage ).toHaveBeenCalled();
-			expect( parseCIConfig ).toHaveBeenCalled();
 			expect( graph ).toMatchObject( {
 				name: 'project-a',
 				path: 'project-a',
 				ciConfig: {
-					jobs: [],
+					jobs: [
+						{
+							command: 'foo',
+							type: 'lint',
+							changes: [
+								/^package\.json$/,
+								/^(?:src(?:\/|\/(?:(?!(?:\/|^)\.).)*?\/)(?!\.)[^/]*?\.js|src(?:\/|\/(?:(?!(?:\/|^)\.).)*?\/)(?!\.)[^/]*?\.jsx|src(?:\/|\/(?:(?!(?:\/|^)\.).)*?\/)(?!\.)[^/]*?\.ts|src(?:\/|\/(?:(?!(?:\/|^)\.).)*?\/)(?!\.)[^/]*?\.tsx)$/,
+							],
+						},
+					],
 				},
 				dependencies: [
 					{
 						name: 'project-b',
 						path: 'project-b',
-						ciConfig: {
-							jobs: [],
-						},
 						dependencies: [
 							{
 								name: 'project-c',
 								path: 'project-c',
-								ciConfig: {
-									jobs: [],
-								},
 								dependencies: [],
 							},
 						],
@@ -85,24 +101,15 @@ describe( 'Project Graph', () => {
 					{
 						name: 'project-c',
 						path: 'project-c',
-						ciConfig: {
-							jobs: [],
-						},
 						dependencies: [],
 					},
 					{
 						name: 'project-d',
 						path: 'project-d',
-						ciConfig: {
-							jobs: [],
-						},
 						dependencies: [
 							{
 								name: 'project-c',
 								path: 'project-c',
-								ciConfig: {
-									jobs: [],
-								},
 								dependencies: [],
 							},
 						],

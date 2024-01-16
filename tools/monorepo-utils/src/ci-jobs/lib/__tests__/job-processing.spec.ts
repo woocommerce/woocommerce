@@ -8,7 +8,7 @@ import { parseTestEnvConfig } from '../test-environment';
 jest.mock( '../test-environment' );
 
 describe( 'Job Processing', () => {
-	describe( 'getFileChanges', () => {
+	describe( 'createJobsForChanges', () => {
 		it( 'should do nothing with no CI configs', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -16,6 +16,7 @@ describe( 'Job Processing', () => {
 					path: 'test',
 					dependencies: [],
 				},
+				{},
 				{}
 			);
 
@@ -41,7 +42,8 @@ describe( 'Job Processing', () => {
 				},
 				{
 					test: [ 'test.js' ],
-				}
+				},
+				{}
 			);
 
 			expect( jobs.lint ).toHaveLength( 1 );
@@ -49,6 +51,92 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				command: 'test-lint',
 			} );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should replace vars in lint command', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint <baseRef>',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 1 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test',
+				command: 'test-lint test-base-ref',
+			} );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should throw when invalid var to replace in lint command', () => {
+			const promise = createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint <invalid>',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( promise ).rejects.toThrow();
+		} );
+
+		it( 'should not trigger a lint job that has already been created', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint',
+								jobCreated: true,
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
@@ -68,6 +156,7 @@ describe( 'Job Processing', () => {
 					},
 					dependencies: [],
 				},
+				{},
 				{}
 			);
 
@@ -124,7 +213,8 @@ describe( 'Job Processing', () => {
 					test: [ 'test.js' ],
 					'test-a': [ 'test-ignored.js' ],
 					'test-b': [ 'test-b.js' ],
-				}
+				},
+				{}
 			);
 
 			expect( jobs.lint ).toHaveLength( 2 );
@@ -179,7 +269,8 @@ describe( 'Job Processing', () => {
 					test: [ 'test.js' ],
 					'test-a': [ 'test-a.js' ],
 					'test-b': [ 'test-b.js' ],
-				}
+				},
+				{}
 			);
 
 			expect( jobs.lint ).toHaveLength( 2 );
@@ -213,7 +304,8 @@ describe( 'Job Processing', () => {
 				},
 				{
 					test: [ 'test.js' ],
-				}
+				},
+				{}
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
@@ -222,7 +314,79 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
+		} );
+
+		it( 'should replace vars in test command', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								name: 'Default',
+								changes: [ /test.js$/ ],
+								command: 'test-cmd <baseRef>',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				name: 'Default',
+				command: 'test-cmd test-base-ref',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+			} );
+		} );
+
+		it( 'should not trigger a test job that has already been created', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								name: 'Default',
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+								jobCreated: true,
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
 		it( 'should not trigger test job for single node with no changes', async () => {
@@ -242,6 +406,7 @@ describe( 'Job Processing', () => {
 					},
 					dependencies: [],
 				},
+				{},
 				{}
 			);
 
@@ -301,7 +466,8 @@ describe( 'Job Processing', () => {
 					test: [ 'test.js' ],
 					'test-a': [ 'test-ignored.js' ],
 					'test-b': [ 'test-b.js' ],
-				}
+				},
+				{}
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
@@ -310,11 +476,19 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-b',
 				name: 'Default B',
 				command: 'test-cmd-b',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 		} );
 
@@ -355,7 +529,8 @@ describe( 'Job Processing', () => {
 				},
 				{
 					'test-a': [ 'test-a.js' ],
-				}
+				},
+				{}
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
@@ -364,11 +539,19 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-a',
 				name: 'Default A',
 				command: 'test-cmd-a',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 		} );
 
@@ -425,7 +608,8 @@ describe( 'Job Processing', () => {
 				},
 				{
 					'test-a': [ 'test-a.js' ],
-				}
+				},
+				{}
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
@@ -434,11 +618,19 @@ describe( 'Job Processing', () => {
 				projectName: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-a',
 				name: 'Default A',
 				command: 'test-cmd-a',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
 			} );
 		} );
 
@@ -459,7 +651,7 @@ describe( 'Job Processing', () => {
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
 								testEnv: {
-									start: 'test-start',
+									start: 'test-start <baseRef>',
 									config: {
 										wpVersion: 'latest',
 									},
@@ -471,6 +663,11 @@ describe( 'Job Processing', () => {
 				},
 				{
 					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+					},
 				}
 			);
 
@@ -481,10 +678,54 @@ describe( 'Job Processing', () => {
 				name: 'Default',
 				command: 'test-cmd',
 				testEnv: {
-					start: 'test-start',
+					shouldCreate: true,
+					start: 'test-start test-base-ref',
 					envVars: {
 						WP_ENV_CORE: 'https://wordpress.org/latest.zip',
 					},
+				},
+			} );
+		} );
+
+		it( 'should trigger all jobs for a single node with changes set to "true"', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint',
+							},
+							{
+								type: JobType.Test,
+								name: 'Default',
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				true,
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 1 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test',
+				command: 'test-lint',
+			} );
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
 				},
 			} );
 		} );
