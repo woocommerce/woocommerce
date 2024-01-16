@@ -9,14 +9,14 @@ import {
 	useState,
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { Product } from '@woocommerce/data';
+import { PartialProduct, Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { reusableBlock } from '@wordpress/icons';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityId } from '@wordpress/core-data';
+import { useEntityId, useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -39,7 +39,9 @@ import {
 	LinkedProductListBlockAttributes,
 	LinkedProductListBlockEmptyState,
 } from './types';
-import getRelatedProducts from '../../../utils/get-related-products';
+import getRelatedProducts, {
+	invalidateRelatedProductsResolution,
+} from '../../../utils/get-related-products';
 import { SectionActions } from '../../../components/block-slot-fill';
 
 export function EmptyStateImage( {
@@ -167,6 +169,34 @@ export function LinkedProductListBlockEdit( {
 
 		setLinkedProductIds( newLinkedProducts );
 	}
+
+	/*
+	 * Detect changes that affect the linked products.
+	 * - categories
+	 * - tags
+	 * - ...
+	 *
+	 * @todo: Ideally, it should be handled by the data layer.
+	 */
+	const [ categories ] = useEntityProp< PartialProduct[ 'categories' ] >(
+		'postType',
+		'product',
+		'categories'
+	);
+
+	const [ tags ] = useEntityProp< PartialProduct[ 'tags' ] >(
+		'postType',
+		'product',
+		'tags'
+	);
+
+	/*
+	 * Detect changes that affect the linked products.
+	 * If so, invalidate the related products cache.
+	 */
+	useEffect( () => {
+		invalidateRelatedProductsResolution( productId );
+	}, [ categories, tags, productId ] );
 
 	return (
 		<div { ...blockProps }>
