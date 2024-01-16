@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+[Product Block Editor]: exclude the current product from the suggested ones to use in the Linked Product tab

@@ -98,7 +98,12 @@ export function LinkedProductListBlockEdit( {
 
 	const filter = useCallback(
 		( search = '' ) => {
-			return searchProductsDispatcher( linkedProductIds ?? [], search );
+			// Exclude the current product and any already linked products.
+			const exclude = [ productId ];
+			if ( linkedProductIds ) {
+				exclude.push( ...linkedProductIds );
+			}
+			return searchProductsDispatcher( exclude, search );
 		},
 		[ linkedProductIds ]
 	);
