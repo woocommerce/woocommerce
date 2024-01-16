@@ -17,7 +17,7 @@ export type CheckboxControlProps = {
 	children?: React.ReactChildren;
 	hasError?: boolean;
 	checked?: boolean;
-	disabled?: boolean;
+	disabled?: string | boolean | undefined;
 };
 
 /**
@@ -33,7 +33,7 @@ export const CheckboxControl = ( {
 	checked = false,
 	disabled = false,
 	...rest
-}: CheckboxControlProps ): JSX.Element => {
+}: CheckboxControlProps & Record< string, unknown > ): JSX.Element => {
 	const instanceId = useInstanceId( CheckboxControl );
 	const checkboxId = id || `checkbox-control-${ instanceId }`;
 
@@ -55,7 +55,7 @@ export const CheckboxControl = ( {
 					onChange={ ( event ) => onChange( event.target.checked ) }
 					aria-invalid={ hasError === true }
 					checked={ checked }
-					disabled={ disabled }
+					disabled={ !! disabled }
 					{ ...rest }
 				/>
 				<svg

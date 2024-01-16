@@ -4,9 +4,10 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const productName = 'Cart product test';
 const productPrice = '13.99';
 const twoProductPrice = +productPrice * 2;
+const fourProductPrice = +productPrice * 4;
 
 test.describe( 'Cart page', () => {
-	let productId;
+	let productId, product2Id, product3Id;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -19,12 +20,33 @@ test.describe( 'Cart page', () => {
 		await api.put( 'settings/general/woocommerce_currency', {
 			value: 'USD',
 		} );
-		// add products
+		// add 3 products
+		await api
+			.post( 'products', {
+				name: `${ productName } cross-sell 1`,
+				type: 'simple',
+				regular_price: productPrice,
+			} )
+			.then( ( response ) => {
+				product2Id = response.data.id;
+			} );
+		await api
+			.post( 'products', {
+				name: `${ productName } cross-sell 2`,
+				type: 'simple',
+				regular_price: productPrice,
+			} )
+			.then( ( response ) => {
+				product3Id = response.data.id;
+			} );
 		await api
 			.post( 'products', {
 				name: productName,
 				type: 'simple',
 				regular_price: productPrice,
+				cross_sell_ids: [ product2Id, product3Id ],
+				manage_stock: true,
+				stock_quantity: 2,
 			} )
 			.then( ( response ) => {
 				productId = response.data.id;
@@ -43,8 +65,8 @@ test.describe( 'Cart page', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		await api.delete( `products/${ productId }`, {
-			force: true,
+		await api.post( 'products/batch', {
+			delete: [ productId, product2Id, product3Id ],
 		} );
 	} );
 
@@ -165,5 +187,85 @@ test.describe( 'Cart page', () => {
 		await page.locator( '.checkout-button' ).click();
 
 		await expect( page.locator( '#order_review' ) ).toBeVisible();
+	} );
+
+	test( 'can manage cross-sell products and maximum item quantity', async ( {
+		page,
+	} ) => {
+		// add same product to cart twice time
+		for ( let i = 1; i < 3; i++ ) {
+			await page.goto( `/shop/?add-to-cart=${ productId }` );
+			await page.waitForLoadState( 'networkidle' );
+			await expect(
+				page.locator( '.wc-block-components-notice-banner__content' )
+			).toContainText(
+				`“${ productName }” has been added to your cart.`
+			);
+		}
+
+		// add the same product the third time
+		await page.goto( `/shop/?add-to-cart=${ productId }` );
+		await page.waitForLoadState( 'networkidle' );
+		await expect(
+			page.locator( '.wc-block-components-notice-banner__content' )
+		).toContainText(
+			'You cannot add that amount to the cart — we have 2 in stock and you already have 2 in your cart.'
+		);
+		await page.goto( '/cart/' );
+
+		// attempt to increase quantity over quantity limit
+		await page.getByLabel( 'Product quantity' ).fill( '3' );
+		await page.locator( 'text=Update cart' ).click();
+		await expect( page.locator( '.order-total .amount' ) ).toContainText(
+			`$${ twoProductPrice }`
+		);
+
+		// add cross-sell products to cart
+		await expect( page.locator( '.cross-sells' ) ).toContainText(
+			'You may be interested in…'
+		);
+		await page
+			.getByLabel( `Add to cart: “${ productName } cross-sell 1”` )
+			.click();
+		await page
+			.getByLabel( `Add to cart: “${ productName } cross-sell 2”` )
+			.click();
+		await page.waitForLoadState( 'networkidle' );
+
+		// reload page and confirm added products
+		await page.reload();
+		await page.waitForLoadState( 'networkidle' );
+		await expect( page.locator( '.cross-sells' ) ).toBeHidden();
+		await expect( page.locator( '.order-total .amount' ) ).toContainText(
+			`$${ fourProductPrice }`
+		);
+
+		// remove cross-sell products from cart
+		await page
+			.getByLabel( `Remove ${ productName } cross-sell 1 from cart` )
+			.click();
+		await expect(
+			page.locator( '.wc-block-components-notice-banner__content' )
+		).toContainText( `“${ productName } cross-sell 1” removed.` );
+		await page
+			.getByLabel( `Remove ${ productName } cross-sell 2 from cart` )
+			.click();
+		await expect(
+			page
+				.locator( '.wc-block-components-notice-banner__content' )
+				.first()
+		).toContainText( `“${ productName } cross-sell 2” removed.` );
+
+		// check if you see now cross-sell products
+		await page.reload();
+		await expect( page.locator( '.cross-sells' ) ).toContainText(
+			'You may be interested in…'
+		);
+		await expect(
+			page.getByLabel( `Add to cart: “${ productName } cross-sell 1”` )
+		).toBeVisible();
+		await expect(
+			page.getByLabel( `Add to cart: “${ productName } cross-sell 2”` )
+		).toBeVisible();
 	} );
 } );

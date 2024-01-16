@@ -1,5 +1,5 @@
 ---
-category_title: Localizatiion and Translation
+category_title: Localization and Translation
 category_slug: localization-translation
 post_title: Localizatiion and Translation
 ---

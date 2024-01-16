@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move HPOS disabled e2e CI run to sharded execution

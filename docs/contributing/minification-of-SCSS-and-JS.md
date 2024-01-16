@@ -1,5 +1,6 @@
 ---
 post_title: Minification of SCSS and JS
+tags: how-to
 ---
 
 ## SCSS

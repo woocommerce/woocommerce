@@ -30,7 +30,7 @@ import {
 	DefaultBanner,
 	ExistingAiThemeBanner,
 	ExistingThemeBanner,
-	CoreBanner,
+	NoAIBanner,
 } from './intro-banners';
 
 export type events =
@@ -39,7 +39,8 @@ export type events =
 	| { type: 'CLICKED_ON_BREADCRUMB' }
 	| { type: 'SELECTED_BROWSE_ALL_THEMES' }
 	| { type: 'SELECTED_ACTIVE_THEME'; payload: { theme: string } }
-	| { type: 'SELECTED_NEW_THEME'; payload: { theme: string } };
+	| { type: 'SELECTED_NEW_THEME'; payload: { theme: string } }
+	| { type: 'DESIGN_WITHOUT_AI' };
 
 export * as actions from './actions';
 export * as services from './services';
@@ -52,7 +53,7 @@ const BANNER_COMPONENTS = {
 	'jetpack-offline': JetpackOfflineBanner,
 	'existing-ai-theme': ExistingAiThemeBanner,
 	'existing-theme': ExistingThemeBanner,
-	[ FlowType.noAI ]: CoreBanner,
+	[ FlowType.noAI ]: NoAIBanner,
 	default: DefaultBanner,
 };
 
@@ -124,6 +125,17 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 	const BannerComponent = BANNER_COMPONENTS[ bannerStatus ];
 
+	const sidebarMessage =
+		context.flowType === FlowType.AIOnline
+			? __(
+					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI',
+					'woocommerce'
+			  )
+			: __(
+					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using our store designer.',
+					'woocommerce'
+			  );
+
 	return (
 		<>
 			{ ModalComponent && (
@@ -157,12 +169,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						</button>
 						{ __( 'Customize your store', 'woocommerce' ) }
 					</div>
-					<p>
-						{ __(
-							'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI.',
-							'woocommerce'
-						) }
-					</p>
+					<p>{ sidebarMessage }</p>
 				</div>
 
 				<div className="woocommerce-customize-store-main">

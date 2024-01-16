@@ -506,7 +506,7 @@ class ProductCollectionPage {
 	 * Private methods to be used by the class.
 	 */
 	private async refreshLocators( currentUI: 'editor' | 'frontend' ) {
-		await this.waitForProductsToLoad( currentUI );
+		await this.waitForProductsToLoad();
 
 		if ( currentUI === 'editor' ) {
 			await this.initializeLocatorsForEditor();
@@ -555,15 +555,12 @@ class ProductCollectionPage {
 		this.pagination = this.page.locator( SELECTORS.pagination.onFrontend );
 	}
 
-	private async waitForProductsToLoad( currentUI: 'editor' | 'frontend' ) {
+	private async waitForProductsToLoad() {
 		// Wait for the product blocks to be loaded.
 		await this.page.waitForSelector( SELECTORS.product );
-		if ( currentUI === 'editor' ) {
-			// Wait for the loading spinner to be detached.
-			await this.page.waitForSelector( '.is-loading', {
-				state: 'detached',
-			} );
-		}
+		await this.page.waitForSelector( 'wc-block-product-template__spinner', {
+			state: 'detached',
+		} );
 	}
 }
 

@@ -4,6 +4,7 @@
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useState } from '@wordpress/element';
 import { AnyInterpreter, Sender } from 'xstate';
+import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -24,6 +25,8 @@ import {
 import { customizeStoreStateMachineEvents } from '..';
 
 import './style.scss';
+import { isAIFlow } from '../guards';
+import { navigateOrParent } from '../utils';
 
 export type events = { type: 'THEME_SUGGESTED' };
 export type DesignWithAiComponent =
@@ -97,6 +100,12 @@ export const DesignWithAi: CustomizeStoreComponent = ( {
 	parentMachine,
 	context,
 } ) => {
+	const assemblerUrl = getNewPath( {}, '/customize-store', {} );
+
+	if ( ! isAIFlow( context.flowType ) ) {
+		navigateOrParent( window, assemblerUrl );
+		return null;
+	}
 	return (
 		<>
 			<DesignWithAiController
