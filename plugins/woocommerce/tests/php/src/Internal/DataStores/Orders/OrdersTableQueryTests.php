@@ -469,7 +469,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox The 'search_filter' argument works with a 'customer' param is passed in.
+	 * @testDox The 'search_filter' argument works with a 'customer' param passed in.
 	 */
 	public function test_query_s_filters_customers() {
 		$orders = $this->setup_dummy_orders_for_search_filter();
@@ -491,7 +491,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox The 'search_filter' argument works with a 'product' param is passed in.
+	 * @testDox The 'search_filter' argument works with a 'product' param passed in.
 	 */
 	public function test_query_s_filters_products() {
 		$orders = $this->setup_dummy_orders_for_search_filter();
@@ -513,7 +513,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox The 'search_filter' argument works with an 'all' param is passed in.
+	 * @testDox The 'search_filter' argument works with an 'all' param passed in.
 	 */
 	public function test_query_s_filters_all() {
 		$orders = $this->setup_dummy_orders_for_search_filter();
