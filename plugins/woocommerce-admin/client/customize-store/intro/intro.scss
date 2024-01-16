@@ -122,7 +122,8 @@
 		background: rgba(242, 237, 255, 0.6) url(../assets/images/intro-banner-no-ai.svg) no-repeat center right;
 	}
 
-	&.existing-ai-theme-banner, &.existing-no-ai-theme-banner {
+	&.existing-ai-theme-banner,
+	&.existing-no-ai-theme-banner {
 		background: rgba(246, 247, 247, 1);
 
 		.woocommerce-customize-store-banner-content {
