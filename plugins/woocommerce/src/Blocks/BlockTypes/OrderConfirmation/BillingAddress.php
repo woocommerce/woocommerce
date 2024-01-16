@@ -33,7 +33,6 @@ class BillingAddress extends AbstractOrderConfirmationBlock {
 
 		$address = '<address>' . wp_kses_post( $order->get_formatted_billing_address() ) . '</address>';
 		$phone   = $order->get_billing_phone() ? '<p class="woocommerce-customer-details--phone">' . esc_html( $order->get_billing_phone() ) . '</p>' : '';
-		$custom  = '';
 
 		$controller = Package::container()->get( CheckoutFields::class );
 		$custom     = $this->render_additional_fields(
