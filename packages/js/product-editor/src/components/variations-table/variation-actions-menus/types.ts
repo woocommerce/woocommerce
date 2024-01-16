@@ -17,4 +17,5 @@ export type MenuItemProps = {
 	order?: number;
 	group?: string;
 	supportsMultipleSelection?: boolean;
+	onClick?: () => void;
 };

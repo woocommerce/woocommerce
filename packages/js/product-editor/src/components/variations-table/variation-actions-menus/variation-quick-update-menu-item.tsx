@@ -16,7 +16,10 @@ import { QUICK_UPDATE, SINGLE_UPDATE } from './constants';
 
 const DEFAULT_ORDER = 20;
 
-const getGroupName = ( group?: string, isMultipleSelection?: boolean ) => {
+export const getGroupName = (
+	group?: string,
+	isMultipleSelection?: boolean
+) => {
 	const name = 'woocommerce-actions-menu-slot';
 	const nameSuffix = isMultipleSelection
 		? `_${ QUICK_UPDATE }`
@@ -24,21 +27,25 @@ const getGroupName = ( group?: string, isMultipleSelection?: boolean ) => {
 	return group ? `${ name }_${ group }${ nameSuffix }` : name;
 };
 
-const getMenuItem = ( children: React.ReactNode ) => (
-	<MenuItem>
-		<span>{ children }</span>
-	</MenuItem>
-);
+export const getMenuItem = (
+	children: React.ReactNode,
+	onClick: () => void
+) => <MenuItem onClick={ onClick }>{ children }</MenuItem>;
 
 export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 	Slot: React.FC<
-		Slot.Props & { group: string; supportsMultipleSelection: boolean }
+		Slot.Props & {
+			group: string;
+			supportsMultipleSelection: boolean;
+			onClick?: () => void;
+		}
 	>;
 } = ( {
 	children,
 	order = DEFAULT_ORDER,
 	group = 'top-level',
 	supportsMultipleSelection,
+	onClick = () => {},
 } ) => {
 	if ( supportsMultipleSelection ) {
 		return (
@@ -53,7 +60,7 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 					>
 						{ ( fillProps: Fill.Props ) =>
 							createOrderedChildren(
-								getMenuItem( children ),
+								getMenuItem( children, onClick ),
 								order,
 								fillProps
 							)
@@ -67,7 +74,7 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 		<Fill name={ getGroupName( group, supportsMultipleSelection ) }>
 			{ ( fillProps: Fill.Props ) =>
 				createOrderedChildren(
-					getMenuItem( children ),
+					getMenuItem( children, onClick ),
 					order,
 					fillProps
 				)
