@@ -1,5 +1,6 @@
 ---
 post_title: Unhook and remove WooCommerce emails
+tags: code-snippet
 ---
 
 This code allows you to unhook and remove the default WooCommerce emails.

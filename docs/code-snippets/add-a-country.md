@@ -1,5 +1,7 @@
 ---
 post_title: Add a country
+menu_title: Add a country
+tags: code-snippet
 ---
 
 

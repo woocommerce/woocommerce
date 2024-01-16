@@ -1,5 +1,7 @@
 ---
-post_title: Building your first extension
+post_title: How to build your first extension
+menu_title: Build your first extension
+tags: how-to
 ---
 
 The easiest way to get started building an extension is to use the built-in extension generator that is included alongside WooCommerce Admin. This utility is maintained as part of the codebase for WooCommerce Admin, so it includes up-to-date tools and many preconfigured settings for building modern extensions that take advantage of the [React-powered](https://react.dev/) user experience available in current versions of WordPress and WooCommerce.

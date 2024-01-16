@@ -1,6 +1,7 @@
 ---
-post_title: Minification of SCSS and JS
-tags: how-to
+post_title: Handling SCSS and JS minification in WooCommerce
+menu_title: Minification of SCSS and JS
+tags: reference
 ---
 
 ## SCSS

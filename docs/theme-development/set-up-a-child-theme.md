@@ -1,5 +1,7 @@
 ---
-post_title: Set up and use a child theme
+post_title: How to set up and use a child theme
+menu_title: Set up and use a child theme
+tags: how-to
 ---
 
 **Note:** This document is intended for creating and using classic child themes. For a comprehensive guide on creating a child block theme and understanding the differences between a classic and block theme, please refer to [this detailed documentation](https://learn.wordpress.org/lesson-plan/create-a-basic-child-theme-for-block-themes/).

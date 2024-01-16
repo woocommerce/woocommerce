@@ -1,5 +1,7 @@
 ---
-post_title: Adding a section to a settings tab
+post_title: How to add a section to a settings tab
+menu_title: Add a section to a settings tab
+tags: how-to
 ---
 
 When you're adding building an extension for WooCommerce that requires settings of some kind, it's important to ask yourself:  **Where do they belong?**  If your extension just has a couple of simple settings, do you really need to create a new tab specifically for it? Most likely the answer is no.

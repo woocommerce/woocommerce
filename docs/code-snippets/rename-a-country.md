@@ -1,5 +1,6 @@
 ---
 post_title: Rename a country
+tags: code-snippet
 ---
 
 

@@ -1,5 +1,7 @@
 ---
-post_title: Conditional tags
+post_title: Conditional tags in WooCommerce
+menu_title: Conditional tags
+tags: reference
 ---
 
 ## What are "conditional tags"?

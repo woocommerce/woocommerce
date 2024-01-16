@@ -383,21 +383,21 @@
         {
           "post_title": "Setting up your development environment",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/development-environment.md",
-          "hash": "0dc9f1da3bd3bc3bed845b7ef562bcf9cc22f241616ac2297b9c5e5c9892daca",
+          "hash": "37389a273260158e5aa176d02cc58848968c0730dfdcf2771f1e70ea804189a6",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/development-environment.md",
           "id": "9080572a3904349c44c565ca7e1bef1212c58757"
         },
         {
           "post_title": "WooCommerce developer tools",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-tools.md",
-          "hash": "4895f3369cfba841462d99ab642777fcba9758fcbff3814ab02dab1088311ee5",
+          "hash": "461c1c973c1097229ffdbc4a8a27fcc60b9f7948a3159d91e718c82706cda51f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-tools.md",
           "id": "2ed3659ae0153c8fb3252c417bb0eb43ea60f862"
         },
         {
           "post_title": "WooCommerce developer resources",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-resources.md",
-          "hash": "5be1916615913aa8ed17e77eadc78d7baba0d4655e9196e9025c923fe2574c33",
+          "hash": "6a038acb284cd9bfca68460921c2a89ce4cc66a31a85be080f064ca194f965b8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-resources.md",
           "id": "77008656b040d376b7cea7b3c7cc8860c6aec70e"
         },
@@ -825,5 +825,5 @@
       "categories": []
     }
   ],
-  "hash": "501d5de5b74ba52cc5e921fa670f5879b3e88494992f171da1e3e56148b860b7"
+  "hash": "4039b62c12d6ce16642ed6e96c36ae137166efa30942e8e3956be876435cb63f"
 }
