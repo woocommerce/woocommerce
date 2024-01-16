@@ -4,7 +4,7 @@
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect } from '@wordpress/element';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidV4 } from 'uuid';
 
 /**
  * Internal dependencies
@@ -46,7 +46,7 @@ const ProductCollectionContent = (
 	 */
 	useEffect( () => {
 		if ( ! attributes?.id ) {
-			setAttributes( { id: uuidv4() } );
+			setAttributes( { id: uuidV4() } );
 		}
 	}, [ attributes, setAttributes ] );
 
