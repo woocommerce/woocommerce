@@ -293,11 +293,7 @@ export const ExistingAiThemeBanner = ( {
 	);
 };
 
-export const ExistingNoAiThemeBanner = ( {
-	setOpenDesignChangeWarningModal,
-}: {
-	setOpenDesignChangeWarningModal: ( arg0: boolean ) => void;
-} ) => {
+export const ExistingNoAiThemeBanner = () => {
 	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
 
 	return (
