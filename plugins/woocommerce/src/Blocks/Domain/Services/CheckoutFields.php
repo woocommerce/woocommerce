@@ -459,6 +459,90 @@ class CheckoutFields {
 	}
 
 	/**
+	 * Gets the location of a field.
+	 *
+	 * @param string $field_key The key of the field to get the location for.
+	 * @return string The location of the field.
+	 */
+	public function get_field_location( $field_key ) {
+		foreach ( $this->fields_locations as $location => $fields ) {
+			if ( in_array( $field_key, $fields, true ) ) {
+				return $location;
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * Validate an additional field against any custom validation rules. The result should be a WP_Error or true.
+	 *
+	 * @param string $key          The key of the field.
+	 * @param mixed  $field_value  The value of the field.
+	 * @param array  $field_schema The schema of the field.
+	 *
+	 * @since 8.6.0
+	 */
+	public function validate_field( $key, $field_value, $field_schema ) {
+
+		$error = new \WP_Error();
+		try {
+			/**
+			 * Filter the result of validating an additional field.
+			 *
+			 * @param \WP_Error $error A WP_Error that extensions may add errors to.
+			 * @param mixed $field_value The value of the field.
+			 * @param array $field_schema The schema of the field.
+			 * @param string $key The key of the field.
+			 *
+			 * @since 8.6.0
+			 */
+			$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, $error, $field_value, $field_schema, $key );
+
+			if ( $error !== $filtered_result ) {
+
+				// Different WP_Error was returned. This would remove errors from other filters. Skip filtering and allow the order to place without validating this field.
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+				trigger_error(
+					sprintf(
+						'The filter %s encountered an error. One of the filters returned a new WP_Error. Filters should use the same WP_Error passed to the filter and use the WP_Error->add function to add errors.						The field will not have any custom validation applied to it.',
+						'woocommerce_blocks_validate_additional_field_' . esc_html( $key ),
+					),
+					E_USER_WARNING
+				);
+			}
+		} catch ( \Throwable $e ) {
+
+			// One of the filters errored so skip them and validate the field. This allows the checkout process to continue.
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error(
+				sprintf(
+					'The filter %s encountered an error. The field will not have any custom validation applied to it. %s',
+					'woocommerce_blocks_validate_additional_field_' . esc_html( $key ),
+					esc_html( $e->getMessage() )
+				),
+				E_USER_WARNING
+			);
+
+			return new \WP_Error();
+		}
+
+		if ( is_wp_error( $filtered_result ) ) {
+			return $filtered_result;
+		}
+
+		// If the filters didn't return a valid value, ignore them and return an empty WP_Error. This allows the checkout process to continue.
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+		trigger_error(
+			sprintf(
+				'The filter %s did not return a valid value. The field will not have any custom validation applied to it.',
+				'woocommerce_blocks_validate_additional_field_' . esc_html( $key )
+			),
+			E_USER_WARNING
+		);
+		return new \WP_Error();
+	}
+
+	/**
 	 * Update the default locale with additional fields without country limitations.
 	 *
 	 * @param array $locale The locale to update.
