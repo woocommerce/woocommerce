@@ -43,6 +43,13 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 	protected $categories = array();
 
 	/**
+	 * Related product tags.
+	 *
+	 * @var array
+	 */
+	protected $tags = array();
+
+	/**
 	 * Register the routes for products.
 	 */
 	public function register_routes() {
@@ -58,6 +65,15 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 					),
 					'categories'     => array(
 						'description'       => __( 'Limit result set to specific product categorie ids.', 'woocommerce' ),
+						'type'              => 'array',
+						'items'             => array(
+							'type' => 'integer',
+						),
+						'default'           => array(),
+						'sanitize_callback' => 'wp_parse_id_list',
+					),
+					'tags' 		     => array(
+						'description'       => __( 'Limit result set to specific product tag ids.', 'woocommerce' ),
 						'type'              => 'array',
 						'items'             => array(
 							'type' => 'integer',
@@ -84,11 +100,19 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 		return $this->categories;
 	}
 
+	/**
+	 * Get the related product tags.
+	 */
+	public function get_related_product_tag_terms( $terms, $product_id ) {
+		return $this->tags;
+	}
+
 	public function get_items( $request ) {
 		$product_id  = $request->get_param( 'product_id' );
 		$object      = wc_get_product( $product_id );
 
 		$categories = $request->get_param( 'categories' );
+		$tags       = $request->get_param( 'tags' );
 
 		// Filter the related product categories.
 		if ( ! empty( $categories ) ) {
@@ -100,10 +124,23 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 			);
 		}
 
+		// Filter the related product tags.
+		if ( ! empty( $tags ) ) {
+			$this->tags = $tags;
+			add_filter(
+				'woocommerce_get_related_product_tag_terms',
+				array( $this, 'get_related_product_tag_terms' ),
+				100, 2
+			);
+		}
+
 		$ids = wc_get_related_products( $product_id );
 
 		// Remove the product categories filter.
 		remove_filter( 'woocommerce_get_related_product_cat_terms', array( $this, 'get_related_product_cat_terms' ), 100, 2 );
+
+		// Remove the product tags filter.
+		remove_filter( 'woocommerce_get_related_product_tag_terms', array( $this, 'get_related_product_tag_terms' ), 100, 2 );
 
 		return (object) array(
 			'ids'        => $ids,
