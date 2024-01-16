@@ -71,24 +71,6 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
-					'categories'     => array(
-						'description'       => __( 'Limit result set to specific product categorie ids.', 'woocommerce' ),
-						'type'              => 'array',
-						'items'             => array(
-							'type' => 'integer',
-						),
-						'default'           => array(),
-						'sanitize_callback' => 'wp_parse_id_list',
-					),
-					'tags' 		     => array(
-						'description'       => __( 'Limit result set to specific product tag ids.', 'woocommerce' ),
-						'type'              => 'array',
-						'items'             => array(
-							'type' => 'integer',
-						),
-						'default'           => array(),
-						'sanitize_callback' => 'wp_parse_id_list',
-					),
 				),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
@@ -99,6 +81,36 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+	}
+
+	public function get_collection_params() {
+		$params                       = array();
+		$params['context']            = $this->get_context_param();
+		$params['context']['default'] = 'view';
+
+		$params['categories'] = array(
+			'description'       => __( 'Limit result set to specific product categorie ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['tags']       = array(
+			'description'       => __( 'Limit result set to specific product tag ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'wp_parse_id_list',
+		);
+
+		return $params;
 	}
 
 	/**
@@ -151,7 +163,7 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 		remove_filter( 'woocommerce_get_related_product_tag_terms', array( $this, 'get_related_product_tag_terms' ), 100, 2 );
 
 		return (object) array(
-			'ids'        => $ids,
+			'ids' => $ids,
 		);
 	}
 }
