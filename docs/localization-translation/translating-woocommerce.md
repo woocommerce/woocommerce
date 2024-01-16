@@ -145,7 +145,7 @@ In order to fix it, navigate to WooCommerce settings corresponding to the string
 3.  Edit both the `Registration privacy policy` and `Checkout privacy policy` fields with your translation.
 4.  Save the settings.
 
-Navigate back to the Checkout page – translations should be reflected there.
+Navigate back to the Checkout page - translations should be reflected there.
 
 ### I have translated the strings I needed, but some of them don't show up translated on the front end. Why?
 

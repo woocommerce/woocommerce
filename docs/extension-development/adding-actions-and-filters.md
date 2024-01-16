@@ -52,7 +52,7 @@ In general, lifecycle hooks:
 
 Note that lifecycle hooks primarily exist to let other systems observe, rather than to modify the result. Of course, this does not stop the function author from additionally providing a filter hook that serves this function.
 
-For example, noting that it is the process of fetching the promotions which we view as the “lifecycle event”, and not the function itself:
+For example, noting that it is the process of fetching the promotions which we view as the "lifecycle event", and not the function itself:
 
 ```php
 function woocommerce_get_current_promotions( ...$args ) {
@@ -92,7 +92,7 @@ function get_product_metrics( $args ): array {
 
 ### Modifying function input and output (global rendering functions)
 
-In the case of global rendering or formatting functions (so-called “template tags”), where it is not readily possible to implement better alternatives, it is permissible to add filters for both the function arguments and the function's return value.
+In the case of global rendering or formatting functions (so-called "template tags"), where it is not readily possible to implement better alternatives, it is permissible to add filters for both the function arguments and the function's return value.
 
 This should be done sparingly, and only where necessary. Remember that while providing opportunities for other components to perform extensive customization, it can potentially derail other components which expect unmodified output.
 
@@ -115,7 +115,7 @@ Example:
 
 ```php
 function get_featured_product_for_current_customer( ) {
-    /* ...Logic to find the featured product for this customer… */
+    /* ...Logic to find the featured product for this customer... */
 
     return apply_filters( 
         'woocommerce_featured_product_for_current_customer', 

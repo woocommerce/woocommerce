@@ -10,6 +10,7 @@ Payments plugins come in many types: payment processors and gateways, wallets, B
 The choice between payment plugins depends on the specific needs and preferences of the merchant and their customers. Some merchants may choose to use multiple types of payment plugins to offer their customers a wider range of payment options.
 
 A merchant can discover a payments plugin in the following ways:
+
 - Through direct installation from WordPress plugins.
 - Through Woo’s public list of payment services on the Marketplace.
 - Through the admin onboarding tasks and payments settings. To be added to the list of payment gateways in the Woo admin, the payments plugin must meet the criteria listed in these guidelines.
@@ -25,6 +26,7 @@ For plugins that use OAuth or a third party experience to obtain permission from
 The merchant is redirected to the payments plugin to complete configuration and completes any required authentication as part of this step.
 
 For example:
+
 - Prompt the merchant to login to or create an account with the payment provider.
 - Ask the merchant to complete configuration for billing plans, payouts, or notifications.
 
@@ -52,7 +54,7 @@ Your plugin needs to inform the merchant that it's ready to process payments. Un
 
 ---
 
-# Payment button size and anatomy
+## Payment button size and anatomy
 
 Payment buttons must be consistent in visual appearance to other buttons in the shopper experience.
 
@@ -85,7 +87,7 @@ The height of the button can adapt based on the needs of the theme.
 
 ### Button size
 
-Make payment buttons the same size, no bigger or smaller than other payment buttons, including the CTAs “Add to cart” and “Proceed to checkout”
+Make payment buttons the same size, no bigger or smaller than other payment buttons, including the CTAs "Add to cart" and "Proceed to checkout"
 
 ![Same button size.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Same-button-size.png)
 
@@ -133,7 +135,7 @@ The button label should appear in sentence case, with only the first letter of t
 
 ---
 
-# Payment button style
+## Payment button style
 
 Use the appropriate button style depending on the site theme.
 
@@ -163,19 +165,19 @@ Buttons should contain the following states for resting, loading, active, and lo
 
 ![Button States and specifications](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Button-States-and-specifications.png)
 
-# Payment button layout
+## Payment button layout
 
 Define the position and alignment of buttons in relationship to their container, with equal hierarchy and consistent spacing between buttons.
 
 ### Product pages
 
-Position payment buttons correctly in relation to “Add to Cart” in horizontal or vertical layout, place payment buttons to the right of or below the “Add to Cart” button.
+Position payment buttons correctly in relation to "Add to Cart" in horizontal or vertical layout, place payment buttons to the right of or below the "Add to Cart" button.
 
 ![Product page layout.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Product-page-layout.png)
 
 ### Cart
 
-Position payment buttons correctly in relation to “Proceed to checkout” buttons in vertical layout. Place payment buttons above the “Proceed to checkout” button. Do not place payment buttons below the button or in between.
+Position payment buttons correctly in relation to "Proceed to checkout" buttons in vertical layout. Place payment buttons above the "Proceed to checkout" button. Do not place payment buttons below the button or in between.
 
 ![Cart layout.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Cart-layout.png)
 

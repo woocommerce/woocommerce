@@ -30,7 +30,7 @@ if ( ! function_exists( 'YOUR_PREFIX_login_message' ) ) {
 }
 ```
 
-Please note that for this code to work, the following options must be checked in the WooCommerce “Accounts & Privacy” settings:
+Please note that for this code to work, the following options must be checked in the WooCommerce "Accounts & Privacy" settings:
 
 -   Allow customers to create an account during checkout.
 -   Allow customers to create an account on the "My Account" page.

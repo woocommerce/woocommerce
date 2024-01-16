@@ -4,9 +4,9 @@
 
 To display images in your catalog, WooCommerce registers a few image sizes which define the actual image dimensions to be used. These sizes include:
 
-- `woocommerce_thumbnail` – used in the product ‘grids’ in places such as the shop page.
-- `woocommerce_single` – used on single product pages.
-- `woocommerce_gallery_thumbnail` – used below the main image on the single product page to switch the gallery.
+- `woocommerce_thumbnail` - used in the product ‘grids’ in places such as the shop page.
+- `woocommerce_single` - used on single product pages.
+- `woocommerce_gallery_thumbnail` - used below the main image on the single product page to switch the gallery.
 
 `woocommerce_single` shows the full product image, as uploaded, so is always uncropped by default. It defaults to 600px width. `woocommerce_gallery_thumbnail` is always square cropped and defaults to 100×100 pixels. This is used for navigating images in the gallery. `woocommerce_thumbnail` defaults to 300px width, square cropped so the product grids look neat. The aspect ratio for cropping can be customized by the store owner. It is important to note that despite the actual image widths that are set, themes can ultimately change the size images are displayed using CSS, and image widths may be limited by the product grid/column widths.
 
@@ -22,7 +22,7 @@ add_theme_support( 'woocommerce', array(
 ) );
 ```
 
-When calling WordPress functions which expect an image size e.g. [`wp_get_attachment_image_src`](https://developer.wordpress.org/reference/functions/wp_get_attachment_image_src), you should use the image size names — these are:
+When calling WordPress functions which expect an image size e.g. [`wp_get_attachment_image_src`](https://developer.wordpress.org/reference/functions/wp_get_attachment_image_src), you should use the image size names - these are:
 
 - `woocommerce_thumbnail`
 - `woocommerce_single`

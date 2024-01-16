@@ -33,7 +33,7 @@ updates, additions, and re-prioritization to stay aligned with the evolving need
 | Orders | Can delete an order                                              | `/wp-json/wc/v3/orders/{id}` | `tests/api-core-tests/tests/orders/orders-crud.test.js`   |
 | Orders | Can view all orders                                              | `/wp-json/wc/v3/orders`      | `tests/api-core-tests/tests/orders/orders.test.js`        |
 | Orders | Can search orders                                                | `/wp-json/wc/v3/orders`      | `tests/api-core-tests/tests/orders/order-search.test.js`  |
-| Orders | Can add new Order complex – multiple product types & tax classes | `/wp-json/wc/v3/orders`      | `tests/api-core-tests/tests/orders/order-complex.test.js` |
+| Orders | Can add new Order complex - multiple product types & tax classes | `/wp-json/wc/v3/orders`      | `tests/api-core-tests/tests/orders/order-complex.test.js` |
 
 ## Refunds
 
