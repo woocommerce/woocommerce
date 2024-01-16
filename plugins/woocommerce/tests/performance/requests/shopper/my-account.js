@@ -46,7 +46,7 @@ export function myAccount() {
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'My account' title": ( response ) =>
-				response.body.includes( '>My account</h1>' ),
+				response.body.includes( 'From your account dashboard you can view' ),
 		} );
 
 		// Correlate nonce value for use in subsequent requests.
