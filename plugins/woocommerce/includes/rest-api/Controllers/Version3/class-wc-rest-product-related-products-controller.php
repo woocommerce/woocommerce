@@ -2,7 +2,7 @@
 /**
  * REST API related-products controller
  *
- * Handles requests to the /products/<product_id>/related-products endpoints.
+ * Handles requests to the /products/<id>/related-products endpoints.
  *
  * @package WooCommerce\RestApi
  * @since   3.0.0
@@ -20,7 +20,8 @@ use Automattic\Jetpack\Constants;
  * @package WooCommerce\RestApi
  * @extends WC_REST_Product_Related_Products_V2_Controller
  */
-class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Controller {
+class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controller {
+
 	/**
 	 * Endpoint namespace.
 	 *
@@ -33,7 +34,14 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'products/(?P<product_id>[\d]+)/related-products';
+	protected $rest_base = 'products/(?P<id>[\d]+)/related-products';
+
+	/**
+	 * Post type.
+	 *
+	 * @var string
+	 */
+	protected $post_type = 'product';
 
 	/**
 	 * Related product categories.
@@ -59,7 +67,7 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 			$this->namespace, '/' . $this->rest_base,
 			array(
 				'args'   => array(
-					'product_id'     => array(
+					'id'     => array(
 						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
@@ -96,20 +104,20 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 	/**
 	 * Get the related product categories.
 	 */
-	public function get_related_product_cat_terms( $terms, $product_id ) {
+	public function get_related_product_cat_terms( $terms, $id ) {
 		return $this->categories;
 	}
 
 	/**
 	 * Get the related product tags.
 	 */
-	public function get_related_product_tag_terms( $terms, $product_id ) {
+	public function get_related_product_tag_terms( $terms, $id ) {
 		return $this->tags;
 	}
 
 	public function get_items( $request ) {
-		$product_id  = $request->get_param( 'product_id' );
-		$object      = wc_get_product( $product_id );
+		$id     = $request->get_param( 'id' );
+		$object = wc_get_product( $id );
 
 		$categories = $request->get_param( 'categories' );
 		$tags       = $request->get_param( 'tags' );
@@ -134,7 +142,7 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 			);
 		}
 
-		$ids = wc_get_related_products( $product_id );
+		$ids = wc_get_related_products( $id );
 
 		// Remove the product categories filter.
 		remove_filter( 'woocommerce_get_related_product_cat_terms', array( $this, 'get_related_product_cat_terms' ), 100, 2 );
