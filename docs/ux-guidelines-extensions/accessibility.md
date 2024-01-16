@@ -1,5 +1,5 @@
 ---
-post_title: User Experience Guidelines - Accessibility
+post_title: WooCommerce Extension Guidelines - Accessibility
 menu_title: Accessibility
 ---
 

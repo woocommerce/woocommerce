@@ -1,5 +1,5 @@
 ---
-post_title: User Experience Guidelines - Colors
+post_title: WooCommerce Extension Guidelines - Colors
 menu_title: Colors
 ---
 
