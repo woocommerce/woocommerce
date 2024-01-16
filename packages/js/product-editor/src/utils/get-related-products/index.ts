@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { select, resolveSelect } from '@wordpress/data';
+import { select, resolveSelect, dispatch } from '@wordpress/data';
 import type { Product } from '@woocommerce/data';
 
 type getRelatedProductsOptions = {
@@ -31,30 +31,28 @@ export default async function getRelatedProducts(
 		return;
 	}
 
-	let relatedProductIds = product?.related_ids;
+	let relatedProductIds = product?.related_ids?.sort(); // sort to ensure cache key is consistent
 	if ( ! relatedProductIds?.length ) {
 		if ( ! options?.fallbackToRandomProducts ) {
 			return;
 		}
 
-		// Pick the last `POSTS_NUMBER_TO_RANDOMIZE` posts
-		const lastPost = ( await resolveSelect( 'core' ).getEntityRecords(
-			'postType',
-			'product',
-			{
-				_fields: [ 'id' ],
-				per_page: POSTS_NUMBER_TO_RANDOMIZE,
-			}
-		) ) as Product[];
+		// Pick the last `POSTS_NUMBER_TO_RANDOMIZE` products
+		const relatedProducts = ( await resolveSelect(
+			'core'
+		).getEntityRecords( 'postType', 'product', {
+			_fields: [ 'id' ],
+			per_page: POSTS_NUMBER_TO_RANDOMIZE,
+		} ) ) as Product[];
 
-		if ( ! lastPost?.length ) {
+		if ( ! relatedProducts?.length ) {
 			return;
 		}
 
-		const lastPostIds = lastPost.map( ( post ) => post.id );
+		relatedProductIds = relatedProducts.map( ( post ) => post.id );
 
 		// Pick POSTS_NUMBER_TO_PICK random post IDs
-		relatedProductIds = lastPostIds
+		relatedProductIds = relatedProductIds
 			.sort( () => Math.random() - 0.5 )
 			.slice( 0, POSTS_NUMBER_TO_PICK );
 	}
@@ -66,4 +64,35 @@ export default async function getRelatedProducts(
 			include: relatedProductIds,
 		}
 	) ) as Product[];
+}
+
+/**
+ * Invalidate the cache for related products.
+ * This is used when a product is updated, to ensure the related products
+ * are updated in the cache.
+ * By convention, this function and getRelatedProducts() sort the related product IDs
+ * to ensure the cache key is consistent.
+ *
+ * @param {number} productId - The ID of the product to invalidate related products for.
+ * @return {Promise} A promise that resolves when the cache has been invalidated.
+ */
+export async function invalidateRelatedProductsResolution(
+	productId: number
+): Promise< void > {
+	const {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore No types for this exist yet.
+		// eslint-disable-next-line @woocommerce/dependency-group
+		invalidateResolution,
+	} = dispatch( 'core' );
+
+	const relatedProducts = await getRelatedProducts( productId );
+	const productsIds =
+		relatedProducts?.map( ( product ) => product.id )?.sort() || []; // sort to ensure cache key is consistent
+
+	return invalidateResolution( 'getEntityRecords', [
+		'postType',
+		'product',
+		{ include: productsIds },
+	] );
 }
