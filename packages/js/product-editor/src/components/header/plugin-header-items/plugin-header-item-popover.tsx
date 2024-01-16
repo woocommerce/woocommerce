@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, Fragment, useState } from '@wordpress/element';
-import { Button, Fill, Popover } from '@wordpress/components';
+import { Button, Popover } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
