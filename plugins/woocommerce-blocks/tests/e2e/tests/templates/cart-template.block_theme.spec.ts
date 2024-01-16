@@ -6,6 +6,7 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 const permalink = '/cart';
 const templatePath = 'woocommerce/woocommerce//page-cart';
 const templateType = 'wp_template';
+const userText = 'Hello World in the template';
 
 test.describe( 'Test the cart template', async () => {
 	test( 'Template can be opened in the site editor', async ( {
@@ -112,12 +113,12 @@ test.describe( 'Test editing the cart template', async () => {
 		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.editor.insertBlock( {
 			name: 'core/paragraph',
-			attributes: { content: 'Hello World in the template' },
+			attributes: { content: userText },
 		} );
 		await editorUtils.saveTemplate();
 		await page.goto( permalink, { waitUntil: 'domcontentloaded' } );
 		await expect(
-			page.getByText( 'Hello World in the template' ).first()
+			page.getByText( userText ).first()
 		).toBeVisible();
 	} );
 } );

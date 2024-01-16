@@ -7,6 +7,7 @@ const permalink = '/shop';
 const templateName = 'Product Catalog';
 const templatePath = 'woocommerce/woocommerce//archive-product';
 const templateType = 'wp_template';
+const userText = 'Hello World in the template';
 
 test.describe( 'Product Catalog template', async () => {
 	test( 'can be modified and reverted', async ( {
@@ -23,12 +24,12 @@ test.describe( 'Product Catalog template', async () => {
 		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.editor.insertBlock( {
 			name: 'core/paragraph',
-			attributes: { content: 'Hello World in the template' },
+			attributes: { content: userText },
 		} );
 		await editorUtils.saveTemplate();
 		await page.goto( permalink );
 		await expect(
-			page.getByText( 'Hello World in the template' ).first()
+			page.getByText( userText ).first()
 		).toBeVisible();
 
 		// Verify the edition can be reverted.
@@ -40,7 +41,7 @@ test.describe( 'Product Catalog template', async () => {
 		await page.goto( permalink );
 
 		await expect(
-			page.getByText( 'Hello World in the template' )
+			page.getByText( userText )
 		).toHaveCount( 0 );
 	} );
 } );

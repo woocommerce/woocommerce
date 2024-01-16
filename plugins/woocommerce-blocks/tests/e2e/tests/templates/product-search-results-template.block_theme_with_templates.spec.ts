@@ -8,6 +8,7 @@ const permalink = '/?s=shirt&post_type=product';
 const templateName = 'Product Search Results';
 const templatePath = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//product-search-results`;
 const templateType = 'wp_template';
+const userText = 'Hello World in the template';
 
 test.describe( 'Product Search Results template', async () => {
 	test( "theme template has priority over WooCommerce's and can be modified", async ( {
@@ -50,7 +51,7 @@ test.describe( 'Product Search Results template', async () => {
 				.first()
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Hello World in the template' )
+			page.getByText( userText )
 		).toHaveCount( 0 );
 	} );
 } );

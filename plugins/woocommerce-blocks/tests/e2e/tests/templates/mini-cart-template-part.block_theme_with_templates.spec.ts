@@ -9,6 +9,7 @@ const templateName = 'Mini-Cart';
 const templatePath = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//mini-cart`;
 const templateType = 'wp_template_part';
 const miniCartBlockName = 'woocommerce/mini-cart';
+const userText = 'Hello World in the template part';
 
 test.describe( 'Mini-Cart template part', async () => {
 	test( "theme template has priority over WooCommerce's and can be modified", async ( {
@@ -34,16 +35,14 @@ test.describe( 'Mini-Cart template part', async () => {
 		await page
 			.frameLocator( 'iframe[name="editor-canvas"]' )
 			.getByLabel( 'Empty block' )
-			.fill( 'Hello World in the template' );
+			.fill( userText );
 		await editorUtils.saveTemplate();
 
 		await page.goto( permalink );
 		await page.getByLabel( 'Add to cart' ).first().click();
 		let block = await frontendUtils.getBlockByName( miniCartBlockName );
 		await block.click();
-		await expect( page.getByRole( 'dialog' ) ).toContainText(
-			'Hello World in the template'
-		);
+		await expect( page.getByRole( 'dialog' ) ).toContainText( userText );
 
 		// Revert edition and verify the template from the theme is used.
 		await admin.visitAdminPage(
@@ -59,7 +58,7 @@ test.describe( 'Mini-Cart template part', async () => {
 			'Mini-Cart template part loaded from theme'
 		);
 		await expect( page.getByRole( 'dialog' ) ).not.toContainText(
-			'Hello World in the template'
+			userText
 		);
 	} );
 } );

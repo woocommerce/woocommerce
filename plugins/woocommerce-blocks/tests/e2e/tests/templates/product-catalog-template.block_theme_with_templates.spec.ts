@@ -8,6 +8,7 @@ const permalink = '/shop';
 const templateName = 'Product Catalog';
 const templatePath = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//archive-product`;
 const templateType = 'wp_template';
+const userText = 'Hello World in the template';
 
 test.describe( 'Product Catalog template', async () => {
 	test( "theme template has priority over WooCommerce's and can be modified", async ( {
@@ -48,7 +49,7 @@ test.describe( 'Product Catalog template', async () => {
 				.first()
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Hello World in the template' )
+			page.getByText( userText )
 		).toHaveCount( 0 );
 	} );
 } );

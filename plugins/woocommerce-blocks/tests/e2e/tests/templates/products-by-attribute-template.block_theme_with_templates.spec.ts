@@ -8,6 +8,7 @@ const permalink = '/color/blue';
 const templateName = 'Products by Attribute';
 const templatePath = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_attribute`;
 const templateType = 'wp_template';
+const userText = 'Hello World in the template';
 
 test.describe( 'Product by Attribute template', async () => {
 	test( "theme template has priority over WooCommerce's and can be modified", async ( {
@@ -24,14 +25,14 @@ test.describe( 'Product by Attribute template', async () => {
 		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.editor.insertBlock( {
 			name: 'core/paragraph',
-			attributes: { content: 'Hello World in the theme template' },
+			attributes: { content: userText },
 		} );
 		await editorUtils.saveTemplate();
 
 		// Verify the template is the one modified by the user.
 		await page.goto( permalink );
 		await expect(
-			page.getByText( 'Hello World in the theme template' ).first()
+			page.getByText( userText ).first()
 		).toBeVisible();
 
 		// Revert edition and verify the template from the theme is used.
@@ -48,7 +49,7 @@ test.describe( 'Product by Attribute template', async () => {
 				.first()
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Hello World in the template' )
+			page.getByText( userText )
 		).toHaveCount( 0 );
 	} );
 } );

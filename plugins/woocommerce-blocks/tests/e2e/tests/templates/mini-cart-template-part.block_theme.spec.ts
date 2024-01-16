@@ -8,6 +8,7 @@ const templateName = 'Mini-Cart';
 const templatePath = 'woocommerce/woocommerce//mini-cart';
 const templateType = 'wp_template_part';
 const miniCartBlockName = 'woocommerce/mini-cart';
+const userText = 'Hello World in the template part';
 
 test.describe( 'Mini-Cart template part', async () => {
 	test( 'can be modified and reverted', async ( {
@@ -33,7 +34,7 @@ test.describe( 'Mini-Cart template part', async () => {
 		await page
 			.frameLocator( 'iframe[name="editor-canvas"]' )
 			.getByLabel( 'Empty block' )
-			.fill( 'Hello World in the template' );
+			.fill( userText );
 		await editorUtils.saveTemplate();
 
 		await page.goto( permalink );
@@ -41,7 +42,7 @@ test.describe( 'Mini-Cart template part', async () => {
 		let block = await frontendUtils.getBlockByName( miniCartBlockName );
 		await block.click();
 		await expect( page.getByRole( 'dialog' ) ).toContainText(
-			'Hello World in the template'
+			userText
 		);
 
 		// Verify the edition can be reverted.
@@ -55,7 +56,7 @@ test.describe( 'Mini-Cart template part', async () => {
 		block = await frontendUtils.getBlockByName( miniCartBlockName );
 		await block.click();
 		await expect( page.getByRole( 'dialog' ) ).not.toContainText(
-			'Hello World in the template'
+			userText
 		);
 	} );
 } );

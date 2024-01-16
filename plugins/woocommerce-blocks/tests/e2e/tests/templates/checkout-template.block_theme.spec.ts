@@ -6,6 +6,7 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 const permalink = '/checkout';
 const templatePath = 'woocommerce/woocommerce//page-checkout';
 const templateType = 'wp_template';
+const userText = 'Hello World in the template';
 
 test.describe( 'Test the checkout template', async () => {
 	test( 'Template can be opened in the site editor', async ( {
@@ -110,7 +111,7 @@ test.describe( 'Test editing the checkout template', async () => {
 		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.editor.insertBlock( {
 			name: 'core/paragraph',
-			attributes: { content: 'Hello World in the template' },
+			attributes: { content: userText },
 		} );
 		await editorUtils.saveTemplate();
 		await frontendUtils.goToShop();
@@ -119,7 +120,7 @@ test.describe( 'Test editing the checkout template', async () => {
 		await frontendUtils.goToCheckout();
 		await expect(
 			frontendUtils.page
-				.getByText( 'Hello World in the template' )
+				.getByText( userText )
 				.first()
 		).toBeVisible();
 	} );
