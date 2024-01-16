@@ -1,5 +1,6 @@
 ---
-post_title: Technical documentation style guide
+post_title: Technical Documentation Style Guide
+menu_title: Style Guide
 ---
 
 This style guide is intended to provide guidelines for creating effective and user-friendly tutorials and how-to guides for WooCommerce technical documentation that will live in repo and be editable and iterative by open source contributors and WooCommerce teams.
@@ -11,15 +12,15 @@ This style guide is intended to provide guidelines for creating effective and us
 - It's important to use clear and concise language that is easy to understand. Use active voice and avoid using jargon or technical terms that may be unfamiliar to the user. The tone should be friendly and approachable, and should encourage the user to take action.
 
 - Articles are written in the 3rd-person voice.
-  Example: “Add an embed block to your page.”
+  Example: "Add an embed block to your page."
 
 - Use American English for spelling and punctuation styles, or consider using a different word that doesn't have a different spelling in other English variants.
 
 - Use sentence case (not title case) for docs titles and subheadings.
-  Example: “Introduction to the launch experience” rather than “Introduction to the Launch Experience.”
+  Example: "Introduction to the launch experience" rather than "Introduction to the Launch Experience."
 
-- When referring to files or directories, the text formatting eliminates the need to include articles such as “the” and clarifying nouns such as “file” or “directory”.
-  Example: “files stored in ~~the~~ `/wp-content/uploads/` ~~directory~~” or “edit ~~the~~ `/config/config.yml` ~~file~~ with”
+- When referring to files or directories, the text formatting eliminates the need to include articles such as "the" and clarifying nouns such as "file" or "directory".
+  Example: "files stored in ~~the~~ `/wp-content/uploads/` ~~directory~~" or "edit ~~the~~ `/config/config.yml` ~~file~~ with"
 
 ### Writing tips
 
@@ -64,10 +65,8 @@ Note: While we've outlined specific rules above, all other default linting rules
     - Use the ATX-style (`#`) for headers.
 
     ```markdown
----
-    # This is an H1
----
-    ## This is an H2
+      # This is an H1
+      ## This is an H2
     ```
 
    [Reference: MD003](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md#md003---heading-style)
@@ -76,8 +75,8 @@ Note: While we've outlined specific rules above, all other default linting rules
     - Indent list items with 4 spaces.
 
     ```markdown
-    - Item 1
-        - Subitem 1.1
+      - Item 1
+          - Subitem 1.1
     ```
 
    [Reference: MD007]([https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md](https://github.com/DavidAnson/markdownlint/blob/3561fc3f38b05b3c55f44e371c2cd9bda194598a/doc/Rules.md)#md007---unordered-list-indentation)
@@ -113,13 +112,13 @@ Note: While we've outlined specific rules above, all other default linting rules
 - Use the H2 style for main headings to be programmatically listed in the articles table of contents.
 - File names and directory paths should be stylized as code per the [HTML spec](https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-code-element).
   Example: `/wp-content/uploads/`
-- References to a single directory should have a trailing slash (eg. “/” appended) to the name.
-  Example: “uploads/“
+- References to a single directory should have a trailing slash (eg. "/" appended) to the name.
+  Example: "uploads/"
 - References to repositories should appear without forward slashes and not be formatted in any way. The first appearance of a repository in article content should link to the URL of the repository source whenever possible.
-  Example: “[woocommerce-blocks](https://github.com/woocommerce/woocommerce-blocks)” followed by “woocommerce-blocks”
+  Example: "[woocommerce-blocks](https://github.com/woocommerce/woocommerce-blocks)" followed by "woocommerce-blocks"
 - Inline references to functions and command line operations should be formatted as inline code.
-  Example: “Use `dig` to retrieve DNS information.”
-- Functions should be styled with “Inline code” formatting and retain upper and lower case formatting as established from their source.
+  Example: "Use `dig` to retrieve DNS information."
+- Functions should be styled with "Inline code" formatting and retain upper and lower case formatting as established from their source.
   Example: `WP_Query` (not WP_query)
 
 ### Visual aids
@@ -156,7 +155,7 @@ When creating a how-to guide, it's important to use a consistent and easy-to-fol
 
 ### Reference to components and features
 
-- “**WordPress Admin dashboard**” should be presented in its complete form the first time it appears in an article, followed by its abbreviated form in parentheses (“WP Admin”). Thereafter the abbreviated form can be used for any reference to the WordPress Admin dashboard within the same article.
+- "**WordPress Admin dashboard**" should be presented in its complete form the first time it appears in an article, followed by its abbreviated form in parentheses ("WP Admin"). Thereafter the abbreviated form can be used for any reference to the WordPress Admin dashboard within the same article.
 - When referring to the URL of the WordPress Admin dashboard, the shortened form `wp-admin` can be used.
 
 ## Testing
@@ -167,6 +166,6 @@ Before publishing a tutorial or guide, it's important to test it thoroughly to e
 
 ### Atomizing the docs
 
-Articles that cover too many topics in one place can make it difficult for users to find the information they are looking for. “Atomizing” the Docs refers to breaking down extensive articles into a group of smaller related articles. This group of articles often has a main “landing page” with a high-level overview of the group of articles, and the descriptive text provides links to the related articles that a user will find relevant. These groups of articles can be considered an information “molecule” formed by the smaller, atomized articles.
+Articles that cover too many topics in one place can make it difficult for users to find the information they are looking for. "Atomizing" the Docs refers to breaking down extensive articles into a group of smaller related articles. This group of articles often has a main "landing page" with a high-level overview of the group of articles, and the descriptive text provides links to the related articles that a user will find relevant. These groups of articles can be considered an information "molecule" formed by the smaller, atomized articles.
 
 Breaking out smaller chunks of content into their own articles makes it easier to link to specific topics rather than relying on links to more extensive articles with anchor tags. This more specific linking approach is helpful to our Support team but is also useful for cross-linking articles throughout the Docs site.

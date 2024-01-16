@@ -54,7 +54,7 @@ The WooCommerce Core API code reference contains information about packages and 
 
 ### [Store API](https://github.com/woocommerce/woocommerce-blocks/tree/trunk/src/StoreApi)
 
-The Store API provides public Rest API endpoints for the development of customer-facing cart, checkout, and product functionality. It follows many of the patterns used in the [WordPress REST API](https://developer.wordpress.org/rest-api/key-concepts/).
+The Store API provides public Rest API endpoints for the development of customer-facing cart, checkout, and product functionality. It follows many of the patterns used in the [WordPress REST API](https://developer.wordpress.org/rest-api/key-concepts/).
 
 ### [WooCommerce Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block/#documentation)
 
@@ -68,8 +68,6 @@ This contains an index of hooks found across all template files, functions, shor
 
 While WooCommerce Blocks are now the easiest and most flexible way to display your products on posts and pages, WooCommerce still comes with several shortcodes to insert content.
 
----
-
 ## GitHub Repositories
 
 ### [WooCommerce on GitHub](https://github.com/woocommerce)
@@ -82,9 +80,7 @@ This is the official Automattic organization on GitHub. It is where you'll find 
 
 ### [WordPress on GitHub](https://github.com/wordpress)
 
-This is the official WordPress organization on GitHub –– a go-to source for the development work that happens on open source projects that the WordPress community maintains.
-
----
+This is the official WordPress organization on GitHub -- a go-to source for the development work that happens on open source projects that the WordPress community maintains.
 
 ## Ecosystem Resources
 
