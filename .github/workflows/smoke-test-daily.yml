@@ -210,7 +210,7 @@ jobs:
             - name: Update performance test site with E2E test
               id: update-perf-site
               continue-on-error: true
-              uses: ./.github/actions/tests/run-k6-tests
+              uses: ./.github/actions/tests/run-e2e-tests
               with:
                   report-name: k6-daily-update-site--run-${{ github.run_number }}
                   tests: update-woocommerce.spec.js
