@@ -136,11 +136,11 @@ export function LinkedProductListBlockEdit( {
 			},
 		} );
 
+		setIsChoosingProducts( true );
+
 		const relatedProducts = ( await getRelatedProducts( productId, {
 			fallbackToRandomProducts: true,
 		} ) ) as Product[];
-
-		setIsChoosingProducts( true );
 
 		dispatch( {
 			type: 'LOADING_LINKED_PRODUCTS',
