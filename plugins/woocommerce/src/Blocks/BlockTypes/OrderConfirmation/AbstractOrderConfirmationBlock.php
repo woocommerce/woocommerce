@@ -298,5 +298,40 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 			)
 		);
 
+		register_block_pattern(
+			'woocommerce/order-confirmation-additional-fields-heading',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"24px"}}} --><h3 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h3><!-- /wp:heading -->',
+			)
+		);
+	}
+
+	/**
+	 * Render custom fields for the order.
+	 *
+	 * @param array $fields List of additional fields with values.
+	 * @return string
+	 */
+	protected function render_additional_fields( $fields ) {
+		if ( empty( $fields ) ) {
+			return '';
+		}
+		return '<dl class="wc-block-components-additional-fields-list">' . implode( '', array_map( array( $this, 'render_additional_field' ), $fields ) ) . '</dl>';
+	}
+
+	/**
+	 * Render custom field row.
+	 *
+	 * @param array $field An additional field and value.
+	 * @return string
+	 */
+	protected function render_additional_field( $field ) {
+		return sprintf(
+			'<dt>%1$s</dt><dd>%2$s</dd>',
+			esc_html( $field['label'] ),
+			esc_html( $field['value'] )
+		);
 	}
 }
