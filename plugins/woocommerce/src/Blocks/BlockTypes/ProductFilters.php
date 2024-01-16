@@ -84,19 +84,19 @@ final class ProductFilters extends AbstractBlock {
 		}
 
 		/**
-		 * At this point, WP starts rendering the Collection Filters block,
+		 * At this point, WP starts rendering the Product Filters block,
 		 * we can safely unset the current response.
 		 */
 		$this->current_response = null;
 
 		$attributes_data = array(
 			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
-			'class'               => 'wc-block-collection-filters',
+			'class'               => 'wc-block-product-filters',
 		);
 
 		if ( ! isset( $block->context['queryId'] ) ) {
 			$attributes_data['data-wc-navigation-id'] = sprintf(
-				'wc-collection-filters-%s',
+				'wc-product-filters-%s',
 				md5( wp_json_encode( $block->parsed_block['innerBlocks'] ) )
 			);
 		}
@@ -122,7 +122,7 @@ final class ProductFilters extends AbstractBlock {
 		}
 
 		/**
-		 * When the first direct child of Collection Filters is rendering, we
+		 * When the first direct child of Product Filters is rendering, we
 		 * hydrate and cache the collection data response.
 		 */
 		if (
