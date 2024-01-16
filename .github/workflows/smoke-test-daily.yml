@@ -79,15 +79,27 @@ jobs:
 
     e2e-tests:
         name: E2E tests on nightly build
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
+        timeout-minutes: 60
+        strategy:
+            fail-fast: false
+            shard:
+                [
+                    { number: 1, name: 1/5 },
+                    { number: 2, name: 2/5 },
+                    { number: 3, name: 3/5 },
+                    { number: 4, name: 4/5 },
+                    { number: 5, name: 5/5 },
+                ]
         permissions:
             contents: read
         outputs:
             test-result: ${{ steps.run_playwright_e2e_tests.outputs.result }}
-        #  needs: [api-tests]
+        needs: [api-tests]
         env:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+
         steps:
             - uses: actions/checkout@v3
 
@@ -107,32 +119,74 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
 
-            - name: Run E2E tests
-              timeout-minutes: 60
-              id: run_playwright_e2e_tests
+            - name: Run Playwright tests
+              working-directory: plugins/woocommerce
               env:
                   USE_WP_ENV: 1
                   E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
-                  ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
-                  ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+              id: run_playwright_e2e_tests
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
 
-            - name: Generate Test report.
-              if: success() || ( failure() && steps.run_playwright_e2e_tests.conclusion == 'failure' )
+            - name: Upload reports to GitHub Actions Artifacts
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: all-blob-reports-${{ matrix.shard.number }}
+                  path: ${{ env.ALLURE_RESULTS_DIR }}
+                  retention-days: 1
+                  compression-level: 9
+
+    e2e-tests-success:
+        name: Runs E2E tests.
+        runs-on: ubuntu-latest
+        needs: e2e-tests-run
+        steps:
+            - run: echo Done!
+
+    merge-reports:
+        name: Merge e2e test reports
+        # Merge reports after playwright-tests, even if some shards have failed
+        if: always()
+        needs: [e2e-tests-success]
+
+        runs-on: ubuntu-latest
+        env:
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+        steps:
+            - uses: actions/checkout@v3
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
+
+            - name: Download blob reports from GitHub Actions Artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  path: ${{ env.ALLURE_RESULTS_DIR }}
+                  pattern: all-blob-reports-*
+                  run-id: e2e-tests-run
+                  merge-multiple: true
+
+            - name: Generate Playwright E2E Test report.
+              id: generate_e2e_report
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
-            - name: Archive test report
-              if: success() || ( failure() && steps.run_playwright_e2e_tests.conclusion == 'failure' )
-              uses: actions/upload-artifact@v3
+            - name: Archive Playwright E2E test report
+              if: |
+                  always() &&
+                  steps.generate_e2e_report.conclusion == 'success'
+              uses: actions/upload-artifact@v4
               with:
-                  name: ${{ env.E2E_ARTIFACT }}
+                  name: e2e-test-report---pr-${{ github.event.number }}
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
-                  retention-days: 20
+                  if-no-files-found: ignore
+                  retention-days: 5
 
     k6-tests:
         name: k6 tests on nightly build
