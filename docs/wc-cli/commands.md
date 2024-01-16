@@ -1,5 +1,5 @@
 ---
-post_title: WC CLI commands
+post_title: WooCommerce CLI Commands
 menu_title: Commands
 tags: reference
 ---
