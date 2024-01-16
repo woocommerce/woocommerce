@@ -184,8 +184,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/admin-layout:
     dependencies:
@@ -257,8 +257,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/ai:
     dependencies:
@@ -399,8 +399,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/api:
     dependencies:
@@ -448,8 +448,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/api-core-tests:
     dependencies:
@@ -482,8 +482,8 @@ importers:
         specifier: ^8.55.0
         version: 8.55.0
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/block-templates:
     dependencies:
@@ -591,8 +591,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/components:
     dependencies:
@@ -919,20 +919,20 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/create-product-editor-block:
     devDependencies:
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/create-woo-extension:
     devDependencies:
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/csv-export:
     dependencies:
@@ -980,8 +980,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/currency:
     dependencies:
@@ -1038,8 +1038,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/customer-effort-score:
     dependencies:
@@ -1162,8 +1162,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/data:
     dependencies:
@@ -1301,8 +1301,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/date:
     dependencies:
@@ -1374,8 +1374,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/dependency-extraction-webpack-plugin:
     dependencies:
@@ -1414,8 +1414,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/e2e-core-tests:
     dependencies:
@@ -1481,8 +1481,8 @@ importers:
         specifier: 23.20.0
         version: 23.20.0(eslint@8.55.0)(typescript@5.3.3)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/e2e-environment:
     dependencies:
@@ -1587,8 +1587,8 @@ importers:
         specifier: ^7.5.4
         version: 7.5.4
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/e2e-utils:
     dependencies:
@@ -1663,8 +1663,8 @@ importers:
         specifier: 23.20.0
         version: 23.20.0(eslint@8.55.0)(typescript@5.3.3)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/eslint-plugin:
     dependencies:
@@ -1709,8 +1709,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/experimental:
     dependencies:
@@ -1848,8 +1848,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/explat:
     dependencies:
@@ -1918,8 +1918,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/expression-evaluation:
     dependencies:
@@ -1964,14 +1964,14 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/extend-cart-checkout-block:
     devDependencies:
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/integrate-plugin:
     dependencies:
@@ -2064,8 +2064,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/internal-e2e-builds:
     devDependencies:
@@ -2091,8 +2091,8 @@ importers:
         specifier: ^1.0.4
         version: 1.0.4
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/internal-js-tests:
     dependencies:
@@ -2146,8 +2146,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/internal-style-build:
     dependencies:
@@ -2207,8 +2207,8 @@ importers:
         specifier: ^5.89.0
         version: 5.89.0(webpack-cli@5.1.4)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/navigation:
     dependencies:
@@ -2289,8 +2289,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/notices:
     dependencies:
@@ -2356,8 +2356,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/number:
     dependencies:
@@ -2405,8 +2405,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/onboarding:
     dependencies:
@@ -2520,8 +2520,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/product-editor:
     dependencies:
@@ -2791,8 +2791,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/tracks:
     dependencies:
@@ -2831,8 +2831,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   plugins/woo-ai:
     dependencies:
@@ -2976,8 +2976,8 @@ importers:
         specifier: ^3.17.4
         version: 3.17.4
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   plugins/woocommerce:
     dependencies:
@@ -3127,8 +3127,8 @@ importers:
         specifier: 3.3.12
         version: 3.3.12(webpack@5.70.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
       wp-textdomain:
         specifier: 1.0.1
         version: 1.0.1
@@ -3701,8 +3701,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   plugins/woocommerce-beta-tester:
     dependencies:
@@ -3810,8 +3810,8 @@ importers:
         specifier: ^3.17.4
         version: 3.17.4
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   plugins/woocommerce-blocks:
     dependencies:
@@ -4427,8 +4427,8 @@ importers:
         specifier: 5.1.4
         version: 5.1.4(webpack-bundle-analyzer@4.7.0)(webpack@5.88.2)
       wireit:
-        specifier: ^0.14.1
-        version: 0.14.1
+        specifier: ^0.14.3
+        version: 0.14.3
       wp-types:
         specifier: 3.63.0
         version: 3.63.0
@@ -4503,8 +4503,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   plugins/woocommerce/client/legacy:
     dependencies:
@@ -4579,8 +4579,8 @@ importers:
         specifier: 13.8.0
         version: 13.8.0
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/code-analyzer:
     dependencies:
@@ -4643,8 +4643,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/compare-perf:
     dependencies:
@@ -4677,8 +4677,8 @@ importers:
         version: 3.2.0
     devDependencies:
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/monorepo-merge:
     dependencies:
@@ -4729,8 +4729,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/monorepo-utils:
     dependencies:
@@ -4847,8 +4847,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/package-release:
     dependencies:
@@ -4893,8 +4893,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/release-posts:
     dependencies:
@@ -4969,8 +4969,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/storybook:
     dependencies:
@@ -5054,8 +5054,8 @@ importers:
         specifier: ^5.89.0
         version: 5.89.0(webpack-cli@5.1.4)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
 packages:
 
@@ -53633,8 +53633,8 @@ packages:
     hasBin: true
     dev: true
 
-  /wireit@0.14.1:
-    resolution: {integrity: sha512-q5sixPM/vKQEpyaub6J9QoHAFAF9g4zBdnjoYelH9/RLAekcUf3x1dmFLACGZ6nYjqehCsTlXC1irmzU7znPhA==}
+  /wireit@0.14.3:
+    resolution: {integrity: sha512-vNSzIBJ1YLMM6dzGUiUMw11KmHOFiXIaOHcQPWVT4j5oCaXQSIYS5AExEzRkAAlm5F0hRPTwDUoazUHu5ZLCNQ==}
     engines: {node: '>=14.14.0'}
     hasBin: true
     dependencies:

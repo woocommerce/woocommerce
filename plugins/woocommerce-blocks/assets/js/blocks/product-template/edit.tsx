@@ -220,7 +220,7 @@ const ProductTemplateEdit = ( {
 	if ( ! products ) {
 		return (
 			<p { ...blockProps }>
-				<Spinner />
+				<Spinner className="wc-block-product-template__spinner" />
 			</p>
 		);
 	}

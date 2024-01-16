@@ -31,19 +31,19 @@ In addition to the software listed above, you'll also want to have some way of s
 
 ### WordPress-specific tools
 
-[vvv](https://varyingvagrantvagrants.org/) – A highly configurable, cross-platform, and robust environment management tool powered by VirtualBox and Vagrant. This is one the tool that the WooCommerce Core team recommends to contributors.
+[vvv](https://varyingvagrantvagrants.org/) - A highly configurable, cross-platform, and robust environment management tool powered by VirtualBox and Vagrant. This is one the tool that the WooCommerce Core team recommends to contributors.
 
-[wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) – A command-line utility maintained by the WordPress community that allows you to set up and run custom WordPress environments with Docker and JSON manifests.
+[wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) - A command-line utility maintained by the WordPress community that allows you to set up and run custom WordPress environments with Docker and JSON manifests.
 
-[LocalWP](https://localwp.com/) – A cross-platform app that bills itself as a one-click WordPress installation.
+[LocalWP](https://localwp.com/) - A cross-platform app that bills itself as a one-click WordPress installation.
 
 ### General PHP-based web stack tools
 
-[MAMP](https://www.mamp.info/en/mac/) – A local server environment that can be installed on Mac or Windows.
+[MAMP](https://www.mamp.info/en/mac/) - A local server environment that can be installed on Mac or Windows.
 
-[WAMP](https://www.wampserver.com/en/) – A Windows web development environment that lets you create applications with Apache2, PHP, and MySQL.
+[WAMP](https://www.wampserver.com/en/) - A Windows web development environment that lets you create applications with Apache2, PHP, and MySQL.
 
-[XAMPP](https://www.apachefriends.org/index.html) – An easy-to-install Apache distribution containing MariaDB, PHP, and Perl. It's available for Windows, Linux, and OS X.
+[XAMPP](https://www.apachefriends.org/index.html) - An easy-to-install Apache distribution containing MariaDB, PHP, and Perl. It's available for Windows, Linux, and OS X.
 
 ### Minimum server requirements
 
@@ -55,11 +55,11 @@ While development environments can vary, the basic file structure for a WordPres
 
 When developing a WooCommerce extension, you'll usually be doing most of your work within the public_html directory of your local server. For now, take some time to familiarize yourself with a few key paths:
 
-`wp-content/debug.log` – This is the file where WordPress writes the important output such as errors and other messages useful for debugging.
+`wp-content/debug.log` - This is the file where WordPress writes the important output such as errors and other messages useful for debugging.
 
-`wp-content/plugins/` – This is the directory on the server where WordPress plugin folders live.
+`wp-content/plugins/` - This is the directory on the server where WordPress plugin folders live.
 
-`wp-content/themes/` – This is the directory on the server where WordPress theme folders live.
+`wp-content/themes/` - This is the directory on the server where WordPress theme folders live.
 
 ## Adding WooCommerce Core to your environment
 

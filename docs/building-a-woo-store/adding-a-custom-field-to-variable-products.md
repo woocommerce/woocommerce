@@ -30,7 +30,7 @@ npm install # Install dependencies
 npm run build # Build the javascript
 ```
 
-WordPress has its own class file naming convention which doesn't work with PSR-4 out of the box. To learn more about Naming Conventions see the [WP Handbook](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/php/#naming-conventions). We will use the standard format of “class-my-classname.php” format, so let's go to the composer.json file and change the autoload to:
+WordPress has its own class file naming convention which doesn't work with PSR-4 out of the box. To learn more about Naming Conventions see the [WP Handbook](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/php/#naming-conventions). We will use the standard format of "class-my-classname.php" format, so let's go to the composer.json file and change the autoload to:
 
 ```json
 "autoload": {
@@ -50,7 +50,7 @@ This generates a new vendor/composer/autoload_classmap.php file containing a lis
 
 Our aim is to create a new custom text field for WooCommerce products to save new stock information for display in the store. To do this, we need to modify the section of the Woo data in the admin area which holds the stock info.
 
-WooCommerce allows us to add our code to these sections through [hooks](https://developer.wordpress.org/plugins/hooks/), which are a standard WordPress method to extend code. In the “Inventory” section we have the following action hooks available to us:
+WooCommerce allows us to add our code to these sections through [hooks](https://developer.wordpress.org/plugins/hooks/), which are a standard WordPress method to extend code. In the "Inventory" section we have the following action hooks available to us:
 
 For our Woo extension, we'll be appending our field right at the end with `woocommerce_product_options_inventory_product_data`.
 
@@ -248,7 +248,7 @@ public function save_variation_field( $variation_id, $i  ) {
 }
 ```
 
-And we now have a new variation field that stores our new stock information. If you cannot see the new field, please make sure to enable “Manage Stock” for the variation by ticking the checkbox in the variation details.
+And we now have a new variation field that stores our new stock information. If you cannot see the new field, please make sure to enable "Manage Stock" for the variation by ticking the checkbox in the variation details.
 
 Displaying the variation in the front store works a bit differently for variable products as only some content on the page is updated when the customer makes a selection. This exceeds the scope of this tutorial, but if you are interested have a look at `/woocommerce/assets/js/frontend/add-to-cart-variation.js` to see how WooCommerce does it.
 

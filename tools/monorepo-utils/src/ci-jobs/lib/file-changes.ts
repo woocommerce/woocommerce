@@ -77,20 +77,26 @@ function getChangedFilesForProject(
  *
  * @param {Object} projectGraph The project graph to assign changes for.
  * @param {string} baseRef      The git ref to compare against for changes.
- * @return {Object} A map of changed files keyed by the project name.
+ * @return {Object|true} A map of changed files keyed by the project name or true if all projects should be marked as changed.
  */
 export function getFileChanges(
 	projectGraph: ProjectNode,
 	baseRef: string
-): ProjectFileChanges {
-	const projectPaths = getProjectPaths( projectGraph );
-
+): ProjectFileChanges | true {
 	// We're going to use git to figure out what files have changed.
 	const output = execSync( `git diff --name-only ${ baseRef }`, {
 		encoding: 'utf8',
 	} );
 	const changedFilePaths = output.split( '\n' );
 
+	// If the root lockfile has been changed we have no easy way
+	// of knowing which projects have been impacted. We want
+	// to re-run all jobs in all projects for safety.
+	if ( changedFilePaths.includes( 'pnpm-lock.yaml' ) ) {
+		return true;
+	}
+
+	const projectPaths = getProjectPaths( projectGraph );
 	const changes: ProjectFileChanges = {};
 	for ( const projectName in projectPaths ) {
 		// Projects with no paths have no changed files for us to identify.

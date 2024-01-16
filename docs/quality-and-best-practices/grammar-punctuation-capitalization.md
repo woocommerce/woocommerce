@@ -44,11 +44,11 @@ Cases when we capitalize:
 - Documentation headings (h2): Use sentence case (not title case) for docs titles and subheadings. 
 - Product names: Every word except prepositions and conjunctions.
 - Sentences: First word.
-- Unordered/Bulleted lists – First word of each entry.
+- Unordered/Bulleted lists - First word of each entry.
 
 Cases when we use lower case:
 
-- “ecommerce” (not “eCommerce”)
+- "ecommerce" (not "eCommerce")
 - email address - `info@woo.com`
 - website URL - `developer.woo.com`
 
@@ -183,21 +183,21 @@ Use common sense for other cases. Read the sentence out loud, and use a comma wh
 
 #### Dashes and hyphens
 
-Use a hyphen – without spaces on either side to link words, or indicate a span or range.
+Use a hyphen - without spaces on either side to link words, or indicate a span or range.
 
 - first-time user
 - Monday-Friday
 
 Use an em dash - without spaces on either side to indicate an aside.
 
-Use a true em dash, not hyphens – or –.
+Use a true em dash, not hyphens.
 
 - Multivariate testing-just one of our new Pro features-can help you grow your business.
 - Austin thought Brad was the donut thief, but he was wrong-it was Lain.
 
 #### Ellipses
 
-Ellipses … can be used to indicate an indefinite ending to a sentence or to show words are omitted when used in brackets […] Use rarely.
+Ellipses ... can be used to indicate an indefinite ending to a sentence or to show words are omitted when used in brackets [...] Use rarely.
 
 #### Exclamation points
 
@@ -215,7 +215,7 @@ Periods should be:
 
 Examples
 
-- Jake said, “I had the best day ever.”
+- Jake said, "I had the best day ever."
 - She went to the supermarket (and to the nail salon).
 - My mom loves pizza and beer. (Beer needs to be cold and dark.)
 
@@ -225,12 +225,12 @@ Question marks follow the same placement convention explained in Periods.
 
 #### Quotation marks
 
-Periods and commas go within quotation marks. Question marks within quotes follow logic—if the question mark is part of the quotation, it goes within. If you're asking a question that ends with a quote, it goes outside the quote.
+Periods and commas go within quotation marks. Question marks within quotes follow logic - if the question mark is part of the quotation, it goes within. If you're asking a question that ends with a quote, it goes outside the quote.
 
 Use single quotation marks for quotes within quotes.
 
-- Who sings, “All These Things That I've Done”?
-- Brandon Flowers of The Killers said, “I was inspired and on a roll when I wrote, 'I got soul, but I'm not a soldier.'”
+- Who sings, "All These Things That I've Done"?
+- Brandon Flowers of The Killers said, "I was inspired and on a roll when I wrote, 'I got soul, but I'm not a soldier.'"
 
 #### Semicolons
 
@@ -244,7 +244,6 @@ Semicolons can be used to join two related phrases.
 
 Use brand identity names and products as written on official websites.
 
-- Nestlé
 - Pull&Bear
 - UE Boom
 
@@ -278,13 +277,13 @@ Capitalize job titles, the names of teams, and departments.
 
 #### Pronouns
 
-Use he/him/his and she/her/her as appropriate. Don't use “one” as a pronoun. Use they/them/their if gender is unknown or when referring to a group.
+Use he/him/his and she/her/her as appropriate. Don't use "one" as a pronoun. Use they/them/their if gender is unknown or when referring to a group.
 
 #### Quotations
 
 Use present tense when quoting someone.
 
-- “I love that WooCommerce is free and flexible,” says Brent Jamison.
+- "I love that WooCommerce is free and flexible," says Brent Jamison.
 
 #### Schools
 
