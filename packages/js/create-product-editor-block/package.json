@@ -28,6 +28,6 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"wireit": "0.14.1"
+		"wireit": "0.14.3"
 	}
 }

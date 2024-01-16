@@ -18,7 +18,7 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"scripts": {
-		"build": "pnpm -r build",
+		"build": "pnpm -r --workspace-concurrency=Infinity --stream '/^build:project:.*$/'",
 		"test": "pnpm -r test",
 		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",

@@ -304,19 +304,18 @@ class CheckoutFields {
 		}
 
 		$field_data = array(
-			'label'          => $options['label'],
-			'hidden'         => false,
-			'type'           => $type,
-			'optionalLabel'  => empty( $options['optionalLabel'] ) ? sprintf(
-				/* translators: %s Field label. */
+			'label'         => $options['label'],
+			'hidden'        => false,
+			'type'          => $type,
+			'optionalLabel' => empty( $options['optionalLabel'] ) ? sprintf(
+			/* translators: %s Field label. */
 				__( '%s (optional)', 'woocommerce' ),
 				$options['label']
 			) : $options['optionalLabel'],
-			'required'       => empty( $options['required'] ) ? false : $options['required'],
-			'autocomplete'   => empty( $options['autocomplete'] ) ? '' : $options['autocomplete'],
-			'autocapitalize' => empty( $options['autocapitalize'] ) ? '' : $options['autocapitalize'],
+			'required'      => empty( $options['required'] ) ? false : $options['required'],
 		);
 
+		$field_data['attributes'] = $this->register_field_attributes( $id, $options['attributes'] ?? [] );
 		/**
 		 * Handle Checkbox fields.
 		 */
@@ -381,6 +380,64 @@ class CheckoutFields {
 		$this->additional_fields[ $id ] = $field_data;
 
 		$this->fields_locations[ $location ][] = $id;
+	}
+
+	/**
+	 * Processes the attributes supplied during field registration.
+	 *
+	 * @param array $id         The field ID.
+	 * @param array $attributes The attributes supplied during field registration.
+	 *
+	 * @return array The processed attributes.
+	 */
+	private function register_field_attributes( $id, $attributes ) {
+
+		// We check if attributes are valid. This is done to prevent too much nesting and also to allow field registration
+		// even if the attributes property is invalid. We can just skip it and register the field without attributes.
+		$has_attributes = false;
+
+		if ( empty( $attributes ) ) {
+			return [];
+		}
+
+		if ( ! is_array( $attributes ) || 0 === count( $attributes ) ) {
+			$message = sprintf( 'An invalid attributes value was supplied when registering field with id: "%s". %s', $id, 'Attributes must be a non-empty array.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return [];
+		}
+
+		// These are formatted in camelCase because React components expect them that way.
+		$allowed_attributes = array(
+			'maxLength',
+			'readOnly',
+			'pattern',
+			'autocomplete',
+			'autocapitalize',
+			'title',
+		);
+
+		$valid_attributes = array_filter(
+			$attributes,
+			function( $_, $key ) use ( $allowed_attributes ) {
+				return in_array( $key, $allowed_attributes, true ) || strpos( $key, 'aria-' ) === 0 || strpos( $key, 'data-' ) === 0;
+			},
+			ARRAY_FILTER_USE_BOTH
+		);
+
+		// Any invalid attributes should show a doing_it_wrong warning. It shouldn't stop field registration, though.
+		if ( count( $attributes ) !== count( $valid_attributes ) ) {
+			$invalid_attributes = array_keys( array_diff_key( $attributes, $valid_attributes ) );
+			$message            = sprintf( 'Invalid attribute found when registering field with id: "%s". Attributes: %s are not allowed.', $id, implode( ', ', $invalid_attributes ) );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+		}
+
+		// Escape attributes to remove any malicious code and return them.
+		return array_map(
+			function( $value ) {
+				return esc_attr( $value );
+			},
+			$valid_attributes
+		);
 	}
 
 	/**
