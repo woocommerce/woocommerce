@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, Fragment, useState } from '@wordpress/element';
-import { Button, Popover } from '@wordpress/components';
+import { Button, Fill, Popover } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -16,10 +16,10 @@ import { PluginHeaderItemPopoverProps } from './types';
 
 export const PluginHeaderItemPopover: React.FC<
 	PluginHeaderItemPopoverProps
-> = ( { children, label, icon, order = 20 } ) => {
+> = ( { children, label, icon } ) => {
 	const [ isVisible, setVisible ] = useState( false );
 	return (
-		<PinnedItems scope={ PINNED_ITEMS_SCOPE } order={ order }>
+		<PinnedItems scope={ PINNED_ITEMS_SCOPE }>
 			<>
 				<Button
 					variant="tertiary"

@@ -18,12 +18,11 @@ export const PluginHeaderItemModal: React.FC< PluginHeaderItemModalProps > = ( {
 	children,
 	label,
 	icon,
-	order = 20,
 	title,
 } ) => {
 	const [ isOpen, setOpen ] = useState( false );
 	return (
-		<PinnedItems scope={ PINNED_ITEMS_SCOPE } order={ order }>
+		<PinnedItems scope={ PINNED_ITEMS_SCOPE }>
 			<>
 				<Button
 					variant="tertiary"
