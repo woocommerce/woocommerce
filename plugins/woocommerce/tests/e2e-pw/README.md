@@ -19,7 +19,7 @@ This is the documentation for the new e2e testing setup based on Playwright and 
 
 ## Pre-requisites
 
-In case this is the first time building WooCommerce, it is advised to go through the [WooCommerce Monorepo prerequisites]([url](https://github.com/woocommerce/woocommerce/blob/trunk/README.md#prerequisites)) first.
+In case this is the first time building WooCommerce, it is advised to go through the [WooCommerce Monorepo prerequisites](https://github.com/woocommerce/woocommerce/blob/trunk/README.md#prerequisites) first.
 
 -   Node.js ([Installation instructions](https://nodejs.org/en/download/))
 -   NVM ([Installation instructions](https://github.com/nvm-sh/nvm))
