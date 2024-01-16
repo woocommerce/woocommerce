@@ -24,5 +24,4 @@ registerBlockType( metadata, {
 		...metadata.attributes,
 	},
 	edit,
-	save: InnerBlocks.Content,
 } );

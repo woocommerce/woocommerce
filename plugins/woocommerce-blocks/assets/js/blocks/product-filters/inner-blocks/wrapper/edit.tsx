@@ -29,9 +29,7 @@ const Edit = ( {
 						{ level: 3, content: attributes.heading || '' },
 					],
 					[
-						`woocommerce/${
-							BLOCK_NAME_MAP[ attributes.filterType ]
-						}`,
+						BLOCK_NAME_MAP[ attributes.filterType ],
 						{
 							heading: '',
 							lock: {

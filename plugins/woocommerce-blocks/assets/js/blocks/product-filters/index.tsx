@@ -13,6 +13,7 @@ import edit from './edit';
 import save from './save';
 
 if ( isExperimentalBuild() ) {
+	console.log( 'here it goes!' );
 	registerBlockType( metadata, {
 		icon: {
 			src: (

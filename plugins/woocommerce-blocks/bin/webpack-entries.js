@@ -97,6 +97,10 @@ const blocks = {
 	'product-filters': {
 		isExperimental: true,
 	},
+	'product-filters-wrapper': {
+		isExperimental: true,
+		customDir: 'product-filters/inner-blocks/wrapper',
+	},
 	'product-filters-stock-status': {
 		isExperimental: true,
 		customDir: 'product-filters/inner-blocks/stock-filter',
