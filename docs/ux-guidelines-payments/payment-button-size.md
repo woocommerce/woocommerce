@@ -18,7 +18,7 @@ Payment buttons consist of up to three elements: a button component, payment log
 
 Don’t place any text outside the surface area of the button.
 
-![Cart layout 2](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Cart-layout-2.png")
+![Cart layout 2](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Cart-layout-2.png)
 
 ### Layout and spacing
 
