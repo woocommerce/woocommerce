@@ -32,7 +32,7 @@ This is a collection of reusable scripts tailored for WordPress development.
 
 ## Libraries
 
-Use these resources to help take some of the heavy lifting off of fetching and transforming data –– as well as creating UI elements.
+Use these resources to help take some of the heavy lifting off of fetching and transforming data -- as well as creating UI elements.
 
 ### API Clients
 

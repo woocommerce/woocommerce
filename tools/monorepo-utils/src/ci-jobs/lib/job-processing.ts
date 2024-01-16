@@ -73,32 +73,38 @@ function replaceCommandVars( command: string, options: CreateOptions ): string {
 /**
  * Checks the config against the changes and creates one if it should be run.
  *
- * @param {string}         projectName The name of the project that the job is for.
- * @param {Object}         config      The config object for the lint job.
- * @param {Array.<string>} changes     The file changes that have occurred for the project.
- * @param {Object}         options     The options to use when creating the job.
+ * @param {string}              projectName The name of the project that the job is for.
+ * @param {Object}              config      The config object for the lint job.
+ * @param {Array.<string>|true} changes     The file changes that have occurred for the project or true if all projects should be marked as changed.
+ * @param {Object}              options     The options to use when creating the job.
  * @return {Object|null} The job that should be run or null if no job should be run.
  */
 function createLintJob(
 	projectName: string,
 	config: LintJobConfig,
-	changes: string[],
+	changes: string[] | true,
 	options: CreateOptions
 ): LintJob | null {
 	let triggered = false;
 
-	// Projects can configure jobs to be triggered when a
-	// changed file matches a path regex.
-	for ( const file of changes ) {
-		for ( const change of config.changes ) {
-			if ( change.test( file ) ) {
-				triggered = true;
+	// When we're forcing changes for all projects we don't need to check
+	// for any changed files before triggering the job.
+	if ( changes === true ) {
+		triggered = true;
+	} else {
+		// Projects can configure jobs to be triggered when a
+		// changed file matches a path regex.
+		for ( const file of changes ) {
+			for ( const change of config.changes ) {
+				if ( change.test( file ) ) {
+					triggered = true;
+					break;
+				}
+			}
+
+			if ( triggered ) {
 				break;
 			}
-		}
-
-		if ( triggered ) {
-			break;
 		}
 	}
 
@@ -115,46 +121,54 @@ function createLintJob(
 /**
  * Checks the config against the changes and creates one if it should be run.
  *
- * @param {string}         projectName The name of the project that the job is for.
- * @param {Object}         config      The config object for the test job.
- * @param {Array.<string>} changes     The file changes that have occurred for the project.
- * @param {Object}         options     The options to use when creating the job.
- * @param {Array.<string>} cascadeKeys The cascade keys that have been triggered in dependencies.
+ * @param {string}              projectName The name of the project that the job is for.
+ * @param {Object}              config      The config object for the test job.
+ * @param {Array.<string>|true} changes     The file changes that have occurred for the project or true if all projects should be marked as changed.
+ * @param {Object}              options     The options to use when creating the job.
+ * @param {Array.<string>}      cascadeKeys The cascade keys that have been triggered in dependencies.
  * @return {Promise.<Object|null>} The job that should be run or null if no job should be run.
  */
 async function createTestJob(
 	projectName: string,
 	config: TestJobConfig,
-	changes: string[],
+	changes: string[] | true,
 	options: CreateOptions,
 	cascadeKeys: string[]
 ): Promise< TestJob | null > {
 	let triggered = false;
 
-	// Some jobs can be configured to trigger when a dependency has a job that
-	// was triggered. For example, a code change in a dependency might mean
-	// that code is impacted in the current project even if no files were
-	// actually changed in this project.
-	if (
-		config.cascadeKeys &&
-		config.cascadeKeys.some( ( value ) => cascadeKeys.includes( value ) )
-	) {
+	// When we're forcing changes for all projects we don't need to check
+	// for any changed files before triggering the job.
+	if ( changes === true ) {
 		triggered = true;
-	}
+	} else {
+		// Some jobs can be configured to trigger when a dependency has a job that
+		// was triggered. For example, a code change in a dependency might mean
+		// that code is impacted in the current project even if no files were
+		// actually changed in this project.
+		if (
+			config.cascadeKeys &&
+			config.cascadeKeys.some( ( value ) =>
+				cascadeKeys.includes( value )
+			)
+		) {
+			triggered = true;
+		}
 
-	// Projects can configure jobs to be triggered when a
-	// changed file matches a path regex.
-	if ( ! triggered ) {
-		for ( const file of changes ) {
-			for ( const change of config.changes ) {
-				if ( change.test( file ) ) {
-					triggered = true;
+		// Projects can configure jobs to be triggered when a
+		// changed file matches a path regex.
+		if ( ! triggered ) {
+			for ( const file of changes ) {
+				for ( const change of config.changes ) {
+					if ( change.test( file ) ) {
+						triggered = true;
+						break;
+					}
+				}
+
+				if ( triggered ) {
 					break;
 				}
-			}
-
-			if ( triggered ) {
-				break;
 			}
 		}
 	}
@@ -189,15 +203,15 @@ async function createTestJob(
 /**
  * Recursively checks the project for any jobs that should be executed and returns them.
  *
- * @param {Object}         node         The current project node to examine.
- * @param {Object}         changedFiles The files that have changed for the project.
- * @param {Object}         options      The options to use when creating the job.
- * @param {Array.<string>} cascadeKeys  The cascade keys that have been triggered in dependencies.
+ * @param {Object}         node        The current project node to examine.
+ * @param {Object|true}    changes     The changed files keyed by their project or true if all projects should be marked as changed.
+ * @param {Object}         options     The options to use when creating the job.
+ * @param {Array.<string>} cascadeKeys The cascade keys that have been triggered in dependencies.
  * @return {Promise.<Object>} The jobs that have been created for the project.
  */
 async function createJobsForProject(
 	node: ProjectNode,
-	changedFiles: ProjectFileChanges,
+	changes: ProjectFileChanges | true,
 	options: CreateOptions,
 	cascadeKeys: string[]
 ): Promise< Jobs > {
@@ -221,7 +235,7 @@ async function createJobsForProject(
 
 		const dependencyJobs = await createJobsForProject(
 			dependency,
-			changedFiles,
+			changes,
 			options,
 			dependencyCascade
 		);
@@ -256,12 +270,23 @@ async function createJobsForProject(
 			continue;
 		}
 
+		// Jobs will check to see whether or not they should trigger based on the files
+		// that have been changed in the project. When "true" is given, however, it
+		// means that we should consider ALL files to have been changed and
+		// trigger any jobs for the project.
+		let projectChanges;
+		if ( changes === true ) {
+			projectChanges = true;
+		} else {
+			projectChanges = changes[ node.name ] ?? [];
+		}
+
 		switch ( jobConfig.type ) {
 			case JobType.Lint: {
 				const created = createLintJob(
 					node.name,
 					jobConfig,
-					changedFiles[ node.name ] ?? [],
+					projectChanges,
 					options
 				);
 				if ( ! created ) {
@@ -277,7 +302,7 @@ async function createJobsForProject(
 				const created = await createTestJob(
 					node.name,
 					jobConfig,
-					changedFiles[ node.name ] ?? [],
+					projectChanges,
 					options,
 					cascadeKeys
 				);
@@ -306,14 +331,14 @@ async function createJobsForProject(
 /**
  * Creates jobs to run for the given project graph and file changes.
  *
- * @param {Object} root    The root node for the project graph.
- * @param {Object} changes The file changes that have occurred.
- * @param {Object} options The options to use when creating the job.
+ * @param {Object}      root    The root node for the project graph.
+ * @param {Object|true} changes The changed files keyed by their project or true if all projects should be marked as changed.
+ * @param {Object}      options The options to use when creating the job.
  * @return {Promise.<Object>} The jobs that should be run.
  */
 export function createJobsForChanges(
 	root: ProjectNode,
-	changes: ProjectFileChanges,
+	changes: ProjectFileChanges | true,
 	options: CreateOptions
 ): Promise< Jobs > {
 	return createJobsForProject( root, changes, options, [] );

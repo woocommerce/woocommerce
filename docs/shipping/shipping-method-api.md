@@ -6,7 +6,7 @@ WooCommerce has a shipping method API which plugins can use to add their own rat
 
 ## Create a plugin
 
-First off, create a regular WordPress/WooCommerce plugin – see our [Extension Developer Handbook](/docs/extension-development/extension-developer-handbook.md) to get started. You'll define your shipping method class in this plugin file and maintain it outside of WooCommerce.
+First off, create a regular WordPress/WooCommerce plugin - see our [Extension Developer Handbook](/docs/extension-development/extension-developer-handbook.md) to get started. You'll define your shipping method class in this plugin file and maintain it outside of WooCommerce.
 
 ## Create a function to house your class
 
@@ -78,7 +78,7 @@ You can then define your options using the settings API. In the snippets above y
 
 ## The calculate_shipping() method
 
-`calculate_shipping()`` is a method which you use to add your rates – WooCommerce will call this when doing shipping calculations. Do your plugin specific calculations here and then add the rates via the API. How do you do that? Like so:
+`calculate_shipping()`` is a method which you use to add your rates - WooCommerce will call this when doing shipping calculations. Do your plugin specific calculations here and then add the rates via the API. How do you do that? Like so:
 
 ``` php
 $rate = array(
@@ -102,7 +102,7 @@ $defaults = array(
 );
 ```
 
-Your shipping method can pass as many rates as you want – just ensure that the id for each is different. The user will get to choose rate during checkout.
+Your shipping method can pass as many rates as you want - just ensure that the id for each is different. The user will get to choose rate during checkout.
 
 ## Piecing it all together
 

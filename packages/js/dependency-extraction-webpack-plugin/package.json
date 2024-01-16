@@ -41,7 +41,7 @@
 		"typescript": "^5.3.3",
 		"webpack": "^5.89.0",
 		"webpack-cli": "^3.3.12",
-		"wireit": "0.14.1"
+		"wireit": "0.14.3"
 	},
 	"scripts": {
 		"changelog": "composer install && composer exec -- changelogger",
