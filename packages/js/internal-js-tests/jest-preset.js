@@ -68,16 +68,15 @@ module.exports = {
 			}
 
 			return acc;
+		},
+		{
+			'(?:src|client|assets/js)/.*\\.[jt]sx?$': [
+				'ts-jest',
+				{ diagnostics: { warnOnly: true } },
+			],
 		}
 	),
 	testEnvironment: 'jest-environment-jsdom',
 	timers: 'modern',
 	verbose: true,
-	globals: {
-		'ts-jest': {
-			diagnostics: {
-				warnOnly: true,
-			},
-		},
-	},
 };

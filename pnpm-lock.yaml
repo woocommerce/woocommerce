@@ -304,7 +304,7 @@ importers:
         version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react-test-renderer@18.2.0)(react@18.2.0)
       '@testing-library/user-event':
         specifier: 13.5.0
-        version: 13.5.0(@testing-library/dom@9.3.3)
+        version: 13.5.0(@testing-library/dom@9.3.4)
       '@types/debug':
         specifier: ^4.1.12
         version: 4.1.12
@@ -811,20 +811,20 @@ importers:
         specifier: 6.5.17-alpha.0
         version: 6.5.17-alpha.0(react-dom@18.2.0)(react@18.2.0)
       '@testing-library/dom':
-        specifier: 8.11.3
-        version: 8.11.3
+        specifier: 9.3.4
+        version: 9.3.4
       '@testing-library/jest-dom':
         specifier: 5.16.2
         version: 5.16.2
       '@testing-library/react':
-        specifier: 12.1.3
-        version: 12.1.3(react-dom@18.2.0)(react@18.2.0)
+        specifier: 14.1.2
+        version: 14.1.2(react-dom@18.2.0)(react@18.2.0)
       '@testing-library/react-hooks':
         specifier: 8.0.1
         version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react-test-renderer@18.2.0)(react@18.2.0)
       '@testing-library/user-event':
         specifier: 13.5.0
-        version: 13.5.0(@testing-library/dom@8.11.3)
+        version: 13.5.0(@testing-library/dom@9.3.4)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -2657,7 +2657,7 @@ importers:
         version: 8.0.1(@types/react@18.2.47)(react-dom@18.2.0)(react-test-renderer@18.2.0)(react@18.2.0)
       '@testing-library/user-event':
         specifier: 13.5.0
-        version: 13.5.0(@testing-library/dom@9.3.3)
+        version: 13.5.0(@testing-library/dom@9.3.4)
       '@types/dompurify':
         specifier: ^2.4.0
         version: 2.4.0
@@ -19133,6 +19133,20 @@ packages:
       pretty-format: 27.5.1
     dev: true
 
+  /@testing-library/dom@9.3.4:
+    resolution: {integrity: sha512-FlS4ZWlp97iiNWig0Muq8p+3rVDjRiYE+YKGbAqXOu9nwJFFOdL00kFpz42M+4huzYi86vAK1sOOfyOG45muIQ==}
+    engines: {node: '>=14'}
+    dependencies:
+      '@babel/code-frame': 7.23.5
+      '@babel/runtime': 7.23.6
+      '@types/aria-query': 5.0.4
+      aria-query: 5.1.3
+      chalk: 4.1.2
+      dom-accessibility-api: 0.5.16
+      lz-string: 1.5.0
+      pretty-format: 27.5.1
+    dev: true
+
   /@testing-library/jest-dom@5.16.2:
     resolution: {integrity: sha512-6ewxs1MXWwsBFZXIk4nKKskWANelkdUehchEOokHsN8X7c2eKXGw+77aRV63UU8f/DTSVUPLaGxdrj4lN7D/ug==}
     engines: {node: '>=8', npm: '>=6', yarn: '>=1'}
@@ -19273,6 +19287,20 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: true
 
+  /@testing-library/react@14.1.2(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-z4p7DVBTPjKM5qDZ0t5ZjzkpSNb+fZy1u6bzO7kk8oeGagpPCAtgh4cx1syrfp7a+QWkM021jGqjJaxJJnXAZg==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      react: ^18.2.0
+      react-dom: ^18.0.0
+    dependencies:
+      '@babel/runtime': 7.23.6
+      '@testing-library/dom': 9.3.4
+      '@types/react-dom': 18.0.10
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: true
+
   /@testing-library/user-event@13.5.0(@testing-library/dom@8.11.3):
     resolution: {integrity: sha512-5Kwtbo3Y/NowpkbRuSepbyMFkZmHgD+vPzYB/RJ4oxt5Gj/avFFBYjhw27cqSVPVw/3a67NK1PbiIr9k4Gwmdg==}
     engines: {node: '>=10', npm: '>=6'}
@@ -19291,6 +19319,16 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.6
       '@testing-library/dom': 9.3.3
+    dev: true
+
+  /@testing-library/user-event@13.5.0(@testing-library/dom@9.3.4):
+    resolution: {integrity: sha512-5Kwtbo3Y/NowpkbRuSepbyMFkZmHgD+vPzYB/RJ4oxt5Gj/avFFBYjhw27cqSVPVw/3a67NK1PbiIr9k4Gwmdg==}
+    engines: {node: '>=10', npm: '>=6'}
+    peerDependencies:
+      '@testing-library/dom': '>=7.21.4'
+    dependencies:
+      '@babel/runtime': 7.23.6
+      '@testing-library/dom': 9.3.4
     dev: true
 
   /@tootallnate/once@1.1.2:
@@ -23949,7 +23987,7 @@ packages:
       jest: '>=24'
       puppeteer: '>=1.19.0'
     dependencies:
-      '@babel/runtime': 7.23.5
+      '@babel/runtime': 7.23.6
       '@wordpress/keycodes': 2.19.3
       '@wordpress/url': 2.22.2(react-native@0.73.0)
       jest: 29.7.0(@types/node@16.18.68)(ts-node@10.9.2)
@@ -45568,7 +45606,7 @@ packages:
       postcss: 8.4.32
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@3.3.12)
+      webpack: 5.89.0(webpack-cli@5.1.4)
 
   /postcss-loader@6.2.1(postcss@8.4.32)(webpack@5.89.0):
     resolution: {integrity: sha512-WbbYpmAaKcux/P66bZ40bpWsBucjx/TTgVVzRZ9yUO8yQfVBlameJ0ZGVaPfH64hNSBh63a+ICP5nqOpBA0w+Q==}
@@ -48063,6 +48101,7 @@ packages:
       react-is: 16.13.1
       scheduler: 0.19.1
     dev: true
+    bundledDependencies: false
 
   /react-test-renderer@17.0.2(react@18.2.0):
     resolution: {integrity: sha512-yaQ9cB89c17PUb0x6UfWRs7kQCorVdHlutU1boVPEsB8IDZH6n9tHxMacc3y0JoXOJUsZb/t/Mb8FUWMKaM7iQ==}
@@ -49412,7 +49451,7 @@ packages:
       sass: 1.69.5
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@3.3.12)
+      webpack: 5.89.0(webpack-cli@5.1.4)
 
   /sass-loader@12.6.0(sass@1.69.5)(webpack@5.89.0):
     resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}
