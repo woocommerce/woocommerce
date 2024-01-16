@@ -14,7 +14,7 @@ Webhooks are useful for integrating with third-party services and other external
 
 Webhooks were introduced in WooCommerce 2.2 and can trigger events each time you add, edit or delete orders, products, coupons or customers.
 
-It’s also possible to use webhooks with WooCommerce actions, e.g., Create a webhook to be used every time a product is added to the shopping cart, using the action  `woocommerce_add_to_cart`.
+It's also possible to use webhooks with WooCommerce actions, e.g., Create a webhook to be used every time a product is added to the shopping cart, using the action  `woocommerce_add_to_cart`.
 
 Webhooks also make it easier for third-party apps to integrate with WooCommerce.
 
@@ -37,9 +37,9 @@ To create a new webhook:
 - **Status**: Set to **Active** (delivers payload),  **Paused** (does not deliver), or **Disabled** (does not deliver due delivery failures).
 - **Topic**: Indicate when the webhook should be triggered -  **Order Created**,  **Product Deleted**, or **Customer Updated**. There are also  **Action** and  **Custom** options.
     - **Action Event**: This option is available when the Topic is a WooCommerce **Action**, such as  `woocommerce_add_to_cart`  for when customers add products to the shopping cart.
-    - **Custom Topic**: This option is for  **advanced users only**. It’s possible to introduce new, customized topics with the help of  `woocommerce_webhook_topic_hooks`  filter.
+    - **Custom Topic**: This option is for  **advanced users only**. It's possible to introduce new, customized topics with the help of  `woocommerce_webhook_topic_hooks`  filter.
 - **Delivery URL**: URL where the webhook payload is delivered.
-- **Secret**: The Secret Key generates a hash of the delivered webhook and is provided in the request headers. This defaults to the current API user’s consumer secret, if nothing is entered.
+- **Secret**: The Secret Key generates a hash of the delivered webhook and is provided in the request headers. This defaults to the current API user's consumer secret, if nothing is entered.
 
 4/ **Save Webhook**.
 
