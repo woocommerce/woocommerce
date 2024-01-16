@@ -10,6 +10,10 @@ import { Button, Tooltip } from '@wordpress/components';
 import { chevronLeft, group, Icon } from '@wordpress/icons';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { PinnedItems } from '@wordpress/interface';
 
 /**
  * Internal dependencies
@@ -20,7 +24,7 @@ import { PreviewButton } from './preview-button';
 import { SaveDraftButton } from './save-draft-button';
 import { PublishButton } from './publish-button';
 import { Tabs } from '../tabs';
-import { TRACKS_SOURCE } from '../../constants';
+import { PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
 
 export type HeaderProps = {
 	onTabSelect: ( tabId: string | null ) => void;
@@ -142,6 +146,7 @@ export function Header( {
 					/>
 
 					<WooHeaderItem.Slot name="product" />
+					<PinnedItems.Slot scope={ PINNED_ITEMS_SCOPE } />
 					<MoreMenu />
 				</div>
 			</div>

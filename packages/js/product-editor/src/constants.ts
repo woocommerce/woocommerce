@@ -55,6 +55,8 @@ export const PRODUCT_SCHEDULED_SALE_SLUG = 'product-scheduled-sale';
 
 export const TRACKS_SOURCE = 'product-block-editor-v1';
 
+export const PINNED_ITEMS_SCOPE = 'woocommerce/product-editor';
+
 /**
  * Since the pagination component does not exposes the way of
  * changing the per page options which are [25, 50, 75, 100]
