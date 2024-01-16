@@ -1,5 +1,7 @@
 ---
-post_title: Fixing outdated WooCommerce templates
+post_title: How to fix outdated WooCommerce templates
+menu_title: Fix outdated templates
+tags: how-to
 ---
 
 ## Template Updates and Changes

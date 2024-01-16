@@ -1,5 +1,6 @@
 ---
 post_title: Setting up your development environment
+menu_title: Development environment
 ---
 
 ## Introduction

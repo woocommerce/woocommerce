@@ -1,4 +1,8 @@
-# Working with WooCommerce Admin Pages
+---
+post_title: Working with WooCommerce Admin Pages
+menu_title: Working with Admin Pages
+tags: how-to
+---
 
 ## Introduction
 

@@ -1,5 +1,7 @@
 ---
-post_title: Translating WooCommerce
+post_title: How to Translate WooCommerce
+menu_title: Translating WooCommerce
+tags: how-to
 ---
 
 WooCommerce is already translated into several languages and is translation-ready right out of the box. All that's needed is a translation file for your language.

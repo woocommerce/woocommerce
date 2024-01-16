@@ -1,5 +1,6 @@
 ---
 post_title: WooCommerce developer tools
+menu_title: Developer tools
 ---
 
 This guide provides an overview of essential tools and libraries for WooCommerce development. It's intended for developers looking to enhance their WooCommerce projects efficiently.

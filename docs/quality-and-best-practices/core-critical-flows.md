@@ -1,5 +1,7 @@
 ---
 post_title: WooCommerce core critical flows
+menu_title: Core critical flows
+tags: reference
 ---
 
 We have identified what we consider to be our most critical user flows within WooCommerce Core. These flows will help us focus and prioritize our testing efforts. They will also help us consider the impact of changes and priority of issues.

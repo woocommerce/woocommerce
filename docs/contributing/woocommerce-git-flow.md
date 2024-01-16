@@ -1,5 +1,7 @@
 ---
 post_title: WooCommerce Git flow
+menu_title: WooCommerce Git flow
+tags: reference
 ---
 
 For core development, we use the following structure and flow.

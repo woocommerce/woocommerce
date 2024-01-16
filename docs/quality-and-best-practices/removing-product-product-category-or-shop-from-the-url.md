@@ -1,5 +1,7 @@
 ---
-post_title: Removing /product/ , /product-category/ , or /shop/ from URLs
+post_title: Understanding the Risks of Removing URL Bases in WooCommerce
+menu_title: Risks of removing URL bases
+tags: reference
 ---
 
 ## [In sum](https://github.com/woocommerce/woocommerce/blob/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-urls.md#section-1)
