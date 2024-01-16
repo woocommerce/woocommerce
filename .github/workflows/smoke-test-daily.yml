@@ -141,7 +141,7 @@ jobs:
     e2e-tests-success:
         name: Runs E2E tests.
         runs-on: ubuntu-latest
-        needs: e2e-tests-run
+        needs: e2e-tests
         steps:
             - run: echo Done!
 
