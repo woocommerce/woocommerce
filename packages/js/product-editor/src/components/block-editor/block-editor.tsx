@@ -158,7 +158,16 @@ export function BlockEditor( {
 			...settings,
 			productTemplate,
 		} as Partial< ProductEditorSettings > );
-	}, [ settings, postType, productTemplate, productType, layoutTemplate ] );
+
+		// We don't need to include onChange or updateEditorSettings in the dependencies,
+		// since we get new instances of them on every render, which would cause an infinite loop.
+		//
+		// We include productId in the dependencies to make sure that the effect is run when the
+		// product is changed, since we need to synchronize the blocks with the template and update
+		// the blocks by calling onChange.
+		//
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ layoutTemplate, settings, productTemplate, productId ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( select ) => {
