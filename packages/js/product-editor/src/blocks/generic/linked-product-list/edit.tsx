@@ -127,6 +127,7 @@ export function LinkedProductListBlockEdit( {
 	}
 
 	const [ isChoosingProducts, setIsChoosingProducts ] = useState( false );
+
 	async function chooseProductsForMe() {
 		dispatch( {
 			type: 'LOADING_LINKED_PRODUCTS',
@@ -135,9 +136,9 @@ export function LinkedProductListBlockEdit( {
 			},
 		} );
 
-		const relatedProducts = ( await getRelatedProducts(
-			productId
-		) ) as Product[];
+		const relatedProducts = ( await getRelatedProducts( productId, {
+			fallbackToRandomProducts: true,
+		} ) ) as Product[];
 
 		setIsChoosingProducts( true );
 
@@ -170,7 +171,6 @@ export function LinkedProductListBlockEdit( {
 					icon={ reusableBlock }
 					onClick={ chooseProductsForMe }
 					isBusy={ isChoosingProducts }
-					disabled={ isChoosingProducts }
 				>
 					{ __( 'Choose products for me', 'woocommerce' ) }
 				</Button>
