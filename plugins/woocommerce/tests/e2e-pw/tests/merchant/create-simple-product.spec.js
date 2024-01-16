@@ -4,6 +4,9 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const virtualProductName = 'Virtual Product Name';
 const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
+const productTag = 'nonVirtualTag';
+const productDescription = 'Description of a non-virtual product.';
+const productDescriptionShort = 'Short description';
 let shippingZoneId, virtualProductId, nonVirtualProductId;
 
 test.describe.serial( 'Add New Simple Product Page', () => {
@@ -112,7 +115,42 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			waitUntil: 'networkidle',
 		} );
 		await page.locator( '#title' ).fill( nonVirtualProductName );
+
+		await page
+			.frameLocator( '#content_ifr' )
+			.locator( '.wp-editor' )
+			.fill( productDescription );
+
 		await page.locator( '#_regular_price' ).fill( productPrice );
+
+		await page.locator( '.inventory_options' ).click();
+		await page.locator( '#_sku' ).fill( '11' );
+
+		const productDimensions = {
+			weight: '2',
+			length: '20',
+			width: '10',
+			height: '30',
+		};
+
+		await page.locator( '.shipping_options' ).click();
+		await page.locator( '#_weight' ).fill( productDimensions.weight );
+		await page.locator( '#product_length' ).fill( productDimensions.length );
+		await page.locator( '#product_width' ).fill( productDimensions.width );
+		await page.locator( '#product_height' ).fill( productDimensions.height );
+
+		await page
+			.frameLocator( '#excerpt_ifr' )
+			.locator( '.wp-editor' )
+			.fill( productDescriptionShort );
+
+		await page.locator( '#product_cat-add-toggle' ).click();
+		await page.locator( '#newproduct_cat' ).fill( Date.now().toString() );
+		await page.locator( '#product_cat-add-submit' ).click();
+
+		await page.locator( '#new-tag-product_tag' ).fill( productTag );
+		await page.locator( '.tagadd' ).click();
+
 		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
 		await page.locator( '#publish' ).click();
 		await page.waitForLoadState( 'networkidle' );
