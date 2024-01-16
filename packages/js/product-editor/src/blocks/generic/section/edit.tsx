@@ -65,7 +65,9 @@ export function SectionBlockEdit( {
 							) }
 						</h2>
 
-						<BlockSlot name="section-actions" />
+						<div className="wp-block-woocommerce-product-section__actions">
+							<BlockSlot name="section-actions" />
+						</div>
 					</div>
 
 					<BlockSlot name="section-description" />

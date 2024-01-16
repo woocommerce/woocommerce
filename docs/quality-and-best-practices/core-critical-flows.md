@@ -8,29 +8,29 @@ These flows will continually evolve as the platform evolves with flows updated, 
 
 ## Shopper critical flow areas
 
--   🛒 [Shopper > Shop](#shopper---shop)
--   🛒 [Shopper > Product](#shopper---product)
--   🛒 [Shopper > Cart](#shopper---cart)
--   🛒 [Shopper > Checkout](#shopper---checkout)
--   🛒 [Shopper > Email](#shopper---email)
--   🛒 [Shopper > My Account](#shopper---my-account)
+- [Shopper > Shop](#shopper---shop)
+- [Shopper > Product](#shopper---product)
+- [Shopper > Cart](#shopper---cart)
+- [Shopper > Checkout](#shopper---checkout)
+- [Shopper > Email](#shopper---email)
+- [Shopper > My Account](#shopper---my-account)
 
 ## Merchant critical flow areas
 
--   💳 [Merchant > Onboarding](#merchant---onboarding)
--   💳 [Merchant > Dashboard](#merchant---dashboard)
--   💳 [Merchant > Settings](#merchant---settings)
--   💳 [Merchant > Coupons](#merchant---coupons)
--   💳 [Merchant > Marketing](#merchant---marketing)
--   💳 [Merchant > Analytics](#merchant---analytics)
--   💳 [Merchant > Products](#merchant---products)
--   💳 [Merchant > Orders](#merchant---orders)
--   💳 [Merchant > Customers](#merchant---customers)
--   💳 [Merchant > Email](#merchant---email)
--   💳 [Merchant > Plugins](#merchant---plugins)
--   💳 [Merchant > My Subscriptions](#merchant---my-subscriptions)
--   💳 [Merchant > Pages](#merchant---pages)
--   💳 [Merchant > Posts](#merchant---posts)
+- [Merchant > Onboarding](#merchant---onboarding)
+- [Merchant > Dashboard](#merchant---dashboard)
+- [Merchant > Settings](#merchant---settings)
+- [Merchant > Coupons](#merchant---coupons)
+- [Merchant > Marketing](#merchant---marketing)
+- [Merchant > Analytics](#merchant---analytics)
+- [Merchant > Products](#merchant---products)
+- [Merchant > Orders](#merchant---orders)
+- [Merchant > Customers](#merchant---customers)
+- [Merchant > Email](#merchant---email)
+- [Merchant > Plugins](#merchant---plugins)
+- [Merchant > My Subscriptions](#merchant---my-subscriptions)
+- [Merchant > Pages](#merchant---pages)
+- [Merchant > Posts](#merchant---posts)
 
 ### Shopper - Shop
 

@@ -132,7 +132,7 @@ Formats a passed price with the correct number of decimals and currency symbol.
 wc_price( $price, $args = array() )
 ```
 
-The ` $args` array has an option called ` ex_tax_label` – if true then an `excluding tax` message will be appended.
+The ` $args` array has an option called ` ex_tax_label` - if true then an `excluding tax` message will be appended.
 
 ## Order Functions
 
