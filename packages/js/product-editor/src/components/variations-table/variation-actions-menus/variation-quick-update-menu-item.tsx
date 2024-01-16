@@ -12,7 +12,11 @@ import {
  * Internal dependencies
  */
 import { MenuItemProps } from './types';
-import { QUICK_UPDATE, SINGLE_UPDATE } from './constants';
+import {
+	MULTIPLE_UPDATE,
+	SINGLE_UPDATE,
+	VARIATION_ACTIONS_SLOT_NAME,
+} from './constants';
 
 const DEFAULT_ORDER = 20;
 
@@ -20,11 +24,12 @@ export const getGroupName = (
 	group?: string,
 	isMultipleSelection?: boolean
 ) => {
-	const name = 'woocommerce-actions-menu-slot';
 	const nameSuffix = isMultipleSelection
-		? `_${ QUICK_UPDATE }`
+		? `_${ MULTIPLE_UPDATE }`
 		: `_${ SINGLE_UPDATE }`;
-	return group ? `${ name }_${ group }${ nameSuffix }` : name;
+	return group
+		? `${ VARIATION_ACTIONS_SLOT_NAME }_${ group }${ nameSuffix }`
+		: VARIATION_ACTIONS_SLOT_NAME;
 };
 
 export const getMenuItem = (
@@ -50,12 +55,12 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 	if ( supportsMultipleSelection ) {
 		return (
 			<>
-				{ [ QUICK_UPDATE, SINGLE_UPDATE ].map( ( updateType ) => (
+				{ [ MULTIPLE_UPDATE, SINGLE_UPDATE ].map( ( updateType ) => (
 					<Fill
 						key={ updateType }
 						name={ getGroupName(
 							group,
-							updateType === QUICK_UPDATE
+							updateType === MULTIPLE_UPDATE
 						) }
 					>
 						{ ( fillProps: Fill.Props ) =>
