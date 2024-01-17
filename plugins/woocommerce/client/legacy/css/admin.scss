@@ -1972,7 +1972,7 @@ ul.wc_coupon_list_block {
 			width: 100%;
 			clear: both;
 
-			input,
+			input:not(.checkbox),
 			textarea,
 			select,
 			.wc-enhanced-select,
