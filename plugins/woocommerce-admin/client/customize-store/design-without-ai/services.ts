@@ -2,11 +2,15 @@
  * External dependencies
  */
 import { Sender } from 'xstate';
+import { recordEvent } from '@woocommerce/tracks';
+
 /**
  * Internal dependencies
  */
 import { updateTemplate } from '../data/actions';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
+import { installAndActivateTheme as setTheme } from '../data/service';
+import { THEME_SLUG } from '../data/constants';
 
 const assembleSite = async () => {
 	await updateTemplate( {
@@ -25,7 +29,23 @@ const browserPopstateHandler =
 		};
 	};
 
+const installAndActivateTheme = async () => {
+	try {
+		await setTheme( THEME_SLUG );
+	} catch ( error ) {
+		recordEvent(
+			'customize_your_store__no_ai_install_and_activate_theme_error',
+			{
+				theme: THEME_SLUG,
+				error: error instanceof Error ? error.message : 'unknown',
+			}
+		);
+		throw error;
+	}
+};
+
 export const services = {
 	assembleSite,
 	browserPopstateHandler,
+	installAndActivateTheme,
 };

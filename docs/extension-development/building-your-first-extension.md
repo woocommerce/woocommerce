@@ -39,14 +39,13 @@ It will also contain files that are JavaScript and CSS assets which shape the cl
 When you run the built-in extension generator, it will output something that looks similar to the structure below.
 
 ```sh
-.
-├── README.md
-├── my-great-extension.php
-├── package.json
-├── src
-│   ├── index.js
-│   └── index.scss
-└── webpack.config.js
+- README.md
+- my-great-extension.php
+- package.json
+- src
+    - index.js
+    - index.scss
+- webpack.config.js
 ```
 
 Here's a breakdown of what these files are and what purpose they serve:

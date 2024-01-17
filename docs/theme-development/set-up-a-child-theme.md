@@ -20,7 +20,7 @@ Read [this guide from the WordPress Codex](https://developer.wordpress.org/theme
 
 ## Make a backup
 
-Before customizing a website, you should always ensure that you have a backup of your site in case anything goes wrong. More info at: [Backing up WordPress content](https://woo.com/document/backup-wordpress-content/).
+Before customizing a website, you should always ensure that you have a backup of your site in case anything goes wrong. More info at: [Backing up WordPress content](https://woo.com/document/backup-wordpress-content/).
 
 ## Getting started
 
@@ -41,7 +41,7 @@ Template: themedir
 */
 ```
 
-Next, we need to change the **Template** field to point to our installed WooTheme. In this example, we'll use the Storefront theme, which is installed under `wp-content/themes/storefront/`. The result will look like this:
+Next, we need to change the **Template** field to point to our installed WooTheme. In this example, we'll use the Storefront theme, which is installed under `wp-content/themes/storefront/`. The result will look like this:
 
 ```css
 /*
@@ -56,7 +56,7 @@ Template: storefront
 /* --------------- Theme customization starts here ----------------- */
 ```
 
-**Note:** With Storefront, you do not need to enqueue any of the parent theme style files with PHP from the theme's `functions.php` file or `@import` these into the child themes `style.css` file as the main parent Storefront theme does this for you.
+**Note:** With Storefront, you do not need to enqueue any of the parent theme style files with PHP from the theme's `functions.php` file or `@import` these into the child themes `style.css` file as the main parent Storefront theme does this for you.
 
 With Storefront, a child theme only requires a blank `functions.php` file and a `style.css` file to get up and running.
 
@@ -64,10 +64,10 @@ With Storefront, a child theme only requires a blank `functions.php` file and a 
 
 You can upload the child theme either through your FTP client, or using the Add New theme option in WordPress.
 
-- **Through FTP.** If you're using FTP, it means that you go directly to the folders of your website. That means you'll need **FTP access** to your host, so you can upload the new child theme. If you don't have this, you should talk to your host and they can give you your FTP login details, and then download an FTP program to upload your files.
+- **Through FTP.** If you're using FTP, it means that you go directly to the folders of your website. That means you'll need **FTP access** to your host, so you can upload the new child theme. If you don't have this, you should talk to your host and they can give you your FTP login details, and then download an FTP program to upload your files.
 - **Through the WP Dashboard.** If you create a .zip file of your child theme folder you can then simply upload that to your site from the **WordPress > Appearance > Themes > Add New** section.
 
-Once you've done that, your child theme will be uploaded to a new folder in `wp-content/themes/`, for example, `wp-content/themes/storefront-child/`. Once uploaded, we can go to our **WP Dashboard > Appearance > Themes** and activate the child theme.
+Once you've done that, your child theme will be uploaded to a new folder in `wp-content/themes/`, for example, `wp-content/themes/storefront-child/`. Once uploaded, we can go to our **WP Dashboard > Appearance > Themes** and activate the child theme.
 
 ## Customizing design and functionality
 
@@ -87,15 +87,15 @@ After saving the file and refreshing our browser, you will now see that the colo
 
 ### Template changes
 
-**Note:** This doesn't apply to Storefront child themes. Any customizations to a Storefront child theme's files will be lost when updating. Instead of customizing the Storefront child theme's files directly, we recommended that you add code snippets to a customization plugin. We've created one to do just this. Download [Theme Customizations](https://github.com/woocommerce/theme-customisations) for free.
+**Note:** This doesn't apply to Storefront child themes. Any customizations to a Storefront child theme's files will be lost when updating. Instead of customizing the Storefront child theme's files directly, we recommended that you add code snippets to a customization plugin. We've created one to do just this. Download [Theme Customizations](https://github.com/woocommerce/theme-customisations) for free.
 
-But wait, there's more! You can do the same with the template files (`*.php`) in the theme folder. For example if w, wanted to modify some code in the header, we need to copy header.php from our parent theme folder `wp-content/themes/storefront/header.php` to our child theme folder `wp-content/themes/storefront-child/header.php`. Once we have copied it to our child theme, we edit `header.php` and customize any code we want. The `header.php` in the child theme will be used instead of the parent theme's `header.php`.
+But wait, there's more! You can do the same with the template files (`*.php`) in the theme folder. For example if w, wanted to modify some code in the header, we need to copy header.php from our parent theme folder `wp-content/themes/storefront/header.php` to our child theme folder `wp-content/themes/storefront-child/header.php`. Once we have copied it to our child theme, we edit `header.php` and customize any code we want. The `header.php` in the child theme will be used instead of the parent theme's `header.php`.
 
-The same goes for WooCommerce templates. If you create a new folder in your child theme called “WooCommerce”, you can make changes to the WooCommerce templates there to make it more in line with the overall design of your website. More on WooCommerce's template structure [can be found here](https://woo.com/document/template-structure/).
+The same goes for WooCommerce templates. If you create a new folder in your child theme called "WooCommerce", you can make changes to the WooCommerce templates there to make it more in line with the overall design of your website. More on WooCommerce's template structure [can be found here](https://woo.com/document/template-structure/).
 
 ### Functionality changes
 
-**NOTE**: The functions.php in your child theme should be **empty** and not include anything from the parent theme's functions.php.
+**NOTE**: The functions.php in your child theme should be **empty** and not include anything from the parent theme's functions.php.
 
 The `functions.php` in your child theme is loaded **before** the parent theme's `functions.php`. If a function in the parent theme is **pluggable**, it allows you to copy a function from the parent theme into the child theme's `functions.php` and have it replace the one in your parent theme. The only requirement is that the parent theme's function is **pluggable**, which basically means it is wrapped in a conditional if statement e.g:
 
@@ -111,7 +111,7 @@ If the parent theme function is **pluggable**, you can copy it to the child them
 
 ## Template directory vs stylesheet directory
 
-WordPress has a few things that it handles differently in child themes. If you have a template file in your child theme, you have to modify how WordPress includes files. `get_template_directory()` will reference the parent theme. To make it use the file in the child theme, you need to change use `get_stylesheet_directory();`.
+WordPress has a few things that it handles differently in child themes. If you have a template file in your child theme, you have to modify how WordPress includes files. `get_template_directory()` will reference the parent theme. To make it use the file in the child theme, you need to change use `get_stylesheet_directory();`.
 
 [More info on this from the WP Codex](https://developer.wordpress.org/themes/advanced-topics/child-themes/#referencing-or-including-other-files)
 
