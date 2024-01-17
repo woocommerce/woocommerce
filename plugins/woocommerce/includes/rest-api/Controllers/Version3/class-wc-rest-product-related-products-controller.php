@@ -20,7 +20,7 @@ use Automattic\Jetpack\Constants;
  * @package WooCommerce\RestApi
  * @extends WC_REST_Product_Related_Products_V2_Controller
  */
-class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controller {
+class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -42,6 +42,13 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 	 * @var string
 	 */
 	protected $post_type = 'product';
+
+	/**
+	 * Related product ids.
+	 * 
+	 * @var array
+	 */
+	protected $ids = array();
 
 	/**
 	 * Related product categories.
@@ -156,7 +163,24 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 	}
 
 	/**
+	 * Prepare objects query.
+	 *
+	 * @since  3.0.0
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return array
+	 */
+	protected function prepare_objects_query( $request ) {
+		$args = parent::prepare_objects_query( $request );
+
+		$args['post__in' ] = $this->ids;
+		return $args;
+	}
+
+	/**
 	 * Get the related products.
+	 * Related products is handled by the wc_get_related_products() core function.
+	 * Currently, the data that define the related products are the categories and tags.
+	 * This endpoint accepts and combines the categories and tags parameters.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return object
@@ -199,7 +223,12 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 			);
 		}
 
-		$ids = wc_get_related_products( $id );
+		$this->ids = wc_get_related_products( $id );
+
+		// If no related products found, return an empty array.
+		if ( empty( $this->ids ) ) {
+			return array();
+		}
 
 		// Remove the product categories filter.
 		remove_filter( 'woocommerce_get_related_product_cat_terms', array( $this, 'get_related_product_cat_terms' ), 100, 2 );
@@ -207,8 +236,6 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 		// Remove the product tags filter.
 		remove_filter( 'woocommerce_get_related_product_tag_terms', array( $this, 'get_related_product_tag_terms' ), 100, 2 );
 
-		return (object) array(
-			'ids' => $ids,
-		);
+		return parent::get_items( $request );
 	}
 }
