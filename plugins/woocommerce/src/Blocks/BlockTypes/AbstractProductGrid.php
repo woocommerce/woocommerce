@@ -672,7 +672,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		 * @since 8.6.0
 		 *
 		 * @param array      $attributes An associative array containing default HTML attributes of the add to cart button.
-   		 * @param WC_Product $product    The WC_Product instance of the product that will be added to the cart once the button is pressed.
+		 * @param WC_Product $product    The WC_Product instance of the product that will be added to the cart once the button is pressed.
 		 *
 		 * @return array Returns an associative array derived from the default array passed as an argument and added the extra HTML attributes.
 		 */
