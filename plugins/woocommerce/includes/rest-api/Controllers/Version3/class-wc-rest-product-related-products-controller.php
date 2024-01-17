@@ -58,6 +58,13 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 	protected $tags = array();
 
 	/**
+	 * Combine the product terms (categories, tags, ...).
+	 *
+	 * @var boolean
+	 */
+	protected $combine = false;
+
+	/**
 	 * Register the routes for products.
 	 */
 	public function register_routes() {
@@ -110,6 +117,15 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 
+		// Add a parameter to whether combine or not the categories and tags.
+		$params['combine'] = array(
+			'description'       => __( 'Combine the product terms (categories, tags, ...).', 'woocommerce' ),
+			'type'              => 'boolean',
+			'default'           => false,
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'rest_sanitize_boolean',
+		);
+
 		return $params;
 	}
 
@@ -117,6 +133,10 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 	 * Get the related product categories.
 	 */
 	public function get_related_product_cat_terms( $cats, $id ) {
+		if ( ! $this->combine ) {
+			return $this->categories;
+		}
+
 		/*
 		 * Merge the given terms with the related product categories
 		 * ensuring to remove any duplicates.
@@ -128,6 +148,10 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 	 * Get the related product tags.
 	 */
 	public function get_related_product_tag_terms( $tags, $id ) {
+		if ( ! $this->combine ) {
+			return $this->tags;
+		}
+
 		return array_unique( array_merge( $tags, $this->tags ) );
 	}
 
@@ -143,6 +167,11 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 
 		$categories = $request->get_param( 'categories' );
 		$tags       = $request->get_param( 'tags' );
+		$combine    = $request->get_param( 'combine' );
+
+		if ( ! empty( $combine ) ) {
+			$this->combine = $combine;
+		}
 
 		/*
 		 * If categories param is defined,
