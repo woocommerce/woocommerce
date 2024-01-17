@@ -583,7 +583,7 @@
           "menu_title": "Block template lifecycle",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/block-template-lifecycle.md",
-          "hash": "459a9583e062dbde5c056903edfa4fad23dad6d2ac4a2cb9f0f0544e7af04bc9",
+          "hash": "8412c1fc634341ef4d4e81cd3212e368acca7e2c8c3ded15de1726cbec88424f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/block-template-lifecycle.md",
           "id": "0c29c74a7e7e9fd88562df1afa489659f460879e"
         }
@@ -938,9 +938,9 @@
       "categories": []
     },
     {
-      "content": "Our research shows that merchants think in terms of tasks and goals while creating new products in Woo. For example, adding or editing a product price is a separate task from uploading images or managing inventory.\n\nFor this reason, the new product form features groups (tabs) that correspond with these tasks. Simply speaking, they are separate views where different form features live. As a developer, you can extend any of these views and offer merchants the information and tools they need to create better, more successful products.\n\nThere are several ways to extend the new product form: from a single field to a whole group or section containing multiple fields and tables. These extension points are linked to the form structure, giving you plenty of freedom to create a great user experience.\n",
-      "category_slug": "ux-guidelines-product-editor",
-      "category_title": "Ux Guidelines Product Editor",
+      "content": "\nOur research shows that merchants think in terms of tasks and goals while creating new products in Woo. For example, adding or editing a product price is a separate task from uploading images or managing inventory.\n\nFor this reason, the new product form features groups (tabs) that correspond with these tasks. Simply speaking, they are separate views where different form features live. As a developer, you can extend any of these views and offer merchants the information and tools they need to create better, more successful products.\n\nThere are several ways to extend the new product form: from a single field to a whole group or section containing multiple fields and tables. These extension points are linked to the form structure, giving you plenty of freedom to create a great user experience.\n",
+      "category_slug": "user-experience-product-editor",
+      "category_title": "Product Editor Guidelines",
       "posts": [
         {
           "post_title": "Product Editor Guidelines - Top Bar Extensions (future feature)",
@@ -1076,5 +1076,5 @@
       "categories": []
     }
   ],
-  "hash": "ef98c98339a494b9baafb00a71490d1f6a02294d6b9848f22008cd731c0ab32c"
+  "hash": "5a8064ecbc4b02ea252bdc2a43b6c5844e7ee8a4384e5bd8f830d14003a4ef4c"
 }
