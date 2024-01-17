@@ -3,10 +3,6 @@
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
-const wrapperBlock = {
-	name: 'woocommerce/product-filters',
-	title: 'Product Filters',
-};
 const filterBlocks = [
 	{
 		name: 'woocommerce/product-filters-price',
@@ -45,21 +41,6 @@ test.describe( 'Filter blocks registration', async () => {
 		await admin.createNewPost();
 	} );
 
-	test( 'Each filter block comes with a default title', async ( {
-		editor,
-		editorUtils,
-	} ) => {
-		await editorUtils.insertBlockUsingGlobalInserter( wrapperBlock.title );
-		for ( const block of filterBlocks ) {
-			await expect(
-				editor.canvas
-					.getByLabel( `Block: ${ block.title }` )
-					.getByLabel( 'Block: Heading' )
-					.and( editor.canvas.getByText( block.heading ) )
-			).toBeVisible();
-		}
-	} );
-
 	test( 'Variations can be inserted through the inserter.', async ( {
 		editor,
 		editorUtils,
@@ -69,6 +50,22 @@ test.describe( 'Filter blocks registration', async () => {
 
 			await expect(
 				editor.canvas.getByLabel( `Block: ${ block.title }` )
+			).toBeVisible();
+		}
+	} );
+
+	test( 'Each filter block comes with a default title', async ( {
+		editor,
+		editorUtils,
+	} ) => {
+		for ( const block of filterBlocks ) {
+			await editorUtils.insertBlockUsingGlobalInserter( block.variation );
+
+			await expect(
+				editor.canvas
+					.getByLabel( `Block: ${ block.title }` )
+					.getByLabel( 'Block: Heading' )
+					.and( editor.canvas.getByText( block.heading ) )
 			).toBeVisible();
 		}
 	} );
