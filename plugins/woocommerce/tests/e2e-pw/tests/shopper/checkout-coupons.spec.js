@@ -306,7 +306,7 @@ test.describe( 'Restricted Coupons', () => {
 		} );
 	} );
 
-	test.beforeEach( async ( { page, context } ) => {
+	test.beforeEach( async ( { context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
 		await context.clearCookies();
 	} );
