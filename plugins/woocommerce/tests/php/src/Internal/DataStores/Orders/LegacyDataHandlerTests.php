@@ -46,6 +46,12 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 			OrderHelper::create_order(),
 			OrderHelper::create_order(),
 		);
+		$refund_order = wc_create_refund(
+			array(
+				'order_id' => $orders[0]->get_id(),
+				'amount'   => 10,
+			)
+		);
 		$this->disable_cot_sync();
 
 		// Confirm orders have been synced up (i.e. are not placeholders) and contain metadata.
@@ -53,10 +59,11 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 			$this->assertEquals( 'shop_order', get_post_type( $order->get_id() ) );
 			$this->assertNotEmpty( get_post_meta( $order->get_id() ) );
 		}
+		$this->assertEquals( 'shop_order_refund', get_post_type( $refund_order->get_id() ) );
 
 		// Check that counts are working ok.
 		$this->assertEquals( 1, $this->sut->count_orders_for_cleanup( array( $orders[0]->get_id() ) ) );
-		$this->assertEquals( 2, $this->sut->count_orders_for_cleanup() );
+		$this->assertEquals( 3, $this->sut->count_orders_for_cleanup() );
 
 		// Cleanup one of the orders.
 		$this->sut->cleanup_post_data( $orders[0]->get_id() );
@@ -67,10 +74,13 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 
 		// Check counts.
 		$this->assertEquals( 0, $this->sut->count_orders_for_cleanup( array( $orders[0]->get_id() ) ) );
-		$this->assertEquals( 1, $this->sut->count_orders_for_cleanup() );
+		$this->assertEquals( 2, $this->sut->count_orders_for_cleanup() );
 
 		// Confirm that we now have 1 unsynced order (due to the removal of the backup data).
 		$this->assertEquals( 1, wc_get_container()->get( DataSynchronizer::class )->get_current_orders_pending_sync_count() );
+
+		// Cleanup the refund order.
+		$this->sut->cleanup_post_data( $refund_order->get_id() );
 	}
 
 	/**
