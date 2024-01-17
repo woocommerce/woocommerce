@@ -173,13 +173,11 @@ class LegacyDataHandler {
 	/**
 	 * Checks whether an HPOS-backed order is newer than the corresponding post.
 	 *
-	 * @param int|\WC_Order $order An HPOS order.
+	 * @param \WC_Abstract_Order $order An HPOS order.
 	 * @return bool TRUE if the order is up to date with the corresponding post.
 	 * @throws \Exception When the order is not an HPOS order.
 	 */
-	private function is_order_newer_than_post( $order ): bool {
-		$order = is_a( $order, 'WC_Order' ) ? $order : wc_get_order( absint( $order ) );
-
+	private function is_order_newer_than_post( \WC_Abstract_Order $order ): bool {
 		if ( ! is_a( $order->get_data_store()->get_current_class_name(), OrdersTableDataStore::class, true ) ) {
 			throw new \Exception( __( 'Order is not an HPOS order.', 'woocommerce' ) );
 		}
