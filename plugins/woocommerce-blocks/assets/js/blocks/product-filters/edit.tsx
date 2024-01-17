@@ -53,7 +53,6 @@ const Edit = ( {
 					[
 						BLOCK_NAME_MAP[ attributes.filterType ],
 						{
-							heading: '',
 							lock: {
 								remove: true,
 							},
