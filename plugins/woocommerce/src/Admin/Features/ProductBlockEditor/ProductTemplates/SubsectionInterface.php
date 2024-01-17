@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTempla
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockContainerInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 
-
 /**
  * Interface for subsection containers, which contain sub-sections and blocks.
  */
