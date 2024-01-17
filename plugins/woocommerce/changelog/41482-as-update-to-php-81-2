@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Prepare code for PHP 8.1
+Improving return value type checks prior to usage
