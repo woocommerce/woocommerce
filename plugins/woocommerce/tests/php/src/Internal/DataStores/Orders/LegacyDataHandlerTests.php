@@ -81,6 +81,8 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 
 		// Cleanup the refund order.
 		$this->sut->cleanup_post_data( $refund_order->get_id() );
+		$this->assertEquals( 1, $this->sut->count_orders_for_cleanup() );
+		$this->assertEquals( 2, wc_get_container()->get( DataSynchronizer::class )->get_current_orders_pending_sync_count() );
 	}
 
 	/**
