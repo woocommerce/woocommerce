@@ -1,5 +1,6 @@
 ---
-post_title: Product Editor Development Handbook
+post_title: Product editor development handbook
+menu_title: Product editor development handbook
 ---
 
 This handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.

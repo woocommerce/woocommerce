@@ -1,5 +1,6 @@
 ---
 post_title: Common issues
+menu_title: Common issues
 tags: reference
 ---
 

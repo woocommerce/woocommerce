@@ -1,6 +1,7 @@
 ---
 post_title: Deprecation in core
-tags: how-to
+menu_title: Deprecation in core
+tags: reference
 ---
 
 Deprecation is a method of discouraging usage of a feature or practice in favour of something else without breaking backwards compatibility or totally prohibiting its usage. To quote the Wikipedia article on Deprecation:

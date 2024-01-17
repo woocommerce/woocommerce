@@ -1,5 +1,7 @@
 ---
 post_title: Writing high quality testing instructions
+Menu_title: Writing testing instructions
+tags: reference
 ---
 
 ## Introduction

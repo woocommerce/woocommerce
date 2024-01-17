@@ -1,5 +1,6 @@
 ---
 post_title: Resources for debugging
+menu_title: Debugging
 ---
 
 ## WordPress

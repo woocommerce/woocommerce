@@ -1,8 +1,10 @@
 ---
-post_title: User Experience Guidelines
+category_title: Extension Guidelines
+category_slug: user-experience-extensions
+post_title: Extension Guidelines
 ---
 
-This guide covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.
+This section covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.
 
 We strongly recommend you review the current [WooCommerce setup experience](https://woo.com/documentation/plugins/woocommerce/getting-started/) to get familiar with the user experience and taxonomy.
 
@@ -17,13 +19,3 @@ Plugins which draw on WordPress' core design aesthetic will benefit from future 
 - [WordPress Components library](https://wordpress.github.io/gutenberg/?path=/story/docs-introduction--page)
 - [Figma for WordPress](https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/) | ([WordPress Design Library Figma](https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library))
 - [WooCommerce Component Library](https://woocommerce.github.io/woocommerce-admin/)
-
-## Explore User Experience Guidlines 
-
-- [Best Practices](/docs/user-experience/best-practices.md)
-- [Colors](/docs/user-experience/colors.md)
-- [Accessibility](/docs/user-experience/accessibility.md)
-- [Onboarding](/docs/user-experience/onboarding.md)
-- [Notices](/docs/user-experience/notices.md)
-- [Task list & Inbox](/docs/user-experience/task-list-and-inbox.md)
-

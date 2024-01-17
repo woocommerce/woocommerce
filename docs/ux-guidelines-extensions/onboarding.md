@@ -1,5 +1,5 @@
 ---
-post_title: User Experience Guidelines - Onboarding
+post_title: WooCommerce Extension Guidelines - Onboarding
 menu_title: Onboarding
 ---
 
