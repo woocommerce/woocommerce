@@ -60,10 +60,8 @@ export function SwitchToClassicShortcodeButton( {
 	const eventValue = {
 		shortcode,
 		notice,
-		incompatible_extensions: {
-			count: incompatibleExtensionsCount,
-			extensions: JSON.stringify( incompatibleExtensions ),
-		},
+		incompatible_extensions_count: incompatibleExtensionsCount,
+		incompatible_extensions_names: JSON.stringify( incompatibleExtensions ),
 	};
 
 	const { getBlocks } = useSelect( ( select ) => {
