@@ -114,7 +114,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product', {
 			waitUntil: 'networkidle',
 		} );
-		await page.locator( '#title' ).fill( nonVirtualProductName );
+		await page.getByLabel( 'Product name' ).fill( nonVirtualProductName );
 
 		await page
 			.frameLocator( '#content_ifr' )
@@ -123,7 +123,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 
 		await page.locator( '#_regular_price' ).fill( productPrice );
 
-		await page.locator( '.inventory_options' ).click();
+		await page.getByText('Inventory').click();
 		await page.locator( '#_sku' ).fill( '11' );
 
 		const productDimensions = {
@@ -133,22 +133,23 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			height: '30',
 		};
 
-		await page.locator( '.shipping_options' ).click();
-		await page.locator( '#_weight' ).fill( productDimensions.weight );
-		await page.locator( '#product_length' ).fill( productDimensions.length );
-		await page.locator( '#product_width' ).fill( productDimensions.width );
-		await page.locator( '#product_height' ).fill( productDimensions.height );
+		await page.getByRole( 'link' , { name: 'Shipping' } ).click();
+		await page.getByPlaceholder( '0' ).fill( productDimensions.weight );
+		await page.getByPlaceholder( 'Length' ).fill( productDimensions.length );
+		await page.getByPlaceholder( 'Width' ).fill( productDimensions.width );
+		await page.getByPlaceholder( 'Height' ).fill( productDimensions.height );
 
 		await page
 			.frameLocator( '#excerpt_ifr' )
 			.locator( '.wp-editor' )
 			.fill( productDescriptionShort );
 
-		await page.locator( '#product_cat-add-toggle' ).click();
+		await page.getByText( '+ Add new category' ).click();
 		await page.locator( '#newproduct_cat' ).fill( Date.now().toString() );
-		await page.locator( '#product_cat-add-submit' ).click();
+		await page.getByRole( 'button', { name: 'Add new category'} ).click();
 
 		await page.locator( '#new-tag-product_tag' ).fill( productTag );
+		// await page.getByRole( 'button', { name: 'Add'} ).click();
 		await page.locator( '.tagadd' ).click();
 
 		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
