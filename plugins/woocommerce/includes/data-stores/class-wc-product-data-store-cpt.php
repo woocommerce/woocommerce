@@ -1413,22 +1413,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				)
 			);
 
-			// Calculate new value for filter below. Set multiplier to subtract or add the meta_value.
+			// Calculate new value for filter below.
 			switch ( $operation ) {
 				case 'increase':
 					$new_stock  = $current_stock + wc_stock_amount( $stock_quantity );
-					$multiplier = 1;
 					break;
 				default:
 					$new_stock  = $current_stock - wc_stock_amount( $stock_quantity );
-					$multiplier = -1;
 					break;
 			}
 
 			// Generate SQL.
 			$sql = $wpdb->prepare(
-				"UPDATE {$wpdb->postmeta} SET meta_value = meta_value %+f WHERE post_id = %d AND meta_key='_stock'",
-				wc_stock_amount( $stock_quantity ) * $multiplier, // This will either subtract or add depending on operation.
+				"UPDATE {$wpdb->postmeta} SET meta_value = meta_value %s WHERE post_id = %d AND meta_key='_stock'",
+				number_format( (float) $new_stock, 6, '.', '' ),
 				$product_id_with_stock
 			);
 		}
