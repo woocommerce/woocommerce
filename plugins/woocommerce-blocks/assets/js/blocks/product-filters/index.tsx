@@ -59,7 +59,7 @@ if ( isExperimentalBuild() ) {
 				name: 'product-filters-price',
 				title: __( 'Product Filters: Price', 'woocommerce' ),
 				description: __(
-					'Enable customers to filter the product grid by choosing a price range.',
+					'Enable customers to filter the product collection by choosing a price range.',
 					'woocommerce'
 				),
 				attributes: {
@@ -79,7 +79,7 @@ if ( isExperimentalBuild() ) {
 				name: 'product-filters-stock-status',
 				title: __( 'Product Filters: Stock Status', 'woocommerce' ),
 				description: __(
-					'Enable customers to filter the product grid by stock status.',
+					'Enable customers to filter the product collection by stock status.',
 					'woocommerce'
 				),
 				attributes: {
@@ -99,7 +99,7 @@ if ( isExperimentalBuild() ) {
 				name: 'product-filters-attribute',
 				title: __( 'Product Filters: Attribute', 'woocommerce' ),
 				description: __(
-					'Enable customers to filter the product grid by selecting one or more attributes, such as color.',
+					'Enable customers to filter the product collection by selecting one or more attributes, such as color.',
 					'woocommerce'
 				),
 				attributes: {
@@ -119,7 +119,7 @@ if ( isExperimentalBuild() ) {
 				name: 'product-filters-rating',
 				title: __( 'Product Filters: Rating', 'woocommerce' ),
 				description: __(
-					'Enable customers to filter the product grid by rating.',
+					'Enable customers to filter the product collection by rating.',
 					'woocommerce'
 				),
 				attributes: {
