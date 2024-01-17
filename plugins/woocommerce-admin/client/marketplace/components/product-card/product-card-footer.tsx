@@ -1,46 +1,88 @@
 /**
  * External dependencies
  */
-import { Icon } from '@wordpress/components';
+import { Button, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { useEffect, useState } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
+import { navigateTo, getNewPath } from '@woocommerce/navigation';
 
-export interface ProductCardFooterProps {
-	price: number | null | undefined;
-	currencySymbol: string;
-	averageRating: number | null | undefined;
-	reviewsCount: number | null | undefined;
-}
+/**
+ * Internal dependencies
+ */
+import { Product } from '~/marketplace/components/product-list/types';
+import { getAdminSetting } from '~/utils/admin-settings';
 
-function ProductCardFooter( props: ProductCardFooterProps ) {
-	const { price, currencySymbol, averageRating, reviewsCount } = props;
+function ProductCardFooter( props: { product: Product } ) {
+	const { product } = props;
+	const [ isInstalled, setIsInstalled ] = useState( false );
+
+	useEffect( () => {
+		const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+		const installedProducts: string[] = wccomSettings?.installedProducts;
+
+		const result = !! installedProducts.find(
+			( item ) => item === product.slug
+		);
+
+		setIsInstalled( result );
+	}, [ product ] );
+
+	function openInstallModal() {
+		recordEvent( 'marketplace_add_to_store_clicked', {
+			product_id: product.id,
+		} );
+
+		navigateTo( {
+			url: getNewPath( {
+				installProduct: product.id,
+			} ),
+		} );
+	}
+
+	// We hardcode this for now while we only display prices in USD.
+	const currencySymbol = '$';
+
+	if ( product.isInstallable && ! isInstalled ) {
+		return (
+			<>
+				<span className="woocommerce-marketplace__product-card__add-to-store">
+					<Button variant="secondary" onClick={ openInstallModal }>
+						{ __( 'Add to Store', 'woocommerce' ) }
+					</Button>
+				</span>
+			</>
+		);
+	}
+
 	return (
 		<>
 			<div className="woocommerce-marketplace__product-card__price">
 				<span className="woocommerce-marketplace__product-card__price-label">
 					{
 						// '0' is a free product
-						price === 0
+						product.price === 0
 							? __( 'Free download', 'woocommerce' )
-							: currencySymbol + price
+							: currencySymbol + product.price
 					}
 				</span>
 				<span className="woocommerce-marketplace__product-card__price-billing">
-					{ props.price === 0
+					{ product.price === 0
 						? ''
 						: __( ' annually', 'woocommerce' ) }
 				</span>
 			</div>
 			<div className="woocommerce-marketplace__product-card__rating">
-				{ averageRating !== null && (
+				{ product.averageRating !== null && (
 					<>
 						<span className="woocommerce-marketplace__product-card__rating-icon">
 							<Icon icon={ 'star-filled' } size={ 16 } />
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-average">
-							{ averageRating }
+							{ product.averageRating }
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-count">
-							({ reviewsCount })
+							({ product.reviewsCount })
 						</span>
 					</>
 				) }
