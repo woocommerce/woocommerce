@@ -1,9 +1,15 @@
 /**
  * External dependencies
  */
-import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
+import {
+	useBlockProps,
+	useInnerBlocksProps,
+	InnerBlocks,
+} from '@wordpress/block-editor';
+import { store as blocksStore, type BlockInstance } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -18,11 +24,25 @@ import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
 import InspectorControls from './inspector-controls';
 import ToolbarControls from './toolbar-controls';
 
+const allowedChildrenPrefixes = [ 'core/', 'woocommerce/' ];
+const getAllowedBlocks = ( blockTypes: BlockInstance[] ) =>
+	blockTypes
+		.filter( ( { name } ) => {
+			return !! allowedChildrenPrefixes.find( ( allowedChildPrefix ) => {
+				return name.startsWith( allowedChildPrefix );
+			} );
+		} )
+		.map( ( { name } ) => name );
+
 const ProductCollectionContent = (
 	props: ProductCollectionEditComponentProps
 ) => {
 	const { attributes, setAttributes } = props;
 	const { queryId } = attributes;
+
+	const blockTypes = useSelect( ( select ) =>
+		select( blocksStore ).getBlockTypes()
+	);
 
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
@@ -66,8 +86,11 @@ const ProductCollectionContent = (
 		return null;
 	}
 
+	const allowedBlocks = getAllowedBlocks( blockTypes );
+
 	return (
 		<div { ...blockProps }>
+			<InnerBlocks allowedBlocks={ allowedBlocks } />
 			<InspectorControls { ...props } />
 			<ToolbarControls { ...props } />
 			<div { ...innerBlocksProps } />
