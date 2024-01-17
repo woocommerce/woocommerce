@@ -124,7 +124,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.locator( '#_regular_price' ).fill( productPrice );
 
 		await page.getByText('Inventory').click();
-		await page.locator( '#_sku' ).fill( '11' );
+		await page.getByLabel( 'SKU', { exact: true } ).fill( '11' );
 
 		const productDimensions = {
 			weight: '2',
@@ -144,13 +144,13 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			.locator( '.wp-editor' )
 			.fill( productDescriptionShort );
 
+		let categoryName = Date.now().toString();
 		await page.getByText( '+ Add new category' ).click();
-		await page.locator( '#newproduct_cat' ).fill( Date.now().toString() );
-		await page.getByRole( 'button', { name: 'Add new category'} ).click();
+		await page.getByLabel( 'Add new category', { exact: true } ).fill( categoryName );
+		await page.getByRole( 'button', { name: 'Add new category', exact: true} ).click();
 
 		await page.locator( '#new-tag-product_tag' ).fill( productTag );
-		// await page.getByRole( 'button', { name: 'Add'} ).click();
-		await page.locator( '.tagadd' ).click();
+		await page.getByRole( 'button', { name: 'Add', exact: true} ).click();
 
 		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
 		await page.locator( '#publish' ).click();
