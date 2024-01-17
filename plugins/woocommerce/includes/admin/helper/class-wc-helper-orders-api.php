@@ -1,10 +1,25 @@
 <?php
+/**
+ * WooCommerce Admin Helper - React admin interface
+ *
+ * @package WooCommerce\Admin\Helper
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * WC_Helper_Orders_API
+ *
+ * Pings Woo.com to create an order and pull in the necessary data to start the installation process.
+ */
 class WC_Helper_Orders_API {
+	/**
+	 * Loads the class, runs on init
+	 *
+	 * @return void
+	 */
 	public static function load() {
 		add_filter( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ) );
 	}
@@ -33,19 +48,32 @@ class WC_Helper_Orders_API {
 		);
 	}
 
+	/**
+	 * The Extensions page can only be accessed by users with the manage_woocommerce
+	 * capability. So the API mimics that behavior.
+	 *
+	 * @return bool
+	 */
 	public static function get_permission() {
 		return WC_Helper_Subscriptions_API::get_permission();
 	}
 
+	/**
+	 * Core function to create an order on Woo.com. Pings the API and catches the exceptions if any.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
 	public static function create_order( $request ) {
 		try {
 			$response = WC_Helper_API::post(
 				'create-order',
 				array(
 					'authenticated' => true,
-					'body' 		=> array(
+					'body'          => array(
 						'product_id' => $request['product_id'],
-					)
+					),
 				)
 			);
 
@@ -56,7 +84,7 @@ class WC_Helper_Orders_API {
 		} catch ( Exception $e ) {
 			return new \WP_REST_Response(
 				array(
-					'message' => __('Could not start the installation process. Reason: ', 'woocommerce' ) . $e->getMessage(),
+					'message' => __( 'Could not start the installation process. Reason: ', 'woocommerce' ) . $e->getMessage(),
 					'code'    => 'could-not-install',
 				),
 				500

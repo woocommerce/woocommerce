@@ -41,18 +41,21 @@ class WC_Helper_Admin {
 
 		// Get the all installed themes and plugins. Knowing this will help us decide to show Add to Store button on product cards.
 		$installed_products = array_merge( WC_Helper::get_local_plugins(), WC_Helper::get_local_themes() );
-		$installed_products = array_map( function ( $product ) {
-			return $product['slug'];
-		}, $installed_products);
+		$installed_products = array_map(
+			function ( $product ) {
+				return $product['slug'];
+			},
+			$installed_products
+		);
 
 		$settings['wccomHelper'] = array(
-			'isConnected' => WC_Helper::is_site_connected(),
-			'connectURL'  => self::get_connection_url(),
-			'userEmail'   => $auth_user_email,
-			'userAvatar'  => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
-			'storeCountry' => wc_get_base_location()['country'],
+			'isConnected'            => WC_Helper::is_site_connected(),
+			'connectURL'             => self::get_connection_url(),
+			'userEmail'              => $auth_user_email,
+			'userAvatar'             => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
+			'storeCountry'           => wc_get_base_location()['country'],
 			'inAppPurchaseURLParams' => WC_Admin_Addons::get_in_app_purchase_url_params(),
-			'installedProducts' => $installed_products,
+			'installedProducts'      => $installed_products,
 		);
 
 		return $settings;
