@@ -41,6 +41,8 @@
 	"scripts": {
 		"build": "pnpm build:admin && pnpm uglify",
 		"build:admin": "wp-scripts build",
+		"watch:build": "pnpm watch:admin && pnpm uglify -- -w",
+		"watch:admin": "wp-scripts start",
 		"build:dev": "pnpm lint:js && pnpm build",
 		"build:zip": "./bin/build-zip.sh",
 		"changelog": "composer install && composer exec -- changelogger",
