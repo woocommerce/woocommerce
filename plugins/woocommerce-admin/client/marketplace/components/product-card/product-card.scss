@@ -63,6 +63,7 @@
 			padding: $medium-gap;
 
 			.woocommerce-marketplace__product-card__description,
+			.woocommerce-marketplace__product-card__add-to-store,
 			.woocommerce-marketplace__product-card__price {
 				display: none;
 			}
@@ -156,6 +157,11 @@
 				right: 0;
 				top: 0;
 			}
+		}
+
+		/* Allow the "add to store" button to "punch through" the "whole card clickable" trick: */
+		&__add-to-store {
+			position: relative;
 		}
 
 		&__vendor {
