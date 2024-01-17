@@ -184,6 +184,12 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		delete_option( \WC_Install::STORE_ID_OPTION );
 	}
 
+	/**
+	 * Documents the expected behavior of `WC_Install::is_new_install()`, and describes certain characteristics such as
+	 * a lazy approach to invoking post counts.
+	 *
+	 * @return void
+	 */
 	public function test_is_new_install(): void {
 		// Determining if we are in a new install is based on the following three factors.
 		$version       = null;
