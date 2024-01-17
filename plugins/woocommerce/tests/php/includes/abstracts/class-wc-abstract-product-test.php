@@ -226,6 +226,8 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 * @testDox Test the `has_attributes` and `update_attributes` methods to ensure invalid attributes are handled gracefully.
 	 */
 	public function test_invalid_attributes() {
+		// `WC_Meta_Box_Product_Data` uses the `$post` and `$product_object` globals.
+		global $post, $product_object;
 		// Create a fake logger to capture log entries.
 		// phpcs:disable Squiz.Commenting
 		$fake_logger = new class() {
@@ -271,6 +273,15 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_variation_product();
 		$this->assertNotNull( $product );
 		$this->assertFalse( $product->has_attributes() );
+
+		$post = get_post( $product->get_id() );
+		$product_object = $product;
+		ob_start();
+		WC_Meta_Box_Product_Data::output_variations();
+		$ob_content = ob_get_contents();
+		ob_end_clean();
+		// We just need to make sure that the `update_attributes` method does not throw an error.
+		$this->assertEquals( '<div id="variable_product_options"', substr( $ob_content, 0, 34 ) );
 
 		remove_filter( 'woocommerce_product_get_attributes', $invalid_attributes_callback_strings, 10 );
 	}

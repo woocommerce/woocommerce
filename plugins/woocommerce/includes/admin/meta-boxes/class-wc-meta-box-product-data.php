@@ -151,7 +151,7 @@ class WC_Meta_Box_Product_Data {
 	 * @return bool
 	 */
 	private static function filter_variation_attributes( $attribute ) {
-		return true === $attribute->get_variation();
+		return is_a( $attribute, 'WC_Product_Attribute' ) && true === $attribute->get_variation();
 	}
 
 	/**
