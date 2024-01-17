@@ -258,10 +258,10 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		 * @param WC_Product $product The product.
 		 * @return array
 		 */
-		function invalid_attributes_callback_strings( $attributes, $product ) {
+		$invalid_attributes_callback_strings = function( $attributes, $product ) {
 			return array( 'invalid' );
-		}
-		add_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_strings', 10, 2 );
+		};
+		add_filter( 'woocommerce_product_get_attributes', $invalid_attributes_callback_strings, 10, 2 );
 
 		$this->assertFalse( $product->has_attributes() );
 		// Check that the log entry was created.
@@ -272,6 +272,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$this->assertNotNull( $product );
 		$this->assertFalse( $product->has_attributes() );
 
-		remove_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_strings', 10 );
+		remove_filter( 'woocommerce_product_get_attributes', $invalid_attributes_callback_strings, 10 );
 	}
 }
