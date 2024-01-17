@@ -84,31 +84,18 @@ final class ProductFilters extends AbstractBlock {
 		$filter_type = $attributes['filterType'];
 
 		if ( 'attribute-filter' === $filter_type ) {
-			echo '<pre>attribute filter: is empty? ' . empty( $this->current_response['attribute_counts'] ) . '</pre>';
-			echo '<pre>';
-			echo '<p>attr counts</p>';
-			echo var_dump( $this->current_response['attribute_counts'] );
-			echo '</pre>';
 			return empty( $this->current_response['attribute_counts'] );
 		}
 
 		if ( 'rating-filter' === $filter_type ) {
-			echo '<pre>rating filter: is empty? ' . empty( $this->current_response['rating_counts'] ) . '</pre>';
 			return empty( $this->current_response['rating_counts'] );
 		}
 
 		if ( 'price-filter' === $filter_type ) {
-			// echo '<pre>price filter: is empty? ' . empty( $this->current_response['price_range'] ) . '</pre>';
-			// echo '<pre>';
-			// echo var_dump( $this->current_response['price_range'] );
-			// echo '</pre>';
-
-			// $min_range === $max_range || ! $max_range
 			return empty( $this->current_response['price_range'] ) || ( $this->current_response['price_range']['min_price'] === $this->current_response['price_range']['max_price'] );
 		}
 
 		if ( 'stock-filter' === $filter_type ) {
-			echo '<pre>stock filter: is empty? ' . empty( $this->current_response['stock_status_counts'] ) . '</pre>';
 			return empty( $this->current_response['stock_status_counts'] );
 		}
 
@@ -128,24 +115,54 @@ final class ProductFilters extends AbstractBlock {
 			return $content;
 		}
 
-		// If the collection data is empty, don't render child blocks.
 		if ( $this->collection_data_is_empty( $attributes ) ) {
-			return sprintf(
-				'<nav %1$s></nav>',
-				get_block_wrapper_attributes(
-					array(
-						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
-						'class'               => 'wc-block-product-filters',
-					)
-				)
-			);
+			return $this->render_empty_block();
 		}
 
+		return $this->render_filter_block( $content, $block );
+	}
+
+	/**
+	 * Reset the current response, must be done before rendering.
+	 *
+	 * @return void
+	 */
+	private function reset_current_response() {
 		/**
-		 * At this point, WP starts rendering the Product Filters block,
+		 * When WP starts rendering the Product Filters block,
 		 * we can safely unset the current response.
 		 */
 		$this->current_response = null;
+	}
+
+	/**
+	 * Render the block when it's empty.
+	 *
+	 * @return string - Rendered block type output.
+	 */
+	private function render_empty_block() {
+		$this->reset_current_response();
+
+		return sprintf(
+			'<nav %1$s></nav>',
+			get_block_wrapper_attributes(
+				array(
+					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+					'class'               => 'wc-block-product-filters',
+				)
+			)
+		);
+	}
+
+	/**
+	 * Render the block when it's not empty.
+	 *
+	 * @param string   $content - Block content.
+	 * @param WP_Block $block   - Block instance.
+	 * @return string - Rendered block type output.
+	 */
+	private function render_filter_block( $content, $block ) {
+		$this->reset_current_response();
 
 		$attributes_data = array(
 			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),

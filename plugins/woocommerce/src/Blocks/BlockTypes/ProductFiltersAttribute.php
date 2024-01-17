@@ -154,7 +154,6 @@ final class ProductFiltersAttribute extends AbstractBlock {
 					)
 				),
 			);
-
 		}
 
 		$attribute_terms = get_terms(
