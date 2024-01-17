@@ -57,6 +57,11 @@ class CheckoutFieldsAdmin {
 			$formatted_field['options'] = array_column( $field['options'], 'label', 'value' );
 		}
 
+		if ( 'checkbox' === $field['type'] ) {
+			$formatted_field['checked_value']   = '1';
+			$formatted_field['unchecked_value'] = '0';
+		}
+
 		return $formatted_field;
 	}
 
