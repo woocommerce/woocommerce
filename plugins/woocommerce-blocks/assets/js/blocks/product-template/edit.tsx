@@ -15,16 +15,36 @@ import {
 } from '@wordpress/block-editor';
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import type { BlockEditProps } from '@wordpress/blocks';
+import {
+	store as blocksStore,
+	type BlockEditProps,
+	type BlockInstance,
+} from '@wordpress/blocks';
 import { ProductCollectionAttributes } from '@woocommerce/blocks/product-collection/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isNumber } from '@woocommerce/types';
 
+const allowedChildrenPrefixes = [ 'core/', 'woocommerce/' ];
+const getAllowedBlocks = ( blockTypes: BlockInstance[] ) =>
+	blockTypes
+		.filter( ( { name } ) => {
+			return !! allowedChildrenPrefixes.find( ( allowedChildPrefix ) => {
+				return name.startsWith( allowedChildPrefix );
+			} );
+		} )
+		.map( ( { name } ) => name );
+
 const ProductTemplateInnerBlocks = () => {
+	const blockTypes = useSelect( ( select ) =>
+		select( blocksStore ).getBlockTypes()
+	);
+	const allowedBlocks = getAllowedBlocks( blockTypes );
+
 	const innerBlocksProps = useInnerBlocksProps(
 		{ className: 'wc-block-product' },
-		{ __unstableDisableLayoutClassNames: true }
+		{ __unstableDisableLayoutClassNames: true, allowedBlocks }
 	);
+
 	return <li { ...innerBlocksProps } />;
 };
 
