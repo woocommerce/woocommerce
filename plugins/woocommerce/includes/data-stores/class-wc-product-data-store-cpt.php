@@ -784,7 +784,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$attributes  = $product->get_attributes();
 			$meta_values = array();
 
-			if ( $attributes ) {
+			if ( is_array( $attributes ) ) {
 				foreach ( $attributes as $attribute_key => $attribute ) {
 					$value = '';
 
@@ -797,7 +797,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 							wp_set_object_terms( $product->get_id(), array(), urldecode( $attribute_key ) );
 						}
 						continue;
-
+					} elseif ( ! is_a( $attribute, 'WC_Product_Attribute' ) ) {
+						$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+						$logger->warning( sprintf( 'found a product attribute that is not a `WC_Product_Attribute` in `update_attributes`: "%s", type %s', var_export( $attribute, true ), gettype( $attribute ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+						continue;
 					} elseif ( $attribute->is_taxonomy() ) {
 						wp_set_object_terms( $product->get_id(), wp_list_pluck( (array) $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
 					} else {

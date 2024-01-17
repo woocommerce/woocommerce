@@ -223,9 +223,9 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Test the `has_attributes` method to ensure invalid attributes are handled gracefully.
+	 * @testDox Test the `has_attributes` and `update_attributes` methods to ensure invalid attributes are handled gracefully.
 	 */
-	public function test_has_attributes() {
+	public function test_invalid_attributes() {
 		// Create a fake logger to capture log entries.
 		// phpcs:disable Squiz.Commenting
 		$fake_logger = new class() {
@@ -266,6 +266,11 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$this->assertFalse( $product->has_attributes() );
 		// Check that the log entry was created.
 		$this->assertEquals( 'found a product attribute that is not a `WC_Product_Attribute` in `has_attributes`: "\'invalid\'", type string', end( $fake_logger->warnings )['message'] );
+
+		// This triggers an error in `WC_Product_Data_Store_CPT::update_attributes` when not handled gracefully.
+		$product = WC_Helper_Product::create_variation_product();
+		$this->assertNotNull( $product );
+		$this->assertFalse( $product->has_attributes() );
 
 		remove_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_strings', 10 );
 	}
