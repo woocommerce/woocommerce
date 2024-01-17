@@ -64,7 +64,7 @@ if ( isExperimentalBuild() ) {
 				),
 				attributes: {
 					filterType: 'price-filter',
-					heading: __( 'Filter by price', 'woocommerce' ),
+					heading: __( 'Filter by Price', 'woocommerce' ),
 				},
 				icon: {
 					src: (
@@ -84,7 +84,7 @@ if ( isExperimentalBuild() ) {
 				),
 				attributes: {
 					filterType: 'stock-filter',
-					heading: __( 'Filter by stock status', 'woocommerce' ),
+					heading: __( 'Filter by Stock Status', 'woocommerce' ),
 				},
 				icon: {
 					src: (
@@ -104,7 +104,7 @@ if ( isExperimentalBuild() ) {
 				),
 				attributes: {
 					filterType: 'attribute-filter',
-					heading: __( 'Filter by attribute', 'woocommerce' ),
+					heading: __( 'Filter by Attribute', 'woocommerce' ),
 				},
 				icon: {
 					src: (
@@ -124,7 +124,7 @@ if ( isExperimentalBuild() ) {
 				),
 				attributes: {
 					filterType: 'rating-filter',
-					heading: __( 'Filter by rating', 'woocommerce' ),
+					heading: __( 'Filter by Rating', 'woocommerce' ),
 				},
 				icon: {
 					src: (
