@@ -242,7 +242,7 @@ Response:
 | reset_tracking             | Reset usage tracking settings    | Reset usage tracking settings | This will reset your usage tracking settings, causing it to show the opt-in banne |
 |                            |                                  |                               | r again and not sending any data.                                                 |
 +----------------------------+----------------------------------+-------------------------------+-----------------------------------------------------------------------------------+
-````
+```
 
 ### Creating a customer
 
