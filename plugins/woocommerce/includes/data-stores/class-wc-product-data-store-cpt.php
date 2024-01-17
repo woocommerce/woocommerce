@@ -1104,8 +1104,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$meta_attribute_names = array();
 
 		// Get attributes to match in meta.
-		foreach ( $product->get_attributes() as $attribute ) {
-			if ( ! $attribute->get_variation() ) {
+		$product_attributes = $product->get_attributes();
+		if ( ! is_array( $product_attributes ) ) {
+			// TODO: log the problem
+			return 0;
+		}
+		foreach ( $product_attributes as $attribute ) {
+			if ( ! is_a( $attribute, 'WC_Product_Attribute' ) || ! $attribute->get_variation() ) {
+				// TODO: log the problem				
 				continue;
 			}
 			$meta_attribute_names[] = 'attribute_' . sanitize_title( $attribute->get_name() );
