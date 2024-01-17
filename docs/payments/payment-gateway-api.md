@@ -6,8 +6,6 @@ tags: reference
 
 Payment gateways in WooCommerce are class based and can be added through traditional plugins. This guide provides an intro to gateway development.
 
-**Note:** We are unable to provide support for customizations under our **[Support Policy](https://woo.com/support-policy/)**. If you need to further customize a snippet, or extend its functionality, we highly recommend [**Codeable**](https://codeable.io/?ref=z4Hnp), or a [**Certified WooExpert**](https://woo.com/experts/).
-
 ## Types of payment gateway
 
 Payment gateways come in several varieties:
@@ -20,10 +18,6 @@ Payment gateways come in several varieties:
 Form and iFrame based gateways post data offsite, meaning there are less security issues for you to think about. Direct gateways, however, require server security to be implemented ([SSL certificates](https://woo.com/document/ssl-and-https/), etc.) and may also require a level of [PCI compliance](https://woo.com/document/pci-dss-compliance-and-woocommerce/).
 
 ## Creating a basic payment gateway
-
-
-
-**Note:** We are unable to provide support for customizations under our [Support Policy](https://woo.com/support-policy/). If you are unfamiliar with code/templates and resolving potential conflicts, select a [WooExpert or Developer](https://woo.com/customizations/)  for assistance.
 
 **Note:** The instructions below are for the default Checkout page. If you're looking to add a custom payment method for the new Checkout block, check out [this documentation.](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)
 
