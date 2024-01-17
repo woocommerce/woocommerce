@@ -127,6 +127,10 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					...field.attributes,
 				};
 
+				if ( field.key === 'email' ) {
+					fieldProps.id = 'email';
+				}
+
 				if ( field.type === 'checkbox' ) {
 					return (
 						<CheckboxControl
