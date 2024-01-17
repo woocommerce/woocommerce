@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
  * Legacy product contains all deprecated methods for this class and can be
@@ -1762,7 +1763,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return boolean
 	 */
 	public function has_attributes() {
+		if ( ! is_array( $this->get_attributes() ) ) {
+			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+			$logger->warning( '`$this->get_attributes()` did not return an array in `has_attributes`' );
+			return false;
+		}
 		foreach ( $this->get_attributes() as $attribute ) {
+			if ( ! is_a( $attribute, 'WC_Product_Attribute' ) ) {
+				$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+				$logger->warning( sprintf( 'found a product attribute that is not a `WC_Product_Attribute` in `has_attributes`: "%s", type %s', var_export( $attribute, true ), gettype( $attribute ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+				continue;
+			}
 			if ( $attribute->get_visible() ) {
 				return true;
 			}
