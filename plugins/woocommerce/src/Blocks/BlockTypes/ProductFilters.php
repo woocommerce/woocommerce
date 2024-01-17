@@ -71,6 +71,51 @@ final class ProductFilters extends AbstractBlock {
 	}
 
 	/**
+	 * Check if the collection data is empty.
+	 *
+	 * @param mixed $attributes - Block attributes.
+	 * @return bool - Whether the collection data is empty.
+	 */
+	private function collection_data_is_empty( $attributes ) {
+		if ( empty( $this->current_response ) ) {
+			return true;
+		}
+
+		$filter_type = $attributes['filterType'];
+
+		if ( 'attribute-filter' === $filter_type ) {
+			echo '<pre>attribute filter: is empty? ' . empty( $this->current_response['attribute_counts'] ) . '</pre>';
+			echo '<pre>';
+			echo '<p>attr counts</p>';
+			echo var_dump( $this->current_response['attribute_counts'] );
+			echo '</pre>';
+			return empty( $this->current_response['attribute_counts'] );
+		}
+
+		if ( 'rating-filter' === $filter_type ) {
+			echo '<pre>rating filter: is empty? ' . empty( $this->current_response['rating_counts'] ) . '</pre>';
+			return empty( $this->current_response['rating_counts'] );
+		}
+
+		if ( 'price-filter' === $filter_type ) {
+			// echo '<pre>price filter: is empty? ' . empty( $this->current_response['price_range'] ) . '</pre>';
+			// echo '<pre>';
+			// echo var_dump( $this->current_response['price_range'] );
+			// echo '</pre>';
+
+			// $min_range === $max_range || ! $max_range
+			return empty( $this->current_response['price_range'] ) || ( $this->current_response['price_range']['min_price'] === $this->current_response['price_range']['max_price'] );
+		}
+
+		if ( 'stock-filter' === $filter_type ) {
+			echo '<pre>stock filter: is empty? ' . empty( $this->current_response['stock_status_counts'] ) . '</pre>';
+			return empty( $this->current_response['stock_status_counts'] );
+		}
+
+		return false;
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -81,6 +126,19 @@ final class ProductFilters extends AbstractBlock {
 	protected function render( $attributes, $content, $block ) {
 		if ( is_admin() ) {
 			return $content;
+		}
+
+		// If the collection data is empty, don't render child blocks.
+		if ( $this->collection_data_is_empty( $attributes ) ) {
+			return sprintf(
+				'<nav %1$s></nav>',
+				get_block_wrapper_attributes(
+					array(
+						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+						'class'               => 'wc-block-product-filters',
+					)
+				)
+			);
 		}
 
 		/**
