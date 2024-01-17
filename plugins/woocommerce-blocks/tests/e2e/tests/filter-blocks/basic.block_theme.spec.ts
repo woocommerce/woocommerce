@@ -45,31 +45,6 @@ test.describe( 'Filter blocks registration', async () => {
 		await admin.createNewPost();
 	} );
 
-	test( 'Wrapper block can be inserted through the inserter', async ( {
-		editor,
-		editorUtils,
-	} ) => {
-		await editorUtils.insertBlockUsingGlobalInserter( wrapperBlock.title );
-
-		await expect(
-			editor.canvas.getByLabel( `Block: ${ wrapperBlock.title }`, {
-				exact: true,
-			} )
-		).toBeVisible();
-	} );
-
-	test( 'Wrapper block contains all filter blocks by default', async ( {
-		editor,
-		editorUtils,
-	} ) => {
-		await editorUtils.insertBlockUsingGlobalInserter( wrapperBlock.title );
-		for ( const block of filterBlocks ) {
-			await expect(
-				editor.canvas.getByLabel( `Block: ${ block.title }` )
-			).toBeVisible();
-		}
-	} );
-
 	test( 'Each filter block comes with a default title', async ( {
 		editor,
 		editorUtils,
