@@ -66,7 +66,8 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 				],
 			},
 			preAssembleSite: {
-				type: 'parallel',
+				id: 'preAssembleSite',
+				initial: 'assembleSite',
 				states: {
 					assembleSite: {
 						initial: 'pending',
@@ -93,6 +94,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 				},
 			},
 			showAssembleHub: {
+				id: 'showAssembleHub',
 				meta: {
 					component: AssembleHubLoader,
 				},

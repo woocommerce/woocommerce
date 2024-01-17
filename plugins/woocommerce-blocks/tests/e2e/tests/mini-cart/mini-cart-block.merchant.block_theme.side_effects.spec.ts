@@ -1,18 +1,12 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
-const blockData: BlockData = {
-	name: 'Mini-Cart',
-	slug: 'woocommerce/mini-cart',
-	mainClass: '.wc-block-minicart',
-	selectors: {
-		frontend: {},
-		editor: {},
-	},
-};
+/**
+ * Internal dependencies
+ */
+import { blockData } from './utils';
 
 test.describe( 'Merchant → Mini Cart', () => {
 	test.describe( 'in FSE editor', () => {
@@ -21,6 +15,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 				'woocommerce/woocommerce//single-product'
 			);
 		} );
+
 		test( 'can be inserted in FSE area', async ( {
 			editorUtils,
 			editor,

@@ -1,4 +1,8 @@
-# Image sizing for theme developers
+---
+post_title: Image sizing for theme developers
+menu_title: Image sizing
+tags: reference
+---
 
 **Note:** this document was created for use when developing classic themes (as opposed to block themes). 
 

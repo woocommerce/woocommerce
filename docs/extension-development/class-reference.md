@@ -1,5 +1,7 @@
 ---
 post_title: Classes in WooCommerce
+menu_title: Classes in WooCommerce
+tags: reference
 ---
 
 ## [List of Classes in WooCommerce](https://github.com/woocommerce/woocommerce/blob/trunk/docs/extension-development/class-reference#section-1)

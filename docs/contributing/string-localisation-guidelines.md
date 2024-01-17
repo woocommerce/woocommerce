@@ -1,5 +1,6 @@
 ---
 post_title: String localization guidelines
+menu_title: String localization guidelines
 tags: reference
 ---
 
