@@ -34,12 +34,22 @@ class Section extends ProductBlock implements SectionInterface {
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
-	 * Add a section block type to this template.
+	 * Add a sub-section block type to this template.
 	 *
 	 * @param array $block_config The block data.
 	 */
-	public function add_section( array $block_config ): SectionInterface {
+	public function add_subsection( array $block_config ): SectionInterface {
 		$block = new Section( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
+	}
+
+	/**
+	 * Add a sub-section block type to this template.
+	 *
+	 * @deprecated 8.6.0
+	 */
+	public function add_section( array $block_config ): SectionInterface {
+		wc_deprecated_function( 'add_section', '8.6.0', 'Use add_subsection instead.' );
+		return $this->add_subsection( $block_config );
 	}
 }
