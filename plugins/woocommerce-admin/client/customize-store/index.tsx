@@ -357,8 +357,29 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'preCheckAiStatus',
+			initial: 'fetchActiveThemeHasMods',
 			states: {
+				fetchActiveThemeHasMods: {
+					invoke: {
+						src: 'fetchIntroData',
+						onDone: {
+							target: 'checkActiveThemeHasMods',
+							actions: [ 'assignActiveThemeHasMods' ],
+						},
+					},
+				},
+				checkActiveThemeHasMods: {
+					always: [
+						{
+							cond: 'activeThemeIsNotModified',
+							target: '#customizeStore.intro',
+						},
+						{
+							cond: 'activeThemeHasMods',
+							target: 'preCheckAiStatus',
+						},
+					],
+				},
 				preCheckAiStatus: {
 					always: [
 						{
@@ -493,6 +514,12 @@ export const CustomizeStoreController = ( {
 				},
 				isWooExpress: () => isWooExpress(),
 				isNotWooExpress: () => ! isWooExpress(),
+				activeThemeHasMods: ( _ctx ) => {
+					return _ctx.intro.activeThemeHasMods;
+				},
+				activeThemeIsNotModified: ( _ctx ) => {
+					return ! _ctx.intro.activeThemeHasMods;
+				},
 			},
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
