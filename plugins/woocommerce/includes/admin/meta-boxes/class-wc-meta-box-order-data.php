@@ -120,6 +120,7 @@ class WC_Meta_Box_Order_Data {
 		 *
 		 * @param array Shipping fields.
 		 * @param WC_Order|false $order Order object.
+		 * @param string $context Context of fields (view or edit).
 		 */
 		return apply_filters(
 			'woocommerce_admin_shipping_fields',
