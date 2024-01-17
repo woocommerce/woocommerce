@@ -22,7 +22,7 @@ const filterBlocks = [
 	{
 		name: 'woocommerce/product-filters-attribute',
 		title: 'Product Filters: Attribute',
-		heading: 'Filter by ', // The attribute filter comes with a dynamic title
+		heading: 'Filter by Attribute',
 	},
 	{
 		name: 'woocommerce/product-filters-active',
@@ -58,6 +58,7 @@ test.describe( 'Filter blocks registration', async () => {
 
 			await expect(
 				editor.canvas
+					.getByLabel( `Block: Product Filters` )
 					.getByLabel( 'Block: Heading' )
 					.and( editor.canvas.getByText( block.heading ) )
 			).toBeVisible();
