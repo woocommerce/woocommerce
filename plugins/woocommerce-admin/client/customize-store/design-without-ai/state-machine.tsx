@@ -61,9 +61,26 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 							type: 'hasStepInUrl',
 							step: 'design',
 						},
-						target: 'preAssembleSite',
+						target: 'installAndActivateTheme',
 					},
 				],
+			},
+			installAndActivateTheme: {
+				initial: 'pending',
+				states: {
+					pending: {
+						invoke: {
+							src: 'installAndActivateTheme',
+							onDone: {
+								target: 'success',
+							},
+						},
+					},
+					success: { type: 'final' },
+				},
+				onDone: {
+					target: 'preAssembleSite',
+				},
 			},
 			preAssembleSite: {
 				id: 'preAssembleSite',
