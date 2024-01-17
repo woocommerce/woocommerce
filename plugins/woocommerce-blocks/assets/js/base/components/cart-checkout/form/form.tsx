@@ -129,6 +129,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 
 				if ( field.key === 'email' ) {
 					fieldProps.id = 'email';
+					fieldProps.errorId = 'billing_email';
 				}
 
 				if ( field.type === 'checkbox' ) {
