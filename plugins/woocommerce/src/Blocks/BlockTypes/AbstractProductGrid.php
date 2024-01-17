@@ -668,9 +668,9 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 
 		/**
 		 * Filter to add additional attributes to the HTML code of the generated add to cart button.
-		 * 
+		 *
 		 * @since 8.6.0
-		 * 
+		 *
 		 * @param array      $attributes An associative array containing default HTML attributes of the add to cart button.
    		 * @param WC_Product $product    The WC_Product instance of the product that will be added to the cart once the button is pressed.
 		 *
