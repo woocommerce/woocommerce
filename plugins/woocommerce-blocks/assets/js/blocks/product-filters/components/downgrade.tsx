@@ -10,9 +10,15 @@ import { createBlock, BlockInstance } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { UPGRADE_MAP } from './upgrade';
+import { FilterType } from '../types';
 
-const Downgrade = ( { clientId }: { clientId: string } ) => {
+const Downgrade = ( {
+	clientId,
+	filterType,
+}: {
+	clientId: string;
+	filterType: FilterType;
+} ) => {
 	const { replaceBlock } = useDispatch( 'core/block-editor' );
 	const block = useSelect( ( select ) => {
 		return select( 'core/block-editor' ).getBlock( clientId );
@@ -20,28 +26,31 @@ const Downgrade = ( { clientId }: { clientId: string } ) => {
 
 	const downgradeBlock = () => {
 		if ( ! block ) return;
-		const filterBlock = block.innerBlocks[ 0 ];
-		const filterType = Object.entries( UPGRADE_MAP ).find(
-			( [ , value ] ) => value === filterBlock.name
-		)?.[ 0 ];
 
-		if ( ! filterType ) return;
+		const filterBlock = block.innerBlocks.find( ( item ) =>
+			item.name.includes( 'filter' )
+		);
 
-		const innerBlocks: BlockInstance[] = [
-			createBlock( `woocommerce/${ filterType }`, {
-				...filterBlock.attributes,
-				heading: '',
-			} ),
-		];
-		const headingBlock = filterBlock.innerBlocks.find(
+		if ( ! filterBlock ) return;
+
+		const headingBlock = block.innerBlocks.find(
 			( item ) => item.name === 'core/heading'
 		);
 
+		const innerBlocks: BlockInstance[] = [];
+
 		if ( headingBlock ) {
-			innerBlocks.unshift(
+			innerBlocks.push(
 				createBlock( 'core/heading', headingBlock.attributes )
 			);
 		}
+
+		innerBlocks.push(
+			createBlock( `woocommerce/${ filterType }`, {
+				...filterBlock.attributes,
+				heading: '',
+			} )
+		);
 
 		replaceBlock(
 			clientId,
@@ -52,8 +61,6 @@ const Downgrade = ( { clientId }: { clientId: string } ) => {
 			)
 		);
 	};
-
-	if ( block?.innerBlocks.length !== 1 ) return null;
 
 	return (
 		<InspectorControls key="inspector">

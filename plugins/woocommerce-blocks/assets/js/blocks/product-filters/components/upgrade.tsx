@@ -19,15 +19,6 @@ import {
  */
 import { FilterType } from '../types';
 
-export const UPGRADE_MAP: Record< FilterType, string > = {
-	'active-filters': 'woocommerce/product-filters-active',
-	'price-filter': 'woocommerce/product-filters-price',
-	'stock-filter': 'woocommerce/product-filters-stock-status',
-	'rating-filter': 'woocommerce/product-filters-rating',
-	'product-filters': 'woocommerce/product-filters',
-	'attribute-filter': 'woocommerce/product-filters-attribute',
-};
-
 const Upgrade = ( { clientId }: { clientId: string } ) => {
 	const block = useSelect( ( select ) => {
 		return select( 'core/block-editor' ).getBlock( clientId );
@@ -49,20 +40,11 @@ const Upgrade = ( { clientId }: { clientId: string } ) => {
 
 		replaceBlock(
 			clientId,
-			createBlock( `woocommerce/product-filters`, {}, [
-				createBlock(
-					`${ UPGRADE_MAP[ filterType ] }`,
-					filterBlockAttributes,
-					headingBlock
-						? [
-								createBlock(
-									'core/heading',
-									headingBlock.attributes
-								),
-						  ]
-						: []
-				),
-			] )
+			createBlock( 'woocommerce/product-filters', {
+				...filterBlockAttributes,
+				heading: headingBlock?.attributes.content || '',
+				filterType,
+			} )
 		);
 	}, [ block, clientId, replaceBlock ] );
 

@@ -39,7 +39,10 @@ const Edit = ( {
 	return (
 		<nav { ...blockProps }>
 			{ ! isNested && <Warning /> }
-			<Downgrade clientId={ clientId } />
+			<Downgrade
+				filterType={ attributes.filterType }
+				clientId={ clientId }
+			/>
 			<InnerBlocks
 				allowedBlocks={ [ 'core/heading' ] }
 				template={ [
