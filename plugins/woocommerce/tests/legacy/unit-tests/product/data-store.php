@@ -940,7 +940,10 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	/**
 	 * Test find_matching_product_variation.
 	 *
+	 * The following linter rule switches are required because the `return` in `invalid_attributes_callback_strings` is wrongly being detected as breaking the declared return type here.
+	 * phpcs:disable Squiz.Commenting.FunctionComment.InvalidReturnVoid
 	 * @return void
+	 * phpcs:enable Squiz.Commenting.FunctionComment.InvalidReturnVoid
 	 */
 	public function test_find_matching_product_variation() {
 		// Create a fake logger to capture log entries.
@@ -971,10 +974,14 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$match = $data_store->find_matching_product_variation( $product, array() );
 		$this->assertEquals( 0, $match );
 
-		// Simulate a filter that returns void for the product attributes.
-		function invalid_attributes_callback_void( $attributes, $product ) {
-			return;
-		}
+		/**
+		 * Simulate a filter that returns void for the product attributes.
+		 *
+		 * @param array      $attributes The product attributes.
+		 * @param WC_Product $product The product.
+		 * @return void
+		 */
+		function invalid_attributes_callback_void( $attributes, $product ) {}
 		add_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_void', 10, 2 );
 		$match = $data_store->find_matching_product_variation( $product, array() );
 		$this->assertEquals( 0, $match );
@@ -982,7 +989,13 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( '`$product->get_attributes()` did not return an array in `find_matching_product_variation`', end( $fake_logger->warns )['message'] );
 		remove_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_void', 10 );
 
-		// Simulate a filter that returns an array of strings for the product attributes.
+		/**
+		 * Simulate a filter that returns an array of strings for the product attributes.
+		 *
+		 * @param array      $attributes The product attributes.
+		 * @param WC_Product $product The product.
+		 * @return array
+		 */
 		function invalid_attributes_callback_strings( $attributes, $product ) {
 			return array( 'invalid' );
 		}
