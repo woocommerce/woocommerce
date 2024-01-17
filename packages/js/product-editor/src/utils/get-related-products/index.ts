@@ -10,7 +10,7 @@ type getRelatedProductsOptions = {
 };
 
 const POSTS_NUMBER_TO_RANDOMIZE = 30;
-const POSTS_NUMBER_TO_PICK = 5;
+const POSTS_NUMBER_TO_PICK = 3;
 
 /**
  * Return related products for a given product ID.
