@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Type check $available_methods before it
+Type check $available_methods before using it
