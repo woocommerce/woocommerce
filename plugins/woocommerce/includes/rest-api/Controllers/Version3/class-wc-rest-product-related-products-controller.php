@@ -116,15 +116,19 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_CRUD_Controlle
 	/**
 	 * Get the related product categories.
 	 */
-	public function get_related_product_cat_terms( $terms, $id ) {
-		return $this->categories;
+	public function get_related_product_cat_terms( $cats, $id ) {
+		/*
+		 * Merge the given terms with the related product categories
+		 * ensuring to remove any duplicates.
+		 */
+		return array_unique( array_merge( $cats, $this->categories ) );
 	}
 
 	/**
 	 * Get the related product tags.
 	 */
-	public function get_related_product_tag_terms( $terms, $id ) {
-		return $this->tags;
+	public function get_related_product_tag_terms( $tags, $id ) {
+		return array_unique( array_merge( $tags, $this->tags ) );
 	}
 
 	/**
