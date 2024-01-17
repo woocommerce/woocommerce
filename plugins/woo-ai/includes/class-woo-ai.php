@@ -78,6 +78,15 @@ class Woo_AI {
 		if ( 'post' === $current_screen->base && 'product' === $current_screen->post_type ) {
 			include_once dirname( __FILE__ ) . '/class-woo-ai-product-text-generation.php';
 		}
+
+		// Extend the new Product Editor
+		if (
+			'woocommerce_page_wc-admin' === $current_screen->base &&
+			$current_screen->is_block_editor() &&
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' )
+		) {
+			include_once dirname( __FILE__ ) . '/class-woo-ai-new-product-ai-assistant.php';
+		}
 	}
 
 	/**
