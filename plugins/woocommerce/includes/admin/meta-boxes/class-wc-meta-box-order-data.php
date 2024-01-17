@@ -114,11 +114,11 @@ class WC_Meta_Box_Order_Data {
 	 */
 	protected static function get_shipping_fields( $order = false, $context = 'edit' ) {
 		/**
-		 * Provides an opportunity to modify the list of order billing fields displayed on the admin.
+		 * Provides an opportunity to modify the list of order shipping fields displayed on the admin.
 		 *
 		 * @since 1.4.0
 		 *
-		 * @param array Billing fields.
+		 * @param array Shipping fields.
 		 * @param WC_Order|false $order Order object.
 		 */
 		return apply_filters(
