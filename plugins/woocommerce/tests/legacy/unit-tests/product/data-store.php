@@ -950,6 +950,25 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$match = $data_store->find_matching_product_variation( $product, array() );
 		$this->assertEquals( 0, $match );
 
+		// TODO: add asserts for the log entries
+		// Simulate a filter that returns void for the product attributes.
+		function invalid_attributes_callback_void( $attributes, $product ) {
+			return;
+		}
+		add_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_void', 10, 2 );
+		$match = $data_store->find_matching_product_variation( $product, array() );
+		$this->assertEquals( 0, $match );
+		remove_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_void', 10 );
+
+		// Simulate a filter that returns an array of strings for the product attributes.
+		function invalid_attributes_callback_strings( $attributes, $product ) {
+			return array( 'invalid', 'attributes' );
+		}
+		add_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_strings', 10, 2 );
+		$match = $data_store->find_matching_product_variation( $product, array() );
+		$this->assertEquals( 0, $match );
+		remove_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_strings', 10 );
+
 		$match = $data_store->find_matching_product_variation(
 			$product,
 			array(
