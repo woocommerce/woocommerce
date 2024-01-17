@@ -943,6 +943,27 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_find_matching_product_variation() {
+		// Create a fake logger to capture log entries.
+		// phpcs:disable Squiz.Commenting
+		$fake_logger = new class() {
+			public $warns = array();
+
+			public function warn( $message, $data = array() ) {
+				$this->warns[] = array(
+					'message' => $message,
+					'data'    => $data,
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_get_logger' => function() use ( $fake_logger ) {
+					return $fake_logger;
+				},
+			)
+		);
+
 		$product    = WC_Helper_Product::create_variation_product();
 		$data_store = WC_Data_Store::load( 'product' );
 		$children   = $product->get_children();
@@ -950,7 +971,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$match = $data_store->find_matching_product_variation( $product, array() );
 		$this->assertEquals( 0, $match );
 
-		// TODO: add asserts for the log entries
 		// Simulate a filter that returns void for the product attributes.
 		function invalid_attributes_callback_void( $attributes, $product ) {
 			return;
@@ -958,15 +978,19 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_void', 10, 2 );
 		$match = $data_store->find_matching_product_variation( $product, array() );
 		$this->assertEquals( 0, $match );
+		// Check that the log entry was created.
+		$this->assertEquals( '`$product->get_attributes()` did not return an array in `find_matching_product_variation`', end( $fake_logger->warns )['message'] );
 		remove_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_void', 10 );
 
 		// Simulate a filter that returns an array of strings for the product attributes.
 		function invalid_attributes_callback_strings( $attributes, $product ) {
-			return array( 'invalid', 'attributes' );
+			return array( 'invalid' );
 		}
 		add_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_strings', 10, 2 );
 		$match = $data_store->find_matching_product_variation( $product, array() );
 		$this->assertEquals( 0, $match );
+		// Check that the log entry was created.
+		$this->assertEquals( 'found a product attribute that is not a `WC_Product_Attribute` in `find_matching_product_variation`: "\'invalid\'", type string', end( $fake_logger->warns )['message'] );
 		remove_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_strings', 10 );
 
 		$match = $data_store->find_matching_product_variation(
