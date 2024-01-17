@@ -659,8 +659,6 @@ class WC_Meta_Box_Order_Data {
 			$props['order_key'] = wc_generate_order_key();
 		}
 
-		self::init_address_fields( $order );
-
 		// Update customer.
 		$customer_id = isset( $_POST['customer_user'] ) ? absint( $_POST['customer_user'] ) : 0;
 		if ( $customer_id !== $order->get_customer_id() ) {
