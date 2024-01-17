@@ -1108,13 +1108,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$product_attributes = $product->get_attributes();
 		if ( ! is_array( $product_attributes ) ) {
 			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
-			$logger->warn( '`$product->get_attributes()` did not return an array in `find_matching_product_variation`' );
+			$logger->warning( '`$product->get_attributes()` did not return an array in `find_matching_product_variation`' );
 			return 0;
 		}
 		foreach ( $product_attributes as $attribute ) {
 			if ( ! is_a( $attribute, 'WC_Product_Attribute' ) || ! $attribute->get_variation() ) {
 				$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
-				$logger->warn( sprintf( 'found a product attribute that is not a `WC_Product_Attribute` in `find_matching_product_variation`: "%s", type %s', var_export( $attribute, true ), gettype( $attribute ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+				$logger->warning( sprintf( 'found a product attribute that is not a `WC_Product_Attribute` in `find_matching_product_variation`: "%s", type %s', var_export( $attribute, true ), gettype( $attribute ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
 				continue;
 			}
 			$meta_attribute_names[] = 'attribute_' . sanitize_title( $attribute->get_name() );

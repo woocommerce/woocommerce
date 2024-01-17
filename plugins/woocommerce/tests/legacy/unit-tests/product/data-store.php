@@ -949,10 +949,10 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		// Create a fake logger to capture log entries.
 		// phpcs:disable Squiz.Commenting
 		$fake_logger = new class() {
-			public $warns = array();
+			public $warnings = array();
 
-			public function warn( $message, $data = array() ) {
-				$this->warns[] = array(
+			public function warning( $message, $data = array() ) {
+				$this->warnings[] = array(
 					'message' => $message,
 					'data'    => $data,
 				);
@@ -986,7 +986,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$match = $data_store->find_matching_product_variation( $product, array() );
 		$this->assertEquals( 0, $match );
 		// Check that the log entry was created.
-		$this->assertEquals( '`$product->get_attributes()` did not return an array in `find_matching_product_variation`', end( $fake_logger->warns )['message'] );
+		$this->assertEquals( '`$product->get_attributes()` did not return an array in `find_matching_product_variation`', end( $fake_logger->warnings )['message'] );
 		remove_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_void', 10 );
 
 		/**
@@ -1003,7 +1003,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$match = $data_store->find_matching_product_variation( $product, array() );
 		$this->assertEquals( 0, $match );
 		// Check that the log entry was created.
-		$this->assertEquals( 'found a product attribute that is not a `WC_Product_Attribute` in `find_matching_product_variation`: "\'invalid\'", type string', end( $fake_logger->warns )['message'] );
+		$this->assertEquals( 'found a product attribute that is not a `WC_Product_Attribute` in `find_matching_product_variation`: "\'invalid\'", type string', end( $fake_logger->warnings )['message'] );
 		remove_filter( 'woocommerce_product_get_attributes', 'invalid_attributes_callback_strings', 10 );
 
 		$match = $data_store->find_matching_product_variation(
