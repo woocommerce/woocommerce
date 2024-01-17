@@ -42,7 +42,7 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 	 */
 	public function test_post_data_cleanup() {
 		$this->enable_cot_sync();
-		$orders = array(
+		$orders       = array(
 			OrderHelper::create_order(),
 			OrderHelper::create_order(),
 		);
