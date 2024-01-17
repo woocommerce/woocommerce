@@ -681,11 +681,6 @@ class WC_Meta_Box_Order_Data {
 
 				$value = wc_clean( wp_unslash( $_POST[ $field['id'] ] ) );
 
-				// Validate a field if it includes a validation callback.
-				if ( isset( $field['validate_callback'] ) ) {
-					// TODO
-				}
-
 				// Update a field if it includes an update callback.
 				if ( isset( $field['update_callback'] ) ) {
 					call_user_func( $field['update_callback'], $field['id'], $value, $order );
@@ -710,10 +705,15 @@ class WC_Meta_Box_Order_Data {
 					continue;
 				}
 
-				if ( is_callable( array( $order, 'set_shipping_' . $key ) ) ) {
-					$props[ 'shipping_' . $key ] = wc_clean( wp_unslash( $_POST[ $field['id'] ] ) );
+				$value = isset( $_POST[ $field['id'] ] ) ? wc_clean( wp_unslash( $_POST[ $field['id'] ] ) ) : '';
+
+				// Update a field if it includes an update callback.
+				if ( isset( $field['update_callback'] ) ) {
+					call_user_func( $field['update_callback'], $field['id'], $value, $order );
+				} elseif ( is_callable( array( $order, 'set_shipping_' . $key ) ) ) {
+					$props[ 'shipping_' . $key ] = $value;
 				} else {
-					$order->update_meta_data( $field['id'], wc_clean( wp_unslash( $_POST[ $field['id'] ] ) ) );
+					$order->update_meta_data( $field['id'], $value );
 				}
 			}
 		}

@@ -38,18 +38,17 @@ class CheckoutFieldsAdmin {
 	/**
 	 * Converts the shape of a checkout field to match whats needed in the WooCommerce meta boxes.
 	 *
-	 * @param array $field The field to format.
+	 * @param array  $field The field to format.
+	 * @param string $key The field key. This will be used for the ID of the field when passed to the meta box.
 	 * @return array Formatted field.
 	 */
-	protected function format_field_for_meta_box( $field ) {
+	protected function format_field_for_meta_box( $field, $key ) {
 		$formatted_field = array(
-			'id'              => $field['id'],
+			'id'              => $key,
 			'label'           => $field['label'],
 			'value'           => $field['value'],
 			'type'            => $field['type'],
-			'update_callback' => function( $key, $value, $order ) {
-				$this->checkout_fields_controller->persist_field_for_order( $key, $value, $order, false );
-			},
+			'update_callback' => array( $this, 'update_callback' ),
 			'show'            => true,
 			'wrapper_class'   => 'form-field-wide',
 		);
@@ -59,6 +58,17 @@ class CheckoutFieldsAdmin {
 		}
 
 		return $formatted_field;
+	}
+
+	/**
+	 * Updates a field value for an order.
+	 *
+	 * @param string    $key The field key.
+	 * @param mixed     $value The field value.
+	 * @param \WC_Order $order The order to update the field for.
+	 */
+	public function update_callback( $key, $value, $order ) {
+		$this->checkout_fields_controller->persist_field_for_order( $key, $value, $order, false );
 	}
 
 	/**
@@ -77,9 +87,8 @@ class CheckoutFieldsAdmin {
 		$group             = doing_action( 'woocommerce_admin_billing_fields' ) ? 'billing' : 'shipping';
 		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'address', $group, $context );
 		foreach ( $additional_fields as $key => $field ) {
-			$group_id                        = '/' . $group . '/' . $field['id'];
-			$additional_fields[ $key ]       = $this->format_field_for_meta_box( $field );
-			$additional_fields[ $key ]['id'] = $group_id;
+			$group_key                 = '/' . $group . '/' . $key;
+			$additional_fields[ $key ] = $this->format_field_for_meta_box( $field, $group_key );
 		}
 
 		array_splice(
@@ -109,17 +118,16 @@ class CheckoutFieldsAdmin {
 			return $fields;
 		}
 
-		$additional_fields = array_map(
-			array( $this, 'format_field_for_meta_box' ),
-			$this->checkout_fields_controller->get_order_additional_fields_with_values(
-				$order,
-				'contact',
-				'', // No group for contact fields.
-				$context
+		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', '', $context );
+
+		return array_merge(
+			$fields,
+			array_map(
+				array( $this, 'format_field_for_meta_box' ),
+				$additional_fields,
+				array_keys( $additional_fields )
 			)
 		);
-
-		return array_merge( $fields, $additional_fields );
 	}
 
 	/**
@@ -135,16 +143,15 @@ class CheckoutFieldsAdmin {
 			return $fields;
 		}
 
-		$additional_fields = array_map(
-			array( $this, 'format_field_for_meta_box' ),
-			$this->checkout_fields_controller->get_order_additional_fields_with_values(
-				$order,
-				'additional',
-				'', // No group for additional fields.
-				$context
+		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'additional', '', $context );
+
+		return array_merge(
+			$fields,
+			array_map(
+				array( $this, 'format_field_for_meta_box' ),
+				$additional_fields,
+				array_keys( $additional_fields )
 			)
 		);
-
-		return array_merge( $fields, $additional_fields );
 	}
 }

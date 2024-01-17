@@ -304,7 +304,6 @@ class CheckoutFields {
 		}
 
 		$field_data = array(
-			'id'            => $id,
 			'label'         => $options['label'],
 			'hidden'        => false,
 			'type'          => $type,
