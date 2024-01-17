@@ -250,7 +250,7 @@ jobs:
                   # C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
                   P_ID: 22733
               run: |
-                  ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
+                  ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
 
     test-plugins:
         name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed
