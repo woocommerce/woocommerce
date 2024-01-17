@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Improving return value type checks prior to usage
+Apply type checks and enhancements for PHP 8.1
