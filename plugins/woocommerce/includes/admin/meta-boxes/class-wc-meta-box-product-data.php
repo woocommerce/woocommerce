@@ -293,7 +293,7 @@ class WC_Meta_Box_Product_Data {
 	private static function prepare_set_attributes( $all_attributes, $key_prefix = 'attribute_', $index = null ) {
 		$attributes = array();
 
-		if ( $all_attributes ) {
+		if ( isset( $all_attributes ) && is_array( $all_attributes ) ) {
 			foreach ( $all_attributes as $attribute ) {
 				if ( $attribute->get_variation() ) {
 					$attribute_key = sanitize_title( $attribute->get_name() );

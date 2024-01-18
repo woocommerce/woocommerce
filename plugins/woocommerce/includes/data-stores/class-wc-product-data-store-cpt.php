@@ -784,7 +784,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$attributes  = $product->get_attributes();
 			$meta_values = array();
 
-			if ( is_array( $attributes ) ) {
+			if ( isset( $attributes ) && is_array( $attributes ) ) {
 				foreach ( $attributes as $attribute_key => $attribute ) {
 					$value = '';
 
@@ -1109,7 +1109,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Get attributes to match in meta.
 		$product_attributes = $product->get_attributes();
-		if ( ! is_array( $product_attributes ) ) {
+		if ( ! issset( $product_attributes ) || ! is_array( $product_attributes ) ) {
 			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 			$logger->warning( '`$product->get_attributes()` did not return an array in `find_matching_product_variation`' );
 			return 0;
