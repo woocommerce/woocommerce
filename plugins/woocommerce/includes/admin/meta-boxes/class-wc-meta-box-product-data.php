@@ -295,7 +295,7 @@ class WC_Meta_Box_Product_Data {
 	private static function prepare_set_attributes( $all_attributes, $key_prefix = 'attribute_', $index = null ) {
 		$attributes = array();
 
-		if ( isset( $all_attributes ) && is_array( $all_attributes ) ) {
+		if ( is_array( $all_attributes ) ) {
 			foreach ( $all_attributes as $attribute ) {
 				if ( ! is_a( $attribute, 'WC_Product_Attribute' ) ) {
 					$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
