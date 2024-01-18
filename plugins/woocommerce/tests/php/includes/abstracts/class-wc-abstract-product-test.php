@@ -282,6 +282,11 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		ob_end_clean();
 		// We just need to make sure that the `update_attributes` method does not throw an error.
 		$this->assertEquals( '<div id="variable_product_options"', substr( $ob_content, 0, 34 ) );
+		
+		// this makes the test fail, now I can uncomment the fix
+		// but I still have to find a place in the UI for the reproduction steps
+		$_POST['variable_post_id'] = array( wp_list_pluck( $product->get_available_variations(), 'variation_id' ) );
+		WC_Meta_Box_Product_Data::save_variations( $product->get_id(), get_post( $product->get_id() ) );
 
 		remove_filter( 'woocommerce_product_get_attributes', $invalid_attributes_callback_strings, 10 );
 	}
