@@ -21,12 +21,7 @@ baseTest.describe('Products > Product Images', () => {
 				name: `Product ${Date.now()}`,
 				type: 'simple',
 				regular_price: '12.99',
-				sale_price: '11.59',
-				images: [
-					{
-						src: "http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_front.jpg"
-					}
-				]
+				sale_price: '11.59'
 			}
 
 			await api
@@ -35,29 +30,34 @@ baseTest.describe('Products > Product Images', () => {
 					product = response.data;
 				});
 
-			await test.step('Navigate to product edit page', async () => {
-				await page.goto(`wp-admin/post.php?post=${product.id}&action=edit`);
-			});
-
 			await use(product);
 
 			// Cleanup
 			await api.delete(`products/${product.id}`, {force: true});
 		},
+		productWithImage: async ({page, api, product}, use) => {
+			let productWithImage;
+			await api
+				.put(`products/${product.id}`, {
+					images: [
+						{
+							src: "http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_front.jpg"
+						}
+					]
+				})
+				.then((response) => {
+					productWithImage = response.data;
+				});
+
+			await use(productWithImage);
+		},
+
 	});
 
 	test('can set product image', async ({page, product, api}) => {
-		// Remove the product image first and reload the page
-		await api
-			.put(`products/${product.id}`,
-				{
-					images: []
-				}
-			)
-			.then((response) => {
-				product = response.data;
-			});
-		await page.reload();
+		await test.step('Navigate to product edit page', async () => {
+			await page.goto(`wp-admin/post.php?post=${product.id}&action=edit`);
+		});
 
 		await test.step('Set product image', async () => {
 			await page.getByRole('link', {name: 'Set product image'}).click();
@@ -84,7 +84,11 @@ baseTest.describe('Products > Product Images', () => {
 		});
 	});
 
-	test('can update the product image', async ({page, product}) => {
+	test('can update the product image', async ({page, productWithImage}) => {
+		await test.step('Navigate to product edit page', async () => {
+			await page.goto(`wp-admin/post.php?post=${productWithImage.id}&action=edit`);
+		});
+
 		await test.step('Update product image', async () => {
 			await page.locator('#set-post-thumbnail').click();
 
@@ -105,12 +109,16 @@ baseTest.describe('Products > Product Images', () => {
 			await expect(page.getByText('Product updated.')).toBeVisible()
 
 			// Verify image in store frontend
-			await page.goto(product.permalink);
+			await page.goto(productWithImage.permalink);
 			await expect(page.getByTitle(`image-02`)).toBeVisible();
 		});
 	});
 
-	test('can delete the product image', async ({page, product}) => {
+	test('can delete the product image', async ({page, productWithImage}) => {
+		await test.step('Navigate to product edit page', async () => {
+			await page.goto(`wp-admin/post.php?post=${productWithImage.id}&action=edit`);
+		});
+
 		await test.step('Remove product image', async () => {
 			await page.getByRole('link', {name: 'Remove product image'}).click();
 			await expect(page.getByRole('link', {name: 'Set product image'})).toBeVisible();
@@ -123,12 +131,16 @@ baseTest.describe('Products > Product Images', () => {
 			await expect(page.getByText('Product updated.')).toBeVisible()
 
 			// Verify image in store frontend
-			await page.goto(product.permalink);
+			await page.goto(productWithImage.permalink);
 			await expect(page.getByAltText("Awaiting product image")).toBeVisible();
 		});
 	});
 
-	test.only('can create a product gallery', async ({page, product}) => {
+	test('can create a product gallery', async ({page, productWithImage}) => {
+		await test.step('Navigate to product edit page', async () => {
+			await page.goto(`wp-admin/post.php?post=${productWithImage.id}&action=edit`);
+		});
+
 		await test.step('Add product gallery images', async () => {
 		});
 
