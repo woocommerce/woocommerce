@@ -264,12 +264,12 @@ add_action(
 This results in the additional information section being rendered like so:
 
 <p>
-	<img width="701" alt="image" src="https://github.com/woocommerce/woocommerce/assets/5656702/bbe17ad0-7c7d-419a-951d-315f56f8898a">
+	<img width="701" alt="image" src="https://github.com/woocommerce/woocommerce/assets/5656702/bbe17ad0-7c7d-419a-951d-315f56f8898a"><br />
 	<em>The select input before being focused</em>
 </p>
 
 <p>
-	<img width="724" alt="image" src="https://github.com/woocommerce/woocommerce/assets/5656702/bd943906-621b-404f-aa84-b951323e25d3">
+	<img width="724" alt="image" src="https://github.com/woocommerce/woocommerce/assets/5656702/bd943906-621b-404f-aa84-b951323e25d3"><br />
 	<em>The select input when focused</em>
 </p>
 
