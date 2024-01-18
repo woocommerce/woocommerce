@@ -96,7 +96,11 @@ test.describe( 'Shopper → Tax', () => {
 
 		// Hovering over the mini cart should not change the label,
 		// see https://github.com/woocommerce/woocommerce/issues/43691
-		page.getByTestId( 'mini-cart' ).getByLabel( '1 item in cart' ).hover();
+		await page
+			.getByTestId( 'mini-cart' )
+			.getByLabel( '1 item in cart' )
+			.dispatchEvent( 'mouseover' );
+
 		await expect(
 			page.getByTestId( 'mini-cart' ).getByLabel( '1 item in cart' )
 		).toContainText( '(incl. tax)' );
