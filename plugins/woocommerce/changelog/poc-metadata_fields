@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow providing meta fields starting with "meta_data_" as regular fields on the REST API

@@ -288,7 +288,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		global $wpdb;
 		if ( ! empty( $this->search_sku_in_product_lookup_table ) ) {
 			$like_search = '%' . $wpdb->esc_like( $this->search_sku_in_product_lookup_table ) . '%';
-			$where .= ' AND ' . $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
+			$where      .= ' AND ' . $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
 		}
 		return $where;
 	}
@@ -777,6 +777,20 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			}
 		}
 
+		$metadata_fields = array_filter(
+			$request->get_params(),
+			function( $k ) {
+				return str_starts_with( $k, 'meta_data_' );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+
+		if ( ! empty( $metadata_fields ) ) {
+			foreach ( $metadata_fields as $key => $value ) {
+				$product->update_meta_data( str_replace( 'meta_data_', '', $key ), $value );
+			}
+		}
+
 		if ( ! empty( $request['date_created'] ) ) {
 			$date = rest_parse_date( $request['date_created'] );
 
@@ -1075,7 +1089,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'low_stock_amount'       => array(
+				'low_stock_amount'      => array(
 					'description' => __( 'Low Stock amount for the product.', 'woocommerce' ),
 					'type'        => array( 'integer', 'null' ),
 					'context'     => array( 'view', 'edit' ),
@@ -1307,7 +1321,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 						),
 					),
 				),
-				'has_options'     => array(
+				'has_options'           => array(
 					'description' => __( 'Shows if the product needs to be configured before it can be bought.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
@@ -1509,6 +1523,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			if ( in_array( 'post_password', $fields, true ) ) {
 				$data['post_password'] = $product->get_post_password( $context );
+			}
+
+			if ( in_array( 'meta_data', $fields, true ) ) {
+				foreach ( $data['meta_data'] as $meta ) {
+					$data[ 'meta_data_' . $meta->key ] = $meta->value;
+				}
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );
