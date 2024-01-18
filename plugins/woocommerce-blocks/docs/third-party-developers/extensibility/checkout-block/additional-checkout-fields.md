@@ -301,7 +301,7 @@ If it is undesirable to force the shopper to select a value, providing a value s
 
 It is possible to add custom validation to any registered additional checkout field as long as you know its namespace and ID.
 
-To do so, use the `woocommerce_blocks_validate_additional_field_{namespace}` filter.
+To do so, use the `woocommerce_blocks_validate_additional_field_{id}` filter.
 
 For example to apply validation to the example text field above use the `woocommerce_blocks_validate_additional_field_namespace/gov-id` filter.
 
