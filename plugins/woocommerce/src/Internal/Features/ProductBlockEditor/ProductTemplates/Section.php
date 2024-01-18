@@ -50,7 +50,7 @@ class Section extends ProductBlock implements SectionInterface {
 	 * @deprecated 8.6.0
 	 */
 	public function add_section( array $block_config ): SubsectionInterface {
-		wc_deprecated_function( 'add_section', '8.6.0', 'Use add_subsection instead.' );
+		wc_deprecated_function( 'add_section', '8.6.0', 'add_subsection' );
 		return $this->add_subsection( $block_config );
 	}
 }
