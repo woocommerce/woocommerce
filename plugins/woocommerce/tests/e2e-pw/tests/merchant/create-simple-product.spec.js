@@ -5,6 +5,7 @@ const virtualProductName = 'Virtual Product Name';
 const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
 const productTag = 'nonVirtualTag';
+const productCategory = 'nonProductCategory'
 const productDescription = 'Description of a non-virtual product.';
 const productDescriptionShort = 'Short description';
 let shippingZoneId, virtualProductId, nonVirtualProductId;
@@ -37,17 +38,45 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		// cleans up all products after run
 		const api = new wcApi( {
 			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
+
+		// cleans up all products after run
 		await api.delete( `products/${ virtualProductId }`, { force: true } );
 		await api.delete( `products/${ nonVirtualProductId }`, {
 			force: true,
 		} );
+
+		// clean up tag after run
+		await api
+			.get( 'products/tags' )
+			.then( async ( response ) => {
+				for (let i = 0; i < response.data.length; i++) {
+					if (response.data[i].name === productTag) {
+						await api.delete(`products/tags/${response.data[i].id}`, {
+							force: true,
+						} );
+					}
+				}
+			} );
+
+		// clean up category after run
+		await api
+			.get( 'products/categories' )
+			.then( async ( response ) => {
+				for (let i = 0; i < response.data.length; i++) {
+					if (response.data[i].name === productCategory) {
+						await api.delete(`products/categories/${response.data[i].id}`, {
+							force: true,
+						} );
+					}
+				}
+			} );
+
 		// delete the shipping zone
 		await api.delete( `shipping/zones/${ shippingZoneId }`, {
 			force: true,
@@ -144,9 +173,8 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			.locator( '.wp-editor' )
 			.fill( productDescriptionShort );
 
-		let categoryName = Date.now().toString();
 		await page.getByText( '+ Add new category' ).click();
-		await page.getByLabel( 'Add new category', { exact: true } ).fill( categoryName );
+		await page.getByLabel( 'Add new category', { exact: true } ).fill( productCategory );
 		await page.getByRole( 'button', { name: 'Add new category', exact: true} ).click();
 
 		await page.getByRole( 'combobox', { name: 'Add new tag'} ).fill( productTag );
