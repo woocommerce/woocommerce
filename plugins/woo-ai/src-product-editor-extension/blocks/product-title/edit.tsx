@@ -1,7 +1,13 @@
 /*
  * External dependencies
  */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
 import { __ } from '@wordpress/i18n';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
 import { useBlockProps } from '@wordpress/block-editor';
 
 /**
