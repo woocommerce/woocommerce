@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Blocks\AssetsController;
 use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
-use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
@@ -161,8 +160,6 @@ class Bootstrap {
 			$this->container->get( SingleProductTemplateCompatibility::class )->init();
 			$this->container->get( Notices::class )->init();
 		}
-
-		$this->container->get( QueryFilters::class )->init();
 	}
 
 	/**
@@ -414,12 +411,6 @@ class Bootstrap {
 			TasksController::class,
 			function() {
 				return new TasksController();
-			}
-		);
-		$this->container->register(
-			QueryFilters::class,
-			function() {
-				return new QueryFilters();
 			}
 		);
 	}
