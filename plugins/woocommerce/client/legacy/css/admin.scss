@@ -1921,7 +1921,7 @@ ul.wc_coupon_list_block {
 				padding: 0 0 3px;
 			}
 
-			input,
+			input:not(.checkbox),
 			textarea {
 				width: 100%;
 			}
