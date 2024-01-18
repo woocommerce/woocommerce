@@ -5,7 +5,7 @@ const virtualProductName = 'Virtual Product Name';
 const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
 const productTag = 'nonVirtualTag';
-const productCategory = 'nonProductCategory'
+const productCategory = 'nonVirtualCategory'
 const productDescription = 'Description of a non-virtual product.';
 const productDescriptionShort = 'Short description';
 let shippingZoneId, virtualProductId, nonVirtualProductId;
