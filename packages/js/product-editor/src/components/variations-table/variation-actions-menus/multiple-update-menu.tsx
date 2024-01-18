@@ -12,7 +12,7 @@ import { chevronDown, chevronUp } from '@wordpress/icons';
 import { VariationActionsMenuProps } from './types';
 import { VariationActions } from './variation-actions';
 
-export function QuickUpdateMenu( {
+export function MultipleUpdateMenu( {
 	selection,
 	disabled,
 	onChange,

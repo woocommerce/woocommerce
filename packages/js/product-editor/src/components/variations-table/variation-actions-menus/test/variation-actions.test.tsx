@@ -9,7 +9,7 @@ import React, { createElement } from 'react';
 /**
  * Internal dependencies
  */
-import { SingleUpdateMenu, QuickUpdateMenu } from '..';
+import { SingleUpdateMenu, MultipleUpdateMenu } from '..';
 import { TRACKS_SOURCE } from '../../../../constants';
 import { PRODUCT_STOCK_STATUS_KEYS } from '../../../../utils/get-product-stock-status';
 
@@ -34,7 +34,7 @@ const anotherMockVariation = {
 	parent_id: 1,
 } as ProductVariation;
 
-describe( 'QuickUpdateMenu', () => {
+describe( 'MultipleUpdateMenu', () => {
 	let onChangeMock: jest.Mock, onDeleteMock: jest.Mock;
 	beforeEach( () => {
 		onChangeMock = jest.fn();
@@ -44,7 +44,7 @@ describe( 'QuickUpdateMenu', () => {
 
 	it( 'should render dropdown with pricing, inventory, and delete options when opened', () => {
 		const { queryByText, getByRole } = render(
-			<QuickUpdateMenu
+			<MultipleUpdateMenu
 				selection={ [ mockVariation, anotherMockVariation ] }
 				onChange={ onChangeMock }
 				onDelete={ onDeleteMock }
@@ -58,7 +58,7 @@ describe( 'QuickUpdateMenu', () => {
 
 	it( 'should call onDelete when Delete menuItem is clicked', async () => {
 		const { getByRole, getByText } = render(
-			<QuickUpdateMenu
+			<MultipleUpdateMenu
 				selection={ [ mockVariation, anotherMockVariation ] }
 				onChange={ onChangeMock }
 				onDelete={ onDeleteMock }
