@@ -4,9 +4,14 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const virtualProductName = 'Virtual Product Name';
 const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
+const salePrice = '6.99';
+const productDescription = 'Virtual product description.';
+const productSKU = '1234567890'
+const productPurchaseNote = 'Virtual product purchase note'
+const productAttribute = 'color'
+const productAttributeColor = 'red | white'
 const productTag = 'nonVirtualTag';
 const productCategory = 'nonVirtualCategory';
-const productDescription = 'Description of a non-virtual product.';
 const productDescriptionShort = 'Short description';
 let shippingZoneId, virtualProductId, nonVirtualProductId;
 
@@ -91,7 +96,33 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		} );
 		await page.locator( '#title' ).fill( virtualProductName );
 		await page.locator( '#_regular_price' ).fill( productPrice );
+		await page.locator( '#_sale_price' ).fill( salePrice );
 		await page.locator( '#_virtual' ).click();
+
+		// Fill in a product description
+		await page
+			.frameLocator( '#content_ifr' )
+			.locator( '.wp-editor' )
+			.fill( productDescription );
+
+		// Fill in SKU
+		await page.getByText( 'Inventory' ).click();
+		await page.locator( '#_sku' ).fill( productSKU );
+
+		// Fill in purchase note
+		await page.getByText( 'Advanced' ).click();
+		await page.locator( '#_purchase_note' ).fill( productPurchaseNote );
+
+		// Fill in a color as attribute
+		await page
+			.locator( '.attribute_tab' )
+			.getByRole( 'link', { name: 'Attributes' } ).click();
+		await page.getByPlaceholder ( 'f.e. size or color' ).fill( productAttribute );
+		await page.getByPlaceholder ( 'Enter some descriptive text. Use “|” to separate different values.' ).fill( productAttributeColor );
+		await page.keyboard.press('Enter');
+		await page.getByRole( 'button', { name: 'Save attributes' } ).click();
+
+		// Publish the product after a short wait
 		await page.locator( '#publish' ).click();
 		await page.waitForLoadState( 'networkidle' );
 
