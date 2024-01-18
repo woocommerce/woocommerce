@@ -11,7 +11,7 @@ import {
 /**
  * Internal dependencies
  */
-import { MenuItemProps } from './types';
+import { MenuItemProps, VariationQuickUpdateSlotProps } from './types';
 import {
 	MULTIPLE_UPDATE,
 	SINGLE_UPDATE,
@@ -19,6 +19,7 @@ import {
 } from './constants';
 
 const DEFAULT_ORDER = 20;
+const TOP_LEVEL_MENU = 'top-level';
 
 export const getGroupName = (
 	group?: string,
@@ -32,71 +33,56 @@ export const getGroupName = (
 		: VARIATION_ACTIONS_SLOT_NAME;
 };
 
-export const getMenuItem = (
-	children: React.ReactNode,
-	onClick: () => void
-) => <MenuItem onClick={ onClick }>{ children }</MenuItem>;
-
 export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
-	Slot: React.FC<
-		Slot.Props & {
-			group: string;
-			supportsMultipleSelection: boolean;
-			onClick?: () => void;
-		}
-	>;
+	Slot: React.FC< Slot.Props & VariationQuickUpdateSlotProps >;
 } = ( {
 	children,
 	order = DEFAULT_ORDER,
-	group = 'top-level',
+	group = TOP_LEVEL_MENU,
 	supportsMultipleSelection,
 	onClick = () => {},
 } ) => {
-	if ( supportsMultipleSelection ) {
-		return (
-			<>
-				{ [ MULTIPLE_UPDATE, SINGLE_UPDATE ].map( ( updateType ) => (
-					<Fill
-						key={ updateType }
-						name={ getGroupName(
-							group,
-							updateType === MULTIPLE_UPDATE
-						) }
-					>
-						{ ( fillProps: Fill.Props ) =>
-							createOrderedChildren(
-								getMenuItem( children, onClick ),
-								order,
-								fillProps
-							)
-						}
-					</Fill>
-				) ) }
-			</>
-		);
-	}
-	return (
-		<Fill name={ getGroupName( group, supportsMultipleSelection ) }>
-			{ ( fillProps: Fill.Props ) =>
+	const handleClick =
+		( fillProps: Fill.Props & VariationQuickUpdateSlotProps ) => () => {
+			const { selection, onChange, onClose } = fillProps;
+			onClick( { selection, onChange, onClose } );
+		};
+
+	const createFill = ( updateType: string ) => (
+		<Fill
+			key={ updateType }
+			name={ getGroupName( group, updateType === MULTIPLE_UPDATE ) }
+		>
+			{ ( fillProps: Fill.Props & VariationQuickUpdateSlotProps ) =>
 				createOrderedChildren(
-					getMenuItem( children, onClick ),
+					<MenuItem onClick={ handleClick( fillProps ) }>
+						{ children }
+					</MenuItem>,
 					order,
 					fillProps
 				)
 			}
 		</Fill>
 	);
+
+	const fills = supportsMultipleSelection
+		? [ MULTIPLE_UPDATE, SINGLE_UPDATE ].map( createFill )
+		: createFill( SINGLE_UPDATE );
+	return <>{ fills }</>;
 };
 
 VariationQuickUpdateMenuItem.Slot = ( {
 	fillProps,
-	group = 'top-level',
+	group = TOP_LEVEL_MENU,
+	onChange,
+	onClose,
+	selection,
 	supportsMultipleSelection,
 } ) => {
 	return (
 		<Slot
 			name={ getGroupName( group, supportsMultipleSelection ) }
-			fillProps={ fillProps }
+			fillProps={ { ...fillProps, onChange, onClose, selection } }
 		>
 			{ ( fills ) => {
 				if ( ! sortFillsByOrder ) {
