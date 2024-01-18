@@ -3,22 +3,36 @@
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
+import type { Page, Response } from '@playwright/test';
+import type { FrontendUtils } from '@woocommerce/e2e-utils';
 
-const templateUserCustomizationTests = [
+type TemplateUserCustomizationTest = {
+	visitPage: ( props: {
+		frontendUtils: FrontendUtils;
+		page: Page;
+	} ) => Promise< void | Response | null >;
+	templateName: string;
+	templatePath: string;
+	templateType: string;
+};
+
+const templateUserCustomizationTests: TemplateUserCustomizationTest[] = [
 	{
-		permalink: '/shop',
+		visitPage: async ( { frontendUtils } ) =>
+			await frontendUtils.goToShop(),
 		templateName: 'Product Catalog',
 		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//archive-product`,
 		templateType: 'wp_template',
 	},
 	{
-		permalink: '/?s=shirt&post_type=product',
+		visitPage: async ( { page } ) =>
+			await page.goto( '/?s=shirt&post_type=product' ),
 		templateName: 'Product Search Results',
 		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//product-search-results`,
 		templateType: 'wp_template',
 	},
 	{
-		permalink: '/color/blue',
+		visitPage: async ( { page } ) => await page.goto( '/color/blue' ),
 		templateName: 'Products by Attribute',
 		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_attribute`,
 		templateType: 'wp_template',
@@ -28,7 +42,8 @@ const templateUserCustomizationTests = [
 		},
 	},
 	{
-		permalink: '/product-category/clothing',
+		visitPage: async ( { page } ) =>
+			await page.goto( '/product-category/clothing' ),
 		templateName: 'Products by Category',
 		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_cat`,
 		templateType: 'wp_template',
@@ -38,7 +53,8 @@ const templateUserCustomizationTests = [
 		},
 	},
 	{
-		permalink: '/product-tag/recommended/',
+		visitPage: async ( { page } ) =>
+			await page.goto( '/product-tag/recommended/' ),
 		templateName: 'Products by Tag',
 		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_tag`,
 		templateType: 'wp_template',
@@ -48,9 +64,26 @@ const templateUserCustomizationTests = [
 		},
 	},
 	{
-		permalink: '/product/hoodie',
+		visitPage: async ( { page } ) => await page.goto( '/product/hoodie' ),
 		templateName: 'Single Product',
 		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//single-product`,
+		templateType: 'wp_template',
+	},
+	{
+		visitPage: async ( { frontendUtils } ) =>
+			await frontendUtils.goToCart(),
+		templateName: 'Page: Cart',
+		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//page-cart`,
+		templateType: 'wp_template',
+	},
+	{
+		visitPage: async ( { frontendUtils } ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart();
+			await frontendUtils.goToCheckout();
+		},
+		templateName: 'Page: Checkout',
+		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//page-checkout`,
 		templateType: 'wp_template',
 	},
 ];
@@ -62,6 +95,7 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 		test( "theme template has priority over WooCommerce's and can be modified", async ( {
 			admin,
 			editorUtils,
+			frontendUtils,
 			page,
 		} ) => {
 			// Edit the theme template.
@@ -78,7 +112,7 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 			await editorUtils.saveTemplate();
 
 			// Verify the template is the one modified by the user.
-			await page.goto( testData.permalink );
+			await testData.visitPage( { frontendUtils, page } );
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 
 			// Revert edition and verify the template from the theme is used.
@@ -89,7 +123,7 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 			await editorUtils.revertTemplateCustomizations(
 				testData.templateName
 			);
-			await page.goto( testData.permalink );
+			await testData.visitPage( { frontendUtils, page } );
 
 			await expect(
 				page
