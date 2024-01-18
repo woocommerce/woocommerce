@@ -157,7 +157,7 @@ The checkbox field type does not have any specific options, however `required` w
 
 ### Attributes
 
-Adding additional attributes to checkbox and text fields is supported. Adding them to select fields is **not**.
+Adding additional attributes to checkbox and text fields is supported. Adding them to select fields is **not possible for now**.
 
 These attributes have a 1:1 mapping to the HTML attributes on `input` elements (except `pattern` on checkbox).
 
