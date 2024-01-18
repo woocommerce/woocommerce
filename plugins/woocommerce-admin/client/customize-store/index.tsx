@@ -55,7 +55,8 @@ export type customizeStoreStateMachineEvents =
 	| assemblerHubEvents
 	| transitionalEvents
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
-	| { type: 'EXTERNAL_URL_UPDATE' };
+	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } };
 
 const updateQueryStep = (
 	_context: unknown,
@@ -176,6 +177,13 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
 			target: 'intro',
 			actions: [ { type: 'updateQueryStep', step: 'intro' } ],
+		},
+		NO_AI_FLOW_ERROR: {
+			target: 'intro',
+			actions: [
+				{ type: 'assignNoAIFlowError' },
+				{ type: 'updateQueryStep', step: 'intro' },
+			],
 		},
 	},
 	states: {

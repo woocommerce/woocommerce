@@ -4,7 +4,10 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
+import interpolateComponents from '@automattic/interpolate-components';
+
 import {
+	Notice,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
@@ -81,6 +84,10 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const isJetpackOffline = false;
 
 	const isNetworkOffline = useNetworkStatus();
+
+	const [ showError, setShowError ] = useState(
+		context.flowType === FlowType.noAI && context.intro.hasErrors
+	);
 
 	const [ openDesignChangeWarningModal, setOpenDesignChangeWarningModal ] =
 		useState( false );
@@ -180,6 +187,30 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 				</div>
 
 				<div className="woocommerce-customize-store-main">
+					{ showError && (
+						<Notice
+							onRemove={ () => setShowError( false ) }
+							status="error"
+						>
+							{ interpolateComponents( {
+								mixedString: __(
+									'Oops! We encountered a problem while setting up the foundations. {{anchor}}Please try again{{/anchor}} or start with a theme.',
+									'woocommerce'
+								),
+								components: {
+									anchor: (
+										// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions, jsx-a11y/anchor-is-valid
+										<a
+											className="woocommerce-customize-store-error-link"
+											onClick={ () =>
+												sendEvent( 'DESIGN_WITHOUT_AI' )
+											}
+										/>
+									),
+								},
+							} ) }
+						</Notice>
+					) }
 					<BannerComponent
 						setOpenDesignChangeWarningModal={
 							setOpenDesignChangeWarningModal
