@@ -3,6 +3,7 @@
  */
 import { Sender } from 'xstate';
 import { recordEvent } from '@woocommerce/tracks';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -44,8 +45,26 @@ const installAndActivateTheme = async () => {
 	}
 };
 
+const createProducts = async () => {
+	try {
+		const { success } = await apiFetch< {
+			success: boolean;
+		} >( {
+			path: `/wc-admin/onboarding/products`,
+			method: 'POST',
+		} );
+
+		if ( ! success ) {
+			throw new Error( 'Product creation failed' );
+		}
+	} catch ( error ) {
+		throw error;
+	}
+};
+
 export const services = {
 	assembleSite,
 	browserPopstateHandler,
 	installAndActivateTheme,
+	createProducts,
 };

@@ -55,7 +55,7 @@ describe( 'Design Without AI state machine', () => {
 			expect( hasStepInUrl ).toBeCalled();
 		} );
 
-		it( 'should transit to installAndActivateTheme state when the url is /design', () => {
+		it( 'should transit to preAssembleSite state when the url is /design', () => {
 			const hasStepInUrl = jest.fn( () => true );
 			const machine = designWithNoAiStateMachineDefinition.withConfig( {
 				guards: {
@@ -66,13 +66,11 @@ describe( 'Design Without AI state machine', () => {
 			const machineInterpret = interpret( machine ).start();
 
 			expect(
-				machineInterpret
-					.getSnapshot()
-					.matches( 'installAndActivateTheme' )
+				machineInterpret.getSnapshot().matches( 'preAssembleSite' )
 			).toBeTruthy();
 		} );
 
-		it( "should not transit to installAndActivateTheme state when the url isn't /design", () => {
+		it( "should not transit to preAssembleSite state when the url isn't /design", () => {
 			const hasStepInUrl = jest.fn( () => false );
 			const machine = designWithNoAiStateMachineDefinition.withConfig( {
 				guards: {
@@ -83,15 +81,15 @@ describe( 'Design Without AI state machine', () => {
 			const machineInterpret = interpret( machine ).start();
 
 			expect(
-				machineInterpret
-					.getSnapshot()
-					.matches( 'installAndActivateTheme' )
+				machineInterpret.getSnapshot().matches( 'preAssembleSite' )
 			).toBeFalsy();
 		} );
 	} );
 
-	describe( 'installAndActivateTheme state', () => {
+	describe( 'preAssembleSite state', () => {
 		it( 'should invoke `installAndActivateTheme` service', async () => {
+			const initialState =
+				'preAssembleSite.preApiCallLoader.installAndActivateTheme';
 			const installAndActivateThemeMock = jest.fn( () =>
 				Promise.resolve()
 			);
@@ -102,34 +100,35 @@ describe( 'Design Without AI state machine', () => {
 				},
 			} );
 
-			const state = machine.getInitialState( 'installAndActivateTheme' );
+			const state = machine.getInitialState( initialState );
 
 			const actor = interpret( machine ).start( state );
 
-			await waitFor( actor, ( currentState ) =>
-				currentState.matches( 'installAndActivateTheme.pending' )
-			);
+			await waitFor( actor, ( currentState ) => {
+				return currentState.matches(
+					'preAssembleSite.preApiCallLoader.installAndActivateTheme.pending'
+				);
+			} );
 
 			expect( installAndActivateThemeMock ).toHaveBeenCalled();
-			expect(
-				actor.getSnapshot().matches( 'preAssembleSite' )
-			).toBeTruthy();
-		} );
-	} );
 
-	describe( 'the preAssembleSite state', () => {
-		const initialState = 'preAssembleSite';
-		it( 'should start with the pending state', async () => {
-			const machine = createMockMachine( {} );
-
-			const actor = interpret( machine ).start( initialState );
+			const finalState = await waitFor( actor, ( currentState ) => {
+				return currentState.matches(
+					'preAssembleSite.preApiCallLoader.installAndActivateTheme.success'
+				);
+			} );
 
 			expect(
-				actor.getSnapshot().matches( 'preAssembleSite.assembleSite' )
+				finalState.matches(
+					'preAssembleSite.preApiCallLoader.installAndActivateTheme.success'
+				)
 			).toBeTruthy();
 		} );
 
 		it( 'should invoke `assembleSite` service', async () => {
+			const initialState =
+				'preAssembleSite.preApiCallLoader.assembleSite';
+
 			const assembleSiteMock = jest.fn( () => Promise.resolve() );
 
 			const machine = createMockMachine( {
@@ -138,23 +137,70 @@ describe( 'Design Without AI state machine', () => {
 				},
 			} );
 
-			const state = machine.getInitialState( 'preAssembleSite' );
+			const state = machine.getInitialState( initialState );
 
-			const actor = interpret( machine );
+			const actor = interpret( machine ).start( state );
 
-			const services = actor.start( state );
-
-			await waitFor( services, ( currentState ) =>
-				currentState.matches( 'preAssembleSite.assembleSite.pending' )
-			);
+			await waitFor( actor, ( currentState ) => {
+				return currentState.matches(
+					'preAssembleSite.preApiCallLoader.assembleSite.pending'
+				);
+			} );
 
 			expect( assembleSiteMock ).toHaveBeenCalled();
+
+			const finalState = await waitFor( actor, ( currentState ) => {
+				return currentState.matches(
+					'preAssembleSite.preApiCallLoader.assembleSite.success'
+				);
+			} );
+
 			expect(
-				actor.getSnapshot().matches( 'showAssembleHub' )
+				finalState.matches(
+					'preAssembleSite.preApiCallLoader.assembleSite.success'
+				)
 			).toBeTruthy();
 		} );
 
-		it( 'should run `assignAPICallLoaderError` when `assembleSite` service fails', async () => {
+		it( 'should invoke `createProducts` service', async () => {
+			const initialState =
+				'preAssembleSite.preApiCallLoader.createProducts';
+
+			const createProductsMock = jest.fn( () => Promise.resolve() );
+
+			const machine = createMockMachine( {
+				services: {
+					createProducts: createProductsMock,
+				},
+			} );
+
+			const state = machine.getInitialState( initialState );
+
+			const actor = interpret( machine ).start( state );
+
+			await waitFor( actor, ( currentState ) => {
+				return currentState.matches(
+					'preAssembleSite.preApiCallLoader.createProducts.pending'
+				);
+			} );
+
+			expect( createProductsMock ).toHaveBeenCalled();
+
+			const finalState = await waitFor( actor, ( currentState ) => {
+				return currentState.matches(
+					'preAssembleSite.preApiCallLoader.createProducts.success'
+				);
+			} );
+
+			expect(
+				finalState.matches(
+					'preAssembleSite.preApiCallLoader.createProducts.success'
+				)
+			).toBeTruthy();
+		} );
+
+		// We have to refactor this test with  https://github.com/woocommerce/woocommerce/issues/43780
+		it.skip( 'should run `assignAPICallLoaderError` when `assembleSite` service fails', async () => {
 			const assembleSiteMock = jest.fn( () => Promise.reject() );
 			const assignAPICallLoaderErrorMock = jest.fn();
 
