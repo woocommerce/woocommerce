@@ -185,7 +185,7 @@ class OrdersTableFieldQuery {
 		} else {
 			$relation = $q['relation'];
 			unset( $q['relation'] );
-			$chunks = [];
+			$chunks = array();
 			foreach ( $q as $query ) {
 				$chunks[] = $this->process( $query );
 			}

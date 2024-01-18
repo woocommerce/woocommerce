@@ -520,8 +520,8 @@ class OrdersTableMetaQuery {
 		$alias = $clause['alias'];
 
 		$meta_compare_string_start = '';
-		$meta_compare_string_end = '';
-		$subquery_alias = '';
+		$meta_compare_string_end   = '';
+		$subquery_alias            = '';
 		if ( in_array( $clause['compare_key'], array( '!=', 'NOT IN', 'NOT LIKE', 'NOT EXISTS', 'NOT REGEXP' ), true ) ) {
 			$i                     = count( $this->table_aliases );
 			$subquery_alias        = self::ALIAS_PREFIX . $i;
