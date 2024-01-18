@@ -3,23 +3,23 @@
 ## Table of Contents  <!-- omit in toc -->
 
 - [Available field locations](#available-field-locations)
-	- [Contact information](#contact-information)
-	- [Address](#address)
-	- [Additional information](#additional-information)
+    - [Contact information](#contact-information)
+    - [Address](#address)
+    - [Additional information](#additional-information)
 - [Supported field types](#supported-field-types)
 - [Using the API](#using-the-api)
-	- [Options](#options)
-		- [General options](#general-options)
-		- [Options for `text` fields](#options-for-text-fields)
-		- [Options for `select` fields](#options-for-select-fields)
-		- [Options for `checkbox` fields](#options-for-checkbox-fields)
+    - [Options](#options)
+        - [General options](#general-options)
+        - [Options for `text` fields](#options-for-text-fields)
+        - [Options for `select` fields](#options-for-select-fields)
+        - [Options for `checkbox` fields](#options-for-checkbox-fields)
 	- [Attributes](#attributes)
 - [Usage examples](#usage-examples)
-	- [Rendering a text field](#rendering-a-text-field)
-	- [Rendering a checkbox field](#rendering-a-checkbox-field)
-	- [Rendering a select field.](#rendering-a-select-field)
+    - [Rendering a text field](#rendering-a-text-field)
+    - [Rendering a checkbox field](#rendering-a-checkbox-field)
+    - [Rendering a select field.](#rendering-a-select-field)
 - [Validation](#validation)
-	- [Example](#example)
+    - [Example](#example)
 - [A full example](#a-full-example)
 
 A common use-case for developers and merchants is to add a new field to the Checkout form to collect additional data about a customer or their order.
@@ -255,7 +255,7 @@ This results in the following contact information section:
 
 Note that because an `optionalLabel` was not supplied, the string `(optional)` is appended to the label. To remove that an `optionalLabel` property should be supplied to override this.
 
-### Rendering a select field.
+### Rendering a select field
 
 This example demonstrates rendering a select field in the additional information section:
 
@@ -353,40 +353,40 @@ In this full example we will register the Government ID text field and verify th
 
 This example is just a full version of the examples shared above.
 
-```php
-add_action(
-	'woocommerce_loaded',
-	function() {
-		woocommerce_blocks_register_checkout_field(
-			array(
-				'id'            => 'namespace/gov-id',
-				'label'         => 'Government ID',
-				'optionalLabel' => 'Government ID (optional)',
-				'location'      => 'address',
-				'required'      => true,
-				'attributes'    => array(
-					'autocomplete' => 'government-id',
-					'pattern'      => '[A-Z0-9]{5}', // A 5-character string of capital letters and numbers.
-					'title'        => 'Your 5-digit Government ID',
+	add_action(
+		'woocommerce_loaded',
+		function() {
+			woocommerce_blocks_register_checkout_field(
+				array(
+					'id'            => 'namespace/gov-id',
+					'label'         => 'Government ID',
+					'optionalLabel' => 'Government ID (optional)',
+					'location'      => 'address',
+					'required'      => true,
+					'attributes'    => array(
+						'autocomplete' => 'government-id',
+						'pattern'      => '[A-Z0-9]{5}', // A 5-character string of capital letters and numbers.
+						'title'        => 'Your 5-digit Government ID',
+					),
 				),
-			),
-		);
+			);
 
-		add_filter(
-			'woocommerce_blocks_validate_additional_field_namespace/gov-id',
-			function ( \WP_Error $error, $value, $schema, $key ) {
-				$match = preg_match( '/[A-Z0-9]{5}/', $value );
-				if ( 0 === $match || false === $match ) {
-					$error->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
+			add_filter(
+				'woocommerce_blocks_validate_additional_field_namespace/gov-id',
+				function ( \WP_Error $error, $value, $schema, $key ) {
+					$match = preg_match( '/[A-Z0-9]{5}/', $value );
+					if ( 0 === $match || false === $match ) {
+						$error->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
+					}
+					return $error;
 				}
-				return $error;
-			}
-		);
-	},
-	10,
-	4
-);
-```
+			);
+		},
+		10,
+		4
+	);
+
+
 <!-- FEEDBACK -->
 
 ---
