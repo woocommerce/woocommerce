@@ -75,8 +75,6 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 	 * Register the routes for products.
 	 */
 	public function register_routes() {
-		parent::register_routes();
-
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -199,7 +197,6 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 	 */
 	public function get_items( $request ) {
 		$id     = $request->get_param( 'id' );
-		$object = wc_get_product( $id );
 
 		$categories = $request->get_param( 'categories' );
 		$tags       = $request->get_param( 'tags' );
