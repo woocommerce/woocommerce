@@ -40,7 +40,7 @@ test.describe( 'Mini-Cart template part', async () => {
 		await editorUtils.saveTemplate();
 
 		await page.goto( testData.permalink );
-		await page.getByLabel( 'Add to cart' ).first().click();
+		await frontendUtils.addToCart();
 		let block = await frontendUtils.getBlockByName(
 			testData.miniCartBlockName
 		);
