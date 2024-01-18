@@ -226,7 +226,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 * @testDox Test the `has_attributes` and `update_attributes` methods to ensure invalid attributes are handled gracefully.
 	 */
 	public function test_invalid_attributes() {
-		// `WC_Meta_Box_Product_Data` uses the `$post` and `$product_object` globals.
+		// `WC_Meta_Box_Product_Data` uses the `$post` and `$product_object` globals. phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 		global $post, $product_object;
 		// Create a fake logger to capture log entries.
 		// phpcs:disable Squiz.Commenting
@@ -274,7 +274,8 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$this->assertNotNull( $product );
 		$this->assertFalse( $product->has_attributes() );
 
-		$post = get_post( $product->get_id() );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$post           = get_post( $product->get_id() );
 		$product_object = $product;
 		ob_start();
 		WC_Meta_Box_Product_Data::output_variations();
@@ -282,11 +283,11 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		ob_end_clean();
 		// We just need to make sure that the `update_attributes` method does not throw an error.
 		$this->assertEquals( '<div id="variable_product_options"', substr( $ob_content, 0, 34 ) );
-		
-		// this makes the test fail, now I can uncomment the fix
-		// but I still have to find a place in the UI for the reproduction steps
+
 		$_POST['variable_post_id'] = array( wp_list_pluck( $product->get_available_variations(), 'variation_id' ) );
 		WC_Meta_Box_Product_Data::save_variations( $product->get_id(), get_post( $product->get_id() ) );
+		// We just need to make sure that no error is thrown.
+		$this->assertTrue( true );
 
 		remove_filter( 'woocommerce_product_get_attributes', $invalid_attributes_callback_strings, 10 );
 	}
