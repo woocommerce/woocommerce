@@ -286,8 +286,8 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 
 		$_POST['variable_post_id'] = array( wp_list_pluck( $product->get_available_variations(), 'variation_id' ) );
 		WC_Meta_Box_Product_Data::save_variations( $product->get_id(), get_post( $product->get_id() ) );
-		// We just need to make sure that no error is thrown.
-		$this->assertTrue( true );
+		// Check that the log entry was created.
+		$this->assertEquals( 'found a product attribute that is not a `WC_Product_Attribute` in `prepare_set_attributes`: "\'invalid\'", type string', end( $fake_logger->warnings )['message'] );
 
 		remove_filter( 'woocommerce_product_get_attributes', $invalid_attributes_callback_strings, 10 );
 	}
