@@ -45,7 +45,7 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 
 	/**
 	 * Related product ids.
-	 * 
+	 *
 	 * @var array
 	 */
 	protected $ids = array();
@@ -78,10 +78,11 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 		parent::register_routes();
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base,
+			$this->namespace,
+			'/' . $this->rest_base,
 			array(
 				'args'   => array(
-					'id'     => array(
+					'id' => array(
 						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
@@ -97,6 +98,11 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 		);
 	}
 
+	/**
+	 * Get the query params for the related products collection.
+	 *
+	 * @return array
+	 */
 	public function get_collection_params() {
 		$params                       = array();
 		$params['context']            = $this->get_context_param();
@@ -113,7 +119,7 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
-		$params['tags']       = array(
+		$params['tags'] = array(
 			'description'       => __( 'Limit result set to specific product tag ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -138,6 +144,10 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 
 	/**
 	 * Get the related product categories.
+	 *
+	 * @param array $cats The related product categories.
+	 * @param int   $id   The product id.
+	 * @return array
 	 */
 	public function get_related_product_cat_terms( $cats, $id ) {
 		if ( ! $this->combine ) {
@@ -153,6 +163,10 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 
 	/**
 	 * Get the related product tags.
+	 *
+	 * @param array $tags The related product tags.
+	 * @param int   $id   The product id.
+	 * @return array
 	 */
 	public function get_related_product_tag_terms( $tags, $id ) {
 		if ( ! $this->combine ) {
@@ -172,7 +186,7 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 	protected function prepare_objects_query( $request ) {
 		$args = parent::prepare_objects_query( $request );
 
-		$args['post__in' ] = $this->ids;
+		$args['post__in'] = $this->ids;
 		return $args;
 	}
 
@@ -205,8 +219,10 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 			$this->categories = $categories;
 			add_filter(
 				'woocommerce_get_related_product_cat_terms',
-				array( $this, 'get_related_product_cat_terms' ),
-				100, 2
+				array(
+					$this,
+					'get_related_product_cat_terms',
+				)
 			);
 		}
 
@@ -218,8 +234,10 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 			$this->tags = $tags;
 			add_filter(
 				'woocommerce_get_related_product_tag_terms',
-				array( $this, 'get_related_product_tag_terms' ),
-				100, 2
+				array(
+					$this,
+					'get_related_product_tag_terms',
+				)
 			);
 		}
 
