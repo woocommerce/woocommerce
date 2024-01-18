@@ -11,7 +11,6 @@ const testData = {
 	miniCartBlockName: 'woocommerce/mini-cart',
 	userText: 'Hello World in the template part',
 };
-const userText = 'Hello World in the template part';
 
 test.describe( 'Mini-Cart template part', async () => {
 	test( 'can be modified and reverted', async ( {
@@ -37,7 +36,7 @@ test.describe( 'Mini-Cart template part', async () => {
 		await page
 			.frameLocator( 'iframe[name="editor-canvas"]' )
 			.getByLabel( 'Empty block' )
-			.fill( userText );
+			.fill( testData.userText );
 		await editorUtils.saveTemplate();
 
 		await page.goto( testData.permalink );
@@ -46,7 +45,9 @@ test.describe( 'Mini-Cart template part', async () => {
 			testData.miniCartBlockName
 		);
 		await block.click();
-		await expect( page.getByRole( 'dialog' ) ).toContainText( userText );
+		await expect( page.getByRole( 'dialog' ) ).toContainText(
+			testData.userText
+		);
 
 		// Verify the edition can be reverted.
 		await admin.visitAdminPage(
@@ -61,7 +62,7 @@ test.describe( 'Mini-Cart template part', async () => {
 		);
 		await block.click();
 		await expect( page.getByRole( 'dialog' ) ).not.toContainText(
-			userText
+			testData.userText
 		);
 	} );
 } );
