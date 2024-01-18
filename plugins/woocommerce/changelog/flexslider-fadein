@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-FlexSlider $.fadeIn() is replaced with a Vanilla JS .animate().
+Improved our FlexSlider implementation by removing the need for jQuery, in relation to fade-in animations.
