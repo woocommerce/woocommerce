@@ -115,6 +115,8 @@ As well as the options above, text fields also support a `required` option. If t
 
 As well as the options above, select fields must also be registered with an  `options` option. This is used to specify what options the shopper can select.
 
+Select fields are always required.
+
 The `optionalLabel` option will never be shown as select fields are _always_ required.
 
 <table>
