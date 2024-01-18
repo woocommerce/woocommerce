@@ -6,6 +6,8 @@ const { setOption } = require( '../../utils/options' );
 
 const ASSEMBLER_HUB_URL =
 	'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store%2Fassembler-hub';
+const CUSTOMIZE_STORE_URL =
+	'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store';
 
 const skipTestIfUndefined = () => {
 	const skipMessage = `Skipping this test on daily run. Environment not compatible.`;
@@ -61,10 +63,25 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 		);
 	} );
 
-	test( 'Can view the Assembler Hub page', async ( { page } ) => {
+	test( 'Can not access the Assembler Hub page when the theme is not customized', async ( {
+		page,
+	} ) => {
 		await page.goto( ASSEMBLER_HUB_URL );
 		const locator = page.locator( 'h1:visible' );
-		await expect( locator ).toHaveText( "Let's get creative" );
+
+		await expect( locator ).not.toHaveText( 'Customize your store' );
+	} );
+
+	test.only( 'Can view the Assembler Hub page when the theme is already customized', async ( {
+		page,
+	} ) => {
+		await page.goto( CUSTOMIZE_STORE_URL );
+		await page.click( 'text=Start designing' );
+
+		await page.waitForURL( ASSEMBLER_HUB_URL );
+
+		await page.goto( ASSEMBLER_HUB_URL );
+		await expect( page.locator( "text=Let's get creative" ) ).toBeVisible();
 	} );
 
 	test( 'Visiting change header should show a list of block patterns to choose from', async ( {
