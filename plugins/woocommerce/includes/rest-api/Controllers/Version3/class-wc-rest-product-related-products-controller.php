@@ -146,10 +146,9 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 	 * Get the related product categories.
 	 *
 	 * @param array $cats The related product categories.
-	 * @param int   $id   The product id.
 	 * @return array
 	 */
-	public function get_related_product_cat_terms( $cats, $id ) {
+	public function get_related_product_cat_terms( $cats ) {
 		if ( ! $this->combine ) {
 			return $this->categories;
 		}
@@ -165,10 +164,9 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 	 * Get the related product tags.
 	 *
 	 * @param array $tags The related product tags.
-	 * @param int   $id   The product id.
 	 * @return array
 	 */
-	public function get_related_product_tag_terms( $tags, $id ) {
+	public function get_related_product_tag_terms( $tags ) {
 		if ( ! $this->combine ) {
 			return $this->tags;
 		}
@@ -249,10 +247,10 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 		}
 
 		// Remove the product categories filter.
-		remove_filter( 'woocommerce_get_related_product_cat_terms', array( $this, 'get_related_product_cat_terms' ), 100, 2 );
+		remove_filter( 'woocommerce_get_related_product_cat_terms', array( $this, 'get_related_product_cat_terms' ) );
 
 		// Remove the product tags filter.
-		remove_filter( 'woocommerce_get_related_product_tag_terms', array( $this, 'get_related_product_tag_terms' ), 100, 2 );
+		remove_filter( 'woocommerce_get_related_product_tag_terms', array( $this, 'get_related_product_tag_terms' ) );
 
 		return parent::get_items( $request );
 	}
