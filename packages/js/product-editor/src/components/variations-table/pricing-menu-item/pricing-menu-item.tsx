@@ -438,6 +438,9 @@ export function PricingMenuItem( {
 						</MenuItem>
 						<VariationQuickUpdateMenuItem.Slot
 							group={ 'pricing' }
+							onChange={ onChange }
+							onClose={ onClose }
+							selection={ selection }
 							supportsMultipleSelection={
 								supportsMultipleSelection
 							}

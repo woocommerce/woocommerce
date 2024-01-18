@@ -203,6 +203,9 @@ export function DownloadsMenuItem( {
 					</MenuItem>
 					<VariationQuickUpdateMenuItem.Slot
 						group={ 'downloads' }
+						onChange={ onChange }
+						onClose={ onClose }
+						selection={ selection }
 						supportsMultipleSelection={ supportsMultipleSelection }
 					/>
 				</div>

@@ -243,6 +243,9 @@ export function ShippingMenuItem( {
 					</MenuItem>
 					<VariationQuickUpdateMenuItem.Slot
 						group={ 'shipping' }
+						onChange={ onChange }
+						onClose={ onClose }
+						selection={ selection }
 						supportsMultipleSelection={ supportsMultipleSelection }
 					/>
 				</div>

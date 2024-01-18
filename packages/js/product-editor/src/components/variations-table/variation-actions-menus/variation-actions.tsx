@@ -86,6 +86,9 @@ export function VariationActions( {
 				/>
 				<VariationQuickUpdateMenuItem.Slot
 					group={ 'top-level' }
+					onChange={ onChange }
+					onClose={ onClose }
+					selection={ selection }
 					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
 			</MenuGroup>
@@ -118,6 +121,9 @@ export function VariationActions( {
 				) }
 				<VariationQuickUpdateMenuItem.Slot
 					group={ 'secondary' }
+					onChange={ onChange }
+					onClose={ onClose }
+					selection={ selection }
 					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
 			</MenuGroup>
@@ -140,6 +146,9 @@ export function VariationActions( {
 				</MenuItem>
 				<VariationQuickUpdateMenuItem.Slot
 					group={ 'tertiary' }
+					onChange={ onChange }
+					onClose={ onClose }
+					selection={ selection }
 					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
 			</MenuGroup>

@@ -237,6 +237,9 @@ export function InventoryMenuItem( {
 						</MenuItem>
 						<VariationQuickUpdateMenuItem.Slot
 							group={ 'inventory' }
+							onChange={ onChange }
+							onClose={ onClose }
+							selection={ selection }
 							supportsMultipleSelection={
 								supportsMultipleSelection
 							}
