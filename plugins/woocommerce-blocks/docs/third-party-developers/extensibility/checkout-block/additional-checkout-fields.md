@@ -50,7 +50,11 @@ The address section currently contains a form for the shipping address and the b
 
 <img width="707" alt="image" src="https://github.com/woocommerce/woocommerce/assets/5656702/746d280f-3354-4d37-a78a-a2518eb0e5de">
 
+Fields registered here will be saved to both the customer _and_ the order, so returning customers won't need to refill those values again.
+
 If a field is registered in the `address` location it will appear in both the shipping **and** the billing address. It is not possible to have the field in only one of the addresses.
+
+You will also end up collecting two values for this field, one for shipping and one for billing.
 
 ### Additional information
 
