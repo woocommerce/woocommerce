@@ -62,8 +62,6 @@ test.describe( 'Shopper → Translations', () => {
 	} );
 } );
 
-// Skipping tax tests until we sorted out a bug that hides the totals price on hover
-// eslint-disable-next-line playwright/no-skipped-test
 test.describe( 'Shopper → Tax', () => {
 	test.beforeAll( async () => {
 		await cli(
