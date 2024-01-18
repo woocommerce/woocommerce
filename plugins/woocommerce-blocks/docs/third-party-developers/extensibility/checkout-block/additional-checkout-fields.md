@@ -34,6 +34,8 @@ Additional checkout fields can be registered in three different places:
 - Addresses (Shipping **and** Billing)
 - Additional information
 
+A field can only be shown in one location, it is not possible to render the same field in multiple locations in the same registration.
+
 ### Contact information
 
 The contact information section currently renders at the top of the form. It contains the `email` field and any other additional fields.
