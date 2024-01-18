@@ -16,7 +16,7 @@ Create a function to house your class
 
 To ensure the classes you need to extend exist, you should wrap your class in a function which is called after all plugins are loaded:
 
-``` php
+```php
 function your_shipping_method_init() {
     // Your class will go here
 }
@@ -28,7 +28,7 @@ add_action( 'woocommerce_shipping_init', 'your_shipping_method_init' );
 
 Create your class and place it inside the function you just created. Make sure it extends the shipping method class so that you have access to the API. You'll see below we also init our shipping method options.
 
-``` php
+```php
 if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
     class WC_Your_Shipping_Method extends WC_Shipping_Method {
         /**
@@ -82,7 +82,7 @@ You can then define your options using the settings API. In the snippets above y
 
 `calculate_shipping()`` is a method which you use to add your rates - WooCommerce will call this when doing shipping calculations. Do your plugin specific calculations here and then add the rates via the API. How do you do that? Like so:
 
-``` php
+```php
 $rate = array(
     'label'    => "Label for the rate",
     'cost'     => '10.99',
@@ -95,7 +95,7 @@ $this->add_rate( $rate );
 
 Add_rate takes an array of options. The defaults/possible values for the array are as follows:
 
-``` php
+```php
 $defaults = array(
     'label' => '',   // Label for the rate
     'cost'  => '0',  // Amount for shipping or an array of costs (for per item shipping)
@@ -110,7 +110,7 @@ Your shipping method can pass as many rates as you want - just ensure that the i
 
 The skeleton shipping method code all put together looks like this:
 
-``` php
+```php
 <?php
 /*
 Plugin Name: Your Shipping plugin
