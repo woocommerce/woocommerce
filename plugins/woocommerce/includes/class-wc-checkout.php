@@ -1119,7 +1119,7 @@ class WC_Checkout {
 			$customer_id = wc_create_new_customer(
 				$data['billing_email'],
 				$username,
-				$password,
+				wp_slash($password), // We need to wp_slash() manually here to mimic the normal registration process.
 				array(
 					'first_name' => ! empty( $data['billing_first_name'] ) ? $data['billing_first_name'] : '',
 					'last_name'  => ! empty( $data['billing_last_name'] ) ? $data['billing_last_name'] : '',
