@@ -13,7 +13,7 @@
         - [Options for `text` fields](#options-for-text-fields)
         - [Options for `select` fields](#options-for-select-fields)
         - [Options for `checkbox` fields](#options-for-checkbox-fields)
-	- [Attributes](#attributes)
+    - [Attributes](#attributes)
 - [Usage examples](#usage-examples)
     - [Rendering a text field](#rendering-a-text-field)
     - [Rendering a checkbox field](#rendering-a-checkbox-field)
@@ -295,15 +295,13 @@ add_action(
 
 This results in the additional information section being rendered like so:
 
-<p>
-	<img width="701" alt="image" src="https://github.com/woocommerce/woocommerce/assets/5656702/bbe17ad0-7c7d-419a-951d-315f56f8898a"><br />
-	<em>The select input before being focused</em>
-</p>
+<img width="701" alt="The select input before being focused" src="https://github.com/woocommerce/woocommerce/assets/5656702/bbe17ad0-7c7d-419a-951d-315f56f8898a">
 
-<p>
-	<img width="724" alt="image" src="https://github.com/woocommerce/woocommerce/assets/5656702/bd943906-621b-404f-aa84-b951323e25d3"><br />
-	<em>The select input when focused</em>
-</p>
+_The select input before being focused_
+
+<img width="724" alt="The select input when focused" src="https://github.com/woocommerce/woocommerce/assets/5656702/bd943906-621b-404f-aa84-b951323e25d3">
+
+_The select input when focused_
 
 If it is undesirable to force the shopper to select a value, providing a value such as "None of the above" may help.
 
