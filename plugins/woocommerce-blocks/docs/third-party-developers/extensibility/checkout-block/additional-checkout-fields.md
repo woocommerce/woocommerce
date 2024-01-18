@@ -40,7 +40,7 @@ A field can only be shown in one location, it is not possible to render the same
 
 The contact information section currently renders at the top of the form. It contains the `email` field and any other additional fields.
 
-<img width="715" alt="image" src="https://github.com/woocommerce/woocommerce/assets/5656702/097c2596-c629-4eab-9604-577ee7a14cfe">
+<img width="715" alt="Showing the contact information section with two fields rendered, email and an additional checkout field (optional)" src="https://github.com/woocommerce/woocommerce/assets/5656702/097c2596-c629-4eab-9604-577ee7a14cfe">
 
 Fields rendered here will be saved to the _order_ (i.e. they will not be part of the customer's saved address or account information. New orders will not have any previously used values pre-filled).
 
@@ -48,7 +48,7 @@ Fields rendered here will be saved to the _order_ (i.e. they will not be part of
 
 The address section currently contains a form for the shipping address and the billing address. Additional checkout fields can be registered here and they will appear within that form.
 
-<img width="707" alt="image" src="https://github.com/woocommerce/woocommerce/assets/5656702/746d280f-3354-4d37-a78a-a2518eb0e5de">
+<img width="707" alt="The shipping address form showing the additional checkout field at the bottom" src="https://github.com/woocommerce/woocommerce/assets/5656702/746d280f-3354-4d37-a78a-a2518eb0e5de">
 
 Fields registered here will be saved to both the customer _and_ the order, so returning customers won't need to refill those values again.
 
@@ -64,11 +64,11 @@ This block is used to render fields that aren't part of the contact information 
 
 Fields rendered here will be saved to the order. They will not be part of the customer's saved address or account information. New orders will not have any previously used values pre-filled.
 
-<img width="724" alt="image" src="https://github.com/woocommerce/woocommerce/assets/5656702/295b3048-a22a-4225-96b0-6b0371a7cd5f">
+<img width="724" alt="The additional order information section containing an additional checkout field" src="https://github.com/woocommerce/woocommerce/assets/5656702/295b3048-a22a-4225-96b0-6b0371a7cd5f">
 
 By default, this block will render as the last step in the Checkout form, however it can be moved using the Gutenberg block controls in the editor.
 
-<img width="892" alt="Screenshot 2024-01-16 at 14 02 00" src="https://github.com/woocommerce/woocommerce/assets/5656702/05a3d7d9-b3af-4445-9318-443ae2c4d7d8">
+<img width="892" alt="The additional order information block in the post editor" src="https://github.com/woocommerce/woocommerce/assets/5656702/05a3d7d9-b3af-4445-9318-443ae2c4d7d8">
 
 ## Supported field types
 
@@ -217,7 +217,7 @@ add_action(
 
 This results in the following address form (the billing form will be the same):
 
-<img width="696" alt="image" src="https://github.com/woocommerce/woocommerce/assets/5656702/f6eb3c6f-9178-4978-8e74-e6b2ea353192">
+<img width="696" alt="The shipping address form with the Government ID field rendered at the bottom" src="https://github.com/woocommerce/woocommerce/assets/5656702/f6eb3c6f-9178-4978-8e74-e6b2ea353192">
 
 The rendered markup looks like this:
 
@@ -251,7 +251,7 @@ add_action(
 
 This results in the following contact information section:
 
-<img width="721" alt="image" src="https://github.com/woocommerce/woocommerce/assets/5656702/7444e41a-97cc-451d-b2c9-4eedfbe05724">
+<img width="721" alt="The contact information section with a newsletter subscription checkbox rendered inside it" src="https://github.com/woocommerce/woocommerce/assets/5656702/7444e41a-97cc-451d-b2c9-4eedfbe05724">
 
 Note that because an `optionalLabel` was not supplied, the string `(optional)` is appended to the label. To remove that an `optionalLabel` property should be supplied to override this.
 
