@@ -12,7 +12,7 @@ import './editor.scss';
 export default function Edit() {
 	return (
 		<p { ...useBlockProps() }>
-			{ __( 'Example Static – hello from the editor!', 'woocommerce' ) }
+			{ __( 'Example Static - hello from the editor!', 'woocommerce' ) }
 		</p>
 	);
 }
