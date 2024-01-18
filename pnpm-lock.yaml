@@ -41,6 +41,9 @@ importers:
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:packages/js/eslint-plugin
+      '@woocommerce/monorepo-utils':
+        specifier: workspace:*
+        version: link:tools/monorepo-utils
       '@wordpress/data':
         specifier: wp-6.0
         version: 6.6.1(react@17.0.2)
@@ -181,8 +184,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/admin-layout:
     dependencies:
@@ -254,8 +257,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/ai:
     dependencies:
@@ -396,8 +399,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/api:
     dependencies:
@@ -445,8 +448,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/api-core-tests:
     dependencies:
@@ -479,8 +482,8 @@ importers:
         specifier: ^8.55.0
         version: 8.55.0
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/block-templates:
     dependencies:
@@ -493,6 +496,9 @@ importers:
       '@wordpress/blocks':
         specifier: ^12.24.0
         version: 12.24.0(react@17.0.2)
+      '@wordpress/core-data':
+        specifier: wp-6.0
+        version: 4.4.5(react@17.0.2)
       '@wordpress/data':
         specifier: wp-6.0
         version: 6.6.1(react@17.0.2)
@@ -585,8 +591,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/components:
     dependencies:
@@ -913,20 +919,20 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/create-product-editor-block:
     devDependencies:
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/create-woo-extension:
     devDependencies:
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/csv-export:
     dependencies:
@@ -974,8 +980,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/currency:
     dependencies:
@@ -1032,8 +1038,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/customer-effort-score:
     dependencies:
@@ -1156,8 +1162,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/data:
     dependencies:
@@ -1295,8 +1301,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/date:
     dependencies:
@@ -1368,8 +1374,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/dependency-extraction-webpack-plugin:
     dependencies:
@@ -1408,8 +1414,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/e2e-core-tests:
     dependencies:
@@ -1475,8 +1481,8 @@ importers:
         specifier: 23.20.0
         version: 23.20.0(eslint@8.55.0)(typescript@5.3.3)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/e2e-environment:
     dependencies:
@@ -1581,8 +1587,8 @@ importers:
         specifier: ^7.5.4
         version: 7.5.4
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/e2e-utils:
     dependencies:
@@ -1657,8 +1663,8 @@ importers:
         specifier: 23.20.0
         version: 23.20.0(eslint@8.55.0)(typescript@5.3.3)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/eslint-plugin:
     dependencies:
@@ -1703,8 +1709,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/experimental:
     dependencies:
@@ -1842,8 +1848,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/explat:
     dependencies:
@@ -1912,8 +1918,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/expression-evaluation:
     dependencies:
@@ -1958,14 +1964,14 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/extend-cart-checkout-block:
     devDependencies:
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/integrate-plugin:
     dependencies:
@@ -2058,8 +2064,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/internal-e2e-builds:
     devDependencies:
@@ -2085,8 +2091,8 @@ importers:
         specifier: ^1.0.4
         version: 1.0.4
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/internal-js-tests:
     dependencies:
@@ -2140,8 +2146,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/internal-style-build:
     dependencies:
@@ -2201,8 +2207,8 @@ importers:
         specifier: ^5.89.0
         version: 5.89.0(webpack-cli@5.1.4)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/navigation:
     dependencies:
@@ -2283,8 +2289,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/notices:
     dependencies:
@@ -2350,8 +2356,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/number:
     dependencies:
@@ -2399,8 +2405,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/onboarding:
     dependencies:
@@ -2514,8 +2520,8 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/product-editor:
     dependencies:
@@ -2549,6 +2555,9 @@ importers:
       '@woocommerce/experimental':
         specifier: workspace:*
         version: link:../experimental
+      '@woocommerce/expression-evaluation':
+        specifier: workspace:*
+        version: link:../expression-evaluation
       '@woocommerce/navigation':
         specifier: workspace:^
         version: link:../navigation
@@ -2782,8 +2791,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   packages/js/tracks:
     dependencies:
@@ -2822,8 +2831,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   plugins/woo-ai:
     dependencies:
@@ -2967,8 +2976,8 @@ importers:
         specifier: ^3.17.4
         version: 3.17.4
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   plugins/woocommerce:
     dependencies:
@@ -3118,8 +3127,8 @@ importers:
         specifier: 3.3.12
         version: 3.3.12(webpack@5.70.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
       wp-textdomain:
         specifier: 1.0.1
         version: 1.0.1
@@ -3424,6 +3433,9 @@ importers:
       '@woocommerce/ai':
         specifier: workspace:0.1.0-beta.0
         version: link:../../packages/js/ai
+      '@woocommerce/block-templates':
+        specifier: workspace:*
+        version: link:../../packages/js/block-templates
       '@woocommerce/components':
         specifier: workspace:*
         version: link:../../packages/js/components
@@ -3557,14 +3569,14 @@ importers:
         specifier: ^8.55.0
         version: 8.55.0
       eslint-import-resolver-typescript:
-        specifier: ^2.7.1
-        version: 2.7.1(eslint-plugin-import@2.29.0)(eslint@8.55.0)
+        specifier: 3.6.1
+        version: 3.6.1(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-webpack@0.13.8)(eslint-plugin-import@2.29.0)(eslint@8.55.0)
       eslint-import-resolver-webpack:
         specifier: ^0.13.8
         version: 0.13.8(eslint-plugin-import@2.29.0)(webpack@5.89.0)
       eslint-plugin-import:
         specifier: ^2.29.0
-        version: 2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@2.7.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
+        version: 2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
       eslint-plugin-react:
         specifier: ^7.33.2
         version: 7.33.2(eslint@8.55.0)
@@ -3689,8 +3701,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   plugins/woocommerce-beta-tester:
     dependencies:
@@ -3798,8 +3810,8 @@ importers:
         specifier: ^3.17.4
         version: 3.17.4
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   plugins/woocommerce-blocks:
     dependencies:
@@ -3929,6 +3941,9 @@ importers:
       usehooks-ts:
         specifier: ^2.9.1
         version: 2.9.1(react-dom@17.0.2)(react@17.0.2)
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
       wordpress-components:
         specifier: npm:@wordpress/components@14.2.0
         version: /@wordpress/components@14.2.0(@types/react@17.0.71)(react-dom@17.0.2)(react-with-direction@1.4.0)(react@17.0.2)(reakit-utils@0.15.2)(redux@4.2.1)
@@ -4072,6 +4087,9 @@ importers:
       '@types/react-transition-group':
         specifier: ^4.4.10
         version: 4.4.10
+      '@types/uuid':
+        specifier: ^9.0.7
+        version: 9.0.7
       '@types/wordpress__block-editor':
         specifier: 6.0.6
         version: 6.0.6(react-dom@17.0.2)(react@17.0.2)
@@ -4415,8 +4433,8 @@ importers:
         specifier: 5.1.4
         version: 5.1.4(webpack-bundle-analyzer@4.7.0)(webpack@5.88.2)
       wireit:
-        specifier: ^0.14.1
-        version: 0.14.1
+        specifier: ^0.14.3
+        version: 0.14.3
       wp-types:
         specifier: 3.63.0
         version: 3.63.0
@@ -4491,8 +4509,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   plugins/woocommerce/client/legacy:
     dependencies:
@@ -4567,8 +4585,8 @@ importers:
         specifier: 13.8.0
         version: 13.8.0
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/code-analyzer:
     dependencies:
@@ -4631,8 +4649,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/compare-perf:
     dependencies:
@@ -4665,8 +4683,8 @@ importers:
         version: 3.2.0
     devDependencies:
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/monorepo-merge:
     dependencies:
@@ -4717,8 +4735,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/monorepo-utils:
     dependencies:
@@ -4776,6 +4794,9 @@ importers:
       luxon:
         specifier: ^3.4.4
         version: 3.4.4
+      minimatch:
+        specifier: ^9.0.3
+        version: 9.0.3
       octokit:
         specifier: ^2.1.0
         version: 2.1.0
@@ -4804,21 +4825,36 @@ importers:
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
+      copy-webpack-plugin:
+        specifier: ^9.1.0
+        version: 9.1.0(webpack@5.89.0)
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
       jest:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
+      replace:
+        specifier: ^1.2.2
+        version: 1.2.2
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.6)(jest@27.5.1)(typescript@5.3.3)
+      ts-loader:
+        specifier: ^9.5.1
+        version: 9.5.1(typescript@5.3.3)(webpack@5.89.0)
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
+      webpack:
+        specifier: ^5.89.0
+        version: 5.89.0(webpack-cli@3.3.12)
+      webpack-cli:
+        specifier: ^3.3.12
+        version: 3.3.12(webpack@5.89.0)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/package-release:
     dependencies:
@@ -4863,8 +4899,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/release-posts:
     dependencies:
@@ -4939,8 +4975,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
   tools/storybook:
     dependencies:
@@ -5024,8 +5060,8 @@ importers:
         specifier: ^5.89.0
         version: 5.89.0(webpack-cli@5.1.4)
       wireit:
-        specifier: 0.14.1
-        version: 0.14.1
+        specifier: 0.14.3
+        version: 0.14.3
 
 packages:
 
@@ -5753,6 +5789,7 @@ packages:
       '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
       '@babel/helper-split-export-declaration': 7.22.6
       semver: 6.3.1
+    dev: true
 
   /@babel/helper-create-class-features-plugin@7.23.6(@babel/core@7.23.6):
     resolution: {integrity: sha512-cBXU1vZni/CpGF29iTu4YRbOZt3Wat6zCoMDxRF1MayiEc4URxOj31tT65HUM0CRpMowA3HCJaAOVOUnMf96cw==}
@@ -7584,7 +7621,7 @@ packages:
       '@babel/core': ^7.12.0
     dependencies:
       '@babel/core': 7.12.9
-      '@babel/helper-create-class-features-plugin': 7.23.6(@babel/core@7.12.9)
+      '@babel/helper-create-class-features-plugin': 7.23.5(@babel/core@7.12.9)
       '@babel/helper-plugin-utils': 7.22.5
       '@babel/plugin-syntax-class-static-block': 7.14.5(@babel/core@7.12.9)
     dev: true
@@ -7596,7 +7633,7 @@ packages:
       '@babel/core': ^7.12.0
     dependencies:
       '@babel/core': 7.23.5
-      '@babel/helper-create-class-features-plugin': 7.23.6(@babel/core@7.23.5)
+      '@babel/helper-create-class-features-plugin': 7.23.5(@babel/core@7.23.5)
       '@babel/helper-plugin-utils': 7.22.5
       '@babel/plugin-syntax-class-static-block': 7.14.5(@babel/core@7.23.5)
 
@@ -8536,7 +8573,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.12.9
-      '@babel/helper-create-class-features-plugin': 7.23.6(@babel/core@7.12.9)
+      '@babel/helper-create-class-features-plugin': 7.23.5(@babel/core@7.12.9)
       '@babel/helper-plugin-utils': 7.22.5
 
   /@babel/plugin-transform-private-methods@7.23.3(@babel/core@7.23.5):
@@ -8546,7 +8583,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.23.5
-      '@babel/helper-create-class-features-plugin': 7.23.6(@babel/core@7.23.5)
+      '@babel/helper-create-class-features-plugin': 7.23.5(@babel/core@7.23.5)
       '@babel/helper-plugin-utils': 7.22.5
 
   /@babel/plugin-transform-private-methods@7.23.3(@babel/core@7.23.6):
@@ -8567,7 +8604,7 @@ packages:
     dependencies:
       '@babel/core': 7.12.9
       '@babel/helper-annotate-as-pure': 7.22.5
-      '@babel/helper-create-class-features-plugin': 7.23.6(@babel/core@7.12.9)
+      '@babel/helper-create-class-features-plugin': 7.23.5(@babel/core@7.12.9)
       '@babel/helper-plugin-utils': 7.22.5
       '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.12.9)
 
@@ -8579,7 +8616,7 @@ packages:
     dependencies:
       '@babel/core': 7.23.5
       '@babel/helper-annotate-as-pure': 7.22.5
-      '@babel/helper-create-class-features-plugin': 7.23.6(@babel/core@7.23.5)
+      '@babel/helper-create-class-features-plugin': 7.23.5(@babel/core@7.23.5)
       '@babel/helper-plugin-utils': 7.22.5
       '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.23.5)
 
@@ -9065,6 +9102,18 @@ packages:
       '@babel/core': 7.23.6
       '@babel/helper-plugin-utils': 7.22.5
 
+  /@babel/plugin-transform-typescript@7.23.5(@babel/core@7.23.5):
+    resolution: {integrity: sha512-2fMkXEJkrmwgu2Bsv1Saxgj30IXZdJ+84lQcKKI7sm719oXs0BBw2ZENKdJdR1PjWndgLCEBNXJOri0fk7RYQA==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/core': 7.23.5
+      '@babel/helper-annotate-as-pure': 7.22.5
+      '@babel/helper-create-class-features-plugin': 7.23.5(@babel/core@7.23.5)
+      '@babel/helper-plugin-utils': 7.22.5
+      '@babel/plugin-syntax-typescript': 7.23.3(@babel/core@7.23.5)
+
   /@babel/plugin-transform-typescript@7.23.5(@babel/core@7.23.6):
     resolution: {integrity: sha512-2fMkXEJkrmwgu2Bsv1Saxgj30IXZdJ+84lQcKKI7sm719oXs0BBw2ZENKdJdR1PjWndgLCEBNXJOri0fk7RYQA==}
     engines: {node: '>=6.9.0'}
@@ -9101,18 +9150,6 @@ packages:
       '@babel/helper-plugin-utils': 7.22.5
       '@babel/plugin-syntax-typescript': 7.23.3(@babel/core@7.23.2)
     dev: true
-
-  /@babel/plugin-transform-typescript@7.23.6(@babel/core@7.23.5):
-    resolution: {integrity: sha512-6cBG5mBvUu4VUD04OHKnYzbuHNP8huDsD3EDqqpIpsswTDoqHCjLoHb6+QgsV1WsT2nipRqCPgxD3LXnEO7XfA==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.23.5
-      '@babel/helper-annotate-as-pure': 7.22.5
-      '@babel/helper-create-class-features-plugin': 7.23.6(@babel/core@7.23.5)
-      '@babel/helper-plugin-utils': 7.22.5
-      '@babel/plugin-syntax-typescript': 7.23.3(@babel/core@7.23.5)
 
   /@babel/plugin-transform-typescript@7.23.6(@babel/core@7.23.6):
     resolution: {integrity: sha512-6cBG5mBvUu4VUD04OHKnYzbuHNP8huDsD3EDqqpIpsswTDoqHCjLoHb6+QgsV1WsT2nipRqCPgxD3LXnEO7XfA==}
@@ -9335,7 +9372,7 @@ packages:
     dependencies:
       '@babel/compat-data': 7.23.5
       '@babel/core': 7.12.9
-      '@babel/helper-compilation-targets': 7.23.6
+      '@babel/helper-compilation-targets': 7.22.15
       '@babel/helper-plugin-utils': 7.22.5
       '@babel/helper-validator-option': 7.23.5
       '@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression': 7.23.3(@babel/core@7.12.9)
@@ -9426,7 +9463,7 @@ packages:
     dependencies:
       '@babel/compat-data': 7.23.5
       '@babel/core': 7.23.5
-      '@babel/helper-compilation-targets': 7.23.6
+      '@babel/helper-compilation-targets': 7.22.15
       '@babel/helper-plugin-utils': 7.22.5
       '@babel/helper-validator-option': 7.23.5
       '@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression': 7.23.3(@babel/core@7.23.5)
@@ -9851,7 +9888,7 @@ packages:
       '@babel/helper-validator-option': 7.23.5
       '@babel/plugin-syntax-jsx': 7.23.3(@babel/core@7.23.5)
       '@babel/plugin-transform-modules-commonjs': 7.23.3(@babel/core@7.23.5)
-      '@babel/plugin-transform-typescript': 7.23.6(@babel/core@7.23.5)
+      '@babel/plugin-transform-typescript': 7.23.5(@babel/core@7.23.5)
 
   /@babel/preset-typescript@7.23.3(@babel/core@7.23.6):
     resolution: {integrity: sha512-17oIGVlqz6CchO9RFYn5U6ZpWRZIngayYCtrPRSgANSwC2V1Jb+iP74nVxzzXJte8b8BYxrL1yY96xfhTBrNNQ==}
@@ -17183,10 +17220,10 @@ packages:
   /@storybook/mdx1-csf@0.0.1(@babel/core@7.23.5):
     resolution: {integrity: sha512-4biZIWWzoWlCarMZmTpqcJNgo/RBesYZwGFbQeXiGYsswuvfWARZnW9RE9aUEMZ4XPn7B1N3EKkWcdcWe/K2tg==}
     dependencies:
-      '@babel/generator': 7.23.6
-      '@babel/parser': 7.23.6
+      '@babel/generator': 7.23.5
+      '@babel/parser': 7.23.5
       '@babel/preset-env': 7.23.5(@babel/core@7.23.5)
-      '@babel/types': 7.23.6
+      '@babel/types': 7.23.5
       '@mdx-js/mdx': 1.6.22
       '@types/lodash': 4.14.202
       js-string-escape: 1.0.1
@@ -22567,7 +22604,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.6
       '@wordpress/compose': 4.2.0(react@17.0.2)
-      '@wordpress/deprecated': 3.41.0
+      '@wordpress/deprecated': 3.6.1
       '@wordpress/element': 3.2.0
       '@wordpress/is-shallow-equal': 4.24.0
       '@wordpress/priority-queue': 2.47.0
@@ -23515,7 +23552,7 @@ packages:
       cosmiconfig: 7.1.0
       eslint: 8.55.0
       eslint-config-prettier: 8.10.0(eslint@8.55.0)
-      eslint-plugin-import: 2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@2.7.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
+      eslint-plugin-import: 2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
       eslint-plugin-jest: 27.6.0(@typescript-eslint/eslint-plugin@5.62.0)(eslint@8.55.0)(jest@27.5.1)(typescript@5.3.3)
       eslint-plugin-jsdoc: 39.9.1(eslint@8.55.0)
       eslint-plugin-jsx-a11y: 6.8.0(eslint@8.55.0)
@@ -23556,7 +23593,7 @@ packages:
       cosmiconfig: 7.1.0
       eslint: 8.55.0
       eslint-config-prettier: 8.10.0(eslint@8.55.0)
-      eslint-plugin-import: 2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@2.7.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
+      eslint-plugin-import: 2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
       eslint-plugin-jest: 27.6.0(@typescript-eslint/eslint-plugin@5.62.0)(eslint@8.55.0)(jest@27.5.1)(typescript@5.3.3)
       eslint-plugin-jsdoc: 39.9.1(eslint@8.55.0)
       eslint-plugin-jsx-a11y: 6.8.0(eslint@8.55.0)
@@ -31845,23 +31882,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /eslint-import-resolver-typescript@2.7.1(eslint-plugin-import@2.29.0)(eslint@8.55.0):
-    resolution: {integrity: sha512-00UbgGwV8bSgUv34igBDbTOtKhqoRMy9bFjNehT40bXg6585PNIct8HhXZ0SybqB9rWtXj9crcku8ndDn/gIqQ==}
-    engines: {node: '>=4'}
-    peerDependencies:
-      eslint: '*'
-      eslint-plugin-import: '*'
-    dependencies:
-      debug: 4.3.4(supports-color@9.4.0)
-      eslint: 8.55.0
-      eslint-plugin-import: 2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@2.7.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
-      glob: 7.2.3
-      is-glob: 4.0.3
-      resolve: 1.22.8
-      tsconfig-paths: 3.14.2
-    transitivePeerDependencies:
-      - supports-color
-
   /eslint-import-resolver-typescript@3.2.4(eslint-plugin-import@2.28.1)(eslint@8.55.0):
     resolution: {integrity: sha512-XmB2RZq534N3cZajuyMb8c2TJCkCHtU7gUHZg2iJaULIgfIclfQoih08C4/4RmdKZgymAkfHTo4sdmljC6/5qA==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
@@ -31881,6 +31901,28 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-webpack@0.13.8)(eslint-plugin-import@2.29.0)(eslint@8.55.0):
+    resolution: {integrity: sha512-xgdptdoi5W3niYeuQxKmzVDTATvLYqhpwmykwsh7f6HIOStGWEIL9iqZgQDF9u9OEzrRwR8no5q2VT+bjAujTg==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    peerDependencies:
+      eslint: '*'
+      eslint-plugin-import: '*'
+    dependencies:
+      debug: 4.3.4(supports-color@9.4.0)
+      enhanced-resolve: 5.15.0
+      eslint: 8.55.0
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
+      eslint-plugin-import: 2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
+      fast-glob: 3.3.2
+      get-tsconfig: 4.7.2
+      is-core-module: 2.13.1
+      is-glob: 4.0.3
+    transitivePeerDependencies:
+      - '@typescript-eslint/parser'
+      - eslint-import-resolver-node
+      - eslint-import-resolver-webpack
+      - supports-color
 
   /eslint-import-resolver-webpack@0.13.2(eslint-plugin-import@2.28.1)(webpack@5.88.2):
     resolution: {integrity: sha512-XodIPyg1OgE2h5BDErz3WJoK7lawxKTJNhgPNafRST6csC/MZC+L5P6kKqsZGRInpbgc02s/WZMrb4uGJzcuRg==}
@@ -31916,7 +31958,7 @@ packages:
       array.prototype.find: 2.2.2
       debug: 3.2.7
       enhanced-resolve: 0.9.1
-      eslint-plugin-import: 2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@2.7.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
+      eslint-plugin-import: 2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
       find-root: 1.1.0
       hasown: 2.0.0
       interpret: 1.4.0
@@ -31989,36 +32031,6 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-module-utils@2.8.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@2.7.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0):
-    resolution: {integrity: sha512-aWajIYfsqCKRDgUfjEXNN/JlrzauMuSEy5sbd7WXbtW3EH6A6MpwEh42c7qD+MqQo9QMJ6fWLAeIJynx0g6OAw==}
-    engines: {node: '>=4'}
-    peerDependencies:
-      '@typescript-eslint/parser': '*'
-      eslint: '*'
-      eslint-import-resolver-node: '*'
-      eslint-import-resolver-typescript: '*'
-      eslint-import-resolver-webpack: '*'
-    peerDependenciesMeta:
-      '@typescript-eslint/parser':
-        optional: true
-      eslint:
-        optional: true
-      eslint-import-resolver-node:
-        optional: true
-      eslint-import-resolver-typescript:
-        optional: true
-      eslint-import-resolver-webpack:
-        optional: true
-    dependencies:
-      '@typescript-eslint/parser': 5.62.0(eslint@8.55.0)(typescript@5.3.3)
-      debug: 3.2.7
-      eslint: 8.55.0
-      eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 2.7.1(eslint-plugin-import@2.29.0)(eslint@8.55.0)
-      eslint-import-resolver-webpack: 0.13.8(eslint-plugin-import@2.29.0)(webpack@5.89.0)
-    transitivePeerDependencies:
-      - supports-color
-
   /eslint-module-utils@2.8.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.2.4)(eslint-import-resolver-webpack@0.13.2)(eslint@8.55.0):
     resolution: {integrity: sha512-aWajIYfsqCKRDgUfjEXNN/JlrzauMuSEy5sbd7WXbtW3EH6A6MpwEh42c7qD+MqQo9QMJ6fWLAeIJynx0g6OAw==}
     engines: {node: '>=4'}
@@ -32049,6 +32061,36 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /eslint-module-utils@2.8.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0):
+    resolution: {integrity: sha512-aWajIYfsqCKRDgUfjEXNN/JlrzauMuSEy5sbd7WXbtW3EH6A6MpwEh42c7qD+MqQo9QMJ6fWLAeIJynx0g6OAw==}
+    engines: {node: '>=4'}
+    peerDependencies:
+      '@typescript-eslint/parser': '*'
+      eslint: '*'
+      eslint-import-resolver-node: '*'
+      eslint-import-resolver-typescript: '*'
+      eslint-import-resolver-webpack: '*'
+    peerDependenciesMeta:
+      '@typescript-eslint/parser':
+        optional: true
+      eslint:
+        optional: true
+      eslint-import-resolver-node:
+        optional: true
+      eslint-import-resolver-typescript:
+        optional: true
+      eslint-import-resolver-webpack:
+        optional: true
+    dependencies:
+      '@typescript-eslint/parser': 5.62.0(eslint@8.55.0)(typescript@5.3.3)
+      debug: 3.2.7
+      eslint: 8.55.0
+      eslint-import-resolver-node: 0.3.9
+      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-webpack@0.13.8)(eslint-plugin-import@2.29.0)(eslint@8.55.0)
+      eslint-import-resolver-webpack: 0.13.8(eslint-plugin-import@2.29.0)(webpack@5.89.0)
+    transitivePeerDependencies:
+      - supports-color
 
   /eslint-module-utils@2.8.0(@typescript-eslint/parser@6.13.2)(eslint-import-resolver-node@0.3.9)(eslint@8.55.0):
     resolution: {integrity: sha512-aWajIYfsqCKRDgUfjEXNN/JlrzauMuSEy5sbd7WXbtW3EH6A6MpwEh42c7qD+MqQo9QMJ6fWLAeIJynx0g6OAw==}
@@ -32149,40 +32191,6 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-plugin-import@2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@2.7.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0):
-    resolution: {integrity: sha512-QPOO5NO6Odv5lpoTkddtutccQjysJuFxoPS7fAHO+9m9udNHvTCPSAMW9zGAYj8lAIdr40I8yPCdUYrncXtrwg==}
-    engines: {node: '>=4'}
-    peerDependencies:
-      '@typescript-eslint/parser': '*'
-      eslint: ^2 || ^3 || ^4 || ^5 || ^6 || ^7.2.0 || ^8
-    peerDependenciesMeta:
-      '@typescript-eslint/parser':
-        optional: true
-    dependencies:
-      '@typescript-eslint/parser': 5.62.0(eslint@8.55.0)(typescript@5.3.3)
-      array-includes: 3.1.7
-      array.prototype.findlastindex: 1.2.3
-      array.prototype.flat: 1.3.2
-      array.prototype.flatmap: 1.3.2
-      debug: 3.2.7
-      doctrine: 2.1.0
-      eslint: 8.55.0
-      eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@2.7.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
-      hasown: 2.0.0
-      is-core-module: 2.13.1
-      is-glob: 4.0.3
-      minimatch: 3.1.2
-      object.fromentries: 2.0.7
-      object.groupby: 1.0.1
-      object.values: 1.1.7
-      semver: 6.3.1
-      tsconfig-paths: 3.14.2
-    transitivePeerDependencies:
-      - eslint-import-resolver-typescript
-      - eslint-import-resolver-webpack
-      - supports-color
-
   /eslint-plugin-import@2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@3.2.4)(eslint-import-resolver-webpack@0.13.2)(eslint@8.55.0):
     resolution: {integrity: sha512-QPOO5NO6Odv5lpoTkddtutccQjysJuFxoPS7fAHO+9m9udNHvTCPSAMW9zGAYj8lAIdr40I8yPCdUYrncXtrwg==}
     engines: {node: '>=4'}
@@ -32217,6 +32225,40 @@ packages:
       - eslint-import-resolver-webpack
       - supports-color
     dev: true
+
+  /eslint-plugin-import@2.29.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0):
+    resolution: {integrity: sha512-QPOO5NO6Odv5lpoTkddtutccQjysJuFxoPS7fAHO+9m9udNHvTCPSAMW9zGAYj8lAIdr40I8yPCdUYrncXtrwg==}
+    engines: {node: '>=4'}
+    peerDependencies:
+      '@typescript-eslint/parser': '*'
+      eslint: ^2 || ^3 || ^4 || ^5 || ^6 || ^7.2.0 || ^8
+    peerDependenciesMeta:
+      '@typescript-eslint/parser':
+        optional: true
+    dependencies:
+      '@typescript-eslint/parser': 5.62.0(eslint@8.55.0)(typescript@5.3.3)
+      array-includes: 3.1.7
+      array.prototype.findlastindex: 1.2.3
+      array.prototype.flat: 1.3.2
+      array.prototype.flatmap: 1.3.2
+      debug: 3.2.7
+      doctrine: 2.1.0
+      eslint: 8.55.0
+      eslint-import-resolver-node: 0.3.9
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.8)(eslint@8.55.0)
+      hasown: 2.0.0
+      is-core-module: 2.13.1
+      is-glob: 4.0.3
+      minimatch: 3.1.2
+      object.fromentries: 2.0.7
+      object.groupby: 1.0.1
+      object.values: 1.1.7
+      semver: 6.3.1
+      tsconfig-paths: 3.14.2
+    transitivePeerDependencies:
+      - eslint-import-resolver-typescript
+      - eslint-import-resolver-webpack
+      - supports-color
 
   /eslint-plugin-import@2.29.0(@typescript-eslint/parser@6.13.2)(eslint@8.55.0):
     resolution: {integrity: sha512-QPOO5NO6Odv5lpoTkddtutccQjysJuFxoPS7fAHO+9m9udNHvTCPSAMW9zGAYj8lAIdr40I8yPCdUYrncXtrwg==}
@@ -34626,6 +34668,11 @@ packages:
     dependencies:
       call-bind: 1.0.5
       get-intrinsic: 1.2.2
+
+  /get-tsconfig@4.7.2:
+    resolution: {integrity: sha512-wuMsz4leaj5hbGgg4IvDU0bqJagpftG5l5cXIAvo8uZrqn0NJqwtfupTN00VnkQJPcIRrxYrm1Ue24btpCha2A==}
+    dependencies:
+      resolve-pkg-maps: 1.0.0
 
   /get-uri@6.0.2:
     resolution: {integrity: sha512-5KLucCJobh8vBY1K07EFV4+cPZH3mrV9YeAruUseCQKHB58SGjjT2l9/eA9LD082IiuMjSlFJEcdJ27TXvbZNw==}
@@ -46890,6 +46937,7 @@ packages:
       react-is: 16.13.1
       scheduler: 0.19.1
     dev: true
+    bundledDependencies: false
 
   /react-test-renderer@17.0.2(react@17.0.2):
     resolution: {integrity: sha512-yaQ9cB89c17PUb0x6UfWRs7kQCorVdHlutU1boVPEsB8IDZH6n9tHxMacc3y0JoXOJUsZb/t/Mb8FUWMKaM7iQ==}
@@ -47806,6 +47854,9 @@ packages:
   /resolve-from@5.0.0:
     resolution: {integrity: sha512-qYg9KP24dD5qka9J47d0aVky0N+b4fTU89LN9iDnjB5waksiC49rvMB0PrUJQGoTmH50XPiqOvAjDfaijGxYZw==}
     engines: {node: '>=8'}
+
+  /resolve-pkg-maps@1.0.0:
+    resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
 
   /resolve-url@0.2.1:
     resolution: {integrity: sha512-ZuF55hVUQaaczgOIwqWzkEcEidmlD/xl44x1UZnhOXcYuFN2S6+rcxpG+C1N3So0wvNI3DmJICUFfu2SxhBmvg==}
@@ -53589,8 +53640,8 @@ packages:
     hasBin: true
     dev: true
 
-  /wireit@0.14.1:
-    resolution: {integrity: sha512-q5sixPM/vKQEpyaub6J9QoHAFAF9g4zBdnjoYelH9/RLAekcUf3x1dmFLACGZ6nYjqehCsTlXC1irmzU7znPhA==}
+  /wireit@0.14.3:
+    resolution: {integrity: sha512-vNSzIBJ1YLMM6dzGUiUMw11KmHOFiXIaOHcQPWVT4j5oCaXQSIYS5AExEzRkAAlm5F0hRPTwDUoazUHu5ZLCNQ==}
     engines: {node: '>=14.14.0'}
     hasBin: true
     dependencies:

@@ -53,25 +53,19 @@ const blocks = {
 	'product-collection-no-results': {
 		customDir: 'product-collection/inner-blocks/no-results',
 	},
-	'product-gallery': {
-		isExperimental: true,
-	},
+	'product-gallery': {},
 	'product-gallery-large-image': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-large-image',
-		isExperimental: true,
 	},
 	'product-gallery-large-image-next-previous': {
 		customDir:
 			'product-gallery/inner-blocks/product-gallery-large-image-next-previous',
-		isExperimental: true,
 	},
 	'product-gallery-pager': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-pager',
-		isExperimental: true,
 	},
 	'product-gallery-thumbnails': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-thumbnails',
-		isExperimental: true,
 	},
 	'product-new': {},
 	'product-on-sale': {},
@@ -94,27 +88,27 @@ const blocks = {
 	},
 	'single-product': {},
 	'stock-filter': {},
-	'collection-filters': {
+	'product-filters': {
 		isExperimental: true,
 	},
-	'collection-stock-filter': {
+	'product-filters-stock-status': {
 		isExperimental: true,
-		customDir: 'collection-filters/inner-blocks/stock-filter',
+		customDir: 'product-filters/inner-blocks/stock-filter',
 	},
-	'collection-price-filter': {
-		customDir: 'collection-filters/inner-blocks/price-filter',
-		isExperimental: true,
-	},
-	'collection-attribute-filter': {
-		customDir: 'collection-filters/inner-blocks/attribute-filter',
+	'product-filters-price': {
+		customDir: 'product-filters/inner-blocks/price-filter',
 		isExperimental: true,
 	},
-	'collection-rating-filter': {
-		customDir: 'collection-filters/inner-blocks/rating-filter',
+	'product-filters-attribute': {
+		customDir: 'product-filters/inner-blocks/attribute-filter',
 		isExperimental: true,
 	},
-	'collection-active-filters': {
-		customDir: 'collection-filters/inner-blocks/active-filters',
+	'product-filters-rating': {
+		customDir: 'product-filters/inner-blocks/rating-filter',
+		isExperimental: true,
+	},
+	'product-filters-active': {
+		customDir: 'product-filters/inner-blocks/active-filters',
 		isExperimental: true,
 	},
 	'order-confirmation-summary': {
@@ -149,6 +143,12 @@ const blocks = {
 	},
 	'order-confirmation-additional-information': {
 		customDir: 'order-confirmation/additional-information',
+	},
+	'order-confirmation-additional-fields-wrapper': {
+		customDir: 'order-confirmation/additional-fields-wrapper',
+	},
+	'order-confirmation-additional-fields': {
+		customDir: 'order-confirmation/additional-fields',
 	},
 };
 

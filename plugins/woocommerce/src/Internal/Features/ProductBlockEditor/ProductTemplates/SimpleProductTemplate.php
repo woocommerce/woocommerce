@@ -354,7 +354,6 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 							'value'   => 'url',
 							'message' => __( 'Link to the external product is an invalid URL.', 'woocommerce' ),
 						),
-						'required'    => __( 'Link to the external product is required.', 'woocommerce' ),
 					),
 				)
 			);
@@ -1105,16 +1104,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 * Adds the linked products group blocks to the template.
 	 */
 	private function add_linked_products_group_blocks() {
-		if ( ! Features::is_enabled( 'product-linked' ) ) {
-			return;
-		}
-
 		$linked_products_group = $this->get_group_by_id( $this::GROUP_IDS['LINKED_PRODUCTS'] );
 		if ( ! isset( $linked_products_group ) ) {
 			return;
 		}
 
-		$linked_product_upsells_section = $linked_products_group->add_section(
+		$linked_products_group->add_section(
 			array(
 				'id'         => 'product-linked-upsells-section',
 				'order'      => 10,
@@ -1128,20 +1123,26 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					),
 				),
 			)
-		);
-
-		$linked_product_upsells_section->add_block(
+		)->add_block(
 			array(
 				'id'         => 'product-linked-upsells',
-				'blockName'  => 'woocommerce/product-upsells',
+				'blockName'  => 'woocommerce/product-linked-list-field',
 				'order'      => 10,
 				'attributes' => array(
-					'property' => 'upsell_ids',
+					'property'   => 'upsell_ids',
+					'emptyState' => array(
+						'image'         => 'ShoppingBags',
+						'tip'           => __(
+							'Tip: Upsells are products that are extra profitable or better quality or more expensive. Experiment with combinations to boost sales.',
+							'woocommerce'
+						),
+						'isDismissible' => true,
+					),
 				),
 			)
 		);
 
-		$linked_product_cross_sells_section = $linked_products_group->add_section(
+		$linked_products_group->add_section(
 			array(
 				'id'             => 'product-linked-cross-sells-section',
 				'order'          => 20,
@@ -1160,15 +1161,21 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					),
 				),
 			)
-		);
-
-		$linked_product_cross_sells_section->add_block(
+		)->add_block(
 			array(
 				'id'         => 'product-linked-cross-sells',
-				'blockName'  => 'woocommerce/product-cross-sells',
+				'blockName'  => 'woocommerce/product-linked-list-field',
 				'order'      => 10,
 				'attributes' => array(
-					'property' => 'upsell_ids',
+					'property'   => 'cross_sell_ids',
+					'emptyState' => array(
+						'image'         => 'CashRegister',
+						'tip'           => __(
+							'Tip: By suggesting complementary products in the cart using cross-sells, you can significantly increase the average order value.',
+							'woocommerce'
+						),
+						'isDismissible' => true,
+					),
 				),
 			)
 		);

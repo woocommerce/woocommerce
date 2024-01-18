@@ -5,6 +5,7 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 const templatePath = 'woocommerce/woocommerce//checkout-header';
 const templateType = 'wp_template_part';
+const userText = 'Hello World in the header';
 
 test.afterAll( async ( { requestUtils } ) => {
 	await requestUtils.deleteAllTemplates( 'wp_template' );
@@ -38,7 +39,7 @@ test.describe( 'Test the checkout header template part', async () => {
 		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.editor.insertBlock( {
 			name: 'core/paragraph',
-			attributes: { content: 'Hello World in the header' },
+			attributes: { content: userText },
 		} );
 		await editorUtils.saveTemplate();
 		await frontendUtils.goToShop();
@@ -46,7 +47,7 @@ test.describe( 'Test the checkout header template part', async () => {
 		await frontendUtils.addToCart( 'Beanie' );
 		await frontendUtils.goToCheckout();
 		await expect(
-			frontendUtils.page.getByText( 'Hello World in the header' ).first()
+			frontendUtils.page.getByText( userText ).first()
 		).toBeVisible();
 	} );
 } );

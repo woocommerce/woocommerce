@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update Mini Cart e2e tests to check against hovering the totals.

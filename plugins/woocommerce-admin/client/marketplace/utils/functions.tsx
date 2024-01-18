@@ -10,7 +10,7 @@ import { Icon } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { LOCALE } from '../../utils/admin-settings';
+import { LOCALE, getAdminSetting } from '../../utils/admin-settings';
 import { CategoryAPIItem } from '../components/category-selector/types';
 import {
 	MARKETPLACE_CART_PATH,
@@ -135,8 +135,8 @@ async function fetchSearchResults(
 							url: product.link,
 							// Due to backwards compatibility, raw_price is from search API, price is from featured API
 							price: product.raw_price ?? product.price,
-							averageRating: product.rating ?? 0,
-							reviewsCount: product.reviews_count ?? 0,
+							averageRating: product.rating ?? null,
+							reviewsCount: product.reviews_count ?? null,
 						};
 					}
 				);
@@ -424,6 +424,18 @@ const subscribeUrl = ( subscription: Subscription ): string => {
 	] );
 };
 
+const connectUrl = (): string => {
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+
+	if ( ! wccomSettings.connectURL ) {
+		return '';
+	}
+
+	return appendURLParams( wccomSettings.connectURL, [
+		[ 'redirect_admin_url', encodeURIComponent( window.location.href ) ],
+	] );
+};
+
 export {
 	ProductGroup,
 	appendURLParams,
@@ -441,4 +453,5 @@ export {
 	renewUrl,
 	subscribeUrl,
 	subscriptionToProduct,
+	connectUrl,
 };

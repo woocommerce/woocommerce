@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+[CYS - Core] Update the homepage with default patterns when the assembler is loaded.

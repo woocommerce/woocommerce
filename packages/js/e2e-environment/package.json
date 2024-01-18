@@ -84,9 +84,17 @@
 		"@wordpress/browserslist-config": "wp-6.0",
 		"ndb": "^1.1.5",
 		"semver": "^7.5.4",
-		"wireit": "0.14.1"
+		"wireit": "0.14.3"
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,ts,tsx}"
+			}
+		}
 	}
 }
