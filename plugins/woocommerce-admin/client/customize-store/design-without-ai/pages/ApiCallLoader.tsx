@@ -8,8 +8,8 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import analyzingYourResponses from '../../assets/images/loader-analyzing-your-responses.svg';
-import assemblingAiOptimizedStore from '../../assets/images/loader-assembling-ai-optimized-store.svg';
+import loaderAssemblingStore from '../../assets/images/loader-assembling-ai-optimized-store.svg';
+import loaderTurningLights from '../../assets/images/loader-turning-lights.svg';
 import openingTheDoors from '../../assets/images/loader-opening-the-doors.svg';
 import { createAugmentedSteps } from '~/customize-store/utils';
 
@@ -18,8 +18,8 @@ const loaderSteps = [
 		title: __( 'Setting up the foundations', 'woocommerce' ),
 		image: (
 			<img
-				src={ analyzingYourResponses }
-				alt={ __( 'Analyzing your responses', 'woocommerce' ) }
+				src={ loaderAssemblingStore }
+				alt={ __( 'Setting up the foundations', 'woocommerce' ) }
 			/>
 		),
 		progress: 25,
@@ -28,8 +28,8 @@ const loaderSteps = [
 		title: __( 'Turning on the lights', 'woocommerce' ),
 		image: (
 			<img
-				src={ analyzingYourResponses }
-				alt={ __( 'Analyzing your responses', 'woocommerce' ) }
+				src={ loaderTurningLights }
+				alt={ __( 'Turning on the lights', 'woocommerce' ) }
 			/>
 		),
 		progress: 50,
@@ -59,7 +59,8 @@ export const ApiCallLoader = () => {
 		};
 
 		// We preload the these images to avoid flickering. We only need to preload them because the others are small enough to be inlined in base64.
-		preload( assemblingAiOptimizedStore );
+		preload( loaderAssemblingStore );
+		preload( loaderTurningLights );
 		preload( openingTheDoors );
 	}, [] );
 
