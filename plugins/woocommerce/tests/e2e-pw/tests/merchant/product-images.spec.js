@@ -113,7 +113,7 @@ baseTest.describe('Products > Product Images', () => {
 		});
 	});
 
-	test.only('can delete the product image', async ({page, product}) => {
+	test('can delete the product image', async ({page, product}) => {
 		await test.step('Remove product image', async () => {
 			await page.getByRole('link', {name: 'Remove product image'}).click();
 			await expect(page.getByRole('link', {name: 'Set product image'})).toBeVisible();
@@ -131,11 +131,11 @@ baseTest.describe('Products > Product Images', () => {
 		});
 	});
 
-	test.skip('can create a product gallery', async ({page, product}) => {
+	test.only('can create a product gallery', async ({page, product}) => {
 		await test.step('Add product gallery images', async () => {
 		});
 
-		await test.step('Verify product image was set', async () => {
+		await test.step('Verify product gallery was set', async () => {
 			// Verify image in admin area
 
 			// Verify images in store frontend
