@@ -1,4 +1,26 @@
-# Additional Checkout Fields
+# Additional Checkout Fields  <!-- omit in toc -->
+
+## Table of Contents  <!-- omit in toc -->
+
+- [Available field locations](#available-field-locations)
+	- [Contact information](#contact-information)
+	- [Address](#address)
+	- [Additional information](#additional-information)
+- [Supported field types](#supported-field-types)
+- [Using the API](#using-the-api)
+	- [Options](#options)
+		- [General options](#general-options)
+		- [Options for `text` fields](#options-for-text-fields)
+		- [Options for `select` fields](#options-for-select-fields)
+		- [Options for `checkbox` fields](#options-for-checkbox-fields)
+	- [Attributes](#attributes)
+- [Usage examples](#usage-examples)
+	- [Rendering a text field](#rendering-a-text-field)
+	- [Rendering a checkbox field](#rendering-a-checkbox-field)
+	- [Rendering a select field.](#rendering-a-select-field)
+- [Validation](#validation)
+	- [Example](#example)
+- [A full example](#a-full-example)
 
 A common use-case for developers and merchants is to add a new field to the Checkout form to collect additional data about a customer or their order.
 
@@ -104,8 +126,8 @@ The `optionalLabel` option will never be shown as select fields are _always_ req
 		<td>
 
 An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way.</td>
-		<td>Yes</td>
-		<td>
+<td>Yes</td>
+<td>
 
 	[
 		[
@@ -275,105 +297,92 @@ This results in the additional information section being rendered like so:
 
 If it is undesirable to force the shopper to select a value, providing a value such as "None of the above" may help.
 
-## Store API
+## Validation
 
-Registered fields appear in the Store API schema. Making an OPTIONS request to the store's checkout endpoint will provide information on the expected checkout payload. Included in this will be any additional checkout fields. Fields added to the `address` location will be part of the `billing_address` and `shipping_address` properties, while fields added to the `additional` or `contact` locations will be within an `additional_fields` property. This property is at the top level (the same level as `billing_address` and `shipping_address`).
+It is possible to add custom validation to any registered additional checkout field as long as you know its namespace and ID.
 
-### POST example
+To do so, use the `woocommerce_blocks_validate_additional_field_{namespace}` filter.
 
-Using the example fields registered above (Government ID, Do you want to subscribe to our newsletter?, and How did you hear about us?) a POST request to the checkout endpoint would look like this:
+For example to apply validation to the example text field above use the `woocommerce_blocks_validate_additional_field_namespace/gov-id` filter.
 
-```json
-{
-	"shipping_address": {
-		"first_name": "John",
-		"last_name": "Doe",
-		"company": "",
-		"address_1": "30 Test Road",
-		"address_2": "",
-		"city": "Testville",
-		"state": "CA",
-		"postcode": "90210",
-		"country": "US",
-		"phone": "",
-		"namespace/gov-id": "12345"
-	},
-	"billing_address": {
-		"first_name": "Jon",
-		"last_name": "Doe",
-		"company": "",
-		"address_1": "30 Test road",
-		"address_2": "",
-		"city": "Testville",
-		"state": "CA",
-		"postcode": "90210",
-		"country": "US",
-		"email": "test@mail.com",
-		"phone": "",
-		"namespace/gov-id": "12345"
-	},
-	"additional_fields": {
-		"namespace/how-did-you-hear-about-us": "other"
-	},
-	"customer_note": "",
-	"create_account": false,
-	"payment_method": "bacs",
-	"payment_data": [
-	{
-		"key": "wc-bacs-new-payment-method",
-		"value": false
+This filter receives the following arguments, in order.
+
+
+| Argument        | Type       | Description                                                                                                                                                                                                                                                     |
+|-----------------|------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `$error`        | `WP_Error` | A `WP_Error` object. Initially it is empty. This filter should add errors to it using the [`add`](https://developer.wordpress.org/reference/classes/wp_error/add/) method. The returned value of this filter must be the _same_ WP_Error that was passed to it. |
+| `$field_value`  | `mixed`      | The current value of the field, i.e. what the user entered in the checkout form.                                                                                                                                                                                |
+| `$field_schema` | `array`      | The schema of the field. This is what is registered with Store API. This is useful to know what values are valid for select fields.                                                                                                                             |
+| `$key`          | `string`     | The field's key (composed of namespace/id)                                                                                                                                                                                                                      |
+
+### Example
+
+The below example will show how it is possible to apply custom validation to the `namespace/gov-id` text field from above.
+
+The custom validation rules in this example could be done with a pattern but it might also be a good idea to check this again during submission since front-end validation can be bypassed.
+
+As a reminder, the `pattern` used above is `[A-Z0-9]{5}` (any 5-character string containing capital letters and numbers).
+
+```php
+add_filter('woocommerce_blocks_validate_additional_field_namespace/gov-id', function ( \WP_Error $error, $value, $schema, $key ) {
+	$match = preg_match( '/[A-Z0-9]{5}/', $value );
+	if ( 0 === $match || false === $match ) {
+		$error->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
 	}
-	]
-}
+	return $error;
+}, 10, 4);
 ```
 
-### Errors from Store API
+It is important to note that the filter must always return the _same_ `WP_Error` object it receives. Returning a different `WP_Error` or any other type will cause validation for this field to be skipped _completely_, even skipping other filters for this field.
 
-When POSTing a checkout request to the Store API, it may return an error status if there is an issue with the submitted additional fields data.
+If no validation errors are encountered, the original `WP_Error` (which starts off with no errors inside it) should be returned.
 
-The error returned will contain the name of the offending field as well as an explanation of the error.
+## A full example
 
-For example, using the example payload from above, if the `namespace/how-did-you-hear-about-us` value is changed to an invalid value (i.e. it is not in the list of options supplied during registration) the response would be:
+In this full example we will register the Government ID text field and verify that it conforms to a single pattern.
 
-```json
-{
-	"code": "rest_invalid_param",
-	"message": "Invalid parameter(s): additional_fields",
-	"data": {
-		"status": 400,
-		"params": {
-			"additional_fields": "namespace\/how-did-you-hear-about-us is not one of google, facebook, friend, and other."
-		},
-		"details": {
-			"additional_fields": {
-				"code": "rest_not_in_enum",
-				"message": "namespace\/how-did-you-hear-about-us is not one of google, facebook, friend, and other.",
-				"data": {
-					"location": "additional",
-					"key": "namespace\/how-did-you-hear-about-us"
+This example is just a full version of the examples shared above.
+
+```php
+add_action(
+	'woocommerce_loaded',
+	function() {
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'            => 'namespace/gov-id',
+				'label'         => 'Government ID',
+				'optionalLabel' => 'Government ID (optional)',
+				'location'      => 'address',
+				'required'      => true,
+				'attributes'    => array(
+					'autocomplete' => 'government-id',
+					'pattern'      => '[A-Z0-9]{5}', // A 5-character string of capital letters and numbers.
+					'title'        => 'Your 5-digit Government ID',
+				),
+			),
+		);
+
+		add_filter(
+			'woocommerce_blocks_validate_additional_field_namespace/gov-id',
+			function ( \WP_Error $error, $value, $schema, $key ) {
+				$match = preg_match( '/[A-Z0-9]{5}/', $value );
+				if ( 0 === $match || false === $match ) {
+					$error->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
 				}
+				return $error;
 			}
-		}
-	}
-}
+		);
+	},
+	10,
+	4
+);
 ```
+<!-- FEEDBACK -->
 
-The error response contains a `details` section within which is an `additional` fields section. This lists each additional checkout field that encountered an error during processing. Along with each error is a `data` array containing a location which indicates where the field was rendered. This is useful for rendering an error as close to the field as possible.
+---
 
-Errors on fields registered with the `address` location will be reported as part of that address, for example:
+[We're hiring!](https://woo.com/careers/) Come work with us!
 
-```json
-{
-	"code": "woocommerce_rest_invalid_address",
-	"message": "There was a problem with the provided billing address: Government ID is required",
-	"data": {
-		"errors": {
-			"billing": [
-				"Government ID is required"
-			]
-		},
-		"status": 400
-	}
-}
-```
-Location is not specified here because the address type is specified in the key of the `errors` object.
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&projects=&template=suggestion-for-documentation-improvement-correction.md&title=%5BDOC-BUG%5D%20./docs/third-party-developers/extensibility/checkout-block/available-filters.md)
+
+<!-- /FEEDBACK -->
