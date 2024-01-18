@@ -14,7 +14,7 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { handlePrompt } from '../../../utils/handle-prompt';
 import { VariationActionsMenuItemProps } from '../types';
 import { SetListPriceMenuItem } from '../set-list-price-menu-item';
-import { VariationQuickUpdateMenuItem } from '../variation-actions-menus/variation-quick-update-menu-item';
+import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
 
 function isPercentage( value: string ) {
 	return value.endsWith( '%' );

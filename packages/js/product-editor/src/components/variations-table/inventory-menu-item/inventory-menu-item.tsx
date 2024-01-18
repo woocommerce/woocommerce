@@ -15,7 +15,7 @@ import { PRODUCT_STOCK_STATUS_KEYS } from '../../../utils/get-product-stock-stat
 import { UpdateStockMenuItem } from '../update-stock-menu-item';
 import { VariationActionsMenuItemProps } from '../types';
 import { handlePrompt } from '../../../utils/handle-prompt';
-import { VariationQuickUpdateMenuItem } from '../variation-actions-menus/variation-quick-update-menu-item';
+import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
 
 export function InventoryMenuItem( {
 	selection,
