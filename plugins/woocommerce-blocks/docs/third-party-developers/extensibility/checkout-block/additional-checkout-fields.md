@@ -318,12 +318,12 @@ For example to apply validation to the example text field above use the `woocomm
 This filter receives the following arguments, in order.
 
 
-| Argument        | Type       | Description                                                                                                                                                                                                                                                     |
-|-----------------|------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `$error`        | `WP_Error` | A `WP_Error` object. Initially it is empty. This filter should add errors to it using the [`add`](https://developer.wordpress.org/reference/classes/wp_error/add/) method. The returned value of this filter must be the _same_ WP_Error that was passed to it. |
-| `$field_value`  | `mixed`      | The current value of the field, i.e. what the user entered in the checkout form.                                                                                                                                                                                |
-| `$field_schema` | `array`      | The schema of the field. This is what is registered with Store API. This is useful to know what values are valid for select fields.                                                                                                                             |
-| `$key`          | `string`     | The field's key (composed of namespace/id)                                                                                                                                                                                                                      |
+| Argument        | Type              | Description                                                                                                                                                                                                                                                     |
+|-----------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `$error`        | `WP_Error`        | A `WP_Error` object. Initially it is empty. This filter should add errors to it using the [`add`](https://developer.wordpress.org/reference/classes/wp_error/add/) method. The returned value of this filter must be the _same_ WP_Error that was passed to it. |
+| `$field_value`  | `mixed`           | The current value of the field, i.e. what the user entered in the checkout form.                                                                                                                                                                                |
+| `$field_schema` | `array`           | The schema of the field. This is what is registered with Store API. This is useful to know what values are valid for select fields.                                                                                                                             |
+| `$request`      | `WP_Rest_Request` | The current request made to the checkout endpoint.                                                                                                                                                                                                              |
 
 ### Example
 
