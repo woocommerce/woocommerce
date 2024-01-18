@@ -48,7 +48,7 @@ describe( 'SingleUpdateMenu', () => {
 		( recordEvent as jest.Mock ).mockClear();
 	} );
 
-	it( 'should render a top level fill in the multiple variation actions', () => {
+	it( 'should render a top level fill in the single variation actions', () => {
 		const { getByRole, getByText } = render(
 			<SlotFillProvider>
 				<VariationQuickUpdateMenuItem
@@ -78,7 +78,7 @@ describe( 'SingleUpdateMenu', () => {
 		);
 	} );
 
-	it( 'should render a fill in the secondary area in the multiple variation actions', () => {
+	it( 'should render a fill in the secondary area in the single variation actions', () => {
 		const { getByRole, getByText } = render(
 			<SlotFillProvider>
 				<VariationQuickUpdateMenuItem
@@ -108,7 +108,7 @@ describe( 'SingleUpdateMenu', () => {
 		);
 	} );
 
-	it( 'should render a fill in the tertiary area in the multiple variation actions', () => {
+	it( 'should render a fill in the tertiary area in the single variation actions', () => {
 		const { getByRole, getByText } = render(
 			<SlotFillProvider>
 				<VariationQuickUpdateMenuItem
@@ -138,7 +138,7 @@ describe( 'SingleUpdateMenu', () => {
 		);
 	} );
 
-	it( 'should render a fill in the pricing group in the multiple variation actions', () => {
+	it( 'should render a fill in the pricing group in the single variation actions', () => {
 		const { getByRole, getByText } = render(
 			<SlotFillProvider>
 				<VariationQuickUpdateMenuItem
