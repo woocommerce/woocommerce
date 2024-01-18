@@ -787,7 +787,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		if ( ! empty( $metadata_fields ) ) {
 			foreach ( $metadata_fields as $key => $value ) {
-				$product->update_meta_data( str_replace( '__meta_data_', '', $key ), $value );
+				if ( is_array( $value ) && isset( $value['key'] ) && isset( $value['value'] ) ) {
+					$product->update_meta_data( str_replace( '__meta_data_', '', $value['key'] ), $value['value'], isset( $value['id'] ) ? $value['id'] : '' );
+				} else {
+					$product->update_meta_data( str_replace( '__meta_data_', '', $key ), $value );
+				}
 			}
 		}
 
