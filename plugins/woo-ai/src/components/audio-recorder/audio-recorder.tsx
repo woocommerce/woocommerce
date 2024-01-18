@@ -8,44 +8,41 @@ import { Button, Spinner } from '@wordpress/components';
  * Internal dependencies
  */
 import playerStop from './player-stop';
-import useMediaRecorder from '../../hooks/useMediaRecorder';
 import './index.scss';
 
 type AudioRecorderProps = {
-	onRecordingComplete: ( audioBlob: Blob ) => void;
+	isRecording: boolean;
+	onStartRecording: () => void;
+	onStopRecording: () => void;
 	isTranscribing: boolean;
-	handleError: ( message: string ) => void;
 };
 
 export const AudioRecorder: React.FC< AudioRecorderProps > = ( {
-	onRecordingComplete,
+	isRecording,
+	onStartRecording,
+	onStopRecording,
 	isTranscribing,
-	handleError,
 } ) => {
-	const { isRecording, startRecording, stopRecording } = useMediaRecorder( {
-		onRecordingComplete,
-		handleError,
-	} );
-
-	if ( isTranscribing && ! isRecording ) {
-		return (
-			<div
-				className="woo-ai-assistant-mic-button-spinner"
-				aria-label="Transcribing"
-			>
-				<Spinner />
-			</div>
-		);
-	}
-
 	return (
-		<Button
-			className="woo-ai-assistant-mic-button"
-			icon={ isRecording ? playerStop : 'microphone' }
-			iconSize={ 32 }
-			onClick={ isRecording ? stopRecording : startRecording }
-			label={ isRecording ? 'Stop recording' : 'Start recording' }
-		/>
+		<>
+			{ isTranscribing && ! isRecording && (
+				<div
+					className="woo-ai-assistant-mic-button-spinner"
+					aria-label="Transcribing"
+				>
+					<Spinner />
+				</div>
+			) }
+			{ ! isTranscribing && (
+				<Button
+					className="woo-ai-assistant-mic-button"
+					icon={ isRecording ? playerStop : 'microphone' }
+					iconSize={ 32 }
+					onClick={ isRecording ? onStopRecording : onStartRecording }
+					label={ isRecording ? 'Stop recording' : 'Start recording' }
+				/>
+			) }
+		</>
 	);
 };
 

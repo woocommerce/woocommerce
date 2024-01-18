@@ -6,7 +6,7 @@
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"require": {
 		"composer/installers": "~1.7",
 		"ext-json": "*"

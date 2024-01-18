@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, TextareaControl } from '@wordpress/components';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 /**
  * Internal dependencies
@@ -23,11 +23,22 @@ const ChatInputForm = ( {
 	handleError,
 }: ChatInputFormProps ) => {
 	const [ input, setInput ] = useState( '' );
-	const { fetchTranscription, isTranscribing, transcription } =
-		useTranscriptionFetcher( handleError );
+	const {
+		fetchTranscription,
+		transcription,
+		isTranscribing,
+		clearTranscription,
+	} = useTranscriptionFetcher( handleError );
 
-	const { audioBlob } = useMediaRecorder( {
-		onRecordingComplete: () => {},
+	const onRecordingComplete = useCallback(
+		( audioBlob: Blob ) => {
+			fetchTranscription( audioBlob );
+		},
+		[ fetchTranscription ]
+	);
+
+	const { isRecording, startRecording, stopRecording } = useMediaRecorder( {
+		onRecordingComplete,
 		handleError,
 	} );
 
@@ -42,6 +53,7 @@ const ChatInputForm = ( {
 	useEffect( () => {
 		if ( transcription && ! input && transcription.length > 0 ) {
 			setInput( transcription );
+			clearTranscription();
 		}
 	}, [ input, setInput, transcription ] );
 
@@ -55,9 +67,10 @@ const ChatInputForm = ( {
 				style={ { flexGrow: 1 } }
 			/>
 			<AudioRecorder
-				onRecordingComplete={ () => fetchTranscription( audioBlob ) }
+				isRecording={ isRecording }
+				onStartRecording={ startRecording }
+				onStopRecording={ stopRecording }
 				isTranscribing={ isTranscribing }
-				handleError={ handleError }
 			/>
 			<Button
 				className="woo-ai-assistant-submit-button"

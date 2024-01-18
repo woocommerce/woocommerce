@@ -25,6 +25,7 @@ const useMediaRecorder = ( {
 	useEffect( () => {
 		if ( audioBlob.size > 0 && ! isRecording ) {
 			onRecordingComplete( audioBlob );
+			setAudioBlob( new Blob() );
 		}
 	}, [ audioBlob, isRecording, onRecordingComplete ] );
 
