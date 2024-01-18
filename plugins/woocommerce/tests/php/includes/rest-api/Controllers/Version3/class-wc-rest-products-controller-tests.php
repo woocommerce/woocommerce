@@ -323,8 +323,8 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
-			$this->assertArrayHasKey( 'meta_data_test1', $order );
-			$this->assertArrayNotHasKey( 'meta_data_test2', $order );
+			$this->assertArrayHasKey( '__meta_data_test1', $order );
+			$this->assertArrayNotHasKey( '__meta_data_test2', $order );
 			$this->assertEquals( 1, count( $order['meta_data'] ) );
 			$meta_keys = array_map(
 				function( $meta_item ) {
@@ -350,8 +350,8 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
-			$this->assertArrayHasKey( 'meta_data_test1', $order );
-			$this->assertArrayHasKey( 'meta_data_test2', $order );
+			$this->assertArrayHasKey( '__meta_data_test1', $order );
+			$this->assertArrayHasKey( '__meta_data_test2', $order );
 			$meta_keys = array_map(
 				function( $meta_item ) {
 					return $meta_item->get_data()['key'];
@@ -377,8 +377,8 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
-			$this->assertArrayNotHasKey( 'meta_data_test1', $order );
-			$this->assertArrayHasKey( 'meta_data_test2', $order );
+			$this->assertArrayNotHasKey( '__meta_data_test1', $order );
+			$this->assertArrayHasKey( '__meta_data_test2', $order );
 
 			$meta_keys = array_map(
 				function( $meta_item ) {
@@ -406,8 +406,8 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
-			$this->assertArrayHasKey( 'meta_data_test1', $order );
-			$this->assertArrayNotHasKey( 'meta_data_test2', $order );
+			$this->assertArrayHasKey( '__meta_data_test1', $order );
+			$this->assertArrayNotHasKey( '__meta_data_test2', $order );
 			$this->assertEquals( 1, count( $order['meta_data'] ) );
 			$meta_keys = array_map(
 				function( $meta_item ) {

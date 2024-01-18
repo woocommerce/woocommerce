@@ -780,14 +780,14 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$metadata_fields = array_filter(
 			$request->get_params(),
 			function( $k ) {
-				return str_starts_with( $k, 'meta_data_' );
+				return str_starts_with( $k, '__meta_data_' );
 			},
 			ARRAY_FILTER_USE_KEY
 		);
 
 		if ( ! empty( $metadata_fields ) ) {
 			foreach ( $metadata_fields as $key => $value ) {
-				$product->update_meta_data( str_replace( 'meta_data_', '', $key ), $value );
+				$product->update_meta_data( str_replace( '__meta_data_', '', $key ), $value );
 			}
 		}
 
@@ -1527,7 +1527,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			if ( in_array( 'meta_data', $fields, true ) ) {
 				foreach ( $data['meta_data'] as $meta ) {
-					$data[ 'meta_data_' . $meta->key ] = $meta->value;
+					$data[ '__meta_data_' . $meta->key ] = $meta->value;
 				}
 			}
 
