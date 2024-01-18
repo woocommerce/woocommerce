@@ -69,7 +69,7 @@ class Woo_AI {
 		add_action( 'current_screen', array( $this, 'includes' ) );
 
 		add_action(
-			'woocommerce_block_template_area_product-form_after_add_block_product-sale-price',
+			'woocommerce_block_template_area_product-form_after_add_block_product-name',
 			array( $this, 'add_product_title_with_ai_assistant' )
 		);
 	}
@@ -123,9 +123,9 @@ class Woo_AI {
 	
 		$parent->add_block(
 			[
-				'id'         => 'product-onsale-label',
+				'id'         => 'product-title-with-ai-assistance',
 				'order'      => $product_name_field->get_order() + 10,
-				'blockName'  => 'woocommerce/product-text-field',
+				'blockName'  => 'woocommerce/product-title-ai-field',
 				'attributes' => [
 					'property' => 'meta_data.onsale_label',
 					'label'    => __( 'Onsale Label', 'woo-product-editor-ai-workshop' ),
