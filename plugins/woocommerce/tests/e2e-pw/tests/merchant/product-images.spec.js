@@ -54,7 +54,7 @@ baseTest.describe('Products > Product Images', () => {
 
 	});
 
-	test('can set product image', async ({page, product, api}) => {
+	test('can set product image', async ({page, product}) => {
 		await test.step('Navigate to product edit page', async () => {
 			await page.goto(`wp-admin/post.php?post=${product.id}&action=edit`);
 		});
