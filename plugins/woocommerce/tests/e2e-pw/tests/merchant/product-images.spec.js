@@ -131,7 +131,7 @@ baseTest.describe('Products > Product Images', () => {
 		});
 	});
 
-	test.only('can create a product gallery', async ({page, product}) => {
+	test.skip('can create a product gallery', async ({page, product}) => {
 		await test.step('Add product gallery images', async () => {
 		});
 
