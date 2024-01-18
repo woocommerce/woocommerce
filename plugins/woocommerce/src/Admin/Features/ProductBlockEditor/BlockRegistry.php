@@ -32,6 +32,7 @@ class BlockRegistry {
 		'woocommerce/product-section',
 		'woocommerce/product-section-description',
 		'woocommerce/product-subsection',
+		'woocommerce/product-subsection-description',
 		'woocommerce/product-details-section-description',
 		'woocommerce/product-tab',
 		'woocommerce/product-toggle-field',

@@ -16,6 +16,7 @@ export { init as initScheduleSale } from './product-fields/schedule-sale';
 export { init as initSection } from './generic/section';
 export { init as initSectionDescription } from './generic/section-description';
 export { init as initSubsection } from './generic/subsection';
+export { init as initSubsectionDescription } from './generic/subsection-description';
 export { init as initShippingClass } from './product-fields/shipping-class';
 export { init as initShippingDimensions } from './product-fields/shipping-dimensions';
 export { init as initSummary } from './product-fields/summary';
