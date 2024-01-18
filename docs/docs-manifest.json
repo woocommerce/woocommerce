@@ -3,7 +3,7 @@
     {
       "post_title": "Webhooks",
       "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/webhooks.md",
-      "hash": "6b227e0f2eecece15cf0bbb82aa4fdb630ce3405d07253fd4a5683369e43be8e",
+      "hash": "94378e7d651e2b612e51899a6380691513a41cce2ba0e87bc4ea8dd5bcef7a8c",
       "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/webhooks.md",
       "id": "2c687171ced32ac451780d6ac95b29d19c70b0b5"
     },
@@ -71,7 +71,7 @@
           "post_title": "Rename a country",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/rename-a-country.md",
-          "hash": "843a469c829566265499a9f78404e73fe12dfeadeb2347a983d752cb9ad9fdcb",
+          "hash": "80086f76587535c16e79d987ba00544766b167fe33fd435544c8b80683c5f946",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/rename-a-country.md",
           "id": "67a49394f2e8ad0f8f81333207679be770bc8038"
         },
@@ -137,7 +137,7 @@
           "menu_title": "Add a country",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/add-a-country.md",
-          "hash": "a2b7935ca0bff60bbd4a792c233071f1caa5e70e353722737181f7042a9e50f1",
+          "hash": "2b5488637e3ecad6113abea73f26fab79e953d84b7e034d4aa71767f6b7338a6",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/add-a-country.md",
           "id": "3f20affcf41e51989b0a7408aefe32b95d1da073"
         }
@@ -424,7 +424,7 @@
           "menu_title": "Add a section to a settings tab",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/adding-a-section-to-a-settings-tab.md",
-          "hash": "f66ae2bea989f70f456142f5505352e92edc880040290d67a0bfa6dba1168a19",
+          "hash": "afa6a5f214c7d56056bff324a9a6b16baa0f1721e88b1102c445534616b7da6f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/adding-a-section-to-a-settings-tab.md",
           "id": "a88144dff894408f31a80c96dcee3bd5126ecd28"
         }
@@ -439,7 +439,7 @@
         {
           "post_title": "WooCommerce Endpoints",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/woocommerce-endpoints.md",
-          "hash": "e50a3aa2753924b13209e50cfb7d06a63cd587a565bf02a79f65c7b7247e186e",
+          "hash": "4cff74381eeda1cd75bab699faa271c57852a1931c98b8acaa9417747f0de040",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/woocommerce-endpoints.md",
           "id": "31a11f74bcd9f21f97cd4c6c719240b3d84e40f4"
         },
@@ -508,7 +508,7 @@
           "menu_title": "Translating WooCommerce",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/localization-translation/translating-woocommerce.md",
-          "hash": "f4c2b0bfb7516650edbfb3dc05b833b2d41c2b0a07eec356677493b3db6ce97f",
+          "hash": "759edc68848053eb76ef15255733a3e07a42a65c706c04e3c164039671730152",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/localization-translation/translating-woocommerce.md",
           "id": "017b9f80a086d119f8bac193c9b4d87d1efff67d"
         }
@@ -542,7 +542,7 @@
           "menu_title": "Payment Gateway API",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/payments/payment-gateway-api.md",
-          "hash": "2273a7c6283f69083d13c426c9c7c72928fd90372913aa5021921ef77b70500e",
+          "hash": "1b73bbacdac68afedceb7d578b0ec86a85ad866d1e1201b6a2a8ce0b01a8cb3b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/payments/payment-gateway-api.md",
           "id": "b337203996650b567f91c70306e1010d6f1ae552"
         }
@@ -556,9 +556,9 @@
       "posts": [
         {
           "post_title": "Product editor development handbook",
-          "menu_title": "Product editor development handbook",
+          "menu_title": "Development handbook",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor.md",
-          "hash": "9f0a9bf23192a2e1b110883a5c15c8753f269458f509c72c560d45573f56648f",
+          "hash": "2bf9215fa06abd744dca3846f0a47f2a8fdb7f2a6a8b1d955c8affffb1816b24",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor.md",
           "id": "59450404de2750d918137e7cf523e52bedfd7214",
           "links": {
@@ -572,9 +572,9 @@
         },
         {
           "post_title": "Product editor extensibility guidelines",
-          "menu_title": "Product editor extensibility guidelines",
+          "menu_title": "Extensibility guidelines",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor-extensibility-guidelines.md",
-          "hash": "f1dfc013e56a70ef65057a250370cb4a4407198225fe637e3c6e6f2231fe10ef",
+          "hash": "fd77b0cd03fb2c3d9d43f9d08bb1491476e5c6c1c67c501cf302cfe890798844",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor-extensibility-guidelines.md",
           "id": "a837eb947d31fcff3c6e1f775926ba5eb13cd790"
         },
@@ -583,7 +583,7 @@
           "menu_title": "Block template lifecycle",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/block-template-lifecycle.md",
-          "hash": "459a9583e062dbde5c056903edfa4fad23dad6d2ac4a2cb9f0f0544e7af04bc9",
+          "hash": "8412c1fc634341ef4d4e81cd3212e368acca7e2c8c3ded15de1726cbec88424f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/block-template-lifecycle.md",
           "id": "0c29c74a7e7e9fd88562df1afa489659f460879e"
         }
@@ -794,7 +794,7 @@
           "menu_title": "Fix outdated templates",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/fixing-outdated-woocommerce-templates.md",
-          "hash": "70752f7bdbde7848407b86857fadc4302f32f1e8ec2d486be238bb971b6a2a15",
+          "hash": "708e7242975ae285e3df391b9cf144f61d3519183eaddd31a96dfc5bbc4a0b47",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/fixing-outdated-woocommerce-templates.md",
           "id": "1fa09bbc2137a65288cc1576c1053224db7187ed"
         },
@@ -938,9 +938,9 @@
       "categories": []
     },
     {
-      "content": "Our research shows that merchants think in terms of tasks and goals while creating new products in Woo. For example, adding or editing a product price is a separate task from uploading images or managing inventory.\n\nFor this reason, the new product form features groups (tabs) that correspond with these tasks. Simply speaking, they are separate views where different form features live. As a developer, you can extend any of these views and offer merchants the information and tools they need to create better, more successful products.\n\nThere are several ways to extend the new product form: from a single field to a whole group or section containing multiple fields and tables. These extension points are linked to the form structure, giving you plenty of freedom to create a great user experience.\n",
-      "category_slug": "ux-guidelines-product-editor",
-      "category_title": "Ux Guidelines Product Editor",
+      "content": "\nOur research shows that merchants think in terms of tasks and goals while creating new products in Woo. For example, adding or editing a product price is a separate task from uploading images or managing inventory.\n\nFor this reason, the new product form features groups (tabs) that correspond with these tasks. Simply speaking, they are separate views where different form features live. As a developer, you can extend any of these views and offer merchants the information and tools they need to create better, more successful products.\n\nThere are several ways to extend the new product form: from a single field to a whole group or section containing multiple fields and tables. These extension points are linked to the form structure, giving you plenty of freedom to create a great user experience.\n",
+      "category_slug": "user-experience-product-editor",
+      "category_title": "Product Editor Guidelines",
       "posts": [
         {
           "post_title": "Product Editor Guidelines - Top Bar Extensions (future feature)",
@@ -1076,5 +1076,5 @@
       "categories": []
     }
   ],
-  "hash": "ef98c98339a494b9baafb00a71490d1f6a02294d6b9848f22008cd731c0ab32c"
+  "hash": "f7c0574f9c07c864981a47732f78786ace557cb0a30111eb9d078c053471531b"
 }

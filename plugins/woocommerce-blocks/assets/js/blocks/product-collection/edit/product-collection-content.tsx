@@ -4,6 +4,7 @@
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect } from '@wordpress/element';
+import { v4 as uuidV4 } from 'uuid';
 
 /**
  * Internal dependencies
@@ -38,6 +39,16 @@ const ProductCollectionContent = (
 			setAttributes( { queryId: Number( instanceId ) } );
 		}
 	}, [ queryId, instanceId, setAttributes ] );
+
+	/**
+	 * We need to set a unique ID for each instance of this block.
+	 * This will help us uniquely identify each block.
+	 */
+	useEffect( () => {
+		if ( ! attributes?.id ) {
+			setAttributes( { id: uuidV4() } );
+		}
+	}, [ attributes, setAttributes ] );
 
 	/**
 	 * Because of issue https://github.com/WordPress/gutenberg/issues/7342,

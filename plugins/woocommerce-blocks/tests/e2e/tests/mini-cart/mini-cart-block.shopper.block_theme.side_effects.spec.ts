@@ -62,8 +62,6 @@ test.describe( 'Shopper → Translations', () => {
 	} );
 } );
 
-// Skipping tax tests until we sorted out a bug that hides the totals price on hover
-// eslint-disable-next-line playwright/no-skipped-test
 test.describe( 'Shopper → Tax', () => {
 	test.beforeAll( async () => {
 		await cli(
@@ -91,6 +89,17 @@ test.describe( 'Shopper → Tax', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToMiniCart();
+
+		await expect(
+			page.getByTestId( 'mini-cart' ).getByLabel( '1 item in cart' )
+		).toContainText( '(incl. tax)' );
+
+		// Hovering over the mini cart should not change the label,
+		// see https://github.com/woocommerce/woocommerce/issues/43691
+		await page
+			.getByTestId( 'mini-cart' )
+			.getByLabel( '1 item in cart' )
+			.dispatchEvent( 'mouseover' );
 
 		await expect(
 			page.getByTestId( 'mini-cart' ).getByLabel( '1 item in cart' )
