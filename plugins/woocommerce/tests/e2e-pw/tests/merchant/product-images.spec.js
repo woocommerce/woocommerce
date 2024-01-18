@@ -4,7 +4,7 @@ const wcApi = require('@woocommerce/woocommerce-rest-api').default;
 baseTest.describe('Products > Product Images', () => {
 	baseTest.use({storageState: process.env.ADMINSTATE});
 
-	const apiFixture = baseTest.extend({
+	const test = baseTest.extend({
 		api: async ({baseURL}, use) => {
 			const api = new wcApi({
 				url: baseURL,
@@ -15,9 +15,6 @@ baseTest.describe('Products > Product Images', () => {
 
 			await use(api);
 		},
-	});
-
-	const test = apiFixture.extend({
 		product: async ({page, api}, use) => {
 			let product = {
 				id: 0,
@@ -131,7 +128,7 @@ baseTest.describe('Products > Product Images', () => {
 		});
 	});
 
-	test.skip('can create a product gallery', async ({page, product}) => {
+	test.only('can create a product gallery', async ({page, product}) => {
 		await test.step('Add product gallery images', async () => {
 		});
 

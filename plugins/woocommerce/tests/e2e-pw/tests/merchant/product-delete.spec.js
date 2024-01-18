@@ -4,7 +4,7 @@ const wcApi = require('@woocommerce/woocommerce-rest-api').default;
 baseTest.describe('Products > Delete Product', () => {
 	baseTest.use({storageState: process.env.ADMINSTATE});
 
-	const apiFixture = baseTest.extend({
+	const test = baseTest.extend({
 		api: async ({baseURL}, use) => {
 			const api = new wcApi({
 				url: baseURL,
@@ -21,9 +21,7 @@ baseTest.describe('Products > Delete Product', () => {
 
 			await use(api);
 		},
-	});
 
-	const test = apiFixture.extend({
 		product: async ({api}, use) => {
 			const product = {
 				id: 0,
