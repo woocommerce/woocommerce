@@ -4,11 +4,12 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 const permalink = '/shop';
-const templateName = 'Product catalog';
+const templateName = 'Product Catalog';
 const templatePath = 'woocommerce/woocommerce//archive-product';
 const templateType = 'wp_template';
+const userText = 'Hello World in the template';
 
-test.describe( 'Product catalog template', async () => {
+test.describe( 'Product Catalog template', async () => {
 	test( 'can be modified and reverted', async ( {
 		admin,
 		editorUtils,
@@ -23,13 +24,11 @@ test.describe( 'Product catalog template', async () => {
 		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.editor.insertBlock( {
 			name: 'core/paragraph',
-			attributes: { content: 'Hello World in the template' },
+			attributes: { content: userText },
 		} );
 		await editorUtils.saveTemplate();
 		await page.goto( permalink );
-		await expect(
-			page.getByText( 'Hello World in the template' ).first()
-		).toBeVisible();
+		await expect( page.getByText( userText ).first() ).toBeVisible();
 
 		// Verify the edition can be reverted.
 		await admin.visitAdminPage(
@@ -39,8 +38,6 @@ test.describe( 'Product catalog template', async () => {
 		await editorUtils.revertTemplateCustomizations( templateName );
 		await page.goto( permalink );
 
-		await expect(
-			page.getByText( 'Hello World in the template' )
-		).toHaveCount( 0 );
+		await expect( page.getByText( userText ) ).toHaveCount( 0 );
 	} );
 } );

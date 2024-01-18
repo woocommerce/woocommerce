@@ -25,6 +25,8 @@ const createMockMachine = ( {
 	return machineWithConfig;
 };
 
+jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+
 describe( 'Design Without AI state machine', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
@@ -53,7 +55,7 @@ describe( 'Design Without AI state machine', () => {
 			expect( hasStepInUrl ).toBeCalled();
 		} );
 
-		it( 'should transit to preAssembleSite state when the url is /design', () => {
+		it( 'should transit to installAndActivateTheme state when the url is /design', () => {
 			const hasStepInUrl = jest.fn( () => true );
 			const machine = designWithNoAiStateMachineDefinition.withConfig( {
 				guards: {
@@ -64,11 +66,13 @@ describe( 'Design Without AI state machine', () => {
 			const machineInterpret = interpret( machine ).start();
 
 			expect(
-				machineInterpret.getSnapshot().matches( 'preAssembleSite' )
+				machineInterpret
+					.getSnapshot()
+					.matches( 'installAndActivateTheme' )
 			).toBeTruthy();
 		} );
 
-		it( "should not transit to preAssembleSite state when the url isn't /design", () => {
+		it( "should not transit to installAndActivateTheme state when the url isn't /design", () => {
 			const hasStepInUrl = jest.fn( () => false );
 			const machine = designWithNoAiStateMachineDefinition.withConfig( {
 				guards: {
@@ -79,8 +83,37 @@ describe( 'Design Without AI state machine', () => {
 			const machineInterpret = interpret( machine ).start();
 
 			expect(
-				machineInterpret.getSnapshot().matches( 'preAssembleSite' )
+				machineInterpret
+					.getSnapshot()
+					.matches( 'installAndActivateTheme' )
 			).toBeFalsy();
+		} );
+	} );
+
+	describe( 'installAndActivateTheme state', () => {
+		it( 'should invoke `installAndActivateTheme` service', async () => {
+			const installAndActivateThemeMock = jest.fn( () =>
+				Promise.resolve()
+			);
+
+			const machine = createMockMachine( {
+				services: {
+					installAndActivateTheme: installAndActivateThemeMock,
+				},
+			} );
+
+			const state = machine.getInitialState( 'installAndActivateTheme' );
+
+			const actor = interpret( machine ).start( state );
+
+			await waitFor( actor, ( currentState ) =>
+				currentState.matches( 'installAndActivateTheme.pending' )
+			);
+
+			expect( installAndActivateThemeMock ).toHaveBeenCalled();
+			expect(
+				actor.getSnapshot().matches( 'preAssembleSite' )
+			).toBeTruthy();
 		} );
 	} );
 

@@ -9,6 +9,9 @@
 	"keywords": [ "WooCommerce", "Products (Beta)" ],
 	"textdomain": "woocommerce",
 	"attributes": {
+		"id": {
+			"type": "string"
+		},
 		"queryId": {
 			"type": "number"
 		},
@@ -34,6 +37,7 @@
 		}
 	},
 	"providesContext": {
+		"id": "id",
 		"queryId": "queryId",
 		"query": "query",
 		"displayLayout": "displayLayout"
