@@ -18,7 +18,7 @@ import './editor.scss';
 export default function Edit() {
 	return (
 		<p { ...useBlockProps() }>
-			{ __( 'Example Static - hello from the editor!', 'woocommerce' ) }
+			{ __( 'Product Title with AI', 'woocommerce' ) }
 		</p>
 	);
 }
