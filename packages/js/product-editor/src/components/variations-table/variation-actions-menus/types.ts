@@ -12,10 +12,33 @@ export type VariationActionsMenuProps = {
 	): void;
 };
 
+export type VariationQuickUpdateSlotProps = {
+	group: string;
+	supportsMultipleSelection: boolean;
+	selection: ProductVariation | ProductVariation[];
+	onChange: (
+		variation: Partial< ProductVariation > | Partial< ProductVariation >[]
+	) => void;
+	onClose: () => void;
+};
+
 export type MenuItemProps = {
 	children?: React.ReactNode;
 	order?: number;
 	group?: string;
 	supportsMultipleSelection?: boolean;
-	onClick?: () => void;
+	onClick?: ( {
+		onChange,
+		onClose,
+		selection,
+	}: {
+		[ K in
+			| 'onChange'
+			| 'onClose'
+			| 'selection' ]: VariationQuickUpdateSlotProps[ K ];
+	} ) => void;
+	onChange?: (
+		variation: Partial< ProductVariation > | Partial< ProductVariation >[]
+	) => void;
+	onClose?: () => void;
 };
