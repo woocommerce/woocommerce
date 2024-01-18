@@ -113,14 +113,21 @@ baseTest.describe('Products > Product Images', () => {
 		});
 	});
 
-	test.skip('can delete the product image', async ({page, product}) => {
+	test.only('can delete the product image', async ({page, product}) => {
 		await test.step('Remove product image', async () => {
+			await page.getByRole('link', {name: 'Remove product image'}).click();
+			await expect(page.getByRole('link', {name: 'Set product image'})).toBeVisible();
+
+			await page.getByRole('button', {name: 'Update'}).click();
 		});
 
-		await test.step('Verify product image was set', async () => {
-			// Verify image in admin area
+		await test.step('Verify product image was removed', async () => {
+			// Verify product was updated
+			await expect(page.getByText('Product updated.')).toBeVisible()
 
 			// Verify image in store frontend
+			await page.goto(product.permalink);
+			await expect(page.getByAltText("Awaiting product image")).toBeVisible();
 		});
 	});
 
