@@ -121,7 +121,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			.locator( '.wp-editor' )
 			.fill( productDescription );
 
-		await page.locator( '#_regular_price' ).fill( productPrice );
+		await page.getByRole( 'textbox', { name: 'Regular price ($)', exact: true} ).fill( productPrice )
 
 		await page.getByText('Inventory').click();
 		await page.getByLabel( 'SKU', { exact: true } ).fill( '11' );
@@ -149,11 +149,10 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.getByLabel( 'Add new category', { exact: true } ).fill( categoryName );
 		await page.getByRole( 'button', { name: 'Add new category', exact: true} ).click();
 
-		await page.locator( '#new-tag-product_tag' ).fill( productTag );
+		await page.getByRole( 'combobox', { name: 'Add new tag'} ).fill( productTag );
 		await page.getByRole( 'button', { name: 'Add', exact: true} ).click();
 
-		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
-		await page.locator( '#publish' ).click();
+		await page.getByRole( 'button', { name: 'Publish', exact: true, disabled: false } ).click();
 		await page.waitForLoadState( 'networkidle' );
 
 		// When running in parallel, clicking the publish button sometimes saves products as a draft
@@ -162,7 +161,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 				await page.locator( '#post-status-display' ).innerText()
 			 ).includes( 'Draft' )
 		) {
-			await page.locator( '#publish' ).click();
+			await page.getByRole( 'button', { name: 'Publish', exact: true, disabled: false } ).click();
 			await page.waitForLoadState( 'networkidle' );
 		}
 
