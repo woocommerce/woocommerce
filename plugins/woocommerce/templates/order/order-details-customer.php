@@ -41,7 +41,16 @@ $show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_a
 			<p class="woocommerce-customer-details--email"><?php echo esc_html( $order->get_billing_email() ); ?></p>
 		<?php endif; ?>
 
-		<?php do_action( 'woocommerce_order_details_after_customer_address', 'billing', $order ); ?>
+		<?php
+			/**
+			 * Action hook fired after an address in the order customer details.
+			 *
+			 * @since 8.6.0
+			 * @param string $address_type Type of address (billing or shipping).
+			 * @param WC_Order $order Order object.
+			 */
+			do_action( 'woocommerce_order_details_after_customer_address', 'billing', $order );
+		?>
 	</address>
 
 	<?php if ( $show_shipping ) : ?>
@@ -57,7 +66,16 @@ $show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_a
 					<p class="woocommerce-customer-details--phone"><?php echo esc_html( $order->get_shipping_phone() ); ?></p>
 				<?php endif; ?>
 
-				<?php do_action( 'woocommerce_order_details_after_customer_address', 'shipping', $order ); ?>
+				<?php
+					/**
+					 * Action hook fired after an address in the order customer details.
+					 *
+					 * @since 8.6.0
+					 * @param string $address_type Type of address (billing or shipping).
+					 * @param WC_Order $order Order object.
+					 */
+					do_action( 'woocommerce_order_details_after_customer_address', 'shipping', $order );
+				?>
 			</address>
 		</div><!-- /.col-2 -->
 
