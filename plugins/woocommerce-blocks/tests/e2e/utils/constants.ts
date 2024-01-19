@@ -3,6 +3,8 @@
  */
 import path from 'path';
 
+export const BLOCK_THEME_WITH_TEMPLATES_SLUG = 'theme-with-woo-templates';
+export const BLOCK_THEME_WITH_TEMPLATES_NAME = 'Theme with Woo Templates';
 export const BLOCK_THEME_SLUG = 'twentytwentyfour';
 export const BLOCK_THEME_NAME = 'Twenty Twenty-Four';
 export const CLASSIC_THEME_SLUG = 'storefront';

@@ -180,15 +180,15 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		$limit = apply_filters( 'woocommerce_rest_batch_items_limit', 100, $this->get_normalized_rest_base() );
 		$total = 0;
 
-		if ( ! empty( $items['create'] ) ) {
+		if ( ! empty( $items['create'] ) && is_countable( $items['create'] ) ) {
 			$total += count( $items['create'] );
 		}
 
-		if ( ! empty( $items['update'] ) ) {
+		if ( ! empty( $items['update'] ) && is_countable( $items['update'] ) ) {
 			$total += count( $items['update'] );
 		}
 
-		if ( ! empty( $items['delete'] ) ) {
+		if ( ! empty( $items['delete'] ) && is_countable( $items['delete'] ) ) {
 			$total += count( $items['delete'] );
 		}
 

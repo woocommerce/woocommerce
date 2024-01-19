@@ -109,13 +109,20 @@ const getErrorContextFromCode = ( code: string ): string => {
 };
 
 /**
- * Gets appropriate error context from error param name.
+ * Gets appropriate error context from error param name. Also checks the error code to check if it's an email error
+ * (Email is part of the billing address).
  */
-const getErrorContextFromParam = ( param: string ): string | undefined => {
+const getErrorContextFromParam = (
+	param: string,
+	code: string
+): string | undefined => {
 	switch ( param ) {
 		case 'invalid_email':
 			return noticeContexts.CONTACT_INFORMATION;
 		case 'billing_address':
+			if ( code === 'invalid_email' ) {
+				return noticeContexts.CONTACT_INFORMATION;
+			}
 			return noticeContexts.BILLING_ADDRESS;
 		case 'shipping_address':
 			return noticeContexts.SHIPPING_ADDRESS;
@@ -168,7 +175,7 @@ const processInvalidParamResponse = (
 			context:
 				context ||
 				additionalFieldContext ||
-				getErrorContextFromParam( param ) ||
+				getErrorContextFromParam( param, code ) ||
 				getErrorContextFromCode( code ),
 		} );
 	} );
