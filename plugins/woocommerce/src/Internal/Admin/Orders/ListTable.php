@@ -546,8 +546,22 @@ class ListTable extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_views() {
-		$view_counts = array();
 		$view_links  = array();
+
+        /**
+         * Filters the list of available list table views link
+         * before the actual query runs so gives the opportunity to remove counts from the links
+         *
+         * @since x.x.x
+         *
+         * @param string[] $views An array of available list table views links.
+         */
+        $view_links = apply_filters( 'woocommerce_' . $this->order_type . '_list_table_view_links', $view_links );
+        if ( !empty($view_links) ) {
+            return $view_links;
+        }
+
+        $view_counts = array();
 		$statuses    = $this->get_visible_statuses();
 		$current     = ! empty( $this->request['status'] ) ? sanitize_text_field( $this->request['status'] ) : 'all';
 		$all_count   = 0;
@@ -723,6 +737,17 @@ class ListTable extends WP_List_Table {
 	 */
 	private function months_filter() {
 		// XXX: [review] we may prefer to move this logic outside of the ListTable class.
+
+        /**
+         * Filters whether to remove the 'Months' drop-down from the order list table.
+         *
+         * @since 4.2.0
+         *
+         * @param bool   $disable   Whether to disable the drop-down. Default false.
+         */
+        if ( apply_filters( 'woocommerce_order_list_table_disable_months_filter', false ) ) {
+            return;
+        }
 
 		global $wp_locale;
 		global $wpdb;

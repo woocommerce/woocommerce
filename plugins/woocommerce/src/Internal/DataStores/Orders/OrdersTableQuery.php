@@ -928,14 +928,14 @@ class OrdersTableQuery {
 		     *
 		     * @param string           $sql   The count SQL query.
 		     * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
-		     * @param array 		   $args  Query args.
-		     * @param string 		   $fields Prepared fields for SELECT clause.
-		     * @param string 		   $join Prepared JOIN clause.
-		     * @param string 		   $where Prepared WHERE clause.
-		     * @param string 		   $groupby Prepared GROUP BY clause.	
+		     * @param array            $args  Query args.
+		     * @param string           $fields Prepared fields for SELECT clause.
+		     * @param string           $join Prepared JOIN clause.
+		     * @param string           $where Prepared WHERE clause.
+		     * @param string           $groupby Prepared GROUP BY clause.
 		     */
 		    $this->count_sql = apply_filters_ref_array( 'woocommerce_orders_table_query_count_sql', array( $this->count_sql, &$this, $this->args, $fields, $join, $where, $groupby ) );
-		}		
+		}
 	}
 
 	/**
