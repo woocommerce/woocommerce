@@ -41,7 +41,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 *
 	 * @var array
 	 */
-	private $suggested_producs_ids = array();
+	private $suggested_products_ids = array();
 
 	/**
 	 * Register the routes for products.
@@ -274,8 +274,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		 * filter the query to return only the suggested products,
 		 * overwriting the post__in parameter.
 		 */
-		if ( ! empty( $this->suggested_producs_ids ) ) {
-			$args['post__in'] = $this->suggested_producs_ids;
+		if ( ! empty( $this->suggested_products_ids ) ) {
+			$args['post__in'] = $this->suggested_products_ids;
 		}
 
 		return $args;
@@ -1636,7 +1636,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$limit       = $request->get_param( 'limit' ) ? $request->get_param( 'limit' ) : 5;
 
 		$data_store                  = WC_Data_Store::load( 'product' );
-		$this->suggested_producs_ids = $data_store->get_related_products(
+		$this->suggested_products_ids = $data_store->get_related_products(
 			$categories,
 			$tags,
 			$exclude_ids,
@@ -1645,7 +1645,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		);
 
 		// When no suggested products are found, return an empty array.
-		if ( empty( $this->suggested_producs_ids ) ) {
+		if ( empty( $this->suggested_products_ids ) ) {
 			return array();
 		}
 
