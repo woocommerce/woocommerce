@@ -13,6 +13,7 @@ import { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { reusableBlock } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -25,6 +26,7 @@ import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { ProductList, Skeleton } from '../../../components/product-list';
 import { ProductSelect } from '../../../components/product-select';
 import { AdviceCard } from '../../../components/advice-card';
+import { TRACKS_SOURCE } from '../../../constants';
 import { ShoppingBags } from '../../../images/shopping-bags';
 import { CashRegister } from '../../../images/cash-register';
 import { ProductEditorBlockEditProps } from '../../../types';
@@ -134,6 +136,11 @@ export function LinkedProductListBlockEdit( {
 	const [ isChoosingProducts, setIsChoosingProducts ] = useState( false );
 
 	async function chooseProductsForMe() {
+		recordEvent( 'linked_products_choose_related_click', {
+			source: TRACKS_SOURCE,
+			field: property,
+		} );
+
 		dispatch( {
 			type: 'LOADING_LINKED_PRODUCTS',
 			payload: {
