@@ -8,6 +8,7 @@ use \WP_HTTP_Response;
 use \WP_REST_Request;
 use \WP_REST_Response;
 use \WP_Error;
+use \InvalidArgumentException;
 use \Exception;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
@@ -23,7 +24,7 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
  *
  * Minimal controller example:
  *
- * class FoobarsController extends RestApiController {
+ * class FoobarsController extends RestApiControllerBase {
  *
  * use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
  *
@@ -77,7 +78,7 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
  *
  * }
  */
-abstract class RestApiController implements RegisterHooksInterface {
+abstract class RestApiControllerBase implements RegisterHooksInterface {
 	use AccessiblePrivateMethods;
 
 	/**
@@ -129,7 +130,7 @@ abstract class RestApiController implements RegisterHooksInterface {
 	 * @return array The updated list of WooCommerce REST API namespaces/controllers.
 	 */
 	protected function handle_woocommerce_rest_api_get_rest_namespaces( array $namespaces ): array {
-		$namespaces['wc/v3'][ $this->get_rest_api_namespace ] = static::class;
+		$namespaces['wc/v3'][ $this->get_rest_api_namespace() ] = static::class;
 		return $namespaces;
 	}
 
@@ -165,6 +166,9 @@ abstract class RestApiController implements RegisterHooksInterface {
 	protected function run( WP_REST_Request $request, string $method_name ) {
 		try {
 			return rest_ensure_response( $this->$method_name( $request ) );
+		} catch ( InvalidArgumentException $ex ) {
+			$message = $ex->getMessage();
+			return new WP_Error( 'woocommerce_rest_invalid_argument', $message ? $message : __( 'Internal server error', 'woocommerce' ), array( 'status' => 400 ) );
 		} catch ( Exception $ex ) {
 			wc_get_logger()->error( StringUtil::class_name_without_namespace( static::class ) . ": when executing method $method_name: {$ex->getMessage()}" );
 			return $this->internal_wp_error( $ex );

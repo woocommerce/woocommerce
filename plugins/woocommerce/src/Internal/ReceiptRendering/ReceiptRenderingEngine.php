@@ -4,6 +4,8 @@ namespace Automattic\WooCommerce\Internal\ReceiptRendering;
 
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 use \WC_Order;
 
 /**
@@ -17,6 +19,20 @@ use \WC_Order;
  * if the meta entry exists but the file doesn't.
  */
 class ReceiptRenderingEngine {
+
+	private const FONT_SIZE = 12;
+
+	private const LINE_HEIGHT = self::FONT_SIZE * 1.5;
+
+	private const ICON_HEIGHT = self::LINE_HEIGHT;
+
+	private const ICON_WIDTH = self::ICON_HEIGHT * ( 4 / 3 );
+
+	/**
+	 * This array must contain all the names of the files in the CardIcons directory (without extension),
+	 * except 'unknown'.
+	 */
+	private const KNOWN_CARD_TYPES = array( 'amex', 'diners', 'discover', 'interac', 'jcb', 'mastercard', 'visa' );
 
 	/**
 	 * Order meta key that stores the file name of the last generated receipt.
@@ -136,10 +152,171 @@ class ReceiptRenderingEngine {
 	 * @return array The order data as an associative array.
 	 */
 	private function get_order_data( WC_Order $order ): array {
-		// TODO: Properly implement this method when the actual template is available.
+		$store_name = get_bloginfo( 'name' );
+		if ( $store_name ) {
+			/* translators: %s = store name */
+			$receipt_title = sprintf( __( 'Receipt from %s', 'woocommerce' ), $store_name );
+		} else {
+			$receipt_title = __( 'Receipt', 'woocommerce' );
+		}
+
+		$order_id = $order->get_id();
+		if ( $order_id ) {
+			/* translators: %d = order id */
+			$summary_title = sprintf( __( 'Summary: Order #%d', 'woocommerce' ), $order->get_id() );
+		} else {
+			$summary_title = __( 'Summary', 'woocommerce' );
+		}
+
+		$get_price_args = array( 'currency' => $order->get_currency() );
+
+		$line_items_info = array();
+		$line_items      = $order->get_items( 'line_item' );
+		foreach ( $line_items as $line_item ) {
+			$line_item_product = $line_item->get_product();
+			$line_item_title   =
+				( $line_item_product instanceof \WC_Product_Variation ) ?
+					( wc_get_product( $line_item_product->get_parent_id() )->get_name() ) . '. ' . $line_item_product->get_attribute_summary() :
+					$line_item_product->get_name();
+			$line_items_info[] = array(
+				'title'    => wp_kses( $line_item_title, array() ),
+				'quantity' => $line_item->get_quantity(),
+				'amount'   => wc_price( $line_item->get_total(), $get_price_args ),
+			);
+		}
+
+		$line_items_info[] = array(
+			'title'  => __( 'Subtotal', 'woocommerce' ),
+			'amount' => wc_price( $order->get_subtotal(), $get_price_args ),
+		);
+
+		$coupon_names      = ArrayUtil::select( $order->get_coupons(), 'get_name', ArrayUtil::SELECT_BY_OBJECT_METHOD );
+		$line_items_info[] = array(
+			/* translators: %s = comma-separated list of coupon codes */
+			'title'  => sprintf( __( 'Discount (%s)', 'woocommerce' ), join( ', ', $coupon_names ) ),
+			'amount' => wc_price( -$order->get_total_discount(), $get_price_args ),
+		);
+
+		foreach ( $order->get_fees() as $fee ) {
+			$name              = $fee->get_name();
+			$line_items_info[] = array(
+				'title'  => '' === $name ? __( 'Fee', 'woocommerce' ) : $name,
+				'amount' => wc_price( $fee->get_amount(), $get_price_args ),
+			);
+		}
+
+		$total_taxes = 0;
+		foreach ( $order->get_taxes() as $tax ) {
+			$total_taxes += $tax->get_tax_total();
+		}
+
+		$line_items_info[] = array(
+			'title'  => __( 'Shipping', 'woocommerce' ),
+			'amount' => wc_price( $order->get_shipping_total(), $get_price_args ),
+		);
+		$line_items_info[] = array(
+			'title'  => __( 'Taxes', 'woocommerce' ),
+			'amount' => wc_price( $total_taxes, $get_price_args ),
+		);
+		$line_items_info[] = array(
+			'title'  => __( 'Amount Paid', 'woocommerce' ),
+			'amount' => wc_price( $order->get_total(), $get_price_args ),
+		);
+
 		return array(
-			'order_id' => $order->get_id(),
-			'amount'   => $order->get_total(),
+			'constants'        => array(
+				'font_size'        => self::FONT_SIZE,
+				'margin'           => 16,
+				'title_font_size'  => 24,
+				'footer_font_size' => 10,
+				'line_height'      => self::LINE_HEIGHT,
+				'icon_height'      => self::ICON_HEIGHT,
+				'icon_width'       => self::ICON_WIDTH,
+			),
+			'texts'            => array(
+				'receipt_title'                => $receipt_title,
+				'amount_paid_section_title'    => __( 'Amount Paid', 'woocommerce' ),
+				'date_paid_section_title'      => __( 'Date Paid', 'woocommerce' ),
+				'payment_method_section_title' => __( 'Payment method', 'woocommerce' ),
+				'summary_section_title'        => $summary_title,
+				'order_notes_section_title'    => __( 'Notes', 'woocommerce' ),
+				'app_name'                     => __( 'Application Name', 'woocommerce' ),
+				'aid'                          => __( 'AID', 'woocommerce' ),
+				'account_type'                 => __( 'Account Type', 'woocommerce' ),
+			),
+			'formatted_amount' => wc_price( $order->get_total(), $get_price_args ),
+			'formatted_date'   => wc_format_datetime( $order->get_date_paid() ),
+			'line_items'       => $line_items_info,
+			'payment_method'   => $order->get_payment_method_title(),
+			'notes'            => array_map( 'get_comment_text', $order->get_customer_order_notes() ),
+			'payment_info'     => $this->get_woo_pay_data( $order ),
+		);
+	}
+
+	/**
+	 * Get the order data related to WooCommerce Payments.
+	 *
+	 * It will return null if any of these is true:
+	 *
+	 * - Payment method is not 'woocommerce_payments".
+	 * - WooCommerce Payments is not installed.
+	 * - No intent id is stored for the order.
+	 * - Retrieving the payment information from Stripe API (providing the intent id) fails.
+	 * - The received data set doesn't contain the expected information.
+	 *
+	 * @param WC_Order $order The order to get the data from.
+	 * @return array|null An array of payment information for the order, or null if not available.
+	 */
+	private function get_woo_pay_data( WC_Order $order ): ?array {
+		// For testing purposes: if WooCommerce Payments development mode is enabled,
+		// an order meta item with key '_intent_data' will be used if it exists as a replacement
+		// for the call to the Stripe API's 'get intent' endpoint.
+		// The value must be the JSON encoding of an array simulating the response from the endpoint.
+		$intent_data = json_decode( defined( 'WCPAY_DEV_MODE' ) && WCPAY_DEV_MODE ? $order->get_meta( '_intent_data' ) : false, true );
+
+		if ( ! $intent_data ) {
+			if ( 'woocommerce_payments' !== $order->get_payment_method() ) {
+				return null;
+			}
+
+			if ( ! class_exists( \WC_Payments::class ) ) {
+				return null;
+			}
+
+			$intent_id = $order->get_meta( '_intent_id' );
+			if ( ! $intent_id ) {
+				return null;
+			}
+
+			try {
+				$intent_data = \WC_Payments::get_payments_api_client()->get_intent( $intent_id );
+			} catch ( \Exception $ex ) {
+				$order_id = $order->get_id();
+				$message  = $ex->getMessage();
+				wc_get_logger()->error( StringUtil::class_name_without_namespace( static::class ) . " - retrieving info for charge {$intent_id} for order {$order_id}: {$message}" );
+				return null;
+			}
+		}
+
+		$card_data = $intent_data['charge']['payment_method_details']['card_present'] ?? null;
+		if ( is_null( $card_data ) ) {
+			return null;
+		}
+
+		$card_brand = $card_data['brand'] ?? '';
+		if ( ! in_array( $card_brand, self::KNOWN_CARD_TYPES, true ) ) {
+			$card_brand = 'unknown';
+		}
+
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$card_svg = base64_encode( file_get_contents( __DIR__ . "/CardIcons/{$card_brand}.svg" ) );
+
+		return array(
+			'card_icon'    => $card_svg,
+			'card_last4'   => wp_kses( $card_data['last4'] ?? '', array() ),
+			'app_name'     => wp_kses( $card_data['receipt']['application_preferred_name'] ?? null, array() ),
+			'aid'          => wp_kses( $card_data['receipt']['dedicated_file_name'] ?? null, array() ),
+			'account_type' => wp_kses( $card_data['receipt']['account_type'] ?? null, array() ),
 		);
 	}
 }

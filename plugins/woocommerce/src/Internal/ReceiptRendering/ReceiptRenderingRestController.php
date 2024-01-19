@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
  * Controller for the REST endpoints associated to the receipt rendering engine.
  * The endpoints require the read_shop_order capability for the order at hand.
  */
-class ReceiptRenderingRestController extends RestApiController {
+class ReceiptRenderingRestController extends RestApiControllerBase {
 	use AccessiblePrivateMethods;
 
 	/**
@@ -99,11 +99,7 @@ class ReceiptRenderingRestController extends RestApiController {
 
 		$order_id = $request->get_param( 'id' );
 
-		try {
-			$filename = wc_get_container()->get( ReceiptRenderingEngine::class )->generate_receipt( $order_id, $expiration_date, $request->get_param( 'force_new' ) );
-		} catch ( InvalidArgumentException $ex ) {
-			return new WP_Error( 'woocommerce_invalid_argument', $ex->getMessage(), array( 'status' => 400 ) );
-		}
+		$filename = wc_get_container()->get( ReceiptRenderingEngine::class )->generate_receipt( $order_id, $expiration_date, $request->get_param( 'force_new' ) );
 
 		return is_null( $filename ) ?
 			new WP_Error( 'woocommerce_rest_not_found', __( 'Order not found', 'woocommerce' ), array( 'status' => 404 ) ) :
