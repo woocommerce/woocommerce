@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Fix wpdb->prepare argument type for coupons query

@@ -13,6 +13,7 @@ import {
 	SIMPLE_VIRTUAL_PRODUCT_NAME,
 } from './constants';
 import { CheckoutPage } from './checkout.page';
+import { utilsLocalPickup as utils } from '../local-pickup/utils.local-pickup';
 
 const testData = {
 	firstname: 'John',
@@ -37,7 +38,10 @@ const test = base.extend< { pageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Order Confirmation', () => {
-	test.beforeEach( async ( { admin, editorUtils } ) => {
+	test.beforeEach( async ( { admin, editorUtils, page } ) => {
+		await utils.openLocalPickupSettings( { admin } );
+		await utils.disableLocalPickup( { page } );
+
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//order-confirmation',
 			postType: 'wp_template',
@@ -45,6 +49,11 @@ test.describe( 'Shopper → Order Confirmation', () => {
 		await editorUtils.enterEditMode();
 		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.transformIntoBlocks();
+	} );
+
+	test.afterEach( async ( { admin, page } ) => {
+		await utils.openLocalPickupSettings( { admin } );
+		await utils.enableLocalPickup( { page } );
 	} );
 
 	test( 'Place order as a logged in user', async ( {
@@ -102,7 +111,7 @@ test.describe( 'Shopper → Order Confirmation', () => {
 		await pageObject.verifyOrderConfirmationDetails( page, false );
 
 		// Access page without order ID or key (test visibility of default message)
-		await page.goto( '/checkout-block/order-received' );
+		await page.goto( '/checkout/order-received' );
 		// Confirm default message is visible
 		await expect(
 			page.getByText(

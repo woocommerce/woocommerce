@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Improved our FlexSlider implementation by removing the need for jQuery, in relation to fade-in animations.

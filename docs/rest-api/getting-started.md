@@ -1,5 +1,6 @@
 ---
-post_title: Getting started with the REST API
+post_title: Getting started with the WooCommerce REST API
+menu_title: Getting started
 ---
 
 The REST API is a powerful part of WooCommerce which lets you read and write various parts of WooCommerce data such as orders, products, coupons, customers, and shipping zones.
@@ -81,7 +82,7 @@ If your server utilizes FastCGI, check that your [authorization headers are prop
 
 ### Consumer key is missing
 
-Occasionally servers may not parse the Authorization header correctly (if you see a “Consumer key is missing” error when authenticating over SSL, you have a server issue).
+Occasionally servers may not parse the Authorization header correctly (if you see a "Consumer key is missing" error when authenticating over SSL, you have a server issue).
 
 In this case, you may provide the consumer key/secret as query string parameters instead. Example:
 

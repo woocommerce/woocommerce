@@ -1,5 +1,7 @@
 ---
 post_title: WooCommerce Git flow
+menu_title: WooCommerce Git flow
+tags: reference
 ---
 
 For core development, we use the following structure and flow.
@@ -25,12 +27,12 @@ Prefixes determine the type of branch, and include:
 
 When creating a **fix branch**, use the correct prefix and the issue number. Example:
 
-``` text
+```text
 fix/12345
 ```
 
 Alternatively you can summarise the change:
 
-``` text
+```text
 fix/shipping-tax-rate-saving
 ```

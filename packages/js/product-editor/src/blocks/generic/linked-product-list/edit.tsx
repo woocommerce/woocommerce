@@ -6,9 +6,17 @@ import {
 	useCallback,
 	useEffect,
 	useReducer,
+	useState,
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
+import { Button } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { reusableBlock } from '@wordpress/icons';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useEntityId } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -31,6 +39,8 @@ import {
 	LinkedProductListBlockAttributes,
 	LinkedProductListBlockEmptyState,
 } from './types';
+import getRelatedProducts from '../../../utils/get-related-products';
+import { SectionActions } from '../../../components/block-slot-fill';
 
 export function EmptyStateImage( {
 	image,
@@ -56,7 +66,7 @@ export function EmptyStateImage( {
 	}
 }
 
-export function Edit( {
+export function LinkedProductListBlockEdit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< LinkedProductListBlockAttributes > ) {
@@ -66,6 +76,9 @@ export function Edit( {
 		linkedProducts: [],
 		searchedProducts: [],
 	} );
+
+	const productId = useEntityId( 'postType', postType );
+
 	const loadLinkedProductsDispatcher =
 		getLoadLinkedProductsDispatcher( dispatch );
 	const searchProductsDispatcher = getSearchProductsDispatcher( dispatch );
@@ -86,7 +99,12 @@ export function Edit( {
 
 	const filter = useCallback(
 		( search = '' ) => {
-			return searchProductsDispatcher( linkedProductIds ?? [], search );
+			// Exclude the current product and any already linked products.
+			const exclude = [ productId ];
+			if ( linkedProductIds ) {
+				exclude.push( ...linkedProductIds );
+			}
+			return searchProductsDispatcher( exclude, search );
 		},
 		[ linkedProductIds ]
 	);
@@ -100,6 +118,7 @@ export function Edit( {
 			product,
 			state.linkedProducts
 		);
+
 		setLinkedProductIds( newLinkedProductIds );
 	}
 
@@ -112,8 +131,57 @@ export function Edit( {
 		setLinkedProductIds( newLinkedProductIds );
 	}
 
+	const [ isChoosingProducts, setIsChoosingProducts ] = useState( false );
+
+	async function chooseProductsForMe() {
+		dispatch( {
+			type: 'LOADING_LINKED_PRODUCTS',
+			payload: {
+				isLoading: true,
+			},
+		} );
+
+		setIsChoosingProducts( true );
+
+		const relatedProducts = ( await getRelatedProducts( productId, {
+			fallbackToRandomProducts: true,
+		} ) ) as Product[];
+
+		dispatch( {
+			type: 'LOADING_LINKED_PRODUCTS',
+			payload: {
+				isLoading: false,
+			},
+		} );
+
+		setIsChoosingProducts( false );
+
+		if ( ! relatedProducts ) {
+			return;
+		}
+
+		const newLinkedProducts = selectSearchedProductDispatcher(
+			relatedProducts,
+			[]
+		);
+
+		setLinkedProductIds( newLinkedProducts );
+	}
+
 	return (
 		<div { ...blockProps }>
+			<SectionActions>
+				<Button
+					variant="tertiary"
+					icon={ reusableBlock }
+					onClick={ chooseProductsForMe }
+					isBusy={ isChoosingProducts }
+					disabled={ isChoosingProducts }
+				>
+					{ __( 'Choose products for me', 'woocommerce' ) }
+				</Button>
+			</SectionActions>
+
 			<div className="wp-block-woocommerce-product-linked-list-field__form-group-content">
 				<ProductSelect
 					items={ state.searchedProducts }
@@ -127,10 +195,11 @@ export function Edit( {
 
 			{ ! state.isLoading && state.linkedProducts.length === 0 && (
 				<AdviceCard
-					image={ <EmptyStateImage { ...emptyState } /> }
 					tip={ emptyState.tip }
 					isDismissible={ emptyState.isDismissible }
-				/>
+				>
+					<EmptyStateImage { ...emptyState } />
+				</AdviceCard>
 			) }
 
 			{ ! state.isLoading && state.linkedProducts.length > 0 && (

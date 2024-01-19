@@ -1,5 +1,7 @@
 ---
-post_title: Adding a section to a settings tab
+post_title: How to add a section to a settings tab
+menu_title: Add a section to a settings tab
+tags: how-to
 ---
 
 When you're adding building an extension for WooCommerce that requires settings of some kind, it's important to ask yourself:  **Where do they belong?**  If your extension just has a couple of simple settings, do you really need to create a new tab specifically for it? Most likely the answer is no.
@@ -12,8 +14,6 @@ Let's say we had an extension that adds a slider to a single product page. This 
 -   Slider Title (text field)
 
 That's only two options, specifically related to  **Products**. We could quite easily just append them onto the core WooCommerce Products Settings (**WooCommerce > Settings > Products**), but that wouldn't be very user friendly. Users wouldn't know where to look initially so they'd have to scan all of the Products options and it would be difficult / impossible to link the options directly. Fortunately, as of WooCommerce 2.2.2, there is a new filter in place that allows you add a new  **section**, beneath one of the core settings' tabs.
-
-> **Note:**  This is a  **Developer level**  doc. If you are unfamiliar with code/templates and resolving potential conflicts, select a  [WooExpert or Developer](https://woo.com/customizations/) for assistance. We are unable to provide support for customizations under our  [Support Policy](https://woo.com/support-policy/).
 
 ## [How to Create a Section](https://github.com/woocommerce/woocommerce/blob/trunk/docs/extesion-developlment/adding-a-section-to-a-settings-tab.md#section-2)
 

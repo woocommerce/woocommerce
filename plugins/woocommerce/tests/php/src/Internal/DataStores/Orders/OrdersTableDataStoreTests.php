@@ -1207,7 +1207,9 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_get_unpaid_orders(): void {
 		// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- Intentional usage since timezone is changed for this file.
-		$now = current_time( 'timestamp' );
+		$now_gmt = time();
+		// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- Testing a legacy code that does expect the offset timestamp.
+		$now_ist = current_time( 'timestamp', 0 ); // IST (Indian standard time) is 5.5 hours ahead of GMT and is set as timezone for this class.
 
 		// Create a few orders.
 		$orders_by_status = array(
@@ -1220,7 +1222,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 				$order = new \WC_Order();
 				$this->switch_data_store( $order, $this->sut );
 				$order->set_status( $order_status );
-				$order->set_date_modified( $now - DAY_IN_SECONDS );
+				$order->set_date_modified( $now_gmt - DAY_IN_SECONDS );
 				$order->save();
 
 				if ( ! $order->is_paid() ) {
@@ -1233,12 +1235,11 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( $orders_by_status['wc-completed'], $this->sut->get_order_count( 'wc-completed' ) );
 
 		// Find unpaid orders.
-		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now ) );
-		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now - HOUR_IN_SECONDS ) );
+		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now_ist ) );
+		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now_ist - HOUR_IN_SECONDS ) );
 
 		// No unpaid orders from before yesterday.
-		$this->assertCount( 0, $this->sut->get_unpaid_orders( $now - WEEK_IN_SECONDS ) );
-
+		$this->assertCount( 0, $this->sut->get_unpaid_orders( $now_ist - DAY_IN_SECONDS ) );
 	}
 
 	/**
@@ -3028,7 +3029,6 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order->set_date_created( '2023-09-01T00:30:00' ); // This would be 2023-08-31T18:00:00 UTC given the current timezone.
 		$this->sut->create( $order );
 
-
 		$query = new OrdersTableQuery( array( 'date_created_gmt' => '2023-09-01' ) );
 		$this->assertEquals( 0, count( $query->orders ) ); // Should not return anything as the order was created on 2023-08-31 UTC.
 
@@ -3058,9 +3058,12 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->toggle_cot_authoritative( true );
 		$this->enable_cot_sync();
 
-		add_action( 'woocommerce_delete_shop_order_transients', function ( $order_id ) {
-			wc_get_order( $order_id );
-		} );
+		add_action(
+			'woocommerce_delete_shop_order_transients',
+			function ( $order_id ) {
+				wc_get_order( $order_id );
+			}
+		);
 		$order = OrderHelper::create_order();
 
 		$this->assertEquals( 1, $order->get_customer_id() );
@@ -3087,7 +3090,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		$order = OrderHelper::create_order();
 
-		// set the cache
+		// set the cache.
 		wc_get_order( $order->get_id() );
 
 		$order->add_meta_data( 'test_key', 'test_value' );

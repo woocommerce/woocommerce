@@ -1,5 +1,7 @@
 ---
 post_title: String localization guidelines
+menu_title: String localization guidelines
+tags: reference
 ---
 
 1. Use `woocommerce` textdomain in all strings.
