@@ -63,7 +63,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_related_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => $this->get_collection_params(),
+					'args'                => $this->get_related_products_collection_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -1522,6 +1522,20 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+
+		return $params;
+	}
+
+	/**
+	 * Handle related products params:
+	 * - related_categories: Limit result set to specific product categorie ids.
+	 * - related_tags: Limit result set to specific product tag ids.
+	 * - combine: Combine the product terms (categories, tags, ...).
+	 *
+	 * @return array
+	 */
+	function get_related_products_collection_params() {
+		$params = parent::get_collection_params();
 
 		$params['related_categories'] = array(
 			'description'       => __( 'Limit result set to specific product categorie ids.', 'woocommerce' ),
