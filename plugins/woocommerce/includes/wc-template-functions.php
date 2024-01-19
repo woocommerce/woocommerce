@@ -1435,8 +1435,8 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 * Get the product thumbnail, or the placeholder if not set.
 	 *
 	 * @param string $size (default: 'woocommerce_thumbnail').
-	 * @param  array $attr Image attributes.
-	 * @param  bool  $placeholder True to return $placeholder if no image is found, or false to return an empty string.
+	 * @param  array  $attr Image attributes.
+	 * @param  bool   $placeholder True to return $placeholder if no image is found, or false to return an empty string.
 	 * @return string
 	 */
 	function woocommerce_get_product_thumbnail( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
@@ -3837,32 +3837,32 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 	$item_data = apply_filters( 'woocommerce_get_item_data', $item_data, $cart_item );
 
 	if ( is_array( $item_data ) ) {
-	    // Format item data ready to display.
-	    foreach ( $item_data as $key => $data ) {
-		    // Set hidden to true to not display meta on cart.
-		    if ( ! empty( $data['hidden'] ) ) {
-			    unset( $item_data[ $key ] );
-			    continue;
-		    }
-		    $item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
-		    $item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
-	    }
+		// Format item data ready to display.
+		foreach ( $item_data as $key => $data ) {
+			// Set hidden to true to not display meta on cart.
+			if ( ! empty( $data['hidden'] ) ) {
+				unset( $item_data[ $key ] );
+				continue;
+			}
+			$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
+			$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
+		}
 
-	    // Output flat or in list format.
-	    if ( count( $item_data ) > 0 ) {
-		    ob_start();
+		// Output flat or in list format.
+		if ( count( $item_data ) > 0 ) {
+			ob_start();
 
-		    if ( $flat ) {
-			    foreach ( $item_data as $data ) {
-				    echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['display'] ) . "\n";
-			    }
-		    } else {
-			    wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
-		    }
+			if ( $flat ) {
+				foreach ( $item_data as $data ) {
+					echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['display'] ) . "\n";
+				}
+			} else {
+				wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
+			}
 
-		    return ob_get_clean();
-	    }
-    }
+			return ob_get_clean();
+		}
+	}
 
 	return '';
 }

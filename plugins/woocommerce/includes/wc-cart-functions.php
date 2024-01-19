@@ -423,7 +423,7 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 	}
 
 	if ( ! isset( $package['rates'] ) || ! is_array( $package['rates'] ) ) {
-		$package['rates'] = [];
+		$package['rates'] = array();
 	}
 
 	// If not set, not available, or available methods have changed, set to the DEFAULT option.
