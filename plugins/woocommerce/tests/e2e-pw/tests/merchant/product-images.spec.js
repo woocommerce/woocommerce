@@ -136,7 +136,9 @@ baseTest.describe('Products > Product Images', () => {
 		});
 	});
 
-	test.only('can create a product gallery', async ({page, productWithImage}) => {
+	test('can create a product gallery', async ({page, productWithImage}) => {
+		const images = ['image-02', 'image-03'];
+
 		await test.step('Navigate to product edit page', async () => {
 			await page.goto(`wp-admin/post.php?post=${productWithImage.id}&action=edit`);
 		});
@@ -145,18 +147,20 @@ baseTest.describe('Products > Product Images', () => {
 			const imageCountSelector = '#product_images_container img'
 			let initialImagesCount = await page.locator(imageCountSelector).count();
 
-			for (const image of ['image-02', 'image-03']) {
+			for (const image of images) {
 				await page.getByRole('link', {name: 'Add product gallery images'}).click();
 				await page.getByRole('tab', {name: 'Media Library'}).click();
 				const imageLocator = page.getByLabel(image).nth(0)
 				await imageLocator.click();
-				await expect(imageLocator).toBeChecked()
+				await expect(imageLocator, 'should be checked').toBeChecked()
 				const dataId = await imageLocator.getAttribute('data-id')
 				await page.getByRole('button', {name: 'Add to gallery'}).click();
 
-				await expect(page.locator(`li[data-attachment_id="${dataId}"]`)).toBeVisible();
+				await expect(page.locator(`li[data-attachment_id="${dataId}"]`), 'thumbnail should be visible')
+					.toBeVisible();
 				const currentImagesCount = await page.locator(imageCountSelector).count();
-				await expect(currentImagesCount).toEqual(initialImagesCount + 1)
+				await expect(currentImagesCount, 'number of images should increase')
+					.toEqual(initialImagesCount + 1)
 				initialImagesCount = currentImagesCount;
 			}
 
@@ -164,7 +168,11 @@ baseTest.describe('Products > Product Images', () => {
 		});
 
 		await test.step('Verify product gallery', async () => {
-			// Verify images in store frontend
+			// Verify gallery in store frontend
+			await page.goto(productWithImage.permalink);
+			await expect(
+				page.locator(`#product-${productWithImage.id} ol img`).nth(images.length), 'all gallery images should be visible'
+			).toBeVisible(); // +1 for the featured image
 		});
 	});
 
