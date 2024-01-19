@@ -741,7 +741,7 @@ class ListTable extends WP_List_Table {
         /**
          * Filters whether to remove the 'Months' drop-down from the order list table.
          *
-         * @since 4.2.0
+         * @since x.x.x
          *
          * @param bool   $disable   Whether to disable the drop-down. Default false.
          */
