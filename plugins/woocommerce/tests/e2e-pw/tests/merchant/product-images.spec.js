@@ -84,7 +84,7 @@ baseTest.describe('Products > Product Images', () => {
 		await test.step('Set product image', async () => {
 			await page.getByRole('link', {name: 'Set product image'}).click();
 			await page.getByRole('tab', {name: 'Media Library'}).click();
-			await page.getByRole('searchbox', { name: 'Search' }).fill('image-01');
+			await page.getByRole('searchbox', {name: 'Search'}).fill('image-01');
 			const imageLocator = page.getByLabel('image-01').nth(0)
 			await imageLocator.click();
 			await expect(imageLocator).toBeChecked()
@@ -115,7 +115,7 @@ baseTest.describe('Products > Product Images', () => {
 		await test.step('Update product image', async () => {
 			await page.locator('#set-post-thumbnail').click();
 
-			await page.getByRole('searchbox', { name: 'Search' }).fill('image-02');
+			await page.getByRole('searchbox', {name: 'Search'}).fill('image-02');
 			const imageLocator = page.getByLabel('image-02').nth(0)
 			await imageLocator.click();
 			await expect(imageLocator).toBeChecked()
@@ -174,7 +174,7 @@ baseTest.describe('Products > Product Images', () => {
 			for (const image of images) {
 				await page.getByRole('link', {name: 'Add product gallery images'}).click();
 				await page.getByRole('tab', {name: 'Media Library'}).click();
-				await page.getByRole('searchbox', { name: 'Search' }).fill(image);
+				await page.getByRole('searchbox', {name: 'Search'}).fill(image);
 				const imageLocator = page.getByLabel(image).nth(0);
 				await imageLocator.click();
 				await expect(imageLocator, 'should be checked').toBeChecked();
@@ -224,9 +224,13 @@ baseTest.describe('Products > Product Images', () => {
 		await test.step('Verify product gallery', async () => {
 			// Verify gallery in store frontend
 			await page.goto(productWithGallery.permalink);
+			const selector = `#product-${productWithGallery.id} ol img`;
 			await expect(
-				page.locator(`#product-${productWithGallery.id} ol img`).nth(imagesCount - 1), 'all gallery images should be visible'
+				page.locator(selector).nth(imagesCount - 1), 'gallery images should be visible'
 			).toBeVisible();
+			await expect(
+				page.locator(selector).nth(imagesCount), 'one gallery image should not be visible'
+			).toBeHidden();
 		});
 	});
 
