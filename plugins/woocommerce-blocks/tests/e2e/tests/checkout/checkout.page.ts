@@ -52,7 +52,14 @@ export class CheckoutPage {
 		return nameIsVisible && priceIsVisible;
 	}
 
-	async fillInCheckoutWithTestData( overrideData = {} ) {
+	async fillInCheckoutWithTestData(
+		overrideData = {},
+		additionalFields: {
+			address?: { label: string; value: string }[];
+			contact?: { label: string; value: string }[];
+			additional?: { label: string; value: string }[];
+		} = { address: [], additional: [], contact: [] }
+	) {
 		const isShippingOpen = await this.page
 			.getByRole( 'group', {
 				name: 'Shipping address',
@@ -67,15 +74,74 @@ export class CheckoutPage {
 
 		const testData = { ...this.testData, ...overrideData };
 
-		await this.page.getByLabel( 'Email address' ).fill( testData.email );
+		await this.fillContactInformation(
+			testData.email,
+			additionalFields.contact || []
+		);
 		if ( isShippingOpen ) {
-			await this.fillShippingDetails( testData );
+			await this.fillShippingDetails(
+				testData,
+				additionalFields.address
+			);
 		}
 		if ( isBillingOpen ) {
-			await this.fillBillingDetails( testData );
+			await this.fillBillingDetails( testData, additionalFields.address );
 		}
+
+		if (
+			Array.isArray( additionalFields?.additional ) &&
+			additionalFields.additional.length > 0
+		) {
+			await this.fillAdditionalInformationSection(
+				additionalFields.additional
+			);
+		}
+
 		// Blur active field to trigger shipping rates update, then wait for requests to finish.
 		await this.page.evaluate( 'document.activeElement.blur()' );
+	}
+
+	async fillContactInformation(
+		email: string,
+		additionalFields: { label: string; value: string }[]
+	) {
+		const contactSection = this.page.getByRole( 'group', {
+			name: 'Contact information',
+		} );
+		await contactSection.getByLabel( 'Email address' ).fill( email );
+
+		// Rest of additional data passed in from the overrideData object.
+		for ( const { label, value } of additionalFields ) {
+			const field = contactSection.getByLabel( label );
+			await field.fill( value );
+		}
+	}
+
+	async fillAdditionalInformationSection(
+		additionalFields: { label: string; value: string }[]
+	) {
+		const contactSection = this.page.getByRole( 'group', {
+			name: 'Additional order information',
+		} );
+
+		// Rest of additional data passed in from the overrideData object.
+		for ( const { label, value } of additionalFields ) {
+			const field = contactSection.getByLabel( label );
+			await field.fill( value );
+		}
+	}
+
+	async fillAdditionalInformation(
+		email: string,
+		additionalFields: { label: string; value: string }[]
+	) {
+		await this.page.getByLabel( 'Email address' ).fill( email );
+
+		// Rest of additional data passed in from the overrideData object.
+		for ( const { label, value } of additionalFields ) {
+			const field = this.page.getByLabel( label );
+			await field.fill( value );
+		}
 	}
 
 	/**
@@ -161,7 +227,10 @@ export class CheckoutPage {
 		}
 	}
 
-	async fillBillingDetails( customerBillingDetails ) {
+	async fillBillingDetails(
+		customerBillingDetails: Record< string, string >,
+		additionalFields: { label: string; value: string }[] = []
+	) {
 		await this.editBillingDetails();
 		const billingForm = this.page.getByRole( 'group', {
 			name: 'Billing address',
@@ -210,11 +279,21 @@ export class CheckoutPage {
 		if ( await postcode.isVisible() ) {
 			await postcode.fill( customerBillingDetails.postcode );
 		}
+
+		// Rest of additional data passed in from the overrideData object.
+		for ( const { label, value } of additionalFields ) {
+			const field = billingForm.getByLabel( label );
+			await field.fill( value );
+		}
+
 		// Blur active field to trigger customer address update.
 		await this.page.evaluate( 'document.activeElement.blur()' );
 	}
 
-	async fillShippingDetails( customerShippingDetails ) {
+	async fillShippingDetails(
+		customerShippingDetails: Record< string, string >,
+		additionalFields: { label: string; value: string }[] = []
+	) {
 		await this.editShippingDetails();
 		const shippingForm = this.page.getByRole( 'group', {
 			name: 'Shipping address',
@@ -260,6 +339,12 @@ export class CheckoutPage {
 
 		if ( await postcode.isVisible() ) {
 			await postcode.fill( customerShippingDetails.postcode );
+		}
+
+		// Rest of additional data passed in from the overrideData object.
+		for ( const { label, value } of additionalFields ) {
+			const field = shippingForm.getByLabel( label );
+			await field.fill( value );
 		}
 
 		// Blur active field to trigger customer address update.
