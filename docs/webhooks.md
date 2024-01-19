@@ -1,9 +1,5 @@
 # Webhooks
 
-> **Notice:** This documentation is currently a **work in progress**. Please be aware that some sections might be incomplete or subject to change. We appreciate your patience and welcome any contributions!
-
-> **Note**: We are unable to provide support for customizations under our **[Support Policy](http://www.woocommerce.com/support-policy)**. If you need to further customize a snippet, or extend its functionality, we highly recommend [**Codeable**](https://codeable.io/?ref=z4Hnp), or a [**Certified WooExpert**](https://woocommerce.com/experts/).
-
 ## [What are Webhooks?](https://github.com/woocommerce/woocommerce/blob/trunk/docs/webhooks#what-are-webhooks)
 
 A  [Webhook](http://en.wikipedia.org/wiki/Webhook)  is an event notification sent to a URL of your choice. Users can configure them to trigger events on one site to invoke behavior on another.

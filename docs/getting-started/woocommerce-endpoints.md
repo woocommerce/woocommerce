@@ -2,8 +2,6 @@
 post_title: WooCommerce Endpoints
 ---
 
-**Note:** We are unable to provide support for customizations under our **[Support Policy](https://woo.com/support-policy/)**. If you need to further customize a snippet, or extend its functionality, we highly recommend [**Codeable**](https://codeable.io/?ref=z4Hnp), or a [**Certified WooExpert**](https://woo.com/experts/).
-
 Endpoints are an extra part in the website URL that is detected to show different content when present.
 
 For example: You may have a 'my account' page shown at URL **yoursite.com/my-account**. When the endpoint 'edit-account' is appended to this URL, making it '**yoursite.com/my-account/edit-account**' then the **Edit account page** is shown instead of the **My account page**.

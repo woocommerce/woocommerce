@@ -8,7 +8,7 @@ import { getQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 
-import { AssembleHubLoader } from '../design-with-ai/pages';
+import { ApiCallLoader, AssembleHubLoader } from './pages/ApiCallLoader';
 
 import { FlowType } from '../types';
 import { DesignWithoutAIStateMachineContext } from './types';
@@ -66,25 +66,79 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 				],
 			},
 			preAssembleSite: {
+				initial: 'preApiCallLoader',
 				id: 'preAssembleSite',
-				initial: 'assembleSite',
 				states: {
-					assembleSite: {
-						initial: 'pending',
+					preApiCallLoader: {
+						meta: {
+							// @todo: Move the current component in a common folder or create a new one dedicated to this flow.
+							component: ApiCallLoader,
+						},
+						type: 'parallel',
 						states: {
-							pending: {
-								invoke: {
-									src: 'assembleSite',
-									onDone: {
-										target: 'done',
+							installAndActivateTheme: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'installAndActivateTheme',
+											onDone: {
+												target: 'success',
+											},
+											// TODO: Handle error case: https://github.com/woocommerce/woocommerce/issues/43780
+											// onError: {
+											// 	actions: [
+											// 		'assignAPICallLoaderError',
+											// 	],
+											// },
+										},
 									},
-									onError: {
-										actions: [ 'assignAPICallLoaderError' ],
+									success: { type: 'final' },
+								},
+							},
+							assembleSite: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'assembleSite',
+											onDone: {
+												target: 'success',
+											},
+											// TODO: Handle error case: https://github.com/woocommerce/woocommerce/issues/43780
+											// onError: {
+											// 	actions: [
+											// 		'assignAPICallLoaderError',
+											// 	],
+											// },
+										},
+									},
+									success: {
+										type: 'final',
 									},
 								},
 							},
-							done: {
-								type: 'final',
+							createProducts: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'createProducts',
+											onDone: {
+												target: 'success',
+											},
+											// TODO: Handle error case: https://github.com/woocommerce/woocommerce/issues/43780
+											// onError: {
+											// 	actions: [
+											// 		'assignAPICallLoaderError',
+											// 	],
+											// },
+										},
+									},
+									success: {
+										type: 'final',
+									},
+								},
 							},
 						},
 						onDone: {

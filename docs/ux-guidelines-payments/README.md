@@ -13,6 +13,6 @@ The choice between payment plugins depends on the specific needs and preferences
 A merchant can discover a payments plugin in the following ways:
 
 - Through direct installation from WordPress plugins.
-- Through Woo’s public list of payment services on the Marketplace.
+- Through Woo's public list of payment services on the Marketplace.
 - Through the admin onboarding tasks and payments settings. To be added to the list of payment gateways in the Woo admin, the payments plugin must meet the criteria listed in these guidelines.
 

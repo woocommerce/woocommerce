@@ -956,22 +956,26 @@ class CheckoutFields {
 	 * @param \WC_Order $order Order object.
 	 * @param string    $location The location to get fields for (address|contact|additional).
 	 * @param string    $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
+	 * @param string    $context The context to get the field value for (edit|view).
 	 * @return array An array of fields definitions as well as their values formatted for display.
 	 */
-	public function get_order_additional_fields_with_values( $order, $location, $group = '' ) {
+	public function get_order_additional_fields_with_values( $order, $location, $group = '', $context = 'edit' ) {
 		$fields             = $this->get_fields_for_location( $location );
 		$fields_with_values = array();
 
 		foreach ( $fields as $field_key => $field ) {
-			$value = $this->format_additional_field_value(
-				$this->get_field_from_order( $field_key, $order, $group ),
-				$field
-			);
+			$value = $this->get_field_from_order( $field_key, $order, $group );
+
 			if ( '' === $value ) {
 				continue;
 			}
-			$fields_with_values[ $field_key ]          = $field;
-			$fields_with_values[ $field_key ]['value'] = $value;
+
+			if ( 'view' === $context ) {
+				$value = $this->format_additional_field_value( $value, $field );
+			}
+
+			$field['value']                   = $value;
+			$fields_with_values[ $field_key ] = $field;
 		}
 
 		return $fields_with_values;

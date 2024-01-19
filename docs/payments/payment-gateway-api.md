@@ -6,8 +6,6 @@ tags: reference
 
 Payment gateways in WooCommerce are class based and can be added through traditional plugins. This guide provides an intro to gateway development.
 
-**Note:** We are unable to provide support for customizations under our **[Support Policy](https://woo.com/support-policy/)**. If you need to further customize a snippet, or extend its functionality, we highly recommend [**Codeable**](https://codeable.io/?ref=z4Hnp), or a [**Certified WooExpert**](https://woo.com/experts/).
-
 ## Types of payment gateway
 
 Payment gateways come in several varieties:
@@ -21,21 +19,17 @@ Form and iFrame based gateways post data offsite, meaning there are less securit
 
 ## Creating a basic payment gateway
 
-
-
-**Note:** We are unable to provide support for customizations under our [Support Policy](https://woo.com/support-policy/). If you are unfamiliar with code/templates and resolving potential conflicts, select a [WooExpert or Developer](https://woo.com/customizations/)  for assistance.
-
 **Note:** The instructions below are for the default Checkout page. If you're looking to add a custom payment method for the new Checkout block, check out [this documentation.](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/docs/third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)
 
 Payment gateways should be created as additional plugins that hook into WooCommerce. Inside the plugin, you need to create a class after plugins are loaded. Example:
 
-``` php
+```php
 add_action( 'plugins_loaded', 'init_your_gateway_class' );
 ```
 
 It is also important that your gateway class extends the WooCommerce base gateway class, so you have access to important methods and the [settings API](https://woo.com/document/settings-api/ "https://woo.com/document/settings-api/"):
 
-``` php
+```php
 function init_your_gateway_class() {
 class WC_Gateway_Your_Gateway extends WC_Payment_Gateway {}
 }
@@ -45,14 +39,14 @@ You can view the [WC_Payment_Gateway class in the API Docs](https://woocommerce.
 
 As well as defining your class, you need to also tell WooCommerce (WC) that it exists. Do this by filtering _woocommerce_payment_gateways_:
 
-``` php
+```php
 function add_your_gateway_class( $methods ) {
 $methods\[\] = 'WC_Gateway_Your_Gateway';
 return $methods;
 }
 ```
 
-``` php
+```php
 add_filter( 'woocommerce_payment_gateways', 'add_your_gateway_class' );
 ```
 
@@ -72,7 +66,7 @@ Within your constructor, you should define the following variables:
 
 Your constructor should also define and load settings fields:
 
-``` php
+```php
 $this->init\_form\_fields();
 $this->init_settings();
 ```
@@ -81,13 +75,13 @@ We'll cover `init_form_fields()` later, but this basically defines your settings
 
 After `init_settings()` is called, you can get the settings and load them into variables, meaning:
 
-``` php
+```php
 $this->title = $this->get_option( 'title' );
 ```
 
 Finally, you need to add a save hook for your settings:
 
-``` php
+```php
 add_action( 'woocommerce_update_options_payment_gateways\_' . $this->id, array( $this, 'process_admin_options' ) );
 ```
 
@@ -97,7 +91,7 @@ Use this method to set `$this->form_fields` - these are options you'll show in a
 
 A basic set of settings for your gateway would consist of _enabled_, _title_ and _description_:
 
-``` php
+```php
 $this->form_fields = array(
 'enabled' => array(
 'title' => \_\_( 'Enable/Disable', 'woocommerce' ),
@@ -126,7 +120,7 @@ Now for the most important part of the gateway - handling payment and processing
 
 Here is an example of a process_payment function from the Cheque gateway:
 
-``` php
+```php
 function process_payment( $order_id ) {
 global $woocommerce;
 $order = new WC_Order( $order_id );
@@ -153,7 +147,7 @@ As you can see, its job is to:
 
 Cheque gives the order On-Hold status since the payment cannot be verified automatically. If, however, you are building a direct gateway, then you can complete the order here instead. Rather than using update_status when an order is paid, you should use payment_complete:
 
-``` php
+```php
 $order->payment_complete();
 ```
 
@@ -161,7 +155,7 @@ This ensures stock reductions are made, and the status is changed to the correct
 
 If payment fails, you should throw an error and return null:
 
-``` php
+```php
 wc_add_notice( \_\_('Payment error:', 'woothemes') . $error_message, 'error' );
 return;
 ```
@@ -174,14 +168,14 @@ Stock levels are updated via actions (`woocommerce_payment_complete` and in tran
 
 Updating the order status can be done using functions in the order class. You should only do this if the order status is not processing (in which case you should use payment_complete()). An example of updating to a custom status would be:
 
-``` php
+```php
 $order = new WC\_Order( $order\_id );
 $order->update_status('on-hold', \_\_('Awaiting cheque payment', 'woothemes'));
 ```
 
 The above example updates the status to On-Hold and adds a note informing the owner that it is awaiting a Cheque. You can add notes without updating the order status; this is used for adding a debug message:
 
-``` php
+```php
 $order->add_order_note( \_\_('IPN payment completed', 'woothemes') );
 ```
 
@@ -195,7 +189,7 @@ $order->add_order_note( \_\_('IPN payment completed', 'woothemes') );
 
 If you are creating an advanced, direct gateway (i.e., one that takes payment on the actual checkout page), there are additional steps involved. First, you need to set has_fields to true in the gateway constructor:
 
-``` php
+```php
 $this->has_fields = true;
 ```
 
@@ -209,19 +203,19 @@ Finally, you need to add payment code inside your `process_payment( $order_id )`
 
 If payment fails, you should output an error and return nothing:
 
-``` php
+```php
 wc_add_notice( \_\_('Payment error:', 'woothemes') . $error_message, 'error' );
 return;
 ```
 
 If payment is successful, you should set the order as paid and return the success array:
 
-``` php
+```php
 // Payment complete
 $order->payment_complete();
 ```
 
-``` php
+```php
 // Return thank you page redirect
 return array(
 'result' => 'success',
@@ -235,13 +229,13 @@ If you are building a gateway that makes a callback to your store to tell you ab
 
 The best way to add a callback and callback handler is to use WC-API hooks. An example would be as PayPal Standard does. It sets the callback/IPN URL as:
 
-``` php
+```php
 str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_Paypal', home_url( '/' ) ) );
 ```
 
 Then hooks in its handler to the hook:
 
-``` php
+```php
 add_action( 'woocommerce_api_wc_gateway_paypal', array( $this, 'check_ipn_response' ) );
 ```
 

@@ -15,6 +15,7 @@ import assemblingAiOptimizedStore from '../../assets/images/loader-assembling-ai
 import applyingFinishingTouches from '../../assets/images/loader-applying-the-finishing-touches.svg';
 import generatingContent from '../../assets/images/loader-generating-content.svg';
 import openingTheDoors from '../../assets/images/loader-opening-the-doors.svg';
+import { createAugmentedSteps } from '~/customize-store/utils';
 
 const loaderSteps = [
 	{
@@ -97,42 +98,6 @@ const loaderSteps = [
 		progress: 100,
 	},
 ];
-
-// Make the loader last longer and provide a smoother progress by duplicating the steps.
-const createAugmentedSteps = (
-	steps: typeof loaderSteps,
-	numOfDupes: number
-) => {
-	// Duplicate each step, so we can animate each one
-	// (e.g. each step will be duplicated 3 times, and each duplicate will
-	// have different progress)
-	const augmentedSteps = steps
-		.map( ( item, index, array ) => {
-			// Get the next item in the array
-			const nextItem = array[ index + 1 ];
-			// If there is no next item, we're at the end of the array
-			// so just return the current item
-			if ( ! nextItem ) return [ item ];
-
-			// If there is a next item, we're not at the end of the array
-			// so return the current item, plus duplicates
-			const duplicates = [ item ];
-			const progressIncreaseBy =
-				( nextItem.progress - item.progress ) / numOfDupes;
-
-			for ( let i = 0; i < numOfDupes; i++ ) {
-				duplicates.push( {
-					...item,
-					progress: item.progress + ( i + 1 ) * progressIncreaseBy,
-				} );
-			}
-
-			return duplicates;
-		} )
-		.flat();
-
-	return augmentedSteps;
-};
 
 // Loader for the API call without the last frame.
 export const ApiCallLoader = () => {
