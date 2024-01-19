@@ -68,13 +68,11 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		);
 		await checkoutPageObject.placeOrder();
 
-		const shippingGovernmentIdText = checkoutPageObject.page
-			.getByText( 'Government ID' )
-			.first();
-		const governmentId = await shippingGovernmentIdText.evaluate(
-			( node ) => node.nextSibling?.textContent
-		);
-		await expect( shippingGovernmentIdText ).toBeVisible();
-		expect( governmentId ).toEqual( '12345' );
+		await expect(
+			checkoutPageObject.page.getByText( 'Government ID12345' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText( 'Government ID54321' )
+		).toBeVisible();
 	} );
 } );
