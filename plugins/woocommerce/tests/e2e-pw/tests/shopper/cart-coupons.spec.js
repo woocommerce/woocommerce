@@ -24,7 +24,7 @@ const totals = [ '$15.00', '$10.00', '$13.00' ];
 
 test.describe( 'Cart applying coupons', () => {
 	let firstProductId;
-	const couponBatchId = new Array();
+	const couponBatchId = [];
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -90,7 +90,7 @@ test.describe( 'Cart applying coupons', () => {
 			await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 			await expect(
-				page.getByText('Coupon code applied successfully.')
+				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
 			// Checks the coupon amount is credited properly
 			await expect(
@@ -108,7 +108,9 @@ test.describe( 'Cart applying coupons', () => {
 		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		// successful first time
-		await expect( page.getByText('Coupon code applied successfully.') ).toBeVisible();
+		await expect(
+			page.getByText( 'Coupon code applied successfully.' )
+		).toBeVisible();
 		await page.waitForLoadState( 'networkidle' );
 		// try to apply the same coupon
 		await page.goto( '/cart/' );
@@ -116,7 +118,9 @@ test.describe( 'Cart applying coupons', () => {
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		await page.waitForLoadState( 'networkidle' );
 		// error received
-		await expect( page.getByText('Coupon code already applied!') ).toBeVisible();
+		await expect(
+			page.getByText( 'Coupon code already applied!' )
+		).toBeVisible();
 		// check cart total
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(
 			discounts[ 0 ]
@@ -131,14 +135,18 @@ test.describe( 'Cart applying coupons', () => {
 		await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		// successful
-		await expect( page.getByText( 'Coupon code applied successfully.' ) ).toBeVisible();
+		await expect(
+			page.getByText( 'Coupon code applied successfully.' )
+		).toBeVisible();
 
 		await page.waitForLoadState( 'networkidle' );
 		await page.locator( '#coupon_code' );
 		await page.locator( '#coupon_code' ).fill( coupons[ 2 ].code );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 		// successful
-		await expect( page.getByText( 'Coupon code applied successfully.' ) ).toBeVisible();
+		await expect(
+			page.getByText( 'Coupon code applied successfully.' )
+		).toBeVisible();
 		// check cart total
 		await expect(
 			page.locator( '.cart-discount .amount >> nth=0' )
