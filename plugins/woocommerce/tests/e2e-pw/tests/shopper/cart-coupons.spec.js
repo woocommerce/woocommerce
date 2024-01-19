@@ -37,6 +37,10 @@ test.describe( 'Cart applying coupons', () => {
 		await api.put( 'settings/general/woocommerce_currency', {
 			value: 'USD',
 		} );
+		// enable COD
+		await api.put( 'payment_gateways/cod', {
+			enabled: true,
+		} );
 		// add product
 		await api
 			.post( 'products', {
@@ -79,6 +83,9 @@ test.describe( 'Cart applying coupons', () => {
 			force: true,
 		} );
 		await api.post( 'coupons/batch', { delete: [ ...couponBatchId ] } );
+		await api.put( 'payment_gateways/cod', {
+			enabled: false,
+		} );
 	} );
 
 	for ( let i = 0; i < coupons.length; i++ ) {
