@@ -113,6 +113,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	) {
 		return async function handleMenuItemClick() {
 			try {
+				recordEvent( 'product_template_selector_selected', {
+					source: TRACKS_SOURCE,
+					selected_template: productTemplate.id,
+					unsupported_template: ! productTemplate.layoutTemplateId,
+				} );
+
 				if ( ! productTemplate.layoutTemplateId ) {
 					setUnsupportedProductTemplate( productTemplate );
 					onClose();
