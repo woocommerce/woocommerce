@@ -966,7 +966,7 @@ class CheckoutFields {
 		foreach ( $fields as $field_key => $field ) {
 			$value = $this->get_field_from_order( $field_key, $order, $group );
 
-			if ( '' === $value ) {
+			if ( '' === $value || null === $value ) {
 				continue;
 			}
 
