@@ -8,84 +8,31 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import analyzingYourResponses from '../../assets/images/loader-analyzing-your-responses.svg';
-import designingTheBestLook from '../../assets/images/loader-designing-the-best-look.svg';
-import comparingTheTopPerformingStores from '../../assets/images/loader-comparing-top-performing-stores.svg';
-import assemblingAiOptimizedStore from '../../assets/images/loader-assembling-ai-optimized-store.svg';
-import applyingFinishingTouches from '../../assets/images/loader-applying-the-finishing-touches.svg';
-import generatingContent from '../../assets/images/loader-generating-content.svg';
+import loaderAssemblingStore from '../../assets/images/loader-assembling-ai-optimized-store.svg';
+import loaderTurningLights from '../../assets/images/loader-turning-lights.svg';
 import openingTheDoors from '../../assets/images/loader-opening-the-doors.svg';
 import { createAugmentedSteps } from '~/customize-store/utils';
 
 const loaderSteps = [
 	{
-		title: __( 'Analyzing your responses', 'woocommerce' ),
+		title: __( 'Setting up the foundations', 'woocommerce' ),
 		image: (
 			<img
-				src={ analyzingYourResponses }
-				alt={ __( 'Analyzing your responses', 'woocommerce' ) }
+				src={ loaderAssemblingStore }
+				alt={ __( 'Setting up the foundations', 'woocommerce' ) }
 			/>
 		),
-		progress: 14,
+		progress: 25,
 	},
 	{
-		title: __( 'Comparing the top performing stores', 'woocommerce' ),
+		title: __( 'Turning on the lights', 'woocommerce' ),
 		image: (
 			<img
-				src={ comparingTheTopPerformingStores }
-				alt={ __(
-					'Comparing the top performing stores',
-					'woocommerce'
-				) }
+				src={ loaderTurningLights }
+				alt={ __( 'Turning on the lights', 'woocommerce' ) }
 			/>
 		),
-		progress: 28,
-	},
-	{
-		title: __( 'Designing the best look for your business', 'woocommerce' ),
-		image: (
-			<img
-				src={ designingTheBestLook }
-				alt={ __(
-					'Designing the best look for your business',
-					'woocommerce'
-				) }
-			/>
-		),
-		progress: 42,
-	},
-	{
-		title: __( 'Generating content', 'woocommerce' ),
-		image: (
-			<img
-				src={ generatingContent }
-				alt={ __( 'Generating content', 'woocommerce' ) }
-			/>
-		),
-		progress: 56,
-	},
-	{
-		title: __( 'Assembling your AI-optimized store', 'woocommerce' ),
-		image: (
-			<img
-				src={ assemblingAiOptimizedStore }
-				alt={ __(
-					'Assembling your AI-optimized store',
-					'woocommerce'
-				) }
-			/>
-		),
-		progress: 70,
-	},
-	{
-		title: __( 'Applying the finishing touches', 'woocommerce' ),
-		image: (
-			<img
-				src={ applyingFinishingTouches }
-				alt={ __( 'Applying the finishing touches', 'woocommerce' ) }
-			/>
-		),
-		progress: 84,
+		progress: 50,
 	},
 	{
 		title: __( 'Opening the doors', 'woocommerce' ),
@@ -112,7 +59,8 @@ export const ApiCallLoader = () => {
 		};
 
 		// We preload the these images to avoid flickering. We only need to preload them because the others are small enough to be inlined in base64.
-		preload( assemblingAiOptimizedStore );
+		preload( loaderAssemblingStore );
+		preload( loaderTurningLights );
 		preload( openingTheDoors );
 	}, [] );
 
@@ -124,7 +72,7 @@ export const ApiCallLoader = () => {
 	return (
 		<Loader>
 			<Loader.Sequence
-				interval={ ( 40 * 1000 ) / ( augmentedSteps.length - 1 ) }
+				interval={ ( 5 * 1000 ) / ( augmentedSteps.length - 1 ) }
 				shouldLoop={ false }
 				onChange={ ( index ) => {
 					// to get around bad set state timing issue
@@ -159,7 +107,7 @@ export const AssembleHubLoader = () => {
 	return (
 		<Loader>
 			<Loader.Sequence
-				interval={ ( 10 * 1000 ) / ( augmentedSteps.length - 1 ) }
+				interval={ ( 2 * 1000 ) / ( augmentedSteps.length - 1 ) }
 				shouldLoop={ false }
 				onChange={ ( index ) => {
 					// to get around bad set state timing issue

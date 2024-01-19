@@ -8,7 +8,7 @@ import { getQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 
-import { ApiCallLoader, AssembleHubLoader } from '../design-with-ai/pages';
+import { ApiCallLoader, AssembleHubLoader } from './pages/ApiCallLoader';
 
 import { FlowType } from '../types';
 import { DesignWithoutAIStateMachineContext } from './types';
