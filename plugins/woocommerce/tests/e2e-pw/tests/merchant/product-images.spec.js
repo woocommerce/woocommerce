@@ -84,6 +84,7 @@ baseTest.describe('Products > Product Images', () => {
 		await test.step('Set product image', async () => {
 			await page.getByRole('link', {name: 'Set product image'}).click();
 			await page.getByRole('tab', {name: 'Media Library'}).click();
+			await page.getByRole('searchbox', { name: 'Search' }).fill('image-01');
 			const imageLocator = page.getByLabel('image-01').nth(0)
 			await imageLocator.click();
 			await expect(imageLocator).toBeChecked()
@@ -114,6 +115,7 @@ baseTest.describe('Products > Product Images', () => {
 		await test.step('Update product image', async () => {
 			await page.locator('#set-post-thumbnail').click();
 
+			await page.getByRole('searchbox', { name: 'Search' }).fill('image-02');
 			const imageLocator = page.getByLabel('image-02').nth(0)
 			await imageLocator.click();
 			await expect(imageLocator).toBeChecked()
@@ -172,6 +174,7 @@ baseTest.describe('Products > Product Images', () => {
 			for (const image of images) {
 				await page.getByRole('link', {name: 'Add product gallery images'}).click();
 				await page.getByRole('tab', {name: 'Media Library'}).click();
+				await page.getByRole('searchbox', { name: 'Search' }).fill(image);
 				const imageLocator = page.getByLabel(image).nth(0);
 				await imageLocator.click();
 				await expect(imageLocator, 'should be checked').toBeChecked();
