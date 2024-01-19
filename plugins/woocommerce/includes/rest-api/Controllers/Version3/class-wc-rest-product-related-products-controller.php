@@ -37,13 +37,6 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 	protected $rest_base = 'products/(?P<id>[\d]+)/related-products';
 
 	/**
-	 * Post type.
-	 *
-	 * @var string
-	 */
-	protected $post_type = 'product';
-
-	/**
 	 * Related product ids.
 	 *
 	 * @var array
@@ -196,8 +189,7 @@ class WC_REST_Product_Related_Products_Controller extends WC_REST_Products_V2_Co
 	 * @return object
 	 */
 	public function get_items( $request ) {
-		$id     = $request->get_param( 'id' );
-
+		$id         = $request->get_param( 'id' );
 		$categories = $request->get_param( 'categories' );
 		$tags       = $request->get_param( 'tags' );
 		$combine    = $request->get_param( 'combine' );
