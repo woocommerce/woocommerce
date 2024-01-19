@@ -40,7 +40,7 @@ A field can only be shown in one location, it is not possible to render the same
 
 The contact information section currently renders at the top of the form. It contains the `email` field and any other additional fields.
 
-<img width="715" alt="Showing the contact information section with two fields rendered, email and an additional checkout field (optional)" src="https://github.com/woocommerce/woocommerce/assets/5656702/097c2596-c629-4eab-9604-577ee7a14cfe">
+![Showing the contact information section with two fields rendered, email and an additional checkout field (optional)](https://github.com/woocommerce/woocommerce/assets/5656702/097c2596-c629-4eab-9604-577ee7a14cfe)
 
 Fields rendered here will be saved to the _order_ (i.e. they will not be part of the customer's saved address or account information. New orders will not have any previously used values pre-filled).
 
@@ -48,7 +48,7 @@ Fields rendered here will be saved to the _order_ (i.e. they will not be part of
 
 The address section currently contains a form for the shipping address and the billing address. Additional checkout fields can be registered here and they will appear within that form.
 
-<img width="707" alt="The shipping address form showing the additional checkout field at the bottom" src="https://github.com/woocommerce/woocommerce/assets/5656702/746d280f-3354-4d37-a78a-a2518eb0e5de">
+![The shipping address form showing the additional checkout field at the bottom](https://github.com/woocommerce/woocommerce/assets/5656702/746d280f-3354-4d37-a78a-a2518eb0e5de)
 
 Fields registered here will be saved to both the customer _and_ the order, so returning customers won't need to refill those values again.
 
@@ -64,11 +64,11 @@ This block is used to render fields that aren't part of the contact information 
 
 Fields rendered here will be saved to the order. They will not be part of the customer's saved address or account information. New orders will not have any previously used values pre-filled.
 
-<img width="724" alt="The additional order information section containing an additional checkout field" src="https://github.com/woocommerce/woocommerce/assets/5656702/295b3048-a22a-4225-96b0-6b0371a7cd5f">
+![The additional order information section containing an additional checkout field](https://github.com/woocommerce/woocommerce/assets/5656702/295b3048-a22a-4225-96b0-6b0371a7cd5f)
 
 By default, this block will render as the last step in the Checkout form, however it can be moved using the Gutenberg block controls in the editor.
 
-<img width="892" alt="The additional order information block in the post editor" src="https://github.com/woocommerce/woocommerce/assets/5656702/05a3d7d9-b3af-4445-9318-443ae2c4d7d8">
+![The additional order information block in the post editor"](https://github.com/woocommerce/woocommerce/assets/5656702/05a3d7d9-b3af-4445-9318-443ae2c4d7d8)
 
 ## Supported field types
 
@@ -217,7 +217,7 @@ add_action(
 
 This results in the following address form (the billing form will be the same):
 
-<img width="696" alt="The shipping address form with the Government ID field rendered at the bottom" src="https://github.com/woocommerce/woocommerce/assets/5656702/f6eb3c6f-9178-4978-8e74-e6b2ea353192">
+![The shipping address form with the Government ID field rendered at the bottom](https://github.com/woocommerce/woocommerce/assets/5656702/f6eb3c6f-9178-4978-8e74-e6b2ea353192)
 
 The rendered markup looks like this:
 
@@ -233,25 +233,24 @@ The rendered markup looks like this:
 
 This example demonstrates rendering a checkbox field in the contact information section:
 
-```php
-add_action(
-	'woocommerce_loaded',
-	function() {
-		woocommerce_blocks_register_checkout_field(
-			array(
-				'id'       => 'namespace/marketing-opt-in',
-				'label'    => 'Do you want to subscribe to our newsletter?',
-				'location' => 'contact',
-				'type'     => 'checkbox',
-			)
-		);
-	}
-);
-```
+
+	add_action(
+		'woocommerce_loaded',
+		function() {
+			woocommerce_blocks_register_checkout_field(
+				array(
+					'id'       => 'namespace/marketing-opt-in',
+					'label'    => 'Do you want to subscribe to our newsletter?',
+					'location' => 'contact',
+					'type'     => 'checkbox',
+				)
+			);
+		}
+	);
 
 This results in the following contact information section:
 
-<img width="721" alt="The contact information section with a newsletter subscription checkbox rendered inside it" src="https://github.com/woocommerce/woocommerce/assets/5656702/7444e41a-97cc-451d-b2c9-4eedfbe05724">
+![The contact information section with a newsletter subscription checkbox rendered inside it](https://github.com/woocommerce/woocommerce/assets/5656702/7444e41a-97cc-451d-b2c9-4eedfbe05724)
 
 Note that because an `optionalLabel` was not supplied, the string `(optional)` is appended to the label. To remove that an `optionalLabel` property should be supplied to override this.
 
@@ -295,13 +294,13 @@ add_action(
 
 This results in the additional information section being rendered like so:
 
-<img width="701" alt="The select input before being focused" src="https://github.com/woocommerce/woocommerce/assets/5656702/bbe17ad0-7c7d-419a-951d-315f56f8898a">
+### The select input before being focused
 
-_The select input before being focused_
+![The select input before being focused](https://github.com/woocommerce/woocommerce/assets/5656702/bbe17ad0-7c7d-419a-951d-315f56f8898a)
 
-<img width="724" alt="The select input when focused" src="https://github.com/woocommerce/woocommerce/assets/5656702/bd943906-621b-404f-aa84-b951323e25d3">
+### The select input when focused
 
-_The select input when focused_
+![The select input when focused](https://github.com/woocommerce/woocommerce/assets/5656702/bd943906-621b-404f-aa84-b951323e25d3)
 
 If it is undesirable to force the shopper to select a value, providing a value such as "None of the above" may help.
 
