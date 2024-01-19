@@ -73,7 +73,7 @@ describe( 'SingleUpdateMenu', () => {
 			expect.objectContaining( {
 				onChange: onChangeMock,
 				onClose: expect.any( Function ),
-				selection: mockVariation,
+				selection: [ mockVariation ],
 			} )
 		);
 	} );
@@ -103,7 +103,7 @@ describe( 'SingleUpdateMenu', () => {
 			expect.objectContaining( {
 				onChange: onChangeMock,
 				onClose: expect.any( Function ),
-				selection: mockVariation,
+				selection: [ mockVariation ],
 			} )
 		);
 	} );
@@ -133,7 +133,7 @@ describe( 'SingleUpdateMenu', () => {
 			expect.objectContaining( {
 				onChange: onChangeMock,
 				onClose: expect.any( Function ),
-				selection: mockVariation,
+				selection: [ mockVariation ],
 			} )
 		);
 	} );
@@ -164,7 +164,7 @@ describe( 'SingleUpdateMenu', () => {
 			expect.objectContaining( {
 				onChange: onChangeMock,
 				onClose: expect.any( Function ),
-				selection: mockVariation,
+				selection: [ mockVariation ],
 			} )
 		);
 	} );

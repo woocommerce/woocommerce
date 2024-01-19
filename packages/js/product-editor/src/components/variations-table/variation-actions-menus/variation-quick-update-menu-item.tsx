@@ -45,7 +45,13 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 	const handleClick =
 		( fillProps: Fill.Props & VariationQuickUpdateSlotProps ) => () => {
 			const { selection, onChange, onClose } = fillProps;
-			onClick( { selection, onChange, onClose } );
+			onClick( {
+				selection: Array.isArray( selection )
+					? selection
+					: [ selection ],
+				onChange,
+				onClose,
+			} );
 		};
 
 	const createFill = ( updateType: string ) => (
