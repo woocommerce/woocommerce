@@ -36,7 +36,7 @@ class BillingAddress extends AbstractOrderConfirmationBlock {
 
 		$controller = Package::container()->get( CheckoutFields::class );
 		$custom     = $this->render_additional_fields(
-			$controller->get_order_additional_fields_with_values( $order, 'address', 'billing' )
+			$controller->get_order_additional_fields_with_values( $order, 'address', 'billing', 'view' )
 		);
 
 		return $address . $phone . $custom;
