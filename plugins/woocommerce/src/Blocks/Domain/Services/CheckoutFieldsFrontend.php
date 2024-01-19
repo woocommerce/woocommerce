@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\Domain\Services;
 
 use WC_Customer;
+use WC_Order;
 
 /**
  * Service class managing checkout fields and its related extensibility points on the frontend.
@@ -29,12 +30,106 @@ class CheckoutFieldsFrontend {
 	 * Initialize hooks. This is not run Store API requests.
 	 */
 	public function init() {
+		// Show custom checkout fields on the order details page.
+		add_action( 'woocommerce_order_details_after_customer_address', array( $this, 'render_order_address_fields' ), 10, 2 );
+		add_action( 'woocommerce_order_details_after_customer_details', array( $this, 'render_order_additional_fields' ), 10 );
+
+		// Show custom checkout fields on the My Account page.
+		add_action( 'woocommerce_my_account_after_my_address', array( $this, 'render_address_fields' ), 10, 1 );
+
+		// Field editing in my account area.
 		add_filter( 'woocommerce_save_account_details_required_fields', array( $this, 'edit_account_form_required_fields' ), 10, 1 );
 		add_filter( 'woocommerce_edit_account_form', array( $this, 'edit_account_form_fields' ), 10, 1 );
 		add_action( 'woocommerce_save_account_details', array( $this, 'save_account_form_fields' ), 10, 1 );
-		add_action( 'woocommerce_my_account_after_my_address', array( $this, 'render_address_fields' ), 10, 1 );
 		add_filter( 'woocommerce_address_to_edit', array( $this, 'edit_address_fields' ), 10, 2 );
 		add_action( 'woocommerce_after_save_address_validation', array( $this, 'save_address_fields' ), 10, 2 );
+	}
+
+	/**
+	 * Render custom fields.
+	 *
+	 * @param array $fields List of additional fields with values.
+	 * @return string
+	 */
+	protected function render_additional_fields( $fields ) {
+		return ! empty( $fields ) ? '<dl class="wc-block-components-additional-fields-list">' . implode( '', array_map( array( $this, 'render_additional_field' ), $fields ) ) . '</dl>' : '';
+	}
+
+	/**
+	 * Render custom field.
+	 *
+	 * @param array $field An additional field and value.
+	 * @return string
+	 */
+	protected function render_additional_field( $field ) {
+		return sprintf(
+			'<dt>%1$s</dt><dd>%2$s</dd>',
+			esc_html( $field['label'] ),
+			esc_html( $field['value'] )
+		);
+	}
+
+	/**
+	 * Renders address fields on the order details page.
+	 *
+	 * @param string   $address_type Type of address (billing or shipping).
+	 * @param WC_Order $order Order object.
+	 */
+	public function render_order_address_fields( $address_type, $order ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->render_additional_fields( $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'address', $address_type, 'view' ) );
+	}
+
+	/**
+	 * Renders additional fields on the order details page.
+	 *
+	 * @param WC_Order $order Order object.
+	 */
+	public function render_order_additional_fields( $order ) {
+		$fields = array_merge(
+			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', '', 'view' ),
+			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'additional', '', 'view' ),
+		);
+
+		if ( ! $fields ) {
+			return;
+		}
+
+		echo '<section class="wc-block-order-confirmation-additional-fields-wrapper">';
+		echo '<h2>' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2>';
+		echo $this->render_additional_fields( $fields ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '</section>';
+	}
+
+	/**
+	 * Renders address fields on the account page.
+	 *
+	 * @param string $address_type Type of address (billing or shipping).
+	 */
+	public function render_address_fields( $address_type ) {
+		if ( ! in_array( $address_type, array( 'billing', 'shipping' ), true ) ) {
+			return;
+		}
+
+		$customer = new WC_Customer( get_current_user_id() );
+		$fields   = $this->checkout_fields_controller->get_fields_for_location( 'address' );
+
+		if ( ! $fields || ! $customer ) {
+			return;
+		}
+
+		foreach ( $fields as $key => $field ) {
+			$value = $this->checkout_fields_controller->format_additional_field_value(
+				$this->checkout_fields_controller->get_field_from_customer( $key, $customer, $address_type ),
+				$field
+			);
+
+			if ( ! $value ) {
+				continue;
+			}
+
+			printf( '<br><strong>%s</strong>: %s', wp_kses_post( $field['label'] ), wp_kses_post( $value ) );
+		}
 	}
 
 	/**
@@ -93,37 +188,6 @@ class CheckoutFieldsFrontend {
 				continue;
 			}
 			$this->checkout_fields_controller->persist_field_for_customer( $field_key, wc_clean( wp_unslash( $_POST[ $field_key ] ) ), $customer );
-		}
-	}
-
-	/**
-	 * Renders address fields on the account page.
-	 *
-	 * @param string $address_type Type of address (billing or shipping).
-	 */
-	public function render_address_fields( $address_type ) {
-		if ( ! in_array( $address_type, array( 'billing', 'shipping' ), true ) ) {
-			return;
-		}
-
-		$customer = new WC_Customer( get_current_user_id() );
-		$fields   = $this->checkout_fields_controller->get_fields_for_location( 'address' );
-
-		if ( ! $fields || ! $customer ) {
-			return;
-		}
-
-		foreach ( $fields as $key => $field ) {
-			$value = $this->checkout_fields_controller->format_additional_field_value(
-				$this->checkout_fields_controller->get_field_from_customer( $key, $customer, $address_type ),
-				$field
-			);
-
-			if ( ! $value ) {
-				continue;
-			}
-
-			printf( '<br><strong>%s</strong>: %s', wp_kses_post( $field['label'] ), wp_kses_post( $value ) );
 		}
 	}
 
