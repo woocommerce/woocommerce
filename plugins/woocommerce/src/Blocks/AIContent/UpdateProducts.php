@@ -295,7 +295,7 @@ class UpdateProducts {
 		$product_image_id = $this->product_image_upload( $product->get_id(), $ai_generated_product_content['image']['src'], $ai_generated_product_content['image']['alt'] );
 
 		if ( is_wp_error( $product_image_id ) ) {
-			return new \WP_Error('error_uploading_image', $product_image_id->get_error_message());
+			return new \WP_Error( 'error_uploading_image', $product_image_id->get_error_message() );
 		}
 
 		$this->product_update( $product, $product_image_id, $ai_generated_product_content['title'], $ai_generated_product_content['description'], $ai_generated_product_content['price'] );
@@ -321,7 +321,7 @@ class UpdateProducts {
 		set_time_limit( 150 );
 		wp_raise_memory_limit( 'image' );
 
-		return media_sideload_image($image_src, $product_id, $image_alt, 'id');
+		return media_sideload_image( $image_src, $product_id, $image_alt, 'id' );
 	}
 
 	/**
