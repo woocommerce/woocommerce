@@ -27,7 +27,18 @@ class FilterData {
 	 *
 	 * @return void
 	 */
-	final public function init( FilterClauses $filter_clauses ): void {
+	final public function init( ClausesProviderInterface $filter_clauses ): void {
+		$this->set_filter_clauses_provider( $filter_clauses );
+	}
+
+	/**
+	 * Allow setting the clauses provider at run time.
+	 *
+	 * @param FilterClauses $filter_clauses Instance of FilterClauses.
+	 *
+	 * @return void
+	 */
+	final public function set_filter_clauses_provider( ClausesProviderInterface $filter_clauses ): void {
 		$this->filter_clauses = $filter_clauses;
 	}
 
