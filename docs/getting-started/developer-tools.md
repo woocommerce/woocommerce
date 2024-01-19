@@ -1,5 +1,7 @@
 ---
 post_title: WooCommerce developer tools
+menu_title: Developer tools
+tags: reference
 ---
 
 This guide provides an overview of essential tools and libraries for WooCommerce development. It's intended for developers looking to enhance their WooCommerce projects efficiently.
@@ -32,7 +34,7 @@ This is a collection of reusable scripts tailored for WordPress development.
 
 ## Libraries
 
-Use these resources to help take some of the heavy lifting off of fetching and transforming data –– as well as creating UI elements.
+Use these resources to help take some of the heavy lifting off of fetching and transforming data -- as well as creating UI elements.
 
 ### API Clients
 

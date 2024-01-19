@@ -1,5 +1,7 @@
 ---
-post_title: Translating WooCommerce
+post_title: How to translate WooCommerce
+menu_title: Translating WooCommerce
+tags: how-to
 ---
 
 WooCommerce is already translated into several languages and is translation-ready right out of the box. All that's needed is a translation file for your language.
@@ -12,8 +14,8 @@ To create custom translations you can consider using [Poedit](https://poedit.net
 
 To set your WordPress site's language:
 
-1. Go to `WP Admin » Settings » General` and adjust the `Site Language`.
-2. Go to `WP Admin » Dashboard » Updates` and click the `Update Translations` button.
+1. Go to `WP Admin > Settings > General` and adjust the `Site Language`.
+2. Go to `WP Admin > Dashboard > Updates` and click the `Update Translations` button.
 
 Once this has been done, the shop displays in your locale if the language file exists. Otherwise, you need to create the language files (process explained below).
 
@@ -67,12 +69,10 @@ To get started:
     ![screenshot](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/Screen-Shot-2013-05-09-at-10.20.58.png)
 
 5. Save after translating strings. The `.mo` file is generated automatically.
-6. Update your `.po` file by opening it and then go to `Catalog » Update from POT file`.
+6. Update your `.po` file by opening it and then go to `Catalog > Update from POT file`.
 7. Choose the file and it will be updated accordingly.
 
 ## Making your translation upgrade safe
-
-> **Note:** We are unable to provide support for customizations under our [Support Policy](https://woo.com/support-policy/). If you need to further customize a snippet, or extend its functionality, we highly recommend [Codeable](https://codeable.io/?ref=z4Hnp), or a [Certified WooExpert](https://woo.com/experts/).
 
 WooCommerce keeps translations in `wp-content/languages/plugins`, like all other plugins. But if you wish to include a custom translation, you can use the directory `wp-content/languages/woocommerce`, or you can use a snippet to load a custom translation stored elsewhere:
 
@@ -124,7 +124,7 @@ In order to fix it, navigate to WooCommerce settings corresponding to the string
 
 **Local pickup**:
 
-1.  Go to `WooCommerce » Settings » Shipping » Shipping Zones`.
+1.  Go to `WooCommerce > Settings > Shipping > Shipping Zones`.
 2.  Select the shipping zone where "Local pickup" is listed.
 3.  Open "Local pickup" settings.
 4.  Rename the method using your translation.
@@ -132,7 +132,7 @@ In order to fix it, navigate to WooCommerce settings corresponding to the string
 
 **Cash on delivery**:
 
-1.  Go to `WooCommerce » Settings » Payments`.
+1.  Go to `WooCommerce > Settings > Payments`.
 2.  Select the "Cash on delivery" payment method.
 3.  Open its settings.
 4.  Rename the method title, description, and instructions using your translation.
@@ -140,12 +140,12 @@ In order to fix it, navigate to WooCommerce settings corresponding to the string
 
 **Privacy policy message**:
 
-1.  Go to `WooCommerce » Settings » Accounts & Privacy`.
+1.  Go to `WooCommerce > Settings > Accounts & Privacy`.
 2.  Scroll to the "Privacy policy" section.
 3.  Edit both the `Registration privacy policy` and `Checkout privacy policy` fields with your translation.
 4.  Save the settings.
 
-Navigate back to the Checkout page – translations should be reflected there.
+Navigate back to the Checkout page - translations should be reflected there.
 
 ### I have translated the strings I needed, but some of them don't show up translated on the front end. Why?
 

@@ -1,32 +1,11 @@
 [
   {
     "name": "project-a",
-    "path": "/test/monorepo/project-a",
-    "dependencies": {
-      "project-b": {
-        "from": "project-b",
-        "version": "link:../project-b",
-        "path": "/test/monorepo/project-b"
-      }
-    },
-    "devDependencies": {
-      "project-c": {
-        "from": "project-c",
-        "version": "link:../project-c",
-        "path": "/test/monorepo/project-c"
-      }
-    }
+    "path": "/test/monorepo/project-a"
   },
   {
     "name": "project-b",
-    "path": "/test/monorepo/project-b",
-    "dependencies": {
-      "project-c": {
-        "from": "project-c",
-        "version": "link:../project-c",
-        "path": "/test/monorepo/project-c"
-      }
-    }
+    "path": "/test/monorepo/project-b"
   },
   {
     "name": "project-c",
@@ -34,13 +13,6 @@
   },
   {
     "name": "project-d",
-    "path": "/test/monorepo/project-d",
-	"dependencies": {
-		"project-c": {
-		  "from": "project-c",
-		  "version": "link:../project-c",
-		  "path": "/test/monorepo/project-c"
-		}
-	  }
+    "path": "/test/monorepo/project-d"
   }
 ]

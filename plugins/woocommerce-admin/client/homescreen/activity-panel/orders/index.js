@@ -4,6 +4,7 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useMemo, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
+import { decodeEntities } from '@wordpress/html-entities';
 import PropTypes from 'prop-types';
 import interpolateComponents from '@automattic/interpolate-components';
 import {
@@ -18,7 +19,7 @@ import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import { ORDERS_STORE_NAME, ITEMS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { CurrencyContext } from '@woocommerce/currency';
+import { CurrencyContext, CurrencyFactory } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -28,7 +29,6 @@ import {
 	ActivityCardPlaceholder,
 } from '~/activity-panel/activity-card';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { getCountryCode } from '~/dashboard/utils';
 import './style.scss';
 
 function recordOrderEvent( eventName ) {
@@ -240,23 +240,30 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 
 	const currencyContext = useContext( CurrencyContext );
 
-	const getFormattedOrderTotal = ( total, countryState ) => {
-		if ( ! countryState ) {
+	const storeCurrency = currencyContext.getCurrencyConfig();
+	const { currencySymbols = {} } = getAdminSetting( 'onboarding', {} );
+	const getFormattedOrderTotal = ( total, orderCurrencyCode ) => {
+		if ( ! orderCurrencyCode ) {
 			return null;
 		}
 
-		const country = getCountryCode( countryState );
-		const { currencySymbols = {}, localeInfo = {} } = getAdminSetting(
-			'onboarding',
-			{}
-		);
-		const currency = currencyContext.getDataForCountry(
-			country,
-			localeInfo,
-			currencySymbols
-		);
-		currencyContext.setCurrency( currency );
-		return currencyContext.formatAmount( total );
+		// If the order currency is the same as the store currency, we show the formatted amount.
+		if ( storeCurrency && storeCurrency.code === orderCurrencyCode ) {
+			return currencyContext.formatAmount( total );
+		}
+		const symbol = currencySymbols[ orderCurrencyCode ];
+
+		if ( ! symbol ) {
+			// This should never happen, but if it does, we'll just show the currency code.
+			return `${ orderCurrencyCode }${ total }`;
+		}
+
+		// If the order currency is different from the store currency, we show the currency code and amount in the order currency.
+		return CurrencyFactory( {
+			...storeCurrency,
+			symbol: decodeEntities( symbol ),
+			code: orderCurrencyCode,
+		} ).formatAmount( total );
 	};
 
 	const {

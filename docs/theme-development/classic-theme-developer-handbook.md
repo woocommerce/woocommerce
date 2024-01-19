@@ -1,5 +1,6 @@
 ---
-post_title: Classic Theme Developer Handbook
+post_title: Classic theme development handbook
+menu_title: Classic theme development
 ---
 
 ---
@@ -12,9 +13,9 @@ WooCommerce looks great with all WordPress themes as of version 3.3, even if the
 
 Non-WooCommerce themes, by default, also include:
 
-- Zoom feature enabled – ability to zoom in/out on a product image
-- Lightbox feature enabled – product gallery images pop up to examine closer
-- Comments enabled, not Reviews – visitors/buyers can leave comments as opposed to product ratings or reviews
+- Zoom feature enabled - ability to zoom in/out on a product image
+- Lightbox feature enabled - product gallery images pop up to examine closer
+- Comments enabled, not Reviews - visitors/buyers can leave comments as opposed to product ratings or reviews
 
 If you want more control over the layout of WooCommerce elements or full reviews support your theme will need to integrate with WooCommerce. There are a few different ways you can do this, and they are outlined below.
 
@@ -188,7 +189,7 @@ Inside the `assets/css/` directory, you will find the stylesheets responsible fo
 
 Files to look for are `woocommerce.scss` and `woocommerce.css`.
 
-- `woocommerce.css` is the minified stylesheet – it's the CSS without any of the spaces, indents, etc. This makes the file very fast to load. This file is referenced by the plugin and declares all WooCommerce styles.
+- `woocommerce.css` is the minified stylesheet - it's the CSS without any of the spaces, indents, etc. This makes the file very fast to load. This file is referenced by the plugin and declares all WooCommerce styles.
 - `woocommerce.scss` is not directly used by the plugin, but by the team developing WooCommerce. We use [SASS](http://sass-lang.com/) in this file to generate the CSS in the first file.
 
 The CSS is written to make the default layout compatible with as many themes as possible by using percentage-based widths for all layout styles. It is, however, likely that you'll want to make your own adjustments.

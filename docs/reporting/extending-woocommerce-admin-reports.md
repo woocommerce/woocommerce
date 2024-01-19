@@ -1,5 +1,7 @@
 ---
-post_title: Extending WooCommerce Analytics reports
+post_title: How to extend WooCommerce analytics reports
+menu_title: Extend analytics reports
+tags: how-to
 ---
 
 ## Introduction

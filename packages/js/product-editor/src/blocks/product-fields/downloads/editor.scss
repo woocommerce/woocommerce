@@ -6,13 +6,6 @@
 $fixed-section-height: 224px;
 
 .wp-block-woocommerce-product-downloads-field {
-	&__header {
-		display: flex;
-		justify-content: flex-end;
-		margin-bottom: $grid-unit-30;
-		gap: $grid-unit;
-	}
-
 	&__body {
 		position: relative;
 	}
