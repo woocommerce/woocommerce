@@ -37,11 +37,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	private $search_sku_in_product_lookup_table = '';
 
 	/**
-	 * Related product ids.
+	 * Suggested product ids.
 	 *
 	 * @var array
 	 */
-	private $related_producs_ids = array();
+	private $suggested_producs_ids = array();
 
 	/**
 	 * Register the routes for products.
@@ -51,7 +51,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)/related-products',
+			'/' . $this->rest_base . '/suggested-products',
 			array(
 				'args'   => array(
 					'id' => array(
@@ -61,9 +61,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_related_items' ),
+					'callback'            => array( $this, 'get_suggested_products' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => $this->get_related_products_collection_params(),
+					'args'                => $this->get_suggested_products_collection_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -270,12 +270,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		/*
-		 * When the related products ids is not empty,
-		 * filter the query to return only the related products,
+		 * When the suggested products ids is not empty,
+		 * filter the query to return only the suggested products,
 		 * overwriting the post__in parameter.
 		 */
-		if ( ! empty( $this->related_producs_ids ) ) {
-			$args['post__in'] = $this->related_producs_ids;
+		if ( ! empty( $this->suggested_producs_ids ) ) {
+			$args['post__in'] = $this->suggested_producs_ids;
 		}
 
 		return $args;
@@ -1527,17 +1527,14 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Handle related products params:
-	 * - related_categories: Limit result set to specific product categorie ids.
-	 * - related_tags: Limit result set to specific product tag ids.
-	 * - combine: Combine the product terms (categories, tags, ...).
+	 * Add new options for the suggested-products endpoint.
 	 *
 	 * @return array
 	 */
-	function get_related_products_collection_params() {
+	function get_suggested_products_collection_params() {
 		$params = parent::get_collection_params();
 
-		$params['related_categories'] = array(
+		$params['categories'] = array(
 			'description'       => __( 'Limit result set to specific product categorie ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -1548,7 +1545,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
-		$params['related_tags'] = array(
+		$params['tags'] = array(
 			'description'       => __( 'Limit result set to specific product tag ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -1559,13 +1556,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 
-		// Add a parameter to whether combine or not the categories and tags.
-		$params['combine'] = array(
-			'description'       => __( 'Combine the product terms (categories, tags, ...).', 'woocommerce' ),
-			'type'              => 'boolean',
-			'default'           => false,
+		$params['limit'] = array(
+			'description'       => __( 'Limit result set to specific amount of suggested products.', 'woocommerce' ),
+			'type'              => 'integer',
+			'default'           => 5,
 			'validate_callback' => 'rest_validate_request_arg',
-			'sanitize_callback' => 'rest_sanitize_boolean',
+			'sanitize_callback' => 'absint',
 		);
 
 		return $params;
@@ -1628,61 +1624,28 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Get the related products.
-	 * Related products is handled by the wc_get_related_products() core function.
-	 * Currently, the data that define the related products are the categories and tags.
-	 * This endpoint accepts and combines the categories and tags parameters.
+	 * Get the suggested products.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return object
 	 */
-	public function get_related_items( $request ) {
-		$id         = $request->get_param( 'id' );
-		$categories = $request->get_param( 'related_categories' );
-		$tags       = $request->get_param( 'related_tags' );
-		$combine    = $request->get_param( 'combine' );
-		$attributes = $request->get_param( 'attributes' );
+	public function get_suggested_products( $request ) {
+		$categories  = $request->get_param( 'categories' );
+		$tags        = $request->get_param( 'tags' );
+		$exclude_ids = $request->get_param( 'exclude' );
+		$limit       = $request->get_param( 'limit' ) ? $request->get_param( 'limit' ) : 5;
 
-		/*
-		 * If the `categories` params is defined,
-		 * filter the categories used by the
-		 * wc_get_related_products() function.
-		 */
-		if ( ! empty( $categories ) ) {
-			add_filter(
-				'woocommerce_get_related_product_cat_terms',
-				function( $product_categories ) use ( $categories, $combine ) {
-					if ( ! $combine ) {
-						return $categories;
-					}
+		$data_store                  = WC_Data_Store::load( 'product' );
+		$this->suggested_producs_ids = $data_store->get_related_products(
+			$categories,
+			$tags,
+			$exclude_ids,
+			$limit - 10, // @todo: WP_Data_Store get_related_products() adds 10 to the limit.
+			null // No need to pass the product ID.
+		);
 
-					return array_unique( array_merge( $product_categories, $categories ) );
-				}
-			);
-		}
-
-		/*
-		 * If the `tags` params is defined,
-		 * filter the tags used by the
-		 * wc_get_related_products() function.
-		 */
-		if ( ! empty( $tags ) ) {
-			add_filter(
-				'woocommerce_get_related_product_tag_terms',
-				function( $product_tags ) use ( $tags, $combine ) {
-					if ( ! $combine ) {
-						return $tags;
-					}
-
-					return array_unique( array_merge( $product_tags, $tags ) );
-				}
-			);
-		}
-
-		$this->related_producs_ids = wc_get_related_products( $id );
-
-		// When no related products are found, return an empty array.
-		if ( empty( $this->related_producs_ids ) ) {
+		// When no suggested products are found, return an empty array.
+		if ( empty( $this->suggested_producs_ids ) ) {
 			return array();
 		}
 
