@@ -647,7 +647,7 @@ class WC_Emails {
 		}
 
 		$checkout_fields = Package::container()->get( CheckoutFields::class );
-		$fields          = $checkout_fields->get_order_additional_fields_with_values( $order, 'address', $address_type );
+		$fields          = $checkout_fields->get_order_additional_fields_with_values( $order, 'address', $address_type, 'view' );
 
 		if ( ! $fields ) {
 			return;
