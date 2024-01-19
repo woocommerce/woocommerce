@@ -98,7 +98,7 @@ Similarly to pages, a category's metadata is set using Front Matter. At the top 
 ---
 category_title: Your Category Name
 category_slug: this-should-match-your-folders-name
-post_title: This should match your category_title
+menu_title: This should match your category_title
 ---
 ```
 
@@ -121,10 +121,8 @@ You don't need to regenerate the manifest if you only make changes to a page's c
 These instructions presume you're currently have your `docs/` branch open and you've made your required changes to any files.
 
 1. In your command line, navigate to your repo's folder.
-2. Run `pnpm --filter=monorepo-utils install`.
-3. Run `pnpm --filter=monorepo-utils build`.
-4. Run `pnpm utils md-docs create docs woocommerce`.
-5. A file called `manifest.json` will appear in your repo's root. Rename this file to `docs-manifest.json` and move it into the `/docs` folder. You'll need to overwrite the existing `/docs/docs-manifest.json` file in the process.
+2. Run `pnpm utils md-docs create docs woocommerce -o docs/manifest.json`.
+3. The `docs-manifest.json` file in the `/docs` folder of your repo will be updated. Verify that the changes to the manifest reflect the changes that you made to the docs.
 
 If you are a non-technical contributor who isn't experienced with command line tools, we're still happy to receive your contributions. If you're unable to include an updated manifest, please ensure that you mention this in your pull request's description.
 

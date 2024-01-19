@@ -15,6 +15,7 @@ import { findBlock } from '@woocommerce/utils';
 /**
  * Internal dependencies
  */
+import { useCombinedIncompatibilityNotice } from '../incompatible-extension-notice/use-combined-incompatibility-notice';
 import { ModalContent } from './modal-content';
 import './editor.scss';
 
@@ -37,6 +38,10 @@ export function SwitchToClassicShortcodeButton( {
 	const closeModal = () => setOpen( false );
 	const { undo } = useDispatch( coreStore );
 
+	// Skipping the first two values in the array.
+	const [ , , incompatibleExtensions, incompatibleExtensionsCount ] =
+		useCombinedIncompatibilityNotice( block );
+
 	const isCart = block === 'woocommerce/cart';
 
 	const switchButtonLabel = isCart
@@ -55,6 +60,8 @@ export function SwitchToClassicShortcodeButton( {
 	const eventValue = {
 		shortcode,
 		notice,
+		incompatible_extensions_count: incompatibleExtensionsCount,
+		incompatible_extensions_names: JSON.stringify( incompatibleExtensions ),
 	};
 
 	const { getBlocks } = useSelect( ( select ) => {
