@@ -6,6 +6,8 @@ const {
 	deleteProductsAddedByTests,
 	productAttributes,
 } = utils;
+const { getTranslationFor } = require('../../../../utils/translations');
+
 
 let productId;
 
@@ -17,7 +19,7 @@ const step_goToAttributesTab = async ( page ) => {
 	await test.step( 'Go to the "Attributes" tab.', async () => {
 		const attributesTab = page
 			.locator( '.attribute_tab' )
-			.getByRole( 'link', { name: 'Attributes' } );
+			.getByRole( 'link', { name: getTranslationFor( 'Attributes' ) } );
 
 		await attributesTab.click();
 	} );
@@ -40,15 +42,15 @@ test.describe( 'Add product attributes', () => {
 
 	test( 'can add custom product attributes', async ( { page } ) => {
 		const textbox_attributeName =
-			page.getByPlaceholder( 'f.e. size or color' );
+			page.getByPlaceholder( getTranslationFor( 'f.e. size or color' ) );
 		const textbox_attributeValues = page.getByPlaceholder(
-			'Enter options for customers to choose from'
+			getTranslationFor( 'Enter options for customers to choose from' )
 		);
 		const checkbox_visible = page
-			.getByText( 'Visible on the product page' )
+			.getByText( getTranslationFor( 'Visible on the product page' ) )
 			.getByRole( 'checkbox' );
 		const checkbox_variations = page
-			.getByText( 'Used for variations' )
+			.getByText( getTranslationFor( 'Used for variations' ) )
 			.getByRole( 'checkbox' );
 
 		await test.step( `Open "Edit product" page of product id ${ productId }`, async () => {
@@ -67,12 +69,13 @@ test.describe( 'Add product attributes', () => {
 			if ( i > 0 ) {
 				await test.step( "Click 'Add new'.", async () => {
 					await page
-						.getByRole( 'button', { name: 'Add new' } )
+						.getByRole( 'button', { name: getTranslationFor('Add new'), exact:true } )
+						.last()
 						.click();
 
 					await expect(
 						page.getByRole( 'heading', {
-							name: 'New attribute',
+							name: getTranslationFor( 'New attribute' ),
 						} ).first()
 					).toBeVisible();
 				} );
@@ -100,7 +103,7 @@ test.describe( 'Add product attributes', () => {
 				await test.step( 'Click "Save attributes".', async () => {
 					await page
 						.getByRole( 'button', {
-							name: 'Save attributes',
+							name: getTranslationFor( 'Save attributes' ),
 						} )
 						.click();
 				} );
@@ -131,7 +134,7 @@ test.describe( 'Add product attributes', () => {
 						'options=woocommerce_task_list_reminder_bar_hidden'
 					)
 			);
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+			await page.getByRole( 'button', { name: getTranslationFor( 'Update' ) } ).click();
 
 			const response = await finalRequestResolution;
 			expect( response.ok() ).toBeTruthy();

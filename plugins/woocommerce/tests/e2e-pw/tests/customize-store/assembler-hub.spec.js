@@ -3,6 +3,7 @@ const { BASE_URL } = process.env;
 const { features } = require( '../../utils' );
 const { activateTheme } = require( '../../utils/themes' );
 const { setOption } = require( '../../utils/options' );
+const { getTranslationFor } = require( '../../utils/translations' );
 
 const ASSEMBLER_HUB_URL =
 	'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store%2Fassembler-hub';
@@ -64,15 +65,18 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 	test( 'Can view the Assembler Hub page', async ( { page } ) => {
 		await page.goto( ASSEMBLER_HUB_URL );
 		const locator = page.locator( 'h1:visible' );
-		await expect( locator ).toHaveText( "Let's get creative" );
+		await expect( locator ).toHaveText(
+			getTranslationFor( "Let's get creative" )
+		);
 	} );
 
 	test( 'Visiting change header should show a list of block patterns to choose from', async ( {
 		page,
 	} ) => {
 		await page.goto( ASSEMBLER_HUB_URL );
-		await page.click( 'text=Change your header' );
-
+		await page.click(
+			`text=${ getTranslationFor( 'Change your header' ) }`
+		);
 		const locator = page.locator(
 			'.block-editor-block-patterns-list__list-item'
 		);

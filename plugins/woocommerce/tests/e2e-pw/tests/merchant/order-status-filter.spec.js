@@ -1,19 +1,12 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 const orderBatchId = new Array();
 const statusColumnTextSelector = 'mark.order-status > span';
 
 // Define order statuses to filter against
-const orderStatus = [
-	[ 'Pending payment', 'wc-pending' ],
-	[ 'Processing', 'wc-processing' ],
-	[ 'On hold', 'wc-on-hold' ],
-	[ 'Completed', 'wc-completed' ],
-	[ 'Cancelled', 'wc-cancelled' ],
-	[ 'Refunded', 'wc-refunded' ],
-	[ 'Failed', 'wc-failed' ],
-];
+const orderStatus = getTranslationFor('orderStatus');
 
 test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -54,7 +47,6 @@ test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 
 	test( 'should filter by All', async ( { page } ) => {
 		await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
-
 		await page.locator( 'li.all > a' ).click();
 		await page.waitForLoadState( 'networkidle' );
 		// because tests are running in parallel, we can't know how many orders there

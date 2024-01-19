@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 const couponCode = `code-${ new Date().getTime().toString() }`;
 
@@ -32,7 +33,7 @@ test.describe( 'Add New Coupon Page', () => {
 		// Blur then wait for the auto-save to finish
 		await page.locator( '#title' ).blur();
 		await expect(
-			page.getByRole( 'link', { name: 'Move to Trash' } )
+			page.getByRole( 'link', { name: getTranslationFor('Move to Trash') } )
 		).toBeVisible();
 
 		await page
@@ -47,7 +48,7 @@ test.describe( 'Add New Coupon Page', () => {
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: 'Coupon updated.' } )
+				.filter( { hasText: getTranslationFor('Coupon updated.') } )
 		).toBeVisible();
 	} );
 } );

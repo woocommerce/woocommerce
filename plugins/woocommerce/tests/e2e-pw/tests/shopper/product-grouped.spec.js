@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require( '../../utils/translations' );
 
 const productPrice = '18.16';
 const simpleProductName = 'Simple single product';
@@ -77,17 +78,18 @@ test.describe( 'Grouped Product Page', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
 		await expect( page.locator( '.is-error' ) ).toContainText(
-			'Please choose the quantity of items you wish to add to your cart…'
+			getTranslationFor( 'Please choose the quantity of items you wish to add to your cart…' )
 		);
 
 		await page.locator( 'div.quantity input.qty >> nth=0' ).fill( '5' );
 		await page.locator( 'div.quantity input.qty >> nth=1' ).fill( '5' );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
 		await expect( page.locator( '.is-success' ) ).toContainText(
-			`“${ simpleProduct1 }” and “${ simpleProduct2 }” have been added to your cart.`
+			getTranslationFor( '“Simple single product 1” and “Simple single product 2” have been added to your cart.' )
 		);
+		
 
 		await page.goto( 'cart/' );
 		await expect(
@@ -110,14 +112,14 @@ test.describe( 'Grouped Product Page', () => {
 		await page.goto( `product/${ slug }` );
 		await page.locator( 'div.quantity input.qty >> nth=0' ).fill( '1' );
 		await page.locator( 'div.quantity input.qty >> nth=1' ).fill( '1' );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
 
 		await page.goto( 'cart/' );
 		await page.locator( 'a.remove >> nth=1' ).click();
 		await page.locator( 'a.remove >> nth=0' ).click();
 
 		await expect( page.locator( '.is-info' ) ).toContainText(
-			'Your cart is currently empty.'
+			getTranslationFor( 'Your cart is currently empty.' )
 		);
 	} );
 } );

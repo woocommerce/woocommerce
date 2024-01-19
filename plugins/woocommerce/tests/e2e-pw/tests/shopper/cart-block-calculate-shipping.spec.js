@@ -2,6 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const { closeWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 const firstProductName = 'First Product';
 const firstProductPrice = '10.00';
@@ -144,29 +145,29 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page.waitForLoadState( 'networkidle' );
 		await page.locator( 'input[name="log"]' ).fill( admin.username );
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-		await page.locator( 'text=Log In' ).click();
+		await page.locator( `text=${getTranslationFor( 'Log In' )}` ).click();
 
 		await closeWelcomeModal( { page } );
 
 		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
+			.getByRole( 'textbox', { name: getTranslationFor( 'Add title' ) } )
 			.fill( pageTitle );
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add default block' ) } ).click();
 		await page
 			.getByRole( 'document', {
-				name: 'Empty block; start writing or type forward slash to choose a block',
+				name: getTranslationFor( 'Empty block; start writing or type forward slash to choose a block' ),
 			} )
 			.fill( '/cart' );
 		await page.keyboard.press( 'Enter' );
 		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.getByRole( 'button', { name: getTranslationFor( 'Publish' ), exact: true } )
 			.click();
 		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.getByRole( 'region', { name: getTranslationFor( 'Editor publish' ) } )
+			.getByRole( 'button', { name: getTranslationFor( 'Publish' ), exact: true } )
 			.click();
 		await expect(
-			page.getByText( `${ pageTitle } is now live.` )
+			page.getByText( getTranslationFor( 'Cart Block is now live' ) )
 		).toBeVisible();
 	} );
 
@@ -182,13 +183,13 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			)
 			.click();
 		await page.getByRole( 'combobox' ).first().fill( 'Netherlands' );
-		await page.getByLabel( 'Postal code' ).fill( '1011AA' );
-		await page.getByLabel( 'City' ).fill( 'Amsterdam' );
-		await page.getByRole( 'button', { name: 'Update' } ).click();
+		await page.getByLabel( getTranslationFor( 'Postal code' ) ).fill( '1011AA' );
+		await page.getByLabel( getTranslationFor( 'City' ) ).fill( 'Amsterdam' );
+		await page.getByRole( 'button', { name: getTranslationFor( 'Update' ) } ).click();
 
 		// Verify shipping costs
 		await expect(
-			page.getByRole( 'group' ).getByText( 'Free shipping' )
+			page.getByRole( 'group' ).getByText( getTranslationFor( 'Free shipping' ) )
 		).toBeVisible();
 		await expect(
 			page.locator(
@@ -214,13 +215,13 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			)
 			.click();
 		await page.getByRole( 'combobox' ).first().fill( 'Portugal' );
-		await page.getByLabel( 'Postal code' ).fill( '1000-001' );
-		await page.getByLabel( 'City' ).fill( 'Lisbon' );
-		await page.getByRole( 'button', { name: 'Update' } ).click();
+		await page.getByLabel( getTranslationFor( 'Postal code' ) ).fill( '1000-001' );
+		await page.getByLabel( getTranslationFor( 'City' ) ).fill( 'Lisbon' );
+		await page.getByRole( 'button', { name: getTranslationFor( 'Update' ) } ).click();
 
 		// Verify shipping costs
 		await expect(
-			page.getByRole( 'group' ).getByText( 'Flat rate' )
+			page.getByRole( 'group' ).getByText( getTranslationFor( 'Flat rate' ) )
 		).toBeVisible();
 		await expect(
 			page.locator(

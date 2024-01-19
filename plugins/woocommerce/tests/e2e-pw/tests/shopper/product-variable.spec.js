@@ -1,10 +1,12 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 const productPrice = '18.16';
 const variableProductName = 'Variable single product';
-const cartDialogMessage =
-	'Please select some product options before adding this product to your cart.';
+const cartDialogMessage = 
+	getTranslationFor('Please select some product options before adding this product to your cart.');
+	
 const variations1 = [
 	{
 		regular_price: productPrice,
@@ -193,10 +195,10 @@ test.describe( 'Variable Product Page', () => {
 			await page
 				.locator( '#size' )
 				.selectOption( attr.attributes[ 0 ].option );
-			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
-			await expect( page.locator( '.is-success' ) ).toContainText(
-				'has been added to your cart.'
-			);
+			await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
+			await expect(
+				page.locator( '.is-success' )
+			).toContainText( getTranslationFor( 'has been added to your cart.' ) );
 		}
 
 		await page.goto( 'cart/' );
@@ -223,13 +225,13 @@ test.describe( 'Variable Product Page', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 		await page.locator( '#size' ).selectOption( 'Large' );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
 
 		await page.goto( 'cart/' );
 		await page.locator( 'a.remove' ).click();
 
 		await expect( page.locator( '.is-info' ) ).toContainText(
-			'Your cart is currently empty.'
+			getTranslationFor( 'Your cart is currently empty.' )
 		);
 	} );
 } );
@@ -372,10 +374,10 @@ test.describe( 'Shopper > Update variable product', () => {
 
 		await expect(
 			page.locator( '.woocommerce-product-attributes-item--weight' )
-		).toContainText( '100 kg' );
+		).toContainText( getTranslationFor('100 kg') );
 		await expect(
 			page.locator( '.woocommerce-product-attributes-item--dimensions' )
-		).toContainText( '5 × 10 × 10 cm' );
+		).toContainText( getTranslationFor('5 × 10 × 10 cm') );
 
 		await page.locator( '#size' ).selectOption( 'XLarge' );
 
@@ -394,10 +396,10 @@ test.describe( 'Shopper > Update variable product', () => {
 
 		await expect(
 			page.locator( '.woocommerce-product-attributes-item--weight' )
-		).toContainText( '400 kg' );
+		).toContainText( getTranslationFor('400 kg') );
 		await expect(
 			page.locator( '.woocommerce-product-attributes-item--dimensions' )
-		).toContainText( '20 × 40 × 30 cm' );
+		).toContainText( getTranslationFor('20 × 40 × 30 cm') );
 	} );
 
 	test( 'Shopper can change variable product attributes to variation with a different price', async ( {

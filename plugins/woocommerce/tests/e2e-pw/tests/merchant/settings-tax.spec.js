@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 test.describe( 'WooCommerce Tax Settings > enable', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -9,22 +10,22 @@ test.describe( 'WooCommerce Tax Settings > enable', () => {
 
 		// Make sure the general tab is active
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
-			'General'
+			getTranslationFor('General')
 		);
 
 		// Enable tax calculation
 		await page.locator( '#woocommerce_calc_taxes' ).check();
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
+			getTranslationFor('Your settings have been saved.')
 		);
 		await expect( page.locator( '#woocommerce_calc_taxes' ) ).toBeChecked();
 
 		// Verify that tax settings are now present
 		await expect(
-			page.locator( 'a.nav-tab:has-text("Tax")' )
+			page.locator( `a.nav-tab:has-text(${getTranslationFor('"Tax"')})` )
 		).toBeVisible();
 	} );
 } );
@@ -62,12 +63,12 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 
 		// Make sure we're on the tax tab
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
-			'Tax'
+			getTranslationFor('Tax')
 		);
 
 		// Prices exclusive of tax
 		await page
-			.locator( 'text=No, I will enter prices exclusive of tax' )
+			.locator( `text=${getTranslationFor('No, I will enter prices exclusive of tax')}` )
 			.check();
 		// Tax based on customer shipping address
 		await page
@@ -75,7 +76,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 			.selectOption( 'shipping' );
 		// Standard tax class for shipping
 		await page.locator( '#woocommerce_shipping_tax_class' ).selectOption( {
-			label: 'Standard',
+			label: getTranslationFor('Standard'),
 		} );
 		// Leave rounding unchecked
 		// Display prices excluding tax
@@ -90,21 +91,21 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		await page
 			.locator( '#woocommerce_tax_total_display' )
 			.selectOption( 'single' );
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
+			getTranslationFor('Your settings have been saved.')
 		);
 		await expect(
-			page.locator( 'text=No, I will enter prices exclusive of tax' )
+			page.locator( `text=${getTranslationFor('No, I will enter prices exclusive of tax')}` )
 		).toBeChecked();
 		await expect( page.locator( '#woocommerce_tax_based_on' ) ).toHaveValue(
 			'shipping'
 		);
 		await expect(
 			page.locator( '#woocommerce_shipping_tax_class' )
-		).toContainText( 'Standard' );
+		).toContainText( getTranslationFor('Standard') );
 		await expect(
 			page.locator( '#woocommerce_tax_display_shop' )
 		).toHaveValue( 'excl' );
@@ -122,16 +123,16 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		} );
 
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
-			'Tax'
+			getTranslationFor('Tax')
 		);
 
 		// Clear out existing tax classes
 		await page.locator( '#woocommerce_tax_classes' ).fill( '' );
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 
 		// Verify that the settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
+			getTranslationFor('Your settings have been saved.')
 		);
 		await expect( page.locator( '#woocommerce_tax_classes' ) ).toHaveValue(
 			''
@@ -139,15 +140,15 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 
 		// Add a "fancy" tax class
 		await page.locator( '#woocommerce_tax_classes' ).fill( 'Fancy' );
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 
 		// Verify that the settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
+			getTranslationFor('Your settings have been saved.')
 		);
 		await expect(
 			page.locator( 'ul.subsubsub > li > a >> nth=2' )
-		).toContainText( 'Fancy rates' );
+		).toContainText( getTranslationFor('Fancy rates') );
 	} );
 
 	test( 'can set rate settings', async ( { page } ) => {
@@ -158,11 +159,11 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 
 		// Make sure the tax tab is active, with the "fancy" subsection
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
-			'Tax'
+			getTranslationFor('Tax')
 		);
 		await expect(
 			page.locator( 'ul.subsubsub > li > a.current' )
-		).toContainText( 'Fancy rates' );
+		).toContainText( getTranslationFor('Fancy rates') );
 
 		// Create a state tax
 		await page.locator( '.wc_tax_rates a.insert' ).click();
@@ -192,7 +193,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		await page.locator( 'input[name^="tax_rate_shipping[new-1"]' ).click();
 
 		// Save changes
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 		await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
 
 		// Verity that there are 2 rates
@@ -201,11 +202,11 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		// Delete federal rate
 		await page.locator( 'input[value="Federal Tax"]' ).click();
 		await page
-			.getByRole( 'link', { name: 'Remove selected row(s)' } )
+			.getByRole( 'link', { name: getTranslationFor( 'Remove selected row(s)' ) } )
 			.click();
 
 		// Save changes
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 		await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
 
 		// Verify that there is 1 tax rate left
@@ -219,30 +220,30 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		// Delete State tax
 		await page.locator( '[value="CA State Tax"]' ).click();
 		await page.locator( '.wc_tax_rates a.remove_tax_rates' ).click();
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 		await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
 	} );
 
 	test( 'can remove tax classes', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=tax' );
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
-			'Tax'
+			getTranslationFor('Tax')
 		);
 
 		// Remove "Fancy" tax class
 		await page.locator( '#woocommerce_tax_classes' ).fill( '' );
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 		await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
+			getTranslationFor('Your settings have been saved.')
 		);
 		await expect( page.locator( '#woocommerce_tax_classes' ) ).toHaveValue(
 			''
 		);
 		await expect(
-			page.locator( 'ul.subsubsub > li > a:has-text("Fancy rates")' )
+			page.locator( `ul.subsubsub > li > a:has-text(${getTranslationFor('"Fancy rates"')})` )
 		).toHaveCount( 0 );
 	} );
 } );

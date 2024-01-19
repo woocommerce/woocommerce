@@ -1,5 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require( './../../utils/translations' );
+const { get } = require('../../utils/api');
 
 const randomNum = new Date().getTime().toString();
 const customer = {
@@ -37,19 +39,19 @@ test.describe( 'Customer can manage addresses in My Account > Addresses page', (
 		// sign in as the "customer" user
 		await page.locator( '#username' ).fill( customer.username );
 		await page.locator( '#password' ).fill( customer.password );
-		await page.locator( 'text=Log in' ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Log in' ) }).click();
 
 		// verify that the page exists and that there are no added addresses
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Addresses'
+			getTranslationFor( 'Addresses_header' )
 		);
 		await expect(
 			page.locator( '.woocommerce-Address' ).first()
-		).toContainText( 'You have not set up this type of address yet.' );
+		).toContainText( getTranslationFor( 'You have not set up this type of address yet.' ) );
 
 		// go to add billing address
 		await page.goto( 'my-account/edit-address/billing' );
-		await expect( page.locator( 'h3' ) ).toContainText( 'Billing address' );
+		await expect( page.locator( 'h3' ) ).toContainText( getTranslationFor( 'Billing address' ) );
 		await page.locator( '#billing_first_name' ).fill( 'John' );
 		await page.locator( '#billing_last_name' ).fill( 'Doe Billing' );
 		await page
@@ -60,11 +62,11 @@ test.describe( 'Customer can manage addresses in My Account > Addresses page', (
 		await page.locator( '#billing_state' ).selectOption( 'CA' );
 		await page.locator( '#billing_postcode' ).fill( '97403' );
 		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
-		await page.locator( 'text=Save address' ).click();
+		await page.locator( `text=${getTranslationFor( 'Save address' )}` ).click();
 
 		// verify billing address has been applied
 		await expect( page.locator( '.is-success' ) ).toContainText(
-			'Address changed successfully.'
+			getTranslationFor( 'Address changed successfully.' )
 		);
 		await expect(
 			page.locator( `:text("John Doe Billing")` )
@@ -82,20 +84,20 @@ test.describe( 'Customer can manage addresses in My Account > Addresses page', (
 		// sign in as the "customer" user
 		await page.locator( '#username' ).fill( customer.username );
 		await page.locator( '#password' ).fill( customer.password );
-		await page.locator( 'text=Log in' ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Log in' ) }).click();
 
 		// verify that the page exists and that there are no added addresses
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Addresses'
+			getTranslationFor( 'Addresses_header' )
 		);
 		await expect(
 			page.locator( '.woocommerce-Address' ).nth( 1 )
-		).toContainText( 'You have not set up this type of address yet.' );
+		).toContainText( getTranslationFor( 'You have not set up this type of address yet.' ) );
 
 		// go to add shipping address
 		await page.goto( 'my-account/edit-address/shipping' );
 		await expect( page.locator( 'h3' ) ).toContainText(
-			'Shipping address'
+			getTranslationFor( 'Shipping address' )
 		);
 		await page.locator( '#shipping_first_name' ).fill( 'John' );
 		await page.locator( '#shipping_last_name' ).fill( 'Doe Shipping' );
@@ -106,11 +108,11 @@ test.describe( 'Customer can manage addresses in My Account > Addresses page', (
 		await page.locator( '#shipping_country' ).selectOption( 'US' );
 		await page.locator( '#shipping_state' ).selectOption( 'NY' );
 		await page.locator( '#shipping_postcode' ).fill( '10010' );
-		await page.locator( 'text=Save address' ).click();
+		await page.locator( `text=${getTranslationFor( 'Save address' )}` ).click();
 
 		// verify shipping address has been applied
 		await expect( page.locator( '.is-success' ) ).toContainText(
-			'Address changed successfully.'
+			getTranslationFor( 'Address changed successfully.' )
 		);
 		await expect(
 			page.locator( `:text("John Doe Shipping")` )

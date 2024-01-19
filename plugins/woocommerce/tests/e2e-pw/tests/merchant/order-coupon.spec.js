@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 let productId, couponId, orderId;
 
@@ -80,7 +81,7 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await page.locator( 'button.add-order-item' ).click();
 
 		// search for product to add
-		await page.locator( 'text=Search for a product…' ).click();
+		await page.locator( `text=${getTranslationFor('Search for a product…')}` ).click();
 		await page
 			.locator( '.select2-search--dropdown' )
 			.getByRole( 'combobox' )
@@ -101,7 +102,7 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 			page.locator('#woocommerce-order-items li').filter({ hasText: couponCode })
 		).toBeVisible();
 		await expect(
-			page.getByRole( 'cell', { name: 'Coupon(s)' } )
+			page.getByRole( 'cell', { name: getTranslationFor( 'Coupon(s)' ) } )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'cell', { name: `- $${ couponAmount }.00` } )
@@ -118,7 +119,7 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 			page.locator('#woocommerce-order-items li').filter({ hasText: couponCode })
 		).toBeVisible();
 		await expect(
-			page.getByRole( 'cell', { name: 'Coupon(s)' } )
+			page.getByRole( 'cell', { name: getTranslationFor( 'Coupon(s)' ) } )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'cell', { name: `- $${ couponAmount }.00` } )

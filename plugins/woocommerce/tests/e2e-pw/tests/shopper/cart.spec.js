@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 const productName = 'Cart product test';
 const productPrice = '13.99';
@@ -72,9 +73,7 @@ test.describe( 'Cart page', () => {
 
 	test( 'should display no item in the cart', async ( { page } ) => {
 		await page.goto( '/cart/' );
-		await expect(
-			page.getByText( 'Your cart is currently empty.' )
-		).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Your cart is currently empty.' ) ) ).toBeVisible();
 	} );
 
 	test( 'should add the product to the cart from the shop page', async ( {
@@ -122,7 +121,7 @@ test.describe( 'Cart page', () => {
 
 		await page.goto( '/cart/' );
 		await page.locator( 'input.qty' ).fill( '2' );
-		await page.locator( 'text=Update cart' ).click();
+		await page.locator( `text=${getTranslationFor('Update cart')}` ).click();
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			`$${ twoProductPrice }`
@@ -147,7 +146,7 @@ test.describe( 'Cart page', () => {
 		await page.locator( 'a.remove' ).click();
 
 		await expect( page.locator( '.is-info' ) ).toContainText(
-			'Your cart is currently empty.'
+			getTranslationFor('Your cart is currently empty.')
 		);
 	} );
 
@@ -166,7 +165,7 @@ test.describe( 'Cart page', () => {
 		);
 
 		await page.locator( 'input.qty' ).fill( '2' );
-		await page.locator( 'text=Update cart' ).click();
+		await page.locator( `text=${getTranslationFor('Update cart')}` ).click();
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			`$${ twoProductPrice }`

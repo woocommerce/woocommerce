@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const uuid = require( 'uuid' );
+const { getTranslationFor } = require('../../utils/translations');
 
 test.describe( 'Edit order', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -47,7 +48,7 @@ test.describe( 'Edit order', () => {
 
 		// confirm we're on the orders page
 		await expect( page.locator( 'h1.components-text' ) ).toContainText(
-			'Orders'
+			`${getTranslationFor('Orders')}`
 		);
 
 		// open order we created
@@ -55,7 +56,7 @@ test.describe( 'Edit order', () => {
 
 		// make sure we're on the order details page
 		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
-			/Edit [oO]rder/
+			getTranslationFor('/Edit [oO]rder/')
 		);
 	} );
 
@@ -73,12 +74,11 @@ test.describe( 'Edit order', () => {
 		);
 		await expect(
 			page.locator( '#woocommerce-order-notes .note_content >> nth=0' )
-		).toContainText( 'Order status changed from Processing to Completed.' );
-
+		).toContainText( `${getTranslationFor('Order status changed from Processing to Completed.')}` );
 		// load the orders listing and confirm order is completed
 		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
-		await expect( page.locator( `:is(#order-${orderId}, #post-${orderId})` ).getByRole( 'cell', { name: 'Completed' }) ).toBeVisible();
+		await expect( page.locator( `:is(#order-${ orderId }, #post-${ orderId })` ).getByRole( 'cell', { name: getTranslationFor( 'Completed' ) }) ).toBeVisible();
 	} );
 
 	test( 'can update order status to cancelled', async ( { page } ) => {
@@ -86,19 +86,19 @@ test.describe( 'Edit order', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderToCancel }&action=edit` );
 
 		// update order status to Completed
-		await page.locator( '#order_status' ).selectOption( 'Cancelled' );
+		await page.locator( '#order_status' ).selectOption( getTranslationFor( 'Cancelled' ) );
 		await page.locator( 'button.save_order' ).click();
 
 		// verify order status changed and note added
 		await expect( page.locator( '#order_status' ) ).toHaveValue(
 			'wc-cancelled'
 		);
-		await expect( page.getByText( 'Order status changed from Processing to Cancelled.' ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Order status changed from Processing to Cancelled.' ) ) ).toBeVisible();
 
 		// load the orders listing and confirm order is cancelled
 		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
-		await expect( page.locator( `:is(#order-${orderToCancel}, #post-${orderToCancel})` ).getByRole( 'cell', { name: 'Cancelled' }) ).toBeVisible();
+		await expect( page.locator( `:is(#order-${ orderToCancel }, #post-${ orderToCancel })` ).getByRole( 'cell', { name: getTranslationFor( 'Cancelled' ) }) ).toBeVisible();
 	} );
 
 	test( 'can update order details', async ( { page } ) => {
@@ -113,7 +113,7 @@ test.describe( 'Edit order', () => {
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: 'Order updated.' } )
+				.filter( { hasText: `${getTranslationFor('Order updated.')}` } )
 		).toBeVisible();
 		await expect( page.locator( 'input[name=order_date]' ) ).toHaveValue(
 			'2018-12-14'
@@ -126,29 +126,29 @@ test.describe( 'Edit order', () => {
 		await page.on( 'dialog', dialog => dialog.accept() );
 
 		// add an order note
-		await page.getByLabel( 'Add note' ).fill( 'This order is a test order. It is only a test. This note is a private note.' );
-		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
+		await page.getByLabel( getTranslationFor( 'Add note' ) ).fill( 'This order is a test order. It is only a test. This note is a private note.' );
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add' ), exact: true } ).click();
 
 		// verify the note saved
 		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).toBeVisible();
 
 		// delete the note
-		await page.getByRole( 'button', { name: 'Delete note' } ).first().click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Delete note' ) } ).first().click();
 
 		// verify the note is gone
 		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).not.toBeVisible();
 
 		// add note to customer
 		// add an order note
-		await page.getByLabel( 'Add note' ).fill( 'This order is a test order. It is only a test. This note is a note to the customer.' );
-		await page.getByLabel('Note type').selectOption( 'Note to customer' );
-		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
+		await page.getByLabel( getTranslationFor( 'Add note' ) ).fill( 'This order is a test order. It is only a test. This note is a note to the customer.' );
+		await page.getByLabel( getTranslationFor( 'Note type' ) ).selectOption( getTranslationFor( 'Note to customer' ) );
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add' ), exact: true } ).click();
 
 		// verify the note saved
 		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a note to the customer.' ) ).toBeVisible();
 
 		// delete the note
-		await page.getByRole( 'button', { name: 'Delete note' } ).first().click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Delete note' ) } ).first().click();
 
 		// verify the note is gone
 		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).not.toBeVisible();
@@ -378,16 +378,16 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 			page.locator(
 				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
 			)
-		).toHaveAttribute( 'placeholder', 'Unlimited' );
+		).toHaveAttribute( 'placeholder', `${getTranslationFor('Unlimited')}` );
 		await expect(
 			page.locator(
 				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
 			)
-		).toHaveAttribute( 'placeholder', 'Never' );
+		).toHaveAttribute( 'placeholder', `${getTranslationFor('Never')}` );
 		await expect( page.locator( 'button.revoke_access' ) ).toBeVisible();
-		await expect( page.locator( 'a:has-text("Copy link")' ) ).toBeVisible();
+		await expect( page.locator( `a:has-text(${getTranslationFor('"Copy link"')})` ) ).toBeVisible();
 		await expect(
-			page.locator( 'a:has-text("View report")' )
+			page.locator(`a:has-text(${getTranslationFor('"View report"')})`)
 		).toBeVisible();
 	} );
 
@@ -420,12 +420,12 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 			page.locator(
 				'#woocommerce-order-downloads input[name^="downloads_remaining"] >> nth=-1'
 			)
-		).toHaveAttribute( 'placeholder', 'Unlimited' );
+		).toHaveAttribute( 'placeholder', `${getTranslationFor('Unlimited')}` );
 		await expect(
 			page.locator(
 				'#woocommerce-order-downloads input[name^="access_expires"] >> nth=-1'
 			)
-		).toHaveAttribute( 'placeholder', 'Never' );
+		).toHaveAttribute( 'placeholder', `${getTranslationFor('Never')}` );
 	} );
 
 	test( 'can edit downloadable product permissions', async ( { page } ) => {
@@ -508,7 +508,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		page,
 	} ) => {
 		const expectedReason =
-			'Sorry, you have reached your download limit for this file';
+		`${getTranslationFor('Sorry, you have reached your download limit for this file')}`;
 
 		// open the order that already has a product assigned
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
@@ -549,7 +549,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 	test( 'should not allow downloading a product if expiration date has passed', async ( {
 		page,
 	} ) => {
-		const expectedReason = 'Sorry, this download has expired';
+		const expectedReason = `${getTranslationFor('Sorry, this download has expired')}`;
 
 		// open the order that already has a product assigned
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );

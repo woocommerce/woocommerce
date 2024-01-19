@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { admin, customer } = require( '../../test-data/data' );
+const { admin, customer } = require( '../../test-data/data' ); 
+const { getTranslationFor } = require( '../../utils/translations' );
 const { setFilterValue, clearFilters } = require( '../../utils/filters' );
 const { addProductsToCart } = require( '../../utils/pdp' );
 
@@ -207,34 +208,18 @@ test.describe( 'Checkout page', () => {
 		await page.goto( '/checkout/' );
 
 		// first try submitting the form with no fields complete
-		await page.getByRole( 'button', { name: 'Place order' } ).click();
-		await expect(
-			page.locator( 'form[name="checkout"]' ).getByRole( 'alert' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Billing First name is a required field.' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Billing Last name is a required field.' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Billing Street address is a required field.' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Billing Town / City is a required field.' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Billing ZIP Code is a required field.' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Billing Phone is a required field.' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Billing Email address is a required field.' )
-		).toBeVisible();
+		await page.getByRole('button', { name: getTranslationFor( 'Place order' ) }).click();
+		await expect( page.locator('form[name="checkout"]').getByRole('alert') ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing First name is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing Last name is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing Street address is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing Town / City is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing ZIP Code is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing Phone is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Billing Email address is a required field.' ) ) ).toBeVisible();
 
 		// toggle ship to different address, fill out billing info and confirm error shown
-		await page.getByText( 'Ship to a different address?' ).click();
+		await page.getByText( getTranslationFor( 'Ship to a different address?' ) ).click();
 		await page.locator( '#billing_first_name' ).fill( 'Homer' );
 		await page.locator( '#billing_last_name' ).fill( 'Simpson' );
 		await page
@@ -246,24 +231,14 @@ test.describe( 'Checkout page', () => {
 		await page.locator( '#billing_postcode' ).fill( '97403' );
 		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
 		await page.locator( '#billing_email' ).fill( customer.email );
-		await page.getByRole( 'button', { name: 'Place order' } ).click();
+		await page.getByRole('button', { name: getTranslationFor( 'Place order' ) }).click();
 
 		await expect( page.locator( '.is-error ul' ) ).toBeVisible();
-		await expect(
-			page.getByText( 'Shipping First name is a required field.' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Shipping Last name is a required field.' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Shipping Street address is a required field.' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Shipping Town / City is a required field.' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Shipping ZIP Code is a required field.' )
-		).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Shipping First name is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Shipping Last name is a required field.' ), { exact : true } ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Shipping Street address is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Shipping Town / City is a required field.' ) ) ).toBeVisible();
+		await expect( page.getByText( getTranslationFor( 'Shipping ZIP Code is a required field.' ) ) ).toBeVisible();
 	} );
 
 	test( 'allows customer to fill shipping details', async ( { page } ) => {
@@ -325,20 +300,21 @@ test.describe( 'Checkout page', () => {
 		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
 		await page.locator( '#billing_email' ).fill( guestEmail );
 
-		await page.locator( 'text=Cash on delivery' ).click();
+
+ 		await page.locator('label').filter({ hasText: getTranslationFor('Cash on delivery') }).click();
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
 
-		await page.locator( 'text=Place order' ).click();
+		await page.locator( `text=${getTranslationFor('Place order')}` ).click();
 
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByRole( 'heading', { name: getTranslationFor('Order received') } )
 		).toBeVisible();
 
 		// get order ID from the page
 		const orderReceivedText = await page
 			.locator( '.woocommerce-order-overview__order.order' )
 			.textContent();
-		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ getTranslationFor('orderReceivedTextsplit') ].toString();
 
 		// Let's simulate a new browser context (by dropping all cookies), and reload the page. This approximates a
 		// scenario where the server can no longer identify the shopper. However, so long as we are within the 10 minute
@@ -346,15 +322,15 @@ test.describe( 'Checkout page', () => {
 		await page.context().clearCookies();
 		await page.reload();
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByRole( 'heading', { name: getTranslationFor('Order received') } )
 		).toBeVisible();
 
 		// Let's simulate a scenario where the 10 minute grace period has expired. This time, we expect the shopper to
 		// be presented with a request to verify their email address.
-		await setFilterValue(
-			page,
-			'woocommerce_order_email_verification_grace_period',
-			0
+		await setFilterValue( page, 'woocommerce_order_email_verification_grace_period', 0 );
+		await page.reload();
+		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(3)' ) ).toContainText(
+			getTranslationFor( '/verify the email address associated with the order/' )
 		);
 		await page.reload();
 		await expect(
@@ -365,34 +341,33 @@ test.describe( 'Checkout page', () => {
 		// page with an error message.
 		await page.fill( '#email', 'incorrect@email.address' );
 		await page.locator( 'form.woocommerce-verify-email button' ).click();
-		await expect(
-			page.locator( 'form.woocommerce-verify-email p:nth-child(4)' )
-		).toContainText( /verify the email address associated with the order/ );
-		await expect( page.locator( '.is-error' ) ).toContainText(
-			/We were unable to verify the email address you provided/
+		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(4)' ) ).toContainText(
+			getTranslationFor( '/verify the email address associated with the order/' )
+		);
+		await expect( page.locator( '.is-error') ).toContainText(
+			getTranslationFor( '/We were unable to verify the email address you provided/' )
 		);
 
 		// However if they supply the *correct* billing email address, they should see the order received page again.
 		await page.fill( '#email', guestEmail );
 		await page.locator( 'form.woocommerce-verify-email button' ).click();
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByRole( 'heading', { name: getTranslationFor('Order received') } )
 		).toBeVisible();
 
 		await page.goto( 'wp-login.php' );
 		await page.locator( 'input[name="log"]' ).fill( admin.username );
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-		await page.locator( 'text=Log In' ).click();
+		await page.locator( `text=${getTranslationFor('Log In')}` ).click();
 
 		// load the order placed as a guest
 		await page.goto(
 			`wp-admin/post.php?post=${ guestOrderId }&action=edit`
 		);
 
+		const orderDetails = getTranslationFor('Order #OrderId details').replace('OrderId',guestOrderId);
 		await expect(
-			page.getByRole( 'heading', {
-				name: `Order #${ guestOrderId } details`,
-			} )
+			page.getByRole( 'heading', { name: orderDetails } )
 		).toBeVisible();
 		await expect( page.locator( '.wc-order-item-name' ) ).toContainText(
 			simpleProductName
@@ -411,13 +386,9 @@ test.describe( 'Checkout page', () => {
 
 	test( 'allows existing customer to place order', async ( { page } ) => {
 		await page.goto( 'my-account/' );
-		await page
-			.locator( 'input[name="username"]' )
-			.fill( customer.username );
-		await page
-			.locator( 'input[name="password"]' )
-			.fill( customer.password );
-		await page.locator( 'text=Log In' ).click();
+		await page.locator( 'input[name="username"]' ).fill( customer.username );
+		await page.locator( 'input[name="password"]' ).fill( customer.password );
+		await page.getByRole('button', { name: getTranslationFor('Log In') }).click();
 		await page.waitForLoadState( 'networkidle' );
 		await addProductsToCart( page, simpleProductName, '2' );
 
@@ -447,13 +418,13 @@ test.describe( 'Checkout page', () => {
 		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
 		await page.locator( '#billing_email' ).fill( customer.email );
 
-		await page.locator( 'text=Cash on delivery' ).click();
+		await page.locator('label').filter({ hasText: getTranslationFor('Cash on delivery') }).click();
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
 
-		await page.locator( 'text=Place order' ).click();
+		await page.locator( `text=${getTranslationFor('Place order')}` ).click();
 
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByRole( 'heading', { name: getTranslationFor('Order received') } )
 		).toBeVisible();
 
 		// get order ID from the page
@@ -461,7 +432,7 @@ test.describe( 'Checkout page', () => {
 			.locator( '.woocommerce-order-overview__order.order' )
 			.textContent();
 		customerOrderId = await orderReceivedText
-			.split( /(\s+)/ )[ 6 ]
+			.split( /(\s+)/ )[ getTranslationFor('orderReceivedTextsplit') ]
 			.toString();
 
 		// Effect a log out/simulate a new browsing session by dropping all cookies.
@@ -470,22 +441,24 @@ test.describe( 'Checkout page', () => {
 
 		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
 		await expect( page.locator( '.is-info' ) ).toContainText(
-			/Please log in to your account to view this order/
+			getTranslationFor('/Please log in to your account to view this order/')
 		);
 
 		// Switch to admin user.
 		await page.goto( 'wp-login.php?loggedout=true' );
 		await page.locator( 'input[name="log"]' ).fill( admin.username );
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-		await page.locator( 'text=Log In' ).click();
+		await page.locator( `text=${getTranslationFor('Log In')}` ).click();
 
 		// load the order placed as a customer
 		await page.goto(
 			`wp-admin/post.php?post=${ customerOrderId }&action=edit`
 		);
+
+		const orderDetails = getTranslationFor('Order #OrderId details').replace('OrderId',customerOrderId);
 		await expect(
 			page.locator( 'h2.woocommerce-order-data__heading' )
-		).toContainText( `Order #${ customerOrderId } details` );
+		).toContainText( orderDetails );
 		await expect( page.locator( '.wc-order-item-name' ) ).toContainText(
 			simpleProductName
 		);

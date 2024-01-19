@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
-
+const { getTranslationFor } = require('../../utils/translations');
+  
 test.describe( 'Marketing page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -9,9 +10,8 @@ test.describe( 'Marketing page', () => {
 		// Go to the Marketing page.
 		await page.goto( 'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing' );
 
-		// Users should see the "Learn about marketing a store" card.
 		await expect(
-			page.locator( '"Learn about marketing a store"' )
+			page.locator( getTranslationFor( '"Learn about marketing a store"' ) )
 		).toBeVisible();
 	} );
 } );

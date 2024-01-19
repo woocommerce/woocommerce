@@ -2,6 +2,7 @@ const { chromium, expect } = require( '@playwright/test' );
 const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
 const { site } = require( './utils' );
+const { getTranslationFor } = require('./utils/translations');
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { ENABLE_HPOS } = process.env;
 
@@ -56,7 +57,7 @@ module.exports = async ( config ) => {
 	const adminPage = await adminContext.newPage();
 	const customerPage = await customerContext.newPage();
 
-	// Sign in as admin user and save state
+		// Sign in as admin user and save state
 	const adminRetries = 5;
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
@@ -67,14 +68,14 @@ module.exports = async ( config ) => {
 				.fill( admin.username );
 			await adminPage
 				.locator( 'input[name="pwd"]' )
-				.fill( admin.password );
-			await adminPage.locator( 'text=Log In' ).click();
+				.fill( admin.password ); 
+			await adminPage.locator( `text=${getTranslationFor('Log In')}` ).click();
 			await adminPage.waitForLoadState( 'networkidle' );
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.waitForLoadState( 'domcontentloaded' );
 
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-				'Dashboard'
+				`${getTranslationFor('Dashboard_WP')}`
 			);
 			await adminPage
 				.context()
@@ -112,7 +113,7 @@ module.exports = async ( config ) => {
 			await adminPage
 				.locator( '#key_permissions' )
 				.selectOption( 'read_write' );
-			await adminPage.locator( 'text=Generate API key' ).click();
+			await adminPage.locator( `text=${getTranslationFor('Generate API key')}` ).click();
 			process.env.CONSUMER_KEY = await adminPage
 				.locator( '#key_consumer_key' )
 				.inputValue();
@@ -151,7 +152,7 @@ module.exports = async ( config ) => {
 			await customerPage
 				.locator( 'input[name="pwd"]' )
 				.fill( customer.password );
-			await customerPage.locator( 'text=Log In' ).click();
+			await customerPage.locator( `text=${getTranslationFor('Log In')}` ).click();
 
 			await customerPage.goto( `/my-account` );
 			await expect(
@@ -163,7 +164,7 @@ module.exports = async ( config ) => {
 				customerPage.locator(
 					'div.woocommerce-MyAccount-content > p >> nth=0'
 				)
-			).toContainText( 'Hello' );
+			).toContainText( `${getTranslationFor('Hello')} `);
 
 			await customerPage
 				.context()

@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 const firstProductName = 'First Product';
 const firstProductPrice = '9.99';
@@ -138,7 +139,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 		// Verify shipping costs
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li' )
-		).toContainText( 'Free shipping' );
+		).toContainText(  getTranslationFor('Free shipping') );
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			firstProductPrice
 		);
@@ -164,7 +165,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 		);
 
 		// Set shipping to local pickup instead of flat rate
-		await page.locator( 'text=Local pickup' ).click();
+		await page.locator( `text=${getTranslationFor('Local pickup')}` ).click();
 
 		// Verify updated shipping costs
 		await expect(
@@ -177,7 +178,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 	} ) => {
 		await page.goto( '/cart/' );
 		await page.locator( 'input.qty' ).fill( '4' );
-		await page.locator( 'text=Update cart' ).click();
+		await page.locator( `text=${getTranslationFor('Update cart')}` ).click();
 
 		// Set shipping country to France
 		await page.locator( 'a.shipping-calculator-button' ).click();

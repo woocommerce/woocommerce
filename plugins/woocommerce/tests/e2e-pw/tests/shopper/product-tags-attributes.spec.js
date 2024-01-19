@@ -1,5 +1,7 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
+const { getTranslationFor } = require('../../utils/translations');
+const { get } = require('http');
 const pageTitle = 'Product Showcase';
 const { goToPageEditor } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
@@ -230,11 +232,11 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 			productTagName1
 		);
 		await expect( page.locator( '.woocommerce-breadcrumb' ) ).toContainText(
-			` / Products tagged “${ productTagName1 }”`
+			getTranslationFor( ' / Products tagged “product tag 1”' )
 		);
 		await expect(
 			page.locator( '.woocommerce-result-count' )
-		).toContainText( 'Showing all 3 results' );
+		).toContainText( getTranslationFor( 'Showing all 3 results' ) );
 	} );
 
 	test( 'should see and sort attributes page with all its products', async ( {
@@ -244,7 +246,7 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 		// but I could see it as checked/enabled in the settings
 		// workaround for the change to take effect is to just save the settings.
 		await page.goto( 'wp-admin/admin.php?page=wc-settings' );
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 
 		const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 		await page.goto( `product/${ slug }` );
@@ -257,11 +259,11 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 			productAttributeTerm
 		);
 		await expect( page.locator( '.woocommerce-breadcrumb' ) ).toContainText(
-			` / Product ${ productAttributeName } / ${ productAttributeTerm }`
+			getTranslationFor( ' / Product color / red' )
 		);
 		await expect(
 			page.locator( '.woocommerce-result-count' )
-		).toContainText( 'Showing all 3 results' );
+		).toContainText( getTranslationFor( 'Showing all 3 results' ) );
 	} );
 
 	test( 'can see products showcase', async ( { page } ) => {
@@ -269,29 +271,29 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 		await goToPageEditor( { page } );
 
 		await page
-			.getByRole( 'textbox', { name: 'Add Title' } )
+			.getByRole( 'textbox', { name: getTranslationFor( 'Add Title' ) } )
 			.fill( pageTitle );
 
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add default block' ) } ).click();
 
 		await page
 			.getByRole( 'document', {
-				name: 'Empty block; start writing or type forward slash to choose a block',
+				name: getTranslationFor( 'Empty block; start writing or type forward slash to choose a block' ),
 			} )
 			.fill( '/products' );
 		await page.keyboard.press( 'Enter' );
 
 		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.getByRole( 'button', { name: getTranslationFor( 'Publish' ), exact: true } )
 			.click();
 
 		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.getByRole( 'region', { name: getTranslationFor( 'Editor publish' ) } )
+			.getByRole( 'button', { name: getTranslationFor( 'Publish' ), exact: true } )
 			.click();
 
 		await expect(
-			page.getByText( `${ pageTitle } is now live.` )
+			page.getByText( `${ pageTitle } ${getTranslationFor('is now live.')}` )
 		).toBeVisible();
 
 		// go to created page with products showcase

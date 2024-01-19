@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { getTranslationFor } = require('../../utils/translations');
 const { features } = require( '../../utils' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -6,98 +7,16 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const wcPages = [
 	{
 		name: 'WooCommerce',
-		subpages: [
-			{
-				name: 'Home',
-				heading: 'Home',
-				element:
-					'.wooocommerce-inbox-card__header > .components-truncate',
-				text: 'Inbox',
-			},
-			{
-				name: 'Orders',
-				heading: 'Orders',
-				element: '.select2-selection__placeholder',
-				text: 'Filter by registered customer',
-			},
-			{
-				name: 'Customers',
-				heading: 'Customers',
-				element: '#search-inline-input-0',
-				text: 'Move backward for selected items',
-			},
-			{
-				name: 'Reports',
-				heading: 'Orders',
-				element: '.nav-tab-wrapper > .nav-tab-active',
-				text: 'Orders',
-			},
-			{
-				name: 'Settings',
-				heading: 'General',
-				element: '#store_address-description',
-				text: 'This is where your business is located. Tax rates and shipping rates will use this address.',
-			},
-			{
-				name: 'Status',
-				heading: 'System status',
-				element: '.nav-tab-active',
-				text: 'System status',
-			},
-		],
+		subpages: getTranslationFor('WooCommerce subpages'),
 	},
 	{
 		name: 'Products',
-		subpages: [
-			{
-				name: 'All Products',
-				heading: 'Products',
-				element: '#dropdown_product_type',
-				text: 'Filter by product type',
-			},
-			{
-				name: 'Add New',
-				heading: 'Add New',
-				element: '.duplication',
-				text: 'Copy to a new draft',
-			},
-			{
-				name: 'Categories',
-				heading: 'Product categories',
-				element: '#submit',
-				text: 'Add new category',
-			},
-			{
-				name: 'Tags',
-				heading: 'Product tags',
-				element: '#submit',
-				text: 'Add new tag',
-			},
-			{
-				name: 'Attributes',
-				heading: 'Attributes',
-				element: '#submit',
-				text: 'Add attribute',
-			},
-		],
+		subpages: getTranslationFor('Products subpages'),
 	},
 	// analytics is handled through a separate test
 	{
 		name: 'Marketing',
-		subpages: [
-			{
-				name: 'Overview',
-				heading: 'Overview',
-				element: '.woocommerce-marketing-card-header-description',
-				text: 'Start by adding a channel to your store',
-			},
-			{
-				name: 'Coupons',
-				heading: 'Coupons',
-				element: '.woocommerce-BlankState-cta.button-primary',
-				text: 'Create your first coupon',
-			},
-		],
+		subpages: getTranslationFor('Marketing subpages'),
 	},
 ];
 
@@ -131,7 +50,7 @@ for ( const currentPage of wcPages ) {
 			expect( httpStatus ).toEqual( 200 );
 			expect( status ).toEqual( 'success' );
 			expect( message ).toEqual(
-				'Onboarding profile data has been updated.'
+				getTranslationFor( 'Onboarding profile data has been updated.' )
 			);
 			const api = new wcApi( {
 				url: baseURL,

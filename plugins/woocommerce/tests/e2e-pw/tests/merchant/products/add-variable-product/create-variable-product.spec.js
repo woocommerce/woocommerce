@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { variableProducts: utils, api } = require( '../../../../utils' );
+const { getTranslationFor } = require('../../../../utils/translations');
 const { showVariableProductTour } = utils;
 const productPageURL = 'wp-admin/post-new.php?post_type=product';
 const variableProductName = 'Variable Product with Three Variations';
@@ -26,7 +27,7 @@ test.describe( 'Add variable product', () => {
 		await test.step(
 			`Type "${ variableProductName }" into the "Product name" input field.`,
 			async () => {
-				const productNameTextbox = page.getByLabel( 'Product name' );
+				const productNameTextbox = page.getByLabel( getTranslationFor('Product name') );
 				const permalink = page.locator( '#sample-permalink' );
 
 				await productNameTextbox.fill( variableProductName );
@@ -49,7 +50,7 @@ test.describe( 'Add variable product', () => {
 			async () => {
 				const attributesTab = page
 					.locator( '.attribute_tab' )
-					.getByRole( 'link', { name: 'Attributes' } );
+					.getByRole( 'link', { name: getTranslationFor('Attributes') } );
 
 				await attributesTab.scrollIntoViewIfNeeded();
 
@@ -70,7 +71,7 @@ test.describe( 'Add variable product', () => {
 		if ( tourWasDisplayed ) {
 			await test.step( 'Tour was displayed, so dismiss it.', async () => {
 				await page
-					.getByRole( 'button', { name: 'Close Tour' } )
+					.getByRole( 'button', { name: getTranslationFor('Close Tour') } )
 					.click();
 			} );
 
@@ -100,7 +101,7 @@ test.describe( 'Add variable product', () => {
 			'Expect the "Product draft updated." notice to appear.',
 			async () => {
 				await expect(
-					page.getByText( 'Product draft updated.' )
+					page.getByText( getTranslationFor('Product draft updated. ') )
 				).toBeVisible();
 			}
 		);
@@ -113,7 +114,7 @@ test.describe( 'Add variable product', () => {
 				);
 
 				await expect( selectedProductType ).toHaveText(
-					'Variable product'
+					getTranslationFor('Variable product')
 				);
 			}
 		);

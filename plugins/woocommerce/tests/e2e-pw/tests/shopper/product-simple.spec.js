@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require( '../../utils/translations' );
 
 const productPrice = '18.16';
 const simpleProductName = 'Simple single product';
@@ -125,10 +126,10 @@ test.describe( 'Single Product Page', () => {
 		await page.goto( `product/${ slug }` );
 
 		await expect( page.locator( '.upsells > h2' ) ).toContainText(
-			'You may also like…'
+			getTranslationFor( 'You may also like…' )
 		);
 		await expect( page.locator( '.related > h2' ) ).toContainText(
-			'Related products'
+			getTranslationFor( 'Related products' )
 		);
 		await expect(
 			page.locator(
@@ -148,23 +149,23 @@ test.describe( 'Single Product Page', () => {
 		await page.goto( 'my-account' );
 		await page.locator( '#username' ).fill( 'admin' );
 		await page.locator( '#password' ).fill( 'password' );
-		await page.locator( 'text=Log in' ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Log in' ) }).click();
 
 		const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 		await page.goto( `product/${ slug }` );
 
 		await expect( page.locator( '.reviews_tab' ) ).toContainText(
-			'Reviews (0)'
+			getTranslationFor( 'Reviews (0)' )
 		);
 		await page.locator( '.reviews_tab' ).click();
 		await page.locator( '.star-4' ).click();
 		await page.locator( '#comment' ).fill( 'This product is great!' );
-		await page.locator( 'text=Submit' ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Submit' ) } ).click();
 		await expect(
 			page.locator( '.woocommerce-Reviews-title' )
-		).toContainText( `1 review for ${ simpleProductName }` );
+		).toContainText( getTranslationFor( '1 review for Simple single product' ) );
 		await expect( page.locator( '.reviews_tab' ) ).toContainText(
-			'Reviews (1)'
+			getTranslationFor( 'Reviews (1)' )
 		);
 	} );
 
@@ -191,10 +192,10 @@ test.describe( 'Single Product Page', () => {
 		await page.goto( `product/${ slug }` );
 
 		await page.locator( 'input.qty' ).fill( '5' );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Add to cart' ) } ).click();
 
 		await expect( page.locator( '.is-success' ) ).toContainText(
-			'have been added to your cart.'
+			getTranslationFor( 'have been added to your cart.' )
 		);
 
 		await page.goto( 'cart/' );
@@ -217,7 +218,7 @@ test.describe( 'Single Product Page', () => {
 		await page.locator( 'a.remove' ).click();
 
 		await expect( page.locator( '.is-info' ) ).toContainText(
-			'Your cart is currently empty.'
+			getTranslationFor( 'Your cart is currently empty.' )
 		);
 	} );
 } );

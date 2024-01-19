@@ -1,6 +1,8 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const path = require( 'path' );
+const { getTranslationFor } = require('../../utils/translations');
+
 const filePath = path.resolve( 'tests/e2e-pw/test-data/sample_products.csv' );
 const filePathOverride = path.resolve(
 	'tests/e2e-pw/test-data/sample_products_override.csv'
@@ -89,8 +91,7 @@ const productCategories = [
 ];
 const productAttributes = [ 'Color', 'Size' ];
 
-const errorMessage =
-	'Invalid file type. The importer supports CSV and TXT file formats.';
+const errorMessage = getTranslationFor('Invalid file type. The importer supports CSV and TXT file formats.');
 
 test.describe.serial( 'Import Products from a CSV file', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -170,7 +171,7 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		);
 
 		// verify the error message if you go without providing CSV file
-		await page.locator( 'button[value="Continue"]' ).click();
+		await page.locator( `button[value=${getTranslationFor('"Continue"')}]` ).click();
 		await expect( page.locator( 'div.error.inline' ) ).toContainText(
 			errorMessage
 		);
@@ -187,18 +188,18 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 			page.locator( '#upload' ).click(),
 		] );
 		await fileChooser.setFiles( filePath );
-		await page.locator( 'button[value="Continue"]' ).click();
+		await page.locator( `button[value=${getTranslationFor('"Continue"')}]` ).click();
 
 		// Click on run the importer
-		await page.locator( 'button[value="Run the importer"]' ).click();
+		await page.locator( `button[value=${getTranslationFor('"Run the importer"')}]` ).click();
 
 		// Confirm that the import is done
 		await expect(
 			page.locator( '.woocommerce-importer-done' )
-		).toContainText( 'Import complete!', { timeout: 120000 } );
+		).toContainText( getTranslationFor('Import complete!'), { timeout: 120000 } );
 
 		// View the products
-		await page.locator( 'text=View products' ).click();
+		await page.locator( `text=${getTranslationFor('View products')}` ).click();
 
 		// Search for "import" to narrow the results to just the products we imported
 		await page.locator( '#post-search-input' ).fill( 'Imported' );
@@ -229,18 +230,18 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		] );
 		await fileChooser.setFiles( filePathOverride );
 		await page.locator( '#woocommerce-importer-update-existing' ).click();
-		await page.locator( 'button[value="Continue"]' ).click();
+		await page.locator( `button[value=${getTranslationFor('"Continue"')}]` ).click();
 
 		// Click on run the importer
-		await page.locator( 'button[value="Run the importer"]' ).click();
+		await page.locator( `button[value=${getTranslationFor('"Run the importer"')}]` ).click();
 
 		// Confirm that the import is done
 		await expect(
 			page.locator( '.woocommerce-importer-done' )
-		).toContainText( 'Import complete!', { timeout: 120000 } ); // import can take a while
+		).toContainText( getTranslationFor('Import complete!'), { timeout: 120000 } ); // import can take a while
 
 		// View the products
-		await page.locator( 'text=View products' ).click();
+		await page.locator( `text=${getTranslationFor('View products')}` ).click();
 
 		// Search for "import" to narrow the results to just the products we imported
 		await page.locator( '#post-search-input' ).fill( 'Imported' );

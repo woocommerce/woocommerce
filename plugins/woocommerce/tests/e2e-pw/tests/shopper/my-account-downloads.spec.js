@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require( '../../utils/translations' );
 
 const randomNum = new Date().getTime().toString();
 const customer = {
@@ -91,11 +92,11 @@ test.describe( 'Customer can manage downloadable file in My Account > Downloads 
 		// sign in as the "customer" user
 		await page.locator( '#username' ).fill( customer.username );
 		await page.locator( '#password' ).fill( customer.password );
-		await page.locator( 'text=Log in' ).click();
+		await page.getByRole( 'button', { name: getTranslationFor( 'Log in' ) }).click();
 
 		// verify that the downloadable product exist in downloads
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Downloads'
+			getTranslationFor( 'Downloads' )
 		);
 		await expect( page.locator( 'td.download-product' ) ).toContainText(
 			product.name
@@ -111,13 +112,13 @@ test.describe( 'Customer can manage downloadable file in My Account > Downloads 
 		await page.locator( '.woocommerce-MyAccount-downloads-file' ).click();
 		await page.goto( 'my-account/downloads/' );
 		await expect( page.locator( '.is-info' ) ).toContainText(
-			'No downloads available yet.'
+			getTranslationFor( 'No downloads available yet.' )
 		);
 		await expect( page.locator( '.wc-forward' ) ).toContainText(
-			'Browse products'
+			getTranslationFor( 'Browse products' )
 		);
 
 		await page.locator( '.wc-forward' ).click();
-		await expect( page.locator( 'h1.page-title' ) ).toContainText( 'Shop' );
+		await expect( page.locator( 'h1.page-title' ) ).toContainText( getTranslationFor( 'Shop' ) );
 	} );
 } );

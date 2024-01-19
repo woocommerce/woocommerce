@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 test.describe( 'Cart > Redirect to cart from shop', () => {
 	let productId;
@@ -71,7 +72,7 @@ test.describe( 'Cart > Redirect to cart from shop', () => {
 		await page.locator( `text=${ productName }` ).click();
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor('Add to cart') } ).click();
 
 		await expect( page ).toHaveURL( /.*\/cart/ );
 		await expect( page.locator( 'td.product-name' ) ).toContainText(

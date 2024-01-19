@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTranslationFor } = require('../../utils/translations');
 
 test.describe( 'WooCommerce General Settings', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -21,7 +22,7 @@ test.describe( 'WooCommerce General Settings', () => {
 
 		// make sure the general tab is active
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
-			'General'
+			getTranslationFor('General')
 		);
 
 		// Set selling location to all countries first so we can
@@ -29,11 +30,11 @@ test.describe( 'WooCommerce General Settings', () => {
 		await page
 			.locator( '#woocommerce_allowed_countries' )
 			.selectOption( 'all' );
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 
 		// confirm setting saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
+			getTranslationFor('Your settings have been saved.')
 		);
 		await expect(
 			page.locator( '#woocommerce_allowed_countries' )
@@ -43,11 +44,11 @@ test.describe( 'WooCommerce General Settings', () => {
 		await page
 			.locator( 'select[name="woocommerce_default_country"]' )
 			.selectOption( 'US:CA' );
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}` ).click();
 
 		// verify the settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
+			getTranslationFor('Your settings have been saved.')
 		);
 		await expect(
 			page.locator( 'select[name="woocommerce_default_country"]' )
@@ -60,7 +61,7 @@ test.describe( 'WooCommerce General Settings', () => {
 			.selectOption( 'specific' );
 		await page
 			.locator(
-				'select[data-placeholder="Choose countries / regions…"] >> nth=1'
+				`select[data-placeholder=${getTranslationFor('"Choose countries / regions…"')}] >> nth=1`
 			)
 			.selectOption( 'US' );
 
@@ -69,11 +70,11 @@ test.describe( 'WooCommerce General Settings', () => {
 		await page.locator( '#woocommerce_price_decimal_sep' ).fill( '.' );
 		await page.locator( '#woocommerce_price_num_decimals' ).fill( '2' );
 
-		await page.locator( 'text=Save changes' ).click();
+		await page.locator( `text=${getTranslationFor('Save changes')}`  ).click();
 
 		// verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
+			getTranslationFor('Your settings have been saved.')
 		);
 		await expect(
 			page.locator( '#woocommerce_price_thousand_sep' )

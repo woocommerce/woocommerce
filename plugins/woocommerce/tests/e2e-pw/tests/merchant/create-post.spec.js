@@ -1,5 +1,6 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
+const { getTranslationFor } = require('../../utils/translations');
 const { goToPostEditor } = require( '../../utils/editor' );
 
 const postTitle = `Post-${ new Date().getTime().toString() }`;
@@ -37,29 +38,29 @@ test.describe( 'Can create a new post', () => {
 		await goToPostEditor( { page } );
 
 		await page
-			.getByRole( 'textbox', { name: 'Add Title' } )
+			.getByRole( 'textbox', { name: getTranslationFor('Add Title') } )
 			.fill( postTitle );
 
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
+		await page.getByRole( 'button', { name: getTranslationFor('Add default block') } ).click();
 
 		await page
 			.getByRole( 'document', {
 				name:
-					'Empty block; start writing or type forward slash to choose a block',
+				`${getTranslationFor('Empty block; start writing or type forward slash to choose a block')}`,
 			} )
 			.fill( 'Test Post' );
 
 		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.getByRole( 'button', { name: getTranslationFor('Publish'), exact: true } )
 			.click();
 
 		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.getByRole( 'region', { name: getTranslationFor('Editor publish') } )
+			.getByRole( 'button', { name: getTranslationFor('Publish'), exact: true } )
 			.click();
 
 		await expect(
-			page.getByText( `${ postTitle } is now live.` )
+			page.getByText( `${ postTitle } ${getTranslationFor('is now live.')}` )
 		).toBeVisible();
 	} );
 } );
