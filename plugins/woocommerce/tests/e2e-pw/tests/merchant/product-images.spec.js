@@ -136,17 +136,34 @@ baseTest.describe('Products > Product Images', () => {
 		});
 	});
 
-	test('can create a product gallery', async ({page, productWithImage}) => {
+	test.only('can create a product gallery', async ({page, productWithImage}) => {
 		await test.step('Navigate to product edit page', async () => {
 			await page.goto(`wp-admin/post.php?post=${productWithImage.id}&action=edit`);
 		});
 
 		await test.step('Add product gallery images', async () => {
+			const imageCountSelector = '#product_images_container img'
+			let initialImagesCount = await page.locator(imageCountSelector).count();
+
+			for (const image of ['image-02', 'image-03']) {
+				await page.getByRole('link', {name: 'Add product gallery images'}).click();
+				await page.getByRole('tab', {name: 'Media Library'}).click();
+				const imageLocator = page.getByLabel(image).nth(0)
+				await imageLocator.click();
+				await expect(imageLocator).toBeChecked()
+				const dataId = await imageLocator.getAttribute('data-id')
+				await page.getByRole('button', {name: 'Add to gallery'}).click();
+
+				await expect(page.locator(`li[data-attachment_id="${dataId}"]`)).toBeVisible();
+				const currentImagesCount = await page.locator(imageCountSelector).count();
+				await expect(currentImagesCount).toEqual(initialImagesCount + 1)
+				initialImagesCount = currentImagesCount;
+			}
+
+			await page.getByRole('button', {name: 'Update'}).click();
 		});
 
-		await test.step('Verify product gallery was set', async () => {
-			// Verify image in admin area
-
+		await test.step('Verify product gallery', async () => {
 			// Verify images in store frontend
 		});
 	});
