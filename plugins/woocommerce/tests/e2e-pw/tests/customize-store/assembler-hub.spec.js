@@ -72,7 +72,7 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 		await expect( locator ).not.toHaveText( 'Customize your store' );
 	} );
 
-	test.only( 'Can view the Assembler Hub page when the theme is already customized', async ( {
+	test( 'Can view the Assembler Hub page when the theme is already customized', async ( {
 		page,
 	} ) => {
 		await page.goto( CUSTOMIZE_STORE_URL );
