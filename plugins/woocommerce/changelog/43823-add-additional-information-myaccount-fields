@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Moved `woocommerce_edit_account_form` above the password field. Introduced `woocommerce_my_account_after_my_address` and `woocommerce_order_details_after_customer_address` hooks.
