@@ -1523,6 +1523,37 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['related_categories'] = array(
+			'description'       => __( 'Limit result set to specific product categorie ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['related_tags'] = array(
+			'description'       => __( 'Limit result set to specific product tag ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'wp_parse_id_list',
+		);
+
+		// Add a parameter to whether combine or not the categories and tags.
+		$params['combine'] = array(
+			'description'       => __( 'Combine the product terms (categories, tags, ...).', 'woocommerce' ),
+			'type'              => 'boolean',
+			'default'           => false,
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'rest_sanitize_boolean',
+		);
+
 		return $params;
 	}
 
@@ -1593,8 +1624,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 */
 	public function get_related_items( $request ) {
 		$id         = $request->get_param( 'id' );
-		$categories = $request->get_param( 'categories' );
-		$tags       = $request->get_param( 'tags' );
+		$categories = $request->get_param( 'related_categories' );
+		$tags       = $request->get_param( 'related_tags' );
 		$combine    = $request->get_param( 'combine' );
 		$attributes = $request->get_param( 'attributes' );
 
