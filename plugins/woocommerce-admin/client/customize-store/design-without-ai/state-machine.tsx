@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { EventObject, createMachine } from 'xstate';
+import { createMachine } from 'xstate';
 import { getQuery } from '@woocommerce/navigation';
 
 /**
