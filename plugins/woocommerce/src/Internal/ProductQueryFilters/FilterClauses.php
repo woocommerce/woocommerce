@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Internal\ProductQueryFilters;
 
 use WC_Tax;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -15,18 +14,6 @@ defined( 'ABSPATH' ) || exit;
  * Class for filter clauses.
  */
 class FilterClauses implements ClausesProviderInterface {
-
-	use AccessiblePrivateMethods;
-
-	/**
-	 * Initialization.
-	 *
-	 * @internal
-	 * @return void
-	 */
-	final public function init(): void {
-		self::add_filter( 'posts_clauses', array( $this, 'main_query_filter' ), 10, 2 );
-	}
 
 	/**
 	 * Add conditional query clauses based on the filter params in query vars.
@@ -36,29 +23,10 @@ class FilterClauses implements ClausesProviderInterface {
 	 * @return array
 	 */
 	public function add_query_clauses( $args, $wp_query ) {
+		// Rating filter is handled by tax query.
 		$args = $this->add_stock_clauses( $args, $wp_query );
 		$args = $this->add_price_clauses( $args, $wp_query );
 		$args = $this->add_attribute_clauses( $args, $wp_query );
-
-		return $args;
-	}
-
-	/**
-	 * Filter the posts clauses of the main query to suport global filters.
-	 *
-	 * @param array     $args     Query args.
-	 * @param \WP_Query $wp_query WP_Query object.
-	 * @return array
-	 */
-	private function main_query_filter( $args, $wp_query ) {
-		if (
-			! $wp_query->is_main_query() ||
-			'product_query' !== $wp_query->get( 'wc_query' )
-		) {
-			return $args;
-		}
-
-		$args = $this->add_stock_clauses( $args, $wp_query );
 
 		return $args;
 	}
@@ -70,7 +38,7 @@ class FilterClauses implements ClausesProviderInterface {
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
-	private function add_stock_clauses( $args, $wp_query ) {
+	public function add_stock_clauses( $args, $wp_query ) {
 		if ( ! $wp_query->get( 'filter_stock_status' ) ) {
 			return $args;
 		}
@@ -88,7 +56,7 @@ class FilterClauses implements ClausesProviderInterface {
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
-	private function add_price_clauses( $args, $wp_query ) {
+	public function add_price_clauses( $args, $wp_query ) {
 		if ( ! $wp_query->get( 'min_price' ) && ! $wp_query->get( 'max_price' ) ) {
 			return $args;
 		}
@@ -128,7 +96,7 @@ class FilterClauses implements ClausesProviderInterface {
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
-	private function add_attribute_clauses( $args, $wp_query ) {
+	public function add_attribute_clauses( $args, $wp_query ) {
 		$chosen_attributes = $this->get_chosen_attributes( $wp_query->query_vars );
 
 		if ( empty( $chosen_attributes ) ) {
