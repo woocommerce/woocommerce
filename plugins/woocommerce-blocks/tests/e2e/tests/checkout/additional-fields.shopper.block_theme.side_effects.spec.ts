@@ -50,16 +50,20 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		await frontendUtils.goToCheckout();
 	} );
 
-	test( 'Shopper can fill in the checkout form with additional fields', async ( {
+	test( 'Shopper can fill in the checkout form with additional fields and can have different value for same field in shipping and billing address', async ( {
 		checkoutPageObject,
 	} ) => {
+		await checkoutPageObject.editShippingDetails();
+		await checkoutPageObject.unsyncBillingWithShipping();
+		await checkoutPageObject.editBillingDetails();
 		await checkoutPageObject.fillInCheckoutWithTestData(
 			{},
 			{
-				address: [ { label: 'Government ID', value: '12345' } ],
-				additional: [
-					{ label: 'How did you hear about us?', value: 'other' },
-				],
+				address: {
+					shipping: { 'Government ID': '12345' },
+					billing: { 'Government ID': '54321' },
+				},
+				additional: { 'How did you hear about us?': 'Other' },
 			}
 		);
 		await checkoutPageObject.placeOrder();

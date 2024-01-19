@@ -55,10 +55,17 @@ export class CheckoutPage {
 	async fillInCheckoutWithTestData(
 		overrideData = {},
 		additionalFields: {
-			address?: { label: string; value: string }[];
-			contact?: { label: string; value: string }[];
-			additional?: { label: string; value: string }[];
-		} = { address: [], additional: [], contact: [] }
+			address?: {
+				shipping?: Record< string, string >;
+				billing?: Record< string, string >;
+			};
+			contact?: Record< string, string >;
+			additional?: Record< string, string >;
+		} = {
+			address: { shipping: {}, billing: {} },
+			additional: {},
+			contact: {},
+		}
 	) {
 		const isShippingOpen = await this.page
 			.getByRole( 'group', {
@@ -76,21 +83,25 @@ export class CheckoutPage {
 
 		await this.fillContactInformation(
 			testData.email,
-			additionalFields.contact || []
+			additionalFields.contact || {}
 		);
 		if ( isShippingOpen ) {
 			await this.fillShippingDetails(
 				testData,
-				additionalFields.address
+				additionalFields.address?.shipping || {}
 			);
 		}
 		if ( isBillingOpen ) {
-			await this.fillBillingDetails( testData, additionalFields.address );
+			// Additional billing details
+			await this.fillBillingDetails( testData, {
+				...( additionalFields.address?.shipping || {} ),
+				...( additionalFields.address?.billing || {} ),
+			} );
 		}
 
 		if (
-			Array.isArray( additionalFields?.additional ) &&
-			additionalFields.additional.length > 0
+			typeof additionalFields.additional !== 'undefined' &&
+			Object.keys( additionalFields.additional ).length > 0
 		) {
 			await this.fillAdditionalInformationSection(
 				additionalFields.additional
@@ -103,7 +114,7 @@ export class CheckoutPage {
 
 	async fillContactInformation(
 		email: string,
-		additionalFields: { label: string; value: string }[]
+		additionalFields: Record< string, string >
 	) {
 		const contactSection = this.page.getByRole( 'group', {
 			name: 'Contact information',
@@ -111,21 +122,21 @@ export class CheckoutPage {
 		await contactSection.getByLabel( 'Email address' ).fill( email );
 
 		// Rest of additional data passed in from the overrideData object.
-		for ( const { label, value } of additionalFields ) {
+		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
 			const field = contactSection.getByLabel( label );
 			await field.fill( value );
 		}
 	}
 
 	async fillAdditionalInformationSection(
-		additionalFields: { label: string; value: string }[]
+		additionalFields: Record< string, string >
 	) {
 		const contactSection = this.page.getByRole( 'group', {
 			name: 'Additional order information',
 		} );
 
 		// Rest of additional data passed in from the overrideData object.
-		for ( const { label, value } of additionalFields ) {
+		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
 			const field = contactSection.getByLabel( label );
 			await field.fill( value );
 		}
@@ -229,7 +240,7 @@ export class CheckoutPage {
 
 	async fillBillingDetails(
 		customerBillingDetails: Record< string, string >,
-		additionalFields: { label: string; value: string }[] = []
+		additionalFields: Record< string, string > = {}
 	) {
 		await this.editBillingDetails();
 		const billingForm = this.page.getByRole( 'group', {
@@ -281,7 +292,7 @@ export class CheckoutPage {
 		}
 
 		// Rest of additional data passed in from the overrideData object.
-		for ( const { label, value } of additionalFields ) {
+		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
 			const field = billingForm.getByLabel( label );
 			await field.fill( value );
 		}
@@ -292,7 +303,7 @@ export class CheckoutPage {
 
 	async fillShippingDetails(
 		customerShippingDetails: Record< string, string >,
-		additionalFields: { label: string; value: string }[] = []
+		additionalFields: Record< string, string > = {}
 	) {
 		await this.editShippingDetails();
 		const shippingForm = this.page.getByRole( 'group', {
@@ -342,7 +353,7 @@ export class CheckoutPage {
 		}
 
 		// Rest of additional data passed in from the overrideData object.
-		for ( const { label, value } of additionalFields ) {
+		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
 			const field = shippingForm.getByLabel( label );
 			await field.fill( value );
 		}
