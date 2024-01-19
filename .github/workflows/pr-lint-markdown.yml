@@ -52,6 +52,7 @@ jobs:
             - name: Install prerequisites
               run: |
                   pnpm i -g markdownlint-cli
+                  npm --prefix .github/workflows/scripts install @actions/core
 
             - name: Lint repo changed markdown files
               run: |
@@ -80,6 +81,10 @@ jobs:
                     echo "No repo markdown files changed."
                   fi
 
+            - name: Check if docs manifest is valid JSON
+              id: is-valid-json
+              run: node .github/workflows/scripts/is-valid-json.js docs/docs-manifest.json
+
             - name: Lint docs changed markdown files
               run: |
                 RED="\e[1;31m"
@@ -87,8 +92,16 @@ jobs:
                 NC="\e[0m"
                 set -e
                 rc=0
-                changed_files="${{ steps.docs-changed-files.outputs.all_changed_files  }}"
-                changed_manifest="${{ steps.docs-manifest.outputs.all_changed_files  }}"
+                changed_files="${{ steps.docs-changed-files.outputs.all_changed_files }}"
+                changed_manifest="${{ steps.docs-manifest.outputs.all_changed_files }}"
+                is_valid_json="${{ steps.is-valid-json.outputs.is-valid-json }}"
+                storybook="no"
+                for L in ${{github.event.pull_request.labels.*.name}}
+                do
+                  if [ $L == "type: storybook" ]; then
+                    storybook="yes"
+                  fi
+                done
                 if [ -n "$changed_files" ]; then
                   lint_results=""
                   failed_check=""
@@ -107,12 +120,20 @@ jobs:
                     echo -e "${GREEN}Linting successful for all files.${NC}"
                   fi
 
-                  if [ -z "$changed_manifest" ]; then
-                    echo -e "${RED}Changes in the docs folder require updating the manifest${NC}"
-                    echo -e "Generate a manifest with `pnpm utils md-docs create docs woocommerce -o docs/docs-manifest.json`"
-                    failed_check="manifest"
+                  if [ "$storybook" == "no" ]; then
+                    if [ -z "$changed_manifest" ]; then
+                      echo -e "${RED}Changes in the docs folder require updating the manifest${NC}"
+                      failed_check="manifest"
+                    fi
+                    if [ "$is_valid_json" == "no" ]; then
+                      echo -e "${RED}'docs/docs-manifest.json' is not valid JSON${NC}"
+                      failed_check="manifest"
+                    fi
+                    if [ "$failed_check" == "manifest" ]; then
+                      echo -e "Generate a manifest with 'pnpm utils md-docs create docs woocommerce -o docs/docs-manifest.json'"
+                    fi
                   fi
-             
+
                   if [ -n "$failed_check" ]; then
                     exit 1
                   fi
