@@ -37,6 +37,40 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	private $search_sku_in_product_lookup_table = '';
 
 	/**
+	 * Related product ids.
+	 *
+	 * @var array
+	 */
+	private $related_producs_ids = array();
+
+	/**
+	 * Register the routes for products.
+	 */
+	public function register_routes() {
+		parent::register_routes();
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/related-products',
+			array(
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_related_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+	}
+
+	/**
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
@@ -1537,5 +1571,62 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Get the related products.
+	 * Related products is handled by the wc_get_related_products() core function.
+	 * Currently, the data that define the related products are the categories and tags.
+	 * This endpoint accepts and combines the categories and tags parameters.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return object
+	 */
+	public function get_related_items( $request ) {
+		$id         = $request->get_param( 'id' );
+		$categories = $request->get_param( 'categories' );
+		$tags       = $request->get_param( 'tags' );
+		$combine    = $request->get_param( 'combine' );
+		$attributes = $request->get_param( 'attributes' );
+
+		/*
+		 * If the `categories` params is defined,
+		 * filter the categories used by the
+		 * wc_get_related_products() function.
+		 */
+		if ( ! empty( $categories ) ) {
+			add_filter(
+				'woocommerce_get_related_product_cat_terms',
+				function( $product_categories ) use ( $categories, $combine ) {
+					if ( ! $combine ) {
+						return $categories;
+					}
+
+					return array_unique( array_merge( $product_categories, $categories ) );
+				}
+			);
+		}
+
+		/*
+		 * If the `tags` params is defined,
+		 * filter the tags used by the
+		 * wc_get_related_products() function.
+		 */
+		if ( ! empty( $tags ) ) {
+			add_filter(
+				'woocommerce_get_related_product_tag_terms',
+				function( $product_tags ) use ( $tags, $combine ) {
+					if ( ! $combine ) {
+						return $tags;
+					}
+
+					return array_unique( array_merge( $product_tags, $tags ) );
+				}
+			);
+		}
+
+		$this->related_producs_ids = wc_get_related_products( $id );
+
+		return parent::get_items( $request );
 	}
 }
