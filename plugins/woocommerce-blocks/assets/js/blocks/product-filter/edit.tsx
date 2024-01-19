@@ -14,11 +14,11 @@ import './editor.scss';
 import { getAllowedBlocks } from './utils';
 
 const BLOCK_NAME_MAP = {
-	'active-filters': 'woocommerce/product-filters-active',
-	'price-filter': 'woocommerce/product-filters-price',
-	'stock-filter': 'woocommerce/product-filters-stock-status',
-	'rating-filter': 'woocommerce/product-filters-rating',
-	'attribute-filter': 'woocommerce/product-filters-attribute',
+	'active-filters': 'woocommerce/product-filter-active',
+	'price-filter': 'woocommerce/product-filter-price',
+	'stock-filter': 'woocommerce/product-filter-stock-status',
+	'rating-filter': 'woocommerce/product-filter-rating',
+	'attribute-filter': 'woocommerce/product-filter-attribute',
 };
 
 type FilterType = keyof typeof BLOCK_NAME_MAP;
@@ -47,11 +47,13 @@ const Edit = ( {
 			<InnerBlocks
 				allowedBlocks={ getAllowedBlocks( [
 					...Object.values( BLOCK_NAME_MAP ),
+					'woocommerce/product-filter',
 					'woocommerce/rating-filter',
 					'woocommerce/active-filters',
 					'woocommerce/attribute-filter',
 					'woocommerce/price-filter',
 					'woocommerce/stock-filter',
+					'woocommerce/filter-wrapper',
 				] ) }
 				template={ [
 					[
