@@ -144,7 +144,9 @@ export function BlockEditor( {
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	useLayoutEffect( () => {
-		if ( ! layoutTemplate ) {
+		const isEditorLoading = ! layoutTemplate || ! productTemplate;
+
+		if ( isEditorLoading ) {
 			return;
 		}
 
@@ -160,7 +162,7 @@ export function BlockEditor( {
 			productTemplate,
 		} as Partial< ProductEditorSettings > );
 
-		setIsEditorLoading( ! layoutTemplate || ! productTemplate );
+		setIsEditorLoading( isEditorLoading );
 
 		// We don't need to include onChange or updateEditorSettings in the dependencies,
 		// since we get new instances of them on every render, which would cause an infinite loop.
@@ -178,10 +180,6 @@ export function BlockEditor( {
 	}, [] );
 
 	const { closeModalEditor } = useDispatch( productEditorUiStore );
-
-	if ( ! blocks ) {
-		return null;
-	}
 
 	if ( isModalEditorOpen ) {
 		return (
@@ -207,7 +205,10 @@ export function BlockEditor( {
 					<BlockEditorKeyboardShortcuts.Register />
 					<BlockTools>
 						<ObserveTyping>
-							<BlockList className="woocommerce-product-block-editor__block-list" />
+							{ blocks.length < 1 && <div>No blocks yet!</div> }
+							{ blocks.length > 0 && (
+								<BlockList className="woocommerce-product-block-editor__block-list" />
+							) }
 						</ObserveTyping>
 					</BlockTools>
 					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }

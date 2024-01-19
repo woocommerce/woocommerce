@@ -31,6 +31,7 @@ import { InterfaceSkeleton } from '@wordpress/interface';
  */
 import { Header } from '../header';
 import { BlockEditor } from '../block-editor';
+import { EditorLoadingContext } from '../../contexts/editor-loading-context';
 import { ValidationProvider } from '../../contexts/validation-context';
 import { EditorProps } from './types';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
@@ -41,9 +42,12 @@ export function Editor( {
 	productType = 'product',
 	settings,
 }: EditorProps ) {
+	const [ isEditorLoading, setIsEditorLoading ] = useState( true );
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
 
 	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
+
+	const productId = product?.id || -1;
 
 	// Check if the prepublish sidebar is open from the store.
 	const isPrepublishPanelOpen = useSelect( ( select ) => {
@@ -56,40 +60,47 @@ export function Editor( {
 				<EntityProvider
 					kind="postType"
 					type={ productType }
-					id={ product.id }
+					id={ productId }
 				>
 					<ShortcutProvider>
 						<ValidationProvider initialValue={ product }>
-							<InterfaceSkeleton
-								header={
-									<Header
-										onTabSelect={ setSelectedTab }
-										productType={ productType }
-									/>
-								}
-								content={
-									<>
-										<BlockEditor
-											settings={ settings }
-											postType={ productType }
-											productId={ product.id }
-											context={ {
-												selectedTab,
-												postType: productType,
-												postId: product.id,
-											} }
-										/>
-									</>
-								}
-								actions={
-									isPrepublishPanelOpen && (
-										<PrepublishPanel
+							<EditorLoadingContext.Provider
+								value={ isEditorLoading }
+							>
+								<InterfaceSkeleton
+									header={
+										<Header
+											onTabSelect={ setSelectedTab }
 											productType={ productType }
-											productId={ product.id }
 										/>
-									)
-								}
-							/>
+									}
+									content={
+										<>
+											<BlockEditor
+												settings={ settings }
+												postType={ productType }
+												productId={ productId }
+												context={ {
+													selectedTab,
+													postType: productType,
+													postId: productId,
+												} }
+												setIsEditorLoading={
+													setIsEditorLoading
+												}
+											/>
+										</>
+									}
+									actions={
+										isPrepublishPanelOpen && (
+											<PrepublishPanel
+												productType={ productType }
+												productId={ product.id }
+											/>
+										)
+									}
+								/>
+							</EditorLoadingContext.Provider>
 							<Popover.Slot />
 						</ValidationProvider>
 					</ShortcutProvider>
