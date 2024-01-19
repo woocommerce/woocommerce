@@ -46,7 +46,7 @@ const redirectToAssemblerHub = async () => {
 	document.body.appendChild( iframe );
 };
 
-export const redirectToIntroWithError = sendParent<
+const redirectToIntroWithError = sendParent<
 	DesignWithoutAIStateMachineContext,
 	DesignWithoutAIStateMachineEvents,
 	DesignWithoutAIStateMachineEvents
