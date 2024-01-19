@@ -74,10 +74,6 @@ export default function ProductPage() {
 		[ productId ]
 	);
 
-	if ( ! product?.id ) {
-		return <ProductPageSkeleton />;
-	}
-
 	return (
 		<>
 			<Editor
@@ -88,7 +84,7 @@ export default function ProductPage() {
 				<>
 					<FeedbackBar productType="product" />
 					<ProductMVPFeedbackModalContainer
-						productId={ product.id }
+						productId={ product?.id }
 					/>
 				</>
 			</WooFooterItem>
