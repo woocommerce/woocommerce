@@ -86,11 +86,11 @@ exit; // Exit if accessed directly
 }
 ```
 
-## Readme
+## README
 
-All plugins need a [standard WordPress readme](http://wordpress.org/plugins/about/readme.txt).
+All plugins need a [standard WordPress README](http://wordpress.org/plugins/about/readme.txt).
 
-Your readme might look something like this:
+Your README might look something like this:
 
 ```php
 === Plugin Name ===
