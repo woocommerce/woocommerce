@@ -28,13 +28,15 @@ const customerBilling = {
 	email: 'john.doe.merchant.test@example.com',
 };
 
-const pageTitle = 'Cart Block';
-const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
+const cartBlockPageTitle = 'Cart Block';
+const cartBlockPageSlug = cartBlockPageTitle
+	.replace( / /gi, '-' )
+	.toLowerCase();
 
 let productId, orderId, limitedCouponId;
 
 test.describe( 'Cart Block Applying Coupons', () => {
-	const couponBatchId = new Array();
+	const couponBatchId = [];
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -131,7 +133,7 @@ test.describe( 'Cart Block Applying Coupons', () => {
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( pageTitle );
+			.fill( cartBlockPageTitle );
 		await page.getByRole( 'button', { name: 'Add default block' } ).click();
 		await page
 			.getByRole( 'document', {
@@ -147,7 +149,7 @@ test.describe( 'Cart Block Applying Coupons', () => {
 			.getByRole( 'button', { name: 'Publish', exact: true } )
 			.click();
 		await expect(
-			page.getByText( `${ pageTitle } is now live.` )
+			page.getByText( `${ cartBlockPageTitle } is now live.` )
 		).toBeVisible();
 	} );
 
@@ -158,9 +160,9 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		// add product to cart block
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
-		await page.goto( pageSlug );
+		await page.goto( cartBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: cartBlockPageTitle } )
 		).toBeVisible();
 
 		// apply all coupon types
@@ -202,9 +204,9 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		// add product to cart block
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
-		await page.goto( pageSlug );
+		await page.goto( cartBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: cartBlockPageTitle } )
 		).toBeVisible();
 
 		// add all coupons and verify prices
@@ -251,9 +253,9 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		// add product to cart block
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
-		await page.goto( pageSlug );
+		await page.goto( cartBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: cartBlockPageTitle } )
 		).toBeVisible();
 
 		// try to add two same coupons and verify the error message
@@ -289,9 +291,9 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		// add product to cart block and go to cart
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
-		await page.goto( pageSlug );
+		await page.goto( cartBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: cartBlockPageTitle } )
 		).toBeVisible();
 
 		// add coupon with usage limit
