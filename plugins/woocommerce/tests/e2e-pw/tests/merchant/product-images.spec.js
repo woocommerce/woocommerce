@@ -198,7 +198,7 @@ baseTest.describe('Products > Product Images', () => {
 		});
 	});
 
-	test.only('can update a product gallery', async ({page, productWithGallery}) => {
+	test('can update a product gallery', async ({page, productWithGallery}) => {
 		let imagesCount;
 
 		await test.step('Navigate to product edit page', async () => {
