@@ -103,8 +103,7 @@
 }
 
 .woocommerce-customize-store-banner {
-	background: rgba(242, 237, 255, 0.6)
-		url(../assets/images/intro-banner-background.svg) no-repeat center right;
+	background: rgba(242, 237, 255, 0.6) url(../assets/images/intro-banner-background.svg) no-repeat center right;
 	background-size: auto 218px;
 	background-position-y: 29px;
 	border-radius: 4px;
@@ -118,16 +117,13 @@
 	position: relative;
 
 	&.offline-banner {
-		background: rgba(242, 237, 255, 0.6)
-			url(../assets/images/intro-banner-offline.svg) no-repeat center
-			right;
+		background: rgba(242, 237, 255, 0.6) url(../assets/images/intro-banner-offline.svg) no-repeat center right;
 		background-size: auto 218px;
 		background-position-y: 29px;
 	}
 
 	&.no-ai-banner {
-		background: rgba(242, 237, 255, 0.6)
-			url(../assets/images/intro-banner-no-ai.svg) no-repeat center right;
+		background: rgba(242, 237, 255, 0.6) url(../assets/images/intro-banner-no-ai.svg) no-repeat center right;
 	}
 
 	&.existing-ai-theme-banner,
@@ -180,8 +176,7 @@
 			height: 40px;
 		}
 
-		button.components-button + button.components-button {
-			// add left margin for all buttons with another button to its left
+		button.components-button + button.components-button { // add left margin for all buttons with another button to its left
 			margin-left: 12px;
 		}
 
