@@ -104,6 +104,45 @@ License: GPLv3 or later License
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 ```
 
+## Changelog.txt
+
+All plugins need [a standard changelog.txt file](https://github.com/woocommerce/marketplace-extension-guide/blob/master/woocommerce-extension-template/changelog.txt).
+
+Your changelog.txt file should look like this:
+
+```*** WooCommerce Extension Name Changelog ***
+
+YYYY-MM-DD - version 1.1.0
+* Added - Useful new feature
+* Fixed - Important bug fix
+
+YYYY-MM-DD - version 1.0.1
+* Fixed a bug
+
+YYYY-MM-DD - version 1.0.0
+* Initial release
+```
+
+### Changelog Entry Types
+
+To showcase the different types of work done in a product update, use any of the following words to denote what type of change each line is:
+
+```
+add
+added
+feature
+new
+developer
+dev
+tweak
+changed
+update
+delete
+remove
+fixed
+fix
+```
+
 ## [Plugin Author Name](https://woo.com/document/create-a-plugin/#section-9)
 
 To ensure a consistent experience for all WooCommerce users,including finding information on who to contact with queries, the following plugin headers should be in place:
