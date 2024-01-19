@@ -116,7 +116,7 @@ final class ProductFilters extends AbstractBlock {
 		}
 
 		if ( $this->collection_data_is_empty( $attributes ) ) {
-			return $this->render_empty_block();
+			return $this->render_empty_block( $block );
 		}
 
 		return $this->render_filter_block( $content, $block );
@@ -138,19 +138,39 @@ final class ProductFilters extends AbstractBlock {
 	/**
 	 * Render the block when it's empty.
 	 *
+	 * @param mixed $block  - Block instance.
 	 * @return string - Rendered block type output.
 	 */
-	private function render_empty_block() {
+	private function render_empty_block( $block ) {
 		$this->reset_current_response();
+
+		$attributes = array(
+			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+			'class'               => 'wc-block-product-filters',
+		);
+
+		if ( ! isset( $block->context['queryId'] ) ) {
+			$attributes['data-wc-navigation-id'] = $this->generate_navigation_id( $block );
+		}
 
 		return sprintf(
 			'<nav %1$s></nav>',
 			get_block_wrapper_attributes(
-				array(
-					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
-					'class'               => 'wc-block-product-filters',
-				)
+				$attributes
 			)
+		);
+	}
+
+	/**
+	 * Generate a unique navigation ID for the block.
+	 *
+	 * @param mixed $block - Block instance.
+	 * @return string - Unique navigation ID.
+	 */
+	private function generate_navigation_id( $block ) {
+		return sprintf(
+			'wc-product-filters-%s',
+			md5( wp_json_encode( $block->parsed_block['innerBlocks'] ) )
 		);
 	}
 
@@ -170,10 +190,7 @@ final class ProductFilters extends AbstractBlock {
 		);
 
 		if ( ! isset( $block->context['queryId'] ) ) {
-			$attributes_data['data-wc-navigation-id'] = sprintf(
-				'wc-product-filters-%s',
-				md5( wp_json_encode( $block->parsed_block['innerBlocks'] ) )
-			);
+			$attributes_data['data-wc-navigation-id'] = $this->generate_navigation_id( $block );
 		}
 
 		return sprintf(
