@@ -12,6 +12,7 @@ import {
 	useContext,
 	useState,
 	Fragment,
+	useEffect,
 } from '@wordpress/element';
 import { MouseEvent } from 'react';
 import {
@@ -106,43 +107,51 @@ export function HeaderToolbar( {
 		}
 	}, [ isInserterOpened, setIsInserterOpened ] );
 
+	useEffect( () => {
+		// If we have a new block selection, show the block tools
+		if ( hasBlockSelection ) {
+			setIsBlockToolsCollapsed( false );
+		}
+	}, [ hasBlockSelection ] );
+
 	return (
 		<NavigableToolbar
 			className="woocommerce-iframe-editor__header-toolbar"
 			aria-label={ toolbarAriaLabel }
 		>
 			<div className="woocommerce-iframe-editor__header-toolbar-left">
-				<ToolbarItem
-					ref={ inserterButton }
-					as={ Button }
-					className="woocommerce-iframe-editor__header-toolbar-inserter-toggle"
-					variant="primary"
-					isPressed={ isInserterOpened }
-					onMouseDown={ (
-						event: MouseEvent< HTMLButtonElement >
-					) => {
-						event.preventDefault();
-					} }
-					onClick={ toggleInserter }
-					disabled={ ! isInserterEnabled }
-					icon={ plus }
-					label={
-						! isInserterOpened
-							? __( 'Add', 'woocommerce' )
-							: __( 'Close', 'woocommerce' )
-					}
-					showTooltip
-				/>
-				{ isLargeViewport && (
+				<div className="woocommerce-iframe-editor-document-tools">
 					<ToolbarItem
-						as={ ToolSelector }
-						disabled={ isTextModeEnabled }
+						ref={ inserterButton }
+						as={ Button }
+						className="woocommerce-iframe-editor__header-toolbar-inserter-toggle"
+						variant="primary"
+						isPressed={ isInserterOpened }
+						onMouseDown={ (
+							event: MouseEvent< HTMLButtonElement >
+						) => {
+							event.preventDefault();
+						} }
+						onClick={ toggleInserter }
+						disabled={ ! isInserterEnabled }
+						icon={ plus }
+						label={
+							! isInserterOpened
+								? __( 'Add', 'woocommerce' )
+								: __( 'Close', 'woocommerce' )
+						}
+						showTooltip
 					/>
-				) }
-				<ToolbarItem as={ EditorHistoryUndo } />
-				<ToolbarItem as={ EditorHistoryRedo } />
-				<ToolbarItem as={ DocumentOverview } />
-
+					{ isLargeViewport && (
+						<ToolbarItem
+							as={ ToolSelector }
+							disabled={ isTextModeEnabled }
+						/>
+					) }
+					<ToolbarItem as={ EditorHistoryUndo } />
+					<ToolbarItem as={ EditorHistoryRedo } />
+					<ToolbarItem as={ DocumentOverview } />
+				</div>
 				{ hasFixedToolbar && isLargeViewport && (
 					<>
 						<div

@@ -93,13 +93,18 @@ export function IframeEditor( {
 	const { clearSelectedBlock, updateSettings } =
 		useDispatch( blockEditorStore );
 
-	// @ts-ignore No types for this exist yet.
-	const { setDefaults } = useDispatch( preferencesStore );
-
 	const parentEditorSettings = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		return select( blockEditorStore ).getSettings();
+	}, [] );
+
+	const { hasFixedToolbar } = useSelect( ( select ) => {
+		// @ts-expect-error These selectors are available in the block data store.
+		const { get: getPreference } = select( preferencesStore );
+		return {
+			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
+		};
 	}, [] );
 
 	useEffect( () => {
@@ -107,10 +112,6 @@ export function IframeEditor( {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		updateSettings( productBlockEditorSettings );
-
-		setDefaults( 'core', {
-			fixedToolbar: true,
-		} );
 	}, [] );
 
 	const settings = __settings || parentEditorSettings;
@@ -134,7 +135,7 @@ export function IframeEditor( {
 				<BlockEditorProvider
 					settings={ {
 						...settings,
-						hasFixedToolbar: true,
+						hasFixedToolbar,
 						templateLock: false,
 					} }
 					value={ blocks }
