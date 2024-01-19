@@ -131,6 +131,13 @@ export function LinkedProductListBlockEdit( {
 		);
 
 		setLinkedProductIds( newLinkedProductIds );
+
+		recordEvent( 'linked_products_product_remove', {
+			source: TRACKS_SOURCE,
+			field: property,
+			product_id: productId,
+			linked_product_id: product.id,
+		} );
 	}
 
 	const [ isChoosingProducts, setIsChoosingProducts ] = useState( false );
