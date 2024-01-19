@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Enable feature plugin in the production build

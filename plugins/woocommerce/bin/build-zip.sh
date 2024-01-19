@@ -6,7 +6,7 @@ BUILD_PATH="${PROJECT_PATH}/build"
 DEST_PATH="$BUILD_PATH/$PLUGIN_SLUG"
 
 if [ -z "${WOOCOMMERCE_BLOCKS_PHASE}" ]; then
-    export WOOCOMMERCE_BLOCKS_PHASE=1
+    export WOOCOMMERCE_BLOCKS_PHASE=2
 fi
 
 echo "Generating build directory..."
