@@ -149,6 +149,15 @@ export function LinkedProductListBlockEdit( {
 		} );
 	}
 
+	function handleProductListPreview( product: Product ) {
+		recordEvent( 'linked_products_product_preview_click', {
+			source: TRACKS_SOURCE,
+			field: property,
+			product_id: productId,
+			linked_product_id: product.id,
+		} );
+	}
+
 	const [ isChoosingProducts, setIsChoosingProducts ] = useState( false );
 
 	async function chooseProductsForMe() {
@@ -239,6 +248,7 @@ export function LinkedProductListBlockEdit( {
 					products={ state.linkedProducts }
 					onRemove={ handleProductListRemove }
 					onEdit={ handleProductListEdit }
+					onPreview={ handleProductListPreview }
 				/>
 			) }
 		</div>

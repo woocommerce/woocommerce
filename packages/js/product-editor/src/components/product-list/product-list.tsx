@@ -21,6 +21,7 @@ export function ProductList( {
 	products,
 	onRemove,
 	onEdit,
+	onPreview,
 	className,
 	...props
 }: ProductListProps ) {
@@ -28,6 +29,14 @@ export function ProductList( {
 		return function handleNameLinkClick() {
 			if ( onEdit ) {
 				onEdit( product );
+			}
+		};
+	}
+
+	function previewLinkClickHandler( product: Product ) {
+		return function handlePreviewLinkClick() {
+			if ( onPreview ) {
+				onPreview( product );
 			}
 		};
 	}
@@ -102,6 +111,9 @@ export function ProductList( {
 									href={ product.permalink }
 									target="_blank"
 									rel="noreferrer"
+									onClick={ previewLinkClickHandler(
+										product
+									) }
 								/>
 								<Button
 									icon={ closeSmall }
