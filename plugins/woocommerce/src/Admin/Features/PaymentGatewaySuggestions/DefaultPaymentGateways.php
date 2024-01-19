@@ -966,8 +966,8 @@ class DefaultPaymentGateways {
 				),
 			),
 			'option_name'  => 'woocommerce_onboarding_profile',
-			'operation'    => 'contains',
-			'value'        => 'no_im_selling_offline',
+			'operation'    => 'in',
+			'value'        => [ 'no_im_selling_offline', 'im_selling_both_online_and_offline' ],
 			'default'      => array(),
 		);
 	}
