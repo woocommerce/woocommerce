@@ -67,6 +67,7 @@ export function BlockEditor( {
 	settings: _settings,
 	postType,
 	productId,
+	setIsEditorLoading,
 }: BlockEditorProps ) {
 	useConfirmUnsavedProductChanges( postType );
 
@@ -158,6 +159,8 @@ export function BlockEditor( {
 			...settings,
 			productTemplate,
 		} as Partial< ProductEditorSettings > );
+
+		setIsEditorLoading( ! layoutTemplate || ! productTemplate );
 
 		// We don't need to include onChange or updateEditorSettings in the dependencies,
 		// since we get new instances of them on every render, which would cause an infinite loop.
