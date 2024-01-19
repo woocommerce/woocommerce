@@ -11,6 +11,7 @@ import { useSelect } from '@wordpress/data';
 import Downgrade from './components/downgrade';
 import Warning from './components/warning';
 import './editor.scss';
+import { getAllowedBlocks } from './utils';
 
 const BLOCK_NAME_MAP = {
 	'active-filters': 'woocommerce/product-filters-active',
@@ -44,7 +45,14 @@ const Edit = ( {
 				clientId={ clientId }
 			/>
 			<InnerBlocks
-				allowedBlocks={ [ 'core/heading' ] }
+				allowedBlocks={ getAllowedBlocks( [
+					...Object.values( BLOCK_NAME_MAP ),
+					'woocommerce/rating-filter',
+					'woocommerce/active-filters',
+					'woocommerce/attribute-filter',
+					'woocommerce/price-filter',
+					'woocommerce/stock-filter',
+				] ) }
 				template={ [
 					[
 						'core/heading',
