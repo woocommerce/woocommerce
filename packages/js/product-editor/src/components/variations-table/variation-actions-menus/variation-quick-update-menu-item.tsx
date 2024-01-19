@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Slot, Fill, MenuItem, MenuGroup } from '@wordpress/components';
-import { Children, createElement, Fragment } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import {
 	createOrderedChildren,
 	sortFillsByOrder,
@@ -91,14 +91,11 @@ VariationQuickUpdateMenuItem.Slot = ( {
 			fillProps={ { ...fillProps, onChange, onClose, selection } }
 		>
 			{ ( fills ) => {
-				if ( ! sortFillsByOrder ) {
+				if ( ! sortFillsByOrder || ! fills?.length ) {
 					return null;
 				}
 
-				return Children.map(
-					sortFillsByOrder( fills )?.props.children,
-					( child ) => <MenuGroup>{ child }</MenuGroup>
-				);
+				return <MenuGroup>{ sortFillsByOrder( fills ) }</MenuGroup>;
 			} }
 		</Slot>
 	);
