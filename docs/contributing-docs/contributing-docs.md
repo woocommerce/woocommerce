@@ -121,7 +121,7 @@ You don't need to regenerate the manifest if you only make changes to a page's c
 These instructions presume you're currently have your `docs/` branch open and you've made your required changes to any files.
 
 1. In your command line, navigate to your repo's folder.
-2. Run `pnpm utils md-docs create docs woocommerce -o docs/manifest.json`.
+2. Run `pnpm utils md-docs create docs woocommerce -o docs/docs-manifest.json`.
 3. The `docs-manifest.json` file in the `/docs` folder of your repo will be updated. Verify that the changes to the manifest reflect the changes that you made to the docs.
 
 If you are a non-technical contributor who isn't experienced with command line tools, we're still happy to receive your contributions. If you're unable to include an updated manifest, please ensure that you mention this in your pull request's description.
