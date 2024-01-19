@@ -153,6 +153,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 				createSuccessNotice(
 					__( 'Product type changed.', 'woocommerce' )
 				);
+
+				recordEvent( 'product_template_changed', {
+					source: TRACKS_SOURCE,
+					template: productTemplate.id,
+				} );
 			} catch ( error ) {
 				const message = getProductErrorMessage( error as WPError );
 				createErrorNotice( message );
@@ -209,7 +214,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		};
 	}
 
-	async function handleModelChangeClick() {
+	async function handleModalChangeClick() {
 		try {
 			if ( isSaving ) return;
 
@@ -252,6 +257,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			);
 
 			createSuccessNotice( __( 'Product type changed.', 'woocommerce' ) );
+
+			recordEvent( 'product_template_changed', {
+				source: TRACKS_SOURCE,
+				template: productTemplateId,
+			} );
 
 			// Let the server manage the redirection when the product is not supported
 			// by the product editor.
@@ -411,7 +421,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 								variant="primary"
 								isBusy={ isSaving }
 								aria-disabled={ isSaving }
-								onClick={ handleModelChangeClick }
+								onClick={ handleModalChangeClick }
 							>
 								{ __( 'Change', 'woocommerce' ) }
 							</Button>
