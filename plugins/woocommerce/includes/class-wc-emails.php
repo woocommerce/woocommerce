@@ -600,8 +600,8 @@ class WC_Emails {
 	 * Renders any additional fields captured during block based checkout.
 	 *
 	 * @param WC_Order $order         Order instance.
-	 * @param bool     $sent_to_admin If should sent to admin.
-	 * @param bool     $plain_text    If is plain text email.
+	 * @param bool     $sent_to_admin If email is sent to admin.
+	 * @param bool     $plain_text    If this is a plain text email.
 	 */
 	public function additional_checkout_fields( $order, $sent_to_admin = false, $plain_text = false ) {
 		if ( ! is_a( $order, 'WC_Order' ) ) {
