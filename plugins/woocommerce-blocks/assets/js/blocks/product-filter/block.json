@@ -1,7 +1,7 @@
 {
-	"name": "woocommerce/product-filters",
+	"name": "woocommerce/product-filter",
 	"version": "1.0.0",
-	"title": "Product Filters",
+	"title": "Product Filter",
 	"description": "A block that adds product filters to the product collection.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce", "Filters" ],

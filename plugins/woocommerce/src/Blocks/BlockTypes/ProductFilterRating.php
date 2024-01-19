@@ -5,11 +5,11 @@ use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
 
 /**
- * Product Filters: Rating Block
+ * Product Filter: Rating Block
  *
  * @package Automattic\WooCommerce\Blocks\BlockTypes
  */
-final class ProductFiltersRating extends AbstractBlock {
+final class ProductFilterRating extends AbstractBlock {
 	/**
 	 * Block name.
 	 *

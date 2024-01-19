@@ -5,28 +5,28 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 const filterBlocks = [
 	{
-		name: 'woocommerce/product-filters-price',
-		title: 'Product Filters: Price',
+		name: 'woocommerce/product-filter-price',
+		title: 'Product Filter: Price',
 		heading: 'Filter by Price',
 	},
 	{
-		name: 'woocommerce/product-filters-stock-status',
-		title: 'Product Filters: Stock Status',
+		name: 'woocommerce/product-filter-stock-status',
+		title: 'Product Filter: Stock Status',
 		heading: 'Filter by Stock Status',
 	},
 	{
-		name: 'woocommerce/product-filters-rating',
-		title: 'Product Filters: Rating',
+		name: 'woocommerce/product-filter-rating',
+		title: 'Product Filter: Rating',
 		heading: 'Filter by Rating',
 	},
 	{
-		name: 'woocommerce/product-filters-attribute',
-		title: 'Product Filters: Attribute',
+		name: 'woocommerce/product-filter-attribute',
+		title: 'Product Filter: Attribute',
 		heading: 'Filter by Attribute',
 	},
 	{
-		name: 'woocommerce/product-filters-active',
-		title: 'Product Filters: Active Filters',
+		name: 'woocommerce/product-filter-active',
+		title: 'Product Filter: Active Filters',
 		heading: 'Active Filters',
 	},
 ];

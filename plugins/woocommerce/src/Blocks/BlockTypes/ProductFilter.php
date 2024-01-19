@@ -5,15 +5,15 @@ use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Package;
 
 /**
- * Product Filters Block.
+ * Product Filter Block.
  */
-final class ProductFilters extends AbstractBlock {
+final class ProductFilter extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filters';
+	protected $block_name = 'product-filter';
 
 	/**
 	 * Cache the current response from the API.

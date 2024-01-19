@@ -40,7 +40,7 @@ const Upgrade = ( { clientId }: { clientId: string } ) => {
 
 		replaceBlock(
 			clientId,
-			createBlock( 'woocommerce/product-filters', {
+			createBlock( 'woocommerce/product-filter', {
 				...filterBlockAttributes,
 				heading: headingBlock?.attributes.content || '',
 				filterType,

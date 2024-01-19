@@ -5,9 +5,9 @@ use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 
 /**
- * Product Filters: Stock Status Block.
+ * Product Filter: Stock Status Block.
  */
-final class ProductFiltersStockStatus extends AbstractBlock {
+final class ProductFilterStockStatus extends AbstractBlock {
 
 	/**
 	 * Block name.

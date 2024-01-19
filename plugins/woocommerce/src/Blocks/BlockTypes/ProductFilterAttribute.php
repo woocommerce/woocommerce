@@ -5,9 +5,9 @@ use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 
 /**
- * Product Filters: Attribute Block.
+ * Product Filter: Attribute Block.
  */
-final class ProductFiltersAttribute extends AbstractBlock {
+final class ProductFilterAttribute extends AbstractBlock {
 
 	/**
 	 * Block name.

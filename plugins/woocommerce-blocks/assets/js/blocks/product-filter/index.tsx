@@ -35,8 +35,8 @@ if ( isExperimentalBuild() ) {
 		save,
 		variations: [
 			{
-				name: 'product-filters-active',
-				title: __( 'Product Filters: Active Filters', 'woocommerce' ),
+				name: 'product-filter-active',
+				title: __( 'Product Filter: Active Filters', 'woocommerce' ),
 				description: __(
 					'Display the currently active filters.',
 					'woocommerce'
@@ -56,8 +56,8 @@ if ( isExperimentalBuild() ) {
 				isDefault: true,
 			},
 			{
-				name: 'product-filters-price',
-				title: __( 'Product Filters: Price', 'woocommerce' ),
+				name: 'product-filter-price',
+				title: __( 'Product Filter: Price', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by choosing a price range.',
 					'woocommerce'
@@ -76,8 +76,8 @@ if ( isExperimentalBuild() ) {
 				},
 			},
 			{
-				name: 'product-filters-stock-status',
-				title: __( 'Product Filters: Stock Status', 'woocommerce' ),
+				name: 'product-filter-stock-status',
+				title: __( 'Product Filter: Stock Status', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by stock status.',
 					'woocommerce'
@@ -96,8 +96,8 @@ if ( isExperimentalBuild() ) {
 				},
 			},
 			{
-				name: 'product-filters-attribute',
-				title: __( 'Product Filters: Attribute', 'woocommerce' ),
+				name: 'product-filter-attribute',
+				title: __( 'Product Filter: Attribute', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by selecting one or more attributes, such as color.',
 					'woocommerce'
@@ -116,8 +116,8 @@ if ( isExperimentalBuild() ) {
 				},
 			},
 			{
-				name: 'product-filters-rating',
-				title: __( 'Product Filters: Rating', 'woocommerce' ),
+				name: 'product-filter-rating',
+				title: __( 'Product Filter: Rating', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by rating.',
 					'woocommerce'

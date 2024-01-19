@@ -9,7 +9,7 @@ export type FilterType =
 	| 'rating-filter'
 	| 'active-filters'
 	| 'stock-filter'
-	| 'product-filters';
+	| 'product-filter';
 
 export type BlockAttributes = {
 	filterType: FilterType;
