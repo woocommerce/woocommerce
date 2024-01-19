@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { MouseEvent } from 'react';
 import { Button } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -19,9 +20,18 @@ import { ProductListProps } from './types';
 export function ProductList( {
 	products,
 	onRemove,
+	onEdit,
 	className,
 	...props
 }: ProductListProps ) {
+	function nameLinkClickHandler( product: Product ) {
+		return function handleNameLinkClick() {
+			if ( onEdit ) {
+				onEdit( product );
+			}
+		};
+	}
+
 	function removeClickHandler( product: Product ) {
 		return function handleRemoveClick() {
 			if ( onRemove ) {
@@ -66,6 +76,9 @@ export function ProductList( {
 										) }
 										target="_blank"
 										rel="noreferrer"
+										onClick={ nameLinkClickHandler(
+											product
+										) }
 									>
 										{ product.name }
 									</a>

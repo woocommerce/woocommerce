@@ -124,7 +124,7 @@ export function LinkedProductListBlockEdit( {
 		setLinkedProductIds( newLinkedProductIds );
 	}
 
-	function handleRemoveProductClick( product: Product ) {
+	function handleProductListRemove( product: Product ) {
 		const newLinkedProductIds = removeLinkedProductDispatcher(
 			product,
 			state.linkedProducts
@@ -133,6 +133,15 @@ export function LinkedProductListBlockEdit( {
 		setLinkedProductIds( newLinkedProductIds );
 
 		recordEvent( 'linked_products_product_remove', {
+			source: TRACKS_SOURCE,
+			field: property,
+			product_id: productId,
+			linked_product_id: product.id,
+		} );
+	}
+
+	function handleProductListEdit( product: Product ) {
+		recordEvent( 'linked_products_product_select', {
 			source: TRACKS_SOURCE,
 			field: property,
 			product_id: productId,
@@ -228,7 +237,8 @@ export function LinkedProductListBlockEdit( {
 			{ ! state.isLoading && state.linkedProducts.length > 0 && (
 				<ProductList
 					products={ state.linkedProducts }
-					onRemove={ handleRemoveProductClick }
+					onRemove={ handleProductListRemove }
+					onEdit={ handleProductListEdit }
 				/>
 			) }
 		</div>
