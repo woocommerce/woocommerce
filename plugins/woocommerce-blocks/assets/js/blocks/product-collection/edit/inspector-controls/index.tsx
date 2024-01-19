@@ -33,6 +33,7 @@ import {
 import { setQueryAttribute } from '../../utils';
 import { DEFAULT_FILTERS, getDefaultSettings } from '../../constants';
 import UpgradeNotice from './upgrade-notice';
+import EnhancedPaginationNotice from './enhanced-pagination-notice';
 import ColumnsControl from './columns-control';
 import InheritQueryControl from './inherit-query-control';
 import OrderByControl from './order-by-control';
@@ -84,6 +85,7 @@ const ProductCollectionInspectorControls = (
 
 	return (
 		<InspectorControls>
+			<EnhancedPaginationNotice />
 			<ToolsPanel
 				label={ __( 'Settings', 'woocommerce' ) }
 				resetAll={ () => {
