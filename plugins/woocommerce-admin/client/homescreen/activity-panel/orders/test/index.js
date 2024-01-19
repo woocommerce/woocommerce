@@ -108,7 +108,7 @@ describe( 'OrdersPanel', () => {
 		const { getByText } = render(
 			<OrdersPanel orderStatuses={ [] } unreadOrdersCount={ 1 } />
 		);
-		expect( getByText( '€123' ) ).toBeInTheDocument();
+		expect( getByText( '€123.00' ) ).toBeInTheDocument();
 	} );
 
 	it( 'should show order total correctly with a currency not in currencySymbols', () => {

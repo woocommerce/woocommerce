@@ -19,7 +19,7 @@ import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import { ORDERS_STORE_NAME, ITEMS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { CurrencyContext } from '@woocommerce/currency';
+import { CurrencyContext, CurrencyFactory } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -259,7 +259,11 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 		}
 
 		// If the order currency is different from the store currency, we show the currency code and amount in the order currency.
-		return `${ decodeEntities( symbol ) }${ total }`;
+		return CurrencyFactory( {
+			...storeCurrency,
+			symbol: decodeEntities( symbol ),
+			code: orderCurrencyCode,
+		} ).formatAmount( total );
 	};
 
 	const {
