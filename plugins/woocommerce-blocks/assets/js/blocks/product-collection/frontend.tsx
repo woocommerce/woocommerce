@@ -84,15 +84,13 @@ const productCollectionStore = {
 				ctx.animation = 'finish';
 				ctx.url = ref.href;
 
-				/**
-				 * Focus the first anchor or button block of product collection block.
-				 * This way:
-				 * 1. We maintain accessibility.
-				 * 2. Scroll to the focused element.
-				 */
-				const selectorPrefix = `[data-wc-navigation-id=${ id }] .wc-block-product-template`;
-				const firstAnchorOrButton = `${ selectorPrefix } a[href], ${ selectorPrefix } button`;
-				document.querySelector( firstAnchorOrButton )?.focus();
+				// Scroll to the first product in the collection.
+				const productSelector = `[data-wc-navigation-id=${ id }] .wc-block-product-template .wc-block-product`;
+				const product = document.querySelector( productSelector );
+				product?.scrollIntoView( {
+					behavior: 'smooth',
+					block: 'start',
+				} );
 			}
 		},
 		*prefetch() {
