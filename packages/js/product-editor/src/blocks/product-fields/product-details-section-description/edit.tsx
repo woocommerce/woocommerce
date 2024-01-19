@@ -20,6 +20,7 @@ import * as icons from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -31,6 +32,7 @@ import { useEntityId } from '@wordpress/core-data';
 import { ProductEditorSettings } from '../../../components';
 import { BlockFill } from '../../../components/block-slot-fill';
 import { useValidations } from '../../../contexts/validation-context';
+import { TRACKS_SOURCE } from '../../../constants';
 import {
 	WPError,
 	getProductErrorMessage,
@@ -254,6 +256,24 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		}
 	}
 
+	function toogleButtonClickHandler( isOpen: boolean, onToggle: () => void ) {
+		return function onClick() {
+			onToggle();
+
+			if ( ! isOpen ) {
+				recordEvent( 'product_template_selector_open', {
+					source: TRACKS_SOURCE,
+					supported_templates: supportedProductTemplates.map(
+						( productTemplate ) => productTemplate.id
+					),
+					unsupported_template: unsupportedProductTemplates.map(
+						( productTemplate ) => productTemplate.id
+					),
+				} );
+			}
+		};
+	}
+
 	return (
 		<BlockFill
 			name="section-description"
@@ -284,7 +304,10 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						<Button
 							aria-expanded={ isOpen }
 							variant="link"
-							onClick={ onToggle }
+							onClick={ toogleButtonClickHandler(
+								isOpen,
+								onToggle
+							) }
 						>
 							<span>
 								{ __( 'Change product type', 'woocommerce' ) }
