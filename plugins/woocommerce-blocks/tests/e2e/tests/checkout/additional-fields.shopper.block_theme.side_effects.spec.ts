@@ -29,6 +29,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		await expect(
 			page.getByText( 'Enabled custom checkout fields' )
 		).toBeVisible();
+		await page.close();
+		await context.close();
 	} );
 	test.afterAll( async ( { browser } ) => {
 		const context = await browser.newContext();
@@ -37,6 +39,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		await expect(
 			page.getByText( 'Disabled custom checkout fields' )
 		).toBeVisible();
+		await page.close();
+		await context.close();
 	} );
 
 	test.beforeEach( async ( { frontendUtils } ) => {
