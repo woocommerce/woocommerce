@@ -46,15 +46,6 @@ class ProductCollection extends AbstractBlock {
 	protected $custom_order_opts = array( 'popularity', 'rating' );
 
 	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
-	}
-
-	/**
 	 * Get the frontend style handle for this block type.
 	 *
 	 * @return null
@@ -123,6 +114,21 @@ class ProductCollection extends AbstractBlock {
 					'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 				);
 				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
+
+				/**
+				 * Setting context data for Interactivity API
+				 * to send translated strings.
+				 */
+				$p->set_attribute(
+					'data-wc-context',
+					wp_json_encode(
+						array(
+							'loadingText' => __( 'Loading page, please wait.', 'woocommerce' ),
+							'loadedText'  => __( 'Page Loaded.', 'woocommerce' ),
+						),
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP
+					)
+				);
 				$block_content = $p->get_updated_html();
 			}
 		}
@@ -155,20 +161,20 @@ class ProductCollection extends AbstractBlock {
 				$is_next             = in_array( 'wp-block-query-pagination-next', $class_list, true );
 				$is_previous_or_next = $is_previous || $is_next;
 
-				$navigation_link_payload = array(
-					'prefetch' => $is_previous_or_next,
-					'scroll'   => false,
-				);
+				$p->set_attribute( 'data-wc-on--click', 'woocommerce/product-collection::actions.navigate' );
 
-				$p->set_attribute(
-					'data-wc-navigation-link',
-					wp_json_encode( $navigation_link_payload )
-				);
+				/**
+				 * We prefetch the page which is assigned to either the previous or next button.
+				 */
+				if ( $is_previous_or_next ) {
+					$p->set_attribute( 'data-wc-watch', 'woocommerce/product-collection::callbacks.prefetch' );
+					$p->set_attribute( 'data-wc-on--mouseenter', 'woocommerce/product-collection::actions.prefetch' );
+				}
 
 				if ( $is_previous ) {
-					$p->set_attribute( 'key', 'pagination-previous' );
+					$p->set_attribute( 'data-wp-key', 'product-collection-pagination--previous' );
 				} elseif ( $is_next ) {
-					$p->set_attribute( 'key', 'pagination-next' );
+					$p->set_attribute( 'data-wp-key', 'product-collection-pagination--next' );
 				}
 			}
 			$block_content = $p->get_updated_html();
