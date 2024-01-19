@@ -116,7 +116,7 @@ class ProductCollection extends AbstractBlock {
 
 			$p = new \WP_HTML_Tag_Processor( $block_content );
 
-			// Add `data-wc-navigation-id to the query block.
+			// Add `data-wc-navigation-id to the Product Collection block.
 			if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) ) ) {
 				$p->set_attribute(
 					'data-wc-navigation-id',
