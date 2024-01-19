@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\Domain\Services\GoogleAnalytics;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsAdmin;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Migration;
@@ -141,6 +142,7 @@ class Bootstrap {
 			$this->container->get( Installer::class )->init();
 			$this->container->get( GoogleAnalytics::class )->init();
 			$this->container->get( CheckoutFields::class )->init();
+			$this->container->get( CheckoutFieldsAdmin::class )->init();
 		}
 
 		// Load assets unless this is a request specifically for the store API.
@@ -351,6 +353,13 @@ class Bootstrap {
 			CheckoutFields::class,
 			function( Container $container ) {
 				return new CheckoutFields( $container->get( AssetDataRegistry::class ) );
+			}
+		);
+		$this->container->register(
+			CheckoutFieldsAdmin::class,
+			function( Container $container ) {
+				$checkout_fields_controller = $container->get( CheckoutFields::class );
+				return new CheckoutFieldsAdmin( $checkout_fields_controller );
 			}
 		);
 		$this->container->register(

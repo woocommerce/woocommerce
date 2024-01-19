@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+HPOS: Remove buggy check in the data cleanup tool.

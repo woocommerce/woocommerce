@@ -55,11 +55,11 @@ export class Logger {
 		}
 	}
 
-	static startTask( message: string ) {
+	static startTask( message: string, isSilentInCI = false ) {
 		if ( Logger.loggingLevel > LOGGING_LEVELS.silent && ! isGithubCI() ) {
 			const spinner = ora( chalk.green( `${ message }...` ) ).start();
 			Logger.lastSpinner = spinner;
-		} else if ( isGithubCI() ) {
+		} else if ( isGithubCI() && ! isSilentInCI ) {
 			Logger.notice( message );
 		}
 	}
@@ -71,7 +71,7 @@ export class Logger {
 		}
 	}
 
-	static endTask() {
+	static endTask( isSilentInCI = false ) {
 		if (
 			Logger.loggingLevel > LOGGING_LEVELS.silent &&
 			Logger.lastSpinner &&
@@ -81,7 +81,7 @@ export class Logger {
 				`${ Logger.lastSpinner.text } complete.`
 			);
 			Logger.lastSpinner = null;
-		} else if ( isGithubCI() ) {
+		} else if ( isGithubCI() && ! isSilentInCI ) {
 			Logger.notice( 'Task complete.' );
 		}
 	}

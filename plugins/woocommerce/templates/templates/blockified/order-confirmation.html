@@ -18,24 +18,36 @@
 	<!-- /wp:woocommerce/order-confirmation-downloads-wrapper -->
 
 	<!-- wp:columns {"align":"wide","className":"woocommerce-order-confirmation-address-wrapper"} -->
-	<div class="wp-block-columns alignwide woocommerce-order-confirmation-address-wrapper"><!-- wp:column -->
-		<div class="wp-block-column"><!-- wp:woocommerce/order-confirmation-shipping-wrapper {"align":"wide"} -->
+	<div class="wp-block-columns alignwide woocommerce-order-confirmation-address-wrapper">
+		<!-- wp:column -->
+		<div class="wp-block-column">
+			<!-- wp:woocommerce/order-confirmation-shipping-wrapper {"align":"wide"} -->
 			<!-- wp:pattern {"slug":"woocommerce/order-confirmation-shipping-heading"} /-->
 
 			<!-- wp:woocommerce/order-confirmation-shipping-address {"lock":{"remove":true}} /-->
-			<!-- /wp:woocommerce/order-confirmation-shipping-wrapper --></div>
+			<!-- /wp:woocommerce/order-confirmation-shipping-wrapper -->
+		</div>
 		<!-- /wp:column -->
 
 		<!-- wp:column -->
-		<div class="wp-block-column"><!-- wp:woocommerce/order-confirmation-billing-wrapper {"align":"wide"} -->
+		<div class="wp-block-column">
+			<!-- wp:woocommerce/order-confirmation-billing-wrapper {"align":"wide"} -->
 			<!-- wp:pattern {"slug":"woocommerce/order-confirmation-billing-heading"} /-->
 
 			<!-- wp:woocommerce/order-confirmation-billing-address {"lock":{"remove":true}} /-->
-			<!-- /wp:woocommerce/order-confirmation-billing-wrapper --></div>
-		<!-- /wp:column --></div>
+			<!-- /wp:woocommerce/order-confirmation-billing-wrapper -->
+		</div>
+		<!-- /wp:column -->
+	</div>
 	<!-- /wp:columns -->
 
-	<!-- wp:woocommerce/order-confirmation-additional-information /--></main>
+	<!-- wp:woocommerce/order-confirmation-additional-fields-wrapper {"align":"wide"} -->
+	<!-- wp:pattern {"slug":"woocommerce/order-confirmation-additional-fields-heading"} /-->
+	<!-- wp:woocommerce/order-confirmation-additional-fields /-->
+	<!-- /wp:woocommerce/order-confirmation-additional-fields-wrapper -->
+
+	<!-- wp:woocommerce/order-confirmation-additional-information /-->
+</main>
 <!-- /wp:group -->
 
 <!-- wp:template-part {"slug":"footer"} /-->
