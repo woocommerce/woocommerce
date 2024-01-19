@@ -222,7 +222,6 @@ class CheckoutFields {
 	 * Initialize hooks. This is not run Store API requests.
 	 */
 	public function init() {
-		// Enqueues custom fields data to the asset data registry.
 		add_action( 'woocommerce_blocks_checkout_enqueue_data', array( $this, 'add_fields_data' ) );
 		add_action( 'woocommerce_blocks_cart_enqueue_data', array( $this, 'add_fields_data' ) );
 	}
