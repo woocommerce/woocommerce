@@ -166,21 +166,22 @@ export function Edit( {
 	}
 
 	function renderFeaturedSuffix() {
+		const markedText = __( 'Mark as featured', 'woocommerce' );
+		const unmarkedText = __( 'Unmark as featured', 'woocommerce' );
+		const tooltipText = featured ? unmarkedText : markedText;
+
 		return (
-			<Tooltip
-				text={ __( 'Mark as featured', 'woocommerce' ) }
-				position="top center"
-			>
+			<Tooltip text={ tooltipText } position="top center">
 				{ featured ? (
 					<Button
 						icon={ starFilled }
-						aria-label={ __( 'Unmark as featured', 'woocommerce' ) }
+						aria-label={ unmarkedText }
 						onClick={ handleSuffixClick }
 					/>
 				) : (
 					<Button
 						icon={ starEmpty }
-						aria-label={ __( 'Mark as featured', 'woocommerce' ) }
+						aria-label={ markedText }
 						onClick={ handleSuffixClick }
 					/>
 				) }
