@@ -1636,6 +1636,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		$this->related_producs_ids = wc_get_related_products( $id );
 
+		// When no related products are found, return an empty array.
+		if ( empty( $this->related_producs_ids ) ) {
+			return array();
+		}
+
 		return parent::get_items( $request );
 	}
 }
