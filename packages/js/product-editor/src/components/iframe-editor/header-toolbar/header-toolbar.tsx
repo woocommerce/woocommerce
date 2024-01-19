@@ -4,12 +4,14 @@
 import { useSelect } from '@wordpress/data';
 import { useViewportMatch } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { plus } from '@wordpress/icons';
+import { plus, next, previous } from '@wordpress/icons';
 import {
 	createElement,
 	useRef,
 	useCallback,
 	useContext,
+	useState,
+	Fragment,
 } from '@wordpress/element';
 import { MouseEvent } from 'react';
 import {
@@ -18,11 +20,14 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore ToolSelector exists in WordPress components.
 	ToolSelector,
+	BlockToolbar,
 } from '@wordpress/block-editor';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore ToolbarItem exists in WordPress components.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { Button, ToolbarItem } from '@wordpress/components';
+import { Button, Popover, ToolbarItem } from '@wordpress/components';
+// @ts-expect-error missing types.
+import { store as preferencesStore } from '@wordpress/preferences';
 
 /**
  * Internal dependencies
@@ -33,6 +38,7 @@ import EditorHistoryUndo from './editor-history-undo';
 import { DocumentOverview } from './document-overview';
 import { ShowBlockInspectorPanel } from './show-block-inspector-panel';
 import { MoreMenu } from './more-menu';
+import classnames from 'classnames';
 
 type HeaderToolbarProps = {
 	onSave?: () => void;
@@ -45,9 +51,16 @@ export function HeaderToolbar( {
 }: HeaderToolbarProps ) {
 	const { isInserterOpened, setIsInserterOpened } =
 		useContext( EditorContext );
+	const [ isBlockToolsCollapsed, setIsBlockToolsCollapsed ] =
+		useState( true );
 	const isLargeViewport = useViewportMatch( 'medium' );
 	const inserterButton = useRef< HTMLButtonElement | null >( null );
-	const { isInserterEnabled, isTextModeEnabled } = useSelect( ( select ) => {
+	const {
+		isInserterEnabled,
+		isTextModeEnabled,
+		hasBlockSelection,
+		hasFixedToolbar,
+	} = useSelect( ( select ) => {
 		const {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore These selectors are available in the block data store.
@@ -61,7 +74,11 @@ export function HeaderToolbar( {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore These selectors are available in the block data store.
 			__unstableGetEditorMode: getEditorMode,
+			// @ts-expect-error These selectors are available in the block data store.
+			getBlockSelectionStart,
 		} = select( blockEditorStore );
+		// @ts-expect-error These selectors are available in the block data store.
+		const { get: getPreference } = select( preferencesStore );
 
 		return {
 			isTextModeEnabled: getEditorMode() === 'text',
@@ -69,6 +86,8 @@ export function HeaderToolbar( {
 				getBlockRootClientId( getBlockSelectionEnd() ?? '' ) ??
 					undefined
 			),
+			hasBlockSelection: !! getBlockSelectionStart(),
+			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
 		};
 	}, [] );
 
@@ -123,6 +142,46 @@ export function HeaderToolbar( {
 				<ToolbarItem as={ EditorHistoryUndo } />
 				<ToolbarItem as={ EditorHistoryRedo } />
 				<ToolbarItem as={ DocumentOverview } />
+
+				{ hasFixedToolbar && isLargeViewport && (
+					<>
+						<div
+							className={ classnames(
+								'selected-block-tools-wrapper',
+								{
+									'is-collapsed': isBlockToolsCollapsed,
+								}
+							) }
+						>
+							{ /* @ts-expect-error missing type */ }
+							<BlockToolbar hideDragHandle />
+						</div>
+						{ /* @ts-expect-error missing type */ }
+						<Popover.Slot name="block-toolbar" />
+						{ hasBlockSelection && (
+							<Button
+								className="edit-post-header__block-tools-toggle"
+								icon={ isBlockToolsCollapsed ? next : previous }
+								onClick={ () => {
+									setIsBlockToolsCollapsed(
+										( collapsed ) => ! collapsed
+									);
+								} }
+								label={
+									isBlockToolsCollapsed
+										? __(
+												'Show block tools',
+												'woocommerce'
+										  )
+										: __(
+												'Hide block tools',
+												'woocommerce'
+										  )
+								}
+							/>
+						) }
+					</>
+				) }
 			</div>
 			<div className="woocommerce-iframe-editor__header-toolbar-right">
 				<ToolbarItem
