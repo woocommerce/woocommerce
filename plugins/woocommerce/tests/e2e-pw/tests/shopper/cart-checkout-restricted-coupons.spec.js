@@ -156,7 +156,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await api.post( 'coupons/batch', { delete: [ ...couponBatchId ] } );
 	} );
 
-	test( 'expired coupon cannot be used', async ( { page } ) => {
+	test( 'expired coupon cannot be used', async ( { page, context } ) => {
 		await test.step( 'Load cart page and try expired coupon usage', async () => {
 			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 			await page.waitForLoadState( 'networkidle' );
@@ -170,6 +170,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 				page.getByText( 'This coupon has expired.' )
 			).toBeVisible();
 		} );
+
+		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try expired coupon usage', async () => {
 			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
@@ -191,6 +193,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 
 	test( 'coupon requiring min and max amounts and can only be used alone can only be used within limits', async ( {
 		page,
+		context,
 	} ) => {
 		await test.step( 'Load cart page and try limited coupon usage', async () => {
 			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
@@ -233,6 +236,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 				)
 			).toBeVisible();
 		} );
+
+		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try limited coupon usage', async () => {
 			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
@@ -300,7 +305,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		} );
 	} );
 
-	test( 'coupon cannot be used on sale item', async ( { page } ) => {
+	test( 'coupon cannot be used on sale item', async ( { page, context } ) => {
 		await test.step( 'Load cart page and try coupon usage on sale item', async () => {
 			await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
 			await page.waitForLoadState( 'networkidle' );
@@ -317,6 +322,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 				)
 			).toBeVisible();
 		} );
+
+		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try coupon usage on sale item', async () => {
 			await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
@@ -339,7 +346,11 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		} );
 	} );
 
-	test( 'coupon can only be used twice', async ( { page, baseURL } ) => {
+	test( 'coupon can only be used twice', async ( {
+		page,
+		context,
+		baseURL,
+	} ) => {
 		const orderIds = [];
 
 		// create 2 orders using the limited coupon
@@ -392,6 +403,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			).toBeVisible();
 		} );
 
+		await context.clearCookies();
+
 		await test.step( 'Load checkout page and try over limit coupon usage', async () => {
 			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 			await page.waitForLoadState( 'networkidle' );
@@ -419,6 +432,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 
 	test( 'coupon cannot be used on certain products/categories (included product/category)', async ( {
 		page,
+		context,
 	} ) => {
 		await test.step( 'Load cart page and try included certain items coupon usage', async () => {
 			await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
@@ -436,6 +450,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 				)
 			).toBeVisible();
 		} );
+
+		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try included certain items coupon usage', async () => {
 			await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
@@ -460,6 +476,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 
 	test( 'coupon can be used on certain products/categories', async ( {
 		page,
+		context,
 	} ) => {
 		await test.step( 'Load cart page and try on certain products coupon usage', async () => {
 			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
@@ -475,6 +492,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
 		} );
+
+		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try on certain products coupon usage', async () => {
 			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
@@ -497,6 +516,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 
 	test( 'coupon cannot be used on specific products/categories (excluded product/category)', async ( {
 		page,
+		context,
 	} ) => {
 		await test.step( 'Load cart page and try excluded items coupon usage', async () => {
 			await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
@@ -514,6 +534,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 				)
 			).toBeVisible();
 		} );
+
+		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try excluded items coupon usage', async () => {
 			await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
@@ -538,6 +560,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 
 	test( 'coupon can be used on other products/categories', async ( {
 		page,
+		context,
 	} ) => {
 		await test.step( 'Load cart page and try coupon usage on other items', async () => {
 			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
@@ -553,6 +576,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
 		} );
+
+		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try coupon usage on other items', async () => {
 			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );

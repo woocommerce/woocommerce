@@ -67,10 +67,6 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 	test.beforeEach( async ( { page, context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
 		await context.clearCookies();
-
-		// all tests use the first product
-		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-		await page.waitForLoadState( 'networkidle' );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -92,8 +88,12 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 	for ( let i = 0; i < coupons.length; i++ ) {
 		test( `allows applying coupon of type ${ coupons[ i ].discount_type }`, async ( {
 			page,
+			context,
 		} ) => {
 			await test.step( 'Load cart page and apply coupons', async () => {
+				await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
+				await page.waitForLoadState( 'networkidle' );
+
 				await page.goto( '/cart/' );
 				await page.locator( '#coupon_code' ).fill( coupons[ i ].code );
 				await page
@@ -113,7 +113,12 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 				).toContainText( totals[ i ] );
 			} );
 
+			await context.clearCookies();
+
 			await test.step( 'Load checkout page and apply coupons', async () => {
+				await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
+				await page.waitForLoadState( 'networkidle' );
+
 				await page.goto( '/checkout/', { waitUntil: 'networkidle' } );
 				await page
 					.locator( 'text=Click here to enter your code' )
@@ -134,8 +139,14 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 		} );
 	}
 
-	test( 'prevents applying same coupon twice', async ( { page } ) => {
+	test( 'prevents applying same coupon twice', async ( {
+		page,
+		context,
+	} ) => {
 		await test.step( 'Load cart page and try applying same coupon twice', async () => {
+			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
+			await page.waitForLoadState( 'networkidle' );
+
 			await page.goto( '/cart/' );
 			await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
 			await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
@@ -161,8 +172,13 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 				page.locator( '.order-total .amount' )
 			).toContainText( totals[ 0 ] );
 		} );
+
+		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try applying same coupon twice', async () => {
+			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
+			await page.waitForLoadState( 'networkidle' );
+
 			await page.goto( '/checkout/' );
 			await page.locator( 'text=Click here to enter your code' ).click();
 			await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
@@ -189,8 +205,11 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 		} );
 	} );
 
-	test( 'allows applying multiple coupons', async ( { page } ) => {
+	test( 'allows applying multiple coupons', async ( { page, context } ) => {
 		await test.step( 'Load cart page and try applying multiple coupons', async () => {
+			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
+			await page.waitForLoadState( 'networkidle' );
+
 			await page.goto( '/cart/' );
 			await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
 			await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
@@ -218,7 +237,12 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 			).toContainText( '$8.00' );
 		} );
 
+		await context.clearCookies();
+
 		await test.step( 'Load checkout page and try applying multiple coupons', async () => {
+			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
+			await page.waitForLoadState( 'networkidle' );
+
 			await page.goto( '/checkout/' );
 			await page.locator( 'text=Click here to enter your code' ).click();
 			await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
@@ -247,8 +271,14 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 		} );
 	} );
 
-	test( 'restores total when coupons are removed', async ( { page } ) => {
+	test( 'restores total when coupons are removed', async ( {
+		page,
+		context,
+	} ) => {
 		await test.step( 'Load cart page and try restoring total when removed coupons', async () => {
+			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
+			await page.waitForLoadState( 'networkidle' );
+
 			await page.goto( '/cart/' );
 			await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
 			await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
@@ -269,7 +299,12 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 			).toContainText( '$20.00' );
 		} );
 
+		await context.clearCookies();
+
 		await test.step( 'Load checkout page and try restoring total when removed coupons', async () => {
+			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
+			await page.waitForLoadState( 'networkidle' );
+
 			await page.goto( '/checkout/' );
 			await page.locator( 'text=Click here to enter your code' ).click();
 			await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
