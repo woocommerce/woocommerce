@@ -51,6 +51,28 @@ baseTest.describe('Products > Product Images', () => {
 
 			await use(productWithImage);
 		},
+		productWithGallery: async ({page, api, product}, use) => {
+			let productWithGallery;
+			await api
+				.put(`products/${product.id}`, {
+					images: [
+						{
+							src: "http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_front.jpg"
+						},
+						{
+							src: "http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_back.jpg"
+						},
+						{
+							src: "http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_front.jpg"
+						}
+					]
+				})
+				.then((response) => {
+					productWithGallery = response.data;
+				});
+
+			await use(productWithGallery);
+		}
 
 	});
 
@@ -144,23 +166,23 @@ baseTest.describe('Products > Product Images', () => {
 		});
 
 		await test.step('Add product gallery images', async () => {
-			const imageCountSelector = '#product_images_container img'
-			let initialImagesCount = await page.locator(imageCountSelector).count();
+			const imageSelector = '#product_images_container img'
+			let initialImagesCount = await page.locator(imageSelector).count();
 
 			for (const image of images) {
 				await page.getByRole('link', {name: 'Add product gallery images'}).click();
 				await page.getByRole('tab', {name: 'Media Library'}).click();
-				const imageLocator = page.getByLabel(image).nth(0)
+				const imageLocator = page.getByLabel(image).nth(0);
 				await imageLocator.click();
-				await expect(imageLocator, 'should be checked').toBeChecked()
-				const dataId = await imageLocator.getAttribute('data-id')
+				await expect(imageLocator, 'should be checked').toBeChecked();
+				const dataId = await imageLocator.getAttribute('data-id');
 				await page.getByRole('button', {name: 'Add to gallery'}).click();
 
 				await expect(page.locator(`li[data-attachment_id="${dataId}"]`), 'thumbnail should be visible')
 					.toBeVisible();
-				const currentImagesCount = await page.locator(imageCountSelector).count();
+				const currentImagesCount = await page.locator(imageSelector).count();
 				await expect(currentImagesCount, 'number of images should increase')
-					.toEqual(initialImagesCount + 1)
+					.toEqual(initialImagesCount + 1);
 				initialImagesCount = currentImagesCount;
 			}
 
@@ -173,6 +195,35 @@ baseTest.describe('Products > Product Images', () => {
 			await expect(
 				page.locator(`#product-${productWithImage.id} ol img`).nth(images.length), 'all gallery images should be visible'
 			).toBeVisible(); // +1 for the featured image
+		});
+	});
+
+	test.only('can update a product gallery', async ({page, productWithGallery}) => {
+		let imagesCount;
+
+		await test.step('Navigate to product edit page', async () => {
+			await page.goto(`wp-admin/post.php?post=${productWithGallery.id}&action=edit`);
+		});
+
+		await test.step('Remove images from product gallery', async () => {
+			const imageSelector = '#product_images_container img'
+			imagesCount = await page.locator(imageSelector).count();
+
+			await page.locator(imageSelector).first().hover();
+			await page.getByRole('link', {name: ' Delete'}).click();
+
+			await expect(await page.locator(imageSelector).count(), 'number of images should decrease')
+				.toEqual(imagesCount - 1);
+
+			await page.getByRole('button', {name: 'Update'}).click();
+		});
+
+		await test.step('Verify product gallery', async () => {
+			// Verify gallery in store frontend
+			await page.goto(productWithGallery.permalink);
+			await expect(
+				page.locator(`#product-${productWithGallery.id} ol img`).nth(imagesCount - 1), 'all gallery images should be visible'
+			).toBeVisible();
 		});
 	});
 
