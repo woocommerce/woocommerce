@@ -28,6 +28,6 @@ class ProductQueryFiltersServiceProvider extends AbstractServiceProvider {
 	public function register() {
 		$this->share( FilterClauses::class );
 
-		$this->share( FilterData::class )->addArgument( FilterClauses::class );
+		$this->add( FilterData::class )->addArgument( FilterClauses::class );
 	}
 }

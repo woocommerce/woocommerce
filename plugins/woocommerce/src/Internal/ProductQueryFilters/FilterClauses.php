@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class for filter clauses.
  */
-class FilterClauses {
+class FilterClauses implements ClausesProviderInterface {
 
 	use AccessiblePrivateMethods;
 
