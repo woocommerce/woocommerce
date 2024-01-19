@@ -372,6 +372,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					always: [
 						{
 							cond: 'activeThemeIsNotModified',
+							actions: [
+								{ type: 'updateQueryStep', step: 'intro' },
+							],
 							target: '#customizeStore.intro',
 						},
 						{
