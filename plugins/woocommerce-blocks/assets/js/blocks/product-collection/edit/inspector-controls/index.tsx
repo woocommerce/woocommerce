@@ -56,6 +56,7 @@ const prepareShouldShowFilter =
 const ProductCollectionInspectorControls = (
 	props: BlockEditProps< ProductCollectionAttributes >
 ) => {
+	const { clientId } = props;
 	const { query, collection, hideControls } = props.attributes;
 	const inherit = query?.inherit;
 	const shouldShowFilter = prepareShouldShowFilter( hideControls );
@@ -85,7 +86,7 @@ const ProductCollectionInspectorControls = (
 
 	return (
 		<InspectorControls>
-			<EnhancedPaginationNotice />
+			<EnhancedPaginationNotice clientId={ clientId } />
 			<ToolsPanel
 				label={ __( 'Settings', 'woocommerce' ) }
 				resetAll={ () => {
