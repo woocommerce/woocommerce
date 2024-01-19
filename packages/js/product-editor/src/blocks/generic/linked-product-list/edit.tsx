@@ -6,6 +6,7 @@ import {
 	useCallback,
 	useEffect,
 	useReducer,
+	useState,
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
@@ -39,6 +40,7 @@ import {
 	LinkedProductListBlockEmptyState,
 } from './types';
 import getRelatedProducts from '../../../utils/get-related-products';
+import { SectionActions } from '../../../components/block-slot-fill';
 
 export function EmptyStateImage( {
 	image,
@@ -97,7 +99,12 @@ export function LinkedProductListBlockEdit( {
 
 	const filter = useCallback(
 		( search = '' ) => {
-			return searchProductsDispatcher( linkedProductIds ?? [], search );
+			// Exclude the current product and any already linked products.
+			const exclude = [ productId ];
+			if ( linkedProductIds ) {
+				exclude.push( ...linkedProductIds );
+			}
+			return searchProductsDispatcher( exclude, search );
 		},
 		[ linkedProductIds ]
 	);
@@ -124,6 +131,8 @@ export function LinkedProductListBlockEdit( {
 		setLinkedProductIds( newLinkedProductIds );
 	}
 
+	const [ isChoosingProducts, setIsChoosingProducts ] = useState( false );
+
 	async function chooseProductsForMe() {
 		dispatch( {
 			type: 'LOADING_LINKED_PRODUCTS',
@@ -132,9 +141,11 @@ export function LinkedProductListBlockEdit( {
 			},
 		} );
 
-		const relatedProducts = ( await getRelatedProducts(
-			productId
-		) ) as Product[];
+		setIsChoosingProducts( true );
+
+		const relatedProducts = ( await getRelatedProducts( productId, {
+			fallbackToRandomProducts: true,
+		} ) ) as Product[];
 
 		dispatch( {
 			type: 'LOADING_LINKED_PRODUCTS',
@@ -142,6 +153,8 @@ export function LinkedProductListBlockEdit( {
 				isLoading: false,
 			},
 		} );
+
+		setIsChoosingProducts( false );
 
 		if ( ! relatedProducts ) {
 			return;
@@ -157,15 +170,17 @@ export function LinkedProductListBlockEdit( {
 
 	return (
 		<div { ...blockProps }>
-			<div className="wp-block-woocommerce-product-linked-list-field__form-group-header">
+			<SectionActions>
 				<Button
 					variant="tertiary"
 					icon={ reusableBlock }
 					onClick={ chooseProductsForMe }
+					isBusy={ isChoosingProducts }
+					disabled={ isChoosingProducts }
 				>
 					{ __( 'Choose products for me', 'woocommerce' ) }
 				</Button>
-			</div>
+			</SectionActions>
 
 			<div className="wp-block-woocommerce-product-linked-list-field__form-group-content">
 				<ProductSelect

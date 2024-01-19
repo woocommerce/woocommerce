@@ -1921,7 +1921,7 @@ ul.wc_coupon_list_block {
 				padding: 0 0 3px;
 			}
 
-			input,
+			input:not(.checkbox),
 			textarea {
 				width: 100%;
 			}
@@ -1972,7 +1972,7 @@ ul.wc_coupon_list_block {
 			width: 100%;
 			clear: both;
 
-			input,
+			input:not(.checkbox),
 			textarea,
 			select,
 			.wc-enhanced-select,
@@ -2944,6 +2944,11 @@ ul.wc_coupon_list_block {
 .post-type-shop_order {
 	.tablenav .one-page .displaying-num {
 		display: none;
+	}
+
+	select.search-filter {
+		margin-right: 4px;
+		margin-bottom: 3px;
 	}
 
 	.tablenav {

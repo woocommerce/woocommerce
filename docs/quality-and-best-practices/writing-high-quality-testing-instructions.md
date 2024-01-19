@@ -1,5 +1,7 @@
 ---
 post_title: Writing high quality testing instructions
+Menu_title: Writing testing instructions
+tags: reference
 ---
 
 ## Introduction
@@ -59,7 +61,7 @@ Therefore, a PR could have testing instructions for multiple scenarios, in fact,
 ### Considerations for writing high-quality testing instructions
 
 -   Define the testing instructions in a way that they can be **understood and followed by everybody**, even for people new to WooCommerce.
--   Make sure to describe every detail and **avoid assuming knowledge**, the spectrum of readers might be wide and some people would not know the concepts behind what is being assumed. For example, instead of saying _“Enable the [x] experiment”_, say something like:
+-   Make sure to describe every detail and **avoid assuming knowledge**, the spectrum of readers might be wide and some people would not know the concepts behind what is being assumed. For example, instead of saying _"Enable the [x] experiment"_, say something like:
 
 ```text
 - Install the WooCommerce Beta Tester plugin.
@@ -67,7 +69,7 @@ Therefore, a PR could have testing instructions for multiple scenarios, in fact,
 - Toggle the [x] experiment.
 ```
 
--   Always try to explain in detail **where the user should head to**, for example instead of saying “Go to the Orders page as admin”, say “Go to [url]” or even “Go to WooCommerce > Orders”.
+-   Always try to explain in detail **where the user should head to**, for example instead of saying "Go to the Orders page as admin", say "Go to [url]" or even "Go to WooCommerce > Orders".
 -   Try to use real test data. For example, instead of saying _"Enter a name for the product"_, say something like _"Enter 'Blue T-Shirt' as the product name"_. This will make it more self-explanatory and remove potential doubts related to assuming knowledge.
 -   Make sure you **keep your testing instructions updated** if they become obsolete as part of a new commit.
 -   If the testing instructions require to add custom code, please **provide the code snippet**.

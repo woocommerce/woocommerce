@@ -21,6 +21,8 @@ import { FONT_PAIRINGS } from '../assembler-hub/sidebar/global-styles/font-pairi
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
 import { updateTemplate } from '../data/actions';
+import { installAndActivateTheme as setTheme } from '../data/service';
+import { THEME_SLUG } from '../data/constants';
 
 const { escalate } = actions;
 
@@ -431,23 +433,13 @@ export const assembleSite = async (
 };
 
 const installAndActivateTheme = async () => {
-	const themeSlug = 'twentytwentyfour';
-
 	try {
-		await apiFetch( {
-			path: `/wc-admin/onboarding/themes/install?theme=${ themeSlug }`,
-			method: 'POST',
-		} );
-
-		await apiFetch( {
-			path: `/wc-admin/onboarding/themes/activate?theme=${ themeSlug }&theme_switch_via_cys_ai_loader=1`,
-			method: 'POST',
-		} );
+		await setTheme( THEME_SLUG );
 	} catch ( error ) {
 		recordEvent(
 			'customize_your_store_ai_install_and_activate_theme_error',
 			{
-				theme: themeSlug,
+				theme: THEME_SLUG,
 				error: error instanceof Error ? error.message : 'unknown',
 			}
 		);

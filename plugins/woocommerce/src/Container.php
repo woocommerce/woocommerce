@@ -29,7 +29,6 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Proxie
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\UtilsClassesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\BatchProcessingServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\BlockTemplatesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\LayoutTemplatesServiceProvider;
 
 /**
@@ -77,7 +76,6 @@ final class Container {
 		FeaturesServiceProvider::class,
 		MarketingServiceProvider::class,
 		MarketplaceServiceProvider::class,
-		BlockTemplatesServiceProvider::class,
 		LayoutTemplatesServiceProvider::class,
 		LoggingServiceProvider::class,
 		EnginesServiceProvider::class,
