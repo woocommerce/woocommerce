@@ -84,14 +84,14 @@ export function VariationActions( {
 					onChange={ onChange }
 					onClose={ onClose }
 				/>
-				<VariationQuickUpdateMenuItem.Slot
-					group={ 'top-level' }
-					onChange={ onChange }
-					onClose={ onClose }
-					selection={ selection }
-					supportsMultipleSelection={ supportsMultipleSelection }
-				/>
 			</MenuGroup>
+			<VariationQuickUpdateMenuItem.Slot
+				group={ 'top-level' }
+				onChange={ onChange }
+				onClose={ onClose }
+				selection={ selection }
+				supportsMultipleSelection={ supportsMultipleSelection }
+			/>
 			<MenuGroup>
 				<PricingMenuItem
 					selection={ selection }
@@ -119,14 +119,14 @@ export function VariationActions( {
 						supportsMultipleSelection={ supportsMultipleSelection }
 					/>
 				) }
-				<VariationQuickUpdateMenuItem.Slot
-					group={ 'secondary' }
-					onChange={ onChange }
-					onClose={ onClose }
-					selection={ selection }
-					supportsMultipleSelection={ supportsMultipleSelection }
-				/>
 			</MenuGroup>
+			<VariationQuickUpdateMenuItem.Slot
+				group={ 'secondary' }
+				onChange={ onChange }
+				onClose={ onClose }
+				selection={ selection }
+				supportsMultipleSelection={ supportsMultipleSelection }
+			/>
 			<MenuGroup>
 				<MenuItem
 					isDestructive
@@ -144,14 +144,14 @@ export function VariationActions( {
 				>
 					{ __( 'Delete', 'woocommerce' ) }
 				</MenuItem>
-				<VariationQuickUpdateMenuItem.Slot
-					group={ 'tertiary' }
-					onChange={ onChange }
-					onClose={ onClose }
-					selection={ selection }
-					supportsMultipleSelection={ supportsMultipleSelection }
-				/>
 			</MenuGroup>
+			<VariationQuickUpdateMenuItem.Slot
+				group={ 'tertiary' }
+				onChange={ onChange }
+				onClose={ onClose }
+				selection={ selection }
+				supportsMultipleSelection={ supportsMultipleSelection }
+			/>
 		</div>
 	);
 }

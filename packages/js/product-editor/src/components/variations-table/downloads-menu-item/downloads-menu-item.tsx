@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Dropdown, MenuItem } from '@wordpress/components';
+import { Dropdown, MenuItem, MenuGroup } from '@wordpress/components';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronRight } from '@wordpress/icons';
@@ -163,44 +163,46 @@ export function DownloadsMenuItem( {
 			) }
 			renderContent={ () => (
 				<div className="components-dropdown-menu__menu">
-					<MediaUpload
-						modalClass={ MODAL_CLASS_NAME }
-						// @ts-expect-error multiple also accepts string.
-						multiple={ 'add' }
-						value={ downloadsIds }
-						onSelect={ handleMediaUploadSelect }
-						render={ ( { open } ) => (
-							<MenuItem
-								onClick={ uploadFilesClickHandler( open ) }
-							>
-								{ __( 'Upload files', 'woocommerce' ) }
-							</MenuItem>
-						) }
-					/>
+					<MenuGroup>
+						<MediaUpload
+							modalClass={ MODAL_CLASS_NAME }
+							// @ts-expect-error multiple also accepts string.
+							multiple={ 'add' }
+							value={ downloadsIds }
+							onSelect={ handleMediaUploadSelect }
+							render={ ( { open } ) => (
+								<MenuItem
+									onClick={ uploadFilesClickHandler( open ) }
+								>
+									{ __( 'Upload files', 'woocommerce' ) }
+								</MenuItem>
+							) }
+						/>
 
-					<MenuItem
-						onClick={ menuItemClickHandler(
-							'download_limit',
-							__(
-								'Leave blank for unlimited re-downloads',
-								'woocommerce'
-							)
-						) }
-					>
-						{ __( 'Set download limit', 'woocommerce' ) }
-					</MenuItem>
+						<MenuItem
+							onClick={ menuItemClickHandler(
+								'download_limit',
+								__(
+									'Leave blank for unlimited re-downloads',
+									'woocommerce'
+								)
+							) }
+						>
+							{ __( 'Set download limit', 'woocommerce' ) }
+						</MenuItem>
 
-					<MenuItem
-						onClick={ menuItemClickHandler(
-							'download_expiry',
-							__(
-								'Enter the number of days before a download link expires, or leave blank',
-								'woocommerce'
-							)
-						) }
-					>
-						{ __( 'Set download expiry', 'woocommerce' ) }
-					</MenuItem>
+						<MenuItem
+							onClick={ menuItemClickHandler(
+								'download_expiry',
+								__(
+									'Enter the number of days before a download link expires, or leave blank',
+									'woocommerce'
+								)
+							) }
+						>
+							{ __( 'Set download expiry', 'woocommerce' ) }
+						</MenuItem>
+					</MenuGroup>
 					<VariationQuickUpdateMenuItem.Slot
 						group={ 'downloads' }
 						onChange={ onChange }

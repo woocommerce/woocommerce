@@ -235,16 +235,14 @@ export function InventoryMenuItem( {
 						>
 							{ __( 'Edit low stock threshold', 'woocommerce' ) }
 						</MenuItem>
-						<VariationQuickUpdateMenuItem.Slot
-							group={ 'inventory' }
-							onChange={ onChange }
-							onClose={ onClose }
-							selection={ selection }
-							supportsMultipleSelection={
-								supportsMultipleSelection
-							}
-						/>
 					</MenuGroup>
+					<VariationQuickUpdateMenuItem.Slot
+						group={ 'inventory' }
+						onChange={ onChange }
+						onClose={ onClose }
+						selection={ selection }
+						supportsMultipleSelection={ supportsMultipleSelection }
+					/>
 				</div>
 			) }
 		/>

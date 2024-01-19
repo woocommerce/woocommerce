@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Dropdown, MenuItem } from '@wordpress/components';
+import { Dropdown, MenuItem, MenuGroup } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronRight } from '@wordpress/icons';
@@ -14,7 +14,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { TRACKS_SOURCE } from '../../../constants';
 import { VariationActionsMenuItemProps } from '../types';
 import { handlePrompt } from '../../../utils/handle-prompt';
-import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
+import { VariationQuickUpdateMenuItem } from '../variation-actions-menus/variation-quick-update-menu-item';
 
 export function ShippingMenuItem( {
 	selection,
@@ -73,174 +73,176 @@ export function ShippingMenuItem( {
 			) }
 			renderContent={ () => (
 				<div className="components-dropdown-menu__menu">
-					{ window.wcAdminFeatures[
-						'product-virtual-downloadable'
-					] && (
+					<MenuGroup>
+						{ window.wcAdminFeatures[
+							'product-virtual-downloadable'
+						] && (
+							<MenuItem
+								onClick={ () => {
+									recordEvent(
+										'product_variations_menu_shipping_select',
+										{
+											source: TRACKS_SOURCE,
+											action: 'toggle_shipping',
+											variation_id: ids,
+										}
+									);
+									if ( Array.isArray( selection ) ) {
+										onChange(
+											selection.map(
+												( { id, virtual } ) => ( {
+													id,
+													virtual: ! virtual,
+												} )
+											)
+										);
+									} else {
+										onChange( {
+											virtual: ! selection.virtual,
+										} );
+									}
+									recordEvent(
+										'product_variations_menu_shipping_update',
+										{
+											source: TRACKS_SOURCE,
+											action: 'toggle_shipping',
+											variation_id: ids,
+										}
+									);
+									onClose();
+								} }
+							>
+								{ __( 'Toggle shipping', 'woocommerce' ) }
+							</MenuItem>
+						) }
 						<MenuItem
 							onClick={ () => {
 								recordEvent(
 									'product_variations_menu_shipping_select',
 									{
 										source: TRACKS_SOURCE,
-										action: 'toggle_shipping',
+										action: 'dimensions_length_set',
 										variation_id: ids,
 									}
 								);
-								if ( Array.isArray( selection ) ) {
-									onChange(
-										selection.map(
-											( { id, virtual } ) => ( {
-												id,
-												virtual: ! virtual,
-											} )
-										)
-									);
-								} else {
-									onChange( {
-										virtual: ! selection.virtual,
-									} );
-								}
-								recordEvent(
-									'product_variations_menu_shipping_update',
-									{
-										source: TRACKS_SOURCE,
-										action: 'toggle_shipping',
-										variation_id: ids,
-									}
-								);
+								handlePrompt( {
+									onOk( value ) {
+										recordEvent(
+											'product_variations_menu_shipping_update',
+											{
+												source: TRACKS_SOURCE,
+												action: 'dimensions_length_set',
+												variation_id: ids,
+											}
+										);
+										handleDimensionsChange( {
+											length: value,
+										} );
+									},
+								} );
 								onClose();
 							} }
 						>
-							{ __( 'Toggle shipping', 'woocommerce' ) }
+							{ __( 'Set length', 'woocommerce' ) }
 						</MenuItem>
-					) }
-					<MenuItem
-						onClick={ () => {
-							recordEvent(
-								'product_variations_menu_shipping_select',
-								{
-									source: TRACKS_SOURCE,
-									action: 'dimensions_length_set',
-									variation_id: ids,
-								}
-							);
-							handlePrompt( {
-								onOk( value ) {
-									recordEvent(
-										'product_variations_menu_shipping_update',
-										{
-											source: TRACKS_SOURCE,
-											action: 'dimensions_length_set',
-											variation_id: ids,
-										}
-									);
-									handleDimensionsChange( {
-										length: value,
-									} );
-								},
-							} );
-							onClose();
-						} }
-					>
-						{ __( 'Set length', 'woocommerce' ) }
-					</MenuItem>
-					<MenuItem
-						onClick={ () => {
-							recordEvent(
-								'product_variations_menu_shipping_select',
-								{
-									source: TRACKS_SOURCE,
-									action: 'dimensions_width_set',
-									variation_id: ids,
-								}
-							);
-							handlePrompt( {
-								onOk( value ) {
-									recordEvent(
-										'product_variations_menu_shipping_update',
-										{
-											source: TRACKS_SOURCE,
-											action: 'dimensions_width_set',
-											variation_id: ids,
-										}
-									);
-									handleDimensionsChange( {
-										width: value,
-									} );
-								},
-							} );
-							onClose();
-						} }
-					>
-						{ __( 'Set width', 'woocommerce' ) }
-					</MenuItem>
-					<MenuItem
-						onClick={ () => {
-							recordEvent(
-								'product_variations_menu_shipping_select',
-								{
-									source: TRACKS_SOURCE,
-									action: 'dimensions_height_set',
-									variation_id: ids,
-								}
-							);
-							handlePrompt( {
-								onOk( value ) {
-									recordEvent(
-										'product_variations_menu_shipping_update',
-										{
-											source: TRACKS_SOURCE,
-											action: 'dimensions_height_set',
-											variation_id: ids,
-										}
-									);
-									handleDimensionsChange( {
-										height: value,
-									} );
-								},
-							} );
-							onClose();
-						} }
-					>
-						{ __( 'Set height', 'woocommerce' ) }
-					</MenuItem>
-					<MenuItem
-						onClick={ () => {
-							recordEvent(
-								'product_variations_menu_shipping_select',
-								{
-									source: TRACKS_SOURCE,
-									action: 'weight_set',
-									variation_id: ids,
-								}
-							);
-							handlePrompt( {
-								onOk( value ) {
-									recordEvent(
-										'product_variations_menu_shipping_update',
-										{
-											source: TRACKS_SOURCE,
-											action: 'weight_set',
-											variation_id: ids,
-										}
-									);
-									if ( Array.isArray( selection ) ) {
-										onChange(
-											selection.map( ( { id } ) => ( {
-												id,
-												weight: value,
-											} ) )
-										);
-									} else {
-										onChange( { weight: value } );
+						<MenuItem
+							onClick={ () => {
+								recordEvent(
+									'product_variations_menu_shipping_select',
+									{
+										source: TRACKS_SOURCE,
+										action: 'dimensions_width_set',
+										variation_id: ids,
 									}
-								},
-							} );
-							onClose();
-						} }
-					>
-						{ __( 'Set weight', 'woocommerce' ) }
-					</MenuItem>
+								);
+								handlePrompt( {
+									onOk( value ) {
+										recordEvent(
+											'product_variations_menu_shipping_update',
+											{
+												source: TRACKS_SOURCE,
+												action: 'dimensions_width_set',
+												variation_id: ids,
+											}
+										);
+										handleDimensionsChange( {
+											width: value,
+										} );
+									},
+								} );
+								onClose();
+							} }
+						>
+							{ __( 'Set width', 'woocommerce' ) }
+						</MenuItem>
+						<MenuItem
+							onClick={ () => {
+								recordEvent(
+									'product_variations_menu_shipping_select',
+									{
+										source: TRACKS_SOURCE,
+										action: 'dimensions_height_set',
+										variation_id: ids,
+									}
+								);
+								handlePrompt( {
+									onOk( value ) {
+										recordEvent(
+											'product_variations_menu_shipping_update',
+											{
+												source: TRACKS_SOURCE,
+												action: 'dimensions_height_set',
+												variation_id: ids,
+											}
+										);
+										handleDimensionsChange( {
+											height: value,
+										} );
+									},
+								} );
+								onClose();
+							} }
+						>
+							{ __( 'Set height', 'woocommerce' ) }
+						</MenuItem>
+						<MenuItem
+							onClick={ () => {
+								recordEvent(
+									'product_variations_menu_shipping_select',
+									{
+										source: TRACKS_SOURCE,
+										action: 'weight_set',
+										variation_id: ids,
+									}
+								);
+								handlePrompt( {
+									onOk( value ) {
+										recordEvent(
+											'product_variations_menu_shipping_update',
+											{
+												source: TRACKS_SOURCE,
+												action: 'weight_set',
+												variation_id: ids,
+											}
+										);
+										if ( Array.isArray( selection ) ) {
+											onChange(
+												selection.map( ( { id } ) => ( {
+													id,
+													weight: value,
+												} ) )
+											);
+										} else {
+											onChange( { weight: value } );
+										}
+									},
+								} );
+								onClose();
+							} }
+						>
+							{ __( 'Set weight', 'woocommerce' ) }
+						</MenuItem>
+					</MenuGroup>
 					<VariationQuickUpdateMenuItem.Slot
 						group={ 'shipping' }
 						onChange={ onChange }
