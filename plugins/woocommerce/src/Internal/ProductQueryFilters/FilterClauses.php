@@ -24,9 +24,27 @@ class FilterClauses implements ClausesProviderInterface {
 	 */
 	public function add_query_clauses( $args, $wp_query ) {
 		// Rating filter is handled by tax query.
-		$args = $this->add_stock_clauses( $args, $wp_query );
-		$args = $this->add_price_clauses( $args, $wp_query );
-		$args = $this->add_attribute_clauses( $args, $wp_query );
+		if ( $wp_query->get( 'filter_stock_status' ) ) {
+			$stock_statuses = trim( $wp_query->get( 'filter_stock_status' ) );
+			$stock_statuses = explode( ',', $stock_statuses );
+			$stock_statuses = array_filter( $stock_statuses );
+
+			$args = $this->add_stock_clauses( $args, $stock_statuses );
+		}
+
+		if ( $wp_query->get( 'min_price' ) || $wp_query->get( 'max_price' ) ) {
+			$price_range = array(
+				'min_price' => $wp_query->get( 'min_price' ),
+				'max_price' => $wp_query->get( 'max_price' ),
+			);
+			$price_range = array_filter( $price_range );
+			$args = $this->add_price_clauses( $args, $price_range );
+		}
+
+		$args = $this->add_attribute_clauses(
+			$args,
+			$this->get_chosen_attributes( $wp_query->query_vars )
+		);
 
 		return $args;
 	}
@@ -34,17 +52,17 @@ class FilterClauses implements ClausesProviderInterface {
 	/**
 	 * Add query clauses for stock filter.
 	 *
-	 * @param array     $args     Query args.
-	 * @param \WP_Query $wp_query WP_Query object.
+	 * @param array $args           Query args.
+	 * @param array $stock_statuses Stock statuses to be queried.
 	 * @return array
 	 */
-	public function add_stock_clauses( $args, $wp_query ) {
-		if ( ! $wp_query->get( 'filter_stock_status' ) ) {
+	public function add_stock_clauses( $args, $stock_statuses ) {
+		if ( empty( $stock_statuses ) ) {
 			return $args;
 		}
 
 		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', array_map( 'esc_sql', explode( ',', $wp_query->get( 'filter_stock_status' ) ) ) ) . '")';
+		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', array_map( 'esc_sql', $stock_statuses ) ) . '")';
 
 		return $args;
 	}
@@ -52,12 +70,17 @@ class FilterClauses implements ClausesProviderInterface {
 	/**
 	 * Add query clauses for price filter.
 	 *
-	 * @param array     $args     Query args.
-	 * @param \WP_Query $wp_query WP_Query object.
+	 * @param array $args        Query args.
+	 * @param array $price_range {
+	 *     Price range array.
+	 *
+	 *     @type int|string $min_price Optional. Min price.
+	 *     @type int|string $max_price Optional. Max Price.
+	 * }
 	 * @return array
 	 */
-	public function add_price_clauses( $args, $wp_query ) {
-		if ( ! $wp_query->get( 'min_price' ) && ! $wp_query->get( 'max_price' ) ) {
+	public function add_price_clauses( $args, $price_range ) {
+		if ( empty( $price_range['min_price'] ) && empty( $price_range['max_price'] ) ) {
 			return $args;
 		}
 
@@ -66,8 +89,8 @@ class FilterClauses implements ClausesProviderInterface {
 		$adjust_for_taxes = $this->adjust_price_filters_for_displayed_taxes();
 		$args['join']     = $this->append_product_sorting_table_join( $args['join'] );
 
-		if ( $wp_query->get( 'min_price' ) ) {
-			$min_price_filter = intval( $wp_query->get( 'min_price' ) );
+		if ( $price_range['min_price'] ) {
+			$min_price_filter = intval( $price_range['min_price'] );
 
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price_filter, 'min_price', '>=' );
@@ -76,8 +99,8 @@ class FilterClauses implements ClausesProviderInterface {
 			}
 		}
 
-		if ( $wp_query->get( 'max_price' ) ) {
-			$max_price_filter = intval( $wp_query->get( 'max_price' ) );
+		if ( $price_range['max_price'] ) {
+			$max_price_filter = intval( $price_range['max_price'] );
 
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price_filter, 'max_price', '<=' );
@@ -92,13 +115,18 @@ class FilterClauses implements ClausesProviderInterface {
 	/**
 	 * Add query clauses for attribute filter.
 	 *
-	 * @param array     $args     Query args.
-	 * @param \WP_Query $wp_query WP_Query object.
+	 * @param array $args              Query args.
+	 * @param array $chosen_attributes {
+	 *     Chosen attributes array
+	 *
+	 *     @type array {$taxonomy: Attribute taxonomy name} {
+	 *         @type string[] $terms      Chosen terms' slug.
+	 *         @type string   $query_type Query type. Accepts 'and' or 'or'.
+	 *     }
+	 * }
 	 * @return array
 	 */
-	public function add_attribute_clauses( $args, $wp_query ) {
-		$chosen_attributes = $this->get_chosen_attributes( $wp_query->query_vars );
-
+	public function add_attribute_clauses( $args, $chosen_attributes ) {
 		if ( empty( $chosen_attributes ) ) {
 			return $args;
 		}
@@ -122,7 +150,7 @@ class FilterClauses implements ClausesProviderInterface {
 			$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 			$term_ids_to_filter_by      = array_map( 'absint', $term_ids_to_filter_by );
 			$term_ids_to_filter_by_list = '(' . join( ',', $term_ids_to_filter_by ) . ')';
-			$is_and_query               = 'and' === $data['query_type'];
+			$is_and_query               = 'and' === strtolower( $data['query_type'] );
 
 			$count = count( $term_ids_to_filter_by );
 

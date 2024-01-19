@@ -59,7 +59,11 @@ class MainQueryFilters {
 		}
 
 		if ( $wp_query->get( 'filter_stock_status' ) ) {
-			$args = $this->filter_clauses->add_stock_clauses( $args, $wp_query );
+			$stock_statuses = trim( $wp_query->get( 'filter_stock_status' ) );
+			$stock_statuses = explode( ',', $stock_statuses );
+			$stock_statuses = array_filter( $stock_statuses );
+
+			$args = $this->filter_clauses->add_stock_clauses( $args, $stock_statuses );
 		}
 
 		return $args;
