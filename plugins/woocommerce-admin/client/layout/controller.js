@@ -208,7 +208,6 @@ export const getPages = () => {
 	if ( isFeatureEnabled( 'product_block_editor' ) ) {
 		const productPage = {
 			container: ProductPage,
-			fallback: ProductPageSkeleton,
 			layout: {
 				header: false,
 			},
@@ -274,7 +273,6 @@ export const getPages = () => {
 	if ( window.wcAdminFeatures[ 'product-variation-management' ] ) {
 		pages.push( {
 			container: ProductVariationPage,
-			fallback: ProductPageSkeleton,
 			layout: {
 				header: false,
 			},
