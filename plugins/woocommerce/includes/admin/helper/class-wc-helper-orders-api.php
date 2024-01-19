@@ -71,9 +71,9 @@ class WC_Helper_Orders_API {
 				'create-order',
 				array(
 					'authenticated' => true,
-					'body'          => array(
-						'product_id' => $request['product_id'],
-					),
+					'body'          => http_build_query(
+						array( 'product_id' => $request['product_id'], ),
+					)
 				)
 			);
 
