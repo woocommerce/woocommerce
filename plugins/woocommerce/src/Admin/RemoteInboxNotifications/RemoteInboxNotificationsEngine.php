@@ -113,7 +113,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	public static function run() {
 		$specs = DataSourcePoller::get_instance()->get_specs_from_data_sources();
 
-		if ( $specs === false || ! is_countable( $specs ) || count( $specs ) === 0 ) {
+		if ( false === $specs || ! is_countable( $specs ) || count( $specs ) === 0 ) {
 			return;
 		}
 

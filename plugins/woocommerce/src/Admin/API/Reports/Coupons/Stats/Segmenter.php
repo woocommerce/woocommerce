@@ -258,7 +258,7 @@ class Segmenter extends ReportsSegmenter {
 			return array();
 		}
 
-		$segments = null;
+		$segments                 = null;
 		$product_segmenting_table = $wpdb->prefix . 'wc_order_product_lookup';
 		$unique_orders_table      = '';
 		$segmenting_where         = '';

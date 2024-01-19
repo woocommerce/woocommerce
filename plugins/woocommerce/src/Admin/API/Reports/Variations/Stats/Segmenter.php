@@ -148,7 +148,7 @@ class Segmenter extends ReportsSegmenter {
 		if ( ! isset( $this->query_args['segmentby'] ) || '' === $this->query_args['segmentby'] ) {
 			return array();
 		}
-		$segments = null;
+		$segments                 = null;
 		$product_segmenting_table = $wpdb->prefix . 'wc_order_product_lookup';
 		$unique_orders_table      = 'uniq_orders';
 		$segmenting_where         = '';
