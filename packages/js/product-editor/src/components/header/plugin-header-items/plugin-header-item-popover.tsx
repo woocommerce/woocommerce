@@ -11,7 +11,7 @@ import { PinnedItems } from '@wordpress/interface';
 /**
  * Internal dependencies
  */
-import { PINNED_ITEMS_SCOPE } from '../../../constants';
+import { HEADER_PINNED_ITEMS_SCOPE } from '../../../constants';
 import { PluginHeaderItemPopoverProps } from './types';
 
 export const PluginHeaderItemPopover: React.FC<
@@ -19,7 +19,7 @@ export const PluginHeaderItemPopover: React.FC<
 > = ( { children, label, icon } ) => {
 	const [ isVisible, setVisible ] = useState( false );
 	return (
-		<PinnedItems scope={ PINNED_ITEMS_SCOPE }>
+		<PinnedItems scope={ HEADER_PINNED_ITEMS_SCOPE }>
 			<>
 				<Button
 					variant="tertiary"
