@@ -10,7 +10,6 @@ import {
 	TRACKS_SOURCE,
 	__experimentalProductMVPCESFooter as FeedbackBar,
 	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
-	ProductPageSkeleton,
 } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
