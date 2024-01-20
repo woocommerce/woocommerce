@@ -18,6 +18,10 @@ export const PluginHeaderItemPopover: React.FC<
 	PluginHeaderItemPopoverProps
 > = ( { children, label, icon } ) => {
 	const [ isVisible, setVisible ] = useState( false );
+	const childrenToRender =
+		typeof children === 'function'
+			? children( { isVisible, setVisible } )
+			: children;
 	return (
 		<PinnedItems scope={ HEADER_PINNED_ITEMS_SCOPE }>
 			<>
@@ -33,7 +37,7 @@ export const PluginHeaderItemPopover: React.FC<
 						onClose={ () => setVisible( false ) }
 						focusOnMount="container"
 					>
-						{ children }
+						{ childrenToRender }
 					</Popover>
 				) }
 			</>

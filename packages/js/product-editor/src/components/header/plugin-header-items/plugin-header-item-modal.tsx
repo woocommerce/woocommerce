@@ -21,6 +21,10 @@ export const PluginHeaderItemModal: React.FC< PluginHeaderItemModalProps > = ( {
 	title,
 } ) => {
 	const [ isOpen, setOpen ] = useState( false );
+	const childrenToRender =
+		typeof children === 'function'
+			? children( { isOpen, setOpen } )
+			: children;
 	return (
 		<PinnedItems scope={ HEADER_PINNED_ITEMS_SCOPE }>
 			<>
@@ -35,7 +39,7 @@ export const PluginHeaderItemModal: React.FC< PluginHeaderItemModalProps > = ( {
 						title={ title }
 						onRequestClose={ () => setOpen( false ) }
 					>
-						{ children }
+						{ childrenToRender }
 					</Modal>
 				) }
 			</>
