@@ -16,7 +16,6 @@ import {
 	isWCAdmin,
 } from '@woocommerce/navigation';
 import { Spinner } from '@woocommerce/components';
-import { ProductPageSkeleton } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
