@@ -55,7 +55,7 @@ export const PRODUCT_SCHEDULED_SALE_SLUG = 'product-scheduled-sale';
 
 export const TRACKS_SOURCE = 'product-block-editor-v1';
 
-export const PINNED_ITEMS_SCOPE = 'woocommerce/product-editor';
+export const HEADER_PINNED_ITEMS_SCOPE = 'woocommerce/product-editor';
 
 /**
  * Since the pagination component does not exposes the way of

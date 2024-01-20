@@ -11,7 +11,7 @@ import { PinnedItems } from '@wordpress/interface';
 /**
  * Internal dependencies
  */
-import { PINNED_ITEMS_SCOPE } from '../../../constants';
+import { HEADER_PINNED_ITEMS_SCOPE } from '../../../constants';
 import { PluginHeaderItemModalProps } from './types';
 
 export const PluginHeaderItemModal: React.FC< PluginHeaderItemModalProps > = ( {
@@ -22,7 +22,7 @@ export const PluginHeaderItemModal: React.FC< PluginHeaderItemModalProps > = ( {
 } ) => {
 	const [ isOpen, setOpen ] = useState( false );
 	return (
-		<PinnedItems scope={ PINNED_ITEMS_SCOPE }>
+		<PinnedItems scope={ HEADER_PINNED_ITEMS_SCOPE }>
 			<>
 				<Button
 					variant="tertiary"

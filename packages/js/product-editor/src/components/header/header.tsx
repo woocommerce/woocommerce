@@ -24,7 +24,7 @@ import { PreviewButton } from './preview-button';
 import { SaveDraftButton } from './save-draft-button';
 import { PublishButton } from './publish-button';
 import { Tabs } from '../tabs';
-import { PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
+import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
 
 export type HeaderProps = {
 	onTabSelect: ( tabId: string | null ) => void;
@@ -146,7 +146,7 @@ export function Header( {
 					/>
 
 					<WooHeaderItem.Slot name="product" />
-					<PinnedItems.Slot scope={ PINNED_ITEMS_SCOPE } />
+					<PinnedItems.Slot scope={ HEADER_PINNED_ITEMS_SCOPE } />
 					<MoreMenu />
 				</div>
 			</div>
