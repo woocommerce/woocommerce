@@ -53,12 +53,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/suggested-products',
 			array(
-				'args'   => array(
-					'id' => array(
-						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
-						'type'        => 'integer',
-					),
-				),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_suggested_products' ),
