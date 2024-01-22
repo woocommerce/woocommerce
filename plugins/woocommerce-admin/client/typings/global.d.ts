@@ -25,6 +25,7 @@ declare global {
 			'product-external-affiliate': boolean;
 			'product-grouped': boolean;
 			'product-linked': boolean;
+			'product-pre-publish-modal': boolean;
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
@@ -40,13 +41,16 @@ declare global {
 		};
 		wp: {
 			updates?: {
-				ajax: ( action, data: {
-					slug?: string;
-					plugin?: string;
-					theme?: string;
-					success?: function;
-					error?: function;
-				} ) => JQuery.Promise;
+				ajax: (
+					action,
+					data: {
+						slug?: string;
+						plugin?: string;
+						theme?: string;
+						success?: function;
+						error?: function;
+					}
+				) => JQuery.Promise;
 			};
 			autosave?: {
 				server: {
