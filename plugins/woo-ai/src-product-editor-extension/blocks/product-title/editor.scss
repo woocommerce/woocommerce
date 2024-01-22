@@ -1,9 +1,3 @@
-/**
- * The following styles get applied inside the editor only.
- *
- * Replace them with your own styles or remove the file completely.
- */
-
-.wp-block-woocommerce-woo-product-editor-ai-workshop {
-	border: 1px dotted #f00;
+.wc-block-ai-title__toolbar {
+	pointer-events: auto;
 }

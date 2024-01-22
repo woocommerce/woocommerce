@@ -5,7 +5,7 @@
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { __ } from '@wordpress/i18n';
-import { ToolbarButton } from '@wordpress/components';
+import { Button, Flex, FlexItem, ToolbarButton } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -22,7 +22,7 @@ import {
 import './editor.scss';
 import ai from '../../icons/ai';
 
-export default function AiTitleBlockEdit() {
+export default function AiTitleBlockEdit( { isSelected }) {
 	const innerBlockProps = useInnerBlocksProps(
 		{},
 		{
@@ -31,26 +31,24 @@ export default function AiTitleBlockEdit() {
 		}
 	);
 
-	const blockProps = useWooBlockProps(
-		{},
-		{
-			tabIndex: 0,
-		}
-	);
+	const blockProps = useWooBlockProps( {} );
 
 	return (
 		<div { ...blockProps }>
-			<BlockControls>
-				<ToolbarButton
-					label={ __(
-						'Get AI suggestions for product title',
-						'woocommerce'
-					) }
-					icon={ ai }
-				>
-					{ __( 'Get AI suggestions', 'woocommerce' ) }
-				</ToolbarButton>
-			</BlockControls>
+			<Flex justify="flex-end" className="wc-block-ai-title__toolbar">
+				<FlexItem>
+					<Button
+						icon={ ai }
+						tabIndex={ 0 }
+						variant="secondary"
+						label={ __(
+							'Get AI suggestions for product title',
+							'woocommerce'
+						) }
+						onClick={ console.log }
+					/>
+				</FlexItem>
+			</Flex>
 
 			<div { ...innerBlockProps } />
 		</div>
