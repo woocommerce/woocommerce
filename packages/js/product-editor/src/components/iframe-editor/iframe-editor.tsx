@@ -181,8 +181,7 @@ export function IframeEditor( {
 								'woocommerce-iframe-editor__content',
 								{
 									'old-fixed-toolbar-shown':
-										! inlineFixedBlockToolbar &&
-										hasFixedToolbar,
+										! inlineFixedBlockToolbar,
 								}
 							) }
 							onClick={ (
