@@ -37,21 +37,6 @@ const Edit = ( {
 		).length;
 	} );
 
-	console.log(
-		'allowedBlocks',
-		getAllowedBlocks( [
-			...Object.values( BLOCK_NAME_MAP ),
-			'woocommerce/product-filter',
-			'woocommerce/rating-filter',
-			'woocommerce/active-filters',
-			'woocommerce/attribute-filter',
-			'woocommerce/price-filter',
-			'woocommerce/stock-filter',
-			'woocommerce/filter-wrapper',
-			'woocommerce/product-collection',
-		] )
-	);
-
 	return (
 		<nav { ...blockProps }>
 			{ ! isNested && <Warning /> }
