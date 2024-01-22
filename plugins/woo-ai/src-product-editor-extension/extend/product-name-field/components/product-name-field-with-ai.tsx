@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
+import { createElement, Fragment, useState } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { ToolbarButton } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -45,19 +45,28 @@ const productNameFieldWithAi =
 
 				debug( 'Extending product name field block' );
 
+				const [ isRequesting, setIsRequesting ] = useState( false );
+
 				const productId = useEntityId( 'postType', 'product' );
 
 				const { requestCompletion } = useCompletion( {
 					feature: WOO_AI_PLUGIN_FEATURE_NAME,
+					onStreamMessage: ( message ) => {
+						debug( 'Message received', message );
+						setIsRequesting( true );
+					},
 					onStreamError: ( error ) => {
 						// eslint-disable-next-line no-console
+						setIsRequesting( false );
 						debug( 'Streaming error encountered', error );
 					},
 					onCompletionFinished: ( reason, content ) => {
 						try {
 							const parsed = JSON.parse( content );
+							setIsRequesting( false );
 							debug( 'Parsed suggestions', parsed );
 						} catch ( e ) {
+							setIsRequesting( false );
 							throw new Error( 'Unable to parse suggestions' );
 						}
 					},
@@ -70,11 +79,13 @@ const productNameFieldWithAi =
 						<BlockControls { ...blockControlProps }>
 							<ToolbarButton
 								icon={ ai }
+								disabled={ isRequesting }
 								label={ __(
 									'Get AI suggestions for product name',
 									'woocommerce'
 								) }
 								onClick={ async () => {
+									setIsRequesting( true );
 									const prompt =
 										await buildProductTitleSuggestionsPromp(
 											productId
