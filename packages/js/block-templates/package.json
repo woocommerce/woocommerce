@@ -121,6 +121,12 @@
 		"build:project:bundle": {
 			"command": "webpack",
 			"clean": "if-file-deleted",
+			"env": {
+				"NODE_ENV": {
+					"external": true,
+					"default": "production"
+				}
+			},
 			"files": [
 				"webpack.config.js",
 				"src/**/*.scss"
