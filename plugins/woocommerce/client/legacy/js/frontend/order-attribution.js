@@ -110,5 +110,27 @@
 			previousInitCheckout && previousInitCheckout();
 		};
 	}
+	// Work around the lack of explicit script dependency for the checkout block.
+	// Conditionally, wait for and use 'wp-data' & 'wc-blocks-checkout.
+
+	// Wait for (async) block checkout initialization and set source values once loaded.
+	function eventuallyInitializeCheckoutBlock() {
+		if (
+			window.wp && window.wp.data && typeof window.wp.data.subscribe === 'function'
+		) {
+			wp.data.subscribe( function () {
+				const checkoutDataStore = wp.data.select( 'wc/store/checkout' );
+				if ( undefined !== checkoutDataStore && checkoutDataStore.getOrderId() !== 0 ) {
+					updateCheckoutBlockData( getData() );
+				}
+			} );
+		}
+	};
+	// Wait for DOMContentLoaded to make sure wp.data is in place, if applicable for the page.
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", eventuallyInitializeCheckoutBlock);
+	} else {
+		eventuallyInitializeCheckoutBlock();
+	}
 
 }( window.wc_order_attribution ) );
