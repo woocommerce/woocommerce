@@ -18,8 +18,10 @@ const singleProductSalePrice = '75.00';
 const twoProductPrice = ( singleProductSalePrice * 2 ).toString();
 const threeProductPrice = ( singleProductSalePrice * 3 ).toString();
 
-const pageTitle = 'Checkout Block';
-const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
+const checkoutBlockPageTitle = 'Checkout Block';
+const checkoutBlockPageSlug = checkoutBlockPageTitle
+	.replace( / /gi, '-' )
+	.toLowerCase();
 
 let guestOrderId1,
 	guestOrderId2,
@@ -225,7 +227,7 @@ test.describe( 'Checkout Block page', () => {
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( pageTitle );
+			.fill( checkoutBlockPageTitle );
 		await page.getByRole( 'button', { name: 'Add default block' } ).click();
 		await page
 			.getByRole( 'document', {
@@ -241,13 +243,13 @@ test.describe( 'Checkout Block page', () => {
 			.getByRole( 'button', { name: 'Publish', exact: true } )
 			.click();
 		await expect(
-			page.getByText( `${ pageTitle } is now live.` )
+			page.getByText( `${ checkoutBlockPageTitle } is now live.` )
 		).toBeVisible();
 
 		// go to the page to test empty cart block
-		await page.goto( pageSlug );
+		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
 		await expect(
 			page.getByText( 'Your cart is currently empty!' )
@@ -267,9 +269,9 @@ test.describe( 'Checkout Block page', () => {
 		// this time we're going to add two products to the cart
 		await addProductsToCart( page, simpleProductName, '2' );
 
-		await page.goto( pageSlug );
+		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
 
 		// check the order summary
@@ -301,9 +303,9 @@ test.describe( 'Checkout Block page', () => {
 		// this time we're going to add three products to the cart
 		await addProductsToCart( page, simpleProductName, '3' );
 
-		await page.goto( pageSlug );
+		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
 
 		// check the order summary
@@ -341,9 +343,9 @@ test.describe( 'Checkout Block page', () => {
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
 			waitUntil: 'networkidle',
 		} );
-		await page.goto( pageSlug );
+		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
 
 		await page.getByLabel( 'Email address' ).fill( guestEmail );
@@ -382,9 +384,9 @@ test.describe( 'Checkout Block page', () => {
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
 			waitUntil: 'networkidle',
 		} );
-		await page.goto( pageSlug );
+		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
 
 		// verify shipping details
@@ -454,9 +456,9 @@ test.describe( 'Checkout Block page', () => {
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
 			waitUntil: 'networkidle',
 		} );
-		await page.goto( pageSlug );
+		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
 
 		// first try submitting the form with no fields complete
@@ -487,9 +489,9 @@ test.describe( 'Checkout Block page', () => {
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
 			waitUntil: 'networkidle',
 		} );
-		await page.goto( pageSlug );
+		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
 
 		await page.getByLabel( 'Email address' ).fill( customer.email );
@@ -514,9 +516,9 @@ test.describe( 'Checkout Block page', () => {
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
 			waitUntil: 'networkidle',
 		} );
-		await page.goto( pageSlug );
+		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
 
 		await page.getByLabel( 'Email address' ).fill( customer.email );
@@ -588,9 +590,9 @@ test.describe( 'Checkout Block page', () => {
 	test( 'allows guest customer to place an order', async ( { page } ) => {
 		await addProductsToCart( page, simpleProductName, '2' );
 
-		await page.goto( pageSlug );
+		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
 
 		await page.getByLabel( 'Email address' ).fill( guestEmail );
@@ -698,9 +700,9 @@ test.describe( 'Checkout Block page', () => {
 	test( 'allows existing customer to place an order', async ( { page } ) => {
 		await addProductsToCart( page, simpleProductName, '2' );
 
-		await page.goto( pageSlug );
+		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
 
 		// click to log in and make sure you are on the same page after logging in
@@ -715,7 +717,7 @@ test.describe( 'Checkout Block page', () => {
 		await page.locator( 'text=Log in' ).click();
 		await page.waitForLoadState( 'networkidle' );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
 
 		// if edit address is present click it, otherwise fill shipping details
@@ -805,9 +807,9 @@ test.describe( 'Checkout Block page', () => {
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
 			waitUntil: 'networkidle',
 		} );
-		await page.goto( pageSlug );
+		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
 
 		// check create account during checkout

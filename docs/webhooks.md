@@ -1,12 +1,12 @@
 # Webhooks
 
-## [What are Webhooks?](https://github.com/woocommerce/woocommerce/blob/trunk/docs/webhooks#what-are-webhooks)
+## What are Webhooks?
 
 A  [Webhook](http://en.wikipedia.org/wiki/Webhook)  is an event notification sent to a URL of your choice. Users can configure them to trigger events on one site to invoke behavior on another.
 
 Webhooks are useful for integrating with third-party services and other external API that support them.
 
-## [Webhooks in WooCommerce](https://github.com/woocommerce/woocommerce/blob/trunk/docs/webhooks#webhooks-in-woocommerce)
+## Webhooks in WooCommerce
 
 Webhooks were introduced in WooCommerce 2.2 and can trigger events each time you add, edit or delete orders, products, coupons or customers.
 
@@ -14,7 +14,7 @@ It's also possible to use webhooks with WooCommerce actions, e.g., Create a webh
 
 Webhooks also make it easier for third-party apps to integrate with WooCommerce.
 
-## [Creating webhooks](https://github.com/woocommerce/woocommerce/blob/trunk/docs/webhooks#creating-webhooks)
+## Creating webhooks
 
 ![WebHooks screen](https://woocommerce.com/wp-content/uploads/2013/01/woo-webhooks.png)
 
@@ -45,7 +45,7 @@ Webhooks are disabled after 5 retries by default if the delivery URL returns an 
 
 To increase the number of retries, you can use the  `woocommerce_max_webhook_delivery_failures`  filter function.
 
-## [Editing and deleting webhooks](https://github.com/woocommerce/woocommerce/blob/trunk/docs/webhooks#editing-and-deleting-webhooks)
+## Editing and deleting webhooks
 
 Webhooks are listed the same way as posts or products.
 
@@ -55,7 +55,7 @@ Webhooks are listed the same way as posts or products.
 
 ![WebHooks deletion](https://woocommerce.com/wp-content/uploads/2013/01/editdelete-webhook.png)
 
-## [Webhook logs](https://github.com/woocommerce/woocommerce/blob/trunk/docs/webhooks#webhook-logs)
+## Webhook logs
 
 WooCommerce saves logs of all events triggering a webhook. Webhook logs are found at:  **WooCommerce > Status > Logs**.
 

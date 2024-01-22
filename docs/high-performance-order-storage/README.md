@@ -12,7 +12,7 @@ In January 2022, we published the [initial plan for the Custom Order Tables feat
 
 From WooCommerce 8.2, released on October 2023, [High-Performance Order Storage (HPOS)](https://developer.woo.com/2022/09/14/high-performance-order-storage-progress-report/)  is officially released under the stable flag and will be enabled by default for new installations.
 
-## [What's New with High-Performance Order Storage?](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-1)
+## What's New with High-Performance Order Storage?
 
 Bringing High-Performance Order Storage (HPOS) to WooCommerce improves these three essential properties for eCommerce stores.
 
@@ -32,7 +32,7 @@ You no longer have to go through a single huge database to locate underlying dat
 
 With High-Performance Order Storage, you can easily browse through the separate tables and easy-to-handle entries, independent of the table  `_posts`, to find data or understand the table structure. It also lets you easily develop new plugins, implement designs for shops and products, and modify WooCommerce with more flexibility.
 
-## [Background](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-2)
+## Background
 
 Before the release of version 8.2, WooCommerce relied on the `_post` and `_postmeta` table structures to store order information, which has served well over the years.
 
@@ -46,15 +46,15 @@ The order data is synced from `_posts` and `_postmeta` table to four custom orde
 4. `_wc_orders_meta`
 
 
-## [Enabling the feature](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-3)
+## Enabling the feature
 
 From WooCommerce 8.2, released on October 2023, HPOS is enabled by default for new installations. Existing stores can check [How to enable HPOS](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/enable-hpos.md)
 
-## [Database tables](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-4)
+## Database tables
 
 A number of database tables are used to store order data by HPOS. The `get_all_table_names` method in [the OrdersTableDataStore class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/OrdersTableDataStore.php) will return the names of all the tables.
 
-## [Authoritative tables](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-5)
+## Authoritative tables
 
 At any given time, while the HPOS feature is enabled, there are two roles for the involved database tables: _authoritative_ and _backup_. The authoritative tables are the working tables, where order data will be stored to and retrieved from during normal operation of the store. The _backup_ tables will receive a copy of the authoritative data whenever [synchronization](#synchronization) happens.
 
@@ -64,7 +64,7 @@ If the `woocommerce_custom_orders_table_enabled` options is set to true, HPOS is
 
 In order to preserve data integrity, switching the authoritative tables (from the new tables to the posts table or the other way around) isn't allowed while there are orders pending synchronization.
 
-## [Synchronization](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-6)
+## Synchronization
 
 _Synchronization_ is the process of applying all the pending changes in the authoritative tables to the backup tables. _Orders pending synchronization_ are orders that have been modified in the authoritative tables but the changes haven't been applied to the backup tables yet.
 
@@ -113,7 +113,7 @@ When the "**High-Performance Order Storage**" and "**Compatibility mode**" are e
 
 > You can find a deeper explanation about the synchronization between the tables in [this document about high-performance-order-storage-backward-compatibility-and-synchronization](https://developer.woo.com/2022/09/29/high-performance-order-storage-backward-compatibility-and-synchronization/#synchronization).
 
-## [Placeholder records](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-7)
+## Placeholder records
 
 Order IDs must match in both the authoritative tables and the backup tables, otherwise synchronization wouldn't be possible. The order IDs that are compared for order identification and synchronization purposes are the ones from the `id` field in both the `wp_wc_orders` table and the posts table.
 
@@ -122,7 +122,7 @@ If the posts table is authoritative, achieving an order ID match is easy: the re
 To solve this, _placeholder records_ are used. Whenever the new orders tables are authoritative and immediate synchronization is disabled, creating a new order will cause a record with post type `shop_order_placehold` and the same ID as the order to be created in the posts table; this effectively "reserves" the order ID in the posts table. Then, at synchronization time, the record is filled appropriately and its post type is changed to `shop_order`.
 
 
-## [Order Data Storage](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-8)
+## Order Data Storage
 
 You can switch between data stores freely to sync the data between the tables.
 
@@ -139,7 +139,7 @@ You can switch between data stores freely to sync the data between the tables.
 ![Select WordPress Post Tables and Enable compatibility mode](https://woo.com/wp-content/uploads/2023/10/image-20.png?w=650)
 
 
-## [Incompatible Plugins](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-9)
+## Incompatible Plugins
 
 If you are using a plugin that is not compatible with High-Performance Order Storage, then the HPOS option will be disabled under  **WooCommerce > Settings > Advanced > Features**.
 
@@ -153,7 +153,7 @@ If you are using a plugin that is not compatible with High-Performance Order Sto
 > **Note:** If you are using a third-party extension that isn't working properly with High-Performance Order Storage then please notify the developers of the extension and ask them to update their extension to add support for HPOS. It's up to the extension developers to add support for HPOS. We have [developer resources and documentation](https://developer.woo.com/2022/09/14/high-performance-order-storage-progress-report/)  available to help with their integration efforts.
 
 
-## [Disabling HPOS](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-10)
+## Disabling HPOS
 
 If you encounter problems or if you need to continue working with plugins that are not yet compatible with HPOS, then we recommend temporarily switching back to  **WordPress posts storage**.
 
