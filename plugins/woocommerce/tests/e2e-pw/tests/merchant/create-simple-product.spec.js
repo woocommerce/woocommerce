@@ -94,10 +94,11 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product', {
 			waitUntil: 'networkidle',
 		} );
-		await page.locator( '#title' ).fill( virtualProductName );
-		await page.locator( '#_regular_price' ).fill( productPrice );
-		await page.locator( '#_sale_price' ).fill( salePrice );
-		await page.locator( '#_virtual' ).click();
+		await page.getByLabel( 'Product name' ).fill( virtualProductName );
+		await page.getByLabel( 'Regular price' ).fill( productPrice );
+		//await page.locator( '#_sale_price' ).fill( salePrice );
+		await page.getByText( 'Sale price ($)' ).fill( salePrice );
+		await page.getByText( 'Virtual' ).click();
 
 		// Fill in a product description
 		await page
