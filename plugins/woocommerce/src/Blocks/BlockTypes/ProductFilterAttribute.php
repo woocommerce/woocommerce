@@ -14,7 +14,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filters-attribute';
+	protected $block_name = 'product-filter-attribute';
 
 	/**
 	 * Initialize this block type.

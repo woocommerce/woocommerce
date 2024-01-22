@@ -77,11 +77,11 @@ final class ProductFilter extends AbstractBlock {
 	 * @return bool - Whether the collection data is empty.
 	 */
 	private function collection_data_is_empty( $attributes ) {
-		if ( empty( $this->current_response ) ) {
+		$filter_type = $attributes['filterType'];
+
+		if ( 'active-filters' !== $filter_type && empty( $this->current_response ) ) {
 			return true;
 		}
-
-		$filter_type = $attributes['filterType'];
 
 		if ( 'attribute-filter' === $filter_type ) {
 			return empty( $this->current_response['attribute_counts'] );
@@ -97,6 +97,15 @@ final class ProductFilter extends AbstractBlock {
 
 		if ( 'stock-filter' === $filter_type ) {
 			return empty( $this->current_response['stock_status_counts'] );
+		}
+
+		if ( 'active-filters' === $filter_type ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+			$parsed_url  = wp_parse_url( esc_url_raw( $request_uri ) );
+			parse_str( $parsed_url['query'], $url_query_params );
+
+			return empty( array_unique( apply_filters( 'collection_filter_query_param_keys', array(), array_keys( $url_query_params ) ) ) );
 		}
 
 		return false;
@@ -169,7 +178,7 @@ final class ProductFilter extends AbstractBlock {
 	 */
 	private function generate_navigation_id( $block ) {
 		return sprintf(
-			'wc-product-filters-%s',
+			'wc-product-filter-%s',
 			md5( wp_json_encode( $block->parsed_block['innerBlocks'] ) )
 		);
 	}

@@ -1,6 +1,6 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"name": "woocommerce/product-filters-attribute",
+	"name": "woocommerce/product-filter-attribute",
 	"version": "1.0.0",
 	"title": "Product Filter: Attribute",
 	"description": "Enable customers to filter the product grid by selecting one or more attributes, such as color.",
@@ -8,7 +8,7 @@
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 2,
-	"ancestor": [ "woocommerce/product-filters" ],
+	"ancestor": [ "woocommerce/product-filter" ],
 	"supports": {
 		"interactivity": true,
 		"inserter": false,

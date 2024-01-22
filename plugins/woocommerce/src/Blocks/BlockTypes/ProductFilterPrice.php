@@ -11,7 +11,7 @@ final class ProductFilterPrice extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filters-price';
+	protected $block_name = 'product-filter-price';
 
 	const MIN_PRICE_QUERY_VAR = 'min_price';
 	const MAX_PRICE_QUERY_VAR = 'max_price';

@@ -10,7 +10,7 @@ final class ProductFilterActive extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filters-active';
+	protected $block_name = 'product-filter-active';
 
 	/**
 	 * Render the block.
@@ -66,7 +66,6 @@ final class ProductFilterActive extends AbstractBlock {
 
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<?php if ( ! empty( $active_filters ) ) : ?>
-				<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<ul class="wc-block-active-filters__list %3$s">
 					<?php foreach ( $active_filters as $filter ) : ?>
 					<li>

@@ -1,6 +1,6 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"name": "woocommerce/product-filters-active",
+	"name": "woocommerce/product-filter-active",
 	"version": "1.0.0",
 	"title": "Product Filter: Active Filters",
 	"description": "Display the currently active filters.",
@@ -8,7 +8,7 @@
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 2,
-	"ancestor": [ "woocommerce/product-filters" ],
+	"ancestor": [ "woocommerce/product-filter" ],
 	"supports": {
 		"interactivity": true,
 		"inserter": false,

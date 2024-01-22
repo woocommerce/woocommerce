@@ -14,7 +14,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filters-stock-status';
+	protected $block_name = 'product-filter-stock-status';
 
 	const STOCK_STATUS_QUERY_VAR = 'filter_stock_status';
 

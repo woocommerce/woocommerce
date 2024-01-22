@@ -15,7 +15,7 @@ final class ProductFilterRating extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filters-rating';
+	protected $block_name = 'product-filter-rating';
 
 	const RATING_FILTER_QUERY_VAR = 'rating_filter';
 
