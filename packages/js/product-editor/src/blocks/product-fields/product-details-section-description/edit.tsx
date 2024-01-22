@@ -275,8 +275,8 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 				</p>
 
 				<Dropdown
-					focusOnMount={ false }
 					// @ts-expect-error Property does exists
+					focusOnMount={ true }
 					popoverProps={ {
 						placement: 'bottom-start',
 					} }
@@ -302,7 +302,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 							{ unsupportedProductTemplates.length > 0 && (
 								<MenuGroup>
 									<Dropdown
-										focusOnMount={ false }
 										// @ts-expect-error Property does exists
 										popoverProps={ {
 											placement: 'right-start',
