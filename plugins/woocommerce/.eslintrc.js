@@ -26,4 +26,15 @@ module.exports = {
 			jsx: true,
 		},
 	},
+	overrides: [
+		{
+			files: [ 'tests/e2e/**/*.spec.js' ],
+			rules: {
+				'jest/no-test-callback': 'off',
+				'@wordpress/no-unsafe-wp-apis': 'off',
+				'import/no-extraneous-dependencies': 'off',
+				'import/no-unresolved': 'off',
+			},
+		},
+	],
 };
