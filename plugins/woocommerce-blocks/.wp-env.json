@@ -4,7 +4,6 @@
 		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
 		"https://downloads.wordpress.org/plugin/wordpress-importer.0.8.zip",
 		"./tests/mocks/woo-test-helper",
-		"./tests/mocks/additional-checkout-fields-test-helper",
 		"../woocommerce"
 	],
 	"env": {

@@ -2,8 +2,11 @@
  * External dependencies
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
-import { BlockData } from '@woocommerce/e2e-types';
-import { customerFile, guestFile } from '@woocommerce/e2e-utils';
+import { customerFile } from '@woocommerce/e2e-utils';
+import {
+	installPluginFromPHPFile,
+	uninstallPluginFromPHPFile,
+} from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -22,25 +25,15 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 
 test.describe( 'Shopper → Additional Checkout Fields', () => {
 	test.use( { storageState: customerFile } );
-	test.beforeAll( async ( { browser } ) => {
-		const context = await browser.newContext();
-		const page = await context.newPage();
-		await page.goto( '/?enable_custom_checkout_fields=true' );
-		await expect(
-			page.getByText( 'Enabled custom checkout fields' )
-		).toBeVisible();
-		await page.close();
-		await context.close();
+	test.beforeAll( async () => {
+		await installPluginFromPHPFile(
+			`${ __dirname }/additional-checkout-fields-plugin.php`
+		);
 	} );
-	test.afterAll( async ( { browser } ) => {
-		const context = await browser.newContext();
-		const page = await context.newPage();
-		await page.goto( '/?disable_custom_checkout_fields=true' );
-		await expect(
-			page.getByText( 'Disabled custom checkout fields' )
-		).toBeVisible();
-		await page.close();
-		await context.close();
+	test.afterAll( async () => {
+		await uninstallPluginFromPHPFile(
+			`${ __dirname }/additional-checkout-fields-plugin.php`
+		);
 	} );
 
 	test.beforeEach( async ( { frontendUtils } ) => {
