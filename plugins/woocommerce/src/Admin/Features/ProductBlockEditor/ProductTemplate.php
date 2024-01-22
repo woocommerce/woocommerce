@@ -34,6 +34,13 @@ class ProductTemplate {
 	private $product_data;
 
 	/**
+	 * Alternate product datas.
+	 *
+	 * @var array
+	 */
+	private $alternate_product_datas = array();
+
+	/**
 	 * The template order.
 	 *
 	 * @var Integer
@@ -86,6 +93,10 @@ class ProductTemplate {
 		if ( isset( $data['icon'] ) ) {
 			$this->icon = $data['icon'];
 		}
+
+		if ( isset( $data['alternate_product_datas'] ) ) {
+			$this->alternate_product_datas = $data['alternate_product_datas'];
+		}
 	}
 
 	/**
@@ -131,6 +142,15 @@ class ProductTemplate {
 	 */
 	public function get_product_data() {
 		return $this->product_data;
+	}
+
+	/**
+	 * Get the alternate product datas.
+	 *
+	 * @return array The alternate product datas.
+	 */
+	public function get_alternate_product_datas() {
+		return $this->alternate_product_datas;
 	}
 
 	/**
@@ -196,13 +216,41 @@ class ProductTemplate {
 	 */
 	public function to_json() {
 		return array(
-			'id'               => $this->get_id(),
-			'title'            => $this->get_title(),
-			'description'      => $this->get_description(),
-			'icon'             => $this->get_icon(),
-			'order'            => $this->get_order(),
-			'layoutTemplateId' => $this->get_layout_template_id(),
-			'productData'      => $this->get_product_data(),
+			'id'                    => $this->get_id(),
+			'title'                 => $this->get_title(),
+			'description'           => $this->get_description(),
+			'icon'                  => $this->get_icon(),
+			'order'                 => $this->get_order(),
+			'layoutTemplateId'      => $this->get_layout_template_id(),
+			'productData'           => $this->get_product_data(),
+			'alternateProductDatas' => $this->get_alternate_product_datas(),
 		);
+	}
+
+	/**
+	 * Check if a product type is supported by the template.
+	 *
+	 * @param string $product_type The product type.
+	 * @return bool True if the product type is supported.
+	 */
+	public function is_product_type_supported( string $product_type ) {
+		$product_data_type = $this->product_data['type'];
+
+		if ( $product_data_type === $product_type ) {
+			return true;
+		}
+
+		$alternate_product_datas = $this->get_alternate_product_datas();
+		if ( ! empty( $alternate_product_datas ) ) {
+			foreach ( $alternate_product_datas as $alternate_product_data ) {
+				$alternate_product_data_type = $alternate_product_data['type'];
+
+				if ( $alternate_product_data_type === $product_type ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }
