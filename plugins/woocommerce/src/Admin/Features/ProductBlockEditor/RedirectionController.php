@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
  * Handle redirecting to the old or new editor based on features and support.
