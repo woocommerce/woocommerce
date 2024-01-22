@@ -638,21 +638,27 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return boolean TRUE when the blank state should be rendered, FALSE otherwise.
 	 */
-	private function should_render_blank_state(): bool {
+    private function should_render_blank_state(): bool {
         /**
          * Filters if we should render blank state, allowing for custom count queries to be used
          *
          * @since x.x.x
          *
-         * @param boolean           $should_render_blank_state
-         * @param object            ListTable The current instance of the class.
-         */
-         return apply_filters(
- 			'woocommerce_' . $this->order_type . '_list_table_render_blank_state',
-            ( ! $this->has_filter ) && 0 === $this->count_orders_by_status( array_keys( $this->get_visible_statuses() ) ),
+         * @param null           $should_render_blank_state null will use the build in counts, and sending a boolean will overwrite it
+         * @param object         ListTable The current instance of the class.
+        */
+        $should_render_blank_state = apply_filters(
+            'woocommerce_' . $this->order_type . '_list_table_render_blank_state',
+            null,
             $this
- 		);
-	}
+        );
+
+        if ( is_bool($should_render_blank_state) ) {
+            return $should_render_blank_state;
+        }
+
+        return ( ! $this->has_filter ) && 0 === $this->count_orders_by_status( array_keys( $this->get_visible_statuses() ) );
+ 	}
 
 	/**
 	 * Returns a list of slug and labels for order statuses that should be visible in the status list.
