@@ -1635,7 +1635,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$exclude_ids = $request->get_param( 'exclude' );
 		$limit       = $request->get_param( 'limit' ) ? $request->get_param( 'limit' ) : 5;
 
-		$data_store = WC_Data_Store::load( 'product' );
+		$data_store                   = WC_Data_Store::load( 'product' );
 		$this->suggested_products_ids = $data_store->get_related_products(
 			$categories,
 			$tags,
