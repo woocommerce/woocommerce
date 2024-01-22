@@ -2,8 +2,15 @@
  * External dependencies
  */
 import { createElement, Fragment, useState } from '@wordpress/element';
+import { check } from '@wordpress/icons';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { Button, DropdownMenu } from '@wordpress/components';
+import {
+	Button,
+	DropdownMenu,
+	Flex,
+	FlexItem,
+	HorizontalRule,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { __experimentalUseCompletion as useCompletion } from '@woocommerce/ai';
 import debugFactory from 'debug';
@@ -28,6 +35,7 @@ import type {
 } from '../../../types';
 import { buildProductTitleSuggestionsPromp } from '../../../ai/build-prompt';
 import parseStringsArray from '../../../ai/parse/strings-array';
+import './styles.scss';
 
 const debug = debugFactory( 'woo-ai:product-editor:name-field' );
 
@@ -43,22 +51,39 @@ function TitleSuggestions( {
 	onRequest?: () => void;
 } ): React.ReactElement {
 	return (
-		<>
-			<Button onClick={ onRequest } disabled={ isRequesting }>
-				{ __( 'Get suggestions', 'woocommerce' ) }
-			</Button>
-			<>
+		<div className="ai-assistant__title-suggestions-dropdown__content">
+			<Flex
+				direction="column"
+				gap={ 1 }
+				className="ai-assistant__title-suggestions-dropdown__content__suggestions"
+			>
 				{ titles.map( ( title ) => (
+					<FlexItem key={ title }>
+						<Button
+							icon={ check }
+							onClick={ () => onSelect( title ) }
+							variant="tertiary"
+						>
+							{ title }
+						</Button>
+					</FlexItem>
+				) ) }
+			</Flex>
+
+			<HorizontalRule />
+
+			<Flex justify="flex-end">
+				<FlexItem>
 					<Button
-						key={ title }
-						onClick={ () => onSelect( title ) }
+						onClick={ onRequest }
+						disabled={ isRequesting }
 						variant="secondary"
 					>
-						{ title }
+						{ __( 'Other suggestions', 'woocommerce' ) }
 					</Button>
-				) ) }
-			</>
-		</>
+				</FlexItem>
+			</Flex>
+		</div>
 	);
 }
 
