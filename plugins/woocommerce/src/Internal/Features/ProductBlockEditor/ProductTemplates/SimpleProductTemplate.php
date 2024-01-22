@@ -466,7 +466,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					),
 				)
 			);
-			
+
 			$product_downloads_section_group->add_block(
 				array(
 					'id'         => 'product-downloadable',
@@ -474,7 +474,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'order'      => 10,
 					'attributes' => array(
 						'property' => 'downloadable',
-						'label'    => __( 'Include downloads', 'woocommerce'),
+						'label'    => __( 'Include downloads', 'woocommerce' ),
 					),
 				)
 			);
