@@ -116,7 +116,7 @@ class WC_Legacy_API {
 		if ( apply_filters( 'woocommerce_log_legacy_rest_api_usages', true ) ) {
             $info = 'Version: ' . WC_API_REQUEST_VERSION . ", Route: $route, User agent: $user_agent";
             $ip_address = WC_Geolocation::get_ip_address();
-            if('' !== $ip_address) {
+            if( '' !== $ip_address ) {
                 $info .= ", IP: $ip_address";
             }
 			wc_get_logger()->info( $info, array( 'source' => 'legacy_rest_api_usages' ) );
