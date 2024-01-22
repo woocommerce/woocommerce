@@ -546,20 +546,20 @@ class ListTable extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_views() {
-		$view_links  = array();
+		$view_links = array();
 
-        /**
-         * Filters the list of available list table views link
-         * before the actual query runs so gives the opportunity to remove counts from the links
-         *
-         * @since x.x.x
-         *
-         * @param string[] $views An array of available list table views links.
-         */
-        $view_links = apply_filters( 'woocommerce_' . $this->order_type . '_list_table_view_links', $view_links );
-        if ( !empty($view_links) ) {
-            return $view_links;
-        }
+		/**
+		 * Filters the list of available list table views link
+		 * before the actual query runs so gives the opportunity to remove counts from the links
+		 *
+		 * @since x.x.x
+		 *
+		 * @param string[] $views An array of available list table views links.
+		 */
+		$view_links = apply_filters( 'woocommerce_' . $this->order_type . '_list_table_view_links', $view_links );
+		if ( ! empty($view_links) ) {
+			return $view_links;
+		}
 
         $view_counts = array();
 		$statuses    = $this->get_visible_statuses();
@@ -639,23 +639,23 @@ class ListTable extends WP_List_Table {
 	 * @return boolean TRUE when the blank state should be rendered, FALSE otherwise.
 	 */
     private function should_render_blank_state(): bool {
-        /**
-         * Filters if we should render blank state, allowing for custom count queries to be used
-         *
-         * @since x.x.x
-         *
-         * @param null           $should_render_blank_state null will use the build in counts, and sending a boolean will overwrite it
-         * @param object         ListTable The current instance of the class.
-        */
-        $should_render_blank_state = apply_filters(
-            'woocommerce_' . $this->order_type . '_list_table_render_blank_state',
-            null,
-            $this
-        );
+		/**
+		 * Filters if we should render blank state, allowing for custom count queries to be used
+		 *
+		 * @since x.x.x
+		 *
+		 * @param null           $should_render_blank_state null will use the build in counts, and sending a boolean will overwrite it
+		 * @param object         ListTable The current instance of the class.
+		*/
+		$should_render_blank_state = apply_filters(
+			'woocommerce_' . $this->order_type . '_list_table_render_blank_state',
+			null,
+			$this
+		);
 
-        if ( is_bool($should_render_blank_state) ) {
-            return $should_render_blank_state;
-        }
+		if ( is_bool($should_render_blank_state) ) {
+			return $should_render_blank_state;
+		}
 
         return ( ! $this->has_filter ) && 0 === $this->count_orders_by_status( array_keys( $this->get_visible_statuses() ) );
  	}
@@ -756,16 +756,16 @@ class ListTable extends WP_List_Table {
 	private function months_filter() {
 		// XXX: [review] we may prefer to move this logic outside of the ListTable class.
 
-        /**
-         * Filters whether to remove the 'Months' drop-down from the order list table.
-         *
-         * @since x.x.x
-         *
-         * @param bool   $disable   Whether to disable the drop-down. Default false.
-         */
-        if ( apply_filters( 'woocommerce_order_list_table_disable_months_filter', false ) ) {
-            return;
-        }
+		/**
+		 * Filters whether to remove the 'Months' drop-down from the order list table.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param bool   $disable   Whether to disable the drop-down. Default false.
+		 */
+		if ( apply_filters( 'woocommerce_order_list_table_disable_months_filter', false ) ) {
+			return;
+		}
 
 		global $wp_locale;
 		global $wpdb;
