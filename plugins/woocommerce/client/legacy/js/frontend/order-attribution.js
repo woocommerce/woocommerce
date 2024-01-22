@@ -122,12 +122,10 @@
 		if (
 			window.wp && window.wp.data && typeof window.wp.data.subscribe === 'function'
 		) {
+			// Update checkout block data once more if the checkout store was loaded after this script.
 			const unsubscribe = wp.data.subscribe( function () {
-				const checkoutDataStore = wp.data.select( CHECKOUT_STORE_KEY );
-				if ( undefined !== checkoutDataStore && checkoutDataStore.getOrderId() !== 0 ) {
-					unsubscribe();
-					updateCheckoutBlockData( getData() );
-				}
+				unsubscribe();
+				updateCheckoutBlockData( getData() );
 			}, CHECKOUT_STORE_KEY );
 		}
 	};
