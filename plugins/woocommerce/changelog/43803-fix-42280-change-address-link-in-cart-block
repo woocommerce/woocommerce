@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+- Hide the shipping calculator from the Cart editor when there is no default address and shipping zone.  - Display the change address link when there are multiple shipping zones available along with a fallback shipping zone.
