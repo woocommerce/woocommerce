@@ -64,18 +64,21 @@ class MailchimpScheduler {
 			return false;
 		}
 
-		$country_code  = WC()->countries->get_base_country();
-		$store_country = WC()->countries->country_exists( $country_code ) ? WC()->countries->countries[ $country_code ] : '';
+		$country_code = WC()->countries->get_base_country();
+		$country_name = WC()->countries->countries[ $country_code ] ?? 'N/A';
+
+		$state      = WC()->countries->get_base_state();
+		$state_name = WC()->countries->states[ $country_code ][ $state ] ?? 'N/A';
 
 		$address = array(
-			// Setting N/A for addr1, city, state, and zipcode as they are
+			// Setting N/A for addr1, city, state, zipcode and country as they are
 			// required fields. Setting '' doesn't work.
 			'addr1'   => 'N/A',
 			'addr2'   => '',
 			'city'    => 'N/A',
-			'state'   => 'N/A',
+			'state'   => $state_name,
 			'zip'     => 'N/A',
-			'country' => $store_country,
+			'country' => $country_name,
 		);
 
 		$response = $this->make_request( $profile_data['store_email'], $address );
