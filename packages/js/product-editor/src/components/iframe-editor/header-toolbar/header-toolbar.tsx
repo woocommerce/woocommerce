@@ -29,6 +29,8 @@ import {
 import { Button, Popover, ToolbarItem } from '@wordpress/components';
 // @ts-expect-error missing types.
 import { store as preferencesStore } from '@wordpress/preferences';
+import { isWpVersion } from '@woocommerce/settings';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -39,7 +41,7 @@ import EditorHistoryUndo from './editor-history-undo';
 import { DocumentOverview } from './document-overview';
 import { ShowBlockInspectorPanel } from './show-block-inspector-panel';
 import { MoreMenu } from './more-menu';
-import classnames from 'classnames';
+import { getGutenbergVersion } from '../../../utils/get-gutenberg-version';
 
 type HeaderToolbarProps = {
 	onSave?: () => void;
@@ -114,6 +116,9 @@ export function HeaderToolbar( {
 		}
 	}, [ hasBlockSelection ] );
 
+	const renderBlockToolbar =
+		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.4;
+
 	return (
 		<NavigableToolbar
 			className="woocommerce-iframe-editor__header-toolbar"
@@ -152,7 +157,7 @@ export function HeaderToolbar( {
 					<ToolbarItem as={ EditorHistoryRedo } />
 					<ToolbarItem as={ DocumentOverview } />
 				</div>
-				{ hasFixedToolbar && isLargeViewport && (
+				{ hasFixedToolbar && isLargeViewport && renderBlockToolbar && (
 					<>
 						<div
 							className={ classnames(

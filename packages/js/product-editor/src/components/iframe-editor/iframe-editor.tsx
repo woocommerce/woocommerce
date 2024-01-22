@@ -22,6 +22,8 @@ import {
 	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
+import classNames from 'classnames';
+import { isWpVersion } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -34,6 +36,7 @@ import { ResizableEditor } from './resizable-editor';
 import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
+import { getGutenbergVersion } from '../../utils/get-gutenberg-version';
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
@@ -116,6 +119,9 @@ export function IframeEditor( {
 
 	const settings = __settings || parentEditorSettings;
 
+	const inlineFixedBlockToolbar =
+		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.4;
+
 	return (
 		<div className="woocommerce-iframe-editor">
 			<EditorContext.Provider
@@ -135,7 +141,8 @@ export function IframeEditor( {
 				<BlockEditorProvider
 					settings={ {
 						...settings,
-						hasFixedToolbar,
+						hasFixedToolbar:
+							hasFixedToolbar || ! inlineFixedBlockToolbar,
 						templateLock: false,
 					} }
 					value={ blocks }
@@ -170,7 +177,14 @@ export function IframeEditor( {
 					<div className="woocommerce-iframe-editor__main">
 						<SecondarySidebar />
 						<BlockTools
-							className={ 'woocommerce-iframe-editor__content' }
+							className={ classNames(
+								'woocommerce-iframe-editor__content',
+								{
+									'old-fixed-toolbar-shown':
+										! inlineFixedBlockToolbar &&
+										hasFixedToolbar,
+								}
+							) }
 							onClick={ (
 								event: React.MouseEvent<
 									HTMLDivElement,
