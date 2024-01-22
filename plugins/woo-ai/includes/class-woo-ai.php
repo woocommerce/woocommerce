@@ -134,6 +134,11 @@ class Woo_AI {
 				],
 			]
 		);
+
+		error_log( '$product_name_field: ' . print_r( $product_name_field, true ) );
+
+		// Remove the current product name field.
+		$product_name_field->remove();
 	}
 
 	/**
