@@ -410,7 +410,7 @@ function wc_get_chosen_shipping_method_ids() {
  * @since  3.2.0
  * @param  int   $key Key of package.
  * @param  array $package Package data array.
- * @return string|bool
+ * @return string|bool Either the chosen method ID or false if nothing is chosen yet.
  */
 function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 	$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
@@ -498,7 +498,7 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	 * @param array  $rates   Shipping rates.
 	 * @param string $chosen_method Chosen method id.
 	 */
-	return apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
+	return (string) apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
 }
 
 /**
