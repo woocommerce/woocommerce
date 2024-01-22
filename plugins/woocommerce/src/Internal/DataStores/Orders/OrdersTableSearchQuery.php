@@ -53,6 +53,8 @@ class OrdersTableSearchQuery {
 	 */
 	private function sanitize_search_filters( string $search_filter ) : array {
 		$available_filters = array(
+			'order_id',
+			'customer_email',
 			'customers', // customers also searches in meta.
 			'products',
 		);
@@ -158,6 +160,20 @@ class OrdersTableSearchQuery {
 
 		$order_table = $this->query->get_table_name( 'orders' );
 
+		if( 'customer_email' === $search_filter ) {
+			return $wpdb->prepare(
+				"`$order_table`.billing_email LIKE %s",
+				$wpdb->esc_like( $this->search_term )
+			);
+		}
+
+		if( 'order_id' === $search_filter && is_numeric( $this->search_term ) ) {
+			return $wpdb->prepare(
+				"`$order_table`.id = %d",
+				absint( $this->search_term )
+			);
+		}
+
 		if ( 'products' === $search_filter ) {
 			return $wpdb->prepare(
 				'search_query_items.order_item_name LIKE %s',
@@ -169,6 +185,7 @@ class OrdersTableSearchQuery {
 			$meta_sub_query = $this->generate_where_for_meta_table();
 			return "`$order_table`.id IN ( $meta_sub_query ) ";
 		}
+
 		return '';
 	}
 
