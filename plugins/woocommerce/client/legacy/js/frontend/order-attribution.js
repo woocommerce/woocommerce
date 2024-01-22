@@ -118,9 +118,10 @@
 		if (
 			window.wp && window.wp.data && typeof window.wp.data.subscribe === 'function'
 		) {
-			wp.data.subscribe( function () {
+			const unsubscribe = wp.data.subscribe( function () {
 				const checkoutDataStore = wp.data.select( 'wc/store/checkout' );
 				if ( undefined !== checkoutDataStore && checkoutDataStore.getOrderId() !== 0 ) {
+					unsubscribe();
 					updateCheckoutBlockData( getData() );
 				}
 			} );
