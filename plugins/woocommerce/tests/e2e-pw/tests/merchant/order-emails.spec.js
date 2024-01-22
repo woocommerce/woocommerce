@@ -61,7 +61,9 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			version: 'wc/v3',
 		} );
 
-		await api.post( `orders/batch`, { delete: [ orderId, newOrderId, cancelledOrderId ] } );
+		await api.post( `orders/batch`, {
+			delete: [ orderId, newOrderId, cancelledOrderId ],
+		} );
 	} );
 
 	test( 'can receive new order email', async ( { page, baseURL } ) => {
