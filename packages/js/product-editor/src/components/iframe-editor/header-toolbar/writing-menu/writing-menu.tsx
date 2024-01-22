@@ -3,7 +3,7 @@
  */
 import { useDispatch } from '@wordpress/data';
 import { MenuGroup } from '@wordpress/components';
-import { __, _x } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { useViewportMatch } from '@wordpress/compose';
 import { createElement } from '@wordpress/element';
 import {
