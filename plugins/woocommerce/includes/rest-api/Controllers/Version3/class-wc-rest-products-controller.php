@@ -1450,6 +1450,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 						),
 					),
 				),
+				'__meta_data_*' => array(
+					'description' => __( 'Meta data can be added to the product by providing properties with the "__meta_data_" prefix', 'woocommerce' ),
+					'type'        => 'mixed',
+					'context'     => array( 'view', 'edit' ),
+				),
 			),
 		);
 
