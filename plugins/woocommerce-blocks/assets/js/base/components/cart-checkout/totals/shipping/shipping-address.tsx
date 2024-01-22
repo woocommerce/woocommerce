@@ -54,10 +54,7 @@ export const ShippingAddress = ( {
 	}
 	const label = hasFormattedAddress
 		? __( 'Change address', 'woocommerce' )
-		: __(
-				'Change address to view shipping options for your location',
-				'woocommerce'
-		  );
+		: __( 'Calculate shipping for your location', 'woocommerce' );
 	const formattedLocation = formatShippingAddress( shippingAddress );
 	return (
 		<>
