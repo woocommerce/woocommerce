@@ -18,9 +18,5 @@ import './style.scss';
 registerBlockType( metadata.name, {
 	title: __( 'Product title with AI assistance', 'woocommerce' ),
 	name: 'woocommerce/product-title-ai-field',
-
-	/**
-	 * @see ./edit.js
-	 */
 	edit: Edit,
 } );

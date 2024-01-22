@@ -114,14 +114,13 @@ class Woo_AI {
 			return;
 		}
 
-		// @todo to extend the block from here
-		$parent = $product_name_field->get_parent();
+		$section_block = $product_name_field->get_parent();
 
-		if ( ! method_exists( $parent, 'add_block' ) ) {
+		if ( ! method_exists( $section_block, 'add_block' ) ) {
 			return;
 		}
 	
-		$parent->add_block(
+		$ai_title_block = $section_block->add_block(
 			[
 				'id'         => 'product-title-with-ai-assistance',
 				'order'      => $product_name_field->get_order() + 10,
@@ -135,10 +134,21 @@ class Woo_AI {
 			]
 		);
 
-		error_log( '$product_name_field: ' . print_r( $product_name_field, true ) );
-
 		// Remove the current product name field.
 		$product_name_field->remove();
+
+		// Add the product name into the new product title field.
+		$ai_title_block->add_block(
+			array(
+				'id'         => 'product-name-with-ai',
+				'blockName'  => 'woocommerce/product-name-field',
+				'order'      => 10,
+				'attributes' => array(
+					'name'      => 'Product name',
+					'autoFocus' => true,
+				),
+			)
+		);
 	}
 
 	/**
