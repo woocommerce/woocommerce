@@ -6,7 +6,13 @@ import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 import type { Page, Response } from '@playwright/test';
 import type { FrontendUtils } from '@woocommerce/e2e-utils';
 
-type TemplateUserCustomizationTest = {
+/**
+ * Internal dependencies
+ */
+import { SIMPLE_VIRTUAL_PRODUCT_NAME } from '../checkout/constants';
+import { CheckoutPage } from '../checkout/checkout.page';
+
+type TemplateCustomizationTest = {
 	visitPage: ( props: {
 		frontendUtils: FrontendUtils;
 		page: Page;
@@ -20,7 +26,7 @@ type TemplateUserCustomizationTest = {
 	};
 };
 
-const templateUserCustomizationTests: TemplateUserCustomizationTest[] = [
+const templateThemeCustomizationTests: TemplateCustomizationTest[] = [
 	{
 		visitPage: async ( { frontendUtils } ) =>
 			await frontendUtils.goToShop(),
@@ -90,11 +96,24 @@ const templateUserCustomizationTests: TemplateUserCustomizationTest[] = [
 		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//page-checkout`,
 		templateType: 'wp_template',
 	},
+	{
+		visitPage: async ( { frontendUtils, page } ) => {
+			const checkoutPage = new CheckoutPage( { page } );
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+			await checkoutPage.fillInCheckoutWithTestData();
+			await checkoutPage.placeOrder();
+		},
+		templateName: 'Order Confirmation',
+		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//order-confirmation`,
+		templateType: 'wp_template',
+	},
 ];
 const userText = 'Hello World in the template';
 const defaultTemplateUserText = 'Hello World in the default template';
 
-templateUserCustomizationTests.forEach( ( testData ) => {
+templateThemeCustomizationTests.forEach( ( testData ) => {
 	test.describe( `${ testData.templateName } template`, async () => {
 		test( "theme template has priority over WooCommerce's and can be modified", async ( {
 			admin,
