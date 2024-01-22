@@ -100,6 +100,8 @@ final class ProductFilter extends AbstractBlock {
 		}
 
 		if ( 'active-filters' === $filter_type ) {
+			// Duplicate query param logic from ProductFilterActive block, to determine if we should
+			// display the ProductFilter block or not.
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
 			$parsed_url  = wp_parse_url( esc_url_raw( $request_uri ) );
