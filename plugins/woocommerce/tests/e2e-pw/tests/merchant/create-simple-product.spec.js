@@ -96,7 +96,6 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		} );
 		await page.getByLabel( 'Product name' ).fill( virtualProductName );
 		await page.getByLabel( 'Regular price' ).fill( productPrice );
-		//await page.locator( '#_sale_price' ).fill( salePrice );
 		await page.getByText( 'Sale price ($)' ).fill( salePrice );
 		await page.getByText( 'Virtual' ).click();
 
@@ -112,7 +111,9 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 
 		// Fill in SKU
 		await page.getByText( 'Inventory' ).click();
-		await page.locator( '#_sku' ).fill( productSKU );
+		await page
+			.getByLabel( 'SKU', { exact: true } )
+			.fill( productSKU );
 
 		// Fill in purchase note
 		await page.getByText( 'Advanced' ).click();
@@ -137,7 +138,8 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.getByRole( 'button', { name: 'Save attributes' } ).click();
 
 		// Publish the product after a short wait
-		await page.locator( '#publish' ).click();
+		//await page.locator( '#publish' ).click();
+		await page.getByRole('button', { name: 'Publish', exact: true }).click();
 		await page.waitForLoadState( 'networkidle' );
 
 		// When running in parallel, clicking the publish button sometimes saves products as a draft
