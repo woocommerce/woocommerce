@@ -1,18 +1,8 @@
 <?php
 /**
- * Plugin Name: Additional Checkout Fields Test Helper
- * Description: A helper plugin to control Additional Checkout Fields within Woo e2e tests.
- * Version: 0.0.2
- * Author: Automattic
- * Author URI: https://automattic.com
- * Text Domain: additional-checkout-fields-test-helper
- * Requires at least: 5.9
- * Requires PHP: 7.3
- * WC requires at least: 6.0
- * WC tested up to: 6.1
- *
- * @package    WordPress
- * @subpackage Additional Checkout Fields Test Helper
+ * Plugin Name: Additional checkout fields plugin
+ * Description: Add additional checkout fields
+ * @package     WordPress
  */
 
 class Additional_Checkout_Fields_Test_Helper {
