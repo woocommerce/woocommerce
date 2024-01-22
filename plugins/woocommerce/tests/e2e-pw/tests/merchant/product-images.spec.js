@@ -1,6 +1,17 @@
 const { test: baseTest, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
+async function addImageFromLibrary( page, imageName, actionButtonName ) {
+	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
+	await page.getByRole( 'searchbox', { name: 'Search' } ).fill( imageName );
+	const imageLocator = page.getByLabel( imageName ).nth( 0 );
+	await imageLocator.click();
+	const dataId = await imageLocator.getAttribute( 'data-id' );
+	await expect( imageLocator ).toBeChecked();
+	await page.getByRole( 'button', { name: actionButtonName } ).click();
+	return dataId;
+}
+
 baseTest.describe( 'Products > Product Images', () => {
 	baseTest.use( { storageState: process.env.ADMINSTATE } );
 
@@ -84,16 +95,7 @@ baseTest.describe( 'Products > Product Images', () => {
 			await page
 				.getByRole( 'link', { name: 'Set product image' } )
 				.click();
-			await page.getByRole( 'tab', { name: 'Media Library' } ).click();
-			await page
-				.getByRole( 'searchbox', { name: 'Search' } )
-				.fill( 'image-01' );
-			const imageLocator = page.getByLabel( 'image-01' ).nth( 0 );
-			await imageLocator.click();
-			await expect( imageLocator ).toBeChecked();
-			await page
-				.getByRole( 'button', { name: 'Set product image' } )
-				.click();
+			await addImageFromLibrary( page, 'image-01', 'Set product image' );
 
 			// Wait for the product image thumbnail to be updated.
 			// Clicking the "Update" button before this happens will not update the image.
@@ -126,16 +128,7 @@ baseTest.describe( 'Products > Product Images', () => {
 
 		await test.step( 'Update product image', async () => {
 			await page.locator( '#set-post-thumbnail' ).click();
-
-			await page
-				.getByRole( 'searchbox', { name: 'Search' } )
-				.fill( 'image-02' );
-			const imageLocator = page.getByLabel( 'image-02' ).nth( 0 );
-			await imageLocator.click();
-			await expect( imageLocator ).toBeChecked();
-			await page
-				.getByRole( 'button', { name: 'Set product image' } )
-				.click();
+			await addImageFromLibrary( page, 'image-02', 'Set product image' );
 
 			// Wait for the product image thumbnail to be updated.
 			// Clicking the "Update" button before this happens will not update the image.
@@ -211,19 +204,11 @@ baseTest.describe( 'Products > Product Images', () => {
 				await page
 					.getByRole( 'link', { name: 'Add product gallery images' } )
 					.click();
-				await page
-					.getByRole( 'tab', { name: 'Media Library' } )
-					.click();
-				await page
-					.getByRole( 'searchbox', { name: 'Search' } )
-					.fill( image );
-				const imageLocator = page.getByLabel( image ).nth( 0 );
-				await imageLocator.click();
-				await expect( imageLocator, 'should be checked' ).toBeChecked();
-				const dataId = await imageLocator.getAttribute( 'data-id' );
-				await page
-					.getByRole( 'button', { name: 'Add to gallery' } )
-					.click();
+				const dataId = await addImageFromLibrary(
+					page,
+					image,
+					'Add to gallery'
+				);
 
 				await expect(
 					page.locator( `li[data-attachment_id="${ dataId }"]` ),
