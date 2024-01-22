@@ -476,27 +476,28 @@ class CheckoutFields {
 	/**
 	 * Validate an additional field against any custom validation rules. The result should be a WP_Error or true.
 	 *
-	 * @param string $key          The key of the field.
-	 * @param mixed  $field_value  The value of the field.
-	 * @param array  $field_schema The schema of the field.
+	 * @param string           $key          The key of the field.
+	 * @param mixed            $field_value  The value of the field.
+	 * @param array            $field_schema The schema of the field.
+	 * @param \WP_REST_Request $request      The current API Request.
 	 *
 	 * @since 8.6.0
 	 */
-	public function validate_field( $key, $field_value, $field_schema ) {
+	public function validate_field( $key, $field_value, $field_schema, $request ) {
 
 		$error = new \WP_Error();
 		try {
 			/**
 			 * Filter the result of validating an additional field.
 			 *
-			 * @param \WP_Error $error A WP_Error that extensions may add errors to.
-			 * @param mixed $field_value The value of the field.
-			 * @param array $field_schema The schema of the field.
-			 * @param string $key The key of the field.
+			 * @param \WP_Error        $error        A WP_Error that extensions may add errors to.
+			 * @param mixed            $field_value  The value of the field.
+			 * @param array            $field_schema The schema of the field.
+			 * @param \WP_REST_Request $request      The current API Request.
 			 *
 			 * @since 8.6.0
 			 */
-			$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, $error, $field_value, $field_schema, $key );
+			$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, $error, $field_value, $field_schema, $request );
 
 			if ( $error !== $filtered_result ) {
 
