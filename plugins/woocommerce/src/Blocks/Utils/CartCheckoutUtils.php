@@ -107,10 +107,10 @@ class CartCheckoutUtils {
 	}
 
 	/**
-     * Retrieves formatted shipping zones from WooCommerce.
-     *
-     * @return array An array of formatted shipping zones.
-     */
+	 * Retrieves formatted shipping zones from WooCommerce.
+	 *
+	 * @return array An array of formatted shipping zones.
+	 */
 	public static function get_shipping_zones() {
 		$shipping_zones             = \WC_Shipping_Zones::get_zones();
 		$formatted_shipping_zones   = array_reduce(
