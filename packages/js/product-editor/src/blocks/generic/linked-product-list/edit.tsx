@@ -122,6 +122,13 @@ export function LinkedProductListBlockEdit( {
 		);
 
 		setLinkedProductIds( newLinkedProductIds );
+
+		recordEvent( 'linked_products_product_add', {
+			source: TRACKS_SOURCE,
+			field: property,
+			product_id: productId,
+			linked_product_id: product.id,
+		} );
 	}
 
 	function handleProductListRemove( product: Product ) {
