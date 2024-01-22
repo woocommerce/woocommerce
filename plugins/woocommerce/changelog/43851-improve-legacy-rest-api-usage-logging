@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Improve the logging/noticing of Legacy REST API usages
