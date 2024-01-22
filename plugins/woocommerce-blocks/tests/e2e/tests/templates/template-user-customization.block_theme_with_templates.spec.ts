@@ -14,6 +14,10 @@ type TemplateUserCustomizationTest = {
 	templateName: string;
 	templatePath: string;
 	templateType: string;
+	defaultTemplate?: {
+		templateName: string;
+		templatePath: string;
+	};
 };
 
 const templateUserCustomizationTests: TemplateUserCustomizationTest[] = [
@@ -138,12 +142,13 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 		if ( testData.defaultTemplate ) {
 			test( `theme template has priority over user-modified ${ testData.defaultTemplate.templateName } template`, async ( {
 				admin,
+				frontendUtils,
 				editorUtils,
 				page,
 			} ) => {
 				// Edit default template and verify changes are not visible, as the theme template has priority.
 				await admin.visitSiteEditor( {
-					postId: testData.defaultTemplate.templatePath,
+					postId: testData.defaultTemplate?.templatePath || '',
 					postType: testData.templateType,
 				} );
 				await editorUtils.enterEditMode();
@@ -155,7 +160,7 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 					},
 				} );
 				await editorUtils.saveTemplate();
-				await page.goto( testData.permalink );
+				await testData.visitPage( { frontendUtils, page } );
 				await expect(
 					page.getByText( defaultTemplateUserText )
 				).toHaveCount( 0 );
@@ -166,7 +171,7 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 					`path=/${ testData.templateType }/all`
 				);
 				await editorUtils.revertTemplateCustomizations(
-					testData.defaultTemplate.templateName
+					testData.defaultTemplate?.templateName || ''
 				);
 			} );
 		}
