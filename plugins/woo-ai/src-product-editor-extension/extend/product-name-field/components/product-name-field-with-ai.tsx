@@ -5,19 +5,27 @@ import { createElement, Fragment } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { ToolbarButton } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { __experimentalUseCompletion as useCompletion } from '@woocommerce/ai';
 import debugFactory from 'debug';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { BlockControls } from '@wordpress/block-editor';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useEntityId } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
 import ai from '../../../icons/ai';
-import {
+import { WOO_AI_PLUGIN_FEATURE_NAME } from '../../../../src/constants';
+
+import type {
 	ProductTitleBlockEditProps,
 	ProductTitleBlockEditComponent,
 } from '../../../types';
+import { buildProductTitleSuggestionsPromp } from '../../../ai/build-prompt';
 
 const debug = debugFactory( 'woo-ai:product-editor:name-field' );
 
@@ -37,6 +45,24 @@ const productNameFieldWithAi =
 
 				debug( 'Extending product name field block' );
 
+				const productId = useEntityId( 'postType', 'product' );
+
+				const { requestCompletion } = useCompletion( {
+					feature: WOO_AI_PLUGIN_FEATURE_NAME,
+					onStreamError: ( error ) => {
+						// eslint-disable-next-line no-console
+						debug( 'Streaming error encountered', error );
+					},
+					onCompletionFinished: ( reason, content ) => {
+						try {
+							const parsed = JSON.parse( content );
+							debug( 'Parsed suggestions', parsed );
+						} catch ( e ) {
+							throw new Error( 'Unable to parse suggestions' );
+						}
+					},
+				} );
+
 				const blockControlProps = { group: 'other' };
 
 				return (
@@ -48,7 +74,14 @@ const productNameFieldWithAi =
 									'Get AI suggestions for product name',
 									'woocommerce'
 								) }
-								onClick={ console.log }
+								onClick={ async () => {
+									const prompt =
+										await buildProductTitleSuggestionsPromp(
+											productId
+										);
+
+									await requestCompletion( prompt );
+								} }
 							>
 								{ __( 'Get title suggestions', 'woocommerce' ) }
 							</ToolbarButton>
