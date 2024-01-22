@@ -23,7 +23,14 @@ const config = {
 	workers: CI ? 1 : 4,
 	reporter: [
 		[ 'list' ],
-		[ 'blob', { outputFolder: ALLURE_RESULTS_DIR ?? './tests/e2e-pw/test-results/allure-results' } ],
+		[
+			'blob',
+			{
+				outputFolder:
+					ALLURE_RESULTS_DIR ??
+					'./tests/e2e-pw/test-results/allure-results',
+			},
+		],
 		[
 			'html',
 			{
