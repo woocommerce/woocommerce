@@ -264,8 +264,14 @@
 			"command": "webpack",
 			"clean": "if-file-deleted",
 			"env": {
-				"NODE_ENV": "production",
-				"WC_ADMIN_PHASE": "core"
+				"NODE_ENV": {
+					"external": true,
+					"default": "production"
+				},
+				"WC_ADMIN_PHASE": {
+					"external": true,
+					"default": "core"
+				}
 			},
 			"files": [
 				"webpack.config.js",
