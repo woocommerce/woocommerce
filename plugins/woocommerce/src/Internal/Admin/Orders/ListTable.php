@@ -557,11 +557,11 @@ class ListTable extends WP_List_Table {
 		 * @param string[] $views An array of available list table views links.
 		 */
 		$view_links = apply_filters( 'woocommerce_' . $this->order_type . '_list_table_view_links', $view_links );
-		if ( ! empty($view_links) ) {
+		if ( ! empty( $view_links ) ) {
 			return $view_links;
 		}
 
-        $view_counts = array();
+		$view_counts = array();
 		$statuses    = $this->get_visible_statuses();
 		$current     = ! empty( $this->request['status'] ) ? sanitize_text_field( $this->request['status'] ) : 'all';
 		$all_count   = 0;
@@ -638,7 +638,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return boolean TRUE when the blank state should be rendered, FALSE otherwise.
 	 */
-    private function should_render_blank_state(): bool {
+	private function should_render_blank_state(): bool {
 		/**
 		 * Filters if we should render blank state, allowing for custom count queries to be used
 		 *
@@ -653,12 +653,12 @@ class ListTable extends WP_List_Table {
 			$this
 		);
 
-		if ( is_bool($should_render_blank_state) ) {
+		if ( is_bool( $should_render_blank_state ) ) {
 			return $should_render_blank_state;
 		}
 
-        return ( ! $this->has_filter ) && 0 === $this->count_orders_by_status( array_keys( $this->get_visible_statuses() ) );
- 	}
+		return ( ! $this->has_filter ) && 0 === $this->count_orders_by_status( array_keys( $this->get_visible_statuses() ) );
+	}
 
 	/**
 	 * Returns a list of slug and labels for order statuses that should be visible in the status list.
