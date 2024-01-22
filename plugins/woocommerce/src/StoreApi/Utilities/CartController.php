@@ -1030,7 +1030,7 @@ class CartController {
 				sprintf(
 					/* translators: %1$s coupon code, %2$s reason. */
 					__( 'The "%1$s" coupon has been removed from your cart: %2$s', 'woocommerce' ),
-					$valid->get_code(),
+					$coupon->get_code(),
 					wp_strip_all_tags( $valid->get_error_message() )
 				),
 				409
