@@ -24,6 +24,7 @@ const test = base.extend< { pageObject: CheckoutPage } >( {
 
 const templatePath = 'woocommerce/woocommerce//order-confirmation';
 const templateType = 'wp_template';
+const userText = 'Hello World in the template';
 
 test.describe( 'Test the order confirmation template', async () => {
 	test( 'Template can be opened in the site editor', async ( {
@@ -99,7 +100,7 @@ test.describe( 'Test the order confirmation template', async () => {
 		await editorUtils.enterEditMode();
 		await editorUtils.editor.insertBlock( {
 			name: 'core/paragraph',
-			attributes: { content: 'Hello World' },
+			attributes: { content: userText },
 		} );
 		await editorUtils.saveTemplate();
 		await frontendUtils.emptyCart();
@@ -115,6 +116,6 @@ test.describe( 'Test the order confirmation template', async () => {
 		await pageObject.fillInCheckoutWithTestData();
 		await pageObject.placeOrder();
 
-		await expect( page.getByText( 'Hello World' ).first() ).toBeVisible();
+		await expect( page.getByText( userText ).first() ).toBeVisible();
 	} );
 } );

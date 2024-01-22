@@ -17,6 +17,6 @@
 		"pnpm": "^8.12.1"
 	},
 	"devDependencies": {
-		"wireit": "0.14.1"
+		"wireit": "0.14.3"
 	}
 }

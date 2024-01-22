@@ -57,9 +57,28 @@ interface BaseJobConfig {
 /**
  * Parses and validates a raw change config entry.
  *
- * @param {string|string[]} raw The raw config to parse.
+ * @param {string|string[]} raw        The raw config to parse.
+ * @param {string[]}        extraGlobs Any extra globs that should be added to the configuration.
  */
-function parseChangesConfig( raw: unknown ): RegExp[] {
+function parseChangesConfig(
+	raw: unknown,
+	extraGlobs: string[] = []
+): RegExp[] {
+	const changes: RegExp[] = [];
+
+	// Make sure to include any extra glob patterns that were passed in.
+	// This allows us to make sure we're watching for changes in files
+	// that may implicitly be impactful but shouldn't need to be
+	// stated explicitly in the list of file changes.
+	for ( const entry of extraGlobs ) {
+		const regex = makeRe( entry );
+		if ( ! regex ) {
+			throw new Error( 'Invalid extra glob pattern.' );
+		}
+
+		changes.push( regex );
+	}
+
 	if ( typeof raw === 'string' ) {
 		const regex = makeRe( raw );
 		if ( ! regex ) {
@@ -68,7 +87,8 @@ function parseChangesConfig( raw: unknown ): RegExp[] {
 			);
 		}
 
-		return [ regex ];
+		changes.push( regex );
+		return changes;
 	}
 
 	if ( ! Array.isArray( raw ) ) {
@@ -77,7 +97,6 @@ function parseChangesConfig( raw: unknown ): RegExp[] {
 		);
 	}
 
-	const changes: RegExp[] = [];
 	for ( const entry of raw ) {
 		if ( typeof entry !== 'string' ) {
 			throw new ConfigError(
@@ -156,7 +175,7 @@ function parseLintJobConfig( raw: any ): LintJobConfig {
 
 	return {
 		type: JobType.Lint,
-		changes: parseChangesConfig( raw.changes ),
+		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
 		command: raw.command,
 	};
 }
@@ -306,7 +325,7 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 	const config: TestJobConfig = {
 		type: JobType.Test,
 		name: raw.name,
-		changes: parseChangesConfig( raw.changes ),
+		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
 		command: raw.command,
 	};
 

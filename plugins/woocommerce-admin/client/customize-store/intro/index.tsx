@@ -31,6 +31,7 @@ import {
 	ExistingAiThemeBanner,
 	ExistingThemeBanner,
 	NoAIBanner,
+	ExistingNoAiThemeBanner,
 } from './intro-banners';
 
 export type events =
@@ -54,6 +55,7 @@ const BANNER_COMPONENTS = {
 	'existing-ai-theme': ExistingAiThemeBanner,
 	'existing-theme': ExistingThemeBanner,
 	[ FlowType.noAI ]: NoAIBanner,
+	'existing-no-ai-theme': ExistingNoAiThemeBanner,
 	default: DefaultBanner,
 };
 
@@ -85,15 +87,20 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
+
 	switch ( true ) {
-		case context.flowType === FlowType.noAI:
-			bannerStatus = FlowType.noAI;
-			break;
 		case isNetworkOffline:
 			bannerStatus = 'network-offline';
 			break;
 		case isJetpackOffline as boolean:
 			bannerStatus = 'jetpack-offline';
+			break;
+		case context.flowType === FlowType.noAI &&
+			! customizeStoreTaskCompleted:
+			bannerStatus = FlowType.noAI;
+			break;
+		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
+			bannerStatus = 'existing-no-ai-theme';
 			break;
 		case ! customizeStoreTaskCompleted && activeThemeHasMods:
 			bannerStatus = 'task-incomplete-active-theme-has-mods';
@@ -124,6 +131,17 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const ModalComponent = MODAL_COMPONENTS[ modalStatus ];
 
 	const BannerComponent = BANNER_COMPONENTS[ bannerStatus ];
+
+	const sidebarMessage =
+		context.flowType === FlowType.AIOnline
+			? __(
+					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI',
+					'woocommerce'
+			  )
+			: __(
+					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using our store designer.',
+					'woocommerce'
+			  );
 
 	return (
 		<>
@@ -158,12 +176,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						</button>
 						{ __( 'Customize your store', 'woocommerce' ) }
 					</div>
-					<p>
-						{ __(
-							'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI.',
-							'woocommerce'
-						) }
-					</p>
+					<p>{ sidebarMessage }</p>
 				</div>
 
 				<div className="woocommerce-customize-store-main">

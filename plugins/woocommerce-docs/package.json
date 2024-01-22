@@ -5,7 +5,9 @@
 	"description": "WooCommerce Docs Plugin",
 	"main": "index.js",
 	"scripts": {
-		"build": "wp-scripts build",
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project:wp-scripts": "wireit",
 		"start": "wp-scripts start",
 		"postinstall": "composer install",
 		"test": "pnpm test:php",
@@ -41,6 +43,33 @@
 		"ts-loader": "^9.5.1",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.3.3",
-		"wireit": "0.14.1"
+		"wireit": "0.14.3"
+	},
+	"wireit": {
+		"build:project:wp-scripts": {
+			"command": "wp-scripts build",
+			"clean": "if-file-deleted",
+			"files": [
+				"webpack.config.js",
+				"tsconfig.json",
+				"client"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/src/",
+				"package.json"
+			]
+		}
 	}
 }

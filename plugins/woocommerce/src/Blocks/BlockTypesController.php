@@ -240,6 +240,11 @@ final class BlockTypesController {
 			'ProductCategory',
 			'ProductCollection',
 			'ProductCollectionNoResults',
+			'ProductGallery',
+			'ProductGalleryLargeImage',
+			'ProductGalleryLargeImageNextPrevious',
+			'ProductGalleryPager',
+			'ProductGalleryThumbnails',
 			'ProductImage',
 			'ProductImageGallery',
 			'ProductNew',
@@ -281,6 +286,8 @@ final class BlockTypesController {
 			'OrderConfirmation\BillingWrapper',
 			'OrderConfirmation\ShippingWrapper',
 			'OrderConfirmation\AdditionalInformation',
+			'OrderConfirmation\AdditionalFieldsWrapper',
+			'OrderConfirmation\AdditionalFields',
 		);
 
 		$block_types = array_merge(
@@ -291,11 +298,6 @@ final class BlockTypesController {
 		);
 
 		if ( Package::feature()->is_experimental_build() ) {
-			$block_types[] = 'ProductGallery';
-			$block_types[] = 'ProductGalleryLargeImage';
-			$block_types[] = 'ProductGalleryLargeImageNextPrevious';
-			$block_types[] = 'ProductGalleryPager';
-			$block_types[] = 'ProductGalleryThumbnails';
 			$block_types[] = 'ProductFilters';
 			$block_types[] = 'ProductFiltersStockStatus';
 			$block_types[] = 'ProductFiltersPrice';
@@ -342,6 +344,8 @@ final class BlockTypesController {
 					'OrderConfirmation\BillingWrapper',
 					'OrderConfirmation\ShippingWrapper',
 					'OrderConfirmation\AdditionalInformation',
+					'OrderConfirmation\AdditionalFieldsWrapper',
+					'OrderConfirmation\AdditionalFields',
 				)
 			);
 		}

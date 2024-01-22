@@ -57,4 +57,46 @@ baz/project-d/baz.js`;
 			} );
 		} );
 	} );
+
+	it( 'should see pnpm-lock.yaml file changes as universal changes', () => {
+		jest.mocked( execSync ).mockImplementation( ( command ) => {
+			if ( command === 'git diff --name-only origin/trunk' ) {
+				return `test/project-a/package.json
+foo/project-b/foo.js
+pnpm-lock.yaml
+bar/project-c/bar.js
+baz/project-d/baz.js`;
+			}
+
+			throw new Error( 'Invalid command' );
+		} );
+
+		const fileChanges = getFileChanges(
+			{
+				name: 'project-a',
+				path: 'test/project-a',
+				dependencies: [
+					{
+						name: 'project-b',
+						path: 'foo/project-b',
+						dependencies: [
+							{
+								name: 'project-c',
+								path: 'bar/project-c',
+								dependencies: [],
+							},
+						],
+					},
+					{
+						name: 'project-c',
+						path: 'bar/project-c',
+						dependencies: [],
+					},
+				],
+			},
+			'origin/trunk'
+		);
+
+		expect( fileChanges ).toStrictEqual( true );
+	} );
 } );

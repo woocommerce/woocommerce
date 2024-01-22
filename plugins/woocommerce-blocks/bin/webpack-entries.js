@@ -53,25 +53,19 @@ const blocks = {
 	'product-collection-no-results': {
 		customDir: 'product-collection/inner-blocks/no-results',
 	},
-	'product-gallery': {
-		isExperimental: true,
-	},
+	'product-gallery': {},
 	'product-gallery-large-image': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-large-image',
-		isExperimental: true,
 	},
 	'product-gallery-large-image-next-previous': {
 		customDir:
 			'product-gallery/inner-blocks/product-gallery-large-image-next-previous',
-		isExperimental: true,
 	},
 	'product-gallery-pager': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-pager',
-		isExperimental: true,
 	},
 	'product-gallery-thumbnails': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-thumbnails',
-		isExperimental: true,
 	},
 	'product-new': {},
 	'product-on-sale': {},
@@ -149,6 +143,12 @@ const blocks = {
 	},
 	'order-confirmation-additional-information': {
 		customDir: 'order-confirmation/additional-information',
+	},
+	'order-confirmation-additional-fields-wrapper': {
+		customDir: 'order-confirmation/additional-fields-wrapper',
+	},
+	'order-confirmation-additional-fields': {
+		customDir: 'order-confirmation/additional-fields',
 	},
 };
 

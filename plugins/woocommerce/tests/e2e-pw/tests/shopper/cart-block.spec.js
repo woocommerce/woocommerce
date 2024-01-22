@@ -15,8 +15,10 @@ const singleProductWithCrossSellProducts =
 	+firstCrossSellProductPrice +
 	+secondCrossSellProductPrice;
 
-const pageTitle = 'Cart Block';
-const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
+const cartBlockPageTitle = 'Cart Block';
+const cartBlockPageSlug = cartBlockPageTitle
+	.replace( / /gi, '-' )
+	.toLowerCase();
 
 let product1Id, product2Id, product3Id;
 
@@ -96,7 +98,7 @@ test.describe( 'Cart Block page', () => {
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( pageTitle );
+			.fill( cartBlockPageTitle );
 		await page.getByRole( 'button', { name: 'Add default block' } ).click();
 		await page
 			.getByRole( 'document', {
@@ -112,13 +114,13 @@ test.describe( 'Cart Block page', () => {
 			.getByRole( 'button', { name: 'Publish', exact: true } )
 			.click();
 		await expect(
-			page.getByText( `${ pageTitle } is now live.` )
+			page.getByText( `${ cartBlockPageTitle } is now live.` )
 		).toBeVisible();
 
 		// go to the page to test empty cart block
-		await page.goto( pageSlug );
+		await page.goto( cartBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: cartBlockPageTitle } )
 		).toBeVisible();
 		await expect(
 			page.getByText( 'Your cart is currently empty!' )
@@ -138,9 +140,9 @@ test.describe( 'Cart Block page', () => {
 		// add product to cart block
 		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
 		await page.waitForLoadState( 'networkidle' );
-		await page.goto( pageSlug );
+		await page.goto( cartBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: cartBlockPageTitle } )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'link', { name: simpleProductName, exact: true } )
@@ -188,9 +190,9 @@ test.describe( 'Cart Block page', () => {
 			} )
 			.click();
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
-		await page.goto( pageSlug );
+		await page.goto( cartBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: cartBlockPageTitle } )
 		).toBeVisible();
 		await page.locator( '.add_to_cart_button' ).click();
 		await expect(

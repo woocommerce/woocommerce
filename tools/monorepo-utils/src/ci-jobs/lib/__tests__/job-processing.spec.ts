@@ -8,7 +8,7 @@ import { parseTestEnvConfig } from '../test-environment';
 jest.mock( '../test-environment' );
 
 describe( 'Job Processing', () => {
-	describe( 'getFileChanges', () => {
+	describe( 'createJobsForChanges', () => {
 		it( 'should do nothing with no CI configs', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -683,6 +683,49 @@ describe( 'Job Processing', () => {
 					envVars: {
 						WP_ENV_CORE: 'https://wordpress.org/latest.zip',
 					},
+				},
+			} );
+		} );
+
+		it( 'should trigger all jobs for a single node with changes set to "true"', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint',
+							},
+							{
+								type: JobType.Test,
+								name: 'Default',
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				true,
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 1 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test',
+				command: 'test-lint',
+			} );
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
 				},
 			} );
 		} );

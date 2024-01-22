@@ -1,5 +1,7 @@
 ---
-post_title: Fixing outdated WooCommerce templates
+post_title: How to fix outdated WooCommerce templates
+menu_title: Fix outdated templates
+tags: how-to
 ---
 
 ## Template Updates and Changes
@@ -17,14 +19,12 @@ Most theme authors fix themes in a timely manner, so you only need to update you
 
 Alternatively, you can select and use a different theme that already uses current WooCommerce templates.
 
-**Note**: We are unable to provide support for customizations under our Support Policy. If you need to further customize a snippet or extend its functionality, we highly recommend considering one of our Certified [WooExperts](https://woo.com/experts/) or [Codeable](https://codeable.io/).
-
 ## How to Update Outdated Templates
 
 You need to determine what templates to update, make a backup of the old templates, and then restore any customizations.
 
 1. Go to WooCommerce > Status > System Status. Scroll to the end of the page where there is a list of templates overridden by your theme/child theme and a warning message that they need to be updated. In the example below, the templates `form-pay.php` and `form-login.php` are outdated:
- ![An example for outdated templates.](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/fix_outdated_theme_templates.png)
+ ![An example for outdated templates.](https://developer.woo.com/wp-content/uploads/sites/2/2024/01/fix_outdated_theme_templates.png)
 2. Save a backup of the outdated template.
 3. Copy the default template from `wp-content/plugins/woocommerce/templates/[path-to-the-template]` and paste it in your theme folder found at `wp-content/themes/[path-to-theme]`.
 4. Open the template you pasted into the theme folder with a text editor, such as Sublime, Visual Code, BBEdit, Notepad++, and replicate any changes that you had to the previous template in your new, updated template file.

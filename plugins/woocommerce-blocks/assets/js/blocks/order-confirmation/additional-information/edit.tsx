@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useBlockProps } from '@wordpress/block-editor';
-import { Skeleton } from '@woocommerce/base-components/skeleton';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -16,8 +16,9 @@ const Edit = (): JSX.Element => {
 
 	return (
 		<div { ...blockProps }>
-			<Skeleton tag="h3" numberOfLines={ 1 } maxWidth="25%" />
-			<Skeleton numberOfLines={ 3 } />
+			<div className="wc-block-order-confirmation-additional-information-placeholder">
+				{ __( 'Additional Information for your order', 'woocommerce' ) }
+			</div>
 		</div>
 	);
 };

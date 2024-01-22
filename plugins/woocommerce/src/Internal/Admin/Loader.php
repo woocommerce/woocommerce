@@ -8,7 +8,6 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplatesController;
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews;
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides;
 use Automattic\WooCommerce\Internal\Admin\Settings;
@@ -73,7 +72,6 @@ class Loader {
 
 		wc_get_container()->get( Reviews::class );
 		wc_get_container()->get( ReviewsCommentsOverrides::class );
-		wc_get_container()->get( BlockTemplatesController::class );
 
 		add_filter( 'admin_body_class', array( __CLASS__, 'add_admin_body_classes' ) );
 		add_filter( 'admin_title', array( __CLASS__, 'update_admin_title' ) );
