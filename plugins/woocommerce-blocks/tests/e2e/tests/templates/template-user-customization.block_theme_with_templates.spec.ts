@@ -22,18 +22,30 @@ const templateUserCustomizationTests = [
 		templateName: 'Products by Attribute',
 		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_attribute`,
 		templateType: 'wp_template',
+		defaultTemplate: {
+			templateName: 'Product Catalog',
+			templatePath: 'woocommerce/woocommerce//archive-product',
+		},
 	},
 	{
 		permalink: '/product-category/clothing',
 		templateName: 'Products by Category',
 		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_cat`,
 		templateType: 'wp_template',
+		defaultTemplate: {
+			templateName: 'Product Catalog',
+			templatePath: 'woocommerce/woocommerce//archive-product',
+		},
 	},
 	{
 		permalink: '/product-tag/recommended/',
 		templateName: 'Products by Tag',
 		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_tag`,
 		templateType: 'wp_template',
+		defaultTemplate: {
+			templateName: 'Product Catalog',
+			templatePath: 'woocommerce/woocommerce//archive-product',
+		},
 	},
 	{
 		permalink: '/product/hoodie',
@@ -43,6 +55,7 @@ const templateUserCustomizationTests = [
 	},
 ];
 const userText = 'Hello World in the template';
+const defaultTemplateUserText = 'Hello World in the default template';
 
 templateUserCustomizationTests.forEach( ( testData ) => {
 	test.describe( `${ testData.templateName } template`, async () => {
@@ -87,5 +100,41 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 			).toBeVisible();
 			await expect( page.getByText( userText ) ).toHaveCount( 0 );
 		} );
+
+		if ( testData.defaultTemplate ) {
+			test( `theme template has priority over user-modified ${ testData.defaultTemplate.templateName } template`, async ( {
+				admin,
+				editorUtils,
+				page,
+			} ) => {
+				// Edit default template and verify changes are not visible, as the theme template has priority.
+				await admin.visitSiteEditor( {
+					postId: testData.defaultTemplate.templatePath,
+					postType: testData.templateType,
+				} );
+				await editorUtils.enterEditMode();
+				await editorUtils.closeWelcomeGuideModal();
+				await editorUtils.editor.insertBlock( {
+					name: 'core/paragraph',
+					attributes: {
+						content: defaultTemplateUserText,
+					},
+				} );
+				await editorUtils.saveTemplate();
+				await page.goto( testData.permalink );
+				await expect(
+					page.getByText( defaultTemplateUserText )
+				).toHaveCount( 0 );
+
+				// Revert the edit.
+				await admin.visitAdminPage(
+					'site-editor.php',
+					`path=/${ testData.templateType }/all`
+				);
+				await editorUtils.revertTemplateCustomizations(
+					testData.defaultTemplate.templateName
+				);
+			} );
+		}
 	} );
 } );
