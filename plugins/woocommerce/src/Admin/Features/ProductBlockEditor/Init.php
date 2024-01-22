@@ -240,14 +240,19 @@ class Init {
 		$templates   = array();
 		$templates[] = new ProductTemplate(
 			array(
-				'id'                 => 'standard-product-template',
-				'title'              => __( 'Standard product', 'woocommerce' ),
-				'description'        => __( 'A single physical or virtual product, e.g. a t-shirt or an eBook.', 'woocommerce' ),
-				'order'              => 10,
-				'icon'               => 'shipping',
-				'layout_template_id' => 'simple-product',
-				'product_data'       => array(
+				'id'                      => 'standard-product-template',
+				'title'                   => __( 'Standard product', 'woocommerce' ),
+				'description'             => __( 'A single physical or virtual product, e.g. a t-shirt or an eBook.', 'woocommerce' ),
+				'order'                   => 10,
+				'icon'                    => 'shipping',
+				'layout_template_id'      => 'simple-product',
+				'product_data'            => array(
 					'type' => 'simple',
+				),
+				'alternate_product_datas' => array(
+					array(
+						'type' => 'variable',
+					),
 				),
 			)
 		);
