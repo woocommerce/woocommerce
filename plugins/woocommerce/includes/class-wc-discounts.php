@@ -940,6 +940,51 @@ class WC_Discounts {
 	}
 
 	/**
+	 * Ensure coupon is valid for allowed emails or throw exception.
+	 *
+	 * @param WC_Coupon $coupon Coupon data.
+	 *
+	 * @return bool
+	 * @throws Exception
+	 * @since  8.6.0
+	 */
+	protected function validate_coupon_allowed_emails( $coupon ) {
+
+		$restrictions = $coupon->get_email_restrictions();
+
+		if ( ! is_array( $restrictions ) || empty( $restrictions ) ) {
+			return true;
+		}
+
+		$user = wp_get_current_user();
+		$check_emails = array( $user->get_billing_email(), $user->get_email()  );
+
+		if ( $this->object instanceof WC_Cart ) {
+			$check_emails[] = $this->object->get_customer()->get_billing_email();
+		} elseif ( $this->object instanceof WC_Order ) {
+			$check_emails[] = $this->object->get_billing_email();
+		}
+
+		$check_emails  = array_unique(
+			array_filter(
+				array_map(
+					'strtolower',
+					array_map(
+						'sanitize_email',
+						$check_emails
+					)
+				)
+			)
+		);
+
+		if( WC()->cart->is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
+			return true;
+		}
+
+		throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ) );
+	}
+
+	/**
 	 * Get the object subtotal
 	 *
 	 * @return int
@@ -998,6 +1043,7 @@ class WC_Discounts {
 			$this->validate_coupon_product_categories( $coupon );
 			$this->validate_coupon_excluded_items( $coupon );
 			$this->validate_coupon_eligible_items( $coupon );
+			$this->validate_coupon_allowed_emails( $coupon );
 
 			if ( ! apply_filters( 'woocommerce_coupon_is_valid', true, $coupon, $this ) ) {
 				throw new Exception( __( 'Coupon is not valid.', 'woocommerce' ), 100 );
