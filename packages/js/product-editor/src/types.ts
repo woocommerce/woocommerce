@@ -12,6 +12,7 @@ export type ProductTemplate = {
 	order: number;
 	layoutTemplateId: string;
 	productData: Partial< Product >;
+	alternateProductDatas?: Partial< Product >[];
 };
 
 export interface ProductEditorContext {

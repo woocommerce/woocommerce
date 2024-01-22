@@ -16,6 +16,25 @@ declare global {
 	}
 }
 
+function isProductTypeSupported(
+	productTemplate: ProductTemplate,
+	productType: ProductType | undefined
+) {
+	if ( productTemplate.productData.type === productType ) {
+		return true;
+	}
+
+	const alternateProductDatas = productTemplate.alternateProductDatas;
+	if ( alternateProductDatas ) {
+		return alternateProductDatas.some(
+			( alternateProductData ) =>
+				alternateProductData.type === productType
+		);
+	}
+
+	return false;
+}
+
 export const useProductTemplate = (
 	productTemplateId: string | undefined,
 	productType: ProductType | undefined
@@ -23,25 +42,16 @@ export const useProductTemplate = (
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
-	const productTemplateIdToFind =
-		productType === 'variable'
-			? 'standard-product-template'
-			: productTemplateId;
-
-	const productTypeToFind =
-		productType === 'variable' ? 'simple' : productType;
-
 	let matchingProductTemplate = productTemplates.find(
 		( productTemplate ) =>
-			productTemplate.id === productTemplateIdToFind &&
-			productTemplate.productData.type === productTypeToFind
+			productTemplate.id === productTemplateId &&
+			isProductTypeSupported( productTemplate, productType )
 	);
 
 	if ( ! matchingProductTemplate ) {
 		// Fallback to the first template with the same product type.
-		matchingProductTemplate = productTemplates.find(
-			( productTemplate ) =>
-				productTemplate.productData.type === productTypeToFind
+		matchingProductTemplate = productTemplates.find( ( productTemplate ) =>
+			isProductTypeSupported( productTemplate, productType )
 		);
 	}
 
