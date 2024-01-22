@@ -3,7 +3,7 @@
  */
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { ToolbarButton } from '@wordpress/components';
+import { Button, DropdownMenu } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { __experimentalUseCompletion as useCompletion } from '@woocommerce/ai';
 import debugFactory from 'debug';
@@ -15,6 +15,7 @@ import { BlockControls } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityId } from '@wordpress/core-data';
+
 /**
  * Internal dependencies
  */
@@ -26,8 +27,40 @@ import type {
 	ProductTitleBlockEditComponent,
 } from '../../../types';
 import { buildProductTitleSuggestionsPromp } from '../../../ai/build-prompt';
+import parseStringsArray from '../../../ai/parse/strings-array';
 
 const debug = debugFactory( 'woo-ai:product-editor:name-field' );
+
+function TitleSuggestions( {
+	titles,
+	isRequesting,
+	onSelect,
+	onRequest,
+}: {
+	titles: string[];
+	isRequesting: boolean;
+	onSelect: ( title: string ) => void;
+	onRequest?: () => void;
+} ): React.ReactElement {
+	return (
+		<>
+			<Button onClick={ onRequest } disabled={ isRequesting }>
+				{ __( 'Get suggestions', 'woocommerce' ) }
+			</Button>
+			<>
+				{ titles.map( ( title ) => (
+					<Button
+						key={ title }
+						onClick={ () => onSelect( title ) }
+						variant="secondary"
+					>
+						{ title }
+					</Button>
+				) ) }
+			</>
+		</>
+	);
+}
 
 const productNameFieldWithAi =
 	createHigherOrderComponent< ProductTitleBlockEditComponent >(
@@ -46,6 +79,9 @@ const productNameFieldWithAi =
 				debug( 'Extending product name field block' );
 
 				const [ isRequesting, setIsRequesting ] = useState( false );
+				const [ titleSuggestions, setTitleSuggestions ] = useState<
+					string[]
+				>( [] );
 
 				const productId = useEntityId( 'postType', 'product' );
 
@@ -54,17 +90,24 @@ const productNameFieldWithAi =
 					onStreamMessage: ( message ) => {
 						debug( 'Message received', message );
 						setIsRequesting( true );
+						try {
+							const suggestions = parseStringsArray( message );
+							setTitleSuggestions( suggestions );
+						} catch ( e ) {
+							throw new Error( 'Unable to parse suggestions' );
+						}
 					},
 					onStreamError: ( error ) => {
 						// eslint-disable-next-line no-console
 						setIsRequesting( false );
 						debug( 'Streaming error encountered', error );
 					},
-					onCompletionFinished: ( reason, content ) => {
+					onCompletionFinished: ( reason, message ) => {
 						try {
-							const parsed = JSON.parse( content );
+							const suggestions = parseStringsArray( message );
+							setTitleSuggestions( suggestions );
 							setIsRequesting( false );
-							debug( 'Parsed suggestions', parsed );
+							// console.log( { titleSuggestions } );
 						} catch ( e ) {
 							setIsRequesting( false );
 							throw new Error( 'Unable to parse suggestions' );
@@ -77,25 +120,49 @@ const productNameFieldWithAi =
 				return (
 					<>
 						<BlockControls { ...blockControlProps }>
-							<ToolbarButton
+							<DropdownMenu
+								className="ai-assistant__title-suggestions-dropdown"
 								icon={ ai }
-								disabled={ isRequesting }
 								label={ __(
-									'Get AI suggestions for product name',
+									'Get title suggestions',
 									'woocommerce'
 								) }
-								onClick={ async () => {
-									setIsRequesting( true );
-									const prompt =
-										await buildProductTitleSuggestionsPromp(
-											productId
-										);
-
-									await requestCompletion( prompt );
+								toggleProps={ {
+									children: (
+										<>
+											<div className="ai-assistant__i18n-dropdown__toggle-label">
+												{ __(
+													'Get suggestions',
+													'woocommerce'
+												) }
+											</div>
+										</>
+									),
+									disabled: false,
+									onClick: async () => {
+										const prompt =
+											await buildProductTitleSuggestionsPromp(
+												productId
+											);
+										requestCompletion( prompt );
+									},
 								} }
 							>
-								{ __( 'Get title suggestions', 'woocommerce' ) }
-							</ToolbarButton>
+								{ ( { onClose } ) => (
+									<TitleSuggestions
+										titles={ titleSuggestions }
+										onSelect={ onClose }
+										isRequesting={ isRequesting }
+										onRequest={ async () => {
+											const prompt =
+												await buildProductTitleSuggestionsPromp(
+													productId
+												);
+											requestCompletion( prompt );
+										} }
+									/>
+								) }
+							</DropdownMenu>
 						</BlockControls>
 
 						<BlockEdit { ...props } />

@@ -37,3 +37,7 @@ export default function ai( {
 		</SVG>
 	);
 }
+
+export function AiIcon(): React.ReactElement {
+	return createElement( ai );
+}
