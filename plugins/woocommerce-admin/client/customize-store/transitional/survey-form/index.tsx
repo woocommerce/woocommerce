@@ -60,9 +60,11 @@ const StarRating = ( {
 };
 
 export const SurveyForm = ( {
+	isWooExpress,
 	onSend,
 	closeFunction,
 }: {
+	isWooExpress: boolean;
 	onSend: () => void;
 	closeFunction: CloseSurveyFunction;
 } ): JSX.Element => {
@@ -76,7 +78,10 @@ export const SurveyForm = ( {
 	const [ rating, setRating ] = useState( 0 );
 
 	const sendData = () => {
-		recordEvent( 'customize_your_store_transitional_survey_complete', {
+		const surveyCompleteEvent = isWooExpress
+			? 'customize_your_store_transitional_survey_complete'
+			: 'customize_your_store_on_core_transitional_survey_complete';
+		recordEvent( surveyCompleteEvent, {
 			rating,
 			choose_streamline: isStreamlineChecked,
 			choose_dislike_themes: isDislikeThemesChecked,
@@ -119,16 +124,28 @@ export const SurveyForm = ( {
 				<hr />
 
 				<h4>
-					{ __(
-						'What motivated you to choose the “Design with AI” option?',
-						'woocommerce'
-					) }
+					{ isWooExpress
+						? __(
+								'What motivated you to choose the “Design with AI” option?',
+								'woocommerce'
+						  )
+						: __(
+								'What motivated you to choose the "Design your own theme" option?',
+								'woocommerce'
+						  ) }
 				</h4>
 				<CheckboxControl
-					label={ __(
-						'I wanted to see how AI could help me streamline the process.',
-						'woocommerce'
-					) }
+					label={
+						isWooExpress
+							? __(
+									'I wanted to see how AI could help me streamline the process.',
+									'woocommerce'
+							  )
+							: __(
+									'I wanted to design my own theme.',
+									'woocommerce'
+							  )
+					}
 					checked={ isStreamlineChecked }
 					onChange={ setStreamlineChecked }
 				/>
@@ -168,10 +185,15 @@ export const SurveyForm = ( {
 				/>
 
 				<h4>
-					{ __(
-						'Feel free to spill the beans here. All suggestions, feedback, or comments about the AI-generated store experience are welcome.',
-						'woocommerce'
-					) }
+					{ isWooExpress
+						? __(
+								'Feel free to spill the beans here. All suggestions, feedback, or comments about the AI-generated store experience are welcome.',
+								'woocommerce'
+						  )
+						: __(
+								'Feel free to spill the beans here. All suggestions, feedback, or comments about the "Design your own theme" experience are welcome.',
+								'woocommerce'
+						  ) }
 				</h4>
 				<TextareaControl
 					value={ spillBeansText }

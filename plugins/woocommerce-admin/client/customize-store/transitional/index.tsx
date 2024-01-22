@@ -37,6 +37,7 @@ export const Transitional = ( {
 	editor,
 	sendEvent,
 	hasCompleteSurvey,
+	isWooExpress,
 	isSurveyOpen,
 	setSurveyOpen,
 	aiOnline,
@@ -44,6 +45,7 @@ export const Transitional = ( {
 	editor: React.ReactNode;
 	sendEvent: ( event: events ) => void;
 	hasCompleteSurvey: boolean;
+	isWooExpress: boolean;
 	isSurveyOpen: boolean;
 	setSurveyOpen: ( isOpen: boolean ) => void;
 	aiOnline: boolean;
@@ -53,6 +55,9 @@ export const Transitional = ( {
 	const closeSurvey = () => {
 		setSurveyOpen( false );
 	};
+
+	const showSurveyButton =
+		( ! hasCompleteSurvey && aiOnline ) || ! isWooExpress;
 
 	return (
 		<div className="woocommerce-customize-store__transitional">
@@ -64,6 +69,7 @@ export const Transitional = ( {
 					className="woocommerce-ai-survey-modal"
 				>
 					<SurveyForm
+						isWooExpress={ isWooExpress }
 						onSend={ () => {
 							sendEvent( {
 								type: 'COMPLETE_SURVEY',
@@ -88,22 +94,29 @@ export const Transitional = ( {
 					{ __( 'Your store looks great!', 'woocommerce' ) }
 				</h1>
 				<h2 className="woocommerce-customize-store__transitional-subheading">
-					{ __(
-						"You're one step closer to launching your online business — we can't wait to see it come to life.",
-						'woocommerce'
-					) }
+					{ isWooExpress
+						? __(
+								"You're one step closer to launching your online business — we can't wait to see it come to life.",
+								'woocommerce'
+						  )
+						: __(
+								'Your store is a reflection of your unique style and personality, and we are thrilled to see it come to life.',
+								'woocommerce'
+						  ) }
 				</h2>
 
 				<div className="woocommerce-customize-store__transitional-main-actions">
 					<WooCYSSecondaryButtonSlot />
 
-					{ ! hasCompleteSurvey && aiOnline && (
+					{ showSurveyButton && (
 						<Button
 							className="woocommerce-customize-store__transitional-preview-button"
 							variant="secondary"
 							onClick={ () => {
 								recordEvent(
-									'customize_your_store_transitional_survey_click'
+									isWooExpress
+										? 'customize_your_store_transitional_survey_click'
+										: 'customize_your_store_on_core_transitional_survey_click'
 								);
 								setSurveyOpen( true );
 							} }
