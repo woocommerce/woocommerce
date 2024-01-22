@@ -1,0 +1,7 @@
+module.exports = {
+	extends: [ 'plugin:playwright/recommended' ],
+	rules: {
+		'playwright/no-skipped-test': 'off',
+		'no-console': 'off',
+	},
+};
