@@ -649,7 +649,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 70, count( $properties ) );
+		$this->assertEquals( 71, count( $properties ) );
 	}
 
 	/**
