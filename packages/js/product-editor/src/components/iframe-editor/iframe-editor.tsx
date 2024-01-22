@@ -120,7 +120,7 @@ export function IframeEditor( {
 	const settings = __settings || parentEditorSettings;
 
 	const inlineFixedBlockToolbar =
-		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.4;
+		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.3;
 
 	return (
 		<div className="woocommerce-iframe-editor">

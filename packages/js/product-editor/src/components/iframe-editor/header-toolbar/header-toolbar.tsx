@@ -117,7 +117,7 @@ export function HeaderToolbar( {
 	}, [ hasBlockSelection ] );
 
 	const renderBlockToolbar =
-		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.4;
+		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.3;
 
 	return (
 		<NavigableToolbar
