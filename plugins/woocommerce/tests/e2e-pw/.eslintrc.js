@@ -3,5 +3,6 @@ module.exports = {
 	rules: {
 		'playwright/no-skipped-test': 'off',
 		'no-console': 'off',
+		'jest/no-test-callback': 'off',
 	},
 };
