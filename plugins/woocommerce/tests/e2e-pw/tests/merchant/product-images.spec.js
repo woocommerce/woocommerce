@@ -99,8 +99,9 @@ baseTest.describe( 'Products > Product Images', () => {
 
 			// Wait for the product image thumbnail to be updated.
 			// Clicking the "Update" button before this happens will not update the image.
+			// Use src* (contains) instead of src$ (ends with) to match duplicated images, like image-01-1.png
 			await expect(
-				page.locator( '#set-post-thumbnail img[src$="image-01.jpeg"]' )
+				page.locator( '#set-post-thumbnail img[src*="image-01"]' )
 			).toBeVisible();
 
 			await page.getByRole( 'button', { name: 'Update' } ).click();
@@ -132,8 +133,9 @@ baseTest.describe( 'Products > Product Images', () => {
 
 			// Wait for the product image thumbnail to be updated.
 			// Clicking the "Update" button before this happens will not update the image.
+			// Use src* (contains) instead of src$ (ends with) to match duplicated images, like image-01-1.png
 			await expect(
-				page.locator( '#set-post-thumbnail img[src$="image-02.png"]' )
+				page.locator( '#set-post-thumbnail img[src*="image-02"]' )
 			).toBeVisible();
 
 			await page.getByRole( 'button', { name: 'Update' } ).click();
