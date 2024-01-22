@@ -1531,7 +1531,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 *
 	 * @return array
 	 */
-	function get_suggested_products_collection_params() {
+	public function get_suggested_products_collection_params() {
 		$params = parent::get_collection_params();
 
 		$params['categories'] = array(
@@ -1635,12 +1635,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$exclude_ids = $request->get_param( 'exclude' );
 		$limit       = $request->get_param( 'limit' ) ? $request->get_param( 'limit' ) : 5;
 
-		$data_store                  = WC_Data_Store::load( 'product' );
+		$data_store = WC_Data_Store::load( 'product' );
 		$this->suggested_products_ids = $data_store->get_related_products(
 			$categories,
 			$tags,
 			$exclude_ids,
-			$limit - 10, // @todo: WP_Data_Store get_related_products() adds 10 to the limit.
+			$limit,
 			null // No need to pass the product ID.
 		);
 
@@ -1648,6 +1648,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		if ( empty( $this->suggested_products_ids ) ) {
 			return array();
 		}
+
+		// Ensure to respect the limit, since the data store may return more than the limit.
+		$this->suggested_products_ids = array_slice( $this->suggested_products_ids, 0, $limit );
 
 		return parent::get_items( $request );
 	}
