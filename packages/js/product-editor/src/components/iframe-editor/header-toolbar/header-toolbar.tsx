@@ -14,23 +14,28 @@ import {
 	Fragment,
 	useEffect,
 } from '@wordpress/element';
+import { isWpVersion } from '@woocommerce/settings';
+import classnames from 'classnames';
 import { MouseEvent } from 'react';
+import {
+	Button,
+	Popover,
+	/* @ts-expect-error missing types. */
+	ToolbarItem,
+} from '@wordpress/components';
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	store as preferencesStore,
+	/* @ts-expect-error missing types. */
+} from '@wordpress/preferences';
+// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	NavigableToolbar,
 	store as blockEditorStore,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore ToolSelector exists in WordPress components.
+	// @ts-expect-error ToolSelector exists in WordPress components.
 	ToolSelector,
 	BlockToolbar,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore ToolbarItem exists in WordPress components.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { Button, Popover, ToolbarItem } from '@wordpress/components';
-// @ts-expect-error missing types.
-import { store as preferencesStore } from '@wordpress/preferences';
-import { isWpVersion } from '@woocommerce/settings';
-import classnames from 'classnames';
 
 /**
  * Internal dependencies

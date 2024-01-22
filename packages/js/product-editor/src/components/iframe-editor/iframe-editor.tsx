@@ -6,8 +6,13 @@ import { Popover } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { useResizeObserver } from '@wordpress/compose';
-// @ts-ignore No types for this exist yet.
-import { store as preferencesStore } from '@wordpress/preferences';
+import classNames from 'classnames';
+import { isWpVersion } from '@woocommerce/settings';
+import {
+	store as preferencesStore,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/preferences';
+// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	BlockEditorProvider,
 	BlockInspector,
@@ -22,8 +27,6 @@ import {
 	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import classNames from 'classnames';
-import { isWpVersion } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
