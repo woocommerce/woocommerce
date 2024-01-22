@@ -68,10 +68,10 @@ class Woo_AI {
 		add_filter( 'jetpack_offline_mode', '__return_false' );
 		add_action( 'current_screen', array( $this, 'includes' ) );
 
-		add_action(
-			'woocommerce_block_template_area_product-form_after_add_block_product-name',
-			array( $this, 'add_product_title_with_ai_assistant' )
-		);
+		// add_action(
+		// 	'woocommerce_block_template_area_product-form_after_add_block_product-name',
+		// 	array( $this, 'add_product_title_with_ai_assistant' )
+		// );
 	}
 
 	public function is_woo_product_editor_available() {

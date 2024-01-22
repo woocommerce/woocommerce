@@ -4,17 +4,23 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
+import { createElement } from '@wordpress/element';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
 import { __ } from '@wordpress/i18n';
-import { Button, Flex, FlexItem, ToolbarButton } from '@wordpress/components';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { Button, Flex, FlexItem } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import {
-	BlockControls,
-	useInnerBlocksProps,
-	useBlockProps,
-} from '@wordpress/block-editor';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useInnerBlocksProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -22,7 +28,7 @@ import {
 import './editor.scss';
 import ai from '../../icons/ai';
 
-export default function AiTitleBlockEdit( { isSelected }) {
+export default function AiTitleBlockEdit() {
 	const innerBlockProps = useInnerBlocksProps(
 		{},
 		{
