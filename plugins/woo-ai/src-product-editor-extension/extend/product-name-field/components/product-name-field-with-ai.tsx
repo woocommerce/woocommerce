@@ -47,9 +47,11 @@ const debug = debugFactory( 'woo-ai:product-editor:name-field' );
 
 function TitleSuggestionsMenu( {
 	onSelect,
+	autoSuggest = true,
 }: {
 	onSelect: ( title: string ) => void;
 	isOpen: boolean;
+	autoSuggest?: boolean;
 } ): React.ReactElement {
 	const productId = useEntityId( 'postType', 'product' );
 
@@ -95,6 +97,19 @@ function TitleSuggestionsMenu( {
 		const prompt = await buildProductTitleSuggestionsPromp( productId );
 		requestCompletion( prompt );
 	}, [ isRequesting, productId, requestCompletion ] );
+
+	// Automatically request suggestions when the dropdown is opened
+	useEffect( () => {
+		if ( ! autoSuggest ) {
+			return;
+		}
+
+		if ( isRequesting ) {
+			return;
+		}
+
+		requestTitleSuggestions();
+	}, [] ); // eslint-disable-line
 
 	return (
 		<div className="ai-assistant__title-suggestions-dropdown__content">
