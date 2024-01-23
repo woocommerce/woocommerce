@@ -42,6 +42,7 @@ import type {
 import { buildProductTitleSuggestionsPromp } from '../../../ai/build-prompt';
 import parseStringsArray from '../../../ai/parse/strings-array';
 import './styles.scss';
+import typeString from '../../../utils/type-string';
 
 const debug = debugFactory( 'woo-ai:product-editor:name-field' );
 
@@ -170,6 +171,7 @@ const productNameFieldWithAi =
 					'product',
 					'name'
 				);
+
 				const blockControlProps = { group: 'other' };
 
 				return (
@@ -198,7 +200,7 @@ const productNameFieldWithAi =
 									<TitleSuggestionsMenu
 										onSelect={ ( newTitle ) => {
 											onClose();
-											setName( newTitle );
+											typeString( newTitle, setName );
 										} }
 										isOpen={ isOpen }
 									/>

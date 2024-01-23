@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { resolveSelect } from '@wordpress/data';
+import debugFactory from 'debug';
+
+const debug = debugFactory( 'woo-ai:product-editor:build-prompt' );
+
 export async function buildProductTitleSuggestionsPromp( productId: number ) {
 	const product = await resolveSelect( 'core' ).getEntityRecord(
 		'postType',
@@ -16,12 +20,18 @@ export async function buildProductTitleSuggestionsPromp( productId: number ) {
 	const {
 		name,
 		tags,
-		categories,
+		categories: categoriesObject,
 		attributes,
 		type: product_type,
 		downloadable: is_downloadable,
 		virtual: is_virtual,
 	} = product;
+
+	const categories = categoriesObject.map(
+		( { name: categoryName }: { name: string } ) => {
+			return categoryName;
+		}
+	);
 
 	const validProductData = Object.entries( {
 		name,
@@ -56,6 +66,8 @@ export async function buildProductTitleSuggestionsPromp( productId: number ) {
 		``,
 		'Important!: Respect the format of the response. The response should be an array of strings: [ "first-title", "second-title", "third-title" ]',
 	];
+
+	debug( 'instructions', instructions );
 
 	return instructions.join( '\n' );
 }
