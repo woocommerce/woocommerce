@@ -763,7 +763,7 @@ class ListTable extends WP_List_Table {
 		 *
 		 * @param bool   $disable   Whether to disable the drop-down. Default false.
 		 */
-		if ( apply_filters( 'woocommerce_order_list_table_disable_months_filter', false ) ) {
+		if ( apply_filters( 'woocommerce_' . $this->order_type . '_list_table_disable_months_filter', false ) ) {
 			return;
 		}
 
