@@ -269,12 +269,13 @@ class ReceiptRenderingEngine {
 	 */
 	private function get_woo_pay_data( WC_Order $order ): ?array {
 		// For testing purposes: if WooCommerce Payments development mode is enabled,
-		// an order meta item with key '_intent_data' will be used if it exists as a replacement
+		// an order meta item with key '_wcpay_payment_details' will be used if it exists as a replacement
 		// for the call to the Stripe API's 'get intent' endpoint.
-		// The value must be the JSON encoding of an array simulating the response from the endpoint.
-		$intent_data = json_decode( defined( 'WCPAY_DEV_MODE' ) && WCPAY_DEV_MODE ? $order->get_meta( '_intent_data' ) : false, true );
+		// The value must be the JSON encoding of an array simulating the "payment_details" part of the response from the endpoint
+		// (at the very least it must contain the "card_present" key).
+		$payment_details = json_decode( defined( 'WCPAY_DEV_MODE' ) && WCPAY_DEV_MODE ? $order->get_meta( '_wcpay_payment_details' ) : false, true );
 
-		if ( ! $intent_data ) {
+		if ( ! $payment_details ) {
 			if ( 'woocommerce_payments' !== $order->get_payment_method() ) {
 				return null;
 			}
@@ -289,7 +290,7 @@ class ReceiptRenderingEngine {
 			}
 
 			try {
-				$intent_data = \WC_Payments::get_payments_api_client()->get_intent( $intent_id );
+				$payment_details = \WC_Payments::get_payments_api_client()->get_intent( $intent_id )->get_charge()->get_payment_method_details();
 			} catch ( \Exception $ex ) {
 				$order_id = $order->get_id();
 				$message  = $ex->getMessage();
@@ -298,7 +299,7 @@ class ReceiptRenderingEngine {
 			}
 		}
 
-		$card_data = $intent_data['charge']['payment_method_details']['card_present'] ?? null;
+		$card_data = $payment_details['card_present'] ?? null;
 		if ( is_null( $card_data ) ) {
 			return null;
 		}

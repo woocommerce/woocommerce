@@ -46,7 +46,7 @@
 	<p>
 		<?php echo $formatted_date; ?>
 	</p>
-	<?php if($payment_method) { ?>}
+	<?php if($payment_method) { ?>
 		<h3><?php echo strtoupper($texts['payment_method_section_title']); ?></h3>
 		<p>
 			<?php if($payment_info) { ?>
