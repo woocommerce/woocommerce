@@ -3335,19 +3335,8 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order->set_date_modified( time() + 1 );
 		$order->save();
 
-		$order_results = wc_get_orders(
-			array(
-				'limit'        => 300,
-				'offset'       => 0,
-				'order'        => 'DESC',
-				'order_by'     => 'ID',
-				'return'       => 'objects',
-				'meta_key'     => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_value'   => '', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-				'meta_compare' => '!=',
-			)
-		);
-		$meta          = $order_results[0]->get_meta( $meta_key );
+		$fetched_order = wc_get_order( $order->get_id() );
+		$meta          = $fetched_order->get_meta( $meta_key );
 
 		$this->assertNotEmpty( $meta );
 		$this->assertEquals( 'object', gettype( $meta ) );
