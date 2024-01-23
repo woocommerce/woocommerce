@@ -4,6 +4,7 @@
 import { Sender } from 'xstate';
 import { recordEvent } from '@woocommerce/tracks';
 import apiFetch from '@wordpress/api-fetch';
+import { resolveSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -47,7 +48,7 @@ const installAndActivateTheme = async () => {
 	}
 };
 
-export async function fetchInstallFont( data: Font ) {
+const installFont = ( data: Font ) => {
 	const config = {
 		path: '/wp/v2/font-families',
 		method: 'POST',
@@ -56,7 +57,7 @@ export async function fetchInstallFont( data: Font ) {
 		},
 	};
 	return apiFetch( config );
-}
+};
 
 type FontCollectionResponse = Array< {
 	data: {
@@ -70,12 +71,21 @@ const installFonts = async () => {
 		method: 'GET',
 	};
 
-	const fontCollection = await apiFetch< FontCollectionResponse >( config );
+	const installedFonts = ( await resolveSelect( 'core' ).getEntityRecords(
+		'postType',
+		'wp_font_family',
+		{
+			per_page: -1,
+		}
+	) ) as Array< Font >;
 
+	const slugInstalledFonts = installedFonts.map( ( { slug } ) => slug );
+
+	const fontCollection = await apiFetch< FontCollectionResponse >( config );
 	const filteredFontCollection = fontCollection[ 0 ].data.fontFamilies.reduce(
 		( acc, fontFamilies ) => {
 			const font = FONT_TO_INSTALL[ fontFamilies.slug ];
-			if ( font ) {
+			if ( font && ! slugInstalledFonts.includes( fontFamilies.slug ) ) {
 				const fontFace = fontFamilies.fontFace.filter(
 					( { fontWeight } ) =>
 						font.fontWeights.includes( fontWeight )
@@ -94,7 +104,11 @@ const installFonts = async () => {
 		[] as Array< Font >
 	);
 
-	await Promise.all( filteredFontCollection.map( fetchInstallFont ) );
+	debugger;
+
+	console.log( filteredFontCollection );
+
+	await Promise.all( filteredFontCollection.map( installFont ) );
 };
 
 const createProducts = async () => {
