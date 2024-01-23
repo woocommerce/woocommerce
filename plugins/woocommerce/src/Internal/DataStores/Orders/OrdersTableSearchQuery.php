@@ -140,7 +140,10 @@ class OrdersTableSearchQuery {
 		}
 
 		foreach ( $this->search_filters as $search_filter ) {
-			$where[] = $this->generate_where_for_search_filter( $search_filter );
+			$search_where = $this->generate_where_for_search_filter( $search_filter );
+			if ( ! empty( $search_where ) ) {
+				$where[] = $search_where;
+			}
 		}
 
 		$where_statement = implode( ' OR ', $where );
