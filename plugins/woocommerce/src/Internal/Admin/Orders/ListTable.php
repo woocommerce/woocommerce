@@ -648,7 +648,7 @@ class ListTable extends WP_List_Table {
 		 * @param object         ListTable The current instance of the class.
 		*/
 		$should_render_blank_state = apply_filters(
-			'woocommerce_' . $this->order_type . '_list_table_render_blank_state',
+			'woocommerce_' . $this->order_type . '_list_table_should_render_blank_state',
 			null,
 			$this
 		);
