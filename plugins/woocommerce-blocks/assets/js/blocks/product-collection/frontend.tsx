@@ -10,8 +10,6 @@ import {
 } from '@woocommerce/interactivity';
 
 export type ProductCollectionStoreContext = {
-	// TODO Add animation CSS
-	animation: 'start' | 'finish' | undefined;
 	message: string;
 	url: string;
 	// Accessibility texts.
@@ -34,39 +32,51 @@ const isValidEvent = ( event: MouseEvent ) =>
 	! event.shiftKey &&
 	! event.defaultPrevented;
 
+/**
+ * Scrolls to the first product in Product Collection if it's not visible.
+ *
+ * @param ref - The reference to the element.
+ */
+function scrollToFirstProductIfNotVisible( ref: HTMLAnchorElement ) {
+	// data-wc-navigation-id is added to each Product Collection block
+	const id = ( ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement )
+		?.dataset?.wcNavigationId;
+
+	const productSelector = `[data-wc-navigation-id=${ id }] .wc-block-product-template .wc-block-product`;
+	const product = document.querySelector( productSelector );
+	if ( product ) {
+		const rect = product.getBoundingClientRect();
+		const isVisible =
+			rect.top >= 0 &&
+			rect.left >= 0 &&
+			rect.bottom <=
+				( window.innerHeight ||
+					document.documentElement.clientHeight ) &&
+			rect.right <=
+				( window.innerWidth || document.documentElement.clientWidth );
+
+		// If the product is not visible, scroll to it.
+		if ( ! isVisible ) {
+			product.scrollIntoView( {
+				behavior: 'smooth',
+				block: 'start',
+			} );
+		}
+	}
+}
+
 const productCollectionStore = {
-	state: {
-		get startAnimation() {
-			return (
-				getContext< ProductCollectionStoreContext >().animation ===
-				'start'
-			);
-		},
-		get finishAnimation() {
-			return (
-				getContext< ProductCollectionStoreContext >().animation ===
-				'finish'
-			);
-		},
-	},
 	actions: {
 		*navigate( event: MouseEvent ) {
 			const ctx = getContext< ProductCollectionStoreContext >();
 			const { ref } = getElement();
 
-			const isDisabled = ref.closest( '[data-wc-navigation-id]' )?.dataset
-				.wcNavigationDisabled;
-
-			if ( isValidLink( ref ) && isValidEvent( event ) && ! isDisabled ) {
+			if ( isValidLink( ref ) && isValidEvent( event ) ) {
 				event.preventDefault();
-
-				const id = ref.closest( '[data-wc-navigation-id]' ).dataset
-					.wcNavigationId;
 
 				// Don't announce the navigation immediately, wait 400 ms.
 				const timeout = setTimeout( () => {
 					ctx.message = ctx.loadingText;
-					ctx.animation = 'start';
 				}, 400 );
 
 				yield navigate( ref.href );
@@ -81,23 +91,14 @@ const productCollectionStore = {
 					ctx.loadedText +
 					( ctx.message === ctx.loadedText ? '\u00A0' : '' );
 
-				ctx.animation = 'finish';
 				ctx.url = ref.href;
 
-				// Scroll to the first product in the collection.
-				const productSelector = `[data-wc-navigation-id=${ id }] .wc-block-product-template .wc-block-product`;
-				const product = document.querySelector( productSelector );
-				product?.scrollIntoView( {
-					behavior: 'smooth',
-					block: 'start',
-				} );
+				scrollToFirstProductIfNotVisible( ref );
 			}
 		},
 		*prefetch() {
 			const { ref } = getElement();
-			const isDisabled = ref.closest( '[data-wc-navigation-id]' )?.dataset
-				.wcNavigationDisabled;
-			if ( isValidLink( ref ) && ! isDisabled ) {
+			if ( isValidLink( ref ) ) {
 				yield prefetch( ref.href );
 			}
 		},

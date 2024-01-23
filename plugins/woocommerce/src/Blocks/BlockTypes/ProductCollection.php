@@ -164,7 +164,7 @@ class ProductCollection extends AbstractBlock {
 				$p->set_attribute( 'data-wc-on--click', 'woocommerce/product-collection::actions.navigate' );
 
 				/**
-				 * We prefetch the page which is assigned to either the previous or next button.
+				 * We prefetch the URL which is assigned to either the previous or next button.
 				 */
 				if ( $is_previous_or_next ) {
 					$p->set_attribute( 'data-wc-watch', 'woocommerce/product-collection::callbacks.prefetch' );
