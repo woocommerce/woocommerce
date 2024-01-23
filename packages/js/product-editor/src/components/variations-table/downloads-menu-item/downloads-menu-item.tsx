@@ -31,15 +31,11 @@ export function DownloadsMenuItem( {
 	onClose,
 	supportsMultipleSelection = false,
 }: VariationActionsMenuItemProps ) {
-	const ids = Array.isArray( selection )
-		? selection.map( ( { id } ) => id )
-		: selection.id;
+	const ids = selection.map( ( { id } ) => id );
 
-	const downloadsIds: number[] = (
-		Array.isArray( selection )
-			? selection[ 0 ].downloads
-			: selection.downloads
-	).map( ( { id }: ProductDownload ) => Number.parseInt( id, 10 ) );
+	const downloadsIds: number[] = selection[ 0 ].downloads.map(
+		( { id }: ProductDownload ) => Number.parseInt( id, 10 )
+	);
 
 	const [ uploadFilesModalOpen, setUploadFilesModalOpen ] = useState( false );
 
@@ -55,16 +51,12 @@ export function DownloadsMenuItem( {
 			downloads,
 		};
 
-		if ( Array.isArray( selection ) ) {
-			onChange(
-				selection.map( ( { id } ) => ( {
-					...partialVariation,
-					id,
-				} ) )
-			);
-		} else {
-			onChange( partialVariation );
-		}
+		onChange(
+			selection.map( ( { id } ) => ( {
+				...partialVariation,
+				id,
+			} ) )
+		);
 
 		recordEvent( 'product_variations_menu_downloads_update', {
 			source: TRACKS_SOURCE,
@@ -98,20 +90,13 @@ export function DownloadsMenuItem( {
 			handlePrompt( {
 				message,
 				onOk( value ) {
-					if ( Array.isArray( selection ) ) {
-						onChange(
-							selection.map( ( { id } ) => ( {
-								id,
-								downloadable: true,
-								[ name ]: value,
-							} ) )
-						);
-					} else {
-						onChange( {
+					onChange(
+						selection.map( ( { id } ) => ( {
+							id,
 							downloadable: true,
 							[ name ]: value,
-						} );
-					}
+						} ) )
+					);
 					recordEvent( 'product_variations_menu_downloads_update', {
 						source: TRACKS_SOURCE,
 						action: `${ name }_set`,

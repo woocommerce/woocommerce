@@ -22,31 +22,20 @@ export function ShippingMenuItem( {
 	onClose,
 	supportsMultipleSelection = false,
 }: VariationActionsMenuItemProps ) {
-	const ids = Array.isArray( selection )
-		? selection.map( ( { id } ) => id )
-		: selection.id;
+	const ids = selection.map( ( { id } ) => id );
 
 	function handleDimensionsChange(
 		value: Partial< ProductVariation[ 'dimensions' ] >
 	) {
-		if ( Array.isArray( selection ) ) {
-			onChange(
-				selection.map( ( { id, dimensions } ) => ( {
-					id,
-					dimensions: {
-						...dimensions,
-						...value,
-					},
-				} ) )
-			);
-		} else {
-			onChange( {
+		onChange(
+			selection.map( ( { id, dimensions } ) => ( {
+				id,
 				dimensions: {
-					...selection.dimensions,
+					...dimensions,
 					...value,
 				},
-			} );
-		}
+			} ) )
+		);
 	}
 
 	return (
@@ -87,20 +76,14 @@ export function ShippingMenuItem( {
 											variation_id: ids,
 										}
 									);
-									if ( Array.isArray( selection ) ) {
-										onChange(
-											selection.map(
-												( { id, virtual } ) => ( {
-													id,
-													virtual: ! virtual,
-												} )
-											)
-										);
-									} else {
-										onChange( {
-											virtual: ! selection.virtual,
-										} );
-									}
+									onChange(
+										selection.map(
+											( { id, virtual } ) => ( {
+												id,
+												virtual: ! virtual,
+											} )
+										)
+									);
 									recordEvent(
 										'product_variations_menu_shipping_update',
 										{
@@ -225,16 +208,12 @@ export function ShippingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map( ( { id } ) => ( {
-													id,
-													weight: value,
-												} ) )
-											);
-										} else {
-											onChange( { weight: value } );
-										}
+										onChange(
+											selection.map( ( { id } ) => ( {
+												id,
+												weight: value,
+											} ) )
+										);
 									},
 								} );
 								onClose();
