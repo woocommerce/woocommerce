@@ -68,4 +68,30 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			checkoutPageObject.page.getByText( 'Government ID54321' )
 		).toBeVisible();
 	} );
+
+	test( 'Shopper can see an error message when a required field is not filled in the checkout form', async ( {
+		checkoutPageObject,
+	} ) => {
+		await checkoutPageObject.editShippingDetails();
+		await checkoutPageObject.unsyncBillingWithShipping();
+		await checkoutPageObject.editBillingDetails();
+		await checkoutPageObject.fillInCheckoutWithTestData(
+			{},
+			{
+				// Purposely skipping the "Government ID" field here.
+				address: {
+					shipping: { 'Government ID': '' },
+					billing: { 'Government ID': '12345' },
+				},
+				additional: { 'How did you hear about us?': 'Other' },
+			}
+		);
+		await checkoutPageObject.placeOrder( false );
+
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Please enter a valid government id'
+			)
+		).toBeVisible();
+	} );
 } );
