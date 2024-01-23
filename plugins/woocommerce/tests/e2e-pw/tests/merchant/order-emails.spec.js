@@ -12,9 +12,10 @@ test.describe( 'Merchant > Order Action emails received', () => {
 
 	const storeName = 'WooCommerce Core E2E Test Suite';
 	let orderId, newOrderId, cancelledOrderId;
+	let api;
 
 	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
+		api = new wcApi( {
 			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
@@ -53,28 +54,15 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		}
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-
+	test.afterAll( async () => {
 		await api.post( `orders/batch`, {
 			delete: [ orderId, newOrderId, cancelledOrderId ],
 		} );
 	} );
 
-	test( 'can receive new order email', async ( { page, baseURL } ) => {
+	test( 'can receive new order email', async ( { page} ) => {
 		// New order emails are sent automatically when we create a simple order. Verify that we get these.
 		// Need to create a new order for this test because we clear logs before each run.
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
 		await api
 			.post( 'orders', {
 				status: 'processing',
@@ -97,13 +85,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
 	} );
 
-	test( 'can receive cancelled order email', async ( { page, baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test( 'can receive cancelled order email', async ( { page} ) => {
 		await api
 			.post( 'orders', {
 				status: 'processing',
@@ -115,6 +97,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 					status: 'cancelled',
 				} );
 			} );
+		await page.waitForTimeout( 1000 );
 		// search to narrow it down to just the messages we want
 		await page.goto(
 			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
