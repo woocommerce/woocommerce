@@ -77,7 +77,7 @@
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/block-editor": "^12.17.0",
 		"@wordpress/blocks": "^12.26.0",
-		"@wordpress/components": "wp-6.0",
+		"@wordpress/components": "^19.8.5",
 		"@wordpress/compose": "wp-6.0",
 		"@wordpress/element": "wp-6.0",
 		"@wordpress/hooks": "wp-6.0",
