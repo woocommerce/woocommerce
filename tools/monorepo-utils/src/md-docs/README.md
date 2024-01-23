@@ -10,7 +10,7 @@ This command is built on postinstall and can be run from monorepo root.
 
 To create a manifest:
 
-```
+```shell
 pnpm utils md-docs create <path-to-directory> <projectName>
 ```
 
@@ -18,6 +18,6 @@ pnpm utils md-docs create <path-to-directory> <projectName>
 
 To find out more about the arguments and options available, run:
 
-```
+```shell
 pnpm utils md-docs create --help
 ```
