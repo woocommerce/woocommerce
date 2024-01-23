@@ -24,7 +24,7 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { chevronRight, title } from '@wordpress/icons';
+import { check, title } from '@wordpress/icons';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -139,7 +139,7 @@ function TitleSuggestionsMenu( {
 							className={
 								! suggestedTitle?.length ? 'is-loading' : ''
 							}
-							icon={ chevronRight }
+							icon={ check }
 							onClick={ () => onSelect( suggestedTitle ) }
 							variant="tertiary"
 							ref={ i === 0 ? firstOption : undefined }
