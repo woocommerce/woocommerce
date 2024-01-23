@@ -6,6 +6,7 @@ import {
 	Fragment,
 	useCallback,
 	useEffect,
+	useRef,
 	useState,
 } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
@@ -67,6 +68,12 @@ function TitleSuggestionsMenu( {
 		[]
 	);
 
+	/*
+	 * Get a reference to the first option,
+	 * so we can focus it when the suggestions are loaded.
+	 */
+	const firstOption = useRef< HTMLButtonElement | null >( null );
+
 	const { requestCompletion } = useCompletion( {
 		feature: WOO_AI_PLUGIN_FEATURE_NAME,
 		onStreamMessage: ( message ) => {
@@ -88,6 +95,7 @@ function TitleSuggestionsMenu( {
 				const suggestions = parseStringsArray( message );
 				setTitleSuggestions( suggestions );
 				setIsRequesting( false );
+				firstOption.current?.focus();
 			} catch ( e ) {
 				setIsRequesting( false );
 				throw new Error( 'Unable to parse suggestions' );
@@ -125,12 +133,13 @@ function TitleSuggestionsMenu( {
 				gap={ 1 }
 				className="ai-assistant__title-suggestions-dropdown__content__suggestions"
 			>
-				{ titleSuggestions.map( ( suggestedTitle ) => (
+				{ titleSuggestions.map( ( suggestedTitle, i ) => (
 					<FlexItem key={ suggestedTitle }>
 						<Button
 							icon={ chevronRight }
 							onClick={ () => onSelect( suggestedTitle ) }
 							variant="tertiary"
+							ref={ i === 0 ? firstOption : undefined }
 						>
 							{ suggestedTitle }
 						</Button>
