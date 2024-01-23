@@ -19,6 +19,10 @@ const woocommerceTemplateUserText = 'Hello World in the WooCommerce template';
 
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	test.describe( `${ testData.templateName } template`, async () => {
+		test.afterAll( async () => {
+			await deleteAllTemplates( 'wp_template' );
+		} );
+
 		test( `user-modified ${ testData.templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
 			admin,
 			frontendUtils,
@@ -84,7 +88,6 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			await cli(
 				`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
 			);
-			deleteAllTemplates( 'wp_template' );
 		} );
 	} );
 } );
