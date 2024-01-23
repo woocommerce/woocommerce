@@ -78,7 +78,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		await checkoutPageObject.fillInCheckoutWithTestData(
 			{},
 			{
-				// Purposely skipping the "Government ID" field here.
+				// Purposely skipping the Shipping "Government ID" field here.
 				address: {
 					shipping: { 'Government ID': '' },
 					billing: { 'Government ID': '12345' },
