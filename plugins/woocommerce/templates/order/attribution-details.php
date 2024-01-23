@@ -1,12 +1,12 @@
 <?php
 /**
- * Display the Order Attribution Data metabox.
+ * Display the Order Attribution details metabox.
  *
- * This template is used to display the order source data metabox on the edit order screen.
+ * This template is used to display the order attribution data metabox on the edit order screen.
  *
  * @see     Automattic\WooCommerce\Internal\Orders\OrderAttributionController
  * @package WooCommerce\Templates
- * @version 8.6.0
+ * @version 8.6.0-dev
  */
 
 declare( strict_types=1 );
@@ -55,21 +55,28 @@ defined( 'ABSPATH' ) || exit;
 		<?php endif; ?>
 
 		<?php if ( array_key_exists( 'utm_campaign', $meta ) ) : ?>
-			<h4><?php esc_html_e( 'UTM campaign', 'woocommerce' ); ?></h4>
+			<h4>
+				<?php esc_html_e( 'Campaign', 'woocommerce' ); ?>
+			</h4>
 			<span class="order-attribution-utm-campaign">
 				<?php echo esc_html( $meta['utm_campaign'] ); ?>
 			</span>
 		<?php endif; ?>
 
 		<?php if ( array_key_exists( 'utm_source', $meta ) ) : ?>
-			<h4><?php esc_html_e( 'UTM source', 'woocommerce' ); ?></h4>
+			<h4>
+				<?php esc_html_e( 'Source', 'woocommerce' ); ?>
+
+			</h4>
 			<span class="order-attribution-utm-source">
 				<?php echo esc_html( $meta['utm_source'] ); ?>
 			</span>
 		<?php endif; ?>
 
 		<?php if ( array_key_exists( 'utm_medium', $meta ) ) : ?>
-			<h4><?php esc_html_e( 'UTM medium', 'woocommerce' ); ?></h4>
+			<h4>
+				<?php esc_html_e( 'Medium', 'woocommerce' ); ?>
+			</h4>
 			<span class="order-attribution-utm-medium">
 				<?php echo esc_html( $meta['utm_medium'] ); ?>
 			</span>
