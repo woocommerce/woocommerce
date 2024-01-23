@@ -41,7 +41,8 @@ export const ShippingAddress = ( {
 		activeShippingZones.length > 1 &&
 		activeShippingZones.some(
 			( zone: { description: string } ) =>
-				zone.description === 'Everywhere'
+				zone.description === 'Everywhere' ||
+				zone.description === 'Locations outside all other zones'
 		);
 
 	const hasFormattedAddress = !! formatShippingAddress( shippingAddress );
