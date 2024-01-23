@@ -2899,14 +2899,7 @@ CREATE TABLE $meta_table (
 
 		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
 			self::$backfilling_order_ids[] = $object->get_id();
-			try {
-				delete_post_meta( $object->get_id(), $meta->key, $meta->value );
-			} catch ( \Throwable $th ) {
-				$incomplete_object_message = 'The script tried to modify a property on an incomplete object';
-				if ( substr( $th->getMessage(), 0, strlen( $incomplete_object_message ) ) !== $incomplete_object_message ) {
-					throw $th;
-				}
-
+			if ( 'object' === gettype( $meta->value ) && '__PHP_Incomplete_Class' === get_class( $meta->value ) ) {
 				$meta_value = maybe_serialize( $meta->value );
 				$wpdb->delete(
 					_get_meta_table( 'post' ),
@@ -2917,6 +2910,8 @@ CREATE TABLE $meta_table (
 					),
 					array( '%d', '%s', '%s' )
 				);
+			} else {
+				delete_post_meta( $object->get_id(), $meta->key, $meta->value );
 			}
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
