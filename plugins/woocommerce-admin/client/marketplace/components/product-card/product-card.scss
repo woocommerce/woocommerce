@@ -96,7 +96,7 @@
 			display: grid;
 			gap: $medium-gap;
 			height: 100%;
-			grid-template-rows: auto 1fr 20px;
+			grid-template-rows: auto 1fr 36px;
 		}
 
 		&__header {
@@ -193,7 +193,6 @@
 			display: flex;
 			align-items: flex-end;
 			gap: $grid-unit-05;
-			align-self: stretch;
 			text-decoration: none !important;
 			color: $gray-900 !important;
 			font-style: normal;
