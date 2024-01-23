@@ -17,12 +17,8 @@
 			"background": false
 		}
 	},
-	"usesContext": [ "collectionData" ],
+	"usesContext": [ "query", "queryId" ],
 	"attributes": {
-		"queryParam": {
-			"type": "object",
-			"default": {}
-		},
 		"attributeId": {
 			"type": "number",
 			"default": 0
