@@ -263,6 +263,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$args['meta_key'] = $ordering_args['meta_key']; // WPCS: slow query ok.
 		}
 
+		/*
+		 * When the suggested products ids is not empty,
+		 * filter the query to return only the suggested products,
+		 * overwriting the post__in parameter.
+		 */
+		if ( ! empty( $this->suggested_products_ids ) ) {
+			$args['post__in'] = $this->suggested_products_ids;
+		}
+
 		return $args;
 	}
 
