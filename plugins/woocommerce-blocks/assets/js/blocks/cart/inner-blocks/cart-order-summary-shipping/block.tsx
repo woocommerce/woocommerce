@@ -21,7 +21,6 @@ const Block = ( { className }: { className: string } ): JSX.Element | null => {
 	const shippingRatesPackageCount =
 		getShippingRatesPackageCount( shippingRates );
 
-	// If there are no shipping rates, and we're in the editor, hide the shipping rates to match front-end.
 	if ( ! shippingRatesPackageCount && isEditor ) {
 		return null;
 	}

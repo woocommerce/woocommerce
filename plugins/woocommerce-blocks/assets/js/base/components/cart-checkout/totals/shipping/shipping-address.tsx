@@ -25,6 +25,10 @@ export interface ShippingAddressProps {
 	shippingAddress: ShippingAddressType;
 }
 
+export type activeShippingZones = {
+	description: string;
+}[];
+
 export const ShippingAddress = ( {
 	showCalculator,
 	isShippingCalculatorOpen,
@@ -35,7 +39,9 @@ export const ShippingAddress = ( {
 	const prefersCollection = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).prefersCollection()
 	);
-	const activeShippingZones = getSetting( 'activeShippingZones' );
+	const activeShippingZones = getSetting(
+		'activeShippingZones'
+	) as activeShippingZones;
 
 	const hasMultipleAndDefaultZone =
 		activeShippingZones.length > 1 &&
@@ -47,8 +53,9 @@ export const ShippingAddress = ( {
 
 	const hasFormattedAddress = !! formatShippingAddress( shippingAddress );
 
-	// If there is no default customer location set in the store, the customer hasn't provided their address,
-	// but only one default shipping method is available for all locations,
+	// If there is no default customer location set in the store,
+	// and the customer hasn't provided their address,
+	// and only one default shipping method is available for all locations,
 	// then the shipping calculator will be hidden to avoid confusion.
 	if ( ! hasFormattedAddress && ! isEditor && ! hasMultipleAndDefaultZone ) {
 		return null;
