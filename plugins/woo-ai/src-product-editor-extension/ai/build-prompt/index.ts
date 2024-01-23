@@ -7,7 +7,7 @@ import debugFactory from 'debug';
 const debug = debugFactory( 'woo-ai:product-editor:build-prompt' );
 
 export async function buildProductTitleSuggestionsPromp( productId: number ) {
-	const product = await resolveSelect( 'core' ).getEntityRecord(
+	const product = await resolveSelect( 'core' ).getEditedEntityRecord(
 		'postType',
 		'product',
 		[ productId ]
@@ -87,7 +87,7 @@ Important!: Respect the format of the response. The response should be an array 
 }
 
 export async function buildProductSummarySuggestionPromp( productId: number ) {
-	const product = await resolveSelect( 'core' ).getEntityRecord(
+	const product = await resolveSelect( 'core' ).getEditedEntityRecord(
 		'postType',
 		'product',
 		[ productId ]
