@@ -455,10 +455,37 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		// Downloads section.
 		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
-			$general_group->add_section(
+			$product_downloads_section_group = $general_group->add_section(
+				array(
+					'id'             => 'product-downloads-section-group',
+					'order'          => 50,
+					'attributes'     => array(
+						'blockGap' => 'unit-40',
+					),
+					'hideConditions' => array(
+						array(
+							'expression' => 'editedProduct.type !== "simple"',
+						),
+					),
+				)
+			);
+
+			$product_downloads_section_group->add_block(
+				array(
+					'id'         => 'product-downloadable',
+					'blockName'  => 'woocommerce/product-checkbox-field',
+					'order'      => 10,
+					'attributes' => array(
+						'property' => 'downloadable',
+						'label'    => __( 'Include downloads', 'woocommerce' ),
+					),
+				)
+			);
+
+			$product_downloads_section_group->add_section(
 				array(
 					'id'             => 'product-downloads-section',
-					'order'          => 50,
+					'order'          => 20,
 					'attributes'     => array(
 						'title'       => __( 'Downloads', 'woocommerce' ),
 						'description' => sprintf(
@@ -470,7 +497,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					),
 					'hideConditions' => array(
 						array(
-							'expression' => 'editedProduct.type !== "simple"',
+							'expression' => 'editedProduct.downloadable !== true',
 						),
 					),
 				)
