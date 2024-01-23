@@ -48,6 +48,15 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 		await activateTheme( 'twentytwentythree' );
 	} );
 
+	test.beforeEach( async ( { baseURL } ) => {
+		await setOption(
+			request,
+			baseURL,
+			'woocommerce_admin_customize_store_completed',
+			'no'
+		);
+	} );
+
 	test.afterAll( async ( { baseURL } ) => {
 		await features.resetFeatureFlags( request, baseURL );
 
