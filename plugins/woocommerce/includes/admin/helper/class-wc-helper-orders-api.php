@@ -66,6 +66,15 @@ class WC_Helper_Orders_API {
 	 * @return WP_REST_Response
 	 */
 	public static function create_order( $request ) {
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return new \WP_REST_Response(
+				array(
+					'message' => __( 'You do not have permission to install plugins.', 'woocommerce' ),
+				),
+				403
+			);
+		}
+
 		try {
 			$response = WC_Helper_API::post(
 				'create-order',

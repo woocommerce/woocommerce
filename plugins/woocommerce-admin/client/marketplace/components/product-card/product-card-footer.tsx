@@ -3,30 +3,21 @@
  */
 import { Button, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
+import { useUser } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { Product } from '../product-list/types';
-import { getAdminSetting } from '../../../utils/admin-settings';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 function ProductCardFooter( props: { product: Product } ) {
 	const { product } = props;
-	const [ isInstalled, setIsInstalled ] = useState( false );
-
-	useEffect( () => {
-		const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-		const installedProducts: string[] = wccomSettings?.installedProducts;
-
-		const result = !! installedProducts.find(
-			( item ) => item === product.slug
-		);
-
-		setIsInstalled( result );
-	}, [ product ] );
+	const { user, currentUserCan } = useUser();
+	const { isProductInstalled } = useContext( MarketplaceContext );
 
 	function openInstallModal() {
 		recordEvent( 'marketplace_add_to_store_clicked', {
@@ -40,10 +31,33 @@ function ProductCardFooter( props: { product: Product } ) {
 		} );
 	}
 
+	function shouldShowAddToStore( productToCheck: Product ) {
+		if ( ! user || ! productToCheck ) {
+			return false;
+		}
+
+		if ( ! currentUserCan( 'install_plugins' ) ) {
+			return false;
+		}
+
+		if ( ! productToCheck.isInstallable ) {
+			return false;
+		}
+
+		if (
+			productToCheck.slug &&
+			isProductInstalled( productToCheck.slug )
+		) {
+			return false;
+		}
+
+		return true;
+	}
+
 	// We hardcode this for now while we only display prices in USD.
 	const currencySymbol = '$';
 
-	if ( product.isInstallable && ! isInstalled ) {
+	if ( shouldShowAddToStore( product ) ) {
 		return (
 			<>
 				<span className="woocommerce-marketplace__product-card__add-to-store">

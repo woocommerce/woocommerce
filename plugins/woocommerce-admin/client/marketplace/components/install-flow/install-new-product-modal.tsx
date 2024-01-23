@@ -4,7 +4,7 @@
 import { ButtonGroup, Button, Modal, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useContext } from '@wordpress/element';
 import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { Status } from '@wordpress/notices';
@@ -20,6 +20,7 @@ import { downloadProduct } from '../../utils/functions';
 import { createOrder } from './create-order';
 import { MARKETPLACE_PATH, WP_ADMIN_PLUGIN_LIST_URL } from '../constants';
 import { getAdminSetting } from '../../../utils/admin-settings';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 enum InstallFlowStatus {
 	'notConnected',
@@ -46,6 +47,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 		message: string;
 		status: Status;
 	} >();
+	const { addInstalledProduct } = useContext( MarketplaceContext );
 
 	const query = useQuery();
 
@@ -156,6 +158,10 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 
 				dispatch( installingStore ).startInstalling( product.id );
 				setDocumentationUrl( response.data.documentation_url );
+
+				if ( product.slug ) {
+					addInstalledProduct( product.slug ?? '' );
+				}
 
 				return downloadProduct(
 					response.data.product_type,
