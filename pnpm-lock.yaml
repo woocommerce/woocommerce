@@ -599,6 +599,9 @@ importers:
       '@automattic/calypso-color-schemes':
         specifier: ^2.1.1
         version: 2.1.1
+      '@automattic/components':
+        specifier: ^2.1.0
+        version: 2.1.0(@types/react@17.0.71)(@wordpress/data@6.6.1)(react-dom@17.0.2)(react@17.0.2)
       '@automattic/interpolate-components':
         specifier: ^1.2.1
         version: 1.2.1(@types/react@17.0.71)(react@17.0.2)
@@ -3136,7 +3139,7 @@ importers:
   plugins/woocommerce-admin:
     dependencies:
       '@automattic/components':
-        specifier: ^2.1.0
+        specifier: ^2.0.1
         version: 2.1.0(@types/react@17.0.71)(@wordpress/data@6.6.1)(react-dom@17.0.2)(react@17.0.2)
       '@automattic/explat-client':
         specifier: ^0.0.3
@@ -5389,10 +5392,10 @@ packages:
   /@automattic/i18n-utils@1.0.1:
     resolution: {integrity: sha512-FrewCnoiVBEwf4pPVC/lV+JePwyP5+3kLs0afDuxUTxv0if1Z9OXTk0DFAyeDOz8MKyrdD4hGbfS/PNdoIM5Dg==}
     dependencies:
-      '@automattic/calypso-url': 1.0.0
+      '@automattic/calypso-url': 1.1.0
       '@automattic/languages': 1.0.0
       '@wordpress/compose': 5.20.0(react@17.0.2)
-      '@wordpress/i18n': 4.47.0
+      '@wordpress/i18n': 4.49.0
       react: 17.0.2
       tslib: 2.6.2
     transitivePeerDependencies:
