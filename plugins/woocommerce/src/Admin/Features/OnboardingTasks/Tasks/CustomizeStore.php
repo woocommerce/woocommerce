@@ -25,7 +25,7 @@ class CustomizeStore extends Task {
 		global $_GET;
 		$theme_switch_via_cys_ai_loader = isset( $_GET['theme_switch_via_cys_ai_loader'] ) ? 1 === absint( $_GET['theme_switch_via_cys_ai_loader'] ) : false;
 		if ( ! $theme_switch_via_cys_ai_loader ) {
-				add_action( 'switch_theme', array( $this, 'mark_task_as_complete' ) );
+			add_action( 'switch_theme', array( $this, 'mark_task_as_complete' ) );
 		}
 
 		// Hook to remove unwanted UI elements when users are viewing with ?cys-hide-admin-bar=true.
