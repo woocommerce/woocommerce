@@ -3,7 +3,7 @@
  */
 import { Button, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import { useUser } from '@woocommerce/data';
@@ -17,7 +17,8 @@ import { MarketplaceContext } from '../../contexts/marketplace-context';
 function ProductCardFooter( props: { product: Product } ) {
 	const { product } = props;
 	const { user, currentUserCan } = useUser();
-	const { isProductInstalled } = useContext( MarketplaceContext );
+	const { selectedTab, isProductInstalled } =
+		useContext( MarketplaceContext );
 
 	function openInstallModal() {
 		recordEvent( 'marketplace_add_to_store_clicked', {
@@ -41,6 +42,14 @@ function ProductCardFooter( props: { product: Product } ) {
 		}
 
 		if ( ! productToCheck.isInstallable ) {
+			return false;
+		}
+
+		if ( productToCheck.type === 'theme' ) {
+			return false;
+		}
+
+		if ( selectedTab === 'discover' ) {
 			return false;
 		}
 
