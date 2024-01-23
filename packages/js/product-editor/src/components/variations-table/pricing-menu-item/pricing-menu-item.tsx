@@ -14,6 +14,7 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { handlePrompt } from '../../../utils/handle-prompt';
 import { VariationActionsMenuItemProps } from '../types';
 import { SetListPriceMenuItem } from '../set-list-price-menu-item';
+import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
 
 function isPercentage( value: string ) {
 	return value.endsWith( '%' );
@@ -58,6 +59,7 @@ export function PricingMenuItem( {
 	selection,
 	onChange,
 	onClose,
+	supportsMultipleSelection = false,
 }: VariationActionsMenuItemProps ) {
 	const ids = Array.isArray( selection )
 		? selection.map( ( { id } ) => id )
@@ -435,6 +437,13 @@ export function PricingMenuItem( {
 							{ __( 'Schedule sale', 'woocommerce' ) }
 						</MenuItem>
 					</MenuGroup>
+					<VariationQuickUpdateMenuItem.Slot
+						group={ 'pricing' }
+						onChange={ onChange }
+						onClose={ onClose }
+						selection={ selection }
+						supportsMultipleSelection={ supportsMultipleSelection }
+					/>
 				</div>
 			) }
 		/>

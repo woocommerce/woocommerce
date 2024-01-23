@@ -27,7 +27,7 @@ import {
 	getProductStockStatusClass,
 	truncate,
 } from '../../../utils';
-import { VariationActionsMenu } from '../variation-actions-menu';
+import { SingleUpdateMenu } from '../variation-actions-menus';
 import { VariationsTableRowProps } from './types';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
@@ -240,7 +240,7 @@ export function VariationsTableRow( {
 							{ __( 'Edit', 'woocommerce' ) }
 						</Button>
 
-						<VariationActionsMenu
+						<SingleUpdateMenu
 							selection={ variation }
 							onChange={ handleChange }
 							onDelete={ onDelete }

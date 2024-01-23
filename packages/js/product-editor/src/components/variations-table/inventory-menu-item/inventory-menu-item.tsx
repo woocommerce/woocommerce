@@ -15,11 +15,13 @@ import { PRODUCT_STOCK_STATUS_KEYS } from '../../../utils/get-product-stock-stat
 import { UpdateStockMenuItem } from '../update-stock-menu-item';
 import { VariationActionsMenuItemProps } from '../types';
 import { handlePrompt } from '../../../utils/handle-prompt';
+import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
 
 export function InventoryMenuItem( {
 	selection,
 	onChange,
 	onClose,
+	supportsMultipleSelection = false,
 }: VariationActionsMenuItemProps ) {
 	const ids = Array.isArray( selection )
 		? selection.map( ( { id } ) => id )
@@ -234,6 +236,13 @@ export function InventoryMenuItem( {
 							{ __( 'Edit low stock threshold', 'woocommerce' ) }
 						</MenuItem>
 					</MenuGroup>
+					<VariationQuickUpdateMenuItem.Slot
+						group={ 'inventory' }
+						onChange={ onChange }
+						onClose={ onClose }
+						selection={ selection }
+						supportsMultipleSelection={ supportsMultipleSelection }
+					/>
 				</div>
 			) }
 		/>

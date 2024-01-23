@@ -9,7 +9,7 @@ import React, { createElement } from 'react';
 /**
  * Internal dependencies
  */
-import { VariationActionsMenu } from '../';
+import { SingleUpdateMenu, MultipleUpdateMenu } from '..';
 import { TRACKS_SOURCE } from '../../../../constants';
 import { PRODUCT_STOCK_STATUS_KEYS } from '../../../../utils/get-product-stock-status';
 
@@ -25,7 +25,54 @@ const mockVariation = {
 	parent_id: 1,
 } as ProductVariation;
 
-describe( 'VariationActionsMenu', () => {
+const anotherMockVariation = {
+	id: 11,
+	manage_stock: false,
+	attributes: [],
+	downloads: [],
+	name: '',
+	parent_id: 1,
+} as ProductVariation;
+
+describe( 'MultipleUpdateMenu', () => {
+	let onChangeMock: jest.Mock, onDeleteMock: jest.Mock;
+	beforeEach( () => {
+		onChangeMock = jest.fn();
+		onDeleteMock = jest.fn();
+		( recordEvent as jest.Mock ).mockClear();
+	} );
+
+	it( 'should render dropdown with pricing, inventory, and delete options when opened', () => {
+		const { queryByText, getByRole } = render(
+			<MultipleUpdateMenu
+				selection={ [ mockVariation, anotherMockVariation ] }
+				onChange={ onChangeMock }
+				onDelete={ onDeleteMock }
+			/>
+		);
+		fireEvent.click( getByRole( 'button', { name: 'Quick update' } ) );
+		expect( queryByText( 'Update stock' ) ).toBeInTheDocument();
+		expect( queryByText( 'Set list price' ) ).toBeInTheDocument();
+		expect( queryByText( 'Toggle visibility' ) ).toBeInTheDocument();
+	} );
+
+	it( 'should call onDelete when Delete menuItem is clicked', async () => {
+		const { getByRole, getByText } = render(
+			<MultipleUpdateMenu
+				selection={ [ mockVariation, anotherMockVariation ] }
+				onChange={ onChangeMock }
+				onDelete={ onDeleteMock }
+			/>
+		);
+		await fireEvent.click(
+			getByRole( 'button', { name: 'Quick update' } )
+		);
+		await fireEvent.click( getByText( 'Delete' ) );
+		expect( onDeleteMock ).toHaveBeenCalled();
+	} );
+} );
+
+describe( 'SingleUpdateMenu', () => {
 	let onChangeMock: jest.Mock, onDeleteMock: jest.Mock;
 	beforeEach( () => {
 		onChangeMock = jest.fn();
@@ -35,7 +82,7 @@ describe( 'VariationActionsMenu', () => {
 
 	it( 'should trigger product_variations_menu_view track when dropdown toggled', () => {
 		const { getByRole } = render(
-			<VariationActionsMenu
+			<SingleUpdateMenu
 				selection={ mockVariation }
 				onChange={ onChangeMock }
 				onDelete={ onDeleteMock }
@@ -53,7 +100,7 @@ describe( 'VariationActionsMenu', () => {
 
 	it( 'should render dropdown with pricing, inventory, and delete options when opened', () => {
 		const { queryByText, getByRole } = render(
-			<VariationActionsMenu
+			<SingleUpdateMenu
 				selection={ mockVariation }
 				onChange={ onChangeMock }
 				onDelete={ onDeleteMock }
@@ -67,7 +114,7 @@ describe( 'VariationActionsMenu', () => {
 
 	it( 'should call onDelete when Delete menuItem is clicked', async () => {
 		const { getByRole, getByText } = render(
-			<VariationActionsMenu
+			<SingleUpdateMenu
 				selection={ mockVariation }
 				onChange={ onChangeMock }
 				onDelete={ onDeleteMock }
@@ -81,7 +128,7 @@ describe( 'VariationActionsMenu', () => {
 	describe( 'Inventory sub-menu', () => {
 		it( 'should open Inventory sub-menu if Inventory is clicked with click track', async () => {
 			const { queryByText, getByRole, getByText } = render(
-				<VariationActionsMenu
+				<SingleUpdateMenu
 					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
@@ -108,7 +155,7 @@ describe( 'VariationActionsMenu', () => {
 		it( 'should onChange with stock_quantity when Update stock is clicked', async () => {
 			window.prompt = jest.fn().mockReturnValue( '10' );
 			const { getByRole, getByText } = render(
-				<VariationActionsMenu
+				<SingleUpdateMenu
 					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
@@ -143,7 +190,7 @@ describe( 'VariationActionsMenu', () => {
 		it( 'should not call onChange when prompt is cancelled', async () => {
 			window.prompt = jest.fn().mockReturnValue( null );
 			const { getByRole, getByText } = render(
-				<VariationActionsMenu
+				<SingleUpdateMenu
 					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
@@ -177,7 +224,7 @@ describe( 'VariationActionsMenu', () => {
 
 		it( 'should call onChange with toggled manage_stock when toggle "track quantity" is clicked', async () => {
 			const { getByRole, getByText, rerender } = render(
-				<VariationActionsMenu
+				<SingleUpdateMenu
 					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
@@ -200,7 +247,7 @@ describe( 'VariationActionsMenu', () => {
 			} );
 			onChangeMock.mockClear();
 			rerender(
-				<VariationActionsMenu
+				<SingleUpdateMenu
 					selection={ { ...mockVariation, manage_stock: true } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
@@ -216,7 +263,7 @@ describe( 'VariationActionsMenu', () => {
 
 		it( 'should call onChange with toggled stock_status when toggle "Set status to In stock" is clicked', async () => {
 			const { getByRole, getByText } = render(
-				<VariationActionsMenu
+				<SingleUpdateMenu
 					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
@@ -242,7 +289,7 @@ describe( 'VariationActionsMenu', () => {
 
 		it( 'should call onChange with toggled stock_status when toggle "Set status to Out of stock" is clicked', async () => {
 			const { getByRole, getByText } = render(
-				<VariationActionsMenu
+				<SingleUpdateMenu
 					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
@@ -268,7 +315,7 @@ describe( 'VariationActionsMenu', () => {
 
 		it( 'should call onChange with toggled stock_status when toggle "Set status to On back order" is clicked', async () => {
 			const { getByRole, getByText } = render(
-				<VariationActionsMenu
+				<SingleUpdateMenu
 					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
@@ -295,7 +342,7 @@ describe( 'VariationActionsMenu', () => {
 		it( 'should call onChange with low_stock_amount when Edit low stock threshold is clicked', async () => {
 			window.prompt = jest.fn().mockReturnValue( '7' );
 			const { getByRole, getByText } = render(
-				<VariationActionsMenu
+				<SingleUpdateMenu
 					selection={ { ...mockVariation } }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
