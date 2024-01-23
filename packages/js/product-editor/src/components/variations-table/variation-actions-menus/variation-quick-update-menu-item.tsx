@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Slot, Fill, MenuItem, MenuGroup } from '@wordpress/components';
+import { Slot, Fill, MenuGroup, MenuItem } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 import {
 	createOrderedChildren,
@@ -41,18 +41,38 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 	group = TOP_LEVEL_MENU,
 	supportsMultipleSelection,
 	onClick = () => {},
+	isCustomGroup = false,
 } ) => {
-	const handleClick =
-		( fillProps: Fill.Props & VariationQuickUpdateSlotProps ) => () => {
-			const { selection, onChange, onClose } = fillProps;
-			onClick( {
-				selection: Array.isArray( selection )
-					? selection
-					: [ selection ],
-				onChange,
-				onClose,
-			} );
+	const getProps = (
+		fillProps: Fill.Props & VariationQuickUpdateSlotProps
+	) => {
+		const { selection, onChange, onClose } = fillProps;
+		return {
+			selection: Array.isArray( selection ) ? selection : [ selection ],
+			onChange,
+			onClose,
 		};
+	};
+	const createMenuItem = (
+		onClickWithCallbacks: () => void,
+		fillProps: Fill.Props & VariationQuickUpdateSlotProps
+	) => {
+		const childrenToRender =
+			typeof children === 'function'
+				? children( getProps( fillProps ) )
+				: children;
+		if ( isCustomGroup ) {
+			return createOrderedChildren( childrenToRender, order, fillProps );
+		}
+
+		return createOrderedChildren(
+			<MenuItem onClick={ onClickWithCallbacks }>
+				{ childrenToRender }
+			</MenuItem>,
+			order,
+			fillProps
+		);
+	};
 
 	const createFill = ( updateType: string ) => (
 		<Fill
@@ -60,11 +80,8 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 			name={ getGroupName( group, updateType === MULTIPLE_UPDATE ) }
 		>
 			{ ( fillProps: Fill.Props & VariationQuickUpdateSlotProps ) =>
-				createOrderedChildren(
-					<MenuItem onClick={ handleClick( fillProps ) }>
-						{ children }
-					</MenuItem>,
-					order,
+				createMenuItem(
+					() => onClick( getProps( fillProps ) ),
 					fillProps
 				)
 			}
