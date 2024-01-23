@@ -538,12 +538,11 @@ class CheckoutFields {
 	 *
 	 * @param string           $key          The key of the field.
 	 * @param mixed            $field_value  The value of the field.
-	 * @param array            $field_schema The schema of the field.
 	 * @param \WP_REST_Request $request      The current API Request.
 	 *
 	 * @since 8.6.0
 	 */
-	public function validate_field( $key, $field_value, $field_schema, $request ) {
+	public function validate_field( $key, $field_value, $request ) {
 
 		$error = new \WP_Error();
 		try {
@@ -552,12 +551,11 @@ class CheckoutFields {
 			 *
 			 * @param \WP_Error        $error        A WP_Error that extensions may add errors to.
 			 * @param mixed            $field_value  The value of the field.
-			 * @param array            $field_schema The schema of the field.
 			 * @param \WP_REST_Request $request      The current API Request.
 			 *
 			 * @since 8.6.0
 			 */
-			$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, $error, $field_value, $field_schema, $request );
+			$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, $error, $field_value, $request );
 
 			if ( $error !== $filtered_result ) {
 
