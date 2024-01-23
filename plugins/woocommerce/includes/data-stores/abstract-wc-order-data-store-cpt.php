@@ -737,7 +737,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					}
 				}
 			}
-			if ( 'object' === gettype( $meta->value ) && '__PHP_Incomplete_Class' === get_class( $meta->value ) ) {
+			if ( 'object' === gettype( $meta_data->value ) && '__PHP_Incomplete_Class' === get_class( $meta_data->value ) ) {
 				$meta_value = maybe_serialize( $meta_data->value );
 				$result     = $wpdb->insert(
 					_get_meta_table( 'post' ),
