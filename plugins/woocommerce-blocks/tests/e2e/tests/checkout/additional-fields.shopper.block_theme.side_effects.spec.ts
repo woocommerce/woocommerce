@@ -94,4 +94,39 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			)
 		).toBeVisible();
 	} );
+
+	test( 'Shopper can check and uncheck a checkbox field and place the order', async ( {
+		checkoutPageObject,
+	} ) => {
+		await checkoutPageObject.editShippingDetails();
+		await checkoutPageObject.unsyncBillingWithShipping();
+		await checkoutPageObject.editBillingDetails();
+
+		const optInCheckbox = checkoutPageObject.page.getByLabel(
+			'Do you want to subscribe to our newsletter? (optional)'
+		);
+		await optInCheckbox.check();
+		await optInCheckbox.uncheck();
+
+		await checkoutPageObject.fillInCheckoutWithTestData(
+			{},
+			{
+				address: {
+					shipping: { 'Government ID': '12345' },
+					billing: { 'Government ID': '54321' },
+				},
+				additional: { 'How did you hear about us?': 'Other' },
+			}
+		);
+
+		await checkoutPageObject.placeOrder();
+
+		// Check the order was placed successfully.
+		await expect(
+			checkoutPageObject.page.getByText( 'Government ID12345' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText( 'Government ID54321' )
+		).toBeVisible();
+	} );
 } );
