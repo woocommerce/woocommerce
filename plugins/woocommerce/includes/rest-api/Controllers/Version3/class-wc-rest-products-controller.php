@@ -1573,7 +1573,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		$context = isset( $this->request ) && isset( $this->request['context'] ) ? $this->request['context'] : 'view';
 
-		if ( $product->is_downloadable() || $context === 'edit' ) {
+		if ( $product->is_downloadable() || 'edit' === $context ) {
 			foreach ( $product->get_downloads() as $file_id => $file ) {
 				$downloads[] = array(
 					'id'   => $file_id, // MD5 hash.
