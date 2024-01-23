@@ -20,6 +20,10 @@ export function SingleUpdateMenu( {
 	onChange,
 	onDelete,
 }: VariationActionsMenuProps ) {
+	if ( ! selection || selection.length !== 1 ) {
+		return null;
+	}
+
 	return (
 		<DropdownMenu
 			popoverProps={ {
@@ -32,7 +36,7 @@ export function SingleUpdateMenu( {
 				onClick() {
 					recordEvent( 'product_variations_menu_view', {
 						source: TRACKS_SOURCE,
-						variation_id: ( selection as ProductVariation ).id,
+						variation_id: selection[ 0 ].id,
 					} );
 				},
 			} }

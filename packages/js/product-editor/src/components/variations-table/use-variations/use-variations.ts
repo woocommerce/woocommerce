@@ -3,6 +3,7 @@
  */
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	PartialProductVariation,
 	ProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
@@ -251,7 +252,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	async function onUpdate( {
 		id: variationId,
 		...variation
-	}: Partial< ProductVariation > ) {
+	}: PartialProductVariation ) {
 		if ( isUpdating[ variationId ] ) return;
 
 		const { updateProductVariation } = dispatch(
@@ -315,7 +316,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		} );
 	}
 
-	async function onBatchUpdate( values: Partial< ProductVariation >[] ) {
+	async function onBatchUpdate( values: PartialProductVariation[] ) {
 		// @ts-expect-error There are no types for this.
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
@@ -376,7 +377,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		return { update: result };
 	}
 
-	async function onBatchDelete( values: Pick< ProductVariation, 'id' >[] ) {
+	async function onBatchDelete( values: PartialProductVariation[] ) {
 		// @ts-expect-error There are no types for this.
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
