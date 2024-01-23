@@ -73,10 +73,37 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
+
+		// Variations tab.
+		if ( Features::is_enabled( 'product-variation-management' ) ) {
+			$variations_hide_conditions = array();
+			if ( Features::is_enabled( 'product-grouped' ) ) {
+				$variations_hide_conditions[] = array(
+					'expression' => 'editedProduct.type === "grouped"',
+				);
+			}
+			if ( Features::is_enabled( 'product-external-affiliate' ) ) {
+				$variations_hide_conditions[] = array(
+					'expression' => 'editedProduct.type === "external"',
+				);
+			}
+
+			$this->add_group(
+				array(
+					'id'             => $this::GROUP_IDS['VARIATIONS'],
+					'order'          => 20,
+					'attributes'     => array(
+						'title' => __( 'Variations', 'woocommerce' ),
+					),
+					'hideConditions' => $variations_hide_conditions,
+				)
+			);
+		}
+
 		$this->add_group(
 			array(
 				'id'         => $this::GROUP_IDS['ORGANIZATION'],
-				'order'      => 15,
+				'order'      => 30,
 				'attributes' => array(
 					'title' => __( 'Organization', 'woocommerce' ),
 				),
@@ -85,7 +112,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$this->add_group(
 			array(
 				'id'             => $this::GROUP_IDS['PRICING'],
-				'order'          => 20,
+				'order'          => 40,
 				'attributes'     => array(
 					'title' => __( 'Pricing', 'woocommerce' ),
 				),
@@ -99,7 +126,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$this->add_group(
 			array(
 				'id'         => $this::GROUP_IDS['INVENTORY'],
-				'order'      => 30,
+				'order'      => 50,
 				'attributes' => array(
 					'title' => __( 'Inventory', 'woocommerce' ),
 				),
@@ -120,44 +147,20 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$this->add_group(
 			array(
 				'id'             => $this::GROUP_IDS['SHIPPING'],
-				'order'          => 40,
+				'order'          => 60,
 				'attributes'     => array(
 					'title' => __( 'Shipping', 'woocommerce' ),
 				),
 				'hideConditions' => $shipping_hide_conditions,
 			)
 		);
-		if ( Features::is_enabled( 'product-variation-management' ) ) {
-			$variations_hide_conditions = array();
-			if ( Features::is_enabled( 'product-grouped' ) ) {
-				$variations_hide_conditions[] = array(
-					'expression' => 'editedProduct.type === "grouped"',
-				);
-			}
-			if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-				$variations_hide_conditions[] = array(
-					'expression' => 'editedProduct.type === "external"',
-				);
-			}
-
-			$this->add_group(
-				array(
-					'id'             => $this::GROUP_IDS['VARIATIONS'],
-					'order'          => 50,
-					'attributes'     => array(
-						'title' => __( 'Variations', 'woocommerce' ),
-					),
-					'hideConditions' => $variations_hide_conditions,
-				)
-			);
-		}
 
 		// Linked Products tab.
 		if ( Features::is_enabled( 'product-linked' ) ) {
 			$this->add_group(
 				array(
 					'id'         => $this::GROUP_IDS['LINKED_PRODUCTS'],
-					'order'      => 60,
+					'order'      => 70,
 					'attributes' => array(
 						'title' => __( 'Linked products', 'woocommerce' ),
 					),
