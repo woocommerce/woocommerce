@@ -58,7 +58,7 @@ test.describe( 'Filter blocks registration', async () => {
 
 			await expect(
 				editor.canvas
-					.getByLabel( `Block: Product Filters` )
+					.getByLabel( `Block: Product Filter` )
 					.getByLabel( 'Block: Heading' )
 					.and( editor.canvas.getByText( block.heading ) )
 			).toBeVisible();
