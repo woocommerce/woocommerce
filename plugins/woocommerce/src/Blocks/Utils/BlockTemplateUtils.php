@@ -691,6 +691,45 @@ class BlockTemplateUtils {
 	}
 
 	/**
+	 * Removes customized templates that shouldn't be available. That means customized templates from other themes or
+	 * customized templates based on the WooCommerce default templates when there is a customized template based on the
+	 * theme one.
+	 *
+	 * @param \WP_Block_Template[]|\stdClass[] $templates  List of templates to run the filter on.
+	 * @param string                           $theme_slug Slug of the theme currently active.
+	 *
+	 * @return array Filtered list of templates with only relevant templates available.
+	 */
+	public static function remove_duplicate_customized_templates( $templates, $theme_slug ) {
+		$filtered_templates = array_filter(
+			$templates,
+			function( $template ) use ( $templates, $theme_slug ) {
+				if ( $template->theme === $theme_slug ) {
+					// This is a customized template based on the theme template, so it should be returned.
+					return true;
+				} elseif ( self::PLUGIN_SLUG !== $template->theme && self::DEPRECATED_PLUGIN_SLUG !== $template->theme ) {
+					// This is a customized template from a different theme, so it shouldn't be returned.
+					return false;
+				}
+				// This is a template customized from the WooCommerce default template.
+				// Only return it if there isn't a customized version of the theme template.
+				$is_there_a_customized_theme_template = array_filter(
+					$templates,
+					function( $theme_template ) use ( $template, $theme_slug ) {
+						return $theme_template->slug === $template->slug && $theme_template->theme === $theme_slug;
+					}
+				);
+				if ( $is_there_a_customized_theme_template ) {
+					return false;
+				}
+				return true;
+			},
+		);
+
+		return $filtered_templates;
+	}
+
+	/**
 	 * Returns whether the blockified templates should be used or not.
 	 * First, we need to make sure WordPress version is higher than 6.1 (lowest that supports Products block).
 	 * Then, if the option is not stored on the db, we need to check if the current theme is a block one or not.

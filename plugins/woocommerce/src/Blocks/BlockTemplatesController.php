@@ -365,6 +365,7 @@ class BlockTemplatesController {
 		$post_type      = isset( $query['post_type'] ) ? $query['post_type'] : '';
 		$slugs          = isset( $query['slug__in'] ) ? $query['slug__in'] : array();
 		$template_files = $this->get_block_templates( $slugs, $template_type );
+		$theme_slug     = wp_get_theme()->get_stylesheet();
 
 		// @todo: Add apply_filters to _gutenberg_get_template_files() in Gutenberg to prevent duplication of logic.
 		foreach ( $template_files as $template_file ) {
@@ -398,7 +399,7 @@ class BlockTemplatesController {
 			}
 
 			$is_not_custom   = false === array_search(
-				wp_get_theme()->get_stylesheet() . '//' . $template_file->slug,
+				$theme_slug . '//' . $template_file->slug,
 				array_column( $query_result, 'id' ),
 				true
 			);
@@ -415,6 +416,11 @@ class BlockTemplatesController {
 		// We need to remove theme (i.e. filesystem) templates that have the same slug as a customised one.
 		// This only affects saved templates that were saved BEFORE a theme template with the same slug was added.
 		$query_result = BlockTemplateUtils::remove_theme_templates_with_custom_alternative( $query_result );
+
+		// There is the chance that the user customized the default template, installed a theme with a custom template
+		// and customized that one as well. When that happens, duplicates might appear in the list. See:
+		// https://github.com/woocommerce/woocommerce/issues/42220
+		$query_result = BlockTemplateUtils::remove_duplicate_customized_templates( $query_result, $theme_slug );
 
 		/**
 		 * WC templates from theme aren't included in `$this->get_block_templates()` but are handled by Gutenberg.
