@@ -81,7 +81,9 @@ class WC_Helper_Orders_API {
 				array(
 					'authenticated' => true,
 					'body'          => http_build_query(
-						array( 'product_id' => $request['product_id'], ),
+						array(
+							'product_id' => $request['product_id'],
+						),
 					)
 				)
 			);
