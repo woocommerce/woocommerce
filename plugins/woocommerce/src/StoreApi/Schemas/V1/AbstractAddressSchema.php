@@ -222,7 +222,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			}
 
 			if ( is_wp_error( $result ) && $result->has_errors() ) {
-				$errors->add( $result->get_error_code(), $result->get_error_message() );
+				$errors->merge_from( $result );
 			}
 		}
 
