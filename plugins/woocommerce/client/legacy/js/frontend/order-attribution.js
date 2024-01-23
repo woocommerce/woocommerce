@@ -123,7 +123,7 @@
 			window.wp && window.wp.data && typeof window.wp.data.subscribe === 'function'
 		) {
 			// Update checkout block data once more if the checkout store was loaded after this script.
-			const unsubscribe = wp.data.subscribe( function () {
+			const unsubscribe = window.wp.data.subscribe( function () {
 				unsubscribe();
 				updateCheckoutBlockData( getData() );
 			}, CHECKOUT_STORE_KEY );
