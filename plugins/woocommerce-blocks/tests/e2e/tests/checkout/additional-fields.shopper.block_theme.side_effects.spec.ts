@@ -95,7 +95,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		).toBeVisible();
 	} );
 
-	test( 'Shopper can check and uncheck a checkbox field and place the order', async ( {
+	test( 'Shopper can change the values of fields multiple times and place the order', async ( {
 		checkoutPageObject,
 	} ) => {
 		await checkoutPageObject.editShippingDetails();
@@ -119,14 +119,56 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			}
 		);
 
+		// First change after initial input.
+		await optInCheckbox.check();
+		await optInCheckbox.uncheck();
+		await checkoutPageObject.fillInCheckoutWithTestData(
+			{},
+			{
+				address: {
+					shipping: { 'Government ID': '54321' },
+					billing: { 'Government ID': '12345' },
+				},
+				additional: { 'How did you hear about us?': 'Facebook' },
+			}
+		);
+
+		// Second change after initial input.
+		await optInCheckbox.check();
+		await checkoutPageObject.fillInCheckoutWithTestData(
+			{},
+			{
+				address: {
+					shipping: { 'Government ID': '98765' },
+					billing: { 'Government ID': '43210' },
+				},
+				additional: { 'How did you hear about us?': 'Google' },
+			}
+		);
+
 		await checkoutPageObject.placeOrder();
 
 		// Check the order was placed successfully.
 		await expect(
-			checkoutPageObject.page.getByText( 'Government ID12345' )
+			checkoutPageObject.page.getByText( 'Government ID98765' )
 		).toBeVisible();
 		await expect(
-			checkoutPageObject.page.getByText( 'Government ID54321' )
+			checkoutPageObject.page.getByText( 'Government ID43210' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'How did you hear about us?Google'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'How did you hear about us?Google'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Do you want to subscribe to our newsletter?Yes'
+			)
 		).toBeVisible();
 	} );
 } );
