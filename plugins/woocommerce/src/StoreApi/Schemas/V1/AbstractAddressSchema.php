@@ -217,7 +217,8 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			// Check if a field is in the list of additional fields then validate the value against the custom validation rules defined for it.
 			// Skip additional validation if the schema validation failed.
 			if ( true === $result && in_array( $key, $additional_keys, true ) ) {
-				$result = $this->additional_fields_controller->validate_field( $key, $address[ $key ], $request );
+				$address_type = 'shipping_address' === $this->title ? 'shipping' : 'billing';
+				$result       = $this->additional_fields_controller->validate_field( $key, $address[ $key ], $request, $address_type );
 			}
 
 			if ( is_wp_error( $result ) && $result->has_errors() ) {
