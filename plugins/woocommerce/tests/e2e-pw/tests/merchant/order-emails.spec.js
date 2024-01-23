@@ -12,10 +12,9 @@ test.describe( 'Merchant > Order Action emails received', () => {
 
 	const storeName = 'WooCommerce Core E2E Test Suite';
 	let orderId, newOrderId, cancelledOrderId;
-	let api;
 
 	test.beforeAll( async ( { baseURL } ) => {
-		api = new wcApi( {
+		const api = new wcApi( {
 			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
@@ -54,15 +53,28 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		}
 	} );
 
-	test.afterAll( async () => {
+	test.afterAll( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+
 		await api.post( `orders/batch`, {
 			delete: [ orderId, newOrderId, cancelledOrderId ],
 		} );
 	} );
 
-	test( 'can receive new order email', async ( { page } ) => {
+	test( 'can receive new order email', async ( { page, baseURL } ) => {
 		// New order emails are sent automatically when we create a simple order. Verify that we get these.
 		// Need to create a new order for this test because we clear logs before each run.
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
 		await api
 			.post( 'orders', {
 				status: 'processing',
@@ -85,7 +97,13 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
 	} );
 
-	test( 'can receive cancelled order email', async ( { page } ) => {
+	test( 'can receive cancelled order email', async ( { page, baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
 		await api
 			.post( 'orders', {
 				status: 'processing',
