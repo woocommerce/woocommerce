@@ -339,7 +339,12 @@ class CheckoutSchema extends AbstractSchema {
 				}
 				$field_schema   = $properties[ $key ];
 				$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $fields[ $key ] ), $field_schema, $key );
-				$carry[ $key ]  = wp_kses( $rest_sanitized, [] );
+				$carry[ $key ]  = $rest_sanitized;
+
+				// Specific sanitization for string types, skipping other types from being coerced to strings.
+				if ( 'string' === $field_schema['type'] ) {
+					$carry[ $key ] = wp_kses( $rest_sanitized, [] );
+				}
 				return $carry;
 			},
 			[]
