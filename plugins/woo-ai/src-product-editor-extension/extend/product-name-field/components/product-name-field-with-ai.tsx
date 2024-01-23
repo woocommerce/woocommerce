@@ -30,7 +30,8 @@ import { check, title } from '@wordpress/icons';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	Button,
-	DropdownMenu,
+	// @ts-expect-error no exported member.
+	ToolbarDropdownMenu,
 	Flex,
 	FlexItem,
 	HorizontalRule,
@@ -197,13 +198,14 @@ const productNameFieldWithAi =
 				return (
 					<>
 						<BlockControls { ...blockControlProps }>
-							<DropdownMenu
+							<ToolbarDropdownMenu
 								icon={ title }
 								className="ai-assistant__title-suggestions-dropdown"
 								label={ __(
 									'Get title suggestions with AI Assistant',
 									'woocommerce'
 								) }
+								text={ __( 'Get suggestions', 'woocommerce' ) }
 								toggleProps={ {
 									children: (
 										<div className="ai-assistant__i18n-dropdown__toggle-label">
@@ -215,8 +217,17 @@ const productNameFieldWithAi =
 									),
 									disabled: false,
 								} }
+								popoverProps={ {
+									variant: 'toolbar',
+								} }
 							>
-								{ ( { onClose, isOpen } ) => (
+								{ ( {
+									onClose,
+									isOpen,
+								}: {
+									onClose: () => void;
+									isOpen: boolean;
+								} ) => (
 									<TitleSuggestionsMenu
 										onSelect={ ( newTitle ) => {
 											onClose();
@@ -225,7 +236,7 @@ const productNameFieldWithAi =
 										isOpen={ isOpen }
 									/>
 								) }
-							</DropdownMenu>
+							</ToolbarDropdownMenu>
 						</BlockControls>
 
 						<BlockEdit { ...props } />
