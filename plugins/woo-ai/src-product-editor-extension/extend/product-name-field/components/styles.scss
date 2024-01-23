@@ -1,7 +1,8 @@
 .ai-assistant__title-suggestions-dropdown__content {
+	min-width: 300px;
+	min-height: 80px;
+
 	&__suggestions {
-		min-width: 200px;
-		min-height: 60px;
 		.components-button {
 			width: 100%;
 		}

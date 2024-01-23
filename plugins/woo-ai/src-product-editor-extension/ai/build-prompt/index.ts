@@ -53,8 +53,8 @@ export async function buildProductTitleSuggestionsPromp( productId: number ) {
 		'Product titles should contain at least 20 characters.',
 		"The product's properties are:",
 		`${ JSON.stringify( validProductData ) }`,
-		'Here is an example of a valid response:',
-		'[ "first-title", "second-title", "third-title" ]',
+		``,
+		'Important!: Respect the format of the response. The response should be an array of strings: [ "first-title", "second-title", "third-title" ]',
 	];
 
 	return instructions.join( '\n' );

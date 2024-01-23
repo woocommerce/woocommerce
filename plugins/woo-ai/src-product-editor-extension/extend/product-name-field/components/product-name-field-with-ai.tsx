@@ -1,8 +1,14 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment, useState } from '@wordpress/element';
-import { check } from '@wordpress/icons';
+import {
+	createElement,
+	Fragment,
+	useCallback,
+	useEffect,
+	useState,
+} from '@wordpress/element';
+import { check, title } from '@wordpress/icons';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import {
 	Button,
@@ -39,7 +45,7 @@ import './styles.scss';
 
 const debug = debugFactory( 'woo-ai:product-editor:name-field' );
 
-function TitleSuggestions( {
+function TitleSuggestionsMenu( {
 	titles,
 	isRequesting,
 	onSelect,
@@ -49,6 +55,7 @@ function TitleSuggestions( {
 	isRequesting: boolean;
 	onSelect: ( title: string ) => void;
 	onRequest?: () => void;
+	isOpen?: boolean;
 } ): React.ReactElement {
 	return (
 		<div className="ai-assistant__title-suggestions-dropdown__content">
@@ -57,14 +64,14 @@ function TitleSuggestions( {
 				gap={ 1 }
 				className="ai-assistant__title-suggestions-dropdown__content__suggestions"
 			>
-				{ titles.map( ( title ) => (
-					<FlexItem key={ title }>
+				{ titles.map( ( suggestedTitle ) => (
+					<FlexItem key={ suggestedTitle }>
 						<Button
 							icon={ check }
-							onClick={ () => onSelect( title ) }
+							onClick={ () => onSelect( suggestedTitle ) }
 							variant="tertiary"
 						>
-							{ title }
+							{ suggestedTitle }
 						</Button>
 					</FlexItem>
 				) ) }
@@ -73,11 +80,12 @@ function TitleSuggestions( {
 			<HorizontalRule />
 
 			<Flex justify="flex-end">
-				<FlexItem>
+				<FlexItem self-align="flex-middle">
 					<Button
 						onClick={ onRequest }
 						disabled={ isRequesting }
 						variant="secondary"
+						icon={ ai }
 					>
 						{ __( 'Other suggestions', 'woocommerce' ) }
 					</Button>
@@ -140,51 +148,45 @@ const productNameFieldWithAi =
 					},
 				} );
 
+				const requestTitleSuggestions = useCallback( async () => {
+					const prompt = await buildProductTitleSuggestionsPromp(
+						productId
+					);
+					requestCompletion( prompt );
+					setIsRequesting( true );
+				}, [ productId, requestCompletion ] );
+
 				const blockControlProps = { group: 'other' };
 
 				return (
 					<>
 						<BlockControls { ...blockControlProps }>
 							<DropdownMenu
+								icon={ title }
 								className="ai-assistant__title-suggestions-dropdown"
-								icon={ ai }
 								label={ __(
-									'Get title suggestions',
+									'Get title suggestions with AI Assistant',
 									'woocommerce'
 								) }
 								toggleProps={ {
 									children: (
-										<>
-											<div className="ai-assistant__i18n-dropdown__toggle-label">
-												{ __(
-													'Get suggestions',
-													'woocommerce'
-												) }
-											</div>
-										</>
+										<div className="ai-assistant__i18n-dropdown__toggle-label">
+											{ __(
+												'Get suggestions',
+												'woocommerce'
+											) }
+										</div>
 									),
 									disabled: false,
-									onClick: async () => {
-										const prompt =
-											await buildProductTitleSuggestionsPromp(
-												productId
-											);
-										requestCompletion( prompt );
-									},
 								} }
 							>
-								{ ( { onClose } ) => (
-									<TitleSuggestions
+								{ ( { onClose, isOpen } ) => (
+									<TitleSuggestionsMenu
 										titles={ titleSuggestions }
 										onSelect={ onClose }
 										isRequesting={ isRequesting }
-										onRequest={ async () => {
-											const prompt =
-												await buildProductTitleSuggestionsPromp(
-													productId
-												);
-											requestCompletion( prompt );
-										} }
+										onRequest={ requestTitleSuggestions }
+										isOpen={ isOpen }
 									/>
 								) }
 							</DropdownMenu>
