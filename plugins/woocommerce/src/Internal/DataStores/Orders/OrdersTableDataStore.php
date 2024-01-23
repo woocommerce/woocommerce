@@ -2907,7 +2907,7 @@ CREATE TABLE $meta_table (
 					throw $th;
 				}
 
-				$meta_value = maybe_serialize( $meta_data->value );
+				$meta_value = maybe_serialize( $meta->value );
 				$wpdb->delete(
 					_get_meta_table( 'post' ),
 					array(

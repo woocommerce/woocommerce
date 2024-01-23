@@ -3335,6 +3335,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order->set_date_modified( time() + 1 );
 		$order->save();
 
+		// Test fetching an order with meta data containing an object of a non-existent class.
 		$fetched_order = wc_get_order( $order->get_id() );
 		$meta          = $fetched_order->get_meta( $meta_key );
 
@@ -3347,6 +3348,16 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( 'Belgium', $meta_object_vars['country_name'] );
 		$this->assertEquals( 'Brussels', $meta_object_vars['city'] );
 		$this->assertEquals( 'Europe/Brussels', $meta_object_vars['timezone'] );
+	
+		// Test deleting meta data containing an object of a non-existent class.
+		$meta_data = $this->sut->read_meta( $order );
+		foreach ( $meta_data as $meta ) {
+			$this->sut->delete_meta( $order, (object) array( 'id' => $meta->meta_id ) );
+		}
+		$fetched_order = wc_get_order( $order->get_id() );
+
+		$this->assertEmpty( $fetched_order->get_meta_data() );
+		$this->assertEquals( '', get_post_meta( $order->get_id(), $meta_key, true ) );
 	}
 
 }
