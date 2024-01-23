@@ -8,15 +8,7 @@ import {
 	useEffect,
 	useState,
 } from '@wordpress/element';
-import { check, title } from '@wordpress/icons';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import {
-	Button,
-	DropdownMenu,
-	Flex,
-	FlexItem,
-	HorizontalRule,
-} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { __experimentalUseCompletion as useCompletion } from '@woocommerce/ai';
 import debugFactory from 'debug';
@@ -28,6 +20,20 @@ import { BlockControls } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp, useEntityId } from '@wordpress/core-data';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { chevronRight, title } from '@wordpress/icons';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	Button,
+	DropdownMenu,
+	Flex,
+	FlexItem,
+	HorizontalRule,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -122,7 +128,7 @@ function TitleSuggestionsMenu( {
 				{ titleSuggestions.map( ( suggestedTitle ) => (
 					<FlexItem key={ suggestedTitle }>
 						<Button
-							icon={ check }
+							icon={ chevronRight }
 							onClick={ () => onSelect( suggestedTitle ) }
 							variant="tertiary"
 						>
