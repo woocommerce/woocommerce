@@ -60,7 +60,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		} );
 	} );
 
-	test( 'can receive new order email', async ( { page} ) => {
+	test( 'can receive new order email', async ( { page } ) => {
 		// New order emails are sent automatically when we create a simple order. Verify that we get these.
 		// Need to create a new order for this test because we clear logs before each run.
 		await api
@@ -85,7 +85,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
 	} );
 
-	test( 'can receive cancelled order email', async ( { page} ) => {
+	test( 'can receive cancelled order email', async ( { page } ) => {
 		await api
 			.post( 'orders', {
 				status: 'processing',
