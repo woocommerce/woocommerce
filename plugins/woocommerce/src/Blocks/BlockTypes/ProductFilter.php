@@ -105,7 +105,12 @@ final class ProductFilter extends AbstractBlock {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
 			$parsed_url  = wp_parse_url( esc_url_raw( $request_uri ) );
-			parse_str( $parsed_url['query'], $url_query_params );
+
+			$url_query_params = [];
+
+			if ( isset( $parsed_url['query'] ) ) {
+				parse_str( $parsed_url['query'], $url_query_params );
+			}
 
 			return empty( array_unique( apply_filters( 'collection_filter_query_param_keys', array(), array_keys( $url_query_params ) ) ) );
 		}
