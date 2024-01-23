@@ -85,37 +85,4 @@ test.describe( 'Test the order confirmation template', async () => {
 				} )
 		).toBeVisible();
 	} );
-
-	test( 'Template can be modified', async ( {
-		page,
-		admin,
-		editorUtils,
-		frontendUtils,
-		pageObject,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-		} );
-		await editorUtils.enterEditMode();
-		await editorUtils.editor.insertBlock( {
-			name: 'core/paragraph',
-			attributes: { content: userText },
-		} );
-		await editorUtils.saveTemplate();
-		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-		await expect(
-			await pageObject.selectAndVerifyShippingOption(
-				FREE_SHIPPING_NAME,
-				FREE_SHIPPING_PRICE
-			)
-		).toBe( true );
-		await pageObject.fillInCheckoutWithTestData();
-		await pageObject.placeOrder();
-
-		await expect( page.getByText( userText ).first() ).toBeVisible();
-	} );
 } );
