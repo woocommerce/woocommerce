@@ -56,12 +56,13 @@ export const Transitional = ( {
 		setSurveyOpen( false );
 	};
 
-	const showSurveyButton =
-		( ! hasCompleteSurvey && aiOnline ) || ! isWooExpress;
+	const showSurveyButton = ! hasCompleteSurvey;
+	const showAISurvey = isWooExpress && aiOnline;
 
+	console.log( { showSurveyButton, showAISurvey } );
 	return (
 		<div className="woocommerce-customize-store__transitional">
-			{ isSurveyOpen && aiOnline && (
+			{ isSurveyOpen && (
 				<Modal
 					title={ __( 'Share feedback', 'woocommerce' ) }
 					onRequestClose={ () => closeSurvey() }
@@ -69,7 +70,7 @@ export const Transitional = ( {
 					className="woocommerce-ai-survey-modal"
 				>
 					<SurveyForm
-						isWooExpress={ isWooExpress }
+						showAISurvey={ showAISurvey }
 						onSend={ () => {
 							sendEvent( {
 								type: 'COMPLETE_SURVEY',

@@ -60,11 +60,11 @@ const StarRating = ( {
 };
 
 export const SurveyForm = ( {
-	isWooExpress,
+	showAISurvey,
 	onSend,
 	closeFunction,
 }: {
-	isWooExpress: boolean;
+	showAISurvey: boolean;
 	onSend: () => void;
 	closeFunction: CloseSurveyFunction;
 } ): JSX.Element => {
@@ -78,7 +78,7 @@ export const SurveyForm = ( {
 	const [ rating, setRating ] = useState( 0 );
 
 	const sendData = () => {
-		const surveyCompleteEvent = isWooExpress
+		const surveyCompleteEvent = showAISurvey
 			? 'customize_your_store_transitional_survey_complete'
 			: 'customize_your_store_on_core_transitional_survey_complete';
 		recordEvent( surveyCompleteEvent, {
@@ -124,7 +124,7 @@ export const SurveyForm = ( {
 				<hr />
 
 				<h4>
-					{ isWooExpress
+					{ showAISurvey
 						? __(
 								'What motivated you to choose the “Design with AI” option?',
 								'woocommerce'
@@ -136,7 +136,7 @@ export const SurveyForm = ( {
 				</h4>
 				<CheckboxControl
 					label={
-						isWooExpress
+						showAISurvey
 							? __(
 									'I wanted to see how AI could help me streamline the process.',
 									'woocommerce'
@@ -185,7 +185,7 @@ export const SurveyForm = ( {
 				/>
 
 				<h4>
-					{ isWooExpress
+					{ showAISurvey
 						? __(
 								'Feel free to spill the beans here. All suggestions, feedback, or comments about the AI-generated store experience are welcome.',
 								'woocommerce'
