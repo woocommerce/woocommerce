@@ -49,7 +49,7 @@ export class FrontendUtils {
 			waitUntil: 'domcontentloaded',
 		} );
 
-		this.page.waitForSelector( '#email' );
+		await this.page.waitForSelector( '#email' );
 	}
 
 	async goToCart() {
