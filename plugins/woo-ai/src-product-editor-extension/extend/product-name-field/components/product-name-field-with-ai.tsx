@@ -135,7 +135,7 @@ function TitleSuggestionsMenu( {
 				className="ai-assistant__title-suggestions-dropdown__content__suggestions"
 			>
 				{ titleSuggestions.map( ( suggestedTitle, i ) => (
-					<FlexItem key={ suggestedTitle }>
+					<FlexItem key={ `suggestion-${ i }` }>
 						<Button
 							className={
 								! suggestedTitle?.length ? 'is-loading' : ''

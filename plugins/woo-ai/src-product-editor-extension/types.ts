@@ -22,10 +22,12 @@ export interface ProductEditorBlockEditProps< T extends Record< string, any > >
 	readonly context: ProductEditorContext;
 	readonly name: string;
 	readonly isSelected: boolean;
+	readonly attributes: T;
 }
 
 export interface ProductEditorBlockAttributes extends BlockAttributes {
 	_templateBlockId?: string;
+	property?: string;
 }
 
 export type ProductTitleBlockEditProps =
