@@ -373,7 +373,7 @@ class CheckoutSchema extends AbstractSchema {
 
 			// Only allow custom validation on fields that pass the schema validation.
 			if ( true === $result ) {
-				$result = $this->additional_fields_controller->validate_field( $key, $field_value, $request );
+				$result = $this->additional_fields_controller->validate_field( $key, $field_value, $request, null );
 			}
 
 			if ( is_wp_error( $result ) && $result->has_errors() ) {
