@@ -8,6 +8,7 @@ import { useState, useEffect, useContext } from '@wordpress/element';
 import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { Status } from '@wordpress/notices';
+import { ConfettiAnimation } from '@automattic/components';
 
 /**
  * Internal dependencies
@@ -21,6 +22,7 @@ import { createOrder } from './create-order';
 import { MARKETPLACE_PATH, WP_ADMIN_PLUGIN_LIST_URL } from '../constants';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
+import { CONFETTI_COLORS } from '../../../utils/constants';
 
 enum InstallFlowStatus {
 	'notConnected',
@@ -392,6 +394,9 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 						label: 'install',
 					} }
 				/>
+			) }
+			{ installStatus === InstallFlowStatus.activated && (
+				<ConfettiAnimation colors={ CONFETTI_COLORS } />
 			) }
 			<ButtonGroup className="woocommerce-marketplace__header-account-modal-button-group">
 				{ secondaryButton() }
