@@ -3,6 +3,8 @@
  */
 import { useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
+
+import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 /**
  * Internal dependencies
  */
@@ -47,13 +49,13 @@ const useHandleRequiresAction = ( {
 	const handleRequiresAction = useCallback(
 		async (
 			response: ApiResponse,
-			token: string,
 			tempthreadID: string,
 			userQuery: string
 		) => {
 			const answer = response.answer;
 			const functionID: string = answer.function_id;
 			const runID: string = response.run_id;
+			const { token } = await requestJetpackToken();
 
 			generateInformationalMessage(
 				"I'm trying to accomplish that for you now..."

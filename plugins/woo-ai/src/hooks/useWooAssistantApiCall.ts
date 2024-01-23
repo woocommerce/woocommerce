@@ -69,7 +69,6 @@ const useWooAssistantApiCall = ( {
 				if ( response.status === 'requires_action' ) {
 					answer = await handleRequiresAction(
 						response,
-						token,
 						newthreadID,
 						userQuery
 					);
