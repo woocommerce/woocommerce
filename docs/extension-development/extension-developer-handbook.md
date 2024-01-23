@@ -16,7 +16,7 @@ Merchants make use of WooCommerce extensions daily, and should have a unified an
 
 Note: We provide this page as a best practice for developers.
 
-## [Check if WooCommerce is active](https://woo.com/document/create-a-plugin/#section-1)
+## Check if WooCommerce is active
 
 Most WooCommerce plugins do not need to run unless WooCommerce is already active. You can wrap your plugin in a check to see if WooCommerce is installed:
 
@@ -44,25 +44,25 @@ in_array( $plugin_path, wp_get_active_and_valid_plugins() )
 
 Note that this check will fail if the WC plugin folder is named anything other than woocommerce.
 
-## [Main file naming](https://woo.com/document/create-a-plugin/#section-2)
+## Main file naming
 
 The main plugin file should adopt the name of the plugin, e.g., A plugin with the directory name plugin-name would have its main file named plugin-name.php.
 
-## [Text domains](https://woo.com/document/create-a-plugin/#section-3)
+## Text domains
 
 Follow guidelines for [Internationalization for WordPress Developers](https://codex.wordpress.org/I18n_for_WordPress_Developers), the text domain should match your plugin directory name, e.g., A plugin with a directory name of plugin-name would have the text domain plugin-name. Do not use underscores.
 
-## [Localization](https://woo.com/document/create-a-plugin/#section-4)
+## Localization
 
 All text strings within the plugin code should be in English. This is the WordPress default locale, and English should always be the first language. If your plugin is intended for a specific market (e.g., Spain or Italy), include appropriate translation files for those languages within your plugin package. Learn more at [Using Makepot to translate your plugin](https://codex.wordpress.org/I18n_for_WordPress_Developers#Translating_Plugins_and_Themes).
 
-## [Follow WordPress PHP Guidelines](https://woo.com/document/create-a-plugin/#section-5)
+## Follow WordPress PHP Guidelines
 
 WordPress has a [set of guidelines](http://make.wordpress.org/core/handbook/coding-standards/php/) to keep all WordPress code consistent and easy to read. This includes quotes, indentation, brace style, shorthand php tags, yoda conditions, naming conventions, and more. Please review the guidelines.
 
 Code conventions also prevent basic mistakes, as [Apple made with iOS 7.0.6](https://www.imperialviolet.org/2014/02/22/applebug.html).
 
-## [Custom Database Tables & Data Storage](https://woo.com/document/create-a-plugin/#section-6)
+## Custom Database Tables & Data Storage
 
 Avoid creating custom database tables. Whenever possible, use WordPress [post types](http://codex.wordpress.org/Post_Types#Custom_Post_Types), [taxonomies](http://codex.wordpress.org/Taxonomies), and [options](http://codex.wordpress.org/Creating_Options_Pages).
 
@@ -76,7 +76,7 @@ Consider the permanence of your data. Here's a quick primer:
 
 Logs should be written to a file using the [WC_Logger](https://woo.com/wc-apidocs/class-WC_Logger.html) class.
 
-## [Prevent Data Leaks](https://woo.com/document/create-a-plugin/#section-7)
+## Prevent Data Leaks
 
 Try to prevent direct access data leaks. Add this line of code after the opening PHP tag in each PHP file:
 
@@ -86,11 +86,11 @@ exit; // Exit if accessed directly
 }
 ```
 
-## [Readme](https://woo.com/document/create-a-plugin/#section-8)
+## README
 
-All plugins need a [standard WordPress readme](http://wordpress.org/plugins/about/readme.txt).
+All plugins need a [standard WordPress README](http://wordpress.org/plugins/about/readme.txt).
 
-Your readme might look something like this:
+Your README might look something like this:
 
 ```php
 === Plugin Name ===
@@ -104,7 +104,7 @@ License: GPLv3 or later License
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 ```
 
-## [Plugin Author Name](https://woo.com/document/create-a-plugin/#section-9)
+## Plugin Author Name
 
 To ensure a consistent experience for all WooCommerce users,including finding information on who to contact with queries, the following plugin headers should be in place:
 
@@ -135,18 +135,18 @@ For example:
 */
 ```
 
-## [Declaring required and supported WooCommerce version](https://woo.com/document/create-a-plugin/#section-10)
+## Declaring required and supported WooCommerce version
 
 Use the follow headers to declare "required" and "tested up to" versions:
 
 - WC requires at least
 - WC tested up to
 
-## [Plugin URI](https://woo.com/document/create-a-plugin/#section-11)
+## Plugin URI
 
 Ensure that the Plugin URI line of the above plugin header is provided. This line should contain the URL of the plugin's product/sale page or to a dedicated page for the plugin on your website.
 
-## [Make it Extensible](https://woo.com/document/create-a-plugin/#section-13)
+## Make it Extensible
 
 Developers should use WordPress actions and filters to allow for modification/customization without requiring users to touch the plugin's core code base.
 
@@ -154,23 +154,23 @@ If your plugin creates a front-end output, we recommend to having a templating e
 
 For more information, check out Pippin's post on [Writing Extensible Plugins with Actions and Filters](http://code.tutsplus.com/tutorials/writing-extensible-plugins-with-actions-and-filters--wp-26759).
 
-## [Use of External Libraries](https://woo.com/document/create-a-plugin/#section-14)
+## Use of External Libraries
 
 The use of entire external libraries is typically not suggested as this can open up the product to security vulnerabilities. If an external library is absolutely necessary, developers should be thoughtful about the code used and assume ownership as well as of responsibility for it. Try to  only include the strictly necessary part of the library, or use a WordPress-friendly version or opt to build your own version. For example, if needing to use a text editor such as TinyMCE, we recommend using the WordPress-friendly version, TinyMCE Advanced.
 
-## [Remove Unused Code](https://woo.com/document/create-a-plugin/#section-15)
+## Remove Unused Code
 
 With version control, there's no reason to leave commented-out code; it's annoying to scroll through and read. Remove it and add it back later if needed.
 
-## [Comment](https://woo.com/document/create-a-plugin/#section-16)
+## Comment
 
 If you have a function, what does the function do? There should be comments for most if not all functions in your code. Someone/You may want to modify the plugin, and comments are helpful for that. We recommend using [PHP Doc Blocks](http://en.wikipedia.org/wiki/PHPDoc)  similar to [WooCommerce](https://github.com/woocommerce/woocommerce/).
 
-## [Avoid God Objects](https://woo.com/document/create-a-plugin/#section-17)
+## Avoid God Objects
 
 [God Objects](http://en.wikipedia.org/wiki/God_object) are objects that know or do too much. The point of object-oriented programming is to take a large problem and break it into smaller parts. When functions do too much, it's hard to follow their logic, making bugs harder to fix. Instead of having massive functions, break them down into smaller pieces.
 
-## [Test Extension Quality & Security with Quality Insights Tool](https://woo.com/document/create-a-plugin/#section-18)
+## Test Extension Quality & Security with Quality Insights Tool
 
 Integrate the [Quality Insights Toolkit (QIT)](https://woocommerce.github.io/qit-documentation/) into your development workflow to ensure your extension adheres to WordPress / WooCommerce quality and security standards. The QIT allows the ability to test your extensions against new releases of PHP, WooCommerce, and WordPress, as well as other active extensions, at the same time. The following tests are available today:
 
@@ -180,19 +180,19 @@ Integrate the [Quality Insights Toolkit (QIT)](https://woocommerce.github.io/qit
 - [PHPStan](https://woocommerce.github.io/qit-documentation/#/test-types/phpstan)
 - [API](https://woocommerce.github.io/qit-documentation/#/test-types/api)
 
-## [Test Your Code with WP_DEBUG](https://woo.com/document/create-a-plugin/#section-19)
+## Test Your Code with WP_DEBUG
 
 Always develop with [WP_DEBUG](http://codex.wordpress.org/Debugging_in_WordPress) mode on, so you can see all PHP warnings sent to the screen. This will flag things like making sure a variable is set before checking the value.
 
-## [Separate Business Logic & Presentation Logic](https://woo.com/document/create-a-plugin/#section-20)
+## Separate Business Logic & Presentation Logic
 
 It's a good practice to separate business logic (i.e., how the plugin works) from [presentation logic](http://en.wikipedia.org/wiki/Presentation_logic) (i.e., how it looks). Two separate pieces of logic are more easily maintained and swapped if necessary. An example is to have two different classes - one for displaying the end results, and one for the admin settings page.
 
-## [Use Transients to Store Offsite Information](https://woo.com/document/create-a-plugin/#section-21)
+## Use Transients to Store Offsite Information
 
 If you provide a service via an API, it's best to store that information so future queries can be done faster and the load on your service is lessened. [WordPress transients](http://codex.wordpress.org/Transients_API) can be used to store data for a certain amount of time.
 
-## [Logging Data](https://woo.com/document/create-a-plugin/#section-22)
+## Logging Data
 
 You may want to log data that can be useful for debugging purposes. This is great with two conditions:
 

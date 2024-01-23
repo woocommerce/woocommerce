@@ -387,10 +387,12 @@
 			"clean": "if-file-deleted",
 			"env": {
 				"NODE_ENV": {
-					"external": true
+					"external": true,
+					"default": "production"
 				},
 				"BABEL_ENV": {
-					"external": true
+					"external": true,
+					"default": "default"
 				},
 				"WOOCOMMERCE_BLOCKS_PHASE": {
 					"external": true
