@@ -23,7 +23,6 @@ export { init as initTag } from './product-fields/tag';
 export { init as initInventoryQuantity } from './product-fields/inventory-quantity';
 export { init as initToggle } from './generic/toggle';
 export { init as attributesInit } from './product-fields/attributes';
-export { init as initVariations } from './product-fields/variations';
 export { init as initRequirePassword } from './product-fields/password';
 export { init as initProductDetailsSectionDescription } from './product-fields/product-details-section-description';
 export { init as initProductList } from './product-fields/product-list';

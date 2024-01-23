@@ -60,7 +60,6 @@ class BlockRegistry {
 		'woocommerce/product-tag-field',
 		'woocommerce/product-inventory-quantity-field',
 		'woocommerce/product-variation-items-field',
-		'woocommerce/product-variations-fields',
 		'woocommerce/product-password-field',
 		'woocommerce/product-list-field',
 		'woocommerce/product-has-variations-notice',
