@@ -1,4 +1,4 @@
 Significance: patch
-Type: add
+Type: update
 
-Add Confetti component from @automattic/components.
+Update @automattic/components package to 2.1.0.
