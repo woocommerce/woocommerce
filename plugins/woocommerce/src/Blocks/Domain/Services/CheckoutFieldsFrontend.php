@@ -230,14 +230,15 @@ class CheckoutFieldsFrontend {
 		$customer = new WC_Customer( $user_id );
 		$fields   = $this->checkout_fields_controller->get_fields_for_location( 'address' );
 
+		// Nonces are checked before the action is fired that this function hooks into.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		foreach ( $fields as $key => $field ) {
 			$field_key = 'billing' === $address_type ? '/billing/' . $key : '/shipping/' . $key;
 
-			if ( ! isset( $_POST[ $field_key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			if ( ! isset( $_POST[ $field_key ] ) ) {
 				continue;
 			}
 
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$value = wc_clean( wp_unslash( $_POST[ $field_key ] ) );
 
 			if ( ! empty( $field['required'] ) && empty( $value ) ) {
@@ -248,5 +249,6 @@ class CheckoutFieldsFrontend {
 
 			$this->checkout_fields_controller->persist_field_for_customer( $field_key, $value, $customer );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 }
