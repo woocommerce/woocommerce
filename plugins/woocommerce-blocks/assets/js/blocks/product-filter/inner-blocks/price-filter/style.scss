@@ -55,23 +55,13 @@
 		--low: 0%;
 		--high: 100%;
 		--range-color: currentColor;
-		--track-background: linear-gradient(
-				to right,
-				transparent var(--low),
-				var(--range-color) 0,
-				var(--range-color) var(--high),
-				transparent 0
-			)
+		--track-background:
+			linear-gradient(to right, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0)
 			no-repeat 0 100% / 100% 100%;
 
 		.rtl & {
-			--track-background: linear-gradient(
-					to left,
-					transparent var(--low),
-					var(--range-color) 0,
-					var(--range-color) var(--high),
-					transparent 0
-				)
+			--track-background:
+				linear-gradient(to left, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0)
 				no-repeat 0 100% / 100% 100%;
 		}
 
