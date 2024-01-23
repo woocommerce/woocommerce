@@ -171,4 +171,60 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			)
 		).toBeVisible();
 	} );
+
+	test( 'Shopper can see server-side validation errors', async ( {
+		checkoutPageObject,
+	} ) => {
+		await checkoutPageObject.editShippingDetails();
+		await checkoutPageObject.unsyncBillingWithShipping();
+		await checkoutPageObject.editBillingDetails();
+
+		await checkoutPageObject.fillInCheckoutWithTestData(
+			{},
+			{
+				address: {
+					shipping: { 'Government ID': 'abcde' },
+					billing: { 'Government ID': 'fghij' },
+				},
+				additional: { 'How did you hear about us?': 'Other' },
+			}
+		);
+
+		await checkoutPageObject.placeOrder( false );
+		await checkoutPageObject.page.waitForResponse( ( response ) => {
+			return response.url().indexOf( 'wc/store/v1/checkout' ) !== -1;
+		} );
+
+		await expect(
+			checkoutPageObject.page
+				.locator( '#billing-fields' )
+				.getByText( 'Invalid government ID.' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page
+				.locator( '#shipping-fields' )
+				.getByText( 'Invalid government ID.' )
+		).toBeVisible();
+
+		await checkoutPageObject.fillInCheckoutWithTestData(
+			{},
+			{
+				address: {
+					shipping: { 'Government ID': '12345' },
+					billing: { 'Government ID': '54321' },
+				},
+				additional: { 'How did you hear about us?': 'Other' },
+			}
+		);
+
+		await checkoutPageObject.placeOrder();
+
+		// Check the order was placed successfully.
+		await expect(
+			checkoutPageObject.page.getByText( 'Government ID12345' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText( 'Government ID54321' )
+		).toBeVisible();
+	} );
 } );
