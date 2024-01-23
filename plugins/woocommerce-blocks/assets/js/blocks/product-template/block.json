@@ -13,7 +13,8 @@
 		"query",
 		"queryContext",
 		"displayLayout",
-		"templateSlug"
+		"templateSlug",
+		"postId"
 	],
 	"supports": {
 		"inserter": false,

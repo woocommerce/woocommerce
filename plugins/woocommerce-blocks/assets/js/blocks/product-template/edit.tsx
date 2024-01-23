@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /**
  * External dependencies
  */
@@ -19,6 +18,11 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductCollectionAttributes } from '@woocommerce/blocks/product-collection/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isNumber } from '@woocommerce/types';
+
+/**
+ * Internal dependencies
+ */
+import { useGetLocation } from './utils';
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -69,36 +73,43 @@ const ProductTemplateBlockPreview = ( {
 
 const MemoizedProductTemplateBlockPreview = memo( ProductTemplateBlockPreview );
 
-const ProductTemplateEdit = ( {
-	clientId,
-	context: {
-		query: {
-			perPage,
-			offset = 0,
-			order,
-			orderBy,
-			search,
-			exclude,
-			inherit,
-			taxQuery,
-			pages,
-			...restQueryArgs
+const ProductTemplateEdit = (
+	props: BlockEditProps< {
+		clientId: string;
+	} > & {
+		context: ProductCollectionAttributes;
+		__unstableLayoutClassNames: string;
+	}
+) => {
+	const {
+		clientId,
+		context: {
+			query: {
+				perPage,
+				offset = 0,
+				order,
+				orderBy,
+				search,
+				exclude,
+				inherit,
+				taxQuery,
+				pages,
+				...restQueryArgs
+			},
+			queryContext = [ { page: 1 } ],
+			templateSlug,
+			displayLayout: { type: layoutType, columns, shrinkColumns } = {
+				type: 'flex',
+				columns: 3,
+				shrinkColumns: false,
+			},
 		},
-		queryContext = [ { page: 1 } ],
-		templateSlug,
-		displayLayout: { type: layoutType, columns, shrinkColumns } = {
-			type: 'flex',
-			columns: 3,
-			shrinkColumns: false,
-		},
-	},
-	__unstableLayoutClassNames,
-}: BlockEditProps< {
-	clientId: string;
-} > & {
-	context: ProductCollectionAttributes;
-	__unstableLayoutClassNames: string;
-} ) => {
+		__unstableLayoutClassNames,
+	} = props;
+	const location = useGetLocation( props.context );
+
+	console.log( location );
+
 	const [ { page } ] = queryContext;
 	const [ activeBlockContextId, setActiveBlockContextId ] = useState();
 	const postType = 'product';
