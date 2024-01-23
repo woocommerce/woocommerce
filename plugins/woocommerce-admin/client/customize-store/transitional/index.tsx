@@ -59,7 +59,6 @@ export const Transitional = ( {
 	const showSurveyButton = ! hasCompleteSurvey;
 	const showAISurvey = isWooExpress && aiOnline;
 
-	console.log( { showSurveyButton, showAISurvey } );
 	return (
 		<div className="woocommerce-customize-store__transitional">
 			{ isSurveyOpen && (
