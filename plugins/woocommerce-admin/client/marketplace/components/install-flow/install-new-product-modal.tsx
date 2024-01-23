@@ -392,7 +392,6 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 				/>
 			) }
 			{ installStatus === InstallFlowStatus.activated && <Confetti /> }
-			<Confetti />
 			<ButtonGroup className="woocommerce-marketplace__header-account-modal-button-group">
 				{ secondaryButton() }
 				{ primaryButton() }
