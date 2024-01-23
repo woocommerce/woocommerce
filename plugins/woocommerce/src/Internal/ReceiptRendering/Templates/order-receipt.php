@@ -46,14 +46,16 @@
 	<p>
 		<?php echo $formatted_date; ?>
 	</p>
-	<h3><?php echo strtoupper($texts['payment_method_section_title']); ?></h3>
-	<p>
-		<?php if($payment_info) { ?>
-			<span class="card-icon"></span> - <?php echo $payment_info['card_last4']; ?>
-		<?php } else { ?>
-			<p><?php echo $payment_method; ?></p>
-		<?php } ?>
-	</p>
+	<?php if($payment_method) { ?>}
+		<h3><?php echo strtoupper($texts['payment_method_section_title']); ?></h3>
+		<p>
+			<?php if($payment_info) { ?>
+				<span class="card-icon"></span> - <?php echo $payment_info['card_last4']; ?>
+			<?php } else { ?>
+				<p><?php echo $payment_method; ?></p>
+			<?php } ?>
+		</p>
+	<?php } ?>
 </header>
 
 <h3><?php echo strtoupper($texts['summary_section_title']); ?></h3>
