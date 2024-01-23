@@ -27,7 +27,7 @@ import { BlockControls } from '@wordpress/block-editor';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityId } from '@wordpress/core-data';
+import { useEntityProp, useEntityId } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -165,6 +165,11 @@ const productNameFieldWithAi =
 
 				debug( 'Extending product name field block' );
 
+				const [ , setName ] = useEntityProp< string >(
+					'postType',
+					'product',
+					'name'
+				);
 				const blockControlProps = { group: 'other' };
 
 				return (
@@ -191,7 +196,10 @@ const productNameFieldWithAi =
 							>
 								{ ( { onClose, isOpen } ) => (
 									<TitleSuggestionsMenu
-										onSelect={ onClose }
+										onSelect={ ( newTitle ) => {
+											onClose();
+											setName( newTitle );
+										} }
 										isOpen={ isOpen }
 									/>
 								) }
