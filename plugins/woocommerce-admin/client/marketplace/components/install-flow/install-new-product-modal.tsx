@@ -12,17 +12,14 @@ import { Status } from '@wordpress/notices';
 /**
  * Internal dependencies
  */
-import ProductCard from '~/marketplace/components/product-card/product-card';
-import { Product } from '~/marketplace/components/product-list/types';
-import { installingStore } from '~/marketplace/contexts/install-store';
-import { downloadProduct } from '~/marketplace/utils/functions';
+import ProductCard from '../product-card/product-card';
+import { Product } from '../product-list/types';
+import ConnectAccountButton from '../my-subscriptions/table/actions/connect-account-button';
+import { installingStore } from '../../contexts/install-store';
+import { downloadProduct } from '../../utils/functions';
 import { createOrder } from './create-order';
-import { getAdminSetting } from '~/utils/admin-settings';
-import {
-	MARKETPLACE_PATH,
-	WP_ADMIN_PLUGIN_LIST_URL,
-} from '~/marketplace/components/constants';
-import ConnectAccountButton from '~/marketplace/components/my-subscriptions/table/actions/connect-account-button';
+import { MARKETPLACE_PATH, WP_ADMIN_PLUGIN_LIST_URL } from '../constants';
+import { getAdminSetting } from '../../../utils/admin-settings';
 
 enum InstallFlowStatus {
 	'notConnected',

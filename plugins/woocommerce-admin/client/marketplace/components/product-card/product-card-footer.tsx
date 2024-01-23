@@ -10,8 +10,8 @@ import { navigateTo, getNewPath } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { Product } from '~/marketplace/components/product-list/types';
-import { getAdminSetting } from '~/utils/admin-settings';
+import { Product } from '../product-list/types';
+import { getAdminSetting } from '../../../utils/admin-settings';
 
 function ProductCardFooter( props: { product: Product } ) {
 	const { product } = props;
