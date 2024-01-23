@@ -108,7 +108,6 @@ function TitleSuggestionsMenu( {
 			return;
 		}
 		setIsRequesting( true );
-		setTitleSuggestions( [ '', '', '' ] );
 
 		const prompt = await buildProductTitleSuggestionsPromp( productId );
 		requestCompletion( prompt );

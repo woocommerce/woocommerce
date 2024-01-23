@@ -3,7 +3,7 @@
 
 	&__suggestions {
 		.components-button {
-			min-width: 300px;
+			min-width: 600px;
 
 			&.is-loading {
 				color: transparent;
@@ -27,6 +27,6 @@
 		background-position: 0 0;
 	}
 	to {
-		background-position: 300px 0;
+		background-position: 600px 0;
 	}
 }
