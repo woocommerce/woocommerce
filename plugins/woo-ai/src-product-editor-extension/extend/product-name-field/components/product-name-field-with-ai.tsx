@@ -158,6 +158,7 @@ function TitleSuggestionsMenu( {
 					<Button
 						onClick={ requestTitleSuggestions }
 						disabled={ isRequesting }
+						isBusy={ isRequesting }
 						variant="secondary"
 						icon={ ai }
 					>
