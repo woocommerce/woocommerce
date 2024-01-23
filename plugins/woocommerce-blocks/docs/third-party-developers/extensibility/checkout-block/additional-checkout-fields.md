@@ -298,12 +298,12 @@ For example to apply validation to the example text field above use the `woocomm
 This filter receives the following arguments, in order.
 
 
-| Argument        | Type              | Description                                                                                                                                                                                                                                                     |
-|-----------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `$error`        | `WP_Error`        | A `WP_Error` object. Initially it is empty. This filter should add errors to it using the [`add`](https://developer.wordpress.org/reference/classes/wp_error/add/) method. The returned value of this filter must be the _same_ WP_Error that was passed to it. |
-| `$field_value`  | `mixed`           | The current value of the field, i.e. what the user entered in the checkout form.                                                                                                                                                                                |
-| `$field_schema` | `array`           | The schema of the field. This is what is registered with Store API. This is useful to know what values are valid for select fields.                                                                                                                             |
-| `$request`      | `WP_Rest_Request` | The current request made to the checkout endpoint.                                                                                                                                                                                                              |
+| Argument        | Type                          | Description                                                                                                                                                                                                                                                     |
+|-----------------|-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `$error`        | `WP_Error`                    | A `WP_Error` object. Initially it is empty. This filter should add errors to it using the [`add`](https://developer.wordpress.org/reference/classes/wp_error/add/) method. The returned value of this filter must be the _same_ WP_Error that was passed to it. |
+| `$field_value`  | `mixed`                       | The current value of the field, i.e. what the user entered in the checkout form.                                                                                                                                                                                |
+| `$request`      | `WP_Rest_Request`             | The current request made to the checkout endpoint.                                                                                                                                                                                                              |
+| `$address_type` | `'billing' \| 'shipping' \| null` | The address type the field belongs to. If it was registered with the `address` location then it will be one of `billing` or `shipping`. If it was registered in the `contact` or `additional` locations it will be `null`.                                       |
 
 ### Example
 
@@ -314,7 +314,7 @@ The custom validation rules in this example could be done with a pattern but it 
 As a reminder, the `pattern` used above is `[A-Z0-9]{5}` (any 5-character string containing capital letters and numbers).
 
 ```php
-add_filter('woocommerce_blocks_validate_additional_field_namespace/gov-id', function ( \WP_Error $error, $value, $schema, $key ) {
+add_filter('woocommerce_blocks_validate_additional_field_namespace/gov-id', function ( \WP_Error $error, $value, $request, $address_type ) {
 	$match = preg_match( '/[A-Z0-9]{5}/', $value );
 	if ( 0 === $match || false === $match ) {
 		$error->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
@@ -354,7 +354,7 @@ add_action(
 
 		add_filter(
 			'woocommerce_blocks_validate_additional_field_namespace/gov-id',
-			function ( \WP_Error $error, $value, $schema, $key ) {
+			function ( \WP_Error $error, $value, $request, $address_type ) {
 				$match = preg_match( '/[A-Z0-9]{5}/', $value );
 				if ( 0 === $match || false === $match ) {
 					$error->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
