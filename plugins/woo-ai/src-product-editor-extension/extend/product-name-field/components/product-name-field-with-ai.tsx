@@ -46,17 +46,56 @@ import './styles.scss';
 const debug = debugFactory( 'woo-ai:product-editor:name-field' );
 
 function TitleSuggestionsMenu( {
-	titles,
-	isRequesting,
 	onSelect,
-	onRequest,
 }: {
-	titles: string[];
-	isRequesting: boolean;
 	onSelect: ( title: string ) => void;
-	onRequest?: () => void;
-	isOpen?: boolean;
+	isOpen: boolean;
 } ): React.ReactElement {
+	const productId = useEntityId( 'postType', 'product' );
+
+	const [ isRequesting, setIsRequesting ] = useState( false );
+	const [ titleSuggestions, setTitleSuggestions ] = useState< string[] >(
+		[]
+	);
+
+	const { requestCompletion } = useCompletion( {
+		feature: WOO_AI_PLUGIN_FEATURE_NAME,
+		onStreamMessage: ( message ) => {
+			debug( 'Message received', message );
+			setIsRequesting( true );
+			try {
+				const suggestions = parseStringsArray( message );
+				setTitleSuggestions( suggestions );
+			} catch ( e ) {
+				throw new Error( 'Unable to parse suggestions' );
+			}
+		},
+		onStreamError: ( error ) => {
+			setIsRequesting( false );
+			debug( 'Streaming error encountered', error );
+		},
+		onCompletionFinished: ( reason, message ) => {
+			try {
+				const suggestions = parseStringsArray( message );
+				setTitleSuggestions( suggestions );
+				setIsRequesting( false );
+			} catch ( e ) {
+				setIsRequesting( false );
+				throw new Error( 'Unable to parse suggestions' );
+			}
+		},
+	} );
+
+	const requestTitleSuggestions = useCallback( async () => {
+		if ( isRequesting ) {
+			return;
+		}
+		setIsRequesting( true );
+
+		const prompt = await buildProductTitleSuggestionsPromp( productId );
+		requestCompletion( prompt );
+	}, [ isRequesting, productId, requestCompletion ] );
+
 	return (
 		<div className="ai-assistant__title-suggestions-dropdown__content">
 			<Flex
@@ -64,7 +103,7 @@ function TitleSuggestionsMenu( {
 				gap={ 1 }
 				className="ai-assistant__title-suggestions-dropdown__content__suggestions"
 			>
-				{ titles.map( ( suggestedTitle ) => (
+				{ titleSuggestions.map( ( suggestedTitle ) => (
 					<FlexItem key={ suggestedTitle }>
 						<Button
 							icon={ check }
@@ -82,7 +121,7 @@ function TitleSuggestionsMenu( {
 			<Flex justify="flex-end">
 				<FlexItem self-align="flex-middle">
 					<Button
-						onClick={ onRequest }
+						onClick={ requestTitleSuggestions }
 						disabled={ isRequesting }
 						variant="secondary"
 						icon={ ai }
@@ -111,51 +150,6 @@ const productNameFieldWithAi =
 
 				debug( 'Extending product name field block' );
 
-				const [ isRequesting, setIsRequesting ] = useState( false );
-				const [ titleSuggestions, setTitleSuggestions ] = useState<
-					string[]
-				>( [] );
-
-				const productId = useEntityId( 'postType', 'product' );
-
-				const { requestCompletion } = useCompletion( {
-					feature: WOO_AI_PLUGIN_FEATURE_NAME,
-					onStreamMessage: ( message ) => {
-						debug( 'Message received', message );
-						setIsRequesting( true );
-						try {
-							const suggestions = parseStringsArray( message );
-							setTitleSuggestions( suggestions );
-						} catch ( e ) {
-							throw new Error( 'Unable to parse suggestions' );
-						}
-					},
-					onStreamError: ( error ) => {
-						// eslint-disable-next-line no-console
-						setIsRequesting( false );
-						debug( 'Streaming error encountered', error );
-					},
-					onCompletionFinished: ( reason, message ) => {
-						try {
-							const suggestions = parseStringsArray( message );
-							setTitleSuggestions( suggestions );
-							setIsRequesting( false );
-							// console.log( { titleSuggestions } );
-						} catch ( e ) {
-							setIsRequesting( false );
-							throw new Error( 'Unable to parse suggestions' );
-						}
-					},
-				} );
-
-				const requestTitleSuggestions = useCallback( async () => {
-					const prompt = await buildProductTitleSuggestionsPromp(
-						productId
-					);
-					requestCompletion( prompt );
-					setIsRequesting( true );
-				}, [ productId, requestCompletion ] );
-
 				const blockControlProps = { group: 'other' };
 
 				return (
@@ -182,10 +176,7 @@ const productNameFieldWithAi =
 							>
 								{ ( { onClose, isOpen } ) => (
 									<TitleSuggestionsMenu
-										titles={ titleSuggestions }
 										onSelect={ onClose }
-										isRequesting={ isRequesting }
-										onRequest={ requestTitleSuggestions }
 										isOpen={ isOpen }
 									/>
 								) }
