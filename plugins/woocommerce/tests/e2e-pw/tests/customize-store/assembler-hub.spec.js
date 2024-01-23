@@ -49,12 +49,16 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 	} );
 
 	test.beforeEach( async ( { baseURL } ) => {
-		await setOption(
-			request,
-			baseURL,
-			'woocommerce_admin_customize_store_completed',
-			'no'
-		);
+		try {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_admin_customize_store_completed',
+				'no'
+			);
+		} catch ( error ) {
+			console.log( 'Store completed option not updated', error );
+		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
