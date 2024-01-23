@@ -119,47 +119,29 @@ Select fields are always required.
 
 The `optionalLabel` option will never be shown as select fields are _always_ required.
 
-<table>
-	<tr>
-		<th>Option name</th>
-		<th>Description</th>
-		<th>Required?</th>
-		<th>Example</th>
-		<th>Default value</th>
-	</tr>
-	<tr>
-		<td>
+| Option name | Description | Required? | Example        | Default value |
+|-----|-----|-----|----------------|--------------|
+| `options` | An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way. | Yes | &ast;see below | No default - this must be provided. |
 
-`options`
+&ast;Example of `options` value:
 
-</td>
-		<td>
-
-An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way.</td>
-<td>Yes</td>
-<td>
+```php
+[
 
 	[
-		[
-			'value' => 'store_1',
-			'label' => 'Our London Store'
-		],
-		[
-			'value' => 'store_2',
-			'label' => 'Our Paris Store'
-		],
-		[
-			'value' => 'store_3',
-			'label' => 'Our New York Store'
-		]
+		'value' => 'store_1',
+		'label' => 'Our London Store'
+	],
+	[
+		'value' => 'store_2',
+		'label' => 'Our Paris Store'
+	],
+	[
+		'value' => 'store_3',
+		'label' => 'Our New York Store'
 	]
-
-</td>
-		<td>
-			No default - this must be provided.
-		</td>
-	</tr>
-</table>
+]
+````
 
 #### Options for `checkbox` fields
 
@@ -233,20 +215,21 @@ The rendered markup looks like this:
 
 This example demonstrates rendering a checkbox field in the contact information section:
 
-
-	add_action(
-		'woocommerce_loaded',
-		function() {
-			woocommerce_blocks_register_checkout_field(
-				array(
-					'id'       => 'namespace/marketing-opt-in',
-					'label'    => 'Do you want to subscribe to our newsletter?',
-					'location' => 'contact',
-					'type'     => 'checkbox',
-				)
-			);
-		}
-	);
+```php
+add_action(
+	'woocommerce_loaded',
+	function() {
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'       => 'namespace/marketing-opt-in',
+				'label'    => 'Do you want to subscribe to our newsletter?',
+				'location' => 'contact',
+				'type'     => 'checkbox',
+			)
+		);
+	}
+);
+````
 
 This results in the following contact information section:
 
@@ -350,38 +333,40 @@ In this full example we will register the Government ID text field and verify th
 
 This example is just a full version of the examples shared above.
 
-	add_action(
-		'woocommerce_loaded',
-		function() {
-			woocommerce_blocks_register_checkout_field(
-				array(
-					'id'            => 'namespace/gov-id',
-					'label'         => 'Government ID',
-					'optionalLabel' => 'Government ID (optional)',
-					'location'      => 'address',
-					'required'      => true,
-					'attributes'    => array(
-						'autocomplete' => 'government-id',
-						'pattern'      => '[A-Z0-9]{5}', // A 5-character string of capital letters and numbers.
-						'title'        => 'Your 5-digit Government ID',
-					),
+```php
+add_action(
+	'woocommerce_loaded',
+	function() {
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'            => 'namespace/gov-id',
+				'label'         => 'Government ID',
+				'optionalLabel' => 'Government ID (optional)',
+				'location'      => 'address',
+				'required'      => true,
+				'attributes'    => array(
+					'autocomplete' => 'government-id',
+					'pattern'      => '[A-Z0-9]{5}', // A 5-character string of capital letters and numbers.
+					'title'        => 'Your 5-digit Government ID',
 				),
-			);
+			),
+		);
 
-			add_filter(
-				'woocommerce_blocks_validate_additional_field_namespace/gov-id',
-				function ( \WP_Error $error, $value, $schema, $key ) {
-					$match = preg_match( '/[A-Z0-9]{5}/', $value );
-					if ( 0 === $match || false === $match ) {
-						$error->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
-					}
-					return $error;
+		add_filter(
+			'woocommerce_blocks_validate_additional_field_namespace/gov-id',
+			function ( \WP_Error $error, $value, $schema, $key ) {
+				$match = preg_match( '/[A-Z0-9]{5}/', $value );
+				if ( 0 === $match || false === $match ) {
+					$error->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
 				}
-			);
-		},
-		10,
-		4
-	);
+				return $error;
+			}
+		);
+	},
+	10,
+	4
+);
+```
 
 
 <!-- FEEDBACK -->
