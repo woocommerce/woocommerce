@@ -13,7 +13,7 @@ type TypeStringOptions = {
 export default function typeString(
 	text: string,
 	callback: ( text: string ) => void,
-	options: TypeStringOptions = { delayBase: 50 }
+	options: TypeStringOptions = { delayBase: 20 }
 ): void {
 	let i = 0;
 
