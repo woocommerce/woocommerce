@@ -3348,7 +3348,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( 'Belgium', $meta_object_vars['country_name'] );
 		$this->assertEquals( 'Brussels', $meta_object_vars['city'] );
 		$this->assertEquals( 'Europe/Brussels', $meta_object_vars['timezone'] );
-	
+
 		// Test deleting meta data containing an object of a non-existent class.
 		$meta_data = $this->sut->read_meta( $order );
 		foreach ( $meta_data as $meta ) {
