@@ -3,6 +3,7 @@
  */
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { Button, Modal } from '@wordpress/components';
+import { plugins } from '@wordpress/icons';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -30,7 +31,7 @@ export const PluginHeaderItemModal: React.FC< PluginHeaderItemModalProps > = ( {
 			<>
 				<Button
 					variant="tertiary"
-					icon={ icon }
+					icon={ icon ?? plugins }
 					label={ label }
 					onClick={ () => setOpen( ! isOpen ) }
 				/>
