@@ -54,7 +54,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 		self::add_action( self::CLEANUP_ACTION_NAME, array( $this, 'handle_expired_files_cleanup_action' ) );
 		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_debug_tools_entries' ), 999, 1 );
 
-		self::add_action( 'init', array( $this, 'handle_init' ), 0 );
+		self::add_action( 'init', array( $this, 'add_endpoint' ), 0 );
 		self::add_filter( 'query_vars', array( $this, 'handle_query_vars' ), 0 );
 		self::add_action( 'parse_request', array( $this, 'handle_parse_request' ), 0 );
 	}
@@ -417,7 +417,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	/**
 	 * Handle the "init" action, add rewrite rules for the "wc/file" endpoint.
 	 */
-	private function handle_init() {
+	public static function add_endpoint() {
 		add_rewrite_rule( '^wc/file/transient/?$', 'index.php?wc-transient-file-name=', 'top' );
 		add_rewrite_rule( '^wc/file/transient/(.+)$', 'index.php?wc-transient-file-name=$matches[1]', 'top' );
 		add_rewrite_endpoint( 'wc/file/transient', EP_ALL );

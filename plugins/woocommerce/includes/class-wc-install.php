@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
@@ -554,6 +555,7 @@ class WC_Install {
 		WC()->query->add_endpoints();
 		WC_API::add_endpoint();
 		WC_Auth::add_endpoint();
+        TransientFilesEngine::add_endpoint();
 	}
 
 	/**
