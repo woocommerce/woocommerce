@@ -10,25 +10,7 @@ import useProductMetadata from '../use-product-metadata';
 
 const mockFnMetadataProp = jest.fn();
 jest.mock( '@wordpress/core-data', () => ( {
-	useEntityProp: jest.fn().mockImplementation( () => {
-		return [
-			[
-				{
-					key: 'field1',
-					value: 'value1',
-				},
-				{
-					key: 'field2',
-					value: 'value1',
-				},
-				{
-					key: 'existing_field',
-					value: 'value1',
-				},
-			],
-			mockFnMetadataProp,
-		];
-	} ),
+	useEntityId: jest.fn().mockReturnValue( 123 ),
 } ) );
 
 jest.mock( '@wordpress/data', () => ( {
@@ -43,12 +25,21 @@ jest.mock( '@wordpress/data', () => ( {
 						},
 						{
 							key: 'field2',
-							value: 'value2',
+							value: 'value1',
+						},
+						{
+							key: 'existing_field',
+							value: 'value1',
 						},
 					],
 				} ),
 			} )
 		);
+	} ),
+	useDispatch: jest.fn().mockImplementation( () => {
+		return {
+			editEntityRecord: mockFnMetadataProp,
+		};
 	} ),
 } ) );
 
@@ -66,28 +57,36 @@ describe( 'useProductMetadata', () => {
 				value: 'value2',
 			},
 		] );
-		expect( mockFnMetadataProp ).toHaveBeenCalledWith( [
+		expect( mockFnMetadataProp ).toHaveBeenCalledWith(
+			'postType',
+			'product',
+			123,
 			{
-				key: 'existing_field',
-				value: 'value1',
-			},
-			{
-				key: 'field1',
-				value: 'value2',
-			},
-			{
-				key: 'field2',
-				value: 'value2',
-			},
-		] );
+				meta_data: [
+					{
+						key: 'existing_field',
+						value: 'value1',
+					},
+					{
+						key: 'field1',
+						value: 'value2',
+					},
+					{
+						key: 'field2',
+						value: 'value2',
+					},
+				],
+			}
+		);
 	} );
 	it( 'should return the metadata as an object for easy readings', async () => {
 		const { metadata } = renderHook( () =>
-			useProductMetadata( 'product-variation', 123, 'product' )
+			useProductMetadata( { postType: 'product', id: 123 } )
 		).result.current;
 		expect( metadata ).toEqual( {
 			field1: 'value1',
-			field2: 'value2',
+			field2: 'value1',
+			existing_field: 'value1',
 		} );
 	} );
 } );

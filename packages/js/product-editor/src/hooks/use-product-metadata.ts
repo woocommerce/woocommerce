@@ -1,60 +1,62 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useEntityId } from '@wordpress/core-data';
 /**
  * External dependencies
  */
-import { useEntityProp } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { Product } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
 import { Metadata } from '../types';
 
-function useProductMetadata(
-	postType?: string,
-	id?: number,
-	parentPostType?: string
-) {
-	const [ thisMetadata, setMetadata ] = useEntityProp< Metadata< string >[] >(
-		'postType',
-		postType || 'product',
-		'meta_data'
-	);
+interface Options {
+	postType?: string;
+	id?: number;
+}
 
-	const metadata = useSelect(
+function useProductMetadata( options?: Options ) {
+	const postType = options?.postType || 'product';
+	const thisId = useEntityId( 'postType', postType );
+	const id = options?.id || thisId;
+
+	// @ts-expect-error There are no types for this.
+	const { editEntityRecord } = useDispatch( 'core' );
+
+	return useSelect(
 		( select ) => {
-			let usedMetadata: Metadata< string >[];
-			if ( id ) {
-				// @ts-expect-error There are no types for this.
-				const { getEditedEntityRecord } = select( 'core' );
-				const { meta_data: parentMetadata }: Product =
-					getEditedEntityRecord( 'postType', parentPostType, id );
-				usedMetadata = parentMetadata;
-			} else {
-				usedMetadata = thisMetadata;
-			}
+			// @ts-expect-error There are no types for this.
+			const { getEditedEntityRecord } = select( 'core' );
+			const { meta_data: metadata }: Product = getEditedEntityRecord(
+				'postType',
+				postType,
+				id
+			);
 
-			return usedMetadata
-				? usedMetadata.reduce( function ( acc, cur ) {
-						acc[ cur.key ] = cur.value;
-						return acc;
-				  }, {} as Record< string, string | undefined > )
-				: undefined;
+			return {
+				metadata: metadata.reduce( function ( acc, cur ) {
+					acc[ cur.key ] = cur.value;
+					return acc;
+				}, {} as Record< string, string | undefined > ),
+				updateMetadata: ( entries: Metadata< string >[] ) => {
+					editEntityRecord( 'postType', postType, id, {
+						meta_data: [
+							...metadata.filter(
+								( item ) =>
+									entries.findIndex(
+										( e ) => e.key === item.key
+									) === -1
+							),
+							...entries,
+						],
+					} );
+				},
+			};
 		},
 		[ id ]
 	);
-
-	return {
-		updateMetadata: ( entries: Metadata< string >[] ) => {
-			setMetadata( [
-				...thisMetadata.filter(
-					( item ) =>
-						entries.findIndex( ( e ) => e.key === item.key ) === -1
-				),
-				...entries,
-			] );
-		},
-		metadata,
-	};
 }
 
 export default useProductMetadata;
