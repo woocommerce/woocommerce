@@ -12,6 +12,8 @@ import { updateTemplate } from '../data/actions';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
 import { installAndActivateTheme as setTheme } from '../data/service';
 import { THEME_SLUG } from '../data/constants';
+import { FONT_TO_INSTALL } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
+import { Font } from '../assembler-hub/types/font';
 
 const assembleSite = async () => {
 	await updateTemplate( {
@@ -45,6 +47,56 @@ const installAndActivateTheme = async () => {
 	}
 };
 
+export async function fetchInstallFont( data: Font ) {
+	const config = {
+		path: '/wp/v2/font-families',
+		method: 'POST',
+		data: {
+			font_family_settings: JSON.stringify( data ),
+		},
+	};
+	return apiFetch( config );
+}
+
+type FontCollectionResponse = Array< {
+	data: {
+		fontFamilies: Array< Font >;
+	};
+} >;
+
+const installFonts = async () => {
+	const config = {
+		path: '/wp/v2/font-collections',
+		method: 'GET',
+	};
+
+	const fontCollection = await apiFetch< FontCollectionResponse >( config );
+
+	const filteredFontCollection = fontCollection[ 0 ].data.fontFamilies.reduce(
+		( acc, fontFamilies ) => {
+			const font = FONT_TO_INSTALL[ fontFamilies.slug ];
+			if ( font ) {
+				const fontFace = fontFamilies.fontFace.filter(
+					( { fontWeight } ) =>
+						font.fontWeights.includes( fontWeight )
+				);
+
+				return [
+					...acc,
+					{
+						...fontFamilies,
+						fontFace,
+					},
+				];
+			}
+			return acc;
+		},
+		[] as Array< Font >
+	);
+
+	await Promise.all( filteredFontCollection.map( fetchInstallFont ) );
+};
+
 const createProducts = async () => {
 	try {
 		const { success } = await apiFetch< {
@@ -67,4 +119,5 @@ export const services = {
 	browserPopstateHandler,
 	installAndActivateTheme,
 	createProducts,
+	installFonts,
 };

@@ -11,7 +11,7 @@ import {
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { useResizeObserver, useViewportMatch } from '@wordpress/compose';
-import { useMemo, useState } from '@wordpress/element';
+import { useContext, useMemo, useState } from '@wordpress/element';
 import {
 	privateApis as blockEditorPrivateApis,
 	// @ts-ignore no types exist yet.
@@ -19,13 +19,16 @@ import {
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { GlobalStylesVariationIframe } from '../global-styles-variation-iframe';
-import { FontFamiliesLoader, FontFamily } from './font-families-loader';
+import { FontFamiliesLoader } from './font-families-loader';
 import {
 	FONT_PREVIEW_LARGE_WIDTH,
 	FONT_PREVIEW_LARGE_HEIGHT,
 	FONT_PREVIEW_WIDTH,
 	FONT_PREVIEW_HEIGHT,
 } from './constants';
+import { Font } from '~/customize-store/assembler-hub/types/font';
+import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
+import { isAIFlow, isNoAIFlow } from '~/customize-store/guards';
 
 const { useGlobalStyle, useGlobalSetting } = unlock( blockEditorPrivateApis );
 
@@ -38,7 +41,7 @@ const DEFAULT_LARGE_FONT_STYLES: React.CSSProperties = {
 export const FontPairingVariationPreview = () => {
 	const [ fontFamilies ] = useGlobalSetting(
 		'typography.fontFamilies.theme'
-	) as [ FontFamily[] ];
+	) as [ Font[] ];
 
 	const [ textFontFamily = 'serif' ] = useGlobalStyle(
 		'typography.fontFamily'
@@ -77,7 +80,13 @@ export const FontPairingVariationPreview = () => {
 	const externalFontFamilies = fontFamilies.filter(
 		( { slug } ) => slug !== 'system-font'
 	);
-	const [ isLoaded, setIsLoaded ] = useState( ! externalFontFamilies.length );
+
+	const { context } = useContext( CustomizeStoreContext );
+
+	const [ isLoaded, setIsLoaded ] = useState(
+		( isAIFlow( context.flowType ) && ! externalFontFamilies.length ) ||
+			isNoAIFlow( context.flowType )
+	);
 
 	const getFontFamilyName = ( targetFontFamily: string ) => {
 		const fontFamily = fontFamilies.find(
@@ -166,10 +175,12 @@ export const FontPairingVariationPreview = () => {
 						</HStack>
 					</div>
 				</div>
-				<FontFamiliesLoader
-					fontFamilies={ fontFamilies }
-					onLoad={ handleOnLoad }
-				/>
+				{ isAIFlow( context.flowType ) && (
+					<FontFamiliesLoader
+						fontFamilies={ fontFamilies }
+						onLoad={ handleOnLoad }
+					/>
+				) }
 			</>
 		</GlobalStylesVariationIframe>
 	);

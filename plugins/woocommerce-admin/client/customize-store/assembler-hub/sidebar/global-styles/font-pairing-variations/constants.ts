@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { FontToInstall } from '~/customize-store/assembler-hub/types/font';
 import { Look } from '~/customize-store/design-with-ai/types';
 
 export const FONT_PREVIEW_LARGE_WIDTH = 136;
@@ -8,6 +9,69 @@ export const FONT_PREVIEW_LARGE_HEIGHT = 106;
 export const FONT_PREVIEW_WIDTH = 120;
 export const FONT_PREVIEW_HEIGHT = 74;
 export const SYSTEM_FONT_SLUG = 'system-font';
+
+export const FONT_TO_INSTALL = {
+	inter: {
+		fontFamily: 'Inter',
+		fontWeights: [ '400', '500', '600' ],
+		fontStyles: [ 'normal' ],
+	},
+	'bodoni-moda': {
+		fontFamily: 'Bodoni Moda',
+		fontWeights: [ '400' ],
+		fontStyles: [ 'normal' ],
+	},
+	overpass: {
+		fontFamily: 'Overpass',
+		fontWeights: [ '300', '400' ],
+		fontStyles: [ 'normal' ],
+	},
+	'albert-sans': {
+		fontFamily: 'Albert Sans',
+		fontWeights: [ '700' ],
+		fontStyles: [ 'normal' ],
+	},
+	lora: {
+		fontFamily: 'Lora',
+		fontWeights: [ '400' ],
+		fontStyles: [ 'normal' ],
+	},
+	montserrat: {
+		fontFamily: 'Montserrat',
+		fontWeights: [ '500', '700' ],
+		fontStyles: [ 'normal' ],
+	},
+	arvo: {
+		fontFamily: 'Arvo',
+		fontWeights: [ '400' ],
+		fontStyles: [ 'normal' ],
+	},
+	rubik: {
+		fontFamily: 'Rubik',
+		fontWeights: [ '400', '800' ],
+		fontStyles: [ 'normal' ],
+	},
+	newsreader: {
+		fontFamily: 'Newsreader',
+		fontWeights: [ '400' ],
+		fontStyles: [ 'normal' ],
+	},
+	cormorant: {
+		fontFamily: 'Cormorant',
+		fontWeights: [ '400', '500' ],
+		fontStyles: [ 'normal' ],
+	},
+	'work-sans': {
+		fontFamily: 'Work Sans',
+		fontWeights: [ '400' ],
+		fontStyles: [ 'normal' ],
+	},
+	raleway: {
+		fontFamily: 'Raleway',
+		fontWeights: [ '700' ],
+		fontStyles: [ 'normal' ],
+	},
+} as FontToInstall;
 
 // Generated from /wpcom/v2/sites/{site_id}/global-styles-variation/font-pairings
 // TODO: Consider creating an API endpoint for this data

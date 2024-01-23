@@ -140,6 +140,28 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									},
 								},
 							},
+							installFonts: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'installFonts',
+											onDone: {
+												target: 'success',
+											},
+											// TODO: Handle error case: https://github.com/woocommerce/woocommerce/issues/43780
+											// onError: {
+											// 	actions: [
+											// 		'assignAPICallLoaderError',
+											// 	],
+											// },
+										},
+									},
+									success: {
+										type: 'final',
+									},
+								},
+							},
 						},
 						onDone: {
 							target: '#designWithoutAI.showAssembleHub',

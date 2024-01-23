@@ -1,62 +1,91 @@
-// TODO: We should Download webfonts and host them locally on a site before launching CYS in Core.
-// Load font families from wp.com.
-
 /**
  * External dependencies
  */
-import { useMemo } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as coreStore } from '@wordpress/core-data';
 
-export type FontFamily = {
-	fontFamily: string;
-	name: string;
-	slug: string;
-};
+/**
+ * Internal dependencies
+ */
+import { FontFamiliesLoaderDotCom } from './font-families-loader-dot-com';
+import { Font } from '~/customize-store/assembler-hub/types/font';
 
 type Props = {
-	fontFamilies: FontFamily[];
+	fontFamilies: Array< Font >;
 	onLoad?: () => void;
 	preload?: boolean;
 };
 
-// See https://developers.google.com/fonts/docs/css2
-const FONT_API_BASE = 'https://fonts-api.wp.com/css2';
-// this is the actual host that the .woff files are at, the above is the one for the .css files with the @font-face declarations
-const FONT_HOST = 'https://fonts.wp.com'; // used for preconnecting so that fonts can get loaded faster
+const isUrlEncoded = ( url: string ) => {
+	if ( typeof url !== 'string' ) {
+		return false;
+	}
+	return url !== decodeURIComponent( url );
+};
 
-const FONT_AXIS = 'ital,wght@0,400;0,700;1,400;1,700';
-
-export const FontFamiliesLoader = ( {
-	fontFamilies,
-	onLoad,
-	preload = false,
-}: Props ) => {
-	const params = useMemo(
-		() =>
-			new URLSearchParams( [
-				...fontFamilies.map( ( { fontFamily } ) => [
-					'family',
-					`${ fontFamily }:${ FONT_AXIS }`,
-				] ),
-				[ 'display', 'swap' ],
-			] ),
-		[ fontFamilies ]
-	);
-
-	if ( ! params.getAll( 'family' ).length ) {
-		return null;
+const getDisplaySrcFromFontFace = (
+	input: Array< string >,
+	urlPrefix: string
+) => {
+	if ( ! input ) {
+		return;
 	}
 
-	return (
-		<>
-			{ preload ? <link rel="preconnect" href={ FONT_HOST } /> : null }
-			<link
-				rel={ preload ? 'preload' : 'stylesheet' }
-				type="text/css"
-				as={ preload ? 'style' : undefined }
-				href={ `${ FONT_API_BASE }?${ params }` }
-				onLoad={ onLoad }
-				onError={ onLoad }
-			/>
-		</>
-	);
+	let src;
+	if ( Array.isArray( input ) ) {
+		src = input[ 0 ];
+	} else {
+		src = input;
+	}
+	// If it is a theme font, we need to make the url absolute
+	if ( src.startsWith( 'file:.' ) && urlPrefix ) {
+		src = src.replace( 'file:.', urlPrefix );
+	}
+	if ( ! isUrlEncoded( src ) ) {
+		src = encodeURI( src );
+	}
+	return src;
+};
+export const FontFamiliesLoader = ( { fontFamilies, onLoad }: Props ) => {
+	const { site, currentTheme } = useSelect( ( select ) => {
+		return {
+			// @ts-expect-error No types for this exist yet.
+			site: select( coreStore ).getSite(),
+			// @ts-expect-error No types for this exist yet.
+			currentTheme: select( coreStore ).getCurrentTheme(),
+		};
+	} );
+
+	const themeUrl =
+		site?.url + '/wp-content/themes/' + currentTheme?.stylesheet;
+
+	useEffect( () => {
+		if ( ! Array.isArray( fontFamilies ) ) return;
+		fontFamilies.forEach( async ( font ) => {
+			font.fontFace?.forEach( async ( fontFace ) => {
+				const srcFont = getDisplaySrcFromFontFace(
+					fontFace.src,
+					themeUrl
+				);
+				const dataSource = `url(${ srcFont })`;
+				const newFont = new FontFace( fontFace.fontFamily, dataSource, {
+					style: fontFace.fontStyle,
+					weight: fontFace.fontWeight,
+				} );
+
+				const loadedFace = await newFont.load();
+
+				document.fonts.add( loadedFace );
+				if ( onLoad ) {
+					onLoad();
+				}
+			} );
+		} );
+	}, [ fontFamilies, onLoad, themeUrl ] );
+
+	return <></>;
 };

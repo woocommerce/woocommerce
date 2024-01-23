@@ -23,12 +23,13 @@ import { noop } from 'lodash';
  * Internal dependencies
  */
 import { LogoBlockContext } from './logo-block-context';
-import {
-	FontFamiliesLoader,
-	FontFamily,
-} from './sidebar/global-styles/font-pairing-variations/font-families-loader';
+import { FontFamiliesLoader } from './sidebar/global-styles/font-pairing-variations/font-families-loader';
 import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
 import { PreloadFonts } from './preload-fonts';
+import { Font } from './types/font';
+import { FontFamiliesLoaderDotCom } from './sidebar/global-styles/font-pairing-variations/font-families-loader-dot-com';
+import { CustomizeStoreContext } from '.';
+import { isAIFlow } from '../guards';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -76,10 +77,12 @@ function ScaledBlockPreview( {
 	const { setLogoBlockIds } = useContext( LogoBlockContext );
 	const [ fontFamilies ] = useGlobalSetting(
 		'typography.fontFamilies.theme'
-	) as [ FontFamily[] ];
+	) as [ Font[] ];
 	const externalFontFamilies = fontFamilies.filter(
 		( { slug } ) => slug !== SYSTEM_FONT_SLUG
 	);
+
+	const { context } = useContext( CustomizeStoreContext );
 
 	if ( ! viewportWidth ) {
 		viewportWidth = containerWidth;
@@ -324,10 +327,12 @@ function ScaledBlockPreview( {
 					</style>
 					<MemoizedBlockList renderAppender={ false } />
 					<PreloadFonts />
-					<FontFamiliesLoader
-						fontFamilies={ externalFontFamilies }
-						onLoad={ noop }
-					/>
+					{ isAIFlow( context.flowType ) && (
+						<FontFamiliesLoaderDotCom
+							fontFamilies={ externalFontFamilies }
+							onLoad={ noop }
+						/>
+					) }
 				</CustomIframeComponent>
 			</div>
 		</DisabledProvider>
