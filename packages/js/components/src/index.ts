@@ -80,7 +80,7 @@ export { Tooltip as __experimentalTooltip } from './tooltip';
 export { default as ViewMoreList } from './view-more-list';
 export { default as WebPreview } from './web-preview';
 export { Badge } from './badge';
-export { Confetti } from './confetti';
+export { default as Confetti } from './confetti';
 export { DynamicForm } from './dynamic-form';
 export { default as TourKit } from './tour-kit';
 export * as TourKitTypes from './tour-kit/types';

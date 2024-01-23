@@ -3139,7 +3139,7 @@ importers:
   plugins/woocommerce-admin:
     dependencies:
       '@automattic/components':
-        specifier: ^2.1.0
+        specifier: ^2.0.1
         version: 2.1.0(@types/react@17.0.71)(@wordpress/data@6.6.1)(react-dom@17.0.2)(react@17.0.2)
       '@automattic/explat-client':
         specifier: ^0.0.3

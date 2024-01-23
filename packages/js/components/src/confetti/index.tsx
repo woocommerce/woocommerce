@@ -18,9 +18,11 @@ export type ConfettiProps = {
 	colors?: string[];
 } & React.HTMLAttributes< HTMLSpanElement >;
 
-export const Confetti: React.FC< ConfettiProps > = ( {
+const Confetti: React.FC< ConfettiProps > = ( {
 	colors = CONFETTI_COLORS,
 	...props
 }: ConfettiProps ) => {
 	return <ConfettiAnimation { ...props } colors={ colors } />;
 };
+
+export default Confetti;
