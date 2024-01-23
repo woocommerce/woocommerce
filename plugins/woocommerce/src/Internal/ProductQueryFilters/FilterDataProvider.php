@@ -1,6 +1,6 @@
 <?php
 /**
- * FilterData class file.
+ * FilterDataProvider class file.
  */
 
 namespace Automattic\WooCommerce\Internal\ProductQueryFilters;
@@ -10,36 +10,36 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class for filter data.
  */
-class FilterData {
+class FilterDataProvider {
 	/**
-	 * Instance of FilterClauses.
+	 * Instance of FilterClausesGenerator.
 	 *
-	 * @var FilterClauses
+	 * @var FilterClausesGenerator
 	 */
-	private $filter_clauses;
+	private $filter_clauses_generator;
 
 	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param FilterClauses $filter_clauses Instance of FilterClauses.
+	 * @param FilterClausesGenerator $filter_clauses_generator Instance of FilterClausesGenerator.
 	 *
 	 * @return void
 	 */
-	final public function init( ClausesProviderInterface $filter_clauses ): void {
-		$this->set_filter_clauses_provider( $filter_clauses );
+	final public function init( ClausesGeneratorInterface $filter_clauses_generator ): void {
+		$this->set_filter_clauses_generator_provider( $filter_clauses_generator );
 	}
 
 	/**
 	 * Allow setting the clauses provider at run time.
 	 *
-	 * @param FilterClauses $filter_clauses Instance of FilterClauses.
+	 * @param FilterClausesGenerator $filter_clauses_generator Instance of FilterClausesGenerator.
 	 *
 	 * @return void
 	 */
-	final public function set_filter_clauses_provider( ClausesProviderInterface $filter_clauses ): void {
-		$this->filter_clauses = $filter_clauses;
+	final public function set_filter_clauses_generator_provider( ClausesGeneratorInterface $filter_clauses_generator ): void {
+		$this->filter_clauses_generator = $filter_clauses_generator;
 	}
 
 	/**
@@ -51,7 +51,7 @@ class FilterData {
 	public function get_filtered_price( $query_vars ) {
 		global $wpdb;
 
-		add_filter( 'posts_clauses', array( $this->filter_clauses, 'add_query_clauses' ), 10, 2 );
+		add_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10, 2 );
 		add_filter( 'posts_pre_query', '__return_empty_array' );
 
 		$query_vars['no_found_rows']  = true;
@@ -61,7 +61,7 @@ class FilterData {
 		$result                       = $query->query( $query_vars );
 		$product_query_sql            = $query->request;
 
-		remove_filter( 'posts_clauses', array( $this->filter_clauses, 'add_query_clauses' ), 10 );
+		remove_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
 		$price_filter_sql = "
@@ -83,7 +83,7 @@ class FilterData {
 		global $wpdb;
 		$stock_status_options = array_map( 'esc_sql', array_keys( wc_get_product_stock_status_options() ) );
 
-		add_filter( 'posts_clauses', array( $this->filter_clauses, 'add_query_clauses' ), 10, 2 );
+		add_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10, 2 );
 		add_filter( 'posts_pre_query', '__return_empty_array' );
 
 		$query_vars['no_found_rows']  = true;
@@ -93,7 +93,7 @@ class FilterData {
 		$result                       = $query->query( $query_vars );
 		$product_query_sql            = $query->request;
 
-		remove_filter( 'posts_clauses', array( $this->filter_clauses, 'add_query_clauses' ), 10 );
+		remove_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
 		$stock_status_counts = array();
@@ -117,7 +117,7 @@ class FilterData {
 	public function get_rating_counts( $query_vars ) {
 		global $wpdb;
 
-		add_filter( 'posts_clauses', array( $this->filter_clauses, 'add_query_clauses' ), 10, 2 );
+		add_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10, 2 );
 		add_filter( 'posts_pre_query', '__return_empty_array' );
 
 		$query_vars['no_found_rows']  = true;
@@ -127,7 +127,7 @@ class FilterData {
 		$result                       = $query->query( $query_vars );
 		$product_query_sql            = $query->request;
 
-		remove_filter( 'posts_clauses', array( $this->filter_clauses, 'add_query_clauses' ), 10 );
+		remove_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
 		$rating_count_sql = "
@@ -154,7 +154,7 @@ class FilterData {
 	public function get_attribute_counts( $query_vars, $attribute_to_count ) {
 		global $wpdb;
 
-		add_filter( 'posts_clauses', array( $this->filter_clauses, 'add_query_clauses' ), 10, 2 );
+		add_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10, 2 );
 		add_filter( 'posts_pre_query', '__return_empty_array' );
 
 		$query_vars['no_found_rows']  = true;
@@ -164,7 +164,7 @@ class FilterData {
 		$result                       = $query->query( $query_vars );
 		$product_query_sql            = $query->request;
 
-		remove_filter( 'posts_clauses', array( $this->filter_clauses, 'add_query_clauses' ), 10 );
+		remove_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
 		$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) ) . '")';

@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * ClausesProviderInterface interface.
  */
-interface ClausesProviderInterface {
+interface ClausesGeneratorInterface {
 
 	/**
 	 * Add conditional query clauses based on the filter params in query vars.

@@ -2,8 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Internal\ProductQueryFilters\FilterData;
-use Automattic\WooCommerce\Internal\ProductQueryFilters\FilterClauses;
+use Automattic\WooCommerce\Internal\ProductQueryFilters\FilterDataProvider;
+use Automattic\WooCommerce\Internal\ProductQueryFilters\FilterClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductQueryFilters\MainQueryFilters;
 
 /**
@@ -16,8 +16,8 @@ class ProductQueryFiltersServiceProvider extends AbstractInterfaceServiceProvide
 	 * @var string[]
 	 */
 	protected $provides = array(
-		FilterClauses::class,
-		FilterData::class,
+		FilterClausesGenerator::class,
+		FilterDataProvider::class,
 		MainQueryFilters::class,
 	);
 
@@ -27,8 +27,8 @@ class ProductQueryFiltersServiceProvider extends AbstractInterfaceServiceProvide
 	 * @return void
 	 */
 	public function register() {
-		$this->share( FilterClauses::class );
-		$this->share_with_implements_tags( MainQueryFilters::class )->addArgument( FilterClauses::class );
-		$this->add( FilterData::class )->addArgument( FilterClauses::class );
+		$this->share( FilterClausesGenerator::class );
+		$this->share_with_implements_tags( MainQueryFilters::class )->addArgument( FilterClausesGenerator::class );
+		$this->add( FilterDataProvider::class )->addArgument( FilterClausesGenerator::class );
 	}
 }

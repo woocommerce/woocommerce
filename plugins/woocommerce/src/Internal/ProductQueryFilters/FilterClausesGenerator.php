@@ -1,6 +1,6 @@
 <?php
 /**
- * FilterClauses class file.
+ * FilterClausesGenerator class file.
  */
 
 namespace Automattic\WooCommerce\Internal\ProductQueryFilters;
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class for filter clauses.
  */
-class FilterClauses implements ClausesProviderInterface {
+class FilterClausesGenerator implements ClausesGeneratorInterface {
 
 	/**
 	 * Add conditional query clauses based on the filter params in query vars.

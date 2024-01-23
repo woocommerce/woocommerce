@@ -17,23 +17,23 @@ class MainQueryFilters implements RegisterHooksInterface {
 	use AccessiblePrivateMethods;
 
 	/**
-	 * Instance of FilterClauses.
+	 * Instance of FilterClausesGenerator.
 	 *
-	 * @var FilterClauses
+	 * @var FilterClausesGenerator
 	 */
-	private $filter_clauses;
+	private $filter_clauses_generator;
 
 	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param FilterClauses $filter_clauses Instance of FilterClauses.
+	 * @param FilterClausesGenerator $filter_clauses_generator Instance of FilterClausesGenerator.
 	 *
 	 * @return void
 	 */
-	final public function init( FilterClauses $filter_clauses ): void {
-		$this->filter_clauses = $filter_clauses;
+	final public function init( FilterClausesGenerator $filter_clauses_generator ): void {
+		$this->filter_clauses_generator = $filter_clauses_generator;
 	}
 
 	/**
@@ -63,7 +63,7 @@ class MainQueryFilters implements RegisterHooksInterface {
 			$stock_statuses = explode( ',', $stock_statuses );
 			$stock_statuses = array_filter( $stock_statuses );
 
-			$args = $this->filter_clauses->add_stock_clauses( $args, $stock_statuses );
+			$args = $this->filter_clauses_generator->add_stock_clauses( $args, $stock_statuses );
 		}
 
 		return $args;
