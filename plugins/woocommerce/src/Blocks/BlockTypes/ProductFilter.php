@@ -112,6 +112,7 @@ final class ProductFilter extends AbstractBlock {
 				parse_str( $parsed_url['query'], $url_query_params );
 			}
 
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			return empty( array_unique( apply_filters( 'collection_filter_query_param_keys', array(), array_keys( $url_query_params ) ) ) );
 		}
 
