@@ -3332,7 +3332,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order_id = $order->get_id();
 
 		$wpdb->query( "INSERT INTO {$order_meta_table} (order_id, meta_key, meta_value) VALUES ({$order_id}, '{$meta_key}', '{$meta_value}')" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		$order->set_date_modified( time() );
+		$order->set_date_modified( time() + 1 );
 		$order->save();
 
 		$order_results = wc_get_orders(
