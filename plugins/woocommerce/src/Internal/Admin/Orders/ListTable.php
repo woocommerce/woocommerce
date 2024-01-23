@@ -556,7 +556,7 @@ class ListTable extends WP_List_Table {
 		 *
 		 * @param string[] $views An array of available list table views links.
 		 */
-		$view_links = apply_filters( 'woocommerce_' . $this->order_type . '_list_table_view_links', $view_links );
+		$view_links = apply_filters( 'woocommerce_before_' . $this->order_type . '_list_table_view_links', $view_links );
 		if ( ! empty( $view_links ) ) {
 			return $view_links;
 		}
