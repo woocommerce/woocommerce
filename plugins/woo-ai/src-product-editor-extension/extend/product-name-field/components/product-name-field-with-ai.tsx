@@ -64,9 +64,11 @@ function TitleSuggestionsMenu( {
 	const productId = useEntityId( 'postType', 'product' );
 
 	const [ isRequesting, setIsRequesting ] = useState( false );
-	const [ titleSuggestions, setTitleSuggestions ] = useState< string[] >(
-		[]
-	);
+	const [ titleSuggestions, setTitleSuggestions ] = useState< string[] >( [
+		'',
+		'',
+		'',
+	] );
 
 	/*
 	 * Get a reference to the first option,
@@ -90,10 +92,8 @@ function TitleSuggestionsMenu( {
 			setIsRequesting( false );
 			debug( 'Streaming error encountered', error );
 		},
-		onCompletionFinished: ( reason, message ) => {
+		onCompletionFinished: () => {
 			try {
-				const suggestions = parseStringsArray( message );
-				setTitleSuggestions( suggestions );
 				setIsRequesting( false );
 				firstOption.current?.focus();
 			} catch ( e ) {
@@ -108,6 +108,7 @@ function TitleSuggestionsMenu( {
 			return;
 		}
 		setIsRequesting( true );
+		setTitleSuggestions( [ '', '', '' ] );
 
 		const prompt = await buildProductTitleSuggestionsPromp( productId );
 		requestCompletion( prompt );
@@ -136,12 +137,16 @@ function TitleSuggestionsMenu( {
 				{ titleSuggestions.map( ( suggestedTitle, i ) => (
 					<FlexItem key={ suggestedTitle }>
 						<Button
+							className={
+								! suggestedTitle?.length ? 'is-loading' : ''
+							}
 							icon={ chevronRight }
 							onClick={ () => onSelect( suggestedTitle ) }
 							variant="tertiary"
 							ref={ i === 0 ? firstOption : undefined }
+							disabled={ ! suggestedTitle?.length }
 						>
-							{ suggestedTitle }
+							{ suggestedTitle || ' ' }
 						</Button>
 					</FlexItem>
 				) ) }

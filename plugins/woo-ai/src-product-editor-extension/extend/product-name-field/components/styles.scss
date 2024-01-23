@@ -1,10 +1,32 @@
 .ai-assistant__title-suggestions-dropdown__content {
-	min-width: 300px;
 	min-height: 80px;
 
 	&__suggestions {
 		.components-button {
-			width: 100%;
+			min-width: 300px;
+
+			&.is-loading {
+				color: transparent;
+				background-image: linear-gradient(
+					90deg,
+					#e4e4e4 0%,
+					#f1f1f1 40%,
+					#ededed 60%,
+					#ddd 100%
+				);
+				background-position: 0px 0px;
+				background-repeat: repeat;
+				animation: animatedBackground 0.8s ease-in-out infinite;
+			}
 		}
+	}
+}
+
+@keyframes animatedBackground {
+	from {
+		background-position: 0 0;
+	}
+	to {
+		background-position: 300px 0;
 	}
 }
