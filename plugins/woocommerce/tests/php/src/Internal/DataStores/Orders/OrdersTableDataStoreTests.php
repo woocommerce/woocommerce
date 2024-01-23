@@ -1677,6 +1677,30 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
 		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[2] ), $query->orders );
 
+		// Complex field query with NOT IN.
+		$field_query = array(
+			array(
+				'field'   => 'billing_first_name',
+				'value'   => array( 'Werner', 'Édouard' ),
+				'compare' => 'NOT IN',
+			),
+			array(
+				'relation' => 'OR',
+				array(
+					'field'   => 'billing_last_name',
+					'value'   => 'Planck',
+					'compare' => 'LIKE',
+				),
+				array(
+					'field'   => 'billing_city',
+					'value'   => 'Tid',
+					'compare' => 'LIKE',
+				),
+			),
+		);
+		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$this->assertEqualsCanonicalizing( array( $order_ids[1] ), $query->orders );
+
 		// Find orders with order_key ending in a number (i.e. all).
 		$field_query = array(
 			array(
@@ -1821,6 +1845,34 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		);
 		$query              = new OrdersTableQuery( $args );
 		$this->assertEqualsCanonicalizing( array( $order_ids[1] ), $query->orders );
+
+		// Max and Werner are born in either 1858, or 1901.
+		$args  = array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Intentional usage for test.
+			'meta_query' => array(
+				array(
+					'key'     => 'customer_birthdate',
+					'value'   => array( '1858-04-23', '1901-12-05' ),
+					'compare' => 'IN',
+				),
+			),
+		);
+		$query = new OrdersTableQuery( $args );
+		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[1] ), $query->orders );
+
+		// Let's do the same query, other way around, by excluding Édouard.
+		$args  = array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Intentional usage for test.
+			'meta_query' => array(
+				array(
+					'key'     => 'customer_birthdate',
+					'value'   => array( '1820-10-17' ),
+					'compare' => 'NOT IN',
+				),
+			),
+		);
+		$query = new OrdersTableQuery( $args );
+		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[1] ), $query->orders );
 	}
 
 	/**
