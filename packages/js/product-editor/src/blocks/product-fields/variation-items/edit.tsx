@@ -4,6 +4,7 @@
 import { sprintf, __ } from '@wordpress/i18n';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	PartialProductVariation,
 	Product,
 	ProductVariation,
 	useUserPreferences,
@@ -115,14 +116,14 @@ export function Edit( {
 	);
 
 	function onSetPrices(
-		handleUpdateAll: ( update: Partial< ProductVariation >[] ) => void
+		handleUpdateAll: ( update: PartialProductVariation[] ) => void
 	) {
 		recordEvent( 'product_variations_set_prices_select', {
 			source: TRACKS_SOURCE,
 		} );
 		const productVariationsListPromise = resolveSelect(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
-		).getProductVariations< Pick< ProductVariation, 'id' >[] >( {
+		).getProductVariations< PartialProductVariation[] >( {
 			product_id: productId,
 			order: 'asc',
 			orderby: 'menu_order',
