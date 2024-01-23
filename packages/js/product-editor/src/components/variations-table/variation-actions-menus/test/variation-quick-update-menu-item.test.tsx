@@ -5,7 +5,8 @@ import { render, fireEvent } from '@testing-library/react';
 import { ProductVariation } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import React, { createElement } from 'react';
-import { SlotFillProvider } from '@wordpress/components';
+import { SlotFillProvider, Dropdown, MenuItem } from '@wordpress/components';
+
 
 /**
  * Internal dependencies
@@ -159,6 +160,75 @@ describe( 'SingleUpdateMenu', () => {
 		fireEvent.click( getByRole( 'button', { name: 'Actions' } ) );
 		fireEvent.click( getByText( 'Shipping' ) );
 		fireEvent.click( getByText( 'My shipping item' ) );
+		expect( onClickMock ).toHaveBeenCalled();
+		expect( onClickMock ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				onChange: onChangeMock,
+				onClose: expect.any( Function ),
+				selection: [ mockVariation ],
+			} )
+		);
+	} );
+
+	it( 'should render a dropdown with our props in the secondary area in the single variation actions', () => {
+		const { getByRole, getByText } = render(
+			<SlotFillProvider>
+				<VariationQuickUpdateMenuItem
+					group={ 'secondary' }
+					order={ 20 }
+					supportsMultipleSelection={ true }
+				>
+					{ ( {
+						selection,
+						onChange,
+						onClose,
+					}: {
+						selection: ProductVariation | ProductVariation[];
+						onChange: (
+							variation:
+								| Partial< ProductVariation >
+								| Partial< ProductVariation >[]
+						) => void;
+						onClose: () => void;
+					} ) => (
+						<Dropdown
+							renderToggle={ ( { onToggle } ) => (
+								<MenuItem
+									onClick={ () => {
+										onToggle();
+									} }
+								>
+									{ 'My sub-group' }
+								</MenuItem>
+							) }
+							renderContent={ () => (
+								<div className="components-dropdown-menu__menu">
+									<MenuItem
+										onClick={ () =>
+											onClickMock( {
+												selection,
+												onChange,
+												onClose,
+											} )
+										}
+									>
+										My sub-group item
+									</MenuItem>
+								</div>
+							) }
+						/>
+					) }
+				</VariationQuickUpdateMenuItem>
+				<SingleUpdateMenu
+					selection={ mockVariation }
+					onChange={ onChangeMock }
+					onDelete={ onDeleteMock }
+				/>
+			</SlotFillProvider>
+		);
+		fireEvent.click( getByRole( 'button', { name: 'Actions' } ) );
+		fireEvent.click( getByText( 'My sub-group' ) );
+		fireEvent.click( getByText( 'My sub-group item' ) );
 		expect( onClickMock ).toHaveBeenCalled();
 		expect( onClickMock ).toHaveBeenCalledWith(
 			expect.objectContaining( {
