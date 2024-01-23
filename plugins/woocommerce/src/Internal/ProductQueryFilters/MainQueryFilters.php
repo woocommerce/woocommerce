@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\ProductQueryFilters;
 
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 defined( 'ABSPATH' ) || exit;
@@ -12,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * MainQueryFilters class.
  */
-class MainQueryFilters {
+class MainQueryFilters implements RegisterHooksInterface {
 	use AccessiblePrivateMethods;
 
 	/**
@@ -33,13 +34,12 @@ class MainQueryFilters {
 	 */
 	final public function init( FilterClauses $filter_clauses ): void {
 		$this->filter_clauses = $filter_clauses;
-		$this->init_hooks();
 	}
 
 	/**
 	 * Hook into actions and filters.
 	 */
-	private function init_hooks() {
+	public function register() {
 		self::add_filter( 'posts_clauses', array( $this, 'main_query_filter' ), 10, 2 );
 	}
 

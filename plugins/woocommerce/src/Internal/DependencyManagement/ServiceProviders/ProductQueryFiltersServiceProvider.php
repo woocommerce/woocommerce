@@ -2,7 +2,6 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 use Automattic\WooCommerce\Internal\ProductQueryFilters\FilterData;
 use Automattic\WooCommerce\Internal\ProductQueryFilters\FilterClauses;
 use Automattic\WooCommerce\Internal\ProductQueryFilters\MainQueryFilters;
@@ -10,7 +9,7 @@ use Automattic\WooCommerce\Internal\ProductQueryFilters\MainQueryFilters;
 /**
  * LoggingServiceProvider class.
  */
-class ProductQueryFiltersServiceProvider extends AbstractServiceProvider {
+class ProductQueryFiltersServiceProvider extends AbstractInterfaceServiceProvider {
 	/**
 	 * List services provided by this class.
 	 *
@@ -29,7 +28,7 @@ class ProductQueryFiltersServiceProvider extends AbstractServiceProvider {
 	 */
 	public function register() {
 		$this->share( FilterClauses::class );
-		$this->share( MainQueryFilters::class )->addArgument( FilterClauses::class );
+		$this->share_with_implements_tags( MainQueryFilters::class )->addArgument( FilterClauses::class );
 		$this->add( FilterData::class )->addArgument( FilterClauses::class );
 	}
 }
