@@ -76,7 +76,7 @@ function _woo_ai_bootstrap(): void {
 
 		register_activation_hook( __FILE__, array( 'Woo_AI', 'activate' ) );
 
-		add_action( 'init', array( 'Woo_AI', 'instance' ) );
+		add_action( 'admin_init', array( 'Woo_AI', 'instance' ) );
 	}
 
 	if ( ! class_exists( 'Woo_AI_Settings' ) ) {
