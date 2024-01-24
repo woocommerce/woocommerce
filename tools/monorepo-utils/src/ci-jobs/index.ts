@@ -29,7 +29,9 @@ const program = new Command( 'ci-jobs' )
 
 		let fileChanges;
 		if ( options.baseRef === '' ) {
-			Logger.warn( 'No base ref was specified, forcing all projects to be marked as changed.' );
+			Logger.warn(
+				'No base ref was specified, forcing all projects to be marked as changed.'
+			);
 			fileChanges = true;
 		} else {
 			Logger.startTask( 'Pulling File Changes', true );
