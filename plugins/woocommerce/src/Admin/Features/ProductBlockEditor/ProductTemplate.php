@@ -76,6 +76,13 @@ class ProductTemplate {
 	private $icon = null;
 
 	/**
+	 * If the template is selectable by the user.
+	 *
+	 * @var bool
+	 */
+	private $is_selectable_by_user = true;
+
+	/**
 	 * ProductTemplate constructor
 	 *
 	 * @param array $data The data.
@@ -107,6 +114,10 @@ class ProductTemplate {
 
 		if ( isset( $data['alternate_product_datas'] ) ) {
 			$this->alternate_product_datas = $data['alternate_product_datas'];
+		}
+
+		if ( isset( $data['is_selectable_by_user'] ) ) {
+			$this->is_selectable_by_user = $data['is_selectable_by_user'];
 		}
 	}
 
@@ -230,6 +241,15 @@ class ProductTemplate {
 	}
 
 	/**
+	 * Check if the template is selectable by the user.
+	 *
+	 * @return bool True if the template is selectable by the user.
+	 */
+	public function is_selectable_by_user() {
+		return $this->is_selectable_by_user;
+	}
+
+	/**
 	 * Get the product template as JSON like.
 	 *
 	 * @return array The JSON.
@@ -245,6 +265,7 @@ class ProductTemplate {
 			'postType'              => $this->get_post_type(),
 			'productData'           => $this->get_product_data(),
 			'alternateProductDatas' => $this->get_alternate_product_datas(),
+			'isSelectableByUser'    => $this->is_selectable_by_user(),
 		);
 	}
 

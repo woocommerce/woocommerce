@@ -258,14 +258,15 @@ class Init {
 		);
 		$templates[] = new ProductTemplate(
 			array(
-				'id'                 => 'variation-product-template',
-				'title'              => __( 'Variation product', 'woocommerce' ),
-				'description'        => __( 'A variation of a variable product.', 'woocommerce' ),
-				'layout_template_id' => 'product-variation',
-				'post_type'          => 'product_variation',
-				'product_data'       => array(
+				'id'                    => 'variation-product-template',
+				'title'                 => __( 'Variation product', 'woocommerce' ),
+				'description'           => __( 'A variation of a variable product.', 'woocommerce' ),
+				'layout_template_id'    => 'product-variation',
+				'post_type'             => 'product_variation',
+				'product_data'          => array(
 					'type' => null,
 				),
+				'is_selectable_by_user' => false,
 			)
 		);
 		$templates[] = new ProductTemplate(
