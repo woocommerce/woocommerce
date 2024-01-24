@@ -2,10 +2,13 @@
  * External dependencies
  */
 import { resolveSelect, useSelect } from '@wordpress/data';
-import { store as coreStore } from '@wordpress/core-data';
 import { useState, useEffect } from '@wordpress/element';
+import { store as coreStore } from '@wordpress/core-data';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 // import { store as editorStore } from '@wordpress/editor';
 import { isNumber } from '@woocommerce/types';
+
+import singleProductMetadata from '../single-product/block.json';
 
 type LocationType = 'product' | 'archive' | 'cart' | 'order' | 'generic';
 type Context< T > = T & {
@@ -34,14 +37,23 @@ export const useGetLocation = < T, >(
 	clientId: string
 ) => {
 	const { templateSlug, postId } = context;
+	const isChildOfSingleProductBlock = useSelect(
+		( select ) =>
+			select( blockEditorStore ).getBlockParentsByBlockName(
+				clientId,
+				'woocommerce/single-product'
+			).length > 0
+	);
 
 	const [ productId, setProductId ] = useState< number | null >( null );
 	const [ catId, setCatId ] = useState< number | null >( null );
 	const [ tagId, setTagId ] = useState< number | null >( null );
 
-	// Case 1.2: Product context, specific ID - Single Product Block
-	// TODO: Verify if parent is Single Product block
-	if ( isNumber( postId ) ) {
+	/**
+	 * Case 1: Specific product - Single Product block
+	 */
+
+	if ( isNumber( postId ) && isChildOfSingleProductBlock ) {
 		return createLocationObject( 'product', { productId: postId } );
 	}
 
