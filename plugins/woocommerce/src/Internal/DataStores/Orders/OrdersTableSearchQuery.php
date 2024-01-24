@@ -167,7 +167,7 @@ class OrdersTableSearchQuery {
 
 			return $wpdb->prepare(
 				"`$order_table`.billing_email LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
-				$wpdb->esc_like( $this->search_term )
+				$wpdb->esc_like( $this->search_term ) . '%'
 			);
 		}
 

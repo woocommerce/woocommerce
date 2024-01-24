@@ -566,7 +566,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$orders = $this->setup_dummy_orders_for_search_filter();
 
 		$query_args = array(
-			's'      => 'customer@woo.test',
+			's'      => 'customer@woo.t',
 			'return' => 'ids',
 		);
 
