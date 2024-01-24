@@ -106,7 +106,7 @@ const ProductTemplateEdit = (
 		},
 		__unstableLayoutClassNames,
 	} = props;
-	const location = useGetLocation( props.context );
+	const location = useGetLocation( props.context, props.clientId );
 
 	const [ { page } ] = queryContext;
 	const [ activeBlockContextId, setActiveBlockContextId ] = useState();

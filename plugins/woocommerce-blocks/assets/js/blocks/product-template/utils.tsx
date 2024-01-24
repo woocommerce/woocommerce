@@ -8,13 +8,18 @@ import { useState, useEffect } from '@wordpress/element';
 import { isNumber } from '@woocommerce/types';
 
 type LocationType = 'product' | 'archive' | 'cart' | 'order' | 'generic';
+type Context< T > = T & {
+	templateSlug?: string;
+	postId?: number;
+};
 
 const parseResponse = ( resp?: Record< 'id', number >[] ): number | null =>
 	resp && resp.length && resp[ 0 ]?.id ? resp[ 0 ].id : null;
+
 const createGetEntitySlug =
 	( templateSlug: string ) =>
-	( taxonomySlug: string ): string =>
-		templateSlug.replace( `${ taxonomySlug }-`, '' );
+	( entitySlug: string ): string =>
+		templateSlug.replace( `${ entitySlug }-`, '' );
 
 const createLocationObject = (
 	type: LocationType,
@@ -23,20 +28,28 @@ const createLocationObject = (
 	type,
 	sourceData,
 } );
-export const useGetLocation = ( context ) => {
+
+export const useGetLocation = < T, >(
+	context: Context< T >,
+	clientId: string
+) => {
 	const { templateSlug, postId } = context;
 
 	const [ productId, setProductId ] = useState< number | null >( null );
 	const [ catId, setCatId ] = useState< number | null >( null );
 	const [ tagId, setTagId ] = useState< number | null >( null );
 
-	const getEntitySlug = createGetEntitySlug( templateSlug );
-
 	// Case 1.2: Product context, specific ID - Single Product Block
 	// TODO: Verify if parent is Single Product block
 	if ( isNumber( postId ) ) {
 		return createLocationObject( 'product', { productId: postId } );
 	}
+
+	if ( ! templateSlug ) {
+		return createLocationObject( 'generic', {} );
+	}
+
+	const getEntitySlug = createGetEntitySlug( templateSlug );
 
 	// Case 1.2: Product context, specific ID - Specific Single Product Template
 	if (
