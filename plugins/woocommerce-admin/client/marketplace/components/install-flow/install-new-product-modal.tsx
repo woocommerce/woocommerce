@@ -22,8 +22,6 @@ import { createOrder } from './create-order';
 import { MARKETPLACE_PATH, WP_ADMIN_PLUGIN_LIST_URL } from '../constants';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
-import { CONFETTI_COLORS } from '../../../utils/constants';
-import ConnectAccountButton from '~/marketplace/components/my-subscriptions/table/actions/connect-account-button';
 
 enum InstallFlowStatus {
 	'notConnected',
