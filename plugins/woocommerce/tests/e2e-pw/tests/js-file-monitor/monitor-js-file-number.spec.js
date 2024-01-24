@@ -27,12 +27,12 @@ const merchantPages = [
 	{
 		name: 'Products page',
 		url: 'wp-admin/edit.php?post_type=product',
-		expectedCount: 113,
+		expectedCount: 114,
 	},
 	{
 		name: 'Add new product',
 		url: 'wp-admin/post-new.php?post_type=product',
-		expectedCount: 131,
+		expectedCount: 132,
 	},
 	{
 		name: 'Analytics page',
