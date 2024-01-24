@@ -293,7 +293,7 @@ export class CheckoutPage {
 
 		// Rest of additional data passed in from the overrideData object.
 		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
-			const field = billingForm.getByLabel( label );
+			const field = billingForm.getByLabel( label, { exact: true } );
 			await field.fill( value );
 		}
 
@@ -354,7 +354,7 @@ export class CheckoutPage {
 
 		// Rest of additional data passed in from the overrideData object.
 		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
-			const field = shippingForm.getByLabel( label );
+			const field = shippingForm.getByLabel( label, { exact: true } );
 			await field.fill( value );
 		}
 
