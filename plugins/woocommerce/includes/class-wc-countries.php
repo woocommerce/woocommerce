@@ -323,24 +323,34 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_shipping_countries() {
-		if ( '' === get_option( 'woocommerce_ship_to_countries' ) ) {
-			return $this->get_allowed_countries();
+		// If shipping is disabled, return an empty array.
+		if ( 'disabled' === get_option( 'woocommerce_ship_to_countries' ) ) {
+			return array();
 		}
 
+		// Default to selling countries.
+		$countries = $this->get_allowed_countries();
+
+		// All indicates that all countries are allowed, regardless of where you sell to.
 		if ( 'all' === get_option( 'woocommerce_ship_to_countries' ) ) {
-			return $this->countries;
-		}
+			$countries = $this->countries;
+		} elseif ( 'specific' === get_option( 'woocommerce_ship_to_countries' ) ) {
+			$countries     = array();
+			$raw_countries = get_option( 'woocommerce_specific_ship_to_countries', array() );
 
-		$countries = array();
-
-		$raw_countries = get_option( 'woocommerce_specific_ship_to_countries' );
-
-		if ( $raw_countries ) {
-			foreach ( $raw_countries as $country ) {
-				$countries[ $country ] = $this->countries[ $country ];
+			if ( $raw_countries ) {
+				foreach ( $raw_countries as $country ) {
+					$countries[ $country ] = $this->countries[ $country ];
+				}
 			}
 		}
 
+		/**
+		 * Filter the list of allowed selling countries.
+		 *
+		 * @since 3.3.0
+		 * @param array $countries
+		 */
 		return apply_filters( 'woocommerce_countries_shipping_countries', $countries );
 	}
 
