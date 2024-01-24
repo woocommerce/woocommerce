@@ -10,7 +10,7 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { FontFamily } from '~/customize-store/assembler-hub/types/font';
+import { FontFamily } from '~/customize-store/types/font';
 
 type Props = {
 	fontFamilies: Array< FontFamily >;

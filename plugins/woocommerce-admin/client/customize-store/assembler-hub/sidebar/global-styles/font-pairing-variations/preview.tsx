@@ -26,7 +26,7 @@ import {
 	FONT_PREVIEW_WIDTH,
 	FONT_PREVIEW_HEIGHT,
 } from './constants';
-import { FontFamily } from '~/customize-store/assembler-hub/types/font';
+import { FontFamily } from '~/customize-store/types/font';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { isAIFlow, isNoAIFlow } from '~/customize-store/guards';
 

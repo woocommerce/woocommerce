@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { FontFamiliesToInstall } from '~/customize-store/assembler-hub/types/font';
+import { FontFamiliesToInstall } from '~/customize-store/types/font';
 import { Look } from '~/customize-store/design-with-ai/types';
 
 export const FONT_PREVIEW_LARGE_WIDTH = 136;

@@ -11,6 +11,7 @@ export type FontFamily = {
 	fontFamily: string;
 	name: string;
 	slug: string;
+	preview: string;
 };
 
 export type FontFace = {

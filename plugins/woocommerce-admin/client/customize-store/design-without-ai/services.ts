@@ -13,8 +13,13 @@ import { updateTemplate } from '../data/actions';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
 import { installAndActivateTheme as setTheme } from '../data/service';
 import { THEME_SLUG } from '../data/constants';
-import { FONT_FAMILY_TO_INSTALL } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
-import { FontFamily } from '../assembler-hub/types/font';
+import { FontFace, FontFamily } from '../types/font';
+import {
+	FontCollectionResponse,
+	installFontFace,
+	installFontFamily,
+	getFontFamiliesAndFontFaceToInstall,
+} from './fonts';
 
 const assembleSite = async () => {
 	await updateTemplate( {
@@ -48,86 +53,64 @@ const installAndActivateTheme = async () => {
 	}
 };
 
-const addFontFamily = ( data: FontFamily ) => {
-	const config = {
-		path: '/wp/v2/font-families',
-		method: 'POST',
-		data: {
-			font_family_settings: JSON.stringify( data ),
-		},
-	};
-	return apiFetch( config );
-};
-
-type FontCollectionResponse = Array< {
-	data: {
-		fontFamilies: Array< FontFamily >;
-	};
-} >;
-
-const getFontFamiliesToInstall = (
-	fontCollection: FontCollectionResponse,
-	installedFonts: Array< FontFamily >
-) => {
-	const slugInstalledFonts = installedFonts.map( ( { slug } ) => slug );
-
-	return Object.entries( FONT_FAMILY_TO_INSTALL ).reduce(
-		( acc, [ slug, fontData ] ) => {
-			if ( slugInstalledFonts.includes( slug ) ) {
-				return acc;
-			}
-
-			const fontFromCollection =
-				fontCollection[ 0 ].data.fontFamilies.find(
-					( { slug: fontSlug } ) => fontSlug === slug
-				);
-
-			if ( ! fontFromCollection ) {
-				return acc;
-			}
-
-			const fontFace = fontFromCollection.fontFace.filter(
-				( { fontWeight } ) =>
-					fontData.fontWeights.includes( fontWeight )
-			);
-
-			return [
-				...acc,
-				{
-					...fontFromCollection,
-					fontFace,
-				},
-			];
-		},
-		[] as Array< FontFamily >
-	);
-};
-
 const installFontFamilies = async () => {
 	const config = {
-		path: '/wp/v2/font-collections',
+		path: '/wp/v2/font-collections/default-font-collection',
 		method: 'GET',
 	};
 
 	try {
-		const installedFonts = ( await resolveSelect( 'core' ).getEntityRecords(
-			'postType',
-			'wp_font_family',
-			{
-				per_page: -1,
-			}
-		) ) as Array< FontFamily >;
+		const installedFontFamily = ( await resolveSelect(
+			'core'
+		).getEntityRecords( 'postType', 'wp_font_family', {
+			per_page: -1,
+		} ) ) as Array< {
+			id: number;
+			font_faces: Array< number >;
+			font_family_settings: FontFamily;
+		} >;
+
+		const installedFontFamilyWithFontFace = await Promise.all(
+			installedFontFamily.map( async ( fontFamily ) => {
+				const fontFaces = await apiFetch< Array< FontFace > >( {
+					path: `/wp/v2/font-families/${ fontFamily.id }/font-faces`,
+					method: 'GET',
+				} );
+
+				return {
+					...fontFamily,
+					font_face: fontFaces,
+				};
+			} )
+		);
 
 		const fontCollection = await apiFetch< FontCollectionResponse >(
 			config
 		);
 
-		const fontFamiliesToInstall = getFontFamiliesToInstall(
+		const {
+			fontFacesToInstall: fontFaceToInstall,
+			fontFamiliesWithFontFacesToInstall: fontFamilyWithFontFaceToInstall,
+		} = getFontFamiliesAndFontFaceToInstall(
 			fontCollection,
-			installedFonts
+			installedFontFamilyWithFontFace
 		);
 
-		await Promise.all( fontFamiliesToInstall.map( addFontFamily ) );
+		await Promise.all(
+			fontFamilyWithFontFaceToInstall.map( async ( fontFamily ) => {
+				const fontFamilyResponse = await installFontFamily(
+					fontFamily
+				);
+				return fontFamily.fontFace.map( async ( fontFace ) => {
+					installFontFace( {
+						...fontFace,
+						fontFamilyId: fontFamilyResponse.id,
+					} );
+				} );
+			} )
+		);
+
+		await Promise.all( fontFaceToInstall.map( installFontFace ) );
 	} catch ( error ) {
 		throw error;
 	}

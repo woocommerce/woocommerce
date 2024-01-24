@@ -22,7 +22,7 @@ import {
 } from './sidebar/global-styles/font-pairing-variations/constants';
 import { FontFamiliesLoader } from './sidebar/global-styles/font-pairing-variations/font-families-loader';
 import { useContext, useEffect } from '@wordpress/element';
-import { FontFamily } from './types/font';
+import { FontFamily } from '../types/font';
 import { FontFamiliesLoaderDotCom } from './sidebar/global-styles/font-pairing-variations/font-families-loader-dot-com';
 import { CustomizeStoreContext } from '.';
 import { isAIFlow, isNoAIFlow } from '../guards';
