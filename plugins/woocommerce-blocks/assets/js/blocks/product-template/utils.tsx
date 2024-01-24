@@ -189,7 +189,7 @@ export const useGetLocation = < T, >(
 
 	if ( templateSlug === 'taxonomy-product_attribute' ) {
 		return createLocationObject( 'archive', {
-			taxonomy: 'attribute',
+			taxonomy: null,
 			termId: null,
 		} );
 	}
