@@ -138,49 +138,69 @@ class ProductCollection extends AbstractBlock {
 
 	/**
 	 * Add interactive links to all anchors inside the Query Pagination block.
+	 * This enabled client-side navigation for the product collection block.
 	 *
 	 * @param string    $block_content The block content.
 	 * @param array     $block         The full block, including name and attributes.
 	 * @param \WP_Block $instance      The block instance.
 	 */
 	public function add_navigation_link_directives( $block_content, $block, $instance ) {
-		$is_product_collection_block = $instance->context['query']['isProductCollectionBlock'] ?? false;
+		$query_context               = $instance->context['query'] ?? array();
+		$is_product_collection_block = $query_context['isProductCollectionBlock'] ?? false;
+		$query_id                    = $instance->context['queryId'] ?? null;
+		$parsed_query_id             = $this->parsed_block['attrs']['queryId'] ?? null;
 
-		if (
-			$is_product_collection_block &&
-			$instance->context['queryId'] === $this->parsed_block['attrs']['queryId']
-		) {
-			$p = new \WP_HTML_Tag_Processor( $block_content );
-			$p->next_tag( array( 'class_name' => 'wp-block-query-pagination' ) );
-
-			while ( $p->next_tag( 'a' ) ) {
-				$class_attr = $p->get_attribute( 'class' );
-				$class_list = preg_split( '/\s+/', $class_attr );
-
-				$is_previous         = in_array( 'wp-block-query-pagination-previous', $class_list, true );
-				$is_next             = in_array( 'wp-block-query-pagination-next', $class_list, true );
-				$is_previous_or_next = $is_previous || $is_next;
-
-				$p->set_attribute( 'data-wc-on--click', 'woocommerce/product-collection::actions.navigate' );
-
-				/**
-				 * We prefetch the URL which is assigned to either the previous or next button.
-				 */
-				if ( $is_previous_or_next ) {
-					$p->set_attribute( 'data-wc-watch', 'woocommerce/product-collection::callbacks.prefetch' );
-					$p->set_attribute( 'data-wc-on--mouseenter', 'woocommerce/product-collection::actions.prefetch' );
-				}
-
-				if ( $is_previous ) {
-					$p->set_attribute( 'data-wp-key', 'product-collection-pagination--previous' );
-				} elseif ( $is_next ) {
-					$p->set_attribute( 'data-wp-key', 'product-collection-pagination--next' );
-				}
-			}
-			$block_content = $p->get_updated_html();
+		// Only proceed if the block is a product collection block and query IDs match.
+		if ( $is_product_collection_block && $query_id === $parsed_query_id ) {
+			$block_content = $this->process_pagination_links( $block_content );
 		}
 
 		return $block_content;
+	}
+
+	/**
+	 * Process pagination links within the block content.
+	 *
+	 * @param string $block_content The block content.
+	 * @return string The updated block content.
+	 */
+	private function process_pagination_links( $block_content ) {
+		$p = new \WP_HTML_Tag_Processor( $block_content );
+		$p->next_tag( array( 'class_name' => 'wp-block-query-pagination' ) );
+		$p->set_bookmark( 'start' );
+
+		$this->update_pagination_anchors( $p, 'page-numbers', 'product-collection-pagination-numbers' );
+		$this->update_pagination_anchors( $p, 'wp-block-query-pagination-next', 'product-collection-pagination--next' );
+		$this->update_pagination_anchors( $p, 'wp-block-query-pagination-previous', 'product-collection-pagination--previous' );
+
+		return $p->get_updated_html();
+	}
+
+	/**
+	 * Update attributes for pagination anchor tags.
+	 *
+	 * @param \WP_HTML_Tag_Processor $processor The HTML tag processor.
+	 * @param string                 $class_name The class name of the anchor tags.
+	 * @param string                 $key_prefix The prefix for the data-wc-key attribute.
+	 */
+	private function update_pagination_anchors( $processor, $class_name, $key_prefix ) {
+		// Start from the beginning of the block content.
+		$processor->seek( 'start' );
+
+		while ( $processor->next_tag(
+			array(
+				'tag_name'   => 'a',
+				'class_name' => $class_name,
+			)
+		) ) {
+			$processor->set_attribute( 'data-wc-on--click', 'woocommerce/product-collection::actions.navigate' );
+			$processor->set_attribute( 'data-wc-key', $key_prefix . '--' . esc_attr( wp_rand() ) );
+
+			if ( in_array( $class_name, array( 'wp-block-query-pagination-next', 'wp-block-query-pagination-previous' ), true ) ) {
+				$processor->set_attribute( 'data-wc-watch', 'woocommerce/product-collection::callbacks.prefetch' );
+				$processor->set_attribute( 'data-wc-on--mouseenter', 'woocommerce/product-collection::actions.prefetch' );
+			}
+		}
 	}
 
 	/**
