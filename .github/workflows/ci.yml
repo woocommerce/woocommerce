@@ -38,7 +38,7 @@ jobs:
               baseRef = 'origin/' + baseRef;
             }
             const child_process = require( 'node:child_process' );
-            child_process.execSync( 'pnpm utils ci-jobs ' + baseRef );
+            child_process.execSync( `pnpm utils ci-jobs ${ baseRef ? `--base-ref ${ baseRef }` : '' }` );
   project-lint-jobs:
     name: 'Lint - ${{ matrix.projectName }}'
     runs-on: 'ubuntu-20.04'
