@@ -211,7 +211,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'      => 10,
 				'attributes' => array(
 					'name'      => 'Product name',
-					'autoFocus' => true,
+					'autoFocus' => false, // @todo: why?
 				),
 			)
 		);

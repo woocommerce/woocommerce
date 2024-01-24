@@ -5,6 +5,7 @@ module.exports = {
 	...defaultConfig,
 	entry: {
 		index: './src/index.ts',
+		'product-editor-extension': './src-product-editor-extension/index.ts',
 	},
 	module: {
 		...defaultConfig.module,

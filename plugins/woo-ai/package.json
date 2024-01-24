@@ -12,17 +12,17 @@
 	"homepage": "http://github.com/woocommerce/woo-ai",
 	"devDependencies": {
 		"@babel/preset-react": "7.23.3",
+		"@babel/preset-typescript": "7.23.2",
 		"@svgr/webpack": "^8.1.0",
-		"@testing-library/react": "12.1.5",
 		"@testing-library/dom": "9.3.3",
 		"@testing-library/jest-dom": "5.16.5",
+		"@testing-library/react": "12.1.5",
 		"@testing-library/react-hooks": "7.0.2",
 		"@testing-library/user-event": "13.5.0",
 		"@types/debug": "^4.1.12",
 		"@types/jquery": "^3.5.29",
 		"@types/react": "^17.0.71",
 		"@types/react-dom": "^17.0.25",
-		"@babel/preset-typescript": "7.23.2",
 		"@types/wordpress__components": "^19.10.5",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
@@ -39,9 +39,11 @@
 		"wireit": "0.14.3"
 	},
 	"scripts": {
-		"build": "pnpm build:admin && pnpm uglify",
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:admin": "wp-scripts build",
 		"build:dev": "pnpm lint:js && pnpm build",
+		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project:wp-scripts": "wireit",
 		"build:zip": "./bin/build-zip.sh",
 		"changelog": "composer install && composer exec -- changelogger",
 		"check-engines": "wp-scripts check-engines",
@@ -59,7 +61,10 @@
 		"start": "wp-scripts start",
 		"test:e2e": "wp-scripts test-e2e",
 		"test:unit": "wp-scripts test-unit-js --config tests/js/jest.config.js",
-		"uglify": "rm -f $npm_package_assets_js_min && for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done"
+		"uglify": "rm -f $npm_package_assets_js_min && for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
+		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
+		"watch:build:project:wp-scripts": "wireit"
 	},
 	"dependencies": {
 		"@automattic/tour-kit": "^1.1.1",
@@ -70,11 +75,14 @@
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/api-fetch": "wp-6.0",
+		"@wordpress/block-editor": "wp-6.0",
+		"@wordpress/blocks": "wp-6.0",
 		"@wordpress/components": "wp-6.0",
 		"@wordpress/compose": "wp-6.0",
 		"@wordpress/element": "wp-6.0",
 		"@wordpress/hooks": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
+		"@wordpress/icons": "wp-6.0",
 		"@wordpress/notices": "wp-6.0",
 		"@wordpress/plugins": "wp-6.0",
 		"@wordpress/preferences": "wp-6.0",
@@ -101,5 +109,45 @@
 		"*.scss": [
 			"npm run lint:css:fix"
 		]
+	},
+	"wireit": {
+		"build:project:wp-scripts": {
+			"command": "wp-scripts build",
+			"clean": "if-file-deleted",
+			"files": [
+				"babel.config.js",
+				"tsconfig.json",
+				"webpack.config.js",
+				"src/*"
+			],
+			"output": [
+				"build"
+			]
+		},
+		"watch:build:project:wp-scripts": {
+			"command": "wp-scripts start",
+			"service": true
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/src/",
+				"node_modules/@woocommerce/tracks/build",
+				"node_modules/@woocommerce/tracks/build-module",
+				"node_modules/@woocommerce/tracks/build-types",
+				"node_modules/@woocommerce/components/build",
+				"node_modules/@woocommerce/components/build-module",
+				"node_modules/@woocommerce/components/build-style",
+				"node_modules/@woocommerce/components/build-types",
+				"node_modules/@woocommerce/ai/build",
+				"node_modules/@woocommerce/ai/build-module",
+				"node_modules/@woocommerce/ai/build-style",
+				"node_modules/@woocommerce/ai/build-types",
+				"package.json"
+			]
+		}
 	}
 }

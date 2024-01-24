@@ -67,6 +67,19 @@ class Woo_AI {
 
 		add_filter( 'jetpack_offline_mode', '__return_false' );
 		add_action( 'current_screen', array( $this, 'includes' ) );
+
+		// add_action(
+		// 	'woocommerce_block_template_area_product-form_after_add_block_product-name',
+		// 	array( $this, 'add_product_title_with_ai_assistant' )
+		// );
+	}
+
+	public function is_woo_product_editor_available() {
+		$current_screen = get_current_screen();
+		return
+			'woocommerce_page_wc-admin' === $current_screen->base &&
+			$current_screen->is_block_editor() &&
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' );
 	}
 
 	/**
@@ -78,6 +91,64 @@ class Woo_AI {
 		if ( 'post' === $current_screen->base && 'product' === $current_screen->post_type ) {
 			include_once dirname( __FILE__ ) . '/class-woo-ai-product-text-generation.php';
 		}
+
+		if ( $this->is_woo_product_editor_available() ) {
+			$this->includes_product_editor();
+		}
+	}
+
+	/**
+	 * Include any classes we need within admin / product editor app.
+	 */
+	public function includes_product_editor() {
+		include_once dirname( __FILE__ ) . '/class-woo-ai-new-product-ai-assistant.php';
+	}
+
+	/**
+	 * Add product title with AI assistant.
+	 *
+	 * @param object $product_name_field The product name field.
+	 */
+	public function add_product_title_with_ai_assistant( $product_name_field ) {
+		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			return;
+		}
+
+		$section_block = $product_name_field->get_parent();
+
+		if ( ! method_exists( $section_block, 'add_block' ) ) {
+			return;
+		}
+	
+		$ai_title_block = $section_block->add_block(
+			[
+				'id'         => 'product-title-with-ai-assistance',
+				'order'      => $product_name_field->get_order() + 10,
+				'blockName'  => 'woocommerce/product-title-ai-field',
+				'attributes' => [
+					'property' => 'meta_data.onsale_label',
+					'label'    => __( 'Onsale Label', 'woo-product-editor-ai-workshop' ),
+					'help'     => __( 'The label to display when the product is on sale.', 'woo-product-editor-ai-workshop' ),
+					'placeholder' => __( 'Onsale Label', 'woo-product-editor-ai-workshop' ),
+				],
+			]
+		);
+
+		// Remove the current product name field.
+		$product_name_field->remove();
+
+		// Add the product name into the new product title field.
+		$ai_title_block->add_block(
+			array(
+				'id'         => 'product-name-with-ai',
+				'blockName'  => 'woocommerce/product-name-field',
+				'order'      => 10,
+				'attributes' => array(
+					'name'      => 'Product name',
+					'autoFocus' => true,
+				),
+			)
+		);
 	}
 
 	/**

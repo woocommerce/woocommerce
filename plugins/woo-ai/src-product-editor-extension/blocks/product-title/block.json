@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"title": "Product title with AI assistance",
+	"name": "woocommerce/product-title-ai-field",
+	"description": "Provides title field with AI assistance for products",
+	"category": "woocommerce",
+	"version": "0.1.0",
+	"icon": "smiley",
+	"example": {},
+	"supports": {
+		"html": false
+	},
+	"textdomain": "woo-product-editor-ai-workshop",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js"
+}
