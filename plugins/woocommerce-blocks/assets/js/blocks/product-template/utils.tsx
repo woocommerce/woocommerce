@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { store as coreStore, resolveSelect } from '@wordpress/data';
+import { useState, useEffect } from '@wordpress/element';
 // import { store as editorStore } from '@wordpress/editor';
 import { isNumber } from '@woocommerce/types';
 
@@ -14,7 +15,8 @@ const createLocationObject = (
 	type,
 	sourceData,
 } );
-export const useGetLocation = async ( context ) => {
+export const useGetLocation = ( context ) => {
+	const [ productId, setProductId ] = useState( null );
 	const { templateSlug, postId } = context;
 
 	// const currentTemplateId = useSelect( ( select ) => {
@@ -34,11 +36,19 @@ export const useGetLocation = async ( context ) => {
 		templateSlug !== 'single-product'
 	) {
 		const [ , slug ] = templateSlug.split( 'single-product' );
-		const productId = await resolveSelect( 'core' ).getEntityRecords(
-			'postType',
-			'product',
-			{ _fields: [ 'id' ], slug }
-		);
+		useEffect( () => {
+			const getProductId = async () => {
+				const productId = await resolveSelect(
+					'core'
+				).getEntityRecords( 'postType', 'product', {
+					_fields: [ 'id' ],
+					slug,
+				} );
+				setProductId( productId );
+			};
+
+			getProductId();
+		}, [ templateSlug ] );
 
 		return createLocationObject( 'product', { productId } );
 	}
