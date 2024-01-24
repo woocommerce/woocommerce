@@ -103,6 +103,12 @@ const webpackConfig = {
 		} ),
 		new WooCommerceDependencyExtractionWebpackPlugin(),
 	],
+	watchOptions: {
+		ignored: [
+			path.resolve( __dirname, `../../../../${ extension }/` ),
+			'**/node_modules',
+		],
+	},
 };
 
 webpackConfig.devtool = 'source-map';
