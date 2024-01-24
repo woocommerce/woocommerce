@@ -59,7 +59,9 @@ export const FontFamiliesLoader = ( { fontFamilies, onLoad }: Props ) => {
 		site?.url + '/wp-content/themes/' + currentTheme?.stylesheet;
 
 	useEffect( () => {
-		if ( ! Array.isArray( fontFamilies ) ) return;
+		if ( ! Array.isArray( fontFamilies ) ) {
+			return;
+		}
 		fontFamilies.forEach( async ( fontFamily ) => {
 			fontFamily.fontFace?.forEach( async ( fontFace ) => {
 				const srcFont = getDisplaySrcFromFontFace(

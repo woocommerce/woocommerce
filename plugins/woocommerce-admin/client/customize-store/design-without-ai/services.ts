@@ -70,7 +70,7 @@ const installFontFamilies = async () => {
 			font_family_settings: FontFamily;
 		} >;
 
-		const installedFontFamilyWithFontFace = await Promise.all(
+		const installedFontFamiliesWithFontFaces = await Promise.all(
 			installedFontFamily.map( async ( fontFamily ) => {
 				const fontFaces = await apiFetch< Array< FontFace > >( {
 					path: `/wp/v2/font-families/${ fontFamily.id }/font-faces`,
@@ -88,16 +88,14 @@ const installFontFamilies = async () => {
 			config
 		);
 
-		const {
-			fontFacesToInstall: fontFaceToInstall,
-			fontFamiliesWithFontFacesToInstall: fontFamilyWithFontFaceToInstall,
-		} = getFontFamiliesAndFontFaceToInstall(
-			fontCollection,
-			installedFontFamilyWithFontFace
-		);
+		const { fontFacesToInstall, fontFamiliesWithFontFacesToInstall } =
+			getFontFamiliesAndFontFaceToInstall(
+				fontCollection,
+				installedFontFamiliesWithFontFaces
+			);
 
-		const fontFamilyWithFontFaceToInstallPromises =
-			fontFamilyWithFontFaceToInstall.map( async ( fontFamily ) => {
+		const fontFamiliesWithFontFaceToInstallPromises =
+			fontFamiliesWithFontFacesToInstall.map( async ( fontFamily ) => {
 				const fontFamilyResponse = await installFontFamily(
 					fontFamily
 				);
@@ -109,12 +107,12 @@ const installFontFamilies = async () => {
 				} );
 			} );
 
-		const fontFaceToInstallPromises =
-			fontFaceToInstall.map( installFontFace );
+		const fontFacesToInstallPromises =
+			fontFacesToInstall.map( installFontFace );
 
 		await Promise.all( [
-			...fontFamilyWithFontFaceToInstallPromises,
-			...fontFaceToInstallPromises,
+			...fontFamiliesWithFontFaceToInstallPromises,
+			...fontFacesToInstallPromises,
 		] );
 	} catch ( error ) {
 		throw error;

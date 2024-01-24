@@ -29,7 +29,7 @@ import { isAIFlow, isNoAIFlow } from '../guards';
 
 const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 
-let isFontEnabled = false;
+let areFontsPreloaded = false;
 
 export const PreloadFonts = () => {
 	// @ts-expect-error No types for this exist yet.
@@ -66,7 +66,7 @@ export const PreloadFonts = () => {
 
 	useEffect( () => {
 		if (
-			isFontEnabled ||
+			areFontsPreloaded ||
 			installedFontFamilies === null ||
 			enabledFontFamilies === null
 		) {
@@ -80,27 +80,30 @@ export const PreloadFonts = () => {
 			...( theme ? theme.map( ( font ) => font.slug ) : [] ),
 		];
 
-		const fontsToEnable = installedFontFamilies.reduce( ( acc, font ) => {
-			if (
-				enabledFontSlugs.includes( font.slug ) ||
-				FONT_FAMILIES_TO_INSTALL[ font.slug ] === undefined
-			) {
-				return acc;
-			}
+		const fontFamiliesToEnable = installedFontFamilies.reduce(
+			( acc, font ) => {
+				if (
+					enabledFontSlugs.includes( font.slug ) ||
+					FONT_FAMILIES_TO_INSTALL[ font.slug ] === undefined
+				) {
+					return acc;
+				}
 
-			return [
-				...acc,
-				{
-					...JSON.parse( font.content.raw ),
-				},
-			];
-		}, [] as Array< FontFamily > );
+				return [
+					...acc,
+					{
+						...JSON.parse( font.content.raw ),
+					},
+				];
+			},
+			[] as Array< FontFamily >
+		);
 
 		setFontFamilies( {
 			...enabledFontFamilies,
 			custom: [
 				...( enabledFontFamilies.custom ?? [] ),
-				...( fontsToEnable ?? [] ),
+				...( fontFamiliesToEnable ?? [] ),
 			],
 		} );
 
@@ -108,7 +111,7 @@ export const PreloadFonts = () => {
 			'settings.typography.fontFamilies',
 		] );
 
-		isFontEnabled = true;
+		areFontsPreloaded = true;
 	}, [
 		enabledFontFamilies,
 		globalStylesId,
