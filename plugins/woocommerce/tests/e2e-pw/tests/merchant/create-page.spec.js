@@ -43,8 +43,7 @@ test.describe( 'Can create a new page', () => {
 
 		await page
 			.getByRole( 'document', {
-				name:
-					'Empty block; start writing or type forward slash to choose a block',
+				name: 'Empty block; start writing or type forward slash to choose a block',
 			} )
 			.fill( 'Test Page' );
 
