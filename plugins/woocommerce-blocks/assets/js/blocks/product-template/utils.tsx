@@ -96,7 +96,6 @@ export const useGetLocation = ( context ) => {
 		return createLocationObject( 'archive', {
 			tag: null,
 			cat: categoryId,
-			attr: null,
 		} );
 	}
 
@@ -124,42 +123,13 @@ export const useGetLocation = ( context ) => {
 		return createLocationObject( 'archive', {
 			tag: tagId,
 			cat: null,
-			attr: null,
 		} );
-	}
-
-	if (
-		templateSlug.includes( 'taxonomy-product_attribute' ) &&
-		templateSlug !== 'taxonomy-product_attribute'
-	) {
-		// useEffect( () => {
-		// 	const slug = getEntitySlug( 'taxonomy-product_attribute' );
-		// 	const getAttributeId = async () => {
-		// 		const response = ( await resolveSelect(
-		// 			coreStore
-		// 		).getEntityRecords( 'taxonomy', 'attribute', {
-		// 			_fields: [ 'id' ],
-		// 			slug,
-		// 		} ) ) as Record< 'id', number >[];
-		// 		const attributeId = parseResponse( response );
-		// 		setAttributeId( attributeId );
-		// 	};
-		// 	if ( slug ) {
-		// 		getAttributeId();
-		// 	}
-		// }, [ templateSlug ] );
-		// return createLocationObject( 'archive', {
-		// 	tag: null,
-		// 	cat: null,
-		// 	attr: attributeId,
-		// } );
 	}
 
 	// Case 2.2: Taxonomy context - Products by * Templates
 	const genericTaxonomyTemplateSlugs = [
 		'taxonomy-product_cat',
 		'taxonomy-product_tag',
-		'taxonomy-product_attribute',
 		'tag',
 		'category',
 	];
@@ -167,7 +137,6 @@ export const useGetLocation = ( context ) => {
 		return createLocationObject( 'archive', {
 			tag: null,
 			cat: null,
-			attr: null,
 		} );
 	}
 	// Case 3: Cart context:
