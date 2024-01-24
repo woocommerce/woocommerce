@@ -51,7 +51,16 @@ class Additional_Checkout_Fields_Test_Helper {
 		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'first-plugin-namespace/government-ID',
-				'label'    => __( 'Government ID', 'woocommerce' ),
+				'label'    => 'Government ID',
+				'location' => 'address',
+				'type'     => 'text',
+				'required' => true,
+			),
+		);
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'       => 'first-plugin-namespace/confirm-government-ID',
+				'label'    => 'Confirm government ID',
 				'location' => 'address',
 				'type'     => 'text',
 				'required' => true,
@@ -63,7 +72,7 @@ class Additional_Checkout_Fields_Test_Helper {
 			function( $error, $value, $schema, $request ) {
 				$match = preg_match( '/^[0-9]{5}$/', $value );
 				if ( 0 === $match || false === $match ) {
-					$error->add( 'first-plugin-namespace/government-ID_invalid_value', __( 'Invalid government ID.', 'woocommerce' ) );
+					$error->add( 'first-plugin-namespace/government-ID_invalid_value', 'Invalid government ID.' );
 				}
 				return $error;
 			},
