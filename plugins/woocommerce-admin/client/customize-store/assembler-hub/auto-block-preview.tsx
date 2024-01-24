@@ -23,7 +23,6 @@ import { noop } from 'lodash';
  * Internal dependencies
  */
 import { LogoBlockContext } from './logo-block-context';
-import { FontFamiliesLoader } from './sidebar/global-styles/font-pairing-variations/font-families-loader';
 import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
 import { PreloadFonts } from './preload-fonts';
 import { FontFamily } from '../types/font';
