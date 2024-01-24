@@ -106,8 +106,9 @@ class Additional_Checkout_Fields_Test_Helper {
 					$error->add( 'first-plugin-namespace/government-ID_invalid_value', 'Invalid government ID.' );
 				}
 
-				$address_key = 'shipping' === $address_type ? 'shipping_address' : 'billing_address';
-				if ( $value !== $request->get_params()[ $address_key ]['first-plugin-namespace/confirm-government-ID'] ) {
+				$address_key  = 'shipping' === $address_type ? 'shipping_address' : 'billing_address';
+				$confirmation = $request->get_params()[ $address_key ]['first-plugin-namespace/confirm-government-ID'];
+				if ( ! empty( $confirmation ) && $value !== $request->get_params()[ $address_key ]['first-plugin-namespace/confirm-government-ID'] ) {
 					$error->add( 'first-plugin-namespace/government-ID_mismatch', 'Please ensure your government ID matches the confirmation.' );
 				}
 				return $error;
