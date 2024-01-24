@@ -109,19 +109,28 @@ const installFonts = async () => {
 		method: 'GET',
 	};
 
-	const installedFonts = ( await resolveSelect( 'core' ).getEntityRecords(
-		'postType',
-		'wp_font_family',
-		{
-			per_page: -1,
-		}
-	) ) as Array< Font >;
+	try {
+		const installedFonts = ( await resolveSelect( 'core' ).getEntityRecords(
+			'postType',
+			'wp_font_family',
+			{
+				per_page: -1,
+			}
+		) ) as Array< Font >;
 
-	const fontCollection = await apiFetch< FontCollectionResponse >( config );
+		const fontCollection = await apiFetch< FontCollectionResponse >(
+			config
+		);
 
-	const fontToInstall = getFontToInstall( fontCollection, installedFonts );
+		const fontToInstall = getFontToInstall(
+			fontCollection,
+			installedFonts
+		);
 
-	await Promise.all( fontToInstall.map( installFont ) );
+		await Promise.all( fontToInstall.map( installFont ) );
+	} catch ( error ) {
+		throw error;
+	}
 };
 
 const createProducts = async () => {
