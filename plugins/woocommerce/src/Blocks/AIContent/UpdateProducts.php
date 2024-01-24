@@ -112,7 +112,11 @@ class UpdateProducts {
 		$dummy_products_count = count( $dummy_products );
 		$products_to_create   = max( 0, 6 - $real_products_count - $dummy_products_count );
 		while ( $products_to_create > 0 ) {
-			$this->create_new_product( self::DUMMY_PRODUCTS[ $products_to_create - 1 ] );
+			$product_created = $this->create_new_product( self::DUMMY_PRODUCTS[ $products_to_create - 1 ] );
+			if ( is_wp_error( $product_created ) ) {
+				return $product_created;
+			}
+
 			$products_to_create--;
 		}
 

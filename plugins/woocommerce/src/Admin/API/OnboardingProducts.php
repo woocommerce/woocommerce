@@ -62,7 +62,7 @@ class OnboardingProducts extends \WC_REST_Data_Controller {
 		$products = $update_products->fetch_dummy_products_to_update();
 
 		if ( is_wp_error( $products ) ) {
-			return rest_ensure_response( array( 'success' => false ) );
+			return rest_ensure_response( $products );
 		}
 
 		return rest_ensure_response( array( 'success' => true ) );
