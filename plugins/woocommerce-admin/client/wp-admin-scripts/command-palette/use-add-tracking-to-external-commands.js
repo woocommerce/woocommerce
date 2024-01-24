@@ -8,6 +8,7 @@ import { store as commandsStore } from '@wordpress/commands';
 
 // Hook to add tracking to non-WooCommerce commands.
 export const useAddTrackingToExternalCommands = ( origin ) => {
+	const originRef = useRef( origin );
 	const commandsWithTracking = useRef( [] );
 	const commandLoadersWithTracking = useRef( [] );
 	const { commands, commandLoaders, isCommandPaletteOpen } = useSelect(
@@ -24,6 +25,10 @@ export const useAddTrackingToExternalCommands = ( origin ) => {
 	);
 
 	useEffect( () => {
+		originRef.current = origin;
+	}, [ origin ] );
+
+	useEffect( () => {
 		if ( ! isCommandPaletteOpen ) {
 			commandsWithTracking.current = [];
 			commandLoadersWithTracking.current = [];
@@ -38,7 +43,7 @@ export const useAddTrackingToExternalCommands = ( origin ) => {
 					callback: ( ...args ) => {
 						recordEvent( 'woocommerce_command_palette_submit', {
 							name: command.name,
-							origin,
+							origin: originRef.current,
 						} );
 						command.callback( ...args );
 					},
@@ -70,7 +75,7 @@ export const useAddTrackingToExternalCommands = ( origin ) => {
 												title:
 													command.label ??
 													command.name,
-												origin,
+												origin: originRef.current,
 											}
 										);
 										command.callback( ...callbackArgs );
@@ -86,5 +91,5 @@ export const useAddTrackingToExternalCommands = ( origin ) => {
 				commandLoadersWithTracking.current.push( commandLoader.name );
 			}
 		} );
-	}, [ commands, commandLoaders, origin ] );
+	}, [ commands, commandLoaders ] );
 };
