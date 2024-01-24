@@ -28,6 +28,18 @@ describe( 'useProductTemplate', () => {
 					},
 				},
 				{
+					id: 'template-2a',
+					title: 'Template 2a',
+					description: 'Template 2a description',
+					icon: 'icon',
+					order: 999,
+					layoutTemplateId: 'layout-template-2a',
+					postType: 'custom_product',
+					productData: {
+						type: 'grouped',
+					},
+				},
+				{
 					id: 'template-2',
 					title: 'Template 2',
 					description: 'Template 2 description',
@@ -49,6 +61,18 @@ describe( 'useProductTemplate', () => {
 					postType: 'product',
 					productData: {
 						type: 'simple',
+					},
+				},
+				{
+					id: 'template-4',
+					title: 'Template 4',
+					description: 'Template 4 description',
+					icon: 'icon',
+					layoutTemplateId: 'layout-template-4',
+					order: 4,
+					postType: 'product_variation',
+					productData: {
+						type: undefined,
 					},
 				},
 			],
@@ -84,9 +108,33 @@ describe( 'useProductTemplate', () => {
 		expect( result.current.productTemplate?.id ).toEqual( 'template-2' );
 	} );
 
+	it( 'should return the first product template with a matching post type when no product template id or product type is set', () => {
+		const { result } = renderHook( () =>
+			useProductTemplate( undefined, undefined, 'product_variation' )
+		);
+
+		expect( result.current.productTemplate?.id ).toEqual( 'template-4' );
+	} );
+
 	it( 'should return undefined if no matching product template by id or type', () => {
 		const { result } = renderHook( () =>
 			useProductTemplate( 'invalid-template-id', 'external', 'product' )
+		);
+
+		expect( result.current.productTemplate ).toBeUndefined();
+	} );
+
+	it( 'should return undefined if post type is not set', () => {
+		const { result } = renderHook( () =>
+			useProductTemplate( 'template-1', 'simple', undefined )
+		);
+
+		expect( result.current.productTemplate ).toBeUndefined();
+	} );
+
+	it( 'should return undefined if post type does not match', () => {
+		const { result } = renderHook( () =>
+			useProductTemplate( 'template-1', 'simple', 'product_variation' )
 		);
 
 		expect( result.current.productTemplate ).toBeUndefined();
