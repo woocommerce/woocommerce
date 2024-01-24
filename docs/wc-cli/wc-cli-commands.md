@@ -13,13 +13,13 @@ This document serves as a comprehensive reference for the WooCommerce Command Li
 The general syntax for WC-CLI commands is:
 
 ```bash
-$ wp wc [command] [options]
+wp wc [command] [options]
 ```
 
 For detailed help on any specific command, use:
 
 ```bash
-$ wp wc [command] --help
+wp wc [command] --help
 ```
 
 ### Commands:
