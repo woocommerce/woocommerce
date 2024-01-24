@@ -207,16 +207,15 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		await checkoutPageObject.editShippingDetails();
 		await checkoutPageObject.unsyncBillingWithShipping();
 		await checkoutPageObject.editBillingDetails();
-
-		const optInCheckbox = checkoutPageObject.page.getByLabel(
-			'Do you want to subscribe to our newsletter? (optional)'
-		);
-		await optInCheckbox.check();
-		await optInCheckbox.uncheck();
-
 		await checkoutPageObject.fillInCheckoutWithTestData(
 			{},
 			{
+				contact: {
+					'Enter a gift message to include in the package':
+						'This is for you!',
+					'Is this a personal purchase or a business purchase?':
+						'business',
+				},
 				address: {
 					shipping: {
 						'Government ID': '12345',
@@ -227,35 +226,87 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						'Confirm government ID': '54321',
 					},
 				},
-				additional: { 'How did you hear about us?': 'Other' },
-			}
-		);
-
-		// First change after initial input.
-		await optInCheckbox.check();
-		await optInCheckbox.uncheck();
-		await checkoutPageObject.fillInCheckoutWithTestData(
-			{},
-			{
-				address: {
-					shipping: {
-						'Government ID': '54321',
-						'Confirm government ID': '54321',
-					},
-					billing: {
-						'Government ID': '12345',
-						'Confirm government ID': '12345',
-					},
+				additional: {
+					'How did you hear about us?': 'Other',
+					'What is your favourite colour?': 'Blue',
 				},
-				additional: { 'How did you hear about us?': 'Facebook' },
 			}
 		);
 
-		// Second change after initial input.
-		await optInCheckbox.check();
+		// Fill select fields "manually" (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
+		// fields until we recreate th Combobox component. This is because the aria-label includes the value so getting
+		// by label alone is not reliable unless we know the value.
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Shipping address',
+			} )
+			.getByLabel( 'How wide is your road?' )
+			.fill( 'wide' );
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Billing address',
+			} )
+			.getByLabel( 'How wide is your road?' )
+			.fill( 'narrow' );
+
+		// Change the shipping and billing select fields again.
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Billing address',
+			} )
+			.getByLabel( 'How wide is your road?' )
+			.fill( 'wide' );
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Shipping address',
+			} )
+			.getByLabel( 'How wide is your road?' )
+			.fill( 'super-wide' );
+
+		await checkoutPageObject.page
+			.getByLabel( 'Would you like a free gift with your order?' )
+			.check();
+		await checkoutPageObject.page
+			.getByLabel( 'Do you want to subscribe to our newsletter?' )
+			.check();
+
+		// Check both "Can a truck fit down your road?" checkboxes (one in shipping, one in billing).
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Shipping address',
+			} )
+			.getByLabel( 'Can a truck fit down your road?' )
+			.check();
+		// Check this one here, but don't uncheck it later.
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Billing address',
+			} )
+			.getByLabel( 'Can a truck fit down your road?' )
+			.check();
+
+		await checkoutPageObject.page
+			.getByLabel( 'Would you like a free gift with your order?' )
+			.uncheck();
+		await checkoutPageObject.page
+			.getByLabel( 'Do you want to subscribe to our newsletter?' )
+			.uncheck();
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Shipping address',
+			} )
+			.getByLabel( 'Can a truck fit down your road?' )
+			.uncheck();
+
 		await checkoutPageObject.fillInCheckoutWithTestData(
 			{},
 			{
+				contact: {
+					'Enter a gift message to include in the package':
+						'This is for you, from me!',
+					'Is this a personal purchase or a business purchase?':
+						'personal',
+				},
 				address: {
 					shipping: {
 						'Government ID': '98765',
@@ -266,7 +317,10 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						'Confirm government ID': '43210',
 					},
 				},
-				additional: { 'How did you hear about us?': 'Google' },
+				additional: {
+					'How did you hear about us?': 'Facebook',
+					'What is your favourite colour?': 'Red',
+				},
 			}
 		);
 
@@ -281,12 +335,49 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		).toBeVisible();
 		await expect(
 			checkoutPageObject.page.getByText(
-				'How did you hear about us?Google'
+				'How did you hear about us?Facebook'
 			)
 		).toBeVisible();
 		await expect(
 			checkoutPageObject.page.getByText(
-				'Do you want to subscribe to our newsletter?Yes'
+				'Do you want to subscribe to our newsletter?No'
+			)
+		).toBeVisible();
+
+		await expect(
+			checkoutPageObject.page.getByText(
+				'What is your favourite colour?Red'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Enter a gift message to include in the packageThis is for you, from me!'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Would you like a free gift with your order?No'
+			)
+		).toBeVisible();
+
+		// Checking that one of the boxes is checked, and one is unchecked
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Can a truck fit down your road?No'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Can a truck fit down your road?Yes'
+			)
+		).toBeVisible();
+
+		await expect(
+			checkoutPageObject.page.getByText( 'How wide is your road?Wide' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'How wide is your road?Super wide'
 			)
 		).toBeVisible();
 	} );
