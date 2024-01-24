@@ -255,6 +255,15 @@ class OrderAttributionController implements RegisterHooksInterface {
 		$session_length = (int) apply_filters( 'wc_order_attribution_session_length_minutes', 30 );
 
 		/**
+		 * Filter the number of cookies.
+		 *
+		 * @since 8.6.0
+		 *
+		 * @param bool $single_cookie True to use a single cookie, false to use multiple cookies.
+		 */
+		$single_cookie = apply_filters( 'wc_order_attribution_single_cookie', true );
+
+		/**
 		 * Filter to allow tracking.
 		 *
 		 * @since 8.5.0
@@ -266,6 +275,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 		// Create Order Attribution JS namespace with parameters.
 		$namespace = array(
 			'params' => array(
+				'single_cookie' => $single_cookie,
 				'lifetime'      => $lifetime,
 				'session'       => $session_length,
 				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
