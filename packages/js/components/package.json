@@ -62,6 +62,7 @@
 	},
 	"dependencies": {
 		"@automattic/calypso-color-schemes": "^2.1.1",
+		"@automattic/components": "^2.1.0",
 		"@automattic/interpolate-components": "^1.2.1",
 		"@automattic/tour-kit": "^1.1.1",
 		"@types/wordpress__block-editor": "7.0.0",

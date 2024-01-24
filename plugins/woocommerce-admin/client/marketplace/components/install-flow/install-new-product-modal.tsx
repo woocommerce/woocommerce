@@ -8,6 +8,7 @@ import { useState, useEffect, useContext } from '@wordpress/element';
 import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { Status } from '@wordpress/notices';
+import { Confetti } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -393,6 +394,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 					} }
 				/>
 			) }
+			{ installStatus === InstallFlowStatus.activated && <Confetti /> }
 			<ButtonGroup className="woocommerce-marketplace__header-account-modal-button-group">
 				{ secondaryButton() }
 				{ primaryButton() }
