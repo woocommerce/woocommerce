@@ -112,7 +112,6 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		// Fill in SKU
 		await page.getByText( 'Inventory' ).click();
 		await page.getByLabel( 'SKU', { exact: true } ).fill( productSKU );
-		await page.keyboard.press( 'Enter' );
 
 		// Fill in purchase note
 		await page.getByText( 'Advanced' ).click();
