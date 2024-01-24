@@ -5,7 +5,6 @@ import { MenuGroup, MenuItem } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import { ProductVariation } from '@woocommerce/data';
 import classNames from 'classnames';
 
 /**
@@ -32,6 +31,11 @@ export function VariationActions( {
 	onClose: () => void;
 	supportsMultipleSelection: boolean;
 } ) {
+	const singleSelection =
+		! supportsMultipleSelection && selection.length === 1
+			? selection[ 0 ]
+			: null;
+
 	return (
 		<div
 			className={ classNames( {
@@ -45,7 +49,7 @@ export function VariationActions( {
 						: sprintf(
 								/** Translators: Variation ID */
 								__( 'Variation Id: %s', 'woocommerce' ),
-								( selection as ProductVariation ).id
+								singleSelection?.id
 						  )
 				}
 			>
@@ -64,14 +68,13 @@ export function VariationActions( {
 					</>
 				) : (
 					<MenuItem
-						href={ ( selection as ProductVariation ).permalink }
+						href={ singleSelection?.permalink }
 						target="_blank"
 						rel="noreferrer"
 						onClick={ () => {
 							recordEvent( 'product_variations_preview', {
 								source: TRACKS_SOURCE,
-								variation_id: ( selection as ProductVariation )
-									.id,
+								variation_id: singleSelection?.id,
 							} );
 						} }
 					>

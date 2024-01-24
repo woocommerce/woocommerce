@@ -61,9 +61,7 @@ export function PricingMenuItem( {
 	onClose,
 	supportsMultipleSelection = false,
 }: VariationActionsMenuItemProps ) {
-	const ids = Array.isArray( selection )
-		? selection.map( ( { id } ) => id )
-		: selection.id;
+	const ids = selection.map( ( { id } ) => id );
 
 	return (
 		<Dropdown
@@ -119,31 +117,18 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map(
-													( {
-														id,
-														regular_price,
-													} ) => ( {
-														id,
-														regular_price:
-															addFixedOrPercentage(
-																regular_price,
-																value
-															)?.toFixed( 2 ),
-													} )
-												)
-											);
-										} else {
-											onChange( {
-												regular_price:
-													addFixedOrPercentage(
-														selection.regular_price,
-														value
-													)?.toFixed( 2 ),
-											} );
-										}
+										onChange(
+											selection.map(
+												( { id, regular_price } ) => ( {
+													id,
+													regular_price:
+														addFixedOrPercentage(
+															regular_price,
+															value
+														)?.toFixed( 2 ),
+												} )
+											)
+										);
 									},
 								} );
 								onClose();
@@ -175,33 +160,19 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map(
-													( {
-														id,
-														regular_price,
-													} ) => ( {
-														id,
-														regular_price:
-															addFixedOrPercentage(
-																regular_price,
-																value,
-																-1
-															)?.toFixed( 2 ),
-													} )
-												)
-											);
-										} else {
-											onChange( {
-												regular_price:
-													addFixedOrPercentage(
-														selection.regular_price,
-														value,
-														-1
-													)?.toFixed( 2 ),
-											} );
-										}
+										onChange(
+											selection.map(
+												( { id, regular_price } ) => ( {
+													id,
+													regular_price:
+														addFixedOrPercentage(
+															regular_price,
+															value,
+															-1
+														)?.toFixed( 2 ),
+												} )
+											)
+										);
 									},
 								} );
 								onClose();
@@ -231,18 +202,12 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map( ( { id } ) => ( {
-													id,
-													sale_price: value,
-												} ) )
-											);
-										} else {
-											onChange( {
+										onChange(
+											selection.map( ( { id } ) => ( {
+												id,
 												sale_price: value,
-											} );
-										}
+											} ) )
+										);
 									},
 								} );
 								onClose();
@@ -274,31 +239,18 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map(
-													( {
-														id,
-														sale_price,
-													} ) => ( {
-														id,
-														sale_price:
-															addFixedOrPercentage(
-																sale_price,
-																value
-															)?.toFixed( 2 ),
-													} )
-												)
-											);
-										} else {
-											onChange( {
-												sale_price:
-													addFixedOrPercentage(
-														selection.sale_price,
-														value
-													)?.toFixed( 2 ),
-											} );
-										}
+										onChange(
+											selection.map(
+												( { id, sale_price } ) => ( {
+													id,
+													sale_price:
+														addFixedOrPercentage(
+															sale_price,
+															value
+														)?.toFixed( 2 ),
+												} )
+											)
+										);
 									},
 								} );
 								onClose();
@@ -330,33 +282,19 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map(
-													( {
-														id,
-														sale_price,
-													} ) => ( {
-														id,
-														sale_price:
-															addFixedOrPercentage(
-																sale_price,
-																value,
-																-1
-															)?.toFixed( 2 ),
-													} )
-												)
-											);
-										} else {
-											onChange( {
-												sale_price:
-													addFixedOrPercentage(
-														selection.sale_price,
-														value,
-														-1
-													)?.toFixed( 2 ),
-											} );
-										}
+										onChange(
+											selection.map(
+												( { id, sale_price } ) => ( {
+													id,
+													sale_price:
+														addFixedOrPercentage(
+															sale_price,
+															value,
+															-1
+														)?.toFixed( 2 ),
+												} )
+											)
+										);
 									},
 								} );
 								onClose();
@@ -388,19 +326,12 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map( ( { id } ) => ( {
-													id,
-													date_on_sale_from_gmt:
-														value,
-												} ) )
-											);
-										} else {
-											onChange( {
+										onChange(
+											selection.map( ( { id } ) => ( {
+												id,
 												date_on_sale_from_gmt: value,
-											} );
-										}
+											} ) )
+										);
 									},
 								} );
 								handlePrompt( {
@@ -417,18 +348,12 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map( ( { id } ) => ( {
-													id,
-													date_on_sale_to_gmt: value,
-												} ) )
-											);
-										} else {
-											onChange( {
+										onChange(
+											selection.map( ( { id } ) => ( {
+												id,
 												date_on_sale_to_gmt: value,
-											} );
-										}
+											} ) )
+										);
 									},
 								} );
 								onClose();
