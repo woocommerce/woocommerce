@@ -543,7 +543,7 @@ class CheckoutFields {
 	 *
 	 * @since 8.6.0
 	 */
-	public function validate_field( $key, $field_value, $request, $address_type ) {
+	public function validate_field( $key, $field_value, $request, $address_type = null ) {
 
 		$error = new \WP_Error();
 		try {
