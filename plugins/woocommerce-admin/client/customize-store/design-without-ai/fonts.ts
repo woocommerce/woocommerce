@@ -6,7 +6,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { FONT_FAMILY_TO_INSTALL } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
+import { FONT_FAMILIES_TO_INSTALL } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 import { FontFace, FontFamiliesToInstall, FontFamily } from '../types/font';
 
 export type FontCollectionResponse = {
@@ -76,7 +76,7 @@ export const getFontFamiliesAndFontFaceToInstall = (
 		font_family_settings: FontFamily;
 	} >
 ) => {
-	return Object.entries( FONT_FAMILY_TO_INSTALL ).reduce(
+	return Object.entries( FONT_FAMILIES_TO_INSTALL ).reduce(
 		( acc, [ slug, fontData ] ) => {
 			const fontFamily = getInstalledFontFamilyByFontFamilySlug(
 				installedFontFamilies,

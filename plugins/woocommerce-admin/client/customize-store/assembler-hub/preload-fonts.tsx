@@ -18,7 +18,7 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
  */
 import {
 	FONT_PAIRINGS,
-	FONT_FAMILY_TO_INSTALL,
+	FONT_FAMILIES_TO_INSTALL,
 } from './sidebar/global-styles/font-pairing-variations/constants';
 import { FontFamiliesLoader } from './sidebar/global-styles/font-pairing-variations/font-families-loader';
 import { useContext, useEffect } from '@wordpress/element';
@@ -83,7 +83,7 @@ export const PreloadFonts = () => {
 		const fontsToEnable = installedFontFamilies.reduce( ( acc, font ) => {
 			if (
 				enabledFontSlugs.includes( font.slug ) ||
-				FONT_FAMILY_TO_INSTALL[ font.slug ] === undefined
+				FONT_FAMILIES_TO_INSTALL[ font.slug ] === undefined
 			) {
 				return acc;
 			}

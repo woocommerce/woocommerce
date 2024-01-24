@@ -10,7 +10,7 @@ export const FONT_PREVIEW_WIDTH = 120;
 export const FONT_PREVIEW_HEIGHT = 74;
 export const SYSTEM_FONT_SLUG = 'system-font';
 
-export const FONT_FAMILY_TO_INSTALL = {
+export const FONT_FAMILIES_TO_INSTALL = {
 	inter: {
 		fontFamily: 'Inter',
 		fontWeights: [ '400', '500', '600' ],
