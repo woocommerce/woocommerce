@@ -51,18 +51,6 @@ describe( 'useProductTemplate', () => {
 						type: 'simple',
 					},
 				},
-				{
-					id: 'standard-product-template',
-					title: 'Standard Product Template',
-					description: 'Standard Product Template description',
-					icon: 'icon',
-					layoutTemplateId: 'layout-template-4',
-					order: 4,
-					postType: 'product',
-					productData: {
-						type: 'simple',
-					},
-				},
 			],
 		};
 	} );
@@ -102,16 +90,6 @@ describe( 'useProductTemplate', () => {
 		);
 
 		expect( result.current.productTemplate ).toBeUndefined();
-	} );
-
-	it( 'should use the standard product template if the product type is variable', () => {
-		const { result } = renderHook( () =>
-			useProductTemplate( 'template-1', 'variable', 'product' )
-		);
-
-		expect( result.current.productTemplate?.id ).toEqual(
-			'standard-product-template'
-		);
 	} );
 
 	it( 'should use the product type to match if the product template id matches a template with a different product type', () => {
