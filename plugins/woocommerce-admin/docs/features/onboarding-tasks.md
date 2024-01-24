@@ -4,6 +4,7 @@ The onboarding tasks provides a way to help store owners get their sites quickly
 
 The task list is easily extensible to allow inserting custom tasks around plugin setup that benefits store owners.
 
+<!-- markdownlint-disable-next-line no-inline-html -->
 <img src="./images/task-list.png" width="500px" alt="Onboarding Task List" />
 
 ## Adding a custom task
@@ -47,7 +48,7 @@ TaskLists::add_task(
 );
 ```
 
-### Step 2 – Register the task in JavaScript.
+### Step 2 – Register the task in JavaScript
 
 Next, you have to add your task to the tasks list in JavaScript.
 
@@ -183,12 +184,12 @@ $task_list = new TaskList($args);
 - `$task_list::get_sorted_tasks($sort_by)`: Returns the tasks sorted based on the specified sorting criteria.
 - `$task_list::get_json()`: Returns the JSON representation of the task list.
 - `$task_list->get_json()` - Get the camelcase JSON for use in the client
-  - `id` (int) - Task list ID.
-  - `title` (string) - Task list title.
-  - `isHidden` (bool) - If a task has been hidden.
-  - `isVisible` (bool) - If a task list is visible.
-  - `isComplete` (bool) - Whether or not all viewable tasks have been completed.
-  - `tasks` (array) - An array of `Task` objects.
+    - `id` (int) - Task list ID.
+    - `title` (string) - Task list title.
+    - `isHidden` (bool) - If a task has been hidden.
+    - `isVisible` (bool) - If a task list is visible.
+    - `isComplete` (bool) - Whether or not all viewable tasks have been completed.
+    - `tasks` (array) - An array of `Task` objects.
 
 ### Task
 
@@ -230,6 +231,7 @@ TaskLists::add_task(
   )
 );
 ```
+
 ### Methods
 
 - `$task->get_id(): string`: Returns the ID of the task.
@@ -262,22 +264,22 @@ TaskLists::add_task(
 - `$task->is_task_actioned($id): bool`: Checks if a specific task has been actioned.
 - `$task->sort($a, $b, $sort_by): int`: Sorts tasks based on given sort criteria.
 - `$task->get_json(): array`: Returns the task data as a JSON-formatted array.
-  - `id` (int) - Task ID.
-  - `title` (string) - Task title.
-  - `canView` (bool) - If a task should be viewable on a given store.
-  - `content` (string) - Task content.
-  - `additionalInfo` (object) - Additional extensible information about the task.
-  - `actionLabel` (string) - The label used for the action button.
-  - `actionUrl` (string) - The URL used when clicking the task if no task card is required.
-  - `isComplete` (bool) - If the task has been completed or not.
-  - `time` (string) - Length of time to complete the task.
-  - `level` (integer) - A priority for task list sorting.
-  - `isActioned` (bool) - If a task has been actioned.
-  - `isDismissed` (bool) - If a task has been dismissed.
-  - `isDismissable` (bool) - Whether or not a task is dismissable.
-  - `isSnoozed` (bool) - If a task has been snoozed.
-  - `isSnoozeable` (bool) - Whether or not a task can be snoozed.
-  - `snoozedUntil` (int) - Timestamp in milliseconds that the task has been snoozed until.
+    - `id` (int) - Task ID.
+    - `title` (string) - Task title.
+    - `canView` (bool) - If a task should be viewable on a given store.
+    - `content` (string) - Task content.
+    - `additionalInfo` (object) - Additional extensible information about the task.
+    - `actionLabel` (string) - The label used for the action button.
+    - `actionUrl` (string) - The URL used when clicking the task if no task card is required.
+    - `isComplete` (bool) - If the task has been completed or not.
+    - `time` (string) - Length of time to complete the task.
+    - `level` (integer) - A priority for task list sorting.
+    - `isActioned` (bool) - If a task has been actioned.
+    - `isDismissed` (bool) - If a task has been dismissed.
+    - `isDismissable` (bool) - Whether or not a task is dismissable.
+    - `isSnoozed` (bool) - If a task has been snoozed.
+    - `isSnoozeable` (bool) - Whether or not a task can be snoozed.
+    - `snoozedUntil` (int) - Timestamp in milliseconds that the task has been snoozed until.
 
 ## Frontend
 
