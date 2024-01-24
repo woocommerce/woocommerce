@@ -37,7 +37,6 @@ export type ProductState = {
 	suggestedProducts: {
 		[ key in SuggestedProductOptionsKey ]: {
 			items: Product[];
-			__meta: object;
 		};
 	};
 };
