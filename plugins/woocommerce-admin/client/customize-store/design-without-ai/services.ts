@@ -96,7 +96,7 @@ const installFontFamilies = async () => {
 			installedFontFamilyWithFontFace
 		);
 
-		await Promise.all(
+		const fontFamilyWithFontFaceToInstallPromises =
 			fontFamilyWithFontFaceToInstall.map( async ( fontFamily ) => {
 				const fontFamilyResponse = await installFontFamily(
 					fontFamily
@@ -107,10 +107,15 @@ const installFontFamilies = async () => {
 						fontFamilyId: fontFamilyResponse.id,
 					} );
 				} );
-			} )
-		);
+			} );
 
-		await Promise.all( fontFaceToInstall.map( installFontFace ) );
+		const fontFaceToInstallPromises =
+			fontFaceToInstall.map( installFontFace );
+
+		await Promise.all( [
+			...fontFamilyWithFontFaceToInstallPromises,
+			...fontFaceToInstallPromises,
+		] );
 	} catch ( error ) {
 		throw error;
 	}
