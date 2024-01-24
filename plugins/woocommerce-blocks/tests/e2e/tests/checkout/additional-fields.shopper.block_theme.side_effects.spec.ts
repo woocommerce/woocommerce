@@ -53,8 +53,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			{},
 			{
 				address: {
-					shipping: { 'Government ID': '12345' },
-					billing: { 'Government ID': '54321' },
+					shipping: {
+						'Government ID': '12345',
+						'Confirm government ID': '12345',
+					},
+					billing: {
+						'Government ID': '54321',
+						'Confirm government ID': '54321',
+					},
 				},
 				additional: { 'How did you hear about us?': 'Other' },
 			}
@@ -112,8 +118,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			{},
 			{
 				address: {
-					shipping: { 'Government ID': '12345' },
-					billing: { 'Government ID': '54321' },
+					shipping: {
+						'Government ID': '12345',
+						'Confirm government ID': '12345',
+					},
+					billing: {
+						'Government ID': '54321',
+						'Confirm government ID': '54321',
+					},
 				},
 				additional: { 'How did you hear about us?': 'Other' },
 			}
@@ -126,8 +138,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			{},
 			{
 				address: {
-					shipping: { 'Government ID': '54321' },
-					billing: { 'Government ID': '12345' },
+					shipping: {
+						'Government ID': '54321',
+						'Confirm government ID': '54321',
+					},
+					billing: {
+						'Government ID': '12345',
+						'Confirm government ID': '12345',
+					},
 				},
 				additional: { 'How did you hear about us?': 'Facebook' },
 			}
@@ -139,8 +157,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			{},
 			{
 				address: {
-					shipping: { 'Government ID': '98765' },
-					billing: { 'Government ID': '43210' },
+					shipping: {
+						'Government ID': '98765',
+						'Confirm government ID': '98765',
+					},
+					billing: {
+						'Government ID': '43210',
+						'Confirm government ID': '43210',
+					},
 				},
 				additional: { 'How did you hear about us?': 'Google' },
 			}
@@ -154,11 +178,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		).toBeVisible();
 		await expect(
 			checkoutPageObject.page.getByText( 'Government ID43210' )
-		).toBeVisible();
-		await expect(
-			checkoutPageObject.page.getByText(
-				'How did you hear about us?Google'
-			)
 		).toBeVisible();
 		await expect(
 			checkoutPageObject.page.getByText(
@@ -183,8 +202,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			{},
 			{
 				address: {
-					shipping: { 'Government ID': 'abcde' },
-					billing: { 'Government ID': 'fghij' },
+					shipping: {
+						'Government ID': 'abcde',
+						'Confirm government ID': '12345',
+					},
+					billing: {
+						'Government ID': 'fghij',
+						'Confirm government ID': '12345',
+					},
 				},
 				additional: { 'How did you hear about us?': 'Other' },
 			}
@@ -200,6 +225,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.locator( '#billing-fields' )
 				.getByText( 'Invalid government ID.' )
 		).toBeVisible();
+
+		await expect(
+			checkoutPageObject.page
+				.locator( '#billing-fields' )
+				.getByText(
+					'Please ensure your government ID matches the confirmation.'
+				)
+		).toBeVisible();
 		await expect(
 			checkoutPageObject.page
 				.locator( '#shipping-fields' )
@@ -210,8 +243,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			{},
 			{
 				address: {
-					shipping: { 'Government ID': '12345' },
-					billing: { 'Government ID': '54321' },
+					shipping: {
+						'Government ID': '12345',
+						'Confirm government ID': '12345',
+					},
+					billing: {
+						'Government ID': '54321',
+						'Confirm government ID': '54321',
+					},
 				},
 				additional: { 'How did you hear about us?': 'Other' },
 			}
