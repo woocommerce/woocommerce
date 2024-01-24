@@ -705,7 +705,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * Helper method to update order metadata from initialized order object.
 	 *
 	 * @param WC_Abstract_Order $order Order object.
-	 * @throws \Throwable If adding post meta fails with both `add_post_meta` and `$wpdb->insert`.
 	 */
 	protected function update_order_meta_from_object( $order ) {
 		global $wpdb;
@@ -748,10 +747,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					),
 					array( '%d', '%s', '%s' )
 				);
-
-				if ( ! $result ) {
-					throw $th;
-				}
 				wp_cache_delete( $order->get_id(), 'post_meta' );
 			} else {
 				add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );

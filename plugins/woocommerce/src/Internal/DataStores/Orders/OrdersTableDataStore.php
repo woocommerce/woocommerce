@@ -2880,7 +2880,6 @@ CREATE TABLE $meta_table (
 	 * @param \stdClass $meta (containing at least ->id).
 	 *
 	 * @return bool
-	 * @throws \Throwable If deleting post meta fails with both `delete_post_meta` and `$wpdb->delete`.
 	 */
 	public function delete_meta( &$object, $meta ) {
 		global $wpdb;
