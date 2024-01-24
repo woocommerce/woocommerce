@@ -77,7 +77,7 @@ final class ProductFilter extends AbstractBlock {
 
 		$tags = new WP_HTML_Tag_Processor( $content );
 
-		while( $tags->next_tag( 'div') ) {
+		while ( $tags->next_tag( 'div' ) ) {
 			if ( 'yes' === $tags->get_attribute( 'data-has-filter' ) ) {
 				return sprintf(
 					'<nav %1$s>%2$s</nav>',

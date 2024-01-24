@@ -279,7 +279,7 @@ final class ProductFilterRating extends AbstractBlock {
 	 * Retrieve the rating filter data for current block.
 	 *
 	 * @param WP_Block $block Block instance.
-	*/
+	 */
 	private function get_rating_counts( $block ) {
 		$filters    = Package::container()->get( QueryFilters::class );
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );

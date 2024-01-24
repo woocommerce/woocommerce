@@ -244,7 +244,7 @@ final class ProductFilterPrice extends AbstractBlock {
 	 * Retrieve the price filter data for current block.
 	 *
 	 * @param WP_Block $block Block instance.
-	*/
+	 */
 	private function get_filtered_price( $block ) {
 		$filters    = Package::container()->get( QueryFilters::class );
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );

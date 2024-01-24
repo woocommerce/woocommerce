@@ -85,9 +85,9 @@ class ProductCollectionUtils {
 	 */
 	private static function remove_empty_array_recursive( $array ) {
 		$array = array_filter( $array );
-		foreach( $array as $key => $item ) {
-			if( is_array( $item ) ) {
-				$array[$key] = self::remove_empty_array_recursive( $item );
+		foreach ( $array as $key => $item ) {
+			if ( is_array( $item ) ) {
+				$array[ $key ] = self::remove_empty_array_recursive( $item );
 			}
 		}
 		return $array;

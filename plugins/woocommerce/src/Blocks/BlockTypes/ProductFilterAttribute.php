@@ -289,7 +289,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @param WP_Block $block      Block instance.
 	 * @param string   $slug       Attribute slug.
 	 * @param string   $query_type and | or
-	*/
+	 */
 	private function get_attribute_counts( $block, $slug, $query_type ) {
 		$filters    = Package::container()->get( QueryFilters::class );
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
@@ -308,9 +308,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $slug );
 		}
 
-
-
-		$counts            = $filters->get_attribute_counts( $query_vars, $slug );
+		$counts           = $filters->get_attribute_counts( $query_vars, $slug );
 		$attribute_counts = array();
 
 		foreach ( $counts as $key => $value ) {
@@ -320,8 +318,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			);
 		}
 
-
-		$attribute_counts  = array_reduce(
+		$attribute_counts = array_reduce(
 			$attribute_counts,
 			function( $acc, $count ) {
 				$acc[ $count['term'] ] = $count['count'];

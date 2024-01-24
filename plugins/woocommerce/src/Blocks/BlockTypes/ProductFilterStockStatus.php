@@ -129,9 +129,11 @@ final class ProductFilterStockStatus extends AbstractBlock {
 		}
 
 		$stock_status_counts = $this->get_stock_status_counts( $block );
-		$wrapper_attributes  = get_block_wrapper_attributes( array(
-			'data-has-filter' => empty( $stock_status_counts ) ? 'no' : 'yes',
-		) );
+		$wrapper_attributes  = get_block_wrapper_attributes(
+			array(
+				'data-has-filter' => empty( $stock_status_counts ) ? 'no' : 'yes',
+			)
+		);
 
 		return sprintf(
 			'<div %1$s>
@@ -234,7 +236,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	 * Retrieve the stock status filter data for current block.
 	 *
 	 * @param WP_Block $block Block instance.
-	*/
+	 */
 	private function get_stock_status_counts( $block ) {
 		$filters    = Package::container()->get( QueryFilters::class );
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
