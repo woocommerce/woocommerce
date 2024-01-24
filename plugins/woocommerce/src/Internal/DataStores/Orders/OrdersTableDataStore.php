@@ -2909,6 +2909,7 @@ CREATE TABLE $meta_table (
 					),
 					array( '%d', '%s', '%s' )
 				);
+				wp_cache_delete( $object->get_id(), 'post_meta' );
 			} else {
 				delete_post_meta( $object->get_id(), $meta->key, $meta->value );
 			}
