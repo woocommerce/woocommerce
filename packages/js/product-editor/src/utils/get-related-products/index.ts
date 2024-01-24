@@ -2,12 +2,8 @@
  * External dependencies
  */
 import { select, resolveSelect } from '@wordpress/data';
+import { PRODUCTS_STORE_NAME } from '@woocommerce/data';
 import type { Product } from '@woocommerce/data';
-/**
- * Internal dependencies
- */
-import { GetSuggestedProductsOptions } from '../../store/data/types';
-import { store as wooProductEditorDataStore } from '../../store/data/constants';
 
 type getRelatedProductsOptions = {
 	// If true, return random products if no related products are found.
@@ -78,16 +74,16 @@ type getSuggestedProductsForOptions = {
 	postType?: 'product' | 'post' | 'page';
 };
 
-type ProductTaxonomyItemProps = {
-	id: number;
-	name: string;
-	slug: string;
-};
-
+/**
+ * Get suggested products for a given post ID.
+ *
+ * @param { getSuggestedProductsForOptions } options - Options.
+ * @return { Promise<Product[] | undefined> } Suggested products.
+ */
 export async function getSuggestedProductsFor( {
 	postId,
 	postType = 'product',
-}: getSuggestedProductsForOptions ) {
+}: getSuggestedProductsForOptions ): Promise< Product[] | undefined > {
 	// @ts-expect-error There are no types for this.
 	const { getEditedEntityRecord } = select( 'core' );
 
@@ -95,14 +91,12 @@ export async function getSuggestedProductsFor( {
 
 	const options = {
 		categories: data?.categories
-			? data.categories.map( ( cat: ProductTaxonomyItemProps ) => cat.id )
+			? data.categories.map( ( cat ) => cat.id )
 			: [],
-		tags: data?.tags
-			? data.tags.map( ( tag: ProductTaxonomyItemProps ) => tag.id )
-			: [],
+		tags: data?.tags ? data.tags.map( ( tag ) => tag.id ) : [],
 	};
 
-	return await resolveSelect(
-		wooProductEditorDataStore
-	).getSuggestedProducts( options );
+	return await resolveSelect( PRODUCTS_STORE_NAME ).getSuggestedProducts(
+		options
+	);
 }
