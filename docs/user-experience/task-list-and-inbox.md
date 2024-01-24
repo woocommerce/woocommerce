@@ -39,6 +39,7 @@ The Inbox provides informational, useful, and supplemental content to the user, 
 ![an example of an inbox notification](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/inbox1.png)
 
 - *What appears in the Inbox*:
+
     - Informational notices such as non-critical reminders.
     - Requests for plugin reviews and feedback.
     - Tips for using the plugin and introducing features.

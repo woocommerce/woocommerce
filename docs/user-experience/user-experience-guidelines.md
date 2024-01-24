@@ -28,4 +28,3 @@ Plugins which draw on WordPress' core design aesthetic will benefit from future 
 - [Onboarding](/docs/user-experience/onboarding.md)
 - [Notices](/docs/user-experience/notices.md)
 - [Task list & Inbox](/docs/user-experience/task-list-and-inbox.md)
-
