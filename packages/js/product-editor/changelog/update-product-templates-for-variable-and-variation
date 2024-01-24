@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove special handling of product template and layout template for variable products and variations
