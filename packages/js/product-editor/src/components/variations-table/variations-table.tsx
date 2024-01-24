@@ -3,7 +3,11 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, CheckboxControl, Notice } from '@wordpress/components';
-import { Product, ProductVariation } from '@woocommerce/data';
+import {
+	PartialProductVariation,
+	Product,
+	ProductVariation,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { ListItem, Sortable } from '@woocommerce/components';
 import {
@@ -37,10 +41,8 @@ type VariationsTableProps = {
 	noticeActions?: {
 		label: string;
 		onClick: (
-			handleUpdateAll: ( values: Partial< ProductVariation >[] ) => void,
-			handleDeleteAll: (
-				values: Pick< ProductVariation, 'id' >[]
-			) => void
+			handleUpdateAll: ( values: PartialProductVariation[] ) => void,
+			handleDeleteAll: ( values: PartialProductVariation[] ) => void
 		) => void;
 		className?: string;
 		variant?: string;
@@ -174,7 +176,7 @@ export const VariationsTable = forwardRef<
 		);
 	}
 
-	function handleDeleteVariationClick( variation: ProductVariation ) {
+	function handleDeleteVariationClick( variation: PartialProductVariation ) {
 		onDelete( variation.id )
 			.then( ( response ) => {
 				recordEvent( 'product_variations_delete', {
@@ -194,7 +196,7 @@ export const VariationsTable = forwardRef<
 			} );
 	}
 
-	function handleVariationChange( variation: Partial< ProductVariation > ) {
+	function handleVariationChange( variation: PartialProductVariation ) {
 		onUpdate( variation )
 			.then( ( response ) => {
 				recordEvent( 'product_variations_change', {
@@ -214,7 +216,7 @@ export const VariationsTable = forwardRef<
 			} );
 	}
 
-	function handleUpdateAll( values: Partial< ProductVariation >[] ) {
+	function handleUpdateAll( values: PartialProductVariation[] ) {
 		const now = Date.now();
 
 		onBatchUpdate( values )
@@ -235,10 +237,10 @@ export const VariationsTable = forwardRef<
 			} );
 	}
 
-	function handleDeleteAll( values: Partial< ProductVariation >[] ) {
+	function handleDeleteAll( values: PartialProductVariation[] ) {
 		const now = Date.now();
 
-		onBatchDelete( values.map( ( variation ) => variation.id ) )
+		onBatchDelete( values )
 			.then( ( response: VariationResponseProps ) => {
 				recordEvent( 'product_variations_delete_all', {
 					source: TRACKS_SOURCE,

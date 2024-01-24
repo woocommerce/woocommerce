@@ -1,24 +1,20 @@
 /**
  * External dependencies
  */
-import { ProductVariation } from '@woocommerce/data';
+import { PartialProductVariation, ProductVariation } from '@woocommerce/data';
 
 export type VariationActionsMenuProps = {
 	disabled?: boolean;
-	selection: ProductVariation | ProductVariation[];
-	onChange( variation: Partial< ProductVariation > ): void;
-	onDelete(
-		variation: ProductVariation | Partial< ProductVariation >[]
-	): void;
+	selection: ProductVariation[];
+	onChange( values: PartialProductVariation[] ): void;
+	onDelete( values: PartialProductVariation[] ): void;
 };
 
 export type VariationQuickUpdateSlotProps = {
 	group: string;
 	supportsMultipleSelection: boolean;
-	selection: ProductVariation | ProductVariation[];
-	onChange: (
-		variation: Partial< ProductVariation > | Partial< ProductVariation >[]
-	) => void;
+	selection: ProductVariation[];
+	onChange: ( values: PartialProductVariation[] ) => void;
 	onClose: () => void;
 };
 
@@ -37,8 +33,6 @@ export type MenuItemProps = {
 			| 'onClose'
 			| 'selection' ]: VariationQuickUpdateSlotProps[ K ];
 	} ) => void;
-	onChange?: (
-		variation: Partial< ProductVariation > | Partial< ProductVariation >[]
-	) => void;
+	onChange?: ( values: PartialProductVariation[] ) => void;
 	onClose?: () => void;
 };
