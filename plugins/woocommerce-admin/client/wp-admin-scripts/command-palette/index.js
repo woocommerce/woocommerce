@@ -96,7 +96,7 @@ function useProductCommandLoader( { search } ) {
 				callback: ( { close } ) => {
 					queueRecordEvent( 'woocommerce_command_palette_submit', {
 						name: 'woocommerce/product',
-						title: record.title.raw,
+						label: record.title.raw,
 						origin,
 					} );
 

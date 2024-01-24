@@ -20,6 +20,7 @@ export const registerCommandWithTracking = ( {
 		callback: ( ...args ) => {
 			queueRecordEvent( 'woocommerce_command_palette_submit', {
 				name,
+				label,
 				origin,
 			} );
 

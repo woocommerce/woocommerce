@@ -43,6 +43,7 @@ export const useAddTrackingToExternalCommands = ( origin ) => {
 					callback: ( ...args ) => {
 						recordEvent( 'woocommerce_command_palette_submit', {
 							name: command.name,
+							label: command.label,
 							origin: originRef.current,
 						} );
 						command.callback( ...args );
@@ -72,7 +73,7 @@ export const useAddTrackingToExternalCommands = ( origin ) => {
 											'woocommerce_command_palette_submit',
 											{
 												name: commandLoader.name,
-												title:
+												label:
 													command.label ??
 													command.name,
 												origin: originRef.current,
