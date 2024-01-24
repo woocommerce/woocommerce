@@ -3,12 +3,12 @@
  */
 import { useEffect, useRef } from '@wordpress/element';
 import { dispatch, useSelect } from '@wordpress/data';
-import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
+import { recordEvent } from '@woocommerce/tracks';
 import { store as commandsStore } from '@wordpress/commands';
 
 // Hook to add tracking to non-WooCommerce commands.
 export const useAddTrackingToExternalCommands = ( origin ) => {
-	const wasTrackingAdded = useRef( false );
+	const commandsWithTracking = useRef( [] );
 	const { commands, commandLoaders } = useSelect( ( select ) => {
 		const { getCommands, getCommandLoaders } = select( commandsStore );
 		return {
@@ -18,8 +18,8 @@ export const useAddTrackingToExternalCommands = ( origin ) => {
 	}, [] );
 
 	useEffect( () => {
-		if ( wasTrackingAdded.current === false ) {
-			commands.forEach( ( command ) => {
+		commands.forEach( ( command ) => {
+			if ( ! commandsWithTracking.current.includes( command.name ) ) {
 				dispatch( commandsStore ).registerCommand( {
 					...command,
 					callback: ( ...args ) => {
@@ -30,20 +30,25 @@ export const useAddTrackingToExternalCommands = ( origin ) => {
 						command.callback( ...args );
 					},
 				} );
-			} );
-			commandLoaders.forEach( ( commandLoader ) => {
+				commandsWithTracking.current.push( command.name );
+			}
+		} );
+		commandLoaders.forEach( ( commandLoader ) => {
+			if (
+				! commandsWithTracking.current.includes( commandLoader.name )
+			) {
 				dispatch( commandsStore ).registerCommandLoader( {
 					...commandLoader,
 					hook: ( ...args ) => {
 						const commandLoaderProps = commandLoader.hook(
 							...args
 						);
-						const commandsWithTracking =
+						const loaderCommandsWithTracking =
 							commandLoaderProps.commands.map( ( command ) => {
 								return {
 									...command,
 									callback: ( ...callbackArgs ) => {
-										queueRecordEvent(
+										recordEvent(
 											'woocommerce_command_palette_submit',
 											{
 												name: commandLoader.name,
@@ -59,12 +64,12 @@ export const useAddTrackingToExternalCommands = ( origin ) => {
 							} );
 						return {
 							...commandLoaderProps,
-							commands: commandsWithTracking,
+							commands: loaderCommandsWithTracking,
 						};
 					},
 				} );
-			} );
-			wasTrackingAdded.current = true;
-		}
+				commandsWithTracking.current.push( commandLoader.name );
+			}
+		} );
 	}, [ commands, commandLoaders, origin ] );
 };
