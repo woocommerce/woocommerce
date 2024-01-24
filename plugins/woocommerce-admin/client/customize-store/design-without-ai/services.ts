@@ -65,6 +65,44 @@ type FontCollectionResponse = Array< {
 	};
 } >;
 
+const getFontToInstall = (
+	fontCollection: FontCollectionResponse,
+	installedFonts: Array< Font >
+) => {
+	const slugInstalledFonts = installedFonts.map( ( { slug } ) => slug );
+
+	return Object.entries( FONT_TO_INSTALL ).reduce(
+		( acc, [ slug, fontData ] ) => {
+			if ( slugInstalledFonts.includes( slug ) ) {
+				return acc;
+			}
+
+			const fontFromCollection =
+				fontCollection[ 0 ].data.fontFamilies.find(
+					( { slug: fontSlug } ) => fontSlug === slug
+				);
+
+			if ( ! fontFromCollection ) {
+				return acc;
+			}
+
+			const fontFace = fontFromCollection.fontFace.filter(
+				( { fontWeight } ) =>
+					fontData.fontWeights.includes( fontWeight )
+			);
+
+			return [
+				...acc,
+				{
+					...fontFromCollection,
+					fontFace,
+				},
+			];
+		},
+		[] as Array< Font >
+	);
+};
+
 const installFonts = async () => {
 	const config = {
 		path: '/wp/v2/font-collections',
@@ -79,36 +117,11 @@ const installFonts = async () => {
 		}
 	) ) as Array< Font >;
 
-	const slugInstalledFonts = installedFonts.map( ( { slug } ) => slug );
-
 	const fontCollection = await apiFetch< FontCollectionResponse >( config );
-	const filteredFontCollection = fontCollection[ 0 ].data.fontFamilies.reduce(
-		( acc, fontFamilies ) => {
-			const font = FONT_TO_INSTALL[ fontFamilies.slug ];
-			if ( font && ! slugInstalledFonts.includes( fontFamilies.slug ) ) {
-				const fontFace = fontFamilies.fontFace.filter(
-					( { fontWeight } ) =>
-						font.fontWeights.includes( fontWeight )
-				);
 
-				return [
-					...acc,
-					{
-						...fontFamilies,
-						fontFace,
-					},
-				];
-			}
-			return acc;
-		},
-		[] as Array< Font >
-	);
+	const fontToInstall = getFontToInstall( fontCollection, installedFonts );
 
-	debugger;
-
-	console.log( filteredFontCollection );
-
-	await Promise.all( filteredFontCollection.map( installFont ) );
+	await Promise.all( fontToInstall.map( installFont ) );
 };
 
 const createProducts = async () => {
