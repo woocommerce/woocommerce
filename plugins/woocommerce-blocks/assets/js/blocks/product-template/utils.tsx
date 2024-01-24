@@ -7,6 +7,9 @@ import { useState, useEffect } from '@wordpress/element';
 import { isNumber } from '@woocommerce/types';
 
 type LocationType = 'product' | 'archive' | 'cart' | 'order' | 'generic';
+const parseProductResponse = (
+	resp?: Record< 'id', number >[]
+): number | null => ( resp && resp.length ? resp[ 0 ]?.id : null );
 
 const createLocationObject = (
 	type: LocationType,
@@ -16,7 +19,7 @@ const createLocationObject = (
 	sourceData,
 } );
 export const useGetLocation = ( context ) => {
-	const [ productId, setProductId ] = useState( null );
+	const [ productId, setProductId ] = useState< number | null >( null );
 	const { templateSlug, postId } = context;
 
 	// const currentTemplateId = useSelect( ( select ) => {
@@ -38,12 +41,13 @@ export const useGetLocation = ( context ) => {
 		const [ , slug ] = templateSlug.split( 'single-product' );
 		useEffect( () => {
 			const getProductId = async () => {
-				const productId = await resolveSelect(
-					'core'
+				const response = ( await resolveSelect(
+					coreStore
 				).getEntityRecords( 'postType', 'product', {
 					_fields: [ 'id' ],
 					slug,
-				} );
+				} ) ) as Record< 'id', number >[];
+				const productId = parseProductResponse( response );
 				setProductId( productId );
 			};
 
