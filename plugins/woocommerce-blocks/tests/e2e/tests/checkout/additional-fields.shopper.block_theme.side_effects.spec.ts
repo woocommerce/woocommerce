@@ -52,6 +52,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		await checkoutPageObject.fillInCheckoutWithTestData(
 			{},
 			{
+				contact: {
+					'Enter a gift message to include in the package':
+						'This is for you!',
+					'Is this a personal purchase or a business purchase?':
+						'business',
+				},
 				address: {
 					shipping: {
 						'Government ID': '12345',
@@ -62,9 +68,40 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						'Confirm government ID': '54321',
 					},
 				},
-				additional: { 'How did you hear about us?': 'Other' },
+				additional: {
+					'How did you hear about us?': 'Other',
+					'What is your favourite colour?': 'Blue',
+				},
 			}
 		);
+
+		// Fill select fields "manually" (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
+		// fields until we recreate th Combobox component. This is because the aria-label includes the value so getting
+		// by label alone is not reliable unless we know the value.
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Shipping address',
+			} )
+			.getByLabel( 'How wide is your road?' )
+			.fill( 'wide' );
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Billing address',
+			} )
+			.getByLabel( 'How wide is your road?' )
+			.fill( 'narrow' );
+
+		await checkoutPageObject.page
+			.getByLabel( 'Would you like a free gift with your order?' )
+			.check();
+		await checkoutPageObject.page
+			.getByLabel( 'Do you want to subscribe to our newsletter?' )
+			.check();
+		await checkoutPageObject.page
+			.getByLabel( 'Can a truck fit down your road?' )
+			.first()
+			.check();
+
 		await checkoutPageObject.placeOrder();
 
 		await expect(
@@ -72,6 +109,36 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		).toBeVisible();
 		await expect(
 			checkoutPageObject.page.getByText( 'Government ID54321' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'What is your favourite colour?Blue'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Enter a gift message to include in the packageThis is for you!'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Do you want to subscribe to our newsletter?Yes'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Would you like a free gift with your order?Yes'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Can a truck fit down your road?Yes'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Can a truck fit down your road?No'
+			)
 		).toBeVisible();
 	} );
 
