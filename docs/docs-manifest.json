@@ -274,13 +274,9 @@
           "post_title": "Integrating admin pages into WooCommerce extensions",
           "menu_title": "Integrating admin pages",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
-          "hash": "e041fe0b0b0bcad7d4b36c8d26c132ea5ab601c67b0d91305da2894cda5e47a2",
+          "hash": "4de161038cdf34b4d683c7f928fc6c6d0407b6f1ef370649f250453832e04c5a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
-          "id": "6f9cc63bc4c614b9e01174069a5ddc4f3d7aa467",
-          "links": {
-            "../../plugins/woocommerce/includes/react-admin/connect-existing-pages.php": "19af727c05cd2eaf8ee8a3c29f95387ca41e0c98",
-            "../../plugins/woocommerce/src/Internal/Admin/Analytics.php": "15aadab6f196323e46081508e2ff3a37b36a659a"
-          }
+          "id": "6f9cc63bc4c614b9e01174069a5ddc4f3d7aa467"
         },
         {
           "post_title": "WooCommerce plugin API callbacks",
@@ -531,16 +527,12 @@
           "post_title": "Product editor development handbook",
           "menu_title": "Development handbook",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor.md",
-          "hash": "2bf9215fa06abd744dca3846f0a47f2a8fdb7f2a6a8b1d955c8affffb1816b24",
+          "hash": "6ba9107308c41fe94a78e8414afe4c24de0af7de68f3363511a6fca17fbdf33e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor.md",
           "id": "59450404de2750d918137e7cf523e52bedfd7214",
           "links": {
             "./product-editor-extensibility-guidelines.md": "a837eb947d31fcff3c6e1f775926ba5eb13cd790",
-            "./block-template-lifecycle.md": "0c29c74a7e7e9fd88562df1afa489659f460879e",
-            "../../packages/js/product-editor/src/blocks/generic/README.md": "367c19c887466222eb368521da5cafe8a1bfa729",
-            "../../packages/js/create-product-editor-block/README.md": "18d14d005baff2f085e8b5f399e573d62851d620",
-            "../../plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md": "31035d872a3984b1164cee8d3168bbbebf23969f",
-            "../../plugins/woocommerce/src/Admin/BlockTemplates/README.md": "3f2d4de8d78bed2166f3b4f6f8f275ba4c1ffd0b"
+            "./block-template-lifecycle.md": "0c29c74a7e7e9fd88562df1afa489659f460879e"
           }
         },
         {
