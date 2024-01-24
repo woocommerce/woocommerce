@@ -12,37 +12,37 @@ const merchantPages = [
 	{
 		name: 'WC Dashboard',
 		url: 'wp-admin/admin.php?page=wc-admin/',
-		expectedCount: 9,
+		expectedCount: 10,
 	},
 	{
 		name: 'Reports',
 		url: 'wp-admin/admin.php?page=wc-reports',
-		expectedCount: 92,
+		expectedCount: 93,
 	},
 	{
 		name: 'Orders page',
 		url: 'wp-admin/admin.php?page=wc-orders',
-		expectedCount: 102,
+		expectedCount: 104,
 	},
 	{
 		name: 'Products page',
 		url: 'wp-admin/edit.php?post_type=product',
-		expectedCount: 112,
+		expectedCount: 113,
 	},
 	{
 		name: 'Add new product',
 		url: 'wp-admin/post-new.php?post_type=product',
-		expectedCount: 130,
+		expectedCount: 131,
 	},
 	{
 		name: 'Analytics page',
 		url: 'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview',
-		expectedCount: 74,
+		expectedCount: 75,
 	},
 	{
 		name: 'Marketing Overview',
 		url: 'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing',
-		expectedCount: 74,
+		expectedCount: 75,
 	},
 ];
 
