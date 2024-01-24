@@ -209,11 +209,6 @@ const reducer: Reducer< ProductState, Actions > = (
 						...state.suggestedProducts,
 						[ payload.key ]: {
 							items: payload.items || [],
-							__meta: {
-								...state.suggestedProducts[ payload.key ]
-									?.__meta,
-								isLoading: false,
-							},
 						},
 					},
 				};
