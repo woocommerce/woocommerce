@@ -32,9 +32,8 @@ export const useGetLocation = ( context ) => {
 
 	const getEntitySlug = createGetEntitySlug( templateSlug );
 
-	console.log( 'templateSlug', templateSlug );
-
 	// Case 1.2: Product context, specific ID - Single Product Block
+	// TODO: Verify if parent is Single Product block
 	if ( isNumber( postId ) ) {
 		return createLocationObject( 'product', { productId: postId } );
 	}
