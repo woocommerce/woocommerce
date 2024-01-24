@@ -33,20 +33,17 @@ const getDisplaySrcFromFontFace = (
 		return;
 	}
 
-	let src;
-	if ( Array.isArray( input ) ) {
-		src = input[ 0 ];
-	} else {
-		src = input;
-	}
+	const src = Array.isArray( input ) ? input[ 0 ] : input;
+
 	// If it is a theme font, we need to make the url absolute
 	if ( src.startsWith( 'file:.' ) && urlPrefix ) {
-		src = src.replace( 'file:.', urlPrefix );
+		const absoluteUrl = src.replace( 'file:.', urlPrefix );
+		return ! isUrlEncoded( absoluteUrl )
+			? encodeURI( absoluteUrl )
+			: absoluteUrl;
 	}
-	if ( ! isUrlEncoded( src ) ) {
-		src = encodeURI( src );
-	}
-	return src;
+
+	return ! isUrlEncoded( src ) ? encodeURI( src ) : src;
 };
 export const FontFamiliesLoader = ( { fontFamilies, onLoad }: Props ) => {
 	const { site, currentTheme } = useSelect( ( select ) => {
