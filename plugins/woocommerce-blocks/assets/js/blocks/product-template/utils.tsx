@@ -104,6 +104,7 @@ export const useGetLocation = < T, >(
 	 * Case 2.1: SPECIFIC TAXONOMY
 	 * Specific Category template
 	 */
+
 	if (
 		templateSlug.includes( 'taxonomy-product_cat' ) &&
 		templateSlug !== 'taxonomy-product_cat'
@@ -126,8 +127,8 @@ export const useGetLocation = < T, >(
 			}
 		}, [ templateSlug ] );
 		return createLocationObject( 'archive', {
-			tag: null,
-			cat: catId,
+			taxonomy: 'cat',
+			termId: catId,
 		} );
 	}
 
@@ -158,8 +159,8 @@ export const useGetLocation = < T, >(
 			}
 		}, [ templateSlug ] );
 		return createLocationObject( 'archive', {
-			tag: tagId,
-			cat: null,
+			taxonomy: 'tag',
+			termId: tagId,
 		} );
 	}
 
@@ -168,16 +169,24 @@ export const useGetLocation = < T, >(
 	 * Generic Taxonomy template
 	 */
 
-	const genericTaxonomyTemplateSlugs = [
-		'taxonomy-product_cat',
-		'taxonomy-product_tag',
-		'tag',
-		'category',
-	];
-	if ( genericTaxonomyTemplateSlugs.includes( templateSlug ) ) {
+	if ( templateSlug === 'taxonomy-product_cat' ) {
 		return createLocationObject( 'archive', {
-			tag: null,
-			cat: null,
+			taxonomy: 'cat',
+			termId: null,
+		} );
+	}
+
+	if ( templateSlug === 'taxonomy-product_tag' ) {
+		return createLocationObject( 'archive', {
+			taxonomy: 'tag',
+			termId: null,
+		} );
+	}
+
+	if ( templateSlug === 'taxonomy-product_attribute' ) {
+		return createLocationObject( 'archive', {
+			taxonomy: 'attribute',
+			termId: null,
 		} );
 	}
 
