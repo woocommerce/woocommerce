@@ -8,6 +8,9 @@
 	const propertyAccessor = ( obj, path ) => path.split( '.' ).reduce( ( acc, part ) => acc && acc[ part ], obj );
 	const returnNull = () => null;
 
+	// Hardcode Checkout store key (`wc.wcBlocksData.CHECKOUT_STORE_KEY`), as we no longer have `wc-blocks-checkout` as a dependency.
+	const CHECKOUT_STORE_KEY = 'wc/store/checkout';
+
 	/**
 	 * Get the order attribution data.
 	 *
@@ -109,6 +112,28 @@
 			updateFormValues( getData() );
 			previousInitCheckout && previousInitCheckout();
 		};
+	}
+
+	// Work around the lack of explicit script dependency for the checkout block.
+	// Conditionally, wait for and use 'wp-data' & 'wc-blocks-checkout.
+
+	// Wait for (async) block checkout initialization and set source values once loaded.
+	function eventuallyInitializeCheckoutBlock() {
+		if (
+			window.wp && window.wp.data && typeof window.wp.data.subscribe === 'function'
+		) {
+			// Update checkout block data once more if the checkout store was loaded after this script.
+			const unsubscribe = window.wp.data.subscribe( function () {
+				unsubscribe();
+				updateCheckoutBlockData( getData() );
+			}, CHECKOUT_STORE_KEY );
+		}
+	};
+	// Wait for DOMContentLoaded to make sure wp.data is in place, if applicable for the page.
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", eventuallyInitializeCheckoutBlock);
+	} else {
+		eventuallyInitializeCheckoutBlock();
 	}
 
 }( window.wc_order_attribution ) );

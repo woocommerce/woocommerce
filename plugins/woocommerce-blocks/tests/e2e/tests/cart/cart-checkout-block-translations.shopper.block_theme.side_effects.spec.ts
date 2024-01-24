@@ -7,7 +7,6 @@ import { cli } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
 import { CheckoutPage } from '../checkout/checkout.page';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
