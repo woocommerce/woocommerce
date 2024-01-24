@@ -1,18 +1,16 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @woocommerce/dependency-group */
 /**
  * External dependencies
  */
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
-import { useSelect, useDispatch, resolveSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	privateApis as blockEditorPrivateApis,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
+	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 
 /**
@@ -34,7 +32,7 @@ const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 let isFontEnabled = false;
 
 export const PreloadFonts = () => {
-	// @ts-ignore No types for this exist yet.
+	// @ts-expect-error No types for this exist yet.
 	const { __experimentalSaveSpecifiedEntityEdits: saveSpecifiedEntityEdits } =
 		useDispatch( coreStore );
 	const [ enabledFontFamilies, setFontFamilies ]: [
@@ -51,7 +49,7 @@ export const PreloadFonts = () => {
 	const { context } = useContext( CustomizeStoreContext );
 
 	const { globalStylesId, installedFontFamilies } = useSelect( ( select ) => {
-		// @ts-ignore No types for this exist yet.
+		// @ts-expect-error No types for this exist yet.
 		const { __experimentalGetCurrentGlobalStylesId, getEntityRecords } =
 			select( coreStore );
 		return {
@@ -59,7 +57,10 @@ export const PreloadFonts = () => {
 			installedFontFamilies: getEntityRecords(
 				'postType',
 				'wp_font_family'
-			),
+			) as Array< {
+				content: { raw: string };
+				slug: string;
+			} >,
 		};
 	} );
 
@@ -79,7 +80,6 @@ export const PreloadFonts = () => {
 			...( theme ? theme.map( ( font ) => font.slug ) : [] ),
 		];
 
-		// @ts-expect-error -- Response from
 		const fontsToEnable = installedFontFamilies.reduce( ( acc, font ) => {
 			if (
 				enabledFontSlugs.includes( font.slug ) ||
@@ -94,11 +94,10 @@ export const PreloadFonts = () => {
 					...JSON.parse( font.content.raw ),
 				},
 			];
-		}, [] as Array< Record< string, FontFamily > > );
+		}, [] as Array< FontFamily > );
 
 		setFontFamilies( {
 			...enabledFontFamilies,
-			// @ts-ignore
 			custom: [
 				...( enabledFontFamilies.custom ?? [] ),
 				...( fontsToEnable ?? [] ),

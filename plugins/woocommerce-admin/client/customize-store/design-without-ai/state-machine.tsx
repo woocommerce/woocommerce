@@ -140,12 +140,12 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									},
 								},
 							},
-							installFonts: {
+							installFontFamilies: {
 								initial: 'pending',
 								states: {
 									pending: {
 										invoke: {
-											src: 'installFonts',
+											src: 'installFontFamilies',
 											onDone: {
 												target: 'success',
 											},

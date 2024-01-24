@@ -1,4 +1,4 @@
-// TODO: We should Download webfonts and host them locally on a site before launching CYS in Core.
+// TODO: When wp.com will upgrade to WordPress 6.5, we should remove this logic and use the FontFamiliesLoader component instead.
 // Load font families from wp.com.
 
 /**

@@ -3,8 +3,7 @@
  */
 import { useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { store as coreStore } from '@wordpress/core-data';
 
