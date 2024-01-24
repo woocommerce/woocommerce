@@ -40,7 +40,6 @@
 	},
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:admin": "wp-scripts build",
 		"build:dev": "pnpm lint:js && pnpm build",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:wp-scripts": "wireit",
