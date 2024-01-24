@@ -26,6 +26,7 @@ describe( 'useProductTemplate', () => {
 					productData: {
 						type: 'simple',
 					},
+					isSelectableByUser: true,
 				},
 				{
 					id: 'template-2a',
@@ -38,6 +39,7 @@ describe( 'useProductTemplate', () => {
 					productData: {
 						type: 'grouped',
 					},
+					isSelectableByUser: true,
 				},
 				{
 					id: 'template-2',
@@ -50,6 +52,7 @@ describe( 'useProductTemplate', () => {
 					productData: {
 						type: 'grouped',
 					},
+					isSelectableByUser: true,
 				},
 				{
 					id: 'template-3',
@@ -62,6 +65,7 @@ describe( 'useProductTemplate', () => {
 					productData: {
 						type: 'simple',
 					},
+					isSelectableByUser: true,
 				},
 				{
 					id: 'template-4',
@@ -74,6 +78,7 @@ describe( 'useProductTemplate', () => {
 					productData: {
 						type: undefined,
 					},
+					isSelectableByUser: false,
 				},
 			],
 		};

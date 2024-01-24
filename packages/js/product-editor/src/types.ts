@@ -14,6 +14,7 @@ export type ProductTemplate = {
 	postType: string;
 	productData: Partial< Product >;
 	alternateProductDatas?: Partial< Product >[];
+	isSelectableByUser: boolean;
 };
 
 export interface ProductEditorContext {
