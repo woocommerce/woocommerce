@@ -42,11 +42,12 @@ class Init {
 			}
 
 			foreach ( $spec->plugins as $plugin ) {
-				$extension = EvaluateExtension::evaluate( (object) $plugin );
-
-				if ( ! property_exists( $extension, 'is_visible' ) || $extension->is_visible ) {
-					$bundle['plugins'][] = $extension;
-				}
+				try {
+					$extension = EvaluateExtension::evaluate( (object) $plugin );
+					if ( ! property_exists( $extension, 'is_visible' ) || $extension->is_visible ) {
+						$bundle['plugins'][] = $extension;
+					}
+				} catch (\Throwable $e) {}
 			}
 
 			$bundles[] = $bundle;
