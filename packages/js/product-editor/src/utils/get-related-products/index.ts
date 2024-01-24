@@ -3,6 +3,11 @@
  */
 import { select, resolveSelect } from '@wordpress/data';
 import type { Product } from '@woocommerce/data';
+/**
+ * Internal dependencies
+ */
+import { GetSuggestedProductsOptions } from '../../store/data/types';
+import { store as wooProductEditorDataStore } from '../../store/data/constants';
 
 type getRelatedProductsOptions = {
 	// If true, return random products if no related products are found.
@@ -66,4 +71,38 @@ export default async function getRelatedProducts(
 			include: relatedProductIds,
 		}
 	) ) as Product[];
+}
+
+type getSuggestedProductsForOptions = {
+	postId: number;
+	postType?: 'product' | 'post' | 'page';
+};
+
+type ProductTaxonomyItemProps = {
+	id: number;
+	name: string;
+	slug: string;
+};
+
+export async function getSuggestedProductsFor( {
+	postId,
+	postType = 'product',
+}: getSuggestedProductsForOptions ) {
+	// @ts-expect-error There are no types for this.
+	const { getEditedEntityRecord } = select( 'core' );
+
+	const data: Product = getEditedEntityRecord( 'postType', postType, postId );
+
+	const options = {
+		categories: data?.categories
+			? data.categories.map( ( cat: ProductTaxonomyItemProps ) => cat.id )
+			: [],
+		tags: data?.tags
+			? data.tags.map( ( tag: ProductTaxonomyItemProps ) => tag.id )
+			: [],
+	};
+
+	return await resolveSelect(
+		wooProductEditorDataStore
+	).getSuggestedProducts( options );
 }
