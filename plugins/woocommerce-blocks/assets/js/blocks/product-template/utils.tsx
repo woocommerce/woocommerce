@@ -5,10 +5,7 @@ import { resolveSelect, useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
-// import { store as editorStore } from '@wordpress/editor';
 import { isNumber } from '@woocommerce/types';
-
-import singleProductMetadata from '../single-product/block.json';
 
 type LocationType = 'product' | 'archive' | 'cart' | 'order' | 'generic';
 type Context< T > = T & {
@@ -24,10 +21,7 @@ const createGetEntitySlug =
 	( entitySlug: string ): string =>
 		templateSlug.replace( `${ entitySlug }-`, '' );
 
-const createLocationObject = (
-	type: LocationType,
-	sourceData: { [ key: string ]: unknown }
-) => ( {
+const createLocationObject = ( type: LocationType, sourceData = {} ) => ( {
 	type,
 	sourceData,
 } );
@@ -39,13 +33,23 @@ export const useGetLocation = < T, >(
 	const templateSlug = context.templateSlug || '';
 	const postId = context.postId || null;
 
-	const isChildOfSingleProductBlock = useSelect(
-		( select ) =>
-			select( blockEditorStore ).getBlockParentsByBlockName(
-				clientId,
-				'woocommerce/single-product'
-			).length > 0
+	const { isChildOfSingleProductBlock, isChildOfMiniCartBlock } = useSelect(
+		( select ) => {
+			const isChildOfSingleProductBlock =
+				select( blockEditorStore ).getBlockParentsByBlockName(
+					clientId,
+					'woocommerce/single-product'
+				).length > 0;
+
+			const isChildOfMiniCartBlock =
+				select( blockEditorStore ).getBlockParentsByBlockName(
+					clientId,
+					'woocommerce/mini-cart-contents'
+				).length > 0;
+			return { isChildOfSingleProductBlock, isChildOfMiniCartBlock };
+		}
 	);
+
 	const getEntitySlug = createGetEntitySlug( templateSlug || '' );
 
 	const [ productId, setProductId ] = useState< number | null >( null );
@@ -195,10 +199,12 @@ export const useGetLocation = < T, >(
 	 * Cart/Checkout templates or Mini Cart
 	 */
 
-	if ( templateSlug === 'page-cart' || templateSlug === 'page-checkout' ) {
-		return createLocationObject( 'cart', {
-			productIds: [],
-		} );
+	if (
+		templateSlug === 'page-cart' ||
+		templateSlug === 'page-checkout' ||
+		isChildOfMiniCartBlock
+	) {
+		return createLocationObject( 'cart' );
 	}
 
 	/**
@@ -207,9 +213,7 @@ export const useGetLocation = < T, >(
 	 */
 
 	if ( templateSlug === 'order-confirmation' ) {
-		return createLocationObject( 'order', {
-			orderId: null,
-		} );
+		return createLocationObject( 'order' );
 	}
 
 	/**
@@ -217,5 +221,5 @@ export const useGetLocation = < T, >(
 	 * All other cases
 	 */
 
-	return createLocationObject( 'generic', {} );
+	return createLocationObject( 'generic' );
 };
