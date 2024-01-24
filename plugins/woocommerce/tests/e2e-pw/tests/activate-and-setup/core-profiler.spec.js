@@ -56,6 +56,16 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			await expect( page.getByText( 'Pinterest' ) ).not.toBeAttached();
 			await expect( page.getByText( 'Google Listings & Ads' ) ).not.toBeAttached();
 		} );
+
+		await test.step( 'Confirm that information from core profiler saved', async() => {
+			await page.goto( 'wp-admin/admin.php?page=wc-settings' );
+			await expect( page.getByRole( 'textbox', { name: 'Australia — Northern Territory' } ) ).toBeVisible();
+			await expect( page.getByRole( 'textbox', { name: 'Australian dollar ($)' } ) ).toBeVisible();
+			await expect( page.getByRole( 'textbox', { name: 'Left' } ) ).toBeVisible();
+			await expect( page.getByLabel( 'Thousand separator', { exact: true } ) ).toHaveValue( ',' );
+			await expect( page.getByLabel( 'Decimal separator', { exact: true } ) ).toHaveValue( '.' );
+			await expect( page.getByLabel( 'Number of decimals' ) ).toHaveValue( '2' );
+		} );
 	} );
 
 	test( 'Can complete the core profiler installing default extensions', async( { page } ) => {
@@ -104,7 +114,6 @@ test.describe( 'Store owner can complete the core profiler', () => {
 
 		await test.step( 'Confirm that core profiler was completed and a couple of default extensions installed', async() => {
 			page.on('dialog', dialog => dialog.accept());
-
 			// intermediate page shown
 			await expect( page.getByRole( 'heading', { name: 'Woo! Let\'s get your features ready' } ) ).toBeVisible( { timeout: 30000 } );
 			await expect( page.getByRole( 'heading', { name: 'Extending your store\'s capabilities' } ) ).toBeVisible( { timeout: 30000 } );
@@ -119,11 +128,26 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			await expect( page.getByText( 'Google Listings and Ads', { exact: true } ) ).toBeVisible();
 		} );
 
+		await test.step( 'Confirm that information from core profiler saved', async() => {
+			await page.goto( 'wp-admin/admin.php?page=wc-settings' );
+			await expect( page.getByRole( 'textbox', { name: 'Afghanistan' } ) ).toBeVisible();
+			await expect( page.getByRole( 'textbox', { name: 'Afghan afghani (؋)' } ) ).toBeVisible();
+			await expect( page.getByRole( 'textbox', { name: 'Left with space' } ) ).toBeVisible();
+			await expect( page.getByLabel( 'Thousand separator', { exact: true } ) ).toHaveValue( '.' );
+			await expect( page.getByLabel( 'Decimal separator', { exact: true } ) ).toHaveValue( ',' );
+			await expect( page.getByLabel( 'Number of decimals' ) ).toHaveValue( '0' );
+		} );
+
 		await test.step( 'Clean up installed extensions', async() => {
+			await page.goto( 'wp-admin/plugins.php' );
 			await page.getByLabel( 'Deactivate Google Listings' ).click();
+			await expect( page.getByText( 'Plugin deactivated.' ) ).toBeVisible();
 			await page.getByLabel( 'Delete Google Listings' ).click();
+			await expect( page.getByText( 'Google Listings and Ads was successfully deleted.' ) ).toBeVisible();
 			await page.getByLabel( 'Deactivate Pinterest for' ).click();
+			await expect( page.getByText( 'Plugin deactivated.' ) ).toBeVisible();
 			await page.getByLabel( 'Delete Pinterest for' ).click();
+			await expect( page.getByText( 'Pinterest for WooCommerce was successfully deleted.' ) ).toBeVisible();
 		} );
 	} );
 } );
