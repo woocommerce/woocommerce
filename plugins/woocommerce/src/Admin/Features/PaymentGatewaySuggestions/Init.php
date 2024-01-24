@@ -41,8 +41,10 @@ class Init {
 		}
 
 		foreach ( $specs as $spec ) {
-			$suggestion    = EvaluateSuggestion::evaluate( $spec );
-			$suggestions[] = $suggestion;
+			try {
+				$suggestion    = EvaluateSuggestion::evaluate( $spec );
+				$suggestions[] = $suggestion;
+			} catch (\Throwable $e) {}
 		}
 
 		return array_values(
