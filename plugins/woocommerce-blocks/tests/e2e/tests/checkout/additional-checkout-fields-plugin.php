@@ -69,10 +69,15 @@ class Additional_Checkout_Fields_Test_Helper {
 
 		add_filter(
 			'woocommerce_blocks_validate_additional_field_first-plugin-namespace/government-ID',
-			function( $error, $value, $schema, $request ) {
+			function( $error, $value, $request, $address_type ) {
 				$match = preg_match( '/^[0-9]{5}$/', $value );
 				if ( 0 === $match || false === $match ) {
 					$error->add( 'first-plugin-namespace/government-ID_invalid_value', 'Invalid government ID.' );
+				}
+
+				$address_key = 'shipping' === $address_type ? 'shipping_address' : 'billing_address';
+				if ( $value !== $request->get_params()[ $address_key ]['first-plugin-namespace/confirm-government-ID'] ) {
+					$error->add( 'first-plugin-namespace/government-ID_mismatch', 'Please ensure your government ID matches the confirmation.' );
 				}
 				return $error;
 			},
