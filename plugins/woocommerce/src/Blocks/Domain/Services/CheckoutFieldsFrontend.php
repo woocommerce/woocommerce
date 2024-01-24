@@ -183,12 +183,14 @@ class CheckoutFieldsFrontend {
 		$customer = new WC_Customer( $user_id );
 		$fields   = $this->checkout_fields_controller->get_fields_for_location( 'contact' );
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		foreach ( $fields as $field_key => $field ) {
-			if ( ! isset( $_POST[ $field_key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			if ( ! isset( $_POST[ $field_key ] ) ) {
 				continue;
 			}
 			$this->checkout_fields_controller->persist_field_for_customer( $field_key, wc_clean( wp_unslash( $_POST[ $field_key ] ) ), $customer );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 
 	/**
