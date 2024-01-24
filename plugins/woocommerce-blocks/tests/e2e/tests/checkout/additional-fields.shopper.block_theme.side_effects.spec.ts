@@ -151,19 +151,46 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		await checkoutPageObject.fillInCheckoutWithTestData(
 			{},
 			{
-				// Purposely skipping the Shipping "Government ID" field here.
-				address: {
-					shipping: { 'Government ID': '' },
-					billing: { 'Government ID': '12345' },
+				contact: {
+					'Enter a gift message to include in the package':
+						'This is for you!',
+					'Is this a personal purchase or a business purchase?':
+						'business',
 				},
-				additional: { 'How did you hear about us?': 'Other' },
+				address: {
+					shipping: {
+						'Government ID': '',
+						'Confirm government ID': '',
+					},
+					billing: {
+						'Government ID': '54321',
+						'Confirm government ID': '54321',
+					},
+				},
+				additional: {
+					'How did you hear about us?': 'Other',
+					'What is your favourite colour?': 'Blue',
+				},
 			}
 		);
+
+		// Use the data store to specifically unset the field value - this is because it might be saved in the user-state.
+		await checkoutPageObject.page.evaluate( () => {
+			window.wp.data.dispatch( 'wc/store/cart' ).setShippingAddress( {
+				'first-plugin-namespace/road-size': '',
+			} );
+		} );
+
 		await checkoutPageObject.placeOrder( false );
 
 		await expect(
 			checkoutPageObject.page.getByText(
 				'Please enter a valid government id'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Please select a valid how wide is your road?'
 			)
 		).toBeVisible();
 	} );
