@@ -52,30 +52,49 @@ TaskLists::add_task(
 Next, you have to add your task to the tasks list in JavaScript.
 
 ```jsx
-import { __ } from '@wordpress/i18n';
+/**
+ * External dependencies
+ */
+import { createElement } from '@wordpress/element';
 import {
-  WooOnboardingTask,
-  WooOnboardingTaskListItem,
+	WooOnboardingTask,
+	WooOnboardingTaskListItem,
 } from '@woocommerce/onboarding';
+import { registerPlugin } from '@wordpress/plugins';
 
 const Task = ( { onComplete, task, query } ) => {
-  // Implement your task UI/feature here.
-  return (
-    <div>
-    </div>
-  );
+	// Implement your task UI/feature here.
+	return <div></div>;
 };
 
 registerPlugin( 'add-task-content', {
-  render: () => (
-    <WooOnboardingTask id="my-task">
-      { ( {
-        onComplete,
-        query,
-        task,
-      } ) => <Task onComplete={ onComplete } task={ task } query={ query } /> }
-    </WooOnboardingTask>
-  )
+	render: () => (
+		<WooOnboardingTask id="my-task">
+			{ ( { onComplete, query, task } ) => (
+				<Task onComplete={ onComplete } task={ task } query={ query } />
+			) }
+		</WooOnboardingTask>
+	),
+} );
+
+registerPlugin( 'add-task-list-item', {
+	scope: 'woocommerce-tasks',
+	render: () => (
+		<WooOnboardingTaskListItem id="my-task">
+			{ ( { defaultTaskItem: DefaultTaskItem } ) => (
+				// Add a custom wrapper around the default task item.
+				<div
+					className="woocommerce-custom-tasklist-item"
+					style={ {
+						border: '1px solid red',
+					} }
+				>
+					<DefaultTaskItem />
+				</div>
+			) }
+		</WooOnboardingTaskListItem>
+	),
+} );
 ```
 
 ### Example
