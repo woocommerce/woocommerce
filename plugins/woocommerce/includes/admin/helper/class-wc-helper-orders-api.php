@@ -84,7 +84,7 @@ class WC_Helper_Orders_API {
 						array(
 							'product_id' => $request['product_id'],
 						),
-					)
+					),
 				)
 			);
 
