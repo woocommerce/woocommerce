@@ -11,6 +11,7 @@ export type ProductTemplate = {
 	icon: string | null;
 	order: number;
 	layoutTemplateId: string;
+	postType: string;
 	productData: Partial< Product >;
 	alternateProductDatas?: Partial< Product >[];
 };

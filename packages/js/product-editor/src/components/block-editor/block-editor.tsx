@@ -45,23 +45,7 @@ import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { ModalEditor } from '../modal-editor';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
-import { ProductTemplate } from '../../types';
 
-function getLayoutTemplateId(
-	productTemplate: ProductTemplate | undefined,
-	postType: string
-) {
-	if ( productTemplate?.layoutTemplateId ) {
-		return productTemplate.layoutTemplateId;
-	}
-
-	if ( postType === 'product_variation' ) {
-		return 'product-variation';
-	}
-
-	// Fallback to simple product if no layout template is set.
-	return 'simple-product';
-}
 export function BlockEditor( {
 	context,
 	settings: _settings,
@@ -127,11 +111,12 @@ export function BlockEditor( {
 
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
-		productType
+		productType,
+		postType
 	);
 
 	const { layoutTemplate } = useLayoutTemplate(
-		getLayoutTemplateId( productTemplate, postType )
+		productTemplate?.layoutTemplateId
 	);
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(

@@ -18,8 +18,22 @@ declare global {
 
 function isProductTypeSupported(
 	productTemplate: ProductTemplate,
-	productType: ProductType | undefined
+	productType: ProductType | undefined,
+	postType: string | undefined
 ) {
+	if ( productTemplate.postType !== postType ) {
+		return false;
+	}
+
+	// consider null and undefined to be the same for product type
+	if (
+		( productTemplate.productData.type === null ||
+			productTemplate.productData.type === undefined ) &&
+		( productType === null || productType === undefined )
+	) {
+		return true;
+	}
+
 	if ( productTemplate.productData.type === productType ) {
 		return true;
 	}
@@ -37,7 +51,8 @@ function isProductTypeSupported(
 
 export const useProductTemplate = (
 	productTemplateId: string | undefined,
-	productType: ProductType | undefined
+	productType: ProductType | undefined,
+	postType: string | undefined = 'product'
 ) => {
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
@@ -45,13 +60,13 @@ export const useProductTemplate = (
 	let matchingProductTemplate = productTemplates.find(
 		( productTemplate ) =>
 			productTemplate.id === productTemplateId &&
-			isProductTypeSupported( productTemplate, productType )
+			isProductTypeSupported( productTemplate, productType, postType )
 	);
 
 	if ( ! matchingProductTemplate ) {
 		// Fallback to the first template with the same product type.
 		matchingProductTemplate = productTemplates.find( ( productTemplate ) =>
-			isProductTypeSupported( productTemplate, productType )
+			isProductTypeSupported( productTemplate, productType, postType )
 		);
 	}
 
