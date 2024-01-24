@@ -27,8 +27,7 @@ export const useGetLocation = ( context ) => {
 	const { templateSlug, postId } = context;
 
 	const [ productId, setProductId ] = useState< number | null >( null );
-	const [ categoryId, setCategoryId ] = useState< number | null >( null );
-	const [ attributeId, setAttributeId ] = useState< number | null >( null );
+	const [ catId, setCatId ] = useState< number | null >( null );
 	const [ tagId, setTagId ] = useState< number | null >( null );
 
 	const getEntitySlug = createGetEntitySlug( templateSlug );
@@ -85,8 +84,8 @@ export const useGetLocation = ( context ) => {
 					_fields: [ 'id' ],
 					slug,
 				} ) ) as Record< 'id', number >[];
-				const categoryId = parseResponse( response );
-				setCategoryId( categoryId );
+				const catId = parseResponse( response );
+				setCatId( catId );
 			};
 
 			if ( slug ) {
@@ -95,7 +94,7 @@ export const useGetLocation = ( context ) => {
 		}, [ templateSlug ] );
 		return createLocationObject( 'archive', {
 			tag: null,
-			cat: categoryId,
+			cat: catId,
 		} );
 	}
 
