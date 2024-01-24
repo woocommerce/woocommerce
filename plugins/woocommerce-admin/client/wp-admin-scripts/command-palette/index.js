@@ -17,6 +17,7 @@ import { decodeEntities } from '@wordpress/html-entities';
  */
 import { registerCommandWithTracking } from './register-command-with-tracking';
 import { useEditedPostType } from './use-edited-post-type';
+import { useAddTrackingToExternalCommands } from './use-add-tracking-to-external-commands';
 
 const registerWooCommerceSettingsCommand = ( { label, tab, origin } ) => {
 	registerCommandWithTracking( {
@@ -95,6 +96,7 @@ function useProductCommandLoader( { search } ) {
 				callback: ( { close } ) => {
 					queueRecordEvent( 'woocommerce_command_palette_submit', {
 						name: 'woocommerce/product',
+						title: record.title.raw,
 						origin,
 					} );
 
@@ -119,6 +121,7 @@ function useProductCommandLoader( { search } ) {
 const WooCommerceCommands = () => {
 	const { editedPostType } = useEditedPostType();
 	const origin = editedPostType ? editedPostType + '-editor' : null;
+	useAddTrackingToExternalCommands( origin );
 	const { isCommandPaletteOpen } = useSelect( ( select ) => {
 		const { isOpen } = select( commandsStore );
 		return {
