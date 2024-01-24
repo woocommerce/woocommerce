@@ -13,7 +13,7 @@ const skipTestIfUndefined = () => {
 	const skipMessage = `Skipping this test on daily run. Environment not compatible.`;
 
 	test.skip( () => {
-		const shouldSkip = BASE_URL != undefined;
+		const shouldSkip = BASE_URL !== undefined;
 
 		if ( shouldSkip ) {
 			console.log( skipMessage );

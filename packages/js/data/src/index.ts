@@ -87,6 +87,7 @@ export * from './onboarding/types';
 export * from './plugins/types';
 export * from './products/types';
 export type {
+	PartialProductVariation,
 	ProductVariation,
 	ProductVariationAttribute,
 	ProductVariationImage,

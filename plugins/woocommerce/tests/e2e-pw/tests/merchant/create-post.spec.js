@@ -28,7 +28,7 @@ test.describe( 'Can create a new post', () => {
 						force: true,
 					},
 				} );
-//				expect( response.ok() ).toBeTruthy();
+				//				expect( response.ok() ).toBeTruthy();
 			}
 		} );
 	} );
@@ -44,8 +44,7 @@ test.describe( 'Can create a new post', () => {
 
 		await page
 			.getByRole( 'document', {
-				name:
-					'Empty block; start writing or type forward slash to choose a block',
+				name: 'Empty block; start writing or type forward slash to choose a block',
 			} )
 			.fill( 'Test Post' );
 
