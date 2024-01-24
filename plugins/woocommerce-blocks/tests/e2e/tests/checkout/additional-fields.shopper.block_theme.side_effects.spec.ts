@@ -140,6 +140,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				'Can a truck fit down your road?No'
 			)
 		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText( 'How wide is your road?Wide' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText( 'How wide is your road?Narrow' )
+		).toBeVisible();
 	} );
 
 	test( 'Shopper can see an error message when a required field is not filled in the checkout form', async ( {
