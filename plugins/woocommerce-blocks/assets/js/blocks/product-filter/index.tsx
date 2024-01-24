@@ -158,12 +158,10 @@ if ( isExperimentalBuild() ) {
 								block.name ===
 								`woocommerce/${ attributes.filterType }`
 							) {
-								const { lock, ...filterBlockAttributes } =
-									block.attributes;
 								newInnerBlocks.push(
 									createBlock(
 										BLOCK_NAME_MAP[ attributes.filterType ],
-										filterBlockAttributes
+										block.attributes
 									)
 								);
 							}
