@@ -299,7 +299,7 @@
           "menu_title": "Integrating admin pages",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
-          "hash": "4de161038cdf34b4d683c7f928fc6c6d0407b6f1ef370649f250453832e04c5a",
+          "hash": "9d01da78347ee7379fe096cce5e3982cd13e46617f90ad78e03af72bc3fb8aba",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
           "id": "6f9cc63bc4c614b9e01174069a5ddc4f3d7aa467"
         },
@@ -573,7 +573,7 @@
           "post_title": "Product editor development handbook",
           "menu_title": "Development handbook",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor.md",
-          "hash": "6ba9107308c41fe94a78e8414afe4c24de0af7de68f3363511a6fca17fbdf33e",
+          "hash": "e94d3333e6ec94f6bf430ef0ea19a52142a1c60592060e527712bfd701487b72",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor.md",
           "id": "59450404de2750d918137e7cf523e52bedfd7214",
           "links": {
@@ -1114,5 +1114,5 @@
       "categories": []
     }
   ],
-  "hash": "a560edb65e44ca311a32c81b6bbce3fc4ebbe492a2eebbc9f9803ef4a4ceb27c"
+  "hash": "ad958cbee4bccafbc89a35c5b41e4a84d9638f666b81adb3b172e658760cb003"
 }
