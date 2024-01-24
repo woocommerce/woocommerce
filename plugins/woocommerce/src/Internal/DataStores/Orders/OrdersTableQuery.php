@@ -924,7 +924,7 @@ class OrdersTableQuery {
 			/**
 			 * Filters the count SQL query.
 			 *
-			 * @since x.x.x
+			 * @since 8.6.0
 			 *
 			 * @param string           $sql   The count SQL query.
 			 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).

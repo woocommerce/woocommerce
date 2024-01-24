@@ -549,12 +549,12 @@ class ListTable extends WP_List_Table {
 		$view_links = array();
 
 		/**
-		 * Filters the list of available list table views link
-		 * before the actual query runs so gives the opportunity to remove counts from the links
+		 * Filters the list of available list table view links before the actual query runs.
+		 * This can be used to, e.g., remove counts from the links.
 		 *
-		 * @since x.x.x
+		 * @since 8.6.0
 		 *
-		 * @param string[] $views An array of available list table views links.
+		 * @param string[] $views An array of available list table view links.
 		 */
 		$view_links = apply_filters( 'woocommerce_before_' . $this->order_type . '_list_table_view_links', $view_links );
 		if ( ! empty( $view_links ) ) {
@@ -640,11 +640,11 @@ class ListTable extends WP_List_Table {
 	 */
 	private function should_render_blank_state(): bool {
 		/**
-		 * Filters if we should render blank state, allowing for custom count queries to be used
+		 * Whether we should render a blank state so that custom count queries can be used.
 		 *
-		 * @since x.x.x
+		 * @since 8.6.0
 		 *
-		 * @param null           $should_render_blank_state null will use the build in counts, and sending a boolean will overwrite it
+		 * @param null           $should_render_blank_state `null` will use the built-in counts. Sending a boolean will short-circuit that path.
 		 * @param object         ListTable The current instance of the class.
 		*/
 		$should_render_blank_state = apply_filters(
@@ -759,7 +759,7 @@ class ListTable extends WP_List_Table {
 		/**
 		 * Filters whether to remove the 'Months' drop-down from the order list table.
 		 *
-		 * @since x.x.x
+		 * @since 8.6.0
 		 *
 		 * @param bool   $disable   Whether to disable the drop-down. Default false.
 		 */
