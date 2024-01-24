@@ -18,7 +18,7 @@ class PaymentGatewaySuggestionsDataSourcePoller extends DataSourcePoller {
 	 * Default data sources array.
 	 */
 	const DATA_SOURCES = array(
-		'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/suggestions.json',
+		'https://api.npoint.io/83d63d29d478ececdbc5',
 	);
 
 	/**
