@@ -118,8 +118,6 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.getByLabel( 'Purchase note' ).fill( productPurchaseNote );
 		await page.keyboard.press( 'Enter' );
 
-		// await page.locator( '#_purchase_note' ).fill( productPurchaseNote );
-
 		// Fill in a color as attribute
 		await page
 			.locator( '.attribute_tab' )
@@ -191,7 +189,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			waitUntil: 'networkidle',
 		} );
 		await expect(
-			page.getByRole( 'heading', { name: 'Virtual Product Name' } )
+			page.getByRole( 'heading', { name: virtualProductName } )
 		).toBeVisible();
 		await expect( page.getByText( productPrice ).first() ).toBeVisible();
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
