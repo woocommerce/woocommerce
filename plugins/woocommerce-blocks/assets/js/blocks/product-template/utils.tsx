@@ -12,9 +12,28 @@ type Context< T > = T & {
 	templateSlug?: string;
 	postId?: number;
 };
+type SetEntityId = (
+	kind: 'postType' | 'taxonomy',
+	name: 'product' | 'product_cat' | 'product_tag',
+	slug: string,
+	stateSetter: ( entityId: number | null ) => void
+) => void;
 
 const parseResponse = ( resp?: Record< 'id', number >[] ): number | null =>
 	resp && resp.length && resp[ 0 ]?.id ? resp[ 0 ].id : null;
+
+const setEntityId: SetEntityId = async ( kind, name, slug, stateSetter ) => {
+	const response = ( await resolveSelect( coreStore ).getEntityRecords(
+		kind,
+		name,
+		{
+			_fields: [ 'id' ],
+			slug,
+		}
+	) ) as Record< 'id', number >[];
+	const entityId = parseResponse( response );
+	stateSetter( entityId );
+};
 
 const createGetEntitySlug =
 	( templateSlug: string ) =>
@@ -33,65 +52,84 @@ export const useGetLocation = < T, >(
 	const templateSlug = context.templateSlug || '';
 	const postId = context.postId || null;
 
-	const { isChildOfSingleProductBlock, isChildOfMiniCartBlock } = useSelect(
+	const getEntitySlug = createGetEntitySlug( templateSlug || '' );
+
+	const { isInSingleProductBlock, isInMiniCartBlock } = useSelect(
 		( select ) => {
-			const isChildOfSingleProductBlock =
+			const isInSingleProductBlock =
 				select( blockEditorStore ).getBlockParentsByBlockName(
 					clientId,
 					'woocommerce/single-product'
 				).length > 0;
 
-			const isChildOfMiniCartBlock =
+			const isInMiniCartBlock =
 				select( blockEditorStore ).getBlockParentsByBlockName(
 					clientId,
 					'woocommerce/mini-cart-contents'
 				).length > 0;
-			return { isChildOfSingleProductBlock, isChildOfMiniCartBlock };
+			return { isInSingleProductBlock, isInMiniCartBlock };
 		}
 	);
 
-	const getEntitySlug = createGetEntitySlug( templateSlug || '' );
+	const isInSpecificProductTemplate =
+		templateSlug.includes( 'single-product' ) &&
+		templateSlug !== 'single-product';
+	const isInSpecificCategoryTemplate =
+		templateSlug.includes( 'taxonomy-product_cat' ) &&
+		templateSlug !== 'taxonomy-product_cat';
+	const isInSpecificTagTemplate =
+		templateSlug.includes( 'taxonomy-product_tag' ) &&
+		templateSlug !== 'taxonomy-product_tag';
+
+	const isInSingleProductTemplate = templateSlug === 'single-product';
+	const isInProductsByCategoryTemplate =
+		templateSlug === 'taxonomy-product_cat';
+	const isInProductsByTagTemplate = templateSlug === 'taxonomy-product_tag';
+	const isInProductsByAttributeTemplate =
+		templateSlug === 'taxonomy-product_attribute';
+	const isInOrderTemplate = templateSlug === 'order-confirmation';
+
+	const isInCartContext =
+		templateSlug === 'page-cart' ||
+		templateSlug === 'page-checkout' ||
+		isInMiniCartBlock;
 
 	const [ productId, setProductId ] = useState< number | null >( null );
 	const [ catId, setCatId ] = useState< number | null >( null );
 	const [ tagId, setTagId ] = useState< number | null >( null );
 
+	useEffect( () => {
+		if ( isInSpecificProductTemplate ) {
+			const slug = getEntitySlug( 'single-product' );
+			setEntityId( 'postType', 'product', slug, setProductId );
+		}
+
+		if ( isInSpecificCategoryTemplate ) {
+			const slug = getEntitySlug( 'taxonomy-product_cat' );
+			setEntityId( 'taxonomy', 'product_cat', slug, setCatId );
+		}
+
+		if ( isInSpecificTagTemplate ) {
+			const slug = getEntitySlug( 'taxonomy-product_tag' );
+			setEntityId( 'taxonomy', 'product_tag', slug, setTagId );
+		}
+	} );
+
 	/**
 	 * Case 1.1: SPECIFIC PRODUCT
-	 * Single Product block
+	 * Single Product block - take product ID from context
 	 */
 
-	if ( isNumber( postId ) && isChildOfSingleProductBlock ) {
+	if ( isInSingleProductBlock ) {
 		return createLocationObject( 'product', { productId: postId } );
 	}
 
 	/**
 	 * Case 1.2: SPECIFIC PRODUCT
-	 * Specific Single Product template
+	 * Specific Single Product template - take product ID from taxononmy
 	 */
 
-	if (
-		templateSlug.includes( 'single-product' ) &&
-		templateSlug !== 'single-product'
-	) {
-		useEffect( () => {
-			const slug = getEntitySlug( 'single-product' );
-			const getProductId = async () => {
-				const response = ( await resolveSelect(
-					coreStore
-				).getEntityRecords( 'postType', 'product', {
-					_fields: [ 'id' ],
-					slug,
-				} ) ) as Record< 'id', number >[];
-				const productId = parseResponse( response );
-				setProductId( productId );
-			};
-
-			if ( slug ) {
-				getProductId();
-			}
-		}, [ templateSlug ] );
-
+	if ( isInSpecificProductTemplate ) {
 		return createLocationObject( 'product', { productId } );
 	}
 
@@ -100,36 +138,16 @@ export const useGetLocation = < T, >(
 	 * Generic Single Product template
 	 */
 
-	if ( templateSlug === 'single-product' ) {
+	if ( isInSingleProductTemplate ) {
 		return createLocationObject( 'product', { postId: null } );
 	}
 
 	/**
 	 * Case 2.1: SPECIFIC TAXONOMY
-	 * Specific Category template
+	 * Specific Category template - take category ID from
 	 */
 
-	if (
-		templateSlug.includes( 'taxonomy-product_cat' ) &&
-		templateSlug !== 'taxonomy-product_cat'
-	) {
-		useEffect( () => {
-			const slug = getEntitySlug( 'taxonomy-product_cat' );
-			const getCategoryId = async () => {
-				const response = ( await resolveSelect(
-					coreStore
-				).getEntityRecords( 'taxonomy', 'product_cat', {
-					_fields: [ 'id' ],
-					slug,
-				} ) ) as Record< 'id', number >[];
-				const catId = parseResponse( response );
-				setCatId( catId );
-			};
-
-			if ( slug ) {
-				getCategoryId();
-			}
-		}, [ templateSlug ] );
+	if ( isInSpecificCategoryTemplate ) {
 		return createLocationObject( 'archive', {
 			taxonomy: 'cat',
 			termId: catId,
@@ -141,27 +159,7 @@ export const useGetLocation = < T, >(
 	 * Specific Tag template
 	 */
 
-	if (
-		templateSlug.includes( 'taxonomy-product_tag' ) &&
-		templateSlug !== 'taxonomy-product_tag'
-	) {
-		useEffect( () => {
-			const slug = getEntitySlug( 'taxonomy-product_tag' );
-			const getTagId = async () => {
-				const response = ( await resolveSelect(
-					coreStore
-				).getEntityRecords( 'taxonomy', 'product_tag', {
-					_fields: [ 'id' ],
-					slug,
-				} ) ) as Record< 'id', number >[];
-				const tagId = parseResponse( response );
-				setTagId( tagId );
-			};
-
-			if ( slug ) {
-				getTagId();
-			}
-		}, [ templateSlug ] );
+	if ( isInSpecificTagTemplate ) {
 		return createLocationObject( 'archive', {
 			taxonomy: 'tag',
 			termId: tagId,
@@ -173,21 +171,21 @@ export const useGetLocation = < T, >(
 	 * Generic Taxonomy template
 	 */
 
-	if ( templateSlug === 'taxonomy-product_cat' ) {
+	if ( isInProductsByCategoryTemplate ) {
 		return createLocationObject( 'archive', {
 			taxonomy: 'cat',
 			termId: null,
 		} );
 	}
 
-	if ( templateSlug === 'taxonomy-product_tag' ) {
+	if ( isInProductsByTagTemplate ) {
 		return createLocationObject( 'archive', {
 			taxonomy: 'tag',
 			termId: null,
 		} );
 	}
 
-	if ( templateSlug === 'taxonomy-product_attribute' ) {
+	if ( isInProductsByAttributeTemplate ) {
 		return createLocationObject( 'archive', {
 			taxonomy: null,
 			termId: null,
@@ -199,11 +197,7 @@ export const useGetLocation = < T, >(
 	 * Cart/Checkout templates or Mini Cart
 	 */
 
-	if (
-		templateSlug === 'page-cart' ||
-		templateSlug === 'page-checkout' ||
-		isChildOfMiniCartBlock
-	) {
+	if ( isInCartContext ) {
 		return createLocationObject( 'cart' );
 	}
 
@@ -212,7 +206,7 @@ export const useGetLocation = < T, >(
 	 * Order Confirmation template
 	 */
 
-	if ( templateSlug === 'order-confirmation' ) {
+	if ( isInOrderTemplate ) {
 		return createLocationObject( 'order' );
 	}
 
