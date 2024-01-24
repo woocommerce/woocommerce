@@ -184,6 +184,7 @@ export function LinkedProductListBlockEdit( {
 
 		const linkedProducts = ( await getSuggestedProductsFor( {
 			postId: productId,
+			forceRequest: true,
 		} ) ) as Product[];
 
 		dispatch( {
