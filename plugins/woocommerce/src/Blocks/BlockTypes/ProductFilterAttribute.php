@@ -288,7 +288,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 *
 	 * @param WP_Block $block      Block instance.
 	 * @param string   $slug       Attribute slug.
-	 * @param string   $query_type and | or
+	 * @param string   $query_type Query type, accept 'and' or 'or'.
 	 */
 	private function get_attribute_counts( $block, $slug, $query_type ) {
 		$filters    = Package::container()->get( QueryFilters::class );
