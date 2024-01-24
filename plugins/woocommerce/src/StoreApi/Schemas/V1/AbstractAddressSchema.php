@@ -115,9 +115,10 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	public function sanitize_callback( $address, $request, $param ) {
 		$validation_util = new ValidationUtils();
 		$address         = (array) $address;
+		$field_schema    = $this->get_properties();
 		$address         = array_reduce(
 			array_keys( $address ),
-			function( $carry, $key ) use ( $address, $validation_util ) {
+			function( $carry, $key ) use ( $address, $validation_util, $field_schema ) {
 				switch ( $key ) {
 					case 'country':
 						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
@@ -130,6 +131,10 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						break;
 					default:
 						$carry[ $key ] = $address[ $key ];
+						// Specific sanitization for string types, skipping other types from being coerced to strings.
+						if ( 'string' === $field_schema[ $key ]['type'] ) {
+							$carry[ $key ] = wp_kses( $address[ $key ], [] );
+						}
 						break;
 				}
 				return $carry;
