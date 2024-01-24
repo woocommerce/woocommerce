@@ -27,6 +27,13 @@ class ProductTemplate {
 	private $title;
 
 	/**
+	 * The post type.
+	 *
+	 * @var string
+	 */
+	private $post_type = 'product';
+
+	/**
 	 * The product data.
 	 *
 	 * @var array
@@ -94,6 +101,10 @@ class ProductTemplate {
 			$this->icon = $data['icon'];
 		}
 
+		if ( isset( $data['post_type'] ) ) {
+			$this->post_type = $data['post_type'];
+		}
+
 		if ( isset( $data['alternate_product_datas'] ) ) {
 			$this->alternate_product_datas = $data['alternate_product_datas'];
 		}
@@ -133,6 +144,15 @@ class ProductTemplate {
 	 */
 	public function set_layout_template_id( string $layout_template_id ) {
 		$this->layout_template_id = $layout_template_id;
+	}
+
+	/**
+	 * Get the post type.
+	 *
+	 * @return string The post type.
+	 */
+	public function get_post_type() {
+		return $this->post_type;
 	}
 
 	/**
@@ -222,6 +242,7 @@ class ProductTemplate {
 			'icon'                  => $this->get_icon(),
 			'order'                 => $this->get_order(),
 			'layoutTemplateId'      => $this->get_layout_template_id(),
+			'postType'              => $this->get_post_type(),
 			'productData'           => $this->get_product_data(),
 			'alternateProductDatas' => $this->get_alternate_product_datas(),
 		);
