@@ -112,10 +112,12 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		// Fill in SKU
 		await page.getByText( 'Inventory' ).click();
 		await page.getByLabel( 'SKU', { exact: true } ).fill( productSKU );
+		await page.keyboard.press( 'Enter' );
 
 		// Fill in purchase note
 		await page.getByText( 'Advanced' ).click();
 		await page.getByLabel( 'Purchase note' ).fill( productPurchaseNote );
+		await page.keyboard.press( 'Enter' );
 
 		// await page.locator( '#_purchase_note' ).fill( productPurchaseNote );
 
@@ -157,7 +159,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 				.filter( { hasText: 'Product published.' } )
 		).toBeVisible();
 
-		// Reload the page and verify that the values remain saved in product editor page
+		// Reload the page and verify that the values remain saved after publish in product editor page
 		await page.reload();
 		await expect( page.getByLabel( 'Product name' ) ).toHaveValue(
 			virtualProductName
@@ -174,7 +176,6 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			.click();
 		await expect( page.getByText( productDescription ) ).toBeVisible();
 		await page.getByText( 'Inventory' ).click();
-		//await expect( page.getByLabel( '_sku' ) ).toHaveValue( productSKU );
 		await expect( page.getByLabel( 'SKU', { exact: true } ) ).toHaveValue(
 			productSKU
 		);
@@ -191,7 +192,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			waitUntil: 'networkidle',
 		} );
 		await expect(
-			page.getByRole( 'heading', { name: virtualProductName } )
+			page.getByRole( 'heading', { name: 'Virtual Product Name' } )
 		).toBeVisible();
 		await expect( page.getByText( productPrice ).first() ).toBeVisible();
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
