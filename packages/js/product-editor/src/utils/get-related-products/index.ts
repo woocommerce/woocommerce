@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { select, resolveSelect } from '@wordpress/data';
+import { select, resolveSelect, dispatch } from '@wordpress/data';
 import { PRODUCTS_STORE_NAME } from '@woocommerce/data';
 import type { Product } from '@woocommerce/data';
 
@@ -72,6 +72,7 @@ export default async function getRelatedProducts(
 type getSuggestedProductsForOptions = {
 	postId: number;
 	postType?: 'product' | 'post' | 'page';
+	forceRequest?: boolean;
 };
 
 /**
@@ -83,6 +84,7 @@ type getSuggestedProductsForOptions = {
 export async function getSuggestedProductsFor( {
 	postId,
 	postType = 'product',
+	forceRequest = false,
 }: getSuggestedProductsForOptions ): Promise< Product[] | undefined > {
 	// @ts-expect-error There are no types for this.
 	const { getEditedEntityRecord } = select( 'core' );
@@ -95,6 +97,13 @@ export async function getSuggestedProductsFor( {
 			: [],
 		tags: data?.tags ? data.tags.map( ( tag ) => tag.id ) : [],
 	};
+
+	if ( forceRequest ) {
+		await dispatch( PRODUCTS_STORE_NAME ).invalidateResolution(
+			'getSuggestedProducts',
+			[ options ]
+		);
+	}
 
 	return await resolveSelect( PRODUCTS_STORE_NAME ).getSuggestedProducts(
 		options
