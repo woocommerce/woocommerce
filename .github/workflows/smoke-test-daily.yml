@@ -127,6 +127,8 @@ jobs:
                   USE_WP_ENV: 1
                   E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
+                  ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+                  ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
               id: run_playwright_e2e_tests
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
 
@@ -191,66 +193,54 @@ jobs:
                   retention-days: 20
 
     k6-tests:
-        name: k6 tests on nightly build
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-        needs: [api-tests]
-        if: success() || failure()
-        outputs:
-            test-result: ${{ steps.run-k6-tests.conclusion }}
-        steps:
-            - uses: actions/checkout@v3
+      name: k6 tests on nightly build
+      runs-on: ubuntu-20.04
+      permissions:
+          contents: read
+      needs: [api-tests]
+      if: success() || failure()
+      outputs:
+          test-result: ${{ steps.run-k6-tests.conclusion }}
+      steps:
+          - uses: actions/checkout@v3
+          - name: Setup WooCommerce Monorepo
+            uses: ./.github/actions/setup-woocommerce-monorepo
+            with:
+                install: '@woocommerce/plugin-woocommerce...'
 
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  install: '@woocommerce/plugin-woocommerce...'
-                  build: '@woocommerce/plugin-woocommerce'
-
-            # - name: Update performance test site with E2E test
-            #   id: update-perf-site
-            #   continue-on-error: true
-            #   uses: ./.github/actions/tests/run-e2e-tests
-            #   with:
-            #       report-name: k6-daily-update-site--run-${{ github.run_number }}
-            #       tests: update-woocommerce.spec.js
-            #   env:
-            #       ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
-            #       ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
-            #       BASE_URL: ${{ secrets.SMOKE_TEST_PERF_URL }}/
-            #       ADMIN_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
-            #       ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-            #       CUSTOMER_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
-            #       CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-            #       DEFAULT_TIMEOUT_OVERRIDE: 120000
-            #       GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-            #       UPDATE_WC: nightly
-
-            - name: Load docker images and start containers.
-              working-directory: plugins/woocommerce
-              env:
-                  ENABLE_HPOS: 0
-              run: |
-                  pnpm --filter=@woocommerce/plugin-woocommerce env:dev
-                  pnpm --filter=@woocommerce/plugin-woocommerce env:performance-init
-
-            - name: Install k6
-              run: |
-                  curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
-
-            - name: Run k6 smoke tests
-              id: run-k6-tests
-              env:
-                  # URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
-                  # HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
-                  # A_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
-                  # A_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-                  # C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
-                  # C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-                  P_ID: 22733
-              run: |
-                  ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
+          - name: Update performance test site with E2E test
+            id: update-perf-site
+            continue-on-error: true
+            uses: ./.github/actions/tests/run-e2e-tests
+            with:
+                report-name: k6-daily-update-site--run-${{ github.run_number }}
+                tests: update-woocommerce.spec.js
+            env:
+                ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
+                ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
+                BASE_URL: ${{ secrets.SMOKE_TEST_PERF_URL }}/
+                ADMIN_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+                ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+                CUSTOMER_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+                CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+                DEFAULT_TIMEOUT_OVERRIDE: 120000
+                GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+                UPDATE_WC: nightly
+          - name: Install k6
+            run: |
+                curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
+          - name: Run k6 smoke tests
+            id: run-k6-tests
+            env:
+                URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
+                HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
+                A_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+                A_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+                C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+                C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+                P_ID: 22733
+            run: |
+                ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
     test-plugins:
         name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed

@@ -110,3 +110,4 @@ changes.json
 /artifacts
 /plugins/*/artifacts
 /tools/*/artifacts
+.vscode
