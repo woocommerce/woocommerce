@@ -52,7 +52,7 @@ function isProductTypeSupported(
 export const useProductTemplate = (
 	productTemplateId: string | undefined,
 	productType: ProductType | undefined,
-	postType: string | undefined = 'product'
+	postType: string | undefined
 ) => {
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
