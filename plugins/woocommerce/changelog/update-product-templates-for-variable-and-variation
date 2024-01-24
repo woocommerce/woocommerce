@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Allow product templates to support alternate product types, as well as post types, and marking as unselectable
