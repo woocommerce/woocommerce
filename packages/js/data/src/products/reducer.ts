@@ -8,7 +8,11 @@ import { Reducer } from 'redux';
  */
 import TYPES from './action-types';
 import { Actions } from './actions';
-import { PartialProduct } from './types';
+import type {
+	PartialProduct,
+	Product,
+	SuggestedProductOptionsKey,
+} from './types';
 import {
 	getProductResourceName,
 	getTotalProductCountResourceName,
@@ -29,6 +33,13 @@ export type ProductState = {
 		updateProduct?: Record< number, boolean >;
 		deleteProduct?: Record< number, boolean >;
 	};
+
+	suggestedProducts: {
+		[ key in SuggestedProductOptionsKey ]: {
+			items: Product[];
+			__meta: object;
+		};
+	};
 };
 
 const reducer: Reducer< ProductState, Actions > = (
@@ -38,6 +49,7 @@ const reducer: Reducer< ProductState, Actions > = (
 		errors: {},
 		data: {},
 		pending: {},
+		suggestedProducts: {},
 	},
 	payload
 ) => {
@@ -190,6 +202,22 @@ const reducer: Reducer< ProductState, Actions > = (
 						},
 					},
 				};
+			case TYPES.SET_SUGGESTED_PRODUCTS: {
+				return {
+					...state,
+					suggestedProducts: {
+						...state.suggestedProducts,
+						[ payload.key ]: {
+							items: payload.items || [],
+							__meta: {
+								...state.suggestedProducts[ payload.key ]
+									?.__meta,
+								isLoading: false,
+							},
+						},
+					},
+				};
+			}
 			default:
 				return state;
 		}
