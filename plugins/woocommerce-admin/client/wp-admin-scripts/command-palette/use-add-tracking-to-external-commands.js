@@ -9,13 +9,26 @@ import { store as commandsStore } from '@wordpress/commands';
 // Hook to add tracking to non-WooCommerce commands.
 export const useAddTrackingToExternalCommands = ( origin ) => {
 	const commandsWithTracking = useRef( [] );
-	const { commands, commandLoaders } = useSelect( ( select ) => {
-		const { getCommands, getCommandLoaders } = select( commandsStore );
-		return {
-			commands: getCommands(),
-			commandLoaders: getCommandLoaders(),
-		};
-	}, [] );
+	const commandLoadersWithTracking = useRef( [] );
+	const { commands, commandLoaders, isCommandPaletteOpen } = useSelect(
+		( select ) => {
+			const { getCommands, getCommandLoaders, isOpen } =
+				select( commandsStore );
+			return {
+				commands: getCommands(),
+				commandLoaders: getCommandLoaders(),
+				isCommandPaletteOpen: isOpen(),
+			};
+		},
+		[]
+	);
+
+	useEffect( () => {
+		if ( ! isCommandPaletteOpen ) {
+			commandsWithTracking.current = [];
+			commandLoadersWithTracking.current = [];
+		}
+	}, [ isCommandPaletteOpen ] );
 
 	useEffect( () => {
 		commands.forEach( ( command ) => {
@@ -35,7 +48,9 @@ export const useAddTrackingToExternalCommands = ( origin ) => {
 		} );
 		commandLoaders.forEach( ( commandLoader ) => {
 			if (
-				! commandsWithTracking.current.includes( commandLoader.name )
+				! commandLoadersWithTracking.current.includes(
+					commandLoader.name
+				)
 			) {
 				dispatch( commandsStore ).registerCommandLoader( {
 					...commandLoader,
@@ -68,7 +83,7 @@ export const useAddTrackingToExternalCommands = ( origin ) => {
 						};
 					},
 				} );
-				commandsWithTracking.current.push( commandLoader.name );
+				commandLoadersWithTracking.current.push( commandLoader.name );
 			}
 		} );
 	}, [ commands, commandLoaders, origin ] );
