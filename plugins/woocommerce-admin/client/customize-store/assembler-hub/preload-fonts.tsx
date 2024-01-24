@@ -20,11 +20,11 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
  */
 import {
 	FONT_PAIRINGS,
-	FONT_TO_INSTALL,
+	FONT_FAMILY_TO_INSTALL,
 } from './sidebar/global-styles/font-pairing-variations/constants';
 import { FontFamiliesLoader } from './sidebar/global-styles/font-pairing-variations/font-families-loader';
 import { useContext, useEffect } from '@wordpress/element';
-import { Font } from './types/font';
+import { FontFamily } from './types/font';
 import { FontFamiliesLoaderDotCom } from './sidebar/global-styles/font-pairing-variations/font-families-loader-dot-com';
 import { CustomizeStoreContext } from '.';
 import { isAIFlow, isNoAIFlow } from '../guards';
@@ -39,28 +39,34 @@ export const PreloadFonts = () => {
 		useDispatch( coreStore );
 	const [ enabledFontFamilies, setFontFamilies ]: [
 		{
-			custom: Array< Font >;
-			theme: Array< Font >;
+			custom: Array< FontFamily >;
+			theme: Array< FontFamily >;
 		},
-		( font: { custom: Array< Font >; theme: Array< Font > } ) => void
+		( font: {
+			custom: Array< FontFamily >;
+			theme: Array< FontFamily >;
+		} ) => void
 	] = useGlobalSetting( 'typography.fontFamilies' );
 
 	const { context } = useContext( CustomizeStoreContext );
 
-	const { globalStylesId, installedFonts } = useSelect( ( select ) => {
+	const { globalStylesId, installedFontFamilies } = useSelect( ( select ) => {
 		// @ts-ignore No types for this exist yet.
 		const { __experimentalGetCurrentGlobalStylesId, getEntityRecords } =
 			select( coreStore );
 		return {
 			globalStylesId: __experimentalGetCurrentGlobalStylesId(),
-			installedFonts: getEntityRecords( 'postType', 'wp_font_family' ),
+			installedFontFamilies: getEntityRecords(
+				'postType',
+				'wp_font_family'
+			),
 		};
 	} );
 
 	useEffect( () => {
 		if (
 			isFontEnabled ||
-			installedFonts === null ||
+			installedFontFamilies === null ||
 			enabledFontFamilies === null
 		) {
 			return;
@@ -74,10 +80,10 @@ export const PreloadFonts = () => {
 		];
 
 		// @ts-expect-error -- Response from
-		const fontsToEnable = installedFonts.reduce( ( acc, font ) => {
+		const fontsToEnable = installedFontFamilies.reduce( ( acc, font ) => {
 			if (
 				enabledFontSlugs.includes( font.slug ) ||
-				FONT_TO_INSTALL[ font.slug ] === undefined
+				FONT_FAMILY_TO_INSTALL[ font.slug ] === undefined
 			) {
 				return acc;
 			}
@@ -88,7 +94,7 @@ export const PreloadFonts = () => {
 					...JSON.parse( font.content.raw ),
 				},
 			];
-		}, [] as Array< Record< string, Font > > );
+		}, [] as Array< Record< string, FontFamily > > );
 
 		setFontFamilies( {
 			...enabledFontFamilies,
@@ -107,7 +113,7 @@ export const PreloadFonts = () => {
 	}, [
 		enabledFontFamilies,
 		globalStylesId,
-		installedFonts,
+		installedFontFamilies,
 		saveSpecifiedEntityEdits,
 		setFontFamilies,
 	] );

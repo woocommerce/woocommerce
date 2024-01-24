@@ -26,7 +26,7 @@ import {
 	FONT_PREVIEW_WIDTH,
 	FONT_PREVIEW_HEIGHT,
 } from './constants';
-import { Font } from '~/customize-store/assembler-hub/types/font';
+import { FontFamily } from '~/customize-store/assembler-hub/types/font';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { isAIFlow, isNoAIFlow } from '~/customize-store/guards';
 
@@ -41,7 +41,7 @@ const DEFAULT_LARGE_FONT_STYLES: React.CSSProperties = {
 export const FontPairingVariationPreview = () => {
 	const [ fontFamilies ] = useGlobalSetting(
 		'typography.fontFamilies.theme'
-	) as [ Font[] ];
+	) as [ FontFamily[] ];
 
 	const [ textFontFamily = 'serif' ] = useGlobalStyle(
 		'typography.fontFamily'

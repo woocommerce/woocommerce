@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { FontToInstall } from '~/customize-store/assembler-hub/types/font';
+import { FontFamiliesToInstall } from '~/customize-store/assembler-hub/types/font';
 import { Look } from '~/customize-store/design-with-ai/types';
 
 export const FONT_PREVIEW_LARGE_WIDTH = 136;
@@ -10,7 +10,7 @@ export const FONT_PREVIEW_WIDTH = 120;
 export const FONT_PREVIEW_HEIGHT = 74;
 export const SYSTEM_FONT_SLUG = 'system-font';
 
-export const FONT_TO_INSTALL = {
+export const FONT_FAMILY_TO_INSTALL = {
 	inter: {
 		fontFamily: 'Inter',
 		fontWeights: [ '400', '500', '600' ],
@@ -71,7 +71,7 @@ export const FONT_TO_INSTALL = {
 		fontWeights: [ '700' ],
 		fontStyles: [ 'normal' ],
 	},
-} as FontToInstall;
+} as FontFamiliesToInstall;
 
 // Generated from /wpcom/v2/sites/{site_id}/global-styles-variation/font-pairings
 // TODO: Consider creating an API endpoint for this data

@@ -1,4 +1,4 @@
-export type FontToInstall = {
+export type FontFamiliesToInstall = {
 	[ slug: string ]: {
 		fontFamily: string;
 		fontWeights: Array< string >;
@@ -6,7 +6,7 @@ export type FontToInstall = {
 	};
 };
 
-export type Font = {
+export type FontFamily = {
 	fontFace: Array< FontFace >;
 	fontFamily: string;
 	name: string;

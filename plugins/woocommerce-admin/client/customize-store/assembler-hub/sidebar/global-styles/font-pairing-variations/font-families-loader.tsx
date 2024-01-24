@@ -11,11 +11,10 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { FontFamiliesLoaderDotCom } from './font-families-loader-dot-com';
-import { Font } from '~/customize-store/assembler-hub/types/font';
+import { FontFamily } from '~/customize-store/assembler-hub/types/font';
 
 type Props = {
-	fontFamilies: Array< Font >;
+	fontFamilies: Array< FontFamily >;
 	onLoad?: () => void;
 	preload?: boolean;
 };
@@ -65,8 +64,8 @@ export const FontFamiliesLoader = ( { fontFamilies, onLoad }: Props ) => {
 
 	useEffect( () => {
 		if ( ! Array.isArray( fontFamilies ) ) return;
-		fontFamilies.forEach( async ( font ) => {
-			font.fontFace?.forEach( async ( fontFace ) => {
+		fontFamilies.forEach( async ( fontFamily ) => {
+			fontFamily.fontFace?.forEach( async ( fontFace ) => {
 				const srcFont = getDisplaySrcFromFontFace(
 					fontFace.src,
 					themeUrl

@@ -26,7 +26,7 @@ import { LogoBlockContext } from './logo-block-context';
 import { FontFamiliesLoader } from './sidebar/global-styles/font-pairing-variations/font-families-loader';
 import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
 import { PreloadFonts } from './preload-fonts';
-import { Font } from './types/font';
+import { FontFamily } from './types/font';
 import { FontFamiliesLoaderDotCom } from './sidebar/global-styles/font-pairing-variations/font-families-loader-dot-com';
 import { CustomizeStoreContext } from '.';
 import { isAIFlow } from '../guards';
@@ -77,7 +77,7 @@ function ScaledBlockPreview( {
 	const { setLogoBlockIds } = useContext( LogoBlockContext );
 	const [ fontFamilies ] = useGlobalSetting(
 		'typography.fontFamilies.theme'
-	) as [ Font[] ];
+	) as [ FontFamily[] ];
 	const externalFontFamilies = fontFamilies.filter(
 		( { slug } ) => slug !== SYSTEM_FONT_SLUG
 	);

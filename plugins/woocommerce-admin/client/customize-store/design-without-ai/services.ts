@@ -13,8 +13,8 @@ import { updateTemplate } from '../data/actions';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
 import { installAndActivateTheme as setTheme } from '../data/service';
 import { THEME_SLUG } from '../data/constants';
-import { FONT_TO_INSTALL } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
-import { Font } from '../assembler-hub/types/font';
+import { FONT_FAMILY_TO_INSTALL } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
+import { FontFamily } from '../assembler-hub/types/font';
 
 const assembleSite = async () => {
 	await updateTemplate( {
@@ -48,7 +48,7 @@ const installAndActivateTheme = async () => {
 	}
 };
 
-const installFont = ( data: Font ) => {
+const addFontFamily = ( data: FontFamily ) => {
 	const config = {
 		path: '/wp/v2/font-families',
 		method: 'POST',
@@ -61,17 +61,17 @@ const installFont = ( data: Font ) => {
 
 type FontCollectionResponse = Array< {
 	data: {
-		fontFamilies: Array< Font >;
+		fontFamilies: Array< FontFamily >;
 	};
 } >;
 
-const getFontToInstall = (
+const getFontFamiliesToInstall = (
 	fontCollection: FontCollectionResponse,
-	installedFonts: Array< Font >
+	installedFonts: Array< FontFamily >
 ) => {
 	const slugInstalledFonts = installedFonts.map( ( { slug } ) => slug );
 
-	return Object.entries( FONT_TO_INSTALL ).reduce(
+	return Object.entries( FONT_FAMILY_TO_INSTALL ).reduce(
 		( acc, [ slug, fontData ] ) => {
 			if ( slugInstalledFonts.includes( slug ) ) {
 				return acc;
@@ -99,11 +99,11 @@ const getFontToInstall = (
 				},
 			];
 		},
-		[] as Array< Font >
+		[] as Array< FontFamily >
 	);
 };
 
-const installFonts = async () => {
+const installFontFamilies = async () => {
 	const config = {
 		path: '/wp/v2/font-collections',
 		method: 'GET',
@@ -116,18 +116,18 @@ const installFonts = async () => {
 			{
 				per_page: -1,
 			}
-		) ) as Array< Font >;
+		) ) as Array< FontFamily >;
 
 		const fontCollection = await apiFetch< FontCollectionResponse >(
 			config
 		);
 
-		const fontToInstall = getFontToInstall(
+		const fontFamiliesToInstall = getFontFamiliesToInstall(
 			fontCollection,
 			installedFonts
 		);
 
-		await Promise.all( fontToInstall.map( installFont ) );
+		await Promise.all( fontFamiliesToInstall.map( addFontFamily ) );
 	} catch ( error ) {
 		throw error;
 	}
@@ -155,5 +155,5 @@ export const services = {
 	browserPopstateHandler,
 	installAndActivateTheme,
 	createProducts,
-	installFonts,
+	installFontFamilies,
 };
