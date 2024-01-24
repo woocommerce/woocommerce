@@ -26,7 +26,7 @@ const mockVariation = {
 	downloads: [],
 	name: '',
 	parent_id: 1,
-} as ProductVariation;
+} as unknown as ProductVariation;
 
 const anotherMockVariation = {
 	id: 11,
@@ -35,7 +35,7 @@ const anotherMockVariation = {
 	downloads: [],
 	name: '',
 	parent_id: 1,
-} as ProductVariation;
+} as unknown as ProductVariation;
 
 describe( 'SingleUpdateMenu', () => {
 	let onClickMock: jest.Mock,
@@ -60,7 +60,7 @@ describe( 'SingleUpdateMenu', () => {
 					My top level item
 				</VariationQuickUpdateMenuItem>
 				<SingleUpdateMenu
-					selection={ mockVariation }
+					selection={ [ mockVariation ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -90,7 +90,7 @@ describe( 'SingleUpdateMenu', () => {
 					My secondary item
 				</VariationQuickUpdateMenuItem>
 				<SingleUpdateMenu
-					selection={ mockVariation }
+					selection={ [ mockVariation ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -120,7 +120,7 @@ describe( 'SingleUpdateMenu', () => {
 					My tertiary item
 				</VariationQuickUpdateMenuItem>
 				<SingleUpdateMenu
-					selection={ mockVariation }
+					selection={ [ mockVariation ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -150,7 +150,7 @@ describe( 'SingleUpdateMenu', () => {
 					My shipping item
 				</VariationQuickUpdateMenuItem>
 				<SingleUpdateMenu
-					selection={ mockVariation }
+					selection={ [ mockVariation ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
