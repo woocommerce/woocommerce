@@ -1,5 +1,4 @@
 const { test, expect } = require( '@playwright/test' );
-const { features } = require( '../../utils' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 // a representation of the menu structure for WC
@@ -210,8 +209,7 @@ for ( const currentPage of wcPages ) {
 				).toContainText( currentPage.subpages[ i ].heading );
 
 				await expect(
-					page.locator( currentPage.subpages[ i ].element )
-					.first()
+					page.locator( currentPage.subpages[ i ].element ).first()
 				).toBeVisible();
 
 				await expect(
