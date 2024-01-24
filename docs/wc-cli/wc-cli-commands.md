@@ -22,8 +22,7 @@ For detailed help on any specific command, use:
 wp wc [command] --help
 ```
 
-### Commands:
-
+### Commands
 
 ### wc shop_coupon
 

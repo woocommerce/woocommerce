@@ -14,8 +14,7 @@ This guide aims to assist beginners in using WooCommerce CLI (WC-CLI) for managi
 - To check WC-CLI availability:
 
 ```bash
-
-  $ wp wc --info
+wp wc --info
 ```
 
 ### General Command Structure
@@ -23,13 +22,13 @@ This guide aims to assist beginners in using WooCommerce CLI (WC-CLI) for managi
 The general syntax for WC-CLI commands is:
 
 ```bash
-$ wp wc [command] [options]
+wp wc [command] [options]
 ```
 
 For detailed help on any specific command, use:
 
 ```bash
-$ wp wc [command] --help
+wp wc [command] --help
 ```
 
 ## Basic Tasks
@@ -39,7 +38,7 @@ $ wp wc [command] --help
 To list all products in your WooCommerce store:
 
 ```bash
-$ wp wc product list
+wp wc product list
 ```
 
 ### 2. Creating a New Product

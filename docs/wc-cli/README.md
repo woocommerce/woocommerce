@@ -32,5 +32,6 @@ For specific details on commands and their usage, refer to the Command Reference
 ## Additional Resources
 
 For those interested in exploring further, the following resources might be helpful:
+
 - [WC REST API Documentation](./docs/category/rest-api/)
 - [Testing files for our CLI tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/cli/features)
