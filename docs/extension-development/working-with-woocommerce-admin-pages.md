@@ -124,5 +124,5 @@ You can learn more about how page registration works by checking out the [`PageC
 
 You can see real-world examples of the two page registration methods in WooCommerce Core by taking a look at:
 
-* [How WooCommerce Admin registers existing core pages](https://github.com/woocommerce/woocommerce/plugins/woocommerce/includes/react-admin/connect-existing-pages.php) - registering PHP-powered pages
-* [How WooCommerce registers React-powered Analytics report pages](https://github.com/woocommerce/woocommerce/plugins/woocommerce/src/Internal/Admin/Analytics.php) - registering React-powered pages
+* [How WooCommerce Admin registers existing core pages](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/react-admin/connect-existing-pages.php) - registering PHP-powered pages
+* [How WooCommerce registers React-powered Analytics report pages](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Admin/Analytics.php) - registering React-powered pages
