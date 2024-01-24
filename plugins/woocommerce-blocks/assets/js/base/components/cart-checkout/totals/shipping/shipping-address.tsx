@@ -25,7 +25,7 @@ export interface ShippingAddressProps {
 	shippingAddress: ShippingAddressType;
 }
 
-export type activeShippingZones = {
+export type ActiveShippingZones = {
 	description: string;
 }[];
 
@@ -39,9 +39,9 @@ export const ShippingAddress = ( {
 	const prefersCollection = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).prefersCollection()
 	);
-	const activeShippingZones = getSetting(
+	const activeShippingZones: ActiveShippingZones = getSetting(
 		'activeShippingZones'
-	) as activeShippingZones;
+	);
 
 	const hasMultipleAndDefaultZone =
 		activeShippingZones.length > 1 &&
