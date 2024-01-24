@@ -36,7 +36,9 @@ export const useGetLocation = < T, >(
 	context: Context< T >,
 	clientId: string
 ) => {
-	const { templateSlug, postId } = context;
+	const templateSlug = context.templateSlug || '';
+	const postId = context.postId || null;
+
 	const isChildOfSingleProductBlock = useSelect(
 		( select ) =>
 			select( blockEditorStore ).getBlockParentsByBlockName(
@@ -44,26 +46,26 @@ export const useGetLocation = < T, >(
 				'woocommerce/single-product'
 			).length > 0
 	);
+	const getEntitySlug = createGetEntitySlug( templateSlug || '' );
 
 	const [ productId, setProductId ] = useState< number | null >( null );
 	const [ catId, setCatId ] = useState< number | null >( null );
 	const [ tagId, setTagId ] = useState< number | null >( null );
 
 	/**
-	 * Case 1: Specific product - Single Product block
+	 * Case 1.1: SPECIFIC PRODUCT
+	 * Single Product block
 	 */
 
 	if ( isNumber( postId ) && isChildOfSingleProductBlock ) {
 		return createLocationObject( 'product', { productId: postId } );
 	}
 
-	if ( ! templateSlug ) {
-		return createLocationObject( 'generic', {} );
-	}
+	/**
+	 * Case 1.2: SPECIFIC PRODUCT
+	 * Specific Single Product template
+	 */
 
-	const getEntitySlug = createGetEntitySlug( templateSlug );
-
-	// Case 1.2: Product context, specific ID - Specific Single Product Template
 	if (
 		templateSlug.includes( 'single-product' ) &&
 		templateSlug !== 'single-product'
@@ -89,12 +91,19 @@ export const useGetLocation = < T, >(
 		return createLocationObject( 'product', { productId } );
 	}
 
-	// Case 1.1: Product context - Single Product Template
+	/**
+	 * Case 1.3: GENERIC PRODUCT
+	 * Generic Single Product template
+	 */
+
 	if ( templateSlug === 'single-product' ) {
 		return createLocationObject( 'product', { postId: null } );
 	}
 
-	// Case 2.1: Taxonomy context - Specific Taxonomy Template
+	/**
+	 * Case 2.1: SPECIFIC TAXONOMY
+	 * Specific Category template
+	 */
 	if (
 		templateSlug.includes( 'taxonomy-product_cat' ) &&
 		templateSlug !== 'taxonomy-product_cat'
@@ -121,6 +130,11 @@ export const useGetLocation = < T, >(
 			cat: catId,
 		} );
 	}
+
+	/**
+	 * Case 2.2: SPECIFIC TAXONOMY
+	 * Specific Tag template
+	 */
 
 	if (
 		templateSlug.includes( 'taxonomy-product_tag' ) &&
@@ -149,7 +163,11 @@ export const useGetLocation = < T, >(
 		} );
 	}
 
-	// Case 2.2: Taxonomy context - Products by * Templates
+	/**
+	 * Case 2.3: GENERIC TAXONOMY
+	 * Generic Taxonomy template
+	 */
+
 	const genericTaxonomyTemplateSlugs = [
 		'taxonomy-product_cat',
 		'taxonomy-product_tag',
@@ -162,22 +180,33 @@ export const useGetLocation = < T, >(
 			cat: null,
 		} );
 	}
-	// Case 3: Cart context:
-	//           - Cart template
-	//           - Checkout template
-	//           - Mini Cart template part
+
+	/**
+	 * Case 3: GENERIC CART
+	 * Cart/Checkout templates or Mini Cart
+	 */
+
 	if ( templateSlug === 'page-cart' || templateSlug === 'page-checkout' ) {
 		return createLocationObject( 'cart', {
 			productIds: [],
 		} );
 	}
 
-	// Case 4: Order context - Order confirmation template
+	/**
+	 * Case 4: GENERIC ORDER
+	 * Order Confirmation template
+	 */
+
 	if ( templateSlug === 'order-confirmation' ) {
 		return createLocationObject( 'order', {
 			orderId: null,
 		} );
 	}
-	// Case 5: Generic context - Others
+
+	/**
+	 * Case 5: GENERIC
+	 * All other cases
+	 */
+
 	return createLocationObject( 'generic', {} );
 };
