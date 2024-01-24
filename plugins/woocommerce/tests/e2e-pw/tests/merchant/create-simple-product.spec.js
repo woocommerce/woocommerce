@@ -111,9 +111,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 
 		// Fill in SKU
 		await page.getByText( 'Inventory' ).click();
-		await page
-			.getByLabel( 'SKU', { exact: true } )
-			.fill( productSKU );
+		await page.getByLabel( 'SKU', { exact: true } ).fill( productSKU );
 
 		// Fill in purchase note
 		await page.getByText( 'Advanced' ).click();
@@ -138,8 +136,9 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.getByRole( 'button', { name: 'Save attributes' } ).click();
 
 		// Publish the product after a short wait
-		//await page.locator( '#publish' ).click();
-		await page.getByRole('button', { name: 'Publish', exact: true }).click();
+		await page
+			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 
 		// When running in parallel, clicking the publish button sometimes saves products as a draft
@@ -157,6 +156,28 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 				.locator( 'div.notice-success > p' )
 				.filter( { hasText: 'Product published.' } )
 		).toBeVisible();
+
+		// Reload the page and verify that the values remain saved in product editor page
+		await page.reload();
+		await expect( page.getByLabel( 'Product name' ) ).toHaveValue(
+			virtualProductName
+		);
+		await expect( page.getByLabel( 'Regular price' ) ).toHaveValue(
+			productPrice
+		);
+		await expect( page.getByText( 'Sale price ($)' ) ).toHaveValue(
+			salePrice
+		);
+		await page
+			.getByRole( 'button', { name: 'Text', exact: true } )
+			.first()
+			.click();
+		await expect( page.getByText( productDescription ) ).toBeVisible();
+		await page.getByText( 'Inventory' ).click();
+		//await expect( page.getByLabel( '_sku' ) ).toHaveValue( productSKU );
+		await expect( page.getByLabel( 'SKU', { exact: true } ) ).toHaveValue(
+			productSKU
+		);
 
 		// Save product ID
 		virtualProductId = page.url().match( /(?<=post=)\d+/ );
