@@ -22,13 +22,13 @@ import { useEntityId, useEntityProp } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { TRACKS_SOURCE } from '../../constants';
-import { VariationsActionsMenu } from './variations-actions-menu';
 import { Pagination } from './pagination';
 import { EmptyOrErrorTableState } from './table-empty-or-error-state';
 import { VariationsFilter } from './variations-filter';
 import { useVariations } from './use-variations';
 import { TableRowSkeleton } from './table-row-skeleton';
 import { VariationsTableRow } from './variations-table-row';
+import { MultipleUpdateMenu } from './variation-actions-menus';
 
 type VariationsTableProps = {
 	noticeText?: string;
@@ -375,7 +375,7 @@ export const VariationsTable = forwardRef<
 								) }
 							</div>
 							<div className="woocommerce-product-variations__actions">
-								<VariationsActionsMenu
+								<MultipleUpdateMenu
 									selection={ selected }
 									disabled={
 										! areSomeSelected && ! isSelectingAll

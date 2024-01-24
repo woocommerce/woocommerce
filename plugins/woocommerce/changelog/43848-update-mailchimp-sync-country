@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Send store address data to the obw subscribe endpoint
