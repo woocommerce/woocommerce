@@ -48,6 +48,7 @@ class Additional_Checkout_Fields_Test_Helper {
 	 * @throws Exception If there is an error during the registration of the checkout fields.
 	 */
 	public function register_custom_checkout_fields() {
+		// Address fields, checkbox, textbox, select
 		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'first-plugin-namespace/government-ID',
@@ -65,6 +66,36 @@ class Additional_Checkout_Fields_Test_Helper {
 				'type'     => 'text',
 				'required' => true,
 			),
+		);
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'       => 'first-plugin-namespace/truck-size-ok',
+				'label'    => 'Can a truck fit down your road?',
+				'location' => 'address',
+				'type'     => 'checkbox',
+			)
+		);
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'       => 'first-plugin-namespace/road-size',
+				'label'    => 'How wide is your road?',
+				'location' => 'address',
+				'type'     => 'select',
+				'options'  => array(
+					array(
+						'label' => 'Wide',
+						'value' => 'wide',
+					),
+					array(
+						'label' => 'Super wide',
+						'value' => 'super-wide',
+					),
+					array(
+						'label' => 'Narrow',
+						'value' => 'narrow',
+					),
+				),
+			)
 		);
 
 		add_filter(
@@ -85,12 +116,59 @@ class Additional_Checkout_Fields_Test_Helper {
 			4
 		);
 
+		// Contact fields, one checkbox, select, and text input.
 		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'second-plugin-namespace/marketing-opt-in',
 				'label'    => 'Do you want to subscribe to our newsletter?',
 				'location' => 'contact',
 				'type'     => 'checkbox',
+			)
+		);
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'       => 'second-plugin-namespace/gift-message-in-package',
+				'label'    => 'Enter a gift message to include in the package',
+				'location' => 'contact',
+				'type'     => 'text',
+			)
+		);
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'       => 'second-plugin-namespace/type-of-purchase',
+				'label'    => 'Is this a personal purchase or a business purchase?',
+				'location' => 'contact',
+				'type'     => 'select',
+				'options'  => [
+					[
+						'label' => 'Personal',
+						'value' => 'personal',
+					],
+					[
+						'label' => 'Business',
+						'value' => 'business',
+					],
+				],
+			)
+		);
+
+		// A field of each type in additional information section.
+
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'       => 'third-plugin-namespace/please-send-me-a-free-gift',
+				'label'    => 'Would you like a free gift with your order?',
+				'location' => 'additional',
+				'type'     => 'checkbox',
+			)
+		);
+
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'       => 'third-plugin-namespace/what-is-your-favourite-colour',
+				'label'    => 'What is your favourite colour?',
+				'location' => 'additional',
+				'type'     => 'text',
 			)
 		);
 
