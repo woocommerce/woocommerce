@@ -21,7 +21,6 @@ jobs:
                       **/*.md
                   files_ignore: |
                       docs/**/*.md
-                      plugins/woocommerce-docs/tests/src/Blocks/fixtures/*.md
 
             - name: Get docs changed files
               id: docs-changed-files

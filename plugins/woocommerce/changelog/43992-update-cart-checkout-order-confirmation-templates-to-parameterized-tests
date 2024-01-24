@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+Comment: Move Cart, Checkout and Order Confirmation template customization tests to the parameterized tests file
+

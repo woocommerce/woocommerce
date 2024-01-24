@@ -242,66 +242,17 @@ class CheckoutFields {
 	 * @return \WP_Error|void True if the field was registered, a WP_Error otherwise.
 	 */
 	public function register_checkout_field( $options ) {
-		if ( empty( $options['id'] ) ) {
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', 'A checkout field cannot be registered without an id.', '8.6.0' );
+
+		// Check the options and show warnings if they're not supplied. Return early if an error that would prevent registration is encountered.
+		$result = $this->validate_options( $options );
+		if ( false === $result ) {
 			return;
 		}
 
-		// Having fewer than 2 after exploding around a / means there is no namespace.
-		if ( count( explode( '/', $options['id'] ) ) < 2 ) {
-			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'A checkout field id must consist of namespace/name.' );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			return;
-		}
-
-		if ( empty( $options['label'] ) ) {
-			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field label is required.' );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			return;
-		}
-
-		if ( empty( $options['location'] ) ) {
-			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field location is required.' );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			return;
-		}
-
-		if ( ! in_array( $options['location'], array_keys( $this->fields_locations ), true ) ) {
-			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field location is invalid.' );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			return;
-		}
-
-		$type = 'text';
-		if ( ! empty( $options['type'] ) ) {
-			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
-				$message = sprintf(
-					'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
-					$options['id'],
-					$options['type'],
-					implode( ', ', $this->supported_field_types )
-				);
-				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-				return;
-			}
-			$type = $options['type'];
-		}
-
-		// At this point, the essentials fields and its location should be set.
-		$location = $options['location'];
+		// The above validate_options function ensures these options are valid. Type might not be supplied but then it defaults to text.
 		$id       = $options['id'];
-		// Check to see if field is already in the array.
-		if ( ! empty( $this->additional_fields[ $id ] ) || in_array( $id, $this->fields_locations[ $location ], true ) ) {
-			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'The field is already registered.' );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			return;
-		}
-
-		// Hidden fields are not supported right now. They will be registered with hidden => false.
-		if ( ! empty( $options['hidden'] ) && true === $options['hidden'] ) {
-			$message = sprintf( 'Registering a field with hidden set to true is not supported. The field "%s" will be registered as visible.', $id );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-		}
+		$location = $options['location'];
+		$type     = $options['type'] ?? 'text';
 
 		$field_data = array(
 			'label'         => $options['label'],
@@ -316,70 +267,179 @@ class CheckoutFields {
 		);
 
 		$field_data['attributes'] = $this->register_field_attributes( $id, $options['attributes'] ?? [] );
-		/**
-		 * Handle Checkbox fields.
-		 */
-		if ( 'checkbox' === $type ) {
-			// Checkbox fields are always optional. Log a warning if it's set explicitly as true.
-			$field_data['required'] = false;
-			if ( isset( $options['required'] ) && true === $options['required'] ) {
-				$message = sprintf( 'Registering checkbox fields as required is not supported. "%s" will be registered as optional.', $id );
-				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			}
-		}
 
-		/**
-		 * Handle Select fields.
-		 */
-		if ( 'select' === $type ) {
-			if ( empty( $options['options'] ) || ! is_array( $options['options'] ) ) {
-				$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'Fields of type "select" must have an array of "options".' );
-				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+		if ( 'checkbox' === $type ) {
+			$result = $this->process_checkbox_field( $options, $field_data );
+
+			// $result will be false if an error that will prevent the field being registered is encountered.
+			if ( false === $result ) {
 				return;
 			}
+			$field_data = $result;
+		}
 
-			// Select fields are always required. Log a warning if it's set explicitly as false.
-			$field_data['required'] = true;
-			if ( isset( $options['required'] ) && false === $options['required'] ) {
-				$message = sprintf( 'Registering select fields as optional is not supported. "%s" will be registered as required.', $id );
-				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+		if ( 'select' === $type ) {
+			$result = $this->process_select_field( $options, $field_data );
+
+			// $result will be false if an error that will prevent the field being registered is encountered.
+			if ( false === $result ) {
+				return;
 			}
-
-			$cleaned_options = array();
-			$added_values    = array();
-
-			// Check all entries in $options['options'] has a key and value member.
-			foreach ( $options['options'] as $option ) {
-				if ( ! isset( $option['value'] ) || ! isset( $option['label'] ) ) {
-					$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'Fields of type "select" must have an array of "options" and each option must contain a "value" and "label" member.' );
-					_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-					return;
-				}
-
-				$sanitized_value = sanitize_text_field( $option['value'] );
-				$sanitized_label = sanitize_text_field( $option['label'] );
-
-				if ( in_array( $sanitized_value, $added_values, true ) ) {
-					$message = sprintf( 'Duplicate key found when registering field with id: "%s". The value in each option of "select" fields must be unique. Duplicate value "%s" found. The duplicate key will be removed.', $id, $sanitized_value );
-					_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-					continue;
-				}
-
-				$added_values[] = $sanitized_value;
-
-				$cleaned_options[] = array(
-					'value' => $sanitized_value,
-					'label' => $sanitized_label,
-				);
-			}
-
-			$field_data['options'] = $cleaned_options;
+			$field_data = $result;
 		}
 
 		// Insert new field into the correct location array.
-		$this->additional_fields[ $id ] = $field_data;
-
+		$this->additional_fields[ $id ]        = $field_data;
 		$this->fields_locations[ $location ][] = $id;
+	}
+
+	/**
+	 * Validates the "base" options (id, label, location) and shows warnings if they're not supplied.
+	 *
+	 * @param array $options The options supplied during field registration.
+	 * @return bool false if an error was encountered, true otherwise.
+	 */
+	private function validate_options( $options ) {
+		if ( empty( $options['id'] ) ) {
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', 'A checkout field cannot be registered without an id.', '8.6.0' );
+			return false;
+		}
+
+		// Having fewer than 2 after exploding around a / means there is no namespace.
+		if ( count( explode( '/', $options['id'] ) ) < 2 ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'A checkout field id must consist of namespace/name.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		if ( empty( $options['label'] ) ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field label is required.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		if ( empty( $options['location'] ) ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field location is required.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		if ( ! in_array( $options['location'], array_keys( $this->fields_locations ), true ) ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field location is invalid.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		// At this point, the essentials fields and its location should be set and valid.
+		$location = $options['location'];
+		$id       = $options['id'];
+
+		// Check to see if field is already in the array.
+		if ( ! empty( $this->additional_fields[ $id ] ) || in_array( $id, $this->fields_locations[ $location ], true ) ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'The field is already registered.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		// Hidden fields are not supported right now. They will be registered with hidden => false.
+		if ( ! empty( $options['hidden'] ) && true === $options['hidden'] ) {
+			$message = sprintf( 'Registering a field with hidden set to true is not supported. The field "%s" will be registered as visible.', $id );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			// Don't return here unlike the other fields because this is not an issue that will prevent registration.
+		}
+
+		if ( ! empty( $options['type'] ) ) {
+			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
+				$message = sprintf(
+					'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
+					$id,
+					$options['type'],
+					implode( ', ', $this->supported_field_types )
+				);
+				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Processes the options for a select field and returns the new field_options array.
+	 *
+	 * @param array $options     The options supplied during field registration.
+	 * @param array $field_data  The field data array to be updated.
+	 *
+	 * @return array|false The updated $field_data array or false if an error was encountered.
+	 */
+	private function process_select_field( $options, $field_data ) {
+		$id = $options['id'];
+
+		if ( empty( $options['options'] ) || ! is_array( $options['options'] ) ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'Fields of type "select" must have an array of "options".' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		// Select fields are always required. Log a warning if it's set explicitly as false.
+		$field_data['required'] = true;
+		if ( isset( $options['required'] ) && false === $options['required'] ) {
+			$message = sprintf( 'Registering select fields as optional is not supported. "%s" will be registered as required.', $id );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+		}
+
+		$cleaned_options = array();
+		$added_values    = array();
+
+		// Check all entries in $options['options'] has a key and value member.
+		foreach ( $options['options'] as $option ) {
+			if ( ! isset( $option['value'] ) || ! isset( $option['label'] ) ) {
+				$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'Fields of type "select" must have an array of "options" and each option must contain a "value" and "label" member.' );
+				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+				return false;
+			}
+
+			$sanitized_value = sanitize_text_field( $option['value'] );
+			$sanitized_label = sanitize_text_field( $option['label'] );
+
+			if ( in_array( $sanitized_value, $added_values, true ) ) {
+				$message = sprintf( 'Duplicate key found when registering field with id: "%s". The value in each option of "select" fields must be unique. Duplicate value "%s" found. The duplicate key will be removed.', $id, $sanitized_value );
+				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+				continue;
+			}
+
+			$added_values[] = $sanitized_value;
+
+			$cleaned_options[] = array(
+				'value' => $sanitized_value,
+				'label' => $sanitized_label,
+			);
+		}
+
+		$field_data['options'] = $cleaned_options;
+		return $field_data;
+	}
+
+	/**
+	 * Processes the options for a checkbox field and returns the new field_options array.
+	 *
+	 * @param array $options     The options supplied during field registration.
+	 * @param array $field_data  The field data array to be updated.
+	 *
+	 * @return array|false The updated $field_data array or false if an error was encountered.
+	 */
+	private function process_checkbox_field( $options, $field_data ) {
+		$id = $options['id'];
+
+		// Checkbox fields are always optional. Log a warning if it's set explicitly as true.
+		$field_data['required'] = false;
+
+		if ( isset( $options['required'] ) && true === $options['required'] ) {
+			$message = sprintf( 'Registering checkbox fields as required is not supported. "%s" will be registered as optional.', $id );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+		}
+
+		return $field_data;
 	}
 
 	/**
@@ -476,27 +536,28 @@ class CheckoutFields {
 	/**
 	 * Validate an additional field against any custom validation rules. The result should be a WP_Error or true.
 	 *
-	 * @param string $key          The key of the field.
-	 * @param mixed  $field_value  The value of the field.
-	 * @param array  $field_schema The schema of the field.
+	 * @param string           $key          The key of the field.
+	 * @param mixed            $field_value  The value of the field.
+	 * @param \WP_REST_Request $request      The current API Request.
+	 * @param string|null      $address_type The type of address (billing, shipping, or null if the field is a contact/additional field).
 	 *
 	 * @since 8.6.0
 	 */
-	public function validate_field( $key, $field_value, $field_schema ) {
+	public function validate_field( $key, $field_value, $request, $address_type = null ) {
 
 		$error = new \WP_Error();
 		try {
 			/**
 			 * Filter the result of validating an additional field.
 			 *
-			 * @param \WP_Error $error A WP_Error that extensions may add errors to.
-			 * @param mixed $field_value The value of the field.
-			 * @param array $field_schema The schema of the field.
-			 * @param string $key The key of the field.
+			 * @param \WP_Error        $error        A WP_Error that extensions may add errors to.
+			 * @param mixed            $field_value  The value of the field.
+			 * @param \WP_REST_Request $request      The current API Request.
+			 * @param string|null      $address_type The type of address (billing, shipping, or null if the field is a contact/additional field).
 			 *
 			 * @since 8.6.0
 			 */
-			$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, $error, $field_value, $field_schema, $key );
+			$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, $error, $field_value, $request, $address_type );
 
 			if ( $error !== $filtered_result ) {
 
@@ -966,7 +1027,7 @@ class CheckoutFields {
 		foreach ( $fields as $field_key => $field ) {
 			$value = $this->get_field_from_order( $field_key, $order, $group );
 
-			if ( '' === $value ) {
+			if ( '' === $value || null === $value ) {
 				continue;
 			}
 

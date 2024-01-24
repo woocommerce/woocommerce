@@ -437,11 +437,21 @@
       "category_title": "Getting Started",
       "posts": [
         {
-          "post_title": "WooCommerce Endpoints",
+          "post_title": "Understanding WooCommerce Endpoints",
+          "menu_title": "WooCommerce Endpoints",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/woocommerce-endpoints.md",
-          "hash": "4cff74381eeda1cd75bab699faa271c57852a1931c98b8acaa9417747f0de040",
+          "hash": "1c4bb0a46074017669b2c51e126345c2688d14a4b922b641e9f2c64c4538ea31",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/woocommerce-endpoints.md",
           "id": "31a11f74bcd9f21f97cd4c6c719240b3d84e40f4"
+        },
+        {
+          "post_title": "Troubleshooting WooCommerce Endpoints",
+          "menu_title": "Troubleshooting Endpoints",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/troubleshooting-endpoints.md",
+          "hash": "afbc874ab03b5ca1d2728cddd688035321effcbfdf5fa7a541e1a423e049ab20",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/troubleshooting-endpoints.md",
+          "id": "dff57bd736ae83850bfc7e4ac994bd22141d96ee"
         },
         {
           "post_title": "Setting up your development environment",
@@ -477,6 +487,15 @@
           "hash": "cb7be473c9f814b6c60e72578b7c2d4ef052ef859f5a3f48d37cdabd0d3fd114",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/debugging.md",
           "id": "75c020ee52329c09f4dc04e33dc8aeb11c088534"
+        },
+        {
+          "post_title": "Customizing WooCommerce Endpoint URLs",
+          "menu_title": "Customizing Endpoint URLs",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/customizing-endpoint-urls.md",
+          "hash": "74c1d648c57acb4ebd9d82c9ca036edf08b8af52608f3dae2c81def1c50cd4f4",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/customizing-endpoint-urls.md",
+          "id": "c19e1b1da6543f8a95ee04ba120f4f171f8e6e40"
         }
       ],
       "categories": []
@@ -1076,5 +1095,5 @@
       "categories": []
     }
   ],
-  "hash": "8c347d13d0ec09364984cdf71fc43b3827945e0f78490f45de33c9a5fc989489"
+  "hash": "9abb5ed7e5cc846dfacb5afd5064195c97687d82186bc9ff129d9f73150f095e"
 }

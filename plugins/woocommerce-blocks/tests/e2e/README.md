@@ -101,19 +101,19 @@ pnpm run test:e2e
 Interactive UI mode:
 
 ```sh
-pnpm run test:e2e -- --ui
+pnpm run test:e2e --ui
 ```
 
 Headed mode:
 
 ```sh
-pnpm run test:e2e -- --headed
+pnpm run test:e2e --headed
 ```
 
 Debug mode:
 
 ```sh
-pnpm run test:e2e -- --debug
+pnpm run test:e2e --debug
 ```
 
 Running a single test:
