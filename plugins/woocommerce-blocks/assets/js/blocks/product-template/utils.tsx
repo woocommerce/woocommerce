@@ -1,16 +1,20 @@
 /**
  * External dependencies
  */
-import { resolveSelect } from '@wordpress/data';
+import { resolveSelect, useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { useState, useEffect } from '@wordpress/element';
 // import { store as editorStore } from '@wordpress/editor';
 import { isNumber } from '@woocommerce/types';
 
 type LocationType = 'product' | 'archive' | 'cart' | 'order' | 'generic';
-const parseProductResponse = (
-	resp?: Record< 'id', number >[]
-): number | null => ( resp && resp.length ? resp[ 0 ]?.id : null );
+
+const parseResponse = ( resp?: Record< 'id', number >[] ): number | null =>
+	resp && resp.length && resp[ 0 ]?.id ? resp[ 0 ].id : null;
+const createGetEntitySlug =
+	( templateSlug: string ) =>
+	( taxonomySlug: string ): string =>
+		templateSlug.replace( `${ taxonomySlug }-`, '' );
 
 const createLocationObject = (
 	type: LocationType,
@@ -20,12 +24,16 @@ const createLocationObject = (
 	sourceData,
 } );
 export const useGetLocation = ( context ) => {
-	const [ productId, setProductId ] = useState< number | null >( null );
 	const { templateSlug, postId } = context;
 
-	// const currentTemplateId = useSelect( ( select ) => {
-	// 	return select( editorStore ).getCurrentPostId();
-	// } );
+	const [ productId, setProductId ] = useState< number | null >( null );
+	const [ categoryId, setCategoryId ] = useState< number | null >( null );
+	const [ attributeId, setAttributeId ] = useState< number | null >( null );
+	const [ tagId, setTagId ] = useState< number | null >( null );
+
+	const getEntitySlug = createGetEntitySlug( templateSlug );
+
+	console.log( 'templateSlug', templateSlug );
 
 	// Case 1.2: Product context, specific ID - Single Product Block
 	if ( isNumber( postId ) ) {
@@ -38,7 +46,7 @@ export const useGetLocation = ( context ) => {
 		templateSlug !== 'single-product'
 	) {
 		useEffect( () => {
-			const [ , slug ] = templateSlug.split( 'single-product-' );
+			const slug = getEntitySlug( 'single-product' );
 			const getProductId = async () => {
 				const response = ( await resolveSelect(
 					coreStore
@@ -46,7 +54,7 @@ export const useGetLocation = ( context ) => {
 					_fields: [ 'id' ],
 					slug,
 				} ) ) as Record< 'id', number >[];
-				const productId = parseProductResponse( response );
+				const productId = parseResponse( response );
 				setProductId( productId );
 			};
 
@@ -68,14 +76,94 @@ export const useGetLocation = ( context ) => {
 		templateSlug.includes( 'taxonomy-product_cat' ) &&
 		templateSlug !== 'taxonomy-product_cat'
 	) {
+		useEffect( () => {
+			const slug = getEntitySlug( 'taxonomy-product_cat' );
+			const getCategoryId = async () => {
+				const response = ( await resolveSelect(
+					coreStore
+				).getEntityRecords( 'taxonomy', 'product_cat', {
+					_fields: [ 'id' ],
+					slug,
+				} ) ) as Record< 'id', number >[];
+				const categoryId = parseResponse( response );
+				setCategoryId( categoryId );
+			};
+
+			if ( slug ) {
+				getCategoryId();
+			}
+		}, [ templateSlug ] );
 		return createLocationObject( 'archive', {
-			tag: 'TODO',
-			cat: 'TODO',
-			attr: 'TODO',
+			tag: null,
+			cat: categoryId,
+			attr: null,
 		} );
 	}
-	// Case 2.2: Taxonomy context, specific ID - Products by * Templates
-	if ( templateSlug === 'taxonomy-product_cat' ) {
+
+	if (
+		templateSlug.includes( 'taxonomy-product_tag' ) &&
+		templateSlug !== 'taxonomy-product_tag'
+	) {
+		useEffect( () => {
+			const slug = getEntitySlug( 'taxonomy-product_tag' );
+			const getTagId = async () => {
+				const response = ( await resolveSelect(
+					coreStore
+				).getEntityRecords( 'taxonomy', 'product_tag', {
+					_fields: [ 'id' ],
+					slug,
+				} ) ) as Record< 'id', number >[];
+				const tagId = parseResponse( response );
+				setTagId( tagId );
+			};
+
+			if ( slug ) {
+				getTagId();
+			}
+		}, [ templateSlug ] );
+		return createLocationObject( 'archive', {
+			tag: tagId,
+			cat: null,
+			attr: null,
+		} );
+	}
+
+	if (
+		templateSlug.includes( 'taxonomy-product_attribute' ) &&
+		templateSlug !== 'taxonomy-product_attribute'
+	) {
+		// useEffect( () => {
+		// 	const slug = getEntitySlug( 'taxonomy-product_attribute' );
+		// 	const getAttributeId = async () => {
+		// 		const response = ( await resolveSelect(
+		// 			coreStore
+		// 		).getEntityRecords( 'taxonomy', 'attribute', {
+		// 			_fields: [ 'id' ],
+		// 			slug,
+		// 		} ) ) as Record< 'id', number >[];
+		// 		const attributeId = parseResponse( response );
+		// 		setAttributeId( attributeId );
+		// 	};
+		// 	if ( slug ) {
+		// 		getAttributeId();
+		// 	}
+		// }, [ templateSlug ] );
+		// return createLocationObject( 'archive', {
+		// 	tag: null,
+		// 	cat: null,
+		// 	attr: attributeId,
+		// } );
+	}
+
+	// Case 2.2: Taxonomy context - Products by * Templates
+	const genericTaxonomyTemplateSlugs = [
+		'taxonomy-product_cat',
+		'taxonomy-product_tag',
+		'taxonomy-product_attribute',
+		'tag',
+		'category',
+	];
+	if ( genericTaxonomyTemplateSlugs.includes( templateSlug ) ) {
 		return createLocationObject( 'archive', {
 			tag: null,
 			cat: null,
