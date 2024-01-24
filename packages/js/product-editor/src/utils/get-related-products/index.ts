@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { select, resolveSelect } from '@wordpress/data';
+import { PRODUCTS_STORE_NAME } from '@woocommerce/data';
 import type { Product } from '@woocommerce/data';
 
 type getRelatedProductsOptions = {
@@ -66,4 +67,36 @@ export default async function getRelatedProducts(
 			include: relatedProductIds,
 		}
 	) ) as Product[];
+}
+
+type getSuggestedProductsForOptions = {
+	postId: number;
+	postType?: 'product' | 'post' | 'page';
+};
+
+/**
+ * Get suggested products for a given post ID.
+ *
+ * @param { getSuggestedProductsForOptions } options - Options.
+ * @return { Promise<Product[] | undefined> } Suggested products.
+ */
+export async function getSuggestedProductsFor( {
+	postId,
+	postType = 'product',
+}: getSuggestedProductsForOptions ): Promise< Product[] | undefined > {
+	// @ts-expect-error There are no types for this.
+	const { getEditedEntityRecord } = select( 'core' );
+
+	const data: Product = getEditedEntityRecord( 'postType', postType, postId );
+
+	const options = {
+		categories: data?.categories
+			? data.categories.map( ( cat ) => cat.id )
+			: [],
+		tags: data?.tags ? data.tags.map( ( tag ) => tag.id ) : [],
+	};
+
+	return await resolveSelect( PRODUCTS_STORE_NAME ).getSuggestedProducts(
+		options
+	);
 }
