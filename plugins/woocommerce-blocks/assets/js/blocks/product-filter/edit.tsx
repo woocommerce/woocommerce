@@ -8,7 +8,6 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import Downgrade from './components/downgrade';
 import Warning from './components/warning';
 import './editor.scss';
 import { getAllowedBlocks } from './utils';
@@ -40,10 +39,6 @@ const Edit = ( {
 	return (
 		<nav { ...blockProps }>
 			{ ! isNested && <Warning /> }
-			<Downgrade
-				filterType={ attributes.filterType }
-				clientId={ clientId }
-			/>
 			<InnerBlocks
 				allowedBlocks={ getAllowedBlocks( [
 					...Object.values( BLOCK_NAME_MAP ),
