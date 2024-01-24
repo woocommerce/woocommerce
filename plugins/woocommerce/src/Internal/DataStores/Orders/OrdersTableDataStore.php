@@ -2898,7 +2898,7 @@ CREATE TABLE $meta_table (
 
 		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
 			self::$backfilling_order_ids[] = $object->get_id();
-			if ( 'object' === gettype( $meta->value ) && '__PHP_Incomplete_Class' === get_class( $meta->value ) ) {
+			if ( is_object( $meta->value ) && '__PHP_Incomplete_Class' === get_class( $meta->value ) ) {
 				$meta_value = maybe_serialize( $meta->value );
 				$wpdb->delete(
 					_get_meta_table( 'post' ),
