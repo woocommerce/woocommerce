@@ -410,7 +410,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			} >(
 				{ product_id: productId },
 				{
-					delete: subset,
+					delete: subset.map( ( { id } ) => id ),
 				}
 			);
 
