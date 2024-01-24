@@ -6,7 +6,6 @@ import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { moreVertical } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
-import { ProductVariation } from '@woocommerce/data';
 
 /**
  * Internal dependencies

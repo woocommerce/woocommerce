@@ -5,7 +5,6 @@ import { MenuGroup, MenuItem } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import { ProductVariation } from '@woocommerce/data';
 import classNames from 'classnames';
 
 /**

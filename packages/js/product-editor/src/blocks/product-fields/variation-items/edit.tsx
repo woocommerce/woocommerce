@@ -6,7 +6,6 @@ import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	PartialProductVariation,
 	Product,
-	ProductVariation,
 	useUserPreferences,
 } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
