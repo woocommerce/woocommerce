@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+CYS: Handle errors when the product creation fails.
