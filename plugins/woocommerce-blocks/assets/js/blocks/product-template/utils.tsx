@@ -139,7 +139,7 @@ export const useGetLocation = < T, >(
 	 */
 
 	if ( isInSingleProductTemplate ) {
-		return createLocationObject( 'product', { postId: null } );
+		return createLocationObject( 'product', { productId: null } );
 	}
 
 	/**
