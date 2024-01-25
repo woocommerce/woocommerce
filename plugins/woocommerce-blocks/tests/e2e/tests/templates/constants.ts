@@ -46,7 +46,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateType: 'wp_template',
 		fallbackTemplate: {
 			templateName: 'Product Catalog',
-			templatePath: 'woocommerce/woocommerce//archive-product',
+			templatePath: 'archive-product',
 		},
 	},
 	{
@@ -57,7 +57,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateType: 'wp_template',
 		fallbackTemplate: {
 			templateName: 'Product Catalog',
-			templatePath: 'woocommerce/woocommerce//archive-product',
+			templatePath: 'archive-product',
 		},
 	},
 	{
@@ -68,7 +68,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateType: 'wp_template',
 		fallbackTemplate: {
 			templateName: 'Product Catalog',
-			templatePath: 'woocommerce/woocommerce//archive-product',
+			templatePath: 'archive-product',
 		},
 	},
 	{

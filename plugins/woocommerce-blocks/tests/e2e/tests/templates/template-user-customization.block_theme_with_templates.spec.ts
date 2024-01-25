@@ -2,11 +2,12 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
-import { CUSTOMIZABLE_WC_TEMPLATES, WC_TEMPLATES_SLUG } from './constants';
+import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
 const userText = 'Hello World in the template';
 const fallbackTemplateUserText = 'Hello World in the default template';
@@ -21,7 +22,7 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 		} ) => {
 			// Edit the theme template.
 			await admin.visitSiteEditor( {
-				postId: `${ WC_TEMPLATES_SLUG }//${ testData.templatePath }`,
+				postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
 				postType: testData.templateType,
 			} );
 			await editorUtils.enterEditMode();
@@ -65,7 +66,7 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			} ) => {
 				// Edit default template and verify changes are not visible, as the theme template has priority.
 				await admin.visitSiteEditor( {
-					postId: `${ WC_TEMPLATES_SLUG }//${
+					postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${
 						testData.fallbackTemplate?.templatePath || ''
 					}`,
 					postType: testData.templateType,
