@@ -1,13 +1,6 @@
 {
   "posts": [
     {
-      "post_title": "Webhooks",
-      "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/webhooks.md",
-      "hash": "f69704e55bdde34927502000a9a308d302d3f7f11d10f1f64ec3fd260f6ad79c",
-      "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/webhooks.md",
-      "id": "2c687171ced32ac451780d6ac95b29d19c70b0b5"
-    },
-    {
       "post_title": "WooCommerce developer documentation",
       "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/README.md",
       "hash": "5090b3208cadaa22f3c85d563ccd8f86194ff9e61c614df6021be805050713f2",
@@ -320,6 +313,14 @@
           "hash": "fc8eb47b9e31c412838a6426965f26dad89454234692a8f26b045da3a8ed872f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/woocommerce-plugin-api-callback.md",
           "id": "9c1985429ab05bf7abc3e0a8676fb3d92a2c62eb"
+        },
+        {
+          "post_title": "Webhooks",
+          "menu_title": "Webhooks",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/webhooks.md",
+          "hash": "eae79157749e2ada34570654d0392974da81f29321663fc86c0db973fee0762e",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/webhooks.md",
+          "id": "5c1dee19b2a23240ee20f1fde448e1a8f9f58ffe"
         },
         {
           "post_title": "Managing custom attributes in WooCommerce menus and taxonomy archives",
@@ -1159,5 +1160,5 @@
       "categories": []
     }
   ],
-  "hash": "8e2a83578cfb32e56bbdbff3598bc22107c1d8eceb6fb9ef5a5dfc040c438f68"
+  "hash": "e8aa6d77e5aa7af8cc920930ef6f0e9349c12394afc440c6ef91a7bd75afd133"
 }

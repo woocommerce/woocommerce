@@ -1,4 +1,7 @@
-# Webhooks
+---
+post_title: Webhooks
+menu_title: Webhooks
+---
 
 ## What are Webhooks?
 
