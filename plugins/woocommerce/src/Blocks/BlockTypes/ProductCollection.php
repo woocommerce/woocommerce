@@ -113,7 +113,16 @@ class ProductCollection extends AbstractBlock {
 					'data-wc-navigation-id',
 					'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 				);
-				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
+				$p->set_attribute( 'data-wc-interactive', '{ "namespace": "woocommerce/product-collection" }' );
+
+				/**
+				 * We don't prefetch the links if user haven't clicked on pagination links yet.
+				 * This way we avoid prefetching when the page loads.
+				 */
+				$p->set_attribute(
+					'data-wc-context',
+					'{ "isPrefetchNextOrPreviousLink": false }'
+				);
 				$block_content = $p->get_updated_html();
 			}
 		}
@@ -180,12 +189,13 @@ class ProductCollection extends AbstractBlock {
 				'class_name' => $class_name,
 			)
 		) ) {
-			$processor->set_attribute( 'data-wc-on--click', 'woocommerce/product-collection::actions.navigate' );
+			$processor->set_attribute( 'data-wc-interactive', '{ "namespace": "woocommerce/product-collection" }' );
+			$processor->set_attribute( 'data-wc-on--click', 'actions.navigate' );
 			$processor->set_attribute( 'data-wc-key', $key_prefix . '--' . esc_attr( wp_rand() ) );
 
 			if ( in_array( $class_name, array( 'wp-block-query-pagination-next', 'wp-block-query-pagination-previous' ), true ) ) {
-				$processor->set_attribute( 'data-wc-watch', 'woocommerce/product-collection::callbacks.prefetch' );
-				$processor->set_attribute( 'data-wc-on--mouseenter', 'woocommerce/product-collection::actions.prefetchOnHover' );
+				$processor->set_attribute( 'data-wc-watch', 'callbacks.prefetch' );
+				$processor->set_attribute( 'data-wc-on--mouseenter', 'actions.prefetchOnHover' );
 			}
 		}
 	}

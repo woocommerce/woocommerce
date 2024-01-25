@@ -10,7 +10,7 @@ import {
 } from '@woocommerce/interactivity';
 
 export type ProductCollectionStoreContext = {
-	isPrefetchNextAndPreviousLink: boolean;
+	isPrefetchNextOrPreviousLink: boolean;
 };
 
 const isValidLink = ( ref: HTMLAnchorElement ) =>
@@ -31,14 +31,14 @@ const isValidEvent = ( event: MouseEvent ) =>
 /**
  * Scrolls to the first product in Product Collection if it's not visible.
  *
- * @param ref - The reference to the element.
+ * @param {string} wcNavigationId Unique ID for each Product Collection block on page/post.
  */
-function scrollToFirstProductIfNotVisible( ref: HTMLAnchorElement ) {
-	// data-wc-navigation-id is unique for each Product Collection block on page/post
-	const id = ( ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement )
-		?.dataset?.wcNavigationId;
+function scrollToFirstProductIfNotVisible( wcNavigationId?: string ) {
+	if ( ! wcNavigationId ) {
+		return;
+	}
 
-	const productSelector = `[data-wc-navigation-id=${ id }] .wc-block-product-template .wc-block-product`;
+	const productSelector = `[data-wc-navigation-id=${ wcNavigationId }] .wc-block-product-template .wc-block-product`;
 	const product = document.querySelector( productSelector );
 	if ( product ) {
 		const rect = product.getBoundingClientRect();
@@ -66,14 +66,22 @@ const productCollectionStore = {
 		*navigate( event: MouseEvent ) {
 			const ctx = getContext< ProductCollectionStoreContext >();
 			const { ref } = getElement();
+			const wcNavigationId = (
+				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
+			 )?.dataset?.wcNavigationId;
 
 			if ( isValidLink( ref ) && isValidEvent( event ) ) {
 				event.preventDefault();
 				yield navigate( ref.href );
-				ctx.isPrefetchNextAndPreviousLink = !! ref.href;
-				scrollToFirstProductIfNotVisible( ref );
+
+				ctx.isPrefetchNextOrPreviousLink = !! ref.href;
+
+				scrollToFirstProductIfNotVisible( wcNavigationId );
 			}
 		},
+		/**
+		 * We prefetch the next or previous button page on hover.
+		 */
 		*prefetchOnHover() {
 			const { ref } = getElement();
 			if ( isValidLink( ref ) ) {
@@ -82,12 +90,15 @@ const productCollectionStore = {
 		},
 	},
 	callbacks: {
+		/**
+		 * - We don't prefetch the next or previous button link on initial page load.
+		 * - If the user has clicked a pagination link, then user is likely to keep paginating. Therefore,
+		 *   once the user has clicked a pagination link, we start prefetching the next or previous button page.
+		 */
 		*prefetch() {
-			const {
-				isPrefetchNextAndPreviousLink: isPrefetchNextOrPreviousLink,
-			} = getContext< ProductCollectionStoreContext >();
+			const context = getContext< ProductCollectionStoreContext >();
 			const { ref } = getElement();
-			if ( isPrefetchNextOrPreviousLink && isValidLink( ref ) ) {
+			if ( context?.isPrefetchNextOrPreviousLink && isValidLink( ref ) ) {
 				yield prefetch( ref.href );
 			}
 		},
