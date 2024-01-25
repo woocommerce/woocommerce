@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
-import { isExperimentalBuild } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
