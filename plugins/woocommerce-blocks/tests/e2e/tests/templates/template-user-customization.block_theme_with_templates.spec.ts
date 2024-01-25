@@ -10,7 +10,7 @@ import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
 const userText = 'Hello World in the template';
-const fallbackTemplateUserText = 'Hello World in the default template';
+const fallbackTemplateUserText = 'Hello World in the fallback template';
 
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	test.describe( `${ testData.templateName } template`, async () => {

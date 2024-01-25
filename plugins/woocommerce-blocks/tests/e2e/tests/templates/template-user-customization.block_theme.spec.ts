@@ -9,7 +9,7 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { CUSTOMIZABLE_WC_TEMPLATES, WC_TEMPLATES_SLUG } from './constants';
 
 const userText = 'Hello World in the template';
-const fallbackTemplateUserText = 'Hello World in the default template';
+const fallbackTemplateUserText = 'Hello World in the fallback template';
 
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	test.describe( `${ testData.templateName } template`, async () => {
