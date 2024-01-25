@@ -48,6 +48,8 @@ class Section extends ProductBlock implements SectionInterface {
 	 * Add a sub-section block type to this template.
 	 *
 	 * @deprecated 8.6.0
+	 *
+	 * @param array $block_config The block data.
 	 */
 	public function add_section( array $block_config ): SubsectionInterface {
 		wc_deprecated_function( 'add_section', '8.6.0', 'add_subsection' );
