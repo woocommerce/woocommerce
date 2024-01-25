@@ -207,19 +207,26 @@ class ReceiptRenderingEngine {
 			);
 		}
 
-		$total_taxes = 0;
-		foreach ( $order->get_taxes() as $tax ) {
-			$total_taxes += $tax->get_tax_total();
+		$shipping_total = (float) $order->get_shipping_total();
+		if ( $shipping_total ) {
+			$line_items_info[] = array(
+				'title'  => __( 'Shipping', 'woocommerce' ),
+				'amount' => wc_price( $order->get_shipping_total(), $get_price_args ),
+			);
 		}
 
-		$line_items_info[] = array(
-			'title'  => __( 'Shipping', 'woocommerce' ),
-			'amount' => wc_price( $order->get_shipping_total(), $get_price_args ),
-		);
-		$line_items_info[] = array(
-			'title'  => __( 'Taxes', 'woocommerce' ),
-			'amount' => wc_price( $total_taxes, $get_price_args ),
-		);
+		$total_taxes = 0;
+		foreach ( $order->get_taxes() as $tax ) {
+			$total_taxes += (float) $tax->get_tax_total();
+		}
+
+		if ( $total_taxes ) {
+			$line_items_info[] = array(
+				'title'  => __( 'Taxes', 'woocommerce' ),
+				'amount' => wc_price( $total_taxes, $get_price_args ),
+			);
+		}
+
 		$line_items_info[] = array(
 			'title'  => __( 'Amount Paid', 'woocommerce' ),
 			'amount' => wc_price( $order->get_total(), $get_price_args ),
