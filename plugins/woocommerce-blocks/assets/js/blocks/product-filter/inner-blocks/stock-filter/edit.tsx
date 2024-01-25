@@ -80,13 +80,9 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 					<Inspector { ...props } />
 					<Disabled>
 						<div
-							className={ classnames(
-								'wc-block-stock-filter',
-								`style-${ displayStyle }`,
-								{
-									'is-loading': false,
-								}
-							) }
+							className={ classnames( `style-${ displayStyle }`, {
+								'is-loading': false,
+							} ) }
 						>
 							{ displayStyle === 'dropdown' ? (
 								<>
