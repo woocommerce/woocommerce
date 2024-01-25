@@ -38,13 +38,15 @@ class SpecRunner {
 		// Evaluate the spec and get the new note status.
 		$previous_status = $note->get_status();
 		try {
-			$status          = EvaluateAndGetStatus::evaluate(
+			$status = EvaluateAndGetStatus::evaluate(
 				$spec,
 				$previous_status,
 				$stored_state,
 				new RuleEvaluator()
 			);
-		} catch (\Throwable $e) { return; }
+		} catch ( \Throwable $e ) {
+			return;
+		}
 
 		// If the status is changing, update the created date to now.
 		if ( $previous_status !== $status ) {

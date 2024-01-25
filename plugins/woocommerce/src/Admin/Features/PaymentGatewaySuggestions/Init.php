@@ -44,7 +44,10 @@ class Init {
 			try {
 				$suggestion    = EvaluateSuggestion::evaluate( $spec );
 				$suggestions[] = $suggestion;
-			} catch (\Throwable $e) {}
+				// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			} catch ( \Throwable $e ) {
+				// Ignore errors.
+			}
 		}
 
 		return array_values(
