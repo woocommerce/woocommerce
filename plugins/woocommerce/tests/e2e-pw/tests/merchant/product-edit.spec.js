@@ -23,7 +23,7 @@ baseTest.describe( 'Products > Edit Product', () => {
 				await api
 					.post( 'products', {
 						id: 0,
-						name: `Product ${ Date.now() }`,
+						name: `Product ${ i }_${ Date.now() }`,
 						type: 'simple',
 						regular_price: `${ 12.99 + i }`,
 						manage_stock: true,
