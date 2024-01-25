@@ -486,6 +486,14 @@ class UpdateProducts {
 
 		if ( ! is_wp_error( $product_image_id ) ) {
 			$product->set_image_id( $product_image_id );
+		} else {
+			wc_get_logger()->warning(
+				sprintf(
+					// translators: %s is a generated error message.
+					__( 'The image upload failed: "%s", creating the product without image', 'woocommerce' ),
+					$product_image_id->get_error_message()
+				),
+			);
 		}
 		$product->set_name( $product_title );
 		$product->set_description( $product_description );
