@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, che
 Requires at least: 6.3
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 8.4.0
+Stable tag: 8.5.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -171,17 +171,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 8.5.1 2024-01-15 =
+= 8.5.2 2024-01-25 =
 
 **WooCommerce**
-
-* Fix - Use GMT date when fetching orders to auto-cancel. [#43641](https://github.com/woocommerce/woocommerce/pull/43641)
-* Fix - Fix Mini-Cart total price disappearing when hovering or focusing the Mini-Cart button [#43550](https://github.com/woocommerce/woocommerce/pull/43550)
-* Fix - Fix product prices not being updated on scheduled automatically. [#43497](https://github.com/woocommerce/woocommerce/pull/43497)
-* Fix - Fixed a bug that prevented notice templates from being overwritten. [#43506](https://github.com/woocommerce/woocommerce/pull/43506)
-* Fix - Limit cookie deduping to WooCommerce cookies only. [#43504](https://github.com/woocommerce/woocommerce/pull/43504)
-* Fix - Fix WooCommerce Settings and Analytics commands with tags breaking the command palette [#43269](https://github.com/woocommerce/woocommerce/pull/43269)
-* Fix - Fix fatal error. Do not access change_feature_enable() statically. [#43428](https://github.com/woocommerce/woocommerce/pull/43428)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
