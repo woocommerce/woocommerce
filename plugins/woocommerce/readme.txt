@@ -175,6 +175,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix PHP warnings and remove opinionated styles from the `Banner` button. [#43354](https://github.com/woocommerce/woocommerce/pull/43354)
 * Fix - Add defensive checks for strpos in ComparisonOperation. [#44033](https://github.com/woocommerce/woocommerce/pull/44033)
 * Fix - Add rudimentary try catch for all remote endpoint spec evaluators. [#44037](https://github.com/woocommerce/woocommerce/pull/44037)
 
