@@ -35,6 +35,24 @@ final class StoreApi {
 			},
 			11
 		);
+
+		add_action(
+			'woocommerce_blocks_pre_get_routes_from_namespace',
+			function( $routes, $namespace, $context ) {
+				if ( 'wc/store/v1' !==  $namespace ) {
+					return array();
+				}
+
+				$routes = array_merge(
+					$routes,
+					self::container()->get( RoutesController::class )->get_all_routes( 'v1' )
+				);
+
+				return $routes;
+			},
+			10,
+			3
+		);
 	}
 
 	/**

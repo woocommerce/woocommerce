@@ -105,6 +105,30 @@ class RoutesController {
 	}
 
 	/**
+	 * Get a route path without instantiating the corresponding RoutesController object.
+	 *
+	 * @throws \Exception If the schema does not exist.
+	 *
+	 * @param string $version API Version being requested.
+	 *
+	 * @return string[] List of route paths.
+	 */
+	public function get_all_routes( $version = 'v1' ) {
+		$routes = [];
+
+		foreach ( $this->routes[ $version ] as $key => $route_class ) {
+
+			if ( ! method_exists( $route_class, '_get_path' ) ) {
+				throw new \Exception( "{$route_class} route does not have a _get_path method" );
+			}
+
+			$routes[$key] = $route_class::_get_path();
+		}
+
+		return $routes;
+	}
+
+	/**
 	 * Register defined list of routes with WordPress.
 	 *
 	 * @param string $version API Version being registered..

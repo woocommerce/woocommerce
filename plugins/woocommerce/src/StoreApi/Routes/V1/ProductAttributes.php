@@ -25,6 +25,15 @@ class ProductAttributes extends AbstractRoute {
 	 * @return string
 	 */
 	public function get_path() {
+		return self::_get_path();
+	}
+
+	/**
+	 * Get the path of this rest route.
+	 *
+	 * @return string
+	 */
+	public static function _get_path() {
 		return '/products/attributes';
 	}
 

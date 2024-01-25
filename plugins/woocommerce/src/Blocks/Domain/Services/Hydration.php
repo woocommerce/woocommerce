@@ -2,6 +2,8 @@
 namespace Automattic\WooCommerce\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
+use Automattic\WooCommerce\StoreApi\RoutesController;
+use Automattic\WooCommerce\StoreApi\StoreApi;
 
 /**
  * Service class that handles hydration of API data for blocks.
