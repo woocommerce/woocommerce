@@ -383,11 +383,13 @@ class WC_Shortcode_Checkout {
 	 */
 	private static function guest_should_verify_email( WC_Order $order, string $context ): bool {
 		// If we cannot match the order with the current user, ask that they verify their email address.
-		$supplied_email = sanitize_email( wp_unslash( filter_input( INPUT_POST, 'email' ) ) ) === $order->get_billing_email()
-		&& wp_verify_nonce( filter_input( INPUT_POST, 'check_submission' ), 'wc_verify_email' )
-			? sanitize_email( wp_unslash( filter_input( INPUT_POST, 'email' ) ) )
-			: null;
-		
+		$nonce_is_valid = wp_verify_nonce( filter_input( INPUT_POST, 'check_submission' ), 'wc_verify_email' );
+		$supplied_email = null;
+
+		if ( $nonce_is_valid ) {
+			$supplied_email = sanitize_email( wp_unslash( filter_input( INPUT_POST, 'email' ) ) );
+		}
+
 		return ! $order->email_is_valid( $supplied_email, $context );
 	}
 }
