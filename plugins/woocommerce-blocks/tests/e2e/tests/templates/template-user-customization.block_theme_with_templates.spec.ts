@@ -2,118 +2,16 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
-import type { Page, Response } from '@playwright/test';
-import type { FrontendUtils } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
-import { SIMPLE_VIRTUAL_PRODUCT_NAME } from '../checkout/constants';
-import { CheckoutPage } from '../checkout/checkout.page';
+import { CUSTOMIZABLE_WC_TEMPLATES, WC_TEMPLATES_SLUG } from './constants';
 
-type TemplateCustomizationTest = {
-	visitPage: ( props: {
-		frontendUtils: FrontendUtils;
-		page: Page;
-	} ) => Promise< void | Response | null >;
-	templateName: string;
-	templatePath: string;
-	templateType: string;
-	defaultTemplate?: {
-		templateName: string;
-		templatePath: string;
-	};
-};
-
-const templateThemeCustomizationTests: TemplateCustomizationTest[] = [
-	{
-		visitPage: async ( { frontendUtils } ) =>
-			await frontendUtils.goToShop(),
-		templateName: 'Product Catalog',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//archive-product`,
-		templateType: 'wp_template',
-	},
-	{
-		visitPage: async ( { page } ) =>
-			await page.goto( '/?s=shirt&post_type=product' ),
-		templateName: 'Product Search Results',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//product-search-results`,
-		templateType: 'wp_template',
-	},
-	{
-		visitPage: async ( { page } ) => await page.goto( '/color/blue' ),
-		templateName: 'Products by Attribute',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_attribute`,
-		templateType: 'wp_template',
-		defaultTemplate: {
-			templateName: 'Product Catalog',
-			templatePath: 'woocommerce/woocommerce//archive-product',
-		},
-	},
-	{
-		visitPage: async ( { page } ) =>
-			await page.goto( '/product-category/clothing' ),
-		templateName: 'Products by Category',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_cat`,
-		templateType: 'wp_template',
-		defaultTemplate: {
-			templateName: 'Product Catalog',
-			templatePath: 'woocommerce/woocommerce//archive-product',
-		},
-	},
-	{
-		visitPage: async ( { page } ) =>
-			await page.goto( '/product-tag/recommended/' ),
-		templateName: 'Products by Tag',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_tag`,
-		templateType: 'wp_template',
-		defaultTemplate: {
-			templateName: 'Product Catalog',
-			templatePath: 'woocommerce/woocommerce//archive-product',
-		},
-	},
-	{
-		visitPage: async ( { page } ) => await page.goto( '/product/hoodie' ),
-		templateName: 'Single Product',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//single-product`,
-		templateType: 'wp_template',
-	},
-	{
-		visitPage: async ( { frontendUtils } ) =>
-			await frontendUtils.goToCart(),
-		templateName: 'Page: Cart',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//page-cart`,
-		templateType: 'wp_template',
-	},
-	{
-		visitPage: async ( { frontendUtils } ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart();
-			await frontendUtils.goToCheckout();
-		},
-		templateName: 'Page: Checkout',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//page-checkout`,
-		templateType: 'wp_template',
-	},
-	{
-		visitPage: async ( { frontendUtils, page } ) => {
-			const checkoutPage = new CheckoutPage( { page } );
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
-			await frontendUtils.goToCheckout();
-			await checkoutPage.fillInCheckoutWithTestData();
-			await checkoutPage.placeOrder();
-		},
-		templateName: 'Order Confirmation',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//order-confirmation`,
-		templateType: 'wp_template',
-	},
-];
 const userText = 'Hello World in the template';
-const defaultTemplateUserText = 'Hello World in the default template';
+const fallbackTemplateUserText = 'Hello World in the default template';
 
-templateThemeCustomizationTests.forEach( ( testData ) => {
+CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	test.describe( `${ testData.templateName } template`, async () => {
 		test( "theme template has priority over WooCommerce's and can be modified", async ( {
 			admin,
@@ -123,7 +21,7 @@ templateThemeCustomizationTests.forEach( ( testData ) => {
 		} ) => {
 			// Edit the theme template.
 			await admin.visitSiteEditor( {
-				postId: testData.templatePath,
+				postId: `${ WC_TEMPLATES_SLUG }//${ testData.templatePath }`,
 				postType: testData.templateType,
 			} );
 			await editorUtils.enterEditMode();
@@ -158,8 +56,8 @@ templateThemeCustomizationTests.forEach( ( testData ) => {
 			await expect( page.getByText( userText ) ).toHaveCount( 0 );
 		} );
 
-		if ( testData.defaultTemplate ) {
-			test( `theme template has priority over user-modified ${ testData.defaultTemplate.templateName } template`, async ( {
+		if ( testData.fallbackTemplate ) {
+			test( `theme template has priority over user-modified ${ testData.fallbackTemplate.templateName } template`, async ( {
 				admin,
 				frontendUtils,
 				editorUtils,
@@ -167,7 +65,9 @@ templateThemeCustomizationTests.forEach( ( testData ) => {
 			} ) => {
 				// Edit default template and verify changes are not visible, as the theme template has priority.
 				await admin.visitSiteEditor( {
-					postId: testData.defaultTemplate?.templatePath || '',
+					postId: `${ WC_TEMPLATES_SLUG }//${
+						testData.fallbackTemplate?.templatePath || ''
+					}`,
 					postType: testData.templateType,
 				} );
 				await editorUtils.enterEditMode();
@@ -175,13 +75,13 @@ templateThemeCustomizationTests.forEach( ( testData ) => {
 				await editorUtils.editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: {
-						content: defaultTemplateUserText,
+						content: fallbackTemplateUserText,
 					},
 				} );
 				await editorUtils.saveTemplate();
 				await testData.visitPage( { frontendUtils, page } );
 				await expect(
-					page.getByText( defaultTemplateUserText )
+					page.getByText( fallbackTemplateUserText )
 				).toHaveCount( 0 );
 
 				// Revert the edit.
@@ -190,7 +90,7 @@ templateThemeCustomizationTests.forEach( ( testData ) => {
 					`path=/${ testData.templateType }/all`
 				);
 				await editorUtils.revertTemplateCustomizations(
-					testData.defaultTemplate?.templateName || ''
+					testData.fallbackTemplate?.templateName || ''
 				);
 			} );
 		}

@@ -18,7 +18,7 @@ type TemplateCustomizationTest = {
 	templateName: string;
 	templatePath: string;
 	templateType: string;
-	defaultTemplate?: {
+	fallbackTemplate?: {
 		templateName: string;
 		templatePath: string;
 	};
@@ -44,6 +44,10 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Products by Attribute',
 		templatePath: 'taxonomy-product_attribute',
 		templateType: 'wp_template',
+		fallbackTemplate: {
+			templateName: 'Product Catalog',
+			templatePath: 'woocommerce/woocommerce//archive-product',
+		},
 	},
 	{
 		visitPage: async ( { page } ) =>
@@ -51,6 +55,10 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Products by Category',
 		templatePath: 'taxonomy-product_cat',
 		templateType: 'wp_template',
+		fallbackTemplate: {
+			templateName: 'Product Catalog',
+			templatePath: 'woocommerce/woocommerce//archive-product',
+		},
 	},
 	{
 		visitPage: async ( { page } ) =>
@@ -58,6 +66,10 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Products by Tag',
 		templatePath: 'taxonomy-product_tag',
 		templateType: 'wp_template',
+		fallbackTemplate: {
+			templateName: 'Product Catalog',
+			templatePath: 'woocommerce/woocommerce//archive-product',
+		},
 	},
 	{
 		visitPage: async ( { page } ) => await page.goto( '/product/hoodie' ),
