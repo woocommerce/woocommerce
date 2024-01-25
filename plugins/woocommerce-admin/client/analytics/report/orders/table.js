@@ -142,7 +142,7 @@ class OrdersReportTable extends Component {
 				customer_type: customerType,
 			} = row;
 			const extendedInfo = row.extended_info || {};
-			const { coupons, customer, products } = extendedInfo;
+			const { coupons, customer, products, attribution } = extendedInfo;
 
 			const formattedProducts = products
 				.sort( ( itemA, itemB ) => itemB.quantity - itemA.quantity )
@@ -258,12 +258,12 @@ class OrdersReportTable extends Component {
 					value: netTotal,
 				},
 				{
-					display: 'Origin',
-					value: 'Origin',
+					display: attribution.source,
+					value: attribution.source,
 				},
 				{
-					display: 'Device',
-					value: 'Device',
+					display: attribution.device,
+					value: attribution.device,
 				},
 			];
 		} );
