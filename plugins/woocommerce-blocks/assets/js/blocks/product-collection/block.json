@@ -46,6 +46,7 @@
 		"align": [ "wide", "full" ],
 		"anchor": true,
 		"html": false,
-		"__experimentalLayout": true
+		"__experimentalLayout": true,
+		"interactivity": true
 	}
 }

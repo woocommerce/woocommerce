@@ -114,21 +114,6 @@ class ProductCollection extends AbstractBlock {
 					'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 				);
 				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
-
-				/**
-				 * Setting context data for Interactivity API
-				 * to send translated strings.
-				 */
-				$p->set_attribute(
-					'data-wc-context',
-					wp_json_encode(
-						array(
-							'loadingText' => __( 'Loading page, please wait.', 'woocommerce' ),
-							'loadedText'  => __( 'Page Loaded.', 'woocommerce' ),
-						),
-						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP
-					)
-				);
 				$block_content = $p->get_updated_html();
 			}
 		}
@@ -167,6 +152,8 @@ class ProductCollection extends AbstractBlock {
 	private function process_pagination_links( $block_content ) {
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 		$p->next_tag( array( 'class_name' => 'wp-block-query-pagination' ) );
+
+		// This will help us to find the start of the block content using the `seek` method.
 		$p->set_bookmark( 'start' );
 
 		$this->update_pagination_anchors( $p, 'page-numbers', 'product-collection-pagination-numbers' );
@@ -198,7 +185,7 @@ class ProductCollection extends AbstractBlock {
 
 			if ( in_array( $class_name, array( 'wp-block-query-pagination-next', 'wp-block-query-pagination-previous' ), true ) ) {
 				$processor->set_attribute( 'data-wc-watch', 'woocommerce/product-collection::callbacks.prefetch' );
-				$processor->set_attribute( 'data-wc-on--mouseenter', 'woocommerce/product-collection::actions.prefetch' );
+				$processor->set_attribute( 'data-wc-on--mouseenter', 'woocommerce/product-collection::actions.prefetchOnHover' );
 			}
 		}
 	}

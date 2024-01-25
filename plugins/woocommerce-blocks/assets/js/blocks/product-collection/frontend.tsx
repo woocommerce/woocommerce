@@ -10,11 +10,7 @@ import {
 } from '@woocommerce/interactivity';
 
 export type ProductCollectionStoreContext = {
-	message: string;
-	url: string;
-	// Accessibility texts.
-	loadingText: string;
-	loadedText: string;
+	isPrefetchNextAndPreviousLink: boolean;
 };
 
 const isValidLink = ( ref: HTMLAnchorElement ) =>
@@ -38,7 +34,7 @@ const isValidEvent = ( event: MouseEvent ) =>
  * @param ref - The reference to the element.
  */
 function scrollToFirstProductIfNotVisible( ref: HTMLAnchorElement ) {
-	// data-wc-navigation-id is added to each Product Collection block
+	// data-wc-navigation-id is unique for each Product Collection block on page/post
 	const id = ( ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement )
 		?.dataset?.wcNavigationId;
 
@@ -73,30 +69,12 @@ const productCollectionStore = {
 
 			if ( isValidLink( ref ) && isValidEvent( event ) ) {
 				event.preventDefault();
-
-				// Don't announce the navigation immediately, wait 400 ms.
-				const timeout = setTimeout( () => {
-					ctx.message = ctx.loadingText;
-				}, 400 );
-
 				yield navigate( ref.href );
-
-				// Dismiss loading message if it hasn't been added yet.
-				clearTimeout( timeout );
-
-				// Announce that the page has been loaded. If the message is the
-				// same, we use a no-break space similar to the @wordpress/a11y
-				// package: https://github.com/WordPress/gutenberg/blob/c395242b8e6ee20f8b06c199e4fc2920d7018af1/packages/a11y/src/filter-message.js#L20-L26
-				ctx.message =
-					ctx.loadedText +
-					( ctx.message === ctx.loadedText ? '\u00A0' : '' );
-
-				ctx.url = ref.href;
-
+				ctx.isPrefetchNextAndPreviousLink = !! ref.href;
 				scrollToFirstProductIfNotVisible( ref );
 			}
 		},
-		*prefetch() {
+		*prefetchOnHover() {
 			const { ref } = getElement();
 			if ( isValidLink( ref ) ) {
 				yield prefetch( ref.href );
@@ -105,9 +83,11 @@ const productCollectionStore = {
 	},
 	callbacks: {
 		*prefetch() {
-			const { url } = getContext< ProductCollectionStoreContext >();
+			const {
+				isPrefetchNextAndPreviousLink: isPrefetchNextOrPreviousLink,
+			} = getContext< ProductCollectionStoreContext >();
 			const { ref } = getElement();
-			if ( url && isValidLink( ref ) ) {
+			if ( isPrefetchNextOrPreviousLink && isValidLink( ref ) ) {
 				yield prefetch( ref.href );
 			}
 		},
