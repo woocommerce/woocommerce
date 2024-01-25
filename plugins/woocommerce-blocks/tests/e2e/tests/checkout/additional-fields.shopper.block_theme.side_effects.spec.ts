@@ -91,6 +91,10 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			.getByLabel( 'How wide is your road?' )
 			.fill( 'narrow' );
 
+		await checkoutPageObject.page.waitForResponse( ( response ) => {
+			return response.url().indexOf( 'wc/store/v1/batch' ) !== -1;
+		} );
+
 		await checkoutPageObject.page
 			.getByLabel( 'Would you like a free gift with your order?' )
 			.check();
@@ -98,9 +102,18 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			.getByLabel( 'Do you want to subscribe to our newsletter?' )
 			.check();
 		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Shipping address',
+			} )
 			.getByLabel( 'Can a truck fit down your road?' )
-			.first()
 			.check();
+
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Billing address',
+			} )
+			.getByLabel( 'Can a truck fit down your road?' )
+			.uncheck();
 
 		await checkoutPageObject.placeOrder();
 
@@ -145,6 +158,11 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		).toBeVisible();
 		await expect(
 			checkoutPageObject.page.getByText( 'How wide is your road?Narrow' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Is this a personal purchase or a business purchase?business'
+			)
 		).toBeVisible();
 	} );
 
@@ -248,6 +266,9 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			} )
 			.getByLabel( 'How wide is your road?' )
 			.fill( 'narrow' );
+		await checkoutPageObject.page.waitForResponse( ( response ) => {
+			return response.url().indexOf( 'wc/store/v1/batch' ) !== -1;
+		} );
 
 		// Change the shipping and billing select fields again.
 		await checkoutPageObject.page
@@ -262,6 +283,10 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			} )
 			.getByLabel( 'How wide is your road?' )
 			.fill( 'super-wide' );
+
+		await checkoutPageObject.page.waitForResponse( ( response ) => {
+			return response.url().indexOf( 'wc/store/v1/batch' ) !== -1;
+		} );
 
 		await checkoutPageObject.page
 			.getByLabel( 'Would you like a free gift with your order?' )
@@ -392,6 +417,10 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		await checkoutPageObject.fillInCheckoutWithTestData(
 			{},
 			{
+				contact: {
+					'Is this a personal purchase or a business purchase?':
+						'business',
+				},
 				address: {
 					shipping: {
 						'Government ID': 'abcde',
@@ -407,9 +436,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		);
 
 		await checkoutPageObject.placeOrder( false );
-		await checkoutPageObject.page.waitForResponse( ( response ) => {
-			return response.url().indexOf( 'wc/store/v1/checkout' ) !== -1;
-		} );
 
 		await expect(
 			checkoutPageObject.page
@@ -433,6 +459,10 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		await checkoutPageObject.fillInCheckoutWithTestData(
 			{},
 			{
+				contact: {
+					'Is this a personal purchase or a business purchase?':
+						'business',
+				},
 				address: {
 					shipping: {
 						'Government ID': '12345',
@@ -445,6 +475,25 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				},
 				additional: { 'How did you hear about us?': 'Other' },
 			}
+		);
+
+		// Fill select fields "manually" (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
+		// fields until we recreate th Combobox component. This is because the aria-label includes the value so getting
+		// by label alone is not reliable unless we know the value.
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Shipping address',
+			} )
+			.getByLabel( 'How wide is your road?' )
+			.fill( 'wide' );
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Billing address',
+			} )
+			.getByLabel( 'How wide is your road?' )
+			.fill( 'narrow' );
+		await checkoutPageObject.page.evaluate(
+			'document.activeElement.blur()'
 		);
 
 		await checkoutPageObject.placeOrder();
