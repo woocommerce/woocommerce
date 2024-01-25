@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Added `__woocommerceNamespace` attribute, which resolved migration issues when transitioning from Products (Beta) block to Product Collection block.
