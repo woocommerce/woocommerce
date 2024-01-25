@@ -175,5 +175,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Add defensive checks for strpos in ComparisonOperation. [#44058](https://github.com/woocommerce/woocommerce/pull/44058)
+* Fix - Add rudimentary try catch for all remote endpoint spec evaluators. [#44070](https://github.com/woocommerce/woocommerce/pull/44070)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
