@@ -21,7 +21,7 @@ This suite of documentation includes:
 - [**How-to Guide**](./docs/using-wc-cli): Step-by-step instructions for common WC-CLI tasks.
 - [**Command Reference**](./docs/woocommerce-cli-commands): Detailed information on WC-CLI commands and their options.
 - [**FAQs**](./docs/woocommerce-cli-frequently-asked-questions): Answers to frequently asked questions about WC-CLI.
-- **Examples**: Practical examples of WC-CLI commands in use.
+- [**Examples**](./docs/wc-cli-examples.md): Practical examples of WC-CLI commands in use.
 
 ## Getting Started with WooCommerce CLI
 
