@@ -1623,9 +1623,11 @@ class ListTable extends WP_List_Table {
 	 */
 	private function search_filter() {
 		$options = array(
-			'customers' => __( 'Customers', 'woocommerce' ),
-			'products'  => __( 'Products', 'woocommerce' ),
-			'all'       => __( 'All', 'woocommerce' ),
+			'order_id'       => __( 'Order ID', 'woocommerce' ),
+			'customer_email' => __( 'Customer Email', 'woocommerce' ),
+			'customers'      => __( 'Customers', 'woocommerce' ),
+			'products'       => __( 'Products', 'woocommerce' ),
+			'all'            => __( 'All', 'woocommerce' ),
 		);
 		?>
 		<select name="search-filter" id="order-search-filter">
