@@ -2,11 +2,24 @@
  * External dependencies
  */
 import { ComboboxControlOption } from '@woocommerce/base-components/combobox';
+import type { AllHTMLAttributes, AriaAttributes } from 'react';
 
 /**
  * Internal dependencies
  */
 import { getSetting } from './utils';
+
+// A list of attributes that can be added to a custom field when registering it.
+type CustomFieldAttributes = Pick<
+	AllHTMLAttributes< HTMLInputElement >,
+	| 'maxLength'
+	| 'readOnly'
+	| 'pattern'
+	| 'title'
+	| 'autoCapitalize'
+	| 'autoComplete'
+> &
+	AriaAttributes;
 
 export interface FormField {
 	// The label for the field.
@@ -27,6 +40,8 @@ export interface FormField {
 	type?: string;
 	// The options if this is a select field
 	options?: ComboboxControlOption[];
+	// Additional attributes added when registering a field. String in key is required for data attributes.
+	attributes?: Record< keyof CustomFieldAttributes, string >;
 }
 
 export interface LocaleSpecificFormField extends Partial< FormField > {
@@ -55,7 +70,12 @@ export type ContactForm = CoreContactForm & Record< string, FormField >;
 export type FormFields = AddressForm & ContactForm;
 export type AddressFormValues = Omit< ShippingAddress, 'email' >;
 export type ContactFormValues = { email: string };
-export type FormType = 'billing' | 'shipping' | 'contact';
+export type AdditionalInformationFormValues = Record< string, string >;
+export type FormType =
+	| 'billing'
+	| 'shipping'
+	| 'contact'
+	| 'additional-information';
 
 export interface CoreAddress {
 	first_name: string;

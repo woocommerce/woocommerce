@@ -170,7 +170,7 @@ export type ProductQuery<
 	Status = ProductStatus,
 	Type = ProductType
 > = BaseQueryParams< keyof Product > & {
-	orderby:
+	orderby?:
 		| 'date'
 		| 'id'
 		| 'include'
@@ -179,19 +179,31 @@ export type ProductQuery<
 		| 'price'
 		| 'popularity'
 		| 'rating';
-	slug: string;
-	status: Status;
-	type: Type;
-	sku: string;
-	featured: boolean;
-	category: string;
-	tag: string;
-	shipping_class: string;
-	attribute: string;
-	attribute_term: string;
-	tax_class: 'standard' | 'reduced-rate' | 'zero-rate';
-	on_sale: boolean;
-	min_price: string;
-	max_price: string;
-	stock_status: 'instock' | 'outofstock' | 'onbackorder';
+	slug?: string;
+	status?: Status;
+	type?: Type;
+	sku?: string;
+	featured?: boolean;
+	category?: string;
+	tag?: string;
+	shipping_class?: string;
+	attribute?: string;
+	attribute_term?: string;
+	tax_class?: 'standard' | 'reduced-rate' | 'zero-rate';
+	on_sale?: boolean;
+	min_price?: string;
+	max_price?: string;
+	stock_status?: 'instock' | 'outofstock' | 'onbackorder';
+};
+
+export type SuggestedProductOptionsKey = string;
+
+/*
+ * Selector types
+ */
+export type GetSuggestedProductsOptions = {
+	categories?: number[];
+	tags?: number[];
+	attributes?: number[];
+	limit?: number;
 };

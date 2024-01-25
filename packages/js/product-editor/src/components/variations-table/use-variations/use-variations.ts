@@ -3,6 +3,7 @@
  */
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	PartialProductVariation,
 	ProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
@@ -69,10 +70,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			setIsLoading( false );
 		}
 	}
-
-	useEffect( () => {
-		getCurrentVariationsPage( { product_id: productId } );
-	}, [ productId ] );
 
 	function onPageChange( page: number ) {
 		getCurrentVariationsPage( {
@@ -255,7 +252,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	async function onUpdate( {
 		id: variationId,
 		...variation
-	}: Partial< ProductVariation > ) {
+	}: PartialProductVariation ) {
 		if ( isUpdating[ variationId ] ) return;
 
 		const { updateProductVariation } = dispatch(
@@ -319,7 +316,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		} );
 	}
 
-	async function onBatchUpdate( values: Partial< ProductVariation >[] ) {
+	async function onBatchUpdate( values: PartialProductVariation[] ) {
 		// @ts-expect-error There are no types for this.
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
@@ -380,7 +377,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		return { update: result };
 	}
 
-	async function onBatchDelete( values: Pick< ProductVariation, 'id' >[] ) {
+	async function onBatchDelete( values: PartialProductVariation[] ) {
 		// @ts-expect-error There are no types for this.
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
@@ -413,7 +410,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			} >(
 				{ product_id: productId },
 				{
-					delete: subset,
+					delete: subset.map( ( { id } ) => id ),
 				}
 			);
 
@@ -457,6 +454,12 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	} = useProductVariationsHelper();
 
 	const wasGenerating = useRef( false );
+
+	useEffect( () => {
+		if ( ! isGenerating ) {
+			getCurrentVariationsPage( { product_id: productId } );
+		}
+	}, [ productId, isGenerating ] );
 
 	useEffect( () => {
 		if ( isGenerating ) {

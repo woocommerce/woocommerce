@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure the email field ID remains as `email` in the Checkout block.

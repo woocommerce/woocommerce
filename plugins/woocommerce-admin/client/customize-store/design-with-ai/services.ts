@@ -19,12 +19,10 @@ import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/compo
 import { designWithAiStateMachineContext } from './types';
 import { FONT_PAIRINGS } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
-import {
-	patternsToNameMap,
-	getTemplatePatterns,
-} from '../assembler-hub/hooks/use-home-templates';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
-import { setLogoWidth } from '../utils';
+import { updateTemplate } from '../data/actions';
+import { installAndActivateTheme as setTheme } from '../data/service';
+import { THEME_SLUG } from '../data/constants';
 
 const { escalate } = actions;
 
@@ -396,58 +394,6 @@ const updateGlobalStyles = async ( {
 	);
 };
 
-// Update the current theme template
-const updateTemplate = async ( {
-	homepageTemplateId,
-}: {
-	homepageTemplateId: keyof typeof HOMEPAGE_TEMPLATES;
-} ) => {
-	// @ts-ignore No types for this exist yet.
-	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
-
-	// Ensure that the patterns are up to date because we populate images and content in previous step.
-	invalidateResolutionForStoreSelector( 'getBlockPatterns' );
-	invalidateResolutionForStoreSelector( '__experimentalGetTemplateForLink' );
-
-	const patterns = ( await resolveSelect(
-		coreStore
-		// @ts-ignore No types for this exist yet.
-	).getBlockPatterns() ) as Pattern[];
-	const patternsByName = patternsToNameMap( patterns );
-	const homepageTemplate = getTemplatePatterns(
-		HOMEPAGE_TEMPLATES[ homepageTemplateId ].blocks,
-		patternsByName
-	);
-
-	let content = [ ...homepageTemplate ]
-		.filter( Boolean )
-		.map( ( pattern ) => pattern.content )
-		.join( '\n\n' );
-
-	// Replace the logo width with the default width.
-	content = setLogoWidth( content );
-
-	const currentTemplate = await resolveSelect(
-		coreStore
-		// @ts-ignore No types for this exist yet.
-	).__experimentalGetTemplateForLink( '/' );
-
-	// @ts-ignore No types for this exist yet.
-	const { saveEntityRecord } = dispatch( coreStore );
-
-	await saveEntityRecord(
-		'postType',
-		currentTemplate.type,
-		{
-			id: currentTemplate.id,
-			content,
-		},
-		{
-			throwOnError: true,
-		}
-	);
-};
-
 export const assembleSite = async (
 	context: designWithAiStateMachineContext
 ) => {
@@ -487,23 +433,13 @@ export const assembleSite = async (
 };
 
 const installAndActivateTheme = async () => {
-	const themeSlug = 'twentytwentyfour';
-
 	try {
-		await apiFetch( {
-			path: `/wc-admin/onboarding/themes/install?theme=${ themeSlug }`,
-			method: 'POST',
-		} );
-
-		await apiFetch( {
-			path: `/wc-admin/onboarding/themes/activate?theme=${ themeSlug }&theme_switch_via_cys_ai_loader=1`,
-			method: 'POST',
-		} );
+		await setTheme( THEME_SLUG );
 	} catch ( error ) {
 		recordEvent(
 			'customize_your_store_ai_install_and_activate_theme_error',
 			{
-				theme: themeSlug,
+				theme: THEME_SLUG,
 				error: error instanceof Error ? error.message : 'unknown',
 			}
 		);

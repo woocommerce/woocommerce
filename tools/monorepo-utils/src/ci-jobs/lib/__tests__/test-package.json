@@ -1,0 +1,52 @@
+{
+    "name": "test-package-json",
+    "config": {
+        "ci": {
+            "lint": {
+				"changes": "src/**/*\\.{js,jsx,ts,tsx}",
+                "command": "foo"
+            },
+            "test": [
+                {
+                    "name": "Minimal",
+                    "changes": "*",
+                    "command": "foo"
+                },
+                {
+                    "name": "Changes Array",
+                    "changes": [
+                        "foo/**/*",
+                        "bar/**/*"
+                    ],
+                    "command": "foo"
+                },
+                {
+                    "name": "Test Environment",
+                    "changes": "env/**/*",
+                    "command": "bar",
+                    "testEnv": {
+                        "start": "foo",
+                        "config": {
+                            "wpVersion": "latest"
+                        }
+                    }
+                },
+                {
+                    "name": "Single Cascade",
+                    "changes": "cascade/**/*",
+                    "command": "bar",
+                    "cascade": "foo"
+                },
+                {
+                    "name": "Array Cascade",
+                    "changes": "cascade/**/*",
+                    "command": "bar",
+                    "cascade": [
+                        "foo",
+                        "bar"
+                    ]
+                }
+            ]
+        }
+    }
+}

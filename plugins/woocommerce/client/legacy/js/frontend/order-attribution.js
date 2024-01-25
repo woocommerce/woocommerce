@@ -8,29 +8,8 @@
 	const propertyAccessor = ( obj, path ) => path.split( '.' ).reduce( ( acc, part ) => acc && acc[ part ], obj );
 	const returnNull = () => null;
 
-	/**
-	 * Map of order attribution field names to sbjs.get property accessors.
-	 */
-	wc_order_attribution.fields = {
-		// main fields.
-		type: 'current.typ',
-		url: 'current_add.rf',
-
-		// utm fields.
-		utm_campaign: 'current.cmp',
-		utm_source: 'current.src',
-		utm_medium: 'current.mdm',
-		utm_content: 'current.cnt',
-		utm_id: 'current.id',
-		utm_term: 'current.trm',
-
-		// additional fields.
-		session_entry: 'current_add.ep',
-		session_start_time: 'current_add.fd',
-		session_pages: 'session.pgs',
-		session_count: 'udata.vst',
-		user_agent: 'udata.uag',
-	};
+	// Hardcode Checkout store key (`wc.wcBlocksData.CHECKOUT_STORE_KEY`), as we no longer have `wc-blocks-checkout` as a dependency.
+	const CHECKOUT_STORE_KEY = 'wc/store/checkout';
 
 	/**
 	 * Get the order attribution data.
@@ -133,6 +112,28 @@
 			updateFormValues( getData() );
 			previousInitCheckout && previousInitCheckout();
 		};
+	}
+
+	// Work around the lack of explicit script dependency for the checkout block.
+	// Conditionally, wait for and use 'wp-data' & 'wc-blocks-checkout.
+
+	// Wait for (async) block checkout initialization and set source values once loaded.
+	function eventuallyInitializeCheckoutBlock() {
+		if (
+			window.wp && window.wp.data && typeof window.wp.data.subscribe === 'function'
+		) {
+			// Update checkout block data once more if the checkout store was loaded after this script.
+			const unsubscribe = window.wp.data.subscribe( function () {
+				unsubscribe();
+				updateCheckoutBlockData( getData() );
+			}, CHECKOUT_STORE_KEY );
+		}
+	};
+	// Wait for DOMContentLoaded to make sure wp.data is in place, if applicable for the page.
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", eventuallyInitializeCheckoutBlock);
+	} else {
+		eventuallyInitializeCheckoutBlock();
 	}
 
 }( window.wc_order_attribution ) );

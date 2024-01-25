@@ -1,21 +1,12 @@
 ---
-post_title: Payment token API
+post_title: WooCommerce Payment Token API
+menu_title: Payment Token API
+tags: reference
 ---
 
 WooCommerce 2.6 introduced an API for storing and managing payment tokens for gateways. Users can also manage these tokens from their account settings and choose from saved payment tokens on checkout.
 
 This guide offers a few useful tutorials for using the new API as well as all the various methods available to you.
-
-## Table Of Contents
-
-* [Tutorials](#tutorials)
-    * [Adding Payment Token API Support To Your Gateway](#adding-payment-token-api-support-to-your-gateway)
-    * [Creating A New Token Type](#creating-a-new-token-type)
-* [Classes](#classes)
-    * [WC_Payment_Tokens](#wc_payment_tokens)
-    * [WC_Payment_Token_CC](#wc_payment_token_cc)
-    * [WC_Payment_Token_eCheck](#wc_payment_token_echeck)
-    * [WC_Payment_Token](#wc_payment_token)
 
 ## Tutorials
 
@@ -39,7 +30,7 @@ We need to tell WooCommerce our gateway supports tokenization. Like other gatewa
 
 Here is the Simplify array:
 
-``` php
+```php
 $this->supports = array(
     'subscriptions',
     'products',
@@ -63,14 +54,14 @@ Since Simplify uses credit cards, we will use the credit card class.
 
 We will use various `set_` methods to pass in information about our token. To start with we will pass the token string and the gateway ID so the token can be associated with Simplify.
 
-``` php
+```php
 $token->set_token( $token_string );
 $token->set_gateway_id( $this->id ); // `$this->id` references the gateway ID set in `__construct`
 ```
 
 At this point we can set any other necessary information we want to store with the token. Credit cards require a card type (visa, mastercard, etc), last four digits of the card number, an expiration month, and an expiration year.
 
-``` php
+```php
 $token->set_card_type( 'visa' );
 $token->set_last4( '1234' );
 $token->set_expiry_month( '12' );
@@ -111,14 +102,14 @@ You can check if an existing token should be used with a conditional like the fo
 
 You can then load a token from ta ID (more on the WC_Payment_Tokens class later in this doc):
 
-``` php
+```php
 $token_id = wc_clean( $_POST['wc-simplify_commerce-payment-token'] );
 $token    = WC_Payment_Tokens::get( $token_id );
 ```
 
 This does **not** check if the loaded token belongs to the current user. You can do that with a simple check:
 
-``` php
+```php
 // Token user ID does not match the current user... bail out of payment processing.
 if ( $token->get_user_id() !== get_current_user_id() ) {
     // Optionally display a notice with `wc_add_notice`
@@ -139,7 +130,7 @@ Start by extending WC_Payment_Token and providing a name for the new type. We'll
 
 A barebones token file should look like this:
 
-``` php
+```php
 class WC_Payment_Token_eCheck extends WC_Payment_Token {
 
     /** @protected string Token Type String */
@@ -158,7 +149,7 @@ Validate should return `true` if everything looks OK, and false if something doe
 
 Always make sure to call `WC_Payment_Token`'s validate method before adding in your own logic.
 
-``` php
+```php
 public function validate() {
     if ( false === parent::validate() ) {
 	       return false;
@@ -167,7 +158,7 @@ public function validate() {
 
 Now we can add some logic in for the "last 4" digits.
 
-``` php
+```php
 if ( ! $this->get_last4() ) {
     return false;
 }
@@ -175,7 +166,7 @@ if ( ! $this->get_last4() ) {
 
 Finally, return true if we make it to the end of the `validate()` method.
 
-``` php
+```php
     return true;
 }
 ```
@@ -186,7 +177,7 @@ You can now add your own methods for each piece of data you would like to expose
 
 Provide a `get_` and `set_` method for each piece of data you want to capture. For eChecks, this is "last4" for the last 4 digits of a check.
 
-``` php
+```php
 public function get_last4() {
     return $this->get_meta( 'last4' );
 }
@@ -202,7 +193,7 @@ That's it! These meta functions are provided by [WC_Data](https://github.com/woo
 
 You can now use your new token type, either directly when building a new token
 
-``` php
+```php
 `$token = new WC_Payment_Token_eCheck();`
 // set token properties
 $token->save()
@@ -220,7 +211,7 @@ This class provides a set of helpful methods for interacting with payment tokens
 
 Returns an array of token objects for the customer specified in `$customer_id`. You can filter by gateway by providing a gateway ID as well.
 
-``` php
+```php
 // Get all tokens for the current user
 $tokens = WC_Payment_Tokens::get_customer_tokens( get_current_user_id() );
 // Get all tokens for user 42
@@ -233,7 +224,7 @@ $tokens = WC_Payment_Tokens::get_customer_tokens( get_current_user_id(), 'simpli
 
 Returns a token object for the token that is marked as 'default' (the token that will be automatically selected on checkout). If a user does not have a default token/has no tokens, this function will return null.
 
-``` php
+```php
 // Get default token for the current user
 $token = WC_Payment_Tokens::get_customer_default_token( get_current_user_id() );
 // Get default token for user 520
@@ -244,7 +235,7 @@ $token = WC_Payment_Tokens::get_customer_default_token( 520 );
 
 Orders can have payment tokens associated with them (useful for subscription products and renewing, for example). You can get a list of tokens associated with this function. Alternatively you can use `WC_Order`'s '`get_payment_tokens()` function to get the same result.
 
-``` php
+```php
 // Get tokens associated with order 25
 $tokens = WC_Payment_Tokens::get_order_tokens( 25 );
 // Get tokens associated with order 25, via WC_Order
@@ -256,7 +247,7 @@ $tokens =  $order->get_payment_tokens();
 
 Returns a single payment token object for the provided `$token_id`.
 
-``` php
+```php
 // Get payment token 52
 $token = WC_Payment_Tokens::get( 52 );
 ```
@@ -265,7 +256,7 @@ $token = WC_Payment_Tokens::get( 52 );
 
 Deletes the provided token.
 
-``` php
+```php
 // Delete payment token 52
 WC_Payment_Tokens::delete( 52 );
 ```
@@ -274,7 +265,7 @@ WC_Payment_Tokens::delete( 52 );
 
 Makes the provided token (`$token_id`) the provided user (`$user_id`)'s default token. It makes sure that whatever token is currently set is default is removed and sets the new one.
 
-``` php
+```php
 // Set user 17's default token to token 82
 WC_Payment_Tokens::set_users_default( 17, 82 );
 ```
@@ -283,7 +274,7 @@ WC_Payment_Tokens::set_users_default( 17, 82 );
 
 You can use this function If you have a token's ID but you don't know what type of token it is (credit card, eCheck, ...).
 
-``` php
+```php
 // Find out that payment token 23 is a cc/credit card token
 $type = WC_Payment_Tokens::get_token_type_by_id( 23 );
 ```
@@ -296,7 +287,7 @@ $type = WC_Payment_Tokens::get_token_type_by_id( 23 );
 
 Makes sure the credit card token has the last 4 digits stored, an expiration year in the format YYYY, an expiration month with the format MM, the card type, and the actual token.
 
-``` php
+```php
 $token = new WC_Payment_Token_CC();
 $token->set_token( 'token here' );
 $token->set_last4( '4124' );
@@ -312,7 +303,7 @@ var_dump( $token->validate() ); // bool(true)
 
 Get the card type (visa, mastercard, etc).
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 );
 echo $token->get_card_type();
 ```
@@ -321,7 +312,7 @@ echo $token->get_card_type();
 
 Set the credit card type. This is a freeform text field, but the following values can be used and WooCommerce will show a formatted label New labels can be added with the `wocommerce_credit_card_type_labels` filter.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 );
 $token->set_last4( 'visa' );
 echo $token->get_card_type(); // returns visa
@@ -329,7 +320,7 @@ echo $token->get_card_type(); // returns visa
 
 Supported types/labels:
 
-``` php
+```php
 array(
 	'mastercard'       => __( 'MasterCard', 'woocommerce' ),
 	'visa'             => __( 'Visa', 'woocommerce' ),
@@ -344,7 +335,7 @@ array(
 
 Get the card's expiration year.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 );
 echo $token->get_expiry_year;
 ```
@@ -353,7 +344,7 @@ echo $token->get_expiry_year;
 
 Set the card's expiration year. YYYY format.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 );
 $token->set_expiry_year( '2018' );
 echo $token->get_expiry_year(); // returns 2018
@@ -363,7 +354,7 @@ echo $token->get_expiry_year(); // returns 2018
 
 Get the card's expiration month.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 );
 echo $token->get_expiry_month();
 ```
@@ -372,7 +363,7 @@ echo $token->get_expiry_month();
 
 Set the card's expiration month. MM format.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 );
 $token->set_expiry_year( '12' );
 echo $token->get_expiry_month(); // returns 12
@@ -382,7 +373,7 @@ echo $token->get_expiry_month(); // returns 12
 
 Get the last 4 digits of the stored credit card number.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 );
 echo $token->get_last4();
 ```
@@ -391,7 +382,7 @@ echo $token->get_last4();
 
 Set the last 4 digits of the stored credit card number.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 );
 $token->set_last4( '2929' );
 echo $token->get_last4(); // returns 2929
@@ -405,7 +396,7 @@ echo $token->get_last4(); // returns 2929
 
 Makes sure the eCheck token has the last 4 digits stored as well as the actual token.
 
-``` php
+```php
 $token = new WC_Payment_Token_eCheck();
 $token->set_token( 'token here' );
 var_dump( $token->validate() ); // bool(false)
@@ -417,7 +408,7 @@ var_dump( $token->validate() ); // bool(true)
 
 Get the last 4 digits of the stored account number.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 );
 echo $token->get_last4();
 ```
@@ -426,7 +417,7 @@ echo $token->get_last4();
 
 Set the last 4 digits of the stored credit card number.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 );
 $token->set_last4( '2929' );
 echo $token->get_last4(); // returns 2929
@@ -442,7 +433,7 @@ You should not use `WC_Payment_Token` directly. Use one of the bundled token cla
 
 Get the token's ID.
 
-``` php
+```php
 // Get the token ID for user ID 26's default token
 $token = WC_Payment_Tokens::get_customer_default_token( 26 );
 echo $token->get_id();
@@ -452,7 +443,7 @@ echo $token->get_id();
 
 Get the actual token string (used to communicate with payment processors).
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 49 );
 echo $token->get_token();
 ```
@@ -461,7 +452,7 @@ echo $token->get_token();
 
 Set the token string.
 
-``` php
+```php
 // $api_token comes from an API request to a payment processor.
 $token = WC_Payment_Tokens::get( 42 );
 $token->set_token( $api_token );
@@ -472,7 +463,7 @@ echo $token->get_token(); // returns our token
 
 Get the type of token. CC or eCheck. This will also return any new types introduced.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 49 );
 echo $token->get_type();
 ```
@@ -481,7 +472,7 @@ echo $token->get_type();
 
 Get the user ID associated with the token.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 49 );
 if ( $token->get_user_id() === get_current_user_id() ) {
     // This token belongs to the current user.
@@ -492,7 +483,7 @@ if ( $token->get_user_id() === get_current_user_id() ) {
 
 Associate a token with a user.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 );
 $token->set_user_id( '21' ); // This token now belongs to user 21.
 echo $token->get_last4(); // returns 2929
@@ -502,7 +493,7 @@ echo $token->get_last4(); // returns 2929
 
 Get the gateway associated with the token.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 49 );
 $token->get_gateway_id();
 ```
@@ -511,7 +502,7 @@ $token->get_gateway_id();
 
 Set the gateway associated with the token. This should match the "ID" defined in your gateway. For example, 'simplify_commerce' is the ID for core's implementation of Simplify.
 
-``` php
+```php
 $token->set_gateway_id( 'simplify_commerce' );
 echo $token->get_gateway_id();
 ```
@@ -520,7 +511,7 @@ echo $token->get_gateway_id();
 
 Returns true if the token is marked as a user's default. Default tokens are auto-selected on checkout.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 ); // Token 42 is a default token for user 3
 var_dump( $token->is_default() ); // returns true
 $token = WC_Payment_Tokens::get( 43 ); // Token 43 is user 3's token, but not default
@@ -531,7 +522,7 @@ var_dump( $token->is_default() ); // returns false
 
 Toggle a tokens 'default' flag. Pass true to set it as default, false if its just another token. This **does not** unset any other tokens that may be set as default. You can use `WC_Payment_Tokens::set_users_default()` to handle that instead.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 ); // Token 42 is a default token for user 3
 var_dump( $token->is_default() ); // returns true
 $token->set_default( false );
@@ -546,7 +537,7 @@ Does a check to make sure both the token and token type (CC, eCheck, ...) are pr
 
 Load an existing token object from the database. See `WC_Payment_Tokens::get()` which is an alias of this function.
 
-``` php
+```php
 // Load a credit card toke, ID 55, user ID 5
 $token = WC_Payment_Token_CC();
 $token->read( 55 );
@@ -558,7 +549,7 @@ echo $token->get_user_id(); // returns 5
 
 Update an existing token. This will take any changed fields (`set_` functions) and actually save them to the database. Returns true or false depending on success.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 ); // credit card token
 $token->set_expiry_year( '2020' );
 $token->set_expiry_month( '06 ');
@@ -569,7 +560,7 @@ $token->update();
 
 This will create a new token in the database. So once you build it, create() will create a new token in the database with the details. Returns true or false depending on success.
 
-``` php
+```php
 $token = new WC_Payment_Token_CC();
 // set last4, expiry year, month, and card type
 $token->create(); // save to database
@@ -579,7 +570,7 @@ $token->create(); // save to database
 
 `save()` can be used in place of `update()` and `create()`. If you are working with an existing token, `save()` will call `update()`. A new token will call `create()`. Returns true or false depending on success.
 
-``` php
+```php
 // calls update
 $token = WC_Payment_Tokens::get( 42 ); // credit card token
 $token->set_expiry_year( '2020' );
@@ -595,7 +586,7 @@ $token->save();
 
 Deletes a token from the database.
 
-``` php
+```php
 $token = WC_Payment_Tokens::get( 42 );
 $token->delete();
 ```

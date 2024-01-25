@@ -20,7 +20,9 @@ class Marketplace {
 	 */
 	final public function init() {
 		if ( false === FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
-			FeaturesController::change_feature_enable( 'marketplace', true );
+			/** Feature controller instance @var FeaturesController $feature_controller */
+			$feature_controller = wc_get_container()->get( FeaturesController::class );
+			$feature_controller->change_feature_enable( 'marketplace', true );
 		}
 
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 70 );

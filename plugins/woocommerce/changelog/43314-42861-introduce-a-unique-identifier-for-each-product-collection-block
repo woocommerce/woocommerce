@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+Comment: Add "id" attribute which will be unique for each Product Collection block
+

@@ -1,14 +1,8 @@
 ---
 post_title: Naming conventions
+menu_title: Naming conventions
+tags: reference
 ---
-
-Table of Contents:
-
-- [PHP](#php)
-    - [`/src`](#src)
-    - [`/includes`](#includes)
-- [JS](#js)
-- [CSS and SASS](#css-and-sass)
 
 ## PHP
 

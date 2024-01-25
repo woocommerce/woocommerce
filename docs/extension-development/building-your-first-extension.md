@@ -1,5 +1,7 @@
 ---
-post_title: Building your first extension
+post_title: How to build your first extension
+menu_title: Build your first extension
+tags: how-to
 ---
 
 The easiest way to get started building an extension is to use the built-in extension generator that is included alongside WooCommerce Admin. This utility is maintained as part of the codebase for WooCommerce Admin, so it includes up-to-date tools and many preconfigured settings for building modern extensions that take advantage of the [React-powered](https://react.dev/) user experience available in current versions of WordPress and WooCommerce.
@@ -37,14 +39,13 @@ It will also contain files that are JavaScript and CSS assets which shape the cl
 When you run the built-in extension generator, it will output something that looks similar to the structure below.
 
 ```sh
-.
-├── README.md
-├── my-great-extension.php
-├── package.json
-├── src
-│   ├── index.js
-│   └── index.scss
-└── webpack.config.js
+- README.md
+- my-great-extension.php
+- package.json
+- src
+    - index.js
+    - index.scss
+- webpack.config.js
 ```
 
 Here's a breakdown of what these files are and what purpose they serve:

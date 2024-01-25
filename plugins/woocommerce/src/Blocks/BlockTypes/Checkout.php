@@ -169,7 +169,8 @@ class Checkout extends AbstractBlock {
 					<div data-block-name="woocommerce/checkout-shipping-address-block" class="wp-block-woocommerce-checkout-shipping-address-block"></div>
 					<div data-block-name="woocommerce/checkout-billing-address-block" class="wp-block-woocommerce-checkout-billing-address-block"></div>
 					<div data-block-name="woocommerce/checkout-shipping-methods-block" class="wp-block-woocommerce-checkout-shipping-methods-block"></div>
-					<div data-block-name="woocommerce/checkout-payment-block" class="wp-block-woocommerce-checkout-payment-block"></div>' .
+					<div data-block-name="woocommerce/checkout-payment-block" class="wp-block-woocommerce-checkout-payment-block"></div>
+					<div data-block-name="woocommerce/checkout-additional-information-block" class="wp-block-woocommerce-checkout-additional-information-block"></div>' .
 					( isset( $attributes['showOrderNotes'] ) && false === $attributes['showOrderNotes'] ? '' : '<div data-block-name="woocommerce/checkout-order-note-block" class="wp-block-woocommerce-checkout-order-note-block"></div>' ) .
 					( isset( $attributes['showPolicyLinks'] ) && false === $attributes['showPolicyLinks'] ? '' : '<div data-block-name="woocommerce/checkout-terms-block" class="wp-block-woocommerce-checkout-terms-block"></div>' ) .
 					'<div data-block-name="woocommerce/checkout-actions-block" class="wp-block-woocommerce-checkout-actions-block"></div>
@@ -215,6 +216,18 @@ class Checkout extends AbstractBlock {
 		if ( ! $has_local_pickup ) {
 			$shipping_address_block_regex = '/<div[^<]*?data-block-name="woocommerce\/checkout-shipping-address-block" class="wp-block-woocommerce-checkout-shipping-address-block"[^>]*?><\/div>/mi';
 			$content                      = preg_replace( $shipping_address_block_regex, $local_pickup_inner_blocks, $content );
+		}
+
+		/**
+		 * Add the Additional Information block to checkouts missing it.
+		 */
+		$additional_information_inner_blocks = '$0' . PHP_EOL . PHP_EOL . '<div data-block-name="woocommerce/checkout-additional-information-block" class="wp-block-woocommerce-checkout-additional-information-block"></div>' . PHP_EOL . PHP_EOL;
+		$has_additional_information_regex    = '/<div[^<]*?data-block-name="woocommerce\/checkout-additional-information-block"[^>]*?>/mi';
+		$has_additional_information_block    = preg_match( $has_additional_information_regex, $content );
+
+		if ( ! $has_additional_information_block ) {
+			$payment_block_regex = '/<div[^<]*?data-block-name="woocommerce\/checkout-payment-block" class="wp-block-woocommerce-checkout-payment-block"[^>]*?><\/div>/mi';
+			$content             = preg_replace( $payment_block_regex, $additional_information_inner_blocks, $content );
 		}
 
 		return $content;
@@ -302,25 +315,7 @@ class Checkout extends AbstractBlock {
 		}
 
 		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'activeShippingZones' ) && class_exists( '\WC_Shipping_Zones' ) ) {
-			$shipping_zones             = \WC_Shipping_Zones::get_zones();
-			$formatted_shipping_zones   = array_reduce(
-				$shipping_zones,
-				function( $acc, $zone ) {
-					$acc[] = [
-						'id'          => $zone['id'],
-						'title'       => $zone['zone_name'],
-						'description' => $zone['formatted_zone_location'],
-					];
-					return $acc;
-				},
-				[]
-			);
-			$formatted_shipping_zones[] = [
-				'id'          => 0,
-				'title'       => __( 'International', 'woocommerce' ),
-				'description' => __( 'Locations outside all other zones', 'woocommerce' ),
-			];
-			$this->asset_data_registry->add( 'activeShippingZones', $formatted_shipping_zones );
+			$this->asset_data_registry->add( 'activeShippingZones', CartCheckoutUtils::get_shipping_zones() );
 		}
 
 		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'globalPaymentMethods' ) ) {
@@ -480,6 +475,7 @@ class Checkout extends AbstractBlock {
 		return [
 			'Checkout',
 			'CheckoutActionsBlock',
+			'CheckoutAdditionalInformationBlock',
 			'CheckoutBillingAddressBlock',
 			'CheckoutContactInformationBlock',
 			'CheckoutExpressPaymentBlock',

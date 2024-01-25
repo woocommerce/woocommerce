@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix WooCommerce Settings and Analytics commands with tags breaking the command palette
-

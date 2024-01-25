@@ -6,8 +6,9 @@
 	"category": "woocommerce",
 	"description": "Contains the block elements used to render a product.",
 	"keywords": [ "WooCommerce" ],
-    "textdomain": "woocommerce",
+	"textdomain": "woocommerce",
 	"usesContext": [
+		"id",
 		"queryId",
 		"query",
 		"queryContext",

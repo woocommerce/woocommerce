@@ -441,7 +441,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		global $wpdb;
 		$usage_count = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT( meta_id ) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_used_by' AND meta_value = %d;",
+				"SELECT COUNT( meta_id ) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_used_by' AND meta_value = %s;",
 				$coupon->get_id(),
 				$user_id
 			)
