@@ -23,6 +23,9 @@ const VariationsReport = lazy( () =>
 const OrdersReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report-orders" */ './orders' )
 );
+const OrderAttributionReport = lazy( () =>
+	import( /* webpackChunkName: "analytics-report-order-attribution" */ './order-attribution' )
+);
 const CategoriesReport = lazy( () =>
 	import(
 		/* webpackChunkName: "analytics-report-categories" */ './categories'
@@ -79,6 +82,14 @@ export default () => {
 			component: OrdersReport,
 			navArgs: {
 				id: 'woocommerce-analytics-orders',
+			},
+		},
+		{
+			report: 'order-attribution',
+			title: __( 'Order Attribution', 'woocommerce' ),
+			component: OrderAttributionReport,
+			navArgs: {
+				id: 'woocommerce-analytics-order-attribution',
 			},
 		},
 		{
