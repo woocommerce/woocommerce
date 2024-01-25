@@ -190,12 +190,14 @@ class ReceiptRenderingEngine {
 			'amount' => wc_price( $order->get_subtotal(), $get_price_args ),
 		);
 
-		$coupon_names      = ArrayUtil::select( $order->get_coupons(), 'get_name', ArrayUtil::SELECT_BY_OBJECT_METHOD );
-		$line_items_info[] = array(
-			/* translators: %s = comma-separated list of coupon codes */
-			'title'  => sprintf( __( 'Discount (%s)', 'woocommerce' ), join( ', ', $coupon_names ) ),
-			'amount' => wc_price( -$order->get_total_discount(), $get_price_args ),
-		);
+		$coupon_names = ArrayUtil::select( $order->get_coupons(), 'get_name', ArrayUtil::SELECT_BY_OBJECT_METHOD );
+		if ( ! empty( $coupon_names ) ) {
+			$line_items_info[] = array(
+				/* translators: %s = comma-separated list of coupon codes */
+				'title'  => sprintf( __( 'Discount (%s)', 'woocommerce' ), join( ', ', $coupon_names ) ),
+				'amount' => wc_price( -$order->get_total_discount(), $get_price_args ),
+			);
+		}
 
 		foreach ( $order->get_fees() as $fee ) {
 			$name              = $fee->get_name();
