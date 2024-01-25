@@ -384,7 +384,7 @@
           "post_title": "WooCommerce extension development best practices",
           "menu_title": "Best Practices",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/extension-development-best-practices.md",
-          "hash": "7dc6503ffd1e5297f049e28c1ca530ee54c6d24cba88ca820d1a1138856662ed",
+          "hash": "86442bed88a67c95a805d3bd36b71b0f6cbb2a48edf8c4ac54c348f9f7ec94ff",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/extension-development-best-practices.md",
           "id": "83050f0142b6de00b73b3638d46ddddc5a2f8b12"
         },
@@ -1120,8 +1120,12 @@
     }
   ],
 <<<<<<< HEAD
+<<<<<<< HEAD
   "hash": "ad958cbee4bccafbc89a35c5b41e4a84d9638f666b81adb3b172e658760cb003"
 =======
   "hash": "02a4ee6a13e4870cd2225a1a3be14c79c0b45845853ff1bfc015b98c99b6d1a5"
 >>>>>>> c901840810 (Update docs-manifest.json)
+=======
+  "hash": "a8f6a9cdda022d4deea88420483b636b8a1af7ccedb9f48600a7d4ff8d7f5f53"
+>>>>>>> 15c0e211ed (Adds latest docs manifest, renames file)
 }
