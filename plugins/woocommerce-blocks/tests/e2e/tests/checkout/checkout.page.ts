@@ -163,9 +163,14 @@ export class CheckoutPage {
 	 */
 	async placeOrder( waitForRedirect = true ) {
 		await this.page.evaluate( () => {
-			return ! window.wp.data
-				.select( 'wc/store/checkout' )
-				.isCalculating();
+			return (
+				! window.wp.data
+					.select( 'wc/store/checkout' )
+					.isCalculating() &&
+				! window.wp.data
+					.select( 'wc/store/cart' )
+					.isShippingRateBeingSelected()
+			);
 		} );
 		await this.page.getByText( 'Place Order', { exact: true } ).click();
 		if ( waitForRedirect ) {
