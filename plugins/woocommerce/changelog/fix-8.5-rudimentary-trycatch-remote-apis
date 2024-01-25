@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add rudimentary try catch for all remote endpoint spec evaluators
