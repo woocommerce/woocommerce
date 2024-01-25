@@ -667,7 +667,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		}
 
 		/**
-		 * Filter to add additional attributes to the HTML code of the generated add to cart button.
+		 * Filter to manipulate (add/modify/remove) attributes in the HTML code of the generated add to cart button.
 		 *
 		 * @since 8.6.0
 		 *
