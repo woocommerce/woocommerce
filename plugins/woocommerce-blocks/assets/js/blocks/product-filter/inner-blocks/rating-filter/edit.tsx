@@ -21,13 +21,12 @@ import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
  * Internal dependencies
  */
 import { previewOptions } from './preview';
-import './style.scss';
 import { Attributes } from './types';
 import { getActiveFilters } from './utils';
 import { useSetWraperVisibility } from '../../../filter-wrapper/context';
-import './editor.scss';
 import { Inspector } from './components/inspector';
 import { PreviewDropdown } from '../components/preview-dropdown';
+import './style.scss';
 
 const NoRatings = () => (
 	<Notice status="warning" isDismissible={ false }>
@@ -167,7 +166,6 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 					{ displayNoProductRatingsNotice && <NoRatings /> }
 					<div
 						className={ classnames(
-							'wc-block-rating-filter',
 							`style-${ blockAttributes.displayStyle }`,
 							{
 								'is-loading': isLoading,
@@ -192,7 +190,6 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 							</>
 						) : (
 							<CheckboxList
-								className={ 'wc-block-rating-filter-list' }
 								options={ displayedOptions }
 								checked={ checked }
 								onChange={ () => {
