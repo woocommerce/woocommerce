@@ -249,7 +249,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( 1 || false === $data ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -395,14 +395,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		foreach ( $orders_data as $key => $order_data ) {
 			$defaults                             = array(
-				'products' => array(),
-				'coupons'  => array(),
-				'customer' => array(),
+				'products'    => array(),
+				'coupons'     => array(),
+				'customer'    => array(),
+				'attribution' => array(),
 			);
 			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_data['order_id'] ] ) ? array_merge( $defaults, $mapped_data[ $order_data['order_id'] ] ) : $defaults;
 			if ( $order_data['customer_id'] && isset( $mapped_customers[ $order_data['customer_id'] ] ) ) {
 				$orders_data[ $key ]['extended_info']['customer'] = $mapped_customers[ $order_data['customer_id'] ];
 			}
+			$orders_data[ $key ]['extended_info']['attribution'] = array(
+				'device' => 'Mobile',
+				'source' => 'Direct',
+			);
 		}
 	}
 
