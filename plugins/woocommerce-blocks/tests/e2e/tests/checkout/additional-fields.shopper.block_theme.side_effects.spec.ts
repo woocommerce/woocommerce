@@ -91,9 +91,9 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			.getByLabel( 'How wide is your road?' )
 			.fill( 'narrow' );
 
-		await checkoutPageObject.page.waitForResponse( ( response ) => {
-			return response.url().indexOf( 'wc/store/v1/batch' ) !== -1;
-		} );
+		await checkoutPageObject.page.evaluate(
+			'document.activeElement.blur()'
+		);
 
 		await checkoutPageObject.page
 			.getByLabel( 'Would you like a free gift with your order?' )
