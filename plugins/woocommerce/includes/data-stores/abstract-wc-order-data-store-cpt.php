@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -748,6 +749,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					array( '%d', '%s', '%s' )
 				);
 				wp_cache_delete( $order->get_id(), 'post_meta' );
+				$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+				$logger->warning( sprintf( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object`: "%s"', var_export( $meta_value, true ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
 			} else {
 				add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
 			}
