@@ -47,7 +47,10 @@ class Init {
 					if ( ! property_exists( $extension, 'is_visible' ) || $extension->is_visible ) {
 						$bundle['plugins'][] = $extension;
 					}
-				} catch (\Throwable $e) {}
+					// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				} catch ( \Throwable $e ) {
+					// Ignore errors.
+				}
 			}
 
 			$bundles[] = $bundle;
