@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix to ensure all customers have a session when visiting the order pay page.
+Ensure all customers have a session when visiting the order pay page.
