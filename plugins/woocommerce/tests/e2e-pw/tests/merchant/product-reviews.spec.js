@@ -30,7 +30,7 @@ test.describe( 'Products > Reviews', () => {
 			product_id: productId,
 			review: productReview,
 			reviewer: 'John Doe',
-			reviewer_email: 'john.doe@example.com',
+			reviewer_email: `john.doe.${ timestamp }@example.com`,
 			rating: 5,
 		} );
 	} );
