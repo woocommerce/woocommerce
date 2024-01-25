@@ -16,35 +16,41 @@ baseTest.describe( 'Products > Edit Product', () => {
 			await use( api );
 		},
 
-		product: async ( { api }, use ) => {
-			let product = {
-				id: 0,
-				name: `Product ${ Date.now() }`,
-				type: 'simple',
-				regular_price: '12.99',
-			};
+		products: async ( { api }, use ) => {
+			const products = [];
 
-			await api.post( 'products', product ).then( ( response ) => {
-				product = response.data;
-			} );
+			for ( let i = 0; i < 2; i++ ) {
+				await api
+					.post( 'products', {
+						id: 0,
+						name: `Product ${ Date.now() }`,
+						type: 'simple',
+						regular_price: `${ 12.99 + i }`,
+						manage_stock: true,
+						stock_quantity: 10 + i,
+						stock_status: 'instock',
+					} )
+					.then( ( response ) => {
+						products.push( response.data );
+					} );
+			}
 
-			await use( product );
+			await use( products );
 
-			// permanently delete the product if it still exists
-			const r = await api.get( `products/${ product.id }` );
-			if ( r.status !== 404 ) {
-				await api.delete( `products/${ product.id }`, {
-					force: true,
-				} );
+			// Cleanup
+			for ( const product of products ) {
+				await api.delete( `products/${ product.id }`, { force: true } );
 			}
 		},
 	} );
 
 	test( 'can edit a product and save the changes', async ( {
 		page,
-		product,
+		products,
 	} ) => {
-		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+		await page.goto(
+			`wp-admin/post.php?post=${ products[ 0 ].id }&action=edit`
+		);
 
 		const newProduct = {
 			name: `Product ${ Date.now() }`,
@@ -91,6 +97,91 @@ baseTest.describe( 'Products > Edit Product', () => {
 			await expect( page.getByLabel( 'Sale price ($)' ) ).toHaveValue(
 				newProduct.salePrice
 			);
+		} );
+	} );
+
+	test( 'can bulk edit products', async ( { page, products } ) => {
+		await page.goto( `wp-admin/edit.php?post_type=product` );
+
+		const regularPriceIncrease = 10;
+		const salePriceDecrease = 10;
+		const stockQtyIncrease = 10;
+
+		await test.step( 'select and bulk edit the products', async () => {
+			for ( const product of products ) {
+				await page.getByLabel( `Select ${ product.name }` ).click();
+			}
+
+			await page
+				.locator( '#bulk-action-selector-top' )
+				.selectOption( 'Edit' );
+			await page.locator( '#doaction' ).click();
+
+			await expect(
+				await page.locator( '#bulk-titles-list li' ).count()
+			).toEqual( products.length );
+		} );
+
+		await test.step( 'update the regular price', async () => {
+			await page
+				.locator( 'select[name="change_regular_price"]' )
+				.selectOption(
+					'Increase existing price by (fixed amount or %):'
+				);
+			await page
+				.getByPlaceholder( 'Enter price ($)' )
+				.fill( `${ regularPriceIncrease }%` );
+		} );
+
+		await test.step( 'update the sale price', async () => {
+			await page
+				.locator( 'select[name="change_sale_price"]' )
+				.selectOption(
+					'Set to regular price decreased by (fixed amount or %):'
+				);
+			await page
+				.getByPlaceholder( 'Enter sale price ($)' )
+				.fill( `${ salePriceDecrease }%` );
+		} );
+
+		await test.step( 'update the stock quantity', async () => {
+			await page
+				.locator( 'select[name="change_stock"]' )
+				.selectOption( 'Increase existing stock by:' );
+			await page
+				.getByPlaceholder( 'Stock qty' )
+				.fill( `${ stockQtyIncrease }` );
+		} );
+
+		await test.step( 'save the updates', async () => {
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+		} );
+
+		await test.step( 'verify the changes', async () => {
+			for ( const product of products ) {
+				await page.goto( `product/${ product.slug }` );
+
+				const expectedRegularPrice = (
+					product.regular_price *
+					( 1 + regularPriceIncrease / 100 )
+				).toFixed( 2 );
+				const expectedSalePrice = (
+					expectedRegularPrice *
+					( 1 - salePriceDecrease / 100 )
+				).toFixed( 2 );
+				const expectedStockQty =
+					product.stock_quantity + stockQtyIncrease;
+
+				await expect
+					.soft( page.locator( 'p' ).locator( 'del' ) )
+					.toHaveText( `$${ expectedRegularPrice }` );
+				await expect
+					.soft( page.locator( 'p' ).getByRole( 'insertion' ) )
+					.toHaveText( `$${ expectedSalePrice }` );
+				await expect
+					.soft( page.getByText( `${ expectedStockQty } in stock` ) )
+					.toBeVisible();
+			}
 		} );
 	} );
 } );
