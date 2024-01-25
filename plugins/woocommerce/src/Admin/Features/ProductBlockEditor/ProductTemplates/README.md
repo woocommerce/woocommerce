@@ -148,6 +148,10 @@ Gets a group by ID. Returns null if the group does not exist.
 
 Gets a section by ID. Returns null if the section does not exist.
 
+##### `get_subsection_by_id( string $subsection_id ): ?SubsectionInterface`
+
+Gets a subsection by ID. Returns null if the subsection does not exist.
+
 ##### `get_block_by_id( string $block_id ): ?BlockInterface`
 
 Gets a block by ID. Returns null if the block does not exist.
