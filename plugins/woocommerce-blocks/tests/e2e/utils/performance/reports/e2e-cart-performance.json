@@ -1,0 +1,8 @@
+{"description":"Cart block loading: (serverResponse)","longest":3916,"shortest":2882,"average":3555.6666666666665}
+{"description":"Cart block loading: (firstPaint)","longest":536,"shortest":303,"average":382.6666666666667}
+{"description":"Cart block loading: (domContentLoaded)","longest":2048,"shortest":1841,"average":1934.6666666666667}
+{"description":"Cart block loading: (loaded)","longest":2433,"shortest":2163,"average":2281.3333333333335}
+{"description":"Cart block loading: (firstContentfulPaint)","longest":716,"shortest":309,"average":520.3333333333334}
+{"description":"Cart block loading: (firstBlock)","longest":2749,"shortest":2441,"average":2550.3333333333335}
+{"description":"Cart block: Change cart item quantity","longest":9.62,"shortest":8.71,"average":9.023333333333333}
+{"description":"Cart block: Coupon entry","longest":5.68,"shortest":4.74,"average":5.1066666666666665}
