@@ -330,7 +330,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
- 
+
 		// External/Affiliate section.
 		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
 			$buy_button_section = $general_group->add_section(
