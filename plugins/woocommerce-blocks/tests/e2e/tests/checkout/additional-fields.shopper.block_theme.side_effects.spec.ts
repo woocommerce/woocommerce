@@ -506,4 +506,255 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			checkoutPageObject.page.getByText( 'Government ID54321' )
 		).toBeVisible();
 	} );
+
+	test( 'Shopper can see and edit submitted fields in my account area', async ( {
+		checkoutPageObject,
+	} ) => {
+		await checkoutPageObject.editShippingDetails();
+		await checkoutPageObject.unsyncBillingWithShipping();
+		await checkoutPageObject.editBillingDetails();
+
+		await checkoutPageObject.fillInCheckoutWithTestData(
+			{},
+			{
+				contact: {
+					'Enter a gift message to include in the package (optional)':
+						'This is a nice gift',
+					'Is this a personal purchase or a business purchase?':
+						'business',
+				},
+				address: {
+					shipping: {
+						'Government ID': '12345',
+						'Confirm government ID': '12345',
+					},
+					billing: {
+						'Government ID': '54321',
+						'Confirm government ID': '54321',
+					},
+				},
+				additional: { 'How did you hear about us?': 'Other' },
+			}
+		);
+
+		// Check checkboxes manually since checking them as part of fillInCheckoutWithTestData is not supported.
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Shipping address',
+			} )
+			.getByLabel( 'Can a truck fit down your road?' )
+			.check();
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Contact information',
+			} )
+			.getByLabel(
+				'Do you want to subscribe to our newsletter? (optional)'
+			)
+			.check();
+
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Billing address',
+			} )
+			.getByLabel( 'Can a truck fit down your road?' )
+			.uncheck();
+		await checkoutPageObject.page.waitForResponse( ( response ) => {
+			return response.url().indexOf( 'wc/store/v1/batch' ) !== -1;
+		} );
+
+		// Fill select fields manually. (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
+		// fields until we recreate th Combobox component. This is because the aria-label includes the value so getting
+		// by label alone is not reliable unless we know the value.
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Shipping address',
+			} )
+			.getByLabel( 'How wide is your road?' )
+			.fill( 'wide' );
+		await checkoutPageObject.page
+			.getByRole( 'group', {
+				name: 'Billing address',
+			} )
+			.getByLabel( 'How wide is your road?' )
+			.fill( 'narrow' );
+
+		// Blur after editing the select fields since they need to be blurred to save.
+		await checkoutPageObject.page.evaluate(
+			'document.activeElement.blur()'
+		);
+		await checkoutPageObject.placeOrder();
+
+		// Check the order was placed successfully.
+		await expect(
+			checkoutPageObject.page.getByText( 'Government ID12345' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText( 'Government ID54321' )
+		).toBeVisible();
+
+		await checkoutPageObject.page.goto( '/my-account' );
+		await checkoutPageObject.page
+			.getByText( 'Addresses', { exact: true } )
+			.click();
+
+		// Check the fields are visible in the addresses.
+		await expect(
+			checkoutPageObject.page.getByText( 'Government ID: 12345' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText( 'Government ID: 54321' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Can a truck fit down your road?: Yes'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText( 'How wide is your road?: Wide' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'How wide is your road?: Narrow'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Can a truck fit down your road?: No'
+			)
+		).toBeVisible();
+
+		// Go to the edit page, check the info matches what was submitted during checkout, then edit it and save it.
+		const billingTitle =
+			checkoutPageObject.page.getByText( 'Billing address' );
+		const billingEdit = checkoutPageObject.page
+			.locator( '.woocommerce-Address-title' )
+			.filter( { has: billingTitle } )
+			.getByText( 'Edit' );
+		await billingEdit.click();
+		await checkoutPageObject.page.waitForURL(
+			'my-account/edit-address/billing/'
+		);
+
+		// Check text inputs in edit mode match the expected values.
+		const govIdInput = checkoutPageObject.page.getByLabel(
+			'Government ID *',
+			{ exact: true }
+		);
+		const confirmGovIdInput = checkoutPageObject.page.getByLabel(
+			'Confirm government ID *',
+			{ exact: true }
+		);
+		await expect( govIdInput ).toHaveValue( '54321' );
+		await expect( confirmGovIdInput ).toHaveValue( '54321' );
+
+		// Check select in edit mode match the expected value.
+		const roadSizeSelect = checkoutPageObject.page.getByLabel(
+			'How wide is your road?'
+		);
+		await expect( roadSizeSelect ).toHaveValue( 'narrow' );
+
+		// Check checkbox in edit mode match the expected value.
+		const truckFittingCheckbox = checkoutPageObject.page.getByLabel(
+			'Can a truck fit down your road? (optional)'
+		);
+		await expect( truckFittingCheckbox ).not.toBeChecked();
+
+		// Change the values and save.
+		await govIdInput.fill( '444444' );
+		await confirmGovIdInput.fill( '444444' );
+		await truckFittingCheckbox.check();
+		await roadSizeSelect.selectOption( 'Super wide' );
+
+		await checkoutPageObject.page.getByText( 'Save address' ).click();
+
+		const shippingTitle =
+			checkoutPageObject.page.getByText( 'Shipping address' );
+		const shippingEdit = checkoutPageObject.page
+			.locator( '.woocommerce-Address-title' )
+			.filter( { has: shippingTitle } )
+			.getByText( 'Edit' );
+		await shippingEdit.click();
+
+		await checkoutPageObject.page.waitForURL(
+			'my-account/edit-address/shipping/'
+		);
+
+		// Check text inputs in edit mode match the expected values.
+		const shippingGovIdInput = checkoutPageObject.page.getByLabel(
+			'Government ID *',
+			{ exact: true }
+		);
+		const shippingConfirmGovIdInput = checkoutPageObject.page.getByLabel(
+			'Confirm government ID *',
+			{ exact: true }
+		);
+		await expect( shippingGovIdInput ).toHaveValue( '12345' );
+		await expect( shippingConfirmGovIdInput ).toHaveValue( '12345' );
+
+		// Check checkbox in edit mode match the expected value.
+		const shippingTruckFittingCheckbox = checkoutPageObject.page.getByLabel(
+			'Can a truck fit down your road? (optional)'
+		);
+		await expect( shippingTruckFittingCheckbox ).toBeChecked();
+
+		// Check select in edit mode match the expected value.
+		const shippingRoadSizeSelect = checkoutPageObject.page.getByLabel(
+			'How wide is your road?'
+		);
+		await expect( shippingRoadSizeSelect ).toHaveValue( 'wide' );
+
+		await govIdInput.fill( '11111' );
+		await confirmGovIdInput.fill( '11111' );
+		await shippingTruckFittingCheckbox.uncheck();
+		await shippingRoadSizeSelect.selectOption( 'Narrow' );
+		await checkoutPageObject.page.getByText( 'Save address' ).click();
+
+		// Check the updated values are visible in the addresses.
+		await expect(
+			checkoutPageObject.page.getByText( 'Government ID: 44444' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText( 'Confirm government ID: 44444' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText( 'Government ID: 11111' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText( 'Confirm government ID: 11111' )
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'How wide is your road?: Super wide'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'How wide is your road?: Narrow'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Can a truck fit down your road?: Yes'
+			)
+		).toBeVisible();
+		await expect(
+			checkoutPageObject.page.getByText(
+				'Can a truck fit down your road?: No'
+			)
+		).toBeVisible();
+
+		// Go to the "Account information" section and check the values from "contact" are visible there.
+		await checkoutPageObject.page
+			.getByText( 'Account details', { exact: true } )
+			.click();
+		await checkoutPageObject.page.waitForURL( 'my-account/edit-account/' );
+
+		// Check text inputs in edit mode match the expected values.
+		const giftMessageInput = checkoutPageObject.page.getByLabel(
+			'Enter a gift message to include in the package (optional)',
+			{ exact: true }
+		);
+		await expect( giftMessageInput ).toHaveValue( 'This is a nice gift' );
+	} );
 } );
