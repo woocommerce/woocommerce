@@ -14,7 +14,7 @@
 		}
 	},
 	"ancestor": [ "woocommerce/product-filter" ],
-	"usesContext": [ "collectionData" ],
+	"usesContext": [ "query", "queryId" ],
 	"attributes": {
 		"className": {
 			"type": "string",
@@ -35,12 +35,6 @@
 		"isPreview": {
 			"type": "boolean",
 			"default": false
-		},
-		"queryParam": {
-			"type": "object",
-			"default": {
-				"calculate_rating_counts": "true"
-			}
 		}
 	},
 	"textdomain": "woocommerce",

@@ -3,6 +3,10 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
+use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
+use Automattic\WooCommerce\Blocks\QueryFilters;
+use Automattic\WooCommerce\Blocks\Package;
+
 
 /**
  * Product Filter: Rating Block
@@ -110,22 +114,23 @@ final class ProductFilterRating extends AbstractBlock {
 			return '';
 		}
 
-		$rating_counts = $block->context['collectionData']['rating_counts'] ?? array();
+		$rating_counts = $this->get_rating_counts( $block );
 		$display_style = $attributes['displayStyle'] ?? 'list';
 		$show_counts   = $attributes['showCounts'] ?? false;
-
-		$wrapper_attributes = get_block_wrapper_attributes(
-			array(
-				'data-wc-interactive' => $this->get_full_block_name(),
-				'class'               => 'wc-block-rating-filter',
-			)
-		);
 
 		$filtered_rating_counts = array_filter(
 			$rating_counts,
 			function( $rating ) {
 				return $rating['count'] > 0;
 			}
+		);
+
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'data-wc-interactive' => $this->get_full_block_name(),
+				'class'               => 'wc-block-rating-filter',
+				'data-has-filter'     => empty( $filtered_rating_counts ) ? 'no' : 'yes',
+			)
 		);
 
 		if ( empty( $filtered_rating_counts ) ) {
@@ -268,5 +273,32 @@ final class ProductFilterRating extends AbstractBlock {
 			'action'         => "{$this->get_full_block_name()}::actions.onDropdownChange",
 			'placeholder'    => $placeholder_text,
 		);
+	}
+
+	/**
+	 * Retrieve the rating filter data for current block.
+	 *
+	 * @param WP_Block $block Block instance.
+	 */
+	private function get_rating_counts( $block ) {
+		$filters    = Package::container()->get( QueryFilters::class );
+		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
+
+		if ( ! empty( $query_vars['tax_query'] ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'rating_filter', true );
+		}
+
+		$counts = $filters->get_rating_counts( $query_vars );
+		$data   = array();
+
+		foreach ( $counts as $key => $value ) {
+			$data[] = array(
+				'rating' => $key,
+				'count'  => $value,
+			);
+		}
+
+		return $data;
 	}
 }

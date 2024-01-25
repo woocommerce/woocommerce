@@ -58,6 +58,7 @@ final class ProductFilterActive extends AbstractBlock {
 				'class'               => 'wc-block-active-filters',
 				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
 				'data-wc-context'     => wp_json_encode( $context ),
+				'data-has-filter'     => empty( $active_filters ) ? 'no' : 'yes',
 			)
 		);
 

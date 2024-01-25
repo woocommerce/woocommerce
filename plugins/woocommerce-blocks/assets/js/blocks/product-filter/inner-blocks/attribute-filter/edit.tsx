@@ -46,14 +46,8 @@ const Edit = ( props: EditProps ) => {
 		debouncedSpeak,
 	} = props;
 
-	const {
-		attributeId,
-		queryParam,
-		queryType,
-		isPreview,
-		displayStyle,
-		showCounts,
-	} = blockAttributes;
+	const { attributeId, queryType, isPreview, displayStyle, showCounts } =
+		blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
 
@@ -75,42 +69,13 @@ const Edit = ( props: EditProps ) => {
 	const { results: filteredCounts } = useCollectionData( {
 		queryAttribute: {
 			taxonomy: attributeObject?.taxonomy || '',
-			queryType: blockAttributes.queryType,
+			queryType,
 		},
 		queryState: {},
 		isEditor: true,
 	} );
 
 	const blockProps = useBlockProps();
-
-	useEffect( () => {
-		if ( ! attributeObject?.taxonomy ) {
-			return;
-		}
-		const newQueryParam = {
-			calculate_attribute_counts: {
-				taxonomy: attributeObject.taxonomy,
-				queryType,
-			},
-		};
-		if (
-			objectHasProp( queryParam, 'calculate_attribute_counts' ) &&
-			objectHasProp(
-				queryParam.calculate_attribute_counts,
-				'taxonomy'
-			) &&
-			objectHasProp(
-				queryParam.calculate_attribute_counts,
-				'queryType'
-			) &&
-			queryParam.calculate_attribute_counts.taxonomy ===
-				attributeObject.taxonomy &&
-			queryParam.calculate_attribute_counts.queryType === queryType
-		) {
-			return;
-		}
-		setAttributes( { queryParam: newQueryParam } );
-	}, [ queryParam, queryType, setAttributes, attributeObject?.taxonomy ] );
 
 	useEffect( () => {
 		const termIdHasProducts =
