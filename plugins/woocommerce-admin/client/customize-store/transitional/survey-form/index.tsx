@@ -77,6 +77,14 @@ export const SurveyForm = ( {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 	const [ rating, setRating ] = useState( 0 );
 
+	const disableSendButton =
+		rating === 0 ||
+		feedbackText === '' ||
+		( ! isStreamlineChecked &&
+			! isDislikeThemesChecked &&
+			! isThemeNoMatchChecked &&
+			! isOtherChecked );
+
 	const sendData = () => {
 		const surveyCompleteEvent = showAISurvey
 			? 'customize_your_store_transitional_survey_complete'
@@ -115,9 +123,10 @@ export const SurveyForm = ( {
 
 				<h4>
 					{ __(
-						'On a scale of 1 = difficult to 5 = very easy, how would you rate the overall experience? *',
+						'On a scale of 1 = difficult to 5 = very easy, how would you rate the overall experience?',
 						'woocommerce'
 					) }
+					<span>*</span>
 				</h4>
 				<StarRating value={ rating } onChange={ setRating } />
 
@@ -133,6 +142,7 @@ export const SurveyForm = ( {
 								'What motivated you to choose the "Design your own theme" option?',
 								'woocommerce'
 						  ) }
+					<span>*</span>
 				</h4>
 				<CheckboxControl
 					label={
@@ -151,7 +161,7 @@ export const SurveyForm = ( {
 				/>
 				<CheckboxControl
 					label={ __(
-						'I didn’t like any of the available themes.',
+						"I didn't like any of the available themes.",
 						'woocommerce'
 					) }
 					checked={ isDislikeThemesChecked }
@@ -159,7 +169,7 @@ export const SurveyForm = ( {
 				/>
 				<CheckboxControl
 					label={ __(
-						'I didn’t find a theme that matched my needs.',
+						"I didn't find a theme that matched my needs.",
 						'woocommerce'
 					) }
 					checked={ isThemeNoMatchChecked }
@@ -178,6 +188,7 @@ export const SurveyForm = ( {
 						'Did you find anything confusing, irrelevant, or not useful?',
 						'woocommerce'
 					) }
+					<span>*</span>
 				</h4>
 				<TextareaControl
 					value={ feedbackText }
@@ -212,7 +223,7 @@ export const SurveyForm = ( {
 					<Button
 						variant="primary"
 						onClick={ sendData }
-						disabled={ rating === 0 }
+						disabled={ disableSendButton }
 					>
 						{ __( 'Send', 'woocommerce' ) }
 					</Button>
