@@ -3,16 +3,16 @@
  */
 import { BlockEditProps } from '@wordpress/blocks';
 
-export type FilterType =
-	| 'price-filter'
-	| 'attribute-filter'
-	| 'rating-filter'
-	| 'active-filters'
-	| 'stock-filter'
-	| 'product-filter';
+/**
+ * Internal dependencies
+ */
+import { BLOCK_NAME_MAP } from './constants';
+
+export type FilterType = keyof typeof BLOCK_NAME_MAP;
 
 export type BlockAttributes = {
 	filterType: FilterType;
+	heading: string;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;

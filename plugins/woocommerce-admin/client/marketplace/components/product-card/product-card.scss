@@ -63,6 +63,8 @@
 			padding: $medium-gap;
 
 			.woocommerce-marketplace__product-card__description,
+			.woocommerce-marketplace__product-card__add-to-store,
+			.woocommerce-marketplace__product-card__rating,
 			.woocommerce-marketplace__product-card__price {
 				display: none;
 			}
@@ -95,7 +97,7 @@
 			display: grid;
 			gap: $medium-gap;
 			height: 100%;
-			grid-template-rows: auto 1fr 20px;
+			grid-template-rows: auto 1fr 36px;
 		}
 
 		&__header {
@@ -158,6 +160,11 @@
 			}
 		}
 
+		/* Allow the "add to store" button to "punch through" the "whole card clickable" trick: */
+		&__add-to-store {
+			position: relative;
+		}
+
 		&__vendor {
 			display: flex;
 			gap: $grid-unit-05;
@@ -187,7 +194,6 @@
 			display: flex;
 			align-items: flex-end;
 			gap: $grid-unit-05;
-			align-self: stretch;
 			text-decoration: none !important;
 			color: $gray-900 !important;
 			font-style: normal;

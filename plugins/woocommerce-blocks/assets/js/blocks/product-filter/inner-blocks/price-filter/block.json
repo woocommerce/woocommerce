@@ -13,14 +13,8 @@
 		"interactivity": true,
 		"inserter": false
 	},
-	"usesContext": [ "collectionData" ],
+	"usesContext": [ "query", "queryId" ],
 	"attributes": {
-		"queryParam": {
-			"type": "object",
-			"default": {
-				"calculate_price_range": "true"
-			}
-		},
 		"showInputFields": {
 			"type": "boolean",
 			"default": true
