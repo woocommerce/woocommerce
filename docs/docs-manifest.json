@@ -516,7 +516,7 @@
           "post_title": "Resources for debugging",
           "menu_title": "Debugging",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/debugging.md",
-          "hash": "cb7be473c9f814b6c60e72578b7c2d4ef052ef859f5a3f48d37cdabd0d3fd114",
+          "hash": "18fa0361e61deb3dbd463cf8c8e6cda3a009365e5de52f65be2d2dcc0742f8e1",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/debugging.md",
           "id": "75c020ee52329c09f4dc04e33dc8aeb11c088534"
         },
@@ -1159,5 +1159,5 @@
       "categories": []
     }
   ],
-  "hash": "8e2a83578cfb32e56bbdbff3598bc22107c1d8eceb6fb9ef5a5dfc040c438f68"
+  "hash": "67a3de0fc35071cd0a334a05134480686569bcae1115990d2172b2142ab7a9a6"
 }
