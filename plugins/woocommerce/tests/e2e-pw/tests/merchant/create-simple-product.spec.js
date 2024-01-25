@@ -6,13 +6,14 @@ const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
 const salePrice = '6.99';
 const productDescription = 'Virtual product description.';
-const productSKU = '1234567890'
-const productPurchaseNote = 'Virtual product purchase note'
-const productAttribute = 'color'
-const productAttributeColor = 'red | white'
+const productSKU = '1234567890';
+const productPurchaseNote = 'Virtual product purchase note';
+const productAttribute = 'color';
+const productAttributeColor = 'red | white';
 const productTag = 'nonVirtualTag';
 const productCategory = 'nonVirtualCategory';
 const productDescriptionShort = 'Short description';
+
 let shippingZoneId, virtualProductId, nonVirtualProductId;
 
 test.describe.serial( 'Add New Simple Product Page', () => {
