@@ -235,6 +235,16 @@ class Analytics {
 				),
 			),
 			array(
+				'id'       => 'woocommerce-analytics-order-attribution',
+				'title'    => __( 'Order Attribution', 'woocommerce' ),
+				'parent'   => 'woocommerce-analytics',
+				'path'     => '/analytics/order-attribution',
+				'nav_args' => array(
+					'order'  => 41,
+					'parent' => 'woocommerce-analytics',
+				),
+			),
+			array(
 				'id'       => 'woocommerce-analytics-variations',
 				'title'    => __( 'Variations', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
