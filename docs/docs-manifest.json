@@ -84,6 +84,15 @@
           "id": "7369dc328c49206771a2f8d0da5d920c480b5207"
         },
         {
+          "post_title": "Add link to logged data",
+          "menu_title": "Add link to logged data",
+          "tags": "code-snippets",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/link-to-logged-data.md",
+          "hash": "fd1c3a58da8b7eed11da841d901b4d3cc117c6753c3b3834f3de41ea266490b9",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/link-to-logged-data.md",
+          "id": "34da337f79be5ce857024f541a99d302174ca37d"
+        },
+        {
           "post_title": "Customizing checkout fields using actions and filters",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/customising-checkout-fields.md",
@@ -390,12 +399,39 @@
           "id": "549d92ad5518998ddcdcaa96beb6e25f09e4b1e5"
         },
         {
-          "post_title": "WooCommerce extension developer handbook",
-          "menu_title": "Extension developer handbook",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/extension-developer-handbook.md",
-          "hash": "c67969ee8f952ca423bdef588f8965f57a48da267222cf8bf03496bf2b95d3ab",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/extension-developer-handbook.md",
-          "id": "2158c631d7e34f2c2d7c9ae16371f501fb47e37f"
+          "post_title": "WooCommerce extension development best practices",
+          "menu_title": "Best Practices",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/extension-development-best-practices.md",
+          "hash": "86442bed88a67c95a805d3bd36b71b0f6cbb2a48edf8c4ac54c348f9f7ec94ff",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/extension-development-best-practices.md",
+          "id": "83050f0142b6de00b73b3638d46ddddc5a2f8b12"
+        },
+        {
+          "post_title": "Example WordPress plugin header comment for WooCommerce extensions",
+          "menu_title": "Plugin header comments",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/example-plugin-header-comment.md",
+          "hash": "b729ec74eb4703f87d0ee46430f2ca473576f0c03de2ab7ecfc87a2f83e7d086",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/example-plugin-header-comment.md",
+          "id": "2fb49dc6ccad894e02f123940a9db98c7724dddc"
+        },
+        {
+          "post_title": "Data storage primer",
+          "menu_title": "Data storage",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/data-storage.md",
+          "hash": "d3a1c2d01b8f4b216f02b357d2510340e1b2f63ea0adab113100946c8d81cdb1",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/data-storage.md",
+          "id": "b3e0b17ca74596e858c26887c1e4c8ee6c8f6102"
+        },
+        {
+          "post_title": "How to check if WooCommerce is active",
+          "menu_title": "Check if WooCommerce is active",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/check-if-woo-is-active.md",
+          "hash": "47cb6a0f60dad691e3dfd1f26e00b5582d51ec23e7de3f800126701b5967f557",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/check-if-woo-is-active.md",
+          "id": "2c2e89013ad76ff2596680224047723163512bc2"
         },
         {
           "post_title": "How to build your first extension",
@@ -610,7 +646,7 @@
           "post_title": "Writing high quality testing instructions",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/writing-high-quality-testing-instructions.md",
-          "hash": "20973104ec763666e0bccc848d1f22ef58891c630d77de80fd13232758064f59",
+          "hash": "80ec05c732a5182c84ebc87b55912a1ad47e9b141c0fa45681c84c283e91711a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/writing-high-quality-testing-instructions.md",
           "id": "56a8ef0ef0afec9c884f655e7fdd23d9666c9d00"
         },
@@ -739,6 +775,15 @@
           "hash": "7b0e53d779fe564b8f6c4e1a96567b2aef938ce840997045707ed4d30aa5b361",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/security/security-best-practices.md",
           "id": "d579f1c5174c67421dff64719e001b31a015a3d2"
+        },
+        {
+          "post_title": "How to Prevent Data Leaks in WooCommerce",
+          "menu_title": "Prevent Data Leaks",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/security/prevent-data-leaks.md",
+          "hash": "762a6725340711063688e33c0107dbcf3a7aed1674bc0bcd9ed4157b3b49ea2e",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/security/prevent-data-leaks.md",
+          "id": "91b86abe2953e1cd4e9d6d407238093245346cf9"
         }
       ],
       "categories": []
@@ -805,7 +850,7 @@
           "menu_title": "Fix outdated templates",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/fixing-outdated-woocommerce-templates.md",
-          "hash": "2b859826f57c2d6f11acf21f67e52a9ac7e582e52a1337484dabbb8fbca60a60",
+          "hash": "708e7242975ae285e3df391b9cf144f61d3519183eaddd31a96dfc5bbc4a0b47",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/fixing-outdated-woocommerce-templates.md",
           "id": "1fa09bbc2137a65288cc1576c1053224db7187ed"
         },
@@ -1114,5 +1159,5 @@
       "categories": []
     }
   ],
-  "hash": "ad958cbee4bccafbc89a35c5b41e4a84d9638f666b81adb3b172e658760cb003"
+  "hash": "8e2a83578cfb32e56bbdbff3598bc22107c1d8eceb6fb9ef5a5dfc040c438f68"
 }
