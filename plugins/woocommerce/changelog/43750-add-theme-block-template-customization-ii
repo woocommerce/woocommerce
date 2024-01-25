@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Add e2e tests to verify specific theme templates have priority over user-modified Product Catalog template
+

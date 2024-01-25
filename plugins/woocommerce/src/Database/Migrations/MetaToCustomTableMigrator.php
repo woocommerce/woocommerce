@@ -262,7 +262,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 		$this->clear_errors();
 		$exception = null;
 
-		if ( count( $data['data'] ) === 0 ) {
+		if ( ! isset( $data['data'] ) || ! is_array( $data['data'] ) || count( $data['data'] ) === 0 ) {
 			return array(
 				'errors'    => $this->get_errors(),
 				'exception' => null,

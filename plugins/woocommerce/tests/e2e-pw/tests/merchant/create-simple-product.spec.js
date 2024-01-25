@@ -5,7 +5,7 @@ const virtualProductName = 'Virtual Product Name';
 const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
 const productTag = 'nonVirtualTag';
-const productCategory = 'nonVirtualCategory'
+const productCategory = 'nonVirtualCategory';
 const productDescription = 'Description of a non-virtual product.';
 const productDescriptionShort = 'Short description';
 let shippingZoneId, virtualProductId, nonVirtualProductId;
@@ -52,30 +52,32 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		} );
 
 		// clean up tag after run
-		await api
-			.get( 'products/tags' )
-			.then( async ( response ) => {
-				for (let i = 0; i < response.data.length; i++) {
-					if (response.data[i].name === productTag) {
-						await api.delete(`products/tags/${response.data[i].id}`, {
+		await api.get( 'products/tags' ).then( async ( response ) => {
+			for ( let i = 0; i < response.data.length; i++ ) {
+				if ( response.data[ i ].name === productTag ) {
+					await api.delete(
+						`products/tags/${ response.data[ i ].id }`,
+						{
 							force: true,
-						} );
-					}
+						}
+					);
 				}
-			} );
+			}
+		} );
 
 		// clean up category after run
-		await api
-			.get( 'products/categories' )
-			.then( async ( response ) => {
-				for (let i = 0; i < response.data.length; i++) {
-					if (response.data[i].name === productCategory) {
-						await api.delete(`products/categories/${response.data[i].id}`, {
+		await api.get( 'products/categories' ).then( async ( response ) => {
+			for ( let i = 0; i < response.data.length; i++ ) {
+				if ( response.data[ i ].name === productCategory ) {
+					await api.delete(
+						`products/categories/${ response.data[ i ].id }`,
+						{
 							force: true,
-						} );
-					}
+						}
+					);
 				}
-			} );
+			}
+		} );
 
 		// delete the shipping zone
 		await api.delete( `shipping/zones/${ shippingZoneId }`, {
@@ -120,7 +122,9 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( `/?post_type=product&p=${ virtualProductId }`, {
 			waitUntil: 'networkidle',
 		} );
-		await expect( page.getByRole( 'heading', { name: virtualProductName } ) ).toBeVisible();
+		await expect(
+			page.getByRole( 'heading', { name: virtualProductName } )
+		).toBeVisible();
 		await expect( page.getByText( productPrice ).first() ).toBeVisible();
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 		await page.getByRole( 'link', { name: 'View cart' } ).click();
@@ -129,14 +133,14 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		);
 		await expect(
 			page.locator( 'a.shipping-calculator-button' )
-		).not.toBeVisible();
+		).toBeHidden();
 		await page
 			.locator( `a.remove[data-product_id='${ virtualProductId }']` )
 			.click();
 		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.locator( `a.remove[data-product_id='${ virtualProductId }']` )
-		).not.toBeVisible();
+		).toBeHidden();
 	} );
 
 	test( 'can create simple non-virtual product', async ( { page } ) => {
@@ -150,9 +154,11 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			.locator( '.wp-editor' )
 			.fill( productDescription );
 
-		await page.getByRole( 'textbox', { name: 'Regular price ($)', exact: true} ).fill( productPrice )
+		await page
+			.getByRole( 'textbox', { name: 'Regular price ($)', exact: true } )
+			.fill( productPrice );
 
-		await page.getByText('Inventory').click();
+		await page.getByText( 'Inventory' ).click();
 		await page.getByLabel( 'SKU', { exact: true } ).fill( '11' );
 
 		const productDimensions = {
@@ -162,11 +168,15 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			height: '30',
 		};
 
-		await page.getByRole( 'link' , { name: 'Shipping' } ).click();
+		await page.getByRole( 'link', { name: 'Shipping' } ).click();
 		await page.getByPlaceholder( '0' ).fill( productDimensions.weight );
-		await page.getByPlaceholder( 'Length' ).fill( productDimensions.length );
+		await page
+			.getByPlaceholder( 'Length' )
+			.fill( productDimensions.length );
 		await page.getByPlaceholder( 'Width' ).fill( productDimensions.width );
-		await page.getByPlaceholder( 'Height' ).fill( productDimensions.height );
+		await page
+			.getByPlaceholder( 'Height' )
+			.fill( productDimensions.height );
 
 		await page
 			.frameLocator( '#excerpt_ifr' )
@@ -174,13 +184,25 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			.fill( productDescriptionShort );
 
 		await page.getByText( '+ Add new category' ).click();
-		await page.getByLabel( 'Add new category', { exact: true } ).fill( productCategory );
-		await page.getByRole( 'button', { name: 'Add new category', exact: true} ).click();
+		await page
+			.getByLabel( 'Add new category', { exact: true } )
+			.fill( productCategory );
+		await page
+			.getByRole( 'button', { name: 'Add new category', exact: true } )
+			.click();
 
-		await page.getByRole( 'combobox', { name: 'Add new tag'} ).fill( productTag );
-		await page.getByRole( 'button', { name: 'Add', exact: true} ).click();
+		await page
+			.getByRole( 'combobox', { name: 'Add new tag' } )
+			.fill( productTag );
+		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
 
-		await page.getByRole( 'button', { name: 'Publish', exact: true, disabled: false } ).click();
+		await page
+			.getByRole( 'button', {
+				name: 'Publish',
+				exact: true,
+				disabled: false,
+			} )
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 
 		// When running in parallel, clicking the publish button sometimes saves products as a draft
@@ -189,7 +211,13 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 				await page.locator( '#post-status-display' ).innerText()
 			 ).includes( 'Draft' )
 		) {
-			await page.getByRole( 'button', { name: 'Publish', exact: true, disabled: false } ).click();
+			await page
+				.getByRole( 'button', {
+					name: 'Publish',
+					exact: true,
+					disabled: false,
+				} )
+				.click();
 			await page.waitForLoadState( 'networkidle' );
 		}
 
@@ -210,7 +238,9 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( `/?post_type=product&p=${ nonVirtualProductId }`, {
 			waitUntil: 'networkidle',
 		} );
-		await expect( page.getByRole( 'heading', { name: nonVirtualProductName } ) ).toBeVisible();
+		await expect(
+			page.getByRole( 'heading', { name: nonVirtualProductName } )
+		).toBeVisible();
 		await expect( page.getByText( productPrice ).first() ).toBeVisible();
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 		await page.getByRole( 'link', { name: 'View cart' } ).click();
@@ -228,6 +258,6 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			page.locator(
 				`a.remove[data-product_id='${ nonVirtualProductId }']`
 			)
-		).not.toBeVisible();
+		).toBeHidden();
 	} );
 } );

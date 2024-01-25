@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Apply type checks based on Rector's suggestions

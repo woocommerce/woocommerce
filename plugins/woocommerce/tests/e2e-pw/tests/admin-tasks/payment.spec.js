@@ -4,7 +4,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 test.describe( 'Payment setup task', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeEach( async ( { page, baseURL } ) => {
+	test.beforeEach( async ( { baseURL } ) => {
 		await new wcApi( {
 			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
