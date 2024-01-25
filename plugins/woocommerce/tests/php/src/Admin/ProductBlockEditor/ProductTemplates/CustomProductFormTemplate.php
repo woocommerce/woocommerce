@@ -63,6 +63,41 @@ class CustomProductFormTemplate extends AbstractProductFormTemplate implements P
 				'blockName' => 'core/columns',
 			]
 		);
+		$inventory_group = $this->add_group(
+			[
+				'id'         => 'inventory',
+				'order'      => 20,
+				'attributes' => [
+					'title' => 'Pricing',
+				],
+			]
+		);
+		$product_inventory_section = $inventory_group->add_section(
+			[
+				'id'         => 'product-inventory-section',
+				'attributes' => [
+					'title'       => 'Inventory',
+					'description' => '',
+					'blockGap'    => 'unit-40',
+				],
+			]
+		);
+		$product_inventory_inner_section = $product_inventory_section->add_subsection(
+			[
+				'id'         => 'product-stock-subsection',
+				'attributes' => [
+					'title'       => 'Stock',
+					'description' => '',
+					'blockGap'    => 'unit-40',
+				],
+			]
+		);
+		$product_inventory_inner_section->add_block(
+			[
+				'id'        => 'product-inventory-sku',
+				'blockName' => 'woocommerce/product-sku-field',
+			]
+		);
 	}
 	/**
 	 * Get the template ID.
