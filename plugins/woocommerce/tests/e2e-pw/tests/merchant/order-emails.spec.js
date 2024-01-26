@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const { test, expect } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
@@ -10,7 +11,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	};
 
 	const storeName = 'WooCommerce Core E2E Test Suite';
-	let orderId, newOrderId;
+	let orderId, newOrderId, cancelledOrderId;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -60,7 +61,9 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			version: 'wc/v3',
 		} );
 
-		await api.post( `orders/batch`, { delete: [ orderId, newOrderId ] } );
+		await api.post( `orders/batch`, {
+			delete: [ orderId, newOrderId, cancelledOrderId ],
+		} );
 	} );
 
 	test( 'can receive new order email', async ( { page, baseURL } ) => {
@@ -92,6 +95,38 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
 		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
+	} );
+
+	test( 'can receive cancelled order email', async ( { page, baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api
+			.post( 'orders', {
+				status: 'processing',
+				billing: customerBilling,
+			} )
+			.then( ( response ) => {
+				cancelledOrderId = response.data.id;
+				api.put( `orders/${ cancelledOrderId }`, {
+					status: 'cancelled',
+				} );
+			} );
+		await page.waitForTimeout( 1000 );
+		// search to narrow it down to just the messages we want
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerBilling.email
+			) }`
+		);
+		await expect(
+			page.getByText(
+				`[${ storeName }]: Order #${ cancelledOrderId } has been cancelled`
+			)
+		).toBeVisible();
 	} );
 
 	test( 'can resend new order notification', async ( { page } ) => {
