@@ -40,12 +40,9 @@ const NoRatings = () => (
 );
 
 const Edit = ( props: BlockEditProps< Attributes > ) => {
-	const { className } = props.attributes;
 	const blockAttributes = props.attributes;
 
-	const blockProps = useBlockProps( {
-		className: classnames( 'wc-block-rating-filter', className ),
-	} );
+	const blockProps = useBlockProps();
 
 	const isEditor = true;
 

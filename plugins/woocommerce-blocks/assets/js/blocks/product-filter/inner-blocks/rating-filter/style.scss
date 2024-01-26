@@ -1,8 +1,10 @@
 .wp-block-woocommerce-product-filter-rating {
-	&.is-loading {
-		@include placeholder();
-		margin-top: $gap;
-		box-shadow: none;
-		border-radius: 0;
+	.wc-block-components-product-rating {
+		margin-bottom: 0;
+		display: flex;
+	}
+
+	.wc-block-components-product-rating-count {
+		margin-left: $gap-smallest;
 	}
 }
