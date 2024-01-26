@@ -37,6 +37,34 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	private $search_sku_in_product_lookup_table = '';
 
 	/**
+	 * Suggested product ids.
+	 *
+	 * @var array
+	 */
+	private $suggested_products_ids = array();
+
+	/**
+	 * Register the routes for products.
+	 */
+	public function register_routes() {
+		parent::register_routes();
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/suggested-products',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_suggested_products' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_suggested_products_collection_params(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+	}
+
+	/**
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
@@ -233,6 +261,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$args['order']   = $ordering_args['order'];
 		if ( $ordering_args['meta_key'] ) {
 			$args['meta_key'] = $ordering_args['meta_key']; // WPCS: slow query ok.
+		}
+
+		/*
+		 * When the suggested products ids is not empty,
+		 * filter the query to return only the suggested products,
+		 * overwriting the post__in parameter.
+		 */
+		if ( ! empty( $this->suggested_products_ids ) ) {
+			$args['post__in'] = $this->suggested_products_ids;
 		}
 
 		return $args;
@@ -1484,6 +1521,72 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
+	 * Add new options for the suggested-products endpoint.
+	 *
+	 * @return array
+	 */
+	public function get_suggested_products_collection_params() {
+		$params = parent::get_collection_params();
+
+		$params['categories'] = array(
+			'description'       => __( 'Limit result set to specific product categorie ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['tags'] = array(
+			'description'       => __( 'Limit result set to specific product tag ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'wp_parse_id_list',
+		);
+
+		$params['limit'] = array(
+			'description'       => __( 'Limit result set to specific amount of suggested products.', 'woocommerce' ),
+			'type'              => 'integer',
+			'default'           => 5,
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'absint',
+		);
+
+		return $params;
+	}
+
+	/**
+	 * Get the downloads for a product.
+	 *
+	 * @param WC_Product $product Product instance.
+	 *
+	 * @return array
+	 */
+	protected function get_downloads( $product ) {
+		$downloads = array();
+
+		$context = isset( $this->request ) && isset( $this->request['context'] ) ? $this->request['context'] : 'view';
+
+		if ( $product->is_downloadable() || 'edit' === $context ) {
+			foreach ( $product->get_downloads() as $file_id => $file ) {
+				$downloads[] = array(
+					'id'   => $file_id, // MD5 hash.
+					'name' => $file['name'],
+					'file' => $file['file'],
+				);
+			}
+		}
+
+		return $downloads;
+	}
+
+	/**
 	 * Get product data.
 	 *
 	 * @param WC_Product $product Product instance.
@@ -1537,5 +1640,37 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Get the suggested products.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return object
+	 */
+	public function get_suggested_products( $request ) {
+		$categories  = $request->get_param( 'categories' );
+		$tags        = $request->get_param( 'tags' );
+		$exclude_ids = $request->get_param( 'exclude' );
+		$limit       = $request->get_param( 'limit' ) ? $request->get_param( 'limit' ) : 5;
+
+		$data_store                   = WC_Data_Store::load( 'product' );
+		$this->suggested_products_ids = $data_store->get_related_products(
+			$categories,
+			$tags,
+			$exclude_ids,
+			$limit,
+			null // No need to pass the product ID.
+		);
+
+		// When no suggested products are found, return an empty array.
+		if ( empty( $this->suggested_products_ids ) ) {
+			return array();
+		}
+
+		// Ensure to respect the limit, since the data store may return more than the limit.
+		$this->suggested_products_ids = array_slice( $this->suggested_products_ids, 0, $limit );
+
+		return parent::get_items( $request );
 	}
 }

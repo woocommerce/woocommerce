@@ -1554,7 +1554,7 @@ WHERE
 	 *
 	 * @param array $ids List of order IDs.
 	 *
-	 * @return \stdClass[]|object|null DB Order objects or error.
+	 * @return \stdClass[] DB Order objects or error.
 	 */
 	protected function get_order_data_for_ids( $ids ) {
 		global $wpdb;

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: This PR fixes a linting error and does not require a change entry
+

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update the validation for business_extensions parameter to accept an array of strings
