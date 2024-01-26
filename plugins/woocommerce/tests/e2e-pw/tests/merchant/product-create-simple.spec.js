@@ -1,12 +1,6 @@
 const { test: baseTest, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const virtualProductName = 'Virtual Product Name';
-const nonVirtualProductName = 'Non Virtual Product Name';
-const productPrice = '9.99';
-
-let shippingZoneId, virtualProductId, nonVirtualProductId;
-
 baseTest.describe( 'Products > Add Simple Product', () => {
 	baseTest.use( { storageState: process.env.ADMINSTATE } );
 
@@ -67,74 +61,6 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 			}
 		},
 	} );
-
-	// test.beforeAll( async ( { api } ) => {
-	// await api.post( 'products/categories', {
-	// 	name: 'Clothing',
-	// 	image: {
-	// 		src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_front.jpg',
-	// 	},
-	// } );
-
-	// // need to add a shipping zone
-	// const api = new wcApi( {
-	// 	url: baseURL,
-	// 	consumerKey: process.env.CONSUMER_KEY,
-	// 	consumerSecret: process.env.CONSUMER_SECRET,
-	// 	version: 'wc/v3',
-	// } );
-	// // and the flat rate shipping method to that zone
-	// await api
-	// 	.post( 'shipping/zones', {
-	// 		name: 'Somewhere',
-	// 	} )
-	// 	.then( ( response ) => {
-	// 		shippingZoneId = response.data.id;
-	// 		api.put( `shipping/zones/${ shippingZoneId }/locations`, [
-	// 			{ code: 'CN' },
-	// 		] );
-	// 		api.post( `shipping/zones/${ shippingZoneId }/methods`, {
-	// 			method_id: 'flat_rate',
-	// 		} );
-	// 	} );
-	// } );
-	//
-	// test.afterAll( async ( { baseURL } ) => {
-
-	//
-	// 	// clean up tag after run
-	// 	await api.get( 'products/tags' ).then( async ( response ) => {
-	// 		for ( let i = 0; i < response.data.length; i++ ) {
-	// 			if ( response.data[ i ].name === productTag ) {
-	// 				await api.delete(
-	// 					`products/tags/${ response.data[ i ].id }`,
-	// 					{
-	// 						force: true,
-	// 					}
-	// 				);
-	// 			}
-	// 		}
-	// 	} );
-	//
-	// 	// clean up category after run
-	// 	await api.get( 'products/categories' ).then( async ( response ) => {
-	// 		for ( let i = 0; i < response.data.length; i++ ) {
-	// 			if ( response.data[ i ].name === productCategory ) {
-	// 				await api.delete(
-	// 					`products/categories/${ response.data[ i ].id }`,
-	// 					{
-	// 						force: true,
-	// 					}
-	// 				);
-	// 			}
-	// 		}
-	// 	} );
-	//
-	// 	// delete the shipping zone
-	// 	await api.delete( `shipping/zones/${ shippingZoneId }`, {
-	// 		force: true,
-	// 	} );
-	// } );
 
 	for ( const productType of Object.keys( productData ) ) {
 		test( `can create a simple ${ productType } product`, async ( {
@@ -280,6 +206,12 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 					.soft( page.getByRole( 'heading', { name: product.name } ) )
 					.toBeVisible();
 
+				// Verify price
+				await expect
+					.soft( page.getByText( product.regularPrice ).first() )
+					.toBeVisible();
+
+				// Verify description
 				await expect
 					.soft( page.getByText( product.shortDescription ) )
 					.toBeVisible();
@@ -290,7 +222,7 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 					.soft( page.getByText( `SKU: ${ product.sku }` ) )
 					.toBeVisible();
 
-				// Category
+				// Verify category
 				await expect
 					.soft(
 						page
@@ -299,7 +231,7 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 					)
 					.toBeVisible();
 
-				// Tags
+				// Verify tags
 				await expect
 					.soft(
 						page.getByRole( 'link', { name: 'e2e', exact: true } )
@@ -318,63 +250,25 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 			await test.step( 'shopper can add the product to cart', async () => {
 				// logout admin user
 				await page.context().clearCookies();
+				await page.reload();
+
+				await page
+					.getByRole( 'button', { name: 'Add to cart' } )
+					.click();
+				await page.getByRole( 'link', { name: 'View cart' } ).click();
+
+				await expect(
+					page.getByRole( 'link' ).filter( { hasText: product.name } )
+				).toBeVisible();
+
+				await page
+					.getByRole( 'link', { name: 'Proceed to checkout' } )
+					.click();
+
+				await expect(
+					page.getByRole( 'cell' ).filter( { hasText: product.name } )
+				).toBeVisible();
 			} );
 		} );
 	}
-
-	test.skip( 'can have a shopper add the simple virtual product to the cart', async ( {
-		page,
-	} ) => {
-		await page.goto( `/?post_type=product&p=${ virtualProductId }`, {
-			waitUntil: 'networkidle',
-		} );
-		await expect(
-			page.getByRole( 'heading', { name: virtualProductName } )
-		).toBeVisible();
-		await expect( page.getByText( productPrice ).first() ).toBeVisible();
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
-		await page.getByRole( 'link', { name: 'View cart' } ).click();
-		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
-			virtualProductName
-		);
-		await expect(
-			page.locator( 'a.shipping-calculator-button' )
-		).toBeHidden();
-		await page
-			.locator( `a.remove[data-product_id='${ virtualProductId }']` )
-			.click();
-		await page.waitForLoadState( 'networkidle' );
-		await expect(
-			page.locator( `a.remove[data-product_id='${ virtualProductId }']` )
-		).toBeHidden();
-	} );
-
-	test.skip( 'can have a shopper add the simple non-virtual product to the cart', async ( {
-		page,
-	} ) => {
-		await page.goto( `/?post_type=product&p=${ nonVirtualProductId }`, {
-			waitUntil: 'networkidle',
-		} );
-		await expect(
-			page.getByRole( 'heading', { name: nonVirtualProductName } )
-		).toBeVisible();
-		await expect( page.getByText( productPrice ).first() ).toBeVisible();
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
-		await page.getByRole( 'link', { name: 'View cart' } ).click();
-		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
-			nonVirtualProductName
-		);
-		await expect(
-			page.locator( 'a.shipping-calculator-button' )
-		).toBeVisible();
-		await page
-			.locator( `a.remove[data-product_id='${ nonVirtualProductId }']` )
-			.click();
-		await page.waitForLoadState( 'networkidle' );
-		await expect(
-			page.locator(
-				`a.remove[data-product_id='${ nonVirtualProductId }']`
-			)
-		).toBeHidden();
-	} );
 } );
