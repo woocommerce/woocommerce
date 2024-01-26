@@ -1,5 +1,5 @@
 .woocommerce-product-block-editor {
-	padding-top: 106px;
+	padding-top: 43px; //
 
 	h1,
 	h2,
@@ -147,17 +147,7 @@
 
 	.block-editor-block-list__layout {
 		&.is-root-container {
-			padding-left: calc(2 * $gap);
-			padding-right: calc(2 * $gap);
 			padding-bottom: 128px;
-
-			@include breakpoint(">782px") {
-				padding-left: 0;
-				padding-right: 0;
-				max-width: 650px;
-				margin-left: auto;
-				margin-right: auto;
-			}
 		}
 
 		.block-editor-block-list__block:not([contenteditable]):focus:after {
