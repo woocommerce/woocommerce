@@ -287,9 +287,10 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_allowed_countries() {
-		$countries = $this->countries;
+		$countries         = $this->countries;
+		$allowed_countries = get_option( 'woocommerce_allowed_countries' );
 
-		if ( 'all_except' === get_option( 'woocommerce_allowed_countries' ) ) {
+		if ( 'all_except' === $allowed_countries ) {
 			$except_countries = get_option( 'woocommerce_all_except_countries', array() );
 
 			if ( $except_countries ) {
@@ -297,7 +298,7 @@ class WC_Countries {
 					unset( $countries[ $country ] );
 				}
 			}
-		} elseif ( 'specific' === get_option( 'woocommerce_allowed_countries' ) ) {
+		} elseif ( 'specific' === $allowed_countries ) {
 			$countries     = array();
 			$raw_countries = get_option( 'woocommerce_specific_allowed_countries', array() );
 
