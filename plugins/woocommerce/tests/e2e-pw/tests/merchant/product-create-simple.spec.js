@@ -84,6 +84,7 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 				await page.getByLabel( 'Product name' ).fill( product.name );
 
 				// Product description
+				await page.locator( '#content-html' ).click(); // text mode to avoid the iframe
 				await page
 					.locator( '.wp-editor-area' )
 					.first()
