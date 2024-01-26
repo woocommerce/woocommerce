@@ -51,6 +51,12 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 			await use( api );
 		},
 
+		product: async ( { api }, use ) => {
+			const product = {};
+			await use( product );
+			await api.delete( `products/${ product.id }`, { force: true } );
+		},
+
 		category: async ( { api }, use ) => {
 			let category = {};
 
@@ -71,51 +77,45 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 		},
 	} );
 
-	test.afterAll( async ( { api } ) => {
-		// Products cleanup
-		for ( const product of Object.values( productData ) ) {
-			await api.delete( `products/${ product.id }`, { force: true } );
-		}
-	} );
-
 	for ( const productType of Object.keys( productData ) ) {
 		test( `can create a simple ${ productType } product`, async ( {
 			page,
 			category,
+			product,
 		} ) => {
-			const product = productData[ productType ];
-
 			await test.step( 'add new product', async () => {
 				await page.goto( 'wp-admin/post-new.php?post_type=product' );
 			} );
 
 			await test.step( 'add product name and description', async () => {
 				// Product name
-				await page.getByLabel( 'Product name' ).fill( product.name );
+				await page
+					.getByLabel( 'Product name' )
+					.fill( productData[ productType ].name );
 
 				// Product description
 				await page.locator( '#content-html' ).click(); // text mode to avoid the iframe
 				await page
 					.locator( '.wp-editor-area' )
 					.first()
-					.fill( product.description );
+					.fill( productData[ productType ].description );
 				await page
 					.locator( '.wp-editor-area' )
 					.nth( 1 )
-					.fill( product.shortDescription );
+					.fill( productData[ productType ].shortDescription );
 			} );
 
 			await test.step( 'add product price and inventory information', async () => {
 				// Product price
 				await page
 					.getByLabel( 'Regular price ($)' )
-					.fill( product.regularPrice );
+					.fill( productData[ productType ].regularPrice );
 				await page.getByText( 'Inventory' ).click();
 
 				// Inventory information
 				await page
 					.getByLabel( 'SKU', { exact: true } )
-					.fill( product.sku );
+					.fill( productData[ productType ].sku );
 			} );
 
 			await test.step( 'add product advanced information', async () => {
@@ -123,7 +123,7 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 				await page.getByText( 'Advanced' ).click();
 				await page
 					.getByLabel( 'Purchase note' )
-					.fill( product.purchaseNote );
+					.fill( productData[ productType ].purchaseNote );
 				await page.keyboard.press( 'Enter' );
 			} );
 
@@ -161,28 +161,28 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 			} );
 
 			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( product.shipping ) {
+			if ( productData[ productType ].shipping ) {
 				await test.step( 'add shipping details', async () => {
 					await page
 						.getByRole( 'link', { name: 'Shipping' } )
 						.click();
 					await page
 						.getByPlaceholder( '0' )
-						.fill( product.shipping.weight );
+						.fill( productData[ productType ].shipping.weight );
 					await page
 						.getByPlaceholder( 'Length' )
-						.fill( product.shipping.length );
+						.fill( productData[ productType ].shipping.length );
 					await page
 						.getByPlaceholder( 'Width' )
-						.fill( product.shipping.width );
+						.fill( productData[ productType ].shipping.width );
 					await page
 						.getByPlaceholder( 'Height' )
-						.fill( product.shipping.height );
+						.fill( productData[ productType ].shipping.height );
 				} );
 			}
 
 			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( product.virtual ) {
+			if ( productData[ productType ].virtual ) {
 				await test.step( 'add virtual product details', async () => {
 					await page.getByLabel( 'Virtual' ).check();
 					await expect( page.getByLabel( 'Virtual' ) ).toBeChecked();
@@ -190,7 +190,7 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 			}
 
 			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( product.downloadable ) {
+			if ( productData[ productType ].downloadable ) {
 				await test.step( 'add downloadable product details', async () => {
 					await page.getByLabel( 'Downloadable' ).check();
 					await expect(
@@ -204,10 +204,12 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 						.click();
 					await page
 						.getByPlaceholder( 'File name' )
-						.fill( product.fileName );
+						.fill( productData[ productType ].fileName );
 					await page
 						.getByPlaceholder( 'http://' )
-						.fill( `https://example.com/${ product.fileName }` );
+						.fill(
+							`https://example.com/${ productData[ productType ].fileName }`
+						);
 					await page.getByPlaceholder( 'Never' ).fill( '365' );
 				} );
 			}
@@ -223,7 +225,7 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 						.filter( { hasText: 'Product published.' } )
 				).toBeVisible();
 
-				product.id = page.url().match( /(?<=post=)\d+/ );
+				product.id = page.url().match( /(?<=post=)\d+/ )[ 0 ];
 				expect( product.id ).toBeDefined();
 			} );
 
@@ -236,23 +238,43 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 
 				// Verify product name
 				await expect
-					.soft( page.getByRole( 'heading', { name: product.name } ) )
+					.soft(
+						page.getByRole( 'heading', {
+							name: productData[ productType ].name,
+						} )
+					)
 					.toBeVisible();
 
 				// Verify price
 				await expect
-					.soft( page.getByText( product.regularPrice ).first() )
+					.soft(
+						page
+							.getByText(
+								productData[ productType ].regularPrice
+							)
+							.first()
+					)
 					.toBeVisible();
 
 				// Verify description
 				await expect
-					.soft( page.getByText( product.shortDescription ) )
+					.soft(
+						page.getByText(
+							productData[ productType ].shortDescription
+						)
+					)
 					.toBeVisible();
 				await expect
-					.soft( page.getByText( product.description ) )
+					.soft(
+						page.getByText( productData[ productType ].description )
+					)
 					.toBeVisible();
 				await expect
-					.soft( page.getByText( `SKU: ${ product.sku }` ) )
+					.soft(
+						page.getByText(
+							`SKU: ${ productData[ productType ].sku }`
+						)
+					)
 					.toBeVisible();
 
 				// Verify category
@@ -291,7 +313,9 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 				await page.getByRole( 'link', { name: 'View cart' } ).click();
 
 				await expect(
-					page.getByRole( 'link' ).filter( { hasText: product.name } )
+					page
+						.getByRole( 'link' )
+						.filter( { hasText: productData[ productType ].name } )
 				).toBeVisible();
 
 				await page
@@ -299,7 +323,9 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 					.click();
 
 				await expect(
-					page.getByRole( 'cell' ).filter( { hasText: product.name } )
+					page
+						.getByRole( 'cell' )
+						.filter( { hasText: productData[ productType ].name } )
 				).toBeVisible();
 			} );
 		} );
