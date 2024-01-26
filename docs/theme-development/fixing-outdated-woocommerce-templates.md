@@ -1,5 +1,7 @@
 ---
-post_title: Fixing outdated WooCommerce templates
+post_title: How to fix outdated WooCommerce templates
+menu_title: Fix outdated templates
+tags: how-to
 ---
 
 ## Template Updates and Changes
@@ -16,8 +18,6 @@ Starting in WooCommerce version 3.3, most themes look great with WooCommerce.
 Most theme authors fix themes in a timely manner, so you only need to update your theme to get the updated templates.
 
 Alternatively, you can select and use a different theme that already uses current WooCommerce templates.
-
-**Note**: We are unable to provide support for customizations under our Support Policy. If you need to further customize a snippet or extend its functionality, we highly recommend considering one of our Certified [WooExperts](https://woo.com/experts/) or [Codeable](https://codeable.io/).
 
 ## How to Update Outdated Templates
 

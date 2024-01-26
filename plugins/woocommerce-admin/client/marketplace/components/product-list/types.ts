@@ -19,10 +19,12 @@ export type SearchAPIProductType = {
 	vendor_name: string;
 	vendor_url: string;
 	icon: string;
+	is_installable: boolean;
 };
 
 export interface Product {
 	id?: number;
+	slug?: string;
 	position?: number;
 	title: string;
 	image: string;
@@ -40,6 +42,7 @@ export interface Product {
 	group?: string;
 	searchTerm?: string;
 	category?: string;
+	isInstallable: boolean;
 }
 
 export interface ProductTracksData {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure table rows on settings pages don't have invalid HTML

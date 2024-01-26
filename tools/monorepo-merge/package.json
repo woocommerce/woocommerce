@@ -41,7 +41,7 @@
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",
 		"typescript": "^5.3.3",
-		"wireit": "0.14.1"
+		"wireit": "0.14.3"
 	},
 	"oclif": {
 		"bin": "monorepo-merge",
@@ -65,5 +65,13 @@
 		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
 	},
-	"types": "dist/index.d.ts"
+	"types": "dist/index.d.ts",
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.ts"
+			}
+		}
+	}
 }

@@ -1,5 +1,26 @@
 == Changelog ==
 
+= 8.5.2 2024-01-25 =
+
+**WooCommerce**
+
+* Fix - Fix PHP warnings and remove opinionated styles from the `Banner` button. [#43354](https://github.com/woocommerce/woocommerce/pull/43354)
+* Fix - Add defensive checks for strpos in ComparisonOperation. [#44033](https://github.com/woocommerce/woocommerce/pull/44033)
+* Fix - Add rudimentary try catch for all remote endpoint spec evaluators. [#44037](https://github.com/woocommerce/woocommerce/pull/44037)
+
+= 8.5.1 2024-01-15 =
+
+**WooCommerce**
+
+* Fix - Use GMT date when fetching orders to auto-cancel. [#43641](https://github.com/woocommerce/woocommerce/pull/43641)
+* Fix - Fix Mini-Cart total price disappearing when hovering or focusing the Mini-Cart button [#43550](https://github.com/woocommerce/woocommerce/pull/43550)
+* Fix - Fix product prices not being updated on scheduled automatically. [#43497](https://github.com/woocommerce/woocommerce/pull/43497)
+* Fix - Fixed a bug that prevented notice templates from being overwritten. [#43506](https://github.com/woocommerce/woocommerce/pull/43506)
+* Fix - Limit cookie deduping to WooCommerce cookies only. [#43504](https://github.com/woocommerce/woocommerce/pull/43504)
+* Fix - Fix WooCommerce Settings and Analytics commands with tags breaking the command palette [#43269](https://github.com/woocommerce/woocommerce/pull/43269)
+* Fix - Fix fatal error. Do not access change_feature_enable() statically. [#43428](https://github.com/woocommerce/woocommerce/pull/43428)
+
+
 = 8.5.0 2024-01-09 =
 
 **WooCommerce**

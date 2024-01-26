@@ -8,6 +8,7 @@ const {
 	DEFAULT_TIMEOUT_OVERRIDE,
 	E2E_MAX_FAILURES,
 	PLAYWRIGHT_HTML_REPORT,
+	REPEAT_EACH,
 } = process.env;
 
 const config = {
@@ -20,10 +21,18 @@ const config = {
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
 	retries: 2,
+	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: CI ? 1 : 4,
 	reporter: [
 		[ 'list' ],
-		[ 'blob', { outputFolder: ALLURE_RESULTS_DIR ?? './tests/e2e-pw/test-results/allure-results' } ],
+		[
+			'blob',
+			{
+				outputFolder:
+					ALLURE_RESULTS_DIR ??
+					'./tests/e2e-pw/test-results/allure-results',
+			},
+		],
 		[
 			'html',
 			{

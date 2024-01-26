@@ -1,16 +1,17 @@
 ---
 post_title: Customizing checkout fields using actions and filters
+tags: code-snippet
 ---
 
-If you are unfamiliar with code and resolving potential conflicts, we have an extension that can help: [WooCommerce Checkout Field Editor](https://woo.com/products/woocommerce-checkout-field-editor/). Installing and activating this extension overrides any code below that you try to implement; and you cannot have custom checkout field code in your functions.php file when the extension is activated.
+If you are unfamiliar with code and resolving potential conflicts, we have an extension that can help: [WooCommerce Checkout Field Editor](https://woo.com/products/woocommerce-checkout-field-editor/). Installing and activating this extension overrides any code below that you try to implement; and you cannot have custom checkout field code in your functions.php file when the extension is activated.
 
-Custom code should be copied into your child theme's **functions.php** file.
+Custom code should be copied into your child theme's **functions.php** file.
 
 ## How Are Checkout Fields Loaded to WooCommerce?
 
-The billing and shipping fields for checkout pull from the countries class `class-wc-countries.php` and the **`get_address_fields`** function. This allows WooCommerce to enable/disable fields based on the user's location.
+The billing and shipping fields for checkout pull from the countries class `class-wc-countries.php` and the **`get_address_fields`** function. This allows WooCommerce to enable/disable fields based on the user's location.
 
-Before returning these fields, WooCommerce puts the fields through a *filter*. This allows them to be edited by third-party plugins, themes and your own custom code.
+Before returning these fields, WooCommerce puts the fields through a *filter*. This allows them to be edited by third-party plugins, themes and your own custom code.
 
 Billing:
 
@@ -24,7 +25,7 @@ Shipping:
 $address_fields = apply_filters( 'woocommerce_shipping_fields', $address_fields );
 ```
 
-The checkout class adds the loaded fields to its `checkout_fields` array, as well as adding a few other fields like “order notes”.
+The checkout class adds the loaded fields to its `checkout_fields` array, as well as adding a few other fields like "order notes".
 
 ```php
 $this->checkout_fields['billing']  = $woocommerce->countries->get_address_fields( $this->get_value( 'billing_country' ), 'billing_' );
@@ -65,11 +66,11 @@ This array is also passed through a filter:
 $this->checkout_fields = apply_filters( 'woocommerce_checkout_fields', $this->checkout_fields );
 ```
 
-That means you have **full control** over checkout fields – you only need to know how to access them.
+That means you have **full control** over checkout fields - you only need to know how to access them.
 
 ## Overriding Core Fields
 
-Hooking into the  **`woocommerce_checkout_fields`** filter lets you override any field. As an example, let's change the placeholder on the order_comments fields. Currently, it's set to:
+Hooking into the  **`woocommerce_checkout_fields`** filter lets you override any field. As an example, let's change the placeholder on the order_comments fields. Currently, it's set to:
 
 ```php
 _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce' );
@@ -149,16 +150,16 @@ Here's a full list of fields in the array passed to `woocommerce_checkout_fields
 
 Each field contains an array of properties:
 
--   `type` – type of field (text, textarea, password, select)
--   `label` – label for the input field
--   `placeholder` – placeholder for the input
--   `class` – class for the input
--   `required` – true or false, whether or not the field is require
--   `clear` – true or false, applies a clear fix to the field/label
--   `label_class` – class for the label element
--   `options` – for select boxes, array of options (key => value pairs)
+-   `type` - type of field (text, textarea, password, select)
+-   `label` - label for the input field
+-   `placeholder` - placeholder for the input
+-   `class` - class for the input
+-   `required` - true or false, whether or not the field is require
+-   `clear` - true or false, applies a clear fix to the field/label
+-   `label_class` - class for the label element
+-   `options` - for select boxes, array of options (key => value pairs)
 
-In specific cases you need to use the **`woocommerce_default_address_fields`** filter. This filter is applied to all billing and shipping default fields:
+In specific cases you need to use the **`woocommerce_default_address_fields`** filter. This filter is applied to all billing and shipping default fields:
 
 -   `country`
 -   `first_name`
@@ -203,15 +204,15 @@ Code with a higher number set as the priority will run after code with a lower n
 
 The priority argument is set during the [add_action](https://developer.wordpress.org/reference/functions/add_action/) function, after you establish which hook you're connecting to and what the name of your custom function will be.
 
-In the example below, blue text is the name of the hook we're modifying, green text is the name of our custom function, and red is the priority we set.
+In the example below, blue text is the name of the hook we're modifying, green text is the name of our custom function, and red is the priority we set.
 
-![Setting priority for the hooked function](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/priority-markup.png)
+![Setting priority for the hooked function](https://developer.woo.com/wp-content/uploads/2023/12/priority-markup.png)
 
 ## Examples
 
 ### Change Return to Shop button redirect URL
 
-In this example, the code is set to redirect the “Return to Shop” button found in the cart to a category that lists products for sale at `http://example.url/category/specials/`.
+In this example, the code is set to redirect the "Return to Shop" button found in the cart to a category that lists products for sale at `http://example.url/category/specials/`.
 
 ```php
 /**
@@ -265,7 +266,7 @@ add_filter( 'woocommerce_return_to_shop_redirect', 'wc_empty_cart_redirect_url',
 
 ### Adding Custom Shipping And Billing Fields
 
-Adding fields is done in a similar way to overriding fields. For example, let's add a new field to shipping fields – `shipping_phone`:
+Adding fields is done in a similar way to overriding fields. For example, let's add a new field to shipping fields - `shipping_phone`:
 
 ```php
 // Hook in
@@ -294,11 +295,11 @@ function my_custom_checkout_field_display_admin_order_meta($order){
 }
 ```
 
-![adding custom sthipping and billing fields](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/Webp-to-PNG-Shipping-Field-Hook.png)
+![adding custom sthipping and billing fields](https://developer.woo.com/wp-content/uploads/2023/12/Webp-to-PNG-Shipping-Field-Hook.png)
 
 It's alive!
 
-What do we do with the new field? Nothing. Because we defined the field in the `checkout_fields` array, the field is automatically processed and saved to the order post meta (in this case, \_shipping_phone). If you want to add validation rules, see the checkout class where there are additional hooks you can use.
+What do we do with the new field? Nothing. Because we defined the field in the `checkout_fields` array, the field is automatically processed and saved to the order post meta (in this case, \_shipping_phone). If you want to add validation rules, see the checkout class where there are additional hooks you can use.
 
 ### Adding a Custom Special Field
 
@@ -332,7 +333,7 @@ function my_custom_checkout_field( $checkout ) {
 
 This gives us:
 
-![WooCommerce Codex - Checkout Field Hook](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/WooCommerce-Codex-Checkout-Field-Hook.png)
+![WooCommerce Codex - Checkout Field Hook](https://developer.woo.com/wp-content/uploads/2023/12/WooCommerce-Codex-Checkout-Field-Hook.png)
 
 Next we need to validate the field when the checkout form is posted. For this example the field is required and not optional:
 
@@ -352,7 +353,7 @@ function my_custom_checkout_field_process() {
 
 A checkout error is displayed if the field is blank:
 
-![WooCommerce Codex - Checkout Field Notice](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/WooCommerce-Codex-Checkout-Field-Notice.png)
+![WooCommerce Codex - Checkout Field Notice](https://developer.woo.com/wp-content/uploads/2023/12/WooCommerce-Codex-Checkout-Field-Notice.png)
 
 Finally, let's save the new field to order custom fields using the following code:
 
@@ -388,7 +389,7 @@ function my_custom_checkout_field_display_admin_order_meta( $order ){
 
 This is the result:
 
-![checkout_field_custom_field_admin](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/checkout_field_custom_field_admin.png)
+![checkout_field_custom_field_admin](https://developer.woo.com/wp-content/uploads/2023/12/checkout_field_custom_field_admin.png)
 
 ### Make phone number not required
 

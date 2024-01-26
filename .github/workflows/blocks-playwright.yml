@@ -37,6 +37,11 @@ jobs:
                             file: playwright.side-effects.config.ts,
                             resultPath: test-results-side-effects,
                         },
+                        {
+                            name: BlockThemeWithTemplates,
+                            file: playwright.block-theme-with-templates.config.ts,
+                            resultPath: test-results-block-theme-with-templates,
+                        },
                     ]
         steps:
             - uses: actions/checkout@v3

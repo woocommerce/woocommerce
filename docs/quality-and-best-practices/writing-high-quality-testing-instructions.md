@@ -1,5 +1,7 @@
 ---
 post_title: Writing high quality testing instructions
+Menu_title: Writing testing instructions
+tags: reference
 ---
 
 ## Introduction
@@ -59,7 +61,7 @@ Therefore, a PR could have testing instructions for multiple scenarios, in fact,
 ### Considerations for writing high-quality testing instructions
 
 -   Define the testing instructions in a way that they can be **understood and followed by everybody**, even for people new to WooCommerce.
--   Make sure to describe every detail and **avoid assuming knowledge**, the spectrum of readers might be wide and some people would not know the concepts behind what is being assumed. For example, instead of saying _“Enable the [x] experiment”_, say something like:
+-   Make sure to describe every detail and **avoid assuming knowledge**, the spectrum of readers might be wide and some people would not know the concepts behind what is being assumed. For example, instead of saying _"Enable the [x] experiment"_, say something like:
 
 ```text
 - Install the WooCommerce Beta Tester plugin.
@@ -67,7 +69,7 @@ Therefore, a PR could have testing instructions for multiple scenarios, in fact,
 - Toggle the [x] experiment.
 ```
 
--   Always try to explain in detail **where the user should head to**, for example instead of saying “Go to the Orders page as admin”, say “Go to [url]” or even “Go to WooCommerce > Orders”.
+-   Always try to explain in detail **where the user should head to**, for example instead of saying "Go to the Orders page as admin", say "Go to [url]" or even "Go to WooCommerce > Orders".
 -   Try to use real test data. For example, instead of saying _"Enter a name for the product"_, say something like _"Enter 'Blue T-Shirt' as the product name"_. This will make it more self-explanatory and remove potential doubts related to assuming knowledge.
 -   Make sure you **keep your testing instructions updated** if they become obsolete as part of a new commit.
 -   If the testing instructions require to add custom code, please **provide the code snippet**.
@@ -81,11 +83,11 @@ Therefore, a PR could have testing instructions for multiple scenarios, in fact,
 
 #### Example 1
 
-![Sample of good quality instructions](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/213682695-3dc51613-b836-4e7e-93ef-f75078ab48ac.png)
+![Sample of good quality instructions](https://developer.woo.com/wp-content/uploads/2023/12/213682695-3dc51613-b836-4e7e-93ef-f75078ab48ac.png)
 
 #### Example 2
 
-![Another sample of good quality instructions](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/213682778-b552ab07-a518-48a7-9358-16adc5762aca.png)
+![Another sample of good quality instructions](https://developer.woo.com/wp-content/uploads/2023/12/213682778-b552ab07-a518-48a7-9358-16adc5762aca.png)
 
 ### Improving real testing instructions
 
@@ -97,7 +99,7 @@ Before:
 
 After:
 
-![Improved instructions](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/213682303-1b12ab97-f27a-41cb-a8db-da8a78d18840.png)
+![Improved instructions](https://developer.woo.com/wp-content/uploads/2023/12/213682303-1b12ab97-f27a-41cb-a8db-da8a78d18840.png)
 
 Improvements:
 
@@ -105,36 +107,36 @@ Improvements:
 
 Before:
 
-![Instructions needing improvement](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/213682396-8c52d20e-1fca-4ac1-8345-f381c15a102a.png)
+![Instructions needing improvement](https://developer.woo.com/wp-content/uploads/2023/12/213682396-8c52d20e-1fca-4ac1-8345-f381c15a102a.png)
 
 After:
 
-![Improved instructions](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/213682480-c01e0e84-5969-4456-8f43-70cbb8509e8d.png)
+![Improved instructions](https://developer.woo.com/wp-content/uploads/2023/12/213682480-c01e0e84-5969-4456-8f43-70cbb8509e8d.png)
 
 Improvements:
 
-![Changes made](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/213682597-8d06e638-35dd-4ff8-9236-63c6ec5d05b8.jpg)
+![Changes made](https://developer.woo.com/wp-content/uploads/2023/12/213682597-8d06e638-35dd-4ff8-9236-63c6ec5d05b8.jpg)
 
 Before:
 
-![example before providing improved instructions](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/216365611-b540a814-3b8f-40f3-ae64-81018b9f97fb.png)
+![example before providing improved instructions](https://developer.woo.com/wp-content/uploads/2023/12/216365611-b540a814-3b8f-40f3-ae64-81018b9f97fb.png)
 
 After:
 
-![example after providing improved instructions](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/216366043-967e5daa-6a23-4ab8-adda-5f3082d1ebf7.png)
+![example after providing improved instructions](https://developer.woo.com/wp-content/uploads/2023/12/216366043-967e5daa-6a23-4ab8-adda-5f3082d1ebf7.png)
 
 Improvements:
 
-![example of improvements](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/216366152-b331648d-bcef-443b-b126-de2621a20862.png)
+![example of improvements](https://developer.woo.com/wp-content/uploads/2023/12/216366152-b331648d-bcef-443b-b126-de2621a20862.png)
 
 Before:
 
-![example before providing improved instructions](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/216388785-8806ea74-62e6-42da-8887-c8e291e7dfe2-1.png)
+![example before providing improved instructions](https://developer.woo.com/wp-content/uploads/2023/12/216388785-8806ea74-62e6-42da-8887-c8e291e7dfe2-1.png)
 
 After:
 
-![example after providing improved instructions](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/216388842-e5ab433e-d288-4306-862f-72f6f81ab2cd.png)
+![example after providing improved instructions](https://developer.woo.com/wp-content/uploads/2023/12/216388842-e5ab433e-d288-4306-862f-72f6f81ab2cd.png)
 
 Improvements:
 
-![example of improvements](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/216388874-c5b21fc3-f693-4a7e-a58a-c5d1b6606682.png)
+![example of improvements](https://developer.woo.com/wp-content/uploads/2023/12/216388874-c5b21fc3-f693-4a7e-a58a-c5d1b6606682.png)

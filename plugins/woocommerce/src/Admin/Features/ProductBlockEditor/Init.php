@@ -10,7 +10,6 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplateLogger;
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 
@@ -84,10 +83,6 @@ class Init {
 			$tracks = new Tracks();
 			$tracks->init();
 
-			// Make sure the block template logger is initialized before any templates are created.
-			BlockTemplateLogger::get_instance();
-
-			$this->register_layout_templates();
 			$this->register_product_templates();
 		}
 	}
@@ -224,18 +219,6 @@ class Init {
 	 * Get the product editor settings.
 	 */
 	private function get_product_editor_settings() {
-		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
-		$layout_template_logger   = BlockTemplateLogger::get_instance();
-
-		$editor_settings = array();
-
-		foreach ( $layout_template_registry->instantiate_layout_templates() as $layout_template ) {
-			$editor_settings['layoutTemplates'][] = $layout_template->to_json();
-
-			$layout_template_logger->log_template_events_to_file( $layout_template->get_id() );
-			$editor_settings['layoutTemplateEvents'][] = $layout_template_logger->get_formatted_template_events( $layout_template->get_id() );
-		}
-
 		$editor_settings['productTemplates'] = array_map(
 			function ( $product_template ) {
 				return $product_template->to_json();
@@ -291,19 +274,6 @@ class Init {
 				'layout_template_id' => 'simple-product',
 				'product_data'       => array(
 					'type' => 'external',
-				),
-			)
-		);
-		$templates[] = new ProductTemplate(
-			array(
-				'id'                 => 'variable-product-template',
-				'title'              => __( 'Variable product', 'woocommerce' ),
-				'description'        => __( 'A product with variations like color or size.', 'woocommerce' ),
-				'order'              => 40,
-				'icon'               => null,
-				'layout_template_id' => 'simple-product',
-				'product_data'       => array(
-					'type' => 'variable',
 				),
 			)
 		);

@@ -32,6 +32,22 @@ export const SELECTORS = {
 	shrinkColumnsToFit: 'Responsive',
 	productSearchLabel: 'Search',
 	productSearchButton: '.wp-block-search__button wp-element-button',
+	createdFilter: {
+		operator: {
+			within: 'Within',
+			before: 'Before',
+		},
+		range: {
+			last24hours: 'last 24 hours',
+			last7days: 'last 7 days',
+			last30days: 'last 30 days',
+			last3months: 'last 3 months',
+		},
+	},
+	priceRangeFilter: {
+		min: 'MIN',
+		max: 'MAX',
+	},
 };
 
 type Collections =
@@ -179,6 +195,9 @@ class ProductCollectionPage {
 			| 'Keyword'
 			| 'Show Taxonomies'
 			| 'Show Product Attributes'
+			| 'Featured'
+			| 'Created'
+			| 'Price Range'
 	) {
 		await this.page
 			.getByRole( 'button', { name: 'Filters options' } )
@@ -256,6 +275,67 @@ class ProductCollectionPage {
 		}
 
 		if ( isLocatorsRefreshNeeded ) await this.refreshLocators( 'editor' );
+	}
+
+	async setShowOnlyFeaturedProducts(
+		{
+			featured,
+			isLocatorsRefreshNeeded,
+		}: {
+			featured: boolean;
+			isLocatorsRefreshNeeded?: boolean;
+		} = {
+			featured: true,
+			isLocatorsRefreshNeeded: true,
+		}
+	) {
+		const sidebarSettings = await this.locateSidebarSettings();
+		const input = sidebarSettings.getByLabel(
+			SELECTORS.featuredControlLabel
+		);
+		if ( featured ) {
+			await input.check();
+		} else {
+			await input.uncheck();
+		}
+
+		if ( isLocatorsRefreshNeeded ) await this.refreshLocators( 'editor' );
+	}
+
+	async setCreatedFilter( {
+		operator,
+		range,
+	}: {
+		operator: 'within' | 'before';
+		range: 'last24hours' | 'last7days' | 'last30days' | 'last3months';
+	} ) {
+		if ( ! operator || ! range ) {
+			return false;
+		}
+
+		const operatorSelector = SELECTORS.createdFilter.operator[ operator ];
+		const rangeSelector = SELECTORS.createdFilter.range[ range ];
+
+		const sidebarSettings = await this.locateSidebarSettings();
+		const operatorButton = sidebarSettings.getByLabel( operatorSelector );
+		const rangeButton = sidebarSettings.getByLabel( rangeSelector );
+
+		await operatorButton.click();
+		await rangeButton.click();
+	}
+
+	async setPriceRange( { min, max }: { min?: string; max?: string } = {} ) {
+		const minInputSelector = SELECTORS.priceRangeFilter.min;
+		const maxInputSelector = SELECTORS.priceRangeFilter.max;
+
+		const sidebarSettings = await this.locateSidebarSettings();
+		const minInput = sidebarSettings.getByLabel( minInputSelector );
+		const maxInput = sidebarSettings.getByLabel( maxInputSelector );
+
+		await minInput.fill( min || '' );
+		await maxInput.fill( max || '' );
+		// Value is applied on blur so it's required.
+		await maxInput.blur();
 	}
 
 	async setFilterComboboxValue( filterName: string, filterValue: string[] ) {
@@ -426,7 +506,7 @@ class ProductCollectionPage {
 	 * Private methods to be used by the class.
 	 */
 	private async refreshLocators( currentUI: 'editor' | 'frontend' ) {
-		await this.waitForProductsToLoad( currentUI );
+		await this.waitForProductsToLoad();
 
 		if ( currentUI === 'editor' ) {
 			await this.initializeLocatorsForEditor();
@@ -475,15 +555,12 @@ class ProductCollectionPage {
 		this.pagination = this.page.locator( SELECTORS.pagination.onFrontend );
 	}
 
-	private async waitForProductsToLoad( currentUI: 'editor' | 'frontend' ) {
+	private async waitForProductsToLoad() {
 		// Wait for the product blocks to be loaded.
 		await this.page.waitForSelector( SELECTORS.product );
-		if ( currentUI === 'editor' ) {
-			// Wait for the loading spinner to be detached.
-			await this.page.waitForSelector( '.is-loading', {
-				state: 'detached',
-			} );
-		}
+		await this.page.waitForSelector( 'wc-block-product-template__spinner', {
+			state: 'detached',
+		} );
 	}
 }
 

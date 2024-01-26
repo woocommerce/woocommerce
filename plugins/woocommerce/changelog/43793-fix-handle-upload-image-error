@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Return an error instead of a string with the error from the `product_image_upload` and `update_product_content` functions to be able to handle the errors.

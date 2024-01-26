@@ -1,5 +1,7 @@
 ---
-post_title: Handling merchant onboarding
+post_title: How to implement merchant onboarding
+menu_title: Implement merchant onboarding
+tags: how-to
 ---
 
 ## Introduction

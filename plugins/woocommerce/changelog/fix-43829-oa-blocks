@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove wp-data & wc-blocks-checkout dependencies from Order Attribution script.

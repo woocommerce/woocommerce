@@ -372,7 +372,7 @@ class ListTable extends WP_List_Table {
 			'type'     => $this->order_type,
 		);
 
-		foreach ( array( 'status', 's', 'm', '_customer_user' ) as $query_var ) {
+		foreach ( array( 'status', 's', 'm', '_customer_user', 'search-filter' ) as $query_var ) {
 			$this->request[ $query_var ] = sanitize_text_field( wp_unslash( $_REQUEST[ $query_var ] ?? '' ) );
 		}
 
@@ -532,6 +532,11 @@ class ListTable extends WP_List_Table {
 			$this->order_query_args['s'] = $search_term;
 			$this->has_filter            = true;
 		}
+
+		$filter = trim( sanitize_text_field( $this->request['search-filter'] ) );
+		if ( ! empty( $filter ) ) {
+			$this->order_query_args['search_filter'] = $filter;
+		}
 	}
 
 	/**
@@ -541,8 +546,22 @@ class ListTable extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_views() {
+		$view_links = array();
+
+		/**
+		 * Filters the list of available list table view links before the actual query runs.
+		 * This can be used to, e.g., remove counts from the links.
+		 *
+		 * @since 8.6.0
+		 *
+		 * @param string[] $views An array of available list table view links.
+		 */
+		$view_links = apply_filters( 'woocommerce_before_' . $this->order_type . '_list_table_view_links', $view_links );
+		if ( ! empty( $view_links ) ) {
+			return $view_links;
+		}
+
 		$view_counts = array();
-		$view_links  = array();
 		$statuses    = $this->get_visible_statuses();
 		$current     = ! empty( $this->request['status'] ) ? sanitize_text_field( $this->request['status'] ) : 'all';
 		$all_count   = 0;
@@ -620,6 +639,24 @@ class ListTable extends WP_List_Table {
 	 * @return boolean TRUE when the blank state should be rendered, FALSE otherwise.
 	 */
 	private function should_render_blank_state(): bool {
+		/**
+		 * Whether we should render a blank state so that custom count queries can be used.
+		 *
+		 * @since 8.6.0
+		 *
+		 * @param null           $should_render_blank_state `null` will use the built-in counts. Sending a boolean will short-circuit that path.
+		 * @param object         ListTable The current instance of the class.
+		*/
+		$should_render_blank_state = apply_filters(
+			'woocommerce_' . $this->order_type . '_list_table_should_render_blank_state',
+			null,
+			$this
+		);
+
+		if ( is_bool( $should_render_blank_state ) ) {
+			return $should_render_blank_state;
+		}
+
 		return ( ! $this->has_filter ) && 0 === $this->count_orders_by_status( array_keys( $this->get_visible_statuses() ) );
 	}
 
@@ -719,11 +756,22 @@ class ListTable extends WP_List_Table {
 	private function months_filter() {
 		// XXX: [review] we may prefer to move this logic outside of the ListTable class.
 
+		/**
+		 * Filters whether to remove the 'Months' drop-down from the order list table.
+		 *
+		 * @since 8.6.0
+		 *
+		 * @param bool   $disable   Whether to disable the drop-down. Default false.
+		 */
+		if ( apply_filters( 'woocommerce_' . $this->order_type . '_list_table_disable_months_filter', false ) ) {
+			return;
+		}
+
 		global $wp_locale;
 		global $wpdb;
 
 		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
-		$utc_offset = wc_timezone_offset();
+		$utc_offset   = wc_timezone_offset();
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$order_dates = $wpdb->get_results(
@@ -1347,7 +1395,7 @@ class ListTable extends WP_List_Table {
 	 * @return int Number of orders that were trashed.
 	 */
 	private function do_delete( array $ids, bool $force_delete = false ): int {
-		$changed      = 0;
+		$changed = 0;
 
 		foreach ( $ids as $id ) {
 			$order = wc_get_order( $id );
@@ -1537,4 +1585,55 @@ class ListTable extends WP_List_Table {
 		return $html;
 	}
 
+	/**
+	 * Renders the search box with various options to limit order search results.
+	 *
+	 * @param string $text The search button text.
+	 * @param string $input_id The search input ID.
+	 *
+	 * @return void
+	 */
+	public function search_box( $text, $input_id ) {
+		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) {
+			return;
+		}
+
+		$input_id = $input_id . '-search-input';
+
+		if ( ! empty( $_REQUEST['orderby'] ) ) {
+			echo '<input type="hidden" name="orderby" value="' . esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) ) ) . '" />';
+		}
+		if ( ! empty( $_REQUEST['order'] ) ) {
+			echo '<input type="hidden" name="order" value="' . esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) ) . '" />';
+		}
+		?>
+		<p class="search-box">
+			<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo esc_html( $text ); ?>:</label>
+			<input type="search" id="<?php echo esc_attr( $input_id ); ?>" name="s" value="<?php _admin_search_query(); ?>" />
+			<?php $this->search_filter(); ?>
+			<?php submit_button( $text, '', '', false, array( 'id' => 'search-submit' ) ); ?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Renders the search filter dropdown.
+	 *
+	 * @return void
+	 */
+	private function search_filter() {
+		$options = array(
+			'order_id'       => __( 'Order ID', 'woocommerce' ),
+			'customer_email' => __( 'Customer Email', 'woocommerce' ),
+			'customers'      => __( 'Customers', 'woocommerce' ),
+			'products'       => __( 'Products', 'woocommerce' ),
+			'all'            => __( 'All', 'woocommerce' ),
+		);
+		?>
+		<select name="search-filter" id="order-search-filter">
+			<?php foreach ( $options as $value => $label ) { ?>
+				<option value="<?php echo esc_attr( wp_unslash( sanitize_text_field( $value ) ) ); ?>" <?php selected( $value, sanitize_text_field( wp_unslash( $_REQUEST['search-filter'] ?? 'all' ) ) ); ?>><?php echo esc_html( $label ); ?></option>
+				<?php
+			}
+	}
 }

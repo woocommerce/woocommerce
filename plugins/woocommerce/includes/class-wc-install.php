@@ -568,9 +568,11 @@ class WC_Install {
 	 * @return boolean
 	 */
 	public static function is_new_install() {
-		$product_count = array_sum( (array) wp_count_posts( 'product' ) );
-
-		return is_null( get_option( 'woocommerce_version', null ) ) || ( 0 === $product_count && -1 === wc_get_page_id( 'shop' ) );
+		return is_null( get_option( 'woocommerce_version', null ) )
+			|| (
+				-1 === wc_get_page_id( 'shop' )
+				&& 0 === array_sum( (array) wp_count_posts( 'product' ) )
+			);
 	}
 
 	/**

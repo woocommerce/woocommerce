@@ -1,14 +1,14 @@
 /**
  * External dependencies
  */
-import { EventObject, createMachine } from 'xstate';
+import { createMachine } from 'xstate';
 import { getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 
-import { AssembleHubLoader } from '../design-with-ai/pages';
+import { ApiCallLoader, AssembleHubLoader } from './pages/ApiCallLoader';
 
 import { FlowType } from '../types';
 import { DesignWithoutAIStateMachineContext } from './types';
@@ -28,6 +28,10 @@ export const hasStepInUrl = (
 	);
 };
 
+export type DesignWithoutAIStateMachineEvents =
+	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } };
+
 export const designWithNoAiStateMachineDefinition = createMachine(
 	{
 		id: 'designWithoutAI',
@@ -35,7 +39,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 		preserveActionOrder: true,
 		schema: {
 			context: {} as DesignWithoutAIStateMachineContext,
-			events: {} as EventObject,
+			events: {} as DesignWithoutAIStateMachineEvents,
 		},
 		invoke: {
 			src: 'browserPopstateHandler',
@@ -66,24 +70,73 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 				],
 			},
 			preAssembleSite: {
-				type: 'parallel',
+				initial: 'preApiCallLoader',
+				id: 'preAssembleSite',
 				states: {
-					assembleSite: {
-						initial: 'pending',
+					preApiCallLoader: {
+						meta: {
+							// @todo: Move the current component in a common folder or create a new one dedicated to this flow.
+							component: ApiCallLoader,
+						},
+						type: 'parallel',
 						states: {
-							pending: {
-								invoke: {
-									src: 'assembleSite',
-									onDone: {
-										target: 'done',
+							installAndActivateTheme: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'installAndActivateTheme',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions:
+													'redirectToIntroWithError',
+											},
+										},
 									},
-									onError: {
-										actions: [ 'assignAPICallLoaderError' ],
+									success: { type: 'final' },
+								},
+							},
+							assembleSite: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'assembleSite',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions:
+													'redirectToIntroWithError',
+											},
+										},
+									},
+									success: {
+										type: 'final',
 									},
 								},
 							},
-							done: {
-								type: 'final',
+							createProducts: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'createProducts',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions:
+													'redirectToIntroWithError',
+											},
+										},
+									},
+									success: {
+										type: 'final',
+									},
+								},
 							},
 						},
 						onDone: {
@@ -93,6 +146,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 				},
 			},
 			showAssembleHub: {
+				id: 'showAssembleHub',
 				meta: {
 					component: AssembleHubLoader,
 				},
