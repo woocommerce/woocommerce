@@ -301,7 +301,7 @@ class WC_Admin_Notices {
 	public static function add_notices() {
 		$notices = self::get_notices();
 
-		if ( empty( $notices ) ) {
+		if ( empty( $notices ) || ! function_exists( 'wc_get_screen_ids' ) ) {
 			return;
 		}
 
