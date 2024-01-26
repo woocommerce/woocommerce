@@ -1,10 +1,13 @@
-const { test: baseTest, expect } = require( '@playwright/test' );
+const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-baseTest.describe( 'Products > Add Simple Product', () => {
-	baseTest.use( { storageState: process.env.ADMINSTATE } );
+test.describe( 'Products > Add Simple Product', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
 
-	const category = 'e2e test products';
+	const category = {
+		id: 0,
+		name: 'e2e test products',
+	};
 	const productData = {
 		virtual: {
 			name: `Virtual product ${ Date.now() }`,
@@ -39,28 +42,44 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 			fileName: 'e2e-product.zip',
 		},
 	};
+	let api;
 
-	const test = baseTest.extend( {
-		api: async ( { baseURL }, use ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
+	test.beforeAll( async ( { baseURL } ) => {
+		api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+
+		// Create the category
+		await api
+			.post( 'products/categories', {
+				name: category.name,
+			} )
+			.then( ( response ) => {
+				category.id = response.data.id;
+			} )
+			.catch( ( error ) => {
+				if ( error.response.data.code !== 'term_exists' ) {
+					console.log( error.response.data );
+					throw error;
+				} else {
+					console.log( 'Category already exists' );
+					category.id = error.response.data.data.resource_id;
+				}
 			} );
+	} );
 
-			// Create the category
-			await api.post( 'products/categories', {
-				name: category,
-			} );
+	test.afterAll( async () => {
+		// Cleanup
+		for ( const product of Object.values( productData ) ) {
+			await api.delete( `products/${ product.id }`, { force: true } );
+		}
 
-			await use( api );
-
-			// Cleanup
-			for ( const product of Object.values( productData ) ) {
-				await api.delete( `products/${ product.id }`, { force: true } );
-			}
-		},
+		await api.delete( `products/categories/${ category.id }`, {
+			force: true,
+		} );
 	} );
 
 	for ( const productType of Object.keys( productData ) ) {
@@ -111,15 +130,17 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 				await page.keyboard.press( 'Enter' );
 
 				// Categories
-				await page.getByRole( 'checkbox', { name: category } ).check();
+				await page
+					.getByRole( 'checkbox', { name: category.name } )
+					.check();
 				await expect(
-					page.getByRole( 'checkbox', { name: category } )
+					page.getByRole( 'checkbox', { name: category.name } )
 				).toBeChecked();
 
 				await expect(
 					page
 						.locator( '#product_cat-all' )
-						.getByText( 'e2e test products' )
+						.getByText( category.name )
 				).toBeVisible();
 
 				// Tags
@@ -239,7 +260,7 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 					.soft(
 						page
 							.getByText( 'Category' )
-							.getByRole( 'link', { name: category } )
+							.getByRole( 'link', { name: category.name } )
 					)
 					.toBeVisible();
 
