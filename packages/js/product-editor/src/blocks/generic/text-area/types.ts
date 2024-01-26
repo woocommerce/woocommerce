@@ -13,6 +13,7 @@ export type TextAreaBlockEditAttributes = ProductEditorBlockAttributes & {
 	label: string;
 	property: string;
 	helpText?: string;
+	placeholder?: string;
 };
 
 export type TextAreaBlockEditProps =

@@ -25,7 +25,8 @@ export function TextAreaBlockEdit( {
 	setAttributes,
 	context,
 }: TextAreaBlockEditProps ) {
-	const { align, allowedFormats, direction, label, helpText } = attributes;
+	const { align, allowedFormats, direction, label, helpText, placeholder } =
+		attributes;
 	const blockProps = useWooBlockProps( attributes, {
 		style: { direction },
 	} );
@@ -93,6 +94,7 @@ export function TextAreaBlockEdit( {
 						} ) }
 						dir={ direction }
 						allowedFormats={ allowedFormats }
+						placeholder={ placeholder }
 					/>
 				</div>
 			</BaseControl>
