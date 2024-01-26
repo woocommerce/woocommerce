@@ -130,7 +130,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
 						break;
 					default:
-						$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $field_schema, $key );
+						$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $field_schema[ $key ], $key );
 						$carry[ $key ]  = $rest_sanitized;
 						// Specific sanitization for string types, skipping other types from being coerced to strings.
 						if ( 'string' === $field_schema[ $key ]['type'] ) {
