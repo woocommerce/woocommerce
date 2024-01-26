@@ -273,26 +273,25 @@ class ProductTemplate {
 	 * Check if a product type is supported by the template.
 	 *
 	 * @param string $product_type The product type.
+	 * @param string $post_type    The post type.
 	 * @return bool True if the product type is supported.
 	 */
-	public function is_product_type_supported( string $product_type ) {
-		$product_data_type = $this->product_data['type'];
+	public function is_product_type_supported( string $product_type, string $post_type ) {
+		if ( $this->post_type !== $post_type ) {
+			return false;
+		}
 
-		if ( $product_data_type === $product_type ) {
+		if ( ( $this->product_data['type'] ?? null ) === ( $product_type ?? null ) ) {
 			return true;
 		}
 
-		$alternate_product_datas = $this->get_alternate_product_datas();
-		if ( ! empty( $alternate_product_datas ) ) {
-			foreach ( $alternate_product_datas as $alternate_product_data ) {
-				$alternate_product_data_type = $alternate_product_data['type'];
-
-				if ( $alternate_product_data_type === $product_type ) {
-					return true;
+		return count(
+			array_filter(
+				$this->get_alternate_product_datas(),
+				function( $alternate_product_data ) use ( $product_type ) {
+					return ( $alternate_product_data['type'] ?? null ) === ( $product_type ?? null );
 				}
-			}
-		}
-
-		return false;
+			)
+		) > 0;
 	}
 }
