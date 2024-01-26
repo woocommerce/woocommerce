@@ -13,12 +13,7 @@ class SanitizationUtils {
 	 * @param  array $array The array to run wp_kses on.
 	 * @return mixed       The array, all string keys will have been run through wp_kses.
 	 */
-	public function wp_kses_array( $array ) {
-		if ( ! is_countable( $array ) ) {
-			_doing_it_wrong( __METHOD__, 'This function expects an array.', '8.7.0' );
-			return $array;
-		}
-
+	public function wp_kses_array( array $array ) {
 		foreach ( $array as $key => $value ) {
 			if ( is_array( $value ) ) {
 				$array[ $key ] = $this->wp_kses_array( $value );
