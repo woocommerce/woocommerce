@@ -276,7 +276,7 @@ class ProductTemplate {
 	 * @param string $post_type    The post type.
 	 * @return bool True if the product type is supported.
 	 */
-	public function is_product_type_supported( string $product_type, string $post_type ) {
+	public function is_product_type_supported( ?string $product_type, string $post_type ) {
 		if ( $this->post_type !== $post_type ) {
 			return false;
 		}
