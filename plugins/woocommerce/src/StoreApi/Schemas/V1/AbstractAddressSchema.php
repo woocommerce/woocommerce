@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\StoreApi\Utilities\SanitizationUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
@@ -113,10 +114,11 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function sanitize_callback( $address, $request, $param ) {
-		$validation_util = new ValidationUtils();
-		$address         = (array) $address;
-		$field_schema    = $this->get_properties();
-		$address         = array_reduce(
+		$validation_util   = new ValidationUtils();
+		$sanitization_util = new SanitizationUtils();
+		$address           = (array) $address;
+		$field_schema      = $this->get_properties();
+		$address           = array_reduce(
 			array_keys( $address ),
 			function( $carry, $key ) use ( $address, $validation_util, $field_schema ) {
 				switch ( $key ) {
@@ -132,10 +134,6 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 					default:
 						$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $field_schema[ $key ], $key );
 						$carry[ $key ]  = $rest_sanitized;
-						// Specific sanitization for string types, skipping other types from being coerced to strings.
-						if ( 'string' === $field_schema[ $key ]['type'] ) {
-							$carry[ $key ] = wp_kses( $rest_sanitized, [] );
-						}
 						break;
 				}
 				return $carry;
@@ -143,7 +141,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			[]
 		);
 
-		return $address;
+		return $sanitization_util->wp_kses_array( $address );
 	}
 
 	/**

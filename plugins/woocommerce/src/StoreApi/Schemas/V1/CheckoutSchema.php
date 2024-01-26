@@ -6,6 +6,7 @@ use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\StoreApi\Utilities\SanitizationUtils;
 
 /**
  * CheckoutSchema class.
@@ -330,8 +331,10 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function sanitize_additional_fields( $fields ) {
-		$properties = $this->get_additional_fields_schema();
-		$fields     = array_reduce(
+		$properties         = $this->get_additional_fields_schema();
+		$sanitization_utils = new SanitizationUtils();
+
+		$fields = array_reduce(
 			array_keys( $fields ),
 			function( $carry, $key ) use ( $fields, $properties ) {
 				if ( ! isset( $properties[ $key ] ) ) {
@@ -340,17 +343,12 @@ class CheckoutSchema extends AbstractSchema {
 				$field_schema   = $properties[ $key ];
 				$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $fields[ $key ] ), $field_schema, $key );
 				$carry[ $key ]  = $rest_sanitized;
-
-				// Specific sanitization for string types, skipping other types from being coerced to strings.
-				if ( 'string' === $field_schema['type'] ) {
-					$carry[ $key ] = wp_kses( $rest_sanitized, [] );
-				}
 				return $carry;
 			},
 			[]
 		);
 
-		return $fields;
+		return $sanitization_utils->wp_kses_array( $fields );
 	}
 
 	/**
