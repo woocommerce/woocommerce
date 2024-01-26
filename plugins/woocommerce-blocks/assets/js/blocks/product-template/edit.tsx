@@ -275,22 +275,16 @@ const ProductTemplateEdit = ( {
 						( activeBlockContextId || blockContexts[ 0 ]?.postId );
 
 					return (
-						<BlockContextProvider
+						<ProductContent
 							key={ blockContext.postId }
-							value={ blockContext }
-						>
-							<ProductContent
-								attributes={ {
-									productId: blockContext.postId,
-								} }
-								blocks={ blocks }
-								displayTemplate={ displayTemplate }
-								blockContext={ blockContext }
-								setActiveBlockContextId={
-									setActiveBlockContextId
-								}
-							/>
-						</BlockContextProvider>
+							attributes={ {
+								productId: blockContext.postId,
+							} }
+							blocks={ blocks }
+							displayTemplate={ displayTemplate }
+							blockContext={ blockContext }
+							setActiveBlockContextId={ setActiveBlockContextId }
+						/>
 					);
 				} ) }
 		</ul>
