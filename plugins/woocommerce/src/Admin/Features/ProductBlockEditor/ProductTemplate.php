@@ -38,7 +38,7 @@ class ProductTemplate {
 	 *
 	 * @var array
 	 */
-	private $product_data;
+	private $product_data = array();
 
 	/**
 	 * Alternate product datas.
@@ -88,9 +88,12 @@ class ProductTemplate {
 	 * @param array $data The data.
 	 */
 	public function __construct( array $data ) {
-		$this->id           = $data['id'];
-		$this->title        = $data['title'];
-		$this->product_data = $data['product_data'];
+		$this->id    = $data['id'];
+		$this->title = $data['title'];
+
+		if ( isset( $data['product_data'] ) ) {
+			$this->product_data = $data['product_data'];
+		}
 
 		if ( isset( $data['order'] ) ) {
 			$this->order = $data['order'];
