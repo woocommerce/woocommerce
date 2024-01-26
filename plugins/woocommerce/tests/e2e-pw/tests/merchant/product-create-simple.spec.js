@@ -4,10 +4,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 test.describe( 'Products > Add Simple Product', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	const category = {
-		id: 0,
-		name: 'e2e test products',
-	};
+	let category = {};
 	const productData = {
 		virtual: {
 			name: `Virtual product ${ Date.now() }`,
@@ -55,19 +52,10 @@ test.describe( 'Products > Add Simple Product', () => {
 		// Create the category
 		await api
 			.post( 'products/categories', {
-				name: category.name,
+				name: `cat_${ Date.now() }`,
 			} )
 			.then( ( response ) => {
-				category.id = response.data.id;
-			} )
-			.catch( ( error ) => {
-				if ( error.response.data.code !== 'term_exists' ) {
-					console.log( error.response.data );
-					throw error;
-				} else {
-					console.log( 'Category already exists' );
-					category.id = error.response.data.data.resource_id;
-				}
+				category = response.data;
 			} );
 	} );
 
@@ -89,14 +77,10 @@ test.describe( 'Products > Add Simple Product', () => {
 			const product = productData[ productType ];
 
 			await test.step( 'add new product', async () => {
-				await page.goto( '/wp-admin/edit.php?post_type=product' );
-				await page
-					.locator( '#wpbody-content' )
-					.getByRole( 'link', { name: 'Add New' } )
-					.click();
+				await page.goto( 'wp-admin/post-new.php?post_type=product' );
 			} );
 
-			await test.step( 'fill in common product details', async () => {
+			await test.step( 'add product name and description', async () => {
 				// Product name
 				await page.getByLabel( 'Product name' ).fill( product.name );
 
@@ -110,7 +94,9 @@ test.describe( 'Products > Add Simple Product', () => {
 					.locator( '.wp-editor-area' )
 					.nth( 1 )
 					.fill( product.shortDescription );
+			} );
 
+			await test.step( 'add product price and inventory information', async () => {
 				// Product price
 				await page
 					.getByLabel( 'Regular price ($)' )
@@ -121,28 +107,33 @@ test.describe( 'Products > Add Simple Product', () => {
 				await page
 					.getByLabel( 'SKU', { exact: true } )
 					.fill( product.sku );
+			} );
 
+			await test.step( 'add product advanced information', async () => {
 				// Advanced information
 				await page.getByText( 'Advanced' ).click();
 				await page
 					.getByLabel( 'Purchase note' )
 					.fill( product.purchaseNote );
 				await page.keyboard.press( 'Enter' );
+			} );
 
-				// Categories
-				await page
-					.getByRole( 'checkbox', { name: category.name } )
-					.check();
-				await expect(
-					page.getByRole( 'checkbox', { name: category.name } )
-				).toBeChecked();
+			await test.step( 'add product categories', async () => {
+				// Using getByRole here is unreliable
+				const categoryCheckbox = page.locator(
+					`#in-product_cat-${ category.id }`
+				);
+				await categoryCheckbox.check();
+				await expect( categoryCheckbox ).toBeChecked();
 
 				await expect(
 					page
 						.locator( '#product_cat-all' )
 						.getByText( category.name )
 				).toBeVisible();
+			} );
 
+			await test.step( 'add product tags', async () => {
 				// Tags
 				await page
 					.getByLabel( 'Add new tag' )
