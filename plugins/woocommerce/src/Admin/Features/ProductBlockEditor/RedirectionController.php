@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 
 /**
  * Handle redirecting to the old or new editor based on features and support.
@@ -14,7 +15,7 @@ class RedirectionController {
 	/**
 	 * Registered product templates.
 	 *
-	 * @var array
+	 * @var ProductTemplate[]
 	 */
 	private $product_templates = array();
 
@@ -70,7 +71,8 @@ class RedirectionController {
 				continue;
 			}
 
-			if ( ! $product_template->is_product_type_supported( $product->get_type() ) ) {
+			// TODO: how to get post type from product?
+			if ( ! $product_template->is_product_type_supported( $product->get_type(), 'product' ) ) {
 				continue;
 			}
 
@@ -91,7 +93,7 @@ class RedirectionController {
 	/**
 	 * Check if a product is supported by the new experience.
 	 *
-	 * @param array $product_templates The registered product templates.
+	 * @param ProductTemplate[] $product_templates The registered product templates.
 	 */
 	public function set_product_templates( array $product_templates ): void {
 		$this->product_templates = $product_templates;
