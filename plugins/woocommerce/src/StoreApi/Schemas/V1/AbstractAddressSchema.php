@@ -134,7 +134,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						$carry[ $key ]  = $rest_sanitized;
 						// Specific sanitization for string types, skipping other types from being coerced to strings.
 						if ( 'string' === $field_schema[ $key ]['type'] ) {
-							$carry[ $key ] = wp_kses( $address[ $key ], [] );
+							$carry[ $key ] = wp_kses( $rest_sanitized, [] );
 						}
 						break;
 				}
