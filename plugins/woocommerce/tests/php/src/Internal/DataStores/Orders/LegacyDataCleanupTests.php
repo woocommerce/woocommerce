@@ -57,37 +57,36 @@ class LegacyDataCleanupTests extends WC_Unit_Test_Case {
 			$this->disable_cot_sync();
 		}
 
-		update_option( $this->sut::FEATURE_OPTION_NAME, 'yes' );
-		$this->assertEquals( $expected_cleanup_option_value, get_option( $this->sut::FEATURE_OPTION_NAME ) );
-		$this->assertEquals( wc_string_to_bool( $expected_cleanup_option_value ), $this->sut->is_enabled() );
+		update_option( $this->sut::OPTION_NAME, 'yes' );
+		$this->assertEquals( $expected_cleanup_option_value, get_option( $this->sut::OPTION_NAME ) );
+		$this->assertEquals( wc_string_to_bool( $expected_cleanup_option_value ), $this->sut->is_flag_set() );
 	}
 
 	/**
-	 * Undocumented function
+	 * Tests that the batch processor is correctly enqueued and removed when the option is updated.
 	 */
 	public function test_batch_process_enqueing() {
 		$batch_processing = wc_get_container()->get( BatchProcessingController::class );
 
 		$this->toggle_cot_authoritative( true );
 		$this->disable_cot_sync();
-		update_option( $this->sut::FEATURE_OPTION_NAME, 'yes' );
+		update_option( $this->sut::OPTION_NAME, 'yes' );
 		$this->assertTrue( $batch_processing->is_enqueued( get_class( $this->sut ) ) );
 		$this->assertFalse( $batch_processing->is_enqueued( DataSynchronizer::class ) );
 
-		update_option( $this->sut::FEATURE_OPTION_NAME, 'no' );
+		update_option( $this->sut::OPTION_NAME, 'no' );
 		$this->assertFalse( $batch_processing->is_enqueued( get_class( $this->sut ) ) );
 	}
 
 	/**
-	 * Undocumented function
+	 * Tests that the cleanup process works correctly as a batch processor.
 	 */
 	public function test_batch_processor_interface() {
 		$batch_processing = wc_get_container()->get( BatchProcessingController::class );
 		$order_ids        = $this->create_test_orders( 11 ); // 11 test orders.
 
 		$this->disable_cot_sync();
-		update_option( $this->sut::FEATURE_OPTION_NAME, 'yes' );
-		$this->assertTrue( $batch_processing->is_enqueued( get_class( $this->sut ) ) );
+		update_option( $this->sut::OPTION_NAME, 'yes' );
 
 		$this->assertEquals( count( $order_ids ), $this->sut->get_total_pending_count() );
 

@@ -21,7 +21,7 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	/**
 	 * Option name for this feature.
 	 */
-	public const FEATURE_OPTION_NAME = 'woocommerce_hpos_legacy_data_cleanup_enabled';
+	public const OPTION_NAME = 'woocommerce_hpos_legacy_data_cleanup_in_progress';
 
 	/**
 	 * The default number of orders to process per batch.
@@ -60,11 +60,11 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 * Class constructor.
 	 */
 	public function __construct() {
-		self::add_filter( 'pre_update_option_' . self::FEATURE_OPTION_NAME, array( $this, 'pre_update_option' ), 999, 2 );
-		self::add_action( 'add_option_' . self::FEATURE_OPTION_NAME, array( $this, 'process_added_option' ), 999, 2 );
-		self::add_action( 'update_option_' . self::FEATURE_OPTION_NAME, array( $this, 'process_updated_option' ), 999, 2 );
-		self::add_action( 'delete_option_' . self::FEATURE_OPTION_NAME, array( $this, 'process_deleted_option' ), 999 );
-		self::add_action( 'shutdown', array( $this, 'maybe_reschedule_cleanup' ) );
+		self::add_filter( 'pre_update_option_' . self::OPTION_NAME, array( $this, 'pre_update_option' ), 999, 2 );
+		self::add_action( 'add_option_' . self::OPTION_NAME, array( $this, 'process_added_option' ), 999, 2 );
+		self::add_action( 'update_option_' . self::OPTION_NAME, array( $this, 'process_updated_option' ), 999, 2 );
+		self::add_action( 'delete_option_' . self::OPTION_NAME, array( $this, 'process_deleted_option' ), 999 );
+		self::add_action( 'shutdown', array( $this, 'maybe_reset_state' ) );
 	}
 
 	/**
@@ -129,7 +129,8 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 */
 	public function process_batch( array $batch ): void {
 		// This is a destructive operation, so check if we need to bail out just in case.
-		if ( ! $this->is_enabled() ) {
+		if ( ! $this->should_run() ) {
+			$this->toggle_flag( false );
 			return;
 		}
 
@@ -147,6 +148,10 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 				);
 			}
 		}
+
+		if ( ! $this->orders_pending() ) {
+			$this->toggle_flag( false );
+		}
 	}
 
 	/**
@@ -159,22 +164,90 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	}
 
 	/**
-	 * Determine whether the cleanup process can be enabled. Legacy data cleanup requires HPOS to be authoritative and
+	 * Determine whether the cleanup process can be initiated. Legacy data cleanup requires HPOS to be authoritative and
 	 * compatibility mode to be disabled.
 	 *
-	 * @return boolean TRUE if the cleanup process can be enabled. FALSE otherwise.
+	 * @return boolean TRUE if the cleanup process can be enabled, FALSE otherwise.
 	 */
-	public function can_be_enabled() {
-		return $this->data_synchronizer->custom_orders_table_is_authoritative() && ! $this->data_synchronizer->data_sync_is_enabled();
+	public function can_run() {
+		return $this->data_synchronizer->custom_orders_table_is_authoritative() && ! $this->data_synchronizer->data_sync_is_enabled() && ! $this->batch_processing->is_enqueued( get_class( $this->data_synchronizer ) );
 	}
 
 	/**
-	 * Is the legacy data cleanup enabled?
+	 * Checks whether the cleanup process should run. That is, it must be activated and {@see can_run()} must return TRUE.
 	 *
-	 * @return boolean
+	 * @return boolean TRUE if the cleanup process should be run, FALSE otherwise.
 	 */
-	public function is_enabled() {
-		return $this->can_be_enabled() && 'yes' === get_option( self::FEATURE_OPTION_NAME );
+	public function should_run() {
+		return $this->can_run() && $this->is_flag_set();
+	}
+
+	/**
+	 * Whether the user has initiated the cleanup process.
+	 *
+	 * @return boolean TRUE if the user has initiated the cleanup process, FALSE otherwise.
+	 */
+	public function is_flag_set() {
+		return 'yes' === get_option( self::OPTION_NAME, 'no' );
+	}
+
+	/**
+	 * Sets the flag that indicates that the cleanup process should be initiated.
+	 *
+	 * @param boolean $enabled TRUE if the process should be initiated, FALSE if it should be canceled.
+	 */
+	public function toggle_flag( bool $enabled ) {
+		if ( $enabled ) {
+			update_option( self::OPTION_NAME, wc_bool_to_string( $enabled ) );
+		} else {
+			delete_option( self::OPTION_NAME );
+		}
+	}
+
+	/**
+	 * Returns an array in format required by 'woocommerce_debug_tools' to register the cleanup tool in WC.
+	 *
+	 * @return array Tools entries to register with WC.
+	 */
+	public function get_tools_entries() {
+		$entry_id  = $this->is_flag_set() ? 'hpos_legacy_cleanup_cancel' : 'hpos_legacy_cleanup';
+		$entry     = array(
+			'name'             => __( 'Clean up order data from legacy tables', 'woocommerce' ),
+			'desc'             => __( 'This tool will clear the data from legacy order tables in WooCommerce.', 'woocommerce' ),
+			'requires_refresh' => true,
+			'button'           => __( 'Clear data', 'woocommerce' ),
+			'disabled'         => ! ( $this->can_run() && $this->orders_pending() ),
+		);
+
+		if ( ! $this->can_run() ) {
+			$entry['desc'] .= '<br />';
+			$entry['desc'] .= sprintf(
+				'<strong class="red">%1$s</strong> %2$s', __( 'Note:', 'woocommerce' ),
+				__( 'Only available when HPOS is authoritative and compatibility mode is disabled.', 'woocommerce' )
+			);
+		} else {
+			if ( $this->is_flag_set() ) {
+				$entry['status_text'] = sprintf(
+					'%1$s %2$s',
+					'<span class="dashicons dashicons-update spin"></span>',
+					__( 'Clearing data...', 'woocommerce' )
+				);
+				$entry['button']     = __( 'Cancel', 'woocommerce' );
+				$entry['callback']   = function() {
+					$this->toggle_flag( false );
+					return __( 'Order legacy data cleanup has been canceled.', 'woocomerce' );
+				};
+			} elseif ( ! $this->orders_pending() ) {
+				$entry['button'] = __( 'No orders in need of cleanup', 'woocommerce' );
+			} else {
+				$entry['callback'] = function() {
+					$this->toggle_flag( true );
+					return __( 'Order legacy data cleanup process has been started.', 'woocomerce' );
+				};
+			}
+		}
+
+		return array( $entry_id => $entry );
 	}
 
 	/**
@@ -204,7 +277,6 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 		$enable = wc_string_to_bool( $new_value );
 
 		if ( $enable ) {
-			$this->batch_processing->remove_processor( get_class( $this->data_synchronizer ) );
 			$this->batch_processing->enqueue_processor( self::class );
 		} else {
 			$this->batch_processing->remove_processor( self::class );
@@ -218,20 +290,29 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 * @param mixed $old_value Previous option value.
 	 */
 	private function pre_update_option( $new_value, $old_value ) {
-		return $this->can_be_enabled() ? $new_value : 'no';
+		return $this->can_run() ? $new_value : 'no';
 	}
 
 	/**
-	 * Hooked onto 'shutdown' to re-schedule the cleanup if necessary.
+	 * Checks whether there are any orders in need of cleanup.
+	 *
+	 * @return bool TRUE if there are orders in need of cleanup, FALSE otherwise.
 	 */
-	private function maybe_reschedule_cleanup() {
-		if ( ! $this->is_enabled() ) {
-			return;
-		}
+	private function orders_pending() {
+		return ! empty( $this->get_next_batch_to_process( 1 ) );
+	}
 
-		$orders_left = ! empty( $this->get_next_batch_to_process( 1 ) );
-		if ( $orders_left && ! $this->batch_processing->is_enqueued( self::class ) ) {
-			$this->batch_processing->enqueue_processor( self::class );
+	/**
+	 * Hooked onto 'shutdown' to clean up or set things straight in case of failures (timeouts, etc).
+	 */
+	private function maybe_reset_state() {
+		$is_enqueued = $this->batch_processing->is_enqueued( self::class );
+		$is_flag_set = $this->is_flag_set();
+		$should_run  = $this->should_run();
+
+		if ( $is_enqueued xor $is_flag_set ) {
+			$this->toggle_flag( false );
+			$this->batch_processing->remove_processor( self::class );
 		}
 	}
 

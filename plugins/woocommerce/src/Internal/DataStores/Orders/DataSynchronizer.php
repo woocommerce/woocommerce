@@ -281,9 +281,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 			}
 
 			if ( $this->data_sync_is_enabled() ) {
-				$this->batch_processing_controller->remove_processor( LegacyDataCleanup::class );
-				update_option( LegacyDataCleanup::FEATURE_OPTION_NAME, 'no' );
-
+				wc_get_container()->get( LegacyDataCleanup::class )->toggle_flag( false );
 				$this->batch_processing_controller->enqueue_processor( self::class );
 			} else {
 				$this->batch_processing_controller->remove_processor( self::class );
@@ -401,11 +399,6 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private function handle_interval_background_sync() {
 		if ( self::BACKGROUND_SYNC_MODE_INTERVAL !== $this->get_background_sync_mode() ) {
 			$this->unschedule_background_sync();
-			return;
-		}
-
-		$cleanup = wc_get_container()->get( LegacyDataCleanup::class );
-		if ( $cleanup->is_enabled() ) {
 			return;
 		}
 

@@ -121,7 +121,7 @@ class CustomOrdersTableController {
 	private function init_hooks() {
 		self::add_filter( 'woocommerce_order_data_store', array( $this, 'get_orders_data_store' ), 999, 1 );
 		self::add_filter( 'woocommerce_order-refund_data_store', array( $this, 'get_refunds_data_store' ), 999, 1 );
-		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_initiate_regeneration_entry_to_tools_array' ), 999, 1 );
+		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_hpos_tools' ), 999 );
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'pre_update_option', array( $this, 'process_pre_update_option' ), 999, 3 );
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
@@ -226,11 +226,15 @@ class CustomOrdersTableController {
 	 * @param array $tools_array The array of tools to add the tool to.
 	 * @return array The updated array of tools-
 	 */
-	private function add_initiate_regeneration_entry_to_tools_array( array $tools_array ): array {
+	private function add_hpos_tools( array $tools_array ): array {
 		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
 			return $tools_array;
 		}
 
+		// Cleanup tool.
+		$tools_array = array_merge( $tools_array, $this->data_cleanup->get_tools_entries() );
+
+		// Delete HPOS tables tool.
 		if ( $this->custom_orders_table_usage_is_enabled() || $this->data_synchronizer->data_sync_is_enabled() ) {
 			$disabled = true;
 			$message  = __( 'This will delete the custom orders tables. The tables can be deleted only if the "High-Performance order storage" is not authoritative and sync is disabled (via Settings > Advanced > Features).', 'woocommerce' );
@@ -335,7 +339,8 @@ class CustomOrdersTableController {
 			return;
 		}
 
-		if ( ! $this->data_cleanup->is_enabled() && filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
+		if ( filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
+			$this->data_cleanup->toggle_flag( false );
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
 		}
 	}
@@ -400,7 +405,6 @@ class CustomOrdersTableController {
 			'setting'             => $this->get_hpos_setting_for_feature(),
 			'additional_settings' => array(
 				$this->get_hpos_setting_for_sync(),
-				$this->get_hpos_setting_for_cleanup(),
 			),
 		);
 
@@ -482,10 +486,6 @@ class CustomOrdersTableController {
 		};
 
 		$get_sync_message = function() {
-			if ( $this->data_cleanup->is_enabled() ) {
-				return '';
-			}
-
 			$orders_pending_sync_count = $this->get_orders_pending_sync_count();
 			$sync_in_progress          = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
 			$sync_enabled              = $this->data_synchronizer->data_sync_is_enabled();
@@ -576,29 +576,6 @@ class CustomOrdersTableController {
 			'desc_tip'             => $get_sync_message,
 			'description_is_error' => $get_description_is_error,
 			'row_class'            => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
-		);
-	}
-
-	/**
-	 * Configures the HPOS setting for the "legacy cleanup" functionality.
-	 *
-	 * @since 8.6.0
-	 * @return array Setting array.
-	 */
-	private function get_hpos_setting_for_cleanup() : array {
-		if ( 'yes' === get_transient( 'wc_installing' ) ) {
-			return array();
-		}
-
-		return array(
-			'id'        => $this->data_cleanup::FEATURE_OPTION_NAME,
-			'title'     => '',
-			'type'      => 'checkbox',
-			'value'     => fn() => get_option( $this->data_cleanup::FEATURE_OPTION_NAME ),
-			'desc'      => __( 'Clean up data from legacy tables.', 'woocommerce' ),
-			'desc_tip'  => '',
-			'disabled'  => fn() => ! $this->data_cleanup->can_be_enabled(),
-			'row_class' => $this->data_cleanup::FEATURE_OPTION_NAME,
 		);
 	}
 
