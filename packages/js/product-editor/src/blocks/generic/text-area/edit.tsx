@@ -95,7 +95,7 @@ export function TextAreaBlockEdit( {
 						value={ content || '' }
 						onChange={ setContent }
 						data-empty={ Boolean( content ) }
-						className={ classNames( 'components-content-control', {
+						className={ classNames( {
 							[ `has-text-align-${ align }` ]: align,
 						} ) }
 						dir={ direction }
