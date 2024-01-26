@@ -35,10 +35,10 @@ jobs:
           script: |
             let baseRef = ${{ toJson( github.base_ref ) }};
             if ( baseRef ) {
-              baseRef = 'origin/' + baseRef;
+              baseRef = `--base-ref origin/${ baseRef }`;
             }
             const child_process = require( 'node:child_process' );
-            child_process.execSync( `pnpm utils ci-jobs ${ baseRef ? `--base-ref ${ baseRef }` : '' }` );
+            child_process.execSync( `pnpm utils ci-jobs ${ baseRef }` );
   project-lint-jobs:
     name: 'Lint - ${{ matrix.projectName }}'
     runs-on: 'ubuntu-20.04'
