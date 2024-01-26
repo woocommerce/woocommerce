@@ -10,7 +10,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	};
 
 	const storeName = 'WooCommerce Core E2E Test Suite';
-	let orderId, newOrderId;
+	let orderId, newOrderId, completedOrderId;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -60,7 +60,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			version: 'wc/v3',
 		} );
 
-		await api.post( `orders/batch`, { delete: [ orderId, newOrderId ] } );
+		await api.post( `orders/batch`, { delete: [ orderId, newOrderId, completedOrderId ] } );
 	} );
 
 	test( 'can receive new order email', async ( { page, baseURL } ) => {
@@ -92,6 +92,60 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
 		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
+	} );
+
+	test( 'can receive completed email', async ( { page, baseURL } ) => {
+		// Completed order emails are sent automatically when an order's payment is completed.
+		// Verify that the email is sent, and that the content is the expected one
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api
+			.post( 'orders', {
+				status: 'completed',
+				billing: customerBilling,
+			} )
+			.then( ( response ) => {
+				completedOrderId = response.data.id;
+			} );
+		// Search to narrow it down to just the messages we want
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerBilling.email
+			) }`
+		);
+
+		// Search to show complete orders only
+		await page.selectOption('select[name="search[place]"]', 'subject');
+		await page.fill('input[name="search[term]"]', 'complete');
+		await page.click('input#search-submit');
+		await page.waitForTimeout(2000);
+		
+		// Verify that the  email has been sent
+		await expect(
+			page.getByText(
+				`Your ${ storeName } order is now complete`
+			)
+		).toBeVisible();
+		
+		// Enter email log and look for the content in JSON
+		await page.click('button[title^="View log"]');
+		await page.waitForTimeout(2000);
+		await page.click('a.wp-mail-logging-modal-format[data-format="json"]');
+
+		// Parse email's content JSON
+		await page.waitForSelector('#wp-mail-logging-modal-content-body-content');
+
+		const emailBodyContent = JSON.parse( wp-mail-logging-modal-content-body-content );
+		// Extract the required information
+		const timestamp = emailBodyContent.timestamp;
+		const receiverEmail = emailBodyContent.receiver;
+		const subject = emailBodyContent.subject;
+		const orderId = emailBodyContent.message.match(/\[Order #(\d+)\]/)[1];
+
 	} );
 
 	test( 'can resend new order notification', async ( { page } ) => {
