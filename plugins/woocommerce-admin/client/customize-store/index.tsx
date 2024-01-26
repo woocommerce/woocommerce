@@ -459,11 +459,24 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					invoke: {
 						src: 'fetchSurveyCompletedOption',
 						onError: {
-							target: 'transitional', // leave it as initialised default on error
+							target: 'checkAiStatus', // leave it as initialised default on error
 						},
 						onDone: {
-							target: 'transitional',
+							target: 'checkAiStatus',
 							actions: [ 'assignHasCompleteSurvey' ],
+						},
+					},
+				},
+				checkAiStatus: {
+					invoke: {
+						src: 'fetchAiStatus',
+						onDone: {
+							actions: 'assignAiStatus',
+							target: 'transitional',
+						},
+						onError: {
+							actions: 'assignAiOffline',
+							target: 'transitional',
 						},
 					},
 				},
