@@ -57,9 +57,10 @@ class RedirectionController {
 	 * @param integer $product_id Product ID.
 	 */
 	protected function is_product_supported( $product_id ): bool {
-		$product = $product_id ? wc_get_product( $product_id ) : null;
+		$product   = $product_id ? wc_get_product( $product_id ) : null;
+		$post_type = get_post_type( $product_id );
 
-		if ( is_null( $product ) ) {
+		if ( is_null( $product ) || ! $post_type ) {
 			return false;
 		}
 
@@ -71,8 +72,7 @@ class RedirectionController {
 				continue;
 			}
 
-			// TODO: how to get post type from product?
-			if ( ! $product_template->is_product_type_supported( $product->get_type(), 'product' ) ) {
+			if ( ! $product_template->is_product_type_supported( $product->get_type(), $post_type ) ) {
 				continue;
 			}
 
