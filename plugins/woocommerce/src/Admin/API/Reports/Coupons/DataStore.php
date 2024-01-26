@@ -64,8 +64,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 	/**
 	 * Set up all the hooks for maintaining and populating table data.
+	 *
+	 * @internal
 	 */
-	public static function init() {
+	final public static function init() {
 		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 5 );
 	}
 
@@ -339,6 +341,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function get_coupon_id( \WC_Order_Item_Coupon $coupon_item ) {
 		// First attempt to get coupon ID from order item data.
+		$coupon_reapply_info = $coupon_item->get_meta( 'coupon_reapply_info', true );
+		if ( $coupon_reapply_info ) {
+			return json_decode( $coupon_reapply_info, true )[0];
+		}
+
 		$coupon_data = $coupon_item->get_meta( 'coupon_data', true );
 
 		// Normal checkout orders should have this data.

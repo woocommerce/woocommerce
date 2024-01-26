@@ -367,9 +367,8 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 				continue;
 			}
 
-			$coupon_2_data = $coupon_2->get_data();
-			unset( $coupon_2_data['used_by'] );
-			$coupon_item->add_meta_data( 'coupon_data', $coupon_2_data );
+			$coupon_2_reapply_info = $coupon_2->get_reapply_info();
+			$coupon_item->add_meta_data( 'coupon_reapply_info', $coupon_2_reapply_info );
 			$coupon_item->save();
 		}
 

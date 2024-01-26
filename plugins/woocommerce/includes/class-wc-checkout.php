@@ -695,10 +695,8 @@ class WC_Checkout {
 				)
 			);
 
-			// Avoid storing used_by - it's not needed and can get large.
-			$coupon_data = $coupon->get_data();
-			unset( $coupon_data['used_by'] );
-			$item->add_meta_data( 'coupon_data', $coupon_data );
+			$coupon_reapply_info = $coupon->get_reapply_info();
+			$item->add_meta_data( 'coupon_reapply_info', $coupon_reapply_info );
 
 			/**
 			 * Action hook to adjust item before save.
@@ -751,7 +749,7 @@ class WC_Checkout {
 		);
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		$skipped = array();
+		$skipped        = array();
 		$form_was_shown = isset( $_POST['woocommerce-process-checkout-nonce'] ); // phpcs:disable WordPress.Security.NonceVerification.Missing
 
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
