@@ -16,6 +16,8 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 	public function test_is_product_type_supported_post_type_mismatch() {
 		$template = new ProductTemplate(
 			array(
+				'id'        => 'test-product-template',
+				'title'     => 'Test Product Template',
 				'post_type' => 'post',
 			)
 		);
@@ -29,6 +31,8 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 	public function test_is_product_type_supported_product_type_mismatch() {
 		$template = new ProductTemplate(
 			array(
+				'id'           => 'test-product-template',
+				'title'        => 'Test Product Template',
 				'post_type'    => 'product',
 				'product_data' => array(
 					'type' => 'variable',
@@ -45,6 +49,8 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 	public function test_is_product_type_supported_product_type_match() {
 		$template = new ProductTemplate(
 			array(
+				'id'           => 'test-product-template',
+				'title'        => 'Test Product Template',
 				'post_type'    => 'product',
 				'product_data' => array(
 					'type' => 'simple',
@@ -61,6 +67,8 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 	public function test_is_product_type_supported_product_type_null_match() {
 		$template = new ProductTemplate(
 			array(
+				'id'           => 'test-product-template',
+				'title'        => 'Test Product Template',
 				'post_type'    => 'product_variation',
 				'product_data' => array(
 					'type' => null,
@@ -77,6 +85,8 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 	public function test_is_product_type_supported_product_type_match_with_alternate_product_data() {
 		$template = new ProductTemplate(
 			array(
+				'id'                      => 'test-product-template',
+				'title'                   => 'Test Product Template',
 				'post_type'               => 'product',
 				'product_data'            => array(
 					'type' => 'simple',
@@ -98,6 +108,8 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 	public function test_is_product_type_supported_product_type_mismatch_with_alternate_product_data() {
 		$template = new ProductTemplate(
 			array(
+				'id'                      => 'test-product-template',
+				'title'                   => 'Test Product Template',
 				'post_type'               => 'product',
 				'product_data'            => array(
 					'type' => 'simple',
