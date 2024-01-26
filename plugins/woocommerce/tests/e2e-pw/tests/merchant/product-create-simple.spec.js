@@ -69,11 +69,8 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 		} ) => {
 			const product = productData[ productType ];
 
-			await test.step( 'navigate to products page', async () => {
-				await page.goto( '/wp-admin/edit.php?post_type=product' );
-			} );
-
 			await test.step( 'add new product', async () => {
+				await page.goto( '/wp-admin/edit.php?post_type=product' );
 				await page
 					.locator( '#wpbody-content' )
 					.getByRole( 'link', { name: 'Add New' } )
