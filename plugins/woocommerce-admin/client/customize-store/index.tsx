@@ -459,13 +459,22 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					invoke: {
 						src: 'fetchSurveyCompletedOption',
 						onError: {
-							target: 'checkAiStatus', // leave it as initialised default on error
+							target: 'preCheckAiStatus', // leave it as initialised default on error
 						},
 						onDone: {
-							target: 'checkAiStatus',
+							target: 'preCheckAiStatus',
 							actions: [ 'assignHasCompleteSurvey' ],
 						},
 					},
+				},
+				preCheckAiStatus: {
+					always: [
+						{
+							cond: 'isWooExpress',
+							target: 'checkAiStatus',
+						},
+						{ cond: 'isNotWooExpress', target: 'transitional' },
+					],
 				},
 				checkAiStatus: {
 					invoke: {
