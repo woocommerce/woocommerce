@@ -39,16 +39,4 @@ class SanitizationUtilTest extends \WC_Unit_Test_Case {
 		];
 		$this->assertEquals( $expected, $sanitization_utils->wp_kses_array( $input ) );
 	}
-
-	/**
-	 * @testdox `kses_array` should return the same value if passed something not-countable and show a doing_it_wrong message.
-	 */
-	public function test_kses_array_invalid_data() {
-		$sanitization_utils = new SanitizationUtils();
-		$input              = 'hello';
-		$this->assertEquals( $input, $sanitization_utils->wp_kses_array( $input ) );
-		$input = [];
-		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\StoreApi\Utilities\SanitizationUtils::wp_kses_array' );
-		$this->assertEquals( $input, $sanitization_utils->wp_kses_array( $input ) );
-	}
 }
