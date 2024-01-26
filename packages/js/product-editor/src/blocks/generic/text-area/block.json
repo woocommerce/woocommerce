@@ -11,8 +11,32 @@
 		"property": {
 			"type": "string"
 		},
-		"align": {
+		"label": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"placeholder": {
 			"type": "string"
+		},
+		"help": {
+			"type": "string"
+		},
+		"tooltip": {
+			"type": "string"
+		},
+		"required": {
+			"type": "string"
+		},
+		"disabled": {
+			"type": "boolean"
+		},
+		"align": {
+			"type": "string",
+			"enum": [ "left", "center", "right", "justify" ]
+		},
+		"direction": {
+			"type": "string",
+			"enum": [ "ltr", "rtl" ]
 		},
 		"allowedFormats": {
 			"type": "array",
@@ -28,20 +52,6 @@
 				"core/superscript",
 				"core/unknown"
 			]
-		},
-		"direction": {
-			"type": "string",
-			"enum": [ "ltr", "rtl" ]
-		},
-		"label": {
-			"type": "string"
-		},
-		"helpText": {
-			"type": "string"
-		},
-		"content": {
-			"type": "string",
-			"__experimentalRole": "content"
 		}
 	},
 	"supports": {

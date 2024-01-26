@@ -25,8 +25,17 @@ export function TextAreaBlockEdit( {
 	setAttributes,
 	context,
 }: TextAreaBlockEditProps ) {
-	const { align, allowedFormats, direction, label, helpText, placeholder } =
-		attributes;
+	const {
+		property,
+		align,
+		allowedFormats,
+		direction,
+		label,
+		help,
+		placeholder,
+		required,
+		disabled,
+	} = attributes;
 	const blockProps = useWooBlockProps( attributes, {
 		style: { direction },
 	} );
@@ -37,7 +46,6 @@ export function TextAreaBlockEdit( {
 	);
 
 	// `property` attribute is required.
-	const { property } = attributes;
 	if ( ! property ) {
 		throw new Error(
 			__( 'Property attribute is required.', 'woocommerce' )
@@ -79,7 +87,7 @@ export function TextAreaBlockEdit( {
 			<BaseControl
 				id={ contentId.toString() }
 				label={ label }
-				help={ helpText }
+				help={ help }
 			>
 				<div { ...blockProps }>
 					<RichText
@@ -95,6 +103,8 @@ export function TextAreaBlockEdit( {
 						dir={ direction }
 						allowedFormats={ allowedFormats }
 						placeholder={ placeholder }
+						required={ required }
+						disabled={ disabled }
 					/>
 				</div>
 			</BaseControl>

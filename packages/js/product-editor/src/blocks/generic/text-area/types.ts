@@ -6,14 +6,29 @@ import {
 	ProductEditorBlockEditProps,
 } from '../../../types';
 
+type AllowedFormat =
+	| 'core/bold'
+	| 'core/code'
+	| 'core/italic'
+	| 'core/link'
+	| 'core/strikethrough'
+	| 'core/underline'
+	| 'core/text-color'
+	| 'core/subscript'
+	| 'core/superscript'
+	| 'core/unknown';
+
 export type TextAreaBlockEditAttributes = ProductEditorBlockAttributes & {
-	align?: 'left' | 'center' | 'right' | 'justify';
-	allowedFormats?: string[];
-	direction?: 'ltr' | 'rtl';
-	label?: string;
 	property: string;
-	helpText?: string;
+	label?: string;
 	placeholder?: string;
+	help?: string;
+	tooltip?: string;
+	required?: boolean;
+	disabled?: boolean;
+	align?: 'left' | 'center' | 'right' | 'justify';
+	allowedFormats?: AllowedFormat[];
+	direction?: 'ltr' | 'rtl';
 };
 
 export type TextAreaBlockEditProps =
