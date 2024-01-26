@@ -1,10 +1,9 @@
-const { test, expect } = require( '@playwright/test' );
+const { test: baseTest, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-test.describe( 'Products > Add Simple Product', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Products > Add Simple Product', () => {
+	baseTest.use( { storageState: process.env.ADMINSTATE } );
 
-	let category = {};
 	const productData = {
 		virtual: {
 			name: `Virtual product ${ Date.now() }`,
@@ -39,40 +38,50 @@ test.describe( 'Products > Add Simple Product', () => {
 			fileName: 'e2e-product.zip',
 		},
 	};
-	let api;
 
-	test.beforeAll( async ( { baseURL } ) => {
-		api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-
-		// Create the category
-		await api
-			.post( 'products/categories', {
-				name: `cat_${ Date.now() }`,
-			} )
-			.then( ( response ) => {
-				category = response.data;
+	const test = baseTest.extend( {
+		api: async ( { baseURL }, use ) => {
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
 			} );
+
+			await use( api );
+		},
+
+		category: async ( { api }, use ) => {
+			let category = {};
+
+			await api
+				.post( 'products/categories', {
+					name: `cat_${ Date.now() }`,
+				} )
+				.then( ( response ) => {
+					category = response.data;
+				} );
+
+			await use( category );
+
+			// Category cleanup
+			await api.delete( `products/categories/${ category.id }`, {
+				force: true,
+			} );
+		},
 	} );
 
-	test.afterAll( async () => {
-		// Cleanup
+	test.afterAll( async ( { api } ) => {
+		// Products cleanup
 		for ( const product of Object.values( productData ) ) {
 			await api.delete( `products/${ product.id }`, { force: true } );
 		}
-
-		await api.delete( `products/categories/${ category.id }`, {
-			force: true,
-		} );
 	} );
 
 	for ( const productType of Object.keys( productData ) ) {
 		test( `can create a simple ${ productType } product`, async ( {
 			page,
+			category,
 		} ) => {
 			const product = productData[ productType ];
 
