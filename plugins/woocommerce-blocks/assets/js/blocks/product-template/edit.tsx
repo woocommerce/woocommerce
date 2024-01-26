@@ -19,6 +19,8 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductCollectionAttributes } from '@woocommerce/blocks/product-collection/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isNumber } from '@woocommerce/types';
+import { ProductDataContextProvider } from '@woocommerce/shared-context';
+import { withProduct } from '@woocommerce/block-hocs';
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -68,6 +70,32 @@ const ProductTemplateBlockPreview = ( {
 };
 
 const MemoizedProductTemplateBlockPreview = memo( ProductTemplateBlockPreview );
+
+const ProductContent = withProduct(
+	( {
+		isLoading,
+		product,
+		displayTemplate,
+		blocks,
+		blockContext,
+		setActiveBlockContextId,
+	} ) => {
+		return (
+			<ProductDataContextProvider
+				product={ product }
+				isLoading={ isLoading }
+			>
+				{ displayTemplate ? <ProductTemplateInnerBlocks /> : null }
+				<MemoizedProductTemplateBlockPreview
+					blocks={ blocks }
+					blockContextId={ blockContext.postId }
+					setActiveBlockContextId={ setActiveBlockContextId }
+					isHidden={ displayTemplate }
+				/>
+			</ProductDataContextProvider>
+		);
+	}
+);
 
 const ProductTemplateEdit = ( {
 	clientId,
@@ -241,28 +269,30 @@ const ProductTemplateEdit = ( {
 	return (
 		<ul { ...blockProps }>
 			{ blockContexts &&
-				blockContexts.map( ( blockContext ) => (
-					<BlockContextProvider
-						key={ blockContext.postId }
-						value={ blockContext }
-					>
-						{ blockContext.postId ===
-						( activeBlockContextId ||
-							blockContexts[ 0 ]?.postId ) ? (
-							<ProductTemplateInnerBlocks />
-						) : null }
-						<MemoizedProductTemplateBlockPreview
-							blocks={ blocks }
-							blockContextId={ blockContext.postId }
-							setActiveBlockContextId={ setActiveBlockContextId }
-							isHidden={
-								blockContext.postId ===
-								( activeBlockContextId ||
-									blockContexts[ 0 ]?.postId )
-							}
-						/>
-					</BlockContextProvider>
-				) ) }
+				blockContexts.map( ( blockContext ) => {
+					const displayTemplate =
+						blockContext.postId ===
+						( activeBlockContextId || blockContexts[ 0 ]?.postId );
+
+					return (
+						<BlockContextProvider
+							key={ blockContext.postId }
+							value={ blockContext }
+						>
+							<ProductContent
+								attributes={ {
+									productId: blockContext.postId,
+								} }
+								blocks={ blocks }
+								displayTemplate={ displayTemplate }
+								blockContext={ blockContext }
+								setActiveBlockContextId={
+									setActiveBlockContextId
+								}
+							/>
+						</BlockContextProvider>
+					);
+				} ) }
 		</ul>
 	);
 };
