@@ -25,28 +25,16 @@ function isProductTypeSupported(
 		return false;
 	}
 
-	// consider null and undefined to be the same for product type
 	if (
-		( productTemplate.productData.type === null ||
-			productTemplate.productData.type === undefined ) &&
-		( productType === null || productType === undefined )
+		( productTemplate.productData.type ?? null ) === ( productType ?? null )
 	) {
 		return true;
 	}
 
-	if ( productTemplate.productData.type === productType ) {
-		return true;
-	}
-
-	const alternateProductDatas = productTemplate.alternateProductDatas;
-	if ( alternateProductDatas ) {
-		return alternateProductDatas.some(
-			( alternateProductData ) =>
-				alternateProductData.type === productType
-		);
-	}
-
-	return false;
+	return productTemplate.alternateProductDatas?.some(
+		( alternateProductData ) =>
+			( alternateProductData.type ?? null ) === ( productType ?? null )
+	);
 }
 
 export const useProductTemplate = (
