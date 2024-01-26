@@ -36,6 +36,7 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 			shortDescription: `Downloadable product short description`,
 			sku: `2_${ Date.now() }`,
 			purchaseNote: 'Downloadable product purchase note',
+			fileName: 'e2e-product.zip',
 		},
 	};
 
@@ -177,6 +178,19 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 					await expect(
 						page.getByLabel( 'Downloadable' )
 					).toBeChecked();
+
+					// Add a download link
+					await page.getByRole( 'link', { name: 'General' } ).click();
+					await page
+						.getByRole( 'link', { name: 'Add File' } )
+						.click();
+					await page
+						.getByPlaceholder( 'File name' )
+						.fill( product.fileName );
+					await page
+						.getByPlaceholder( 'http://' )
+						.fill( `https://example.com/${ product.fileName }` );
+					await page.getByPlaceholder( 'Never' ).fill( '365' );
 				} );
 			}
 
