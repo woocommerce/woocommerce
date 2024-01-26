@@ -29,7 +29,8 @@ const isValidEvent = ( event: MouseEvent ) =>
 	! event.defaultPrevented;
 
 /**
- * Scrolls to the first product in Product Collection if it's not visible.
+ * Ensures the visibility of the first product in the collection.
+ * Scrolls the page to the first product if it's not in the viewport.
  *
  * @param {string} wcNavigationId Unique ID for each Product Collection block on page/post.
  */
@@ -81,6 +82,7 @@ const productCollectionStore = {
 		},
 		/**
 		 * We prefetch the next or previous button page on hover.
+		 * Optimizes user experience by preloading content for faster access.
 		 */
 		*prefetchOnHover() {
 			const { ref } = getElement();
@@ -91,9 +93,8 @@ const productCollectionStore = {
 	},
 	callbacks: {
 		/**
-		 * - We don't prefetch the next or previous button link on initial page load.
-		 * - If the user has clicked a pagination link, then user is likely to keep paginating. Therefore,
-		 *   once the user has clicked a pagination link, we start prefetching the next or previous button page.
+		 * Prefetches content for next or previous links after initial user interaction.
+		 * Reduces perceived load times for subsequent page navigations.
 		 */
 		*prefetch() {
 			const context = getContext< ProductCollectionStoreContext >();

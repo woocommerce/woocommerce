@@ -173,7 +173,7 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Update attributes for pagination anchor tags.
+	 * Sets up data attributes required for interactivity and client-side navigation.
 	 *
 	 * @param \WP_HTML_Tag_Processor $processor The HTML tag processor.
 	 * @param string                 $class_name The class name of the anchor tags.
