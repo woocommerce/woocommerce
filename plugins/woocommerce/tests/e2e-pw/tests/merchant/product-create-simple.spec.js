@@ -75,8 +75,8 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 
 			await test.step( 'add new product', async () => {
 				await page
+					.locator( '#wpbody-content' )
 					.getByRole( 'link', { name: 'Add New' } )
-					.last()
 					.click();
 			} );
 
