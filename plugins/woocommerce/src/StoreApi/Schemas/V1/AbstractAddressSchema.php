@@ -158,8 +158,31 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	 */
 	public function validate_callback( $address, $request, $param ) {
 		$errors          = new \WP_Error();
-		$address         = $this->sanitize_callback( $address, $request, $param );
+		$address         = (array) $address;
 		$validation_util = new ValidationUtils();
+
+		// Validate each key manually before sanitizing. The reason we need to sanitize "before" validation is to ensure
+		// the values are in the correct normalized format, e.g. postcode.
+		foreach ( $address as $key => $value ) {
+			if ( is_wp_error( rest_validate_value_from_schema( $value, $this->get_properties()[ $key ], $key ) ) ) {
+				$errors->add(
+					'invalid_' . $key,
+					sprintf(
+						/* translators: %s: field name */
+						__( 'Invalid %s provided.', 'woocommerce' ),
+						$key
+					)
+				);
+			}
+		}
+
+		// This condition will be true if any validation errors were encountered, e.g. wrong type supplied or invalid
+		// option in enum fields.
+		if ( $errors->has_errors() ) {
+			return $errors;
+		}
+
+		$address = $this->sanitize_callback( $address, $request, $param );
 
 		if ( ! empty( $address['country'] ) && ! in_array( $address['country'], array_keys( wc()->countries->get_countries() ), true ) ) {
 			$errors->add(
