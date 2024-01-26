@@ -81,7 +81,7 @@ baseTest.describe( 'Products > Edit Product', () => {
 		} );
 
 		await test.step( 'publish the updated product', async () => {
-			await page.locator( '#publish' ).click();
+			await page.getByRole( 'button', { name: 'Update' } ).click();
 		} );
 
 		await test.step( 'verify the changes', async () => {
