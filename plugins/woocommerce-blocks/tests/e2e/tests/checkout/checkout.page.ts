@@ -169,7 +169,10 @@ export class CheckoutPage {
 					.isCalculating() &&
 				! window.wp.data
 					.select( 'wc/store/cart' )
-					.isShippingRateBeingSelected()
+					.isShippingRateBeingSelected() &&
+				! window.wp.data
+					.select( 'wc/store/cart' )
+					.isCustomerDataUpdating()
 			);
 		} );
 		await this.page.getByText( 'Place Order', { exact: true } ).click();
