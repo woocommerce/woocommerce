@@ -40,13 +40,13 @@ export const ALIGNMENT_CONTROLS = [
 
 export default function AligmentToolbarButton( {
 	align,
-	setAligment,
+	setAlignment,
 }: AlignmentControl ) {
 	return (
 		<AlignmentControl
 			alignmentControls={ ALIGNMENT_CONTROLS }
 			value={ align }
-			onChange={ setAligment }
+			onChange={ setAlignment }
 		/>
 	);
 }

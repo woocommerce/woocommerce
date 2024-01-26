@@ -14,15 +14,17 @@ import classNames from 'classnames';
  * Internal dependencies
  */
 import { RTLToolbarButton } from './toolbar/toolbar-button-rtl';
-import type { TextAreaBlockEdit } from './types';
-import { ProductEditorBlockEditProps } from '../../../types';
+import type {
+	TextAreaBlockEditAttributes,
+	TextAreaBlockEditProps,
+} from './types';
 import AligmentToolbarButton from './toolbar/toolbar-button-alignment';
 
 export function TextAreaBlockEdit( {
 	attributes,
 	setAttributes,
 	context,
-}: ProductEditorBlockEditProps< TextAreaBlockEdit > ) {
+}: TextAreaBlockEditProps ) {
 	const { align, allowedFormats, direction, label, helpText } = attributes;
 	const blockProps = useWooBlockProps( attributes, {
 		style: { direction },
@@ -47,11 +49,13 @@ export function TextAreaBlockEdit( {
 		property
 	);
 
-	function setAligment( value: TextAreaBlockEdit[ 'align' ] ) {
+	function setAlignment( value: TextAreaBlockEditAttributes[ 'align' ] ) {
 		setAttributes( { align: value } );
 	}
 
-	function changeDirection( value: TextAreaBlockEdit[ 'direction' ] ) {
+	function changeDirection(
+		value: TextAreaBlockEditAttributes[ 'direction' ]
+	) {
 		setAttributes( { direction: value } );
 	}
 
@@ -62,7 +66,7 @@ export function TextAreaBlockEdit( {
 			<BlockControls { ...blockControlsProps }>
 				<AligmentToolbarButton
 					align={ align }
-					setAligment={ setAligment }
+					setAlignment={ setAlignment }
 				/>
 
 				<RTLToolbarButton

@@ -1,4 +1,12 @@
-export type TextAreaBlockEdit = {
+/**
+ * Internal dependencies
+ */
+import {
+	ProductEditorBlockAttributes,
+	ProductEditorBlockEditProps,
+} from '../../../types';
+
+export type TextAreaBlockEditAttributes = ProductEditorBlockAttributes & {
 	align: 'left' | 'center' | 'right' | 'justify';
 	allowedFormats?: string[];
 	direction: 'ltr' | 'rtl';
@@ -6,3 +14,6 @@ export type TextAreaBlockEdit = {
 	property: string;
 	helpText?: string;
 };
+
+export type TextAreaBlockEditProps =
+	ProductEditorBlockEditProps< TextAreaBlockEditAttributes >;
