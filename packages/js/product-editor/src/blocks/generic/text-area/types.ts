@@ -7,10 +7,10 @@ import {
 } from '../../../types';
 
 export type TextAreaBlockEditAttributes = ProductEditorBlockAttributes & {
-	align: 'left' | 'center' | 'right' | 'justify';
+	align?: 'left' | 'center' | 'right' | 'justify';
 	allowedFormats?: string[];
-	direction: 'ltr' | 'rtl';
-	label: string;
+	direction?: 'ltr' | 'rtl';
+	label?: string;
 	property: string;
 	helpText?: string;
 	placeholder?: string;
