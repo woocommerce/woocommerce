@@ -4,6 +4,8 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const timestamp = Date.now().toString();
 const productName = `Review me ${ timestamp }`;
 const productReview = `Nice one, Playwright! ${ timestamp }`;
+const randomRating = ( Math.random() * ( 5 - 1 ) + 1 ).toFixed( 0 );
+const reviewerEmail = `john.doe.${ timestamp }@example.com`;
 
 test.describe( 'Products > Reviews', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -30,8 +32,8 @@ test.describe( 'Products > Reviews', () => {
 			product_id: productId,
 			review: productReview,
 			reviewer: 'John Doe',
-			reviewer_email: `john.doe.${ timestamp }@example.com`,
-			rating: 5,
+			reviewer_email: reviewerEmail,
+			rating: randomRating,
 		} );
 	} );
 
@@ -50,6 +52,12 @@ test.describe( 'Products > Reviews', () => {
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'link', { name: productName } )
+		).toBeVisible();
+		await expect(
+			page.getByLabel( `${ randomRating } out of 5` )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'link', { name: reviewerEmail } )
 		).toBeVisible();
 	} );
 } );
