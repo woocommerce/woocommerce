@@ -39,6 +39,9 @@
 		"helpText": {
 			"type": "string"
 		},
+		"placeholder": {
+			"type": "string"
+		},
 		"content": {
 			"type": "string",
 			"__experimentalRole": "content"

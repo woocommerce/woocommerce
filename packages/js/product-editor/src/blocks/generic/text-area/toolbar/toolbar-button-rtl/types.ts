@@ -1,8 +1,11 @@
 /**
  * Internal dependencies
  */
-import type { TextAreaBlockEdit } from '../../types';
+import type { TextAreaBlockEditAttributes } from '../../types';
 
-export type RTLToolbarButtonProps = Pick< TextAreaBlockEdit, 'direction' > & {
-	onChange( direction?: TextAreaBlockEdit[ 'direction' ] ): void;
+export type RTLToolbarButtonProps = Pick<
+	TextAreaBlockEditAttributes,
+	'direction'
+> & {
+	onChange( direction?: TextAreaBlockEditAttributes[ 'direction' ] ): void;
 };
