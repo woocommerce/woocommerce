@@ -816,7 +816,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 	<tr>
 		<td data-export-label="Log directory size"><?php esc_html_e( 'Log directory size', 'woocommerce' ); ?></td>
 		<td class="help"><?php echo wc_help_tip( esc_html__( 'The total size of the files in the log directory.', 'woocommerce' ) ); ?></td>
-		<td><?php echo $logging['log_directory_size']; ?></td>
+		<td><?php echo esc_html( $logging['log_directory_size'] ); ?></td>
 	</tr>
 	</tbody>
 </table>

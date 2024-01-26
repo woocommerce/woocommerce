@@ -256,7 +256,7 @@ class Settings {
 
 		$location_info[] = sprintf(
 			// translators: %s is an amount of computer disk space, e.g. 5 KB.
-			__( 'Directory size: %s' ),
+			__( 'Directory size: %s', 'woocommerce' ),
 			size_format( wc_get_container()->get( FileController::class )->get_log_directory_size() )
 		);
 
@@ -302,8 +302,8 @@ class Settings {
 			),
 			'database_table' => array(
 				'title' => __( 'Location', 'woocommerce' ),
-				'type' => 'info',
-				'text' => $location_info,
+				'type'  => 'info',
+				'text'  => $location_info,
 			),
 			'file_end'       => array(
 				'id'   => self::PREFIX . 'settings',

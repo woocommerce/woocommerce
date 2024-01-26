@@ -418,14 +418,14 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		$htaccess = wp_filesize( Constants::get_constant( 'WC_LOG_DIR' ) . '.htaccess' );
 		$index    = wp_filesize( Constants::get_constant( 'WC_LOG_DIR' ) . 'index.html' );
 
-		$path = Constants::get_constant( 'WC_LOG_DIR' ) . 'unit-testing-1.log';
+		$path             = Constants::get_constant( 'WC_LOG_DIR' ) . 'unit-testing-1.log';
 		$resource         = fopen( $path, 'a' );
 		$existing_content = random_bytes( 200 );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
 		fwrite( $resource, $existing_content );
 		fclose( $resource );
 
-		$path = Constants::get_constant( 'WC_LOG_DIR' ) . 'unit-testing-2.log';
+		$path             = Constants::get_constant( 'WC_LOG_DIR' ) . 'unit-testing-2.log';
 		$resource         = fopen( $path, 'a' );
 		$existing_content = random_bytes( 300 );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite

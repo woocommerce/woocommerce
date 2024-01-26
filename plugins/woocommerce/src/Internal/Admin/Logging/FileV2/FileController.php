@@ -676,7 +676,7 @@ class FileController {
 		if ( wp_is_writable( $path ) ) {
 			$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $path, \FilesystemIterator::SKIP_DOTS ) );
 
-			foreach( $iterator as $file ) {
+			foreach ( $iterator as $file ) {
 				$bytes += $file->getSize();
 			}
 		}
