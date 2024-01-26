@@ -92,7 +92,7 @@ export function TextAreaBlockEdit( {
 						id={ contentId.toString() }
 						identifier="content"
 						tagName="p"
-						value={ content }
+						value={ content || '' }
 						onChange={ setContent }
 						data-empty={ Boolean( content ) }
 						className={ classNames( 'components-content-control', {
