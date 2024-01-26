@@ -99,6 +99,7 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 					.locator( '.wp-editor-area' )
 					.first()
 					.fill( productData[ productType ].description );
+				await page.locator( '#excerpt-html' ).click(); // text mode to avoid the iframe
 				await page
 					.locator( '.wp-editor-area' )
 					.nth( 1 )
