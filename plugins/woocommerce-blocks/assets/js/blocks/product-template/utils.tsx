@@ -5,7 +5,6 @@ import { resolveSelect, useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import { isNumber } from '@woocommerce/types';
 
 type LocationType = 'product' | 'archive' | 'cart' | 'order' | 'generic';
 type Context< T > = T & {
