@@ -45,7 +45,7 @@ foreach ( $tools as $action_name => $tool ) {
 					</p>
 				</th>
 				<td class="run-tool">
-					<?php if ( ! empty( $tool['status_text'] ) ): ?>
+					<?php if ( ! empty( $tool['status_text'] ) ) : ?>
 					<span class="run-tool-status"><?php echo wp_kses_post( $tool['status_text'] ); ?></span>
 					<?php endif; ?>
 

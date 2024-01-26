@@ -210,8 +210,8 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 * @return array Tools entries to register with WC.
 	 */
 	public function get_tools_entries() {
-		$entry_id  = $this->is_flag_set() ? 'hpos_legacy_cleanup_cancel' : 'hpos_legacy_cleanup';
-		$entry     = array(
+		$entry_id = $this->is_flag_set() ? 'hpos_legacy_cleanup_cancel' : 'hpos_legacy_cleanup';
+		$entry    = array(
 			'name'             => __( 'Clean up order data from legacy tables', 'woocommerce' ),
 			'desc'             => __( 'This tool will clear the data from legacy order tables in WooCommerce.', 'woocommerce' ),
 			'requires_refresh' => true,
@@ -222,7 +222,8 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 		if ( ! $this->can_run() ) {
 			$entry['desc'] .= '<br />';
 			$entry['desc'] .= sprintf(
-				'<strong class="red">%1$s</strong> %2$s', __( 'Note:', 'woocommerce' ),
+				'<strong class="red">%1$s</strong> %2$s',
+				__( 'Note:', 'woocommerce' ),
 				__( 'Only available when HPOS is authoritative and compatibility mode is disabled.', 'woocommerce' )
 			);
 		} else {
@@ -232,17 +233,17 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 					'<span class="dashicons dashicons-update spin"></span>',
 					__( 'Clearing data...', 'woocommerce' )
 				);
-				$entry['button']     = __( 'Cancel', 'woocommerce' );
-				$entry['callback']   = function() {
+				$entry['button']      = __( 'Cancel', 'woocommerce' );
+				$entry['callback']    = function() {
 					$this->toggle_flag( false );
-					return __( 'Order legacy data cleanup has been canceled.', 'woocomerce' );
+					return __( 'Order legacy data cleanup has been canceled.', 'woocommerce' );
 				};
 			} elseif ( ! $this->orders_pending() ) {
 				$entry['button'] = __( 'No orders in need of cleanup', 'woocommerce' );
 			} else {
 				$entry['callback'] = function() {
 					$this->toggle_flag( true );
-					return __( 'Order legacy data cleanup process has been started.', 'woocomerce' );
+					return __( 'Order legacy data cleanup process has been started.', 'woocommerce' );
 				};
 			}
 		}
