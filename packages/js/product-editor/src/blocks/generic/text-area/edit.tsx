@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { createElement } from '@wordpress/element';
 import { BaseControl } from '@wordpress/components';
-import { useEntityProp } from '@wordpress/core-data';
 import { useInstanceId } from '@wordpress/compose';
 import { BlockControls, RichText } from '@wordpress/block-editor';
 import classNames from 'classnames';
@@ -19,11 +18,12 @@ import type {
 	TextAreaBlockEditProps,
 } from './types';
 import AligmentToolbarButton from './toolbar/toolbar-button-alignment';
+import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 
 export function TextAreaBlockEdit( {
 	attributes,
 	setAttributes,
-	context,
+	context: { postType },
 }: TextAreaBlockEditProps ) {
 	const {
 		property,
@@ -52,11 +52,9 @@ export function TextAreaBlockEdit( {
 		);
 	}
 
-	const [ content, setContent ] = useEntityProp< string >(
-		'postType',
-		context.postType || 'product',
-		property
-	);
+	const [ content, setContent ] = useProductEntityProp< string >( property, {
+		postType,
+	} );
 
 	function setAlignment( value: TextAreaBlockEditAttributes[ 'align' ] ) {
 		setAttributes( { align: value } );
