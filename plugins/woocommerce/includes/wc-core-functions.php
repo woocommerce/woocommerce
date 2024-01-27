@@ -1894,7 +1894,7 @@ function wc_get_rounding_precision() {
 	if ( $precision < absint( WC_ROUNDING_PRECISION ) ) {
 		$precision = absint( WC_ROUNDING_PRECISION );
 	}
-	return $precision;
+	return apply_filters( 'wc_get_rounding_precision', $precision );
 }
 
 /**
