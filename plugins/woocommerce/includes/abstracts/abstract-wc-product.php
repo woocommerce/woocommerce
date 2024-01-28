@@ -1996,7 +1996,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$image = wc_placeholder_img( $size, $attr );
 		}
 
-		return apply_filters( 'woocommerce_product_get_image', $image, $this, $size, $attr, $placeholder, $image );
+		return apply_filters( 'woocommerce_product_get_image', $image, $this, $size, $attr, $placeholder);
 	}
 
 	/**
