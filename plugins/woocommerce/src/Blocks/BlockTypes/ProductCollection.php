@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 use WP_Query;
 use WC_Tax;
 
@@ -109,6 +110,12 @@ class ProductCollection extends AbstractBlock {
 	 * @param \WP_Block $instance      The block instance.
 	 */
 	public function add_navigation_id_directive( $block_content, $block, $instance ) {
+
+		// Debug start.
+		$context = ProductCollectionUtils::parse_context( $instance );
+		$block_content = json_encode( $context ) . $block_content;
+		// Debug end.
+
 		$is_product_collection_block = $block['attrs']['query']['isProductCollectionBlock'] ?? false;
 		if ( $is_product_collection_block ) {
 			// Enqueue the Interactivity API runtime.
