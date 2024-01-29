@@ -1644,7 +1644,7 @@ class WC_Order extends WC_Abstract_Order {
 		$can_view_orders      = current_user_can( 'read_private_shop_orders' );
 		$session_email_match  = $session_email === $billing_email;
 		$supplied_email_match = $supplied_email === $billing_email;
-			
+
 		$email_verification_required = ! $session_email_match && ! $supplied_email_match && ! $can_view_orders;
 
 		/**
