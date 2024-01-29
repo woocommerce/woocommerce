@@ -5,7 +5,7 @@
 	"title": "Product textarea block",
 	"category": "woocommerce",
 	"description": "A text-area field for use in the product editor.",
-	"keywords": [ "products", "description" ],
+	"keywords": [ "textarea", "rich-text" ],
 	"textdomain": "default",
 	"attributes": {
 		"property": {
