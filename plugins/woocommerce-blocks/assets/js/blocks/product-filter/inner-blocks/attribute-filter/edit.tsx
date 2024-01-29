@@ -189,7 +189,7 @@ const Edit = ( props: EditProps ) => {
 			</Wrapper>
 		);
 
-	if ( isEditing ) {
+	if ( isEditing )
 		return (
 			<Wrapper
 				onClickToolbarEdit={ toggleEditing }
@@ -203,7 +203,6 @@ const Edit = ( props: EditProps ) => {
 				/>
 			</Wrapper>
 		);
-	}
 
 	if ( ! attributeId || ! attributeObject )
 		return (
