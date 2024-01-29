@@ -19,6 +19,7 @@ import {
 	installFontFace,
 	installFontFamily,
 	getFontFamiliesAndFontFaceToInstall,
+	FontCollectionsResponse,
 } from './fonts';
 
 const assembleSite = async () => {
@@ -54,11 +55,6 @@ const installAndActivateTheme = async () => {
 };
 
 const installFontFamilies = async () => {
-	const config = {
-		path: '/wp/v2/font-collections/default-font-collection',
-		method: 'GET',
-	};
-
 	try {
 		const installedFontFamily = ( await resolveSelect(
 			'core'
@@ -84,9 +80,15 @@ const installFontFamilies = async () => {
 			} )
 		);
 
-		const fontCollection = await apiFetch< FontCollectionResponse >(
-			config
-		);
+		const fontCollections = await apiFetch< FontCollectionsResponse >( {
+			path: '/wp/v2/font-collections?_fields=slug,name,description,id',
+			method: 'GET',
+		} );
+
+		const fontCollection = await apiFetch< FontCollectionResponse >( {
+			path: `/wp/v2/font-collections/${ fontCollections[ 0 ].slug }`,
+			method: 'GET',
+		} );
 
 		const { fontFacesToInstall, fontFamiliesWithFontFacesToInstall } =
 			getFontFamiliesAndFontFaceToInstall(

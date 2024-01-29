@@ -9,6 +9,12 @@ import apiFetch from '@wordpress/api-fetch';
 import { FONT_FAMILIES_TO_INSTALL } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 import { FontFace, FontFamiliesToInstall, FontFamily } from '../types/font';
 
+export type FontCollectionsResponse = Array< {
+	slug: string;
+	description: string;
+	name: string;
+} >;
+
 export type FontCollectionResponse = {
 	slug: string;
 	name: string;
