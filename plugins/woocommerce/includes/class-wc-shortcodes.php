@@ -509,10 +509,19 @@ class WC_Shortcodes {
 			return '';
 		}
 
+		$product_status = empty( $atts['status'] ) ? 'publish' : $atts['status'];
+		$valid_statuses = array( 'auto-draft', 'draft', 'future', 'pending', 'private', 'publish' );
+		if ( ! in_array( $product_status, $valid_statuses, true ) ) {
+			return '';
+		}
+		if ( 'publish' !== $product_status && ! current_user_can( 'read_product', $atts['id'] ) ) {
+			return '';
+		}
+
 		$args = array(
 			'posts_per_page'      => 1,
 			'post_type'           => 'product',
-			'post_status'         => ( ! empty( $atts['status'] ) ) ? $atts['status'] : 'publish',
+			'post_status'         => $product_status,
 			'ignore_sticky_posts' => 1,
 			'no_found_rows'       => 1,
 		);
