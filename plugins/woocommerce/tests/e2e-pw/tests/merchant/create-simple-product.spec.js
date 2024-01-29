@@ -4,10 +4,16 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const virtualProductName = 'Virtual Product Name';
 const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
+const salePrice = '6.99';
+const productDescription = 'Virtual product description.';
+const productSKU = '1234567890';
+const productPurchaseNote = 'Virtual product purchase note';
+const productAttribute = 'color';
+const productAttributeColor = 'red | white';
 const productTag = 'nonVirtualTag';
 const productCategory = 'nonVirtualCategory';
-const productDescription = 'Description of a non-virtual product.';
 const productDescriptionShort = 'Short description';
+
 let shippingZoneId, virtualProductId, nonVirtualProductId;
 
 test.describe.serial( 'Add New Simple Product Page', () => {
@@ -89,10 +95,50 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product', {
 			waitUntil: 'networkidle',
 		} );
-		await page.locator( '#title' ).fill( virtualProductName );
-		await page.locator( '#_regular_price' ).fill( productPrice );
-		await page.locator( '#_virtual' ).click();
-		await page.locator( '#publish' ).click();
+		await page.getByLabel( 'Product name' ).fill( virtualProductName );
+		await page.getByLabel( 'Regular price' ).fill( productPrice );
+		await page.getByText( 'Sale price ($)' ).fill( salePrice );
+		await page.getByText( 'Virtual' ).click();
+
+		// Fill in a product description
+		await page
+			.getByRole( 'button', { name: 'Visual', exact: true } )
+			.first()
+			.click();
+		await page
+			.frameLocator( '#content_ifr' )
+			.locator( '.wp-editor' )
+			.fill( productDescription );
+
+		// Fill in SKU
+		await page.getByText( 'Inventory' ).click();
+		await page.getByLabel( 'SKU', { exact: true } ).fill( productSKU );
+
+		// Fill in purchase note
+		await page.getByText( 'Advanced' ).click();
+		await page.getByLabel( 'Purchase note' ).fill( productPurchaseNote );
+		await page.keyboard.press( 'Enter' );
+
+		// Fill in a color as attribute
+		await page
+			.locator( '.attribute_tab' )
+			.getByRole( 'link', { name: 'Attributes' } )
+			.click();
+		await page
+			.getByPlaceholder( 'f.e. size or color' )
+			.fill( productAttribute );
+		await page
+			.getByPlaceholder(
+				'Enter some descriptive text. Use “|” to separate different values.'
+			)
+			.fill( productAttributeColor );
+		await page.keyboard.press( 'Enter' );
+		await page.getByRole( 'button', { name: 'Save attributes' } ).click();
+
+		// Publish the product after a short wait
+		await page
+			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 
 		// When running in parallel, clicking the publish button sometimes saves products as a draft
@@ -110,6 +156,27 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 				.locator( 'div.notice-success > p' )
 				.filter( { hasText: 'Product published.' } )
 		).toBeVisible();
+
+		// Reload the page and verify that the values remain saved after publish in product editor page
+		await page.reload();
+		await expect( page.getByLabel( 'Product name' ) ).toHaveValue(
+			virtualProductName
+		);
+		await expect( page.getByLabel( 'Regular price' ) ).toHaveValue(
+			productPrice
+		);
+		await expect( page.getByText( 'Sale price ($)' ) ).toHaveValue(
+			salePrice
+		);
+		await page
+			.getByRole( 'button', { name: 'Text', exact: true } )
+			.first()
+			.click();
+		await expect( page.getByText( productDescription ) ).toBeVisible();
+		await page.getByText( 'Inventory' ).click();
+		await expect( page.getByLabel( 'SKU', { exact: true } ) ).toHaveValue(
+			productSKU
+		);
 
 		// Save product ID
 		virtualProductId = page.url().match( /(?<=post=)\d+/ );
