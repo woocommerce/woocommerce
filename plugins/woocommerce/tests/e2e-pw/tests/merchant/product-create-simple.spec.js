@@ -119,6 +119,30 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 					.fill( productData[ productType ].sku );
 			} );
 
+			await test.step( 'add product attributes', async () => {
+				// Product attributes
+				const attributeName = 'attribute name';
+				await page
+					.locator( '#woocommerce-product-data' )
+					.getByRole( 'link', { name: 'Attributes' } )
+					.click();
+				await page
+					.getByPlaceholder( 'f.e. size or color' )
+					.fill( attributeName );
+				await page
+					.getByPlaceholder( 'Enter some descriptive text.' )
+					.fill( 'some attribute value' );
+				await page.keyboard.press( 'Enter' );
+				await page
+					.getByRole( 'button', { name: 'Save attributes' } )
+					.click();
+				await expect(
+					page.getByRole( 'heading', {
+						name: `Remove ${ attributeName }`,
+					} )
+				).toBeVisible();
+			} );
+
 			await test.step( 'add product advanced information', async () => {
 				// Advanced information
 				await page.getByText( 'Advanced' ).click();
