@@ -151,17 +151,24 @@ class Bootstrap {
 			// regular rest requests to maintain compatibility with the store editor.
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
-			$this->container->get( BlockTemplatesController::class );
-			$this->container->get( ProductSearchResultsTemplate::class );
-			$this->container->get( ProductAttributeTemplate::class );
-			$this->container->get( CartTemplate::class );
-			$this->container->get( CheckoutTemplate::class );
-			$this->container->get( CheckoutHeaderTemplate::class );
-			$this->container->get( OrderConfirmationTemplate::class );
-			$this->container->get( ClassicTemplatesCompatibility::class );
-			$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
-			$this->container->get( SingleProductTemplateCompatibility::class )->init();
 			$this->container->get( Notices::class )->init();
+
+			if ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) {
+				$this->container->get( BlockTemplatesController::class );
+				if ( wc_current_theme_is_fse_theme() ) {
+					$this->container->get( ProductSearchResultsTemplate::class );
+					$this->container->get( ProductAttributeTemplate::class );
+					$this->container->get( CartTemplate::class );
+					$this->container->get( CheckoutTemplate::class );
+					// Even though CheckoutHeaderTemplate is a template part, it's only available when the
+					// CheckoutTemplate is available, so we can load it here.
+					$this->container->get( CheckoutHeaderTemplate::class );
+					$this->container->get( OrderConfirmationTemplate::class );
+					$this->container->get( ClassicTemplatesCompatibility::class );
+					$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
+					$this->container->get( SingleProductTemplateCompatibility::class )->init();
+				}
+			}
 		}
 
 		$this->container->get( QueryFilters::class )->init();
