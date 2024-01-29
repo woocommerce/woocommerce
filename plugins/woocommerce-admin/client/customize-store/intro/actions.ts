@@ -146,3 +146,12 @@ export const assignNoAI = assign<
 >( {
 	flowType: FlowType.noAI,
 } );
+
+export const assignNoAIFlowError = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	intro: ( context ) => {
+		return { ...context.intro, hasErrors: true };
+	},
+} );

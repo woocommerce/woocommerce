@@ -77,36 +77,12 @@ class ShippingController {
 		add_filter( 'woocommerce_shipping_settings', array( $this, 'remove_shipping_settings' ) );
 		add_filter( 'wc_shipping_enabled', array( $this, 'force_shipping_enabled' ), 100, 1 );
 		add_filter( 'woocommerce_order_shipping_to_display', array( $this, 'show_local_pickup_details' ), 10, 2 );
-		add_filter( 'woocommerce_shipping_chosen_method', array( $this, 'prevent_shipping_method_selection_changes' ), 20, 3 );
 
 		// This is required to short circuit `show_shipping` from class-wc-cart.php - without it, that function
 		// returns based on the option's value in the DB and we can't override it any other way.
 		add_filter( 'option_woocommerce_shipping_cost_requires_address', array( $this, 'override_cost_requires_address_option' ) );
 
 		add_action( 'rest_pre_serve_request', array( $this, 'track_local_pickup' ), 10, 4 );
-	}
-
-	/**
-	 * Prevent changes in the selected shipping method when new rates are added or removed.
-	 *
-	 * If the chosen method exists within package rates, it is returned to maintain the selection.
-	 * Otherwise, the default rate is returned.
-	 *
-	 * @param string $default        Default shipping method.
-	 * @param array  $package_rates  Associative array of available package rates.
-	 * @param string $chosen_method  Previously chosen shipping method.
-	 *
-	 * @return string                Chosen shipping method or default.
-	 */
-	public function prevent_shipping_method_selection_changes( $default, $package_rates, $chosen_method ) {
-
-		// If the chosen method exists in the package rates, return it.
-		if ( $chosen_method && isset( $package_rates[ $chosen_method ] ) ) {
-			return $chosen_method;
-		}
-
-		// Otherwise, return the default method.
-		return $default;
 	}
 
 	/**

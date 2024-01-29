@@ -195,3 +195,15 @@ export type ProductQuery<
 	max_price?: string;
 	stock_status?: 'instock' | 'outofstock' | 'onbackorder';
 };
+
+export type SuggestedProductOptionsKey = string;
+
+/*
+ * Selector types
+ */
+export type GetSuggestedProductsOptions = {
+	categories?: number[];
+	tags?: number[];
+	attributes?: number[];
+	limit?: number;
+};
