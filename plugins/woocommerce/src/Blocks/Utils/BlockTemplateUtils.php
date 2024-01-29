@@ -493,28 +493,6 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Retrieves a single unified template object using its id.
-	 *
-	 * @param string $id            Template unique identifier (example: theme_slug//template_slug).
-	 * @param string $template_type Optional. Template type: `wp_template` or 'wp_template_part`.
-	 *                              Default `wp_template`.
-	 *
-	 * @return WP_Block_Template|null Template.
-	 */
-	public static function get_block_template( $id, $template_type ) {
-		if ( function_exists( 'get_block_template' ) ) {
-			return get_block_template( $id, $template_type );
-		}
-
-		if ( function_exists( 'gutenberg_get_block_template' ) ) {
-			return gutenberg_get_block_template( $id, $template_type );
-		}
-
-		return null;
-
-	}
-
-	/**
 	 * Checks if we can fall back to the `archive-product` template for a given slug.
 	 *
 	 * `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-product_attribute` templates can
@@ -820,7 +798,7 @@ class BlockTemplateUtils {
 			$theme_has_template    = self::theme_has_template_part( $slug );
 			$template_slug_to_load = $theme_has_template ? get_stylesheet() : self::PLUGIN_SLUG;
 		}
-		$template_part = self::get_block_template( $template_slug_to_load . '//' . $slug, 'wp_template_part' );
+		$template_part = get_block_template( $template_slug_to_load . '//' . $slug, 'wp_template_part' );
 
 		if ( $template_part && ! empty( $template_part->content ) ) {
 			return $template_part->content;
