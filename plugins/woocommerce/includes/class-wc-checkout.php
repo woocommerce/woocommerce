@@ -783,6 +783,9 @@ class WC_Checkout {
 							$value = wc_sanitize_textarea( $value );
 							break;
 						case 'password':
+							if ( $data[ 'createaccount' ] && 'account_password' === $key ) {
+								$value = wp_slash( $value ); // Passwords are encrypted with slashes on account creation, so we need to slash here too.
+							}
 							break;
 						default:
 							$value = wc_clean( $value );
@@ -1119,7 +1122,7 @@ class WC_Checkout {
 			$customer_id = wc_create_new_customer(
 				$data['billing_email'],
 				$username,
-				wp_slash( $password ), // We need to wp_slash() manually here to mimic the normal registration process.
+				$password,
 				array(
 					'first_name' => ! empty( $data['billing_first_name'] ) ? $data['billing_first_name'] : '',
 					'last_name'  => ! empty( $data['billing_last_name'] ) ? $data['billing_last_name'] : '',
