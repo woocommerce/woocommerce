@@ -114,8 +114,6 @@ const ProductTemplateEdit = ( {
 		isNumber
 	);
 
-	// const blockProps1 = useBlockProps();
-
 	const parentCollectionBlockAttributes =
 		useProductCollectionBlockAttributes( clientId );
 
