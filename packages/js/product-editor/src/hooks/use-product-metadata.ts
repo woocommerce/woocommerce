@@ -25,40 +25,47 @@ function useProductMetadata( options?: Options ) {
 	// @ts-expect-error There are no types for this.
 	const { editEntityRecord } = useDispatch( 'core' );
 
-	return useSelect( ( select ) => {
-		// @ts-expect-error There are no types for this.
-		const { getEditedEntityRecord, hasFinishedResolution } =
-			select( 'core' );
-		const { meta_data: metadataArray }: Product = getEditedEntityRecord(
-			'postType',
-			postType,
-			id
-		);
-		const isResolutionFinished = hasFinishedResolution(
-			'getEditedEntityRecord',
-			[ 'postType', postType, id ]
-		);
+	const { isLoading, meta_data } = useSelect(
+		( select ) => {
+			// @ts-expect-error There are no types for this.
+			const { getEditedEntityRecord, hasFinishedResolution } =
+				select( 'core' );
+			const { meta_data: metadata }: Product = getEditedEntityRecord(
+				'postType',
+				postType,
+				id
+			);
+			const isResolutionFinished = hasFinishedResolution(
+				'getEditedEntityRecord',
+				[ 'postType', postType, id ]
+			);
 
-		return {
-			metadata: metadataArray.reduce( function ( acc, cur ) {
-				acc[ cur.key ] = cur.value;
-				return acc;
-			}, {} as Record< string, string | undefined > ),
-			update: ( entries: Metadata< string >[] ) =>
-				editEntityRecord( 'postType', postType, id, {
-					meta_data: [
-						...metadataArray.filter(
-							( item ) =>
-								entries.findIndex(
-									( e ) => e.key === item.key
-								) === -1
-						),
-						...entries,
-					],
-				} ),
-			isLoading: ! isResolutionFinished,
-		};
-	} );
+			return {
+				meta_data: metadata,
+				isLoading: ! isResolutionFinished,
+			};
+		},
+		[ id ]
+	);
+
+	return {
+		metadata: meta_data.reduce( function ( acc, cur ) {
+			acc[ cur.key ] = cur.value;
+			return acc;
+		}, {} as Record< string, string | undefined > ),
+		update: ( entries: Metadata< string >[] ) =>
+			editEntityRecord( 'postType', postType, id, {
+				meta_data: [
+					...meta_data.filter(
+						( item ) =>
+							entries.findIndex( ( e ) => e.key === item.key ) ===
+							-1
+					),
+					...entries,
+				],
+			} ),
+		isLoading,
+	};
 }
 
 export default useProductMetadata;
