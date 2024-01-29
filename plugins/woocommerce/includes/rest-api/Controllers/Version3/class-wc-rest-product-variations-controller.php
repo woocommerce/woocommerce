@@ -69,7 +69,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * Get the downloads for a product variation.
 	 *
 	 * @param WC_Product_Variation $product Product variation instance.
-	 * @param string $context Context of the request: 'view' or 'edit'.
+	 * @param string               $context Context of the request: 'view' or 'edit'.
 	 *
 	 * @return array
 	 */

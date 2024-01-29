@@ -2,16 +2,20 @@
 /**
  * DownloadableProductTrait
  */
+
 namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\GroupInterface;
 
 /**
  * Downloadable Product Trait.
  */
 trait DownloadableProductTrait {
 	/**
-	 * Adds the general group blocks to the template.
+	 * Adds downloadable blocks to the given parent block.
+	 *
+	 * @param GroupInterface $parent_block The parent block.
 	 */
 	private function add_downloadable_product_blocks( $parent_block ) {
 		// Downloads section.
