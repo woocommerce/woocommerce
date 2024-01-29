@@ -30,12 +30,11 @@ export function TextAreaBlockEdit( {
 		label,
 		placeholder,
 		help,
-		align,
-		tooltip,
 		required,
+		disabled,
+		align,
 		allowedFormats,
 		direction,
-		disabled,
 	} = attributes;
 	const blockProps = useWooBlockProps( attributes, {
 		style: { direction },

@@ -21,9 +21,6 @@
 		"help": {
 			"type": "string"
 		},
-		"tooltip": {
-			"type": "string"
-		},
 		"required": {
 			"type": "string"
 		},

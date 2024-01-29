@@ -23,7 +23,6 @@ export type TextAreaBlockEditAttributes = ProductEditorBlockAttributes & {
 	label?: string;
 	placeholder?: string;
 	help?: string;
-	tooltip?: string;
 	required?: boolean;
 	disabled?: boolean;
 	align?: 'left' | 'center' | 'right' | 'justify';
