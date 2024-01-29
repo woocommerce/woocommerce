@@ -16,23 +16,24 @@ baseTest.describe( 'Products > Related products', () => {
 			await use( api );
 		},
 		products: async ( { page, api }, use ) => {
-			const productTypes = [ 'simple', 'upsell1', 'upsell2' ];
+			const keys = [ 'main', 'linked1', 'linked2' ];
 			const products = {};
 
-			for ( const type of Object.values( productTypes ) ) {
+			for ( const key of Object.values( keys ) ) {
 				await api
 					.post( 'products', {
-						name: `Product ${ type } ${ Date.now() }`,
+						name: `${ key } ${ Date.now() }`,
 						type: 'simple',
+						regular_price: '12.99',
 					} )
 					.then( ( response ) => {
-						products[ type ] = response.data;
+						products[ key ] = response.data;
 					} );
 			}
 
 			await test.step( 'Navigate to product edit page', async () => {
 				await page.goto(
-					`wp-admin/post.php?post=${ products.simple.id }&action=edit`
+					`wp-admin/post.php?post=${ products.main.id }&action=edit`
 				);
 			} );
 
@@ -59,28 +60,34 @@ baseTest.describe( 'Products > Related products', () => {
 
 		await test.step( 'add an up-sell by searching for product name', async () => {
 			await upsellTextBoxLocator.click();
-			await upsellTextBoxLocator.fill( products.upsell1.name );
+			await upsellTextBoxLocator.fill( products.linked1.name );
 			await page.keyboard.press( 'Space' ); // This is needed to trigger the search
 			await page
-				.getByRole( 'option', { name: products.upsell1.name } )
+				.getByRole( 'option', { name: products.linked1.name } )
 				.click();
 			await expect(
-				page.getByRole( 'listitem', { name: products.upsell1.name } )
+				page.getByRole( 'listitem', {
+					name: products.linked1.name,
+				} )
 			).toBeVisible();
 		} );
 
 		await test.step( 'add an up-sell by searching for product id', async () => {
 			await upsellTextBoxLocator.click();
-			await upsellTextBoxLocator.fill( `${ products.upsell2.id }` );
+			await upsellTextBoxLocator.fill( `${ products.linked2.id }` );
 			await page.keyboard.press( 'Space' ); // This is needed to trigger the search
 			await page
-				.getByRole( 'option', { name: products.upsell2.name } )
+				.getByRole( 'option', { name: products.linked2.name } )
 				.click();
 			await expect(
-				page.getByRole( 'listitem', { name: products.upsell2.name } )
+				page.getByRole( 'listitem', {
+					name: products.linked2.name,
+				} )
 			).toBeVisible();
 			await expect(
-				page.getByRole( 'listitem', { name: products.upsell1.name } )
+				page.getByRole( 'listitem', {
+					name: products.linked1.name,
+				} )
 			).toBeVisible();
 		} );
 
@@ -89,7 +96,7 @@ baseTest.describe( 'Products > Related products', () => {
 		} );
 
 		await test.step( 'verify the up-sell in the store frontend', async () => {
-			await page.goto( products.simple.permalink );
+			await page.goto( products.main.permalink );
 			const sectionLocator = page.locator( 'section' ).filter( {
 				has: page.getByRole( 'heading', {
 					name: 'You may also like',
@@ -98,22 +105,92 @@ baseTest.describe( 'Products > Related products', () => {
 
 			await expect(
 				sectionLocator.getByRole( 'heading', {
-					name: products.upsell1.name,
+					name: products.linked1.name,
 				} )
 			).toBeVisible();
 			await expect(
 				sectionLocator.getByRole( 'heading', {
-					name: products.upsell2.name,
+					name: products.linked2.name,
 				} )
 			).toBeVisible();
 		} );
 	} );
 
+	test( 'remove up-sells', async ( { page, products } ) => {
+		await test.step( 'remove up-sells for a product', async () => {} );
+	} );
+
 	test( 'add cross-sells', async ( { page, products } ) => {
-		await test.step( 'Navigate to product edit page', async () => {
-			await page.goto(
-				`wp-admin/post.php?post=${ products.simple.id }&action=edit`
-			);
+		const upsellTextBoxLocator = page
+			.locator( 'p' )
+			.filter( { hasText: 'Cross-sells' } )
+			.getByRole( 'textbox' );
+
+		await test.step( 'add a cross-sell by searching for product name', async () => {
+			await upsellTextBoxLocator.click();
+			await upsellTextBoxLocator.fill( products.linked1.name );
+			await page.keyboard.press( 'Space' ); // This is needed to trigger the search
+			await page
+				.getByRole( 'option', { name: products.linked1.name } )
+				.click();
+			await expect(
+				page.getByRole( 'listitem', {
+					name: products.linked1.name,
+				} )
+			).toBeVisible();
 		} );
+
+		await test.step( 'add a cross-sell by searching for product id', async () => {
+			await upsellTextBoxLocator.click();
+			await upsellTextBoxLocator.fill( `${ products.linked2.id }` );
+			await page.keyboard.press( 'Space' ); // This is needed to trigger the search
+			await page
+				.getByRole( 'option', { name: products.linked2.name } )
+				.click();
+			await expect(
+				page.getByRole( 'listitem', {
+					name: products.linked2.name,
+				} )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'listitem', {
+					name: products.linked1.name,
+				} )
+			).toBeVisible();
+		} );
+
+		await test.step( 'publish the updated product', async () => {
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+		} );
+
+		await test.step( 'verify the up-sell in the store frontend', async () => {
+			await page.goto( products.main.permalink );
+
+			// add to cart and view proceed to checkout
+			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+			await page.getByRole( 'link', { name: 'View cart' } ).click();
+
+			// check for cross-sells
+			const sectionLocator = page.locator( 'div' ).filter( {
+				has: page.getByRole( 'heading', {
+					name: 'You may be interested in',
+				} ),
+			} );
+
+			await expect(
+				sectionLocator.getByRole( 'heading', {
+					name: products.linked1.name,
+				} )
+			).toBeVisible();
+			await expect(
+				sectionLocator.getByRole( 'heading', {
+					name: products.linked2.name,
+				} )
+			).toBeVisible();
+		} );
+	} );
+
+	test( 'remove cross-sells', async ( { page, products } ) => {
+		await test.step( 'remove cross-sells for a product', async () => {} );
 	} );
 } );
