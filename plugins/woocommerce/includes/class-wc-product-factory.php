@@ -36,7 +36,7 @@ class WC_Product_Factory {
 			wc_deprecated_argument( 'args', '3.0', 'Passing args to the product factory is deprecated. If you need to force a type, construct the product class directly.' );
 
 			if ( isset( $deprecated['product_type'] ) ) {
-				$product_type = static::get_classname_from_product_type( $deprecated['product_type'] );
+				$product_type = self::get_classname_from_product_type( $deprecated['product_type'] );
 			}
 		}
 
