@@ -74,6 +74,8 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		...uiStrings,
 	};
 	const [ isNewModalVisible, setIsNewModalVisible ] = useState( false );
+	const [ defaultAttributeSearch, setDefaultAttributeSearch ] =
+		useState< string >();
 	const [ removingAttribute, setRemovingAttribute ] =
 		useState< null | ProductAttribute >();
 	const [ currentAttributeId, setCurrentAttributeId ] = useState<
@@ -126,6 +128,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const closeNewModal = () => {
 		setIsNewModalVisible( false );
+		setDefaultAttributeSearch( undefined );
 		onNewModalClose();
 	};
 
@@ -276,6 +279,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					}
 					termsAutoSelection={ termsAutoSelection }
 					defaultVisibility={ defaultVisibility }
+					defaultSearch={ defaultAttributeSearch }
 				/>
 			) }
 			<SelectControlMenuSlot />
@@ -343,7 +347,12 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			) }
 			{ ! isMobileViewport &&
 				value.length === 0 &&
-				renderCustomEmptyState() }
+				renderCustomEmptyState( {
+					addAttribute( search ) {
+						setDefaultAttributeSearch( search );
+						openNewModal();
+					},
+				} ) }
 		</div>
 	);
 };

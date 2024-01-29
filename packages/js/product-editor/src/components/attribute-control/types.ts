@@ -8,6 +8,10 @@ import { ProductAttribute } from '@woocommerce/data';
  */
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 
+export type AttributeControlEmptyStateProps = {
+	addAttribute: ( search?: string ) => void;
+};
+
 export type AttributeControlProps = {
 	value: EnhancedProductAttribute[];
 	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
@@ -24,7 +28,7 @@ export type AttributeControlProps = {
 	onEditModalClose?: ( attribute?: ProductAttribute ) => void;
 	onEditModalOpen?: ( attribute?: ProductAttribute ) => void;
 	onNoticeDismiss?: () => void;
-	renderCustomEmptyState?: () => void;
+	renderCustomEmptyState?: ( props: AttributeControlEmptyStateProps ) => void;
 	createNewAttributesAsGlobal?: boolean;
 	useRemoveConfirmationModal?: boolean;
 	disabledAttributeIds?: number[];

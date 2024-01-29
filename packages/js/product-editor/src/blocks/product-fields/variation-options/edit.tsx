@@ -26,7 +26,10 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { useProductAttributes } from '../../../hooks/use-product-attributes';
-import { AttributeControl } from '../../../components/attribute-control';
+import {
+	AttributeControl,
+	AttributeControlEmptyStateProps,
+} from '../../../components/attribute-control';
 import { useProductVariationsHelper } from '../../../hooks/use-product-variations-helper';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { Button } from '@wordpress/components';
@@ -115,7 +118,9 @@ export function Edit( {
 		} ) );
 	}
 
-	function renderCustomEmptyState() {
+	function renderCustomEmptyState( {
+		addAttribute,
+	}: AttributeControlEmptyStateProps ) {
 		return (
 			<div className="wp-block-woocommerce-product-variations-options-field__empty-state">
 				<div className="wp-block-woocommerce-product-variations-options-field__empty-state-image">
@@ -132,13 +137,23 @@ export function Edit( {
 				</p>
 
 				<div className="wp-block-woocommerce-product-variations-options-field__empty-state-actions">
-					<Button variant="primary">
+					<Button variant="primary" onClick={ () => addAttribute() }>
 						{ __( 'Add options', 'woocommerce' ) }
 					</Button>
-					<Button variant="secondary">
+					<Button
+						variant="secondary"
+						onClick={ () =>
+							addAttribute( __( 'Size', 'woocommerce' ) )
+						}
+					>
 						{ __( 'Add sizes', 'woocommerce' ) }
 					</Button>
-					<Button variant="secondary">
+					<Button
+						variant="secondary"
+						onClick={ () =>
+							addAttribute( __( 'Color', 'woocommerce' ) )
+						}
+					>
 						{ __( 'Add colors', 'woocommerce' ) }
 					</Button>
 				</div>
