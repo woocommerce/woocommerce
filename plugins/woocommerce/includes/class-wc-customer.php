@@ -105,10 +105,12 @@ class WC_Customer extends WC_Legacy_Customer {
 			$this->set_id( $data );
 		}
 
-		$this->data_store = WC_Data_Store::load( 'customer' );
+		$is_session       = $is_session && isset( WC()->session );
+		$store_type       = $is_session ? 'customer-session' : 'customer';
+		$this->data_store = WC_Data_Store::load( $store_type );
 
 		// If we have an ID, load the user from the DB.
-		if ( $this->get_id() ) {
+		if ( $this->get_id() || $is_session ) {
 			try {
 				$this->data_store->read( $this );
 			} catch ( Exception $e ) {
@@ -117,12 +119,6 @@ class WC_Customer extends WC_Legacy_Customer {
 			}
 		} else {
 			$this->set_object_read( true );
-		}
-
-		// If this is a session, set or change the data store to sessions. Changes do not persist in the database.
-		if ( $is_session && isset( WC()->session ) ) {
-			$this->data_store = WC_Data_Store::load( 'customer-session' );
-			$this->data_store->read( $this );
 		}
 	}
 
