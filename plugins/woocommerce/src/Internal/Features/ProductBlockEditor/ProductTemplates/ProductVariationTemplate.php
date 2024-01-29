@@ -133,12 +133,13 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		$basic_details->add_block(
 			array(
 				'id'         => 'product-variation-note',
-				'blockName'  => 'woocommerce/product-summary-field',
+				'blockName'  => 'woocommerce/product-text-area-field',
 				'order'      => 20,
 				'attributes' => array(
 					'property' => 'description',
-					'label'    => __( 'Note <optional />', 'woocommerce' ),
-					'helpText' => 'Enter an optional note displayed on the product page when customers select this variation.',
+					// Translators: %s defines the field is optional.
+					'label'    => sprintf( esc_html__( 'Note %s', 'woocommerce' ), '<note>(Optional)</note>' ),
+					'help'     => 'Enter an optional note displayed on the product page when customers select this variation.',
 				),
 			)
 		);
