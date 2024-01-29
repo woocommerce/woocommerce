@@ -15,7 +15,7 @@ baseTest.describe( 'Products > Related products', () => {
 
 			await use( api );
 		},
-		products: async ( { page, api }, use ) => {
+		products: async ( { api }, use ) => {
 			const keys = [ 'main', 'linked1', 'linked2' ];
 			const products = {};
 
@@ -31,18 +31,6 @@ baseTest.describe( 'Products > Related products', () => {
 					} );
 			}
 
-			await test.step( 'Navigate to product edit page', async () => {
-				await page.goto(
-					`wp-admin/post.php?post=${ products.main.id }&action=edit`
-				);
-			} );
-
-			await test.step( 'go to Linked Products', async () => {
-				await page
-					.getByRole( 'link', { name: 'Linked Products' } )
-					.click();
-			} );
-
 			await use( products );
 
 			// Cleanup
@@ -52,7 +40,21 @@ baseTest.describe( 'Products > Related products', () => {
 		},
 	} );
 
+	async function navigate( page, productId ) {
+		await test.step( 'Navigate to product edit page', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productId }&action=edit`
+			);
+		} );
+
+		await test.step( 'go to Linked Products', async () => {
+			await page.getByRole( 'link', { name: 'Linked Products' } ).click();
+		} );
+	}
+
 	test( 'add up-sells', async ( { page, products } ) => {
+		await navigate( page, products.main.id );
+
 		const upsellTextBoxLocator = page
 			.locator( 'p' )
 			.filter( { hasText: 'Upsells' } )
@@ -97,6 +99,7 @@ baseTest.describe( 'Products > Related products', () => {
 
 		await test.step( 'verify the up-sell in the store frontend', async () => {
 			await page.goto( products.main.permalink );
+
 			const sectionLocator = page.locator( 'section' ).filter( {
 				has: page.getByRole( 'heading', {
 					name: 'You may also like',
@@ -116,11 +119,43 @@ baseTest.describe( 'Products > Related products', () => {
 		} );
 	} );
 
-	test( 'remove up-sells', async ( { page, products } ) => {
-		await test.step( 'remove up-sells for a product', async () => {} );
+	test( 'remove up-sells', async ( { page, api, products } ) => {
+		await api.put( `products/${ products.main.id }`, {
+			upsell_ids: [ products.linked1.id, products.linked2.id ],
+		} );
+
+		await navigate( page, products.main.id );
+
+		await test.step( 'remove up-sells for a product', async () => {
+			await page
+				.getByRole( 'listitem', { name: products.linked1.name } )
+				.getByText( '×' )
+				.click();
+			await page
+				.getByRole( 'listitem', { name: products.linked2.name } )
+				.getByText( '×' )
+				.click();
+		} );
+
+		await test.step( 'publish the updated product', async () => {
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+		} );
+
+		await test.step( 'verify the up-sells in the store frontend', async () => {
+			await page.goto( products.main.permalink );
+
+			await expect(
+				page.getByText( products.linked1.name )
+			).toBeHidden();
+			await expect(
+				page.getByText( products.linked2.name )
+			).toBeHidden();
+		} );
 	} );
 
 	test( 'add cross-sells', async ( { page, products } ) => {
+		await navigate( page, products.main.id );
+
 		const upsellTextBoxLocator = page
 			.locator( 'p' )
 			.filter( { hasText: 'Cross-sells' } )
@@ -190,7 +225,45 @@ baseTest.describe( 'Products > Related products', () => {
 		} );
 	} );
 
-	test( 'remove cross-sells', async ( { page, products } ) => {
-		await test.step( 'remove cross-sells for a product', async () => {} );
+	test( 'remove cross-sells', async ( { page, api, products } ) => {
+		await api.put( `products/${ products.main.id }`, {
+			cross_sell_ids: [ products.linked1.id, products.linked2.id ],
+		} );
+
+		await navigate( page, products.main.id );
+
+		await test.step( 'remove cross-sells for a product', async () => {
+			await page
+				.getByRole( 'listitem', { name: products.linked1.name } )
+				.getByText( '×' )
+				.click();
+			await page
+				.getByRole( 'listitem', { name: products.linked2.name } )
+				.getByText( '×' )
+				.click();
+		} );
+
+		await test.step( 'publish the updated product', async () => {
+			await page
+				.getByRole( 'heading', { name: 'Edit product', exact: true } )
+				.click();
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+		} );
+
+		await test.step( 'verify the cross-sells in the store frontend', async () => {
+			await page.goto( products.main.permalink );
+
+			// add to cart and view proceed to checkout
+			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+			await page.getByRole( 'link', { name: 'View cart' } ).click();
+
+			// check for cross-sells
+			await expect(
+				page.getByText( products.linked1.name )
+			).toBeHidden();
+			await expect(
+				page.getByText( products.linked2.name )
+			).toBeHidden();
+		} );
 	} );
 } );
