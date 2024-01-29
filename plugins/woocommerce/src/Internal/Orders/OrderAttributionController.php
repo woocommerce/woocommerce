@@ -261,7 +261,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 		 *
 		 * @param bool $web_storage Type of web storage to use, 'cookies' is the default.
 		 */
-		$web_storage = apply_filters( 'wc_order_attribution_single_cookie', 'cookies' );
+		$web_storage = apply_filters( 'wc_order_attribution_web_storage', 'cookies' );
 
 		/**
 		 * Filter to allow tracking.
@@ -275,12 +275,12 @@ class OrderAttributionController implements RegisterHooksInterface {
 		// Create Order Attribution JS namespace with parameters.
 		$namespace = array(
 			'params' => array(
-				'single_cookie' => $single_cookie,
+				'web_storage'   => $web_storage,
 				'lifetime'      => $lifetime,
 				'session'       => $session_length,
 				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
 				'prefix'        => $this->field_prefix,
-				'web_storage'   => $web_storage,
+				'allowTracking' => 'yes' === $allow_tracking,
 			),
 			'fields' => $this->fields,
 		);
