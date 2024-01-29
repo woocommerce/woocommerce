@@ -17,6 +17,7 @@ jest.mock( '@wordpress/data', () => ( {
 	useSelect: jest.fn().mockImplementation( ( callback ) => {
 		return callback(
 			jest.fn().mockReturnValue( {
+				hasFinishedResolution: jest.fn().mockReturnValue( true ),
 				getEditedEntityRecord: () => ( {
 					meta_data: [
 						{

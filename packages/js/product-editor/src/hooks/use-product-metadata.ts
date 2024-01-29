@@ -25,38 +25,41 @@ function useProductMetadata( options?: Options ) {
 	// @ts-expect-error There are no types for this.
 	const { editEntityRecord } = useDispatch( 'core' );
 
-	return useSelect(
-		( select ) => {
-			// @ts-expect-error There are no types for this.
-			const { getEditedEntityRecord } = select( 'core' );
-			const { meta_data: metadata }: Product = getEditedEntityRecord(
-				'postType',
-				postType,
-				id
-			);
+	return useSelect( ( select ) => {
+		// @ts-expect-error There are no types for this.
+		const { getEditedEntityRecord, hasFinishedResolution } =
+			select( 'core' );
+		const { meta_data: metadata }: Product = getEditedEntityRecord(
+			'postType',
+			postType,
+			id
+		);
+		const isResolutionFinished = hasFinishedResolution(
+			'getEditedEntityRecord',
+			[ 'postType', postType, id ]
+		);
 
-			return {
-				metadata: metadata.reduce( function ( acc, cur ) {
-					acc[ cur.key ] = cur.value;
-					return acc;
-				}, {} as Record< string, string | undefined > ),
-				updateMetadata: ( entries: Metadata< string >[] ) => {
-					editEntityRecord( 'postType', postType, id, {
-						meta_data: [
-							...metadata.filter(
-								( item ) =>
-									entries.findIndex(
-										( e ) => e.key === item.key
-									) === -1
-							),
-							...entries,
-						],
-					} );
-				},
-			};
-		},
-		[ id ]
-	);
+		return {
+			metadata: metadata.reduce( function ( acc, cur ) {
+				acc[ cur.key ] = cur.value;
+				return acc;
+			}, {} as Record< string, string | undefined > ),
+			updateMetadata: ( entries: Metadata< string >[] ) => {
+				editEntityRecord( 'postType', postType, id, {
+					meta_data: [
+						...metadata.filter(
+							( item ) =>
+								entries.findIndex(
+									( e ) => e.key === item.key
+								) === -1
+						),
+						...entries,
+					],
+				} );
+			},
+			isLoading: ! isResolutionFinished,
+		};
+	} );
 }
 
 export default useProductMetadata;
