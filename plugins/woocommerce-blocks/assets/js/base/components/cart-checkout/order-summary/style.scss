@@ -110,11 +110,13 @@
 		padding-top: $gap-smaller;
 	}
 
-	@include breakpoint("<480px") {
-		.wc-block-components-panel__content, .wc-block-components-totals-coupon {
-			padding-left: $gap-small;
-			padding-right: $gap-small;
-		}
+}
+
+@include breakpoint("<600px") {
+	.wc-block-components-order-summary.wc-block-components-panel,
+	.wc-block-components-totals-coupon {
+		padding-left: $gap-small;
+		padding-right: $gap-small;
 	}
 }
 
