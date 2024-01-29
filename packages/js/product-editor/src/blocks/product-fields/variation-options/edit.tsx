@@ -29,6 +29,8 @@ import { useProductAttributes } from '../../../hooks/use-product-attributes';
 import { AttributeControl } from '../../../components/attribute-control';
 import { useProductVariationsHelper } from '../../../hooks/use-product-variations-helper';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { Button } from '@wordpress/components';
+import { ProductTShirt } from './images';
 
 export function Edit( {
 	attributes: blockAttributes,
@@ -113,6 +115,37 @@ export function Edit( {
 		} ) );
 	}
 
+	function renderCustomEmptyState() {
+		return (
+			<div className="wp-block-woocommerce-product-variations-options-field__empty-state">
+				<div className="wp-block-woocommerce-product-variations-options-field__empty-state-image">
+					<ProductTShirt className="wp-block-woocommerce-product-variations-options-field__empty-state-image-product" />
+					<ProductTShirt className="wp-block-woocommerce-product-variations-options-field__empty-state-image-product" />
+					<ProductTShirt className="wp-block-woocommerce-product-variations-options-field__empty-state-image-product" />
+				</div>
+
+				<p className="wp-block-woocommerce-product-variations-options-field__empty-state-description">
+					{ __(
+						'Sell your product in multiple variations like size or color.',
+						'woocommerce'
+					) }
+				</p>
+
+				<div className="wp-block-woocommerce-product-variations-options-field__empty-state-actions">
+					<Button variant="primary">
+						{ __( 'Add options', 'woocommerce' ) }
+					</Button>
+					<Button variant="secondary">
+						{ __( 'Add sizes', 'woocommerce' ) }
+					</Button>
+					<Button variant="secondary">
+						{ __( 'Add colors', 'woocommerce' ) }
+					</Button>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div { ...blockProps }>
 			<AttributeControl
@@ -160,6 +193,7 @@ export function Edit( {
 						'product_remove_option_confirmation_cancel_click'
 					)
 				}
+				renderCustomEmptyState={ renderCustomEmptyState }
 				disabledAttributeIds={ entityAttributes
 					.filter( ( attr ) => ! attr.variation )
 					.map( ( attr ) => attr.id ) }
