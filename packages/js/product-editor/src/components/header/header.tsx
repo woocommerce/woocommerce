@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { WooHeaderItem } from '@woocommerce/admin-layout';
+import { WooHeaderItem, useAdminSidebarWidth } from '@woocommerce/admin-layout';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement, useEffect } from '@wordpress/element';
@@ -56,34 +56,19 @@ export function Header( {
 		'name'
 	);
 
-	/**
-	 * the admin menu can have different widths in certain scenarios, like when using calypso
-	 * so we need to observe it and adjust the header width and position accordingly */
+	const sidebarWidth = useAdminSidebarWidth();
+
 	useEffect( () => {
-		const resizeObserver = new ResizeObserver( ( entries ) => {
-			for ( const entry of entries ) {
-				const width = entry.contentRect.width;
-				document
-					.querySelectorAll( '.interface-interface-skeleton__header' )
-					.forEach( ( el ) => {
-						if ( ( el as HTMLElement ).style ) {
-							( el as HTMLElement ).style.width =
-								'calc(100% - ' + width + 'px)';
-							( el as HTMLElement ).style.left = width + 'px';
-						}
-					} );
-			}
-		} );
-		const adminMenu = document.getElementById( 'adminmenu' );
-		if ( adminMenu ) {
-			resizeObserver.observe( adminMenu );
-		}
-		return () => {
-			if ( adminMenu ) {
-				resizeObserver.unobserve( adminMenu );
-			}
-		};
-	}, [] );
+		document
+			.querySelectorAll( '.interface-interface-skeleton__header' )
+			.forEach( ( el ) => {
+				if ( ( el as HTMLElement ).style ) {
+					( el as HTMLElement ).style.width =
+						'calc(100% - ' + sidebarWidth + 'px)';
+					( el as HTMLElement ).style.left = sidebarWidth + 'px';
+				}
+			} );
+	}, [ sidebarWidth ] );
 
 	if ( ! productId ) {
 		return null;
