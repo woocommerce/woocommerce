@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { BlockControls, useBlockProps } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
 import {
@@ -38,6 +38,67 @@ import { AttributeDropdown } from './components/attribute-dropdown';
 import './style.scss';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
+
+const Toolbar = ( {
+	onClick,
+	isEditing,
+}: {
+	onClick: () => void;
+	isEditing: boolean;
+} ) => (
+	<BlockControls>
+		<ToolbarGroup
+			controls={ [
+				{
+					icon: 'edit',
+					title: __( 'Edit', 'woocommerce' ),
+					onClick,
+					isActive: isEditing,
+				},
+			] }
+		/>
+	</BlockControls>
+);
+
+const Wrapper = ( {
+	children,
+	onClickToolbarEdit,
+	isEditing,
+	blockProps,
+}: {
+	children: React.ReactNode;
+	onClickToolbarEdit: () => void;
+	isEditing: boolean;
+	blockProps: object;
+} ) => (
+	<div { ...blockProps }>
+		<Toolbar onClick={ onClickToolbarEdit } isEditing={ isEditing } />
+		{ children }
+	</div>
+);
+
+const AttributeSelectPlaceholder = ( {
+	attributeId,
+	setAttributeId,
+	onClickDone,
+}: {
+	attributeId: number;
+	setAttributeId: ( id: number ) => void;
+	onClickDone: () => void;
+} ) => (
+	<AttributesPlaceholder>
+		<div className="wc-block-attribute-filter__selection">
+			<AttributeSelectControls
+				isCompact={ false }
+				attributeId={ attributeId }
+				setAttributeId={ setAttributeId }
+			/>
+			<Button variant="primary" onClick={ onClickDone }>
+				{ __( 'Done', 'woocommerce' ) }
+			</Button>
+		</div>
+	</AttributesPlaceholder>
+);
 
 const Edit = ( props: EditProps ) => {
 	const {
@@ -93,76 +154,64 @@ const Edit = ( props: EditProps ) => {
 		);
 	}, [ attributeTerms, filteredCounts ] );
 
-	const Toolbar = () => (
-		<BlockControls>
-			<ToolbarGroup
-				controls={ [
-					{
-						icon: 'edit',
-						title: __( 'Edit', 'woocommerce' ),
-						onClick: () => setIsEditing( ! isEditing ),
-						isActive: isEditing,
-					},
-				] }
-			/>
-		</BlockControls>
+	const onClickDone = useCallback( () => {
+		setIsEditing( false );
+		debouncedSpeak(
+			__(
+				'Now displaying a preview of the Filter Products by Attribute block.',
+				'woocommerce'
+			)
+		);
+	}, [ setIsEditing ] );
+
+	const setAttributeId = useCallback(
+		( id ) => {
+			setAttributes( {
+				attributeId: id,
+			} );
+		},
+		[ setAttributes ]
 	);
 
-	const AttributeSelectPlaceholder = () => (
-		<AttributesPlaceholder>
-			<div className="wc-block-attribute-filter__selection">
-				<AttributeSelectControls
-					isCompact={ false }
-					attributeId={ attributeId }
-					setAttributeId={ ( id ) =>
-						setAttributes( {
-							attributeId: id,
-						} )
-					}
-				/>
-				<Button
-					variant="primary"
-					onClick={ () => {
-						setIsEditing( false );
-						debouncedSpeak(
-							__(
-								'Now displaying a preview of the Filter Products by Attribute block.',
-								'woocommerce'
-							)
-						);
-					} }
-				>
-					{ __( 'Done', 'woocommerce' ) }
-				</Button>
-			</div>
-		</AttributesPlaceholder>
-	);
-
-	const Wrapper = ( { children }: { children: React.ReactNode } ) => (
-		<div { ...blockProps }>
-			<Toolbar />
-			{ children }
-		</div>
-	);
+	const toggleEditing = useCallback( () => {
+		setIsEditing( ! isEditing );
+	}, [ isEditing ] );
 
 	// Block rendering starts.
 	if ( Object.keys( ATTRIBUTES ).length === 0 )
 		return (
-			<Wrapper>
+			<Wrapper
+				onClickToolbarEdit={ toggleEditing }
+				isEditing={ isEditing }
+				blockProps={ blockProps }
+			>
 				<NoAttributesPlaceholder />
 			</Wrapper>
 		);
 
-	if ( isEditing )
+	if ( isEditing ) {
 		return (
-			<Wrapper>
-				<AttributeSelectPlaceholder />
+			<Wrapper
+				onClickToolbarEdit={ toggleEditing }
+				isEditing={ isEditing }
+				blockProps={ blockProps }
+			>
+				<AttributeSelectPlaceholder
+					onClickDone={ onClickDone }
+					attributeId={ attributeId }
+					setAttributeId={ setAttributeId }
+				/>
 			</Wrapper>
 		);
+	}
 
 	if ( ! attributeId || ! attributeObject )
 		return (
-			<Wrapper>
+			<Wrapper
+				onClickToolbarEdit={ toggleEditing }
+				isEditing={ isEditing }
+				blockProps={ blockProps }
+			>
 				<Notice status="warning" isDismissible={ false }>
 					<p>
 						{ __(
@@ -176,7 +225,11 @@ const Edit = ( props: EditProps ) => {
 
 	if ( attributeOptions.length === 0 )
 		return (
-			<Wrapper>
+			<Wrapper
+				onClickToolbarEdit={ toggleEditing }
+				isEditing={ isEditing }
+				blockProps={ blockProps }
+			>
 				<Notice status="warning" isDismissible={ false }>
 					<p>
 						{ __(
@@ -189,7 +242,11 @@ const Edit = ( props: EditProps ) => {
 		);
 
 	return (
-		<Wrapper>
+		<Wrapper
+			onClickToolbarEdit={ toggleEditing }
+			isEditing={ isEditing }
+			blockProps={ blockProps }
+		>
 			<Inspector { ...props } />
 			<Disabled>
 				{ displayStyle === 'dropdown' ? (
