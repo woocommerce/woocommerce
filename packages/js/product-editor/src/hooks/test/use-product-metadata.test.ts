@@ -90,4 +90,10 @@ describe( 'useProductMetadata', () => {
 			existing_field: 'value1',
 		} );
 	} );
+	it( 'should return isLoading as false when the resolution is finished', async () => {
+		const { isLoading } = renderHook( () =>
+			useProductMetadata( { postType: 'product', id: 123 } )
+		).result.current;
+		expect( isLoading ).toEqual( false );
+	} );
 } );
