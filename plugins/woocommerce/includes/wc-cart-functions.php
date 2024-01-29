@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -446,24 +447,54 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
  * @since  3.2.0
  * @param  int    $key Key of package.
  * @param  array  $package Package data array.
- * @param  string $chosen_method Chosen method id.
+ * @param  string $chosen_method Chosen shipping method. e.g. flat_rate:1.
  * @return string
  */
 function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
-	$rate_keys = array_keys( $package['rates'] );
-	$default   = current( $rate_keys );
-	$coupons   = WC()->cart->get_coupons();
-	foreach ( $coupons as $coupon ) {
-		if ( $coupon->get_free_shipping() ) {
-			foreach ( $rate_keys as $rate_key ) {
-				if ( 0 === stripos( $rate_key, 'free_shipping' ) ) {
-					$default = $rate_key;
-					break;
+	$chosen_method_id     = current( explode( ':', $chosen_method ) );
+	$rate_keys            = array_keys( $package['rates'] );
+	$chosen_method_exists = in_array( $chosen_method, $rate_keys, true );
+
+	/**
+	 * If the customer has selected local pickup, keep it selected if it's still in the package. We don't want to auto
+	 * toggle between shipping and pickup even if available shipping methods are changed.
+	 *
+	 * This is important for block based checkout where there is an explicit toggle between shipping and pickup.
+	 */
+	$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
+	$is_local_pickup_chosen  = in_array( $chosen_method_id, $local_pickup_method_ids, true );
+
+	// Default to the first method in the package. This can be sorted in the backend by the merchant.
+	$default = current( $rate_keys );
+
+	// Default to local pickup if its chosen already.
+	if ( $chosen_method_exists && $is_local_pickup_chosen ) {
+		$default = $chosen_method;
+
+	} else {
+		// Check coupons to see if free shipping is available. If it is, we'll use that method as the default.
+		$coupons = WC()->cart->get_coupons();
+		foreach ( $coupons as $coupon ) {
+			if ( $coupon->get_free_shipping() ) {
+				foreach ( $rate_keys as $rate_key ) {
+					if ( 0 === stripos( $rate_key, 'free_shipping' ) ) {
+						$default = $rate_key;
+						break;
+					}
 				}
+				break;
 			}
-			break;
 		}
 	}
+
+	/**
+	 * Filters the default shipping method for a package.
+	 *
+	 * @since 3.2.0
+	 * @param string $default Default shipping method.
+	 * @param array  $rates   Shipping rates.
+	 * @param string $chosen_method Chosen method id.
+	 */
 	return apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
 }
 
