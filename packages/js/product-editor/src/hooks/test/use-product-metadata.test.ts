@@ -46,9 +46,9 @@ jest.mock( '@wordpress/data', () => ( {
 
 describe( 'useProductMetadata', () => {
 	it( 'should update all the metadata with new values and not replace existing fields', async () => {
-		const { updateMetadata } = renderHook( () => useProductMetadata() )
-			.result.current;
-		updateMetadata( [
+		const { update } = renderHook( () => useProductMetadata() ).result
+			.current;
+		update( [
 			{
 				key: 'field1',
 				value: 'value2',

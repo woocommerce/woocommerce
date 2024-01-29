@@ -29,7 +29,7 @@ function useProductMetadata( options?: Options ) {
 		// @ts-expect-error There are no types for this.
 		const { getEditedEntityRecord, hasFinishedResolution } =
 			select( 'core' );
-		const { meta_data: metadata }: Product = getEditedEntityRecord(
+		const { meta_data: metadataArray }: Product = getEditedEntityRecord(
 			'postType',
 			postType,
 			id
@@ -40,14 +40,14 @@ function useProductMetadata( options?: Options ) {
 		);
 
 		return {
-			metadata: metadata.reduce( function ( acc, cur ) {
+			metadata: metadataArray.reduce( function ( acc, cur ) {
 				acc[ cur.key ] = cur.value;
 				return acc;
 			}, {} as Record< string, string | undefined > ),
-			updateMetadata: ( entries: Metadata< string >[] ) => {
+			update: ( entries: Metadata< string >[] ) =>
 				editEntityRecord( 'postType', postType, id, {
 					meta_data: [
-						...metadata.filter(
+						...metadataArray.filter(
 							( item ) =>
 								entries.findIndex(
 									( e ) => e.key === item.key
@@ -55,8 +55,7 @@ function useProductMetadata( options?: Options ) {
 						),
 						...entries,
 					],
-				} );
-			},
+				} ),
 			isLoading: ! isResolutionFinished,
 		};
 	} );
