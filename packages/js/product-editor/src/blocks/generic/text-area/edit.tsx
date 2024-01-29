@@ -27,13 +27,14 @@ export function TextAreaBlockEdit( {
 }: TextAreaBlockEditProps ) {
 	const {
 		property,
+		label,
+		placeholder,
+		help,
 		align,
+		tooltip,
+		required,
 		allowedFormats,
 		direction,
-		label,
-		help,
-		placeholder,
-		required,
 		disabled,
 	} = attributes;
 	const blockProps = useWooBlockProps( attributes, {

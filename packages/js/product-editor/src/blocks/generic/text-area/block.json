@@ -34,10 +34,6 @@
 			"type": "string",
 			"enum": [ "left", "center", "right", "justify" ]
 		},
-		"direction": {
-			"type": "string",
-			"enum": [ "ltr", "rtl" ]
-		},
 		"allowedFormats": {
 			"type": "array",
 			"default": [
@@ -52,6 +48,10 @@
 				"core/superscript",
 				"core/unknown"
 			]
+		},
+		"direction": {
+			"type": "string",
+			"enum": [ "ltr", "rtl" ]
 		}
 	},
 	"supports": {
