@@ -7,11 +7,14 @@ namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\Prod
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\DownloadableProductTrait;
 
 /**
  * Simple Product Template.
  */
 class SimpleProductTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
+	use DownloadableProductTrait;
+
 	/**
 	 * The context name used to identify the editor.
 	 */
@@ -459,62 +462,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
+
 		// Downloads section.
-		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
-			$product_downloads_section_group = $general_group->add_section(
-				array(
-					'id'             => 'product-downloads-section-group',
-					'order'          => 50,
-					'attributes'     => array(
-						'blockGap' => 'unit-40',
-					),
-					'hideConditions' => array(
-						array(
-							'expression' => 'editedProduct.type !== "simple"',
-						),
-					),
-				)
-			);
-
-			$product_downloads_section_group->add_block(
-				array(
-					'id'         => 'product-downloadable',
-					'blockName'  => 'woocommerce/product-checkbox-field',
-					'order'      => 10,
-					'attributes' => array(
-						'property' => 'downloadable',
-						'label'    => __( 'Include downloads', 'woocommerce' ),
-					),
-				)
-			);
-
-			$product_downloads_section_group->add_section(
-				array(
-					'id'             => 'product-downloads-section',
-					'order'          => 20,
-					'attributes'     => array(
-						'title'       => __( 'Downloads', 'woocommerce' ),
-						'description' => sprintf(
-							/* translators: %1$s: Downloads settings link opening tag. %2$s: Downloads settings link closing tag. */
-							__( 'Add any files you\'d like to make available for the customer to download after purchasing, such as instructions or warranty info. Store-wide updates can be managed in your %1$sproduct settings%2$s.', 'woocommerce' ),
-							'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=downloadable' ) . '" target="_blank" rel="noreferrer">',
-							'</a>'
-						),
-					),
-					'hideConditions' => array(
-						array(
-							'expression' => 'editedProduct.downloadable !== true',
-						),
-					),
-				)
-			)->add_block(
-				array(
-					'id'        => 'product-downloads',
-					'blockName' => 'woocommerce/product-downloads-field',
-					'order'     => 10,
-				)
-			);
-		}
+		$this->add_downloadable_product_blocks( $general_group );
 	}
 
 	/**
