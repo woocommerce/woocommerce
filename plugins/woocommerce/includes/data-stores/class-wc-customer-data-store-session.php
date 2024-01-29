@@ -10,14 +10,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC Customer Data Store which stores the data in session.
+ * Customer Session Data Store which stores customer data for logged out guests.
  *
  * @version  3.0.0
  */
-class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Customer_Data_Store_Interface, WC_Object_Data_Store_Interface {
+class WC_Customer_Data_Store_Session extends WC_Customer_Data_Store {
 
 	/**
-	 * Keys which are also stored in a session (so we can make sure they get updated...)
+	 * Keys which are stored to the customer session.
 	 *
 	 * @var array
 	 */
@@ -49,10 +49,11 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		'shipping_last_name',
 		'shipping_company',
 		'shipping_phone',
+		'meta_data',
 	);
 
 	/**
-	 * Simply update the session.
+	 * Create the session. Note this does not call the parent create method because we don't want to create a new user object.
 	 *
 	 * @param WC_Customer $customer Customer object.
 	 */
@@ -61,39 +62,17 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	}
 
 	/**
-	 * Simply update the session.
-	 *
-	 * @param WC_Customer $customer Customer object.
-	 */
-	public function update( &$customer ) {
-		$this->save_to_session( $customer );
-	}
-
-	/**
-	 * Saves all customer data to the session.
-	 *
-	 * @param WC_Customer $customer Customer object.
-	 */
-	public function save_to_session( $customer ) {
-		$data = array();
-		foreach ( $this->session_keys as $session_key ) {
-			$function_key = $session_key;
-			if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
-				$session_key = str_replace( 'billing_', '', $session_key );
-			}
-			$data[ $session_key ] = (string) $customer->{"get_$function_key"}( 'edit' );
-		}
-		WC()->session->set( 'customer', $data );
-	}
-
-	/**
-	 * Read customer data from the session unless the user has logged in, in
-	 * which case the stored ID will differ from the actual ID.
+	 * Read customer data from the session unless the user has logged in, in which case the stored ID will differ from
+	 * the actual ID.
 	 *
 	 * @since 3.0.0
 	 * @param WC_Customer $customer Customer object.
 	 */
 	public function read( &$customer ) {
+		if ( $customer->get_id() > 0 ) {
+			parent::read( $customer );
+		}
+
 		$data = (array) WC()->session->get( 'customer' );
 
 		/**
@@ -111,22 +90,69 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 					$session_key = str_replace( 'billing_', '', $session_key );
 				}
 				if ( isset( $data[ $session_key ] ) && is_callable( array( $customer, "set_{$function_key}" ) ) ) {
-					$customer->{"set_{$function_key}"}( wp_unslash( $data[ $session_key ] ) );
+					if ( 'meta_data' === $session_key ) {
+						$meta_data_values = json_decode( wp_unslash( $data[ $session_key ] ), true );
+						foreach ( $meta_data_values as $meta_data_value ) {
+							if ( ! isset( $meta_data_value['key'], $meta_data_value['value'] ) ) {
+								continue;
+							}
+							$customer->add_meta_data( $meta_data_value['key'], $meta_data_value['value'], true );
+						}
+					} else {
+						$customer->{"set_{$function_key}"}( wp_unslash( $data[ $session_key ] ) );
+					}
 				}
 			}
 		}
 		$this->set_defaults( $customer );
-		$customer->set_object_read( true );
 	}
 
 	/**
-	 * Load default values if props are unset.
+	 * Update the session.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 */
+	public function update( &$customer ) {
+		parent::update( $customer );
+		$this->save_to_session( $customer );
+	}
+
+	/**
+	 * Deletes the customer session.
+	 *
+	 * @since 3.0.0
+	 * @param WC_Customer $customer Customer object.
+	 * @param array       $args Array of args to pass to the delete method.
+	 */
+	public function delete( &$customer, $args = array() ) {
+		WC()->session->set( 'customer', null );
+	}
+
+	/**
+	 * Helper that saves all customer data to the session.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 */
+	public function save_to_session( $customer ) {
+		$data = array();
+		foreach ( $this->session_keys as $session_key ) {
+			$function_key = $session_key;
+			if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
+				$session_key = str_replace( 'billing_', '', $session_key );
+			}
+			$data[ $session_key ] = 'meta_data' === $session_key ? wp_json_encode( $customer->get_meta_data() ) : (string) $customer->{"get_$function_key"}( 'edit' );
+		}
+		WC()->session->set( 'customer', $data );
+	}
+
+	/**
+	 * Set default values for the customer object if props are unset.
 	 *
 	 * @param WC_Customer $customer Customer object.
 	 */
 	protected function set_defaults( &$customer ) {
 		try {
-			$default = wc_get_customer_default_location();
+			$default              = wc_get_customer_default_location();
 			$has_shipping_address = $customer->has_shipping_address();
 
 			if ( ! $customer->get_billing_country() ) {
@@ -151,49 +177,5 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 			}
 		} catch ( WC_Data_Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 		}
-	}
-
-	/**
-	 * Deletes a customer from the database.
-	 *
-	 * @since 3.0.0
-	 * @param WC_Customer $customer Customer object.
-	 * @param array       $args Array of args to pass to the delete method.
-	 */
-	public function delete( &$customer, $args = array() ) {
-		WC()->session->set( 'customer', null );
-	}
-
-	/**
-	 * Gets the customers last order.
-	 *
-	 * @since 3.0.0
-	 * @param WC_Customer $customer Customer object.
-	 * @return WC_Order|false
-	 */
-	public function get_last_order( &$customer ) {
-		return false;
-	}
-
-	/**
-	 * Return the number of orders this customer has.
-	 *
-	 * @since 3.0.0
-	 * @param WC_Customer $customer Customer object.
-	 * @return integer
-	 */
-	public function get_order_count( &$customer ) {
-		return 0;
-	}
-
-	/**
-	 * Return how much money this customer has spent.
-	 *
-	 * @since 3.0.0
-	 * @param WC_Customer $customer Customer object.
-	 * @return float
-	 */
-	public function get_total_spent( &$customer ) {
-		return 0;
 	}
 }
