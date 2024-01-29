@@ -509,12 +509,17 @@ class WC_Shortcodes {
 			return '';
 		}
 
+		$product_id = isset( $atts['id'] ) ? absint( $atts['id'] ) : 0;
+		if ( ! $product_id && isset( $atts['sku'] ) ) {
+			$product_id = wc_get_product_id_by_sku( $atts['sku'] );
+		}
+
 		$product_status = empty( $atts['status'] ) ? 'publish' : $atts['status'];
 		$valid_statuses = array( 'auto-draft', 'draft', 'future', 'pending', 'private', 'publish' );
 		if ( ! in_array( $product_status, $valid_statuses, true ) ) {
 			return '';
 		}
-		if ( 'publish' !== $product_status && ! current_user_can( 'read_product', $atts['id'] ) ) {
+		if ( 'publish' !== $product_status && ! current_user_can( 'read_product', $product_id ) ) {
 			return '';
 		}
 
