@@ -204,15 +204,15 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		return () => clearTimeout( timeoutId );
 	}, [] );
 
+	const initialAttribute = {
+		name: defaultSearch,
+	} as EnhancedProductAttribute;
+
 	return (
 		<>
 			<Form< AttributeForm >
 				initialValues={ {
-					attributes: [
-						defaultSearch
-							? ( { name: defaultSearch } as any )
-							: null,
-					],
+					attributes: [ defaultSearch ? initialAttribute : null ],
 				} }
 			>
 				{ ( {

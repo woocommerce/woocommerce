@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { BlockAttributes } from '@wordpress/blocks';
+import { Button } from '@wordpress/components';
 import {
 	createElement,
 	createInterpolateElement,
@@ -32,7 +33,6 @@ import {
 } from '../../../components/attribute-control';
 import { useProductVariationsHelper } from '../../../hooks/use-product-variations-helper';
 import { ProductEditorBlockEditProps } from '../../../types';
-import { Button } from '@wordpress/components';
 import { ProductTShirt } from './images';
 
 export function Edit( {
