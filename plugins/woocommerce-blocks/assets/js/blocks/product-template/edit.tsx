@@ -20,6 +20,11 @@ import { ProductCollectionAttributes } from '@woocommerce/blocks/product-collect
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isNumber } from '@woocommerce/types';
 
+/**
+ * Internal dependencies
+ */
+import { useProductCollectionBlockAttributes } from './utils';
+
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
 		{ className: 'wc-block-product' },
@@ -91,6 +96,7 @@ const ProductTemplateEdit = ( {
 			columns: 3,
 			shrinkColumns: false,
 		},
+		includeInQueryContext,
 	},
 	__unstableLayoutClassNames,
 }: BlockEditProps< {
@@ -107,6 +113,27 @@ const ProductTemplateEdit = ( {
 		12,
 		isNumber
 	);
+
+	// const blockProps1 = useBlockProps();
+
+	const parentCollectionBlockAttributes =
+		useProductCollectionBlockAttributes( clientId );
+
+	const productCollectionBlockContext = useMemo( () => {
+		const productCollectionQueryContext: {
+			[ key: string ]: unknown;
+		} = {};
+		if ( includeInQueryContext?.length ) {
+			includeInQueryContext.forEach( ( attribute: string ) => {
+				if ( parentCollectionBlockAttributes?.[ attribute ] ) {
+					productCollectionQueryContext[ attribute ] =
+						parentCollectionBlockAttributes[ attribute ];
+				}
+			} );
+		}
+		return productCollectionQueryContext;
+	}, [ includeInQueryContext, parentCollectionBlockAttributes ] );
+
 	const { products, blocks } = useSelect(
 		( select ) => {
 			const { getEntityRecords, getTaxonomies } = select( coreStore );
@@ -171,6 +198,7 @@ const ProductTemplateEdit = ( {
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
+					productCollectionBlockContext,
 				} ),
 				blocks: getBlocks( clientId ),
 			};
@@ -189,6 +217,8 @@ const ProductTemplateEdit = ( {
 			templateSlug,
 			taxQuery,
 			restQueryArgs,
+			productCollectionBlockContext,
+			loopShopPerPage,
 		]
 	);
 	const blockContexts = useMemo(

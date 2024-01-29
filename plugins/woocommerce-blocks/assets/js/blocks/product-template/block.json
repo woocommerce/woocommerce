@@ -13,7 +13,8 @@
 		"query",
 		"queryContext",
 		"displayLayout",
-		"templateSlug"
+		"templateSlug",
+		"includeInQueryContext"
 	],
 	"supports": {
 		"inserter": false,

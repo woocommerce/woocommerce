@@ -34,13 +34,17 @@
 		"hideControls": {
 			"default": [],
 			"type": "array"
+		},
+		"includeInQueryContext": {
+			"type": "array"
 		}
 	},
 	"providesContext": {
 		"id": "id",
 		"queryId": "queryId",
 		"query": "query",
-		"displayLayout": "displayLayout"
+		"displayLayout": "displayLayout",
+		"includeInQueryContext": "includeInQueryContext"
 	},
 	"supports": {
 		"align": [ "wide", "full" ],

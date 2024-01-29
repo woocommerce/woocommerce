@@ -19,6 +19,10 @@ export interface ProductCollectionAttributes {
 	convertedFromProducts: boolean;
 	collection?: string;
 	hideControls: FilterName[];
+	/**
+	 * Contain the list of attributes that should be included in the queryContext
+	 */
+	includeInQueryContext: string[];
 }
 
 export enum LayoutOptions {
