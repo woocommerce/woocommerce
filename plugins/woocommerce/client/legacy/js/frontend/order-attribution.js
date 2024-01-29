@@ -72,7 +72,7 @@
 				lifetime: Number( params.lifetime ),
 				session_length: Number( params.session ),
 				timezone_offset: '0', // utc
-				single_cookie: Boolean( params.single_cookie ),
+				web_storage: params.web_storage,
 			} );
 		}
 		const values = getData();

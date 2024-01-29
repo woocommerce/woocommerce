@@ -259,9 +259,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 		 *
 		 * @since 8.6.0
 		 *
-		 * @param bool $single_cookie True to use a single cookie, false to use multiple cookies.
+		 * @param bool $web_storage Type of web storage to use, 'cookies' is the default.
 		 */
-		$single_cookie = apply_filters( 'wc_order_attribution_single_cookie', true );
+		$web_storage = apply_filters( 'wc_order_attribution_single_cookie', 'cookies' );
 
 		/**
 		 * Filter to allow tracking.
@@ -280,7 +280,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 				'session'       => $session_length,
 				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
 				'prefix'        => $this->field_prefix,
-				'allowTracking' => 'yes' === $allow_tracking,
+				'web_storage'   => $web_storage,
 			),
 			'fields' => $this->fields,
 		);

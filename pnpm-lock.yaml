@@ -4451,8 +4451,8 @@ importers:
   plugins/woocommerce/client/legacy:
     dependencies:
       sourcebuster:
-        specifier: github:woocommerce/sourcebuster-js#update/single-cookie
-        version: github.com/woocommerce/sourcebuster-js/a8ccc3d15f8f5024cf8e2b6b3b4f71ddfa0f4d69
+        specifier: github:woocommerce/sourcebuster-js#add/web-storage-options
+        version: github.com/woocommerce/sourcebuster-js/28be8d1711120d7c38f03959f6c1dd7ca262193b
     devDependencies:
       '@types/node':
         specifier: ^16.18.68
