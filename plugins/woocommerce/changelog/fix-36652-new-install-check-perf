@@ -1,4 +1,0 @@
-Significance: patch
-Type: performance
-
-Improves the performance of the `is_new_install` check by eliminating expensive post counts where possible.
