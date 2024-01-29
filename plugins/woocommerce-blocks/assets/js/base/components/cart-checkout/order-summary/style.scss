@@ -91,7 +91,7 @@
 		p,
 		.wc-block-components-product-metadata {
 			line-height: 1.375;
-			margin-top: #{ ($gap-large - $gap) * 0.5 };
+			margin-top: $gap-smaller;
 		}
 	}
 
@@ -100,9 +100,21 @@
 		margin-left: auto;
 		text-align: right;
 	}
+	.wc-block-components-totals-item__description.wc-block-components-totals-shipping__via {
+		padding-top: $gap-smallest;
+	}
 
 
 	.wc-block-components-order-summary-item__individual-prices {
 		display: block;
+		padding-top: $gap-smaller;
+	}
+
+	@include breakpoint("<480px") {
+		.wc-block-components-panel__content, .wc-block-components-totals-coupon {
+			padding-left: $gap-small;
+			padding-right: $gap-small;
+		}
 	}
 }
+
