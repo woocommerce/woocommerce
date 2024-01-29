@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use WC_Customer;
+use WC_Order;
 
 /**
  * Service class managing checkout fields and its related extensibility points.
@@ -735,31 +736,28 @@ class CheckoutFields {
 	/**
 	 * Persists a field value for a given order. This would also optionally set the field value on the customer.
 	 *
-	 * @param string    $key The field key.
-	 * @param mixed     $value The field value.
-	 * @param \WC_Order $order The order to persist the field for.
-	 * @param bool      $set_customer Whether to set the field value on the customer or not.
+	 * @param string   $key The field key.
+	 * @param mixed    $value The field value.
+	 * @param WC_Order $order The order to persist the field for.
+	 * @param bool     $set_customer Whether to set the field value on the customer or not.
 	 *
 	 * @return void
 	 */
 	public function persist_field_for_order( $key, $value, $order, $set_customer = true ) {
 		$this->set_array_meta( $key, $value, $order );
 		if ( $set_customer ) {
-			if ( isset( wc()->customer ) ) {
-				$this->set_array_meta( $key, $value, wc()->customer );
-			} elseif ( $order->get_customer_id() ) {
-				$customer = new \WC_Customer( $order->get_customer_id() );
-				$this->set_array_meta( $key, $value, $customer );
-			}
+			// Use order customer if it has one, otherwise use session.
+			$customer = $order->get_customer_id() ? new WC_Customer( $order->get_customer_id() ) : wc()->customer;
+			$this->persist_field_for_customer( $key, $value, $customer );
 		}
 	}
 
 	/**
 	 * Persists a field value for a given customer.
 	 *
-	 * @param string       $key The field key.
-	 * @param mixed        $value The field value.
-	 * @param \WC_Customer $customer The customer to persist the field for.
+	 * @param string      $key The field key.
+	 * @param mixed       $value The field value.
+	 * @param WC_Customer $customer The customer to persist the field for.
 	 *
 	 * @return void
 	 */
@@ -770,9 +768,9 @@ class CheckoutFields {
 	/**
 	 * Sets a field value in an array meta, supporting routing things to billing, shipping, or additional fields, based on a prefix for the key.
 	 *
-	 * @param string                 $key The field key.
-	 * @param mixed                  $value The field value.
-	 * @param \WC_Customer|\WC_Order $object The object to set the field value for.
+	 * @param string               $key The field key.
+	 * @param mixed                $value The field value.
+	 * @param WC_Customer|WC_Order $object The object to set the field value for.
 	 *
 	 * @return void
 	 */
@@ -789,39 +787,22 @@ class CheckoutFields {
 			$meta_key = self::ADDITIONAL_FIELDS_KEY;
 		}
 
-		if ( $object instanceof \WC_Customer ) {
-			if ( ! $object->get_id() ) {
-				$meta_data = wc()->session->get( $meta_key, array() );
-			} else {
-				$meta_data = get_user_meta( $object->get_id(), $meta_key, true );
-			}
-		} elseif ( $object instanceof \WC_Order ) {
-			$meta_data = $object->get_meta( $meta_key, true );
-		}
+		$meta_data = $object->get_meta( $meta_key, true );
 
 		if ( ! is_array( $meta_data ) ) {
 			$meta_data = array();
 		}
 
 		$meta_data[ $key ] = $value;
-		if ( $object instanceof \WC_Customer ) {
-			if ( ! $object->get_id() ) {
-				wc()->session->set( $meta_key, $meta_data );
-			} else {
-				update_user_meta( $object->get_id(), $meta_key, $meta_data );
-			}
-		} elseif ( $object instanceof \WC_Order ) {
-			$object->update_meta_data( $meta_key, $meta_data );
-		}
-
+		$object->update_meta_data( $meta_key, $meta_data );
 	}
 
 	/**
 	 * Returns a field value for a given object.
 	 *
-	 * @param string       $key The field key.
-	 * @param \WC_Customer $customer The customer to get the field value for.
-	 * @param string       $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
+	 * @param string      $key The field key.
+	 * @param WC_Customer $customer The customer to get the field value for.
+	 * @param string      $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
 	 *
 	 * @return mixed The field value.
 	 */
@@ -832,9 +813,9 @@ class CheckoutFields {
 	/**
 	 * Returns a field value for a given order.
 	 *
-	 * @param string    $field The field key.
-	 * @param \WC_Order $order The order to get the field value for.
-	 * @param string    $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
+	 * @param string   $field The field key.
+	 * @param WC_Order $order The order to get the field value for.
+	 * @param string   $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
 	 *
 	 * @return mixed The field value.
 	 */
@@ -845,9 +826,9 @@ class CheckoutFields {
 	/**
 	 * Returns a field value for a given object.
 	 *
-	 * @param string                 $key The field key.
-	 * @param \WC_Customer|\WC_Order $object The customer to get the field value for.
-	 * @param string                 $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
+	 * @param string               $key The field key.
+	 * @param WC_Customer|WC_Order $object The customer to get the field value for.
+	 * @param string               $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
 	 *
 	 * @return mixed The field value.
 	 */
@@ -863,15 +844,7 @@ class CheckoutFields {
 			$meta_key = self::ADDITIONAL_FIELDS_KEY;
 		}
 
-		if ( $object instanceof \WC_Customer ) {
-			if ( ! $object->get_id() ) {
-				$meta_data = wc()->session->get( $meta_key, array() );
-			} else {
-				$meta_data = get_user_meta( $object->get_id(), $meta_key, true );
-			}
-		} elseif ( $object instanceof \WC_Order ) {
-			$meta_data = $object->get_meta( $meta_key, true );
-		}
+		$meta_data = $object->get_meta( $meta_key, true );
 
 		if ( ! is_array( $meta_data ) ) {
 			return '';
@@ -887,38 +860,30 @@ class CheckoutFields {
 	/**
 	 * Returns an array of all fields values for a given customer.
 	 *
-	 * @param \WC_Customer $customer The customer to get the fields for.
-	 * @param bool         $all Whether to return all fields or only the ones that are still registered. Default false.
+	 * @param WC_Customer $customer The customer to get the fields for.
+	 * @param bool        $all Whether to return all fields or only the ones that are still registered. Default false.
 	 *
 	 * @return array An array of fields.
 	 */
 	public function get_all_fields_from_customer( $customer, $all = false ) {
-		$customer_id = $customer->get_id();
-		$meta_data   = array(
+		$meta_data = array(
 			'billing'    => array(),
 			'shipping'   => array(),
 			'additional' => array(),
 		);
-		if ( ! $customer_id ) {
-			if ( isset( wc()->session ) ) {
-				$meta_data['billing']    = wc()->session->get( self::BILLING_FIELDS_KEY, array() );
-				$meta_data['shipping']   = wc()->session->get( self::SHIPPING_FIELDS_KEY, array() );
-				$meta_data['additional'] = wc()->session->get( self::ADDITIONAL_FIELDS_KEY, array() );
-			}
-		} else {
-			$meta_data['billing']    = get_user_meta( $customer_id, self::BILLING_FIELDS_KEY, true );
-			$meta_data['shipping']   = get_user_meta( $customer_id, self::SHIPPING_FIELDS_KEY, true );
-			$meta_data['additional'] = get_user_meta( $customer_id, self::ADDITIONAL_FIELDS_KEY, true );
+		if ( $customer instanceof WC_Customer ) {
+			$meta_data['billing']    = $customer->get_meta( self::BILLING_FIELDS_KEY, true );
+			$meta_data['shipping']   = $customer->get_meta( self::SHIPPING_FIELDS_KEY, true );
+			$meta_data['additional'] = $customer->get_meta( self::ADDITIONAL_FIELDS_KEY, true );
 		}
-
 		return $this->format_meta_data( $meta_data, $all );
 	}
 
 	/**
 	 * Returns an array of all fields values for a given order.
 	 *
-	 * @param \WC_Order $order The order to get the fields for.
-	 * @param bool      $all Whether to return all fields or only the ones that are still registered. Default false.
+	 * @param WC_Order $order The order to get the fields for.
+	 * @param bool     $all Whether to return all fields or only the ones that are still registered. Default false.
 	 *
 	 * @return array An array of fields.
 	 */
@@ -928,7 +893,7 @@ class CheckoutFields {
 			'shipping'   => array(),
 			'additional' => array(),
 		);
-		if ( $order instanceof \WC_Order ) {
+		if ( $order instanceof WC_Order ) {
 			$meta_data['billing']    = $order->get_meta( self::BILLING_FIELDS_KEY, true );
 			$meta_data['shipping']   = $order->get_meta( self::SHIPPING_FIELDS_KEY, true );
 			$meta_data['additional'] = $order->get_meta( self::ADDITIONAL_FIELDS_KEY, true );
@@ -1020,10 +985,10 @@ class CheckoutFields {
 	/**
 	 * Get additional fields for an order.
 	 *
-	 * @param \WC_Order $order Order object.
-	 * @param string    $location The location to get fields for (address|contact|additional).
-	 * @param string    $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
-	 * @param string    $context The context to get the field value for (edit|view).
+	 * @param WC_Order $order Order object.
+	 * @param string   $location The location to get fields for (address|contact|additional).
+	 * @param string   $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
+	 * @param string   $context The context to get the field value for (edit|view).
 	 * @return array An array of fields definitions as well as their values formatted for display.
 	 */
 	public function get_order_additional_fields_with_values( $order, $location, $group = '', $context = 'edit' ) {
