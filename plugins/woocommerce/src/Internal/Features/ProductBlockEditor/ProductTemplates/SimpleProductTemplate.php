@@ -223,7 +223,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'      => 20,
 				'attributes' => array(
 					'label'    => __( 'Summary', 'woocommerce' ),
-					'help' => __(
+					'help'     => __(
 						"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
 						'woocommerce'
 					),
