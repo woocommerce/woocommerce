@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, createInterpolateElement } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, help as helpIcon } from '@wordpress/icons';
 import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
@@ -24,20 +24,13 @@ export const Label: React.FC< LabelProps > = ( {
 } ) => {
 	return (
 		<div className="woocommerce-product-form-label__label">
-			{ required
-				? createInterpolateElement(
-						__( '<label/> <required/>', 'woocommerce' ),
-						{
-							label: <span>{ label }</span>,
-							required: (
-								<span className="woocommerce-product-form-label__required">
-									{ /* translators: field 'required' indicator */ }
-									{ __( '*', 'woocommerce' ) }
-								</span>
-							),
-						}
-				  )
-				: label }
+			{ label }
+			{ required && (
+				<span className="woocommerce-product-form-label__required">
+					{ /* translators: field 'required' indicator */ }
+					{ __( '*', 'woocommerce' ) }
+				</span>
+			) }
 
 			{ tooltip && (
 				<Tooltip
@@ -47,7 +40,7 @@ export const Label: React.FC< LabelProps > = ( {
 						></span>
 					}
 					position="top center"
-					className={ 'woocommerce-product-form-label__tooltip' }
+					className="woocommerce-product-form-label__tooltip"
 				>
 					<span className="woocommerce-product-form-label__icon">
 						<Icon icon={ helpIcon } size={ 18 } fill="#949494" />

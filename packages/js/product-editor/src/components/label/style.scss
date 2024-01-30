@@ -4,9 +4,11 @@
 		align-items: center;
 		gap: 2px;
 	}
+
 	&__required {
 		color: #CC1818;
 	}
+
 	&__tooltip {
 		.components-popover__content {
 			width: 200px;
@@ -14,6 +16,7 @@
 			white-space: normal !important;
 		}
 	}
+
 	&__icon {
 		display: flex;
 	}
