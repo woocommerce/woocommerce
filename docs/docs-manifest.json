@@ -425,6 +425,15 @@
           "id": "b3e0b17ca74596e858c26887c1e4c8ee6c8f6102"
         },
         {
+          "post_title": "Classes in WooCommerce",
+          "menu_title": "Classes in WooCommerce",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/class-reference.md",
+          "hash": "72afd8f0332d676c1c8c46534a62dfed5db1adf97d4ddf0aa40882d3a23da839",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/class-reference.md",
+          "id": "d5f4d8e645707552d013b4be2cd5fd1c943f2122"
+        },
+        {
           "post_title": "How to check if WooCommerce is active",
           "menu_title": "Check if WooCommerce is active",
           "tags": "how-to",
@@ -456,7 +465,7 @@
           "menu_title": "Add a section to a settings tab",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/adding-a-section-to-a-settings-tab.md",
-          "hash": "c4a6059d58af6b488d45daebba8f0c6ea4b42149b0d3bf1bcd55305ee08464e5",
+          "hash": "400124b03f0d2f53736012100d2be87e77a7bc9c72a5c6af143f62d84321b09d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/adding-a-section-to-a-settings-tab.md",
           "id": "a88144dff894408f31a80c96dcee3bd5126ecd28"
         }
@@ -651,6 +660,15 @@
           "id": "56a8ef0ef0afec9c884f655e7fdd23d9666c9d00"
         },
         {
+          "post_title": "Understanding the risks of removing URL bases in WooCommerce",
+          "menu_title": "Risks of removing URL bases",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-url.md",
+          "hash": "414970e7d53ddcafb186f2f3a253eed0d01800df2182f8bd2a4310c53079a795",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-url.md",
+          "id": "827bfa56d40c2155542147ea5afe7cc756e18c5d"
+        },
+        {
           "post_title": "How to optimize performance for WooCommerce stores",
           "menu_title": "Optimize store performance",
           "tags": "reference",
@@ -701,7 +719,7 @@
           "menu_title": "Core critical flows",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/core-critical-flows.md",
-          "hash": "c1380271cea0f15a4be3d2a96b94cfaa0b1b0b098cf717db58640d8f84da1c66",
+          "hash": "51529e3c07276ea267763d7520f1ca8d8b37eda4337ec97b4c8d19231f3a0334",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/core-critical-flows.md",
           "id": "e561b46694dba223c38b87613ce4907e4e14333a"
         },
@@ -1159,5 +1177,5 @@
       "categories": []
     }
   ],
-  "hash": "8e2a83578cfb32e56bbdbff3598bc22107c1d8eceb6fb9ef5a5dfc040c438f68"
+  "hash": "a301bb1f5d8a9062f80f6725e090d96fa2845213f5cc0bbf336b7cf0ecbe2e76"
 }
