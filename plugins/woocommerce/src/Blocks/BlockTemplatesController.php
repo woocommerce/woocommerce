@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
@@ -9,7 +8,6 @@ use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
 
 /**
@@ -27,27 +25,12 @@ class BlockTemplatesController {
 	const TEMPLATES_ROOT_DIR = 'templates';
 
 	/**
-	 * Package instance.
-	 *
-	 * @var Package
-	 */
-	private $package;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Package $package An instance of Package.
 	 */
-	public function __construct( Package $package ) {
-		$this->package = $package;
-
-		$feature_gating                                 = $package->feature();
-		$is_block_templates_controller_refactor_enabled = $feature_gating->is_block_templates_controller_refactor_enabled();
-
-		// This feature is gated for WooCommerce versions 6.0.0 and above.
-		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '6.0.0', '>=' ) && ! $is_block_templates_controller_refactor_enabled ) {
-			$this->init();
-		}
+	public function __construct() {
+		$this->init();
 	}
 
 	/**
