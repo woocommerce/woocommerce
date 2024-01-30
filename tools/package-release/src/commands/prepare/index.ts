@@ -18,6 +18,7 @@ import {
 	writeChangelog,
 	hasValidChangelogs,
 } from '../../changelogger';
+import { execSync } from 'child_process';
 
 /**
  * PackagePrepare class
@@ -64,6 +65,8 @@ export default class PackagePrepare extends Command {
 		if ( ! args.packages && ! flags.all ) {
 			this.error( 'No packages supplied.' );
 		}
+
+		execSync( 'pnpm --filter="@woocommerce/*" composer-install' );
 
 		if ( flags.all ) {
 			await this.preparePackages( getAllPackges() );

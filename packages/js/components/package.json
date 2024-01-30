@@ -52,7 +52,8 @@
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "wireit",
 		"watch:build:project:cjs": "wireit",
-		"watch:build:project:esm": "wireit"
+		"watch:build:project:esm": "wireit",
+		"composer-install": "composer install"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
