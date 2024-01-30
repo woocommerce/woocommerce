@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+Comment: Add e2e tests to verify Cart, Checkout and Order Confirmation theme templates have priority over default WooCommerce templates.
+
