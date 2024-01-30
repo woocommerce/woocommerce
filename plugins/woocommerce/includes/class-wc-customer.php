@@ -87,13 +87,21 @@ class WC_Customer extends WC_Legacy_Customer {
 	protected $object_type = 'customer';
 
 	/**
+	 * True if this customer is linked to a session.
+	 *
+	 * @var boolean
+	 */
+	protected $is_session = false;
+
+	/**
 	 * Load customer data based on how WC_Customer is called.
 	 *
 	 * If $customer is 'new', you can build a new WC_Customer object. If it's empty, some
 	 * data will be pulled from the session for the current user/customer.
 	 *
 	 * @param WC_Customer|int $data       Customer ID or data.
-	 * @param bool            $is_session True if this is the customer session.
+	 * @param bool            $is_session True if this is the customer session. Sessions do not persist to the DB.
+	 *
 	 * @throws Exception If customer cannot be read/found and $data is set.
 	 */
 	public function __construct( $data = 0, $is_session = false ) {
@@ -105,12 +113,11 @@ class WC_Customer extends WC_Legacy_Customer {
 			$this->set_id( $data );
 		}
 
-		$is_session       = $is_session && isset( WC()->session );
-		$store_type       = $is_session ? 'customer-session' : 'customer';
-		$this->data_store = WC_Data_Store::load( $store_type );
+		$this->is_session = $is_session && isset( WC()->session );
+		$this->data_store = $this->is_session ? WC_Data_Store::load( 'customer-session' ) : WC_Data_Store::load( 'customer' );
 
 		// If we have an ID, load the user from the DB.
-		if ( $this->get_id() || $is_session ) {
+		if ( $this->get_id() || $this->is_session ) {
 			try {
 				$this->data_store->read( $this );
 			} catch ( Exception $e ) {
