@@ -369,9 +369,7 @@ class BlockTemplatesController {
 
 			// It would be custom if the template was modified in the editor, so if it's not custom we can load it from
 			// the filesystem.
-			if ( 'custom' !== $template_file->source ) {
-				$template = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
-			} else {
+			if ( 'custom' === $template_file->source ) {
 				$template_file->title       = BlockTemplateUtils::get_block_template_title( $template_file->slug );
 				$template_file->description = BlockTemplateUtils::get_block_template_description( $template_file->slug );
 				$query_result[]             = $template_file;
@@ -389,6 +387,7 @@ class BlockTemplatesController {
 				! isset( $query['area'] ) || ( property_exists( $template_file, 'area' ) && $template_file->area === $query['area'] );
 			$should_include  = $is_not_custom && $fits_slug_query && $fits_area_query;
 			if ( $should_include ) {
+				$template       = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
 				$query_result[] = $template;
 			}
 		}
