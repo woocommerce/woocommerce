@@ -298,12 +298,12 @@ final class BlockTypesController {
 		);
 
 		if ( Package::feature()->is_experimental_build() ) {
-			$block_types[] = 'ProductFilters';
-			$block_types[] = 'ProductFiltersStockStatus';
-			$block_types[] = 'ProductFiltersPrice';
-			$block_types[] = 'ProductFiltersAttribute';
-			$block_types[] = 'ProductFiltersRating';
-			$block_types[] = 'ProductFiltersActive';
+			$block_types[] = 'ProductFilter';
+			$block_types[] = 'ProductFilterStockStatus';
+			$block_types[] = 'ProductFilterPrice';
+			$block_types[] = 'ProductFilterAttribute';
+			$block_types[] = 'ProductFilterRating';
+			$block_types[] = 'ProductFilterActive';
 		}
 
 		/**

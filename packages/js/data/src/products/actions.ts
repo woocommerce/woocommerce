@@ -216,6 +216,14 @@ export function* deleteProduct(
 	}
 }
 
+export function setSuggestedProductAction( key: string, items: Product[] ) {
+	return {
+		type: TYPES.SET_SUGGESTED_PRODUCTS as const,
+		key,
+		items,
+	};
+}
+
 export type Actions = ReturnType<
 	| typeof createProductStart
 	| typeof createProductError
@@ -232,6 +240,7 @@ export type Actions = ReturnType<
 	| typeof deleteProductStart
 	| typeof deleteProductSuccess
 	| typeof deleteProductError
+	| typeof setSuggestedProductAction
 >;
 
 export type ActionDispatchers = DispatchFromMap< {

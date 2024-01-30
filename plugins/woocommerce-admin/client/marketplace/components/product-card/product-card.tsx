@@ -40,9 +40,6 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		reviewsCount: null,
 	};
 
-	// We hardcode this for now while we only display prices in USD.
-	const currencySymbol = '$';
-
 	function recordTracksEvent( event: string, data: ExtraProperties ) {
 		const tracksData = props.tracksData;
 
@@ -181,13 +178,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 					{ isLoading && (
 						<div className="woocommerce-marketplace__product-card__price" />
 					) }
-					{ ! isLoading && (
-						<ProductCardFooter
-							currencySymbol={ currencySymbol }
-							price={ product.price }
-							averageRating={ product.averageRating }
-							reviewsCount={ product.reviewsCount }
-						/>
+					{ ! isLoading && props.product && (
+						<ProductCardFooter product={ props.product } />
 					) }
 				</footer>
 			</div>

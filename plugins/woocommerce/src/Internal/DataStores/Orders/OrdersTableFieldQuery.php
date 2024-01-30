@@ -185,7 +185,7 @@ class OrdersTableFieldQuery {
 		} else {
 			$relation = $q['relation'];
 			unset( $q['relation'] );
-
+			$chunks = array();
 			foreach ( $q as $query ) {
 				$chunks[] = $this->process( $query );
 			}
@@ -292,11 +292,10 @@ class OrdersTableFieldQuery {
 		}
 
 		$clause_compare = $clause['compare'];
-
 		switch ( $clause_compare ) {
 			case 'IN':
 			case 'NOT IN':
-				$where = $wpdb->prepare( '(' . substr( str_repeat( ',%s', count( $clause_value ) ), 1 ) . ')', $clause_value ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				$where = $wpdb->prepare( '(' . substr( str_repeat( ',%s', count( (array) $clause_value ) ), 1 ) . ')', $clause_value ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				break;
 			case 'BETWEEN':
 			case 'NOT BETWEEN':
@@ -327,7 +326,7 @@ class OrdersTableFieldQuery {
 				break;
 		}
 
-		if ( $where ) {
+		if ( ! empty( $where ) ) {
 			if ( 'CHAR' === $clause['cast'] ) {
 				return "`{$clause['alias']}`.`{$clause['column']}` {$clause_compare} {$where}";
 			} else {

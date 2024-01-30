@@ -84,6 +84,27 @@ export class EditorUtils {
 		);
 	}
 
+	async removeBlocks( { name }: { name: string } ) {
+		await this.page.evaluate(
+			( { name: _name } ) => {
+				const blocks = window.wp.data
+					.select( 'core/block-editor' )
+					.getBlocks() as ( BlockRepresentation & {
+					clientId: string;
+				} )[];
+				const matchingBlocksClientIds = blocks
+					.filter( ( block ) => {
+						return block && block.name === _name;
+					} )
+					.map( ( block ) => block?.clientId );
+				window.wp.data
+					.dispatch( 'core/block-editor' )
+					.removeBlocks( matchingBlocksClientIds );
+			},
+			{ name }
+		);
+	}
+
 	async closeModalByName( name: string ) {
 		const isModalOpen = await this.page.getByLabel( name ).isVisible();
 
@@ -364,6 +385,15 @@ export class EditorUtils {
 		await this.page
 			.getByRole( 'button', { name: 'Dismiss this notice' } )
 			.getByText( `"${ templateName }" reverted.` )
+			.waitFor();
+	}
+
+	async updatePost() {
+		await this.page.click( 'role=button[name="Update"i]' );
+
+		await this.page
+			.getByRole( 'button', { name: 'Dismiss this notice' } )
+			.filter( { hasText: 'updated' } )
 			.waitFor();
 	}
 

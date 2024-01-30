@@ -42,7 +42,6 @@ test.describe( 'Add New Coupon Page', () => {
 		await page.locator( '#coupon_amount' ).fill( '100' );
 
 		await page.locator( '#publish:not(.disabled)' ).click();
-		await page.waitForLoadState( 'networkidle' );
 
 		await expect(
 			page

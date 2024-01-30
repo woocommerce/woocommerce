@@ -53,12 +53,16 @@ test.describe.serial( 'Disable block product editor', () => {
 	} );
 
 	test( 'can be disabled from the header', async ( { page } ) => {
-		await page.goto( '/wp-admin/admin.php?page=wc-admin&path=%2Fadd-product' );
+		await page.goto(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fadd-product'
+		);
 
 		try {
 			// dismiss feature highlight if shown
-			await page.getByRole( 'button', { name: 'Close Tour' } ).click( { timeout: 5000 } );
-		} catch (e) {}
+			await page
+				.getByRole( 'button', { name: 'Close Tour' } )
+				.click( { timeout: 5000 } );
+		} catch ( e ) {}
 
 		// turn off block product editor from the header
 		await page

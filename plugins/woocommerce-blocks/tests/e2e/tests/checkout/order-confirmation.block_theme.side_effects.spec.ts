@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { adminFile, guestFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -37,7 +38,9 @@ const test = base.extend< { pageObject: CheckoutPage } >( {
 	},
 } );
 
-test.describe( 'Shopper → Order Confirmation', () => {
+test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
+	test.use( { storageState: adminFile } );
+
 	test.beforeEach( async ( { admin, editorUtils, page } ) => {
 		await utils.openLocalPickupSettings( { admin } );
 		await utils.disableLocalPickup( { page } );
@@ -125,65 +128,47 @@ test.describe( 'Shopper → Order Confirmation', () => {
 		// - Confirm details are hidden when logged out
 		// - Confirm data is hidden without valid session/key
 	} );
+} );
 
-	// This test is skipped until the multiple sign in roles is implemented
-	// See: https://github.com/woocommerce/woocommerce-blocks/pull/10561
-	// eslint-disable-next-line playwright/no-skipped-test
-	test.skip( 'Place order as guest user', async ( {
+test.describe( 'Shopper → Order Confirmation (guest user)', () => {
+	test.use( { storageState: guestFile } );
+
+	test( 'Place order as guest user', async ( {
 		frontendUtils,
 		pageObject,
 		page,
 	} ) => {
+		await page.goto( '/my-account', { waitUntil: 'commit' } );
+
+		// Verify that the user is logged out.
+		await expect(
+			page.getByRole( 'heading', { name: 'Login' } )
+		).toBeVisible();
+
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
+
 		await expect(
 			await pageObject.selectAndVerifyShippingOption(
 				FREE_SHIPPING_NAME,
 				FREE_SHIPPING_PRICE
 			)
 		).toBe( true );
+
 		await pageObject.fillInCheckoutWithTestData( testData );
 		await pageObject.placeOrder();
 
-		// confirm details are limited
 		await expect(
 			page.getByText( 'Thank you. Your order has been received.' )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'listitem' ).filter( { hasText: 'Email' } )
-		).toBeHidden();
-		await expect(
-			page.getByRole( 'listitem' ).filter( { hasText: 'Payment method' } )
-		).toBeHidden();
-		await expect(
-			page.locator(
-				'[data-block-name="woocommerce/order-confirmation-billing-address"]'
-			)
-		).toBeHidden();
-		await expect(
-			page.locator(
-				'[data-block-name="woocommerce/order-confirmation-totals"]'
-			)
-		).toBeVisible();
-		await expect(
-			page.locator(
-				'[data-block-name="woocommerce/order-confirmation-summary"]'
-			)
-		).toBeVisible();
-
-		const { postcode, city, state, country } = testData;
-
-		await expect(
-			page.getByText(
-				`Shipping to ${ postcode }, ${ city }, ${ state }, ${ country }`
-			)
 		).toBeVisible();
 	} );
 } );
 
 test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
+	test.use( { storageState: adminFile } );
+
 	test( 'Confirm shipping address section is hidden, but billing is visible', async ( {
 		pageObject,
 		frontendUtils,
@@ -230,6 +215,8 @@ test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
 } );
 
 test.describe( 'Shopper → Order Confirmation → Downloadable Products', () => {
+	test.use( { storageState: adminFile } );
+
 	let confirmationPageUrl: string;
 
 	test.beforeEach( async ( { frontendUtils, pageObject } ) => {

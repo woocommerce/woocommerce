@@ -1,6 +1,8 @@
 {
 	"phpVersion": "7.4",
-	"plugins": [ "." ],
+	"plugins": [
+		"."
+	],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG_LOG": true,
@@ -11,7 +13,8 @@
 		"wp-cli.yml": "./tests/wp-cli.yml",
 		"wp-content/plugins/filter-setter.php": "./tests/e2e-pw/bin/filter-setter.php",
 		"wp-content/plugins/process-waiting-actions.php": "./tests/e2e-pw/bin/process-waiting-actions.php",
-		"wp-content/plugins/test-helper-apis.php": "./tests/e2e-pw/bin/test-helper-apis.php"
+		"wp-content/plugins/test-helper-apis.php": "./tests/e2e-pw/bin/test-helper-apis.php",
+		"test-data/images/": "./tests/e2e-pw/test-data/images/"
 	},
 	"lifecycleScripts": {
 		"afterStart": "./tests/e2e-pw/bin/test-env-setup.sh",

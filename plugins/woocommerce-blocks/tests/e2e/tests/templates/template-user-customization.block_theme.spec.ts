@@ -3,69 +3,25 @@
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
-const templateUserCustomizationTests = [
-	{
-		permalink: '/shop',
-		templateName: 'Product Catalog',
-		templatePath: 'woocommerce/woocommerce//archive-product',
-		templateType: 'wp_template',
-	},
-	{
-		permalink: '/?s=shirt&post_type=product',
-		templateName: 'Product Search Results',
-		templatePath: 'woocommerce/woocommerce//product-search-results',
-		templateType: 'wp_template',
-	},
-	{
-		permalink: '/color/blue',
-		templateName: 'Products by Attribute',
-		templatePath: 'woocommerce/woocommerce//taxonomy-product_attribute',
-		templateType: 'wp_template',
-		defaultTemplate: {
-			templateName: 'Product Catalog',
-			templatePath: 'woocommerce/woocommerce//archive-product',
-		},
-	},
-	{
-		permalink: '/product-category/clothing',
-		templateName: 'Products by Category',
-		templatePath: 'woocommerce/woocommerce//taxonomy-product_cat',
-		templateType: 'wp_template',
-		defaultTemplate: {
-			templateName: 'Product Catalog',
-			templatePath: 'woocommerce/woocommerce//archive-product',
-		},
-	},
-	{
-		permalink: '/product-tag/recommended/',
-		templateName: 'Products by Tag',
-		templatePath: 'woocommerce/woocommerce//taxonomy-product_tag',
-		templateType: 'wp_template',
-		defaultTemplate: {
-			templateName: 'Product Catalog',
-			templatePath: 'woocommerce/woocommerce//archive-product',
-		},
-	},
-	{
-		permalink: '/product/hoodie',
-		templateName: 'Single Product',
-		templatePath: 'woocommerce/woocommerce//single-product',
-		templateType: 'wp_template',
-	},
-];
-const userText = 'Hello World in the template';
-const defaultTemplateUserText = 'Hello World in the default template';
+/**
+ * Internal dependencies
+ */
+import { CUSTOMIZABLE_WC_TEMPLATES, WC_TEMPLATES_SLUG } from './constants';
 
-templateUserCustomizationTests.forEach( ( testData ) => {
+const userText = 'Hello World in the template';
+const fallbackTemplateUserText = 'Hello World in the fallback template';
+
+CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	test.describe( `${ testData.templateName } template`, async () => {
 		test( 'can be modified and reverted', async ( {
 			admin,
+			frontendUtils,
 			editorUtils,
 			page,
 		} ) => {
 			// Verify the template can be edited.
 			await admin.visitSiteEditor( {
-				postId: testData.templatePath,
+				postId: `${ WC_TEMPLATES_SLUG }//${ testData.templatePath }`,
 				postType: testData.templateType,
 			} );
 			await editorUtils.enterEditMode();
@@ -75,7 +31,7 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 				attributes: { content: userText },
 			} );
 			await editorUtils.saveTemplate();
-			await page.goto( testData.permalink );
+			await testData.visitPage( { frontendUtils, page } );
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 
 			// Verify the edition can be reverted.
@@ -86,19 +42,22 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 			await editorUtils.revertTemplateCustomizations(
 				testData.templateName
 			);
-			await page.goto( testData.permalink );
+			await testData.visitPage( { frontendUtils, page } );
 			await expect( page.getByText( userText ) ).toHaveCount( 0 );
 		} );
 
-		if ( testData.defaultTemplate ) {
-			test( `defaults to the ${ testData.defaultTemplate.templateName } template`, async ( {
+		if ( testData.fallbackTemplate ) {
+			test( `defaults to the ${ testData.fallbackTemplate.templateName } template`, async ( {
 				admin,
+				frontendUtils,
 				editorUtils,
 				page,
 			} ) => {
 				// Edit default template and verify changes are visible.
 				await admin.visitSiteEditor( {
-					postId: testData.defaultTemplate.templatePath,
+					postId: `${ WC_TEMPLATES_SLUG }//${
+						testData.fallbackTemplate?.templatePath || ''
+					}`,
 					postType: testData.templateType,
 				} );
 				await editorUtils.enterEditMode();
@@ -106,13 +65,13 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 				await editorUtils.editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: {
-						content: defaultTemplateUserText,
+						content: fallbackTemplateUserText,
 					},
 				} );
 				await editorUtils.saveTemplate();
-				await page.goto( testData.permalink );
+				await testData.visitPage( { frontendUtils, page } );
 				await expect(
-					page.getByText( defaultTemplateUserText ).first()
+					page.getByText( fallbackTemplateUserText ).first()
 				).toBeVisible();
 
 				// Verify the edition can be reverted.
@@ -121,11 +80,11 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 					`path=/${ testData.templateType }/all`
 				);
 				await editorUtils.revertTemplateCustomizations(
-					testData.defaultTemplate.templateName
+					testData.fallbackTemplate?.templateName || ''
 				);
-				await page.goto( testData.permalink );
+				await testData.visitPage( { frontendUtils, page } );
 				await expect(
-					page.getByText( defaultTemplateUserText )
+					page.getByText( fallbackTemplateUserText )
 				).toHaveCount( 0 );
 			} );
 		}
