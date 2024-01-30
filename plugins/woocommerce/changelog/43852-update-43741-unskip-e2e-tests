@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Unskip various checkout-related e2e tests.
-

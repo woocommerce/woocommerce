@@ -60,9 +60,11 @@ const StarRating = ( {
 };
 
 export const SurveyForm = ( {
+	showAISurvey,
 	onSend,
 	closeFunction,
 }: {
+	showAISurvey: boolean;
 	onSend: () => void;
 	closeFunction: CloseSurveyFunction;
 } ): JSX.Element => {
@@ -75,8 +77,19 @@ export const SurveyForm = ( {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 	const [ rating, setRating ] = useState( 0 );
 
+	const disableSendButton =
+		rating === 0 ||
+		feedbackText === '' ||
+		( ! isStreamlineChecked &&
+			! isDislikeThemesChecked &&
+			! isThemeNoMatchChecked &&
+			! isOtherChecked );
+
 	const sendData = () => {
-		recordEvent( 'customize_your_store_transitional_survey_complete', {
+		const surveyCompleteEvent = showAISurvey
+			? 'customize_your_store_transitional_survey_complete'
+			: 'customize_your_store_on_core_transitional_survey_complete';
+		recordEvent( surveyCompleteEvent, {
 			rating,
 			choose_streamline: isStreamlineChecked,
 			choose_dislike_themes: isDislikeThemesChecked,
@@ -110,31 +123,45 @@ export const SurveyForm = ( {
 
 				<h4>
 					{ __(
-						'On a scale of 1 = difficult to 5 = very easy, how would you rate the overall experience? *',
+						'On a scale of 1 = difficult to 5 = very easy, how would you rate the overall experience?',
 						'woocommerce'
 					) }
+					<span>*</span>
 				</h4>
 				<StarRating value={ rating } onChange={ setRating } />
 
 				<hr />
 
 				<h4>
-					{ __(
-						'What motivated you to choose the “Design with AI” option?',
-						'woocommerce'
-					) }
+					{ showAISurvey
+						? __(
+								'What motivated you to choose the “Design with AI” option?',
+								'woocommerce'
+						  )
+						: __(
+								'What motivated you to choose the "Design your own theme" option?',
+								'woocommerce'
+						  ) }
+					<span>*</span>
 				</h4>
 				<CheckboxControl
-					label={ __(
-						'I wanted to see how AI could help me streamline the process.',
-						'woocommerce'
-					) }
+					label={
+						showAISurvey
+							? __(
+									'I wanted to see how AI could help me streamline the process.',
+									'woocommerce'
+							  )
+							: __(
+									'I wanted to design my own theme.',
+									'woocommerce'
+							  )
+					}
 					checked={ isStreamlineChecked }
 					onChange={ setStreamlineChecked }
 				/>
 				<CheckboxControl
 					label={ __(
-						'I didn’t like any of the available themes.',
+						"I didn't like any of the available themes.",
 						'woocommerce'
 					) }
 					checked={ isDislikeThemesChecked }
@@ -142,7 +169,7 @@ export const SurveyForm = ( {
 				/>
 				<CheckboxControl
 					label={ __(
-						'I didn’t find a theme that matched my needs.',
+						"I didn't find a theme that matched my needs.",
 						'woocommerce'
 					) }
 					checked={ isThemeNoMatchChecked }
@@ -161,6 +188,7 @@ export const SurveyForm = ( {
 						'Did you find anything confusing, irrelevant, or not useful?',
 						'woocommerce'
 					) }
+					<span>*</span>
 				</h4>
 				<TextareaControl
 					value={ feedbackText }
@@ -168,10 +196,15 @@ export const SurveyForm = ( {
 				/>
 
 				<h4>
-					{ __(
-						'Feel free to spill the beans here. All suggestions, feedback, or comments about the AI-generated store experience are welcome.',
-						'woocommerce'
-					) }
+					{ showAISurvey
+						? __(
+								'Feel free to spill the beans here. All suggestions, feedback, or comments about the AI-generated store experience are welcome.',
+								'woocommerce'
+						  )
+						: __(
+								'Feel free to spill the beans here. All suggestions, feedback, or comments about the "Design your own theme" experience are welcome.',
+								'woocommerce'
+						  ) }
 				</h4>
 				<TextareaControl
 					value={ spillBeansText }
@@ -190,7 +223,7 @@ export const SurveyForm = ( {
 					<Button
 						variant="primary"
 						onClick={ sendData }
-						disabled={ rating === 0 }
+						disabled={ disableSendButton }
 					>
 						{ __( 'Send', 'woocommerce' ) }
 					</Button>

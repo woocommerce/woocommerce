@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix an error in plugin auto-installer triggered in certain installation failure scenarios.

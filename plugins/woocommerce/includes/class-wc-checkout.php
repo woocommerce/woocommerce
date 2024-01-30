@@ -751,7 +751,7 @@ class WC_Checkout {
 		);
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		$skipped = array();
+		$skipped        = array();
 		$form_was_shown = isset( $_POST['woocommerce-process-checkout-nonce'] ); // phpcs:disable WordPress.Security.NonceVerification.Missing
 
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
@@ -1023,6 +1023,9 @@ class WC_Checkout {
 
 		if ( is_array( $data['shipping_method'] ) ) {
 			foreach ( $data['shipping_method'] as $i => $value ) {
+				if ( ! is_string( $value ) ) {
+					continue;
+				}
 				$chosen_shipping_methods[ $i ] = $value;
 			}
 		}

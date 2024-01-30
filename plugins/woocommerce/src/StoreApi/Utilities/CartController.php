@@ -878,6 +878,9 @@ class CartController {
 	 * @param string     $rate_id ID of the rate being chosen.
 	 */
 	public function select_shipping_rate( $package_id, $rate_id ) {
+		if ( ! is_string( $rate_id ) ) {
+			return;
+		}
 		$cart                        = $this->get_cart_instance();
 		$session_data                = wc()->session->get( 'chosen_shipping_methods' ) ? wc()->session->get( 'chosen_shipping_methods' ) : [];
 		$session_data[ $package_id ] = $rate_id;
