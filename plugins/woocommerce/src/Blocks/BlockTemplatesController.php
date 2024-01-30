@@ -374,17 +374,11 @@ class BlockTemplatesController {
 				continue;
 			}
 
-			$is_not_custom   = false === array_search(
-				$theme_slug . '//' . $template_file->slug,
-				array_column( $query_result, 'id' ),
-				true
-			);
 			$fits_slug_query =
 				! isset( $query['slug__in'] ) || in_array( $template_file->slug, $query['slug__in'], true );
 			$fits_area_query =
 				! isset( $query['area'] ) || ( property_exists( $template_file, 'area' ) && $template_file->area === $query['area'] );
-			$should_include  = $is_not_custom && $fits_slug_query && $fits_area_query;
-			if ( $should_include ) {
+			if ( $fits_slug_query && $fits_area_query ) {
 				$template       = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
 				$query_result[] = $template;
 			}
