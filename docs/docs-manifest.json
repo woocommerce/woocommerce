@@ -490,6 +490,14 @@
           "id": "31a11f74bcd9f21f97cd4c6c719240b3d84e40f4"
         },
         {
+          "post_title": "What is WooCommerce?",
+          "menu_title": "What is WooCommerce?",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/what-is-woocommerce.md",
+          "hash": "a1342ab29101153ff4281d4362536a4da2c5b5d73ca4d1af2e3ce5df1d1dc923",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/what-is-woocommerce.md",
+          "id": "7e749861b9e74d591c830d943c70ec8f3166a863"
+        },
+        {
           "post_title": "Troubleshooting WooCommerce Endpoints",
           "menu_title": "Troubleshooting Endpoints",
           "tags": "how-to",
@@ -1181,5 +1189,5 @@
       "categories": []
     }
   ],
-  "hash": "c336cbf433d754903461b6d50c7ff5ca5e2275667562c3dbc86d4988c04075b4"
+  "hash": "8d00925b60861c870b7b51bcde0b3347e1f2f646a83e00370aa5fc80eab17dd7"
 }
