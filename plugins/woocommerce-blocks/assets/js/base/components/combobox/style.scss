@@ -72,6 +72,7 @@
 			background-color: $select-dropdown-light;
 			border: 1px solid $input-border-gray;
 			border-top: 0;
+			border-bottom: 0;
 			margin: 3em 0 0 0;
 			padding: 0;
 			max-height: 300px;
@@ -80,7 +81,7 @@
 			color: $input-text-active;
 			border-bottom-left-radius: $universal-border-radius;
 			border-bottom-right-radius: $universal-border-radius;
-			box-shadow: 0 0 0 1px $input-border-gray;
+			box-shadow: 0 1px 0 1px $input-border-gray;
 			box-sizing: border-box;
 
 			.has-dark-controls & {
