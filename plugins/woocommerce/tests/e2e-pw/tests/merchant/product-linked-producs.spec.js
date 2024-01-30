@@ -35,7 +35,7 @@ baseTest.describe( 'Products > Related products', () => {
 
 			// Cleanup
 			for ( const product of Object.values( products ) ) {
-				await api.delete( `products/${ product.id }`, { force: true } );
+				// await api.delete( `products/${ product.id }`, { force: true } );
 			}
 		},
 	} );
@@ -109,19 +109,13 @@ baseTest.describe( 'Products > Related products', () => {
 		await test.step( 'verify the up-sell in the store frontend', async () => {
 			await page.goto( products.main.permalink );
 
-			const sectionLocator = page.locator( 'section' ).filter( {
-				has: page.getByRole( 'heading', {
-					name: 'You may also like',
-				} ),
-			} );
-
 			await expect(
-				sectionLocator.getByRole( 'heading', {
+				page.locator( 'section.upsells' ).getByRole( 'heading', {
 					name: products.linked1.name,
 				} )
 			).toBeVisible();
 			await expect(
-				sectionLocator.getByRole( 'heading', {
+				page.locator( 'section.upsells' ).getByRole( 'heading', {
 					name: products.linked2.name,
 				} )
 			).toBeVisible();
@@ -131,20 +125,35 @@ baseTest.describe( 'Products > Related products', () => {
 	test( 'remove up-sells', async ( { page, api, products } ) => {
 		// Add up-sells
 		await api.put( `products/${ products.main.id }`, {
-			upsell_ids: [ products.linked1.id, products.linked2.id ],
+			upsell_ids: [ products.linked1.id ],
+		} );
+
+		// Verify up-sells are present, so we can assert the opposite after removing them
+		// This should prevent a possible false negative result
+		await test.step( 'verify the up-sells in the store frontend', async () => {
+			await page.goto( products.main.permalink );
+
+			await expect(
+				page.locator( 'section.upsells' ).getByRole( 'heading', {
+					name: products.linked1.name,
+				} )
+			).toBeVisible();
 		} );
 
 		await navigate( page, products.main.id );
 
 		await test.step( 'remove up-sells for a product', async () => {
+			// Using backspace to remove the product because clicking the remove button is flaky
 			await page
-				.getByRole( 'listitem', { name: products.linked1.name } )
-				.getByText( '×' )
+				.locator( 'p' )
+				.filter( { hasText: 'Upsells' } )
+				.getByRole( 'textbox' )
 				.click();
-			await page
-				.getByRole( 'listitem', { name: products.linked2.name } )
-				.getByText( '×' )
-				.click();
+			await page.keyboard.press( 'Backspace' );
+
+			await expect(
+				page.getByRole( 'listitem', { name: products.linked1.name } )
+			).toBeHidden();
 		} );
 
 		await updateProduct( page );
@@ -152,50 +161,11 @@ baseTest.describe( 'Products > Related products', () => {
 		await test.step( 'verify the up-sells in the store frontend', async () => {
 			await page.goto( products.main.permalink );
 
-			const sectionLocator = page.locator( 'section' ).filter( {
-				has: page.getByRole( 'heading', {
-					name: 'You may also like',
-				} ),
-			} );
-
-			// False negative warning: this is not an ideal check, but I cannot find a better one.
-			// The products can still be visible, but in a different section, and this test will incorrectly pass.
-			// Checking the product names in the entire page is also not an option
-			// because they still appear under the Related products section, where they are expected.
-			//
-			// The poll is needed because ~2 out of 10 runs at least one product is still linked,
-			// but will be removed after a page reload.
-			await expect
-				.poll(
-					async () => {
-						await page.reload();
-						return await sectionLocator
-							.getByRole( 'heading', {
-								name: products.linked1.name,
-							} )
-							.isVisible();
-					},
-					{
-						timeout: 10000,
-					}
-				)
-				.toBeFalsy();
-
-			await expect
-				.poll(
-					async () => {
-						await page.reload();
-						return await sectionLocator
-							.getByRole( 'heading', {
-								name: products.linked2.name,
-							} )
-							.isVisible();
-					},
-					{
-						timeout: 10000,
-					}
-				)
-				.toBeFalsy();
+			await expect(
+				page.locator( 'section.upsells' ).getByRole( 'heading', {
+					name: products.linked1.name,
+				} )
+			).toBeHidden();
 		} );
 	} );
 
@@ -272,20 +242,23 @@ baseTest.describe( 'Products > Related products', () => {
 	test( 'remove cross-sells', async ( { page, api, products } ) => {
 		// Add cross-sells
 		await api.put( `products/${ products.main.id }`, {
-			cross_sell_ids: [ products.linked1.id, products.linked2.id ],
+			cross_sell_ids: [ products.linked1.id ],
 		} );
 
 		await navigate( page, products.main.id );
 
 		await test.step( 'remove cross-sells for a product', async () => {
+			// Using backspace to remove the product because clicking the remove button is flaky
 			await page
-				.getByRole( 'listitem', { name: products.linked1.name } )
-				.getByText( '×' )
+				.locator( 'p' )
+				.filter( { hasText: 'Cross-sells' } )
+				.getByRole( 'textbox' )
 				.click();
-			await page
-				.getByRole( 'listitem', { name: products.linked2.name } )
-				.getByText( '×' )
-				.click();
+			await page.keyboard.press( 'Backspace' );
+
+			await expect(
+				page.getByRole( 'listitem', { name: products.linked1.name } )
+			).toBeHidden();
 		} );
 
 		await updateProduct( page );
@@ -300,9 +273,6 @@ baseTest.describe( 'Products > Related products', () => {
 			// check for cross-sells
 			await expect(
 				page.getByText( products.linked1.name )
-			).toBeHidden();
-			await expect(
-				page.getByText( products.linked2.name )
 			).toBeHidden();
 		} );
 	} );
