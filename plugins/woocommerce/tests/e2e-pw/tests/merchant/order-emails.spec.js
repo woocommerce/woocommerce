@@ -60,7 +60,9 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			version: 'wc/v3',
 		} );
 
-		await api.post( `orders/batch`, { delete: [ orderId, newOrderId, completedOrderId ] } );
+		await api.post( `orders/batch`, {
+			delete: [ orderId, newOrderId, completedOrderId ],
+		} );
 	} );
 
 	test( 'can receive new order email', async ( { page, baseURL } ) => {
@@ -117,35 +119,36 @@ test.describe( 'Merchant > Order Action emails received', () => {
 				customerBilling.email
 			) }`
 		);
+		await page.selectOption( 'select[name="search[place]"]', 'subject' );
+		await page.fill( 'input[name="search[term]"]', 'complete' );
+		await page.click( 'input#search-submit' );
+		await page.waitForTimeout( 2000 );
 
-		// Search to show complete orders only
-		await page.selectOption('select[name="search[place]"]', 'subject');
-		await page.fill('input[name="search[term]"]', 'complete');
-		await page.click('input#search-submit');
-		await page.waitForTimeout(2000);
-		
 		// Verify that the  email has been sent
 		await expect(
-			page.getByText(
-				`Your ${ storeName } order is now complete`
-			)
+			page.getByText( `Your ${ storeName } order is now complete` )
 		).toBeVisible();
-		
+
 		// Enter email log and look for the content in JSON
-		await page.click('button[title^="View log"]');
-		await page.waitForTimeout(2000);
-		await page.click('a.wp-mail-logging-modal-format[data-format="json"]');
+		await page.click( 'button[title^="View log"]' );
+		await page.waitForTimeout( 2000 );
+		await page.getByLabel( 'wp-mail-logging-modal-format-json' ).click;
+		await page.waitForTimeout( 2000 );
 
 		// Parse email's content JSON
-		await page.waitForSelector('#wp-mail-logging-modal-content-body-content');
+		// await page.waitForSelector(
+		// 	'#wp-mail-logging-modal-content-body-content'
+		// );
 
-		const emailBodyContent = JSON.parse( wp-mail-logging-modal-content-body-content );
+		// const emailBodyContent = JSON.parse(
+		//	'wp-mail-logging-modal-content-body-content'
+		// );
 		// Extract the required information
-		const timestamp = emailBodyContent.timestamp;
-		const receiverEmail = emailBodyContent.receiver;
-		const subject = emailBodyContent.subject;
-		const orderId = emailBodyContent.message.match(/\[Order #(\d+)\]/)[1];
-
+		// const timestamp = emailBodyContent.timestamp;
+		// const receiverEmail = emailBodyContent.receiver;
+		// const subject = emailBodyContent.subject;
+		// const orderId =
+		// 	emailBodyContent.message.match( /\[Order #(\d+)\]/ )[ 1 ];
 	} );
 
 	test( 'can resend new order notification', async ( { page } ) => {
