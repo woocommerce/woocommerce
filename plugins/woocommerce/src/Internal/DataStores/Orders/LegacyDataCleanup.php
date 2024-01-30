@@ -116,8 +116,7 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 * @return array Batch of records.
 	 */
 	public function get_next_batch_to_process( int $size ): array {
-		return
-			$this->should_run()
+		return $this->should_run()
 			? array_map( 'absint', $this->legacy_handler->get_orders_for_cleanup( array(), $size ) )
 			: array();
 	}
