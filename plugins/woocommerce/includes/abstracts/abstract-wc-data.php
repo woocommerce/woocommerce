@@ -118,14 +118,6 @@ abstract class WC_Data {
 	protected $legacy_datastore_props = array();
 
 	/**
-	 * Legacy package key.
-	 *
-	 * @deprecated 4.4.0 For legacy actions.
-	 * @var string
-	 */
-	public $legacy_package_key;
-
-	/**
 	 * Default constructor.
 	 *
 	 * @param int|object|array $read ID to load from the DB (optional) or already queried data.
