@@ -134,14 +134,17 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 			return;
 		}
 
+		$batch_failed = true;
+
 		foreach ( $batch as $order_id ) {
 			try {
 				$this->legacy_handler->cleanup_post_data( absint( $order_id ) );
+				$batch_failed = false;
 			} catch ( \Exception $e ) {
 				$this->error_logger->error(
 					sprintf(
 						// translators: %1$d is an order ID, %2$s is an error message.
-						__( 'Order %1$d could not be cleaned up during batch process. Error: %2$s', 'woocommerce' ),
+						__( 'Order %1$d legacy data could not be cleaned up during batch process. Error: %2$s', 'woocommerce' ),
 						$order_id,
 						$e->getMessage()
 					)
@@ -149,7 +152,11 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 			}
 		}
 
-		if ( ! $this->orders_pending() ) {
+		if ( $batch_failed ) {
+			$this->error_logger->error( __( 'Order legacy cleanup failed for an entire batch of orders. Aborting cleanup.', 'woocommerce' ) );
+		}
+
+		if ( ! $this->orders_pending() || $batch_failed ) {
 			$this->toggle_flag( false );
 		}
 	}
