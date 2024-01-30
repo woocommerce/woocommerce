@@ -370,9 +370,7 @@ class BlockTemplatesController {
 			// It would be custom if the template was modified in the editor, so if it's not custom we can load it from
 			// the filesystem.
 			if ( 'custom' === $template_file->source ) {
-				$template_file->title       = BlockTemplateUtils::get_block_template_title( $template_file->slug );
-				$template_file->description = BlockTemplateUtils::get_block_template_description( $template_file->slug );
-				$query_result[]             = $template_file;
+				$query_result[] = $template_file;
 				continue;
 			}
 
@@ -438,15 +436,13 @@ class BlockTemplatesController {
 					}
 				}
 
-				if ( 'theme' === $template->origin && BlockTemplateUtils::template_has_title( $template ) ) {
-					return $template;
-				}
-				if ( $template->title === $template->slug ) {
+				if ( ! $template->title || $template->title === $template->slug ) {
 					$template->title = BlockTemplateUtils::get_block_template_title( $template->slug );
 				}
-				if ( ! $template->description ) {
+				if ( $template->description ) {
 					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
 				}
+
 				return $template;
 			},
 			$query_result
