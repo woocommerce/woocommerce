@@ -39,7 +39,7 @@ final class StoreApi {
 		add_action(
 			'woocommerce_blocks_pre_get_routes_from_namespace',
 			function( $routes, $namespace, $context ) {
-				if ( 'wc/store/v1' !==  $namespace ) {
+				if ( 'wc/store/v1' !== $namespace ) {
 					return array();
 				}
 
