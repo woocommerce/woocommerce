@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Hide the shipping calculator link on the Cart editor with no default address and zone. Display the shipping calculator link on the front end for multiple zones with a fallback.
