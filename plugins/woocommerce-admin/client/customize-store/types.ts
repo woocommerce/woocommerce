@@ -50,7 +50,7 @@ export type customizeStoreStateMachineContext = {
 		hasErrors: boolean;
 		themeData: RecommendThemesAPIResponse;
 		activeTheme: string;
-		activeThemeHasMods: boolean;
+		activeThemeHasMods: boolean | undefined;
 		customizeStoreTaskCompleted: boolean;
 		currentThemeIsAiGenerated: boolean;
 	};

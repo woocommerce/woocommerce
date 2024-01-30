@@ -11,7 +11,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { aiStatusResponse } from '../types';
+import { aiStatusResponse, customizeStoreStateMachineContext } from '../types';
 
 export const fetchAiStatus = () => async (): Promise< aiStatusResponse > => {
 	const response = await fetch(
@@ -28,6 +28,57 @@ export const fetchThemeCards = async () => {
 	} );
 
 	return themes;
+};
+
+export const fetchActiveThemeHasMods = async (
+	context: customizeStoreStateMachineContext
+) => {
+	if ( context.intro.activeThemeHasMods !== undefined ) {
+		return {
+			activeThemeHasMods: context.intro.activeThemeHasMods,
+		};
+	}
+
+	const currentTemplatePromise =
+		// @ts-expect-error No types for this exist yet.
+		resolveSelect( coreStore ).__experimentalGetTemplateForLink( '/' );
+
+	const styleRevsPromise =
+		// @ts-expect-error No types for this exist yet.
+		resolveSelect( coreStore ).getCurrentThemeGlobalStylesRevisions();
+
+	// @ts-expect-error No types for this exist yet.
+	const hasModifiedPagesPromise = resolveSelect( coreStore ).getEntityRecords(
+		'postType',
+		'page',
+		{
+			per_page: 100,
+			_fields: [ 'id', '_links.version-history' ],
+			orderby: 'menu_order',
+			order: 'asc',
+		}
+	);
+
+	const [ currentTemplate, styleRevs, rawPages ] = await Promise.all( [
+		currentTemplatePromise,
+		styleRevsPromise,
+		hasModifiedPagesPromise,
+	] );
+
+	const hasModifiedPages = rawPages?.some(
+		( page: { _links: { [ key: string ]: string[] } } ) => {
+			return page._links?.[ 'version-history' ]?.length > 1;
+		}
+	);
+
+	const activeThemeHasMods =
+		!! currentTemplate?.modified ||
+		styleRevs?.length > 0 ||
+		hasModifiedPages;
+
+	return {
+		activeThemeHasMods,
+	};
 };
 
 export const fetchIntroData = async () => {

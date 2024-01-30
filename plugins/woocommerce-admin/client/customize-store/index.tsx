@@ -158,7 +158,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				},
 			},
 			activeTheme: '',
-			activeThemeHasMods: false,
+			activeThemeHasMods: undefined,
 			customizeStoreTaskCompleted: false,
 			currentThemeIsAiGenerated: false,
 		},
@@ -369,7 +369,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			states: {
 				fetchActiveThemeHasMods: {
 					invoke: {
-						src: 'fetchIntroData',
+						src: 'fetchActiveThemeHasMods',
 						onDone: {
 							target: 'checkActiveThemeHasMods',
 							actions: [ 'assignActiveThemeHasMods' ],
@@ -526,7 +526,7 @@ export const CustomizeStoreController = ( {
 				isWooExpress: () => isWooExpress(),
 				isNotWooExpress: () => ! isWooExpress(),
 				activeThemeHasMods: ( _ctx ) => {
-					return _ctx.intro.activeThemeHasMods;
+					return !! _ctx.intro.activeThemeHasMods;
 				},
 				activeThemeIsNotModified: ( _ctx ) => {
 					return ! _ctx.intro.activeThemeHasMods;
