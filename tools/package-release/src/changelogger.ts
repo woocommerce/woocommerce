@@ -9,6 +9,7 @@ import { join } from 'path';
  * Internal dependencies
  */
 import { getFilepathFromPackageName } from './validate';
+import { MONOREPO_ROOT } from './const';
 
 /**
  * Call changelogger's next version function to get the version for the next release.
@@ -24,9 +25,9 @@ export const getNextVersion = ( name: string ) => {
 		// 	encoding: 'utf-8',
 		// } ).trim();
 		return execSync( `pnpm --filter="${ name }" changelog version next`, {
-			cwd,
+			cwd: MONOREPO_ROOT,
 			encoding: 'utf-8',
-			stdio: 'inherit',
+			// stdio: 'inherit',
 		} ).trim();
 	} catch ( e ) {
 		if ( e instanceof Error ) {
@@ -50,9 +51,8 @@ export const validateChangelogEntries = ( name: string ) => {
 		// } );
 
 		return execSync( `pnpm --filter="${ name }" changelog validate`, {
-			cwd,
+			cwd: MONOREPO_ROOT,
 			encoding: 'utf-8',
-			stdio: 'inherit',
 		} );
 	} catch ( e ) {
 		if ( e instanceof Error ) {
