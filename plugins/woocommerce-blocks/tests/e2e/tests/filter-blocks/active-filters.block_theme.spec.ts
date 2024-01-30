@@ -4,7 +4,7 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 test.describe( 'Product Filter: Active Filters Block', async () => {
-	describe( 'frontend', () => {
+	test.describe( 'frontend', () => {
 		test( 'Without any filters selected, only a wrapper block is rendered', async ( {
 			page,
 		} ) => {
@@ -51,16 +51,18 @@ test.describe( 'Product Filter: Active Filters Block', async () => {
 			page,
 		} ) => {
 			await page.goto(
-				'/product-filters-active-block/?filter_stock_status=instock,outofstock'
+				'/product-filters-active-block/?filter_stock_status=instock,onbackorder'
 			);
 
 			const listLocator = page.locator( '.filter-list' );
 			const hasTitle =
-				( await listLocator.locator( 'text=Rating:' ).count() ) === 1;
+				( await listLocator
+					.locator( 'text=Stock Status:' )
+					.count() ) === 1;
 
 			expect( hasTitle ).toBe( true );
 
-			for ( const text of [ 'In stock', 'Out of stock' ] ) {
+			for ( const text of [ 'In stock', 'On backorder' ] ) {
 				const hasFilter =
 					( await listLocator
 						.locator( `text=${ text }` )
