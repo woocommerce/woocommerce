@@ -85,6 +85,21 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		canBeOverridenByThemes: true,
 	},
 	{
+		visitPage: async ( { frontendUtils } ) => {
+			await frontendUtils.emptyCart();
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart();
+			const block = await frontendUtils.getBlockByName(
+				'woocommerce/mini-cart'
+			);
+			await block.click();
+		},
+		templateName: 'Mini-Cart',
+		templatePath: 'mini-cart',
+		templateType: 'wp_template_part',
+		canBeOverridenByThemes: true,
+	},
+	{
 		visitPage: async ( { frontendUtils } ) =>
 			await frontendUtils.goToCart(),
 		templateName: 'Page: Cart',
@@ -94,6 +109,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 	},
 	{
 		visitPage: async ( { frontendUtils } ) => {
+			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart();
 			await frontendUtils.goToCheckout();
