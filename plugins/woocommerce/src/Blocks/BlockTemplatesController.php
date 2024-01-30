@@ -389,9 +389,7 @@ class BlockTemplatesController {
 			if ( 'custom' !== $template_file->source ) {
 				$template = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
 			} else {
-				$template_file->title       = BlockTemplateUtils::get_block_template_title( $template_file->slug );
-				$template_file->description = BlockTemplateUtils::get_block_template_description( $template_file->slug );
-				$query_result[]             = $template_file;
+				$query_result[] = $template_file;
 				continue;
 			}
 
@@ -456,15 +454,13 @@ class BlockTemplatesController {
 					}
 				}
 
-				if ( 'theme' === $template->origin && BlockTemplateUtils::template_has_title( $template ) ) {
-					return $template;
-				}
-				if ( $template->title === $template->slug ) {
+				if ( ! $template->title || $template->title === $template->slug ) {
 					$template->title = BlockTemplateUtils::get_block_template_title( $template->slug );
 				}
 				if ( ! $template->description ) {
 					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
 				}
+
 				return $template;
 			},
 			$query_result
