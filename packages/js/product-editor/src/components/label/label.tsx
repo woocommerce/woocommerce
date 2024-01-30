@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, help as helpIcon } from '@wordpress/icons';
 import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
@@ -14,6 +14,7 @@ import { sanitizeHTML } from '../../utils/sanitize-html';
 export interface LabelProps {
 	label: string;
 	required?: boolean;
+	note?: string;
 	tooltip?: string;
 }
 
@@ -21,16 +22,60 @@ export const Label: React.FC< LabelProps > = ( {
 	label,
 	required,
 	tooltip,
+	note,
 } ) => {
+	let labelElement: JSX.Element | string = label;
+
+	if ( required ) {
+		if ( note?.length ) {
+			labelElement = createInterpolateElement(
+				__( '<label/> <note /> <required/>', 'woocommerce' ),
+				{
+					label: <span>{ label }</span>,
+					note: (
+						<span className="woocommerce-product-form-label__note">
+							{ note }
+						</span>
+					),
+					required: (
+						<span className="woocommerce-product-form-label__required">
+							{ /* translators: field 'required' indicator */ }
+							{ __( '*', 'woocommerce' ) }
+						</span>
+					),
+				}
+			);
+		} else {
+			labelElement = createInterpolateElement(
+				__( '<label/> <required/>', 'woocommerce' ),
+				{
+					label: <span>{ label }</span>,
+					required: (
+						<span className="woocommerce-product-form-label__required">
+							{ /* translators: field 'required' indicator */ }
+							{ __( '*', 'woocommerce' ) }
+						</span>
+					),
+				}
+			);
+		}
+	} else if ( note?.length ) {
+		labelElement = createInterpolateElement(
+			__( '<label/> <note />', 'woocommerce' ),
+			{
+				label: <span>{ label }</span>,
+				note: (
+					<span className="woocommerce-product-form-label__note">
+						{ note }
+					</span>
+				),
+			}
+		);
+	}
+
 	return (
 		<div className="woocommerce-product-form-label__label">
-			{ label }
-			{ required && (
-				<span className="woocommerce-product-form-label__required">
-					{ /* translators: field 'required' indicator */ }
-					{ __( '*', 'woocommerce' ) }
-				</span>
-			) }
+			{ labelElement }
 
 			{ tooltip && (
 				<Tooltip
