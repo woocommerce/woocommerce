@@ -13,7 +13,6 @@ On this page, we will share some guidelines to help you assess the impact degree
 - It adds a **new feature** to WooCommerce, except if it's behind a feature flag.
 - Modifies **critical functionality** (see the [critical flows list](https://github.com/woocommerce/woocommerce/wiki/Critical-Flows)).
 - It fixes a **high-priority bug** (this includes Blocks fix releases core version bumps).
-- It contains a **security fix**.
 - Updates **SQL queries**.
 - Touches any of the **$_REQUEST** family of variables.
 - Any kind of **data migration/update**.
@@ -22,6 +21,8 @@ On this page, we will share some guidelines to help you assess the impact degree
 - Changes to **REST API endpoints**.
 - It's a **big PR** (i.e. adds several changes in many files).
 - It has **i18n changes** (for example, any file from `woocommerce/i18n` is modified).
+
+Note that security issues and fixes should all go through our [security reporting process](./reporting-security-issues.md).
 
 ## You should not mark a Pull Request as High-Impact if
 
