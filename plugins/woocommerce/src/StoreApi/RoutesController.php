@@ -21,6 +21,11 @@ class RoutesController {
 	 */
 	protected $routes = [];
 
+	/**
+	 * Namespace for the API.
+	 *
+	 * @var string
+	 */
 	private static $api_namespace = 'wc/store';
 
 	/**
