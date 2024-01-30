@@ -35,7 +35,7 @@ baseTest.describe( 'Products > Related products', () => {
 
 			// Cleanup
 			for ( const product of Object.values( products ) ) {
-				// await api.delete( `products/${ product.id }`, { force: true } );
+				await api.delete( `products/${ product.id }`, { force: true } );
 			}
 		},
 	} );
