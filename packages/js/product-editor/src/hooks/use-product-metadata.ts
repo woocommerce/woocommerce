@@ -41,7 +41,7 @@ function useProductMetadata( options?: Options ) {
 			);
 
 			return {
-				meta_data: metadata,
+				meta_data: metadata || [],
 				isLoading: ! isResolutionFinished,
 			};
 		},
