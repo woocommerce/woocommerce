@@ -9,6 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+
 /**
  * WC Customer Data Store which stores the data in session.
  *
@@ -85,7 +87,20 @@ class WC_Customer_Data_Store_Session extends WC_Customer_Data_Store {
 				$session_key = str_replace( 'billing_', '', $session_key );
 			}
 			if ( 'meta_data' === $session_key ) {
-				$session_value = wp_json_encode( $customer->get_meta_data() );
+				// This is an allow-list of meta data keys which we want to store in session. Avoids storing everything for logged in users.
+				$allowed_meta_data_keys = array(
+					CheckoutFields::ADDITIONAL_FIELDS_KEY,
+					CheckoutFields::BILLING_FIELDS_KEY,
+					CheckoutFields::SHIPPING_FIELDS_KEY,
+				);
+				$session_value          = wp_json_encode(
+					array_filter(
+						$customer->get_meta_data(),
+						function( $meta_data ) use ( $allowed_meta_data_keys ) {
+							return in_array( $meta_data->key, $allowed_meta_data_keys, true );
+						}
+					)
+				);
 			} else {
 				$session_value = $customer->{"get_$function_key"}( 'edit' );
 			}
@@ -125,11 +140,13 @@ class WC_Customer_Data_Store_Session extends WC_Customer_Data_Store {
 				if ( ! empty( $data[ $session_key ] ) && is_callable( array( $customer, "set_{$function_key}" ) ) ) {
 					if ( 'meta_data' === $session_key ) {
 						$meta_data_values = json_decode( wp_unslash( $data[ $session_key ] ), true );
-						foreach ( $meta_data_values as $meta_data_value ) {
-							if ( ! isset( $meta_data_value['key'], $meta_data_value['value'] ) ) {
-								continue;
+						if ( $meta_data_values ) {
+							foreach ( $meta_data_values as $meta_data_value ) {
+								if ( ! isset( $meta_data_value['key'], $meta_data_value['value'] ) ) {
+									continue;
+								}
+								$customer->add_meta_data( $meta_data_value['key'], $meta_data_value['value'], true );
 							}
-							$customer->add_meta_data( $meta_data_value['key'], $meta_data_value['value'], true );
 						}
 					} else {
 						$customer->{"set_{$function_key}"}( wp_unslash( $data[ $session_key ] ) );

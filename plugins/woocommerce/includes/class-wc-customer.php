@@ -100,7 +100,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * data will be pulled from the session for the current user/customer.
 	 *
 	 * @param WC_Customer|int $data       Customer ID or data.
-	 * @param bool            $is_session True if this is the customer session. Sessions do not persist to the DB.
+	 * @param bool            $is_session True if this is the customer session.
 	 *
 	 * @throws Exception If customer cannot be read/found and $data is set.
 	 */
@@ -113,6 +113,7 @@ class WC_Customer extends WC_Legacy_Customer {
 			$this->set_id( $data );
 		}
 
+		// We enable sessions if requested, the session handle exists, and the user is not logged in.
 		$this->is_session = $is_session && isset( WC()->session );
 		$this->data_store = $this->is_session ? WC_Data_Store::load( 'customer-session' ) : WC_Data_Store::load( 'customer' );
 

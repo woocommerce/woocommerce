@@ -793,7 +793,9 @@ class CheckoutFields {
 		}
 
 		$meta_data[ $key ] = $value;
-		$object->update_meta_data( $meta_key, $meta_data );
+
+		// Replacing all meta using `add_meta_data`. For some reason `update_meta_data` causes duplicate keys.
+		$object->add_meta_data( $meta_key, $meta_data, true );
 	}
 
 	/**
