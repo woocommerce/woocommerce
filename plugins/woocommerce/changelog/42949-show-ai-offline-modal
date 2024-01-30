@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Ensure the offline modal is displayed whenever AI is unavailable and not just on the initial store setup.

@@ -1935,15 +1935,6 @@ ul.wc_coupon_list_block {
 				width: 100% !important;
 			}
 
-			.date-picker {
-				width: 50%;
-			}
-
-			.hour,
-			.minute {
-				width: 3.5em;
-			}
-
 			small {
 				display: block;
 				margin: 5px 0 0;
@@ -1979,6 +1970,13 @@ ul.wc_coupon_list_block {
 			.wc-category-search,
 			.wc-customer-search {
 				width: 100%;
+			}
+			input.date-picker {
+				width: 50%;
+			}
+			input.hour,
+			input.minute {
+				width: 3.5em;
 			}
 		}
 

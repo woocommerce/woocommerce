@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Update admin gutenberg_version setting to more accurately retrieve the Gutenberg version.
