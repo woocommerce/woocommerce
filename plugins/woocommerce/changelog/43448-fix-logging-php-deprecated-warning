@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fixes a PHP deprecation warning introduced in PR-42979.
-

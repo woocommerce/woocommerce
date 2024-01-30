@@ -561,7 +561,7 @@ function wc_create_refund( $args = array() ) {
 		}
 
 		// Negative line items.
-		if ( count( $args['line_items'] ) > 0 ) {
+		if ( is_array( $args['line_items'] ) && count( $args['line_items'] ) > 0 ) {
 			$items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
 
 			foreach ( $items as $item_id => $item ) {

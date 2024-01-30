@@ -25,6 +25,7 @@ declare global {
 			'product-external-affiliate': boolean;
 			'product-grouped': boolean;
 			'product-linked': boolean;
+			'product-pre-publish-modal': boolean;
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;

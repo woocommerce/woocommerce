@@ -226,9 +226,10 @@ class OrderAttributionController implements RegisterHooksInterface {
 		wp_enqueue_script(
 			'wc-order-attribution',
 			plugins_url( "assets/js/frontend/order-attribution{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
-			// Technically, we do not need 'wp-data', 'wc-blocks-checkout' for classic checkout,
-			// but we do not seem to distingush and load blocks scripts there anyway.
-			array( 'sourcebuster-js', 'wp-data', 'wc-blocks-checkout' ),
+			// Technically we do depend on 'wp-data', 'wc-blocks-checkout' for blocks checkout,
+			// but as implementing conditional dependency on the server-side would be too complex,
+			// we resolve this condition at the client-side.
+			array( 'sourcebuster-js' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);

@@ -1,5 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Change the selector in E2E tests which improves robustness of the tests but is not particularly important for users
-
-

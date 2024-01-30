@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add extra checks (description, sale-price, SKU, purchase note, attribute color) to the existing add-virtual-product test

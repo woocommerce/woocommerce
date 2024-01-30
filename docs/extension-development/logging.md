@@ -8,7 +8,7 @@ WooCommerce has its own robust system for logging, which can be used for debuggi
 
 Depending on the log handler(s) used, you can view the entries created by the logger by going to **WooCommerce > Status > Logs**.
 
-![Log file viewer](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/log-critical.jpg)
+![Log file viewer](https://developer.woo.com/wp-content/uploads/2023/12/log-critical.jpg)
 
 ## Log levels
 
