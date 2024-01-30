@@ -40,6 +40,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 	);
 	const [ product, setProduct ] = useState< Product >();
 	const [ installedProducts, setInstalledProducts ] = useState< string[] >();
+	const [ isStoreConnected, setIsStoreConnected ] = useState< boolean >();
 	const [ activateUrl, setActivateUrl ] = useState< string >();
 	const [ documentationUrl, setDocumentationUrl ] = useState< string >();
 	const [ showModal, setShowModal ] = useState< boolean >( false );
@@ -54,22 +55,9 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 	// Check if the store is connected to Woo.com. This is run once, when the component is mounted.
 	useEffect( () => {
 		const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-		const isStoreConnected = wccomSettings?.isConnected;
 
 		setInstalledProducts( wccomSettings?.installedProducts );
-
-		if ( isStoreConnected === false ) {
-			setInstallStatus( InstallFlowStatus.notConnected );
-			setNotice( {
-				status: 'warning',
-				message: __(
-					'In order to install a product, you need to first connect your account.',
-					'woocommerce'
-				),
-			} );
-		} else {
-			setInstallStatus( InstallFlowStatus.notInstalled );
-		}
+		setIsStoreConnected( wccomSettings?.isConnected );
 	}, [] );
 
 	/**
@@ -105,6 +93,19 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 			if ( isInstalled ) {
 				return;
 			}
+		}
+
+		if ( ! isStoreConnected ) {
+			setInstallStatus( InstallFlowStatus.notConnected );
+			setNotice( {
+				status: 'warning',
+				message: __(
+					'In order to install a product, you need to first connect your account.',
+					'woocommerce'
+				),
+			} );
+		} else {
+			setInstallStatus( InstallFlowStatus.notInstalled );
 		}
 
 		setShowModal( true );
