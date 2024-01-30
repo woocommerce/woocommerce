@@ -75,17 +75,19 @@ export function TextAreaBlockEdit( {
 
 	return (
 		<div { ...blockProps }>
-			<BlockControls { ...blockControlsBlockProps }>
-				<AligmentToolbarButton
-					align={ align }
-					setAlignment={ setAlignment }
-				/>
+			{ isRichTextMode && (
+				<BlockControls { ...blockControlsBlockProps }>
+					<AligmentToolbarButton
+						align={ align }
+						setAlignment={ setAlignment }
+					/>
 
-				<RTLToolbarButton
-					direction={ direction }
-					onChange={ changeDirection }
-				/>
-			</BlockControls>
+					<RTLToolbarButton
+						direction={ direction }
+						onChange={ changeDirection }
+					/>
+				</BlockControls>
+			) }
 
 			<BaseControl
 				id={ contentId.toString() }
