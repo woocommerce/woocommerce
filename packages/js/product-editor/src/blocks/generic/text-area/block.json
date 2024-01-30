@@ -33,7 +33,8 @@
 		},
 		"mode": {
 			"type": "string",
-			"enum": [ "plain-text", "rich-text" ]
+			"enum": [ "plain-text", "rich-text" ],
+			"default": "rich-text"
 		},
 		"allowedFormats": {
 			"type": "array",
