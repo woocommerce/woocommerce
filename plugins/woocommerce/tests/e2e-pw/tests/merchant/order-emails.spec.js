@@ -122,33 +122,40 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await page.selectOption( 'select[name="search[place]"]', 'subject' );
 		await page.fill( 'input[name="search[term]"]', 'complete' );
 		await page.click( 'input#search-submit' );
-		await page.waitForTimeout( 2000 );
 
 		// Verify that the  email has been sent
 		await expect(
 			page.getByText( `Your ${ storeName } order is now complete` )
 		).toBeVisible();
 
-		// Enter email log and look for the content in JSON
+		// Enter email log and parse the content in JSON
 		await page.click( 'button[title^="View log"]' );
-		await page.waitForTimeout( 2000 );
-		await page.getByLabel( 'wp-mail-logging-modal-format-json' ).click;
-		await page.waitForTimeout( 2000 );
+		await page.locator( '#wp-mail-logging-modal-format-json' ).click();
 
-		// Parse email's content JSON
-		await page.waitForSelector(
-		 	'#wp-mail-logging-modal-content-body-content'
-		 );
+		// Verify that the message includes an order processing confirmation
+		await expect(
+			page.locator( '#wp-mail-logging-modal-content-body-content' )
+		).toContainText( 'We have finished processing your order.' );
 
-		const emailBodyContent = JSON.parse(
-			'wp-mail-logging-modal-content-body-content'
-		 );
-		// Extract the required information
-		const timestamp = emailBodyContent.timestamp;
-		const receiverEmail = emailBodyContent.receiver;
-		const subject = emailBodyContent.subject;
-		const orderId =
-			emailBodyContent.message.match( /\[Order #(\d+)\]/ )[ 1 ];
+		// Verify that the email address is the correct one
+		await expect(
+			page.locator( '#wp-mail-logging-modal-content-body-content' )
+		).toContainText( customerBilling.email );
+
+		// Verify that the email contains the order ID
+		await expect(
+			page.locator( '#wp-mail-logging-modal-content-body-content' )
+		).toContainText( `[Order #${ completedOrderId.toString() }]` );
+
+		// Verify that the email contains a "Thanks" note
+		await expect(
+			page.locator( '#wp-mail-logging-modal-content-body-content' )
+		).toContainText( 'Thanks for shopping with us' );
+
+		// Verify that the email contains a "Thanks" note
+		await expect(
+			page.locator( '#wp-mail-logging-modal-content-body-content' )
+		).toContainText( 'We have finished processing your order.' );
 	} );
 
 	test( 'can resend new order notification', async ( { page } ) => {
