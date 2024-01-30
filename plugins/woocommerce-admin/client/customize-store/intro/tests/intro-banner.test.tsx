@@ -46,6 +46,7 @@ describe( 'Intro Banners', () => {
 						hasCompleteSurvey: false,
 					},
 					flowType: FlowType.AIOnline,
+					isFontLibraryAvailable: false,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -84,6 +85,7 @@ describe( 'Intro Banners', () => {
 						hasCompleteSurvey: false,
 					},
 					flowType: FlowType.AIOnline,
+					isFontLibraryAvailable: false,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -128,6 +130,7 @@ describe( 'Intro Banners', () => {
 						hasCompleteSurvey: false,
 					},
 					flowType: FlowType.AIOnline,
+					isFontLibraryAvailable: false,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
