@@ -10,7 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Customer Session Data Store which stores customer data for logged out guests.
+ * WC Customer Data Store which stores the data in session.
+ *
+ * Used by the WC_Customer class to store customer data to the session without persisting it to the database.
  *
  * @version  3.0.0
  */
@@ -53,12 +55,43 @@ class WC_Customer_Data_Store_Session extends WC_Customer_Data_Store {
 	);
 
 	/**
-	 * Create the session. Note this does not call the parent create method because we don't want to create a new user object.
+	 * Update the session. Note, this does not persist the data to the DB.
 	 *
 	 * @param WC_Customer $customer Customer object.
 	 */
 	public function create( &$customer ) {
 		$this->save_to_session( $customer );
+	}
+
+	/**
+	 * Update the session. Note, this does not persist the data to the DB.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 */
+	public function update( &$customer ) {
+		$this->save_to_session( $customer );
+	}
+
+	/**
+	 * Saves all customer data to the session.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 */
+	public function save_to_session( $customer ) {
+		$data = array();
+		foreach ( $this->session_keys as $session_key ) {
+			$function_key = $session_key;
+			if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
+				$session_key = str_replace( 'billing_', '', $session_key );
+			}
+			if ( 'meta_data' === $session_key ) {
+				$session_value = wp_json_encode( $customer->get_meta_data() );
+			} else {
+				$session_value = $customer->{"get_$function_key"}( 'edit' );
+			}
+			$data[ $session_key ] = (string) $session_value;
+		}
+		WC()->session->set( 'customer', $data );
 	}
 
 	/**
@@ -69,7 +102,7 @@ class WC_Customer_Data_Store_Session extends WC_Customer_Data_Store {
 	 * @param WC_Customer $customer Customer object.
 	 */
 	public function read( &$customer ) {
-		if ( $customer->get_id() > 0 ) {
+		if ( $customer->get_id() ) {
 			parent::read( $customer );
 		}
 
@@ -89,7 +122,7 @@ class WC_Customer_Data_Store_Session extends WC_Customer_Data_Store {
 				if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
 					$session_key = str_replace( 'billing_', '', $session_key );
 				}
-				if ( isset( $data[ $session_key ] ) && is_callable( array( $customer, "set_{$function_key}" ) ) ) {
+				if ( ! empty( $data[ $session_key ] ) && is_callable( array( $customer, "set_{$function_key}" ) ) ) {
 					if ( 'meta_data' === $session_key ) {
 						$meta_data_values = json_decode( wp_unslash( $data[ $session_key ] ), true );
 						foreach ( $meta_data_values as $meta_data_value ) {
@@ -105,44 +138,7 @@ class WC_Customer_Data_Store_Session extends WC_Customer_Data_Store {
 			}
 		}
 		$this->set_defaults( $customer );
-	}
-
-	/**
-	 * Update the session.
-	 *
-	 * @param WC_Customer $customer Customer object.
-	 */
-	public function update( &$customer ) {
-		parent::update( $customer );
-		$this->save_to_session( $customer );
-	}
-
-	/**
-	 * Deletes the customer session.
-	 *
-	 * @since 3.0.0
-	 * @param WC_Customer $customer Customer object.
-	 * @param array       $args Array of args to pass to the delete method.
-	 */
-	public function delete( &$customer, $args = array() ) {
-		WC()->session->set( 'customer', null );
-	}
-
-	/**
-	 * Helper that saves all customer data to the session.
-	 *
-	 * @param WC_Customer $customer Customer object.
-	 */
-	public function save_to_session( $customer ) {
-		$data = array();
-		foreach ( $this->session_keys as $session_key ) {
-			$function_key = $session_key;
-			if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
-				$session_key = str_replace( 'billing_', '', $session_key );
-			}
-			$data[ $session_key ] = 'meta_data' === $session_key ? wp_json_encode( $customer->get_meta_data() ) : (string) $customer->{"get_$function_key"}( 'edit' );
-		}
-		WC()->session->set( 'customer', $data );
+		$customer->set_object_read( true );
 	}
 
 	/**
@@ -177,5 +173,16 @@ class WC_Customer_Data_Store_Session extends WC_Customer_Data_Store {
 			}
 		} catch ( WC_Data_Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 		}
+	}
+
+	/**
+	 * Deletes the customer session.
+	 *
+	 * @since 3.0.0
+	 * @param WC_Customer $customer Customer object.
+	 * @param array       $args Array of args to pass to the delete method.
+	 */
+	public function delete( &$customer, $args = array() ) {
+		WC()->session->set( 'customer', null );
 	}
 }
