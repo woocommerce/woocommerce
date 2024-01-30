@@ -62,7 +62,7 @@ const config = {
 		stateDir: 'tests/e2e-pw/test-results/storage/',
 		trace: 'retain-on-failure',
 		video: 'on-first-retry',
-		viewport: { width: 1600, height: 1280 },
+		viewport: { width: 1280, height: 1600 },
 	},
 	projects: [
 		{
