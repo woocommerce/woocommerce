@@ -385,9 +385,13 @@
           "menu_title": "Implement merchant onboarding",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/handling-merchant-onboarding.md",
-          "hash": "01c4a6b310abcadaa4f7dfaed8808b6caf0cf5c27834d150757efa10763b3084",
+          "hash": "16e577d96b41cc0252e8d55d0ada92a56fd0501fa8291c4d6cea309d839c496c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/handling-merchant-onboarding.md",
-          "id": "89fe15dc232379f546852822230c334d3d940b93"
+          "id": "89fe15dc232379f546852822230c334d3d940b93",
+          "links": {
+            "../../plugins/woocommerce-admin/docs/examples/extensions/add-task": "3b7e57a59d714d74f4551a5437945b3f3fad1217",
+            "../../plugins/woocommerce-admin/docs/features/onboarding-tasks.md": "3b838384abee3ac1f61329c7e4ef96964f555282"
+          }
         },
         {
           "post_title": "Managing extension deactivation and uninstallation",
@@ -425,6 +429,15 @@
           "id": "b3e0b17ca74596e858c26887c1e4c8ee6c8f6102"
         },
         {
+          "post_title": "Classes in WooCommerce",
+          "menu_title": "Classes in WooCommerce",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/class-reference.md",
+          "hash": "72afd8f0332d676c1c8c46534a62dfed5db1adf97d4ddf0aa40882d3a23da839",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/class-reference.md",
+          "id": "d5f4d8e645707552d013b4be2cd5fd1c943f2122"
+        },
+        {
           "post_title": "How to check if WooCommerce is active",
           "menu_title": "Check if WooCommerce is active",
           "tags": "how-to",
@@ -456,7 +469,7 @@
           "menu_title": "Add a section to a settings tab",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/adding-a-section-to-a-settings-tab.md",
-          "hash": "c4a6059d58af6b488d45daebba8f0c6ea4b42149b0d3bf1bcd55305ee08464e5",
+          "hash": "400124b03f0d2f53736012100d2be87e77a7bc9c72a5c6af143f62d84321b09d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/adding-a-section-to-a-settings-tab.md",
           "id": "a88144dff894408f31a80c96dcee3bd5126ecd28"
         }
@@ -649,6 +662,15 @@
           "hash": "80ec05c732a5182c84ebc87b55912a1ad47e9b141c0fa45681c84c283e91711a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/writing-high-quality-testing-instructions.md",
           "id": "56a8ef0ef0afec9c884f655e7fdd23d9666c9d00"
+        },
+        {
+          "post_title": "Understanding the risks of removing URL bases in WooCommerce",
+          "menu_title": "Risks of removing URL bases",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-url.md",
+          "hash": "414970e7d53ddcafb186f2f3a253eed0d01800df2182f8bd2a4310c53079a795",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-url.md",
+          "id": "827bfa56d40c2155542147ea5afe7cc756e18c5d"
         },
         {
           "post_title": "How to optimize performance for WooCommerce stores",
@@ -1159,5 +1181,5 @@
       "categories": []
     }
   ],
-  "hash": "8e2a83578cfb32e56bbdbff3598bc22107c1d8eceb6fb9ef5a5dfc040c438f68"
+  "hash": "c336cbf433d754903461b6d50c7ff5ca5e2275667562c3dbc86d4988c04075b4"
 }
