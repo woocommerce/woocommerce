@@ -106,7 +106,7 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 * @return int Number of pending records.
 	 */
 	public function get_total_pending_count(): int {
-		return $this->legacy_handler->count_orders_for_cleanup();
+		return $this->should_run() ? $this->legacy_handler->count_orders_for_cleanup() : 0;
 	}
 
 	/**
@@ -116,10 +116,10 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 * @return array Batch of records.
 	 */
 	public function get_next_batch_to_process( int $size ): array {
-		return array_map(
-			'absint',
-			$this->legacy_handler->get_orders_for_cleanup( array(), $size )
-		);
+		return
+			$this->should_run()
+			? array_map( 'absint', $this->legacy_handler->get_orders_for_cleanup( array(), $size ) )
+			: array();
 	}
 
 	/**
@@ -210,13 +210,14 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 * @return array Tools entries to register with WC.
 	 */
 	public function get_tools_entries() {
-		$entry_id = $this->is_flag_set() ? 'hpos_legacy_cleanup_cancel' : 'hpos_legacy_cleanup';
-		$entry    = array(
+		$orders_for_cleanup_exist = ! empty( $this->legacy_handler->get_orders_for_cleanup( array(), 1 ) );
+		$entry_id                 = $this->is_flag_set() ? 'hpos_legacy_cleanup_cancel' : 'hpos_legacy_cleanup';
+		$entry                    = array(
 			'name'             => __( 'Clean up order data from legacy tables', 'woocommerce' ),
 			'desc'             => __( 'This tool will clear the data from legacy order tables in WooCommerce.', 'woocommerce' ),
 			'requires_refresh' => true,
 			'button'           => __( 'Clear data', 'woocommerce' ),
-			'disabled'         => ! ( $this->can_run() && $this->orders_pending() ),
+			'disabled'         => ! ( $this->can_run() && ( $orders_for_cleanup_exist || $this->is_flag_set() ) ),
 		);
 
 		if ( ! $this->can_run() ) {
@@ -238,7 +239,7 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 					$this->toggle_flag( false );
 					return __( 'Order legacy data cleanup has been canceled.', 'woocommerce' );
 				};
-			} elseif ( ! $this->orders_pending() ) {
+			} elseif ( ! $orders_for_cleanup_exist ) {
 				$entry['button'] = __( 'No orders in need of cleanup', 'woocommerce' );
 			} else {
 				$entry['callback'] = function() {
@@ -295,7 +296,7 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	}
 
 	/**
-	 * Checks whether there are any orders in need of cleanup.
+	 * Checks whether there are any orders in need of cleanup and cleanup can run.
 	 *
 	 * @return bool TRUE if there are orders in need of cleanup, FALSE otherwise.
 	 */
@@ -309,7 +310,6 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	private function maybe_reset_state() {
 		$is_enqueued = $this->batch_processing->is_enqueued( self::class );
 		$is_flag_set = $this->is_flag_set();
-		$should_run  = $this->should_run();
 
 		if ( $is_enqueued xor $is_flag_set ) {
 			$this->toggle_flag( false );
