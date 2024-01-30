@@ -68,14 +68,14 @@ export function TextAreaBlockEdit( {
 		setAttributes( { direction: value } );
 	}
 
-	const blockControlsProps = { group: 'block' };
+	const blockControlsBlockProps = { group: 'block' };
 
 	const isRichTextMode = mode === 'rich-text';
 	const isPlainTextMode = mode === 'plain-text';
 
 	return (
 		<div { ...blockProps }>
-			<BlockControls { ...blockControlsProps }>
+			<BlockControls { ...blockControlsBlockProps }>
 				<AligmentToolbarButton
 					align={ align }
 					setAlignment={ setAlignment }
