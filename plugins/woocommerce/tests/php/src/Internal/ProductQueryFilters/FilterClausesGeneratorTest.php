@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Internal\ProductQueryFilters\FilterClausesGenerator;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
  * Tests related to FilterClausesGenerator service.
@@ -17,32 +18,18 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * The test products data
+	 * FixtureData instance.
 	 *
-	 * @var Array
+	 * @var FixtureData
 	 */
-	private $test_products_data = array(
-		array(
-			'name' => 'Product 1',
-			'regular_price' => 20,
-			'stock_status' => 'instock',
-		),
-		array(
-			'name' => 'Product 2',
-			'regular_price' => 30,
-			'stock_status' => 'instock',
-		),
-		array(
-			'name' => 'Product 3',
-			'regular_price' => 40,
-			'stock_status' => 'outofstock',
-		),
-		array(
-			'name' => 'Product 4',
-			'regular_price' => 50,
-			'stock_status' => 'onbackorder',
-		),
-	);
+	private $fixture_data;
+
+	/**
+	 * Test products.
+	 *
+	 * @var \WC_Product[]
+	 */
+	private $products;
 
 	/**
 	 * Runs before each test.
@@ -53,13 +40,35 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 		$container = wc_get_container();
 		$this->sut = $container->get( FilterClausesGenerator::class );
 
-		foreach ( $this->test_products_data as $product_data ) {
-			$product = new \WC_Product_Simple();
-			$product->set_name($product_data['name']);
-			$product->set_regular_price($product_data['regular_price']);
-			$product->set_stock_status($product_data['stock_status']);
-			$product->save();
-		}
+		$this->fixture_data = new FixtureData();
+
+		$this->products = array_map(
+			function( $product_data ) {
+				return $this->fixture_data->get_simple_product( $product_data );
+			},
+			array(
+				array(
+					'name' => 'Product 1',
+					'regular_price' => 20,
+					'stock_status' => 'instock',
+				),
+				array(
+					'name' => 'Product 2',
+					'regular_price' => 30,
+					'stock_status' => 'instock',
+				),
+				array(
+					'name' => 'Product 3',
+					'regular_price' => 40,
+					'stock_status' => 'outofstock',
+				),
+				array(
+					'name' => 'Product 4',
+					'regular_price' => 50,
+					'stock_status' => 'onbackorder',
+				),
+			)
+		);
 	}
 
 	/**
@@ -135,25 +144,27 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 		};
 
 		add_filter( 'posts_clauses', $filter_callback );
-		$received_products_name = $this->get_data_from_query_results(
+		$received_products_name = $this->get_data_from_products_array(
 			wc_get_products( array() )
 		);
 		remove_filter( 'posts_clauses', $filter_callback );
 
-		$expected_products_name = $this->get_expected_products_data(
-			function( $product ) use ( $price_range ) {
-				if ( $price_range['min_price'] && $price_range['max_price'] ) {
-					return $product['regular_price'] >= $price_range['min_price'] &&
-						$product['regular_price'] <= $price_range['max_price'];
+		$expected_products_name = $this->get_data_from_products_array(
+			array_filter(
+				$this->products,
+				function( \WC_Product $product ) use ( $price_range ) {
+					if ( $price_range['min_price'] && $price_range['max_price'] ) {
+						return $product->get_regular_price() >= $price_range['min_price'] &&
+							$product->get_regular_price() <= $price_range['max_price'];
+					}
+					if ( $price_range['max_price'] ) {
+						return $product->get_regular_price() <= $price_range['max_price'];
+					}
+					if ( $price_range['min_price'] ) {
+						return $product->get_regular_price() >= $price_range['min_price'];
+					}
 				}
-				if ( $price_range['max_price'] ) {
-					return $product['regular_price'] <= $price_range['max_price'];
-				}
-				if ( $price_range['min_price'] ) {
-					return $product['regular_price'] >= $price_range['min_price'];
-				}
-			},
-			'name'
+			)
 		);
 
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
@@ -165,21 +176,24 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 		};
 
 		add_filter( 'posts_clauses', $filter_callback );
-		$received_products_name = $this->get_data_from_query_results(
+		$received_products_name = $this->get_data_from_products_array(
 			wc_get_products( array() )
 		);
 		remove_filter( 'posts_clauses', $filter_callback );
 
-		$expected_products_name = $this->get_expected_products_data(
-			function( $product ) use ( $stock_statuses ) {
-				return in_array( $product['stock_status'], $stock_statuses, true );
-			}
+		$expected_products_name = $this->get_data_from_products_array(
+			array_filter(
+				$this->products,
+				function( \WC_PRoduct $product ) use ( $stock_statuses ) {
+					return in_array( $product->get_stock_status(), $stock_statuses, true );
+				}
+			)
 		);
 
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
 	}
 
-	private function get_data_from_query_results( $products, $callback = null ) {
+	private function get_data_from_products_array( $products, $callback = null ) {
 		if ( ! $callback ) {
 			$callback = function( $product ) {
 				return $product->get_name();
@@ -191,18 +205,5 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 			$products
 		);
 
-	}
-
-	private function get_expected_products_data( $callback, $field = 'name' ) {
-		$expected_products = array_filter(
-			$this->test_products_data,
-			$callback
-		);
-
-		if ( ! $field ) {
-			return $expected_products;
-		}
-
-		return array_column( $expected_products, $field );
 	}
 }
