@@ -81,18 +81,23 @@ const ProductContent = withProduct(
 		setActiveBlockContextId,
 	} ) => {
 		return (
-			<ProductDataContextProvider
-				product={ product }
-				isLoading={ isLoading }
+			<BlockContextProvider
+				key={ blockContext.postId }
+				value={ blockContext }
 			>
-				{ displayTemplate ? <ProductTemplateInnerBlocks /> : null }
-				<MemoizedProductTemplateBlockPreview
-					blocks={ blocks }
-					blockContextId={ blockContext.postId }
-					setActiveBlockContextId={ setActiveBlockContextId }
-					isHidden={ displayTemplate }
-				/>
-			</ProductDataContextProvider>
+				<ProductDataContextProvider
+					product={ product }
+					isLoading={ isLoading }
+				>
+					{ displayTemplate ? <ProductTemplateInnerBlocks /> : null }
+					<MemoizedProductTemplateBlockPreview
+						blocks={ blocks }
+						blockContextId={ blockContext.postId }
+						setActiveBlockContextId={ setActiveBlockContextId }
+						isHidden={ displayTemplate }
+					/>
+				</ProductDataContextProvider>
+			</BlockContextProvider>
 		);
 	}
 );
