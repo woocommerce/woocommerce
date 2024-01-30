@@ -22,6 +22,10 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await api.put( 'settings/general/woocommerce_currency', {
 			value: 'USD',
 		} );
+		// enable COD
+		await api.put( 'payment_gateways/cod', {
+			enabled: true,
+		} );
 		// add categories
 		await api
 			.post( 'products/categories', {
@@ -154,6 +158,10 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			force: true,
 		} );
 		await api.post( 'coupons/batch', { delete: [ ...couponBatchId ] } );
+
+		await api.put( 'payment_gateways/cod', {
+			enabled: false,
+		} );
 	} );
 
 	test( 'expired coupon cannot be used', async ( { page, context } ) => {
@@ -610,6 +618,10 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			.click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+		// succeeded so far because we don't know who the customr is
+		await expect(
+			page.getByText( 'Coupon code applied successfully.' )
+		).toBeVisible();
 
 		await page.getByLabel( 'First name' ).fill( 'Marge' );
 		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
@@ -648,6 +660,10 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			.getByRole( 'link', { name: 'Click here to enter your code' } )
 			.click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+		await expect(
+			page.getByText( 'Coupon code applied successfully.' )
+		).toBeVisible();
 
 		await page.getByLabel( 'First name' ).fill( 'Homer' );
 		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
@@ -677,6 +693,10 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			.click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+		// succeeded so far because we don't know who the customr is
+		await expect(
+			page.getByText( 'Coupon code applied successfully.' )
+		).toBeVisible();
 
 		await page.getByLabel( 'First name' ).fill( 'Homer' );
 		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
