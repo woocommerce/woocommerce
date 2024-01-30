@@ -174,7 +174,7 @@ class ReceiptRenderingEngineTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get_existing_receipt' returns the file name of an existing receipt if the appropriate order meta entry exists and the file actually exists too.
+	 * @testdox 'get_existing_receipt' returns the file name of an existing receipt if the appropriate order meta entry exists and the file actually exists too and has not expired.
 	 */
 	public function test_get_existing_receipt_returns_existing_receipt() {
 		$order = OrderHelper::create_order();
@@ -186,6 +186,12 @@ class ReceiptRenderingEngineTest extends \WC_Unit_Test_Case {
 			->method( 'get_transient_file_path' )
 			->with( 'the_existing_receipt_filename' )
 			->willReturn( 'transient_files/the_existing_receipt_filename' );
+
+		$this->tfe_mock
+			->expects( self::once() )
+			->method( 'file_has_expired' )
+			->with( 'transient_files/the_existing_receipt_filename' )
+			->willReturn( false );
 
 		$filename = $this->sut->get_existing_receipt( $order );
 		$this->assertEquals( 'the_existing_receipt_filename', $filename );
@@ -218,6 +224,30 @@ class ReceiptRenderingEngineTest extends \WC_Unit_Test_Case {
 			->method( 'get_transient_file_path' )
 			->with( 'the_existing_receipt_filename' )
 			->willReturn( null );
+
+		$filename = $this->sut->get_existing_receipt( $order );
+		$this->assertNull( $filename );
+	}
+
+	/**
+	 * @testdox 'get_existing_receipt' returns the file name of an existing receipt if the appropriate order meta entry exists and the file exists but has expired.
+	 */
+	public function test_get_existing_receipt_returns_null_if_meta_entry_exists_but_file_has_expired() {
+		$order = OrderHelper::create_order();
+
+		$order->update_meta_data( ReceiptRenderingEngine::RECEIPT_FILE_NAME_META_KEY, 'the_existing_receipt_filename' );
+
+		$this->tfe_mock
+			->expects( self::once() )
+			->method( 'get_transient_file_path' )
+			->with( 'the_existing_receipt_filename' )
+			->willReturn( 'transient_files/the_existing_receipt_filename' );
+
+		$this->tfe_mock
+			->expects( self::once() )
+			->method( 'file_has_expired' )
+			->with( 'transient_files/the_existing_receipt_filename' )
+			->willReturn( true );
 
 		$filename = $this->sut->get_existing_receipt( $order );
 		$this->assertNull( $filename );

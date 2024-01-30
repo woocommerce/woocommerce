@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use \Exception;
 use \WC_Order;
 
 /**
@@ -81,7 +82,7 @@ class ReceiptRenderingEngine {
 	 * @param bool            $force_new If true, creates a new receipt file even if one already exists for the order.
 	 * @return string|null The file name of the new or already existing receipt file, null if an order id is passed and the order doesn't exist.
 	 * @throws \InvalidArgumentException Invalid expiration date (wrongly formatted, or it's a date in the past).
-	 * @throws \Exception The directory to store the file doesn't exist and can't be created.
+	 * @throws Exception The directory to store the file doesn't exist and can't be created.
 	 */
 	public function generate_receipt( $order, $expiration_date = null, bool $force_new = false ) : ?string {
 		if ( ! $order instanceof WC_Order ) {
@@ -128,10 +129,11 @@ class ReceiptRenderingEngine {
 	 * Get the file name of an existing receipt file for an order.
 	 *
 	 * A receipt is considered to be available for the order if there's an order meta entry with key
-	 * RECEIPT_FILE_NAME_META_KEY AND the transient file it points to exists.
+	 * RECEIPT_FILE_NAME_META_KEY AND the transient file it points to exists AND it has not expired.
 	 *
 	 * @param WC_Order $order The order object or order id to get the receipt for.
 	 * @return string|null The receipt file name, or null if no receipt is currently available for the order.
+	 * @throws Exception Thrown if a wrong file path is passed.
 	 */
 	public function get_existing_receipt( $order ): ?string {
 		if ( ! $order instanceof WC_Order ) {
@@ -142,7 +144,17 @@ class ReceiptRenderingEngine {
 		}
 
 		$existing_receipt_filename = $order->get_meta( self::RECEIPT_FILE_NAME_META_KEY, true );
-		return '' === $existing_receipt_filename || is_null( $this->transient_files_engine->get_transient_file_path( $existing_receipt_filename ) ) ? null : $existing_receipt_filename;
+
+		if ( '' === $existing_receipt_filename ) {
+			return null;
+		}
+
+		$file_path = $this->transient_files_engine->get_transient_file_path( $existing_receipt_filename );
+		if ( is_null( $file_path ) ) {
+			return null;
+		}
+
+		return $this->transient_files_engine->file_has_expired( $file_path ) ? null : $existing_receipt_filename;
 	}
 
 	/**
@@ -300,7 +312,7 @@ class ReceiptRenderingEngine {
 
 			try {
 				$payment_details = \WC_Payments::get_payments_api_client()->get_intent( $intent_id )->get_charge()->get_payment_method_details();
-			} catch ( \Exception $ex ) {
+			} catch ( Exception $ex ) {
 				$order_id = $order->get_id();
 				$message  = $ex->getMessage();
 				wc_get_logger()->error( StringUtil::class_name_without_namespace( static::class ) . " - retrieving info for charge {$intent_id} for order {$order_id}: {$message}" );
