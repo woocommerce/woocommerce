@@ -81,7 +81,9 @@ export const fetchActiveThemeHasMods = async (
 	};
 };
 
-export const fetchIntroData = async () => {
+export const fetchIntroData = async (
+	context: customizeStoreStateMachineContext
+) => {
 	const currentTemplatePromise =
 		// @ts-expect-error No types for this exist yet.
 		resolveSelect( coreStore ).__experimentalGetTemplateForLink( '/' );
@@ -90,43 +92,19 @@ export const fetchIntroData = async () => {
 		OPTIONS_STORE_NAME
 	).getOption( 'woocommerce_admin_customize_store_completed_theme_id' );
 
-	const styleRevsPromise =
-		// @ts-expect-error No types for this exist yet.
-		resolveSelect( coreStore ).getCurrentThemeGlobalStylesRevisions();
-
-	// @ts-expect-error No types for this exist yet.
-	const hasModifiedPagesPromise = resolveSelect( coreStore ).getEntityRecords(
-		'postType',
-		'page',
-		{
-			per_page: 100,
-			_fields: [ 'id', '_links.version-history' ],
-			orderby: 'menu_order',
-			order: 'asc',
-		}
-	);
-
 	const getTaskPromise = resolveSelect( ONBOARDING_STORE_NAME ).getTask(
 		'customize-store'
 	);
 
 	const themeDataPromise = fetchThemeCards();
 
-	const [
-		currentTemplate,
-		maybePreviousTemplate,
-		styleRevs,
-		rawPages,
-		task,
-		themeData,
-	] = await Promise.all( [
-		currentTemplatePromise,
-		maybePreviousTemplatePromise,
-		styleRevsPromise,
-		hasModifiedPagesPromise,
-		getTaskPromise,
-		themeDataPromise,
-	] );
+	const [ currentTemplate, maybePreviousTemplate, task, themeData ] =
+		await Promise.all( [
+			currentTemplatePromise,
+			maybePreviousTemplatePromise,
+			getTaskPromise,
+			themeDataPromise,
+		] );
 
 	let currentThemeIsAiGenerated = false;
 	if (
@@ -136,18 +114,9 @@ export const fetchIntroData = async () => {
 		currentThemeIsAiGenerated = true;
 	}
 
-	const hasModifiedPages = rawPages?.some(
-		( page: { _links: { [ key: string ]: string[] } } ) => {
-			return page._links?.[ 'version-history' ]?.length > 1;
-		}
-	);
-
-	const activeThemeHasMods =
-		!! currentTemplate?.modified ||
-		styleRevs?.length > 0 ||
-		hasModifiedPages;
-
 	const customizeStoreTaskCompleted = task?.isComplete;
+
+	const activeThemeHasMods = fetchActiveThemeHasMods( context );
 
 	return {
 		activeThemeHasMods,
