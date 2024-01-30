@@ -84,7 +84,7 @@ class RoutesController {
 	 */
 	public function register_all_routes() {
 		$this->register_routes( 'v1', self::$api_namespace );
-		$this->register_routes( 'v1', self::$api_namespace . 'v1' );
+		$this->register_routes( 'v1', self::$api_namespace . '/v1' );
 		$this->register_routes( 'private', 'wc/private' );
 	}
 
