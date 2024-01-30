@@ -158,20 +158,44 @@ baseTest.describe( 'Products > Related products', () => {
 				} ),
 			} );
 
-			// This is not an ideal check, but I cannot find a better one.
+			// False negative warning: this is not an ideal check, but I cannot find a better one.
 			// The products can still be visible, but in a different section, and this test will incorrectly pass.
 			// Checking the product names in the entire page is also not an option
-			// because they still appear under the Related products section, where they are expected
-			await expect(
-				sectionLocator.getByRole( 'heading', {
-					name: products.linked1.name,
-				} )
-			).toBeHidden();
-			await expect(
-				sectionLocator.getByRole( 'heading', {
-					name: products.linked2.name,
-				} )
-			).toBeHidden();
+			// because they still appear under the Related products section, where they are expected.
+			//
+			// The poll is needed because ~2 out of 10 runs at least one product is still linked,
+			// but will be removed after a page reload.
+			await expect
+				.poll(
+					async () => {
+						await page.reload();
+						return await sectionLocator
+							.getByRole( 'heading', {
+								name: products.linked1.name,
+							} )
+							.isVisible();
+					},
+					{
+						timeout: 10000,
+					}
+				)
+				.toBeFalsy();
+
+			await expect
+				.poll(
+					async () => {
+						await page.reload();
+						return await sectionLocator
+							.getByRole( 'heading', {
+								name: products.linked2.name,
+							} )
+							.isVisible();
+					},
+					{
+						timeout: 10000,
+					}
+				)
+				.toBeFalsy();
 		} );
 	} );
 
