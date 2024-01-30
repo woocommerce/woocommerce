@@ -60,6 +60,18 @@ pnpm run env:restart
 pnpm run test:e2e
 ```
 
+### Adding posts for testing block content
+
+During test setup posts are automatically created from all the html files contained in `./bin/posts`.
+All posts are given a title like `File Name Block` which generates a url like `file-name-block`.
+
+e.g. `my-test.html` will generate a post with the title `My Test Block` and permalink `my-test-block`.
+You'll be able to navigate to that page in your test like:
+
+```ts
+await page.goto( '/my-test-block/' );
+```
+
 ### Tests with side effects
 
 We call tests that affect other tests (ones that modify the site settings, using
@@ -88,7 +100,7 @@ pnpm run test:e2e:classic-theme
 pnpm run test:e2e:block-theme-with-templates
 ```
 
-_Note: All command parameters of `test:e2e` can be used for these commands too.
+\_Note: All command parameters of `test:e2e` can be used for these commands too.
 
 ### Other ways of running tests
 
