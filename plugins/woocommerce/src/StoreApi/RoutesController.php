@@ -21,6 +21,8 @@ class RoutesController {
 	 */
 	protected $routes = [];
 
+	private static $api_namespace = 'wc/store';
+
 	/**
 	 * Constructor.
 	 *
@@ -76,8 +78,8 @@ class RoutesController {
 	 * Register all Store API routes. This includes routes under specific version namespaces.
 	 */
 	public function register_all_routes() {
-		$this->register_routes( 'v1', 'wc/store' );
-		$this->register_routes( 'v1', 'wc/store/v1' );
+		$this->register_routes( 'v1', self::$api_namespace );
+		$this->register_routes( 'v1', self::$api_namespace . 'v1' );
 		$this->register_routes( 'private', 'wc/private' );
 	}
 
@@ -122,7 +124,9 @@ class RoutesController {
 				throw new \Exception( "{$route_class} route does not have a _get_path method" );
 			}
 
-			$routes[$key] = $route_class::_get_path();
+			$route_path = '/' . trailingslashit( self::$api_namespace ) . $version . $route_class::_get_path();
+
+			$routes[ $route_path ] = array();
 		}
 
 		return $routes;
