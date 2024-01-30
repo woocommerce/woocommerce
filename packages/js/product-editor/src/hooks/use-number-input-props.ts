@@ -19,6 +19,8 @@ type Props = {
 	onKeyDown?: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 };
 
+const NOT_NUMBERS_OR_SEPARATORS_REGEX =/[^0-9,.]/g;
+
 export const useNumberInputProps = ( {
 	value,
 	onChange,
@@ -56,7 +58,9 @@ export const useNumberInputProps = ( {
 			}
 		},
 		onChange( newValue: string ) {
-			const sanitizeValue = parseNumber( newValue );
+			const sanitizeValue = parseNumber(
+				newValue.replace( NOT_NUMBERS_OR_SEPARATORS_REGEX, '' )
+			);
 			onChange( sanitizeValue );
 		},
 	};
