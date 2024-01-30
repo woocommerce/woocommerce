@@ -37,6 +37,7 @@ export function TextAreaBlockEdit( {
 		direction,
 	} = attributes;
 	const blockProps = useWooBlockProps( attributes, {
+		className: 'wp-block-woocommerce-product-text-area-field',
 		style: { direction },
 	} );
 
@@ -69,7 +70,7 @@ export function TextAreaBlockEdit( {
 	const blockControlsProps = { group: 'block' };
 
 	return (
-		<div className={ 'wp-block-woocommerce-product-text-area-field' }>
+		<div { ...blockProps }>
 			<BlockControls { ...blockControlsProps }>
 				<AligmentToolbarButton
 					align={ align }
@@ -87,24 +88,22 @@ export function TextAreaBlockEdit( {
 				label={ label }
 				help={ help }
 			>
-				<div { ...blockProps }>
-					<RichText
-						id={ contentId.toString() }
-						identifier="content"
-						tagName="p"
-						value={ content || '' }
-						onChange={ setContent }
-						data-empty={ Boolean( content ) }
-						className={ classNames( 'components-summary-control', {
-							[ `has-text-align-${ align }` ]: align,
-						} ) }
-						dir={ direction }
-						allowedFormats={ allowedFormats }
-						placeholder={ placeholder }
-						required={ required }
-						disabled={ disabled }
-					/>
-				</div>
+				<RichText
+					id={ contentId.toString() }
+					identifier="content"
+					tagName="p"
+					value={ content || '' }
+					onChange={ setContent }
+					data-empty={ Boolean( content ) }
+					className={ classNames( 'components-summary-control', {
+						[ `has-text-align-${ align }` ]: align,
+					} ) }
+					dir={ direction }
+					allowedFormats={ allowedFormats }
+					placeholder={ placeholder }
+					required={ required }
+					disabled={ disabled }
+				/>
 			</BaseControl>
 		</div>
 	);
