@@ -5,6 +5,7 @@ use \Exception;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use WC_Customer;
 
 /**
  * OrderController class.
@@ -122,7 +123,7 @@ class OrderController {
 	 */
 	public function sync_customer_data_with_order( \WC_Order $order ) {
 		if ( $order->get_customer_id() ) {
-			$customer = new \WC_Customer( $order->get_customer_id() );
+			$customer = new WC_Customer( $order->get_customer_id() );
 			$customer->set_props(
 				array(
 					'billing_first_name'  => $order->get_billing_first_name(),
@@ -148,8 +149,7 @@ class OrderController {
 					'shipping_phone'      => $order->get_shipping_phone(),
 				)
 			);
-			$order_fields = $this->additional_fields_controller->get_all_fields_from_order( $order );
-
+			$order_fields    = $this->additional_fields_controller->get_all_fields_from_order( $order );
 			$customer_fields = $this->additional_fields_controller->filter_fields_for_customer( $order_fields );
 			foreach ( $customer_fields as $key => $value ) {
 				$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer );

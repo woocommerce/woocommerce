@@ -962,6 +962,11 @@ class CheckoutFields {
 		return array_filter(
 			$fields,
 			function( $key ) use ( $customer_fields_keys ) {
+				if ( 0 === strpos( $key, '/billing/' ) ) {
+					$key = str_replace( '/billing/', '', $key );
+				} elseif ( 0 === strpos( $key, '/shipping/' ) ) {
+					$key = str_replace( '/shipping/', '', $key );
+				}
 				return in_array( $key, $customer_fields_keys, true );
 			},
 			ARRAY_FILTER_USE_KEY

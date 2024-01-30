@@ -421,7 +421,7 @@ class Checkout extends AbstractCartRoute {
 		foreach ( $request['billing_address'] as $key => $value ) {
 			if ( is_callable( [ $customer, "set_billing_$key" ] ) ) {
 				$customer->{"set_billing_$key"}( $value );
-			} elseif ( $this->additional_fields_controller->is_field( $key, 'address' ) ) {
+			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
 				$this->additional_fields_controller->persist_field_for_customer( "/billing/$key", $value, $customer );
 			}
 		}
@@ -434,7 +434,7 @@ class Checkout extends AbstractCartRoute {
 				$customer->{"set_shipping_$key"}( $value );
 			} elseif ( 'phone' === $key ) {
 				$customer->update_meta_data( 'shipping_phone', $value );
-			} elseif ( $this->additional_fields_controller->is_field( $key, 'address' ) ) {
+			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
 				$this->additional_fields_controller->persist_field_for_customer( "/shipping/$key", $value, $customer );
 			}
 		}
