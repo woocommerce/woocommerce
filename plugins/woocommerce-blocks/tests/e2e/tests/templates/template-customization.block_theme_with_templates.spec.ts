@@ -13,6 +13,9 @@ const userText = 'Hello World in the template';
 const fallbackTemplateUserText = 'Hello World in the fallback template';
 
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
+	if ( ! testData.canBeOverridenByThemes ) {
+		return;
+	}
 	test.describe( `${ testData.templateName } template`, async () => {
 		test( "theme template has priority over WooCommerce's and can be modified", async ( {
 			admin,

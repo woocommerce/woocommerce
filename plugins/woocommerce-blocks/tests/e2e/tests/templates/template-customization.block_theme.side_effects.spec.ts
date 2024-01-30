@@ -18,6 +18,9 @@ const userText = 'Hello World in the template';
 const woocommerceTemplateUserText = 'Hello World in the WooCommerce template';
 
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
+	if ( ! testData.canBeOverridenByThemes ) {
+		return;
+	}
 	test.describe( `${ testData.templateName } template`, async () => {
 		test.afterAll( async () => {
 			await deleteAllTemplates( 'wp_template' );

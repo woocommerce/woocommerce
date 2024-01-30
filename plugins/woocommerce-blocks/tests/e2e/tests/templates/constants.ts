@@ -22,6 +22,7 @@ type TemplateCustomizationTest = {
 		templateName: string;
 		templatePath: string;
 	};
+	canBeOverridenByThemes: boolean;
 };
 
 export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
@@ -31,6 +32,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Product Catalog',
 		templatePath: 'archive-product',
 		templateType: 'wp_template',
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) =>
@@ -38,6 +40,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Product Search Results',
 		templatePath: 'product-search-results',
 		templateType: 'wp_template',
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) => await page.goto( '/color/blue' ),
@@ -48,6 +51,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			templateName: 'Product Catalog',
 			templatePath: 'archive-product',
 		},
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) =>
@@ -59,6 +63,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			templateName: 'Product Catalog',
 			templatePath: 'archive-product',
 		},
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) =>
@@ -70,12 +75,14 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			templateName: 'Product Catalog',
 			templatePath: 'archive-product',
 		},
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) => await page.goto( '/product/hoodie' ),
 		templateName: 'Single Product',
 		templatePath: 'single-product',
 		templateType: 'wp_template',
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { frontendUtils } ) =>
@@ -83,6 +90,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Page: Cart',
 		templatePath: 'page-cart',
 		templateType: 'wp_template',
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { frontendUtils } ) => {
@@ -93,6 +101,23 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Page: Checkout',
 		templatePath: 'page-checkout',
 		templateType: 'wp_template',
+		canBeOverridenByThemes: true,
+	},
+	{
+		visitPage: async ( { frontendUtils } ) => {
+			await frontendUtils.emptyCart();
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart();
+			await frontendUtils.goToCheckout();
+		},
+		templateName: 'Checkout Header',
+		templatePath: 'checkout-header',
+		templateType: 'wp_template_part',
+		// Creating a `checkout-header.html` template part in the theme doesn't
+		// automatically override the checkout header. That's because the
+		// Page: Checkout template still points to the default `checkout-header`
+		// from WooCommerce.
+		canBeOverridenByThemes: false,
 	},
 	{
 		visitPage: async ( { frontendUtils, page } ) => {
@@ -106,6 +131,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Order Confirmation',
 		templatePath: 'order-confirmation',
 		templateType: 'wp_template',
+		canBeOverridenByThemes: true,
 	},
 ];
 
