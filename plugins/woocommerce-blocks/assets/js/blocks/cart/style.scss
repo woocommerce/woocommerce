@@ -21,7 +21,7 @@
 	table.wc-block-cart-items,
 	table.wc-block-cart-items th,
 	table.wc-block-cart-items td {
-		margin: 0 0 2em;
+		margin: 0 0 $gap * 2.5;
 	}
 }
 
@@ -89,6 +89,7 @@
 	}
 }
 
+
 .is-small,
 .is-mobile {
 	.wc-block-cart-item__total {
@@ -126,7 +127,7 @@
 		@include font-size( smaller );
 		display: block;
 		font-weight: 700;
-		padding: 0.25rem 0;
+		padding: $gap-smaller $gap 0;
 		text-align: right;
 		text-transform: uppercase;
 
@@ -140,6 +141,21 @@
 		.wc-block-components-shipping-rates-control__package:not(.wc-block-components-panel) {
 			padding-left: $gap;
 			padding-right: $gap;
+		}
+
+		.wc-block-components-totals-item__description.wc-block-components-totals-shipping__via,
+		.wc-block-components-totals-shipping__change-address__link {
+			padding-top: $gap-smallest;
+		}
+
+		.wc-block-components-totals-shipping__options {
+			margin-top: $gap;
+		}
+		.wc-block-components-radio-control > * {
+			margin-bottom: $gap;
+		}
+		.wc-block-components-radio-control > *:last-child {
+			margin-bottom: 0;
 		}
 	}
 
