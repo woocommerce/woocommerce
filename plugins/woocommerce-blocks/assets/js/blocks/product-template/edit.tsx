@@ -15,12 +15,12 @@ import {
 } from '@wordpress/block-editor';
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductCollectionAttributes } from '@woocommerce/blocks/product-collection/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
-import { isNumber } from '@woocommerce/types';
+import { isNumber, ProductResponseItem } from '@woocommerce/types';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
 import { withProduct } from '@woocommerce/block-hocs';
+import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -79,6 +79,17 @@ const ProductContent = withProduct(
 		blocks,
 		blockContext,
 		setActiveBlockContextId,
+	}: {
+		attributes: { productId: string };
+		isLoading: boolean;
+		product: ProductResponseItem;
+		displayTemplate: boolean;
+		blocks: BlockInstance[];
+		blockContext: {
+			postType: string;
+			postId: string;
+		};
+		setActiveBlockContextId: ( id: string ) => void;
 	} ) => {
 		return (
 			<BlockContextProvider
@@ -133,7 +144,8 @@ const ProductTemplateEdit = ( {
 	__unstableLayoutClassNames: string;
 } ) => {
 	const [ { page } ] = queryContext;
-	const [ activeBlockContextId, setActiveBlockContextId ] = useState();
+	const [ activeBlockContextId, setActiveBlockContextId ] =
+		useState< string >();
 	const postType = 'product';
 	const loopShopPerPage = getSettingWithCoercion(
 		'loopShopPerPage',
@@ -280,6 +292,8 @@ const ProductTemplateEdit = ( {
 						( activeBlockContextId || blockContexts[ 0 ]?.postId );
 
 					return (
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore isLoading and product props are missing as they're coming from untyped withProduct HOC.
 						<ProductContent
 							key={ blockContext.postId }
 							attributes={ {
