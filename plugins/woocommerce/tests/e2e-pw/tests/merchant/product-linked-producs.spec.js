@@ -54,6 +54,7 @@ baseTest.describe( 'Products > Related products', () => {
 
 	async function updateProduct( page ) {
 		await test.step( 'update the product', async () => {
+			// extra click somewhere in the page as a workaround for update button click not always working
 			await page
 				.getByRole( 'heading', { name: 'Edit product', exact: true } )
 				.click();
@@ -128,6 +129,7 @@ baseTest.describe( 'Products > Related products', () => {
 	} );
 
 	test( 'remove up-sells', async ( { page, api, products } ) => {
+		// Add up-sells
 		await api.put( `products/${ products.main.id }`, {
 			upsell_ids: [ products.linked1.id, products.linked2.id ],
 		} );
@@ -150,11 +152,25 @@ baseTest.describe( 'Products > Related products', () => {
 		await test.step( 'verify the up-sells in the store frontend', async () => {
 			await page.goto( products.main.permalink );
 
+			const sectionLocator = page.locator( 'section' ).filter( {
+				has: page.getByRole( 'heading', {
+					name: 'You may also like',
+				} ),
+			} );
+
+			// This is not an ideal check, but I cannot find a better one.
+			// The products can still be visible, but in a different section, and this test will incorrectly pass.
+			// Checking the product names in the entire page is also not an option
+			// because they still appear under the Related products section, where they are expected
 			await expect(
-				page.getByText( products.linked1.name )
+				sectionLocator.getByRole( 'heading', {
+					name: products.linked1.name,
+				} )
 			).toBeHidden();
 			await expect(
-				page.getByText( products.linked2.name )
+				sectionLocator.getByRole( 'heading', {
+					name: products.linked2.name,
+				} )
 			).toBeHidden();
 		} );
 	} );
@@ -230,6 +246,7 @@ baseTest.describe( 'Products > Related products', () => {
 	} );
 
 	test( 'remove cross-sells', async ( { page, api, products } ) => {
+		// Add cross-sells
 		await api.put( `products/${ products.main.id }`, {
 			cross_sell_ids: [ products.linked1.id, products.linked2.id ],
 		} );
