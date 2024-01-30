@@ -19,10 +19,14 @@ import { getFilepathFromPackageName } from './validate';
 export const getNextVersion = ( name: string ) => {
 	try {
 		const cwd = getFilepathFromPackageName( name );
-		execSync( 'composer install', { cwd, encoding: 'utf-8' } );
-		return execSync( './vendor/bin/changelogger version next', {
+		// return execSync( './vendor/bin/changelogger version next', {
+		// 	cwd,
+		// 	encoding: 'utf-8',
+		// } ).trim();
+		return execSync( `pnpm --filter="${ name }" changelog version next`, {
 			cwd,
 			encoding: 'utf-8',
+			stdio: 'inherit',
 		} ).trim();
 	} catch ( e ) {
 		if ( e instanceof Error ) {
@@ -40,9 +44,15 @@ export const getNextVersion = ( name: string ) => {
 export const validateChangelogEntries = ( name: string ) => {
 	try {
 		const cwd = getFilepathFromPackageName( name );
-		return execSync( './vendor/bin/changelogger validate', {
+		// return execSync( './vendor/bin/changelogger validate', {
+		// 	cwd,
+		// 	encoding: 'utf-8',
+		// } );
+
+		return execSync( `pnpm --filter="${ name }" changelog validate`, {
 			cwd,
 			encoding: 'utf-8',
+			stdio: 'inherit',
 		} );
 	} catch ( e ) {
 		if ( e instanceof Error ) {
@@ -62,7 +72,10 @@ export const writeChangelog = ( name: string, nextVersion?: string ) => {
 	try {
 		const cwd = getFilepathFromPackageName( name );
 		execSync(
-			`./vendor/bin/changelogger write --add-pr-num ${
+			// `./vendor/bin/changelogger write --add-pr-num ${
+			// 	nextVersion ? '--use-version ' + nextVersion : ''
+			// }`,
+			`pnpm --filter="${ name }" changelog write --add-pr-num ${
 				nextVersion ? '--use-version ' + nextVersion : ''
 			}`,
 			{

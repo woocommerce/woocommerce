@@ -51,10 +51,10 @@ export default class PackagePrepare extends Command {
 			default: false,
 			description: 'Perform prepare function on all packages.',
 		} ),
-		'skip-install': Flags.boolean( {
-			description: 'Skip composer install',
-			default: false,
-		} ),
+		// 'skip-install': Flags.boolean( {
+		// 	description: 'Skip composer install',
+		// 	default: false,
+		// } ),
 		'initial-release': Flags.boolean( {
 			default: false,
 			description: "Create a package's first release to NPM",
@@ -71,16 +71,11 @@ export default class PackagePrepare extends Command {
 			this.error( 'No packages supplied.' );
 		}
 
-		if ( ! flags[ 'skip-install' ] ) {
-			execSync( 'pnpm --filter="@woocommerce/*" composer-install', {
-				cwd: MONOREPO_ROOT,
-				encoding: 'utf-8',
-				stdio: 'inherit',
-			} );
-		}
-
 		if ( flags.all ) {
-			await this.preparePackages( getAllPackges() );
+			await this.preparePackages(
+				getAllPackges(),
+				flags[ 'initial-release' ]
+			);
 			return;
 		}
 
@@ -110,6 +105,14 @@ export default class PackagePrepare extends Command {
 	) {
 		packages.forEach( async ( name ) => {
 			CliUx.ux.action.start( `Preparing ${ name }` );
+
+			// if ( ! skipInstall ) {
+			// 	execSync( `pnpm --filter="${ name }" composer-install`, {
+			// 		cwd: MONOREPO_ROOT,
+			// 		encoding: 'utf-8',
+			// 		stdio: 'inherit',
+			// 	} );
+			// }
 
 			try {
 				if ( hasValidChangelogs( name ) ) {
