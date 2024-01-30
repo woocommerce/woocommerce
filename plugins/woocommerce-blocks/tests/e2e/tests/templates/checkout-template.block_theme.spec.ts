@@ -57,7 +57,12 @@ test.describe( 'Test the checkout template', async () => {
 		).toBeVisible();
 	} );
 
-	test( 'Admin bar edit site link opens site editor', async ( { admin } ) => {
+	test( 'Admin bar edit site link opens site editor', async ( {
+		admin,
+		frontendUtils,
+	} ) => {
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart();
 		await admin.page.goto( permalink, { waitUntil: 'load' } );
 		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
 		await expect(
