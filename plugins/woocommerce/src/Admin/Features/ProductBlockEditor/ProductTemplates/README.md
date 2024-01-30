@@ -120,13 +120,24 @@ if further organization is needed.
 
 #### Methods
 
-##### `add_section( array $block_config ): SectionInterface`
+##### `add_subsection( array $block_config ): SubsectionInterface`
 
 Add a new sub-section to the section.
 
 ##### `add_block( array $block_config ): BlockInterface`
 
 Add a new block to the section.
+
+### SubsectionInterface
+
+Subsections are the third-level organizational structure for product editor templates.
+They typically contain one or more blocks.
+
+#### Methods
+
+##### `add_block( array $block_config ): BlockInterface`
+
+Add a new block to the subsection.
 
 ### ProductFormTemplateInterface
 
