@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Store API: Add support to query `product_variations` by attribute slugs.
