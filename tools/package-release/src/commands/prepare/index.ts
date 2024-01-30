@@ -19,6 +19,7 @@ import {
 	hasValidChangelogs,
 } from '../../changelogger';
 import { execSync } from 'child_process';
+import { MONOREPO_ROOT } from '../../const';
 
 /**
  * PackagePrepare class
@@ -50,6 +51,10 @@ export default class PackagePrepare extends Command {
 			default: false,
 			description: 'Perform prepare function on all packages.',
 		} ),
+		'skip-install': Flags.boolean( {
+			description: 'Skip composer install',
+			default: false,
+		} ),
 		'initial-release': Flags.boolean( {
 			default: false,
 			description: "Create a package's first release to NPM",
@@ -66,7 +71,13 @@ export default class PackagePrepare extends Command {
 			this.error( 'No packages supplied.' );
 		}
 
-		execSync( 'pnpm --filter="@woocommerce/*" composer-install' );
+		if ( ! flags[ 'skip-install' ] ) {
+			execSync( 'pnpm --filter="@woocommerce/*" composer-install', {
+				cwd: MONOREPO_ROOT,
+				encoding: 'utf-8',
+				stdio: 'inherit',
+			} );
+		}
 
 		if ( flags.all ) {
 			await this.preparePackages( getAllPackges() );

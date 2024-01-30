@@ -91,6 +91,12 @@ export default class PackageRelease extends Command {
 				stdio: 'inherit',
 			} );
 
+			execSync( 'pnpm --filter="@woocommerce/*" composer-install', {
+				cwd: MONOREPO_ROOT,
+				encoding: 'utf-8',
+				stdio: 'inherit',
+			} );
+
 			CliUx.ux.action.stop();
 		}
 
