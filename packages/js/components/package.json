@@ -42,6 +42,7 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "composer install && composer exec -- changelogger",
+		"composer-install": "composer install",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint --ext=js,ts,tsx src --fix",
@@ -52,8 +53,7 @@
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "wireit",
 		"watch:build:project:cjs": "wireit",
-		"watch:build:project:esm": "wireit",
-		"composer-install": "composer install"
+		"watch:build:project:esm": "wireit"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

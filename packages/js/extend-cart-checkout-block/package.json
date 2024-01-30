@@ -18,7 +18,8 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"scripts": {
-		"changelog": "composer install && composer exec -- changelogger"
+		"changelog": "composer install && composer exec -- changelogger",
+		"composer-install": "composer install"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/extend-cart-checkout-block#readme",
 	"devDependencies": {
