@@ -103,7 +103,7 @@ pnpm run test:e2e:classic-theme
 pnpm run test:e2e:block-theme-with-templates
 ```
 
-\_Note: All command parameters of `test:e2e` can be used for these commands too.
+_Note: All command parameters of `test:e2e` can be used for these commands too.
 
 ### Other ways of running tests
 
