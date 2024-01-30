@@ -103,16 +103,18 @@ class CustomProductFormTemplateTest extends WC_Unit_Test_Case {
 	public function test_add_custom_block_to_subsection() {
 		$template  = new CustomProductFormTemplate();
 		$block     = $template->get_subsection_by_id( 'product-stock-subsection' );
-		$new_block = $block->add_block( array(
-			'id'         => 'my-test-block-id',
-			'blockName'  => 'my-test-block-name',
-			'attributes' => array(
-				'name' => 'A block name',
-			),
-		) );
+		$new_block = $block->add_block(
+			array(
+				'id'         => 'my-test-block-id',
+				'blockName'  => 'my-test-block-name',
+				'attributes' => array(
+					'name' => 'A block name',
+				),
+			)
+		);
 
-        $this->assertEquals( $new_block->get_parent(), $block );
-    }
+		$this->assertEquals( $new_block->get_parent(), $block );
+	}
 
 	/**
 	 * Test add custom group.
