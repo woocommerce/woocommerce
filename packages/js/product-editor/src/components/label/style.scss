@@ -3,10 +3,18 @@
 		display: flex;
 		align-items: center;
 		gap: 2px;
+		color: $gray-900;
+		text-transform: uppercase;
 	}
+
+	&__note {
+		color: $gray-700;
+	}
+
 	&__required {
 		color: #CC1818;
 	}
+
 	&__tooltip {
 		.components-popover__content {
 			width: 200px;
@@ -14,6 +22,7 @@
 			white-space: normal !important;
 		}
 	}
+
 	&__icon {
 		display: flex;
 	}
