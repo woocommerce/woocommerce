@@ -136,19 +136,19 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await page.waitForTimeout( 2000 );
 
 		// Parse email's content JSON
-		// await page.waitForSelector(
-		// 	'#wp-mail-logging-modal-content-body-content'
-		// );
+		await page.waitForSelector(
+		 	'#wp-mail-logging-modal-content-body-content'
+		 );
 
-		// const emailBodyContent = JSON.parse(
-		//	'wp-mail-logging-modal-content-body-content'
-		// );
+		const emailBodyContent = JSON.parse(
+			'wp-mail-logging-modal-content-body-content'
+		 );
 		// Extract the required information
-		// const timestamp = emailBodyContent.timestamp;
-		// const receiverEmail = emailBodyContent.receiver;
-		// const subject = emailBodyContent.subject;
-		// const orderId =
-		// 	emailBodyContent.message.match( /\[Order #(\d+)\]/ )[ 1 ];
+		const timestamp = emailBodyContent.timestamp;
+		const receiverEmail = emailBodyContent.receiver;
+		const subject = emailBodyContent.subject;
+		const orderId =
+			emailBodyContent.message.match( /\[Order #(\d+)\]/ )[ 1 ];
 	} );
 
 	test( 'can resend new order notification', async ( { page } ) => {
