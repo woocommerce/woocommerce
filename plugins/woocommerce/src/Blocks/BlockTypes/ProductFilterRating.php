@@ -45,7 +45,7 @@ final class ProductFilterRating extends AbstractBlock {
 	 * @return array Active filters param keys.
 	 */
 	public function get_filter_query_param_keys( $filter_param_keys, $url_param_keys ) {
-		$price_param_keys = array_filter(
+		$rating_param_keys = array_filter(
 			$url_param_keys,
 			function( $param ) {
 				return self::RATING_FILTER_QUERY_VAR === $param;
@@ -54,7 +54,7 @@ final class ProductFilterRating extends AbstractBlock {
 
 		return array_merge(
 			$filter_param_keys,
-			$price_param_keys
+			$rating_param_keys
 		);
 	}
 
