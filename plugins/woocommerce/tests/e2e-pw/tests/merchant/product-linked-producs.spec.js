@@ -52,6 +52,16 @@ baseTest.describe( 'Products > Related products', () => {
 		} );
 	}
 
+	async function updateProduct( page ) {
+		await test.step( 'update the product', async () => {
+			await page
+				.getByRole( 'heading', { name: 'Edit product', exact: true } )
+				.click();
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
+		} );
+	}
+
 	test( 'add up-sells', async ( { page, products } ) => {
 		await navigate( page, products.main.id );
 
@@ -93,9 +103,7 @@ baseTest.describe( 'Products > Related products', () => {
 			).toBeVisible();
 		} );
 
-		await test.step( 'publish the updated product', async () => {
-			await page.getByRole( 'button', { name: 'Update' } ).click();
-		} );
+		await updateProduct( page );
 
 		await test.step( 'verify the up-sell in the store frontend', async () => {
 			await page.goto( products.main.permalink );
@@ -137,9 +145,7 @@ baseTest.describe( 'Products > Related products', () => {
 				.click();
 		} );
 
-		await test.step( 'publish the updated product', async () => {
-			await page.getByRole( 'button', { name: 'Update' } ).click();
-		} );
+		await updateProduct( page );
 
 		await test.step( 'verify the up-sells in the store frontend', async () => {
 			await page.goto( products.main.permalink );
@@ -194,9 +200,7 @@ baseTest.describe( 'Products > Related products', () => {
 			).toBeVisible();
 		} );
 
-		await test.step( 'publish the updated product', async () => {
-			await page.getByRole( 'button', { name: 'Update' } ).click();
-		} );
+		await updateProduct( page );
 
 		await test.step( 'verify the up-sell in the store frontend', async () => {
 			await page.goto( products.main.permalink );
@@ -243,12 +247,7 @@ baseTest.describe( 'Products > Related products', () => {
 				.click();
 		} );
 
-		await test.step( 'publish the updated product', async () => {
-			await page
-				.getByRole( 'heading', { name: 'Edit product', exact: true } )
-				.click();
-			await page.getByRole( 'button', { name: 'Update' } ).click();
-		} );
+		await updateProduct( page );
 
 		await test.step( 'verify the cross-sells in the store frontend', async () => {
 			await page.goto( products.main.permalink );
