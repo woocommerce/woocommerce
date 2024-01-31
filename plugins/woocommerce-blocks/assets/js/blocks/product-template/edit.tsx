@@ -23,7 +23,7 @@ import { isNumber } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { useProductCollectionBlockAttributes } from './utils';
+import { useProductCollectionQueryContext } from './utils';
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -114,23 +114,10 @@ const ProductTemplateEdit = ( {
 		isNumber
 	);
 
-	const parentCollectionBlockAttributes =
-		useProductCollectionBlockAttributes( clientId );
-
-	const productCollectionBlockContext = useMemo( () => {
-		const productCollectionQueryContext: {
-			[ key: string ]: unknown;
-		} = {};
-		if ( queryContextIncludes?.length ) {
-			queryContextIncludes.forEach( ( attribute: string ) => {
-				if ( parentCollectionBlockAttributes?.[ attribute ] ) {
-					productCollectionQueryContext[ attribute ] =
-						parentCollectionBlockAttributes[ attribute ];
-				}
-			} );
-		}
-		return productCollectionQueryContext;
-	}, [ queryContextIncludes, parentCollectionBlockAttributes ] );
+	const productCollectionQueryContext = useProductCollectionQueryContext( {
+		clientId,
+		queryContextIncludes,
+	} );
 
 	const { products, blocks } = useSelect(
 		( select ) => {
@@ -196,7 +183,8 @@ const ProductTemplateEdit = ( {
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
-					productCollectionBlockContext,
+					productCollectionBlockContext:
+						productCollectionQueryContext,
 				} ),
 				blocks: getBlocks( clientId ),
 			};
@@ -215,7 +203,7 @@ const ProductTemplateEdit = ( {
 			templateSlug,
 			taxQuery,
 			restQueryArgs,
-			productCollectionBlockContext,
+			productCollectionQueryContext,
 			loopShopPerPage,
 		]
 	);
