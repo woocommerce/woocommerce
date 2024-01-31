@@ -37,22 +37,22 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 			array(
 				array(
 					'name'          => 'Product 1',
-					'regular_price' => 20,
+					'regular_price' => 10,
 					'stock_status'  => 'instock',
 				),
 				array(
 					'name'          => 'Product 2',
-					'regular_price' => 30,
+					'regular_price' => 20,
 					'stock_status'  => 'instock',
 				),
 				array(
 					'name'          => 'Product 3',
-					'regular_price' => 40,
+					'regular_price' => 30,
 					'stock_status'  => 'outofstock',
 				),
 				array(
 					'name'          => 'Product 4',
-					'regular_price' => 50,
+					'regular_price' => 40,
 					'stock_status'  => 'onbackorder',
 				),
 				array(
@@ -61,7 +61,6 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 						array(
 							'attributes' => array(
 								'pa_color' => 'red',
-								'pa_size'  => 'small',
 							),
 							'props'      => array(
 								'regular_price' => 50,
@@ -71,10 +70,32 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 						array(
 							'attributes' => array(
 								'pa_color' => 'green',
-								'pa_size'  => 'medium',
 							),
 							'props'      => array(
 								'regular_price' => 50,
+								'stock_status'  => 'instock',
+							),
+						),
+					),
+				),
+				array(
+					'name'       => 'Product 6',
+					'variations' => array(
+						array(
+							'attributes' => array(
+								'pa_color' => 'blue',
+							),
+							'props'      => array(
+								'regular_price' => 60,
+								'stock_status'  => 'instock',
+							),
+						),
+						array(
+							'attributes' => array(
+								'pa_color' => 'green',
+							),
+							'props'      => array(
+								'regular_price' => 60,
 								'stock_status'  => 'instock',
 							),
 						),

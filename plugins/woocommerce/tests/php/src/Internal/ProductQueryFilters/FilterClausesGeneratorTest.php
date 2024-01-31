@@ -27,8 +27,8 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 
 	public function test_price_clauses() {
 		for ( $x = 0; $x <= 10; $x++ ) {
-			$min = rand( 10, 60 );
-			$max = rand( 50, 100 );
+			$min = rand( 0, 50 );
+			$max = rand( 40, 100 );
 			$this->test_price_clauses_with( array( 'min_price' => $min ) );
 			$this->test_price_clauses_with( array( 'max_price' => $max ) );
 			$this->test_price_clauses_with(
@@ -172,9 +172,9 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 			array_filter(
 				$this->products,
 				function( \WC_Product $product ) use ( $chosen_attributes ) {
-					$product_attributes =
-					$product->get_attributes(); foreach ( $chosen_attributes as
-					$taxonomy => $data ) {
+					$product_attributes = $product->get_attributes();
+
+					foreach ( $chosen_attributes as $taxonomy => $data ) {
 						if ( ! in_array(
 							$taxonomy,
 							array_keys( $product_attributes )
