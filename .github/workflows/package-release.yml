@@ -31,6 +31,9 @@ jobs:
             - name: Clean working directory
               run: git checkout pnpm-lock.yaml # in case for whatever reason the lockfile is out of sync, there won't be interference with npm publish.
 
+            - name: Add authentication token to .npmrc
+              run: echo "\n//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" >> .npmrc
+
             - name: Execute script
               # run: ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} ${{ ( github.event.inputs.dry_run == 'true' && '--dry-run' ) || '' }} --skip-install
               run: npm whoami
