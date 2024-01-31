@@ -27,6 +27,10 @@ export function MarketplaceContextProvider( props: {
 		[]
 	);
 
+	/**
+	 * Knowing installed products will help us to determine which products
+	 * should have the "Add to Site" button enabled.
+	 */
 	useEffect( () => {
 		const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 		const installedProductSlugs: string[] =
