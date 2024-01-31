@@ -68,7 +68,7 @@ jobs:
                   USE_WP_ENV: 1
                   E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
-              id: run_playwright_e2e_tests_main
+              id: run_playwright_e2e_tests
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
 
             - name: Run Playwright tests on chrome-new-editor.
