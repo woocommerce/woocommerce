@@ -9,10 +9,6 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 			page,
 		} ) => {
 			await page.goto( '/product-filters-rating-block/' );
-			await page.evaluate( () =>
-				window.scrollTo( 0, document.body.scrollHeight * 0.35 )
-			);
-
 			const ratingStars = page.locator(
 				'.wc-block-components-product-rating__stars'
 			);
