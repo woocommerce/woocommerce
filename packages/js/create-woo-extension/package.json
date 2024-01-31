@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/create-woo-extension",
-	"version": "1.0.2",
+	"version": "> @woocommerce/create-woo-extension@1.0.2 changelog /home/runner/work/woocommerce/woocommerce/packages/js/create-woo-extension\n> composer install && composer exec -- changelogger \"version\" \"next\"\n\n1.1.0",
 	"description": "A template to be used with `@wordpress/create-block` to create a WooCommerce extension.",
 	"main": "index.js",
 	"engines": {
