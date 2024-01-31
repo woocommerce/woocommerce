@@ -103,7 +103,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Create a new customer in the database.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param WC_Customer $customer Customer object.
+	 *
 	 * @throws WC_Data_Exception If unable to create new customer.
 	 */
 	public function create( &$customer ) {
