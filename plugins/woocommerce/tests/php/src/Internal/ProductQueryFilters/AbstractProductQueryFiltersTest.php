@@ -44,7 +44,7 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 			array(
 				'name'          => 'Product 1',
 				'regular_price' => 10,
-				'stock_status'  => 'instock',
+				'stock_status'  => 'onbackorder',
 			),
 			array(
 				'name'          => 'Product 2',
@@ -59,11 +59,12 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 			array(
 				'name'          => 'Product 4',
 				'regular_price' => 40,
-				'stock_status'  => 'onbackorder',
+				'stock_status'  => 'instock',
 			),
 			// To keep our test simple, we set the same price for all variations of a product.
 			array(
-				'name'       => 'Product 5',
+				'name'          => 'Product 5',
+				'stock_status'  => 'instock',
 				'variations' => array(
 					array(
 						'attributes' => array(
@@ -86,7 +87,8 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 				),
 			),
 			array(
-				'name'       => 'Product 6',
+				'name'          => 'Product 6',
+				'stock_status'  => 'instock',
 				'variations' => array(
 					array(
 						'attributes' => array(
