@@ -43,6 +43,11 @@ const tableHeaders = [
 		label: __( 'Cost', 'woocommerce' ),
 		isNumeric: true,
 	},
+	{
+		key: 'sales',
+		label: __( 'Sales', 'woocommerce' ),
+		isNumeric: true,
+	},
 ];
 
 const perPage = 5;
@@ -163,6 +168,7 @@ export const Campaigns = () => {
 							),
 						},
 						{ display: el.cost },
+						{ display: el.sales },
 					];
 				} ) }
 			/>

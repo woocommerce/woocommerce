@@ -87,6 +87,7 @@ export * from './onboarding/types';
 export * from './plugins/types';
 export * from './products/types';
 export type {
+	PartialProductVariation,
 	ProductVariation,
 	ProductVariationAttribute,
 	ProductVariationImage,
@@ -109,6 +110,7 @@ export {
 export { TaxClass } from './tax-classes/types';
 export { ProductTag, Query } from './product-tags/types';
 export { WCUser } from './user/types';
+export { UserPreferences } from './user/types';
 
 /**
  * Internal dependencies

@@ -2,14 +2,13 @@
  * External dependencies
  */
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
-import type { BlockEditProps } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import { Attributes } from './types';
+import { EditProps } from './types';
 
-const Edit = ( { attributes }: BlockEditProps< Attributes > ) => {
+const Edit = ( { attributes }: EditProps ) => {
 	const blockProps = useBlockProps();
 
 	return (

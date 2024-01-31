@@ -15,7 +15,7 @@ interface BlockRepresentation< T extends Record< string, object > > {
 	settings: Partial< BlockConfiguration< T > >;
 }
 
-function useEvaluationContext( context: Record< string, unknown > ) {
+export function useEvaluationContext( context: Record< string, unknown > ) {
 	const { postType } = context;
 
 	const productId = useEntityId( 'postType', postType );

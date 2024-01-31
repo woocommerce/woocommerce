@@ -1,0 +1,18 @@
+[
+  {
+    "name": "project-a",
+    "path": "/test/monorepo/project-a"
+  },
+  {
+    "name": "project-b",
+    "path": "/test/monorepo/project-b"
+  },
+  {
+    "name": "project-c",
+    "path": "/test/monorepo/project-c"
+  },
+  {
+    "name": "project-d",
+    "path": "/test/monorepo/project-d"
+  }
+]

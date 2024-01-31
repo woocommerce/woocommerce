@@ -182,6 +182,11 @@ class CheckoutSchema extends AbstractSchema {
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'properties'  => $this->get_additional_fields_schema(),
+				'arg_options' => [
+					'sanitize_callback' => [ $this, 'sanitize_additional_fields' ],
+					'validate_callback' => [ $this, 'validate_additional_fields' ],
+				],
+				'required'    => $this->is_additional_fields_required(),
 			],
 			self::EXTENDING_KEY => $this->get_extended_schema( self::IDENTIFIER ),
 		];
@@ -273,27 +278,119 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_additional_fields_schema() {
-		$additional_fields_keys = $this->additional_fields_controller->get_additional_fields_keys();
-
-		$fields = $this->additional_fields_controller->get_additional_fields();
-
-		$additional_fields = array_filter(
-			$fields,
-			function( $key ) use ( $additional_fields_keys ) {
-				return in_array( $key, $additional_fields_keys, true );
-			},
-			ARRAY_FILTER_USE_KEY
-		);
+		$order_only_fields = $this->additional_fields_controller->get_order_only_fields();
 
 		$schema = [];
-		foreach ( $additional_fields as $key => $field ) {
-			$schema[ $key ] = [
+		foreach ( $order_only_fields as $key => $field ) {
+			$field_schema = [
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
+				'required'    => $field['required'],
 			];
+
+			if ( 'select' === $field['type'] ) {
+				$field_schema['enum'] = array_map(
+					function( $option ) {
+						return $option['value'];
+					},
+					$field['options']
+				);
+			}
+
+			if ( 'checkbox' === $field['type'] ) {
+				$field_schema['type'] = 'boolean';
+			}
+
+			$schema[ $key ] = $field_schema;
 		}
 		return $schema;
+	}
+
+	/**
+	 * Check if any additional field is required, so that the parent item is required as well.
+	 *
+	 * @return bool
+	 */
+	public function is_additional_fields_required() {
+		$additional_fields_schema = $this->get_additional_fields_schema();
+		return array_reduce(
+			array_keys( $additional_fields_schema ),
+			function( $carry, $key ) use ( $additional_fields_schema ) {
+				return $carry || $additional_fields_schema[ $key ]['required'];
+			},
+			false
+		);
+	}
+
+	/**
+	 * Sanitize and format additional fields object.
+	 *
+	 * @param array $fields Values being sanitized.
+	 * @return array
+	 */
+	public function sanitize_additional_fields( $fields ) {
+		$properties = $this->get_additional_fields_schema();
+		$fields     = array_reduce(
+			array_keys( $fields ),
+			function( $carry, $key ) use ( $fields, $properties ) {
+				if ( ! isset( $properties[ $key ] ) ) {
+					return $carry;
+				}
+				$field_schema   = $properties[ $key ];
+				$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $fields[ $key ] ), $field_schema, $key );
+				$carry[ $key ]  = wp_kses( $rest_sanitized, [] );
+				return $carry;
+			},
+			[]
+		);
+
+		return $fields;
+	}
+
+	/**
+	 * Validate additional fields object.
+	 *
+	 * @see rest_validate_value_from_schema
+	 *
+	 * @param array            $fields Value being sanitized.
+	 * @param \WP_REST_Request $request The Request.
+	 * @return true|\WP_Error
+	 */
+	public function validate_additional_fields( $fields, $request ) {
+		$errors     = new \WP_Error();
+		$fields     = $this->sanitize_additional_fields( $fields, $request );
+		$properties = $this->get_additional_fields_schema();
+
+		foreach ( array_keys( $properties ) as $key ) {
+			if ( ! isset( $fields[ $key ] ) && false === $properties[ $key ]['required'] ) {
+				continue;
+			}
+
+			$field_value = isset( $fields[ $key ] ) ? $fields[ $key ] : null;
+
+			$result = rest_validate_value_from_schema( $field_value, $properties[ $key ], $key );
+
+			// Only allow custom validation on fields that pass the schema validation.
+			if ( true === $result ) {
+				$result = $this->additional_fields_controller->validate_field( $key, $field_value, $request );
+			}
+
+			if ( is_wp_error( $result ) && $result->has_errors() ) {
+				$location = $this->additional_fields_controller->get_field_location( $key );
+				foreach ( $result->get_error_codes() as $code ) {
+					$result->add_data(
+						[
+							'location' => $location,
+							'key'      => $key,
+						],
+						$code
+					);
+				}
+				$errors->merge_from( $result );
+			}
+		}
+
+		return $errors->has_errors( $errors ) ? $errors : true;
 	}
 }

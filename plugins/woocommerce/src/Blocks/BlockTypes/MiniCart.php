@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
+use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 
 /**
  * Mini-Cart class.
@@ -17,6 +18,8 @@ use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
  * @internal
  */
 class MiniCart extends AbstractBlock {
+	use BlockHooksTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -53,6 +56,19 @@ class MiniCart extends AbstractBlock {
 	protected $display_cart_prices_including_tax = false;
 
 	/**
+	 * Block Hook API placements.
+	 *
+	 * @var array
+	 */
+	protected $hooked_block_placements = array(
+		array(
+			'position' => 'after',
+			'anchor'   => 'core/navigation',
+			'area'     => 'header',
+		),
+	);
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi            $asset_api Instance of the asset API.
@@ -72,8 +88,8 @@ class MiniCart extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
-		add_action( 'hooked_block_types', array( $this, 'register_auto_insert' ), 10, 4 );
 		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
+		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 10, 4 );
 	}
 
 	/**
@@ -421,7 +437,7 @@ class MiniCart extends AbstractBlock {
 		if ( isset( $attributes['miniCartIcon'] ) ) {
 			if ( 'bag' === $attributes['miniCartIcon'] ) {
 				$icon = '<svg class="wc-block-mini-cart__icon" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path fill-rule="evenodd" clip-rule="evenodd" d="M12.4444 14.2222C12.9354 14.2222 13.3333 14.6202 13.3333 15.1111C13.3333 15.8183 13.6143 16.4966 14.1144 16.9967C14.6145 17.4968 15.2927 17.7778 16 17.7778C16.7072 17.7778 17.3855 17.4968 17.8856 16.9967C18.3857 16.4966 18.6667 15.8183 18.6667 15.1111C18.6667 14.6202 19.0646 14.2222 19.5555 14.2222C20.0465 14.2222 20.4444 14.6202 20.4444 15.1111C20.4444 16.2898 19.9762 17.4203 19.1427 18.2538C18.3092 19.0873 17.1787 19.5555 16 19.5555C14.8212 19.5555 13.6908 19.0873 12.8573 18.2538C12.0238 17.4203 11.5555 16.2898 11.5555 15.1111C11.5555 14.6202 11.9535 14.2222 12.4444 14.2222Z" fill="' . $icon_color . '""/>
+							<path fill-rule="evenodd" clip-rule="evenodd" d="M12.4444 14.2222C12.9354 14.2222 13.3333 14.6202 13.3333 15.1111C13.3333 15.8183 13.6143 16.4966 14.1144 16.9967C14.6145 17.4968 15.2927 17.7778 16 17.7778C16.7072 17.7778 17.3855 17.4968 17.8856 16.9967C18.3857 16.4966 18.6667 15.8183 18.6667 15.1111C18.6667 14.6202 19.0646 14.2222 19.5555 14.2222C20.0465 14.2222 20.4444 14.6202 20.4444 15.1111C20.4444 16.2898 19.9762 17.4203 19.1427 18.2538C18.3092 19.0873 17.1787 19.5555 16 19.5555C14.8212 19.5555 13.6908 19.0873 12.8573 18.2538C12.0238 17.4203 11.5555 16.2898 11.5555 15.1111C11.5555 14.6202 11.9535 14.2222 12.4444 14.2222Z" fill="' . $icon_color . '"/>
 							<path fill-rule="evenodd" clip-rule="evenodd" d="M11.2408 6.68254C11.4307 6.46089 11.7081 6.33333 12 6.33333H20C20.2919 6.33333 20.5693 6.46089 20.7593 6.68254L24.7593 11.3492C25.0134 11.6457 25.0717 12.0631 24.9085 12.4179C24.7453 12.7727 24.3905 13 24 13H8.00001C7.60948 13 7.25469 12.7727 7.0915 12.4179C6.92832 12.0631 6.9866 11.6457 7.24076 11.3492L11.2408 6.68254ZM12.4599 8.33333L10.1742 11H21.8258L19.5401 8.33333H12.4599Z" fill="' . $icon_color . '"/>
 							<path fill-rule="evenodd" clip-rule="evenodd" d="M7 12C7 11.4477 7.44772 11 8 11H24C24.5523 11 25 11.4477 25 12V25.3333C25 25.8856 24.5523 26.3333 24 26.3333H8C7.44772 26.3333 7 25.8856 7 25.3333V12ZM9 13V24.3333H23V13H9Z" fill="' . $icon_color . '"/>
 						</svg>';
@@ -576,111 +592,6 @@ class MiniCart extends AbstractBlock {
 				'content'  => '<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>' . __( 'Your cart is currently empty!', 'woocommerce' ) . '</strong></p><!-- /wp:paragraph -->',
 			)
 		);
-	}
-
-	/**
-	 * Callback for `hooked_block_types` to auto-inject the mini-cart block into headers after navigation.
-	 *
-	 * @param array                    $hooked_blocks An array of block slugs hooked into a given context.
-	 * @param string                   $position      Position of the block insertion point.
-	 * @param string                   $anchor_block  The block acting as the anchor for the inserted block.
-	 * @param \WP_Block_Template|array $context       Where the block is embedded.
-	 * @since $VID:$
-	 * @return array An array of block slugs hooked into a given context.
-	 */
-	public function register_auto_insert( $hooked_blocks, $position, $anchor_block, $context ) {
-		// Cache for active theme.
-		static $active_theme_name = null;
-		if ( is_null( $active_theme_name ) ) {
-			$active_theme_name = wp_get_theme()->get( 'Name' );
-		}
-		/**
-		 * A list of pattern slugs to exclude from auto-insert (useful when
-		 * there are patterns that have a very specific location for the block)
-		 *
-		 * @since $VID:$
-		 */
-		$pattern_exclude_list = apply_filters( 'woocommerce_blocks_mini_cart_auto_insert_pattern_exclude_list', array( 'twentytwentytwo/header-centered-logo', 'twentytwentytwo/header-stacked' ) );
-
-		/**
-		 * A list of theme slugs to execute this with. This is a temporary
-		 * measure until improvements to the Block Hooks API allow for exposing
-		 * to all block themes.
-		 *
-		 * @since $VID:$
-		 */
-		$theme_include_list = apply_filters( 'woocommerce_blocks_mini_cart_auto_insert_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
-
-		if ( $context && in_array( $active_theme_name, $theme_include_list, true ) ) {
-			if (
-				'after' === $position &&
-				'core/navigation' === $anchor_block &&
-				$this->is_header_part_or_pattern( $context ) &&
-				! $this->pattern_is_excluded( $context, $pattern_exclude_list ) &&
-				! $this->has_mini_cart_block( $context )
-			) {
-				$hooked_blocks[] = 'woocommerce/' . $this->block_name;
-			}
-		}
-
-		return $hooked_blocks;
-	}
-
-	/**
-	 * Returns whether the pattern is excluded or not
-	 *
-	 * @param array|\WP_Block_Template $context Where the block is embedded.
-	 * @param array                    $pattern_exclude_list List of pattern slugs to exclude.
-	 * @since $VID:$
-	 * @return boolean
-	 */
-	private function pattern_is_excluded( $context, $pattern_exclude_list ) {
-		$pattern_slug = is_array( $context ) && isset( $context['slug'] ) ? $context['slug'] : '';
-		if ( ! $pattern_slug ) {
-			/**
-			 * Woo patterns have a slug property in $context, but core/theme patterns dont.
-			 * In that case, we fallback to the name property, as they're the same.
-			 */
-			$pattern_slug = is_array( $context ) && isset( $context['name'] ) ? $context['name'] : '';
-		}
-		return in_array( $pattern_slug, $pattern_exclude_list, true );
-	}
-
-	/**
-	 * Checks if the provided context contains a mini-cart block.
-	 *
-	 * @param array|\WP_Block_Template $context Where the block is embedded.
-	 * @since $VID:$
-	 * @return boolean
-	 */
-	private function has_mini_cart_block( $context ) {
-		/**
-		 * Note: this won't work for parsing WP_Block_Template instance until it's fixed in core
-		 * because $context->content is set as the result of `traverse_and_serialize_blocks` so
-		 * the filter callback doesn't get the original content.
-		 *
-		 * @see https://core.trac.wordpress.org/ticket/59882
-		 */
-		$content = is_array( $context ) && isset( $context['content'] ) ? $context['content'] : '';
-		$content = '' === $content && $context instanceof \WP_Block_Template ? $context->content : $content;
-		return strpos( $content, 'wp:woocommerce/mini-cart' ) !== false;
-	}
-
-	/**
-	 * Given a provided context, returns whether the context refers to header content.
-	 *
-	 * @param array|\WP_Block_Template $context Where the block is embedded.
-	 * @since $VID:$
-	 * @return boolean
-	 */
-	private function is_header_part_or_pattern( $context ) {
-		$is_header_pattern = is_array( $context ) &&
-		(
-			( isset( $context['blockTypes'] ) && in_array( 'core/template-part/header', $context['blockTypes'], true ) ) ||
-			( isset( $context['categories'] ) && in_array( 'header', $context['categories'], true ) )
-		);
-		$is_header_part    = $context instanceof \WP_Block_Template && 'header' === $context->area;
-		return ( $is_header_pattern || $is_header_part );
 	}
 
 	/**

@@ -4,7 +4,10 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
+import interpolateComponents from '@automattic/interpolate-components';
+
 import {
+	Notice,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
@@ -13,7 +16,7 @@ import {
 /**
  * Internal dependencies
  */
-import { CustomizeStoreComponent } from '../types';
+import { CustomizeStoreComponent, FlowType } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
 import { ThemeCard } from './theme-card';
 import {
@@ -30,6 +33,8 @@ import {
 	DefaultBanner,
 	ExistingAiThemeBanner,
 	ExistingThemeBanner,
+	NoAIBanner,
+	ExistingNoAiThemeBanner,
 } from './intro-banners';
 
 export type events =
@@ -38,7 +43,8 @@ export type events =
 	| { type: 'CLICKED_ON_BREADCRUMB' }
 	| { type: 'SELECTED_BROWSE_ALL_THEMES' }
 	| { type: 'SELECTED_ACTIVE_THEME'; payload: { theme: string } }
-	| { type: 'SELECTED_NEW_THEME'; payload: { theme: string } };
+	| { type: 'SELECTED_NEW_THEME'; payload: { theme: string } }
+	| { type: 'DESIGN_WITHOUT_AI' };
 
 export * as actions from './actions';
 export * as services from './services';
@@ -51,6 +57,8 @@ const BANNER_COMPONENTS = {
 	'jetpack-offline': JetpackOfflineBanner,
 	'existing-ai-theme': ExistingAiThemeBanner,
 	'existing-theme': ExistingThemeBanner,
+	[ FlowType.noAI ]: NoAIBanner,
+	'existing-no-ai-theme': ExistingNoAiThemeBanner,
 	default: DefaultBanner,
 };
 
@@ -77,6 +85,10 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 	const isNetworkOffline = useNetworkStatus();
 
+	const [ showError, setShowError ] = useState(
+		context.flowType === FlowType.noAI && context.intro.hasErrors
+	);
+
 	const [ openDesignChangeWarningModal, setOpenDesignChangeWarningModal ] =
 		useState( false );
 
@@ -89,6 +101,13 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 		case isJetpackOffline as boolean:
 			bannerStatus = 'jetpack-offline';
+			break;
+		case context.flowType === FlowType.noAI &&
+			! customizeStoreTaskCompleted:
+			bannerStatus = FlowType.noAI;
+			break;
+		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
+			bannerStatus = 'existing-no-ai-theme';
 			break;
 		case ! customizeStoreTaskCompleted && activeThemeHasMods:
 			bannerStatus = 'task-incomplete-active-theme-has-mods';
@@ -119,6 +138,17 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const ModalComponent = MODAL_COMPONENTS[ modalStatus ];
 
 	const BannerComponent = BANNER_COMPONENTS[ bannerStatus ];
+
+	const sidebarMessage =
+		context.flowType === FlowType.AIOnline
+			? __(
+					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI',
+					'woocommerce'
+			  )
+			: __(
+					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using our store designer.',
+					'woocommerce'
+			  );
 
 	return (
 		<>
@@ -153,15 +183,35 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						</button>
 						{ __( 'Customize your store', 'woocommerce' ) }
 					</div>
-					<p>
-						{ __(
-							'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI.',
-							'woocommerce'
-						) }
-					</p>
+					<p>{ sidebarMessage }</p>
 				</div>
 
 				<div className="woocommerce-customize-store-main">
+					{ showError && (
+						<Notice
+							onRemove={ () => setShowError( false ) }
+							className="woocommerce-cys-design-with-ai__error-notice"
+							status="error"
+						>
+							{ interpolateComponents( {
+								mixedString: __(
+									'Oops! We encountered a problem while setting up the foundations. {{anchor}}Please try again{{/anchor}} or start with a theme.',
+									'woocommerce'
+								),
+								components: {
+									anchor: (
+										// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions, jsx-a11y/anchor-is-valid
+										<a
+											className="woocommerce-customize-store-error-link"
+											onClick={ () =>
+												sendEvent( 'DESIGN_WITHOUT_AI' )
+											}
+										/>
+									),
+								},
+							} ) }
+						</Notice>
+					) }
 					<BannerComponent
 						setOpenDesignChangeWarningModal={
 							setOpenDesignChangeWarningModal

@@ -24,12 +24,9 @@ class CheckboxList {
 		wp_enqueue_script( 'wc-interactivity-checkbox-list' );
 		wp_enqueue_style( 'wc-interactivity-checkbox-list' );
 
-		$items = $props['items'] ?? array();
-
+		$items                 = $props['items'] ?? array();
 		$checkbox_list_context = array( 'items' => $items );
-
-		// Items should be an array of objects with a label (which can be plaintext or HTML) and value property.
-		$items = $props['items'] ?? array();
+		$on_change             = $props['on_change'] ?? '';
 
 		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-checkbox-list' ) );
 
@@ -38,11 +35,11 @@ class CheckboxList {
 		<div data-wc-interactive='<?php echo esc_attr( $namespace ); ?>'>
 			<div data-wc-context='<?php echo esc_attr( wp_json_encode( $checkbox_list_context ) ); ?>' >
 			<div class="wc-block-stock-filter style-list">
-					<ul class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list">
+					<ul class="wc-block-components-checkbox-list">
 						<?php foreach ( $items as $item ) { ?>
 							<?php $item['id'] = $item['id'] ?? uniqid( 'checkbox-' ); ?>
 							<li>
-								<div class="wc-block-components-checkbox wc-block-checkbox-list__checkbox">
+								<div class="wc-block-components-checkbox">
 									<label for="<?php echo esc_attr( $item['id'] ); ?>">
 										<input 
 											id="<?php echo esc_attr( $item['id'] ); ?>" 
@@ -50,7 +47,7 @@ class CheckboxList {
 											type="checkbox" 
 											aria-invalid="false"
 											data-wc-on--change--select-item="actions.selectCheckboxItem"
-											data-wc-on--change--parent-action="<?php echo esc_attr( $props['on_change'] ?? '' ); ?>"
+											data-wc-on--change--parent-action="<?php echo esc_attr( $on_change ); ?>"
 											value="<?php echo esc_attr( $item['value'] ); ?>"
 											<?php checked( $item['checked'], 1 ); ?>
 										>

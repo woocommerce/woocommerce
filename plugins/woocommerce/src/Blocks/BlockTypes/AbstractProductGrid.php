@@ -614,6 +614,10 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			return '';
 		}
 
+		if ( empty( $this->attributes['contentVisibility']['image'] ) ) {
+			return '';
+		}
+
 		if ( ! $product->is_on_sale() ) {
 			return;
 		}
@@ -661,6 +665,18 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		) {
 			$attributes['class'] .= ' ajax_add_to_cart';
 		}
+
+		/**
+		 * Filter to manipulate (add/modify/remove) attributes in the HTML code of the generated add to cart button.
+		 *
+		 * @since 8.6.0
+		 *
+		 * @param array      $attributes An associative array containing default HTML attributes of the add to cart button.
+		 * @param WC_Product $product    The WC_Product instance of the product that will be added to the cart once the button is pressed.
+		 *
+		 * @return array Returns an associative array derived from the default array passed as an argument and added the extra HTML attributes.
+		 */
+		$attributes = apply_filters( 'woocommerce_blocks_product_grid_add_to_cart_attributes', $attributes, $product );
 
 		return sprintf(
 			'<a href="%s" %s>%s</a>',

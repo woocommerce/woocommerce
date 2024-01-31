@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const orderBatchId = new Array();
+const orderBatchId = [];
 const statusColumnTextSelector = 'mark.order-status > span';
 
 // Define order statuses to filter against

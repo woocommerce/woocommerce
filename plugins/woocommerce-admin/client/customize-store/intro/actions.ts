@@ -11,6 +11,7 @@ import { customizeStoreStateMachineEvents } from '..';
 import {
 	aiStatusResponse,
 	customizeStoreStateMachineContext,
+	FlowType,
 	RecommendThemesAPIResponse,
 } from '../types';
 import { events } from './';
@@ -109,7 +110,7 @@ export const assignAiStatus = assign<
 	customizeStoreStateMachineContext,
 	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
 >( {
-	aiOnline: ( _context, _event ) => {
+	flowType: ( _context, _event ) => {
 		const indicator = ( _event as DoneInvokeEvent< aiStatusResponse > ).data
 			.status.indicator;
 		const status = indicator !== 'critical' && indicator !== 'major';
@@ -120,7 +121,7 @@ export const assignAiStatus = assign<
 			online: status ? 'yes' : 'no',
 		} );
 
-		return status;
+		return status ? FlowType.AIOnline : FlowType.AIOffline;
 	},
 } );
 
@@ -128,13 +129,29 @@ export const assignAiOffline = assign<
 	customizeStoreStateMachineContext,
 	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
 >( {
-	aiOnline: () => {
+	flowType: () => {
 		// @ts-expect-error temp workaround;
 		window.cys_aiOnline = false;
 		recordEvent( 'customize_your_store_ai_status', {
 			online: 'no',
 		} );
 
-		return false;
+		return FlowType.AIOffline;
+	},
+} );
+
+export const assignNoAI = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
+>( {
+	flowType: FlowType.noAI,
+} );
+
+export const assignNoAIFlowError = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	intro: ( context ) => {
+		return { ...context.intro, hasErrors: true };
 	},
 } );

@@ -21,19 +21,23 @@ export const BaseIntroBanner = ( {
 	bannerTitle,
 	bannerText,
 	bannerClass,
+	showAIDisclaimer,
 	buttonIsLink,
 	bannerButtonOnClick,
 	bannerButtonText,
 	secondaryButton,
+	previewBanner,
 	children,
 }: {
 	bannerTitle: string;
 	bannerText: string;
 	bannerClass: string;
+	showAIDisclaimer: boolean;
 	buttonIsLink?: boolean;
 	bannerButtonOnClick?: () => void;
 	bannerButtonText?: string;
 	secondaryButton?: React.ReactNode;
+	previewBanner?: React.ReactNode;
 	children?: React.ReactNode;
 } ) => {
 	return (
@@ -58,26 +62,29 @@ export const BaseIntroBanner = ( {
 						</Button>
 					) }
 					{ secondaryButton }
-					<p className="ai-disclaimer">
-						{ interpolateComponents( {
-							mixedString: __(
-								'Powered by experimental AI. {{link}}Learn more{{/link}}',
-								'woocommerce'
-							),
-							components: {
-								link: (
-									<Link
-										href="https://automattic.com/ai-guidelines"
-										target="_blank"
-										type="external"
-									/>
+					{ showAIDisclaimer && (
+						<p className="ai-disclaimer">
+							{ interpolateComponents( {
+								mixedString: __(
+									'Powered by experimental AI. {{link}}Learn more{{/link}}',
+									'woocommerce'
 								),
-							},
-						} ) }
-					</p>
+								components: {
+									link: (
+										<Link
+											href="https://automattic.com/ai-guidelines"
+											target="_blank"
+											type="external"
+										/>
+									),
+								},
+							} ) }
+						</p>
+					) }
 				</div>
 				{ children }
 			</div>
+			{ previewBanner }
 		</div>
 	);
 };
@@ -95,6 +102,7 @@ export const NetworkOfflineBanner = () => {
 			) }
 			bannerClass="offline-banner"
 			bannerButtonOnClick={ () => {} }
+			showAIDisclaimer={ true }
 		/>
 	);
 };
@@ -122,6 +130,7 @@ export const JetpackOfflineBanner = ( {
 				} );
 			} }
 			bannerButtonText={ __( 'Find out how', 'woocommerce' ) }
+			showAIDisclaimer={ true }
 		/>
 	);
 };
@@ -147,6 +156,7 @@ export const ExistingThemeBanner = ( {
 				setOpenDesignChangeWarningModal( true );
 			} }
 			bannerButtonText={ __( 'Design with AI', 'woocommerce' ) }
+			showAIDisclaimer={ true }
 		/>
 	);
 };
@@ -174,6 +184,7 @@ export const DefaultBanner = ( {
 				} );
 			} }
 			bannerButtonText={ __( 'Design with AI', 'woocommerce' ) }
+			showAIDisclaimer={ true }
 		/>
 	);
 };
@@ -199,6 +210,31 @@ export const ThemeHasModsBanner = ( {
 				setOpenDesignChangeWarningModal( true );
 			} }
 			bannerButtonText={ __( 'Design with AI', 'woocommerce' ) }
+			showAIDisclaimer={ true }
+		/>
+	);
+};
+
+export const NoAIBanner = ( {
+	sendEvent,
+}: {
+	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
+} ) => {
+	return (
+		<BaseIntroBanner
+			bannerTitle={ __( 'Design your own', 'woocommerce' ) }
+			bannerText={ __(
+				'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
+				'woocommerce'
+			) }
+			bannerClass="no-ai-banner"
+			bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
+			bannerButtonOnClick={ () => {
+				sendEvent( {
+					type: 'DESIGN_WITHOUT_AI',
+				} );
+			} }
+			showAIDisclaimer={ false }
 		/>
 	);
 };
@@ -246,6 +282,7 @@ export const ExistingAiThemeBanner = ( {
 			} }
 			bannerButtonText={ __( 'Customize', 'woocommerce' ) }
 			secondaryButton={ secondaryButton }
+			showAIDisclaimer={ true }
 		>
 			<div className={ 'woocommerce-block-preview-container' }>
 				<div className="iframe-container">
@@ -253,5 +290,35 @@ export const ExistingAiThemeBanner = ( {
 				</div>
 			</div>
 		</BaseIntroBanner>
+	);
+};
+
+export const ExistingNoAiThemeBanner = () => {
+	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
+
+	return (
+		<BaseIntroBanner
+			bannerTitle={ __( 'Edit your custom theme', 'woocommerce' ) }
+			bannerText={ __(
+				'Continue to customize your store using the store designer. Change your color palette, fonts, page layouts, and more.',
+				'woocommerce'
+			) }
+			bannerClass="existing-no-ai-theme-banner"
+			buttonIsLink={ false }
+			bannerButtonOnClick={ () => {
+				recordEvent( 'customize_your_store_intro_customize_click' );
+				navigateOrParent(
+					window,
+					getNewPath(
+						{ customizing: true },
+						'/customize-store/assembler-hub',
+						{}
+					)
+				);
+			} }
+			bannerButtonText={ __( 'Customize your theme', 'woocommerce' ) }
+			showAIDisclaimer={ false }
+			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
+		></BaseIntroBanner>
 	);
 };

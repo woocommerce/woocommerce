@@ -29,10 +29,10 @@ export class FrontendUtils {
 	async addToCart( itemName = '' ) {
 		await this.page.waitForLoadState( 'domcontentloaded' );
 		if ( itemName !== '' ) {
+			// We can't use `getByRole()` here because the Add to Cart button
+			// might be a button (in blocks) or a link (in the legacy template).
 			await this.page
-				.getByRole( 'button', {
-					name: `Add to cart: “${ itemName }”`,
-				} )
+				.getByLabel( `Add to cart: “${ itemName }”` )
 				.click();
 		} else {
 			await this.page.click( 'text=Add to cart' );
@@ -53,6 +53,12 @@ export class FrontendUtils {
 	async goToCart() {
 		await this.page.goto( '/cart', {
 			waitUntil: 'commit',
+		} );
+	}
+
+	async goToMiniCart() {
+		await this.page.goto( '/mini-cart', {
+			waitUntil: 'domcontentloaded',
 		} );
 	}
 

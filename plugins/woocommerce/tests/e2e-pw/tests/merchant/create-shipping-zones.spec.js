@@ -67,22 +67,19 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				.getByPlaceholder( 'Zone name' )
 				.fill( shippingZoneNameLocalPickup );
 
-			const input = await page.getByPlaceholder(
+			const input = page.getByPlaceholder(
 				'Start typing to filter zones'
 			);
 			input.click();
-			input.type( 'British Columbia, Canada' );
+			input.fill( 'British Columbia, Canada' );
 
 			await page.getByText( 'British Columbia, Canada' ).last().click();
 
 			// Close dropdown
-			await page.keyboard.press( 'Escape' );
+			await page.getByPlaceholder( 'Zone name' ).click();
 
-			await page
-				.getByRole( 'link', {
-					name: 'Limit to specific ZIP/postcodes',
-				} )
-				.click();
+			// Click limit to specific zip or post zone and fill it
+			await page.locator( '.wc-shipping-zone-postcodes-toggle' ).click();
 			await page
 				.getByPlaceholder( 'List 1 postcode per line' )
 				.fill( maynePostal );
@@ -142,16 +139,16 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				.getByPlaceholder( 'Zone name' )
 				.fill( shippingZoneNameFreeShip );
 
-			const input = await page.getByPlaceholder(
+			const input = page.getByPlaceholder(
 				'Start typing to filter zones'
 			);
 			input.click();
-			input.type( 'British Columbia, Canada' );
+			input.fill( 'British Columbia, Canada' );
 
 			await page.getByText( 'British Columbia, Canada' ).last().click();
 
 			// Close dropdown
-			await page.keyboard.press( 'Escape' );
+			await page.getByPlaceholder( 'Zone name' ).click();
 
 			await page
 				.getByRole( 'button', { name: 'Add shipping method' } )
@@ -206,16 +203,16 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				.getByPlaceholder( 'Zone name' )
 				.fill( shippingZoneNameFlatRate );
 
-			const input = await page.getByPlaceholder(
+			const input = page.getByPlaceholder(
 				'Start typing to filter zones'
 			);
 			input.click();
-			input.type( 'Canada' );
+			input.fill( 'Canada' );
 
 			await page.getByText( 'Canada' ).last().click();
 
 			// Close dropdown
-			await page.keyboard.press( 'Escape' );
+			await page.getByPlaceholder( 'Zone name' ).click();
 
 			await page
 				.getByRole( 'button', { name: 'Add shipping method' } )
@@ -277,7 +274,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			);
 			await page.locator( '#zone_name' ).fill( shippingZoneNameUSRegion );
 
-			const input = await page.getByPlaceholder(
+			const input = page.getByPlaceholder(
 				'Start typing to filter zones'
 			);
 			input.click();
@@ -343,7 +340,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			);
 			await page.locator( '#zone_name' ).fill( shippingZoneNameFlatRate );
 
-			const input = await page.getByPlaceholder(
+			const input = page.getByPlaceholder(
 				'Start typing to filter zones'
 			);
 			input.click();
@@ -511,7 +508,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		await page.locator( 'button[name=calc_shipping]' ).click();
 		await expect(
 			page.locator( 'button[name=calc_shipping]' )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
@@ -532,7 +529,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		await page.locator( 'button[name=calc_shipping]' ).click();
 		await expect(
 			page.locator( 'button[name=calc_shipping]' )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
@@ -554,7 +551,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		await page.locator( 'button[name=calc_shipping]' ).click();
 		await expect(
 			page.locator( 'button[name=calc_shipping]' )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )

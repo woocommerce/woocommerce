@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Integrations\WPConsentAPI;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
 use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
@@ -26,8 +27,15 @@ class OrderAttributionController implements RegisterHooksInterface {
 
 	use ScriptDebug;
 	use OrderAttributionMeta {
-		get_prefixed_field as public;
+		get_prefixed_field_name as public;
 	}
+
+	/**
+	 * The WPConsentAPI integration instance.
+	 *
+	 * @var WPConsentAPI
+	 */
+	private $consent;
 
 	/**
 	 * The FeatureController instance.
@@ -59,11 +67,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 *
 	 * @param LegacyProxy         $proxy      The legacy proxy.
 	 * @param FeaturesController  $controller The feature controller.
+	 * @param WPConsentAPI        $consent    The WPConsentAPI integration.
 	 * @param WC_Logger_Interface $logger     The logger object. If not provided, it will be obtained from the proxy.
 	 */
-	final public function init( LegacyProxy $proxy, FeaturesController $controller, ?WC_Logger_Interface $logger = null ) {
+	final public function init( LegacyProxy $proxy, FeaturesController $controller, WPConsentAPI $consent, ?WC_Logger_Interface $logger = null ) {
 		$this->proxy              = $proxy;
 		$this->feature_controller = $controller;
+		$this->consent            = $consent;
 		$this->logger             = $logger ?? $proxy->call_function( 'wc_get_logger' );
 		$this->set_fields_and_prefix();
 	}
@@ -84,6 +94,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 			return;
 		}
 
+		// Register WPConsentAPI integration.
+		$this->consent->register();
+
 		add_action(
 			'wp_enqueue_scripts',
 			function() {
@@ -98,13 +111,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 			}
 		);
 
-		// Include our hidden fields on order notes and registration form.
-		$source_form_fields = function() {
-			$this->source_form_fields();
+		// Include our hidden `<input>` elements on order notes and registration form.
+		$source_form_elements = function() {
+			$this->source_form_elements();
 		};
 
-		add_action( 'woocommerce_after_order_notes', $source_form_fields );
-		add_action( 'woocommerce_register_form', $source_form_fields );
+		add_action( 'woocommerce_after_order_notes', $source_form_elements );
+		add_action( 'woocommerce_register_form', $source_form_elements );
 
 		// Update order based on submitted fields.
 		add_action(
@@ -112,7 +125,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			function( $order ) {
 				// Nonce check is handled by WooCommerce before woocommerce_checkout_order_created hook.
 				// phpcs:ignore WordPress.Security.NonceVerification
-				$params = $this->get_unprefixed_fields( $_POST );
+				$params = $this->get_unprefixed_field_values( $_POST );
 				/**
 				 * Run an action to save order attribution data.
 				 *
@@ -175,18 +188,18 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 */
 	private function maybe_set_admin_source( WC_Order $order ) {
 		if ( function_exists( 'is_admin' ) && is_admin() ) {
-			$order->add_meta_data( $this->get_meta_prefixed_field( 'type' ), 'admin' );
+			$order->add_meta_data( $this->get_meta_prefixed_field_name( 'source_type' ), 'admin' );
 			$order->save();
 		}
 	}
 
 	/**
-	 * Get all of the fields.
+	 * Get all of the field names.
 	 *
 	 * @return array
 	 */
-	public function get_fields(): array {
-		return $this->fields;
+	public function get_field_names(): array {
+		return $this->field_names;
 	}
 
 	/**
@@ -213,6 +226,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 		wp_enqueue_script(
 			'wc-order-attribution',
 			plugins_url( "assets/js/frontend/order-attribution{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
+			// Technically we do depend on 'wp-data', 'wc-blocks-checkout' for blocks checkout,
+			// but as implementing conditional dependency on the server-side would be too complex,
+			// we resolve this condition at the client-side.
 			array( 'sourcebuster-js' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
@@ -254,8 +270,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 				'session'       => $session_length,
 				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
 				'prefix'        => $this->field_prefix,
-				'allowTracking' => $allow_tracking,
+				'allowTracking' => 'yes' === $allow_tracking,
 			),
+			'fields' => $this->fields,
 		);
 
 		wp_localize_script( 'wc-order-attribution', 'wc_order_attribution', $namespace );
@@ -308,8 +325,8 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function output_origin_column( WC_Order $order ) {
-		$source_type = $order->get_meta( $this->get_meta_prefixed_field( 'type' ) );
-		$source      = $order->get_meta( $this->get_meta_prefixed_field( 'utm_source' ) );
+		$source_type = $order->get_meta( $this->get_meta_prefixed_field_name( 'source_type' ) );
+		$source      = $order->get_meta( $this->get_meta_prefixed_field_name( 'utm_source' ) );
 		$origin      = $this->get_origin_label( $source_type, $source );
 		if ( empty( $origin ) ) {
 			$origin = __( 'Unknown', 'woocommerce' );
@@ -318,11 +335,12 @@ class OrderAttributionController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Add attribution hidden input fields for checkout & customer register froms.
+	 * Add `<input type="hidden">` elements for source fields.
+	 * Used for checkout & customer register froms.
 	 */
-	private function source_form_fields() {
-		foreach ( $this->fields as $field ) {
-			printf( '<input type="hidden" name="%s" value="" />', esc_attr( $this->get_prefixed_field( $field ) ) );
+	private function source_form_elements() {
+		foreach ( $this->field_names as $field_name ) {
+			printf( '<input type="hidden" name="%s" value="" />', esc_attr( $this->get_prefixed_field_name( $field_name ) ) );
 		}
 	}
 
@@ -336,8 +354,8 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private function set_customer_source_data( WC_Customer $customer ) {
 		// Nonce check is handled before user_register hook.
 		// phpcs:ignore WordPress.Security.NonceVerification
-		foreach ( $this->get_source_values( $this->get_unprefixed_fields( $_POST ) ) as $key => $value ) {
-			$customer->add_meta_data( $this->get_meta_prefixed_field( $key ), $value );
+		foreach ( $this->get_source_values( $this->get_unprefixed_field_values( $_POST ) ) as $key => $value ) {
+			$customer->add_meta_data( $this->get_meta_prefixed_field_name( $key ), $value );
 		}
 
 		$customer->save_meta_data();
@@ -352,8 +370,12 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function set_order_source_data( array $source_data, WC_Order $order ) {
+		// If all the values are empty, bail.
+		if ( empty( array_filter( $source_data ) ) ) {
+			return;
+		}
 		foreach ( $source_data as $key => $value ) {
-			$order->add_meta_data( $this->get_meta_prefixed_field( $key ), $value );
+			$order->add_meta_data( $this->get_meta_prefixed_field_name( $key ), $value );
 		}
 
 		$order->save_meta_data();
@@ -395,7 +417,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 */
 	private function send_order_tracks( array $source_data, WC_Order $order ) {
 		$origin_label        = $this->get_origin_label(
-			$source_data['type'] ?? '',
+			$source_data['source_type'] ?? '',
 			$source_data['utm_source'] ?? '',
 			false
 		);
@@ -403,10 +425,10 @@ class OrderAttributionController implements RegisterHooksInterface {
 		$customer_info       = $this->get_customer_history( $customer_identifier );
 		$tracks_data         = array(
 			'order_id'             => $order->get_id(),
-			'type'                 => $source_data['type'] ?? '',
+			'source_type'          => $source_data['source_type'] ?? '',
 			'medium'               => $source_data['utm_medium'] ?? '',
 			'source'               => $source_data['utm_source'] ?? '',
-			'device_type'          => strtolower( $source_data['device_type'] ?? '(unknown)' ),
+			'device_type'          => strtolower( $source_data['device_type'] ?? 'unknown' ),
 			'origin_label'         => strtolower( $origin_label ),
 			'session_pages'        => $source_data['session_pages'] ?? 0,
 			'session_count'        => $source_data['session_count'] ?? 0,

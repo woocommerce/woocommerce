@@ -1,5 +1,6 @@
 ---
 post_title: Add a message above the login / register form
+tags: code-snippet
 ---
 
 This code will add a custom message above the login/register form on the user's my-account page.
@@ -30,7 +31,7 @@ if ( ! function_exists( 'YOUR_PREFIX_login_message' ) ) {
 }
 ```
 
-Please note that for this code to work, the following options must be checked in the WooCommerce “Accounts & Privacy” settings:
+Please note that for this code to work, the following options must be checked in the WooCommerce "Accounts & Privacy" settings:
 
 -   Allow customers to create an account during checkout.
 -   Allow customers to create an account on the "My Account" page.

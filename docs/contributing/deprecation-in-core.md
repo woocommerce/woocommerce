@@ -1,5 +1,7 @@
 ---
 post_title: Deprecation in core
+menu_title: Deprecation in core
+tags: reference
 ---
 
 Deprecation is a method of discouraging usage of a feature or practice in favour of something else without breaking backwards compatibility or totally prohibiting its usage. To quote the Wikipedia article on Deprecation:
@@ -27,7 +29,7 @@ When we deprecate something in WooCommerce, we take a few actions to make it cle
 
 The function or method itself is not removed from the codebase. This preserves backwards compatibility until removed - usually over a year or several major releases into the future.
 
-We mentioned `wc_deprecated_function` above – this is our own wrapper for the `_deprecated_function` WordPress function. It works very similar except for that it forces a log entry instead of displaying it - regardless of the value of `WP_DEBUG` during AJAX events - so that AJAX requests are not broken by the notice.
+We mentioned `wc_deprecated_function` above - this is our own wrapper for the `_deprecated_function` WordPress function. It works very similar except for that it forces a log entry instead of displaying it - regardless of the value of `WP_DEBUG` during AJAX events - so that AJAX requests are not broken by the notice.
 
 ## What happens when a deprecated function is called?
 

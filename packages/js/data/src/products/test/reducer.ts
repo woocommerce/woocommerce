@@ -16,6 +16,7 @@ const defaultState: ProductState = {
 	errors: {},
 	data: {},
 	pending: {},
+	suggestedProducts: {},
 };
 
 describe( 'products reducer', () => {
@@ -42,6 +43,7 @@ describe( 'products reducer', () => {
 				2: { id: 2, name: 'Sauce', status: 'publish' },
 			},
 			pending: {},
+			suggestedProducts: {},
 		};
 		const update: PartialProduct = {
 			id: 2,
@@ -252,6 +254,7 @@ describe( 'products reducer', () => {
 					2: true,
 				},
 			},
+			suggestedProducts: {},
 		};
 		const product: PartialProduct = {
 			id: 2,
@@ -322,6 +325,7 @@ describe( 'products reducer', () => {
 					2: true,
 				},
 			},
+			suggestedProducts: {},
 		};
 		const product: PartialProduct = {
 			id: 1,

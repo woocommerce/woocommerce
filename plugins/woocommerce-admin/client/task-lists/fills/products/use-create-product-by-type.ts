@@ -16,7 +16,7 @@ import { createNoticesFromResponse } from '../../../lib/notices';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 const EXPERIMENT_NAME =
-	'woocommerce_product_creation_experience_add_external_and_grouped_202401_v1';
+	'woocommerce_product_creation_experience_linked_products_202402_v1';
 
 export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
