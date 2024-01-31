@@ -18,7 +18,7 @@ const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
 
 type Store = typeof productGallery & StorePart< ProductGallery >;
-const { state } = store< Store >( 'woocommerce/product-gallery' );
+const { state, actions } = store< Store >( 'woocommerce/product-gallery' );
 
 const selectImage = (
 	context: ProductGalleryContext,
@@ -55,6 +55,9 @@ const productGallery = {
 		get pagerButtonPressed(): boolean {
 			return state.isSelected ? true : false;
 		},
+		get thumbnailTabIndex(): string {
+			return state.isSelected ? '0' : '-1';
+		},
 	},
 	actions: {
 		closeDialog: () => {
@@ -86,6 +89,16 @@ const productGallery = {
 			const context = getContext();
 			if ( event.code === 'Enter' ) {
 				context.selectedImage = context.imageId;
+			}
+		},
+		onSelectedLargeImageKeyDown: ( event: KeyboardEvent ) => {
+			if ( state.isSelected && event.code === 'Enter' ) {
+				actions.openDialog();
+			}
+		},
+		onViewAllImagesKeyDown: ( event: KeyboardEvent ) => {
+			if ( event.code === 'Enter' ) {
+				actions.openDialog();
 			}
 		},
 	},
