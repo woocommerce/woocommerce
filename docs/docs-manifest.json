@@ -733,7 +733,7 @@
           "menu_title": "Core critical flows",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/core-critical-flows.md",
-          "hash": "c1380271cea0f15a4be3d2a96b94cfaa0b1b0b098cf717db58640d8f84da1c66",
+          "hash": "51529e3c07276ea267763d7520f1ca8d8b37eda4337ec97b4c8d19231f3a0334",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/core-critical-flows.md",
           "id": "e561b46694dba223c38b87613ce4907e4e14333a"
         },
@@ -1191,5 +1191,5 @@
       "categories": []
     }
   ],
-  "hash": "7e5dbc1e6e4e5191e2ad42a11ded70379385e7c3a923b31d8f4bb717005dee46"
+  "hash": "f5c8de9fa3200fa1b67e6da03a853285badd8692ce6864949a30715d173b52ec"
 }
