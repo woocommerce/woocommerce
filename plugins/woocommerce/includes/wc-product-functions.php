@@ -1572,6 +1572,8 @@ function wc_update_product_lookup_tables_column( $column ) {
 						, 1, 0 )
 					",
 					$decimals,
+					$decimals,
+					$decimals,
 					$decimals
 				)
 			);
