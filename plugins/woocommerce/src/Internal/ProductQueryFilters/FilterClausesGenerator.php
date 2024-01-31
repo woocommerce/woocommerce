@@ -193,7 +193,7 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 		if ( ! empty( $clauses ) ) {
 			// "temp" is needed because the extra derived tables require an alias.
 			$args['where'] .= ' AND (' . join( ' temp ) AND ', $clauses ) . ' temp ))';
-		} elseif ( ! empty( $attributes_to_filter_by ) ) {
+		} elseif ( ! empty( $chosen_attributes ) ) {
 			$args['where'] .= ' AND 1=0';
 		}
 
