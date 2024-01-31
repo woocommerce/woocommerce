@@ -39,15 +39,21 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 
 		$wp_query->set( 'filter_stock_status', 'instock' );
-		$this->test_get_filtered_price_with( $wp_query, function( $product_data ) {
-			return $product_data['stock_status'] === 'instock';
-		} );
+		$this->test_get_filtered_price_with(
+			$wp_query,
+			function( $product_data ) {
+				return $product_data['stock_status'] === 'instock';
+			}
+		);
 
 		$wp_query->set( 'filter_stock_status', 'outofstock,onbackorder' );
-		$this->test_get_filtered_price_with( $wp_query, function( $product_data ) {
-			return $product_data['stock_status'] === 'outofstock' ||
+		$this->test_get_filtered_price_with(
+			$wp_query,
+			function( $product_data ) {
+				return $product_data['stock_status'] === 'outofstock' ||
 				$product_data['stock_status'] === 'onbackorder';
-		} );
+			}
+		);
 	}
 
 	public function test_get_stock_status_counts_with_default_query() {
@@ -59,25 +65,28 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 	public function test_get_stock_status_counts_with_min_price() {
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 		$wp_query->set( 'min_price', 20 );
-		$this->test_get_stock_status_counts_with( $wp_query, function( $product_data ) {
-			if ( ! isset( $product_data['variations'] ) ) {
-				return $product_data['regular_price'] >= 20;
-			}
-
-			foreach( $product_data['variations'] as $variation_data ) {
-				if( $variation_data['props']['regular_price'] < 20 ) {
-					return false;
+		$this->test_get_stock_status_counts_with(
+			$wp_query,
+			function( $product_data ) {
+				if ( ! isset( $product_data['variations'] ) ) {
+					return $product_data['regular_price'] >= 20;
 				}
+
+				foreach ( $product_data['variations'] as $variation_data ) {
+					if ( $variation_data['props']['regular_price'] < 20 ) {
+						return false;
+					}
+				}
+				return true;
 			}
-			return true;
-		} );
+		);
 	}
 
 	public function test_get_rating_counts_with_default_query() {
-		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+		$wp_query   = new \WP_Query( array( 'post_type' => 'product' ) );
 		$query_vars = array_filter( $wp_query->query_vars );
 
-		$actual_rating_counts = (array) $this->sut->get_rating_counts( $query_vars );
+		$actual_rating_counts   = (array) $this->sut->get_rating_counts( $query_vars );
 		$expected_rating_counts = array(
 			3 => 1,
 			5 => 2,
@@ -94,7 +103,7 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 		$wp_query->set( 'min_price', 20 );
 		$query_vars = array_filter( $wp_query->query_vars );
 
-		$actual_rating_counts = (array) $this->sut->get_rating_counts( $query_vars );
+		$actual_rating_counts   = (array) $this->sut->get_rating_counts( $query_vars );
 		$expected_rating_counts = array(
 			3 => 1,
 			5 => 1,
@@ -107,13 +116,13 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 	}
 
 	public function test_get_attribute_counts_with_default_query() {
-		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
-		$query_vars = array_filter( $wp_query->query_vars );
+		$wp_query                = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars              = array_filter( $wp_query->query_vars );
 		$actual_attribute_counts = (array) $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
 
 		$expected_attribute_counts = array();
-		foreach( get_terms( array('taxonomy' => 'pa_color') ) as $term ) {
-			$expected_attribute_counts[$term->term_id] = $term->count;
+		foreach ( get_terms( array( 'taxonomy' => 'pa_color' ) ) as $term ) {
+			$expected_attribute_counts[ $term->term_id ] = $term->count;
 		}
 
 		$this->assertEqualsCanonicalizing( $expected_attribute_counts, $actual_attribute_counts );
@@ -122,13 +131,13 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 	public function test_get_attribute_counts_with_max_price() {
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 		$wp_query->set( 'max_price', 55 );
-		$query_vars = array_filter( $wp_query->query_vars );
+		$query_vars              = array_filter( $wp_query->query_vars );
 		$actual_attribute_counts = (array) $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
 
 		$expected_attribute_counts = array();
-		foreach( get_terms( array('taxonomy' => 'pa_color') ) as $term ) {
-			if( in_array( $term->name, array( 'red', 'green' ) ) ) {
-				$expected_attribute_counts[$term->term_id] = 1;
+		foreach ( get_terms( array( 'taxonomy' => 'pa_color' ) ) as $term ) {
+			if ( in_array( $term->name, array( 'red', 'green' ) ) ) {
+				$expected_attribute_counts[ $term->term_id ] = 1;
 			}
 		}
 
@@ -141,12 +150,12 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 		$actual_stock_status_counts = (array) $this->sut->get_stock_status_counts( $query_vars );
 
 		$expected_stock_status_counts = array(
-			'instock' => 0,
-			'outofstock' => 0,
+			'instock'     => 0,
+			'outofstock'  => 0,
 			'onbackorder' => 0,
 		);
 
-		if( $filter_callback ) {
+		if ( $filter_callback ) {
 			$filtered_product_data = array_filter(
 				$this->products_data,
 				$filter_callback
@@ -155,8 +164,8 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 			$filtered_product_data = $this->products_data;
 		}
 
-		foreach($filtered_product_data as $product_data ) {
-			$expected_stock_status_counts[$product_data['stock_status']] += 1;
+		foreach ( $filtered_product_data as $product_data ) {
+			$expected_stock_status_counts[ $product_data['stock_status'] ] += 1;
 		}
 
 		$this->assertEqualsCanonicalizing( $expected_stock_status_counts, $actual_stock_status_counts );
@@ -167,7 +176,7 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 
 		$prices = array();
 
-		if( $filter_callback ) {
+		if ( $filter_callback ) {
 			$filtered_product_data = array_filter(
 				$this->products_data,
 				$filter_callback
@@ -176,11 +185,11 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 			$filtered_product_data = $this->products_data;
 		}
 
-		foreach( $filtered_product_data as $product_data ) {
+		foreach ( $filtered_product_data as $product_data ) {
 			$prices[] = $product_data['regular_price'] ?? null;
 
 			if ( isset( $product_data['variations'] ) ) {
-				foreach( $product_data['variations'] as $variation_data ) {
+				foreach ( $product_data['variations'] as $variation_data ) {
 					$prices[] = $variation_data['props']['regular_price'] ?? null;
 				}
 			}
@@ -190,8 +199,8 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 		$prices = array_map( 'intval', $prices );
 
 		$expected_price_range = array(
-			'min_price' => min($prices),
-			'max_price' => max($prices),
+			'min_price' => min( $prices ),
+			'max_price' => max( $prices ),
 		);
 
 		$actual_price_range = (array) $this->sut->get_filtered_price( $query_vars );

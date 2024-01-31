@@ -117,7 +117,7 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 			array_filter(
 				$this->products,
 				function( \WC_Product $product ) use ( $price_range ) {
-					if ( $product->is_type('variable') ) {
+					if ( $product->is_type( 'variable' ) ) {
 						$product_price = $product->get_variation_price();
 					} else {
 						$product_price = $product->get_regular_price();
