@@ -33,10 +33,10 @@ export const fetchThemeCards = async () => {
 export const fetchActiveThemeHasMods = async (
 	context: customizeStoreStateMachineContext
 ) => {
+	console.log( 'fetchActiveThemeHasMods', context.intro.activeThemeHasMods );
 	if ( context.intro.activeThemeHasMods !== undefined ) {
-		return {
-			activeThemeHasMods: context.intro.activeThemeHasMods,
-		};
+		console.log( 'fetchActiveThemeHasMods returning cached value' );
+		return context.intro.activeThemeHasMods;
 	}
 
 	const currentTemplatePromise =
@@ -76,9 +76,7 @@ export const fetchActiveThemeHasMods = async (
 		styleRevs?.length > 0 ||
 		hasModifiedPages;
 
-	return {
-		activeThemeHasMods,
-	};
+	return activeThemeHasMods;
 };
 
 export const fetchIntroData = async (
@@ -116,7 +114,7 @@ export const fetchIntroData = async (
 
 	const customizeStoreTaskCompleted = task?.isComplete;
 
-	const activeThemeHasMods = fetchActiveThemeHasMods( context );
+	const activeThemeHasMods = await fetchActiveThemeHasMods( context );
 
 	return {
 		activeThemeHasMods,
