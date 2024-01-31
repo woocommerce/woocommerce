@@ -57,15 +57,6 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
 
-            - name: Run Playwright E2E tests on chrome-new-editor.
-              timeout-minutes: 60
-              id: run_playwright_e2e_tests_new_editor
-              env:
-                  USE_WP_ENV: 1
-                  ENABLE_HPOS: 0
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --project=chrome-new-editor --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
-
             - name: Upload reports to GitHub Actions Artifacts
               if: always()
               uses: actions/upload-artifact@v4
