@@ -80,6 +80,11 @@ For technical reasons, images cannot currently be imported into the Woo Develope
 
 We understand that this process currently isn't ideal, and we're working to improve the contributor experience.
 
+### Linking to Other Pages
+It can often be useful to link to other pages in WooCommerce's developer documentation to provide context or additional information. You should link to the markdown file for a page, rather than the page itself when linking internally. For example, to link to [*Setting up your development environment*](https://developer.woo.com/docs/setting-up-your-development-environment/) from a doc in a different category, you should link to `../getting-started/development-environment.md`.
+
+To link to non-markdown files, or to files outside the `/docs` folder in WooCommerce's monorepo, you should use the full link (for example, `https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/packages/prices/utils/price.ts`).
+
 ## Creating New Categories
 
 Before creating a new category, you should consider whether it is truly necessary to do so. Where possible, you should default to creating content in an existing category. If you do need to create a new category, follow these steps:
