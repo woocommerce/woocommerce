@@ -540,6 +540,7 @@ declare global {
 
 // HACK: This is a temporary solution to pass flags computed into the iframe instance state machines.
 // This is needed because the iframe loads the entire Customize Store app. This means that the iframe instance will have different state machines than the parent window.
+// Check https://github.com/woocommerce/woocommerce/pull/44206 for more details.
 const setFlagsForIframeInstance = async (
 	send: (
 		event: customizeStoreStateMachineEvents,
