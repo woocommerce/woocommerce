@@ -23,6 +23,10 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 
 		$container = wc_get_container();
 		$this->sut = $container->get( FilterDataProvider::class );
+
+		$this->fixture_data->add_product_review( $this->products[0]->get_id(), 5 );
+		$this->fixture_data->add_product_review( $this->products[1]->get_id(), 3 );
+		$this->fixture_data->add_product_review( $this->products[3]->get_id(), 5 );
 	}
 
 	public function test_get_filtered_price() {
@@ -63,6 +67,39 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 		} );
 	}
 
+	public function test_get_rating_counts_with_default_query() {
+		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars = array_filter( $wp_query->query_vars );
+
+		$actual_rating_counts = (array) $this->sut->get_rating_counts( $query_vars );
+		$expected_rating_counts = array(
+			3 => 1,
+			5 => 2,
+		);
+
+		$this->assertEqualsCanonicalizing(
+			$expected_rating_counts,
+			$actual_rating_counts
+		);
+	}
+
+	public function test_get_rating_counts_with_min_price() {
+		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+		$wp_query->set( 'min_price', 20 );
+		$query_vars = array_filter( $wp_query->query_vars );
+
+		$actual_rating_counts = (array) $this->sut->get_rating_counts( $query_vars );
+		$expected_rating_counts = array(
+			3 => 1,
+			5 => 1,
+		);
+
+		$this->assertEqualsCanonicalizing(
+			$expected_rating_counts,
+			$actual_rating_counts
+		);
+	}
+
 	private function test_get_stock_status_counts_with( $wp_query, $filter_callback = null ) {
 		$query_vars = array_filter( $wp_query->query_vars );
 
@@ -86,7 +123,6 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 		foreach($filtered_product_data as $product_data ) {
 			$expected_stock_status_counts[$product_data['stock_status']] += 1;
 		}
-		var_dump( $expected_stock_status_counts, $actual_stock_status_counts );
 
 		$this->assertEqualsCanonicalizing( $expected_stock_status_counts, $actual_stock_status_counts );
 	}
