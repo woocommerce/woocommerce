@@ -51,10 +51,6 @@ export default class PackagePrepare extends Command {
 			default: false,
 			description: 'Perform prepare function on all packages.',
 		} ),
-		// 'skip-install': Flags.boolean( {
-		// 	description: 'Skip composer install',
-		// 	default: false,
-		// } ),
 		'initial-release': Flags.boolean( {
 			default: false,
 			description: "Create a package's first release to NPM",
@@ -72,10 +68,7 @@ export default class PackagePrepare extends Command {
 		}
 
 		if ( flags.all ) {
-			await this.preparePackages(
-				getAllPackges(),
-				flags[ 'initial-release' ]
-			);
+			await this.preparePackages( getAllPackges() );
 			return;
 		}
 
