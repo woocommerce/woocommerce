@@ -33,12 +33,17 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 	private $products;
 
 	public function test_price_clauses() {
-		for( $x = 0; $x <= 10; $x++ ) {
+		for ( $x = 0; $x <= 10; $x++ ) {
 			$min = rand( 10, 60 );
 			$max = rand( 50, 100 );
 			$this->test_price_clauses_with( array( 'min_price' => $min ) );
 			$this->test_price_clauses_with( array( 'max_price' => $max ) );
-			$this->test_price_clauses_with( array( 'min_price' => $min, 'max_price' => $max ) );
+			$this->test_price_clauses_with(
+				array(
+					'min_price' => $min,
+					'max_price' => $max,
+				)
+			);
 		}
 	}
 
@@ -51,40 +56,50 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	public function test_attribute_clauses() {
-		$this->test_attribute_clauses_with( array(
-			'pa_color' => array(
-				'terms' => array( 'not-exist-slug' ),
-				'query_type' => 'or'
+		$this->test_attribute_clauses_with(
+			array(
+				'pa_color' => array(
+					'terms'      => array( 'not-exist-slug' ),
+					'query_type' => 'or',
+				),
 			)
-		) );
+		);
 
-		$this->test_attribute_clauses_with( array(
-			'pa_color' => array(
-				'terms' => array( 'red-slug' ),
-				'query_type' => 'or'
+		$this->test_attribute_clauses_with(
+			array(
+				'pa_color' => array(
+					'terms'      => array( 'red-slug' ),
+					'query_type' => 'or',
+				),
 			)
-		) );
+		);
 
-		$this->test_attribute_clauses_with( array(
-			'pa_color' => array(
-				'terms' => array( 'red-slug', 'green-slug' ),
-				'query_type' => 'and'
+		$this->test_attribute_clauses_with(
+			array(
+				'pa_color' => array(
+					'terms'      => array( 'red-slug', 'green-slug' ),
+					'query_type' => 'and',
+				),
 			)
-		) );
+		);
 
-		$this->test_attribute_clauses_with( array(
-			'pa_color' => array(
-				'terms' => array( 'red-slug', 'green-slug' ),
-				'query_type' => 'or'
+		$this->test_attribute_clauses_with(
+			array(
+				'pa_color' => array(
+					'terms'      => array( 'red-slug', 'green-slug' ),
+					'query_type' => 'or',
+				),
 			)
-		) );
+		);
 
-		$this->test_attribute_clauses_with( array(
-			'pa_color' => array(
-				'terms' => array( 'red-slug', 'not-exist-slug' ),
-				'query_type' => 'or'
+		$this->test_attribute_clauses_with(
+			array(
+				'pa_color' => array(
+					'terms'      => array( 'red-slug', 'not-exist-slug' ),
+					'query_type' => 'or',
+				),
 			)
-		) );
+		);
 	}
 
 	/**
@@ -101,49 +116,49 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 		$this->fixture_data = new FixtureData();
 
 		$this->products = array_map(
-			array( $this, 'create_test_product' ) ,
+			array( $this, 'create_test_product' ),
 			array(
 				array(
-					'name' => 'Product 1',
+					'name'          => 'Product 1',
 					'regular_price' => 20,
-					'stock_status' => 'instock',
+					'stock_status'  => 'instock',
 				),
 				array(
-					'name' => 'Product 2',
+					'name'          => 'Product 2',
 					'regular_price' => 30,
-					'stock_status' => 'instock',
+					'stock_status'  => 'instock',
 				),
 				array(
-					'name' => 'Product 3',
+					'name'          => 'Product 3',
 					'regular_price' => 40,
-					'stock_status' => 'outofstock',
+					'stock_status'  => 'outofstock',
 				),
 				array(
-					'name' => 'Product 4',
+					'name'          => 'Product 4',
 					'regular_price' => 50,
-					'stock_status' => 'onbackorder',
+					'stock_status'  => 'onbackorder',
 				),
 				array(
-					'name' => 'Product 5',
+					'name'       => 'Product 5',
 					'variations' => array(
 						array(
 							'attributes' => array(
 								'pa_color' => 'red',
-								'pa_size' => 'small',
+								'pa_size'  => 'small',
 							),
-							'props' => array(
+							'props'      => array(
 								'regular_price' => 50,
-								'stock_status' => 'instock',
+								'stock_status'  => 'instock',
 							),
 						),
 						array(
 							'attributes' => array(
 								'pa_color' => 'green',
-								'pa_size' => 'medium',
+								'pa_size'  => 'medium',
 							),
-							'props' => array(
+							'props'      => array(
 								'regular_price' => 50,
-								'stock_status' => 'instock',
+								'stock_status'  => 'instock',
 							),
 						),
 					),
@@ -195,7 +210,7 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	private function test_price_clauses_with( $price_range ) {
-		$price_range = wp_parse_args(
+		$price_range     = wp_parse_args(
 			$price_range,
 			array(
 				'min_price' => 0,
@@ -268,14 +283,20 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 		remove_filter( 'posts_clauses', $filter_callback );
 
 		$expected_products_name = $this->get_data_from_products_array(
-			array_filter( $this->products, function( \WC_Product $product ) use
-				( $chosen_attributes ) { $product_attributes =
+			array_filter(
+				$this->products,
+				function( \WC_Product $product ) use ( $chosen_attributes ) {
+					$product_attributes =
 					$product->get_attributes(); foreach ( $chosen_attributes as
-					$taxonomy => $data ) { if ( ! in_array( $taxonomy,
-						array_keys( $product_attributes ) ) ) { return false;
+					$taxonomy => $data ) {
+						if ( ! in_array(
+							$taxonomy,
+							array_keys( $product_attributes )
+						) ) {
+							return false;
 						}
 
-						$slugs = $product_attributes[$taxonomy]->get_slugs();
+						$slugs = $product_attributes[ $taxonomy ]->get_slugs();
 
 						if ( 'or' === $data['query_type'] && empty( array_intersect( $data['terms'], $slugs ) ) ) {
 							return false;
@@ -309,14 +330,14 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 
 	private function get_attributes_from_variations( $variations_data ) {
 		$attributes_data = array();
-		foreach( $variations_data as $variation_data ) {
-			foreach( $variation_data['attributes'] as $taxonomy => $slug ) {
+		foreach ( $variations_data as $variation_data ) {
+			foreach ( $variation_data['attributes'] as $taxonomy => $slug ) {
 				$attributes_data[ str_replace( 'pa_', '', $taxonomy ) ][] = $slug;
 			}
 		}
 		return array_map(
-			function( $item ) use ($attributes_data) {
-				return $this->fixture_data->get_product_attribute( $item, $attributes_data[$item] );
+			function( $item ) use ( $attributes_data ) {
+				return $this->fixture_data->get_product_attribute( $item, $attributes_data[ $item ] );
 
 			},
 			array_keys( $attributes_data )
@@ -333,7 +354,7 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 				'taxonomy'               => $taxonomy,
 				'term_id'                => $term_id,
 				'is_variation_attribute' => true,
-				'in_stock' => $product->is_in_stock(),
+				'in_stock'               => $product->is_in_stock(),
 			),
 			array( '%d', '%d', '%s', '%d', '%d', '%d' )
 		);
@@ -341,18 +362,18 @@ class FilterClausesGeneratorTest extends \WC_Unit_Test_Case {
 
 	private function create_test_product( $product_data ) {
 		if ( isset( $product_data['variations'] ) ) {
-			$attributes = $this->get_attributes_from_variations( $product_data['variations'] );
+			$attributes       = $this->get_attributes_from_variations( $product_data['variations'] );
 			$variable_product = $this->fixture_data->get_variable_product(
 				$product_data,
 				$attributes
 			);
-			foreach( $product_data['variations'] as $variation_data ) {
+			foreach ( $product_data['variations'] as $variation_data ) {
 				$variation = $this->fixture_data->get_variation_product(
 					$variable_product->get_id(),
 					$variation_data['attributes'],
 					$variation_data['props']
 				);
-				foreach( $variation_data['attributes'] as $taxonomy => $slug ) {
+				foreach ( $variation_data['attributes'] as $taxonomy => $slug ) {
 					$term = get_term_by( 'slug', "$slug-slug", $taxonomy );
 					$this->update_lookup_table( $variation, $taxonomy, $term->term_id );
 				}
