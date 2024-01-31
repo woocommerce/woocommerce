@@ -96,7 +96,7 @@ const ProductTemplateEdit = ( {
 			columns: 3,
 			shrinkColumns: false,
 		},
-		includeInQueryContext,
+		queryContextIncludes,
 	},
 	__unstableLayoutClassNames,
 }: BlockEditProps< {
@@ -121,8 +121,8 @@ const ProductTemplateEdit = ( {
 		const productCollectionQueryContext: {
 			[ key: string ]: unknown;
 		} = {};
-		if ( includeInQueryContext?.length ) {
-			includeInQueryContext.forEach( ( attribute: string ) => {
+		if ( queryContextIncludes?.length ) {
+			queryContextIncludes.forEach( ( attribute: string ) => {
 				if ( parentCollectionBlockAttributes?.[ attribute ] ) {
 					productCollectionQueryContext[ attribute ] =
 						parentCollectionBlockAttributes[ attribute ];
@@ -130,7 +130,7 @@ const ProductTemplateEdit = ( {
 			} );
 		}
 		return productCollectionQueryContext;
-	}, [ includeInQueryContext, parentCollectionBlockAttributes ] );
+	}, [ queryContextIncludes, parentCollectionBlockAttributes ] );
 
 	const { products, blocks } = useSelect(
 		( select ) => {

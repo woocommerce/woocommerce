@@ -9,20 +9,18 @@ import { useSelect } from '@wordpress/data';
 export const useProductCollectionBlockAttributes = ( clientId: string ) => {
 	return useSelect(
 		( select ) => {
-			const { getBlockParents, getBlockName, getBlockAttributes } =
+			const { getBlockParentsByBlockName, getBlockAttributes } =
 				select( 'core/block-editor' );
 
-			let currentBlockId = clientId;
-			while ( currentBlockId ) {
-				const parentIds = getBlockParents( currentBlockId, true );
-				if ( ! parentIds.length ) break;
+			const parentBlocksClientIds = getBlockParentsByBlockName(
+				clientId,
+				'woocommerce/product-collection',
+				true
+			);
 
-				currentBlockId = parentIds[ 0 ]; // Get the first parent
-				const parentName = getBlockName( currentBlockId );
-
-				if ( parentName === 'woocommerce/product-collection' ) {
-					return getBlockAttributes( currentBlockId );
-				}
+			if ( parentBlocksClientIds.length ) {
+				const closestParentClientId = parentBlocksClientIds[ 0 ];
+				return getBlockAttributes( closestParentClientId );
 			}
 
 			return null;

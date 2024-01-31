@@ -35,7 +35,7 @@
 			"default": [],
 			"type": "array"
 		},
-		"includeInQueryContext": {
+		"queryContextIncludes": {
 			"type": "array"
 		}
 	},
@@ -44,7 +44,7 @@
 		"queryId": "queryId",
 		"query": "query",
 		"displayLayout": "displayLayout",
-		"includeInQueryContext": "includeInQueryContext"
+		"queryContextIncludes": "queryContextIncludes"
 	},
 	"supports": {
 		"align": [ "wide", "full" ],
