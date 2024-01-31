@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Internal\ProductQueryFilters\ClausesProviderInterface;
 use WC_Tax;
 
 /**
@@ -8,7 +9,7 @@ use WC_Tax;
  *
  * Helper class to handle product queries for the API.
  */
-class ProductQuery {
+class ProductQuery implements ClausesProviderInterface {
 	/**
 	 * Prepare query args to pass to WP_Query for a REST API request.
 	 *
