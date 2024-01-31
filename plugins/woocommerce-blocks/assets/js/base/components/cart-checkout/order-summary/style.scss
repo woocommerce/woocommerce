@@ -112,11 +112,14 @@
 
 }
 
-@include breakpoint("<600px") {
-	.wc-block-components-order-summary.wc-block-components-panel,
-	.wc-block-components-totals-coupon {
-		padding-left: $gap-small;
-		padding-right: $gap-small;
+.is-medium,
+.is-small,
+.is-mobile {
+	.wp-block-woocommerce-checkout-order-summary-block
+	{
+		.wc-block-components-totals-wrapper {
+			padding-left: $gap-small;
+			padding-right: $gap-small;
+		}
 	}
 }
-
