@@ -45,7 +45,6 @@
 	},
 	"scripts": {
 		"changelog": "composer install && composer exec -- changelogger",
-		"composer-install": "composer install",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",

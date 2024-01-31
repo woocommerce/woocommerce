@@ -10,8 +10,7 @@
 		"pnpm": "^8.12.1"
 	},
 	"scripts": {
-		"changelog": "composer install && composer exec -- changelogger",
-		"composer-install": "composer install"
+		"changelog": "composer install && composer exec -- changelogger"
 	},
 	"repository": {
 		"type": "git",
