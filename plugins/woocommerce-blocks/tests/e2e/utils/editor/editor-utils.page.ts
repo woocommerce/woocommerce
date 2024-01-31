@@ -47,7 +47,7 @@ export class EditorUtils {
 
 	// todo: Make a PR to @wordpress/e2e-test-utils-playwright to add this method.
 	/**
-	 * Inserts a block after a given client ID.
+	 * Inserts a block inside a given client ID.
 	 *
 	 */
 	async insertBlock(
