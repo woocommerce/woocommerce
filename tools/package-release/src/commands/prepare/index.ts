@@ -18,8 +18,6 @@ import {
 	writeChangelog,
 	hasValidChangelogs,
 } from '../../changelogger';
-import { execSync } from 'child_process';
-import { MONOREPO_ROOT } from '../../const';
 
 /**
  * PackagePrepare class
