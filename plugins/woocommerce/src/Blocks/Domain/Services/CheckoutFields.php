@@ -957,7 +957,8 @@ class CheckoutFields {
 	public function filter_fields_for_customer( $fields ) {
 		$customer_fields_keys = array_merge(
 			$this->get_address_fields_keys(),
-			$this->get_contact_fields_keys()
+			$this->get_contact_fields_keys(),
+			$this->get_additional_fields_keys()
 		);
 		return array_filter(
 			$fields,

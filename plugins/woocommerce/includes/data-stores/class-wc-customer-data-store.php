@@ -186,10 +186,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @param WC_Customer $customer Customer object.
 	 */
 	public function update( &$customer ) {
-		if ( ! $customer->get_id() ) {
-			return;
-		}
-
 		wp_update_user(
 			apply_filters(
 				'woocommerce_update_customer_args',
@@ -252,10 +248,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @param WC_Customer $customer Customer object.
 	 */
 	private function update_user_meta( $customer ) {
-		if ( ! $customer->get_id() ) {
-			return;
-		}
-
 		$updated_props = array();
 		$changed_props = $customer->get_changes();
 
@@ -346,10 +338,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return WC_Order|false
 	 */
 	public function get_last_order( &$customer ) {
-		if ( ! $customer->get_id() ) {
-			return false;
-		}
-
 		//phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/**
 		 * Filters the id of the last order from a given customer.
@@ -413,10 +401,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return integer
 	 */
 	public function get_order_count( &$customer ) {
-		if ( ! $customer->get_id() ) {
-			return 0;
-		}
-
 		$count = apply_filters(
 			'woocommerce_customer_get_order_count',
 			get_user_meta( $customer->get_id(), '_order_count', true ),
@@ -464,10 +448,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return float
 	 */
 	public function get_total_spent( &$customer ) {
-		if ( ! $customer->get_id() ) {
-			return 0;
-		}
-
 		$spent = apply_filters(
 			'woocommerce_customer_get_total_spent',
 			get_user_meta( $customer->get_id(), '_money_spent', true ),

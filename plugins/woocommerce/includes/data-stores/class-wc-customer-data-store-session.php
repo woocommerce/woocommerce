@@ -14,14 +14,14 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 /**
  * WC Customer Data Store which stores the data in session.
  *
- * Used by the WC_Customer class to store customer data to the session without persisting it to the database.
+ * Used by the WC_Customer class to store customer data to the session.
  *
  * @version  3.0.0
  */
-class WC_Customer_Data_Store_Session extends WC_Customer_Data_Store {
+class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Customer_Data_Store_Interface, WC_Object_Data_Store_Interface {
 
 	/**
-	 * Keys which are stored to the customer session.
+	 * Keys which are also stored in a session (so we can make sure they get updated...)
 	 *
 	 * @var array
 	 */
@@ -115,10 +115,6 @@ class WC_Customer_Data_Store_Session extends WC_Customer_Data_Store {
 	 * @param WC_Customer $customer Customer object.
 	 */
 	public function read( &$customer ) {
-		if ( $customer->get_id() ) {
-			parent::read( $customer );
-		}
-
 		$data = (array) WC()->session->get( 'customer' );
 
 		/**
@@ -199,5 +195,38 @@ class WC_Customer_Data_Store_Session extends WC_Customer_Data_Store {
 	 */
 	public function delete( &$customer, $args = array() ) {
 		WC()->session->set( 'customer', null );
+	}
+
+	/**
+	 * Gets the customers last order.
+	 *
+	 * @since 3.0.0
+	 * @param WC_Customer $customer Customer object.
+	 * @return WC_Order|false
+	 */
+	public function get_last_order( &$customer ) {
+		return false;
+	}
+
+	/**
+	 * Return the number of orders this customer has.
+	 *
+	 * @since 3.0.0
+	 * @param WC_Customer $customer Customer object.
+	 * @return integer
+	 */
+	public function get_order_count( &$customer ) {
+		return 0;
+	}
+
+	/**
+	 * Return how much money this customer has spent.
+	 *
+	 * @since 3.0.0
+	 * @param WC_Customer $customer Customer object.
+	 * @return float
+	 */
+	public function get_total_spent( &$customer ) {
+		return 0;
 	}
 }
