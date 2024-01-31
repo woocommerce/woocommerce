@@ -44,10 +44,18 @@ const setEntityId: SetEntityId = async ( kind, name, slug, stateSetter ) => {
 	stateSetter( entityId );
 };
 
-const createGetEntitySlug =
+const prepareGetEntitySlug =
 	( templateSlug: string ) =>
 	( entitySlug: string ): string =>
 		templateSlug.replace( `${ entitySlug }-`, '' );
+const prepareIsInSpecificTemplate =
+	( templateSlug: string ) =>
+	( entitySlug: string ): boolean =>
+		templateSlug.includes( entitySlug ) && templateSlug !== entitySlug;
+const prepareIsInGenericTemplate =
+	( templateSlug: string ) =>
+	( entitySlug: string ): boolean =>
+		templateSlug === entitySlug;
 
 const createLocationObject = ( type: LocationType, sourceData = {} ) => ( {
 	type,
@@ -61,7 +69,37 @@ export const useGetLocation = < T, >(
 	const templateSlug = context.templateSlug || '';
 	const postId = context.postId || null;
 
-	const getEntitySlug = createGetEntitySlug( templateSlug || '' );
+	const getEntitySlug = prepareGetEntitySlug( templateSlug );
+	const isInSpecificTemplate = prepareIsInSpecificTemplate( templateSlug );
+	const isInGenericTemplate = prepareIsInGenericTemplate( templateSlug );
+
+	// Detec Specific Templates
+	const isInSpecificProductTemplate = isInSpecificTemplate(
+		templateSlugs.singleProduct
+	);
+	const isInSpecificCategoryTemplate = isInSpecificTemplate(
+		templateSlugs.productCategory
+	);
+	const isInSpecificTagTemplate = isInSpecificTemplate(
+		templateSlugs.productTag
+	);
+
+	// Detec Generic Templates
+	const isInSingleProductTemplate = isInGenericTemplate(
+		templateSlugs.singleProduct
+	);
+	const isInProductsByCategoryTemplate = isInGenericTemplate(
+		templateSlugs.productCategory
+	);
+	const isInProductsByTagTemplate = isInGenericTemplate(
+		templateSlugs.productTag
+	);
+	const isInProductsByAttributeTemplate = isInGenericTemplate(
+		templateSlugs.productAttribute
+	);
+	const isInOrderTemplate = isInGenericTemplate(
+		templateSlugs.orderConfirmation
+	);
 
 	const { isInSingleProductBlock, isInMiniCartBlock } = useSelect(
 		( select ) => ( {
@@ -82,25 +120,6 @@ export const useGetLocation = < T, >(
 		} ),
 		[ clientId ]
 	);
-
-	const isInSpecificProductTemplate =
-		templateSlug.includes( templateSlugs.singleProduct ) &&
-		templateSlug !== templateSlugs.singleProduct;
-	const isInSpecificCategoryTemplate =
-		templateSlug.includes( templateSlugs.productCategory ) &&
-		templateSlug !== templateSlugs.productCategory;
-	const isInSpecificTagTemplate =
-		templateSlug.includes( templateSlugs.productTag ) &&
-		templateSlug !== templateSlugs.productTag;
-
-	const isInSingleProductTemplate =
-		templateSlug === templateSlugs.singleProduct;
-	const isInProductsByCategoryTemplate =
-		templateSlug === templateSlugs.productCategory;
-	const isInProductsByTagTemplate = templateSlug === templateSlugs.productTag;
-	const isInProductsByAttributeTemplate =
-		templateSlug === templateSlugs.productAttribute;
-	const isInOrderTemplate = templateSlug === templateSlugs.orderConfirmation;
 
 	const isInCartContext =
 		templateSlug === templateSlugs.cart ||
