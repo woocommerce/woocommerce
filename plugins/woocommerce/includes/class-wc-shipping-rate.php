@@ -28,6 +28,10 @@ class WC_Shipping_Rate {
 		'label'       => '',
 		'cost'        => 0,
 		'taxes'       => array(),
+		'delivery_time' => array(
+			'start' => '',
+			'end'   => '',
+		),
 	);
 
 	/**
@@ -48,13 +52,14 @@ class WC_Shipping_Rate {
 	 * @param string  $method_id   Shipping method ID.
 	 * @param int     $instance_id Shipping instance ID.
 	 */
-	public function __construct( $id = '', $label = '', $cost = 0, $taxes = array(), $method_id = '', $instance_id = 0 ) {
+	public function __construct( $id = '', $label = '', $cost = 0, $taxes = array(), $method_id = '', $instance_id = 0, $delivery_time_start = '', $delivery_time_end = ''  ) {
 		$this->set_id( $id );
 		$this->set_label( $label );
 		$this->set_cost( $cost );
 		$this->set_taxes( $taxes );
 		$this->set_method_id( $method_id );
 		$this->set_instance_id( $instance_id );
+		$this->set_delivery_time( $delivery_time_start, $delivery_time_end );
 	}
 
 	/**
@@ -165,6 +170,24 @@ class WC_Shipping_Rate {
 	}
 
 	/**
+	 * Set delivery time.
+	 *
+	 * @since 8.7.0
+	 * @param string $start Delivery time start.
+	 * @param string $end   Delivery time end.
+	 */
+	public function set_delivery_time( $start, $end ) {
+        $delivery_time = array(
+            'start' => $start ? date('c', strtotime($start)) : '',
+            'end'   => $end ? date('c', strtotime($end)) : '',
+        );
+
+        // Apply a filter to allow third parties to modify the delivery time array.
+        $this->data['delivery_time'] = apply_filters( 'woocommerce_shipping_rate_set_delivery_time', $delivery_time, $this );
+    }
+
+
+	/**
 	 * Get ID for the rate. This is usually a combination of the method and instance IDs.
 	 *
 	 * @since 3.2.0
@@ -252,4 +275,20 @@ class WC_Shipping_Rate {
 	public function get_meta_data() {
 		return $this->meta_data;
 	}
+
+	/**
+	 * Get delivery time.
+	 *
+	 * @since 8.7.0
+	 * @return mixed
+	 */
+	public function get_delivery_time() {
+		$delivery_time = $this->data['delivery_time'];
+		if ( ! empty( $delivery_time['start'] ) && ! empty( $delivery_time['end'] ) ) {
+			return $delivery_time;
+		}
+
+		return null;
+	}
+
 }

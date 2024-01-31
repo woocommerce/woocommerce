@@ -153,11 +153,25 @@ class CartShippingRateSchema extends AbstractSchema {
 					'readonly'    => true,
 				],
 				'delivery_time' => [
-					'description' => __( 'Delivery time estimate text, e.g. 3-5 business days.', 'woocommerce' ),
-					'type'        => 'string',
+					'description' => __( 'Estimated delivery time range.', 'woocommerce' ),
+					'type'        => 'object',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
-				],
+					'properties'  => [
+							'start' => [
+								'description' => __( 'Estimated delivery start date in ISO format.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
+								'readonly'    => true,
+							],
+							'end' => [
+								'description' => __( 'Estimated delivery end date in ISO format.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
+								'readonly'    => true,
+							],
+						],
+					],
 				'price'         => [
 					'description' => __( 'Price of this shipping rate using the smallest unit of the currency.', 'woocommerce' ),
 					'type'        => 'string',
@@ -307,7 +321,10 @@ class CartShippingRateSchema extends AbstractSchema {
 				'rate_id'       => $this->get_rate_prop( $rate, 'id' ),
 				'name'          => $this->prepare_html_response( $this->get_rate_prop( $rate, 'label' ) ),
 				'description'   => $this->prepare_html_response( $this->get_rate_prop( $rate, 'description' ) ),
-				'delivery_time' => $this->prepare_html_response( $this->get_rate_prop( $rate, 'delivery_time' ) ),
+				'delivery_time' => [
+					'start' => isset($delivery_time['start']) ? $this->prepare_html_response( $delivery_time['start'] ) : null,
+					'end'   => isset($delivery_time['end']) ? $this->prepare_html_response( $delivery_time['end'] ) : null,
+				],
 				'price'         => $this->prepare_money_response( $this->get_rate_prop( $rate, 'cost' ), wc_get_price_decimals() ),
 				'taxes'         => $this->prepare_money_response( array_sum( (array) $this->get_rate_prop( $rate, 'taxes' ) ), wc_get_price_decimals() ),
 				'instance_id'   => $this->get_rate_prop( $rate, 'instance_id' ),
