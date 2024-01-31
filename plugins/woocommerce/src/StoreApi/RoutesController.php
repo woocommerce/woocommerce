@@ -117,10 +117,13 @@ class RoutesController {
 	 * @throws \Exception If the schema does not exist.
 	 *
 	 * @param string $version API Version being requested.
+	 * @param string $controller Whether to return controller name. If false, returns empty array. Note:
+	 * When $controller param is true, the output should not be used directly in front-end code, to prevent class names from leaking. It's not a security issue necessarily, but it's not a good practice.
+	 * When $controller param is false, it currently returns and empty array. But it can be modified in future to return include more details about the route info that can be used in frontend.
 	 *
 	 * @return string[] List of route paths.
 	 */
-	public function get_all_routes( $version = 'v1' ) {
+	public function get_all_routes( $version = 'v1', $controller = false ) {
 		$routes = [];
 
 		foreach ( $this->routes[ $version ] as $key => $route_class ) {
@@ -131,7 +134,7 @@ class RoutesController {
 
 			$route_path = '/' . trailingslashit( self::$api_namespace ) . $version . $route_class::_get_path();
 
-			$routes[ $route_path ] = array();
+			$routes[ $route_path ] = $controller ? $route_class : array();
 		}
 
 		return $routes;
