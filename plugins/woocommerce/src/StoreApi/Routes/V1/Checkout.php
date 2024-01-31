@@ -435,6 +435,15 @@ class Checkout extends AbstractCartRoute {
 			}
 		}
 
+		// Persist additional fields to session.
+		if ( ! empty( $request['additional_fields'] ) ) {
+			foreach ( $request['additional_fields'] as $key => $value ) {
+				if ( $this->additional_fields_controller->is_field( $key ) ) {
+					$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer );
+				}
+			}
+		}
+
 		/**
 		 * Fires when the Checkout Block/Store API updates a customer from the API request data.
 		 *
