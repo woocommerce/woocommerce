@@ -621,25 +621,8 @@ class BlockTemplateUtils {
 	 * @return WP_Block_Template[] An array of block template objects.
 	 */
 	public static function filter_block_templates_by_feature_flag( $block_templates ) {
-		$feature_gating = new FeatureGating();
-		$flag           = $feature_gating->get_flag();
-
-		/**
-		 * An array of block templates with slug as key and flag as value.
-		 *
-		 * @var array
-		*/
-		$block_templates_with_feature_gate = array();
-
-		return array_filter(
-			$block_templates,
-			function( $block_template ) use ( $flag, $block_templates_with_feature_gate ) {
-				if ( isset( $block_templates_with_feature_gate[ $block_template->slug ] ) ) {
-					return $block_templates_with_feature_gate[ $block_template->slug ] <= $flag;
-				}
-				return true;
-			}
-		);
+		wc_deprecated_function( 'BlockTemplateUtils::filter_block_templates_by_feature_flag()', '8.7' );
+		return $block_templates;
 	}
 
 	/**
