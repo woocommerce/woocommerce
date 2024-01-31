@@ -31,11 +31,10 @@ jobs:
             - name: Clean working directory
               run: git checkout pnpm-lock.yaml # in case for whatever reason the lockfile is out of sync, there won't be interference with npm publish.
 
-            - name: Set deployment token
-              run: npm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
-
             - name: Execute script
               # run: ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} ${{ ( github.event.inputs.dry_run == 'true' && '--dry-run' ) || '' }} --skip-install
-              run: npm whoami
+              run: |
+                  npm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
+                  npm whoami
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
