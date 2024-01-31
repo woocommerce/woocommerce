@@ -53,7 +53,7 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				editorUtils,
 				page,
 			} ) => {
-				// Edit default template and verify changes are visible.
+				// Edit fallback template and verify changes are visible.
 				await admin.visitSiteEditor( {
 					postId: `${ WC_TEMPLATES_SLUG }//${
 						testData.fallbackTemplate?.templatePath || ''
