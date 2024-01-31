@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\Options;
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
@@ -345,51 +346,60 @@ class BlockTemplateUtils {
 	 * @return array The plugin template types.
 	 */
 	public static function get_plugin_block_template_types() {
-		return array(
-			'single-product'                      => array(
-				'title'       => _x( 'Single Product', 'Template name', 'woocommerce' ),
-				'description' => __( 'Displays a single product.', 'woocommerce' ),
-			),
-			'archive-product'                     => array(
-				'title'       => _x( 'Product Catalog', 'Template name', 'woocommerce' ),
-				'description' => __( 'Displays your products.', 'woocommerce' ),
-			),
-			'taxonomy-product_cat'                => array(
-				'title'       => _x( 'Products by Category', 'Template name', 'woocommerce' ),
-				'description' => __( 'Displays products filtered by a category.', 'woocommerce' ),
-			),
-			'taxonomy-product_tag'                => array(
-				'title'       => _x( 'Products by Tag', 'Template name', 'woocommerce' ),
-				'description' => __( 'Displays products filtered by a tag.', 'woocommerce' ),
-			),
-			ProductAttributeTemplate::SLUG        => array(
-				'title'       => _x( 'Products by Attribute', 'Template name', 'woocommerce' ),
-				'description' => __( 'Displays products filtered by an attribute.', 'woocommerce' ),
-			),
-			ProductSearchResultsTemplate::SLUG    => array(
-				'title'       => _x( 'Product Search Results', 'Template name', 'woocommerce' ),
-				'description' => __( 'Displays search results for your store.', 'woocommerce' ),
-			),
-			MiniCartTemplate::SLUG                => array(
-				'title'       => _x( 'Mini-Cart', 'Template name', 'woocommerce' ),
-				'description' => __( 'Template used to display the Mini-Cart drawer.', 'woocommerce' ),
-			),
-			CartTemplate::get_slug()              => array(
-				'title'       => _x( 'Page: Cart', 'Template name', 'woocommerce' ),
-				'description' => __( 'The Cart template displays the items selected by the user for purchase, including quantities, prices, and discounts. It allows users to review their choices before proceeding to checkout.', 'woocommerce' ),
-			),
-			CheckoutTemplate::get_slug()          => array(
-				'title'       => _x( 'Page: Checkout', 'Template name', 'woocommerce' ),
-				'description' => __( 'The Checkout template guides users through the final steps of the purchase process. It enables users to enter shipping and billing information, select a payment method, and review order details.', 'woocommerce' ),
-			),
-			CheckoutHeaderTemplate::SLUG          => array(
-				'title'       => _x( 'Checkout Header', 'Template name', 'woocommerce' ),
-				'description' => __( 'Template used to display the simplified Checkout header.', 'woocommerce' ),
-			),
-			OrderConfirmationTemplate::get_slug() => array(
-				'title'       => _x( 'Order Confirmation', 'Template name', 'woocommerce' ),
-				'description' => __( 'The Order Confirmation template serves as a receipt and confirmation of a successful purchase. It includes a summary of the ordered items, shipping, billing, and totals.', 'woocommerce' ),
-			),
+		$templates      = BlockTemplatesRegistry::get_templates();
+		$templates_data = [];
+
+		foreach ( $templates as $template ) {
+			// Convert from template object to a simple array. Once all templates have been migrated, this won't be necessary anymore (@todo).
+			$templates_data[ $template->slug ] = array(
+				'title'       => $template->template_title,
+				'description' => $template->template_description,
+			);
+		}
+		return array_merge(
+			$templates_data,
+			array(
+				'archive-product'                     => array(
+					'title'       => _x( 'Product Catalog', 'Template name', 'woocommerce' ),
+					'description' => __( 'Displays your products.', 'woocommerce' ),
+				),
+				'taxonomy-product_cat'                => array(
+					'title'       => _x( 'Products by Category', 'Template name', 'woocommerce' ),
+					'description' => __( 'Displays products filtered by a category.', 'woocommerce' ),
+				),
+				'taxonomy-product_tag'                => array(
+					'title'       => _x( 'Products by Tag', 'Template name', 'woocommerce' ),
+					'description' => __( 'Displays products filtered by a tag.', 'woocommerce' ),
+				),
+				ProductAttributeTemplate::SLUG        => array(
+					'title'       => _x( 'Products by Attribute', 'Template name', 'woocommerce' ),
+					'description' => __( 'Displays products filtered by an attribute.', 'woocommerce' ),
+				),
+				ProductSearchResultsTemplate::SLUG    => array(
+					'title'       => _x( 'Product Search Results', 'Template name', 'woocommerce' ),
+					'description' => __( 'Displays search results for your store.', 'woocommerce' ),
+				),
+				MiniCartTemplate::SLUG                => array(
+					'title'       => _x( 'Mini-Cart', 'Template name', 'woocommerce' ),
+					'description' => __( 'Template used to display the Mini-Cart drawer.', 'woocommerce' ),
+				),
+				CartTemplate::get_slug()              => array(
+					'title'       => _x( 'Page: Cart', 'Template name', 'woocommerce' ),
+					'description' => __( 'The Cart template displays the items selected by the user for purchase, including quantities, prices, and discounts. It allows users to review their choices before proceeding to checkout.', 'woocommerce' ),
+				),
+				CheckoutTemplate::get_slug()          => array(
+					'title'       => _x( 'Page: Checkout', 'Template name', 'woocommerce' ),
+					'description' => __( 'The Checkout template guides users through the final steps of the purchase process. It enables users to enter shipping and billing information, select a payment method, and review order details.', 'woocommerce' ),
+				),
+				CheckoutHeaderTemplate::SLUG          => array(
+					'title'       => _x( 'Checkout Header', 'Template name', 'woocommerce' ),
+					'description' => __( 'Template used to display the simplified Checkout header.', 'woocommerce' ),
+				),
+				OrderConfirmationTemplate::get_slug() => array(
+					'title'       => _x( 'Order Confirmation', 'Template name', 'woocommerce' ),
+					'description' => __( 'The Order Confirmation template serves as a receipt and confirmation of a successful purchase. It includes a summary of the ordered items, shipping, billing, and totals.', 'woocommerce' ),
+				),
+			)
 		);
 	}
 

@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\AssetsController;
 use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
 use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
@@ -38,6 +39,7 @@ use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
+use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Domain\Services\OnboardingTasks\TasksController;
@@ -160,6 +162,7 @@ class Bootstrap {
 			$this->container->get( OrderConfirmationTemplate::class );
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
+			$this->container->get( SingleProductTemplate::class );
 			$this->container->get( SingleProductTemplateCompatibility::class )->init();
 			$this->container->get( Notices::class )->init();
 		}
@@ -263,6 +266,12 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
+			BlockTemplatesRegistry::class,
+			function () {
+				return new BlockTemplatesRegistry();
+			}
+		);
+		$this->container->register(
 			ProductSearchResultsTemplate::class,
 			function () {
 				return new ProductSearchResultsTemplate();
@@ -311,7 +320,12 @@ class Bootstrap {
 				return new ArchiveProductTemplatesCompatibility();
 			}
 		);
-
+		$this->container->register(
+			SingleProductTemplate::class,
+			function () {
+				return new SingleProductTemplate();
+			}
+		);
 		$this->container->register(
 			SingleProductTemplateCompatibility::class,
 			function () {
