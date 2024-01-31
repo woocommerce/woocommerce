@@ -20,7 +20,7 @@ class CartApplyCoupon extends AbstractCartRoute {
 	 * @return string
 	 */
 	public function get_path() {
-		return self::_get_path();
+		return self::get_path_regex();
 	}
 
 	/**
@@ -28,7 +28,7 @@ class CartApplyCoupon extends AbstractCartRoute {
 	 *
 	 * @return string
 	 */
-	public static function _get_path() {
+	public static function get_path_regex() {
 		return '/cart/apply-coupon';
 	}
 

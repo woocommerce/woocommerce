@@ -128,11 +128,11 @@ class RoutesController {
 
 		foreach ( $this->routes[ $version ] as $key => $route_class ) {
 
-			if ( ! method_exists( $route_class, '_get_path' ) ) {
-				throw new \Exception( "{$route_class} route does not have a _get_path method" );
+			if ( ! method_exists( $route_class, 'get_path_regex' ) ) {
+				throw new \Exception( "{$route_class} route does not have a get_path_regex method" );
 			}
 
-			$route_path = '/' . trailingslashit( self::$api_namespace ) . $version . $route_class::_get_path();
+			$route_path = '/' . trailingslashit( self::$api_namespace ) . $version . $route_class::get_path_regex();
 
 			$routes[ $route_path ] = $controller ? $route_class : array();
 		}

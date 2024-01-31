@@ -32,7 +32,7 @@ class StoreInfo extends AbstractRoute {
 	 * @return string
 	 */
 	public function get_path() {
-		return self::_get_path();
+		return self::get_path_regex();
 	}
 
 	/**
@@ -40,7 +40,7 @@ class StoreInfo extends AbstractRoute {
 	 *
 	 * @return string
 	 */
-	public static function _get_path() {
+	public static function get_path_regex() {
 		return '/ai/store-info';
 	}
 
