@@ -82,6 +82,12 @@ const productGallery = {
 			const context = getContext();
 			selectImage( context, 'previous' );
 		},
+		onThumbnailKeyDown: ( event: KeyboardEvent ) => {
+			const context = getContext();
+			if ( event.code === 'Enter' ) {
+				context.selectedImage = context.imageId;
+			}
+		},
 	},
 	callbacks: {
 		watchForChangesOnAddToCartForm: () => {
