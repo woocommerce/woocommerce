@@ -18,6 +18,16 @@ type SetEntityId = (
 	stateSetter: ( entityId: number | null ) => void
 ) => void;
 
+const templateSlugs = {
+	singleProduct: 'single-product',
+	productCategory: 'taxonomy-product_cat',
+	productTag: 'taxonomy-product_tag',
+	productAttribute: 'taxonomy-product_attribute',
+	orderConfirmation: 'order-confirmation',
+	cart: 'page-cart',
+	checkout: 'page-checkout',
+};
+
 const parseResponse = ( resp?: Record< 'id', number >[] ): number | null =>
 	resp && resp.length && resp[ 0 ]?.id ? resp[ 0 ].id : null;
 
@@ -54,43 +64,47 @@ export const useGetLocation = < T, >(
 	const getEntitySlug = createGetEntitySlug( templateSlug || '' );
 
 	const { isInSingleProductBlock, isInMiniCartBlock } = useSelect(
-		( select ) => {
-			const isInSingleProductBlock =
+		( select ) => ( {
+			isInSingleProductBlock:
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore No types for this selector exist yet
 				select( blockEditorStore ).getBlockParentsByBlockName(
 					clientId,
 					'woocommerce/single-product'
-				).length > 0;
-
-			const isInMiniCartBlock =
+				).length > 0,
+			isInMiniCartBlock:
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore No types for this selector exist yet
 				select( blockEditorStore ).getBlockParentsByBlockName(
 					clientId,
 					'woocommerce/mini-cart-contents'
-				).length > 0;
-			return { isInSingleProductBlock, isInMiniCartBlock };
-		}
+				).length > 0,
+		} ),
+		[ clientId ]
 	);
 
 	const isInSpecificProductTemplate =
-		templateSlug.includes( 'single-product' ) &&
-		templateSlug !== 'single-product';
+		templateSlug.includes( templateSlugs.singleProduct ) &&
+		templateSlug !== templateSlugs.singleProduct;
 	const isInSpecificCategoryTemplate =
-		templateSlug.includes( 'taxonomy-product_cat' ) &&
-		templateSlug !== 'taxonomy-product_cat';
+		templateSlug.includes( templateSlugs.productCategory ) &&
+		templateSlug !== templateSlugs.productCategory;
 	const isInSpecificTagTemplate =
-		templateSlug.includes( 'taxonomy-product_tag' ) &&
-		templateSlug !== 'taxonomy-product_tag';
+		templateSlug.includes( templateSlugs.productTag ) &&
+		templateSlug !== templateSlugs.productTag;
 
-	const isInSingleProductTemplate = templateSlug === 'single-product';
+	const isInSingleProductTemplate =
+		templateSlug === templateSlugs.singleProduct;
 	const isInProductsByCategoryTemplate =
-		templateSlug === 'taxonomy-product_cat';
-	const isInProductsByTagTemplate = templateSlug === 'taxonomy-product_tag';
+		templateSlug === templateSlugs.productCategory;
+	const isInProductsByTagTemplate = templateSlug === templateSlugs.productTag;
 	const isInProductsByAttributeTemplate =
-		templateSlug === 'taxonomy-product_attribute';
-	const isInOrderTemplate = templateSlug === 'order-confirmation';
+		templateSlug === templateSlugs.productAttribute;
+	const isInOrderTemplate = templateSlug === templateSlugs.orderConfirmation;
 
 	const isInCartContext =
-		templateSlug === 'page-cart' ||
-		templateSlug === 'page-checkout' ||
+		templateSlug === templateSlugs.cart ||
+		templateSlug === templateSlugs.checkout ||
 		isInMiniCartBlock;
 
 	const [ productId, setProductId ] = useState< number | null >( null );
@@ -99,17 +113,17 @@ export const useGetLocation = < T, >(
 
 	useEffect( () => {
 		if ( isInSpecificProductTemplate ) {
-			const slug = getEntitySlug( 'single-product' );
+			const slug = getEntitySlug( templateSlugs.singleProduct );
 			setEntityId( 'postType', 'product', slug, setProductId );
 		}
 
 		if ( isInSpecificCategoryTemplate ) {
-			const slug = getEntitySlug( 'taxonomy-product_cat' );
+			const slug = getEntitySlug( templateSlugs.productCategory );
 			setEntityId( 'taxonomy', 'product_cat', slug, setCatId );
 		}
 
 		if ( isInSpecificTagTemplate ) {
-			const slug = getEntitySlug( 'taxonomy-product_tag' );
+			const slug = getEntitySlug( templateSlugs.productTag );
 			setEntityId( 'taxonomy', 'product_tag', slug, setTagId );
 		}
 	} );
