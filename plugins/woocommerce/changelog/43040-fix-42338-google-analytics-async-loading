@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Load the gtag script used by Google Analytics asynchronously in WooCommerce Blocks.

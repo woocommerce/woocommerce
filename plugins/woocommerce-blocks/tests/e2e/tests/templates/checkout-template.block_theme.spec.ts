@@ -37,7 +37,7 @@ test.describe( 'Test the checkout template', async () => {
 			postId: templatePath,
 			postType: templateType,
 		} );
-		await admin.visitAdminPage( `/site-editor.php?path=%2Fpage` );
+		await admin.visitAdminPage( 'site-editor.php', 'path=%2Fpage' );
 		await editor.page
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
 			.click();

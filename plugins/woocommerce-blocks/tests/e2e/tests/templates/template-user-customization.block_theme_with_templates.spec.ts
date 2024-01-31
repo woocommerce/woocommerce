@@ -4,69 +4,25 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
-const templateUserCustomizationTests = [
-	{
-		permalink: '/shop',
-		templateName: 'Product Catalog',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//archive-product`,
-		templateType: 'wp_template',
-	},
-	{
-		permalink: '/?s=shirt&post_type=product',
-		templateName: 'Product Search Results',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//product-search-results`,
-		templateType: 'wp_template',
-	},
-	{
-		permalink: '/color/blue',
-		templateName: 'Products by Attribute',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_attribute`,
-		templateType: 'wp_template',
-		defaultTemplate: {
-			templateName: 'Product Catalog',
-			templatePath: 'woocommerce/woocommerce//archive-product',
-		},
-	},
-	{
-		permalink: '/product-category/clothing',
-		templateName: 'Products by Category',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_cat`,
-		templateType: 'wp_template',
-		defaultTemplate: {
-			templateName: 'Product Catalog',
-			templatePath: 'woocommerce/woocommerce//archive-product',
-		},
-	},
-	{
-		permalink: '/product-tag/recommended/',
-		templateName: 'Products by Tag',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//taxonomy-product_tag`,
-		templateType: 'wp_template',
-		defaultTemplate: {
-			templateName: 'Product Catalog',
-			templatePath: 'woocommerce/woocommerce//archive-product',
-		},
-	},
-	{
-		permalink: '/product/hoodie',
-		templateName: 'Single Product',
-		templatePath: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//single-product`,
-		templateType: 'wp_template',
-	},
-];
-const userText = 'Hello World in the template';
-const defaultTemplateUserText = 'Hello World in the default template';
+/**
+ * Internal dependencies
+ */
+import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
-templateUserCustomizationTests.forEach( ( testData ) => {
+const userText = 'Hello World in the template';
+const fallbackTemplateUserText = 'Hello World in the fallback template';
+
+CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	test.describe( `${ testData.templateName } template`, async () => {
 		test( "theme template has priority over WooCommerce's and can be modified", async ( {
 			admin,
 			editorUtils,
+			frontendUtils,
 			page,
 		} ) => {
 			// Edit the theme template.
 			await admin.visitSiteEditor( {
-				postId: testData.templatePath,
+				postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
 				postType: testData.templateType,
 			} );
 			await editorUtils.enterEditMode();
@@ -78,7 +34,7 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 			await editorUtils.saveTemplate();
 
 			// Verify the template is the one modified by the user.
-			await page.goto( testData.permalink );
+			await testData.visitPage( { frontendUtils, page } );
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 
 			// Revert edition and verify the template from the theme is used.
@@ -89,7 +45,7 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 			await editorUtils.revertTemplateCustomizations(
 				testData.templateName
 			);
-			await page.goto( testData.permalink );
+			await testData.visitPage( { frontendUtils, page } );
 
 			await expect(
 				page
@@ -101,15 +57,18 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 			await expect( page.getByText( userText ) ).toHaveCount( 0 );
 		} );
 
-		if ( testData.defaultTemplate ) {
-			test( `theme template has priority over user-modified ${ testData.defaultTemplate.templateName } template`, async ( {
+		if ( testData.fallbackTemplate ) {
+			test( `theme template has priority over user-modified ${ testData.fallbackTemplate.templateName } template`, async ( {
 				admin,
+				frontendUtils,
 				editorUtils,
 				page,
 			} ) => {
 				// Edit default template and verify changes are not visible, as the theme template has priority.
 				await admin.visitSiteEditor( {
-					postId: testData.defaultTemplate.templatePath,
+					postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${
+						testData.fallbackTemplate?.templatePath || ''
+					}`,
 					postType: testData.templateType,
 				} );
 				await editorUtils.enterEditMode();
@@ -117,13 +76,13 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 				await editorUtils.editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: {
-						content: defaultTemplateUserText,
+						content: fallbackTemplateUserText,
 					},
 				} );
 				await editorUtils.saveTemplate();
-				await page.goto( testData.permalink );
+				await testData.visitPage( { frontendUtils, page } );
 				await expect(
-					page.getByText( defaultTemplateUserText )
+					page.getByText( fallbackTemplateUserText )
 				).toHaveCount( 0 );
 
 				// Revert the edit.
@@ -132,7 +91,7 @@ templateUserCustomizationTests.forEach( ( testData ) => {
 					`path=/${ testData.templateType }/all`
 				);
 				await editorUtils.revertTemplateCustomizations(
-					testData.defaultTemplate.templateName
+					testData.fallbackTemplate?.templateName || ''
 				);
 			} );
 		}
