@@ -26,8 +26,6 @@ class BlockTemplatesController {
 
 	/**
 	 * Constructor.
-	 *
-	 * @param Package $package An instance of Package.
 	 */
 	public function __construct() {
 		$this->init();
