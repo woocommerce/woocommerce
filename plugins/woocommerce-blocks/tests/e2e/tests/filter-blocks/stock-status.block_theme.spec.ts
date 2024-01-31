@@ -28,9 +28,34 @@ test.describe( 'Product Filter: Stock Status Block', async () => {
 		);
 
 		await expect( stockStatuses ).toHaveCount( 2 );
-
 		await expect( stockStatuses.nth( 0 ) ).toHaveText( 'In stock' );
 		await expect( stockStatuses.nth( 1 ) ).toHaveText( 'Out of stock' );
+
+		await deletePost();
+	} );
+
+	test( 'When displayStyle is dropdown, a dropdown is displayed with the available stock statuses', async ( {
+		page,
+	} ) => {
+		const { url, deletePost } = await createPostFromTemplate(
+			'Product Filter: Stock Status Block - Dropdown',
+			TEMPLATE_PATH,
+			{
+				attributes: {
+					displayStyle: 'dropdown',
+				},
+			}
+		);
+
+		await page.goto( url );
+		const dropdownLocator = page.locator( '.wc-interactivity-dropdown' );
+
+		await expect( dropdownLocator ).toBeVisible();
+
+		await dropdownLocator.click();
+
+		await expect( page.getByText( 'In stock' ) ).toBeVisible();
+		await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
 
 		await deletePost();
 	} );
