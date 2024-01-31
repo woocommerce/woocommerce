@@ -126,7 +126,12 @@ export const useGetLocation = < T, >(
 			const slug = getEntitySlug( templateSlugs.productTag );
 			setEntityId( 'taxonomy', 'product_tag', slug, setTagId );
 		}
-	} );
+	}, [
+		isInSpecificProductTemplate,
+		isInSpecificCategoryTemplate,
+		isInSpecificTagTemplate,
+		getEntitySlug,
+	] );
 
 	/**
 	 * Case 1.1: SPECIFIC PRODUCT
