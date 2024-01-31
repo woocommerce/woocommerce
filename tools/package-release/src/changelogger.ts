@@ -19,10 +19,17 @@ import { MONOREPO_ROOT } from './const';
  */
 export const getNextVersion = ( name: string ) => {
 	try {
-		return execSync( `pnpm --filter="${ name }" changelog version next`, {
-			cwd: MONOREPO_ROOT,
-			encoding: 'utf-8',
-		} ).trim();
+		// Match the last version number in the string.
+		const semverPattern = /\d+(\.\d+){2}$/;
+		const str = execSync(
+			`pnpm --filter="${ name }" --silent changelog version next`,
+			{
+				cwd: MONOREPO_ROOT,
+				encoding: 'utf-8',
+			}
+		).trim();
+		const match = str.match( semverPattern );
+		return match ? match[ 0 ] : null;
 	} catch ( e ) {
 		if ( e instanceof Error ) {
 			return null;
