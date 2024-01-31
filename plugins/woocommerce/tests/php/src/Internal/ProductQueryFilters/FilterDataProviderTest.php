@@ -29,11 +29,14 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 		$this->fixture_data->add_product_review( $this->products[3]->get_id(), 5 );
 	}
 
-	public function test_get_filtered_price() {
+	public function test_get_filtered_price_with_default_query() {
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 
 		$this->test_get_filtered_price_with( $wp_query );
+	}
 
+	public function test_get_filtered_price_with_stock_filter() {
+		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 
 		$wp_query->set( 'filter_stock_status', 'instock' );
 		$this->test_get_filtered_price_with( $wp_query, function( $product_data ) {
@@ -47,11 +50,14 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 		} );
 	}
 
-	public function test_get_stock_status_counts() {
+	public function test_get_stock_status_counts_with_default_query() {
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 
 		$this->test_get_stock_status_counts_with( $wp_query );
+	}
 
+	public function test_get_stock_status_counts_with_min_price() {
+		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 		$wp_query->set( 'min_price', 20 );
 		$this->test_get_stock_status_counts_with( $wp_query, function( $product_data ) {
 			if ( ! isset( $product_data['variations'] ) ) {
@@ -98,6 +104,35 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 			$expected_rating_counts,
 			$actual_rating_counts
 		);
+	}
+
+	public function test_get_attribute_counts_with_default_query() {
+		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars = array_filter( $wp_query->query_vars );
+		$actual_attribute_counts = (array) $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+
+		$expected_attribute_counts = array();
+		foreach( get_terms( array('taxonomy' => 'pa_color') ) as $term ) {
+			$expected_attribute_counts[$term->term_id] = $term->count;
+		}
+
+		$this->assertEqualsCanonicalizing( $expected_attribute_counts, $actual_attribute_counts );
+	}
+
+	public function test_get_attribute_counts_with_max_price() {
+		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+		$wp_query->set( 'max_price', 55 );
+		$query_vars = array_filter( $wp_query->query_vars );
+		$actual_attribute_counts = (array) $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+
+		$expected_attribute_counts = array();
+		foreach( get_terms( array('taxonomy' => 'pa_color') ) as $term ) {
+			if( in_array( $term->name, array( 'red', 'green' ) ) ) {
+				$expected_attribute_counts[$term->term_id] = 1;
+			}
+		}
+
+		$this->assertEqualsCanonicalizing( $expected_attribute_counts, $actual_attribute_counts );
 	}
 
 	private function test_get_stock_status_counts_with( $wp_query, $filter_callback = null ) {
