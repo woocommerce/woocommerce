@@ -94,7 +94,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @param WC_Customer|int $data       Customer ID or data.
 	 * @param bool            $is_session True if this is the customer session.
-	 *
 	 * @throws Exception If customer cannot be read/found and $data is set.
 	 */
 	public function __construct( $data = 0, $is_session = false ) {
