@@ -193,7 +193,7 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				return;
 			}
 			try {
-				setAndStoreMessages( input, 'user' );
+				setAndStoreMessages( input, 'user', messages.length );
 				makeWooAssistantApiCall( input );
 			} catch ( error ) {
 				handleError(
@@ -201,7 +201,12 @@ const ChatModal: React.FC< ChatModalProps > = ( { onClose } ) => {
 				);
 			}
 		},
-		[ makeWooAssistantApiCall, setAndStoreMessages, handleError ]
+		[
+			makeWooAssistantApiCall,
+			setAndStoreMessages,
+			handleError,
+			messages.length,
+		]
 	);
 
 	const OnboardingMessage = useCallback( () => {

@@ -29,6 +29,7 @@ interface UseWooAssistantApiCallProps {
 const useWooAssistantApiCall = ( {
 	setAndStorethreadID,
 	generateInformationalMessage,
+	messages,
 	setMessages,
 	setLoading,
 	handleError,
@@ -80,7 +81,7 @@ const useWooAssistantApiCall = ( {
 					throw new Error( 'No message returned from assistant' );
 				}
 
-				setAndStoreMessages( answer, 'assistant' );
+				setAndStoreMessages( answer, 'assistant', messages.length );
 			} catch ( error: any ) {
 				handleError( error.message || 'An error occurred' );
 			} finally {
@@ -88,6 +89,7 @@ const useWooAssistantApiCall = ( {
 			}
 		},
 		[
+			messages,
 			setAndStoreMessages,
 			setAndStorethreadID,
 			handleRequiresAction,
