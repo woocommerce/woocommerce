@@ -29,5 +29,27 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 				'Rated 5 out of 5'
 			);
 		} );
+
+		test( 'Selecting a checkbox filters down the products', async ( {
+			page,
+		} ) => {
+			await page.goto( '/product-filters-rating-block/' );
+
+			const ratingCheckboxes = page.locator(
+				'.wc-block-components-checkbox__input'
+			);
+
+			ratingCheckboxes.nth( 0 ).check();
+
+			// wait for navigation
+			await page.waitForURL(
+				'/product-filters-rating-block/?rating_filter=1'
+			);
+
+			const products = page.locator( '.wc-block-product' );
+			const productCount = await products.count();
+
+			expect( productCount ).toBe( 1 );
+		} );
 	} );
 } );
