@@ -12,8 +12,6 @@ table.wc-block-cart-items td {
 table.wc-block-cart-items {
 	width: 100%;
 
-
-
 	.wc-block-cart-items__header {
 		@include font-size( smaller );
 		text-transform: uppercase;
@@ -67,12 +65,6 @@ table.wc-block-cart-items {
 		}
 		.wc-block-components-product-metadata {
 			margin-bottom: 0.75em;
-		}
-		.wc-block-cart-item__prices {
-			display: inline-block;
-		}
-		.wc-block-components-product-badge.wc-block-components-sale-badge {
-			margin-left: $gap-smaller;
 		}
 
 		&.is-disabled {
