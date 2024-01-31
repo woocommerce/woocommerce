@@ -180,6 +180,7 @@ const ProductTemplateEdit = (
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
+					location,
 				} ),
 				blocks: getBlocks( clientId ),
 			};
@@ -198,6 +199,7 @@ const ProductTemplateEdit = (
 			templateSlug,
 			taxQuery,
 			restQueryArgs,
+			location,
 		]
 	);
 	const blockContexts = useMemo(
