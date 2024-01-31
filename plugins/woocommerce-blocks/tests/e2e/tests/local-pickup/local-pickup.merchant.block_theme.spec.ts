@@ -9,29 +9,31 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { utilsLocalPickup as utils } from './utils.local-pickup';
 
 test.describe( 'Merchant → Local Pickup Settings', () => {
-	test.beforeEach( async ( { admin, page } ) => {
-		await utils.openLocalPickupSettings( { admin } );
-		await utils.clearLocations( admin, page );
-		await utils.removeCostForLocalPickup( { page } );
-		await utils.enableLocalPickup( { page } );
+	test.beforeEach( async ( { localPickupUtils } ) => {
+		await localPickupUtils.deleteLocations();
+		await localPickupUtils.disableLocalPickupCosts();
+		await localPickupUtils.enableLocalPickup();
 	} );
 
-	test( 'user can toggle the enabled state', async ( { page } ) => {
+	test( 'user can toggle the enabled state', async ( {
+		page,
+		localPickupUtils,
+	} ) => {
 		await expect( page.getByLabel( 'Enable local pickup' ) ).toBeChecked();
 
-		await utils.disableLocalPickup( { page } );
+		await localPickupUtils.disableLocalPickup();
 
 		await expect(
 			page.getByLabel( 'Enable local pickup' )
 		).not.toBeChecked();
 	} );
 
-	test( 'user can change the title', async ( { page } ) => {
+	test( 'user can change the title', async ( { page, localPickupUtils } ) => {
 		await page
 			.getByPlaceholder( 'Local Pickup' )
 			.fill( 'Local Pickup Test #1' );
 
-		await utils.savelocalPickupSettings( { page } );
+		await localPickupUtils.saveLocalPickupSettings();
 
 		await expect( page.getByPlaceholder( 'Local Pickup' ) ).toHaveValue(
 			'Local Pickup Test #1'
@@ -41,15 +43,18 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			.getByPlaceholder( 'Local Pickup' )
 			.fill( 'Local Pickup Test #2' );
 
-		await utils.savelocalPickupSettings( { page } );
+		await localPickupUtils.saveLocalPickupSettings();
 
 		await expect( page.getByPlaceholder( 'Local Pickup' ) ).toHaveValue(
 			'Local Pickup Test #2'
 		);
 	} );
 
-	test( 'user can toggle the price field state', async ( { page } ) => {
-		await utils.enableLocalPickupCosts( { page } );
+	test( 'user can toggle the price field state', async ( {
+		page,
+		localPickupUtils,
+	} ) => {
+		await localPickupUtils.enableLocalPickupCosts();
 
 		await expect(
 			page.getByLabel(
@@ -57,7 +62,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			)
 		).toBeChecked();
 
-		await utils.disableLocalPickupCosts( { page } );
+		await localPickupUtils.disableLocalPickupCosts();
 
 		await expect(
 			page.getByLabel(
@@ -66,8 +71,11 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		).not.toBeChecked();
 	} );
 
-	test( 'user can edit costs and tax status', async ( { page } ) => {
-		await utils.enableLocalPickupCosts( { page } );
+	test( 'user can edit costs and tax status', async ( {
+		page,
+		localPickupUtils,
+	} ) => {
+		await localPickupUtils.enableLocalPickupCosts();
 
 		await expect(
 			page.getByLabel(
@@ -78,7 +86,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		await page.getByPlaceholder( 'Free' ).fill( '20' );
 		await page.getByLabel( 'Taxes' ).selectOption( 'none' );
 
-		await utils.savelocalPickupSettings( { page } );
+		await localPickupUtils.saveLocalPickupSettings();
 
 		await expect( page.getByPlaceholder( 'Free' ) ).toHaveValue( '20' );
 		await expect( page.getByLabel( 'Taxes' ) ).toHaveValue( 'none' );
@@ -86,14 +94,17 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		await page.getByPlaceholder( 'Free' ).fill( '' );
 		await page.getByLabel( 'Taxes' ).selectOption( 'taxable' );
 
-		await utils.savelocalPickupSettings( { page } );
+		await localPickupUtils.saveLocalPickupSettings();
 
 		await expect( page.getByPlaceholder( 'Free' ) ).toHaveValue( '' );
 		await expect( page.getByLabel( 'Taxes' ) ).toHaveValue( 'taxable' );
 	} );
 
-	test( 'user can add a new location', async ( { page } ) => {
-		await utils.addPickupLocation( {
+	test( 'user can add a new location', async ( {
+		page,
+		localPickupUtils,
+	} ) => {
+		await localPickupUtils.addPickupLocation( {
 			page,
 			location: {
 				name: 'Automattic, Inc.',
@@ -112,8 +123,8 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		).toBeVisible();
 	} );
 
-	test( 'user can edit a location', async ( { page } ) => {
-		await utils.addPickupLocation( {
+	test( 'user can edit a location', async ( { page, localPickupUtils } ) => {
+		await localPickupUtils.addPickupLocation( {
 			page,
 			location: {
 				name: 'Automattic, Inc.',
@@ -131,7 +142,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			} )
 		).toBeVisible();
 
-		await utils.editPickupLocation( {
+		await localPickupUtils.editPickupLocation( {
 			page,
 			location: {
 				name: 'Ministry of Automattic Limited',
@@ -150,8 +161,11 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		).toBeVisible();
 	} );
 
-	test( 'user can delete a location', async ( { page } ) => {
-		await utils.addPickupLocation( {
+	test( 'user can delete a location', async ( {
+		page,
+		localPickupUtils,
+	} ) => {
+		await localPickupUtils.addPickupLocation( {
 			page,
 			location: {
 				name: 'Ausomattic Pty Ltd',
@@ -170,7 +184,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			} )
 		).toBeVisible();
 
-		await utils.deletePickupLocation( { page } );
+		await localPickupUtils.deletePickupLocation();
 
 		await expect(
 			page.getByRole( 'cell', {

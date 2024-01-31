@@ -18,6 +18,10 @@ import {
 	FrontendUtils,
 	StoreApiUtils,
 	PerformanceUtils,
+	ShippingUtils,
+	LocalPickupUtils,
+	MiniCartUtils,
+	WPCLIUtils,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -114,6 +118,10 @@ const test = base.extend<
 		storeApiUtils: StoreApiUtils;
 		performanceUtils: PerformanceUtils;
 		snapshotConfig: void;
+		shippingUtils: ShippingUtils;
+		localPickupUtils: LocalPickupUtils;
+		miniCartUtils: MiniCartUtils;
+		wpCliUtils: WPCLIUtils;
 	},
 	{
 		requestUtils: RequestUtils;
@@ -153,6 +161,18 @@ const test = base.extend<
 	},
 	storeApiUtils: async ( { requestUtils }, use ) => {
 		await use( new StoreApiUtils( requestUtils ) );
+	},
+	shippingUtils: async ( { page, admin }, use ) => {
+		await use( new ShippingUtils( page, admin ) );
+	},
+	localPickupUtils: async ( { page, admin }, use ) => {
+		await use( new LocalPickupUtils( page, admin ) );
+	},
+	miniCartUtils: async ( { page, frontendUtils }, use ) => {
+		await use( new MiniCartUtils( page, frontendUtils ) );
+	},
+	wpCliUtils: async ( {}, use ) => {
+		await use( new WPCLIUtils() );
 	},
 	requestUtils: [
 		async ( {}, use, workerInfo ) => {
