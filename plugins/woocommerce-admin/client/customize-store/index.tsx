@@ -4,7 +4,7 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
-import { Sender, createMachine } from 'xstate';
+import { EventData, Sender, createMachine } from 'xstate';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { useMachine, useSelector } from '@xstate/react';
 import {
@@ -530,6 +530,49 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 	},
 } );
 
+declare global {
+	interface Window {
+		__wcCustomizeStore: {
+			isFontLibraryAvailable: boolean | null;
+		};
+	}
+}
+
+// HACK: This is a temporary solution to pass flags computed into the iframe instance state machines.
+// This is needed because the iframe loads the entire Customize Store app. This means that the iframe instance will have different state machines than the parent window.
+const setFlagsForIframeInstance = async (
+	send: (
+		event: customizeStoreStateMachineEvents,
+		payload?: EventData | undefined
+	) => void
+) => {
+	if ( ! window.frameElement ) {
+		return {
+			FONT_LIBRARY_AVAILABLE: ( async () => {
+				const isFontLibraryAvailable =
+					await fetchIsFontLibraryAvailable();
+
+				window.__wcCustomizeStore = {
+					...window.__wcCustomizeStore,
+					isFontLibraryAvailable,
+				};
+			} )(),
+		};
+	}
+
+	return {
+		FONT_LIBRARY_AVAILABLE: ( async () => {
+			window.__wcCustomizeStore = window.__wcCustomizeStore ?? {};
+			const isFontLibraryAvailable =
+				window.__wcCustomizeStore.isFontLibraryAvailable || false;
+			send( {
+				type: 'IS_FONT_LIBRARY_AVAILABLE',
+				payload: isFontLibraryAvailable,
+			} );
+		} )(),
+	};
+};
+
 export const CustomizeStoreController = ( {
 	actionOverrides,
 	servicesOverrides,
@@ -581,10 +624,9 @@ export const CustomizeStoreController = ( {
 	} );
 
 	useEffect( () => {
-		fetchIsFontLibraryAvailable().then( ( value ) =>
-			send( { type: 'IS_FONT_LIBRARY_AVAILABLE', payload: value } )
-		);
+		setFlagsForIframeInstance( send );
 	}, [ send ] );
+
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
 		findComponentMeta< CustomizeStoreComponentMeta >(
