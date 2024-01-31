@@ -38,21 +38,13 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
 
-            - name: Run Playwright E2E tests on chrome-main.
+            - name: Run Playwright E2E tests.
               timeout-minutes: 60
-              id: run_playwright_e2e_tests_main
+              id: run_playwright_e2e_tests
               env:
                   USE_WP_ENV: 1
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --project=chrome-main --config=tests/e2e-pw/playwright.config.js
-
-            - name: Run Playwright E2E tests on chrome-legacy-editor.
-              timeout-minutes: 60
-              id: run_playwright_e2e_tests_legacy_editor
-              env:
-                  USE_WP_ENV: 1
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --project=chrome-legacy-editor --config=tests/e2e-pw/playwright.config.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Run Playwright E2E tests on chrome-new-editor.
               timeout-minutes: 60
