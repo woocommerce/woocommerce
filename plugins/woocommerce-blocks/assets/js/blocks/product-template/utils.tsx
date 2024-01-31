@@ -28,7 +28,7 @@ const templateSlugs = {
 	checkout: 'page-checkout',
 };
 
-const parseResponse = ( resp?: Record< 'id', number >[] ): number | null =>
+const getIdFromResponse = ( resp?: Record< 'id', number >[] ): number | null =>
 	resp && resp.length && resp[ 0 ]?.id ? resp[ 0 ].id : null;
 
 const setEntityId: SetEntityId = async ( kind, name, slug, stateSetter ) => {
@@ -40,7 +40,7 @@ const setEntityId: SetEntityId = async ( kind, name, slug, stateSetter ) => {
 			slug,
 		}
 	) ) as Record< 'id', number >[];
-	const entityId = parseResponse( response );
+	const entityId = getIdFromResponse( response );
 	stateSetter( entityId );
 };
 
