@@ -3,6 +3,7 @@
  */
 import { readFile } from 'fs/promises';
 import Handlebars from 'handlebars';
+import { exec } from 'child_process';
 
 /**
  * Internal dependencies
@@ -23,24 +24,49 @@ Handlebars.registerHelper( 'stringify', function ( context ) {
 } );
 
 const deletePost = async ( id: string ) => {
-	await cli( `wp post delete ${ id } --force` );
+	await cli(
+		`npm run wp-env run tests-cli -- wp post delete ${ id } --force`
+	);
 };
 
 // Creates a post as user 1.
-const createPost = async ( title: string, templateContent: string ) => {
-	const { stdout } = await cli(
-		`wp post create --post_status=publish --post_author=1 --post_title="${ title }" "${ templateContent }"`
-	);
+const createPost = async (
+	title: string,
+	templateContent: string
+): Promise< {
+	url: string;
+	id: string;
+	deletePost: () => Promise< void >;
+} > => {
+	return new Promise( ( resolve, reject ) => {
+		const command = `npm run wp-env run tests-cli -- wp post create --porcelain --post_status=publish --post_author=1 --post_title="${ title }" -`;
 
-	const match = stdout.match( /\d+/ );
-	if ( match ) {
-		const postId = match[ 0 ];
-		return {
-			url: `?p=${ postId }`,
-			id: postId,
-			deletePost: () => deletePost( postId ),
-		};
-	}
+		const childProcess = exec( command, ( error, stdout ) => {
+			// stderr is not empty when the command succeeds, so the best we can do is check if stdout contains the id.
+			// stdout also contains cruft from passing the command to wp-env, so we have to extract the ID from the output.
+			const outputLines = stdout.trim().split( '\n' );
+			const postId = outputLines.find( ( line ) =>
+				line.match( /^\d+$/ )
+			);
+
+			if ( ! postId ) {
+				reject( new Error( `Could not create post: ${ stdout }` ) );
+			} else {
+				resolve( {
+					id: postId,
+					url: `/${ title.toLowerCase().replace( /\s+/g, '-' ) }/`,
+					deletePost: () => deletePost( postId ),
+				} );
+			}
+		} );
+
+		if ( childProcess.stdin ) {
+			childProcess.stdin.write( templateContent );
+			childProcess.stdin.end();
+		} else {
+			reject( new Error( 'Could not create post: stdin not available' ) );
+		}
+	} );
 };
 
 export const createPostFromTemplate = async (
