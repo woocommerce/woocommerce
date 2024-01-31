@@ -181,17 +181,25 @@ class OrderAttributionController implements RegisterHooksInterface {
 
 	/**
 	 * If the order is created in the admin, set the source type and origin to admin/Web admin.
-	 * Ensure it's not an AJAX request because these can come from the frontend in some cases.
+	 * Only execute this if the order is created in the admin interface (or via ajax in the admin interface).
 	 *
 	 * @param WC_Order $order The recently created order object.
 	 *
 	 * @since 8.5.0
 	 */
 	private function maybe_set_admin_source( WC_Order $order ) {
-		if ( is_admin() && ! wp_doing_ajax() ) {
-			$order->add_meta_data( $this->get_meta_prefixed_field_name( 'source_type' ), 'admin' );
-			$order->save();
+		// If ajax request but not from admin, bail.
+		if ( wp_doing_ajax() && strpos( $_SERVER['HTTP_REFERER'], get_admin_url() ) !== 0 )  {
+			return;
 		}
+
+		// If not admin interface page, bail.
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		$order->add_meta_data( $this->get_meta_prefixed_field_name( 'source_type' ), 'admin' );
+		$order->save();
 	}
 
 	/**
