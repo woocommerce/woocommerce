@@ -22,9 +22,9 @@ import { useMemo } from '@wordpress/element';
  *  collection: 'woocommerce/product-collection/featured'
  * }
  *
- * @param args                      - Arguments for the hook.
- * @param args.clientId             - Client ID of the inner block.
- * @param args.queryContextIncludes - Array of attribute names to be included in the query context.
+ * @param args                      Arguments for the hook.
+ * @param args.clientId             Client ID of the inner block.
+ * @param args.queryContextIncludes Array of attribute names to be included in the query context.
  *
  * @return Query context object.
  */

@@ -183,8 +183,7 @@ const ProductTemplateEdit = ( {
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
-					productCollectionBlockContext:
-						productCollectionQueryContext,
+					productCollectionQueryContext,
 				} ),
 				blocks: getBlocks( clientId ),
 			};
