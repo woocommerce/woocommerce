@@ -127,7 +127,7 @@ export const useGetLocation = < T, >(
 		isInMiniCartBlock;
 
 	const [ productId, setProductId ] = useState< number | null >( null );
-	const [ catId, setCatId ] = useState< number | null >( null );
+	const [ categoryId, setCategoryId ] = useState< number | null >( null );
 	const [ tagId, setTagId ] = useState< number | null >( null );
 
 	useEffect( () => {
@@ -138,7 +138,7 @@ export const useGetLocation = < T, >(
 
 		if ( isInSpecificCategoryTemplate ) {
 			const slug = getEntitySlug( templateSlugs.productCategory );
-			setEntityId( 'taxonomy', 'product_cat', slug, setCatId );
+			setEntityId( 'taxonomy', 'product_cat', slug, setCategoryId );
 		}
 
 		if ( isInSpecificTagTemplate ) {
@@ -186,8 +186,8 @@ export const useGetLocation = < T, >(
 
 	if ( isInSpecificCategoryTemplate ) {
 		return createLocationObject( 'archive', {
-			taxonomy: 'cat',
-			termId: catId,
+			taxonomy: 'product_cat',
+			termId: categoryId,
 		} );
 	}
 
@@ -198,7 +198,7 @@ export const useGetLocation = < T, >(
 
 	if ( isInSpecificTagTemplate ) {
 		return createLocationObject( 'archive', {
-			taxonomy: 'tag',
+			taxonomy: 'product_tag',
 			termId: tagId,
 		} );
 	}
@@ -210,14 +210,14 @@ export const useGetLocation = < T, >(
 
 	if ( isInProductsByCategoryTemplate ) {
 		return createLocationObject( 'archive', {
-			taxonomy: 'cat',
+			taxonomy: 'product_cat',
 			termId: null,
 		} );
 	}
 
 	if ( isInProductsByTagTemplate ) {
 		return createLocationObject( 'archive', {
-			taxonomy: 'tag',
+			taxonomy: 'product_tag',
 			termId: null,
 		} );
 	}
