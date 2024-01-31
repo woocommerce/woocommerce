@@ -2,7 +2,9 @@
 
 namespace Automattic\WooCommerce\Internal;
 
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use \Exception;
 
@@ -10,8 +12,21 @@ use \Exception;
  * This class is intended to be used with BatchProcessingController and converts verbose
  * 'coupon_data' metadata entries in coupon line items (corresponding to coupons applied to orders)
  * into simplified 'coupon_reapply_info' entries. See WC_Coupon::get_reapply_info.
+ *
+ * Additionally, this class manages the "Convert order coupon data" tool.
  */
-class OrderCouponDataMigrator implements BatchProcessorInterface {
+class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksInterface {
+
+	use AccessiblePrivateMethods;
+
+	/**
+	 * Register hooks for the class.
+	 */
+	public function register() {
+		self::add_filter( 'woocommerce_debug_tools', array( $this, 'handle_woocommerce_debug_tools' ), 999, 1 );
+		self::mark_method_as_accessible( 'enqueue' );
+		self::mark_method_as_accessible( 'dequeue' );
+	}
 
 	/**
 	 * Get a user-friendly name for this processor.
@@ -141,5 +156,76 @@ class OrderCouponDataMigrator implements BatchProcessorInterface {
 	 */
 	public function get_default_batch_size(): int {
 		return 1000;
+	}
+
+	/**
+	 * Add the tool to start or stop the background process that converts order coupon metadata entries.
+	 *
+	 * @param array $tools Old tools array.
+	 * @return array Updated tools array.
+	 */
+	private function handle_woocommerce_debug_tools( array $tools ): array {
+		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
+
+		$pending_count = $this->get_total_pending_count();
+
+		if ( 0 === $pending_count ) {
+			$tools['start_convert_order_coupon_data'] = array(
+				'name'     => __( 'Start converting order coupon data to the simplified format', 'woocommerce' ),
+				'button'   => __( 'Start converting', 'woocommerce' ),
+				'disabled' => true,
+				'desc'     => __( 'This will convert <code>coupon_data</code> order item meta entries to simplified <code>coupon_reapply_info</code> entries. The conversion will happen overtime in the background (via Action Scheduler). There are currently no entries to convert.', 'woocommerce' ),
+			);
+		} elseif ( $batch_processor->is_enqueued( self::class ) ) {
+			$tools['stop_convert_order_coupon_data'] = array(
+				'name'     => __( 'Stop converting order coupon data to the simplified format', 'woocommerce' ),
+				'button'   => __( 'Stop converting', 'woocommerce' ),
+				'desc'     =>
+					/* translators: %d=count of entries pending conversion */
+					sprintf( __( 'This will stop the background process that converts <code>coupon_data</code> order item meta entries to simplified <code>coupon_reapply_info</code> entries. There are currently %d entries that can be converted.', 'woocommerce' ), $pending_count ),
+				'callback' => array( $this, 'dequeue' ),
+			);
+		} else {
+			$tools['start_converting_order_coupon_data'] = array(
+				'name'     => __( 'Convert order coupon data to the simplified format', 'woocommerce' ),
+				'button'   => __( 'Start converting', 'woocommerce' ),
+				'desc'     =>
+					/* translators: %d=count of entries pending conversion */
+					sprintf( __( 'This will convert <code>coupon_data</code> order item meta entries to simplified <code>coupon_reapply_info</code> entries. The conversion will happen overtime in the background (via Action Scheduler). There are currently %d entries that can be converted.', 'woocommerce' ), $pending_count ),
+				'callback' => array( $this, 'enqueue' ),
+			);
+		}
+
+		return $tools;
+	}
+
+	/**
+	 * Start the background process for coupon data conversion.
+	 *
+	 * @return string Informative string to show after the tool is triggered in UI.
+	 */
+	private function enqueue(): string {
+		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
+		if ( $batch_processor->is_enqueued( self::class ) ) {
+			return __( 'Background process for coupon meta conversion already started, nothing done.', 'woocommerce' );
+		}
+
+		$batch_processor->enqueue_processor( self::class );
+		return __( 'Background process for coupon meta conversion started', 'woocommerce' );
+	}
+
+	/**
+	 * Stop the background process for coupon data conversion.
+	 *
+	 * @return string Informative string to show after the tool is triggered in UI.
+	 */
+	private function dequeue(): string {
+		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
+		if ( ! $batch_processor->is_enqueued( self::class ) ) {
+			return __( 'Background process for coupon meta conversion not started, nothing done.', 'woocommerce' );
+		}
+
+		$batch_processor->remove_processor( self::class );
+		return __( 'Background process for coupon meta conversion stopped', 'woocommerce' );
 	}
 }
