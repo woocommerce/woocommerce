@@ -493,6 +493,20 @@ class BlockTemplateUtils {
 	}
 
 	/**
+	 * Retrieves a single unified template object using its id.
+	 *
+	 * @param string $id            Template unique identifier (example: theme_slug//template_slug).
+	 * @param string $template_type Optional. Template type: `wp_template` or 'wp_template_part`.
+	 *                              Default `wp_template`.
+	 *
+	 * @return WP_Block_Template|null Template.
+	 */
+	public static function get_block_template( $id, $template_type ) {
+		wc_deprecated_function( 'BlockTemplateUtils::get_block_template()', '8.7', 'get_block_template()' );
+		return get_block_template( $id, $template_type );
+	}
+
+	/**
 	 * Checks if we can fall back to the `archive-product` template for a given slug.
 	 *
 	 * `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-product_attribute` templates can
