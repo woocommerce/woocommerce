@@ -6,9 +6,7 @@ use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
-use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
 
 /**
  * BlockTypesController class.
@@ -418,36 +416,6 @@ class BlockTemplatesController {
 		 */
 		$query_result = array_map(
 			function( $template ) {
-				if ( str_contains( $template->slug, 'single-product' ) ) {
-					// We don't want to add the compatibility layer on the Editor Side.
-					// The second condition is necessary to not apply the compatibility layer on the REST API. Gutenberg uses the REST API to clone the template.
-					// More details: https://github.com/woocommerce/woocommerce-blocks/issues/9662.
-					if ( ( ! is_admin() && ! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) && ! BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
-						// Add the product class to the body. We should move this to a more appropriate place.
-						add_filter(
-							'body_class',
-							function( $classes ) {
-								return array_merge( $classes, wc_get_product_class() );
-							}
-						);
-
-						global $product;
-
-						if ( ! $product instanceof \WC_Product ) {
-							$product_id = get_the_ID();
-							if ( $product_id ) {
-								wc_setup_product_data( $product_id );
-							}
-						}
-
-						if ( post_password_required() ) {
-							$template->content = SingleProductTemplate::add_password_form( $template->content );
-						} else {
-							$template->content = SingleProductTemplateCompatibility::add_compatibility_layer( $template->content );
-						}
-					}
-				}
-
 				if ( ! $template->title || $template->title === $template->slug ) {
 					$template->title = BlockTemplateUtils::get_block_template_title( $template->slug );
 				}
