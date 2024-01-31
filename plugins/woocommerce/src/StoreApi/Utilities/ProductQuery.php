@@ -96,14 +96,25 @@ class ProductQuery {
 			'and'    => 'AND',
 		];
 
+		
+		$all_product_taxonomies     = get_object_taxonomies( 'product', 'names' );
+		$exclude_special_taxonomies = array( 'product_visibility', 'product_shipping_class' );
+		$all_product_taxonomies     = array_reduce(
+			array_diff( $all_product_taxonomies, $exclude_special_taxonomies ), 
+			function( $acc, $tax ) {
+				$acc[ $tax ] = $tax;
+				return $acc;
+			}
+		);
+
 		// Gets all registered product taxonomies and prefixes them with `tax_`.
 		// This is needed to avoid situations where a user registers a new product taxonomy with the same name as default field.
-		// eg an `sku` taxonomy will be mapped to `tax_sku`.
+		// eg an `sku` taxonomy will be mapped to `_unstable_tax_sku`.
 		$all_product_taxonomies = array_map(
 			function ( $value ) {
 				return '_unstable_tax_' . $value;
 			},
-			get_taxonomies( array( 'object_type' => array( 'product' ) ), 'names' )
+			$all_product_taxonomies
 		);
 
 		// Map between taxonomy name and arg key.
