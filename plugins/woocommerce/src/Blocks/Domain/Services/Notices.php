@@ -46,7 +46,6 @@ class Notices {
 			add_filter( 'wc_get_template', [ $this, 'get_notices_template' ], 10, 5 );
 			add_action( 'wp_head', [ $this, 'enqueue_notice_styles' ] );
 		}
-
 	}
 
 	/**
@@ -87,10 +86,17 @@ class Notices {
 	 * @return string
 	 */
 	public function get_notices_template( $template, $template_name, $args, $template_path, $default_path ) {
+		$directory = get_stylesheet_directory();
+		$file	   = $directory . '/woocommerce/' . $template_name;
+		if ( file_exists( $file ) ) {
+			return $file;
+		}
+
 		if ( in_array( $template_name, $this->notice_templates, true ) ) {
 			$template = $this->package->get_path( 'templates/block-' . $template_name );
 			wp_enqueue_style( 'wc-blocks-style' );
 		}
+
 		return $template;
 	}
 

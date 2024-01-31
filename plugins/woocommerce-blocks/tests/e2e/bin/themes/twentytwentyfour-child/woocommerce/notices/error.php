@@ -36,13 +36,13 @@ $multiple = count( $notices ) > 1;
 			<ul>
 			<?php foreach ( $notices as $notice ) : ?>
 				<li<?php echo wc_get_notice_data_attr( $notice ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-					Block error notice - <?php echo wc_kses_notice( $notice['notice'] ); ?>
+					BLOCK ERROR NOTICE - <?php echo wc_kses_notice( $notice['notice'] ); ?>
 				</li>
 			<?php endforeach; ?>
 			</ul>
 			<?php
 		} else {
-			echo 'Block error notice - ' . wc_kses_notice( $notices[0]['notice'] );
+			echo 'BLOCK ERROR NOTICE - ' . wc_kses_notice( $notices[0]['notice'] );
 		}
 		?>
 	</div>
