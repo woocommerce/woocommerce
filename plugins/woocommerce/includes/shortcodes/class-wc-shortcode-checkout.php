@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\Users;
+
 /**
  * Shortcode checkout class.
  */
@@ -385,11 +387,12 @@ class WC_Shortcode_Checkout {
 		// If we cannot match the order with the current user, ask that they verify their email address.
 		$nonce_is_valid = wp_verify_nonce( filter_input( INPUT_POST, 'check_submission' ), 'wc_verify_email' );
 		$supplied_email = null;
+		$order_id       = $order->get_id();
 
 		if ( $nonce_is_valid ) {
 			$supplied_email = sanitize_email( wp_unslash( filter_input( INPUT_POST, 'email' ) ) );
 		}
 
-		return ! $order->email_is_valid( $supplied_email, $context );
+		return Users::should_user_verify_order_email( $order_id, $supplied_email, $context );
 	}
 }
