@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Internal\ProductQueryFilters;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
+use WC_Product_Variable;
 
 /**
  * Tests related to FilterClausesGenerator service.
@@ -14,6 +15,13 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	 * @var FixtureData
 	 */
 	protected $fixture_data;
+
+	/**
+	 * Test products data.
+	 *
+	 * @var Array
+	 */
+	protected $products_data;
 
 	/**
 	 * Test products.
@@ -32,76 +40,79 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 
 		$this->fixture_data = new FixtureData();
 
+		$this->products_data = array(
+			array(
+				'name'          => 'Product 1',
+				'regular_price' => 10,
+				'stock_status'  => 'instock',
+			),
+			array(
+				'name'          => 'Product 2',
+				'regular_price' => 20,
+				'stock_status'  => 'instock',
+			),
+			array(
+				'name'          => 'Product 3',
+				'regular_price' => 30,
+				'stock_status'  => 'outofstock',
+			),
+			array(
+				'name'          => 'Product 4',
+				'regular_price' => 40,
+				'stock_status'  => 'onbackorder',
+			),
+			// To keep our test simple, we set the same price for all variations of a product.
+			array(
+				'name'       => 'Product 5',
+				'variations' => array(
+					array(
+						'attributes' => array(
+							'pa_color' => 'red',
+						),
+						'props'      => array(
+							'regular_price' => 50,
+							'stock_status'  => 'instock',
+						),
+					),
+					array(
+						'attributes' => array(
+							'pa_color' => 'green',
+						),
+						'props'      => array(
+							'regular_price' => 50,
+							'stock_status'  => 'instock',
+						),
+					),
+				),
+			),
+			array(
+				'name'       => 'Product 6',
+				'variations' => array(
+					array(
+						'attributes' => array(
+							'pa_color' => 'blue',
+						),
+						'props'      => array(
+							'regular_price' => 60,
+							'stock_status'  => 'instock',
+						),
+					),
+					array(
+						'attributes' => array(
+							'pa_color' => 'green',
+						),
+						'props'      => array(
+							'regular_price' => 60,
+							'stock_status'  => 'instock',
+						),
+					),
+				),
+			),
+		);
+
 		$this->products = array_map(
 			array( $this, 'create_test_product' ),
-			array(
-				array(
-					'name'          => 'Product 1',
-					'regular_price' => 10,
-					'stock_status'  => 'instock',
-				),
-				array(
-					'name'          => 'Product 2',
-					'regular_price' => 20,
-					'stock_status'  => 'instock',
-				),
-				array(
-					'name'          => 'Product 3',
-					'regular_price' => 30,
-					'stock_status'  => 'outofstock',
-				),
-				array(
-					'name'          => 'Product 4',
-					'regular_price' => 40,
-					'stock_status'  => 'onbackorder',
-				),
-				array(
-					'name'       => 'Product 5',
-					'variations' => array(
-						array(
-							'attributes' => array(
-								'pa_color' => 'red',
-							),
-							'props'      => array(
-								'regular_price' => 50,
-								'stock_status'  => 'instock',
-							),
-						),
-						array(
-							'attributes' => array(
-								'pa_color' => 'green',
-							),
-							'props'      => array(
-								'regular_price' => 50,
-								'stock_status'  => 'instock',
-							),
-						),
-					),
-				),
-				array(
-					'name'       => 'Product 6',
-					'variations' => array(
-						array(
-							'attributes' => array(
-								'pa_color' => 'blue',
-							),
-							'props'      => array(
-								'regular_price' => 60,
-								'stock_status'  => 'instock',
-							),
-						),
-						array(
-							'attributes' => array(
-								'pa_color' => 'green',
-							),
-							'props'      => array(
-								'regular_price' => 60,
-								'stock_status'  => 'instock',
-							),
-						),
-					),
-				),
-			)
+			$this->products_data
 		);
 	}
 
@@ -211,6 +222,7 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 					$this->update_lookup_table( $variation, $taxonomy, $term->term_id );
 				}
 			}
+			WC_Product_Variable::sync( $variable_product );
 			return $variable_product;
 		}
 
