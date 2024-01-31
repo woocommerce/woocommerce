@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix undefined meta_data on slow connections
+
+
