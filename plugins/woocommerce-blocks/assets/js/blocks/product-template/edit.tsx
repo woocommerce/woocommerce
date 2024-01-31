@@ -248,38 +248,31 @@ const ProductTemplateEdit = (
 	// This ensures that when it is displayed again, the cached rendering of the
 	// block preview is used, instead of having to re-render the preview from scratch.
 	return (
-		<>
-			<h3>Location type: { location.type }</h3>
-			<h3>Location data: { JSON.stringify( location.sourceData ) }</h3>
-			<br />
-			<ul { ...blockProps }>
-				{ blockContexts &&
-					blockContexts.map( ( blockContext ) => (
-						<BlockContextProvider
-							key={ blockContext.postId }
-							value={ blockContext }
-						>
-							{ blockContext.postId ===
-							( activeBlockContextId ||
-								blockContexts[ 0 ]?.postId ) ? (
-								<ProductTemplateInnerBlocks />
-							) : null }
-							<MemoizedProductTemplateBlockPreview
-								blocks={ blocks }
-								blockContextId={ blockContext.postId }
-								setActiveBlockContextId={
-									setActiveBlockContextId
-								}
-								isHidden={
-									blockContext.postId ===
-									( activeBlockContextId ||
-										blockContexts[ 0 ]?.postId )
-								}
-							/>
-						</BlockContextProvider>
-					) ) }
-			</ul>
-		</>
+		<ul { ...blockProps }>
+			{ blockContexts &&
+				blockContexts.map( ( blockContext ) => (
+					<BlockContextProvider
+						key={ blockContext.postId }
+						value={ blockContext }
+					>
+						{ blockContext.postId ===
+						( activeBlockContextId ||
+							blockContexts[ 0 ]?.postId ) ? (
+							<ProductTemplateInnerBlocks />
+						) : null }
+						<MemoizedProductTemplateBlockPreview
+							blocks={ blocks }
+							blockContextId={ blockContext.postId }
+							setActiveBlockContextId={ setActiveBlockContextId }
+							isHidden={
+								blockContext.postId ===
+								( activeBlockContextId ||
+									blockContexts[ 0 ]?.postId )
+							}
+						/>
+					</BlockContextProvider>
+				) ) }
+		</ul>
 	);
 };
 
