@@ -9,6 +9,7 @@ const product = {
 	slug: 'protected-product',
 	password: 'password',
 };
+
 test.describe( 'Single Product Template', () => {
 	let id: null | string = null;
 	test.beforeEach( async ( { admin, page } ) => {

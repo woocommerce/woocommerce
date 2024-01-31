@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { BlockControls, useBlockProps } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
 import {
@@ -39,6 +39,67 @@ import './style.scss';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
+const Toolbar = ( {
+	onClick,
+	isEditing,
+}: {
+	onClick: () => void;
+	isEditing: boolean;
+} ) => (
+	<BlockControls>
+		<ToolbarGroup
+			controls={ [
+				{
+					icon: 'edit',
+					title: __( 'Edit', 'woocommerce' ),
+					onClick,
+					isActive: isEditing,
+				},
+			] }
+		/>
+	</BlockControls>
+);
+
+const Wrapper = ( {
+	children,
+	onClickToolbarEdit,
+	isEditing,
+	blockProps,
+}: {
+	children: React.ReactNode;
+	onClickToolbarEdit: () => void;
+	isEditing: boolean;
+	blockProps: object;
+} ) => (
+	<div { ...blockProps }>
+		<Toolbar onClick={ onClickToolbarEdit } isEditing={ isEditing } />
+		{ children }
+	</div>
+);
+
+const AttributeSelectPlaceholder = ( {
+	attributeId,
+	setAttributeId,
+	onClickDone,
+}: {
+	attributeId: number;
+	setAttributeId: ( id: number ) => void;
+	onClickDone: () => void;
+} ) => (
+	<AttributesPlaceholder>
+		<div className="wc-block-attribute-filter__selection">
+			<AttributeSelectControls
+				isCompact={ false }
+				attributeId={ attributeId }
+				setAttributeId={ setAttributeId }
+			/>
+			<Button variant="primary" onClick={ onClickDone }>
+				{ __( 'Done', 'woocommerce' ) }
+			</Button>
+		</div>
+	</AttributesPlaceholder>
+);
+
 const Edit = ( props: EditProps ) => {
 	const {
 		attributes: blockAttributes,
@@ -46,14 +107,8 @@ const Edit = ( props: EditProps ) => {
 		debouncedSpeak,
 	} = props;
 
-	const {
-		attributeId,
-		queryParam,
-		queryType,
-		isPreview,
-		displayStyle,
-		showCounts,
-	} = blockAttributes;
+	const { attributeId, queryType, isPreview, displayStyle, showCounts } =
+		blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
 
@@ -75,42 +130,13 @@ const Edit = ( props: EditProps ) => {
 	const { results: filteredCounts } = useCollectionData( {
 		queryAttribute: {
 			taxonomy: attributeObject?.taxonomy || '',
-			queryType: blockAttributes.queryType,
+			queryType,
 		},
 		queryState: {},
 		isEditor: true,
 	} );
 
 	const blockProps = useBlockProps();
-
-	useEffect( () => {
-		if ( ! attributeObject?.taxonomy ) {
-			return;
-		}
-		const newQueryParam = {
-			calculate_attribute_counts: {
-				taxonomy: attributeObject.taxonomy,
-				queryType,
-			},
-		};
-		if (
-			objectHasProp( queryParam, 'calculate_attribute_counts' ) &&
-			objectHasProp(
-				queryParam.calculate_attribute_counts,
-				'taxonomy'
-			) &&
-			objectHasProp(
-				queryParam.calculate_attribute_counts,
-				'queryType'
-			) &&
-			queryParam.calculate_attribute_counts.taxonomy ===
-				attributeObject.taxonomy &&
-			queryParam.calculate_attribute_counts.queryType === queryType
-		) {
-			return;
-		}
-		setAttributes( { queryParam: newQueryParam } );
-	}, [ queryParam, queryType, setAttributes, attributeObject?.taxonomy ] );
 
 	useEffect( () => {
 		const termIdHasProducts =
@@ -128,76 +154,63 @@ const Edit = ( props: EditProps ) => {
 		);
 	}, [ attributeTerms, filteredCounts ] );
 
-	const Toolbar = () => (
-		<BlockControls>
-			<ToolbarGroup
-				controls={ [
-					{
-						icon: 'edit',
-						title: __( 'Edit', 'woocommerce' ),
-						onClick: () => setIsEditing( ! isEditing ),
-						isActive: isEditing,
-					},
-				] }
-			/>
-		</BlockControls>
+	const onClickDone = useCallback( () => {
+		setIsEditing( false );
+		debouncedSpeak(
+			__(
+				'Now displaying a preview of the Filter Products by Attribute block.',
+				'woocommerce'
+			)
+		);
+	}, [ setIsEditing ] );
+
+	const setAttributeId = useCallback(
+		( id ) => {
+			setAttributes( {
+				attributeId: id,
+			} );
+		},
+		[ setAttributes ]
 	);
 
-	const AttributeSelectPlaceholder = () => (
-		<AttributesPlaceholder>
-			<div className="wc-block-attribute-filter__selection">
-				<AttributeSelectControls
-					isCompact={ false }
-					attributeId={ attributeId }
-					setAttributeId={ ( id ) =>
-						setAttributes( {
-							attributeId: id,
-						} )
-					}
-				/>
-				<Button
-					variant="primary"
-					onClick={ () => {
-						setIsEditing( false );
-						debouncedSpeak(
-							__(
-								'Now displaying a preview of the Filter Products by Attribute block.',
-								'woocommerce'
-							)
-						);
-					} }
-				>
-					{ __( 'Done', 'woocommerce' ) }
-				</Button>
-			</div>
-		</AttributesPlaceholder>
-	);
-
-	const Wrapper = ( { children }: { children: React.ReactNode } ) => (
-		<div { ...blockProps }>
-			<Toolbar />
-			{ children }
-		</div>
-	);
+	const toggleEditing = useCallback( () => {
+		setIsEditing( ! isEditing );
+	}, [ isEditing ] );
 
 	// Block rendering starts.
 	if ( Object.keys( ATTRIBUTES ).length === 0 )
 		return (
-			<Wrapper>
+			<Wrapper
+				onClickToolbarEdit={ toggleEditing }
+				isEditing={ isEditing }
+				blockProps={ blockProps }
+			>
 				<NoAttributesPlaceholder />
 			</Wrapper>
 		);
 
 	if ( isEditing )
 		return (
-			<Wrapper>
-				<AttributeSelectPlaceholder />
+			<Wrapper
+				onClickToolbarEdit={ toggleEditing }
+				isEditing={ isEditing }
+				blockProps={ blockProps }
+			>
+				<AttributeSelectPlaceholder
+					onClickDone={ onClickDone }
+					attributeId={ attributeId }
+					setAttributeId={ setAttributeId }
+				/>
 			</Wrapper>
 		);
 
 	if ( ! attributeId || ! attributeObject )
 		return (
-			<Wrapper>
+			<Wrapper
+				onClickToolbarEdit={ toggleEditing }
+				isEditing={ isEditing }
+				blockProps={ blockProps }
+			>
 				<Notice status="warning" isDismissible={ false }>
 					<p>
 						{ __(
@@ -211,7 +224,11 @@ const Edit = ( props: EditProps ) => {
 
 	if ( attributeOptions.length === 0 )
 		return (
-			<Wrapper>
+			<Wrapper
+				onClickToolbarEdit={ toggleEditing }
+				isEditing={ isEditing }
+				blockProps={ blockProps }
+			>
 				<Notice status="warning" isDismissible={ false }>
 					<p>
 						{ __(
@@ -224,7 +241,11 @@ const Edit = ( props: EditProps ) => {
 		);
 
 	return (
-		<Wrapper>
+		<Wrapper
+			onClickToolbarEdit={ toggleEditing }
+			isEditing={ isEditing }
+			blockProps={ blockProps }
+		>
 			<Inspector { ...props } />
 			<Disabled>
 				{ displayStyle === 'dropdown' ? (

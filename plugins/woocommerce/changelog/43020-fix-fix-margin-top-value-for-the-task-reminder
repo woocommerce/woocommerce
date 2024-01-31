@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix incorrect wpBody margin top value set by TaskReminderBar component.

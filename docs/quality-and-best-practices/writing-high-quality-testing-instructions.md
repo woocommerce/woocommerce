@@ -95,7 +95,7 @@ In this section, you will see some real examples of testing instructions that ha
 
 Before:
 
-![Instructions needing improvement](https://developer.woo.com/wp-content/uploads/sites/2/2024/01/Instructions-needing-improvement.png)
+![Instructions needing improvement](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/213682262-25bec5c3-154c-45ec-aa3d-d3e07f52669e.png)
 
 After:
 
@@ -103,7 +103,7 @@ After:
 
 Improvements:
 
-![Changes made](https://developer.woo.com/wp-content/uploads/sites/2/2024/01/changes-made.png)
+![Changes made](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/213682323-0ecc998d-69ab-4201-8daa-820b948315e8.png)
 
 Before:
 

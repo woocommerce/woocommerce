@@ -2,11 +2,17 @@
  * External dependencies
  */
 import { expect, test } from '@woocommerce/e2e-playwright-utils';
+import { BlockData } from '@woocommerce/e2e-types';
 
-/**
- * Internal dependencies
- */
-import { blockData } from './utils';
+const blockData: BlockData = {
+	name: 'Mini-Cart',
+	slug: 'woocommerce/mini-cart',
+	mainClass: '.wc-block-minicart',
+	selectors: {
+		frontend: {},
+		editor: {},
+	},
+};
 
 test.describe( 'Merchant → Mini Cart', () => {
 	test.describe( 'in widget editor', () => {

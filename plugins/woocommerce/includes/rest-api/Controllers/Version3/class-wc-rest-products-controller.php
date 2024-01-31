@@ -1562,6 +1562,31 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
+	 * Get the downloads for a product.
+	 *
+	 * @param WC_Product $product Product instance.
+	 *
+	 * @return array
+	 */
+	protected function get_downloads( $product ) {
+		$downloads = array();
+
+		$context = isset( $this->request ) && isset( $this->request['context'] ) ? $this->request['context'] : 'view';
+
+		if ( $product->is_downloadable() || 'edit' === $context ) {
+			foreach ( $product->get_downloads() as $file_id => $file ) {
+				$downloads[] = array(
+					'id'   => $file_id, // MD5 hash.
+					'name' => $file['name'],
+					'file' => $file['file'],
+				);
+			}
+		}
+
+		return $downloads;
+	}
+
+	/**
 	 * Get product data.
 	 *
 	 * @param WC_Product $product Product instance.

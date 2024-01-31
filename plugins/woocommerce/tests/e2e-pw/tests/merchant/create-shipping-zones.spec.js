@@ -274,7 +274,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			);
 			await page.locator( '#zone_name' ).fill( shippingZoneNameUSRegion );
 
-			const input = await page.getByPlaceholder(
+			const input = page.getByPlaceholder(
 				'Start typing to filter zones'
 			);
 			input.click();
@@ -340,7 +340,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			);
 			await page.locator( '#zone_name' ).fill( shippingZoneNameFlatRate );
 
-			const input = await page.getByPlaceholder(
+			const input = page.getByPlaceholder(
 				'Start typing to filter zones'
 			);
 			input.click();
@@ -508,7 +508,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		await page.locator( 'button[name=calc_shipping]' ).click();
 		await expect(
 			page.locator( 'button[name=calc_shipping]' )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
@@ -529,7 +529,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		await page.locator( 'button[name=calc_shipping]' ).click();
 		await expect(
 			page.locator( 'button[name=calc_shipping]' )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
@@ -551,7 +551,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		await page.locator( 'button[name=calc_shipping]' ).click();
 		await expect(
 			page.locator( 'button[name=calc_shipping]' )
-		).not.toBeVisible();
+		).toBeHidden();
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )

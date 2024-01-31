@@ -16,6 +16,8 @@ import reducer, { ProductState, State } from './reducer';
 import controls from '../controls';
 
 registerStore< State >( STORE_NAME, {
+	// @ts-expect-error There are no types for this.
+	__experimentalUseThunks: true,
 	reducer: reducer as Reducer< ProductState >,
 	actions,
 	controls,

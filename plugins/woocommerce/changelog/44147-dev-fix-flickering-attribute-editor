@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+[Experimental] Fix a bug where the editor for attribute selector would flicker and re-render constantly.
