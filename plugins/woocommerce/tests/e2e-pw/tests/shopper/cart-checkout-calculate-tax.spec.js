@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { admin, customer } = require( '../../../test-data/data' );
+const { customer } = require( '../../test-data/data' );
 
 const productName = 'Taxed products are awesome';
 const productPrice = '100.00';
@@ -245,17 +245,17 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 				).toBeVisible();
 
 				await page
-					.locator( '#billing_first_name' )
+					.getByRole( 'textbox', { name: 'First name *' } )
 					.fill( customer.billing.us.first_name );
 				await page
-					.locator( '#billing_last_name' )
+					.getByRole( 'textbox', { name: 'Last name *' } )
 					.fill( customer.billing.us.last_name );
 				await page
-					.locator( '#billing_address_1' )
+					.getByRole( 'textbox', { name: 'Street address *' } )
 					.fill( customer.billing.us.address );
 				await page
-					.locator( '#billing_city' )
-					.fill( customer.billing.us.city );
+					.getByRole( 'textbox', { name: 'Town / City *' } )
+					.type( customer.billing.us.city );
 				await page
 					.locator( '#billing_country' )
 					.selectOption( customer.billing.us.country );
@@ -263,13 +263,13 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					.locator( '#billing_state' )
 					.selectOption( customer.billing.us.state );
 				await page
-					.locator( '#billing_postcode' )
-					.fill( customer.billing.us.zip );
+					.getByRole( 'textbox', { name: 'ZIP Code *' } )
+					.type( customer.billing.us.zip );
 				await page
-					.locator( '#billing_phone' )
+					.getByLabel( 'Phone *' )
 					.fill( customer.billing.us.phone );
 				await page
-					.locator( '#billing_email' )
+					.getByLabel( 'Email address *' )
 					.fill( customer.billing.us.email );
 
 				await expect(
@@ -944,7 +944,6 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 
 		test( 'checks that tax is applied to shipping as well as order', async ( {
 			page,
-			baseURL,
 		} ) => {
 			await test.step( 'Load cart page and confirm price display', async () => {
 				await page.goto( '/cart/' );

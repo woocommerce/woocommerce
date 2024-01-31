@@ -7,7 +7,6 @@ import { cli } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import { openMiniCart } from './utils';
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
 
 test.describe( 'Shopper → Translations', () => {
@@ -26,10 +25,11 @@ test.describe( 'Shopper → Translations', () => {
 	test( 'User can see translation in empty Mini-Cart', async ( {
 		page,
 		frontendUtils,
+		miniCartUtils,
 	} ) => {
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
-		await openMiniCart( frontendUtils );
+		await miniCartUtils.openMiniCart();
 
 		await expect(
 			page.getByText( 'Je winkelwagen is momenteel leeg!' )
@@ -43,10 +43,11 @@ test.describe( 'Shopper → Translations', () => {
 	test( 'User can see translation in filled Mini-Cart', async ( {
 		page,
 		frontendUtils,
+		miniCartUtils,
 	} ) => {
 		await frontendUtils.goToShop();
 		await page.getByLabel( 'Toevoegen aan winkelwagen: “Beanie“' ).click();
-		await openMiniCart( frontendUtils );
+		await miniCartUtils.openMiniCart();
 
 		await expect(
 			page.getByRole( 'heading', { name: 'Je winkelwagen (1 artikel)' } )

@@ -14,7 +14,6 @@ import {
 	SIMPLE_VIRTUAL_PRODUCT_NAME,
 } from './constants';
 import { CheckoutPage } from './checkout.page';
-import { utilsLocalPickup as utils } from '../local-pickup/utils.local-pickup';
 
 const testData = {
 	firstname: 'John',
@@ -41,9 +40,8 @@ const test = base.extend< { pageObject: CheckoutPage } >( {
 test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 	test.use( { storageState: adminFile } );
 
-	test.beforeEach( async ( { admin, editorUtils, page } ) => {
-		await utils.openLocalPickupSettings( { admin } );
-		await utils.disableLocalPickup( { page } );
+	test.beforeEach( async ( { admin, editorUtils, localPickupUtils } ) => {
+		await localPickupUtils.disableLocalPickup();
 
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//order-confirmation',
@@ -54,9 +52,8 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		await editorUtils.transformIntoBlocks();
 	} );
 
-	test.afterEach( async ( { admin, page } ) => {
-		await utils.openLocalPickupSettings( { admin } );
-		await utils.enableLocalPickup( { page } );
+	test.afterEach( async ( { localPickupUtils } ) => {
+		await localPickupUtils.enableLocalPickup();
 	} );
 
 	test( 'Place order as a logged in user', async ( {
@@ -175,7 +172,8 @@ test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
 		admin,
 	} ) => {
 		await admin.visitAdminPage(
-			'admin.php?page=wc-settings&tab=shipping&section=pickup_location'
+			'admin.php',
+			'page=wc-settings&tab=shipping&section=pickup_location'
 		);
 		await admin.page.getByLabel( 'Enable local pickup' ).uncheck();
 		await admin.page.getByLabel( 'Enable local pickup' ).check();
@@ -250,7 +248,7 @@ test.describe( 'Shopper → Order Confirmation → Downloadable Products', () =>
 		).toBeHidden();
 
 		// Update last order status to completed.
-		await admin.visitAdminPage( 'edit.php?post_type=shop_order' );
+		await admin.visitAdminPage( 'edit.php', 'post_type=shop_order' );
 		await admin.page.waitForSelector( '.wp-list-table' );
 		await admin.page.click(
 			'.wp-list-table tbody tr:first-child a.order-view'
