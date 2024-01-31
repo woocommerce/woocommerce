@@ -106,14 +106,6 @@ export default class PackagePrepare extends Command {
 		packages.forEach( async ( name ) => {
 			CliUx.ux.action.start( `Preparing ${ name }` );
 
-			// if ( ! skipInstall ) {
-			// 	execSync( `pnpm --filter="${ name }" composer-install`, {
-			// 		cwd: MONOREPO_ROOT,
-			// 		encoding: 'utf-8',
-			// 		stdio: 'inherit',
-			// 	} );
-			// }
-
 			try {
 				if ( hasValidChangelogs( name ) ) {
 					validateChangelogEntries( name );
