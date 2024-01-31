@@ -62,14 +62,34 @@ jobs:
                   COUNT=${NO_PREFIX%" tests in"*}
                   echo "E2E_GRAND_TOTAL=$COUNT" >> $GITHUB_OUTPUT
 
-            - name: Run Playwright tests
+            - name: Run Playwright tests on chrome-main.
               working-directory: plugins/woocommerce
               env:
                   USE_WP_ENV: 1
                   E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
-              id: run_playwright_e2e_tests
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
+              id: run_playwright_e2e_tests_main
+              run: pnpm exec playwright test --project=chrome-main --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
+
+            - name: Run Playwright tests on chrome-legacy-editor.
+              timeout-minutes: 60
+              id: run_playwright_e2e_tests_legacy_editor
+              env:
+                  USE_WP_ENV: 1
+                  E2E_MAX_FAILURES: 15
+                  FORCE_COLOR: 1
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright test --project=chrome-legacy-editor --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
+
+            - name: Run Playwright tests on chrome-new-editor.
+              timeout-minutes: 60
+              id: run_playwright_e2e_tests_new_editor
+              env:
+                  USE_WP_ENV: 1
+                  E2E_MAX_FAILURES: 15
+                  FORCE_COLOR: 1
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright test --project=chrome-new-editor --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
 
             - name: Upload reports to GitHub Actions Artifacts
               if: always()

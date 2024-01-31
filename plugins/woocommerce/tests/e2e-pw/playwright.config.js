@@ -66,8 +66,21 @@ const config = {
 	},
 	projects: [
 		{
-			name: 'Chrome',
+			name: 'chrome-main',
 			use: { ...devices[ 'Desktop Chrome' ] },
+			testDir: 'tests',
+			testIgnore: '**/products/**', // Ignore 'product' tests.
+		},
+		{
+			name: 'chrome-legacy-editor',
+			use: { ...devices[ 'Desktop Chrome' ] },
+			testDir: 'tests/merchant/products',
+			testIgnore: '**/products/block-editor/**', // Ignore 'block-editor' tests.
+		},
+		{
+			name: 'chrome-new-editor',
+			use: { ...devices[ 'Desktop Chrome' ] },
+			testDir: 'tests/merchant/products/block-editor',
 		},
 	],
 };

@@ -25,15 +25,39 @@ runs:
           shell: bash
           run: pnpm exec playwright install chromium
 
-        - name: Run E2E tests.
-          id: run-e2e-tests
+        - name: Run E2E tests on chrome-main.
+          id: run-e2e-tests-main
           env:
               FORCE_COLOR: 1
               USE_WP_ENV: 1
           working-directory: plugins/woocommerce
           shell: bash
           run: |
-              pnpm exec playwright test \
+              pnpm exec playwright test --project=chrome-main \
+              --config=tests/e2e-pw/${{ inputs.playwright-config }} \
+              ${{ inputs.tests }}
+
+        - name: Run E2E tests on chrome-legacy-editor.
+          id: run-e2e-tests-legacy-editor
+          env:
+              FORCE_COLOR: 1
+              USE_WP_ENV: 1
+          working-directory: plugins/woocommerce
+          shell: bash
+          run: |
+              pnpm exec playwright test --project=chrome-legacy-editor \
+              --config=tests/e2e-pw/${{ inputs.playwright-config }} \
+              ${{ inputs.tests }}
+
+        - name: Run E2E tests on chrome-new-editor.
+          id: run-e2e-tests-new-editor
+          env:
+              FORCE_COLOR: 1
+              USE_WP_ENV: 1
+          working-directory: plugins/woocommerce
+          shell: bash
+          run: |
+              pnpm exec playwright test --project=chrome-new-editor \
               --config=tests/e2e-pw/${{ inputs.playwright-config }} \
               ${{ inputs.tests }}
 

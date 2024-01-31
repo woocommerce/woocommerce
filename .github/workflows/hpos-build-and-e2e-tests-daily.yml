@@ -38,13 +38,29 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
 
-            - name: Run Playwright E2E tests.
+            - name: Run Playwright E2E tests on chrome-main.
               timeout-minutes: 60
-              id: run_playwright_e2e_tests
+              id: run_playwright_e2e_tests_main
               env:
                   USE_WP_ENV: 1
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+              run: pnpm exec playwright test --project=chrome-main --config=tests/e2e-pw/playwright.config.js
+
+            - name: Run Playwright E2E tests on chrome-legacy-editor.
+              timeout-minutes: 60
+              id: run_playwright_e2e_tests_legacy_editor
+              env:
+                  USE_WP_ENV: 1
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright test --project=chrome-legacy-editor --config=tests/e2e-pw/playwright.config.js
+
+            - name: Run Playwright E2E tests on chrome-new-editor.
+              timeout-minutes: 60
+              id: run_playwright_e2e_tests_new_editor
+              env:
+                  USE_WP_ENV: 1
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright test --project=chrome-new-editor --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
