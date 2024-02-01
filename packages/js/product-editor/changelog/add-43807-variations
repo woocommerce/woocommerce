@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Unlink downloads and downloadable product props so they can be managed separately
