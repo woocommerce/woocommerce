@@ -27,6 +27,8 @@ class SanitizationUtilTest extends \WC_Unit_Test_Case {
 			'g' => '<script>alert("hello");</script>',
 			'h' => [
 				'i' => '<script>alert("i");</script>',
+				'j' => '&lt;script&gt;alert("i");&lt;/script&gt;',
+				'k' => '<div <script>alert("malformed HTML");</s<div>cript><img src= />',
 			],
 		];
 		$expected           = [
@@ -41,6 +43,8 @@ class SanitizationUtilTest extends \WC_Unit_Test_Case {
 			'g' => 'alert("hello");',
 			'h' => [
 				'i' => 'alert("i");',
+				'j' => '&lt;script&gt;alert("i");&lt;/script&gt;',
+				'k' => '&lt;div alert("malformed HTML");&lt;/script&gt;',
 			],
 		];
 		$this->assertEquals( $expected, $sanitization_utils->wp_kses_array( $input ) );
