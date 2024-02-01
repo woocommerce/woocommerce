@@ -12,7 +12,7 @@
  *
  * @see https://woo.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 8.6.0
+ * @version 8.7.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -46,11 +46,11 @@ do_action( 'woocommerce_before_edit_account_form' ); ?>
 
 	<?php
 		/**
-		 * My Account edit account form.
+		 * Hook where additional fields should be rendered.
 		 *
-		 * @since 2.6.0
+		 * @since 8.7.0
 		 */
-		do_action( 'woocommerce_edit_account_form' );
+		do_action( 'woocommerce_edit_account_form_fields' );
 	?>
 
 	<fieldset>
@@ -70,6 +70,15 @@ do_action( 'woocommerce_before_edit_account_form' ); ?>
 		</p>
 	</fieldset>
 	<div class="clear"></div>
+
+	<?php
+		/**
+		 * My Account edit account form.
+		 *
+		 * @since 2.6.0
+		 */
+		do_action( 'woocommerce_edit_account_form' );
+	?>
 
 	<p>
 		<?php wp_nonce_field( 'save_account_details', 'save-account-details-nonce' ); ?>

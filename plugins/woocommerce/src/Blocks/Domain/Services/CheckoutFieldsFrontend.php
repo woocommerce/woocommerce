@@ -39,7 +39,7 @@ class CheckoutFieldsFrontend {
 
 		// Field editing in my account area.
 		add_filter( 'woocommerce_save_account_details_required_fields', array( $this, 'edit_account_form_required_fields' ), 10, 1 );
-		add_filter( 'woocommerce_edit_account_form', array( $this, 'edit_account_form_fields' ), 10, 1 );
+		add_filter( 'woocommerce_edit_account_form_fields', array( $this, 'edit_account_form_fields' ), 10, 1 );
 		add_action( 'woocommerce_save_account_details', array( $this, 'save_account_form_fields' ), 10, 1 );
 		add_filter( 'woocommerce_address_to_edit', array( $this, 'edit_address_fields' ), 10, 2 );
 		add_action( 'woocommerce_after_save_address_validation', array( $this, 'save_address_fields' ), 10, 2 );
