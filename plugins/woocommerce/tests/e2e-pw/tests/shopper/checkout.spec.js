@@ -351,7 +351,7 @@ test.describe( 'Checkout page', () => {
 			// The order having just been placed, a verify-email field should not be present.
 			await expect(
 				page.locator( 'form.woocommerce-verify-email p:nth-child(3)' )
-			).toBeFalsy();
+			).not.toBeVisible();
 
 			// get order ID from the page
 			const orderReceivedText = await page
