@@ -22,50 +22,8 @@ class WC_Helper_Updater {
 	 * Loads the class, runs on init.
 	 */
 	public static function load() {
-		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'upgrader_process_complete' ) );
 		add_action( 'upgrader_pre_download', array( __CLASS__, 'block_expired_updates' ), 10, 2 );
-	}
-
-	/**
-	 * Runs on pre_set_site_transient_update_themes, provides custom
-	 * packages for Woo.com-hosted extensions.
-	 *
-	 * @param object $transient The update_themes transient object.
-	 *
-	 * @return object The same or a modified version of the transient.
-	 */
-	public static function transient_update_themes( $transient ) {
-		$update_data = self::get_update_data();
-
-		foreach ( WC_Helper::get_local_woo_themes() as $theme ) {
-			if ( empty( $update_data[ $theme['_product_id'] ] ) ) {
-				continue;
-			}
-
-			$data = $update_data[ $theme['_product_id'] ];
-			$slug = $theme['_stylesheet'];
-
-			$item = array(
-				'theme'       => $slug,
-				'new_version' => $data['version'],
-				'url'         => $data['url'],
-				'package'     => '',
-			);
-
-			if ( self::_has_active_subscription( $theme['_product_id'] ) ) {
-				$item['package'] = $data['package'];
-			}
-
-			if ( version_compare( $theme['Version'], $data['version'], '<' ) ) {
-				$transient->response[ $slug ] = $item;
-			} else {
-				unset( $transient->response[ $slug ] );
-				$transient->checked[ $slug ] = $data['version'];
-			}
-		}
-
-		return $transient;
 	}
 
 	/**
