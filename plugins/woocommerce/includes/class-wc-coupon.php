@@ -83,6 +83,14 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	protected $cache_group = 'coupons';
 
 	/**
+	 * Sort
+	 *
+	 * @var int
+	 */
+
+	public $sort;
+
+	/**
 	 * Coupon constructor. Loads coupon data.
 	 *
 	 * @param mixed $data Coupon data, object, ID or code.
