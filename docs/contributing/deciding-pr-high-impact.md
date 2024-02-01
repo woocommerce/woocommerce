@@ -22,7 +22,7 @@ On this page, we will share some guidelines to help you assess the impact degree
 - It's a **big PR** (i.e. adds several changes in many files).
 - It has **i18n changes** (for example, any file from `woocommerce/i18n` is modified).
 
-Note that security issues and fixes should all go through our [security reporting process](./reporting-security-issues.md).
+Note that **security issues and fixes** should all go through our [security reporting process](./reporting-security-issues.md).
 
 ## You should not mark a Pull Request as High-Impact if
 
