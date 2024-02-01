@@ -8,7 +8,6 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { FONT_FAMILIES_TO_INSTALL } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 import { FontFace, FontFamiliesToInstall, FontFamily } from '../types/font';
-import { file } from '@wordpress/icons';
 
 export type FontCollectionsResponse = Array< {
 	slug: string;
