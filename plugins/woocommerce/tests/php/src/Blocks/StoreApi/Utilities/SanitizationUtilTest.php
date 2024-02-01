@@ -30,6 +30,13 @@ class SanitizationUtilTest extends \WC_Unit_Test_Case {
 				'j' => '&lt;script&gt;alert("i");&lt;/script&gt;',
 				'k' => '<div <script>alert("malformed HTML");</s<div>cript><img src= />',
 			],
+			'l' => false,
+			'm' => null,
+			'n' => 0,
+			'o' => [],
+			'p' => [ [ [ [ [ [ [ [ [] ] ] ] ] ] ] ] ],
+			'q' => [ [ [ [ [ [ [ [ [ 'really_nested' => 'boo' ] ] ] ] ] ] ] ] ],
+			'r' => '',
 		];
 		$expected           = [
 			'a' => 'a',
@@ -46,6 +53,13 @@ class SanitizationUtilTest extends \WC_Unit_Test_Case {
 				'j' => '&lt;script&gt;alert("i");&lt;/script&gt;',
 				'k' => '&lt;div alert("malformed HTML");&lt;/script&gt;',
 			],
+			'l' => false,
+			'm' => null,
+			'n' => 0,
+			'o' => [],
+			'p' => [ [ [ [ [ [ [ [ [] ] ] ] ] ] ] ] ],
+			'q' => [ [ [ [ [ [ [ [ [ 'really_nested' => 'boo' ] ] ] ] ] ] ] ] ],
+			'r' => '',
 		];
 		$this->assertEquals( $expected, $sanitization_utils->wp_kses_array( $input ) );
 	}
