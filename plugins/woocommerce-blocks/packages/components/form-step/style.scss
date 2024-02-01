@@ -62,13 +62,13 @@
 }
 
 .wc-block-checkout__payment-method .wc-block-components-checkout-step__content {
-    padding-top: em($gap);
+	padding-top: em($gap);
 }
 
 .wc-block-components-checkout-step__description {
 	@include font-size(small);
 	line-height: 0.7;
-	margin:0 0 em($gap);
+	margin: 0 0 em($gap);
 }
 
 .wc-block-components-checkout-step--with-step-number {
