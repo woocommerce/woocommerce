@@ -51,6 +51,13 @@ trait BlockHooksTrait {
 					) {
 						$hooked_blocks[] = $this->namespace . '/' . $this->block_name;
 					}
+
+					// If no area has been specified for this placement just insert the block.
+					// This is likely to be the case when we're inserting into the navigation block
+					// where we don't have a specific area to target.
+					if ( ! isset( $placement['area'] ) ) {
+						$hooked_blocks[] = $this->namespace . '/' . $this->block_name;
+					}
 				}
 			}
 		}
@@ -90,19 +97,7 @@ trait BlockHooksTrait {
 	}
 
 	/**
-	 * Given a provided context, returns whether the context refers to the core navigation.
-	 *
-	 * @param array|\WP_Post|\WP_Block_Template $context the context to check.
-	 * @param string                            $area The area to check against before inserting.
-	 * @since $VID:$
-	 * @return boolean
-	 */
-	protected function is_navigation( $context, $area ) {
-		return isset( $context->post_type ) && 'wp_navigation' === $context->post_type && 'navigation' === $area;
-	}
-
-	/**
-	 * Given a provided context, returns whether the context refers to the target area.
+	 * Given a provided context, returns whether the context refers to the target area and isn't marked as excluded.
 	 *
 	 * @param array|\WP_Post|\WP_Block_Template $context the context to check.
 	 * @param string                            $area The area to check against before inserting.
@@ -111,10 +106,6 @@ trait BlockHooksTrait {
 	 */
 	protected function is_target_area( $context, $area ) {
 		if ( $this->is_template_part_or_pattern( $context, $area ) && ! $this->pattern_is_excluded( $context ) ) {
-			return true;
-		}
-
-		if ( $this->is_navigation( $context, $area ) ) {
 			return true;
 		}
 
