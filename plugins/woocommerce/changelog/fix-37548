@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Adding a filter to fix the 50 term limitation in product edit page
