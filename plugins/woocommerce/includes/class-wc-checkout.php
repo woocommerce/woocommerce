@@ -783,6 +783,9 @@ class WC_Checkout {
 							$value = wc_sanitize_textarea( $value );
 							break;
 						case 'password':
+							if ( $data['createaccount'] && 'account_password' === $key ) {
+								$value = wp_slash( $value ); // Passwords are encrypted with slashes on account creation, so we need to slash here too.
+							}
 							break;
 						default:
 							$value = wc_clean( $value );
