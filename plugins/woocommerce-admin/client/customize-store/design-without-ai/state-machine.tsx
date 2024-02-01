@@ -138,6 +138,28 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									},
 								},
 							},
+							installFontFamilies: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'installFontFamilies',
+											onDone: {
+												target: 'success',
+											},
+											// TODO: Handle error case: https://github.com/woocommerce/woocommerce/issues/43780
+											// onError: {
+											// 	actions: [
+											// 		'assignAPICallLoaderError',
+											// 	],
+											// },
+										},
+									},
+									success: {
+										type: 'final',
+									},
+								},
+							},
 						},
 						onDone: {
 							target: '#designWithoutAI.showAssembleHub',
