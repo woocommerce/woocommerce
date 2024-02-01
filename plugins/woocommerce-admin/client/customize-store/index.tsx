@@ -61,7 +61,8 @@ export type customizeStoreStateMachineEvents =
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
 	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean }
-	| { type: 'ACTIVE_THEME_HAS_MODS'; payload: boolean };
+	| { type: 'ACTIVE_THEME_HAS_MODS'; payload: boolean }
+	| { type: 'START_ASSEMBLER_HUB' };
 
 const updateQueryStep = (
 	_context: unknown,
@@ -121,18 +122,6 @@ const CYSSpinner = () => (
 	</div>
 );
 
-const fetchIsFontLibraryAvailable = async () => {
-	try {
-		await apiFetch( {
-			path: '/wp/v2/font-collections',
-			method: 'GET',
-		} );
-
-		return true;
-	} catch ( err ) {
-		return false;
-	}
-};
 export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
@@ -153,7 +142,7 @@ export const customizeStoreStateMachineServices = {
 };
 export const customizeStoreStateMachineDefinition = createMachine( {
 	id: 'customizeStore',
-	initial: 'navigate',
+	initial: 'setFlags',
 	predictableActionArguments: true,
 	preserveActionOrder: true,
 	schema: {
@@ -211,6 +200,15 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 	},
 	states: {
+		setFlags: {
+			invoke: {
+				src: 'setFlags',
+				onDone: {
+					actions: 'assignFlags',
+					target: 'navigate',
+				},
+			},
+		},
 		navigate: {
 			always: [
 				{
@@ -535,66 +533,6 @@ declare global {
 	}
 }
 
-// HACK: This is a temporary solution to pass flags computed into the iframe instance state machines.
-// This is needed because the iframe loads the entire Customize Store app. This means that the iframe instance will have different state machines than the parent window.
-// Check https://github.com/woocommerce/woocommerce/pull/44206 for more details.
-const setFlagsForIframeInstance = async (
-	send: (
-		event: customizeStoreStateMachineEvents,
-		payload?: EventData | undefined
-	) => void
-) => {
-	if ( ! window.frameElement ) {
-		console.log( 'setFlagsForIframeInstance', 'principal' );
-		// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to retrieve flag value.
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const _featureFlags = {
-			FONT_LIBRARY_AVAILABLE: ( async () => {
-				const isFontLibraryAvailable =
-					await fetchIsFontLibraryAvailable();
-				console.log( 'isFontLibraryAvailable', isFontLibraryAvailable );
-				window.__wcCustomizeStore = {
-					...window.__wcCustomizeStore,
-					isFontLibraryAvailable,
-				};
-			} )(),
-			ACTIVE_THEME_HAS_MODS: ( async () => {
-				const activeThemeHasMods = await fetchActiveThemeHasMods();
-				console.log( 'activeThemeHasMods', activeThemeHasMods );
-				window.__wcCustomizeStore = {
-					...window.__wcCustomizeStore,
-					activeThemeHasMods,
-				};
-			} )(),
-		};
-		return;
-	}
-
-	console.log( 'setFlagsForIframeInstance', 'iframe' );
-	// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to send the event to set the flag value to the iframe instance state machine.
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const _featureFlagsEvents = {
-		FONT_LIBRARY_AVAILABLE: ( async () => {
-			window.__wcCustomizeStore = window.__wcCustomizeStore ?? {};
-			const isFontLibraryAvailable =
-				window.__wcCustomizeStore.isFontLibraryAvailable || false;
-			send( {
-				type: 'IS_FONT_LIBRARY_AVAILABLE',
-				payload: isFontLibraryAvailable,
-			} );
-		} )(),
-		ACTIVE_THEME_HAS_MODS: ( async () => {
-			window.__wcCustomizeStore = window.__wcCustomizeStore ?? {};
-			const activeThemeHasMods =
-				window.__wcCustomizeStore.activeThemeHasMods || false;
-			send( {
-				type: 'ACTIVE_THEME_HAS_MODS',
-				payload: activeThemeHasMods,
-			} );
-		} )(),
-	};
-};
-
 export const CustomizeStoreController = ( {
 	actionOverrides,
 	servicesOverrides,
@@ -658,10 +596,6 @@ export const CustomizeStoreController = ( {
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
 		devTools: process.env.NODE_ENV === 'development',
 	} );
-
-	useEffect( () => {
-		setFlagsForIframeInstance( send );
-	}, [ send ] );
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>

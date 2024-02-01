@@ -167,3 +167,28 @@ export const assignIsFontLibraryAvailable = assign<
 		 ).payload;
 	},
 } );
+
+export const assignFlags = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	intro: ( context, event: unknown ) => {
+		if ( ! window.frameElement ) {
+			return context.intro;
+		}
+		const activeThemeHasMods =
+			window.parent.__wcCustomizeStore.activeThemeHasMods;
+		return {
+			...context.intro,
+			activeThemeHasMods,
+		};
+	},
+	isFontLibraryAvailable: ( context ) => {
+		if ( ! window.frameElement ) {
+			return context.isFontLibraryAvailable;
+		}
+		const isFontLibraryAvailable =
+			window.parent.__wcCustomizeStore.isFontLibraryAvailable || false;
+		return isFontLibraryAvailable;
+	},
+} );

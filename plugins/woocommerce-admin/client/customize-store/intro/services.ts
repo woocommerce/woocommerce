@@ -110,3 +110,40 @@ export const fetchIntroData = async () => {
 		currentThemeIsAiGenerated,
 	};
 };
+
+const fetchIsFontLibraryAvailable = async () => {
+	try {
+		await apiFetch( {
+			path: '/wp/v2/font-collections',
+			method: 'GET',
+		} );
+
+		return true;
+	} catch ( err ) {
+		return false;
+	}
+};
+
+export const setFlags = async () => {
+	if ( ! window.frameElement ) {
+		// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to retrieve flag value.
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const _featureFlags = {
+			FONT_LIBRARY_AVAILABLE: ( async () => {
+				const isFontLibraryAvailable =
+					await fetchIsFontLibraryAvailable();
+				window.__wcCustomizeStore = {
+					...window.__wcCustomizeStore,
+					isFontLibraryAvailable,
+				};
+			} )(),
+			ACTIVE_THEME_HAS_MODS: ( async () => {
+				const activeThemeHasMods = await fetchActiveThemeHasMods();
+				window.__wcCustomizeStore = {
+					...window.__wcCustomizeStore,
+					activeThemeHasMods,
+				};
+			} )(),
+		};
+	}
+};
