@@ -36,9 +36,16 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
-
 		$this->fixture_data = new FixtureData();
+
+		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_tax_display_shop', 'excl' );
+
+		wp_cache_flush();
+		$this->remove_all_attributes();
+		$this->remove_all_products();
+		$this->empty_lookup_tables();
 
 		$this->products_data = array(
 			array(
@@ -124,8 +131,19 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		// Unregister all product attributes.
+		$this->remove_all_attributes();
+		$this->remove_all_products();
+		$this->empty_lookup_tables();
+		wp_cache_flush();
+	}
 
+	private function empty_lookup_tables() {
+		global $wpdb;
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_meta_lookup" );
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );
+	}
+
+	private function remove_all_attributes() {
 		$attribute_ids_by_name = wc_get_attribute_taxonomy_ids();
 		foreach ( $attribute_ids_by_name as $attribute_name => $attribute_id ) {
 			$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
@@ -134,9 +152,9 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 
 			wc_delete_attribute( $attribute_id );
 		}
+	}
 
-		// Remove all products.
-
+	private function remove_all_products() {
 		$product_ids = wc_get_products( array( 'return' => 'ids' ) );
 		foreach ( $product_ids as $product_id ) {
 			$product     = wc_get_product( $product_id );
@@ -192,7 +210,8 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 
 	private function update_lookup_table( \WC_Product $product, $taxonomy, $term_id ) {
 		global $wpdb;
-		$wpdb->insert(
+
+		$wpdb->replace(
 			$wpdb->prefix . 'wc_product_attributes_lookup',
 			array(
 				'product_id'             => $product->get_id(),

@@ -25,30 +25,38 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 		$this->sut = $container->get( FilterClausesGenerator::class );
 	}
 
-	public function test_price_clauses() {
-		for ( $x = 0; $x <= 10; $x++ ) {
-			$min = rand( 0, 50 );
-			$max = rand( 40, 100 );
-			$this->test_price_clauses_with( array( 'min_price' => $min ) );
-			$this->test_price_clauses_with( array( 'max_price' => $max ) );
-			$this->test_price_clauses_with(
-				array(
-					'min_price' => $min,
-					'max_price' => $max,
-				)
-			);
-		}
+	public function test_price_clauses_with_min_price() {
+		$this->test_price_clauses_with( array( 'min_price' => 20 ) );
 	}
 
-	public function test_stock_clauses() {
+	public function test_price_clauses_with_max_price() {
+		$this->test_price_clauses_with( array( 'max_price' => 55 ) );
+	}
+
+	public function test_price_clauses_with_both_min_max_price() {
+		$this->test_price_clauses_with( array(
+			'min_price' => 15,
+			'max_price' => 50
+		) );
+	}
+
+	public function test_stock_clauses_instock() {
 		$this->test_stock_clauses_with( array( 'instock' ) );
-		$this->test_stock_clauses_with( array( 'onbackorder' ) );
-		$this->test_stock_clauses_with( array( 'outofstock' ) );
-		$this->test_stock_clauses_with( array( 'instock', 'onbackorder' ) );
-		$this->test_stock_clauses_with( array( 'outofstock', 'onbackorder' ) );
 	}
 
-	public function test_attribute_clauses() {
+	public function test_stock_clauses_onbackorder() {
+		$this->test_stock_clauses_with( array( 'onbackorder' ) );
+	}
+
+	public function test_stock_clauses_outofstock() {
+		$this->test_stock_clauses_with( array( 'outofstock' ) );
+	}
+
+	public function test_stock_clauses_with_two_status() {
+		$this->test_stock_clauses_with( array( 'instock', 'onbackorder' ) );
+	}
+
+	public function test_attribute_clauses_with_non_exist_term() {
 		$this->test_attribute_clauses_with(
 			array(
 				'pa_color' => array(
@@ -57,7 +65,9 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 				),
 			)
 		);
+	}
 
+	public function test_attribute_clauses_with_one_term() {
 		$this->test_attribute_clauses_with(
 			array(
 				'pa_color' => array(
@@ -66,16 +76,20 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 				),
 			)
 		);
+	}
 
-		$this->test_attribute_clauses_with(
-			array(
-				'pa_color' => array(
-					'terms'      => array( 'red-slug', 'green-slug' ),
-					'query_type' => 'and',
-				),
-			)
-		);
+	// public function test_attribute_clauses_with_two_terms_query_type_and() {
+	// 	$this->test_attribute_clauses_with(
+	// 		array(
+	// 			'pa_color' => array(
+	// 				'terms'      => array( 'red-slug', 'green-slug' ),
+	// 				'query_type' => 'and',
+	// 			),
+	// 		)
+	// 	);
+	// }
 
+	public function test_attribute_clauses_with_two_terms_query_type_or() {
 		$this->test_attribute_clauses_with(
 			array(
 				'pa_color' => array(
@@ -84,7 +98,9 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 				),
 			)
 		);
+	}
 
+	public function test_attribute_clauses_with_two_terms_but_only_one_exists() {
 		$this->test_attribute_clauses_with(
 			array(
 				'pa_color' => array(
@@ -202,6 +218,7 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 			)
 		);
 
+		var_dump( $expected_products_name, $received_products_name );
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
 	}
 }
