@@ -87,7 +87,7 @@ class Notices {
 	 */
 	public function get_notices_template( $template, $template_name, $args, $template_path, $default_path ) {
 		$directory = get_stylesheet_directory();
-		$file	   = $directory . '/woocommerce/' . $template_name;
+		$file      = $directory . '/woocommerce/' . $template_name;
 		if ( file_exists( $file ) ) {
 			return $file;
 		}
