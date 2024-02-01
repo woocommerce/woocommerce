@@ -30,17 +30,19 @@ const ProductTemplateInnerBlocks = () => {
 	return <li { ...innerBlocksProps } />;
 };
 
+type ProductTemplateBlockPreviewProps = {
+	blocks: object[];
+	blockContextId: string;
+	isHidden: boolean;
+	setActiveBlockContextId: ( blockContextId: string ) => void;
+};
+
 const ProductTemplateBlockPreview = ( {
 	blocks,
 	blockContextId,
 	isHidden,
 	setActiveBlockContextId,
-}: {
-	blocks: object[];
-	blockContextId: string;
-	isHidden: boolean;
-	setActiveBlockContextId: ( blockContextId: string ) => void;
-} ) => {
+}: ProductTemplateBlockPreviewProps ) => {
 	const blockPreviewProps = useBlockPreview( {
 		blocks,
 		props: {
@@ -71,6 +73,19 @@ const ProductTemplateBlockPreview = ( {
 
 const MemoizedProductTemplateBlockPreview = memo( ProductTemplateBlockPreview );
 
+type ProductContentProps = {
+	attributes: { productId: string };
+	isLoading: boolean;
+	product: ProductResponseItem;
+	displayTemplate: boolean;
+	blocks: BlockInstance[];
+	blockContext: {
+		postType: string;
+		postId: string;
+	};
+	setActiveBlockContextId: ( id: string ) => void;
+};
+
 const ProductContent = withProduct(
 	( {
 		isLoading,
@@ -79,18 +94,7 @@ const ProductContent = withProduct(
 		blocks,
 		blockContext,
 		setActiveBlockContextId,
-	}: {
-		attributes: { productId: string };
-		isLoading: boolean;
-		product: ProductResponseItem;
-		displayTemplate: boolean;
-		blocks: BlockInstance[];
-		blockContext: {
-			postType: string;
-			postId: string;
-		};
-		setActiveBlockContextId: ( id: string ) => void;
-	} ) => {
+	}: ProductContentProps ) => {
 		return (
 			<BlockContextProvider
 				key={ blockContext.postId }
