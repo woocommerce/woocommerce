@@ -22,69 +22,9 @@ class WC_Helper_Updater {
 	 * Loads the class, runs on init.
 	 */
 	public static function load() {
-		add_action( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'transient_update_plugins' ), 21, 1 );
 		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'upgrader_process_complete' ) );
 		add_action( 'upgrader_pre_download', array( __CLASS__, 'block_expired_updates' ), 10, 2 );
-	}
-
-	/**
-	 * Runs in a cron thread, or in a visitor thread if triggered
-	 * by _maybe_update_plugins(), or in an auto-update thread.
-	 *
-	 * @param object $transient The update_plugins transient object.
-	 *
-	 * @return object The same or a modified version of the transient.
-	 */
-	public static function transient_update_plugins( $transient ) {
-		$update_data = self::get_update_data();
-
-		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
-			if ( empty( $update_data[ $plugin['_product_id'] ] ) ) {
-				continue;
-			}
-
-			$data     = $update_data[ $plugin['_product_id'] ];
-			$filename = $plugin['_filename'];
-
-			$item = array(
-				'id'             => 'woocommerce-com-' . $plugin['_product_id'],
-				'slug'           => 'woocommerce-com-' . $data['slug'],
-				'plugin'         => $filename,
-				'new_version'    => $data['version'],
-				'url'            => $data['url'],
-				'package'        => $data['package'],
-				'upgrade_notice' => $data['upgrade_notice'],
-			);
-
-			if ( isset( $data['requires_php'] ) ) {
-				$item['requires_php'] = $data['requires_php'];
-			}
-
-			// We don't want to deliver a valid upgrade package when their subscription has expired.
-			// To avoid the generic "no_package" error that empty strings give, we will store an
-			// indication of expiration for the `upgrader_pre_download` filter to error on.
-			if ( ! self::_has_active_subscription( $plugin['_product_id'] ) ) {
-				$item['package'] = 'woocommerce-com-expired-' . $plugin['_product_id'];
-			}
-
-			if ( $transient instanceof stdClass ) {
-				if ( version_compare( $plugin['Version'], $data['version'], '<' ) ) {
-					$transient->response[ $filename ] = (object) $item;
-					unset( $transient->no_update[ $filename ] );
-				} else {
-					$transient->no_update[ $filename ] = (object) $item;
-					unset( $transient->response[ $filename ] );
-				}
-			}
-		}
-
-		if ( $transient instanceof stdClass ) {
-			$translations            = self::get_translations_update_data();
-			$transient->translations = array_merge( isset( $transient->translations ) ? $transient->translations : array(), $translations );
-		}
-
-		return $transient;
 	}
 
 	/**
