@@ -2,7 +2,6 @@ const { test } = require( '@playwright/test' );
 const {
 	clickAddNewMenuItem,
 	expectBlockProductEditor,
-	expectOldProductEditor,
 	isBlockProductEditorEnabled,
 	toggleBlockProductEditor,
 } = require( '../../../../utils/simple-products' );
@@ -14,7 +13,9 @@ const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
 async function dismissFeedbackModalIfShown( page ) {
 	try {
-		await page.getByText( 'Skip' ).nth( 3 ).click( { timeout: 5000 } );
+		await page
+			.getByRole( 'button', { name: 'Skip' } )
+			.click( { timeout: 10000 } );
 	} catch ( error ) {}
 }
 
@@ -75,13 +76,17 @@ test.describe.serial( 'Disable block product editor', () => {
 			} )
 			.click();
 		await dismissFeedbackModalIfShown( page );
-		await expectOldProductEditor( page );
+		await expect(
+			page.getByRole( 'heading', { name: 'Product data' } )
+		).toBeVisible();
 	} );
 
 	test( 'can be disabled from settings', async ( { page } ) => {
 		await toggleBlockProductEditor( 'disable', page );
 		await page.goto( '/wp-admin/edit.php?post_type=product' );
 		await clickAddNewMenuItem( page );
-		await expectOldProductEditor( page );
+		await expect(
+			page.getByRole( 'heading', { name: 'Product data' } )
+		).toBeVisible();
 	} );
 } );
