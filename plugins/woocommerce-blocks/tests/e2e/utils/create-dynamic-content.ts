@@ -10,6 +10,12 @@ import { exec } from 'child_process';
  */
 import { cli } from './cli';
 
+export type GeneratedPost = {
+	url: string;
+	id: string;
+	deletePost: () => Promise< void >;
+};
+
 Handlebars.registerPartial(
 	'wp-block',
 	`
@@ -33,11 +39,7 @@ const deletePost = async ( id: string ) => {
 const createPost = async (
 	title: string,
 	templateContent: string
-): Promise< {
-	url: string;
-	id: string;
-	deletePost: () => Promise< void >;
-} > => {
+): Promise< GeneratedPost > => {
 	return new Promise( ( resolve, reject ) => {
 		const command = `npm run wp-env run tests-cli -- wp post create --porcelain --post_status=publish --post_author=1 --post_title="${ title }" -`;
 
