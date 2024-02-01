@@ -14,10 +14,13 @@ import {
  */
 import { CUSTOMIZABLE_WC_TEMPLATES, WC_TEMPLATES_SLUG } from './constants';
 
-const userText = 'Hello World in the template';
-const woocommerceTemplateUserText = 'Hello World in the WooCommerce template';
-
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
+	if ( ! testData.canBeOverridenByThemes ) {
+		return;
+	}
+	const userText = `Hello World in the ${ testData.templateName } template`;
+	const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ testData.templateName } template`;
+
 	test.describe( `${ testData.templateName } template`, async () => {
 		test.afterAll( async () => {
 			await deleteAllTemplates( 'wp_template' );
