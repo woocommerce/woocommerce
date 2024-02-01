@@ -10,7 +10,10 @@ export { DetailsFeatureField as __experimentalDetailsFeatureField } from './deta
 export { DetailsSummaryField as __experimentalDetailsSummaryField } from './details-summary-field';
 export { DetailsDescriptionField as __experimentalDetailsDescriptionField } from './details-description-field';
 export { WooProductMoreMenuItem as __experimentalWooProductMoreMenuItem } from './header';
-export { PluginHeaderItemModal, PluginHeaderItemPopover } from './header';
+export {
+	PluginHeaderItemModal as __experimentalPluginHeaderItemModal,
+	PluginHeaderItemPopover as __experimentalPluginHeaderItemPopover,
+} from './header';
 export {
 	Editor as __experimentalEditor,
 	initBlocks as __experimentalInitBlocks,
