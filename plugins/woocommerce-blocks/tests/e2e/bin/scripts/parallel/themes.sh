@@ -8,8 +8,8 @@ themes_dir="$script_dir/../../themes"
 
 # Delete the child themes if they already exist.
 wp theme delete storefront-child
-wp theme delete twentytwentyfour-child
+wp theme delete twenty-twentyfour-child
 
 # Install the child themes.
 wp theme install "$themes_dir/storefront-child.zip"
-wp theme install "$themes_dir/twentytwentyfour-child.zip"
+wp theme install "$themes_dir/twenty-twentyfour-child.zip"
