@@ -25,25 +25,20 @@ const isUrlEncoded = ( url: string ) => {
 	return url !== decodeURIComponent( url );
 };
 
-const getDisplaySrcFromFontFace = (
-	input: Array< string >,
-	urlPrefix: string
-) => {
+const getDisplaySrcFromFontFace = ( input: string, urlPrefix: string ) => {
 	if ( ! input ) {
 		return;
 	}
 
-	const src = Array.isArray( input ) ? input[ 0 ] : input;
-
 	// If it is a theme font, we need to make the url absolute
-	if ( src.startsWith( 'file:.' ) && urlPrefix ) {
-		const absoluteUrl = src.replace( 'file:.', urlPrefix );
+	if ( input.startsWith( 'file:.' ) && urlPrefix ) {
+		const absoluteUrl = input.replace( 'file:.', urlPrefix );
 		return ! isUrlEncoded( absoluteUrl )
 			? encodeURI( absoluteUrl )
 			: absoluteUrl;
 	}
 
-	return ! isUrlEncoded( src ) ? encodeURI( src ) : src;
+	return ! isUrlEncoded( input ) ? encodeURI( input ) : input;
 };
 export const FontFamiliesLoader = ( { fontFamilies, onLoad }: Props ) => {
 	const { site, currentTheme } = useSelect( ( select ) => {

@@ -102,11 +102,14 @@ const installFontFamilies = async () => {
 					fontFamily
 				);
 				return Promise.all(
-					fontFamily.fontFace.map( async ( fontFace ) => {
-						installFontFace( {
-							...fontFace,
-							fontFamilyId: fontFamilyResponse.id,
-						} );
+					fontFamily.fontFace.map( async ( fontFace, index ) => {
+						installFontFace(
+							{
+								...fontFace,
+								fontFamilyId: fontFamilyResponse.id,
+							},
+							index
+						);
 					} )
 				);
 			} );

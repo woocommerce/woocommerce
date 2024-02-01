@@ -8,6 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { FONT_FAMILIES_TO_INSTALL } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 import { FontFace, FontFamiliesToInstall, FontFamily } from '../types/font';
+import { file } from '@wordpress/icons';
 
 export type FontCollectionsResponse = Array< {
 	slug: string;
@@ -155,22 +156,52 @@ export const installFontFamily = ( data: FontFamily ) => {
 	} >( config );
 };
 
-export const installFontFace = (
+async function downloadFontFaceAssets( src: string ) {
+	try {
+		const fontBlob = await ( await fetch( new Request( src ) ) ).blob();
+		const fileName = src.split( '/' ).pop() as string;
+		return new File( [ fontBlob ], fileName, {
+			type: fontBlob.type,
+		} );
+	} catch ( error ) {
+		throw new Error( `Error downloading font face asset from ${ src }` );
+	}
+}
+
+function makeFontFacesFormData(
+	fontFaceFile: File,
+	formData: FormData,
+	index: number
+) {
+	const fileId = `file-${ index }`;
+	formData.append( fileId, fontFaceFile, fontFaceFile.name );
+	return fileId;
+}
+
+export const installFontFace = async (
 	data: FontFace & {
 		fontFamilyId: number;
-	}
+	},
+	index: number
 ) => {
+	const { fontFamilyId, ...font } = data;
+	const fontFaceAssets = await downloadFontFaceAssets( font.src );
+	const formData = new FormData();
+
+	const fontFile = await makeFontFacesFormData(
+		fontFaceAssets,
+		formData,
+		index
+	);
+
+	formData.append(
+		'font_face_settings',
+		JSON.stringify( { ...font, src: fontFile } )
+	);
 	const config = {
 		path: `/wp/v2/font-families/${ data.fontFamilyId }/font-faces/`,
 		method: 'POST',
-		data: {
-			font_face_settings: JSON.stringify( {
-				fontFamily: data.fontFamily,
-				fontWeight: data.fontWeight,
-				fontStyle: data.fontStyle,
-				src: data.src,
-			} ),
-		},
+		body: formData,
 	};
 
 	return apiFetch( config );

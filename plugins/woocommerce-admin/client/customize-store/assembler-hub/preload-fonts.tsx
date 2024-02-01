@@ -21,8 +21,8 @@ import {
 	FONT_FAMILIES_TO_INSTALL,
 } from './sidebar/global-styles/font-pairing-variations/constants';
 import { FontFamiliesLoader } from './sidebar/global-styles/font-pairing-variations/font-families-loader';
-import { useContext, useEffect } from '@wordpress/element';
-import { FontFamily } from '../types/font';
+import { useContext, useEffect, useMemo } from '@wordpress/element';
+import { FontFace, FontFamily } from '../types/font';
 import { FontFamiliesLoaderDotCom } from './sidebar/global-styles/font-pairing-variations/font-families-loader-dot-com';
 import { CustomizeStoreContext } from '.';
 import { isAIFlow, isNoAIFlow } from '../guards';
@@ -56,13 +56,34 @@ export const PreloadFonts = () => {
 			globalStylesId: __experimentalGetCurrentGlobalStylesId(),
 			installedFontFamilies: getEntityRecords(
 				'postType',
-				'wp_font_family'
+				'wp_font_family',
+				{ _embed: true }
 			) as Array< {
-				content: { raw: string };
-				slug: string;
+				id: number;
+				font_family_settings: FontFamily;
+				_embedded: {
+					font_faces: Array< {
+						font_face_settings: FontFace;
+					} >;
+				};
 			} >,
 		};
 	} );
+
+	const parsedInstalledFontFamilies = useMemo( () => {
+		return (
+			( installedFontFamilies || [] ).map( ( fontFamilyPost ) => {
+				return {
+					id: fontFamilyPost.id,
+					...fontFamilyPost.font_family_settings,
+					fontFace:
+						fontFamilyPost?._embedded?.font_faces.map(
+							( face ) => face.font_face_settings
+						) || [],
+				};
+			} ) || []
+		);
+	}, [ installedFontFamilies ] );
 
 	useEffect( () => {
 		if (
@@ -80,7 +101,7 @@ export const PreloadFonts = () => {
 			...( theme ? theme.map( ( font ) => font.slug ) : [] ),
 		];
 
-		const fontFamiliesToEnable = installedFontFamilies.reduce(
+		const fontFamiliesToEnable = parsedInstalledFontFamilies.reduce(
 			( acc, font ) => {
 				if (
 					enabledFontSlugs.includes( font.slug ) ||
@@ -92,7 +113,7 @@ export const PreloadFonts = () => {
 				return [
 					...acc,
 					{
-						...JSON.parse( font.content.raw ),
+						...font,
 					},
 				];
 			},
@@ -116,6 +137,7 @@ export const PreloadFonts = () => {
 		enabledFontFamilies,
 		globalStylesId,
 		installedFontFamilies,
+		parsedInstalledFontFamilies,
 		saveSpecifiedEntityEdits,
 		setFontFamilies,
 	] );
