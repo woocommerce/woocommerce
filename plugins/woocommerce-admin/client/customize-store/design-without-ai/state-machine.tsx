@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { EventObject, createMachine } from 'xstate';
+import { createMachine } from 'xstate';
 import { getQuery } from '@woocommerce/navigation';
 
 /**
@@ -28,6 +28,10 @@ export const hasStepInUrl = (
 	);
 };
 
+export type DesignWithoutAIStateMachineEvents =
+	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } };
+
 export const designWithNoAiStateMachineDefinition = createMachine(
 	{
 		id: 'designWithoutAI',
@@ -35,7 +39,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 		preserveActionOrder: true,
 		schema: {
 			context: {} as DesignWithoutAIStateMachineContext,
-			events: {} as EventObject,
+			events: {} as DesignWithoutAIStateMachineEvents,
 		},
 		invoke: {
 			src: 'browserPopstateHandler',
@@ -85,12 +89,10 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 											onDone: {
 												target: 'success',
 											},
-											// TODO: Handle error case: https://github.com/woocommerce/woocommerce/issues/43780
-											// onError: {
-											// 	actions: [
-											// 		'assignAPICallLoaderError',
-											// 	],
-											// },
+											onError: {
+												actions:
+													'redirectToIntroWithError',
+											},
 										},
 									},
 									success: { type: 'final' },
@@ -105,12 +107,10 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 											onDone: {
 												target: 'success',
 											},
-											// TODO: Handle error case: https://github.com/woocommerce/woocommerce/issues/43780
-											// onError: {
-											// 	actions: [
-											// 		'assignAPICallLoaderError',
-											// 	],
-											// },
+											onError: {
+												actions:
+													'redirectToIntroWithError',
+											},
 										},
 									},
 									success: {
@@ -127,12 +127,10 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 											onDone: {
 												target: 'success',
 											},
-											// TODO: Handle error case: https://github.com/woocommerce/woocommerce/issues/43780
-											// onError: {
-											// 	actions: [
-											// 		'assignAPICallLoaderError',
-											// 	],
-											// },
+											onError: {
+												actions:
+													'redirectToIntroWithError',
+											},
 										},
 									},
 									success: {

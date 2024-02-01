@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
-use Automattic\WooCommerce\Blocks\Utils\BlockTemplateMigrationUtils;
 
 /**
  * BlockTypesController class.
@@ -66,8 +65,6 @@ class BlockTemplatesController {
 		add_action( 'after_switch_theme', array( $this, 'check_should_use_blockified_product_grid_templates' ), 10, 2 );
 
 		if ( wc_current_theme_is_fse_theme() ) {
-			add_action( 'init', array( $this, 'maybe_migrate_content' ) );
-
 			// By default, the Template Part Block only supports template parts that are in the current theme directory.
 			// This render_callback wrapper allows us to add support for plugin-housed template parts.
 			add_filter(
@@ -365,6 +362,7 @@ class BlockTemplatesController {
 		$post_type      = isset( $query['post_type'] ) ? $query['post_type'] : '';
 		$slugs          = isset( $query['slug__in'] ) ? $query['slug__in'] : array();
 		$template_files = $this->get_block_templates( $slugs, $template_type );
+		$theme_slug     = wp_get_theme()->get_stylesheet();
 
 		// @todo: Add apply_filters to _gutenberg_get_template_files() in Gutenberg to prevent duplication of logic.
 		foreach ( $template_files as $template_file ) {
@@ -398,7 +396,7 @@ class BlockTemplatesController {
 			}
 
 			$is_not_custom   = false === array_search(
-				wp_get_theme()->get_stylesheet() . '//' . $template_file->slug,
+				$theme_slug . '//' . $template_file->slug,
 				array_column( $query_result, 'id' ),
 				true
 			);
@@ -415,6 +413,11 @@ class BlockTemplatesController {
 		// We need to remove theme (i.e. filesystem) templates that have the same slug as a customised one.
 		// This only affects saved templates that were saved BEFORE a theme template with the same slug was added.
 		$query_result = BlockTemplateUtils::remove_theme_templates_with_custom_alternative( $query_result );
+
+		// There is the chance that the user customized the default template, installed a theme with a custom template
+		// and customized that one as well. When that happens, duplicates might appear in the list.
+		// See: https://github.com/woocommerce/woocommerce/issues/42220.
+		$query_result = BlockTemplateUtils::remove_duplicate_customized_templates( $query_result, $theme_slug );
 
 		/**
 		 * WC templates from theme aren't included in `$this->get_block_templates()` but are handled by Gutenberg.
@@ -760,23 +763,5 @@ class BlockTemplatesController {
 		}
 
 		return $post_type_name;
-	}
-
-	/**
-	 * Migrates page content to templates if needed.
-	 */
-	public function maybe_migrate_content() {
-		// Migration should occur on a normal request to ensure every requirement is met.
-		// We are postponing it if WP is in maintenance mode, installing, WC installing or if the request is part of a WP-CLI command.
-		if ( wp_is_maintenance_mode() || ! get_option( 'woocommerce_db_version', false ) || Constants::is_defined( 'WP_SETUP_CONFIG' ) || Constants::is_defined( 'WC_INSTALLING' ) || Constants::is_defined( 'WP_CLI' ) ) {
-			return;
-		}
-
-		if ( ! BlockTemplateMigrationUtils::has_migrated_page( 'cart' ) ) {
-			BlockTemplateMigrationUtils::migrate_page( 'cart' );
-		}
-		if ( ! BlockTemplateMigrationUtils::has_migrated_page( 'checkout' ) ) {
-			BlockTemplateMigrationUtils::migrate_page( 'checkout' );
-		}
 	}
 }

@@ -136,13 +136,8 @@ final class ProductFilterStockStatus extends AbstractBlock {
 		);
 
 		return sprintf(
-			'<div %1$s>
-				%2$s
-				<div class="wc-block-stock-filter__controls">%3$s</div>
-				<div class="wc-block-stock-filter__actions"></div>
-			</div>',
+			'<div %1$s>%2$s</div>',
 			$wrapper_attributes,
-			$content,
 			$this->get_stock_filter_html( $stock_status_counts, $attributes ),
 		);
 	}
