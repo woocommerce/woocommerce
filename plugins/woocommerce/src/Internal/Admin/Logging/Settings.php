@@ -4,10 +4,12 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
 use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Settings;
-use WC_Log_Handler, WC_Log_Handler_DB, WC_Log_Handler_File, WC_Log_Levels;
+use WC_Log_Handler_DB, WC_Log_Handler_File, WC_Log_Levels;
 
 /**
  * Settings class.
@@ -22,11 +24,10 @@ class Settings {
 	 * @const array
 	 */
 	private const DEFAULTS = array(
-		'logging_enabled'           => true,
-		'default_handler'           => LogHandlerFileV2::class,
-		'retention_period_days'     => 30,
-		'level_threshold'           => 'none',
-		'file_entry_collapse_lines' => true,
+		'logging_enabled'       => true,
+		'default_handler'       => LogHandlerFileV2::class,
+		'retention_period_days' => 30,
+		'level_threshold'       => 'none',
 	);
 
 	/**
@@ -77,13 +78,13 @@ class Settings {
 			$settings['default_handler']       = $this->get_default_handler_setting_definition();
 			$settings['retention_period_days'] = $this->get_retention_period_days_setting_definition();
 			$settings['level_threshold']       = $this->get_level_threshold_setting_definition();
-		}
 
-		$default_handler = $this->get_default_handler();
-		if ( in_array( $default_handler, array( LogHandlerFileV2::class, WC_Log_Handler_File::class ), true ) ) {
-			$settings += $this->get_filesystem_settings_definitions();
-		} elseif ( WC_Log_Handler_DB::class === $default_handler ) {
-			$settings += $this->get_database_settings_definitions();
+			$default_handler = $this->get_default_handler();
+			if ( in_array( $default_handler, array( LogHandlerFileV2::class, WC_Log_Handler_File::class ), true ) ) {
+				$settings += $this->get_filesystem_settings_definitions();
+			} elseif ( WC_Log_Handler_DB::class === $default_handler ) {
+				$settings += $this->get_database_settings_definitions();
+			}
 		}
 
 		return $settings;
@@ -231,7 +232,7 @@ class Settings {
 	 */
 	private function get_filesystem_settings_definitions(): array {
 		$location_info = array();
-		$directory     = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) );
+		$directory     = trailingslashit( Constants::get_constant( 'WC_LOG_DIR' ) );
 
 		$location_info[] = sprintf(
 			// translators: %s is a location in the filesystem.
@@ -253,6 +254,12 @@ class Settings {
 			'<code>wp-config.php</code>'
 		);
 
+		$location_info[] = sprintf(
+			// translators: %s is an amount of computer disk space, e.g. 5 KB.
+			__( 'Directory size: %s', 'woocommerce' ),
+			size_format( wc_get_container()->get( FileController::class )->get_log_directory_size() )
+		);
+
 		return array(
 			'file_start'    => array(
 				'title' => __( 'File system settings', 'woocommerce' ),
@@ -260,8 +267,9 @@ class Settings {
 				'type'  => 'title',
 			),
 			'log_directory' => array(
-				'type' => 'info',
-				'text' => implode( "\n\n", $location_info ),
+				'title' => __( 'Location', 'woocommerce' ),
+				'type'  => 'info',
+				'text'  => implode( "\n\n", $location_info ),
 			),
 			'entry_format'  => array(),
 			'file_end'      => array(
@@ -293,8 +301,9 @@ class Settings {
 				'type'  => 'title',
 			),
 			'database_table' => array(
-				'type' => 'info',
-				'text' => $location_info,
+				'title' => __( 'Location', 'woocommerce' ),
+				'type'  => 'info',
+				'text'  => $location_info,
 			),
 			'file_end'       => array(
 				'id'   => self::PREFIX . 'settings',

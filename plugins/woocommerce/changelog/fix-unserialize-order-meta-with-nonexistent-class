@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+HPOS: fix handling order meta containing nonexistent class when sync is on.

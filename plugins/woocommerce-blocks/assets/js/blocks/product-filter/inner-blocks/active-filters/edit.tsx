@@ -25,9 +25,8 @@ const Edit = ( props: EditProps ) => {
 			<Inspector { ...props } />
 			<Disabled>
 				<ul
-					className={ classNames( 'wc-block-active-filters__list', {
-						'wc-block-active-filters__list--chips':
-							displayStyle === 'chips',
+					className={ classNames( 'filter-list', {
+						'list-chips': displayStyle === 'chips',
 					} ) }
 				>
 					<RemovableListItem
