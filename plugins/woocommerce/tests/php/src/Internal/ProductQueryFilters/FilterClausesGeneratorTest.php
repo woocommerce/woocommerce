@@ -218,7 +218,6 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 			)
 		);
 
-		var_dump( $expected_products_name, $received_products_name );
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
 	}
 }

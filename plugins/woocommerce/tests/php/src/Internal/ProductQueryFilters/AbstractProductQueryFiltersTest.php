@@ -42,6 +42,20 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'no' );
 		update_option( 'woocommerce_tax_display_shop', 'excl' );
 
+		global $wpdb;
+		$wpdb->query(
+			"
+			  CREATE TABLE IF NOT EXISTS {$wpdb->prefix}wc_product_attributes_lookup (
+			  product_id bigint(20) NOT NULL,
+			  product_or_parent_id bigint(20) NOT NULL,
+			  taxonomy varchar(32) NOT NULL,
+			  term_id bigint(20) NOT NULL,
+			  is_variation_attribute tinyint(1) NOT NULL,
+			  in_stock tinyint(1) NOT NULL
+			  );
+			"
+		);
+
 		$this->remove_all_attributes();
 		$this->remove_all_products();
 		$this->empty_lookup_tables();
@@ -147,6 +161,12 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		foreach ( $attribute_ids_by_name as $attribute_name => $attribute_id ) {
 			$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
 			$taxonomy_name  = wc_attribute_taxonomy_name( $attribute_name );
+			$attribute_terms = get_terms(array('taxonomy' => $taxonomy_name) );
+			if( ! is_wp_error( $attribute_terms)) {
+				foreach( $attribute_terms as $term ){
+					wp_delete_term( $term->term_id, $taxonomy_name );
+				}
+			}
 			unregister_taxonomy( $taxonomy_name );
 
 			wc_delete_attribute( $attribute_id );
@@ -232,11 +252,16 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 				$attributes
 			);
 			foreach ( $product_data['variations'] as $variation_data ) {
+				$variation_attributes = array_map( function($item) {
+					return "$item-slug";
+				}, $variation_data['attributes'] );
 				$variation = $this->fixture_data->get_variation_product(
 					$variable_product->get_id(),
-					$variation_data['attributes'],
+					$variation_attributes,
 					$variation_data['props']
 				);
+
+				// Manually insert the lookup data if it isn't automatically inserted.
 				foreach ( $variation_data['attributes'] as $taxonomy => $slug ) {
 					$term = get_term_by( 'slug', "$slug-slug", $taxonomy );
 					$this->update_lookup_table( $variation, $taxonomy, $term->term_id );
