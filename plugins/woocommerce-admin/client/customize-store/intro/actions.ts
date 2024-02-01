@@ -61,9 +61,8 @@ export const assignActiveThemeHasMods = assign<
 	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
 >( {
 	intro: ( context, event ) => {
-		const activeThemeHasMods = (
-			event as DoneInvokeEvent< { activeThemeHasMods: boolean } >
-		 ).data.activeThemeHasMods;
+		console.log( 'assignActiveThemeHasMods', event );
+		const activeThemeHasMods = event.payload;
 		// type coercion workaround for now
 		return { ...context.intro, activeThemeHasMods };
 	},

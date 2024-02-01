@@ -50,6 +50,7 @@ import './style.scss';
 import { navigateOrParent, attachParentListeners } from './utils';
 import useBodyClass from './hooks/use-body-class';
 import { isWooExpress } from '~/utils/is-woo-express';
+import { fetchActiveThemeHasMods } from '~/customize-store/intro/services';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -59,7 +60,8 @@ export type customizeStoreStateMachineEvents =
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
-	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean };
+	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean }
+	| { type: 'ACTIVE_THEME_HAS_MODS'; payload: boolean };
 
 const updateQueryStep = (
 	_context: unknown,
@@ -204,6 +206,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		IS_FONT_LIBRARY_AVAILABLE: {
 			actions: [ 'assignIsFontLibraryAvailable' ],
 		},
+		ACTIVE_THEME_HAS_MODS: {
+			actions: [ 'assignActiveThemeHasMods' ],
+		},
 	},
 	states: {
 		navigate: {
@@ -299,7 +304,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 									target: 'success',
 									actions: [
 										'assignThemeData',
-										'assignActiveThemeHasMods',
 										'assignCustomizeStoreCompleted',
 										'assignCurrentThemeIsAiGenerated',
 									],
@@ -385,25 +389,8 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'shouldFetchActiveThemeHasMods',
+			initial: 'checkActiveThemeHasMods',
 			states: {
-				shouldFetchActiveThemeHasMods: {
-					always: [
-						{
-							cond: { type: 'log', state: 'shouldFetch' },
-							target: 'fetchActiveThemeHasMods',
-						},
-					],
-				},
-				fetchActiveThemeHasMods: {
-					invoke: {
-						src: 'fetchActiveThemeHasMods',
-						onDone: {
-							target: 'checkActiveThemeHasMods',
-							actions: [ 'assignActiveThemeHasMods' ],
-						},
-					},
-				},
 				checkActiveThemeHasMods: {
 					always: [
 						{
@@ -543,6 +530,7 @@ declare global {
 	interface Window {
 		__wcCustomizeStore: {
 			isFontLibraryAvailable: boolean | null;
+			activeThemeHasMods: boolean | undefined;
 		};
 	}
 }
@@ -557,22 +545,32 @@ const setFlagsForIframeInstance = async (
 	) => void
 ) => {
 	if ( ! window.frameElement ) {
-		// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to retrive flag value.
+		console.log( 'setFlagsForIframeInstance', 'principal' );
+		// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to retrieve flag value.
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const _featureFlags = {
 			FONT_LIBRARY_AVAILABLE: ( async () => {
 				const isFontLibraryAvailable =
 					await fetchIsFontLibraryAvailable();
-
+				console.log( 'isFontLibraryAvailable', isFontLibraryAvailable );
 				window.__wcCustomizeStore = {
 					...window.__wcCustomizeStore,
 					isFontLibraryAvailable,
+				};
+			} )(),
+			ACTIVE_THEME_HAS_MODS: ( async () => {
+				const activeThemeHasMods = await fetchActiveThemeHasMods();
+				console.log( 'activeThemeHasMods', activeThemeHasMods );
+				window.__wcCustomizeStore = {
+					...window.__wcCustomizeStore,
+					activeThemeHasMods,
 				};
 			} )(),
 		};
 		return;
 	}
 
+	console.log( 'setFlagsForIframeInstance', 'iframe' );
 	// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to send the event to set the flag value to the iframe instance state machine.
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const _featureFlagsEvents = {
@@ -583,6 +581,15 @@ const setFlagsForIframeInstance = async (
 			send( {
 				type: 'IS_FONT_LIBRARY_AVAILABLE',
 				payload: isFontLibraryAvailable,
+			} );
+		} )(),
+		ACTIVE_THEME_HAS_MODS: ( async () => {
+			window.__wcCustomizeStore = window.__wcCustomizeStore ?? {};
+			const activeThemeHasMods =
+				window.__wcCustomizeStore.activeThemeHasMods || false;
+			send( {
+				type: 'ACTIVE_THEME_HAS_MODS',
+				payload: activeThemeHasMods,
 			} );
 		} )(),
 	};
@@ -629,9 +636,19 @@ export const CustomizeStoreController = ( {
 				isWooExpress: () => isWooExpress(),
 				isNotWooExpress: () => ! isWooExpress(),
 				activeThemeHasMods: ( _ctx ) => {
+					console.log(
+						'activeThemeHasMods',
+						_ctx.intro.activeThemeHasMods,
+						!! _ctx.intro.activeThemeHasMods
+					);
 					return !! _ctx.intro.activeThemeHasMods;
 				},
 				activeThemeIsNotModified: ( _ctx ) => {
+					console.log(
+						'activeThemeIsNotModified',
+						_ctx.intro.activeThemeHasMods,
+						! _ctx.intro.activeThemeHasMods
+					);
 					return ! _ctx.intro.activeThemeHasMods;
 				},
 			},

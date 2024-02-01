@@ -11,7 +11,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { aiStatusResponse, customizeStoreStateMachineContext } from '../types';
+import { aiStatusResponse } from '../types';
 
 export const fetchAiStatus = () => async (): Promise< aiStatusResponse > => {
 	const response = await fetch(
@@ -30,15 +30,7 @@ export const fetchThemeCards = async () => {
 	return themes;
 };
 
-export const fetchActiveThemeHasMods = async (
-	context: customizeStoreStateMachineContext
-) => {
-	console.log( 'fetchActiveThemeHasMods', context.intro.activeThemeHasMods );
-	if ( context.intro.activeThemeHasMods !== undefined ) {
-		console.log( 'fetchActiveThemeHasMods returning cached value' );
-		return context.intro.activeThemeHasMods;
-	}
-
+export const fetchActiveThemeHasMods = async () => {
 	const currentTemplatePromise =
 		// @ts-expect-error No types for this exist yet.
 		resolveSelect( coreStore ).__experimentalGetTemplateForLink( '/' );
@@ -79,9 +71,7 @@ export const fetchActiveThemeHasMods = async (
 	return activeThemeHasMods;
 };
 
-export const fetchIntroData = async (
-	context: customizeStoreStateMachineContext
-) => {
+export const fetchIntroData = async () => {
 	const currentTemplatePromise =
 		// @ts-expect-error No types for this exist yet.
 		resolveSelect( coreStore ).__experimentalGetTemplateForLink( '/' );
@@ -114,10 +104,7 @@ export const fetchIntroData = async (
 
 	const customizeStoreTaskCompleted = task?.isComplete;
 
-	const activeThemeHasMods = await fetchActiveThemeHasMods( context );
-
 	return {
-		activeThemeHasMods,
 		customizeStoreTaskCompleted,
 		themeData,
 		currentThemeIsAiGenerated,
