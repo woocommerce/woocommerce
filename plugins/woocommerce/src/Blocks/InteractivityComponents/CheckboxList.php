@@ -35,11 +35,11 @@ class CheckboxList {
 		<div data-wc-interactive='<?php echo esc_attr( $namespace ); ?>'>
 			<div data-wc-context='<?php echo esc_attr( wp_json_encode( $checkbox_list_context ) ); ?>' >
 			<div class="wc-block-stock-filter style-list">
-					<ul class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list">
+					<ul class="wc-block-components-checkbox-list">
 						<?php foreach ( $items as $item ) { ?>
 							<?php $item['id'] = $item['id'] ?? uniqid( 'checkbox-' ); ?>
 							<li>
-								<div class="wc-block-components-checkbox wc-block-checkbox-list__checkbox">
+								<div class="wc-block-components-checkbox">
 									<label for="<?php echo esc_attr( $item['id'] ); ?>">
 										<input 
 											id="<?php echo esc_attr( $item['id'] ); ?>" 

@@ -20,6 +20,13 @@ class WC_Beta_Tester {
 	private $plugin_config;
 
 	/**
+	 * Plugin name.
+	 *
+	 * @var string
+	 */
+	private $plugin_name;
+
+	/**
 	 * Plugin instance.
 	 *
 	 * @var WC_Beta_Tester

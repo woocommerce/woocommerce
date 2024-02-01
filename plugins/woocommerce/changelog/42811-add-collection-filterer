@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-Comment: Add `QueryFilters` class to calculate filter data for product queries. Update new interactive filter blocks to use `QueryFilters` instead of internal REST API requests.
-

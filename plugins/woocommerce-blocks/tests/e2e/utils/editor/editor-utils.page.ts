@@ -47,7 +47,7 @@ export class EditorUtils {
 
 	// todo: Make a PR to @wordpress/e2e-test-utils-playwright to add this method.
 	/**
-	 * Inserts a block after a given client ID.
+	 * Inserts a block inside a given client ID.
 	 *
 	 */
 	async insertBlock(
@@ -81,6 +81,27 @@ export class EditorUtils {
 					.insertBlock( block, _index, _rootClientId );
 			},
 			{ blockRepresentation, index, rootClientId }
+		);
+	}
+
+	async removeBlocks( { name }: { name: string } ) {
+		await this.page.evaluate(
+			( { name: _name } ) => {
+				const blocks = window.wp.data
+					.select( 'core/block-editor' )
+					.getBlocks() as ( BlockRepresentation & {
+					clientId: string;
+				} )[];
+				const matchingBlocksClientIds = blocks
+					.filter( ( block ) => {
+						return block && block.name === _name;
+					} )
+					.map( ( block ) => block?.clientId );
+				window.wp.data
+					.dispatch( 'core/block-editor' )
+					.removeBlocks( matchingBlocksClientIds );
+			},
+			{ name }
 		);
 	}
 
@@ -364,6 +385,15 @@ export class EditorUtils {
 		await this.page
 			.getByRole( 'button', { name: 'Dismiss this notice' } )
 			.getByText( `"${ templateName }" reverted.` )
+			.waitFor();
+	}
+
+	async updatePost() {
+		await this.page.click( 'role=button[name="Update"i]' );
+
+		await this.page
+			.getByRole( 'button', { name: 'Dismiss this notice' } )
+			.filter( { hasText: 'updated' } )
 			.waitFor();
 	}
 

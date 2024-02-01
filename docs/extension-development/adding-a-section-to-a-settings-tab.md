@@ -136,4 +136,4 @@ You would now just use your newly created settings like you would any other Word
 
 ## Conclusion
 
-When creating an extension for WooCommerce, think about where your settings belong before you create them. The key to building a useful product is making it easy to use for the end user, so appropriate setting placement is crucially important. For more specific information on adding settings to WooCommerce, check out the  [**Settings API documentation**](https://github.com/woocommerce/woocommerce/blob/trunk/docs/extesion-developlment/settings-api/).
+When creating an extension for WooCommerce, think about where your settings belong before you create them. The key to building a useful product is making it easy to use for the end user, so appropriate setting placement is crucially important. For more specific information on adding settings to WooCommerce, check out the  [**Settings API documentation**](https://github.com/woocommerce/woocommerce/blob/trunk/docs/extension-development/settings-api.md).

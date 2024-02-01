@@ -409,6 +409,34 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, $match['line_number'] );
 		$this->assertStringContainsString( 'A trip to the food bar', $match['line'] );
 	}
+
+	/**
+	 * @testdox The get_log_directory_size method should return an accurate size of the directory in bytes.
+	 */
+	public function test_get_log_directory_size(): void {
+		// Non-log files that should be in the log directory.
+		$htaccess = wp_filesize( Constants::get_constant( 'WC_LOG_DIR' ) . '.htaccess' );
+		$index    = wp_filesize( Constants::get_constant( 'WC_LOG_DIR' ) . 'index.html' );
+
+		$path             = Constants::get_constant( 'WC_LOG_DIR' ) . 'unit-testing-1.log';
+		$resource         = fopen( $path, 'a' );
+		$existing_content = random_bytes( 200 );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+		fwrite( $resource, $existing_content );
+		fclose( $resource );
+
+		$path             = Constants::get_constant( 'WC_LOG_DIR' ) . 'unit-testing-2.log';
+		$resource         = fopen( $path, 'a' );
+		$existing_content = random_bytes( 300 );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+		fwrite( $resource, $existing_content );
+		fclose( $resource );
+
+		$expected_size = $htaccess + $index + 200 + 300;
+
+		$size = $this->sut->get_log_directory_size();
+		$this->assertEquals( $expected_size, $size );
+	}
 }
 
 // phpcs:enable WordPress.WP.AlternativeFunctions.file_system_read_fopen, WordPress.WP.AlternativeFunctions.file_system_read_fclose

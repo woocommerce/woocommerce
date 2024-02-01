@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix strpos php8 compliant and payment gateway recommendation rule default value

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a PHP Warning when sending order emails to the shopper and merchant.

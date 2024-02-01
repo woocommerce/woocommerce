@@ -52,6 +52,7 @@ import { AiOfflineModal } from '~/customize-store/assembler-hub/onboarding-tour/
 import { useQuery } from '@woocommerce/navigation';
 import { FlowType } from '../types';
 import { isOfflineAIFlow } from '../guards';
+import { isWooExpress } from '~/utils/is-woo-express';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -128,6 +129,7 @@ export const Layout = () => {
 					<Transitional
 						sendEvent={ sendEvent }
 						editor={ editor }
+						isWooExpress={ isWooExpress() }
 						isSurveyOpen={ isSurveyOpen }
 						setSurveyOpen={ setSurveyOpen }
 						hasCompleteSurvey={

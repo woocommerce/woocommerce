@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "8.6.0",
+	"version": "8.7.0",
 	"homepage": "https://woo.com/",
 	"repository": {
 		"type": "git",
@@ -257,15 +257,6 @@
 	"wireit": {
 		"build:project:copy-assets": {
 			"command": "rm -rf assets/client/blocks assets/client/admin assets/js assets/css && cp -r ../woocommerce-admin/build assets/client/admin && cp -r client/legacy/build/js assets/js && cp -r client/legacy/build/css assets/css && cp -r ../woocommerce-blocks/build assets/client/blocks && cp -r ../woocommerce-blocks/blocks.ini blocks.ini",
-			"clean": "if-file-deleted",
-			"files": [],
-			"output": [
-				"assets/client/admin",
-				"assets/client/blocks",
-				"blocks.ini",
-				"assets/js",
-				"assets/css"
-			],
 			"dependencies": [
 				"dependencyOutputs"
 			]

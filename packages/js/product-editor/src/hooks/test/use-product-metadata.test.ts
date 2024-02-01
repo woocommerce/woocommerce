@@ -17,6 +17,7 @@ jest.mock( '@wordpress/data', () => ( {
 	useSelect: jest.fn().mockImplementation( ( callback ) => {
 		return callback(
 			jest.fn().mockReturnValue( {
+				hasFinishedResolution: jest.fn().mockReturnValue( true ),
 				getEditedEntityRecord: () => ( {
 					meta_data: [
 						{
@@ -45,9 +46,9 @@ jest.mock( '@wordpress/data', () => ( {
 
 describe( 'useProductMetadata', () => {
 	it( 'should update all the metadata with new values and not replace existing fields', async () => {
-		const { updateMetadata } = renderHook( () => useProductMetadata() )
-			.result.current;
-		updateMetadata( [
+		const { update } = renderHook( () => useProductMetadata() ).result
+			.current;
+		update( [
 			{
 				key: 'field1',
 				value: 'value2',
@@ -88,5 +89,11 @@ describe( 'useProductMetadata', () => {
 			field2: 'value1',
 			existing_field: 'value1',
 		} );
+	} );
+	it( 'should return isLoading as false when the resolution is finished', async () => {
+		const { isLoading } = renderHook( () =>
+			useProductMetadata( { postType: 'product', id: 123 } )
+		).result.current;
+		expect( isLoading ).toEqual( false );
 	} );
 } );

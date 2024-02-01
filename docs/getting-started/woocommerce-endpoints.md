@@ -36,5 +36,5 @@ The following endpoints are used for account-related functionality and are appen
 
 ## Learn more
 
-- [Customizing endpoint URLs](./docs/customizing-endpoint-urls)
-- [Troubleshooting endpoints](.docs/troubleshooting-endpoints)
+- [Customizing endpoint URLs](./customizing-endpoint-urls.md)
+- [Troubleshooting endpoints](./troubleshooting-endpoints.md)
