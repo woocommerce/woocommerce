@@ -158,13 +158,14 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$errors          = new \WP_Error();
 		$address         = (array) $address;
 		$validation_util = new ValidationUtils();
+		$schema          = $this->get_properties();
 
 		// The flow is Validate -> Sanitize -> Re-Validate
 		// First validation step is to ensure fields match their schema, then we sanitize to put them in the
 		// correct format, and finally the second validation step is to ensure the correctly-formatted values
 		// match what we expect (postcode etc.).
 		foreach ( $address as $key => $value ) {
-			if ( is_wp_error( rest_validate_value_from_schema( $value, $this->get_properties()[ $key ], $key ) ) ) {
+			if ( is_wp_error( rest_validate_value_from_schema( $value, $schema[ $key ], $key ) ) ) {
 				$errors->add(
 					'invalid_' . $key,
 					sprintf(
