@@ -945,19 +945,21 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * displays the message/error.
 	 *
 	 * @param int $msg_code Message/error code.
+	 * @param string $notice_type Notice type.
 	 */
-	public function add_coupon_message( $msg_code ) {
-		$msg = $msg_code < 200 ? $this->get_coupon_error( $msg_code ) : $this->get_coupon_message( $msg_code );
+	public function add_coupon_message( $msg_code, $notice_type = 'success' ) {
+		if ( $msg_code < 200 ) {
+			$msg         = $this->get_coupon_error( $msg_code );
+			$notice_type = 'error';
+		} else {
+			$msg = $this->get_coupon_message( $msg_code );
+		}
 
-		if ( ! $msg ) {
+		if ( empty( $msg ) ) {
 			return;
 		}
 
-		if ( $msg_code < 200 ) {
-			wc_add_notice( $msg, 'error' );
-		} else {
-			wc_add_notice( $msg );
-		}
+		wc_add_notice( $msg, $notice_type );
 	}
 
 	/**
@@ -976,7 +978,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				break;
 			case self::WC_COUPON_NOT_YOURS_APPLIED:
 				/* translators: %s: coupon code */
-				$msg = sprintf( __( 'The coupon "%s" has been applied. However, in order to use it you must supply the associated email on Checkout.', 'woocommerce' ), esc_html( $this->get_code() ) );
+				$msg = sprintf( __( 'The coupon "%s" has been applied. However, in order to use it you must supply the correct associated email on Checkout.', 'woocommerce' ), esc_html( $this->get_code() ) );
 				break;
 			default:
 				$msg = '';
