@@ -10,6 +10,7 @@ export { DetailsFeatureField as __experimentalDetailsFeatureField } from './deta
 export { DetailsSummaryField as __experimentalDetailsSummaryField } from './details-summary-field';
 export { DetailsDescriptionField as __experimentalDetailsDescriptionField } from './details-description-field';
 export { WooProductMoreMenuItem as __experimentalWooProductMoreMenuItem } from './header';
+export { PluginHeaderItemModal, PluginHeaderItemPopover } from './header';
 export {
 	Editor as __experimentalEditor,
 	initBlocks as __experimentalInitBlocks,
@@ -32,6 +33,7 @@ export { AttributeControl as __experimentalAttributeControl } from './attribute-
 export { Attributes as __experimentalAttributes } from './attributes';
 export * from './add-new-shipping-class-modal';
 export { VariationSwitcherFooter as __experimentalVariationSwitcherFooter } from './variation-switcher-footer';
+export { VariationQuickUpdateMenuItem } from './variations-table/variation-actions-menus';
 
 export * from './remove-confirmation-modal';
 

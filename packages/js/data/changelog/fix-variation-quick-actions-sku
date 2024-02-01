@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add PartialProductVariation type, where id is required

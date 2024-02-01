@@ -41,7 +41,7 @@ import {
 	LinkedProductListBlockAttributes,
 	LinkedProductListBlockEmptyState,
 } from './types';
-import getRelatedProducts from '../../../utils/get-related-products';
+import { getSuggestedProductsFor } from '../../../utils/get-related-products';
 import { SectionActions } from '../../../components/block-slot-fill';
 
 export function EmptyStateImage( {
@@ -182,8 +182,9 @@ export function LinkedProductListBlockEdit( {
 
 		setIsChoosingProducts( true );
 
-		const relatedProducts = ( await getRelatedProducts( productId, {
-			fallbackToRandomProducts: true,
+		const linkedProducts = ( await getSuggestedProductsFor( {
+			postId: productId,
+			forceRequest: true,
 		} ) ) as Product[];
 
 		dispatch( {
@@ -195,12 +196,12 @@ export function LinkedProductListBlockEdit( {
 
 		setIsChoosingProducts( false );
 
-		if ( ! relatedProducts ) {
+		if ( ! linkedProducts ) {
 			return;
 		}
 
 		const newLinkedProducts = selectSearchedProductDispatcher(
-			relatedProducts,
+			linkedProducts,
 			[]
 		);
 

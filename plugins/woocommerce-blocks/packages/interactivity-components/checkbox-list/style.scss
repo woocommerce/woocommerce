@@ -1,3 +1,33 @@
 //  Import styles we need to render the checkbox list and checkbox control.
 @import "../../../packages/components/checkbox-list/style";
 @import "../../../packages/components/checkbox-control/style";
+
+.wc-block-stock-filter-list {
+	margin: 0;
+
+	li {
+		label {
+			cursor: pointer;
+		}
+
+		input {
+			cursor: pointer;
+			display: inline-block;
+		}
+	}
+
+	.wc-block-components-checkbox-list {
+		margin: 0;
+
+		li {
+			label {
+				cursor: pointer;
+			}
+
+			input {
+				cursor: pointer;
+				display: inline-block;
+			}
+		}
+	}
+}

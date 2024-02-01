@@ -2,10 +2,14 @@
  * External dependencies
  */
 import { getNewPath } from '@woocommerce/navigation';
+import { sendParent } from 'xstate';
+
 /**
  * Internal dependencies
  */
 import { attachIframeListeners, onIframeLoad } from '../utils';
+import { DesignWithoutAIStateMachineContext } from './types';
+import { DesignWithoutAIStateMachineEvents } from './state-machine';
 
 const redirectToAssemblerHub = async () => {
 	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
@@ -42,6 +46,15 @@ const redirectToAssemblerHub = async () => {
 	document.body.appendChild( iframe );
 };
 
+const redirectToIntroWithError = sendParent<
+	DesignWithoutAIStateMachineContext,
+	DesignWithoutAIStateMachineEvents,
+	DesignWithoutAIStateMachineEvents
+>( {
+	type: 'NO_AI_FLOW_ERROR',
+} );
+
 export const actions = {
 	redirectToAssemblerHub,
+	redirectToIntroWithError,
 };

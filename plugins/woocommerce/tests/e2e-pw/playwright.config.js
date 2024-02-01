@@ -8,6 +8,7 @@ const {
 	DEFAULT_TIMEOUT_OVERRIDE,
 	E2E_MAX_FAILURES,
 	PLAYWRIGHT_HTML_REPORT,
+	REPEAT_EACH,
 } = process.env;
 
 const config = {
@@ -19,11 +20,19 @@ const config = {
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
-	retries: 2,
+	retries: CI ? 2 : 0,
+	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: CI ? 1 : 4,
 	reporter: [
 		[ 'list' ],
-		[ 'blob', { outputFolder: ALLURE_RESULTS_DIR ?? './tests/e2e-pw/test-results/allure-results' } ],
+		[
+			'blob',
+			{
+				outputFolder:
+					ALLURE_RESULTS_DIR ??
+					'./tests/e2e-pw/test-results/allure-results',
+			},
+		],
 		[
 			'html',
 			{
@@ -49,7 +58,7 @@ const config = {
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {
 		baseURL: BASE_URL ?? 'http://localhost:8086',
-		screenshot: 'only-on-failure',
+		screenshot: { mode: 'only-on-failure', fullPage: true },
 		stateDir: 'tests/e2e-pw/test-results/storage/',
 		trace: 'retain-on-failure',
 		video: 'on-first-retry',

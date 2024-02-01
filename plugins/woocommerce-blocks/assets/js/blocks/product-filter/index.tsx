@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { registerBlockType } from '@wordpress/blocks';
+import {
+	BlockInstance,
+	createBlock,
+	registerBlockType,
+} from '@wordpress/blocks';
 import {
 	Icon,
 	box,
@@ -20,6 +24,8 @@ import { toggle } from '@woocommerce/icons';
 import metadata from './block.json';
 import edit from './edit';
 import save from './save';
+import { BLOCK_NAME_MAP } from './constants';
+import { BlockAttributes } from './types';
 
 if ( isExperimentalBuild() ) {
 	registerBlockType( metadata, {
@@ -136,5 +142,43 @@ if ( isExperimentalBuild() ) {
 				},
 			},
 		],
+		transforms: {
+			from: [
+				{
+					type: 'block',
+					blocks: [ 'woocommerce/filter-wrapper' ],
+					transform: (
+						attributes: BlockAttributes,
+						innerBlocks: BlockInstance[]
+					) => {
+						const newInnerBlocks: BlockInstance[] = [];
+						// Loop through inner blocks to preserve the block order.
+						innerBlocks.forEach( ( block ) => {
+							if (
+								block.name ===
+								`woocommerce/${ attributes.filterType }`
+							) {
+								newInnerBlocks.push(
+									createBlock(
+										BLOCK_NAME_MAP[ attributes.filterType ],
+										block.attributes
+									)
+								);
+							}
+
+							if ( block.name === 'core/heading' ) {
+								newInnerBlocks.push( block );
+							}
+						} );
+
+						return createBlock(
+							'woocommerce/product-filter',
+							attributes,
+							newInnerBlocks
+						);
+					},
+				},
+			],
+		},
 	} );
 }
