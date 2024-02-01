@@ -22,6 +22,10 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await api.put( 'settings/general/woocommerce_currency', {
 			value: 'USD',
 		} );
+		// enable COD
+		await api.put( 'payment_gateways/cod', {
+			enabled: true,
+		} );
 		// add categories
 		await api
 			.post( 'products/categories', {
@@ -154,6 +158,10 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			force: true,
 		} );
 		await api.post( 'coupons/batch', { delete: [ ...couponBatchId ] } );
+
+		await api.put( 'payment_gateways/cod', {
+			enabled: false,
+		} );
 	} );
 
 	test( 'expired coupon cannot be used', async ( { page, context } ) => {
