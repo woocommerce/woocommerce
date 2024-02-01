@@ -548,7 +548,9 @@ const setFlagsForIframeInstance = async (
 	) => void
 ) => {
 	if ( ! window.frameElement ) {
-		return {
+		// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to retrive flag value.
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const _featureFlags = {
 			FONT_LIBRARY_AVAILABLE: ( async () => {
 				const isFontLibraryAvailable =
 					await fetchIsFontLibraryAvailable();
@@ -559,9 +561,12 @@ const setFlagsForIframeInstance = async (
 				};
 			} )(),
 		};
+		return;
 	}
 
-	return {
+	// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to send the event to set the flag value to the iframe instance state machine.
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const _featureFlagsEvents = {
 		FONT_LIBRARY_AVAILABLE: ( async () => {
 			window.__wcCustomizeStore = window.__wcCustomizeStore ?? {};
 			const isFontLibraryAvailable =
