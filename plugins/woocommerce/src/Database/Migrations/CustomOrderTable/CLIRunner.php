@@ -262,7 +262,7 @@ class CLIRunner {
 	 * ## EXAMPLES
 	 *
 	 *     # Copy all order data into the post meta table, 500 posts at a time.
-	 *     wp wc cot backfill --batch-size=500
+	 *     wp wc cot migrate --batch-size=500
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
