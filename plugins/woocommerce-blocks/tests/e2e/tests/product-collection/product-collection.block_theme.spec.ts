@@ -674,4 +674,71 @@ test.describe( 'Product Collection', () => {
 			} );
 		} );
 	} );
+
+	test.describe( 'With other blocks', () => {
+		test( 'In Single Product block', async ( {
+			admin,
+			editor,
+			page,
+			editorUtils,
+			pageObject,
+		} ) => {
+			await admin.createNewPost();
+			await editorUtils.closeWelcomeGuideModal();
+
+			// Prepare Single Product block
+			await editor.insertBlock( { name: 'woocommerce/single-product' } );
+			await page.waitForResponse(
+				( response ) =>
+					response.url().includes( 'wc/store/v1/products' ) &&
+					response.status() === 200
+			);
+			const singleProductBlock = await editorUtils.getBlockByName(
+				'woocommerce/single-product'
+			);
+			await singleProductBlock
+				.locator( 'input[type="radio"]' )
+				.nth( 0 )
+				.click();
+			await singleProductBlock.getByText( 'Done' ).click();
+
+			await page.getByLabel( 'Block: Product Title' ).press( 'Enter' );
+			await page
+				.getByLabel(
+					'Empty block; start writing or type forward slash to choose a block'
+				)
+				.pressSequentially( '/Product Collection (Beta)' );
+			await page
+				.getByRole( 'option', {
+					name: 'Product Collection (Beta)',
+					exact: true,
+				} )
+				.first()
+				.click();
+			await pageObject.chooseCollectionInPost( 'featured' );
+
+			const featuredProducts = [
+				'Cap',
+				'Hoodie with Zipper',
+				'Sunglasses',
+				'V-Neck T-Shirt',
+			];
+			const featuredProductsPrices = [
+				'Previous price:$18.00Discounted price:$16.00',
+				'$45.00',
+				'$90.00',
+				'Price between $15.00 and $20.00$15.00 — $20.00',
+			];
+
+			await expect( pageObject.products ).toHaveCount( 4 );
+			// This verifies if Core's block context is provided
+			await expect( pageObject.productTitles ).toHaveText(
+				featuredProducts
+			);
+			// This verifies if Blocks's product context is provided
+			await expect( pageObject.productPrices ).toHaveText(
+				featuredProductsPrices
+			);
+		} );
+	} );
 } );
