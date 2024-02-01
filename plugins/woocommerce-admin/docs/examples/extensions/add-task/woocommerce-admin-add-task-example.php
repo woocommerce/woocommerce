@@ -8,7 +8,7 @@
 /**
  * Register the task.
  */
-function add_task_my_task() {
+function add_my_task() {
 	require_once __DIR__ . '/class-mytask.php';
 	$task_lists = \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists::instance();
 
@@ -21,7 +21,7 @@ function add_task_my_task() {
 	);
 }
 
-add_action( 'init', 'add_task_my_task' );
+add_action( 'init', 'add_my_task' );
 
 /**
  * Register the scripts to fill the task content on the frontend.

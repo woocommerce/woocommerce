@@ -4,7 +4,7 @@ menu_title: Customizing Endpoint URLs
 tags: how-to
 ---
 
-Before you start, check out [WooCommerce Endpoints](./docs/woocommerce-endpoints). 
+Before you start, check out [WooCommerce Endpoints](./woocommerce-endpoints.md). 
 
 ## Customizing endpoint URLs
 
