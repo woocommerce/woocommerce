@@ -623,15 +623,19 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			page.getByText( 'Coupon code applied successfully.' )
 		).toBeVisible();
 
-		await page.getByLabel( 'First name' ).fill( 'Marge' );
-		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
+		await page.getByLabel( 'First name' ).first().fill( 'Marge' );
+		await page.getByLabel( 'Last name' ).first().fill( 'Simpson' );
 		await page
 			.getByLabel( 'Street address' )
+			.first()
 			.fill( '123 Evergreen Terrace' );
-		await page.getByLabel( 'Town / City' ).fill( 'Springfield' );
-		await page.getByLabel( 'ZIP Code' ).fill( '55555' );
-		await page.getByLabel( 'Phone' ).fill( '555-555-5555' );
-		await page.getByLabel( 'Email address' ).fill( 'marge@example.com' );
+		await page.getByLabel( 'Town / City' ).first().fill( 'Springfield' );
+		await page.getByLabel( 'ZIP Code' ).first().fill( '55555' );
+		await page.getByLabel( 'Phone' ).first().fill( '555-555-5555' );
+		await page
+			.getByLabel( 'Email address' )
+			.first()
+			.fill( 'marge@example.com' );
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 		await expect(
@@ -665,15 +669,19 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			page.getByText( 'Coupon code applied successfully.' )
 		).toBeVisible();
 
-		await page.getByLabel( 'First name' ).fill( 'Homer' );
-		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
+		await page.getByLabel( 'First name' ).first().fill( 'Homer' );
+		await page.getByLabel( 'Last name' ).first().fill( 'Simpson' );
 		await page
 			.getByLabel( 'Street address' )
+			.first()
 			.fill( '123 Evergreen Terrace' );
-		await page.getByLabel( 'Town / City' ).fill( 'Springfield' );
-		await page.getByLabel( 'ZIP Code' ).fill( '55555' );
-		await page.getByLabel( 'Phone' ).fill( '555-555-5555' );
-		await page.getByLabel( 'Email address' ).fill( 'homer@example.com' );
+		await page.getByLabel( 'Town / City' ).first().fill( 'Springfield' );
+		await page.getByLabel( 'ZIP Code' ).first().fill( '55555' );
+		await page.getByLabel( 'Phone' ).first().fill( '555-555-5555' );
+		await page
+			.getByLabel( 'Email address' )
+			.first()
+			.fill( 'homer@example.com' );
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 		await expect(
@@ -698,15 +706,19 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			page.getByText( 'Coupon code applied successfully.' )
 		).toBeVisible();
 
-		await page.getByLabel( 'First name' ).fill( 'Homer' );
-		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
+		await page.getByLabel( 'First name' ).first().fill( 'Homer' );
+		await page.getByLabel( 'Last name' ).first().fill( 'Simpson' );
 		await page
 			.getByLabel( 'Street address' )
+			.first()
 			.fill( '123 Evergreen Terrace' );
-		await page.getByLabel( 'Town / City' ).fill( 'Springfield' );
-		await page.getByLabel( 'ZIP Code' ).fill( '55555' );
-		await page.getByLabel( 'Phone' ).fill( '555-555-5555' );
-		await page.getByLabel( 'Email address' ).fill( 'homer@example.com' );
+		await page.getByLabel( 'Town / City' ).first().fill( 'Springfield' );
+		await page.getByLabel( 'ZIP Code' ).first().fill( '55555' );
+		await page.getByLabel( 'Phone' ).first().fill( '555-555-5555' );
+		await page
+			.getByLabel( 'Email address' )
+			.first()
+			.fill( 'homer@example.com' );
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 		await expect(
