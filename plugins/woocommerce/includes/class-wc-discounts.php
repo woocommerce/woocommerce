@@ -1058,7 +1058,7 @@ class WC_Discounts {
 			 */
 
 			if ( (int) $e->getCode() === WC_Coupon::WC_COUPON_NOT_YOURS_APPLIED ) {
-				$coupon->add_coupon_message( $e->getCode() );
+				$coupon->add_coupon_message( $e->getCode(), 'notice' );
 
 				return true;
 			}
