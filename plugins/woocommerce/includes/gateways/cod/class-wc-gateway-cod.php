@@ -236,6 +236,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
 		$raw_zones  = $data_store->get_zones();
+		$zones      = array();
 
 		foreach ( $raw_zones as $raw_zone ) {
 			$zones[] = new WC_Shipping_Zone( $raw_zone );
@@ -327,7 +328,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @since  3.4.0
 	 *
 	 * @param array $rate_ids Rate ids to check.
-	 * @return boolean
+	 * @return array
 	 */
 	private function get_matching_rates( $rate_ids ) {
 		// First, match entries in 'method_id:instance_id' format. Then, match entries in 'method_id' format by stripping off the instance ID from the candidates.
