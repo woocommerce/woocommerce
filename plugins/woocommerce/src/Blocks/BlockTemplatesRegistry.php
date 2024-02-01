@@ -16,4 +16,12 @@ class BlockTemplatesRegistry {
 	public static function get_templates() {
 		return self::$templates;
 	}
+
+	public static function get_template( $template_slug ) {
+		if ( array_key_exists( $template_slug, self::$templates ) ) {
+			$registered_template = self::$templates[ $template_slug ];
+			return $registered_template;
+		}
+		return null;
+	}
 }

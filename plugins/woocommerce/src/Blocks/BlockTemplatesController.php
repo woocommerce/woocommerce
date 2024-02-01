@@ -33,11 +33,10 @@ class BlockTemplatesController {
 	 * Initialization method.
 	 */
 	protected function init() {
-		add_filter( 'default_wp_template_part_areas', array( $this, 'register_mini_cart_template_part_area' ), 10, 1 );
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'pre_get_block_template', array( $this, 'get_block_template_fallback' ), 10, 3 );
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
-		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 1 );
+		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
 		add_filter( 'current_theme_supports-block-templates', array( $this, 'remove_block_template_support_for_shop_page' ) );
 		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_archive_product_to_eligible_for_fallback_templates' ), 10, 1 );
@@ -112,23 +111,6 @@ class BlockTemplatesController {
 				10
 			);
 		}
-	}
-
-	/**
-	 * Add Mini-Cart to the default template part areas.
-	 *
-	 * @param array $default_area_definitions An array of supported area objects.
-	 * @return array The supported template part areas including the Mini-Cart one.
-	 */
-	public function register_mini_cart_template_part_area( $default_area_definitions ) {
-		$mini_cart_template_part_area = [
-			'area'        => 'mini-cart',
-			'label'       => __( 'Mini-Cart', 'woocommerce' ),
-			'description' => __( 'The Mini-Cart template allows shoppers to see their cart items and provides access to the Cart and Checkout pages.', 'woocommerce' ),
-			'icon'        => 'mini-cart',
-			'area_tag'    => 'mini-cart',
-		];
-		return array_merge( $default_area_definitions, [ $mini_cart_template_part_area ] );
 	}
 
 	/**
@@ -330,9 +312,11 @@ class BlockTemplatesController {
 	 * Add the template title and description to WooCommerce templates.
 	 *
 	 * @param WP_Block_Template|null $block_template The found block template, or null if there isn't one.
+	 * @param string                 $id             Template unique identifier (example: 'theme_slug//template_slug').
+	 * @param array                  $template_type  Template type: 'wp_template' or 'wp_template_part'.
 	 * @return WP_Block_Template|null
 	 */
-	public function add_block_template_details( $block_template ) {
+	public function add_block_template_details( $block_template, $id, $template_type ) {
 		if ( ! $block_template ) {
 			return $block_template;
 		}
@@ -341,6 +325,9 @@ class BlockTemplatesController {
 		}
 		if ( ! $block_template->description ) {
 			$block_template->description = BlockTemplateUtils::get_block_template_description( $block_template->slug );
+		}
+		if ( ! $block_template->area || 'uncategorized' === $block_template->area ) {
+			$block_template->area = BlockTemplateUtils::get_block_template_area( $block_template->slug, $template_type );
 		}
 		return $block_template;
 	}
@@ -415,12 +402,16 @@ class BlockTemplatesController {
 		 * templates that aren't listed in theme.json.
 		 */
 		$query_result = array_map(
-			function( $template ) {
+			function( $template ) use ( $template_type ) {
 				if ( ! $template->title || $template->title === $template->slug ) {
 					$template->title = BlockTemplateUtils::get_block_template_title( $template->slug );
 				}
 				if ( ! $template->description ) {
 					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
+				}
+
+				if ( ! $template->area || 'uncategorized' === $template->area ) {
+					$template->area = BlockTemplateUtils::get_block_template_area( $template->slug, $template_type );
 				}
 
 				return $template;

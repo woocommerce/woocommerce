@@ -27,6 +27,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Registry\Container;
+use Automattic\WooCommerce\Blocks\Templates\MiniCartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
@@ -161,6 +162,7 @@ class Bootstrap {
 				if ( wc_current_theme_is_fse_theme() ) {
 					$this->container->get( ProductSearchResultsTemplate::class );
 					$this->container->get( ProductAttributeTemplate::class );
+					$this->container->get( MiniCartTemplate::class );
 					$this->container->get( CartTemplate::class );
 					$this->container->get( CheckoutTemplate::class );
 					// Even though CheckoutHeaderTemplate is a template part, it's only available when the
@@ -289,6 +291,12 @@ class Bootstrap {
 			ProductAttributeTemplate::class,
 			function () {
 				return new ProductAttributeTemplate();
+			}
+		);
+		$this->container->register(
+			MiniCartTemplate::class,
+			function () {
+				return new MiniCartTemplate();
 			}
 		);
 		$this->container->register(

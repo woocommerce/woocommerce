@@ -222,20 +222,8 @@ class BlockTemplateUtils {
 		$template->origin         = $template_file->source;
 		$template->is_custom      = false; // Templates loaded from the filesystem aren't custom, ones that have been edited and loaded from the DB are.
 		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
-		$template->area           = 'uncategorized';
+		$template->area           = self::get_block_template_area( $template->slug, $template_type );
 
-		// Force the Mini-Cart template part to be in the Mini-Cart template part area.
-		// @todo When this class is refactored, move title, description, and area definition to the template classes (CheckoutHeaderTemplate, MiniCartTemplate, etc).
-		if ( 'wp_template_part' === $template_type ) {
-			switch ( $template_file->slug ) {
-				case 'mini-cart':
-					$template->area = 'mini-cart';
-					break;
-				case 'checkout-header':
-					$template->area = 'header';
-					break;
-			}
-		}
 		return $template;
 	}
 
@@ -339,6 +327,19 @@ class BlockTemplateUtils {
 		return '';
 	}
 
+	public static function get_block_template_area( $template_slug, $template_type ) {
+		if ( 'wp_template_part' === $template_type ) {
+			if ( 'checkout-header' === $template_slug ) {
+				return 'header';
+			}
+			$registered_template = BlockTemplatesRegistry::get_template( $template_slug );
+			if ( $registered_template && property_exists( $registered_template, 'template_area' ) ) {
+				return $registered_template->template_area;
+			}
+		}
+		return 'uncategorized';
+	}
+
 	/**
 	 * Returns a filtered list of plugin template types, containing their
 	 * localized titles and descriptions.
@@ -378,10 +379,6 @@ class BlockTemplateUtils {
 				ProductSearchResultsTemplate::SLUG    => array(
 					'title'       => _x( 'Product Search Results', 'Template name', 'woocommerce' ),
 					'description' => __( 'Displays search results for your store.', 'woocommerce' ),
-				),
-				MiniCartTemplate::SLUG                => array(
-					'title'       => _x( 'Mini-Cart', 'Template name', 'woocommerce' ),
-					'description' => __( 'Template used to display the Mini-Cart drawer.', 'woocommerce' ),
 				),
 				CartTemplate::get_slug()              => array(
 					'title'       => _x( 'Page: Cart', 'Template name', 'woocommerce' ),

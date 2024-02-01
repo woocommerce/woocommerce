@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -20,10 +19,10 @@ class SingleProductTemplate {
 	public function __construct() {
 		$this->template_title       = _x( 'Single Product', 'Template name', 'woocommerce' );
 		$this->template_description = __( 'Displays a single product.', 'woocommerce' );
+		BlockTemplatesRegistry::register_template( $this );
 	}
 
 	public function init() {
-		BlockTemplatesRegistry::register_template( $this );
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 10, 3 );
 	}
