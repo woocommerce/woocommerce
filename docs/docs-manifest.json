@@ -539,9 +539,12 @@
           "post_title": "Resources for debugging",
           "menu_title": "Debugging",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/debugging.md",
-          "hash": "82cebd2c03c35e8fd3028bbf093a7b01355ceda1a38131484935bff48d4d08d5",
+          "hash": "68ce2cf0aae27b9214ea5da1ad7474cd2274547732f6212bef39e9d7e60edd49",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/debugging.md",
-          "id": "75c020ee52329c09f4dc04e33dc8aeb11c088534"
+          "id": "75c020ee52329c09f4dc04e33dc8aeb11c088534",
+          "links": {
+            "../extension-development/logging.md": "c684e2efba45051a4e1f98eb5e6ef6bab194f25c"
+          }
         },
         {
           "post_title": "Customizing WooCommerce Endpoint URLs",
@@ -736,7 +739,7 @@
           "menu_title": "Core critical flows",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/core-critical-flows.md",
-          "hash": "c1380271cea0f15a4be3d2a96b94cfaa0b1b0b098cf717db58640d8f84da1c66",
+          "hash": "51529e3c07276ea267763d7520f1ca8d8b37eda4337ec97b4c8d19231f3a0334",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/core-critical-flows.md",
           "id": "e561b46694dba223c38b87613ce4907e4e14333a"
         },

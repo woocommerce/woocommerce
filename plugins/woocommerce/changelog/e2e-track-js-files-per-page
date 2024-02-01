@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Added e2e test to monitor number of JS includes in certain pages
