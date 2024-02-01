@@ -29,6 +29,7 @@ import {
 import { FontFamily } from '~/customize-store/types/font';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { isAIFlow, isNoAIFlow } from '~/customize-store/guards';
+import { FontFamiliesLoaderDotCom } from './font-families-loader-dot-com';
 
 const { useGlobalStyle, useGlobalSetting } = unlock( blockEditorPrivateApis );
 
@@ -176,7 +177,7 @@ export const FontPairingVariationPreview = () => {
 					</div>
 				</div>
 				{ isAIFlow( context.flowType ) && (
-					<FontFamiliesLoader
+					<FontFamiliesLoaderDotCom
 						fontFamilies={ fontFamilies }
 						onLoad={ handleOnLoad }
 					/>
