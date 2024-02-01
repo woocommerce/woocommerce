@@ -19,7 +19,6 @@ import {
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { GlobalStylesVariationIframe } from '../global-styles-variation-iframe';
-import { FontFamiliesLoader } from './font-families-loader';
 import {
 	FONT_PREVIEW_LARGE_WIDTH,
 	FONT_PREVIEW_LARGE_HEIGHT,
