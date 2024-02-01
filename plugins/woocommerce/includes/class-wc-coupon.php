@@ -959,6 +959,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			return;
 		}
 
+		// Since coupon validation is done multiple times (e.g. to ensure a valid cart), we need to check for dupes.
+		if ( wc_has_notice( $msg, $notice_type ) ) {
+			return;
+		}
+
 		wc_add_notice( $msg, $notice_type );
 	}
 
