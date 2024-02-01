@@ -674,4 +674,39 @@ test.describe( 'Product Collection', () => {
 			} );
 		} );
 	} );
+
+	test.describe( 'Location is recognised correctly', () => {
+		test( 'in specific Single Product template', async ( {
+			pageObject,
+		} ) => {} );
+		test( 'in Single Product block in specific Product template', async ( {
+			pageObject,
+		} ) => {} );
+		test( 'in Single Product template', async ( { pageObject } ) => {} );
+		test( 'in specific Category template', async ( { pageObject } ) => {} );
+		test( 'in specific Tag template', async ( { pageObject } ) => {} );
+		test( 'in Products by Category template', async ( {
+			pageObject,
+		} ) => {} );
+		test( 'in Products by Tag template', async ( { pageObject } ) => {} );
+		test( 'in Products by Attribute template', async ( {
+			pageObject,
+		} ) => {} );
+		test( 'in Cart template', async ( { pageObject } ) => {} );
+		test( 'in Checkout template', async ( { pageObject } ) => {} );
+		test( 'in Order Confirmation template', async ( {
+			pageObject,
+		} ) => {} );
+		test( 'as product in Single Product block in specific Category template', async ( {
+			pageObject,
+		} ) => {} );
+		test( 'as product in Single Product block in specific Tag template', async ( {
+			pageObject,
+		} ) => {} );
+		test( 'as product in Single Product block in Products by Attribute template', async ( {
+			pageObject,
+		} ) => {} );
+		test( 'as generic in post', async ( { pageObject } ) => {} );
+		test( 'as generic in Product Catalog', async ( { pageObject } ) => {} );
+	} );
 } );
