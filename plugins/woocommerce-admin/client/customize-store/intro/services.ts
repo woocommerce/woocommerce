@@ -145,5 +145,7 @@ export const setFlags = async () => {
 				};
 			} )(),
 		};
+
+		await Promise.all( Object.values( _featureFlags ) );
 	}
 };

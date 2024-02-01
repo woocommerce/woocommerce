@@ -174,10 +174,13 @@ export const assignFlags = assign<
 >( {
 	intro: ( context, event: unknown ) => {
 		if ( ! window.frameElement ) {
-			return context.intro;
+			const activeThemeHasMods =
+				window.__wcCustomizeStore?.activeThemeHasMods;
+			return { ...context.intro, activeThemeHasMods };
 		}
 		const activeThemeHasMods =
 			window.parent.__wcCustomizeStore.activeThemeHasMods;
+
 		return {
 			...context.intro,
 			activeThemeHasMods,
