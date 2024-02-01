@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: There are no functional changes being introduced, we're just making an E2E test (covering the checkout flow) a little more robust.
+
+
