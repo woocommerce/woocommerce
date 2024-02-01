@@ -536,9 +536,12 @@
           "post_title": "Resources for debugging",
           "menu_title": "Debugging",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/debugging.md",
-          "hash": "82cebd2c03c35e8fd3028bbf093a7b01355ceda1a38131484935bff48d4d08d5",
+          "hash": "68ce2cf0aae27b9214ea5da1ad7474cd2274547732f6212bef39e9d7e60edd49",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/debugging.md",
-          "id": "75c020ee52329c09f4dc04e33dc8aeb11c088534"
+          "id": "75c020ee52329c09f4dc04e33dc8aeb11c088534",
+          "links": {
+            "../extension-development/logging.md": "c684e2efba45051a4e1f98eb5e6ef6bab194f25c"
+          }
         },
         {
           "post_title": "Customizing WooCommerce Endpoint URLs",
@@ -1191,5 +1194,5 @@
       "categories": []
     }
   ],
-  "hash": "f5c8de9fa3200fa1b67e6da03a853285badd8692ce6864949a30715d173b52ec"
+  "hash": "5add14b023641e79e7e5cc7c6dfe367717a947ce0fd3d4ded8dfcf9dbe5d231b"
 }
