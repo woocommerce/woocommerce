@@ -34,7 +34,7 @@ test.describe( 'Shopper → Classic Notice Templates', () => {
 
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME, true );
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 	} );
 
 	test.afterEach( async ( { wpCliUtils, frontendUtils } ) => {

@@ -26,21 +26,9 @@ export class FrontendUtils {
 		return block;
 	}
 
-	async addToCart( itemName = '', classicShop = false ) {
+	async addToCart( itemName = '' ) {
 		await this.page.waitForLoadState( 'domcontentloaded' );
 		if ( itemName !== '' ) {
-			if ( classicShop ) {
-				await this.page
-					.getByLabel( `Add to cart: “${ itemName }”` )
-					.click();
-			} else {
-				await this.page
-					.getByRole( 'button', {
-						name: `Add to cart: “${ itemName }”`,
-					} )
-					.click();
-			}
-		} else {
 			await this.page.click( 'text=Add to cart' );
 		}
 
