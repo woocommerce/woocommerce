@@ -31,6 +31,7 @@ class CustomerAccount extends AbstractBlock {
 		array(
 			'position' => 'last_child',
 			'anchor'   => 'core/navigation',
+			'area'     => 'navigation',
 		),
 	);
 

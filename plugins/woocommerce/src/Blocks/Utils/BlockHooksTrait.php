@@ -10,10 +10,10 @@ trait BlockHooksTrait {
 	/**
 	 * Callback for `hooked_block_types` to auto-inject the mini-cart block into headers after navigation.
 	 *
-	 * @param array                    $hooked_blocks An array of block slugs hooked into a given context.
-	 * @param string                   $position      Position of the block insertion point.
-	 * @param string                   $anchor_block  The block acting as the anchor for the inserted block.
-	 * @param \WP_Block_Template|array $context       Where the block is embedded.
+	 * @param array                             $hooked_blocks An array of block slugs hooked into a given context.
+	 * @param string                            $position      Position of the block insertion point.
+	 * @param string                            $anchor_block  The block acting as the anchor for the inserted block.
+	 * @param array|\WP_Post|\WP_Block_Template $context       Where the block is embedded.
 	 * @since $VID:$
 	 * @return array An array of block slugs hooked into a given context.
 	 */
@@ -33,14 +33,6 @@ trait BlockHooksTrait {
 		}
 
 		/**
-		 * A list of pattern slugs to exclude from auto-insert (useful when
-		 * there are patterns that have a very specific location for the block)
-		 *
-		 * @since $VID:$
-		 */
-		$pattern_exclude_list = apply_filters( 'woocommerce_hooked_blocks_pattern_exclude_list', array( 'twentytwentytwo/header-centered-logo', 'twentytwentytwo/header-stacked' ) );
-
-		/**
 		 * A list of theme slugs to execute this with. This is a temporary
 		 * measure until improvements to the Block Hooks API allow for exposing
 		 * to all block themes.
@@ -48,22 +40,15 @@ trait BlockHooksTrait {
 		 * @since $VID:$
 		 */
 		$theme_include_list = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
-
 		if ( $context && in_array( $active_theme_name, $theme_include_list, true ) ) {
 			foreach ( $this->hooked_block_placements as $placement ) {
 				if ( $placement['position'] === $position && $placement['anchor'] === $anchor_block ) {
 					// If an area has been specified for this placement.
 					if (
 						isset( $placement['area'] ) &&
-						$this->is_template_part_or_pattern( $context, $placement['area'] ) &&
-						! $this->pattern_is_excluded( $context, $pattern_exclude_list ) &&
 						! $this->has_block_in_content( $context )
+						&& $this->is_target_area( $context, $placement['area'] )
 					) {
-						$hooked_blocks[] = $this->namespace . '/' . $this->block_name;
-					}
-
-					// If no area has been specified, just check that the block is not already in the content.
-					if ( ! isset( $placement['area'] ) && ! $this->has_block_in_content( $context ) ) {
 						$hooked_blocks[] = $this->namespace . '/' . $this->block_name;
 					}
 				}
@@ -89,8 +74,8 @@ trait BlockHooksTrait {
 	/**
 	 * Given a provided context, returns whether the context refers to header content.
 	 *
-	 * @param array|\WP_Block_Template $context Where the block is embedded.
-	 * @param string                   $area The area to check against before inserting.
+	 * @param array|\WP_Post|\WP_Block_Template $context Where the block is embedded.
+	 * @param string                            $area The area to check against before inserting.
 	 * @since $VID:$
 	 * @return boolean
 	 */
@@ -105,14 +90,53 @@ trait BlockHooksTrait {
 	}
 
 	/**
-	 * Returns whether the pattern is excluded or not
+	 * Given a provided context, returns whether the context refers to the core navigation.
 	 *
-	 * @param array|\WP_Block_Template $context Where the block is embedded.
-	 * @param array                    $pattern_exclude_list List of pattern slugs to exclude.
+	 * @param array|\WP_Post|\WP_Block_Template $context the context to check.
+	 * @param string                            $area The area to check against before inserting.
 	 * @since $VID:$
 	 * @return boolean
 	 */
-	protected function pattern_is_excluded( $context, $pattern_exclude_list = array() ) {
+	protected function is_navigation( $context, $area ) {
+		return isset( $context->post_type ) && 'wp_navigation' === $context->post_type && 'navigation' === $area;
+	}
+
+	/**
+	 * Given a provided context, returns whether the context refers to the target area.
+	 *
+	 * @param array|\WP_Post|\WP_Block_Template $context the context to check.
+	 * @param string                            $area The area to check against before inserting.
+	 * @since $VID:$
+	 * @return boolean
+	 */
+	protected function is_target_area( $context, $area ) {
+		if ( $this->is_template_part_or_pattern( $context, $area ) && ! $this->pattern_is_excluded( $context ) ) {
+			return true;
+		}
+
+		if ( $this->is_navigation( $context, $area ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns whether the pattern is excluded or not
+	 *
+	 * @param array|\WP_Block_Template $context Where the block is embedded.
+	 * @since $VID:$
+	 * @return boolean
+	 */
+	protected function pattern_is_excluded( $context ) {
+		/**
+		 * A list of pattern slugs to exclude from auto-insert (useful when
+		 * there are patterns that have a very specific location for the block)
+		 *
+		 * @since $VID:$
+		 */
+		$pattern_exclude_list = apply_filters( 'woocommerce_hooked_blocks_pattern_exclude_list', array( 'twentytwentytwo/header-centered-logo', 'twentytwentytwo/header-stacked' ) );
+
 		$pattern_slug = is_array( $context ) && isset( $context['slug'] ) ? $context['slug'] : '';
 		if ( ! $pattern_slug ) {
 			/**
