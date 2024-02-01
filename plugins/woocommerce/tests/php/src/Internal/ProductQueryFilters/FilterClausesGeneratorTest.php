@@ -78,16 +78,16 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 		);
 	}
 
-	// public function test_attribute_clauses_with_two_terms_query_type_and() {
-	// 	$this->test_attribute_clauses_with(
-	// 		array(
-	// 			'pa_color' => array(
-	// 				'terms'      => array( 'red-slug', 'green-slug' ),
-	// 				'query_type' => 'and',
-	// 			),
-	// 		)
-	// 	);
-	// }
+	public function test_attribute_clauses_with_two_terms_query_type_and() {
+		$this->test_attribute_clauses_with(
+			array(
+				'pa_color' => array(
+					'terms'      => array( 'red-slug', 'green-slug' ),
+					'query_type' => 'and',
+				),
+			)
+		);
+	}
 
 	public function test_attribute_clauses_with_two_terms_query_type_or() {
 		$this->test_attribute_clauses_with(

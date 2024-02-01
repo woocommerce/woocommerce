@@ -42,7 +42,6 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'no' );
 		update_option( 'woocommerce_tax_display_shop', 'excl' );
 
-		wp_cache_flush();
 		$this->remove_all_attributes();
 		$this->remove_all_products();
 		$this->empty_lookup_tables();
