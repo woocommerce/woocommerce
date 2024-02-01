@@ -251,27 +251,28 @@ class CheckoutFields {
 		$field_data = wp_parse_args(
 			$options,
 			array(
-				'id'            => '',
-				'label'         => '',
-				'optionalLabel' => sprintf(
+				'id'                         => '',
+				'label'                      => '',
+				'optionalLabel'              => sprintf(
 					/* translators: %s Field label. */
 					__( '%s (optional)', 'woocommerce' ),
 					$options['label']
 				),
-				'location'      => '',
-				'type'          => 'text',
-				'hidden'        => false,
-				'required'      => false,
-				'attributes'    => array(),
+				'location'                   => '',
+				'type'                       => 'text',
+				'hidden'                     => false,
+				'required'                   => false,
+				'attributes'                 => array(),
+				'show_in_order_confirmation' => true,
 			)
 		);
 
 		$field_data['attributes'] = $this->register_field_attributes( $field_data['id'], $field_data['attributes'] );
 
 		if ( 'checkbox' === $field_data['type'] ) {
-			$field_data = $this->process_checkbox_field( $options, $field_data );
+			$field_data = $this->process_checkbox_field( $field_data, $options );
 		} elseif ( 'select' === $field_data['type'] ) {
-			$field_data = $this->process_select_field( $options, $field_data );
+			$field_data = $this->process_select_field( $field_data, $options );
 		}
 
 		// $field_data will be false if an error that will prevent the field being registered is encountered.
@@ -985,7 +986,6 @@ class CheckoutFields {
 	 * For now, this only supports fields in address location.
 	 *
 	 * @param array $fields The fields to filter.
-	 *
 	 * @return array The filtered fields.
 	 */
 	public function filter_fields_for_customer( $fields ) {
@@ -999,6 +999,21 @@ class CheckoutFields {
 				return in_array( $key, $customer_fields_keys, true );
 			},
 			ARRAY_FILTER_USE_KEY
+		);
+	}
+
+	/**
+	 * Filter fields for order confirmation.
+	 *
+	 * @param array $fields The fields to filter.
+	 * @return array The filtered fields.
+	 */
+	public function filter_fields_for_order_confirmation( $fields ) {
+		return array_filter(
+			$fields,
+			function( $field ) {
+				return ! empty( $field['show_in_order_confirmation'] );
+			}
 		);
 	}
 
