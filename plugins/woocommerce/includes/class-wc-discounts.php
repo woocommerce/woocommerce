@@ -1049,7 +1049,10 @@ class WC_Discounts {
 			}
 
 			// These are soft validations that need to only run after hard validations.
-			$this->validate_coupon_allowed_emails( $coupon );
+			// These should also only be run on Cart object, after the order is fulfilled there's no need to supply additional feedback.
+			if ( $this->object instanceof WC_Cart ) {
+				$this->validate_coupon_allowed_emails( $coupon );
+			}
 		} catch ( Exception $e ) {
 
 			/**
