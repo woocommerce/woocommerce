@@ -1,4 +1,45 @@
 .wp-block-woocommerce-product-variations-options-field {
+	&__empty-state {
+		border: 1px dashed $gray-400;
+		border-radius: 2px;
+		padding: $grid-unit-60 $grid-unit-20;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: $grid-unit-30;
+
+		&-image {
+			display: inline-flex;
+			gap: $grid-unit-05;
+
+			&-product {
+				height: 66px;
+				aspect-ratio: 1 / 1;
+				color: $gray-100;
+
+				&:first-child {
+					height: $grid-unit-70;
+					color: $gray-200;
+				}
+
+				&:last-child {
+					height: 50px;
+					color: $gray-300;
+				}
+			}
+		}
+
+		&-description {
+			margin: 0;
+		}
+
+		&-actions {
+			display: inline-flex;
+			gap: 12px;
+		}
+	}
+
 	.woocommerce-sortable {
 		padding: 0;
 	}
