@@ -357,7 +357,7 @@ class BlockTemplatesController {
 		if ( ! $block_template ) {
 			return $block_template;
 		}
-		if ( ! $block_template->title || $block_template->title === $block_template->slug ) {
+		if ( ! BlockTemplateUtils::template_has_title( $block_template ) ) {
 			$block_template->title = BlockTemplateUtils::get_block_template_title( $block_template->slug );
 		}
 		if ( ! $block_template->description ) {
@@ -474,7 +474,7 @@ class BlockTemplatesController {
 					}
 				}
 
-				if ( ! $template->title || $template->title === $template->slug ) {
+				if ( ! BlockTemplateUtils::template_has_title( $template ) ) {
 					$template->title = BlockTemplateUtils::get_block_template_title( $template->slug );
 				}
 				if ( ! $template->description ) {
