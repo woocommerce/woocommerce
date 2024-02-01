@@ -66,7 +66,7 @@ const config = {
 	},
 	projects: [
 		{
-			name: 'chrome',
+			name: 'Chrome',
 			use: { ...devices[ 'Desktop Chrome' ] },
 			testDir: 'tests',
 			testIgnore: '**/products/block-editor/**', // Ignore 'block-editor' tests.
