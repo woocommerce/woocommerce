@@ -51,17 +51,21 @@ trait BlockHooksTrait {
 
 		if ( $context && in_array( $active_theme_name, $theme_include_list, true ) ) {
 			foreach ( $this->hooked_block_placements as $placement ) {
-				if (
-					$placement['position'] === $position &&
-					$placement['anchor'] === $anchor_block &&
-					(
+				if ( $placement['position'] === $position && $placement['anchor'] === $anchor_block ) {
+					// If an area has been specified for this placement.
+					if (
 						isset( $placement['area'] ) &&
-						$this->is_template_part_or_pattern( $context, $placement['area'] )
-					) &&
-					! $this->pattern_is_excluded( $context, $pattern_exclude_list ) &&
-					! $this->has_block_in_content( $context )
-				) {
-					$hooked_blocks[] = $this->namespace . '/' . $this->block_name;
+						$this->is_template_part_or_pattern( $context, $placement['area'] ) &&
+						! $this->pattern_is_excluded( $context, $pattern_exclude_list ) &&
+						! $this->has_block_in_content( $context )
+					) {
+						$hooked_blocks[] = $this->namespace . '/' . $this->block_name;
+					}
+
+					// If no area has been specified, just check that the block is not already in the content.
+					if ( ! isset( $placement['area'] ) && ! $this->has_block_in_content( $context ) ) {
+						$hooked_blocks[] = $this->namespace . '/' . $this->block_name;
+					}
 				}
 			}
 		}

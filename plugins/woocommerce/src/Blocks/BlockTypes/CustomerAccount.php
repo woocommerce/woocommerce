@@ -29,9 +29,8 @@ class CustomerAccount extends AbstractBlock {
 	 */
 	protected $hooked_block_placements = array(
 		array(
-			'position' => 'after',
+			'position' => 'last_child',
 			'anchor'   => 'core/navigation',
-			'area'     => 'header',
 		),
 	);
 
