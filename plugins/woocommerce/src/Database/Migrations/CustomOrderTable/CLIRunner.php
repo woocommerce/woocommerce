@@ -67,6 +67,7 @@ class CLIRunner {
 		WP_CLI::add_command( 'wc hpos cleanup', array( $this, 'cleanup_post_data' ) );
 		WP_CLI::add_command( 'wc hpos status', array( $this, 'status' ) );
 		WP_CLI::add_command( 'wc hpos diff', array( $this, 'diff' ) );
+		WP_CLI::add_command( 'wc hpos backfill', array( $this, 'backfill' ) );
 	}
 
 	/**
@@ -1063,4 +1064,57 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			array( 'property', 'hpos', 'post' )
 		);
 	}
+
+	/**
+	 * Backfills an order from either the HPOS or the posts datastore.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>
+	 * :The ID of the order.
+	 *
+	 * [--from=<hpos|posts>]
+	 * : Source datastore. Defaults to the currently active datastore.
+	 *
+	 * [--to=<hpos|posts>]
+	 * : Destination datastore. Defaults to the current backup datastore.
+	 *
+	 * @since 8.6.0
+	 *
+	 * @param array $args       Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
+	 */
+	public function backfill( array $args = array(), array $assoc_args = array() ) {
+		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
+
+		$hpos_enabled = $this->synchronizer->custom_orders_table_is_authoritative();
+		$from         = $assoc_args['source'] ?? ( $hpos_enabled ? 'hpos' : 'posts' );
+		$to           = $assoc_args['destination'] ?? ( $hpos_enabled ? 'posts' : 'hpos' );
+		$order_id     = absint( $args[0] );
+
+		if ( ! $order_id ) {
+			WP_CLI::error( __( 'Please provide a valid order ID.', 'woocommerce' ) );
+		}
+
+		try {
+			$order = $legacy_handler->get_order_from_datastore( $order_id, $from );
+
+			if ( 'posts' === $to ) {
+				$order->get_data_store()->backfill_post_record( $order );
+			} elseif ( 'hpos' === $to ) {
+				$this->post_to_cot_migrator->migrate_orders( array( $order_id ) );
+			}
+		} catch ( \Exception $e ) {
+		}
+
+		WP_CLI::success(
+			sprintf(
+				__( 'Order %d backfilled from %s to %s.', 'woocommerce' ),
+				$order_id,
+				$from,
+				$to
+			)
+		);
+	}
+
 }
