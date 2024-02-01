@@ -58,4 +58,5 @@ export type customizeStoreStateMachineContext = {
 		hasCompleteSurvey: boolean;
 	};
 	flowType: FlowType;
+	isFontLibraryAvailable: boolean | null;
 };

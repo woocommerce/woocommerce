@@ -215,12 +215,18 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
+
 		$basic_details->add_block(
 			array(
 				'id'         => 'product-summary',
-				'blockName'  => 'woocommerce/product-summary-field',
+				'blockName'  => 'woocommerce/product-text-area-field',
 				'order'      => 20,
 				'attributes' => array(
+					'label'    => __( 'Summary', 'woocommerce' ),
+					'help'     => __(
+						"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
+						'woocommerce'
+					),
 					'property' => 'short_description',
 				),
 			)
@@ -1077,51 +1083,34 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		if ( ! $variation_group ) {
 			return;
 		}
-		$variation_fields          = $variation_group->add_block(
-			array(
-				'id'         => 'product_variation-field-group',
-				'blockName'  => 'woocommerce/product-variations-fields',
-				'order'      => 10,
-				'attributes' => array(
-					'description' => sprintf(
-					/* translators: %1$s: Sell your product in multiple variations like size or color. strong opening tag. %2$s: Sell your product in multiple variations like size or color. strong closing tag.*/
-						__( '%1$sSell your product in multiple variations like size or color.%2$s Get started by adding options for the buyers to choose on the product page.', 'woocommerce' ),
-						'<strong>',
-						'</strong>'
-					),
-				),
-			)
-		);
-		$variation_options_section = $variation_fields->add_block(
+
+		$variation_group->add_section(
 			array(
 				'id'         => 'product-variation-options-section',
-				'blockName'  => 'woocommerce/product-section',
 				'order'      => 10,
 				'attributes' => array(
 					'title'       => __( 'Variation options', 'woocommerce' ),
 					'description' => __( 'Add and manage attributes used for product options, such as size and color.', 'woocommerce' ),
 				),
 			)
-		);
-		$variation_options_section->add_block(
+		)->add_block(
 			array(
 				'id'        => 'product-variation-options',
 				'blockName' => 'woocommerce/product-variations-options-field',
+				'order'     => 10,
 			)
 		);
-		$variation_section = $variation_fields->add_block(
+
+		$variation_group->add_section(
 			array(
 				'id'         => 'product-variation-section',
-				'blockName'  => 'woocommerce/product-section',
 				'order'      => 20,
 				'attributes' => array(
 					'title'       => __( 'Variations', 'woocommerce' ),
 					'description' => __( 'Manage individual product combinations created from options.', 'woocommerce' ),
 				),
 			)
-		);
-
-		$variation_section->add_block(
+		)->add_block(
 			array(
 				'id'        => 'product-variation-items',
 				'blockName' => 'woocommerce/product-variation-items-field',

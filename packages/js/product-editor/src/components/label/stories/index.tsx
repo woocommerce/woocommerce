@@ -13,8 +13,9 @@ export default {
 	title: 'Product Editor/components/Label',
 	component: Label,
 	args: {
-		label: 'Woo',
-		required: false,
+		label: 'sku',
+		required: true,
+		note: __( '(stock keeping unit)', 'woocommerce' ),
 		tooltip: __( 'Visit woo.com', 'woocommerce' ),
 	},
 };

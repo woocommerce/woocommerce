@@ -155,3 +155,16 @@ export const assignNoAIFlowError = assign<
 		return { ...context.intro, hasErrors: true };
 	},
 } );
+
+export const assignIsFontLibraryAvailable = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	isFontLibraryAvailable: ( context, event: unknown ) => {
+		return (
+			event as {
+				payload: boolean;
+			}
+		 ).payload;
+	},
+} );

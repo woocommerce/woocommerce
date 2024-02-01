@@ -36,6 +36,7 @@ class BlockRegistry {
 		'woocommerce/product-toggle-field',
 		'woocommerce/product-taxonomy-field',
 		'woocommerce/product-text-field',
+		'woocommerce/product-text-area-field',
 		'woocommerce/product-number-field',
 		'woocommerce/product-linked-list-field',
 	);
@@ -60,7 +61,6 @@ class BlockRegistry {
 		'woocommerce/product-tag-field',
 		'woocommerce/product-inventory-quantity-field',
 		'woocommerce/product-variation-items-field',
-		'woocommerce/product-variations-fields',
 		'woocommerce/product-password-field',
 		'woocommerce/product-list-field',
 		'woocommerce/product-has-variations-notice',

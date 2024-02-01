@@ -128,7 +128,6 @@ final class ProductFilterRating extends AbstractBlock {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'data-wc-interactive' => $this->get_full_block_name(),
-				'class'               => 'wc-block-rating-filter',
 				'data-has-filter'     => empty( $filtered_rating_counts ) ? 'no' : 'yes',
 			)
 		);
@@ -155,11 +154,8 @@ final class ProductFilterRating extends AbstractBlock {
 		return sprintf(
 			'<div %1$s>
 				%2$s
-				<div class="wc-block-rating-filter__controls">%3$s</div>
-				<div class="wc-block-rating-filter__actions"></div>
 			</div>',
 			$wrapper_attributes,
-			$content,
 			$input
 		);
 	}

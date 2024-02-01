@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-Comment: Allow additional fields to be rendered at the end of the Checkout block.  This is locked behind a feature flag, the fields won't show up until we remove the feature gate.
-

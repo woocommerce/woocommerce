@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Change the HPOS and non-HPOS e2e tests to use 5 shards each to reduce queueing
