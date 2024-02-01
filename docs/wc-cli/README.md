@@ -18,10 +18,10 @@ WP-CLI is a powerful set of command-line tools for managing WordPress installati
 
 This suite of documentation includes:
 
-- [**How-to Guide**](./docs/using-wc-cli): Step-by-step instructions for common WC-CLI tasks.
-- [**Command Reference**](./docs/woocommerce-cli-commands): Detailed information on WC-CLI commands and their options.
-- [**FAQs**](./docs/woocommerce-cli-frequently-asked-questions): Answers to frequently asked questions about WC-CLI.
-- [**Examples**](./docs/wc-cli-examples.md): Practical examples of WC-CLI commands in use.
+- [**How-to Guide**](./using-wc-cli.md): Step-by-step instructions for common WC-CLI tasks.
+- [**Command Reference**](./wc-cli-commands.md): Detailed information on WC-CLI commands and their options.
+- [**FAQs**](./cli-faq.md): Answers to frequently asked questions about WC-CLI.
+- [**Examples**](./wc-cli-examples.md): Practical examples of WC-CLI commands in use.
 
 ## Getting Started with WooCommerce CLI
 
@@ -33,5 +33,5 @@ For specific details on commands and their usage, refer to the Command Reference
 
 For those interested in exploring further, the following resources might be helpful:
 
-- [WC REST API Documentation](./docs/category/rest-api/)
+- [WC REST API Documentation](../rest-api/getting-started.md)
 - [Testing files for our CLI tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/cli/features)
