@@ -695,8 +695,8 @@ class WC_Checkout {
 				)
 			);
 
-			$coupon_reapply_info = $coupon->get_reapply_info();
-			$item->add_meta_data( 'coupon_reapply_info', $coupon_reapply_info );
+			$coupon_info = $coupon->get_short_info();
+			$item->add_meta_data( 'coupon_info', $coupon_info );
 
 			/**
 			 * Action hook to adjust item before save.

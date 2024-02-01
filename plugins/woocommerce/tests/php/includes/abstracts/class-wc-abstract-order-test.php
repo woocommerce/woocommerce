@@ -262,11 +262,11 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$coupon_items = $order->get_items( 'coupon' );
 		$this->assertCount( 1, $coupon_items );
 
-		$coupon_reapply_info = ( current( $coupon_items ) )->get_meta( 'coupon_reapply_info' );
-		$this->assertNotEmpty( $coupon_reapply_info, 'WC_Order_Item_Coupon missing `coupon_reapply_info` meta.' );
-		$coupon_reapply_info = json_decode( $coupon_reapply_info, true );
-		$this->assertEquals( $coupon->get_id(), $coupon_reapply_info[0] );
-		$this->assertEquals( $coupon_code, $coupon_reapply_info[1] );
+		$coupon_info = ( current( $coupon_items ) )->get_meta( 'coupon_info' );
+		$this->assertNotEmpty( $coupon_info, 'WC_Order_Item_Coupon missing `coupon_info` meta.' );
+		$coupon_info = json_decode( $coupon_info, true );
+		$this->assertEquals( $coupon->get_id(), $coupon_info[0] );
+		$this->assertEquals( $coupon_code, $coupon_info[1] );
 	}
 
 	/**

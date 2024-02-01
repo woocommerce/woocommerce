@@ -1112,7 +1112,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @return string A JSON string with information that allows the coupon to be reapplied to an existing order.
 	 */
-	public function get_reapply_info(): string {
+	public function get_short_info(): string {
 		$type = $this->get_discount_type();
 		$info = array(
 			$this->get_id(),
@@ -1129,11 +1129,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	 * Sets the coupon parameters from a reapply information set generated with 'get_reapply_info'.
+	 * Sets the coupon parameters from a reapply information set generated with 'get_short_info'.
 	 *
-	 * @param string $info JSON string with reapply information as returned by 'get_reapply_info'.
+	 * @param string $info JSON string with reapply information as returned by 'get_short_info'.
 	 */
-	public function set_reapply_info( string $info ) {
+	public function set_short_info( string $info ) {
 		$info = json_decode( $info, true );
 
 		$this->set_id( $info[0] ?? 0 );

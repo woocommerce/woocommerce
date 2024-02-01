@@ -11,7 +11,7 @@ use \Exception;
 /**
  * This class is intended to be used with BatchProcessingController and converts verbose
  * 'coupon_data' metadata entries in coupon line items (corresponding to coupons applied to orders)
- * into simplified 'coupon_reapply_info' entries. See WC_Coupon::get_reapply_info.
+ * into simplified 'coupon_info' entries. See WC_Coupon::get_short_info.
  *
  * Additionally, this class manages the "Convert order coupon data" tool.
  */
@@ -34,7 +34,7 @@ class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksI
 	 * @return string Name of the processor.
 	 */
 	public function get_name(): string {
-		return "Coupon line item 'coupon_data' to 'coupon_reapply_info' metadata migrator";
+		return "Coupon line item 'coupon_data' to 'coupon_info' metadata migrator";
 	}
 
 	/**
@@ -43,7 +43,7 @@ class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksI
 	 * @return string Description of what this processor does.
 	 */
 	public function get_description(): string {
-		return "Migrates verbose metadata about coupons applied to an order ('coupon_data' metadata key in coupon line items) to simplified metadata ('coupon_reapply_info' keys)";
+		return "Migrates verbose metadata about coupons applied to an order ('coupon_data' metadata key in coupon line items) to simplified metadata ('coupon_info' keys)";
 	}
 
 	/**
@@ -116,7 +116,7 @@ class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksI
 	}
 
 	/**
-	 * Convert one verbose 'coupon_data' entry into a simplified 'coupon_reapply_info' entry.
+	 * Convert one verbose 'coupon_data' entry into a simplified 'coupon_info' entry.
 	 *
 	 * The existing database row is updated in place, both the 'meta_key' and the 'meta_value' columns.
 	 *
@@ -137,8 +137,8 @@ class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksI
 		$wpdb->update(
 			"{$wpdb->prefix}woocommerce_order_itemmeta",
 			array(
-				'meta_key'   => 'coupon_reapply_info',
-				'meta_value' => $temp_coupon->get_reapply_info(),
+				'meta_key'   => 'coupon_info',
+				'meta_value' => $temp_coupon->get_short_info(),
 			),
 			array( 'meta_id' => $meta_id )
 		);
@@ -166,7 +166,6 @@ class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksI
 	 */
 	private function handle_woocommerce_debug_tools( array $tools ): array {
 		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
-
 		$pending_count = $this->get_total_pending_count();
 
 		if ( 0 === $pending_count ) {
@@ -174,7 +173,7 @@ class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksI
 				'name'     => __( 'Start converting order coupon data to the simplified format', 'woocommerce' ),
 				'button'   => __( 'Start converting', 'woocommerce' ),
 				'disabled' => true,
-				'desc'     => __( 'This will convert <code>coupon_data</code> order item meta entries to simplified <code>coupon_reapply_info</code> entries. The conversion will happen overtime in the background (via Action Scheduler). There are currently no entries to convert.', 'woocommerce' ),
+				'desc'     => __( 'This will convert <code>coupon_data</code> order item meta entries to simplified <code>coupon_info</code> entries. The conversion will happen overtime in the background (via Action Scheduler). There are currently no entries to convert.', 'woocommerce' ),
 			);
 		} elseif ( $batch_processor->is_enqueued( self::class ) ) {
 			$tools['stop_convert_order_coupon_data'] = array(
@@ -182,7 +181,7 @@ class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksI
 				'button'   => __( 'Stop converting', 'woocommerce' ),
 				'desc'     =>
 					/* translators: %d=count of entries pending conversion */
-					sprintf( __( 'This will stop the background process that converts <code>coupon_data</code> order item meta entries to simplified <code>coupon_reapply_info</code> entries. There are currently %d entries that can be converted.', 'woocommerce' ), $pending_count ),
+					sprintf( __( 'This will stop the background process that converts <code>coupon_data</code> order item meta entries to simplified <code>coupon_info</code> entries. There are currently %d entries that can be converted.', 'woocommerce' ), $pending_count ),
 				'callback' => array( $this, 'dequeue' ),
 			);
 		} else {
@@ -191,7 +190,7 @@ class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksI
 				'button'   => __( 'Start converting', 'woocommerce' ),
 				'desc'     =>
 					/* translators: %d=count of entries pending conversion */
-					sprintf( __( 'This will convert <code>coupon_data</code> order item meta entries to simplified <code>coupon_reapply_info</code> entries. The conversion will happen overtime in the background (via Action Scheduler). There are currently %d entries that can be converted.', 'woocommerce' ), $pending_count ),
+					sprintf( __( 'This will convert <code>coupon_data</code> order item meta entries to simplified <code>coupon_info</code> entries. The conversion will happen overtime in the background (via Action Scheduler). There are currently %d entries that can be converted.', 'woocommerce' ), $pending_count ),
 				'callback' => array( $this, 'enqueue' ),
 			);
 		}

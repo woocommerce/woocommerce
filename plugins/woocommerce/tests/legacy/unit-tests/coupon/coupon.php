@@ -348,7 +348,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get_reapply_info' returns JSON-encoded information that allows to reapply the coupon on an existing order.
+	 * @testdox 'get_short_info' returns JSON-encoded information that allows to reapply the coupon on an existing order.
 	 *
 	 * @testWith ["fixed_cart", true, "[1234,\"the_coupon\",null,56.78,true]"]
 	 *           ["percent", false, "[1234,\"the_coupon\",\"percent\",56.78]"]
@@ -357,7 +357,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	 * @param bool   $free_shipping Value of 'free shipping' to test.
 	 * @param string $expected_json Expected JSON string generated.
 	 */
-	public function test_get_reapply_info( string $type, bool $free_shipping, string $expected_json ) {
+	public function test_get_short_info( string $type, bool $free_shipping, string $expected_json ) {
 		$coupon = new WC_Coupon();
 		$coupon->set_id( 1234 );
 		$coupon->set_code( 'the_coupon' );
@@ -365,12 +365,12 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		$coupon->set_amount( 56.78 );
 		$coupon->set_free_shipping( $free_shipping );
 
-		$actual_json = $coupon->get_reapply_info();
+		$actual_json = $coupon->get_short_info();
 		$this->assertEquals( $expected_json, $actual_json );
 	}
 
 	/**
-	 * @testdox 'set_reapply_info' sets coupon parameters from a set of JSON-encoded information returned by 'get_reapply_info'.
+	 * @testdox 'set_short_info' sets coupon parameters from a set of JSON-encoded information returned by 'get_short_info'.
 	 *
 	 * @testWith ["[1234,\"the_coupon\",null,56.78,true]", "fixed_cart", true]
 	 *           ["[1234,\"the_coupon\",\"percent\",56.78]", "percent", false]
@@ -379,9 +379,9 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	 * @param string $expected_type Expected coupon type set.
 	 * @param bool   $expected_free_shipping Expected value of 'free shipping' set.
 	 */
-	public function test_set_reapply_info( string $json, string $expected_type, bool $expected_free_shipping ) {
+	public function test_set_short_info( string $json, string $expected_type, bool $expected_free_shipping ) {
 		$coupon = new WC_Coupon();
-		$coupon->set_reapply_info( $json );
+		$coupon->set_short_info( $json );
 
 		$this->assertEquals( 1234, $coupon->get_id() );
 		$this->assertEquals( 'the_coupon', $coupon->get_code() );

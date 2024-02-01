@@ -341,9 +341,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function get_coupon_id( \WC_Order_Item_Coupon $coupon_item ) {
 		// First attempt to get coupon ID from order item data.
-		$coupon_reapply_info = $coupon_item->get_meta( 'coupon_reapply_info', true );
-		if ( $coupon_reapply_info ) {
-			return json_decode( $coupon_reapply_info, true )[0];
+		$coupon_info = $coupon_item->get_meta( 'coupon_info', true );
+		if ( $coupon_info ) {
+			return json_decode( $coupon_info, true )[0];
 		}
 
 		$coupon_data = $coupon_item->get_meta( 'coupon_data', true );
