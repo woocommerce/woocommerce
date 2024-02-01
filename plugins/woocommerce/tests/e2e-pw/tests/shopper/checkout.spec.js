@@ -334,6 +334,11 @@ test.describe( 'Checkout page', () => {
 			page.getByRole( 'heading', { name: 'Order received' } )
 		).toBeVisible();
 
+		// The order having just been placed, a verify-email field should not be present.
+		await expect(
+			page.locator( 'form.woocommerce-verify-email p:nth-child(3)' )
+		).toBeFalsy();
+
 		// get order ID from the page
 		const orderReceivedText = await page
 			.locator( '.woocommerce-order-overview__order.order' )
