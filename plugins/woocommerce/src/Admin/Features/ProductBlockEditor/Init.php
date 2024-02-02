@@ -10,8 +10,10 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\StandardProductFormTemplate;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\GroupedProductFormTemplate;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\AffiliateProductFormTemplate;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationFormTemplate;
 
 use WP_Block_Editor_Context;
 
@@ -341,19 +343,35 @@ class Init {
 	public function register_layout_templates() {
 		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
 
-		if ( ! $layout_template_registry->is_registered( 'simple-product' ) ) {
+		if ( ! $layout_template_registry->is_registered( 'standard-product-form' ) ) {
 			$layout_template_registry->register(
-				'simple-product',
+				'standard-product-form',
 				'product-form',
-				SimpleProductTemplate::class
+				StandardProductFormTemplate::class
 			);
 		}
 
-		if ( ! $layout_template_registry->is_registered( 'product-variation' ) ) {
+		if ( ! $layout_template_registry->is_registered( 'grouped-product-form' ) ) {
 			$layout_template_registry->register(
-				'product-variation',
+				'grouped-product-form',
 				'product-form',
-				ProductVariationTemplate::class
+				GroupedProductFormTemplate::class
+			);
+		}
+
+		if ( ! $layout_template_registry->is_registered( 'affiliate-product-form' ) ) {
+			$layout_template_registry->register(
+				'affiliate-product-form',
+				'product-form',
+				AffiliateProductFormTemplate::class
+			);
+		}
+
+		if ( ! $layout_template_registry->is_registered( 'product-variation-form' ) ) {
+			$layout_template_registry->register(
+				'product-variation-form',
+				'product-form',
+				ProductVariationFormTemplate::class
 			);
 		}
 	}
