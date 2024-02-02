@@ -11,7 +11,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	};
 
 	const storeName = 'WooCommerce Core E2E Test Suite';
-	let orderId, newOrderId, cancelledOrderId;
+	let orderId, newOrderId, cancelledOrderId, completedOrderId;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -62,7 +62,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		} );
 
 		await api.post( `orders/batch`, {
-			delete: [ orderId, newOrderId, cancelledOrderId ],
+			delete: [ orderId, newOrderId, completedOrderId, cancelledOrderId ],
 		} );
 	} );
 
@@ -95,6 +95,65 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
 		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
+	} );
+
+	test( 'can receive completed email', async ( { page, baseURL } ) => {
+		// Completed order emails are sent automatically when an order's payment is completed.
+		// Verify that the email is sent, and that the content is the expected one
+		const emailContent = '#wp-mail-logging-modal-content-body-content';
+		const emailContentJson = '#wp-mail-logging-modal-format-json';
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api
+			.post( 'orders', {
+				status: 'completed',
+				billing: customerBilling,
+			} )
+			.then( ( response ) => {
+				completedOrderId = response.data.id;
+			} );
+		// Search to narrow it down to just the messages we want
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerBilling.email
+			) }`
+		);
+		await page.selectOption( 'select[name="search[place]"]', 'subject' );
+		await page.fill( 'input[name="search[term]"]', 'complete' );
+		await page.click( 'input#search-submit' );
+
+		// Verify that the  email has been sent
+		await expect(
+			page.getByText( `Your ${ storeName } order is now complete` )
+		).toBeVisible();
+
+		// Enter email log and select to view the content in JSON
+		await page.click( 'button[title^="View log"]' );
+		await page.locator( emailContentJson ).click();
+
+		// Verify that the message includes an order processing confirmation
+		await expect(
+			page.locator( emailContent )
+		).toContainText( 'We have finished processing your order.' );
+
+		// Verify that the email address is the correct one
+		await expect(
+			page.locator( emailContent )
+		).toContainText( customerBilling.email );
+
+		// Verify that the email contains the order ID
+		await expect(
+			page.locator( emailContent )
+		).toContainText( `[Order #${ completedOrderId.toString() }]` );
+
+		// Verify that the email contains a "Thanks" note
+		await expect(
+			page.locator( emailContent )
+		).toContainText( 'Thanks for shopping with us' );
 	} );
 
 	test( 'can receive cancelled order email', async ( { page, baseURL } ) => {

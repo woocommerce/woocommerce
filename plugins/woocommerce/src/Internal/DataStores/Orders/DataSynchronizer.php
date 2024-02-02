@@ -281,6 +281,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 			}
 
 			if ( $this->data_sync_is_enabled() ) {
+				wc_get_container()->get( LegacyDataCleanup::class )->toggle_flag( false );
 				$this->batch_processing_controller->enqueue_processor( self::class );
 			} else {
 				$this->batch_processing_controller->remove_processor( self::class );
