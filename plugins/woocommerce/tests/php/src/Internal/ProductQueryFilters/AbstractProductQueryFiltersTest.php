@@ -38,10 +38,6 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 
 		$this->fixture_data = new FixtureData();
 
-		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
-		update_option( 'woocommerce_calc_taxes', 'no' );
-		update_option( 'woocommerce_tax_display_shop', 'excl' );
-
 		global $wpdb;
 		$wpdb->query(
 			"
@@ -55,6 +51,10 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 			  );
 			"
 		);
+
+		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_tax_display_shop', 'excl' );
 
 		$this->remove_all_attributes();
 		$this->remove_all_products();
@@ -83,9 +83,9 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 			),
 			// To keep our test simple, we set the same price for all variations of a product.
 			array(
-				'name'          => 'Product 5',
-				'stock_status'  => 'instock',
-				'variations' => array(
+				'name'         => 'Product 5',
+				'stock_status' => 'instock',
+				'variations'   => array(
 					array(
 						'attributes' => array(
 							'pa_color' => 'red',
@@ -107,9 +107,9 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 				),
 			),
 			array(
-				'name'          => 'Product 6',
-				'stock_status'  => 'instock',
-				'variations' => array(
+				'name'         => 'Product 6',
+				'stock_status' => 'instock',
+				'variations'   => array(
 					array(
 						'attributes' => array(
 							'pa_color' => 'blue',
@@ -150,20 +150,26 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		wp_cache_flush();
 	}
 
+	/**
+	 * Truncate the lookup table.
+	 */
 	private function empty_lookup_tables() {
 		global $wpdb;
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_meta_lookup" );
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );
 	}
 
+	/**
+	 * Remove all attributes and associated terms.
+	 */
 	private function remove_all_attributes() {
 		$attribute_ids_by_name = wc_get_attribute_taxonomy_ids();
 		foreach ( $attribute_ids_by_name as $attribute_name => $attribute_id ) {
-			$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
-			$taxonomy_name  = wc_attribute_taxonomy_name( $attribute_name );
-			$attribute_terms = get_terms(array('taxonomy' => $taxonomy_name) );
-			if( ! is_wp_error( $attribute_terms)) {
-				foreach( $attribute_terms as $term ){
+			$attribute_name  = wc_sanitize_taxonomy_name( $attribute_name );
+			$taxonomy_name   = wc_attribute_taxonomy_name( $attribute_name );
+			$attribute_terms = get_terms( array( 'taxonomy' => $taxonomy_name ) );
+			if ( ! is_wp_error( $attribute_terms ) ) {
+				foreach ( $attribute_terms as $term ) {
 					wp_delete_term( $term->term_id, $taxonomy_name );
 				}
 			}
@@ -173,6 +179,9 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Remove all products.
+	 */
 	private function remove_all_products() {
 		$product_ids = wc_get_products( array( 'return' => 'ids' ) );
 		foreach ( $product_ids as $product_id ) {
@@ -197,6 +206,12 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Get data from results of wc_get_product(), default to return the product name.
+	 *
+	 * @param \WC_Product[] $products Array of products.
+	 * @param function      $callback The callback that passed to array map.
+	 */
 	protected function get_data_from_products_array( $products, $callback = null ) {
 		if ( ! $callback ) {
 			$callback = function( $product ) {
@@ -211,6 +226,11 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 
 	}
 
+	/**
+	 * Build and create attribute from variations data.
+	 *
+	 * @param array $variations_data Variation data.
+	 */
 	private function get_attributes_from_variations( $variations_data ) {
 		$attributes_data = array();
 		foreach ( $variations_data as $variation_data ) {
@@ -227,8 +247,15 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		);
 	}
 
+
 	private function update_lookup_table( \WC_Product $product, $taxonomy, $term_id ) {
 		global $wpdb;
+
+		$rows = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->prefix . 'wc_product_attributes_lookup WHERE `product_id` = ' . $product->get_id() . ' AND `product_or_parent_id` = ' . $product->get_parent_id() . ' AND `taxonomy` = "' . $taxonomy . '" AND `term_id` = ' . $term_id );
+		var_dump($rows);
+		if( ! empty($rows)) {
+			return;
+		}
 
 		$wpdb->replace(
 			$wpdb->prefix . 'wc_product_attributes_lookup',
@@ -244,17 +271,29 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		);
 	}
 
+
+	/**
+	 * Create test product from provided data.
+	 *
+	 * @param array $product_data Product data.
+	 */
 	private function create_test_product( $product_data ) {
 		if ( isset( $product_data['variations'] ) ) {
 			$attributes       = $this->get_attributes_from_variations( $product_data['variations'] );
+
 			$variable_product = $this->fixture_data->get_variable_product(
 				$product_data,
 				$attributes
 			);
+
 			foreach ( $product_data['variations'] as $variation_data ) {
-				$variation_attributes = array_map( function($item) {
-					return "$item-slug";
-				}, $variation_data['attributes'] );
+				$variation_attributes = array_map(
+					function( $item ) {
+						return "$item-slug";
+					},
+					$variation_data['attributes']
+				);
+
 				$variation = $this->fixture_data->get_variation_product(
 					$variable_product->get_id(),
 					$variation_attributes,
@@ -268,6 +307,7 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 				}
 			}
 			WC_Product_Variable::sync( $variable_product );
+
 			return $variable_product;
 		}
 

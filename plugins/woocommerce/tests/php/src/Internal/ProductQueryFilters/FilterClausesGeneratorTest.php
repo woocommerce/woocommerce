@@ -119,23 +119,24 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 	/**
 	 * Test the product query with post clauses containing attribute clauses.
 	 *
-	 * @testWith [{"pa_color":{"terms":["not-exist-slug"],"query_type":"or"}}]
-	 *           [{"pa_color":{"terms":["red-slug"],"query_type":"or"}}]
-	 *           [{"pa_color":{"terms":["red-slug","not-exist-slug"],"query_type":"or"}}]
-	 *           [{"pa_color":{"terms":["red-slug","green-slug"],"query_type":"or"}}]
-	 *           [{"pa_color":{"terms":["red-slug","green-slug"],"query_type":"and"}}]
+	 * @testWith ["pa_color",["not-exist-slug"],"or"]
+	 *           ["pa_color",["red-slug"],"or"]
+	 *           ["pa_color",["red-slug","not-exist-slug"],"or"]
+	 *           ["pa_color",["red-slug","green-slug"],"or"]
+	 *           ["pa_color",["red-slug","green-slug"],"and"]
 	 *
-	 * @param array $chosen_attributes {
-	 *     Chosen attributes array.
-	 *
-	 *     @type array {$taxonomy: Attribute taxonomy name} {
-	 *         @type string[] $terms      Chosen terms' slug.
-	 *         @type string   $query_type Query type. Accepts 'and' or 'or'.
-	 *     }
-	 * }
+	 * @param string   $taxonomy   Attribute taxonomy name.
+	 * @param string[] $terms      Chosen terms' slug.
+	 * @param string   $query_type Query type. Accepts 'and' or 'or'.
 	 */
-	public function test_attribute_clauses_with( $chosen_attributes ) {
-		$filter_callback = function( $args ) use ( $chosen_attributes ) {
+	public function test_attribute_clauses_with( $taxonomy, $terms, $query_type ) {
+		$chosen_attributes = array(
+			$taxonomy => array(
+				'terms'      => $terms,
+				'query_type' => $query_type,
+			),
+		);
+		$filter_callback   = function( $args ) use ( $chosen_attributes ) {
 			return $this->sut->add_attribute_clauses( $args, $chosen_attributes );
 		};
 
