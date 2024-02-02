@@ -22,8 +22,17 @@ class CustomerHistory {
 	 * @return void
 	 */
 	public function output( WC_Order $order ): void {
-		$args = $this->get_customer_history( $order->get_report_customer_id() );
-		wc_get_template( 'order/customer-history.php', $args );
+		$customer_history = $this->get_customer_history( $order->get_report_customer_id() );
+
+		if ( ! $customer_history ) {
+			$customer_history = array(
+				'orders_count'    => 0,
+				'total_spend'     => 0,
+				'avg_order_value' => 0,
+			);
+		}
+
+		wc_get_template( 'order/customer-history.php', $customer_history );
 	}
 
 }
