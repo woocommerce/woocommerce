@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { type Request } from '@playwright/test';
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import type { Response, Request, Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -678,50 +678,77 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Location is recognised correctly', () => {
-		const verifyProductRequest =
-			( slug: string ) => ( request: Request ) => {
-				const url = request.url();
-				let getEntityRecordFired = false;
-
-				if (
-					url.includes( 'wp/v2/product' ) &&
-					url.includes( `slug=${ slug }` )
-				) {
-					getEntityRecordFired = true;
-				}
-
-				if (
-					getEntityRecordFired &&
-					url.includes( 'wp/v2/product' ) &&
-					url.includes( 'isProductCollectionBlock=true' )
-				) {
-					const searchParams = new URLSearchParams( request.url() );
-					const locationType = searchParams.get( 'location[type]' );
-					const productId = searchParams.get(
-						'location[sourceData][productId]'
-					);
-					expect( locationType ).toBe( 'product' );
-					expect( productId ).toBeTruthy();
-				}
+		const getProductIdFromResponse = async ( response ) => {
+			const products = await response.json();
+			return products[ 0 ].id;
+		};
+		const getLocationDetailsFromRequest = ( request ) => {
+			const searchParams = new URLSearchParams( request.url() );
+			return {
+				locationType: searchParams.get( 'location[type]' ),
+				productId: searchParams.get(
+					'location[sourceData][productId]'
+				),
 			};
+		};
+		const verifyProductId = async ( page: Page, productSlug: string ) => {
+			const productResponsePromise = page.waitForResponse(
+				( response: Response ) => {
+					const url = response.url();
+					return (
+						url.includes( 'wp/v2/product' ) &&
+						url.includes( `slug=${ productSlug }` )
+					);
+				}
+			);
+			const locationRequestPromise = page.waitForRequest(
+				( request: Request ) => {
+					const url = request.url();
+					return (
+						url.includes( 'wp/v2/product' ) &&
+						url.includes( 'isProductCollectionBlock=true' )
+					);
+				}
+			);
+			const [ productResponse, locationRequest ] = await Promise.all( [
+				productResponsePromise,
+				locationRequestPromise,
+			] );
+			const expectedProductId = await getProductIdFromResponse(
+				productResponse
+			);
+			const { locationType, productId } =
+				getLocationDetailsFromRequest( locationRequest );
+
+			expect( locationType ).toBe( 'product' );
+			expect( productId ).toBe( String( expectedProductId ) );
+		};
 
 		test( 'in specific Single Product template', async ( {
 			page,
 			pageObject,
 			editorUtils,
 		} ) => {
-			editorUtils.openSpecificProductTemplate( 'Cap', 'cap' );
+			const productName = 'Cap';
+			const productSlug = 'cap';
 
-			page.on( 'request', verifyProductRequest( 'cap' ) );
+			await editorUtils.openSpecificProductTemplate(
+				productName,
+				productSlug
+			);
 
 			await editorUtils.insertBlockUsingGlobalInserter(
 				'Product Collection (Beta)'
 			);
 			await pageObject.chooseCollectionInTemplate( 'featured' );
 
-			page.removeListener( 'request', verifyProductRequest( 'cap' ) );
+			await verifyProductId( page, productSlug );
 		} );
-		test( 'in Single Product block in specific Product template', async ( {} ) => {} );
+		test( 'in Single Product block in specific Product template', async ( {
+			page,
+			editorUtils,
+			pageObject,
+		} ) => {} );
 		test( 'in Single Product template', async ( {} ) => {} );
 		test( 'in specific Category template', async ( {} ) => {} );
 		test( 'in specific Tag template', async ( {} ) => {} );

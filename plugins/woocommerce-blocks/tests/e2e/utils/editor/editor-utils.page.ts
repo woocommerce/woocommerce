@@ -439,15 +439,15 @@ export class EditorUtils {
 		await this.page.goto( '/wp-admin/site-editor.php' );
 		await this.page.getByRole( 'button', { name: 'Templates' } ).click();
 
-		const templateButton = await this.page.getByRole( 'button', {
+		const templateButton = this.page.getByRole( 'button', {
 			name: `Product: ${ productName }`,
 		} );
 
 		// Template can be created only once. Go to template if exists,
 		// otherwise create one.
 		if ( await templateButton.isVisible() ) {
-			templateButton.click();
-			this.enterEditMode();
+			await templateButton.click();
+			await this.enterEditMode();
 		} else if ( createIfDoesntExist ) {
 			await this.page
 				.getByRole( 'button', { name: 'Add New Template' } )
@@ -466,5 +466,6 @@ export class EditorUtils {
 				} )
 				.click();
 		}
+		await this.closeWelcomeGuideModal();
 	}
 }
