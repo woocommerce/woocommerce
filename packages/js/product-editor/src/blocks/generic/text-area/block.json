@@ -59,5 +59,8 @@
 		"inserter": false,
 		"lock": false,
 		"__experimentalToolbar": true
+	},
+	"providesContext": {
+		"product-editor/entity-prop": "property"
 	}
 }
