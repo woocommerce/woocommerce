@@ -980,10 +980,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			case self::WC_COUPON_REMOVED:
 				$msg = __( 'Coupon code removed successfully.', 'woocommerce' );
 				break;
-			case self::WC_COUPON_NOT_YOURS_APPLIED:
-				/* translators: %s: coupon code */
-				$msg = sprintf( __( 'The coupon <strong>"%s"</strong> has been applied. However, in order to use it you must supply the correct associated email on Checkout.', 'woocommerce' ), esc_html( $this->get_code() ) );
-				break;
 			default:
 				$msg = '';
 				break;
