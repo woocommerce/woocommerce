@@ -1,110 +1,55 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { useWooBlockProps } from '@woocommerce/block-templates';
 import { createElement } from '@wordpress/element';
-import { BaseControl } from '@wordpress/components';
-import { useInstanceId } from '@wordpress/compose';
-import { BlockControls, RichText } from '@wordpress/block-editor';
-import classNames from 'classnames';
-
+import { useWooBlockProps } from '@woocommerce/block-templates';
+import {
+	// @ts-expect-error no exported member.
+	useBaseControlProps,
+	BaseControl,
+} from '@wordpress/components';
+/**
+ * External dependencies
+ */
+import {
+	// @ts-expect-error no exported member.
+	useInnerBlocksProps,
+} from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import { RTLToolbarButton } from './toolbar/toolbar-button-rtl';
-import type {
-	TextAreaBlockEditAttributes,
-	TextAreaBlockEditProps,
-} from './types';
-import AligmentToolbarButton from './toolbar/toolbar-button-alignment';
-import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import type { TextAreaBlockEditProps } from './types';
 
-export function TextAreaBlockEdit( {
-	attributes,
-	setAttributes,
-	context: { postType },
-}: TextAreaBlockEditProps ) {
-	const {
-		property,
-		label,
-		placeholder,
-		help,
-		required,
-		disabled,
-		align,
-		allowedFormats,
-		direction,
-	} = attributes;
-	const blockProps = useWooBlockProps( attributes, {
-		style: { direction },
-	} );
-
-	const contentId = useInstanceId(
-		TextAreaBlockEdit,
-		'wp-block-woocommerce-product-content-field__content'
-	);
-
-	// `property` attribute is required.
+export function TextAreaBlockEdit( { attributes }: TextAreaBlockEditProps ) {
+	// `property` attribute mandatory for this block
+	const { property, placeholder } = attributes;
 	if ( ! property ) {
-		throw new Error(
-			__( 'Property attribute is required.', 'woocommerce' )
-		);
+		throw new Error( 'Property attribute is missing.' );
 	}
 
-	const [ content, setContent ] = useProductEntityProp< string >( property, {
-		postType,
+	const { label, helpText } = attributes;
+
+	const innerBlockProps = useInnerBlocksProps(
+		{},
+		{
+			templateLock: 'contentOnly',
+			allowedBlocks: [ 'core/paragraph' ],
+			template: [ [ 'core/paragraph', { placeholder } ] ],
+		}
+	);
+	const { baseControlProps } = useBaseControlProps( {
+		label,
+		help: helpText,
 	} );
 
-	function setAlignment( value: TextAreaBlockEditAttributes[ 'align' ] ) {
-		setAttributes( { align: value } );
-	}
-
-	function changeDirection(
-		value: TextAreaBlockEditAttributes[ 'direction' ]
-	) {
-		setAttributes( { direction: value } );
-	}
-
-	const blockControlsProps = { group: 'block' };
+	const blockProps = useWooBlockProps( attributes, {
+		className: 'wp-block-woocommerce-product-text-area-field',
+	} );
 
 	return (
-		<div className={ 'wp-block-woocommerce-product-text-area-field' }>
-			<BlockControls { ...blockControlsProps }>
-				<AligmentToolbarButton
-					align={ align }
-					setAlignment={ setAlignment }
-				/>
-
-				<RTLToolbarButton
-					direction={ direction }
-					onChange={ changeDirection }
-				/>
-			</BlockControls>
-
-			<BaseControl
-				id={ contentId.toString() }
-				label={ label }
-				help={ help }
-			>
-				<div { ...blockProps }>
-					<RichText
-						id={ contentId.toString() }
-						identifier="content"
-						tagName="p"
-						value={ content || '' }
-						onChange={ setContent }
-						data-empty={ Boolean( content ) }
-						className={ classNames( 'components-summary-control', {
-							[ `has-text-align-${ align }` ]: align,
-						} ) }
-						dir={ direction }
-						allowedFormats={ allowedFormats }
-						placeholder={ placeholder }
-						required={ required }
-						disabled={ disabled }
-					/>
-				</div>
+		<div { ...blockProps }>
+			<BaseControl { ...baseControlProps }>
+				<div { ...innerBlockProps } />
 			</BaseControl>
 		</div>
 	);

@@ -1,5 +1,6 @@
 .wp-block-woocommerce-product-text-area-field {	
-	&.rich-text {
+	.rich-text, // text-area :clap:
+	&.rich-text { // and core/paragraph calc( :clap * 100 )
 		width: 100%;
 		min-height: calc($gap-larger * 3);
 		background-color: $white;

@@ -29,8 +29,8 @@ export const init = () =>
 		settings: settings as never,
 	} );
 
-addFilter(
-	'blocks.registerBlockType',
-	'woocommerce/product-text-area-field',
-	coreParagraphWithTextArea
-);
+// addFilter(
+// 	'blocks.registerBlockType',
+// 	'woocommerce/product-text-area-field',
+// 	coreParagraphWithTextArea
+// );

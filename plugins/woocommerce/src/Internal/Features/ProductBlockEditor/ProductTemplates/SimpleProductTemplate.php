@@ -219,7 +219,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$basic_details->add_block(
 			array(
 				'id'         => 'product-summary',
-				'blockName'  => 'core/paragraph',
+				'blockName'  => 'woocommerce/product-text-area-field',
 				'order'      => 20,
 				'attributes' => array(
 					'label'       => __( 'Summary', 'woocommerce' ),
