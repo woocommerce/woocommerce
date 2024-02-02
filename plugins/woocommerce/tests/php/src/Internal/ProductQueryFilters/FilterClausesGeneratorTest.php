@@ -25,93 +25,21 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 		$this->sut = $container->get( FilterClausesGenerator::class );
 	}
 
-	public function test_price_clauses_with_min_price() {
-		$this->test_price_clauses_with( array( 'min_price' => 20 ) );
-	}
-
-	public function test_price_clauses_with_max_price() {
-		$this->test_price_clauses_with( array( 'max_price' => 55 ) );
-	}
-
-	public function test_price_clauses_with_both_min_max_price() {
-		$this->test_price_clauses_with( array(
-			'min_price' => 15,
-			'max_price' => 50
-		) );
-	}
-
-	public function test_stock_clauses_instock() {
-		$this->test_stock_clauses_with( array( 'instock' ) );
-	}
-
-	public function test_stock_clauses_onbackorder() {
-		$this->test_stock_clauses_with( array( 'onbackorder' ) );
-	}
-
-	public function test_stock_clauses_outofstock() {
-		$this->test_stock_clauses_with( array( 'outofstock' ) );
-	}
-
-	public function test_stock_clauses_with_two_status() {
-		$this->test_stock_clauses_with( array( 'instock', 'onbackorder' ) );
-	}
-
-	public function test_attribute_clauses_with_non_exist_term() {
-		$this->test_attribute_clauses_with(
-			array(
-				'pa_color' => array(
-					'terms'      => array( 'not-exist-slug' ),
-					'query_type' => 'or',
-				),
-			)
-		);
-	}
-
-	public function test_attribute_clauses_with_one_term() {
-		$this->test_attribute_clauses_with(
-			array(
-				'pa_color' => array(
-					'terms'      => array( 'red-slug' ),
-					'query_type' => 'or',
-				),
-			)
-		);
-	}
-
-	public function test_attribute_clauses_with_two_terms_query_type_and() {
-		$this->test_attribute_clauses_with(
-			array(
-				'pa_color' => array(
-					'terms'      => array( 'red-slug', 'green-slug' ),
-					'query_type' => 'and',
-				),
-			)
-		);
-	}
-
-	public function test_attribute_clauses_with_two_terms_query_type_or() {
-		$this->test_attribute_clauses_with(
-			array(
-				'pa_color' => array(
-					'terms'      => array( 'red-slug', 'green-slug' ),
-					'query_type' => 'or',
-				),
-			)
-		);
-	}
-
-	public function test_attribute_clauses_with_two_terms_but_only_one_exists() {
-		$this->test_attribute_clauses_with(
-			array(
-				'pa_color' => array(
-					'terms'      => array( 'red-slug', 'not-exist-slug' ),
-					'query_type' => 'or',
-				),
-			)
-		);
-	}
-
-	private function test_price_clauses_with( $price_range ) {
+	/**
+	 * @testdox Test the product query with post clauses containing price clauses.
+	 *
+	 * @testWith [{"min_price": 20}]
+	 *           [{"max_price": 50}]
+	 *           [{"min_price": 20,"max_price": 50}]
+	 *
+	 * @param array $price_range {
+	 *     Price range array.
+	 *
+	 *     @type int|string $min_price Optional. Min price.
+	 *     @type int|string $max_price Optional. Max Price.
+	 * }
+	 */
+	public function test_price_clauses_with( $price_range ) {
 		$price_range     = wp_parse_args(
 			$price_range,
 			array(
@@ -138,14 +66,14 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 					} else {
 						$product_price = $product->get_regular_price();
 					}
-					if ( $price_range['min_price'] && $price_range['max_price'] ) {
+					if ( ! empty( $price_range['min_price'] ) && ! empty( $price_range['max_price'] ) ) {
 						return $product_price >= $price_range['min_price'] &&
 							$product_price <= $price_range['max_price'];
 					}
-					if ( $price_range['max_price'] ) {
+					if ( ! empty( $price_range['max_price'] ) ) {
 						return $product_price <= $price_range['max_price'];
 					}
-					if ( $price_range['min_price'] ) {
+					if ( ! empty( $price_range['min_price'] ) ) {
 						return $product_price >= $price_range['min_price'];
 					}
 				}
@@ -155,7 +83,17 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
 	}
 
-	private function test_stock_clauses_with( $stock_statuses ) {
+	/**
+	 * @testdox Test the product query with post clauses containing stock clauses.
+	 *
+	 * @testWith [["instock"]]
+	 *           [["outofstock"]]
+	 *           [["onbackorder"]]
+	 *           [["instock","onbackorder"]]
+	 *
+	 * @param array $stock_statuses Stock statuses to be queried.
+	 */
+	public function test_stock_clauses_with( $stock_statuses ) {
 		$filter_callback = function( $args ) use ( $stock_statuses ) {
 			return $this->sut->add_stock_clauses( $args, $stock_statuses );
 		};
@@ -178,7 +116,25 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
 	}
 
-	private function test_attribute_clauses_with( $chosen_attributes ) {
+	/**
+	 * Test the product query with post clauses containing attribute clauses.
+	 *
+	 * @testWith [{"pa_color":{"terms":["not-exist-slug"],"query_type":"or"}}]
+	 *           [{"pa_color":{"terms":["red-slug"],"query_type":"or"}}]
+	 *           [{"pa_color":{"terms":["red-slug","not-exist-slug"],"query_type":"or"}}]
+	 *           [{"pa_color":{"terms":["red-slug","green-slug"],"query_type":"or"}}]
+	 *           [{"pa_color":{"terms":["red-slug","green-slug"],"query_type":"and"}}]
+	 *
+	 * @param array $chosen_attributes {
+	 *     Chosen attributes array.
+	 *
+	 *     @type array {$taxonomy: Attribute taxonomy name} {
+	 *         @type string[] $terms      Chosen terms' slug.
+	 *         @type string   $query_type Query type. Accepts 'and' or 'or'.
+	 *     }
+	 * }
+	 */
+	public function test_attribute_clauses_with( $chosen_attributes ) {
 		$filter_callback = function( $args ) use ( $chosen_attributes ) {
 			return $this->sut->add_attribute_clauses( $args, $chosen_attributes );
 		};
@@ -198,7 +154,8 @@ class FilterClausesGeneratorTest extends AbstractProductQueryFiltersTest {
 					foreach ( $chosen_attributes as $taxonomy => $data ) {
 						if ( ! in_array(
 							$taxonomy,
-							array_keys( $product_attributes )
+							array_keys( $product_attributes ),
+							true
 						) ) {
 							return false;
 						}
