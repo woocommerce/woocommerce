@@ -92,10 +92,17 @@ class Notices {
 	 * @return string
 	 */
 	public function get_notices_template( $template, $template_name, $args, $template_path, $default_path ) {
+		$directory = get_stylesheet_directory();
+		$file      = $directory . '/woocommerce/' . $template_name;
+		if ( file_exists( $file ) ) {
+			return $file;
+		}
+
 		if ( in_array( $template_name, $this->notice_templates, true ) ) {
 			$template = $this->package->get_path( 'templates/block-' . $template_name );
 			wp_enqueue_style( 'wc-blocks-style' );
 		}
+
 		return $template;
 	}
 
