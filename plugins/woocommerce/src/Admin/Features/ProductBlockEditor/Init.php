@@ -34,13 +34,6 @@ class Init {
 	private $supported_product_types = array( 'simple' );
 
 	/**
-	 * Registered product templates.
-	 *
-	 * @var array
-	 */
-	private $product_templates = array();
-
-	/**
 	 * Redirection controller.
 	 *
 	 * @var RedirectionController
@@ -84,8 +77,6 @@ class Init {
 
 			$tracks = new Tracks();
 			$tracks->init();
-
-			$this->register_product_templates();
 		}
 	}
 
@@ -221,66 +212,9 @@ class Init {
 	 * Get the product editor settings.
 	 */
 	private function get_product_editor_settings() {
-		$editor_settings['productTemplates'] = array_map(
-			function ( $product_template ) {
-				return $product_template->to_json();
-			},
-			$this->product_templates
-		);
-
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
 
-		return get_block_editor_settings( $editor_settings, $block_editor_context );
-	}
-
-	/**
-	 * Get default product templates.
-	 *
-	 * @return array The default templates.
-	 */
-	private function get_default_product_templates() {
-		$templates   = array();
-		$templates[] = new ProductTemplate(
-			array(
-				'id'                 => 'standard-product-template',
-				'title'              => __( 'Standard product', 'woocommerce' ),
-				'description'        => __( 'A single physical or virtual product, e.g. a t-shirt or an eBook.', 'woocommerce' ),
-				'order'              => 10,
-				'icon'               => 'shipping',
-				'layout_template_id' => 'simple-product',
-				'product_data'       => array(
-					'type' => 'simple',
-				),
-			)
-		);
-		$templates[] = new ProductTemplate(
-			array(
-				'id'                 => 'grouped-product-template',
-				'title'              => __( 'Grouped product', 'woocommerce' ),
-				'description'        => __( 'A set of products that go well together, e.g. camera kit.', 'woocommerce' ),
-				'order'              => 20,
-				'icon'               => 'group',
-				'layout_template_id' => 'simple-product',
-				'product_data'       => array(
-					'type' => 'grouped',
-				),
-			)
-		);
-		$templates[] = new ProductTemplate(
-			array(
-				'id'                 => 'affiliate-product-template',
-				'title'              => __( 'Affiliate product', 'woocommerce' ),
-				'description'        => __( 'A link to a product sold on a different website, e.g. brand collab.', 'woocommerce' ),
-				'order'              => 30,
-				'icon'               => 'link',
-				'layout_template_id' => 'simple-product',
-				'product_data'       => array(
-					'type' => 'external',
-				),
-			)
-		);
-
-		return $templates;
+		return get_block_editor_settings( array(), $block_editor_context );
 	}
 
 	/**
@@ -374,27 +308,5 @@ class Init {
 				ProductVariationFormTemplate::class
 			);
 		}
-	}
-
-	/**
-	 * Register product templates.
-	 */
-	public function register_product_templates() {
-		/**
-		 * Allows for new product template registration.
-		 *
-		 * @since 8.5.0
-		 */
-		$this->product_templates = apply_filters( 'woocommerce_product_editor_product_templates', $this->get_default_product_templates() );
-		$this->product_templates = $this->create_default_product_template_by_custom_product_type( $this->product_templates );
-
-		usort(
-			$this->product_templates,
-			function ( $a, $b ) {
-				return $a->get_order() - $b->get_order();
-			}
-		);
-
-		$this->redirection_controller->set_product_templates( $this->product_templates );
 	}
 }
