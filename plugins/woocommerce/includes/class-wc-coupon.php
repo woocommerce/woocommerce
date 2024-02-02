@@ -943,7 +943,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Converts one of the WC_Coupon message/error codes to a message string and.
 	 * displays the message/error.
 	 *
-	 * @param int $msg_code Message/error code.
+	 * @param int    $msg_code Message/error code.
 	 * @param string $notice_type Notice type.
 	 */
 	public function add_coupon_message( $msg_code, $notice_type = 'success' ) {
