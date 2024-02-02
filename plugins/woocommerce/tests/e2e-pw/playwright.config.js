@@ -22,7 +22,7 @@ const config = {
 	testDir: 'tests',
 	retries: CI ? 2 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
-	workers: CI ? 1 : 4,
+	workers: 1,
 	reporter: [
 		[ 'list' ],
 		[

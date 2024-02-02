@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { createElement } from '@wordpress/element';
-import { BaseControl } from '@wordpress/components';
+import { BaseControl, TextareaControl } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { BlockControls, RichText } from '@wordpress/block-editor';
 import classNames from 'classnames';
@@ -35,8 +35,10 @@ export function TextAreaBlockEdit( {
 		align,
 		allowedFormats,
 		direction,
+		mode = 'rich-text',
 	} = attributes;
 	const blockProps = useWooBlockProps( attributes, {
+		className: 'wp-block-woocommerce-product-text-area-field',
 		style: { direction },
 	} );
 
@@ -66,28 +68,33 @@ export function TextAreaBlockEdit( {
 		setAttributes( { direction: value } );
 	}
 
-	const blockControlsProps = { group: 'block' };
+	const blockControlsBlockProps = { group: 'block' };
+
+	const isRichTextMode = mode === 'rich-text';
+	const isPlainTextMode = mode === 'plain-text';
 
 	return (
-		<div className={ 'wp-block-woocommerce-product-text-area-field' }>
-			<BlockControls { ...blockControlsProps }>
-				<AligmentToolbarButton
-					align={ align }
-					setAlignment={ setAlignment }
-				/>
+		<div { ...blockProps }>
+			{ isRichTextMode && (
+				<BlockControls { ...blockControlsBlockProps }>
+					<AligmentToolbarButton
+						align={ align }
+						setAlignment={ setAlignment }
+					/>
 
-				<RTLToolbarButton
-					direction={ direction }
-					onChange={ changeDirection }
-				/>
-			</BlockControls>
+					<RTLToolbarButton
+						direction={ direction }
+						onChange={ changeDirection }
+					/>
+				</BlockControls>
+			) }
 
 			<BaseControl
 				id={ contentId.toString() }
 				label={ label }
 				help={ help }
 			>
-				<div { ...blockProps }>
+				{ isRichTextMode && (
 					<RichText
 						id={ contentId.toString() }
 						identifier="content"
@@ -104,7 +111,17 @@ export function TextAreaBlockEdit( {
 						required={ required }
 						disabled={ disabled }
 					/>
-				</div>
+				) }
+
+				{ isPlainTextMode && (
+					<TextareaControl
+						value={ content || '' }
+						onChange={ setContent }
+						placeholder={ placeholder }
+						required={ required }
+						disabled={ disabled }
+					/>
+				) }
 			</BaseControl>
 		</div>
 	);
