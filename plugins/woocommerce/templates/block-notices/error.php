@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( empty( $notices ) || ! is_array( $notices ) ) {
+if ( ! $notices ) {
 	return;
 }
 
