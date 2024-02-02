@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { type Request } from '@playwright/test';
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 
 /**
@@ -21,6 +22,7 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 			editorUtils,
 		} );
 		await pageObject.createNewPostAndInsertBlock();
+		await editorUtils.closeWelcomeGuideModal();
 		await use( pageObject );
 	},
 } );
@@ -676,37 +678,63 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Location is recognised correctly', () => {
+		const verifyProductRequest =
+			( slug: string ) => ( request: Request ) => {
+				const url = request.url();
+				let getEntityRecordFired = false;
+
+				if (
+					url.includes( 'wp/v2/product' ) &&
+					url.includes( `slug=${ slug }` )
+				) {
+					getEntityRecordFired = true;
+				}
+
+				if (
+					getEntityRecordFired &&
+					url.includes( 'wp/v2/product' ) &&
+					url.includes( 'isProductCollectionBlock=true' )
+				) {
+					const searchParams = new URLSearchParams( request.url() );
+					const locationType = searchParams.get( 'location[type]' );
+					const productId = searchParams.get(
+						'location[sourceData][productId]'
+					);
+					expect( locationType ).toBe( 'product' );
+					expect( productId ).toBeTruthy();
+				}
+			};
+
 		test( 'in specific Single Product template', async ( {
+			page,
 			pageObject,
-		} ) => {} );
-		test( 'in Single Product block in specific Product template', async ( {
-			pageObject,
-		} ) => {} );
-		test( 'in Single Product template', async ( { pageObject } ) => {} );
-		test( 'in specific Category template', async ( { pageObject } ) => {} );
-		test( 'in specific Tag template', async ( { pageObject } ) => {} );
-		test( 'in Products by Category template', async ( {
-			pageObject,
-		} ) => {} );
-		test( 'in Products by Tag template', async ( { pageObject } ) => {} );
-		test( 'in Products by Attribute template', async ( {
-			pageObject,
-		} ) => {} );
-		test( 'in Cart template', async ( { pageObject } ) => {} );
-		test( 'in Checkout template', async ( { pageObject } ) => {} );
-		test( 'in Order Confirmation template', async ( {
-			pageObject,
-		} ) => {} );
-		test( 'as product in Single Product block in specific Category template', async ( {
-			pageObject,
-		} ) => {} );
-		test( 'as product in Single Product block in specific Tag template', async ( {
-			pageObject,
-		} ) => {} );
-		test( 'as product in Single Product block in Products by Attribute template', async ( {
-			pageObject,
-		} ) => {} );
-		test( 'as generic in post', async ( { pageObject } ) => {} );
-		test( 'as generic in Product Catalog', async ( { pageObject } ) => {} );
+			editorUtils,
+		} ) => {
+			editorUtils.openSpecificProductTemplate( 'Cap', 'cap' );
+
+			page.on( 'request', verifyProductRequest( 'cap' ) );
+
+			await editorUtils.insertBlockUsingGlobalInserter(
+				'Product Collection (Beta)'
+			);
+			await pageObject.chooseCollectionInTemplate( 'featured' );
+
+			page.removeListener( 'request', verifyProductRequest( 'cap' ) );
+		} );
+		test( 'in Single Product block in specific Product template', async ( {} ) => {} );
+		test( 'in Single Product template', async ( {} ) => {} );
+		test( 'in specific Category template', async ( {} ) => {} );
+		test( 'in specific Tag template', async ( {} ) => {} );
+		test( 'in Products by Category template', async ( {} ) => {} );
+		test( 'in Products by Tag template', async ( {} ) => {} );
+		test( 'in Products by Attribute template', async ( {} ) => {} );
+		test( 'in Cart template', async ( {} ) => {} );
+		test( 'in Checkout template', async ( {} ) => {} );
+		test( 'in Order Confirmation template', async ( {} ) => {} );
+		test( 'as product in Single Product block in specific Category template', async ( {} ) => {} );
+		test( 'as product in Single Product block in specific Tag template', async ( {} ) => {} );
+		test( 'as product in Single Product block in Products by Attribute template', async ( {} ) => {} );
+		test( 'as generic in post', async ( {} ) => {} );
+		test( 'as generic in Product Catalog', async ( {} ) => {} );
 	} );
 } );
