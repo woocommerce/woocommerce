@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Pr
 /**
  * Simple Product Template.
  */
-class SimpleProductTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
+abstract class SimpleProductTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
 	/**
 	 * The context name used to identify the editor.
 	 */
@@ -37,27 +37,6 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$this->add_shipping_group_blocks();
 		$this->add_variation_group_blocks();
 		$this->add_linked_products_group_blocks();
-	}
-
-	/**
-	 * Get the template ID.
-	 */
-	public function get_id(): string {
-		return 'simple-product';
-	}
-
-	/**
-	 * Get the template title.
-	 */
-	public function get_title(): string {
-		return __( 'Simple Product Template', 'woocommerce' );
-	}
-
-	/**
-	 * Get the template description.
-	 */
-	public function get_description(): string {
-		return __( 'Template for the simple product form', 'woocommerce' );
 	}
 
 	/**

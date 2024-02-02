@@ -1,7 +1,4 @@
 <?php
-/**
- * ProductVariationTemplate
- */
 
 namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates;
 
@@ -9,9 +6,9 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
 
 /**
- * Product Variation Template.
+ * Product variation form template.
  */
-class ProductVariationTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
+class ProductVariationFormTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
 	/**
 	 * The context name used to identify the editor.
 	 */
@@ -42,21 +39,21 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 * Get the template ID.
 	 */
 	public function get_id(): string {
-		return 'product-variation';
+		return 'product-variation-form';
 	}
 
 	/**
 	 * Get the template title.
 	 */
 	public function get_title(): string {
-		return __( 'Product Variation Template', 'woocommerce' );
+		return __( 'Product variation', 'woocommerce' );
 	}
 
 	/**
 	 * Get the template description.
 	 */
 	public function get_description(): string {
-		return __( 'Template for the product variation form', 'woocommerce' );
+		return __( 'A specific variation of a variable product', 'woocommerce' );
 	}
 
 	/**
