@@ -75,9 +75,14 @@ class Notices {
 	/**
 	 * Replaces core notice templates with those from blocks.
 	 *
-	 * The new notice templates match block components with matching icons and styling. The only difference is that core
-	 * only has notices for info, success, and error notices, whereas blocks has notices for info, success, error,
+	 * The new notice templates match block components with matching icons and styling. The differences are:
+	 * 1. Core has notices for info, success, and error notices, blocks has notices for info, success, error,
 	 * warning, and a default notice type.
+	 * 2. The block notices use different CSS classes to the core notices. Core uses `woocommerce-message`, `is-info`
+	 * and `is-error` classes, blocks uses `wc-block-components-notice-banner is-error`,
+	 * `wc-block-components-notice-banner is-info`, and `wc-block-components-notice-banner is-success`.
+	 * 3. The markup of the notices is different, with the block notices using SVG icons and a slightly different
+	 * structure to accommodate this.
 	 *
 	 * @param string $template Located template path.
 	 * @param string $template_name Template name.
