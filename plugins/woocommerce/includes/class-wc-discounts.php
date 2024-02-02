@@ -1026,12 +1026,14 @@ class WC_Discounts {
 	 * - 113: Excluded products.
 	 * - 114: Excluded categories.
 	 *
-	 * @since  3.2.0
-	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
+	 * @param bool $soft_validations Whether to run soft validations or not.
+	 *
 	 * @return bool|WP_Error
+	 * @throws Exception Error message.
+	 * @since  3.2.0
 	 */
-	public function is_coupon_valid( $coupon ) {
+	public function is_coupon_valid( $coupon, $soft_validations = false ) {
 		try {
 			$this->validate_coupon_exists( $coupon );
 			$this->validate_coupon_usage_limit( $coupon );
@@ -1050,7 +1052,7 @@ class WC_Discounts {
 
 			// These are soft validations that need to only run after hard validations.
 			// These should also only be run on Cart object, after the order is fulfilled there's no need to supply additional feedback.
-			if ( $this->object instanceof WC_Cart ) {
+			if ( $soft_validations && $this->object instanceof WC_Cart ) {
 				$this->validate_coupon_allowed_emails( $coupon );
 			}
 		} catch ( Exception $e ) {
