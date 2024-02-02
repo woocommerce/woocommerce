@@ -6,43 +6,37 @@ tags: how-to
 
 When developing for WooCommerce, it's important to check that WooCommerce is installed and active before your own code runs. This ensures no errors occur from missing WooCommerce functions or classes.
 
-There are a few methods to achieve this. The most reliable approach is to initiate your code on `plugins_loaded`. This means you can be sure that WooCommerce has already initiated, by checking if one of its core classes exists.
+There are a few methods to achieve this. The first is to initialize your code on `woocommerce_loaded`. This means you can be sure that WooCommerce has loaded and its functions are ready to use. This is fired at the same time as the core `plugins_loaded` action. **Note**: at this point, the current user has not yet been set.
 
 ```php
-add_action( 'plugins_loaded', 'prefix_plugins_loaded' );
+add_action( 'woocommerce_loaded', 'prefix_woocommerce_loaded' );
 
-function prefix_plugins_loaded() {
-	// Check if the "WooCommerce" class exists. If not, exit early.
-	if ( ! class_exists( 'WooCommerce' ) ) {
-		return;
-	}
-
-	// Custom code here. WooCommerce is active and initiated...
+function prefix_woocommerce_loaded() {
+	// Custom code here. WooCommerce is active and all plugins have been loaded...
 }
 ```
 
-Another route you could take is to initiate your code on the `woocommerce_init` hook. We know this only runs when WooCommerce is active and initiated.
+You can also initialize your code on the `woocommerce_init` hook. We know this only runs when WooCommerce is active and initialized. This fires around the same time as the core `init` action, but is triggered _after_ WooCommerce initialization finishes. **Note**: you can also utilize the `before_woocommerce_init` hook, which is fired on the core `init` hook, just _before_ WooCommerce is initialized.
 
 ```php
 add_action( 'woocommerce_init', 'prefix_woocommerce_init' );
 
 function prefix_woocommerce_init() {
-	// Custom code here. WooCommerce is active and initiated...
+	// Custom code here. WooCommerce is active and initialized...
 }
 ```
 
-However, in some cases you may want to check if WooCommerce exists *before* `plugins_loaded`. This method is slightly less reliable, because it assumes the path of the WooCommerce plugin hasn't been changed. It's also worth noting that this method may run _before or after_ WooCommerce is ready; meaning you may not be able to utilize WooCommerce functions yet.
+Using the hooks recommended above means you have access to WooCommerce functions, which can then be used to check for additional conditions. For example, you might want to check the version of WooCommerce before proceeding:
 
 ```php
-// Test to see if WooCommerce is active (including network activated).
+add_action( 'woocommerce_init', 'prefix_woocommerce_init' );
 
-$plugin_path = trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce/woocommerce.php';
+function prefix_woocommerce_init() {
+	// Only continue if we have access to version 8.7.0 or higher.
+	if ( version_compare( wc()->version, '8.7.0', '<' ) ) {
+		return;
+	}
 
-if (
-	in_array( $plugin_path, wp_get_active_and_valid_plugins() ) ||
-	in_array( $plugin_path, wp_get_active_network_plugins() )
-) {
-	// Custom code here. WooCommerce is active, however it has not
-	// necessarily initialized...
+	// Custom code here. WooCommerce is active and initialized...
 }
 ```
