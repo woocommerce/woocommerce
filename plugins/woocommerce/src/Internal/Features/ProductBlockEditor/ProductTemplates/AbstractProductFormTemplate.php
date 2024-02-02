@@ -102,9 +102,9 @@ abstract class AbstractProductFormTemplate extends AbstractBlockTemplate impleme
 	public function to_json(): array {
 		$json = parent::to_json();
 
-		$json['icon']         = $this->get_icon();
-		$json['order']        = $this->get_order();
-		$json['product_data'] = $this->get_product_data();
+		$json['icon']        = $this->get_icon();
+		$json['order']       = $this->get_order();
+		$json['productData'] = $this->get_product_data();
 
 		return $json;
 	}
