@@ -32,7 +32,8 @@ table.wc-block-cart-items {
 	}
 	.wc-block-cart-items__row {
 
-		.wc-block-cart-item__wrap > * {
+		.wc-block-cart-item__wrap > *,
+		.wc-block-components-quantity-selector {
 			margin-bottom: $gap-small;
 		}
 
