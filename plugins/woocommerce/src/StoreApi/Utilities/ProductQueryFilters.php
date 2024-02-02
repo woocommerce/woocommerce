@@ -196,10 +196,10 @@ class ProductQueryFilters {
 			)
 		);
 
-		$cached_results = get_transient( $transient_key );
-		if ( ! empty( $cached_results ) && defined( 'WP_DEBUG' ) && ! WP_DEBUG ) {
-			return $cached_results;
-		}
+		// $cached_results = get_transient( $transient_key );
+		// if ( ! empty( $cached_results ) && defined( 'WP_DEBUG' ) && ! WP_DEBUG ) {
+		// 	return $cached_results;
+		// }
 
 		if ( empty( $attributes_data ) && empty( $min_price ) && empty( $max_price ) && empty( $rating ) && empty( $stock_status ) ) {
 			$counts = $this->get_terms_list( $filtered_attribute );
@@ -301,7 +301,7 @@ class ProductQueryFilters {
 		// phpcs:enable
 		$results = array_map( 'absint', wp_list_pluck( $counts, 'term_count', 'term_count_id' ) );
 
-		set_transient( $transient_key, $results, 24 * HOUR_IN_SECONDS );
+		//set_transient( $transient_key, $results, 24 * HOUR_IN_SECONDS );
 
 		return $results;
 	}
