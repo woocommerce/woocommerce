@@ -245,7 +245,7 @@ jobs:
 
     test-plugins:
         name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: read
         needs: [api-tests]
