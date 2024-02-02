@@ -39,9 +39,10 @@ import {
 } from '../../../utils/get-product-error-message';
 import type {
 	ProductEditorBlockEditProps,
-	ProductTemplate,
+	LayoutTemplate,
 } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
+import { useProductFormTemplates } from '../../../hooks/use-product-form-templates';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
@@ -49,25 +50,15 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 }: ProductEditorBlockEditProps< ProductDetailsSectionDescriptionBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	const { productTemplates, productTemplate: selectedProductTemplate } =
-		useSelect( ( select ) => {
+	const { productTemplate: selectedProductTemplate } = useSelect(
+		( select ) => {
 			const { getEditorSettings } = select( 'core/editor' );
 			return getEditorSettings() as ProductEditorSettings;
-		} );
+		}
+	);
 
-	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const [ supportedProductTemplates, unsupportedProductTemplates ] =
-		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
-			( [ supported, unsupported ], productTemplate ) => {
-				if ( productTemplate.layoutTemplateId ) {
-					supported.push( productTemplate );
-				} else {
-					unsupported.push( productTemplate );
-				}
-				return [ supported, unsupported ];
-			},
-			[ [], [] ]
-		);
+	const [ supportedProductFormTemplates, unsupportedProductFormTemplates ] =
+		useProductFormTemplates();
 
 	const productId = useEntityId( 'postType', 'product' );
 
@@ -86,8 +77,10 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		[ clientId ]
 	);
 
-	const [ unsupportedProductTemplate, setUnsupportedProductTemplate ] =
-		useState< ProductTemplate >();
+	const [
+		unsupportedProductFormTemplate,
+		setUnsupportedProductFormTemplate,
+	] = useState< LayoutTemplate >();
 
 	const { isSaving } = useSelect(
 		( select ) => {
@@ -108,35 +101,34 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	if ( ! rootClientId ) return;
 
 	function menuItemClickHandler(
-		productTemplate: ProductTemplate,
+		template: LayoutTemplate,
 		onClose: () => void
 	) {
 		return async function handleMenuItemClick() {
 			try {
 				recordEvent( 'product_template_selector_selected', {
 					source: TRACKS_SOURCE,
-					selected_template: productTemplate.id,
-					unsupported_template: ! productTemplate.layoutTemplateId,
+					selected_template: template.id,
+					unsupported_template: ! template.blockTemplates?.length,
 				} );
 
-				if ( ! productTemplate.layoutTemplateId ) {
-					setUnsupportedProductTemplate( productTemplate );
+				if ( ! template.blockTemplates?.length ) {
+					setUnsupportedProductFormTemplate( template );
 					onClose();
 					return;
 				}
 
-				await validate( productTemplate.productData );
+				await validate( template.productData );
 
-				const productMetaData =
-					productTemplate.productData.meta_data ?? [];
+				const productMetaData = template.productData?.meta_data ?? [];
 
 				await editEntityRecord( 'postType', 'product', productId, {
-					...productTemplate.productData,
+					...template?.productData,
 					meta_data: [
 						...productMetaData,
 						{
 							key: '_product_template_id',
-							value: productTemplate.id,
+							value: template.id,
 						},
 					],
 				} );
@@ -156,7 +148,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 				recordEvent( 'product_template_changed', {
 					source: TRACKS_SOURCE,
-					template: productTemplate.id,
+					template: template.id,
 				} );
 			} catch ( error ) {
 				const message = getProductErrorMessage( error as WPError );
@@ -185,30 +177,26 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	}
 
 	function getMenuItem( onClose: () => void ) {
-		return function renderMenuItem( productTemplate: ProductTemplate ) {
-			const isSelected =
-				selectedProductTemplate?.id === productTemplate.id;
+		return function renderMenuItem( template: LayoutTemplate ) {
+			const isSelected = selectedProductTemplate?.id === template.id;
 			return (
 				<MenuItem
-					key={ productTemplate.id }
-					info={ productTemplate.description ?? undefined }
+					key={ template.id }
+					info={ template.description ?? undefined }
 					isSelected={ isSelected }
 					icon={
 						isSelected
 							? resolveIcon( 'check' )
-							: resolveIcon(
-									productTemplate.icon,
-									productTemplate.title
-							  )
+							: resolveIcon( template.icon, template.title )
 					}
 					iconPosition="left"
 					role="menuitemradio"
-					onClick={ menuItemClickHandler( productTemplate, onClose ) }
+					onClick={ menuItemClickHandler( template, onClose ) }
 					className={ classNames( {
 						'components-menu-item__button--selected': isSelected,
 					} ) }
 				>
-					{ productTemplate.title }
+					{ template.title }
 				</MenuItem>
 			);
 		};
@@ -216,10 +204,10 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	async function handleModalChangeClick() {
 		try {
-			if ( isSaving ) return;
+			if ( isSaving || ! unsupportedProductFormTemplate ) return;
 
 			const { id: productTemplateId, productData } =
-				unsupportedProductTemplate as ProductTemplate;
+				unsupportedProductFormTemplate;
 
 			await validate( productData );
 
@@ -279,11 +267,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			if ( ! isOpen ) {
 				recordEvent( 'product_template_selector_open', {
 					source: TRACKS_SOURCE,
-					supported_templates: supportedProductTemplates.map(
-						( productTemplate ) => productTemplate.id
+					supported_templates: supportedProductFormTemplates.map(
+						( template ) => template.id
 					),
-					unsupported_template: unsupportedProductTemplates.map(
-						( productTemplate ) => productTemplate.id
+					unsupported_template: unsupportedProductFormTemplates.map(
+						( template ) => template.id
 					),
 				} );
 			}
@@ -333,12 +321,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					renderContent={ ( { onClose } ) => (
 						<div className="wp-block-woocommerce-product-details-section-description__dropdown components-dropdown-menu__menu">
 							<MenuGroup>
-								{ supportedProductTemplates.map(
+								{ supportedProductFormTemplates.map(
 									getMenuItem( onClose )
 								) }
 							</MenuGroup>
 
-							{ unsupportedProductTemplates.length > 0 && (
+							{ unsupportedProductFormTemplates.length > 0 && (
 								<MenuGroup>
 									<Dropdown
 										// @ts-expect-error Property does exists
@@ -368,7 +356,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 										renderContent={ () => (
 											<div className="wp-block-woocommerce-product-details-section-description__dropdown components-dropdown-menu__menu">
 												<MenuGroup>
-													{ unsupportedProductTemplates.map(
+													{ unsupportedProductFormTemplates.map(
 														getMenuItem( onClose )
 													) }
 												</MenuGroup>
@@ -381,12 +369,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					) }
 				/>
 
-				{ Boolean( unsupportedProductTemplate ) && (
+				{ Boolean( unsupportedProductFormTemplate ) && (
 					<Modal
 						title={ __( 'Change product type?', 'woocommerce' ) }
 						className="wp-block-woocommerce-product-details-section-description__modal"
 						onRequestClose={ () => {
-							setUnsupportedProductTemplate( undefined );
+							setUnsupportedProductFormTemplate( undefined );
 						} }
 					>
 						<p>
@@ -411,7 +399,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 								aria-disabled={ isSaving }
 								onClick={ () => {
 									if ( isSaving ) return;
-									setUnsupportedProductTemplate( undefined );
+									setUnsupportedProductFormTemplate(
+										undefined
+									);
 								} }
 							>
 								{ __( 'Cancel', 'woocommerce' ) }
