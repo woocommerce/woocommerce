@@ -67,7 +67,7 @@ jobs:
                   compression-level: 9
 
     e2e-tests-success:
-        name: Runs E2E tests.
+        name: Evaluate e2e results
         runs-on: ubuntu-latest
         needs: non-hpos-e2e-tests-run
         if: ${{ always() }}
