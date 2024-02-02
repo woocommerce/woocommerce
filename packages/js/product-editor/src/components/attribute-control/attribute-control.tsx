@@ -53,7 +53,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onRemove = () => {},
 	onRemoveCancel = () => {},
 	onNoticeDismiss = () => {},
-	renderCustomEmptyState = () => <AttributeEmptyStateSkeleton />,
+	renderCustomEmptyState,
 	uiStrings,
 	createNewAttributesAsGlobal = false,
 	useRemoveConfirmationModal = false,
@@ -203,19 +203,43 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 
+	function renderEmptyState() {
+		if ( isMobileViewport || value.length ) return null;
+
+		if ( renderCustomEmptyState ) {
+			return renderCustomEmptyState( {
+				addAttribute( search ) {
+					setDefaultAttributeSearch( search );
+					openNewModal();
+				},
+			} );
+		}
+
+		return <AttributeEmptyStateSkeleton />;
+	}
+
+	function renderSectionActions() {
+		if ( renderCustomEmptyState && value.length === 0 ) return null;
+
+		return (
+			<SectionActions>
+				{ uiStrings?.newAttributeListItemLabel && (
+					<Button
+						variant="secondary"
+						className="woocommerce-add-attribute-list-item__add-button"
+						onClick={ openNewModal }
+					>
+						{ uiStrings.newAttributeListItemLabel }
+					</Button>
+				) }
+			</SectionActions>
+		);
+	}
+
 	return (
 		<div className="woocommerce-attribute-field">
-			<SectionActions>
-				<Button
-					variant="secondary"
-					className="woocommerce-add-attribute-list-item__add-button"
-					onClick={ () => {
-						openNewModal();
-					} }
-				>
-					{ uiStrings.newAttributeListItemLabel }
-				</Button>
-			</SectionActions>
+			{ renderSectionActions() }
+
 			{ uiStrings.notice && (
 				<Notice
 					isDismissible={ true }
@@ -345,14 +369,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					} }
 				/>
 			) }
-			{ ! isMobileViewport &&
-				value.length === 0 &&
-				renderCustomEmptyState( {
-					addAttribute( search ) {
-						setDefaultAttributeSearch( search );
-						openNewModal();
-					},
-				} ) }
+			{ renderEmptyState() }
 		</div>
 	);
 };
