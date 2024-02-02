@@ -152,6 +152,7 @@ class FilterDataProvider {
 	 * @return array termId=>count pairs.
 	 */
 	public function get_attribute_counts( $query_vars, $attribute_to_count ) {
+		$start = microtime(true);
 		global $wpdb;
 
 		add_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10, 2 );
@@ -180,6 +181,9 @@ class FilterDataProvider {
 		";
 
 		$results = $wpdb->get_results( $attribute_count_sql ); // phpcs:ignore
+
+		$end = microtime(true);
+		error_log( 'FilterDataProvider::get_attribute_counts excecution time: ' . $end - $start );
 
 		return array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 	}

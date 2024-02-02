@@ -165,6 +165,7 @@ class ProductQueryFilters {
 	 * @return array
 	 */
 	public function get_attribute_counts( $request, $filtered_attribute ) {
+		$start = microtime(true);
 		if ( is_array( $filtered_attribute ) ) {
 			wc_deprecated_argument( 'attributes', 'TBD', 'get_attribute_counts does not require an array of attributes as the second parameter anymore. Provide the filtered attribute as a string instead.' );
 
@@ -302,6 +303,9 @@ class ProductQueryFilters {
 		$results = array_map( 'absint', wp_list_pluck( $counts, 'term_count', 'term_count_id' ) );
 
 		//set_transient( $transient_key, $results, 24 * HOUR_IN_SECONDS );
+
+		$end = microtime(true);
+		error_log( 'ProductQueryFilters::get_attribute_counts excecution time: ' . $end - $start );
 
 		return $results;
 	}
