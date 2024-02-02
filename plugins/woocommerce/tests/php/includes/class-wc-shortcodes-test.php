@@ -22,7 +22,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	 */
 	protected static $user_contributor;
 
-    /**
+	/**
 	 * Setup once before running tests.
 	 *
 	 * @param object $factory Factory object.
@@ -33,14 +33,14 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
-		self::$user_contributor = $factory->user->create(
+		self::$user_contributor   = $factory->user->create(
 			array(
 				'role' => 'contributor',
 			)
 		);
 	}
 
-    /**
+	/**
 	 * Setup before each test method.
 	 */
 	public function setUp(): void {
@@ -48,275 +48,312 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		wp_set_current_user( self::$user_administrator );
 	}
 
-    private function disable_deprecation_notice() {
-        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
-        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
-    }
+	/**
+	 * Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
+	 */
+	private function disable_deprecation_notice() {
+		remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+	}
 
-    private function enable_deprecation_notice() {
-        // Enable the deprecation notice again.
-        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
-    }
+	/**
+	 * Enable the deprecation notice again.
+	 */
+	private function enable_deprecation_notice() {
+		add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+	}
 
-    /**
-     * Ensure the `product_page` shortcode renders a published product correctly.
-    */
-    public function test_product_page_shortcode_published_product() {
-        $product = WC_Helper_Product::create_simple_product();
-        $product->set_name( 'Test Product' );
-        $product->set_description( 'Test Description' );
-        $product->set_sku( 'Test SKU 1' );
-        $product->save();
-        $product_id = $product->get_id();
-        $this->disable_deprecation_notice();
+	/**
+	 * Ensure the `product_page` shortcode renders a published product correctly.
+	 */
+	public function test_product_page_shortcode_published_product() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->set_description( 'Test Description' );
+		$product->set_sku( 'Test SKU 1' );
+		$product->save();
+		$product_id = $product->get_id();
+		$this->disable_deprecation_notice();
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id' => $product_id,
+			)
+		);
 
-        $this->enable_deprecation_notice();
+		$this->enable_deprecation_notice();
 
-        $this->assertNotEmpty( $product->get_name() );
-        $this->assertNotEmpty( $product->get_description() );
-        $this->assertNotEmpty( $product->get_sku() );
-        $this->assertStringContainsString( $product->get_name(), $product_page );
-        $this->assertStringContainsString( $product->get_description(), $product_page );
-        $this->assertStringContainsString( $product->get_sku(), $product_page );
-    }
+		$this->assertNotEmpty( $product->get_name() );
+		$this->assertNotEmpty( $product->get_description() );
+		$this->assertNotEmpty( $product->get_sku() );
+		$this->assertStringContainsString( $product->get_name(), $product_page );
+		$this->assertStringContainsString( $product->get_description(), $product_page );
+		$this->assertStringContainsString( $product->get_sku(), $product_page );
+	}
 
-    /**
-     * Ensure the `product_page` shortcode renders a public, but hidden product belonging to another user.
-     */
-    public function test_product_page_shortcode_hidden_product() {
-        $product = WC_Helper_Product::create_simple_product();
-        $product->set_name( 'Test Product' );
-        $product->set_description( 'Test Description' );
-        $product->set_sku( 'Test SKU 1' );
-        $product->set_catalog_visibility( 'hidden' );
-        $product->save();
-        $product_id = $product->get_id();
-        wp_set_current_user( self::$user_contributor );
-        $this->disable_deprecation_notice();
+	/**
+	 * Ensure the `product_page` shortcode renders a public, but hidden product belonging to another user.
+	 */
+	public function test_product_page_shortcode_hidden_product() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->set_description( 'Test Description' );
+		$product->set_sku( 'Test SKU 1' );
+		$product->set_catalog_visibility( 'hidden' );
+		$product->save();
+		$product_id = $product->get_id();
+		wp_set_current_user( self::$user_contributor );
+		$this->disable_deprecation_notice();
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'visibility' => 'hidden',
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'         => $product_id,
+				'visibility' => 'hidden',
+			)
+		);
 
-        $this->enable_deprecation_notice();
+		$this->enable_deprecation_notice();
 
-        $this->assertNotEmpty( $product->get_name() );
-        $this->assertNotEmpty( $product->get_description() );
-        $this->assertNotEmpty( $product->get_sku() );
-        $this->assertStringContainsString( $product->get_name(), $product_page );
-        $this->assertStringContainsString( $product->get_description(), $product_page );
-        $this->assertStringContainsString( $product->get_sku(), $product_page );
-    }
+		$this->assertNotEmpty( $product->get_name() );
+		$this->assertNotEmpty( $product->get_description() );
+		$this->assertNotEmpty( $product->get_sku() );
+		$this->assertStringContainsString( $product->get_name(), $product_page );
+		$this->assertStringContainsString( $product->get_description(), $product_page );
+		$this->assertStringContainsString( $product->get_sku(), $product_page );
+	}
 
-    /**
-     * Ensure the `product_page` shortcode does not render a trashed product.
-     */
-    public function test_product_page_shortcode_trashed_product() {
-        $product = WC_Helper_Product::create_simple_product();
-        $product->set_name( 'Test Product' );
-        $product->set_description( 'Test Description' );
-        $product->set_sku( 'Test SKU 1' );
-        $product->set_catalog_visibility( 'hidden' );
-        $product->save();
-        $product_id = $product->get_id();
-        wp_trash_post( $product_id );
+	/**
+	 * Ensure the `product_page` shortcode does not render a trashed product.
+	 */
+	public function test_product_page_shortcode_trashed_product() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->set_description( 'Test Description' );
+		$product->set_sku( 'Test SKU 1' );
+		$product->set_catalog_visibility( 'hidden' );
+		$product->save();
+		$product_id = $product->get_id();
+		wp_trash_post( $product_id );
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'status' => 'trash'
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'trash',
+			)
+		);
 
-        $this->assertEmpty( $product_page );
-    }
+		$this->assertEmpty( $product_page );
+	}
 
-    /**
-     * Ensure we can override the list of invalid statuses for the `product_page` shortcode so that a trashed product is rendered.
-     */
-    public function test_product_page_shortcode_trashed_product_override() {
-        $product = WC_Helper_Product::create_simple_product();
-        $product->set_name( 'Test Product' );
-        $product->set_description( 'Test Description' );
-        $product->set_sku( 'Test SKU 1' );
-        $product->set_catalog_visibility( 'hidden' );
-        $product->save();
-        $product_id = $product->get_id();
-        wp_trash_post( $product_id );
-        add_filter( 'woocommerce_shortcode_product_page_invalid_statuses', function() { return array(); } );
-        $this->disable_deprecation_notice();
+	/**
+	 * Ensure we can override the list of invalid statuses for the `product_page` shortcode so that a trashed product is rendered.
+	 */
+	public function test_product_page_shortcode_trashed_product_override() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->set_description( 'Test Description' );
+		$product->set_sku( 'Test SKU 1' );
+		$product->set_catalog_visibility( 'hidden' );
+		$product->save();
+		$product_id = $product->get_id();
+		wp_trash_post( $product_id );
+		add_filter(
+			'woocommerce_shortcode_product_page_invalid_statuses',
+			function() {
+				return array();
+			}
+		);
+		$this->disable_deprecation_notice();
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'status' => 'trash'
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'trash',
+			)
+		);
 
-        $this->enable_deprecation_notice();
+		$this->enable_deprecation_notice();
 
-        $this->assertNotEmpty( $product_page );
-    }
+		$this->assertNotEmpty( $product_page );
+	}
 
-    /**
-     * Ensure the `product_page` shortcode does not render a draft product belonging to another user.
-     */
-    public function test_product_page_shortcode_draft_product() {
-        $product = WC_Helper_Product::create_simple_product();
-        $product->set_name( 'Test Product' );
-        $product->set_description( 'Test Description' );
-        $product->set_sku( 'Test SKU 2' );
-        $product->set_status( 'draft' );
-        $product->save();
-        $product_id = $product->get_id();
-        $this->disable_deprecation_notice();
+	/**
+	 * Ensure the `product_page` shortcode does not render a draft product belonging to another user.
+	 */
+	public function test_product_page_shortcode_draft_product() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->set_description( 'Test Description' );
+		$product->set_sku( 'Test SKU 2' );
+		$product->set_status( 'draft' );
+		$product->save();
+		$product_id = $product->get_id();
+		$this->disable_deprecation_notice();
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'status' => 'draft'
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'draft',
+			)
+		);
 
-        $this->enable_deprecation_notice();
+		$this->enable_deprecation_notice();
 
-        $this->assertNotEmpty( $product_page );
+		$this->assertNotEmpty( $product_page );
 
-        wp_set_current_user( self::$user_contributor );
+		wp_set_current_user( self::$user_contributor );
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'status' => 'draft'
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'draft',
+			)
+		);
 
-        $this->assertEmpty( $product_page );
-    }
+		$this->assertEmpty( $product_page );
+	}
 
-    /**
-     * Ensure the `product_page` shortcode does not render a private product belonging to another user.
-     */
-    public function test_product_page_shortcode_private_product() {
-        $product = WC_Helper_Product::create_simple_product();
-        $product->set_name( 'Test Product' );
-        $product->set_description( 'Test Description' );
-        $product->set_sku( 'Test SKU 3' );
-        $product->set_status( 'private' );
-        $product->save();
-        $product_id = $product->get_id();
-        $this->disable_deprecation_notice();
+	/**
+	 * Ensure the `product_page` shortcode does not render a private product belonging to another user.
+	 */
+	public function test_product_page_shortcode_private_product() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->set_description( 'Test Description' );
+		$product->set_sku( 'Test SKU 3' );
+		$product->set_status( 'private' );
+		$product->save();
+		$product_id = $product->get_id();
+		$this->disable_deprecation_notice();
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'status' => 'private'
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'private',
+			)
+		);
 
-        $this->enable_deprecation_notice();
+		$this->enable_deprecation_notice();
 
-        $this->assertNotEmpty( $product_page );
+		$this->assertNotEmpty( $product_page );
 
-        wp_set_current_user( self::$user_contributor );
+		wp_set_current_user( self::$user_contributor );
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'status' => 'private'
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'private',
+			)
+		);
 
-        $this->assertEmpty( $product_page );
-    }
+		$this->assertEmpty( $product_page );
+	}
 
-    /**
-     * Ensure we can override the `product_page` shortcode's read permission check.
-     */
-    public function test_product_page_shortcode_private_product_override() {
-        $product = WC_Helper_Product::create_simple_product();
-        $product->set_name( 'Test Product' );
-        $product->set_description( 'Test Description' );
-        $product->set_sku( 'Test SKU 3' );
-        $product->set_status( 'private' );
-        $product->save();
-        $product_id = $product->get_id();
-        $this->disable_deprecation_notice();
+	/**
+	 * Ensure we can override the `product_page` shortcode's read permission check.
+	 */
+	public function test_product_page_shortcode_private_product_override() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->set_description( 'Test Description' );
+		$product->set_sku( 'Test SKU 3' );
+		$product->set_status( 'private' );
+		$product->save();
+		$product_id = $product->get_id();
+		$this->disable_deprecation_notice();
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'status' => 'private'
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'private',
+			)
+		);
 
-        $this->enable_deprecation_notice();
+		$this->enable_deprecation_notice();
 
-        $this->assertNotEmpty( $product_page );
+		$this->assertNotEmpty( $product_page );
 
-        wp_set_current_user( self::$user_contributor );
-        add_filter( 'woocommerce_shortcode_product_page_override_read_permissions_unpublished', '__return_true');
-        $this->disable_deprecation_notice();
+		wp_set_current_user( self::$user_contributor );
+		add_filter( 'woocommerce_shortcode_product_page_override_read_permissions_unpublished', '__return_true' );
+		$this->disable_deprecation_notice();
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'status' => 'private'
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'private',
+			)
+		);
 
-        $this->enable_deprecation_notice();
+		$this->enable_deprecation_notice();
 
-        $this->assertNotEmpty( $product_page );
-    }
+		$this->assertNotEmpty( $product_page );
+	}
 
-    /**
-     * Ensure the `product_page` shortcode does not render a pending product belonging to another user.
-     */
-    public function test_product_page_shortcode_pending_product() {
-        $product = WC_Helper_Product::create_simple_product();
-        $product->set_name( 'Test Product' );
-        $product->set_description( 'Test Description' );
-        $product->set_sku( 'Test SKU 4' );
-        $product->set_status( 'pending' );
-        $product->save();
-        $product_id = $product->get_id();
-        $this->disable_deprecation_notice();
+	/**
+	 * Ensure the `product_page` shortcode does not render a pending product belonging to another user.
+	 */
+	public function test_product_page_shortcode_pending_product() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->set_description( 'Test Description' );
+		$product->set_sku( 'Test SKU 4' );
+		$product->set_status( 'pending' );
+		$product->save();
+		$product_id = $product->get_id();
+		$this->disable_deprecation_notice();
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'status' => 'pending'
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'pending',
+			)
+		);
 
-        $this->enable_deprecation_notice();
+		$this->enable_deprecation_notice();
 
-        $this->assertNotEmpty( $product_page );
+		$this->assertNotEmpty( $product_page );
 
-        wp_set_current_user( self::$user_contributor );
+		wp_set_current_user( self::$user_contributor );
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'status' => 'pending'
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'pending',
+			)
+		);
 
-        $this->assertEmpty( $product_page );
-    }
+		$this->assertEmpty( $product_page );
+	}
 
-    /**
-     * Ensure the `product_page` shortcode renders the password prompt for a protected product belonging to any user.
-     */
-    public function test_product_page_shortcode_protected_product() {
-        $product = WC_Helper_Product::create_simple_product();
-        $product->set_name( 'Test Product' );
-        $product->set_description( 'Test Description' );
-        $product->set_sku( 'Test SKU 5' );
-        $product->set_post_password( 'test password' );
-        $product->save();
-        $product_id = $product->get_id();
+	/**
+	 * Ensure the `product_page` shortcode renders the password prompt for a protected product belonging to any user.
+	 */
+	public function test_product_page_shortcode_protected_product() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->set_description( 'Test Description' );
+		$product->set_sku( 'Test SKU 5' );
+		$product->set_post_password( 'test password' );
+		$product->save();
+		$product_id = $product->get_id();
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'visibility' => 'protected'
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'         => $product_id,
+				'visibility' => 'protected',
+			)
+		);
 
-        $this->assertStringContainsString( 'This content is password protected', $product_page );
+		$this->assertStringContainsString( 'This content is password protected', $product_page );
 
-        wp_set_current_user( self::$user_contributor );
+		wp_set_current_user( self::$user_contributor );
 
-        $product_page = WC_Shortcodes::product_page( [
-            'id' => $product_id,
-            'visibility' => 'protected'
-        ] );
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'         => $product_id,
+				'visibility' => 'protected',
+			)
+		);
 
-        $this->assertStringContainsString( 'This content is password protected', $product_page );
-    }
+		$this->assertStringContainsString( 'This content is password protected', $product_page );
+	}
 }

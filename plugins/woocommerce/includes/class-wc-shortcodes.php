@@ -517,7 +517,7 @@ class WC_Shortcodes {
 		$product_status = empty( $atts['status'] ) ? 'publish' : $atts['status'];
 		/**
 		 * Filters the list of invalid statuses for the `product_page` shortcode.
-		 * 
+		 *
 		 * @since 8.6.0
 		 * @param array $invalid_statuses List of invalid statuses.
 		 * @param int   $product_id       Product ID.
