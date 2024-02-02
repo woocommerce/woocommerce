@@ -385,43 +385,45 @@ trait OrderAttributionMeta {
 	 * @return array Order count, total spend, and average spend per order.
 	 */
 	private function get_customer_history( $customer_identifier ): array {
-		/*
-		 * Exclude the statuses that aren't valid for the Customers report.
-		 * 'checkout-draft' is the checkout block's draft order status. `any` is added by V2 Orders REST.
-		 * @see /Automattic/WooCommerce/Admin/API/Report/DataStore::get_excluded_report_order_statuses()
-		 */
-		$all_order_statuses = ReportsController::get_order_statuses();
-		$excluded_statuses  = array( 'pending', 'failed', 'cancelled', 'auto-draft', 'trash', 'checkout-draft', 'any' );
-
-		// Get the valid customer orders.
-		$args = array(
-			'limit'  => - 1,
-			'return' => 'objects',
-			'status' => array_diff( $all_order_statuses, $excluded_statuses ),
-			'type'   => 'shop_order',
-		);
-
-		// If the customer_identifier is a valid ID, use it. Otherwise, use the billing email.
-		if ( is_numeric( $customer_identifier ) && $customer_identifier > 0 ) {
-			$args['customer_id'] = $customer_identifier;
-		} else {
-			$args['billing_email'] = $customer_identifier;
-			$args['customer_id']   = 0;
+		if ( ! is_numeric( $customer_identifier ) ) {
+			// Find the customer by email.
+			$matching_customers = $this->get_customer_reports_rest_response(
+				array(
+					'search'   => $customer_identifier,
+					'searchby' => 'email',
+				)
+			);
+			// If the customer_identifier is an email, that means the customer has no user id.
+			foreach ( $matching_customers as $customer ) {
+				if ( 0 === $customer['user_id'] ) {
+					$customer_identifier = $customer['id'];
+					break;
+				}
+			}
 		}
 
-		$orders = wc_get_orders( $args );
-
-		// Populate the order_count and total_spent variables with the valid orders.
-		$order_count = count( $orders );
-		$total_spent = 0;
-		foreach ( $orders as $order ) {
-			$total_spent += $order->get_total() - $order->get_total_refunded();
-		}
-
+		$data = $this->get_customer_reports_rest_response( array( 'customers' => $customer_identifier ) );
 		return array(
-			'order_count'   => $order_count,
-			'total_spent'   => $total_spent,
-			'average_spent' => $order_count ? $total_spent / $order_count : 0,
+			'order_count'   => $data[0]['orders_count'],
+			'total_spent'   => $data[0]['total_spend'],
+			'average_spent' => $data[0]['avg_order_value'],
 		);
+	}
+
+	/**
+	 * Make a REST request to the customer reports (analytics) endpoint.
+	 *
+	 * @param array  $params The query parameters to use.
+	 * @param string $method The HTTP method to use, defaults to GET.
+	 *
+	 * @return array The server response data.
+	 *
+	 * @since 8.5.3
+	 */
+	private function get_customer_reports_rest_response( $params, $method = 'GET' ) {
+		$request = new \WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
+		$request->set_query_params( $params );
+		$response = rest_do_request( $request );
+		return rest_get_server()->response_to_data( $response, false );
 	}
 }
