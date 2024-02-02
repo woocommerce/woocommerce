@@ -18,41 +18,69 @@ Payment buttons consist of up to three elements: a button component, payment log
 
 Don’t place any text outside the surface area of the button.
 
+<<<<<<< HEAD
 ![Cart layout 2](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Cart-layout-2.png)
+=======
+![Cart layout 2](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Cart-layout-2.png")
+>>>>>>> 522832ff71 (Rework UX guidelines to be in distinct folders and files)
 
 ### Layout and spacing
 
 The spacing between and around the Label and Payment Logo adapts based on the size of the button.
 
+<<<<<<< HEAD
 ![Layout and spacing 0.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Layout-and-spacing-0.png)
+=======
+![Layout and spacing 0.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Layout-and-spacing-0.png)
+>>>>>>> 522832ff71 (Rework UX guidelines to be in distinct folders and files)
 
 ### Adaptive height
 
 The height of the button can adapt based on the needs of the theme.
 
+<<<<<<< HEAD
 ![Layout and spacing.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Layout-and-spacing.png)
+=======
+![Layout and spacing.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Layout-and-spacing.png)
+>>>>>>> 522832ff71 (Rework UX guidelines to be in distinct folders and files)
 
 ### Button size
 
 Make payment buttons the same size, no bigger or smaller than other payment buttons, including the CTAs “Add to cart” and “Proceed to checkout”
 
+<<<<<<< HEAD
 ![Same button size.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Same-button-size.png)
+=======
+![Same button size.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Same-button-size.png)
+>>>>>>> 522832ff71 (Rework UX guidelines to be in distinct folders and files)
 
 ### Button width
 
 Use the same width size for all payment buttons. Don’t make the width larger or smaller than other payment buttons.
 
+<<<<<<< HEAD
 ![button width.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Button-width.png)
+=======
+![button width.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Button-width.png)
+>>>>>>> 522832ff71 (Rework UX guidelines to be in distinct folders and files)
 
 ### Minimum width
 
 Buttons have a minimum width to ensure readability.
 
+<<<<<<< HEAD
 ![Layout and spacing-2.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Layout-and-spacing-2.png)
 
 Follow the minimum width of each payment button size. Don’t squeeze payment buttons in a single line.
 
 ![Minimum width.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Minimum-width.png)
+=======
+![Layout and spacing-2.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Layout-and-spacing-2.png)
+
+Follow the minimum width of each payment button size. Don’t squeeze payment buttons in a single line.
+
+![Minimum width.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Minimum-width.png)
+>>>>>>> 522832ff71 (Rework UX guidelines to be in distinct folders and files)
 
 ### Button Shape
 
@@ -61,7 +89,11 @@ Use the same corner radius for all payment buttons. Don’t make the corner radi
 - Default corner radius: 4px
 - Maximum corner radius: ½ button height
 
+<<<<<<< HEAD
 ![Corner radius.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Corner-radius.png)
+=======
+![Corner radius.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Corner-radius.png)
+>>>>>>> 522832ff71 (Rework UX guidelines to be in distinct folders and files)
 
 ### Button Label
 
@@ -78,4 +110,8 @@ Icon only
 
 The button label should appear in sentence case, with only the first letter of the first word capitalized.
 
+<<<<<<< HEAD
 ![Button labels.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Button-Labels.png)
+=======
+![Button labels.png](https://woo-docs-multi-com.go-vip.net/docs/wp-content/uploads/sites/3/2024/01/Button-Labels.png)
+>>>>>>> 522832ff71 (Rework UX guidelines to be in distinct folders and files)

@@ -7,4 +7,8 @@ Upon submission theme authors must provide a way for the theme to be showcased a
 
 All imagery and text should be appropriate for all ages/family-friendly. The theme author should consider using imagery that is inclusive of ages, nationalities, etc. The theme should refrain from using imagery that looks like 'stock photography'.
 
+<<<<<<< HEAD
 The theme must be distributed and cleared of all the necessary licenses for assets such as images, fonts, icons, etc.
+=======
+The theme must be distributed and cleared of all the necessary licenses for assets such as images, fonts, icons, etc.
+>>>>>>> 522832ff71 (Rework UX guidelines to be in distinct folders and files)

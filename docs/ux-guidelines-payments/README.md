@@ -4,6 +4,7 @@ category_slug: user-experience-payments
 post_title: Payments Guidelines
 ---
 
+<<<<<<< HEAD
 When building payments extensions, you should ensure you follow the [WooCommerce Extension Guidelines](./user-experience-guidelines).
 
 Payments plugins come in many types: payment processors and gateways, wallets, Buy Now Pay Later, crypto, and more.
@@ -16,3 +17,6 @@ A merchant can discover a payments plugin in the following ways:
 - Through Woo's public list of payment services on the Marketplace.
 - Through the admin onboarding tasks and payments settings. To be added to the list of payment gateways in the Woo admin, the payments plugin must meet the criteria listed in these guidelines.
 
+=======
+TODO
+>>>>>>> 522832ff71 (Rework UX guidelines to be in distinct folders and files)
