@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { store, getContext as getContextFn } from '@woocommerce/interactivity';
 import { StorePart } from '@woocommerce/utils';
 
 export interface ProductGalleryContext {
@@ -67,6 +66,15 @@ const productGallery = {
 			document.body.classList.add(
 				'wc-block-product-gallery-modal-open'
 			);
+
+			const dialogCloseButton = document.querySelector(
+				'.wc-block-product-gallery-dialog__close'
+			);
+
+			if ( ! dialogCloseButton ) {
+				return;
+			}
+			( dialogCloseButton as HTMLButtonElement ).focus();
 		},
 		selectImage: () => {
 			const context = getContext();
