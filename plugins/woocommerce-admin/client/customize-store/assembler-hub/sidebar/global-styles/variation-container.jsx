@@ -18,7 +18,6 @@ const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 export const VariationContainer = ( { variation, children } ) => {
 	const { base, user, setUserConfig } = useContext( GlobalStylesContext );
-	console.log( user, 'user' );
 	const context = useMemo( () => {
 		return {
 			user: {
