@@ -92,8 +92,6 @@ function YOUR_PREFIX_hide_block( BlockInterface $sale_price_block ) {
 add_action( 'woocommerce_block_template_area_product-form_after_add_block_product-sale-price', 'YOUR_PREFIX_hide_block' );
 ```
 
-
-
 ## Interfaces
 
 ### GroupInterface
@@ -102,7 +100,7 @@ Groups are the top-level organizational structure for product editor templates.
 They typically contain one or more sections, though they can also contain
 blocks directly.
 
-#### Methods
+#### GroupInterface Methods
 
 ##### `add_section( array $block_config ): SectionInterface`
 
@@ -118,7 +116,7 @@ Sections are the second-level organizational structure for product editor templa
 They typically contain one or more blocks, though they can also contain sub-sections
 if further organization is needed.
 
-#### Methods
+#### SectionInterface Methods
 
 ##### `add_subsection( array $block_config ): SubsectionInterface`
 
@@ -133,7 +131,7 @@ Add a new block to the section.
 Subsections are the third-level organizational structure for product editor templates.
 They typically contain one or more blocks.
 
-#### Methods
+#### SubsectionInterface Methods
 
 ##### `add_block( array $block_config ): BlockInterface`
 
@@ -145,7 +143,7 @@ All product form templates implement this interface.
 Product form templates are used to define the structure of the product editor form.
 They contain groups as their top-level organizational structure.
 
-#### Methods
+#### ProductFormTemplateInterface Methods
 
 ##### `add_group( array $block_config ): GroupInterface`
 
