@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Use existing data for customer order history if available or hide the metabox.
