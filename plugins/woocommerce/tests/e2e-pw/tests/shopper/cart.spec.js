@@ -243,14 +243,14 @@ test.describe( 'Cart page', () => {
 			.getByLabel( `Remove ${ productName } cross-sell 1 from cart` )
 			.click();
 		await expect(
-			page.locator( '.wc-block-components-notice-banner__content' )
+			page.locator( '.woocommerce-message' )
 		).toContainText( `“${ productName } cross-sell 1” removed.` );
 		await page
 			.getByLabel( `Remove ${ productName } cross-sell 2 from cart` )
 			.click();
 		await expect(
 			page
-				.locator( '.wc-block-components-notice-banner__content' )
+				.locator( '.woocommerce-message' )
 				.first()
 		).toContainText( `“${ productName } cross-sell 2” removed.` );
 
