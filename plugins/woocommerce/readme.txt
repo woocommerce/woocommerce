@@ -175,6 +175,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix alignment of date fields in the order panel [#44174](https://github.com/woocommerce/woocommerce/pull/44174)
 * Fix - Add rudimentary try catch for all remote endpoint spec evaluators [#44037](https://github.com/woocommerce/woocommerce/pull/44037)
 * Fix - Ensure table rows on settings pages don't have invalid HTML [#44094](https://github.com/woocommerce/woocommerce/pull/44094)
 * Fix - Added `__woocommerceNamespace` attribute, which resolved migration issues when transitioning from Products (Beta) block to Product Collection block. [#43130](https://github.com/woocommerce/woocommerce/pull/43130)
