@@ -722,9 +722,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function check_cart_coupons() {
 		foreach ( $this->get_applied_coupons() as $code ) {
-			$coupon = new WC_Coupon( $code );
+			$coupon    = new WC_Coupon( $code );
 			$discounts = new WC_Discounts( $this );
-			$valid     = $discounts->is_coupon_valid( $coupon, true );
+			$valid     = $discounts->is_coupon_valid( $coupon );
 
 			if ( is_wp_error( $valid ) ) {
 				$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_INVALID_REMOVED );

@@ -942,11 +942,10 @@ class WC_Discounts {
 	/**
 	 * Ensure coupon is valid for allowed emails or throw exception.
 	 *
-	 * @param WC_Coupon $coupon Coupon data.
-	 *
-	 * @return bool
-	 * @throws Exception
 	 * @since  8.6.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
 	 */
 	protected function validate_coupon_allowed_emails( $coupon ) {
 
@@ -956,8 +955,8 @@ class WC_Discounts {
 			return true;
 		}
 
-		$user = wp_get_current_user();
-		$check_emails = array( $user->get_billing_email(), $user->get_email()  );
+		$user         = wp_get_current_user();
+		$check_emails = array( $user->get_billing_email(), $user->get_email() );
 
 		if ( $this->object instanceof WC_Cart ) {
 			$check_emails[] = $this->object->get_customer()->get_billing_email();
@@ -965,7 +964,7 @@ class WC_Discounts {
 			$check_emails[] = $this->object->get_billing_email();
 		}
 
-		$check_emails  = array_unique(
+		$check_emails = array_unique(
 			array_filter(
 				array_map(
 					'strtolower',
@@ -1049,7 +1048,6 @@ class WC_Discounts {
 			if ( ! apply_filters( 'woocommerce_coupon_is_valid', true, $coupon, $this ) ) {
 				throw new Exception( __( 'Coupon is not valid.', 'woocommerce' ), WC_Coupon::E_WC_COUPON_INVALID_FILTERED );
 			}
-
 		} catch ( Exception $e ) {
 			/**
 			 * Filter the coupon error message.
