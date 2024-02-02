@@ -177,7 +177,7 @@ class FixtureData {
 			$result = term_exists( $term, $attribute->slug );
 
 			if ( ! $result ) {
-				$result               = wp_insert_term(
+				$result = wp_insert_term(
 					$term,
 					$attribute->slug,
 					array(
