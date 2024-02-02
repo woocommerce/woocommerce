@@ -2,6 +2,7 @@ const { test } = require( '@playwright/test' );
 const {
 	clickAddNewMenuItem,
 	expectBlockProductEditor,
+	expectOldProductEditor,
 	isBlockProductEditorEnabled,
 	toggleBlockProductEditor,
 } = require( '../../../../utils/simple-products' );
@@ -76,17 +77,13 @@ test.describe.serial( 'Disable block product editor', () => {
 			} )
 			.click();
 		await dismissFeedbackModalIfShown( page );
-		await expect(
-			page.getByRole( 'heading', { name: 'Product data' } )
-		).toBeVisible();
+		await expectOldProductEditor( page );
 	} );
 
 	test( 'can be disabled from settings', async ( { page } ) => {
 		await toggleBlockProductEditor( 'disable', page );
 		await page.goto( '/wp-admin/edit.php?post_type=product' );
 		await clickAddNewMenuItem( page );
-		await expect(
-			page.getByRole( 'heading', { name: 'Product data' } )
-		).toBeVisible();
+		await expectOldProductEditor( page );
 	} );
 } );
