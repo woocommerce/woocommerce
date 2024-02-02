@@ -15,10 +15,12 @@ import {
 	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
+
 /**
  * Internal dependencies
  */
 import type { TextAreaBlockEditProps } from './types';
+import { Label } from '../../../components/label/label';
 
 export function TextAreaBlockEdit( { attributes }: TextAreaBlockEditProps ) {
 	// `property` attribute mandatory for this block
@@ -27,7 +29,7 @@ export function TextAreaBlockEdit( { attributes }: TextAreaBlockEditProps ) {
 		throw new Error( 'Property attribute is missing.' );
 	}
 
-	const { label, helpText } = attributes;
+	const { help, label, note, required } = attributes;
 
 	const innerBlockProps = useInnerBlocksProps(
 		{},
@@ -37,9 +39,12 @@ export function TextAreaBlockEdit( { attributes }: TextAreaBlockEditProps ) {
 			template: [ [ 'core/paragraph', { placeholder } ] ],
 		}
 	);
+
 	const { baseControlProps } = useBaseControlProps( {
-		label,
-		help: helpText,
+		label: (
+			<Label label={ label || '' } required={ required } note={ note } />
+		),
+		help,
 	} );
 
 	const blockProps = useWooBlockProps( attributes, {
