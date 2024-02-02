@@ -205,7 +205,10 @@ class ProductQueryFilters {
 		if ( empty( $attributes_data ) && empty( $min_price ) && empty( $max_price ) && empty( $rating ) && empty( $stock_status ) ) {
 			$counts = $this->get_terms_list( $filtered_attribute );
 
-			return array_map( 'absint', wp_list_pluck( $counts, 'term_count', 'term_count_id' ) );
+			$results = array_map( 'absint', wp_list_pluck( $counts, 'term_count', 'term_count_id' ) );
+			$end = microtime(true);
+			error_log( 'ProductQueryFilters::get_attribute_counts excecution time: ' . $end - $start );
+			return $results;
 		}
 
 		$where_clause = '';
@@ -229,7 +232,10 @@ class ProductQueryFilters {
 			} else {
 				$counts = $this->get_empty_terms_list( $filtered_attribute );
 
-				return array_map( 'absint', wp_list_pluck( $counts, 'term_count', 'term_count_id' ) );
+				$results = array_map( 'absint', wp_list_pluck( $counts, 'term_count', 'term_count_id' ) );
+				$end = microtime(true);
+				error_log( 'ProductQueryFilters::get_attribute_counts excecution time: ' . $end - $start );
+				return $results;
 			}
 		}
 
