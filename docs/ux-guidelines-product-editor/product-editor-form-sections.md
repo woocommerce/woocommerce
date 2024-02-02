@@ -5,7 +5,11 @@ menu_title: Sections
 
 Sections are significant parts of the form that may consist of multiple subsections and fields. They should be used sparsely throughout the form, so merchants are not overwhelmed with options while filling out the information about their products.
 
+<<<<<<< HEAD
 ![Sections example](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-sections.png)
+=======
+![Sections example](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/product-editor-ext-guidelines-sections.png)
+>>>>>>> 127c6a9e63 (Move product editor guidelines into a ux-guidelines folder)
 
 ## What they are for
 
@@ -27,4 +31,8 @@ If you're working on an extension that allows merchants to offer discounts based
 
 - Adding product labels with a robust interactive preview
 - Managing product warranty options
+<<<<<<< HEAD
 - Creating product packages and bundles
+=======
+- Creating product packages and bundles
+>>>>>>> 127c6a9e63 (Move product editor guidelines into a ux-guidelines folder)

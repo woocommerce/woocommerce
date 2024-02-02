@@ -17,4 +17,8 @@ Custom product types include niche and specific use cases, such as bookings, tic
 
 - Your extension consists of several different form sections scattered across several different tabs
 - Using just your extension, merchants can completely a product
+<<<<<<< HEAD
 - You want to help merchants create products faster and automate some of their work
+=======
+- You want to help merchants create products faster and automate some of their work
+>>>>>>> 127c6a9e63 (Move product editor guidelines into a ux-guidelines folder)

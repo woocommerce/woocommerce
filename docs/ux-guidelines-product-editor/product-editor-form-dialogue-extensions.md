@@ -7,7 +7,11 @@ Dialog extensions differ from other extensions as they are unrelated to any sect
 
 Dialogs can have different sizes (small, medium, large, or custom) and trigger locations (text or icon button anywhere in the form or in the form's top bar).
 
+<<<<<<< HEAD
 ![Dialog example](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-dialog-extensions.png)
+=======
+![Dialog example](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/product-editor-ext-guidelines-dialog-extensions.png)
+>>>>>>> 127c6a9e63 (Move product editor guidelines into a ux-guidelines folder)
 
 ## What they are for
 

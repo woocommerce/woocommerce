@@ -5,7 +5,11 @@ menu_title: Subsections
 
 Subsections add extra fields to existing form groups. They are small forms with a low to medium level of complexity. This interface location works best for extensions that add extra features that build off an existing Woo functionality.
 
+<<<<<<< HEAD
 ![Subsections example](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-subsections.png)
+=======
+![Subsections example](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/product-editor-ext-guidelines-subsections.png)
+>>>>>>> 127c6a9e63 (Move product editor guidelines into a ux-guidelines folder)
 
 
 ## What they are for
@@ -28,4 +32,8 @@ If you're developing an extension that allows merchants to upload 360 images or 
 
 - Adding extra product details, e.g., measurements under Shipping
 - Setting up social channels in the Visibility section in the General tab
+<<<<<<< HEAD
 - Changing the VAT tax settings in the Pricing tab
+=======
+- Changing the VAT tax settings in the Pricing tab
+>>>>>>> 127c6a9e63 (Move product editor guidelines into a ux-guidelines folder)
