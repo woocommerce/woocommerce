@@ -2,6 +2,10 @@
  * External dependencies
  */
 import type { BlockConfiguration } from '@wordpress/blocks';
+/**
+ * Internal dependencies
+ */
+import coreParagraphBlockEditChildTextArea from './components/core-paragraph-with-text-area-role';
 
 /**
  * Extend core/paragraph block with attributes
@@ -28,5 +32,8 @@ export default function coreParagraphChildOfTextAreaField(
 	return {
 		...settings,
 		usesContext,
+		edit: settings.edit
+			? coreParagraphBlockEditChildTextArea( settings.edit )
+			: null,
 	};
 }
