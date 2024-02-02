@@ -911,10 +911,11 @@ class WC_Install {
 
 			// For new installs, setup and enable Approved Product Download Directories.
 			wc_get_container()->get( Download_Directories_Sync::class )->init_feature( false, true );
+
+			// New installs should have Order Attribution disabled by default. We do it here to avoid disabling for existing shops.
+			add_option( 'woocommerce_feature_order_attribution_enabled', 'no', '', 'yes' );
 		}
 
-		// New installs should have Order Attribution disabled by default. We do it here to avoid disabling for existing shops.
-		add_option( 'woocommerce_feature_order_attribution_enabled', 'no', '', 'yes' );
 	}
 
 	/**
