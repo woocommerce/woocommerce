@@ -26,8 +26,6 @@ class Users {
 		return is_multisite() ? $user->has_cap( 'manage_sites' ) : $user->has_cap( 'manage_options' );
 	}
 
-	
-
 	/**
 	 * Check if the email is valid.
 	 *
@@ -71,7 +69,7 @@ class Users {
 
 		// We do not need to verify the email address if we are within the grace period immediately following order creation.
 		if (
-			is_a( $date_created, WC_DateTime::class )
+			is_a( $date_created, \WC_DateTime::class, true )
 			&& time() - $date_created->getTimestamp() <= $verification_grace_period
 		) {
 			return false;
@@ -80,7 +78,7 @@ class Users {
 		$session       = wc()->session;
 		$session_email = '';
 
-		if ( is_a( $session, WC_Session::class ) ) {
+		if ( is_a( $session, \WC_Session::class ) ) {
 			$customer      = $session->get( 'customer' );
 			$session_email = is_array( $customer ) && isset( $customer['email'] ) ? $customer['email'] : '';
 		}
