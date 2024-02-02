@@ -335,6 +335,7 @@ const redirectToAssemblerHub = async (
 	};
 
 	document.body.appendChild( iframe );
+	window.parent.__wcCustomizeStore.activeThemeHasMods = true;
 
 	// Listen for back button click
 	window.addEventListener(
@@ -356,7 +357,7 @@ const redirectToAssemblerHub = async (
 					'*'
 				);
 				// When the user clicks the back button, push state changes to the previous step
-				// Set it back to the assember hub
+				// Set it back to the assembler hub
 				window.history?.pushState( {}, '', assemblerUrl );
 			}
 		},

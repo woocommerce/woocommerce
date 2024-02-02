@@ -44,6 +44,7 @@ const redirectToAssemblerHub = async () => {
 	};
 
 	document.body.appendChild( iframe );
+	window.parent.__wcCustomizeStore.activeThemeHasMods = true;
 };
 
 const redirectToIntroWithError = sendParent<
