@@ -37,6 +37,16 @@ export default function coreParagraphWithTextArea(
 			label: {
 				type: 'string',
 			},
+			help: {
+				type: 'string',
+			},
+			note: {
+				type: 'string',
+			},
+			required: {
+				type: 'boolean',
+				default: false,
+			},
 			role: {
 				type: 'string',
 				default: 'product-editor/text-area-field',

@@ -3,15 +3,19 @@
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
+import { BaseControl } from '@wordpress/components';
 import {
 	// @ts-expect-error no exported member.
 	ComponentType,
 	createElement,
 	useEffect,
 } from '@wordpress/element';
+
 /**
  * Internal dependencies
  */
+import { Label } from '../../../../../../components/label/label';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ProductEditorBlockEditProps< T extends Record< string, any > >
 	extends BlockEditProps< T > {
@@ -29,9 +33,8 @@ const coreParagraphWithTextAreaRole =
 	createHigherOrderComponent< CoreParagrapahEditComponent >(
 		( BlockEdit: CoreParagrapahEditComponent ) => {
 			return ( props: coreParagraphEditProps ) => {
-				const { attributes, setAttributes } = props;
-
-				const { role } = attributes;
+				const { attributes, setAttributes, clientId } = props;
+				const { role, label, help, required, note } = attributes;
 
 				// Extend only when the role is set
 				if ( role !== 'product-editor/text-area-field' ) {
@@ -46,7 +49,21 @@ const coreParagraphWithTextAreaRole =
 					} );
 				}, [ setAttributes ] );
 
-				return <BlockEdit { ...props } />;
+				return (
+					<BaseControl
+						id={ clientId }
+						label={
+							<Label
+								label={ label }
+								required={ required }
+								note={ note }
+							/>
+						}
+						help={ help }
+					>
+						<BlockEdit { ...props } />
+					</BaseControl>
+				);
 			};
 		},
 		'coreParagraphWithTextAreaRole'
