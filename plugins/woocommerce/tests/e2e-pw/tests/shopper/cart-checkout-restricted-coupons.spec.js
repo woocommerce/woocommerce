@@ -613,15 +613,6 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/checkout/' );
-		await page
-			.getByRole( 'link', { name: 'Click here to enter your code' } )
-			.click();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
-		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
-		// succeeded so far because we don't know who the customr is
-		await expect(
-			page.getByText( 'Coupon code applied successfully.' )
-		).toBeVisible();
 
 		await page.getByLabel( 'First name' ).fill( 'Marge' );
 		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
@@ -632,11 +623,16 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page.getByLabel( 'ZIP Code' ).fill( '55555' );
 		await page.getByLabel( 'Phone' ).fill( '555-555-5555' );
 		await page.getByLabel( 'Email address' ).fill( 'marge@example.com' );
-		await page.getByRole( 'button', { name: 'Place order' } ).click();
+
+		await page
+			.getByRole( 'link', { name: 'Click here to enter your code' } )
+			.click();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
 			page.getByText(
-				'Sorry, it seems the coupon "email-restricted" is not yours - it has now been removed from your order.'
+				'The coupon code "email-restricted" isn’t available to you right now. Please enter a valid email on Checkout.'
 			)
 		).toBeVisible();
 	} );
@@ -656,14 +652,6 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/checkout/' );
-		await page
-			.getByRole( 'link', { name: 'Click here to enter your code' } )
-			.click();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
-		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
-		await expect(
-			page.getByText( 'Coupon code applied successfully.' )
-		).toBeVisible();
 
 		await page.getByLabel( 'First name' ).fill( 'Homer' );
 		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
@@ -674,6 +662,16 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page.getByLabel( 'ZIP Code' ).fill( '55555' );
 		await page.getByLabel( 'Phone' ).fill( '555-555-5555' );
 		await page.getByLabel( 'Email address' ).fill( 'homer@example.com' );
+
+		await page
+			.getByRole( 'link', { name: 'Click here to enter your code' } )
+			.click();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+		await expect(
+			page.getByText( 'Coupon code applied successfully.' )
+		).toBeVisible();
+
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 		await expect(
@@ -688,15 +686,6 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/checkout/' );
-		await page
-			.getByRole( 'link', { name: 'Click here to enter your code' } )
-			.click();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
-		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
-		// succeeded so far because we don't know who the customr is
-		await expect(
-			page.getByText( 'Coupon code applied successfully.' )
-		).toBeVisible();
 
 		await page.getByLabel( 'First name' ).fill( 'Homer' );
 		await page.getByLabel( 'Last name' ).fill( 'Simpson' );
@@ -707,6 +696,16 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page.getByLabel( 'ZIP Code' ).fill( '55555' );
 		await page.getByLabel( 'Phone' ).fill( '555-555-5555' );
 		await page.getByLabel( 'Email address' ).fill( 'homer@example.com' );
+
+		await page
+			.getByRole( 'link', { name: 'Click here to enter your code' } )
+			.click();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+		await expect(
+			page.getByText( 'Coupon code applied successfully.' )
+		).toBeVisible();
+
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 		await expect(
