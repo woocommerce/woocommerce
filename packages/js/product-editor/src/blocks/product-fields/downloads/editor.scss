@@ -8,6 +8,10 @@ $fixed-section-height: 224px;
 .wp-block-woocommerce-product-downloads-field {
 	&__body {
 		position: relative;
+
+		.woocommerce-media-uploader .woocommerce-media-uploader__label {
+			margin-bottom: 0;
+		}
 	}
 
 	&__table {
