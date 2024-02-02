@@ -1,5 +1,6 @@
 ---
 <<<<<<< HEAD
+<<<<<<< HEAD
 post_title: WooCommerce Extension Guidelines - Onboarding
 menu_title: Onboarding
 ---
@@ -15,6 +16,9 @@ The first experience your users have with your extension is crucial. A user acti
 - Keep the post-activation notice with the WordPress plugin area in context of the plugin listing-do not display it on the dashboard, or any other parts of the platform.
 =======
 post_title: User Experience Guidelines - Onboarding
+=======
+post_title: WooCommerce Extension Guidelines - Onboarding
+>>>>>>> 84ecff5ebd (Rename "user experience guidelines" to "extension guidelines")
 menu_title: Onboarding
 ---
 
