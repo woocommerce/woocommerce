@@ -34,6 +34,9 @@ export default function coreParagraphWithTextArea(
 		},
 		attributes: {
 			...settings.attributes,
+			property: {
+				type: 'string',
+			},
 			label: {
 				type: 'string',
 			},
